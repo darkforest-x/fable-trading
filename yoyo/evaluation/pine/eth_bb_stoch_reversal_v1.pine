@@ -1,0 +1,440 @@
+//@version=6
+// ETH BB × Stoch · 5m is a chart-side position reference, not a strategy or
+// trading API. It deliberately has no alerts, orders, aggregate statistics, or
+// backtest panel. The historical path is an OHLC approximation; live state uses
+// varip fields to retain a first BB touch when Pine rolls an open bar back.
+//
+// Signal provenance: experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/
+// source/owner_fanshen_v1_20250706.pine. This version keeps only Stoch 5/3/3
+// strict oversold/overbought crossings. WVF is intentionally not a condition.
+indicator("ETH BB × Stoch · 5m", shorttitle="ETH BB×Stoch", overlay=true, max_labels_count=500, max_boxes_count=100, max_lines_count=200, behind_chart=false)
+
+string gBands = "01 · 布林带"
+int bbLength = input.int(200, "BB 长度", minval=2, group=gBands)
+float bbMultiplier = input.float(2.0, "BB 标准差倍数", minval=0.1, step=0.1, group=gBands)
+bool showBasis = input.bool(false, "显示 BB 中线", group=gBands)
+
+string gRisk = "02 · 仓位参考"
+float stopPercent = input.float(1.5, "初始止损 (%)", minval=0.1, maxval=50.0, step=0.1, group=gRisk, tooltip="从信号收盘价冻结；只使用价格风险，不使用 ATR。") / 100.0
+int keepGroups = input.int(40, "保留参考组数", minval=1, maxval=40, group=gRisk, tooltip="最多保留 40 组：80 个框、200 条线和少于 500 个标签。")
+bool showPanel = input.bool(true, "显示状态面板", group=gRisk)
+
+string gCheck = "03 · 原生检查"
+bool runSelfTest = input.bool(false, "合成自检", group=gCheck, tooltip="只运行固定合成 tick/bar，不读取、评分或交易图表历史。")
+
+color bull = #008F82
+color bear = #D34B66
+color ink = chart.fg_color
+color muted = color.new(ink, 42)
+color bbColor = color.new(#7D8490, 30)
+
+// Exact v9 BB calculation: population standard deviation of close over the same
+// length, with the basis and multiplier exposed only as indicator inputs.
+float sourceClose = runSelfTest ? na : close
+float sourceHigh = runSelfTest ? na : high
+float sourceLow = runSelfTest ? na : low
+float bbBasis = ta.sma(sourceClose, bbLength)
+float bbDeviation = ta.stdev(sourceClose, bbLength, true)
+float bbUpper = bbBasis + bbMultiplier * bbDeviation
+float bbLower = bbBasis - bbMultiplier * bbDeviation
+bool bbReady = not na(bbBasis) and not na(bbDeviation)
+
+// Exact owner Stoch 5/3/3 recipe. Both values must still be strictly beyond
+// the threshold on the crossing bar; no WVF confirmation is carried over.
+float stochK = ta.sma(ta.stoch(sourceClose, sourceHigh, sourceLow, 5), 3)
+float stochD = ta.sma(stochK, 3)
+bool stochGreen = ta.crossover(stochK, stochD) and stochK < 20 and stochD < 20
+bool stochRed = ta.crossunder(stochK, stochD) and stochK > 80 and stochD > 80
+
+// A standard 5m ETH/USDT candle is required. The guard leaves the chart useful
+// for inspection but suppresses all state transitions on another symbol, TF, or
+// synthetic chart type.
+bool isEthUsdt = syminfo.basecurrency == "ETH" and syminfo.currency == "USDT" and syminfo.ticker == "ETHUSDT.P"
+bool isFiveMinute = timeframe.isminutes and timeframe.multiplier == 5
+bool chartAllowed = isEthUsdt and isFiveMinute and chart.is_standard
+f_composite(float o, float c, float upper, float lower, bool green, bool red) =>
+    math.max(o, c) < lower and green ? 1 : math.min(o, c) > upper and red ? -1 : 0
+int rawComposite = runSelfTest ? 0 : f_composite(open, close, bbUpper, bbLower, stochGreen, stochRed)
+bool longComposite = chartAllowed and bbReady and rawComposite == 1
+bool shortComposite = chartAllowed and bbReady and rawComposite == -1
+
+// All risk values use the original entry-to-initial-stop distance. Partial
+// exits add their quantity-weighted R immediately. The remaining quantity is
+// marked against the latest close, so a peak is never presented as realized R.
+f_r(int side, float entry, float risk, float price) =>
+    risk > 0 ? side * (price - entry) / risk : na
+
+f_stopFill(int side, float barOpen, float stop) =>
+    side == 1 ? math.min(barOpen, stop) : math.max(barOpen, stop)
+
+f_priceText(float price) =>
+    str.tostring(price, format.mintick)
+
+f_rText(float value) =>
+    na(value) ? "—" : (value >= 0 ? "+" : "") + str.tostring(value, "#.##") + "R"
+
+f_eventLabel(int side, float price, string caption, color tone) =>
+    label.new(time, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=side == 1 ? label.style_label_up : label.style_label_down, color=color.new(tone, 88), textcolor=tone, size=size.small, force_overlay=true)
+
+// Pure transition shared by chart execution and the opt-in synthetic check.
+// targetFired is separate from exitKind because a historical target may later
+// prove a same-bar BE close. `isLive` selects tick-close stop comparison;
+// historical mode intentionally uses the documented O/H/L/C approximation.
+f_step(int side, float entry, float risk, float stop, float fraction, float realizedR, bool partial, float targetPrice, float barOpen, float barHigh, float barLow, float barClose, float currentTarget, bool stopActive, bool isLive, int compositeSide, bool isConfirmed) =>
+    int nextSide = side
+    float nextStop = stop
+    float nextFraction = fraction
+    float nextRealizedR = realizedR
+    bool nextPartial = partial
+    float nextTargetPrice = targetPrice
+    bool targetFired = false
+    int exitKind = 0 // 1 SL, 2 BE
+    float exitPrice = na
+    float finalR = na
+    bool stopHit = stopActive and (side == 1 ? (isLive ? barClose <= stop : barLow <= stop) : (isLive ? barClose >= stop : barHigh >= stop))
+    if side != 0 and stopHit
+        // On live ticks the current price is the only honest fill reference;
+        // using the bar open would retroactively apply a pre-TP gap to BE.
+        exitPrice := isLive ? barClose : f_stopFill(side, barOpen, stop)
+        finalR := realizedR + fraction * f_r(side, entry, risk, exitPrice)
+        exitKind := partial ? 2 : 1
+        nextSide := 0
+        nextFraction := 0.0
+    else if side != 0 and stopActive and not partial
+        // A live high/low is cumulative and can belong to an earlier BB value.
+        // Compare this update's close to the current band instead; historical
+        // OHLC retains its declared wick approximation.
+        bool targetHit = side == 1 ? (isLive ? barClose >= currentTarget : barHigh >= currentTarget) : (isLive ? barClose <= currentTarget : barLow <= currentTarget)
+        if targetHit
+            targetFired := true
+            nextTargetPrice := currentTarget
+            nextRealizedR += 0.5 * f_r(side, entry, risk, currentTarget)
+            nextFraction := 0.5
+            nextPartial := true
+            nextStop := entry
+            // A historical wick has no internal ordering. A close across BE is
+            // the only allowed proof that the return followed this TP.
+            bool closeProvesBe = not isLive and (side == 1 ? barClose <= entry : barClose >= entry)
+            if closeProvesBe
+                exitKind := 2
+                exitPrice := entry
+                finalR := nextRealizedR
+                nextSide := 0
+                nextFraction := 0.0
+    bool reverseRequested = nextSide != 0 and isConfirmed and compositeSide == -nextSide
+    [nextSide, nextStop, nextFraction, nextRealizedR, nextPartial, nextTargetPrice, targetFired, exitKind, exitPrice, finalR, reverseRequested]
+
+// `varip` fields are deliberately primitive only. TradingView rolls normal
+// variables and drawing objects back between live ticks, but these fields hold
+// a first target touch, then redraw ordinary drawing IDs from that numeric fact.
+type PositionState
+    varip int side = 0
+    varip int entryBar = na
+    varip float entry = na
+    varip float initialStop = na
+    varip float stop = na
+    varip float risk = na
+    varip float fraction = 0.0
+    varip float realizedR = 0.0
+    varip bool partial = false
+    varip float targetPrice = na
+    varip int targetTime = na
+    varip int targetSide = 0
+    varip float targetEventPrice = na
+    varip int lastExitTime = na
+    varip float lastFinalR = na
+    varip float lastExitPrice = na
+    varip string lastExitKind = ""
+    varip int eventTime = na
+    varip int eventSide = 0
+    varip float eventPrice = na
+    varip string eventText = ""
+
+// Drawing IDs intentionally remain ordinary `var` state. Intrabar rollbacks
+// remove/revert them, then the current varip numeric state recreates the same
+// TP/BE/SL view on the next tick. This avoids a vanished TP label without
+// attempting to store drawing IDs in varip fields.
+type PositionDrawing
+    box riskBox
+    box rewardBox
+    line entryLine
+    line stopLine
+    line r1Line
+    line r2Line
+    line r3Line
+    label r1Label
+    label r2Label
+    label r3Label
+    label entryLabel
+    label stopLabel
+    label targetLabel
+    label exitLabel
+    int startedAt
+    float entryPrice
+    float originalStop
+    float riskDistance
+
+method deleteGroup(PositionDrawing group) =>
+    box.delete(group.riskBox)
+    box.delete(group.rewardBox)
+    line.delete(group.entryLine)
+    line.delete(group.stopLine)
+    line.delete(group.r1Line)
+    line.delete(group.r2Line)
+    line.delete(group.r3Line)
+    label.delete(group.r1Label)
+    label.delete(group.r2Label)
+    label.delete(group.r3Label)
+    label.delete(group.entryLabel)
+    label.delete(group.stopLabel)
+    label.delete(group.targetLabel)
+    label.delete(group.exitLabel)
+
+method freezeGroup(PositionDrawing group, int rightTime, float stopPrice, bool hasTp, float frozenTarget, float exitPrice, string exitText) =>
+    box.set_right(group.riskBox, rightTime)
+    box.set_right(group.rewardBox, rightTime)
+    label.set_x(group.targetLabel, rightTime)
+    line.set_x2(group.entryLine, rightTime)
+    line.set_x2(group.stopLine, rightTime)
+    line.set_y1(group.stopLine, stopPrice)
+    line.set_y2(group.stopLine, stopPrice)
+    label.set_x(group.entryLabel, rightTime)
+    label.set_xy(group.stopLabel, rightTime, stopPrice)
+    label.set_text(group.stopLabel, hasTp ? "BE · " + f_priceText(stopPrice) : "SL · " + f_priceText(stopPrice))
+    line.set_x2(group.r1Line, rightTime)
+    line.set_x2(group.r2Line, rightTime)
+    line.set_x2(group.r3Line, rightTime)
+    label.set_x(group.r1Label, rightTime)
+    label.set_x(group.r2Label, rightTime)
+    label.set_x(group.r3Label, rightTime)
+    if hasTp and not na(frozenTarget)
+        box.set_right(group.rewardBox, rightTime)
+        box.set_top(group.rewardBox, math.max(group.entryPrice, frozenTarget))
+        box.set_bottom(group.rewardBox, math.min(group.entryPrice, frozenTarget))
+        label.set_xy(group.targetLabel, rightTime, frozenTarget)
+        label.set_text(group.targetLabel, "TP50% · " + f_priceText(frozenTarget))
+    label.set_xy(group.exitLabel, rightTime, exitPrice)
+    label.set_text(group.exitLabel, exitText)
+
+var PositionState pos = PositionState.new()
+var PositionDrawing activeDrawing = na
+var array<PositionDrawing> drawingHistory = array.new<PositionDrawing>()
+var array<label> eventLabels = array.new<label>()
+
+f_storeEvent(label eventLabel) =>
+    array.push(eventLabels, eventLabel)
+    if array.size(eventLabels) > 120
+        label.delete(array.shift(eventLabels))
+
+int barMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
+int projectedRight = time + math.max(barMillis, 1) * 8
+
+// The same pure step governs both chart paths and the opt-in self-test. Live
+// checks the latest tick close against the operative stop; historical bars use
+// old-stop → BB wick → close-only-BE ordering described above.
+if not runSelfTest and chartAllowed and bbReady and pos.side != 0
+    int stateSide = pos.side
+    bool stopActive = bar_index > pos.entryBar
+    float currentTarget = stateSide == 1 ? bbUpper : bbLower
+    int compositeSideForStep = longComposite ? 1 : shortComposite ? -1 : 0
+    [nextSide, nextStop, nextFraction, nextRealizedR, nextPartial, nextTargetPrice, targetFired, exitKind, exitPrice, finalR, reverseRequested] = f_step(stateSide, pos.entry, pos.risk, pos.stop, pos.fraction, pos.realizedR, pos.partial, pos.targetPrice, open, high, low, close, currentTarget, stopActive, barstate.isrealtime, compositeSideForStep, barstate.isconfirmed)
+    if targetFired
+        pos.targetTime := time
+        pos.targetSide := stateSide
+        pos.targetEventPrice := nextTargetPrice
+    pos.stop := nextStop
+    pos.fraction := nextFraction
+    pos.realizedR := nextRealizedR
+    pos.partial := nextPartial
+    pos.targetPrice := nextTargetPrice
+    if exitKind != 0
+        pos.lastExitTime := time
+        pos.lastFinalR := finalR
+        pos.lastExitPrice := exitPrice
+        pos.lastExitKind := exitKind == 1 ? "SL" : "BE"
+        pos.eventTime := time
+        pos.eventSide := stateSide
+        pos.eventPrice := exitPrice
+        pos.eventText := pos.lastExitKind + " · " + f_rText(finalR)
+    pos.side := nextSide
+
+// Composite crossings are decisions at a confirmed close. They close whatever
+// fraction remains, then immediately allocate the opposing full position at
+// that same close. Same-side composite signals deliberately do nothing.
+if not runSelfTest and chartAllowed and bbReady and barstate.isconfirmed
+    int compositeSide = longComposite ? 1 : shortComposite ? -1 : 0
+    bool reverse = pos.side != 0 and compositeSide == -pos.side
+    bool frozeOldGroup = false
+    if reverse
+        float finalR = pos.realizedR + pos.fraction * f_r(pos.side, pos.entry, pos.risk, close)
+        if not na(activeDrawing)
+            activeDrawing.freezeGroup(time_close, pos.stop, pos.partial, pos.targetPrice, close, "反向平仓 · " + f_rText(finalR))
+            frozeOldGroup := true
+        pos.lastExitTime := time
+        pos.lastFinalR := finalR
+        pos.lastExitPrice := close
+        pos.lastExitKind := "反向平仓"
+        pos.eventTime := time
+        pos.eventSide := pos.side
+        pos.eventPrice := close
+        pos.eventText := "反向平仓 · " + f_rText(finalR)
+        pos.side := 0
+        pos.fraction := 0.0
+    bool startNew = compositeSide != 0 and pos.side == 0
+    if startNew
+        if not frozeOldGroup and pos.lastExitTime == time and not na(activeDrawing)
+            activeDrawing.freezeGroup(time_close, pos.partial ? pos.entry : pos.initialStop, pos.partial, pos.targetPrice, pos.lastExitPrice, pos.lastExitKind + " · 加权 " + f_rText(pos.lastFinalR))
+        float entryPrice = close
+        float originalStop = compositeSide == 1 ? entryPrice * (1.0 - stopPercent) : entryPrice * (1.0 + stopPercent)
+        float riskDistance = compositeSide * (entryPrice - originalStop)
+        if entryPrice > 0 and originalStop > 0 and riskDistance > 0
+            while array.size(drawingHistory) >= keepGroups
+                PositionDrawing oldest = array.shift(drawingHistory)
+                oldest.deleteGroup()
+            pos.side := compositeSide
+            pos.entryBar := bar_index
+            pos.entry := entryPrice
+            pos.initialStop := originalStop
+            pos.stop := originalStop
+            pos.risk := riskDistance
+            pos.fraction := 1.0
+            pos.realizedR := 0.0
+            pos.partial := false
+            pos.targetPrice := na
+            pos.lastFinalR := na
+            pos.lastExitTime := na
+            string sideText = compositeSide == 1 ? "多" : "空"
+            activeDrawing := PositionDrawing.new(
+                 box.new(time, math.max(entryPrice, originalStop), projectedRight, math.min(entryPrice, originalStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true),
+                 box.new(time, entryPrice, projectedRight, entryPrice, xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true),
+                 line.new(time, entryPrice, projectedRight, entryPrice, xloc=xloc.bar_time, color=color.new(ink, 50), style=line.style_dotted, force_overlay=true),
+                 line.new(time, originalStop, projectedRight, originalStop, xloc=xloc.bar_time, color=bear, width=1, force_overlay=true),
+                 line.new(time, entryPrice + compositeSide * riskDistance, projectedRight, entryPrice + compositeSide * riskDistance, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, force_overlay=true),
+                 line.new(time, entryPrice + compositeSide * riskDistance * 2.0, projectedRight, entryPrice + compositeSide * riskDistance * 2.0, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, force_overlay=true),
+                 line.new(time, entryPrice + compositeSide * riskDistance * 3.0, projectedRight, entryPrice + compositeSide * riskDistance * 3.0, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, force_overlay=true),
+                 label.new(projectedRight, entryPrice + compositeSide * riskDistance, "1R", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(bull, 94), textcolor=bull, size=size.tiny, force_overlay=true),
+                 label.new(projectedRight, entryPrice + compositeSide * riskDistance * 2.0, "2R", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(bull, 94), textcolor=bull, size=size.tiny, force_overlay=true),
+                 label.new(projectedRight, entryPrice + compositeSide * riskDistance * 3.0, "3R", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(bull, 94), textcolor=bull, size=size.tiny, force_overlay=true),
+                 label.new(projectedRight, entryPrice, sideText + " · " + f_priceText(entryPrice), xloc=xloc.bar_time, yloc=yloc.price, style=compositeSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(compositeSide == 1 ? bull : bear, 88), textcolor=compositeSide == 1 ? bull : bear, size=size.small, force_overlay=true),
+                 label.new(projectedRight, originalStop, "SL · " + f_priceText(originalStop), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(bear, 88), textcolor=bear, size=size.tiny, force_overlay=true),
+                 label.new(projectedRight, entryPrice, "BB TP", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, force_overlay=true),
+                 label.new(projectedRight, entryPrice, "", xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(ink, 100), textcolor=ink, size=size.tiny, force_overlay=true),
+                 time, entryPrice, originalStop, riskDistance)
+            array.push(drawingHistory, activeDrawing)
+            f_storeEvent(f_eventLabel(compositeSide, entryPrice, reverse ? "反向平仓" + sideText : sideText, compositeSide == 1 ? bull : bear))
+
+// Native, chart-data-free transition checks. They use only fixed artificial
+// prices and never feed the indicator's market state. This remains off by
+// default so normal chart use cannot score or inspect historical prices.
+varip bool selfTestDone = false
+varip bool selfTestPass = false
+if not runSelfTest
+    selfTestDone := false
+    selfTestPass := false
+if runSelfTest and barstate.islast and not selfTestDone
+    // Long: first wick target, then a later live tick closes back through BE.
+    [longTpSide, longTpStop, longTpFraction, longTpRealized, longTpPartial, longTpPrice, longTpFired, longTpExit, longTpExitPrice, longTpFinal, longTpReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 99.0, 104.2, 99.0, 104.2, 104.0, true, true, 0, false)
+    [longBeSide, longBeStop, longBeFraction, longBeRealized, longBePartial, longBePrice, longBeFired, longBeExit, longBeExitPrice, longBeFinal, longBeReverse] = f_step(longTpSide, 100.0, 1.5, longTpStop, longTpFraction, longTpRealized, longTpPartial, longTpPrice, 99.0, 104.2, 99.0, 99.0, 104.0, true, true, 0, false)
+    // A second target observation cannot sell another half or change the first target.
+    [onceSide, onceStop, onceFraction, onceRealized, oncePartial, oncePrice, onceFired, onceExit, onceExitPrice, onceFinal, onceReverse] = f_step(1, 100.0, 1.5, longTpStop, longTpFraction, longTpRealized, true, longTpPrice, 100.0, 120.0, 99.0, 103.0, 120.0, true, true, 0, false)
+    // Short old stop uses the adverse gap-aware fill before any target.
+    [shortSlSide, shortSlStop, shortSlFraction, shortSlRealized, shortSlPartial, shortSlPrice, shortSlFired, shortSlExit, shortSlExitPrice, shortSlFinal, shortSlReverse] = f_step(-1, 100.0, 1.5, 101.5, 1.0, 0.0, false, na, 100.0, 101.6, 96.0, 101.6, 96.0, true, false, 0, true)
+    [longSlSide, longSlStop, longSlFraction, longSlRealized, longSlPartial, longSlPrice, longSlFired, longSlExit, longSlExitPrice, longSlFinal, longSlReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 100.0, 104.0, 98.4, 98.4, 104.0, true, false, 0, true)
+    // A stale high above a *previous* BB must not trigger a live target once
+    // the current tick closes below the current (moved) BB.
+    [staleSide, staleStop, staleFraction, staleRealized, stalePartial, stalePrice, staleFired, staleExit, staleExitPrice, staleFinal, staleReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 100.0, 105.0, 99.0, 103.0, 104.0, true, true, 0, false)
+    // Historical path may use a wick for TP, but only this later close proves BE.
+    [histSide, histStop, histFraction, histRealized, histPartial, histPrice, histFired, histExit, histExitPrice, histFinal, histReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 100.0, 104.0, 99.0, 99.0, 104.0, true, false, 0, true)
+    // Opposite confirmed composite requests a close-and-full reverse in caller state.
+    [revSide, revStop, revFraction, revRealized, revPartial, revPrice, revFired, revExit, revExitPrice, revFinal, revRequested] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 100.0, 101.0, 99.0, 100.0, 104.0, true, true, -1, true)
+    bool longLiveOk = longTpSide == 1 and longTpPartial and longTpFired and longTpFraction == 0.5 and longTpStop == 100.0 and longBeSide == 0 and longBeExit == 2 and longBeExitPrice == 99.0 and math.abs(longBeFinal - 1.0) < 0.000001
+    bool oneHalfOnlyOk = onceSide == 1 and not onceFired and onceFraction == 0.5 and oncePrice == longTpPrice and math.abs(onceRealized - longTpRealized) < 0.000001
+    bool stopSidesOk = shortSlSide == 0 and shortSlExit == 1 and shortSlExitPrice == 101.5 and math.abs(shortSlFinal + 1.0) < 0.000001 and longSlSide == 0 and longSlExit == 1 and longSlExitPrice == 98.5 and math.abs(longSlFinal + 1.0) < 0.000001
+    bool liveCurrentBandOk = staleSide == 1 and not staleFired and not stalePartial and staleFraction == 1.0
+    bool historyOk = histSide == 0 and histFired and histExit == 2 and histExitPrice == 100.0 and histFraction == 0.0
+    bool reverseOk = revSide == 1 and revRequested and revExit == 0
+    [shortTpSide, shortTpStop, shortTpFraction, shortTpRealized, shortTpPartial, shortTpPrice, shortTpFired, shortTpExit, shortTpExitPrice, shortTpFinal, shortTpReverse] = f_step(-1, 100.0, 1.5, 101.5, 1.0, 0.0, false, na, 100.0, 101.0, 97.0, 97.0, 97.0, true, true, 0, false)
+    [shortBeSide, shortBeStop, shortBeFraction, shortBeRealized, shortBePartial, shortBePrice, shortBeFired, shortBeExit, shortBeExitPrice, shortBeFinal, shortBeReverse] = f_step(shortTpSide, 100.0, 1.5, shortTpStop, shortTpFraction, shortTpRealized, shortTpPartial, shortTpPrice, 101.0, 101.0, 97.0, 100.0, 97.0, true, true, 0, false)
+    [entrySide, entryStop, entryFraction, entryRealized, entryPartial, entryPrice, entryFired, entryExit, entryExitPrice, entryFinal, entryReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 99.0, 104.0, 97.0, 100.0, 104.0, false, false, 0, true)
+    [gapSide, gapStop, gapFraction, gapRealized, gapPartial, gapPrice, gapFired, gapExit, gapExitPrice, gapFinal, gapReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 97.0, 104.0, 97.0, 103.0, 104.0, true, false, 0, true)
+    [wickSide, wickStop, wickFraction, wickRealized, wickPartial, wickPrice, wickFired, wickExit, wickExitPrice, wickFinal, wickReverse] = f_step(1, 100.0, 1.5, 98.5, 1.0, 0.0, false, na, 99.0, 104.0, 99.0, 103.0, 104.0, true, false, -1, false)
+    bool shortPartialOk = shortTpSide == -1 and shortTpFired and shortTpFraction == 0.5 and shortBeExit == 2 and math.abs(shortBeFinal - 1.0) < 0.000001
+    bool entryBarOk = entrySide == 1 and entryFraction == 1.0 and not entryFired and entryExit == 0
+    bool gapOk = gapSide == 0 and gapExitPrice == 97.0 and math.abs(gapFinal + 2.0) < 0.000001 and not gapFired
+    bool noRetroBeOk = wickSide == 1 and wickFired and wickStop == 100.0 and wickExit == 0 and not wickReverse
+    bool compositeOk = f_composite(97.0, 98.0, 102.0, 99.0, true, false) == 1 and f_composite(103.0, 104.0, 102.0, 99.0, false, true) == -1 and f_composite(97.0, 99.0, 102.0, 99.0, true, false) == 0 and f_composite(98.0, 100.0, 102.0, 99.0, true, false) == 0 and f_composite(97.0, 98.0, 102.0, 99.0, false, false) == 0
+    selfTestPass := longLiveOk and oneHalfOnlyOk and stopSidesOk and liveCurrentBandOk and historyOk and reverseOk and shortPartialOk and entryBarOk and gapOk and noRetroBeOk and compositeOk
+    selfTestDone := true
+    if not selfTestPass
+        runtime.error("ETH BB × Stoch synthetic state check failed")
+
+// Render after transitions so a closed group freezes on its exit tick. The
+// numeric event latch recreates its label on every live update after rollback.
+if not runSelfTest and not na(activeDrawing)
+    bool drawingMatchesPosition = pos.side != 0 and activeDrawing.entryPrice == pos.entry
+    int rightTime = pos.side == 0 and not na(pos.lastExitTime) ? pos.lastExitTime : projectedRight
+    float displayTarget = pos.partial ? pos.targetPrice : pos.side == 1 ? bbUpper : pos.side == -1 ? bbLower : na
+    float shownStop = pos.side == 0 ? (pos.partial ? activeDrawing.entryPrice : activeDrawing.originalStop) : pos.stop
+    string stopCaption = pos.partial ? "BE · " + f_priceText(shownStop) : "SL · " + f_priceText(shownStop)
+    if drawingMatchesPosition or pos.side == 0
+        box.set_right(activeDrawing.riskBox, rightTime)
+        box.set_right(activeDrawing.rewardBox, rightTime)
+        label.set_x(activeDrawing.targetLabel, rightTime)
+        line.set_x2(activeDrawing.entryLine, rightTime)
+        line.set_x2(activeDrawing.stopLine, rightTime)
+        line.set_y1(activeDrawing.stopLine, shownStop)
+        line.set_y2(activeDrawing.stopLine, shownStop)
+        label.set_x(activeDrawing.entryLabel, rightTime)
+        label.set_x(activeDrawing.stopLabel, rightTime)
+        label.set_y(activeDrawing.stopLabel, shownStop)
+        label.set_text(activeDrawing.stopLabel, stopCaption)
+        line.set_x2(activeDrawing.r1Line, rightTime)
+        line.set_x2(activeDrawing.r2Line, rightTime)
+        line.set_x2(activeDrawing.r3Line, rightTime)
+        label.set_x(activeDrawing.r1Label, rightTime)
+        label.set_x(activeDrawing.r2Label, rightTime)
+        label.set_x(activeDrawing.r3Label, rightTime)
+        if not na(displayTarget) and displayTarget > 0
+            box.set_right(activeDrawing.rewardBox, rightTime)
+            box.set_top(activeDrawing.rewardBox, math.max(activeDrawing.entryPrice, displayTarget))
+            box.set_bottom(activeDrawing.rewardBox, math.min(activeDrawing.entryPrice, displayTarget))
+            label.set_xy(activeDrawing.targetLabel, rightTime, displayTarget)
+            label.set_text(activeDrawing.targetLabel, pos.partial ? "TP50% · " + f_priceText(displayTarget) : "BB TP · " + f_priceText(displayTarget))
+        if pos.side == 0 and not na(pos.lastFinalR)
+            label.set_xy(activeDrawing.exitLabel, rightTime, pos.lastExitPrice)
+            label.set_text(activeDrawing.exitLabel, pos.lastExitKind + " · 加权 " + f_rText(pos.lastFinalR))
+    if pos.targetTime == time and pos.targetSide != 0 and not na(pos.targetEventPrice)
+        f_storeEvent(f_eventLabel(pos.targetSide, pos.targetEventPrice, "TP50% · BE", bull))
+    if pos.eventTime == time and pos.eventSide != 0 and not na(pos.eventPrice)
+        f_storeEvent(f_eventLabel(pos.eventSide, pos.eventPrice, pos.eventText, bear))
+
+// The two shapes are signal markers only. Entry labels above reflect the actual
+// single-position state, therefore same-side signals do not create a second one.
+plotshape(not runSelfTest and barstate.isconfirmed and longComposite, "Long composite", shape.triangleup, location.belowbar, bull, size=size.tiny, force_overlay=true)
+plotshape(not runSelfTest and barstate.isconfirmed and shortComposite, "Short composite", shape.triangledown, location.abovebar, bear, size=size.tiny, force_overlay=true)
+pUpper = plot(runSelfTest ? na : bbUpper, "BB upper", bbColor, 1, plot.style_linebr, force_overlay=true)
+pLower = plot(runSelfTest ? na : bbLower, "BB lower", bbColor, 1, plot.style_linebr, force_overlay=true)
+plot(not runSelfTest and showBasis ? bbBasis : na, "BB basis", color.new(bbColor, 35), 1, plot.style_linebr, force_overlay=true)
+fill(pUpper, pLower, runSelfTest ? na : color.new(bbColor, 92), title="BB channel")
+
+float openWeightedR = runSelfTest or pos.side == 0 ? na : pos.realizedR + pos.fraction * f_r(pos.side, pos.entry, pos.risk, close)
+string positionText = pos.side == 1 ? "多 " + str.tostring(pos.fraction * 100, "#") + "%" : pos.side == -1 ? "空 " + str.tostring(pos.fraction * 100, "#") + "%" : "空仓"
+string guardText = chartAllowed ? "ETHUSDT.P · 5m" : "请用 ETHUSDT.P · 5m 普通K线"
+string rText = pos.side == 0 ? "上次 " + f_rText(pos.lastFinalR) : "已实现+未平 " + f_rText(openWeightedR)
+string protectionText = pos.side == 0 ? "—" : (pos.partial ? "BE " : "SL ") + f_priceText(pos.stop)
+string targetText = pos.side == 0 ? "—" : pos.partial ? "TP50% " + f_priceText(pos.targetPrice) : "动态 BB " + f_priceText(pos.side == 1 ? bbUpper : bbLower)
+
+var table panel = table.new(position.top_right, 2, 6, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+if barstate.islast and showPanel
+    table.cell(panel, 0, 0, "BB × Stoch", text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, guardText, text_color=chartAllowed ? bull : bear, text_size=size.tiny)
+    table.cell(panel, 0, 1, "仓位", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, positionText, text_color=pos.side == 1 ? bull : pos.side == -1 ? bear : muted, text_size=size.small)
+    table.cell(panel, 0, 2, "加权毛 R", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 2, rText, text_color=pos.side == 0 ? muted : openWeightedR >= 0 ? bull : bear, text_size=size.small)
+    table.cell(panel, 0, 3, "保护", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 3, protectionText, text_color=pos.partial ? bull : bear, text_size=size.tiny)
+    table.cell(panel, 0, 4, "目标", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 4, targetText, text_color=bull, text_size=size.tiny)
+    table.cell(panel, 0, 5, runSelfTest ? "检查" : "", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 5, runSelfTest and selfTestPass ? "SELFTEST PASS" : "", text_color=runSelfTest and selfTestPass ? bull : muted, text_size=size.tiny)
