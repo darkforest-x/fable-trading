@@ -1,3 +1,5 @@
+> **Owner 授权按币种成绩作固定条件统计（2026-09-15）**：Owner 分别询问排除胜率≤10%、平均净R<−0.36、PF(R)<0.5 的币种。仅对已保存全量V8/V9账本做三条独立条件的事后统计与前一年定名单/后一年只读核对；不读新行情、不重放、不调参、不实施名单。每个阈值/模式第1次已暴露账本统计消费，原回放消费记录保留。合同：`experiments/active/exp-spike-v9-asset-exclusions-20260915-v1/PROJECT_PLAN.md`。
+
 > **Owner 授权 ETH V9 3m/5m 固定对照（2026-09-15）**：Owner 在收到 ETH 30m/1H/4H 结果后要求“3min 5min 也跑一下”。复用原 ETH 3m OKX / 5m Binance 完整历史及分段，保持 V9 三门和原 V8 退出/0.002 成本；允许已暴露的 3m holdout 后段本次固定比较，不调参、不扩池。V9 低周期专项曝光第 1 次，固定 V9 全历史评估累计第 2 次。合同：`experiments/active/exp-spike-v9-eth-lowtf-20260915-v1/PROJECT_PLAN.md`。
 
 > **Owner 后续授权 SPIKE V9 全量对比与 TV 保存（2026-09-15）**：完成代码后，Owner 明确要求
