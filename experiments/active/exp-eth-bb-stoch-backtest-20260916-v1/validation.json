@@ -1,0 +1,27 @@
+{
+  "focused_tests": {
+    "command": "python3 -m pytest tests/evaluation/test_bb_stoch_replay.py tests/evaluation/test_eth_bb_stoch_study.py tests/test_spike_fanshen_exit.py -q",
+    "passed": 23
+  },
+  "broad_gates": {
+    "command": "python3 -m pytest tests/boundaries tests/causality tests/parity -q",
+    "passed": 463,
+    "failed": 10,
+    "skipped": 2,
+    "causes": {
+      "system_python_dependency_version_mismatches": 3,
+      "existing_artifact_missing_source_commit": 5,
+      "existing_migration_hash_mismatches": 2
+    }
+  },
+  "project_venv_recheck": {
+    "command": ".venv/bin/python -m pytest tests/boundaries/test_ci_installs_from_requirements.py tests/evaluation/test_bb_stoch_replay.py tests/evaluation/test_eth_bb_stoch_study.py tests/test_spike_fanshen_exit.py -q",
+    "passed": 45,
+    "failed": 0
+  },
+  "scope": "3 environment pin failures resolved by existing project venv; 7 unrelated registry/hash failures remain. No dependency or unrelated source changed. NumPy2.0.2 and pandas2.3.3 used for economic replay match project pins.",
+  "independent_code_review": "Study sampling/serial/censor review found no blocker; engine synthetic fixes completed before source commit and first price read.",
+  "native_full_ledger_parity": false,
+  "economic_ledger_checks": 912,
+  "holdout_consumed": false
+}

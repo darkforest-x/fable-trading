@@ -1,0 +1,48 @@
+{
+  "status": "passed",
+  "reviewer_role": "budget-evidence",
+  "scope": "Existing permitted JSON artifacts and frozen config/plan; no raw OHLC reads or new replay",
+  "natural": 75,
+  "boundary_censored": 1,
+  "exit_counts": {
+    "initial_stop": 34,
+    "opposite_signal_close": 19,
+    "break_even": 17,
+    "break_even_marketable": 5
+  },
+  "independent_fill_reconciliation": {
+    "gross_pnl": -375.3846,
+    "fees": 349.3926088,
+    "net_pnl": -724.7772088,
+    "gross_r": -6.0203147408,
+    "net_r": -11.0175615514,
+    "profit_factor_r": 0.7043430512,
+    "profit_factor_cash": 0.7122782627,
+    "max_realized_drawdown_r": 13.7337851155,
+    "max_realized_drawdown_usdt": 941.3930106,
+    "max_loss_streak": 6
+  },
+  "controls": {
+    "draws": 380,
+    "actual_groups": 76,
+    "draws_per_group": 5,
+    "censored_draws_retained": 2,
+    "complete_pairs": 74,
+    "unpaired_groups": 2,
+    "paired_actual_mean": -0.1482694624,
+    "paired_random_mean": -0.1155420331,
+    "excess_mean": -0.0327274293,
+    "exact_month_signflip_p": 0.75,
+    "null_events": 32
+  },
+  "actual_paths_byte_identical": true,
+  "summary_paths_identical": true,
+  "config_and_plan_match_code_receipt": true,
+  "limitations": [
+    "Raw source receipt assertions not independently re-read; source file outside evidence scope",
+    "Adverse control records not in scoped audit; actual records and full summaries compared",
+    "Anti-redraw artifact consistency verified; algorithm separately reviewed in main and code-review task",
+    "Native TradingView ledger parity not established",
+    "Tail price R must not replace fill-weighted economic R"
+  ]
+}

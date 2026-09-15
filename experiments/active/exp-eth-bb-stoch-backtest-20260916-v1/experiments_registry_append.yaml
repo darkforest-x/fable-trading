@@ -1,0 +1,14 @@
+
+  - experiment_id: exp-eth-bb-stoch-backtest-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2feef5767e7d21b536dead1dddeac4845c132f93
+    status: inconclusive
+    question: Does frozen owner whole-wick BB200 Stoch5m with3percent stop and dynamic half exit have a net entry advantage?
+    single_variable: Fixed v2 first economic replay; no strategy parameter search. Two predeclared OHLC paths are execution sensitivity only.
+    result: 75complete trades net-11.0176R,win45.33percent,PF(R).7043,realizedDD13.7338R. Matched74events excess-.03273R,p.75;positive profitability not established.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_backtest_20260916.md
+    artifacts: [eth-bb-stoch-backtest-20260916-delivery]
+    notes: OKXnative5m permitted37896bars ending2026-05-01;1boundary position separate. 5marketable protection approximations;no native broker ledger parity,no V1 gate.
