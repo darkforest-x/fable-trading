@@ -18,6 +18,35 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: owner-manual-trading-system-20260916-v2-delivery
+    artifact_type: manifest
+    role: owner_manual_order_handbook_and_checklist
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4257eb4c515c780ba529a65ffb637714b510d7a3
+    source_path: experiments/active/exp-owner-manual-trading-system-20260916-v2/delivery_manifest.json
+    sha256: 1ce5eee633ef748ecc54621cb8d034045596192e2da8d0e2e6b58c3637f8ef66
+    size_bytes: 2945
+    storage_uri: repo://experiments/active/exp-owner-manual-trading-system-20260916-v2/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Document-only; registry lacks not-applicable. Existing reports reused, no market data read. Static HTML structure
+      and arithmetic checked; no browser pixel QA.
+  - artifact_id: owner-okx-history-20260916-delivery
+    artifact_type: manifest
+    role: personal_ledger_audit_and_existing_indicator_system_synthesis
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebe08f32300aca32d094ffea9a1f50637999f0e5
+    source_path: experiments/active/exp-owner-okx-history-20260916-v1/delivery_manifest.json
+    sha256: 183a5f8b99f2f428f94e640af741641030451136c775d56b27600543e8cf0179
+    size_bytes: 9985
+    storage_uri: repo://experiments/active/exp-owner-okx-history-20260916-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Personal ledger is not a model split; unknown retained because registry lacks not-applicable. Recent personal records
+      owner-authorized; no new market evaluation. Manifest binds local private data and cited reports, not permission to train
+      or trade.
   - artifact_id: spike-v9-cost-be2-20260915-eth-delivery
     artifact_type: manifest
     role: v9_cost_protection_fixed_entry_and_serial_eth_evaluation
@@ -382,6 +411,81 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Hash receipt for report, HTML, five figures, plans and frozen replay/post manifests; independent review PASS.
+  - artifact_id: ai-strategy-factory-audit-20260913-report-md
+    artifact_type: report
+    role: read_only_public_workflow_and_trade_contract_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    source_path: analysis/p0_ai_strategy_factory_workflow_audit_20260913.md
+    sha256: b3cbbe7e157c95bf18cdc2c7399bb06e804cbc5a203aca52e885a9249b1d1364
+    size_bytes: 16087
+    storage_uri: repo://analysis/p0_ai_strategy_factory_workflow_audit_20260913.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No raw market/ledger reads or new holdout scoring. Summarizes prior written reports without changing their
+      evidence status. source_commit is the audited repository baseline; new audit outputs are uncommitted. unknown
+      is conservative non-evaluation provenance, not new holdout consumption.
+  - artifact_id: ai-strategy-factory-audit-20260913-report-html
+    artifact_type: report
+    role: read_only_public_workflow_and_trade_contract_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    source_path: analysis/html/p0_ai_strategy_factory_workflow_audit_20260913.html
+    sha256: bfddb6b497194ae432c951fb1facc5dd617356fbdaeb01ab6c9694de79423f34
+    size_bytes: 20024
+    storage_uri: repo://analysis/html/p0_ai_strategy_factory_workflow_audit_20260913.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No raw market/ledger reads or new holdout scoring. Summarizes prior written reports without changing their
+      evidence status. source_commit is the audited repository baseline; new audit outputs are uncommitted. unknown
+      is conservative non-evaluation provenance, not new holdout consumption.
+  - artifact_id: ai-strategy-factory-audit-20260913-plan
+    artifact_type: manifest
+    role: read_only_public_workflow_and_trade_contract_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    source_path: experiments/active/exp-ai-strategy-factory-audit-20260913-v1/PROJECT_PLAN.md
+    sha256: 05ab16316149f284545bdeae3a8b720f742a2c6c54d299272e3f08f7d2cb6c63
+    size_bytes: 1424
+    storage_uri: repo://experiments/active/exp-ai-strategy-factory-audit-20260913-v1/PROJECT_PLAN.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No raw market/ledger reads or new holdout scoring. Summarizes prior written reports without changing their
+      evidence status. source_commit is the audited repository baseline; new audit outputs are uncommitted. unknown
+      is conservative non-evaluation provenance, not new holdout consumption.
+  - artifact_id: ai-strategy-factory-audit-20260913-sources
+    artifact_type: manifest
+    role: read_only_public_workflow_and_trade_contract_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    source_path: experiments/active/exp-ai-strategy-factory-audit-20260913-v1/source_inventory.json
+    sha256: 4b6ba9a6859f98c8d89119858ac3c640ffbcfdff80ecb01146016c6a54365d70
+    size_bytes: 3646
+    storage_uri: repo://experiments/active/exp-ai-strategy-factory-audit-20260913-v1/source_inventory.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No raw market/ledger reads or new holdout scoring. Summarizes prior written reports without changing their
+      evidence status. source_commit is the audited repository baseline; new audit outputs are uncommitted. unknown
+      is conservative non-evaluation provenance, not new holdout consumption.
+  - artifact_id: ai-strategy-factory-audit-20260913-learning
+    artifact_type: report
+    role: read_only_public_workflow_and_trade_contract_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0b479e1d57a46c3c6880e7b65066dedf697c87ce
+    source_path: docs/learnings/strategy-factory-integration-must-preserve-the-trade-contract.md
+    sha256: 8bba15b4f057e996b499cc9820dd45f0b6e768f19a105a413782b9add7905473
+    size_bytes: 1627
+    storage_uri: repo://docs/learnings/strategy-factory-integration-must-preserve-the-trade-contract.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No raw market/ledger reads or new holdout scoring. Summarizes prior written reports without changing their
+      evidence status. source_commit is the audited repository baseline; new audit outputs are uncommitted. unknown
+      is conservative non-evaluation provenance, not new holdout consumption.
   - artifact_id: spike-v1-plus-backtest-20260912-config
     artifact_type: manifest
     role: fixed_default_research_comparison
@@ -684,6 +788,26 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Source identity only; no price history or model evaluation.
+  - artifact_id: spike-v1-plus-evidence-20260912-source-receipt
+    artifact_type: manifest
+    role: identity_of_existing_not_newly_evaluated_sources
+    source_repo: darkforest-x/fable-trading
+    source_commit: 11ed67f4b94e402463b437b711365c5804fe18e5
+    source_path: experiments/active/exp-spike-v1-plus-evidence-20260912/source_receipt.json
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Evidence audit only; no new strategy outcome.
+  - artifact_id: spike-v1-plus-evidence-20260912-report
+    artifact_type: report
+    role: evidence_audit_and_unvalidated_v1_plus_design
+    source_repo: darkforest-x/fable-trading
+    source_commit: 11ed67f4b94e402463b437b711365c5804fe18e5
+    source_path: analysis/p0_spike_v1_plus_evidence_20260912.md
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    notes: Evidence audit only; no new strategy outcome.
   - artifact_id: spike-v1-okx-133-review-20260911-data-manifest
     artifact_type: manifest
     role: fixed_133_signal_chart_membership
@@ -1465,46 +1589,46 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Owner-selected case; fixed scan then expanded exploratory scan, no independent profitability validation or live change.
-  - artifact_id: altcoin-rotation-20260909-tool-connectivity
-    artifact_type: manifest
-    role: engineering_observer_evidence
-    source_repo: darkforest-x/fable-trading
-    source_commit: manual-public-api-probe-20260908T171643Z
-    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
-    sha256: 1359969825beb092234fbe9e6fc6d80e2c962f57c0e8b527e46ba8adc5146367
-    size_bytes: 1215
-    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
-    holdout_status: unknown
-    training_eligible: false
-    production_eligible: false
-    notes: Manual anonymous public endpoint smoke before scanner implementation; no committed probe generator claimed.
-      This is connectivity evidence only, not CLI, model or profitability validation. Current unscored values remain
-      in unknown holdout status.
-  - artifact_id: altcoin-rotation-20260909-live-proposal
-    artifact_type: config
+  - artifact_id: altcoin-rotation-20260909-report-source
+    artifact_type: report
     role: engineering_observer_evidence
     source_repo: darkforest-x/fable-trading
     source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
     generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
-    sha256: fb7bed7e7d5d3b0a10a123fcf7885b61a08f6e369a85484b280c6f2a1e16c0a7
-    size_bytes: 2934
-    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
-    holdout_status: pre_holdout
+    source_path: analysis/p0_altcoin_rotation_system_20260909.md
+    sha256: 92bb324fc67324afe8fba82e760de554df21bea4169ec09100a95c8c3002cc0c
+    size_bytes: 12247
+    storage_uri: repo://analysis/p0_altcoin_rotation_system_20260909.md
+    holdout_status: unknown
     training_eligible: false
     production_eligible: false
     notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
       not a scored holdout result; unknown entries are not performance clearance.
-  - artifact_id: altcoin-rotation-20260909-validation
+  - artifact_id: altcoin-rotation-20260909-report-html
+    artifact_type: report
+    role: engineering_observer_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
+    source_path: analysis/html/p0_altcoin_rotation_system_20260909.html
+    sha256: 23879ab9725a0dcb5ede61a9e43daab041017433c73f922e5392ab78f33e3405
+    size_bytes: 16381
+    storage_uri: repo://analysis/html/p0_altcoin_rotation_system_20260909.html
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
+      not a scored holdout result; unknown entries are not performance clearance.
+  - artifact_id: altcoin-rotation-20260909-historical-snapshot
     artifact_type: manifest
     role: engineering_observer_evidence
     source_repo: darkforest-x/fable-trading
     source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
     generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
-    sha256: e5eb6a346093524ef2b682f728ce5b26c969437e3a3f391da1f3f7d513b05ba5
-    size_bytes: 2166
-    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
+    sha256: 9b0dc2a5ba8f4f61552bc8909e0837d6286ab8b6429195d5e09985626f04b4d9
+    size_bytes: 130388
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
@@ -1525,51 +1649,51 @@ artifacts:
     production_eligible: false
     notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
       not a scored holdout result; unknown entries are not performance clearance.
-  - artifact_id: altcoin-rotation-20260909-historical-snapshot
+  - artifact_id: altcoin-rotation-20260909-validation
     artifact_type: manifest
     role: engineering_observer_evidence
     source_repo: darkforest-x/fable-trading
     source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
     generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
-    sha256: 9b0dc2a5ba8f4f61552bc8909e0837d6286ab8b6429195d5e09985626f04b4d9
-    size_bytes: 130388
-    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/historical_snapshot.json
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
+    sha256: e5eb6a346093524ef2b682f728ce5b26c969437e3a3f391da1f3f7d513b05ba5
+    size_bytes: 2166
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/validation_receipt.json
     holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
     notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
       not a scored holdout result; unknown entries are not performance clearance.
-  - artifact_id: altcoin-rotation-20260909-report-html
-    artifact_type: report
+  - artifact_id: altcoin-rotation-20260909-live-proposal
+    artifact_type: config
     role: engineering_observer_evidence
     source_repo: darkforest-x/fable-trading
     source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
     generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    source_path: analysis/html/p0_altcoin_rotation_system_20260909.html
-    sha256: 23879ab9725a0dcb5ede61a9e43daab041017433c73f922e5392ab78f33e3405
-    size_bytes: 16381
-    storage_uri: repo://analysis/html/p0_altcoin_rotation_system_20260909.html
-    holdout_status: unknown
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
+    sha256: fb7bed7e7d5d3b0a10a123fcf7885b61a08f6e369a85484b280c6f2a1e16c0a7
+    size_bytes: 2934
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/approval_request.json
+    holdout_status: pre_holdout
     training_eligible: false
     production_eligible: false
     notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
       not a scored holdout result; unknown entries are not performance clearance.
-  - artifact_id: altcoin-rotation-20260909-report-source
-    artifact_type: report
+  - artifact_id: altcoin-rotation-20260909-tool-connectivity
+    artifact_type: manifest
     role: engineering_observer_evidence
     source_repo: darkforest-x/fable-trading
-    source_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    generator_commit: 694d0dcb01916b0dd421a14e90cba67c727421dd
-    source_path: analysis/p0_altcoin_rotation_system_20260909.md
-    sha256: 92bb324fc67324afe8fba82e760de554df21bea4169ec09100a95c8c3002cc0c
-    size_bytes: 12247
-    storage_uri: repo://analysis/p0_altcoin_rotation_system_20260909.md
+    source_commit: manual-public-api-probe-20260908T171643Z
+    source_path: experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
+    sha256: 1359969825beb092234fbe9e6fc6d80e2c962f57c0e8b527e46ba8adc5146367
+    size_bytes: 1215
+    storage_uri: repo://experiments/active/exp-altcoin-rotation-system-20260909-v1/tool_connectivity_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Engineering only. Historical snapshot cutoff 2026-04-30. Report includes contemporary public tool documentation/connectivity,
-      not a scored holdout result; unknown entries are not performance clearance.
+    notes: Manual anonymous public endpoint smoke before scanner implementation; no committed probe generator claimed.
+      This is connectivity evidence only, not CLI, model or profitability validation. Current unscored values remain
+      in unknown holdout status.
   - artifact_id: altcoin-rotation-20260909-prereg
     artifact_type: manifest
     role: engineering_observer_preregistration
@@ -13411,6 +13535,95 @@ artifacts:
     config_hash: "e885e3c7d7ed7fb12d5e4fe69a26ccb05d894598cee2f0e61933a9cf9a63ad35"
     data_cutoff: "2026-08-31T02:00:00Z"
     notes: Self-contained Owner-facing HTML with embedded overview and direct local chart-pack paths.
+
+  - artifact_id: 15m-arbusdt-screenshot-probe-20260901-v1-run-contract
+    artifact_type: config
+    role: owner_authorized_single_screenshot_run_receipt_recorded_after_inference
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    source_path: experiments/active/exp-15m-arbusdt-screenshot-probe-20260901-v1/run_contract.json
+    sha256: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    size_bytes: 4591
+    storage_uri: "repo://experiments/active/exp-15m-arbusdt-screenshot-probe-20260901-v1/run_contract.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    config_hash: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    data_cutoff: "2026-09-01T01:00:00Z"
+    notes: >-
+      Records Owner-authorized checkpoint holdout use #3 and explicitly states
+      that this repository receipt was written after inference rather than
+      being falsely represented as a before-run preregistration.
+
+  - artifact_id: 15m-arbusdt-screenshot-probe-20260901-v1-result
+    artifact_type: manifest
+    role: exact_single_episode_coordinates_timing_price_and_cross_venue_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    source_path: analysis/output/arb_screenshot_probe_20260901_v1/result.json
+    sha256: "d7b91d804ac122cb4f1c3be9a022d3bfc239b989c02773fc7986dcbf828de81d"
+    size_bytes: 2414
+    storage_uri: "file://analysis/output/arb_screenshot_probe_20260901_v1/result.json"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    config_hash: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    data_cutoff: "2026-09-01T01:00:00Z"
+    notes: One Binance episode plus exact OKX cross-check; the incomplete 09:00 CST screenshot bar is excluded.
+
+  - artifact_id: 15m-arbusdt-screenshot-probe-20260901-v1-annotated-chart
+    artifact_type: report
+    role: owner_facing_preserved_raw_box_first_detection_time_and_price_chart
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    source_path: analysis/output/arb_screenshot_probe_20260901_v1/ARB_15m_model_detection_annotated.png
+    sha256: "c6102d65d0f0ec0ae1f1fbe2325928b83e71dbda7d3950c1202f374d565a64b9"
+    size_bytes: 187765
+    storage_uri: "file://analysis/output/arb_screenshot_probe_20260901_v1/ARB_15m_model_detection_annotated.png"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    config_hash: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    data_cutoff: "2026-09-01T01:00:00Z"
+    notes: Full context with preserved raw box, first endpoint, fully available time, price point and exact input inset.
+
+  - artifact_id: 15m-arbusdt-screenshot-probe-20260901-v1-report
+    artifact_type: report
+    role: canonical_markdown_single_screenshot_model_probe
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    source_path: analysis/p1_15m_arbusdt_screenshot_model_probe_20260901.md
+    sha256: "9385ed74066596018b47db7fc7b4bdaa246409f9b5444ce8c0aaf9891c6ccbde"
+    size_bytes: 6351
+    storage_uri: "repo://analysis/p1_15m_arbusdt_screenshot_model_probe_20260901.md"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    config_hash: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    data_cutoff: "2026-09-01T01:00:00Z"
+    notes: Chinese report separating endpoint-bar label, bar-close availability, selected-screenshot hindsight and production status.
+
+  - artifact_id: 15m-arbusdt-screenshot-probe-20260901-v1-html
+    artifact_type: report
+    role: owner_facing_self_contained_html_single_screenshot_model_probe
+    source_repo: darkforest-x/fable-trading
+    source_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    source_path: analysis/html/p1_15m_arbusdt_screenshot_model_probe_20260901.html
+    sha256: "b146d68b7be581f729b7ba14c2fed80b0cf64f0262a74b790c9449ac44dbb516"
+    size_bytes: 260199
+    storage_uri: "repo://analysis/html/p1_15m_arbusdt_screenshot_model_probe_20260901.html"
+    holdout_status: holdout_consumed
+    training_eligible: false
+    production_eligible: false
+    generator_commit: "f82431b7cca040ce84347276a899ed278c28e7ae"
+    config_hash: "0640671e7d45dbfcfcb75bff26ac7912442699be924a31a893d5f3eebd90302f"
+    data_cutoff: "2026-09-01T01:00:00Z"
+    notes: Self-contained HTML with the annotated 1920x1400 model-evidence chart embedded.
+
   # ---- 15m L2 causal global-context rejection (2026-09-01) ------------
   - artifact_id: 15m-ma-launch-l2-global-context-v1-prereg
     artifact_type: config
@@ -25104,7 +25317,7 @@ artifacts:
     source_commit: b494138028a64b293d1fb3a950467c0420725030
     source_path: experiments/active/exp-imacd-yolo-timeframes-20260908-v1/results/summary.json
     sha256: 5f8892b6d663faae16cede37675efc4fb4c58b98e745fa11b437674f7f65fb48
-    size_bytes: 8835
+    size_bytes: 8834
     storage_uri: repo://experiments/active/exp-imacd-yolo-timeframes-20260908-v1/results/summary.json
     holdout_status: holdout_consumed
     training_eligible: false
@@ -30255,34 +30468,6 @@ artifacts:
     production_eligible: false
     notes: V5 native revision4 saved00:16. Owner-authorized display-only changes; known-history counterfactual8vs60.
       No return scoring.
-  - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-source
-    artifact_type: report
-    role: coverage_limited_incremental_backtest_report
-    source_repo: darkforest-x/fable-trading
-    source_commit: fa91d12
-    generator_commit: 395dcc3
-    source_path: analysis/p1_spike_v1_twoyear_20260911.md
-    sha256: 2294b2eb96d3c47100539cbf9af94eb9416bf58709ee7d9847abc8a18802421f
-    size_bytes: 5827
-    storage_uri: repo://analysis/p1_spike_v1_twoyear_20260911.md
-    holdout_status: holdout_consumed
-    training_eligible: false
-    production_eligible: false
-    notes: Frozen current-catalog denominator remains 1,681x4; this report exposes incremental executable ledgers without claiming all-market completion.
-  - artifact_id: spike-v1-twoyear-allmarkets-20260911-report-html
-    artifact_type: report
-    role: owner_delivery_coverage_limited_incremental_report
-    source_repo: darkforest-x/fable-trading
-    source_commit: fa91d12
-    generator_commit: 395dcc3
-    source_path: analysis/html/p1_spike_v1_twoyear_20260911.html
-    sha256: 72b376c410cc71fbdfef8cdc05fb7c147f905926fc35c010cfdcc062ecf80a7c
-    size_bytes: 8835
-    storage_uri: repo://analysis/html/p1_spike_v1_twoyear_20260911.html
-    holdout_status: holdout_consumed
-    training_eligible: false
-    production_eligible: false
-    notes: HTML delivery labels the run coverage-limited and links the searchable incremental ledger.
   - artifact_id: spike-v6-wvf-20260912-report-md
     artifact_type: report
     role: fixed_strategy_comparison
@@ -31122,6 +31307,36 @@ artifacts:
     production_eligible: false
     notes: Native3m only,12groups and50770events audited;40raw output hashes plus report,HTML,Pine and validation documents. Negative frozen configuration;zero holdout,no live changes.
 
+  - artifact_id: eth-bb-stoch-indicator-20260915-delivery
+    artifact_type: manifest
+    role: pine_visual_indicator_native_synthetic_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: a5976113f48a8081a02ccaddefbef02e7186e978
+    source_path: experiments/active/exp-eth-bb-stoch-indicator-20260915-v1/delivery_manifest.json
+    sha256: 6ce5754f00a0bea765261acc4f3cb0bdbe656bf275fb71471ae832db2f289e2d
+    size_bytes: 2205
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-indicator-20260915-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Pine v6 native compile and11synthetic groups pass. No backtest or market-dependent drawing parity. Repository gates480pass11unrelated
+      failures disclosed.
+
+  - artifact_id: eth-bb-stoch-strategy-20260916-v2-delivery
+    artifact_type: manifest
+    role: pine_strategy_conversion_and_synthetic_visual_validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3bb80aaf83bd184c08e0520ef95110452efb5137
+    source_path: experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/delivery_manifest.json
+    sha256: 746418c283b59efb0de55c3d98a0c085d0b65ce3389ffae2bb948583cf3f21c3
+    size_bytes: 2203
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-strategy-20260916-v2/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Native compile and no-order fixtures pass;2400BB boundary comparisons and800rounding checks pass. No market return
+      evaluation or full broker-fill-sequence parity.
+
   - artifact_id: eth-bb-stoch-backtest-20260916-delivery
     artifact_type: manifest
     role: frozen_bb_stoch_pre_only_economic_replay_with_matched_null
@@ -31150,3 +31365,17 @@ artifacts:
     production_eligible: false
     notes: Full315 development grid,212eligible,2frozen later arms,matched controls and fill ledgers.33focused tests and110scoped
       repository checks pass. Candidate fails later profitability;zero holdout,no live changes.
+
+  - artifact_id: eth-bb-stoch-rsi-filter-20260916-delivery
+    artifact_type: manifest
+    role: frozen_rsi_zone_entry_gate_comparison_on_bb_stoch_v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a44171f936076e423eaf5fa69c6ab449c57db45
+    source_path: experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/delivery_manifest.json
+    sha256: 4139d5d074031933fb4aa70583fb966726dfbda0849441876b8ee99d2908ad65
+    size_bytes: 12278
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three arms x two paths plus 111event-level replays;24focused checks pass,468repository gate checks pass with7 pre-existing unrelated failures. No live change,no promotion.

@@ -14,6 +14,44 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-owner-manual-trading-system-20260916-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4257eb4c515c780ba529a65ffb637714b510d7a3
+    status: inconclusive
+    question: Translate owner ledger findings and MA compression/V9/YOLO into a human-operated trading handbook.
+    single_variable: Document-only human workflow design; multiple proposed execution choices explicitly unvalidated, no economic
+      experiment.
+    result: Delivered manual entry, sizing, true protection, partial-fill, position, offline and review procedures plus order
+      checklist. Arithmetic and source semantics checked; human selection has no new profitability evidence.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_owner_manual_trading_system_20260916.md
+    artifacts:
+    - owner-manual-trading-system-20260916-v2-delivery
+    reuse_allowed: false
+    notes: Owner clarified manual orders. Preserve old reports; visible reverse V9 exit and explicit RMA14 differ from original
+      engine details; no return inheritance. New timeframe/risk/chase limits are proposals. No account or production changes.
+  - experiment_id: exp-owner-okx-history-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ebe08f32300aca32d094ffea9a1f50637999f0e5
+    status: inconclusive
+    question: What does the owner OKX lifecycle history support, and how should existing V9, BB Stoch v2 and V1 permissions
+      form a coherent personal protocol?
+    single_variable: Descriptive supplied-ledger audit and existing report synthesis; no strategy intervention or new market
+      evaluation.
+    result: 4898 USDT lifecycles net -14828.4821; gross15129.6312, fees-27811.1575, funding479.1839, clearance-2626.1397. Best
+      trade29002.9927; remainder-43831.4748. V9 trend and BB reversal remain unvalidated; V1 gate is proposed next variable.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_owner_okx_history_20260916.md
+    artifacts:
+    - owner-okx-history-20260916-delivery
+    reuse_allowed: false
+    notes: Personal attached 2026 ledger explicitly authorized; no new market holdout or model evaluation. 1 BTC inverse row
+      segregated. No account equity, historical R or causal behavioral claim. Portable HTML structural QA passed; browser-enhanced
+      interaction unverified. Detailed private ledger local-only.
   - experiment_id: exp-chartart-bbrsi-martingale-20260915-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2a2cf9a2b1570564332533216c24933e7e979f1e
@@ -9425,6 +9463,37 @@ experiments:
     notes: Existing ETH perpetual3m prefix only; no30s or highest-timeframe arbitration. Zero holdout,122focused tests passed. Pine compiled and3m cutoff panel verified;no full cross-platform ledger parity.
     artifacts: [ifvg-lrl-eth-20260915-delivery]
 
+  - experiment_id: exp-eth-bb-stoch-indicator-20260915-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a5976113f48a8081a02ccaddefbef02e7186e978
+    status: active
+    question: Visualize owner ETH5m body-outside-BB plus original Stoch reversal with half exit and breakeven.
+    single_variable: Indicator implementation only; no economic experiment or parameter selection.
+    result: Native Pine compile and synthetic transitions pass; market effectiveness untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_indicator_20260915.md
+    artifacts:
+    - eth-bb-stoch-indicator-20260915-delivery
+    notes: Owner confirmed body only and full opposite BB plus Stoch composite exit; no V1 gate; default1.5percent stop.
+
+  - experiment_id: exp-eth-bb-stoch-strategy-20260916-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3bb80aaf83bd184c08e0520ef95110452efb5137
+    status: active
+    question: Convert owner whole-candle BB Stoch idea to Pine strategy with intrabar half exit and clear runner drawings.
+    single_variable: Owner explicitly requested nine implementation changes together; no parameter search or return experiment.
+    result: Native compiler, synthetic formula and layout checks pass; economic effectiveness untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_strategy_20260916.md
+    artifacts:
+    - eth-bb-stoch-strategy-20260916-v2-delivery
+    notes: Supersedes v1 body-only and1.5percent defaults;v2 whole candle includes wicks,3percent stop,price R. V1 multi-timeframe
+      gate deferred.
+
   - experiment_id: exp-eth-bb-stoch-backtest-20260916-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2feef5767e7d21b536dead1dddeac4845c132f93
@@ -9458,3 +9527,17 @@ experiments:
     - eth-bb-stoch-optimization-20260916-delivery
     notes: Jan-Feb selection committed before Mar-Apr recheck;both periods previously exposed,not freshOOS.1ETH,10bp each side.
       No recheck reselection;no nativeTV broker ledger parity,no V1 gate.
+
+  - experiment_id: exp-eth-bb-stoch-rsi-filter-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a44171f936076e423eaf5fa69c6ab449c57db45
+    status: inconclusive
+    question: Does a ChartPrime Parabolic RSI zone gate on entries improve the frozen BB x Stoch v2 rule?
+    single_variable: Only new-entry admission changes; exits, costs, stop and targets stay at v2 values. rsi_both is a predeclared exit-side sensitivity, not a second tuning trial.
+    result: 58complete trades net-8.4118R vs baseline 75/-11.0176R; per-trade -0.1469->-0.1450R, maxlossstreak 6->12. Matched 56pairs excess0.00819R,p0.4688. Event-level passed 73 -0.1113R vs blocked 37 -0.2116R,diff0.1004,p0.313. No improvement established;both arms net negative.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_rsi_filter_20260916.md
+    artifacts: [eth-bb-stoch-rsi-filter-20260916-delivery]
+    notes: Same OKXnative5m prefix ending2026-05-01 as the v2 replay;unfiltered arm reproduces that ledger trade by trade. Gate blocks 37of111 candidates;long median RSI28.42,short75.37. Pine v3 written but NOT saved or compiled on TradingView;owner TV inputs unverified.

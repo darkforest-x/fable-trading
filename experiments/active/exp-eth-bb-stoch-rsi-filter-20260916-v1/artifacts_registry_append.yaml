@@ -1,0 +1,14 @@
+
+  - artifact_id: eth-bb-stoch-rsi-filter-20260916-delivery
+    artifact_type: manifest
+    role: frozen_rsi_zone_entry_gate_comparison_on_bb_stoch_v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a44171f936076e423eaf5fa69c6ab449c57db45
+    source_path: experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/delivery_manifest.json
+    sha256: 4139d5d074031933fb4aa70583fb966726dfbda0849441876b8ee99d2908ad65
+    size_bytes: 12278
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Three arms x two paths plus 111event-level replays;24focused checks pass,468repository gate checks pass with7 pre-existing unrelated failures. No live change,no promotion.

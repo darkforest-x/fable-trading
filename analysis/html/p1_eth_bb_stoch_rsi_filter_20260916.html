@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ETH 5m · BB × Stoch 加 Parabolic RSI 区域过滤</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ETH 5m · BB × Stoch 加 Parabolic RSI 区域过滤</h1>
+<h2>结论</h2>
+<p><strong>加上「只在超卖做多、超买做空」的 RSI 门后，同一段历史里过滤后仍为净亏损：58笔完整交易， 净-8.41R，胜率43.10%，PF 0.73； 未过滤的 v2 是75笔、净-11.02R、PF 0.70。</strong> 总亏损少了 2.61R，方向上更少亏。</p>
+<p><strong>但少亏主要来自少做单，不是每笔变好：</strong>每笔净收益 -0.1469R → -0.1450R，几乎没动（+0.0019R/笔）， 入场数 75 → 58 笔。同时最大连续亏损从 6 笔变成 12 笔，<strong>变差了</strong>。没有证明优于匹配随机入场。本轮没有调任何参数，V1 门禁未加入。</p>
+<p><strong>Pine v3 尚未保存到 TradingView</strong>：本机没有已登录的 TradingView 浏览器会话（Chrome 扩展未连接，内置浏览器无 cookie），保存需要 Owner 自己登录或连上扩展。源码已在仓库，可直接粘贴到 Pine 编辑器。</p>
+<h2>这次到底改了什么</h2>
+<table><thead><tr>
+<th>组</th>
+<th>入场</th>
+<th>反向/退出</th>
+</tr></thead><tbody>
+<tr><td><code>unfiltered</code></td><td>原 v2 组合信号</td><td>原 v2 信号</td></tr>
+<tr><td><code>rsi_entry</code>（主，= 保存的 Pine v3）</td><td>组合信号 ∩ RSI 区域</td><td><strong>原 v2 信号，未过滤</strong></td></tr>
+<tr><td><code>rsi_both</code>（事前冻结的敏感性）</td><td>组合信号 ∩ RSI 区域</td><td>同样被过滤</td></tr>
+</tbody></table>
+<p>RSI 取 ChartPrime 源码里的 <code>ta.rsi(close, 14)</code> 曲线，和策略同图 5m； 严格 <code>&lt;30</code> 才允许做多、严格 <code>&gt;70</code> 才允许做空， 等于阈值不放行，在组合信号那根 5m 收盘同根判定。<strong>不使用该指标的 SAR 翻转/强信号菱形</strong>， 那是另一个事件。阈值与周期是公开源码默认值；本机没有可用的 TradingView 会话， <strong>没有核实 Owner 图上保存的实时参数</strong>，若不是 14/30/70 则本报告数字需按其参数重跑。</p>
+<p>主口径刻意只过滤入场：如果连反向退出也要等 RSI 极值，过滤就会把亏损单留在场内， 这在 <code>rsi_both</code> 那一行看得见，它是敏感性披露，不是可选成绩。</p>
+<h2>过滤掉了什么</h2>
+<table><thead><tr>
+<th>候选</th>
+<th>可用信号</th>
+<th>RSI 放行</th>
+<th>放行率</th>
+<th>信号根 RSI 中位数</th>
+</tr></thead><tbody>
+<tr><td>全部</td><td>111</td><td>74</td><td>66.67%</td><td>—</td></tr>
+<tr><td>做多候选（需 RSI&lt;30）</td><td>56</td><td>34</td><td>60.71%</td><td>28.42</td></tr>
+<tr><td>做空候选（需 RSI&gt;70）</td><td>55</td><td>40</td><td>72.73%</td><td>75.37</td></tr>
+</tbody></table>
+<p><code>unfiltered</code> 与上一轮冻结账本逐笔一致（{&quot;status&quot;: &quot;passed&quot;, &quot;trades&quot;: 76, &quot;results_sha256&quot;: &quot;af6d39ca59c51b859c6e714fbf22466fbcc52fbd9b4ec3d96bded5667e49d492&quot;, &quot;trades_sha256&quot;: &quot;0198d52e6b9d8643260926f8eaf251bbd2cbc4af402b1453d6a25f31e4561888&quot;}）， 这是回归校验不是新评分。</p>
+<p><strong>RSI 门其实拦不掉多少</strong>：BB 带外 + Stoch 极区的信号本身已经处在极端位置， 做多候选的 RSI 中位数就是 28.42、做空候选是 75.37， 本来就贴着 30/70。111 个候选只被拦掉 37 个；序贯占仓后实际入场从 76 笔降到 59 笔。这个指标和原信号高度重叠， 不是一个独立的新条件。</p>
+<h2>收益、回撤与匹配随机对照</h2>
+<table><thead><tr>
+<th>组</th>
+<th>完整交易</th>
+<th>毛 R</th>
+<th>净 R</th>
+<th>净胜率</th>
+<th>PF（R）</th>
+<th>已实现回撤 R</th>
+<th>配对数</th>
+<th>随机均值 R/笔</th>
+<th>配对超额 R/笔</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>v2 原版（无 RSI 过滤）·TV路径</td><td>75</td><td>-6.02</td><td>-11.02</td><td>45.33%</td><td>0.70</td><td>13.73</td><td>74</td><td>-0.116</td><td>-0.033</td><td>0.7500</td></tr>
+<tr><td>v3 主口径（RSI 只过滤入场）·TV路径</td><td>58</td><td>-4.54</td><td>-8.41</td><td>43.10%</td><td>0.73</td><td>13.54</td><td>56</td><td>-0.156</td><td>+0.008</td><td>0.4688</td></tr>
+<tr><td>敏感性（RSI 同时过滤反向退出）·TV路径</td><td>58</td><td>-4.99</td><td>-8.86</td><td>43.10%</td><td>0.71</td><td>13.54</td><td>56</td><td>-0.152</td><td>-0.004</td><td>0.5312</td></tr>
+<tr><td>v2 原版（无 RSI 过滤）·先走逆向</td><td>75</td><td>-6.02</td><td>-11.02</td><td>45.33%</td><td>0.70</td><td>13.73</td><td>74</td><td>-0.116</td><td>-0.033</td><td>0.7500</td></tr>
+<tr><td>v3 主口径（RSI 只过滤入场）·先走逆向</td><td>58</td><td>-4.54</td><td>-8.41</td><td>43.10%</td><td>0.73</td><td>13.54</td><td>56</td><td>-0.156</td><td>+0.008</td><td>0.4688</td></tr>
+<tr><td>敏感性（RSI 同时过滤反向退出）·先走逆向</td><td>58</td><td>-4.99</td><td>-8.86</td><td>43.10%</td><td>0.71</td><td>13.54</td><td>56</td><td>-0.152</td><td>-0.004</td><td>0.5312</td></tr>
+</tbody></table>
+<p>PF = 盈利交易净 R 之和 / 亏损交易净 R 绝对值之和；净胜率扣手续费后计算；回撤是完整交易结算后的 累计净 R 回撤，<strong>不含持仓浮动回撤</strong>。两条路径只是预先冻结的成交顺序敏感性，不得挑较好者当成绩。</p>
+<p><strong>这段样本里两条路径结果逐笔相同</strong>（上一轮 v2 冻结账本也是如此）：主口径只有 5 根持仓 K 线同时够到止盈与保护价，而这几根里先后顺序没有改变结果。 所以这条敏感性在本样本上没有分辨力，不能当作&quot;路径无关&quot;已被证明。</p>
+<p><img src="eth_bb_stoch_rsi_filter_20260916_equity.png" alt="按组的累计已实现净 R"></p>
+<h2>事件级：过滤到底有没有选出更好的信号</h2>
+<p>序贯账本里删掉一些入场会改变后续机会，净差不能全部算在&quot;被删掉的那些单&quot;头上。 因此对每个可用原始信号独立回放一笔 1 ETH（忽略占仓），按 RSI 放行/拦截分组：</p>
+<table><thead><tr>
+<th>事件级独立回放</th>
+<th>笔数</th>
+<th>净 R 合计</th>
+<th>净 R/笔</th>
+<th>净胜率</th>
+</tr></thead><tbody>
+<tr><td>RSI 放行</td><td>73</td><td>-8.12</td><td>-0.1113</td><td>47.95%</td></tr>
+<tr><td>RSI 拦截</td><td>37</td><td>-7.83</td><td>-0.2116</td><td>45.95%</td></tr>
+</tbody></table>
+<p>放行组减拦截组的净 R/笔差为 +0.1004， 在事件集合内做 9999 次种子化标签置换，单侧 p = 0.3130。 放行组与拦截组的差异在标签置换零假设下不显著。<strong>两组都是亏的</strong>——放行组 -0.1113R/笔、 拦截组 -0.2116R/笔，所以这个门顶多是&quot;亏得少一点&quot;与&quot;亏得多一点&quot;之分， 不是把赢家从输家里挑出来。这只检验&quot;RSI 区域标签是否含信息&quot;，不是收益证明；事件可重叠， 不构成可执行的单仓账户。共 111 个事件，其中 1 笔在末端未平仓已排除。</p>
+<h2>主口径的分段与退出构成</h2>
+<table><thead><tr>
+<th>组</th>
+<th>完整交易</th>
+<th>毛 R</th>
+<th>净 R</th>
+<th>净胜率</th>
+<th>PF（R）</th>
+<th>已实现回撤 R</th>
+<th>配对数</th>
+<th>随机均值 R/笔</th>
+<th>配对超额 R/笔</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>时间前半</td><td>26</td><td>+1.40</td><td>-0.33</td><td>57.69%</td><td>0.97</td><td>6.40</td><td>26</td><td>-0.142</td><td>+0.130</td><td>0.1250</td></tr>
+<tr><td>时间后半</td><td>32</td><td>-5.94</td><td>-8.08</td><td>31.25%</td><td>0.58</td><td>13.54</td><td>30</td><td>-0.169</td><td>-0.097</td><td>0.8750</td></tr>
+<tr><td>多头</td><td>30</td><td>-1.82</td><td>-3.82</td><td>40.00%</td><td>0.76</td><td>5.89</td><td>30</td><td>-0.203</td><td>+0.076</td><td>0.3125</td></tr>
+<tr><td>空头</td><td>28</td><td>-2.72</td><td>-4.59</td><td>46.43%</td><td>0.70</td><td>8.95</td><td>26</td><td>-0.103</td><td>-0.070</td><td>0.7188</td></tr>
+<tr><td>2025-12</td><td>4</td><td>+1.62</td><td>+1.35</td><td>100.00%</td><td>N/A</td><td>0.00</td><td>4</td><td>-0.096</td><td>+0.433</td><td>0.5000</td></tr>
+<tr><td>2026-01</td><td>8</td><td>+1.04</td><td>+0.50</td><td>62.50%</td><td>1.16</td><td>1.07</td><td>8</td><td>-0.062</td><td>+0.125</td><td>0.5000</td></tr>
+<tr><td>2026-02</td><td>17</td><td>-1.08</td><td>-2.21</td><td>41.18%</td><td>0.79</td><td>6.40</td><td>17</td><td>-0.214</td><td>+0.084</td><td>0.5000</td></tr>
+<tr><td>2026-03</td><td>16</td><td>-3.58</td><td>-4.64</td><td>25.00%</td><td>0.54</td><td>10.13</td><td>16</td><td>-0.237</td><td>-0.054</td><td>1.0000</td></tr>
+<tr><td>2026-04</td><td>13</td><td>-2.55</td><td>-3.41</td><td>38.46%</td><td>0.51</td><td>3.94</td><td>11</td><td>-0.041</td><td>-0.259</td><td>1.0000</td></tr>
+</tbody></table>
+<p>时间切点固定为数据起点到研究终点的中点：2026-02-24T05:00:00+00:00。前后半、月度只是同一固定规则的 稳定性诊断，不是独立重复试验，也没有用来选参数。</p>
+<table><thead><tr>
+<th>最终退出原因</th>
+<th>笔数</th>
+<th>其中已平半</th>
+</tr></thead><tbody>
+<tr><td>平半后保本</td><td>10</td><td>10</td></tr>
+<tr><td>完整反向信号退出</td><td>16</td><td>16</td></tr>
+<tr><td>初始止损</td><td>28</td><td>0</td></tr>
+<tr><td>上移保护价已被越过</td><td>4</td><td>4</td></tr>
+</tbody></table>
+<p>完整交易中 30 笔触轨平半；最大连续净亏损 12 笔， 平均盈利 +0.90R、平均亏损 -0.94R， 平均持仓约 22.89 小时（按覆盖 K 线根数估计）。 固定 1 ETH 归一化下，主口径毛盈亏 -248.47 USDT、 手续费 266.84 USDT、净 -515.31 USDT； 这是仓位归一化数字，不是账户收益率。</p>
+<h2>匹配随机对照口径</h2>
+<p>每笔实际入场提前抽 5 个同 ETH、同方向、同 UTC 月、同因果波动桶（TR-SMA14/close 相对前 120 个值的 三分位）的随机入场，先冻结抽样再读结果，未平仓也不重抽；随机入场使用同组的平半、保本、反向、 3% 止损与费用规则。主口径共抽 295 个对照，其中 3 个末端未完成， 完整配对 56 笔、未配对 3 笔。按 5 个 UTC 月整体翻转差值符号， 单侧 p = 0.4688。月份数少，显著性分辨率有限。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>这是对冻结 Pine 规则的 Python 离线回放，<strong>不声称与 TradingView 策略测试器逐笔成交一致</strong>。 5m OHLC 无法还原真实逐笔先后；主路径用 TradingView 文档的近端极值优先约定，开盘距高低相等时固定先低。</li>
+<li>样本量：过滤后完整交易 58 笔，月度与前后半的子表低到十几笔，<strong>只作描述，不宣称稳健</strong>； 本区间此前已被 v2 回测使用，属探索性历史复用，不是独立样本外验证。</li>
+<li>本配置 <strong>holdout 消耗 0 次</strong>，读价止于 2026-05-01T00:00:00Z，早于 05-04 holdout 起点。 数据缺口/重复均为 0，不补 K 线、不换源；受限价格解析 0 行。</li>
+<li>主口径 0 笔入场开盘已越过止盈价、0 笔同开盘 处理已触发的保本、4 笔盘中平半时新保护价已被越过，均按观察价近似并保留标记。</li>
+<li>无排序模型，val AUC、top-decile 排序收益与单特征基线不适用，不编造；替代零假设是匹配随机入场 与事件级标签置换。未完成仓位 1 笔按末端盯市，不计入完整交易收益。</li>
+<li>费用只含每边 0.1%，不含资金费率、额外滑点与冲击成本；固定 1 ETH 现金换算不等于交易所合约乘数。</li>
+<li>本轮不训练、不 promote、不改仓、不动真金，也不产生任何实盘资格。</li>
+</ul>
+<h2>校验与复现</h2>
+<p>源码冻结提交：<code>3a44171f936076e423eaf5fa69c6ab449c57db45</code>。Pine v3 SHA256：<code>11c3ccaf34732aab337158f1e533a8b279094e7749b0ccd8fad4f11a08eb1493</code>； 父版 v2：<code>d329a60a4b355ee47c530277e8f04aabab0290603ecc9ab49fcd1c8949eb01ea</code>；ChartPrime 源：<code>ca5785ff28a10a51c9d08ec60af14491e62ca50bb56ed3bbc39698aadde51098</code>。 只读前缀 SHA256：<code>fdc5e2fe276b3f6662b9891108bc7eae26243c465de3215c4b3174f717c22900</code>。程序在任何价格读取前核对 HEAD 的 builder、配置、 计划与两个 Pine 字节一致，否则拒绝运行。验证记录：<code>{&quot;focused_tests&quot;: {&quot;command&quot;: &quot;.venv/bin/python -m pytest tests/evaluation/test_bb_stoch_rsi_study.py tests/evaluation/test_bb_stoch_replay.py tests/evaluation/test_eth_bb_stoch_study.py tests/test_ma_stoch_rsi_filter.py -q&quot;, &quot;passed&quot;: 24, &quot;failed&quot;: 0}, &quot;broad_gates&quot;: {&quot;command&quot;: &quot;.venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q&quot;, &quot;passed&quot;: 468, &quot;failed&quot;: 7, &quot;causes&quot;: {&quot;existing_artifact_missing_source_commit&quot;: 5, &quot;existing_migration_hash_mismatches&quot;: 2}, &quot;scope&quot;: &quot;identical to the failures already disclosed in HANDOFF for the previous rounds; unrelated to this experiment and not bypassed&quot;}, &quot;baseline_parity&quot;: {&quot;status&quot;: &quot;passed&quot;, &quot;trades&quot;: 76, &quot;results_sha256&quot;: &quot;af6d39ca59c51b859c6e714fbf22466fbcc52fbd9b4ec3d96bded5667e49d492&quot;, &quot;trades_sha256&quot;: &quot;0198d52e6b9d8643260926f8eaf251bbd2cbc4af402b1453d6a25f31e4561888&quot;}, &quot;economic_ledger_checks&quot;: 2439, &quot;path_sensitivity_discriminated&quot;: false, &quot;native_tradingview_parity&quot;: false, &quot;pine_saved_to_tradingview&quot;: false, &quot;pine_compiled_natively&quot;: false, &quot;holdout_consumed&quot;: false}</code>。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest tests/evaluation/test_bb_stoch_rsi_study.py tests/evaluation/test_bb_stoch_replay.py \
+  tests/evaluation/test_eth_bb_stoch_study.py tests/test_ma_stoch_rsi_filter.py -q
+.venv/bin/python -m yoyo.evaluation.bb_stoch_rsi_study
+.venv/bin/python -m yoyo.evaluation.bb_stoch_rsi_report
+python3 scripts/md_to_html.py analysis/p1_eth_bb_stoch_rsi_filter_20260916.md --out-dir analysis/html
+</code></pre>
+<p>逐笔、对照抽签、事件级账本与摘要保存在 <code>experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/</code>；数据未入 git。</p>
+<h2>下一步（需 Owner 决定）</h2>
+<ol>
+<li>核对 Owner 图上 Parabolic RSI 的实际参数；不是 14/30/70 就按其参数重跑，本轮数字作废。</li>
+<li>若要改阈值（例如 35/65）或改成&quot;最近 N 根内曾经超卖&quot;，那是新变量，需另行冻结，不在本轮自动尝试。</li>
+<li>是否要用该指标的 <strong>SAR 翻转/强信号菱形</strong>作为另一种过滤——与本轮的区域口径不是一回事。</li>
+<li>任何 holdout 评估仍需 Owner 明确批准并记账。</li>
+</ol>
+</body>
+</html>

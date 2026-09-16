@@ -1,5 +1,52 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：BB×Stoch 加 Parabolic RSI 区域过滤，未证明改善（2026-09-16）
+
+Owner要求在已保存的「ETH BB × Stoch · 策略 v2」上加 ChartPrime Parabolic RSI：超卖才做多、
+超买才做空；先写Pine保存TV再回测。Pine v3已写好（yoyo/evaluation/pine/eth_bb_stoch_strategy_v3.pine，
+仅比v2多RSI门与显示，退出仍用未过滤信号，带useRSI开关），**尚未保存到TradingView**——
+本机无已登录TV会话（Chrome扩展未连接、内置浏览器无cookie），需Owner登录或连扩展后再保存与编译。
+Owner图上RSI实参未核实；本轮按公开默认14/30/70。
+回测沿用v2冻结前缀（OKX ETH-USDT-SWAP 5m，读到2026-05-01之前，holdout消耗0），三组事前冻结：
+unfiltered逐笔复现上一轮账本；rsi_entry（主）58笔净−8.4118R、PF0.7277、胜率43.10%；
+rsi_both（敏感性）−8.8614R。原版75笔净−11.0176R。**总亏少2.61R但每笔几乎没变**
+（−0.1469→−0.1450R），最大连亏6→12笔变差；配对随机超额+0.0082R/笔、p0.4688。
+事件级独立回放：放行73笔−0.1113R/笔 vs 拦截37笔−0.2116R/笔，9999次标签置换p0.313，两组都亏。
+候选111只拦37，做多候选RSI中位28.42、做空75.37，指标与原信号高度共线。
+HTML：analysis/html/p1_eth_bb_stoch_rsi_filter_20260916.html；源：analysis/p1_eth_bb_stoch_rsi_filter_20260916.md。
+实验：experiments/active/exp-eth-bb-stoch-rsi-filter-20260916-v1/（56文件manifest）；源码3a44171f93。
+24项聚焦测试通过，全库468通过/7既有失败（未绕过）。两条成交路径逐笔相同，敏感性无分辨力。
+未训练、未promote、未改仓、无实盘资格。Notion本轮未记录（无可用登录会话）。
+
+## 最新：Owner澄清为人工开单系统，手册v2已交付（2026-09-16）
+
+Owner要本人看图、人工判断和下单；均线密集为主练形态，YOLO辅助识别，V9收盘确认，BB反转另卡。
+HTML：analysis/html/p1_owner_manual_trading_system_20260916.html；开单卡：analysis/html/p1_owner_manual_order_card_20260916.html。
+覆盖盘前、画结构、信号有效期、SL/仓位、部分成交、真实保护、趋势管理、值守/预定离屏及复盘。
+默认1H和风险0.25%等是提案，用户本金/盯盘时间尚待补充；没有新增盈利证据或账户操作。
+人工版采用可见V9反向确认与独立ATR14/RMA读数，明确不能继承原V6反向退出回测。
+源码4257eb4c51；来源/算例/链接/静态HTML结构核查通过，未浏览器像素QA；市场样本和holdout0。
+新版本Notion：https://app.notion.com/p/3dd8856479af81fc8db1e26ee985359e，Inbox/想法，关联旧版。
+实验目录experiments/active/exp-owner-manual-trading-system-20260916-v2/绑定手册与源证据。旧账本报告保留。
+
+## 最新：个人欧易账本复盘与指标系统重组（2026-09-16）
+
+Owner要求结合近期V9、V1、Stoch、BB反转分析旧交易并重整系统。附件4899条，
+4898 USDT重构净−14828.48U，另1条BTC净+0.0004480031BTC分列。最大BTC赢家
++29002.99U，其余−43831.47U；177条强平净−9983.44U。缺权益/现金流/初始SL，
+不能算账户回报或历史R，不把持仓时长、做空分组直接当因果优势。
+复用已有报告重组：原V9趋势A、最新BB×Stoch v2反转B、待实现V1四周期门禁、统一账户预算。
+A/B均无新增实盘资格；下一项经济研究只变V1门禁，未新回测、未新读市场holdout。
+个人2026记录为附件明确授权。本轮未训练/promote/改仓。原始V9与YOLO追加通知去重，
+Pine收盘参考和Python下一开盘成交时序区分，V7/V8影子不冒称V9。
+HTML：analysis/html/p1_owner_okx_history_20260916.html；源：analysis/p1_owner_okx_history_20260916.md。
+实验目录：experiments/active/exp-owner-okx-history-20260916-v1/，含规则、日志CSV、
+3图SQL、artifact.json、核验notebook和delivery_manifest。逐条私人数据留本地data；未推远程。
+统计源68dd0775e9，报告源ebe08f3230；独立CSV/Decimal核心金额复核、只读指标映射完成。
+HTML规范/结构校验通过；无兼容headless-shell，交互图表/来源菜单及窄屏未验收，保留语义数据表。
+Notion审计：https://app.notion.com/p/3dd8856479af81eb9f0ac76bd5aaf1e6；
+系统Inbox：https://app.notion.com/p/3dd8856479af81deb0ffe4ad7d8ae08c；不是已验证或实盘。
+
 ## 最新：MA/Stoch退出v2找到相对改善，后段仍亏（2026-09-15）
 
 Owner继续找更好止盈止损；固定原入场、1x权益名义、20bp成本。第二轮31组含3旧锚点，
@@ -1858,6 +1905,24 @@ L1.5 的正确职责是“局部 YOLO 之后、经济 L2 之前”的因果全�
 K 线，LONG / SHORT 分开建 Owner-confirmed `global_shape_good` Gold 和局部像但全局错的 hard
 negatives；不得拿未来收益自动生成形态标签。报告：
 `analysis/html/p3_15m_ma_launch_l2_side_split_20260901.html`。
+
+## ⚡ 当前真相（2026-09-01 — ARBUSDT 用户截图已由 Grade-A 1280 模型检出）
+
+Owner 给出 2026-09-01 09:05 CST 的 ARBUSDT 15m 大涨截图，要求用现有模型实测并标出
+点位和时间。冻结使用 Grade-A 8,000 正例 + 24,000 负例 full40 native-1280
+`best.pt`，`conf=0.25` / NMS `0.70` / W18–19 / core4–5 / post2–9 全部未改。Binance
+截图匹配报价与 OKX 原生数据源交叉扫描均只得到 **1 个 LONG episode**，两者
+核心均为 **09-01 00:00..00:45 CST**，首次检出窗口右端均为 **01:15 bar**。
+
+Binance 首次置信度 0.6713，01:15 bar 收盘 `0.08962`；因 K 线按开盘时间命名，无前视
+完整可用时间是 **01:30 CST**，下根开盘 `0.08963`。截图时仍在形成的 09:00 bar
+明确排除；后续到截图 `0.11694` 的 +30.48% 是结果条件选图，不是精度或收益
+证据。标注图：`analysis/output/arb_screenshot_probe_20260901_v1/ARB_15m_model_detection_annotated.png`；
+交付报告：`analysis/html/p1_15m_arbusdt_screenshot_model_probe_20260901.html`。
+
+这是 Grade-A full40 native-1280 checkpoint 的 holdout 使用 **#3**。没有训练、调参、promote、部署、
+forward 写入或下单；该模型仍需 2 根 post-core 确认 K，只是 completed-history / delayed
+detector，`production_eligible=false`，生产仍 `detector=none`。
 
 ## ⚡ 当前真相（2026-08-29 — A级 8k + 匹配负例 24k 已在 RTX3060 训练）
 

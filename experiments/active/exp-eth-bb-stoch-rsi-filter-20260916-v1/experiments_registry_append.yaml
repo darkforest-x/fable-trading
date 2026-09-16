@@ -1,0 +1,14 @@
+
+  - experiment_id: exp-eth-bb-stoch-rsi-filter-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3a44171f936076e423eaf5fa69c6ab449c57db45
+    status: inconclusive
+    question: Does a ChartPrime Parabolic RSI zone gate on entries improve the frozen BB x Stoch v2 rule?
+    single_variable: Only new-entry admission changes; exits, costs, stop and targets stay at v2 values. rsi_both is a predeclared exit-side sensitivity, not a second tuning trial.
+    result: 58complete trades net-8.4118R vs baseline 75/-11.0176R; per-trade -0.1469->-0.1450R, maxlossstreak 6->12. Matched 56pairs excess0.00819R,p0.4688. Event-level passed 73 -0.1113R vs blocked 37 -0.2116R,diff0.1004,p0.313. No improvement established;both arms net negative.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_rsi_filter_20260916.md
+    artifacts: [eth-bb-stoch-rsi-filter-20260916-delivery]
+    notes: Same OKXnative5m prefix ending2026-05-01 as the v2 replay;unfiltered arm reproduces that ledger trade by trade. Gate blocks 37of111 candidates;long median RSI28.42,short75.37. Pine v3 written but NOT saved or compiled on TradingView;owner TV inputs unverified.

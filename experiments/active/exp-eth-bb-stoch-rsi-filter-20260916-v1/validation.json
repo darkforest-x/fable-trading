@@ -1,0 +1,29 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_bb_stoch_rsi_study.py tests/evaluation/test_bb_stoch_replay.py tests/evaluation/test_eth_bb_stoch_study.py tests/test_ma_stoch_rsi_filter.py -q",
+    "passed": 24,
+    "failed": 0
+  },
+  "broad_gates": {
+    "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+    "passed": 468,
+    "failed": 7,
+    "causes": {
+      "existing_artifact_missing_source_commit": 5,
+      "existing_migration_hash_mismatches": 2
+    },
+    "scope": "identical to the failures already disclosed in HANDOFF for the previous rounds; unrelated to this experiment and not bypassed"
+  },
+  "baseline_parity": {
+    "status": "passed",
+    "trades": 76,
+    "results_sha256": "af6d39ca59c51b859c6e714fbf22466fbcc52fbd9b4ec3d96bded5667e49d492",
+    "trades_sha256": "0198d52e6b9d8643260926f8eaf251bbd2cbc4af402b1453d6a25f31e4561888"
+  },
+  "economic_ledger_checks": 2439,
+  "path_sensitivity_discriminated": false,
+  "native_tradingview_parity": false,
+  "pine_saved_to_tradingview": false,
+  "pine_compiled_natively": false,
+  "holdout_consumed": false
+}
