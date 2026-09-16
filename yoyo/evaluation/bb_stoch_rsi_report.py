@@ -154,8 +154,13 @@ RSI 取 ChartPrime 源码里的 `ta.rsi(close, {cfg['rsi_length']})` 曲线，�
 {gate_table}
 
 `unfiltered` 与上一轮冻结账本逐笔一致（{json.dumps(result.get('baseline_parity', {}), ensure_ascii=False)}），
-这是回归校验不是新评分。BB 带外 + Stoch 极区的信号本身已经是"极端位置"，
-再叠加 RSI 极值后，同向确认的样本数量大幅下降，这是本轮样本量变小的直接原因。
+这是回归校验不是新评分。
+
+**RSI 门其实拦不掉多少**：BB 带外 + Stoch 极区的信号本身已经处在极端位置，
+做多候选的 RSI 中位数就是 {number(counts['long']['median_rsi'])}、做空候选是 {number(counts['short']['median_rsi'])}，
+本来就贴着 30/70。111 个候选只被拦掉 {counts['gate_blocked']} 个；序贯占仓后实际入场从
+{os_['total_entries']} 笔降到 {fs['total_entries']} 笔。这个指标和原信号高度重叠，
+不是一个独立的新条件。
 
 ## 收益、回撤与匹配随机对照
 
@@ -179,7 +184,9 @@ PF = 盈利交易净 R 之和 / 亏损交易净 R 绝对值之和；净胜率扣
 
 放行组减拦截组的净 R/笔差为 {number(events.get('mean_difference'), 4, True)}，
 在事件集合内做 {events.get('permutations', 0)} 次种子化标签置换，单侧 p = {number(events.get('p'), 4)}。
-{label_evidence}。这只检验"RSI 区域标签是否含信息"，不是收益证明；事件可重叠，
+{label_evidence}。**两组都是亏的**——放行组 {number(events['passed_mean_net_r'], 4, True)}R/笔、
+拦截组 {number(events['blocked_mean_net_r'], 4, True)}R/笔，所以这个门顶多是"亏得少一点"与"亏得多一点"之分，
+不是把赢家从输家里挑出来。这只检验"RSI 区域标签是否含信息"，不是收益证明；事件可重叠，
 不构成可执行的单仓账户。共 {events['events']} 个事件，其中 {events['censored']} 笔在末端未平仓已排除。
 
 ## 主口径的分段与退出构成
@@ -210,7 +217,7 @@ PF = 盈利交易净 R 之和 / 亏损交易净 R 绝对值之和；净胜率扣
 
 - 这是对冻结 Pine 规则的 Python 离线回放，**不声称与 TradingView 策略测试器逐笔成交一致**。
   5m OHLC 无法还原真实逐笔先后；主路径用 TradingView 文档的近端极值优先约定，开盘距高低相等时固定先低。
-- 样本量：过滤后完整交易仅 {fs['natural']} 笔。**笔数少于 30 时只描述，不宣称稳健**；
+- 样本量：过滤后完整交易 {fs['natural']} 笔，月度与前后半的子表低到十几笔，**只作描述，不宣称稳健**；
   本区间此前已被 v2 回测使用，属探索性历史复用，不是独立样本外验证。
 - 本配置 **holdout 消耗 0 次**，读价止于 {cfg['end']}，早于 05-04 holdout 起点。
   数据缺口/重复均为 0，不补 K 线、不换源；受限价格解析 {source['restricted_price_rows_parsed']} 行。
