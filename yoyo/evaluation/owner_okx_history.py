@@ -89,6 +89,9 @@ def main() -> None:
     d["leverage_band"] = pd.cut(d.leverage, [0, 10, 20, 50, np.inf],
                                 labels=["≤10倍", "11–20倍", "21–50倍", ">50倍"])
     linear = d.instrument.str.endswith("-USDT-SWAP")
+    # Inverse contract face value is quoted in USD, not base-coin units.
+    d.loc[~linear, "closed_notional"] = (d.closed_contracts * d.contract_value * d.multiplier)[~linear]
+    d.loc[~linear, "max_notional_proxy"] = (d.max_contracts * d.contract_value * d.multiplier)[~linear]
     u = d[linear].sort_values(["updated", "source_row"]).copy()
     other = d[~linear].copy()
     u["calc_gross"] = u.closed_notional * (u.exit / u.entry - 1) * u.direction
