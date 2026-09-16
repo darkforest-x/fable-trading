@@ -9569,3 +9569,27 @@ experiments:
     canonical_report: analysis/p1_btc_xau_bb_stoch_timeframes_20260916.md
     artifacts: [btc-xau-bb-stoch-timeframes-20260916-delivery]
     notes: OKX official monthly archives; BTC 245088bars 5m and 1225440bars 1m 2023-12-31..2026-04-30, XAU-USDT-SWAP only lists from 2026-01-15 so 151674bars. XAUT-USDT-SWAP has no archive data. Each series declares its own bar duration; the engine five-minute gap default is never used for 1m.
+
+  - experiment_id: exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ec0135ce163741e4fc52812f990f0a897b14a15
+    status: rejected
+    question: Does ChartArt v1.2's long-only exit beat the v1.1 reversal on OKX BTC/ETH USDT swap 15m, and does either beat
+      random long entries or buy-and-hold before the holdout?
+    single_variable: What the flat signal does -- v1.2 closes to cash, v1.1 reverses short. Entries, features, next-open fills,
+      costs and trade accounting are shared code.
+    result: v1.2 beats v1.1 in the four trending cells and loses both2026 Jan-Apr cells, which is what deleting a short leg does,
+      not what a better entry does. Its long legs are bit-identical to v1.1's, so the claim reduces to "the shorts lost". No entry
+      edge anywhere; matched random excess ranges -55.4bp to +29.1bp with permutation p0.361 to0.837, none near p<0.01. Returns are
+      discounted long beta - BTC full +67.9percent compounded at44percent exposure against +282.5percent buy-and-hold, ETH full
+      -12.9percent against +110.4percent.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md
+    artifacts: [chartart-bbrsi-v12-longonly-btceth-15m-20260917-summary, chartart-bbrsi-v12-longonly-btceth-15m-20260917-report]
+    reuse_allowed: false
+    notes: Windows full/long/jan_apr are nested and are not three independent tests; jan_apr holds8-11 trades and is noise on its
+      own. Funding rate excluded although the arm holds spot-like long exposure for weeks. The TradingView broker-emulator fill and
+      cancel semantics are reconstructed, never checked against an actual TradingView report, so no screenshot or author result is
+      claimed reproduced.

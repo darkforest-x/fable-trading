@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测</h1>
+<ul>
+<li>实验 ID：<code>exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1</code></li>
+<li>日期：2026-09-17（产物 <code>generated_at</code> 2026-09-16T16:53:38Z）</li>
+<li>冻结提交：<code>9ec0135ce1</code>（builder / config / tests 先于读价落库）</li>
+<li>holdout：<strong>未消耗</strong>。end 冻结在 2026-05-01T00:00Z，<code>HOLDOUT_START</code>（2026-05-04）之后的字节未被解析。</li>
+</ul>
+<h2>一句话结论</h2>
+<p>作者在 v1.2 里写的&quot;改成只做多后回测更成功&quot;，在 BTC/ETH 的长窗口上<strong>确实成立</strong>，但成立的原因不是入场变准了： v1.2 在数学上就等于 v1.1 删掉空头腿，而删掉的那段腿在一轮上涨里必然亏钱。 扣 0.2% 往返成本后，v1.2 的每笔收益与<strong>同期匹配随机做多</strong>没有可区分的差别 （12 个格子里最好的置换 p = 0.361，验收线是 p &lt; 0.01）， 而它用不到一半的持仓时间换来的收益远低于直接买入持有 （BTC <code>full</code> +67.9% vs +282.5%，ETH <code>full</code> −12.9% vs +110.4%）。 <strong>不构成可用信号，不进入 tip-smoke / forward / ACTIVE / 部署的任何一步。</strong></p>
+<h2>1. 策略逻辑：原文 → 可执行语义</h2>
+<table><thead><tr>
+<th>原文</th>
+<th>可执行语义</th>
+<th>备注</th>
+</tr></thead><tbody>
+<tr><td><code>long = crossover(vrsi,50) and crossover(source, BBlower)</code></td><td><strong>同一根</strong> 15m 收盘同时满足：RSI(6) 从 ≤50 上穿 &gt;50，且收盘价从 ≤下轨 上穿 &gt;下轨</td><td>是&quot;同一根双穿越&quot;，不是&quot;两个条件都成立&quot;</td></tr>
+<tr><td><code>strategy.entry(..., stop=BBlower)</code></td><td>买入<strong>停止单</strong>，不是止损</td><td>挂单价在已被穿越的下轨下方，创建即激活，下一根 open 成交</td></tr>
+<tr><td><code>else strategy.cancel(id=&quot;RSI_BB&quot;)</code></td><td>撤销未成交的入场单</td><td>撤销在下一根<strong>收盘计算</strong>时执行，晚于该根 open 的成交，撤不掉已成交单</td></tr>
+<tr><td><code>close_long = crossunder(vrsi,50) and crossunder(source, BBupper)</code></td><td>同一根：RSI 从 ≥50 下穿 &lt;50，<strong>且</strong>上一根收在<strong>上轨之上</strong>、这一根收回上轨之内</td><td>价格贴上轨时 RSI 通常远高于 50，两者同根发生很罕见</td></tr>
+<tr><td><code>strategy.close(&quot;RSI_BB&quot;)</code></td><td>平多回到空仓，不反手</td><td><strong>这是 v1.2 相对 v1.1 唯一的改动</strong></td></tr>
+<tr><td><code>RSIoverSold = RSIoverBought = 50</code></td><td>超买超卖阈值都被写成 50</td><td>所谓&quot;双重超卖&quot;退化成 RSI 的中轴穿越，不是超卖</td></tr>
+<tr><td><code>barcolor</code> / <code>bgcolor</code> / <code>fill</code> / <code>plot</code></td><td>不下单</td><td>本轮重建省略，不影响成交</td></tr>
+</tbody></table>
+<p><strong>结构性结论（已由测试钉住）</strong>：v1.2 的多头状态机与 v1.1 完全相同 —— 两者都在 <code>long</code> 信号时（若当前不是多头）进多，都在 <code>close_long</code> 信号时离开多头。 差别只是 v1.1 离开多头后立刻转为空头、v1.2 转为空仓。 因此 <strong>v1.2 的每一笔多头腿与 v1.1 的多头腿逐笔（entry_i / exit_i / 价格 / 净收益）完全一致</strong>， <code>tests/evaluation/test_chartart_bbrsi_v12.py::test_long_legs_are_identical_to_v11_which_only_adds_shorts</code> 断言了这一点。 所以&quot;只做多更成功&quot;这句话，等价于&quot;空头腿是亏的&quot;，它不是关于入场质量的陈述。</p>
+<h2>2. 复现命令</h2>
+<pre><code>
+git checkout 9ec0135ce1
+python3 -m pytest tests/evaluation/test_chartart_bbrsi_v12.py -q
+python3 -m yoyo.evaluation.chartart_bbrsi_v12_study
+python3 experiments/active/exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1/report.py
+python3 scripts/md_to_html.py analysis/p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md --out-dir analysis/html
+</code></pre>
+<p><code>chartart_bbrsi_v12_study.run()</code> 在读价之前会逐个比对 builder 与 <code>HEAD</code> 的字节，不一致直接拒跑； <code>results/</code> 目录存在时拒绝覆盖。</p>
+<h2>3. 数据统计</h2>
+<table><thead><tr>
+<th>项</th>
+<th>值</th>
+</tr></thead><tbody>
+<tr><td>数据源</td><td><code>data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv</code>（前缀 sha256 <code>7c998faab9c8a3f0…</code>，151525 根）&lt;br&gt;<code>data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv</code>（前缀 sha256 <code>e6945708914c3e7e…</code>，151522 根）</td></tr>
+<tr><td>解析区间</td><td>BTC 2022-01-03T14:45Z、ETH 2022-01-03T15:30Z 起，两者均止于 2026-05-01T00:00Z</td></tr>
+<tr><td>首个<strong>未</strong>解析时间戳</td><td>2026-05-01T00:00:00Z（仅读时间戳，未读该行 OHLC）</td></tr>
+<tr><td>网格校验</td><td>无缺口、无重复、UTC epoch 对齐、几何一致（<code>validate_ohlcv</code>）</td></tr>
+<tr><td>预热</td><td>每个窗口起点前至少 250 根；BB200 需要 200 根</td></tr>
+<tr><td>成本</td><td>每笔 0.2% 往返（<code>trade_row</code> 内），无资金费率、无滑点、无合约张数取整</td></tr>
+<tr><td>成交假设</td><td>信号根收盘确认，下一根 open 成交；末端未平仓按最后一根收盘标记并标 <code>censored</code></td></tr>
+</tbody></table>
+<p>窗口 <code>full</code> ⊃ <code>long</code> ⊃ <code>jan_apr</code>，<strong>互相包含，不是三次独立检验</strong>。</p>
+<h2>4. 结果表</h2>
+<h3>主表：每臂 vs 买入持有</h3>
+<table><thead><tr>
+<th>币</th>
+<th>窗口</th>
+<th>臂</th>
+<th>笔数</th>
+<th>净胜率</th>
+<th>均净bp</th>
+<th>PF</th>
+<th>复利净收益</th>
+<th>持仓占比</th>
+<th>买入持有净</th>
+</tr></thead><tbody>
+<tr><td>BTC</td><td>full</td><td>v1.2 只做多</td><td>126</td><td>65.1%</td><td>+51.8</td><td>1.39</td><td>+67.9%</td><td>44%</td><td>+282.5%</td></tr>
+<tr><td>BTC</td><td>full</td><td>v1.1 反手</td><td>253</td><td>63.6%</td><td>-18.3</td><td>0.90</td><td>-62.2%</td><td>100%</td><td>+282.5%</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.2 只做多</td><td>76</td><td>57.9%</td><td>+29.0</td><td>1.20</td><td>+16.2%</td><td>45%</td><td>+80.2%</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.1 反手</td><td>153</td><td>60.1%</td><td>-25.0</td><td>0.87</td><td>-49.7%</td><td>100%</td><td>+80.2%</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.2 只做多</td><td>10</td><td>50.0%</td><td>-18.5</td><td>0.87</td><td>-1.8%</td><td>46%</td><td>-13.1%</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.1 反手</td><td>21</td><td>61.9%</td><td>+49.6</td><td>1.40</td><td>+9.4%</td><td>99%</td><td>-13.1%</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.2 只做多</td><td>123</td><td>65.0%</td><td>+22.0</td><td>1.09</td><td>-12.9%</td><td>49%</td><td>+110.4%</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.1 反手</td><td>247</td><td>62.3%</td><td>-38.9</td><td>0.87</td><td>-85.5%</td><td>100%</td><td>+110.4%</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.2 只做多</td><td>74</td><td>64.9%</td><td>+53.0</td><td>1.20</td><td>+12.3%</td><td>50%</td><td>-1.3%</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.1 反手</td><td>148</td><td>65.5%</td><td>+15.4</td><td>1.05</td><td>-34.0%</td><td>100%</td><td>-1.3%</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.2 只做多</td><td>8</td><td>62.5%</td><td>-173.3</td><td>0.57</td><td>-16.7%</td><td>53%</td><td>-24.2%</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.1 反手</td><td>17</td><td>64.7%</td><td>-32.1</td><td>0.89</td><td>-10.9%</td><td>99%</td><td>-24.2%</td></tr>
+</tbody></table>
+<h3>对照表：匹配随机入场</h3>
+<table><thead><tr>
+<th>币</th>
+<th>窗口</th>
+<th>臂</th>
+<th>配对数</th>
+<th>本策略均净bp</th>
+<th>随机均净bp</th>
+<th>超额bp</th>
+<th>置换p</th>
+<th>周块数</th>
+</tr></thead><tbody>
+<tr><td>BTC</td><td>full</td><td>v1.2 只做多</td><td>126</td><td>+51.8</td><td>+54.1</td><td>-2.3</td><td>0.517</td><td>114</td></tr>
+<tr><td>BTC</td><td>full</td><td>v1.1 反手</td><td>253</td><td>-18.3</td><td>-14.1</td><td>-4.2</td><td>0.564</td><td>157</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.2 只做多</td><td>76</td><td>+29.0</td><td>+22.4</td><td>+6.6</td><td>0.444</td><td>66</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.1 反手</td><td>153</td><td>-25.0</td><td>-10.3</td><td>-14.7</td><td>0.638</td><td>96</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.2 只做多</td><td>10</td><td>-18.5</td><td>-47.6</td><td>+29.1</td><td>0.361</td><td>10</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.1 反手</td><td>21</td><td>+49.6</td><td>+103.7</td><td>-54.1</td><td>0.712</td><td>16</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.2 只做多</td><td>123</td><td>+22.0</td><td>+77.4</td><td>-55.4</td><td>0.837</td><td>110</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.1 反手</td><td>247</td><td>-38.9</td><td>-16.2</td><td>-22.8</td><td>0.724</td><td>150</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.2 只做多</td><td>74</td><td>+53.0</td><td>+80.3</td><td>-27.3</td><td>0.656</td><td>67</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.1 反手</td><td>148</td><td>+15.4</td><td>+32.6</td><td>-17.2</td><td>0.627</td><td>91</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.2 只做多</td><td>8</td><td>-173.3</td><td>-210.7</td><td>+37.4</td><td>0.449</td><td>7</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.1 反手</td><td>17</td><td>-32.1</td><td>+4.6</td><td>-36.8</td><td>0.601</td><td>12</td></tr>
+</tbody></table>
+<h3>风险剖面</h3>
+<table><thead><tr>
+<th>币</th>
+<th>窗口</th>
+<th>臂</th>
+<th>均盈bp</th>
+<th>均亏bp</th>
+<th>最大单笔亏bp</th>
+<th>最长连亏</th>
+<th>最差持仓MAE bp</th>
+</tr></thead><tbody>
+<tr><td>BTC</td><td>full</td><td>v1.2 只做多</td><td>+284.0</td><td>-381.1</td><td>-2085.6</td><td>4</td><td>-2561.5</td></tr>
+<tr><td>BTC</td><td>full</td><td>v1.1 反手</td><td>+272.5</td><td>-527.2</td><td>-4023.9</td><td>4</td><td>-4309.7</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.2 只做多</td><td>+301.8</td><td>-346.1</td><td>-1948.0</td><td>4</td><td>-2451.5</td></tr>
+<tr><td>BTC</td><td>long</td><td>v1.1 反手</td><td>+287.5</td><td>-496.2</td><td>-4023.9</td><td>4</td><td>-4309.7</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.2 只做多</td><td>+237.5</td><td>-274.6</td><td>-909.4</td><td>3</td><td>-2078.2</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>v1.1 反手</td><td>+280.3</td><td>-325.4</td><td>-909.4</td><td>2</td><td>-2078.2</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.2 只做多</td><td>+422.4</td><td>-722.9</td><td>-2836.1</td><td>6</td><td>-3684.3</td></tr>
+<tr><td>ETH</td><td>full</td><td>v1.1 反手</td><td>+401.0</td><td>-767.4</td><td>-4156.0</td><td>3</td><td>-5058.9</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.2 只做多</td><td>+495.2</td><td>-763.3</td><td>-2738.7</td><td>6</td><td>-3684.3</td></tr>
+<tr><td>ETH</td><td>long</td><td>v1.1 反手</td><td>+465.3</td><td>-840.3</td><td>-4156.0</td><td>3</td><td>-5058.9</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.2 只做多</td><td>+374.6</td><td>-1086.3</td><td>-2597.8</td><td>2</td><td>-3684.3</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>v1.1 反手</td><td>+420.3</td><td>-861.6</td><td>-2597.8</td><td>2</td><td>-3684.3</td></tr>
+</tbody></table>
+<h3>信号统计</h3>
+<table><thead><tr>
+<th>币</th>
+<th>窗口</th>
+<th>区间(UTC)</th>
+<th>评估bar</th>
+<th>入场信号</th>
+<th>平仓信号</th>
+<th>v1.2 持仓次数</th>
+</tr></thead><tbody>
+<tr><td>BTC</td><td>full</td><td>2022-07-01 → 2026-05-01</td><td>134400</td><td>462</td><td>475</td><td>127</td></tr>
+<tr><td>BTC</td><td>long</td><td>2024-01-01 → 2026-05-01</td><td>81696</td><td>290</td><td>294</td><td>77</td></tr>
+<tr><td>BTC</td><td>jan_apr</td><td>2026-01-01 → 2026-05-01</td><td>11520</td><td>36</td><td>45</td><td>11</td></tr>
+<tr><td>ETH</td><td>full</td><td>2022-07-01 → 2026-05-01</td><td>134400</td><td>399</td><td>428</td><td>124</td></tr>
+<tr><td>ETH</td><td>long</td><td>2024-01-01 → 2026-05-01</td><td>81696</td><td>238</td><td>256</td><td>75</td></tr>
+<tr><td>ETH</td><td>jan_apr</td><td>2026-01-01 → 2026-05-01</td><td>11520</td><td>25</td><td>24</td><td>9</td></tr>
+</tbody></table>
+<h2>5. 与上一版本同表对照</h2>
+<p>2026-09-15 那一轮（<code>exp-chartart-bbrsi-martingale-20260915-v1</code>）在<strong>同一个 ETH 源文件、同样两个窗口</strong>上跑过 v1.1。 本轮 <code>v11_reversal</code> 臂是它的独立重跑，确定性部分逐位一致：</p>
+<table><thead><tr>
+<th>指标</th>
+<th>ETH <code>long</code> 旧轮</th>
+<th>ETH <code>long</code> 本轮</th>
+<th>ETH <code>jan_apr</code> 旧轮</th>
+<th>ETH <code>jan_apr</code> 本轮</th>
+</tr></thead><tbody>
+<tr><td>闭合笔数 / 未平</td><td>148 / 1</td><td>148 / 1</td><td>17 / 1</td><td>17 / 1</td></tr>
+<tr><td>净胜率</td><td>0.6554054054054054</td><td>0.6554054054054054</td><td>0.6470588235294118</td><td>0.6470588235294118</td></tr>
+<tr><td>均毛 bp</td><td>35.396671790063216</td><td>35.396671790063216</td><td>−12.120275686548727</td><td>−12.120275686548727</td></tr>
+<tr><td>均净 bp</td><td>15.396671790063193</td><td>15.396671790063193</td><td>−32.120275686548744</td><td>−32.120275686548744</td></tr>
+<tr><td>PF</td><td>1.0531736948931751</td><td>1.0531736948931751</td><td>0.8943701280338451</td><td>0.8943701280338451</td></tr>
+<tr><td>最大单笔亏 bp</td><td>−4155.999219740563</td><td>−4155.999219740563</td><td>−2597.8397253014496</td><td>−2597.8397253014496</td></tr>
+<tr><td>匹配随机超额 bp / p</td><td>−14.475 / 0.622</td><td>−17.187 / 0.627</td><td>+31.345 / 0.400</td><td>−36.760 / 0.601</td></tr>
+</tbody></table>
+<p>最后一行<strong>不该相同</strong>：匹配随机对照的 seed 不同（旧轮 915611+tf，本轮 917613）， 随机对照的数值随 seed 漂移几十 bp 而 p 值都远离显著，这本身说明这套对照的结论不依赖某个幸运 seed。 前六行相同则说明两轮的确定性重建没有漂移。</p>
+<p>v1.2 是本轮新增，无上一版本可比；它与 v1.1 的对照就是上面主表里成对的两行。</p>
+<h2>6. 必报指标口径</h2>
+<p>本仓要求的 <strong>val AUC / top-decile 毛净收益 / 单特征基线</strong> 针对的是打分模型。 本轮对象是一条<strong>确定性规则</strong>：没有概率输出，样本无法按分数排序，因此不存在 AUC 与 top-decile 分层， 硬报这三个数只能靠编造。按 CLAUDE.md&quot;非适用必须给同等严格的零假设对照&quot;的要求，本轮用三层对照替代：</p>
+<ol>
+<li><strong>匹配随机入场</strong>（同币 × 同 UTC 月 × 前一根 BB 宽度桶，20 个固定 seed，出场用同一条 <code>close_long</code> 规则） —— 检验入场择时是否胜过同环境下的随机做多；按周块符号置换 4000 次给 p 值。</li>
+<li><strong>买入持有</strong> —— 检验是否胜过单纯持有（长期多头 beta 的上界参照）。</li>
+<li><strong>持仓占比</strong> —— 说明这条规则到底暴露了多少时间，防止把&quot;半仓时间的 beta&quot;读成&quot;策略收益&quot;。</li>
+</ol>
+<p>置换 p 值只验排序，抓不到整池踩在 beta 上；买入持有与持仓占比就是补这个洞的。 胜率、PF、平均盈亏、最大单笔亏、最长连亏、最差持仓 MAE 见上面的风险剖面表。</p>
+<h2>7. 解读</h2>
+<p><strong>(a) 作者的说法在长窗口上成立，但理由是被删掉的空头腿。</strong> v1.2 在 6 个&quot;币 × 窗口&quot;格子里赢 v1.1 四个（BTC <code>full</code>/<code>long</code>、ETH <code>full</code>/<code>long</code>）， 输两个（两个 <code>jan_apr</code>，2026 年 1–4 月 BTC −13.1%、ETH −24.2% 的下跌段，这时空头腿反而帮忙）。 方向完全跟随该窗口的行情方向，这正是&quot;删掉空头腿&quot;应有的表现，而不是&quot;入场变准&quot;的表现。</p>
+<p><strong>(b) 扣成本后入场没有可测的边。</strong> 12 个格子（2 币 × 3 窗口 × 2 臂）的匹配随机超额从 −55.4bp 到 +29.1bp， 置换 p 从 0.361 到 0.837，<strong>没有一个接近 p &lt; 0.01</strong>。 样本最大的两格（BTC <code>full</code> 126 笔、ETH <code>full</code> 123 笔）超额分别是 −2.3bp 与 −55.4bp—— 一个等于零，一个明显为负。也就是说：在同币同月同波动桶里随机做多、用同一条规则离场， 结果不比这条&quot;双重穿越&quot;差；ETH 上还更好。</p>
+<p><strong>(c) 真正的收益来源是多头 beta，而且是打了折的 beta。</strong> BTC <code>full</code> 持仓占比 44%，复利 +67.9%，同期买入持有 +282.5%； ETH <code>full</code> 持仓占比 49%，复利 <strong>−12.9%</strong>，同期买入持有 +110.4%。 ETH 这一格尤其干净：暴露了一半的时间在一个翻倍的行情里，还亏钱—— 因为每笔 0.2% 成本 × 123 笔 ≈ 246bp 的摩擦，加上入场择时的负超额，把 beta 吃干净了。</p>
+<p><strong>(d) 胜率高不代表赚钱。</strong> 所有格子的净胜率都在 50–65%，但均亏远大于均盈 （ETH <code>full</code> 只做多：+422bp vs −723bp），PF 只有 1.09–1.39。 这是&quot;出场信号极罕见&quot;的直接后果：赢的单被一条几乎不触发的规则拖着走， 输的单要等到价格先上穿上轨再掉回来才肯平——ETH 只做多最长连亏 6 笔，最差持仓 MAE −3684bp。</p>
+<p><strong>(e) 出场规则罕见到近似&quot;不出场&quot;。</strong> 见信号统计表： ETH <code>full</code> 3.8 年只有 399 个入场信号、428 个平仓信号，v1.2 只成交 124 次持仓。 这条策略绝大部分时间要么空仓、要么抱着一个不肯平的多单。</p>
+<h2>8. 风险与诚实声明</h2>
+<ul>
+<li><strong>窗口不独立</strong>：<code>full</code> ⊃ <code>long</code> ⊃ <code>jan_apr</code>，三行不是三次独立验证，<code>jan_apr</code> 只有 8–11 笔， 它的 PF / 超额 bp 基本是噪声，不要单独引用。</li>
+<li><strong>成本乐观</strong>：只计 0.2% 往返。永续的资金费率没有计入，而一条持仓占比 44–49%、 单笔可以扛几周的多头策略，资金费在多头拥挤期是实打实的支出；滑点、合约张数取整也未计。 加上这些之后，上表的净收益只会更差，不会更好。</li>
+<li><strong>未验证的成交假设</strong>：下一根 open 成交、零延迟、无部分成交。<code>strategy.cancel</code> 按&quot;撤不掉已成交单&quot;处理， 这是对 TradingView 模拟器行为的推断，<strong>未与 TradingView 实际回测报告做过逐笔核对</strong>， 所以本报告不声称复现了作者或任何截图里的成交。</li>
+<li><strong>没有跑 holdout</strong>：2026-05-04 之后的数据本轮完全没有读。上面所有结论都只在预 holdout 区间成立。</li>
+<li><strong>本轮未做参数搜索</strong>：RSI6 / BB200×2 / 阈值 50 全部取作者原值。没有&quot;调一调也许能行&quot;的证据， 也没有做过这种尝试；若以后要调，那是另一次实验，且需要 owner 决定是否值得花 holdout。</li>
+<li><strong>仓库守门测试当前 9 红，与本轮无关但要记账</strong>： <code>tests/boundaries/test_ci_installs_from_requirements.py</code> 的 opencv-python / pyyaml 两项， 以及 <code>tests/boundaries/test_teacher_proposals_are_isolated.py</code> 的 5 项。 后者的根因是 <code>artifacts/registry.yaml</code> 里 <code>spike-v8-total2-1h-native-20260914-delivery</code> 这条记录写了 <code>generator_commit</code> 但缺 <code>source_commit</code>，<code>load_registries</code> 直接抛错。 它是上一轮别的会话留下的，本轮没有动它，也没有绕过它——但这意味着<strong>注册表校验目前是坏的</strong>， 本轮新增的注册记录没有经过该校验。</li>
+<li><strong>本报告的全部表格由 <code>report.py</code> 从 <code>results/summary.json</code> 生成，不是手抄</strong>； 正文引用的数字与表格同源。第 5 节旧轮数字来自上一轮落库的 <code>summary.json</code>。</li>
+</ul>
+<h2>9. 下一步选项</h2>
+<ol>
+<li><strong>就此结案（推荐）</strong>：把 v1.2 记为 <code>rejected</code>，与 v1.1 一起归档。 证据已经足够：入场无超额、收益是打折的多头 beta、ETH 上连 beta 都没跑出来。 继续在这条规则上花时间不划算。</li>
+<li><strong>只保留一条可复用事实</strong>（无需新实验）： &quot;RSI 中轴穿越 + 触下轨&quot;这类双重穿越入场，在 BTC/ETH 15m 上对随机做多没有可测优势—— 写进 Notion 作为已验证的<strong>负面</strong>结论，防止以后再被同类脚本吸引。（需 owner 确认是否入库）</li>
+<li><strong>若 owner 仍想看它在最近行情里的样子</strong>：需要<strong>明确授权</strong>读 2026-05-04 之后的数据， 并记录该配置第 1 次消耗 holdout。按上面的证据，我不建议花这次 holdout。</li>
+<li><strong>顺手要修的仓库问题</strong>（与本策略无关）：补 <code>spike-v8-total2-1h-native-20260914-delivery</code> 的 <code>source_commit</code>，让注册表校验恢复。需要 owner 确认该产物对应的提交。</li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,74 @@
+{
+  "config": {
+    "experiment_id": "exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1",
+    "strategy": "ChartArt Bollinger + RSI Double Strategy Long-Only v1.2",
+    "author": "ChartArt, 2017-10-04",
+    "source_profile": "https://www.tradingview.com/u/ChartArt/",
+    "related_experiment": "exp-chartart-bbrsi-martingale-20260915-v1",
+    "rsi_length": 6,
+    "rsi_thresholds": [
+      50,
+      50
+    ],
+    "bb_length": 200,
+    "bb_std": 2,
+    "minutes": 15,
+    "end": "2026-05-01T00:00:00Z",
+    "sources": {
+      "BTC_USDT_SWAP": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+      "ETH_USDT_SWAP": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+    },
+    "windows": [
+      {
+        "name": "full",
+        "start": "2022-07-01T00:00:00Z"
+      },
+      {
+        "name": "long",
+        "start": "2024-01-01T00:00:00Z"
+      },
+      {
+        "name": "jan_apr",
+        "start": "2026-01-01T00:00:00Z"
+      }
+    ],
+    "arms": [
+      "v12_long_only",
+      "v11_reversal"
+    ],
+    "arm_seeds": {
+      "v12_long_only": 917612,
+      "v11_reversal": 917613
+    },
+    "single_variable": "What the flat signal does: v1.2 closes to cash, v1.1 reverses into a short. Entries, features, fills and costs identical.",
+    "cost": 0.002,
+    "cost_note": "Round-trip 0.2 percent charged inside chartart_bbrsi.trade_row; funding, slippage and contract granularity excluded.",
+    "controls": [
+      "matched_random_entry",
+      "buy_and_hold",
+      "time_in_market"
+    ],
+    "control_draws": 20,
+    "minimum_warmup_bars": 250,
+    "window_independence": "full contains long contains jan_apr; three rows are not three independent tests",
+    "parameter_optimization": false,
+    "holdout_consumed": false,
+    "holdout_note": "End is 2026-05-01T00:00:00Z; bars at or after HOLDOUT_START 2026-05-04 are not parsed by this config.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "builders": {
+    "yoyo/evaluation/chartart_bbrsi.py": "5edcd45a6f21efcb734bba1b06f6887e00ebe4ca594d585f457fe6636fdc8585",
+    "yoyo/evaluation/chartart_bbrsi_study.py": "2f74396e9e45cf5290bda61af8120e3b6371929e0c36082cf9ea4c6d67145ca6",
+    "yoyo/evaluation/chartart_bbrsi_v12.py": "a9835a50663674957413661639becd4e265f4b88d4f4079c3e4f3f19fdb882ee",
+    "yoyo/evaluation/chartart_bbrsi_v12_study.py": "ff4be79377769b832c30c568bb9d3aaeac8dc2554954174b1bbda1f0a0e922f2",
+    "yoyo/data/release_eth_prefix.py": "8e57347d3491acf699161796594cc60890cd171596b10cb8c5f94709716d810c",
+    "yoyo/contracts/holdout.py": "63cb6b73b3c8f419108744a75d29a03487e4857b4ee5b056c578c0213877de0a",
+    "tests/evaluation/test_chartart_bbrsi_v12.py": "e9088e249255c1378c43e8735158ee1e11c52b5abe451213cdcf79d5bc75df9c",
+    "experiments/active/exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1/config.json": "49be5aa3149ad85543f3268db3eff2bf69bafbaa39c7793fad1247d690cde6ce",
+    "experiments/active/exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1/PROJECT_PLAN.md": "89e4034b44c1ed824a6881c1862840a170f331983fe8c4c1a3eaf70a3a55d7d0"
+  },
+  "source_commit": "9ec0135ce163741e4fc52812f990f0a897b14a15",
+  "holdout_consumed": false,
+  "holdout_consumption_number": 0
+}

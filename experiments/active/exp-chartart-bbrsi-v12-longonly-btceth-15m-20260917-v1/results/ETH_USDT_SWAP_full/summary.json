@@ -1,0 +1,78 @@
+{
+  "symbol": "ETH_USDT_SWAP",
+  "minutes": 15,
+  "window": "full",
+  "start": "2022-07-01T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "evaluated_bars": 134400,
+  "entry_signals": 399,
+  "flat_signals": 428,
+  "buy_and_hold": {
+    "entry_time": "2022-07-01 00:00:00+00:00",
+    "exit_time": "2026-04-30 23:45:00+00:00",
+    "bars": 134400,
+    "entry_price": 1071.64,
+    "exit_price": 2256.74,
+    "gross_return": 1.1058751073121567,
+    "net_return": 1.1038751073121567,
+    "max_drawdown": -0.6581506462243034
+  },
+  "arms": [
+    {
+      "arm": "v12_long_only",
+      "seed": 917612,
+      "metrics": {
+        "closed": 123,
+        "open": 1,
+        "gross_win_rate": 0.6585365853658537,
+        "net_win_rate": 0.6504065040650406,
+        "mean_gross_bp": 42.044110951535735,
+        "mean_net_bp": 22.044110951535714,
+        "profit_factor": 1.087230646799675,
+        "avg_win_bp": 422.43540087884384,
+        "avg_loss_bp": -722.8699168202003,
+        "max_consecutive_losses": 6,
+        "max_loss_bp": -2836.0723478951254,
+        "worst_open_mae_bp": -3684.256375634296,
+        "control_matched_targets": 123,
+        "control_mean_net_bp": 77.41556676558942,
+        "matched_target_mean_net_bp": 22.044110951535714,
+        "excess_net_bp": -55.37145581405372,
+        "block_count": 110,
+        "p_value": 0.8370407398150462
+      },
+      "compounded_return": -0.12869730830600246,
+      "window_bars": 134400,
+      "held_bars": 65822,
+      "time_in_market": 0.4897470238095238
+    },
+    {
+      "arm": "v11_reversal",
+      "seed": 917613,
+      "metrics": {
+        "closed": 247,
+        "open": 1,
+        "gross_win_rate": 0.631578947368421,
+        "net_win_rate": 0.6234817813765182,
+        "mean_gross_bp": -18.918059761672737,
+        "mean_net_bp": -38.91805976167275,
+        "profit_factor": 0.8653019899922968,
+        "avg_win_bp": 400.99036352835583,
+        "avg_loss_bp": -767.3685671451609,
+        "max_consecutive_losses": 3,
+        "max_loss_bp": -4155.999219740563,
+        "worst_open_mae_bp": -5058.92909392373,
+        "control_matched_targets": 247,
+        "control_mean_net_bp": -16.15536660716564,
+        "matched_target_mean_net_bp": -38.91805976167275,
+        "excess_net_bp": -22.762693154507115,
+        "block_count": 150,
+        "p_value": 0.7238190452386903
+      },
+      "compounded_return": -0.8546885620339739,
+      "window_bars": 134400,
+      "held_bars": 133998,
+      "time_in_market": 0.9970089285714285
+    }
+  ]
+}
