@@ -109,8 +109,12 @@ def build_gates(frame: pd.DataFrame, signals: np.ndarray, cfg: dict) -> tuple[di
 
 
 def run_arm(frame: pd.DataFrame, prepared, context: dict, entry_signal: np.ndarray,
-            path_mode: str) -> list[dict]:
-    """One serial 1 ETH stream; exits read the unfiltered signals in ``prepared``."""
+            path_mode: str, minutes: int = 5) -> list[dict]:
+    """One serial 1-unit stream; exits read the unfiltered signals in ``prepared``.
+
+    ``minutes`` is the source bar duration, used only to stamp times and hold
+    length; the default keeps every five-minute caller identical.
+    """
     candidates = np.flatnonzero((entry_signal != 0) & context["valid"])
     rows, earliest = [], 0
     for i in candidates:
@@ -119,7 +123,7 @@ def run_arm(frame: pd.DataFrame, prepared, context: dict, entry_signal: np.ndarr
         row = replay_entry(prepared, int(i), side_override=int(entry_signal[i]), path_mode=path_mode)
         if row is None:
             continue
-        row = enrich(row, frame)
+        row = enrich(row, frame, minutes)
         rows.append(row)
         if row["censored"]:
             break

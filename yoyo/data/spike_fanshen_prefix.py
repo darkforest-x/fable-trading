@@ -20,7 +20,10 @@ def read_prefix(path, minutes, end):
     end = pd.Timestamp(end)
     if end.tzinfo is None or end > min(pd.Timestamp(HOLDOUT_START), pd.Timestamp("2026-05-01T00:00Z")):
         raise ValueError("research endpoint cannot expose holdout")
-    if minutes not in (3, 5, 15):
+    # 1m is the OKX archive's own resolution; 3/5/15 are the aggregations
+    # already in use. The holdout refusal above is what guards the boundary,
+    # and it is unchanged by widening this list.
+    if minutes not in (1, 3, 5, 15):
         raise ValueError("unsupported native source duration")
     path = Path(path)
     before = path.stat()

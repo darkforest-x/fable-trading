@@ -1,0 +1,78 @@
+{
+  "experiment_id": "exp-btc-xau-bb-stoch-timeframes-20260916-v1",
+  "question": "Does the frozen ETH BB x Stoch rule work on BTC 5m/1m and XAU 1m without retuning?",
+  "datasets": {
+    "btc_5m": {
+      "source": "data/kline_deep_5m/okx_BTC_USDT_SWAP_5m_245088.csv",
+      "minutes": 5,
+      "instrument": "OKX BTC-USDT-SWAP",
+      "sha256": "0aa83a603a6cb61a3269bf6ae1993e51d110a41193f2daeb67eef95a59671730"
+    },
+    "btc_1m": {
+      "source": "data/kline_deep_1m/okx_BTC_USDT_SWAP_1m_1225440.csv",
+      "minutes": 1,
+      "instrument": "OKX BTC-USDT-SWAP",
+      "sha256": "bf6d348b64054fb40eb690a855d48cb6832fafa7e6b6c4198d6ac2978b9655c0"
+    },
+    "xau_1m": {
+      "source": "data/kline_deep_1m/okx_XAU_USDT_SWAP_1m_151674.csv",
+      "minutes": 1,
+      "instrument": "OKX XAU-USDT-SWAP",
+      "sha256": "137814f9b0fda3d258c506da62896b922cc74e44347ef733c13a5d9f84b4625b"
+    }
+  },
+  "end": "2026-04-30T16:00:00Z",
+  "archive_max_exclusive": "2026-05-04T00:00:00Z",
+  "bb_length": 200,
+  "bb_population_std_multiple": 2.0,
+  "stoch": [
+    5,
+    3,
+    3
+  ],
+  "stop_fraction": 0.03,
+  "partial_fraction": 0.5,
+  "be_cost_fraction": 0.002,
+  "rsi_length": 14,
+  "rsi_lower": 30.0,
+  "rsi_upper": 70.0,
+  "arms": {
+    "v2_baseline": {
+      "be_cost": 0.0,
+      "partial": 0.5,
+      "gate": null
+    },
+    "be_cost": {
+      "be_cost": 0.002,
+      "partial": 0.5,
+      "gate": null
+    },
+    "be_cost_rsi_line": {
+      "be_cost": 0.002,
+      "partial": 0.5,
+      "gate": "rsi_line"
+    }
+  },
+  "reference_arm": "be_cost",
+  "gate_scope": "new entries only; opposite-composite exit always reads the unfiltered signal",
+  "primary_path": "tv",
+  "fee_per_executed_notional": 0.001,
+  "fee_sensitivity_rates": [
+    0.0,
+    0.0002,
+    0.0005,
+    0.001
+  ],
+  "tick": 0.01,
+  "quantity_normalization_units": 1.0,
+  "slippage": 0,
+  "funding": "not modeled",
+  "seed": 9162026,
+  "controls_per_trade": 5,
+  "max_signflip_permutations": 9999,
+  "retuned_for_new_market": false,
+  "parameter_search": false,
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}

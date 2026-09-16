@@ -11,7 +11,9 @@ from typing import Final
 import pandas as pd
 
 
-ARCHIVE_BAR_MINUTES: Final[dict[str, int]] = {"5m": 5, "15m": 15}
+# 1m is the archive's own resolution: the aggregation degenerates to an
+# identity that still drops unconfirmed rows and duplicate timestamps.
+ARCHIVE_BAR_MINUTES: Final[dict[str, int]] = {"1m": 1, "5m": 5, "15m": 15}
 
 
 def aggregate_complete_ohlcv(

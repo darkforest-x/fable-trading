@@ -67,8 +67,12 @@ def freeze_receipt(cfg):
                 code_frozen_before_price_read=True, generated_at=pd.Timestamp.now(tz="UTC"))
 
 
-def match_context(frame):
-    """Causal controls use current TR-SMA14 / close and prior120 terciles."""
+def match_context(frame, minutes=5):
+    """Causal controls use current TR-SMA14 / close and prior120 terciles.
+
+    ``minutes`` is the source bar duration; it only positions the confirmed
+    close, and the default keeps every existing five-minute caller identical.
+    """
     previous = frame.close.shift()
     tr = pd.concat([frame.high-frame.low, (frame.high-previous).abs(),
                     (frame.low-previous).abs()], axis=1).max(axis=1)
@@ -76,7 +80,7 @@ def match_context(frame):
     prior = vol.shift().rolling(120, min_periods=120)
     q1, q2 = prior.quantile(1/3), prior.quantile(2/3)
     bucket = np.where(vol <= q1, 0, np.where(vol <= q2, 1, 2))
-    confirmed = frame.index + pd.Timedelta(minutes=5)
+    confirmed = frame.index + pd.Timedelta(minutes=minutes)
     valid = (q1.notna() & frame.upper.notna() & frame.lower.notna()).to_numpy()
     valid[-1] = False
     return dict(month=confirmed.strftime("%Y-%m").to_numpy(), bucket=bucket,
@@ -93,14 +97,19 @@ def draw_controls(context, i, side, cfg):
     return rng.choice(pool, min(cfg["controls_per_trade"], len(pool)), replace=False).tolist()
 
 
-def enrich(row, frame):
+def enrich(row, frame, minutes=5):
+    """Attach times, month and hold length for one replayed trade.
+
+    ``minutes`` is the source bar duration; the default reproduces every
+    existing five-minute caller exactly.
+    """
     if row is None: raise ValueError("Valid replay produced no result")
     row = dict(row)
     for name in ("signal", "entry", "exit"):
         row[name + "_time"] = frame.index[int(row[name + "_i"])].isoformat()
-    row["signal_close"] = (pd.Timestamp(row["signal_time"]) + pd.Timedelta(minutes=5)).isoformat()
+    row["signal_close"] = (pd.Timestamp(row["signal_time"]) + pd.Timedelta(minutes=minutes)).isoformat()
     row["month"] = row["signal_close"][:7]
-    row["hold_hours"] = (row["exit_i"]-row["entry_i"]+1) / 12
+    row["hold_hours"] = (row["exit_i"]-row["entry_i"]+1) * minutes / 60
     return row
 
 
