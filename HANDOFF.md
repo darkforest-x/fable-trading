@@ -1,5 +1,30 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：换市场换周期——BTC 毛微正、ETH 毛为负，净额全亏（2026-09-16）
+
+Owner要求测BTC 5m/1m与XAU 1m，并要求同时进行。规则一字未改（BB200/Stoch5·3·3/3%止损/每边10bp
+全是ETH值），唯一变量是市场与周期，**未为新市场调参**。数据全部OKX官方月度档案：
+BTC 5m 245,088根、BTC 1m 1,225,440根（均2023-12-31→2026-04-30），XAU 1m 151,674根
+（OKX的XAU-USDT-SWAP 2026-01-15才上市，仅3.5个月；XAUT-USDT-SWAP无档案数据）。holdout消耗0。
+三组×三市场全部净亏：参照每笔BTC5m −0.0625R/702笔、BTC1m −0.0638R/3192笔、XAU1m −0.0722R/405笔。
+**但毛收益符号不同**：ETH 5m毛−21.16R（免费也亏），**BTC 5m毛+4.98R/697笔、BTC 1m毛+11.74R/3159笔**
+（优势微正、被费用吃光），XAU约0。BTC最好一组f*=+0.51bp/边，而OKX最低maker 2bp，**拿不到**。
+BTC 5m原版配对随机超额+0.0384R/笔 p=0.042——按本项目p<0.01门槛不显著，且属3×3多重比较。
+RSI门在三个市场一致为负贡献（BTC5m毛+4.98→−1.76）。
+HTML：analysis/html/p1_btc_xau_bb_stoch_timeframes_20260916.html；实验：
+experiments/active/exp-btc-xau-bb-stoch-timeframes-20260916-v1/（50文件manifest）；源码97ad1ba3a8。
+37项聚焦测试通过，全库468/7既有失败。引擎改动：1m序列必须自带_data_gap列，
+match_context/enrich新增minutes参数（默认5，既有调用逐字节不变）；archive与prefix reader接受1m。
+
+## 进行中：BTC 5m 315组参数搜索（2026-09-16）
+
+Owner明确批准的多变量搜索。experiments/active/exp-btc-bb-stoch-optimization-20260916-v1/，
+复用bb_stoch_optimization（新增--exp指向任意实验目录、开发段可关闭随机对照）。
+开发段2024-01→2025-09，复查段2025-09→2026-04，**选完提交selection.json后才准读复查段**；
+选稳健邻域中位数而非峰值。约37秒/组，开发段≈3小时。config冻结于b71a36efad。
+**诚实边界：这28个月今天已被整体看过，复查段是已观察数据内的时间留出，不是新鲜盲验；
+先验很差（f*仅+0.51bp），要翻盘需把毛优势提高一个数量级。**
+
 ## 最新：BB×Stoch 28个月长周期诊断——七组全负，规则本身是负期望（2026-09-16）
 
 Owner连批三件事：保本价含0.2%往返成本（**只批这一条**，"止盈不许挂在亏损侧"未批准）、

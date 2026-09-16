@@ -72,6 +72,14 @@ def main() -> None:
     worst = min(loaded, key=lambda k: loaded[k]["arms"][ref]["all"]["stats"]["mean_net_r"] or 0)
     any_positive = any(loaded[k]["arms"][a]["all"]["stats"]["net_r"] > 0 for k in loaded for a in cfg["arms"])
     verdict = "有组在本样本上为正，见表" if any_positive else "没有任何一组做到费用后为正"
+    # Gross sign and f* differ by market here, and a single sentence covering
+    # both would be false for one of them. Say which is which.
+    gross_positive = {k: [a for a in cfg["arms"] if loaded[k]["fee_curves"][a][0]["net_r"] > 0] for k in loaded}
+    star_rows = {k: max((loaded[k]["fee_curves"][a][-1]["value"] or -9) for a in cfg["arms"]) for k in loaded}
+    gross_line = "；".join(
+        f"{DATASET_NAMES[k]} 毛收益" + ("**为正**" if gross_positive[k] else "为负或约零")
+        + f"（最好一组 {number(max(loaded[k]['fee_curves'][a][0]['net_r'] for a in cfg['arms']), 2, True)}R，"
+        + f"f* 最高 {number(1e4 * star_rows[k], 2, True)} bp/边）" for k in loaded)
 
     import matplotlib
     matplotlib.use("Agg")
@@ -103,11 +111,15 @@ def main() -> None:
 参照组（保本含 0.2% 成本）每笔净 R：""" + "；".join(
         f"{DATASET_NAMES[k]} {number(ref_stats[k]['mean_net_r'], 4, True)}R（{ref_stats[k]['natural']} 笔）"
         for k in loaded) + f"""。
-最差的是 {DATASET_NAMES[worst]}。**所有组合的盈亏平衡费率 f\\* 见主表**——f\\* 为负即表示
-把手续费降到 0 仍然亏，成本不是病因。
+最差的是 {DATASET_NAMES[worst]}。
 
-这是 ETH 那轮结论的外部检验：ETH 5m 上 28 个月毛收益为负，换市场换周期后
-{'结论没有改变' if not any_positive else '出现了例外，见表'}。
+**但毛收益的符号在不同市场并不一样，这点不能糊过去：**{gross_line}。
+ETH 5m 28 个月毛收益是明确为负的（−21.37R/652 笔），**BTC 不是**——BTC 的毛收益微正，
+是被手续费吃光的。两者的病因不同：ETH 是规则本身没有优势，BTC 是优势太小扛不住成本。
+
+**微正也不等于能做。** f* 是使总净额归零所需的每边费率；BTC 最好的一组 f* 只有
+{number(1e4 * max(star_rows.values()), 2, True)} bp/边，而 OKX 最低 maker 是 2 bp、taker 5 bp——
+**需要的费率比市面最便宜的还低 4 倍以上**，现实中拿不到。所以净额仍然是表里那些负数。
 
 ## 数据
 

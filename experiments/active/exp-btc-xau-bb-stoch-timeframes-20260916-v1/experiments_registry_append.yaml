@@ -1,0 +1,14 @@
+
+  - experiment_id: exp-btc-xau-bb-stoch-timeframes-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 97ad1ba3a8cdb92a32fbb3e94e119ad1d803c6f4
+    status: negative
+    question: Does the frozen ETH BB x Stoch rule work on BTC 5m/1m and XAU 1m without any retuning?
+    single_variable: Market and bar duration only. BB200, Stoch5/3/3, 3percent stop and 10bp per side stay at their ETH values.
+    result: No arm is net positive anywhere. Reference btc_5m n=702 perTrade-0.0625R gross2.91R fstar0.24bp; btc_1m n=3192 perTrade-0.0638R gross9.20R fstar0.38bp; xau_1m n=405 perTrade-0.0722R gross-2.22R fstar-1.04bp. Unlike ETH, BTC gross is POSITIVE but tiny on both durations (best +4.98R/697 on 5m, +11.74R/3159 on 1m); the breakeven fee is +0.51bp per side against an OKX minimum maker of 2bp, so it is not reachable. XAU gross is about zero on 3.5 months only. The RSI zone gate reduced gross on every market.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btc_xau_bb_stoch_timeframes_20260916.md
+    artifacts: [btc-xau-bb-stoch-timeframes-20260916-delivery]
+    notes: OKX official monthly archives; BTC 245088bars 5m and 1225440bars 1m 2023-12-31..2026-04-30, XAU-USDT-SWAP only lists from 2026-01-15 so 151674bars. XAUT-USDT-SWAP has no archive data. Each series declares its own bar duration; the engine five-minute gap default is never used for 1m.

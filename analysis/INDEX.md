@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **546** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **547** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -439,6 +439,7 @@
 | — | [`p1_15m_ma_launch_t3_label_semantics_audit_20260827.md`](p1_15m_ma_launch_t3_label_semantics_audit_20260827.md) | 15m t-3 YOLO 信号框语义审计：K 线框与均线密集框错位 | Owner 的判断是对的：当前 9,938 个正样本框定位的是 **4–7 根 K 线的最高价到最低价**，不是六条均线的密集区域。 |
 | — | [`p1_15m_ma_launch_t3_yolo10000_20260826.md`](p1_15m_ma_launch_t3_yolo10000_20260826.md) | 15m 六均线密集启动 t-3 弱标签数据集与 YOLO 训练报告 | 已把首批 1,000 与新增 9,000 个 15m 完成态候选合并为 **10,000 个唯一事件**，LONG / SHORT |
 | — | [`p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md`](p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md) | 15m 六均线密集启动 t-3：原图宽度 imgsz=1280 重训报告 | 本轮直接使用上一轮已经验收过的 **36,812 张 1280×742 PNG** 和对应 YOLO 标签；没有重渲染、 |
+| — | [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) | BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m | 规则一个字没改，直接搬到 BTC 5m、BTC 1m、XAU 1m——没有任何一组做到费用后为正。 |
 | — | [`p1_btcusdtp_genuine_flow_coverage_v34_20260907.md`](p1_btcusdtp_genuine_flow_coverage_v34_20260907.md) | Genuine Flow Coverage · V34 |  |
 | — | [`p1_btcusdtp_hourly_background_support_v23_20260907.md`](p1_btcusdtp_hourly_background_support_v23_20260907.md) | Entry Comparison Coverage | V23 已实际完成。原 251 个 BTCUSDT.P 小时 K1 入口全部保留，**248 个能各配到三个不重复的背景对照，覆盖率 98.80%**，超过事先规定的至少 226/251 门槛。分配共 744 个控制时间，另外三个入口因事前波动桶未知而没有配对；未知供给没有写成零，也没有删除母信号。 |
 | — | [`p1_btcusdtp_hourly_breadth_change_v22_20260907.md`](p1_btcusdtp_hourly_breadth_change_v22_20260907.md) | External Rank Change |  |
@@ -717,6 +718,7 @@
 - [`p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md) — A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02）
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
 - [`p1_bico_194r_exit_case_20260910.md`](p1_bico_194r_exit_case_20260910.md) — BICO 194R：最高浮盈与可执行退出
+- [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) — BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — P1：BTCUSDT.P 15m 多因子共振与特征工程审计（2026-09-04）
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — P1：BTCUSDT.P 15m 趋势接管交易可识别性审计（2026-09-04）
 - [`p1_btcusdtp_15m_trend_refactor_20260904.md`](p1_btcusdtp_15m_trend_refactor_20260904.md) — P1：BTCUSDT.P 15m K1→K2 高召回与均线趋势退出重构（2026-09-04）

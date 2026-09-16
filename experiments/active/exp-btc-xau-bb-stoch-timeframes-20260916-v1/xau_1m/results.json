@@ -1,0 +1,741 @@
+{
+  "dataset": "xau_1m",
+  "config": {
+    "source": "data/kline_deep_1m/okx_XAU_USDT_SWAP_1m_151674.csv",
+    "minutes": 1,
+    "instrument": "OKX XAU-USDT-SWAP",
+    "sha256": "137814f9b0fda3d258c506da62896b922cc74e44347ef733c13a5d9f84b4625b"
+  },
+  "counts": {
+    "bars": 151674,
+    "minutes": 1,
+    "raw_signals": 1548,
+    "admissible": 1548,
+    "admissible_long": 734,
+    "admissible_short": 814,
+    "gap_bars": 0,
+    "rsi_line_passed": 1082
+  },
+  "data": {
+    "path": "/Users/zhangzc/fable-trading/data/kline_deep_1m/okx_XAU_USDT_SWAP_1m_151674.csv",
+    "source_size_metadata_only": 11152085,
+    "rows": 151674,
+    "first_open": "2026-01-15 08:06:00+00:00",
+    "last_close": "2026-04-30 16:00:00+00:00",
+    "prefix_sha256": "137814f9b0fda3d258c506da62896b922cc74e44347ef733c13a5d9f84b4625b",
+    "first_excluded_timestamp_only": null,
+    "holdout_consumed": false,
+    "restricted_price_rows_parsed": 0,
+    "gaps": 0,
+    "duplicates": 0
+  },
+  "source_commit": "97ad1ba3a8cdb92a32fbb3e94e119ad1d803c6f4",
+  "arms": {
+    "v2_baseline": {
+      "all": {
+        "stats": {
+          "total_entries": 405,
+          "natural": 404,
+          "censored": 1,
+          "wins": 157,
+          "losses": 247,
+          "win_rate": 0.3886138613861386,
+          "gross_r": -1.6914287588299812,
+          "net_r": -28.62753412556924,
+          "mean_net_r": -0.07086023298408228,
+          "profit_factor": 0.4443836808886146,
+          "avg_win_r": 0.14583689109512768,
+          "avg_loss_r": -0.2085988907996125,
+          "max_realized_drawdown_r": 29.162837801889605,
+          "max_realized_drawdown_usdt": 4341.436069999999,
+          "max_loss_streak": 13,
+          "gross_pnl": -330.9499999999989,
+          "fees": 3936.9211499999988,
+          "net_pnl": -4267.871149999999,
+          "partial": 384,
+          "reasons": {
+            "break_even": 77,
+            "opposite_signal_close": 182,
+            "break_even_marketable": 124,
+            "initial_stop": 20,
+            "break_even_gap": 1
+          },
+          "mean_hold_hours": 5.592945544554456,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 144,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 124
+        },
+        "control": {
+          "paired_n": 403,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.07143327549977843,
+          "random_mean_net_r": -0.07450060810684991,
+          "excess_mean_net_r": 0.0030673326070714737,
+          "controls_drawn": 2025,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.0036020985556463833,
+          "months": 4,
+          "p": 0.375,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "long": {
+        "stats": {
+          "total_entries": 201,
+          "natural": 200,
+          "censored": 1,
+          "wins": 81,
+          "losses": 119,
+          "win_rate": 0.405,
+          "gross_r": 0.5403023235471545,
+          "net_r": -12.793571312109728,
+          "mean_net_r": -0.06396785656054864,
+          "profit_factor": 0.53719234590078,
+          "avg_win_r": 0.18333106383139597,
+          "avg_loss_r": -0.2322973738021243,
+          "max_realized_drawdown_r": 14.113801061221407,
+          "max_realized_drawdown_usdt": 2147.9283699999896,
+          "max_loss_streak": 9,
+          "gross_pnl": -12.799999999987449,
+          "fees": 1940.7816000000003,
+          "net_pnl": -1953.5815999999875,
+          "partial": 187,
+          "reasons": {
+            "break_even": 34,
+            "opposite_signal_close": 93,
+            "break_even_marketable": 59,
+            "initial_stop": 13,
+            "break_even_gap": 1
+          },
+          "mean_hold_hours": 5.632583333333333,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 67,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 59
+        },
+        "control": {
+          "paired_n": 199,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.06509370458769445,
+          "random_mean_net_r": -0.07240475998863564,
+          "excess_mean_net_r": 0.007311055400941184,
+          "controls_drawn": 1005,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.008346342781961577,
+          "months": 4,
+          "p": 0.375,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "short": {
+        "stats": {
+          "total_entries": 204,
+          "natural": 204,
+          "censored": 0,
+          "wins": 76,
+          "losses": 128,
+          "win_rate": 0.37254901960784315,
+          "gross_r": -2.231731082377139,
+          "net_r": -15.833962813459515,
+          "mean_net_r": -0.07761746477186036,
+          "profit_factor": 0.3369511837604426,
+          "avg_win_r": 0.10587599646831548,
+          "avg_loss_r": -0.18656670738321476,
+          "max_realized_drawdown_r": 16.077583762451095,
+          "max_realized_drawdown_usdt": 2348.0228750000115,
+          "max_loss_streak": 7,
+          "gross_pnl": -318.15000000001146,
+          "fees": 1996.1395499999994,
+          "net_pnl": -2314.289550000012,
+          "partial": 197,
+          "reasons": {
+            "break_even": 43,
+            "opposite_signal_close": 89,
+            "break_even_marketable": 65,
+            "initial_stop": 7
+          },
+          "mean_hold_hours": 5.554084967320262,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 77,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 65
+        },
+        "control": {
+          "paired_n": 204,
+          "unpaired_n": 0,
+          "paired_actual_mean_net_r": -0.07761746477186036,
+          "random_mean_net_r": -0.07654508739863736,
+          "excess_mean_net_r": -0.001072377373223,
+          "controls_drawn": 1020,
+          "controls_censored": 0,
+          "all_draw_boundary_mark_excess": -0.001072377373223,
+          "months": 4,
+          "p": 0.625,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "2026": {
+        "stats": {
+          "total_entries": 405,
+          "natural": 404,
+          "censored": 1,
+          "wins": 157,
+          "losses": 247,
+          "win_rate": 0.3886138613861386,
+          "gross_r": -1.6914287588299812,
+          "net_r": -28.62753412556924,
+          "mean_net_r": -0.07086023298408228,
+          "profit_factor": 0.4443836808886146,
+          "avg_win_r": 0.14583689109512768,
+          "avg_loss_r": -0.2085988907996125,
+          "max_realized_drawdown_r": 29.162837801889605,
+          "max_realized_drawdown_usdt": 4341.436069999999,
+          "max_loss_streak": 13,
+          "gross_pnl": -330.9499999999989,
+          "fees": 3936.9211499999988,
+          "net_pnl": -4267.871149999999,
+          "partial": 384,
+          "reasons": {
+            "break_even": 77,
+            "opposite_signal_close": 182,
+            "break_even_marketable": 124,
+            "initial_stop": 20,
+            "break_even_gap": 1
+          },
+          "mean_hold_hours": 5.592945544554456,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 144,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 0,
+          "marketable_be_approximations": 124
+        },
+        "control": {
+          "paired_n": 403,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.07143327549977843,
+          "random_mean_net_r": -0.07450060810684991,
+          "excess_mean_net_r": 0.0030673326070714737,
+          "controls_drawn": 2025,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.0036020985556463833,
+          "months": 4,
+          "p": 0.375,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      }
+    },
+    "be_cost": {
+      "all": {
+        "stats": {
+          "total_entries": 406,
+          "natural": 405,
+          "censored": 1,
+          "wins": 167,
+          "losses": 238,
+          "win_rate": 0.4123456790123457,
+          "gross_r": -2.2229932402185844,
+          "net_r": -29.225791012810305,
+          "mean_net_r": -0.07216244694521062,
+          "profit_factor": 0.4296385862893249,
+          "avg_win_r": 0.13182656789344188,
+          "avg_loss_r": -0.21529759601266849,
+          "max_realized_drawdown_r": 29.804048439249115,
+          "max_realized_drawdown_usdt": 4435.279122800005,
+          "max_loss_streak": 13,
+          "gross_pnl": -408.82990000000245,
+          "fees": 3946.950136500002,
+          "net_pnl": -4355.780036500003,
+          "partial": 385,
+          "reasons": {
+            "break_even": 68,
+            "break_even_marketable": 215,
+            "opposite_signal_close": 99,
+            "break_even_gap": 3,
+            "initial_stop": 20
+          },
+          "mean_hold_hours": 5.3238683127572015,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 241,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 3,
+          "marketable_be_approximations": 215
+        },
+        "control": {
+          "paired_n": 404,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.07273729434072221,
+          "random_mean_net_r": -0.07574982777202896,
+          "excess_mean_net_r": 0.0030125334313067524,
+          "controls_drawn": 2030,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.003529405866904174,
+          "months": 4,
+          "p": 0.375,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "long": {
+        "stats": {
+          "total_entries": 201,
+          "natural": 200,
+          "censored": 1,
+          "wins": 84,
+          "losses": 116,
+          "win_rate": 0.42,
+          "gross_r": 0.28738967575032115,
+          "net_r": -13.046231047258765,
+          "mean_net_r": -0.06523115523629382,
+          "profit_factor": 0.5272785403691386,
+          "avg_win_r": 0.17323696156357138,
+          "avg_loss_r": -0.23791496395343759,
+          "max_realized_drawdown_r": 14.134137923749027,
+          "max_realized_drawdown_usdt": 2147.4326885999894,
+          "max_loss_streak": 9,
+          "gross_pnl": -48.34669999998687,
+          "fees": 1940.7684533000004,
+          "net_pnl": -1989.1151532999868,
+          "partial": 187,
+          "reasons": {
+            "break_even": 29,
+            "break_even_marketable": 102,
+            "opposite_signal_close": 55,
+            "break_even_gap": 1,
+            "initial_stop": 13
+          },
+          "mean_hold_hours": 5.446999999999999,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 109,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 1,
+          "marketable_be_approximations": 102
+        },
+        "control": {
+          "paired_n": 199,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.06636335149799111,
+          "random_mean_net_r": -0.07244230553225255,
+          "excess_mean_net_r": 0.006078954034261423,
+          "controls_drawn": 1005,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.0070924732762845276,
+          "months": 4,
+          "p": 0.3125,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "short": {
+        "stats": {
+          "total_entries": 205,
+          "natural": 205,
+          "censored": 0,
+          "wins": 83,
+          "losses": 122,
+          "win_rate": 0.40487804878048783,
+          "gross_r": -2.5103829159689064,
+          "net_r": -16.17955996555154,
+          "mean_net_r": -0.078924682758788,
+          "profit_factor": 0.3156633794760827,
+          "avg_win_r": 0.08991725381764813,
+          "avg_loss_r": -0.19379255764275688,
+          "max_realized_drawdown_r": 16.44637183857461,
+          "max_realized_drawdown_usdt": 2403.601408200016,
+          "max_loss_streak": 11,
+          "gross_pnl": -360.4832000000156,
+          "fees": 2006.1816831999984,
+          "net_pnl": -2366.6648832000155,
+          "partial": 198,
+          "reasons": {
+            "break_even_marketable": 113,
+            "opposite_signal_close": 44,
+            "initial_stop": 7,
+            "break_even": 39,
+            "break_even_gap": 2
+          },
+          "mean_hold_hours": 5.203739837398375,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 132,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 2,
+          "marketable_be_approximations": 113
+        },
+        "control": {
+          "paired_n": 205,
+          "unpaired_n": 0,
+          "paired_actual_mean_net_r": -0.078924682758788,
+          "random_mean_net_r": -0.07896054448283633,
+          "excess_mean_net_r": 3.586172404831904e-05,
+          "controls_drawn": 1025,
+          "controls_censored": 0,
+          "all_draw_boundary_mark_excess": 3.586172404831904e-05,
+          "months": 4,
+          "p": 0.5,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "2026": {
+        "stats": {
+          "total_entries": 406,
+          "natural": 405,
+          "censored": 1,
+          "wins": 167,
+          "losses": 238,
+          "win_rate": 0.4123456790123457,
+          "gross_r": -2.2229932402185844,
+          "net_r": -29.225791012810305,
+          "mean_net_r": -0.07216244694521062,
+          "profit_factor": 0.4296385862893249,
+          "avg_win_r": 0.13182656789344188,
+          "avg_loss_r": -0.21529759601266849,
+          "max_realized_drawdown_r": 29.804048439249115,
+          "max_realized_drawdown_usdt": 4435.279122800005,
+          "max_loss_streak": 13,
+          "gross_pnl": -408.82990000000245,
+          "fees": 3946.950136500002,
+          "net_pnl": -4355.780036500003,
+          "partial": 385,
+          "reasons": {
+            "break_even": 68,
+            "break_even_marketable": 215,
+            "opposite_signal_close": 99,
+            "break_even_gap": 3,
+            "initial_stop": 20
+          },
+          "mean_hold_hours": 5.3238683127572015,
+          "boundary_mark_net_r": -0.06722992708626192,
+          "boundary_mark_net_pnl": -9.321899999999818,
+          "ambiguous_bar_count": 241,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 3,
+          "marketable_be_approximations": 215
+        },
+        "control": {
+          "paired_n": 404,
+          "unpaired_n": 2,
+          "paired_actual_mean_net_r": -0.07273729434072221,
+          "random_mean_net_r": -0.07574982777202896,
+          "excess_mean_net_r": 0.0030125334313067524,
+          "controls_drawn": 2030,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.003529405866904174,
+          "months": 4,
+          "p": 0.375,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      }
+    },
+    "be_cost_rsi_line": {
+      "all": {
+        "stats": {
+          "total_entries": 354,
+          "natural": 354,
+          "censored": 0,
+          "wins": 143,
+          "losses": 211,
+          "win_rate": 0.403954802259887,
+          "gross_r": -0.2508151075354734,
+          "net_r": -23.856246922085525,
+          "mean_net_r": -0.06739052802849019,
+          "profit_factor": 0.43403619920051006,
+          "avg_win_r": 0.12793912644624184,
+          "avg_loss_r": -0.1997703412507019,
+          "max_realized_drawdown_r": 24.54535702131784,
+          "max_realized_drawdown_usdt": 3651.6574432999973,
+          "max_loss_streak": 13,
+          "gross_pnl": -107.95879999999852,
+          "fees": 3448.9180185999985,
+          "net_pnl": -3556.876818599999,
+          "partial": 339,
+          "reasons": {
+            "break_even": 54,
+            "opposite_signal_close": 89,
+            "break_even_marketable": 193,
+            "break_even_gap": 3,
+            "initial_stop": 15
+          },
+          "mean_hold_hours": 5.432532956685499,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 213,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 3,
+          "marketable_be_approximations": 193
+        },
+        "control": {
+          "paired_n": 353,
+          "unpaired_n": 1,
+          "paired_actual_mean_net_r": -0.06803490884681868,
+          "random_mean_net_r": -0.07868671718693279,
+          "excess_mean_net_r": 0.01065180834011411,
+          "controls_drawn": 1770,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.011274579707505042,
+          "months": 4,
+          "p": 0.1875,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "long": {
+        "stats": {
+          "total_entries": 169,
+          "natural": 169,
+          "censored": 0,
+          "wins": 74,
+          "losses": 95,
+          "win_rate": 0.4378698224852071,
+          "gross_r": 2.5904997212556893,
+          "net_r": -8.678757445132236,
+          "mean_net_r": -0.051353594349894886,
+          "profit_factor": 0.5856349530352031,
+          "avg_win_r": 0.16575617112331026,
+          "avg_loss_r": -0.22047067482375995,
+          "max_realized_drawdown_r": 9.755831631442833,
+          "max_realized_drawdown_usdt": 1485.3938852999859,
+          "max_loss_streak": 9,
+          "gross_pnl": 308.92990000001555,
+          "fees": 1639.9919299,
+          "net_pnl": -1331.0620298999847,
+          "partial": 160,
+          "reasons": {
+            "break_even": 20,
+            "opposite_signal_close": 54,
+            "break_even_gap": 1,
+            "break_even_marketable": 85,
+            "initial_stop": 9
+          },
+          "mean_hold_hours": 5.557100591715976,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 91,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 1,
+          "marketable_be_approximations": 85
+        },
+        "control": {
+          "paired_n": 168,
+          "unpaired_n": 1,
+          "paired_actual_mean_net_r": -0.052612103249843466,
+          "random_mean_net_r": -0.07654341579791966,
+          "excess_mean_net_r": 0.023931312548076195,
+          "controls_drawn": 845,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.02515723893771187,
+          "months": 4,
+          "p": 0.25,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "short": {
+        "stats": {
+          "total_entries": 185,
+          "natural": 185,
+          "censored": 0,
+          "wins": 69,
+          "losses": 116,
+          "win_rate": 0.372972972972973,
+          "gross_r": -2.8413148287911616,
+          "net_r": -15.177489476953287,
+          "mean_net_r": -0.08204048365920696,
+          "profit_factor": 0.2843111873382518,
+          "avg_win_r": 0.08738171621286416,
+          "avg_loss_r": -0.18281748185897337,
+          "max_realized_drawdown_r": 15.44430134997635,
+          "max_realized_drawdown_usdt": 2262.7513137000133,
+          "max_loss_streak": 10,
+          "gross_pnl": -416.88870000001407,
+          "fees": 1808.9260886999991,
+          "net_pnl": -2225.814788700014,
+          "partial": 179,
+          "reasons": {
+            "break_even_marketable": 108,
+            "opposite_signal_close": 35,
+            "break_even": 34,
+            "initial_stop": 6,
+            "break_even_gap": 2
+          },
+          "mean_hold_hours": 5.318738738738739,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 122,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 2,
+          "marketable_be_approximations": 108
+        },
+        "control": {
+          "paired_n": 185,
+          "unpaired_n": 0,
+          "paired_actual_mean_net_r": -0.08204048365920696,
+          "random_mean_net_r": -0.08063306655641496,
+          "excess_mean_net_r": -0.001407417102791997,
+          "controls_drawn": 925,
+          "controls_censored": 0,
+          "all_draw_boundary_mark_excess": -0.001407417102791997,
+          "months": 4,
+          "p": 0.5625,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      },
+      "2026": {
+        "stats": {
+          "total_entries": 354,
+          "natural": 354,
+          "censored": 0,
+          "wins": 143,
+          "losses": 211,
+          "win_rate": 0.403954802259887,
+          "gross_r": -0.2508151075354734,
+          "net_r": -23.856246922085525,
+          "mean_net_r": -0.06739052802849019,
+          "profit_factor": 0.43403619920051006,
+          "avg_win_r": 0.12793912644624184,
+          "avg_loss_r": -0.1997703412507019,
+          "max_realized_drawdown_r": 24.54535702131784,
+          "max_realized_drawdown_usdt": 3651.6574432999973,
+          "max_loss_streak": 13,
+          "gross_pnl": -107.95879999999852,
+          "fees": 3448.9180185999985,
+          "net_pnl": -3556.876818599999,
+          "partial": 339,
+          "reasons": {
+            "break_even": 54,
+            "opposite_signal_close": 89,
+            "break_even_marketable": 193,
+            "break_even_gap": 3,
+            "initial_stop": 15
+          },
+          "mean_hold_hours": 5.432532956685499,
+          "boundary_mark_net_r": 0,
+          "boundary_mark_net_pnl": 0,
+          "ambiguous_bar_count": 213,
+          "entries_open_beyond_target": 0,
+          "same_open_be_approximations": 3,
+          "marketable_be_approximations": 193
+        },
+        "control": {
+          "paired_n": 353,
+          "unpaired_n": 1,
+          "paired_actual_mean_net_r": -0.06803490884681868,
+          "random_mean_net_r": -0.07868671718693279,
+          "excess_mean_net_r": 0.01065180834011411,
+          "controls_drawn": 1770,
+          "controls_censored": 1,
+          "all_draw_boundary_mark_excess": 0.011274579707505042,
+          "months": 4,
+          "p": 0.1875,
+          "method": "exact_month_block_sign_symmetry_one_sided",
+          "null_draws": 16
+        }
+      }
+    }
+  },
+  "fee_curves": {
+    "v2_baseline": [
+      {
+        "fee_rate": 0.0,
+        "net_pnl": -330.9499999999989,
+        "net_r": -1.6914287588299812
+      },
+      {
+        "fee_rate": 0.0002,
+        "net_pnl": -1118.3342299999988,
+        "net_r": -7.078649832177841
+      },
+      {
+        "fee_rate": 0.0005,
+        "net_pnl": -2299.410574999999,
+        "net_r": -15.15948144219961
+      },
+      {
+        "fee_rate": 0.001,
+        "net_pnl": -4267.871149999999,
+        "net_r": -28.627534125569234
+      },
+      {
+        "fee_rate": "breakeven_f_star",
+        "net_pnl": 0.0,
+        "value": -8.406315173469984e-05,
+        "gross_pnl": -330.9499999999989,
+        "notional": 3936921.1499999994
+      }
+    ],
+    "be_cost": [
+      {
+        "fee_rate": 0.0,
+        "net_pnl": -408.82990000000245,
+        "net_r": -2.2229932402185844
+      },
+      {
+        "fee_rate": 0.0002,
+        "net_pnl": -1198.2199273000017,
+        "net_r": -7.623552794736937
+      },
+      {
+        "fee_rate": 0.0005,
+        "net_pnl": -2382.3049682500005,
+        "net_r": -15.724392126514445
+      },
+      {
+        "fee_rate": 0.001,
+        "net_pnl": -4355.7800364999985,
+        "net_r": -29.225791012810305
+      },
+      {
+        "fee_rate": "breakeven_f_star",
+        "net_pnl": 0.0,
+        "value": -0.00010358121736053578,
+        "gross_pnl": -408.82990000000245,
+        "notional": 3946950.1364999963
+      }
+    ],
+    "be_cost_rsi_line": [
+      {
+        "fee_rate": 0.0,
+        "net_pnl": -107.95879999999852,
+        "net_r": -0.2508151075354734
+      },
+      {
+        "fee_rate": 0.0002,
+        "net_pnl": -797.742403719998,
+        "net_r": -4.971901470445487
+      },
+      {
+        "fee_rate": 0.0005,
+        "net_pnl": -1832.417809299997,
+        "net_r": -12.053531014810492
+      },
+      {
+        "fee_rate": 0.001,
+        "net_pnl": -3556.8768185999957,
+        "net_r": -23.856246922085514
+      },
+      {
+        "fee_rate": "breakeven_f_star",
+        "net_pnl": 0.0,
+        "value": -3.1302222731238394e-05,
+        "gross_pnl": -107.95879999999852,
+        "notional": 3448918.0185999973
+      }
+    ]
+  }
+}

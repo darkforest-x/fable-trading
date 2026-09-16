@@ -1,0 +1,23 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_btc_xau_bb_stoch_study.py tests/evaluation/test_bb_stoch_longrun_study.py tests/evaluation/test_bb_stoch_parameter_replay.py tests/evaluation/test_eth_bb_stoch_study.py tests/evaluation/test_bb_stoch_rsi_study.py -q",
+    "passed": 37,
+    "failed": 0
+  },
+  "broad_gates": {
+    "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+    "passed": 468,
+    "failed": 7,
+    "causes": {
+      "existing_artifact_missing_source_commit": 5,
+      "existing_migration_hash_mismatches": 2
+    },
+    "scope": "unchanged pre-existing failures already disclosed in HANDOFF; unrelated and not bypassed"
+  },
+  "bar_duration_handling": "each dataset declares its own _data_gap; the engine's five-minute default is never used for the 1m series",
+  "economic_ledger_checks": 70842,
+  "retuned_for_new_market": false,
+  "parameter_search": false,
+  "native_tradingview_parity": false,
+  "holdout_consumed": false
+}
