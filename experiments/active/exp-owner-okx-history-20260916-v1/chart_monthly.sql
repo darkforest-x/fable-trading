@@ -1,0 +1,1 @@
+SELECT substr(updated,1,7) AS "group", COUNT(*) AS n, SUM(gross) AS gross, SUM(fee) AS fee, SUM(funding) AS funding, SUM(liquidation_fee) AS liquidation_fee, SUM(gross+fee+funding+liquidation_fee) AS net FROM positions_usdt GROUP BY substr(updated,1,7) ORDER BY "group";

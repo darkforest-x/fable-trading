@@ -1,0 +1,103 @@
+{
+  "audience": "product stakeholders",
+  "delivery": "local HTML per owner repository requirement",
+  "structure": [
+    "title",
+    "summary",
+    "evidence with charts",
+    "proposed system and next steps",
+    "questions",
+    "caveats"
+  ],
+  "summary_heading_override": "中文owner要求，Executive Summary译为核心结论",
+  "chart_map": [
+    {
+      "chart": "cumulative",
+      "family": "two-series line",
+      "question": "How fees separate gross from net",
+      "grain": "observed update days",
+      "warning": "not account equity",
+      "palette": "two series; native shared renderer"
+    },
+    {
+      "chart": "monthly",
+      "family": "bar",
+      "question": "Monthly consistency",
+      "grain": "29 observed months; absent months not zero",
+      "warning": "lifecycle attribution"
+    },
+    {
+      "chart": "duration",
+      "family": "bar",
+      "question": "Where realized results concentrate",
+      "grain": "7 duration groups, completed only",
+      "warning": "post-outcome grouping; not a causal entry rule"
+    }
+  ],
+  "method": "weekly cluster bootstrap; exploratory; no matched market benchmark",
+  "builder_commit": "68dd0775e936de4e68888c64d346ef9f35e9d9ed",
+  "data": {
+    "raw_rows": 4899,
+    "linear_usdt_rows": 4898,
+    "other_rows": 1,
+    "null_cells": 0,
+    "exact_duplicates": 0,
+    "lifecycle_key_duplicates": 0,
+    "invalid_duration": 0,
+    "invalid_entry": 0,
+    "unit_missing_linear": 89,
+    "linear_pnl_max_error": 3.6844999442564585e-05,
+    "linear_pnl_errors_above_cent": 0,
+    "partial_rows": 19,
+    "open_min": "2024-02-23 00:02:07",
+    "update_max": "2026-09-13 22:41:56",
+    "currencies": {
+      "USDT": 4809,
+      "-": 90
+    },
+    "row_number_definition": "CSV source line: metadata=1, header=2, first data=3",
+    "archive_sha256": "e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385",
+    "csv_sha256": "06c8cea19fd8ccfc77acd3bc2b7641567f0e151587b65532c2ddf2918c7e85b1",
+    "timezone": "UTC+08:00 from original export metadata",
+    "generated_at": "2026-09-16T05:03:16.150769+00:00",
+    "source_commit": "68dd0775e936de4e68888c64d346ef9f35e9d9ed",
+    "source_sha256": "432c43e05aee49acca08bfb71935a22b2a8c4d377bec5a93ccefd2a7dcc2bb55",
+    "python": "3.12.14",
+    "pandas": "2.2.3",
+    "numpy": "2.3.5"
+  },
+  "report_builder_commit": "ebe08f32300aca32d094ffea9a1f50637999f0e5",
+  "qa": {
+    "ok": true,
+    "html": "/Users/zhangzc/fable-trading/analysis/html/p1_owner_okx_history_20260916.html",
+    "stages": {
+      "validation": "passed",
+      "package": "passed",
+      "verification": "structural_only"
+    },
+    "browserWarning": {
+      "code": "browser_unavailable",
+      "message": "No installed Chromium headless-shell executable was found. Set CHROMIUM_EXECUTABLE_PATH (or the legacy PLAYWRIGHT_EXECUTABLE_PATH) or preinstall Chromium headless-shell under PLAYWRIGHT_BROWSERS_PATH; portable tooling never downloads browsers."
+    },
+    "counts": {
+      "blocks": 24,
+      "charts": 3,
+      "html": 0,
+      "metrics": 0,
+      "tables": 1
+    },
+    "sourceDialog": "not_verified",
+    "sourceInteraction": "not_verified",
+    "viewports": [],
+    "timings": {
+      "validateAndPackageMs": 635.7,
+      "staticChartExtractionMs": 12.9,
+      "structuralVerificationMs": 39.9,
+      "totalMs": 691
+    }
+  },
+  "notion_research": "https://app.notion.com/p/3dd8856479af81eb9f0ac76bd5aaf1e6",
+  "notion_strategy": "https://app.notion.com/p/3dd8856479af81deb0ffe4ad7d8ae08c",
+  "delegation": "Independent CSV+Decimal arithmetic review and bounded indicator-code mapping completed. Actual running model/effort absent from tool receipts; no verified Luna Max assertion.",
+  "visual_qa_limit": "Canonical payload, source SQL and structural roots passed; enhanced browser charts, source interactions and narrow layout unverified. Semantic chart tables preserved."
+}
