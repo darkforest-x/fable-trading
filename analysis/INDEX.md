@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **545** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **546** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -399,6 +399,7 @@
 | 2026-01-01 | [`p2_eth_yearly_morphology_count_20260813.md`](p2_eth_yearly_morphology_count_20260813.md) | ETH 2026 同类空头形态计数（冻结门 v1） | 按本轮在扫描前冻结的 `eth_yearly_morphology_gate_v1_20260813`，2026-01-01 至 |
 | 2024-09-10 | [`p1_spike_account_growth_20260913.md`](p1_spike_account_growth_20260913.md) | SPIKE 账户冻结回放技术报告 | 仓位 \| 风险 \| 路径数 \| 中位终值 \| 最好终值 \| 最差终值 \| 达 100k \| 中位已实现回撤 \| |
 | 2024-08-25 | [`p0_btc_4h_ma_launch_similarity_20260825.md`](p0_btc_4h_ma_launch_similarity_20260825.md) | BTC 4h 双均线密集启动相似形态检索 |  |
+| 2023-12-31 | [`p1_eth_bb_stoch_longrun_20260916.md`](p1_eth_bb_stoch_longrun_20260916.md) | ETH 5m · BB × Stoch 28 个月长周期诊断 | 把窗口从 4.4 个月拉到 28 个月（245,088 根 5m，2023-12-31 → 2026-04-30）， |
 | — | [`OPEN_QUESTIONS_FOR_RESEARCH.md`](OPEN_QUESTIONS_FOR_RESEARCH.md) | 卡点与待研究问题清单(给外部调研用) |  |
 | — | [`ma206_profitability_diagnosis.md`](ma206_profitability_diagnosis.md) | MA206 收益为什么弱 |  |
 | — | [`ma206_q80_shadow_diagnosis.md`](ma206_q80_shadow_diagnosis.md) | MA206 q80 影子漏斗诊断 | 当前不是“只监控 50 多个币”。本地共有 `401` 个 OKX USDT SWAP 15m 文件；按既定 |
@@ -773,6 +774,7 @@
 - [`p1_crypto_grade_a_yolo_mtf_latest_20260903.md`](p1_crypto_grade_a_yolo_mtf_latest_20260903.md) — P1：最新加密行情四周期 Grade-A YOLO 排序图审（2026-09-03）
 - [`p1_eth_bb_stoch_backtest_20260916.md`](p1_eth_bb_stoch_backtest_20260916.md) — ETH 5m · BB × Stoch v2 回测
 - [`p1_eth_bb_stoch_indicator_20260915.md`](p1_eth_bb_stoch_indicator_20260915.md) — ETH 5m · BB × Stoch 反转指标
+- [`p1_eth_bb_stoch_longrun_20260916.md`](p1_eth_bb_stoch_longrun_20260916.md) — ETH 5m · BB × Stoch 28 个月长周期诊断
 - [`p1_eth_bb_stoch_optimization_20260916.md`](p1_eth_bb_stoch_optimization_20260916.md) — ETH 5min · BB × Stoch 参数搜索
 - [`p1_eth_bb_stoch_rsi_filter_20260916.md`](p1_eth_bb_stoch_rsi_filter_20260916.md) — ETH 5m · BB × Stoch 加 Parabolic RSI 区域过滤
 - [`p1_eth_bb_stoch_strategy_20260916.md`](p1_eth_bb_stoch_strategy_20260916.md) — ETH 5m · BB × Stoch 策略 v2

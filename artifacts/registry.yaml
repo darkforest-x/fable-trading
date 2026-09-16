@@ -31379,3 +31379,17 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Three arms x two paths plus 111event-level replays;24focused checks pass,468repository gate checks pass with7 pre-existing unrelated failures. No live change,no promotion.
+
+  - artifact_id: eth-bb-stoch-longrun-diagnosis-20260916-delivery
+    artifact_type: manifest
+    role: frozen_28_month_bb_stoch_gate_and_cost_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7bbf45b073fbfa6ee3b6e635132f1780b4d17286
+    source_path: experiments/active/exp-eth-bb-stoch-longrun-diagnosis-20260916-v1/delivery_manifest.json
+    sha256: a86eb5ae63824a96517fc48d95ecb78d81560cb07aba814a426acaf600aa06c9
+    size_bytes: 11568
+    storage_uri: repo://experiments/active/exp-eth-bb-stoch-longrun-diagnosis-20260916-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Seven arms plus 1085occupancy-free event replays;43focused checks pass,468repository gate checks pass with7 pre-existing unrelated failures. No live change,no promotion.

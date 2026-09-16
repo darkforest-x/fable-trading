@@ -154,6 +154,11 @@ PF {number(reference['profit_factor'])}；原 v2 是 {base['natural']} 笔、
 {'两条成交路径在本样本上仍逐笔相同，敏感性零分辨力。' if all(result['arms'][a]['adverse_first']['all']['stats']['net_r'] == result['arms'][a][path]['all']['stats']['net_r'] for a in result['arms'] if 'adverse_first' in result['arms'][a]) else '两条路径存在差异，见表。'}
 **不得挑其中较好的一组当成绩**：它们是同一批数据上的并列诊断，不是候选筛选。
 
+![七组的累计已实现净 R](eth_bb_stoch_longrun_20260916_equity.png)
+
+图里虚线是"此前已看过的窗口"的起点。七条线在 28 个月里没有一条站上 0 轴；
+样本少的组（◈ 同根 18 笔、SAR 方向 87 笔）曲线平只是因为交易少，不是因为稳。
+
 ## 门到底拦掉了什么
 
 {gate_table}

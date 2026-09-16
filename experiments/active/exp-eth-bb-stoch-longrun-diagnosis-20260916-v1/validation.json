@@ -1,0 +1,37 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_bb_stoch_longrun_study.py tests/evaluation/test_bb_stoch_parameter_replay.py tests/evaluation/test_parabolic_rsi_sar.py tests/evaluation/test_bb_stoch_rsi_study.py tests/evaluation/test_bb_stoch_replay.py -q",
+    "passed": 43,
+    "failed": 0
+  },
+  "broad_gates": {
+    "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+    "passed": 468,
+    "failed": 7,
+    "causes": {
+      "existing_artifact_missing_source_commit": 5,
+      "existing_migration_hash_mismatches": 2
+    },
+    "scope": "unchanged pre-existing failures already disclosed in HANDOFF; unrelated to this experiment and not bypassed"
+  },
+  "frozen_engine_parity": "parameterized defaults still reproduce bb_stoch_replay trade dictionaries exactly (test_default_features_and_replay_dicts_match_frozen_engine)",
+  "source_cross_check": {
+    "other": "data/kline_fetched/okx_ETH_USDT_SWAP_5m_57699.csv",
+    "other_sha256": "0f164249ef356b2fc7118078b6d9379b0da4f507e0ef7cb6aef0ca0cc5e67d01",
+    "overlapping_bars": 37800,
+    "max_abs_ohlc_difference": 0.0,
+    "rows_differing": 0
+  },
+  "economic_ledger_checks": 25457,
+  "signflip_independent_recheck": {
+    "partition": "be_cost/tv/all",
+    "saved_p": 0.5856,
+    "recheck_p": 0.5844,
+    "draws": 200000
+  },
+  "known_benign_warning": "numpy reports divide-by-zero/overflow FP flags from the sign-flip matmul on this BLAS build; every produced p is finite and within [0,1] and an independent 200k-draw recheck agrees",
+  "native_tradingview_parity": false,
+  "pine_saved_to_tradingview": false,
+  "parameter_search": false,
+  "holdout_consumed": false
+}

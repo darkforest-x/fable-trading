@@ -9541,3 +9541,17 @@ experiments:
     canonical_report: analysis/p1_eth_bb_stoch_rsi_filter_20260916.md
     artifacts: [eth-bb-stoch-rsi-filter-20260916-delivery]
     notes: Same OKXnative5m prefix ending2026-05-01 as the v2 replay;unfiltered arm reproduces that ledger trade by trade. Gate blocks 37of111 candidates;long median RSI28.42,short75.37. Pine v3 written but NOT saved or compiled on TradingView;owner TV inputs unverified.
+
+  - experiment_id: exp-eth-bb-stoch-longrun-diagnosis-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7bbf45b073fbfa6ee3b6e635132f1780b4d17286
+    status: negative
+    question: Over 28 months, does owner-approved break-even-with-cost or any ChartPrime RSI/SAR entry gate rescue the BB x Stoch v2 rule?
+    single_variable: Seven pre-registered arms, each one change from the be_cost reference. No parameter search exists in the builder.
+    result: All seven arms lose after fees AND before fees. Reference 652trades net-64.85R perTrade-0.0995R PF0.777 grossR-21.37; v2 baseline 650/-64.51R. Breakeven fee f*=-7.87bp per side, i.e. negative, so zero fees still lose. Every gate made per-trade WORSE; event-level label permutations p 0.49-0.74 with no gate carrying information. Matched control excess-0.00754R p0.586.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_eth_bb_stoch_longrun_20260916.md
+    artifacts: [eth-bb-stoch-longrun-diagnosis-20260916-delivery]
+    notes: OKX official monthly 1m archive aggregated to 5m, 245088bars 2023-12-31..2026-04-30, cross-checked byte-identical against the prior CSV on 37800 overlapping bars. 23 of these months were unused by this strategy family and are now spent. Gate pass counts rsi_line:682 sar_strong_same_bar:18 sar_strong_window:357 sar_direction:90 of 1085. Owner approved BE-with-cost only; the losing-side target guard was NOT approved and its losses remain.
