@@ -10,6 +10,7 @@ import csv
 import json
 import re
 import subprocess
+from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / 'experiments/active/exp-owner-okx-history-20260916-v1'
@@ -32,6 +33,7 @@ def table(rows, fields):
 
 F=[('group','分组',str),('n','记录数',str),('gross','毛盈亏 U',money),('fee','手续费 U',money),('net','重构净盈亏 U',money),('win_rate','净胜率',pct),('profit_factor','净利润因子',lambda x:f'{x:.3f}')]
 TITLE='你的交易复盘与执行系统'
+GENERATED=datetime.now(timezone.utc).isoformat()
 report=f'''# {TITLE}
 
 ## 核心结论
@@ -51,7 +53,7 @@ report=f'''# {TITLE}
 
 净损益口径：**收益额 + 累计手续费 + 累计资金费用 + 强平清算费**，全部保留原正负号。4,898 条线性记录的收益额均能由“方向 × 累计平仓张数 × 面值 × 乘数 ×（平仓均价−开仓均价）”复算，最大差异小于 0.00004 U，因此这份 CSV 的收益额是价格毛盈亏，不能套用 App 上其他“已实现收益”标签的净口径。[OKX 导出字段说明](https://www.okx.com/help/how-to-check-download-order-history-position-history-and-trading-history)；[OKX API 字段定义](https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-positions-history)。
 
-币本位那一条为 2024 年 6 月 10—11 日 BTC 多单，部分平仓；已列净损益约 **+0.0004480031 BTC**，不作汇率换算。即使完全不另计强平清算费，USDT 净损益仍为 **−12,202.34 U**，总体亏损判断不依赖这一项。
+币本位那一条为 2024 年 6 月 10—11 日 BTC 多单，部分平仓；已列净损益约 **+0.0004480031 BTC**，不作汇率换算。即使完全不另计强平清算费，USDT 净损益仍为 **−12,202.34 U**，总体亏损判断不依赖这一项。CSV与API的逐字段对应是官方定义结合本文件公式复核的推断，未登录账户逐项勾稽；API另有settledPnl列而此CSV没有，故只重构已列项，任何未列结算收益必须由账单补证。强平成交手续费不再额外加一次，避免与累计手续费重复。
 
 缺少出入金、转账、返佣、现货及其他账户、逐笔成交、余额与权益快照。因此不报告账户本金回报率、年化、夏普、真正最大回撤、真实有效杠杆或历史 R；原表“收益率”也不能平均成账户收益率。以下“净”均指**CSV 已列项目的重构净损益**，不是完整资金审计。
 
@@ -124,6 +126,10 @@ report=f'''# {TITLE}
 
 更重要的是，全部普通平仓组本身仍亏 −4,712.98 U。最大单笔亏损不是强平：2026 年 6 月 4 日 23:06 开始的 ETH 多单，次日结束，净亏 **−9,816.93 U**；8 秒后开始的 BTC 多单又净亏 **−3,482.62 U**。两条合计 **−13,299.55 U**，反映相关品种同向暴露需要共同限额。仅凭文件无法判断它们是否为组合对冲的一部分，必须核对当时完整仓位。
 
+{table(S['by_leverage'],F)}
+
+所有杠杆分组都净亏。大于50倍组1,413条，92条强平；不超过10倍组336条，1条强平。但不同组品种、风险预算和时期不同，不能把该差异当作随机实验。尤其100倍是界面设置，缺少账户权益时无法还原真实有效杠杆。
+
 4,825 条原始记录采用全仓。全仓共享保证金，孤立看单个币的名义止损，无法完整代表组合风险。[OKX 全仓与逐仓说明](https://www.okx.com/en-gb/help/how-do-i-trade-using-cross-and-isolated-modes)。报告建议的逐仓、低仓位与硬止损用于限制风险传播，不能承诺完全没有跳价或强平风险。
 
 逐更新时间归集的累计净损益最大峰谷下降约 **33,026.02 U**，谷底归集于 2026 年 6 月 5 日；由于缺少权益和浮盈亏，**绝不可标成账户最大回撤百分比，也不一定是实际盘中回撤下界**。
@@ -173,6 +179,8 @@ report=f'''# {TITLE}
 | 执行故障 | 没有确认生效的保护止损、行情/订单状态异常、剩余预算不足时不新开；无法保护既有仓位时按事先故障预案人工减险 | 止损必须能执行 |
 
 每日开仓预算用当日日初交易权益与当前权益的较低者计算，避免日内盈利后立即放大风险；外部转入不自动提高预算。1R 是开仓前锁定的 U 金额，不能亏损后重新定义。日/周/回撤限制按净权益监控，不能只看已经平仓的损益。
+
+拟定停机预案：触及任一账户级损失限制时停止新开，人工有序平掉剩余风险仓位，确认平仓后清理遗留委托；平仓确认前保持保护止损，不能先撤掉保护再等待。若价格跳变造成超限，如实记录超限金额，不修改触发线以继续交易。规则只有经你确认后才可用于实盘。
 
 **仓位公式（USDT 线性合约）：** 设权益 E、风险比例 r=0.0025、入场价 P、止损价 S，止损价格比例 d=|P−S|/P，预计往返手续费+滑点+不利资金费比例为 c，则名义仓位 **N≤E×r/(d+c)**，还要受组合风险与名义仓位上限约束；张数=N/(P×合约面值×乘数)，按交易所步长向下取整。风险由止损距离与数量决定，不能用“保证金×100倍”倒推想要的盈利。
 
@@ -278,6 +286,7 @@ repro='''\n## 复现与审计附录\n\n统计生成器先于本地结果入库�
 md.write_text(report.replace('[[CHART:cumulative]]','（交互HTML中有累计毛/净损益图。）').replace('[[CHART:monthly]]','（交互HTML中有月度净损益图。）').replace('[[CHART:duration]]','（交互HTML中有持仓时长分组图。）')+repro)
 subprocess.run(['python3',str(ROOT/'scripts/md_to_html.py'),str(md),'--out-dir',str(ROOT/'analysis/html')],check=True)
 source=dict(id='ledger',label='本次欧易个人持仓历史：经核验的USDT重构账本',path='data/owner_okx_history_20260916/summary.json',query=dict(description='用户提供的欧易持仓历史CSV；2024-02-23至2026-09-13，UTC+8；线性4898条；币本位单独；净=价格毛P&L+signed fee+funding+liquidation clearance。原ZIP SHA256 e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385。代码yoyo/evaluation/owner_okx_history.py。'))
+source['query'].update(sql=(ROOT/'yoyo/evaluation/owner_okx_history.py').read_text(), language='python', engine='pandas', tables_used=['OKX position-history CSV supplied by owner'])
 sources=[source,dict(id='okx_pnl',label='OKX API：历史持仓及损益字段',href='https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-positions-history'),dict(id='okx_export',label='OKX：导出持仓历史字段',href='https://www.okx.com/help/how-to-check-download-order-history-position-history-and-trading-history'),dict(id='okx_margin',label='OKX：全仓与逐仓',href='https://www.okx.com/en-gb/help/how-do-i-trade-using-cross-and-isolated-modes')]
 blocks=[]
 sections=re.split(r'(?m)(?=^## )',report)
@@ -304,7 +313,7 @@ for cid,title,dataset,x,y,xtype in [('cumulative','累计记账损益（非账�
     enc=dict(x=dict(field=x,type=xtype),y=dict(field=y,type='quantitative',unit='USDT'))
     if cid=='cumulative':enc['color']=dict(field='series',type='nominal')
     charts.append(dict(id=cid,title=title,type='line' if cid=='cumulative' else 'bar',dataset=dataset,sourceId='ledger',encodings=enc))
-artifact=dict(surface='report',manifest=dict(version=1,surface='report',title=TITLE,generatedAt='2026-09-16T00:00:00Z',blocks=blocks,charts=charts,tables=[dict(id='months',title='月度原始口径对照',dataset='months',sourceId='ledger',columns=[dict(field=k,label=l,format='number') if k!='group' else dict(field=k,label=l) for k,l in [('group','月份'),('n','记录数'),('gross','毛盈亏 U'),('fee','手续费 U'),('net','净盈亏 U')]],defaultSort=dict(field='group',direction='asc'))],sources=sources),snapshot=dict(version=1,status='ready',generatedAt='2026-09-16T00:00:00Z',datasets=dict(cumulative=cumulative,months=S['by_month'],duration=S['by_duration'])),sources=sources)
+artifact=dict(surface='report',manifest=dict(version=1,surface='report',title=TITLE,generatedAt=GENERATED,blocks=blocks,charts=charts,tables=[dict(id='months',title='月度原始口径对照',dataset='months',sourceId='ledger',columns=[dict(field=k,label=l,format='number') if k!='group' else dict(field=k,label=l) for k,l in [('group','月份'),('n','记录数'),('gross','毛盈亏 U'),('fee','手续费 U'),('net','净盈亏 U')]],defaultSort=dict(field='group',direction='asc'))],sources=sources),snapshot=dict(version=1,status='ready',generatedAt=GENERATED,datasets=dict(cumulative=cumulative,months=S['by_month'],duration=S['by_duration'])),sources=sources)
 (OUT/'artifact.json').write_text(json.dumps(artifact,ensure_ascii=False,indent=2))
 # Source notes retain process details rather than putting them into the reader flow.
 notes=dict(audience='product stakeholders',delivery='local HTML per owner repository requirement',structure=['title','summary','evidence with charts','proposed system and next steps','questions','caveats'],summary_heading_override='中文owner要求，Executive Summary译为核心结论',chart_map=[dict(chart='cumulative',family='two-series line',question='How fees separate gross from net',grain='observed update days',warning='not account equity',palette='two series; native shared renderer'),dict(chart='monthly',family='bar',question='Monthly consistency',grain='29 observed months; absent months not zero',warning='lifecycle attribution'),dict(chart='duration',family='bar',question='Where realized results concentrate',grain='7 duration groups, completed only',warning='post-outcome grouping; not a causal entry rule')],method='weekly cluster bootstrap; exploratory; no matched market benchmark',builder_commit='9983ba3b34',data=S['audit'])
