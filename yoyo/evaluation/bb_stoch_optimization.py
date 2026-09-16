@@ -44,11 +44,27 @@ def identity(spec):
     return f"bb{spec.bb_length}_m{spec.bb_mult:g}_sl{spec.stop_fraction*100:g}"
 
 
+def use_experiment(path):
+    """Point this optimizer at another experiment directory.
+
+    The grid, the selection receipt and the recheck gate are instrument
+    agnostic; only the directory and the two per-experiment files change. The
+    default stays the ETH run so its frozen receipts still verify.
+    """
+    global EXP, BUILDERS
+    EXP = Path(path).resolve()
+    tail = [str((EXP/"config.json").relative_to(ROOT)), str((EXP/"PROJECT_PLAN.md").relative_to(ROOT))]
+    BUILDERS = BUILDERS[:-2] + tail
+    return EXP
+
+
 def parameter_grid(cfg):
     for n, mult, stop in itertools.product(cfg["bb_lengths"], cfg["bb_multiples"], cfg["stop_fractions"]):
         yield ParamSpec(bb_length=n, bb_mult=mult, stop_fraction=stop,
                         stoch_length=cfg["stoch_length"], k_smooth=cfg["k_smooth"],
-                        d_smooth=cfg["d_smooth"], oversold=cfg["oversold"])
+                        d_smooth=cfg["d_smooth"], oversold=cfg["oversold"],
+                        partial_fraction=cfg.get("partial_fraction", 0.5),
+                        be_cost_fraction=cfg.get("be_cost_fraction", 0.0))
 
 
 def require_committed(path, head):
@@ -266,6 +282,12 @@ def write_grid(path, results):
 
 def main(stage):
     cfg = json.loads((EXP/"config.json").read_text())
+    # Matched controls rank nothing during the grid; they validate the chosen
+    # finalists. Drawing five per trade across 315 specs on a long series costs
+    # hours and buys no selection information, so a config may switch them off
+    # for the development stage only.
+    if stage == "development" and "grid_controls_per_trade" in cfg:
+        cfg = dict(cfg, controls_per_trade=cfg["grid_controls_per_trade"])
     frozen = dict(partial_fraction=.5, fee_per_notional=.001, full_quantity_eth=1.,
                   slippage=0, funding="not modeled", v1_gate=False,
                   stoch_length=5, k_smooth=3, d_smooth=3, oversold=20)
@@ -314,4 +336,7 @@ def main(stage):
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser(); parser.add_argument("stage", choices=["development", "recheck"])
-    main(parser.parse_args().stage)
+    parser.add_argument("--exp", default=None, help="experiment directory; defaults to the ETH run")
+    args=parser.parse_args()
+    if args.exp: use_experiment(args.exp)
+    main(args.stage)
