@@ -123,9 +123,12 @@ def main() -> None:
 **加上「只在超卖做多、超买做空」的 RSI 门后，同一段历史里{verdict}：{fs['natural']}笔完整交易，
 净{number(fs['net_r'], signed=True)}R，胜率{number(100 * fs['win_rate'])}%，PF {number(fs['profit_factor'])}；
 未过滤的 v2 是{os_['natural']}笔、净{number(os_['net_r'], signed=True)}R、PF {number(os_['profit_factor'])}。**
-过滤把可用信号从 {counts['admissible']} 个砍到 {counts['gate_passed']} 个
-（{number(100 * counts['gate_passed'] / counts['admissible'])}%），净 R 差 {number(delta_r, signed=True)}R，
-方向上{better}。{evidence}。本轮没有调任何参数，V1 门禁未加入。
+总亏损少了 {number(abs(delta_r))}R，方向上{better}。
+
+**但少亏主要来自少做单，不是每笔变好：**每笔净收益 {number(os_['mean_net_r'], 4, True)}R →
+{number(fs['mean_net_r'], 4, True)}R，几乎没动（{number(fs['mean_net_r'] - os_['mean_net_r'], 4, True)}R/笔），
+入场数 {os_['natural']} → {fs['natural']} 笔。同时最大连续亏损从 {os_['max_loss_streak']} 笔变成
+{fs['max_loss_streak']} 笔，**变差了**。{evidence}。本轮没有调任何参数，V1 门禁未加入。
 
 {tv_line}
 
@@ -160,6 +163,10 @@ RSI 取 ChartPrime 源码里的 `ta.rsi(close, {cfg['rsi_length']})` 曲线，�
 
 PF = 盈利交易净 R 之和 / 亏损交易净 R 绝对值之和；净胜率扣手续费后计算；回撤是完整交易结算后的
 累计净 R 回撤，**不含持仓浮动回撤**。两条路径只是预先冻结的成交顺序敏感性，不得挑较好者当成绩。
+
+**这段样本里两条路径结果逐笔相同**（上一轮 v2 冻结账本也是如此）：主口径只有
+{fs['ambiguous_bar_count']} 根持仓 K 线同时够到止盈与保护价，而这几根里先后顺序没有改变结果。
+所以这条敏感性在本样本上没有分辨力，不能当作"路径无关"已被证明。
 
 ![按组的累计已实现净 R](eth_bb_stoch_rsi_filter_20260916_equity.png)
 
