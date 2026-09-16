@@ -42,7 +42,7 @@ report=f'''# {TITLE}
 - **这份记录里的交易总体亏损，暂不支持“已经能够稳定盈利”。** 2024 年 2 月 23 日至 2026 年 9 月 13 日，4,898 条 USDT 持仓记录重构净损益 **{money(O['net'])} USDT**；另有一条 BTC 币本位记录单独列示。这里评价的是这份文件，不是你全部资产或所有账户。
 - **你确实抓到过大行情，但正收益高度集中。** 最大一笔 BTC 空单净赚 **29,002.99 U**；其余记录合计 **−43,831.47 U**。这笔盈利是真实成绩，也需要检验能否以可承受风险重复。
 - **主要问题是交易优势尚不稳固、费用侵蚀和风险约束失效同时存在。** 毛盈亏 +15,129.63 U，手续费 −27,811.16 U；177 条强平记录净损益 −9,983.44 U。即使只看普通全部平仓记录，仍净亏 −4,712.98 U。
-- **下一步建议建立一套小风险、低复杂度、可记录、先模拟验证的系统。** 本报告给出完整操作草案。它不是已验证盈利策略，也不意味着现在应该加本金或放大杠杆。
+- **下一步以你的原V9趋势与最新BB×Stoch v2反转为两条独立研究主线，补V1门禁、统一账户风控与净收益账。** 本报告给出完整操作草案。它不是已验证盈利策略，也不意味着现在应该加本金或放大杠杆。
 
 ## 1. 先把账算对：本报告能说明什么
 
@@ -161,110 +161,14 @@ report=f'''# {TITLE}
 
 你的信心可以保留为待验证假设：“我能识别少数大行情，而且能减少日常无效损耗。” 要让这句话成立，需要一份固定规则的未来记录，而不是更多历史获利截图。
 
-## 9. 个人交易系统 v1：先把风险与执行写死
-
-**定位：未验证的模拟执行草案。** 本金、可接受回撤、时间投入和其他账户覆盖尚未补充，下面按比例设计，不承诺收入目标。数值是保守起点，未通过这份历史优化；所有规则一起组成一个拟验证版本，不声称每项有独立因果增益。不修改现有 Spike/V9 或任何实盘配置。
-
-| 事项 | v1 操作规则 | 对应历史问题 |
-| --- | --- | --- |
-| 资金边界 | 仅使用可承受损失的独立交易预算；不以借款、生活支出或补仓转账扩大预算 | 没有权益记录，无法知道此前承担多少账户风险 |
-| 起步阶段 | 先模拟；通过下述前向验收后，再由你决定是否小额实盘 | 全体历史尚未净盈利 |
-| 单笔风险 | 计划最坏正常止损损失含手续费/滑点为账户参考权益的 0.25%，记为 1R | 限制普通大亏，不等待强平 |
-| 总开放风险 | 全部未平仓计划损失合计≤0.5%；BTC/ETH等相关同向仓位合计≤0.25% | 同向组合不能算独立分散 |
-| 仓位上限 | 起步总名义仓位≤参考权益1倍；逐仓、界面杠杆≤3倍；关闭自动追加保证金的建议由你手动检查 | 杠杆数字不能代替实际仓位/权益控制 |
-| 加减仓 | v1不亏损加仓、不翻倍、不摊平、不临时扩大止损；先不设计盈利加仓 | 避免无法审计的风险扩张 |
-| 日止损 | 日内已实现+未实现净损益≤−0.75%日初权益，停止新开；按预案处理已有仓位 | 阻断连续损耗 |
-| 周止损 | 周内净损益≤−1.5%周初权益，余周停止新开并复盘 | 约6个初始R的预算 |
-| 回撤停机 | 剔除外部现金流后的权益较高点跌4%，回到模拟并审核版本 | 防止盈利阶段被后续操作完全回吐 |
-| 次数/冷静期 | 每日最多3次新风险事件；任何平仓后至少等一根完整15m K线，同币同向要出现新形态；两次连续止损后至少休息60分钟 | 限制反复入场及费用，阈值待验证 |
-| 执行故障 | 没有确认生效的保护止损、行情/订单状态异常、剩余预算不足时不新开；无法保护既有仓位时按事先故障预案人工减险 | 止损必须能执行 |
-
-每日开仓预算用当日日初交易权益与当前权益的较低者计算，避免日内盈利后立即放大风险；外部转入不自动提高预算。1R 是开仓前锁定的 U 金额，不能亏损后重新定义。日/周/回撤限制按净权益监控，不能只看已经平仓的损益。
-
-拟定停机预案：触及任一账户级损失限制时停止新开，人工有序平掉剩余风险仓位，确认平仓后清理遗留委托；平仓确认前保持保护止损，不能先撤掉保护再等待。若价格跳变造成超限，如实记录超限金额，不修改触发线以继续交易。规则只有经你确认后才可用于实盘。
-
-**仓位公式（USDT 线性合约）：** 设权益 E、风险比例 r=0.0025、入场价 P、止损价 S，止损价格比例 d=|P−S|/P，预计往返手续费+滑点+不利资金费比例为 c，则名义仓位 **N≤E×r/(d+c)**，还要受组合风险与名义仓位上限约束；张数=N/(P×合约面值×乘数)，按交易所步长向下取整。风险由止损距离与数量决定，不能用“保证金×100倍”倒推想要的盈利。
-
-例子仅演示算术：E=10,000 U、d=1%、c=0.2%，风险预算25 U，N≈2,083 U；3倍杠杆初始保证金约694 U，但正常止损计划损失仍约25 U。这里的0.2%仅为算例与保守预算，不改仓库成本契约；实际下单必须使用当时费率与保守滑点估计。跳空、流动性恶化、触发机制或订单失败仍可能令实际亏损超过预算。
-
-## 10. 只保留一种入场语言：趋势中的回调再启动
-
-**以下是可执行、可证伪的模拟模板，不是从历史反推出的有效信号。** 你已有的主观交易没有策略标签，直接宣称“最适合你的指标”会是编造。先从观察范围 BTC/ETH 开始，仅为简化记录与执行；方向上把空头作为优先研究假设，多头另记一组，不因历史空单盈利而强制做空。
-
-所有判断只使用已经收盘的 K 线，EMA 使用收盘价；只选一种数据源与固定 UTC K 线边界，至少200根预热。v1使用4H判断环境、1H找回调、15m触发；不要在同一验证期混入3m/5m临时信号。
-
-| 步骤 | 做多模板 | 做空模板 |
-| --- | --- | --- |
-| 4H环境 | 最近完整4H收盘价>EMA20>EMA50，EMA20高于3根前 | 收盘价<EMA20<EMA50，EMA20低于3根前 |
-| 1H回调 | 最新完整1H的低点触及/跌破其EMA20，收盘重新在EMA20之上且高于EMA50 | 高点触及/突破其EMA20，收盘重新在EMA20之下且低于EMA50 |
-| 形态有效期 | 回调1H收盘后最多4根15m等待确认；期间结构低点被跌破即作废 | 对称；结构高点被突破即作废 |
-| 15m触发 | 一根完整15m收盘突破其之前4根完整15m最高价 | 收盘跌破其之前4根完整15m最低价 |
-| 入场 | 信号后下一根15m开始观察可成交价；较信号收盘偏离超过初始止损距离0.1倍则放弃，不追价 | 对称 |
-| 初始保护 | 回调1H结束时最近6根完整1H最低价下方一个最小价格档 | 最近6根完整1H最高价上方一个最小价格档 |
-| 风险审查 | 以实际入场重算张数，止损必须在逻辑失效处；预计费用c≤价格止损距离d的20%，否则放弃 | 相同 |
-| 形态唯一性 | 同一回调1H只允许一条风险事件；失败后等待新回调，不能反复点击同一突破 | 相同 |
-
-止损价若在入场价错误一侧，或距离导致最小下单量已经超风险预算，该信号不交易。保护单采用明确触发价类型并确认生效的减仓止损；市价止损优先考虑退出确定性，但实际成交价不保证等于触发价。限价止损则存在触发后不成交风险，应先在模拟环境核对。
-
-**退出模板也固定，避免每单临场改剧本：**
-
-1. 初始止损永不扩大。价格先碰初始止损，按预案退出；不等待15m收盘确认亏损。
-2. 当价格沿盈利方向走到初始价格风险的2倍，平掉一半；剩余一半的止损提高到含预计退出成本的盈亏平衡附近。2倍价格风险是触发距离，实际净R仍需扣费计算。
-3. 剩余仓位每根1H收盘后，用最近3根完整1H的低点（多）/高点（空）外一档跟踪；止损只允许收紧，下一时点才生效。若新止损已经被当前可成交价穿越，则按退出处理，不能假定早已成交在更好价格。
-4. 入场满12根1H收盘仍未触发第一档获利退出，按时间退出；触发过第一档则由跟踪止损管理。这个时间阈值只是待验证约束，不来自“长持仓更赚钱”的因果结论。
-5. 同一根K线同时可能触及止损和止盈、且没有更细成交顺序证据时，模拟按不利顺序；真实记录按实际成交。手续费、滑点、资金费都计入净R。
-
-该模板故意不拼接更多指标。之后若要改止盈倍数、时间退出或其他参数，一次只改一项、另存新版本；先有对照，再谈优化。当前没有为这个模板运行历史回测，也没有为它消耗项目行情holdout。
-
-## 11. 每天照着做：开仓前、持仓中、收盘后
-
-### 开始交易前（约15分钟）
-
-记录日初权益、外部现金流、日/周剩余亏损预算；检查是否触发停机条件。只看约定品种的完整4H趋势，列出“可做多／可做空／不交易”，没有满足条件就空仓。为候选形态写清入场、失效、止损、N、1R、预计成本和组合相关性。
-
-### 每次下单前（约1分钟）
-
-必须回答六项：规则版本是否固定；K线是否已收盘；形态是否首次触发；止损价是否明确且订单可生效；全部成本和组合风险是否在预算内；是否处于冷静期或达到日限。任一项不满足就放弃。这不是靠“感觉很好”可以豁免的清单。
-
-### 持仓中
-
-只执行预定保护、分批退出与跟踪，不因刷到新闻、浮亏扩大或急于回本而改计划。记录每一次修改的时间、价格、理由以及修改前后的开放风险。不要把现有持仓切换成另一个周期的故事。
-
-### 每日结束（约10分钟）
-
-对账权益、实际成交、手续费和资金费，记录计划R、实际净R及规则偏差。把“按规则亏损”与“违规亏损”分开；也把“按规则盈利”与“违规侥幸盈利”分开。只有前两者能用于判断策略，后两类中的违规行为都要单独整改。
-
-### 每周复盘（约45分钟）
-
-只评估已冻结版本：净R均值、利润因子、总成本R、最大回撤R、最大单笔损失R、最大赢家占比、按多空分组、规则遵守率。检查空仓是否是主动等待，而不是需要找单填满次数。复盘只提出下周研究问题，不允许看完亏损就当场重写当前验证期规则。
-
-## 12. 用未来证据决定是否扩大规模
-
-**第一阶段：把账补齐。** 补充同范围资金流水、成交明细、返佣、账户权益快照和其他主要账户覆盖。重点核验2024年稀疏记录、BTC大赢家的完整加减仓、2026年6月大亏及强平日。账户净资产变化需剔除外部净流入后再与交易损益对账。
-
-**第二阶段：先完成30条模拟记录的流程检查。** 目标是日志完整、止损可执行、没有未来K线、没有随意改规则；30条不用于宣布盈利。若修改规则，保留旧数据和原因，重新开始新版本的正式前向期。
-
-**第三阶段：至少100条连续有效样本且覆盖至少3个月，取较晚达到者。** 不为凑样本强行交易；没有信号就继续等。记录全部合格信号、拒绝原因和实际执行，不只记录下过单的信号。行情阶段或实际独立机会不足时继续积累，不以刚好赚钱的日期提前结束。
-
-| 验收项 | v1参考门槛 | 为什么 |
-| --- | --- | --- |
-| 规则遵守 | ≥95%，强平0、亏损加仓0、风险超额0 | 先确定研究的是同一个系统 |
-| 经济结果 | 所有成本后总净R>0、净R均值>0、利润因子>1.2 | 需要对估计误差留余量，阈值为拟定标准 |
-| 风险 | 不突破已批准账户回撤与日/周预算；实际滑点超预算要复盘 | 不能用未来大赢家为当前破限辩护 |
-| 稳定性 | 分月/分方向报告，最大单笔和前三笔剔除敏感性必须公开 | 集中获利可以存在，但必须解释可重复性 |
-| 对照 | 同币×同时间块×同波动桶匹配随机入场，沿用同退出、成本与风险规则；超额净R与区间公开 | 区分行情红利与择时价值 |
-| 不确定性 | 采用时间块重抽样；样本少或区间很宽继续模拟 | 100条不是充分性定理 |
-
-这些门槛是个人执行草案，不能替代仓库的生产准入和owner人工审批；已有模型的top-decile扣成本与p<0.01等门槛没有被改动。满足以上条件也不自动变成实盘或自动放大仓位。
-
-若允许小额实盘，仍先用0.25%单笔风险、另观察至少50笔真实成交与成本偏差，再讨论风险预算。是否提高到0.5%必须由你在清楚本金、回撤和验证证据后另行决定；本报告不给收益保证或月赚目标。
+{(OUT/'indicator_system.md').read_text()}
 
 ## 13. 需要你补充的四件事
 
 1. 目前独立交易本金是多少，能接受多大的账户净值回撤；这些钱是否有生活用途。
 2. 每天可投入多长时间，能否在持仓时确认保护单并按1H节拍管理；若不能，应调整交易周期而不是漏执行规则。
 3. 这份导出覆盖哪些账户，是否还有现货、子账户、其他交易所、返佣与转账。
-4. 最大 BTC 空单与两笔6月大亏的原始入场理由、加减仓及截图。它们决定下一步应该研究真实存在的哪一种能力。
+4. 最大 BTC 空单与两笔6月大亏的原始入场理由、当时指标版本、初始止损、加减仓及截图。它们决定下一步应该研究真实存在的哪一种能力。
 
 这些信息补齐前，不把10,000 U算例当作你的本金，也不把任何拟定风险比例当作你已接受的实盘设置。
 
@@ -274,7 +178,7 @@ report=f'''# {TITLE}
 
 按更新时间归集可能把跨月多次结算集中在一个月；持仓记录可能包含加减仓、双向持仓与重叠持仓。杠杆为表内设置值，不等于账户有效杠杆。分组相关性不证明因果，删赢家/删强平也不代表可实现策略。止损和逐仓只能帮助控制风险，不能消灭跳价、系统故障与流动性风险。
 
-本轮是owner明确授权的个人历史复盘；读取了附件中的2026年记录，但没有读取项目价格数据、没有评估或选择任何模型配置、没有新训练、没有promote或实盘操作。个人系统为待验证假设，禁止将它标记为“已验证”或“实盘”。
+本轮是owner明确授权的个人历史复盘；读取了附件中的2026年记录，但没有读取项目价格数据、仅复用已完成指标研究报告，没有新评估或选择模型配置、没有新训练、没有promote或实盘操作。个人系统为待验证假设，禁止将它标记为“已验证”或“实盘”。
 
 你需要证明的不是“曾经赚过一大笔”，而是：在预先写明的入场规则和有限风险下，扣除全部成本后，连续样本仍能留下正收益。
 '''
@@ -283,12 +187,14 @@ report=f'''# {TITLE}
 OUT.mkdir(parents=True,exist_ok=True)
 md=ROOT/'analysis/p1_owner_okx_history_20260916.md'
 # The repository requires reproduction commands in the archived Markdown source.
-repro='''\n## 复现与审计附录\n\n统计生成器先于本地结果入库，提交9983ba3b34。全部金额采用附件原列，不变更项目成本参数。此为首次个人账本审计，无上一版本；对照列为原始毛损益与扣费重构净损益，非策略对照。\n\n```bash\ncd /Users/zhangzc/fable-trading\nPY=/Users/zhangzc/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3\n"$PY" yoyo/evaluation/owner_okx_history.py --input '/Users/zhangzc/工作/未命名文件夹/MTY4MjQ4NTU=_欧易持仓历史__2023-09-14~2026-09-14~8~29f81692d9af87c8826aafca8ff5dad3.zip' --out data/owner_okx_history_20260916\n"$PY" yoyo/evaluation/owner_okx_report.py\n```\n\n原始ZIP SHA256：e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385。数据检查与机器可读汇总在data/owner_okx_history_20260916；可检查笔记本在本实验目录audit.ipynb。外部参考核对日期：2026年9月16日。\n'''
-md.write_text(report.replace('[[CHART:cumulative]]','（交互HTML中有累计毛/净损益图。）').replace('[[CHART:monthly]]','（交互HTML中有月度净损益图。）').replace('[[CHART:duration]]','（交互HTML中有持仓时长分组图。）')+repro)
+repro='''\n## 复现与审计附录\n\n统计生成器先于本地结果入库；初始修正提交9983ba3b34，最终统计版本及SHA见summary.json的audit字段，报告与指标模板版本见交付manifest。全部金额采用附件原列，不变更项目成本参数。此为首次个人账本审计，无上一版本；对照列为原始毛损益与扣费重构净损益，非策略对照。\n\n```bash\ncd /Users/zhangzc/fable-trading\nPY=/Users/zhangzc/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3\n"$PY" yoyo/evaluation/owner_okx_history.py --input '/Users/zhangzc/工作/未命名文件夹/MTY4MjQ4NTU=_欧易持仓历史__2023-09-14~2026-09-14~8~29f81692d9af87c8826aafca8ff5dad3.zip' --out data/owner_okx_history_20260916\n"$PY" yoyo/evaluation/owner_okx_report.py\n```\n\n原始ZIP SHA256：e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385。数据检查与机器可读汇总在data/owner_okx_history_20260916；可检查笔记本在本实验目录audit.ipynb。外部参考核对日期：2026年9月16日。\n'''
+md.write_text(report.replace('[[CHART:cumulative]]','（HTML报告中有累计毛/净损益图。）').replace('[[CHART:monthly]]','（HTML报告中有月度净损益图。）').replace('[[CHART:duration]]','（HTML报告中有持仓时长分组图。）')+repro)
 subprocess.run(['python3',str(ROOT/'scripts/md_to_html.py'),str(md),'--out-dir',str(ROOT/'analysis/html')],check=True)
 source=dict(id='ledger',label='本次欧易个人持仓历史：经核验的USDT重构账本',path='data/owner_okx_history_20260916/summary.json',query=dict(description='用户提供的欧易持仓历史CSV；2024-02-23至2026-09-13，UTC+8；线性4898条；币本位单独；净=价格毛P&L+signed fee+funding+liquidation clearance。原ZIP SHA256 e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385。代码yoyo/evaluation/owner_okx_history.py。'))
 
 sources=[source,dict(id='okx_pnl',label='OKX API：历史持仓及损益字段',href='https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-positions-history'),dict(id='okx_export',label='OKX：导出持仓历史字段',href='https://www.okx.com/help/how-to-check-download-order-history-position-history-and-trading-history'),dict(id='okx_margin',label='OKX：全仓与逐仓',href='https://www.okx.com/en-gb/help/how-do-i-trade-using-cross-and-isolated-modes')]
+for fname in ['p1_spike_v9_full_backtest_20260915','p1_spike_v9_implementation_20260915','p1_eth_bb_stoch_strategy_20260916','p1_eth_bb_stoch_backtest_20260916','p1_eth_bb_stoch_optimization_20260916','p1_ma_shift_stoch_eth_month_20260915','p1_ma_stoch_exit_optimization_v2_20260915','p1_spike_eth_v9_yolo_entry_20260915','p1_spike_v9_cost_be2_20260915','p1_spike_eth_lowtf_cost_diagnostic_20260914']:
+    sources.append(dict(id=fname,label=fname.replace('p1_',''),path=f'analysis/{fname}.md'))
 blocks=[]
 sections=re.split(r'(?m)(?=^## )',report)
 for i,section in enumerate(sections):
@@ -341,7 +247,7 @@ for cid,title,dataset,x,y,xtype in [('cumulative','累计记账损益（非账�
 artifact=dict(surface='report',manifest=dict(version=1,surface='report',title=TITLE,generatedAt=GENERATED,blocks=blocks,charts=charts,tables=[dict(id='months',title='月度原始口径对照',dataset='months',sourceId='sql_monthly',columns=[dict(field=k,label=l,format='number') if k!='group' else dict(field=k,label=l) for k,l in [('group','月份'),('n','记录数'),('gross','毛盈亏 U'),('fee','手续费 U'),('net','净盈亏 U')]],defaultSort=dict(field='group',direction='asc'))],sources=sources),snapshot=dict(version=1,status='ready',generatedAt=GENERATED,datasets=dict(cumulative=cumulative,months=chart_datasets['monthly'],duration=chart_datasets['duration'])),sources=sources)
 (OUT/'artifact.json').write_text(json.dumps(artifact,ensure_ascii=False,indent=2))
 # Source notes retain process details rather than putting them into the reader flow.
-notes=dict(audience='product stakeholders',delivery='local HTML per owner repository requirement',structure=['title','summary','evidence with charts','proposed system and next steps','questions','caveats'],summary_heading_override='中文owner要求，Executive Summary译为核心结论',chart_map=[dict(chart='cumulative',family='two-series line',question='How fees separate gross from net',grain='observed update days',warning='not account equity',palette='two series; native shared renderer'),dict(chart='monthly',family='bar',question='Monthly consistency',grain='29 observed months; absent months not zero',warning='lifecycle attribution'),dict(chart='duration',family='bar',question='Where realized results concentrate',grain='7 duration groups, completed only',warning='post-outcome grouping; not a causal entry rule')],method='weekly cluster bootstrap; exploratory; no matched market benchmark',builder_commit=S['audit']['source_commit'],data=S['audit'])
+notes=dict(audience='owner reviewing personal trading and indicator research',delivery='local HTML per owner repository requirement',structure=['title','summary','evidence with charts','proposed system and next steps','questions','caveats'],summary_heading_override='中文owner要求，Executive Summary译为核心结论',chart_map=[dict(chart='cumulative',family='two-series line',question='How fees separate gross from net',grain='observed update days',warning='not account equity',palette='two series; native shared renderer'),dict(chart='monthly',family='bar',question='Monthly consistency',grain='29 observed months; absent months not zero',warning='lifecycle attribution'),dict(chart='duration',family='bar',question='Where realized results concentrate',grain='7 duration groups, completed only',warning='post-outcome grouping; not a causal entry rule')],method='weekly cluster bootstrap; exploratory; no matched market benchmark',builder_commit=S['audit']['source_commit'],data=S['audit'])
 (OUT/'source_notes.json').write_text(json.dumps(notes,ensure_ascii=False,indent=2))
 nb={'nbformat':4,'nbformat_minor':5,'metadata':{'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'}},'cells':[]}
 for kind,content in [('markdown','# OKX个人持仓历史核验\n\n统计对象为持仓周期快照；USDT与BTC分开。结果不是账户收益率，未来规则未验证。需从仓库根目录启动。'),('code',"from pathlib import Path\nimport json, pandas as pd\nroot=Path.cwd()\ns=json.loads((root/'data/owner_okx_history_20260916/summary.json').read_text())\nd=pd.read_csv(root/'data/owner_okx_history_20260916/positions_usdt.csv')\ns['audit']"),('code',"assert len(d)==4898\nassert (d['gross_error'].abs()<0.01).all()\nassert abs(d.net.sum()-sum(d[c].sum() for c in ['gross','fee','funding','liquidation_fee']))<1e-7\nd[['source_row','instrument','side','opened','updated','gross','fee','funding','liquidation_fee','net']].head(10)"),('code',"pd.DataFrame(s['by_year'])[['group','n','gross','fee','net','win_rate','profit_factor']]"),('code',"pd.DataFrame(s['sensitivity']), s['bootstrap'], s['realized_drawdown']")]:
@@ -349,7 +255,8 @@ for kind,content in [('markdown','# OKX个人持仓历史核验\n\n统计对象�
     if kind=='code':cell.update(execution_count=None,outputs=[])
     nb['cells'].append(cell)
 (OUT/'audit.ipynb').write_text(json.dumps(nb,ensure_ascii=False,indent=2))
-fields=['trade_id','strategy_version','account_equity_before','signal_closed_at','symbol','side','regime','setup_id','entry_plan','initial_stop','planned_cost_fraction','initial_risk_usdt','notional_plan','contracts_plan','portfolio_open_risk','actual_entry','actual_exit','closed_at','fees','funding','slippage','net_pnl','net_R','MAE_R','MFE_R','followed_rules','deviation_reason','entry_screenshot','exit_reason','review_note']
-with (OUT/'trading_journal_template.csv').open('w') as f:
-    csv.writer(f).writerow(['交易编号','规则版本','开仓前权益','信号收盘时间','标的','方向','行情环境','形态编号','计划入场价','初始止损价','预计成本比例','初始风险金额U','计划名义仓位U','计划合约张数','组合开放风险U','实际入场价','实际退出价','平仓时间','手续费U','资金费U','滑点U','净损益U','净R','最大不利波动R','最大有利波动R','是否遵守规则','偏差原因','入场截图','退出原因','复盘记录'])
+# One row per lifecycle; partial fills are linked separately, never summed as display-R.
+journal_headers=['交易编号','模块ID','规则版本与哈希','信号ID','开仓前权益','信号收盘时间','标的','方向','信号周期','V1四周期状态与确认时间','门禁判定与拒绝原因','行情环境','形态编号','计划入场价','初始止损价','预计成本比例','初始价格风险金额U','含费风险预算U','计划名义仓位U','计划合约张数','组合开放风险U','实际入场价','实际开仓数量','平半成交价与数量','尾仓退出价与数量','逐笔成交明细路径','平仓时间','手续费U','资金费U','强平清算费U','滑点估计U_不可重复扣除','净损益U','净价格风险R','预算R','最大不利波动R','最大有利波动R','是否遵守规则','偏差原因','入场截图','退出原因','复盘记录']
+with (OUT/'trading_journal_template.csv').open('w',encoding='utf-8-sig',newline='') as f:
+    csv.writer(f).writerow(journal_headers)
 print(json.dumps({'markdown':str(md),'artifact':str(OUT/'artifact.json'),'blocks':len(blocks),'charts':len(charts),'characters':len(report)},ensure_ascii=False))
