@@ -10,6 +10,7 @@ import csv
 import json
 import re
 import subprocess
+import sqlite3
 from datetime import datetime, timezone
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -286,7 +287,7 @@ repro='''\n## 复现与审计附录\n\n统计生成器先于本地结果入库�
 md.write_text(report.replace('[[CHART:cumulative]]','（交互HTML中有累计毛/净损益图。）').replace('[[CHART:monthly]]','（交互HTML中有月度净损益图。）').replace('[[CHART:duration]]','（交互HTML中有持仓时长分组图。）')+repro)
 subprocess.run(['python3',str(ROOT/'scripts/md_to_html.py'),str(md),'--out-dir',str(ROOT/'analysis/html')],check=True)
 source=dict(id='ledger',label='本次欧易个人持仓历史：经核验的USDT重构账本',path='data/owner_okx_history_20260916/summary.json',query=dict(description='用户提供的欧易持仓历史CSV；2024-02-23至2026-09-13，UTC+8；线性4898条；币本位单独；净=价格毛P&L+signed fee+funding+liquidation clearance。原ZIP SHA256 e7d5d176bc9f1e730f2db06b733281b6f2f2e32e12cd89a3721c5e6f8c4b2385。代码yoyo/evaluation/owner_okx_history.py。'))
-source['query'].update(sql=(ROOT/'yoyo/evaluation/owner_okx_history.py').read_text(), language='python', engine='pandas', tables_used=['OKX position-history CSV supplied by owner'])
+
 sources=[source,dict(id='okx_pnl',label='OKX API：历史持仓及损益字段',href='https://www.okx.com/docs-v5/en/#trading-account-rest-api-get-positions-history'),dict(id='okx_export',label='OKX：导出持仓历史字段',href='https://www.okx.com/help/how-to-check-download-order-history-position-history-and-trading-history'),dict(id='okx_margin',label='OKX：全仓与逐仓',href='https://www.okx.com/en-gb/help/how-do-i-trade-using-cross-and-isolated-modes')]
 blocks=[]
 sections=re.split(r'(?m)(?=^## )',report)
@@ -308,12 +309,36 @@ cumulative=[]
 for row in rows:
     for field,label in [('cumulative_gross','累计毛损益'),('cumulative_net','累计净损益')]:
         cumulative.append(dict(date=row['date'],value=float(row[field]),series=label,day_net=float(row['net']),records=int(row['n'])))
+# Derive chart rows directly from reviewed position-level fields with real SQL.
+# The packaged renderer requires SQL provenance even for file-backed sources.
+connection=sqlite3.connect(':memory:')
+with (DATA/'positions_usdt.csv').open() as f:
+    position_rows=list(csv.DictReader(f))
+columns=['updated','hours','close_type','gross','fee','funding','liquidation_fee']
+connection.execute('CREATE TABLE positions_usdt(updated TEXT,hours REAL,close_type TEXT,gross REAL,fee REAL,funding REAL,liquidation_fee REAL)')
+connection.executemany('INSERT INTO positions_usdt VALUES(?,?,?,?,?,?,?)',[[r[c] if c in ['updated','close_type'] else float(r[c]) for c in columns] for r in position_rows])
+net_expr='gross+fee+funding+liquidation_fee'
+queries={
+'monthly': f'SELECT substr(updated,1,7) AS "group", COUNT(*) AS n, SUM(gross) AS gross, SUM(fee) AS fee, SUM(funding) AS funding, SUM(liquidation_fee) AS liquidation_fee, SUM({net_expr}) AS net FROM positions_usdt GROUP BY substr(updated,1,7) ORDER BY "group"',
+'cumulative': f"WITH daily AS (SELECT substr(updated,1,10) AS date, SUM(gross) AS gross, SUM({net_expr}) AS net, COUNT(*) AS n FROM positions_usdt GROUP BY substr(updated,1,10)), running AS (SELECT *, SUM(gross) OVER (ORDER BY date) AS cum_gross, SUM(net) OVER (ORDER BY date) AS cum_net FROM daily) SELECT date,cum_gross AS value,'累计毛损益' AS series,net AS day_net,n AS records FROM running UNION ALL SELECT date,cum_net AS value,'累计净损益' AS series,net AS day_net,n AS records FROM running ORDER BY date,series",
+'duration': f"WITH grouped AS (SELECT *,CASE WHEN hours<=5.0/60 THEN 1 WHEN hours<=0.25 THEN 2 WHEN hours<=1 THEN 3 WHEN hours<=4 THEN 4 WHEN hours<=24 THEN 5 WHEN hours<=72 THEN 6 ELSE 7 END AS bucket FROM positions_usdt WHERE close_type!='部分平仓') SELECT bucket, CASE bucket WHEN 1 THEN '≤5分钟' WHEN 2 THEN '5–15分钟' WHEN 3 THEN '15–60分钟' WHEN 4 THEN '1–4小时' WHEN 5 THEN '4–24小时' WHEN 6 THEN '1–3天' ELSE '>3天' END AS \"group\", COUNT(*) AS n, SUM(gross) AS gross, SUM(fee) AS fee,SUM({net_expr}) AS net FROM grouped GROUP BY bucket ORDER BY bucket"
+}
+chart_datasets={}
+for key,sql in queries.items():
+    cursor=connection.execute(sql)
+    chart_datasets[key]=[dict(zip([c[0] for c in cursor.description],r)) for r in cursor.fetchall()]
+    (OUT/f'chart_{key}.sql').write_text(sql+';\n')
+    sources.append(dict(id=f'sql_{key}',label=f'欧易持仓CSV核验后的{key}汇总',path=f'experiments/active/exp-owner-okx-history-20260916-v1/chart_{key}.sql',query=dict(sql=sql,language='sql',engine='SQLite',tables_used=['positions_usdt'],description='positions_usdt由经币种分账并逐行价格核验的原始持仓字段导入；源文件data/owner_okx_history_20260916/positions_usdt.csv。生成器为yoyo/evaluation/owner_okx_report.py。非账户权益。')))
+for group in chart_datasets['monthly']:
+    expected=next(r for r in S['by_month'] if r['group']==group['group'])
+    assert abs(group['net']-expected['net'])<1e-6
+cumulative=chart_datasets['cumulative']
 charts=[]
 for cid,title,dataset,x,y,xtype in [('cumulative','累计记账损益（非账户权益）','cumulative','date','value','temporal'),('monthly','有记录月份的净损益（USDT）','months','group','net','nominal'),('duration','完整持仓周期的时长分组净损益（USDT）','duration','group','net','nominal')]:
     enc=dict(x=dict(field=x,type=xtype),y=dict(field=y,type='quantitative',unit='USDT'))
     if cid=='cumulative':enc['color']=dict(field='series',type='nominal')
-    charts.append(dict(id=cid,title=title,type='line' if cid=='cumulative' else 'bar',dataset=dataset,sourceId='ledger',encodings=enc))
-artifact=dict(surface='report',manifest=dict(version=1,surface='report',title=TITLE,generatedAt=GENERATED,blocks=blocks,charts=charts,tables=[dict(id='months',title='月度原始口径对照',dataset='months',sourceId='ledger',columns=[dict(field=k,label=l,format='number') if k!='group' else dict(field=k,label=l) for k,l in [('group','月份'),('n','记录数'),('gross','毛盈亏 U'),('fee','手续费 U'),('net','净盈亏 U')]],defaultSort=dict(field='group',direction='asc'))],sources=sources),snapshot=dict(version=1,status='ready',generatedAt=GENERATED,datasets=dict(cumulative=cumulative,months=S['by_month'],duration=S['by_duration'])),sources=sources)
+    charts.append(dict(id=cid,title=title,type='line' if cid=='cumulative' else 'bar',dataset=dataset,sourceId=f'sql_{cid}',encodings=enc))
+artifact=dict(surface='report',manifest=dict(version=1,surface='report',title=TITLE,generatedAt=GENERATED,blocks=blocks,charts=charts,tables=[dict(id='months',title='月度原始口径对照',dataset='months',sourceId='sql_monthly',columns=[dict(field=k,label=l,format='number') if k!='group' else dict(field=k,label=l) for k,l in [('group','月份'),('n','记录数'),('gross','毛盈亏 U'),('fee','手续费 U'),('net','净盈亏 U')]],defaultSort=dict(field='group',direction='asc'))],sources=sources),snapshot=dict(version=1,status='ready',generatedAt=GENERATED,datasets=dict(cumulative=cumulative,months=chart_datasets['monthly'],duration=chart_datasets['duration'])),sources=sources)
 (OUT/'artifact.json').write_text(json.dumps(artifact,ensure_ascii=False,indent=2))
 # Source notes retain process details rather than putting them into the reader flow.
 notes=dict(audience='product stakeholders',delivery='local HTML per owner repository requirement',structure=['title','summary','evidence with charts','proposed system and next steps','questions','caveats'],summary_heading_override='中文owner要求，Executive Summary译为核心结论',chart_map=[dict(chart='cumulative',family='two-series line',question='How fees separate gross from net',grain='observed update days',warning='not account equity',palette='two series; native shared renderer'),dict(chart='monthly',family='bar',question='Monthly consistency',grain='29 observed months; absent months not zero',warning='lifecycle attribution'),dict(chart='duration',family='bar',question='Where realized results concentrate',grain='7 duration groups, completed only',warning='post-outcome grouping; not a causal entry rule')],method='weekly cluster bootstrap; exploratory; no matched market benchmark',builder_commit='9983ba3b34',data=S['audit'])
