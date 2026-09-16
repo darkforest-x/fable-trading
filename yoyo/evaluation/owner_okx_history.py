@@ -15,6 +15,8 @@ import io
 import json
 import platform
 import zipfile
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -111,10 +113,14 @@ def main() -> None:
                  archive_sha256=hashlib.sha256(args.input.read_bytes()).hexdigest(),
                  csv_sha256=hashlib.sha256(raw).hexdigest(),
                  timezone="UTC+08:00 from original export metadata",
+                 generated_at=datetime.now(timezone.utc).isoformat(),
+                 source_commit=subprocess.check_output(["git", "log", "-1", "--format=%H", "--", str(Path(__file__).resolve())], text=True).strip(),
+                 source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                  python=platform.python_version(), pandas=pd.__version__, numpy=np.__version__)
     monthly = groups(u, "month")
     daily = u.groupby("date", as_index=False).agg(net=("net", "sum"), gross=("gross", "sum"),
-                                                  fee=("fee", "sum"), n=("net", "size"))
+                                                  fee=("fee", "sum"), funding=("funding", "sum"),
+                                                  liquidation_fee=("liquidation_fee", "sum"), n=("net", "size"))
     daily["cumulative_net"] = daily.net.cumsum()
     daily["cumulative_gross"] = daily.gross.cumsum()
     daily["drawdown_usdt"] = daily.cumulative_net.cummax().clip(lower=0)-daily.cumulative_net
