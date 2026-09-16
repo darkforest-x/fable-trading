@@ -1,0 +1,17 @@
+{
+  "file": "source/chartart_original_v1.2.pine",
+  "sha256": "adc5ae57c31604bc86f9a4ae083c77d33183f8042835798b7271ed1182daba69",
+  "bytes": 1132,
+  "provenance": "Pasted by owner in conversation 2026-09-17; plotting, bar-colour and commentary lines omitted from the local copy as they do not affect orders.",
+  "author": "ChartArt",
+  "published": "2017-10-04",
+  "pine_version": 3,
+  "profile": "https://www.tradingview.com/u/ChartArt/",
+  "related_v11_receipt": "experiments/active/exp-chartart-bbrsi-martingale-20260915-v1/source_receipt.json",
+  "order_lines": [
+    "strategy.entry(RSI_BB, long, stop=BBlower, oca_type=oca.cancel)",
+    "strategy.cancel(RSI_BB) when long is false",
+    "strategy.close(RSI_BB) when close_long"
+  ],
+  "redistribution": "Not republished; kept local and gitignored."
+}

@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-chartart-bbrsi-v12-longonly-btceth-15m-20260917-v1",
+  "strategy": "ChartArt Bollinger + RSI Double Strategy Long-Only v1.2",
+  "author": "ChartArt, 2017-10-04",
+  "source_profile": "https://www.tradingview.com/u/ChartArt/",
+  "related_experiment": "exp-chartart-bbrsi-martingale-20260915-v1",
+  "rsi_length": 6,
+  "rsi_thresholds": [50, 50],
+  "bb_length": 200,
+  "bb_std": 2,
+  "minutes": 15,
+  "end": "2026-05-01T00:00:00Z",
+  "sources": {
+    "BTC_USDT_SWAP": "data/kline_deep/okx_BTC_USDT_SWAP_15m_158499.csv",
+    "ETH_USDT_SWAP": "data/kline_deep/okx_ETH_USDT_SWAP_15m_158499.csv"
+  },
+  "windows": [
+    {"name": "full", "start": "2022-07-01T00:00:00Z"},
+    {"name": "long", "start": "2024-01-01T00:00:00Z"},
+    {"name": "jan_apr", "start": "2026-01-01T00:00:00Z"}
+  ],
+  "arms": ["v12_long_only", "v11_reversal"],
+  "arm_seeds": {"v12_long_only": 917612, "v11_reversal": 917613},
+  "single_variable": "What the flat signal does: v1.2 closes to cash, v1.1 reverses into a short. Entries, features, fills and costs identical.",
+  "cost": 0.002,
+  "cost_note": "Round-trip 0.2 percent charged inside chartart_bbrsi.trade_row; funding, slippage and contract granularity excluded.",
+  "controls": ["matched_random_entry", "buy_and_hold", "time_in_market"],
+  "control_draws": 20,
+  "minimum_warmup_bars": 250,
+  "window_independence": "full contains long contains jan_apr; three rows are not three independent tests",
+  "parameter_optimization": false,
+  "holdout_consumed": false,
+  "holdout_note": "End is 2026-05-01T00:00:00Z; bars at or after HOLDOUT_START 2026-05-04 are not parsed by this config.",
+  "training_eligible": false,
+  "production_eligible": false
+}
