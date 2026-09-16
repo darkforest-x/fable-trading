@@ -52,6 +52,14 @@ class ParamSpec:
     closed-bar sequence, matching the source formula even when a BB history is
     reset by a declared data gap; this deliberately leaves scope selection
     available as a future explicit parameter rather than changing defaults.
+
+    ``partial_fraction`` is the tranche the band touch exits; ``0`` removes the
+    target tranche entirely so one position runs to its stop or the opposite
+    composite.  ``be_cost_fraction`` lifts the runner's protective price above
+    (long) or below (short) the entry by that fraction, so "break even" clears
+    the round-trip fee instead of paying it.  Both default to the frozen v2
+    behaviour and an entry is still only admitted when its band target exists,
+    which keeps the admitted entry set identical across these variants.
     """
 
     bb_length: int = 200
@@ -61,6 +69,8 @@ class ParamSpec:
     k_smooth: int = 3
     d_smooth: int = 3
     oversold: float = 20.0
+    partial_fraction: float = 0.5
+    be_cost_fraction: float = 0.0
 
     def __post_init__(self) -> None:
         bb_length = _positive_int(self.bb_length, "bb_length")
@@ -70,6 +80,8 @@ class ParamSpec:
         bb_mult = _finite_float(self.bb_mult, "bb_mult")
         stop_fraction = _finite_float(self.stop_fraction, "stop_fraction")
         oversold = _finite_float(self.oversold, "oversold")
+        partial_fraction = _finite_float(self.partial_fraction, "partial_fraction")
+        be_cost_fraction = _finite_float(self.be_cost_fraction, "be_cost_fraction")
         if bb_length < 3:
             raise ValueError("bb_length must be at least 3")
         if bb_mult <= 0:
@@ -80,6 +92,10 @@ class ParamSpec:
             raise ValueError("stop_fraction must be between zero and one")
         if not 0 < oversold < 50:
             raise ValueError("oversold must be strictly between zero and 50")
+        if not 0 <= partial_fraction < 1:
+            raise ValueError("partial_fraction must be in [0, 1)")
+        if not 0 <= be_cost_fraction < stop_fraction:
+            raise ValueError("be_cost_fraction must be non-negative and below the stop")
         object.__setattr__(self, "bb_length", bb_length)
         object.__setattr__(self, "bb_mult", bb_mult)
         object.__setattr__(self, "stop_fraction", stop_fraction)
@@ -87,6 +103,8 @@ class ParamSpec:
         object.__setattr__(self, "k_smooth", k_smooth)
         object.__setattr__(self, "d_smooth", d_smooth)
         object.__setattr__(self, "oversold", oversold)
+        object.__setattr__(self, "partial_fraction", partial_fraction)
+        object.__setattr__(self, "be_cost_fraction", be_cost_fraction)
 
     @property
     def overbought(self) -> float:
@@ -280,8 +298,14 @@ def replay_entry(prepared: Prepared, signal_i: int, *, side_override: int | None
     if not math.isfinite(target):
         return None
     entry = float(opens[entry_i])
-    risk = entry * prepared.spec.stop_fraction
+    spec = prepared.spec
+    risk = entry * spec.stop_fraction
     initial_stop = entry - side * risk
+    # Protection after the partial clears the round-trip fee when asked; a
+    # long's break-even therefore sits ABOVE its entry, which also makes it
+    # marketable sooner. That consequence is counted, not hidden.
+    break_even_price = entry + side * entry * spec.be_cost_fraction
+    use_target = spec.partial_fraction > 0
     qty, partial, protection = 1.0, False, initial_stop
     fees, gross_pnl = entry * _FEE_RATE, 0.0
     fills: list[dict[str, object]] = [{"i": entry_i, "phase": "entry", "reason": "next_open", "price": entry, "qty": 1.0}]
@@ -321,24 +345,24 @@ def replay_entry(prepared: Prepared, signal_i: int, *, side_override: int | None
 
     def take_partial(i: int, price: float, reason: str) -> None:
         nonlocal partial, protection, tp_i, tp_price
-        exit_fill(i, price, reason, 0.5, "partial")
-        partial, protection, tp_i, tp_price = True, entry, i, float(price)
+        exit_fill(i, price, reason, spec.partial_fraction, "partial")
+        partial, protection, tp_i, tp_price = True, break_even_price, i, float(price)
 
     for i in range(entry_i, end):
         if prepared.gaps[i]:
             return finish(i - 1, float(closes[i - 1]), "data_gap_censor", censored=True)
         opening, high, low, close = float(opens[i]), float(highs[i]), float(lows[i]), float(closes[i])
-        if not partial:
+        if use_target and not partial:
             target = float(targets[i])
             if not math.isfinite(target):
                 return finish(i - 1, float(closes[i - 1]), "target_unavailable_censor", censored=True)
             spans_stop = low <= protection if side == 1 else high >= protection
             spans_target = high >= target if side == 1 else low <= target
-            spans_entry = low <= entry if side == 1 else high >= entry
+            spans_entry = low <= break_even_price if side == 1 else high >= break_even_price
             if spans_target and (spans_stop or spans_entry):
                 ambiguous += 1
         stopped_open = opening <= protection if side == 1 else opening >= protection
-        target_open = not partial and (opening >= target if side == 1 else opening <= target)
+        target_open = use_target and not partial and (opening >= target if side == 1 else opening <= target)
         if stopped_open:
             return finish(i, opening, "break_even_gap" if partial else "initial_stop_gap")
         if target_open:
@@ -356,7 +380,7 @@ def replay_entry(prepared: Prepared, signal_i: int, *, side_override: int | None
             start = points[0]
             while True:
                 hits_stop = _cross(start, end_price, protection, upward=side == -1)
-                hits_target = not partial and _cross(start, end_price, target, upward=side == 1)
+                hits_target = use_target and not partial and _cross(start, end_price, target, upward=side == 1)
                 if not hits_stop and not hits_target:
                     break
                 if hits_stop:
