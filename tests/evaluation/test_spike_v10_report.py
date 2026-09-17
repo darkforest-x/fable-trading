@@ -6,7 +6,8 @@ import pandas as pd
 import pytest
 
 from yoyo.evaluation.spike_v10 import ARMS
-from yoyo.evaluation.spike_v10_report import REQUIRED, age_profile, attribution, summary_rows
+from yoyo.evaluation.spike_v10_report import (AGE_LABELS, REQUIRED, age_buckets, age_profile,
+                                              attribution, crossing_outcomes, summary_rows)
 from yoyo.evaluation.spike_v10_full_replay import CUT, replay_stream
 from yoyo.evaluation.spike_v9_full_replay import random_controls
 from yoyo.evaluation.spike_v9_full_report import event_keys
@@ -79,3 +80,40 @@ def test_summary_rows_keep_the_registered_arm_order():
 def test_nothing_in_the_fixture_reaches_the_holdout_cut():
     trades, _, _ = ledgers()
     assert trades.entry_time.max() < CUT
+
+
+def test_age_buckets_name_every_age_exactly_once():
+    ages = pd.Series([-1, 0, 1, 3, 4, 12, 13, 48, 49, 200, 201, 5000])
+    named = age_buckets(ages).astype(str).tolist()
+    assert named == ["no_break", "age_0", "age_1_3", "age_1_3", "age_4_12", "age_4_12",
+                     "age_13_48", "age_13_48", "age_49_200", "age_49_200", "age_gt_200", "age_gt_200"]
+    assert set(named) <= set(AGE_LABELS)
+
+
+def test_crossing_split_keeps_every_trade_and_labels_the_missing_ones():
+    trades, decisions, _ = ledgers()
+    v9 = trades.loc[trades.arm.eq("v9") & ~trades.censored]
+    joined = v9.merge(decisions[["event_key", "local_i", "trendline_break_age"]], on="event_key")
+    crossings = pd.DataFrame({
+        "stream_key": joined.stream_key, "side": joined.side.astype(int),
+        "break_i": joined.local_i.astype(int) - joined.trendline_break_age.astype(int),
+        "led_by": "price", "price_move_atr": 2.0, "line_drop_atr": 0.4,
+    }).drop_duplicates(["stream_key", "side", "break_i"])
+    table = crossing_outcomes(trades, decisions, crossings)
+    assert int(table.trades.sum()) == len(v9)
+    # Dropping every crossing row must relabel, never lose, a trade.
+    empty = crossings.iloc[:0]
+    fallback = crossing_outcomes(trades, decisions, empty)
+    assert int(fallback.trades.sum()) == len(v9)
+    assert set(fallback.led_by) <= {"unmatched", "no_break"}
+
+
+def test_crossing_split_refuses_a_duplicated_crossing_row():
+    trades, decisions, _ = ledgers()
+    v9 = trades.loc[trades.arm.eq("v9") & ~trades.censored]
+    joined = v9.merge(decisions[["event_key", "local_i", "trendline_break_age"]], on="event_key")
+    row = {"stream_key": joined.stream_key.iloc[0], "side": int(joined.side.iloc[0]),
+           "break_i": int(joined.local_i.iloc[0]) - int(joined.trendline_break_age.iloc[0]),
+           "led_by": "price", "price_move_atr": 2.0, "line_drop_atr": 0.4}
+    with pytest.raises(Exception):
+        crossing_outcomes(trades, decisions, pd.DataFrame([row, row]))

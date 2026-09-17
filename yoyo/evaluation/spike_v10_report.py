@@ -27,7 +27,16 @@ from yoyo.evaluation.spike_v10 import ARMS, VERSION
 from yoyo.evaluation.spike_v10_full_replay import CONFIG, CUT, DEPENDENCIES, digest, engine, _committed
 from yoyo.evaluation.spike_v9_full_report import block_statistics, boolean, control_metrics, event_keys
 
+CROSSINGS = Path("experiments/active/exp-spike-v10-trendline-gate-20260918-v1/results/crossings.csv.gz")
+
 REQUIRED = {f"{arm}.{kind}.csv.gz" for arm in ARMS for kind in ("trades", "fills")} | {"decisions.csv.gz", "controls.csv.gz"}
+AGE_EDGES = [-2, -1, 0, 3, 12, 48, 200, 10 ** 9]
+AGE_LABELS = ["no_break", "age_0", "age_1_3", "age_4_12", "age_13_48", "age_49_200", "age_gt_200"]
+
+
+def age_buckets(age: pd.Series) -> pd.Series:
+    """One bucketing of break age, shared by every table that reports it."""
+    return pd.cut(age.astype(int), AGE_EDGES, labels=AGE_LABELS)
 
 
 def load(output: Path):
@@ -154,12 +163,37 @@ def age_profile(trades: pd.DataFrame, decisions: pd.DataFrame) -> pd.DataFrame:
     if joined.trendline_break_age.isna().any():
         raise ValueError("a V9 trade has no candidate decision row")
     age = joined.trendline_break_age.astype(int)
-    bucket = pd.cut(age, [-2, -1, 0, 3, 12, 48, 200, 10**9],
-                    labels=["no_break", "age_0", "age_1_3", "age_4_12", "age_13_48", "age_49_200", "age_gt_200"])
-    frame = joined.assign(bucket=bucket).groupby("bucket", observed=False)
+    frame = joined.assign(bucket=age_buckets(age)).groupby("bucket", observed=False)
     return frame.agg(trades=("net_r", "size"), net_r=("net_r", "sum"), mean_net_r=("net_r", "mean"),
                      gross_r=("gross_r", "sum"), win_rate=("net_r", lambda s: float(s.gt(0).mean()) if len(s) else np.nan),
                      realized_ge10=("net_r", lambda s: int(s.ge(10).sum()))).reset_index()
+
+
+def crossing_outcomes(trades: pd.DataFrame, decisions: pd.DataFrame, crossings: pd.DataFrame) -> pd.DataFrame:
+    """Descriptive: V9's own trades split by which side closed the gap.
+
+    A crossing of a falling line has two causes that mean opposite things --
+    price climbed, or the line descended into price that did not move. The gate
+    cannot tell them apart, so this says what each kind was worth. It ranks
+    nothing: serial interaction is ignored here, as in `age_profile`.
+    """
+    v9 = trades.loc[trades.arm.eq("v9") & ~trades.censored]
+    joined = v9.merge(decisions[["event_key", "local_i", "trendline_break_age"]], on="event_key",
+                      validate="one_to_one")
+    joined["break_i"] = joined.local_i.astype(int) - joined.trendline_break_age.astype(int)
+    joined = joined.merge(crossings[["stream_key", "side", "break_i", "led_by", "price_move_atr",
+                                     "line_drop_atr"]],
+                          on=["stream_key", "side", "break_i"], how="left", validate="many_to_one")
+    joined["led_by"] = np.where(joined.trendline_break_age.lt(0), "no_break", joined.led_by.fillna("unmatched"))
+    joined["bucket"] = age_buckets(joined.trendline_break_age)
+    grouped = joined.groupby(["led_by", "bucket"], observed=True)
+    table = grouped.agg(trades=("net_r", "size"), net_r=("net_r", "sum"), mean_net_r=("net_r", "mean"),
+                        gross_r=("gross_r", "sum"), win_rate=("net_r", lambda s: float(s.gt(0).mean())),
+                        median_price_move_atr=("price_move_atr", "median"),
+                        median_line_drop_atr=("line_drop_atr", "median")).reset_index()
+    if int(table.trades.sum()) != len(v9):
+        raise ValueError("crossing split lost trades")
+    return table
 
 
 def build(output: Path, destination: Path):
@@ -191,7 +225,16 @@ def build(output: Path, destination: Path):
     monthly = trades.loc[~trades.censored].copy()
     monthly["entry_month"] = monthly.entry_time.dt.strftime("%Y-%m")
     monthly.groupby(["entry_month", "arm"]).agg(trades=("net_r", "size"), total_r=("net_r", "sum")).reset_index().to_csv(destination / "monthly.csv", index=False)
-    decisions.groupby("v10_reason").agg(candidates=("v9", "size"), v9_admitted=("v9", "sum")).reset_index().to_csv(destination / "gate_counts.csv", index=False)
+    # Group by the shared bucket, not by the per-age reason string: that one
+    # produced one row per distinct age and was unreadable.
+    gate = decisions.assign(bucket=age_buckets(decisions.trendline_break_age))
+    gate.groupby("bucket", observed=False).agg(candidates=("v9", "size"), v9_admitted=("v9", "sum")).reset_index().to_csv(destination / "gate_counts.csv", index=False)
+    crossings = pd.read_csv(CROSSINGS)
+    crossing_outcomes(trades, decisions, crossings).to_csv(destination / "crossing_outcomes.csv", index=False)
+    crossings.groupby(["timeframe_min", "side", "led_by"]).agg(
+        crossings=("break_i", "size"), median_price_move_atr=("price_move_atr", "median"),
+        median_line_drop_atr=("line_drop_atr", "median"), median_bars_held=("bars_held", "median")
+    ).reset_index().to_csv(destination / "crossing_types.csv", index=False)
     for name, frame in (("trades", trades), ("decisions", decisions), ("controls", controls)):
         frame.to_csv(destination / f"{name}.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
     stats = {"replay_manifest_sha256": digest(output / "manifest.json"), "strategy_version": VERSION,
@@ -200,7 +243,8 @@ def build(output: Path, destination: Path):
              "holdout_consumption": 0, "cut_exclusive_bar_close": str(CUT),
              "history": "pre-holdout span already exposed by V8/V9 work; not blind validation",
              "builder_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-             "builder_sha256": digest(Path(__file__)), "source_receipts": receipts,
+             "builder_sha256": digest(Path(__file__)), "crossings_sha256": digest(CROSSINGS),
+             "source_receipts": receipts,
              "files": {p.name: digest(p) for p in destination.iterdir() if p.is_file() and p.name != "statistics_receipt.json"}}
     (destination / "statistics_receipt.json").write_text(json.dumps(stats, indent=2) + "\n")
     print(summary.to_string(index=False))
