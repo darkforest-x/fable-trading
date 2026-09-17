@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m</h1>
+<p>日期：2026-09-17 · 输入为已发布的 V9 逐笔账本与冻结控制组 · 未重放行情 · 未改配置 · <strong>holdout 消耗 0</strong></p>
+<p><strong>后一年的毛收益仍然是正的（+1,743.07R，+0.0348R/笔），但固定 0.2% 成本要 0.0766R/笔——毛优势只剩成本的 45%，所以净额是 −2,089.19R。毛优势从前一年的 +0.1999R/笔 掉到 +0.0348R/笔（−83%），其中约 70% 是信号自身的超额衰减（配对超额 +0.1524 → +0.0188R），约 30% 是市场对任何入场都变差（同契约随机入场从 −0.0017 掉到 −0.0600R/笔）。塌陷几乎全在 30m 这一档：它占后一年 61% 的交易，毛优势 +0.00013R/笔 ≈ 0，盈亏平衡成本 0.03bp——免手续费也不赚。1H 与 4H 后一年扣完 0.2% 仍是正的。</strong></p>
+<h2>1. 一个恒等式和三个候选原因</h2>
+<p>每笔净 R = 每笔毛 R − 每笔成本 R。净额下滑只能来自这三处，而已有账本足以把它们分开：</p>
+<table><thead><tr>
+<th></th>
+<th>前一年</th>
+<th>后一年</th>
+<th>变化</th>
+</tr></thead><tbody>
+<tr><td>已平仓笔数</td><td>31,295</td><td>50,021</td><td>+59.8%</td></tr>
+<tr><td>每笔毛 R</td><td>+0.19987</td><td>+0.03485</td><td><strong>−0.16502</strong></td></tr>
+<tr><td>每笔成本 R</td><td>0.06301</td><td>0.07661</td><td><strong>+0.01360</strong></td></tr>
+<tr><td>每笔净 R</td><td>+0.13686</td><td>−0.04177</td><td>−0.17863</td></tr>
+<tr><td>净 R 合计</td><td>+4,282.94</td><td>−2,089.19</td><td></td></tr>
+<tr><td>毛 R 合计</td><td>+6,254.93</td><td><strong>+1,743.07</strong></td><td></td></tr>
+<tr><td>成本合计</td><td>1,971.99</td><td><strong>3,832.26</strong></td><td></td></tr>
+</tbody></table>
+<p>跨切点的 538 笔按已发布口径两边都不计。两个周期的净 R 与已发布 <code>summary.csv</code> 逐值一致 （程序内置校验，不一致直接抛错）。</p>
+<p><strong>92% 的下滑来自毛优势衰减，8% 来自成本在 R 单位上变贵。</strong> 但决定后一年符号的是成本：毛还是 正的 +1,743.07R，是成本 3,832.26R 把它压成了 −2,089.19R。这两句话都要说，只说一句都是误导。</p>
+<p>成本为什么变贵：成本是名义 0.2%，换成 R 要除以止损距离。止损距离中位数从 3.68% 收到 3.15% （30m 从 3.08% 收到 2.64%），波动收缩 → 止损更近 → 同样的手续费吃掉更大比例的 R。</p>
+<h2>2. 谁在衰减：信号自己，还是整个市场</h2>
+<p>用原报告那套冻结的匹配随机入场对照（同币 × 同月 × 同波动桶，同障碍同成本）：</p>
+<table><thead><tr>
+<th>周期</th>
+<th>配对数</th>
+<th>策略每笔 R</th>
+<th>随机入场每笔 R</th>
+<th>超额</th>
+</tr></thead><tbody>
+<tr><td>前一年</td><td>31,416</td><td>+0.15073</td><td>−0.00169</td><td><strong>+0.15242</strong></td></tr>
+<tr><td>后一年</td><td>49,874</td><td>−0.04121</td><td>−0.06001</td><td><strong>+0.01880</strong></td></tr>
+<tr><td>变化</td><td></td><td>−0.19194</td><td>−0.05832</td><td>−0.13362</td></tr>
+</tbody></table>
+<p>随机入场也变差了 −0.0583R/笔，占策略下滑的 <strong>30.4%</strong>——这部分是市场，不是 V9 的错。 剩下 <strong>69.6%</strong> 是超额本身缩水：入场信号相对随机的优势从 +0.1524 掉到 +0.0188R/笔。</p>
+<p>超额在后一年仍然为正，但月块符号翻转 p=0.1924，远不到本项目 p&lt;0.01 的门槛。<strong>&quot;还剩一点点 优势&quot;和&quot;能证明有优势&quot;不是一回事。</strong></p>
+<h2>3. 塌在哪里：30m</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>周期</th>
+<th>笔数</th>
+<th>占比</th>
+<th>每笔毛 R</th>
+<th>每笔成本 R</th>
+<th>每笔净 R</th>
+<th>净 R 合计</th>
+<th>盈亏平衡往返成本</th>
+</tr></thead><tbody>
+<tr><td>前一年</td><td>30m</td><td>18,299</td><td>58.5%</td><td>+0.2879</td><td>0.0747</td><td>+0.2132</td><td>+3,901.16</td><td>77.1 bp</td></tr>
+<tr><td>前一年</td><td>1H</td><td>9,868</td><td>31.5%</td><td>+0.0274</td><td>0.0528</td><td>−0.0254</td><td>−251.11</td><td>10.4 bp</td></tr>
+<tr><td>前一年</td><td>4H</td><td>3,128</td><td>10.0%</td><td>+0.2293</td><td>0.0270</td><td>+0.2023</td><td>+632.89</td><td>170.1 bp</td></tr>
+<tr><td>后一年</td><td>30m</td><td>30,578</td><td><strong>61.1%</strong></td><td><strong>+0.0001</strong></td><td>0.0903</td><td>−0.0902</td><td><strong>−2,757.97</strong></td><td><strong>0.03 bp</strong></td></tr>
+<tr><td>后一年</td><td>1H</td><td>14,913</td><td>29.8%</td><td>+0.0857</td><td>0.0619</td><td>+0.0239</td><td>+355.94</td><td>27.7 bp</td></tr>
+<tr><td>后一年</td><td>4H</td><td>4,530</td><td>9.1%</td><td>+0.1017</td><td>0.0326</td><td>+0.0691</td><td>+312.84</td><td>62.3 bp</td></tr>
+</tbody></table>
+<p>盈亏平衡往返成本 = 让毛优势刚好被吃光的名义费率。后一年 30m 是 <strong>0.03bp</strong>：不是&quot;成本太高&quot;， 是<strong>根本没有毛优势</strong>。而它同时是交易量最大的一档，笔数还从月均 1,415 涨到 2,459。 <strong>交易翻倍 × 优势归零 × 成本照付 = 后一年的全部亏损。</strong></p>
+<p>1H 和 4H 后一年都是净正的，且盈亏平衡成本 27.7 / 62.3bp 离 20bp 不算远也不算宽裕。注意 1H 在前一年反而是负的（−251.11R）——两档的符号在两年之间对调了，这本身就说明<strong>单档的年度符号 不稳定</strong>，不能据此挑档位。</p>
+<h2>4. 前一年的&quot;优势&quot;本身是三个月</h2>
+<p>按入场月看 30m（含跨切点笔，故合计与上表略有差异）：</p>
+<table><thead><tr>
+<th>30m 分段</th>
+<th>笔数</th>
+<th>毛 R</th>
+<th>净 R</th>
+</tr></thead><tbody>
+<tr><td>前一年全部</td><td>16,975</td><td>+5,793.1</td><td>+4,571.4</td></tr>
+<tr><td>其中 2025-05 / 06 / 07</td><td>4,869</td><td><strong>+3,844.2（66.4%）</strong></td><td><strong>+3,455.2（75.6%）</strong></td></tr>
+<tr><td>前一年扣掉这三个月</td><td>12,106</td><td>+1,948.9</td><td>+1,116.2</td></tr>
+</tbody></table>
+<p>2025-07 一个月 30m 净 +1,755.8R、毛 +1.363R/笔。2025-08 之后 30m 每笔毛 R 再没回到 +0.2 以上， 后一年 13 个月里只有 5 个月净为正。<strong>所以&quot;后一年亏&quot;更准确的说法是：前一年的盈利是一段三个月的 行情，之后这套入场在 30m 上就没有毛优势了。</strong> 把 2025-05..07 当作常态，是这次落差的来源。</p>
+<h2>5. 收益结构：右尾变薄</h2>
+<p>V9 的赚钱方式是收盘达到 2R 后启用 4ATR 跟踪去抓大赢家，所以够不够得着 2R 决定一切：</p>
+<table><thead><tr>
+<th>指标</th>
+<th>前一年</th>
+<th>后一年</th>
+</tr></thead><tbody>
+<tr><td>净胜率</td><td>32.82%</td><td>29.43%</td></tr>
+<tr><td>平均盈利笔</td><td>+2.397R</td><td>+2.229R</td></tr>
+<tr><td>平均亏损笔</td><td>−0.967R</td><td>−0.989R</td></tr>
+<tr><td>净 R ≥ 2 的比例</td><td>13.43%</td><td>10.67%</td></tr>
+<tr><td>MFE ≥ 2R 的比例（跟踪是否启用）</td><td>34.14%</td><td>31.57%</td></tr>
+<tr><td>平均 MFE</td><td>2.076R</td><td>1.946R</td></tr>
+</tbody></table>
+<p>每一项都往坏的方向走，但幅度都不大——<strong>没有哪一项单独能解释 −0.179R/笔</strong>。真正的差别是 &quot;够到 2R 的交易少了 2.6 个百分点，而这类策略的全部利润都在那条尾巴上&quot;，叠加亏损笔从 −0.967 变成 −0.989（成本变贵的同一件事）。</p>
+<h2>6. 多头毛转负，空头还活着</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>方向</th>
+<th>笔数</th>
+<th>每笔毛 R</th>
+<th>每笔净 R</th>
+<th>净 R 合计</th>
+</tr></thead><tbody>
+<tr><td>前一年</td><td>多</td><td>15,807</td><td>+0.2763</td><td>+0.2121</td><td>+3,353.07</td></tr>
+<tr><td>前一年</td><td>空</td><td>15,488</td><td>+0.1219</td><td>+0.0600</td><td>+929.87</td></tr>
+<tr><td>后一年</td><td>多</td><td>25,567</td><td><strong>−0.0138</strong></td><td>−0.0911</td><td><strong>−2,328.76</strong></td></tr>
+<tr><td>后一年</td><td>空</td><td>24,454</td><td>+0.0857</td><td>+0.0098</td><td>+239.57</td></tr>
+</tbody></table>
+<p>后一年的亏损几乎全部在多头，而多头是<strong>毛就已经为负</strong>——不是成本问题，是向上突破在后一年 普遍不跟随。空头毛优势 +0.0857R/笔 基本保住了，扣完成本刚好在零附近。</p>
+<p>这解释了 V8 → V9 那些过滤为什么改善有限：它们筛的是入场质量，没有碰方向。</p>
+<h2>7. 必报指标的适用性</h2>
+<p>本轮没有训练分类器或排序模型，val AUC、top-decile 毛/净收益、单特征分类基线<strong>不适用</strong>， 不编造也不留空。方向性收益的匹配随机对照见第 2 节，直接引用 V9 冻结控制组按周期重算， 两个周期的配对数与已发布值一致。本轮是对已发生结果的归因分解，<strong>不构成任何新的收益主张</strong>， 因此没有新的置换检验对象；后一年超额的 p=0.1924 引自原报告口径并已重算确认。</p>
+<h2>8. 风险与诚实声明</h2>
+<ul>
+<li><strong>归因不是因果。</strong> 上面把 −0.179R/笔 拆成毛/成本、市场/超额、周期/方向几个轴，这些轴互相 不独立（30m 同时是笔数最多、止损最近、成本占比最高的一档），拆分比例不能当作独立贡献相加。</li>
+<li><strong>后一年不是盲样本外。</strong> 这段历史已被 V8/V9 研究整体看过，本轮只重读既有逐笔账本。</li>
+<li><strong>&quot;1H/4H 后一年为正&quot;不是可交易结论。</strong> 两档在两年之间符号对调，样本上事后挑档位正是本项目 明令禁止的操作（见 <code>analysis/p1_spike_v9_v1_comparison_20260915.md</code> 同一条警告）。</li>
+<li><strong>盈亏平衡费率只算了手续费口径的名义成本</strong>，没有滑点、没有资金费率、没有成交容量。30m 山寨 突破的真实滑点不为零，所以 27.7 / 62.3bp 这两个数字是上界不是预算。</li>
+<li>事件累计 R 不是账户曲线；未统一资金、并发仓位与复利。</li>
+<li><strong>holdout 消耗 0</strong>：未重放行情、未读新数据、未改任何配置或阈值。本轮不产生任何可 promote 的配置，<code>production_eligible</code> 保持 false。</li>
+</ul>
+<h2>9. 下一步选项</h2>
+<ol>
+<li><strong>（需项目所有者决策）</strong> 最直接的一条：<strong>砍掉 30m</strong>。它是后一年全部亏损的来源且毛优势为零。 但这必须作为预注册的规则变更来做——本轮是事后看出来的，且 1H 在前一年也曾是负的。</li>
+<li><strong>（需项目所有者决策）</strong> 方向不对称（多头毛为负、空头毛为正）是比过滤器更大的杠杆。 若要做，应先定方向门的假设再回测，不能先看这张表再挑。</li>
+<li>不需要决策：<strong>不要再往 V9 上加入场过滤器</strong>。第 6 节显示后一年的病因在方向和周期， 不在入场质量；<code>exp-spike-v8-six-filters-20260914-v1</code> 与 <code>exp-spike-v9-asset-exclusions-20260915-v1</code> 已经分别给过 negative 结论。</li>
+<li>与 <code>analysis/p1_spike_v1_v9_asset_trim_20260917.md</code> 合读：剔除极值币救不了后一年 （k=0..10 全负且越剔越负），本报告解释了为什么——病因是整档的毛优势归零，不是几个币。</li>
+</ol>
+<h2>10. 复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v9-later-year-attribution-20260917-v1/attribution.py
+python3 scripts/md_to_html.py analysis/p1_spike_v9_later_year_attribution_20260917.md --out-dir analysis/html
+</code></pre>
+<p>产物：<code>experiments/active/exp-spike-v9-later-year-attribution-20260917-v1/results/</code> （<code>decomposition.csv</code> / <code>monthly_by_timeframe.csv</code> / <code>control_decomposition.csv</code> / <code>receipt.json</code>， receipt 内含三个输入文件的 sha256 与 builder 提交）。</p>
+<p>输入（只读，未修改）：<a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/">V9 逐笔账本与冻结控制组</a>，<code>arm=v9</code>。 上一版本同表对照：<a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v9_full_backtest_20260915.html">V9 全量回测</a>（本报告前/后一年净 R 与其逐值一致）。</p>
+</body>
+</html>

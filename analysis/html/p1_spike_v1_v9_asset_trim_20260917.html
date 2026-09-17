@@ -191,7 +191,7 @@ li { margin: .25rem 0; }
 <h2>9. 复现命令</h2>
 <pre><code>
 cd /Users/zhangzc/fable-trading
-.venv/bin/python experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/asset_trim.py
+PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/asset_trim.py
 python3 scripts/md_to_html.py analysis/p1_spike_v1_v9_asset_trim_20260917.md --out-dir analysis/html
 </code></pre>
 <p>产物：<code>experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/results/</code> （<code>per_asset_net_r.csv</code> / <code>trim_curve.csv</code> / <code>null_drop.csv</code> / <code>receipt.json</code>， receipt 内含四个输入文件的 sha256、builder 提交与随机种子 91509）。</p>

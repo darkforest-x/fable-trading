@@ -157,7 +157,7 @@ V9 不同，当初没有生成——所以 V1 的行只作集中度分解，不�
 
 ```bash
 cd /Users/zhangzc/fable-trading
-.venv/bin/python experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/asset_trim.py
+PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/asset_trim.py
 python3 scripts/md_to_html.py analysis/p1_spike_v1_v9_asset_trim_20260917.md --out-dir analysis/html
 ```
 

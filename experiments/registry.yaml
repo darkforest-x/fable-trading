@@ -9636,3 +9636,17 @@ experiments:
     canonical_report: analysis/p1_spike_v1_v9_asset_trim_20260917.md
     artifacts: []
     notes: The ranking uses realised outcomes, so every trimmed row is a post-hoc decomposition and never a tradeable universe;no blacklist is proposed. The builder refuses to write a trimmed row unless the untrimmed V9 row reproduces the published summary.csv net R, matched pairs, paired excess and p, which it did for all three periods. V1 has no same-contract random-entry control in the published artifacts, so its rows are concentration diagnostics only and are not used to rank V1 against V9. USDC sits at the worst end of both V1 variants and V9 already excludes USDC as underlying.
+
+  - experiment_id: exp-spike-v9-later-year-attribution-20260917-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: PLACEHOLDER
+    status: rejected
+    question: Why is SPIKE V9 net negative in the later year?
+    single_variable: No strategy change. Attribution only, splitting net R per trade into gross and cost, market and excess, timeframe, side and month on the published ledger.
+    result: Gross stayed positive at +1743.07R (+0.0348R per trade) while the fixed 0.2percent cost took 0.0766R per trade, so net is -2089.19R. Gross per trade fell -0.16502 and cost rose +0.01360 versus the earlier year. The frozen matched control attributes 30.4percent of the fall to the market (random entries went -0.00169 to -0.06001R) and 69.6percent to the signal excess (+0.15242 to +0.01880R,p=0.1924). The loss has one address 30m at 61percent of later trades and +0.00013R gross per trade, break-even fee 0.03bp, with monthly volume up from1415 to2459; 1H and 4H stay net positive after the same cost. The earlier year was itself concentrated,66percent of 30m gross came from 2025-05..07. Longs went gross negative (-0.0138R) while shorts held (+0.0857R).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v9_later_year_attribution_20260917.md
+    artifacts: []
+    notes: Attribution axes are not independent (30m is simultaneously the highest-count, tightest-stop and highest-cost-share bucket), so the shares must not be added as independent contributions. Dropping 30m or adding a direction gate are both post-hoc reads of this table and would need pre-registration. Later year is not blind;the history was already observed by the V8/V9 work. The builder refuses to write if either period fails to reproduce the published summary.csv total R.
