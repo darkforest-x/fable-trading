@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V9 信号卡片接上持仓跟踪：R 与胜率不再是破折号</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V9 信号卡片接上持仓跟踪：R 与胜率不再是破折号</h1>
+<p>日期：2026-09-17。源码提交：<code>20998213a1</code>。前置状态：前端与 Bark 自 2026-09-15 14:56 切换 V9 后正常出信号， 但看板统计区的「运行中 / 已结束 / R / 胜率」全部显示 <code>—</code>。Owner 询问「v9 前端是不是没接好」。</p>
+<h2>本轮结论</h2>
+<p><strong>病因不是前端没接好，是后端从来没生产过前端要的那个对象。</strong> 前端 <code>performanceView()</code> 早就会渲染 <code>performance.status / current_r / peak_r / stop_price / trailing_active / bars_held</code>；而 V9 事件在 <code>v9_signals.analyze</code> 里写的是字符串 <code>&quot;performance&quot;: &quot;not_tracked&quot;</code>， <code>signal_analytics.performance()</code> 只接受 dict，于是每张卡片都落进「仅入场参考 · —」分支。</p>
+<p>本轮新增 <code>yoyo/monitor/v9_performance.py</code>，用<strong>与 V9 全量回测同一个冻结串行引擎</strong>为每条准入信号 生成持仓投影。前端一行未改。</p>
+<h2>关键判断：用哪个引擎</h2>
+<p><code>yoyo/evaluation/spike_v9.py::replay_v9</code> 是全量回测的入口，但它经 <code>spike_exit_policy_study._cohort_inputs</code> 把 <code>START=2024-09-10 / END=2026-09-10</code> 之外的信号<strong>全部清零</strong>。 今天是 2026-09-17，直接调用它会让所有实时信号静默消失。</p>
+<p>因此卡片投影调用同族的 <code>spike_v6_wvf_study.simulate_v6_variant</code>，并把两者的一致性<strong>钉成测试</strong> （<code>tests/parity/test_duplicate_semantics.py</code>，该文件的既有职责就是「一个语义多个实现，谁必须一致」）。</p>
+<h2>冻结的投影规则（与回测逐条相同）</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>取值</th>
+</tr></thead><tbody>
+<tr><td>入场</td><td>信号 K 线的<strong>下一根开盘</strong>，不是确认收盘</td></tr>
+<tr><td>初始止损</td><td>信号收盘冻结：<code>min(近5根最低 − 0.2ATR, 收盘 − 2ATR)</code>，向外取整 tick，风险 ≥ 2ATR</td></tr>
+<tr><td>跟踪</td><td>收盘毛 2R 启动 4ATR 收盘跟踪，只收紧</td></tr>
+<tr><td>反向退出</td><td>原始反向 V6 确认（不过 V9 三门）在下一根开盘平仓</td></tr>
+<tr><td>成本</td><td>固定 0.2% 往返，<code>current_r</code>/<code>exit_r</code> 都是<strong>净 R</strong></td></tr>
+<tr><td>串行</td><td>每个 symbol×周期同时只有一个持仓</td></tr>
+<tr><td>未平仓</td><td>以最后一根已收盘 K 线标记（<code>mark=last_closed_bar_close</code>），状态 <code>active</code></td></tr>
+<tr><td>引擎已有持仓时的同向信号</td><td>状态 <code>unknown</code>、<code>reason=serial_position_already_open</code>，<strong>不借用别人的 R</strong></td></tr>
+<tr><td>数据缺口</td><td>状态 <code>unknown</code>、<code>reason=data_gap_censored</code></td></tr>
+</tbody></table>
+<h2>验证</h2>
+<table><thead><tr>
+<th>检查</th>
+<th>证据与结果</th>
+</tr></thead><tbody>
+<tr><td>与冻结回测引擎逐笔一致</td><td>窗口内合成流：两引擎开出相同笔数，<code>signal_bar_open/entry_time/side/entry_price/initial_stop/initial_risk/mfe_r/exit_time/exit_price/exit_reason/censored</code> 逐字段相同；已平仓 <code>gross_r</code>/<code>net_r</code> 差 ≤1e-12</td></tr>
+<tr><td>真实数据抽查（ETH 1H，OKX，2025-05-30→2026-04-30，未读 holdout）</td><td>14 笔逐笔一致；<code>gross_r</code> 最大差 3.55e-15、<code>net_r</code> 1.11e-16；唯一差异是未平仓那笔：冻结回测给 NaN，卡片给 mark</td></tr>
+<tr><td>因果性</td><td>延长供给前缀不改变已定字段（entry/stop/risk），只有运行中的 mark 与 bars_held 前进</td></tr>
+<tr><td>不借用 R</td><td>持仓期间的第二条同向准入信号返回 <code>unknown</code>，<code>current_r</code>/<code>peak_r</code> 均为 None</td></tr>
+<tr><td>契约形状</td><td><code>signal_analytics.performance()</code> 读出 <code>(&quot;active&quot;, current_r)</code>，与事件内取值一致</td></tr>
+<tr><td>输入拒绝</td><td>minutes≤0、tick≤0、evidence 未对齐一律 ValueError；空前缀返回 <code>{}</code></td></tr>
+<tr><td>回归</td><td><code>tests/monitor + tests/boundaries + tests/parity</code>：改动前 <strong>275 failed / 986 passed</strong>，改动后 <strong>275 failed / 994 passed</strong>（+8 即本轮新增 7 项单测与 1 项 parity）。既有 275 项失败与本轮无关，来自工作树中其他会话的未提交改动与 V1 旧夹具</td></tr>
+<tr><td>扫描开销</td><td>720 根 1H 窗口：<code>analyze</code> 全流程 448.4ms，其中 <code>project</code> 34.3ms（+7.7%）。整点四周期同时收盘是峰值场景，重启后需实测 <code>scan.duration_seconds</code></td></tr>
+</tbody></table>
+<h2>非方向性声明与零假设对照</h2>
+<p>本轮不产生任何收益主张，因此 val AUC、置换检验 p、top-decile 毛/净收益、胜率、匹配随机入场对照 <strong>按字面不适用</strong>：这是把既有回测口径接到展示层，没有新规则、新参数、新样本。</p>
+<p>对应的同等严格零假设是<strong>引擎等价性</strong>：如果卡片用的是另一套语义，它与冻结回测在同一批 K 线上 必然开出不同的笔或不同的 R。上面两项逐笔对照就是这个零假设的检验，结果是除未平仓标记外完全一致。 第二条零假设是回归基线：若本轮动了别处，失败数应上升；实测失败数不变（275 → 275）。</p>
+<p><strong>卡片上的 R 仍不是账户成交。</strong> 它是下一根开盘的参考成交价 + 冻结止损的投影，不含滑点、 不含实际下单、不含仓位规模；Pine 图上的确认收盘参考与这套 next-open 口径依然是两套时序。</p>
+<h2>复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+python3 -m pytest -q tests/monitor/test_v9_performance.py tests/monitor/test_v9_signals.py \
+  tests/parity/test_duplicate_semantics.py
+python3 scripts/md_to_html.py analysis/p0_spike_v9_card_performance_20260917.md --out-dir analysis/html
+</code></pre>
+<h2>尚未完成</h2>
+<ul>
+<li><strong>监控服务未重启</strong>，运行中的进程仍是旧代码；卡片要等重启后的扫描才会带上投影。重启属 owner 决定。</li>
+<li>重启后只有仍在 720 根供给窗口内的信号会被刷新；更早的历史事件保持原样（不回填）。</li>
+<li>本轮未动通知口径、未改阈值、未 promote、未触碰 forward_log 或任何真金路径。 Bark 徽标「异常」是另一件事（历史累计 2 条 unknown 永久钉住徽标），本轮未改。</li>
+</ul>
+<h2>顺带记录的现场事实</h2>
+<p>工作树里 <code>yoyo/monitor/static/app.js</code>、<code>index.html</code>、<code>tests/monitor/frontend_cards.test.cjs</code> 有<strong>其他会话留下的未提交改动</strong>，本轮未纳入本次提交，也未验证其内容。</p>
+</body>
+</html>
