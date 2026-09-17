@@ -1,0 +1,170 @@
+//@version=6
+indicator("主下降趋势线 · 关键高点 V1", overlay = true, max_lines_count = 30, max_bars_back = 2500)
+
+// ───────────── 选点规则 ─────────────
+leftBars    = input.int(12, "高点左侧比较 K 数", minval = 2, maxval = 100, group = "01 选点")
+rightBars   = input.int(8, "高点右侧确认 K 数", minval = 1, maxval = 50, group = "01 选点")
+lookback    = input.int(600, "搜索范围 / 主线最长年龄（K 数）", minval = 100, maxval = 2000, group = "01 选点")
+minSpan     = input.int(48, "两个锚点最小间隔（K 数）", minval = 5, maxval = 500, group = "01 选点")
+minDropATR  = input.float(2.0, "两个高点最小落差（ATR 倍数）", minval = 0.1, step = 0.1, group = "01 选点")
+minTouches  = input.int(2, "至少贴线的高点数（含两端）", minval = 2, maxval = 6, group = "01 选点")
+
+// ATR 仅用来衡量价格容差，不会画出额外指标。
+wickTolATR  = input.float(0.35, "建线时允许越线的幅度（ATR）", minval = 0.0, step = 0.05, group = "02 容差")
+touchTolATR = input.float(0.50, "高点贴线容差（ATR）", minval = 0.05, step = 0.05, group = "02 容差")
+breakBufATR = input.float(0.20, "突破需超出趋势线的幅度（ATR）", minval = 0.0, step = 0.05, group = "02 容差")
+breakBars   = input.int(2, "突破需要连续收盘确认的 K 数", minval = 1, maxval = 5, group = "02 容差")
+
+// 默认只画白色细线。
+lineColor   = input.color(color.white, "趋势线颜色", group = "03 显示")
+lineWidth   = input.int(1, "线宽", minval = 1, maxval = 4, group = "03 显示")
+extendLeft  = input.bool(true, "同时向左延伸", group = "03 显示")
+keepLines   = input.int(1, "最多保留的趋势线数量", minval = 1, maxval = 20, group = "03 显示")
+brokenDash  = input.bool(false, "突破后改成虚线", group = "03 显示")
+showBreak   = input.bool(false, "显示突破标记", group = "03 显示")
+showBorn    = input.bool(false, "显示实际建线时刻", group = "03 显示")
+
+if barstate.isfirst and lookback < minSpan + rightBars
+    runtime.error("搜索范围必须不小于：两个锚点最小间隔 + 右侧确认 K 数。")
+
+float atrValue = ta.atr(14)
+float pivotHigh = ta.pivothigh(high, leftBars, rightBars)
+float pivotATR = atrValue[rightBars]
+bool newPivot = not na(pivotHigh) and not na(pivotATR)
+
+// 检查第一锚点到当前确认 K 线：不允许价格明显穿过候选线。
+// 只读取当前及过去的数据；最大历史偏移受 lookback 限制。
+f_isClean(int x1, float y1, int x2, float y2) =>
+    float slope = (y2 - y1) / (x2 - x1)
+    bool clean = true
+    int age = bar_index - x1
+    for offset = 0 to age
+        float ceiling = y1 + slope * (bar_index - offset - x1)
+        float pastATR = math.max(nz(atrValue[offset], syminfo.mintick), syminfo.mintick)
+        if high[offset] > ceiling + pastATR * wickTolATR
+            clean := false
+            break
+    clean
+
+var array<int> pivotXs = array.new_int()
+var array<float> pivotYs = array.new_float()
+var array<float> pivotATRs = array.new_float()
+var array<line> savedLines = array.new_line()
+
+var line mainLine = na
+var bool lineActive = false
+var int firstAnchor = na
+var int bornBar = na
+var int aboveCount = 0
+
+// 不使用 var：这两个事件每根 K 线重新置为 false。
+bool breakEvent = false
+bool bornEvent = false
+
+if barstate.isconfirmed
+    // 1. 先检查上一根 K 线已经存在的主线，避免换线造成虚假突破。
+    if lineActive and not na(mainLine)
+        float lineNow = line.get_price(mainLine, bar_index)
+        if bar_index > bornBar
+            bool above = close > lineNow + atrValue * breakBufATR
+            aboveCount := above ? aboveCount + 1 : 0
+            if aboveCount >= breakBars
+                breakEvent := true
+                lineActive := false
+                aboveCount := 0
+                if brokenDash
+                    line.set_style(mainLine, line.style_dashed)
+
+        // 太旧的主线退出监测；不把“到期”当作突破。
+        if lineActive and bar_index - firstAnchor > lookback
+            lineActive := false
+            aboveCount := 0
+            line.set_xy2(mainLine, bar_index, lineNow)
+            line.set_extend(mainLine, extend.none)
+
+    // 2. 高点在右侧确认完成后才进入候选池。
+    if newPivot
+        array.push(pivotXs, bar_index - rightBars)
+        array.push(pivotYs, pivotHigh)
+        array.push(pivotATRs, math.max(pivotATR, syminfo.mintick))
+
+    // 限制候选数量和历史跨度。
+    while array.size(pivotXs) > 0
+        bool tooOld = bar_index - array.get(pivotXs, 0) > lookback
+        if tooOld or array.size(pivotXs) > 40
+            array.shift(pivotXs)
+            array.shift(pivotYs)
+            array.shift(pivotATRs)
+        else
+            break
+
+    // 3. 有有效主线时保持锚点不动；失效后才寻找下一条。
+    // 突破当根不换线，防止覆盖本次突破事件。
+    int n = array.size(pivotXs)
+    if not lineActive and not breakEvent and newPivot and n >= 2
+        int x2 = array.get(pivotXs, n - 1)
+        float y2 = array.get(pivotYs, n - 1)
+        float a2 = array.get(pivotATRs, n - 1)
+        float bestScore = -1.0
+        int bestX1 = na
+        float bestY1 = na
+
+        // 最新确认高点作第二锚点，向前寻找适合的第一锚点。
+        // 不是简单连接“最近两个高点”。
+        for i = 0 to n - 2
+            int x1 = array.get(pivotXs, i)
+            float y1 = array.get(pivotYs, i)
+            int span = x2 - x1
+            bool geometryOK = span >= minSpan and y1 > y2 and y1 - y2 >= a2 * minDropATR
+            if geometryOK
+                float slope = (y2 - y1) / span
+                float projectedNow = y1 + slope * (bar_index - x1)
+
+                // 建线时收盘价必须仍在线下，不补画一个已经发生的突破。
+                if close <= projectedNow
+                    int touches = 0
+                    for j = i to n - 1
+                        int tx = array.get(pivotXs, j)
+                        float ty = array.get(pivotYs, j)
+                        float touchATR = array.get(pivotATRs, j)
+                        float expected = y1 + slope * (tx - x1)
+                        if math.abs(ty - expected) <= touchATR * touchTolATR
+                            touches += 1
+
+                    // 跨度较大、额外贴线高点较多的候选优先。
+                    float score = span + math.max(touches - 2, 0) * minSpan * 2.0
+                    if touches >= minTouches and score > bestScore
+                        if f_isClean(x1, y1, x2, y2)
+                            bestScore := score
+                            bestX1 := x1
+                            bestY1 := y1
+
+        // 4. 真正建线：记录“现在才知道这条线”的时刻。
+        if not na(bestX1)
+            mainLine := line.new(
+                 bestX1, bestY1, x2, y2,
+                 xloc = xloc.bar_index,
+                 extend = extendLeft ? extend.both : extend.right,
+                 color = lineColor,
+                 style = line.style_solid,
+                 width = lineWidth)
+            lineActive := true
+            firstAnchor := bestX1
+            bornBar := bar_index
+            aboveCount := 0
+            bornEvent := true
+            array.push(savedLines, mainLine)
+
+            // 已突破的旧线不会立即消失；出现新线后按保留数量清理。
+            while array.size(savedLines) > keepLines
+                line.delete(array.shift(savedLines))
+
+plotshape(showBreak and breakEvent, title = "收盘确认突破", style = shape.triangleup,
+     location = location.belowbar, color = color.lime, size = size.tiny,
+     text = "破", textcolor = color.white)
+
+plotshape(showBorn and bornEvent, title = "实际建线时刻", style = shape.circle,
+     location = location.abovebar, color = color.orange, size = size.tiny)
+
+alertcondition(breakEvent, title = "下降趋势线向上突破",
+     message = "{{ticker}} {{interval}}：收盘确认突破已存在的下降趋势线。")
