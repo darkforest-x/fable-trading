@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-spike-v1-v9-asset-trim-20260917-v1",
+  "systems": ["v1_native", "v1_common", "v9"],
+  "window_utc": ["2024-09-10T00:00:00Z", "2026-09-10T00:00:00Z"],
+  "split_utc": "2025-09-10T00:00:00Z",
+  "trim_k": [0, 1, 3, 5, 10],
+  "ranking_basis": "realised closed net R per asset, post-hoc",
+  "null_control": {"reps": 2000, "seed": 91509, "match": "combined closed-trade count +-25%"},
+  "cost": "0.2% nominal round trip, inherited from the source ledgers",
+  "replayed_prices": false,
+  "configuration_changed": false,
+  "holdout_consumed": 0
+}
