@@ -71,7 +71,12 @@ def v9_parity(key: str, ours: pd.DataFrame, last_close: pd.Timestamp) -> dict[st
     name = "v9.trades.csv.gz"
     if receipt.get("status") != "complete" or digest(folder / name) != receipt["files"][name]:
         raise ValueError(f"published V9 ledger receipt mismatch: {key}")
-    published = pd.read_csv(folder / name)
+    return compare_v9_ledger(key, pd.read_csv(folder / name), ours, last_close)
+
+
+def compare_v9_ledger(key: str, published: pd.DataFrame, ours: pd.DataFrame,
+                      last_close: pd.Timestamp) -> dict[str, float]:
+    """Compare two ledgers over the trades that both settled before the cut."""
     for table in (published, ours):
         for column in ("entry_time", "exit_time"):
             table[column] = pd.to_datetime(table[column], utc=True, errors="coerce")
@@ -81,8 +86,11 @@ def v9_parity(key: str, ours: pd.DataFrame, last_close: pd.Timestamp) -> dict[st
     if len(left) != len(right):
         raise ValueError(f"truncated V9 arm has a different trade count than the published ledger: {key}")
     drift = 0.0
+    # Compare values, never dtypes: a stream whose every trade opened after the
+    # cut leaves both sides empty, and an empty CSV column and an empty replay
+    # column legitimately carry different dtypes.
     for column in KEY:
-        if left[column].dtype.kind == "f":
+        if column in ("entry_price", "exit_price", "initial_stop", "initial_risk", "net_return", "net_r"):
             # The published ledger is a CSV, so its floats are decimal
             # round-trips of the originals, not the originals.
             gap = np.abs(left[column].to_numpy(float) - right[column].to_numpy(float))
@@ -90,7 +98,7 @@ def v9_parity(key: str, ours: pd.DataFrame, last_close: pd.Timestamp) -> dict[st
             if np.any(gap / scale > 1e-9):
                 raise ValueError(f"truncated V9 arm diverged from the published ledger at {column}: {key}")
             drift = max(drift, float((gap / scale).max()) if len(gap) else 0.0)
-        elif not left[column].equals(right[column]):
+        elif left[column].tolist() != right[column].tolist():
             raise ValueError(f"truncated V9 arm diverged from the published ledger at {column}: {key}")
     return {"published_trades": int(len(published)), "compared_trades": int(len(left)),
             "published_after_cut": int(len(published) - len(settled)),

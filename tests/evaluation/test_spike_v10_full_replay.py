@@ -15,7 +15,7 @@ from yoyo.evaluation import spike_v1_v8_be05 as engine
 from yoyo.evaluation.spike_v8_six_filters import assert_baseline_parity
 from yoyo.evaluation.spike_v9 import replay_v9
 from yoyo.evaluation.spike_v10 import ARMS, break_ages, gate_mask, gate_reason, signal_break_age
-from yoyo.evaluation.spike_v10_full_replay import CUT, V9_LEDGER, replay_stream, truncate, v9_parity
+from yoyo.evaluation.spike_v10_full_replay import CUT, V9_LEDGER, compare_v9_ledger, replay_stream, truncate, v9_parity
 
 
 def fixture(periods=900, seed=4, start="2025-01-04"):
@@ -150,3 +150,36 @@ def test_one_real_stream_reproduces_the_published_v9_ledger_before_the_cut():
     assert parity["compared_trades"] > 0
     assert parity["max_relative_float_drift"] < 1e-9
     assert (decisions.trendline_break_age >= -1).all()
+
+
+def ledger_frame(rows):
+    """Minimal ledger shaped like the published V9 CSV."""
+    columns = ["signal_i", "entry_i", "side", "exit_i", "exit_reason", "entry_price", "exit_price",
+               "initial_stop", "initial_risk", "net_return", "net_r", "entry_time", "exit_time", "censored"]
+    return pd.DataFrame(rows, columns=columns)
+
+
+def test_parity_accepts_a_stream_whose_every_trade_opened_after_the_cut():
+    """Both sides empty must pass. CSV and replay dtypes differ when empty."""
+    cut = pd.Timestamp("2026-05-04T00:00:00Z")
+    published = ledger_frame([[7, 8, 1, 20, "initial_stop", 1., .9, .8, .2, -.2, -1., "2026-08-01T00:00:00Z", "2026-08-02T00:00:00Z", False]])
+    mine = ledger_frame([]).astype({"signal_i": "float64", "exit_reason": "object"})
+    result = compare_v9_ledger("synthetic", published, mine, cut)
+    assert result == {"published_trades": 1, "compared_trades": 0, "published_after_cut": 1,
+                      "max_relative_float_drift": 0.0}
+
+
+def test_parity_rejects_a_changed_pre_cut_decision():
+    cut = pd.Timestamp("2026-05-04T00:00:00Z")
+    row = [7, 8, 1, 20, "initial_stop", 1., .9, .8, .2, -.2, -1., "2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z", False]
+    published = ledger_frame([list(row)])
+    shifted = list(row)
+    shifted[0] = 9
+    with pytest.raises(ValueError, match="signal_i"):
+        compare_v9_ledger("synthetic", published, ledger_frame([shifted]), cut)
+    priced = list(row)
+    priced[10] = -1.5
+    with pytest.raises(ValueError, match="net_r"):
+        compare_v9_ledger("synthetic", ledger_frame([list(row)]), ledger_frame([priced]), cut)
+    with pytest.raises(ValueError, match="different trade count"):
+        compare_v9_ledger("synthetic", ledger_frame([list(row), list(row)]), ledger_frame([list(row)]), cut)
