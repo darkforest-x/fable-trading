@@ -1,0 +1,34 @@
+{
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_btc_bb_stoch_acceptance.py -q",
+    "passed": 5,
+    "failed": 0
+  },
+  "broad_gates": {
+    "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+    "passed": 468,
+    "failed": 7,
+    "scope": "unchanged pre-existing failures already disclosed in HANDOFF"
+  },
+  "economic_ledger_checks": 2064,
+  "holdout_consumed": true,
+  "holdout_ledger_index": 2,
+  "holdout_rows_read": 34464,
+  "second_run_refused_by_code": true,
+  "frozen_prefix_reader_unchanged": true,
+  "accepted": false,
+  "criteria_met": {
+    "v2_baseline": {
+      "net_r_positive": false,
+      "excess_mean_net_r_positive": true,
+      "signflip_p_below_threshold": false
+    },
+    "be_cost": {
+      "net_r_positive": false,
+      "excess_mean_net_r_positive": true,
+      "signflip_p_below_threshold": false
+    }
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}

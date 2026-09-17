@@ -9607,3 +9607,18 @@ experiments:
     canonical_report: analysis/p1_btc_bb_stoch_optimization_20260916.md
     artifacts: [btc-bb-stoch-optimization-20260916-delivery]
     notes: selection.json committed at 67af64a458 before any recheck price read;the recheck gate verifies those bytes against HEAD. Second time this shape appears after the ETH grid. The 28-month window was already observed in aggregate, so the recheck is a hold-back inside seen data, not blind validation. 71MB per-cell ledger kept local with its hash in local_artifacts.json.
+
+  - experiment_id: exp-btc-bb-stoch-holdout-acceptance-20260917-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c8c72e3f5e0e6b3a0b8a4e1fbb0b5d0e1f6a2c4d
+    status: rejected
+    question: Does the frozen BB x Stoch rule pass a one-shot BTC 5m holdout acceptance?
+    single_variable: No search. Two frozen arms, the original BB200/2.0/3percent and the owner-approved break-even-with-cost. Grid candidates already rejected at recheck were deliberately not scored.
+    result: NOT ACCEPTED.85natural trades2026-05-04..2026-08-31, net-6.0619R, per trade-0.0713R, gross-0.3990R, PF.712; be_cost arm net-5.5797R, per trade-0.0656R, gross+0.0830R. Criterion1 net positive FAILED, criterion2 matched excess positive passed(+.0298/+.0367R), criterion3 monthblock p<.01 FAILED(.50/.4375). One of three is not a pass.
+    holdout_consumed: true
+    holdout_ledger_index: 2
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btc_bb_stoch_holdout_acceptance_20260917.md
+    artifacts: []
+    notes: First holdout consumption for this configuration and the second recorded read in the repository. Ledger entry and pass rule were committed before any byte was parsed;the module refuses a second run into the same directory. The frozen pre-holdout reader keeps its end>2026-05-01 refusal;crossing needs the separate authorized reader. Matched excess stayed positive, consistent with the tiny BTC entry edge seen pre-window, but the rule is still net negative after 10bp per side.

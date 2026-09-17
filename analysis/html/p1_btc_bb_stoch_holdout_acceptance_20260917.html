@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTC 5m · BB × Stoch 最终验收（holdout）</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTC 5m · BB × Stoch 最终验收（holdout）</h1>
+<h2>判定：<strong>未通过</strong></h2>
+<p><strong>这是该配置第 1 次消耗 holdout，也是本仓第 2 次记录在案的 holdout 读取</strong> （<code>docs/HOLDOUT_LEDGER.md</code> 第 2 条，在读取任何字节之前登记并提交）。</p>
+<p>计分区间 <strong>2026-05-04T00:00Z → 2026-08-31T16:00Z</strong>（约 3.9 个月）， 实际读入 holdout K 线 34,464 根，计分信号 157 个 （多 79 / 空 78）。 原参数组 85 笔完整交易，净 -6.06R， 每笔 -0.0713R，毛 -0.40R， PF 0.712。</p>
+<table><thead><tr>
+<th>组</th>
+<th>标准</th>
+<th>判定</th>
+<th>实际值</th>
+</tr></thead><tbody>
+<tr><td>原参数 BB200/2.0/3%（图上那版）</td><td>① 扣费后总净 R 为正</td><td>❌ 不满足</td><td>-6.06</td></tr>
+<tr><td>原参数 BB200/2.0/3%（图上那版）</td><td>② 配对随机对照超额为正</td><td>✅ 满足</td><td>+0.0298</td></tr>
+<tr><td>原参数 BB200/2.0/3%（图上那版）</td><td>③ 月块单侧 p &lt; 0.01</td><td>❌ 不满足</td><td>0.5000</td></tr>
+<tr><td>＋保本含 0.2% 成本</td><td>① 扣费后总净 R 为正</td><td>❌ 不满足</td><td>-5.58</td></tr>
+<tr><td>＋保本含 0.2% 成本</td><td>② 配对随机对照超额为正</td><td>✅ 满足</td><td>+0.0367</td></tr>
+<tr><td>＋保本含 0.2% 成本</td><td>③ 月块单侧 p &lt; 0.01</td><td>❌ 不满足</td><td>0.4375</td></tr>
+</tbody></table>
+<p>三条标准在读数据之前就写死在 <code>config.json</code> 与计划里，由代码逐条判定， <strong>任何一条不满足即为未通过</strong>。本次未通过，本配置即被否决；后续任何 BTC 5m BB×Stoch 参数实验都必须重新取得 holdout 授权。</p>
+<h2>结果</h2>
+<table><thead><tr>
+<th>组</th>
+<th>完整交易</th>
+<th>净 R</th>
+<th>每笔净 R</th>
+<th>毛 R</th>
+<th>净胜率</th>
+<th>PF</th>
+<th>回撤 R</th>
+<th>最大连亏</th>
+<th>配对超额 R/笔</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>原参数 BB200/2.0/3%（图上那版）</td><td>85</td><td>-6.06</td><td>-0.0713</td><td>-0.40</td><td>47.06%</td><td>0.712</td><td>8.67</td><td>6</td><td>+0.0298</td><td>0.5000</td></tr>
+<tr><td>＋保本含 0.2% 成本</td><td>85</td><td>-5.58</td><td>-0.0656</td><td>+0.08</td><td>54.12%</td><td>0.732</td><td>8.26</td><td>5</td><td>+0.0367</td><td>0.4375</td></tr>
+<tr><td>原参数 BB200/2.0/3%（图上那版）·先走逆向</td><td>85</td><td>-6.06</td><td>-0.0713</td><td>-0.40</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>＋保本含 0.2% 成本·先走逆向</td><td>85</td><td>-5.58</td><td>-0.0656</td><td>+0.08</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p><img src="btc_bb_stoch_holdout_acceptance_20260917.png" alt="holdout 区间累计净 R"></p>
+<h2>成本敏感性</h2>
+<table><thead><tr>
+<th>组</th>
+<th>每边 0bp</th>
+<th>每边 2bp</th>
+<th>每边 5bp</th>
+<th>每边 10bp</th>
+<th>盈亏平衡费率 f*</th>
+</tr></thead><tbody>
+<tr><td>原参数 BB200/2.0/3%（图上那版）</td><td>-0.40</td><td>-1.53</td><td>-3.23</td><td>-6.06</td><td>-0.95 bp</td></tr>
+<tr><td>＋保本含 0.2% 成本</td><td>+0.08</td><td>-1.05</td><td>-2.75</td><td>-5.58</td><td>-0.21 bp</td></tr>
+</tbody></table>
+<p>费用不改变止损、止盈与成交价，这几档是从同一条价格路径精确重算的。 f* = Σ毛盈亏 / Σ成交名义，即使总净额归零所需的每边费率。</p>
+<h2>退出构成（原参数组）</h2>
+<table><thead><tr>
+<th>最终退出原因</th>
+<th>笔数</th>
+<th>净 R 合计</th>
+</tr></thead><tbody>
+<tr><td>平半后保本</td><td>26</td><td>+1.33</td></tr>
+<tr><td>完整反向信号退出</td><td>24</td><td>+13.33</td></tr>
+<tr><td>平半时新保护价已被越过</td><td>21</td><td>-5.79</td></tr>
+<tr><td>初始止损</td><td>14</td><td>-14.93</td></tr>
+</tbody></table>
+<h2>事前预期与实际的对照</h2>
+<p>计划里写明的预期是<strong>未通过</strong>，理由是前段（2023-12 → 2026-04）该规则毛 +4.98R/697 笔、 f* 仅 +0.51 bp/边，而 OKX 最低 maker 2 bp。 本次实际 f* 为 -0.95 bp/边。 把预期写在前面是为了两件事：不让&quot;果然没过&quot;被说成早有洞见，也不让万一通过被当成可以直接下单。</p>
+<h2>风险与诚实声明</h2>
+<ul>
+<li><strong>这次消耗不可退回。</strong> 同一配置不得再跑第二次，也不得事后换标准、换窗口或换参数重评。 程序在 <code>results.json</code> 已存在时直接拒绝运行。</li>
+<li>参评的只有原参数与 Owner 已批准的保本含成本变体。<strong>网格搜出的 BB400/3.0/4%、BB300/2.5/3% 没有参评</strong>——它们已在 2025-09→2026-04 复查段被否决（每笔 −0.4080R / −0.2843R）。</li>
+<li>Python 离线回放，<strong>不声称与 TradingView 策略测试器逐笔成交一致</strong>；5m OHLC 无法还原逐笔先后。 两条成交路径都跑，主口径为 TV 近端极值优先。</li>
+<li>157 个信号、约 3.9 个月仍是单一品种的一段行情；<strong>即使通过也只是通过这一次验收</strong>， 不构成对未来收益的保证。</li>
+<li>无排序模型，val AUC 与 top-decile 排序收益不适用，不编造；替代零假设为匹配随机入场。</li>
+<li>费用只含每边 0.1%，不含资金费率、额外滑点与冲击成本；固定 1 BTC 归一化不是账户收益率。</li>
+<li>本轮不训练、不 promote、不改仓、不动真金。</li>
+</ul>
+<h2>校验与复现</h2>
+<p>源码冻结提交 <code>c8c72e3f5ed51d68615875fd706dce25c71eee80</code>；数据 SHA256 <code>6d9bc74324bf733c…</code>， 窗口 2026-02-28 16:00:00+00:00 → 2026-08-31 16:00:00+00:00，计分自 2026-05-04 00:00:00+00:00。 验证记录：<code>{&quot;focused_tests&quot;: {&quot;command&quot;: &quot;.venv/bin/python -m pytest tests/evaluation/test_btc_bb_stoch_acceptance.py -q&quot;, &quot;passed&quot;: 5, &quot;failed&quot;: 0}, &quot;broad_gates&quot;: {&quot;command&quot;: &quot;.venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q&quot;, &quot;passed&quot;: 468, &quot;failed&quot;: 7, &quot;scope&quot;: &quot;unchanged pre-existing failures already disclosed in HANDOFF&quot;}, &quot;economic_ledger_checks&quot;: 2064, &quot;holdout_consumed&quot;: true, &quot;holdout_ledger_index&quot;: 2, &quot;holdout_rows_read&quot;: 34464, &quot;second_run_refused_by_code&quot;: true, &quot;frozen_prefix_reader_unchanged&quot;: true, &quot;accepted&quot;: false, &quot;criteria_met&quot;: {&quot;v2_baseline&quot;: {&quot;net_r_positive&quot;: false, &quot;excess_mean_net_r_positive&quot;: true, &quot;signflip_p_below_threshold&quot;: false}, &quot;be_cost&quot;: {&quot;net_r_positive&quot;: false, &quot;excess_mean_net_r_positive&quot;: true, &quot;signflip_p_below_threshold&quot;: false}}, &quot;training_eligible&quot;: false, &quot;production_eligible&quot;: false}</code>。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m pytest tests/evaluation/test_btc_bb_stoch_acceptance.py -q
+.venv/bin/python -m src.data.fetch_okx --symbols BTC_USDT_SWAP --bar 5m \
+  --archive-monthly-start 2026-03 --archive-monthly-end 2026-08 \
+  --archive-max-exclusive 2026-09-01T00:00:00Z --out-dir data/kline_holdout_btc5m
+.venv/bin/python -m yoyo.evaluation.btc_bb_stoch_acceptance      # 已跑过，会拒绝重跑
+.venv/bin/python -m yoyo.evaluation.btc_bb_stoch_acceptance_report
+</code></pre>
+</body>
+</html>
