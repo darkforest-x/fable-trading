@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>BTC 5m · BB × Stoch 315 组参数搜索</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>BTC 5m · BB × Stoch 315 组参数搜索</h1>
+<h2>结论</h2>
+<p><strong>调参在开发段把这条规则从亏变成赚，然后在复查段全部崩掉，而且比不调参更差。</strong></p>
+<p>开发段（2024-01 → 2025-09）按事前固定规则选出稳健候选 <strong>BB400 / 倍数3.0 / 止损4%</strong> （131 笔，每笔 +0.0512R， 净清算 25184.86 USDT），诊断用峰值为 <strong>BB300 / 2.5 / 3%</strong>。 复查段（2025-09 → 2026-04，选择提交之后才读）两者分别变成每笔 -0.4080R 和 -0.2843R； <strong>同期未调参的原参数是 -0.0666R。</strong> 两个入选者在复查段都输给了原参数——搜索不但没找到更好的参数，还找到了更差的。</p>
+<p><strong>而且不是成本问题。</strong>复查段稳健候选的毛 R 是 -17.55（49 笔），<strong>免手续费也亏</strong>； 开发段那点优势一天都没延续下来。</p>
+<h2>开发段（选择依据，2024-01 → 2025-09）</h2>
+<table><thead><tr>
+<th>配置</th>
+<th>完整交易</th>
+<th>净清算 USDT</th>
+<th>每笔净 R</th>
+<th>毛 R</th>
+<th>PF</th>
+<th>净胜率</th>
+<th>收盘盯市回撤 USDT</th>
+<th>最大连亏</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>原参数 BB200 / 2.0 / 3%</td><td>523</td><td>-67924.14</td><td>-0.0548</td><td>+6.22</td><td>0.828</td><td>55.83%</td><td>70489.44</td><td>8</td><td>未抽对照</td></tr>
+<tr><td>稳健候选 BB400 / 3.0 / 4%</td><td>131</td><td>25184.86</td><td>+0.0512</td><td>+13.27</td><td>1.133</td><td>55.73%</td><td>28856.81</td><td>5</td><td>未抽对照</td></tr>
+<tr><td>峰值 BB300 / 2.5 / 3%</td><td>270</td><td>32412.51</td><td>+0.0431</td><td>+29.65</td><td>1.111</td><td>58.52%</td><td>34609.11</td><td>4</td><td>未抽对照</td></tr>
+</tbody></table>
+<p>开发段按事前约定<strong>不抽随机对照</strong>（对照是用来验证入选者的，不参与 315 组排序）， 所以这一段没有 p 值可报，表中如实写&quot;未抽对照&quot;而不是填一个占位数字。</p>
+<h2>复查段（一次性评分，2025-09 → 2026-04）</h2>
+<table><thead><tr>
+<th>配置</th>
+<th>完整交易</th>
+<th>净清算 USDT</th>
+<th>每笔净 R</th>
+<th>毛 R</th>
+<th>PF</th>
+<th>净胜率</th>
+<th>收盘盯市回撤 USDT</th>
+<th>最大连亏</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>原参数 BB200 / 2.0 / 3%</td><td>173</td><td>-38605.44</td><td>-0.0666</td><td>-0.00</td><td>0.802</td><td>52.02%</td><td>53914.34</td><td>6</td><td>0.418</td></tr>
+<tr><td>稳健候选 BB400 / 3.0 / 4%</td><td>49</td><td>-72650.21</td><td>-0.4080</td><td>-17.55</td><td>0.275</td><td>38.78%</td><td>82371.19</td><td>5</td><td>0.945</td></tr>
+<tr><td>峰值 BB300 / 2.5 / 3%</td><td>97</td><td>-74754.59</td><td>-0.2843</td><td>-21.13</td><td>0.451</td><td>45.36%</td><td>83435.49</td><td>7</td><td>0.961</td></tr>
+</tbody></table>
+<p><img src="btc_bb_stoch_optimization_20260916.png" alt="开发段 vs 复查段"></p>
+<h2>为什么这个结果是可预期的</h2>
+<ul>
+<li>315 组里<strong>只有 10 组</strong>在较差成交路径下净清算为正，占 3.17%。 这个存活率本身就接近&quot;在噪声里挑极值&quot;的量级。</li>
+<li>赢家全部挤在网格的同一个角落：BB 长度 300–400、倍数 2.5–3.0、止损 3–5%—— 也就是&quot;带子极宽、止损极宽、信号极少&quot;。BB400/3.0 在 20 个月里只有 131 笔，平均 4.6 天一笔。</li>
+</ul>
+<table><thead><tr>
+<th>开发段较差路径净清算为正的组合</th>
+<th>净清算 USDT</th>
+<th>BB 长度</th>
+<th>倍数</th>
+<th>止损</th>
+</tr></thead><tbody>
+<tr><td>bb300_m2.5_sl3</td><td>32412.51</td><td>300</td><td>2.5</td><td>3%</td></tr>
+<tr><td>bb400_m2.5_sl4</td><td>28924.06</td><td>400</td><td>2.5</td><td>4%</td></tr>
+<tr><td>bb400_m3_sl4</td><td>25184.86</td><td>400</td><td>3.0</td><td>4%</td></tr>
+<tr><td>bb400_m3_sl3</td><td>24272.90</td><td>400</td><td>3.0</td><td>3%</td></tr>
+<tr><td>bb300_m2.5_sl5</td><td>19254.34</td><td>300</td><td>2.5</td><td>5%</td></tr>
+<tr><td>bb400_m2.5_sl3</td><td>16733.76</td><td>400</td><td>2.5</td><td>3%</td></tr>
+<tr><td>bb400_m3_sl2</td><td>16236.17</td><td>400</td><td>3.0</td><td>2%</td></tr>
+<tr><td>bb300_m2.5_sl4</td><td>13956.34</td><td>300</td><td>2.5</td><td>4%</td></tr>
+<tr><td>bb400_m3_sl5</td><td>13559.78</td><td>400</td><td>3.0</td><td>5%</td></tr>
+<tr><td>bb400_m2.5_sl5</td><td>9536.22</td><td>400</td><td>2.5</td><td>5%</td></tr>
+</tbody></table>
+<ul>
+<li>这是<strong>第二次</strong>看到同一个形态。ETH 那轮（<code>exp-eth-bb-stoch-optimization-20260916-v1</code>） 同样是开发段最优、复查段翻负，见 <code>docs/learnings/a-grid-winner-can-depend-on-one-boundary-position.md</code>。</li>
+</ul>
+<h2>这轮的诚实边界</h2>
+<ol>
+<li><strong>复查段不是新鲜盲验。</strong> 这 28 个月在 2026-09-16 的冻结回测里已经被整体看过， 复查段只是已观察数据内部的时间留出。真正未接触的只有 holdout（≥2026-05-04），本轮不碰， <strong>holdout 消耗 0</strong>。</li>
+<li><strong>多重比较</strong>：315 组 × 2 条成交路径。选择规则事前固定为邻域中位数而非峰值， 并在 <code>selection.json</code> 提交（<code>b71a36efad</code>）之后才读复查段价格， 程序核对字节一致才肯运行——这道闸是代码强制的。</li>
+<li><strong>不因为失败再搜一轮。</strong>换网格、换 Stoch 参数、换周期都属于新的搜索，需要 Owner 另行指定； 而且这 28 个月已经被消费，届时不能再算未接触数据。</li>
+<li>先验已经说明了这一点：同规则在这段数据上毛收益仅 +4.98R/697 笔、 盈亏平衡费率 +0.51bp/边，而 OKX 最低 maker 2bp。<strong>要靠调参翻盘需要把毛优势提高一个数量级</strong>， 而不是把信号数从 523 笔砍到 131 笔。</li>
+</ol>
+<h2>风险与诚实声明</h2>
+<ul>
+<li>Python 离线回放，<strong>不声称与 TradingView 策略测试器逐笔成交一致</strong>；OHLC 无法还原逐笔先后。 两条成交路径都跑，表中取较差者。</li>
+<li>净清算 USDT 按固定 1 BTC 名义归一化，<strong>不是账户收益率</strong>；BTC 与 ETH 的现金列不可相加。</li>
+<li>无排序模型，val AUC 与 top-decile 排序收益不适用，不编造；替代零假设为匹配随机入场。</li>
+<li>本轮不训练、不 promote、不改仓、不动真金，<strong>不产生任何实盘资格</strong>。 开发段的正收益<strong>不是</strong>可交易结论。</li>
+</ul>
+<h2>校验与复现</h2>
+<p>网格冻结提交 <code>b71a36efad</code>；选择在读复查段之前生成 （<code>selected_without_recheck_price_read: true</code>）。 逐组账本 315 行、 71.0 MB 因体积只在本地保留， SHA256 <code>78e0fc74d27d7e7b…</code> 记录在 <code>local_artifacts.json</code>。</p>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python -m yoyo.evaluation.bb_stoch_optimization development \
+  --exp experiments/active/exp-btc-bb-stoch-optimization-20260916-v1
+git add experiments/active/exp-btc-bb-stoch-optimization-20260916-v1 &amp;&amp; git commit   # 必须先提交
+.venv/bin/python -m yoyo.evaluation.bb_stoch_optimization recheck \
+  --exp experiments/active/exp-btc-bb-stoch-optimization-20260916-v1
+.venv/bin/python -m yoyo.evaluation.btc_bb_stoch_optimization_report
+</code></pre>
+<h2>下一步（需 Owner 决定）</h2>
+<ol>
+<li><strong>建议到此为止。</strong> ETH 毛为负、BTC 毛微正但 f\* 拿不到、XAU 约零、参数搜索两次都在复查段崩掉。</li>
+<li>若仍要继续，应该换的是<strong>入场形态本身</strong>，不是这条规则的参数。</li>
+<li>任何 holdout 评估仍需逐次授权并在 <code>docs/HOLDOUT_LEDGER.md</code> 记账。</li>
+</ol>
+</body>
+</html>

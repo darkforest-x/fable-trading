@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **547** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **549** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-17 | [`p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md`](p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md) | ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测 | 作者在 v1.2 里写的"改成只做多后回测更成功"，在 BTC/ETH 的长窗口上**确实成立**，但成立的原因不是入场变准了： |
 | 2026-09-16 | [`p1_owner_manual_order_card_20260916.md`](p1_owner_manual_order_card_20260916.md) | 人工开单卡 · 均线密集启动 |  |
 | 2026-09-16 | [`p1_owner_manual_trading_system_20260916.md`](p1_owner_manual_trading_system_20260916.md) | 人工交易手册：均线密集、V9与YOLO怎样一起用 |  |
 | 2026-09-15 | [`p1_goal_martingale_path_20260915.md`](p1_goal_martingale_path_20260915.md) | 倍投可行路径搜索 · 第 1 轮：前提检验 | 1. **ETH × V8 在 3m/15m/30m/60m/240m 全都没有可信的毛 edge。** 10 个格子的毛 R |
@@ -439,6 +440,7 @@
 | — | [`p1_15m_ma_launch_t3_label_semantics_audit_20260827.md`](p1_15m_ma_launch_t3_label_semantics_audit_20260827.md) | 15m t-3 YOLO 信号框语义审计：K 线框与均线密集框错位 | Owner 的判断是对的：当前 9,938 个正样本框定位的是 **4–7 根 K 线的最高价到最低价**，不是六条均线的密集区域。 |
 | — | [`p1_15m_ma_launch_t3_yolo10000_20260826.md`](p1_15m_ma_launch_t3_yolo10000_20260826.md) | 15m 六均线密集启动 t-3 弱标签数据集与 YOLO 训练报告 | 已把首批 1,000 与新增 9,000 个 15m 完成态候选合并为 **10,000 个唯一事件**，LONG / SHORT |
 | — | [`p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md`](p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md) | 15m 六均线密集启动 t-3：原图宽度 imgsz=1280 重训报告 | 本轮直接使用上一轮已经验收过的 **36,812 张 1280×742 PNG** 和对应 YOLO 标签；没有重渲染、 |
+| — | [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) | BTC 5m · BB × Stoch 315 组参数搜索 | 调参在开发段把这条规则从亏变成赚，然后在复查段全部崩掉，而且比不调参更差。 |
 | — | [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) | BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m | 规则一个字没改，直接搬到 BTC 5m、BTC 1m、XAU 1m——没有任何一组做到费用后为正。 |
 | — | [`p1_btcusdtp_genuine_flow_coverage_v34_20260907.md`](p1_btcusdtp_genuine_flow_coverage_v34_20260907.md) | Genuine Flow Coverage · V34 |  |
 | — | [`p1_btcusdtp_hourly_background_support_v23_20260907.md`](p1_btcusdtp_hourly_background_support_v23_20260907.md) | Entry Comparison Coverage | V23 已实际完成。原 251 个 BTCUSDT.P 小时 K1 入口全部保留，**248 个能各配到三个不重复的背景对照，覆盖率 98.80%**，超过事先规定的至少 226/251 门槛。分配共 744 个控制时间，另外三个入口因事前波动桶未知而没有配对；未知供给没有写成零，也没有删除母信号。 |
@@ -718,6 +720,7 @@
 - [`p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md) — A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02）
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
 - [`p1_bico_194r_exit_case_20260910.md`](p1_bico_194r_exit_case_20260910.md) — BICO 194R：最高浮盈与可执行退出
+- [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) — BTC 5m · BB × Stoch 315 组参数搜索
 - [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) — BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — P1：BTCUSDT.P 15m 多因子共振与特征工程审计（2026-09-04）
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — P1：BTCUSDT.P 15m 趋势接管交易可识别性审计（2026-09-04）
@@ -772,6 +775,7 @@
 - [`p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.md`](p1_btcusdtp_owner_k1k2_pending_entry_v38_20260907.md) — K1/K2 Pending Entry Audit · V38
 - [`p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md`](p1_btcusdtp_owner_k1k2_transition_exit_v37_20260907.md) — K1/K2 Exit Timing Test · V37
 - [`p1_chartart_bbrsi_martingale_20260915.md`](p1_chartart_bbrsi_martingale_20260915.md) — ChartArt BB＋RSI v1.1：原逻辑与亏损后翻倍
+- [`p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md`](p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md) — ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测
 - [`p1_chartprime_public_confluence_audit_20260906.md`](p1_chartprime_public_confluence_audit_20260906.md) — ChartPrime Confluence Audit
 - [`p1_crypto_grade_a_yolo_mtf_latest_20260903.md`](p1_crypto_grade_a_yolo_mtf_latest_20260903.md) — P1：最新加密行情四周期 Grade-A YOLO 排序图审（2026-09-03）
 - [`p1_eth_bb_stoch_backtest_20260916.md`](p1_eth_bb_stoch_backtest_20260916.md) — ETH 5m · BB × Stoch v2 回测

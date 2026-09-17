@@ -9593,3 +9593,17 @@ experiments:
       own. Funding rate excluded although the arm holds spot-like long exposure for weeks. The TradingView broker-emulator fill and
       cancel semantics are reconstructed, never checked against an actual TradingView report, so no screenshot or author result is
       claimed reproduced.
+
+  - experiment_id: exp-btc-bb-stoch-optimization-20260916-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 67af64a4586c0a1cd0d27ba1aa6a3a92f1d6e3e5
+    status: negative
+    question: Does a 315-cell BB/stop grid find BTC 5m parameters that survive a later chronological window?
+    single_variable: Owner-authorized multi-variable parameter search;315 BB-length/multiple/stop cells. Stoch5/3/3, costs, exits and the 50percent partial fixed.
+    result: Development 2024-01..2025-09 selected BB400/3.0/4percent (131trades,+0.0512R each,+25184.86USDT worst path) with BB300/2.5/3percent as diagnostic peak. Recheck 2025-09..2026-04 collapsed both to -0.4080R and -0.2843R per trade versus the untouched baseline at -0.0666R; recheck gross R -17.55 and -21.13, so it is not a cost effect. Only10of315 cells were positive in development and all winners sat in the wide-band wide-stop corner. Effective parameters not established.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btc_bb_stoch_optimization_20260916.md
+    artifacts: [btc-bb-stoch-optimization-20260916-delivery]
+    notes: selection.json committed at 67af64a458 before any recheck price read;the recheck gate verifies those bytes against HEAD. Second time this shape appears after the ETH grid. The 28-month window was already observed in aggregate, so the recheck is a hold-back inside seen data, not blind validation. 71MB per-cell ledger kept local with its hash in local_artifacts.json.
