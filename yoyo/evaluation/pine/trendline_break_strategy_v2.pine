@@ -1,0 +1,212 @@
+//@version=6
+// 主下降趋势线 · 关键高点 V2（策略版）
+//
+// 来源：owner 2026-09-18 贴出的指标「主下降趋势线 · 关键高点 V1」。
+// V2 只做一件事：把 V1 的突破事件接上可搜索的 ATR 止盈止损，变成可回测的策略。
+// 选点、容差、建线与突破确认的每一行都与 V1 逐字一致，**没有改过一个指标参数**。
+//
+// 回测口径与本仓 Python 复算 (yoyo/evaluation/trendline_v2_*.py) 对齐：
+//   入场   突破 bar 收盘确认 → 下一根开盘市价成交（Pine 市价单的默认行为）
+//   风险   R = 止损倍数 × 信号 bar 的 ATR(14)
+//   止损   入场价 − R      止盈   入场价 + 止盈倍数 × 同一个 ATR
+//   时间止损 持有满 maxHold 根后按收盘平
+//   成本   commission_value 每边 0.1%（往返 0.2%，本项目的固定假设）
+//
+// 注意事项，别把回测面板当成实盘预期：
+//  * 枢轴需要右侧 rightBars 根确认，所以线在实盘比历史图上看到的晚 8 根出现。
+//    这不是前视（画线只用到当时已有的 K），但实盘的线确实来得更晚。
+//  * 同一根 K 同时碰到止盈与止损时，TradingView 的默认假设不一定是最坏情况。
+//    Python 复算默认把这种 bar 记为止损（adverse_first），面板数字会比它乐观。
+//  * 本文件不含任何收益主张，不进入 ACTIVE / forward / 部署。
+
+strategy("主下降趋势线 V2 · 策略", overlay = true, max_lines_count = 30, max_bars_back = 2500,
+     default_qty_type = strategy.percent_of_equity, default_qty_value = 100,
+     initial_capital = 10000, commission_type = strategy.commission.percent,
+     commission_value = 0.1, pyramiding = 0, calc_on_every_tick = false)
+
+// ───────────── 选点规则（与 V1 逐字一致，不要在这里调参） ─────────────
+leftBars    = input.int(12, "高点左侧比较 K 数", minval = 2, maxval = 100, group = "01 选点")
+rightBars   = input.int(8, "高点右侧确认 K 数", minval = 1, maxval = 50, group = "01 选点")
+lookback    = input.int(600, "搜索范围 / 主线最长年龄（K 数）", minval = 100, maxval = 2000, group = "01 选点")
+minSpan     = input.int(48, "两个锚点最小间隔（K 数）", minval = 5, maxval = 500, group = "01 选点")
+minDropATR  = input.float(2.0, "两个高点最小落差（ATR 倍数）", minval = 0.1, step = 0.1, group = "01 选点")
+minTouches  = input.int(2, "至少贴线的高点数（含两端）", minval = 2, maxval = 6, group = "01 选点")
+
+wickTolATR  = input.float(0.35, "建线时允许越线的幅度（ATR）", minval = 0.0, step = 0.05, group = "02 容差")
+touchTolATR = input.float(0.50, "高点贴线容差（ATR）", minval = 0.05, step = 0.05, group = "02 容差")
+breakBufATR = input.float(0.20, "突破需超出趋势线的幅度（ATR）", minval = 0.0, step = 0.05, group = "02 容差")
+breakBars   = input.int(2, "突破需要连续收盘确认的 K 数", minval = 1, maxval = 5, group = "02 容差")
+
+// ───────────── V2 新增：出场 ─────────────
+// 这两个是本策略唯一被搜索过的参数。默认值填的是本仓复查段用的参照格，
+// 不是"最优值"——最优格见 analysis/p1_trendline_v2_tbsl_20260918.md，
+// 而那份报告的结论是它在复查段没站住。
+slATR       = input.float(1.0, "止损（ATR 倍数）", minval = 0.1, step = 0.05, group = "03 出场")
+tpATR       = input.float(2.0, "止盈（ATR 倍数）", minval = 0.1, step = 0.05, group = "03 出场")
+maxHold     = input.int(200, "最长持有 K 数（时间止损）", minval = 5, maxval = 2000, group = "03 出场")
+
+lineColor   = input.color(color.white, "趋势线颜色", group = "04 显示")
+lineWidth   = input.int(1, "线宽", minval = 1, maxval = 4, group = "04 显示")
+extendLeft  = input.bool(true, "同时向左延伸", group = "04 显示")
+keepLines   = input.int(1, "最多保留的趋势线数量", minval = 1, maxval = 20, group = "04 显示")
+brokenDash  = input.bool(true, "突破后改成虚线", group = "04 显示")
+showBreak   = input.bool(true, "显示突破标记", group = "04 显示")
+
+if barstate.isfirst and lookback < minSpan + rightBars
+    runtime.error("搜索范围必须不小于：两个锚点最小间隔 + 右侧确认 K 数。")
+
+float atrValue = ta.atr(14)
+float pivotHigh = ta.pivothigh(high, leftBars, rightBars)
+float pivotATR = atrValue[rightBars]
+bool newPivot = not na(pivotHigh) and not na(pivotATR)
+
+// 检查第一锚点到当前确认 K 线：不允许价格明显穿过候选线。
+// 只读取当前及过去的数据；最大历史偏移受 lookback 限制。
+f_isClean(int x1, float y1, int x2, float y2) =>
+    float slope = (y2 - y1) / (x2 - x1)
+    bool clean = true
+    int age = bar_index - x1
+    for offset = 0 to age
+        float ceiling = y1 + slope * (bar_index - offset - x1)
+        float pastATR = math.max(nz(atrValue[offset], syminfo.mintick), syminfo.mintick)
+        if high[offset] > ceiling + pastATR * wickTolATR
+            clean := false
+            break
+    clean
+
+var array<int> pivotXs = array.new_int()
+var array<float> pivotYs = array.new_float()
+var array<float> pivotATRs = array.new_float()
+var array<line> savedLines = array.new_line()
+
+var line mainLine = na
+var bool lineActive = false
+var int firstAnchor = na
+var int bornBar = na
+var int aboveCount = 0
+
+// V2 状态：下单时锁住信号 bar 的 ATR，成交后才知道真实均价。
+var float pendingATR = na
+var float stopPrice = na
+var float limitPrice = na
+var int entryBar = na
+
+bool breakEvent = false
+
+if barstate.isconfirmed
+    // 1. 先检查上一根 K 线已经存在的主线，避免换线造成虚假突破。
+    if lineActive and not na(mainLine)
+        float lineNow = line.get_price(mainLine, bar_index)
+        if bar_index > bornBar
+            bool above = close > lineNow + atrValue * breakBufATR
+            aboveCount := above ? aboveCount + 1 : 0
+            if aboveCount >= breakBars
+                breakEvent := true
+                lineActive := false
+                aboveCount := 0
+                if brokenDash
+                    line.set_style(mainLine, line.style_dashed)
+
+        // 太旧的主线退出监测；不把"到期"当作突破。
+        if lineActive and bar_index - firstAnchor > lookback
+            lineActive := false
+            aboveCount := 0
+            line.set_xy2(mainLine, bar_index, lineNow)
+            line.set_extend(mainLine, extend.none)
+
+    // 2. 高点在右侧确认完成后才进入候选池。
+    if newPivot
+        array.push(pivotXs, bar_index - rightBars)
+        array.push(pivotYs, pivotHigh)
+        array.push(pivotATRs, math.max(pivotATR, syminfo.mintick))
+
+    // 限制候选数量和历史跨度。
+    while array.size(pivotXs) > 0
+        bool tooOld = bar_index - array.get(pivotXs, 0) > lookback
+        if tooOld or array.size(pivotXs) > 40
+            array.shift(pivotXs)
+            array.shift(pivotYs)
+            array.shift(pivotATRs)
+        else
+            break
+
+    // 3. 有有效主线时保持锚点不动；失效后才寻找下一条。
+    int n = array.size(pivotXs)
+    if not lineActive and not breakEvent and newPivot and n >= 2
+        int x2 = array.get(pivotXs, n - 1)
+        float y2 = array.get(pivotYs, n - 1)
+        float a2 = array.get(pivotATRs, n - 1)
+        float bestScore = -1.0
+        int bestX1 = na
+        float bestY1 = na
+
+        for i = 0 to n - 2
+            int x1 = array.get(pivotXs, i)
+            float y1 = array.get(pivotYs, i)
+            int span = x2 - x1
+            bool geometryOK = span >= minSpan and y1 > y2 and y1 - y2 >= a2 * minDropATR
+            if geometryOK
+                float slope = (y2 - y1) / span
+                float projectedNow = y1 + slope * (bar_index - x1)
+                if close <= projectedNow
+                    int touches = 0
+                    for j = i to n - 1
+                        int tx = array.get(pivotXs, j)
+                        float ty = array.get(pivotYs, j)
+                        float touchATR = array.get(pivotATRs, j)
+                        float expected = y1 + slope * (tx - x1)
+                        if math.abs(ty - expected) <= touchATR * touchTolATR
+                            touches += 1
+                    float score = span + math.max(touches - 2, 0) * minSpan * 2.0
+                    if touches >= minTouches and score > bestScore
+                        if f_isClean(x1, y1, x2, y2)
+                            bestScore := score
+                            bestX1 := x1
+                            bestY1 := y1
+
+        if not na(bestX1)
+            mainLine := line.new(
+                 bestX1, bestY1, x2, y2,
+                 xloc = xloc.bar_index,
+                 extend = extendLeft ? extend.both : extend.right,
+                 color = lineColor,
+                 style = line.style_solid,
+                 width = lineWidth)
+            lineActive := true
+            firstAnchor := bestX1
+            bornBar := bar_index
+            aboveCount := 0
+            array.push(savedLines, mainLine)
+
+            while array.size(savedLines) > keepLines
+                line.delete(array.shift(savedLines))
+
+    // ───────────── V2：下单 ─────────────
+    // 突破 bar 收盘挂市价买单，Pine 在下一根开盘成交。信号 bar 的 ATR 在这里
+    // 就被锁住，之后无论成交价是多少，R 都由这个值决定——和 Python 复算一致。
+    if breakEvent and strategy.position_size == 0
+        pendingATR := atrValue
+        strategy.entry("TLBreak", strategy.long)
+
+// 成交那一根才知道真实均价，此时把两条障碍按锁住的 ATR 算出来。
+if strategy.position_size > 0 and strategy.position_size[1] == 0 and not na(pendingATR)
+    stopPrice := strategy.position_avg_price - slATR * pendingATR
+    limitPrice := strategy.position_avg_price + tpATR * pendingATR
+    entryBar := bar_index
+
+if strategy.position_size > 0 and not na(stopPrice)
+    strategy.exit("TLExit", from_entry = "TLBreak", stop = stopPrice, limit = limitPrice)
+    if bar_index - entryBar >= maxHold - 1
+        strategy.close("TLBreak", comment = "time")
+
+if strategy.position_size == 0
+    stopPrice := na
+    limitPrice := na
+    pendingATR := na
+
+plotshape(showBreak and breakEvent, title = "收盘确认突破", style = shape.triangleup,
+     location = location.belowbar, color = color.lime, size = size.tiny,
+     text = "破", textcolor = color.white)
+
+alertcondition(breakEvent, title = "下降趋势线向上突破",
+     message = "{{ticker}} {{interval}}：收盘确认突破已存在的下降趋势线。")

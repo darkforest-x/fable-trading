@@ -1,0 +1,96 @@
+{
+  "experiment_id": "exp-trendline-v2-tbsl-20260918-v1",
+  "question": "Does the owner's descending-trendline break become a profitable long strategy once a take-profit and stop-loss are searched, and does any searched cell survive an out-of-selection time segment?",
+  "single_variable": "The exit only. Entry, indicator parameters, universe, costs and execution assumptions are frozen; the searched axis is (stop_loss_atr, take_profit_atr).",
+  "source_dir": "data/kline_deep",
+  "source_note": "OKX USDT perpetual 15m CSVs already in the repository. All rows are parsed by the frozen release_eth_prefix byte-gated reader, which stops at the first row at or after the holdout boundary.",
+  "instrument_note": "read_prefix stamps its receipt with instrument ETH-USDT-SWAP because it was written for that one file. The symbol is taken from the filename here and the receipt field is ignored.",
+  "end_exclusive": "2026-05-04T00:00:00+00:00",
+  "dev_end_exclusive": "2025-01-01T00:00:00+00:00",
+  "minutes": [
+    15,
+    60,
+    240
+  ],
+  "min_bars": 1500,
+  "max_hold_bars": 200,
+  "trendline_params": {
+    "left_bars": 12,
+    "right_bars": 8,
+    "lookback": 600,
+    "min_span": 48,
+    "min_drop_atr": 2.0,
+    "min_touches": 2,
+    "wick_tol_atr": 0.35,
+    "touch_tol_atr": 0.5,
+    "break_buf_atr": 0.2,
+    "break_bars": 2,
+    "max_candidates": 40
+  },
+  "sl_mults": [
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    4.0,
+    5.0,
+    6.0
+  ],
+  "tp_mults": [
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0
+  ],
+  "reference_cells": [
+    [
+      1.0,
+      2.0
+    ],
+    [
+      2.0,
+      4.0
+    ]
+  ],
+  "min_signals_for_selection": 200,
+  "max_notional_per_r": 1000.0,
+  "leverage_note": "median entry price / R. A cell above the cap is excluded from selection: risking 1% of equity there needs more than 10x notional, and the net-R axis rewards tight stops purely because a fixed percentage fee is smaller when measured in a smaller R.",
+  "selection_rule": "Among development cells with at least min_signals_for_selection signals and median notional per R at or below max_notional_per_r, take the cell whose median of (own mean net R, up to four grid-neighbour mean net R) is highest. Ties go to the smaller stop, then the smaller target.",
+  "reported_metrics": [
+    "mean net R (fixed-fractional-risk objective)",
+    "mean net return in bp of notional (unit-free)",
+    "mean cost in R",
+    "median notional per R"
+  ],
+  "primary_path": "adverse_first",
+  "sensitivity_paths": [
+    "favorable_first"
+  ],
+  "fee_per_side": 0.001,
+  "cost_note": "0.2% round trip, the project's frozen assumption. Funding and slippage are not modelled; both would make the result worse.",
+  "side": "long only, on the upward close-confirmed break of the descending line",
+  "entry": "next bar open after the break bar's close",
+  "risk_unit": "R = stop_loss_atr x ATR(14) at the signal bar",
+  "controls_per_signal": 5,
+  "control_seed": "trendline-v2-tbsl-20260918",
+  "control_note": "Same symbol, same UTC month of the signal's close, same causal volatility tercile (SMA14 true range / close versus its own preceding 120 values). Same barriers, same horizon, same cost.",
+  "seed": 9182026,
+  "max_signflip_permutations": 9999,
+  "pass_criteria_review": [
+    "mean net R per signal on the review segment is positive",
+    "matched paired excess net R on the review segment is positive",
+    "month-block sign-flip one-sided p < 0.01 on the review segment"
+  ],
+  "pass_note": "All three are required. Passing means only that it is worth asking the owner for a holdout read; it is not a promotion, not a live permission, and not a trade.",
+  "holdout_consumed": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
