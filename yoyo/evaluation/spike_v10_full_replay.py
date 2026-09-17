@@ -60,29 +60,35 @@ def truncate(context: base.StreamContext, cut: pd.Timestamp) -> tuple[base.Strea
     return replace(context, cache=cache), int(keep.sum()), int((~keep).sum())
 
 
-def v9_parity(key: str, ours: pd.DataFrame, last_close: pd.Timestamp) -> dict[str, int]:
-    """Every published V9 trade that closed before the cut must reappear here.
+def v9_parity(key: str, ours: pd.DataFrame, last_open: pd.Timestamp) -> dict[str, int]:
+    """Every published V9 trade that exited on a kept bar must reappear here.
 
     This is what makes truncation auditable: if removing the tail had changed a
     single earlier decision, these two ledgers would disagree.
+
+    The boundary is the last KEPT bar's open, not its close. Exits are stamped
+    with the exit bar's open, so a published trade stamped at the cut instant
+    exited on the first holdout bar -- it belongs to the tail this run does not
+    have, and comparing against it would be comparing against a bar we refused
+    to read.
     """
     folder = V9_LEDGER / "streams" / key
     receipt = json.loads((folder / "completion.json").read_text())
     name = "v9.trades.csv.gz"
     if receipt.get("status") != "complete" or digest(folder / name) != receipt["files"][name]:
         raise ValueError(f"published V9 ledger receipt mismatch: {key}")
-    return compare_v9_ledger(key, pd.read_csv(folder / name), ours, last_close)
+    return compare_v9_ledger(key, pd.read_csv(folder / name), ours, last_open)
 
 
 def compare_v9_ledger(key: str, published: pd.DataFrame, ours: pd.DataFrame,
-                      last_close: pd.Timestamp) -> dict[str, float]:
-    """Compare two ledgers over the trades that both settled before the cut."""
+                      last_open: pd.Timestamp) -> dict[str, float]:
+    """Compare two ledgers over the trades that both exited on a kept bar."""
     for table in (published, ours):
         for column in ("entry_time", "exit_time"):
             table[column] = pd.to_datetime(table[column], utc=True, errors="coerce")
-    settled = published.loc[published.exit_time.le(last_close) & ~published.censored.astype(bool)]
+    settled = published.loc[published.exit_time.le(last_open) & ~published.censored.astype(bool)]
     left = settled[KEY].reset_index(drop=True)
-    right = ours.loc[ours.exit_time.le(last_close) & ~ours.censored.astype(bool)][KEY].reset_index(drop=True)
+    right = ours.loc[ours.exit_time.le(last_open) & ~ours.censored.astype(bool)][KEY].reset_index(drop=True)
     if len(left) != len(right):
         raise ValueError(f"truncated V9 arm has a different trade count than the published ledger: {key}")
     drift = 0.0
@@ -167,9 +173,10 @@ def run_stream(args):
             (staging / "completion.json").write_text(json.dumps(receipt, indent=2) + "\n")
             staging.replace(final)
             return receipt
-        last_close = context.cache["bars"].index[-1] + pd.Timedelta(minutes=context.minutes)
+        last_open = context.cache["bars"].index[-1]
+        last_close = last_open + pd.Timedelta(minutes=context.minutes)
         outputs, decisions, treatment = replay_stream(context)
-        parity = v9_parity(key, outputs["v9"][0].copy(), last_close)
+        parity = v9_parity(key, outputs["v9"][0].copy(), last_open)
         combined = pd.concat([outputs[arm][0] for arm in ARMS], ignore_index=True)
         controls = random_controls(treatment, combined)
         summaries = []

@@ -169,6 +169,25 @@ def test_parity_accepts_a_stream_whose_every_trade_opened_after_the_cut():
                       "max_relative_float_drift": 0.0}
 
 
+def test_parity_excludes_a_published_exit_that_landed_on_the_first_dropped_bar():
+    """An exit stamped at the cut instant happened on a bar this run refused.
+
+    Exits carry the exit bar's open. The published V9 run had bars past the
+    cut, so a trade of its own could exit on the first holdout bar; here that
+    position is simply still open and censored. Comparing the two would compare
+    against a bar we did not read.
+    """
+    last_open = pd.Timestamp("2026-05-03T20:00:00Z")
+    published = ledger_frame([
+        [7, 8, 1, 20, "initial_stop", 1., .9, .8, .2, -.2, -1., "2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z", False],
+        [30, 31, -1, 40, "initial_stop", 1., 1.1, 1.2, .2, -.2, -1.07, "2026-05-02T04:00:00Z", "2026-05-04T00:00:00Z", False]])
+    mine = ledger_frame([
+        [7, 8, 1, 20, "initial_stop", 1., .9, .8, .2, -.2, -1., "2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z", False],
+        [30, 31, -1, 39, "boundary_mark", 1., np.nan, 1.2, .2, np.nan, np.nan, "2026-05-02T04:00:00Z", "2026-05-03T20:00:00Z", True]])
+    result = compare_v9_ledger("synthetic", published, mine, last_open)
+    assert result["compared_trades"] == 1 and result["published_after_cut"] == 1
+
+
 def test_parity_rejects_a_changed_pre_cut_decision():
     cut = pd.Timestamp("2026-05-04T00:00:00Z")
     row = [7, 8, 1, 20, "initial_stop", 1., .9, .8, .2, -.2, -1., "2026-01-01T00:00:00Z", "2026-01-02T00:00:00Z", False]
