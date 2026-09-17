@@ -35,8 +35,9 @@ def render(key: str, bars_shown: int, destination: Path) -> dict:
     treatment, decisions = prepare_v9(prepared)
     frame, gap, tick = treatment.frame, treatment.gap, float(context.cache["tick"])
     ages = break_ages(frame, gap, tick)
-    up = trendline_breaks(frame.high.to_numpy(float), frame.low.to_numpy(float), frame.close.to_numpy(float),
-                          frame.atr.to_numpy(float), gap, tick, direction=1)
+    arrays = tuple(frame[name].to_numpy(float) for name in ("high", "low", "close", "atr"))
+    up = trendline_breaks(*arrays, gap, tick, direction=1)
+    down = trendline_breaks(*arrays, gap, tick, direction=-1)
     start = max(0, len(frame) - bars_shown)
     x = np.arange(len(frame))
     figure, axis = plt.subplots(figsize=(19, 8.5))
@@ -47,22 +48,30 @@ def render(key: str, bars_shown: int, destination: Path) -> dict:
         part = body.loc[mask]
         axis.vlines(x[start:][mask.to_numpy()], part[["open", "close"]].min(axis=1),
                     part[["open", "close"]].max(axis=1), color=colour, linewidth=2.4, zorder=2)
-    drawn = 0
-    for line in up.anchors:
-        if line["born_i"] < start:
-            continue
-        # Draw each line only over the span where the replay held it live.
-        end = line["born_i"]
-        while end + 1 < len(frame) and up.line_active[end + 1]:
-            end += 1
-        span = np.arange(line["x1"], end + 1)
-        slope = (line["y2"] - line["y1"]) / (line["x2"] - line["x1"])
-        axis.plot(span, line["y1"] + slope * (span - line["x1"]), color="#1f77b4", linewidth=1.1, zorder=3)
-        drawn += 1
+    drawn = {}
+    marks = {}
+    for name, result, colour, marker in (("resistance", up, "#1f77b4", "^"), ("support", down, "#AD7B29", "v")):
+        count = 0
+        for line in result.anchors:
+            if line["born_i"] < start:
+                continue
+            # Draw each line only over the span where the replay held it live.
+            end = line["born_i"]
+            while end + 1 < len(frame) and result.line_active[end + 1]:
+                end += 1
+            span = np.arange(line["x1"], end + 1)
+            slope = (line["y2"] - line["y1"]) / (line["x2"] - line["x1"])
+            axis.plot(span, line["y1"] + slope * (span - line["x1"]), color=colour, linewidth=1.1, zorder=3)
+            count += 1
+        hits = np.flatnonzero(result.break_event)
+        hits = hits[hits >= start]
+        direction = "upward" if name == "resistance" else "downward"
+        axis.scatter(hits, frame.close.to_numpy()[hits], marker=marker, s=70, color=colour, zorder=5,
+                     label=f"{direction} break of the {name} line ({len(hits)})")
+        drawn[name] = count
+        marks[name] = int(len(hits))
     breaks = np.flatnonzero(up.break_event)
     breaks = breaks[breaks >= start]
-    axis.scatter(breaks, frame.close.to_numpy()[breaks], marker="^", s=70, color="#1f77b4",
-                 zorder=5, label=f"upward break of the descending line ({len(breaks)})")
     shown = decisions.loc[decisions.local_i.ge(start)]
     for label, marker, colour in (("long", "o", "#008F82"), ("short", "o", "#D34B66")):
         side = 1 if label == "long" else -1
@@ -80,7 +89,7 @@ def render(key: str, bars_shown: int, destination: Path) -> dict:
     axis.set_xticklabels([frame.index[i].strftime("%Y-%m-%d") for i in ticks], fontsize=8)
     identity = context.identity
     axis.set_title(f"{identity['venue']} {identity['symbol']} {identity['timeframe_min']}m · "
-                   f"descending trendlines and close-confirmed breaks · last {len(frame)-start} bars before "
+                   f"main trendlines and close-confirmed breaks · last {len(frame)-start} bars before "
                    f"{CUT.date()} · numbers are the break age at each V9 confirmation", fontsize=10)
     axis.legend(loc="upper left", fontsize=8, framealpha=.9)
     axis.grid(alpha=.12)
@@ -89,8 +98,8 @@ def render(key: str, bars_shown: int, destination: Path) -> dict:
     figure.savefig(destination, dpi=125)
     plt.close(figure)
     return {"key": key, "bars_kept": kept, "bars_dropped": dropped, "lines_drawn_in_view": drawn,
-            "breaks_in_view": int(len(breaks)), "total_long_breaks": int(up.break_event.sum()),
-            "total_short_breaks": int(ages.short_break.sum()), "pivot_ties": up.pivot_ties,
+            "breaks_in_view": marks, "total_long_breaks": int(up.break_event.sum()),
+            "total_short_breaks": int(down.break_event.sum()), "pivot_ties": up.pivot_ties,
             "v9_signals": int(decisions.v9.astype(bool).sum()),
             "first_bar": str(frame.index[0]), "last_bar": str(frame.index[-1])}
 
