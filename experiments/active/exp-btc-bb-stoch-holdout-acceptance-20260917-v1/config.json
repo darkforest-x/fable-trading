@@ -1,0 +1,71 @@
+{
+  "experiment_id": "exp-btc-bb-stoch-holdout-acceptance-20260917-v1",
+  "purpose": "One-shot final acceptance of the frozen BB x Stoch rule on OKX BTC-USDT-SWAP 5m holdout",
+  "source": "data/kline_holdout_btc5m/okx_BTC_USDT_SWAP_5m_52992.csv",
+  "source_sha256": "6d9bc74324bf733c76d6a7e3a3a5a6644f021cf23991df8704f43d94a7f04b8c",
+  "instrument": "OKX BTC-USDT-SWAP",
+  "minutes": 5,
+  "holdout_authorization": {
+    "ledger_index": 2,
+    "experiment_id": "exp-btc-bb-stoch-holdout-acceptance-20260917-v1",
+    "owner_words": "拿btcusdt.p 5min 跑最终验收",
+    "granted_at": "2026-09-17",
+    "window_start": "2026-02-28T16:00:00Z",
+    "window_end": "2026-08-31T16:00:00Z",
+    "evaluation_start": "2026-05-04T00:00:00Z"
+  },
+  "consumption_note": "This is the 1st holdout consumption for this configuration and the 2nd recorded holdout read in this repository.",
+  "arms": {
+    "v2_baseline": {
+      "be_cost": 0.0,
+      "partial": 0.5
+    },
+    "be_cost": {
+      "be_cost": 0.002,
+      "partial": 0.5
+    }
+  },
+  "rejected_candidates_not_scored": [
+    "bb400_m3_sl4",
+    "bb300_m2.5_sl3"
+  ],
+  "bb_length": 200,
+  "bb_population_std_multiple": 2.0,
+  "stoch": [
+    5,
+    3,
+    3
+  ],
+  "stop_fraction": 0.03,
+  "partial_fraction": 0.5,
+  "primary_path": "tv",
+  "sensitivity_paths": [
+    "adverse_first"
+  ],
+  "fee_per_executed_notional": 0.001,
+  "fee_sensitivity_rates": [
+    0.0,
+    0.0002,
+    0.0005,
+    0.001
+  ],
+  "tick": 0.01,
+  "quantity_normalization_units": 1.0,
+  "slippage": 0,
+  "funding": "not modeled",
+  "seed": 9172026,
+  "controls_per_trade": 5,
+  "max_signflip_permutations": 9999,
+  "pass_criteria": {
+    "net_r_positive": true,
+    "excess_mean_net_r_positive": true,
+    "signflip_p_below": 0.01,
+    "all_must_hold": true
+  },
+  "prior_expectation": "fail; pre-window breakeven fee was +0.51bp per side against a 2bp minimum maker",
+  "rerun_forbidden": "One evaluation only. No criterion, window, parameter or arm may change afterwards.",
+  "parameter_search": false,
+  "holdout_consumed": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
