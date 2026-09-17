@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V1 / V9：剔除盈利最高与最低的币种后还剩什么</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V1 / V9：剔除盈利最高与最低的币种后还剩什么</h1>
+<p>日期：2026-09-17 · 输入为已发布的逐笔账本 · 未重放行情 · 未改配置 · <strong>holdout 消耗 0</strong></p>
+<p><strong>V1 的两年 +854.70R 全部来自一个币：只要同时剔掉最好的 RAVE 和最差的 USDC（合计 23 笔，占 6,116 笔的 0.38%），净 R 就从 +854.70 变成 −238.03，PF 从 1.184 掉到 0.948。V9 相反：剔掉最好和最差各 10 个币（共 4,444 笔）后两年仍有 +2,022.50R，PF 1.039，配对随机超额基本不动（+0.0628 → +0.0623R/笔）。但 V9 后一年在任何剔除档位都仍然亏损，且越剔越差。</strong></p>
+<p>换句话说，这次剔除把上一份对读里&quot;V1 平均 R 和 PF 更高&quot;这条结论证伪成了记账假象；同时它没有把 V9 的后一年亏损救回来。两个系统都没有变成可交易结论。</p>
+<h2>1. 本次做了什么</h2>
+<p>Owner：「去掉盈利最高和盈利最低的几个币种」。本轮唯一变动的变量是<strong>聚合时纳入哪些币种</strong>， 策略、出场、成本（名义往返 0.2%）、评估窗口（UTC 2024-09-10 至 2026-09-10，切点 2025-09-10） 全部沿用已冻结口径，一个字节都没改。做法是按<strong>已实现净 R</strong> 给每个币排序，成对剔掉最高 k 个和 最低 k 个（k = 0/1/3/5/10），重算存活交易的笔数、净 R、每笔 R、PF；V9 另外用其<strong>原报告那套 冻结的匹配随机入场对照</strong>重算超额与月块符号翻转 p。</p>
+<p>程序内置拒绝：未剔除的 V9 那一行必须与已发布 <code>statistics/full_v1/summary.csv</code> 的净 R、 配对数、配对超额、p 四项逐值一致，否则抛错、不写任何剔除行。三个周期全部复现通过。</p>
+<p><strong>排序用的是事后已实现结果，所以每一个剔除行都是分解，不是可执行的选币规则</strong>——2024 年 9 月 站在起点上没有任何办法知道 RAVE 会是那个币。本报告不提议任何黑名单或白名单。</p>
+<h2>2. 数据统计</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>V1 原生（只做多）</th>
+<th>V1 统一退出（只做多）</th>
+<th>V9（多空）</th>
+</tr></thead><tbody>
+<tr><td>已平仓笔数</td><td>6,116</td><td>6,138</td><td>81,854</td></tr>
+<tr><td>出现过交易的币种数</td><td>751</td><td>753</td><td>820</td></tr>
+<tr><td>净 R 为正的币种</td><td>252（33.6%）</td><td>264（35.1%）</td><td>389（47.4%）</td></tr>
+<tr><td>币种净 R 中位数</td><td>−1.567R</td><td>−1.248R</td><td>−0.881R</td></tr>
+<tr><td>最好一个币占总净 R</td><td>RAVE 139.7%</td><td>RAVE 112.5%</td><td>XRP 9.2%</td></tr>
+<tr><td>最好 10 币合计</td><td>+1,689.3R</td><td>+1,677.4R</td><td>+1,442.5R</td></tr>
+<tr><td>最差 10 币合计</td><td>−249.0R</td><td>−230.9R</td><td>−706.8R</td></tr>
+</tbody></table>
+<p>V1 的最好一个币超过总净 R 的 100%，意思就是其余 750 个币加起来是负的。这与已发布的 <code>native_v1/rave_concentration.csv</code> 一致：剔掉 RAVE 一个币，其余 6,109 笔合计 −339.03R。</p>
+<p>V1 的极值是<strong>不对称的</strong>：最好 +1,193.7R、最差 −101.0R，相差 11.8 倍。所以&quot;对称剔除&quot;对 V1 必然是净减利——这不是检验的缺陷，这正是结论本身：利润集中在一个币，亏损摊在几百个币上。 V9 的两端量级接近（+254.4 / −89.7），对称剔除对它才是接近中性的操作。</p>
+<h2>3. 结果表：剔除曲线</h2>
+<p>排序在全期上做一次，然后同一份名单同时应用到全期和后一年（不按分期重新排序，否则等于用 后一年的结果去选后一年的币）。</p>
+<h3>V1 原生（只做多，无同契约随机对照）</h3>
+<table><thead><tr>
+<th>剔除 k</th>
+<th>剩余币种</th>
+<th>已平仓</th>
+<th>净 R（全期）</th>
+<th>每笔 R</th>
+<th>PF</th>
+<th>净 R（后一年）</th>
+<th>每笔 R</th>
+<th>PF</th>
+</tr></thead><tbody>
+<tr><td>0</td><td>751</td><td>6,116</td><td><strong>+854.70</strong></td><td>+0.1397</td><td>1.184</td><td><strong>+1,128.79</strong></td><td>+0.2538</td><td>1.341</td></tr>
+<tr><td>1</td><td>749</td><td>6,093</td><td>−238.03</td><td>−0.0391</td><td>0.948</td><td>−36.28</td><td>−0.0082</td><td>0.989</td></tr>
+<tr><td>3</td><td>745</td><td>6,016</td><td>−360.25</td><td>−0.0599</td><td>0.920</td><td>−166.31</td><td>−0.0379</td><td>0.949</td></tr>
+<tr><td>5</td><td>741</td><td>5,924</td><td>−453.17</td><td>−0.0765</td><td>0.897</td><td>−248.02</td><td>−0.0574</td><td>0.923</td></tr>
+<tr><td>10</td><td>731</td><td>5,734</td><td>−585.55</td><td>−0.1021</td><td>0.863</td><td>−299.42</td><td>−0.0714</td><td>0.904</td></tr>
+</tbody></table>
+<h3>V1 统一退出（只做多，无同契约随机对照）</h3>
+<table><thead><tr>
+<th>剔除 k</th>
+<th>剩余币种</th>
+<th>已平仓</th>
+<th>净 R（全期）</th>
+<th>每笔 R</th>
+<th>PF</th>
+<th>净 R（后一年）</th>
+<th>每笔 R</th>
+<th>PF</th>
+</tr></thead><tbody>
+<tr><td>0</td><td>753</td><td>6,138</td><td><strong>+1,060.98</strong></td><td>+0.1729</td><td>1.259</td><td><strong>+1,243.18</strong></td><td>+0.2781</td><td>1.423</td></tr>
+<tr><td>1</td><td>751</td><td>6,115</td><td>−34.91</td><td>−0.0057</td><td>0.991</td><td>+77.06</td><td>+0.0173</td><td>1.026</td></tr>
+<tr><td>3</td><td>747</td><td>6,017</td><td>−144.81</td><td>−0.0241</td><td>0.963</td><td>−16.59</td><td>−0.0038</td><td>0.994</td></tr>
+<tr><td>5</td><td>743</td><td>5,945</td><td>−247.74</td><td>−0.0417</td><td>0.936</td><td>−118.87</td><td>−0.0274</td><td>0.958</td></tr>
+<tr><td>10</td><td>733</td><td>5,766</td><td>−385.55</td><td>−0.0669</td><td>0.898</td><td>−173.60</td><td>−0.0413</td><td>0.937</td></tr>
+</tbody></table>
+<h3>V9（多空，带冻结匹配随机入场对照）</h3>
+<table><thead><tr>
+<th>剔除 k</th>
+<th>剩余币种</th>
+<th>已平仓</th>
+<th>净 R（全期）</th>
+<th>每笔 R</th>
+<th>PF</th>
+<th>配对数</th>
+<th>配对超额 R</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>0</td><td>820</td><td>81,854</td><td><strong>+2,758.17</strong></td><td>+0.0337</td><td>1.050</td><td>81,703</td><td>+0.06281</td><td>0.01699</td></tr>
+<tr><td>1</td><td>818</td><td>81,300</td><td>+2,593.52</td><td>+0.0319</td><td>1.047</td><td>81,149</td><td>+0.06349</td><td>0.01749</td></tr>
+<tr><td>3</td><td>814</td><td>80,637</td><td>+2,360.82</td><td>+0.0293</td><td>1.043</td><td>80,487</td><td>+0.06105</td><td>0.02249</td></tr>
+<tr><td>5</td><td>810</td><td>79,818</td><td>+2,265.43</td><td>+0.0284</td><td>1.042</td><td>79,669</td><td>+0.06212</td><td>0.02049</td></tr>
+<tr><td>10</td><td>800</td><td>77,410</td><td>+2,022.50</td><td>+0.0261</td><td>1.039</td><td>77,263</td><td>+0.06229</td><td>0.01999</td></tr>
+</tbody></table>
+<p>V9 后一年（同一份剔除名单）：</p>
+<table><thead><tr>
+<th>剔除 k</th>
+<th>已平仓</th>
+<th>净 R</th>
+<th>每笔 R</th>
+<th>PF</th>
+<th>配对超额 R</th>
+<th>月块 p</th>
+</tr></thead><tbody>
+<tr><td>0</td><td>50,021</td><td>−2,089.19</td><td>−0.0418</td><td>0.940</td><td>+0.01880</td><td>0.19240</td></tr>
+<tr><td>1</td><td>49,749</td><td>−2,187.30</td><td>−0.0440</td><td>0.937</td><td>+0.01609</td><td>0.20190</td></tr>
+<tr><td>3</td><td>49,282</td><td>−2,456.39</td><td>−0.0498</td><td>0.929</td><td>+0.01040</td><td>0.28436</td></tr>
+<tr><td>5</td><td>48,794</td><td>−2,556.18</td><td>−0.0524</td><td>0.925</td><td>+0.00880</td><td>0.30935</td></tr>
+<tr><td>10</td><td>47,543</td><td>−2,415.11</td><td>−0.0508</td><td>0.927</td><td>+0.01098</td><td>0.26837</td></tr>
+</tbody></table>
+<p>所有 k 的月块 p 都没到本项目 p&lt;0.01 的门槛，全期最好也只有 0.017。剔除不改变这个判定。</p>
+<h2>4. 零假设对照：剔掉最好的币当然会变差，问题是变得异不异常</h2>
+<p>剔掉最好一个币必然降低总额，所以&quot;剔完变负&quot;本身不构成证据。对照是：从同一系统里<strong>随机</strong>抽 2 个币剔掉，且要求这 2 个币的合计成交笔数与被剔的那对在 ±25% 以内（RAVE 只有 7 笔，不做笔数 匹配的对照会偏），抽 2,000 次，看观测值落在哪。</p>
+<table><thead><tr>
+<th>系统</th>
+<th>剔除对</th>
+<th>剔掉笔数</th>
+<th>观测净 R</th>
+<th>随机剔除中位</th>
+<th>随机 2.5–97.5%</th>
+<th>≤观测值的比例</th>
+</tr></thead><tbody>
+<tr><td>V1 原生</td><td>RAVE + USDC</td><td>23</td><td>−238.03</td><td>+858.49</td><td>[+819.43, +874.80]</td><td><strong>0/2000</strong></td></tr>
+<tr><td>V1 统一退出</td><td>RAVE + USDC</td><td>23</td><td>−34.91</td><td>+1,063.93</td><td>[+1,029.23, +1,078.82]</td><td><strong>0/2000</strong></td></tr>
+<tr><td>V9</td><td>XRP + ETC</td><td>554</td><td>+2,593.52</td><td>+2,738.93</td><td>[+2,598.29, +2,847.07]</td><td>0.0225</td></tr>
+</tbody></table>
+<p>V1 的观测值在 2,000 次匹配随机剔除中一次都没被触及，落在分布之外几百 R；V9 的观测值只是 落在下尾边缘（2.25%），且剔完仍为正。<strong>两个系统对&quot;剔掉两个币&quot;这件事的敏感度不在一个量级。</strong></p>
+<h2>5. 必报指标的适用性</h2>
+<p>本轮没有训练分类器或排序模型，所以 val AUC、top-decile 毛/净收益、单特征分类基线<strong>不适用</strong>， 这里不编造也不留空。方向性收益的匹配随机对照：V9 有，直接引用其冻结控制组并在每个剔除档位 重算（上表）；<strong>V1 在已发布产物中没有同契约的随机入场对照</strong>——原生 V1 的保护退出和初始 R 与 V9 不同，当初没有生成——所以 V1 的行只作集中度分解，不用来裁决 V1 与 V9 谁的 alpha 更强。 针对&quot;剔除&quot;这个操作本身的零假设对照见第 4 节，三个系统一视同仁。</p>
+<h2>6. 解读</h2>
+<ul>
+<li><strong>V1 的 +854.70R 不是 6,116 笔交易的统计结论，是 7 笔交易的结论。</strong> 上一份对读已经写过 RAVE 分解，但把它放进剔除曲线后更清楚：k=1 就翻负，k=3/5/10 单调恶化到 −585.55R， 而 750 个币的中位数是 −1.567R。&quot;V1 每笔 +0.1397R、PF 1.184 优于 V9&quot; 这句话在去掉一个币 之后不成立。</li>
+<li><strong>V9 的正净 R 是宽度堆出来的，不是靠某几个币。</strong> 最好的币只占 9.2%，剔掉 20 个极值币 （4,444 笔）后每笔 R 从 +0.0337 降到 +0.0261，配对超额几乎不动（+0.0628 → +0.0623）。 这说明 V9 全期那点优势是<strong>分布式</strong>的——但&quot;分布式的微弱优势&quot;和&quot;可交易&quot;是两回事。</li>
+<li><strong>剔除救不了 V9 的后一年。</strong> 后一年在 k=0 到 k=10 全部为负，且大体越剔越负 （−2,089 → −2,556 附近），因为后一年的赢家币比输家币被剔掉得更多。事后剔极值不是 一个能修复时间段失效的操作。</li>
+<li><strong>USDC 反复出现在最差一端</strong>（V1 原生 −101.0R、统一退出 −97.8R），而 V9 已经把底层 USDC 排除在外。这一条是 V9 相对 V1 的真实改进，且不依赖事后排序。</li>
+<li><strong>V1 的 33.6% 正币率 vs V9 的 47.4%</strong>：V9 在币层面的击中面明显更宽。这与&quot;V1 靠极端赢家、 V9 靠宽度&quot;的图景一致。</li>
+</ul>
+<h2>7. 风险与诚实声明</h2>
+<ul>
+<li><strong>排序用了已实现结果，全部剔除行都是事后分解，不能当选币规则、不能当收益预测。</strong> 未来是否 还会出现 RAVE 这样的币、会出现在哪个币上，本轮完全没有回答。</li>
+<li><strong>对称剔除对 V1 天然不利</strong>（最好 +1,193.7R vs 最差 −101.0R），第 4 节的匹配随机对照就是为了 不让这个不对称冒充证据；结论以那一节为准。</li>
+<li><strong>后一年不是盲样本外。</strong> 这段历史此前已被 V8/V9 研究整体看过，本轮只是重读既有逐笔账本。</li>
+<li><strong>holdout 消耗 0</strong>：未重放行情、未读新数据、未改任何配置或阈值，也没有为剔除后的&quot;新宇宙&quot; 生成任何新的评分管线。剔除后的组合<strong>不是一个可以被 promote 的配置</strong>，不得进入 ACTIVE / frozen / tip-smoke / forward。</li>
+<li>事件累计 R 不是账户曲线，未统一资金、并发仓位、复利、资金费率与成交容量；RAVE 那 7 笔 能否按 0.2% 固定成本真实成交，本轮没有验证，而 V1 的全部利润都压在这 7 笔上。</li>
+<li>V1 的两个变体（原生 / 统一退出）来自同一组 6,185 条入场，两行不是独立证据。</li>
+<li><code>v1_native</code> 的逐笔行只有 <code>symbol</code> 没有 <code>asset</code>，币种键由同一文件内其他系统的 symbol→asset 映射还原，6,185 行全部命中，无未映射符号。</li>
+</ul>
+<h2>8. 下一步选项</h2>
+<ol>
+<li><strong>（需项目所有者决策）</strong> 若想知道 V1 除 RAVE 外是否还有可用信号，正确做法是为 V1 生成 与 V9 同契约的匹配随机入场对照后再比，而不是继续拆分已实现结果。这需要一次重放授权。</li>
+<li><strong>（需项目所有者决策）</strong> 若想把&quot;币种筛选&quot;变成真规则，必须用<strong>交易窗之前闭合</strong>的排名窗 （见 <code>docs/learnings/symbol-ranking-window-must-end-before-the-trading-window.md</code>）， 并单独预注册；本轮的事后名单不得直接使用。</li>
+<li>不需要决策：<code>exp-spike-v9-asset-exclusions-20260915-v1</code> 已经测过跨期币种黑名单并给出 negative 结论，选项 2 若要做，须先解释为何这次会不同。</li>
+<li>本轮不改策略、不改 TradingView、不改生产配置，<code>production_eligible</code> 保持 false。</li>
+</ol>
+<h2>9. 复现命令</h2>
+<pre><code>
+cd /Users/zhangzc/fable-trading
+.venv/bin/python experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/asset_trim.py
+python3 scripts/md_to_html.py analysis/p1_spike_v1_v9_asset_trim_20260917.md --out-dir analysis/html
+</code></pre>
+<p>产物：<code>experiments/active/exp-spike-v1-v9-asset-trim-20260917-v1/results/</code> （<code>per_asset_net_r.csv</code> / <code>trim_curve.csv</code> / <code>null_drop.csv</code> / <code>receipt.json</code>， receipt 内含四个输入文件的 sha256、builder 提交与随机种子 91509）。</p>
+<p>输入（只读，未修改）：</p>
+<ul>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v1-v8-be05-20260914-v1/delivery_v1/all_outcomes.csv.gz">V1 逐笔账本</a>：<code>rule=baseline, mode=fixed</code>。</li>
+<li><a href="/Users/zhangzc/fable-trading/experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/">V9 逐笔账本与冻结控制组</a>：<code>arm=v9</code>。</li>
+<li>上一版本同表对照：<a href="/Users/zhangzc/fable-trading/analysis/html/p1_spike_v9_v1_comparison_20260915.html">V9 与 V1 对读</a>（本报告 k=0 行与其逐值一致）。</li>
+</ul>
+</body>
+</html>

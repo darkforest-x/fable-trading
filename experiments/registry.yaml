@@ -9622,3 +9622,17 @@ experiments:
     canonical_report: analysis/p1_btc_bb_stoch_holdout_acceptance_20260917.md
     artifacts: []
     notes: First holdout consumption for this configuration and the second recorded read in the repository. Ledger entry and pass rule were committed before any byte was parsed;the module refuses a second run into the same directory. The frozen pre-holdout reader keeps its end>2026-05-01 refusal;crossing needs the separate authorized reader. Matched excess stayed positive, consistent with the tiny BTC entry edge seen pre-window, but the rule is still net negative after 10bp per side.
+
+  - experiment_id: exp-spike-v1-v9-asset-trim-20260917-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 860e38a494e877453267d7788cd862279b25e76d
+    status: rejected
+    question: What survives in SPIKE V1 and V9 after the best and worst few assets are removed?
+    single_variable: Only the set of assets included in the aggregate. Strategies, exits, 0.2percent round-trip cost and the 2024-09-10..2026-09-10 window are the frozen published ones;no price replay.
+    result: V1 profit is one asset. Dropping the best and worst asset (RAVE and USDC,23 of6116 trades) turns native V1 from +854.70R to -238.03R and PF1.184 to0.948;2000 count-matched random 2-asset drops never reach that value (0/2000). V1 common exit falls +1060.98R to -34.91R, also 0/2000. V9 is broad instead. Dropping the best and worst10 assets (4444 trades) leaves +2022.50R, PF1.039, matched excess +0.0628 to +0.0623R per trade, and the random-drop null puts the observed at the 2.25percent edge. V9 later year stays negative at every trim level (-2089.19R to about -2500R) and no month-block p reaches the p<0.01 bar.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v1_v9_asset_trim_20260917.md
+    artifacts: []
+    notes: The ranking uses realised outcomes, so every trimmed row is a post-hoc decomposition and never a tradeable universe;no blacklist is proposed. The builder refuses to write a trimmed row unless the untrimmed V9 row reproduces the published summary.csv net R, matched pairs, paired excess and p, which it did for all three periods. V1 has no same-contract random-entry control in the published artifacts, so its rows are concentration diagnostics only and are not used to rank V1 against V9. USDC sits at the worst end of both V1 variants and V9 already excludes USDC as underlying.
