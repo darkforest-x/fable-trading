@@ -179,6 +179,12 @@ class V9Scanner:
                             # load/infer it as if it were a new live candidate.
                             if inserted and raw_bark:
                                 store.register_candidate(event, pending_proof(event))
+                            # Later closed bars move an open card's projection.
+                            # This narrow payload merge never reopens the
+                            # immutable insert path or seeds an outbox.
+                            if not inserted and isinstance(event.get("performance"), dict):
+                                store.update_event_payload(store.event_id(event),
+                                                           {"performance": event["performance"]})
                         state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
                                      chart=[dict(row, burst=False, burst_up=False, burst_down=False) if row["t"] + TIMEFRAMES[timeframe] <= cutoff else row

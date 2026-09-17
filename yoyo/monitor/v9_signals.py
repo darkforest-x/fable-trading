@@ -23,6 +23,7 @@ from yoyo.evaluation.spike_v7_fast import v6_signals, v7_diagnostics
 from yoyo.evaluation.spike_v9 import VERSION as V9_STRATEGY_VERSION, v9_admissions
 from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
 from yoyo.monitor.signals import AnalysisResult
+from yoyo.monitor.v9_performance import BASIS as PERFORMANCE_BASIS, project
 
 
 V9_PINE_SOURCE = Path(__file__).resolve().parents[1] / "evaluation/pine/spike_burst_v9.pine"
@@ -39,7 +40,7 @@ PROTOCOL = {
     "signal": "confirmed_bar_close",
     "entry_reference": "confirmation_close_reference_not_fill",
     "orders_enabled": False,
-    "performance": "not_tracked",
+    "performance": PERFORMANCE_BASIS,
     "warmup_bars_minimum": V7_MINIMUM_WARMUP_BARS,
 }
 
@@ -114,6 +115,9 @@ def _decision_frame(frame: pd.DataFrame, timeframe: str, *, tick: float,
     # ``v7`` is an admitted raw event, while chart readiness is a property of
     # every bar's complete BB-history window.
     evidence["v7_ready"] = bb.v7_ready.reindex(evidence.index).fillna(False).astype(bool)
+    # The projection replays the same supplied prefix; keep its gap mask rather
+    # than recomputing a second, possibly divergent one downstream.
+    built.attrs["data_gap"] = gaps
     return built, evidence
 
 
@@ -152,7 +156,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         return AnalysisResult({
             "events": [], "chart": [],
             "state": {"phase": "loading", "ready": False, "bars": 0, "timeframe": timeframe,
-                      "direction": "both", "performance": "not_tracked"},
+                      "direction": "both", "performance": PERFORMANCE_BASIS},
             "protocol": dict(PROTOCOL),
         })
     built, evidence = _decision_frame(frame, timeframe, tick=tick, base_asset=base_asset)
@@ -182,6 +186,10 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
             "burst_up": bool(burst and side_values[i] == 1),
             "burst_down": bool(burst and side_values[i] == -1),
         })
+    # Display-only path projection for the admitted signals below.  It is
+    # computed from this same closed prefix and never gates an event.
+    projections = project(built, evidence, minutes=step // 60_000, tick=float(tick),
+                          data_gap=built.attrs["data_gap"], admitted=admitted)
     # A V9 gate can pass while its five-bar reference risk is unavailable.  Such
     # a row is evidence only: suppressing it avoids a fake zero-risk signal card.
     for i in np.flatnonzero(admitted):
@@ -207,7 +215,8 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
                 "source_sha256": V9_SOURCE_SHA256, "ready": True, "confirmed": True,
                 "entry_reference": "confirmation_close_reference_not_fill",
                 "executable_entry_time": None, "is_trade": False,
-                "performance": "not_tracked", "v9_evidence": _evidence_row(gate),
+                "performance": projections.get(close_ms, {"status": "unknown", "basis": PERFORMANCE_BASIS}),
+                "v9_evidence": _evidence_row(gate),
             })
     latest = evidence.iloc[-1]
     # ``v7`` is intentionally false on a non-signal bar, so retain the V7
@@ -219,9 +228,9 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         "bars": len(built), "timeframe": timeframe, "direction": "both",
         "bar_open_ms": int(times[-1]), "bar_close_ms": int(times[-1]) + step,
         "price": float(built.close.iloc[-1]), "protocol": SIGNAL_PROTOCOL,
-        "source_sha256": V9_SOURCE_SHA256, "performance": "not_tracked",
+        "source_sha256": V9_SOURCE_SHA256, "performance": PERFORMANCE_BASIS,
         "base_asset": latest.base_asset,
         "v9_evidence": _evidence_row(latest),
     }
     return AnalysisResult({"events": events, "chart": chart, "state": state,
-                           "protocol": dict(PROTOCOL)}, event_performance={})
+                           "protocol": dict(PROTOCOL)}, event_performance=projections)

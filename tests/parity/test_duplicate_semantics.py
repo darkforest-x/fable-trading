@@ -154,3 +154,76 @@ def test_the_holdout_boundary_has_exactly_one_canonical_definition():
     from yoyo.contracts.holdout import HOLDOUT_START, HOLDOUT_START_ISO
 
     assert HOLDOUT_START.isoformat() == HOLDOUT_START_ISO
+
+
+# -- the monitor card engine must agree with the frozen V9 replay ----------
+
+def _v9_stream(periods: int = 420):
+    """Synthetic closed 1H bars with two forced raw V6 signals inside the window.
+
+    Timestamps sit inside the frozen 2024-09-10..2026-09-10 research window so
+    both engines are defined on the same bars; ``replay_v9`` zeroes everything
+    outside it, which is exactly why the monitor cannot use that entry point.
+    """
+    import numpy as np
+    import pandas as pd
+    from yoyo.evaluation.spike_burst_progressive import features
+    from yoyo.evaluation.spike_v6_wvf_study import _data_gap
+    from yoyo.evaluation.spike_v7_fast import v6_signals
+
+    index = pd.date_range("2025-01-06T00:00:00Z", periods=periods, freq="1h")
+    walk = np.sin(np.arange(periods) / 11.0) * 4.0 + np.arange(periods) * 0.05
+    close = 100.0 + walk
+    frame = pd.DataFrame({"open": close - 0.2, "high": close + 1.0, "low": close - 1.0,
+                          "close": close, "volume": 10.0}, index=index)
+    built = features(frame)
+    built.attrs["minutes"] = 60
+    gap = _data_gap(built, 60)
+    signals = v6_signals(built, 60)
+    signals.loc[:, :] = False
+    signals.iloc[300, signals.columns.get_loc("long_signal")] = True
+    signals.iloc[340, signals.columns.get_loc("short_signal")] = True
+    return built, signals, gap
+
+
+def test_the_monitor_card_engine_and_the_frozen_v9_replay_produce_the_same_trades():
+    """The signal card's R must be the backtest's R, not a second convention.
+
+    The monitor projects cards with ``simulate_v6_variant`` because
+    ``spike_v9.replay_v9`` is hard-bounded to the frozen research window. That
+    is a second implementation of one semantic, so it is pinned here. The one
+    deliberate difference is the still-open position: the frozen replay refuses
+    to value it, while a card must mark it to the last close.
+    """
+    import numpy as np
+    import pandas as pd
+    from yoyo.evaluation.spike_exit_policy_study import StreamContext
+    from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec, simulate_v6_variant
+    from yoyo.evaluation.spike_v7_fast import v7_diagnostics
+    from yoyo.evaluation.spike_v9 import replay_v9
+
+    built, signals, gap = _v9_stream()
+    bb = v7_diagnostics(built, data_gap=gap)
+    bb["prior_squeeze_run3"] = True
+    bb["v7_ready"] = True
+    context = StreamContext(path=Path("."), key="parity:60", receipt={},
+                            cache={"bars": built, "signals": signals, "bb": bb,
+                                   "data_gap": gap, "tick": 0.01},
+                            signals_ledger=pd.DataFrame(), minutes=60, identity={"asset": "ETH"})
+    frozen, _, _, evidence = replay_v9(context)
+    admitted = evidence.v9 & evidence.risk_status.eq("known")
+    _, live = simulate_v6_variant(built, signals, admission=admitted, variant="v9_monitor",
+                                  data_gap=gap, spec=ExecutionSpec(tick=0.01))
+
+    assert len(frozen) and len(frozen) == len(live), "the two engines opened different trades"
+    for column in ("signal_bar_open", "entry_time", "side", "entry_price", "initial_stop",
+                   "initial_risk", "mfe_r", "exit_time", "exit_price", "exit_reason", "censored"):
+        assert frozen[column].astype(str).tolist() == live[column].astype(str).tolist(), column
+    closed = ~live.censored.astype(bool)
+    for column in ("gross_r", "net_r"):
+        assert np.allclose(frozen.loc[closed, column].astype(float),
+                           live.loc[closed, column].astype(float), rtol=0, atol=1e-12), column
+    # The open position is the pinned divergence, in one direction only.
+    for _, row in live.loc[~closed].iterrows():
+        assert row.exit_reason == "boundary_mark" and np.isfinite(float(row.net_r))
+    assert frozen.loc[~closed.to_numpy(), "net_r"].isna().all()

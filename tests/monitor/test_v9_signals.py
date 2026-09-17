@@ -58,7 +58,10 @@ def test_pipeline_uses_v9_admission_and_confirmation_reference_not_a_fill(monkey
     assert event["base_asset"] == "ETH"
     assert event["reference_cost_r"] == gate.reference_cost_r
     assert event["entry_reference"] == "confirmation_close_reference_not_fill"
-    assert event["is_trade"] is False and event["performance"] == "not_tracked"
+    # The card now carries a display projection; it is still not an order.
+    assert event["is_trade"] is False
+    assert event["performance"]["basis"] == v9_signals.PERFORMANCE_BASIS
+    assert event["performance"]["status"] in {"active", "profit", "loss", "breakeven", "unknown"}
     assert event["v9_evidence"]["v9_reason"] == "passed"
     # V7 readiness is an indicator-history property, not an event flag.
     assert result["chart"][129]["ready"] is True
