@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负</h1>
+<p>2026-09-18 · V9 + Owner「主下降趋势线 · 关键高点 V1」突破门 · 3,531 流截断至 holdout 之前 · <strong>holdout 消耗 0</strong></p>
+<p><strong>结论一句话：门把每笔净 R 从 +0.0553 提到 +0.1028（≤12 根窗口），PF 1.083→1.155，配对随机超额 +0.0699→+0.1018，事件回撤降 66%，但准入笔数只剩 42%，总净 R 从 +3,400R 降到 +2,685R。改善几乎全部来自前一段；2025-09 之后所有臂仍然亏，而且三个较宽窗口的配对超额在后段转为负——这道门没有修好 V9 的病。不建议 promote，holdout 仍然是完整的 4.2 个月盲样本。</strong></p>
+<p><strong>附带一个反直觉结果</strong>：多头侧有 47.7%~55.7% 的「突破」其实是那条下降线自己走到价格上，价格根本没涨；而<strong>这一类反而更赚</strong>（+0.0822 vs 价格真冲上去的 +0.0399 R/笔）。「再加一道只要真突破」的直觉被数据推翻了，见 §6。</p>
+<h2>1. 本次做了什么</h2>
+<p>Owner 给出 Pine v6 指标「主下降趋势线 · 关键高点 V1」，提了两件事： 「把这个趋势线突破 加入我们的spike v9 写一个v10」，以及 「对v10做回测 要求v9出了信号 同时 或者信号处于刚好趋势线突破 或者突破了一会的」。</p>
+<p>V10 = V9 + 一道入场门。门的定义：V9 原始确认那一根，<strong>本方向的趋势线突破</strong>要么就发生在这一根 （年龄 0），要么发生在最近 <code>N</code> 根之内。多头看由关键高点连成的主下降压力线被向上突破， 空头看由关键低点连成的主上升支撑线被向下突破。</p>
+<p><strong>门只会删掉 V9 的入场，不会新增入场，也不碰任何出场。</strong> 原始反向 V6 确认照旧结束已有参考， 串行引擎收到的反向事件流与 V9 一字不差。所以 V10 与 V9 的差额只有三个来源：避开的亏损、 错过的盈利、以及删掉入场后腾出仓位带来的新入场。三者相加必须等于总净 R 差额，程序强制核对。</p>
+<p>TradingView 脚本：<code>yoyo/evaluation/pine/spike_burst_v10.pine</code>（「SPIKE V10 · 趋势线突破确认」）。 <strong>这份 Pine 没有在 TradingView 上编译过</strong>——见 §7。</p>
+<h2>2. 移植的忠实度：四道验证</h2>
+<p>趋势线逻辑是 Owner 脚本的逐行翻译，包括一根 K 线内部的操作顺序（①检查已存在的线是否被收盘 突破或到期 → ②压入刚完成右侧确认的关键点 → ③只有在「本根确认了关键点且本根没有刚突破」时 才寻找新线）。这个顺序本身就是因果性的一部分。</p>
+<p>因果性：关键点在 p 根出现，但要到 p+8 根才确认，所以 b 根建立的线不读 b 之后任何数据； <code>f_isClean</code> 只走 x1..b；突破判定只读当根收盘和当根 ATR。<strong>右侧确认的 8 根延迟是画法本身的 延迟</strong>——回看历史时线看起来「早就画好了」，实盘要晚 8 根才看到。这不是前视，但必须记在账上。</p>
+<table><thead><tr>
+<th>验证</th>
+<th>方法</th>
+<th>结果</th>
+</tr></thead><tbody>
+<tr><td>与 Pine 文本逐字对照</td><td>测试里另写一份把 Pine 嵌套循环照抄的参照实现</td><td>3 种子 × 双方向，break / born 逐根一致</td></tr>
+<tr><td>无前视</td><td>序列在第 t 根截断重跑，t 之前输出必须一字不变</td><td>3 个截断点，break / born / 年龄全部一致</td></tr>
+<tr><td>两份独立移植互校</td><td>并行会话为「趋势线独立策略」另写了一份移植</td><td>6 种子 × 6,000 根，break / born / line_active 逐根一致</td></tr>
+<tr><td>镜像</td><td><code>direction=-1</code> 必须等于把 (high, low, close) 取负后的 <code>direction=1</code></td><td>一致</td></tr>
+<tr><td>目视</td><td>ETH 4H 画出线与突破，可与 TradingView 对照</td><td><code>results/trendline_check_eth_4h.png</code></td></tr>
+</tbody></table>
+<p><code>ta.pivothigh</code> 的并列（tie）处理 TradingView 没有公开。本移植取<strong>两侧都严格大于</strong>，并把 「只在非严格比较下才成立」的根数计数上报；本次全池 tie 计数为 0，这个歧义没有实际影响。</p>
+<p>与 Owner 脚本的两处有意差异，都只会<strong>减少</strong>信号：</p>
+<ol>
+<li><strong>数据缺口清空状态</strong>——缺口清掉关键点池、当前有效线和已记录的突破。跨越未观测区间画出的线 不是证据；年龄随之作废（年龄 −1 = 「本连续段内没有突破」，不是「突破很旧」）。</li>
+<li><strong>空头镜像</strong>——Owner 脚本只画下降压力线。V9 本身就是多空镜像结构，所以这里把同一套算术做 符号翻转用于空头。这是 V10 的新增部分，也是最需要被看见而不是被相信的部分。</li>
+</ol>
+<h2>3. 数据范围、分母、holdout</h2>
+<table><thead><tr>
+<th>项目</th>
+<th>本次覆盖</th>
+</tr></thead><tbody>
+<tr><td>冻结数据流</td><td>Binance / OKX / Gate，30m / 1H / 4H，共 3,531 流（与已发布 V9 全量回测同一个池）</td></tr>
+<tr><td>有 holdout 前 K 线的流</td><td>3,067；另 464 条流全部 K 线都在 2026-05-04 之后（holdout 期间才上市），本次贡献 0</td></tr>
+<tr><td>入场窗口</td><td>2024-09-10 00:00 UTC（含）起</td></tr>
+<tr><td><strong>截断点</strong></td><td><strong>丢掉所有开盘 ≥ 2026-05-04 00:00 UTC 的 K 线，一根都不读入</strong></td></tr>
+<tr><td>年度切点</td><td>2025-09-10 00:00 UTC</td></tr>
+<tr><td>因此「后一段」</td><td>2025-09-10 → 2026-05-04，<strong>7.8 个月，不是整年</strong>，不能直接与已发布 V9 报告的「后一年」比</td></tr>
+<tr><td><strong>holdout 消耗</strong></td><td><strong>0</strong>。2026-05-04 → 2026-09-10 这 4.2 个月留作将来一次性最终验收的盲样本</td></tr>
+<tr><td>往返成本</td><td>固定名义 0.2%，与 V9 逐字相同</td></tr>
+<tr><td>V8 候选 / V9 准入</td><td>85,811 / 72,378（84.35%）</td></tr>
+</tbody></table>
+<p>截断不是口头保证，是被逐笔核对过的：每条流的 <code>v9</code> 臂与<strong>已发布的 V9 账本</strong>逐笔对照，凡是在 最后一根保留 K 线（含）之前出场的交易，其 signal_i / entry_i / side / exit_i / exit_reason / 四个价格 / net_return / net_r 必须全部一致，否则 raise、不出结果。3,531 条流全部通过， 最大相对浮点偏差 &lt;1e-9（已发布账本是 CSV，浮点是十进制往返值）。这道检查抓到两个真 bug，见 §7。</p>
+<p><strong>这两段都不是盲样本。</strong> 2024-09 → 2026-05 已经被 V8/V9 的研究看过多轮，前一段更是被看得最久 的一段。本报告里任何「前一段变好」都不能当作样本外证据。</p>
+<h2>4. 主结果：五个臂</h2>
+<p>事前登记的五个臂：<code>v9</code>（未加门的对照）、<code>v10_now</code>（突破当根）、<code>v10_a12</code> / <code>v10_a48</code> / <code>v10_a200</code>（突破后 ≤12 / ≤48 / ≤200 根）。<strong>三个窗口是对 Owner「一会」的三个量级读数， 不是择优搜索</strong>；全部如实上表。净胜率 = 已平仓净 R＞0；PF = 净 R 正收益和 ÷ 负收益绝对值和； 「配对超额」= 同流 × 同方向 × 同月 × 同 ATR 桶的随机入场，走同一套出场与成本，配对差的均值； <code>p</code> = 整月块符号翻转检验（2,000 次，种子 91509），检验对象是配对超额，不是池子自身收益。</p>
+<h3>全期 2024-09-10 → 2026-05-04</h3>
+<table><thead><tr>
+<th>臂</th>
+<th>准入</th>
+<th>已平仓</th>
+<th>净胜率</th>
+<th>每笔净R</th>
+<th>净R合计</th>
+<th>PF(R)</th>
+<th>净10R</th>
+<th>事件回撤R</th>
+<th>配对数</th>
+<th>随机均值R</th>
+<th><strong>配对超额R</strong></th>
+<th>p(月块)</th>
+</tr></thead><tbody>
+<tr><td>v9</td><td>72,378</td><td>61,530</td><td>31.43%</td><td>+0.0553</td><td><strong>+3,399.96</strong></td><td>1.083</td><td>306</td><td>4,023.13</td><td>61,383</td><td>−0.0133</td><td><strong>+0.0699</strong></td><td>0.0285</td></tr>
+<tr><td>v10_now</td><td>9,338</td><td>9,070</td><td>32.59%</td><td>+0.0957</td><td>+868.25</td><td>1.150</td><td>35</td><td>539.75</td><td>9,056</td><td>−0.0238</td><td><strong>+0.1204</strong></td><td>0.0225</td></tr>
+<tr><td>v10_a12</td><td>28,268</td><td>26,124</td><td>32.57%</td><td><strong>+0.1028</strong></td><td>+2,685.30</td><td><strong>1.155</strong></td><td>146</td><td>1,380.65</td><td>26,062</td><td>+0.0023</td><td><strong>+0.1018</strong></td><td><strong>0.0105</strong></td></tr>
+<tr><td>v10_a48</td><td>43,219</td><td>37,737</td><td>32.18%</td><td>+0.0850</td><td>+3,207.67</td><td>1.128</td><td>199</td><td>2,194.39</td><td>37,646</td><td>+0.0046</td><td>+0.0817</td><td>0.0190</td></tr>
+<tr><td>v10_a200</td><td>62,467</td><td>53,383</td><td>31.54%</td><td>+0.0573</td><td>+3,060.58</td><td>1.086</td><td>264</td><td>3,634.68</td><td>53,256</td><td>−0.0060</td><td>+0.0647</td><td>0.0375</td></tr>
+</tbody></table>
+<p><strong>总净 R 在每个窗口都比 V9 低，每笔净 R 在每个窗口都比 V9 高。</strong> 这两句不矛盾：门砍掉了 58% 的入场（a12），被砍掉的那批平均只值 +0.0202R/笔，远低于留下的 +0.1028R/笔。 按事件累计 R 排的最大回撤从 4,023R 降到 1,381R（−65.7%）。 <strong>这里是 3,531 条流叠加、没有配共同资金和仓位，所以「净 R 合计」不是账户收益，回撤也不是账户回撤。</strong></p>
+<h3>前一段 2024-09-10 → 2025-09-10 vs 后一段 2025-09-10 → 2026-05-04</h3>
+<table><thead><tr>
+<th>臂</th>
+<th>段</th>
+<th>已平仓</th>
+<th>每笔净R</th>
+<th>净R合计</th>
+<th>PF(R)</th>
+<th>配对超额R</th>
+<th>p(月块)</th>
+</tr></thead><tbody>
+<tr><td>v9</td><td>前</td><td>31,295</td><td>+0.1369</td><td>+4,282.94</td><td>1.211</td><td>+0.1386</td><td>0.0145</td></tr>
+<tr><td>v10_now</td><td>前</td><td>4,781</td><td>+0.1971</td><td>+942.21</td><td>1.320</td><td>+0.2019</td><td>0.0100</td></tr>
+<tr><td>v10_a12</td><td>前</td><td>13,320</td><td><strong>+0.2335</strong></td><td>+3,110.31</td><td><strong>1.368</strong></td><td><strong>+0.2049</strong></td><td><strong>0.0040</strong></td></tr>
+<tr><td>v10_a48</td><td>前</td><td>19,166</td><td>+0.2029</td><td>+3,888.62</td><td>1.317</td><td>+0.1684</td><td>0.0095</td></tr>
+<tr><td>v10_a200</td><td>前</td><td>27,044</td><td>+0.1523</td><td>+4,118.25</td><td>1.235</td><td>+0.1400</td><td>0.0175</td></tr>
+<tr><td>v9</td><td>后</td><td>29,697</td><td>−0.0487</td><td>−1,447.40</td><td>0.930</td><td>+0.0033</td><td>0.4448</td></tr>
+<tr><td>v10_now</td><td>后</td><td>4,206</td><td>−0.0363</td><td>−152.58</td><td>0.946</td><td><strong>+0.0266</strong></td><td>0.4498</td></tr>
+<tr><td>v10_a12</td><td>后</td><td>12,571</td><td>−0.0579</td><td>−728.43</td><td>0.917</td><td><strong>−0.0028</strong></td><td>0.5292</td></tr>
+<tr><td>v10_a48</td><td>后</td><td>18,215</td><td>−0.0598</td><td>−1,089.84</td><td>0.915</td><td><strong>−0.0097</strong></td><td>0.6577</td></tr>
+<tr><td>v10_a200</td><td>后</td><td>25,882</td><td>−0.0580</td><td>−1,502.13</td><td>0.916</td><td><strong>−0.0109</strong></td><td>0.7111</td></tr>
+</tbody></table>
+<p><strong>这张表是本次最重要的结果。</strong> 前一段门把配对超额从 +0.1386 提到 +0.2049（a12）， p 从 0.0145 降到 0.0040；后一段 a12 / a48 / a200 的配对超额<strong>全部由正转负</strong>， 每笔净 R 还略差于不加门的 V9（−0.0579 vs −0.0487）。 只有 <code>v10_now</code> 在后段配对超额为正（+0.0266），但 4,206 笔、p=0.4498，按本项目标准这不是证据。</p>
+<p><strong>没有任何一个「全期」或「后一段」格子达到 p&lt;0.01。</strong> 达到的只有前一段的 a12（0.0040） 与 now（0.0100）——而前一段正是被观察最久的一段。</p>
+<h3>差额分解（相对 V9，必须自洽）</h3>
+<table><thead><tr>
+<th>臂</th>
+<th>共同事件</th>
+<th>删除事件</th>
+<th>新增事件</th>
+<th>避开亏损R</th>
+<th>错过盈利R</th>
+<th>新入场净R</th>
+<th>合计差额R</th>
+<th>保留的原 10R</th>
+</tr></thead><tbody>
+<tr><td>v10_now</td><td>7,830</td><td>54,068</td><td>1,303</td><td>+36,119.72</td><td>−38,930.31</td><td>+278.88</td><td><strong>−2,531.71</strong></td><td>32 / 306</td></tr>
+<tr><td>v10_a12</td><td>23,883</td><td>38,015</td><td>2,394</td><td>+25,329.94</td><td>−26,581.01</td><td>+536.41</td><td><strong>−714.66</strong></td><td>135 / 306</td></tr>
+<tr><td>v10_a48</td><td>35,718</td><td>26,180</td><td>2,251</td><td>+17,426.30</td><td>−17,961.55</td><td>+342.97</td><td><strong>−192.28</strong></td><td>192 / 306</td></tr>
+<tr><td>v10_a200</td><td>53,037</td><td>8,861</td><td>668</td><td>+5,857.51</td><td>−6,282.32</td><td>+85.44</td><td><strong>−339.38</strong></td><td>263 / 306</td></tr>
+</tbody></table>
+<p>避开的亏损与错过的盈利几乎等量（a12：25,330 vs 26,581），错过的略多一点。 <strong>门不是在挑赢家，是在等比例砍掉两头，再把留下的那批的平均值拉高。</strong> 共同事件的出场时间、出场原因、删失状态与净 R 全部逐笔不变（程序强制核对）， 所以差额只可能来自删除 / 新增，不能用「删掉亏损单」解释。</p>
+<h2>5. 周期与方向：改善不是均匀的</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>臂</th>
+<th>已平仓</th>
+<th>每笔净R</th>
+<th>PF(R)</th>
+<th>配对超额R</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>v9</td><td>36,294</td><td>+0.0611</td><td>1.090</td><td>+0.1074</td><td>0.0285</td></tr>
+<tr><td>30m</td><td>v10_a12</td><td>15,307</td><td>+0.1211</td><td>1.180</td><td><strong>+0.1570</strong></td><td>0.0125</td></tr>
+<tr><td>1H</td><td>v9</td><td>19,035</td><td>+0.0305</td><td>1.047</td><td>+0.0568</td><td>0.1399</td></tr>
+<tr><td>1H</td><td>v10_a12</td><td>8,325</td><td>+0.0511</td><td>1.078</td><td>+0.0695</td><td>0.1489</td></tr>
+<tr><td>4H</td><td>v9</td><td>6,201</td><td>+0.0970</td><td>1.149</td><td><strong>−0.1101</strong></td><td>0.9520</td></tr>
+<tr><td>4H</td><td>v10_a12</td><td>2,492</td><td>+0.1635</td><td>1.258</td><td><strong>−0.1313</strong></td><td>0.8941</td></tr>
+</tbody></table>
+<p><strong>4H 的正收益依然是 beta。</strong> 4H 每笔净 R 最高（+0.1635），但配对随机入场比它更赚， 配对超额是 −0.1313——门把 4H 的绝对收益抬高了，同时把它相对随机的劣势也抬高了。 这与已发布 V9 报告的 4H 超额 −0.138 一致。<strong>只看 4H 的 PF 1.258 会得出完全错误的结论。</strong></p>
+<table><thead><tr>
+<th>方向</th>
+<th>臂</th>
+<th>段</th>
+<th>已平仓</th>
+<th>每笔净R</th>
+<th>PF(R)</th>
+<th>配对超额R</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>空</td><td>v9</td><td>全期</td><td>30,642</td><td>+0.0808</td><td>1.125</td><td>+0.0704</td><td>0.1044</td></tr>
+<tr><td>空</td><td>v10_a12</td><td>全期</td><td>12,040</td><td>+0.1324</td><td>1.206</td><td>+0.1176</td><td>0.0405</td></tr>
+<tr><td>空</td><td>v9</td><td>后段</td><td>14,942</td><td>+0.1107</td><td>1.173</td><td>+0.0607</td><td>0.1334</td></tr>
+<tr><td>空</td><td>v10_a12</td><td>后段</td><td>5,808</td><td><strong>+0.1534</strong></td><td>1.242</td><td><strong>+0.1262</strong></td><td>0.0265</td></tr>
+<tr><td>多</td><td>v9</td><td>全期</td><td>30,888</td><td>+0.0299</td><td>1.043</td><td>+0.0695</td><td>0.1514</td></tr>
+<tr><td>多</td><td>v10_a12</td><td>全期</td><td>14,084</td><td>+0.0775</td><td>1.114</td><td>+0.0882</td><td>0.1704</td></tr>
+<tr><td>多</td><td>v9</td><td>后段</td><td>14,755</td><td><strong>−0.2102</strong></td><td>0.718</td><td>−0.0549</td><td>0.9810</td></tr>
+<tr><td>多</td><td>v10_a12</td><td>后段</td><td>6,763</td><td><strong>−0.2395</strong></td><td>0.680</td><td>−0.1141</td><td>0.9820</td></tr>
+</tbody></table>
+<p><strong>后一段的亏损全部在多头，而门让多头变得更差。</strong> V9 后段多头每笔 −0.2102R，加门后 −0.2395R， 配对超额从 −0.0549 掉到 −0.1141。空头后段每笔 +0.1534R、超额 +0.1262、p=0.0265，是全表最亮的 一格——但<strong>这是事后按方向切出来的</strong>，已发布的 V9 归因报告明确写过「加方向门是这张表的事后读法， 需要事前登记」。这里同样适用，不能据此宣布「V10 只做空」有效。</p>
+<h2>6. 门筛的到底是什么：一半的「突破」是线自己降下来的</h2>
+<p>并行会话的笔记 <code>docs/learnings/a-descending-trendline-break-is-a-crossing-not-a-breakout.md</code> 证明了一件事： 这个指标的信号是<strong>一条向下移动的阈值线被跨越</strong>，而跨越有两种完全不同的成因——价格涨上去了， 或者线自己降到价格上。本次对全池 3,531 流每一次跨越做了精确分解 （<code>price_move + line_drop</code> 等于建线到跨越之间闭合的全部差距，两项都换成跨越当根的 ATR）：</p>
+<table><thead><tr>
+<th>周期</th>
+<th>方向</th>
+<th>线降主导</th>
+<th>价格主导</th>
+<th><strong>线降占比</strong></th>
+</tr></thead><tbody>
+<tr><td>30m</td><td>空（破上升支撑）</td><td>60,838</td><td>93,971</td><td>39.3%</td></tr>
+<tr><td>30m</td><td>多（破下降压力）</td><td>77,951</td><td>85,565</td><td><strong>47.7%</strong></td></tr>
+<tr><td>1H</td><td>空</td><td>30,635</td><td>48,173</td><td>38.9%</td></tr>
+<tr><td>1H</td><td>多</td><td>42,541</td><td>42,468</td><td><strong>50.0%</strong></td></tr>
+<tr><td>4H</td><td>空</td><td>9,684</td><td>15,885</td><td>37.9%</td></tr>
+<tr><td>4H</td><td>多</td><td>16,900</td><td>13,431</td><td><strong>55.7%</strong></td></tr>
+</tbody></table>
+<p>线降主导的跨越中位数：价格移动 <strong>−0.047 ATR</strong>、线下移 <strong>+2.83 ATR</strong>、线已存活 44 根。 价格主导的中位数：价格移动 +2.08 ATR、线下移 +0.47 ATR、存活 11 根。</p>
+<p><strong>所以「V10 是突破过滤器」这句话是不准确的。</strong> 多头侧接近一半的准入事件，价格在建线到跨越 之间根本没涨（中位数还微跌），是那条陡峭的旧线走下来碰到了价格。ETH 4H 的目视图 （<code>results/trendline_check_eth_4h.png</code>）就是这个形态：所有压力线都锚在同一个远处高点上， 呈扇形降下来，420 根里出了 10 次「突破」。</p>
+<h3>但是：线降主导的跨越反而更赚</h3>
+<p>既然分得开，就顺手算了一下 <strong>V9 自己的已平仓交易按跨越成因分组</strong>（同样是描述性的， 忽略串行相互作用，不能当排序依据）：</p>
+<table><thead><tr>
+<th>跨越成因</th>
+<th>笔数</th>
+<th>每笔净R</th>
+<th>净R合计</th>
+<th>中位价格移动ATR</th>
+<th>中位线下移ATR</th>
+</tr></thead><tbody>
+<tr><td>线降主导</td><td>24,494</td><td><strong>+0.0822</strong></td><td>+2,012.88</td><td>+0.11 ~ +0.33</td><td>≈ +2.7</td></tr>
+<tr><td>价格主导</td><td>36,618</td><td><strong>+0.0399</strong></td><td>+1,461.39</td><td>+1.92 ~ +2.44</td><td>≈ +0.5</td></tr>
+<tr><td>本段无突破</td><td>418</td><td>−0.1778</td><td>−74.31</td><td>—</td><td>—</td></tr>
+</tbody></table>
+<p>只看门实际采纳的窗口（年龄 ≤12）：线降主导 10,002 笔 +0.1091R/笔， 价格主导 13,744 笔 +0.0768R/笔。</p>
+<p><strong>这把「加一道『只要真突破』的条件会更好」这个直觉直接推翻了。</strong> 在这段历史上， 价格真的冲上去的那一类反而更差。一个说得通的机制：V9 里本来就有 V8 的过热门 （收盘离六线超过 3ATR 不入场），而「价格主导」按定义就是建线到跨越之间价格走了 2 个 ATR 以上，两者指向同一件事——<strong>在一段猛冲之后才进场是更差的</strong>。线降主导的跨越中位存活 44 根、 价格几乎没动，那是盘整后的状态，不是追涨。</p>
+<p>所以 §9 里原本最自然的下一步（「只保留价格主导的跨越」）<strong>按本数据是反方向的</strong>。 真要做这个单变量实验，它检验的是「只保留线降主导」，而且要先接受它与已有的过热门高度重叠。 本轮不做：按成因过滤是改入场规则，属于新实验、新的单变量（铁律 4）。</p>
+<h3>年龄分桶（描述性，不是可交易读数）</h3>
+<p>下表是 <strong>V9 自己的已平仓交易</strong>按当根趋势线突破年龄分桶。它忽略串行相互作用 （删掉一笔入场会让引擎腾出仓位去接后面的一笔），所以<strong>不能用来排序、不能当作臂的替代</strong>， 上面的五个臂才是诚实的对照。放在这里是因为它解释了门为什么有效。</p>
+<table><thead><tr>
+<th>年龄桶</th>
+<th>笔数</th>
+<th>每笔净R</th>
+<th>净R合计</th>
+<th>毛R合计</th>
+<th>净胜率</th>
+<th>净10R</th>
+</tr></thead><tbody>
+<tr><td>本段无突破</td><td>418</td><td><strong>−0.1778</strong></td><td>−74.31</td><td>−50.86</td><td>27.75%</td><td><strong>0</strong></td></tr>
+<tr><td>0（当根）</td><td>7,778</td><td>+0.0758</td><td>+589.37</td><td>+1,031.45</td><td>31.96%</td><td>32</td></tr>
+<tr><td>1–3</td><td>8,613</td><td>+0.0787</td><td>+677.45</td><td>+1,222.78</td><td>32.38%</td><td>44</td></tr>
+<tr><td>4–12</td><td>7,355</td><td><strong>+0.1197</strong></td><td>+880.17</td><td>+1,441.19</td><td>32.36%</td><td>59</td></tr>
+<tr><td>13–48</td><td>11,766</td><td>+0.0605</td><td>+711.54</td><td>+1,475.69</td><td>31.66%</td><td>57</td></tr>
+<tr><td>49–200</td><td>17,215</td><td><strong>+0.0065</strong></td><td>+111.60</td><td>+1,283.61</td><td>30.42%</td><td>71</td></tr>
+<tr><td>&gt;200</td><td>8,385</td><td>+0.0601</td><td>+504.14</td><td>+1,063.87</td><td>31.08%</td><td>43</td></tr>
+</tbody></table>
+<p>两个观察：<strong>「本段完全没有突破」那 418 笔是全表最差的一桶</strong>（−0.178R/笔、27.75% 胜率、 一笔 10R 都没有），门把它们全部排除是合理的；而<strong>最好的一桶不是「刚好突破」，是突破后 4–12 根</strong> （+0.1197 vs 当根 +0.0758）。Owner 直觉里的「或者突破了一会的」这半句，比「刚好突破」那半句更值钱。</p>
+<h2>7. 风险与诚实声明</h2>
+<ul>
+<li><strong>两段都不是盲样本。</strong> 2024-09 → 2026-05 已被 V8/V9 研究反复观察，前一段最久。 「前一段 p=0.004」在这种曝光程度下不能当作显著性证据。<strong>holdout 消耗 0</strong>， 2026-05-04 → 2026-09-10 仍是完整的 4.2 个月盲样本。</li>
+<li><strong>多重比较。</strong> 5 个臂 × 3 段 × （周期 / 方向）切分。表里最小的 p 是 0.0040， 按最保守的方式看这些 p 全部不过项目的 p&lt;0.01 门。</li>
+<li><strong>这份 Pine 没有在 TradingView 上编译过。</strong> 做了差分标识符检查（V10 里所有未声明标识符 都出现在已在 TV 上跑过的 V9 里，无一例外），但那不等于编译通过。Owner 首次粘贴时若报错， 把错误发我。另外 <code>max_bars_back=1300</code> 是为 600 根扫描窗留的余量，V9 原来没有这一项。</li>
+<li><strong>Pine 与 Python 的一处已知细微差异</strong>：非法价格那一根，Python 把新连续段起点设在该根之后， Pine 的 <code>segmentIndex</code> 把该根本身算作段起点，差一根。本池的冻结缓存已验证过价格合法性， 这条路径在本次回放里不可达，但如果换到未验证数据源上会显现。</li>
+<li><strong>截断使切点附近的样本被删失。</strong> 入场在切点前、出场在切点后的仓位记为删失（a12：153 笔）， 不把未知收益算成 0；配对随机对照里出场跨切点的也同样删失、不计入配对分母。</li>
+<li><strong>「净 R 合计」不是账户收益。</strong> 3,531 条流叠加，没有共同资金、没有仓位管理， 事件回撤不是账户回撤。每笔净 R 与配对超额才是信号质量的读数。</li>
+<li><strong>4H 的 PF 1.258 是 beta</strong>，配对超额 −0.1313。不要只看 PF。</li>
+<li><strong>方向切分是事后的。</strong> 「空头后段 +0.1534R、p=0.027」不能作为「V10 只做空」的结论。</li>
+<li><strong>两个 bug 是被这套检查抓出来的，不是事后发现的</strong>：① 用 <code>Series.equals</code> 比较列会连 dtype 一起比，两边都为空时 CSV 空列与回放空列 dtype 不同，22 条流误报；② 出场时间戳记的是出场 那根的<strong>开盘</strong>，所以「时间戳 == 切点」意味着这笔在 holdout 第一根出场，对照窗口右端必须 取最后一根保留 K 线的开盘而不是收盘。详见 <code>docs/learnings/truncation-parity-boundary-is-the-last-kept-bar-open.md</code>。</li>
+<li><strong>未训练、未 promote、未改仓、未动真金、未接实盘。</strong> <code>models/ACTIVE</code> 与 frozen 默认配置 没有变化；<code>experiments/registry.yaml</code> 里本实验 <code>production_eligible</code> / <code>training_eligible</code> 保持 false。</li>
+<li><strong>AUC / top-decile 不适用</strong>：V10 是规则门，不是打分模型，没有连续分数可以排序取前 10%。 对应位置用的是「准入率 + 按年龄分桶的每笔净 R」（§6 末表）与五个臂的对照， 以及方向性实验必须的匹配随机对照组（每张结果表都带）与整月块符号翻转检验。</li>
+</ul>
+<h2>8. 复现命令</h2>
+<pre><code>
+python3 -m pytest tests/evaluation/test_trendline_break.py \
+  tests/evaluation/test_spike_v10_full_replay.py tests/evaluation/test_spike_v10_report.py -q
+</code></pre>
+<pre><code>
+python3 -m yoyo.evaluation.spike_v10_full_replay \
+  --output experiments/active/exp-spike-v10-trendline-gate-20260918-v1/results/prehold_v3 --workers 6
+</code></pre>
+<pre><code>
+python3 -m scripts.audit_spike_v10_crossing_type \
+  --out experiments/active/exp-spike-v10-trendline-gate-20260918-v1/results/crossings.csv.gz --workers 6
+</code></pre>
+<pre><code>
+python3 -m yoyo.evaluation.spike_v10_report \
+  --input experiments/active/exp-spike-v10-trendline-gate-20260918-v1/results/prehold_v3 \
+  --output experiments/active/exp-spike-v10-trendline-gate-20260918-v1/statistics
+</code></pre>
+<pre><code>
+python3 -m scripts.plot_spike_v10_trendline_check \
+  --out experiments/active/exp-spike-v10-trendline-gate-20260918-v1/results/trendline_check_eth_4h.png
+</code></pre>
+<pre><code>
+python3 scripts/md_to_html.py analysis/p1_spike_v10_trendline_gate_20260918.md --out-dir analysis/html
+</code></pre>
+<p>回放 1,526 秒 / 6 进程，跨越审计 409 秒，0 条流失败。 产物：<code>experiments/active/exp-spike-v10-trendline-gate-20260918-v1/</code> （<code>results/prehold_v3/</code> 逐流账本与收据、<code>results/crossings.csv.gz</code>、<code>statistics/</code>）。</p>
+<h2>9. 下一步选项</h2>
+<p><strong>全部需要 Owner 决策。</strong> 本轮不自行推进任何一项。</p>
+<ul>
+<li><strong>A（不消耗 holdout，但方向与直觉相反）：按跨越成因分门。</strong> §6 已经用描述性分组回答了 「门筛的是突破还是线漂移」：<strong>线漂移那一类反而更赚</strong>（+0.0822 vs +0.0399 R/笔）。 所以这个单变量实验要检验的是「只保留线降主导」，不是「只保留真突破」。 做之前要先想清楚它与 V9 已有的 3ATR 过热门有多大重叠——如果基本重叠，那这条路只是 换个说法重复一道已有的门，不值得开一轮。</li>
+<li><strong>B：用 holdout 做一次性最终验收。</strong> 需要 Owner 在对话中明确批准 + <code>docs/HOLDOUT_LEDGER.md</code> 新编号条目。<strong>参评臂必须在读任何字节之前冻结成一个</strong>，并且要写明它是在已观察数据上挑出来的： 按本轮结果我会选 <code>v10_a12</code>（全期每笔 +0.1028R、超额 +0.1018、前段 p=0.0040）， 但后一段它的超额已经转负，所以我的事前预期是<strong>不通过</strong>。 个人建议：A 的问题已经在 §6 里被描述性地回答了，所以真正的岔路是 B 和 D。</li>
+<li><strong>C：空头 + 趋势线门。</strong> 后段空头 a12 每笔 +0.1534R、超额 +0.1262、p=0.0265 是全表最亮的格子， 但这是事后方向切分，要做就必须事前登记为新实验，并且要面对「V9 后段多头亏损」这个更根本的问题。</li>
+<li><strong>D：什么都不做。</strong> V10 作为研究记录留档，V9 保持现状（ACTIVE 仍然是 0 个模型）。 考虑到「前段有效、后段消失」已经是本项目第三次出现同一形态 （ETH BB×Stoch、BTC BB×Stoch 参数搜索，现在是趋势线门），这个选项不是消极选项。</li>
+</ul>
+</body>
+</html>

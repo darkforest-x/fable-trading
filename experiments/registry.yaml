@@ -9650,3 +9650,17 @@ experiments:
     canonical_report: analysis/p1_spike_v9_later_year_attribution_20260917.md
     artifacts: []
     notes: Attribution axes are not independent (30m is simultaneously the highest-count, tightest-stop and highest-cost-share bucket), so the shares must not be added as independent contributions. Dropping 30m or adding a direction gate are both post-hoc reads of this table and would need pre-registration. Later year is not blind;the history was already observed by the V8/V9 work. The builder refuses to write if either period fails to reproduce the published summary.csv total R.
+
+  - experiment_id: exp-spike-v10-trendline-gate-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: PLACEHOLDER
+    status: rejected
+    question: Does requiring a recent trendline break at the V9 confirmation bar improve SPIKE V9?
+    single_variable: Entry mask only. Exits, the 0.2 percent round-trip cost, the raw opposite-confirmation reversal and the matched-control draw and seed are the published V9 ones. Five arms registered before any replay - V9 ungated plus break ages 0, 12, 48 and 200 - and all five are reported.
+    result: NOT ADOPTED. Per trade quality rises and total falls. Over 2024-09-10..2026-05-04 the age<=12 arm keeps 42 percent of V9 entries and turns +0.0553 into +0.1028 net R per trade, PF 1.083 into 1.155, matched excess +0.0699 into +0.1018 (month-block p .0285 into .0105), event drawdown 4023R into 1381R, while total net R falls +3399.96 into +2685.30. The gain is almost entirely the earlier period (+0.1386 into +0.2049 excess, p .0040). In 2025-09-10..2026-05-04 every arm is still net negative and the a12/a48/a200 matched excess turns negative (+0.0033 into -0.0028/-0.0097/-0.0109). No full-period or later-period cell reaches p<0.01. 4H net R rises but its matched excess stays negative, so that profit is beta. The later loss is entirely longs and the gate makes longs worse (-0.2102 into -0.2395 per trade).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v10_trendline_gate_20260918.md
+    artifacts: []
+    notes: Every stream is truncated so no bar opening at or after 2026-05-04 is read; the 4.2 month tail stays blind. Truncation is verified, not asserted - each stream's V9 arm reproduced the published V9 ledger trade for trade over everything that exited on a kept bar, and that check caught two real bugs. The indicator port is held against a literal transcription of the Pine, against truncated history, and against an independently written sibling port. Counter-intuitive side result - 47.7 to 55.7 percent of long crossings are the falling line reaching flat price rather than price rising, and that population outperformed the real thrusts (+0.0822 versus +0.0399 net R per trade), so a "only real breakouts" filter would have lowered the edge on this data. Both periods were already observed by V8/V9 work, so neither is blind and the earlier-period p values cannot carry significance.
