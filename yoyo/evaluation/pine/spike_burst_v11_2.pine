@@ -724,6 +724,7 @@ string v112Rule = input.string("多头框内", "突破+spike 规则", options=["
 bool v112AddOnBreak = input.bool(true, "框内突破时提示加仓（止损沿用原框）", group=v112Group, display=display.none)
 bool v112EarlyExit = input.bool(false, "N 根内没出突破：盈亏参考提前结束", group=v112Group, tooltip="V9多头框开了N根仍没有任何突破（本周期或上级），在第N根收盘结束参考框，标「未突破离场」。只改参考框，不下单。", display=display.none)
 int v112ExitBars = input.int(6, "等待突破的根数 N", minval=1, maxval=500, group=v112Group, display=display.none)
+bool v112ShowAllLines = input.bool(false, "诊断：显示本周期全部有效候选线", group=v112Group, tooltip="画出程序此刻候选池里所有未突破的下降线（虚线，编号），并在面板显示最近一次找线的结果：入池/重复/实体穿线/针刺/容量。用来查“为什么这条线没画出来”。", display=display.none)
 
 // ───────────── 双轨高点 ─────────────
 
@@ -1771,6 +1772,27 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
                 array.push(v11HtfMarks, label.new(htfActBxT, htfActBp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), tooltip=activeTip, force_overlay=true))
                 array.push(v11HtfMarks, label.new(htfActCxT, htfActCp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), tooltip=activeTip, force_overlay=true))
 
+// 诊断：候选池里所有未突破的本周期下降线。
+var array<polyline> v112DiagLines = array.new<polyline>()
+var array<label> v112DiagMarks = array.new_label()
+
+if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
+    while array.size(v112DiagLines) > 0
+        polyline.delete(array.pop(v112DiagLines))
+
+    while array.size(v112DiagMarks) > 0
+        label.delete(array.pop(v112DiagMarks))
+
+    if v112ShowAllLines
+        for item in v10Tracks
+            if item.phase == 1 and v10ClosedBar - item.ax < 9000
+                array<chart.point> diagPoints = array.new<chart.point>()
+                array.push(diagPoints, chart.point.from_index(item.ax, item.ap))
+                array.push(diagPoints, chart.point.from_index(v10ClosedBar + v10Ahead, item.at(v10ClosedBar + v10Ahead)))
+                array.push(v112DiagLines, polyline.new(diagPoints, curved=false, closed=false, xloc=xloc.bar_index, line_color=color.new(v10LineColor, 55), line_style=line.style_dotted, line_width=1, force_overlay=true))
+                string diagTip = "候选#" + str.tostring(item.uid) + " · 分数 " + str.tostring(item.score, "#.###") + " · " + (item.source == 0 ? "完整影线" : "削尖影线") + "\n三点确认：" + str.format_time(item.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai")
+                array.push(v112DiagMarks, label.new(item.cx, item.cp, "#" + str.tostring(item.uid), style=label.style_label_down, color=color.new(v10LineColor, 100), textcolor=color.new(v10LineColor, 40), size=size.tiny, tooltip=diagTip, force_overlay=true))
+
 // ───────────── 联合信号与趋势线成组保留 ─────────────
 
 bool v10JointVisible = v10Enabled and (v10ShowJoint or v10OnlyJoint) and v112ChartShow
@@ -1921,8 +1943,8 @@ int rrKeep = input.int(60, "保留盈亏框组数", minval=1, maxval=60, group=r
 
 int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
 
-f_rrPriceTag(int stamp, float price, string caption, color tone, string tip) =>
-    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=tone, size=size.small, tooltip=tip, force_overlay=true)
+f_rrPriceTag(int stamp, float price, string caption, color tone, string tip, bool hide = false) =>
+    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, hide ? 100 : 12), textcolor=hide ? color.new(tone, 100) : tone, size=size.small, tooltip=tip, force_overlay=true)
 
 type RRDrawing
     box riskBox
@@ -1939,6 +1961,7 @@ type RRDrawing
     float stopPrice
     float distance
     float maximum
+    bool hidden = false
 
 method deleteDrawings(RRDrawing group) =>
     box.delete(group.riskBox)
@@ -1951,6 +1974,42 @@ method deleteDrawings(RRDrawing group) =>
         line.delete(array.get(group.targetLines, slot))
         line.delete(array.get(group.milestoneLines, slot))
         label.delete(array.get(group.milestoneTags, slot))
+
+// 仅显示突破+spike时，V9盈亏框先隐藏创建；框内出现突破+spike才显示，没出就随框结束删除。
+method reveal(RRDrawing group, array<label> targetTags) =>
+    if not na(group.riskBox)
+        box.set_border_color(group.riskBox, color.new(bear, 45))
+        box.set_bgcolor(group.riskBox, color.new(bear, 92))
+
+    if not na(group.rewardBox)
+        box.set_border_color(group.rewardBox, color.new(bull, 45))
+        box.set_bgcolor(group.rewardBox, color.new(bull, 92))
+
+    if not na(group.entryTag)
+        label.set_color(group.entryTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.entryTag, ink)
+
+    if not na(group.stopTag)
+        label.set_color(group.stopTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.stopTag, bear)
+
+    if not na(group.peakTag)
+        label.set_color(group.peakTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.peakTag, bull)
+
+    for slot = 0 to 2
+        line targetLine = array.get(group.targetLines, slot)
+        label targetTag = array.get(targetTags, slot)
+
+        if not na(targetLine)
+            line.set_color(targetLine, color.new(bull, 72))
+
+        if not na(targetTag)
+            label.set_color(targetTag, color.new(chart.bg_color, 12))
+            label.set_textcolor(targetTag, bull)
+
+    group.hidden := false
+    0
 
 var array<RRDrawing> rrHistory = array.new<RRDrawing>()
 var RRDrawing activeRR = na
@@ -1983,6 +2042,9 @@ if barstate.isconfirmed
         rrTargetLines := array.new<line>(3, na)
         rrTargetTags := array.new<label>(3, na)
         activeRR := na
+
+    if not na(activeRR) and activeRR.hidden and activeRR.side == 1 and v11AnyJoint
+        activeRR.reveal(rrTargetTags)
 
     if not na(activeRR)
         bool ended = exitReference
@@ -2057,6 +2119,9 @@ if barstate.isconfirmed
             for targetSlot = 0 to 2
                 label.delete(array.get(rrTargetTags, targetSlot))
 
+            if activeRR.hidden
+                activeRR.deleteDrawings()
+
             rrTargetLines := array.new<line>(3, na)
             rrTargetTags := array.new<label>(3, na)
             activeRR := na
@@ -2077,20 +2142,22 @@ if barstate.isconfirmed
             array.push(rrHistory, activeRR)
 
             // 仅联合模式下隐藏旧V9参考图形，不修改参考状态和退出。
-            if showRisk and rrShow and not v10OnlyJoint
+            if showRisk and rrShow
+                bool rrHide = v10OnlyJoint
+                activeRR.hidden := rrHide
                 float observation = entry + rrNewSide * 3.0 * rrNewDistance
                 string sideText = rrNewSide == 1 ? "多头" : "空头"
 
                 string tip = sideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框为走势参考，峰值未兑现。"
 
-                activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, 45), border_width=1, bgcolor=color.new(bear, 92), force_overlay=true)
+                activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, rrHide ? 100 : 45), border_width=1, bgcolor=color.new(bear, rrHide ? 100 : 92), force_overlay=true)
 
-                activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, 45), border_width=1, bgcolor=color.new(bull, 92), force_overlay=true) : na
+                activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, rrHide ? 100 : 45), border_width=1, bgcolor=color.new(bull, rrHide ? 100 : 92), force_overlay=true) : na
 
-                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip)
-                activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip)
+                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip, rrHide)
+                activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip, rrHide)
 
-                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, (showMilestones ? "" : "3R 观察位 · " + str.tostring(observation, format.mintick)), bull, tip) : na
+                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, (showMilestones ? "" : "3R 观察位 · " + str.tostring(observation, format.mintick)), bull, tip, rrHide) : na
 
                 if showMilestones
                     rrTargetLines := activeRR.targetLines
@@ -2103,9 +2170,9 @@ if barstate.isconfirmed
                         if targetPrice > 0
                             string targetTip = "预先显示的 " + str.tostring(targetR, "#") + "R 参考价，基于冻结初始风险；不是止盈指令。"
 
-                            line targetLine = line.new(time, targetPrice, rrRightTime, targetPrice, xloc=xloc.bar_time, color=color.new(bull, 72), style=line.style_dashed, width=1, force_overlay=true)
+                            line targetLine = line.new(time, targetPrice, rrRightTime, targetPrice, xloc=xloc.bar_time, color=color.new(bull, rrHide ? 100 : 72), style=line.style_dashed, width=1, force_overlay=true)
 
-                            label targetTag = label.new(rrRightTime, targetPrice, str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, 12), textcolor=bull, size=size.tiny, tooltip=targetTip, force_overlay=true)
+                            label targetTag = label.new(rrRightTime, targetPrice, str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, rrHide ? 100 : 12), textcolor=color.new(bull, rrHide ? 100 : 0), size=size.tiny, tooltip=targetTip, force_overlay=true)
 
                             array.set(rrTargetLines, targetSlot, targetLine)
                             array.set(rrTargetTags, targetSlot, targetTag)
@@ -2188,7 +2255,7 @@ plot(barstate.isconfirmed and exitReference ? exitReferencePrice : na, "V6 参�
 
 // ───────────── 状态面板 ─────────────
 
-var table panel = table.new(position.top_right, 2, 12, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+var table panel = table.new(position.top_right, 2, 13, bgcolor=color.new(chart.bg_color, 8), border_width=0)
 
 if barstate.islast and showPanel
     string stateText = (v10OnlyJoint ? "仅联合显示 · " : "") + (trendSide == 1 ? "V9多头参考" : trendSide == -1 ? "V9空头参考" : "当前无跟踪参考")
@@ -2235,6 +2302,10 @@ if barstate.islast and showPanel
     string v11HtfState = not v11UseHtfSource ? "未启用" : not v11HtfOn ? "上级周期无效（须大于本图）" : v11HtfText + " · " + (na(v11LastHtfBreakTime) ? "尚无突破" : "最近突破可见 " + str.format_time(v11LastHtfBreakTime, "MM-dd HH:mm", "Asia/Shanghai")) + " · " + v11HtfPairWhy
     table.cell(panel, 0, 11, "上级周期 · " + v112Rule, text_color=muted, text_size=size.tiny)
     table.cell(panel, 1, 11, v11HtfState, text_color=v11HtfColor, text_size=size.tiny)
+
+    if v112ShowAllLines
+        table.cell(panel, 0, 12, "诊断 · 最近一次找线", text_color=muted, text_size=size.tiny)
+        table.cell(panel, 1, 12, v10SearchWhy + " · 当前候选 " + str.tostring(v10ActiveCount), text_color=ink, text_size=size.tiny)
 
 // ───────────── 原有结构与参考预警 ─────────────
 
