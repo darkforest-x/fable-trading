@@ -1,0 +1,20 @@
+{
+  "schema": "spike-v112-manage-v1",
+  "experiment_id": "exp-spike-v112-manage-20260919-v1",
+  "pairs": [["15m", "1h"], ["1h", "4h"]],
+  "base": "every final V9 long, serial, published fixed-entry exit",
+  "break": "higher-timeframe break first visible on the chart bar OR own-timeframe V10.4 line break",
+  "arms": ["v9_add", "v9_exit3", "v9_exit6", "v9_exit12", "v9_exit24", "v9_exit48", "v9_exit6_add"],
+  "primary": {"add": "v9_add", "exit": "v9_exit6"},
+  "reference_ledger": "exp-spike-v10-4-joint-multitf-20260918-v1 run_v1 v9_long (15m, 1h)",
+  "source": "data/kline_preholdout_binance_um5m/series",
+  "expected_symbols": 638,
+  "evaluation_signal_close": ["2024-09-10T00:00:00Z", "2026-05-01T00:00:00Z"],
+  "split": "2025-09-10T00:00:00Z",
+  "holdout_consumption": 0,
+  "round_trip_cost": 0.002,
+  "bootstrap": {"method": "UTC event-month block resample", "seed": 91509, "reps": 2000},
+  "parameter_search": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
