@@ -1,5 +1,40 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：趋势线突破 V2 策略 · 止盈止损网格——三个周期全部未过（2026-09-18）
+
+Owner 贴 Pine「主下降趋势线 · 关键高点 V1」，要求「做个 v2 版本 做成策略 回测一下
+自己找到止盈止损的最优参数 多个级别都试试」，本人睡觉、由我自行跑完。
+**这是和上面 SPIKE V10 不同的一件事**：V10 拿这条线给 V9 做入场门；这里是把这条线的突破
+单独当成做多策略，只搜出场。两份移植（`trendline_break.py` / `trendline_v2_signals.py`）
+由 `tests/evaluation/test_trendline_break.py` 逐 bar 钉在一起。
+
+**holdout 消耗 0**，数据止于 2026-05-04（冻结的 `read_prefix` 逐字节拦截）。
+54 个 OKX 永续，15m 为底合成 1h/4h；止损 10 档 × 止盈 9 档 = 90 格 × 3 周期 = 270 个配置。
+开发段 2022-01→2025-01 选参（邻域中位数，事前写死），`selection.json` 提交后才读复查段
+2025-01→2026-05。
+
+| 周期 | 入选 | 开发段每笔 R | 复查段每笔 R | 配对超额 R | 月块 p | 判定 |
+|---|---|---|---|---|---|---|
+| 15m | SL6 / TP0.5 | −0.0847 | −0.0799 | −0.0048 | 0.81 | 未过 |
+| 1h | SL6 / TP10 | −0.0073 | −0.1831 | −0.0328 | 0.80 | 未过 |
+| 4h | SL2.5 / TP10 | +0.0368 | −0.0053 | +0.0933 | 0.21 | 未过 |
+
+- 15m 与 1h 的开发段 **180 格没有一格为正**（R 与 bp 两个口径都是）。成本吃掉一切：
+  1 ATR 止损的每笔成本 15m 0.42R、1h 0.20R、4h 0.09R。
+- **搜出来的格子输给没搜的参照格**：4h 参照 SL2/TP4 复查 +0.0298R、PF1.045，入选格 −0.0053R。
+  本仓第三次同形态（ETH/BTC BB×Stoch 各一次）。
+- 唯一正面信息：4h 入场比匹配随机好（复查三格超额 +0.070~+0.093R、毛 R 为正），
+  但量级小于成本、bp 口径全负、p>0.1。**不是换止盈止损能修的。**
+- 指标的"突破"包含"线自己降到横盘价格上"，是穿越不是上涨（有测试钉住）。
+
+HTML：analysis/html/p1_trendline_v2_tbsl_20260918.html；
+实验：experiments/active/exp-trendline-v2-tbsl-20260918-v1/；
+Pine 策略：yoyo/evaluation/pine/trendline_break_strategy_v2.pine（**未在 TV 上编译过**；
+默认参数是参照格 SL1/TP2，不是"最优值"）；owner 原文逐字存 trendline_key_high_v1_owner.pine。
+笔记：docs/learnings/net-r-grid-search-drifts-to-wide-stops-because-fees-shrink-in-r.md、
+a-descending-trendline-break-is-a-crossing-not-a-breakout.md。
+不申请 holdout。未训练、未 promote、未改仓、未动真金。
+
 ## 最新：SPIKE V10 趋势线突破门——每笔更好、总量减半、后一段依然为负（2026-09-18）
 
 Owner 给出 Pine「主下降趋势线 · 关键高点 V1」，要求「加入 spike v9 写一个 v10」并回测，

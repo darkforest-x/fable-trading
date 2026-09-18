@@ -9664,3 +9664,17 @@ experiments:
     canonical_report: analysis/p1_spike_v10_trendline_gate_20260918.md
     artifacts: []
     notes: Every stream is truncated so no bar opening at or after 2026-05-04 is read; the 4.2 month tail stays blind. Truncation is verified, not asserted - each stream's V9 arm reproduced the published V9 ledger trade for trade over everything that exited on a kept bar, and that check caught two real bugs. The indicator port is held against a literal transcription of the Pine, against truncated history, and against an independently written sibling port. Counter-intuitive side result - 47.7 to 55.7 percent of long crossings are the falling line reaching flat price rather than price rising, and that population outperformed the real thrusts (+0.0822 versus +0.0399 net R per trade), so a "only real breakouts" filter would have lowered the edge on this data. Both periods were already observed by V8/V9 work, so neither is blind and the earlier-period p values cannot carry significance.
+
+  - experiment_id: exp-trendline-v2-tbsl-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8c2867f0c122e94f5305dbb012bc7873630ae394
+    status: rejected
+    question: Does the owner's descending-trendline break (Pine V1) become a profitable long strategy once take-profit and stop-loss are searched, on 15m, 1h and 4h, and does the searched cell survive a later time segment?
+    single_variable: The exit only, (stop ATR multiple, target ATR multiple) on a 10x9 grid. Indicator parameters, next-open entry, long side, 0.2percent round trip and 54-perpetual OKX universe frozen; a contract test asserts every V1 rule line appears verbatim in the V2 Pine.
+    result: NOT PASSED on any timeframe. Development 2022-01..2025-01 had 0 of 90 cells net positive on either axis at 15m and at 1h; 43 of 90 at 4h. Frozen neighbourhood-median picks SL6/TP0.5 (15m), SL6/TP10 (1h), SL2.5/TP10 (4h). Review 2025-01..2026-05 per signal -0.0799R (21471), -0.1831R (5545), -0.0053R (1248); paired excess -0.0048, -0.0328, +0.0933R; month-block p 0.81, 0.80, 0.21. At 4h and 1h the unsearched reference cells beat the searched pick (4h SL2/TP4 +0.0298R PF1.045). 4h entry beats matched random in all three review cells (+0.070 to +0.093R) with positive gross R, but the edge is smaller than the cost and every 4h review cell is negative in bp of notional.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_trendline_v2_tbsl_20260918.md
+    artifacts: []
+    notes: Review segment is pre-holdout data already observed by other studies, so it is a time split, not a blind set. Selection.json was committed before any review byte was read and the review stage refuses to run unless it matches HEAD. 270 configurations with no multiple-comparison correction on review p. Universe is 54 currently listed OKX perpetuals, survivorship not removed. Net R rewards wide stops because the fixed fee shrinks in a larger R (1 ATR stop costs 0.42R at 15m, 0.20R at 1h, 0.09R at 4h); every cell also reports bp of notional. Leverage gate never bound (max 350 notional per R). A second independent port of the same Pine (trendline_break.py) is held equal by test_trendline_break.py.

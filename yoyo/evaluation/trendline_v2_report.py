@@ -42,6 +42,16 @@ def grid_figure(dev: dict, cfg: dict) -> Path:
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    import matplotlib.font_manager as fm
+
+    # The report is in Chinese and DejaVu has no CJK glyphs, so the figure would
+    # ship a grid of tofu boxes. Pick whichever CJK face this machine has.
+    available = {face.name for face in fm.fontManager.ttflist}
+    for candidate in ("Arial Unicode MS", "Hiragino Sans GB", "STHeiti", "Songti SC"):
+        if candidate in available:
+            plt.rcParams["font.family"] = [candidate]
+            break
+    plt.rcParams["axes.unicode_minus"] = False
 
     sl, tp = cfg["sl_mults"], cfg["tp_mults"]
     minutes = [str(m) for m in cfg["minutes"]]
@@ -80,9 +90,14 @@ def dev_table(dev: dict, selection: dict, cfg: dict, key: str) -> list[str]:
     chosen = selection["timeframes"][key]["selected"]
     ranked = sorted((e for e in entries if e["stats"].get("n")),
                     key=lambda e: -(e["stats"]["mean_net_r"] or -9e9))
+    picked = (chosen["sl_mult"], chosen["tp_mult"]) if chosen else None
     marks = []
-    for entry in ranked[:5]:
+    for entry in ranked:
+        if (entry["sl_mult"], entry["tp_mult"]) == picked:
+            continue  # it already has its own row as 入选
         marks.append((f"网格最高 #{len(marks) + 1}", entry))
+        if len(marks) == 5:
+            break
     for reference in cfg["reference_cells"]:
         marks.append(("参照格", next(e for e in entries
                                      if (e["sl_mult"], e["tp_mult"]) == tuple(reference))))
@@ -191,15 +206,72 @@ def build() -> Path:
             f"配对超额 {fmt(c['excess_mean_net_r'], 4, True)}R、月块 p {fmt(c.get('p'), 3)}。"
             f"{'通过' if judge['passed'] else '**未通过**'}。")
     add("")
+    # The reference cells are unsearched. If one beats the searched winner on
+    # the review segment, that is the headline, not a footnote.
+    beaten = []
+    for key in keys:
+        if judged[key]["selected"] is None:
+            continue
+        chosen_cell = (judged[key]["selected"]["sl_mult"], judged[key]["selected"]["tp_mult"])
+        chosen_r = judged[key]["entry"]["stats"]["mean_net_r"]
+        for entry in review["timeframes"][key]["paths"][cfg["primary_path"]]["cells"]:
+            if (entry["sl_mult"], entry["tp_mult"]) == chosen_cell:
+                continue
+            if (entry["stats"]["mean_net_r"] or -9e9) > (chosen_r or -9e9):
+                beaten.append((key, entry, chosen_r))
+    if beaten:
+        add("### 搜出来的那一格，输给了没搜的参照格")
+        add("")
+        for key, entry, chosen_r in beaten:
+            add(f"- **{TF_LABEL[key]}**：事前参照格 {cell_name(entry)} 复查段每笔 "
+                f"{fmt(entry['stats']['mean_net_r'], 4, True)}R、PF "
+                f"{fmt(entry['stats']['profit_factor'], 3)}；"
+                f"按规则选出来的那一格是 {fmt(chosen_r, 4, True)}R。")
+        add("")
+        add("**搜索没有找到更好的参数，找到的是更差的。**"
+            "这是本仓第三次看到同一个形态（ETH 与 BTC 的 BB×Stoch 参数搜索各一次）。"
+            "邻域中位数规则防住了「孤立尖峰」，但防不住「整片区域在开发段本身就是噪声」。")
+        add("")
+
     add("### 为什么会这样：两件事，都不是调参能修的")
     add("")
-    add("**第一，在 15m 上，1 ATR 的止损比往返手续费还小。**"
-        "ATR(14) 在 15m 上大约是价格的 0.1–0.15%，而往返成本固定 0.2%。"
-        "把成本换算成 R，一个 1 ATR 的止损要先赚回一倍多的 R 才回本——"
-        "下表的「每笔成本 R」那一列直接把这件事写出来了。"
-        "网格里宽止损之所以好看，主要就是同一笔固定百分比费用被更大的 R 除小了，"
-        "不是择时变准了。所以报告同时给「每笔净收益 bp」这一列：它不含仓位假设。")
+    cost_rows = []
+    for key in keys:
+        one = next((e for e in dev["timeframes"][key]["cells"]
+                    if (e["sl_mult"], e["tp_mult"]) == (1.0, 2.0)), None)
+        if one:
+            lev = one["stats"]["median_notional_per_r"]
+            cost_rows.append((TF_LABEL[key], one["stats"]["mean_cost_r"], lev,
+                              100.0 / lev if lev else None))
+    add("**第一，成本在 R 轴上的占比随周期变，而且决定了网格往哪边走。**"
+        "往返成本固定 0.2%，R = 止损倍数 × ATR；ATR 占价格越小，同一档止损里交给手续费的份额越大。"
+        "下表取开发段 1 ATR 止损那一行：")
     add("")
+    add("| 周期 | 1 ATR 止损的每笔成本（R） | 名义额/R 中位 | 推得的 ATR/价格 |")
+    add("| --- | --- | --- | --- |")
+    for label, cost_r, lev, atr_pct in cost_rows:
+        add(f"| {label} | {fmt(cost_r, 3)} | {fmt(lev, 0)} | {fmt(atr_pct, 2)}% |")
+    add("")
+    add("同一个周期里，止损放宽 k 倍，成本在 R 轴上就缩小 k 倍。"
+        "**所以网格的赢家贴在最宽止损那一边，主要是同一笔固定百分比费用被更大的 R 除小了，"
+        "不是择时变准了。**报告因此并列「每笔净收益 bp」：它不含仓位假设，"
+        "两列在 4h 上直接打架——R 轴较好的格子在 bp 轴上多数是负的，"
+        "说明 R 轴上的正值集中在 ATR 小（R 小、被放大）的那些交易里。")
+    add("")
+    four = review["timeframes"].get("240")
+    if four:
+        cells4 = four["paths"][cfg["primary_path"]]["cells"]
+        excess4 = [e["control"]["excess_mean_net_r"] for e in cells4
+                   if e["control"].get("excess_mean_net_r") is not None]
+        gross4 = [e["stats"]["gross_r"] for e in cells4]
+        if excess4 and min(excess4) > 0:
+            add(f"**唯一站得住的正面信息在 4h：入场比随机好，但不够付手续费。**"
+                f"复查段三格的配对超额全为正（{fmt(min(excess4), 4, True)} 到 "
+                f"{fmt(max(excess4), 4, True)}R），毛 R 合计 {fmt(min(gross4), 1, True)} 到 "
+                f"{fmt(max(gross4), 1, True)}——线的突破在 4h 上确实比同月同波动的随机做多强一点。"
+                "但月块 p 都在 0.1 以上，而且扣掉 0.2% 往返之后每笔净 R 在零附近、bp 口径全负。"
+                "**优势的量级比成本小，这不是换止盈止损能修的。**")
+            add("")
     add("**第二，这个指标的「突破」不等于「上涨」。**"
         "信号条件是收盘价高于趋势线加缓冲，而趋势线本身是向下倾斜的。"
         "一条足够陡的线会自己降到横盘价格上，于是在完全没有上涨的行情里也照样触发。"
@@ -210,14 +282,16 @@ def build() -> Path:
 
     add("## 数据与信号统计")
     add("")
-    add("| 周期 | 参与币种 | 开发段信号 | 复查段信号 | 平局枢轴（未采纳） | 尾部窗口不足而丢弃 |")
+    add("| 周期 | 参与币种 | 开发段信号 | 复查段信号 | 只在放宽平局时才算枢轴的 bar（占全部 bar） | 尾部窗口不足而丢弃 |")
     add("| --- | --- | --- | --- | --- | --- |")
     for key in keys:
         dev_block = dev["timeframes"][key]
         review_block = review["timeframes"][key]["paths"][cfg["primary_path"]]
         ties = sum(v["pivot_ties"] for v in dev_block["per_symbol"].values())
+        bars = sum(v["bars"] for v in dev_block["per_symbol"].values())
         add(f"| {TF_LABEL[key]} | {len(dev_block['symbols'])} | {dev_block['signals']} | "
-            f"{review_block['signals']} | {ties} | {dev_block['dropped_horizon']} |")
+            f"{review_block['signals']} | {ties}（{100 * ties / bars:.2f}%） | "
+            f"{dev_block['dropped_horizon']} |")
     add("")
     first = dev["timeframes"][keys[0]]["per_symbol"]
     earliest = min(v["first"] for v in first.values())
@@ -227,6 +301,10 @@ def build() -> Path:
     add(f"- 1h / 4h 由冻结的 `aggregate()` 从 15m 合成，只用成分完整的 bar。")
     add(f"- **holdout 消耗 0**：读取经 `release_eth_prefix.read_prefix`，"
         f"端点 {cfg['end_exclusive'][:10]}，它在第一条越界行就停止解析。")
+    max_lev = max(e["stats"]["median_notional_per_r"] for k in keys
+                  for e in dev["timeframes"][k]["cells"])
+    add(f"- 杠杆闸（名义额/R 中位数 ≤ {cfg['max_notional_per_r']:.0f}）**一次都没触发**："
+        f"全网格最高 {max_lev:.0f}。它是护栏，没有筛掉任何格子。")
     add(f"- 匹配对照每信号 {cfg['controls_per_signal']} 个；开发段未配上对照的信号 "
         f"{sum(dev['timeframes'][k]['unmatched'] for k in keys)} 个（按事前约定剔除，不降级匹配轴）。")
     add("")
@@ -343,7 +421,10 @@ def build() -> Path:
         "`yoyo/evaluation/pine/trendline_key_high_v1_owner.pine`，"
         "`tests/evaluation/test_trendline_v2_pine_contract.py` 逐行断言 V1 的每一条"
         "选点/容差/突破规则都原样出现在 V2 策略里——单变量这件事是机器保证的，不是我说的。")
-    add("10. **未训练、未 promote、未改仓、未动真金、未开新分支。**")
+    add("10. **运行日志里的 `RuntimeWarning: ... in matmul` 是假警报。** "
+        "macOS Accelerate BLAS 在输入输出全有限时也会置浮点异常标志；"
+        "用全有限的随机输入单独复现过，输出有限、数值正确。置换检验的 p 值不受影响。")
+    add("11. **未训练、未 promote、未改仓、未动真金、未开新分支。**")
     add("")
 
     add("## 下一步选项")
