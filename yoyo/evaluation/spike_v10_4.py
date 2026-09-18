@@ -665,6 +665,26 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
                       raw_extra + soft_extra, htf_joint_event, htf_joints, htf_refusals)
 
 
+def box_joints(long_open, box_entry, break_now) -> np.ndarray:
+    """V11.1 box rule (owner 2026-09-18 「只要多头框还开着 … 不要任何限制」).
+
+    A joint fires on a bar where a break is seen (`break_now`) while the chart's
+    V9 long reference box is open after that bar's close; no window, no
+    second-bar gate. Each box yields at most one joint (its first break).
+    """
+    long_open = np.asarray(long_open, dtype=bool)
+    box_entry = np.asarray(box_entry, dtype=np.int64)
+    brk = np.asarray(break_now, dtype=bool)
+    out = np.zeros(len(brk), dtype=bool)
+    used = set()
+    for i in np.flatnonzero(long_open & brk).tolist():
+        box = int(box_entry[i])
+        if box not in used:
+            used.add(box)
+            out[i] = True
+    return out
+
+
 def htf_breaks(open_, high, low, close, atr, *, can_run, tick: float, params: V104Params | None = None) -> list[dict]:
     """V11 higher-timeframe engine (Pine `f_v11_lineEngine`), run on the higher bars.
 
@@ -734,13 +754,19 @@ def htf_breaks(open_, high, low, close, atr, *, can_run, tick: float, params: V1
 
 def reference_long_exits(high, low, close, atr, *, ready, gap, raw_side, signal_side,
                          tick: float, arm_r: float = 2.0, trail_atr: float = 4.0,
-                         floor_atr: float = 2.0, buffer_atr: float = 0.2, stop_len: int = 5) -> np.ndarray:
+                         floor_atr: float = 2.0, buffer_atr: float = 0.2, stop_len: int = 5,
+                         state: dict | None = None) -> np.ndarray:
     """The indicator's own V9 risk reference; True on bars where a LONG reference ended.
 
     Translated from the Pine sections "原有风险参考与退出", f_risk and f_path. The
     reference opens at the confirmation close (not a fill); it is only needed
     because V10.4 drops saved SPIKE evidence on a bar where the long reference
     ends. It is not the backtest's trade engine.
+
+    `state`, when a dict is passed, also receives per bar whether a LONG
+    reference box is open after that bar's close (`long_open`) and the bar
+    that opened it (`box_entry`, -1 when none) -- the "多头信号框" the owner
+    reads on the chart (V11.1 box rule).
     """
     h, lo, c, a = (np.asarray(x, dtype=float) for x in (high, low, close, atr))
     n = len(c)
@@ -754,6 +780,9 @@ def reference_long_exits(high, low, close, atr, *, ready, gap, raw_side, signal_
         recent_low[stop_len - 1:] = win_low
         recent_high[stop_len - 1:] = win_high
     out = np.zeros(n, dtype=bool)
+    if state is not None:
+        state["long_open"] = np.zeros(n, dtype=bool)
+        state["box_entry"] = np.full(n, -1, dtype=np.int64)
     trend = 0
     entry_bar = -1
     entry = risk = protection = math.nan
@@ -792,4 +821,7 @@ def reference_long_exits(high, low, close, atr, *, ready, gap, raw_side, signal_
             if sig[i] != 0 and ok:
                 trend, entry_bar, entry, risk, protection, armed = int(sig[i]), i, c[i], r, stop, False
         out[i] = exit_side == 1
+        if state is not None:
+            state["long_open"][i] = trend == 1
+            state["box_entry"][i] = entry_bar if trend == 1 else -1
     return out

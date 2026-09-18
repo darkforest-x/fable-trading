@@ -1,0 +1,21 @@
+{
+  "schema": "spike-v11-box-joint-v1",
+  "experiment_id": "exp-spike-v11-box-joint-20260918-v1",
+  "rule": "break seen while the chart's V9 long reference box is open after that close; no window; no second-bar gate; one joint per box",
+  "pairs": [["15m", "1h"], ["1h", "4h"]],
+  "arms": ["v9_long", "v10_4", "box_htf", "box_chart", "box_any"],
+  "primary_arm": "box_any",
+  "source": "data/kline_preholdout_binance_um5m/series",
+  "expected_symbols": 638,
+  "evaluation_signal_close": ["2024-09-10T00:00:00Z", "2026-05-01T00:00:00Z"],
+  "split": "2025-09-10T00:00:00Z",
+  "data_end_exclusive": "2026-05-01T00:00:00Z",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "holdout_consumption": 0,
+  "round_trip_cost": 0.002,
+  "control_seed": 91918,
+  "bootstrap": {"method": "UTC event-month block resample, both arms together", "seed": 91509, "reps": 2000},
+  "parameter_search": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
