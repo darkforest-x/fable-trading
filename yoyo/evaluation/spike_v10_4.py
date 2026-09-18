@@ -257,8 +257,12 @@ def _search(xs: list, ps: list, ats: list, source: int, i: int, low: np.ndarray,
     return bag
 
 
-def _store(pool: list[Line], item: Line, i: int, high, close, body, atr, tick, p: V104Params) -> int:
-    """f_v10_store: 1 stored, 0 duplicate, 2 body, 3 needle, 4 already broken, 5 no room."""
+def _store(pool: list[Line], item: Line, i: int, high, close, body, atr, tick, p: V104Params,
+           evicted: list | None = None) -> int:
+    """f_v10_store: 1 stored, 0 duplicate, 2 body, 3 needle, 4 already broken, 5 no room.
+
+    `evicted`, when given, receives the line removed to make room (trace only).
+    """
     for known in pool:
         if _same(known, item, i, atr, tick, p):
             return 0
@@ -276,6 +280,8 @@ def _store(pool: list[Line], item: Line, i: int, high, close, body, atr, tick, p
                 worst, worst_score = k, known.score
     room = group < p.per_track_group
     if not room and worst >= 0 and item.score < worst_score:
+        if evicted is not None:
+            evicted.append(pool[worst])
         del pool[worst]
         room = True
     if room:
@@ -323,7 +329,7 @@ def soft_peak(open_: np.ndarray, high: np.ndarray, close: np.ndarray, atr: np.nd
 
 def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, parent_high, parent_low,
                  raw_side, long_alive, momentum, current_gate, ref_long_exit, tick: float,
-                 params: V104Params | None = None) -> V104Result:
+                 params: V104Params | None = None, trace: dict | None = None) -> V104Result:
     """Replay the V10.4 structure monitor and joint pairing bar by bar.
 
     V9 inputs, one value per closed bar, all known at that bar's close:
@@ -335,6 +341,12 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
       momentum        md > sb and md > md[1]
       current_gate    BB compression gate, V9 bundle, <= 3 ATR from the MAs
       ref_long_exit   the indicator's V9 long reference ended on this bar
+
+    `trace`, when a dict is passed, is filled with audit records and never
+    feeds back into any decision: every stored line, every line end, every
+    saved/dropped SPIKE with its reason, every pair attempt, a snapshot of the
+    lines available on each V9 bar, and the display-only "current main line"
+    per bar (Pine's v10Main, which the script says only affects the picture).
     """
     p = params or V104Params()
     o, h, lo, c, a = (np.asarray(x, dtype=float) for x in (open_, high, low, close, atr))
@@ -375,39 +387,93 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
     segment_start = 0
     consumed = -1
 
+    tr = trace
+    if tr is not None:
+        for key in ("lines", "line_events", "spike_events", "pair_attempts", "v9_snapshots"):
+            tr[key] = []
+        tr["main_uid"] = np.full(n, -1, dtype=np.int64)
+        tr["main_faded"] = np.zeros(n, dtype=bool)
+        tr["break_winner_uid"] = np.full(n, -1, dtype=np.int64)
+        main: Line | None = None
+        main_faded = False
+        promotion = -1
+        last_event_bar = -1
+
+        def spike_event(item: Line, i: int, event: str) -> None:
+            tr["spike_events"].append({"uid": item.uid, "spike_i": item.spike, "i": i, "event": event})
+
     for i in range(n):
         if not can[i]:
+            if tr is not None:
+                for item in tracks:
+                    if item.spike >= 0:
+                        spike_event(item, i, "dropped:data_gap")
+                    tr["line_events"].append({"uid": item.uid, "i": i, "event": "cleared_data_gap"})
+                if main is not None and not main_faded:
+                    main_faded = True
             rx.clear(); rp.clear(); ra.clear(); sx.clear(); sp.clear(); sa.clear()
             tracks.clear()
             segment_start = i
+            if tr is not None:
+                if confirmed[i]:
+                    tr["v9_snapshots"].append({"i": i, "can_run": False, "available": []})
+                tr["main_uid"][i] = -1 if main is None else main.uid
+                tr["main_faded"][i] = main_faded
             continue
         close_i, atr_i = closes[i], atrs[i]
         break_winner = joint_winner = None
         pair_attempt = False
         failure = ""
+        available_now: list[Line] = []
         for item in tracks:
             y = item.at(i)
             if item.phase == 1:
                 if i - item.born > p.life or y <= 0:
+                    if tr is not None:
+                        if item.spike >= 0:
+                            spike_event(item, i, "dropped:line_expired")
+                        tr["line_events"].append({"uid": item.uid, "i": i,
+                                                  "event": "expired_life" if y > 0 else "expired_nonpositive"})
                     item.phase, item.stopped, item.spike = 3, i, -1
                 elif i > item.born:
                     item.above = item.above + 1 if close_i > y + atr_i * p.break_buffer else 0
                     if item.above >= p.break_bars:
                         item.phase, item.stopped, item.broken, item.usable = 2, i, i, True
+                        if tr is not None:
+                            tr["line_events"].append({"uid": item.uid, "i": i, "event": "broke"})
                         if break_winner is None or item.score < break_winner.score:
                             break_winner = item
             if item.spike >= 0:
                 if item.spike <= consumed or i - item.spike > p.window:
+                    if tr is not None:
+                        spike_event(item, i, "dropped:consumed" if item.spike <= consumed else "dropped:window_expired")
                     item.spike = -1
                 elif (not alive[i] or math.isnan(item.parent_low) or close_i < item.parent_low
                       or ref_exit[i]):
+                    if tr is not None:
+                        why = ("no_ma_support_or_raw_short" if not alive[i] else "parent_unknown"
+                               if math.isnan(item.parent_low) else "below_parent_low"
+                               if close_i < item.parent_low else "v9_reference_exit")
+                        spike_event(item, i, "dropped:" + why)
                     item.spike = -1
             if item.usable:
                 if i - item.broken > p.window or close_i <= y or side[i] == -1:
+                    if tr is not None:
+                        why = ("window" if i - item.broken > p.window else "close_back_below_line"
+                               if close_i <= y else "raw_short")
+                        if item.spike >= 0:
+                            spike_event(item, i, "dropped:broken_line_unusable_" + why)
+                        tr["line_events"].append({"uid": item.uid, "i": i, "event": "unusable_" + why})
                     item.usable, item.spike = False, -1
             available = item.born < i and not item.joined and (item.phase == 1 or item.usable)
             if confirmed[i] and available:
+                if tr is not None:
+                    if item.spike >= 0:
+                        spike_event(item, i, "dropped:overwritten_by_newer_v9")
+                    available_now.append(item)
                 item.spike, item.parent_high, item.parent_low = i, ph[i], pl[i]
+                if tr is not None:
+                    spike_event(item, i, "saved")
             if item.usable and not item.joined and item.spike >= 0 and item.spike > consumed:
                 within = abs(item.spike - item.broken) <= p.window
                 second_now = i == max(item.spike, item.broken)
@@ -415,13 +481,24 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
                 recovered = not math.isnan(item.parent_high) and close_i > item.parent_high
                 if within and second_now and born_before:
                     pair_attempt = True
-                    if alive[i] and mom[i] and gate[i] and recovered:
+                    ok = alive[i] and mom[i] and gate[i] and recovered
+                    if ok:
                         if joint_winner is None or item.score < joint_winner.score:
                             joint_winner = item
                     else:
                         failure = ("no_ma_support" if not alive[i] else "momentum" if not mom[i]
                                    else "parent_not_recovered" if not recovered else "gate")
+                    if tr is not None:
+                        tr["pair_attempts"].append({"uid": item.uid, "spike_i": item.spike, "break_i": item.broken,
+                                                    "i": i, "eligible": ok,
+                                                    "reason": "eligible" if ok else failure})
+        if tr is not None and confirmed[i]:
+            tr["v9_snapshots"].append({"i": i, "can_run": True, "available": [
+                {"uid": it.uid, "ax": it.ax, "ap": it.ap, "bx": it.bx, "bp": it.bp, "cx": it.cx, "cp": it.cp,
+                 "born_i": it.born, "phase": it.phase, "source": it.source} for it in available_now]})
         break_event[i] = break_winner is not None
+        if tr is not None and break_winner is not None:
+            tr["break_winner_uid"][i] = break_winner.uid
         if pair_attempt and joint_winner is None:
             refusals.append({"i": i, "reason": failure})
         if joint_winner is not None:
@@ -434,10 +511,23 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
                            "ax": w.ax, "ap": w.ap, "bx": w.bx, "bp": w.bp, "cx": w.cx, "cp": w.cp,
                            "born_i": w.born, "line_at_signal": w.at(i),
                            "parent_high": w.parent_high, "parent_low": w.parent_low})
+            if tr is not None:
+                spike_event(w, i, "paired")
+                tr["line_events"].append({"uid": w.uid, "i": i, "event": "joined"})
+                joints[-1]["displayed_main_before"] = int(tr["main_uid"][i - 1]) if i > 0 else -1
             w.joined, w.usable = True, False
             for item in tracks:
                 if item.spike >= 0 and item.spike <= consumed:
+                    if tr is not None and item is not w:
+                        spike_event(item, i, "dropped:same_spike_paired_on_other_line"
+                                    if item.spike == consumed else "dropped:consumed")
                     item.spike = -1
+        if tr is not None:
+            event_line = joint_winner if joint_winner is not None else break_winner
+            if event_line is not None:
+                if main is None or main.uid != event_line.uid:
+                    promotion = i
+                main, main_faded, last_event_bar = event_line, False, i
 
         # New pivots confirmed on this bar, one price source per track.
         raw_new = soft_new = False
@@ -454,16 +544,51 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
         for k in range(len(tracks) - 1, -1, -1):
             if tracks[k].phase != 1 and not tracks[k].usable:
                 del tracks[k]
+        evicted: list | None = [] if tr is not None else None
         for source, new, xs, ps, ats in ((0, raw_new, rx, rp, ra), (1, soft_new, sx, sp, sa)):
             if not new:
                 continue
             for item in _search(xs, ps, ats, source, i, lo, close_i, a, tick, p):
-                code = _store(tracks, item, i, h, c, body, a, tick, p)
+                code = _store(tracks, item, i, h, c, body, a, tick, p, evicted)
                 codes[code] += 1
                 if code == 1:
                     serial += 1
                     item.uid = serial
                     born_event[i] = True
+                    if tr is not None:
+                        tr["lines"].append({"uid": item.uid, "born_i": i, "source": item.source, "ax": item.ax,
+                                            "ap": item.ap, "bx": item.bx, "bp": item.bp, "cx": item.cx,
+                                            "cp": item.cp, "fit": item.fit, "wave": item.wave,
+                                            "score": item.score})
+                if tr is not None and evicted:
+                    for gone in evicted:
+                        tr["line_events"].append({"uid": gone.uid, "i": i, "event": "evicted_for_capacity"})
+                    evicted.clear()
+        if tr is not None:
+            # Display-only choice of the single drawn candidate (Pine v10Main).
+            best = None
+            main_in_pool = False
+            for item in tracks:
+                if item.phase == 1 and close_i <= item.at(i) and (best is None or item.score < best.score):
+                    best = item
+                if main is not None and item is main:
+                    main_in_pool = True
+            hold = last_event_bar >= 0 and i - last_event_bar <= p.window + 1
+            if not hold:
+                main_live = main is not None and not main_faded and main.phase == 1
+                if best is not None:
+                    if main is None or not main_live or not main_in_pool:
+                        main, main_faded, promotion = best, False, i
+                    elif best is not main and i - promotion >= p.right and best.score + 0.10 < main.score:
+                        main, main_faded, promotion = best, False, i
+                elif main is not None and main_live and not main_in_pool:
+                    main_faded = True
+            tr["main_uid"][i] = -1 if main is None else main.uid
+            tr["main_faded"][i] = main_faded or (main is not None and main.phase != 1)
+    if tr is not None:
+        for item in tracks:
+            if item.spike >= 0:
+                spike_event(item, n - 1, "pending_at_data_end")
     return V104Result(born_event, break_event, joint_event, joints, refusals, raw_ties + soft_ties, codes,
                       raw_extra + soft_extra)
 
