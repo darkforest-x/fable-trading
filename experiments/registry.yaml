@@ -9663,7 +9663,7 @@ experiments:
     production_eligible: false
     canonical_report: analysis/p1_spike_v10_trendline_gate_20260918.md
     artifacts: []
-    notes: Every stream is truncated so no bar opening at or after 2026-05-04 is read; the 4.2 month tail stays blind. Truncation is verified, not asserted - each stream's V9 arm reproduced the published V9 ledger trade for trade over everything that exited on a kept bar, and that check caught two real bugs. The indicator port is held against a literal transcription of the Pine, against truncated history, and against an independently written sibling port. Counter-intuitive side result - 47.7 to 55.7 percent of long crossings are the falling line reaching flat price rather than price rising, and that population outperformed the real thrusts (+0.0822 versus +0.0399 net R per trade), so a "only real breakouts" filter would have lowered the edge on this data. Both periods were already observed by V8/V9 work, so neither is blind and the earlier-period p values cannot carry significance.
+    notes: Every stream is truncated so no bar opening at or after 2026-05-04 is read; the 4.2 month tail stays blind. Truncation is verified, not asserted - each stream's V9 arm reproduced the published V9 ledger trade for trade over everything that exited on a kept bar, and that check caught two real bugs. The indicator port is held against a literal transcription of the Pine, against truncated history, and against an independently written sibling port. Counter-intuitive side result - 47.7 to 55.7 percent of long crossings are the falling line reaching flat price rather than price rising, and that population outperformed the real thrusts (+0.0822 versus +0.0399 net R per trade), so a "only real breakouts" filter would have lowered the edge on this data. Both periods were already observed by V8/V9 work, so neither is blind and the earlier-period p values cannot carry significance. WITHDRAWN by the owner on 2026-09-18 (v10去掉 重新做); the name V10 now refers to exp-spike-v10-long-break7-20260918-v1 and this row, report and code stay as history.
 
   - experiment_id: exp-trendline-v2-tbsl-20260918-v1
     source_repo: darkforest-x/fable-trading
@@ -9678,3 +9678,17 @@ experiments:
     canonical_report: analysis/p1_trendline_v2_tbsl_20260918.md
     artifacts: []
     notes: Review segment is pre-holdout data already observed by other studies, so it is a time split, not a blind set. Selection.json was committed before any review byte was read and the review stage refuses to run unless it matches HEAD. 270 configurations with no multiple-comparison correction on review p. Universe is 54 currently listed OKX perpetuals, survivorship not removed. Net R rewards wide stops because the fixed fee shrinks in a larger R (1 ATR stop costs 0.42R at 15m, 0.20R at 1h, 0.09R at 4h); every cell also reports bp of notional. Leverage gate never bound (max 350 notional per R). A second independent port of the same Pine (trendline_break.py) is held equal by test_trendline_break.py.
+
+  - experiment_id: exp-spike-v10-long-break7-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f8b4fa078e
+    status: rejected
+    question: Does SPIKE V10 as the owner restated it - long only, a V9 long confirmation on the trendline break bar or at most 7 bars after it - improve on SPIKE V9?
+    single_variable: Entry mask only, in two attributed steps registered before any replay - v9 (published, both sides) to v9_long (no short entries) to v10 (v9_long and break age 0..7). Exits, the raw V9 short confirmation that still ends an open long, the 0.2 percent round trip and the matched-control draw and seed are the published V9 ones. Trendline parameters are the owner's defaults.
+    result: NOT PASSED. Over 2024-09-10..2026-05-04 V10 closes 12297 trades at +0.0752 net R each, PF 1.111, matched excess +0.0957, month-block p 0.154. In 2025-09-10..2026-05-04 it is -0.2448 net R per trade, PF 0.673, matched excess -0.1204, p 0.987. The break gate changes long-side total net R by -0.3R (avoided loss 13760R against forgone profit 14050R) while keeping 40 percent of the trades, so per-trade gains are a denominator effect. Going long-only removes V9's shorts, which were +2475R overall and +1654R in the later period, the only profitable half there. Every break-age bucket is -0.16 to -0.26R per trade in the later period and 0..7 is among the worst, so no window length fixes it. All three timeframes are negative in the later period; 4H matched excess is negative in both periods.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v10_long_break7_20260918.md
+    artifacts: []
+    notes: Same truncation as the withdrawn V10 - no bar opening at or after 2026-05-04 is read - and each stream's V9 arm reproduced all 61530 closed published V9 trades. Not a blind test - the withdrawn V10 had already split these months by direction and its long side was negative in the later period, and the plan committed before the run said it expected a fail. The Pine at yoyo/evaluation/pine/spike_burst_v10.pine was replaced with this definition and has not been compiled on TradingView.

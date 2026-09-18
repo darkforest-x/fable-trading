@@ -1,0 +1,31 @@
+{
+  "complete": true,
+  "streams": 3531,
+  "expected_streams": 3531,
+  "run_identity": "2729f0091e32a172911d0bf9011cb8e4c86b43447a102edbee91cd0cb32ce72e",
+  "holdout_consumption": 0,
+  "cut_exclusive_bar_close": "2026-05-04 00:00:00+00:00",
+  "strategy_version": "spike-v10-long-break7-20260918-v2",
+  "arms": [
+    "v9",
+    "v9_long",
+    "v10"
+  ],
+  "max_break_age": 7,
+  "trendline_params": {
+    "left_bars": 12,
+    "right_bars": 8,
+    "lookback": 600,
+    "min_span": 48,
+    "min_drop_atr": 2.0,
+    "min_touches": 2,
+    "wick_tol_atr": 0.35,
+    "touch_tol_atr": 0.5,
+    "break_buf_atr": 0.2,
+    "break_bars": 2,
+    "max_candidates": 40
+  },
+  "v9_parity": "every published V9 trade closing before the cut reproduced trade-for-trade",
+  "controls": "same deterministic stream/side/month/ATR-bucket draw and seed as the published V9 run",
+  "summary_sha256": "480a18ba0b0bf2a75b946cadf3a17efa3198ead8ddec5b2615684a22d9f6040d"
+}

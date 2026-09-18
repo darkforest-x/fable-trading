@@ -1,13 +1,16 @@
 //@version=6
-// SPIKE V10: V9 plus the owner's descending-trendline break as an entry gate.
-// V9 remains the immutable parent. Owner instruction 2026-09-18:
-// 「把这个趋势线突破 加入我们的spike v9 写一个v10」 and 「要求v9出了信号 同时
-// 或者信号处于刚好趋势线突破 或者突破了一会的」. The trendline construction is a
-// transcription of the owner's Pine indicator 「主下降趋势线 · 关键高点 V1」, with
-// its defaults unchanged; the short side mirrors it onto pivot lows, exactly as
-// V9 already mirrors its own long engine.
+// SPIKE V10 (second definition, 2026-09-18): long only; a V9 long confirmation
+// is an entry only on the bar of an upward break of the owner's descending
+// trendline or at most 7 bars after it. V9 remains the immutable parent.
+// Owner instruction: 「v10去掉 重新做 用spike v9 和我这个趋势线指标 只有当我的
+// 趋势线指标出现 突破信号 然后v9也有信号才行 支持先突破 然后最多7根k出现v9信号
+// 我们v10才做多 不需要做空信号」. The first V10 (two-sided, age<=12) is withdrawn;
+// its script is kept in git history at 5be18a4757.
+// The trendline construction is a transcription of the owner's Pine indicator
+// 「主下降趋势线 · 关键高点 V1」 with its defaults unchanged.
 // The gate only removes entries. It never creates one, never moves a stop, and
-// never blocks a raw opposite V6 confirmation from ending an existing reference.
+// never blocks a raw V9 short confirmation from ending an open long reference:
+// that reversal is V9's exit, and "no short signals" does not change exits.
 // Two deliberate additions to the pasted indicator: a data gap clears the pivot
 // store, the active line and the recorded break, because a line drawn across
 // unobserved bars is not evidence; and the line is tracked arithmetically so the
@@ -22,7 +25,7 @@
 // reference-exit revision is not the frozen monitor/backtest configuration.
 // max_bars_back covers the 600-bar trendline scan window with margin; the V7 BB
 // percentile needs 700 and is computed by the built-in, not by history refs.
-indicator("SPIKE V10 · 趋势线突破确认", shorttitle="SPIKE V10", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=500, max_bars_back=1300, explicit_plot_zorder=true, behind_chart=false)
+indicator("SPIKE V10 · 趋势线突破后做多", shorttitle="SPIKE V10", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=500, max_bars_back=1300, explicit_plot_zorder=true, behind_chart=false)
 
 // Frozen research constants; changing them defines a new unvalidated config.
 const int maLen = 34
@@ -81,8 +84,8 @@ color bbCompressionColor = input.color(#AD7B29, "压缩颜色", group=gBb, displ
 string gV8 = "03 · V8 噪音过滤"
 bool useOverheatFilter = input.bool(true, "过滤离六线超过 3ATR 的迟到信号", group=gV8, tooltip="只影响新入场确认：多头收盘离六线最高边、空头收盘离六线最低边超过3ATR时不显示、不报警。原始反向确认仍可结束已有参考。", display=display.none)
 string gV10 = "04 · V10 趋势线突破门"
-bool useTrendlineFilter = input.bool(true, "只保留趋势线突破后的确认", group=gV10, tooltip="多头要求已向上突破由关键高点连成的主下降压力线，空头要求已向下突破由关键低点连成的主上升支撑线。突破当根年龄为0；年龄超过上限、本段内没有突破、或突破落在数据缺口另一侧都不准入。关闭此项即退回 V9 口径。", display=display.none)
-int tlMaxAge = input.int(12, "允许的突破年龄上限（K 数，0=只要突破当根）", minval=0, maxval=600, group=gV10, tooltip="Owner 口径「刚好突破 或者突破了一会」。12 根沿用本脚本既有的 breakoutLookback / cooldownBars 常数，不是在数据上挑出来的。", display=display.none)
+bool useTrendlineFilter = input.bool(true, "只保留趋势线突破后的多头确认", group=gV10, tooltip="V9 多头确认必须落在「由关键高点连成的主下降压力线」向上突破的当根或其后若干根之内。V9 先出、突破后到的不算；本段内没有突破、或突破落在数据缺口另一侧都不准入。关闭此项 = V9 只做多。任何情况下都不开空。", display=display.none)
+int tlMaxAge = input.int(7, "突破后最多几根 K 内出 V9 信号（0=只要突破当根）", minval=0, maxval=600, group=gV10, tooltip="Owner 口径「支持先突破 然后最多7根k出现v9信号」。突破当根算第 0 根，第 7 根仍准入，第 8 根起不准入。", display=display.none)
 int tlLeft = input.int(12, "关键点左侧比较 K 数", minval=2, maxval=100, group=gV10, display=display.none)
 int tlRight = input.int(8, "关键点右侧确认 K 数", minval=1, maxval=50, group=gV10, display=display.none)
 int tlLookback = input.int(600, "搜索范围 / 主线最长年龄（K 数）", minval=100, maxval=1200, group=gV10, display=display.none)
@@ -94,10 +97,8 @@ float tlTouchTol = input.float(0.50, "关键点贴线容差（ATR）", minval=0.
 float tlBreakBuf = input.float(0.20, "突破需超出趋势线的幅度（ATR）", minval=0.0, step=0.05, group=gV10, display=display.none)
 int tlBreakBars = input.int(2, "突破需要连续收盘确认的 K 数", minval=1, maxval=5, group=gV10, display=display.none)
 bool showTrendlines = input.bool(true, "画出趋势线", group=gV10, display=display.none)
-bool showTlShort = input.bool(true, "同时画上升支撑线（空头侧）", group=gV10, display=display.none)
-int tlKeep = input.int(2, "每侧最多保留的趋势线数量", minval=1, maxval=10, group=gV10, display=display.none)
+int tlKeep = input.int(2, "最多保留的趋势线数量", minval=1, maxval=10, group=gV10, display=display.none)
 color tlUpColor = input.color(color.white, "下降压力线颜色", group=gV10, display=display.none)
-color tlDnColor = input.color(color.new(#7D8490, 20), "上升支撑线颜色", group=gV10, display=display.none)
 
 if barstate.isfirst and tlLookback < tlMinSpan + tlRight
     runtime.error("趋势线搜索范围必须不小于：两个锚点最小间隔 + 右侧确认 K 数。")
@@ -202,18 +203,6 @@ f_tlCleanUp(int x1, float y1, int x2, float y2) =>
         float ceiling = y1 + slope * (bar_index - offset - x1)
         float pastAtr = math.max(nz(atr[offset], syminfo.mintick), syminfo.mintick)
         if high[offset] > ceiling + pastAtr * tlWickTol
-            clean := false
-            break
-    clean
-
-f_tlCleanDn(int x1, float y1, int x2, float y2) =>
-    float slope = (y2 - y1) / (x2 - x1)
-    bool clean = true
-    int age = bar_index - x1
-    for offset = 0 to age
-        float floorLevel = y1 + slope * (bar_index - offset - x1)
-        float pastAtr = math.max(nz(atr[offset], syminfo.mintick), syminfo.mintick)
-        if low[offset] < floorLevel - pastAtr * tlWickTol
             clean := false
             break
     clean
@@ -551,26 +540,12 @@ var float tlUpSlope = na
 var int tlUpBorn = na
 var int tlUpAbove = 0
 var int tlUpBreakBar = na
-var array<int> tlDnX = array.new_int()
-var array<float> tlDnY = array.new_float()
-var array<float> tlDnA = array.new_float()
-var array<line> tlDnDrawn = array.new_line()
-var bool tlDnActive = false
-var int tlDnAnchor = na
-var float tlDnAnchorY = na
-var float tlDnSlope = na
-var int tlDnBorn = na
-var int tlDnBelow = 0
-var int tlDnBreakBar = na
 bool tlUpBreak = false
-bool tlDnBreak = false
 
 float tlUpPivot = ta.pivothigh(high, tlLeft, tlRight)
-float tlDnPivot = ta.pivotlow(low, tlLeft, tlRight)
 float tlPivotAtr = atr[tlRight]
 bool tlWindowClean = segmentIndex >= tlLeft + tlRight and not na(tlPivotAtr) and not na(atr) and atr > 0
 bool tlUpNew = not na(tlUpPivot) and tlWindowClean
-bool tlDnNew = not na(tlDnPivot) and tlWindowClean
 
 if barstate.isconfirmed
     if dataGap or not pricesValid
@@ -578,15 +553,9 @@ if barstate.isconfirmed
         array.clear(tlUpX)
         array.clear(tlUpY)
         array.clear(tlUpA)
-        array.clear(tlDnX)
-        array.clear(tlDnY)
-        array.clear(tlDnA)
         tlUpActive := false
-        tlDnActive := false
         tlUpAbove := 0
-        tlDnBelow := 0
         tlUpBreakBar := na
-        tlDnBreakBar := na
     else
         if tlUpActive
             float upNow = tlUpAnchorY + tlUpSlope * (bar_index - tlUpAnchor)
@@ -602,39 +571,15 @@ if barstate.isconfirmed
                 // Expiry retires the line; it is deliberately not a break.
                 tlUpActive := false
                 tlUpAbove := 0
-        if tlDnActive
-            float dnNow = tlDnAnchorY + tlDnSlope * (bar_index - tlDnAnchor)
-            if bar_index > tlDnBorn
-                bool below = close < dnNow - atr * tlBreakBuf
-                tlDnBelow := below ? tlDnBelow + 1 : 0
-                if tlDnBelow >= tlBreakBars
-                    tlDnBreak := true
-                    tlDnBreakBar := bar_index
-                    tlDnActive := false
-                    tlDnBelow := 0
-            if tlDnActive and bar_index - tlDnAnchor > tlLookback
-                tlDnActive := false
-                tlDnBelow := 0
         if tlUpNew
             array.push(tlUpX, bar_index - tlRight)
             array.push(tlUpY, tlUpPivot)
             array.push(tlUpA, math.max(tlPivotAtr, syminfo.mintick))
-        if tlDnNew
-            array.push(tlDnX, bar_index - tlRight)
-            array.push(tlDnY, tlDnPivot)
-            array.push(tlDnA, math.max(tlPivotAtr, syminfo.mintick))
         while array.size(tlUpX) > 0
             if bar_index - array.get(tlUpX, 0) > tlLookback or array.size(tlUpX) > 40
                 array.shift(tlUpX)
                 array.shift(tlUpY)
                 array.shift(tlUpA)
-            else
-                break
-        while array.size(tlDnX) > 0
-            if bar_index - array.get(tlDnX, 0) > tlLookback or array.size(tlDnX) > 40
-                array.shift(tlDnX)
-                array.shift(tlDnY)
-                array.shift(tlDnA)
             else
                 break
         int nUp = array.size(tlUpX)
@@ -674,43 +619,6 @@ if barstate.isconfirmed
                     array.push(tlUpDrawn, line.new(upBestX, upBestY, ux2, uy2, xloc=xloc.bar_index, extend=extend.right, color=tlUpColor, style=line.style_solid, width=1, force_overlay=true))
                     while array.size(tlUpDrawn) > tlKeep
                         line.delete(array.shift(tlUpDrawn))
-        int nDn = array.size(tlDnX)
-        if not tlDnActive and not tlDnBreak and tlDnNew and nDn >= 2
-            int dx2 = array.get(tlDnX, nDn - 1)
-            float dy2 = array.get(tlDnY, nDn - 1)
-            float da2 = array.get(tlDnA, nDn - 1)
-            float dnBest = -1.0
-            int dnBestX = na
-            float dnBestY = na
-            for i = 0 to nDn - 2
-                int dx1 = array.get(tlDnX, i)
-                float dy1 = array.get(tlDnY, i)
-                int dspan = dx2 - dx1
-                if dspan >= tlMinSpan and dy1 < dy2 and dy2 - dy1 >= da2 * tlMinDrop
-                    float dslope = (dy2 - dy1) / dspan
-                    if close >= dy1 + dslope * (bar_index - dx1)
-                        int dtouch = 0
-                        for j = i to nDn - 1
-                            float dexp = dy1 + dslope * (array.get(tlDnX, j) - dx1)
-                            if math.abs(array.get(tlDnY, j) - dexp) <= array.get(tlDnA, j) * tlTouchTol
-                                dtouch += 1
-                        float dscore = dspan + math.max(dtouch - 2, 0) * tlMinSpan * 2.0
-                        if dtouch >= tlMinTouches and dscore > dnBest
-                            if f_tlCleanDn(dx1, dy1, dx2, dy2)
-                                dnBest := dscore
-                                dnBestX := dx1
-                                dnBestY := dy1
-            if not na(dnBestX)
-                tlDnActive := true
-                tlDnAnchor := dnBestX
-                tlDnAnchorY := dnBestY
-                tlDnSlope := (dy2 - dnBestY) / (dx2 - dnBestX)
-                tlDnBorn := bar_index
-                tlDnBelow := 0
-                if showTrendlines and showTlShort
-                    array.push(tlDnDrawn, line.new(dnBestX, dnBestY, dx2, dy2, xloc=xloc.bar_index, extend=extend.right, color=tlDnColor, style=line.style_solid, width=1, force_overlay=true))
-                    while array.size(tlDnDrawn) > tlKeep
-                        line.delete(array.shift(tlDnDrawn))
 // END V10 TRENDLINE ENGINE
 
 // Keep raw opposite confirmations independent of entry permission.
@@ -735,11 +643,14 @@ bool v9EntryAllowed = bbEntryAllowed and v8EntryAllowed and v9BundleAllowed
 // Age 0 is the break bar itself; a gap cleared the record, so an age of -1
 // means "no break this side of anything this script observed", never "old".
 int tlLongAge = na(tlUpBreakBar) ? -1 : bar_index - tlUpBreakBar
-int tlShortAge = na(tlDnBreakBar) ? -1 : bar_index - tlDnBreakBar
-int tlSignalAge = rawSignalSide == 1 ? tlLongAge : rawSignalSide == -1 ? tlShortAge : -1
+// Only the long side has a line; a short confirmation has no age to report.
+int tlSignalAge = rawSignalSide == 1 ? tlLongAge : -1
 bool tlWindowOpen = tlSignalAge >= 0 and tlSignalAge <= tlMaxAge
 bool v10TrendlineAllowed = not useTrendlineFilter or tlWindowOpen
-bool v10EntryAllowed = v9EntryAllowed and v10TrendlineAllowed
+// Long only: a short confirmation is never an entry. It still reaches the
+// reference state below through rawSignalSide, where it ends an open long.
+bool v10LongOnly = rawSignalSide == 1
+bool v10EntryAllowed = v9EntryAllowed and v10TrendlineAllowed and v10LongOnly
 // END V10 TRENDLINE GATE
 string v9Reasons = ""
 v9Reasons += not baseAssetKnown ? "底层资产未知；" : not baseAllowed ? "底层USDC；" : ""
@@ -747,7 +658,7 @@ v9Reasons += not volumeRatioKnown ? "量比未知；" : not volumeAllowed ? "量
 v9Reasons += not entryClockKnown ? "开仓时钟未知；" : utcSunday ? "UTC周日；" : ""
 v9Reasons += not bbEntryAllowed ? "BB条件未通过；" : ""
 v9Reasons += not v8EntryAllowed ? "距六线>3ATR或未知；" : ""
-v9Reasons += not v10TrendlineAllowed ? (tlSignalAge < 0 ? "本段无趋势线突破；" : "突破已过" + str.tostring(tlSignalAge) + "根；") : ""
+v9Reasons += rawSignalSide == -1 ? "V10不做空（仍结束已有多头参考）；" : not v10TrendlineAllowed ? (tlSignalAge < 0 ? "本段无趋势线突破；" : "突破已过" + str.tostring(tlSignalAge) + "根；") : ""
 v9Reasons := v9Reasons == "" ? "通过" : v9Reasons
 // Informational risk is fixed at confirmation CLOSE, not an actual entry fill.
 [signalReferenceStop, signalReferenceRisk, signalReferenceValid] = f_risk(rawSignalSide, close, rawSignalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
@@ -765,7 +676,8 @@ if barstate.isconfirmed and rawSignalSide != 0
     lastV9CostR := signalReferenceCostR
     lastTlAge := tlSignalAge
 confirmedSignal := confirmedSignal and v10EntryAllowed
-confirmedShortSignal := confirmedShortSignal and v10EntryAllowed
+// V10 never opens, shows or alerts a short.
+confirmedShortSignal := false
 // END V9 ENTRY BUNDLE
 int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
 
@@ -866,7 +778,6 @@ if barstate.isconfirmed
 // keeps same-direction repeats unchanged; an opposite close ends the old one.
 // A continuous triangle survives label garbage collection on long histories.
 plotshape(confirmedSignal, title="确认多头", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
-plotshape(confirmedShortSignal, title="确认空头", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
 var array<label> signalTags = array.new<label>()
 if barstate.isconfirmed and signalSide != 0 and showLabels
     string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
@@ -1043,7 +954,6 @@ hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewi
 plot(shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
 plot(shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
 plot(confirmedSignal ? md : na, "多头确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
-plot(confirmedShortSignal ? md : na, "空头确认点", bear, 4, plot.style_circles, display=display.pane + display.data_window)
 plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
 plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
@@ -1091,8 +1001,7 @@ plot(barstate.isconfirmed ? (aboveSix ? 1 : 0) : na, "当前收盘六线之上",
 plot(barstate.isconfirmed ? ropeDistanceAtr : na, "V9 离六线距离 ATR", display=display.data_window)
 plot(barstate.isconfirmed ? (v9EntryAllowed ? 1 : 0) : na, "V9 全部入场过滤通过", display=display.data_window)
 plot(barstate.isconfirmed ? tlLongAge : na, "V10 上破下降线年龄", display=display.data_window)
-plot(barstate.isconfirmed ? tlShortAge : na, "V10 下破上升线年龄", display=display.data_window)
-plot(barstate.isconfirmed ? (tlUpActive ? 1 : 0) + (tlDnActive ? 2 : 0) : na, "V10 在场线（1压力/2支撑/3两条）", display=display.data_window)
+plot(barstate.isconfirmed ? (tlUpActive ? 1 : 0) : na, "V10 下降压力线在场", display=display.data_window)
 plot(barstate.isconfirmed ? (v10EntryAllowed ? 1 : 0) : na, "V10 全部入场过滤通过", display=display.data_window)
 
 // Only optional diagnostics; no observation/confirmation display taxonomy.
@@ -1126,8 +1035,6 @@ if barstate.islast and showPanel
     table.cell(panel, 1, 7, na(lastTlAge) ? "—" : lastTlAge < 0 ? "本段无突破" : lastTlAge == 0 ? "本根突破" : str.tostring(lastTlAge) + " 根前", text_color=na(lastTlAge) ? muted : lastTlAge >= 0 and lastTlAge <= tlMaxAge ? bull : gold, text_size=size.tiny)
 
 // These are local study conditions. Creating a TV alert is a separate action.
-alertcondition(signalSide != 0, "SPIKE V10 结构确认", "SPIKE V10 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
 alertcondition(confirmedSignal, "SPIKE V10 多头结构确认", "SPIKE V10 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
-alertcondition(confirmedShortSignal, "SPIKE V10 空头结构确认", "SPIKE V10 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
 alertcondition(exitReference and not referenceReverse, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
 alertcondition(referenceReverse, "SPIKE 参考反向结束", "SPIKE 参考反向结束 | {{exchange}}:{{ticker}} | {{interval}} | 反向确认收盘 {{close}}")
