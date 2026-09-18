@@ -66,6 +66,7 @@ class Monitor:
         self.scan_process = None
         self.scan_generation = None
         self.model_process = None
+        self.lines_process = None
         # HTTP must never wait behind SQLite's WAL writer.  The initial value
         # deliberately describes an incomplete service until the background
         # refresher obtains a complete read snapshot.
@@ -80,8 +81,8 @@ class Monitor:
         self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
-        for name, target in (("scan", self.run), ("model", self.run_model), ("bark", self.deliver_bark),
-                             ("status", self.refresh_status_forever)):
+        for name, target in (("scan", self.run), ("model", self.run_model), ("lines", self.run_lines),
+                             ("bark", self.deliver_bark), ("status", self.refresh_status_forever)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -94,6 +95,9 @@ class Monitor:
         if self.model_process is not None and self.model_process.is_alive():
             self.model_process.terminate()
             self.model_process.join(timeout=2)
+        if self.lines_process is not None and self.lines_process.is_alive():
+            self.lines_process.terminate()
+            self.lines_process.join(timeout=2)
         for thread in self.threads:
             thread.join(timeout=2)
 
@@ -129,6 +133,16 @@ class Monitor:
             if self.model_process is None or not self.model_process.is_alive():
                 self.model_process = multiprocessing.Process(target=model_forever, args=(str(self.store.path),), daemon=True)
                 self.model_process.start()
+            self.stop_event.wait(self.interval)
+
+    def run_lines(self):
+        """突破 / 突破+spike menus: own process and own SQLite book, display only (no Bark)."""
+        from yoyo.monitor.spike_lines_worker import lines_forever
+        while not self.stop_event.is_set():
+            if self.lines_process is None or not self.lines_process.is_alive():
+                self.lines_process = multiprocessing.Process(target=lines_forever, args=(str(self.store.path.parent),),
+                                                             daemon=True)
+                self.lines_process.start()
             self.stop_event.wait(self.interval)
 
     def deliver_bark(self):

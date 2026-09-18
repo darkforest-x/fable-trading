@@ -19,6 +19,8 @@ from yoyo.monitor.service import Monitor
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
                                      status as shadow_status)
+from yoyo.monitor.spike_lines_api import (LinesUnavailable, database as lines_database, events as lines_events,
+                                         status as lines_status)
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
 
@@ -66,6 +68,7 @@ def create_app(runtime=None, start_monitor=True):
     runtime = Path(runtime or os.environ.get("FABLE_IMPULSE_RUNTIME", DEFAULT_RUNTIME))
     store = Store(runtime / "monitor.sqlite3")
     shadow_book = runtime / SHADOW_DATABASE
+    lines_book = lines_database(runtime)
     monitor = Monitor(store)
 
     @asynccontextmanager
@@ -245,6 +248,30 @@ def create_app(runtime=None, start_monitor=True):
             else:
                 raise HTTPException(503, "V7/V8 市场状态暂不可读。") from error
         return {"items": rows, "total": len(rows), "semantics": "descriptive_only_no_gate"}
+
+    @app.get("/api/lines/status")
+    def spike_lines_status():
+        try:
+            return lines_status(lines_book, monitor.client.clock())
+        except LinesUnavailable as error:
+            if str(error) == "lines_not_started":
+                return {"configured": False, "counts": {}, "activation": None, "scan": None}
+            raise HTTPException(503, "趋势线突破账本暂不可读。") from error
+
+    @app.get("/api/lines/events")
+    def spike_lines_events(kind: str, timeframe: str = None, search: str = Query("", max_length=24),
+                           limit: int = Query(300, ge=1, le=2000)):
+        try:
+            rows = lines_events(lines_book, kind=kind, now_ms=monitor.client.clock(), timeframe=timeframe,
+                                search=search, limit=limit)
+        except ValueError as exc:
+            raise HTTPException(400, "不支持的信号类型或周期。") from exc
+        except LinesUnavailable as error:
+            if str(error) != "lines_not_started":
+                raise HTTPException(503, "趋势线突破账本暂不可读。") from error
+            rows = []
+        return {"items": rows, "total": len(rows), "kind": kind, "notification_eligible": False,
+                "execution_eligible": False}
 
     @app.get("/api/chart")
     def chart(symbol: str, timeframe: str = "1H"):

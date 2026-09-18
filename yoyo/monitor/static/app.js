@@ -12,11 +12,14 @@
     timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
+    lines: { kind: null, items: [], status: null, timeframe: "all", search: "", liveOnly: false, limit: 24, loading: false, syncedAt: null },
   };
   const titles = {
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
+    joints: ["突破+spike", "V9 多头框还开着时出现的第一次趋势线突破，本周期或上级周期都算（V11.2 默认「多头框内」）。"],
+    breaks: ["趋势线突破", "15m、1H、4H、日线自己的三点下降线被收盘突破：连续 2 根收在线上 0.2 ATR。"],
     shadow: ["前向影子", "V7 与 V8 在相同新收盘数据上并行记录，积累未参与调参的新样本。"],
     ashare: ["A股回测", "沪深主板近三年 · 固定 V1 / V8 · 日线与周线对照。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
@@ -238,8 +241,9 @@
     const previousView = state.view;
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
-    ["signals", "watch", "shadow", "ashare", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== (signalView(state.view) ? "signals" : state.view)));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "ashare"].includes(state.view));
+    const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
+    ["signals", "watch", "lines", "shadow", "ashare", "system"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "ashare", "joints", "breaks"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -270,6 +274,102 @@
     if (state.view === "watch") loadMarkets();
     if (state.view === "shadow") loadShadow();
     if (state.view === "ashare") window.SpikeAshare.load();
+    if (linesView(state.view)) {
+      const kind = state.view === "joints" ? "joint" : "break";
+      if (state.lines.kind !== kind) Object.assign(state.lines, { kind, items: [], timeframe: "all", limit: 24 });
+      renderLines();
+      loadLines();
+    }
+  }
+  const LINE_TIMEFRAMES = { joint: ["15m", "30m", "1H", "4H"], break: ["15m", "1H", "4H", "1Dutc"] };
+  const LINE_HIGHER = { "15m": "1H", "30m": "2H", "1H": "4H", "4H": "日线" };
+  const LINE_STATES = { live: ["实时", "admitted"], late: ["补录", "filtered"], history: ["启用前", "filtered"] };
+  function linesView(view = state.view) { return view === "joints" || view === "breaks"; }
+  function lineFacts(line, label) {
+    if (!line || !finite(line.a_price)) return "";
+    const tf = timeframeLabel(line.line_timeframe === "2H" ? "2H" : line.line_timeframe);
+    return `<div class="lines-geometry"><dt>${escapeHTML(label)} · ${escapeHTML(tf)}</dt><dd>A ${escapeHTML(shortDate(line.a_ms))} ${escapeHTML(price(line.a_price))} → B ${escapeHTML(shortDate(line.b_ms))} ${escapeHTML(price(line.b_price))} → C ${escapeHTML(shortDate(line.c_ms))} ${escapeHTML(price(line.c_price))}</dd><dd class="lines-born">三点确认 ${escapeHTML(shortDate(line.born_close_ms))}${line.track ? " · " + escapeHTML(line.track) : ""}</dd></div>`;
+  }
+  function stopFact(item) {
+    if (!finite(item.reference_stop) || !finite(item.close) || Number(item.close) <= 0) return "—";
+    const distance = (Number(item.close) - Number(item.reference_stop)) / Number(item.close) * 100;
+    return `${price(item.reference_stop)} · −${distance.toFixed(2)}%`;
+  }
+  function lineCardHTML(item) {
+    const [stateName, stateClass] = LINE_STATES[item.display_state] || ["—", "filtered"];
+    const joint = item.kind === "joint";
+    const higher = joint && (item.source === "higher" || item.source === "both");
+    const title = joint ? (higher ? "突破+spike（上级突破）" : "突破+spike") : "趋势线突破";
+    const facts = joint
+      ? `<div><dt>V9 信号</dt><dd>${escapeHTML(shortDate(item.v9_signal_close_ms))} · 后第 ${escapeHTML(number(item.bars_after_v9))} 根</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`
+      : `<div><dt>线上价（本根）</dt><dd>${escapeHTML(price(item.line_at_bar))}</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`;
+    const geometry = joint
+      ? (item.source !== "higher" ? lineFacts(item, "本周期线") : "") + (higher ? lineFacts(item.higher_line, `上级线（${LINE_HIGHER[item.timeframe] || "上级"}）`) : "")
+      : lineFacts(item, "突破的线");
+    const delay = finite(item.detect_delay_ms) && item.display_state !== "history" ? ` · 收盘后 ${escapeHTML(duration(Math.max(0, Number(item.detect_delay_ms))))} 发现` : "";
+    return `<article class="shadow-event-card lines-card long ${stateClass}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
+  }
+  function renderLines() {
+    const lines = state.lines;
+    const kind = lines.kind || (state.view === "joints" ? "joint" : "break");
+    const status = lines.status || {};
+    const configured = status.configured === true;
+    $("lines-policy-title").textContent = kind === "joint" ? "SPIKE V11.2 · 突破+spike（多头框内）" : "SPIKE V11.2 · 趋势线突破";
+    $("lines-rule-note").textContent = kind === "joint"
+      ? "上级：15m 看 1H，30m 看 2H，1H 看 4H，4H 看日线 · 每个 V9 框只算第一次"
+      : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
+    $("lines-timeframes").innerHTML = ["all", ...LINE_TIMEFRAMES[kind]].map((tf) => `<button type="button" data-lines-timeframe="${tf}" class="${lines.timeframe === tf ? "selected" : ""}" aria-pressed="${lines.timeframe === tf}">${tf === "all" ? "全部" : escapeHTML(timeframeLabel(tf))}</button>`).join("");
+    const q = lines.search.trim().toUpperCase();
+    const day = Date.now() - 86_400_000;
+    const items = lines.items.filter((item) => (lines.timeframe === "all" || item.timeframe === lines.timeframe)
+      && (!q || String(item.symbol).toUpperCase().includes(q)) && (!lines.liveOnly || item.display_state === "live"));
+    $("lines-day-count").textContent = lines.items.length || configured ? number(lines.items.filter((item) => item.bar_close_ms >= day).length) : "—";
+    $("lines-live-count").textContent = lines.items.length || configured ? number(lines.items.filter((item) => item.display_state === "live").length) : "—";
+    const scan = status.scan || {};
+    $("lines-scan-state").textContent = !configured ? "未启动" : scan.status === "idle" ? "正常" : scan.status === "scanning" ? "扫描中" : scan.status === "degraded" ? "部分异常" : scan.status === "error" ? "失败" : "—";
+    $("lines-scan-detail").textContent = !configured ? "工作进程随监控服务启动" : scan.finished_ms
+      ? `上轮 ${shortDate(scan.finished_ms)} · ${number(scan.symbols)} 个合约${scan.errors ? ` · 异常 ${number(scan.errors)}` : ""}`
+      : scan.status === "error" ? String(scan.error || "") : `进行中 · ${number(scan.cells)} 格`;
+    $("lines-activation").textContent = configured && status.activation?.activated_ms
+      ? `启用于 ${fullDate(status.activation.activated_ms)}（之前的是启用时回算，标「启用前」）` : "尚未启用";
+    $("lines-last-sync").textContent = lines.syncedAt ? `同步于 ${clockTime(lines.syncedAt)}` : "尚未同步";
+    $("lines-section-title").textContent = kind === "joint" ? "最新突破+spike" : "最新趋势线突破";
+    $("lines-filtered-count").textContent = `${number(items.length)} 条`;
+    $("lines-empty").classList.toggle("hidden", items.length > 0);
+    $("lines-empty-title").textContent = configured ? "暂无符合条件的信号" : "等待第一次扫描";
+    $("lines-empty-text").textContent = configured ? "换个周期或清空搜索试试；新信号在 K 线收盘后约 1–3 分钟出现。" : "工作进程启动后约几分钟出现结果。";
+    $("lines-rows").innerHTML = items.slice(0, lines.limit).map(lineCardHTML).join("");
+    $("load-more-lines").classList.toggle("hidden", items.length <= lines.limit);
+    renderTradingViewButtons();
+  }
+  async function loadLinesStatus() {
+    try {
+      const status = await api("/api/lines/status");
+      state.lines.status = status;
+      const recent = status.recent_24h || {};
+      $("nav-joints-count").textContent = status.configured ? number(recent.joint || 0) : "—";
+      $("nav-breaks-count").textContent = status.configured ? number(recent.break || 0) : "—";
+    } catch (error) { /* the page view reports load errors */ }
+  }
+  async function loadLines() {
+    if (state.lines.loading || !linesView()) return;
+    state.lines.loading = true;
+    const kind = state.view === "joints" ? "joint" : "break";
+    try {
+      const [events] = await Promise.all([api(`/api/lines/events?kind=${kind}&limit=1000`), loadLinesStatus()]);
+      if (!Array.isArray(events.items)) throw new Error("服务返回的数据格式有误");
+      if (state.lines.kind === kind) {
+        state.lines.items = events.items.filter((item) => item && typeof item === "object" && item.id && item.symbol);
+        state.lines.syncedAt = Date.now();
+      }
+      delete state.errors.lines;
+    } catch (error) {
+      state.errors.lines = error.message || "请求失败";
+    } finally {
+      state.lines.loading = false;
+      renderErrors();
+      if (linesView()) renderLines();
+    }
   }
   function filteredSignals() {
     const q = normalSearch(state.search);
@@ -639,7 +739,7 @@
     const errors = Object.entries(state.errors);
     $("error-notice").classList.toggle("hidden", !errors.length);
     if (errors.length) {
-      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", performanceSignals: "走势状态", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察", shadow: "前向影子" };
+      const names = { status: "运行状态", signals: "模型确认", directSignals: "指标启动", performanceSignals: "走势状态", earlierSignals: "更早历史记录", candidates: "指标候选", markets: "蓄势观察", shadow: "前向影子", lines: "趋势线突破" };
       $("error-notice").textContent = `${errors.map(([key, error]) => `${names[key] || key}：${error}`).join("；")}。${state.lastSync ? "当前保留上次成功获取的数据，" : ""}15 秒后自动重试。`;
     }
   }
@@ -798,8 +898,20 @@
     if (state.ledger?.has_more && !state.syncing) { state.page++; invalidateSignalQuery(); refresh(); }
   });
   $("load-earlier-signals").addEventListener("click", loadEarlierRawSignals);
+  $("lines-timeframes").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-lines-timeframe]");
+    if (!button) return;
+    state.lines.timeframe = button.dataset.linesTimeframe; state.lines.limit = 24; renderLines();
+  });
+  document.querySelectorAll("[data-lines-state]").forEach((button) => button.addEventListener("click", () => {
+    state.lines.liveOnly = button.dataset.linesState === "live";
+    document.querySelectorAll("[data-lines-state]").forEach((b) => { b.classList.toggle("selected", b === button); b.setAttribute("aria-pressed", String(b === button)); });
+    state.lines.limit = 24; renderLines();
+  }));
+  $("lines-search").addEventListener("input", (event) => { state.lines.search = event.target.value; state.lines.limit = 24; renderLines(); });
+  $("load-more-lines").addEventListener("click", () => { state.lines.limit += 24; renderLines(); });
   function activateRow(event, type) {
-    const cardClass = type === "signal" ? ".signal-card" : type === "shadow" ? ".shadow-event-card" : ".watch-card";
+    const cardClass = type === "signal" ? ".signal-card" : type === "shadow" || type === "lines" ? ".shadow-event-card" : ".watch-card";
     const row = event.target.closest("[data-tradingview-action]") || event.target.closest(cardClass)?.querySelector("[data-tradingview-action]");
     if (!row) return;
     if (event.type === "keydown") {
@@ -813,7 +925,9 @@
       ? sourceItems().find((candidate) => sameEvent(candidate, { id: row.dataset.signalId, kind: row.dataset.signalKind, symbol: row.dataset.tvSymbol, timeframe: row.dataset.tvTimeframe }))
       : type === "shadow"
         ? state.shadowEvents.find((candidate) => candidate.id === row.dataset.shadowId)
-        : state.markets.find((candidate) => candidate.symbol === row.dataset.tvSymbol && candidate.timeframe === row.dataset.tvTimeframe);
+        : type === "lines"
+          ? state.lines.items.find((candidate) => candidate.id === row.dataset.lineId)
+          : state.markets.find((candidate) => candidate.symbol === row.dataset.tvSymbol && candidate.timeframe === row.dataset.tvTimeframe);
     if (!item) return;
     openTradingView(item);
   }
@@ -821,6 +935,7 @@
     $("signal-rows").addEventListener(eventType, (event) => activateRow(event, "signal"));
     $("watch-rows").addEventListener(eventType, (event) => activateRow(event, "market"));
     $("shadow-rows").addEventListener(eventType, (event) => activateRow(event, "shadow"));
+    $("lines-rows").addEventListener(eventType, (event) => activateRow(event, "lines"));
   });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
@@ -828,7 +943,7 @@
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName)) {
       event.preventDefault();
       if (["system", "shadow", "ashare"].includes(state.view)) setView("signals");
-      (state.view === "watch" ? $("watch-search") : $("symbol-search")).focus();
+      (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), false));
@@ -838,4 +953,6 @@
   $("local-clock").textContent = clockTime(Date.now());
   if (state.view !== "warmup") refresh();
   setInterval(() => refresh("periodic"), 15000);
+  loadLinesStatus();
+  setInterval(() => { if (linesView()) loadLines(); else loadLinesStatus(); }, 15000);
 })();
