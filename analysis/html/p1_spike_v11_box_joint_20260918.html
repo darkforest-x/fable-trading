@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4</h1>
+<p>2026-09-19 · 15m（看 1h 突破）/ 1h（看 4h 突破）· Binance 638 个永续 · <strong>holdout 消耗 0</strong> · 未 push</p>
+<p><strong>结论一句话：未通过，而且比 V10.4 的旧规则更差。</strong> 按你的规则（本图 V9 多头框还开着时出现突破就算，不限根数、突破那根不检查、每个框算一次），单独做这个信号： 15m 每笔 <strong>−0.095R</strong>（V10.4 −0.056R，V9 多头 −0.100R），1h 每笔 <strong>−0.092R</strong>（V10.4 <strong>+0.088R</strong>，V9 多头 −0.005R）。 1h 上比 V10.4 每笔差 −0.180R，区间 [−0.325, −0.024]，<strong>不含 0，是真的变差了</strong>。后段 15m −0.292R、1h −0.228R，都比 V10.4 和 V9 更差。</p>
+<h2>1. 规则（按你的话落地）</h2>
+<ul>
+<li><strong>突破+spike</strong> = 某根 K 上出现突破，此时本图的 V9 多头信号框（指标自己的盈亏框：V9 多头确认收盘开框，保护触及/原始空头确认/断档关框） 在这根收盘后还开着。<strong>不限几根、突破那根不做任何检查。每个框只算第一次突破。</strong></li>
+<li>突破来源：上级突破（1h 收盘后 15m 才看得见；4h 收盘后 1h 才看得见）和/或本周期线的突破。</li>
+<li>单独交易：这根收盘后次根开盘入场，止损按这根重新算；出场、0.2% 往返、每币一笔和之前完全一样。</li>
+<li>五个臂事前登记：V9 多头、V10.4 旧规则、框内+上级突破、框内+本周期突破、框内+任一突破（主）。V9 与 V10.4 两臂和原账本逐笔一致（0 差异）。</li>
+</ul>
+<h2>2. 结果（每笔净 R；随机 = 同币同月同波动随机做多）</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>臂</th>
+<th>已平仓</th>
+<th>胜率</th>
+<th>全期每笔</th>
+<th>前段</th>
+<th>后段</th>
+<th>PF</th>
+<th>总净R</th>
+<th>比随机多</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>V9 多头</td><td>23,205</td><td>28.5%</td><td>−0.100</td><td>+0.018</td><td>−0.234</td><td>0.863</td><td>−2,317.9</td><td>+0.049</td><td>0.206</td></tr>
+<tr><td>15m</td><td>V10.4 旧规则</td><td>4,708</td><td>30.8%</td><td>−0.056</td><td>+0.116</td><td>−0.251</td><td>0.921</td><td>−263.5</td><td>+0.120</td><td>0.045</td></tr>
+<tr><td>15m</td><td>框内+上级突破</td><td>2,987</td><td>27.3%</td><td><strong>−0.164</strong></td><td>−0.008</td><td><strong>−0.336</strong></td><td>0.790</td><td>−489.5</td><td>+0.033</td><td>0.326</td></tr>
+<tr><td>15m</td><td>框内+本周期突破</td><td>5,372</td><td>30.5%</td><td>−0.068</td><td>+0.095</td><td>−0.255</td><td>0.905</td><td>−362.8</td><td>+0.124</td><td>0.063</td></tr>
+<tr><td>15m</td><td><strong>框内+任一（主）</strong></td><td>7,082</td><td>29.4%</td><td><strong>−0.095</strong></td><td>+0.078</td><td><strong>−0.292</strong></td><td>0.871</td><td>−672.8</td><td>+0.089</td><td>0.086</td></tr>
+<tr><td>1h</td><td>V9 多头</td><td>6,551</td><td>29.7%</td><td>−0.005</td><td>+0.119</td><td>−0.159</td><td>0.992</td><td>−33.6</td><td>+0.082</td><td>0.139</td></tr>
+<tr><td>1h</td><td>V10.4 旧规则</td><td>1,476</td><td>32.8%</td><td><strong>+0.088</strong></td><td>+0.249</td><td>−0.077</td><td>1.135</td><td>+129.6</td><td>+0.244</td><td>0.009</td></tr>
+<tr><td>1h</td><td>框内+上级突破</td><td>869</td><td>27.6%</td><td>−0.066</td><td>+0.139</td><td>−0.270</td><td>0.911</td><td>−56.9</td><td>+0.070</td><td>0.198</td></tr>
+<tr><td>1h</td><td>框内+本周期突破</td><td>1,716</td><td>28.0%</td><td>−0.089</td><td>+0.007</td><td>−0.187</td><td>0.873</td><td>−153.3</td><td>−0.031</td><td>0.625</td></tr>
+<tr><td>1h</td><td><strong>框内+任一（主）</strong></td><td>2,199</td><td>27.8%</td><td><strong>−0.092</strong></td><td>+0.038</td><td><strong>−0.228</strong></td><td>0.871</td><td>−202.6</td><td>+0.013</td><td>0.393</td></tr>
+</tbody></table>
+<p><strong>判定</strong>（全期、后段每笔 &gt; 0，比随机多 &gt; 0 且 p &lt; 0.01）：15m、1h 的「框内+任一」和「框内+上级突破」<strong>全部未通过</strong>。</p>
+<p><strong>每笔差（月份整块重抽样 95% 区间）：</strong></p>
+<table><thead><tr>
+<th>周期</th>
+<th>比较</th>
+<th>全期</th>
+<th>区间</th>
+<th>后段</th>
+<th>区间</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>框内+任一 − V9 多头</td><td>+0.005</td><td>[−0.048, +0.070]</td><td>−0.058</td><td>[−0.105, −0.003]</td></tr>
+<tr><td>15m</td><td>框内+任一 − V10.4</td><td>−0.039</td><td>[−0.084, +0.011]</td><td>−0.041</td><td>[−0.100, +0.027]</td></tr>
+<tr><td>1h</td><td>框内+任一 − V9 多头</td><td>−0.087</td><td>[−0.180, −0.008]</td><td>−0.069</td><td>[−0.211, +0.038]</td></tr>
+<tr><td>1h</td><td>框内+任一 − V10.4</td><td><strong>−0.180</strong></td><td><strong>[−0.325, −0.024]</strong></td><td>−0.151</td><td>[−0.374, +0.060]</td></tr>
+</tbody></table>
+<h2>3. 为什么更差</h2>
+<ul>
+<li><strong>上级突破那一类最差</strong>（「框内+任一」里按来源拆）：15m 后段 940 笔每笔 <strong>−0.42R</strong>，1h 后段 272 笔 −0.25R。</li>
+<li><strong>离 V9 信号越久越差</strong>：15m 后段，V9 同根就突破的 −0.22R，隔 7–12 根的 −0.50R，隔 13–24 根的 −0.46R。 框开着很久之后才来的突破，多数是行情已经走了一段、快结束的时候，此时再按新价重新开仓，止损更远、位置更高。</li>
+<li>V10.4 原来的 6 根窗口和突破那根的检查（六线之上、动量、离均线 ≤3ATR、站上启动区间），恰好挡掉了这些晚到的突破。 去掉它们，1h 从「比随机好 +0.24R」掉到「+0.01R」。</li>
+</ul>
+<h2>4. 说明</h2>
+<ul>
+<li>你截图里的 HYPE 2026-09-17 在 holdout 期内，本地没有这段数据，核对不了；按这条规则它会算「突破+spike（上级突破）」。</li>
+<li>Python 按规则复刻，Pine 还没改成这条规则（等你决定）；TV 一致性未验证。</li>
+<li>这 20 个月被反复看过，<strong>不是盲测</strong>；事前计划写了「预期不通过」。币池有幸存者偏差；滑点、资金费率未建模。</li>
+<li>未训练、未调参、未 promote、未改仓、未动真金、未 push。</li>
+</ul>
+<h2>5. 下一步（你决定）</h2>
+<ol>
+<li>建议：<strong>不要用「框内就算」</strong>；如果要保留上级突破，用 V11 的窗口规则（6 根 + 突破那根检查），而且上级突破只当提示。</li>
+<li>如果你仍要在图上显示「框内突破」（只看不交易），我可以把 Pine 改成这条规则并加开关，默认关。</li>
+</ol>
+<h2>复现命令</h2>
+<pre><code>
+git checkout 5558319734
+PYTHONPATH=. python3 -m pytest tests/evaluation/test_spike_v11_box.py tests/evaluation/test_spike_v11.py tests/evaluation/test_spike_v10_4.py -q
+E=experiments/active/exp-spike-v11-box-joint-20260918-v1
+PYTHONPATH=. python3 -W ignore -m yoyo.evaluation.spike_v11_box_study --output $E/results/run_v1 --workers 8
+PYTHONPATH=. python3 -W ignore -m yoyo.evaluation.spike_v11_box_report --run $E/results/run_v1 --out $E/statistics/run_v1
+</code></pre>
+</body>
+</html>

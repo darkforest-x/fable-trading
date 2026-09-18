@@ -9734,3 +9734,17 @@ experiments:
     canonical_report: analysis/p1_spike_v11_mtf_joint_20260918.md
     artifacts: []
     notes: The v10_4 and v9_long arms reproduce the six-timeframe ledgers trade for trade (15m and 1h, 0 differences). A higher break is used only from the first chart bar opening at the higher bar's close (Pine request.security f[1] with lookahead_on). V11 Pine not compiled on TradingView; its display text was relabeled after the run (突破+spike（上级突破）), logic unchanged. Owner's HYPE 2026-09-17 example lies in the holdout period and was not checked. Not blind; plan said expected to fail. Not pushed.
+
+  - experiment_id: exp-spike-v11-box-joint-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5558319734
+    status: rejected
+    question: Owner rule V11.1 - a break (higher-timeframe and/or own-timeframe) seen while the chart's V9 long risk box is still open counts as 突破+spike, with no window and no check on the break bar, one per box; traded on its own, does it make money on 15m (1h breaks) and 1h (4h breaks)?
+    single_variable: Pairing rule only - the V10.4 6-bar window and second-bar gates replaced by "box open", everything else (data, exit, cost, serial, controls) as the V10.4 and V11 runs. Arms v9_long, v10_4, box_htf, box_chart, box_any (primary).
+    result: NOT PASSED and worse than the V10.4 rule. box_any per trade 15m -0.095R (V10.4 -0.056, V9 -0.100), later -0.292R; 1h -0.092R (V10.4 +0.088, V9 -0.005), later -0.228R. 1h box_any minus V10.4 -0.180 [-0.325, -0.024]. Higher-timeframe breaks are the weakest source (15m later -0.42R over 940 trades). Breaks arriving long after the V9 bar are worse (15m later 7-12 bars -0.50R). Excess over random at 1h falls from +0.244 to +0.013.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v11_box_joint_20260918.md
+    artifacts: []
+    notes: v9_long and v10_4 arms reproduce the earlier ledgers exactly. The box is the indicator's own V9 reference (reference_long_exits state), asserted identical to the one V10.4 uses. Pine not changed to this rule pending owner decision. Not blind. Not pushed.

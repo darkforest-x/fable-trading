@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **560** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **561** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-19 | [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) | SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4 |  |
 | 2026-09-18 | [`p1_spike_v10_4_1h_detail_20260918.md`](p1_spike_v10_4_1h_detail_20260918.md) | SPIKE V10.4 · 1h「突破+spike」只做多——逐笔拆解：挑点比随机好，但盈亏基本跟着大盘走 | 1. **信号本身有东西**：在 1h 上，突破+spike 选出来的做多点，比同币同月随机做多每笔好 0.24R，而且这个优势在前后两段都在（+0.31 / +0.17），与大盘涨跌几乎无关。 |
 | 2026-09-18 | [`p1_spike_v10_4_1h_increment_20260918.md`](p1_spike_v10_4_1h_increment_20260918.md) | SPIKE V10.4 · 1h 复现与趋势线增量验证：原结果逐笔复现；联合门的「改善」主要是少做，不是做得更好 |  |
 | 2026-09-18 | [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) | SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近 |  |
@@ -877,6 +878,7 @@
 - [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
 - [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
 - [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
+- [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
 - [`p1_spike_v1_eth_stops_20260911.md`](p1_spike_v1_eth_stops_20260911.md) — ETH-USDT-SWAP：原版 SPIKE Burst V1 / V6 的止损敏感性
 - [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) — SPIKE V1+ 完整默认配置：两年回测
