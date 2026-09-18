@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用</h1>
+<p>2026-09-19 · 15m（看 1h 突破）/ 1h（看 4h 突破）· Binance 638 个永续 · <strong>holdout 消耗 0</strong> · 未 push</p>
+<p><strong>结论一句话：两条都没达到「前后段都改善」的事前标准。</strong></p>
+<ul>
+<li><strong>加仓</strong>（持仓中第一次突破，下一根开盘加一份，止损和出场跟原单）：加的那份 15m 每笔 −0.052R、1h −0.064R，后段 −0.28R / −0.17R； 加仓后整体比不加更差（15m −0.116 vs −0.100，1h −0.027 vs −0.005）。</li>
+<li><strong>没突破就走</strong>（V9 信号起 6 根内没突破就在下一根开盘离场）：后段少亏（15m −0.234 → −0.149R/笔，区间 [+0.039, +0.139]； 1h −0.159 → −0.088），但前段赚得更少，全期每笔几乎不变（15m −0.100 → −0.103，1h −0.005 → −0.017）。</li>
+</ul>
+<h2>1. 规则</h2>
+<ul>
+<li>底：每个 V9 最终多头，串行，原出场（次根开盘、5 根低点−0.2ATR/收盘−2ATR 止损、2R 后 4ATR 追踪、V9 空头确认次根开盘平仓、往返 0.2%）。 这组交易与六周期报告的 V9 多头账本逐笔一致（15m 23,223 笔、1h 6,565 笔，0 差异）。</li>
+<li>突破 = 上级突破（上级 K 收盘后第一根本图 K 可见）或本周期线突破，任一即可。</li>
+<li>加仓：从信号 K 到出场前，第一次突破的下一根开盘加一份同名义仓位；和原单一起出场，盈亏按原单的 R 计（同名义）。</li>
+<li>没突破就走：信号 K 起 N 根内（含信号 K）没有任何突破且还没平仓，第 N+1 根开盘离场；早走会腾出仓位，串行重跑。N=6 为主，其余只作参考。</li>
+</ul>
+<h2>2. 加仓</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>段</th>
+<th>加仓笔数 / 总单数</th>
+<th>加的那份每笔R</th>
+<th>胜率</th>
+<th>加的那份合计R</th>
+<th>每笔 bp</th>
+<th>原单+加仓 每笔</th>
+<th>只原单 每笔</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>全期</td><td>7,089 / 23,205</td><td>−0.052</td><td>33.4%</td><td>−367.3</td><td>−12.4</td><td>−0.116</td><td>−0.100</td></tr>
+<tr><td>15m</td><td>后段</td><td>3,314 / 10,857</td><td>−0.276</td><td>27.1%</td><td>−914.5</td><td>−54.3</td><td>−0.318</td><td>−0.234</td></tr>
+<tr><td>1h</td><td>全期</td><td>2,198 / 6,551</td><td>−0.064</td><td>32.7%</td><td>−141.6</td><td>−65.0</td><td>−0.027</td><td>−0.005</td></tr>
+<tr><td>1h</td><td>后段</td><td>1,045 / 2,926</td><td>−0.173</td><td>27.6%</td><td>−180.4</td><td>−80.2</td><td>−0.221</td><td>−0.159</td></tr>
+</tbody></table>
+<p>加仓价中位数只比原入场高约 0.2R——突破多发生在进场后不久、价格还没走开的时候；加的那份就是「等突破再追」，所以跟着亏。</p>
+<h2>3. 没突破就走</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>N</th>
+<th>段</th>
+<th>已平仓</th>
+<th>胜率</th>
+<th>每笔净R</th>
+<th>PF</th>
+<th>总净R</th>
+<th>事件回撤R</th>
+<th>每笔比原出场</th>
+<th>区间</th>
+<th>被提前离场</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>原出场</td><td>全期</td><td>23,205</td><td>28.5%</td><td>−0.100</td><td>0.863</td><td>−2,317.9</td><td>2,969</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>15m</td><td><strong>6</strong></td><td>全期</td><td>25,897</td><td>36.1%</td><td>−0.103</td><td>0.738</td><td>−2,660.3</td><td>2,766</td><td>−0.003</td><td>[−0.088, +0.067]</td><td>18,384</td></tr>
+<tr><td>15m</td><td>原出场</td><td>后段</td><td>10,857</td><td>24.4%</td><td>−0.234</td><td>0.697</td><td>−2,538.0</td><td>2,586</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>15m</td><td><strong>6</strong></td><td>后段</td><td>12,090</td><td>33.3%</td><td><strong>−0.149</strong></td><td>0.643</td><td>−1,795.0</td><td>1,805</td><td><strong>+0.085</strong></td><td><strong>[+0.039, +0.139]</strong></td><td>8,536</td></tr>
+<tr><td>1h</td><td>原出场</td><td>全期</td><td>6,551</td><td>29.7%</td><td>−0.005</td><td>0.992</td><td>−33.6</td><td>708</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>1h</td><td><strong>6</strong></td><td>全期</td><td>7,448</td><td>41.9%</td><td>−0.017</td><td>0.948</td><td>−129.8</td><td>380</td><td>−0.012</td><td>[−0.192, +0.150]</td><td>5,388</td></tr>
+<tr><td>1h</td><td>原出场</td><td>后段</td><td>2,926</td><td>25.3%</td><td>−0.159</td><td>0.778</td><td>−466.0</td><td>710</td><td>—</td><td>—</td><td>—</td></tr>
+<tr><td>1h</td><td><strong>6</strong></td><td>后段</td><td>3,291</td><td>36.6%</td><td>−0.088</td><td>0.770</td><td>−287.9</td><td>383</td><td>+0.072</td><td>[−0.035, +0.192]</td><td>2,270</td></tr>
+</tbody></table>
+<p><strong>其他 N（只作参考，没有用来挑）：</strong></p>
+<table><thead><tr>
+<th>周期</th>
+<th>N</th>
+<th>全期每笔</th>
+<th>全期总R</th>
+<th>后段每笔</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>3 / 12 / 24 / 48</td><td>−0.100 / −0.107 / −0.104 / −0.114</td><td>−2,614 / −2,704 / −2,531 / −2,684</td><td>−0.142 / −0.163 / −0.177 / −0.224</td></tr>
+<tr><td>1h</td><td>3 / 12 / 24 / 48</td><td>−0.024 / +0.017 / +0.043 / +0.063</td><td>−183 / +123 / +295 / +420</td><td>−0.073 / −0.089 / −0.070 / −0.095</td></tr>
+</tbody></table>
+<ul>
+<li>早走把大部分单子（15m、1h 都约七成）提前平了：亏的少亏，但也砍掉了后来才突破的赢家，所以上涨段（前段）吃亏，下跌段（后段）占便宜。</li>
+<li>1h 等得越久（24、48 根）全期越好看，但后段仍为负；这是同一段数据上的 5 个 N 里挑出来的，<strong>不能直接当结论</strong>，要用新数据验证。</li>
+</ul>
+<h2>4. 说明</h2>
+<ul>
+<li>这 20 个月已被反复看过，不是盲测；滑点、资金费率未建模；币池有幸存者偏差。</li>
+<li>「框里后来出了突破的 V9 单子 +0.49R」是事后分组，这两条规则就是它在不看未来时能兑现的部分：兑现不了多少。</li>
+<li>Pine V11.2 里两条都做成了开关（加仓只是提示；「N 根没突破就走」默认关）。</li>
+</ul>
+<h2>5. 下一步（你决定）</h2>
+<ol>
+<li>加仓：建议关掉，不用。</li>
+<li>没突破就走：可以当「下跌行情里的减亏工具」保留开关；N 要不要用 6 以外的值，需要在 2026-09 以后的新数据上看，不在这 20 个月里挑。</li>
+</ol>
+<h2>复现命令</h2>
+<pre><code>
+git checkout f787d79162
+PYTHONPATH=. python3 -m pytest tests/evaluation/test_spike_v112_manage.py -q
+PYTHONPATH=. python3 -W ignore -m yoyo.evaluation.spike_v112_manage_study --output experiments/active/exp-spike-v112-manage-20260919-v1/results/run_v1 --workers 8
+</code></pre>
+<p>统计：<code>PYTHONPATH=. python3 -m yoyo.evaluation.spike_v112_manage_report --run experiments/active/exp-spike-v112-manage-20260919-v1/results/run_v1 --out experiments/active/exp-spike-v112-manage-20260919-v1/statistics/run_v1</code>。</p>
+</body>
+</html>

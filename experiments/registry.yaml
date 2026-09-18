@@ -9748,3 +9748,17 @@ experiments:
     canonical_report: analysis/p1_spike_v11_box_joint_20260918.md
     artifacts: []
     notes: v9_long and v10_4 arms reproduce the earlier ledgers exactly. The box is the indicator's own V9 reference (reference_long_exits state), asserted identical to the one V10.4 uses. Pine not changed to this rule pending owner decision. Not blind. Not pushed.
+
+  - experiment_id: exp-spike-v112-manage-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f787d79162
+    status: rejected
+    question: Can a descending-line break (own or higher timeframe) improve V9 longs as position management - adding one unit at the open after the first break while in the trade, or leaving at the open after N bars (N=6 primary) without any break - on 15m (1h breaks) and 1h (4h breaks)?
+    single_variable: Management only; entries are every V9 long with the published exit, which reproduces the six-timeframe v9_long ledger exactly. Other N (3, 12, 24, 48) descriptive only.
+    result: Neither rule improves both segments. Adding - the add unit loses (15m -0.052R, 1h -0.064R per add; later -0.276R, -0.173R) and the position with adds is worse than without (15m -0.116 vs -0.100, 1h -0.027 vs -0.005). Leave-if-no-break N=6 - later segment improves (15m -0.234 to -0.149R per trade, diff +0.085 [+0.039, +0.139]; 1h -0.159 to -0.088, [-0.035, +0.192]) but the earlier segment worsens and full-period per trade is unchanged (15m -0.103, 1h -0.017); about 70 percent of trades are cut. At 1h longer waits look better over the full period (N=48 +0.063R) but stay negative later and were not pre-selected.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_manage_20260919.md
+    artifacts: []
+    notes: Motivated by a hindsight grouping (V9 longs whose box later saw a break +0.49R/+0.53R from the V9 entry) that no rule without hindsight can capture. Not blind. Not pushed.
