@@ -316,3 +316,20 @@ def test_runner_v8_mask_is_the_published_lowtf_v8_mask():
     assert published.sum() > 0
     assert np.array_equal(facts["v8"], published.to_numpy(bool))
     assert not (facts["v9"] & ~facts["v8"]).any()
+
+
+def test_strict_pivots_equal_the_repo_convention_and_one_sided_breaks_plateaus_once():
+    from yoyo.evaluation.spike_v10_4 import pivots
+    rng = np.random.default_rng(3)
+    u = np.round(100 + np.cumsum(rng.normal(0, 1, 5000)), 0)     # coarse grid -> many ties
+    u[[50, 51, 900]] = np.nan
+    strict, loose_ties, extra = pivots(u, 12, 8, "strict")
+    reference, reference_ties = _confirmed_pivots(u, 12, 8, np.isfinite(u))
+    assert np.array_equal(strict, reference) and loose_ties == reference_ties
+    one_sided, _, extra_again = pivots(u, 12, 8, "right_inclusive")
+    assert extra == extra_again == int(((one_sided >= 0) & (strict < 0)).sum()) > 0
+    assert not ((strict >= 0) & (one_sided < 0)).any()
+    plateau = np.r_[np.arange(20.0), [30.0, 30.0], np.arange(20.0)[::-1]]
+    assert (pivots(plateau, 12, 8, "strict")[0] >= 0).sum() == 0
+    found = pivots(plateau, 12, 8, "right_inclusive")[0]
+    assert found[found >= 0].tolist() == [20]

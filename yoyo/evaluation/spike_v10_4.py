@@ -44,7 +44,7 @@ import math
 
 import numpy as np
 
-from yoyo.evaluation.trendline_break import _confirmed_pivots
+from yoyo.evaluation.trendline_break import _rolling_max
 
 VERSION = "spike-v10.4-joint-20260918-v1"
 
@@ -73,6 +73,9 @@ class V104Params:
     pivots_cap: int = 48         # V10_PIVOTS
     per_bucket: int = 4          # V10_PER_BUCKET
     per_track_group: int = 2     # V10_PER_TRACK_GROUP
+    # ta.pivothigh tie rule, undocumented by TradingView: "strict" (both sides
+    # strictly lower) or "right_inclusive" (left strictly lower, right <=).
+    pivot_ties: str = "strict"
 
     @property
     def gap(self) -> int:
@@ -85,6 +88,8 @@ class V104Params:
     def __post_init__(self) -> None:
         if self.lookback < self.span + self.right:
             raise ValueError("V10.4 搜索范围不足: lookback must cover span + right (Pine runtime.error)")
+        if self.pivot_ties not in ("strict", "right_inclusive"):
+            raise ValueError("pivot_ties must be 'strict' or 'right_inclusive'")
 
 
 class Line:
@@ -121,6 +126,7 @@ class V104Result:
     refusals: list[dict] = field(default_factory=list)
     pivot_ties: int = 0
     store_codes: dict = field(default_factory=dict)
+    one_sided_extra_pivots: int = 0
 
 
 def _bucket(span: int, p: V104Params) -> int:
@@ -278,6 +284,35 @@ def _store(pool: list[Line], item: Line, i: int, high, close, body, atr, tick, p
     return 5
 
 
+def pivots(u: np.ndarray, left: int, right: int, mode: str = "strict") -> tuple[np.ndarray, int, int]:
+    """Pivot bar for every confirmation bar (-1 if none), plus two tie counts.
+
+    A pivot needs `left` bars before and `right` bars after it, all finite. The
+    counts are how many bars qualify only under fully non-strict comparison
+    (flat stretches included) and how many extra pivots the one-sided rule
+    "left strict, right <=" adds over strict; the second is the number that
+    measures how much the undocumented TradingView rule can matter.
+    """
+    u = np.asarray(u, dtype=float)
+    n = len(u)
+    pivot_of = np.full(n, -1, dtype=np.int64)
+    if n < left + right + 1:
+        return pivot_of, 0, 0
+    finite = np.isfinite(u)
+    centers = np.arange(left, n - right)
+    left_max = _rolling_max(u, left)[centers - left]
+    right_max = _rolling_max(u, right)[centers + 1]
+    counts = np.concatenate([[0], np.cumsum(finite.astype(np.int64))])
+    whole = counts[centers + right + 1] - counts[centers - left] == left + right + 1
+    value = u[centers]
+    strict = whole & (value > left_max) & (value > right_max)
+    one_sided = whole & (value > left_max) & (value >= right_max)
+    loose = whole & (value >= left_max) & (value >= right_max)
+    chosen = strict if mode == "strict" else one_sided
+    pivot_of[centers[chosen] + right] = centers[chosen]
+    return pivot_of, int((loose & ~strict).sum()), int((one_sided & ~strict).sum())
+
+
 def soft_peak(open_: np.ndarray, high: np.ndarray, close: np.ndarray, atr: np.ndarray,
               wick_cap: float) -> np.ndarray:
     """v10Peak in 削尖影线 mode: min(high, body top + cap*ATR); na while ATR is na."""
@@ -312,9 +347,8 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
         raise ValueError("tick must be positive and finite")
     body = np.maximum(o, c)
     soft = soft_peak(o, h, c, a, p.wick_cap)
-    finite_raw = np.isfinite(h)
-    raw_pivot_of, raw_ties = _confirmed_pivots(h, p.left, p.right, finite_raw)
-    soft_pivot_of, soft_ties = _confirmed_pivots(soft, p.left, p.right, np.isfinite(soft))
+    raw_pivot_of, raw_ties, raw_extra = pivots(h, p.left, p.right, p.pivot_ties)
+    soft_pivot_of, soft_ties, soft_extra = pivots(soft, p.left, p.right, p.pivot_ties)
 
     can = np.asarray(can_run, dtype=bool).tolist()
     confirmed = np.asarray(confirmed_long, dtype=bool).tolist()
@@ -430,7 +464,8 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
                     serial += 1
                     item.uid = serial
                     born_event[i] = True
-    return V104Result(born_event, break_event, joint_event, joints, refusals, raw_ties + soft_ties, codes)
+    return V104Result(born_event, break_event, joint_event, joints, refusals, raw_ties + soft_ties, codes,
+                      raw_extra + soft_extra)
 
 
 def reference_long_exits(high, low, close, atr, *, ready, gap, raw_side, signal_side,

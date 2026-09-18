@@ -321,6 +321,7 @@ def run_stream(symbol: str, timeframe: str, bars: pd.DataFrame, meta: dict, para
                "breaks_in_window": int((joint.break_event & window).sum()),
                "lines_born_in_window": int((joint.born_event & window).sum()),
                "joint_in_window": int(masks["joint"].sum()), "pivot_ties": joint.pivot_ties,
+               "one_sided_extra_pivots": joint.one_sided_extra_pivots,
                "store_codes": {str(k): v for k, v in joint.store_codes.items()},
                "pair_refusals": {str(k): int(v) for k, v in refusals.items()},
                "serial": counts}
@@ -329,7 +330,7 @@ def run_stream(symbol: str, timeframe: str, bars: pd.DataFrame, meta: dict, para
 
 def run_symbol(args) -> dict:
     """Load one 5m file once and run all six timeframes; write, then mark complete."""
-    symbol, path, meta, output, identity_hash = args
+    symbol, path, meta, output, identity_hash, pivot_ties = args
     final = Path(output) / "streams" / symbol
     if (final / "completion.json").is_file():
         receipt = json.loads((final / "completion.json").read_text())
@@ -343,7 +344,7 @@ def run_symbol(args) -> dict:
             p.unlink()
     else:
         staging.mkdir(parents=True)
-    params = V104Params()
+    params = V104Params(pivot_ties=pivot_ties)
     earliest = START - pd.Timedelta(minutes=WARMUP_BARS * max(TIMEFRAMES.values()))
     base = load_5m(Path(path), earliest)
     summaries, failures = [], []
@@ -382,7 +383,7 @@ def run_symbol(args) -> dict:
 
 
 def run(output: Path, *, workers: int = 8, limit: int | None = None, symbols: list[str] | None = None,
-        allow_uncommitted: bool = False) -> None:
+        allow_uncommitted: bool = False, pivot_ties: str = "strict") -> None:
     if not allow_uncommitted and not _committed(DEPENDENCIES):
         raise ValueError("commit runner, port, tests, plan and config before any market replay")
     config = json.loads(CONFIG.read_text())
@@ -395,7 +396,8 @@ def run(output: Path, *, workers: int = 8, limit: int | None = None, symbols: li
     keys = symbols or sorted(files)
     keys = keys[:limit] if limit is not None else keys
     identity = {str(p): digest(p) for p in DEPENDENCIES}
-    identity["params"] = json.dumps(vars(V104Params()), sort_keys=True)
+    params = V104Params(pivot_ties=pivot_ties)
+    identity["params"] = json.dumps(vars(params), sort_keys=True)
     identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     output.mkdir(parents=True, exist_ok=True)
     (output / "streams").mkdir(exist_ok=True)
@@ -413,7 +415,7 @@ def run(output: Path, *, workers: int = 8, limit: int | None = None, symbols: li
     receipts = []
     with ProcessPoolExecutor(max_workers=max(1, workers)) as pool:
         tasks = {pool.submit(run_symbol, (s, str(files[s]), meta.get(s, {"asset": "", "tick": math.nan}),
-                                          str(output), identity_hash)): s for s in keys}
+                                          str(output), identity_hash, pivot_ties)): s for s in keys}
         for number, future in enumerate(as_completed(tasks), 1):
             receipt = future.result()
             receipts.append(receipt)
@@ -426,7 +428,7 @@ def run(output: Path, *, workers: int = 8, limit: int | None = None, symbols: li
     (output / "manifest.json").write_text(json.dumps({
         "complete": limit is None and symbols is None, "symbols": len(keys),
         "expected_symbols": config["expected_symbols"], "run_identity": identity_hash,
-        "holdout_consumption": 0, "strategy_version": VERSION, "params": vars(V104Params()),
+        "holdout_consumption": 0, "strategy_version": VERSION, "params": vars(params),
         "window": [str(START), str(DATA_END)], "split": str(SPLIT),
         "failures": {r["symbol"]: r["failures"] for r in receipts if r["failures"]},
         "summary_sha256": digest(output / "stream_summary.csv")}, indent=2, default=str) + "\n")
@@ -438,8 +440,10 @@ if __name__ == "__main__":
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--symbols", nargs="*")
+    parser.add_argument("--pivot-ties", choices=["strict", "right_inclusive"], default="strict",
+                        help="pre-registered sensitivity only; the primary run is strict")
     parser.add_argument("--allow-uncommitted", action="store_true",
                         help="smoke runs only; results from such runs are not reportable")
     args = parser.parse_args()
     run(args.output, workers=args.workers, limit=args.limit, symbols=args.symbols,
-        allow_uncommitted=args.allow_uncommitted)
+        allow_uncommitted=args.allow_uncommitted, pivot_ties=args.pivot_ties)
