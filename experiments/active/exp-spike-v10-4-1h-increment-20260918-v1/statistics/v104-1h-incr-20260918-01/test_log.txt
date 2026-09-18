@@ -1,0 +1,30 @@
+plugins: anyio-4.12.1, cov-7.1.0
+collecting ... collected 25 items
+
+tests/evaluation/test_spike_v10_4.py::test_vectorized_search_and_validate_equal_literal_pine PASSED [  4%]
+tests/evaluation/test_spike_v10_4.py::test_vectorized_search_equals_literal_pine_on_real_bars PASSED [  8%]
+tests/evaluation/test_spike_v10_4.py::test_validate_catches_each_failure_kind_like_the_loop PASSED [ 12%]
+tests/evaluation/test_spike_v10_4.py::test_no_future_bar_changes_past_events PASSED [ 16%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[0-True] PASSED [ 20%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[-3-True] PASSED [ 24%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[-6-True] PASSED [ 28%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[-7-False] PASSED [ 32%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[3-True] PASSED [ 36%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[6-True] PASSED [ 40%]
+tests/evaluation/test_spike_v10_4.py::test_joint_needs_break_and_spike_within_six_bars_either_order[7-False] PASSED [ 44%]
+tests/evaluation/test_spike_v10_4.py::test_joint_refused_when_gate_fails_on_the_second_bar PASSED [ 48%]
+tests/evaluation/test_spike_v10_4.py::test_spike_evidence_dropped_when_ma_support_is_lost PASSED [ 52%]
+tests/evaluation/test_spike_v10_4.py::test_one_spike_is_consumed_once PASSED [ 56%]
+tests/evaluation/test_spike_v10_4.py::test_reference_long_ends_on_stop_bar PASSED [ 60%]
+tests/evaluation/test_spike_v10_4.py::test_reference_reverses_on_raw_short_even_when_v9_refuses_it PASSED [ 64%]
+tests/evaluation/test_spike_v10_4.py::test_aggregate_is_plain_ohlcv_on_epoch_buckets PASSED [ 68%]
+tests/evaluation/test_spike_v10_4.py::test_runner_v8_mask_is_the_published_lowtf_v8_mask PASSED [ 72%]
+tests/evaluation/test_spike_v10_4.py::test_strict_pivots_equal_the_repo_convention_and_one_sided_breaks_plateaus_once PASSED [ 76%]
+tests/evaluation/test_spike_v10_4_increment.py::test_boundary_refuses_any_row_at_or_after_data_end PASSED [ 80%]
+tests/evaluation/test_spike_v10_4_increment.py::test_trace_is_record_only PASSED [ 84%]
+tests/evaluation/test_spike_v10_4_increment.py::test_fill_is_next_open_and_stop_is_frozen_from_signal_history PASSED [ 88%]
+tests/evaluation/test_spike_v10_4_increment.py::test_raw_short_exits_at_next_open_whatever_arm_admitted_the_trade PASSED [ 92%]
+tests/evaluation/test_spike_v10_4_increment.py::test_a_trail_set_on_a_close_only_protects_from_the_next_bar PASSED [ 96%]
+tests/evaluation/test_spike_v10_4_increment.py::test_every_candidate_gets_exactly_one_status PASSED [100%]
+
+============================== 25 passed in 1.25s ==============================

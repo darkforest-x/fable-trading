@@ -1,0 +1,159 @@
+
+== reproduction ==
+                                                    comparison  original_trades  other_trades  only_original  only_other  diff_signal_i  diff_entry_i  diff_entry_time  diff_entry_price  diff_initial_stop  diff_initial_risk  diff_exit_i  diff_exit_time  diff_exit_price  diff_exit_reason  diff_net_r  diff_gross_r  diff_censored  diff_mfe_r  diff_spike_i  diff_break_i  diff_order  diff_uid  diff_score  diff_control_signal_i  diff_control_net_r
+                        original run_v1 vs original_code_rerun             8041          8041              0           0         0.0000        0.0000           0.0000            0.0000             0.0000             0.0000       0.0000          0.0000           0.0000            0.0000      0.0000        0.0000         0.0000      0.0000           NaN           NaN         NaN       NaN         NaN                    NaN                 NaN
+                            original run_v1 vs new_runner_head             8041          8041              0           0         0.0000        0.0000           0.0000            0.0000             0.0000             0.0000       0.0000          0.0000           0.0000            0.0000      0.0000        0.0000         0.0000      0.0000           NaN           NaN         NaN       NaN         NaN                    NaN                 NaN
+original joints vs new runner joints (all bars, incl. warm-up)             1608          1608              0           0            NaN           NaN              NaN               NaN                NaN                NaN          NaN             NaN              NaN               NaN         NaN           NaN            NaN         NaN        0.0000        0.0000      0.0000    0.0000      0.0000                    NaN                 NaN
+            original controls vs new controls (same trade_key)             8041          8041              0           0            NaN           NaN              NaN               NaN                NaN                NaN          NaN             NaN              NaN               NaN         NaN           NaN            NaN         NaN           NaN           NaN         NaN       NaN         NaN                 0.0000              0.0000
+
+== reproduction_diffs ==
+(empty)
+
+== conservation ==
+           arm  candidates  closed  censored_boundary  censored_gap  skipped_in_position  risk_invalid  no_next_bar  next_bar_is_gap  status_sum_equals_candidates  taken_equals_trade_rows
+   A · V9_ONLY        7757    6551                 14             0                 1192             0            0                0                          True                     True
+B · BREAK_ONLY       23291   15494                 35             0                 7762             0            0                0                          True                     True
+     C · JOINT        1528    1476                  0             0                   52             0            0                0                          True                     True
+
+== main_table ==
+           arm  period  signals  trades_taken  closed  censored_boundary  censored_gap  skipped_in_position  risk_invalid  no_next_bar  win_rate  mean_gross_r  mean_net_r  mean_net_bp     pf  total_net_r  event_drawdown_r  median_hold_h  concurrent_median  concurrent_max  random_mean_r  excess_vs_random_r  p_vs_random
+   A · V9_ONLY    full     7757          6565    6551                 14             0                 1192             0            0    0.2972        0.0507     -0.0051     -34.3070 0.9924     -33.5884          707.8660        40.0000            24.0000             212        -0.0850              0.0816       0.1394
+   A · V9_ONLY earlier     4332          3625    3625                  0             0                  707             0            0    0.3327        0.1744      0.1193      -3.6254 1.1879     432.3934          527.0412        46.0000            22.0000             212         0.0016              0.1180       0.2029
+   A · V9_ONLY   later     3425          2940    2926                 14             0                  485             0            0    0.2532       -0.1025     -0.1593     -72.3182 0.7779    -465.9818          709.6102        33.0000            27.0000             160        -0.1933              0.0360       0.2314
+B · BREAK_ONLY    full    23291         15529   15494                 35             0                 7762             0            0    0.2814        0.0235     -0.0431     -36.8076 0.9389    -668.4615         2356.8184        32.0000            58.0000             251        -0.1524              0.1069       0.0400
+B · BREAK_ONLY earlier    10660          7266    7262                  4             0                 3394             0            0    0.3382        0.2286      0.1570      37.7806 1.2377    1140.0188          924.2166        37.0000            42.0000             246        -0.0511              0.2054       0.0370
+B · BREAK_ONLY   later    12631          8263    8232                 31             0                 4368             0            0    0.2313       -0.1575     -0.2197    -102.6068 0.7058   -1808.4802         2308.4054        28.0000            70.0000             247        -0.2419              0.0197       0.3753
+     C · JOINT    full     1528          1476    1476                  0             0                   52             0            0    0.3279        0.1442      0.0878      17.6688 1.1353     129.5986          197.7246        41.0000             9.0000              57        -0.1550              0.2436       0.0090
+     C · JOINT earlier      772           747     747                  0             0                   25             0            0    0.3949        0.3061      0.2490      72.4565 1.4255     185.9783           93.0940        48.0000             7.0000              57        -0.0615              0.3105       0.0815
+     C · JOINT   later      756           729     729                  0             0                   27             0            0    0.2593       -0.0217     -0.0773     -38.4716 0.8917     -56.3797          197.7246        35.0000            10.0000              46        -0.2511              0.1748       0.0325
+
+== c_minus_a ==
+ period  months  months_without_A  months_without_C  reps  valid_reps  A_closed  C_closed  C_per_A_trades  A_mean_r  C_mean_r  diff_mean_r  ci95_low_r  ci95_high_r  A_mean_bp  C_mean_bp  diff_mean_bp  ci95_low_bp  ci95_high_bp  A_total_r  C_total_r  diff_total_r
+   full      20                 0                 0  2000        2000      6551      1476          0.2253   -0.0051    0.0878       0.0929     -0.0456       0.2226   -34.3070    17.6688       51.9758      -9.4722      114.2314   -33.5884   129.5986      163.1870
+earlier      13                 0                 0  2000        2000      3625       747          0.2061    0.1193    0.2490       0.1297     -0.0706       0.3369    -3.6254    72.4565       76.0819     -18.7928      172.6507   432.3934   185.9783     -246.4151
+  later       8                 0                 0  2000        2000      2926       729          0.2491   -0.1593   -0.0773       0.0819     -0.0880       0.2467   -72.3182   -38.4716       33.8466     -40.4516      115.2758  -465.9818   -56.3797      409.6022
+
+== c_minus_a_right_inclusive ==
+ period  months  months_without_A  months_without_C  reps  valid_reps  A_closed  C_closed  C_per_A_trades  A_mean_r  C_mean_r  diff_mean_r  ci95_low_r  ci95_high_r  A_mean_bp  C_mean_bp  diff_mean_bp  ci95_low_bp  ci95_high_bp  A_total_r  C_total_r  diff_total_r
+   full      20                 0                 0  2000        2000      6551      1594          0.2433   -0.0051    0.0926       0.0977     -0.0233       0.2163   -34.3070    14.9305       49.2375      -5.7632      105.7253   -33.5884   147.5622      181.1507
+earlier      13                 0                 0  2000        2000      3625       807          0.2226    0.1193    0.2743       0.1550     -0.0121       0.3386    -3.6254    71.1202       74.7455      -6.1699      162.8512   432.3934   221.3362     -211.0572
+  later       8                 0                 0  2000        2000      2926       787          0.2690   -0.1593   -0.0937       0.0655     -0.0884       0.2185   -72.3182   -42.6871       29.6311     -36.2562      102.8932  -465.9818   -73.7740      392.2078
+
+== main_table_right_inclusive ==
+           arm  period  signals  trades_taken  closed  censored_boundary  censored_gap  skipped_in_position  risk_invalid  no_next_bar  win_rate  mean_gross_r  mean_net_r  mean_net_bp     pf  total_net_r  event_drawdown_r  median_hold_h  concurrent_median  concurrent_max  random_mean_r  excess_vs_random_r  p_vs_random
+   A · V9_ONLY    full     7757          6565    6551                 14             0                 1192             0            0    0.2972        0.0507     -0.0051     -34.3070 0.9924     -33.5884          707.8660        40.0000            24.0000             212        -0.0850              0.0816       0.1394
+   A · V9_ONLY earlier     4332          3625    3625                  0             0                  707             0            0    0.3327        0.1744      0.1193      -3.6254 1.1879     432.3934          527.0412        46.0000            22.0000             212         0.0016              0.1180       0.2029
+   A · V9_ONLY   later     3425          2940    2926                 14             0                  485             0            0    0.2532       -0.1025     -0.1593     -72.3182 0.7779    -465.9818          709.6102        33.0000            27.0000             160        -0.1933              0.0360       0.2314
+B · BREAK_ONLY    full    25226         16557   16522                 35             0                 8669             0            0    0.2827        0.0309     -0.0422     -36.4404 0.9406    -697.6678         2534.4616        32.0000            61.0000             275        -0.1803              0.1363       0.0145
+B · BREAK_ONLY earlier    11453          7724    7720                  4             0                 3729             0            0    0.3421        0.2496      0.1654      42.8758 1.2474    1277.1243          985.1105        37.0000            45.0000             258        -0.0706              0.2338       0.0180
+B · BREAK_ONLY   later    13773          8833    8802                 31             0                 4940             0            0    0.2306       -0.1608     -0.2244    -106.0066 0.7004   -1974.7921         2492.3963        29.0000            74.0000             271        -0.2768              0.0506       0.1734
+     C · JOINT    full     1651          1594    1594                  0             0                   57             0            0    0.3287        0.1496      0.0926      14.9305 1.1429     147.5622          220.1892        41.0000             9.5000              68        -0.1365              0.2292       0.0090
+     C · JOINT earlier      835           807     807                  0             0                   28             0            0    0.3978        0.3320      0.2743      71.1202 1.4754     221.3362          104.4037        48.0000             7.0000              68        -0.0411              0.3153       0.0590
+     C · JOINT   later      816           787     787                  0             0                   29             0            0    0.2579       -0.0374     -0.0937     -42.6871 0.8699     -73.7740          220.1892        35.0000            10.0000              47        -0.2348              0.1405       0.0425
+
+== v9_pair_reasons ==
+                      pair_status  v9_events  shadow_closed  shadow_mean_r  shadow_total_r  ge3r  ge10r  share
+                no_available_line       5161           5147        -0.0251       -129.0485   305     39 0.6653
+                            joint       1528           1528         0.1474        225.1548   113     12 0.1970
+                   window_expired        527            527         0.2781        146.5503    47      9 0.0679
+       no_ma_support_or_raw_short        373            373        -0.6477       -241.5912     8      0 0.0481
+            pair_refused:momentum         71             70         0.0908          6.3545     6      0 0.0092
+                pair_refused:gate         58             58         0.4208         24.4071     3      0 0.0075
+          overwritten_by_newer_v9         14             14         0.4770          6.6782     2      0 0.0018
+pair_refused:parent_not_recovered         10             10        -0.6523         -6.5229     0      0 0.0013
+                v9_reference_exit          9              9        -1.0794         -9.7145     0      0 0.0012
+                     line_expired          6              6         0.2093          1.2555     1      0 0.0008
+
+== filtering ==
+ period               group  v9_events  shadow_closed  shadow_censored  shadow_no_trade  mean_net_r  total_net_r  win_rate     loss_r  profit_r  ge3r  ge10r  mean_net_bp
+   full   paired_into_joint       1528           1528                0                0      0.1474     225.1548    0.3416  -968.6170 1193.7719   113     12      39.2208
+   full  not_paired_decided       6229           6214               15                0     -0.0324    -201.6315    0.2864 -4263.1213 4061.4899   372     48     -43.9244
+   full pending_at_data_end          0              0                0                0         NaN       0.0000       NaN     0.0000    0.0000     0      0          NaN
+earlier   paired_into_joint        772            772                0                0      0.3070     237.0007    0.4106  -436.6814  673.6820    71      3      96.4953
+earlier  not_paired_decided       3560           3560                0                0      0.0871     310.1008    0.3160 -2330.8052 2640.9060   246     32     -11.4945
+earlier pending_at_data_end          0              0                0                0         NaN       0.0000       NaN     0.0000    0.0000     0      0          NaN
+  later   paired_into_joint        756            756                0                0     -0.0157     -11.8458    0.2712  -531.9357  520.0898    42      9     -19.2658
+  later  not_paired_decided       2669           2654               15                0     -0.1928    -511.7323    0.2468 -1932.3162 1420.5839   126     16     -87.4249
+  later pending_at_data_end          0              0                0                0         NaN       0.0000       NaN     0.0000    0.0000     0      0          NaN
+
+== realtime_split ==
+ period   at_v9_bar  v9_events  shadow_closed  mean_net_r  total_net_r  ge3r  ge10r
+   full   joint_now       1223           1223      0.0740      90.4534    82     10
+   full no_line_now       5161           5147     -0.0251    -129.0485   305     39
+   full     pending       1373           1372      0.0453      62.1184    98     11
+earlier   joint_now        611            611      0.2403     146.8176    51      3
+earlier no_line_now       3048           3048      0.0905     275.8562   206     26
+earlier     pending        673            673      0.1849     124.4277    60      6
+  later   joint_now        612            612     -0.0921     -56.3642    31      7
+  later no_line_now       2113           2099     -0.1929    -404.9047    99     13
+  later     pending        700            699     -0.0891     -62.3093    38      5
+
+== pending_outcomes ==
+                      pair_status  v9_events  v9path_total_r  v9path_mean_r
+                   window_expired        527        146.5503         0.2781
+       no_ma_support_or_raw_short        373       -241.5912        -0.6477
+                            joint        305        134.7014         0.4416
+            pair_refused:momentum         71          6.3545         0.0908
+                pair_refused:gate         58         24.4071         0.4208
+          overwritten_by_newer_v9         14          6.6782         0.4770
+pair_refused:parent_not_recovered         10         -6.5229        -0.6523
+                v9_reference_exit          9         -9.7145        -1.0794
+                     line_expired          6          1.2555         0.2093
+
+== wait_policy ==
+ period  pending_v9_events  enter_all_at_v9_trades  enter_all_at_v9_total_r  enter_all_at_v9_total_bp  wait_for_joint_trades  wait_for_joint_total_r  wait_for_joint_total_bp  same_events_entered_at_v9_total_r
+   full               1373                    1372                  62.1184               -35049.4437                    305                 55.1089               25191.1102                           134.7014
+earlier                673                     673                 124.4277                 2617.9496                    161                 37.7446               10510.2910                            90.1831
+  later                700                     699                 -62.3093               -37667.3933                    144                 17.3643               14680.8192                            44.5183
+
+== waiting ==
+      order  joints  both_closed  wait_bars_mean  wait_bars_max  entry_diff_bp_mean  entry_diff_bp_median  risk_pct_v9_median  risk_pct_joint_median  net_r_v9_mean  net_r_joint_mean  joint_in_v9_r_mean  net_bp_v9_mean  net_bp_joint_mean  same_exit_share
+        all    1528         1528          0.4202              6             16.4820                0.0000              4.0264                 3.9985         0.1474            0.0953              0.0997         39.2208            21.0917           0.9319
+break_first     714          714          0.0000              0              0.0000                0.0000              3.7714                 3.7714         0.1465            0.1465              0.1465         68.1950            68.1950           1.0000
+   same_bar     509          509          0.0000              0              0.0000                0.0000              4.4540                 4.4540        -0.0277           -0.0277             -0.0277        -81.8354           -81.8354           1.0000
+spike_first     305          305          2.1049              6             82.5721               51.4139              3.8871                 3.7450         0.4416            0.1807              0.2032        173.4176            82.5938           0.6590
+
+== occupancy ==
+                                                           group  trades  closed  mean_net_r  total_net_r
+                                                   C trades, all    1476    1476      0.0878     129.5986
+                                              C trades, A closed    1345    1345      0.0635      85.3713
+                                 C trades, A skipped_in_position     131     131      0.3376      44.2273
+               C trades while A held a position at the joint bar     388     388      0.1321      51.2699
+paired V9 events whose joint C skipped (C in position / invalid)      52      52      0.3998      20.7876
+                                 V9 events A skipped in position    1192    1191      0.0480      57.1118
+                              of which later paired into a joint     182     182      0.3755      68.3333
+
+== errata ==
+                        item                  original_text                                                                                     actual                                                 consequence
+1h 拆解报告第 7 节「去掉最好的 1%（15 笔）」                   15 笔，剩 1,462                                            len//100 = 1476//100 = 14 笔；isin 去掉 14 行，剩 1462           标签「15 笔」写错，删的是 14 笔；表中每笔 R/合计 R 数值本身按 14 笔计算，无需改数
+              配对超额 vs 两组均值相减 +0.0878 − (−0.1550) 读作 +0.2436 配对超额只在 1473 对匹配成功的交易上算（共 1476 笔），配对内信号均值 +0.0886、随机均值 -0.1550、差 +0.2436；表中「每笔净R」用全部 1476 笔 0.2436 ≠ 0.0878+0.1550=0.2428 来自 3 笔未匹配交易的分母差；不是计算错误，需在表注写明
+
+== gap_audit ==
+   symbol  gap_i              gap_bar_open  window_end_i  raw_signals  v9_final_long  v9_final_any  joint_events  break_events  in_eval_window
+  AIAUSDT    456 2026-01-20 11:00:00+00:00           479            0              0             0             0             0            True
+  CTKUSDT    696 2025-04-30 10:00:00+00:00           719            0              0             0             0             0            True
+  CVCUSDT    360 2025-05-16 08:00:00+00:00           383            0              0             0             0             0            True
+  CVXUSDT    528 2025-07-23 11:00:00+00:00           551            0              0             0             0             0            True
+  LITUSDT    528 2025-12-23 17:00:00+00:00           551            0              0             0             0             0            True
+MAVIAUSDT    600 2025-03-26 17:00:00+00:00           623            0              0             0             0             0            True
+ PUMPUSDT    216 2025-07-10 07:00:00+00:00           239            0              0             0             0             0            True
+  SLPUSDT    528 2025-07-23 11:00:00+00:00           551            0              0             0             0             0            True
+
+== cashbook ==
+        arm   sizing  risk_fraction  candidates  selected  rejected  closed  censored_boundary  final_balance  net_return  floor_triggered  bankrupt  max_gross_leverage  max_portfolio_initial_risk  realized_max_drawdown                                                           rejection_reasons
+A · V9_ONLY    fixed         0.0300        6565       168      6397     168                  0       294.0461     -0.7060            False     False              2.9160                      0.0998                 0.7094                      {"gross_leverage_cap": 18, "portfolio_risk_cap": 6379}
+A · V9_ONLY    fixed         0.0500        6565       128      6437     128                  0       452.8657     -0.5471            False     False              2.8010                      0.0992                 0.7506                      {"gross_leverage_cap": 16, "portfolio_risk_cap": 6421}
+A · V9_ONLY    fixed         0.1000        6565         1      6564       1                  0       894.9506     -0.1050            False     False              2.5247                      0.1000                 0.0000                       {"gross_leverage_cap": 1, "portfolio_risk_cap": 6563}
+A · V9_ONLY compound         0.0300        6565       341      6224     341                  0       222.5523     -0.7774             True     False              2.9969                      0.0990                 0.8893 {"gross_leverage_cap": 22, "portfolio_risk_cap": 3663, "entry_floor": 2539}
+A · V9_ONLY compound         0.0500        6565       199      6366     199                  0       189.8579     -0.8101             True     False              2.9992                      0.1000                 0.8598 {"gross_leverage_cap": 81, "portfolio_risk_cap": 3896, "entry_floor": 2389}
+A · V9_ONLY compound         0.1000        6565        97      6468      97                  0       187.1474     -0.8129             True     False              2.9829                      0.1000                 0.8486 {"gross_leverage_cap": 14, "portfolio_risk_cap": 3192, "entry_floor": 3262}
+  C · JOINT    fixed         0.0300        1476       350      1126     350                  0      2955.4868      1.9555            False     False              2.9518                      0.0998                 0.6126                      {"portfolio_risk_cap": 1085, "gross_leverage_cap": 41}
+  C · JOINT    fixed         0.0500        1476       321      1155     321                  0      4931.8491      3.9318            False     False              2.9401                      0.0995                 0.6113                      {"portfolio_risk_cap": 1110, "gross_leverage_cap": 45}
+  C · JOINT    fixed         0.1000        1476         1      1475       1                  0       895.3415     -0.1047            False     False              2.3293                      0.1000                 0.0000                                                {"portfolio_risk_cap": 1475}
+  C · JOINT compound         0.0300        1476       360      1116     360                  0      1712.1065      0.7121            False     False              2.9713                      0.0994                 0.7534                      {"portfolio_risk_cap": 1093, "gross_leverage_cap": 23}
+  C · JOINT compound         0.0500        1476       200      1276     200                  0       762.7206     -0.2373            False     False              2.9774                      0.1000                 0.7374                      {"portfolio_risk_cap": 1202, "gross_leverage_cap": 74}
+  C · JOINT compound         0.1000        1476       126      1350     126                  0      8504.7502      7.5048            False     False              2.9873                      0.1000                 0.7757                      {"portfolio_risk_cap": 1312, "gross_leverage_cap": 38}
+
+== joint_display ==
+ joints_in_window  line_was_displayed_main_bar_before  median_bars_line_born_to_joint  min_bars_line_born_to_first_event
+             1528                                1229                         26.0000                                  1

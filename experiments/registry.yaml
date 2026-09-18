@@ -9706,3 +9706,17 @@ experiments:
     canonical_report: analysis/p1_spike_v10_4_joint_multitf_20260918.md
     artifacts: []
     notes: Binance USD-M official 5m archive (638 listed perpetuals, ends 2026-04-30), every timeframe aggregated from the same 5m rows; window 2024-09-10..2026-05-01 split at 2025-09-10, same as published V9/V10. Not blind for 30m/1h/4h - V9/V10 already split these months. Pre-registered pivot-tie sensitivity (left strict, right inclusive; commit 9e98a0068e) added 4 to 24 percent more joint signals and changed no sign and no verdict. Port held to a literal line-by-line transcription of the Pine loops by tests; exits borrowed from V9 because the joint signal opens no reference box of its own. Universe is Binance perpetuals still listed on 2026-08-28, survivorship not removed.
+
+  - experiment_id: exp-spike-v10-4-1h-increment-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ca0c536574
+    status: inconclusive
+    question: On 1h long only, what does adding the V10.4 descending-line break plus SPIKE pairing to V9 select, what does waiting for confirmation cost, how does position occupancy change, and does the original V10.4 result reproduce?
+    single_variable: Entry set only, three arms on identical data, universe, window, exit and cost with independent serial state - v9_only (original v9_long), break_only (every line-break winner of the frozen V10.4 engine, no V9 gates, module ablation reference) and joint (original V10.4 joint). No parameter changed; pivot tie rule run under both existing conventions.
+    result: Original 1h results reproduce exactly (8041 trades, 1608 joints, 8041 controls; 0 differences in 14 fields, also from a read-only export of ccc52dff29). Joint minus V9 per trade +0.093R, UTC month-block 95 percent interval [-0.046, +0.223]; +52bp [-9, +114]; joint takes 22.5 percent of V9's trades. Later segment joint -0.077R vs V9 -0.159R per trade (diff +0.082, [-0.088, +0.247]); of the +410R later total difference about +350R is the frequency effect of trading a quarter as often in a losing market and +60R per-trade; in the earlier segment the joint earns 246R less in total. Shadow attribution - unpaired V9 events avoided -4263R of losses and forwent +4061R of profits, and 48 of 60 V9 winners of 10R or more were not paired. 80 percent of joints fire on the V9 bar itself (zero wait); spike-first joints wait 2.1 bars and pay about 83bp worse entries. Break-only is -0.043R per trade, -0.220R later. Evidence does not support a hard filter; at most a tag on V9.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v10_4_1h_increment_20260918.md
+    artifacts: []
+    notes: Not blind - the same 20 months of 1h joint and V9 ledgers had been read in the six-timeframe and 1h detail reports, and 1h itself was singled out from six timeframes. TradingView consistency not verified. A record-only trace hook was added to the port; a test and a per-stream assertion show it changes no event. The V9 engine's data-gap differences from Pine affect zero 1h events (no raw signal inside any of the eight 24-bar gap windows). Errata on the 1h detail report - the top-1 percent cut removed 14 trades, not 15; paired excess uses 1473 matched pairs. Realized-balance cashbook replay is extremely path dependent and is not an account validation; mark-to-market account replay not done. Not pushed.
