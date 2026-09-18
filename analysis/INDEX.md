@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-19 | [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) | 突破+spike（框内规则）逐笔明细 9,287 笔 + 随机抽样 50 张 TV 风格图 |  |
 | 2026-09-19 | [`p1_spike_v112_manage_20260919.md`](p1_spike_v112_manage_20260919.md) | V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用 |  |
 | 2026-09-19 | [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) | SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4 |  |
 | 2026-09-18 | [`p1_spike_v10_4_1h_detail_20260918.md`](p1_spike_v10_4_1h_detail_20260918.md) | SPIKE V10.4 · 1h「突破+spike」只做多——逐笔拆解：挑点比随机好，但盈亏基本跟着大盘走 | 1. **信号本身有东西**：在 1h 上，突破+spike 选出来的做多点，比同币同月随机做多每笔好 0.24R，而且这个优势在前后两段都在（+0.31 / +0.17），与大盘涨跌几乎无关。 |
@@ -879,6 +880,7 @@
 - [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
 - [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
 - [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
+- [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) — 突破+spike（框内规则）逐笔明细 9,287 笔 + 随机抽样 50 张 TV 风格图
 - [`p1_spike_v112_manage_20260919.md`](p1_spike_v112_manage_20260919.md) — V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
