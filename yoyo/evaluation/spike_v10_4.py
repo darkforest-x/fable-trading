@@ -127,6 +127,9 @@ class V104Result:
     pivot_ties: int = 0
     store_codes: dict = field(default_factory=dict)
     one_sided_extra_pivots: int = 0
+    htf_joint_event: np.ndarray | None = None
+    htf_joints: list = field(default_factory=list)
+    htf_refusals: list = field(default_factory=list)
 
 
 def _bucket(span: int, p: V104Params) -> int:
@@ -329,7 +332,8 @@ def soft_peak(open_: np.ndarray, high: np.ndarray, close: np.ndarray, atr: np.nd
 
 def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, parent_high, parent_low,
                  raw_side, long_alive, momentum, current_gate, ref_long_exit, tick: float,
-                 params: V104Params | None = None, trace: dict | None = None) -> V104Result:
+                 params: V104Params | None = None, trace: dict | None = None, use_chart: bool = True,
+                 htf: dict | None = None) -> V104Result:
     """Replay the V10.4 structure monitor and joint pairing bar by bar.
 
     V9 inputs, one value per closed bar, all known at that bar's close:
@@ -347,6 +351,18 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
     saved/dropped SPIKE with its reason, every pair attempt, a snapshot of the
     lines available on each V9 bar, and the display-only "current main line"
     per bar (Pine's v10Main, which the script says only affects the picture).
+
+    V11 (Pine `spike_burst_v11.pine`): `use_chart=False` stops chart-timeframe
+    lines from pairing ("仅上级周期"); `htf`, when given, adds the higher-
+    timeframe break source paired on this chart. Its per-chart-bar arrays are
+    `known` (a higher-timeframe break first becomes visible on this bar, i.e.
+    the first chart bar opening at that higher bar's close), the frozen line
+    `ax_t, ap, bx_t, bp`, `born_t` (higher bar close that confirmed the line),
+    `bar_t` (chart bar open, same time unit) and `gap`. The steps and their
+    order are the Pine's: drop a stale SPIKE, drop an unusable break, register
+    a new break, register a SPIKE, then pair on the later event's bar with the
+    same second-bar gates; the consumed-SPIKE record is shared with the chart
+    source so one SPIKE is used once.
     """
     p = params or V104Params()
     o, h, lo, c, a = (np.asarray(x, dtype=float) for x in (open_, high, low, close, atr))
@@ -387,6 +403,19 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
     segment_start = 0
     consumed = -1
 
+    htf_joint_event = np.zeros(n, dtype=bool)
+    htf_joints: list[dict] = []
+    htf_refusals: list[dict] = []
+    if htf is not None:
+        h_known = np.asarray(htf["known"], dtype=bool).tolist()
+        h_geo = {k: np.asarray(htf[k], dtype=float).tolist() for k in ("ax_t", "ap", "bx_t", "bp", "born_t", "bar_t")}
+        h_extra = {k: np.asarray(htf[k], dtype=float).tolist() for k in ("cx_t", "cp", "break_t") if k in htf}
+        h_gap = np.asarray(htf["gap"], dtype=bool).tolist()
+    h_usable = False
+    h_break = h_spike = -1
+    h_ax = h_ap = h_bx = h_bp = h_born = h_spike_t = h_ph = h_pl = math.nan
+    h_meta: dict = {}
+
     tr = trace
     if tr is not None:
         for key in ("lines", "line_events", "spike_events", "pair_attempts", "v9_snapshots"):
@@ -414,6 +443,8 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
             rx.clear(); rp.clear(); ra.clear(); sx.clear(); sp.clear(); sa.clear()
             tracks.clear()
             segment_start = i
+            if htf is not None and h_gap[i]:
+                h_usable, h_spike = False, -1
             if tr is not None:
                 if confirmed[i]:
                     tr["v9_snapshots"].append({"i": i, "can_run": False, "available": []})
@@ -501,7 +532,7 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
             tr["break_winner_uid"][i] = break_winner.uid
         if pair_attempt and joint_winner is None:
             refusals.append({"i": i, "reason": failure})
-        if joint_winner is not None:
+        if joint_winner is not None and use_chart:
             w = joint_winner
             joint_event[i] = True
             consumed = w.spike
@@ -522,6 +553,47 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
                         spike_event(item, i, "dropped:same_spike_paired_on_other_line"
                                     if item.spike == consumed else "dropped:consumed")
                     item.spike = -1
+        if htf is not None:
+            if h_gap[i]:
+                h_usable, h_spike = False, -1
+            else:
+                # 1. stale SPIKE evidence, same conditions as the chart source
+                if h_spike >= 0:
+                    if h_spike <= consumed or i - h_spike > p.window:
+                        h_spike = -1
+                    elif not alive[i] or math.isnan(h_pl) or close_i < h_pl or ref_exit[i]:
+                        h_spike = -1
+                # 2. a known higher-timeframe break stops being usable
+                if h_usable:
+                    y_now = h_ap + (h_bp - h_ap) * ((h_geo["bar_t"][i] - h_ax) / (h_bx - h_ax))
+                    if i - h_break > p.window or close_i <= y_now or side[i] == -1:
+                        h_usable = False
+                # 3. a new break becomes visible on this chart bar (single slot)
+                if h_known[i]:
+                    h_ax, h_ap, h_bx, h_bp = (h_geo[k][i] for k in ("ax_t", "ap", "bx_t", "bp"))
+                    h_born, h_break, h_usable = h_geo["born_t"][i], i, True
+                    h_meta = {k: v[i] for k, v in h_extra.items()}
+                # 4. chart SPIKE
+                if confirmed[i]:
+                    h_spike, h_spike_t, h_ph, h_pl = i, h_geo["bar_t"][i], ph[i], pl[i]
+                # 5. pair on the later event's bar
+                if h_usable and h_spike >= 0 and h_spike > consumed:
+                    within = abs(h_spike - h_break) <= p.window
+                    second_now = i == max(h_spike, h_break)
+                    known_before = not math.isnan(h_born) and h_born <= h_spike_t
+                    recovered = not math.isnan(h_ph) and close_i > h_ph
+                    if within and second_now and known_before:
+                        if alive[i] and mom[i] and gate[i] and recovered:
+                            htf_joint_event[i] = True
+                            order = "same_bar" if h_spike == h_break else "spike_first" if h_spike < h_break else "break_first"
+                            htf_joints.append({"i": i, "spike_i": h_spike, "break_known_i": h_break, "order": order,
+                                               "ax_t": h_ax, "ap": h_ap, "bx_t": h_bx, "bp": h_bp, "born_t": h_born,
+                                               "parent_high": h_ph, "parent_low": h_pl, **h_meta})
+                            consumed = h_spike
+                            h_usable, h_spike = False, -1
+                        else:
+                            htf_refusals.append({"i": i, "reason": "no_ma_support" if not alive[i] else "momentum"
+                                                 if not mom[i] else "parent_not_recovered" if not recovered else "gate"})
         if tr is not None:
             event_line = joint_winner if joint_winner is not None else break_winner
             if event_line is not None:
@@ -590,7 +662,74 @@ def joint_events(open_, high, low, close, atr, *, can_run, confirmed_long, paren
             if item.spike >= 0:
                 spike_event(item, n - 1, "pending_at_data_end")
     return V104Result(born_event, break_event, joint_event, joints, refusals, raw_ties + soft_ties, codes,
-                      raw_extra + soft_extra)
+                      raw_extra + soft_extra, htf_joint_event, htf_joints, htf_refusals)
+
+
+def htf_breaks(open_, high, low, close, atr, *, can_run, tick: float, params: V104Params | None = None) -> list[dict]:
+    """V11 higher-timeframe engine (Pine `f_v11_lineEngine`), run on the higher bars.
+
+    Same pivots, three-point search, validation, capacity and close-break test as
+    the chart engine; no SPIKE bookkeeping, and a broken line leaves the pool at
+    once (the chart engine keeps it "usable" for the pairing window). Returns one
+    record per higher bar that had a break winner: its index and the frozen line.
+    Columns used: open, high, low, close, atr of the higher timeframe only.
+    """
+    p = params or V104Params()
+    o, h, lo, c, a = (np.asarray(x, dtype=float) for x in (open_, high, low, close, atr))
+    n = len(c)
+    body = np.maximum(o, c)
+    soft = soft_peak(o, h, c, a, p.wick_cap)
+    raw_of = pivots(h, p.left, p.right, p.pivot_ties)[0].tolist()
+    soft_of = pivots(soft, p.left, p.right, p.pivot_ties)[0].tolist()
+    can = np.asarray(can_run, dtype=bool).tolist()
+    closes, atrs = c.tolist(), a.tolist()
+    rx: list[int] = []; rp: list[float] = []; ra: list[float] = []
+    sx: list[int] = []; sp: list[float] = []; sa: list[float] = []
+    pool: list[Line] = []
+    segment_start = 0
+    out: list[dict] = []
+    for i in range(n):
+        if not can[i]:
+            rx.clear(); rp.clear(); ra.clear(); sx.clear(); sp.clear(); sa.clear()
+            pool.clear()
+            segment_start = i
+            continue
+        close_i, atr_i = closes[i], atrs[i]
+        winner = None
+        for item in pool:
+            y = item.at(i)
+            if item.phase == 1:
+                if i - item.born > p.life or y <= 0:
+                    item.phase, item.stopped = 3, i
+                elif i > item.born:
+                    item.above = item.above + 1 if close_i > y + atr_i * p.break_buffer else 0
+                    if item.above >= p.break_bars:
+                        item.phase, item.stopped, item.broken = 2, i, i
+                        if winner is None or item.score < winner.score:
+                            winner = item
+        if winner is not None:
+            out.append({"i": i, "ax": winner.ax, "ap": winner.ap, "bx": winner.bx, "bp": winner.bp, "cx": winner.cx,
+                        "cp": winner.cp, "born_i": winner.born, "source": winner.source, "score": winner.score})
+        raw_new = soft_new = False
+        px = i - p.right
+        if px - p.left >= segment_start and px >= 0 and atrs[px] == atrs[px]:
+            scale = max(atrs[px], tick)
+            if raw_of[i] >= 0:
+                rx.append(px); rp.append(float(h[px])); ra.append(scale); raw_new = True
+            if soft_of[i] >= 0:
+                sx.append(px); sp.append(float(soft[px])); sa.append(scale); soft_new = True
+        for xs, ps, ats in ((rx, rp, ra), (sx, sp, sa)):
+            while xs and (i - xs[0] > p.lookback or len(xs) > p.pivots_cap):
+                xs.pop(0); ps.pop(0); ats.pop(0)
+        for k in range(len(pool) - 1, -1, -1):
+            if pool[k].phase != 1:
+                del pool[k]
+        for source, new, xs, ps, ats in ((0, raw_new, rx, rp, ra), (1, soft_new, sx, sp, sa)):
+            if not new:
+                continue
+            for item in _search(xs, ps, ats, source, i, lo, close_i, a, tick, p):
+                _store(pool, item, i, h, c, body, a, tick, p)
+    return out
 
 
 def reference_long_exits(high, low, close, atr, *, ready, gap, raw_side, signal_side,
