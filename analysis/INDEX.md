@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **550** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **557** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,7 +10,13 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-18 | [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) | SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近 |  |
+| 2026-09-18 | [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) | SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差 |  |
+| 2026-09-18 | [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) | SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负 |  |
+| 2026-09-17 | [`p0_spike_v9_card_performance_20260917.md`](p0_spike_v9_card_performance_20260917.md) | V9 信号卡片接上持仓跟踪：R 与胜率不再是破折号 | 病因不是前端没接好，是后端从来没生产过前端要的那个对象。** 前端 `performanceView()` 早就会渲染 |
 | 2026-09-17 | [`p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md`](p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md) | ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测 | 作者在 v1.2 里写的"改成只做多后回测更成功"，在 BTC/ETH 的长窗口上**确实成立**，但成立的原因不是入场变准了： |
+| 2026-09-17 | [`p1_spike_v1_v9_asset_trim_20260917.md`](p1_spike_v1_v9_asset_trim_20260917.md) | SPIKE V1 / V9：剔除盈利最高与最低的币种后还剩什么 |  |
+| 2026-09-17 | [`p1_spike_v9_later_year_attribution_20260917.md`](p1_spike_v9_later_year_attribution_20260917.md) | V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m |  |
 | 2026-09-16 | [`p1_owner_manual_order_card_20260916.md`](p1_owner_manual_order_card_20260916.md) | 人工开单卡 · 均线密集启动 |  |
 | 2026-09-16 | [`p1_owner_manual_trading_system_20260916.md`](p1_owner_manual_trading_system_20260916.md) | 人工交易手册：均线密集、V9与YOLO怎样一起用 |  |
 | 2026-09-15 | [`p1_goal_martingale_path_20260915.md`](p1_goal_martingale_path_20260915.md) | 倍投可行路径搜索 · 第 1 轮：前提检验 | 1. **ETH × V8 在 3m/15m/30m/60m/240m 全都没有可信的毛 edge。** 10 个格子的毛 R |
@@ -537,6 +543,7 @@
 | — | [`p1_spike_v8_noise_filter_20260913.md`](p1_spike_v8_noise_filter_20260913.md) | SPIKE V8：V7 全量信号降噪与冻结规则回放 | V7 共 **132,593 条确认事件**，其中 **107,238 条形成串行交易**，另有 **25,355 条**因同一交易流已有持仓而没有成为新交易。冻结的 V8 门槛保留 **113,295 条确认**、形成 **95,191 条交易，信号总量减少 14.55%**。 |
 | — | [`p1_spike_v8_total2_1h_native_20260914.md`](p1_spike_v8_total2_1h_native_20260914.md) | V8 × TOTAL2 1H：TradingView 原生回测 |  |
 | — | [`p1_spike_v9_asset_exclusions_20260915.md`](p1_spike_v9_asset_exclusions_20260915.md) | 按币种成绩排除：V9 三个固定条件 | 完整账本保留每笔原先的同流、同方向、同时间块、同波动桶随机控制。整币删除时只保留同一实际事件原绑定的控制，没有重抽；只有两边均可评分且符合原时间边界的配对进入统计。全期事后选择也会污染筛选后的控制检验，不将其中较小的 p 值用作筛币验收。 |
+| — | [`p1_trendline_v2_tbsl_20260918.md`](p1_trendline_v2_tbsl_20260918.md) | 下降趋势线突破 V2 · 止盈止损网格与多周期回测 | 三个周期全部未通过事前三条标准。没有一组止盈止损参数值得拿去消耗 holdout。 |
 | — | [`p1_useless_multiscale_launch_20260909.md`](p1_useless_multiscale_launch_20260909.md) | SPIKE · USELESS 多周期启动复盘与超级趋势原型 |  |
 | — | [`p1_yolo_owner_annotation_audit_20260908.md`](p1_yolo_owner_annotation_audit_20260908.md) | 你已调整的 72 张图：怎样标平台、怎样看后续 150 根 |  |
 | — | [`p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md`](p2_local_signal_v2_positive_semantic_audit_owner_result_20260812.md) | Local Signal V2 语义审核结果：Positive基本成立，连续判别边界失败 |  |
@@ -652,6 +659,7 @@
 - [`p0_spike_v1_okx_133_review_20260911.md`](p0_spike_v1_okx_133_review_20260911.md) — SPIKE Burst V1 · OKX 133 笔逐笔图册（2026-09-11）
 - [`p0_spike_v1_plus_evidence_20260912.md`](p0_spike_v1_plus_evidence_20260912.md) — SPIKE V1 加强版：先纠正回测口径，再验证退出与过热过滤
 - [`p0_spike_v1_plus_implementation_20260912.md`](p0_spike_v1_plus_implementation_20260912.md) — SPIKE 强劲爆发 V1+：保护与因果参考实现（2026-09-12）
+- [`p0_spike_v9_card_performance_20260917.md`](p0_spike_v9_card_performance_20260917.md) — V9 信号卡片接上持仓跟踪：R 与胜率不再是破折号
 - [`p0_spike_yolo_monitor_20260908.md`](p0_spike_yolo_monitor_20260908.md) — spike：指标启动后 YOLO 确认已接入
 - [`p0_tv_release_4h_logic_20260914.md`](p0_tv_release_4h_logic_20260914.md) — release-20260201-回放样式：ETH 4H 逻辑与回测口径核对
 - [`p0_two_key_candle_ma_retest_deep_dive_20260904.md`](p0_two_key_candle_ma_retest_deep_dive_20260904.md) — P0 — 两根关键 K 线 + SMA40 回踩：55 维因果拆解与盈利性证伪（2026-09-04）
@@ -861,6 +869,9 @@
 - [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) — SPIKE 市场广度：冻结候选的匹配随机对照整合报告
 - [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) — SPIKE V7／V8 五条降噪路线：执行与验收报告
 - [`p1_spike_pepe_owner_notes_20260910.md`](p1_spike_pepe_owner_notes_20260910.md) — PEPE 4H：Owner 批注与 V4 确认含义核对
+- [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
+- [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
+- [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
 - [`p1_spike_v1_eth_stops_20260911.md`](p1_spike_v1_eth_stops_20260911.md) — ETH-USDT-SWAP：原版 SPIKE Burst V1 / V6 的止损敏感性
 - [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) — SPIKE V1+ 完整默认配置：两年回测
 - [`p1_spike_v1_replay_ledger_link_20260911.md`](p1_spike_v1_replay_ledger_link_20260911.md) — SPIKE V1 回放记录与 v2 覆盖账本逐笔关联
@@ -869,6 +880,7 @@
 - [`p1_spike_v1_v8_asset_ranking_20260914.md`](p1_spike_v1_v8_asset_ranking_20260914.md) — V1与V8：币种收益榜、赢家特征与差币排除检验
 - [`p1_spike_v1_v8_be05_20260914.md`](p1_spike_v1_v8_be05_20260914.md) — V1 / V8：浮盈触及 0.5R 后推开仓价，效果如何
 - [`p1_spike_v1_v8_tier_lock_20260914.md`](p1_spike_v1_v8_tier_lock_20260914.md) — V1 / V8：0.5R保本＋1.5R锁0.5R，三组对照
+- [`p1_spike_v1_v9_asset_trim_20260917.md`](p1_spike_v1_v9_asset_trim_20260917.md) — SPIKE V1 / V9：剔除盈利最高与最低的币种后还剩什么
 - [`p1_spike_v3_confirmation_gate_20260910.md`](p1_spike_v3_confirmation_gate_20260910.md) — SPIKE V3：确认之后再抑制重复预警
 - [`p1_spike_v3_density_rearm_20260910.md`](p1_spike_v3_density_rearm_20260910.md) — SPIKE G：提示减少了，但丢掉了太多及时启动
 - [`p1_spike_v3_focus_20260910.md`](p1_spike_v3_focus_20260910.md) — SPIKE：减少提示之后，真正的启动还留住了吗
@@ -911,7 +923,9 @@
 - [`p1_spike_v9_eth_lowtf_20260915.md`](p1_spike_v9_eth_lowtf_20260915.md) — ETH V9 · 3m / 5m 完整历史回测
 - [`p1_spike_v9_full_backtest_20260915.md`](p1_spike_v9_full_backtest_20260915.md) — SPIKE V9 全量回测：优于 V8，但后一年仍亏损
 - [`p1_spike_v9_implementation_20260915.md`](p1_spike_v9_implementation_20260915.md) — SPIKE V9：标的、量比与 UTC 周日过滤已实现
+- [`p1_spike_v9_later_year_attribution_20260917.md`](p1_spike_v9_later_year_attribution_20260917.md) — V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m
 - [`p1_spike_v9_v1_comparison_20260915.md`](p1_spike_v9_v1_comparison_20260915.md) — SPIKE V9 与 V1：已有全量结果对读
+- [`p1_trendline_v2_tbsl_20260918.md`](p1_trendline_v2_tbsl_20260918.md) — 下降趋势线突破 V2 · 止盈止损网格与多周期回测
 - [`p1_useless_multiscale_launch_20260909.md`](p1_useless_multiscale_launch_20260909.md) — SPIKE · USELESS 多周期启动复盘与超级趋势原型
 - [`p1_yolo_dataset_consolidation_20260908.md`](p1_yolo_dataset_consolidation_20260908.md) — 最新模型1043事件已带原训练框进入人工审核
 - [`p1_yolo_historical_inventory_20260908.md`](p1_yolo_historical_inventory_20260908.md) — 旧2513题已建处置清单，继续优先审核最新1043题
