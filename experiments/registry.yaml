@@ -9692,3 +9692,17 @@ experiments:
     canonical_report: analysis/p1_spike_v10_long_break7_20260918.md
     artifacts: []
     notes: Same truncation as the withdrawn V10 - no bar opening at or after 2026-05-04 is read - and each stream's V9 arm reproduced all 61530 closed published V9 trades. Not a blind test - the withdrawn V10 had already split these months by direction and its long side was negative in the later period, and the plan committed before the run said it expected a fail. The Pine at yoyo/evaluation/pine/spike_burst_v10.pine was replaced with this definition and has not been compiled on TradingView.
+
+  - experiment_id: exp-spike-v10-4-joint-multitf-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: Does going long only on the owner's SPIKE V10.4 joint signal (V9 long confirmation and a dual-track three-point descending-line break within 6 bars, either order) make money on 5m, 15m, 30m, 1h, 4h and 1d, and does it beat plain V9 longs and matched random entries?
+    single_variable: Entry set only - joint events versus every V9 long, same published V9 fixed-entry exit, 0.2 percent round trip, one position per stream. Indicator parameters are the owner's Pine defaults; no search.
+    result: pending
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v10_4_joint_multitf_20260918.md
+    artifacts: []
+    notes: Binance USD-M official 5m archive (638 listed perpetuals, ends 2026-04-30), every timeframe aggregated from the same 5m rows; window 2024-09-10..2026-05-01 split at 2025-09-10, same as published V9/V10. Not blind for 30m/1h/4h - V9/V10 already split these months.

@@ -1,0 +1,21 @@
+{
+  "schema": "spike-v10.4-joint-multitf-v1",
+  "strategy_version": "spike-v10.4-joint-20260918-v1",
+  "parent_version": "spike-v9-entry-bundle-20260915-v1",
+  "source": "data/kline_preholdout_binance_um5m/series (Binance USD-M official monthly 5m archive)",
+  "expected_symbols": 638,
+  "timeframes": ["5m", "15m", "30m", "1h", "4h", "1d"],
+  "evaluation_start_signal_close": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "data_end_exclusive": "2026-05-01T00:00:00Z",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "holdout_consumption": 0,
+  "warmup_bars": 1500,
+  "round_trip_cost": 0.002,
+  "arms": ["joint", "v9_long"],
+  "control_seed": 91918,
+  "vol_bins": [0.005, 0.01, 0.02, 0.05, 0.1],
+  "parameter_search": false,
+  "training_eligible": false,
+  "production_eligible": false
+}
