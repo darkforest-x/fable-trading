@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **559** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **560** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -15,6 +15,7 @@
 | 2026-09-18 | [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) | SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近 |  |
 | 2026-09-18 | [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) | SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差 |  |
 | 2026-09-18 | [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) | SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负 |  |
+| 2026-09-18 | [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) | SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱 |  |
 | 2026-09-17 | [`p0_spike_v9_card_performance_20260917.md`](p0_spike_v9_card_performance_20260917.md) | V9 信号卡片接上持仓跟踪：R 与胜率不再是破折号 | 病因不是前端没接好，是后端从来没生产过前端要的那个对象。** 前端 `performanceView()` 早就会渲染 |
 | 2026-09-17 | [`p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md`](p1_chartart_bbrsi_v12_longonly_btceth_15m_20260917.md) | ChartArt BB+RSI v1.2 只做多：BTC / ETH USDT 永续 15m 预 holdout 回测 | 作者在 v1.2 里写的"改成只做多后回测更成功"，在 BTC/ETH 的长窗口上**确实成立**，但成立的原因不是入场变准了： |
 | 2026-09-17 | [`p1_spike_v1_v9_asset_trim_20260917.md`](p1_spike_v1_v9_asset_trim_20260917.md) | SPIKE V1 / V9：剔除盈利最高与最低的币种后还剩什么 |  |
@@ -876,6 +877,7 @@
 - [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
 - [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
 - [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
+- [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
 - [`p1_spike_v1_eth_stops_20260911.md`](p1_spike_v1_eth_stops_20260911.md) — ETH-USDT-SWAP：原版 SPIKE Burst V1 / V6 的止损敏感性
 - [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) — SPIKE V1+ 完整默认配置：两年回测
 - [`p1_spike_v1_replay_ledger_link_20260911.md`](p1_spike_v1_replay_ledger_link_20260911.md) — SPIKE V1 回放记录与 v2 覆盖账本逐笔关联

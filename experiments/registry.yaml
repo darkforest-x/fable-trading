@@ -9720,3 +9720,17 @@ experiments:
     canonical_report: analysis/p1_spike_v10_4_1h_increment_20260918.md
     artifacts: []
     notes: Not blind - the same 20 months of 1h joint and V9 ledgers had been read in the six-timeframe and 1h detail reports, and 1h itself was singled out from six timeframes. TradingView consistency not verified. A record-only trace hook was added to the port; a test and a per-stream assertion show it changes no event. The V9 engine's data-gap differences from Pine affect zero 1h events (no raw signal inside any of the eight 24-bar gap windows). Errata on the 1h detail report - the top-1 percent cut removed 14 trades, not 15; paired excess uses 1473 matched pairs. Realized-balance cashbook replay is extremely path dependent and is not an account validation; mark-to-market account replay not done. Not pushed.
+
+  - experiment_id: exp-spike-v11-mtf-joint-20260918-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ed8fdd9a57
+    status: rejected
+    question: Does SPIKE V11 - a chart SPIKE paired with either the chart's own descending-line break or the next higher timeframe's break (15m reads 1h, 1h reads 4h) - make money long only, and does it beat V10.4 and plain V9 longs?
+    single_variable: Entry set only - the higher-timeframe break is added as a second source for the V10.4 pairing (same 6-bar window, second-bar gates and one-use SPIKE). Four arms on identical data, exit and cost - v9_long, v10_4, v11_htf_only, v11_both.
+    result: NOT PASSED on 15m or 1h. V11 both-sources per trade 15m -0.048R (V10.4 -0.056R), later -0.254R; 1h +0.062R (V10.4 +0.088R), later -0.126R (V10.4 -0.077R). V11 minus V10.4 per trade 15m +0.008 [-0.021, +0.041], 1h -0.026 [-0.071, +0.034]. The added higher-timeframe pairs are about 13-14 percent of V11 signals; earlier segment +0.27R (15m) and +0.21R (1h) per trade, later segment -0.29R and -0.42R, the weakest group in both timeframes. 1h excess over matched random drops from +0.244 (p 0.009) to +0.123 (p 0.113).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v11_mtf_joint_20260918.md
+    artifacts: []
+    notes: The v10_4 and v9_long arms reproduce the six-timeframe ledgers trade for trade (15m and 1h, 0 differences). A higher break is used only from the first chart bar opening at the higher bar's close (Pine request.security f[1] with lookahead_on). V11 Pine not compiled on TradingView; its display text was relabeled after the run (突破+spike（上级突破）), logic unchanged. Owner's HYPE 2026-09-17 example lies in the holdout period and was not checked. Not blind; plan said expected to fail. Not pushed.

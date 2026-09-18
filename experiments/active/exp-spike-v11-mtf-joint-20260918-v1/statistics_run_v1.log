@@ -1,0 +1,106 @@
+
+== reproduction ==
+timeframe     arm  original  rerun  only_original  only_rerun  field_differences
+      15m   v10_4      4711   4711              0           0                  0
+      15m v9_long     23223  23223              0           0                  0
+       1h   v10_4      1476   1476              0           0                  0
+       1h v9_long      6565   6565              0           0                  0
+
+== main_table ==
+timeframe          arm                label  period  signals  trades_taken  closed  censored_boundary  censored_gap  skipped_in_position  risk_invalid  no_next_bar  win_rate  mean_gross_r  mean_net_r  mean_net_bp     pf  total_net_r  event_drawdown_r  median_hold_h  concurrent_median  concurrent_max  random_mean_r  excess_vs_random_r  p_vs_random
+      15m      v9_long                V9 多头    full    26939         23223   23205                 18             0                 3716             0            0    0.2852        0.0097     -0.0999     -22.1669 0.8626   -2317.9228         2969.0776         8.7500            26.0000             232        -0.1480              0.0487       0.2064
+      15m      v9_long                V9 多头 earlier    14354         12351   12348                  3             0                 2003             0            0    0.3217        0.1244      0.0178      -4.9332 1.0259     220.0644         1341.9369         9.5000            23.0000             232        -0.1220              0.1401       0.0625
+      15m      v9_long                V9 多头   later    12585         10872   10857                 15             0                 1713             0            0    0.2436       -0.1207     -0.2338     -41.7674 0.6972   -2537.9872         2586.2305         8.2500            25.0000             171        -0.1777             -0.0556       0.7586
+      15m        v10_4 V10.4 突破+spike（本周期线）    full     4867          4711    4708                  3             0                  156             0            0    0.3076        0.0522     -0.0560     -10.0296 0.9207    -263.4763          670.9584         9.2500             7.0000              91        -0.1764              0.1203       0.0450
+      15m        v10_4 V10.4 突破+spike（本周期线） earlier     2593          2501    2501                  0             0                   92             0            0    0.3551        0.2218      0.1160      23.2673 1.1770     290.0107          321.5235        10.7500             6.0000              91        -0.1836              0.2996       0.0035
+      15m        v10_4 V10.4 突破+spike（本周期线）   later     2274          2210    2207                  3             0                   64             0            0    0.2537       -0.1401     -0.2508     -47.7621 0.6715    -553.4870          609.7922         8.2500             7.0000              49        -0.1681             -0.0832       0.9395
+      15m v11_htf_only     突破+spike（上级突破）单独    full     1171          1149    1148                  1             0                   22             0            0    0.3084        0.1050     -0.0377      -7.8446 0.9494     -43.2984          166.9338         7.2500             2.0000              34        -0.1538              0.1161       0.1584
+      15m v11_htf_only     突破+spike（上级突破）单独 earlier      640           627     627                  0             0                   13             0            0    0.3604        0.2679      0.1273      16.2627 1.1854      79.8284           86.9126         8.5000             2.0000              34        -0.1078              0.2351       0.0655
+      15m v11_htf_only     突破+spike（上级突破）单独   later      531           522     521                  1             0                    9             0            0    0.2457       -0.0910     -0.2363     -36.8568 0.7101    -123.1268          138.1730         6.0000             2.0000              20        -0.2092             -0.0271       0.5987
+      15m     v11_both   V11 突破+spike（两种合并）    full     5607          5401    5398                  3             0                  206             0            0    0.3068        0.0646     -0.0479      -8.4710 0.9327    -258.6011          760.8067         9.0000             7.0000             103        -0.1133              0.0664       0.1549
+      15m     v11_both   V11 突破+spike（两种合并） earlier     2988          2870    2870                  0             0                  118             0            0    0.3568        0.2444      0.1339      25.5746 1.2039     384.2743          337.8010        10.7500             7.0000             103        -0.0209              0.1548       0.0955
+      15m     v11_both   V11 突破+spike（两种合并）   later     2619          2531    2528                  3             0                   88             0            0    0.2500       -0.1394     -0.2543     -47.1225 0.6713    -642.8754          691.4455         8.0000             8.0000              53        -0.2184             -0.0343       0.6967
+       1h      v9_long                V9 多头    full     7757          6565    6551                 14             0                 1192             0            0    0.2972        0.0507     -0.0051     -34.3070 0.9924     -33.5884          707.8660        40.0000            24.0000             212        -0.0850              0.0816       0.1394
+       1h      v9_long                V9 多头 earlier     4332          3625    3625                  0             0                  707             0            0    0.3327        0.1744      0.1193      -3.6254 1.1879     432.3934          527.0412        46.0000            22.0000             212         0.0016              0.1180       0.2029
+       1h      v9_long                V9 多头   later     3425          2940    2926                 14             0                  485             0            0    0.2532       -0.1025     -0.1593     -72.3182 0.7779    -465.9818          709.6102        33.0000            27.0000             160        -0.1933              0.0360       0.2314
+       1h        v10_4 V10.4 突破+spike（本周期线）    full     1528          1476    1476                  0             0                   52             0            0    0.3279        0.1442      0.0878      17.6688 1.1353     129.5986          197.7246        41.0000             9.0000              57        -0.1550              0.2436       0.0090
+       1h        v10_4 V10.4 突破+spike（本周期线） earlier      772           747     747                  0             0                   25             0            0    0.3949        0.3061      0.2490      72.4565 1.4255     185.9783           93.0940        48.0000             7.0000              57        -0.0615              0.3105       0.0815
+       1h        v10_4 V10.4 突破+spike（本周期线）   later      756           729     729                  0             0                   27             0            0    0.2593       -0.0217     -0.0773     -38.4716 0.8917     -56.3797          197.7246        35.0000            10.0000              46        -0.2511              0.1748       0.0325
+       1h v11_htf_only     突破+spike（上级突破）单独    full      345           341     341                  0             0                    4             0            0    0.2874        0.0234     -0.0497       1.0967 0.9313     -16.9422           73.6317        32.0000             2.0000              26        -0.0712              0.0174       0.4703
+       1h v11_htf_only     突破+spike（上级突破）单独 earlier      171           169     169                  0             0                    2             0            0    0.3491        0.3106      0.2366      87.0161 1.3680      39.9814           31.8567        38.0000             2.0000              26        -0.1175              0.3541       0.0855
+       1h v11_htf_only     突破+spike（上级突破）单独   later      174           172     172                  0             0                    2             0            0    0.2267       -0.2588     -0.3310     -83.3241 0.5870     -56.9236           73.6317        28.0000             3.0000              18        -0.0252             -0.3173       0.6897
+       1h     v11_both   V11 突破+spike（两种合并）    full     1744          1678    1678                  0             0                   66             0            0    0.3206        0.1207      0.0622      13.6111 1.0941     104.3993          251.5743        40.0000             9.0000              69        -0.0571              0.1234       0.1129
+       1h     v11_both   V11 突破+spike（两种合并） earlier      877           843     843                  0             0                   34             0            0    0.3903        0.3076      0.2485      74.2881 1.4211     209.5066          110.2332        46.0000             7.0000              69         0.0279              0.2207       0.1134
+       1h     v11_both   V11 突破+spike（两种合并）   later      867           835     835                  0             0                   32             0            0    0.2503       -0.0680     -0.1259     -47.6473 0.8282    -105.1073          251.5743        34.0000            10.0000              47        -0.1441              0.0238       0.4073
+
+== verdict ==
+timeframe          arm  full_mean_positive  later_mean_positive  excess_positive  p_below_0_01  passed
+      15m     v11_both               False                False             True         False   False
+      15m v11_htf_only               False                False             True         False   False
+       1h     v11_both                True                False             True         False   False
+       1h v11_htf_only               False                False             True         False   False
+
+== differences ==
+timeframe                compare  period  months  valid_reps  a_closed  c_closed  a_mean_r  c_mean_r  diff_mean_r  ci95_low  ci95_high  a_total_r  c_total_r
+      15m       v11_both − v10_4    full      20        2000      4708      5398   -0.0560   -0.0479       0.0081   -0.0211     0.0414  -263.4763  -258.6011
+      15m       v11_both − v10_4 earlier      13        2000      2501      2870    0.1160    0.1339       0.0179   -0.0190     0.0649   290.0107   384.2743
+      15m       v11_both − v10_4   later       8        2000      2207      2528   -0.2508   -0.2543      -0.0035   -0.0427     0.0455  -553.4870  -642.8754
+      15m     v11_both − v9_long    full      20        2000     23205      5398   -0.0999   -0.0479       0.0520   -0.0160     0.1301 -2317.9228  -258.6011
+      15m     v11_both − v9_long earlier      13        2000     12348      2870    0.0178    0.1339       0.1161    0.0238     0.2096   220.0644   384.2743
+      15m     v11_both − v9_long   later       8        2000     10857      2528   -0.2338   -0.2543      -0.0205   -0.0887     0.0420 -2537.9872  -642.8754
+      15m v11_htf_only − v9_long    full      20        2000     23205      1148   -0.0999   -0.0377       0.0622   -0.1133     0.2303 -2317.9228   -43.2984
+      15m v11_htf_only − v9_long earlier      13        2000     12348       627    0.0178    0.1273       0.1095   -0.1112     0.3221   220.0644    79.8284
+      15m v11_htf_only − v9_long   later       8        2000     10857       521   -0.2338   -0.2363      -0.0026   -0.2690     0.2467 -2537.9872  -123.1268
+       1h       v11_both − v10_4    full      20        2000      1476      1678    0.0878    0.0622      -0.0256   -0.0709     0.0337   129.5986   104.3993
+       1h       v11_both − v10_4 earlier      13        2000       747       843    0.2490    0.2485      -0.0004   -0.0619     0.0887   185.9783   209.5066
+       1h       v11_both − v10_4   later       8        2000       729       835   -0.0773   -0.1259      -0.0485   -0.1034     0.0259   -56.3797  -105.1073
+       1h     v11_both − v9_long    full      20        2000      6551      1678   -0.0051    0.0622       0.0673   -0.0413     0.1715   -33.5884   104.3993
+       1h     v11_both − v9_long earlier      13        2000      3625       843    0.1193    0.2485       0.1292   -0.0265     0.2866   432.3934   209.5066
+       1h     v11_both − v9_long   later       8        2000      2926       835   -0.1593   -0.1259       0.0334   -0.1079     0.1589  -465.9818  -105.1073
+       1h v11_htf_only − v9_long    full      20        2000      6551       341   -0.0051   -0.0497      -0.0446   -0.2183     0.2492   -33.5884   -16.9422
+       1h v11_htf_only − v9_long earlier      13        2000      3625       169    0.1193    0.2366       0.1173   -0.2006     0.5430   432.3934    39.9814
+       1h v11_htf_only − v9_long   later       8        2000      2926       172   -0.1593   -0.3310      -0.1717   -0.3097     0.1689  -465.9818   -56.9236
+
+== by_source ==
+timeframe          arm source joint_order  period  closed  mean_net_r  total_net_r
+      15m     v11_both  chart break_first earlier    1118      0.0266      29.7413
+      15m     v11_both  chart break_first   later    1035     -0.2492    -257.9017
+      15m     v11_both  chart    same_bar earlier     833      0.2002     166.7922
+      15m     v11_both  chart    same_bar   later     721     -0.2524    -181.9680
+      15m     v11_both  chart spike_first earlier     533      0.1602      85.3842
+      15m     v11_both  chart spike_first   later     437     -0.2400    -104.8938
+      15m     v11_both    htf break_first earlier      83     -0.0243      -2.0137
+      15m     v11_both    htf break_first   later     100     -0.3742     -37.4152
+      15m     v11_both    htf    same_bar earlier      32      0.9581      30.6585
+      15m     v11_both    htf    same_bar   later      23     -0.2988      -6.8715
+      15m     v11_both    htf spike_first earlier     271      0.2720      73.7118
+      15m     v11_both    htf spike_first   later     212     -0.2539     -53.8252
+      15m v11_htf_only    htf break_first earlier     118      0.2234      26.3622
+      15m v11_htf_only    htf break_first   later     129     -0.4633     -59.7669
+      15m v11_htf_only    htf    same_bar earlier      53      0.5078      26.9123
+      15m v11_htf_only    htf    same_bar   later      32     -0.0353      -1.1296
+      15m v11_htf_only    htf spike_first earlier     456      0.0582      26.5539
+      15m v11_htf_only    htf spike_first   later     360     -0.1729     -62.2302
+       1h     v11_both  chart break_first earlier     335      0.3989     133.6356
+       1h     v11_both  chart break_first   later     353     -0.0449     -15.8412
+       1h     v11_both  chart    same_bar earlier     254      0.0804      20.4170
+       1h     v11_both  chart    same_bar   later     240     -0.1248     -29.9567
+       1h     v11_both  chart spike_first earlier     155      0.2228      34.5317
+       1h     v11_both  chart spike_first   later     132     -0.1011     -13.3414
+       1h     v11_both    htf break_first earlier      31      0.2058       6.3783
+       1h     v11_both    htf break_first   later      38     -0.0979      -3.7193
+       1h     v11_both    htf    same_bar earlier       8      1.2552      10.0414
+       1h     v11_both    htf    same_bar   later       6     -0.3699      -2.2192
+       1h     v11_both    htf spike_first earlier      60      0.0750       4.5025
+       1h     v11_both    htf spike_first   later      66     -0.6065     -40.0295
+       1h v11_htf_only    htf break_first earlier      41      0.0960       3.9343
+       1h v11_htf_only    htf break_first   later      52     -0.1467      -7.6304
+       1h v11_htf_only    htf    same_bar earlier      10      1.2825      12.8252
+       1h v11_htf_only    htf    same_bar   later       8     -0.4444      -3.5553
+       1h v11_htf_only    htf spike_first earlier     118      0.1968      23.2219
+       1h v11_htf_only    htf spike_first   later     112     -0.4084     -45.7379
+
+== coverage ==
+timeframe  htf_breaks_total  htf_breaks_visible  htf_breaks_visible_in_window  v10_4_joint_events_differ_in_both  n_v9_long  n_v10_4  n_v11_htf_only  n_v11_both  both_chart  both_htf
+      15m             24953               23942                         23307                                 21      26939     4867            1171        5607        4846       761
+       1h              7002                6495                          6178                                  7       7757     1528             345        1744        1521       223

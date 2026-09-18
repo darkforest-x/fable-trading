@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱</h1>
+<p>2026-09-18 · 15m 看 1h 突破、1h 看 4h 突破 · Binance 638 个永续 · <strong>holdout 消耗 0</strong> · 未 push</p>
+<p><strong>结论一句话：未通过，而且 V11 没有比 V10.4 更好。</strong> 15m：V11 每笔 −0.048R（V10.4 −0.056R），后段 −0.254R；1h：V11 每笔 +0.062R（V10.4 +0.088R），后段 −0.126R（V10.4 −0.077R）。 V11 − V10.4 的每笔差：15m +0.008R [−0.021, +0.041]，1h −0.026R [−0.071, +0.034]，都在 0 附近。 新加进来的「突破+spike（上级突破）」前段每笔还行（15m +0.27R、1h +0.21R），<strong>后段最差</strong>（15m −0.29R、1h −0.42R），不是最强信号。</p>
+<h2>1. 规则</h2>
+<ul>
+<li><strong>突破+spike（上级突破）</strong> = 本图（15m）自己出了 V9 多头确认（SPIKE），同时上级（1h）下降线收盘突破； 两者间隔 ≤6 根本图 K，第二个事件当根要过和 V10.4 一样的检查（六线之上、动量、BB/标的/量比/时段、离六线 ≤3ATR、站上启动区间）。 本图没有自己的 SPIKE 时，上级突破只是提示，不算信号。一个 SPIKE 只算一次（本周期线和上级线共用）。</li>
+<li><strong>时间</strong>：上级 K 收盘后才算突破——1h 的 19:00 那根要到 20:00 收盘后，15m 从 20:00 那根开始才看得见，不回填。</li>
+<li>上级周期找线规则与本周期相同（参数全默认）；已突破的线立即退出上级候选池。</li>
+<li>出场、成本、每币一笔与 V10.4 回测完全相同（次根开盘入场、5 根低点/2ATR 止损、2R 后 4ATR 追踪、V9 空头确认平仓、往返 0.2%）。</li>
+</ul>
+<h2>2. 数据与复现</h2>
+<ul>
+<li>数据：本地 Binance 5m 档案 638 个永续，15m/1h/4h 都由同一份 5m 聚合；信号收盘 2024-09-10 → 2026-05-01，后段从 2025-09-10 起。 批量前检查所有文件没有 2026-05-01 之后的行；holdout 未读。<strong>你截图里的 HYPE 2026-09-17 在 holdout 期内，本地没有，这次核对不了。</strong></li>
+<li><strong>复现核对</strong>：同一次运行里的 V10.4 与 V9 多头两臂，和六周期报告的原账本逐笔比对（15m 4,711 + 23,223 笔、1h 1,476 + 6,565 笔），<strong>0 差异</strong>。</li>
+<li>上级突破数量：15m 这边能看到的 1h 突破 23,307 次、1h 这边的 4h 突破 6,178 次（窗口内）。</li>
+</ul>
+<h2>3. 主表（每笔净 R；随机 = 同币同月同波动随机做多，同出场同成本）</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>臂</th>
+<th>段</th>
+<th>已平仓</th>
+<th>胜率</th>
+<th>每笔净R</th>
+<th>PF</th>
+<th>总净R</th>
+<th>事件回撤R</th>
+<th>随机均值</th>
+<th>比随机多</th>
+<th>p</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>V9 多头</td><td>全期</td><td>23,205</td><td>28.5%</td><td>−0.100</td><td>0.863</td><td>−2,317.9</td><td>2,969</td><td>−0.148</td><td>+0.049</td><td>0.206</td></tr>
+<tr><td>15m</td><td>V10.4 突破+spike</td><td>全期</td><td>4,708</td><td>30.8%</td><td>−0.056</td><td>0.921</td><td>−263.5</td><td>671</td><td>−0.176</td><td>+0.120</td><td>0.045</td></tr>
+<tr><td>15m</td><td>只用（上级突破）</td><td>全期</td><td>1,148</td><td>30.8%</td><td>−0.038</td><td>0.949</td><td>−43.3</td><td>167</td><td>−0.154</td><td>+0.116</td><td>0.158</td></tr>
+<tr><td>15m</td><td><strong>V11（两种合并）</strong></td><td>全期</td><td>5,398</td><td>30.7%</td><td><strong>−0.048</strong></td><td>0.933</td><td>−258.6</td><td>761</td><td>−0.113</td><td>+0.066</td><td>0.155</td></tr>
+<tr><td>15m</td><td>V11</td><td>前段</td><td>2,870</td><td>35.7%</td><td>+0.134</td><td>1.204</td><td>+384.3</td><td>338</td><td>−0.021</td><td>+0.155</td><td>0.096</td></tr>
+<tr><td>15m</td><td>V11</td><td><strong>后段</strong></td><td>2,528</td><td>25.0%</td><td><strong>−0.254</strong></td><td>0.671</td><td>−642.9</td><td>691</td><td>−0.218</td><td>−0.034</td><td>0.697</td></tr>
+<tr><td>1h</td><td>V9 多头</td><td>全期</td><td>6,551</td><td>29.7%</td><td>−0.005</td><td>0.992</td><td>−33.6</td><td>708</td><td>−0.085</td><td>+0.082</td><td>0.139</td></tr>
+<tr><td>1h</td><td>V10.4 突破+spike</td><td>全期</td><td>1,476</td><td>32.8%</td><td>+0.088</td><td>1.135</td><td>+129.6</td><td>198</td><td>−0.155</td><td>+0.244</td><td>0.009</td></tr>
+<tr><td>1h</td><td>只用（上级突破）</td><td>全期</td><td>341</td><td>28.7%</td><td>−0.050</td><td>0.931</td><td>−16.9</td><td>74</td><td>−0.071</td><td>+0.017</td><td>0.470</td></tr>
+<tr><td>1h</td><td><strong>V11（两种合并）</strong></td><td>全期</td><td>1,678</td><td>32.1%</td><td><strong>+0.062</strong></td><td>1.094</td><td>+104.4</td><td>252</td><td>−0.057</td><td>+0.123</td><td>0.113</td></tr>
+<tr><td>1h</td><td>V11</td><td>前段</td><td>843</td><td>39.0%</td><td>+0.249</td><td>1.421</td><td>+209.5</td><td>110</td><td>+0.028</td><td>+0.221</td><td>0.113</td></tr>
+<tr><td>1h</td><td>V11</td><td><strong>后段</strong></td><td>835</td><td>25.0%</td><td><strong>−0.126</strong></td><td>0.828</td><td>−105.1</td><td>252</td><td>−0.144</td><td>+0.024</td><td>0.407</td></tr>
+</tbody></table>
+<p><strong>判定</strong>（全期与后段每笔 &gt; 0、比随机多 &gt; 0 且 p &lt; 0.01）：15m、1h 的 V11 和「只用上级突破」<strong>全部未通过</strong>。</p>
+<h2>4. V11 比 V10.4 / V9 多了什么（月份整块重抽样 95% 区间，描述性）</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>比较</th>
+<th>全期每笔差</th>
+<th>区间</th>
+<th>后段每笔差</th>
+<th>区间</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>V11 − V10.4</td><td>+0.008</td><td>[−0.021, +0.041]</td><td>−0.004</td><td>[−0.043, +0.046]</td></tr>
+<tr><td>15m</td><td>V11 − V9 多头</td><td>+0.052</td><td>[−0.016, +0.130]</td><td>−0.021</td><td>[−0.089, +0.042]</td></tr>
+<tr><td>1h</td><td>V11 − V10.4</td><td>−0.026</td><td>[−0.071, +0.034]</td><td>−0.049</td><td>[−0.103, +0.026]</td></tr>
+<tr><td>1h</td><td>V11 − V9 多头</td><td>+0.067</td><td>[−0.041, +0.172]</td><td>+0.033</td><td>[−0.108, +0.159]</td></tr>
+</tbody></table>
+<h2>5. 「突破+spike（上级突破）」本身怎么样（V11 合并臂里按来源拆）</h2>
+<table><thead><tr>
+<th>周期</th>
+<th>来源</th>
+<th>前段 笔数 / 每笔R</th>
+<th>后段 笔数 / 每笔R</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>本周期线</td><td>2,484 / +0.113</td><td>2,193 / −0.248</td></tr>
+<tr><td>15m</td><td><strong>上级突破</strong></td><td>386 / +0.265</td><td>335 / <strong>−0.293</strong></td></tr>
+<tr><td>1h</td><td>本周期线</td><td>744 / +0.253</td><td>725 / −0.082</td></tr>
+<tr><td>1h</td><td><strong>上级突破</strong></td><td>99 / +0.211</td><td>110 / <strong>−0.418</strong></td></tr>
+</tbody></table>
+<p>上级突破那一类只占 V11 信号的约 13%–14%（15m 761/5,607、1h 223/1,744）。前段它和本周期那一类差不多甚至略好， 后段两个周期都是最差的——数据<strong>不支持</strong>把它当「最强信号」。1h 后段「先 SPIKE 后等 4h 收盘突破」那一组 66 笔每笔 −0.61R， 等 4h 收盘确认的这段时间里，价格往往已经冲过头。</p>
+<h2>6. 解读</h2>
+<ul>
+<li>上级突破给 15m/1h 各多出约 13%–14% 的联合信号，它们和原来的联合一样<strong>跟着大盘走</strong>：前段赚、后段亏，择时上没有更好。</li>
+<li>1h 上 V11 比 V10.4 略差，是因为新增的（上级突破）那类后段亏得多，把原来 1h 的「比随机好」冲淡了（p 从 0.009 变成 0.113）。</li>
+<li>必报项里的 AUC / top-decile 不适用（无模型打分）；对照 = 匹配随机做多 + V9 多头 + V10.4 同引擎基线。</li>
+</ul>
+<h2>7. 风险与诚实声明</h2>
+<ul>
+<li>Python 复刻的是 V11 Pine 的逻辑，<strong>Pine 还没在 TV 上编译</strong>，TV 一致性未验证；相等高点用两侧严格口径。</li>
+<li>这 20 个月的 15m/1h 已经被 V9/V10/V10.4 反复看过，<strong>不是盲测</strong>；事前计划写了「预期不通过」。</li>
+<li>币池有幸存者偏差；滑点、资金费率未建模；各币叠加的总 R 不是账户收益。</li>
+<li>回测跑完后我按你的要求改了 Pine 的<strong>显示文字</strong>（「突破+spike（上级突破）」、标签更大更实），没有改任何计算逻辑。</li>
+<li>未训练、未调参、未 promote、未改仓、未动真金、未 push。</li>
+</ul>
+<h2>8. 下一步（需要你决定）</h2>
+<ol>
+<li>建议：V11 的上级突破<strong>只当画面提示</strong>，不作为额外的入场信号；联合整体仍不建议实盘。</li>
+<li>如果你说的「15m 已经出多头信号框、叠加上级突破就算」指的是<strong>只要 15m 的多头框还开着</strong>（不限 6 根、第二根不再检查）， 那是另一条规则，要重新写再测；告诉我是不是这个意思。</li>
+</ol>
+<h2>复现命令</h2>
+<pre><code>
+git checkout ed8fdd9a57
+PYTHONPATH=. python3 -m pytest tests/evaluation/test_spike_v11.py tests/evaluation/test_spike_v10_4.py -q
+E=experiments/active/exp-spike-v11-mtf-joint-20260918-v1
+PYTHONPATH=. python3 -W ignore -m yoyo.evaluation.spike_v11_study --output $E/results/run_v1 --workers 8
+PYTHONPATH=. python3 -W ignore -m yoyo.evaluation.spike_v11_report --run $E/results/run_v1 --out $E/statistics/run_v1
+</code></pre>
+<p>全量 638 个币约 5 分钟（8 进程）。</p>
+</body>
+</html>

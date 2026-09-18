@@ -1,5 +1,6 @@
 //@version=6
-// V11：在V10.4基础上，本图SPIKE可以与上级周期的下降线突破配对（15分看1小时、1小时看4小时）；
+// V11：在V10.4基础上，本图SPIKE可以与上级周期的下降线突破配对（15分看1小时、1小时看4小时），
+// 配成的仍叫「突破+spike」，标注（上级突破）；本图没有自己的SPIKE时，上级突破只是提示，不算信号。
 // 突破后的趋势线继续向右延伸，并默认标出A/B/C与突破点。
 // 上级周期突破只在上级K线收盘后的第一根本图K线才可见（lookahead_on + [1]），不回填、不重绘。
 // 这是指标，不下单；本地检查不等于TradingView编译或行情验证。
@@ -30,7 +31,7 @@ const float roundTripCost = 0.002
 
 string gView = "01 · 显示"
 
-bool v10OnlyJoint = input.bool(false, "仅显示突破+spike 信号", group=gView, tooltip="只控制显示，不改变信号计算或预警。隐藏普通多空、单独突破、普通价格标签/染色及V9盈亏框；保留联合标记、对应趋势线、均线和IMACD。", display=display.none)
+bool v10OnlyJoint = input.bool(false, "仅显示突破+spike 信号", group=gView, tooltip="含「突破+spike（上级突破）」。只控制显示，不改变信号计算或预警。隐藏普通多空、单独突破、普通价格标签/染色及V9盈亏框；保留联合标记、对应趋势线、均线和IMACD。", display=display.none)
 
 // 为联合标记预留对象配额：普通价格标签40个，退出标签20个。
 const int SIGNAL_TAG_LIMIT = 40
@@ -1592,7 +1593,7 @@ if barstate.isconfirmed and v11HtfOn
                     v10LastJointPrice := close
                     v10LastJointTime := time_close
                     v10LastJointOrder := v11HtfOrder + " · 上级线"
-                    v11HtfPairWhy := v11HtfText + "突破+spike成立"
+                    v11HtfPairWhy := "突破+spike（上级突破）成立"
                     v10PairWhy := v11HtfPairWhy
                 else
                     v11HtfPairWhy := not v10LongAlive ? "联合当根失去六线支撑" : not v10Momentum ? "联合当根动量未通过" : not parentRecovered ? "未站上原启动区间" : not bbEntryAllowed ? "联合当根BB过滤未通过" : not v9BundleAllowed ? "联合当根V9标的/量比/时段未通过" : "联合当根离六线过远"
@@ -1801,12 +1802,13 @@ if v11HtfJointVisible and not na(v11HtfAxT) and not na(v11HtfBxT) and v11HtfBxT 
     int htfEnd = time + v11ExtendBars * v11BarMs
     polyline htfTrend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10JointLineWidth, force_overlay=true)
 
-    string htfCaption = v11HtfText + "突破+spike" + (v10TagPrice ? "\n" + str.tostring(close, format.mintick) : "")
-    string htfTagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
+    // 就是突破+spike，只是突破来自上级周期；标签比普通联合大一号、底色更实，表示最强。
+    string htfCaption = "突破+spike（上级突破）" + (v10TagPrice ? "\n" + str.tostring(close, format.mintick) : "")
+    string htfTagSize = v10TagSize == "小" ? size.normal : size.large
     string htfSourceText = v11HtfSrc == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
-    string htfTip = v11HtfText + "突破+spike · 上级结构 · " + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v11HtfBornT, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v11HtfBreakT, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
+    string htfTip = "突破+spike（上级突破 · " + v11HtfText + "） · " + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v11HtfBornT, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v11HtfBreakT, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
 
-    label htfTag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), htfCaption, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_up, color=color.new(v10JointColor, 12), textcolor=color.white, size=htfTagSize, textalign=text.align_center, tooltip=htfTip, text_formatting=text.format_bold, force_overlay=true)
+    label htfTag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), htfCaption, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_up, color=v10JointColor, textcolor=color.white, size=htfTagSize, textalign=text.align_center, tooltip=htfTip, text_formatting=text.format_bold, force_overlay=true)
 
     array<label> htfJointMarks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, htfTip, false) : array.new_label()
     array.push(v10SignalHistory, V10SignalDrawing.new(htfTrend, htfTag, htfJointMarks))
@@ -1822,7 +1824,7 @@ alertcondition(v10BreakEvent, "SPIKE V11 本周期下降线突破", "SPIKE V11 �
 
 alertcondition(v11HtfBreakKnown, "SPIKE V11 上级周期下降线突破", "SPIKE V11 上级周期下降线突破（上级K已收盘） | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
 
-alertcondition(v11HtfJointEvent, "SPIKE V11 上级突破+spike", "SPIKE V11 上级突破+spike | {{exchange}}:{{ticker}} | {{interval}} | 联合收盘 {{close}} | 不代表成交")
+alertcondition(v11HtfJointEvent, "SPIKE V11 突破+spike（上级突破）", "SPIKE V11 突破+spike（上级突破） | {{exchange}}:{{ticker}} | {{interval}} | 联合收盘 {{close}} | 不代表成交")
 
 alertcondition(v11AnyJoint, "SPIKE V11 突破+spike 联合确认（任一来源）", "SPIKE V11 突破+spike | {{exchange}}:{{ticker}} | {{interval}} | 联合收盘 {{close}} | 不代表成交")
 
