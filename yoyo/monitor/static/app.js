@@ -282,11 +282,17 @@
     }
   }
   const LINE_TIMEFRAMES = { joint: ["15m", "30m", "1H", "4H"], break: ["15m", "1H", "4H", "1Dutc"] };
-  const LINE_HIGHER = { "15m": "1H", "30m": "2H", "1H": "4H", "4H": "日线" };
   const LINE_STATES = { live: ["实时", "admitted"], late: ["补录", "filtered"], history: ["启用前", "filtered"] };
   function linesView(view = state.view) { return view === "joints" || view === "breaks"; }
-  function lineFacts(line, label) {
+  // Capped-wick line prices are off the tick grid; show them at the contract's precision.
+  function tickPrice(value, tick) {
+    if (!finite(value)) return "—";
+    const decimals = finite(tick) && Number(tick) > 0 ? Math.min(10, Math.max(0, Math.ceil(-Math.log10(Number(tick)) - 1e-9))) : null;
+    return decimals === null ? price(value) : Number(value).toFixed(decimals);
+  }
+  function lineFacts(line, label, tick) {
     if (!line || !finite(line.a_price)) return "";
+    const price = (value) => tickPrice(value, tick);
     const tf = timeframeLabel(line.line_timeframe === "2H" ? "2H" : line.line_timeframe);
     return `<div class="lines-geometry"><dt>${escapeHTML(label)} · ${escapeHTML(tf)}</dt><dd>A ${escapeHTML(shortDate(line.a_ms))} ${escapeHTML(price(line.a_price))} → B ${escapeHTML(shortDate(line.b_ms))} ${escapeHTML(price(line.b_price))} → C ${escapeHTML(shortDate(line.c_ms))} ${escapeHTML(price(line.c_price))}</dd><dd class="lines-born">三点确认 ${escapeHTML(shortDate(line.born_close_ms))}${line.track ? " · " + escapeHTML(line.track) : ""}</dd></div>`;
   }
@@ -302,10 +308,10 @@
     const title = joint ? (higher ? "突破+spike（上级突破）" : "突破+spike") : "趋势线突破";
     const facts = joint
       ? `<div><dt>V9 信号</dt><dd>${escapeHTML(shortDate(item.v9_signal_close_ms))} · 后第 ${escapeHTML(number(item.bars_after_v9))} 根</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`
-      : `<div><dt>线上价（本根）</dt><dd>${escapeHTML(price(item.line_at_bar))}</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`;
+      : `<div><dt>线上价（本根）</dt><dd>${escapeHTML(tickPrice(item.line_at_bar, item.tick))}</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`;
     const geometry = joint
-      ? (item.source !== "higher" ? lineFacts(item, "本周期线") : "") + (higher ? lineFacts(item.higher_line, `上级线（${LINE_HIGHER[item.timeframe] || "上级"}）`) : "")
-      : lineFacts(item, "突破的线");
+      ? (item.source !== "higher" ? lineFacts(item, "本周期线", item.tick) : "") + (higher ? lineFacts(item.higher_line, "上级线", item.tick) : "")
+      : lineFacts(item, "突破的线", item.tick);
     const delay = finite(item.detect_delay_ms) && item.display_state !== "history" ? ` · 收盘后 ${escapeHTML(duration(Math.max(0, Number(item.detect_delay_ms))))} 发现` : "";
     return `<article class="shadow-event-card lines-card long ${stateClass}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
   }
