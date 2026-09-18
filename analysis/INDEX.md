@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **557** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **558** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-18 | [`p1_spike_v10_4_1h_detail_20260918.md`](p1_spike_v10_4_1h_detail_20260918.md) | SPIKE V10.4 · 1h「突破+spike」只做多——逐笔拆解：挑点比随机好，但盈亏基本跟着大盘走 | 1. **信号本身有东西**：在 1h 上，突破+spike 选出来的做多点，比同币同月随机做多每笔好 0.24R，而且这个优势在前后两段都在（+0.31 / +0.17），与大盘涨跌几乎无关。 |
 | 2026-09-18 | [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) | SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近 |  |
 | 2026-09-18 | [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) | SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差 |  |
 | 2026-09-18 | [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) | SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负 |  |
@@ -869,6 +870,7 @@
 - [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) — SPIKE 市场广度：冻结候选的匹配随机对照整合报告
 - [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) — SPIKE V7／V8 五条降噪路线：执行与验收报告
 - [`p1_spike_pepe_owner_notes_20260910.md`](p1_spike_pepe_owner_notes_20260910.md) — PEPE 4H：Owner 批注与 V4 确认含义核对
+- [`p1_spike_v10_4_1h_detail_20260918.md`](p1_spike_v10_4_1h_detail_20260918.md) — SPIKE V10.4 · 1h「突破+spike」只做多——逐笔拆解：挑点比随机好，但盈亏基本跟着大盘走
 - [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
 - [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
 - [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
