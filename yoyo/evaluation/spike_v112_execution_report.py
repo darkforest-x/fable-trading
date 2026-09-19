@@ -18,7 +18,8 @@ import pandas as pd
 
 from yoyo.evaluation import spike_v10_4_study as study
 from yoyo.evaluation.spike_v112_execution_study import ARMS, EXP, SOURCE, TABLES, validate_receipt
-from yoyo.evaluation.spike_v112_support_report import dates, strict_booleans, validate_control_keys
+from yoyo.evaluation.spike_v112_support_report import compare, dates, strict_booleans, validate_control_keys
+from yoyo.evaluation.spike_v10_4_increment_report import PARITY
 from yoyo.evaluation.spike_v8_six_filters import _committed
 from yoyo.evaluation.spike_v9_full_report import block_statistics
 
@@ -189,6 +190,23 @@ def main(run: Path, out: Path) -> None:
     assert config["bootstrap_seed"] == SEED and config["bootstrap_reps"] == REPS
     tables, manifest, audit = load(run)
     t, s, f = tables["trades"], tables["statuses"], tables["fixed"]
+    if run.name == "run_v2":
+        old = pd.read_csv(EXP / "statistics/run_v1/trades.csv.gz")
+        checks = [compare(old.loc[old.arm.eq(arm)], t.loc[t.arm.eq(arm)],
+                          [*PARITY, "initial_risk_frac", "net_return", "gross_return", "status"], arm) for arm in ARMS]
+        assert all(check["passed"] for check in checks)
+        control_join = old.merge(t, on=["arm", "trade_key"], suffixes=("_v1", "_v2"), validate="one_to_one")
+        changed = control_join.loc[control_join.matched_v1.ne(control_join.matched_v2)]
+        assert list(zip(changed.arm, changed.trade_key)) == [("parent_stop", "binance_um:GALAUSDT:15m:box_any:53375")]
+        assert changed.matched_v1.all() and not changed.matched_v2.any()
+        # Apart from the explicitly rejected numerical-zero control, the full
+        # original control contract must be unchanged in every candidate arm.
+        for arm in ARMS:
+            skip = changed.loc[changed.arm.eq(arm), "trade_key"]
+            control_contract(old.loc[old.arm.eq(arm) & ~old.trade_key.isin(skip)],
+                             t.loc[t.arm.eq(arm) & ~t.trade_key.isin(skip)])
+        audit["revision_comparison"] = {"all_actual_trades_unchanged": True, "checks": checks,
+                                         "changed_control": changed[["arm", "trade_key", "matched_v1", "matched_v2", "reason_v2"]].to_dict("records")}
     rows, differences, gates = [], [], []
     for tf in ("15m", "1h"):
         for arm in ARMS:
