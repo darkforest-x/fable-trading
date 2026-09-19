@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / 'experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1'
 URL = 'https://www.okx.com/api/v5/market/history-candles'
 SEEDS = ['data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv',
-         'data/kline_fetched/okx_BTC_USDT_SWAP_5m_57699.csv']
+         'data/kline_holdout_btc5m/okx_BTC_USDT_SWAP_5m_52992.csv']
 COLS = ['open', 'high', 'low', 'close', 'volume']
 
 
