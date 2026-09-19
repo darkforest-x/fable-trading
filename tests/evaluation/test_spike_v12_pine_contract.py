@@ -44,6 +44,10 @@ def test_v9_logic_and_risk_parameters_unchanged():
     start = OLD.index("const int maLen")
     end = OLD.index("string v10LineGroup")
     def executable(source):
+        # Owner explicitly requested visible historical BB compression zones.
+        # Normalize only these display defaults; entry filters remain identical.
+        source = source.replace('bool showBb = input.bool(false,', 'bool showBb = input.bool(true,')
+        source = source.replace('bool bbOnlyCompressed = input.bool(false,', 'bool bbOnlyCompressed = input.bool(true,')
         return [line for line in source.splitlines() if line.strip() and not line.lstrip().startswith("//")]
     assert executable(OLD[start:end]) == executable(NEW[NEW.index("const int maLen"):NEW.index("string v10LineGroup")])
 

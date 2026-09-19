@@ -65,11 +65,11 @@ string gBb = "02 · BB 压缩通道"
 
 bool useBbFilter = input.bool(true, "仅保留近期持续压缩后的信号", group=gBb, tooltip="信号前12根内须有连续3根带宽处于此前500根最低10%区域。不要求信号当根扩张；原V6反向确认仍可结束已有风险参考。关闭仅跳过BB条件，距离门和V9三条过滤仍独立生效。", display=display.none)
 
-// 默认只隐藏BB图形，不关闭BB过滤。
-bool showBb = input.bool(false, "显示 BB 压缩通道", group=gBb, display=display.none)
+// V12 displays the historical compression zones by default.
+bool showBb = input.bool(true, "显示 BB 压缩通道", group=gBb, display=display.none)
 int bbLength = input.int(200, "SMA 长度", minval=2, group=gBb, display=display.none)
 float bbMult = input.float(2.0, "标准差倍数", minval=0.1, step=0.1, group=gBb, display=display.none)
-bool bbOnlyCompressed = input.bool(false, "仅显示压缩段", group=gBb, display=display.none)
+bool bbOnlyCompressed = input.bool(true, "仅显示压缩段", group=gBb, display=display.none)
 bool bbShowBasis = input.bool(false, "显示中线", group=gBb, display=display.none)
 color bbChannelColor = input.color(color.new(#7D8490, 48), "通道颜色", group=gBb, display=display.none)
 color bbCompressionColor = input.color(#AD7B29, "压缩颜色", group=gBb, display=display.none)
@@ -656,13 +656,48 @@ if barstate.isconfirmed
 string v10LineGroup = "04 · 本周期自动下降线"
 
 bool v10Enabled = input.bool(true, "启用自动线与联合提示", group=v10LineGroup, display=display.none)
-int v10Lookback = input.int(600, "搜索范围（K 数）", minval=100, maxval=1500, group=v10LineGroup, display=display.none)
-int v10Life = input.int(600, "三点确认后的最长存活（K 数）", minval=20, maxval=1500, group=v10LineGroup, tooltip="搜索范围限制选点历史；已确认线不再因A移出搜索范围立即失效。仍检查真实突破，最长存活从三点确认时计算。", display=display.none)
+int v12FallbackLookback = input.int(600, "搜索范围（K 数）", minval=100, maxval=1500, group=v10LineGroup, display=display.none)
+int v12FallbackLife = input.int(600, "三点确认后的最长存活（K 数）", minval=20, maxval=1500, group=v10LineGroup, tooltip="搜索范围限制选点历史；已确认线不再因A移出搜索范围立即失效。仍检查真实突破，最长存活从三点确认时计算。", display=display.none)
 
-int v10Left = input.int(12, "高点左侧比较 K 数", minval=4, maxval=80, group=v10LineGroup, display=display.none)
-int v10Right = input.int(8, "高点右侧确认 K 数", minval=2, maxval=40, group=v10LineGroup, display=display.none)
-int v10MinGap = input.int(24, "独立反弹最小间隔", minval=5, maxval=200, group=v10LineGroup, display=display.none)
-int v10MinSpan = input.int(72, "三点最小跨度", minval=20, maxval=600, group=v10LineGroup, display=display.none)
+int v12FallbackLeft = input.int(12, "高点左侧比较 K 数", minval=4, maxval=80, group=v10LineGroup, display=display.none)
+int v12FallbackRight = input.int(8, "高点右侧确认 K 数", minval=2, maxval=40, group=v10LineGroup, display=display.none)
+int v12FallbackMinGap = input.int(24, "独立反弹最小间隔", minval=5, maxval=200, group=v10LineGroup, display=display.none)
+int v12FallbackMinSpan = input.int(72, "三点最小跨度", minval=20, maxval=600, group=v10LineGroup, display=display.none)
+
+
+// Independent bar-count profiles; equal defaults preserve the audited geometry.
+bool v12ByTimeframe = input.bool(true, "使用分周期结构参数", group=v10LineGroup, tooltip="15m、30m、1h、4h分别设置。单位都是各自周期K数；上级请求使用上级自己的配置。默认保持已核验的几何参数，不代表参数已优化。", display=display.none)
+int v12Tf15Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 15m 结构参数", display=display.none)
+int v12Tf30Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 30m 结构参数", display=display.none)
+int v12Tf60Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 1h 结构参数", display=display.none)
+int v12Tf240Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 4h 结构参数", display=display.none)
+float v12TfSeconds = timeframe.in_seconds()
+int v10Lookback = not v12ByTimeframe ? v12FallbackLookback : v12TfSeconds == 900 ? v12Tf15Lookback : v12TfSeconds == 1800 ? v12Tf30Lookback : v12TfSeconds == 3600 ? v12Tf60Lookback : v12TfSeconds == 14400 ? v12Tf240Lookback : v12FallbackLookback
+int v10Life = not v12ByTimeframe ? v12FallbackLife : v12TfSeconds == 900 ? v12Tf15Life : v12TfSeconds == 1800 ? v12Tf30Life : v12TfSeconds == 3600 ? v12Tf60Life : v12TfSeconds == 14400 ? v12Tf240Life : v12FallbackLife
+int v10Left = not v12ByTimeframe ? v12FallbackLeft : v12TfSeconds == 900 ? v12Tf15Left : v12TfSeconds == 1800 ? v12Tf30Left : v12TfSeconds == 3600 ? v12Tf60Left : v12TfSeconds == 14400 ? v12Tf240Left : v12FallbackLeft
+int v10Right = not v12ByTimeframe ? v12FallbackRight : v12TfSeconds == 900 ? v12Tf15Right : v12TfSeconds == 1800 ? v12Tf30Right : v12TfSeconds == 3600 ? v12Tf60Right : v12TfSeconds == 14400 ? v12Tf240Right : v12FallbackRight
+int v10MinGap = not v12ByTimeframe ? v12FallbackMinGap : v12TfSeconds == 900 ? v12Tf15MinGap : v12TfSeconds == 1800 ? v12Tf30MinGap : v12TfSeconds == 3600 ? v12Tf60MinGap : v12TfSeconds == 14400 ? v12Tf240MinGap : v12FallbackMinGap
+int v10MinSpan = not v12ByTimeframe ? v12FallbackMinSpan : v12TfSeconds == 900 ? v12Tf15MinSpan : v12TfSeconds == 1800 ? v12Tf30MinSpan : v12TfSeconds == 3600 ? v12Tf60MinSpan : v12TfSeconds == 14400 ? v12Tf240MinSpan : v12FallbackMinSpan
 
 string v12Group = "04A · V12 主高点＋局部回踩"
 bool v12LocalEnabled = input.bool(true, "识别主高点＋局部回踩线", group=v12Group, tooltip="保留原三大高点找线；新增A/B两个已确认主高点，加较短反弹C贴线。只在C右侧确认完成后建线，不回填突破。", display=display.none)
@@ -708,11 +743,10 @@ color v10JointColor = input.color(#AD7B29, "联合颜色", group=v10JointGroup, 
 int v10LineWidth = input.int(1, "主线宽度", minval=1, maxval=3, group=v10JointGroup, display=display.none)
 int v10Ahead = input.int(24, "向右预留 K 数", minval=0, maxval=200, group=v10JointGroup, display=display.none)
 
-int v10JointKeep = input.int(30, "保留联合信号与趋势线组数", minval=1, maxval=60, group=v10JointGroup, tooltip="每组包含一条冻结趋势线和一个标记。超出数量时整组删除，避免只剩信号没有线。", display=display.none)
+int v10JointKeep = input.int(30, "保留 break 信号与趋势线组数", minval=1, maxval=40, group=v10JointGroup, tooltip="单独突破和联合提示共用保留数量；标记和对应冻结线整组创建、整组删除。", display=display.none)
 int v10JointLineWidth = input.int(2, "联合趋势线线宽", minval=1, maxval=4, group=v10JointGroup, display=display.none)
 
 string v10TagSize = input.string("小", "突破+spike 标签大小", options=["小", "正常", "大"], group=v10JointGroup, display=display.none)
-bool v10TagPrice = input.bool(true, "标签显示联合确认价", group=v10JointGroup, display=display.none)
 float v10TagGap = input.float(0.8, "标签距K线（ATR）", minval=0.1, maxval=4.0, step=0.1, group=v10JointGroup, display=display.none)
 
 // ───────────── V11 上级周期与显示参数 ─────────────
@@ -722,16 +756,17 @@ string v11Group = "04C · V11 上级周期突破"
 string v11SourceMode = input.string("本周期+上级周期", "突破来源", options=["本周期+上级周期", "仅上级周期", "仅本周期"], group=v11Group, tooltip="SPIKE始终来自本图周期。本周期=本图自己的下降线；上级周期=上级K线收盘确认的下降线突破。", display=display.none)
 string v11HtfChoice = input.string("自动", "上级周期", options=["自动", "手动"], group=v11Group, tooltip="自动：1分→5分，3/5分→15分，15分→1小时，30分→2小时，1小时→4小时，2/4小时→日线，日线→周线。", display=display.none)
 string v11HtfManual = input.timeframe("60", "手动上级周期", group=v11Group, tooltip="必须大于本图周期，否则上级来源自动停用。", display=display.none)
-bool v11ShowBroken = input.bool(true, "显示最近一次突破的趋势线（含A/B/C与突破点）", group=v11Group, display=display.none)
 bool v11ShowHtfLine = input.bool(true, "显示上级周期当前候选线", group=v11Group, display=display.none)
 bool v11ShowHtfBreak = input.bool(true, "显示上级周期突破提示", group=v11Group, display=display.none)
 int v11ExtendBars = input.int(48, "突破后趋势线继续向右延伸（本图K数）", minval=0, maxval=400, group=v11Group, tooltip="只影响画线：突破或联合之后，原A/B斜率继续向右画这么多根。", display=display.none)
-int v11AbcKeep = input.int(8, "历史联合组保留A/B/C的最近组数", minval=0, maxval=30, group=v11Group, tooltip="更早的联合组只保留线和标签，控制标签总数。", display=display.none)
+int v11AbcKeep = input.int(8, "历史信号组保留A/B/C的最近组数", minval=0, maxval=8, group=v11Group, tooltip="更早的组只保留线和标记，控制标签总数。", display=display.none)
 color v11HtfColor = input.color(#9DB7FF, "上级周期线颜色", group=v11Group, display=display.none)
 
 string v112Group = "04D · V11.2 规则与持仓管理"
 
 string v112Rule = input.string("多头框内", "突破+spike 规则", options=["多头框内", "V10.4 窗口"], group=v112Group, tooltip="多头框内：V9多头盈亏框开着时出现突破（本周期或上级）就算，每个框只算第一次，不限根数、不做当根检查。V10.4窗口：SPIKE与突破间隔≤配对窗口，第二个事件当根做全部检查。", display=display.none)
+bool v112UseBox = v112Rule == "多头框内"
+bool v12HoldPair = input.bool(true, "先突破、持续站上线后出现 V9 也算联合", group=v112Group, tooltip="用于多头框内规则。突破确认后每根收盘必须严格高于同一冻结线；收回线上或线下、数据断档、超过本图最长存活根数即永久取消。后来重新站上不恢复旧突破。仅在新的V9多头确认当根配对，不回填；每个框一次、每条已用突破不复用。", display=display.none)
 bool v112AddOnBreak = input.bool(true, "框内突破时提示加仓（止损沿用原框）", group=v112Group, display=display.none)
 bool v112EarlyExit = input.bool(false, "N 根内没出突破：盈亏参考提前结束", group=v112Group, tooltip="V9多头框开了N根仍没有任何突破（本周期或上级），在第N根收盘结束参考框，标「未突破离场」。只改参考框，不下单。", display=display.none)
 int v112ExitBars = input.int(6, "等待突破的根数 N", minval=1, maxval=500, group=v112Group, display=display.none)
@@ -1085,6 +1120,8 @@ var array<float> v10SoftPs = array.new_float()
 var array<float> v10SoftAs = array.new_float()
 
 var array<V10Line> v10Tracks = array.new<V10Line>()
+var array<V10Line> v12Held = array.new<V10Line>()
+const int V12_HELD_LIMIT = 24
 
 // 当前主线只控制画面，不决定后台结构是否有资格发信号。
 var V10Line v10Main = na
@@ -1363,6 +1400,7 @@ if barstate.isconfirmed and v10Enabled
         array.clear(v10SoftAs)
 
         array.clear(v10Tracks)
+        array.clear(v12Held)
 
         v10SegmentStart := bar_index
         v10ActiveCount := 0
@@ -1372,6 +1410,14 @@ if barstate.isconfirmed and v10Enabled
         v10PairWhy := "数据未就绪"
 
     else
+        // Retire evidence permanently at the first failed close; no resurrection.
+        if array.size(v12Held) > 0
+            for n = array.size(v12Held) - 1 to 0
+                V10Line held = array.get(v12Held, n)
+                float heldY = held.at(bar_index)
+                if held.joined or bar_index - held.brokenBar > v10Life or heldY <= 0 or close <= heldY
+                    array.remove(v12Held, n)
+
         // 先监测此前已经成立的结构，再处理本根新结构。
         V10Line breakWinner = na
         V10Line jointWinner = na
@@ -1395,6 +1441,10 @@ if barstate.isconfirmed and v10Enabled
                         item.stopped := bar_index
                         item.brokenBar := bar_index
                         item.usable := true
+                        if v112UseBox and v12HoldPair
+                            if array.size(v12Held) >= V12_HELD_LIMIT
+                                array.shift(v12Held)
+                            array.push(v12Held, item)
 
                         if na(breakWinner) or item.score < breakWinner.score
                             breakWinner := item
@@ -1449,7 +1499,7 @@ if barstate.isconfirmed and v10Enabled
 
         // 同根多条结构联合时，只输出一个代表性信号。
         // 同一SPIKE事件不会被多条结构重复消费。
-        if not na(jointWinner) and v11UseChart
+        if not v112UseBox and not na(jointWinner) and v11UseChart
             v10JointEvent := true
             v10JointLine := jointWinner
             v10ConsumedSpike := jointWinner.spikeBar
@@ -1467,7 +1517,7 @@ if barstate.isconfirmed and v10Enabled
 
             v10PairWhy := "联合成立；不重置原盈亏框"
 
-        V10Line eventLine = not na(jointWinner) and v11UseChart ? jointWinner : breakWinner
+        V10Line eventLine = not v112UseBox and not na(jointWinner) and v11UseChart ? jointWinner : breakWinner
 
         if not na(eventLine)
             if na(v10Main) or v10Main.uid != eventLine.uid
@@ -1707,7 +1757,7 @@ if barstate.isconfirmed and v11HtfOn
             v11SpikeParentLow := legacyParentLow
 
         // 5. 配对：较晚的事件当根检查。
-        if v11HtfUsable and not na(v11SpikeBar) and v11SpikeBar > v10ConsumedSpike
+        if not v112UseBox and v11HtfUsable and not na(v11SpikeBar) and v11SpikeBar > v10ConsumedSpike
             bool withinWindow = math.abs(v11SpikeBar - v11HtfBreakBar) <= v10Window
             bool secondNow = bar_index == math.max(v11SpikeBar, v11HtfBreakBar)
             bool knownBeforeSpike = not na(v11HtfBornT) and v11HtfBornT <= v11SpikeTime
@@ -1730,9 +1780,21 @@ if barstate.isconfirmed and v11HtfOn
                 else
                     v11HtfPairWhy := not v10LongAlive ? "联合当根失去六线支撑" : not v10Momentum ? "联合当根动量未通过" : not parentRecovered ? "未站上原启动区间" : not bbEntryAllowed ? "联合当根BB过滤未通过" : not v9BundleAllowed ? "联合当根V9标的/量比/时段未通过" : "联合当根离六线过远"
 
-// ───────────── V11.2 多头框内突破 + 持仓管理 ─────────────
+// ───────────── V12 ordered pairing: box-first OR continuously held break-first ─────────────
 
-bool v112UseBox = v112Rule == "多头框内"
+type V12HeldHtf
+    int ax
+    float ap
+    int bx
+    float bp
+    int cx
+    float cp
+    int born
+    int breakTime
+    int visibleBar
+    int source
+
+var array<V12HeldHtf> v12HeldHtf = array.new<V12HeldHtf>()
 var int v112BoxUsed = na
 var int v112BoxBroke = na
 var int v112DrawnLineUid = na
@@ -1741,26 +1803,83 @@ bool v112BreakHtf = v11HtfOn and v11HtfBreakKnown
 bool v112BoxJoint = false
 bool v112BoxJointHtf = false
 bool v112EarlyExitNow = false
+V10Line v12SelectedLine = v11LastBroken
+V12HeldHtf v12SelectedHtf = na
+bool v12BreakFirst = false
 
-// 框内出现过突破（任一来源），供“没突破就走”使用；与规则选择无关。
+if barstate.isconfirmed
+    if dataGap or not pricesValid or not v11HtfOn
+        array.clear(v12HeldHtf)
+    else
+        if v11HtfBreakKnown and v112UseBox and v12HoldPair
+            if array.size(v12HeldHtf) >= V12_HELD_LIMIT
+                array.shift(v12HeldHtf)
+            array.push(v12HeldHtf, V12HeldHtf.new(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBornT, v11HtfBreakT, bar_index, v11HtfSrc))
+        // Check the first visible chart close too: a stale HTF cross is not a hold.
+        if array.size(v12HeldHtf) > 0
+            for n = array.size(v12HeldHtf) - 1 to 0
+                V12HeldHtf held = array.get(v12HeldHtf, n)
+                float y = f_v11_timePrice(held.ax, held.ap, held.bx, held.bp, time)
+                if bar_index - held.visibleBar > v10Life or y <= 0 or close <= y
+                    array.remove(v12HeldHtf, n)
+
+// Existing V9 box first, new break second: preserve V11.2 behavior.
 if barstate.isconfirmed and v10Enabled and trendSide == 1 and (v112BreakChart or v112BreakHtf)
     v112BoxBroke := entryBar
 
-if barstate.isconfirmed and v10Enabled and v112UseBox and trendSide == 1 and (v112BreakChart or v112BreakHtf) and (na(v112BoxUsed) or v112BoxUsed != entryBar)
-    v112BoxJoint := true
-    v112BoxJointHtf := v112BreakHtf
-    v112BoxUsed := entryBar
-    string boxOrder = (v112BreakHtf ? "框内上级突破" : "框内突破") + " · V9后第" + str.tostring(bar_index - entryBar) + "根"
-    v10LastJointPrice := close
-    v10LastJointTime := time_close
-    v10LastJointOrder := boxOrder
-    v10PairWhy := v112BreakHtf ? "突破+spike（上级突破）成立" : "突破+spike成立"
+if barstate.isconfirmed and v10Enabled and v112UseBox and trendSide == 1 and (na(v112BoxUsed) or v112BoxUsed != entryBar)
+    bool boxFirst = v112BreakChart or v112BreakHtf
+    if boxFirst
+        v112BoxJoint := true
+        v112BoxJointHtf := v112BreakHtf
+    else if v12HoldPair and confirmedSignal
+        // Only the new V9 event may complete a break-first pair. Select newest
+        // qualifying evidence, then lowest fit score for simultaneous chart lines.
+        V10Line heldBest = na
+        if v11UseChart
+            for held in v12Held
+                if not held.joined and held.brokenBar < bar_index and (na(heldBest) or held.brokenBar > heldBest.brokenBar or (held.brokenBar == heldBest.brokenBar and held.score < heldBest.score))
+                    heldBest := held
+        if v11HtfOn and array.size(v12HeldHtf) > 0
+            v12SelectedHtf := array.last(v12HeldHtf)
+        bool chooseHtf = not na(v12SelectedHtf) and (na(heldBest) or v12SelectedHtf.visibleBar >= heldBest.brokenBar)
+        v112BoxJoint := not na(heldBest) or not na(v12SelectedHtf)
+        v112BoxJointHtf := v112BoxJoint and chooseHtf
+        v12SelectedLine := heldBest
+        v12BreakFirst := v112BoxJoint
 
-    if v112BreakHtf
-        v11HtfOrder := boxOrder
-        v11HtfJoined := true
-    else if not na(v11LastBroken)
-        v112DrawnLineUid := v11LastBroken.uid
+    if v112BoxJoint
+        v112BoxUsed := entryBar
+        v112BoxBroke := entryBar
+        string boxOrder = v12BreakFirst ? "突破→连续站在线上→V9" : (v112BreakHtf ? "框内上级突破" : "框内突破") + " · V9后第" + str.tostring(bar_index - entryBar) + "根"
+        v10LastJointPrice := close
+        v10LastJointTime := time_close
+        v10LastJointOrder := boxOrder
+        v10PairWhy := "break+spike · " + boxOrder
+        if v112BoxJointHtf
+            v11HtfOrder := boxOrder
+            if not v12BreakFirst
+                v11HtfJoined := true
+        else if not na(v12SelectedLine)
+            v112DrawnLineUid := v12SelectedLine.uid
+            v12SelectedLine.joined := true
+        // All currently eligible breaks participated in this box's opportunity;
+        // do not recycle parallel equivalent lines into a later V9 box.
+        for held in v12Held
+            held.joined := true
+        array.clear(v12Held)
+        array.clear(v12HeldHtf)
+
+// Frozen event geometry, separate from the latest HTF-break display state.
+int v12JointAx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.ax : v11HtfAxT
+float v12JointAp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.ap : v11HtfAp
+int v12JointBx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.bx : v11HtfBxT
+float v12JointBp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.bp : v11HtfBp
+int v12JointCx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.cx : v11HtfCxT
+float v12JointCp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.cp : v11HtfCp
+int v12JointBorn = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.born : v11HtfBornT
+int v12JointBreak = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.breakTime : v11HtfBreakT
+int v12JointSource = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.source : v11HtfSrc
 
 // N根内没出突破：在第N根收盘结束V9多头参考框（只改参考，不下单）。
 if barstate.isconfirmed and v10Enabled and v112EarlyExit and trendSide == 1 and bar_index > entryBar and bar_index - entryBar >= v112ExitBars and (na(v112BoxBroke) or v112BoxBroke != entryBar)
@@ -1776,7 +1895,7 @@ if barstate.isconfirmed and v10Enabled and v112EarlyExit and trendSide == 1 and 
 
 bool v112ChartShow = v112UseBox ? v112BoxJoint and not v112BoxJointHtf : v10JointEvent
 bool v112HtfShow = v112UseBox ? v112BoxJoint and v112BoxJointHtf : v11HtfJointEvent
-V10Line v112ChartLine = v112UseBox ? v11LastBroken : v10JointLine
+V10Line v112ChartLine = v112UseBox ? v12SelectedLine : v10JointLine
 bool v11AnyJoint = v112ChartShow or v112HtfShow
 
 if v112EarlyExitNow and showExitLabels and not v10OnlyJoint
@@ -1829,35 +1948,7 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
 
 // ───────────── V11 最近突破线与上级周期线 ─────────────
 
-// 最近一次本周期突破：突破后不消失，继续向右延伸并标出A/B/C与突破点。
-if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
-    if not na(v11BrokenDrawing)
-        polyline.delete(v11BrokenDrawing)
-        v11BrokenDrawing := na
-
-    while array.size(v11BrokenMarks) > 0
-        label.delete(array.pop(v11BrokenMarks))
-
-    V10Line lb = v11LastBroken
-    bool drawnAsMain = v10ShowLine and not na(v10Main) and not na(lb) and v10Main.uid == lb.uid and v10Main.phase == 2
-
-    if v11ShowBroken and not v10OnlyJoint and not na(lb) and not na(lb.brokenBar) and not drawnAsMain and not (lb.joined and v10ShowJoint) and not (v112UseBox and v10ShowJoint and not na(v112DrawnLineUid) and lb.uid == v112DrawnLineUid) and v10ClosedBar - lb.ax < 9000
-        int endBar = lb.brokenBar + v11ExtendBars
-        array<chart.point> points = array.new<chart.point>()
-
-        if v10Log
-            for x = lb.ax to endBar
-                array.push(points, chart.point.from_index(x, lb.at(x)))
-        else
-            array.push(points, chart.point.from_index(lb.ax, lb.ap))
-            array.push(points, chart.point.from_index(endBar, lb.at(endBar)))
-
-        color brokenTone = color.new(v10LineColor, 25)
-        v11BrokenDrawing := polyline.new(points, curved=false, closed=false, xloc=xloc.bar_index, line_color=brokenTone, line_width=v10LineWidth, force_overlay=true)
-
-        if v10ShowABC
-            string tip = "本周期结构#" + str.tostring(lb.uid) + " · " + f_v12_kindText(lb) + " 已突破\n三点确认：" + str.format_time(lb.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间"
-            v11BrokenMarks := f_v11_indexMarks(lb, lb.brokenBar, brokenTone, tip, true)
+// Broken lines are archived together with their marker below.
 
 // 上级周期：最近一次突破的线（延伸）与当前候选线（虚线）。
 if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
@@ -1873,17 +1964,6 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
         label.delete(array.pop(v11HtfMarks))
 
     if v11HtfOn and not v10OnlyJoint
-        if v11ShowBroken and not na(v11HtfAxT) and not na(v11HtfBxT) and v11HtfBxT != v11HtfAxT and not (v11HtfJoined and v10ShowJoint)
-            int endT = v11LastHtfBreakTime + v11ExtendBars * v11BarMs
-            v11HtfDrawing := polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, endT), curved=false, closed=false, xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10LineWidth, force_overlay=true)
-
-            if v10ShowABC
-                string tip = v11HtfText + " 结构已突破\n三点确认：" + str.format_time(v11HtfBornT, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n本图可见：" + str.format_time(v11LastHtfBreakTime, "MM-dd HH:mm", "Asia/Shanghai")
-                array<label> htfMarks = f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, tip, true)
-
-                for m in htfMarks
-                    array.push(v11HtfMarks, m)
-
         if v11ShowHtfLine and not na(htfActAxT) and not na(htfActBxT) and htfActBxT != htfActAxT
             int activeEnd = time + v10Ahead * v11BarMs
             v11HtfActiveDrawing := polyline.new(f_v11_timePoints(htfActAxT, htfActAp, htfActBxT, htfActBp, activeEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=color.new(v11HtfColor, 20), line_style=line.style_dashed, line_width=v10LineWidth, force_overlay=true)
@@ -1919,9 +1999,7 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
 
 bool v10JointVisible = v10Enabled and (v10ShowJoint or v10OnlyJoint) and v112ChartShow
 bool v11HtfJointVisible = v10Enabled and (v10ShowJoint or v10OnlyJoint) and v112HtfShow
-string v112AddText = v112UseBox and v112AddOnBreak ? "\n加仓 · sl " + str.tostring(initialStop, format.mintick) : ""
 
-plotshape(not v10OnlyJoint and v10Enabled and v10ShowBreak and v10BreakEvent and not v10JointVisible, title="V12 下降线突破", style=shape.triangleup, location=location.belowbar, color=v10BreakColor, size=size.small, text="突破", textcolor=v10BreakColor, force_overlay=true, display=display.pane)
 
 // 联合信号不再使用无限历史plotshape。
 // 通过一组标签+趋势线共同保留，保证不会只剩标签却没有线。
@@ -1973,7 +2051,7 @@ if v10JointVisible and not na(v112ChartLine)
     // 不受“显示当前候选线”和“保留失效线”开关影响。
     polyline frozenTrend = polyline.new(eventPoints, curved=false, closed=false, xloc=xloc.bar_index, line_color=v10LineColor, line_width=v10JointLineWidth, force_overlay=true)
 
-    string caption = "突破+spike" + (v10TagPrice ? "\n" + str.tostring(close, format.mintick) : "") + v112AddText
+    string caption = "break+spike"
     string tagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
     string sourceText = v112ChartLine.source == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
 
@@ -1987,9 +2065,9 @@ if v10JointVisible and not na(v112ChartLine)
          caption,
          xloc=xloc.bar_index,
          yloc=yloc.price,
-         style=label.style_label_up,
-         color=color.new(v10JointColor, 12),
-         textcolor=color.white,
+         style=label.style_none,
+         color=color.new(v10JointColor, 100),
+         textcolor=v10JointColor,
          size=tagSize,
          textalign=text.align_center,
          tooltip=tagTip,
@@ -2001,27 +2079,58 @@ if v10JointVisible and not na(v112ChartLine)
     f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
 // 上级周期突破 + 本图SPIKE：同样整组保留线、标签与A/B/C。
-if v11HtfJointVisible and not na(v11HtfAxT) and not na(v11HtfBxT) and v11HtfBxT != v11HtfAxT
+if v11HtfJointVisible and not na(v12JointAx) and not na(v12JointBx) and v12JointBx != v12JointAx
     while array.size(v10SignalHistory) >= v10JointKeep
         V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
         oldestSignal.erase()
 
     int htfEnd = time + v11ExtendBars * v11BarMs
-    polyline htfTrend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10JointLineWidth, force_overlay=true)
+    polyline htfTrend = polyline.new(f_v11_timePoints(v12JointAx, v12JointAp, v12JointBx, v12JointBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10JointLineWidth, force_overlay=true)
 
     // 就是突破+spike，只是突破来自上级周期；标签比普通联合大一号、底色更实，表示最强。
-    string htfCaption = "突破+spike（上级突破）" + (v10TagPrice ? "\n" + str.tostring(close, format.mintick) : "") + v112AddText
-    string htfTagSize = v10TagSize == "小" ? size.normal : size.large
-    string htfSourceText = v11HtfSrc % 2 == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
-    string htfTip = "突破+spike（上级突破 · " + v11HtfText + "） · " + (v11HtfSrc >= 2 ? "主高点＋局部回踩 · " : "三主高点 · ") + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v11HtfBornT, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v11HtfBreakT, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
+    string htfCaption = "break+spike"
+    string htfTagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
+    string htfSourceText = v12JointSource % 2 == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
+    string htfTip = "突破+spike（上级突破 · " + v11HtfText + "） · " + (v12JointSource >= 2 ? "主高点＋局部回踩 · " : "三主高点 · ") + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v12JointBorn, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v12JointBreak, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
 
-    label htfTag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), htfCaption, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_label_up, color=v10JointColor, textcolor=color.white, size=htfTagSize, textalign=text.align_center, tooltip=htfTip, text_formatting=text.format_bold, force_overlay=true)
+    label htfTag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), htfCaption, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, color=color.new(v10JointColor, 100), textcolor=v11HtfColor, size=htfTagSize, textalign=text.align_center, tooltip=htfTip, text_formatting=text.format_bold, force_overlay=true)
 
-    array<label> htfJointMarks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, htfTip, false) : array.new_label()
+    array<label> htfJointMarks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v12JointAx, v12JointAp, v12JointBx, v12JointBp, v12JointCx, v12JointCp, v12JointBreak, v12JointBorn, v11HtfColor, htfTip, false) : array.new_label()
     array.push(v10SignalHistory, V10SignalDrawing.new(htfTrend, htfTag, htfJointMarks))
     f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
-plotshape(not v10OnlyJoint and v11HtfOn and v11ShowHtfBreak and v11HtfBreakKnown and not v11HtfJointVisible, title="V12 上级周期突破", style=shape.triangleup, location=location.belowbar, color=color.new(v11HtfColor, 10), size=size.tiny, text="上级突破", textcolor=v11HtfColor, force_overlay=true, display=display.pane)
+
+// Standalone break markers have the same bounded, atomic line ownership.
+if not v10OnlyJoint and v10Enabled and v10ShowBreak and v10BreakEvent and not v10JointVisible and not na(v11LastBroken)
+    while array.size(v10SignalHistory) >= v10JointKeep
+        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
+        oldestSignal.erase()
+    V10Line item = v11LastBroken
+    int endBar = bar_index + v11ExtendBars
+    array<chart.point> points = array.new<chart.point>()
+    if v10Log
+        for x = item.ax to endBar
+            array.push(points, chart.point.from_index(x, item.at(x)))
+    else
+        array.push(points, chart.point.from_index(item.ax, item.ap))
+        array.push(points, chart.point.from_index(endBar, item.at(endBar)))
+    polyline trend = polyline.new(points, xloc=xloc.bar_index, line_color=v10LineColor, line_width=v10LineWidth, force_overlay=true)
+    string tip = "本周期 break · #" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + "\n确认收盘 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai")
+    label tag = label.new(bar_index, low - v10Atr * v10TagGap, "break", style=label.style_none, textcolor=v10BreakColor, size=size.small, tooltip=tip, force_overlay=true)
+    array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_indexMarks(item, item.brokenBar, v10LineColor, tip, false) : array.new_label()
+    array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks))
+    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+
+if not v10OnlyJoint and v11HtfOn and v11ShowHtfBreak and v11HtfBreakKnown and not v11HtfJointVisible
+    while array.size(v10SignalHistory) >= v10JointKeep
+        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
+        oldestSignal.erase()
+    polyline trend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time + v11ExtendBars * v11BarMs), xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10LineWidth, force_overlay=true)
+    string tip = v11HtfText + " break · 上级K已收盘，本图可见 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai")
+    label tag = label.new(bar_index, low - v10Atr * (v10TagGap + (v10BreakEvent ? 0.6 : 0)), "break " + v11HtfText, style=label.style_none, textcolor=v11HtfColor, size=size.small, tooltip=tip, force_overlay=true)
+    array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, tip, false) : array.new_label()
+    array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks))
+    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
 // 事件码：1结构确认，2突破，4联合，8上级突破可见，16上级突破+spike；同根可以相加。
 plot(barstate.isconfirmed ? (v10BornEvent ? 1 : 0) + (v10BreakEvent ? 2 : 0) + (v112ChartShow ? 4 : 0) + (v11HtfBreakKnown ? 8 : 0) + (v112HtfShow ? 16 : 0) : na, "V12 事件码（1结构/2突破/4联合/8上级突破/16上级联合）", display=display.data_window)
@@ -2061,7 +2170,7 @@ string rrGroup = "05 · 趋势盈亏框"
 
 bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。", display=display.none)
 
-int rrKeep = input.int(60, "保留盈亏框组数", minval=1, maxval=60, group=rrGroup, tooltip="保留最近 60 组以内的完整历史框、价格标签和 R 虚线。仅清理超出组数的最旧参考；信号箭头本身不受此限制。", display=display.none)
+int rrKeep = input.int(30, "保留盈亏框组数", minval=1, maxval=30, group=rrGroup, tooltip="保留最近30组完整历史框、出场R虚线与价格标签，避免平台对象上限导致缺线。仅清理超出组数的最旧参考；信号箭头本身不受此限制。", display=display.none)
 
 int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
 
@@ -2084,6 +2193,8 @@ type RRDrawing
     float distance
     float maximum
     bool hidden = false
+    line exitLine = na
+    label exitTag = na
 
 method deleteDrawings(RRDrawing group) =>
     box.delete(group.riskBox)
@@ -2091,6 +2202,8 @@ method deleteDrawings(RRDrawing group) =>
     label.delete(group.entryTag)
     label.delete(group.stopTag)
     label.delete(group.peakTag)
+    line.delete(group.exitLine)
+    label.delete(group.exitTag)
 
     for slot = 0 to 2
         line.delete(array.get(group.targetLines, slot))
@@ -2165,7 +2278,7 @@ if barstate.isconfirmed
         rrTargetTags := array.new<label>(3, na)
         activeRR := na
 
-    if not na(activeRR) and activeRR.hidden and activeRR.side == 1 and v11AnyJoint
+    if not na(activeRR) and not exitReference and activeRR.hidden and activeRR.side == 1 and v11AnyJoint
         activeRR.reveal(rrTargetTags)
 
     if not na(activeRR)
@@ -2238,6 +2351,13 @@ if barstate.isconfirmed
                 line.set_x2(guide, rrCloseTime)
 
         if ended
+            if showRisk and rrShow and not activeRR.hidden and not na(exitReferencePrice)
+                float grossR = activeRR.side * (exitReferencePrice - activeRR.entryPrice) / activeRR.distance
+                float netR = grossR - activeRR.entryPrice * roundTripCost / activeRR.distance
+                color exitTone = grossR >= 0 ? bull : bear
+                string exitTip = exitReason + " · " + str.format_time(rrCloseTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京\n参考出场 " + str.tostring(exitReferencePrice, format.mintick) + "\n毛 " + str.tostring(grossR, "#.##") + "R · 扣0.2%成本 " + str.tostring(netR, "#.##") + "R；不是实际成交。"
+                activeRR.exitLine := line.new(activeRR.startedAt, exitReferencePrice, rrCloseTime, exitReferencePrice, xloc=xloc.bar_time, color=exitTone, style=line.style_dashed, width=2, force_overlay=true)
+                activeRR.exitTag := label.new(rrCloseTime, exitReferencePrice, "exit " + (grossR > 0 ? "+" : "") + str.tostring(grossR, "#.##") + "R", xloc=xloc.bar_time, style=label.style_none, textcolor=exitTone, size=size.small, tooltip=exitTip, force_overlay=true)
             for targetSlot = 0 to 2
                 label.delete(array.get(rrTargetTags, targetSlot))
 
@@ -2265,7 +2385,7 @@ if barstate.isconfirmed
 
             // 仅联合模式下隐藏旧V9参考图形，不修改参考状态和退出。
             if showRisk and rrShow
-                bool rrHide = v10OnlyJoint
+                bool rrHide = v10OnlyJoint and not (v11AnyJoint and rrNewSide == 1)
                 activeRR.hidden := rrHide
                 float observation = entry + rrNewSide * 3.0 * rrNewDistance
                 string sideText = rrNewSide == 1 ? "多头" : "空头"
@@ -2377,7 +2497,7 @@ plot(barstate.isconfirmed and exitReference ? exitReferencePrice : na, "V6 参�
 
 // ───────────── 状态面板 ─────────────
 
-var table panel = table.new(position.top_right, 2, 15, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+var table panel = table.new(position.top_right, 2, 16, bgcolor=color.new(chart.bg_color, 8), border_width=0)
 
 if barstate.islast and showPanel
     string stateText = (v10OnlyJoint ? "仅联合显示 · " : "") + (trendSide == 1 ? "V9多头参考" : trendSide == -1 ? "V9空头参考" : "当前无跟踪参考")
@@ -2435,6 +2555,9 @@ if barstate.islast and showPanel
     table.cell(panel, 1, 13, latestBreakText, text_color=v10BreakColor, text_size=size.tiny)
     table.cell(panel, 0, 14, "V12 局部回踩找线", text_color=muted, text_size=size.tiny)
     table.cell(panel, 1, 14, v12LocalEnabled ? v12SearchWhy : "未启用", text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 15, "本周期结构参数（K数）", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 15, timeframe.period + " · 高点 " + str.tostring(v10Left) + "/" + str.tostring(v10Right) + " · 间隔 " + str.tostring(v10Gap) + " · 跨度 " + str.tostring(v10Span) + " · 持线待V9 " + str.tostring(array.size(v12Held) + array.size(v12HeldHtf)), text_color=ink, text_size=size.tiny)
 
 // ───────────── 原有结构与参考预警 ─────────────
 
