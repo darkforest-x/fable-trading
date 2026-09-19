@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-spike-ma-density-20260920-v1",
+  "source_identity": "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/identity.json",
+  "timeframes": [["15m",15],["1h",60],["4h",240]],
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "window": 12,
+  "width_caps": [0.5,1.0,1.5,2.0,3.0],
+  "seed": 92027,
+  "claim_scope": "Non-directional morphology audit. Counts and mechanism flags are not true-positive/false-positive labels; synthetic inputs are not market gold. No outcome-based tuning or profitability inference.",
+  "null": "Within each continuous segment, independently reorder the six MA identities on each bar with a fixed seed. This preserves per-bar span and MA levels but breaks temporal cross identity. Inspect whether crossing rules change while instantaneous compactness is identical.",
+  "training_eligible": false,
+  "production_eligible": false
+}
