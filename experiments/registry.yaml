@@ -9749,6 +9749,20 @@ experiments:
     artifacts: []
     notes: v9_long and v10_4 arms reproduce the earlier ledgers exactly. The box is the indicator's own V9 reference (reference_long_exits state), asserted identical to the one V10.4 uses. Pine not changed to this rule pending owner decision. Not blind. Not pushed.
 
+  - experiment_id: exp-spike-v112-support-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder_commit
+    status: active
+    question: Does requiring the first box breakout close to remain above all six moving averages improve default SPIKE V11.2 box_any entries?
+    single_variable: Entry eligibility only - finite close strictly above finite ropeHigh after the original one-use box joint. A rejected first breakout consumes the box. Independent serial replay; original data, V9 exit and 0.2 percent cost unchanged.
+    result: Pending full replay; no parameter search and no live changes.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_support_20260919.md
+    artifacts: []
+    notes: Two timeframes, same 638-symbol archive and original 2024-09-10 to 2026-05-01 window for comparison. Not blind. Owner removed historical holdout access restriction on 2026-09-19.
+
   - experiment_id: exp-spike-v112-manage-20260919-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f787d79162

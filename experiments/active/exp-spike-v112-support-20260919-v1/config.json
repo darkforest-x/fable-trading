@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-spike-v112-support-20260919-v1",
+  "arms": ["box_any", "box_support"],
+  "single_variable": "At the original first box breakout, finite close > finite ropeHigh; reject and consume the box otherwise.",
+  "timeframes": {"15m": "1h", "1h": "4h"},
+  "expected_symbols": 638,
+  "signal_close_start": "2024-09-10T00:00:00Z",
+  "signal_close_end_exclusive": "2026-05-01T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "roundtrip_cost": 0.002,
+  "exit": "unchanged published V9 fixed-entry exit",
+  "controls": "same symbol, month, period and causal ATR/price bucket; same exit and cost",
+  "control_seed": 91918,
+  "bootstrap_seed": 91509,
+  "bootstrap_reps": 2000,
+  "parameter_search": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "baseline_ledger": "experiments/active/exp-spike-v11-box-joint-20260918-v1/statistics/run_v1/trades.csv.gz"
+}
