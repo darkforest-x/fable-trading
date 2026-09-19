@@ -1,0 +1,518 @@
+{
+  "source_commit": "e06b10d6c0bf50d567a265939f90f7ef27815c80",
+  "code_and_manifests": {
+    "yoyo/evaluation/ma_morphology_reuse_recover.py": "f20eb3b3b072ec20de97f534b795666a31d9a8e20c4f743938787e19872094b9",
+    "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9",
+    "experiments/active/exp-ma-morphology-reuse-20260920-v1/PROJECT_PLAN.md": "5e60c8933db2de41b3d1dfb4bf7a3ee2774a14bd50e0eacc2952319f8def472c"
+  },
+  "inputs": {
+    "data/kline_fetched/okx_2Z_USDT_SWAP_15m_30303.csv": {
+      "sha256": "4318a7ba0ca42cf916ef2dccf6a63f0f79c09e564c2e532de689a5479aa84c76",
+      "rows": 30303
+    },
+    "data/kline_fetched/okx_ACH_USDT_SWAP_15m_41918.csv": {
+      "sha256": "a400e86c2b8767173b6b2d618228ea76e18492b49c7db2638157a6b8c61af3c3",
+      "rows": 41918
+    },
+    "data/kline_deep/okx_ADA_USDT_SWAP_15m_158499.csv": {
+      "sha256": "b92d632f46c2bee65eb8646e3a702b6a9a9bcf4cd6a0a2f1fcda6d7cd7977061",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_AGLD_USDT_SWAP_15m_41917.csv": {
+      "sha256": "67c36c30ddcef6eceb1004d6450f26a12c74453867c132feb5287b1d69891c05",
+      "rows": 41917
+    },
+    "data/kline_fetched/okx_AIXBT_USDT_SWAP_15m_41917.csv": {
+      "sha256": "59bc422c08c1d81b3aa693cf97d4c3d292c4f032eb09d67b80b50d916456cd1a",
+      "rows": 41917
+    },
+    "data/kline_fetched/okx_ALLO_USDT_SWAP_15m_26448.csv": {
+      "sha256": "8ca57b20765687fece70467ecea05c9ba299ee00827928eb868cf8309b1b3f71",
+      "rows": 26448
+    },
+    "data/kline_fetched/okx_ANIME_USDT_SWAP_15m_41816.csv": {
+      "sha256": "e0ea452641f6b1f19bbae4006b0392ab1993003297c5d94ed892cc8fdb3d4901",
+      "rows": 41816
+    },
+    "data/kline_deep/okx_APE_USDT_SWAP_15m_151496.csv": {
+      "sha256": "e36774d8861572ae5cbf9e0eb0e618d48fd5938b094ddff2367b1ae1b00f50f1",
+      "rows": 151496
+    },
+    "data/kline_fetched/okx_API3_USDT_SWAP_15m_41916.csv": {
+      "sha256": "5ca02e365e20736f636622be92dc741ba3a8c5827b7d33e1e3de9cdb97ea3283",
+      "rows": 41916
+    },
+    "data/kline_fetched/okx_APR_USDT_SWAP_15m_28219.csv": {
+      "sha256": "12f33bafe583b392fcad39b9529ad40625db9a907293bf4d686c45f8f0ba426e",
+      "rows": 28219
+    },
+    "data/kline_deep/okx_APT_USDT_SWAP_15m_130807.csv": {
+      "sha256": "a3038e53b72a76a893e2143cfbc8a1bee08c0601eb0d7ac61b6a4276af25dad0",
+      "rows": 130807
+    },
+    "data/kline_deep/okx_ARB_USDT_SWAP_15m_115876.csv": {
+      "sha256": "4a7fa76e28f01fa0aca060088af494cea1dffd06c102d84c6ab128819bfc019b",
+      "rows": 115876
+    },
+    "data/kline_fetched/okx_ARKM_USDT_SWAP_15m_41916.csv": {
+      "sha256": "08350e3433bb06d013c1146b7850e4b8331e7ad0de2fc0cba77b7a0cffe0432a",
+      "rows": 41916
+    },
+    "data/kline_fetched/okx_AUCTION_USDT_SWAP_15m_41915.csv": {
+      "sha256": "71f942e20e7d7ec2f01430c88a93ad1ac46b675f03d58954c5caa3a17362b26c",
+      "rows": 41915
+    },
+    "data/kline_fetched/okx_A_USDT_SWAP_15m_41918.csv": {
+      "sha256": "5a7966cc6ead59e480bf152daa373929b5ca4c6846b30a4ded9088260d326e59",
+      "rows": 41918
+    },
+    "data/kline_fetched/okx_BAND_USDT_SWAP_15m_41914.csv": {
+      "sha256": "a1c46ba99576d895e6f501d1310fcecf9c03d9ac050f1c72cdca57696ceddf3d",
+      "rows": 41914
+    },
+    "data/kline_fetched/okx_BARD_USDT_SWAP_15m_31651.csv": {
+      "sha256": "c438bce40dffa3ef907620d40d0e7611164c34911805a300dc067b3b694e8e92",
+      "rows": 31651
+    },
+    "data/kline_fetched/okx_BLUR_USDT_SWAP_15m_41913.csv": {
+      "sha256": "5a9a9a6c30d88d53c3bf6adfe56c510858b09aaaac7e3c32942a33df0d5b0378",
+      "rows": 41913
+    },
+    "data/kline_fetched/okx_BONK_USDT_SWAP_15m_41913.csv": {
+      "sha256": "c2e6974e62ee6a7f5755518ba0ee8d12dd8ab5dc7b381dfc99582641fc243f68",
+      "rows": 41913
+    },
+    "data/kline_fetched/okx_BRETT_USDT_SWAP_15m_41913.csv": {
+      "sha256": "9178619b0c7ed5470d2811359a132e1eb8f84a06a29614366a35a0d80c255a62",
+      "rows": 41913
+    },
+    "data/kline_fetched/okx_CELO_USDT_SWAP_15m_41912.csv": {
+      "sha256": "62c71e54676c53397b148c2bd4e558225c38af89329bdd0c8f8dae200b6013f8",
+      "rows": 41912
+    },
+    "data/kline_deep/okx_CFX_USDT_SWAP_15m_158499.csv": {
+      "sha256": "e4957200534a5ee0394691f387c8a2fe100324f2f0af0a8dcc6b9bdb3146d995",
+      "rows": 158499
+    },
+    "data/kline_deep/okx_CHZ_USDT_SWAP_15m_158499.csv": {
+      "sha256": "ff887d3536e7cda8167e657e02d2d1134b3c239a6ec3f70fc9a299566cc3d147",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_COIN_USDT_SWAP_15m_16212.csv": {
+      "sha256": "b31c3ddc4b0c28f5a0beea1bbe1ca8e872386b46128d9ded8fb55f71f0282c78",
+      "rows": 16212
+    },
+    "data/kline_fetched/okx_CORE_USDT_SWAP_15m_41912.csv": {
+      "sha256": "7e70408d047dfc08e36c7a611050faafb3357c6d3d3465000b9db5fc97b920b2",
+      "rows": 41912
+    },
+    "data/kline_deep/okx_CRV_USDT_SWAP_15m_158499.csv": {
+      "sha256": "1323759d58a0a271a826710f970fe9c15ab10b08e28fdf346458e6b15aeff3f5",
+      "rows": 158499
+    },
+    "data/kline_deep/okx_DOGE_USDT_SWAP_15m_158499.csv": {
+      "sha256": "3d6958eb9606a56b20d1790f6d483a0e730381f40629765a035b8001ffd8621f",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_DOOD_USDT_SWAP_15m_41911.csv": {
+      "sha256": "cc1029c0785f5c81883857142ce44058df4c1e12ec414c7920d473c85e0ca5cd",
+      "rows": 41911
+    },
+    "data/kline_deep/okx_DOT_USDT_SWAP_15m_158499.csv": {
+      "sha256": "248668f0237f1265e2df5c8acf0988851917676f8cf0451454bfa58ec11887fe",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_DYDX_USDT_SWAP_15m_41911.csv": {
+      "sha256": "23959cf9791316e72bdc3da2aeba12ce7a79dc2f06ac83318ed46b9757cfc617",
+      "rows": 41911
+    },
+    "data/kline_fetched/okx_EDEN_USDT_SWAP_15m_30501.csv": {
+      "sha256": "e38d43699743b95418528b07cacb5bc32926085a4653f79107aac90b63f00f78",
+      "rows": 30501
+    },
+    "data/kline_fetched/okx_EGLD_USDT_SWAP_15m_41910.csv": {
+      "sha256": "0437ee1fee0587960a3d668478b746c648c18d0838e2cecaaf3ff19a1c6ee093",
+      "rows": 41910
+    },
+    "data/kline_fetched/okx_ENJ_USDT_SWAP_15m_41910.csv": {
+      "sha256": "5e835a840c90745ba4d54c91c07f2fa3c9dd18196f85f4e034516612223bba1b",
+      "rows": 41910
+    },
+    "data/kline_fetched/okx_ENSO_USDT_SWAP_15m_27723.csv": {
+      "sha256": "1c18b1bc2e80f662404ca0e46b7daa3be0d91370e70d6efa2ab2874e7601c2ba",
+      "rows": 27723
+    },
+    "data/kline_fetched/okx_ENS_USDT_SWAP_15m_41910.csv": {
+      "sha256": "1168a44cecafbb204c898e785e33aa89523b75849b0d51f9affc8e11988af6a5",
+      "rows": 41910
+    },
+    "data/kline_deep/okx_ETC_USDT_SWAP_15m_158499.csv": {
+      "sha256": "5e7fe833e223d185ec82a607601f15e73c354fdde7e7a7ad3b9c7564cbb14825",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_FARTCOIN_USDT_SWAP_15m_41909.csv": {
+      "sha256": "fa79d7ecfa5da9fd95fd3770f0b6e50d0b9701b488c3a6462edef62ff96fe5c4",
+      "rows": 41909
+    },
+    "data/kline_deep/okx_FIL_USDT_SWAP_15m_158499.csv": {
+      "sha256": "3b80c237bc37c3e5405ea25b0ac5e6ebfaf38b1e32273a1a576e192cba098333",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_FLOW_USDT_SWAP_15m_41909.csv": {
+      "sha256": "e922a4dd691907b48107f843c10a517d69437e04c78f8ddd55aa7a027e74707b",
+      "rows": 41909
+    },
+    "data/kline_fetched/okx_GIGGLE_USDT_SWAP_15m_28119.csv": {
+      "sha256": "9a8c38d59de93a4a5a3d27f2ec2fce949625cb8913c8ed2040d8a15eacfb3f7e",
+      "rows": 28119
+    },
+    "data/kline_fetched/okx_GMT_USDT_SWAP_15m_41908.csv": {
+      "sha256": "e2835ce51243e0ee42dd5698a966185b46e841dd8822c7210a5810840082cca2",
+      "rows": 41908
+    },
+    "data/kline_fetched/okx_GMX_USDT_SWAP_15m_41908.csv": {
+      "sha256": "e16f1d3832b288f512cf954e829bbdfb7799b983bd6841e1cbc98aa983948044",
+      "rows": 41908
+    },
+    "data/kline_fetched/okx_GPS_USDT_SWAP_15m_41908.csv": {
+      "sha256": "4d502c8cc0f4a5f5120085cec2f4f91b33ee5fd6bb95da67d4af2a5203b1b889",
+      "rows": 41908
+    },
+    "data/kline_deep/okx_HBAR_USDT_SWAP_15m_101898.csv": {
+      "sha256": "9357c1aa1a2c6441c707e39d6ad1cb9c130e56a1c6b8d48294de3ee51daf236b",
+      "rows": 101898
+    },
+    "data/kline_fetched/okx_HMSTR_USDT_SWAP_15m_41908.csv": {
+      "sha256": "bdb02a7693311add6e15c41431fa931c86bb58ea7919c339c72701209c301be4",
+      "rows": 41908
+    },
+    "data/kline_fetched/okx_HOME_USDT_SWAP_15m_40970.csv": {
+      "sha256": "55be699a681b8e4ea09286639e5247b2cdb961e556c105e836dedb3fcd9e3301",
+      "rows": 40970
+    },
+    "data/kline_fetched/okx_H_USDT_SWAP_15m_39067.csv": {
+      "sha256": "e38f77c03a8a6ddccea50b346b35905ce3cf5253c22ced0f076f2023f31067c1",
+      "rows": 39067
+    },
+    "data/kline_fetched/okx_ICX_USDT_SWAP_15m_41907.csv": {
+      "sha256": "ebd3c9da372551a794408af0a1c7efa89e0061242c518b35e2c6d53f3a7ddc91",
+      "rows": 41907
+    },
+    "data/kline_fetched/okx_INIT_USDT_SWAP_15m_41907.csv": {
+      "sha256": "2b0ef6b36eb0997f3009c6c36abc1f9a4e8e59566c8ba74c989fd63a23b2440f",
+      "rows": 41907
+    },
+    "data/kline_deep/okx_INJ_USDT_SWAP_15m_91699.csv": {
+      "sha256": "f705ac7c1e4a31b5b095743e6fcb5db5aa44b64abead3435c44f56849e40d4b6",
+      "rows": 91699
+    },
+    "data/kline_fetched/okx_IOTA_USDT_SWAP_15m_41907.csv": {
+      "sha256": "ce0724535206e8f220d0dbdddec6f0fba244dfae99a276468d617a143b43798f",
+      "rows": 41907
+    },
+    "data/kline_deep/okx_JTO_USDT_SWAP_15m_87975.csv": {
+      "sha256": "2affd294e29394dc4fc8066bc93555687c6db30bea09ef6655fe69d6a907f191",
+      "rows": 87975
+    },
+    "data/kline_fetched/okx_KAITO_USDT_SWAP_15m_41907.csv": {
+      "sha256": "39378f20bf465bf86a8ed6bb9aac11930413ff0cf245122ed0eeecdc5f7d0ff7",
+      "rows": 41907
+    },
+    "data/kline_fetched/okx_KMNO_USDT_SWAP_15m_41907.csv": {
+      "sha256": "96610398351a60c4bcc899ca47bdddce263218a38f732a82cc173dea05d36c11",
+      "rows": 41907
+    },
+    "data/kline_fetched/okx_KSM_USDT_SWAP_15m_41907.csv": {
+      "sha256": "9eaa64fe3902de42e96baeb73eb386f4a0c2be42d2e4ebcb64df779e9c5d8a5b",
+      "rows": 41907
+    },
+    "data/kline_fetched/okx_LAYER_USDT_SWAP_15m_41907.csv": {
+      "sha256": "455c3f87d4d88f5d5742ec56596c250e5c6fa820451d39806987ff2938c34ed2",
+      "rows": 41907
+    },
+    "data/kline_fetched/okx_LA_USDT_SWAP_15m_40971.csv": {
+      "sha256": "0a28176fa42ecfe2a46c15b72be2e27714e86bfae825d8d2988c9bcd8f938098",
+      "rows": 40971
+    },
+    "data/kline_fetched/okx_LIGHT_USDT_SWAP_15m_23123.csv": {
+      "sha256": "0ac4a1f84045692dfa597d5de4674c95b45e21f6eeca33e177063b1ff25f97f7",
+      "rows": 23123
+    },
+    "data/kline_deep/okx_LINK_USDT_SWAP_15m_158499.csv": {
+      "sha256": "52c7e002d840b59df9b39ffe811c98651960fd77ba42df53dac8bfa2f45185fb",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_LIT_USDT_SWAP_15m_22373.csv": {
+      "sha256": "0b1fd43fb2699904e0d42c9cbe533082d99099e851add76d48d13a0f01de4e8d",
+      "rows": 22373
+    },
+    "data/kline_fetched/okx_LPT_USDT_SWAP_15m_41906.csv": {
+      "sha256": "8a8d95019733af3247c008f1919fdb5e0082a021e4b8961f83212e01bb74464d",
+      "rows": 41906
+    },
+    "data/kline_fetched/okx_LRC_USDT_SWAP_15m_39172.csv": {
+      "sha256": "0e473debe5a6d3d9e5f41e9291d71d2bc2ad78b3fb0217cf9d363af395025d2c",
+      "rows": 39172
+    },
+    "data/kline_fetched/okx_LUNA_USDT_SWAP_15m_41906.csv": {
+      "sha256": "4ff67b00e79d7dd8b687fe41301b66e49e69922a93860e4a008adc358c644c23",
+      "rows": 41906
+    },
+    "data/kline_fetched/okx_MAGIC_USDT_SWAP_15m_41906.csv": {
+      "sha256": "d59f21c5f6af04fe9b0391fab39991d8aad9547454556a6f7b5052bd7bb941ce",
+      "rows": 41906
+    },
+    "data/kline_fetched/okx_MANA_USDT_SWAP_15m_41806.csv": {
+      "sha256": "6a7d4ac9af7533dd8f73705e018621921e4cacd68213e61e4545f3699ade0f2c",
+      "rows": 41806
+    },
+    "data/kline_fetched/okx_MASK_USDT_SWAP_15m_41906.csv": {
+      "sha256": "de8d8e9fe207d2125c492a9c0b46e6b19415ae926fb2441f61b1d741f1078d45",
+      "rows": 41906
+    },
+    "data/kline_fetched/okx_MEME_USDT_SWAP_15m_41905.csv": {
+      "sha256": "af07d9729ed53f111cb00075651ecfed2e6ff2ea4197d8e3d2530303d47b2d95",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_METIS_USDT_SWAP_15m_41905.csv": {
+      "sha256": "0e7b17b6d7de41a3e9837a33c41c8bf0bbc2a2253d1e64fe0a3ab3f88d39998c",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_MEW_USDT_SWAP_15m_41905.csv": {
+      "sha256": "352f7031d7a110006b1f10797e54fe031a60803ecdf0d50ce7d64e73fc631598",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_MOODENG_USDT_SWAP_15m_41905.csv": {
+      "sha256": "494eb7d0f2debd6509a5913f1e944fae14eeb06d84c4834b6d72d82094d1ec10",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_MOVE_USDT_SWAP_15m_41905.csv": {
+      "sha256": "19af407e0271eb80db416550bfb51bf3b30462387cdfb6d97b8babcc76facc5e",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_MUBARAK_USDT_SWAP_15m_41905.csv": {
+      "sha256": "98fb12a6f7a7bd6ed587d1962d1281736b71f8da51a5d83df4c5ac1f3fa4c65d",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_NEO_USDT_SWAP_15m_41905.csv": {
+      "sha256": "8e75181e42a24bd0e0d39a61b9d88bde2b034fce179c9a504888a6321c525b0f",
+      "rows": 41905
+    },
+    "data/kline_fetched/okx_NIGHT_USDT_SWAP_15m_23781.csv": {
+      "sha256": "8b8ebb23a09a2579808671b5f3439a36a128288e824a158c232fb9c6819f48ae",
+      "rows": 23781
+    },
+    "data/kline_fetched/okx_NMR_USDT_SWAP_15m_41904.csv": {
+      "sha256": "af935349315311f4f3d5c2de0e41b7bc56b13acee93b41b7ef53369f4810a17d",
+      "rows": 41904
+    },
+    "data/kline_fetched/okx_NOT_USDT_SWAP_15m_41904.csv": {
+      "sha256": "56e1303a4206ecdd8d21bf717596aee2043241a3471e6bdea5d54ac142d461e4",
+      "rows": 41904
+    },
+    "data/kline_fetched/okx_OFC_USDT_SWAP_15m_12167.csv": {
+      "sha256": "a86a144de35b17aa726b3085e2b749b31eb4a76e64800def7886295c721422d7",
+      "rows": 12167
+    },
+    "data/kline_deep/okx_ONDO_USDT_SWAP_15m_67705.csv": {
+      "sha256": "ff77b9932d045a93fa6ae8e47caf2bd804bdecd8d24f82f259d02c36f8390da0",
+      "rows": 67705
+    },
+    "data/kline_fetched/okx_ONE_USDT_SWAP_15m_41904.csv": {
+      "sha256": "c251448976c8d50c421daea03f0cee0bb2a89ac21c7aa642d25af69415719679",
+      "rows": 41904
+    },
+    "data/kline_fetched/okx_ONT_USDT_SWAP_15m_41904.csv": {
+      "sha256": "eb309b10b0d665f9c1f2518e626b917fd1a5b5299bf9a1d4852b3bddb239de15",
+      "rows": 41904
+    },
+    "data/kline_deep/okx_OP_USDT_SWAP_15m_144244.csv": {
+      "sha256": "335e02ff9b67dd8ea2f2585c4aebe5da5ca482971c908887507579d6eacd9896",
+      "rows": 144244
+    },
+    "data/kline_fetched/okx_ORDER_USDT_SWAP_15m_30486.csv": {
+      "sha256": "3c6ac92481263523e21e0cccf92393fc431bcbe4050473031815807fa7a95fdb",
+      "rows": 30486
+    },
+    "data/kline_deep/okx_ORDI_USDT_SWAP_15m_110236.csv": {
+      "sha256": "ffe49fd58348edf345a84a736c79bdb66580772f4bc31182aaaab90010803720",
+      "rows": 110236
+    },
+    "data/kline_fetched/okx_PARTI_USDT_SWAP_15m_41904.csv": {
+      "sha256": "750c8b2d3b7e002823115d0248ceb3287f4484ae2a3a28bb233504a29e787bea",
+      "rows": 41904
+    },
+    "data/kline_deep/okx_PENGU_USDT_SWAP_15m_54916.csv": {
+      "sha256": "bed3268ea3fb17a6cd3cf727265290c0c6cce42dbf4df9430675814386bd0139",
+      "rows": 54916
+    },
+    "data/kline_deep/okx_PEPE_USDT_SWAP_15m_111988.csv": {
+      "sha256": "786cf42e9715e16e8144519b281a2788b7d6c317c9058947fe0047ff11e6fa55",
+      "rows": 111988
+    },
+    "data/kline_deep/okx_PI_USDT_SWAP_15m_48704.csv": {
+      "sha256": "65fe1443525a1b745070c24b4e3cb03edffaf89ac31e6047e91360a7d18b0aca",
+      "rows": 48704
+    },
+    "data/kline_fetched/okx_PLUME_USDT_SWAP_15m_41903.csv": {
+      "sha256": "c5bbf648351e36a790264bdf5330dc0b280d64307de1469760a66296060183ea",
+      "rows": 41903
+    },
+    "data/kline_fetched/okx_PNUT_USDT_SWAP_15m_41903.csv": {
+      "sha256": "384b41bb84796195183ea7ca04c076e02e0fea3e430eea737c18b89b5f9f25a7",
+      "rows": 41903
+    },
+    "data/kline_fetched/okx_PROVE_USDT_SWAP_15m_28869.csv": {
+      "sha256": "31ea77163548086fa3ea2d2484611ddae1165561e343b71a208cd09fa6c8de20",
+      "rows": 28869
+    },
+    "data/kline_fetched/okx_PUMP_USDT_SWAP_15m_37965.csv": {
+      "sha256": "27356a5f4e1972b37c5860aaa8be2ae63d98e5f0ab44237a63cb86141f4aad83",
+      "rows": 37965
+    },
+    "data/kline_fetched/okx_RESOLV_USDT_SWAP_15m_41241.csv": {
+      "sha256": "4b5d6bc2ef622fc8baebd8b34dd66e0f681b9a31058d219c9f04abcc5b9e9ac7",
+      "rows": 41241
+    },
+    "data/kline_fetched/okx_RSR_USDT_SWAP_15m_41902.csv": {
+      "sha256": "a8eb5795b96f69d8f0c4781cf9e4cf7b7c570b1799c76f843563c6bb2cbe1496",
+      "rows": 41902
+    },
+    "data/kline_fetched/okx_RVN_USDT_SWAP_15m_41902.csv": {
+      "sha256": "1f0493f43ccda9827b472fcb06b942ec576c50e7c59b1036c5bc6c56256e2a21",
+      "rows": 41902
+    },
+    "data/kline_fetched/okx_SAPIEN_USDT_SWAP_15m_26948.csv": {
+      "sha256": "dcc42c471b511a37b99f2b63cd5950bb130e2365df93a1c07137888d4273882e",
+      "rows": 26948
+    },
+    "data/kline_fetched/okx_SENT_USDT_SWAP_15m_26167.csv": {
+      "sha256": "db019dfeeb2fdcb6d85561d214812482fb3a8dffb7de0f20eb7dd0615271fb91",
+      "rows": 26167
+    },
+    "data/kline_fetched/okx_SIGN_USDT_SWAP_15m_41902.csv": {
+      "sha256": "aef5d219b99c9604545c816ccf198e79fecc45031ef10b854548d3e0c51422b3",
+      "rows": 41902
+    },
+    "data/kline_deep/okx_SOL_USDT_SWAP_15m_158499.csv": {
+      "sha256": "72837586eff583cb06cd152ba873ce03ae0eb33196d0a04703f5252f6dbbc1eb",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_SPX_USDT_SWAP_15m_37727.csv": {
+      "sha256": "738fa58ac07bcbf45ae41deda36035ce84e875bb9e0e5171d5642e3f4f10d69e",
+      "rows": 37727
+    },
+    "data/kline_fetched/okx_STX_USDT_SWAP_15m_41901.csv": {
+      "sha256": "368d4ccec9308f78875c0ceb77aeb10797e00d8eadef1a20fb2947f548cfc3df",
+      "rows": 41901
+    },
+    "data/kline_deep/okx_SUI_USDT_SWAP_15m_111797.csv": {
+      "sha256": "4b40d01cf6597cff9acf5a0fc5272805d4f5091fd308219b7e87fc152d432cfb",
+      "rows": 111797
+    },
+    "data/kline_fetched/okx_SUSHI_USDT_SWAP_15m_41901.csv": {
+      "sha256": "d406f9abc9c4600dfa1186493a4248b41c573400f2596e8b2c2c77a97d73f5c6",
+      "rows": 41901
+    },
+    "data/kline_fetched/okx_S_USDT_SWAP_15m_41902.csv": {
+      "sha256": "81f97dd18e3c557c88e124069ff788b23cec8427d2224c877b17f7521c055581",
+      "rows": 41902
+    },
+    "data/kline_fetched/okx_TAO_USDT_SWAP_15m_41901.csv": {
+      "sha256": "1c2d7e89def416b163824172af6582abdd055a0e778a4a68646d7fe2ee344a59",
+      "rows": 41901
+    },
+    "data/kline_fetched/okx_THETA_USDT_SWAP_15m_41901.csv": {
+      "sha256": "3afb5b49dc4b7c2a4705a0e3160ace6b1d85d4f25d6b833e0c2f095f74b0817e",
+      "rows": 41901
+    },
+    "data/kline_deep/okx_TIA_USDT_SWAP_15m_94555.csv": {
+      "sha256": "f80676c3775f6bfb12cad7863a315b1bbc149c5a53c8bdf8b105675dee4c2139",
+      "rows": 94555
+    },
+    "data/kline_fetched/okx_TRB_USDT_SWAP_15m_41901.csv": {
+      "sha256": "08388bc8ec43a6b441646c8d7c66a7c87ba76e42aee3a63169e53f50fb340c09",
+      "rows": 41901
+    },
+    "data/kline_deep/okx_TRUMP_USDT_SWAP_15m_51790.csv": {
+      "sha256": "5f41d8f19ea424df90ecee252b87069667f20c04c44b6e5654ade7e2a944d7c8",
+      "rows": 51790
+    },
+    "data/kline_fetched/okx_TRUTH_USDT_SWAP_15m_24837.csv": {
+      "sha256": "09446945d09f757dfebc28328af2fd9756d3aa4fea286bd9135f63fd114e3dab",
+      "rows": 24837
+    },
+    "data/kline_deep/okx_TRX_USDT_SWAP_15m_158499.csv": {
+      "sha256": "f9ccea74665a0dbc674f7e6a07144d35dd20c5a08d10686da226211490f9a70a",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_TURBO_USDT_SWAP_15m_41900.csv": {
+      "sha256": "923c4b191b2409685d046c8ca3762272f0cf6162b5680ae0058ab96d239f2ceb",
+      "rows": 41900
+    },
+    "data/kline_fetched/okx_UMA_USDT_SWAP_15m_41900.csv": {
+      "sha256": "ebaa100877c94c5b885f7cafa31b8701cfb248825e3d0eabf15d97e7311808c4",
+      "rows": 41900
+    },
+    "data/kline_fetched/okx_USELESS_USDT_SWAP_15m_36939.csv": {
+      "sha256": "33ac74602c97ab70bd8f65d2cafe6fef5beff8ed995075819c618c0bb5541181",
+      "rows": 36939
+    },
+    "data/kline_fetched/okx_VANA_USDT_SWAP_15m_41900.csv": {
+      "sha256": "41e9940448ccc658d8633b7740e8ff0128bed3d7b46dce42cfe6100d68de8b2a",
+      "rows": 41900
+    },
+    "data/kline_fetched/okx_WCT_USDT_SWAP_15m_41900.csv": {
+      "sha256": "8f45e9a68adf51f603db57ad86fdbe45cbc9d6505229486a377b6c73bad9a36e",
+      "rows": 41900
+    },
+    "data/kline_fetched/okx_WET_USDT_SWAP_15m_23763.csv": {
+      "sha256": "7b3e1b1bc8fd94d9dc4a171476c25c106779c3d9b752ec44d68e2531009e7c47",
+      "rows": 23763
+    },
+    "data/kline_deep/okx_WLD_USDT_SWAP_15m_104087.csv": {
+      "sha256": "f495bc8e031ca96a2a856dd4debd23f0ec49b01bdbfb1b27279ccbb68098fc47",
+      "rows": 104087
+    },
+    "data/kline_fetched/okx_WOO_USDT_SWAP_15m_41900.csv": {
+      "sha256": "6a481e8b273fffbbc767f9d5fe85fec00f119c2c833080bd89219b6e8e4dd681",
+      "rows": 41900
+    },
+    "data/kline_fetched/okx_W_USDT_SWAP_15m_41900.csv": {
+      "sha256": "3ae688cb400147b5591b618e97249689d02957f2464137feecda5124afa6fb7e",
+      "rows": 41900
+    },
+    "data/kline_deep/okx_XRP_USDT_SWAP_15m_158499.csv": {
+      "sha256": "6c398128cf0ae6b49787ec1eea83764f4eda623a00cce31ce3706103c119c0fb",
+      "rows": 158499
+    },
+    "data/kline_fetched/okx_YGG_USDT_SWAP_15m_41899.csv": {
+      "sha256": "b4245adce3311606f6911839a33e806df097b58e4f08e6c5e5f8676ea4edeaaa",
+      "rows": 41899
+    },
+    "data/kline_fetched/okx_ZBT_USDT_SWAP_15m_28869.csv": {
+      "sha256": "c028760b5092b0c0c7cc7a15e112f20c2dbda92aee2b14777a8ffc53b01b6dc0",
+      "rows": 28869
+    },
+    "data/kline_fetched/okx_ZETA_USDT_SWAP_15m_41899.csv": {
+      "sha256": "cf67b9bdce15730b64c66d9054ebc761ed80fc39279c5cc446dc351cf6dd02c3",
+      "rows": 41899
+    },
+    "data/kline_fetched/okx_ZIL_USDT_SWAP_15m_41899.csv": {
+      "sha256": "83150c30953a6f651a05db4341e3152ad215a2d9c4219c9de4a07e8941f0421e",
+      "rows": 41899
+    },
+    "data/kline_deep/okx_ZK_USDT_SWAP_15m_72422.csv": {
+      "sha256": "bb072473cfc13ff0b02a78385d896dbf786e09f6d35e782b1b03d36e39bc8688",
+      "rows": 72422
+    },
+    "data/kline_fetched/okx_ZORA_USDT_SWAP_15m_29541.csv": {
+      "sha256": "222c664318014a0f8c01c1fbfc6648ce33f5946fe22368ee72df59a00b2a0e34",
+      "rows": 29541
+    }
+  },
+  "files": {
+    "summary.json": "b3abb90c35e46f0e43c2ae60d276fe4d97de02c0fc5a5a5d085d50f3d274fe85",
+    "lineage.csv": "a08b382d39258d796994df51b74e8dde9528ec1bd0a404444a3d17768fc55682"
+  }
+}

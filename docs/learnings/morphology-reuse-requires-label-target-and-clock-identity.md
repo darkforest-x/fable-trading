@@ -1,0 +1,7 @@
+# Reusing morphology assets requires both target identity and clock identity
+
+- **问题**：Owner wants old YOLO/L2 research reused for six-MA morphology. Historical reviewed labels exist, but old image/source paths fail and an economic model target is different from shape agreement.
+- **死胡同**：Declare the old data lost from a failed path lookup, reuse a new CSV's old positional index, or rename future-return scores morphology quality. For the221-row reviewed set, original paths expose0 images/1 numeric row; all221 original images are actually archived with matching SHA.51 chosen current same-feed files shift event indices by up to119618 rows.
+- **有效路径**：Recover images only through original hashes; bind current OHLC by original symbol/timeframe/start/end timestamps with full grid and overlapping-source agreement, preserving unknown original OHLC hash parity. Reuse causal pre-core feature extractors while rebuilding the target around human shape judgments; preserve rule-derived versus directly confirmed geometry and post-core visibility.
+- **通用规则**：Before reusing a model or a dataset, answer both what the label means and which exact historical interval the row points to. A surviving label or matched clock alone is not original data parity, and a useful feature extractor is not a validated classifier.
+- **牵连**：`ma_morphology_reuse_inventory.py`, `ma_morphology_reuse_recover.py`, `global_shape.py`, originalv3.2 reviewed manifest. Historical reports and source labels stay unchanged; no training or production eligibility is inferred.

@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-reuse-20260920-v1-delivery
+    artifact_type: manifest
+    role: historical_owner_morphology_lineage_and_reuse_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: e06b10d6c0bf50d567a265939f90f7ef27815c80
+    source_path: experiments/active/exp-ma-morphology-reuse-20260920-v1/delivery_manifest.json
+    sha256: 6dbeaaf5275712a60120b8a17addd1503737bae7d70f6527fbe984a46dbe935f
+    size_bytes: 2855
+    storage_uri: repo://experiments/active/exp-ma-morphology-reuse-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Non-directional audit; legacy enum has no not-applicable. Owner canceled historical-data restriction. Exact image identity and timestamp
+      recovery, not original OHLC parity or validated causal classifier. No new training.
   - artifact_id: btc-rsi1h-sixma5m-short-only-20260920-v1-delivery
     artifact_type: manifest
     role: short_only_entry_occupancy_sensitivity
