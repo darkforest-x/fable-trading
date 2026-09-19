@@ -233,6 +233,11 @@ md 源文件必须包含：
 - 四仓历史结论（含全部负面结果）在 `experiments/historical/`，
   验收在 `reports/consolidation/FINAL_ACCEPTANCE.md`。
 
+## SPIKE Pine version delivery (owner, 2026-09-20)
+
+- Every delivered change increments the minor version (V12 → V12.1 → V12.2).
+- Preserve the prior version's source file. Create a new versioned Pine file and a new private TradingView script; do not overwrite the previous script.
+
 ## learning law
 
 每解决一个非平凡问题（修 bug、架构决策、反直觉结论），先运行 extract-approach skill
