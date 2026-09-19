@@ -31450,3 +31450,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: 315cells x2 fill paths in development with controls disabled;3 finalists rescored once on the later window with5 matched controls per trade. No reselection after the recheck. No live change,no promotion.
+
+  - artifact_id: spike-v112-support-20260919-delivery
+    artifact_type: manifest
+    role: six_ma_support_gate_full_serial_ablation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 626a4b364adb477d600f4a52735341c9b7e29c69
+    source_path: experiments/active/exp-spike-v112-support-20260919-v1/delivery_manifest.json
+    sha256: 7d94c27b4ee0ba03c76f920ea5ccf49db6e8fc912eab4f13c83a2f1e1741ee02
+    size_bytes: 4097
+    storage_uri: repo://experiments/active/exp-spike-v112-support-20260919-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Rejected both timeframes. 638 archived symbols, original 9287-trade baseline reproduced. Packed full streams, decisions, controls and receipts plus readable MD/HTML and statistical tables;
+      legacy holdout_status records archive dates only, not an access restriction. No live change.

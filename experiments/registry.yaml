@@ -9751,16 +9751,16 @@ experiments:
 
   - experiment_id: exp-spike-v112-support-20260919-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder_commit
-    status: active
+    source_commit: 626a4b364adb477d600f4a52735341c9b7e29c69
+    status: rejected
     question: Does requiring the first box breakout close to remain above all six moving averages improve default SPIKE V11.2 box_any entries?
     single_variable: Entry eligibility only - finite close strictly above finite ropeHigh after the original one-use box joint. A rejected first breakout consumes the box. Independent serial replay; original data, V9 exit and 0.2 percent cost unchanged.
-    result: Pending full replay; no parameter search and no live changes.
+    result: Rejected on both timeframes. 638 symbols completed without failures; all 9287 baseline trades reproduce. The gate removes only about 2 percent of candidates. 15m full mean net R -0.0950 to -0.0909, later -0.2921 to -0.2921; full change +0.0041 with month-block 95 percent interval [-0.0022,+0.0099]. 1h full -0.0921 to -0.1090, later -0.2278 to -0.2359; avoids 23.50R loss but forgoes 55.01R profit plus one newly freed -1.02R trade. Neither passes original net-profit and matched-random criteria. No parameter search or live change.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v112_support_20260919.md
-    artifacts: []
+    artifacts: [spike-v112-support-20260919-delivery]
     notes: Two timeframes, same 638-symbol archive and original 2024-09-10 to 2026-05-01 window for comparison. Not blind. Owner removed historical holdout access restriction on 2026-09-19.
 
   - experiment_id: exp-spike-v112-manage-20260919-v1

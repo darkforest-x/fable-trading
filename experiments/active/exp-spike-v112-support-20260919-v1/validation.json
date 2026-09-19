@@ -1,0 +1,23 @@
+{
+  "python": "3.9.6",
+  "numpy": "2.0.2",
+  "pandas": "2.3.3",
+  "platform": "macOS-26.5.2-arm64-arm-64bit",
+  "focused_and_boundary_tests": {
+    "passed": 118
+  },
+  "report_integrity_tests": {
+    "passed": 4
+  },
+  "registry_suite": {
+    "passed": 12,
+    "failed": 4,
+    "pre_existing_at_HEAD_verified": true,
+    "blocking_rows": [
+      "spike-v8-total2-1h-native-20260914-delivery",
+      "exp-eth-ma120-longest-runs-20260914-v1"
+    ],
+    "reason": "Pre-existing records missing source_commit; this experiment row validates independently."
+  },
+  "review": "Terra High static review: no gate/serial defect; stream inventory, control coverage and canonical baseline config checks integrated; additional object-boolean normalization tested."
+}

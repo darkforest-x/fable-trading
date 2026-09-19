@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,">
+<title>SPIKE V11.2 六均线支撑单变量完整回放</title>
+<style>
+:root { color-scheme: light dark; }
+*, *::before, *::after { box-sizing: border-box; }
+body { width: 100%; max-width: 62rem; margin: 0 auto; padding: 2rem 1.2rem 5rem;
+       font: 16px/1.75 -apple-system, "PingFang SC", "Hiragino Sans GB",
+             "Microsoft YaHei", system-ui, sans-serif;
+       color: #1a1a1a; background: #fff; overflow-wrap: anywhere; }
+h1 { font-size: 1.9rem; border-bottom: 3px solid #1976d2; padding-bottom: .4rem;
+     margin: 2.4rem 0 1rem; }
+h2 { font-size: 1.45rem; border-bottom: 1px solid #d0d7de; padding-bottom: .3rem;
+     margin: 2rem 0 .8rem; }
+h3 { font-size: 1.15rem; margin: 1.5rem 0 .6rem; }
+h4 { font-size: 1rem; margin: 1.2rem 0 .5rem; color: #444; }
+table { border-collapse: collapse; margin: 1rem 0; font-size: .92rem;
+        display: block; overflow-x: auto; max-width: 100%; }
+th, td { border: 1px solid #d0d7de; padding: .45rem .7rem; text-align: left;
+         white-space: nowrap; }
+th { background: #f2f5f8; font-weight: 600; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f2f5f8; padding: .12em .35em; border-radius: 4px;
+       font: .88em/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+pre { background: #f6f8fa; padding: .9rem 1.1rem; border-radius: 8px;
+      overflow-x: auto; border: 1px solid #e3e8ee; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+blockquote { margin: 1rem 0; padding: .6rem 1rem; border-left: 4px solid #1976d2;
+             background: #f5f9ff; color: #2c3e50; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 2.5rem 0; }
+a { color: #1976d2; }
+img { display: block; max-width: 100%; height: auto; margin: 1rem 0;
+      border: 1px solid #d0d7de; border-radius: 8px; }
+ul, ol { padding-left: 1.5rem; }
+li { margin: .25rem 0; }
+@media (prefers-color-scheme: dark) {
+  body { color: #e6e6e6; background: #14171a; }
+  h2, th, td, hr, pre { border-color: #30363d; }
+  th { background: #1c2128; } tr:nth-child(even) td { background: #191d21; }
+  code, pre { background: #1c2128; } h4 { color: #b8c0c8; }
+  blockquote { background: #172029; color: #cbd5e0; }
+}
+</style>
+</head>
+<body>
+<h1>SPIKE V11.2 六均线支撑单变量完整回放</h1>
+<p><strong>结论：两个周期均未通过本轮研究门，这项过滤不能据此升级为默认交易条件。</strong></p>
+<p>日期：2026-09-19。638 个币完整重放，原基线逐笔复现。</p>
+<ul>
+<li><strong>15m</strong>：全期每笔净 R -0.0950 → -0.0909，平仓笔数 7082 → 6945；后段每笔净 R -0.2921 → -0.2921，平仓笔数 3313 → 3245。</li>
+<li><strong>1h</strong>：全期每笔净 R -0.0921 → -0.1090，平仓笔数 2199 → 2157；后段每笔净 R -0.2278 → -0.2359，平仓笔数 1077 → 1057。</li>
+</ul>
+<h2>结果</h2>
+<table><thead><tr>
+<th>timeframe</th>
+<th>arm</th>
+<th>period</th>
+<th>closed</th>
+<th>win_rate</th>
+<th>mean_gross_r</th>
+<th>mean_net_r</th>
+<th>pf</th>
+<th>random_mean_r</th>
+<th>excess_vs_random_r</th>
+<th>p_vs_random</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>box_any</td><td>full</td><td>7082</td><td>0.2938</td><td>0.0253</td><td>-0.0950</td><td>0.8705</td><td>-0.1834</td><td>0.0894</td><td>0.0855</td></tr>
+<tr><td>15m</td><td>box_any</td><td>earlier</td><td>3769</td><td>0.3386</td><td>0.1976</td><td>0.0782</td><td>1.1143</td><td>-0.1690</td><td>0.2476</td><td>0.0040</td></tr>
+<tr><td>15m</td><td>box_any</td><td>later</td><td>3313</td><td>0.2430</td><td>-0.1707</td><td>-0.2921</td><td>0.6298</td><td>-0.1998</td><td>-0.0911</td><td>0.9305</td></tr>
+<tr><td>15m</td><td>box_support</td><td>full</td><td>6945</td><td>0.2947</td><td>0.0286</td><td>-0.0909</td><td>0.8759</td><td>-0.1815</td><td>0.0917</td><td>0.0840</td></tr>
+<tr><td>15m</td><td>box_support</td><td>earlier</td><td>3700</td><td>0.3403</td><td>0.2042</td><td>0.0856</td><td>1.1253</td><td>-0.1650</td><td>0.2509</td><td>0.0050</td></tr>
+<tr><td>15m</td><td>box_support</td><td>later</td><td>3245</td><td>0.2428</td><td>-0.1716</td><td>-0.2921</td><td>0.6299</td><td>-0.2004</td><td>-0.0904</td><td>0.9360</td></tr>
+<tr><td>1h</td><td>box_any</td><td>full</td><td>2199</td><td>0.2783</td><td>-0.0298</td><td>-0.0921</td><td>0.8705</td><td>-0.1091</td><td>0.0126</td><td>0.3933</td></tr>
+<tr><td>1h</td><td>box_any</td><td>earlier</td><td>1122</td><td>0.3253</td><td>0.0993</td><td>0.0381</td><td>1.0576</td><td>-0.0170</td><td>0.0551</td><td>0.2409</td></tr>
+<tr><td>1h</td><td>box_any</td><td>later</td><td>1077</td><td>0.2293</td><td>-0.1644</td><td>-0.2278</td><td>0.7018</td><td>-0.2062</td><td>-0.0323</td><td>0.6592</td></tr>
+<tr><td>1h</td><td>box_support</td><td>full</td><td>2157</td><td>0.2754</td><td>-0.0470</td><td>-0.1090</td><td>0.8476</td><td>-0.1089</td><td>0.0026</td><td>0.4693</td></tr>
+<tr><td>1h</td><td>box_support</td><td>earlier</td><td>1100</td><td>0.3200</td><td>0.0737</td><td>0.0129</td><td>1.0194</td><td>-0.0215</td><td>0.0344</td><td>0.3383</td></tr>
+<tr><td>1h</td><td>box_support</td><td>later</td><td>1057</td><td>0.2289</td><td>-0.1727</td><td>-0.2359</td><td>0.6918</td><td>-0.2008</td><td>-0.0309</td><td>0.6417</td></tr>
+</tbody></table>
+<p>R 是每笔初始止损风险单位；胜率为小数。净收益已扣原设定 0.2% 往返成本。所有均值只用已平仓交易。</p>
+<h2>条件与数据</h2>
+<p>A=原框内首次任一突破，B=A 且当根收盘严格高于 SMA/EMA 20、60、120 的最高值。先消耗原框首个突破，再过滤，拒绝后不能同框重试。其他动量、方向门没有恢复。两臂独立串行回放，允许过滤后释放仓位。</p>
+<p>638 个 Binance 永续历史档案，5m 聚合，15m←1h 与 1h←4h；收盘信号区间 2024-09-10 至 2026-05-01（右端不含），2025-09-10 切前后段。原始数据全部允许研究，本次保持旧窗口只为复现。候选和截尾如下。</p>
+<table><thead><tr>
+<th>timeframe</th>
+<th>arm</th>
+<th>original_candidates</th>
+<th>support_rejections</th>
+<th>eligible_candidates</th>
+<th>closed</th>
+<th>skipped_in_position</th>
+<th>censored_boundary</th>
+<th>risk_invalid</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>box_any</td><td>7095</td><td>0</td><td>7095</td><td>7082</td><td>8</td><td>4</td><td>1.0000</td></tr>
+<tr><td>15m</td><td>box_support</td><td>7095</td><td>139</td><td>6956</td><td>6945</td><td>7</td><td>4</td><td>0.0000</td></tr>
+<tr><td>1h</td><td>box_any</td><td>2206</td><td>0</td><td>2206</td><td>2199</td><td>5</td><td>2</td><td>0.0000</td></tr>
+<tr><td>1h</td><td>box_support</td><td>2206</td><td>43</td><td>2163</td><td>2157</td><td>4</td><td>2</td><td>0.0000</td></tr>
+</tbody></table>
+<p>规则回测没有分类正类标签、训练集或 val AUC，也没有连续打分及 top-decile 组合，因此这些指标不适用；后段样本数见 later 行。零假设对照是同币×同月×同时间段×同 ATR/价格波动桶随机入场、同退出同成本。共同事件共享随机种子；随机对照按交易配对，不构成独立串行资金账户。</p>
+<h2>改善幅度与可用门</h2>
+<table><thead><tr>
+<th>timeframe</th>
+<th>compare</th>
+<th>period</th>
+<th>months</th>
+<th>valid_reps</th>
+<th>a_closed</th>
+<th>c_closed</th>
+<th>a_mean_r</th>
+<th>c_mean_r</th>
+<th>diff_mean_r</th>
+<th>ci95_low</th>
+<th>ci95_high</th>
+<th>a_total_r</th>
+<th>c_total_r</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>box_support − box_any</td><td>full</td><td>20</td><td>2000</td><td>7082</td><td>6945</td><td>-0.0950</td><td>-0.0909</td><td>0.0041</td><td>-0.0022</td><td>0.0099</td><td>-672.8149</td><td>-631.1775</td></tr>
+<tr><td>15m</td><td>box_support − box_any</td><td>earlier</td><td>13</td><td>2000</td><td>3769</td><td>3700</td><td>0.0782</td><td>0.0856</td><td>0.0073</td><td>-0.0025</td><td>0.0140</td><td>294.9065</td><td>316.6032</td></tr>
+<tr><td>15m</td><td>box_support − box_any</td><td>later</td><td>8</td><td>2000</td><td>3313</td><td>3245</td><td>-0.2921</td><td>-0.2921</td><td>0.0000</td><td>-0.0066</td><td>0.0073</td><td>-967.7214</td><td>-947.7807</td></tr>
+<tr><td>1h</td><td>box_support − box_any</td><td>full</td><td>20</td><td>2000</td><td>2199</td><td>2157</td><td>-0.0921</td><td>-0.1090</td><td>-0.0169</td><td>-0.0369</td><td>0.0000</td><td>-202.6292</td><td>-235.1595</td></tr>
+<tr><td>1h</td><td>box_support − box_any</td><td>earlier</td><td>13</td><td>2000</td><td>1122</td><td>1100</td><td>0.0381</td><td>0.0129</td><td>-0.0252</td><td>-0.0552</td><td>0.0008</td><td>42.7585</td><td>14.2047</td></tr>
+<tr><td>1h</td><td>box_support − box_any</td><td>later</td><td>8</td><td>2000</td><td>1077</td><td>1057</td><td>-0.2278</td><td>-0.2359</td><td>-0.0081</td><td>-0.0275</td><td>0.0105</td><td>-245.3877</td><td>-249.3643</td></tr>
+</tbody></table>
+<p>B−A 的区间为两臂共同 UTC 月份重抽样 2,000 次（seed=91509），每次按各臂自己的交易数重算均值；描述性，不是盲测。随机超额 p 沿用月块符号置换，不是 B−A 的 p。</p>
+<table><thead><tr>
+<th>timeframe</th>
+<th>full_positive</th>
+<th>later_positive</th>
+<th>random_excess_positive</th>
+<th>p_lt_001</th>
+<th>passed</th>
+<th>p_bonferroni_2</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>False</td><td>False</td><td>True</td><td>False</td><td>False</td><td>0.1679</td></tr>
+<tr><td>1h</td><td>False</td><td>False</td><td>True</td><td>False</td><td>False</td><td>0.9385</td></tr>
+</tbody></table>
+<p>passed 必须全期与后段净均值均为正、全期随机超额为正且原始 p&lt;0.01；同时列出两个周期的 Bonferroni p 参考。任何研究门通过也不会自动 promote。</p>
+<h2>误删与仓位变化</h2>
+<table><thead><tr>
+<th>timeframe</th>
+<th>period</th>
+<th>removed</th>
+<th>removed_gate_fail</th>
+<th>removed_occupancy</th>
+<th>removed_losers</th>
+<th>removed_winners</th>
+<th>removed_ge10r</th>
+<th>avoided_loss_r</th>
+<th>forgone_profit_r</th>
+<th>added</th>
+<th>added_net_r</th>
+<th>delta_total_r</th>
+</tr></thead><tbody>
+<tr><td>15m</td><td>full</td><td>138</td><td>138</td><td>0</td><td>103</td><td>35</td><td>0</td><td>107.1747</td><td>66.4799</td><td>1</td><td>0.9426</td><td>41.6374</td></tr>
+<tr><td>15m</td><td>earlier</td><td>70</td><td>70</td><td>0</td><td>52</td><td>18</td><td>0</td><td>54.2815</td><td>33.5274</td><td>1</td><td>0.9426</td><td>21.6967</td></tr>
+<tr><td>15m</td><td>later</td><td>68</td><td>68</td><td>0</td><td>51</td><td>17</td><td>0</td><td>52.8933</td><td>32.9525</td><td>0</td><td>0.0000</td><td>19.9407</td></tr>
+<tr><td>1h</td><td>full</td><td>43</td><td>43</td><td>0</td><td>25</td><td>18</td><td>1</td><td>23.4980</td><td>55.0071</td><td>1</td><td>-1.0212</td><td>-32.5304</td></tr>
+<tr><td>1h</td><td>earlier</td><td>23</td><td>23</td><td>0</td><td>10</td><td>13</td><td>0</td><td>9.8356</td><td>37.3681</td><td>1</td><td>-1.0212</td><td>-28.5538</td></tr>
+<tr><td>1h</td><td>later</td><td>20</td><td>20</td><td>0</td><td>15</td><td>5</td><td>1</td><td>13.6624</td><td>17.6390</td><td>0</td><td>0.0000</td><td>-3.9766</td></tr>
+</tbody></table>
+<p>removed_gate_fail 是直接支撑拒绝；removed_occupancy 是虽然通过支撑、但被新交易占仓而消失。forgone_profit_r 是误删盈利总和，avoided_loss_r 是少亏的绝对值。added 是完整重放才出现的交易。逐周期、逐段验证：总净 R 差 = 新增交易净 R − 消失交易净 R；共同交易 14 字段和随机对照均不变。</p>
+<h2>复现核对</h2>
+<table><thead><tr>
+<th>comparison</th>
+<th>left</th>
+<th>right</th>
+<th>shared</th>
+<th>only_left</th>
+<th>only_right</th>
+<th>diff_signal_i</th>
+<th>diff_entry_i</th>
+<th>diff_entry_time</th>
+<th>diff_entry_price</th>
+<th>diff_initial_stop</th>
+<th>diff_initial_risk</th>
+<th>diff_exit_i</th>
+<th>diff_exit_time</th>
+<th>diff_exit_price</th>
+<th>diff_exit_reason</th>
+<th>diff_net_r</th>
+<th>diff_gross_r</th>
+<th>diff_censored</th>
+<th>diff_mfe_r</th>
+<th>diff_initial_risk_frac</th>
+<th>diff_gross_return</th>
+<th>diff_net_return</th>
+<th>diff_matched</th>
+<th>diff_control_net_r</th>
+<th>diff_control_net_return</th>
+<th>diff_status</th>
+<th>passed</th>
+</tr></thead><tbody>
+<tr><td>original_vs_baseline</td><td>9287</td><td>9287</td><td>9287</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>True</td></tr>
+<tr><td>shared_baseline_vs_support</td><td>9287</td><td>9108</td><td>9106</td><td>181</td><td>2</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>True</td></tr>
+</tbody></table>
+<p>代码提交 <code>626a4b364adb477d600f4a52735341c9b7e29c69</code>；run identity <code>23964e9b6d5ed9090b29d1d87b7f1b072a6cf666b8ae429673b87e344f6bdc33</code>。638 个回执逐个核对输出 SHA，基线成交和状态集合与原 V11.1 框内回测相同。</p>
+<p>验证：118 项策略与边界测试、4 项报告完整性测试通过。注册表套件另有 12 通过、4 失败，失败为本轮之前已存在的记录缺少 source_commit；本次新记录单独校验通过。详情见实验目录 validation.json。</p>
+<h2>复现命令</h2>
+<p>在仓库根目录执行；需保留原638份5m档案及旧基线账本（哈希见 summary.json 和 identity.json）。</p>
+<pre><code>
+.venv/bin/python -m pytest tests/evaluation/test_spike_v112_support.py -q
+.venv/bin/python -m yoyo.evaluation.spike_v112_support_study --output experiments/active/exp-spike-v112-support-20260919-v1/results/run_v1 --workers 8
+.venv/bin/python -m yoyo.evaluation.spike_v112_support_report --run experiments/active/exp-spike-v112-support-20260919-v1/results/run_v1 --output experiments/active/exp-spike-v112-support-20260919-v1/statistics/run_v1
+.venv/bin/python scripts/md_to_html.py analysis/p1_spike_v112_support_20260919.md --out-dir analysis/html
+</code></pre>
+<p>第一次运行生成输出；再次运行验证同身份回执后复用。改变任一输入/依赖必须使用新输出目录，不能覆盖旧 run 身份。</p>
+<h2>风险与诚实声明</h2>
+<p>这是已看过数据上的逻辑假设检验，不能称为样本外发现。币池采用后来仍挂牌的合约，存活偏差仍在；跨币与行情相关，638 币不等于638个独立样本。日期聚合、暖机和缺口沿用旧实现以保持一致，并非已做 TradingView 逐根认证。次根开盘撮合，没有额外滑点、资金费、盘口容量或合约精度约束；0.2% 是原成本假设。合计 R、事件回撤及跨币同时持仓不是共享资金账户收益。未平仓/断档截尾单单列，不混进已平仓净收益。没有参数搜索或选择最优周期，Pine、监控与实盘配置未改。</p>
+<h2>下一步</h2>
+<p>先根据本轮全期、后段和误删赢家判断此条件是否值得保留；失败也保留完整记录。参数搜索不是本轮任务。若以后改 TP/SL、成本或生产默认配置，仍需 Owner 决策。</p>
+</body>
+</html>
