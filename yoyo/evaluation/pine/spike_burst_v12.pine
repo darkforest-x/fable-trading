@@ -10,6 +10,8 @@
 // Local C is admitted only at its right-confirmation close, using already known A/B.
 // Both families share history validation, break confirmation and unchanged V9 box pairing.
 indicator("SPIKE V12 · 主高点+回踩确认", shorttitle="SPIKE V12", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, max_polylines_count=100, max_bars_back=2000, explicit_plot_zorder=true, behind_chart=false)
+// HTF anchor timestamps can outlive the search window: 1500 search + 1500 life.
+max_bars_back(time, 3100)
 
 // ───────────── 原有参数与显示 ─────────────
 

@@ -52,6 +52,7 @@ def test_htf_closed_bar_contract_unchanged():
     assert function(OLD, "f_v11_htfOutputs") == function(NEW, "f_v11_htfOutputs")
     old_request = next(x for x in OLD.splitlines() if "= request.security(" in x)
     assert old_request in NEW
+    assert "max_bars_back(time, 3100)" in NEW
 
 
 def test_alert_and_event_codes_follow_selected_box_rule():
