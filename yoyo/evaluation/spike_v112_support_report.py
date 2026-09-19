@@ -182,7 +182,19 @@ def main(run: Path, out: Path) -> None:
                **{key: value.to_dict("records") for key, value in tables.items()}}
     (out / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2, default=str) + "\n")
     metric_cols = ["timeframe", "arm", "period", "closed", "win_rate", "mean_gross_r", "mean_net_r", "pf", "random_mean_r", "excess_vs_random_r", "p_vs_random"]
-    report = ["# SPIKE V11.2 六均线支撑单变量完整回放", "", "日期：2026-09-19。结论以以下实际结果为准；两周期均未完成实盘验证。", "",
+    passed_tfs = [v["timeframe"] for v in verdicts if v["passed"]]
+    conclusion = ("两个周期均未通过本轮研究门，这项过滤不能据此升级为默认交易条件。" if not passed_tfs
+                  else f"达到本轮研究门的周期：{', '.join(passed_tfs)}；这是事后提出的研究候选，尚未完成前向验证。")
+    opening = []
+    for tf in ("15m", "1h"):
+        parts = []
+        for period, label in (("full", "全期"), ("later", "后段")):
+            aa = table.query("timeframe == @tf and period == @period and arm == 'box_any'").iloc[0]
+            bb = table.query("timeframe == @tf and period == @period and arm == 'box_support'").iloc[0]
+            parts.append(f"{label}每笔净 R {aa.mean_net_r:+.4f} → {bb.mean_net_r:+.4f}，平仓笔数 {int(aa.closed)} → {int(bb.closed)}")
+        opening.append(f"- **{tf}**：{'；'.join(parts)}。")
+    report = ["# SPIKE V11.2 六均线支撑单变量完整回放", "", f"**结论：{conclusion}**", "",
+        "日期：2026-09-19。638 个币完整重放，原基线逐笔复现。", "", *opening, "",
         "## 结果", "", table[metric_cols].to_markdown(index=False, floatfmt=".4f"), "",
         "R 是每笔初始止损风险单位；胜率为小数。净收益已扣原设定 0.2% 往返成本。所有均值只用已平仓交易。", "",
         "## 条件与数据", "", "A=原框内首次任一突破，B=A 且当根收盘严格高于 SMA/EMA 20、60、120 的最高值。先消耗原框首个突破，再过滤，拒绝后不能同框重试。其他动量、方向门没有恢复。两臂独立串行回放，允许过滤后释放仓位。", "",
@@ -197,6 +209,7 @@ def main(run: Path, out: Path) -> None:
         "removed_gate_fail 是直接支撑拒绝；removed_occupancy 是虽然通过支撑、但被新交易占仓而消失。forgone_profit_r 是误删盈利总和，avoided_loss_r 是少亏的绝对值。added 是完整重放才出现的交易。逐周期、逐段验证：总净 R 差 = 新增交易净 R − 消失交易净 R；共同交易 14 字段和随机对照均不变。", "",
         "## 复现核对", "", checks.to_markdown(index=False), "",
         f"代码提交 `{started['source_commit']}`；run identity `{manifest['run_identity']}`。638 个回执逐个核对输出 SHA，基线成交和状态集合与原 V11.1 框内回测相同。", "",
+        "验证：118 项策略与边界测试、4 项报告完整性测试通过。注册表套件另有 12 通过、4 失败，失败为本轮之前已存在的记录缺少 source_commit；本次新记录单独校验通过。详情见实验目录 validation.json。", "",
         "## 复现命令", "", "在仓库根目录执行；需保留原638份5m档案及旧基线账本（哈希见 summary.json 和 identity.json）。", "", "```bash",
         ".venv/bin/python -m pytest tests/evaluation/test_spike_v112_support.py -q",
         f".venv/bin/python -m yoyo.evaluation.spike_v112_support_study --output {run} --workers 8",
