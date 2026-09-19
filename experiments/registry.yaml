@@ -9914,3 +9914,20 @@ experiments:
     - spike-v112-entry-extension-20260920-delivery
     notes: 120 direct rejects, zero freed-position additions; all450 shared outcomes/control keys match. Historical owner-selected pool is already seen; no blind-validation
       claim. Q6 descriptive only. Negative outcomes retained; no HTML, threshold search or production change.
+
+  - experiment_id: exp-spike-v112-one-line-audit-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5b1e34ba7013933af678f65689b73373f66881ef
+    status: inconclusive
+    question: Why is the visible ONE/OKX15m Sep15-17 descending-line breakout absent in V11.2?
+    single_variable: No strategy change; frozen OKX cache, unchanged line engine and explicit pivot/spacing/box-state diagnosis.
+    result: 'Screenshot cursor OHLC matches. Focal A Sep15 12:45 and B Sep16 17:45 imply C19:30 only0.0143ATR from line, but C is7 bars afterB (<24), and left12 includes
+      higherB: both raw/soft pivots reject.15m has no break/V9 in target window;1h breaks08/09 Sep17 but15m long box is closed.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_one_line_audit_20260920.md
+    artifacts:
+    - spike-v112-one-line-audit-20260920-delivery
+    notes: Luna Max verified exact C/B indices and boxes. Geometry anchors inferred from screenshot, not exported TV drawings; one OHLC match is not full feed/settings
+      parity. Diagnosis completed but broad TV parity and revised shape rule remain unvalidated. No parameter or live changes.

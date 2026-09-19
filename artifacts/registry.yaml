@@ -31582,3 +31582,18 @@ artifacts:
     production_eligible: false
     notes: 29 streams,571 candidates,570 baseline and450 treatment entries; random controls, temporal/tail/attribution tables, PNG, Markdown and Luna Max review. All
       gates fail. Legacy holdout vocabulary is archive-date metadata only, not an access restriction.
+
+  - artifact_id: spike-v112-one-line-audit-20260920-delivery
+    artifact_type: manifest
+    role: one_okx_screenshot_line_admission_and_joint_state_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5b1e34ba7013933af678f65689b73373f66881ef
+    source_path: experiments/active/exp-spike-v112-one-line-audit-20260920-v1/delivery_manifest.json
+    sha256: 9aa28112f025e948e979ffdfd888a3b368b4c006342bb25228aa0eebec100cb3
+    size_bytes: 4089
+    storage_uri: repo://experiments/active/exp-spike-v112-one-line-audit-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen15m/1h cache, trace/pivots, visible-touch geometry, Markdown and independent Luna Max review. September2026 data allowed by owner; legacy holdout enum
+      does not restrict access.

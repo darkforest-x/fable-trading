@@ -1,0 +1,82 @@
+{
+  "experiment_id": "exp-spike-v112-one-line-audit-20260920-v1",
+  "source_commit": "5b1e34ba7013933af678f65689b73373f66881ef",
+  "generated_at": "2026-09-19T17:23:22.436607+00:00",
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": {
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/15m_facts.csv.gz": {
+      "sha256": "bd5d91459e66b2af2ac7f57b0908980788027aded29aec59121d299d1329124c",
+      "size_bytes": 255276
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/15m_line_events.csv": {
+      "sha256": "81648de481c7f3ecf9b98d191cc1768c5d01dfe3a4b7a3154cde29ba2d729ffe",
+      "size_bytes": 550
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/15m_lines.csv": {
+      "sha256": "3e1cb62c52144690120571037686d9de3cb9c142709ca4acb43614e481e34cb4",
+      "size_bytes": 1367
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/15m_pivots.csv": {
+      "sha256": "0e9cf795fb160a2c10c0cd2414542260d5ae2fe580b854d2b156ea5d40f2d775",
+      "size_bytes": 7703
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/1H_facts.csv.gz": {
+      "sha256": "6584519ee7b3c14804f8e8c147aafb8d873f197a5763b4090d5caf1f0f2c9065",
+      "size_bytes": 156996
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/1H_line_events.csv": {
+      "sha256": "e13c4f5b11155bb5ac85926207b4aa2ccda0ce46bb3e73aee1396130068a1546",
+      "size_bytes": 363
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/1H_lines.csv": {
+      "sha256": "4d1c8ba6de69942603278d850357ad8fd590ff5e789dde135bca78ac1f8a7e07",
+      "size_bytes": 938
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/1H_pivots.csv": {
+      "sha256": "ae0d5df452ba7de29d62840ba3a2e5059817be9ec14cd22afc731b912cc1c0a3",
+      "size_bytes": 5504
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/PROJECT_PLAN.md": {
+      "sha256": "1d0dc9256ab988718295ac77d4a260be470663417219b010ba6660d6d4fb4f09",
+      "size_bytes": 1220
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/independent_review.md": {
+      "sha256": "bbfc6f898c6dccb496d2c71d9a07b2a24b72e76c36c8701c1dcc19e797104279",
+      "size_bytes": 1515
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/input.json.gz": {
+      "sha256": "7e866d3383b6515b9845b6244de345b40906529ba68da1cbcc58a33b33c9b591",
+      "size_bytes": 43186
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/receipt.json": {
+      "sha256": "6dbb88746410314a8f92efca703b5b2daa3e8bdd2db0dba89da7139b0bfb419b",
+      "size_bytes": 2061
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/summary.json": {
+      "sha256": "bf647e2bf3304dfeaf665799a912ce2854400e2fc049e5efc1a8f8dd2c9e4e42",
+      "size_bytes": 667
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/visible_geometry.json": {
+      "sha256": "b990be5cf0e8971b30a1dcf35a03670a65b3733a004047cb893b4f5826ae0f10",
+      "size_bytes": 1062
+    },
+    "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/visible_peak_triplets.csv": {
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "size_bytes": 1
+    },
+    "yoyo/evaluation/spike_v112_one_line_audit.py": {
+      "sha256": "ac9d29f16812b9a7da74091d6eb4a67837db12ca37a1546ec45aee497cf1638e",
+      "size_bytes": 7774
+    },
+    "analysis/p1_spike_v112_one_line_audit_20260920.md": {
+      "sha256": "34774e6f7bbb605c63c6fa4344f2210f368a74af0d344a6ca1be9cf877aab093",
+      "size_bytes": 5518
+    },
+    "docs/learnings/nearby-trendline-touches-can-fail-independent-pivot-gates.md": {
+      "sha256": "872aa16c5d4da2eed69bc813be3a765dbddedd93ac5bba80ddb4a0e01f66eea4",
+      "size_bytes": 1591
+    }
+  },
+  "note": "Single case diagnosis, original defaults unchanged. Empty visible_peak_triplets.csv means no near-collinear eligible pivot triple with the focal A; use pivots CSV and visible_geometry JSON for rejected visual touch evidence."
+}
