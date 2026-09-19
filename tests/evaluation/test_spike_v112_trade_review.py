@@ -13,7 +13,7 @@ def bars(rows):
 def test_touch_candle_high_is_only_an_upper_bound():
     raw = bars([[101, 105, 97, 99], [99, 112, 98, 110]])
     low, high, stamp, ambiguous = stop_bar_bounds(raw, 100, 2, 98, 0)
-    assert (low, high, ambiguous) == (0, 2.5, True)
+    assert (low, high, ambiguous) == (.5, 2.5, True)
     assert stamp == str(raw.index[0])
 
 
@@ -27,6 +27,12 @@ def test_gap_at_open_excludes_all_later_highs():
     raw = bars([[97, 110, 96, 106]])
     low, high, _, ambiguous = stop_bar_bounds(raw, 100, 2, 98, 1)
     assert (low, high, ambiguous) == (1, 1, False)
+
+
+def test_touch_candle_open_above_prior_high_is_definite():
+    raw = bars([[104, 105, 97, 99]])
+    low, high, _, ambiguous = stop_bar_bounds(raw, 100, 2, 98, 1)
+    assert (low, high, ambiguous) == (2, 2.5, True)
 
 
 def test_missing_stop_touch_is_rejected():

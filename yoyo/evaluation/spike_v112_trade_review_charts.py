@@ -99,6 +99,12 @@ def draw(path, pick, r, ctx, trace, parent, jt, lines):
     ax.hlines(jt["entry_price"],e,max(end,e+1),color=GOLD,ls="--",lw=.7,alpha=.5)
     ax.axvline(i,color=GOLD,lw=.8,alpha=.55)
     ax.plot(e,jt["entry_price"],"^",color=GOLD,ms=10)
+    if r["net_r"] < 0 and r["mfe_r"] >= 1 and end > e:
+        peak = int(np.argmax(f.high.iloc[e:end].to_numpy()))+e
+        ax.annotate(f"盘中 +{r['mfe_r']:.2f}R",(peak,f.high.iloc[peak]),xytext=(-8,32),
+                    textcoords="offset points",ha="right",color=GREEN,fontsize=9,
+                    bbox={"boxstyle":"round,pad=.25","fc":BG,"ec":"none","alpha":.9},
+                    arrowprops={"arrowstyle":"-","color":GREEN,"lw":.8})
     if r["status"] == "closed": ax.plot(end,jt["exit_price"],"X",color=GOLD,ms=10)
     ax.annotate(f"突破+spike\n次根开盘 {jt['entry_price']:.6g}",(e,jt["entry_price"]),
                 xytext=(15,42),textcoords="offset points",color=GOLD,fontsize=9,ha="left",
@@ -130,7 +136,7 @@ def draw(path, pick, r, ctx, trace, parent, jt, lines):
     side.text(0,1,"逐笔诊断",color="white",fontsize=14,fontweight="bold",va="top")
     y=.93
     blocks=[("实际退出",f"{book.REASON.get(r['exit_reason'],r['exit_reason'])}；净{r['net_r']:+.2f}R。" if r["status"]=="closed" else "数据边界仍持仓，未实现收益。",GOLD),
-            ("入场时",f"V9后第{r['bars_after_v9']}根；相对V9入场{r['entry_premium_pct']:+.2f}%。初始风险{r['initial_risk_frac']*100:.2f}%。",FG),
+            ("入场时",f"V9后第{r['bars_after_v9']:.0f}根；相对V9入场{r['entry_premium_pct']:+.2f}%。初始风险{r['initial_risk_frac']*100:.2f}%。",FG),
             ("追踪怎样生效",f"最高存活收盘{r['max_close_r']:.2f}R；追踪{'已激活' if r['trail_ever_armed'] else '未激活'}。末端保护{r['exit_stop_r']:+.2f}R。" if np.isfinite(r['max_close_r']) else "入场当根退出，未产生存活持仓收盘，追踪未激活。",FG),
             ("浮盈证据",f"止损前可确定至少{r['mfe_lower_r']:.2f}R；5m顺序上界{r['mfe_upper_r']:.2f}R。" if "stop" in r["exit_reason"] else f"账本持仓内最大浮盈{r['mfe_r']:.2f}R。",FG),
             ("这张图要看什么",pick["message"],GREEN)]
@@ -145,7 +151,8 @@ def draw(path, pick, r, ctx, trace, parent, jt, lines):
     assert y > -.1, (path,y)
     fig.text(.055,.965,f"{r['review_id']}  {r['symbol']} · {r['timeframe']}   |   {pick['title']}",
              color="white",fontsize=18,fontweight="bold")
-    fig.text(.055,.925,f"入场 {book.bj(r['entry_time'])} 北京   ·   突破来源 {r['source']}   ·   {r['category']}",color=FG,fontsize=11)
+    source_label={"chart":"本周期", "htf":"上级周期", "both":"本周期及上级"}[r['source']]
+    fig.text(.055,.925,f"入场 {book.bj(r['entry_time'])} 北京   ·   突破来源 {source_label}   ·   {r['category']}",color=FG,fontsize=11)
     ptext=f"{parent['net_r']:+.2f}R" if not parent["censored"] else "未平仓"
     fig.text(.055,.889,f"绿▲ / 白×：父V9模拟入场与退出（事后参照 {ptext}）   橙▲ / X：本笔入场与退出   橙阶梯：逐根已生效保护价",
              color=FG,fontsize=10)

@@ -130,6 +130,8 @@ def stop_bar_bounds(raw, entry, risk, stop, prior_mfe):
     for row in raw.itertuples():
         if row.open <= stop:
             return lower, lower, str(row.Index), False
+        # The open is observed before the subsequent low, even in the touch bar.
+        lower = max(lower, (row.open - entry) / risk)
         if row.low <= stop:
             upper = max(lower, (row.high - entry) / risk)
             return lower, upper, str(row.Index), upper > lower + 1e-10
@@ -143,18 +145,18 @@ def describe(r):
     closed = r["status"] == "closed"
     if not closed:
         category = "数据结束仍持仓"
-        why = f"截至数据结束仍持仓，不能按已平仓盈利或亏损归类。末端保护价{r['active_stop_at_exit']:.6g}。"
+        why = f"截至{r['boundary_close_time']}仍持仓，不能按已平仓盈利或亏损归类。末根收盘计算的下根保护价{r['active_stop_at_exit']:.6g}。"
     elif "stop" in reason:
         category = "盈利保护退出" if r["net_r"] > 0 else (
             "收盘激活追踪后仍亏" if r["trail_ever_armed"] else
             "盘中到2R但收盘未激活" if r["mfe_lower_r"] >= 2 else
             "到过1R后回吐" if r["mfe_lower_r"] >= 1 else
             "前三根止损" if r["held_bars"] <= 2 else "推进不足后止损")
-        why = f"持仓第{r['held_bars']+1}根K，最低价{r['exit_bar_low']:.6g}触及当时已生效保护价{r['active_stop_at_exit']:.6g}；按{book.REASON.get(reason,reason)}在{r['exit_price']:.6g}退出，扣费{r['net_r']:+.2f}R。"
+        why = f"持仓第{r['held_bars']+1}根K，最低价{r['exit_bar_low']:.6g}触及当时已生效保护价{r['active_stop_at_exit']:.6g}；按{book.REASON.get(reason,reason)}在{r['exit_price']:.6g}退出，扣费后净{r['net_r']:+.2f}R。"
     else:
         category = "反向确认盈利退出" if r["net_r"] > 0 else "反向确认亏损退出"
-        why = f"上一根出现原始反向信号，下一根开盘{r['exit_price']:.6g}退出；这笔不是价格触及止损退出，扣费{r['net_r']:+.2f}R。"
-    observations = [f"距V9 {r['bars_after_v9']}根，较父V9模拟入场价{r['entry_premium_pct']:+.2f}%；初始风险{r['initial_risk_frac']*100:.2f}%（{r['risk_atr']:.2f}个信号ATR）。"]
+        why = f"上一根出现原始反向信号，下一根开盘{r['exit_price']:.6g}退出；这笔不是价格触及止损退出，扣费后净{r['net_r']:+.2f}R。"
+    observations = [f"距V9 {r['bars_after_v9']:.0f}根，较父V9独立模拟入场价{r['entry_premium_pct']:+.2f}%；初始风险{r['initial_risk_frac']*100:.2f}%（{r['risk_atr']:.2f}个信号ATR），往返成本{r['cost_r']:.3f}R。"]
     observations.append(f"入场信号收盘{'在' if r['above_all_ma'] else '不在'}六均线上方，IMACD{'向上且增强' if r['momentum_ok'] else '未同时满足向上和增强'}，相对成交量{r['signal_rv']:.2f}倍。")
     if "stop" in reason and r["exit_5m_complete"]:
         observations.append(f"原账本最大浮盈{r['mfe_r']:.2f}R；5分钟审计得到实际止损前浮盈范围{r['mfe_lower_r']:.2f}–{r['mfe_upper_r']:.2f}R（若上下界不同，触及止损的5分钟内先后未知）。")
@@ -196,6 +198,9 @@ def review_one(trade, ctx, base):
         np.testing.assert_allclose(jt[col], trade[col], rtol=1e-9, atol=1e-10, equal_nan=True)
     assert jt["exit_reason"] == trade["exit_reason"]
     assert f.index[i] == pd.Timestamp(trade["signal_bar_open"])
+    assert f.index[e] == pd.Timestamp(trade["entry_time"]) == pd.Timestamp(jt["entry_time"])
+    assert f.index[x] == pd.Timestamp(trade["exit_time"]) == pd.Timestamp(jt["exit_time"])
+    assert status in ("closed", "censored_boundary"), "This audit scope excludes gap-censored trades"
     ps, parent = inc.attempt(p, s)
     assert parent is not None
     linepack = lines_for(ctx, i, trade["source"])
@@ -215,10 +220,12 @@ def review_one(trade, ctx, base):
     extrema_stop = float(f.low.iloc[i-4:i+1].min() - .2*f.atr.iloc[i])
     atr_stop = float(f.close.iloc[i] - 2*f.atr.iloc[i])
     r = dict(trade)
-    r.update(v9_status=ps, v9_entry=parent["entry_price"], v9_stop=parent["initial_stop"],
+    r.update(v9_status=ps, v9_censored=parent["censored"], v9_entry=parent["entry_price"], v9_stop=parent["initial_stop"],
              v9_exit_time=str(parent["exit_time"]), v9_net_r=parent["net_r"], v9_mfe_r=parent["mfe_r"],
              parent_exit_before_joint=int(parent["exit_i"]) <= i and not parent["censored"],
              entry_premium_pct=(entry/parent["entry_price"]-1)*100,
+             cost_r=.002/float(jt["initial_risk_frac"]),
+             boundary_close_time=str(f.index[x]+pd.Timedelta(minutes=ctx["minutes"])) if status!="closed" else None,
              risk_atr=risk/float(f.atr.iloc[i]), stop_anchor="近5根低点减0.2ATR" if extrema_stop <= atr_stop else "信号收盘减2ATR",
              stop_above_prior20_low=jt["initial_stop"] > f.low.iloc[max(0,i-19):i+1].min(),
              signal_atr=float(f.atr.iloc[i]), signal_rv=float(f.rv.iloc[i]),
@@ -278,13 +285,13 @@ def main():
     reviews=pd.concat([pd.read_csv(EXP/"streams"/s/"reviews.csv") for s in sorted(ledger.symbol.unique())],ignore_index=True).sort_values("review_id")
     assert len(reviews)==570 and reviews.trade_key.nunique()==570
     reviews.to_csv(EXP/"reviews.csv",index=False)
-    chinese={"review_id":"编号","symbol":"币种","timeframe":"周期","entry_time":"入场时间UTC","exit_time":"退出或边界时间UTC",
+    chinese={"review_id":"编号","symbol":"币种","timeframe":"周期","entry_time":"入场时间UTC","exit_time":"退出根或末根开盘UTC","boundary_close_time":"未平仓数据末端收盘UTC",
              "entry_price":"入场价","initial_stop":"初始止损","exit_price":"退出价","net_r":"净R","category":"路径分类",
              "exit_explanation":"为何退出","observations":"当时与后续事实","research_questions":"待验证不足","trade_key":"交易唯一键"}
     reviews[list(chinese)].rename(columns=chinese).to_csv(EXP/"逐笔分析570笔.csv",index=False,encoding="utf-8-sig")
     docs=EXP/"by_symbol";docs.mkdir(exist_ok=True)
     for symbol,group in reviews.groupby("symbol"):
-        texts=[f"# {symbol}：{len(group)}笔逐笔复盘\n\n数据是原Binance回放，不是TV截图。所有改法仅为待验证问题；信号时事实与事后路径分开。\n"]
+        texts=[f"# {symbol}：{len(group)}笔逐笔复盘\n\n数据是原Binance回放，不是TV截图。所有改法仅为待验证问题；信号时事实与事后路径分开。父V9仅是从其信号独立入场的重放，非串行账户；父收益是事后参照。止损根时间为K线开盘标签，5m首次触及另存于机器表。\n"]
         for r in group.to_dict("records"):
             texts.append(f"## {r['review_id']} · {r['timeframe']} · {book.bj(r['entry_time'])} 北京\n\n**{r['category']}**\n\n{r['exit_explanation']}\n\n{r['observations']}\n\n待验证：{r['research_questions']}\n\n唯一键：`{r['trade_key']}`\n")
         (docs/f"{symbol}.md").write_text("\n".join(texts))
