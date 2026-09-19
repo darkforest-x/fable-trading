@@ -10018,11 +10018,12 @@ experiments:
 
   - experiment_id: exp-spike-v9-htf-sma-20260920-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
+    source_commit: d26088fde2e632a19cf0ff3f5ff83635ffbed1fa
     status: inconclusive
     question: Does a confirmed higher-timeframe SMA direction gate improve pure V9 long-short entries across the owner's29 assets?
     single_variable: Entry direction gate;SMA20,30,50,60,90,120,150,200 versus baseline;select on development only by timeframe.
-    result: Preregistered config and causal feature/serial checks;market replay pending.
+    result: Completed29 assets/87 streams;58 checks and full baseline trade parity. Development selects15m SMA50,1h SMA20,4h baseline.
+      Later netR51.7652->69.0416,47.1622->51.4119,-4.4794 unchanged. 15m delta CI crosses0;1h removes only4 losing trades. No default replacement.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -10030,4 +10031,6 @@ experiments:
     artifacts:
     - spike-v9-htf-sma-20260920-delivery
     reuse_allowed: false
-    notes: Owner authorized parameter search. Same29-asset frozen Binance archive;actual and common-warmup scopes. No HTML or live/default promotion.
+    notes: Owner authorized parameter search. Same29-asset frozen Binance archive;actual and common-warmup scopes. Final statistics_v2 source b842c5560e.
+      Eight monthly blocks imply minimum Holm p0.01171875 above planned0.01, an explicit design resolution limitation, not proof of no effect.
+      Long-side validation remains negative. No HTML or live/default promotion. Notion3e08856479af813984a1fbbe2be6c194.

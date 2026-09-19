@@ -1,0 +1,348 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-v9-htf-sma-20260920-v1",
+    "lengths": [
+      20,
+      30,
+      50,
+      60,
+      90,
+      120,
+      150,
+      200
+    ],
+    "pairs": [
+      [
+        "15m",
+        15,
+        "1h",
+        60
+      ],
+      [
+        "1h",
+        60,
+        "4h",
+        240
+      ],
+      [
+        "4h",
+        240,
+        "1d",
+        1440
+      ]
+    ],
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end": "2026-05-01T00:00:00Z",
+    "seed": 92026,
+    "bootstrap_reps": 4000,
+    "selection": "Per chart timeframe, shared length for long/short, highest development total net R; baseline included, ties prefer baseline then shorter length. Only complete development trades; validation never selects.",
+    "common_warmup_sensitivity": "All lengths and baseline additionally replay on a shared SMA200-ready eligibility clock; original V9 baseline separately preserved.",
+    "acceptance": "Selected filter needs positive later total net R, positive improvement over baseline in net R and nominal net return, positive monthly-block delta lower95 bound and Holm adjusted one-sided p<0.01 across 3 selected TF tests; later realized10R retention>=0.85 where baseline has such winners. Common-warmup result must not reverse improvement. Otherwise research-only, no default replacement.",
+    "entry_rule": "chart confirmation close strictly above last confirmed HTF SMA for long, below for short; equality and unknown reject",
+    "htf_visibility": "HTF close_time <= chart bar OPEN; SMA[1]+lookahead_on semantics",
+    "unchanged": "V9 raw reversals; next-open entry; original 5bar/0.2ATR/min2ATR stop; close2R arms4ATR trail; 0.2% round trip",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "mapping": {
+    "BTC": "BTCUSDT",
+    "ETH": "ETHUSDT",
+    "SOL": "SOLUSDT",
+    "PEPE": "1000PEPEUSDT",
+    "WIF": "WIFUSDT",
+    "ZEC": "ZECUSDT",
+    "HYPE": "HYPEUSDT",
+    "USELESS": "USELESSUSDT",
+    "MUBARAK": "MUBARAKUSDT",
+    "UNI": "UNIUSDT",
+    "PUMP": "PUMPUSDT",
+    "ARB": "ARBUSDT",
+    "AR": "ARUSDT",
+    "BOME": "BOMEUSDT",
+    "ENA": "ENAUSDT",
+    "ONE": "ONEUSDT",
+    "PIEVERSE": "PIEVERSEUSDT",
+    "AAVE": "AAVEUSDT",
+    "NEAR": "NEARUSDT",
+    "ZEN": "ZENUSDT",
+    "DASH": "DASHUSDT",
+    "PENDLE": "PENDLEUSDT",
+    "XTZ": "XTZUSDT",
+    "JUP": "JUPUSDT",
+    "AERO": "AEROUSDT",
+    "OP": "OPUSDT",
+    "FIL": "FILUSDT",
+    "APT": "APTUSDT",
+    "API3": "API3USDT"
+  },
+  "inputs": {
+    "1000PEPEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_1000PEPEUSDT_5m_314298.csv",
+      "sha256": "d30690b93dc3f4591beb946301e3633275d627878bc77414ead37780c61afb9d",
+      "meta": {
+        "asset": "1000PEPE",
+        "tick": 1e-07
+      }
+    },
+    "AAVEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_AAVEUSDT_5m_582540.csv",
+      "sha256": "d7394fcba22f0390a04eb5733cd4a8d6cfc2edd39b5169d1ad0d2d04fd14b28d",
+      "meta": {
+        "asset": "AAVE",
+        "tick": 0.01
+      }
+    },
+    "AEROUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_AEROUSDT_5m_147573.csv",
+      "sha256": "8f04009ce843a035e6cb0f0cc87761397248058d87387b43ee952d904bb6c5d1",
+      "meta": {
+        "asset": "AERO",
+        "tick": 0.0001
+      }
+    },
+    "API3USDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_API3USDT_5m_440310.csv",
+      "sha256": "0e62f11ff8c5332e35b990c4b5b2139ff5fc9a6f68c1469b62f81ed0e70b8ce3",
+      "meta": {
+        "asset": "API3",
+        "tick": 0.0001
+      }
+    },
+    "APTUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_APTUSDT_5m_371496.csv",
+      "sha256": "d3741d961d34d40fe841535fdbad101cd77c64da513a2de58a1e0a1441013adc",
+      "meta": {
+        "asset": "APT",
+        "tick": 0.0001
+      }
+    },
+    "ARBUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ARBUSDT_5m_326700.csv",
+      "sha256": "3676a8600eba7438a4ed5cf79faf95d9f8e67c543d677ed54e65f2840bb12457",
+      "meta": {
+        "asset": "ARB",
+        "tick": 1e-05
+      }
+    },
+    "ARUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ARUSDT_5m_482646.csv",
+      "sha256": "8cc0ce24938b8a1c759cfebbf15807faf92afd70d080306a541fe4cd06c9ef00",
+      "meta": {
+        "asset": "AR",
+        "tick": 0.001
+      }
+    },
+    "BOMEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_BOMEUSDT_5m_223338.csv",
+      "sha256": "885c8d3bb7e72f96847574e8bb560c6808b06f1fb1ea620caec0ff8a53de8416",
+      "meta": {
+        "asset": "BOME",
+        "tick": 1e-07
+      }
+    },
+    "BTCUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+      "sha256": "b609b006d30c1db0aba54bad31f16e7b533c95005a977f43ce0033931f226322",
+      "meta": {
+        "asset": "BTC",
+        "tick": 0.1
+      }
+    },
+    "DASHUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_DASHUSDT_5m_655967.csv",
+      "sha256": "2df21d9cd567f979c4bad9bc1a828cd1df4ed3edaad8baafd314405daced813e",
+      "meta": {
+        "asset": "DASH",
+        "tick": 0.01
+      }
+    },
+    "ENAUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ENAUSDT_5m_218442.csv",
+      "sha256": "f7d23039b42fdaa1603c32b47ff4ffa5c6417bff1bbe3aac90fdbd21d7bf54a2",
+      "meta": {
+        "asset": "ENA",
+        "tick": 1e-05
+      }
+    },
+    "ETHUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+      "sha256": "8041770149cff3551f84966b1b5f3641f2f731dc3ae7c7d0bfeaf7b24dcd64e8",
+      "meta": {
+        "asset": "ETH",
+        "tick": 0.01
+      }
+    },
+    "FILUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_FILUSDT_5m_581112.csv",
+      "sha256": "42ac198359d71579893af761ef3dfa6dfea5094ca7444e959079e1db907ef070",
+      "meta": {
+        "asset": "FIL",
+        "tick": 0.0001
+      }
+    },
+    "HYPEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_HYPEUSDT_5m_96642.csv",
+      "sha256": "1b9275701a078f61d7e879cb70d73417c4cc225240741143ee1272b6ccbca930",
+      "meta": {
+        "asset": "HYPE",
+        "tick": 0.001
+      }
+    },
+    "JUPUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_JUPUSDT_5m_236226.csv",
+      "sha256": "ace65f05801a331bd494b4814fc30d8a6c2d53b03876489c10a9ceb31adff204",
+      "meta": {
+        "asset": "JUP",
+        "tick": 0.0001
+      }
+    },
+    "MUBARAKUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_MUBARAKUSDT_5m_117915.csv",
+      "sha256": "015799945dacbd2cbb0a48e58125dade70b333f1452a1bdc434df3c181bdb09b",
+      "meta": {
+        "asset": "MUBARAK",
+        "tick": 1e-05
+      }
+    },
+    "NEARUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_NEARUSDT_5m_581376.csv",
+      "sha256": "a8f054cfedff52926185445e187e03f1aa6f3661468be36f821f2561a9aa5188",
+      "meta": {
+        "asset": "NEAR",
+        "tick": 0.001
+      }
+    },
+    "ONEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ONEUSDT_5m_537036.csv",
+      "sha256": "d1c03799d236337c341f33fa0aade7790d4dd6f18b1b9b4b39f571f6fca9ae70",
+      "meta": {
+        "asset": "ONE",
+        "tick": 1e-07
+      }
+    },
+    "OPUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_OPUSDT_5m_411672.csv",
+      "sha256": "09e37133287134eb6eecb69b5314013d2c35dfe024f4a775fc7fadb7cf4d8fd0",
+      "meta": {
+        "asset": "OP",
+        "tick": 1e-05
+      }
+    },
+    "PENDLEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PENDLEUSDT_5m_290274.csv",
+      "sha256": "30c285f13ed7d102dcd7f698c1369db85eca4a91775e44b648818b8465ba7248",
+      "meta": {
+        "asset": "PENDLE",
+        "tick": 0.0001
+      }
+    },
+    "PIEVERSEUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PIEVERSEUSDT_5m_48246.csv",
+      "sha256": "772a33bfeed296d75c34004e68580a75ae851a9cefdc49637a8bf4d729849bd8",
+      "meta": {
+        "asset": "PIEVERSE",
+        "tick": 0.0001
+      }
+    },
+    "PUMPUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PUMPUSDT_5m_87462.csv",
+      "sha256": "40ef103f438fc14c6f2c3ba098325bb5b22e14eebf2c3c76306c1f30d8cb861e",
+      "meta": {
+        "asset": "PUMP",
+        "tick": 1e-06
+      }
+    },
+    "SOLUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+      "sha256": "87a76aa5c36208d862a29016c399d9124365dc93e7cdbd9799e14e2dba8e1165",
+      "meta": {
+        "asset": "SOL",
+        "tick": 0.01
+      }
+    },
+    "UNIUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_UNIUSDT_5m_590604.csv",
+      "sha256": "f83f02cff8f09936a40b7c70137f7add7e43e3d6cd8edb395a7ea35a4fae2a41",
+      "meta": {
+        "asset": "UNI",
+        "tick": 0.001
+      }
+    },
+    "USELESSUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_USELESSUSDT_5m_74445.csv",
+      "sha256": "9f1490e8856a39b419eb5b52b8bd460541510f1fae7a78a8672d13cd9e05390e",
+      "meta": {
+        "asset": "USELESS",
+        "tick": 1e-05
+      }
+    },
+    "WIFUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_WIFUSDT_5m_240021.csv",
+      "sha256": "2d2103b45a435104547f29b8526702a3fc1172d7057480dfff330a460e59ff06",
+      "meta": {
+        "asset": "WIF",
+        "tick": 0.0001
+      }
+    },
+    "XTZUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_XTZUSDT_5m_655392.csv",
+      "sha256": "ecfca44e7de2c526b6e4b7e278f8e897614a8936e8d6625e299a1da325e20fe8",
+      "meta": {
+        "asset": "XTZ",
+        "tick": 0.0001
+      }
+    },
+    "ZECUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ZECUSDT_5m_654240.csv",
+      "sha256": "72d9cd5b7d20ed0fe4286388c59cfe1ab0f076ad2c53a5d84c534f51bd122e8d",
+      "meta": {
+        "asset": "ZEC",
+        "tick": 0.01
+      }
+    },
+    "ZENUSDT": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ZENUSDT_5m_569868.csv",
+      "sha256": "08a43c69bc3a198a0ac451356d027761dac948846f45e6b83aa1bdd0d653ebfd",
+      "meta": {
+        "asset": "ZEN",
+        "tick": 0.001
+      }
+    }
+  },
+  "source_commit": "d26088fde2e632a19cf0ff3f5ff83635ffbed1fa",
+  "declared": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/__init__.py": "a29dd367b750b396ce7f95d4aadd061b5c55d6ae0ac3ad72a8555c1e7d43dc13",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_accounts.py": "ce3f225c479a42d3b5fd269e554bb8999eeb069446f73a2128e77dea0321dbe5",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_policy_study.py": "f52d73309e0a28a26b0d9daa445c2a4484003dd4f32ec2f47b1e039c365c430c",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4.py": "f32891e5d29394c5c27730d58302ac39911b5ff9b7899ed8d625dde96d778c16",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_increment.py": "a18fb5f2dc4e5ef7c78085eceaf0caab1714e25d6ccff212d3036ff8c874abbe",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_study.py": "55f06bdaa20fb2f21877c42b73e29e9cfbffde707ac9a85bed520ab2a811d0f7",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_selected_counts.py": "8b2c4008fd214264d9c7e33b6fd66f6ad6a916a93dd30fbc91a9ee1c9bf744df",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_support_study.py": "9aca98efdc162e2eea17bef0a6df5675f44c49ff93272f96d544598021abf176",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_box_study.py": "e9dd1bb73055808ec70fa4f451cb8831b9f6673e1008ffba3837d3e2d4828333",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_study.py": "02ba6b26c03e08284852e0224ea272320e0fc3d9b26e8a075a5725b665e61c66",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py": "72a325fccdfc8b0298e651d136beb6fffc89bb9c79b1ae086cc92b0d5142c98f",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study_post.py": "334772aa325660b5ae9abbf93db4ddbc9e8908d6becb2ddd7e7dd2d1d3866e9a",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_episode_study.py": "f18e2548bf8487e224acd48b4a7931d629bc5401bd3f64e94c4695c3368ae110",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_lowtf_study.py": "f1b2349926ef9b92731f838e9e4e559207f42e16db499cc396a9eec1a0674463",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_six_filters.py": "365cef00b81151e51d11fddda061be3630cba1abf80a8be4cf4616fb14e71bfd",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9.py": "7bdee0dfbe783fdcfcae78a6ba3db4a11c4b035b6cc153edfb9cb21ecf161d4d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_full_replay.py": "240694e60131647f2276134bbcb1753086f4cc8d6929d936f8444cf7533eb7c5",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma.py": "6bfd45a4381faeeb56830c11619615e7afb7785fa809cb2554416497cd78483e",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma_study.py": "f846ea10d78865bbaa21a417d82a373ac733820a95f0ab9d5421361359537100",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/trendline_break.py": "5eab890adae46b28818aec2a79a1c04d7a377a5e7960cce76506b3c6087a01dc",
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/config.json": "3230c72309e8ca1139695cc81e95de5f348ccd94e8c36ab2d35805afc08eb245",
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/PROJECT_PLAN.md": "cd1dc5ccd80e82bc2811e81ea58e0fd89045e837345ec80bbc98a882f2f6fc81",
+    "tests/evaluation/test_spike_v9_htf_sma.py": "f0dfbc81b05795a1e05435fcc9035eda55d4280cf558e11117c6a5972091c7a5"
+  },
+  "metadata_sha256": "dccd2fa8bc4b1bb567e4e2d6117f154a57bc2f260b4b898a8c6869585598602c",
+  "identity_hash": "24af25d83cfc0aba706dff53630e7a65dc92620982c3a7bdca8ff998cb75d91b"
+}

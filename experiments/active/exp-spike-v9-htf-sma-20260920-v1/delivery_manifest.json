@@ -1,0 +1,772 @@
+{
+  "experiment_id": "exp-spike-v9-htf-sma-20260920-v1",
+  "status": "inconclusive",
+  "source_commit": "d26088fde2e632a19cf0ff3f5ff83635ffbed1fa",
+  "statistics_commit": "a3c87c55e13576f023e93f02f1433ebe869792ae",
+  "generated_at": "2026-09-19T21:25:21.586792+00:00",
+  "files": {
+    "analysis/p1_spike_v9_htf_sma_20260920.md": {
+      "sha256": "5cebb6347ff552405a59aec4f59feea6b422d717b70a2f4769d5f2c8f02f1f16",
+      "size_bytes": 8714
+    },
+    "docs/learnings/exact-test-resolution-must-precede-acceptance-threshold.md": {
+      "sha256": "5658dda061a21f8e394dc20a7647ca5cc5090284c99e638523dde85d5d11e368",
+      "size_bytes": 1580
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/PROJECT_PLAN.md": {
+      "sha256": "cd1dc5ccd80e82bc2811e81ea58e0fd89045e837345ec80bbc98a882f2f6fc81",
+      "size_bytes": 3282
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/README.md": {
+      "sha256": "2d0c35dafe50deb9765a6bc28eee2994e1a0c9897d2f11470f59ba96b81d5e72",
+      "size_bytes": 1325
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/config.json": {
+      "sha256": "3230c72309e8ca1139695cc81e95de5f348ccd94e8c36ab2d35805afc08eb245",
+      "size_bytes": 1551
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/completion.json": {
+      "sha256": "15e7d310a8cce7cdf48aa7d7a47942aef1c73c9abcd3ef07a51f0a8a1ce57388",
+      "size_bytes": 140
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/identity.json": {
+      "sha256": "bba47a057b7ef37d07453a4e493fae92c7834fdb8f2cc4defc18a9a37c7ab635",
+      "size_bytes": 7322
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/streams/BTCUSDT/completion.json": {
+      "sha256": "21622e6aa7ab49862ed7d21999be977671434a3f4dbb4fa805c542eda73d6994",
+      "size_bytes": 1674
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/streams/BTCUSDT/controls.csv.gz": {
+      "sha256": "234fd6c99fd323c4378eae21c16a84b7c7d579c8d456933fe02eca749acec3d0",
+      "size_bytes": 6712
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/streams/BTCUSDT/evidence.csv.gz": {
+      "sha256": "f15befff231d66c377c4ac4d9798c2119c6eac57f28c7840f7f1c392ad01709a",
+      "size_bytes": 11471
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/streams/BTCUSDT/fills.csv.gz": {
+      "sha256": "2ed524e912e54d652758b4609ad8c4866b8761c8dc8a61a90e91332bf94d7942",
+      "size_bytes": 67581
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/probe_v1/streams/BTCUSDT/trades.csv.gz": {
+      "sha256": "61a5b1da3aeb4e5e1c255a16f8c7a8ae819cf95b13dc3ad828c85b9fe5c982ca",
+      "size_bytes": 128048
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/review_and_qa.json": {
+      "sha256": "c1694e413bd80cf6fd333ad6403f66cafd509f8ff40661cd45dbdf352f52a538",
+      "size_bytes": 1704
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/completion.json": {
+      "sha256": "d16383870643f1f741cf919599fed60cd6dbb9cfad0e3037130ff8611eeee471",
+      "size_bytes": 588
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/identity.json": {
+      "sha256": "a5060d249b4b2a86aef79696a7db955a1975127f03e2f8d8b94dad78a7861e8d",
+      "size_bytes": 15775
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/attribution.csv": {
+      "sha256": "30b3ae3dfcd879609985edc9768a40aadd166e8d56d38d210ea3015cc94d9514",
+      "size_bytes": 1021
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/baseline_parity.csv": {
+      "sha256": "9a71bedea51ca97f458469b6e78c2474599241ed31b0c72eef6f36d7edeb9d6f",
+      "size_bytes": 1797
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/candidate_counts.csv": {
+      "sha256": "228d253f8266ab6e51d895759420aeb620ebc393f09c0f088ed08ca57b953cd8",
+      "size_bytes": 1374
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/coverage.csv": {
+      "sha256": "b9f5e9b909eebebe4451c48e1962872f91ac07ef23414f40983c60cdbff37cbe",
+      "size_bytes": 7880
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/parameter_ranks.csv": {
+      "sha256": "4c4affbefa316a746a8e0476797099181efc4161c6779beae3d03168e12f1cd9",
+      "size_bytes": 29302
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/per_asset.csv": {
+      "sha256": "b22766c4edca69a97dfdcb60860e267a7c2c6203ad7a5ede1295ea445a71c92a",
+      "size_bytes": 910898
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/receipt.json": {
+      "sha256": "1f1b00effa10dabbc8be7d3304843e7f8af5493afac0efaf5e26ded922ad4bd8",
+      "size_bytes": 1433
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/selected_comparisons.csv": {
+      "sha256": "26094341d735e405a1737dee8862f0324b1cc6d8983fcfca0915ef68725142f1",
+      "size_bytes": 2350
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/selection.json": {
+      "sha256": "e05b6c9f5106b39f0df14e4e7efde17110450e6adba6a0021e713375e3aa61de",
+      "size_bytes": 377
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/summary.csv": {
+      "sha256": "17e5fe33b8c71143e70e650a36e9aee58606ba56e7530a59528018d7ed9e7d8d",
+      "size_bytes": 167415
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/trades_with_controls.csv.gz": {
+      "sha256": "e7bccc7a75fc2717e6a097f48187e3cde2557c677b7eafe19f904b7f6597c3c8",
+      "size_bytes": 6216774
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics/verdict.csv": {
+      "sha256": "fd89ec60f34221e57f4239241415ab557059629e6936805842e5b4f3e2411575",
+      "size_bytes": 891
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/attribution.csv": {
+      "sha256": "30b3ae3dfcd879609985edc9768a40aadd166e8d56d38d210ea3015cc94d9514",
+      "size_bytes": 1021
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/baseline_parity.csv": {
+      "sha256": "9a71bedea51ca97f458469b6e78c2474599241ed31b0c72eef6f36d7edeb9d6f",
+      "size_bytes": 1797
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/candidate_counts.csv": {
+      "sha256": "228d253f8266ab6e51d895759420aeb620ebc393f09c0f088ed08ca57b953cd8",
+      "size_bytes": 1374
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/control_status.csv": {
+      "sha256": "495efd34dc6ca6bf894d775107b902918b8174d4be9b03d89a2931c05f3542eb",
+      "size_bytes": 15414
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/coverage.csv": {
+      "sha256": "b9f5e9b909eebebe4451c48e1962872f91ac07ef23414f40983c60cdbff37cbe",
+      "size_bytes": 7880
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/parameter_ranks.csv": {
+      "sha256": "e2a156fcb47049465d787807780d73a8f08d8ea97aabd151d9c31070ae4c3e94",
+      "size_bytes": 28528
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/per_asset.csv": {
+      "sha256": "7a1c8f7d90abb3ef8e9b80a40e72b0b3dc3b7ce764d8ffec34b99c969c869d06",
+      "size_bytes": 2687927
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/receipt.json": {
+      "sha256": "fa5867182ba12a0ae538f7ae825761afe2f6e670c6cc4c9679b26efed5a8afbf",
+      "size_bytes": 1527
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/selected_comparisons.csv": {
+      "sha256": "3a828554348d5c04b6658c141df7b36f5b198f4895340b655b1cc6c7df7d0e79",
+      "size_bytes": 2686
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/selection.json": {
+      "sha256": "e05b6c9f5106b39f0df14e4e7efde17110450e6adba6a0021e713375e3aa61de",
+      "size_bytes": 377
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/summary.csv": {
+      "sha256": "ab6f9e3c7836b47bd8f019659d2082c175d5b8e4fcb822fe3db805f3b4b8614a",
+      "size_bytes": 162323
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/trades_with_controls.csv.gz": {
+      "sha256": "82cb065b3627626aeda3d11edd69375446b8ed4bf290023d5bec539aa6236613",
+      "size_bytes": 6228937
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/statistics_v2/verdict.csv": {
+      "sha256": "8e11029495f73de6d2f6e1a55db7fd1d738a6c59810cd0f9253510631387cefb",
+      "size_bytes": 1082
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/1000PEPEUSDT/completion.json": {
+      "sha256": "89f9312b3478e65762b46e23c194bc4d552946a97bcee43fbbc8c466d60db428",
+      "size_bytes": 1699
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/1000PEPEUSDT/controls.csv.gz": {
+      "sha256": "bda790727123ef8de1ff4a36f855170ce2cedc9600ad24ef4a6b4c2c37a057c1",
+      "size_bytes": 7403
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/1000PEPEUSDT/evidence.csv.gz": {
+      "sha256": "44fa6e3efbf813cae5e90ffe2da04728a1f71b1277a6cdf5962bfac2f54984e0",
+      "size_bytes": 11686
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/1000PEPEUSDT/fills.csv.gz": {
+      "sha256": "1090041caade2cafb1191077fbbb905598b6a772d8cd4aa2b33fc6b2d76ee585",
+      "size_bytes": 89406
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/1000PEPEUSDT/trades.csv.gz": {
+      "sha256": "bbe2a28f36eaa13f4b7bceae16c0064609687af5fbb5627dcb74282005aa4c54",
+      "size_bytes": 194837
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AAVEUSDT/completion.json": {
+      "sha256": "11e9f9877bf30ff4556b331e2eec39b787c9dfc6a39de82eb5e953ab0def0025",
+      "size_bytes": 1683
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AAVEUSDT/controls.csv.gz": {
+      "sha256": "5598667043be6ab41c281669a9eae3c0877ec714db35fa399936a073df0b00e5",
+      "size_bytes": 8326
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AAVEUSDT/evidence.csv.gz": {
+      "sha256": "087d3bdc82c689d1776a98f1cdb4ce20edb04cb4f3b59b082025a078e0494982",
+      "size_bytes": 12930
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AAVEUSDT/fills.csv.gz": {
+      "sha256": "36038bea2faccef8d02315724a14da94c8657f37c2cc7719392dfe550abeb156",
+      "size_bytes": 91123
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AAVEUSDT/trades.csv.gz": {
+      "sha256": "ffea036cc4d77efc2f0fae7da122e75e7d00830c42c7272bdad1395e48cbe4a9",
+      "size_bytes": 194749
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AEROUSDT/completion.json": {
+      "sha256": "8621ace94f4735185dbf2cb9e0cec138e6e2dd6a77258808bd975dfbccafdd52",
+      "size_bytes": 1681
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AEROUSDT/controls.csv.gz": {
+      "sha256": "579671952b5a4526e0928ed2e991bc8d9e36833546c204acb397bf1d7fb9c6f0",
+      "size_bytes": 6471
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AEROUSDT/evidence.csv.gz": {
+      "sha256": "679dba23e87d307c2af1647746c2c7fcc22a28792195b44d98139f4284dea9a3",
+      "size_bytes": 9552
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AEROUSDT/fills.csv.gz": {
+      "sha256": "2b1d9cb241e08d56add2f52f4a6fa29a3e884069d33738902f588ca5bf336f74",
+      "size_bytes": 75989
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/AEROUSDT/trades.csv.gz": {
+      "sha256": "2c38f6505afe89ea5c12624be04aeeafc2c4e1f6b0bd5ef56c09a559f6bad1d2",
+      "size_bytes": 165763
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/API3USDT/completion.json": {
+      "sha256": "f732a2c95930d3accfebc6e27394480b31201763b9aa3972376b495d5c20f3a8",
+      "size_bytes": 1681
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/API3USDT/controls.csv.gz": {
+      "sha256": "f8e45b11111eec7f5c3d8dbe8e88e1fc63f4490211fe8b00b7f51f06fd2106e8",
+      "size_bytes": 6285
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/API3USDT/evidence.csv.gz": {
+      "sha256": "3fcabcbcd894ccc5d2409fb5cd160b1791eef36252bc79fa37880ae2c0194c40",
+      "size_bytes": 8877
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/API3USDT/fills.csv.gz": {
+      "sha256": "46fd13939a2a2290e5116bd01e6ce1f326d617db0d4c4a1385175dcc2dccb778",
+      "size_bytes": 75507
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/API3USDT/trades.csv.gz": {
+      "sha256": "1997d27caf45f5b7baa5e7c8fbc3d54513b0c6332851786cde4f167c01e5fb89",
+      "size_bytes": 160905
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/APTUSDT/completion.json": {
+      "sha256": "a70064dbe6b142fa1aef400507028c02570c66fe4751ef841cda1639faed2928",
+      "size_bytes": 1679
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/APTUSDT/controls.csv.gz": {
+      "sha256": "9a90cc080316e5b481f257e41fa1fa441c1eaabd21078b8a306cee717a3a2423",
+      "size_bytes": 7675
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/APTUSDT/evidence.csv.gz": {
+      "sha256": "319c58b48f000afd687970286a2048b45ebc6a1a4b235bdd26b91b2cfed0a0e8",
+      "size_bytes": 11548
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/APTUSDT/fills.csv.gz": {
+      "sha256": "acc0869007bfdd0f94727fe3f3221faf8751c23d2407f6d54472bb2205ba549e",
+      "size_bytes": 89486
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/APTUSDT/trades.csv.gz": {
+      "sha256": "7301139843297886e34dfb09b8f1bf8f93443817a9b1a4712e73cbc0e8f55cb8",
+      "size_bytes": 195697
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARBUSDT/completion.json": {
+      "sha256": "bbe6fd70643f87ebc8b61dfb7dcbda32ce843c44c5e59eaffadf5360d68dd6e0",
+      "size_bytes": 1678
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARBUSDT/controls.csv.gz": {
+      "sha256": "c2934efa14adf31bcd8fa6e861d2704ec6ccd5cb95d736d559c914d3d8197486",
+      "size_bytes": 7737
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARBUSDT/evidence.csv.gz": {
+      "sha256": "249147782c9fc83a1deb9255b740ddfde27e6b823a43e7b4cf02df4660903464",
+      "size_bytes": 10851
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARBUSDT/fills.csv.gz": {
+      "sha256": "60e28464cf51e1393c29eae38a77a7b7ee04ccd8bf83d7b5fbec7fdf7899c59e",
+      "size_bytes": 85057
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARBUSDT/trades.csv.gz": {
+      "sha256": "e1a96f4d1510247e167c99ee840a7ce3795d8e56df0b1cadbce96eb1f7eb130a",
+      "size_bytes": 186481
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARUSDT/completion.json": {
+      "sha256": "70b525a7256469c7bacb0946dd54b3a7d41f4dc4c0b6c3d9391fcce7a6f67e7f",
+      "size_bytes": 1673
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARUSDT/controls.csv.gz": {
+      "sha256": "c447acf65ca5e749382390bcbc3a2fb419f9c98ce4945371888d03871ac32e27",
+      "size_bytes": 7006
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARUSDT/evidence.csv.gz": {
+      "sha256": "0a0ac697b34552bf9090a2319037fed2976d0e8b1155d80652ecf458452c7dfa",
+      "size_bytes": 10696
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARUSDT/fills.csv.gz": {
+      "sha256": "d5b16083a1304b1b602c9d49510b20e6e7090522afb71ae65bbb8b0e8c92ddbe",
+      "size_bytes": 82460
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ARUSDT/trades.csv.gz": {
+      "sha256": "a1acb7e6b4b7069d4b297caa195cea49f553e6e96b7e8a93ab0ebdc7e76511cd",
+      "size_bytes": 179561
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BOMEUSDT/completion.json": {
+      "sha256": "a5e0db868283bb4a27506ba4f560c5d1e7353d8a94d60255ea3c10a39ad9cd1a",
+      "size_bytes": 1683
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BOMEUSDT/controls.csv.gz": {
+      "sha256": "849344e93e11fbcc80080cbe706a37042dc1f32873301f40cc28f67d9c57ed87",
+      "size_bytes": 7614
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BOMEUSDT/evidence.csv.gz": {
+      "sha256": "13ac9d397fbcaad4b2816d7e32a6627d5805dd978c2f974778d272308f0e24d7",
+      "size_bytes": 10779
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BOMEUSDT/fills.csv.gz": {
+      "sha256": "ce2cec0c443bba36d2859dc688264781ff113a804ad46c66bd8b80a5db4a7735",
+      "size_bytes": 89248
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BOMEUSDT/trades.csv.gz": {
+      "sha256": "06c92a988b8b42e25158d366996cf9e19bc0767bf80e9377b41f6d50056f147f",
+      "size_bytes": 193956
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BTCUSDT/completion.json": {
+      "sha256": "0b7a18d28f7099bfcee25faf0b98f071eab95f1f8ed42c0ae48dcd9d0e0d3901",
+      "size_bytes": 1674
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BTCUSDT/controls.csv.gz": {
+      "sha256": "234fd6c99fd323c4378eae21c16a84b7c7d579c8d456933fe02eca749acec3d0",
+      "size_bytes": 6712
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BTCUSDT/evidence.csv.gz": {
+      "sha256": "f15befff231d66c377c4ac4d9798c2119c6eac57f28c7840f7f1c392ad01709a",
+      "size_bytes": 11471
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BTCUSDT/fills.csv.gz": {
+      "sha256": "2ed524e912e54d652758b4609ad8c4866b8761c8dc8a61a90e91332bf94d7942",
+      "size_bytes": 67581
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/BTCUSDT/trades.csv.gz": {
+      "sha256": "61a5b1da3aeb4e5e1c255a16f8c7a8ae819cf95b13dc3ad828c85b9fe5c982ca",
+      "size_bytes": 128048
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/DASHUSDT/completion.json": {
+      "sha256": "a6d136ef92cb285fd63ddbf2968ac2faa74e616898667f2254593e23ebfb16f5",
+      "size_bytes": 1681
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/DASHUSDT/controls.csv.gz": {
+      "sha256": "ffac2d8510acc0e1ccfe234c52fb3a82103c536cf0274302f67bf414db7153d9",
+      "size_bytes": 7289
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/DASHUSDT/evidence.csv.gz": {
+      "sha256": "f578d14942beae682c35372f61b58cd1b33fbff51b60ebbfd1e7e975c13aeefd",
+      "size_bytes": 10893
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/DASHUSDT/fills.csv.gz": {
+      "sha256": "848b6af1f868d21ee96de667019cec939e1b32bc5fa5d5c394d6f7e98354ac2c",
+      "size_bytes": 87597
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/DASHUSDT/trades.csv.gz": {
+      "sha256": "32a340d50380af5810fd6f6dc79bdcc90f71db9589fb19ce9aa6983048a85bd4",
+      "size_bytes": 187224
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ENAUSDT/completion.json": {
+      "sha256": "561a370a93a284eeb57fcb3992a31001bf2bb7c866b5bfc01f4f7cc505aeb29d",
+      "size_bytes": 1679
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ENAUSDT/controls.csv.gz": {
+      "sha256": "33ed332752068c62031cd41f9f32e2085a8445d632dbc6dca4510921dd1f3b2c",
+      "size_bytes": 7305
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ENAUSDT/evidence.csv.gz": {
+      "sha256": "0a8d48018dfd794db92590442d536093034de74e592833eb3b24d24a20d12da5",
+      "size_bytes": 10304
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ENAUSDT/fills.csv.gz": {
+      "sha256": "fdd8e7afc1f70d42c98b3f2b029b31a48ae9a94ae0450e2aa31fa82bb5c07f91",
+      "size_bytes": 84028
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ENAUSDT/trades.csv.gz": {
+      "sha256": "33ddb0a2cf095ff77bd62baeaedcdb190eea6ede71b3682cc7a998711c5dda41",
+      "size_bytes": 181113
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ETHUSDT/completion.json": {
+      "sha256": "fd5ec266160fbc749f7e757b38de0034c3bdf5091c17826afd7bf858a4739236",
+      "size_bytes": 1676
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ETHUSDT/controls.csv.gz": {
+      "sha256": "202104a76e2b999c51c347b036bdb815dcfe13078031e5541b457766a23e7c03",
+      "size_bytes": 7291
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ETHUSDT/evidence.csv.gz": {
+      "sha256": "a6448882189222d89b493e7b62a34227b7e615816eb246e51a0dfe1ddc9156dd",
+      "size_bytes": 11955
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ETHUSDT/fills.csv.gz": {
+      "sha256": "a2fcdd55fa1792135d1489528e166577c355619375834df0f75d2fc988ecd28e",
+      "size_bytes": 79161
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ETHUSDT/trades.csv.gz": {
+      "sha256": "13ae9706fd6e9725edb932a9f71c0ce0cf87e02f2077358fb87b064311e18d81",
+      "size_bytes": 150149
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/FILUSDT/completion.json": {
+      "sha256": "8ffc8de45a9c62d4214c19b90e44213994ddf31aab260c2c9ffd1f3590838ef7",
+      "size_bytes": 1678
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/FILUSDT/controls.csv.gz": {
+      "sha256": "5721a74f984893386d694eef850754b9daba13035d1da28f9314aa48cac486eb",
+      "size_bytes": 8173
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/FILUSDT/evidence.csv.gz": {
+      "sha256": "52eff0c249ee9d34274bfabb5864b04fdd7fa683a1420ddf45fd0e5cb92110bc",
+      "size_bytes": 11341
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/FILUSDT/fills.csv.gz": {
+      "sha256": "696b8fc6e8faf207a5363411afc81cbb7ac2a8536340f343f7f6a017441b8055",
+      "size_bytes": 93753
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/FILUSDT/trades.csv.gz": {
+      "sha256": "757a88ed24594d3bba768bbe83badfc1c4cc7ac1c0c72f897f4934ea5f531e98",
+      "size_bytes": 207606
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/HYPEUSDT/completion.json": {
+      "sha256": "067ab0c8c400062295105e9929dc4f2a20108637f0c540e08c7f751fcc6a5872",
+      "size_bytes": 1678
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/HYPEUSDT/controls.csv.gz": {
+      "sha256": "5f3742f4a058f47b08a51759360699946bf1e87e754e08c886839c16d0e29469",
+      "size_bytes": 4565
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/HYPEUSDT/evidence.csv.gz": {
+      "sha256": "476415edf16b391ba37597f98a29c802d398fac5f100793e6ad567a39d0b2faf",
+      "size_bytes": 7213
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/HYPEUSDT/fills.csv.gz": {
+      "sha256": "b305f284c08d6c4bfdc45789f2c5bb1fc27843f1ca7bf3fc58adcb73bcc8abd4",
+      "size_bytes": 47122
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/HYPEUSDT/trades.csv.gz": {
+      "sha256": "e4c84e037ab82fa3667672ac95bb170bb0665dd63a986c3a12e94954721a893b",
+      "size_bytes": 81629
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/JUPUSDT/completion.json": {
+      "sha256": "d3811b70fac2e113052d4849b30554ee8c58021dc802490a4072b80c5ee05e1d",
+      "size_bytes": 1677
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/JUPUSDT/controls.csv.gz": {
+      "sha256": "be1bb3ae2a93093af815ad22687b5f05334565b7316522b484b7f512733598de",
+      "size_bytes": 6286
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/JUPUSDT/evidence.csv.gz": {
+      "sha256": "4dfa4e9be9cddaa8efb032fc89eb45b3f6570a5d1f057940116b1036922db45c",
+      "size_bytes": 9488
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/JUPUSDT/fills.csv.gz": {
+      "sha256": "4b3193922e05a73369fc23bdafd2b349feceb056de067cf085e4547e61126ab0",
+      "size_bytes": 66485
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/JUPUSDT/trades.csv.gz": {
+      "sha256": "7560750eec974eb692e40dcf5683a81f3bfb4e3e27fefae1a037d4c8e1431fe3",
+      "size_bytes": 130727
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/MUBARAKUSDT/completion.json": {
+      "sha256": "c46014a952d95186998c09ca682bf620ee3325b87cac29b53a9457197658fbdd",
+      "size_bytes": 1692
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/MUBARAKUSDT/controls.csv.gz": {
+      "sha256": "07319919adc3e0d148f1e15e7bac49ab0051ea0e2665dd31544b0fee92849f82",
+      "size_bytes": 5373
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/MUBARAKUSDT/evidence.csv.gz": {
+      "sha256": "022cc7034c6002bdfac632b3e46b16c961bf40593ea6bcdab410ed36d42a46de",
+      "size_bytes": 7811
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/MUBARAKUSDT/fills.csv.gz": {
+      "sha256": "937c1c3e6157465e64fd99733752854eba9dd5c3b632b5d1884ad1a62a7e84cf",
+      "size_bytes": 60549
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/MUBARAKUSDT/trades.csv.gz": {
+      "sha256": "01f4a18dc715ef4fbd5176e4e3f4ce388bdc4e7a3e3bdcf91e2cc6f458e4e03d",
+      "size_bytes": 111518
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/NEARUSDT/completion.json": {
+      "sha256": "0e6eaee4fcbef7c1b62c53f798c6bf61b66e1633a7493c8431e24e718f20621b",
+      "size_bytes": 1682
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/NEARUSDT/controls.csv.gz": {
+      "sha256": "e15db650d3bd8f389787238efc67dde360f4a98b88ab1575c7d75e75ae3d0127",
+      "size_bytes": 7579
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/NEARUSDT/evidence.csv.gz": {
+      "sha256": "bea61e002bd8f2ab94bcdbbe74ea8124672bc9228312edc51e70dd217b1dd148",
+      "size_bytes": 10786
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/NEARUSDT/fills.csv.gz": {
+      "sha256": "46f82a20e4de429d521175a4f984fafbd4a00927eb9808a952742b68a808b9ed",
+      "size_bytes": 81634
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/NEARUSDT/trades.csv.gz": {
+      "sha256": "edcf09a5fc7d6ae52def03b04198e12779b1f6647887d0d55075ff047ff6a670",
+      "size_bytes": 170389
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ONEUSDT/completion.json": {
+      "sha256": "e9464ac10280e870b28b85c85b3ef5038bddf2d37b8a0e4f95d4a3e9dd8d294b",
+      "size_bytes": 1679
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ONEUSDT/controls.csv.gz": {
+      "sha256": "cb8de4e4b97fd2f779aa191e23d842b53bcfe4b053d0995cde71dd09c8fb9998",
+      "size_bytes": 7482
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ONEUSDT/evidence.csv.gz": {
+      "sha256": "c954b2eea847071ac3dcb61ff229aeabd248ee19e9792b342b120bc7ba0e032d",
+      "size_bytes": 9906
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ONEUSDT/fills.csv.gz": {
+      "sha256": "3b67cffe616a008ec1b1d359b4938bb00fac90a6fc0d17920ba0734d91f21a42",
+      "size_bytes": 85167
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ONEUSDT/trades.csv.gz": {
+      "sha256": "af11c83d06d7a4e09c5ef40c4ce7f2a7a1ce60448c6844b6fb667b9649ab5c09",
+      "size_bytes": 186641
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/OPUSDT/completion.json": {
+      "sha256": "28e47a1deaa05d92f496f45c8bfbd7e74e06849758ee484625def938746c5ce0",
+      "size_bytes": 1673
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/OPUSDT/controls.csv.gz": {
+      "sha256": "608a8759ed0960a2b21a31b333642b043f6503e7466d868683adcc7d169de59c",
+      "size_bytes": 6700
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/OPUSDT/evidence.csv.gz": {
+      "sha256": "1b109cd1029f24c1537cd5abfb03a4ee91edceed575476786c895861cd66790f",
+      "size_bytes": 9613
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/OPUSDT/fills.csv.gz": {
+      "sha256": "c8e4a143cbce5d18cac3cec241649344127e37c609273253c0d68880de77cabf",
+      "size_bytes": 74458
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/OPUSDT/trades.csv.gz": {
+      "sha256": "cad97ffbd92392472f6692fa31e7191c43160b6ec8c56cab6feed016a64d81e5",
+      "size_bytes": 149686
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PENDLEUSDT/completion.json": {
+      "sha256": "66d04602e58870c32cba6fded5e8e45eded912fb98ceb5047537e52d342dcd1c",
+      "size_bytes": 1690
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PENDLEUSDT/controls.csv.gz": {
+      "sha256": "f0d8f333aa989cee7fe65ecf2821362aa63dd2b27ac762a3dfe588f7b56f4dd6",
+      "size_bytes": 7564
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PENDLEUSDT/evidence.csv.gz": {
+      "sha256": "f8db42433ba131469dd4e25218ee4ab337dbc89754ec0da46f80d43b66b48797",
+      "size_bytes": 10924
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PENDLEUSDT/fills.csv.gz": {
+      "sha256": "f73059d4b07317513da625a7927a928eb5e37ded3f4018ab64d7695d62c3112e",
+      "size_bytes": 84088
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PENDLEUSDT/trades.csv.gz": {
+      "sha256": "10c693b4e4d0c075edd27c080529e8a438fe96866588afe16cb81eddf211607a",
+      "size_bytes": 182741
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PIEVERSEUSDT/completion.json": {
+      "sha256": "5fb425252717c0e0e01d61454f43ddf8e8a451d4945839dbf43637a86bee76e9",
+      "size_bytes": 1694
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PIEVERSEUSDT/controls.csv.gz": {
+      "sha256": "5e07745b6f6a0e236aa7c9fc473eda1ea9dedaa97f33424831bafbb25b54000c",
+      "size_bytes": 2289
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PIEVERSEUSDT/evidence.csv.gz": {
+      "sha256": "273f6ab5db1a4d70e1e41ef514a7081c63ded9612ca14290ecd27e7f1f9a802e",
+      "size_bytes": 3484
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PIEVERSEUSDT/fills.csv.gz": {
+      "sha256": "4dbb177424686692a5dfad1c6f54c2c465f3fd81d49bc1ba145674fbdc632ceb",
+      "size_bytes": 9315
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PIEVERSEUSDT/trades.csv.gz": {
+      "sha256": "0d9a34447f3966849e1c29e182e98ca35d2ba96a9c668cc41ec8481fdba6c60f",
+      "size_bytes": 12501
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PUMPUSDT/completion.json": {
+      "sha256": "4336e4c0c1a8a38573569cef0377c57dd5de42f6cfecd4e44ae3f29eb400fb88",
+      "size_bytes": 1678
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PUMPUSDT/controls.csv.gz": {
+      "sha256": "72e0f16903caf47efd67039bc913e1a5d23077ad90581a6b84b9bd98c16733d2",
+      "size_bytes": 3900
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PUMPUSDT/evidence.csv.gz": {
+      "sha256": "06f4536743a3550be3bdf942e20fc8bd289c1e226be7e7de40fa50820043f77e",
+      "size_bytes": 5984
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PUMPUSDT/fills.csv.gz": {
+      "sha256": "778d1d1e7ddf0c98ce38bf1c515e1ae827891bd00db4caacf4a49fdaff98a641",
+      "size_bytes": 35460
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/PUMPUSDT/trades.csv.gz": {
+      "sha256": "25e83cc8dce11635d653866c26e5b0eea776cc3061924219bf4641b7da7d17bf",
+      "size_bytes": 49252
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/SOLUSDT/completion.json": {
+      "sha256": "a478488839d6925a584b2f824e97ce8cded0f68159e581fd3144a1b57b719010",
+      "size_bytes": 1679
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/SOLUSDT/controls.csv.gz": {
+      "sha256": "ca6c0d27d4a8586c96fba91045764b251c6c4744e84a3570595898c1cf7c807c",
+      "size_bytes": 6992
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/SOLUSDT/evidence.csv.gz": {
+      "sha256": "9b61dc11a3dd5dff104b218f5525526c1c5db8a1c29a8a77250aed65c4d362c1",
+      "size_bytes": 11099
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/SOLUSDT/fills.csv.gz": {
+      "sha256": "75c679ae770d405392783ad74e284d1349b05035e5584db61d747f94937c37e3",
+      "size_bytes": 79191
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/SOLUSDT/trades.csv.gz": {
+      "sha256": "868c57f67b75881489b9a3a8e06014065a38ac670a46a88dc863aa9620879a6c",
+      "size_bytes": 169345
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/UNIUSDT/completion.json": {
+      "sha256": "9f8aecb551e8444611f8440ccc14ff354e714816ebdfbbf1cd93493469d65c19",
+      "size_bytes": 1677
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/UNIUSDT/controls.csv.gz": {
+      "sha256": "c48aacddb335679d842e6faaeaabc00a4203cb75b9900df64cd711dbbbcadc54",
+      "size_bytes": 7597
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/UNIUSDT/evidence.csv.gz": {
+      "sha256": "921944fad96bb9ebc2cdfdd75d8e02c0583420f266ce099d26e5bf542a5fbe76",
+      "size_bytes": 11067
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/UNIUSDT/fills.csv.gz": {
+      "sha256": "6d508bb4b37c18e43a8f6a8c70885dfab2ea9d2b095ea842692b1b9d6ecfa3c7",
+      "size_bytes": 85002
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/UNIUSDT/trades.csv.gz": {
+      "sha256": "2e335891efca2abccbb54e6e0cbef0382170c72c28a1676f78bf6d02c5df033c",
+      "size_bytes": 180645
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/USELESSUSDT/completion.json": {
+      "sha256": "4c35fc1d3ffec368cdf58294efe042c513508e435202aca655081745af62377d",
+      "size_bytes": 1690
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/USELESSUSDT/controls.csv.gz": {
+      "sha256": "399a03a5479f93d48faa47600ffa3a427aabc703e43a6737cef431c4bf012f8c",
+      "size_bytes": 4170
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/USELESSUSDT/evidence.csv.gz": {
+      "sha256": "9a35376333271bfc7ea320e2255616cfbda4c7513008e0ddd4010c7be3bdeeed",
+      "size_bytes": 6137
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/USELESSUSDT/fills.csv.gz": {
+      "sha256": "f51d19ed4e345da8f395ad8d55e17be495857ad5c47ed362de8c3b6cbb728a03",
+      "size_bytes": 37801
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/USELESSUSDT/trades.csv.gz": {
+      "sha256": "40a27bd80bcdddfe15f76b40d7ae83df14277f1aa826a1e0bf6e976c7103c55c",
+      "size_bytes": 53381
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/WIFUSDT/completion.json": {
+      "sha256": "10f4ce02142e15b789b28c956ada722991e63b8d843b021835d0db7170b8dcc3",
+      "size_bytes": 1678
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/WIFUSDT/controls.csv.gz": {
+      "sha256": "d918768a56e30e6c7b4e9a9f94d423e5085ab4e6bae6a25e8b9ed86ba8ce75a5",
+      "size_bytes": 7160
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/WIFUSDT/evidence.csv.gz": {
+      "sha256": "966905c24152dda985d5a66a6d572bb97be6ba3e37b3bc7945819c9071c24ee7",
+      "size_bytes": 10750
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/WIFUSDT/fills.csv.gz": {
+      "sha256": "6350211397788c1d8cda6a1d8d87d1c8bb7437d4661ddc2951fe87f25eeb4008",
+      "size_bytes": 81997
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/WIFUSDT/trades.csv.gz": {
+      "sha256": "38b519b98478d2f27960d2abceeefacbb4c9f6c242ea94454e2bbb4b76e7e1ef",
+      "size_bytes": 180066
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/XTZUSDT/completion.json": {
+      "sha256": "494e3b5552a761578ed2b38ae7555e643f92bda2e676db88a04c0a1626dfe1d0",
+      "size_bytes": 1677
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/XTZUSDT/controls.csv.gz": {
+      "sha256": "490130d62bcd908e586be467c9a27c763b6b639f62bdfdd31316942a5246072a",
+      "size_bytes": 6283
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/XTZUSDT/evidence.csv.gz": {
+      "sha256": "965f256c1b23f0fa70977862db25e2e301fbc512facbc8819951dcbc109f8f7e",
+      "size_bytes": 8413
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/XTZUSDT/fills.csv.gz": {
+      "sha256": "38ae514a0e727aa45c2f037e598ca7530eb4fced165688fc21f1e15c468405d1",
+      "size_bytes": 72562
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/XTZUSDT/trades.csv.gz": {
+      "sha256": "ab12f5ef7fcd89bf2faf6e2900f876b9dbe7fb69b82eedb722b4fca974dd9c36",
+      "size_bytes": 153132
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZECUSDT/completion.json": {
+      "sha256": "c3eaf40992690d20e0665df32481b6a0df89ae030a12b8c9a8eb891ab6823514",
+      "size_bytes": 1677
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZECUSDT/controls.csv.gz": {
+      "sha256": "b2e9d17b3d1899e6cebe73424b3f48baf8e242879898abdde62a118b05f59574",
+      "size_bytes": 7317
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZECUSDT/evidence.csv.gz": {
+      "sha256": "32000520359bb41463857a62b7ce3090dbab26f338dd95398cbf6a2f75d479c6",
+      "size_bytes": 10962
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZECUSDT/fills.csv.gz": {
+      "sha256": "74a84745b13322f584d2607ef893185ca7676f50b8f960f5a94bebd7cda4adc8",
+      "size_bytes": 88419
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZECUSDT/trades.csv.gz": {
+      "sha256": "3b815238fca7e655750d07d8fed56b9273bd74662bba4f95c26b9d60c22f6c55",
+      "size_bytes": 193286
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZENUSDT/completion.json": {
+      "sha256": "452898e8de35a5d66083e8c744edc9b9fd84d3ae3134b1c2a5f2b83e81eb338c",
+      "size_bytes": 1679
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZENUSDT/controls.csv.gz": {
+      "sha256": "887cd82346978b10baa218ba98a2b3ad4efecc1851cc22dc0513384d77f4c966",
+      "size_bytes": 8195
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZENUSDT/evidence.csv.gz": {
+      "sha256": "20c9f3909fa04e2af208b8767b7e69939e9bf16a52d95f9316dfe684d056b387",
+      "size_bytes": 11885
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZENUSDT/fills.csv.gz": {
+      "sha256": "8abf268d8fbf70f43ba2fe47d8a0e4f4a82e949fa270e633f2f518b687d41f8a",
+      "size_bytes": 94204
+    },
+    "experiments/active/exp-spike-v9-htf-sma-20260920-v1/run_v1/streams/ZENUSDT/trades.csv.gz": {
+      "sha256": "885948127a1be711437484b7f565ec8a3a46a4c464ab3bfc9c62f48fd3040fca",
+      "size_bytes": 205613
+    },
+    "tests/evaluation/test_spike_v9_htf_sma.py": {
+      "sha256": "f0dfbc81b05795a1e05435fcc9035eda55d4280cf558e11117c6a5972091c7a5",
+      "size_bytes": 3749
+    },
+    "tests/evaluation/test_spike_v9_htf_sma_report.py": {
+      "sha256": "5654c3fc2ef893d7ef223fa1c136730f1be1c7806019ad845377d275b81962bf",
+      "size_bytes": 2864
+    },
+    "yoyo/evaluation/spike_v9_htf_sma.py": {
+      "sha256": "6bfd45a4381faeeb56830c11619615e7afb7785fa809cb2554416497cd78483e",
+      "size_bytes": 3568
+    },
+    "yoyo/evaluation/spike_v9_htf_sma_report.py": {
+      "sha256": "1c6358112e1166fc93afddfaa095ad1b808d41f65f9edcf768fd4508d6dd069e",
+      "size_bytes": 23616
+    },
+    "yoyo/evaluation/spike_v9_htf_sma_study.py": {
+      "sha256": "f846ea10d78865bbaa21a417d82a373ac733820a95f0ab9d5421361359537100",
+      "size_bytes": 14089
+    }
+  },
+  "production_eligible": false,
+  "training_eligible": false,
+  "note": "Excludes self and shared mutable registries/HANDOFF. Initial statistics preserved; final is statistics_v2."
+}

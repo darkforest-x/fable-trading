@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-09-19T21:25:21.563088+00:00",
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v9_htf_sma.py tests/evaluation/test_spike_v9_htf_sma_report.py tests/evaluation/test_spike_v9_full_replay.py tests/evaluation/test_spike_v9.py",
+    "passed": 58
+  },
+  "baseline_parity_streams": 87,
+  "source_files_sha_bound": 29,
+  "independent_reviewer": {
+    "agent": "v9_htf_sma_mapper",
+    "role": "budget-mapper",
+    "model": "gpt-5.6-luna",
+    "effort": "max",
+    "mode": "read-only",
+    "findings": [
+      "Eight-month exact sign test Holm p<0.01 is unreachable; interpretation must be inconclusive, not no effect.",
+      "Attribution must verify common-event censor and exit state before closed-only slicing.",
+      "Expose cross-split/unavailable/censored controls and per-asset directions."
+    ],
+    "resolution": [
+      "Preserved preregistration; disclosed minimum p and added known exact-resolution test.",
+      "All common event engine keys, entry/exit times, periods and censor flags equal before attribution.",
+      "Added control_period/control_status, cross-split paired guard and per-asset direction rows."
+    ]
+  },
+  "numerical_reconciliation": {
+    "initial_blas_warning": "Finite signs@delta produces warning even on small integer vector; output equals elementwise reduction.",
+    "scalar_exhaustive_p_values_equal": 24,
+    "final_vs_initial": "Trade metrics, selections and all24 exact p values unchanged; cross-split control cohort now restricted."
+  },
+  "production_eligible": false,
+  "training_eligible": false,
+  "tv_change": false,
+  "notion_url": "https://app.notion.com/p/3e08856479af813984a1fbbe2be6c194"
+}
