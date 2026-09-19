@@ -31465,3 +31465,45 @@ artifacts:
     production_eligible: false
     notes: Rejected both timeframes. 638 archived symbols, original 9287-trade baseline reproduced. Packed full streams, decisions, controls and receipts plus readable MD/HTML and statistical tables;
       legacy holdout_status records archive dates only, not an access restriction. No live change.
+
+  - artifact_id: spike-v112-tv-parity-20260919-delivery
+    artifact_type: manifest
+    role: selected_native_tv_and_backend_signal_parity_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: d7c9acf5d15dd5b4e1cfffa6d627fb9ccfc15c9f
+    source_path: experiments/active/exp-spike-v112-tv-parity-20260919-v1/manifest.json
+    sha256: 373cfbf420ef67fed000b74a7e6284484218d49109cadda11b9f0064e3e30c27
+    size_bytes: 1399
+    storage_uri: repo://experiments/active/exp-spike-v112-tv-parity-20260919-v1/manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Legacy holdout vocabulary does not express this post-rule-removal audit; no access restriction or consumption is implied. Four-case diagnostic summaries, report and learning only. Full original OHLCV was not frozen; GAS cause established, remaining case-level parity incomplete.
+
+  - artifact_id: spike-v112-sample-direction-20260919-delivery
+    artifact_type: manifest
+    role: fixed_sample_trade_direction_and_post_exit_path_diagnosis
+    source_repo: darkforest-x/fable-trading
+    source_commit: e190edbe68f2951c937349eda839aea611bdbe41
+    source_path: experiments/active/exp-spike-v112-sample-direction-20260919-v1/manifest.json
+    sha256: 64ccdf13a081fe10da46e3461934cefda2a324b72f0d9fd21e07bf081edbfd4d
+    size_bytes: 1488
+    storage_uri: repo://experiments/active/exp-spike-v112-sample-direction-20260919-v1/manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Original 50 sample identities reproduced and 100 MFE checks passed. Raw archive input hashes and source recorded. Historical date vocabulary only; owner removed the access restriction. Direction labels are hindsight outcomes, never entry features. No HTML or production changes.
+
+  - artifact_id: spike-v112-execution-20260919-delivery
+    artifact_type: manifest
+    role: independent_timing_stop_anchor_and_wick_arm_execution_ablation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 270238bbbb58e23914312479140621fa729cabbf
+    source_path: experiments/active/exp-spike-v112-execution-20260919-v1/delivery_manifest.json
+    sha256: c2c11777fe284ff5db5e42f18cbef384088b1634cffe0eb76b61b52fa587133d
+    size_bytes: 6879
+    storage_uri: repo://experiments/active/exp-spike-v112-execution-20260919-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Full baseline parity; all six candidates rejected. Both original failed numerical implementation and corrected canonical run packed with all receipts; all archive member bytes verified. Historical-date vocabulary only, no access restriction. No HTML per owner preference.

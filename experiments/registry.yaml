@@ -9776,3 +9776,45 @@ experiments:
     canonical_report: analysis/p1_spike_v112_manage_20260919.md
     artifacts: []
     notes: Motivated by a hindsight grouping (V9 longs whose box later saw a break +0.49R/+0.53R from the V9 entry) that no rule without hindsight can capture. Not blind. Not pushed.
+
+  - experiment_id: exp-spike-v112-tv-parity-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d7c9acf5d15dd5b4e1cfffa6d627fb9ccfc15c9f
+    status: inconclusive
+    question: Why do selected monitor stop-loss cards have no corresponding visible TradingView V11.2 signal?
+    single_variable: Diagnostic copy only - omit zero-volume chart bars while keeping the engine, parameters and higher-timeframe data fixed.
+    result: GAS mismatch explained by observed missing zero-volume candle in TV and the resulting BB continuity gate reset. Four original backend events reproduce; GAS parent V9 and joint disappear when zero-volume chart bars are omitted; other three zero-free streams are unchanged. TSLA and LIGHT remain unresolved; observed BTC chart was 15m while the card was 30m. Full cross-platform parity remains unproven.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_tv_parity_20260919.md
+    artifacts: [spike-v112-tv-parity-20260919-delivery]
+    notes: Read-only diagnosis, four selected failures, not a profitability experiment or parameter search. Native TV observations and diagnostic summaries retained; full original OHLCV not frozen. No live changes. Historical-data access restriction was removed by owner.
+
+  - experiment_id: exp-spike-v112-sample-direction-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e190edbe68f2951c937349eda839aea611bdbe41
+    status: inconclusive
+    question: Does the owner's impression that most of the existing 50 sampled trades got direction right survive entry-specific and path-aware diagnosis?
+    single_variable: No strategy change. Fixed original sample; descriptive V9 versus joint origins, existing holding windows, and all 12/24/48-bar outcome horizons reported without selection.
+    result: All 50 sample keys reproduce; 100 MFE values reconcile against original OHLC. V9 reaches 1R in 34 of 50 versus joint 24; joint 13 wins and 37 losses. Eleven losses saw 1R before exit; six additional initial-stop losses reach 1R in the next 48 bars after exit. All 37 joint losses never close at 2R before exit. Supports distinct timing, stop-anchor and close-versus-wick mechanisms, not a profitable fix.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_sample_direction_20260919.md
+    artifacts: [spike-v112-sample-direction-20260919-delivery]
+    notes: Conditional hindsight sample, 25 per timeframe, 48 symbols. Original matched controls retained; sample excess is unrepresentative of the full pool. No HTML per owner preference. No new strategy, parameter optimization, TV parity claim or live change.
+
+  - experiment_id: exp-spike-v112-execution-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 270238bbbb58e23914312479140621fa729cabbf
+    status: rejected
+    question: Can three isolated changes to entry age, original V9 stop anchor, or high-based trail activation rescue the fixed sample mechanisms while improving full serial results?
+    single_variable: Three separate arms, never combined - maximum parent age 6; original parent V9 stop; high reaches 2R to arm the unchanged close-minus-4ATR next-bar trail. Original candidates, data and 0.2 percent costs; independent serial occupancy and fixed-entry counterfactuals.
+    result: All six candidate/timeframe pairs rejected. 638 streams complete and baseline 9287 records reproduce. 15m age6 improves mean net bp from -16.286 to -4.346, difference +11.940 with month-block CI [-1.272,+24.752], but later -35.820bp. 1h age6 worsens -62.555 to -73.347bp, later -136.440. Parent stop raises win rate but 1h net bp worsens to -74.256; native R improvement partly changes denominator. Wick activation worsens full-period net bp in both timeframes. Sample parent stop rescues three losers but loses three winners; full data does not validate a profitable fix.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_execution_20260919.md
+    artifacts: [spike-v112-execution-20260919-delivery]
+    notes: Non-blind existing archive, same temporal split with early exits crossing split purged. Parent random anchors are surrogates and only 88.6-88.8 percent match. run_v1 retained with one floating-zero-risk control failure; run_v2 numeric guard changes no actual trade and invalidates only that control. 33 focused tests passed. No parameter grid, HTML, live change or promotion.
