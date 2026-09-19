@@ -747,6 +747,18 @@ float v10Atr = ta.atr(14)
 float v10Body = math.max(open, close)
 float v10Peak = v10PeakMode == "实体上沿" ? v10Body : math.min(high, v10Body + v10WickCap * v10Atr)
 
+// Snapshot ATR on every bar, before any conditional candidate search. Native Pine
+// replay showed derived-series history inside intermittent nested calls disagreeing
+// with raw OHLC at the same offset. Absolute-bar slots avoid call-history indexing.
+// request.security evaluates this bounded buffer separately in its own context.
+const int V12_HISTORY = 2001
+var array<float> v12AtrBars = array.new_float(V12_HISTORY, na)
+array.set(v12AtrBars, bar_index % V12_HISTORY, v10Atr)
+
+f_v12_atrAt(int absoluteBar) =>
+    int age = bar_index - absoluteBar
+    age >= 0 and age < V12_HISTORY and absoluteBar >= 0 ? array.get(v12AtrBars, absoluteBar % V12_HISTORY) : na
+
 // 两个序列逐根计算，分别在独立候选池中选点。
 float v10RawPivot = ta.pivothigh(high, v10Left, v10Right)
 float v10SoftPivot = ta.pivothigh(v10Peak, v10Left, v10Right)
@@ -834,8 +846,8 @@ f_v10_same(V10Line first, V10Line second) =>
     int rightEdge = math.min(first.cx, second.cx)
 
     if not same and rightEdge - leftEdge >= v10Gap
-        float leftTol = math.max(syminfo.mintick, v10Touch * 0.5 * v10Atr[bar_index - leftEdge])
-        float rightTol = math.max(syminfo.mintick, v10Touch * 0.5 * v10Atr[bar_index - rightEdge])
+        float leftTol = math.max(syminfo.mintick, v10Touch * 0.5 * f_v12_atrAt(leftEdge))
+        float rightTol = math.max(syminfo.mintick, v10Touch * 0.5 * f_v12_atrAt(rightEdge))
         float nowTol = math.max(syminfo.mintick, v10Touch * 0.5 * v10Atr)
 
         same := math.abs(first.at(leftEdge) - second.at(leftEdge)) <= leftTol and math.abs(first.at(rightEdge) - second.at(rightEdge)) <= rightTol and math.abs(first.at(bar_index) - second.at(bar_index)) <= nowTol
@@ -853,9 +865,9 @@ f_v10_validate(V10Line item) =>
     for step = 0 to age
         int offset = age - step
         float y = item.at(item.ax + step)
-        float a = math.max(nz(v10Atr[offset], syminfo.mintick), syminfo.mintick)
+        float a = math.max(nz(f_v12_atrAt(item.ax + step), syminfo.mintick), syminfo.mintick)
 
-        if v10Body[offset] > y + v10BodyTol * a + syminfo.mintick * 0.0001
+        if math.max(open[offset], close[offset]) > y + v10BodyTol * a + syminfo.mintick * 0.0001
             reason := 1
             break
 
@@ -937,7 +949,7 @@ f_v10_search(array<int> xs, array<float> ps, array<float> ats, int sourceId) =>
                         array.set(prefix, step, localLow)
 
                     for item in localBag
-                        float ba = math.max(v10Atr[bar_index - item.bx], syminfo.mintick)
+                        float ba = math.max(f_v12_atrAt(item.bx), syminfo.mintick)
                         float ab = (math.min(item.ap, item.bp) - array.get(prefix, item.bx - ax - 1)) / math.max(aa, ba)
                         float bc = (math.min(item.bp, cp) - array.get(lows, item.bx + 1 - oldest)) / math.max(ba, ca)
 
@@ -1215,8 +1227,8 @@ f_v11_lineEngine() =>
         bool softNew = false
         int pivotBar = bar_index - v10Right
 
-        if pivotBar - v10Left >= segStart and not na(v10Atr[v10Right])
-            float pivotScale = math.max(v10Atr[v10Right], syminfo.mintick)
+        if pivotBar - v10Left >= segStart and not na(f_v12_atrAt(pivotBar))
+            float pivotScale = math.max(f_v12_atrAt(pivotBar), syminfo.mintick)
 
             if v10UseRaw and not na(v10RawPivot)
                 f_v10_addPivot(xs, ps, ats, pivotBar, v10RawPivot, pivotScale)
@@ -1249,8 +1261,8 @@ f_v11_lineEngine() =>
 
         int touchBar = bar_index - v12LocalRight
         bool touchSegment = touchBar - v12LocalLeft >= segStart
-        if v12LocalEnabled and touchSegment and not na(v10Atr[v12LocalRight])
-            float touchScale = math.max(v10Atr[v12LocalRight], syminfo.mintick)
+        if v12LocalEnabled and touchSegment and not na(f_v12_atrAt(touchBar))
+            float touchScale = math.max(f_v12_atrAt(touchBar), syminfo.mintick)
             for sourceId = 0 to 1
                 bool touchNow = sourceId == 0 ? v10UseRaw and not na(v12RawTouch) : v10UseSoft and not na(v12SoftTouch)
                 if touchNow
@@ -1482,8 +1494,8 @@ if barstate.isconfirmed and v10Enabled
         int px = bar_index - v10Right
         bool sameSegment = px - v10Left >= v10SegmentStart
 
-        if sameSegment and not na(v10Atr[v10Right])
-            float pivotScale = math.max(v10Atr[v10Right], syminfo.mintick)
+        if sameSegment and not na(f_v12_atrAt(pivotBar))
+            float pivotScale = math.max(f_v12_atrAt(pivotBar), syminfo.mintick)
 
             if v10UseRaw and not na(v10RawPivot)
                 f_v10_addPivot(v10Xs, v10Ps, v10As, px, v10RawPivot, pivotScale)
@@ -1546,11 +1558,11 @@ if barstate.isconfirmed and v10Enabled
 
         int touchBar = bar_index - v12LocalRight
         bool touchSegment = touchBar - v12LocalLeft >= v10SegmentStart
-        if v12LocalEnabled and touchSegment and not na(v10Atr[v12LocalRight])
+        if v12LocalEnabled and touchSegment and not na(f_v12_atrAt(touchBar))
             bool rawTouchNow = v10UseRaw and not na(v12RawTouch)
             bool softTouchNow = v10UseSoft and not na(v12SoftTouch)
             if rawTouchNow or softTouchNow
-                float touchScale = math.max(v10Atr[v12LocalRight], syminfo.mintick)
+                float touchScale = math.max(f_v12_atrAt(touchBar), syminfo.mintick)
                 int tested = 0
                 int passed = 0
                 int duplicates = 0

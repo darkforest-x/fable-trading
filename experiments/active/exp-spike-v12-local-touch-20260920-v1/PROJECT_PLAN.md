@@ -11,3 +11,5 @@ Owner 2026-09-20 明确要求识别 ONE 截图白线并写 V12。保留 V11.2 �
 图契约：ONE/OKX 15m 原始 OHLC，2026-09-15 至09-17，趋势类K线＋固定AB线；全景和局部两面板，逐根数据不少于100根；单位USDT、北京时间，标明确认使用收盘时间，横轴K线开盘时间。独立PNG（用户此前要求交易图、不需HTML），Matplotlib，蓝色上涨/空心灰色下跌、橙色确认和突破、灰色参考线，标记形状和文字同时区分；PNG实际打开检查。
 
 复现：`.venv/bin/python -m pytest -q tests/evaluation/test_spike_v12_local_touch.py tests/evaluation/test_spike_v12_pine_contract.py`；`.venv/bin/python -W ignore -m yoyo.evaluation.spike_v12_one_case`。
+
+原生验收发现并补充：2026-09-20 TV 回放把 Sep16 18:00 的 `v10Body[offset]` 读成 .0006518，但同 offset 原始 open/close 在 .0006463/.0006420 附近；ATR 派生历史也不一致。这属于实现正确性修复，不是第二个收益实验：V12 的历史实体改从原始 OHLC 计算，ATR 每 bar 无条件快照、按绝对 bar 索引读取。旧 V11.2 文件不动；不再宣称 V12 关闭辅助族后与旧 Pine 实际运行逐信号完全一致，只承诺原公式、阈值和风险规则保留。需原生回放确认建线/突破时序与上级已收盘输出。

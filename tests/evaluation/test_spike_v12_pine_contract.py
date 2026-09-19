@@ -14,9 +14,30 @@ def function(source, name):
     return tail[:end.start() if end else len(tail)].strip()
 
 
-def test_original_search_validation_geometry_unchanged():
+def test_original_search_validation_geometry_unchanged_except_history_fix():
+    # Native replay exposed sparse derived-history reads. Only these data-access
+    # substitutions are permitted; thresholds, geometry and rejection rules stay.
+    def corrected_history(source):
+        replacements = {
+            "v10Atr[bar_index - leftEdge]": "f_v12_atrAt(leftEdge)",
+            "v10Atr[bar_index - rightEdge]": "f_v12_atrAt(rightEdge)",
+            "v10Atr[bar_index - item.bx]": "f_v12_atrAt(item.bx)",
+            "v10Atr[offset]": "f_v12_atrAt(item.ax + step)",
+            "v10Body[offset]": "math.max(open[offset], close[offset])",
+        }
+        for before, after in replacements.items():
+            source = source.replace(before, after)
+        return source
     for name in ("f_v10_search", "f_v10_validate", "f_v10_same", "f_v10_price", "f_v10_rank"):
-        assert function(OLD, name) == function(NEW, name), name
+        assert corrected_history(function(OLD, name)) == function(NEW, name), name
+
+
+def test_history_snapshot_is_unconditional_bounded_and_in_context():
+    assert "\narray.set(v12AtrBars, bar_index % V12_HISTORY, v10Atr)\n" in NEW
+    assert "age >= 0 and age < V12_HISTORY and absoluteBar >= 0" in NEW
+    assert "v10Atr[" not in NEW
+    assert "v10Body[" not in NEW
+    assert "const int V12_HISTORY = 2001" in NEW
 
 
 def test_v9_logic_and_risk_parameters_unchanged():
