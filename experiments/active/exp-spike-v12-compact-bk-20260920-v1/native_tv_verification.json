@@ -1,0 +1,88 @@
+{
+  "type": "manual_native_ui_receipt_not_full_event_export",
+  "source_commit": "4becc98a0e1f47fb730bcf9d4d52ddbc150dcfc2",
+  "source_sha256": "aca54ec5f292fefdcbb45b496746224c619ef31411428a592ffecc358d8238ad",
+  "script_revision": 12,
+  "compiled_at_bj": "2026-09-20T03:48:27+08:00",
+  "errors": 0,
+  "warnings": [
+    "pre-existing second builtin shadowing"
+  ],
+  "symbol": "OKX:ONEUSDT.P",
+  "tf": "15m",
+  "replay_cut_0500": {
+    "cut_bj": "2026-09-17T05:00:00+08:00",
+    "observed_at_bj": "2026-09-20T03:50:47+08:00",
+    "display": "bk · 3",
+    "representative": "first break, id218",
+    "members": [
+      {
+        "id": 218,
+        "break_close": "09-17 02:30",
+        "A": [
+          "09-15 12:45",
+          0.0007039
+        ],
+        "B": [
+          "09-16 17:45",
+          0.0006518
+        ],
+        "C": [
+          "09-16 19:30",
+          0.0006486
+        ]
+      },
+      {
+        "id": 221,
+        "break_close": "09-17 03:30",
+        "A": [
+          "09-15 23:45",
+          0.0006749
+        ],
+        "B": [
+          "09-16 17:45",
+          0.0006518
+        ],
+        "C": [
+          "09-17 02:00",
+          0.0006424
+        ]
+      },
+      {
+        "id": 220,
+        "break_close": "09-17 04:30",
+        "A": [
+          "09-16 08:00",
+          0.0006619
+        ],
+        "B": [
+          "09-16 17:45",
+          0.0006518
+        ],
+        "C": [
+          "09-17 02:00",
+          0.0006445
+        ]
+      }
+    ]
+  },
+  "replay_cut_0300": {
+    "cut_bj": "2026-09-17T03:00:00+08:00",
+    "observed_at_bj": "2026-09-20T03:52:40+08:00",
+    "display": "bk",
+    "tooltip_ids": [
+      218
+    ],
+    "future_members_absent": true
+  },
+  "replay_closed": true,
+  "final_view": "OKX:ONEUSDT.P15m, current market",
+  "tests_passed": 51,
+  "signal_engine_pairing_risk_event_alert_blocks_unchanged": true,
+  "notion_url": "https://app.notion.com/p/3e08856479af813dab66c21468108a32",
+  "limitations": [
+    "Native full history picks a different second line than the archived auxiliary-only reference; not full engine parity.",
+    "Display grouping does not remove events or alerts.",
+    "No new economic backtest."
+  ]
+}

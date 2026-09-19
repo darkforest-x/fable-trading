@@ -31626,3 +31626,17 @@ artifacts:
     production_eligible: false
     notes: Source,51 tests, old/new AB auxiliary market references, manual native UI receipt, report and three learnings. No full Bybit CSV or merged
       Pine event parity; no return improvement claim. Legacy holdout vocabulary imposes no data restriction.
+
+  - artifact_id: spike-v12-compact-bk-20260920-delivery
+    artifact_type: manifest
+    role: v12_compact_bk_same_pivot_visual_aggregation_and_native_prefix_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4becc98a0e1f47fb730bcf9d4d52ddbc150dcfc2
+    source_path: experiments/active/exp-spike-v12-compact-bk-20260920-v1/delivery_manifest.json
+    sha256: f9b8801788329f4388869379d9099a53aad81d08489fb3d16b2218a80128eefa
+    size_bytes: 1624
+    storage_uri: repo://experiments/active/exp-spike-v12-compact-bk-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Source and report, archived three-event reference, actual native member anchors and two prefix observations. Manual UI receipt, not full event export.

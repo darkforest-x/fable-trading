@@ -9966,3 +9966,20 @@ experiments:
     reuse_allowed: false
     notes: Break labels own frozen lines;30 groups default, BB compression visible, dashed exit R, independent timeframe inputs with unchanged default numbers.
       Native15m cases only; auxiliary replay is not full Pine parity. No profitability or optimal parameter claim, no HTML or production changes.
+
+  - experiment_id: exp-spike-v12-compact-bk-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4becc98a0e1f47fb730bcf9d4d52ddbc150dcfc2
+    status: inconclusive
+    question: Explain three nearby ONE15m break confirmations and simplify their visual presentation without changing signal semantics.
+    single_variable: Presentation policy only; bk/bk+spike/C-RT and optional same-B first-eight-chart-bars aggregation. No event or strategy filter.
+    result: 51 checks pass; signal engines/pairing/risk/alerts unchanged. Native revision12 confirms bk at03:00 and bk3 at05:00 for02:30/03:30/04:30 events.
+      First representative geometry and event time retained; full tooltip members preserved. Different native second representative vs auxiliary reference disclosed.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_compact_bk_20260920.md
+    artifacts:
+    - spike-v12-compact-bk-20260920-delivery
+    reuse_allowed: false
+    notes: Functional display verification completed; financial status not evaluated. Grouping is presentation, not geometric dedup or fewer alerts. No HTML.
