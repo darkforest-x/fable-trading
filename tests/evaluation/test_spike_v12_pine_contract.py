@@ -71,3 +71,36 @@ def test_auxiliary_family_capacity_does_not_evict_legacy_by_score():
     assert "bx + v10Right <= bar_index" in NEW
     assert "touchBar - v12LocalLeft >= segStart" in NEW
     assert "touchBar - v12LocalLeft >= v10SegmentStart" in NEW
+
+
+def test_held_pairing_is_independent_of_legacy_window_consumption():
+    assert "if not v112UseBox and not na(jointWinner) and v11UseChart" in NEW
+    assert "if not v112UseBox and v11HtfUsable" in NEW
+    assert "else if v12HoldPair and confirmedSignal" in NEW
+    assert "held.brokenBar < bar_index" in NEW
+    assert "heldY <= 0 or close <= heldY" in NEW
+    assert "array.clear(v12HeldHtf)" in NEW
+    assert "v12SelectedHtf.ax : v11HtfAxT" in NEW
+
+
+def test_exits_use_ended_frame_and_new_joint_cannot_reveal_old_frame():
+    assert "activeRR.side * (exitReferencePrice - activeRR.entryPrice) / activeRR.distance" in NEW
+    assert "not exitReference and activeRR.hidden" in NEW
+    assert "bool rrHide = v10OnlyJoint and not (v11AnyJoint and rrNewSide == 1)" in NEW
+    assert "line.delete(group.exitLine)" in NEW and "label.delete(group.exitTag)" in NEW
+
+
+def test_every_break_marker_has_bounded_line_ownership():
+    assert 'string caption = "break+spike"' in NEW
+    assert 'string htfCaption = "break+spike"' in NEW
+    assert not any(x.startswith("plotshape(") and 'text="突破"' in x for x in NEW.splitlines())
+    assert NEW.count("array.push(v10SignalHistory, V10SignalDrawing.new(") == 4
+    assert NEW.count("f_v11_trimAbc(v10SignalHistory, v11AbcKeep)") == 4
+    assert "polyline.delete(self.trend)" in NEW and "label.delete(self.tag)" in NEW
+
+
+def test_timeframe_profiles_use_requested_context_and_keep_audited_defaults():
+    assert "float v12TfSeconds = timeframe.in_seconds()" in NEW
+    for tf in (15,30,60,240):
+        for name,value in (("Lookback",600),("Life",600),("Left",12),("Right",8),("MinGap",24),("MinSpan",72)):
+            assert f"int v12Tf{tf}{name} = input.int({value}," in NEW

@@ -8,6 +8,10 @@
 // 这是指标，不下单；本地检查不等于TradingView编译或行情验证。
 // V12: preserve the major-three-pivot family, add two major anchors plus a local touch.
 // Local C is admitted only at its right-confirmation close, using already known A/B.
+// V12 revision: persist a confirmed break while every chart close remains above
+// its frozen line, then pair at the next eligible V9. HTF geometry uses HTF bars;
+// held evidence deliberately uses CHART closes/lifetime because V9 is on this chart.
+// Break labels and lines share bounded lifetime; exit R uses the ended frame.
 // Both families share history validation, break confirmation and unchanged V9 box pairing.
 indicator("SPIKE V12 · 主高点+回踩确认", shorttitle="SPIKE V12", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, max_polylines_count=100, max_bars_back=2000, explicit_plot_zorder=true, behind_chart=false)
 // HTF anchor timestamps can outlive the search window: 1500 search + 1500 life.
@@ -2055,7 +2059,7 @@ if v10JointVisible and not na(v112ChartLine)
     string tagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
     string sourceText = v112ChartLine.source == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
 
-    string tagTip = "突破+spike · 结构#" + str.tostring(v112ChartLine.uid) + " · " + f_v12_kindText(v112ChartLine) + " · " + sourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n结构提前确认：" + str.format_time(v112ChartLine.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + "\n" + v10LastJointOrder + "\n对应线固定保留。旧V9风险参考不重置；此价格不代表成交。" + (v112UseBox and v112AddOnBreak ? "\n加仓提示：止损沿用原框 " + str.tostring(initialStop, format.mintick) : "")
+    string tagTip = "突破+spike · 结构#" + str.tostring(v112ChartLine.uid) + " · " + f_v12_kindText(v112ChartLine) + " · " + sourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n结构提前确认：" + str.format_time(v112ChartLine.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + "\n" + v10LastJointOrder + "\n对应线固定保留。旧V9风险参考不重置；此价格不代表成交。" + (v112UseBox and v112AddOnBreak and not v12BreakFirst and bar_index > entryBar ? "\n加仓提示：止损沿用原框 " + str.tostring(initialStop, format.mintick) : "")
 
     float tagY = math.max(syminfo.mintick, low - v10Atr * v10TagGap)
 
