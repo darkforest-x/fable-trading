@@ -122,7 +122,7 @@ def draw(path, pick, r, ctx, trace, parent, jt, lines):
     ax.ticklabel_format(axis="y",style="plain",useOffset=False)
     ax.text(.01,.015,"六均线：SMA/EMA 20 · 60 · 120",transform=ax.transAxes,color="#8b96a9",fontsize=8)
     if r["status"]=="closed" and end+6<hi:
-        ax.text((end+hi)/2,high+pad*.63,"退出后路径（事后）",ha="center",color="#94a3b8",fontsize=9)
+        ax.text((end+hi)/2,low-pad*.60,"退出后路径（事后）",ha="center",color="#94a3b8",fontsize=9)
     sub.axhline(0,color="#555",lw=.7)
     sub.plot(x,part.md,color="#679dff",lw=1.2,label="IMACD")
     sub.plot(x,part.sb,color=GOLD,lw=1.1,label="信号线")
