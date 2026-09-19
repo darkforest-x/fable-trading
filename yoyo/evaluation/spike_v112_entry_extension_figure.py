@@ -39,7 +39,7 @@ def main():
                 label="原规则" if j==0 else "推进≤1过滤"
                 bars=ax.bar(x+off,values,width=.34,color=("#B5BEC8" if j==0 else "#376EA8"),label=label)
                 ax.bar_label(bars,labels=[f"{v:+.3f}" if metric=="r" else f"{v:+.1f}" for v in values],padding=5,fontsize=10)
-                ax.scatter(x+off,q["random_"+metric],marker="_",s=230,color="#30343B",zorder=4,label="匹配随机均值" if j==0 else None)
+                ax.scatter(x+off+.125,q["random_"+metric],marker="D",s=32,facecolors="none",edgecolors="#30343B",zorder=4,label="匹配随机均值" if j==0 else None)
             labels=[]
             for tf in ("15m","1h","4h"):
                 ns=[int(table[(table.period==period)&(table.arm==arm)&(table.timeframe==tf)].iloc[0]["n"]) for arm in ARMS]
@@ -52,7 +52,7 @@ def main():
     axes[0,0].legend(frameon=False,fontsize=10,loc="upper left")
     fig.suptitle("框内突破：仅限制相对父V9的价格推进，是否改善入场？",fontsize=18,y=.985)
     fig.text(.05,.055,"固定29币 · 2024-09-10至2026-05-01前 · 每个策略独立串行 · 原止损/追踪/20bp成本不变",fontsize=10)
-    fig.text(.05,.027,"柱为全部已平仓交易；黑横线为各臂匹配随机均值（4h有缺配对）。样本数/收益不代表账户净值；区间见报告。",fontsize=10)
+    fig.text(.05,.027,"柱为全部已平仓交易；空心菱形为各臂匹配随机均值（4h有缺配对）。样本数/收益不代表账户净值；区间见报告。",fontsize=10)
     fig.tight_layout(rect=[.015,.08,.995,.95],h_pad=2)
     output=EXP/"comparison.png";fig.savefig(output,dpi=160);plt.close(fig)
     receipt={"renderer_commit":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
