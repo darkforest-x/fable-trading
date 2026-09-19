@@ -9818,3 +9818,24 @@ experiments:
     canonical_report: analysis/p1_spike_v112_execution_20260919.md
     artifacts: [spike-v112-execution-20260919-delivery]
     notes: Non-blind existing archive, same temporal split with early exits crossing split purged. Parent random anchors are surrogates and only 88.6-88.8 percent match. run_v1 retained with one floating-zero-risk control failure; run_v2 numeric guard changes no actual trade and invalidates only that control. 33 focused tests passed. No parameter grid, HTML, live change or promotion.
+
+  - experiment_id: exp-spike-v112-1h-diagnostics-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01eb0821ac2d82c534327aaa8b322f690d66bf3b
+    status: inconclusive
+    question: What explains the latest box-any 1h results, including failure paths, delay, initial risk, time slices and discrepancies with earlier
+      reports?
+    single_variable: No strategy change. Descriptive aggregation of verified run_v2 ledger; all existing delay buckets retained, initial-risk buckets
+      descriptive, matched controls and outlier sensitivity reported.
+    result: '2199 closed trades from 556 symbols: 27.83 percent wins, -0.0921R and -62.56bp per trade. 68.4 percent of losses record less than 1R
+      MFE. 48 cross-split trades account for the old/new earlier-period difference. Above-48-bar delays are weak; the positive 13-24 group has random-excess
+      CI spanning zero and later R flips negative without its largest BULLA winner. No optimal parameter or validated fix established.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_1h_diagnostics_20260919.md
+    artifacts:
+    - spike-v112-1h-diagnostics-20260919-delivery
+    notes: Luna Max independent review. All 2199 sourcebook identities reconcile; source/output SHA and arithmetic checked. MFE excludes exit-bar
+      updates; subgroup observations are hindsight. Existing Binance archive, not current OKX or TV parity evidence. No HTML, live change or promotion.
+      Historical-data restriction removed by owner.

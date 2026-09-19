@@ -31507,3 +31507,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Full baseline parity; all six candidates rejected. Both original failed numerical implementation and corrected canonical run packed with all receipts; all archive member bytes verified. Historical-date vocabulary only, no access restriction. No HTML per owner preference.
+
+  - artifact_id: spike-v112-1h-diagnostics-20260919-delivery
+    artifact_type: manifest
+    role: complete_one_hour_ledger_and_failure_path_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: 01eb0821ac2d82c534327aaa8b322f690d66bf3b
+    source_path: experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/delivery_manifest.json
+    sha256: 13547b4cd4effabc95b5949dc2c07538970d412177f9aa409150103bb60bf85a
+    size_bytes: 6237
+    storage_uri: repo://experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 2199-row Chinese trade detail, complete English ledger, all subgroup/control/tail tables, static PNG, Markdown and Luna Max reconciliation.
+      Legacy holdout vocabulary describes archive dates only, not access restrictions. No account-return inference or new trading rule.

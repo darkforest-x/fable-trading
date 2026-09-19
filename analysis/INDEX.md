@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **569** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **570** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
 | 2026-09-19 | [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) | SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法 | 结论：单独限制入场时效、沿用父 V9 止损、改用盘中高点激活原追踪，均未在 15m 或 1h 通过预先设定的研究门。15m 的 6 根时效限制有改善线索，但区间跨零、后段仍亏；统一放宽止损或提前追踪不能据此采用。没有搜索最优参数，没有修改 Pine、监控、默认参数或实盘。 |
 | 2026-09-19 | [`p1_spike_v112_failure_diagnosis_20260919.md`](p1_spike_v112_failure_diagnosis_20260919.md) | SPIKE V11.2 失败交易诊断：先查入场有效性，再做局部参数检验 | 结论：现有数据足够提出并排序可检验的逻辑优化假设，不足以直接宣布某个参数最优。当前优先排查入场当根是否仍有支撑和推进，不能只围绕止盈参数优化。** 本次只对已有完整成交账本做诊断；未修改规则、未搜索参数、未重跑策略。 |
@@ -886,6 +887,7 @@
 - [`p1_spike_v10_4_joint_multitf_20260918.md`](p1_spike_v10_4_joint_multitf_20260918.md) — SPIKE V10.4「突破+spike」只做多 · 6 个周期回测——没有一个周期通过；1h 最接近
 - [`p1_spike_v10_long_break7_20260918.md`](p1_spike_v10_long_break7_20260918.md) — SPIKE V10（重做）：只做多 + 突破后 ≤7 根——每笔变好是因为笔数少了，后一段更差
 - [`p1_spike_v10_trendline_gate_20260918.md`](p1_spike_v10_trendline_gate_20260918.md) — SPIKE V10 趋势线突破门：每笔质量明显变好，总量砍掉一半以上，后一段依然为负
+- [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) — SPIKE V11.2 1h：完整回测数据与失败路径分析
 - [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) — SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据
 - [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) — SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法
 - [`p1_spike_v112_failure_diagnosis_20260919.md`](p1_spike_v112_failure_diagnosis_20260919.md) — SPIKE V11.2 失败交易诊断：先查入场有效性，再做局部参数检验

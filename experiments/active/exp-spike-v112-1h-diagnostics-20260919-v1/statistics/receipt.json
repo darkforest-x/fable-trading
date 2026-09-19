@@ -1,0 +1,40 @@
+{
+  "source_commit": "01eb0821ac2d82c534327aaa8b322f690d66bf3b",
+  "script_sha256": "c4f2c2c789a95d123064b4feef2a3afa61687e3777d06e713e1f81ede8bfdbdb",
+  "plan_sha256": "75c7f2c9bb7888a8262aafe66702f0d10b2ba5c1f3c655cd36a94c05ca6b575e",
+  "inputs": {
+    "experiments/active/exp-spike-v112-execution-20260919-v1/statistics/run_v2/trades.csv.gz": "4795be64654af98693db73f1b9fb22b27d9c29886838be0613c624f9dffc884f",
+    "experiments/active/exp-spike-v112-execution-20260919-v1/statistics/run_v2/summary.csv": "cffd14ff9e3f65c6cfc6737748e0a94c53dddf1feebb2fa5299a35d5c560c4b6",
+    "experiments/active/exp-spike-v112-execution-20260919-v1/statistics/run_v2/attribution.csv": "0b56dc90924f69922979da557da219bc89c8d88922a2c87d82be8a0aede79e5d",
+    "experiments/active/exp-spike-v112-execution-20260919-v1/statistics/run_v2/tail_retention.csv": "da916d5fec4ea3dd2d61371f42816bad1c23dc4e9f5bb329df998a28bd5fdd17",
+    "experiments/active/exp-spike-v112-execution-20260919-v1/statistics/run_v2/gates.csv": "2f91d9da83879f9da5be5a5380f694a4ea60f6a5a6c537b3e3cee9f528660046",
+    "experiments/active/exp-spike-v11-box-joint-20260918-v1/statistics/trade_book/\u9010\u7b14\u660e\u7ec6_\u7a81\u7834spike.csv": "e57de7167848be53c44d4b896b51f7a3f7c21f044665b2ba6586bf989e9389fe",
+    "experiments/active/exp-spike-v112-execution-20260919-v1/delivery_manifest.json": "c2c11777fe284ff5db5e42f18cbef384088b1634cffe0eb76b61b52fa587133d"
+  },
+  "source_run_identity": "bff316e45138e4ed5b25ae95f88b4faab5aaab63d8cd44ae7209dd4a6e4104e9",
+  "baseline_parity": true,
+  "command": ".venv/bin/python -W ignore -m yoyo.evaluation.spike_v112_1h_diagnostics",
+  "files": {
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/variants_summary.csv": "08de1f7ba206488b1f22421ff5e5f4681397e9beb371871e1ab22210bde67e6b",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_mfe.csv": "fa216fd2e3d07c89bf9c102a86e10ad42473f1f3cd2aafe0eb6e880c5745e2cb",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/one_hour_summary.png": "e97dd7cfbef5d107488fe876595e7ff4620b958fe0ac01f1d7c5be3921802e81",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_delay.csv": "32042fdbe4c94504ba61a2fa6cffcc2b341667ec516f3f78c3e53bc3ad4bc118",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/variants_attribution.csv": "2b283975261d03dbfa80e9e70d2284352ce4993eb800ad0a7d9f42823396c58b",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/variants_tail_retention.csv": "dd73b3420465c0673aba88039eab74fa82e3620084b8fce3b9f39c9fd686560f",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_source.csv": "87e64b15a65f43b0075596860b189415dac85881381402d5614b859729febe60",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_symbol.csv": "31f1a607bbe71a0b9b85e6a10141c734ae6f965e14bc719fcfd87cca1b9881a6",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/tail_sensitivity.csv": "bf8251b4dd7c2aa618becba86d194bce6df7e6e23021283a6ee3b73b009b5811",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/overview.csv": "ff2d1ffdf14a3b1dd5bc6bb644d9e8f3b83ce2d21973dc44230c2061007a8522",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/source_decomposition.csv": "5ccc2abdc875218dc1981ab238fe69e8707ea1f373fc9fd083e254610295d52f",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/variants_gates.csv": "47c64a26fdb222b2419b3cdce25844f33e2d0ff80c2aa6e6dba86e80c951bdb3",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/1h\u9010\u7b14\u660e\u7ec6.csv": "d55576ec1f2c271a529c6861f03a8c79f849bcceb4d8bc347460d128fe19ce67",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/delay_13_24_sensitivity.csv": "deb1cd2c5c3c4772f9bff7f2ab069746dd9f22153f120861871587a0488cc8b3",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/quantiles.csv": "02fb4cdc111ad2f9814a05d623a7c4782a17622e8f076d70f0466315b8301dad",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_risk.csv": "212b4e32e44ea11ee1a606ab53c34c57f3e184d077f18213028816b844940922",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/baseline_1h_ledger.csv": "57d0a7ad453db2b8a93675f4c1f26ec1c51b087935d2312334f832e00a037423",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/parent_comparison.json": "5182666904c68ef65933105bf0f9043774165898f3c26d2244dd9061a2afeca8",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/by_exit.csv": "f0ba82376b1ced8f55077b45e8b74814a15ce22f864a327ce1ad0a835cd2902a",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/mfe_outcomes.csv": "08ed4eedca2d90d26934d27e806553043d1fb869e913181820877812f3ab1e9d",
+    "experiments/active/exp-spike-v112-1h-diagnostics-20260919-v1/statistics/monthly.csv": "cb95f91b9827c1b94fe27db02169c6d55242547aec387bced32233b77b833263"
+  }
+}
