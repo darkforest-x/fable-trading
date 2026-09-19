@@ -126,3 +126,69 @@ def test_page_has_both_menus_and_the_shared_view():
     assert "不推送 · 不下单" in html
     script = (WEB / "app.js").read_text()
     assert "/api/lines/events?kind=" in script and "突破+spike（上级突破）" in script
+
+
+def test_joint_positions_follow_the_backtest_serial_engine():
+    from yoyo.evaluation import spike_v10_4_increment as inc
+    from yoyo.evaluation import spike_v10_4_study as study
+    frame_in = _walk(1200, 3)
+    facts = study.v9_facts(frame_in, 15, "TEST", 0.001)
+    frame = facts["frame"]
+    fired = np.zeros(len(frame), dtype=bool)
+    fired[[700, 701, len(frame) - 1]] = True
+    got = sl.positions(frame, facts, fired, minutes=15, tick=0.001)
+    prepared = study.prepared_arm(frame, facts["gap"], facts["side"], "k", {"venue": "okx", "symbol": "", "asset": "",
+                                                                          "timeframe": "", "timeframe_min": 15}, 15, 0.001)
+    status, trade = inc.attempt(prepared, 700)
+    assert trade is not None
+    first = got[700]
+    if status == "closed":
+        assert first["status"] in ("profit", "loss", "breakeven")
+        assert first["exit_r"] == pytest.approx(trade["net_r"])
+    else:
+        assert status == "censored_boundary" and first["status"] == "active"
+        mark = float(frame.close.iloc[-1])
+        entry, risk = float(trade["entry_price"]), float(trade["initial_risk"])
+        assert first["current_r"] == pytest.approx((mark - entry - 0.002 * entry) / risk)
+    # a joint while that position is open does not open a second one
+    if int(trade["exit_i"]) > 701:
+        assert got[701] == {**got[701], "status": "unknown", "reason": "serial_position_already_open"}
+    # the newest closed bar has no next open yet
+    assert got[len(frame) - 1]["reason"] in ("awaiting_next_open", "serial_position_already_open")
+
+
+def test_ledger_summarizes_positions_like_the_signal_center(tmp_path):
+    book = LinesBook(api.database(tmp_path))
+    book.set_meta("activation", {"activated_ms": 0})
+
+    def joint(n, tf, perf):
+        return {"id": f"{n:024d}", "kind": "joint", "symbol": f"S{n}-USDT-SWAP", "timeframe": tf, "bar_open_ms": n,
+                "bar_close_ms": 1_000_000 + n, "detected_at_ms": 1_000_000 + n, "performance": perf}
+    book.insert([joint(1, "15m", {"status": "profit", "exit_r": 2.0, "current_r": 2.0}),
+                 joint(2, "15m", {"status": "loss", "exit_r": -1.1, "current_r": -1.1}),
+                 joint(3, "1H", {"status": "active", "current_r": 0.5}),
+                 joint(4, "1H", {"status": "unknown", "reason": "serial_position_already_open"})])
+    body = api.ledger(api.database(tmp_path), kind="joint", now_ms=2_000_000)
+    stats = body["stats"]
+    assert (stats["total"], stats["closed"], stats["active"], stats["unknown"]) == (4, 2, 1, 1)
+    assert stats["realized_r"] == pytest.approx(0.9) and stats["floating_r"] == pytest.approx(0.5)
+    assert stats["win_rate"] == pytest.approx(0.5) and stats["long"] == 4
+    by_tf = {row["timeframe"]: row for row in body["by_timeframe"]}
+    assert by_tf["1H"]["active"] == 1 and by_tf["30m"]["total"] == 0
+    assert [r["id"] for r in api.ledger(api.database(tmp_path), kind="joint", now_ms=2_000_000,
+                                        sort="r_desc")["items"]][:2] == [f"{1:024d}", f"{3:024d}"]
+    with pytest.raises(ValueError):
+        api.ledger(api.database(tmp_path), kind="joint", now_ms=0, period="month")
+
+
+def test_performance_refresh_rewrites_only_positions_and_retires_stale_open_ones(tmp_path):
+    book = LinesBook(tmp_path / "b.sqlite3")
+    base = {"kind": "joint", "symbol": "X-USDT-SWAP", "timeframe": "15m", "bar_close_ms": 9, "detected_at_ms": 10}
+    book.insert([{**base, "id": "a" * 24, "bar_open_ms": 1, "performance": {"status": "active", "current_r": 1.0}},
+                 {**base, "id": "b" * 24, "bar_open_ms": 2, "performance": {"status": "active", "current_r": 0.3}}])
+    changed = book.refresh_performance("X-USDT-SWAP", "15m", {"a" * 24: {"status": "profit", "exit_r": 1.5}})
+    assert changed == 2
+    rows = {r["id"]: r for r in api.events(tmp_path / "b.sqlite3", kind="joint", now_ms=20)}
+    assert rows["a" * 24]["performance"]["status"] == "profit" and rows["a" * 24]["detected_at_ms"] == 10
+    assert rows["b" * 24]["performance"]["status"] == "unknown"
+    assert rows["b" * 24]["performance"]["reason"] == "left_analysis_window"

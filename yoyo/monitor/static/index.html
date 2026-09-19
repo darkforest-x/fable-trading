@@ -79,8 +79,21 @@
             <article class="shadow-summary-card"><span>实时发现</span><strong id="lines-live-count">—</strong><small id="lines-live-detail">启用后、收盘一根内发现</small></article>
             <article class="shadow-summary-card"><span>扫描</span><strong id="lines-scan-state">—</strong><small id="lines-scan-detail">等待扫描</small></article>
           </div>
+          <div id="lines-stats" class="hidden">
+            <div class="ledger-heading"><h2>模拟持仓统计</h2><div class="segmented" role="group" aria-label="统计时间范围"><button type="button" data-lines-period="today" aria-pressed="false">今天</button><button type="button" data-lines-period="week" aria-pressed="false">本周</button><button type="button" data-lines-period="all" class="selected" aria-pressed="true">全部</button></div></div>
+            <div class="notice hidden" id="lines-stats-notice" role="status"></div>
+            <div class="ledger-metrics" aria-label="突破+spike 模拟持仓 R 统计">
+              <article><span>已结束 · 合计 R</span><strong id="lines-stats-realized">—</strong><small id="lines-stats-closed-note">等待统计</small></article>
+              <article><span>运行中 · 浮动 R</span><strong id="lines-stats-floating">—</strong><small id="lines-stats-active-note">等待统计</small></article>
+              <article><span>已结束胜率</span><strong id="lines-stats-winrate">—</strong><small id="lines-stats-win-note">只统计有退出 R 的信号</small></article>
+              <article><span>信号总数</span><strong id="lines-stats-total">—</strong><small id="lines-stats-side-note">每个 V9 框只算一次</small></article>
+            </div>
+            <details class="ledger-breakdown" open><summary>分周期统计<span>次根开盘入场 · 扣 0.2% 往返 · 同周期同币一次一笔</span></summary><div class="ledger-table-wrap"><table><thead><tr><th>周期</th><th>信号</th><th>运行中</th><th>已结束</th><th>状态未知</th><th>结束 R</th><th>浮动 R</th><th>胜率</th></tr></thead><tbody id="lines-stats-timeframes"></tbody></table></div></details>
+            <p class="ledger-basis" id="lines-stats-basis">按信号收盘日归属 · 北京时间 · 周一开始</p>
+          </div>
           <div class="section-toolbar"><div class="section-title"><h2 id="lines-section-title">最新信号</h2><span class="subtle-count" id="lines-filtered-count">—</span></div><div class="segmented" id="lines-timeframes" role="group" aria-label="周期"></div></div>
           <div class="filters"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="lines-search" type="search" placeholder="搜索合约，例如 SOL" aria-label="搜索合约" autocomplete="off" spellcheck="false"></label><div class="segmented" role="group" aria-label="显示范围"><button type="button" data-lines-state="all" class="selected" aria-pressed="true">全部</button><button type="button" data-lines-state="live" aria-pressed="false">只看实时</button></div><span class="quiet-text" id="lines-rule-note"></span></div>
+          <div class="ledger-filter-row hidden" id="lines-ledger-filters"><label class="ledger-select"><span>状态</span><select id="lines-outcome" aria-label="持仓状态"><option value="all">全部状态</option><option value="active">运行中</option><option value="profit">已止盈 / 保护退出</option><option value="loss">已止损</option><option value="breakeven">保本退出</option><option value="unknown">未开仓 / 状态未知</option></select></label><label class="ledger-select"><span>排序</span><select id="lines-sort" aria-label="排序"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="quiet-text">R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。</span></div>
           <div id="lines-rows" class="shadow-event-grid"></div>
           <div id="lines-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 8l30 14 30-4"/></svg></div><h3 id="lines-empty-title">等待第一次扫描</h3><p id="lines-empty-text">工作进程启动后约几分钟出现结果。</p></div>
           <div class="panel-foot"><span id="lines-activation">尚未启用</span><button id="load-more-lines" class="load-more hidden" type="button">显示更多</button><span id="lines-last-sync">尚未同步</span></div>

@@ -9,7 +9,9 @@ V9 events, Bark or the model gate. No notification, no order endpoint.
 A cell (symbol, timeframe) is recomputed only when its own checkpoint or its higher
 timeframe's bars changed. Events are insert-only; an event first seen long after its
 bar closed keeps that late ``detected_at_ms`` and is shown as a late record, never as
-a fresh one.
+a fresh one. Only a joint's ``performance`` (its simulated position) is rewritten as
+later bars close; a position left open when its signal falls out of the analysis
+window becomes ``unknown`` rather than a frozen floating R.
 """
 from __future__ import annotations
 
@@ -81,6 +83,27 @@ class LinesBook:
                            [(e["id"], e["kind"], e["symbol"], e["timeframe"], e["bar_open_ms"], e["bar_close_ms"],
                              e["detected_at_ms"], _json(e)) for e in events])
             return db.total_changes - before
+
+    def refresh_performance(self, symbol: str, timeframe: str, computed: dict[str, dict]) -> int:
+        """Rewrite joint positions from the latest replay; strand no stale open position."""
+        changed = 0
+        with self.connect() as db:
+            rows = db.execute("SELECT id,payload FROM events WHERE kind='joint' AND symbol=? AND timeframe=?",
+                              (symbol, timeframe)).fetchall()
+            for event_id, payload in rows:
+                event = json.loads(payload)
+                new = computed.get(event_id)
+                if new is None:
+                    old = event.get("performance") or {}
+                    if old.get("status") != "active":
+                        continue
+                    new = {**old, "status": "unknown", "reason": "left_analysis_window", "current_r": None}
+                if new == event.get("performance"):
+                    continue
+                event["performance"] = new
+                db.execute("UPDATE events SET payload=? WHERE id=?", (_json(event), event_id))
+                changed += 1
+        return changed
 
     def load_daily(self) -> dict[str, list[dict]]:
         with self.connect() as db:
@@ -244,6 +267,11 @@ class LinesWorker:
                                      id=sl.event_id(event["kind"], symbol, tf, event["bar_open_ms"]))
                         rows.append(event)
                     scan["inserted"] += self.book.insert(rows)
+                    if tf in sl.JOINT_TIMEFRAMES:
+                        computed = {sl.event_id("joint", symbol, tf, e["bar_open_ms"]): e["performance"]
+                                    for e in result["joints"]}
+                        scan["positions_updated"] = scan.get("positions_updated", 0) + \
+                            self.book.refresh_performance(symbol, tf, computed)
                     self.seen[(symbol, tf)] = key
                 except Exception as exc:  # one bad cell must not stop the pass
                     scan["errors"] += 1

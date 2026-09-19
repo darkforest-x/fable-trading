@@ -20,7 +20,7 @@ from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, eve
                                      market_snapshots as shadow_market_snapshots,
                                      status as shadow_status)
 from yoyo.monitor.spike_lines_api import (LinesUnavailable, database as lines_database, events as lines_events,
-                                         status as lines_status)
+                                         ledger as lines_ledger, status as lines_status)
 from yoyo.monitor.store import Store
 from yoyo.monitor.tradingview import DesktopOpenError, open_chart
 
@@ -272,6 +272,21 @@ def create_app(runtime=None, start_monitor=True):
             rows = []
         return {"items": rows, "total": len(rows), "kind": kind, "notification_eligible": False,
                 "execution_eligible": False}
+
+    @app.get("/api/lines/ledger")
+    def spike_lines_ledger(kind: str = "joint", period: str = "all", timeframe: str = None, scope: str = "all",
+                           search: str = Query("", max_length=24), outcome: str = "all", sort: str = "newest",
+                           limit: int = Query(1000, ge=1, le=2000)):
+        try:
+            return lines_ledger(lines_book, kind=kind, now_ms=monitor.client.clock(), period=period,
+                                timeframe=timeframe, scope=scope, search=search, outcome=outcome, sort=sort,
+                                limit=limit)
+        except ValueError as exc:
+            raise HTTPException(400, "不支持的统计筛选条件。") from exc
+        except LinesUnavailable as error:
+            if str(error) != "lines_not_started":
+                raise HTTPException(503, "趋势线突破账本暂不可读。") from error
+            return {"items": [], "total": 0, "stats": None, "by_timeframe": [], "as_of_ms": monitor.client.clock()}
 
     @app.get("/api/chart")
     def chart(symbol: str, timeframe: str = "1H"):

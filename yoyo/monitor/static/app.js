@@ -12,7 +12,8 @@
     timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
-    lines: { kind: null, items: [], status: null, timeframe: "all", search: "", liveOnly: false, limit: 24, loading: false, syncedAt: null },
+    lines: { kind: null, items: [], status: null, timeframe: "all", search: "", liveOnly: false, limit: 24, loading: false, syncedAt: null,
+      period: "all", outcome: "all", sort: "newest", ledger: null, revision: 0 },
   };
   const titles = {
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
@@ -296,6 +297,32 @@
     const tf = timeframeLabel(line.line_timeframe === "2H" ? "2H" : line.line_timeframe);
     return `<div class="lines-geometry"><dt>${escapeHTML(label)} · ${escapeHTML(tf)}</dt><dd>A ${escapeHTML(shortDate(line.a_ms))} ${escapeHTML(price(line.a_price))} → B ${escapeHTML(shortDate(line.b_ms))} ${escapeHTML(price(line.b_price))} → C ${escapeHTML(shortDate(line.c_ms))} ${escapeHTML(price(line.c_price))}</dd><dd class="lines-born">三点确认 ${escapeHTML(shortDate(line.born_close_ms))}${line.track ? " · " + escapeHTML(line.track) : ""}</dd></div>`;
   }
+  const LINE_UNOPENED = {
+    awaiting_next_open: "等待下一根开盘入场", serial_position_already_open: "同币同周期已有持仓 · 本信号不开仓",
+    data_gap_censored: "数据断档 · 无法跟踪", left_analysis_window: "超出计算窗口 · 停止跟踪",
+    next_bar_is_gap: "下一根数据断档 · 未开仓", risk_invalid: "止损无效 · 未开仓",
+  };
+  const LINE_EXITS = { initial_stop: "初始止损", initial_stop_gap: "初始止损（跳空）", trailing_stop: "跟随保护",
+    trailing_stop_gap: "跟随保护（跳空）", opposite_v6_next_open: "V9 空头确认平仓" };
+  function linePerformanceView(item) {
+    const p = item.performance;
+    if (!p || !["active", "profit", "loss", "breakeven"].includes(p.status)) {
+      return { className: "outcome-unknown", badge: LINE_UNOPENED[p?.reason] || "状态未知", value: "—", valueLabel: "当前 R",
+        peak: "—", stop: finite(item.reference_stop) ? price(item.reference_stop) : "—", stopLabel: "参考 SL",
+        note: "未开仓的信号不计入 R" };
+    }
+    const value = p.status === "active" ? p.current_r : p.exit_r;
+    const up = finite(value) && Number(value) > 0.005, down = finite(value) && Number(value) < -0.005;
+    const className = p.status === "profit" ? "outcome-win" : p.status === "loss" ? "outcome-loss" : p.status === "breakeven" ? "outcome-even" : up ? "outcome-active-win" : down ? "outcome-active-loss" : "outcome-active";
+    const exitName = LINE_EXITS[p.exit_reason] || p.exit_reason || "";
+    const badge = p.status === "active" ? `运行中 · ${signedR(value)}` : p.status === "loss" ? `已止损 · ${signedR(value)}` : p.status === "breakeven" ? "保本退出 · 0.00R" : `已退出 · ${signedR(value)}`;
+    const stop = p.stop_price ?? p.initial_stop;
+    return { className, badge, value: signedR(value), valueLabel: p.status === "active" ? "当前 R" : "退出 R",
+      peak: signedR(p.peak_r), stop: finite(stop) ? price(stop) : "—", stopLabel: p.trailing_active ? "跟随保护" : "SL",
+      note: p.status === "active"
+        ? `入场 ${price(p.entry_price)} · 已持有 ${number(p.bars_held)} 根 · 按最新收盘估值`
+        : `入场 ${price(p.entry_price)} → 出场 ${price(p.exit_price)}（${exitName}）· 持有 ${number(p.bars_held)} 根` };
+  }
   function stopFact(item) {
     if (!finite(item.reference_stop) || !finite(item.close) || Number(item.close) <= 0) return "—";
     const distance = (Number(item.close) - Number(item.reference_stop)) / Number(item.close) * 100;
@@ -306,6 +333,10 @@
     const joint = item.kind === "joint";
     const higher = joint && (item.source === "higher" || item.source === "both");
     const title = joint ? (higher ? "突破+spike（上级突破）" : "突破+spike") : "趋势线突破";
+    const outcome = joint ? linePerformanceView(item) : null;
+    const performance = joint
+      ? `<span class="performance-badge">${escapeHTML(outcome.badge)}</span><dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl><span class="performance-note">${escapeHTML(outcome.note)} · 模拟持仓，并非账户实际成交</span>`
+      : "";
     const facts = joint
       ? `<div><dt>V9 信号</dt><dd>${escapeHTML(shortDate(item.v9_signal_close_ms))} · 后第 ${escapeHTML(number(item.bars_after_v9))} 根</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`
       : `<div><dt>线上价（本根）</dt><dd>${escapeHTML(tickPrice(item.line_at_bar, item.tick))}</dd></div><div><dt>参考止损</dt><dd>${escapeHTML(stopFact(item))}</dd></div>`;
@@ -313,7 +344,7 @@
       ? (item.source !== "higher" ? lineFacts(item, "本周期线", item.tick) : "") + (higher ? lineFacts(item.higher_line, "上级线", item.tick) : "")
       : lineFacts(item, "突破的线", item.tick);
     const delay = finite(item.detect_delay_ms) && item.display_state !== "history" ? ` · 收盘后 ${escapeHTML(duration(Math.max(0, Number(item.detect_delay_ms))))} 发现` : "";
-    return `<article class="shadow-event-card lines-card long ${stateClass}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
+    return `<article class="shadow-event-card lines-card long ${stateClass}${outcome ? " " + outcome.className : ""}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span>${performance}<dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
   }
   function renderLines() {
     const lines = state.lines;
@@ -325,6 +356,9 @@
       ? "上级：15m 看 1H，30m 看 2H，1H 看 4H，4H 看日线 · 每个 V9 框只算第一次"
       : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
     $("lines-timeframes").innerHTML = ["all", ...LINE_TIMEFRAMES[kind]].map((tf) => `<button type="button" data-lines-timeframe="${tf}" class="${lines.timeframe === tf ? "selected" : ""}" aria-pressed="${lines.timeframe === tf}">${tf === "all" ? "全部" : escapeHTML(timeframeLabel(tf))}</button>`).join("");
+    $("lines-stats").classList.toggle("hidden", kind !== "joint");
+    $("lines-ledger-filters").classList.toggle("hidden", kind !== "joint");
+    if (kind === "joint") renderLinesStats();
     const q = lines.search.trim().toUpperCase();
     const day = Date.now() - 86_400_000;
     const items = lines.items.filter((item) => (lines.timeframe === "all" || item.timeframe === lines.timeframe)
@@ -348,6 +382,30 @@
     $("load-more-lines").classList.toggle("hidden", items.length <= lines.limit);
     renderTradingViewButtons();
   }
+  function renderLinesStats() {
+    const data = state.lines.ledger, stats = data?.stats;
+    const unknown = stats ? numeric(stats.unknown) : 0, empty = stats?.total === 0;
+    const notice = $("lines-stats-notice");
+    notice.classList.toggle("hidden", !stats || unknown === 0);
+    notice.textContent = `${number(unknown)} 条信号没有开仓或状态未知（等待次根开盘、同币同周期已有持仓或数据断档），不计入运行中、已结束和胜率。`;
+    const setR = (id, value) => {
+      const node = $(id);
+      node.textContent = signedR(value);
+      node.classList.toggle("r-positive", finite(value) && Number(value) > 0);
+      node.classList.toggle("r-negative", finite(value) && Number(value) < 0);
+    };
+    setR("lines-stats-realized", stats?.realized_r);
+    setR("lines-stats-floating", stats?.floating_r);
+    $("lines-stats-closed-note").textContent = empty ? "当前筛选无信号" : stats ? `${stats.measured_closed} 笔有 R / ${stats.closed} 笔已结束` : "等待统计";
+    $("lines-stats-active-note").textContent = empty ? "当前筛选无信号" : stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔运行中` : "等待统计";
+    $("lines-stats-winrate").textContent = finite(stats?.win_rate) ? `${(stats.win_rate * 100).toFixed(1)}%` : "—";
+    $("lines-stats-win-note").textContent = empty ? "当前筛选无信号" : stats ? `盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}${finite(stats.average_r) ? ` · 平均 ${signedR(stats.average_r)}` : ""}` : "只统计有退出 R 的信号";
+    $("lines-stats-total").textContent = stats ? number(stats.total) : "—";
+    $("lines-stats-side-note").textContent = stats ? `只做多 · 未开仓/未知 ${unknown}` : "每个 V9 框只算一次";
+    const cellR = (r) => `<td class="${finite(r) && r > 0 ? "r-positive" : finite(r) && r < 0 ? "r-negative" : ""}">${escapeHTML(signedR(r))}</td>`;
+    $("lines-stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(timeframeLabel(row.timeframe))}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td><td>${row.unknown}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
+    $("lines-stats-basis").textContent = `按信号收盘日归属 · 北京时间 · 周一开始 · 周期、搜索、「只看实时」同样生效 · ${data ? `更新 ${clockTime(data.as_of_ms)}` : "等待同步"}`;
+  }
   async function loadLinesStatus() {
     try {
       const status = await api("/api/lines/status");
@@ -362,11 +420,16 @@
     state.lines.loading = true;
     const kind = state.view === "joints" ? "joint" : "break";
     try {
-      const [events] = await Promise.all([api(`/api/lines/events?kind=${kind}&limit=1000`), loadLinesStatus()]);
+      const lines = state.lines, revision = lines.revision;
+      const query = kind === "joint"
+        ? `/api/lines/ledger?kind=joint&limit=2000&period=${lines.period}&outcome=${lines.outcome}&sort=${lines.sort}&scope=${lines.liveOnly ? "live" : "all"}${lines.timeframe === "all" ? "" : `&timeframe=${encodeURIComponent(lines.timeframe)}`}&search=${encodeURIComponent(lines.search.trim().slice(0, 24))}`
+        : `/api/lines/events?kind=${kind}&limit=1000`;
+      const [events] = await Promise.all([api(query), loadLinesStatus()]);
       if (!Array.isArray(events.items)) throw new Error("服务返回的数据格式有误");
-      if (state.lines.kind === kind) {
-        state.lines.items = events.items.filter((item) => item && typeof item === "object" && item.id && item.symbol);
-        state.lines.syncedAt = Date.now();
+      if (lines.kind === kind && lines.revision === revision) {
+        lines.items = events.items.filter((item) => item && typeof item === "object" && item.id && item.symbol);
+        lines.ledger = kind === "joint" ? events : null;
+        lines.syncedAt = Date.now();
       }
       delete state.errors.lines;
     } catch (error) {
@@ -907,14 +970,27 @@
   $("lines-timeframes").addEventListener("click", (event) => {
     const button = event.target.closest("[data-lines-timeframe]");
     if (!button) return;
-    state.lines.timeframe = button.dataset.linesTimeframe; state.lines.limit = 24; renderLines();
+    state.lines.timeframe = button.dataset.linesTimeframe; state.lines.limit = 24; renderLines(); reloadLinesLedger();
   });
+  function reloadLinesLedger() {
+    if (state.lines.kind !== "joint") return;
+    state.lines.revision++;
+    clearTimeout(state.lines.timer);
+    state.lines.timer = setTimeout(() => { state.lines.loading = false; loadLines(); }, 250);
+  }
+  document.querySelectorAll("[data-lines-period]").forEach((button) => button.addEventListener("click", () => {
+    state.lines.period = button.dataset.linesPeriod;
+    document.querySelectorAll("[data-lines-period]").forEach((b) => { b.classList.toggle("selected", b === button); b.setAttribute("aria-pressed", String(b === button)); });
+    state.lines.limit = 24; reloadLinesLedger();
+  }));
+  $("lines-outcome").addEventListener("change", (event) => { state.lines.outcome = event.target.value; state.lines.limit = 24; reloadLinesLedger(); });
+  $("lines-sort").addEventListener("change", (event) => { state.lines.sort = event.target.value; reloadLinesLedger(); });
   document.querySelectorAll("[data-lines-state]").forEach((button) => button.addEventListener("click", () => {
     state.lines.liveOnly = button.dataset.linesState === "live";
     document.querySelectorAll("[data-lines-state]").forEach((b) => { b.classList.toggle("selected", b === button); b.setAttribute("aria-pressed", String(b === button)); });
-    state.lines.limit = 24; renderLines();
+    state.lines.limit = 24; renderLines(); reloadLinesLedger();
   }));
-  $("lines-search").addEventListener("input", (event) => { state.lines.search = event.target.value; state.lines.limit = 24; renderLines(); });
+  $("lines-search").addEventListener("input", (event) => { state.lines.search = event.target.value; state.lines.limit = 24; renderLines(); reloadLinesLedger(); });
   $("load-more-lines").addEventListener("click", () => { state.lines.limit += 24; renderLines(); });
   function activateRow(event, type) {
     const cardClass = type === "signal" ? ".signal-card" : type === "shadow" || type === "lines" ? ".shadow-event-card" : ".watch-card";

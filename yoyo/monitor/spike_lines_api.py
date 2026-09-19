@@ -84,3 +84,41 @@ def events(path: Path, *, kind: str, now_ms: int, timeframe: str | None = None, 
 
 def database(runtime: Path) -> Path:
     return Path(runtime) / DATABASE
+
+
+def ledger(path: Path, *, kind: str, now_ms: int, period: str = "all", timeframe: str | None = None,
+           scope: str = "all", search: str = "", outcome: str = "all", sort: str = "newest",
+           limit: int = 1000) -> dict:
+    """The 信号中心 ledger for joint positions: same summarize/performance rules, same periods."""
+    from yoyo.monitor.signal_analytics import OUTCOMES, performance, period_start, search_key, summarize
+    if (kind not in KINDS or period not in ("all", "today", "week") or scope not in ("all", "live")
+            or (timeframe is not None and timeframe not in TIMEFRAMES[kind])
+            or outcome not in ("all", *OUTCOMES) or sort not in ("newest", "oldest", "r_desc", "r_asc")):
+        raise ValueError("unsupported ledger filter")
+    rows = events(path, kind=kind, now_ms=now_ms, limit=100_000)
+    start, query = period_start(now_ms, period), search_key(search)
+    items = []
+    for row in rows:
+        if start is not None and row["bar_close_ms"] < start:
+            continue
+        if (timeframe and row["timeframe"] != timeframe) or (scope == "live" and row["display_state"] != "live"):
+            continue
+        if query and query not in search_key(row["symbol"]):
+            continue
+        row.setdefault("side", "long")
+        status, value = performance(row)
+        if outcome != "all" and status != outcome:
+            continue
+        row.update(outcome_status=status, sort_r=value)
+        items.append(row)
+    stats = summarize(items)
+    by_timeframe = [dict(timeframe=tf, **summarize([r for r in items if r["timeframe"] == tf]))
+                    for tf in TIMEFRAMES[kind]]
+    if sort in ("r_desc", "r_asc"):
+        sign = -1 if sort == "r_desc" else 1
+        items.sort(key=lambda r: (r["sort_r"] is None, sign * (r["sort_r"] or 0), -r["bar_close_ms"], r["id"]))
+    else:
+        items.sort(key=lambda r: (r["bar_close_ms"], r["id"]), reverse=sort == "newest")
+    return {"items": items[:limit], "total": len(items), "stats": stats, "by_timeframe": by_timeframe,
+            "as_of_ms": now_ms, "period": period, "scope": scope,
+            "basis": "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"}

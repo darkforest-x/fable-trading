@@ -1589,6 +1589,9 @@ h2 {
 .lines-geometry dd { font-weight:500; font-size:11.5px; line-height:1.55; overflow-wrap:anywhere; }
 .lines-geometry dd.lines-born { margin-top:2px; color:var(--dim); font-weight:400; }
 .lines-card.is-fresh { border-color:var(--positive-border); }
+.lines-card.outcome-win .card-performance>div:first-child dd, .lines-card.outcome-active-win .card-performance>div:first-child dd { color:var(--positive-text); }
+.lines-card.outcome-loss .card-performance>div:first-child dd, .lines-card.outcome-active-loss .card-performance>div:first-child dd { color:var(--negative-strong); }
+.lines-card .performance-badge { margin-top:0; }
 .lines-card .card-footer time { overflow-wrap:anywhere; }
 .shadow-timeframe { flex-shrink:0; }
 

@@ -15,6 +15,13 @@ Two event kinds, computed with the exact research code the backtests used (no po
 Every field of an event uses bars at or before that event's bar close; a higher bar is
 only visible on the first chart bar opening at its close (`spike_v11_study.htf_inputs`).
 Events are observations at the bar close, not fills; nothing here orders or notifies.
+
+Joint cards carry a simulated position (owner 2026-09-19 「spike信号要和信号中心一样 模拟开仓 跟踪R」),
+replayed with the engine the box-rule backtest used (`spike_v10_4_increment.attempt`,
+`serial`): next-open entry, stop min(5-bar low - 0.2ATR, close - 2ATR), 4ATR close trail
+armed at 2R, raw V9 short exits at the next open, 0.2% round trip, one position per
+symbol/timeframe. An open position is marked at the last closed bar's close with the
+same cost. The projection reads only bars after the signal and never feeds an event.
 The V11.2 box rule backtested at -0.09R per trade (analysis/p1_spike_v11_box_joint_20260918.md),
 so these cards are for watching, not an admitted strategy.
 """
@@ -26,8 +33,10 @@ import math
 import numpy as np
 import pandas as pd
 
+from yoyo.evaluation import spike_v10_4_increment as inc
 from yoyo.evaluation import spike_v10_4_study as study
 from yoyo.evaluation import spike_v11_study as v11
+from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec
 from yoyo.evaluation.spike_v10_4 import V104Params, box_joints, joint_events, reference_long_exits
 
 PROTOCOL = "spike-v11-2-lines-monitor-v1"
@@ -39,6 +48,8 @@ HIGHER = {"15m": "1H", "30m": "2H", "1H": "4H", "4H": "1Dutc"}
 # a recent decision beyond indicator warm-up, and the tail bounds the CPU per cell.
 TAIL_BARS = 1500
 TRACK = {0: "完整影线", 1: "削尖影线"}
+BASIS = "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"
+ROUND_TRIP_COST = ExecutionSpec.round_trip_cost
 
 
 def frame_of(candles: list[dict]) -> pd.DataFrame:
@@ -92,6 +103,68 @@ def reference_stop(frame: pd.DataFrame, i: int, tick: float) -> float | None:
         return None
     stop = min(float(frame.low.iloc[i - 4:i + 1].min()) - 0.2 * atr, float(frame.close.iloc[i]) - 2.0 * atr)
     return math.floor(stop / tick) * tick if stop > 0 else None
+
+
+def _unopened(reason: str) -> dict:
+    """A joint with no position (awaiting the next open, or one already running) has no R."""
+    return {"status": "unknown", "reason": reason, "current_r": None, "exit_r": None, "peak_r": None,
+            "stop_price": None, "trailing_active": False, "bars_held": 0, "basis": BASIS,
+            "round_trip_cost": ROUND_TRIP_COST}
+
+
+def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool) -> dict:
+    """Serialize one replayed joint trade like the V9 card projection."""
+    entry, risk = _num(trade.get("entry_price")), _num(trade.get("initial_risk"))
+    entry_i, exit_i = int(trade["entry_i"]), int(trade["exit_i"])
+    initial_stop, protection = _num(trade.get("initial_stop")), _num(trade.get("protection"))
+    if active:
+        last = len(frame) - 1
+        mark = float(frame.close.iloc[last])
+        net_r = (mark - entry - ROUND_TRIP_COST * entry) / risk if entry and risk else None
+        updated = _ms(frame.index[last] + step)
+    else:
+        net_r = _num(trade.get("net_r"))
+        updated = _ms(pd.Timestamp(trade["exit_time"]) + step)
+    status = "active" if active else ("unknown" if net_r is None else "profit" if net_r > 1e-9
+                                      else "loss" if net_r < -1e-9 else "breakeven")
+    reason = str(trade.get("exit_reason"))
+    return {"status": status, "current_r": net_r, "exit_r": None if active else net_r,
+            "peak_r": _num(trade.get("mfe_r")), "entry_price": entry, "entry_time_ms": _ms(pd.Timestamp(trade["entry_time"])),
+            "initial_stop": initial_stop, "initial_risk": risk, "stop_price": protection if active else initial_stop,
+            "trailing_active": bool(active and protection is not None and initial_stop is not None
+                                    and protection > initial_stop),
+            "exit_price": None if active else _num(trade.get("exit_price")),
+            "exit_time_ms": None if active else updated, "exit_reason": None if active else reason,
+            "stop_triggered": not active and reason.startswith(("initial_stop", "trailing_stop")),
+            "bars_held": (len(frame) - 1 if active else exit_i) - entry_i, "updated_at_ms": updated,
+            "mark": "last_closed_bar_close" if active else None, "basis": BASIS,
+            "round_trip_cost": ROUND_TRIP_COST}
+
+
+def positions(frame: pd.DataFrame, facts: dict, fired: np.ndarray, *, minutes: int, tick: float) -> dict[int, dict]:
+    """Serial replay of every joint (the backtest's `serial`), keyed by joint bar index."""
+    identity = {"venue": "okx", "symbol": "", "asset": "", "timeframe": "", "timeframe_min": minutes}
+    prepared = study.prepared_arm(frame, facts["gap"], facts["side"], "okx:monitor", identity, minutes, tick)
+    step = pd.Timedelta(minutes=minutes)
+    out: dict[int, dict] = {}
+    flat_from = -1
+    for i in np.flatnonzero(fired).tolist():
+        if i < flat_from:
+            out[i] = _unopened("serial_position_already_open")
+            continue
+        status, trade = inc.attempt(prepared, i)
+        if trade is None:
+            out[i] = _unopened({"no_next_bar": "awaiting_next_open"}.get(status, status))
+        elif status == "closed":
+            out[i] = _position(trade, frame, step, active=False)
+            flat_from = int(trade["exit_i"])
+        elif status == "censored_boundary":
+            out[i] = _position(trade, frame, step, active=True)
+            flat_from = len(frame) + 1
+        else:
+            out[i] = _unopened("data_gap_censored")
+            flat_from = int(trade["exit_i"])
+    return out
 
 
 def analyze(chart: pd.DataFrame, timeframe: str, *, tick: float, asset: str | None,
@@ -148,13 +221,14 @@ def analyze(chart: pd.DataFrame, timeframe: str, *, tick: float, asset: str | No
             htf_now = H["known"]
         chart_now = np.asarray(result.break_event, dtype=bool)
         fired = box_joints(box["long_open"], box["box_entry"], htf_now | chart_now)
+        performance = positions(frame, facts, fired, minutes=minutes, tick=float(tick))
         for i in np.flatnonzero(fired).tolist():
             s = int(box["box_entry"][i])
             own, up = bool(chart_now[i]), bool(htf_now[i])
             record = {**base("joint", i), "source": "both" if own and up else "chart" if own else "higher",
                       "higher_timeframe": HIGHER[timeframe], "v9_signal_open_ms": _ms(index[s]),
                       "v9_signal_close_ms": _ms(index[s] + step), "v9_signal_close": float(frame.close.iloc[s]),
-                      "bars_after_v9": i - s}
+                      "bars_after_v9": i - s, "side": "long", "performance": performance[i]}
             if own:
                 record.update(chart_line(i))
             if up and H is not None:
