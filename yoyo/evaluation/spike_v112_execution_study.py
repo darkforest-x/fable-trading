@@ -85,12 +85,19 @@ def matched_controls(prepared, trades: list[dict], ready: np.ndarray, minutes: i
             status, result = evaluate(arm, chosen, parent)
             reason = status if result is None else "censored" if result["censored"] else "matched"
         matched = reason == "matched" and not trade["censored"]
+        control_risk_frac = math.nan
+        if chosen is not None:
+            _, baseline = evaluate("baseline", chosen, parent)
+            if baseline is not None:
+                control_risk_frac = float(baseline["initial_risk_frac"])
         rows.append({"trade_key": trade["trade_key"], "arm": arm, "matched": matched,
                      "reason": "target_censored" if trade["censored"] else reason,
                      "control_signal_i": chosen, "control_parent_i": parent,
                      "control_signal_bar_open": None if chosen is None else frame.index[chosen],
                      "control_net_r": result["net_r"] if matched else math.nan,
                      "control_net_return": result["net_return"] if matched else math.nan,
+                     "control_baseline_risk_frac": control_risk_frac,
+                     "control_net_r_on_baseline_risk": result["net_return"] / control_risk_frac if matched else math.nan,
                      "control_exit_time": None if result is None else result["exit_time"],
                      "month": key[0], "vol_bin": key[1], "fold": key[2]})
     return rows

@@ -68,7 +68,13 @@ def _parent_stop_row(prepared: fixed.PreparedArm, joint: dict[str, object], i: i
         return "parent_stop_invalid", None
     stop, entry = float(parent["initial_stop"]), float(joint["entry_price"])
     risk = entry - stop
-    if not all(math.isfinite(value) for value in (stop, entry, risk)) or stop <= 0 or entry <= 0 or risk <= 0:
+    # Both prices originate on the exchange tick grid.  A sub-tick residual at
+    # the scale of binary floating point is an equal stop/entry, not a viable
+    # risk denominator.  The tolerance is 1e-8 of one tick, so a legitimate
+    # one-tick stop remains accepted by a factor of 100 million.
+    numerical_zero = float(prepared.spec.tick) * 1e-8
+    if (not all(math.isfinite(value) for value in (stop, entry, risk)) or stop <= 0 or entry <= 0
+            or risk <= numerical_zero):
         return "parent_stop_invalid", None
     out = dict(joint)
     out["initial_stop"] = stop

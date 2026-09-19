@@ -26,3 +26,26 @@ def test_each_arm_owns_occupancy_and_released_candidate_is_replayed():
     assert [r["signal_i"] for r in base] == [10, 20]
     assert [r["signal_i"] for r in candidate] == [10, 13, 20]
     assert bs[1]["status"] == "skipped_in_position" and cs[1]["status"] == "closed"
+
+
+def test_control_uses_its_own_original_risk_denominator():
+    """A random entry's 10% risk must not borrow the target's 2% risk."""
+    from types import SimpleNamespace
+    import numpy as np
+    import pandas as pd
+    from yoyo.evaluation.spike_v112_execution_study import matched_controls
+
+    frame = pd.DataFrame(index=pd.date_range("2025-01-01", periods=20, freq="15min", tz="UTC"))
+    prepared = SimpleNamespace(frame=frame, atr=np.full(20, 1.), close=np.full(20, 100.))
+    target = {"trade_key": "test_control_risk", "signal_i": 10, "bars_after_v9": 3,
+              "arm": "parent_stop", "censored": False, "baseline_risk_frac": .02}
+
+    def evaluate(arm, i, parent):
+        return "closed", {"censored": False, "net_r": .5, "net_return": .01,
+                           "initial_risk_frac": .1 if arm == "baseline" else .02,
+                           "exit_time": frame.index[-1]}
+
+    result = matched_controls(prepared, [target], np.ones(20, dtype=bool), 15, evaluate)[0]
+    assert result["matched"]
+    assert result["control_baseline_risk_frac"] == .1
+    assert np.isclose(result["control_net_r_on_baseline_risk"], .1)

@@ -110,6 +110,7 @@ def metrics(t: pd.DataFrame, period: str) -> dict:
         matched &= p.control_exit_time.lt(study.SPLIT)
     q = p.loc[matched]
     delta_r, delta_bp = q.net_r - q.control_net_r, (q.net_return - q.control_net_return) * 1e4
+    delta_original_r = q.net_r_on_baseline_risk - q.control_net_r_on_baseline_risk
     rstat, bpstat = block_statistics(delta_r, q.month), block_statistics(delta_bp, q.month)
     winners, losers = p.net_r.clip(lower=0).sum(), -p.net_r.clip(upper=0).sum()
     return {"closed": len(p), "wins": int(p.net_r.gt(0).sum()), "win_rate": p.net_r.gt(0).mean(),
@@ -124,6 +125,7 @@ def metrics(t: pd.DataFrame, period: str) -> dict:
             "paired_actual_r": q.net_r.mean(), "random_r": q.control_net_r.mean(),
             "paired_actual_bp": q.net_bp.mean(), "random_bp": q.control_net_return.mean() * 1e4,
             "excess_r": delta_r.mean(), "excess_bp": delta_bp.mean(),
+            "random_original_r": q.control_net_r_on_baseline_risk.mean(), "excess_original_r": delta_original_r.mean(),
             **{f"r_{k}": v for k, v in rstat.items()}, **{f"bp_{k}": v for k, v in bpstat.items()}}
 
 
@@ -237,7 +239,7 @@ def main(run: Path, out: Path) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--run", type=Path, default=EXP / "results/run_v1")
-    parser.add_argument("--output", type=Path, default=EXP / "statistics/run_v1")
+    parser.add_argument("--run", type=Path, default=EXP / "results/run_v2")
+    parser.add_argument("--output", type=Path, default=EXP / "statistics/run_v2")
     args = parser.parse_args()
     main(args.run, args.output)

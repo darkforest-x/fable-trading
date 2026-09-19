@@ -11,13 +11,13 @@ from yoyo.evaluation import spike_v10_4_study as study
 from yoyo.evaluation import spike_v112_execution_ablation as ablation
 
 
-def _prepared(open_, high, low, close, *, raw_side=None, gap=None):
+def _prepared(open_, high, low, close, *, raw_side=None, gap=None, tick=.01, atr=1.):
     n = len(close)
     index = pd.date_range("2025-01-01", periods=n, freq="h", tz="UTC")
-    frame = pd.DataFrame({"open": open_, "high": high, "low": low, "close": close, "atr": 1., "ready": True}, index=index)
+    frame = pd.DataFrame({"open": open_, "high": high, "low": low, "close": close, "atr": atr, "ready": True}, index=index)
     return study.prepared_arm(frame, np.zeros(n, bool) if gap is None else np.asarray(gap, bool),
                               np.zeros(n, int) if raw_side is None else np.asarray(raw_side, int), "t:TEST:1h",
-                              {"venue": "t", "symbol": "TEST", "asset": "TEST", "timeframe": "1h", "timeframe_min": 60}, 60, .01)
+                              {"venue": "t", "symbol": "TEST", "asset": "TEST", "timeframe": "1h", "timeframe_min": 60}, 60, tick)
 
 
 def _bars(n=40):
@@ -57,6 +57,24 @@ def test_parent_surrogate_need_not_be_a_signal_but_invalid_anchor_never_falls_ba
     prepared = _prepared(open_, high, low, close)
     assert ablation.attempt_variant(prepared, 12, np.int64(10), "parent_stop")[0] == "censored_boundary"
     assert ablation.attempt_variant(prepared, 12, 2, "parent_stop") == ("parent_stop_invalid", None)
+
+
+def test_parent_stop_rejects_float_equal_prices_but_keeps_a_one_tick_stop():
+    """The guard removes a binary residue, not an economically possible tick risk."""
+    n = 20
+    open_ = np.full(n, .0034); high = np.full(n, .00341); low = np.full(n, .00339); close = np.full(n, .0034)
+    atr = np.full(n, .000025)
+    # Parent i=10 creates a rounded .00334 stop; joint i=12 enters at .00334.
+    open_[10], high[10], low[10], close[10] = .00339, .00340, .00338, .00339
+    open_[12], high[12], low[12], close[12] = .00334, .00335, .00333, .00334
+    open_[13], high[13], low[13], close[13] = .00334, .00336, .00333, .00334
+    equal = _prepared(open_, high, low, close, tick=1e-6, atr=atr)
+    assert ablation.attempt_variant(equal, 12, 10, "parent_stop") == ("parent_stop_invalid", None)
+    atr_one_tick = atr.copy(); atr_one_tick[10] = .0000255  # parent stop .003339, one tick below joint entry
+    one_tick = _prepared(open_, high, low, close, tick=1e-6, atr=atr_one_tick)
+    status, result = ablation.attempt_variant(one_tick, 12, 10, "parent_stop")
+    assert status in {"closed", "censored_boundary"}
+    assert result["initial_risk"] == pytest.approx(1e-6)
 
 
 def test_wick_and_close_arming_disagree_but_use_the_same_close_based_trail_price():
