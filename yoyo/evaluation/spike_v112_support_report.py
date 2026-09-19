@@ -26,6 +26,19 @@ ARMS = ("box_any", "box_support")
 PERIODS = ("full", "earlier", "later")
 
 
+def markdown_table(frame: pd.DataFrame) -> str:
+    """Render report tables without adding an optional tabulate dependency."""
+    def cell(value):
+        if pd.isna(value):
+            return "—"
+        if isinstance(value, (float, np.floating)):
+            return f"{value:.4f}"
+        return str(value).replace("|", "\\|").replace("\n", " ")
+    return "\n".join(["| " + " | ".join(map(str, frame.columns)) + " |",
+                      "| " + " | ".join(["---"] * len(frame.columns)) + " |",
+                      *["| " + " | ".join(map(cell, row)) + " |" for row in frame.itertuples(index=False, name=None)]])
+
+
 def validated_tables(run: Path, manifest: dict) -> tuple[pd.DataFrame, ...]:
     """Load precisely the streams bound by identity; reject foreign or partial outputs."""
     from yoyo.evaluation.spike_v112_support_study import _validate_completion
@@ -195,19 +208,19 @@ def main(run: Path, out: Path) -> None:
         opening.append(f"- **{tf}**：{'；'.join(parts)}。")
     report = ["# SPIKE V11.2 六均线支撑单变量完整回放", "", f"**结论：{conclusion}**", "",
         "日期：2026-09-19。638 个币完整重放，原基线逐笔复现。", "", *opening, "",
-        "## 结果", "", table[metric_cols].to_markdown(index=False, floatfmt=".4f"), "",
+        "## 结果", "", markdown_table(table[metric_cols]), "",
         "R 是每笔初始止损风险单位；胜率为小数。净收益已扣原设定 0.2% 往返成本。所有均值只用已平仓交易。", "",
         "## 条件与数据", "", "A=原框内首次任一突破，B=A 且当根收盘严格高于 SMA/EMA 20、60、120 的最高值。先消耗原框首个突破，再过滤，拒绝后不能同框重试。其他动量、方向门没有恢复。两臂独立串行回放，允许过滤后释放仓位。", "",
         "638 个 Binance 永续历史档案，5m 聚合，15m←1h 与 1h←4h；收盘信号区间 2024-09-10 至 2026-05-01（右端不含），2025-09-10 切前后段。原始数据全部允许研究，本次保持旧窗口只为复现。候选和截尾如下。", "",
-        tables["conservation"].fillna(0).to_markdown(index=False), "",
+        markdown_table(tables["conservation"].fillna(0)), "",
         "规则回测没有分类正类标签、训练集或 val AUC，也没有连续打分及 top-decile 组合，因此这些指标不适用；后段样本数见 later 行。零假设对照是同币×同月×同时间段×同 ATR/价格波动桶随机入场、同退出同成本。共同事件共享随机种子；随机对照按交易配对，不构成独立串行资金账户。", "",
-        "## 改善幅度与可用门", "", differences.to_markdown(index=False, floatfmt=".4f"), "",
+        "## 改善幅度与可用门", "", markdown_table(differences), "",
         "B−A 的区间为两臂共同 UTC 月份重抽样 2,000 次（seed=91509），每次按各臂自己的交易数重算均值；描述性，不是盲测。随机超额 p 沿用月块符号置换，不是 B−A 的 p。", "",
-        tables["verdict"].to_markdown(index=False, floatfmt=".4f"), "",
+        markdown_table(tables["verdict"]), "",
         "passed 必须全期与后段净均值均为正、全期随机超额为正且原始 p<0.01；同时列出两个周期的 Bonferroni p 参考。任何研究门通过也不会自动 promote。", "",
-        "## 误删与仓位变化", "", tables["attribution"].to_markdown(index=False, floatfmt=".4f"), "",
+        "## 误删与仓位变化", "", markdown_table(tables["attribution"]), "",
         "removed_gate_fail 是直接支撑拒绝；removed_occupancy 是虽然通过支撑、但被新交易占仓而消失。forgone_profit_r 是误删盈利总和，avoided_loss_r 是少亏的绝对值。added 是完整重放才出现的交易。逐周期、逐段验证：总净 R 差 = 新增交易净 R − 消失交易净 R；共同交易 14 字段和随机对照均不变。", "",
-        "## 复现核对", "", checks.to_markdown(index=False), "",
+        "## 复现核对", "", markdown_table(checks), "",
         f"代码提交 `{started['source_commit']}`；run identity `{manifest['run_identity']}`。638 个回执逐个核对输出 SHA，基线成交和状态集合与原 V11.1 框内回测相同。", "",
         "验证：118 项策略与边界测试、4 项报告完整性测试通过。注册表套件另有 12 通过、4 失败，失败为本轮之前已存在的记录缺少 source_commit；本次新记录单独校验通过。详情见实验目录 validation.json。", "",
         "## 复现命令", "", "在仓库根目录执行；需保留原638份5m档案及旧基线账本（哈希见 summary.json 和 identity.json）。", "", "```bash",
