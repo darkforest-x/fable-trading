@@ -34,37 +34,60 @@ def acquire():
     out = EXP / "data"
     target = out / "okx_btc_usdt_swap_5m_90d.csv.gz"
     if target.exists():
-        raise ValueError("immutable frozen output exists")
+        receipt = json.loads((out / "source_receipt.json").read_text())
+        if sha(target) != receipt["sha256"]:
+            raise ValueError("existing frozen source SHA mismatch")
+        print("verified existing immutable source; no write")
+        return
     raw = out / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     base = pd.read_csv(PARENT, index_col="open_time", parse_dates=True)
     base.index = pd.to_datetime(base.index, utc=True)
     start = pd.Timestamp("2023-09-19T21:00Z") - pd.Timedelta(days=90)
     end = pd.Timestamp("2026-09-19T21:00Z")
-    old = pd.read_csv(SEED)
-    old.index = pd.to_datetime(old.ts, unit="ms", utc=True)
-    prefix = old.loc[(old.index >= start) & (old.index < base.index[0]), COLS]
+    if SEED.exists():
+        old = pd.read_csv(SEED)
+        old.index = pd.to_datetime(old.ts, unit="ms", utc=True)
+        prefix = old.loc[(old.index >= start) & (old.index < base.index[0]), COLS]
+    else:
+        prefix = pd.DataFrame(columns=COLS, index=pd.DatetimeIndex([], tz="UTC"))
     if not prefix.index.is_unique:
         raise ValueError("duplicate prefix source rows")
     frame = pd.concat([prefix, base]).sort_index()
     grid = pd.date_range(start, end, freq="5min", inclusive="left")
     missing = grid.difference(frame.index)
     receipts = []
+    pieces = [frame]
+    intervals = []
     for stamp in missing:
-        params = dict(instId="BTC-USDT-SWAP", bar="5m", after=int((stamp + pd.Timedelta(minutes=5)).timestamp() * 1000), limit=10)
-        response = requests.get(URL, params=params, timeout=30)
-        response.raise_for_status()
-        payload = response.json()
-        if payload.get("code") != "0":
-            raise ValueError(payload)
-        rows = [row for row in payload.get("data", []) if int(row[0]) == int(stamp.timestamp() * 1000)]
-        if len(rows) != 1 or rows[0][8] != "1":
-            raise ValueError("missing exact confirmed same-source row")
-        path = raw / f"{int(stamp.timestamp() * 1000)}.json"
-        path.write_text(json.dumps(payload, separators=(",", ":")))
-        frame.loc[stamp, COLS] = [float(v) for v in rows[0][1:6]]
-        receipts.append(dict(timestamp=str(stamp), params=params, path=str(path.relative_to(ROOT)), sha256=sha(path)))
-    frame = frame.sort_index()
+        if not intervals or stamp != intervals[-1][1]:
+            intervals.append([stamp, stamp + pd.Timedelta(minutes=5)])
+        else:
+            intervals[-1][1] += pd.Timedelta(minutes=5)
+    for low, high in intervals:
+        cursor = int(high.timestamp() * 1000)
+        bound = int(low.timestamp() * 1000)
+        while cursor > bound:
+            params = dict(instId="BTC-USDT-SWAP", bar="5m", after=cursor, limit=300)
+            response = requests.get(URL, params=params, timeout=30)
+            response.raise_for_status()
+            payload = response.json()
+            if payload.get("code") != "0":
+                raise ValueError(payload)
+            all_rows = payload.get("data", [])
+            if not all_rows or min(int(row[0]) for row in all_rows) >= cursor:
+                raise ValueError("history pagination did not advance")
+            rows = [row for row in all_rows if bound <= int(row[0]) < cursor]
+            if any(row[8] != "1" for row in rows):
+                raise ValueError("unconfirmed same-source row")
+            path = raw / f"page_before_{cursor}.json"
+            path.write_text(json.dumps(payload, separators=(",", ":")))
+            if rows:
+                pieces.append(pd.DataFrame([[float(v) for v in row[1:6]] for row in rows], columns=COLS,
+                    index=pd.to_datetime([int(row[0]) for row in rows], unit="ms", utc=True)))
+            receipts.append(dict(params=params, selected_rows=len(rows), path=str(path.relative_to(ROOT)), sha256=sha(path)))
+            cursor = min(int(row[0]) for row in all_rows)
+    frame = pd.concat(pieces).sort_index()
     if not frame.index.equals(grid) or not np.isfinite(frame[COLS].to_numpy()).all():
         raise ValueError("source grid/nonfinite mismatch")
     if (frame[COLS[:4]] <= 0).any().any() or (frame.volume < 0).any() or (frame.low > frame[["open", "close"]].min(axis=1)).any() or (frame.high < frame[["open", "close"]].max(axis=1)).any():
@@ -75,7 +98,8 @@ def acquire():
     receipt = dict(source_url=URL, symbol="BTC-USDT-SWAP", start=str(start), end_exclusive=str(end),
         rows=len(frame), expected_rows=len(grid), missing_after=0, initial_missing=len(missing),
         prior_source=str(PARENT.relative_to(ROOT)), prior_sha256=sha(PARENT), prior_rows_identical=len(base),
-        prefix_source=str(SEED.relative_to(ROOT)), prefix_sha256=sha(SEED), raw_pages=receipts,
+        prefix_source=str(SEED.relative_to(ROOT)) if SEED.exists() else None,
+        prefix_sha256=sha(SEED) if SEED.exists() else None, raw_pages=receipts,
         output=str(target.relative_to(ROOT)), sha256=sha(target),
         builder_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         generated_at=pd.Timestamp.now(tz="UTC").isoformat())
