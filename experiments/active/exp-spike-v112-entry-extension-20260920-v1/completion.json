@@ -1,0 +1,406 @@
+{
+  "baseline_entries": 570,
+  "baseline_closed": 568,
+  "candidate_rows": 571,
+  "original_status_parity": 571,
+  "gate_invalid": 0,
+  "verdict": [
+    {
+      "timeframe": "15m",
+      "full_r_bp_positive": true,
+      "later_r_bp_positive": true,
+      "both_bp_delta_ci_positive": false,
+      "random_excess_positive_and_adjusted_p": false,
+      "later_random_excess_positive": true,
+      "passed": false,
+      "adjusted_p": 0.2518740629685158
+    },
+    {
+      "timeframe": "1h",
+      "full_r_bp_positive": true,
+      "later_r_bp_positive": false,
+      "both_bp_delta_ci_positive": false,
+      "random_excess_positive_and_adjusted_p": false,
+      "later_random_excess_positive": true,
+      "passed": false,
+      "adjusted_p": 0.32533733133433285
+    },
+    {
+      "timeframe": "4h",
+      "full_r_bp_positive": true,
+      "later_r_bp_positive": false,
+      "both_bp_delta_ci_positive": false,
+      "random_excess_positive_and_adjusted_p": false,
+      "later_random_excess_positive": false,
+      "passed": false,
+      "adjusted_p": 1.0
+    }
+  ],
+  "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+  "streams": [
+    {
+      "symbol": "AEROUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_AEROUSDT_5m_147573.csv",
+      "source_sha256": "8f04009ce843a035e6cb0f0cc87761397248058d87387b43ee952d904bb6c5d1",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "f726ff03d1ad1ecfdf9258c4d2b4589b1ec0f80fdeb9c3272946e436cc08ccf9",
+        "statuses.csv.gz": "da376562dbebd885f2692b3522bce974de63567d795affc313e8659a836dbaf4",
+        "controls.csv.gz": "eb5a2082c3861bf00feff958c1bc77bdb52a0beaac9ad2603018ae17e027baa2",
+        "decisions.csv.gz": "ebf0ef2921af270dc4244636db1659460c2edf1abe36f6395d80960a4e0ba809"
+      }
+    },
+    {
+      "symbol": "1000PEPEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_1000PEPEUSDT_5m_314298.csv",
+      "source_sha256": "d30690b93dc3f4591beb946301e3633275d627878bc77414ead37780c61afb9d",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "5428714a011fac0613e6eef76a5762588a1bb82f9fb44fcff2d20ce12feb8764",
+        "statuses.csv.gz": "a91c847dd54072982333ace8ae00c9bca7691bd4282e61c92cac59a55ce8df9a",
+        "controls.csv.gz": "ab48b575024555fed7af319ed5f1d202c4e174f553f4f10e15c0de3dee555b18",
+        "decisions.csv.gz": "39fcbc3632182ad4133c361a4c6702e8d0b75a300b8da2967a161cd6ce5dc757"
+      }
+    },
+    {
+      "symbol": "API3USDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_API3USDT_5m_440310.csv",
+      "source_sha256": "0e62f11ff8c5332e35b990c4b5b2139ff5fc9a6f68c1469b62f81ed0e70b8ce3",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "9777f3d728bf1fd20ee96b9e085b9229636fc716d517a614ee818f11c3f3ea18",
+        "statuses.csv.gz": "413809719b687ede46e522a25ab83f2cf24ab7404784e477aec504681286d10d",
+        "controls.csv.gz": "f87bcecda7b36b8917fe963352033c96238afdc6df8cc5af2370d21e425a1569",
+        "decisions.csv.gz": "d97feae8865149993bc12e906116065007c3f068a1079df15fc75ca8e59be815"
+      }
+    },
+    {
+      "symbol": "AAVEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_AAVEUSDT_5m_582540.csv",
+      "source_sha256": "d7394fcba22f0390a04eb5733cd4a8d6cfc2edd39b5169d1ad0d2d04fd14b28d",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "1bc04fc10dc69512315e16607574ec853333b7889c2ece6a5e0d22ea80c3d109",
+        "statuses.csv.gz": "2599ed5a2b69ff97b5f2640d0112900f654c0e9ed3ce97fa3031fbddbe26d4ea",
+        "controls.csv.gz": "e9f5e3bbd885c90025b555c7b0a72c76f9e612cd25105ba1d5ec64a94349efaf",
+        "decisions.csv.gz": "ef71a318759ea2efd7fe06708e58eab04feddf5d86c3a2771b7984ddfc412085"
+      }
+    },
+    {
+      "symbol": "APTUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_APTUSDT_5m_371496.csv",
+      "source_sha256": "d3741d961d34d40fe841535fdbad101cd77c64da513a2de58a1e0a1441013adc",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "a2b9e1da30bed0ccef295647744bee762bfdbf87776542d92cc449c44d312ca6",
+        "statuses.csv.gz": "ea84b068da035b57e640652d34d32f34889bfc8688000b61e3ff2429911a4bba",
+        "controls.csv.gz": "7674218a743da83efd22f2f1252301992a243544becb97e216408ea7f4b65e04",
+        "decisions.csv.gz": "1b522cd6ad529857d83c48bd6025251950352df8790c7bc04cc850b8307ef8b3"
+      }
+    },
+    {
+      "symbol": "BOMEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_BOMEUSDT_5m_223338.csv",
+      "source_sha256": "885c8d3bb7e72f96847574e8bb560c6808b06f1fb1ea620caec0ff8a53de8416",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "b41d01ef6417c1e1b9365922762cef4ea8186a06bd5c66ab69be91235c27c5ef",
+        "statuses.csv.gz": "e0e40d671c091ffd95437851a11854e8e1248a5a45e1a34fbc23a96fe7f94036",
+        "controls.csv.gz": "489ccab064af3507eac19cc6b4420a167acc888c83c2df21871f2d84386d70fc",
+        "decisions.csv.gz": "307590342046c69f5b89ec41a6ba846fb39984178278b6ce3ebe747df41cab5d"
+      }
+    },
+    {
+      "symbol": "ARBUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ARBUSDT_5m_326700.csv",
+      "source_sha256": "3676a8600eba7438a4ed5cf79faf95d9f8e67c543d677ed54e65f2840bb12457",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "48a80bc561f5f94cce6e7bd5954df81705a4ce9a9570d32c7adfa11e6886b7ac",
+        "statuses.csv.gz": "7fdd4aa943fd1844ea84772a6a54958f38f419a967b541fa440efc616f12ccec",
+        "controls.csv.gz": "5dc20447c32a29fa4bb4aa9dc1f9c3f357646d485d947e6eb67781b4ae22871e",
+        "decisions.csv.gz": "42c4b76c7d994c3ac19834bec879ca6dce5cbc191febed10d493b4232776aa00"
+      }
+    },
+    {
+      "symbol": "ARUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ARUSDT_5m_482646.csv",
+      "source_sha256": "8cc0ce24938b8a1c759cfebbf15807faf92afd70d080306a541fe4cd06c9ef00",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "5cfbb2c1c433651ca06c03b544c91b51ceb91bb64662b6e04302d22c0bfc3ced",
+        "statuses.csv.gz": "bf2805ce3686ee3817b0a24ef75831b6135df741b5e7f76f79cb12ec7bb290de",
+        "controls.csv.gz": "bcb9d0391bfc0c2832fff9b36f912816522c1d5d2e7cb2ffaa1ccf6899e83932",
+        "decisions.csv.gz": "89e77fa0ea60075c4fa4ba593b726437eb0fde2dceea89c60409429413a20a8c"
+      }
+    },
+    {
+      "symbol": "BTCUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv",
+      "source_sha256": "b609b006d30c1db0aba54bad31f16e7b533c95005a977f43ce0033931f226322",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "d4d2cdfdd92aa9483a7d8db68572adea2b0a7120b1d5b22a1e146b8918af37b1",
+        "statuses.csv.gz": "ac16e3bebbc2500f47a8b72e7940b6dc1ddf211c2a99e232c7d0d943b545a46a",
+        "controls.csv.gz": "547e3bf295c5a7db03ce6c7cf5dd5bd1ee0ba4e17d941ea2272cd0c602d91d19",
+        "decisions.csv.gz": "3a7b42fc3d9882ea4eb95099c80d13030fa479cd872f956ccb59daa6650b2bfb"
+      }
+    },
+    {
+      "symbol": "ENAUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ENAUSDT_5m_218442.csv",
+      "source_sha256": "f7d23039b42fdaa1603c32b47ff4ffa5c6417bff1bbe3aac90fdbd21d7bf54a2",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "a1389846ba95e6c63324b5c4b8f515e88dccb71b769030a31ade615f7e78d191",
+        "statuses.csv.gz": "bd87585514f86d2ae5944a92a31cf11e8ac81911557a92337955408a49b80ca6",
+        "controls.csv.gz": "4a6b2c41d690318380cdfbb1719ef8fcae83a5af013acb12a2145f5d98dadc57",
+        "decisions.csv.gz": "bb4211e6100006d1e6972120a44968426664766243524498881c2439df6a8637"
+      }
+    },
+    {
+      "symbol": "DASHUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_DASHUSDT_5m_655967.csv",
+      "source_sha256": "2df21d9cd567f979c4bad9bc1a828cd1df4ed3edaad8baafd314405daced813e",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "346f50c014f6ccc17a501152308f6fe96e51615e48bcfa54b40f938e5d143f9a",
+        "statuses.csv.gz": "76b05c9ba0cb1aaee5cd3d96b2f208c2f83f06242753058fc8944cb03262eb59",
+        "controls.csv.gz": "92e97419cb186d8eb02446562f05aae2b885f28d050d166cdc8d9b17497db514",
+        "decisions.csv.gz": "7561a26e1a9cf24fe89d94264066dc7eba3527e71bc5bd03e780da52e7e6a469"
+      }
+    },
+    {
+      "symbol": "ETHUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv",
+      "source_sha256": "8041770149cff3551f84966b1b5f3641f2f731dc3ae7c7d0bfeaf7b24dcd64e8",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "a1900a1d816ec1449d780e1a7a8c94dd985a9a3e055db062144af4aaccbf4790",
+        "statuses.csv.gz": "a26c63b17ac1bd5001c33b50d26fdd5c6007092dd03cd051014a76f9456da6de",
+        "controls.csv.gz": "5261d3fc92b8c3289b68123e911af1687e2a87b094a979ef38edf0dd79999e54",
+        "decisions.csv.gz": "015d3dc4ffef6b9be8ce825a9a5e9c7da981fe4cd6b8d309a716f8958747025a"
+      }
+    },
+    {
+      "symbol": "HYPEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_HYPEUSDT_5m_96642.csv",
+      "source_sha256": "1b9275701a078f61d7e879cb70d73417c4cc225240741143ee1272b6ccbca930",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "2b727e1f130b4e036225bee071b88849fc3125622035a5cb50dff378e8f340b3",
+        "statuses.csv.gz": "4312e6859ccab0688a014b6c21e0cfa5f8a670e9cca1716258d7006a58000928",
+        "controls.csv.gz": "4a59b4eb655a139907580dc6a37dde1682a5211ce083f58cfdc88cca9fd75d38",
+        "decisions.csv.gz": "f34f7153de42bbf9a86db95b2741ad42f1373385e8aa503dbd53897aa0669535"
+      }
+    },
+    {
+      "symbol": "MUBARAKUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_MUBARAKUSDT_5m_117915.csv",
+      "source_sha256": "015799945dacbd2cbb0a48e58125dade70b333f1452a1bdc434df3c181bdb09b",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "aee00c4fe2ff2148dfc409dcfa1642e384c8bd5593523dc94ffc88fe1f0628b6",
+        "statuses.csv.gz": "02ebc8cad6440c4230eed5a5a989c49e6f0b98b902cdbe7aa47811596a1ded52",
+        "controls.csv.gz": "8e890071603875b89d2df238220a9efaa9b57f6ca66807d370dc654922b40baa",
+        "decisions.csv.gz": "47933da724824946fae15151a14b593541461423cc5647ab0e5e466e1a2ddbd2"
+      }
+    },
+    {
+      "symbol": "FILUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_FILUSDT_5m_581112.csv",
+      "source_sha256": "42ac198359d71579893af761ef3dfa6dfea5094ca7444e959079e1db907ef070",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "6ff7ff05cfed9f88c86a194e39190425bee124c3670a3f85c177a00f94c2574d",
+        "statuses.csv.gz": "e456511526ffac45d03404e068a93fa8461a599e64c6a7b972d4a6c033e16036",
+        "controls.csv.gz": "7eda00415c54d8e5997a79323f5e6d1bc1c459607c277637880741617e4dc145",
+        "decisions.csv.gz": "a293302ee1552e7e20fb854cd0206bac53e3953e532e28db954e5676c2570811"
+      }
+    },
+    {
+      "symbol": "JUPUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_JUPUSDT_5m_236226.csv",
+      "source_sha256": "ace65f05801a331bd494b4814fc30d8a6c2d53b03876489c10a9ceb31adff204",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "96d6fb1f1d43de996f748d0e6bca26588a66ebbe23cc59edbe8915350986a1b5",
+        "statuses.csv.gz": "1e3e6c09e7ebce4c516ea29e4bdddc74b7cf3fa48be0aa3b158270798972029a",
+        "controls.csv.gz": "459687894fad8aaa32d57631c273a8650fefcb9faf84e98c93ebfa4a8ced5716",
+        "decisions.csv.gz": "4777fa41dfbc9bf50a76636eece0ccada6b13ade83caa963f1d5f8661c7a83f7"
+      }
+    },
+    {
+      "symbol": "NEARUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_NEARUSDT_5m_581376.csv",
+      "source_sha256": "a8f054cfedff52926185445e187e03f1aa6f3661468be36f821f2561a9aa5188",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "d3c839e854448cc593c57f09cd8d5d8bb4f1c649a4f72fb02fba76a10ae8c45a",
+        "statuses.csv.gz": "b861e5697f2cb350dc939331d80fcd631e0056f8533a849eead965e3886bba60",
+        "controls.csv.gz": "c24688a1cab5d02bff2722ef4975caf3c96d50070876001c472c50fc75390161",
+        "decisions.csv.gz": "0d9939822675f3e4ac29ca0b41f99de83181f466f888520e035628df81d683bb"
+      }
+    },
+    {
+      "symbol": "ONEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ONEUSDT_5m_537036.csv",
+      "source_sha256": "d1c03799d236337c341f33fa0aade7790d4dd6f18b1b9b4b39f571f6fca9ae70",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "09b310a9bee883a41b84e9fea8afeed57d4e857ee9ad5c8633c14543fe4ffec3",
+        "statuses.csv.gz": "063264f1fd01014bf42059d13a1c07bf9994a8609b6b6b8e7a789382f09d2011",
+        "controls.csv.gz": "9ba1f7c1b0b23a273e9c7bca830c12b32356d22fb31ddcc62512ca60f3988843",
+        "decisions.csv.gz": "bfa61c534f85953e40d3be4e42270b48ed8f13447054bb38d4c3f50c4f7c3929"
+      }
+    },
+    {
+      "symbol": "PIEVERSEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PIEVERSEUSDT_5m_48246.csv",
+      "source_sha256": "772a33bfeed296d75c34004e68580a75ae851a9cefdc49637a8bf4d729849bd8",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "26b14106f9f5c0b32da4d3b0bc001d9175a6e3b8b73cb6f9574a40f251c4c409",
+        "statuses.csv.gz": "85e4131b99d232e1c248919ad317c12ec076c0eb936aae235e0831c5fdad153a",
+        "controls.csv.gz": "b50ffb6aebf4338928747b09676509b95c340a4b38081de7467b22d7a8cbbe81",
+        "decisions.csv.gz": "4e0133b897b9b03d1d7365e0a7e353b9718987fe3a3bae84eca6b40aa685133e"
+      }
+    },
+    {
+      "symbol": "PENDLEUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PENDLEUSDT_5m_290274.csv",
+      "source_sha256": "30c285f13ed7d102dcd7f698c1369db85eca4a91775e44b648818b8465ba7248",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "645bf3b0e26f5972a4d7f09031a7bf905369f7f25e9c6cdb5ac98acfd98812d2",
+        "statuses.csv.gz": "1f70e6c40e27c7fdd4b0cf274d84122594e1bb02edba9d08485de7bb5ff591b7",
+        "controls.csv.gz": "3bb76ef942c5f85b02357347b3854280cbcc6149b28a740660d63bb5d8e71677",
+        "decisions.csv.gz": "3a0c8b18fd09e2749edc881816c49f9f57c9c94b5e5ef3fa60c070f0537e48b5"
+      }
+    },
+    {
+      "symbol": "OPUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_OPUSDT_5m_411672.csv",
+      "source_sha256": "09e37133287134eb6eecb69b5314013d2c35dfe024f4a775fc7fadb7cf4d8fd0",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "fb435ff3d89328dd57c553cdf663a487e173c9b5ae9a2d846aa9a7bc77f7b7d4",
+        "statuses.csv.gz": "95a6f1089a3f7f8ccc995be30c1cbfc1cf78aff05428fee79372719599be1239",
+        "controls.csv.gz": "731af9b60564311dd4aa10ebdd0bd0db84d4302b18ca680bc9e684c7f9cf6453",
+        "decisions.csv.gz": "8a747110a41a7998205b350e65786358cfc581cb6fae39bb3f6e501205b5cbb4"
+      }
+    },
+    {
+      "symbol": "PUMPUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_PUMPUSDT_5m_87462.csv",
+      "source_sha256": "40ef103f438fc14c6f2c3ba098325bb5b22e14eebf2c3c76306c1f30d8cb861e",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "14d0d32422eb9da54a403b0a8cf226495e92f76fb6f25b6bb5ff7f3ac4887423",
+        "statuses.csv.gz": "e6c03caefe7db7c45f0fbb473b89af69f044be18a1d6443b8ff499106944ebed",
+        "controls.csv.gz": "42bc4b187b519c12a569455978803a3b6010570030f0b9d66d5b1683f7f657fb",
+        "decisions.csv.gz": "32a5c45b46cdcb21f59c2afb2911cddc4b1c573b95ec6307ea36f2eadecbcfc9"
+      }
+    },
+    {
+      "symbol": "USELESSUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_USELESSUSDT_5m_74445.csv",
+      "source_sha256": "9f1490e8856a39b419eb5b52b8bd460541510f1fae7a78a8672d13cd9e05390e",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "319da310657a61af7d1837b22f134e76e3111cbf94a6b1dc2dff06ce4deede55",
+        "statuses.csv.gz": "a808ebc6b0c31f33d3810b735593e6eb290bdae721575988b2ea1c8d5c9ad31b",
+        "controls.csv.gz": "0e554302da2e892d283aa3f1d93fa3066c417529e53d9c252f435be9a46bc45c",
+        "decisions.csv.gz": "08a48d922774f819f4560dbbc0634a590a343fa8fe53bf67505f29a471a294b3"
+      }
+    },
+    {
+      "symbol": "SOLUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_SOLUSDT_5m_590316.csv",
+      "source_sha256": "87a76aa5c36208d862a29016c399d9124365dc93e7cdbd9799e14e2dba8e1165",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "4433ff7930961666a41e7441c41974d31a0f1936ffd69735daf35b9f214f7645",
+        "statuses.csv.gz": "4842ea328138c85fba84da9fde63ac663644d0634bce4fd5a2d9e3f6dc4e8d45",
+        "controls.csv.gz": "c63f7e3a231ac72451c2efd65fa1a96fd18dd49fe83609684afbb9c63624ea7b",
+        "decisions.csv.gz": "39c25add878415c5bee654ff7823fa4f788c193510757029e2bd283022c9b2a0"
+      }
+    },
+    {
+      "symbol": "UNIUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_UNIUSDT_5m_590604.csv",
+      "source_sha256": "f83f02cff8f09936a40b7c70137f7add7e43e3d6cd8edb395a7ea35a4fae2a41",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "9e872b1868e95565358e3742cf009387951eb200fddab8c897a0a63eb7bc9dcb",
+        "statuses.csv.gz": "25b0e8d5bfb9ffe425d2d6751f928bef1bba7862008d26e3f2f720884643c991",
+        "controls.csv.gz": "c4cd74b8cd827927a409e3d4f6b1b53e400ad681f1cb6e4f6df7756e747de4b5",
+        "decisions.csv.gz": "f25bd694caba189a8ac0f09844caaa1a9d9d26e1e4245fd32f9bff344ff7ba96"
+      }
+    },
+    {
+      "symbol": "WIFUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_WIFUSDT_5m_240021.csv",
+      "source_sha256": "2d2103b45a435104547f29b8526702a3fc1172d7057480dfff330a460e59ff06",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "54d872d2ac1c9a8c9c37df7aa817cf262cd99fb30abb086e9208887e510b2359",
+        "statuses.csv.gz": "13229282959a80580ea688b02b5150d54b2ceb6a15a290c1dbff6085f1384300",
+        "controls.csv.gz": "a547fd3a8278599b7f6870a2f4da126142eb553356644a39276075bc6d3929e2",
+        "decisions.csv.gz": "11ad521704185324d2c9a260ae33e141d538d1d5981152782ff264693147a17c"
+      }
+    },
+    {
+      "symbol": "XTZUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_XTZUSDT_5m_655392.csv",
+      "source_sha256": "ecfca44e7de2c526b6e4b7e278f8e897614a8936e8d6625e299a1da325e20fe8",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "fee0c09acb735c45970bebd5ffcef33f24ed16a9da1b003b82ad3ec6ede59504",
+        "statuses.csv.gz": "c9edb2242b2b3c9e8a334b907b2513dbd764ae0b2f9e45357c703f55217d7eaa",
+        "controls.csv.gz": "d1de6535182b8f46373f33ac1cf6be86b1679fb0dab2a6e88815b395f2a6c03a",
+        "decisions.csv.gz": "ffe7715e300ccd834a5f9ebd6f3394769b7e919bccadc164ae19ef8b3d2d7e24"
+      }
+    },
+    {
+      "symbol": "ZECUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ZECUSDT_5m_654240.csv",
+      "source_sha256": "72d9cd5b7d20ed0fe4286388c59cfe1ab0f076ad2c53a5d84c534f51bd122e8d",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "840a1093ace509beafeb19bc269fd071d7720490e6f0c2274080b0e937c38b7f",
+        "statuses.csv.gz": "373f99af5a73264284f24a1d03ce69c91822b7f95a1b9956ce99e11c6ac276e2",
+        "controls.csv.gz": "a5614fd1c7d9516605abfdd371478761bb38e7e1b516172469285a3ca7b0df6e",
+        "decisions.csv.gz": "904997690ebfcd3636d84dcc5a22ce207ff6f893e662e9888360a8f7eff5b3e4"
+      }
+    },
+    {
+      "symbol": "ZENUSDT",
+      "source_path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ZENUSDT_5m_569868.csv",
+      "source_sha256": "08a43c69bc3a198a0ac451356d027761dac948846f45e6b83aa1bdd0d653ebfd",
+      "identity_hash": "1e9878af4bfc385d7e9a0ce181986343134ed6d7e783a257ac0ff1fced63c35e",
+      "outputs": {
+        "trades.csv.gz": "824aaaea4d1c664530465beca669286f46dc92d4032e1ac2bee1618ee023ac24",
+        "statuses.csv.gz": "d1dff7536e0954d6c78f861013f6311c5a2c4d8879729ca9655b88b9f152ee2f",
+        "controls.csv.gz": "d349c55ebd410cb6b88d41c8d64beb0d862c72b20c02ce381f86ce4815f36240",
+        "decisions.csv.gz": "ef887c22a425f2d554e28df4f2c492cffa619974e3db9931235899a253fd3c0d"
+      }
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": {
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/attribution.csv": "aa5688530daba9571e19d0f37540f33ed53f4b113079c765ffe688d7209f5370",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/candidate_counts.csv": "62b8ccd46482bbd0d82354e673d2209e9f22ad0d124482cf3a9a57bd23eb3da3",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/changed_trades.csv": "c50030e10b72ace2c59eb4eb8526c5f2c4ba56f879e4007a4e8fefc41bf8c5a9",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/decisions.csv.gz": "940fbc067733034a6a1b2a183c28a57eae9c9ef00f2792574d7b5188b0063386",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/differences.csv": "39b9bcc51ea50df7169ffdc52a50a0f43fe7d5f2d6f781c176201ab921965cce",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/feature_groups.csv": "b0025dd529cb2017f56d5df7d3d2fb787afd1d2386b9e2965a336ebdbbf99f1c",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/parity.csv": "f236fa54bbd6a448d27403205cdca3cafb90f1d5949d6ab9cacc52ef778b5689",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/status_counts.csv": "6670b05fc7198ea4622c63b12cd12e88ab31b4a5fc8d851592da312d8167b03c",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/summary.csv": "05cffb920639daa1b5ad455c45438f63b4e9d6d8ce96156b7d6ed62787c3f8e3",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/tail_sensitivity.csv": "1cda902fa13369956031e02da1efb6aaed6b181510188d4f0a34c3085efb7dd9",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/trades.csv.gz": "62335fb13774633e0e8a0b014e9be25925f51ce186eb46d07adbe4bda037b231",
+    "experiments/active/exp-spike-v112-entry-extension-20260920-v1/statistics/verdict.csv": "752186687173bd8a74909c58fad21852a42c7e9fff676f31a960d90650e775de"
+  }
+}

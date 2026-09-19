@@ -9896,3 +9896,21 @@ experiments:
     notes: Luna Max reviewed mechanics and arithmetic. Six chronology checks passed. Two boundary-censored4h entries excluded from realized returns;
       parentV9 is conditional fixed-entry hindsight, not an account. Original controls and negative experiments retained; no new profitable fix,
       HTML or live changes.
+
+  - experiment_id: exp-spike-v112-entry-extension-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a744bb3e72f80f05074d3a77e2cd25e469f0436b
+    status: rejected
+    question: Does a causal parent-signal-close extension cap improve original box-first breakout entries for the fixed 29-symbol pool?
+    single_variable: Original first box break AND E<=1, where E uses only parent signal close/known stop and current signal close; independent serial replay, unchanged
+      exits and20bp cost. No search.
+    result: 571 candidates and570 original entries reproduce; treatment450 entries/448 closed.15m net R -7.97 to+11.21,1h -1.47 to+8.08,4h+53.55 to+53.50. All full-period
+      improvement CIs cross zero; later1h remains negative and4h worsens. All three preregistered gates fail.15m total bp falls despite higher total R.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_entry_extension_20260920.md
+    artifacts:
+    - spike-v112-entry-extension-20260920-delivery
+    notes: 120 direct rejects, zero freed-position additions; all450 shared outcomes/control keys match. Historical owner-selected pool is already seen; no blind-validation
+      claim. Q6 descriptive only. Negative outcomes retained; no HTML, threshold search or production change.

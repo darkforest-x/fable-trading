@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "checked_hashes": 225,
+  "unique_candidates": 571,
+  "unique_arm_trade_rows": 1020,
+  "summary_rows_recomputed": 20,
+  "fixed_cost": 0.002,
+  "pytest": "19 passed",
+  "visual_qa": "comparison.png inspected; labels and matched-control diamonds legible",
+  "notion": "https://app.notion.com/p/3e08856479af818bb35dfb97ca51f890",
+  "live_changes": false,
+  "additional_control_parity": [
+    {
+      "comparison": "original_control_identity",
+      "left": 570,
+      "right": 570,
+      "shared": 570,
+      "only_left": 0,
+      "only_right": 0,
+      "diff_control_signal_i": 0,
+      "diff_control_signal_bar_open": 0,
+      "diff_control_exit_time": 0,
+      "diff_month": 0,
+      "diff_vol_bin": 0,
+      "diff_fold": 0,
+      "passed": true
+    },
+    {
+      "comparison": "shared_control_identity",
+      "left": 570,
+      "right": 450,
+      "shared": 450,
+      "only_left": 120,
+      "only_right": 0,
+      "diff_control_signal_i": 0,
+      "diff_control_signal_bar_open": 0,
+      "diff_control_exit_time": 0,
+      "diff_month": 0,
+      "diff_vol_bin": 0,
+      "diff_fold": 0,
+      "passed": true
+    }
+  ],
+  "independent_review": "Luna Max found no blocking issue; artifact/identity coverage gaps completed"
+}

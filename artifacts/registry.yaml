@@ -31567,3 +31567,18 @@ artifacts:
     production_eligible: false
     notes: 570-row Chinese review,29 symbol documents,8 real-OHLC charts,570 per-bar protection paths, source/figure receipts, independent Luna
       Max review and Markdown. Historical-date vocabulary only; no access restriction. Illustrative charts are not a random sample.
+
+  - artifact_id: spike-v112-entry-extension-20260920-delivery
+    artifact_type: manifest
+    role: causal_entry_extension_single_variable_replay_and_negative_result
+    source_repo: darkforest-x/fable-trading
+    source_commit: a744bb3e72f80f05074d3a77e2cd25e469f0436b
+    source_path: experiments/active/exp-spike-v112-entry-extension-20260920-v1/delivery_manifest.json
+    sha256: 2f200131fcbaa0fe1efd019bb0986054e6ff3d3465a5f3083de2fef6067e6736
+    size_bytes: 38167
+    storage_uri: repo://experiments/active/exp-spike-v112-entry-extension-20260920-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 29 streams,571 candidates,570 baseline and450 treatment entries; random controls, temporal/tail/attribution tables, PNG, Markdown and Luna Max review. All
+      gates fail. Legacy holdout vocabulary is archive-date metadata only, not an access restriction.
