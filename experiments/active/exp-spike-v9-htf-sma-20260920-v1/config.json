@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-spike-v9-htf-sma-20260920-v1",
+  "lengths": [20, 30, 50, 60, 90, 120, 150, 200],
+  "pairs": [["15m", 15, "1h", 60], ["1h", 60, "4h", 240], ["4h", 240, "1d", 1440]],
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "seed": 92026,
+  "bootstrap_reps": 4000,
+  "selection": "Per chart timeframe, shared length for long/short, highest development total net R; baseline included, ties prefer baseline then shorter length. Only complete development trades; validation never selects.",
+  "common_warmup_sensitivity": "All lengths and baseline additionally replay on a shared SMA200-ready eligibility clock; original V9 baseline separately preserved.",
+  "acceptance": "Selected filter needs positive later total net R, positive improvement over baseline in net R and nominal net return, positive monthly-block delta lower95 bound and Holm adjusted one-sided p<0.01 across 3 selected TF tests; later realized10R retention>=0.85 where baseline has such winners. Common-warmup result must not reverse improvement. Otherwise research-only, no default replacement.",
+  "entry_rule": "chart confirmation close strictly above last confirmed HTF SMA for long, below for short; equality and unknown reject",
+  "htf_visibility": "HTF close_time <= chart bar OPEN; SMA[1]+lookahead_on semantics",
+  "unchanged": "V9 raw reversals; next-open entry; original 5bar/0.2ATR/min2ATR stop; close2R arms4ATR trail; 0.2% round trip",
+  "training_eligible": false,
+  "production_eligible": false
+}

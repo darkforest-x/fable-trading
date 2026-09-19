@@ -10015,3 +10015,19 @@ experiments:
     - spike-v12-2-history-regions-20260920-delivery
     reuse_allowed: false
     notes: V12 and V12.1 preserved;no detection,pairing,risk,cost or production changes. User rejected V12.1 global three-line UX despite its functional checks. No HTML.
+
+  - experiment_id: exp-spike-v9-htf-sma-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: inconclusive
+    question: Does a confirmed higher-timeframe SMA direction gate improve pure V9 long-short entries across the owner's29 assets?
+    single_variable: Entry direction gate;SMA20,30,50,60,90,120,150,200 versus baseline;select on development only by timeframe.
+    result: Preregistered config and causal feature/serial checks;market replay pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v9_htf_sma_20260920.md
+    artifacts:
+    - spike-v9-htf-sma-20260920-delivery
+    reuse_allowed: false
+    notes: Owner authorized parameter search. Same29-asset frozen Binance archive;actual and common-warmup scopes. No HTML or live/default promotion.
