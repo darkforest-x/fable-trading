@@ -705,6 +705,7 @@ int v10MinSpan = not v12ByTimeframe ? v12FallbackMinSpan : v12TfSeconds == 900 ?
 
 string v12Group = "04A · V12 主高点＋局部回踩"
 bool v12LocalEnabled = input.bool(true, "识别主高点＋局部回踩线", group=v12Group, tooltip="保留原三大高点找线；新增A/B两个已确认主高点，加较短反弹C贴线。只在C右侧确认完成后建线，不回填突破。", display=display.none)
+bool v12ReboundAtB = input.bool(true, "A-B 独立反弹按 B 点 ATR 衡量", group=v12Group, tooltip="仅用于局部回踩分支。谷底到B的反弹使用B点ATR，避免A点大冲击的ATR压制后续正常反弹。仍要求2ATR（或设置值）；关闭恢复较大端点ATR。原三主高点分支保持原口径。", display=display.none)
 int v12LocalLeft = input.int(2, "回踩高点左侧比较 K 数", minval=1, maxval=12, group=v12Group, display=display.none)
 int v12LocalRight = input.int(2, "回踩高点右侧确认 K 数", minval=1, maxval=12, group=v12Group, display=display.none)
 int v12LocalMinGap = input.int(4, "B 到回踩 C 最小间隔", minval=4, maxval=24, group=v12Group, tooltip="仅适用于辅助触点C。A-B仍用原独立反弹间隔，A-C仍用原最小跨度；两段仍要求原ATR回落。", display=display.none)
@@ -1032,7 +1033,7 @@ f_v12_searchLocal(array<int> xs, array<float> ps, array<float> ats, int sourceId
                                     abLow := na(abLow) ? value : math.min(abLow, value)
                                 if x > bx
                                     bcLow := na(bcLow) ? value : math.min(bcLow, value)
-                            float ab = (math.min(ap, bp) - abLow) / math.max(aa, ba)
+                            float ab = (math.min(ap, bp) - abLow) / (v12ReboundAtB ? ba : math.max(aa, ba))
                             float bc = (math.min(bp, cp) - bcLow) / math.max(ba, ca)
                             if not na(ab) and not na(bc) and ab >= v10Pullback and bc >= v10Pullback
                                 V10Line item = V10Line.new(ax=ax, ap=ap, bx=bx, bp=bp, cx=cx, cp=cp, fit=fit, born=bar_index, source=sourceId, kind=1, confirmedTime=time_close)
