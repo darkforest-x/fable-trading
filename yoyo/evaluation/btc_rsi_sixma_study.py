@@ -152,7 +152,11 @@ def control_summary(c, seed=SEED):
     bs = values[draws].sum(axis=1)
     bootstrap_r,bootstrap_bp = bs[:,0]/bs[:,2],bs[:,1]/bs[:,2]*10000
     signs = rng.choice([-1,1],(20000,len(values)))
-    null_r = signs@values[:,0]/values[:,2].sum()
+    # Explicit reduction avoids spurious floating-point matmul warnings from
+    # this Mac's BLAS backend; inputs and outputs must remain finite.
+    null_r = (signs*values[None,:,0]).sum(axis=1)/values[:,2].sum()
+    if not np.isfinite(null_r).all():
+        raise ValueError('non-finite permutation null')
     observed = float(pairs.diff_r.mean())
     return dict(matched_trades=len(pairs), controls=len(c), minimum_matches=int(pairs['count'].min()),
                 months=len(blocks), actual_net_r_mean=float(pairs.actual_r.mean()),
