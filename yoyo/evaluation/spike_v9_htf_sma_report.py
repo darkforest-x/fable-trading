@@ -59,6 +59,8 @@ def paired_controls(g, split, period):
         valid &= pd.to_datetime(g.control_exit_time, utc=True) < split
     if period == "later":
         valid &= pd.to_datetime(g.control_entry_time, utc=True) >= split
+    if period == "cross_split":
+        valid &= (pd.to_datetime(g.control_entry_time, utc=True) < split) & (pd.to_datetime(g.control_exit_time, utc=True) >= split)
     c = g.loc[valid]
     return {"random_pairs": len(c), "random_mean_r": float(c.control_net_r.mean()),
             "paired_strategy_mean_r": float(c.net_r.mean()),
@@ -80,11 +82,15 @@ def monthly_delta(a, b, period, cfg, field="net_r"):
     if len(d) <= 16:
         bits = np.arange(2**len(d), dtype=np.uint64)[:, None]
         signs = ((bits >> np.arange(len(d), dtype=np.uint64)) & 1).astype(float) * 2 - 1
-        p = float(np.mean((signs @ d) >= d.sum() - 1e-12))
+        # Elementwise reduction avoids spurious Accelerate BLAS FP warnings on
+        # finite small vectors; verified against scalar exhaustive enumeration.
+        p = float(np.mean((signs * d).sum(axis=1) >= d.sum() - 1e-12))
     else:
         signs = rng.choice([-1., 1.], size=(cfg["bootstrap_reps"], len(d)))
-        p = float((1 + ((signs @ d) >= d.sum() - 1e-12).sum()) / (len(signs) + 1))
-    return {"months": len(d), "delta": float(d.sum()), "low95": float(lo95), "high95": float(hi95), "p": p}
+        p = float((1 + ((signs * d).sum(axis=1) >= d.sum() - 1e-12).sum()) / (len(signs) + 1))
+    return {"months": len(d), "nonzero_months": int(np.count_nonzero(d)),
+            "minimum_exact_p": 2. ** -int(np.count_nonzero(d)),
+            "delta": float(d.sum()), "low95": float(lo95), "high95": float(hi95), "p": p}
 
 
 def holm(values):
@@ -122,7 +128,7 @@ def audit_baselines(identity, trades):
     return pd.DataFrame(rows)
 
 
-def run(source):
+def run(source, statistics_name="statistics_v2"):
     if not _committed((Path(__file__), Path("tests/evaluation/test_spike_v9_htf_sma_report.py"))):
         raise ValueError("Commit report builder and tests before statistics")
     cfg = config(); split = pd.Timestamp(cfg["split"]); source = Path(source)
@@ -131,6 +137,7 @@ def run(source):
     assert len(complete["symbols"]) == 29 and complete["streams"] == 87
     assert complete["identity_hash"] == identity["identity_hash"]
     assert cfg == identity["config"]
+    for path, sha in identity["declared"].items(): assert digest(Path(path)) == sha
     trades, controls, evidence, coverage = [], [], [], []
     for symbol in complete["symbols"]:
         folder = source / "streams" / symbol
@@ -146,10 +153,23 @@ def run(source):
     t = t.merge(c, on="event_key", how="left", validate="many_to_one")
     assert t.reason.notna().all()
     t["period"] = assign_period(t, split)
+    t["control_period"] = assign_period(t.rename(columns={"entry_time":"target_entry_time","exit_time":"target_exit_time","control_entry_time":"entry_time","control_exit_time":"exit_time"}), split)
+    t.loc[t.control_entry_time.isna(),"control_period"] = "unavailable"
     for col in ("entry_time", "exit_time", "signal_bar_open"):
         t[col] = pd.to_datetime(t[col], utc=True)
-    out = source / "statistics"; out.mkdir(exist_ok=True)
-    audit_baselines(identity, t).to_csv(out / "baseline_parity.csv", index=False)
+    out = source / statistics_name
+    out.mkdir()  # Preserve every previous statistical artifact and its receipt.
+    prior = source / "statistics"
+    if (prior / "receipt.json").exists():
+        previous = json.loads((prior / "receipt.json").read_text())
+        assert previous["replay_identity"] == identity["identity_hash"]
+        assert digest(prior / "baseline_parity.csv") == previous["files"]["baseline_parity.csv"]
+        parity = pd.read_csv(prior / "baseline_parity.csv")
+        assert len(parity) == 87 and parity.parity.all()
+        assert parity.trades.sum() == len(t.loc[t.scope.eq("actual") & t.length.eq(0)])
+    else:
+        parity = audit_baselines(identity, t)
+    parity.to_csv(out / "baseline_parity.csv", index=False)
     t.to_csv(out / "trades_with_controls.csv.gz", index=False, compression={"method":"gzip", "mtime":0})
     pd.DataFrame(coverage).to_csv(out / "coverage.csv", index=False)
     rows = []
@@ -166,6 +186,13 @@ def run(source):
     comparisons, attr = [], []
     for tf, length in selected.items():
         for scope in ("actual", "common"):
+            # A gate changes entry opportunities, never an already-open path.
+            # Check all common events BEFORE slicing by censoring or period.
+            allq = t.loc[t.timeframe.eq(tf) & t.scope.eq(scope)]
+            fulla, fullb = [allq.loc[allq.length.eq(n)].set_index("event_key") for n in (0,length)]
+            keys = fulla.index.intersection(fullb.index).sort_values()
+            fields = [*study.engine.KEY,"censored","entry_time","exit_time","period"]
+            pd.testing.assert_frame_equal(fulla.loc[keys,fields],fullb.loc[keys,fields],check_dtype=False,rtol=1e-9,atol=1e-9)
             for period in ("earlier", "later"):
                 q = t.loc[t.timeframe.eq(tf) & t.scope.eq(scope) & t.period.eq(period) & ~t.censored]
                 a, b = [q.loc[q.length.eq(n)] for n in (0, length)]
@@ -190,6 +217,7 @@ def run(source):
     comp = pd.DataFrame(comparisons)
     primary = comp.loc[comp.scope.eq("actual") & comp.period.eq("later")].copy()
     primary["holm_p"] = holm(primary.net_r_p.to_numpy())
+    primary["p_threshold_resolvable"] = 3 * 2. ** -primary.net_r_months < .01
     for i, row in primary.iterrows():
         common = comp.loc[comp.timeframe.eq(row.timeframe)&comp.scope.eq("common")&comp.period.eq("later")].iloc[0]
         passed = (row.selected_length != 0 and row.selected_net_r > 0 and row.net_r_delta > 0 and row.net_return_delta > 0
@@ -211,7 +239,9 @@ def run(source):
     for (scope,tf,symbol,length),g in t.groupby(["scope","timeframe","symbol","length"]):
         for period in ("earlier","later","full"):
             z=g if period=="full" else g.loc[g.period.eq(period)]
-            assetrows.append({"scope":scope,"timeframe":tf,"symbol":symbol,"length":length,"period":period,**metrics(z)})
+            for direction,side in (("both",0),("long",1),("short",-1)):
+                subset=z if not side else z.loc[z.side.eq(side)]
+                assetrows.append({"scope":scope,"timeframe":tf,"symbol":symbol,"length":length,"period":period,"direction":direction,**metrics(subset)})
     pd.DataFrame(assetrows).to_csv(out/"per_asset.csv",index=False)
     # Full/late maxima are explicitly exploratory; selection remains unchanged.
     ranks = summary.loc[summary.scope.eq("actual") & summary.direction.eq("both")].copy()
@@ -219,6 +249,11 @@ def run(source):
     ranks.to_csv(out/"parameter_ranks.csv",index=False)
     preview = summary.loc[summary.scope.eq("actual") & summary.direction.eq("both") & summary.period.isin(["earlier","later"])].copy()
     preview=preview.loc[[n in (0, selected[tf]) for n,tf in zip(preview.length,preview.timeframe)]]
+    sideview = summary.loc[summary.scope.eq("actual") & summary.direction.ne("both") & summary.period.eq("later")]
+    sideview = sideview.loc[[n in (0,selected[tf]) for n,tf in zip(sideview.length,sideview.timeframe)]]
+    grid = summary.loc[summary.scope.eq("actual") & summary.direction.eq("both") & summary.period.eq("full")].pivot(index="length",columns="timeframe",values="net_r").reset_index()
+    control_status = t.groupby(["scope","timeframe","length","period","control_period","reason","censored"],dropna=False).size().rename("trades").reset_index()
+    control_status.to_csv(out / "control_status.csv",index=False)
     report=f'''# V9 上级SMA方向过滤：固定29币参数对照
 
 本轮只比较入场过滤，所有交易来自完整双向串行回放；不是从原账本删单。开发期选值：{selected}。验证结果见下表，不把全历史最高值当成未来最优。
@@ -233,7 +268,7 @@ def run(source):
 
 ## 已选参数与基线
 
-{markdown_table(preview, ['timeframe','period','length','closed','win_rate','net_r','mean_net_bp','pf','event_drawdown_r','realized_10r','random_pairs','random_mean_r','random_excess_r'])}
+{markdown_table(preview, ['timeframe','period','length','entries','closed','censored','win_rate','gross_r','net_r','mean_net_bp','pf','event_drawdown_r','realized_10r','random_pairs','random_mean_r','random_excess_r'])}
 
 胜率为0–1比例，length=0为不加过滤。随机列使用同币、同方向、同月、同时间段、同ATR/价格桶配对；与全部交易不是同一分母。跨切点/删失控制不冒充已知收益。
 
@@ -243,15 +278,29 @@ def run(source):
 
 按共同自然月聚合后做4000次区块bootstrap，符号置换对三个已选周期作Holm调整。所选门必须同时改善后段总净R与名义收益、达到不确定性门槛、保留至少85%原已实现10R赢家，且共同预热对照不翻转改善方向。否则仅研究，不能替换默认。统计不证明市场因果。
 
+**设计限制必须单列**：后段只有8个自然月，精确月符号置换最小p为1/256，三项Holm第一门最小0.01171875；原设<0.01在这个样本长度下不可达。这是本轮预注册的分辨率不足，不能把“未过p门”解释成过滤无效。保留原门和结果，不在看见收益后改成更容易通过的检验；收益改善、区间和方向表现分别判断。非零差异月更少时实际最小p更大，详见selected_comparisons.csv。
+
+## 多空分别看：后段
+
+{markdown_table(sideview, ['timeframe','length','direction','closed','net_r','win_rate','pf'])}
+
+15m和1h的已选过滤后，多头在后段仍为负；合并净R为正不能解释为两个方向都已改善到可盈利。
+
+## 全历史网格：描述性结果，不重新选参
+
+{markdown_table(grid, ['length','15m','1h','4h'])}
+
+单位为累计净R。整段最高与前段选值是两种不同的问题；不追认后段赢家为原先可知的最优值。
+
 ## 完整数据与复现
 
-所有长度/周期/多空/时间段及随机对照在 `run_v1/statistics/summary.csv`；逐币 `per_asset.csv`；全长度排名 `parameter_ranks.csv`；移除亏单/误删赢家/新增重入 `attribution.csv`；未知预热 `candidate_counts.csv`；完整带控制逐笔 `trades_with_controls.csv.gz`。这些是仓内相对路径，根目录为 `{EXP}`。
+所有长度/周期/多空/时间段及随机对照在 `run_v1/{statistics_name}/summary.csv`；逐币×方向 `per_asset.csv`；全长度排名 `parameter_ranks.csv`；移除亏单/误删赢家/新增入场 `attribution.csv`；未知预热 `candidate_counts.csv`；控制失败/删失/跨切点 `control_status.csv`；完整带控制逐笔 `trades_with_controls.csv.gz`。这些是仓内相对路径，根目录为 `{EXP}`。归因前已对全部共同事件的进入/退出时点、原因、价格、收益及删失状态逐项确认一致，故没有把状态变化误记成新增或移除。
 
 ```bash
 cd /Users/zhangzc/fable-trading
 .venv/bin/python -m pytest -q tests/evaluation/test_spike_v9_htf_sma.py tests/evaluation/test_spike_v9_htf_sma_report.py tests/evaluation/test_spike_v9_full_replay.py tests/evaluation/test_spike_v9.py
-.venv/bin/python -m yoyo.evaluation.spike_v9_htf_sma_study --workers 3
-.venv/bin/python -m yoyo.evaluation.spike_v9_htf_sma_report
+.venv/bin/python -m yoyo.evaluation.spike_v9_htf_sma_study --workers 3 --output experiments/active/exp-spike-v9-htf-sma-20260920-v1/reproduce_run
+.venv/bin/python -m yoyo.evaluation.spike_v9_htf_sma_report --source experiments/active/exp-spike-v9-htf-sma-20260920-v1/reproduce_run
 ```
 
 原回放代码提交 `{identity['source_commit']}`，身份 `{identity['identity_hash']}`；每流源/输出SHA和完成收据均核对。全部29币×三个周期与原V9 adapter逐笔核对（baseline_parity.csv）；全部流关闭新门的准入mask与原adapter一致。
@@ -264,6 +313,7 @@ cd /Users/zhangzc/fable-trading
 - 事件累计R回撤不是账户回撤；没有资金费率、真实滑点、同币跨周期相关仓位或资金容量模型。成本未为改善结果而更改。
 - 信号数量、交易数量、已平仓数量分别统计；未平仓与缺口删失不计胜负。AUC、top-decile与单特征分类准确率不适用，无训练模型。
 - 原始失败试验和旧版源码保留。没有自动promote、通知或真金操作；本轮不生成HTML。
+- 初版统计保存在statistics：本机BLAS对有限小数组matmul发出浮点警告，24个置换p逐个与纯标量穷举完全一致；v2改用逐元素求和，收益/选参/检验数值不变。没有更换numpy或依赖。
 
 下一步：只对通过的参数考虑独立小版本TV展示；未通过则保留原版并报告失败，不改验证期阈值继续追分。
 '''
@@ -278,4 +328,5 @@ cd /Users/zhangzc/fable-trading
 
 if __name__ == "__main__":
     p=argparse.ArgumentParser();p.add_argument("--source",type=Path,default=EXP/"run_v1")
-    run(p.parse_args().source)
+    p.add_argument("--statistics-name",default="statistics_v2")
+    args=p.parse_args();run(args.source,args.statistics_name)
