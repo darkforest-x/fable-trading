@@ -735,10 +735,11 @@ int v10Window = input.int(6, "SPIKE 与突破最大间隔（0=同根）", minval
 
 bool v10ShowLine = input.bool(true, "显示当前候选主线（最多一条）", group=v10JointGroup, tooltip="只控制当前候选线，不会隐藏已经显示的突破+spike所对应的历史趋势线。", display=display.none)
 bool v10ShowBreak = input.bool(true, "显示单独突破", group=v10JointGroup, display=display.none)
+bool v12CompactBreaks = input.bool(true, "合并同一 B 点附近的 bk 提示", group=v10JointGroup, tooltip="仅整理显示：同来源、同一B点及价格，距首次突破不超过8根本图K的普通突破合并为 bk · 数量。保留首次时间和首次趋势线，提示列出各条确认；不改变事件、预警或联合配对。关闭可逐条显示。", display=display.none)
 bool v10ShowJoint = input.bool(true, "显示突破+spike", group=v10JointGroup, tooltip="开启仅显示模式时，强制显示联合标记。联合标记和对应趋势线一起创建和清理。", display=display.none)
 bool v10KeepStopped = input.bool(true, "失效后保留最近淡色线", group=v10JointGroup, display=display.none)
 
-bool v10ShowABC = input.bool(true, "显示 A/B/C 与三点确认", group=v10JointGroup, display=display.none)
+bool v10ShowABC = input.bool(true, "显示 A/B/C（RT=回踩）", group=v10JointGroup, display=display.none)
 bool v10Debug = input.bool(false, "核对：最近8次 SPIKE 配对说明", group=v10JointGroup, tooltip="仅说明这次SPIKE与主线的关系，不把未来结果当作当时已知信息。", display=display.none)
 
 color v10LineColor = input.color(color.white, "主线颜色", group=v10JointGroup, display=display.none)
@@ -748,7 +749,7 @@ color v10JointColor = input.color(#AD7B29, "联合颜色", group=v10JointGroup, 
 int v10LineWidth = input.int(1, "主线宽度", minval=1, maxval=3, group=v10JointGroup, display=display.none)
 int v10Ahead = input.int(24, "向右预留 K 数", minval=0, maxval=200, group=v10JointGroup, display=display.none)
 
-int v10JointKeep = input.int(30, "保留 break 信号与趋势线组数", minval=1, maxval=40, group=v10JointGroup, tooltip="单独突破和联合提示共用保留数量；标记和对应冻结线整组创建、整组删除。", display=display.none)
+int v10JointKeep = input.int(30, "保留 bk 信号与趋势线组数", minval=1, maxval=40, group=v10JointGroup, tooltip="单独突破和联合提示共用保留数量；标记和对应冻结线整组创建、整组删除。", display=display.none)
 int v10JointLineWidth = input.int(2, "联合趋势线线宽", minval=1, maxval=4, group=v10JointGroup, display=display.none)
 
 string v10TagSize = input.string("小", "突破+spike 标签大小", options=["小", "正常", "大"], group=v10JointGroup, display=display.none)
@@ -1357,32 +1358,32 @@ f_v11_timePoints(int ta, float pa, int tb, float pb, int tEnd) =>
 // 本周期线的A/B/C、A点与突破点圆圈。
 f_v11_indexMarks(V10Line ln, int breakBar, color tone, string tip, bool withConfirm) =>
     array<label> marks = array.new_label()
-    array.push(marks, label.new(ln.ax, ln.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(ln.bx, ln.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(ln.cx, ln.cp, ln.kind == 1 ? "C·回踩" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(ln.ax, ln.ap, "◯", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.normal, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.ax, ln.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.bx, ln.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.cx, ln.cp, ln.kind == 1 ? "C·RT" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.ax, ln.ap, "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
 
     if not na(breakBar)
-        array.push(marks, label.new(breakBar, ln.at(breakBar), "◯", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.normal, tooltip=tip, force_overlay=true))
+        array.push(marks, label.new(breakBar, ln.at(breakBar), "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
 
     if withConfirm
-        array.push(marks, label.new(ln.born, ln.at(ln.born), "三点确认", style=label.style_label_up, color=color.new(tone, 88), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+        array.push(marks, label.new(ln.born, ln.at(ln.born), "ok", style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
 
     marks
 
 // 上级周期线的A/B/C与圆圈，按时间定位。
 f_v11_timeMarks(int axT, float ap, int bxT, float bp, int cxT, float cp, int breakT, int bornT, color tone, string tip, bool withConfirm) =>
     array<label> marks = array.new_label()
-    array.push(marks, label.new(axT, ap, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(bxT, bp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(cxT, cp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-    array.push(marks, label.new(axT, ap, "◯", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.normal, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(axT, ap, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(bxT, bp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(cxT, cp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(axT, ap, "·", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
 
     if not na(breakT)
-        array.push(marks, label.new(breakT, f_v11_timePrice(axT, ap, bxT, bp, breakT), "◯", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.normal, tooltip=tip, force_overlay=true))
+        array.push(marks, label.new(breakT, f_v11_timePrice(axT, ap, bxT, bp, breakT), "·", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
 
     if withConfirm and not na(bornT)
-        array.push(marks, label.new(bornT, f_v11_timePrice(axT, ap, bxT, bp, bornT), "三点确认", xloc=xloc.bar_time, style=label.style_label_up, color=color.new(tone, 88), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+        array.push(marks, label.new(bornT, f_v11_timePrice(axT, ap, bxT, bp, bornT), "ok", xloc=xloc.bar_time, style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
 
     marks
 
@@ -1921,7 +1922,7 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
     while array.size(v10Marks) > 0
         label.delete(array.pop(v10Marks))
 
-    if v10ShowLine and not v10OnlyJoint and not na(v10Main) and not na(v10ClosedBar) and not (v10Main.joined and v10ShowJoint) and (v10Main.phase == 1 or v10KeepStopped)
+    if v10ShowLine and not v10OnlyJoint and not na(v10Main) and not na(v10ClosedBar) and not (v10Main.joined and v10ShowJoint) and (v10Main.phase == 1 or (v10KeepStopped and v10Main.phase == 3))
         int endBar = v10Main.phase == 1 ? v10ClosedBar + v10Ahead : v10Main.phase == 2 and not na(v10Main.brokenBar) ? v10Main.brokenBar + v11ExtendBars : v10Main.stopped
 
         if not na(endBar) and endBar > v10Main.ax and v10ClosedBar - v10Main.ax < 9000
@@ -1943,13 +1944,13 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
 
                 string tip = "结构#" + str.tostring(v10Main.uid) + " · " + f_v12_kindText(v10Main) + " · " + sourceText + "\n三点实际确认：" + str.format_time(v10Main.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n本次切换显示K：" + str.tostring(v10Promotion) + "。后台确认不等于当时已显示；信号不回填。"
 
-                array.push(v10Marks, label.new(v10Main.ax, v10Main.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-                array.push(v10Marks, label.new(v10Main.bx, v10Main.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-                array.push(v10Marks, label.new(v10Main.cx, v10Main.cp, v10Main.kind == 1 ? "C·回踩" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, tooltip=tip, force_overlay=true))
-                array.push(v10Marks, label.new(v10Main.born, v10Main.at(v10Main.born), "三点确认", style=label.style_label_up, color=color.new(tone, 88), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.ax, v10Main.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.bx, v10Main.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.cx, v10Main.cp, v10Main.kind == 1 ? "C·RT" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.born, v10Main.at(v10Main.born), "ok", style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
 
                 if v10Main.phase == 2 and not na(v10Main.brokenBar)
-                    array.push(v10Marks, label.new(v10Main.brokenBar, v10Main.at(v10Main.brokenBar), "◯", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.normal, tooltip=tip, force_overlay=true))
+                    array.push(v10Marks, label.new(v10Main.brokenBar, v10Main.at(v10Main.brokenBar), "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
 
 // ───────────── V11 最近突破线与上级周期线 ─────────────
 
@@ -1975,9 +1976,9 @@ if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
 
             if v10ShowABC
                 string activeTip = v11HtfText + " 当前候选下降线（未突破）"
-                array.push(v11HtfMarks, label.new(htfActAxT, htfActAp, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), tooltip=activeTip, force_overlay=true))
-                array.push(v11HtfMarks, label.new(htfActBxT, htfActBp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), tooltip=activeTip, force_overlay=true))
-                array.push(v11HtfMarks, label.new(htfActCxT, htfActCp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), tooltip=activeTip, force_overlay=true))
+                array.push(v11HtfMarks, label.new(htfActAxT, htfActAp, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
+                array.push(v11HtfMarks, label.new(htfActBxT, htfActBp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
+                array.push(v11HtfMarks, label.new(htfActCxT, htfActCp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
 
 // 诊断：候选池里所有未突破的本周期下降线。
 var array<polyline> v112DiagLines = array.new<polyline>()
@@ -2012,6 +2013,13 @@ type V10SignalDrawing
     polyline trend
     label tag
     array<label> marks
+    int breakContext = 0
+    int pivotB = na
+    float pivotPrice = na
+    int firstBreak = na
+    int breakCount = 1
+    string breakDetails = ""
+    string breakCaption = "bk"
 
 method erase(V10SignalDrawing self) =>
     polyline.delete(self.trend)
@@ -2033,6 +2041,25 @@ f_v11_trimAbc(array<V10SignalDrawing> history, int keep) =>
                 label.delete(array.pop(aged.marks))
 
     0
+
+// Presentation only: never move the first event or replace its frozen line.
+// Each update contains only confirmations known on the current closed bar.
+f_v12_mergeBreak(array<V10SignalDrawing> history, int context, int pivotB, float pivotPrice, int eventBar, string detail) =>
+    bool merged = false
+    if v12CompactBreaks and array.size(history) > 0
+        for n = array.size(history) - 1 to 0
+            V10SignalDrawing group = array.get(history, n)
+            // A joint separates display episodes and is never folded into bk.
+            if group.breakContext == 0
+                break
+            if group.breakContext == context and group.pivotB == pivotB and group.pivotPrice == pivotPrice and eventBar >= group.firstBreak and eventBar - group.firstBreak <= 8
+                group.breakCount += 1
+                group.breakDetails += "\n\n" + detail
+                label.set_text(group.tag, group.breakCaption + " · " + str.tostring(group.breakCount))
+                label.set_tooltip(group.tag, "同一B点附近 " + str.tostring(group.breakCount) + " 条候选突破，不代表多笔入场。\n仅合并显示，事件/预警/配对不变。显示首条冻结线，标记位于首次确认K。\n\n" + group.breakDetails)
+                merged := true
+                break
+    merged
 
 var array<V10SignalDrawing> v10SignalHistory = array.new<V10SignalDrawing>()
 
@@ -2056,7 +2083,7 @@ if v10JointVisible and not na(v112ChartLine)
     // 不受“显示当前候选线”和“保留失效线”开关影响。
     polyline frozenTrend = polyline.new(eventPoints, curved=false, closed=false, xloc=xloc.bar_index, line_color=v10LineColor, line_width=v10JointLineWidth, force_overlay=true)
 
-    string caption = "break+spike"
+    string caption = "bk+spike"
     string tagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
     string sourceText = v112ChartLine.source == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
 
@@ -2092,8 +2119,8 @@ if v11HtfJointVisible and not na(v12JointAx) and not na(v12JointBx) and v12Joint
     int htfEnd = time + v11ExtendBars * v11BarMs
     polyline htfTrend = polyline.new(f_v11_timePoints(v12JointAx, v12JointAp, v12JointBx, v12JointBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10JointLineWidth, force_overlay=true)
 
-    // 就是突破+spike，只是突破来自上级周期；标签比普通联合大一号、底色更实，表示最强。
-    string htfCaption = "break+spike"
+    // Same compact typography for chart and HTF joint confirmations.
+    string htfCaption = "bk+spike"
     string htfTagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
     string htfSourceText = v12JointSource % 2 == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
     string htfTip = "突破+spike（上级突破 · " + v11HtfText + "） · " + (v12JointSource >= 2 ? "主高点＋局部回踩 · " : "三主高点 · ") + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v12JointBorn, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v12JointBreak, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
@@ -2105,37 +2132,42 @@ if v11HtfJointVisible and not na(v12JointAx) and not na(v12JointBx) and v12Joint
     f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
 
-// Standalone break markers have the same bounded, atomic line ownership.
+// Ordinary breaks can form a presentation group; signal events remain untouched.
 if not v10OnlyJoint and v10Enabled and v10ShowBreak and v10BreakEvent and not v10JointVisible and not na(v11LastBroken)
-    while array.size(v10SignalHistory) >= v10JointKeep
-        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-        oldestSignal.erase()
     V10Line item = v11LastBroken
-    int endBar = bar_index + v11ExtendBars
-    array<chart.point> points = array.new<chart.point>()
-    if v10Log
-        for x = item.ax to endBar
-            array.push(points, chart.point.from_index(x, item.at(x)))
-    else
-        array.push(points, chart.point.from_index(item.ax, item.ap))
-        array.push(points, chart.point.from_index(endBar, item.at(endBar)))
-    polyline trend = polyline.new(points, xloc=xloc.bar_index, line_color=v10LineColor, line_width=v10LineWidth, force_overlay=true)
-    string tip = "本周期 break · #" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + "\n确认收盘 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai")
-    label tag = label.new(bar_index, low - v10Atr * v10TagGap, "break", style=label.style_none, textcolor=v10BreakColor, size=size.small, tooltip=tip, force_overlay=true)
-    array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_indexMarks(item, item.brokenBar, v10LineColor, tip, false) : array.new_label()
-    array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks))
-    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+    string tip = "本周期 bk · #" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + "\n确认收盘 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(time[bar_index - item.ax], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.ap, format.mintick) + "\nB " + str.format_time(time[bar_index - item.bx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.bp, format.mintick) + "\nC " + str.format_time(time[bar_index - item.cx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.cp, format.mintick)
+    bool merged = f_v12_mergeBreak(v10SignalHistory, 1, item.bx, item.bp, bar_index, tip)
+    if not merged
+        while array.size(v10SignalHistory) >= v10JointKeep
+            V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
+            oldestSignal.erase()
+        int endBar = bar_index + v11ExtendBars
+        array<chart.point> points = array.new<chart.point>()
+        if v10Log
+            for x = item.ax to endBar
+                array.push(points, chart.point.from_index(x, item.at(x)))
+        else
+            array.push(points, chart.point.from_index(item.ax, item.ap))
+            array.push(points, chart.point.from_index(endBar, item.at(endBar)))
+        polyline trend = polyline.new(points, xloc=xloc.bar_index, line_color=color.new(v10LineColor, 25), line_width=v10LineWidth, force_overlay=true)
+        label tag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), "bk", style=label.style_none, textcolor=v10BreakColor, size=size.small, tooltip=tip, force_overlay=true)
+        array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_indexMarks(item, item.brokenBar, color.new(v10LineColor, 25), tip, false) : array.new_label()
+        array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks, 1, item.bx, item.bp, bar_index, 1, tip, "bk"))
+        f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
 if not v10OnlyJoint and v11HtfOn and v11ShowHtfBreak and v11HtfBreakKnown and not v11HtfJointVisible
-    while array.size(v10SignalHistory) >= v10JointKeep
-        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-        oldestSignal.erase()
-    polyline trend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time + v11ExtendBars * v11BarMs), xloc=xloc.bar_time, line_color=v11HtfColor, line_width=v10LineWidth, force_overlay=true)
-    string tip = v11HtfText + " break · 上级K已收盘，本图可见 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai")
-    label tag = label.new(bar_index, low - v10Atr * (v10TagGap + (v10BreakEvent ? 0.6 : 0)), "break " + v11HtfText, style=label.style_none, textcolor=v11HtfColor, size=size.small, tooltip=tip, force_overlay=true)
-    array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, tip, false) : array.new_label()
-    array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks))
-    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+    string tip = v11HtfText + " bk · 上级K已收盘，本图可见 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(v11HtfAxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfAp, format.mintick) + "\nB " + str.format_time(v11HtfBxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfBp, format.mintick) + "\nC " + str.format_time(v11HtfCxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfCp, format.mintick)
+    bool merged = f_v12_mergeBreak(v10SignalHistory, 2, v11HtfBxT, v11HtfBp, bar_index, tip)
+    if not merged
+        while array.size(v10SignalHistory) >= v10JointKeep
+            V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
+            oldestSignal.erase()
+        polyline trend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time + v11ExtendBars * v11BarMs), xloc=xloc.bar_time, line_color=color.new(v11HtfColor, 20), line_width=v10LineWidth, force_overlay=true)
+        string caption = "bk " + v11HtfText
+        label tag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * (v10TagGap + (v10BreakEvent ? 0.6 : 0))), caption, style=label.style_none, textcolor=v11HtfColor, size=size.small, tooltip=tip, force_overlay=true)
+        array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, v11HtfColor, tip, false) : array.new_label()
+        array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks, 2, v11HtfBxT, v11HtfBp, bar_index, 1, tip, caption))
+        f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
 
 // 事件码：1结构确认，2突破，4联合，8上级突破可见，16上级突破+spike；同根可以相加。
 plot(barstate.isconfirmed ? (v10BornEvent ? 1 : 0) + (v10BreakEvent ? 2 : 0) + (v112ChartShow ? 4 : 0) + (v11HtfBreakKnown ? 8 : 0) + (v112HtfShow ? 16 : 0) : na, "V12 事件码（1结构/2突破/4联合/8上级突破/16上级联合）", display=display.data_window)

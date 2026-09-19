@@ -91,8 +91,8 @@ def test_exits_use_ended_frame_and_new_joint_cannot_reveal_old_frame():
 
 
 def test_every_break_marker_has_bounded_line_ownership():
-    assert 'string caption = "break+spike"' in NEW
-    assert 'string htfCaption = "break+spike"' in NEW
+    assert 'string caption = "bk+spike"' in NEW
+    assert 'string htfCaption = "bk+spike"' in NEW
     assert not any(x.startswith("plotshape(") and 'text="突破"' in x for x in NEW.splitlines())
     assert NEW.count("array.push(v10SignalHistory, V10SignalDrawing.new(") == 4
     assert NEW.count("f_v11_trimAbc(v10SignalHistory, v11AbcKeep)") == 4
