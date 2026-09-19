@@ -1,0 +1,77 @@
+{
+  "experiment_id": "exp-spike-h1-sma60-release-20260920-v1",
+  "observed_at": "2026-09-20T06:22:41+08:00",
+  "source_commit": "1e1f1bab5d1e0c28ccde7f101e60de7df28ded11",
+  "files": [
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v12_2.pine",
+      "sha256": "93b4337c52279da5daaea83dc94fffb64652469d1e677dfbd34239094b8b0fee",
+      "size_bytes": 150905
+    },
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v12_3.pine",
+      "sha256": "ed7999159574e1d3a4c848a46f55d6c096fa3aca0cfeb57c75f16a414b5c3d75",
+      "size_bytes": 153905
+    },
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v9.pine",
+      "sha256": "162e5a3e8f9647b061a4cb51794707978b3fbe8cc5285981741263d5bc40774b",
+      "size_bytes": 55888
+    },
+    {
+      "path": "yoyo/evaluation/pine/spike_burst_v9_1.pine",
+      "sha256": "ccf968a51dfd8d9ac275147ae61cbcfff59726dfd8540f4d5853b5e4e6862d28",
+      "size_bytes": 58894
+    },
+    {
+      "path": "tests/evaluation/test_spike_h1_sma60_pine_contract.py",
+      "sha256": "3e577b1f03b362f75ba08201f330b845b349cff11988eda4896d3c73e6b615c7",
+      "size_bytes": 3340
+    }
+  ],
+  "checks": {
+    "passed": 38,
+    "duration_seconds": 0.45,
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_h1_sma60_pine_contract.py tests/evaluation/test_spike_v9_htf_sma.py tests/evaluation/test_spike_v12_2_pine_contract.py tests/evaluation/test_spike_v12_pairing_reference.py tests/evaluation/test_spike_v12_local_touch.py tests/evaluation/test_spike_v11_box.py"
+  },
+  "independent_review": {
+    "agent": "/root/v9_htf_sma_mapper",
+    "model": "gpt-5.6-luna",
+    "effort": "max",
+    "result": "No blocker. Entry gate preserves raw opposite exits and non-15m behavior. Existing admitted frames can pair later without a new SMA check."
+  },
+  "native_ui": {
+    "method": "TradingView desktop through cua; screenshots and accessibility observed in conversation; no disk screenshots or complete event export",
+    "chart": "OKX:BTCUSDT.P",
+    "v12_3": {
+      "private_title": "SPIKE V12.3 · 15m · 1h SMA60",
+      "revision": 2,
+      "saved_at_local": "2026-09-20 06:15:31",
+      "compile_errors": 0,
+      "inherited_warning": "921:1 Shadowing built-in variable second",
+      "default_on": true,
+      "settings_off_then_on_verified": true,
+      "h1_panel": "仅15m启用",
+      "m15_panel": "79309.1 · 仅允许多头"
+    },
+    "v9_1": {
+      "private_title": "SPIKE V9.1 · 15m · 1h SMA60",
+      "revision": 1,
+      "saved_at_local": "2026-09-20 06:18:50",
+      "added_at_local": "2026-09-20 06:18:51",
+      "compile_errors": 0,
+      "warnings_observed": 0,
+      "default_on": true,
+      "h1_panel": "仅15m启用",
+      "m15_panel": "79309.1 · 仅允许多头"
+    },
+    "final_state": "15m, V12.3 only on current chart, V9.1 private script retained; layout saved 06:22:41"
+  },
+  "limitations": [
+    "No full native event parity or new profitability evaluation.",
+    "Native hourly candles differ in data contract from the prior study complete-5m aggregation.",
+    "V12.3 revision1 initially saved a placeholder due to paste/save synchronization; final revision2 replaced it and compiled."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -10112,3 +10112,20 @@ experiments:
     reuse_allowed: false
     notes: Owner requests detailed density decomposition. Source anchors have unconfirmed proposal boundaries;no accuracy or trading-return claim.
       Span-preserving identity null and6 causal tests. TV V12.2 unchanged;no HTML. Notion3e08856479af81cf879ffdbad0a82d24.
+
+  - experiment_id: exp-spike-h1-sma60-release-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1e1f1bab5d1e0c28ccde7f101e60de7df28ded11
+    status: inconclusive
+    question: Implement the owner-selected confirmed H1 SMA60 direction gate on15m in new V12.3 and V9.1 scripts.
+    single_variable: Final V9 admission on15m only;preserve raw opposite exits and bypass all other chart periods.
+    result: 38 checks and Luna Max review pass;new private V12.3 revision2 and V9.1 revision1 compile;default-on15m and non15m bypass verified natively.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_h1_sma60_release_20260920.md
+    artifacts:
+    - spike-h1-sma60-release-20260920-delivery
+    reuse_allowed: false
+    notes: Functional delivery completed;economic validity remains inconclusive. SMA60 explicitly owner-selected,not a new optimality claim.
+      Native H1 vs prior complete5m aggregate parity not established. Old scripts preserved,no HTML,production deployment or orders.
