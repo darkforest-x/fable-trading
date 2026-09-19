@@ -9983,3 +9983,19 @@ experiments:
     - spike-v12-compact-bk-20260920-delivery
     reuse_allowed: false
     notes: Functional display verification completed; financial status not evaluated. Grouping is presentation, not geometric dedup or fewer alerts. No HTML.
+
+  - experiment_id: exp-spike-v12-1-focus-view-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a65eb0f8edb33cf4c9983cd2e615f71e0ea8694d
+    status: inconclusive
+    question: Reduce trendline clutter in the owner's wide BTC15m viewport while preserving V12 and creating a separate TV script.
+    single_variable: Presentation budget only; three automatic trendlines maximum in default focus view, full review restores history controls.
+    result: 52 local checks pass;new private TV revision1 compiled;BTC15m wide viewport shows2 lines;full-review and focus round trip verified.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_1_focus_view_20260920.md
+    artifacts:
+    - spike-v12-1-focus-view-20260920-delivery
+    reuse_allowed: false
+    notes: No entry/risk/cost/alert-condition changes. V12 preserved byte-for-byte;new V12.1 source and private script. No HTML or financial claim.
