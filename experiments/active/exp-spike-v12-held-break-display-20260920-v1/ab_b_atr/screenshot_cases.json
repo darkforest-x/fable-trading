@@ -1,0 +1,256 @@
+{
+  "scope": "auxiliary family only; no merged Pine parity",
+  "source_commit": "158ff1e3394d3b67a4da4b9a49537b036cb58dc6",
+  "cases": [
+    {
+      "asset": "BTC",
+      "exchange": "OKX",
+      "input": "data/altcoin_trends_20260909_v1/history_full_verified/frozen_pool/BTC_USDT_SWAP_15m.csv",
+      "sha256": "4989c77c81b164587208826081f38f38e4b9852b7695e735e291181c41476d8c",
+      "tick_assumption": 0.1,
+      "bars": 2496,
+      "start": "2026-08-01T08:00:00+08:00",
+      "end": "2026-08-27T07:45:00+08:00",
+      "target_day_bj": "2026-08-24",
+      "target_breaks": [
+        {
+          "uid": 14,
+          "kind": "auxiliary_touch",
+          "kind_id": 1,
+          "track": "soft",
+          "track_id": 1,
+          "source": 1,
+          "ax": 1955,
+          "ap": 79603.1,
+          "bx": 2169,
+          "bp": 77633.1,
+          "cx": 2179,
+          "cp": 77471.8,
+          "fit": 0.2990092175953202,
+          "wave": 2.932573366276199,
+          "score": 0.3998665014581213,
+          "born_i": 2181,
+          "break_i": 2197.0,
+          "A": 1955,
+          "B": 2169,
+          "C": 2179,
+          "ax_bj": "2026-08-21T16:45:00+08:00",
+          "bx_bj": "2026-08-23T22:15:00+08:00",
+          "cx_bj": "2026-08-24T00:45:00+08:00",
+          "born_i_bj": "2026-08-24T01:30:00+08:00",
+          "break_i_bj": "2026-08-24T05:30:00+08:00",
+          "hold_until_v9": [
+            {
+              "v9_close_bj": "2026-08-24T19:15:00+08:00",
+              "elapsed_bars": 55,
+              "continuous_close_above": false,
+              "first_failure_close_bj": "2026-08-24T08:45:00+08:00"
+            }
+          ]
+        },
+        {
+          "uid": 15,
+          "kind": "auxiliary_touch",
+          "kind_id": 1,
+          "track": "soft",
+          "track_id": 1,
+          "source": 1,
+          "ax": 2030,
+          "ap": 78819.9,
+          "bx": 2169,
+          "bp": 77633.1,
+          "cx": 2179,
+          "cp": 77471.8,
+          "fit": 0.32783226134364446,
+          "wave": 2.932573366276199,
+          "score": 0.4286895452064456,
+          "born_i": 2181,
+          "break_i": 2197.0,
+          "A": 2030,
+          "B": 2169,
+          "C": 2179,
+          "ax_bj": "2026-08-22T11:30:00+08:00",
+          "bx_bj": "2026-08-23T22:15:00+08:00",
+          "cx_bj": "2026-08-24T00:45:00+08:00",
+          "born_i_bj": "2026-08-24T01:30:00+08:00",
+          "break_i_bj": "2026-08-24T05:30:00+08:00",
+          "hold_until_v9": [
+            {
+              "v9_close_bj": "2026-08-24T19:15:00+08:00",
+              "elapsed_bars": 55,
+              "continuous_close_above": false,
+              "first_failure_close_bj": "2026-08-24T08:45:00+08:00"
+            }
+          ]
+        },
+        {
+          "uid": 16,
+          "kind": "auxiliary_touch",
+          "kind_id": 1,
+          "track": "raw",
+          "track_id": 0,
+          "source": 0,
+          "ax": 1955,
+          "ap": 79603.1,
+          "bx": 2197,
+          "bp": 78054.2,
+          "cx": 2236,
+          "cp": 77777.7,
+          "fit": 0.10018646959122673,
+          "wave": 4.151845936260996,
+          "score": 0.13900750625932867,
+          "born_i": 2238,
+          "break_i": 2249.0,
+          "A": 1955,
+          "B": 2197,
+          "C": 2236,
+          "ax_bj": "2026-08-21T16:45:00+08:00",
+          "bx_bj": "2026-08-24T05:15:00+08:00",
+          "cx_bj": "2026-08-24T15:00:00+08:00",
+          "born_i_bj": "2026-08-24T15:45:00+08:00",
+          "break_i_bj": "2026-08-24T18:30:00+08:00",
+          "hold_until_v9": [
+            {
+              "v9_close_bj": "2026-08-24T19:15:00+08:00",
+              "elapsed_bars": 3,
+              "continuous_close_above": false,
+              "first_failure_close_bj": "2026-08-24T19:00:00+08:00"
+            }
+          ]
+        }
+      ],
+      "v9_final_longs": [
+        {
+          "i": 2252,
+          "close_bj": "2026-08-24T19:15:00+08:00",
+          "close": 77804.3
+        }
+      ],
+      "all_aux_breaks": 15
+    },
+    {
+      "asset": "HYPE",
+      "exchange": "OKX",
+      "input": "data/altcoin_trends_20260909_v1/history_full_verified/frozen_pool/HYPE_USDT_SWAP_15m.csv",
+      "sha256": "8960f8e7d1038838169ba10ecf9d209dbb55c5c3d9d622693236a402c5425555",
+      "tick_assumption": 0.001,
+      "bars": 2496,
+      "start": "2026-08-01T08:00:00+08:00",
+      "end": "2026-08-27T07:45:00+08:00",
+      "target_day_bj": "2026-08-19",
+      "target_breaks": [
+        {
+          "uid": 10,
+          "kind": "auxiliary_touch",
+          "kind_id": 1,
+          "track": "raw",
+          "track_id": 0,
+          "source": 0,
+          "ax": 1661,
+          "ap": 60.473,
+          "bx": 1748,
+          "bp": 58.688,
+          "cx": 1755,
+          "cp": 58.603,
+          "fit": 0.2897578849554192,
+          "wave": 2.8668986029118884,
+          "score": 0.3414789204771146,
+          "born_i": 1757,
+          "break_i": 1771,
+          "A": 1661,
+          "B": 1748,
+          "C": 1755,
+          "ax_bj": "2026-08-18T15:15:00+08:00",
+          "bx_bj": "2026-08-19T13:00:00+08:00",
+          "cx_bj": "2026-08-19T14:45:00+08:00",
+          "born_i_bj": "2026-08-19T15:30:00+08:00",
+          "break_i_bj": "2026-08-19T19:00:00+08:00",
+          "hold_until_v9": [
+            {
+              "v9_close_bj": "2026-08-19T23:00:00+08:00",
+              "elapsed_bars": 16,
+              "continuous_close_above": true,
+              "first_failure_close_bj": null
+            }
+          ]
+        },
+        {
+          "uid": 11,
+          "kind": "auxiliary_touch",
+          "kind_id": 1,
+          "track": "raw",
+          "track_id": 0,
+          "source": 0,
+          "ax": 1678,
+          "ap": 59.998,
+          "bx": 1748,
+          "bp": 58.688,
+          "cx": 1755,
+          "cp": 58.603,
+          "fit": 0.22737471678266458,
+          "wave": 2.8668986029118884,
+          "score": 0.27909575230435996,
+          "born_i": 1757,
+          "break_i": 1771,
+          "A": 1678,
+          "B": 1748,
+          "C": 1755,
+          "ax_bj": "2026-08-18T19:30:00+08:00",
+          "bx_bj": "2026-08-19T13:00:00+08:00",
+          "cx_bj": "2026-08-19T14:45:00+08:00",
+          "born_i_bj": "2026-08-19T15:30:00+08:00",
+          "break_i_bj": "2026-08-19T19:00:00+08:00",
+          "hold_until_v9": [
+            {
+              "v9_close_bj": "2026-08-19T23:00:00+08:00",
+              "elapsed_bars": 16,
+              "continuous_close_above": true,
+              "first_failure_close_bj": null
+            }
+          ]
+        }
+      ],
+      "v9_final_longs": [
+        {
+          "i": 1787,
+          "close_bj": "2026-08-19T23:00:00+08:00",
+          "close": 59.879
+        }
+      ],
+      "all_aux_breaks": 13
+    }
+  ],
+  "rebound_at_b": true,
+  "one_regression": {
+    "input": "experiments/active/exp-spike-v112-one-line-audit-20260920-v1/input.json.gz",
+    "sha256": "7e866d3383b6515b9845b6244de345b40906529ba68da1cbcc58a33b33c9b591",
+    "target_lines": [
+      {
+        "uid": 15,
+        "kind": "auxiliary_touch",
+        "kind_id": 1,
+        "track": "raw",
+        "track_id": 0,
+        "source": 0,
+        "ax": 1066,
+        "ap": 0.0007039,
+        "bx": 1182,
+        "bp": 0.0006518,
+        "cx": 1189,
+        "cp": 0.0006486,
+        "fit": 0.014254730454778541,
+        "wave": 2.4132576034858904,
+        "score": 0.0728497804726102,
+        "born_i": 1191,
+        "break_i": 1216,
+        "A": 1066,
+        "B": 1182,
+        "C": 1189
+      }
+    ],
+    "prefix_checks": [
+      1192,
+      1217
+    ]
+  }
+}

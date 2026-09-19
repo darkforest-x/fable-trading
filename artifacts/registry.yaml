@@ -31611,3 +31611,18 @@ artifacts:
     production_eligible: false
     notes: Frozen prior input, auxiliary replay and PNG, 37 tests, native UI observations, report and learnings. Legacy holdout enum does not restrict owner-authorized
       data access.
+
+  - artifact_id: spike-v12-held-break-display-20260920-delivery
+    artifact_type: manifest
+    role: v12_held_break_display_causal_tests_and_native_screenshot_case_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 158ff1e3394d3b67a4da4b9a49537b036cb58dc6
+    source_path: experiments/active/exp-spike-v12-held-break-display-20260920-v1/delivery_manifest.json
+    sha256: c58599e94b1d91e63afcabb6bec3c38765c3b3b9e7aef980ef868b628732e747
+    size_bytes: 4410
+    storage_uri: repo://experiments/active/exp-spike-v12-held-break-display-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Source,51 tests, old/new AB auxiliary market references, manual native UI receipt, report and three learnings. No full Bybit CSV or merged
+      Pine event parity; no return improvement claim. Legacy holdout vocabulary imposes no data restriction.

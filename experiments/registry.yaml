@@ -9948,3 +9948,21 @@ experiments:
     reuse_allowed: false
     notes: V11.2 and production untouched. 17 lines/12 breaks are auxiliary reference only, not merged signal or trade totals. No HTML per owner. Private
       TV version7 saved and native replay verified.
+
+  - experiment_id: exp-spike-v12-held-break-display-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 158ff1e3394d3b67a4da4b9a49537b036cb58dc6
+    status: inconclusive
+    question: Recognize held-break-then-V9 order and make V12 screenshot signals visually traceable across chart and HTF sources.
+    single_variable: Owner-authorized seven-part functional revision; separate old/new auxiliary AB rebound normalization comparison, no financial parameter optimization.
+    result: 51 tests pass; native private revision11 compiles. HYPE Aug19 joint after16 held bars and exit gross/net R verified. Bybit target line admitted by
+      B-endpoint ATR normalization. OKX BTC target candidates fail continuous hold. ONE target and causal prefixes retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_held_break_display_20260920.md
+    artifacts:
+    - spike-v12-held-break-display-20260920-delivery
+    reuse_allowed: false
+    notes: Break labels own frozen lines;30 groups default, BB compression visible, dashed exit R, independent timeframe inputs with unchanged default numbers.
+      Native15m cases only; auxiliary replay is not full Pine parity. No profitability or optimal parameter claim, no HTML or production changes.

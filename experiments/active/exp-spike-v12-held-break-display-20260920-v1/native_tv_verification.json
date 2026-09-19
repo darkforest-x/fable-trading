@@ -1,0 +1,82 @@
+{
+  "kind": "manual_native_ui_verification_receipt_not_event_export",
+  "observed_date": "2026-09-20",
+  "timezone": "Asia/Shanghai",
+  "script": "SPIKE V12 · 主高点+回踩确认",
+  "private_revision": 11,
+  "compiled_at": "03:26:09",
+  "source_path": "yoyo/evaluation/pine/spike_burst_v12.pine",
+  "source_sha256": "6b1d0af141eb0da92e9eaa42ee89e55ad00ba03f564fb7e4c953b38bdee8ab06",
+  "unicode_codepoints": 129259,
+  "fnv1a_unicode_codepoints": "c2b15b8f",
+  "compile_errors": 0,
+  "compile_warnings": [
+    "pre-existing variable second shadows a built-in"
+  ],
+  "replay_cut_bj": "2026-08-20T00:00:00+08:00",
+  "hype": {
+    "symbol": "OKX:HYPEUSDT.P",
+    "tf": "15",
+    "checked_at": "03:32:42",
+    "structure_id": 158,
+    "structure_confirm_close_bj": "2026-08-19T15:30:00+08:00",
+    "joint_close_bj": "2026-08-19T23:00:00+08:00",
+    "joint_price": 59.879,
+    "tooltip_order": "突破→连续站在线上→V9",
+    "label": "break+spike",
+    "background": false
+  },
+  "exit": {
+    "symbol": "OKX:HYPEUSDT.P",
+    "checked_at": "03:32:47",
+    "reason": "保护触及",
+    "exit_bj": "2026-08-19T19:15:00+08:00",
+    "price": 58.656,
+    "gross_r": -1.0,
+    "net_r_rounded": -1.23,
+    "line_style": "dashed",
+    "actual_execution": false
+  },
+  "bybit": {
+    "symbol": "BYBIT:BTCUSDT.P",
+    "tf": "15",
+    "checked_at": "03:31:37",
+    "structure_id": 200,
+    "A_bj": "2026-08-18T22:30:00+08:00",
+    "A_price": 65041.7,
+    "B_bj": "2026-08-19T07:45:00+08:00",
+    "B_price": 64757.9,
+    "C_bj": "2026-08-19T16:30:00+08:00",
+    "C_price": 64480.9,
+    "confirm_close_bj": "2026-08-19T17:15:00+08:00",
+    "span": 72,
+    "fit_atr_rounded": 0.097,
+    "bc_atr_rounded": 3.906,
+    "legacy_ab_atr_rounded": 1.416,
+    "history_validation": "passed temporary raw-OHLC diagnostic",
+    "final_line_and_break_marker_observed": true,
+    "diagnostic_two_close_break_bj": "2026-08-19T19:30:00+08:00",
+    "final_break_tooltip_exported": false,
+    "joint_claimed": false
+  },
+  "cleanup": {
+    "temporary_diagnostics_removed": true,
+    "replay_closed": true,
+    "restored_symbol": "OKX:BTCUSDT.P",
+    "restored_timeframe": "15",
+    "checked_at": "03:33:50",
+    "user_drawings_preserved": true
+  },
+  "limitations": [
+    "No full TV event/OHLC CSV exported; tool transcript contains screenshots and AX evidence.",
+    "Python auxiliary replay is not complete Pine runtime parity.",
+    "Non-default 30m/1h/4h configurations not native replayed.",
+    "No return improvement or optimal parameter claim."
+  ],
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v12_pairing_reference.py tests/evaluation/test_spike_v12_local_touch.py tests/evaluation/test_spike_v12_pine_contract.py tests/evaluation/test_spike_v10_4.py tests/evaluation/test_spike_v11_box.py",
+    "passed": 51,
+    "failed": 0
+  },
+  "notion_url": "https://app.notion.com/p/3e08856479af81049d35f914484a7cd7"
+}
