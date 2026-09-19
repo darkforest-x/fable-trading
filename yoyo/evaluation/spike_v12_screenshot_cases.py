@@ -46,6 +46,16 @@ def main():
         signals = [{'i':int(i),'close_bj':stamp(i,True),'close':float(frame.close.iloc[i])} for i in idx if long_signals[i]]
         target = lines[(pd.to_datetime(lines.break_i_bj,utc=True) >= start) & (pd.to_datetime(lines.break_i_bj,utc=True) < start+pd.Timedelta(days=1))]
         selected = target.to_dict('records')
+        for line in selected:
+            held_checks = []
+            for signal in signals:
+                if signal['i'] < line['break_i']:
+                    continue
+                xs = np.arange(int(line['break_i'])+1, signal['i']+1)
+                ys = line['ap'] + (line['bp']-line['ap']) * (xs-line['ax']) / (line['bx']-line['ax'])
+                failed = xs[frame.close.to_numpy()[xs] <= ys]
+                held_checks.append({'v9_close_bj':signal['close_bj'],'elapsed_bars':signal['i']-int(line['break_i']), 'continuous_close_above':not len(failed), 'first_failure_close_bj':stamp(failed[0],True) if len(failed) else None})
+            line['hold_until_v9'] = held_checks
         case = {'asset':asset,'exchange':'OKX','input':str(path),'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'tick_assumption':tick,'bars':len(frame),'start':stamp(0),'end':stamp(len(frame)-1),'target_day_bj':day,'target_breaks':selected,'v9_final_longs':signals,'all_aux_breaks':len(aux.events)}
         result['cases'].append(case)
         print(json.dumps(case,ensure_ascii=False,default=str), flush=True)
