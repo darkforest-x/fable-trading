@@ -1,0 +1,155 @@
+{
+  "scope": "read-only source validation; no production cache, configuration, source data, or application code was changed",
+  "source_files": {
+    "frozen_5m": "experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/data/okx_btc_usdt_swap_5m.csv.gz",
+    "receipt": "experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/data/source_receipt.json",
+    "acquirer": "yoyo/data/btc_rsi_research_source.py"
+  },
+  "trigger_and_expected_behavior": {
+    "trigger": "Validate the frozen BTC-USDT-SWAP five-minute source used by the 1h Parabolic-RSI / 5m six-MA study.",
+    "expected": "324288 confirmed, continuous UTC five-minute OHLCV rows from 2023-08-20T21:00:00Z through exclusive 2026-09-19T21:00:00Z; receipt SHA and provenance reconcile; 1h aggregation agrees with public OKX history-candles prices; event identities do not depend on 30 versus a longer available prefix.",
+    "observed": "The frozen source meets those checks. The older preholdout snapshot has one row missing before the frozen source begins; it does not affect frozen data, and an in-memory same-venue read of that row restored an exact 90-day sensitivity prefix without changing any evaluation-window RSI or strong event."
+  },
+  "frozen_integrity": {
+    "sha256_actual": "076e9d1c74b9912a8d3421216fa6a10c3b19544fbdf93e90050dc92d2bf560ae",
+    "sha256_receipt": "076e9d1c74b9912a8d3421216fa6a10c3b19544fbdf93e90050dc92d2bf560ae",
+    "sha256_matches_receipt": true,
+    "rows_actual": 324288,
+    "rows_receipt": 324288,
+    "rows_expected_receipt": 324288,
+    "start_actual": "2023-08-20T21:00:00Z",
+    "end_exclusive_actual": "2026-09-19T21:00:00Z",
+    "exact_five_minute_grid": true,
+    "gap_count": 0,
+    "duplicate_timestamp_count": 0,
+    "nonfinite_cell_count": 0,
+    "nonpositive_ohlc_row_count": 0,
+    "negative_volume_row_count": 0,
+    "low_above_open_or_close_count": 0,
+    "high_below_open_or_close_count": 0
+  },
+  "receipt_provenance_reconciliation": {
+    "seed_rows": {
+      "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv": {
+        "receipt_sha_matches": true,
+        "receipt_rows_in_frozen_interval": 265764,
+        "actual_rows_in_frozen_interval": 265764,
+        "all_ohlcv_rows_exactly_match_frozen_output": true
+      },
+      "data/kline_holdout_btc5m/okx_BTC_USDT_SWAP_5m_52992.csv": {
+        "receipt_sha_matches": true,
+        "receipt_rows_in_frozen_interval": 52992,
+        "actual_rows_in_frozen_interval": 52992,
+        "all_ohlcv_rows_exactly_match_frozen_output": true
+      }
+    },
+    "duplicate_seed_rows_in_frozen_interval": 0,
+    "raw_page_count": 19,
+    "raw_page_sha_matches_all_receipt_entries": true,
+    "raw_page_api_code_zero_all": true,
+    "selected_raw_rows": 5532,
+    "selected_raw_rows_equal_receipt_initial_missing": true,
+    "selected_raw_rows_unique": true,
+    "selected_raw_rows_all_confirmed": true,
+    "selected_raw_rows_all_exactly_match_frozen_output": true
+  },
+  "public_okx_1h_crosscheck": {
+    "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+    "request": "instId=BTC-USDT-SWAP, bar=1H, after=(sample open plus one hour), limit=5",
+    "checked_candle_open_times_utc": [
+      "2023-09-21T13:00:00Z",
+      "2023-11-15T07:00:00Z",
+      "2024-01-20T22:00:00Z",
+      "2024-03-16T04:00:00Z",
+      "2024-05-24T18:00:00Z",
+      "2024-07-30T11:00:00Z",
+      "2024-09-27T23:00:00Z",
+      "2024-11-22T09:00:00Z",
+      "2025-01-19T16:00:00Z",
+      "2025-03-28T02:00:00Z",
+      "2025-05-30T20:00:00Z",
+      "2025-07-31T14:00:00Z",
+      "2025-09-25T06:00:00Z",
+      "2025-11-27T19:00:00Z",
+      "2026-01-23T10:00:00Z",
+      "2026-03-31T17:00:00Z",
+      "2026-05-28T03:00:00Z",
+      "2026-07-29T21:00:00Z",
+      "2026-09-18T12:00:00Z"
+    ],
+    "sample_count": 19,
+    "http_200_and_api_code_zero_for_all": true,
+    "confirmed_for_all": true,
+    "open_high_low_close_exact_match_count": 19,
+    "max_abs_price_difference": 0.0,
+    "max_abs_volume_difference": 2.3283064365386963e-10,
+    "volume_difference_interpretation": "IEEE-754 summation representation only; the request permits tiny archive-volume float differences and all prices match exactly."
+  },
+  "rsi14_and_strong_event_prefix_sensitivity": {
+    "implementation": "_rsi_wilder(hourly.close, 14), then pine_sar and diamonds; strong events use SAR thresholds as implemented in yoyo/evaluation/parabolic_rsi_sar.py.",
+    "evaluation_window": {
+      "start_inclusive": "2023-09-19T21:00:00Z",
+      "end_exclusive": "2026-09-19T21:00:00Z",
+      "hour_count": 26304
+    },
+    "frozen_prefix": {
+      "start": "2023-08-20T21:00:00Z",
+      "nominal_days_before_evaluation": 30
+    },
+    "existing_nominal_90_day_prefix": {
+      "start": "2023-06-21T21:00:00Z",
+      "expected_5m_rows": 341568,
+      "actual_5m_rows": 341567,
+      "confirmed_missing_timestamp": "2023-06-22T22:15:00Z",
+      "result": "Not an exact continuous 90-day source from existing files alone."
+    },
+    "longest_continuous_existing_prefix_after_gap": {
+      "start": "2023-06-22T23:00:00Z",
+      "days_before_evaluation": 88.91666666666667,
+      "five_minute_grid_exact": true,
+      "max_abs_rsi14_difference": 0.0,
+      "rsi14_values_differing_by_more_than_1e-10": 0,
+      "strong_events": {
+        "frozen_30day_total": 564,
+        "longer_prefix_total": 564,
+        "frozen_30day_up": 276,
+        "longer_prefix_up": 276,
+        "frozen_30day_down": 288,
+        "longer_prefix_down": 288,
+        "side_or_timestamp_difference_count": 0
+      }
+    },
+    "read_only_same_venue_gap_check": {
+      "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+      "bar": "5m",
+      "timestamp": "2023-06-22T22:15:00Z",
+      "http_status": 200,
+      "api_code": "0",
+      "confirm": "1",
+      "ohlcv": [30028.1, 30039.9, 29991.1, 30029.9, 26458.0],
+      "persisted": false,
+      "in_memory_exact_90day_grid": true,
+      "in_memory_exact_90day_max_abs_rsi14_difference": 0.0,
+      "in_memory_exact_90day_strong_event_count": 564,
+      "in_memory_exact_90day_event_side_or_timestamp_difference_count": 0
+    }
+  },
+  "code_and_receipt_evidence": {
+    "acquirer_seed_and_grid_logic": "yoyo/data/btc_rsi_research_source.py:22-55",
+    "acquirer_confirmed_raw_selection_and_validations": "yoyo/data/btc_rsi_research_source.py:64-119",
+    "receipt_claims": "experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/data/source_receipt.json:2-18",
+    "hourly_rsi_sar_event_path": "yoyo/evaluation/btc_rsi_sixma.py:110-124",
+    "strong_event_definition": "yoyo/evaluation/parabolic_rsi_sar.py:97-116"
+  },
+  "conclusion": {
+    "confirmed_source_integrity_failure": false,
+    "confirmed_nonblocking_archive_defect": "The older preholdout archive lacks the single confirmed 5m candle at 2023-06-22T22:15:00Z, so it cannot alone supply a literal continuous 90-day prefix.",
+    "effect_on_frozen_source_or_evaluation_events": "None observed: frozen data is complete and 30-day versus longer available/exact-90 in-memory prefixes give bit-identical evaluation RSI14 and identical 564 strong events.",
+    "smallest_proposed_fix": "If a durable literal 90-day sensitivity input is required, append only this one same-venue, confirmed raw candle with a receipt and then rerun the source-integrity check. No change is required for the frozen study input or its current event set.",
+    "limitations": [
+      "The public OKX crosscheck samples 19 dispersed one-hour candles; it is not a full independent download.",
+      "No native TradingView export or parity assertion was made.",
+      "No performance scoring, production interaction, or mutable data repair was performed."
+    ]
+  }
+}

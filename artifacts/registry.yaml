@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-rsi1h-sixma5m-20260920-v1-delivery
+    artifact_type: manifest
+    role: btc_hourly_rsi_five_minute_six_ma_three_year_backtest
+    source_repo: darkforest-x/fable-trading
+    source_commit: 67411473aa92e14f699d75a20877c7ac1ac0d9ae
+    source_path: experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/delivery_manifest.json
+    sha256: 7f55f2eda0827b5ecdf8313f9d5d824357222f86c6b08117082b5e92b31ed135
+    size_bytes: 14002
+    storage_uri: repo://experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Deprecated holdout schema has no not-applicable value; Owner canceled restriction20260919. All historical data authorized. Binds324288bars inclwarmup,876closed actual trades,87600matched controls, source audit and negative report. Raw market data and dense curves local-only.
   - artifact_id: owner-manual-trading-system-20260916-v2-delivery
     artifact_type: manifest
     role: owner_manual_order_handbook_and_checklist

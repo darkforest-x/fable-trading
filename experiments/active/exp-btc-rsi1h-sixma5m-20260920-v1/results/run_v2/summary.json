@@ -1,0 +1,601 @@
+{
+  "start": "2023-09-19 21:00:00+00:00",
+  "end_exclusive": "2026-09-19 21:00:00+00:00",
+  "split": "2025-09-19 21:00:00+00:00",
+  "seed": 20260920,
+  "bars": 324288,
+  "evaluation_bars": 315648,
+  "data_sha256": "076e9d1c74b9912a8d3421216fa6a10c3b19544fbdf93e90050dc92d2bf560ae",
+  "builder_commit": "67411473aa92e14f699d75a20877c7ac1ac0d9ae",
+  "builder_sha256": {
+    "yoyo/evaluation/btc_rsi_sixma.py": "2d33bec0587601c4a62d250e116ab39fa945d0844ee578fa762cfdfdccee2ef0",
+    "yoyo/evaluation/btc_rsi_sixma_study.py": "cccb3770567ed23878f4b3f1cff07e5465051cec26a24b61d8474f19e37d2a7a",
+    "yoyo/evaluation/parabolic_rsi_sar.py": "743e2d9cf73d4e3f4c893c2b7ccd7d8bb705a264d48abe3174a5567d88e07f46",
+    "yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+    "yoyo/data/btc_rsi_research_source.py": "691913dee814663f692937e7cfa558b69aed58391ee43801c519722bac59d016"
+  },
+  "generated_at": "2026-09-19 21:35:09.888210+00:00",
+  "arms": {
+    "direct": {
+      "stats": {
+        "all": {
+          "n": 520,
+          "win_rate": 0.23461538461538461,
+          "gross_win_rate": 0.23846153846153847,
+          "gross_r_sum": -23.999999999999986,
+          "net_r_sum": -289.36436170660664,
+          "net_r_mean": -0.556469926358859,
+          "gross_bp_mean": 3.41962649096517,
+          "mean_net_r_month_bootstrap_95": [
+            -0.7425636531422006,
+            -0.3507624472590658
+          ],
+          "net_bp_mean": -16.580373509034835,
+          "net_bp_sum": -8621.794224698115,
+          "profit_factor_r": 0.5193295421726436,
+          "profit_factor_bp": 0.761033634015682,
+          "max_closed_drawdown_r": 290.90192406556497,
+          "longest_net_loss_streak": 24,
+          "risk_pct_median": 0.00554090151374382,
+          "risk_pct_p10": 0.0022398067533650084,
+          "risk_pct_p90": 0.015010292671370228,
+          "cost_r_mean": 0.5103160802050127,
+          "holding_hours_median": 3.7083333333333335,
+          "holding_hours_p95": 57.98333333333327,
+          "wait_minutes_median": 0.0,
+          "dual_touch": 1,
+          "optimistic_dual_touch_net_r_sum": -285.36436170660664,
+          "break_even_roundtrip_cost_bp": 3.41962649096517,
+          "min_trade_net_r": -7.932751219512195,
+          "max_trade_net_r": 2.94057273673257,
+          "control": {
+            "matched_trades": 520,
+            "controls": 52000,
+            "minimum_matches": 100,
+            "months": 37,
+            "actual_net_r_mean": -0.556469926358859,
+            "control_net_r_mean": -0.5447819512978836,
+            "excess_r_mean": -0.011687975060975306,
+            "control_net_bp_mean": -25.44861521082238,
+            "excess_bp_mean": 8.868241701787548,
+            "excess_r_month_bootstrap_95": [
+              -0.17391932470550284,
+              0.16622788426819854
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -8.054252813002186,
+              27.98987478838054
+            ],
+            "month_sign_permutation_p_greater": 0.5552722363881806,
+            "terminal_control_count": 54,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "early_closed": {
+          "n": 333,
+          "win_rate": 0.24624624624624625,
+          "gross_win_rate": 0.24924924924924924,
+          "gross_r_sum": -0.9999999999999893,
+          "net_r_sum": -160.44484382536888,
+          "net_r_mean": -0.48181634782393057,
+          "gross_bp_mean": 12.057351206081227,
+          "mean_net_r_month_bootstrap_95": [
+            -0.7419009029143314,
+            -0.20187042481407166
+          ],
+          "net_bp_mean": -7.942648793918775,
+          "net_bp_sum": -2644.9020483749523,
+          "profit_factor_r": 0.570161749723805,
+          "profit_factor_bp": 0.8838106580985668,
+          "max_closed_drawdown_r": 160.44484382536893,
+          "longest_net_loss_streak": 24,
+          "risk_pct_median": 0.005493391012225268,
+          "risk_pct_p10": 0.0023999027455280575,
+          "risk_pct_p90": 0.015385015771661745,
+          "cost_r_mean": 0.4788133448209276,
+          "holding_hours_median": 3.8333333333333335,
+          "holding_hours_p95": 54.44999999999993,
+          "wait_minutes_median": 0.0,
+          "dual_touch": 1,
+          "optimistic_dual_touch_net_r_sum": -156.44484382536888,
+          "break_even_roundtrip_cost_bp": 12.057351206081227,
+          "min_trade_net_r": -6.790702702701563,
+          "max_trade_net_r": 2.94057273673257,
+          "control": {
+            "matched_trades": 333,
+            "controls": 33300,
+            "minimum_matches": 100,
+            "months": 25,
+            "actual_net_r_mean": -0.48181634782393057,
+            "control_net_r_mean": -0.5064514149524778,
+            "excess_r_mean": 0.02463506712854732,
+            "control_net_bp_mean": -25.89162065112923,
+            "excess_bp_mean": 17.94897185721046,
+            "excess_r_month_bootstrap_95": [
+              -0.1962285547976494,
+              0.26479118695429144
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -3.8484485656679945,
+              42.97413704567591
+            ],
+            "month_sign_permutation_p_greater": 0.4201789910504475,
+            "terminal_control_count": 45,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "late": {
+          "n": 187,
+          "win_rate": 0.21390374331550802,
+          "gross_win_rate": 0.2192513368983957,
+          "gross_r_sum": -22.999999999999996,
+          "net_r_sum": -128.91951788123777,
+          "net_r_mean": -0.6894091865306833,
+          "gross_bp_mean": -11.961990247717441,
+          "mean_net_r_month_bootstrap_95": [
+            -0.9495744427353068,
+            -0.433844190595536
+          ],
+          "net_bp_mean": -31.961990247717445,
+          "net_bp_sum": -5976.892176323162,
+          "profit_factor_r": 0.4363769976702467,
+          "profit_factor_bp": 0.5511430676100041,
+          "max_closed_drawdown_r": 130.45708024019603,
+          "longest_net_loss_streak": 11,
+          "risk_pct_median": 0.005597918022121041,
+          "risk_pct_p10": 0.0018859328979055558,
+          "risk_pct_p90": 0.014369053770475704,
+          "cost_r_mean": 0.5664145341242662,
+          "holding_hours_median": 3.5,
+          "holding_hours_p95": 60.24166666666665,
+          "wait_minutes_median": 0.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -128.91951788123777,
+          "break_even_roundtrip_cost_bp": -11.961990247717441,
+          "min_trade_net_r": -7.932751219512195,
+          "max_trade_net_r": 2.9403699432463144,
+          "control": {
+            "matched_trades": 187,
+            "controls": 18700,
+            "minimum_matches": 100,
+            "months": 13,
+            "actual_net_r_mean": -0.6894091865306833,
+            "control_net_r_mean": -0.6130390026509324,
+            "excess_r_mean": -0.07637018387975086,
+            "control_net_bp_mean": -24.659733865249223,
+            "excess_bp_mean": -7.302256382468223,
+            "excess_r_month_bootstrap_95": [
+              -0.30449716828369994,
+              0.1643312730796976
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -30.11888951011432,
+              21.157247240674916
+            ],
+            "month_sign_permutation_p_greater": 0.7254137293135343,
+            "terminal_control_count": 9,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "cross_split": {
+          "n": 0,
+          "control": {
+            "matched_trades": 0
+          }
+        },
+        "long": {
+          "n": 250,
+          "win_rate": 0.228,
+          "gross_win_rate": 0.232,
+          "gross_r_sum": -17.999999999999986,
+          "net_r_sum": -139.21583430527755,
+          "net_r_mean": -0.5568633372211103,
+          "gross_bp_mean": 6.806724308389286,
+          "mean_net_r_month_bootstrap_95": [
+            -0.8307515600380061,
+            -0.2678166557012454
+          ],
+          "net_bp_mean": -13.193275691610715,
+          "net_bp_sum": -3298.318922902679,
+          "profit_factor_r": 0.5183352330750122,
+          "profit_factor_bp": 0.816254054632448,
+          "max_closed_drawdown_r": 143.28873836406063,
+          "longest_net_loss_streak": 24,
+          "risk_pct_median": 0.006068066545049711,
+          "risk_pct_p10": 0.0023096770037300475,
+          "risk_pct_p90": 0.015646178756406507,
+          "cost_r_mean": 0.48486333722111025,
+          "holding_hours_median": 2.9166666666666665,
+          "holding_hours_p95": 48.258333333333326,
+          "wait_minutes_median": 0.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -139.21583430527755,
+          "break_even_roundtrip_cost_bp": 6.806724308389286,
+          "min_trade_net_r": -7.932751219512195,
+          "max_trade_net_r": 2.9403699432463144,
+          "control": {
+            "matched_trades": 250,
+            "controls": 25000,
+            "minimum_matches": 100,
+            "months": 36,
+            "actual_net_r_mean": -0.5568633372211103,
+            "control_net_r_mean": -0.49129924436395017,
+            "excess_r_mean": -0.06556409285716006,
+            "control_net_bp_mean": -23.206731978424934,
+            "excess_bp_mean": 10.013456286814213,
+            "excess_r_month_bootstrap_95": [
+              -0.29927229279407663,
+              0.1786349402918647
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -13.978173166096056,
+              38.088818743495025
+            ],
+            "month_sign_permutation_p_greater": 0.6935153242337883,
+            "terminal_control_count": 31,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "short": {
+          "n": 270,
+          "win_rate": 0.24074074074074073,
+          "gross_win_rate": 0.24444444444444444,
+          "gross_r_sum": -6.0,
+          "net_r_sum": -150.1485274013291,
+          "net_r_mean": -0.5561056570419596,
+          "gross_bp_mean": 0.2834248081650618,
+          "mean_net_r_month_bootstrap_95": [
+            -0.781968874144029,
+            -0.3048387740547844
+          ],
+          "net_bp_mean": -19.71657519183494,
+          "net_bp_sum": -5323.4753017954345,
+          "profit_factor_r": 0.5202477924594459,
+          "profit_factor_bp": 0.7063574284805404,
+          "max_closed_drawdown_r": 154.46258781052742,
+          "longest_net_loss_streak": 23,
+          "risk_pct_median": 0.005056814751597536,
+          "risk_pct_p10": 0.0022392701598701673,
+          "risk_pct_p90": 0.01441431029090176,
+          "cost_r_mean": 0.5338834348197373,
+          "holding_hours_median": 4.208333333333333,
+          "holding_hours_p95": 77.08333333333327,
+          "wait_minutes_median": 0.0,
+          "dual_touch": 1,
+          "optimistic_dual_touch_net_r_sum": -146.1485274013291,
+          "break_even_roundtrip_cost_bp": 0.2834248081650618,
+          "min_trade_net_r": -6.790702702701563,
+          "max_trade_net_r": 2.94057273673257,
+          "control": {
+            "matched_trades": 270,
+            "controls": 27000,
+            "minimum_matches": 100,
+            "months": 37,
+            "actual_net_r_mean": -0.5561056570419596,
+            "control_net_r_mean": -0.5943029762367109,
+            "excess_r_mean": 0.03819731919475131,
+            "control_net_bp_mean": -27.5244330185978,
+            "excess_bp_mean": 7.807857826762858,
+            "excess_r_month_bootstrap_95": [
+              -0.1710587516850258,
+              0.26105466623136303
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -9.014167152509748,
+              27.217800381327727
+            ],
+            "month_sign_permutation_p_greater": 0.36598170091495424,
+            "terminal_control_count": 23,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        }
+      },
+      "events": 564,
+      "events_with_warmup": 576,
+      "event_status_counts": {
+        "entered": 520,
+        "occupied_skip": 43,
+        "outside_window": 12,
+        "open": 1
+      },
+      "open_positions": 1,
+      "max_5m_close_marked_drawdown_r": 291.38760293665575,
+      "terminal_marked_net_r": -289.0243938085176
+    },
+    "sixma": {
+      "stats": {
+        "all": {
+          "n": 356,
+          "win_rate": 0.2556179775280899,
+          "gross_win_rate": 0.2556179775280899,
+          "gross_r_sum": 8.000000000000016,
+          "net_r_sum": -97.05014436481807,
+          "net_r_mean": -0.27261276506971366,
+          "gross_bp_mean": 1.9420462578324094,
+          "mean_net_r_month_bootstrap_95": [
+            -0.465703010734707,
+            -0.06968883260187046
+          ],
+          "net_bp_mean": -18.05795374216759,
+          "net_bp_sum": -6428.6315322116625,
+          "profit_factor_r": 0.7181120544526681,
+          "profit_factor_bp": 0.8056492297563379,
+          "max_closed_drawdown_r": 109.85210270779388,
+          "longest_net_loss_streak": 17,
+          "risk_pct_median": 0.008653970415861943,
+          "risk_pct_p10": 0.0034583809262359556,
+          "risk_pct_p90": 0.018841168051177085,
+          "cost_r_mean": 0.29508467518207326,
+          "holding_hours_median": 7.833333333333333,
+          "holding_hours_p95": 82.70833333333333,
+          "wait_minutes_median": 10.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -97.05014436481807,
+          "break_even_roundtrip_cost_bp": 1.9420462578324094,
+          "min_trade_net_r": -3.791333333333333,
+          "max_trade_net_r": 2.947008446155757,
+          "control": {
+            "matched_trades": 356,
+            "controls": 35600,
+            "minimum_matches": 100,
+            "months": 37,
+            "actual_net_r_mean": -0.27261276506971366,
+            "control_net_r_mean": -0.36424640148791204,
+            "excess_r_mean": 0.0916336364181984,
+            "control_net_bp_mean": -33.61383900794691,
+            "excess_bp_mean": 15.555885265779315,
+            "excess_r_month_bootstrap_95": [
+              -0.10357854409764615,
+              0.29584028864012024
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -9.31709437996607,
+              42.06307852459804
+            ],
+            "month_sign_permutation_p_greater": 0.19074046297685116,
+            "terminal_control_count": 77,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "early_closed": {
+          "n": 231,
+          "win_rate": 0.2554112554112554,
+          "gross_win_rate": 0.2554112554112554,
+          "gross_r_sum": 5.000000000000012,
+          "net_r_sum": -61.38536928140945,
+          "net_r_mean": -0.2657375293567509,
+          "gross_bp_mean": 8.224085849084148,
+          "mean_net_r_month_bootstrap_95": [
+            -0.5178697137265617,
+            0.0009669599845687153
+          ],
+          "net_bp_mean": -11.775914150915856,
+          "net_bp_sum": -2720.236168861563,
+          "profit_factor_r": 0.7242848962835565,
+          "profit_factor_bp": 0.8739894837122115,
+          "max_closed_drawdown_r": 69.71877530304992,
+          "longest_net_loss_streak": 17,
+          "risk_pct_median": 0.008583087332829866,
+          "risk_pct_p10": 0.0034533339230168473,
+          "risk_pct_p90": 0.019814856583436978,
+          "cost_r_mean": 0.2873825510017725,
+          "holding_hours_median": 7.5,
+          "holding_hours_p95": 84.41666666666667,
+          "wait_minutes_median": 10.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -61.38536928140945,
+          "break_even_roundtrip_cost_bp": 8.224085849084148,
+          "min_trade_net_r": -1.9738362989323845,
+          "max_trade_net_r": 2.947008446155757,
+          "control": {
+            "matched_trades": 231,
+            "controls": 23100,
+            "minimum_matches": 100,
+            "months": 25,
+            "actual_net_r_mean": -0.2657375293567509,
+            "control_net_r_mean": -0.3682730857337723,
+            "excess_r_mean": 0.10253555637702147,
+            "control_net_bp_mean": -36.97364162285722,
+            "excess_bp_mean": 25.19772747194136,
+            "excess_r_month_bootstrap_95": [
+              -0.13817121110516473,
+              0.3565820821628818
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -6.7647865710434205,
+              60.91959778573101
+            ],
+            "month_sign_permutation_p_greater": 0.2150892455377231,
+            "terminal_control_count": 50,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "late": {
+          "n": 125,
+          "win_rate": 0.256,
+          "gross_win_rate": 0.256,
+          "gross_r_sum": 3.0000000000000036,
+          "net_r_sum": -35.66477508340863,
+          "net_r_mean": -0.28531820066726904,
+          "gross_bp_mean": -9.667162906800806,
+          "mean_net_r_month_bootstrap_95": [
+            -0.5958440759343666,
+            0.02778471931686126
+          ],
+          "net_bp_mean": -29.6671629068008,
+          "net_bp_sum": -3708.3953633501,
+          "profit_factor_r": 0.7068142830268959,
+          "profit_factor_bp": 0.6772528420957946,
+          "max_closed_drawdown_r": 53.49195375174752,
+          "longest_net_loss_streak": 15,
+          "risk_pct_median": 0.00871183839235475,
+          "risk_pct_p10": 0.0034874878438508426,
+          "risk_pct_p90": 0.017825783302026076,
+          "cost_r_mean": 0.309318200667269,
+          "holding_hours_median": 8.666666666666666,
+          "holding_hours_p95": 76.51666666666665,
+          "wait_minutes_median": 10.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -35.66477508340863,
+          "break_even_roundtrip_cost_bp": -9.667162906800806,
+          "min_trade_net_r": -3.791333333333333,
+          "max_trade_net_r": 2.9357487984306068,
+          "control": {
+            "matched_trades": 125,
+            "controls": 12500,
+            "minimum_matches": 100,
+            "months": 13,
+            "actual_net_r_mean": -0.28531820066726904,
+            "control_net_r_mean": -0.3568050890015623,
+            "excess_r_mean": 0.07148688833429341,
+            "control_net_bp_mean": -27.40492377559264,
+            "excess_bp_mean": -2.2622391312081596,
+            "excess_r_month_bootstrap_95": [
+              -0.2719422798789675,
+              0.4260945164650837
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -39.308106556660405,
+              35.30035974199419
+            ],
+            "month_sign_permutation_p_greater": 0.35473226338683067,
+            "terminal_control_count": 27,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "cross_split": {
+          "n": 0,
+          "control": {
+            "matched_trades": 0
+          }
+        },
+        "long": {
+          "n": 167,
+          "win_rate": 0.25748502994011974,
+          "gross_win_rate": 0.25748502994011974,
+          "gross_r_sum": 5.000000000000018,
+          "net_r_sum": -42.354279457551144,
+          "net_r_mean": -0.2536184398655757,
+          "gross_bp_mean": 7.620380720985875,
+          "mean_net_r_month_bootstrap_95": [
+            -0.5577924389074239,
+            0.09019149432298308
+          ],
+          "net_bp_mean": -12.379619279014129,
+          "net_bp_sum": -2067.3964195953595,
+          "profit_factor_r": 0.7348613132730919,
+          "profit_factor_bp": 0.8702286236659619,
+          "max_closed_drawdown_r": 53.49432230005449,
+          "longest_net_loss_streak": 21,
+          "risk_pct_median": 0.009231754814281299,
+          "risk_pct_p10": 0.003937142484442793,
+          "risk_pct_p90": 0.02077706415063642,
+          "cost_r_mean": 0.28355855962605486,
+          "holding_hours_median": 7.666666666666667,
+          "holding_hours_p95": 68.52499999999996,
+          "wait_minutes_median": 10.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -42.354279457551144,
+          "break_even_roundtrip_cost_bp": 7.620380720985875,
+          "min_trade_net_r": -3.791333333333333,
+          "max_trade_net_r": 2.9368047011952187,
+          "control": {
+            "matched_trades": 167,
+            "controls": 16700,
+            "minimum_matches": 100,
+            "months": 36,
+            "actual_net_r_mean": -0.2536184398655757,
+            "control_net_r_mean": -0.3343815239198816,
+            "excess_r_mean": 0.08076308405430577,
+            "control_net_bp_mean": -31.251936586775567,
+            "excess_bp_mean": 18.872317307761435,
+            "excess_r_month_bootstrap_95": [
+              -0.21416513464073583,
+              0.4031353926007827
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -18.135131351618416,
+              60.523227984209406
+            ],
+            "month_sign_permutation_p_greater": 0.30523473826308684,
+            "terminal_control_count": 33,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        },
+        "short": {
+          "n": 189,
+          "win_rate": 0.25396825396825395,
+          "gross_win_rate": 0.25396825396825395,
+          "gross_r_sum": 3.0,
+          "net_r_sum": -54.69586490726692,
+          "net_r_mean": -0.2893961106204599,
+          "gross_bp_mean": -3.0753180561709192,
+          "mean_net_r_month_bootstrap_95": [
+            -0.4801441570279208,
+            -0.09654174650701029
+          ],
+          "net_bp_mean": -23.07531805617092,
+          "net_bp_sum": -4361.235112616304,
+          "profit_factor_r": 0.7036135347285561,
+          "profit_factor_bp": 0.7456472190324217,
+          "max_closed_drawdown_r": 63.506298833014235,
+          "longest_net_loss_streak": 14,
+          "risk_pct_median": 0.008209894959844713,
+          "risk_pct_p10": 0.003433755827273636,
+          "risk_pct_p90": 0.017732848601577075,
+          "cost_r_mean": 0.30526912649347576,
+          "holding_hours_median": 8.25,
+          "holding_hours_p95": 97.63333333333333,
+          "wait_minutes_median": 15.0,
+          "dual_touch": 0,
+          "optimistic_dual_touch_net_r_sum": -54.69586490726692,
+          "break_even_roundtrip_cost_bp": -3.0753180561709192,
+          "min_trade_net_r": -2.685597911227186,
+          "max_trade_net_r": 2.947008446155757,
+          "control": {
+            "matched_trades": 189,
+            "controls": 18900,
+            "minimum_matches": 100,
+            "months": 37,
+            "actual_net_r_mean": -0.2893961106204599,
+            "control_net_r_mean": -0.3906349441009338,
+            "excess_r_mean": 0.10123883348047395,
+            "control_net_bp_mean": -35.700810988558615,
+            "excess_bp_mean": 12.625492932387703,
+            "excess_r_month_bootstrap_95": [
+              -0.11627143846241407,
+              0.3167651374225578
+            ],
+            "excess_bp_month_bootstrap_95": [
+              -13.926389135640278,
+              41.41110379108538
+            ],
+            "month_sign_permutation_p_greater": 0.18834058297085146,
+            "terminal_control_count": 44,
+            "method": "paired timing null; matched month/side/causal-vol quintile/risk%; 100 controls max; 10000 month bootstrap; 20000 month sign permutations"
+          }
+        }
+      },
+      "events": 564,
+      "events_with_warmup": 576,
+      "event_status_counts": {
+        "entered": 356,
+        "cancelled_stop": 150,
+        "occupied_skip": 57,
+        "outside_window": 12,
+        "open": 1
+      },
+      "open_positions": 1,
+      "max_5m_close_marked_drawdown_r": 110.99344864449832,
+      "terminal_marked_net_r": -96.83025846500358
+    }
+  },
+  "limitations": [
+    "No historical funding charge series",
+    "No native TradingView event export parity",
+    "Historical exploratory temporal recheck, not blind validation",
+    "Same-5m dual barriers conservatively stop-first",
+    "Fixed risk R sums are not compounded account returns",
+    "Random timing controls preserve risk distance, not hourly stop geometry"
+  ]
+}

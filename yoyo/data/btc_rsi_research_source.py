@@ -39,12 +39,15 @@ def acquire():
     pieces, seeds = [], []
     for rel in SEEDS:
         path = ROOT / rel
+        if not path.exists():
+            continue  # A fresh checkout can fetch the whole fixed grid from OKX.
         d = pd.read_csv(path)
         d.index = pd.to_datetime(d.ts, unit='ms', utc=True)
         d = d.loc[(d.index >= start) & (d.index < end), COLS]
         pieces.append(d)
         seeds.append(dict(path=rel, sha256=sha(path), rows=len(d)))
-    both = pd.concat(pieces).sort_index()
+    both = (pd.concat(pieces).sort_index() if pieces else
+            pd.DataFrame(columns=COLS, index=pd.DatetimeIndex([], tz='UTC')))
     duplicates = both.loc[both.index.duplicated(keep=False)]
     conflict = duplicates.groupby(level=0)[COLS].nunique().gt(1).any(axis=1)
     if conflict.any():

@@ -1,0 +1,34 @@
+{
+  "targeted_tests": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_btc_rsi_sixma.py tests/evaluation/test_parabolic_rsi_sar.py tests/boundaries/test_layer_imports.py",
+    "passed": 84
+  },
+  "run_v1_v2_parity": {
+    "events_trades_open_positions": "byte-identical for both arms",
+    "control_tables": "87600 rows identical",
+    "reason_for_v2": "replace BLAS matmul warning with finite-checked explicit reduction; max null-sum difference2.84e-14, same p"
+  },
+  "independent_review": {
+    "mechanism_blockers": 0,
+    "start_boundary": {
+      "direct": {
+        "prestart_closed": 12,
+        "open_at_start": 0,
+        "pending_at_start": 0
+      },
+      "sixma": {
+        "prestart_closed": 12,
+        "open_at_start": 0,
+        "pending_at_start": 0
+      }
+    },
+    "scope": "causality, timing, stop and target, serial occupancy, causal controls; no native TradingView parity"
+  },
+  "same_diamond_membership": {
+    "shared_closed": 353,
+    "direct_only": 167,
+    "sixma_only": 3
+  },
+  "generated_at": "2026-09-19 21:38:37.626429+00:00",
+  "independent_arithmetic_and_serial_occupancy": "passed for all876 closed trades"
+}

@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **576** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **582** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -13,6 +13,8 @@
 | 2026-09-20 | [`p1_spike_v112_entry_extension_20260920.md`](p1_spike_v112_entry_extension_20260920.md) | V11.2：限制入场前价格推进，三个周期均未通过研究筛查 | 结论：固定29币，只试一个因果入场门——突破收盘相对父V9收盘的推进，不超过父信号收盘到原止损的一份距离。15m和1h全期净R从负转正，但不足以接受此规则：三个周期的全期改善区间都跨0，1h后段仍亏，4h后段更差。保留15m时机线索；拒绝本规则准入，不搜索新阈值，不修改Pine/监控/实盘。 |
 | 2026-09-20 | [`p1_spike_v112_one_line_audit_20260920.md`](p1_spike_v112_one_line_audit_20260920.md) | V11.2：ONE 15m白色下降线卡在第三个独立高点 | 结论：按当前默认线性/双轨规则和本地同段OKX数据，这条图示线首先卡在建线。第三次贴线虽很准，但不被12左/8右的pivot定义承认为独立高点，且相邻间隔只有7根，低于24根。另一个独立问题是1h已出现突破时，15m没有开放V9多头参考框，因此不产生框内联合。未改脚本或参数。 |
 | 2026-09-20 | [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) | V11.2：29币570笔逐笔复盘与8张行情图 | 结论：570次入场全部重放并生成逐笔说明，568笔已平仓、187盈、381亏，2笔边界仍持仓。381笔亏损里127笔曾到1R、33笔曾到2R；“先有明显浮盈再回吐”真实存在，但不能解释多数亏单。最大的亏损类别是未到1R便价格止损，共234笔。8张图按机制选取，另有29份逐币明细和完整中文CSV。 |
+| 2026-09-20 | [`p1_spike_v12_compact_bk_20260920.md`](p1_spike_v12_compact_bk_20260920.md) | V12：ONE 三次突破说明与紧凑样式 |  |
+| 2026-09-20 | [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) | SPIKE V12：持线配对、信号显示与截图漏线验收 |  |
 | 2026-09-20 | [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) | SPIKE V12：主高点＋局部回踩确认 |  |
 | 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
@@ -467,6 +469,7 @@
 | — | [`p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md`](p1_15m_ma_launch_t3_yolo10000_imgsz1280_20260827.md) | 15m 六均线密集启动 t-3：原图宽度 imgsz=1280 重训报告 | 本轮直接使用上一轮已经验收过的 **36,812 张 1280×742 PNG** 和对应 YOLO 标签；没有重渲染、 |
 | — | [`p1_btc_bb_stoch_holdout_acceptance_20260917.md`](p1_btc_bb_stoch_holdout_acceptance_20260917.md) | BTC 5m · BB × Stoch 最终验收（holdout） |  |
 | — | [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) | BTC 5m · BB × Stoch 315 组参数搜索 | 调参在开发段把这条规则从亏变成赚，然后在复查段全部崩掉，而且比不调参更差。 |
+| — | [`p1_btc_rsi1h_sixma5m_20260920.md`](p1_btc_rsi1h_sixma5m_20260920.md) | BTC 永续：1h RSI 大菱形 → 5m 六均线确认，三年回测 | 结论：Owner 确认的固定规则在 OKX BTC-USDT-SWAP 三年样本中未通过盈利验证。356 笔已平仓，91 笔止盈、265 笔止损；毛收益 +8R，扣固定往返 0.2% 后 −97.0501R。前两年、最后一年、多头和空头均净亏。六线确认较直接入场改善固定风险单位结果，但平均价格... |
 | — | [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) | BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m | 规则一个字没改，直接搬到 BTC 5m、BTC 1m、XAU 1m——没有任何一组做到费用后为正。 |
 | — | [`p1_btcusdtp_genuine_flow_coverage_v34_20260907.md`](p1_btcusdtp_genuine_flow_coverage_v34_20260907.md) | Genuine Flow Coverage · V34 |  |
 | — | [`p1_btcusdtp_hourly_background_support_v23_20260907.md`](p1_btcusdtp_hourly_background_support_v23_20260907.md) | Entry Comparison Coverage | V23 已实际完成。原 251 个 BTCUSDT.P 小时 K1 入口全部保留，**248 个能各配到三个不重复的背景对照，覆盖率 98.80%**，超过事先规定的至少 226/251 门槛。分配共 744 个控制时间，另外三个入口因事前波动桶未知而没有配对；未知供给没有写成零，也没有删除母信号。 |
@@ -532,6 +535,8 @@
 | — | [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) | SPIKE 市场广度：冻结候选的匹配随机对照整合报告 | 冻结的 `joint_delta_60m > 0` **应拒绝作为统一硬过滤**：6 个 cohort 的 matched 配对差值净R跨组合方向翻转，全部 6 个 paired p 均不显著（最小 p=0.2964），且至少一个 cohort 丢失了原有 ≥10R 候选。此结论只拒绝这条冻结... |
 | — | [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) | SPIKE V7／V8 五条降噪路线：执行与验收报告 | 五条建议已经逐项执行。结果不是“再叠五个过滤条件”，而是把可证实的用途分开： |
 | — | [`p1_spike_pepe_owner_notes_20260910.md`](p1_spike_pepe_owner_notes_20260910.md) | PEPE 4H：Owner 批注与 V4 确认含义核对 |  |
+| — | [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) | SPIKE V12.1 简洁看盘 |  |
+| — | [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) | SPIKE V12.2：保留历史区域，只整理局部重复线 |  |
 | — | [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) | SPIKE V1+ 完整默认配置：两年回测 |  |
 | — | [`p1_spike_v1_triple_exit_20260914.md`](p1_spike_v1_triple_exit_20260914.md) | SPIKE V1 三规则组合退出：逐根回放 |  |
 | — | [`p1_spike_v3_confirmation_gate_20260910.md`](p1_spike_v3_confirmation_gate_20260910.md) | SPIKE V3：确认之后再抑制重复预警 |  |
@@ -562,6 +567,7 @@
 | — | [`p1_spike_v8_noise_filter_20260913.md`](p1_spike_v8_noise_filter_20260913.md) | SPIKE V8：V7 全量信号降噪与冻结规则回放 | V7 共 **132,593 条确认事件**，其中 **107,238 条形成串行交易**，另有 **25,355 条**因同一交易流已有持仓而没有成为新交易。冻结的 V8 门槛保留 **113,295 条确认**、形成 **95,191 条交易，信号总量减少 14.55%**。 |
 | — | [`p1_spike_v8_total2_1h_native_20260914.md`](p1_spike_v8_total2_1h_native_20260914.md) | V8 × TOTAL2 1H：TradingView 原生回测 |  |
 | — | [`p1_spike_v9_asset_exclusions_20260915.md`](p1_spike_v9_asset_exclusions_20260915.md) | 按币种成绩排除：V9 三个固定条件 | 完整账本保留每笔原先的同流、同方向、同时间块、同波动桶随机控制。整币删除时只保留同一实际事件原绑定的控制，没有重抽；只有两边均可评分且符合原时间边界的配对进入统计。全期事后选择也会污染筛选后的控制检验，不将其中较小的 p 值用作筛币验收。 |
+| — | [`p1_spike_v9_htf_sma_20260920.md`](p1_spike_v9_htf_sma_20260920.md) | V9 上级SMA方向过滤：固定29币参数对照 |  |
 | — | [`p1_trendline_v2_tbsl_20260918.md`](p1_trendline_v2_tbsl_20260918.md) | 下降趋势线突破 V2 · 止盈止损网格与多周期回测 | 三个周期全部未通过事前三条标准。没有一组止盈止损参数值得拿去消耗 holdout。 |
 | — | [`p1_useless_multiscale_launch_20260909.md`](p1_useless_multiscale_launch_20260909.md) | SPIKE · USELESS 多周期启动复盘与超级趋势原型 |  |
 | — | [`p1_yolo_owner_annotation_audit_20260908.md`](p1_yolo_owner_annotation_audit_20260908.md) | 你已调整的 72 张图：怎样标平台、怎样看后续 150 根 |  |
@@ -750,6 +756,7 @@
 - [`p1_bico_194r_exit_case_20260910.md`](p1_bico_194r_exit_case_20260910.md) — BICO 194R：最高浮盈与可执行退出
 - [`p1_btc_bb_stoch_holdout_acceptance_20260917.md`](p1_btc_bb_stoch_holdout_acceptance_20260917.md) — BTC 5m · BB × Stoch 最终验收（holdout）
 - [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) — BTC 5m · BB × Stoch 315 组参数搜索
+- [`p1_btc_rsi1h_sixma5m_20260920.md`](p1_btc_rsi1h_sixma5m_20260920.md) — BTC 永续：1h RSI 大菱形 → 5m 六均线确认，三年回测
 - [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) — BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — P1：BTCUSDT.P 15m 多因子共振与特征工程审计（2026-09-04）
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — P1：BTCUSDT.P 15m 趋势接管交易可识别性审计（2026-09-04）
@@ -909,6 +916,10 @@
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) — 突破+spike 逐笔明细 + 抽样 50 张图（框内规则）
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
+- [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
+- [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
+- [`p1_spike_v12_compact_bk_20260920.md`](p1_spike_v12_compact_bk_20260920.md) — V12：ONE 三次突破说明与紧凑样式
+- [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) — SPIKE V12：持线配对、信号显示与截图漏线验收
 - [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) — SPIKE V12：主高点＋局部回踩确认
 - [`p1_spike_v1_eth_stops_20260911.md`](p1_spike_v1_eth_stops_20260911.md) — ETH-USDT-SWAP：原版 SPIKE Burst V1 / V6 的止损敏感性
 - [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) — SPIKE V1+ 完整默认配置：两年回测
@@ -960,6 +971,7 @@
 - [`p1_spike_v9_cost_be2_20260915.md`](p1_spike_v9_cost_be2_20260915.md) — V9 加入净2R后的0.2%保护：同入场与串行回测
 - [`p1_spike_v9_eth_lowtf_20260915.md`](p1_spike_v9_eth_lowtf_20260915.md) — ETH V9 · 3m / 5m 完整历史回测
 - [`p1_spike_v9_full_backtest_20260915.md`](p1_spike_v9_full_backtest_20260915.md) — SPIKE V9 全量回测：优于 V8，但后一年仍亏损
+- [`p1_spike_v9_htf_sma_20260920.md`](p1_spike_v9_htf_sma_20260920.md) — V9 上级SMA方向过滤：固定29币参数对照
 - [`p1_spike_v9_implementation_20260915.md`](p1_spike_v9_implementation_20260915.md) — SPIKE V9：标的、量比与 UTC 周日过滤已实现
 - [`p1_spike_v9_later_year_attribution_20260917.md`](p1_spike_v9_later_year_attribution_20260917.md) — V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m
 - [`p1_spike_v9_v1_comparison_20260915.md`](p1_spike_v9_v1_comparison_20260915.md) — SPIKE V9 与 V1：已有全量结果对读

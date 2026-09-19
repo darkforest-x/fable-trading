@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-rsi1h-sixma5m-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 67411473aa92e14f699d75a20877c7ac1ac0d9ae
+    status: rejected
+    question: Does confirmed hourly Parabolic RSI plus the first strict five-minute six-MA candle make fixed 3R BTC swap entries profitable?
+    single_variable: Direct hourly strong-diamond entry versus waiting for first post-close five-minute body beyond all six close MAs; identical hourly stop, 3R, cost and serial occupancy.
+    result: OKX three years, 564 diamonds, six-MA356closed91wins265losses gross8R net-97.0501R; early-61.3854R late-35.6648R; matched excess0.09163R CI[-0.10358,0.29584],p0.19074. Direct520closed net-289.3644R; six-MA mean price bp worsens.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btc_rsi1h_sixma5m_20260920.md
+    artifacts:
+    - btc-rsi1h-sixma5m-20260920-v1-delivery
+    reuse_allowed: false
+    notes: Owner specified OKX and exact diamond-hour stop. Historical permission rule canceled; no blind validation. Funding and native TV export parity unavailable.84checks; independent source,timing and ledger reviews.1terminal position per arm. No parameter optimization or production change.
   - experiment_id: exp-owner-manual-trading-system-20260916-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 4257eb4c515c780ba529a65ffb637714b510d7a3
