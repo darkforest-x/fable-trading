@@ -99,6 +99,55 @@ def decomposition(table):
     return pd.DataFrame(rows)
 
 
+def plot_summary(monthly, outcomes, path):
+    """Static MD companion: matched monthly means and all-trade outcome counts.
+
+    Two panels, single blue root plus neutrals, direct count labels. Monthly
+    strategy/control bars use the same matched denominator. MFE is explicitly
+    retrospective; no cumulative account-equity plot is implied.
+    """
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.font_manager import FontProperties, fontManager
+
+    font = "/System/Library/Fonts/STHeiti Light.ttc"
+    fontManager.addfont(font)
+    plt.rcParams.update({"font.family": FontProperties(fname=font).get_name(), "axes.unicode_minus": False,
+                         "font.size": 12, "axes.spines.top": False, "axes.spines.right": False})
+    fig, axes = plt.subplots(2, 1, figsize=(14, 9.5), gridspec_kw={"height_ratios": [1.2, 1]})
+    blue, grey, ink = "#426B9B", "#C4C9CF", "#333B44"
+    fig.patch.set_facecolor("#FFFFFF")
+    x = np.arange(len(monthly)); ax = axes[0]
+    ax.bar(x, monthly.paired_actual_r, color=blue, width=.62, label="策略：配对成交")
+    ax.plot(x, monthly.random_r, color=ink, linestyle="--", marker="o", markersize=4, label="同币同月同波动随机入场")
+    ax.axhline(0, color=ink, linewidth=.9)
+    ax.set_xticks(x); ax.set_xticklabels(monthly.month, rotation=45, ha="right", fontsize=10)
+    ax.set_ylabel("每笔平均净 R")
+    ax.set_title("1h 月度净收益与匹配随机对照", loc="left", fontsize=17, pad=14)
+    ax.legend(frameon=False, loc="upper left", fontsize=11)
+    ax.grid(axis="y", color="#E6E8EB", linewidth=.7); ax.set_axisbelow(True)
+    ax.set_xlim(-.7, len(monthly)-.3)
+    ax = axes[1]
+    order = ["<0.5", "0.5-1", "1-2", "2-3", "3-5", ">=5"]
+    pivot = outcomes.pivot(index="mfe_bucket", columns="won", values="n").reindex(order).fillna(0)
+    loss, wins = pivot[0.], pivot[1.]
+    y = np.arange(len(order))
+    ax.barh(y, loss, color=grey, label="最终亏损", height=.64)
+    ax.barh(y, wins, left=loss, color=blue, label="最终盈利", height=.64)
+    for k, (a, b) in enumerate(zip(loss, wins)):
+        ax.text(a+b+9, k, f"{int(a)} 亏 / {int(b)} 盈", va="center", fontsize=11, color=ink)
+    ax.set_yticks(y); ax.set_yticklabels(["不足 0.5R", "0.5–1R", "1–2R", "2–3R", "3–5R", "至少 5R"])
+    ax.invert_yaxis(); ax.set_xlim(0, 875); ax.set_xlabel("交易笔数（全部 2,199 笔已平仓）")
+    ax.set_title("持仓期间记录的最大浮盈与最终盈亏", loc="left", fontsize=17, pad=14)
+    ax.legend(frameon=False, loc="lower right", fontsize=11)
+    ax.grid(axis="x", color="#E6E8EB", linewidth=.7); ax.set_axisbelow(True)
+    fig.text(.06, .026, "数据：2024年9月–2026年4月，1h 框内首破新开多仓；往返成本0.2%。月图按信号收盘月归属。", fontsize=11, color=ink)
+    fig.text(.06, .008, "最大浮盈属于事后路径，不是入场特征；原引擎不更新退出根的浮盈。图中收益不是账户净值。", fontsize=11, color=ink)
+    fig.tight_layout(rect=[.015, .045, .99, 1], h_pad=2.4)
+    fig.savefig(path, dpi=160, facecolor=fig.get_facecolor()); plt.close(fig)
+
+
 def main():
     assert _committed((Path(__file__), EXP / "PROJECT_PLAN.md")), "Commit builder and plan before producing statistics."
     manifest = json.loads((SOURCE / "delivery_manifest.json").read_text())
@@ -168,6 +217,7 @@ def main():
         tables[f"variants_{name}"] = pd.read_csv(STATS / f"{name}.csv").query("timeframe == '1h'")
     for name, table in tables.items():
         table.to_csv(out / f"{name}.csv", index=False)
+    plot_summary(by_month, outcomes, out / "one_hour_summary.png")
     (out / "parent_comparison.json").write_text(json.dumps(parent, indent=2) + "\n")
     receipt = {"source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                "script_sha256": sha(Path(__file__)), "plan_sha256": sha(EXP / "PROJECT_PLAN.md"),
