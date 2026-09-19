@@ -38,6 +38,13 @@ def one(args):
     output.mkdir(parents=True, exist_ok=True)
     for key in ("trades", "statuses", "controls"):
         table = result.get(key, pd.DataFrame())
+        if not len(table.columns):
+            schemas = {
+                "trades": [*study.TRADE_KEEP, "status", "arm", "trade_key", "symbol", "timeframe"],
+                "statuses": ["arm", "signal_i", "status", "symbol", "timeframe"],
+                "controls": ["trade_key", "arm", "matched", "reason"],
+            }
+            table = pd.DataFrame(columns=schemas[key])
         table.to_csv(output / f"{key}.csv", index=False)
     chart, daily = v11.bars_for(base, 240), v11.bars_for(base, 1440)
     coverage = {"symbol": symbol, "loaded_first_5m": str(base.index.min()),
