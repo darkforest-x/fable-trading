@@ -295,10 +295,30 @@ def main():
         for r in group.to_dict("records"):
             texts.append(f"## {r['review_id']} · {r['timeframe']} · {book.bj(r['entry_time'])} 北京\n\n**{r['category']}**\n\n{r['exit_explanation']}\n\n{r['observations']}\n\n待验证：{r['research_questions']}\n\n唯一键：`{r['trade_key']}`\n")
         (docs/f"{symbol}.md").write_text("\n".join(texts))
-    summary=reviews.groupby(["timeframe","category"]).agg(n=("trade_key","size"),sum_r=("net_r","sum")).reset_index()
+    summary=reviews.groupby(["timeframe","category"]).agg(n=("trade_key","size"),sum_r=("net_r",lambda s:s.sum(min_count=1))).reset_index()
     summary.to_csv(EXP/"categories.csv",index=False)
+    diagnostics={}
+    for name,group in [("all",reviews)]+list(reviews.groupby("timeframe")):
+        closed=group.loc[group.status.eq("closed")]
+        loss=closed.loc[closed.net_r.lt(0)]
+        win=closed.loc[closed.net_r.gt(0)]
+        diagnostics[name]={"entries":len(group),"closed":len(closed),"wins":len(win),"losses":len(loss),
+            "loss_mfe_ge1":int(loss.mfe_lower_r.ge(1).sum()),"loss_mfe_ge2":int(loss.mfe_lower_r.ge(2).sum()),
+            "closed_mfe_ge1":int(closed.mfe_lower_r.ge(1).sum()),"closed_mfe_ge2":int(closed.mfe_lower_r.ge(2).sum()),
+            "loss_categories":{k:int(v) for k,v in loss.category.value_counts().items()},
+            "loss_post48_complete":int(loss.post_exit48_complete.sum()),
+            "loss_post48_ge1":int((loss.post_exit48_complete & loss.post_exit48_max_r.ge(1)).sum()),
+            "loss_parent_mfe_ge1":int(loss.v9_mfe_r.ge(1).sum()),"loss_parent_net_win":int(loss.v9_net_r.gt(0).sum()),
+            "loss_price_premium_positive":int(loss.entry_premium_pct.gt(0).sum()),
+            "win_price_premium_positive":int(win.entry_premium_pct.gt(0).sum()),
+            "loss_above_all_ma":int(loss.above_all_ma.sum()),"loss_momentum_ok":int(loss.momentum_ok.sum()),
+            "loss_median_wait_bars":float(loss.bars_after_v9.median()),"win_median_wait_bars":float(win.bars_after_v9.median()),
+            "median_cost_r":float(closed.cost_r.median()),"loss_cost_only":int(loss.gross_r.gt(0).sum())}
+    (EXP/"diagnostic_summary.json").write_text(json.dumps(diagnostics,ensure_ascii=False,indent=2)+"\n")
+    owned=[EXP/name for name in ("PROJECT_PLAN.md","identity.json","reviews.csv","逐笔分析570笔.csv","categories.csv","diagnostic_summary.json")]
+    owned += sorted((EXP/"streams").rglob("*.csv"))+sorted((EXP/"streams").rglob("*.gz"))+sorted((EXP/"by_symbol").glob("*.md"))
     completion={"rows":570,"symbols":29,"joint_trade_parity":570,"protection_trace_parity":570,
-                "inputs":done,"outputs":{str(p):study.digest(p) for p in sorted(EXP.rglob("*")) if p.is_file() and p.name!="completion.json"},
+                "inputs":done,"outputs":{str(p):study.digest(p) for p in owned},
                 "training_eligible":False,"production_eligible":False}
     (EXP/"completion.json").write_text(json.dumps(completion,ensure_ascii=False,indent=2)+"\n")
     print(summary.to_string(index=False))
