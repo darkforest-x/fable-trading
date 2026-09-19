@@ -1494,8 +1494,8 @@ if barstate.isconfirmed and v10Enabled
         int px = bar_index - v10Right
         bool sameSegment = px - v10Left >= v10SegmentStart
 
-        if sameSegment and not na(f_v12_atrAt(pivotBar))
-            float pivotScale = math.max(f_v12_atrAt(pivotBar), syminfo.mintick)
+        if sameSegment and not na(f_v12_atrAt(px))
+            float pivotScale = math.max(f_v12_atrAt(px), syminfo.mintick)
 
             if v10UseRaw and not na(v10RawPivot)
                 f_v10_addPivot(v10Xs, v10Ps, v10As, px, v10RawPivot, pivotScale)
