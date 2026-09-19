@@ -9999,3 +9999,19 @@ experiments:
     - spike-v12-1-focus-view-20260920-delivery
     reuse_allowed: false
     notes: No entry/risk/cost/alert-condition changes. V12 preserved byte-for-byte;new V12.1 source and private script. No HTML or financial claim.
+
+  - experiment_id: exp-spike-v12-2-history-regions-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4ab18ee2e0
+    status: inconclusive
+    question: Preserve faded historical trendlines while limiting only repeated lines around one A-anchor region.
+    single_variable: Owner correction to presentation;replace unauthorized V12.1 global cap with local regional grouping and muted history.
+    result: 55 checks and Luna Max review pass;new private TV revision1 compiled;BTC15m wide-view local tidy on-off-on verified with historical regions retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_2_history_regions_20260920.md
+    artifacts:
+    - spike-v12-2-history-regions-20260920-delivery
+    reuse_allowed: false
+    notes: V12 and V12.1 preserved;no detection,pairing,risk,cost or production changes. User rejected V12.1 global three-line UX despite its functional checks. No HTML.

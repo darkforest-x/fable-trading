@@ -237,6 +237,7 @@ md 源文件必须包含：
 
 - Every delivered change increments the minor version (V12 → V12.1 → V12.2).
 - Preserve the prior version's source file. Create a new versioned Pine file and a new private TradingView script; do not overwrite the previous script.
+- Trendline display must retain historical regions. Reduce local overlap and fade historical lines; do not substitute an unrequested chart-wide three-line limit (owner correction, 2026-09-20).
 
 ## learning law
 
