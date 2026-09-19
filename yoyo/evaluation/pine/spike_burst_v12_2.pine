@@ -2081,6 +2081,12 @@ f_v11_trimAbc(array<V10SignalDrawing> history, int keep) =>
                 removed.erase()
             regionCount -= 1
 
+    // Apply resource capacity only after local replacement; never evict another
+    // region merely to insert a fourth line that will immediately be removed.
+    while array.size(history) > v10JointKeep
+        V10SignalDrawing oldest = array.shift(history)
+        oldest.erase()
+
     int cut = array.size(history) - keep - 1
     if cut >= 0
         for n = 0 to cut
@@ -2124,10 +2130,7 @@ f_v12_mergeBreak(array<V10SignalDrawing> history, int context, int pivotB, float
 var array<V10SignalDrawing> v10SignalHistory = array.new<V10SignalDrawing>()
 
 if v10JointVisible and not na(v112ChartLine)
-    // 先整组删除旧记录，再创建新记录，避免触发对象垃圾回收。
-    while array.size(v10SignalHistory) >= v10JointKeep
-        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-        oldestSignal.erase()
+    // Local replacement precedes the global resource limit inside trimAbc.
 
     // 冻结原A/B斜率，穿过联合确认当根继续向右延伸。
     array<chart.point> eventPoints = array.new<chart.point>()
@@ -2173,9 +2176,6 @@ if v10JointVisible and not na(v112ChartLine)
 
 // 上级周期突破 + 本图SPIKE：同样整组保留线、标签与A/B/C。
 if v11HtfJointVisible and not na(v12JointAx) and not na(v12JointBx) and v12JointBx != v12JointAx
-    while array.size(v10SignalHistory) >= v10JointKeep
-        V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-        oldestSignal.erase()
 
     int htfEnd = time + v11ExtendBars * v11BarMs
     polyline htfTrend = polyline.new(f_v11_timePoints(v12JointAx, v12JointAp, v12JointBx, v12JointBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=color.new(v11HtfColor, v122JointFade), line_width=v10JointLineWidth, force_overlay=true)
@@ -2200,9 +2200,6 @@ if not v10OnlyJoint and v10Enabled and v10ShowBreak and v10BreakEvent and not v1
     string tip = "本周期 bk · #" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + "\n确认收盘 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(time[bar_index - item.ax], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.ap, format.mintick) + "\nB " + str.format_time(time[bar_index - item.bx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.bp, format.mintick) + "\nC " + str.format_time(time[bar_index - item.cx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.cp, format.mintick)
     bool merged = f_v12_mergeBreak(v10SignalHistory, 1, item.bx, item.bp, bar_index, tip)
     if not merged
-        while array.size(v10SignalHistory) >= v10JointKeep
-            V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-            oldestSignal.erase()
         int endBar = bar_index + v11ExtendBars
         array<chart.point> points = array.new<chart.point>()
         if v10Log
@@ -2222,9 +2219,6 @@ if not v10OnlyJoint and v11HtfOn and v11ShowHtfBreak and v11HtfBreakKnown and no
     string tip = v11HtfText + " bk · 上级K已收盘，本图可见 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(v11HtfAxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfAp, format.mintick) + "\nB " + str.format_time(v11HtfBxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfBp, format.mintick) + "\nC " + str.format_time(v11HtfCxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfCp, format.mintick)
     bool merged = f_v12_mergeBreak(v10SignalHistory, 2, v11HtfBxT, v11HtfBp, bar_index, tip)
     if not merged
-        while array.size(v10SignalHistory) >= v10JointKeep
-            V10SignalDrawing oldestSignal = array.shift(v10SignalHistory)
-            oldestSignal.erase()
         polyline trend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time + v11ExtendBars * v11BarMs), xloc=xloc.bar_time, line_color=color.new(v11HtfColor, v122HistoryFade), line_width=v10LineWidth, force_overlay=true)
         string caption = "bk " + v11HtfText
         label tag = label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * (v10TagGap + (v10BreakEvent ? 0.6 : 0))), caption, style=label.style_none, textcolor=color.new(v11HtfColor, 25), size=size.tiny, tooltip=tip, force_overlay=true)

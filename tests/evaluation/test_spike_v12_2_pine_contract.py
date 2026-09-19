@@ -28,3 +28,9 @@ def test_only_display_inputs_changed():
     changed = {key for key in old if old[key] != new.get(key)}
     assert changed == {"v10JointKeep", "v11ExtendBars"}
     assert set(new) - set(old) == {"v122LocalTidy", "v122RegionKeep", "v122RegionGap", "v122HistoryFade", "v122JointFade"}
+
+
+def test_region_replacement_precedes_resource_eviction():
+    trim = section(NEW, "f_v11_trimAbc(", "// Presentation only:")
+    assert trim.index("while regionCount > v122RegionKeep") < trim.index("while array.size(history) > v10JointKeep")
+    assert "while array.size(v10SignalHistory) >= v10JointKeep" not in NEW
