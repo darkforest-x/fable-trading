@@ -1,0 +1,53 @@
+{
+  "selection": "按机制解释选取，非随机、非比例代表；6亏损+2盈利，对应15m/1h/4h",
+  "examples": [
+    {
+      "trade_key": "binance_um:PENDLEUSDT:1h:box_any:15516",
+      "review_id": "T531",
+      "title": "方向启动较早，突破入场已贵20.18%",
+      "message": "等待33根后才入场；父V9事后盈利，本笔却几乎未再推进。值得检验确认时机，不能把父V9收益当可提前挑中的策略。"
+    },
+    {
+      "trade_key": "binance_um:ZENUSDT:1h:box_any:6819",
+      "review_id": "T447",
+      "title": "盘中浮盈4.44R，追踪仍未激活",
+      "message": "最高存活收盘只有1.28R。原规则要求收盘达到2R；尖刺高点并不触发追踪。"
+    },
+    {
+      "trade_key": "binance_um:ETHUSDT:15m:box_any:29561",
+      "review_id": "T206",
+      "title": "追踪已激活，保护仍在成本线下",
+      "message": "曾收盘超过3R，但4ATR距离仍宽；有效保护低于入场，叠加成本后亏损。激活追踪不等于保本。"
+    },
+    {
+      "trade_key": "binance_um:BTCUSDT:15m:box_any:22776",
+      "review_id": "T150",
+      "title": "止损1R，扣费却亏1.76R",
+      "message": "初始风险只有约0.262%；20bp成本相当于0.763R。仅看命中方向，会忽略窄风险单位里的高成本。"
+    },
+    {
+      "trade_key": "binance_um:BTCUSDT:4h:box_any:2728",
+      "review_id": "T545",
+      "title": "入场当根止损，随后继续走弱",
+      "message": "5分钟顺序审计确认止损前曾到约0.51R，仍未到1R。原账本MFE为0是退出根不更新造成的。"
+    },
+    {
+      "trade_key": "binance_um:APTUSDT:4h:box_any:3323",
+      "review_id": "T552",
+      "title": "这笔亏损来自反向确认，不是止损",
+      "message": "曾浮盈2.28R，最终因反向信号在下一开盘退出。需要分别评价反向退出与价格止损。"
+    },
+    {
+      "trade_key": "binance_um:DASHUSDT:4h:box_any:1860",
+      "review_id": "T544",
+      "title": "盈利对照：趋势延续带来32.49R",
+      "message": "这笔展示宽追踪保留大趋势的价值。若为挽救回吐单而提前退出，也必须计入失去这类赢家的代价。"
+    },
+    {
+      "trade_key": "binance_um:AEROUSDT:1h:box_any:3340",
+      "review_id": "T453",
+      "title": "1h盈利对照：追踪最终锁住8.38R",
+      "message": "同样的收盘2R激活、4ATR追踪，在持续推进的行情中有效锁盈；不能只从亏损单判断退出机制。"
+    }
+  ]
+}
