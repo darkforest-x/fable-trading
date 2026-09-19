@@ -31522,3 +31522,18 @@ artifacts:
     production_eligible: false
     notes: 2199-row Chinese trade detail, complete English ledger, all subgroup/control/tail tables, static PNG, Markdown and Luna Max reconciliation.
       Legacy holdout vocabulary describes archive dates only, not access restrictions. No account-return inference or new trading rule.
+
+  - artifact_id: spike-v112-selected-counts-20260919-delivery
+    artifact_type: manifest
+    role: selected_symbol_entry_counts_and_four_hour_replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: aaacb029f3b55dcfb67285be98aa290ccf0e3ccb
+    source_path: experiments/active/exp-spike-v112-selected-counts-20260919-v1/completion.json
+    sha256: 50623880782c948916d671c36b61e34ea822284ee6638aca87511203501f3fc1
+    size_bytes: 20654
+    storage_uri: repo://experiments/active/exp-spike-v112-selected-counts-20260919-v1/completion.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Receipt binds 29 streams, identity, coverage, counts and 570-row selected ledger. Historical date vocabulary only; owner removed access
+      restrictions. Counts are not strategy acceptance.

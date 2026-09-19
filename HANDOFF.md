@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：Owner选定29币，三个周期共570笔入场（2026-09-19）
+
+- Owner列出30币后明确先排除ARY；保留BTC ETH SOL PEPE WIF ZEC HYPE USELESS MUBARAK UNI PUMP ARB AR BOME ENA ONE PIEVERSE AAVE NEAR ZEN DASH PENDLE XTZ JUP AERO OP FIL APT API3。PEPE对应1000PEPEUSDT。
+- 相同V11.2框内首破与原2024-09-10至2026-05-01窗：15m 409笔、1h 122笔、4h 39笔；568笔已平仓，PEPE/XTZ的4h各1笔数据边界未平仓。4h是本轮补算，29币全部完成；BTC1h适配器逐笔4单复现。
+- 逐币数量/完整交易/覆盖见`experiments/active/exp-spike-v112-selected-counts-20260919-v1/`；解释见`analysis/p1_spike_v112_selected_counts_20260919.md`。新币覆盖较短，日线上级预热实际根数逐币披露。仅数量盘点，无盈利或策略接受结论。
+
 ## 最新：V11.2 1h完整账本诊断（2026-09-19）
 
 - Owner要求1h详细分析并用Luna Max子代理；已独立复核。原run_v2按SHA读取，2,199已闭合、2条边界未闭合；556币，全期胜率27.83%，−0.0921R/−62.56bp每笔。

@@ -1,0 +1,10 @@
+{
+  "source_commit": "e7eacf56bd",
+  "replays_completed": 29,
+  "error": "pandas.errors.EmptyDataError: No columns to parse from file",
+  "cause": "Valid zero-trade streams serialized without CSV column headers; aggregation failed after all replays completed.",
+  "empty_trade_streams": [
+    "PUMPUSDT"
+  ],
+  "fix": "Preserve schemas for empty stream output tables; no trading logic change."
+}

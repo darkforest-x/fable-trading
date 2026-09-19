@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **570** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **571** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -16,6 +16,7 @@
 | 2026-09-19 | [`p1_spike_v112_failure_diagnosis_20260919.md`](p1_spike_v112_failure_diagnosis_20260919.md) | SPIKE V11.2 失败交易诊断：先查入场有效性，再做局部参数检验 | 结论：现有数据足够提出并排序可检验的逻辑优化假设，不足以直接宣布某个参数最优。当前优先排查入场当根是否仍有支撑和推进，不能只围绕止盈参数优化。** 本次只对已有完整成交账本做诊断；未修改规则、未搜索参数、未重跑策略。 |
 | 2026-09-19 | [`p1_spike_v112_manage_20260919.md`](p1_spike_v112_manage_20260919.md) | V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用 |  |
 | 2026-09-19 | [`p1_spike_v112_sample_direction_20260919.md`](p1_spike_v112_sample_direction_20260919.md) | SPIKE 抽样 50 笔：方向、入场位置与利润兑现 | 结论：Owner 看到的“走势有向上机会”有数据支持，但需要明确起点。早期 V9 持仓中有 34/50 笔到过 1R；等待联合突破再入场只有 24/50，最终盈利 13/50。既有入场延迟，也有先止损后启动、以及盘中高点未触发收盘保护的问题。不能把所有亏损归为方向错，也不能据此说只改止盈就能盈利。 |
+| 2026-09-19 | [`p1_spike_v112_selected_counts_20260919.md`](p1_spike_v112_selected_counts_20260919.md) | V11.2：Owner选定29币的15m、1h、4h交易数量 | 结论：排除Owner明确暂不研究的ARY后，29币共570笔入场：15m 409笔，1h 122笔，4h 39笔。其中568笔已平仓，4h的PEPE和XTZ各有1笔截至数据边界尚未平仓。 |
 | 2026-09-19 | [`p1_spike_v112_support_20260919.md`](p1_spike_v112_support_20260919.md) | SPIKE V11.2 六均线支撑单变量完整回放 | 结论：两个周期均未通过本轮研究门，这项过滤不能据此升级为默认交易条件。 |
 | 2026-09-19 | [`p1_spike_v112_tv_parity_20260919.md`](p1_spike_v112_tv_parity_20260919.md) | SPIKE V11.2：看板止损与 TradingView 缺信号核查 | 结论：GAS 已查到实际输入 K 线不一致，足以造成母 V9 和联合信号差异。“启用前”只是监控激活前的历史回算分类，不能解释全部缺信号，也不是 TV 一致性认证。TSLA、LIGHT 尚未定案；BTC 首次核查时 TV 选中 15m，卡片是 30m，尚不能直接比较。 |
 | 2026-09-19 | [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) | SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4 |  |
@@ -893,6 +894,7 @@
 - [`p1_spike_v112_failure_diagnosis_20260919.md`](p1_spike_v112_failure_diagnosis_20260919.md) — SPIKE V11.2 失败交易诊断：先查入场有效性，再做局部参数检验
 - [`p1_spike_v112_manage_20260919.md`](p1_spike_v112_manage_20260919.md) — V9 多头用「突破」管理持仓：加仓变差；没突破就走只在下跌段有用
 - [`p1_spike_v112_sample_direction_20260919.md`](p1_spike_v112_sample_direction_20260919.md) — SPIKE 抽样 50 笔：方向、入场位置与利润兑现
+- [`p1_spike_v112_selected_counts_20260919.md`](p1_spike_v112_selected_counts_20260919.md) — V11.2：Owner选定29币的15m、1h、4h交易数量
 - [`p1_spike_v112_support_20260919.md`](p1_spike_v112_support_20260919.md) — SPIKE V11.2 六均线支撑单变量完整回放
 - [`p1_spike_v112_tv_parity_20260919.md`](p1_spike_v112_tv_parity_20260919.md) — SPIKE V11.2：看板止损与 TradingView 缺信号核查
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
