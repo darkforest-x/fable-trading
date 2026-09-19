@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-rsi-fifth-color-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cb13985eb6e7a6d55f1615e3f74f58debd308f61
+    status: active
+    question: Does a fifth same-color RSI entry with no stop and opposite strong-diamond exit work on OKX BTC 1h and 4h?
+    single_variable: Owner requested a new rule bundle replacing six-MA and fixed3R; timeframe arms remain separate. Counting object and gradual exit schedule await clarification.
+    result: Signal-only preparation committed;79 focused/source/boundary checks passed. No new strategy returns scored while entry count and exit policy remain undefined.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Plan in experiments/active/exp-btc-rsi-fifth-color-20260920-v1/PROJECT_PLAN.md; frozen prior OKX source and20bp cost. No stop implies R undefined. Notion3e08856479af81169602db2278ae57d7 marked planned.
   - experiment_id: exp-ma-morphology-reuse-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e06b10d6c0bf50d567a265939f90f7ef27815c80
