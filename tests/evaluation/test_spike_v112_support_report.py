@@ -5,7 +5,7 @@ import json
 import pytest
 import pandas as pd
 
-from yoyo.evaluation.spike_v112_support_report import validated_tables, validate_control_keys
+from yoyo.evaluation.spike_v112_support_report import validated_tables, validate_control_keys, strict_booleans
 
 
 def test_report_rejects_extra_stream_before_loading(tmp_path):
@@ -29,3 +29,10 @@ def test_report_rejects_missing_control_on_treatment_only_trade():
     with pytest.raises(ValueError, match="coverage mismatch"):
         validate_control_keys(trades, trades.iloc[:1])
     validate_control_keys(trades, trades.copy())
+
+
+def test_empty_csv_object_promotion_does_not_turn_negation_into_negative_counts():
+    raw = pd.Series([True, False, True], dtype=object)
+    assert int((~strict_booleans(raw)).sum()) == 1
+    with pytest.raises(ValueError, match="invalid boolean"):
+        strict_booleans(pd.Series([True, None], dtype=object))

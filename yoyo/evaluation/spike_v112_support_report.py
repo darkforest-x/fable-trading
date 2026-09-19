@@ -61,6 +61,13 @@ def validate_control_keys(trades: pd.DataFrame, controls: pd.DataFrame) -> None:
         raise ValueError("trade/control key coverage mismatch")
 
 
+def strict_booleans(values: pd.Series) -> pd.Series:
+    """Empty symbol CSVs can promote boolean concatenations to object dtype."""
+    if not values.isin([True, False]).all():
+        raise ValueError(f"missing or invalid boolean: {values.name}")
+    return values.astype(bool)
+
+
 def compare(left: pd.DataFrame, right: pd.DataFrame, fields: list[str], name: str, *, same_keys: bool = True) -> dict:
     joined = left[["trade_key", *fields]].merge(right[["trade_key", *fields]], on="trade_key", how="outer",
                                                suffixes=("_a", "_b"), indicator=True, validate="one_to_one")
@@ -90,6 +97,8 @@ def main(run: Path, out: Path) -> None:
     assert manifest["complete"] and manifest["symbols"] == 638 and not manifest["failures"], manifest
     t, s, c, d = validated_tables(run, manifest)
     validate_control_keys(t, c)
+    c["matched"] = strict_booleans(c.matched)
+    d["support_pass"] = strict_booleans(d.support_pass)
     t, s, d = dates(t), dates(s), dates(d)
     for col in ("entry_time", "exit_time"):
         t[col] = pd.to_datetime(t[col], utc=True, format="mixed")
