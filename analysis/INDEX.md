@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **575** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **576** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -13,6 +13,7 @@
 | 2026-09-20 | [`p1_spike_v112_entry_extension_20260920.md`](p1_spike_v112_entry_extension_20260920.md) | V11.2：限制入场前价格推进，三个周期均未通过研究筛查 | 结论：固定29币，只试一个因果入场门——突破收盘相对父V9收盘的推进，不超过父信号收盘到原止损的一份距离。15m和1h全期净R从负转正，但不足以接受此规则：三个周期的全期改善区间都跨0，1h后段仍亏，4h后段更差。保留15m时机线索；拒绝本规则准入，不搜索新阈值，不修改Pine/监控/实盘。 |
 | 2026-09-20 | [`p1_spike_v112_one_line_audit_20260920.md`](p1_spike_v112_one_line_audit_20260920.md) | V11.2：ONE 15m白色下降线卡在第三个独立高点 | 结论：按当前默认线性/双轨规则和本地同段OKX数据，这条图示线首先卡在建线。第三次贴线虽很准，但不被12左/8右的pivot定义承认为独立高点，且相邻间隔只有7根，低于24根。另一个独立问题是1h已出现突破时，15m没有开放V9多头参考框，因此不产生框内联合。未改脚本或参数。 |
 | 2026-09-20 | [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) | V11.2：29币570笔逐笔复盘与8张行情图 | 结论：570次入场全部重放并生成逐笔说明，568笔已平仓、187盈、381亏，2笔边界仍持仓。381笔亏损里127笔曾到1R、33笔曾到2R；“先有明显浮盈再回吐”真实存在，但不能解释多数亏单。最大的亏损类别是未到1R便价格止损，共234笔。8张图按机制选取，另有29份逐币明细和完整中文CSV。 |
+| 2026-09-20 | [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) | SPIKE V12：主高点＋局部回踩确认 |  |
 | 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
 | 2026-09-19 | [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) | SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法 | 结论：单独限制入场时效、沿用父 V9 止损、改用盘中高点激活原追踪，均未在 15m 或 1h 通过预先设定的研究门。15m 的 6 根时效限制有改善线索，但区间跨零、后段仍亏；统一放宽止损或提前追踪不能据此采用。没有搜索最优参数，没有修改 Pine、监控、默认参数或实盘。 |
@@ -908,6 +909,7 @@
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) — 突破+spike 逐笔明细 + 抽样 50 张图（框内规则）
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
+- [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) — SPIKE V12：主高点＋局部回踩确认
 - [`p1_spike_v1_eth_stops_20260911.md`](p1_spike_v1_eth_stops_20260911.md) — ETH-USDT-SWAP：原版 SPIKE Burst V1 / V6 的止损敏感性
 - [`p1_spike_v1_plus_backtest_20260912.md`](p1_spike_v1_plus_backtest_20260912.md) — SPIKE V1+ 完整默认配置：两年回测
 - [`p1_spike_v1_replay_ledger_link_20260911.md`](p1_spike_v1_replay_ledger_link_20260911.md) — SPIKE V1 回放记录与 v2 覆盖账本逐笔关联

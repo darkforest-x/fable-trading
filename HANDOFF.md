@@ -1,5 +1,12 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：SPIKE V12 已识别 ONE 局部回踩线，原生回放通过（2026-09-20）
+
+- 新文件 `yoyo/evaluation/pine/spike_burst_v12.pine` 保留原主要三点族，新增A/B主点＋left2/right2局部C；本图与上级同步接入。V11.2源文件、V9/风险/成本及生产监控未改。
+- ONE目标A09-15 12:45/B09-16 17:45/C19:30，Python与TV原生均20:15建线、09-17 02:30收盘突破；当时无V9多头框，所以只有单独突破。TV正式私有脚本版本7已保存、编译运行；诊断实例移除，回放已退出。
+- 原生验收发现条件嵌套校验内派生body历史与同offset原始O/C不一致。V12修为原始OHLC实体＋每bar ATR快照，阈值不变；另把time历史缓冲扩大到3100覆盖极限输入。不能再称关闭辅助族后与旧Pine执行逐信号完全一致。
+- 37测试通过、真实ONE8前缀一致；辅助参考1499根17线12突破不是合并Pine交易数。Luna Max实现参考及审查，主代理完成原生验证。报告 `analysis/p1_spike_v12_local_touch_20260920.md`；产物 `experiments/active/exp-spike-v12-local-touch-20260920-v1/`；Notion `3e08856479af817fb953ea3b3f8d2531`。仅单案例功能通过，跨币误报/收益与完整parity未验证，production/training=false，无HTML。
+
 ## 最新：ONE15m截图未识别的两层门已定位（2026-09-20）
 
 - 以截图明显A9/15 12:45 .0007039、B9/16 17:45 .0006518推定白线，C19:30 .0006486距线仅.0143ATR；但B-C仅7根<24，C左12根包含更高B，raw/soft都不认pivot。卡在建线，不是贴线误差大。单改min_gap仍会被pivot定义挡住。

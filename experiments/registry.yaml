@@ -9931,3 +9931,20 @@ experiments:
     - spike-v112-one-line-audit-20260920-delivery
     notes: Luna Max verified exact C/B indices and boxes. Geometry anchors inferred from screenshot, not exported TV drawings; one OHLC match is not full feed/settings
       parity. Diagnosis completed but broad TV parity and revised shape rule remain unvalidated. No parameter or live changes.
+  - experiment_id: exp-spike-v12-local-touch-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 46c3b6e2f57793f92c99aee291492756dd5a0229
+    status: inconclusive
+    question: Recognize ONE descending line with two major pivots plus causal local C in SPIKE V12.
+    single_variable: Add local-touch structural family; native validation separately required derived-history access correction, no financial parameter experiment.
+    result: 37 tests and 8 ONE prefixes pass; native V12 builds target at Sep16 20:15 and breaks Sep17 02:30; no V9 long box means standalone break. Native
+      derived-body history mismatch fixed with raw OHLC and unconditional ATR snapshots. Recognition accepted for case; broad parity and economics untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_local_touch_20260920.md
+    artifacts:
+    - spike-v12-local-touch-20260920-delivery
+    reuse_allowed: false
+    notes: V11.2 and production untouched. 17 lines/12 breaks are auxiliary reference only, not merged signal or trade totals. No HTML per owner. Private
+      TV version7 saved and native replay verified.
