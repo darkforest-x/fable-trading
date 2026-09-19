@@ -14,6 +14,23 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-rsi1h-sixma5m-short-only-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bc2063abe3df10d72136b5a58d09353cd0694fb9
+    status: rejected
+    question: Does disabling long entries improve frozen BTC RSI1h six-MA5m strategy after releasing long occupancy?
+    single_variable: Disable long entry admission only; retain both diamond events, original stop3R,20bp cost, source and serial execution.
+    result: 194closed50target144stop net-53.4293R;189oldshorts unchanged plus5new net1.2666R. Early-40.9061R late-12.5232R. Matched19400controls
+      excess0.1128R CI[-0.1061,0.3326],p0.1626;reject profitability.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_btc_rsi1h_sixma5m_short_only_20260920.md
+    artifacts:
+    - btc-rsi1h-sixma5m-short-only-20260920-v1-delivery
+    reuse_allowed: false
+    notes: Owner direction-only follow-up; historical restriction canceled. No funding/nativeTV parity or account returns. One terminal open separate;
+      independent semantic and occupancy review passed.
   - experiment_id: exp-btc-rsi1h-sixma5m-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 67411473aa92e14f699d75a20877c7ac1ac0d9ae

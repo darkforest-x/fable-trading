@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-rsi1h-sixma5m-short-only-20260920-v1-delivery
+    artifact_type: manifest
+    role: short_only_entry_occupancy_sensitivity
+    source_repo: darkforest-x/fable-trading
+    source_commit: bc2063abe3df10d72136b5a58d09353cd0694fb9
+    source_path: experiments/active/exp-btc-rsi1h-sixma5m-short-only-20260920-v1/delivery_manifest.json
+    sha256: 3ce624e164900b1ed80a95e48f5a575131ecddabcc3516c028bd9229e21d1847
+    size_bytes: 3512
+    storage_uri: repo://experiments/active/exp-btc-rsi1h-sixma5m-short-only-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Legacy holdout enum has no not-applicable;Owner canceled restriction. Parent data unchanged and allowed.194actual19400controls,5added,negative
+      result. Dense curve and controls local-only.
   - artifact_id: btc-rsi1h-sixma5m-20260920-v1-delivery
     artifact_type: manifest
     role: btc_hourly_rsi_five_minute_six_ma_three_year_backtest

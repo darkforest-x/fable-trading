@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **582** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **584** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-20 | [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) | SPIKE 六均线密集：单项拆分与语义反例 |  |
 | 2026-09-20 | [`p1_spike_v112_entry_extension_20260920.md`](p1_spike_v112_entry_extension_20260920.md) | V11.2：限制入场前价格推进，三个周期均未通过研究筛查 | 结论：固定29币，只试一个因果入场门——突破收盘相对父V9收盘的推进，不超过父信号收盘到原止损的一份距离。15m和1h全期净R从负转正，但不足以接受此规则：三个周期的全期改善区间都跨0，1h后段仍亏，4h后段更差。保留15m时机线索；拒绝本规则准入，不搜索新阈值，不修改Pine/监控/实盘。 |
 | 2026-09-20 | [`p1_spike_v112_one_line_audit_20260920.md`](p1_spike_v112_one_line_audit_20260920.md) | V11.2：ONE 15m白色下降线卡在第三个独立高点 | 结论：按当前默认线性/双轨规则和本地同段OKX数据，这条图示线首先卡在建线。第三次贴线虽很准，但不被12左/8右的pivot定义承认为独立高点，且相邻间隔只有7根，低于24根。另一个独立问题是1h已出现突破时，15m没有开放V9多头参考框，因此不产生框内联合。未改脚本或参数。 |
 | 2026-09-20 | [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) | V11.2：29币570笔逐笔复盘与8张行情图 | 结论：570次入场全部重放并生成逐笔说明，568笔已平仓、187盈、381亏，2笔边界仍持仓。381笔亏损里127笔曾到1R、33笔曾到2R；“先有明显浮盈再回吐”真实存在，但不能解释多数亏单。最大的亏损类别是未到1R便价格止损，共234笔。8张图按机制选取，另有29份逐币明细和完整中文CSV。 |
@@ -470,6 +471,7 @@
 | — | [`p1_btc_bb_stoch_holdout_acceptance_20260917.md`](p1_btc_bb_stoch_holdout_acceptance_20260917.md) | BTC 5m · BB × Stoch 最终验收（holdout） |  |
 | — | [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) | BTC 5m · BB × Stoch 315 组参数搜索 | 调参在开发段把这条规则从亏变成赚，然后在复查段全部崩掉，而且比不调参更差。 |
 | — | [`p1_btc_rsi1h_sixma5m_20260920.md`](p1_btc_rsi1h_sixma5m_20260920.md) | BTC 永续：1h RSI 大菱形 → 5m 六均线确认，三年回测 | 结论：Owner 确认的固定规则在 OKX BTC-USDT-SWAP 三年样本中未通过盈利验证。356 笔已平仓，91 笔止盈、265 笔止损；毛收益 +8R，扣固定往返 0.2% 后 −97.0501R。前两年、最后一年、多头和空头均净亏。六线确认较直接入场改善固定风险单位结果，但平均价格... |
+| — | [`p1_btc_rsi1h_sixma5m_short_only_20260920.md`](p1_btc_rsi1h_sixma5m_short_only_20260920.md) | BTC RSI 1h 大菱形＋5m 六线：独立只做空仍净亏 | 结论：真正停用多头入场、释放多单占仓后，194笔已平仓空单，50止盈/144止损，胜率25.77%，毛+6R、净−53.4293R。原双向账本的空单为189笔、净−54.6959R；新增5笔仅改善1.2666R。前两年与最后一年均亏，对匹配随机的超额不显著。本轮拒绝固定只做空版本的盈利验证，不... |
 | — | [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) | BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m | 规则一个字没改，直接搬到 BTC 5m、BTC 1m、XAU 1m——没有任何一组做到费用后为正。 |
 | — | [`p1_btcusdtp_genuine_flow_coverage_v34_20260907.md`](p1_btcusdtp_genuine_flow_coverage_v34_20260907.md) | Genuine Flow Coverage · V34 |  |
 | — | [`p1_btcusdtp_hourly_background_support_v23_20260907.md`](p1_btcusdtp_hourly_background_support_v23_20260907.md) | Entry Comparison Coverage | V23 已实际完成。原 251 个 BTCUSDT.P 小时 K1 入口全部保留，**248 个能各配到三个不重复的背景对照，覆盖率 98.80%**，超过事先规定的至少 226/251 门槛。分配共 744 个控制时间，另外三个入口因事前波动桶未知而没有配对；未知供给没有写成零，也没有删除母信号。 |
@@ -757,6 +759,7 @@
 - [`p1_btc_bb_stoch_holdout_acceptance_20260917.md`](p1_btc_bb_stoch_holdout_acceptance_20260917.md) — BTC 5m · BB × Stoch 最终验收（holdout）
 - [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) — BTC 5m · BB × Stoch 315 组参数搜索
 - [`p1_btc_rsi1h_sixma5m_20260920.md`](p1_btc_rsi1h_sixma5m_20260920.md) — BTC 永续：1h RSI 大菱形 → 5m 六均线确认，三年回测
+- [`p1_btc_rsi1h_sixma5m_short_only_20260920.md`](p1_btc_rsi1h_sixma5m_short_only_20260920.md) — BTC RSI 1h 大菱形＋5m 六线：独立只做空仍净亏
 - [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) — BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — P1：BTCUSDT.P 15m 多因子共振与特征工程审计（2026-09-04）
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — P1：BTCUSDT.P 15m 趋势接管交易可识别性审计（2026-09-04）
@@ -892,6 +895,7 @@
 - [`p1_spike_exit_policy_20260912.md`](p1_spike_exit_policy_20260912.md) — SPIKE V1／V6／V7：退出规则与账户风险比较
 - [`p1_spike_fanshen_exit_multitf_20260914.md`](p1_spike_fanshen_exit_multitf_20260914.md) — V8 × 翻身 Stoch：六周期退出回测
 - [`p1_spike_fanshen_source_audit_20260914.md`](p1_spike_fanshen_source_audit_20260914.md) — 翻身 V1 源码核验：找到旧 Stoch，尚未找到目标完整版本
+- [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) — SPIKE 六均线密集：单项拆分与语义反例
 - [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) — SPIKE 市场广度：冻结候选的匹配随机对照整合报告
 - [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) — SPIKE V7／V8 五条降噪路线：执行与验收报告
 - [`p1_spike_pepe_owner_notes_20260910.md`](p1_spike_pepe_owner_notes_20260910.md) — PEPE 4H：Owner 批注与 V4 确认含义核对
