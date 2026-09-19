@@ -1,0 +1,163 @@
+{
+  "source_sha256": "776251a5118648192c58118e52b3c84ad6ba104db8f070a24b2b290d13fa284b",
+  "endpoint": "https://www.okx.com/api/v5/market/history-candles",
+  "parameters": {
+    "instId": "BTC-USDT-SWAP",
+    "bar": "4H",
+    "limit": 10,
+    "after": "sample open + 4h"
+  },
+  "audit_agent": "rsi_fifth_signal_audit",
+  "native_request_count": 8,
+  "native_all_code_zero": true,
+  "native_all_confirmed": true,
+  "parent_recomputed_aggregates_match_all": true,
+  "raw_payloads_persisted": false,
+  "scope": "8 deterministic native4h samples only; not full-series native or TradingView signal parity",
+  "samples": [
+    {
+      "open_time": "2023-09-20T00:00Z",
+      "native_ohlcv": [
+        27207.1,
+        27388.0,
+        27082.1,
+        27120.0,
+        1992726.0
+      ],
+      "aggregate_ohlcv": [
+        27207.1,
+        27388.0,
+        27082.1,
+        27120.0,
+        1992726.0
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2024-03-15T12:00Z",
+      "native_ohlcv": [
+        67767.8,
+        68750.0,
+        67392.1,
+        68166.3,
+        3342410.0
+      ],
+      "aggregate_ohlcv": [
+        67767.8,
+        68750.0,
+        67392.1,
+        68166.3,
+        3342410.0
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2024-09-19T20:00Z",
+      "native_ohlcv": [
+        63260.1,
+        63260.1,
+        62659.0,
+        62967.6,
+        1152795.6
+      ],
+      "aggregate_ohlcv": [
+        63260.1,
+        63260.1,
+        62659.0,
+        62967.6,
+        1152795.6
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2025-03-01T04:00Z",
+      "native_ohlcv": [
+        85316.3,
+        86555.0,
+        84729.0,
+        84744.1,
+        1787792.68
+      ],
+      "aggregate_ohlcv": [
+        85316.3,
+        86555.0,
+        84729.0,
+        84744.1,
+        1787792.68
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2025-09-19T16:00Z",
+      "native_ohlcv": [
+        115815.7,
+        116076.0,
+        115046.0,
+        115066.0,
+        820677.5
+      ],
+      "aggregate_ohlcv": [
+        115815.7,
+        116076.0,
+        115046.0,
+        115066.0,
+        820677.5
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2026-03-15T08:00Z",
+      "native_ohlcv": [
+        71416.1,
+        71900.0,
+        71416.1,
+        71802.8,
+        732168.03
+      ],
+      "aggregate_ohlcv": [
+        71416.1,
+        71900.0,
+        71416.1,
+        71802.8,
+        732168.03
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2026-09-01T12:00Z",
+      "native_ohlcv": [
+        78060.0,
+        78388.0,
+        77400.9,
+        77882.1,
+        2007646.06
+      ],
+      "aggregate_ohlcv": [
+        78060.0,
+        78388.0,
+        77400.9,
+        77882.1,
+        2007646.06
+      ],
+      "max_abs_difference": 0.0
+    },
+    {
+      "open_time": "2026-09-15T16:00Z",
+      "native_ohlcv": [
+        76474.1,
+        77324.9,
+        74896.6,
+        76144.9,
+        3849287.34
+      ],
+      "aggregate_ohlcv": [
+        76474.1,
+        77324.9,
+        74896.6,
+        76144.9,
+        3849287.34
+      ],
+      "max_abs_difference": 0.0
+    }
+  ]
+}

@@ -1,0 +1,380 @@
+{
+  "start": "2023-09-19 21:00:00+00:00",
+  "split": "2025-09-19 21:00:00+00:00",
+  "end_exclusive": "2026-09-19 21:00:00+00:00",
+  "data_sha256": "776251a5118648192c58118e52b3c84ad6ba104db8f070a24b2b290d13fa284b",
+  "source_rows": 341568,
+  "arms": {
+    "1h": {
+      "stats": {
+        "all": {
+          "entries": 28,
+          "closed": 28,
+          "open": 0,
+          "closed_wins": 18,
+          "closed_win_rate": 0.6428571428571429,
+          "closed_net_sum": -0.19423308631277586,
+          "marked_net_sum": -0.19423308631277586,
+          "marked_net_mean": -0.006936895939741995,
+          "marked_gross_sum": -0.13823308631277587,
+          "mean_net_month_bootstrap_95": [
+            -0.039937142910719065,
+            0.02203162464078989
+          ],
+          "closed_profit_factor": 0.7921947717827351,
+          "max_holding_days": 39.541666666666664,
+          "median_holding_days": 14.145833333333332,
+          "worst_raw_price_mae": -0.5506063354496287,
+          "worst_position_marked_return": -0.31842100314695765,
+          "control": {
+            "matched_entries": 28,
+            "controls": 2800,
+            "minimum_matches": 100,
+            "months": 23,
+            "actual_mean": -0.006936895939741995,
+            "random_mean": -0.026719816788499783,
+            "excess_mean": 0.01978292084875779,
+            "excess_month_bootstrap_95": [
+              0.003741702326979147,
+              0.03595064105561075
+            ],
+            "p_greater": 0.009499525023748812,
+            "method": "20000 month-sign permutations",
+            "censored_controls": 0
+          }
+        },
+        "long": {
+          "entries": 12,
+          "closed": 12,
+          "open": 0,
+          "closed_wins": 8,
+          "closed_win_rate": 0.6666666666666666,
+          "closed_net_sum": 0.011038910051165016,
+          "marked_net_sum": 0.011038910051165016,
+          "marked_net_mean": 0.0009199091709304179,
+          "marked_gross_sum": 0.035038910051165016,
+          "mean_net_month_bootstrap_95": [
+            -0.05510929056982881,
+            0.04357358847524675
+          ],
+          "closed_profit_factor": 1.0274501304100834,
+          "max_holding_days": 30.416666666666668,
+          "median_holding_days": 15.541666666666666,
+          "worst_raw_price_mae": -0.31642100314695765,
+          "worst_position_marked_return": -0.31842100314695765,
+          "control": {
+            "matched_entries": 12,
+            "controls": 1200,
+            "minimum_matches": 100,
+            "months": 11,
+            "actual_mean": 0.0009199091709304179,
+            "random_mean": -0.011789819829884885,
+            "excess_mean": 0.012709729000815304,
+            "excess_month_bootstrap_95": [
+              -0.008203455260719776,
+              0.03225472694111446
+            ],
+            "p_greater": 0.12890625,
+            "method": "exact month-sign permutation",
+            "censored_controls": 0
+          }
+        },
+        "short": {
+          "entries": 16,
+          "closed": 16,
+          "open": 0,
+          "closed_wins": 10,
+          "closed_win_rate": 0.625,
+          "closed_net_sum": -0.2052719963639409,
+          "marked_net_sum": -0.2052719963639409,
+          "marked_net_mean": -0.012829499772746306,
+          "marked_gross_sum": -0.1732719963639409,
+          "mean_net_month_bootstrap_95": [
+            -0.05634205828995327,
+            0.021767655212189096
+          ],
+          "closed_profit_factor": 0.6145445214634004,
+          "max_holding_days": 39.541666666666664,
+          "median_holding_days": 13.375,
+          "worst_raw_price_mae": -0.5506063354496287,
+          "worst_position_marked_return": -0.2700352254022641,
+          "control": {
+            "matched_entries": 16,
+            "controls": 1600,
+            "minimum_matches": 100,
+            "months": 16,
+            "actual_mean": -0.012829499772746306,
+            "random_mean": -0.03791731450746095,
+            "excess_mean": 0.025087814734714643,
+            "excess_month_bootstrap_95": [
+              0.006120287398259651,
+              0.04369313781775784
+            ],
+            "p_greater": 0.011688232421875,
+            "method": "exact month-sign permutation",
+            "censored_controls": 0
+          }
+        },
+        "late_entries": {
+          "entries": 10,
+          "closed": 10,
+          "open": 0,
+          "closed_wins": 5,
+          "closed_win_rate": 0.5,
+          "closed_net_sum": -0.2396585178222586,
+          "marked_net_sum": -0.2396585178222586,
+          "marked_net_mean": -0.02396585178222586,
+          "marked_gross_sum": -0.21965851782225862,
+          "mean_net_month_bootstrap_95": [
+            -0.06576063116818903,
+            0.025109320249555277
+          ],
+          "closed_profit_factor": 0.42469859739374755,
+          "max_holding_days": 30.416666666666668,
+          "median_holding_days": 15.333333333333334,
+          "worst_raw_price_mae": -0.31642100314695765,
+          "worst_position_marked_return": -0.31842100314695765,
+          "control": {
+            "matched_entries": 10,
+            "controls": 1000,
+            "minimum_matches": 100,
+            "months": 8,
+            "actual_mean": -0.02396585178222586,
+            "random_mean": -0.0223503175477788,
+            "excess_mean": -0.0016155342344470636,
+            "excess_month_bootstrap_95": [
+              -0.025537945328231938,
+              0.029818918989109298
+            ],
+            "p_greater": 0.53125,
+            "method": "exact month-sign permutation",
+            "censored_controls": 0
+          }
+        },
+        "early_entries_asof_split": {
+          "entries": 18,
+          "closed": 17,
+          "open": 1,
+          "marked_net_sum": 0.03239747779271277,
+          "marked_net_mean": 0.0017998598773729317,
+          "control": {
+            "matched_entries": 18,
+            "controls": 1800,
+            "minimum_matches": 100,
+            "months": 16,
+            "actual_mean": 0.0017998598773729317,
+            "random_mean": -0.029728624682127627,
+            "excess_mean": 0.03152848455950056,
+            "excess_month_bootstrap_95": [
+              0.016776629099481258,
+              0.046073582154701885
+            ],
+            "p_greater": 0.0007781982421875,
+            "method": "exact month-sign permutation",
+            "censored_controls": 143
+          }
+        }
+      },
+      "strong_diamonds": 564,
+      "fifth_candidates": 33,
+      "fifth_long": 14,
+      "fifth_short": 19,
+      "max_strong_run": 14,
+      "marked_drawdown": 0.4928509552542615,
+      "early_calendar_marked_pnl": 0.03239747779271278,
+      "late_calendar_marked_pnl": -0.22663056410548865,
+      "vector_tracer_checks": [
+        0,
+        1400,
+        2799
+      ],
+      "empty_control_pools": 0
+    },
+    "4h": {
+      "stats": {
+        "all": {
+          "entries": 8,
+          "closed": 7,
+          "open": 1,
+          "closed_wins": 4,
+          "closed_win_rate": 0.5714285714285714,
+          "closed_net_sum": -0.0964140641434805,
+          "marked_net_sum": -0.11330109340044398,
+          "marked_net_mean": -0.014162636675055497,
+          "marked_gross_sum": -0.09730109340044397,
+          "mean_net_month_bootstrap_95": [
+            -0.0650954185604766,
+            0.03563185558853039
+          ],
+          "closed_profit_factor": 0.6692000750068351,
+          "max_holding_days": 76.66666666666667,
+          "median_holding_days": 50.25,
+          "worst_raw_price_mae": -0.3436879572652385,
+          "worst_position_marked_return": -0.2448555543200266,
+          "control": {
+            "matched_entries": 8,
+            "controls": 800,
+            "minimum_matches": 100,
+            "months": 8,
+            "actual_mean": -0.014162636675055497,
+            "random_mean": -0.09235648265287959,
+            "excess_mean": 0.07819384597782407,
+            "excess_month_bootstrap_95": [
+              0.04563835681648888,
+              0.12084793702624526
+            ],
+            "p_greater": 0.00390625,
+            "method": "exact month-sign permutation",
+            "censored_controls": 100
+          }
+        },
+        "long": {
+          "entries": 3,
+          "closed": 3,
+          "open": 0,
+          "closed_wins": 3,
+          "closed_win_rate": 1.0,
+          "closed_net_sum": 0.14174477866348242,
+          "marked_net_sum": 0.14174477866348242,
+          "marked_net_mean": 0.04724825955449414,
+          "marked_gross_sum": 0.14774477866348243,
+          "mean_net_month_bootstrap_95": [
+            0.0008458073919969215,
+            0.09101407709511915
+          ],
+          "closed_profit_factor": null,
+          "max_holding_days": 56.833333333333336,
+          "median_holding_days": 54.5,
+          "worst_raw_price_mae": -0.11929773187675796,
+          "worst_position_marked_return": -0.12129773187675796,
+          "control": {
+            "matched_entries": 3,
+            "controls": 300,
+            "minimum_matches": 100,
+            "months": 3,
+            "actual_mean": 0.04724825955449414,
+            "random_mean": -0.011621492313184158,
+            "excess_mean": 0.058869751867678295,
+            "excess_month_bootstrap_95": [
+              0.03358041295757442,
+              0.09432173281971273
+            ],
+            "p_greater": 0.125,
+            "method": "exact month-sign permutation",
+            "censored_controls": 0
+          }
+        },
+        "short": {
+          "entries": 5,
+          "closed": 4,
+          "open": 1,
+          "closed_wins": 1,
+          "closed_win_rate": 0.25,
+          "closed_net_sum": -0.23815884280696292,
+          "marked_net_sum": -0.25504587206392637,
+          "marked_net_mean": -0.051009174412785276,
+          "marked_gross_sum": -0.24504587206392636,
+          "mean_net_month_bootstrap_95": [
+            -0.1055514841467184,
+            0.005883356357913365
+          ],
+          "closed_profit_factor": 0.182868930618256,
+          "max_holding_days": 76.66666666666667,
+          "median_holding_days": 45.333333333333336,
+          "worst_raw_price_mae": -0.3436879572652385,
+          "worst_position_marked_return": -0.2448555543200266,
+          "control": {
+            "matched_entries": 5,
+            "controls": 500,
+            "minimum_matches": 100,
+            "months": 5,
+            "actual_mean": -0.051009174412785276,
+            "random_mean": -0.14079747685669683,
+            "excess_mean": 0.08978830244391155,
+            "excess_month_bootstrap_95": [
+              0.042415096311411896,
+              0.1542230043789802
+            ],
+            "p_greater": 0.03125,
+            "method": "exact month-sign permutation",
+            "censored_controls": 100
+          }
+        },
+        "late_entries": {
+          "entries": 4,
+          "closed": 3,
+          "open": 1,
+          "closed_wins": 3,
+          "closed_win_rate": 1.0,
+          "closed_net_sum": 0.14515837543097743,
+          "marked_net_sum": 0.12827134617401398,
+          "marked_net_mean": 0.032067836543503495,
+          "marked_gross_sum": 0.13627134617401399,
+          "mean_net_month_bootstrap_95": [
+            -0.008020610932483263,
+            0.07215628401949024
+          ],
+          "closed_profit_factor": null,
+          "max_holding_days": 56.833333333333336,
+          "median_holding_days": 43.58333333333333,
+          "worst_raw_price_mae": -0.11929773187675796,
+          "worst_position_marked_return": -0.12129773187675796,
+          "control": {
+            "matched_entries": 4,
+            "controls": 400,
+            "minimum_matches": 100,
+            "months": 4,
+            "actual_mean": 0.032067836543503495,
+            "random_mean": -0.024533052394903637,
+            "excess_mean": 0.05660088893840713,
+            "excess_month_bootstrap_95": [
+              0.037362087174617746,
+              0.08474836205851743
+            ],
+            "p_greater": 0.0625,
+            "method": "exact month-sign permutation",
+            "censored_controls": 100
+          }
+        },
+        "early_entries_asof_split": {
+          "entries": 4,
+          "closed": 4,
+          "open": 0,
+          "marked_net_sum": -0.2415724395744579,
+          "marked_net_mean": -0.060393109893614474,
+          "control": {
+            "matched_entries": 4,
+            "controls": 400,
+            "minimum_matches": 100,
+            "months": 4,
+            "actual_mean": -0.060393109893614474,
+            "random_mean": -0.1601799129108555,
+            "excess_mean": 0.09978680301724104,
+            "excess_month_bootstrap_95": [
+              0.042060871934410445,
+              0.1754188402399942
+            ],
+            "p_greater": 0.0625,
+            "method": "exact month-sign permutation",
+            "censored_controls": 0
+          }
+        }
+      },
+      "strong_diamonds": 149,
+      "fifth_candidates": 8,
+      "fifth_long": 3,
+      "fifth_short": 5,
+      "max_strong_run": 8,
+      "marked_drawdown": 0.45605934079934085,
+      "early_calendar_marked_pnl": -0.2415724395744579,
+      "late_calendar_marked_pnl": 0.128271346174014,
+      "vector_tracer_checks": [
+        0,
+        400,
+        799
+      ],
+      "empty_control_pools": 0
+    }
+  },
+  "builder_commit": "2b3b5b1f1c5aca0252988b6897fc2f1ba36c6213"
+}

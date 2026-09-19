@@ -1,0 +1,73 @@
+{
+  "status": "passed with disclosed methodological limitations",
+  "reviews": [
+    {
+      "role": "budget-implementer",
+      "scope": "engine implementation and independent read-only root statistics review",
+      "configuration": "Terra High role; runtime model receipt not exposed",
+      "findings": "no blocking defect: strict later opposite events, quarters, fees, split boundaries, vector/path accounting"
+    },
+    {
+      "role": "budget-mapper",
+      "scope": "source semantics,8native4Hsamples,independent scored-ledger reconciliation",
+      "configuration": "Luna Max role; runtime model receipt not exposed",
+      "findings": "exact-five counts, all fills same raw5m open, all quarter quantities, lifecycle PnL, MAE and relative-null p reconcile"
+    }
+  ],
+  "tests": {
+    "engine_signal_source_boundary_passed": 88,
+    "vector_and_partial_accounting_passed": 6,
+    "total": 94
+  },
+  "source": {
+    "original_overlap_identical_rows": 324288,
+    "new_total_5m": 341568,
+    "native4h_samples_exact": 8,
+    "warmup_event_difference": 0,
+    "warmup4h_rsi_values_not_bitwise_equal": true
+  },
+  "ledgers": {
+    "1h": {
+      "entries": 28,
+      "closed": 28,
+      "wins": 18,
+      "quarter_exits": 112,
+      "net_sum": -0.19423308631277586
+    },
+    "4h": {
+      "entries": 8,
+      "closed": 7,
+      "wins": 4,
+      "quarter_exits": 29,
+      "open_remaining": 0.75,
+      "marked_net_sum": -0.11330109340044398
+    }
+  },
+  "independent_mae_max_abs_error_less_than": 2.3e-16,
+  "controls": {
+    "rows": 3600,
+    "per_actual_entry": 100,
+    "actual_sample_sizes": [
+      28,
+      8
+    ],
+    "1h_unique_times_in_two_replacement_samples": [
+      60,
+      42
+    ],
+    "4h_unique_times_range": [
+      20,
+      50
+    ],
+    "terminal_4h_controls_kept": 100,
+    "p_tests_relative_not_absolute_profit": true
+  },
+  "limitations": [
+    "funding not covered for3years",
+    "no leverage/margin/liquidation model",
+    "fixed-notional PnL is not an account return",
+    "native TradingView full signal export absent",
+    "repeated control timestamps and overlapping long horizons; exploratory uncertainty",
+    "source fallback full missing-prefix network path not rerun; existing immutable source reuse verified"
+  ]
+}

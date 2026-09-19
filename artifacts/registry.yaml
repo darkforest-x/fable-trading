@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-rsi-fifth-color-20260920-v1-delivery
+    artifact_type: manifest
+    role: btc_fifth_large_diamond_original_quarter_exit_three_year_backtest
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2b3b5b1f1c5aca0252988b6897fc2f1ba36c6213
+    source_path: experiments/active/exp-btc-rsi-fifth-color-20260920-v1/delivery_manifest.json
+    sha256: 6f18d57a76ba4cec4fb2f358b0a6cf48bae7db80225d5d972c06cf730a28ed7e
+    size_bytes: 7794
+    storage_uri: repo://experiments/active/exp-btc-rsi-fifth-color-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner canceled historical restrictions;legacy enum retained.341568source5m,1h28positions,4h8positions,3600matchedcontrols.Quarter
+      original qty,20bp,noR.94checks. Funding/leverage unmodeled;nonprofitable fixed
+      rule.
   - artifact_id: ma-morphology-reuse-20260920-v1-delivery
     artifact_type: manifest
     role: historical_owner_morphology_lineage_and_reuse_audit

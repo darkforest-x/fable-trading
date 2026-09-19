@@ -1,0 +1,32 @@
+{
+  "source_url": "https://www.okx.com/api/v5/market/history-candles",
+  "symbol": "BTC-USDT-SWAP",
+  "start": "2023-06-21 21:00:00+00:00",
+  "end_exclusive": "2026-09-19 21:00:00+00:00",
+  "rows": 341568,
+  "expected_rows": 341568,
+  "missing_after": 0,
+  "initial_missing": 1,
+  "prior_source": "experiments/active/exp-btc-rsi1h-sixma5m-20260920-v1/data/okx_btc_usdt_swap_5m.csv.gz",
+  "prior_sha256": "076e9d1c74b9912a8d3421216fa6a10c3b19544fbdf93e90050dc92d2bf560ae",
+  "prior_rows_identical": 324288,
+  "prefix_source": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+  "prefix_sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac",
+  "raw_pages": [
+    {
+      "timestamp": "2023-06-22 22:15:00+00:00",
+      "params": {
+        "instId": "BTC-USDT-SWAP",
+        "bar": "5m",
+        "after": 1687472400000,
+        "limit": 10
+      },
+      "path": "experiments/active/exp-btc-rsi-fifth-color-20260920-v1/data/raw/1687472100000.json",
+      "sha256": "f7ec4be095d240d3065ce46b6b8861b3c93df7e7879a7ecb838dc405ed50cb8b"
+    }
+  ],
+  "output": "experiments/active/exp-btc-rsi-fifth-color-20260920-v1/data/okx_btc_usdt_swap_5m_90d.csv.gz",
+  "sha256": "776251a5118648192c58118e52b3c84ad6ba104db8f070a24b2b290d13fa284b",
+  "builder_commit": "4ef932004ac30cc5b2a70f82e00ad9f0770cb452",
+  "generated_at": "2026-09-19T22:19:38.384942+00:00"
+}

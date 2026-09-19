@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **584** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **587** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,9 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-20 | [`p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md`](p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md) | BTC RSI：第5个同色大菱形入场，反向大菱形分四次退出 | 结论：**当前规则在1h、4h两个周期全期均未盈利**。1h 28笔全部闭合，18盈10亏，胜率64.29%，净价格收益平均每笔−0.6937%；4h开仓8笔，7笔已平（4盈3亏），另1笔剩75%原仓位，计入末端估值后平均每笔−1.4163%。两组相对匹配随机入场均有正超额，但绝对价格损益仍为... |
+| 2026-09-20 | [`p1_ma_morphology_reuse_20260920.md`](p1_ma_morphology_reuse_20260920.md) | 历史 YOLO / L2 资产能否用于识别 Owner 六线密集 |  |
+| 2026-09-20 | [`p1_spike_h1_sma60_release_20260920.md`](p1_spike_h1_sma60_release_20260920.md) | SPIKE V12.3 / V9.1：15m 增加已收盘 1h SMA60 入场过滤 |  |
 | 2026-09-20 | [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) | SPIKE 六均线密集：单项拆分与语义反例 |  |
 | 2026-09-20 | [`p1_spike_v112_entry_extension_20260920.md`](p1_spike_v112_entry_extension_20260920.md) | V11.2：限制入场前价格推进，三个周期均未通过研究筛查 | 结论：固定29币，只试一个因果入场门——突破收盘相对父V9收盘的推进，不超过父信号收盘到原止损的一份距离。15m和1h全期净R从负转正，但不足以接受此规则：三个周期的全期改善区间都跨0，1h后段仍亏，4h后段更差。保留15m时机线索；拒绝本规则准入，不搜索新阈值，不修改Pine/监控/实盘。 |
 | 2026-09-20 | [`p1_spike_v112_one_line_audit_20260920.md`](p1_spike_v112_one_line_audit_20260920.md) | V11.2：ONE 15m白色下降线卡在第三个独立高点 | 结论：按当前默认线性/双轨规则和本地同段OKX数据，这条图示线首先卡在建线。第三次贴线虽很准，但不被12左/8右的pivot定义承认为独立高点，且相邻间隔只有7根，低于24根。另一个独立问题是1h已出现突破时，15m没有开放V9多头参考框，因此不产生框内联合。未改脚本或参数。 |
@@ -760,6 +763,7 @@
 - [`p1_btc_bb_stoch_optimization_20260916.md`](p1_btc_bb_stoch_optimization_20260916.md) — BTC 5m · BB × Stoch 315 组参数搜索
 - [`p1_btc_rsi1h_sixma5m_20260920.md`](p1_btc_rsi1h_sixma5m_20260920.md) — BTC 永续：1h RSI 大菱形 → 5m 六均线确认，三年回测
 - [`p1_btc_rsi1h_sixma5m_short_only_20260920.md`](p1_btc_rsi1h_sixma5m_short_only_20260920.md) — BTC RSI 1h 大菱形＋5m 六线：独立只做空仍净亏
+- [`p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md`](p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md) — BTC RSI：第5个同色大菱形入场，反向大菱形分四次退出
 - [`p1_btc_xau_bb_stoch_timeframes_20260916.md`](p1_btc_xau_bb_stoch_timeframes_20260916.md) — BB × Stoch 换市场换周期：BTC 5m/1m、XAU 1m
 - [`p1_btcusdtp_15m_multifactor_confluence_20260904.md`](p1_btcusdtp_15m_multifactor_confluence_20260904.md) — P1：BTCUSDT.P 15m 多因子共振与特征工程审计（2026-09-04）
 - [`p1_btcusdtp_15m_runner_isolation_20260904.md`](p1_btcusdtp_15m_runner_isolation_20260904.md) — P1：BTCUSDT.P 15m 趋势接管交易可识别性审计（2026-09-04）
@@ -852,6 +856,7 @@
 - [`p1_local_signal_v2_stagea_position_eval_20260811.md`](p1_local_signal_v2_stagea_position_eval_20260811.md) — Local Signal V2 Stage A 训练与分位置诊断（2026-08-11）
 - [`p1_local_signal_v2_stageb_cold_report.md`](p1_local_signal_v2_stageb_cold_report.md) — P1 — Local Signal V2 Stage B 冷启动（owner_lsv2_stageb_cold）
 - [`p1_ma_launch_label_leakage_and_edge_20260830.md`](p1_ma_launch_label_leakage_and_edge_20260830.md) — MA 密集启动：标签泄漏与真实 edge（2026-08-30）
+- [`p1_ma_morphology_reuse_20260920.md`](p1_ma_morphology_reuse_20260920.md) — 历史 YOLO / L2 资产能否用于识别 Owner 六线密集
 - [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) — P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21）
 - [`p1_ma_shift_stoch_eth_month_20260915.md`](p1_ma_shift_stoch_eth_month_20260915.md) — ETH 近一月：15分钟颜色 × 5分钟 Stoch
 - [`p1_ma_stoch_exit_optimization_20260915.md`](p1_ma_stoch_exit_optimization_20260915.md) — ETH：退出、止盈、止损优化 v1
@@ -895,6 +900,7 @@
 - [`p1_spike_exit_policy_20260912.md`](p1_spike_exit_policy_20260912.md) — SPIKE V1／V6／V7：退出规则与账户风险比较
 - [`p1_spike_fanshen_exit_multitf_20260914.md`](p1_spike_fanshen_exit_multitf_20260914.md) — V8 × 翻身 Stoch：六周期退出回测
 - [`p1_spike_fanshen_source_audit_20260914.md`](p1_spike_fanshen_source_audit_20260914.md) — 翻身 V1 源码核验：找到旧 Stoch，尚未找到目标完整版本
+- [`p1_spike_h1_sma60_release_20260920.md`](p1_spike_h1_sma60_release_20260920.md) — SPIKE V12.3 / V9.1：15m 增加已收盘 1h SMA60 入场过滤
 - [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) — SPIKE 六均线密集：单项拆分与语义反例
 - [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) — SPIKE 市场广度：冻结候选的匹配随机对照整合报告
 - [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) — SPIKE V7／V8 五条降噪路线：执行与验收报告
