@@ -31552,3 +31552,18 @@ artifacts:
     production_eligible: false
     notes: Source-bound570 entries, matched controls, all period/coin/tail tables, report, independent review and learning. Date vocabulary only,
       no historical access restriction. Not account PnL.
+
+  - artifact_id: spike-v112-trade-review-20260920-delivery
+    artifact_type: manifest
+    role: all_selected_trade_path_diagnoses_and_eight_source_backed_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 74d755720e19afd55317059085c0f4c3a73c90fe
+    source_path: experiments/active/exp-spike-v112-trade-review-20260920-v1/delivery_manifest.json
+    sha256: 3dbfa48d9e570c65ac0f30de68625abfe5d67657394514809c84c5cca073900b
+    size_bytes: 23887
+    storage_uri: repo://experiments/active/exp-spike-v112-trade-review-20260920-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: 570-row Chinese review,29 symbol documents,8 real-OHLC charts,570 per-bar protection paths, source/figure receipts, independent Luna
+      Max review and Markdown. Historical-date vocabulary only; no access restriction. Illustrative charts are not a random sample.

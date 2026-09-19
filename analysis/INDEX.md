@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **572** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **573** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-20 | [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) | V11.2：29币570笔逐笔复盘与8张行情图 | 结论：570次入场全部重放并生成逐笔说明，568笔已平仓、187盈、381亏，2笔边界仍持仓。381笔亏损里127笔曾到1R、33笔曾到2R；“先有明显浮盈再回吐”真实存在，但不能解释多数亏单。最大的亏损类别是未到1R便价格止损，共234笔。8张图按机制选取，另有29份逐币明细和完整中文CSV。 |
 | 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
 | 2026-09-19 | [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) | SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法 | 结论：单独限制入场时效、沿用父 V9 止损、改用盘中高点激活原追踪，均未在 15m 或 1h 通过预先设定的研究门。15m 的 6 根时效限制有改善线索，但区间跨零、后段仍亏；统一放宽止损或提前追踪不能据此采用。没有搜索最优参数，没有修改 Pine、监控、默认参数或实盘。 |
@@ -898,6 +899,7 @@
 - [`p1_spike_v112_selected_counts_20260919.md`](p1_spike_v112_selected_counts_20260919.md) — V11.2：Owner选定29币的15m、1h、4h交易数量
 - [`p1_spike_v112_selected_returns_20260919.md`](p1_spike_v112_selected_returns_20260919.md) — V11.2选定29币收益：15m受仓位口径影响，4h盈利集中于前段
 - [`p1_spike_v112_support_20260919.md`](p1_spike_v112_support_20260919.md) — SPIKE V11.2 六均线支撑单变量完整回放
+- [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) — V11.2：29币570笔逐笔复盘与8张行情图
 - [`p1_spike_v112_tv_parity_20260919.md`](p1_spike_v112_tv_parity_20260919.md) — SPIKE V11.2：看板止损与 TradingView 缺信号核查
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) — 突破+spike 逐笔明细 + 抽样 50 张图（框内规则）

@@ -9876,3 +9876,23 @@ experiments:
     notes: Luna Max independent check. Costs and R equations verified for568 rows; cohort sums reconcile. Cross-split1h3 winners retained.4h controls36/37;
       one random exit censored. Fixed owner pool is a hindsight historical subset, and daily warmup varies. No HTML, parameter search, live change
       or promotion.
+
+  - experiment_id: exp-spike-v112-trade-review-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5911f53841b94cddb46efd8aaa3c2475e6c58e25
+    status: inconclusive
+    question: For every fixed selected-pool V11.2 trade, what contemporaneous context and actual stop path explain its exit and reveal untested
+      improvement questions?
+    single_variable: No policy change; original entry/exit replay with causal signal context and separately labeled hindsight path audit.
+    result: 570 entries and protection traces reproduce. Of381 losses,234 stop below1R MFE,78 retrace from1R to below2R,16 hit2R intrabar without
+      close activation,11 net lose after trail activation,42 exit on reverse signals.127 losses reach1R and33 reach2R.512 stop bars have complete5m;
+      only2 sub-1R MFE corrections.29 coin documents and8 mechanism-selected charts delivered.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_trade_review_20260920.md
+    artifacts:
+    - spike-v112-trade-review-20260920-delivery
+    notes: Luna Max reviewed mechanics and arithmetic. Six chronology checks passed. Two boundary-censored4h entries excluded from realized returns;
+      parentV9 is conditional fixed-entry hindsight, not an account. Original controls and negative experiments retained; no new profitable fix,
+      HTML or live changes.

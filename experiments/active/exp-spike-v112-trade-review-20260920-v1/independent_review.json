@@ -1,0 +1,37 @@
+{
+  "reviewer": "/root/v112_1h_evidence",
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "max",
+  "scope": "Read-only execution timing, code semantics, 570-row arithmetic and 8 selected-case claims; no independent full raw replay",
+  "verified": {
+    "entries": 570,
+    "closed": 568,
+    "losses": 381,
+    "wins": 187,
+    "loss_ge1r": 127,
+    "loss_ge2r": 33,
+    "1h_losses": 82,
+    "1h_loss_ge1r": 29,
+    "1h_loss_ge2r": 6,
+    "figure_key_matches": 8
+  },
+  "findings": [
+    {
+      "issue": "5m touch-bar open must contribute to definite MFE lower bound",
+      "resolution": "Fixed before final rebuild; synthetic regression added."
+    },
+    {
+      "issue": "Net R wording, entry/exit timestamps, parent-censored and boundary-close semantics",
+      "resolution": "Clarified and asserted before final rebuild; parent remains an independent fixed-entry replay."
+    },
+    {
+      "issue": "1500-day warmup initially challenged",
+      "resolution": "Reviewer retracted: 4h uses daily higher timeframe; v11.bars_for separately clips each stream to 1500 bars. 250 days would be insufficient."
+    },
+    {
+      "issue": "Gap-censored input unsupported",
+      "resolution": "Explicit fixed-cohort assertion accepts only closed or boundary-censored; no gap-censored cases in this cohort."
+    }
+  ],
+  "limitations": "Counts and illustrative mechanisms are descriptive. Parent comparisons are conditional hindsight; selected winners do not establish a causal effect of wide stops."
+}
