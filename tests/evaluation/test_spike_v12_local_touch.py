@@ -199,3 +199,56 @@ def test_pool_capacity_is_two_per_source_and_span_bucket():
         for line in pool
     )
     assert max(buckets.values()) == 2
+
+
+def _ab_shock_fixture(*, ab_wave: float = 2.8):
+    """One A/B/C geometry where A's shock ATR can dilute the AB rebound."""
+
+    # A=0, B=37, C=72 mirrors the 72-bar native 15m span.  The prices are
+    # scaled, while aa=2 and ba=1 model a large A shock and smaller B ATR.
+    n = 90
+    low = np.full(n, 95.0)
+    low[1:37] = 97.2 - ab_wave
+    low[38:72] = 90.544
+    atr = np.ones(n)
+    atr[0], atr[37], atr[72] = 2.0, 1.0, 1.0
+    return low, atr
+
+
+def _search_ab_shock(low, atr, *, rebound_at_b: bool):
+    return _local_search(
+        [0, 37], [100.0, 97.2], [2.0, 1.0],
+        cx=72, cp=94.45, ca=1.0, source=0, i=74,
+        low=low, close_i=94.0, atr=atr, tick=0.01,
+        p=V104Params(),
+        local_params=LocalTouchParams(rebound_at_b=rebound_at_b),
+    )
+
+
+def test_ab_rebound_uses_b_atr_when_a_shock_is_large():
+    low, atr = _ab_shock_fixture(ab_wave=2.8)
+    accepted = _search_ab_shock(low, atr, rebound_at_b=True)
+    legacy = _search_ab_shock(low, atr, rebound_at_b=False)
+
+    # New: AB=2.8/ba=2.8 passes the unchanged 2-ATR pullback gate.  Legacy:
+    # AB=2.8/max(aa,ba)=1.4 is rejected.  No threshold was lowered.
+    assert len(accepted) == 1
+    assert np.isclose(accepted[0].wave, 2.8)
+    assert legacy == []
+
+
+def test_ab_rebound_still_rejects_below_two_b_atr():
+    low, atr = _ab_shock_fixture(ab_wave=1.9)
+    assert _search_ab_shock(low, atr, rebound_at_b=True) == []
+    assert _search_ab_shock(low, atr, rebound_at_b=False) == []
+
+
+def test_ab_rebound_switch_is_prefix_invariant():
+    low, atr = _ab_shock_fixture(ab_wave=2.8)
+    full = _search_ab_shock(low, atr, rebound_at_b=True)
+    prefix = _search_ab_shock(low[:75], atr[:75], rebound_at_b=True)
+    assert len(full) == len(prefix) == 1
+    assert (full[0].ax, full[0].bx, full[0].cx, full[0].born) == (
+        prefix[0].ax, prefix[0].bx, prefix[0].cx, prefix[0].born
+    )
+    assert np.isclose(full[0].wave, prefix[0].wave)

@@ -54,13 +54,17 @@ class LocalTouchParams:
 
     The major geometry, validation, lifetime, and capacity values remain in
     :class:`V104Params` or the fixed V10.4 pool rules.  Three span buckets ×
-    two tracks × two lines gives twelve active auxiliary candidates.
+    two tracks × two lines gives twelve active auxiliary candidates.  With
+    ``rebound_at_b=True``, the A-B valley-to-B rebound uses B's ATR as its
+    scale; ``False`` retains the legacy ``max(A_ATR, B_ATR, tick)`` scale for
+    side-by-side audit comparisons.
     """
 
     local_left: int = 2
     local_right: int = 2
     min_gap: int = 4
     enabled: bool = True
+    rebound_at_b: bool = True
 
     @property
     def gap(self) -> int:
@@ -253,7 +257,14 @@ def _local_search(
             bc_valley = _finite_min(low[bx + 1 : cx])
             if ab_valley is None or bc_valley is None:
                 continue
-            ab = (min(ap, bp) - ab_valley) / max(aa, ba, tick)
+            # The A-B numerator measures the valley-to-B rebound.  When the
+            # switch is enabled, scale that wave by B's ATR so a large shock
+            # ATR at A cannot dilute a valid rebound.  The pullback threshold
+            # itself remains the original 2 ATR; the disabled path preserves
+            # the pre-switch denominator for audit comparisons.  B-C keeps
+            # its original B/C scale.
+            ab_scale = max(ba, tick) if lp.rebound_at_b else max(aa, ba, tick)
+            ab = (min(ap, bp) - ab_valley) / ab_scale
             bc = (min(bp, cp) - bc_valley) / max(ba, ca, tick)
             if ab < p.pullback or bc < p.pullback:
                 continue
