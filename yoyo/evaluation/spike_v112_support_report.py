@@ -8,6 +8,7 @@ sign-flip statistics reuse the original reporting implementations.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -25,6 +26,23 @@ ARMS = ("box_any", "box_support")
 PERIODS = ("full", "earlier", "later")
 
 
+def validated_tables(run: Path, manifest: dict) -> tuple[pd.DataFrame, ...]:
+    """Load precisely the streams bound by identity; reject foreign or partial outputs."""
+    from yoyo.evaluation.spike_v112_support_study import _validate_completion
+    identity = json.loads((run / "identity.json").read_text())
+    identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
+    if identity_hash != manifest["run_identity"]:
+        raise ValueError("manifest and identity hash disagree")
+    expected = set(identity["inputs"])
+    actual = {path.name for path in (run / "streams").iterdir()}
+    if actual != expected or len(expected) != manifest["symbols"]:
+        raise ValueError(f"stream inventory mismatch: extra={sorted(actual - expected)}, missing={sorted(expected - actual)}")
+    for symbol, sha in identity["inputs"].items():
+        _validate_completion(run / "streams" / symbol, identity_hash, sha)
+    return tuple(pd.concat([pd.read_csv(run / "streams" / symbol / f"{name}.csv.gz") for symbol in sorted(expected)],
+                           ignore_index=True) for name in ("trades", "statuses", "controls", "decisions"))
+
+
 def dates(frame: pd.DataFrame) -> pd.DataFrame:
     frame = frame.copy()
     frame["signal_bar_open"] = pd.to_datetime(frame.signal_bar_open, utc=True, format="mixed")
@@ -32,6 +50,15 @@ def dates(frame: pd.DataFrame) -> pd.DataFrame:
     frame["period"] = np.where(frame.signal_close < study.SPLIT, "earlier", "later")
     frame["month"] = frame.signal_close.dt.strftime("%Y-%m")
     return frame
+
+
+def validate_control_keys(trades: pd.DataFrame, controls: pd.DataFrame) -> None:
+    """Missing controls are errors; explicitly unmatched controls remain legitimate rows."""
+    keys = ["arm", "trade_key"]
+    if trades.duplicated(keys).any() or controls.duplicated(keys).any():
+        raise ValueError("duplicate trade/control composite keys")
+    if set(map(tuple, trades[keys].values)) != set(map(tuple, controls[keys].values)):
+        raise ValueError("trade/control key coverage mismatch")
 
 
 def compare(left: pd.DataFrame, right: pd.DataFrame, fields: list[str], name: str, *, same_keys: bool = True) -> dict:
@@ -56,14 +83,13 @@ def compare(left: pd.DataFrame, right: pd.DataFrame, fields: list[str], name: st
 
 
 def main(run: Path, out: Path) -> None:
+    config = json.loads((EXP / "config.json").read_text())
+    if config["baseline_ledger"] != str(OLD / "statistics/run_v1/trades.csv.gz"):
+        raise ValueError("configured baseline ledger is not the frozen canonical source")
     manifest = json.loads((run / "manifest.json").read_text())
     assert manifest["complete"] and manifest["symbols"] == 638 and not manifest["failures"], manifest
-    from yoyo.evaluation.spike_v112_support_study import _validate_completion
-    identity = json.loads((run / "identity.json").read_text())
-    for symbol, sha in identity["inputs"].items():
-        _validate_completion(run / "streams" / symbol, manifest["run_identity"], sha)
-    t, s, c, d = (cat(str(run / "streams" / "*" / f"{name}.csv.gz"))
-                  for name in ("trades", "statuses", "controls", "decisions"))
+    t, s, c, d = validated_tables(run, manifest)
+    validate_control_keys(t, c)
     t, s, d = dates(t), dates(s), dates(d)
     for col in ("entry_time", "exit_time"):
         t[col] = pd.to_datetime(t[col], utc=True, format="mixed")
@@ -72,6 +98,7 @@ def main(run: Path, out: Path) -> None:
                 on=["arm", "trade_key"], how="left", validate="one_to_one")
     keys = ["symbol", "timeframe", "signal_i"]
     assert not d.duplicated(keys).any()
+    assert not s.duplicated([*keys, "arm"]).any()
     t = t.drop(columns=["source", "box_entry_i", "bars_after_v9"], errors="ignore")
     t = t.merge(d[[*keys, "source", "box_entry_i", "bars_after_v9", "support_pass", "distance_atr"]],
                 on=keys, validate="many_to_one")
@@ -79,7 +106,7 @@ def main(run: Path, out: Path) -> None:
     assert d.support_pass.eq(np.isfinite(d.close) & np.isfinite(d.ropeHigh) & d.close.gt(d.ropeHigh)).all()
     a, b = t.loc[t.arm == "box_any"], t.loc[t.arm == "box_support"]
     old = pd.read_csv(OLD / "statistics/run_v1/trades.csv.gz").query("arm == 'box_any'")
-    check_fields = [*PARITY, "matched", "control_net_r", "control_net_return", "status"]
+    check_fields = [*PARITY, "initial_risk_frac", "gross_return", "net_return", "matched", "control_net_r", "control_net_return", "status"]
     checks = pd.DataFrame([compare(old, a, check_fields, "original_vs_baseline"),
                            compare(a, b, check_fields, "shared_baseline_vs_support", same_keys=False)])
     assert checks.passed.all(), checks.to_dict("records")
