@@ -31537,3 +31537,18 @@ artifacts:
     production_eligible: false
     notes: Receipt binds 29 streams, identity, coverage, counts and 570-row selected ledger. Historical date vocabulary only; owner removed access
       restrictions. Counts are not strategy acceptance.
+
+  - artifact_id: spike-v112-selected-returns-20260919-delivery
+    artifact_type: manifest
+    role: fixed_owner_pool_return_units_temporal_and_tail_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a87ad15ca2d8cbd0c01e70ac55f930eefdd0b6a
+    source_path: experiments/active/exp-spike-v112-selected-returns-20260919-v1/delivery_manifest.json
+    sha256: f35160c5d82e673d46fa22a6de7445eec3bf710e916451962389242aae915f76
+    size_bytes: 2352
+    storage_uri: repo://experiments/active/exp-spike-v112-selected-returns-20260919-v1/delivery_manifest.json
+    holdout_status: pre_holdout
+    training_eligible: false
+    production_eligible: false
+    notes: Source-bound570 entries, matched controls, all period/coin/tail tables, report, independent review and learning. Date vocabulary only,
+      no historical access restriction. Not account PnL.

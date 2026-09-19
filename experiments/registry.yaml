@@ -9857,3 +9857,22 @@ experiments:
     - spike-v112-selected-counts-20260919-delivery
     notes: ARY excluded by owner. PEPE mapped to 1000PEPEUSDT. Same 2024-09-10 to 2026-05-01 archive window; differing listing history and daily
       warmup coverage disclosed. Initial empty-CSV aggregation error retained, fixed without strategy changes. No HTML or live changes.
+
+  - experiment_id: exp-spike-v112-selected-returns-20260919-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a87ad15ca2d8cbd0c01e70ac55f930eefdd0b6a
+    status: inconclusive
+    question: What are returns of the fixed owner-selected 29-symbol V11.2 pool by timeframe, time segment and risk unit?
+    single_variable: No strategy or pool change; descriptive analysis of existing 570 entries/568 closed with original matching controls.
+    result: '15m409 closed: -0.01949R but +38.40bp per trade; 1h122: -0.01206R/-23.34bp; 4h37: +1.44741R/+694.82bp. DASH and BTC two trades contribute83.9
+      percent of 4h net R; later4h14 trades -0.34174R/-399.43bp. All matched-random excess intervals span zero. Top 4h arithmetic and bounded OHLC
+      checks find no specific bug; no profitability acceptance.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v112_selected_returns_20260919.md
+    artifacts:
+    - spike-v112-selected-returns-20260919-delivery
+    notes: Luna Max independent check. Costs and R equations verified for568 rows; cohort sums reconcile. Cross-split1h3 winners retained.4h controls36/37;
+      one random exit censored. Fixed owner pool is a hindsight historical subset, and daily warmup varies. No HTML, parameter search, live change
+      or promotion.

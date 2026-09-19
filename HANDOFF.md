@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：固定29币收益已拆解（2026-09-19）
+
+- 同一570入场/568已平仓：15m−7.97R但等名义每笔+0.3840%；1h−1.47R/每笔−0.2334%；4h+53.55R/每笔+6.9482%。R与价格金额权重不同，不能当账户百分比。
+- 4h37笔中DASH32.49R和BTC12.46R贡献净R的83.9%；Luna Max核对极端交易算式和局部原始OHLC，暂未发现计算bug。4h后段14笔−4.78R/−3.9943%每笔；1h后段52笔−21.55R，15m后段160笔+11.64R。1h另3笔跨界+8.04R单列。
+- 三周期相对原匹配随机的区间均跨0，保留不确定研究结论，不接受策略。详情`analysis/p1_spike_v112_selected_returns_20260919.md`，全部逐币/分段/尾部表与控制账本见`experiments/active/exp-spike-v112-selected-returns-20260919-v1/`。Notion已同步，无HTML/新回放/生产变更。
+
 ## 最新：Owner选定29币，三个周期共570笔入场（2026-09-19）
 
 - Owner列出30币后明确先排除ARY；保留BTC ETH SOL PEPE WIF ZEC HYPE USELESS MUBARAK UNI PUMP ARB AR BOME ENA ONE PIEVERSE AAVE NEAR ZEN DASH PENDLE XTZ JUP AERO OP FIL APT API3。PEPE对应1000PEPEUSDT。

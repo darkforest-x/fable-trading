@@ -1,0 +1,14 @@
+{
+  "agent": "/root/v112_1h_evidence",
+  "model": "gpt-5.6-luna",
+  "reasoning_effort": "max",
+  "scope": "Read-only top 4h arithmetic, next-open clock and bounded source OHLC reconciliation",
+  "findings": [
+    "37 closed and 2 censored; censored excluded",
+    "DASH32.485176R/BTC12.458108R/ZEC3.324511R arithmetic verified",
+    "DASH and BTC local raw 5m entry/exit bars reconcile with 4h ledger",
+    "37 next-bar entries; no exit before entry; no specific calculation bug found",
+    "DASH+BTC contribute83.9 percent of net R; small-sample and bar-path limitations remain"
+  ],
+  "not_claimed": "Not a complete dynamic-stop replay, portfolio return, TV parity or forward acceptance"
+}
