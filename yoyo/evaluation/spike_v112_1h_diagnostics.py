@@ -199,6 +199,18 @@ def main():
             remaining = order.iloc[count:]
             sensitivity.append({"rank_metric": col, "removed_top": count, **metrics(remaining),
                                 "removed_sum_r": order.iloc[:count].net_r.sum(), "removed_sum_bp": order.iloc[:count].net_bp.sum()})
+    # Exploratory robustness check prompted by the positive pre-existing bin;
+    # preserve all variants rather than selecting a trading filter.
+    bucket_sensitivity = []
+    for period in ("full", "earlier", "later"):
+        q = b.loc[b.bars_after_v9.between(13, 24)]
+        if period != "full":
+            q = q.loc[q.cohort.eq(period)]
+        ordered = q.sort_values("net_r", ascending=False)
+        for nremove in (0, 1, int(np.ceil(len(q) * .01))):
+            bucket_sensitivity.append({"period": period, "bucket": "13-24", "removed_top_r": nremove,
+                                       "removed_keys": "|".join(ordered.iloc[:nremove].trade_key),
+                                       **metrics(ordered.iloc[nremove:], period == "earlier")})
     quantiles = b[["net_r", "net_bp", "mfe_r", "hold_h", "initial_risk_frac", "bars_after_v9", "entry_premium_pct"]].quantile(
         [0, .01, .1, .25, .5, .75, .9, .95, .99, 1]).rename_axis("quantile").reset_index()
     parent = {"n": len(b), "parent_available": int(b.parent_v9_net_r.notna().sum()),
@@ -212,7 +224,20 @@ def main():
     tables = {"overview": overview, "monthly": by_month, "by_source": cuts(b, "source"), "by_delay": cuts(b, "delay_bucket"),
               "by_risk": cuts(b, "risk_bucket"), "by_mfe": cuts(b, "mfe_bucket"), "by_exit": cuts(b, "exit_reason"),
               "mfe_outcomes": outcomes, "source_decomposition": decomposition(b), "tail_sensitivity": pd.DataFrame(sensitivity),
-              "quantiles": quantiles, "by_symbol": by_symbol, "baseline_1h_ledger": b}
+              "quantiles": quantiles, "by_symbol": by_symbol, "baseline_1h_ledger": b,
+              "delay_13_24_sensitivity": pd.DataFrame(bucket_sensitivity)}
+    z = b.sort_values(["signal_bar_open", "symbol"])
+    public = pd.DataFrame({"币种": z.symbol, "信号K时间(北京)": z.signal_bar_open.dt.tz_convert("Asia/Shanghai"),
+                           "入场时间(北京)": z.entry_time.dt.tz_convert("Asia/Shanghai"),
+                           "退出时间(北京)": z.exit_time.dt.tz_convert("Asia/Shanghai"),
+                           "突破来源": z.source.map({"chart": "本周期1h", "htf": "上级4h", "both": "双周期"}),
+                           "距V9根数": z.bars_after_v9, "入场价": z.entry_price, "初始止损": z.initial_stop,
+                           "初始风险距离(%)": z.initial_risk_frac * 100, "退出价": z.exit_price,
+                           "退出原因": z.exit_reason.map({"initial_stop": "初始止损", "trailing_stop": "追踪止损", "opposite_v6_next_open": "反向确认"}),
+                           "持仓小时": z.hold_h, "最大记录浮盈R": z.mfe_r, "净R": z.net_r,
+                           "净价格收益(%)": z.net_return * 100, "较原V9入场追价(%)": z.entry_premium_pct,
+                           "原V9净R(事后关联)": z.parent_v9_net_r, "交易标识": z.trade_key})
+    tables["1h逐笔明细"] = public
     for name in ("summary", "attribution", "tail_retention", "gates"):
         tables[f"variants_{name}"] = pd.read_csv(STATS / f"{name}.csv").query("timeframe == '1h'")
     for name, table in tables.items():
