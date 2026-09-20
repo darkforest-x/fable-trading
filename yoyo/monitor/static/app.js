@@ -13,7 +13,7 @@
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
     lines: { kind: null, items: [], status: null, timeframe: "all", search: "", liveOnly: false, limit: 24, loading: false, syncedAt: null,
-      period: "all", outcome: "all", sort: "newest", ledger: null, revision: 0 },
+      period: "all", outcome: "all", sort: "newest", performanceVersion: "current", ledger: null, revision: 0 },
   };
   const titles = {
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
@@ -303,7 +303,18 @@
     next_bar_is_gap: "下一根数据断档 · 未开仓", risk_invalid: "止损无效 · 未开仓",
   };
   const LINE_EXITS = { initial_stop: "初始止损", initial_stop_gap: "初始止损（跳空）", trailing_stop: "跟随保护",
-    trailing_stop_gap: "跟随保护（跳空）", opposite_v6_next_open: "V9 空头确认平仓" };
+    trailing_stop_gap: "跟随保护（跳空）", opposite_v6_next_open: "V9 空头确认平仓",
+    rsi_seventh_reverse_next_open: "RSI 第7个空头大菱形 · 全平" };
+  const RSI_LINES_BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost";
+  const linesSnapshot = () => state.lines.ledger?.selected_performance_version === "baseline";
+  function rsiProgress(p) {
+    if (p.performance_version !== RSI_LINES_BASIS && p.basis !== RSI_LINES_BASIS) return "";
+    if (p.rsi_exit_pending) return " · 第7个空头大菱形已确认，待次根开盘全平";
+    if (!p.rsi_counter_known) return " · RSI 连续计数待完整序列";
+    if (p.rsi_run_side !== -1) return " · 空头大菱形计数待开始";
+    return p.rsi_run_count >= 7 ? ` · 本轮空头大菱形 ${number(p.rsi_run_count)} 个 · 第7个在本仓入场前`
+      : ` · 空头大菱形 ${number(p.rsi_run_count)} / 7`;
+  }
   function linePerformanceView(item) {
     const p = item.performance;
     if (!p || !["active", "profit", "loss", "breakeven"].includes(p.status)) {
@@ -315,12 +326,14 @@
     const up = finite(value) && Number(value) > 0.005, down = finite(value) && Number(value) < -0.005;
     const className = p.status === "profit" ? "outcome-win" : p.status === "loss" ? "outcome-loss" : p.status === "breakeven" ? "outcome-even" : up ? "outcome-active-win" : down ? "outcome-active-loss" : "outcome-active";
     const exitName = LINE_EXITS[p.exit_reason] || p.exit_reason || "";
-    const badge = p.status === "active" ? `运行中 · ${signedR(value)}` : p.status === "loss" ? `已止损 · ${signedR(value)}` : p.status === "breakeven" ? "保本退出 · 0.00R" : `已退出 · ${signedR(value)}`;
+    const snapshot = linesSnapshot();
+    const stopExit = /^(initial_stop|trailing_stop)/.test(p.exit_reason || "");
+    const badge = p.status === "active" ? `${snapshot ? "快照时运行中" : "运行中"} · ${signedR(value)}` : p.status === "loss" ? `${stopExit ? "已止损" : "亏损退出"} · ${signedR(value)}` : p.status === "breakeven" ? "保本退出 · 0.00R" : `已退出 · ${signedR(value)}`;
     const stop = p.stop_price ?? p.initial_stop;
-    return { className, badge, value: signedR(value), valueLabel: p.status === "active" ? "当前 R" : "退出 R",
+    return { className, badge, value: signedR(value), valueLabel: p.status === "active" ? (snapshot ? "快照浮动 R" : "当前 R") : "退出 R",
       peak: signedR(p.peak_r), stop: finite(stop) ? price(stop) : "—", stopLabel: p.trailing_active ? "跟随保护" : "SL",
       note: p.status === "active"
-        ? `入场 ${price(p.entry_price)} · 已持有 ${number(p.bars_held)} 根 · 按最新收盘估值`
+        ? `入场 ${price(p.entry_price)} · 已持有 ${number(p.bars_held)} 根 · ${snapshot ? "仅为切换前快照，不再更新" : "按最新收盘估值"}${snapshot ? "" : rsiProgress(p)}`
         : `入场 ${price(p.entry_price)} → 出场 ${price(p.exit_price)}（${exitName}）· 持有 ${number(p.bars_held)} 根` };
   }
   function stopFact(item) {
@@ -355,6 +368,13 @@
     $("lines-rule-note").textContent = kind === "joint"
       ? "上级：15m 看 1H，30m 看 2H，1H 看 4H，4H 看日线 · 每个 V9 框只算第一次"
       : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
+    const rsiPolicy = status.performance_policy?.version === RSI_LINES_BASIS || lines.ledger?.basis === RSI_LINES_BASIS;
+    $("lines-exit-rule").classList.toggle("hidden", kind !== "joint");
+    $("lines-exit-rule").textContent = linesSnapshot()
+      ? "切换前旧规则快照 · 原止损、4ATR跟随保护、V9反向退出 · 数值固定，不是当前持仓"
+      : rsiPolicy
+        ? "退出：原保护与同周期第7个空头大菱形，先触发先退出 · 仅大菱形连续同色计数，异色重置 · 收盘确认，次根开盘全平"
+        : "退出：原止损、4ATR跟随保护、V9反向退出 · 等待退出规则同步";
     $("lines-timeframes").innerHTML = ["all", ...LINE_TIMEFRAMES[kind]].map((tf) => `<button type="button" data-lines-timeframe="${tf}" class="${lines.timeframe === tf ? "selected" : ""}" aria-pressed="${lines.timeframe === tf}">${tf === "all" ? "全部" : escapeHTML(timeframeLabel(tf))}</button>`).join("");
     $("lines-stats").classList.toggle("hidden", kind !== "joint");
     $("lines-ledger-filters").classList.toggle("hidden", kind !== "joint");
@@ -384,6 +404,11 @@
   }
   function renderLinesStats() {
     const data = state.lines.ledger, stats = data?.stats;
+    const versions = data?.available_performance_versions || [{ value: "current", label: "当前退出规则" }];
+    const select = $("lines-performance-version");
+    select.innerHTML = versions.map((v) => `<option value="${escapeHTML(v.value)}">${escapeHTML(v.label)}</option>`).join("");
+    select.value = state.lines.performanceVersion;
+    select.disabled = versions.length < 2;
     const unknown = stats ? numeric(stats.unknown) : 0, empty = stats?.total === 0;
     const notice = $("lines-stats-notice");
     notice.classList.toggle("hidden", !stats || unknown === 0);
@@ -397,14 +422,18 @@
     setR("lines-stats-realized", stats?.realized_r);
     setR("lines-stats-floating", stats?.floating_r);
     $("lines-stats-closed-note").textContent = empty ? "当前筛选无信号" : stats ? `${stats.measured_closed} 笔有 R / ${stats.closed} 笔已结束` : "等待统计";
-    $("lines-stats-active-note").textContent = empty ? "当前筛选无信号" : stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔运行中` : "等待统计";
+    $("lines-stats-active-note").textContent = empty ? "当前筛选无信号" : stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔${linesSnapshot() ? "快照时运行中" : "运行中"}` : "等待统计";
     $("lines-stats-winrate").textContent = finite(stats?.win_rate) ? `${(stats.win_rate * 100).toFixed(1)}%` : "—";
     $("lines-stats-win-note").textContent = empty ? "当前筛选无信号" : stats ? `盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}${finite(stats.average_r) ? ` · 平均 ${signedR(stats.average_r)}` : ""}` : "只统计有退出 R 的信号";
     $("lines-stats-total").textContent = stats ? number(stats.total) : "—";
     $("lines-stats-side-note").textContent = stats ? `只做多 · 未开仓/未知 ${unknown}` : "每个 V9 框只算一次";
     const cellR = (r) => `<td class="${finite(r) && r > 0 ? "r-positive" : finite(r) && r < 0 ? "r-negative" : ""}">${escapeHTML(signedR(r))}</td>`;
     $("lines-stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(timeframeLabel(row.timeframe))}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td><td>${row.unknown}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
-    $("lines-stats-basis").textContent = `按信号收盘日归属 · 北京时间 · 周一开始 · 周期、搜索、「只看实时」同样生效 · ${data ? `更新 ${clockTime(data.as_of_ms)}` : "等待同步"}`;
+    const versionsInView = data?.projection_versions || [];
+    const mixed = Array.isArray(versionsInView) ? versionsInView.length > 1 : Object.keys(versionsInView).length > 1;
+    const timeNote = linesSnapshot() ? `切换前固定快照 ${fullDate(data.performance_snapshot_ms || data.as_of_ms)} · 不作新旧规则同步收益对照`
+      : data ? `当前规则回算 · 更新 ${clockTime(data.as_of_ms)}${mixed ? " · 退出规则更新中，部分记录仍为旧版" : ""}` : "等待同步";
+    $("lines-stats-basis").textContent = `按信号收盘日归属 · 北京时间 · 周一开始 · 周期、搜索、「只看实时」同样生效 · ${timeNote}`;
   }
   async function loadLinesStatus() {
     try {
@@ -422,7 +451,7 @@
     try {
       const lines = state.lines, revision = lines.revision;
       const query = kind === "joint"
-        ? `/api/lines/ledger?kind=joint&limit=2000&period=${lines.period}&outcome=${lines.outcome}&sort=${lines.sort}&scope=${lines.liveOnly ? "live" : "all"}${lines.timeframe === "all" ? "" : `&timeframe=${encodeURIComponent(lines.timeframe)}`}&search=${encodeURIComponent(lines.search.trim().slice(0, 24))}`
+        ? `/api/lines/ledger?kind=joint&limit=2000&performance_version=${encodeURIComponent(lines.performanceVersion)}&period=${lines.period}&outcome=${lines.outcome}&sort=${lines.sort}&scope=${lines.liveOnly ? "live" : "all"}${lines.timeframe === "all" ? "" : `&timeframe=${encodeURIComponent(lines.timeframe)}`}&search=${encodeURIComponent(lines.search.trim().slice(0, 24))}`
         : `/api/lines/events?kind=${kind}&limit=1000`;
       const [events] = await Promise.all([api(query), loadLinesStatus()]);
       if (!Array.isArray(events.items)) throw new Error("服务返回的数据格式有误");
@@ -985,6 +1014,12 @@
   }));
   $("lines-outcome").addEventListener("change", (event) => { state.lines.outcome = event.target.value; state.lines.limit = 24; reloadLinesLedger(); });
   $("lines-sort").addEventListener("change", (event) => { state.lines.sort = event.target.value; reloadLinesLedger(); });
+  $("lines-performance-version").addEventListener("change", (event) => {
+    state.lines.performanceVersion = event.target.value; state.lines.limit = 24;
+    // Clear the prior projection while the new version loads; never label old
+    // values as the newly selected version during an asynchronous request.
+    state.lines.items = []; state.lines.ledger = null; reloadLinesLedger();
+  });
   document.querySelectorAll("[data-lines-state]").forEach((button) => button.addEventListener("click", () => {
     state.lines.liveOnly = button.dataset.linesState === "live";
     document.querySelectorAll("[data-lines-state]").forEach((b) => { b.classList.toggle("selected", b === button); b.setAttribute("aria-pressed", String(b === button)); });

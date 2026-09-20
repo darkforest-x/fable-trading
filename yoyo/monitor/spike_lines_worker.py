@@ -11,7 +11,9 @@ timeframe's bars changed. Events are insert-only; an event first seen long after
 bar closed keeps that late ``detected_at_ms`` and is shown as a late record, never as
 a fresh one. Only a joint's ``performance`` (its simulated position) is rewritten as
 later bars close; a position left open when its signal falls out of the analysis
-window becomes ``unknown`` rather than a frozen floating R.
+window becomes ``unknown`` rather than a frozen floating R. A projection-policy
+change freezes the existing joint performance as an audit snapshot before a new
+policy rewrites it; the snapshot is never recomputed.
 """
 from __future__ import annotations
 
@@ -32,6 +34,7 @@ POLL_SECONDS = 60
 HISTORY_BARS = 200          # how far back a cold start records events, per timeframe
 DAY_MS = 86_400_000
 SCANNER_TIMEFRAMES = ("15m", "30m", "1H", "4H")
+LEGACY_PERFORMANCE_BASIS = "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"
 
 
 def _json(value: object) -> str:
@@ -52,6 +55,10 @@ class LinesBook:
                     bar_open_ms INTEGER NOT NULL, bar_close_ms INTEGER NOT NULL,
                     detected_at_ms INTEGER NOT NULL, payload TEXT NOT NULL);
                 CREATE INDEX IF NOT EXISTS events_kind_close ON events(kind, bar_close_ms DESC);
+                CREATE TABLE IF NOT EXISTS performance_versions (
+                    event_id TEXT NOT NULL, version TEXT NOT NULL, payload TEXT NOT NULL, saved_ms INTEGER NOT NULL,
+                    PRIMARY KEY(event_id, version));
+                CREATE INDEX IF NOT EXISTS performance_versions_version ON performance_versions(version);
                 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, payload TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS daily (symbol TEXT PRIMARY KEY, payload BLOB NOT NULL, updated_ms INTEGER NOT NULL);
             """)
@@ -74,6 +81,30 @@ class LinesBook:
         with self.connect() as db:
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, _json(value)))
 
+    def initialize_performance_policy(self, version: str, *, changed_at_ms: int) -> dict:
+        """Set the active projection, atomically snapshotting all joint cards on change."""
+        if not isinstance(version, str) or not version:
+            raise ValueError("performance basis must be a non-empty string")
+        with self.connect() as db:
+            row = db.execute("SELECT payload FROM meta WHERE key='performance_policy'").fetchone()
+            existing = json.loads(row[0]) if row else None
+            current = existing.get("version") if isinstance(existing, dict) else LEGACY_PERFORMANCE_BASIS
+            if current == version and isinstance(existing, dict):
+                return existing
+            if existing is None and version == LEGACY_PERFORMANCE_BASIS:
+                policy = {"version": version, "changed_at_ms": changed_at_ms,
+                          "baseline_version": None, "baseline_snapshot_ms": None}
+            else:
+                for event_id, raw in db.execute("SELECT id,payload FROM events WHERE kind='joint'"):
+                    performance = dict((json.loads(raw).get("performance") or {}))
+                    performance.setdefault("basis", current)
+                    db.execute("INSERT OR IGNORE INTO performance_versions VALUES (?,?,?,?)",
+                               (event_id, current, _json(performance), changed_at_ms))
+                policy = {"version": version, "changed_at_ms": changed_at_ms,
+                          "baseline_version": current, "baseline_snapshot_ms": changed_at_ms}
+            db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("performance_policy", _json(policy)))
+            return policy
+
     def insert(self, events: list[dict]) -> int:
         if not events:
             return 0
@@ -88,6 +119,8 @@ class LinesBook:
         """Rewrite joint positions from the latest replay; strand no stale open position."""
         changed = 0
         with self.connect() as db:
+            policy_row = db.execute("SELECT payload FROM meta WHERE key='performance_policy'").fetchone()
+            policy = json.loads(policy_row[0]) if policy_row else None
             rows = db.execute("SELECT id,payload FROM events WHERE kind='joint' AND symbol=? AND timeframe=?",
                               (symbol, timeframe)).fetchall()
             for event_id, payload in rows:
@@ -98,6 +131,10 @@ class LinesBook:
                     if old.get("status") != "active":
                         continue
                     new = {**old, "status": "unknown", "reason": "left_analysis_window", "current_r": None}
+                old_basis = (event.get("performance") or {}).get("basis", LEGACY_PERFORMANCE_BASIS)
+                new_basis = new.get("basis", LEGACY_PERFORMANCE_BASIS)
+                if old_basis != new_basis and (not isinstance(policy, dict) or policy.get("version") != new_basis):
+                    raise RuntimeError("refusing cross-version projection refresh without active policy")
                 if new == event.get("performance"):
                     continue
                 event["performance"] = new
@@ -175,6 +212,7 @@ class LinesWorker:
         self.universe_at = 0
         self.daily = self.book.load_daily()
         self.seen: dict[tuple[str, str], tuple] = {}
+        self.performance_policy: dict | None = None
         activation = self.book.get_meta("activation")
         if not isinstance(activation, dict) or type(activation.get("activated_ms")) is not int:
             activation = {"activated_ms": now_ms(), "protocol": None}
@@ -219,6 +257,7 @@ class LinesWorker:
     def pass_once(self) -> dict:
         from yoyo.monitor import spike_lines as sl
         started = now_ms()
+        self.performance_policy = self.book.initialize_performance_policy(sl.BASIS, changed_at_ms=started)
         self.client.synchronize()
         self.refresh_universe()
         stamps = self.primary.stamps()
@@ -245,7 +284,8 @@ class LinesWorker:
                 scan["cells"] += 1
                 try:
                     higher = sl.HIGHER.get(tf)
-                    key = (stamps.get((symbol, tf)) if tf in SCANNER_TIMEFRAMES else None,
+                    key = (sl.BASIS,
+                           stamps.get((symbol, tf)) if tf in SCANNER_TIMEFRAMES else None,
                            stamps.get((symbol, {"2H": "1H"}.get(higher, higher))) if higher in ("1H", "2H", "4H") else None)
                     if tf in ("4H", "1Dutc"):
                         daily = self.daily_candles(symbol)

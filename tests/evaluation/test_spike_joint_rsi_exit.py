@@ -113,6 +113,15 @@ def test_adapter_never_mutates_the_raw_sides_or_caller_mask():
     np.testing.assert_array_equal(mask, before_mask)
 
 
+def test_rsi_exit_has_no_profit_gate():
+    open_, high, low, close = _bars()
+    open_[13], high[13], low[13] = 99.0, 100.0, 98.5
+    mask = np.zeros(len(close), dtype=bool); mask[12] = True
+    status, trade = subject.attempt_with_rsi_exit(_prepared(open_, high, low, close), 10, mask)
+    assert status == "closed" and trade["exit_reason"] == "rsi_seventh_reverse_next_open"
+    assert trade["net_r"] < 0
+
+
 def _feature_frame(n=80):
     index = pd.date_range("2025-03-01", periods=n, freq="h", tz="UTC")
     close = 100 + np.cumsum(np.sin(np.arange(n) / 3) + .15)
@@ -127,13 +136,36 @@ def test_chartprime_features_are_prefix_causal():
     pdt.assert_frame_equal(left.iloc[:55], right.iloc[:55])
 
 
+def test_only_strong_diamonds_count_and_first_truncated_color_stays_unknown_until_reversal():
+    side = np.array([0, -1, -1, 0, 1, -1, -1, -1, -1, -1, -1, -1, -1], dtype=int)
+    counts = subject.strong_diamond_counts(side, np.ones(len(side), dtype=bool),
+                                           reset=np.array([True] + [False] * (len(side) - 1), dtype=bool))
+    assert counts.strong_streak.iloc[:4].isna().all()
+    assert counts.last_strong_side.iloc[3] == -1 and not counts.counter_known.iloc[3]
+    assert counts.strong_streak.iloc[4] == 1 and counts.counter_known.iloc[4]
+    assert counts.strong_streak.iloc[11] == 7 and counts.strong_streak.iloc[12] == 8
+    features = pd.DataFrame({"strong_side": side, "strong_streak": counts.strong_streak,
+                             "counter_known": counts.counter_known})
+    np.testing.assert_array_equal(subject.rsi_exit_mask(features), np.arange(len(side)) == 11)
+
+
+def test_gap_resets_the_global_count_and_preentry_zeros_do_not():
+    side = np.array([1, -1, -1, 0, -1, -1], dtype=int)
+    reset = np.array([True, False, False, False, True, False], dtype=bool)
+    counts = subject.strong_diamond_counts(side, np.ones(len(side), dtype=bool), reset=reset)
+    assert counts.strong_streak.iloc[2] == counts.strong_streak.iloc[3] == 2
+    assert counts.strong_streak.iloc[4:].isna().all() and not counts.counter_known.iloc[5]
+    assert counts.last_strong_side.iloc[4] == -1  # valid post-gap event is observed but remains unknown
+
+
 def test_gap_and_timestamp_discontinuity_reseed_against_an_isolated_segment():
     frame = _feature_frame()
     gap = np.zeros(len(frame), dtype=bool); gap[30] = True
     joined = subject.chartprime_strong_side(frame, gap=gap, minutes=60)
     isolated = subject.chartprime_strong_side(frame.iloc[30:], minutes=60)
     pdt.assert_frame_equal(joined.iloc[30:], isolated)
-    discontinuous = pd.concat([frame.iloc[:30], frame.iloc[30:].set_axis(frame.index[30:] + pd.Timedelta(hours=3))])
+    discontinuous = frame.copy()
+    discontinuous.index = frame.index[:30].append(frame.index[30:] + pd.Timedelta(hours=3))
     auto = subject.chartprime_strong_side(discontinuous, minutes=60)
     pdt.assert_frame_equal(auto.iloc[30:], isolated.set_axis(discontinuous.index[30:]))
 

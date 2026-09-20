@@ -36,6 +36,7 @@ import pandas as pd
 from yoyo.evaluation import spike_v10_4_increment as inc
 from yoyo.evaluation import spike_v10_4_study as study
 from yoyo.evaluation import spike_v11_study as v11
+from yoyo.evaluation import spike_joint_rsi_exit as rsi_exit
 from yoyo.evaluation.spike_v6_wvf_study import ExecutionSpec
 from yoyo.evaluation.spike_v10_4 import V104Params, box_joints, joint_events, reference_long_exits
 
@@ -48,7 +49,9 @@ HIGHER = {"15m": "1H", "30m": "2H", "1H": "4H", "4H": "1Dutc"}
 # a recent decision beyond indicator warm-up, and the tail bounds the CPU per cell.
 TAIL_BARS = 1500
 TRACK = {0: "完整影线", 1: "削尖影线"}
-BASIS = "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"
+BASELINE_BASIS = "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"
+BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost"
+PERFORMANCE_VERSION = BASIS
 ROUND_TRIP_COST = ExecutionSpec.round_trip_cost
 
 
@@ -105,14 +108,33 @@ def reference_stop(frame: pd.DataFrame, i: int, tick: float) -> float | None:
     return math.floor(stop / tick) * tick if stop > 0 else None
 
 
-def _unopened(reason: str) -> dict:
+def _unopened(reason: str, *, basis: str, rsi: dict | None = None) -> dict:
     """A joint with no position (awaiting the next open, or one already running) has no R."""
     return {"status": "unknown", "reason": reason, "current_r": None, "exit_r": None, "peak_r": None,
-            "stop_price": None, "trailing_active": False, "bars_held": 0, "basis": BASIS,
-            "round_trip_cost": ROUND_TRIP_COST}
+            "stop_price": None, "trailing_active": False, "bars_held": 0, "basis": basis,
+            "performance_version": basis, "round_trip_cost": ROUND_TRIP_COST, **(rsi or {})}
 
 
-def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool) -> dict:
+def _rsi_metadata(features: pd.DataFrame, mask: np.ndarray, *, minutes: int, as_of_i: int,
+                  active: bool, trigger_i: int | None = None) -> dict:
+    """Project one causal RSI counter snapshot without consulting later bars."""
+    if not 0 <= as_of_i < len(features):
+        side, count, known = 0, None, False
+    else:
+        row = features.iloc[as_of_i]
+        side, known = int(row.last_strong_side), bool(row.counter_known)
+        count = None if pd.isna(row.last_strong_run) else int(row.last_strong_run)
+    result = {"rsi_exit_rule": dict(rsi_exit.RSI_EXIT_RULE), "rsi_timeframe_minutes": minutes,
+              "rsi_run_side": side, "rsi_run_count": count, "rsi_counter_known": known,
+              "rsi_exit_pending": bool(active and len(mask) and mask[-1]),
+              "rsi_exit_trigger_close_ms": None}
+    if trigger_i is not None:
+        result["rsi_exit_trigger_close_ms"] = _ms(features.index[trigger_i] + pd.Timedelta(minutes=minutes))
+    return result
+
+
+def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool, *, basis: str,
+              rsi_features: pd.DataFrame | None = None, rsi_mask: np.ndarray | None = None) -> dict:
     """Serialize one replayed joint trade like the V9 card projection."""
     entry, risk = _num(trade.get("entry_price")), _num(trade.get("initial_risk"))
     entry_i, exit_i = int(trade["entry_i"]), int(trade["exit_i"])
@@ -128,47 +150,80 @@ def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool
     status = "active" if active else ("unknown" if net_r is None else "profit" if net_r > 1e-9
                                       else "loss" if net_r < -1e-9 else "breakeven")
     reason = str(trade.get("exit_reason"))
+    is_rsi_exit = reason == "rsi_seventh_reverse_next_open"
+    rsi = {}
+    if rsi_features is not None and rsi_mask is not None:
+        trigger_i = int(trade["rsi_exit_trigger_i"]) if is_rsi_exit else None
+        # Closed trades cannot consult their exit bar's close: an open or
+        # intrabar fill has no claim to that future close.  An RSI exit's
+        # confirmed trigger is exactly the last alive close.
+        as_of_i = len(frame) - 1 if active else (trigger_i if trigger_i is not None else int(trade["exit_i"]) - 1)
+        rsi = _rsi_metadata(rsi_features, rsi_mask, minutes=int(step / pd.Timedelta(minutes=1)),
+                            as_of_i=as_of_i, active=active, trigger_i=trigger_i)
     return {"status": status, "current_r": net_r, "exit_r": None if active else net_r,
             "peak_r": _num(trade.get("mfe_r")), "entry_price": entry, "entry_time_ms": _ms(pd.Timestamp(trade["entry_time"])),
             "initial_stop": initial_stop, "initial_risk": risk, "stop_price": protection if active else initial_stop,
             "trailing_active": bool(active and protection is not None and initial_stop is not None
                                     and protection > initial_stop),
             "exit_price": None if active else _num(trade.get("exit_price")),
-            "exit_time_ms": None if active else updated, "exit_reason": None if active else reason,
+            "exit_time_ms": None if active else (_ms(pd.Timestamp(trade["exit_time"])) if is_rsi_exit else updated),
+            "exit_time_precision": None if active else ("bar_open" if is_rsi_exit else "bar_close_legacy"),
+            "exit_reason": None if active else reason,
             "stop_triggered": not active and reason.startswith(("initial_stop", "trailing_stop")),
             "bars_held": (len(frame) - 1 if active else exit_i) - entry_i, "updated_at_ms": updated,
-            "mark": "last_closed_bar_close" if active else None, "basis": BASIS,
-            "round_trip_cost": ROUND_TRIP_COST}
+            "mark": "last_closed_bar_close" if active else None, "basis": basis,
+            "performance_version": basis, "round_trip_cost": ROUND_TRIP_COST, **rsi}
 
 
-def positions(frame: pd.DataFrame, facts: dict, fired: np.ndarray, *, minutes: int, tick: float) -> dict[int, dict]:
+def positions(frame: pd.DataFrame, facts: dict, fired: np.ndarray, *, minutes: int, tick: float,
+              rsi_exit_enabled: bool = False, rsi_features: pd.DataFrame | None = None) -> dict[int, dict]:
     """Serial replay of every joint (the backtest's `serial`), keyed by joint bar index."""
     identity = {"venue": "okx", "symbol": "", "asset": "", "timeframe": "", "timeframe_min": minutes}
     prepared = study.prepared_arm(frame, facts["gap"], facts["side"], "okx:monitor", identity, minutes, tick)
     step = pd.Timedelta(minutes=minutes)
+    basis = BASIS if rsi_exit_enabled else BASELINE_BASIS
+    if rsi_exit_enabled:
+        features = (rsi_exit.chartprime_strong_side(frame, gap=np.asarray(facts["gap"], dtype=bool), minutes=minutes)
+                    if rsi_features is None else rsi_features)
+        if not features.index.equals(frame.index):
+            raise ValueError("rsi_features must align to the replay frame")
+        rsi_mask = rsi_exit.rsi_exit_mask(features)
+    else:
+        features = None
+        rsi_mask = None
     out: dict[int, dict] = {}
     flat_from = -1
     for i in np.flatnonzero(fired).tolist():
         if i < flat_from:
-            out[i] = _unopened("serial_position_already_open")
+            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=i, active=False)
+                   if features is not None and rsi_mask is not None else None)
+            out[i] = _unopened("serial_position_already_open", basis=basis, rsi=rsi)
             continue
-        status, trade = inc.attempt(prepared, i)
+        status, trade = (rsi_exit.attempt_with_rsi_exit(prepared, i, rsi_mask)
+                         if rsi_mask is not None else inc.attempt(prepared, i))
         if trade is None:
-            out[i] = _unopened({"no_next_bar": "awaiting_next_open"}.get(status, status))
+            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=i, active=False)
+                   if features is not None and rsi_mask is not None else None)
+            out[i] = _unopened({"no_next_bar": "awaiting_next_open"}.get(status, status), basis=basis, rsi=rsi)
         elif status == "closed":
-            out[i] = _position(trade, frame, step, active=False)
+            out[i] = _position(trade, frame, step, active=False, basis=basis,
+                               rsi_features=features, rsi_mask=rsi_mask)
             flat_from = int(trade["exit_i"])
         elif status == "censored_boundary":
-            out[i] = _position(trade, frame, step, active=True)
+            out[i] = _position(trade, frame, step, active=True, basis=basis,
+                               rsi_features=features, rsi_mask=rsi_mask)
             flat_from = len(frame) + 1
         else:
-            out[i] = _unopened("data_gap_censored")
+            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=int(trade["exit_i"]) - 1, active=False)
+                   if features is not None and rsi_mask is not None else None)
+            out[i] = _unopened("data_gap_censored", basis=basis, rsi=rsi)
             flat_from = int(trade["exit_i"])
     return out
 
 
 def analyze(chart: pd.DataFrame, timeframe: str, *, tick: float, asset: str | None,
-            higher: pd.DataFrame | None = None, want_breaks: bool = True, want_joints: bool = True) -> dict:
+            higher: pd.DataFrame | None = None, want_breaks: bool = True, want_joints: bool = True,
+            rsi_exit_enabled: bool = True, rsi_features: pd.DataFrame | None = None) -> dict:
     """Break and joint events over one closed-bar prefix of one symbol/timeframe."""
     if isinstance(tick, bool) or not math.isfinite(float(tick)) or float(tick) <= 0:
         raise ValueError("tick must be positive and finite")
@@ -221,7 +276,12 @@ def analyze(chart: pd.DataFrame, timeframe: str, *, tick: float, asset: str | No
             htf_now = H["known"]
         chart_now = np.asarray(result.break_event, dtype=bool)
         fired = box_joints(box["long_open"], box["box_entry"], htf_now | chart_now)
-        performance = positions(frame, facts, fired, minutes=minutes, tick=float(tick))
+        # Build this same-timeframe causal series once for the whole replay,
+        # never separately for individual joint entries.
+        current_rsi = (rsi_exit.chartprime_strong_side(frame, gap=np.asarray(facts["gap"], dtype=bool), minutes=minutes)
+                       if rsi_exit_enabled and rsi_features is None else rsi_features)
+        performance = positions(frame, facts, fired, minutes=minutes, tick=float(tick),
+                                rsi_exit_enabled=rsi_exit_enabled, rsi_features=current_rsi)
         for i in np.flatnonzero(fired).tolist():
             s = int(box["box_entry"][i])
             own, up = bool(chart_now[i]), bool(htf_now[i])

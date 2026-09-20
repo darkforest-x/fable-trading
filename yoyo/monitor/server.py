@@ -276,11 +276,11 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/api/lines/ledger")
     def spike_lines_ledger(kind: str = "joint", period: str = "all", timeframe: str = None, scope: str = "all",
                            search: str = Query("", max_length=24), outcome: str = "all", sort: str = "newest",
-                           limit: int = Query(1000, ge=1, le=2000)):
+                           limit: int = Query(1000, ge=1, le=2000), performance_version: str = "current"):
         try:
             return lines_ledger(lines_book, kind=kind, now_ms=monitor.client.clock(), period=period,
                                 timeframe=timeframe, scope=scope, search=search, outcome=outcome, sort=sort,
-                                limit=limit)
+                                limit=limit, performance_version=performance_version)
         except ValueError as exc:
             raise HTTPException(400, "不支持的统计筛选条件。") from exc
         except LinesUnavailable as error:
