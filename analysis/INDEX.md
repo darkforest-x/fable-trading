@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **592** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **593** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -11,6 +11,7 @@
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
 | 2026-09-20 | [`p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md`](p1_btc_rsi_fifth_diamond_quarter_exit_20260920.md) | BTC RSI：第5个同色大菱形入场，反向大菱形分四次退出 | 结论：**当前规则在1h、4h两个周期全期均未盈利**。1h 28笔全部闭合，18盈10亏，胜率64.29%，净价格收益平均每笔−0.6937%；4h开仓8笔，7笔已平（4盈3亏），另1笔剩75%原仓位，计入末端估值后平均每笔−1.4163%。两组相对匹配随机入场均有正超额，但绝对价格损益仍为... |
+| 2026-09-20 | [`p1_four_hour_range_btc_eth_20260920.md`](p1_four_hour_range_btc_eth_20260920.md) | 首4小时区间假突破回归：BTC、ETH三年固定规则回测 | 结论：**当前固定版本在BTC、ETH上扣除20bp往返成本后均为负期望，不能据此采用为实盘策略。** BTC扣费前已略亏；ETH毛收益为正，但远不足以覆盖成本。前两年、后一年以及多空方向均为净亏。代码实现完成，负面结果保留，不以调参后替换本版结论。 |
 | 2026-09-20 | [`p1_ma_morphology_reuse_20260920.md`](p1_ma_morphology_reuse_20260920.md) | 历史 YOLO / L2 资产能否用于识别 Owner 六线密集 |  |
 | 2026-09-20 | [`p1_spike_h1_sma60_release_20260920.md`](p1_spike_h1_sma60_release_20260920.md) | SPIKE V12.3 / V9.1：15m 增加已收盘 1h SMA60 入场过滤 |  |
 | 2026-09-20 | [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) | SPIKE 六均线密集：单项拆分与语义反例 |  |
@@ -839,6 +840,7 @@
 - [`p1_fixed_w10_blind_audit_pack_20260820.md`](p1_fixed_w10_blind_audit_pack_20260820.md) — P1 fixed-W10 门禁修复、artifact 谱系与盲审包（2026-08-20）
 - [`p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md`](p1_fixed_w10_canonical_ohlc_triage_v2_20260821.md) — P1 统一原始 OHLC 全量筛选包 v2（2026-08-21）
 - [`p1_fixed_w10_original_source_triage_20260821.md`](p1_fixed_w10_original_source_triage_20260821.md) — P1 fixed-W10 原始来源图全量筛选包（2026-08-21）
+- [`p1_four_hour_range_btc_eth_20260920.md`](p1_four_hour_range_btc_eth_20260920.md) — 首4小时区间假突破回归：BTC、ETH三年固定规则回测
 - [`p1_goal_martingale_path_20260915.md`](p1_goal_martingale_path_20260915.md) — 倍投可行路径搜索 · 第 1 轮：前提检验
 - [`p1_goal_martingale_path_r2_20260915.md`](p1_goal_martingale_path_r2_20260915.md) — 倍投可行路径搜索 · 第 2 轮：行情能否事前识别 & 亏后加码是否成立
 - [`p1_goal_martingale_path_r3_20260915.md`](p1_goal_martingale_path_r3_20260915.md) — 倍投可行路径搜索 · 第 3 轮：全仓库普查 + 破产概率

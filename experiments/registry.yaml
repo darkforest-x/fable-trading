@@ -16,18 +16,22 @@ schema_version: 1
 experiments:
   - experiment_id: exp-four-hour-range-20260920-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 8a548c23ae
-    status: inconclusive
+    source_commit: 36d27908a4ee5c84a4af2c26ae2b3074a658e9b9
+    status: rejected
     question: Does a fixed NY00-04 range false-breakout reversion rule produce positive net returns on BTC and ETH perpetuals?
     single_variable: First fixed baseline;close outside then inside,next5m open,excursion extreme stop,2R target,NY day-end exit,20bp.
-    result: Preregistered before economic replay;two same-venue sources frozen with31-day warmup and no missing5m bars.
+    result: BTC2335 trades gross-38.59R net-1694.91R;ETH2246 gross135.05R net-851.82R. Both early/late and long/short netnegative.
+      Later paired-null Holm p0.6020/0.09110;no admission. Full4581-trade independent arithmetic/barrier audit passed.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_four_hour_range_btc_eth_20260920.md
-    artifacts: []
+    artifacts:
+    - four-hour-range-20260920-v1-delivery
     reuse_allowed: false
-    notes: Historical chronology split,matched random timing controls;no optimization or live changes. Pending scoring is not evidence of edge.
+    notes: NY00-04 wallclock,close-based return,nextopen,2R,20bp,NY EOD;1095days and315360bars/asset plus31day warmup.
+      18focused checks,468project checks pass8existing failures;12nativeAPI OHLC exactmatches. PrivatePinev1 compiled;fullTV parity notestablished.
+      TV referencehigh mismatch observed and rawexport plan-gated. No optimization,training,production or orders. Notion3e18856479af8131a2b9d56908ea9397.
   - experiment_id: exp-spike-v12-4-5m-filter-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a

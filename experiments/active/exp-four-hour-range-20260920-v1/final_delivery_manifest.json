@@ -1,0 +1,1031 @@
+{
+  "experiment_id": "exp-four-hour-range-20260920-v1",
+  "generated_at": "2026-09-20 06:11:39.998258+00:00",
+  "builders": {
+    "yoyo/evaluation/four_hour_range_delivery.py": "62e78475ec87bb849e2f2f073497264b3447ba6e1cc88b126fb750d20056cd5c",
+    "experiments/active/exp-four-hour-range-20260920-v1/config.json": "90688e3350536f636e9c2b7e1e3b034de4feae3ae50809aaa44bea8f9bd702d7"
+  },
+  "files": {
+    "analysis/p1_four_hour_range_btc_eth_20260920.md": {
+      "sha256": "9e167413d0899de2a8cc7482f853deb047f544b6b1fa4d9a8ed85037700a824e",
+      "size_bytes": 13098
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/.gitignore": {
+      "sha256": "70d077171eb2e185bdd85ca99174b2d801a166e5ded7e85d3c39b94ea4a583af",
+      "size_bytes": 43
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/AUDIT.md": {
+      "sha256": "1737431d05c2a7ae00d25e4f0fb420c94921f315fe8f8341d4b8b114fa9d18ee",
+      "size_bytes": 3146
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/PROJECT_PLAN.md": {
+      "sha256": "628fbf2a8014fb5d6023842422238c51c55bef941601076a9f5d5eb2b3b69817",
+      "size_bytes": 5122
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/boundary_checks.log": {
+      "sha256": "a0c7deab3adcdf634a3626d37d22a8e111940b4e371534e83ea85933396c96db",
+      "size_bytes": 17656
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/config.json": {
+      "sha256": "90688e3350536f636e9c2b7e1e3b034de4feae3ae50809aaa44bea8f9bd702d7",
+      "size_bytes": 818
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/BTC-USDT-SWAP/bars.csv.gz": {
+      "sha256": "0f5c5d3ee8b23df5fadf86ff7655bfc0aad4a099c86e884a2b2ab027f5c5a3e3",
+      "size_bytes": 6017185
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/BTC-USDT-SWAP/source_receipt.json": {
+      "sha256": "a43deaa385e3ef872d47629992ba52ca4f4abb5c2f4e5298c4909f3e17933e7a",
+      "size_bytes": 1303
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/bars.csv.gz": {
+      "sha256": "ba5ca45b8f2ed4c42ff00ec50ad090308229e9a2fd2ee5015cbd9557c626baf4",
+      "size_bytes": 5895793
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692518400000.json": {
+      "sha256": "e799718090db68626125bba79b50755e007b7b3a024c07961a43907bdf2e5e67",
+      "size_bytes": 27350
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692608400000.json": {
+      "sha256": "39e7c3240dc5ac4f284e817fb4979c2c1b1fee09c9b8a9a9cd6ff52335268fb7",
+      "size_bytes": 27434
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692698400000.json": {
+      "sha256": "53b2e6ab28aa9c02c99329339582ab7e9a45cd4b7309638ab78d399f6aeca877",
+      "size_bytes": 27493
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692788400000.json": {
+      "sha256": "24dc7fdb5fbd9bc98c10b191dc044d1b85fc04e85ff501ff76fa93b6ae6096d4",
+      "size_bytes": 27574
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692878400000.json": {
+      "sha256": "ada3a3110c78469d933309517f8e4708b7addf5c142c220672cb1a50c41dbe27",
+      "size_bytes": 27647
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1692968400000.json": {
+      "sha256": "406a477bc619617a7e09e3515edee6c9351ccad9a073ea0de1acee2bb8f21892",
+      "size_bytes": 27620
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693058400000.json": {
+      "sha256": "30d3a4280b90f8fd602a5451355099da4e5e2bf0733cb71d41e4c1763d8251fc",
+      "size_bytes": 27329
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693148400000.json": {
+      "sha256": "5e354fb9e8ad18fff77f5999ec09c7a4a13e13b9f4697f815b7de8c7f0c54be7",
+      "size_bytes": 27057
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693238400000.json": {
+      "sha256": "e2ef267629e3fc5d2afa096bcb7fc9e6df384a30e7a44a7f9a6410692969904f",
+      "size_bytes": 27473
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693328400000.json": {
+      "sha256": "452bbb89570e95283944da331aa1ff235a0b4f8580727671f68f6a7bf74fb3b3",
+      "size_bytes": 27570
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693418400000.json": {
+      "sha256": "7d2162c8d18feb930062318f370406a2566930596454046c7d5bb9112950980a",
+      "size_bytes": 27549
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693508400000.json": {
+      "sha256": "64e99d733827bdbe85ee2d3ea3b7466054bb07b68b6961f250d691b36289dc0c",
+      "size_bytes": 27483
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693598400000.json": {
+      "sha256": "e87cae829a5b62be09d12aee340d9eb300e0c8afd006fb3efa76078b0a794123",
+      "size_bytes": 27601
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693688400000.json": {
+      "sha256": "803ad1852fc4ef46239b010ed305deaf8fae4b15f5453b698b7b0d61edbf1ea9",
+      "size_bytes": 27311
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693778400000.json": {
+      "sha256": "a64783a7d26b16f236384c2c35653529938e1671fa986645e25ed1e102cdf341",
+      "size_bytes": 27220
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693868400000.json": {
+      "sha256": "3443d604916c1081b934a4d970b6e3fd5da15261bf4fe2a9d63f14665eee6a85",
+      "size_bytes": 27327
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1693958400000.json": {
+      "sha256": "13355235a6aeba8edc98669b967010d89ab8e789f7d01c64465d883062fd9e66",
+      "size_bytes": 27467
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694048400000.json": {
+      "sha256": "dc1d9abb76072ecedd79d5373bffcaf50409a728a100c4dfc0c214c9b03fd1bf",
+      "size_bytes": 27392
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694138400000.json": {
+      "sha256": "bd8b7fb3025461200f7ef6d8c69433190bf57833eaca7dee529cc8c7218f160d",
+      "size_bytes": 27508
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694228400000.json": {
+      "sha256": "1d651b694465f712072d08a3fce4098938ff18691d9dc2534e4cde51225fdae6",
+      "size_bytes": 27433
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694318400000.json": {
+      "sha256": "81a10fe4b2903eed3a2cfed9e96246edaaa39464266312837bd3d79ab3579e0f",
+      "size_bytes": 26974
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694408400000.json": {
+      "sha256": "80277e96dd5e6882ac6496137e64e1dae76c19969b20b8c6c6b0bea4340c5365",
+      "size_bytes": 27475
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694498400000.json": {
+      "sha256": "c39a5cb5da3fa3aaa3cb63f1b6c29a07932c7610be7b98012b1da29239d96c73",
+      "size_bytes": 27742
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694588400000.json": {
+      "sha256": "e0442fdc87f6d7120622a66b53e65784e7f25e5b02b657ef1cf1b7ae7f0bba8d",
+      "size_bytes": 27615
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694678400000.json": {
+      "sha256": "abfb65c19bb51fcd2776e68a1deea4ae412e57029e20a399066add13013fab8b",
+      "size_bytes": 27637
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694768400000.json": {
+      "sha256": "16cb730884f04c82f9c3a024013dcb8850dabb3992e66f8144f05840e7cb5551",
+      "size_bytes": 27482
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694858400000.json": {
+      "sha256": "af72814e384794fe37508e4aafa4c3656db4f772bdf20a1497ca1ae4e9163bb1",
+      "size_bytes": 27482
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1694948400000.json": {
+      "sha256": "2c328d7a57cd79b41b76abe1e6c13555c3735f77d80fa0e53390a440e028ce6b",
+      "size_bytes": 27214
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695038400000.json": {
+      "sha256": "972dfeaca15a0e7ead3df0375bb47b3969ebb76794903854520e93a42c73783f",
+      "size_bytes": 27421
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695128400000.json": {
+      "sha256": "8918a7e9935f6bbe2a8dbedf8094a2535d7708a13443d07dea6c3a5e9654d478",
+      "size_bytes": 27536
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695218400000.json": {
+      "sha256": "92a0cdaa045ec244284eabb9fc50f56fb83b8ce85f3ed80cd363f9e872283c82",
+      "size_bytes": 27544
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695308400000.json": {
+      "sha256": "4f3181212a600b382f3c3aa4c4d2d8d42b932d60dcfca64f063ff7643a4d9395",
+      "size_bytes": 27723
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695398400000.json": {
+      "sha256": "596d1a896fada1e38742419e15887805c4ae6c632c1bbe1d61ca6cd658f02a71",
+      "size_bytes": 27433
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695488400000.json": {
+      "sha256": "a61d4d014a23aa4a052cc841ac663907b1b3eccd949ef234d783bfca8fefdb77",
+      "size_bytes": 27264
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695578400000.json": {
+      "sha256": "e32226fd6d6672fff15d4753a7ea206e23e9876df20dc4e2ee15f44a09c8dc63",
+      "size_bytes": 27034
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695668400000.json": {
+      "sha256": "488373a9249b7171eaf5eb8d9eb117239f22bf4060e85fadcc34a3e70ccd1e9d",
+      "size_bytes": 27513
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695758400000.json": {
+      "sha256": "4379f14a61783fdf10dd21707238cec182f86f1bfbab0dda1a8b28dc7e316086",
+      "size_bytes": 27514
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695848400000.json": {
+      "sha256": "1a21014b85b9ee03b6652761be014d5d0dcd818e48c958ee7bbb905b7c2685e2",
+      "size_bytes": 27552
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1695938400000.json": {
+      "sha256": "f55ab8600c60e4dc83dd2745b0448b069dcf4f2d656adbedd68120b8aa1fc365",
+      "size_bytes": 27727
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696028400000.json": {
+      "sha256": "e38b3be18c9357e3476fda7875eb25bf6f20d7b8686871474bbeb21eef3977f9",
+      "size_bytes": 27593
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696118400000.json": {
+      "sha256": "8332fa6b303dd81591c67681a6d56978352a844e174b00179ff82a0ad59d4a17",
+      "size_bytes": 27373
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696208400000.json": {
+      "sha256": "58f3b74c586400254e76dc65defe1208469eff2931902e16c960226cc45cbf34",
+      "size_bytes": 27475
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696298400000.json": {
+      "sha256": "5974d01ee91ded54d151479f318792e9b82adc53a769375de1b84e8156e164ee",
+      "size_bytes": 27715
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696388400000.json": {
+      "sha256": "4d4ed05a45328aa745d87d564ac6c81598c627b900c199974c04b65bae605b28",
+      "size_bytes": 27570
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696478400000.json": {
+      "sha256": "edd732f6e818e8b9c14ba3f4b0792e32c372748887ac161fdad5d24bdabfce86",
+      "size_bytes": 27510
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696568400000.json": {
+      "sha256": "f7e0288653edb0bb338d568679511442c39a69613adda02c478c7a5bb8a87560",
+      "size_bytes": 27575
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696658400000.json": {
+      "sha256": "f6577624b1d0f965d8c29404e4db2071125e9dc9dd545583f7fb9bba6fdc5e96",
+      "size_bytes": 27515
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696748400000.json": {
+      "sha256": "22fde567c5280627dc62956983e545e4067193628fd59b75c81c3cc0a8f93629",
+      "size_bytes": 27301
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696838400000.json": {
+      "sha256": "d036584ebd385da83ec8867951ce8706bad128c249db85357c85aa7b26661676",
+      "size_bytes": 27412
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1696928400000.json": {
+      "sha256": "aa542551cb73626494e1b7cd08b79d37390edc372e890f2f35d36c76f5bb0cc0",
+      "size_bytes": 27665
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697018400000.json": {
+      "sha256": "170b1e1c7da3286cab8206ff714c63cf525497cdbc0823d5d5aa8c4031d38109",
+      "size_bytes": 27710
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697108400000.json": {
+      "sha256": "77bbb16007c33dc83dda37fc4614e794d25d8bbd078551bd4663d852292e1860",
+      "size_bytes": 27658
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697198400000.json": {
+      "sha256": "dbbc3b658edb74ae2563a9e4e9550f07bf8297ea5e59efbee11a9502bd93bbf0",
+      "size_bytes": 27627
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697288400000.json": {
+      "sha256": "641f05df3b7be42aa73fb1f8e88cc8d35e900721603496bf09c58054b7458e65",
+      "size_bytes": 27414
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697378400000.json": {
+      "sha256": "1956870de1ac5193073f6de7c6dd33398c975312f1d1f4bbb08f5ee95997b0c9",
+      "size_bytes": 27111
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697468400000.json": {
+      "sha256": "41c11ad161b20cdecfb317852da5838be6eeaf327eabe1691016451419b94dab",
+      "size_bytes": 27582
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697558400000.json": {
+      "sha256": "d856eff884eb7d404a6d39e18a9bab2c2cbebfd166fddde41801e76770fc7688",
+      "size_bytes": 27705
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697648400000.json": {
+      "sha256": "f0d801d3776c916360a4f03afbbf30373cd3134ccce150309bda9a94ac17b3bb",
+      "size_bytes": 27610
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697738400000.json": {
+      "sha256": "b751be7342254c124883c64e945f66fc33394573a967262d78ea3423bc346869",
+      "size_bytes": 27642
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697828400000.json": {
+      "sha256": "10c3e0b5ffce635983960db0124b9a08d7837467120ff5cc4871a510a396bb19",
+      "size_bytes": 27763
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1697918400000.json": {
+      "sha256": "285490fa0f64667504d369957e2ff5d00a164b055d4e26daa796f74d4c4caaaa",
+      "size_bytes": 27584
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698008400000.json": {
+      "sha256": "60ea0a81fbb93f2a1db1551f883b1494ed6f9d26043af6fa2cb22c36e854c709",
+      "size_bytes": 27594
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698098400000.json": {
+      "sha256": "8893662c659e20a977e4363d12f529a2bd373f8dd75e63f2a3fd9aac472b91af",
+      "size_bytes": 27876
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698188400000.json": {
+      "sha256": "6162336e627c0f8659abcd936bd1510da3dc24f177360036cd3e62499ca5ac86",
+      "size_bytes": 28024
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698278400000.json": {
+      "sha256": "3744dfa02c9a79e7bf2fab015dacf3f0b6b6f321086478f90a08745aa35ce277",
+      "size_bytes": 27757
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698368400000.json": {
+      "sha256": "32ecccb3bcc78aab235925010298706b87b13df4e38c73cd0ecb9316455beb53",
+      "size_bytes": 27847
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698458400000.json": {
+      "sha256": "01560362c2391d9b2d6a091f2740007b58b476dbfda67f542c6b6cf5953b385c",
+      "size_bytes": 27713
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698548400000.json": {
+      "sha256": "02f6de3df2bb1d30f997199ffdff9fc9d487fad9578a518460e3c49a29348630",
+      "size_bytes": 27440
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698638400000.json": {
+      "sha256": "902ea5b53d0d830538eb121290f1ffdbacbe7a273bfd8704baf1f4d51acabbf3",
+      "size_bytes": 27585
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698728400000.json": {
+      "sha256": "6ef372702722fc1b0b66dfc92705457b8bd9e72e53db0d024cc9a5450132edb8",
+      "size_bytes": 27720
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698818400000.json": {
+      "sha256": "20d744dbeb3556bc744751dc7941c9b6018056c652bb6a2e0e1ca9335cd4e8e9",
+      "size_bytes": 27712
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698908400000.json": {
+      "sha256": "95ec8d934c1e8e1675dcf6a5933913449916e7e705953f95384fd321b45740d8",
+      "size_bytes": 27814
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1698998400000.json": {
+      "sha256": "205b9808c394082c33f3eee294e1d200eff3925a61d0fa0e868a4b5ea5c60fe8",
+      "size_bytes": 27703
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699088400000.json": {
+      "sha256": "0323553fe386e4f03a8093b423e79621b636e27d5d4c4f19dbf07c11e429352e",
+      "size_bytes": 27633
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699178400000.json": {
+      "sha256": "ab1be4a5d0b244a075d7d693d2c918d7cd6937630a16db127101466fd7966896",
+      "size_bytes": 27591
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699268400000.json": {
+      "sha256": "84bd194e8b525224c11bae31a6f2c1083313d79b2851bc958efcb5c41c0e513c",
+      "size_bytes": 27718
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699358400000.json": {
+      "sha256": "cd4058928d2ce3eee14ba835d931de386307d1c333a69ab122d38ccf35b4fcc5",
+      "size_bytes": 27619
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699448400000.json": {
+      "sha256": "0c0a8893c6e470b70c89bc9686e766195e2d0598fc1357e28a6b23b7061df63b",
+      "size_bytes": 27674
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699538400000.json": {
+      "sha256": "d4616f6381d43f6baf03f9d7e6d95f806b8eff2d1759b5b9788ffa3802b814d5",
+      "size_bytes": 27728
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699628400000.json": {
+      "sha256": "b6a60fbf27629b7615a34ed60ab5f6f50d201d4028121b143c4b278a75603337",
+      "size_bytes": 28108
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699718400000.json": {
+      "sha256": "23f0360910613500ba884790489fd1bccbc8dc4e7b7c8106c4722941729a0374",
+      "size_bytes": 27666
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699808400000.json": {
+      "sha256": "8c4f80df9af7a52b1a834a29f05654b0b017e0a3977e630a2c9640d213015821",
+      "size_bytes": 27617
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699898400000.json": {
+      "sha256": "c7ff2c3e04ccceef8f75d1e8063db2c8f51973c9be939620fc9cbaf910e4b847",
+      "size_bytes": 27774
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1699988400000.json": {
+      "sha256": "ae019d5a48e91683872e5a2c768bfccee6bf62ee275eb498895d2c76b48ddad4",
+      "size_bytes": 27837
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700078400000.json": {
+      "sha256": "4f6af2e737f92fb29070da8ae6ee83f1bbf7305708c35f55687c39cafe01dc5c",
+      "size_bytes": 27709
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700168400000.json": {
+      "sha256": "e5d85bf4e99cc566634d851301d65fa289cd8cc6b68cdefa1fb7d730ac4f1fb6",
+      "size_bytes": 27802
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700258400000.json": {
+      "sha256": "944552d7ef40f9214115f9dfec647fec74ca63e558d3d592b132eebe76b0a45d",
+      "size_bytes": 27758
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700348400000.json": {
+      "sha256": "3b2731015698195feeb43189bbfe14037edffab0d0090f0a3a121f4601ce0fc6",
+      "size_bytes": 27489
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700438400000.json": {
+      "sha256": "ae6d0e74b7ef65deff557140b219fda7c75eb999ffbd78d6f0c89b6063f821b1",
+      "size_bytes": 27583
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700528400000.json": {
+      "sha256": "b059f386099c16e05295224e3dbf79d60b0e3ef3da862ee9244a77aebcf511dd",
+      "size_bytes": 27700
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700618400000.json": {
+      "sha256": "366afeb464417dd7a323c1f0a15d96e5e557f9e6bfb86a04d4231714f733982b",
+      "size_bytes": 27775
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700708400000.json": {
+      "sha256": "e4a3233cce45e0a47d63d179f7c967cc7856e841c0d723408f384cb9dc58d3bd",
+      "size_bytes": 27881
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700798400000.json": {
+      "sha256": "e047c20e92e54bcb19dfe3b8e4793f0684860046519f453ba05c7e48cfbfb5c7",
+      "size_bytes": 27621
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700888400000.json": {
+      "sha256": "febb8d2daedf8cdd8bea97ce18e52cbae77f3534fbffd69d0e15188f74027758",
+      "size_bytes": 27714
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1700978400000.json": {
+      "sha256": "0719c947f0f20d9c40bf1d8b305d52d4880b7dfa720fecd8b09404074929e9fc",
+      "size_bytes": 27379
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701068400000.json": {
+      "sha256": "2228b8deb5ea7914ac04a7034b6a3e4e4ce00e38c8f0564e9e1db9d4d56e2ab9",
+      "size_bytes": 27553
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701158400000.json": {
+      "sha256": "07d95ed6b01ef723bbc39d249a975d7623c1b860b80c6f528cdaaf574d08a6f9",
+      "size_bytes": 27731
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701248400000.json": {
+      "sha256": "33e6258c095fbe97839be6361612ccd93f776dc5130b84924d1f373d6aa35394",
+      "size_bytes": 27686
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701338400000.json": {
+      "sha256": "36872b5a23603d11cbcc89d84bbbb8afea9c713749a1dc5fa09e9e0b30d28057",
+      "size_bytes": 27664
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701428400000.json": {
+      "sha256": "79347aaed6d0367d4b621f4d8bc7a3fb5e5df313517615f96505e13a8b51354d",
+      "size_bytes": 27694
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701518400000.json": {
+      "sha256": "24082013578340e83401e4c2f6039f90fe1bf378f5aac5f2d9d6f5ff7e6aa9e7",
+      "size_bytes": 27475
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701608400000.json": {
+      "sha256": "3c4c14b5df0c34dce501618cd5c12290cdd81c6b5c01aae8696f1335f1e16925",
+      "size_bytes": 27602
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701698400000.json": {
+      "sha256": "313272ca0bddd7cbe5315e14a2f5ccb6b6847921cf70478630cab0be15938a62",
+      "size_bytes": 27854
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701788400000.json": {
+      "sha256": "889d4a23515ea59ac9930149e980030166007020e417354e452b352881298a20",
+      "size_bytes": 27728
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701878400000.json": {
+      "sha256": "23b0e6bf91dc4429f8e8688a1427d63535732da1544714328ca671face2daa75",
+      "size_bytes": 27905
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1701968400000.json": {
+      "sha256": "2356a1e83dffa929e8732a6899592db045401cfe23f87c3d3bcd6b54c9f420d7",
+      "size_bytes": 27635
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702058400000.json": {
+      "sha256": "24ac42f5818c869483ffdf49723679a718e663cd1c5dc9ece900a0599381318a",
+      "size_bytes": 27824
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702148400000.json": {
+      "sha256": "dfd1927aca255d0c1e0c52fa7e8e9fdc54c29212cdc486c7d22333e754242f61",
+      "size_bytes": 27640
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702238400000.json": {
+      "sha256": "c25f6ea7d61006727be60c16bc7c04a953056b9280faeb3689873882062040c7",
+      "size_bytes": 27519
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702328400000.json": {
+      "sha256": "016424d3632b0b1540847528cb54a99394238c9f0410b9dbcfcab36e117e676f",
+      "size_bytes": 27796
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702418400000.json": {
+      "sha256": "92644d08d65a686ca50be46a6ad88970176cb45cc0ba85a1153e32aea1b204e0",
+      "size_bytes": 27732
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702508400000.json": {
+      "sha256": "54299299d1c974ab9626339262d84b36782b948087549367611ce545342d4a7c",
+      "size_bytes": 27713
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702598400000.json": {
+      "sha256": "435a3f91e2703363ac5ac9026e28c314becae1dd10aadf63dac36bb1f604dd95",
+      "size_bytes": 27879
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702688400000.json": {
+      "sha256": "16fb8510208fc8f07409710ecdb9ef0fd6ba8fc0a623f42c58c82fd9cfd392dd",
+      "size_bytes": 27716
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702778400000.json": {
+      "sha256": "6921b2698f785f02ebb1085dbf0a5969b63b015fa1491c12ac92fd54b11c9a84",
+      "size_bytes": 27482
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702868400000.json": {
+      "sha256": "ecef651d045544cf9669856f5f0fe37dfaa66d7b6330c4faaf6f9a8d1320c10c",
+      "size_bytes": 27734
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1702958400000.json": {
+      "sha256": "c66f09b7c798edd7ebae1e1b6789ed408a5d8d0947e7752cd3c08493d5cd5bf2",
+      "size_bytes": 27743
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703048400000.json": {
+      "sha256": "ff099fce7570367fa45152863fb591c93a5fa71d6b9c8ae81d815971b6dbe404",
+      "size_bytes": 27740
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703138400000.json": {
+      "sha256": "808b9fb614be44474f5edb6f5269ece4e3b7d188e8c3594d5c5f486461dc5f3a",
+      "size_bytes": 27799
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703228400000.json": {
+      "sha256": "07ead50541b03e149ce1c1057d4a569b9248a1304446ee8449b9971b32f43732",
+      "size_bytes": 27873
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703318400000.json": {
+      "sha256": "1ca9e29b61f962467d32abed533358f286488fa880e7ca3d0925c43b5dda5f49",
+      "size_bytes": 27861
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703408400000.json": {
+      "sha256": "623c313c0672e1cb289aff69e867f4cfc95ff54c5b2299582766b0f85a7e1aa1",
+      "size_bytes": 27509
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703498400000.json": {
+      "sha256": "60e1b9d5f61417abbbc7b72c7b6c11c3857d2391501fce233a9a88834c459612",
+      "size_bytes": 27583
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703588400000.json": {
+      "sha256": "bc75581a1da3cac50f66c2fa2da6fb31c245f0e991e240d7cd888cbf6da7c632",
+      "size_bytes": 27597
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703678400000.json": {
+      "sha256": "e4aa7c0839ee076078393fa638f8e992312087358f12434d44d25a260dcc0cc2",
+      "size_bytes": 27583
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703768400000.json": {
+      "sha256": "4856471be29c90bf60e287e888fd1fc8ad1dce7a484e097db4a290f40cabed9d",
+      "size_bytes": 27904
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703858400000.json": {
+      "sha256": "647f7336a6f904cd0cc0f4838c77472d3fb3e3b3fa7abeb8f06eeb252a4ac0e4",
+      "size_bytes": 27769
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1703948400000.json": {
+      "sha256": "ab6652d32d922759a60c865b92d6fdbf1c57889b136da07cb86dfba4f422c0c1",
+      "size_bytes": 27732
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1704038400000.json": {
+      "sha256": "4b25a3a7658e699d61d1d04cfdb9cdfc4b162c3e7088b082783688b912661877",
+      "size_bytes": 27511
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1783580400000.json": {
+      "sha256": "4e6eaa266bccb23b4fd551bb2b1970371ce2103b2f34889ab4bcd68ee26e52bd",
+      "size_bytes": 30113
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1783670400000.json": {
+      "sha256": "2ff6c7c79999fd520ec16674d56a93c821b49ced54ceb96907ad2cd40f086836",
+      "size_bytes": 29953
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1783760400000.json": {
+      "sha256": "456927fc8d7e483bd31ec37b3afb3fe8d08123895426de8032b77482d887a568",
+      "size_bytes": 29824
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1783850400000.json": {
+      "sha256": "310f926c54d9f7f4d2d60ee47dd2a3042bc552e204eb9dd5b3746330895360e0",
+      "size_bytes": 29941
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1783940400000.json": {
+      "sha256": "d1891a35f4d48f725efddb86ac69b91b57d1e8ebd62f0841e902942b828c30d8",
+      "size_bytes": 29971
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784030400000.json": {
+      "sha256": "5ff9d5055625916920297ea29c384e4f3786106fee75e1b1b1cce6dc17ebb1de",
+      "size_bytes": 30038
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784120400000.json": {
+      "sha256": "920169ea05046525bfbea79bc454451b4c565d028197c9b8f0a9c78da9024125",
+      "size_bytes": 30052
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784210400000.json": {
+      "sha256": "16521b9c2d87b23fc5c8d6981cb062de1744ddc7789b38e023696d6404921642",
+      "size_bytes": 30031
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784300400000.json": {
+      "sha256": "58697a5197cb3c88ee7cb19826496629914edf2eff1adb65944e61344b527a97",
+      "size_bytes": 30115
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784390400000.json": {
+      "sha256": "22331fbdc69d93ce6941bcb6c555bfd4d76645bcc6cfb79eea1faebba341b563",
+      "size_bytes": 29700
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784480400000.json": {
+      "sha256": "8380b0df35467cc02fb9bca1751f955d1b4419ff04e687c96983573a29ba7f82",
+      "size_bytes": 29739
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784570400000.json": {
+      "sha256": "98eb0530c357c420be826de32fe656b9f15e1eeca58a657508d93bcf0eaece90",
+      "size_bytes": 30125
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784660400000.json": {
+      "sha256": "33635e30703d3f7cd3b542674e1f6d96a4c203e8ddb4c9e4aacec793ae0c8567",
+      "size_bytes": 30078
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784750400000.json": {
+      "sha256": "00c75114a74dc9ab5a47e7cdc776615a036a09d3bb3830ad658f173216fc4e2a",
+      "size_bytes": 29988
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784840400000.json": {
+      "sha256": "8effb5c1a33fcf690e3b1ed18af152ee1037fe831e4f262b0e2a076be090b5eb",
+      "size_bytes": 29891
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1784930400000.json": {
+      "sha256": "9988bb1104c8f5d40b655c8faeeb58a75b32c874b383b4b13e162c0e9120f730",
+      "size_bytes": 29960
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785020400000.json": {
+      "sha256": "d404ae192da78f03f1dd5dbf0118fc269707021598a097f7a55e2d63ba92a354",
+      "size_bytes": 29627
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785110400000.json": {
+      "sha256": "4815bf8cae05e58d9e6d87d0455960d3dc280a4b99993a3faced3db4438e3994",
+      "size_bytes": 29776
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785200400000.json": {
+      "sha256": "6e54535296ba81b6d0429f1742bcee104f1d796b0583bf7ccfe09889a4a39a79",
+      "size_bytes": 30021
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785290400000.json": {
+      "sha256": "10d468123b1438c5f370efd92fbdd0e2f77cc4fa6626b3497860ea796bf6eb61",
+      "size_bytes": 30044
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785380400000.json": {
+      "sha256": "48dc8de1410decd2b6fe4d0a4591f05d7ba82f79eb02caca7eaaa8545306e91d",
+      "size_bytes": 30144
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785470400000.json": {
+      "sha256": "163c4aa75b0af6ea24bf5d21aeb809771c02fe69db1c83fad83e02ba4da15463",
+      "size_bytes": 29909
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785560400000.json": {
+      "sha256": "b2466ca80eeba3a0b2e13ba17cbd2b66dbec511ee1dbc02d2f6604b9f602ff73",
+      "size_bytes": 29788
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785650400000.json": {
+      "sha256": "6d19ec5086cae3c9f7187ca9bd18c48b6fe0f6b99c759b8650fbefc4f3bf93f5",
+      "size_bytes": 29742
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785740400000.json": {
+      "sha256": "5e85ec226e10fc21e9222ca91bdc4a98f74ecdc9b282757d1cb3937280dc7f3b",
+      "size_bytes": 29825
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785830400000.json": {
+      "sha256": "6307c99ac52d4856737ad39b4205b667ced39298337d4dfbaf76a24fa3c08a7f",
+      "size_bytes": 29986
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1785920400000.json": {
+      "sha256": "7aac17c4ba0f01de2f5801acf6632fab141c89e8b04fbf713b384db68c84c471",
+      "size_bytes": 29873
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786010400000.json": {
+      "sha256": "52e2a7bdae82ab0c84379c992c549a074b5e97f7f8fe603029169dc2643cf6f8",
+      "size_bytes": 29908
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786100400000.json": {
+      "sha256": "0cc0cfd2ef7ed19058a7742806780ad6548feb5772bbc86c0c1bceff71bd5a4d",
+      "size_bytes": 29749
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786190400000.json": {
+      "sha256": "d92e67692ec4b4c577d14a323aa0eb7305aec198465c28080a1142e1ae806a47",
+      "size_bytes": 29602
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786280400000.json": {
+      "sha256": "d550c8538daf5893261ffe9ead1ded9ced75906dd8738a5272eda866c3748b9d",
+      "size_bytes": 29397
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786370400000.json": {
+      "sha256": "af0163905f215dd530c052a3384a8d130529d71e78094bb0e2fb5117508414bd",
+      "size_bytes": 29768
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786460400000.json": {
+      "sha256": "b8f690b62c17c953e939d83e787abf46f1d091e4f2abed182a1f56ef12f76768",
+      "size_bytes": 29795
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786550400000.json": {
+      "sha256": "717d299fea65cebb807887653fe582895c1164e92b65469f79693890ed2482cc",
+      "size_bytes": 29788
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786640400000.json": {
+      "sha256": "99629b87a28f0a80dd7f318c2209d472459aed5bf557f0f09207f8ac8706058b",
+      "size_bytes": 29819
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786730400000.json": {
+      "sha256": "d30b7d35e2c47383443eae605ce59c4a27330f1fcd9f33fb604b55047f3eb996",
+      "size_bytes": 29772
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786820400000.json": {
+      "sha256": "13a655442cfffbb75960b30e8dbb9cd2190dbe402940b4a64b1fa2aa85c472b2",
+      "size_bytes": 29548
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1786910400000.json": {
+      "sha256": "a4a99c236b220693e03ce8e8091fc05e99082d6661d60ae93bfad72bad0e7091",
+      "size_bytes": 29273
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787000400000.json": {
+      "sha256": "989ebac3ea406332186716901b57eaaa93938e12684afda99711b5b81f5bd14a",
+      "size_bytes": 29849
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787090400000.json": {
+      "sha256": "75f481f3876055a9ca3f8a8fd66f0c0013357b7f0afca2ae4d4ef1bbec44e0f0",
+      "size_bytes": 29764
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787180400000.json": {
+      "sha256": "fca3da2f92c7fdafc517c869680eaea3aefdb6f870b09d9198b7be0d249f7e0d",
+      "size_bytes": 30051
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787270400000.json": {
+      "sha256": "ebcd28c643876a3855abc28f8f9be5d79ebb6a3f789bf9821b38adb62b55627d",
+      "size_bytes": 30270
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787360400000.json": {
+      "sha256": "a768b450e64f060270243075bb9f4fc979b222b5528b789480411bd397d21e61",
+      "size_bytes": 30285
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787450400000.json": {
+      "sha256": "9d845c72dc8fe49170433d553d5fd62ca5db7822e75865159f9af457087376e0",
+      "size_bytes": 29898
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787540400000.json": {
+      "sha256": "3814be866a835ceacbb5923e78928617bf8ca615bc02d4e91e2b5b6749995692",
+      "size_bytes": 29968
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787630400000.json": {
+      "sha256": "b618bdc79bd62e6c2ec127358c485da9ec9892e24a459afff947c0bc9dc8bb76",
+      "size_bytes": 30100
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787720400000.json": {
+      "sha256": "5cbe59f117bddb6748aaeb53f38b601eb1b006b4661bab7faeae378e607cf4e1",
+      "size_bytes": 29984
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787810400000.json": {
+      "sha256": "1054fe2bb6999e4d0dc6d77f02cdf406f7031a5dd750591c652fe02dee5aa79d",
+      "size_bytes": 30016
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787900400000.json": {
+      "sha256": "e6dac3668af2162c169bd209ee54365323063adc08c8a23534fda94c527adfc1",
+      "size_bytes": 29994
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1787990400000.json": {
+      "sha256": "6ec5113afb6af040f4331d88041f6aadf6b27a31afdb8f6d848edf7377b7d486",
+      "size_bytes": 29884
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788080400000.json": {
+      "sha256": "c5bc1bf6740a3aa382fcb2b4ca97171d850a41e718368984d60cb7bcc6ef9080",
+      "size_bytes": 29528
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788170400000.json": {
+      "sha256": "ea0330b3b0c880895ae495ac036863fbc08779781987e1614e6930b06b902efb",
+      "size_bytes": 30012
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788260400000.json": {
+      "sha256": "b08420bc75359d8b35bd19acc2e2aa7d433c49e6d9d7f713bd9340d50ae99010",
+      "size_bytes": 29917
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788350400000.json": {
+      "sha256": "08e9a404c5742104c4e69534bb1c0e7723cefeafa61ba3b3e8fd85de7f8df096",
+      "size_bytes": 30025
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788440400000.json": {
+      "sha256": "6a763c335938fad00a9fb802a70a1ed5663197810a9c1c24e4009c4d0551f458",
+      "size_bytes": 29984
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788530400000.json": {
+      "sha256": "24730e38df515260901cb5ae1cc498b59120601118c1560c55616ab80187ddc5",
+      "size_bytes": 30048
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788620400000.json": {
+      "sha256": "57e2c84242d38ddcf0cb9c233b462e02745cc1dce6f87ccde4567c0def98733c",
+      "size_bytes": 29597
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788710400000.json": {
+      "sha256": "d00f62322554811bb132cf8b31eb7680504ec700b0d81f2779d23fefdf37ad01",
+      "size_bytes": 29720
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788800400000.json": {
+      "sha256": "4620e9ea61a0377f0783666c68e32fd1c6ed6052662ff2efe6401ec3ccb7dfc6",
+      "size_bytes": 29862
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788890400000.json": {
+      "sha256": "5970ff98c16454e191697066355a24f074efdbde70ac5f83520df1bb346a0321",
+      "size_bytes": 29857
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1788980400000.json": {
+      "sha256": "6f470049cbd4113caa801865bb2d54e372f5005292b9ab4f5369948d1d561919",
+      "size_bytes": 29959
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789070400000.json": {
+      "sha256": "bf25adf1e76c694da52a240e0b3305559085e6d8d13dd65358e7bcc4fd035789",
+      "size_bytes": 30008
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789160400000.json": {
+      "sha256": "a36aa9c4f77b883dae592067b9a8dd9d958db96a1cfcf43f0d636d1b26d8e406",
+      "size_bytes": 30002
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789250400000.json": {
+      "sha256": "311da1d422f529b200d6bb4e6383b22a872e3c65d6ffea20d88e6cb0ea7ff1ef",
+      "size_bytes": 29734
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789340400000.json": {
+      "sha256": "5e922e67ffd52838ef697777c1d5171847925e0deaeee142bd6976e3109cde67",
+      "size_bytes": 29752
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789430400000.json": {
+      "sha256": "3c6bfc7b915f37a7b63fd5a2718c5b3e9646e0c84d304885144f38980b94f355",
+      "size_bytes": 30001
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789520400000.json": {
+      "sha256": "259ad7ba27c344e0f3d0c46ffbdd5469cdb45116790b63dd76c60aa5567f8868",
+      "size_bytes": 30076
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789610400000.json": {
+      "sha256": "e4ebae4faab3934f8799e8fa735b6ea91118a5da17c5f1db28eafebc369a8cd1",
+      "size_bytes": 29987
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789700400000.json": {
+      "sha256": "aa2d9576e7819d211c3cf6d0210f865c0c0fb37df1fe4ef080b1e08fe553048f",
+      "size_bytes": 29920
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/raw/1789790400000.json": {
+      "sha256": "e673b5c7566abb00dff5d426121c1583066b5d6bd8c094e724434435013f0498",
+      "size_bytes": 30126
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/source_receipt.json": {
+      "sha256": "c472064c1cf4de3a20aa7aee25340e8dccd6c3f1ee002c9a34e7597a1c0841a0",
+      "size_bytes": 73100
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/control_coverage.csv.gz": {
+      "sha256": "8ff391bf9ab0e247b53fc8e314d9f031f0ce97cb50c9ea3aee9461c8ab3a4967",
+      "size_bytes": 9477
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/controls.csv.gz": {
+      "sha256": "e636559ebfc0fe45a07599a3720531f64bd9167d26df33e040f49c67ad18ea80",
+      "size_bytes": 2297803
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/daily_ranges.csv.gz": {
+      "sha256": "9f7f1d48fc3b8edf2e1eea80eb43ec965531185523fe03a8ea11582b9bda15c9",
+      "size_bytes": 24194
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/events.csv.gz": {
+      "sha256": "680126e9bb81d4b2f50f8c458f8d9e352e1753c42c40d2b4117f0932e3ee8593",
+      "size_bytes": 258765
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/marked_curve.csv.gz": {
+      "sha256": "6bc6dac228622d173bcc3125088db74beb7b2eebed7abd93771bc0a261369080",
+      "size_bytes": 1753708
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/trades.csv": {
+      "sha256": "c1596d8b78bbf8567112532471b9c0da5dad3b18e6ec44fc93a18045989bb63b",
+      "size_bytes": 807605
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/trades.csv.gz": {
+      "sha256": "f682b3e516ecb44ec68b3264cd00ce8daaf9526dab15f19ef5cc1366a0342f2e",
+      "size_bytes": 233294
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/BTC-USDT-SWAP/逐笔交易.csv": {
+      "sha256": "2ba7fece0d1a25232e4a29dea87bf0f3ba738f64c053b33c3d918974132d0eea",
+      "size_bytes": 807645
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/control_coverage.csv.gz": {
+      "sha256": "c31b2881fe9190b2daa836c8c2c6b1120b7b95fc3c544b025503a557e78ff976",
+      "size_bytes": 9116
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/controls.csv.gz": {
+      "sha256": "64de977c54304546c5494f51d10228f03b08bbb8440206130c028d0ced29b555",
+      "size_bytes": 2177823
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/daily_ranges.csv.gz": {
+      "sha256": "8cbd147f51dfaf89ded856650c796d5d707aab33b09ff04bbb0551b51dc9bc65",
+      "size_bytes": 24005
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/events.csv.gz": {
+      "sha256": "6f39edd5fb1748680b2d3f566440785c3fcfda739f9746ba1155959e3edc791f",
+      "size_bytes": 247963
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/marked_curve.csv.gz": {
+      "sha256": "abcbb9b8fb43ac702d039d84b0572b504471c2adf224a980a90f3617d83e2acf",
+      "size_bytes": 1719486
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/trades.csv": {
+      "sha256": "889a74eab73bd13915eebb92677e8d04fca21a1811f8ee6ebab95cf163664492",
+      "size_bytes": 771982
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/trades.csv.gz": {
+      "sha256": "2068682df02b96e598df6c6d7e58e51ee1e28e786b5719714b6f76110ff441b8",
+      "size_bytes": 224543
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/ETH-USDT-SWAP/逐笔交易.csv": {
+      "sha256": "8411f76d83b79ba5d496a57281c3357c543fe7cc8a9f34ca10d36b8501be57cd",
+      "size_bytes": 772022
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/grouped_metrics.csv": {
+      "sha256": "386c58e9ea2ab1028ea2bb2a530e55a337e8bda6710097054c0ac9882583aab7",
+      "size_bytes": 63763
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/identity.json": {
+      "sha256": "0b27ffa2f48f9dba4801e9f61bee0acf186f68296f69aecb5a7e7cc2a2ce1ea1",
+      "size_bytes": 1613
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/manifest.json": {
+      "sha256": "b0ea084127b29f22cb5d5fccf2f24f57085208b3a1956989fc57b785ef989643",
+      "size_bytes": 4949
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/overview.png": {
+      "sha256": "d5a31501c7f054b731b977c51eaa0d0e5e28d1537a13498a6dfb2b68fc9deda0",
+      "size_bytes": 130859
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1/summary.json": {
+      "sha256": "4bfd856ff066f2bd4bd3567ee40ddd353993863727a3c63f21eb8414b9c8630e",
+      "size_bytes": 11915
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/run_v1.log": {
+      "sha256": "ebb7fba660c2ce6f452e57fa01af1fb9d2584f8a8e738a5c54bf9469ab6b64b5",
+      "size_bytes": 3794
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/source_acquisition.log": {
+      "sha256": "977cf74837f00ec798c1cdcb37bb109c907c72f3ca1c2ff207552e4069570b40",
+      "size_bytes": 1702
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/source_acquisition_attempt1.log": {
+      "sha256": "1413ba537e191ac7a0fb283056c9ae2ee402a7c1beb79fc010c8746510d6f003",
+      "size_bytes": 1298
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/source_config.json": {
+      "sha256": "1b360840d50f031b929779422d5120689c782859cdd0230a712d856aa10a02c6",
+      "size_bytes": 892
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20230920T0800.json": {
+      "sha256": "274f34d3fe19495b4ed8beba7d7a23f03eac7a799188132d8128016f160d1d0d",
+      "size_bytes": 213
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20231231T1600.json": {
+      "sha256": "361bc7d25378611d3a5dfaead98c825d9fd1c161a5ab9bd6b466d73787656a0e",
+      "size_bytes": 212
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20240310T0700.json": {
+      "sha256": "a0bf86f8ad747f83d3d1bd6b1715ff685e99a52252f92329649569b8c3de8686",
+      "size_bytes": 211
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20251102T0600.json": {
+      "sha256": "8b6da8d6459f94a51a6713d41fe346655873092dbb7387ef9ed1909fe7cfe9e7",
+      "size_bytes": 219
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20260708T1815.json": {
+      "sha256": "b9fdb59415774114592136a8f4c847642a7cd77483f4ec24b8a9c25809d26138",
+      "size_bytes": 218
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/BTC-USDT-SWAP_20260918T2355.json": {
+      "sha256": "b1c8ef966a6d893a87cd31f6d381fcc56d4d114ec53971585224cf0e4ac6c44e",
+      "size_bytes": 221
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20230920T0800.json": {
+      "sha256": "7152ceab2266118af655bb16d4a310cffc1b4f62c3b501bacce8f041f43a57d5",
+      "size_bytes": 210
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20231231T1600.json": {
+      "sha256": "be71c7f94e68a10fd8c1b3540731f337b89d72a5c0761b2c2fc7657910f72905",
+      "size_bytes": 211
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20240310T0700.json": {
+      "sha256": "49aef71ad1cba8ba5bb855695c09dd76792878e53096a24ddf2ef26d7da1fd74",
+      "size_bytes": 210
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20251102T0600.json": {
+      "sha256": "5a29f286cdc594f1bfdf9934e71c2db78ae636c288e0ca0ca7ed39eacc3a51bc",
+      "size_bytes": 211
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20260708T1815.json": {
+      "sha256": "48c065f6824c81d82b792a9411e50f7d1aaee5b26ab54a92dacbeb823e989b2b",
+      "size_bytes": 221
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/ETH-USDT-SWAP_20260918T2355.json": {
+      "sha256": "be7f8448c738c743823d6170d1b46842101f47b00918c9e5242e30f5e0926b11",
+      "size_bytes": 220
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/overview.png": {
+      "sha256": "682811cc9255cee3fb0591060027feacdf30752e84c96e626a606f1ebc4b90d5",
+      "size_bytes": 128694
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1/verification.json": {
+      "sha256": "d6f5fd32de72a1943e44243461a98a3fe47fa39d69abb79e3d221382a98d40f3",
+      "size_bytes": 7765
+    },
+    "experiments/active/exp-four-hour-range-20260920-v1/verification_v1.log": {
+      "sha256": "c6994c36c638f000ba8a02d5998bee6c73fff52b258a53f41179b2367bf4e332",
+      "size_bytes": 2344
+    },
+    "yoyo/data/four_hour_range_source.py": {
+      "sha256": "3013415e53e0b68b3f30afcd7fdb16c4b6e6602eabeb7cb57364756d705b79b8",
+      "size_bytes": 8286
+    },
+    "yoyo/evaluation/four_hour_range.py": {
+      "sha256": "f3534bea6c337452ee1da4fcfaedff64eeb5246b05a18c59234a6ca1ced2a804",
+      "size_bytes": 21350
+    },
+    "yoyo/evaluation/four_hour_range_study.py": {
+      "sha256": "a94eb1602805de80b9f029cb8b0d849f7b66c191c2de48b83db8c6b18e397309",
+      "size_bytes": 17843
+    },
+    "yoyo/evaluation/pine/four_hour_range_v1.pine": {
+      "sha256": "1819ae81b47e28fc84f0d48ac4c8d93a092d9ffcbbc02182980148a04e003066",
+      "size_bytes": 11802
+    },
+    "yoyo/evaluation/pine/four_hour_range_v1_README.md": {
+      "sha256": "8832f2f25ccc9ab345aa2090aa1d540c3b6d3c43f6801aeb87e0e37fd5687650",
+      "size_bytes": 3529
+    }
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "economic_run": "run_v1",
+  "native_parity": false,
+  "notion_url": "https://app.notion.com/p/3e18856479af8131a2b9d56908ea9397"
+}

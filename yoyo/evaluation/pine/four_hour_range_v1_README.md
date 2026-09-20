@@ -45,3 +45,14 @@ it is not an allocation, leverage, or account-size recommendation.
   inspect current-bar high, low, or close or advance the range/excursion state.
   `varip` position-change facts and `lastProcessedBar` keep those callbacks
   from consuming historical bar OHLC.
+
+## Native check on 2026-09-20
+
+The new private script `NY 首4小时区间假突破回归 · v1`, revision 1,
+compiled and ran on standard OKX BTC 5m. TradingView displays its generic
+look-ahead caution for the order-fill recalculation setting. This is not a
+full parity certificate: on NY 2026-09-17 the native plotted reference high
+was 76648.7 while the independently checked OKX API range high was 76655.2.
+Native raw-history export required a Premium upgrade and was not completed.
+Source and execution differences therefore remain unisolated. Use the frozen
+Python ledgers for the reported three-year economic result.

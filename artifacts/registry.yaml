@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: four-hour-range-20260920-v1-delivery
+    artifact_type: manifest
+    role: ny_first_range_false_break_return_btc_eth_fixed_2r_and_random_timing_null
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1489c8dcead0ed5fa344b385fff6939f891378f
+    source_path: experiments/active/exp-four-hour-range-20260920-v1/final_delivery_manifest.json
+    sha256: babd3442c7b324b6d4364c7505a51d390597719005ef35a3ac6ef3d8258d44ba
+    size_bytes: 55521
+    storage_uri: repo://experiments/active/exp-four-hour-range-20260920-v1/final_delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 254hashed files;2samevenue315360bar evaluation streams,4581closed trades,217377matched controls,12exactnativeOHLC checks.
+      Negative20bp result preserved. PrivatePinev1 compiled but TV/API referencehigh mismatch and exportplan gate preventfullnativeparity.
+      No production eligibility,training,orders or parameter optimization. CSVinference needs round_trip float parsing.
   - artifact_id: trend-baselines-20260920-v1-delivery
     artifact_type: manifest
     role: fixed_common_risk_trend_family_comparison
