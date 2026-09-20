@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v9-5m-15m-ma-20260920-v1-delivery
+    artifact_type: manifest
+    role: five_minute_v9_six_completed_fifteen_minute_direction_lines
+    source_repo: darkforest-x/fable-trading
+    source_commit: 27e23560f2af9d1793a98644ef13c533976a9781
+    source_path: experiments/active/exp-spike-v9-5m-15m-ma-20260920-v1/delivery_manifest.json
+    sha256: 00ad2800ec5734e1fb34529f5e93d9aa9211b5b1ef33950eae2f169b9cd879d7
+    size_bytes: 47577
+    storage_uri: repo://experiments/active/exp-spike-v9-5m-15m-ma-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Legacy enum retained;historical restrictions canceled. Binds29inputs,11943candidates,all14serial arms,controls,receipts,summary and independent final input/scope audit. Earlier-selectedSMA120notaccepted,p0.203125. Compressed event ledgers local-only;generated report and final audit addendum both preserved. No Pine or production change.
   - artifact_id: btc-rsi-fifth-color-20260920-v1-delivery
     artifact_type: manifest
     role: btc_fifth_large_diamond_original_quarter_exit_three_year_backtest

@@ -1,0 +1,148 @@
+{
+  "identity_hash": "da128e289e27496266abf1a9fe440fcc1685e723b022cb0a9478fc6903777bff",
+  "complete_frozen_29": true,
+  "per_symbol_input_checks": {
+    "1000PEPEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "AAVEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "AEROUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "API3USDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "APTUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ARBUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ARUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "BOMEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "BTCUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "DASHUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ENAUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ETHUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "FILUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "HYPEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "JUPUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "MUBARAKUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "NEARUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ONEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "OPUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "PENDLEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "PIEVERSEUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "PUMPUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "SOLUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "UNIUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "USELESSUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "WIFUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "XTZUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ZECUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    },
+    "ZENUSDT": {
+      "symbol_frozen_hash_matches": true,
+      "current_file_hash_matches": true
+    }
+  },
+  "metadata_sha256": "dccd2fa8bc4b1bb567e4e2d6117f154a57bc2f260b4b898a8c6869585598602c",
+  "statistics_v1_v2_numeric_identity": {
+    "summary.csv": true,
+    "coverage.csv": true,
+    "per_asset.csv": true,
+    "selected_comparisons.csv": true,
+    "control_status.csv": true,
+    "shared_path_audit.csv": true,
+    "candidate_counts.csv": true,
+    "attribution.csv": true,
+    "selection.json": true
+  },
+  "independent_review": {
+    "agent": "budget-mapper",
+    "model": "gpt-5.6-luna",
+    "reasoning": "max",
+    "focused_tests": "12 passed",
+    "market_replay_repeated": false,
+    "result": "No result-changing timing, EMA warmup/gap, serial replay or selection error found."
+  },
+  "known_reuse_limitations": [
+    "Runner checks frozen pool hashes as a set, not symbol binding; all29 individually verified for this delivery.",
+    "Report does not automatically rehash original files/metadata; all29 original files and metadata rehashed for this delivery.",
+    "Subset CLI can be reported as primary; this delivery independently verifies complete29."
+  ],
+  "reuse_decision": "Current full29 results verified; future reruns must repeat this final scope/input audit or harden the guards before relying on their output."
+}

@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **587** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **588** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -20,6 +20,7 @@
 | 2026-09-20 | [`p1_spike_v12_compact_bk_20260920.md`](p1_spike_v12_compact_bk_20260920.md) | V12：ONE 三次突破说明与紧凑样式 |  |
 | 2026-09-20 | [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) | SPIKE V12：持线配对、信号显示与截图漏线验收 |  |
 | 2026-09-20 | [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) | SPIKE V12：主高点＋局部回踩确认 |  |
+| 2026-09-20 | [`p1_spike_v9_5m_15m_ma_20260920.md`](p1_spike_v9_5m_15m_ma_20260920.md) | 5分钟SPIKE开多空：15分钟六条均线方向过滤（2026-09-20） | 结论：按前段开发期累计净R选出的共用规则是 **sma120**；**未通过预注册验证，不能推荐为实盘最优**。后段原基线4263笔、-923.96R，所选规则3339笔、-785.21R；差值138.76R，月块95%区间[-173.47, 361.13]，单侧符号置换p=0.203125。... |
 | 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
 | 2026-09-19 | [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) | SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法 | 结论：单独限制入场时效、沿用父 V9 止损、改用盘中高点激活原追踪，均未在 15m 或 1h 通过预先设定的研究门。15m 的 6 根时效限制有改善线索，但区间跨零、后段仍亏；统一放宽止损或提前追踪不能据此采用。没有搜索最优参数，没有修改 Pine、监控、默认参数或实盘。 |
@@ -977,6 +978,7 @@
 - [`p1_spike_v8_noise_filter_20260913.md`](p1_spike_v8_noise_filter_20260913.md) — SPIKE V8：V7 全量信号降噪与冻结规则回放
 - [`p1_spike_v8_six_filters_20260914.md`](p1_spike_v8_six_filters_20260914.md) — V8：六批 V1 观察的独立过滤回放（2026-09-14）
 - [`p1_spike_v8_total2_1h_native_20260914.md`](p1_spike_v8_total2_1h_native_20260914.md) — V8 × TOTAL2 1H：TradingView 原生回测
+- [`p1_spike_v9_5m_15m_ma_20260920.md`](p1_spike_v9_5m_15m_ma_20260920.md) — 5分钟SPIKE开多空：15分钟六条均线方向过滤（2026-09-20）
 - [`p1_spike_v9_asset_exclusions_20260915.md`](p1_spike_v9_asset_exclusions_20260915.md) — 按币种成绩排除：V9 三个固定条件
 - [`p1_spike_v9_cost_be2_20260915.md`](p1_spike_v9_cost_be2_20260915.md) — V9 加入净2R后的0.2%保护：同入场与串行回测
 - [`p1_spike_v9_eth_lowtf_20260915.md`](p1_spike_v9_eth_lowtf_20260915.md) — ETH V9 · 3m / 5m 完整历史回测
