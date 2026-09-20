@@ -370,7 +370,9 @@
       : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
     const rsiPolicy = status.performance_policy?.version === RSI_LINES_BASIS || lines.ledger?.basis === RSI_LINES_BASIS;
     $("lines-exit-rule").classList.toggle("hidden", kind !== "joint");
-    $("lines-exit-rule").textContent = linesSnapshot()
+    $("lines-exit-rule").textContent = !lines.ledger && lines.versionOptions
+      ? "正在读取所选退出规则…"
+      : linesSnapshot()
       ? "切换前旧规则快照 · 原止损、4ATR跟随保护、V9反向退出 · 数值固定，不是当前持仓"
       : rsiPolicy
         ? "退出：原保护与同周期第7个空头大菱形，先触发先退出 · 仅大菱形连续同色计数，异色重置 · 收盘确认，次根开盘全平"
@@ -402,9 +404,17 @@
     $("load-more-lines").classList.toggle("hidden", items.length <= lines.limit);
     renderTradingViewButtons();
   }
+  function changeLinesPerformanceVersion(value) {
+    const lines = state.lines;
+    lines.versionOptions = lines.ledger?.available_performance_versions || lines.versionOptions;
+    lines.performanceVersion = value; lines.limit = 24;
+    lines.items = []; lines.ledger = null;
+    // Render the cleared values immediately, including during the debounce.
+    renderLines();
+  }
   function renderLinesStats() {
     const data = state.lines.ledger, stats = data?.stats;
-    const versions = data?.available_performance_versions || [{ value: "current", label: "当前退出规则" }];
+    const versions = data?.available_performance_versions || state.lines.versionOptions || [{ value: "current", label: "当前退出规则" }];
     const select = $("lines-performance-version");
     select.innerHTML = versions.map((v) => `<option value="${escapeHTML(v.value)}">${escapeHTML(v.label)}</option>`).join("");
     select.value = state.lines.performanceVersion;
@@ -1015,10 +1025,9 @@
   $("lines-outcome").addEventListener("change", (event) => { state.lines.outcome = event.target.value; state.lines.limit = 24; reloadLinesLedger(); });
   $("lines-sort").addEventListener("change", (event) => { state.lines.sort = event.target.value; reloadLinesLedger(); });
   $("lines-performance-version").addEventListener("change", (event) => {
-    state.lines.performanceVersion = event.target.value; state.lines.limit = 24;
     // Clear the prior projection while the new version loads; never label old
     // values as the newly selected version during an asynchronous request.
-    state.lines.items = []; state.lines.ledger = null; reloadLinesLedger();
+    changeLinesPerformanceVersion(event.target.value); reloadLinesLedger();
   });
   document.querySelectorAll("[data-lines-state]").forEach((button) => button.addEventListener("click", () => {
     state.lines.liveOnly = button.dataset.linesState === "live";

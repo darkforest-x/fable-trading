@@ -37,7 +37,7 @@ function harness(fetchImpl = async () => response({})) {
     document: { getElementById: getElement, querySelectorAll: () => [] } };
   vm.runInNewContext(`${app.slice(0, cutoff)}
     renderErrors = () => {};
-    globalThis.__client = { state, loadLines, renderLines, renderLinesStats, linePerformanceView, rsiProgress };
+    globalThis.__client = { state, loadLines, renderLines, renderLinesStats, linePerformanceView, rsiProgress, changeLinesPerformanceVersion };
   })();`, sandbox);
   const client = sandbox.__client;
   client.state.view = "joints";
@@ -116,4 +116,17 @@ test("current rules are only named when the backend advertises the new policy", 
   assert.match(client.getElement("lines-exit-rule").textContent, /同周期第7个空头大菱形/);
   assert.match(client.getElement("lines-exit-rule").textContent, /连续同色计数，异色重置/);
   assert.match(client.getElement("lines-exit-rule").textContent, /收盘确认，次根开盘全平/);
+});
+
+test("choosing a version clears the rendered prior values before the debounced request", () => {
+  const client = harness();
+  client.state.lines.ledger = ledger();
+  client.renderLines();
+  assert.equal(client.getElement("lines-stats-floating").textContent, "+2.50R");
+  client.changeLinesPerformanceVersion("baseline");
+  assert.equal(client.getElement("lines-stats-floating").textContent, "—");
+  assert.equal(client.getElement("lines-rows").innerHTML, "");
+  assert.equal(client.getElement("lines-performance-version").value, "baseline");
+  assert.equal(client.getElement("lines-performance-version").disabled, false);
+  assert.match(client.getElement("lines-exit-rule").textContent, /正在读取所选退出规则/);
 });
