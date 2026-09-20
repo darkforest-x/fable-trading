@@ -1,0 +1,228 @@
+//@version=6
+// New York 00:00--04:00 range false-break return, research mirror v1.
+//
+// This is a TradingView-native companion to yoyo/evaluation/four_hour_range.py
+// and experiments/active/exp-four-hour-range-20260920-v1/PROJECT_PLAN.md.
+// It deliberately has no order-block interpretation, indicator, trend filter,
+// sizing rule, or parameter search. The range is America/New_York wall-clock
+// time, so DST transition dates contain 36 or 60 reference 5m bars.
+//
+// Entry: first strict close back inside an armed outside excursion, next-bar
+// open. SL: the full-wick extreme from the first outside close through that
+// return bar. TP: 2R from the actual broker fill. A position is closed at the
+// NY 23:55 bar close. Commission is 0.1% per executed side, i.e. 20bp round
+// trip under the strategy broker model. Qty=1 is only a transparent unit, not
+// a sizing recommendation.
+//
+// Native-Pine boundary, not an exact parity claim:
+// * The Python replay marks same-bar SL/TP touches adversely (SL first); the
+//   TradingView broker emulator has its own OHLC/intrabar path assumptions.
+// * Python deducts a fixed 20bp round trip. Pine charges 0.1% on each filled
+//   order, so actual total commission depends on exits and fill notionals.
+// * Python rejects a next-open fill whose known frozen SL gives non-positive
+//   risk. Pine only learns that open after the entry filled, so it can only
+//   immediately close that already-filled invalid position.
+// * Python validates nonnegative source volume; this chart strategy does not
+//   consume or validate volume because it is not an entry rule.
+// * Python can label an incomplete final NY day as censored; this native
+//   strategy has no equivalent data-end/censoring ledger, and its immediate
+//   NY-EOD close remains subject to the broker emulator's fill model.
+//
+// calc_on_order_fills is needed to submit a bracket from the actual next-open
+// fill. Its fill callback NEVER reads current-bar high/low/close for state or
+// reference construction: it only turns the already-frozen SL into a bracket.
+
+strategy("NY 首4小时区间假突破回归 · v1", shorttitle="NY 4H Range v1", overlay=true,
+     pyramiding=0, initial_capital=10000000, default_qty_type=strategy.fixed,
+     default_qty_value=1, commission_type=strategy.commission.percent,
+     commission_value=0.1, slippage=0, margin_long=100, margin_short=100,
+     calc_on_every_tick=false, calc_on_order_fills=true,
+     process_orders_on_close=false, max_lines_count=20, max_labels_count=100)
+
+string ny = "America/New_York"
+int barMillis = 5 * 60 * 1000
+
+string windowGroup = "研究窗口"
+// These two literal timestamps are NY midnight while EDT (UTC-4). input.time
+// requires a const default, hence it cannot use the dynamic timestamp() below.
+int researchStart = input.time(timestamp("20 Sep 2023 00:00 -0400"), "起始（纽约午夜）", group=windowGroup)
+int researchEnd = input.time(timestamp("19 Sep 2026 00:00 -0400"), "结束（纽约午夜，排除）", group=windowGroup)
+
+string displayGroup = "显示"
+bool showRange = input.bool(true, "显示已完成区间", group=displayGroup)
+bool showBrackets = input.bool(true, "显示当前 SL / TP", group=displayGroup)
+
+if barstate.isfirst
+    if not timeframe.isminutes or timeframe.multiplier != 5 or not chart.is_standard
+        runtime.error("请在标准5分钟K线图上使用本策略。")
+    if researchEnd <= researchStart
+        runtime.error("研究结束必须晚于研究起始。")
+
+int nyYear = year(time, ny)
+int nyMonth = month(time, ny)
+int nyDay = dayofmonth(time, ny)
+int nyHour = hour(time, ny)
+int nyMinute = minute(time, ny)
+int nyDateKey = nyYear * 10000 + nyMonth * 100 + nyDay
+int nyMidnight = timestamp(ny, nyYear, nyMonth, nyDay, 0, 0)
+int nyRangeEnd = timestamp(ny, nyYear, nyMonth, nyDay, 4, 0)
+int expectedReferenceBars = int((nyRangeEnd - nyMidnight) / barMillis)
+
+bool referenceBar = nyHour >= 0 and nyHour < 4
+bool referenceStart = nyHour == 0 and nyMinute == 0
+bool rangeEndBar = nyHour == 4 and nyMinute == 0
+bool nyEodBar = nyHour == 23 and nyMinute == 55
+bool inResearch = time >= researchStart and time < researchEnd
+bool finalResearchBar = inResearch and time + barMillis >= researchEnd
+
+// Closed-bar reference/excursion state. It is intentionally separate from
+// varip execution facts below, because only normal confirmed calculations may
+// mutate it. armSide: +1 = lower break -> future long, -1 = upper -> short.
+var float rangeHigh = na
+var float rangeLow = na
+var int referenceBars = 0
+var bool referenceContinuous = true
+var bool rangeReady = false
+var int armSide = 0
+var float extremeLow = na
+var float extremeHigh = na
+var int lastNyDateKey = na
+
+// The pending SL is frozen at the return close. The actual fill price is only
+// known in a calc_on_order_fills callback, where these varip primitives survive
+// the callback rollback. lastProcessedBar prevents a callback from consuming
+// historical final-bar H/L/C and creating a duplicate state transition.
+varip float seenPositionSize = 0.0
+varip int lastProcessedBar = na
+varip int pendingSide = 0
+varip float pendingStop = na
+varip float activeStop = na
+varip float activeTarget = na
+
+bool fillCallback = strategy.position_size != seenPositionSize
+bool newPosition = strategy.position_size != 0 and seenPositionSize == 0
+
+if fillCallback
+    if newPosition
+        int fillSide = strategy.position_size > 0 ? 1 : -1
+        float actualEntry = strategy.position_avg_price
+        float actualRisk = fillSide * (actualEntry - pendingStop)
+        float candidateTarget = actualEntry + fillSide * 2.0 * actualRisk
+        // Pine represents unavailable numeric results as na. With a positive
+        // actual entry and finite inputs, this is the native finite/positive
+        // counterpart of Python's np.isfinite(target) and target > 0 guard.
+        bool validBracket = fillSide == pendingSide and not na(pendingStop) and not na(actualEntry) and actualEntry > 0 and not na(actualRisk) and actualRisk > 0 and not na(candidateTarget) and candidateTarget > 0
+        if validBracket
+            activeStop := pendingStop
+            activeTarget := candidateTarget
+            strategy.exit("BRACKET", from_entry=fillSide == 1 ? "LONG" : "SHORT",
+                 stop=activeStop, limit=activeTarget, comment_loss="SL", comment_profit="TP 2R")
+        else
+            // See the documented mismatch above: Pine has already filled this
+            // market order before it can discover the adverse opening gap.
+            strategy.close(fillSide == 1 ? "LONG" : "SHORT", comment="INVALID NEXT-OPEN RISK", immediately=true)
+        pendingSide := 0
+        pendingStop := na
+    else if strategy.position_size == 0
+        activeStop := na
+        activeTarget := na
+
+// This block runs once for a non-fill, confirmed close. No fill callback may
+// enter it, which avoids the historical calc_on_order_fills OHLC lookahead.
+bool processClose = barstate.isconfirmed and not fillCallback and (na(lastProcessedBar) or lastProcessedBar != bar_index)
+if processClose
+    lastProcessedBar := bar_index
+
+    // Reset first on every NY date transition. This fail-closes a chart that
+    // begins after 00:00 or has no NY reference bars, so a prior day's finished
+    // range can never carry into a later day.
+    bool nyDateChanged = na(lastNyDateKey) or nyDateKey != lastNyDateKey
+    if nyDateChanged
+        rangeHigh := na
+        rangeLow := na
+        referenceBars := 0
+        referenceContinuous := false
+        rangeReady := false
+        armSide := 0
+        extremeLow := na
+        extremeHigh := na
+    lastNyDateKey := nyDateKey
+
+    // The reference range is built only from NY [00:00, 04:00) bar opens.
+    // Count plus timestamp continuity rejects charts that omit any reference
+    // candle, including the 36/60-bar DST transition mornings.
+    if referenceStart
+        rangeHigh := high
+        rangeLow := low
+        referenceBars := 1
+        referenceContinuous := true
+        rangeReady := false
+        armSide := 0
+        extremeLow := na
+        extremeHigh := na
+    else if referenceBar
+        rangeHigh := na(rangeHigh) ? high : math.max(rangeHigh, high)
+        rangeLow := na(rangeLow) ? low : math.min(rangeLow, low)
+        referenceBars += 1
+        referenceContinuous := referenceContinuous and not na(time[1]) and time - time[1] == barMillis
+        rangeReady := false
+
+    if rangeEndBar
+        rangeReady := referenceBars == expectedReferenceBars and referenceContinuous and not na(rangeHigh) and not na(rangeLow)
+
+    // Daily close is an explicit research assumption. It takes priority over a
+    // potential 23:55 return signal, because its next open is a new NY day.
+    if (nyEodBar or finalResearchBar) and strategy.position_size != 0
+        strategy.close_all(comment=nyEodBar ? "NY EOD" : "RESEARCH END", immediately=true)
+
+    bool canEvaluate = inResearch and rangeReady and not referenceBar and not nyEodBar and not finalResearchBar
+    if canEvaluate
+        int outsideSide = close < rangeLow ? 1 : close > rangeHigh ? -1 : 0
+        bool strictlyInside = close > rangeLow and close < rangeHigh
+
+        if armSide == 0
+            if outsideSide != 0
+                armSide := outsideSide
+                extremeLow := low
+                extremeHigh := high
+        else if strictlyInside
+            // The return bar's entire wick is part of the frozen SL excursion.
+            extremeLow := math.min(extremeLow, low)
+            extremeHigh := math.max(extremeHigh, high)
+            float candidateStop = armSide == 1 ? extremeLow : extremeHigh
+            if strategy.position_size == 0 and pendingSide == 0 and not na(candidateStop)
+                pendingSide := armSide
+                pendingStop := candidateStop
+                strategy.entry(armSide == 1 ? "LONG" : "SHORT", armSide == 1 ? strategy.long : strategy.short,
+                     comment=armSide == 1 ? "return long" : "return short")
+            // A candidate made while occupied is deliberately discarded; it is
+            // not queued. New trades must leave the range again first.
+            armSide := 0
+            extremeLow := na
+            extremeHigh := na
+        else if outsideSide != 0 and outsideSide != armSide
+            // Direct lower-outside -> upper-outside (or inverse) replacement.
+            armSide := outsideSide
+            extremeLow := low
+            extremeHigh := high
+        else
+            // Same-side outside closes and range-edge equality preserve the arm.
+            extremeLow := math.min(extremeLow, low)
+            extremeHigh := math.max(extremeHigh, high)
+
+    // No active excursion crosses an NY-day boundary, even if a chart has a
+    // partial final day after the research window.
+    if nyEodBar or finalResearchBar
+        armSide := 0
+        extremeLow := na
+        extremeHigh := na
+
+seenPositionSize := strategy.position_size
+
+plot(showRange and rangeReady ? rangeHigh : na, "NY 00--04 High", color=color.new(color.aqua, 0), linewidth=2, style=plot.style_linebr)
+plot(showRange and rangeReady ? rangeLow : na, "NY 00--04 Low", color=color.new(color.aqua, 0), linewidth=2, style=plot.style_linebr)
+plot(showBrackets and strategy.position_size != 0 ? activeStop : na, "SL", color=color.new(color.red, 0), linewidth=2, style=plot.style_linebr)
+plot(showBrackets and strategy.position_size != 0 ? activeTarget : na, "TP 2R", color=color.new(color.lime, 0), linewidth=2, style=plot.style_linebr)
+
+plotshape(processClose and armSide == 1, "Armed lower excursion", shape.circle, location.belowbar, color=color.new(color.teal, 65), size=size.tiny)
+plotshape(processClose and armSide == -1, "Armed upper excursion", shape.circle, location.abovebar, color=color.new(color.fuchsia, 65), size=size.tiny)
