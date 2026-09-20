@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-four-hour-range-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8a548c23ae
+    status: inconclusive
+    question: Does a fixed NY00-04 range false-breakout reversion rule produce positive net returns on BTC and ETH perpetuals?
+    single_variable: First fixed baseline;close outside then inside,next5m open,excursion extreme stop,2R target,NY day-end exit,20bp.
+    result: Preregistered before economic replay;two same-venue sources frozen with31-day warmup and no missing5m bars.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_four_hour_range_btc_eth_20260920.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Historical chronology split,matched random timing controls;no optimization or live changes. Pending scoring is not evidence of edge.
   - experiment_id: exp-spike-v12-4-5m-filter-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a

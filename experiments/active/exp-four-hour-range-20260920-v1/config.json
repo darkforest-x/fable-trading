@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-four-hour-range-20260920-v1",
+  "start": "2023-09-20T04:00:00Z",
+  "split": "2025-09-19T04:00:00Z",
+  "end": "2026-09-19T04:00:00Z",
+  "sources": {
+    "BTC-USDT-SWAP": {
+      "path": "experiments/active/exp-four-hour-range-20260920-v1/data/BTC-USDT-SWAP/bars.csv.gz",
+      "sha256": "0f5c5d3ee8b23df5fadf86ff7655bfc0aad4a099c86e884a2b2ab027f5c5a3e3"
+    },
+    "ETH-USDT-SWAP": {
+      "path": "experiments/active/exp-four-hour-range-20260920-v1/data/ETH-USDT-SWAP/bars.csv.gz",
+      "sha256": "ba5ca45b8f2ed4c42ff00ec50ad090308229e9a2fd2ee5015cbd9557c626baf4"
+    }
+  },
+  "builders": [
+    "yoyo/evaluation/four_hour_range.py",
+    "yoyo/evaluation/four_hour_range_study.py",
+    "yoyo/contracts/costs.py",
+    "experiments/active/exp-four-hour-range-20260920-v1/PROJECT_PLAN.md"
+  ]
+}
