@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-09-20T04:55:56.733703+00:00",
+  "source_commit": "c66fce874f53e10e117d84ec9fb5b3996bd6af5a",
+  "tests": {
+    "passed": 48,
+    "failed": 0,
+    "duration_seconds": 0.53,
+    "scope": "Eight related evaluation modules listed in PROJECT_PLAN.md; observed earlier in this session, not rerun for this receipt"
+  },
+  "native_delivery": {
+    "platform": "TradingView desktop",
+    "script": "SPIKE V12.4 · 5m方向过滤",
+    "revision": 1,
+    "private": true,
+    "saved_at": "2026-09-20T12:39:06+08:00",
+    "compile_errors": 0,
+    "inherited_warning": "954:1 Shadowing built-in variable second",
+    "chart_url": "https://www.tradingview.com/chart/AlGc61US/",
+    "final_symbol": "OKX:ETHUSDT.P",
+    "final_timeframe": "5m",
+    "final_filter_enabled": true,
+    "layout_saved_at": "2026-09-20T12:47:27+08:00",
+    "prior_version_preserved": true
+  },
+  "same_bar_native_ab": {
+    "bar_open": "2026-08-19T14:00:00+08:00",
+    "bar_close": "2026-08-19T14:05:00+08:00",
+    "ohlc": [
+      1909.45,
+      1910.29,
+      1908.01,
+      1908.14
+    ],
+    "completed_m15_ema120_displayed": 1907.87,
+    "off": {
+      "entry_allowed": 1,
+      "reference_start": 1,
+      "confirmed_close": 1908.14,
+      "short_point_present": true
+    },
+    "on": {
+      "entry_allowed": 0,
+      "reference_start": 0,
+      "confirmed_close": null,
+      "short_point_present": false
+    }
+  },
+  "m15_regression": {
+    "h1_sma60_retained": true,
+    "observed_value": 2569.58,
+    "observed_gate": "long only",
+    "five_minute_ema_line_absent": true
+  },
+  "notion": {
+    "url": "https://app.notion.com/p/3e18856479af81998e51e11e956e48c5",
+    "fetched_and_verified": true,
+    "status": "完成",
+    "status_scope": "functional delivery only",
+    "production_eligible": false
+  },
+  "limitations": [
+    "No new return backtest or optimal-line claim",
+    "No full native15m vs aggregated5m missing-data parity",
+    "Native equality/gap/first-ready edge cases not individually replayed",
+    "No full-text TradingView source export hash roundtrip"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

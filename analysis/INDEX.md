@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **588** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **589** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -17,6 +17,7 @@
 | 2026-09-20 | [`p1_spike_v112_entry_extension_20260920.md`](p1_spike_v112_entry_extension_20260920.md) | V11.2：限制入场前价格推进，三个周期均未通过研究筛查 | 结论：固定29币，只试一个因果入场门——突破收盘相对父V9收盘的推进，不超过父信号收盘到原止损的一份距离。15m和1h全期净R从负转正，但不足以接受此规则：三个周期的全期改善区间都跨0，1h后段仍亏，4h后段更差。保留15m时机线索；拒绝本规则准入，不搜索新阈值，不修改Pine/监控/实盘。 |
 | 2026-09-20 | [`p1_spike_v112_one_line_audit_20260920.md`](p1_spike_v112_one_line_audit_20260920.md) | V11.2：ONE 15m白色下降线卡在第三个独立高点 | 结论：按当前默认线性/双轨规则和本地同段OKX数据，这条图示线首先卡在建线。第三次贴线虽很准，但不被12左/8右的pivot定义承认为独立高点，且相邻间隔只有7根，低于24根。另一个独立问题是1h已出现突破时，15m没有开放V9多头参考框，因此不产生框内联合。未改脚本或参数。 |
 | 2026-09-20 | [`p1_spike_v112_trade_review_20260920.md`](p1_spike_v112_trade_review_20260920.md) | V11.2：29币570笔逐笔复盘与8张行情图 | 结论：570次入场全部重放并生成逐笔说明，568笔已平仓、187盈、381亏，2笔边界仍持仓。381笔亏损里127笔曾到1R、33笔曾到2R；“先有明显浮盈再回吐”真实存在，但不能解释多数亏单。最大的亏损类别是未到1R便价格止损，共234笔。8张图按机制选取，另有29份逐币明细和完整中文CSV。 |
+| 2026-09-20 | [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) | SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20） |  |
 | 2026-09-20 | [`p1_spike_v12_compact_bk_20260920.md`](p1_spike_v12_compact_bk_20260920.md) | V12：ONE 三次突破说明与紧凑样式 |  |
 | 2026-09-20 | [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) | SPIKE V12：持线配对、信号显示与截图漏线验收 |  |
 | 2026-09-20 | [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) | SPIKE V12：主高点＋局部回踩确认 |  |
@@ -929,6 +930,7 @@
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
 - [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
 - [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
+- [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) — SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20）
 - [`p1_spike_v12_compact_bk_20260920.md`](p1_spike_v12_compact_bk_20260920.md) — V12：ONE 三次突破说明与紧凑样式
 - [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) — SPIKE V12：持线配对、信号显示与截图漏线验收
 - [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) — SPIKE V12：主高点＋局部回踩确认

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v12-4-5m-filter-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a
+    status: inconclusive
+    question: Deliver the authorized completed15m EMA120 entry gate for5m in a new private TradingView V12.4.
+    single_variable: Add5m final entry admission only; preserve15m H1 SMA60, raw reverse exits and existing risk/line/box behavior.
+    result: Functional delivery complete;48checks and LunaMax review pass. TVrevision1 saved and compiled;ETH20260819T1400BJ close1908.14 aboveEMA1907.87,gateoff entry1 gateon0;final5m filteron and layout saved.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v12_4_5m_filter_20260920.md
+    artifacts:
+    - spike-v12-4-5m-filter-20260920-v1-delivery
+    reuse_allowed: false
+    notes: Inconclusive refers to economic validity,not unfinished implementation. No validated optimum claim. Native edge-case/full-text parity limitations recorded. Prior scripts preserved,no new alerts/orders/production changes. Notion3e18856479af81998e51e11e956e48c5.
   - experiment_id: exp-trend-baselines-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a

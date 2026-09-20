@@ -1,0 +1,17 @@
+{
+  "role": "budget-mapper",
+  "model": "gpt-5.6-luna",
+  "reasoning": "max",
+  "scope": "Read-only V12.3/V12.4 Pine diff and existing five-minute EMA behavioral tests",
+  "verdict": "No blocking logic issue found",
+  "evidence": [
+    "EMA first-close seed alpha2/121;1200 native completed15m bars;reset on missing/invalid higher bars",
+    "Internal offset[1] plus lookahead_on;prior higher close equals current15m opening boundary",
+    "Only entry admission changed;raw reverse exits preserved",
+    "Existing H1 gate and trendline/box pairing retain original semantics"
+  ],
+  "limitations": [
+    "Not full TradingView versus Python parity for partial missing5m children",
+    "Native equality,missing15m and first-warmup-bar edge cases not separately replayed"
+  ]
+}

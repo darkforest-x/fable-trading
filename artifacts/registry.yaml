@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v12-4-5m-filter-20260920-v1-delivery
+    artifact_type: manifest
+    role: five_minute_completed_m15_ema120_pine_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a
+    source_path: experiments/active/exp-spike-v12-4-5m-filter-20260920-v1/delivery_manifest.json
+    sha256: 7655ef3a00e8b6a6043160e34ebde51a599023093d25645b203444dea659c600
+    size_bytes: 5111
+    storage_uri: repo://experiments/active/exp-spike-v12-4-5m-filter-20260920-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Functional release complete;48checks,native compile and exact ETH20260819T1400BJ filteroff/on A/B pass. PNG evidence local-only;AX text and hashes committed. No new profitability or native full-text parity claim. Legacy holdout enum retained;historical restrictions canceled.
   - artifact_id: spike-v9-5m-15m-ma-20260920-v1-delivery
     artifact_type: manifest
     role: five_minute_v9_six_completed_fifteen_minute_direction_lines
