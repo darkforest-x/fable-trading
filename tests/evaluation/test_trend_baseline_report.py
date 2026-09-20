@@ -23,6 +23,7 @@ def _rows(values: list[float], exits: list[str]) -> pd.DataFrame:
                           "censored": False, "exit_time": pd.to_datetime(exits, utc=True)})
     frame["entry_time"] = pd.Timestamp("2025-01-02T00:00:00Z")
     frame["event_key"] = [f"e{i}" for i in range(len(frame))]
+    frame["reason"] = "matched"
     return frame
 
 
@@ -94,3 +95,13 @@ def test_empty_group_is_stable_and_cost_tail_statistics_are_correct() -> None:
     assert result["cost_r"] == 3.0
     assert result["winners_10r"] == 1
     assert result["winners_10r_positive_profit_share"] == 10.0 / 15.0
+
+
+def test_censored_control_is_counted_even_when_sampler_marks_it_unmatched() -> None:
+    frame = _rows([1.0], ["2025-01-10T00:00:00Z"])
+    frame["matched"] = False; frame["control_censored"] = True
+    frame["reason"] = "censored"
+    frame["control_exit_time"] = pd.Timestamp("2025-01-31T00:00:00Z")
+    got = control_metrics(frame, pd.Timestamp(CFG["split"]), "full")
+    assert got["control_censored"] == 1 and got["control_unmatched"] == 1
+    assert got["random_pairs"] == 0 and got["closed_without_eligible_control"] == 1

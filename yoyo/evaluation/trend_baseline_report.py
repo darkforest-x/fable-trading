@@ -135,7 +135,7 @@ def control_metrics(group: pd.DataFrame, split: pd.Timestamp, period: str) -> di
     return {
         "random_pairs": int(len(paired)),
         "control_unmatched": int((~group.matched.fillna(False).astype(bool)).sum()),
-        "control_censored": int((group.matched.fillna(False).astype(bool) & group.control_censored.fillna(True).astype(bool)).sum()),
+        "control_censored": int(group.reason.eq("censored").sum()),
         "closed_without_eligible_control": int((~group.censored.astype(bool)).sum() - len(paired)),
         "random_mean_r": float(net.mean()) if len(net) else np.nan,
         "paired_strategy_mean_r": float(strategy.mean()) if len(strategy) else np.nan,
@@ -311,7 +311,7 @@ def _verify_source(source: Path) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
     return identity, t, coverage_frame
 
 
-def _write_report(summary: pd.DataFrame, comp: pd.DataFrame, tests: pd.DataFrame, identity: dict, source: Path, output: Path) -> None:
+def _write_report(summary: pd.DataFrame, comp: pd.DataFrame, tests: pd.DataFrame, identity: dict, source: Path, output: Path, report_path: Path, manifest_path: Path) -> None:
     """Write the Chinese Markdown record without selecting a winner or tuning."""
 
     view = summary.loc[summary.direction.eq("both") & summary.period.isin(["earlier", "later"])]
@@ -352,7 +352,7 @@ def _write_report(summary: pd.DataFrame, comp: pd.DataFrame, tests: pd.DataFrame
 cd /Users/zhangzc/fable-trading
 .venv/bin/python -m pytest -q tests/evaluation/test_trend_baseline_signals.py tests/evaluation/test_trend_baseline_study.py tests/evaluation/test_trend_baseline_report.py
 .venv/bin/python -W ignore -m yoyo.evaluation.trend_baseline_study --workers 3 --output {EXP}/run_v2
-.venv/bin/python -m yoyo.evaluation.trend_baseline_report --source {EXP}/run_v2 --output-name {output.name}
+.venv/bin/python -m yoyo.evaluation.trend_baseline_report --source {EXP}/run_v2 --output-name {output.name} --report {report_path} --manifest {manifest_path}
 ```
 
 回放 identity：`{identity["identity_hash"]}`；回放 source commit：`{identity["source_commit"]}`。`summary.csv`、`per_asset.csv`、`monthly.csv`、`comparisons.csv`、`random_tests.csv` 和带控制的逐笔账本均在 `{output}`。命令用于输入归档齐全且输出尚未生成的环境；统计拒绝覆盖历史文件。相同重跑源须保持 identity 中的提交及全部声明文件一致，后续文档提交不能冒充原构建提交。run_v1 保留，run_v2 仅补来源绑定校验；最终审计比较两次逐流产物 SHA。
@@ -361,12 +361,12 @@ cd /Users/zhangzc/fable-trading
 
 下一步只能由 owner 在完整表、随机对照与限制基础上决定是否做新的独立观察；不得据此追调简单信号参数。
 '''
-    if REPORT.exists():
+    if report_path.exists():
         raise ValueError("refusing to overwrite an existing historical report")
-    REPORT.write_text(report)
+    report_path.write_text(report)
 
 
-def run(source: Path = EXP / "run_v2", output_name: str = "statistics_v1") -> None:
+def run(source: Path = EXP / "run_v2", output_name: str = "statistics_v1", report_path: Path = REPORT, manifest_path: Path = EXP / "delivery_manifest.json") -> None:
     """Authenticate a committed full replay, then produce immutable statistics."""
 
     if not engine._committed((Path(__file__), TEST)):
@@ -390,22 +390,21 @@ def run(source: Path = EXP / "run_v2", output_name: str = "statistics_v1") -> No
     comp.to_csv(output / "comparisons.csv", index=False)
     random.to_csv(output / "random_tests.csv", index=False)
     coverage.to_csv(output / "coverage.csv", index=False)
-    _write_report(summary, comp, random, identity, source, output)
+    _write_report(summary, comp, random, identity, source, output, report_path, manifest_path)
     files = {path.name: digest(path) for path in output.iterdir() if path.is_file()}
     receipt = {"sourceCommit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                "replay_identity": identity["identity_hash"], "files": files,
-               "report_sha256": digest(REPORT), "stream_coverage": int(len(coverage))}
+               "report_sha256": digest(report_path), "report_path": str(report_path), "stream_coverage": int(len(coverage))}
     (output / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     manifest = {"sourceCommit": receipt["sourceCommit"], "source_commit": receipt["source_commit"],
                 "replay_identity": identity["identity_hash"], "artifacts": [
-                    {"path": str(REPORT), "sha256": digest(REPORT)},
+                    {"path": str(report_path), "sha256": digest(report_path)},
                     *[{"path": str(path), "sha256": digest(path)} for path in output.iterdir()],
                     *[{"path": str(path), "sha256": digest(path)} for path in
                       [source/"identity.json", source/"completion.json", EXP/"config.json", EXP/"PROJECT_PLAN.md",
                        *sorted(source.glob("streams/*/completion.json"))]],
                 ]}
-    manifest_path = EXP / "delivery_manifest.json"
     if manifest_path.exists():
         raise ValueError("refusing to overwrite experiment delivery manifest")
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
@@ -415,5 +414,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", type=Path, default=EXP / "run_v2")
     parser.add_argument("--output-name", default="statistics_v1")
+    parser.add_argument("--report", type=Path, default=REPORT)
+    parser.add_argument("--manifest", type=Path, default=EXP / "delivery_manifest.json")
     args = parser.parse_args()
-    run(args.source, args.output_name)
+    run(args.source, args.output_name, args.report, args.manifest)
