@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v9-5m-15m-ma-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72f11f95f040d77f632f8cf0f6240da20317fb7e
+    status: active
+    question: Which of six completed15m SMA/EMA20/60/120 lines best gates existing5m V9 long and short entries?
+    single_variable: Categorical15m direction-line admission only; full two-sided serial replay with original exits, stop and20bp cost.
+    result: Preregistered seven arms including none; common readiness primary, earlier selection and later validation, frozen29 Binance5m source with ETH subgroup. Market replay not yet run.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner asked to validate lines after an ETH5m versus15m conflict. Six existing chart lines only; no Pine or production changes. Plan at experiments/active/exp-spike-v9-5m-15m-ma-20260920-v1/PROJECT_PLAN.md.
   - experiment_id: exp-btc-rsi-fifth-color-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2b3b5b1f1c5aca0252988b6897fc2f1ba36c6213

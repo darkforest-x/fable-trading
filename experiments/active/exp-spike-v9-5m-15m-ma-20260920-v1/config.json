@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-v9-5m-15m-ma-20260920-v1",
+  "lengths": [20, 60, 120],
+  "arms": ["none", "sma20", "ema20", "sma60", "ema60", "sma120", "ema120"],
+  "pairs": [["5m", 5, "15m", 15]],
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "seed": 920515,
+  "bootstrap_reps": 4000,
+  "ema_warmup_multiple": 10,
+  "selection": "One shared long/short line selected by highest development total net R on the common-ready clock, including none; ties follow arms order. Exclude censored and cross-split trades. ETH and separate directions are descriptive checks, not separate production policies.",
+  "primary_scope": "common",
+  "primary_universe": "all",
+  "common_warmup_sensitivity": "All seven arms require all six MA values ready; EMA requires 10*N contiguous valid completed higher bars. Actual scope also runs each line's own readiness. No admission or unknown silently imputed.",
+  "acceptance": "Selected non-baseline line must have positive later total net R, positive improvement over baseline in both net R and nominal net return, monthly-block net R delta lower95>0 and one-sided exact sign-flip p<0.01, retention of at least85percent of original later realized10R winners when present, and positive actual-scope delta in R and nominal return. One pooled selected-line primary test; ETH, directions and full grid are exploratory. Research evidence never promotes or changes Pine defaults.",
+  "entry_rule": "5m confirmation close strictly above last completed15m MA for long, below for short; equality and unknown reject",
+  "htf_visibility": "15m close_time <= 5m bar OPEN; original Pine offset plus lookahead_on timing. No evolving15m candle or later close at the same5m close is used.",
+  "unchanged": "V9 raw opposite exits; next-open entry; original5bar/0.2ATR/min2ATR stop; close2R arms4ATR trail;0.2percent round trip; single position per symbol for each complete two-sided replay",
+  "training_eligible": false,
+  "production_eligible": false
+}
