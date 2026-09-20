@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **589** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **592** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -22,6 +22,7 @@
 | 2026-09-20 | [`p1_spike_v12_held_break_display_20260920.md`](p1_spike_v12_held_break_display_20260920.md) | SPIKE V12：持线配对、信号显示与截图漏线验收 |  |
 | 2026-09-20 | [`p1_spike_v12_local_touch_20260920.md`](p1_spike_v12_local_touch_20260920.md) | SPIKE V12：主高点＋局部回踩确认 |  |
 | 2026-09-20 | [`p1_spike_v9_5m_15m_ma_20260920.md`](p1_spike_v9_5m_15m_ma_20260920.md) | 5分钟SPIKE开多空：15分钟六条均线方向过滤（2026-09-20） | 结论：按前段开发期累计净R选出的共用规则是 **sma120**；**未通过预注册验证，不能推荐为实盘最优**。后段原基线4263笔、-923.96R，所选规则3339笔、-785.21R；差值138.76R，月块95%区间[-173.47, 361.13]，单侧符号置换p=0.203125。... |
+| 2026-09-20 | [`p1_trend_baselines_20260920_findings.md`](p1_trend_baselines_20260920_findings.md) | 趋势系统基线比较：没有找到可稳定替换 Spike 的简单规则 |  |
 | 2026-09-19 | [`p1_spike_v112_1h_diagnostics_20260919.md`](p1_spike_v112_1h_diagnostics_20260919.md) | SPIKE V11.2 1h：完整回测数据与失败路径分析 |  |
 | 2026-09-19 | [`p1_spike_v112_audit_20260919.md`](p1_spike_v112_audit_20260919.md) | SPIKE V11.2「框内突破+spike」审查：已有负面答案，剩余问题是交易口径、一致性与前向证据 |  |
 | 2026-09-19 | [`p1_spike_v112_execution_20260919.md`](p1_spike_v112_execution_20260919.md) | SPIKE V11.2 三项执行逻辑研究：能救回个别亏单，尚未得到正收益改法 | 结论：单独限制入场时效、沿用父 V9 止损、改用盘中高点激活原追踪，均未在 15m 或 1h 通过预先设定的研究门。15m 的 6 根时效限制有改善线索，但区间跨零、后段仍亏；统一放宽止损或提前追踪不能据此采用。没有搜索最优参数，没有修改 Pine、监控、默认参数或实盘。 |
@@ -575,6 +576,8 @@
 | — | [`p1_spike_v8_total2_1h_native_20260914.md`](p1_spike_v8_total2_1h_native_20260914.md) | V8 × TOTAL2 1H：TradingView 原生回测 |  |
 | — | [`p1_spike_v9_asset_exclusions_20260915.md`](p1_spike_v9_asset_exclusions_20260915.md) | 按币种成绩排除：V9 三个固定条件 | 完整账本保留每笔原先的同流、同方向、同时间块、同波动桶随机控制。整币删除时只保留同一实际事件原绑定的控制，没有重抽；只有两边均可评分且符合原时间边界的配对进入统计。全期事后选择也会污染筛选后的控制检验，不将其中较小的 p 值用作筛币验收。 |
 | — | [`p1_spike_v9_htf_sma_20260920.md`](p1_spike_v9_htf_sma_20260920.md) | V9 上级SMA方向过滤：固定29币参数对照 |  |
+| — | [`p1_trend_baselines_20260920.md`](p1_trend_baselines_20260920.md) | 固定趋势基线：29 币、三周期、共同风险退出 |  |
+| — | [`p1_trend_baselines_20260920_v2.md`](p1_trend_baselines_20260920_v2.md) | 固定趋势基线：29 币、三周期、共同风险退出 |  |
 | — | [`p1_trendline_v2_tbsl_20260918.md`](p1_trendline_v2_tbsl_20260918.md) | 下降趋势线突破 V2 · 止盈止损网格与多周期回测 | 三个周期全部未通过事前三条标准。没有一组止盈止损参数值得拿去消耗 holdout。 |
 | — | [`p1_useless_multiscale_launch_20260909.md`](p1_useless_multiscale_launch_20260909.md) | SPIKE · USELESS 多周期启动复盘与超级趋势原型 |  |
 | — | [`p1_yolo_owner_annotation_audit_20260908.md`](p1_yolo_owner_annotation_audit_20260908.md) | 你已调整的 72 张图：怎样标平台、怎样看后续 150 根 |  |
@@ -989,6 +992,9 @@
 - [`p1_spike_v9_implementation_20260915.md`](p1_spike_v9_implementation_20260915.md) — SPIKE V9：标的、量比与 UTC 周日过滤已实现
 - [`p1_spike_v9_later_year_attribution_20260917.md`](p1_spike_v9_later_year_attribution_20260917.md) — V9 后一年为什么会亏：毛优势塌到成本线以下，塌的地方是 30m
 - [`p1_spike_v9_v1_comparison_20260915.md`](p1_spike_v9_v1_comparison_20260915.md) — SPIKE V9 与 V1：已有全量结果对读
+- [`p1_trend_baselines_20260920.md`](p1_trend_baselines_20260920.md) — 固定趋势基线：29 币、三周期、共同风险退出
+- [`p1_trend_baselines_20260920_findings.md`](p1_trend_baselines_20260920_findings.md) — 趋势系统基线比较：没有找到可稳定替换 Spike 的简单规则
+- [`p1_trend_baselines_20260920_v2.md`](p1_trend_baselines_20260920_v2.md) — 固定趋势基线：29 币、三周期、共同风险退出
 - [`p1_trendline_v2_tbsl_20260918.md`](p1_trendline_v2_tbsl_20260918.md) — 下降趋势线突破 V2 · 止盈止损网格与多周期回测
 - [`p1_useless_multiscale_launch_20260909.md`](p1_useless_multiscale_launch_20260909.md) — SPIKE · USELESS 多周期启动复盘与超级趋势原型
 - [`p1_yolo_dataset_consolidation_20260908.md`](p1_yolo_dataset_consolidation_20260908.md) — 最新模型1043事件已带原训练框进入人工审核

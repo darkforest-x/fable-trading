@@ -31,18 +31,23 @@ experiments:
     notes: Inconclusive refers to economic validity,not unfinished implementation. No validated optimum claim. Native edge-case/full-text parity limitations recorded. Prior scripts preserved,no new alerts/orders/production changes. Notion3e18856479af81998e51e11e956e48c5.
   - experiment_id: exp-trend-baselines-20260920-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a
-    status: active
-    question: Do fixed Donchian20/55-bar and SMA20/60 signal families outperform Spike under common historical risk and costs?
-    single_variable: Categorical signal family including raw opposite exits; original stop/trail/cost and shared readiness/calendar/RV guards.
-    result: Preregistered; market results pending. OriginalV9 and releasedV9.1 are receipt-bound comparators; no parameter search.
+    source_commit: ba86ffea3296890e21777d861ed2cdedac009f29
+    status: rejected
+    question: Do fixed Donchian20/55 and SMA20/60 signal families stably outperform Spike under common risk and costs?
+    single_variable: Categorical signal family including own raw opposite exits; common stop/trail/cost/readiness/guards.
+    result: No stable simple-family replacement. Later15m DC20/DC55/SMA netR -1598.34/-579.29/-1440.68;1h all negative;4h DC55+8.20/SMA+25.96
+      but paired random excess negative or zero. Nine later Holm p all1. V9.1 15m+103.50R,short+132.92/long-29.41,random p0.046875
+      remains unvalidated.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-trend-baselines-20260920-v1/PROJECT_PLAN.md
-    artifacts: []
+    canonical_report: analysis/p1_trend_baselines_20260920_findings.md
+    artifacts:
+    - trend-baselines-20260920-v1-delivery
     reuse_allowed: false
-    notes: Owner go-ahead20260920;29 frozenBinance symbols,15m1h4h,20240910to20260501 split20250910. Chart-bar adaptations not originalTurtle. Exploratory inference only;8later months cannot resolve9wayHolm0.01. NoPine/production changes.
+    notes: 29 frozenBinance symbols,3TF,435streams;18focused checks,539corepass8existingfailures;source and independent accounting
+      audits complete. Replayv2 equalsv1 bytes;statisticsv2 fixes censored-control display only. Chart-bar adaptations not originalTurtle.
+      NoPine/production changes. Notion3e18856479af81bbae71e8c929d9805a.
   - experiment_id: exp-spike-v9-5m-15m-ma-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 27e23560f2af9d1793a98644ef13c533976a9781

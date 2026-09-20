@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: trend-baselines-20260920-v1-delivery
+    artifact_type: manifest
+    role: fixed_common_risk_trend_family_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: ba86ffea3296890e21777d861ed2cdedac009f29
+    source_path: experiments/active/exp-trend-baselines-20260920-v1/final_delivery_manifest.json
+    sha256: ca238698238034d3a2fe0c6a09488631681bbc957f1577eb0818b5a0df1f9a04
+    size_bytes: 75323
+    storage_uri: repo://experiments/active/exp-trend-baselines-20260920-v1/final_delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Legacy enum retained;historical restrictions canceled. Complete29x3x5stream comparison and controls;negative replacement
+      result. Local-only dense ledgers,per_asset/monthly tables retained withSHA. No model/Pine/production action.
   - artifact_id: spike-v12-4-5m-filter-20260920-v1-delivery
     artifact_type: manifest
     role: five_minute_completed_m15_ema120_pine_delivery
