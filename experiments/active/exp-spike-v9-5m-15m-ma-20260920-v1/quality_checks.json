@@ -1,0 +1,15 @@
+{
+  "focused_command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v9_5m_15m_ma.py tests/evaluation/test_spike_v9_5m_15m_ma_report.py tests/evaluation/test_spike_v9_htf_sma.py",
+  "focused_result": "20 passed in 0.46s",
+  "repository_command": ".venv/bin/python -m pytest -q tests/boundaries tests/causality tests/parity",
+  "repository_result": "8 failed, 468 passed, 14 warnings in 58.36s",
+  "existing_failure_causes": [
+    "test_no_cross_repository_bridges: existing ma_morphology_reuse_recover.py names archive/consolidated/yoyo-trading",
+    "5 teacher-protocol tests: existing artifact spike-v8-total2-1h-native-20260914-delivery lacks source_commit",
+    "2 migration hash tests: existing candidates.py and render.py differ from historical migration hashes"
+  ],
+  "failure_scope_evidence": "git diff --name-only 72f11f95f040d77f632f8cf0f6240da20317fb7e HEAD -- yoyo/evaluation/ma_morphology_reuse_recover.py yoyo/layers/l1_detection/candidates.py yoyo/layers/l1_detection/render.py artifacts/registry.yaml returned no paths before this experiment's artifact registration. candidates.py also had a pre-existing working-tree modification. None of these files were changed by the experiment.",
+  "real_baseline_parity": "All29 current5m no-filter V9 admissions and full serial trades equal the original replay_v9 adapter; per-stream hashes and completion receipts preserved.",
+  "initial_failed_check": "The first report unit test used mixed date-only and date-time strings; pandas refused the fixture. Normalize test timestamps to the ledger's consistent format. No market outputs existed then; no strategy logic changed.",
+  "summary": "20项专项检查通过，29币无过滤基线完整逐笔对账通过。全仓守门468通过、8项已有失败：历史回迁路径1项、既有artifact缺source_commit导致5项、L1迁移哈希2项。本实验未改这些故障路径，未把全仓状态写成通过。"
+}

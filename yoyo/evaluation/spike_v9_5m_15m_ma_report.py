@@ -208,6 +208,11 @@ def run(source, statistics_name="statistics_v1"):
     primary = comp.loc[comp.scope.eq("common") & comp.period.eq("later")].iloc[0]
     honest_verdict = {"research_pass": "达到预注册研究门槛，尚非生产准入", "not_accepted": "未通过预注册验证，不能推荐为实盘最优", "baseline_selected": "开发期选择不加过滤，六条线未胜过基线"}[verdict]
     count = len(identity["inputs"])
+    late_best = view.loc[view.period.eq("later")].sort_values("net_r", ascending=False).iloc[0]
+    control_counts = candidate_counts.groupby("ma")[["candidates", "unknown", "passed", "known_reject"]].sum()
+    quality_path = EXP / "quality_checks.json"
+    quality = json.loads(quality_path.read_text()) if quality_path.exists() else {}
+    quality_text = quality.get("summary", "专项检查与逐币原始V9对账见实验收据；未附全仓检查记录。")
     report = f'''# 5分钟SPIKE开多空：15分钟六条均线方向过滤（2026-09-20）
 
 结论：按前段开发期累计净R选出的共用规则是 **{selected}**；**{honest_verdict}**。后段原基线{baseline.closed:.0f}笔、{baseline.net_r:.2f}R，所选规则{chosen.closed:.0f}笔、{chosen.net_r:.2f}R；差值{primary.net_r_delta:.2f}R，月块95%区间[{primary.net_r_low95:.2f}, {primary.net_r_high95:.2f}]，单侧符号置换p={primary.net_r_p:.6f}。这些是等初始风险的事件合计，不是账户收益率。
@@ -225,6 +230,14 @@ def run(source, statistics_name="statistics_v1"):
 {markdown_table(view, ['ma','period','closed','censored','win_rate','gross_r','net_r','mean_net_bp','pf','event_drawdown_r','random_pairs','random_mean_r','random_excess_r'])}
 
 胜率为0到1。R与名义bp是不同权重的汇总；不能把累计R换写成账户百分比。随机列为同币、同方向、同月、同时间段、同ATR/价格桶的同障碍同成本入场，random_pairs是实际有效配对分母，不保证等于交易数。随机均值/超额以R计；这些描述量不是因果证明。
+
+## 结果解读
+
+- 20周期过滤与原5m六线条件高度重合：EMA20放行全部{control_counts.loc['ema20','candidates']:.0f}候选，SMA20仅方向拒绝{control_counts.loc['sma20','known_reject']:.0f}个。这里是实测冗余，不声称跨周期EMA有严格代数等价。
+- 120周期两条线真正减少交易；但主选{selected}使后段累计净R从{baseline.net_r:.2f}变为{chosen.net_r:.2f}的同时，单笔净bp从{baseline.mean_net_bp:.2f}变为{chosen.mean_net_bp:.2f}。减少累计亏损与提高每笔质量必须分开判断。
+- 后段描述性最高为{late_best.ma}、{late_best.net_r:.2f}R；这是看过后段才知道的排名，不能推翻前段已选{selected}。六条线均不提供已经验证的未来最优。
+- 主选规则保留了{primary.retained_10r:.0f}/{primary.baseline_10r:.0f}个原已实现10R赢家；保护亏单也会误删大趋势。置换p与区间均指向改善尚不稳健。
+- ETH的R与名义bp可能异号：每笔固定风险和每笔固定名义本金是不同加权。两种数值都列出，不选其中更好看的一个宣布盈利。
 
 ## 多头与空头分开：后段
 
@@ -260,6 +273,7 @@ ETH属于原样本池的子组，没有独立选参资格；本表也不是OKX8�
 - 未平仓/缺口删失和跨切点单独保留。手续费是固定20bp假设，未计资金费与额外真实滑点；事件曲线回撤不是共享账户回撤，不含仓位相关性与容量。
 - 固定币池有历史选择偏差，Binance结果不等于OKX执行。六条线之外没搜索斜率、组合或其他长度。通过代码检查也不代表已经完成TV原生逐笔parity。
 - 没有改Pine、生产默认、ACTIVE、成本、止损或账户操作；未生成HTML。结论不能自动promote。
+- 验证记录：{quality_text}
 
 ## 完整产物与复现
 
@@ -279,7 +293,8 @@ cd /Users/zhangzc/fable-trading
     receipt = dict(source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                    replay_identity=identity["identity_hash"], selected=selected, verdict=verdict,
                    report_path=str(REPORT), report_sha256=digest(REPORT), files=files,
-                   input_stream_receipts=len(receipts), candidates=len(e), unique_events=int(t.event_key.nunique()))
+                   input_stream_receipts=len(receipts), candidates=len(e), unique_events=int(t.event_key.nunique()),
+                   quality_checks_sha256=digest(quality_path) if quality_path.exists() else None)
     (out / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(selection, indent=2))
     print(view[["ma", "period", "closed", "net_r", "mean_net_bp"]].to_string(index=False))
