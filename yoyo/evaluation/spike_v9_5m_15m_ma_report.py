@@ -208,9 +208,9 @@ def run(source, statistics_name="statistics_v1"):
     primary = comp.loc[comp.scope.eq("common") & comp.period.eq("later")].iloc[0]
     honest_verdict = {"research_pass": "达到预注册研究门槛，尚非生产准入", "not_accepted": "未通过预注册验证，不能推荐为实盘最优", "baseline_selected": "开发期选择不加过滤，六条线未胜过基线"}[verdict]
     count = len(identity["inputs"])
-    report = f'''# 5分钟SPIKE开多空：15分钟六条均线方向过滤
+    report = f'''# 5分钟SPIKE开多空：15分钟六条均线方向过滤（2026-09-20）
 
-按前段开发期累计净R选出的共用规则是 **{selected}**。结论：**{honest_verdict}**。后段原基线{baseline.closed:.0f}笔、{baseline.net_r:.2f}R，所选规则{chosen.closed:.0f}笔、{chosen.net_r:.2f}R；差值{primary.net_r_delta:.2f}R，月块95%区间[{primary.net_r_low95:.2f}, {primary.net_r_high95:.2f}]，单侧符号置换p={primary.net_r_p:.6f}。这些是等初始风险的事件合计，不是账户收益率。
+结论：按前段开发期累计净R选出的共用规则是 **{selected}**；**{honest_verdict}**。后段原基线{baseline.closed:.0f}笔、{baseline.net_r:.2f}R，所选规则{chosen.closed:.0f}笔、{chosen.net_r:.2f}R；差值{primary.net_r_delta:.2f}R，月块95%区间[{primary.net_r_low95:.2f}, {primary.net_r_high95:.2f}]，单侧符号置换p={primary.net_r_p:.6f}。这些是等初始风险的事件合计，不是账户收益率。
 
 ## 固定方案与数据
 
