@@ -99,7 +99,28 @@ def run(output):
     print(json.dumps(dict(native_ohlc_exact_matches=len(source_checks), diagnostics=diagnostics), default=str), flush=True)
 
 
+def finalize(output):
+    """Hash the existing delivery without rescoring or rewriting any run."""
+    output = Path(output)
+    if output.exists():
+        raise FileExistsError(output)
+    identity = committed_identity([Path(__file__), EXP/'config.json'])
+    paths = list(EXP.rglob('*')) + [ROOT/'analysis/p1_four_hour_range_btc_eth_20260920.md',
+        ROOT/'yoyo/evaluation/four_hour_range.py', ROOT/'yoyo/evaluation/four_hour_range_study.py',
+        ROOT/'yoyo/data/four_hour_range_source.py', ROOT/'yoyo/evaluation/pine/four_hour_range_v1.pine',
+        ROOT/'yoyo/evaluation/pine/four_hour_range_v1_README.md']
+    files = {str(p.relative_to(ROOT)): dict(sha256=sha(p), size_bytes=p.stat().st_size)
+             for p in sorted(paths) if p.is_file()}
+    dump(output, dict(experiment_id=EXP.name, generated_at=pd.Timestamp.now(tz='UTC'),
+        builders=identity, files=files, training_eligible=False, production_eligible=False,
+        economic_run='run_v1', native_parity=False,
+        notion_url='https://app.notion.com/p/3e18856479af8131a2b9d56908ea9397'))
+    print(f'Final delivery manifest: {len(files)} files; {sha(output)}')
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    run(parser.parse_args().output)
+    parser.add_argument('--finalize', action='store_true')
+    args = parser.parse_args()
+    finalize(args.output) if args.finalize else run(args.output)
