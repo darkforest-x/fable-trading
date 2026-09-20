@@ -81,8 +81,15 @@ def compare_prior(actual, expected):
                                   check_dtype=False, rtol=1e-9, atol=1e-9)
 
 
+def validate_prior_receipt(receipt, prior_identity_hash, symbol, source_sha256):
+    """A self-consistent ledger must also belong to the frozen source identity."""
+    assert receipt["identity_hash"] == prior_identity_hash
+    assert receipt["symbol"] == symbol
+    assert receipt["source_sha256"] == source_sha256
+
+
 def one(args):
-    symbol, item, identity_hash, output = args
+    symbol, item, identity_hash, prior_identity_hash, output = args
     folder = Path(output) / "streams" / symbol
     if (folder / "completion.json").exists():
         receipt = json.loads((folder / "completion.json").read_text())
@@ -93,6 +100,7 @@ def one(args):
     assert old.source.digest(path) == item["sha256"]
     prior_folder = PRIOR / "streams" / symbol
     old_receipt = json.loads((prior_folder / "completion.json").read_text())
+    validate_prior_receipt(old_receipt, prior_identity_hash, symbol, item["sha256"])
     assert old.source.digest(prior_folder / "trades.csv.gz") == old_receipt["files"]["trades.csv.gz"]
     prior_trades = pd.read_csv(prior_folder / "trades.csv.gz")
     base = old.inc.guarded_5m(path, old.source.START - pd.Timedelta(days=old.source.WARMUP_BARS))
@@ -145,6 +153,8 @@ def one(args):
         if name == "controls": assert not table.duplicated(["arm","event_key"]).any()
         table.to_csv(folder/f"{name}.csv.gz", index=False, compression={"method":"gzip","mtime":0})
     receipt = {"identity_hash":identity_hash,"symbol":symbol,"coverage":coverage,
+        "source_sha256":item["sha256"],
+        "prior_identity_sha256":old.source.digest(PRIOR/"identity.json"),
         "files":{p.name:old.source.digest(p) for p in folder.iterdir()},"seconds":time.monotonic()-began,
         "prior_receipt_sha256":old.source.digest(prior_folder/"completion.json")}
     (folder/"completion.json").write_text(json.dumps(receipt,indent=2)+"\n")
@@ -183,7 +193,7 @@ def run(output, workers=3, symbols=None):
     else: ip.write_text(json.dumps(identity,indent=2)+"\n")
     results=[]
     with ProcessPoolExecutor(max_workers=workers) as pool:
-        futures=[pool.submit(one,(s,item,identity["identity_hash"],str(output))) for s,item in inputs.items()]
+        futures=[pool.submit(one,(s,item,identity["identity_hash"],prior["identity_hash"],str(output))) for s,item in inputs.items()]
         for future in as_completed(futures):
             row=future.result();results.append(row)
             print(json.dumps({"done":len(results),"total":len(inputs),"symbol":row["symbol"],"seconds":row["seconds"]}),flush=True)

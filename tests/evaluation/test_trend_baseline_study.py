@@ -7,7 +7,7 @@ import pandas as pd
 
 from yoyo.evaluation import spike_v10_4_study as source
 from yoyo.evaluation import spike_v9_htf_sma_study as old
-from yoyo.evaluation.trend_baseline_study import execute, compare_prior, config
+from yoyo.evaluation.trend_baseline_study import execute, compare_prior, config, validate_prior_receipt
 
 
 def prepared():
@@ -64,3 +64,13 @@ def test_prior_parity_rejects_different_cash_result():
     compare_prior(t,t.copy())
     changed=t.copy();changed.loc[0,"net_r"]+=.1
     with pytest.raises(AssertionError): compare_prior(t,changed)
+
+
+def test_self_consistent_prior_receipt_must_belong_to_frozen_input():
+    import pytest
+    receipt = {"identity_hash":"identity", "symbol":"BTCUSDT", "source_sha256":"raw"}
+    validate_prior_receipt(receipt, "identity", "BTCUSDT", "raw")
+    for field in receipt:
+        replaced = {**receipt, field:"different"}
+        with pytest.raises(AssertionError):
+            validate_prior_receipt(replaced, "identity", "BTCUSDT", "raw")
