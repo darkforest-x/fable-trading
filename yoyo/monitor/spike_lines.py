@@ -50,7 +50,7 @@ HIGHER = {"15m": "1H", "30m": "2H", "1H": "4H", "4H": "1Dutc"}
 TAIL_BARS = 1500
 TRACK = {0: "完整影线", 1: "削尖影线"}
 BASELINE_BASIS = "v11_2_box_joint_next_open_serial_net_of_round_trip_cost"
-BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost"
+BASIS = "v11_2_box_joint_rsi7_since_entry_same_tf_streak_next_open_v2_net_cost"
 PERFORMANCE_VERSION = BASIS
 ROUND_TRIP_COST = ExecutionSpec.round_trip_cost
 
@@ -115,26 +115,28 @@ def _unopened(reason: str, *, basis: str, rsi: dict | None = None) -> dict:
             "performance_version": basis, "round_trip_cost": ROUND_TRIP_COST, **(rsi or {})}
 
 
-def _rsi_metadata(features: pd.DataFrame, mask: np.ndarray, *, minutes: int, as_of_i: int,
-                  active: bool, trigger_i: int | None = None) -> dict:
+def _rsi_metadata(entry_counts: pd.DataFrame, mask: np.ndarray, *, minutes: int, as_of_i: int,
+                  entry_i: int, active: bool, trigger_i: int | None = None) -> dict:
     """Project one causal RSI counter snapshot without consulting later bars."""
-    if not 0 <= as_of_i < len(features):
+    if not 0 <= as_of_i < len(entry_counts):
         side, count, known = 0, None, False
     else:
-        row = features.iloc[as_of_i]
-        side, known = int(row.last_strong_side), bool(row.counter_known)
-        count = None if pd.isna(row.last_strong_run) else int(row.last_strong_run)
+        row = entry_counts.iloc[as_of_i]
+        side, known = int(row.entry_last_strong_side), bool(row.entry_counter_known)
+        count = None if pd.isna(row.entry_last_strong_run) else int(row.entry_last_strong_run)
     result = {"rsi_exit_rule": dict(rsi_exit.RSI_EXIT_RULE), "rsi_timeframe_minutes": minutes,
               "rsi_run_side": side, "rsi_run_count": count, "rsi_counter_known": known,
+              "rsi_counter_start": "position_entry",
+              "rsi_counter_start_bar_open_ms": _ms(entry_counts.index[entry_i]),
               "rsi_exit_pending": bool(active and len(mask) and mask[-1]),
               "rsi_exit_trigger_close_ms": None}
     if trigger_i is not None:
-        result["rsi_exit_trigger_close_ms"] = _ms(features.index[trigger_i] + pd.Timedelta(minutes=minutes))
+        result["rsi_exit_trigger_close_ms"] = _ms(entry_counts.index[trigger_i] + pd.Timedelta(minutes=minutes))
     return result
 
 
 def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool, *, basis: str,
-              rsi_features: pd.DataFrame | None = None, rsi_mask: np.ndarray | None = None) -> dict:
+              entry_counts: pd.DataFrame | None = None, rsi_mask: np.ndarray | None = None) -> dict:
     """Serialize one replayed joint trade like the V9 card projection."""
     entry, risk = _num(trade.get("entry_price")), _num(trade.get("initial_risk"))
     entry_i, exit_i = int(trade["entry_i"]), int(trade["exit_i"])
@@ -152,14 +154,14 @@ def _position(trade: dict, frame: pd.DataFrame, step: pd.Timedelta, active: bool
     reason = str(trade.get("exit_reason"))
     is_rsi_exit = reason == "rsi_seventh_reverse_next_open"
     rsi = {}
-    if rsi_features is not None and rsi_mask is not None:
+    if entry_counts is not None and rsi_mask is not None:
         trigger_i = int(trade["rsi_exit_trigger_i"]) if is_rsi_exit else None
         # Closed trades cannot consult their exit bar's close: an open or
         # intrabar fill has no claim to that future close.  An RSI exit's
         # confirmed trigger is exactly the last alive close.
         as_of_i = len(frame) - 1 if active else (trigger_i if trigger_i is not None else int(trade["exit_i"]) - 1)
-        rsi = _rsi_metadata(rsi_features, rsi_mask, minutes=int(step / pd.Timedelta(minutes=1)),
-                            as_of_i=as_of_i, active=active, trigger_i=trigger_i)
+        rsi = _rsi_metadata(entry_counts, rsi_mask, minutes=int(step / pd.Timedelta(minutes=1)),
+                            as_of_i=as_of_i, entry_i=int(trade["entry_i"]), active=active, trigger_i=trigger_i)
     return {"status": status, "current_r": net_r, "exit_r": None if active else net_r,
             "peak_r": _num(trade.get("mfe_r")), "entry_price": entry, "entry_time_ms": _ms(pd.Timestamp(trade["entry_time"])),
             "initial_stop": initial_stop, "initial_risk": risk, "stop_price": protection if active else initial_stop,
@@ -187,35 +189,35 @@ def positions(frame: pd.DataFrame, facts: dict, fired: np.ndarray, *, minutes: i
                     if rsi_features is None else rsi_features)
         if not features.index.equals(frame.index):
             raise ValueError("rsi_features must align to the replay frame")
-        rsi_mask = rsi_exit.rsi_exit_mask(features)
     else:
         features = None
-        rsi_mask = None
     out: dict[int, dict] = {}
     flat_from = -1
     for i in np.flatnonzero(fired).tolist():
         if i < flat_from:
-            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=i, active=False)
-                   if features is not None and rsi_mask is not None else None)
-            out[i] = _unopened("serial_position_already_open", basis=basis, rsi=rsi)
+            out[i] = _unopened("serial_position_already_open", basis=basis)
             continue
+        entry_counts = None
+        rsi_mask = None
+        if features is not None and i + 1 < len(frame):
+            entry_counts = rsi_exit.entry_strong_diamond_counts(features, i + 1)
+            rsi_mask = rsi_exit.entry_rsi_exit_mask(entry_counts, features)
         status, trade = (rsi_exit.attempt_with_rsi_exit(prepared, i, rsi_mask)
                          if rsi_mask is not None else inc.attempt(prepared, i))
         if trade is None:
-            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=i, active=False)
-                   if features is not None and rsi_mask is not None else None)
-            out[i] = _unopened({"no_next_bar": "awaiting_next_open"}.get(status, status), basis=basis, rsi=rsi)
+            out[i] = _unopened({"no_next_bar": "awaiting_next_open"}.get(status, status), basis=basis)
         elif status == "closed":
             out[i] = _position(trade, frame, step, active=False, basis=basis,
-                               rsi_features=features, rsi_mask=rsi_mask)
+                               entry_counts=entry_counts, rsi_mask=rsi_mask)
             flat_from = int(trade["exit_i"])
         elif status == "censored_boundary":
             out[i] = _position(trade, frame, step, active=True, basis=basis,
-                               rsi_features=features, rsi_mask=rsi_mask)
+                               entry_counts=entry_counts, rsi_mask=rsi_mask)
             flat_from = len(frame) + 1
         else:
-            rsi = (_rsi_metadata(features, rsi_mask, minutes=minutes, as_of_i=int(trade["exit_i"]) - 1, active=False)
-                   if features is not None and rsi_mask is not None else None)
+            rsi = (_rsi_metadata(entry_counts, rsi_mask, minutes=minutes, as_of_i=int(trade["exit_i"]) - 1,
+                                 entry_i=int(trade["entry_i"]), active=False)
+                   if entry_counts is not None and rsi_mask is not None else None)
             out[i] = _unopened("data_gap_censored", basis=basis, rsi=rsi)
             flat_from = int(trade["exit_i"])
     return out

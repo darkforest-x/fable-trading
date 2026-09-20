@@ -158,6 +158,42 @@ def test_gap_resets_the_global_count_and_preentry_zeros_do_not():
     assert counts.last_strong_side.iloc[4] == -1  # valid post-gap event is observed but remains unknown
 
 
+def test_entry_counter_starts_known_at_zero_includes_entry_close_and_excludes_signal_history():
+    index = pd.date_range("2025-04-01", periods=20, freq="h", tz="UTC")
+    side = np.zeros(20, dtype=int)
+    side[[4, 5, 6, 10, 11]] = -1  # 10 is signal bar; 11 is actual next-open entry bar.
+    features = pd.DataFrame({"strong_side": side, "known": np.ones(20, dtype=bool)}, index=index)
+    counts = subject.entry_strong_diamond_counts(features, 11)
+    assert counts.entry_counter_known.iloc[11] and counts.entry_last_strong_run.iloc[11] == 1
+    assert counts.entry_last_strong_side.iloc[11] == -1
+    assert counts.entry_last_strong_run.iloc[:11].isna().all()
+
+
+def test_entry_counter_hits_only_exact_seventh_and_an_opposite_strong_diamond_resets_to_one():
+    index = pd.date_range("2025-04-01", periods=24, freq="h", tz="UTC")
+    side = np.zeros(24, dtype=int)
+    side[5:12] = -1
+    side[12] = 1
+    side[13:20] = -1
+    features = pd.DataFrame({"strong_side": side, "known": np.ones(24, dtype=bool)}, index=index)
+    counts = subject.entry_strong_diamond_counts(features, 5)
+    mask = subject.entry_rsi_exit_mask(counts, features)
+    assert counts.entry_last_strong_run.iloc[11] == 7 and mask[11]
+    assert counts.entry_last_strong_side.iloc[12] == 1 and counts.entry_last_strong_run.iloc[12] == 1
+    assert counts.entry_last_strong_run.iloc[19] == 7 and mask[19]
+    assert not mask[10] and not mask[18]
+
+
+def test_entry_counter_waits_for_indicator_availability_then_starts_at_zero():
+    index = pd.date_range("2025-04-01", periods=10, freq="h", tz="UTC")
+    features = pd.DataFrame({"strong_side": [0, 0, 0, 0, -1, 0, 0, 0, 0, 0],
+                             "known": [False, False, False, True, True, True, True, True, True, True]}, index=index)
+    counts = subject.entry_strong_diamond_counts(features, 0)
+    assert not counts.entry_counter_known.iloc[2] and counts.entry_last_strong_run.iloc[2] is pd.NA
+    assert counts.entry_counter_known.iloc[3] and counts.entry_last_strong_run.iloc[3] == 0
+    assert counts.entry_last_strong_run.iloc[4] == 1
+
+
 def test_gap_and_timestamp_discontinuity_reseed_against_an_isolated_segment():
     frame = _feature_frame()
     gap = np.zeros(len(frame), dtype=bool); gap[30] = True

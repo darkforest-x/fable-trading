@@ -82,7 +82,7 @@ class LinesBook:
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", (key, _json(value)))
 
     def initialize_performance_policy(self, version: str, *, changed_at_ms: int) -> dict:
-        """Set the active projection, atomically snapshotting all joint cards on change."""
+        """Set the active projection, atomically retaining each frozen comparison view."""
         if not isinstance(version, str) or not version:
             raise ValueError("performance basis must be a non-empty string")
         with self.connect() as db:
@@ -100,8 +100,17 @@ class LinesBook:
                     performance.setdefault("basis", current)
                     db.execute("INSERT OR IGNORE INTO performance_versions VALUES (?,?,?,?)",
                                (event_id, current, _json(performance), changed_at_ms))
-                policy = {"version": version, "changed_at_ms": changed_at_ms,
-                          "baseline_version": current, "baseline_snapshot_ms": changed_at_ms}
+                if isinstance(existing, dict) and existing.get("baseline_version"):
+                    # The initial pre-RSI price-exit snapshot is an audit anchor. A
+                    # v1 -> v2 correction must not silently repoint it to v1.
+                    policy = {"version": version, "changed_at_ms": changed_at_ms,
+                              "baseline_version": existing["baseline_version"],
+                              "baseline_snapshot_ms": existing.get("baseline_snapshot_ms")}
+                    if current != LEGACY_PERFORMANCE_BASIS:
+                        policy.update(previous_version=current, previous_snapshot_ms=changed_at_ms)
+                else:
+                    policy = {"version": version, "changed_at_ms": changed_at_ms,
+                              "baseline_version": current, "baseline_snapshot_ms": changed_at_ms}
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("performance_policy", _json(policy)))
             return policy
 

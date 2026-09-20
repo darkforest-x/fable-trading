@@ -305,15 +305,15 @@
   const LINE_EXITS = { initial_stop: "初始止损", initial_stop_gap: "初始止损（跳空）", trailing_stop: "跟随保护",
     trailing_stop_gap: "跟随保护（跳空）", opposite_v6_next_open: "V9 空头确认平仓",
     rsi_seventh_reverse_next_open: "RSI 第7个空头大菱形 · 全平" };
-  const RSI_LINES_BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost";
-  const linesSnapshot = () => state.lines.ledger?.selected_performance_version === "baseline";
+  const RSI_GLOBAL_LINES_BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost";
+  const RSI_LINES_BASIS = "v11_2_box_joint_rsi7_since_entry_same_tf_streak_next_open_v2_net_cost";
+  const linesSnapshot = () => ["baseline", "previous"].includes(state.lines.ledger?.selected_performance_version);
+  const linesSnapshotName = () => state.lines.ledger?.selected_performance_version === "previous" ? "修正前全局计数快照" : "原价格退出快照";
   function rsiProgress(p) {
     if (p.performance_version !== RSI_LINES_BASIS && p.basis !== RSI_LINES_BASIS) return "";
     if (p.rsi_exit_pending) return " · 第7个空头大菱形已确认，待次根开盘全平";
-    if (!p.rsi_counter_known) return " · RSI 连续计数待完整序列";
-    if (p.rsi_run_side !== -1) return " · 空头大菱形计数待开始";
-    return p.rsi_run_count >= 7 ? ` · 本轮空头大菱形 ${number(p.rsi_run_count)} 个 · 第7个在本仓入场前`
-      : ` · 空头大菱形 ${number(p.rsi_run_count)} / 7`;
+    if (!p.rsi_counter_known) return " · RSI 入场后计数暂不可用";
+    return ` · 入场后空头大菱形 ${number(p.rsi_run_side === -1 ? p.rsi_run_count : 0)} / 7`;
   }
   function linePerformanceView(item) {
     const p = item.performance;
@@ -333,7 +333,7 @@
     return { className, badge, value: signedR(value), valueLabel: p.status === "active" ? (snapshot ? "快照浮动 R" : "当前 R") : "退出 R",
       peak: signedR(p.peak_r), stop: finite(stop) ? price(stop) : "—", stopLabel: p.trailing_active ? "跟随保护" : "SL",
       note: p.status === "active"
-        ? `入场 ${price(p.entry_price)} · 已持有 ${number(p.bars_held)} 根 · ${snapshot ? "仅为切换前快照，不再更新" : "按最新收盘估值"}${snapshot ? "" : rsiProgress(p)}`
+        ? `入场 ${price(p.entry_price)} · 已持有 ${number(p.bars_held)} 根 · ${snapshot ? `${linesSnapshotName()}，不再更新` : "按最新收盘估值"}${snapshot ? "" : rsiProgress(p)}`
         : `入场 ${price(p.entry_price)} → 出场 ${price(p.exit_price)}（${exitName}）· 持有 ${number(p.bars_held)} 根` };
   }
   function stopFact(item) {
@@ -368,15 +368,17 @@
     $("lines-rule-note").textContent = kind === "joint"
       ? "上级：15m 看 1H，30m 看 2H，1H 看 4H，4H 看日线 · 每个 V9 框只算第一次"
       : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
-    const rsiPolicy = status.performance_policy?.version === RSI_LINES_BASIS || lines.ledger?.basis === RSI_LINES_BASIS;
+    const policyVersion = lines.ledger?.basis || status.performance_policy?.version;
+    const rsiPolicy = policyVersion === RSI_LINES_BASIS;
     $("lines-exit-rule").classList.toggle("hidden", kind !== "joint");
     $("lines-exit-rule").textContent = !lines.ledger && lines.versionOptions
       ? "正在读取所选退出规则…"
       : linesSnapshot()
-      ? "切换前旧规则快照 · 原止损、4ATR跟随保护、V9反向退出 · 数值固定，不是当前持仓"
+      ? `${linesSnapshotName()} · 数值固定，不是当前持仓`
       : rsiPolicy
-        ? "退出：原保护与同周期第7个空头大菱形，先触发先退出 · 仅大菱形连续同色计数，异色重置 · 收盘确认，次根开盘全平"
-        : "退出：原止损、4ATR跟随保护、V9反向退出 · 等待退出规则同步";
+        ? "退出：从本仓开仓后开始计数 · 同周期大菱形连续同色、异色重置 · 第7个空头大菱形收盘确认，次根开盘全平 · 原保护先触发先退出"
+        : policyVersion === RSI_GLOBAL_LINES_BASIS ? "旧全局计数仍在运行 · 正在修正为从本仓开仓后计数"
+          : "退出：原止损、4ATR跟随保护、V9反向退出 · 等待退出规则同步";
     $("lines-timeframes").innerHTML = ["all", ...LINE_TIMEFRAMES[kind]].map((tf) => `<button type="button" data-lines-timeframe="${tf}" class="${lines.timeframe === tf ? "selected" : ""}" aria-pressed="${lines.timeframe === tf}">${tf === "all" ? "全部" : escapeHTML(timeframeLabel(tf))}</button>`).join("");
     $("lines-stats").classList.toggle("hidden", kind !== "joint");
     $("lines-ledger-filters").classList.toggle("hidden", kind !== "joint");
@@ -441,7 +443,7 @@
     $("lines-stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(timeframeLabel(row.timeframe))}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td><td>${row.unknown}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
     const versionsInView = data?.projection_versions || [];
     const mixed = Array.isArray(versionsInView) ? versionsInView.length > 1 : Object.keys(versionsInView).length > 1;
-    const timeNote = linesSnapshot() ? `切换前固定快照 ${fullDate(data.performance_snapshot_ms || data.as_of_ms)} · 不作新旧规则同步收益对照`
+    const timeNote = linesSnapshot() ? `${linesSnapshotName()} · 固定快照 ${fullDate(data.performance_snapshot_ms || data.as_of_ms)} · 不作新旧规则同步收益对照`
       : data ? `当前规则回算 · 更新 ${clockTime(data.as_of_ms)}${mixed ? " · 退出规则更新中，部分记录仍为旧版" : ""}` : "等待同步";
     $("lines-stats-basis").textContent = `按信号收盘日归属 · 北京时间 · 周一开始 · 周期、搜索、「只看实时」同样生效 · ${timeNote}`;
   }

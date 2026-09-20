@@ -31,6 +31,7 @@ RSI_EXIT_RULE = {
     "strong_streak": RSI_EXIT_STREAK,
     "profit_gate": False,
     "fill": "next_open",
+    "counter_start": "position_entry",
 }
 
 
@@ -179,6 +180,61 @@ def rsi_exit_mask(features: pd.DataFrame) -> np.ndarray:
         raise ValueError("features must carry integer sides and bool counter_known")
     return (known & (side == RSI_EXIT_SIDE)
             & features.strong_streak.eq(RSI_EXIT_STREAK).fillna(False).to_numpy(bool))
+
+
+def entry_strong_diamond_counts(features: pd.DataFrame, entry_i: int) -> pd.DataFrame:
+    """Count strong diamonds for one accepted long from its actual entry bar.
+
+    The signal bar and every earlier event are excluded.  Counting begins at
+    ``entry_i`` (the next-open fill bar), so that bar's confirmed close is the
+    first eligible strong diamond.  Once the RSI/SAR feature is known, the
+    entry-local counter starts at zero and any same-side strong diamond becomes
+    one; an opposite strong diamond resets to one.  This differs deliberately
+    from the global audit counter: a position supplies its own left boundary,
+    so it needs no pre-entry color reversal to make zero/one known.
+    """
+    required = {"strong_side", "known"}
+    if not isinstance(features, pd.DataFrame) or not required.issubset(features):
+        raise ValueError("features requires strong_side and known")
+    if isinstance(entry_i, bool) or not isinstance(entry_i, Integral) or not 0 <= entry_i < len(features):
+        raise ValueError("entry_i must be a valid feature position")
+    side = features.strong_side.to_numpy()
+    available = features.known.to_numpy()
+    if side.dtype.kind not in "iu" or not np.isin(side, (-1, 0, 1)).all() or available.dtype != np.dtype(bool):
+        raise ValueError("features must carry integer sides and bool known")
+    last_side = np.zeros(len(features), dtype=int)
+    runs: list[int | None] = [None] * len(features)
+    known = np.zeros(len(features), dtype=bool)
+    current_side, current_run, current_known = 0, 0, False
+    for i in range(int(entry_i), len(features)):
+        if not bool(available[i]):
+            current_side, current_run, current_known = 0, 0, False
+        elif not current_known:
+            # This is a position-local zero, even if indicator warmup delayed
+            # its availability past the fill bar.
+            current_side, current_run, current_known = 0, 0, True
+        if current_known and int(side[i]):
+            event_side = int(side[i])
+            if event_side == current_side:
+                current_run += 1
+            else:
+                current_side, current_run = event_side, 1
+        last_side[i], runs[i], known[i] = current_side, current_run if current_known else None, current_known
+    nullable_run = pd.array(runs, dtype="Int64")
+    return pd.DataFrame({"entry_strong_streak": nullable_run, "entry_last_strong_side": last_side,
+                         "entry_last_strong_run": nullable_run.copy(), "entry_counter_known": known},
+                        index=features.index)
+
+
+def entry_rsi_exit_mask(entry_counts: pd.DataFrame, features: pd.DataFrame) -> np.ndarray:
+    """Return the bearish exact-seventh mask for one entry-scoped counter."""
+    required = {"entry_strong_streak", "entry_counter_known"}
+    if (not isinstance(entry_counts, pd.DataFrame) or not required.issubset(entry_counts)
+            or not entry_counts.index.equals(features.index)):
+        raise ValueError("entry counts and features must be aligned")
+    return (entry_counts.entry_counter_known.to_numpy(bool)
+            & (features.strong_side.to_numpy() == RSI_EXIT_SIDE)
+            & entry_counts.entry_strong_streak.eq(RSI_EXIT_STREAK).fillna(False).to_numpy(bool))
 
 
 def attempt_with_rsi_exit(prepared: PreparedArm, i: int,

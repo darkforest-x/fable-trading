@@ -10,6 +10,7 @@ from yoyo.monitor import spike_lines_api as api
 from yoyo.monitor.spike_lines_worker import LEGACY_PERFORMANCE_BASIS, LinesBook
 
 RSI_BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost"
+RSI_V2_BASIS = "v11_2_box_joint_rsi7_since_entry_same_tf_streak_next_open_v2_net_cost"
 
 
 def _joint(number: int, *, side: str = "long", performance: dict | None = None) -> dict:
@@ -47,6 +48,52 @@ def test_policy_switch_archives_all_existing_joints_before_refresh_including_old
     assert baseline["available_performance_versions"][-1]["value"] == "baseline"
     assert current["stats"] == baseline["stats"]
     assert current["available_performance_versions"][-1]["value"] == "baseline"
+    assert current["available_performance_versions"][0]["label"] == "旧全局计数 · 当前回算"
+
+
+def test_v2_switch_retains_initial_baseline_and_freezes_v1_as_previous(tmp_path):
+    book, path = _book(tmp_path)
+    original = _joint(1)
+    book.insert([original])
+    book.initialize_performance_policy(RSI_BASIS, changed_at_ms=100)
+    book.refresh_performance(original["symbol"], original["timeframe"], {
+        original["id"]: {"status": "profit", "exit_r": 4.0, "current_r": 4.0, "basis": RSI_BASIS},
+    })
+    v1_later = _joint(2, performance={"status": "loss", "exit_r": -3.0, "current_r": -3.0, "basis": RSI_BASIS})
+    book.insert([v1_later])
+
+    policy = book.initialize_performance_policy(RSI_V2_BASIS, changed_at_ms=200)
+    assert policy == {"version": RSI_V2_BASIS, "changed_at_ms": 200,
+                      "baseline_version": LEGACY_PERFORMANCE_BASIS, "baseline_snapshot_ms": 100,
+                      "previous_version": RSI_BASIS, "previous_snapshot_ms": 200}
+    book.refresh_performance(original["symbol"], original["timeframe"], {
+        original["id"]: {"status": "loss", "exit_r": -5.0, "current_r": -5.0, "basis": RSI_V2_BASIS},
+    })
+    book.refresh_performance(v1_later["symbol"], v1_later["timeframe"], {
+        v1_later["id"]: {"status": "profit", "exit_r": 6.0, "current_r": 6.0, "basis": RSI_V2_BASIS},
+    })
+    v2_later = _joint(3, performance={"status": "profit", "exit_r": 9.0, "current_r": 9.0, "basis": RSI_V2_BASIS})
+    book.insert([v2_later])
+
+    baseline = api.ledger(path, kind="joint", now_ms=1_000, performance_version="baseline")
+    previous = api.ledger(path, kind="joint", now_ms=1_000, performance_version="previous")
+    current = api.ledger(path, kind="joint", now_ms=1_000)
+    assert {row["id"] for row in baseline["items"]} == {original["id"]}
+    assert baseline["performance_snapshot_ms"] == baseline["as_of_ms"] == 100
+    assert {row["id"] for row in previous["items"]} == {original["id"], v1_later["id"]}
+    assert previous["performance_snapshot_ms"] == previous["as_of_ms"] == 200
+    assert previous["items"][0]["is_fresh"] is False
+    assert {row["id"] for row in current["items"]} == {original["id"], v1_later["id"], v2_later["id"]}
+    assert current["basis"] == RSI_V2_BASIS
+    assert current["available_performance_versions"] == [
+        {"value": "current", "label": "开仓后RSI第7个 · 当前回算"},
+        {"value": "baseline", "label": "原价格退出 · 初始快照"},
+        {"value": "previous", "label": "旧全局计数 · 修正前快照"},
+    ]
+    assert LinesBook(path).initialize_performance_policy(RSI_V2_BASIS, changed_at_ms=999) == policy
+    with sqlite3.connect(path) as db:
+        assert db.execute("SELECT COUNT(*) FROM performance_versions WHERE version=? AND saved_ms=?",
+                          (RSI_BASIS, 200)).fetchone()[0] == 2
 
 
 def test_refresh_and_later_insert_cannot_overwrite_or_expand_frozen_baseline(tmp_path):
