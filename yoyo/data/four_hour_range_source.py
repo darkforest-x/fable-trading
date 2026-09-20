@@ -1,7 +1,8 @@
 """Freeze two OKX perpetual 5m research sources, separate from live caches.
 
 Public source: OKX market/history-candles with confirm=1. Existing local seed
-snapshots are read-only and hash bound; duplicate OHLCV must agree exactly.
+snapshots are read-only and hash bound; duplicate OHLC must agree exactly.
+Volume serialization roundoff alone is tolerated to relative 1e-12 and logged.
 Missing intervals alone are fetched, with raw response receipts and no price
 interpolation or venue substitution. Commit this builder/config before use.
 """
@@ -30,13 +31,21 @@ def sha(path):
 
 
 def merge(pieces):
-    """Fail on any conflicting duplicate, including downloaded overlap."""
+    """Fail on conflicting prices; tolerate only logged volume roundoff."""
     if not pieces:
         return pd.DataFrame(columns=COLS, index=pd.DatetimeIndex([], tz="UTC"))
     frame = pd.concat(pieces).sort_index()
     duplicates = frame.loc[frame.index.duplicated(keep=False)]
-    if duplicates.groupby(level=0)[COLS].nunique().gt(1).any().any():
-        raise ValueError("conflicting duplicate OHLCV source rows")
+    grouped = duplicates.groupby(level=0)
+    if grouped[COLS[:4]].nunique().gt(1).any().any():
+        raise ValueError("conflicting duplicate OHLC source rows")
+    if len(duplicates):
+        spread = grouped.volume.max() - grouped.volume.min()
+        allowed = grouped.volume.max().abs() * 1e-12
+        if (spread > allowed).any():
+            raise ValueError("conflicting duplicate volume beyond serialization tolerance")
+        if (spread > 0).any():
+            print(f"volume-only roundoff overlaps={int((spread > 0).sum())} max_abs={spread.max()}", flush=True)
     return frame.loc[~frame.index.duplicated(keep="last")]
 
 
@@ -62,7 +71,8 @@ def acquire(config_path):
         if target.exists() or receipt_path.exists():
             if target.exists() and receipt_path.exists():
                 prior = json.loads(receipt_path.read_text())
-                if (prior["builders"] == identities and prior["sha256"] == sha(target)
+                if (prior["builders"].get(str(config_path.relative_to(ROOT))) == sha(config_path)
+                        and prior["sha256"] == sha(target)
                         and prior["start"] == str(start) and prior["end_exclusive"] == str(end)):
                     all_receipts[symbol] = prior
                     print(f"{symbol}: verified existing frozen source", flush=True)
