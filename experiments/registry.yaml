@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-trend-baselines-20260920-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c66fce874f53e10e117d84ec9fb5b3996bd6af5a
+    status: active
+    question: Do fixed Donchian20/55-bar and SMA20/60 signal families outperform Spike under common historical risk and costs?
+    single_variable: Categorical signal family including raw opposite exits; original stop/trail/cost and shared readiness/calendar/RV guards.
+    result: Preregistered; market results pending. OriginalV9 and releasedV9.1 are receipt-bound comparators; no parameter search.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-trend-baselines-20260920-v1/PROJECT_PLAN.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner go-ahead20260920;29 frozenBinance symbols,15m1h4h,20240910to20260501 split20250910. Chart-bar adaptations not originalTurtle. Exploratory inference only;8later months cannot resolve9wayHolm0.01. NoPine/production changes.
   - experiment_id: exp-spike-v9-5m-15m-ma-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 27e23560f2af9d1793a98644ef13c533976a9781

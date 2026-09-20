@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-trend-baselines-20260920-v1",
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "timeframes": [["15m",15],["1h",60],["4h",240]],
+  "arms": ["v9", "v9_1", "dc20", "dc55", "sma20_60"],
+  "seed": 920261,
+  "bootstrap_reps": 4000,
+  "signal_units": "chart bars, not days; fixed parameters without a search",
+  "risk": "Original next-open fills; five-bar extreme plus0.2ATR and minimum2ATR; close2R activates4ATR trailing;20bp roundtrip",
+  "common_guards": "Original V9 known base/nonUSDC, finite0<=RV<=50 and no scheduled UTC Sunday entry; common61-contiguous-OHLC plus original feature readiness",
+  "comparison": "Categorical signal family supplies entry and raw opposite exit; V9/V9.1 preserve original raw V6 exits. V9.1 adds H1 SMA60 to15m only.",
+  "selection": "No parameter or winner selection for deployment. Report all prespecified arms and temporal segments.",
+  "inference": "Exploratory shared-calendar-month bootstrap and sign flips; Holm across9 simple-baseline versus V9 later comparisons. Eight later months cannot resolve0.01 after9-way correction; no formal validation/promotion claim.",
+  "training_eligible": false,
+  "production_eligible": false
+}
