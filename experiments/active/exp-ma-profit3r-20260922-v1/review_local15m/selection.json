@@ -1,0 +1,46 @@
+{
+  "direction_counts": {
+    "LONG": 3,
+    "SHORT": 3
+  },
+  "events": [
+    {
+      "direction": "LONG",
+      "event_id": "cluster_ba885123e2e1f46da632a8b3",
+      "sample_order": 1
+    },
+    {
+      "direction": "LONG",
+      "event_id": "cluster_e1db5ee76a5ed7d4107b02e3",
+      "sample_order": 2
+    },
+    {
+      "direction": "LONG",
+      "event_id": "cluster_f6499d2b85dfe10da7996df8",
+      "sample_order": 3
+    },
+    {
+      "direction": "SHORT",
+      "event_id": "cluster_96fa019f120a78569be98843",
+      "sample_order": 4
+    },
+    {
+      "direction": "SHORT",
+      "event_id": "cluster_e711d332250c4df2781638a4",
+      "sample_order": 5
+    },
+    {
+      "direction": "SHORT",
+      "event_id": "cluster_7e121ab185126efa0f31ad09",
+      "sample_order": 6
+    }
+  ],
+  "outcomes_path": "experiments/active/exp-ma-profit3r-20260922-v1/outcomes_local15m/outcomes.jsonl",
+  "outcomes_sha256": "8dd71586eafc6409d826476215b74fa53c7abe85e7c958c0903da832a57e82c7",
+  "production_eligible": false,
+  "requested_max_per_direction": 3,
+  "schema_version": 1,
+  "selected_count": 6,
+  "selection_rule": "train && profit.retained; stable SHA256(event_id) order; max 3 per direction; no outcome-magnitude ranking",
+  "training_eligible": false
+}
