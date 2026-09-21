@@ -10363,3 +10363,19 @@ experiments:
     reuse_allowed: false
     notes: Exploratory follow-up authorized byOwner all-methods request;not blind validation or MLtraining. Minimum1pctcoverage andV3supportconstraints unchanged.
       Notion3e28856479af81d78963d4016a0f28aa;parentreceipt hardening rerun byte-identical decisions. No MLtraining.
+
+  - experiment_id: exp-spike-10r-model-20260921-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa783fbc0aebff5bfd3d2faafba8c3c26baf6b82
+    status: active
+    question: Can two fixed classifiers improve strict realized netR-over10 precision from all original V9 longs under quarterly forward evaluation?
+    single_variable: Long admission only;fixed logistic andsmall LightGBM use20causal features plus timeframe,rolling9month fit and3month unlabelled threshold calibration.
+    result: Owner approved specific offline training exception via continue afterproposal;implementation being frozen before training.
+    holdout_consumed: false
+    training_eligible: true
+    production_eligible: false
+    canonical_report: analysis/p1_spike_10r_model_v4_20260921.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Specific dataset SHA andtwo-model exception inAUTHORIZATION.json;doesnot waive globalP0/P1 orparentartifact eligibility.
+      No risk/exits/costs/production/Pine/account change. Fourquarter targets starting2025Q4,allhistory alreadyexposed.

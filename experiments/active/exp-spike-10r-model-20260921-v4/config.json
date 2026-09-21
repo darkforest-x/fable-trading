@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp-spike-10r-model-20260921-v4",
+  "version": "SPIKE 10R Model V4",
+  "dataset_receipt_sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+  "quarters": [
+    "2025-10-01",
+    "2026-01-01",
+    "2026-04-01",
+    "2026-07-01"
+  ],
+  "development_months": 12,
+  "fit_months": 9,
+  "calibration_months": 3,
+  "nominal_coverages": [
+    0.01,
+    0.05,
+    0.1,
+    0.2
+  ],
+  "calibration_min_rows": 100,
+  "model_names": [
+    "logistic",
+    "lightgbm"
+  ],
+  "seed": 921401,
+  "round_trip_cost": 0.002,
+  "training_eligible": true,
+  "training_scope": "Owner20260921 continue approves this dataset/two models only",
+  "production_eligible": false,
+  "serial_trigger_min_hits": 10,
+  "serial_trigger_min_recall": 0.1,
+  "protocol": "quarterly_fit9_calibrate3_predict3_no_refit",
+  "probability_bins": [
+    0,
+    0.001,
+    0.002,
+    0.005,
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.5,
+    1
+  ]
+}
