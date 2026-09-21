@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-launch-rules-aug19-window-20260922-delivery
+    artifact_type: manifest
+    role: bounded_historical_six_timeframe_grade_a_rule_replay_with_review_charts
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1c712bed861b5af3c8fe47b67b4d9d899d1926eb
+    source_path: experiments/active/exp-ma-launch-rules-20260819-window-20260922-v1/delivery_manifest.json
+    sha256: fe019cca4bfb874a035d4ea1fb72532446b3ac0a1963cb732ea713f0664dca15
+    size_bytes: 15448
+    storage_uri: repo://experiments/active/exp-ma-launch-rules-20260819-window-20260922-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 4950frozen source hashes,825symbols,133650confirmation endpoints,197geometries,1JUP5mLONG20h55,16charts. No22hplus prices;not prospective returns or Owner gold.
+
   - artifact_id: ma-launch-followup50-20260922-manifest
     artifact_type: manifest
     role: historical_followup_visual_review_only

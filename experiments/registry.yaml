@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-launch-rules-20260819-window-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1c712bed861b5af3c8fe47b67b4d9d899d1926eb
+    status: active
+    question: Replay original Grade-A rules only at Aug19 Beijing18-22 completed confirmation endpoints across all available symbols and six timeframes.
+    single_variable: Historical rule replay with unchanged gates and references; no training or future outcomes.
+    result: 825symbols x6periods,4950sources;197weak geometries,98strict scored,1GradeA JUP5mLONG20h55.16charts;97tests;all endpoint counts and6calibration scalars verified.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_launch_rules_20260819_window_20260922.md
+    artifacts:
+    - ma-launch-rules-aug19-window-20260922-delivery
+    reuse_allowed: false
+    notes: Owner visual review pending. All prices end by22Beijing;30short-warmup streams disclosed. Earlier epoch-ms boundary preflight superseded before final full scan. Notion3e28856479af817695b6c0dca69c80bc.
+
   - experiment_id: exp-ma-launch-followup50-20260922-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
