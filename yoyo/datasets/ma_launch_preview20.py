@@ -109,7 +109,10 @@ def candidates(df, path):
 def render(df, row, destination, early=False):
     """Render true OHLC and causal MAs; early y limits exclude future data."""
     onset = row["onset_i"]
-    start, stop = onset-140, onset+(4 if early else 41)
+    pre_bars=int(row.get("pre_bars",140))
+    post_bars=int(row.get("post_bars",40))
+    synthetic=row.get("source_type")=="synthetic"
+    start, stop = onset-pre_bars, onset+(4 if early else post_bars+1)
     part=df.iloc[start:stop].reset_index(drop=True)
     fig, ax=plt.subplots(figsize=(16,9), dpi=100)
     fig.subplots_adjust(left=.035,right=.94,bottom=.09,top=.90)
@@ -118,7 +121,7 @@ def render(df, row, destination, early=False):
     hi=max(float(part.high.max()),float(part[MA_NAMES].max().max()))
     span=max(hi-lo, hi*.001)
     ax.set_ylim(lo-span*.07,hi+span*.08)
-    ax.set_xlim(-1,len(part)+1)
+    ax.set_xlim(-1,len(part)+(8 if synthetic and early else 1))
     colors=np.where(part.close >= part.open,"#3179f5","#713fc5")
     xs=np.arange(len(part)); width=.68
     wicks=[[(i,l),(i,h)] for i,l,h in zip(xs,part.low,part.high)]
@@ -134,7 +137,7 @@ def render(df, row, destination, early=False):
             ax.plot(xs,part[f"{kind}{period}"],color=color,alpha=alpha,lw=1.15,zorder=2)
     center=float(df[MA_NAMES].iloc[onset-1].mean())
     circle_height=max(span*.115,float(df.high.iloc[onset:onset+4].max())-center+span*.025)
-    ax.add_patch(Ellipse((141,center+circle_height*.22),width=14,height=circle_height,
+    ax.add_patch(Ellipse((pre_bars+1,center+circle_height*.22),width=14,height=circle_height,
                         fill=False,edgecolor="#ef2222",linewidth=1.7,zorder=6))
     ax.yaxis.tick_right(); ax.yaxis.set_label_position("right")
     ax.grid(True,ls=(0,(1,4)),color="#d6d9df",lw=.8)
@@ -142,14 +145,21 @@ def render(df, row, destination, early=False):
     for s in ax.spines.values():s.set_visible(False)
     tick=np.linspace(0,len(part)-1,7).astype(int)
     times=pd.to_datetime(part.ts,unit="ms",utc=True).dt.tz_convert("Asia/Shanghai")
-    ax.set_xticks(tick,[times.iloc[i].strftime("%m-%d\n%H:%M") for i in tick])
+    labels=([f"T{i-pre_bars:+d}" for i in tick] if synthetic else
+            [times.iloc[i].strftime("%m-%d\n%H:%M") for i in tick])
+    ax.set_xticks(tick,labels)
     ax.ticklabel_format(axis="y",style="plain",useOffset=False)
     symbol=row["symbol"].replace("_USDT_SWAP","USDT.P")
     onset_time=pd.to_datetime(row["onset_open_ms"],unit="ms",utc=True).tz_convert("Asia/Shanghai")
     title=f"{row['id']}   {symbol}  |  {row['timeframe']}  |  OKX  |  {onset_time:%Y-%m-%d %H:%M} UTC+8"
+    if synthetic:title=f"SYNTHETIC {row['id']}   |   {row['family']}   |   seed {row['seed']}"
     fig.text(.035,.954,title,fontsize=16,color="#202938",weight="medium")
     subtitle=("EARLY VIEW: through onset + 3 closed bars; own past-only price scale" if early else
               "FULL REVIEW: includes 40 bars after proposed onset; retrospective example")
+    if synthetic:
+        subtitle=("PROGRAM-GENERATED OHLC + calculated moving averages | " +
+                  ("Early view through T+3; no later prices used" if early else
+                   f"Full illustration through T+{post_bars}; not real market data"))
     fig.text(.035,.922,subtitle,fontsize=10,color="#757d88")
     fig.text(.035,.02,"SMA / EMA   20 gray    60 blue    120 purple     |     Red circle: proposed launch area, pending your review",
              fontsize=10,color="#757d88")
