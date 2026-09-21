@@ -109,9 +109,9 @@ def plot(frame, row, destination):
     fig.text(.07,.956,f'{int(row["rank"]):02d} / 50    {row.asset}USDT',fontsize=20,color='#243443',weight='bold')
     fig.text(.07,.921,f'{row.venue.upper()}  ·  {tf}  ·  {row.visual_id}',fontsize=12,color='#7d8791')
     fig.text(.855,.924,f'{float(row.net_r):.2f}R',fontsize=18,color='#278c83',ha='right')
-    fig.text(.07,.886,'SMA / EMA   20             60             120',fontsize=10,color='#8b959e')
-    for left,label,color in [(.31,'━━  --','#35a398'),(.47,'━━  --','#70a4cf'),(.64,'━━  --','#aaa997')]:
-        fig.text(left,.868,label,color=color,fontsize=9)
+    fig.text(.07,.888,'SMA — / EMA --',fontsize=10,color='#8b959e')
+    for left,label,color in [(.36,'20','#35a398'),(.49,'60','#70a4cf'),(.62,'120','#aaa997')]:
+        fig.text(left,.888,label,color=color,fontsize=11)
     local=pd.Timestamp(row.entry_time).tz_convert('Asia/Shanghai')
     fig.text(.07,.065,f'入场  {entry:.7g}    ·    初始 SL  {stop:.7g}    ·    退出  {exit_price:.7g}',fontproperties=font,fontsize=11,color='#4e5d6a')
     fig.text(.07,.042,f'{local:%Y-%m-%d %H:%M} 北京时间   |   历史交易复盘 · 净R扣除20bp成本',fontproperties=font,fontsize=10,color='#7d8791')
