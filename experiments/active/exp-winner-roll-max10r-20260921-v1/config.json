@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-winner-roll-max10r-20260921-v1",
+  "selection": "arm=v9,side=1,censored=false,net_r>10",
+  "expected_trades": 367,
+  "expected_assets": 209,
+  "capital": 100.0,
+  "max_adds": 2,
+  "leverage": 40.0,
+  "fee_each_side": 0.001,
+  "maintenance_rate": 0.05,
+  "liquidation_fee_reserve_rate": 0.001,
+  "maintenance_buffer_usd": 0.01,
+  "funding_rate": 0.0,
+  "quantity_model": "continuous linear base units; no historical lot/order/risk limits",
+  "mark_model": "last-trade low proxy; historical mark prices unavailable",
+  "entry": "original frozen V9 entry open",
+  "adds": "at most two later original-timeframe opens, strictly increasing fill prices",
+  "exit": "any full-bar high before original V9 exit bar; require survival of entire chosen exit bar",
+  "statistical_role": "future-informed outcome label; not a causal strategy or live solvency certificate",
+  "training_eligible": false,
+  "production_eligible": false
+}
