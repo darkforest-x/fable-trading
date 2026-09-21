@@ -10182,6 +10182,21 @@ experiments:
     notes: Owner requests detailed density decomposition. Source anchors have unconfirmed proposal boundaries;no accuracy or trading-return claim.
       Span-preserving identity null and6 causal tests. TV V12.2 unchanged;no HTML. Notion3e08856479af81cf879ffdbad0a82d24.
 
+  - experiment_id: exp-winner-pyramiding-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8d88e79181ea298752752f0e9f466708c0ddd886
+    status: active
+    question: Does removing the two-add cap improve net outcomes under one common causal profitable-pyramiding policy?
+    single_variable: Successful add count limit zero,two,unlimited;shared1h long entries,structural clock,stops,costs and funding rules.
+    result: Protocol frozen before replay;29 prior Binance sources,V9 long proxy,chronological segments and matched random timing controls.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_winner_pyramiding_20260921.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Screenshot venue/date/signal unknown;not screenshot replay. Method units100capital/1grossrisk/1x exposure,not an all-in leveraged portfolio.
+
   - experiment_id: exp-spike-h1-sma60-release-20260920-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1e1f1bab5d1e0c28ccde7f101e60de7df28ded11

@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-winner-pyramiding-20260921-v1",
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "minutes": 60,
+  "arms": {"none": 0, "two": 2, "continuous": null},
+  "capital": 100.0,
+  "gross_risk_budget": 1.0,
+  "leverage_cap": 1.0,
+  "profit_retention": 0.5,
+  "seed": 921261,
+  "bootstrap_reps": 4000,
+  "controls_per_event": 1,
+  "cost": "Fixed 0.2% of EACH leg entry notional, half at entry and half reserved for exit; inherited execution cost basis.",
+  "scope": "Frozen prior29 Binance symbols, existing V9 long signals, 1h; screenshot identity unknown; no fetching, fitting or parameter search.",
+  "account_interpretation": "Each event independently starts100 with1 gross risk unit and1x cash-backed exposure ceiling; event sums are not a shared account, compounding or a100U high-leverage backtest.",
+  "training_eligible": false,
+  "production_eligible": false
+}
