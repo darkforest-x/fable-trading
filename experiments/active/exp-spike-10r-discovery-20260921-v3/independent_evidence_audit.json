@@ -1,0 +1,85 @@
+{
+  "reviewer": "budget-evidence / Luna Max",
+  "scope": "Read-only saved data arithmetic and past-only threshold reconstruction; no market replay; fixed V3 policies only",
+  "verdict": "Dataset, label, original-event coverage and fixed-policy numerical findings verified; no validated improvement",
+  "dataset": {
+    "streams": 3531,
+    "nonempty_long_streams": 3169,
+    "empty_long_streams": 362,
+    "candidates": 49207,
+    "closed": 49070,
+    "censored": 137,
+    "strict_gt10": 448,
+    "invalid": 0,
+    "original_events_covered": 41814,
+    "original_closed": 41700,
+    "original_gt10_all_present": 367,
+    "additional_candidates": 7393,
+    "additional_closed": 7370,
+    "additional_gt10": 81
+  },
+  "thresholds": {
+    "rows": 9000,
+    "recomputed_all": true,
+    "max_absolute_cutoff_difference": 8.9e-16,
+    "history": "previous3 complete calendar months per timeframe,minimum100",
+    "labels_used": false
+  },
+  "later_serial_baseline": {
+    "closed": 25567,
+    "gt10": 210
+  },
+  "fixed_later_serial": [
+    {
+      "rule": "A",
+      "closed": 1551,
+      "gt10": 14,
+      "retained": 14,
+      "lost": 196,
+      "gained": 0
+    },
+    {
+      "rule": "B",
+      "closed": 3186,
+      "gt10": 26,
+      "retained": 26,
+      "lost": 184,
+      "gained": 0
+    },
+    {
+      "rule": "C",
+      "closed": 6384,
+      "gt10": 62,
+      "retained": 59,
+      "lost": 151,
+      "gained": 3
+    },
+    {
+      "rule": "D",
+      "closed": 7643,
+      "gt10": 86,
+      "retained": 80,
+      "lost": 130,
+      "gained": 6
+    },
+    {
+      "rule": "E",
+      "closed": 6161,
+      "gt10": 93,
+      "retained": 90,
+      "lost": 120,
+      "gained": 3
+    }
+  ],
+  "confirmed_reporting_issue": "serial_v1 recall is selected winner count/baseline count, not identity recall; corrected in serial_stats_v2 without altering original artifact",
+  "wif": {
+    "event_key": "okx_60m_d567226c051c9c20:20551:1",
+    "net_r": 14.3299,
+    "all_five_selected_policies_reject": true
+  },
+  "limits": [
+    "Adaptive result not independently audited by this reviewer",
+    "Raw price paths and random-control matching not rerun by reviewer",
+    "No claim of live validity or model-training approval"
+  ]
+}

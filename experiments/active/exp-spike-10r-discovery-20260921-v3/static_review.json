@@ -1,0 +1,23 @@
+{
+  "review_scope": [
+    "spike_10r_search.py",
+    "spike_10r_serial.py",
+    "config.json",
+    "PROJECT_PLAN.md",
+    "spike_10r_adaptive.py"
+  ],
+  "review_role": "budget-reviewer (configured Terra High)",
+  "review_type": "independent static; no market run",
+  "confirmed_finding": "selected terms were not independently bound to earlier-only optimum",
+  "resolution": "validate_selection recomputes canonical earlier-only choices; tampered-term regression test passes",
+  "withdrawn_finding": "Candidate stream count must equal3531 was withdrawn because zero-long source streams exist; completion-receipt coverage is instead exact3531",
+  "runtime_validation_by_root": {
+    "focused_passed": 25,
+    "seconds": 2.39,
+    "log": "focused_tests.log"
+  },
+  "final_source_commit": "8da99e990956a88215fe1e48fb5b764b1eea2003",
+  "remaining_confirmed_core_blockers": [],
+  "adaptive_confirmed_finding": "parent selection.json not verified when defining the Holm family",
+  "adaptive_resolution": "verify_parent checks every parent receipt file; tamper test and byte-identical run_v2 decisions confirm hardening"
+}

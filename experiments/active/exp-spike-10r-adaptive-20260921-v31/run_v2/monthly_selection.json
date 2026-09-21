@@ -1,0 +1,548 @@
+[
+  {
+    "month": "2024-09",
+    "history_start": "2024-03-01T00:00:00+00:00",
+    "history_end": "2024-09-01T00:00:00+00:00",
+    "history_closed": 0,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2024-10",
+    "history_start": "2024-04-01T00:00:00+00:00",
+    "history_end": "2024-10-01T00:00:00+00:00",
+    "history_closed": 1026,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2024-11",
+    "history_start": "2024-05-01T00:00:00+00:00",
+    "history_end": "2024-11-01T00:00:00+00:00",
+    "history_closed": 2096,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2024-12",
+    "history_start": "2024-06-01T00:00:00+00:00",
+    "history_end": "2024-12-01T00:00:00+00:00",
+    "history_closed": 2998,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2025-01",
+    "history_start": "2024-07-01T00:00:00+00:00",
+    "history_end": "2025-01-01T00:00:00+00:00",
+    "history_closed": 4327,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2025-02",
+    "history_start": "2024-08-01T00:00:00+00:00",
+    "history_end": "2025-02-01T00:00:00+00:00",
+    "history_closed": 5455,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2025-03",
+    "history_start": "2024-09-01T00:00:00+00:00",
+    "history_end": "2025-03-01T00:00:00+00:00",
+    "history_closed": 6806,
+    "known": false,
+    "rule": null,
+    "terms": null
+  },
+  {
+    "month": "2025-04",
+    "history_start": "2024-10-01T00:00:00+00:00",
+    "history_end": "2025-04-01T00:00:00+00:00",
+    "history_closed": 7227,
+    "known": false,
+    "rule": null,
+    "terms": null,
+    "history_gt10": 47,
+    "max_label_available_at": "2025-03-31T09:30:00+00:00"
+  },
+  {
+    "month": "2025-05",
+    "history_start": "2024-11-01T00:00:00+00:00",
+    "history_end": "2025-05-01T00:00:00+00:00",
+    "history_closed": 7867,
+    "known": false,
+    "rule": null,
+    "terms": null,
+    "history_gt10": 75,
+    "max_label_available_at": "2025-04-30T23:30:00+00:00"
+  },
+  {
+    "month": "2025-06",
+    "history_start": "2024-12-01T00:00:00+00:00",
+    "history_end": "2025-06-01T00:00:00+00:00",
+    "history_closed": 8584,
+    "known": false,
+    "rule": null,
+    "terms": null,
+    "history_gt10": 62,
+    "max_label_available_at": "2025-05-31T08:00:00+00:00"
+  },
+  {
+    "month": "2025-07",
+    "history_start": "2025-01-01T00:00:00+00:00",
+    "history_end": "2025-07-01T00:00:00+00:00",
+    "history_closed": 8585,
+    "known": true,
+    "rule": "risk_atr__low40 & trend_alignment__low20",
+    "terms": [
+      14,
+      85
+    ],
+    "history_gt10": 58,
+    "max_label_available_at": "2025-06-30T23:30:00+00:00",
+    "selection": {
+      "rule": "risk_atr__low40 & trend_alignment__low20",
+      "terms": [
+        14,
+        85
+      ],
+      "closed": 735,
+      "gt10": 19,
+      "precision": 0.02585034013605442,
+      "recall": 0.3275862068965517,
+      "coverage": 0.0856144437973209,
+      "wilson_lower": 0.016610598565762604,
+      "assets": 308,
+      "active_months": 6,
+      "positive_asset_months": 14
+    }
+  },
+  {
+    "month": "2025-08",
+    "history_start": "2025-02-01T00:00:00+00:00",
+    "history_end": "2025-08-01T00:00:00+00:00",
+    "history_closed": 9605,
+    "known": true,
+    "rule": "volatility_ratio20_100__low40 & efficiency20__low40",
+    "terms": [
+      98,
+      104
+    ],
+    "history_gt10": 121,
+    "max_label_available_at": "2025-07-31T22:00:00+00:00",
+    "selection": {
+      "rule": "volatility_ratio20_100__low40 & efficiency20__low40",
+      "terms": [
+        98,
+        104
+      ],
+      "closed": 1039,
+      "gt10": 32,
+      "precision": 0.030798845043310877,
+      "recall": 0.2644628099173554,
+      "coverage": 0.108172826652785,
+      "wilson_lower": 0.021899651946992487,
+      "assets": 354,
+      "active_months": 6,
+      "positive_asset_months": 25
+    }
+  },
+  {
+    "month": "2025-09",
+    "history_start": "2025-03-01T00:00:00+00:00",
+    "history_end": "2025-09-01T00:00:00+00:00",
+    "history_closed": 10492,
+    "known": true,
+    "rule": "breakout20_atr__low40 & prior_range20_atr__low20",
+    "terms": [
+      62,
+      109
+    ],
+    "history_gt10": 134,
+    "max_label_available_at": "2025-09-01T00:00:00+00:00",
+    "selection": {
+      "rule": "breakout20_atr__low40 & prior_range20_atr__low20",
+      "terms": [
+        62,
+        109
+      ],
+      "closed": 316,
+      "gt10": 15,
+      "precision": 0.04746835443037975,
+      "recall": 0.11194029850746269,
+      "coverage": 0.030118185284025923,
+      "wilson_lower": 0.028974486750024054,
+      "assets": 204,
+      "active_months": 6,
+      "positive_asset_months": 11
+    }
+  },
+  {
+    "month": "2025-10",
+    "history_start": "2025-04-01T00:00:00+00:00",
+    "history_end": "2025-10-01T00:00:00+00:00",
+    "history_closed": 11487,
+    "known": true,
+    "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+    "terms": [
+      2,
+      108
+    ],
+    "history_gt10": 147,
+    "max_label_available_at": "2025-10-01T00:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+      "terms": [
+        2,
+        108
+      ],
+      "closed": 591,
+      "gt10": 28,
+      "precision": 0.047377326565143825,
+      "recall": 0.19047619047619047,
+      "coverage": 0.05144946461217028,
+      "wilson_lower": 0.03297957428764419,
+      "assets": 268,
+      "active_months": 6,
+      "positive_asset_months": 20
+    }
+  },
+  {
+    "month": "2025-11",
+    "history_start": "2025-05-01T00:00:00+00:00",
+    "history_end": "2025-11-01T00:00:00+00:00",
+    "history_closed": 11698,
+    "known": true,
+    "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+    "terms": [
+      2,
+      108
+    ],
+    "history_gt10": 127,
+    "max_label_available_at": "2025-10-31T18:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+      "terms": [
+        2,
+        108
+      ],
+      "closed": 571,
+      "gt10": 27,
+      "precision": 0.047285464098073555,
+      "recall": 0.2125984251968504,
+      "coverage": 0.048811762694477685,
+      "wilson_lower": 0.03269822453792171,
+      "assets": 260,
+      "active_months": 6,
+      "positive_asset_months": 19
+    }
+  },
+  {
+    "month": "2025-12",
+    "history_start": "2025-06-01T00:00:00+00:00",
+    "history_end": "2025-12-01T00:00:00+00:00",
+    "history_closed": 11571,
+    "known": true,
+    "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+    "terms": [
+      2,
+      108
+    ],
+    "history_gt10": 111,
+    "max_label_available_at": "2025-12-01T00:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+      "terms": [
+        2,
+        108
+      ],
+      "closed": 590,
+      "gt10": 27,
+      "precision": 0.04576271186440678,
+      "recall": 0.24324324324324326,
+      "coverage": 0.050989542822573675,
+      "wilson_lower": 0.0316389129257479,
+      "assets": 271,
+      "active_months": 6,
+      "positive_asset_months": 19
+    }
+  },
+  {
+    "month": "2026-01",
+    "history_start": "2025-07-01T00:00:00+00:00",
+    "history_end": "2026-01-01T00:00:00+00:00",
+    "history_closed": 12462,
+    "known": true,
+    "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+    "terms": [
+      2,
+      108
+    ],
+    "history_gt10": 118,
+    "max_label_available_at": "2026-01-01T00:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low40 & prior_range20_atr__low10",
+      "terms": [
+        2,
+        108
+      ],
+      "closed": 600,
+      "gt10": 27,
+      "precision": 0.045,
+      "recall": 0.2288135593220339,
+      "coverage": 0.04814636494944632,
+      "wilson_lower": 0.03110848866772834,
+      "assets": 270,
+      "active_months": 6,
+      "positive_asset_months": 19
+    }
+  },
+  {
+    "month": "2026-02",
+    "history_start": "2025-08-01T00:00:00+00:00",
+    "history_end": "2026-02-01T00:00:00+00:00",
+    "history_closed": 12602,
+    "known": true,
+    "rule": "reference_risk_fraction__low10 & momentum20_atr__low40",
+    "terms": [
+      0,
+      68
+    ],
+    "history_gt10": 65,
+    "max_label_available_at": "2026-01-31T20:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low10 & momentum20_atr__low40",
+      "terms": [
+        0,
+        68
+      ],
+      "closed": 625,
+      "gt10": 17,
+      "precision": 0.0272,
+      "recall": 0.26153846153846155,
+      "coverage": 0.04959530233296302,
+      "wilson_lower": 0.01705054345009689,
+      "assets": 249,
+      "active_months": 6,
+      "positive_asset_months": 13
+    }
+  },
+  {
+    "month": "2026-03",
+    "history_start": "2025-09-01T00:00:00+00:00",
+    "history_end": "2026-03-01T00:00:00+00:00",
+    "history_closed": 11852,
+    "known": true,
+    "rule": "rope_width_atr__low10 & past_width_atr__low40",
+    "terms": [
+      42,
+      50
+    ],
+    "history_gt10": 55,
+    "max_label_available_at": "2026-02-28T13:00:00+00:00",
+    "selection": {
+      "rule": "rope_width_atr__low10 & past_width_atr__low40",
+      "terms": [
+        42,
+        50
+      ],
+      "closed": 1165,
+      "gt10": 17,
+      "precision": 0.014592274678111588,
+      "recall": 0.3090909090909091,
+      "coverage": 0.0982956463044212,
+      "wilson_lower": 0.009130433454599325,
+      "assets": 426,
+      "active_months": 6,
+      "positive_asset_months": 11
+    }
+  },
+  {
+    "month": "2026-04",
+    "history_start": "2025-10-01T00:00:00+00:00",
+    "history_end": "2026-04-01T00:00:00+00:00",
+    "history_closed": 12298,
+    "known": true,
+    "rule": "risk_atr__low40 & volume_ratio__high40",
+    "terms": [
+      14,
+      23
+    ],
+    "history_gt10": 56,
+    "max_label_available_at": "2026-03-31T23:00:00+00:00",
+    "selection": {
+      "rule": "risk_atr__low40 & volume_ratio__high40",
+      "terms": [
+        14,
+        23
+      ],
+      "closed": 1391,
+      "gt10": 15,
+      "precision": 0.010783608914450037,
+      "recall": 0.26785714285714285,
+      "coverage": 0.113107822410148,
+      "wilson_lower": 0.006545811468215648,
+      "assets": 481,
+      "active_months": 6,
+      "positive_asset_months": 14
+    }
+  },
+  {
+    "month": "2026-05",
+    "history_start": "2025-11-01T00:00:00+00:00",
+    "history_end": "2026-05-01T00:00:00+00:00",
+    "history_closed": 14129,
+    "known": true,
+    "rule": "volume_ratio__low40 & momentum20_atr__high20",
+    "terms": [
+      20,
+      70
+    ],
+    "history_gt10": 87,
+    "max_label_available_at": "2026-05-01T00:00:00+00:00",
+    "selection": {
+      "rule": "volume_ratio__low40 & momentum20_atr__high20",
+      "terms": [
+        20,
+        70
+      ],
+      "closed": 863,
+      "gt10": 15,
+      "precision": 0.01738122827346466,
+      "recall": 0.1724137931034483,
+      "coverage": 0.06108004812796376,
+      "wilson_lower": 0.010561109307501333,
+      "assets": 394,
+      "active_months": 6,
+      "positive_asset_months": 11
+    }
+  },
+  {
+    "month": "2026-06",
+    "history_start": "2025-12-01T00:00:00+00:00",
+    "history_end": "2026-06-01T00:00:00+00:00",
+    "history_closed": 15582,
+    "known": true,
+    "rule": "rope_width_atr__low20 & efficiency20__high40",
+    "terms": [
+      43,
+      107
+    ],
+    "history_gt10": 100,
+    "max_label_available_at": "2026-06-01T00:00:00+00:00",
+    "selection": {
+      "rule": "rope_width_atr__low20 & efficiency20__high40",
+      "terms": [
+        43,
+        107
+      ],
+      "closed": 994,
+      "gt10": 16,
+      "precision": 0.01609657947686117,
+      "recall": 0.16,
+      "coverage": 0.0637915543575921,
+      "wilson_lower": 0.009931974915648052,
+      "assets": 426,
+      "active_months": 6,
+      "positive_asset_months": 12
+    }
+  },
+  {
+    "month": "2026-07",
+    "history_start": "2026-01-01T00:00:00+00:00",
+    "history_end": "2026-07-01T00:00:00+00:00",
+    "history_closed": 15686,
+    "known": true,
+    "rule": "past_width_atr__low20 & efficiency20__high40",
+    "terms": [
+      49,
+      107
+    ],
+    "history_gt10": 104,
+    "max_label_available_at": "2026-06-30T22:30:00+00:00",
+    "selection": {
+      "rule": "past_width_atr__low20 & efficiency20__high40",
+      "terms": [
+        49,
+        107
+      ],
+      "closed": 1131,
+      "gt10": 18,
+      "precision": 0.015915119363395226,
+      "recall": 0.17307692307692307,
+      "coverage": 0.0721025117939564,
+      "wilson_lower": 0.010090465279993821,
+      "assets": 439,
+      "active_months": 6,
+      "positive_asset_months": 14
+    }
+  },
+  {
+    "month": "2026-08",
+    "history_start": "2026-02-01T00:00:00+00:00",
+    "history_end": "2026-08-01T00:00:00+00:00",
+    "history_closed": 16869,
+    "known": true,
+    "rule": "volume_ratio__low40 & momentum20_atr__high20",
+    "terms": [
+      20,
+      70
+    ],
+    "history_gt10": 108,
+    "max_label_available_at": "2026-08-01T00:00:00+00:00",
+    "selection": {
+      "rule": "volume_ratio__low40 & momentum20_atr__high20",
+      "terms": [
+        20,
+        70
+      ],
+      "closed": 1015,
+      "gt10": 16,
+      "precision": 0.015763546798029555,
+      "recall": 0.14814814814814814,
+      "coverage": 0.060169541762997214,
+      "wilson_lower": 0.009726006584774283,
+      "assets": 433,
+      "active_months": 6,
+      "positive_asset_months": 13
+    }
+  },
+  {
+    "month": "2026-09",
+    "history_start": "2026-03-01T00:00:00+00:00",
+    "history_end": "2026-09-01T00:00:00+00:00",
+    "history_closed": 18526,
+    "known": true,
+    "rule": "reference_risk_fraction__low40 & expansion__high10",
+    "terms": [
+      2,
+      27
+    ],
+    "history_gt10": 197,
+    "max_label_available_at": "2026-09-01T00:00:00+00:00",
+    "selection": {
+      "rule": "reference_risk_fraction__low40 & expansion__high10",
+      "terms": [
+        2,
+        27
+      ],
+      "closed": 535,
+      "gt10": 20,
+      "precision": 0.037383177570093455,
+      "recall": 0.10152284263959391,
+      "coverage": 0.028878333153406023,
+      "wilson_lower": 0.024328153893325204,
+      "assets": 285,
+      "active_months": 6,
+      "positive_asset_months": 15
+    }
+  }
+]

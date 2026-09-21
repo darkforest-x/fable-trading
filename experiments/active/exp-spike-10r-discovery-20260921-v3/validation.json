@@ -1,0 +1,35 @@
+{
+  "source_commit": "8da99e990956a88215fe1e48fb5b764b1eea2003",
+  "focused": {
+    "passed": 25,
+    "seconds": 2.39,
+    "log": "focused_tests.log"
+  },
+  "related_gates": {
+    "passed": 108,
+    "seconds": 36.64,
+    "log": "related_tests.log"
+  },
+  "dataset": {
+    "streams_complete": 3531,
+    "failures": 0,
+    "original_serial_and_common_event_parity": true,
+    "raw_hashes_unchanged": true
+  },
+  "serial": {
+    "streams_complete": 3531,
+    "arms": 7,
+    "original_baseline_and_common_candidate_economics_parity": true,
+    "authoritative_statistics": "serial_stats_v2/comparison.csv",
+    "original_reporting_bug_preserved": "serial_v1/comparison.csv recall includes gained winners"
+  },
+  "independent_reviews": [
+    "static_review.json",
+    "independent_evidence_audit.json"
+  ],
+  "adaptive_review_limits": "Maturity and parent-receipt binding independently reviewed; final adaptive numeric figures checked by root, not the independent numerical reviewer",
+  "adaptive_rerun_proof": "experiments/active/exp-spike-10r-adaptive-20260921-v31/hardening_parity.json",
+  "failed_attempt": "serial_stats_v2_failed.log records duplicate recall keyword before writing output; fixed and succeeded",
+  "training_started": false,
+  "production_eligible": false
+}

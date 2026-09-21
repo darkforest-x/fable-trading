@@ -1,0 +1,289 @@
+{
+  "experiment_ids": [
+    "exp-spike-10r-discovery-20260921-v3",
+    "exp-spike-10r-adaptive-20260921-v31"
+  ],
+  "status": "complete,rejected at strategy acceptance gate",
+  "generated_at": "2026-09-21T10:15:32.216023+00:00",
+  "source_commit": "8da99e990956a88215fe1e48fb5b764b1eea2003",
+  "builders": {
+    "dataset": "04c01d1f460eb7174868354bde7d6a4d64a7e3f4",
+    "serial_and_first_adaptive": "829488cf54c86c312051afe552c344ed5c19926e",
+    "adaptive_hardening": "db61b297f3",
+    "serial_statistics_fix": "8da99e990956a88215fe1e48fb5b764b1eea2003"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "pending_action": "Owner authorization required for proposed offline classifier; no model training run",
+  "report": "analysis/p1_spike_10r_discovery_v3_20260921.md",
+  "hash_validation": {
+    "dataset_v1": {
+      "completion_receipts": 3531,
+      "leaf_files_hashed": 10593,
+      "all_match": true
+    },
+    "serial_v1": {
+      "completion_receipts": 3531,
+      "leaf_files_hashed": 3531,
+      "all_match": true
+    }
+  },
+  "files": {
+    "analysis/p1_spike_10r_discovery_v3_20260921.md": {
+      "sha256": "536a7154d99847372b1a66316539dd84f8cb1c797dd53502ec6f063f415090b6",
+      "size_bytes": 16324
+    },
+    "docs/learnings/serial-winner-count-ratios-are-not-tail-recall.md": {
+      "sha256": "0ed34b3268febabe8c5dbc735966677ca58cbbb435caf64f94f32bdac1abf016",
+      "size_bytes": 1104
+    },
+    "docs/learnings/signal-selection-needs-all-candidates-not-only-opened-trades.md": {
+      "sha256": "b5156a9ebe681bb62122105b44e75f53b16d34dd15308cf4b283b87d5c3e4b50",
+      "size_bytes": 1354
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/PROJECT_PLAN.md": {
+      "sha256": "0e180732ffb18234f084845551536f45a7c41bfbd06b606789e910497ed36917",
+      "size_bytes": 1770
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/config.json": {
+      "sha256": "028e779b1210aed7c734b5d81af20e3916f1e7b3ee33639f27474f39708dcdf0",
+      "size_bytes": 305
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/hardening_parity.json": {
+      "sha256": "db859b106d4b032472b6c0c857dc845f041fb8c0f99e30b792ec1a567664828f",
+      "size_bytes": 817
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run.log": {
+      "sha256": "6fc591c5510c310da570a16456d3d1a8cf4fc78be1b4646f571e007e01f700ee",
+      "size_bytes": 2625
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v1/comparison.csv": {
+      "sha256": "1bc16b725a1f7c7ec8de6508a6bdec274d6ea227800a490fbab48f026c0f8588",
+      "size_bytes": 14338
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v1/decisions.csv.gz": {
+      "sha256": "4fbf9775d7bca5de0369ece0ceb4ae8f51816b143fa7c91bd4b87b537d03c837",
+      "size_bytes": 232620
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v1/monthly_selection.json": {
+      "sha256": "3bdfdcf424c7a54ef6178bd6d2c57dfc4f45ed3b05b9efeabfaa59181ffcd9ba",
+      "size_bytes": 14192
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v1/receipt.json": {
+      "sha256": "cbb48af0a14a481e82ed31b843c97db31751820a1777e521118cdc7cd7028cbf",
+      "size_bytes": 1499
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v2/comparison.csv": {
+      "sha256": "1bc16b725a1f7c7ec8de6508a6bdec274d6ea227800a490fbab48f026c0f8588",
+      "size_bytes": 14338
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v2/decisions.csv.gz": {
+      "sha256": "4fbf9775d7bca5de0369ece0ceb4ae8f51816b143fa7c91bd4b87b537d03c837",
+      "size_bytes": 232620
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v2/monthly_selection.json": {
+      "sha256": "3bdfdcf424c7a54ef6178bd6d2c57dfc4f45ed3b05b9efeabfaa59181ffcd9ba",
+      "size_bytes": 14192
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v2/receipt.json": {
+      "sha256": "f991832b2d706bde8bdce64ebe266be849f757bc52ad9a0b073bc3158041480d",
+      "size_bytes": 1499
+    },
+    "experiments/active/exp-spike-10r-adaptive-20260921-v31/run_v2.log": {
+      "sha256": "6fc591c5510c310da570a16456d3d1a8cf4fc78be1b4646f571e007e01f700ee",
+      "size_bytes": 2625
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/NEXT_MODEL_PROPOSAL.md": {
+      "sha256": "1d31e30f897814087c14e2a4c158b41b87ad32228c4d2eba3156cd8023c20392",
+      "size_bytes": 2315
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/PROJECT_PLAN.md": {
+      "sha256": "5283ef7c7042139240c3e88e5f577dbed9b081ac95294daa89b9008ba7648322",
+      "size_bytes": 4687
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/config.json": {
+      "sha256": "ed3fd3fa4ce6e70937f5de99d9681c0a625936bbcdb8f5fdc089c71d2423f284",
+      "size_bytes": 1331
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_run.log": {
+      "sha256": "b0487b4b032f693ee8cee935165df5c2cbbd95f2b1f0ef01321e3a51f07016e6",
+      "size_bytes": 2667
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1/candidates.csv.gz": {
+      "sha256": "935b9141bf1a476f0f507785678d599b99f3d40e49fe3513d7fc8e724afb49b6",
+      "size_bytes": 14428269
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1/controls.csv.gz": {
+      "sha256": "a31b447787cf93ec5603a8736d1e449ca3266b381d22312fad9b91ecf36b11e9",
+      "size_bytes": 3783530
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1/identity.json": {
+      "sha256": "3b1afe71a635ec5014ee67aa594dc127443ea9cdc1fb569f0d87004dca295ed8",
+      "size_bytes": 2130
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1/manifest.json": {
+      "sha256": "88dbf47f7cbc55b790dfc4a6953eccc7aa725abed694713a14675ab4562cab8b",
+      "size_bytes": 363869
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1/receipt.json": {
+      "sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+      "size_bytes": 612
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/delivery_hash_validation.json": {
+      "sha256": "f01d8d64172a56cb7f46bb3bb9e5e2c4072c9355a40cda1dd7d6cc428ba7c0fa",
+      "size_bytes": 221
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/focused_tests.log": {
+      "sha256": "23ca1d1210592645bda0c237746c6f15ec0316eb7c8337bd171f52e68e283fd1",
+      "size_bytes": 99
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/independent_evidence_audit.json": {
+      "sha256": "677f40b3cf7afa951930da43df7145f3026101ca4c6188f0b45b72a2f912aa9c",
+      "size_bytes": 2221
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/notion_receipt.json": {
+      "sha256": "0e05c78a4f71cd8910630b9efe12ce65636588ff9178ac7404d4f28a8d6b97f1",
+      "size_bytes": 252
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/related_tests.log": {
+      "sha256": "143a37b14b8d4c1d040eb8b396a4ac209a7f4271b40eafc29b7d0f4bea32ff82",
+      "size_bytes": 181
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_evaluate.log": {
+      "sha256": "00967cf0121a4b3d427bded5176ab80096719daa53bf2a7180cea17845345c6a",
+      "size_bytes": 4941
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_select.log": {
+      "sha256": "d66a6eac700b1241485ab5737f7242352ede694d62143455651aaf8f39dff34c",
+      "size_bytes": 2194
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/comparison.csv": {
+      "sha256": "033e45677e73f3df6ebb20cbe4a02f973afb0a7e1b28875a65d7daf4a56e73be",
+      "size_bytes": 13280
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/decisions.csv.gz": {
+      "sha256": "f8cd3ffaecf7bbed66e54c960eaabe8f9b5ad8f67e100d280775f8f42f110db2",
+      "size_bytes": 1077564
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/earlier_search.csv": {
+      "sha256": "0762c32ba3922e2e82ea52db84f05387f154ae5092f83112f54b0398fa80ecdf",
+      "size_bytes": 1213630
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/evaluation_receipt.json": {
+      "sha256": "051a11ba084a5fa968757f2f4695878d1c78b5c2d637d517994168bf9bd80cac",
+      "size_bytes": 878
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/groups.csv": {
+      "sha256": "e1131810cdf779d7cda670de155268482c711ad10eab62cd8f936ecf6657dd74",
+      "size_bytes": 1619837
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/score_diagnostics.csv": {
+      "sha256": "2b5d432ca470e70d1e33f5afd911146235ce287ad93a7a254bdfe96329de326f",
+      "size_bytes": 33093
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/selection.json": {
+      "sha256": "f0d7b8a4de704781e621c264fa2b6aea98af30c004759bec2a2d96510bdcd5d3",
+      "size_bytes": 4577
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/search_v1/thresholds.csv": {
+      "sha256": "fad82153ef9ff8284016553d9fdc4dac878e0219c7d7b7860ab75b7d0042ad28",
+      "size_bytes": 1007889
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/selection_freeze.json": {
+      "sha256": "f655c6f9acf6d921187fc6d3a4b7b999e34d793d58d7759942dfb19727524f2a",
+      "size_bytes": 204
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_run.log": {
+      "sha256": "cc4e823e12033b2da6fd0bd54a8c5d409cfa991a04a5db24f58ae6b5ff18a822",
+      "size_bytes": 56030
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_stats_v2/comparison.csv": {
+      "sha256": "ef2f358d6becc15a5b9fbda8a0848a2176febe069e260671efe17334666fd7bc",
+      "size_bytes": 12535
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_stats_v2/receipt.json": {
+      "sha256": "c2c9f0f254c85b70ddc65611e00920f5e0b4bc3962aad0cec071332143f81fcb",
+      "size_bytes": 1092
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_stats_v2.log": {
+      "sha256": "3b9f073467ffa742cf1e35071448f82398bf2d0fe4ffae158b5ba5ca86128804",
+      "size_bytes": 917
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_stats_v2_failed.log": {
+      "sha256": "55cd0a9b98aaa97845086f14e86b1a9ee69e1c807e42e44dfea2290dacef31f5",
+      "size_bytes": 786
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_v1/comparison.csv": {
+      "sha256": "e277bcaf1ae4cb823de53e2cb2d0c2cbf0a463d34b37fb5889baaa7ae4188313",
+      "size_bytes": 11779
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_v1/receipt.json": {
+      "sha256": "96c5d9de94584dd65113f3167ee169ec0936f5cddbd64d370197420ab5f99160",
+      "size_bytes": 365078
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/serial_v1/trades.csv.gz": {
+      "sha256": "92eb497112048cf62c3cf362fcfc9bbcb45e839691b2471d734691da28fad2af",
+      "size_bytes": 4924395
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/static_review.json": {
+      "sha256": "2e69c52bfbbfbe6de62ea136f536aeaa6af664a10b455f1533616cec373db74d",
+      "size_bytes": 1116
+    },
+    "experiments/active/exp-spike-10r-discovery-20260921-v3/validation.json": {
+      "sha256": "363770cb70ca1ebd0878c21f575e93c0f914ed2086ee98c1d93ad48ab3d42fee",
+      "size_bytes": 1273
+    },
+    "tests/evaluation/test_spike_10r_adaptive.py": {
+      "sha256": "7368b231eb4117f20a6a8643479f22f39ba1fa86f6ef71fe4010b0b1ed52c4c7",
+      "size_bytes": 2740
+    },
+    "tests/evaluation/test_spike_10r_dataset.py": {
+      "sha256": "9145237e8484c19c736c45fec4324e957abc94e3fe0d3e6878132de71fe530d7",
+      "size_bytes": 4058
+    },
+    "tests/evaluation/test_spike_10r_features.py": {
+      "sha256": "008d68f1f75fa47264048cbfac5c272432d508301e8f9c95724c7dd257597c41",
+      "size_bytes": 3740
+    },
+    "tests/evaluation/test_spike_10r_search.py": {
+      "sha256": "0f0ac8c9666e5670f5d92c62cddc3948850aad5c30bf7f45732b823f7754a511",
+      "size_bytes": 5144
+    },
+    "tests/evaluation/test_spike_10r_serial.py": {
+      "sha256": "e53f0825218e26f114910e2d163eb650a7df9b802ae4ec80b8d9b00fc66eb8a0",
+      "size_bytes": 1664
+    },
+    "yoyo/evaluation/spike_10r_adaptive.py": {
+      "sha256": "870dbdc34260ae5443bebf0d4a4a32149c58aae2668da6d4a086ae28b5236851",
+      "size_bytes": 7848
+    },
+    "yoyo/evaluation/spike_10r_dataset.py": {
+      "sha256": "bf6b9d013f9f3fd1049a46877df6ff7728e649e27ae7ac3e024c95db588039e8",
+      "size_bytes": 26604
+    },
+    "yoyo/evaluation/spike_10r_features.py": {
+      "sha256": "f9c7b6d35dc3b3041f6c211df4955e07b35ef522487bbf05c38545c81f820648",
+      "size_bytes": 9745
+    },
+    "yoyo/evaluation/spike_10r_search.py": {
+      "sha256": "cecd4629618afd86b12af2831b43f4ae43f254fd861705206908b2be8284714b",
+      "size_bytes": 23474
+    },
+    "yoyo/evaluation/spike_10r_serial.py": {
+      "sha256": "ca6d1ce2ca3348e2029b14e673b51face0f2e5cf27ff756f4932d39581c41cb3",
+      "size_bytes": 12477
+    },
+    "yoyo/evaluation/spike_10r_serial_report.py": {
+      "sha256": "59c532ae55db117e96ae010e61c9845c2311559c1fd4416942db65556a9ff039",
+      "size_bytes": 4376
+    }
+  },
+  "storage": "Large merged CSVs and per-stream outputs remain local; frozen builders and receipts allow reproduction. This manifest binds all listed local files and both completion-receipt trees.",
+  "limitations": [
+    "All historical data exposed; not blind validation",
+    "Monthly clustered uncertainty includes zero for every new rule",
+    "WIF rejected by all gates",
+    "Independent evidence audit limited to dataset/threshold/fixed V3 numerical checks",
+    "No funding,depth,leverage or liquidation model"
+  ]
+}

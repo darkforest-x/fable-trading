@@ -10333,14 +10333,16 @@ experiments:
   - experiment_id: exp-spike-10r-discovery-20260921-v3
     source_repo: darkforest-x/fable-trading
     source_commit: 022e6647d0b2b2307bee7c1a30bdc7369c53def8
-    status: active
+    status: rejected
     question: Which causal admission rules improve strict realized netR-over10 precision from all49207 originalV9long candidates?
     single_variable: Long admission only;20causal axes,120single and6840two-feature finite rules,earlier-only selection,unchangedrisk/exits/costs.
-    result: Builders being frozen before fullcandidate replay and time-separated rule discovery;no numerical result yet.
+    result: All49207 candidates,49070closed448strictgt10;6960finite rules earlier-selected,allfive later serial gates fail. Risklow20 later93of6161vsbaseline210of25567;rateCIcrosseszero,netbp-3.04,Holmp1. No stable improvement.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_spike_10r_discovery_v3_20260921.md
+    artifacts:
+    - spike-10r-discovery-adaptive-20260921-delivery
     reuse_allowed: false
     notes: Owner20260921 explicitly corrected primary objective to10Rprecision fromalloriginalsignals. Not ordinarywinrate.
       Retain losers,unknown andunopenedcandidates;matched timingnull,coverage/recall,serialconfirmation. Notion3e28856479af81f5a96fcb782658bd18.
@@ -10348,13 +10350,16 @@ experiments:
   - experiment_id: exp-spike-10r-adaptive-20260921-v31
     source_repo: darkforest-x/fable-trading
     source_commit: 04c01d1f460eb7174868354bde7d6a4d64a7e3f4
-    status: active
+    status: rejected
     question: Can monthly selection of the same10R rule family from mature past-six-month labels survive regime changes better than a fixed earlier-year choice?
     single_variable: Rule-choice clock only;monthly past6complete-month closed labels replace frozen earlier-year choice. Same6960rules/features/thresholds/risk/exits/costs.
-    result: Preregistered after V3 fixed-combination later failure;causal maturity tests pass,no economic result yet.
+    result: Monthly past6months mature-label selection fails;later independent14of1680,serial13of1657vsbaseline210of25567. Retains12 old winners,loses198,gains1;Holmp1. Rejected,not blindvalidation.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    canonical_report: analysis/p1_spike_10r_discovery_v3_20260921.md
+    artifacts:
+    - spike-10r-discovery-adaptive-20260921-delivery
     reuse_allowed: false
     notes: Exploratory follow-up authorized byOwner all-methods request;not blind validation or MLtraining. Minimum1pctcoverage andV3supportconstraints unchanged.
+      Notion3e28856479af81d78963d4016a0f28aa;parentreceipt hardening rerun byte-identical decisions. No MLtraining.

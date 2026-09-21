@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_10r_serial_report.py", line 80, in <module>
+    run(a.source,a.dataset,a.output)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_10r_serial_report.py", line 53, in run
+    rows.append(dict(period=period,rule=name,**s.metrics(selected,universe),
+TypeError: dict() got multiple values for keyword argument 'recall'
