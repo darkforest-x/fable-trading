@@ -6,7 +6,7 @@ fully closed candle by that ceiling and are diagnostic, not asserted hits.
 Close-based SMA/EMA20/60/120 are the original discovery feature definition.
 """
 from __future__ import annotations
-import argparse,hashlib,html,json
+import argparse,hashlib,html,json,textwrap
 from collections import Counter
 from pathlib import Path
 import matplotlib
@@ -22,6 +22,8 @@ ROOT=Path(__file__).resolve().parents[2]
 MA_COLS=['sma20','ema20','sma60','ema60','sma120','ema120']
 COLORS=['#858995','#b0b3ba','#638cff','#a3b9ff','#ca7fe0','#e3b2ed']
 REASONS={'six_ma_end_bandwidth_atr':'核心末端六条均线仍过散','six_ma_core_envelope_atr':'核心期间均线覆盖范围过大','candle_bundle_touch_rate':'K线贴近均线的比例不足','pre_body_q90_atr':'启动前K线实体过大','pre_abs_path_atr':'启动前累计波动过大','pre_last3_directional_progress_atr':'核心前已经沿方向走得太远','pre_max_favourable_excursion_atr':'核心前已有明显同向运动','post_retrace_atr':'确认期间回撤过大','positive_post_steps':'确认期间同向推进不足','core_reverse_body_count':'核心反向实体过多','post_reverse_body_count':'确认期间反向实体过多','core_max_body_atr':'核心实体过大','good_combined_distance':'与认可参考形态差距过大','good_lockstep_distance':'与认可参考的节奏差距过大','accepted_family_distance':'与认可形态家族差距过大','aligned_ma_slope_atr_per_bar':'均线顺向斜率不足','close_to_bundle_q75_atr':'价格离均线过远','density_topology':'均线收拢或交叉形态不足','core_directional_progress_atr':'核心涨跌幅不符合范围','max_opposite_post_body_atr':'确认期反向实体过大'}
+
+REASONS.update({'core_directional_progress_too_negative':'核心内反向运动过大','core_directional_progress_too_large':'核心内已经走得太远','ma_bundle_topology':'均线未充分收拢或交叉','core_wick_q90_atr':'核心影线过长','post_min_progress_atr':'确认期价格跌回核心起点反侧','box_height_norm':'核心框过高',**{f'post{i}_progress_atr':f'第{i}根确认K线推进不足' for i in (1,2,3,5)}})
 
 def readl(p):return [json.loads(s) for s in p.read_text().splitlines() if s.strip()]
 def bj(v):return pd.Timestamp(v).tz_convert('Asia/Shanghai').strftime('%m-%d %H:%M')
@@ -56,7 +58,7 @@ def figure(frame,row,dest,kind,cutoff):
     reasons=[REASONS.get(v,v) for v in reasons]
     if kind=='未通过原规则' and not reasons:reasons=['总分未达到原Grade-A门槛']
     foot='未通过：'+'；'.join(reasons) if reasons else ('达到原 Grade-A 条件；不代表此后会涨跌。' if kind=='原规则命中' else '仅显示截至22:00已收盘K线；此图不是命中声明。')
-    fig.text(.075,.045,foot[:180],fontsize=9,color='#707888')
+    fig.text(.075,.035,textwrap.fill(foot,width=95),fontsize=9,color='#707888')
     ax.legend(loc='upper center',bbox_to_anchor=(.5,-.085),ncol=6,frameon=False,fontsize=9)
     fig.subplots_adjust(left=.075,right=.94,top=.85,bottom=.16);fig.savefig(dest);plt.close(fig)
     return {'visible_start_open_utc':visible.open_time.iloc[0].isoformat(),'visible_end_close_utc':closes.max().isoformat(),'visible_bars':len(visible),'image_sha256':hashlib.sha256(dest.read_bytes()).hexdigest()}
