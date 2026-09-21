@@ -10217,3 +10217,22 @@ experiments:
     reuse_allowed: false
     notes: Functional delivery completed;economic validity remains inconclusive. SMA60 explicitly owner-selected,not a new optimality claim.
       Native H1 vs prior complete5m aggregate parity not established. Old scripts preserved,no HTML,production deployment or orders.
+
+  - experiment_id: exp-wif-screenshot-roll-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9b79e1e7f5b558df5db58c2f085789004f12dbe2
+    status: inconclusive
+    question: How do100U cap-two and unlimited structural adds behave on the Owner-identified OKX WIF Aug20 screenshot?
+    single_variable: Successful add count0,2,unlimited within fixed25000/40x and19000/30x profiles;shared firsttwo fills and stop.
+    result: Matched0.1402 entry/0.2296 peak. Main two-add ideal-stop balance3024.159217U;unlimited7adds counterfactual3134.840971U
+      conflicts with current-tier maintenance in the same crash minute,so realizable balance unresolved. Peak22043.184999U is hindsight only.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_wif_screenshot_roll_20260921.md
+    artifacts:
+    - wif-screenshot-roll-20260921-delivery
+    reuse_allowed: false
+    notes: One selected winner,no edge inference;126price/mark hours,31fundings,60price/mark minutes. Seven synthetic checks and6ledger audits.
+      Historical risk tiers unverified;current-tier sensitivity only. Raw candles memory-only,no local cache writes. No live/default changes.
+      Notion3e28856479af81d8b4dbeb16ebd1a41a. Primary builder9fe06ba865 committed before outputs;minute audit9b79e1e7f5 before diagnosis.
