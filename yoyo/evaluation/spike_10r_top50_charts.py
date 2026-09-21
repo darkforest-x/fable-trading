@@ -128,6 +128,8 @@ def plot(frame, row, destination):
 def build(limit=50):
     deps=[Path(__file__),EXP/'TG_TOP50_PLAN.md']
     if not _committed(deps):raise ValueError('commit renderer and chart plan before build')
+    if (OUT/'telegram_receipt.json').exists():
+        raise ValueError('sent gallery is frozen; preserve it and use a new version for revisions')
     selected, receipt=selection()
     OUT.mkdir(exist_ok=True)
     selected.to_csv(OUT/'selection.csv',index=False)

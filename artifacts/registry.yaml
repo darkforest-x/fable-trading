@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-10r-top50-telegram-20260921-delivery
+    artifact_type: manifest
+    role: owner_requested_retrospective_ranked_winner_chart_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 434437c4423da7103d5172c904379d57d0d1329a
+    source_path: experiments/active/exp-spike-10r-visual-20260921-v1/tg_top50_v1/delivery_manifest.json
+    sha256: a2276e999e4f7ee501b4ad271facc72ff9bbf9988a5acb587f9930226d87dd58
+    size_bytes: 1068
+    storage_uri: repo://experiments/active/exp-spike-10r-visual-20260921-v1/tg_top50_v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 50 of448 original netRgt10 winners; netR descending. Five photo albums acknowledged,
+      IDs2044-2093. Retrospective only; separate from blind inputs; no Telegram exact-byte
+      claim.
   - artifact_id: four-hour-range-20260920-v1-delivery
     artifact_type: manifest
     role: ny_first_range_false_break_return_btc_eth_fixed_2r_and_random_timing_null
