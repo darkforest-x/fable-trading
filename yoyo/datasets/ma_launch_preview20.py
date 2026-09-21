@@ -92,7 +92,7 @@ def candidates(df, path):
         & (gain6 > 1.8) & (gain40 > .8) & (pullback < 2)
         & (scale/prev > .00005) & gaps.eq(0)
     )
-    score = 3*np.log1p(gain40.clip(upper=6)) - .6*band - 1.2*drift90 - .1*close_near
+    score = 3*np.log1p(gain40.clip(lower=0, upper=6)) - .6*band - 1.2*drift90 - .1*close_near
     rows=[]
     for i in np.flatnonzero(eligible.fillna(False).to_numpy()):
         if i < 900 or i+45 >= len(df):
@@ -184,10 +184,13 @@ const rows=ITEMS;let i=0,early=false;const $=s=>document.getElementById(s);rows.
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument("--experiment-dir",type=Path,default=DEFAULT_DIR)
+    parser.add_argument("--plan-name",default="plan.json")
+    parser.add_argument("--output-name",default="preview_v1")
     args=parser.parse_args(); directory=args.experiment_dir
-    plan=json.loads((directory/"plan.json").read_text());out=directory/"preview_v1"
+    plan_path=directory/args.plan_name
+    plan=json.loads(plan_path.read_text());out=directory/args.output_name
     if out.exists():raise RuntimeError("Output already exists; use a new version")
-    tracked=[str(Path(__file__).relative_to(ROOT)),str((directory/"plan.json").relative_to(ROOT))]
+    tracked=[str(Path(__file__).relative_to(ROOT)),str(plan_path.relative_to(ROOT))]
     status=subprocess.check_output(["git","status","--porcelain","--",*tracked],cwd=ROOT,text=True)
     if status:raise RuntimeError("Commit builder and plan before generating")
     commit=subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip()
@@ -203,6 +206,9 @@ def main():
     dump(out/"candidate_pool.json",pool);dump(out/"source_manifest.json",sources)
     chosen=[];symbols=set();times=Counter()
     for row in pool:
+        excluded=any(row["source"]==r["source"] and abs(row["onset_i"]-r["onset_i"])<=40
+                     for r in plan.get("visual_exclusions",[]))
+        if excluded:continue
         day=pd.to_datetime(row["onset_open_ms"],unit="ms",utc=True).strftime("%Y-%m-%d")
         if row["symbol"] in symbols or times[day]>=2:continue
         chosen.append(row);symbols.add(row["symbol"]);times[day]+=1
@@ -227,7 +233,7 @@ def main():
         print(f"Rendered {n}/20 {row['symbol']} {row['timeframe']}",flush=True)
     dump(out/"manifest.json",chosen);overview(chosen,out);gallery(chosen,out)
     dump(out/"receipt.json",{"experiment_id":EXPERIMENT,"builder_commit":commit,
-         "builder_sha256":digest(__file__),"plan_sha256":digest(directory/"plan.json"),
+         "builder_sha256":digest(__file__),"plan_sha256":digest(plan_path),"plan_path":str(plan_path.relative_to(ROOT)),
          "generated_at":datetime.now(timezone.utc).isoformat(),"source_count":len(sources),
          "candidate_count":len(pool),"events":len(chosen),"unique_symbols":len(symbols),
          "timeframes":dict(Counter(r["timeframe"] for r in chosen)),
