@@ -74,9 +74,10 @@ def paired_comparison(unique):
         win_only, control_only = int((a & ~b).sum()), int((~a & b).sum())
         discordant = win_only+control_only
         delta = a.astype(int)-b.astype(int)
-        blocks = delta.groupby(pairs.asset_winner).sum().to_numpy(float)
+        blocks = delta.groupby(pairs.asset_winner).sum().to_numpy(np.int64)
         rng = np.random.default_rng(921603)
-        null = rng.choice([-1,1], size=(20000,len(blocks))) @ blocks
+        # Integer elementwise reduction avoids platform-specific BLAS float flags.
+        null = (rng.choice([-1,1], size=(20000,len(blocks))) * blocks).sum(axis=1)
         block_p = (1+int((np.abs(null)>=abs(float(blocks.sum()))).sum()))/(len(null)+1)
         rows.append(dict(metric=name, pairs=len(pairs), winner_hits=int(a.sum()),
                          control_hits=int(b.sum()), difference_pp=100*float(delta.mean()),
