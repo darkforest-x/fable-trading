@@ -1,0 +1,36 @@
+{
+  "events": 20,
+  "unique_symbols": 20,
+  "verified_source_exports": 20,
+  "decoded_pngs": 40,
+  "unique_pngs": 40,
+  "dimensions": [
+    1600,
+    900
+  ],
+  "future_removed_prefix_checks": [
+    {
+      "id": "01",
+      "timeframe": "1H",
+      "prefix_pixel_equal": true
+    },
+    {
+      "id": "05",
+      "timeframe": "5m",
+      "prefix_pixel_equal": true
+    },
+    {
+      "id": "16",
+      "timeframe": "3m",
+      "prefix_pixel_equal": true
+    }
+  ],
+  "lineage_null": {
+    "real_match": 20,
+    "rotated_match": 0,
+    "scope": "Checks event identity only, not semantic correctness"
+  },
+  "candidate_pool_identical_after_log_domain_fix": true,
+  "visual_review": "All 20 full views inspected via two overviews; initial OKB and BTC5m probe episodes removed; final BTC3m and NEAR replacements inspected. Owner confirmation pending.",
+  "browser_review": "20 entries visible; full/early switch changes main image and caption; user-facing local gallery opened."
+}
