@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-ma-launch-rules-20260819-window-20260922-v1",
+  "experiment_dir": "experiments/active/exp-ma-launch-rules-20260819-window-20260922-v1",
+  "scan_start_utc": "2026-08-19T10:00:00Z",
+  "scan_end_utc": "2026-08-19T14:00:00Z",
+  "time_zone": "Asia/Shanghai",
+  "timeframes_minutes": [3,5,15,30,60,240],
+  "endpoint_semantics": "inclusive confirmation bar CLOSE inside 18:00-22:00 Beijing; five post-core bars must already be closed",
+  "normalized_root": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data/normalized",
+  "universe_policy": "all Binance and OKX USDT perpetual assets in local normalized cache with at least one closed candle in requested interval; one venue per asset selected by latest approved coverage then Binance priority; catalog survivorship disclosed",
+  "source_policy": "30m local timestamp-first clipped to cutoff; UTC complete-bin resampling to1h4h; native3m5m15m bounded public API from same selected venue",
+  "warmup_bars": 1200,
+  "ma_source": "close (original discovery contract), not later HL2 rerender",
+  "rule_policy": "original frozen coarse morphology, reference distance and strict Grade-A rules unchanged; no dataset quota caps; retain raw hits and NMS views",
+  "training_eligible": false,
+  "production_eligible": false
+}
