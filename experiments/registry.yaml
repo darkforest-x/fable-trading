@@ -10381,3 +10381,17 @@ experiments:
     notes: Specific dataset SHA andtwo-model exception inAUTHORIZATION.json;doesnot waive globalP0/P1 orparentartifact eligibility.
       No risk/exits/costs/production/Pine/account change. Fourquarter targets starting2025Q4,allhistory alreadyexposed.
       15focused/108related pass;4additionalglobalregistry tests fail on preexisting missing sourcecommits. Numericwarnings retained,independent probabilities agree1.53e-16. Notion3e28856479af810fa172fcb435e084ae.
+
+  - experiment_id: exp-spike-5r-model-20260921-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6cffb35b86bb514342bcf9b2dc586a05aeba16cc
+    status: planned
+    question: Does targeting strict realized netR-over5 improve causal tail selection compared with the fixed10R model and risk baselines?
+    single_variable: Prediction target only changes from strictnetRover10 to strictnetRover5;dataset features models clocks risk exits costs unchanged.
+    holdout_consumed: false
+    training_eligible: true
+    production_eligible: false
+    canonical_report: analysis/p1_spike_5r_model_v5_20260921.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner20260921 或者大于5r extends the same dataset-and-two-model offline experiment only. AUTHORIZATION binds prior approval;no globaltraining orproduction exception.
