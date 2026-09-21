@@ -64,9 +64,10 @@ def closed_confirmation_indices(
     return np.flatnonzero(((closes >= start_utc) & (closes <= end_utc)).to_numpy())
 
 
-def source_frame(path: Path, *, bar_minutes: int, end_exclusive: pd.Timestamp) -> tuple[pd.DataFrame, dict[str, Any]]:
+def source_frame(path: Path, *, bar_minutes: int, close_cutoff: pd.Timestamp) -> tuple[pd.DataFrame, dict[str, Any]]:
     """Read one already-clipped canonical source and preserve its local chronology evidence."""
 
+    end_exclusive = close_cutoff - pd.Timedelta(minutes=bar_minutes) + pd.Timedelta(milliseconds=1)
     frame, audit = read_preholdout_prefix(path, end_exclusive=end_exclusive, bar_minutes=bar_minutes)
     if frame.empty:
         raise SnapshotScanError(f"empty source: {path}")
@@ -228,7 +229,7 @@ def build(plan_path: Path) -> dict[str, Any]:
         bar_minutes = int(spec["bar_minutes"])
         path = ROOT / str(spec["path"])
         if sha256_file(path) != str(spec["prefix_sha256"]): raise SnapshotScanError(f"source prefix SHA drift: {path}")
-        frame, audit = source_frame(path, bar_minutes=bar_minutes, end_exclusive=end - pd.Timedelta(minutes=bar_minutes) + pd.Timedelta(nanoseconds=1))
+        frame, audit = source_frame(path, bar_minutes=bar_minutes, close_cutoff=end)
         endpoints = closed_confirmation_indices(frame["open_time"], bar_minutes=bar_minutes, start_utc=start, end_utc=end)
         rows, counts = scan_weak_source(frame, spec, start=start, end=end, autofill=autofill, references=scan_references)
         raw.extend(rows)
@@ -242,7 +243,7 @@ def build(plan_path: Path) -> dict[str, Any]:
     for source_path, rows in by_source.items():
         spec = next(source for source in sources if str(source["path"]) == source_path)
         bar_minutes = int(spec["bar_minutes"])
-        frame, _ = source_frame(ROOT / source_path, bar_minutes=bar_minutes, end_exclusive=end - pd.Timedelta(minutes=bar_minutes) + pd.Timedelta(nanoseconds=1))
+        frame, _ = source_frame(ROOT / source_path, bar_minutes=bar_minutes, close_cutoff=end)
         for row in rows:
             try:
                 profiles[_profile_key(row)] = extract_profile(frame, row, bar_minutes=bar_minutes, visibility_end_exclusive=utc(row["confirmation_close_utc"]) + pd.Timedelta(nanoseconds=1))

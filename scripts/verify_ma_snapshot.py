@@ -39,9 +39,7 @@ def main(plan_path):
         assert row['quality_tier']=='PERFECT_CANDIDATE' and row['hard_gate_pass'] and row['reference_gate_pass']
         assert row['quality_score']>=cal['perfect_score_threshold']
     comparisons={}
-    high=exp/'results_high'/'grade_a_matches.jsonl'
-    if high.exists() and res.name!='results_high':
-        old={r['sample_id'] for r in jl(high)};new={r['sample_id'] for r in matches if r['bar_minutes']>=30};assert old==new;comparisons['higher_tf_preflight_matches_identical']=True
+    comparisons['superseded_high_preflight']='results_high excluded exact-22:00 bar due epoch-ms rounding; final scan verifies complete endpoint counts independently'
     review=exp/'review'/'manifest.json'
     if review.exists():
         from PIL import Image

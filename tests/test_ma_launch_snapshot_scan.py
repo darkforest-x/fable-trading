@@ -34,3 +34,14 @@ def test_source_event_nms_keeps_minimum_similarity_per_original_fixed_cluster() 
         {"sample_id": "next", "source_path": "one.csv", "bar_minutes": 15, "direction": "LONG", "core_bars": 4, "similarity_distance": .3, "core_end_time": (base + pd.Timedelta(minutes=60)).isoformat()},
     ]
     assert [row["sample_id"] for row in source_event_nms(rows)] == ["better", "next"]
+
+
+def test_epoch_ms_source_reader_includes_exact_close_and_ignores_next_poison(tmp_path):
+    from yoyo.datasets.ma_launch_snapshot_scan import source_frame
+    p=tmp_path/'source.csv'
+    start=pd.Timestamp('2026-08-19T12:00:00Z')
+    ts=[int((start+pd.Timedelta(hours=i)).timestamp()*1000) for i in range(3)]
+    p.write_text('ts,open,high,low,close,volume\n'+f'{ts[0]},1,2,1,2,1\n{ts[1]},1,2,1,2,1\n{ts[2]},POISON,POISON,POISON,POISON,POISON\n')
+    f,_=source_frame(p,bar_minutes=60,close_cutoff=pd.Timestamp('2026-08-19T14:00:00Z'))
+    assert len(f)==2
+    assert f.open_time.iloc[-1]+pd.Timedelta(hours=1)==pd.Timestamp('2026-08-19T14:00:00Z')
