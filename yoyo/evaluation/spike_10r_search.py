@@ -58,9 +58,50 @@ def clean(value):
     return value
 
 
+def validate_stream_coverage(completed_keys, source_keys, nonempty_keys):
+    """Require every source receipt, while retaining legitimate empty streams."""
+    if (len(completed_keys) != len(source_keys) or set(completed_keys) != set(source_keys)
+            or not set(nonempty_keys).issubset(source_keys)):
+        raise ValueError('dataset completed-stream coverage mismatch')
+
+
+def verify_lineage(folder, receipt):
+    """Bind all completed streams, including zero-long streams, to pinned V9."""
+    cfg = json.loads((EXP/'config.json').read_text())
+    source = Path('experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/statistics_receipt.json')
+    if digest(source) != cfg['statistics_receipt_sha256']:
+        raise ValueError('source statistics identity drift')
+    pins = {x['key']:x['receipt_sha256'] for x in json.loads(source.read_text())['source_receipts']}
+    for name, sha in receipt['files'].items():
+        if digest(folder/name) != sha:
+            raise ValueError('dataset receipt file drift')
+    manifest = json.loads((folder/'manifest.json').read_text())
+    if not manifest['complete'] or manifest['streams'] != 3531:
+        raise ValueError('incomplete dataset manifest')
+    hashes = manifest['stream_completion_sha256']
+    validate_stream_coverage(list(hashes),list(pins),[])
+    count = 0
+    for key, sha in hashes.items():
+        stream = folder/'streams'/key
+        if digest(stream/'completion.json') != sha:
+            raise ValueError('dataset stream completion drift')
+        item = json.loads((stream/'completion.json').read_text())
+        if (item['source_completion_sha256'] != pins[key] or not item['source_serial_parity']
+                or not item['common_fixed_event_parity'] or item['run_identity'] != manifest['run_identity']):
+            raise ValueError('dataset stream lineage mismatch')
+        for name, expected in item['files'].items():
+            if digest(stream/name) != expected:
+                raise ValueError('dataset stream leaf drift')
+        count += item['candidates']
+    if count != 49207:
+        raise ValueError('dataset stream candidate count mismatch')
+    return list(pins)
+
+
 def load_candidates(folder):
     """Read only aggregate files certified by the dataset receipt."""
     receipt = json.loads((folder/'receipt.json').read_text())
+    source_keys = verify_lineage(folder,receipt)
     for name in ('candidates.csv.gz', 'controls.csv.gz'):
         expected = receipt['files'][name]
         if isinstance(expected, dict):
@@ -78,8 +119,9 @@ def load_candidates(folder):
         for name in ('valid_entry','censored','matched','control_censored','target_censored'):
             if name in frame:
                 frame[name] = strict_bool(frame[name])
-    if len(c) != 49207 or c.stream_key.nunique() > 3531:
+    if len(c) != 49207:
         raise ValueError('all-original-long universe mismatch')
+    validate_stream_coverage(source_keys,source_keys,list(c.stream_key.unique()))
     closed = c.valid_entry & ~c.censored
     if not np.isfinite(c.loc[closed, ['net_r','net_return','gross_return']].to_numpy(float)).all():
         raise ValueError('nonfinite closed outcome')
@@ -323,6 +365,15 @@ def evaluate(c, controls, matrix, ranks, selection):
     return table,pd.DataFrame(diagnostics),kept,masks
 
 
+def validate_config(cfg):
+    """Prevent documentary parameters from drifting away from implemented gates."""
+    if (tuple(cfg['quantiles']) != QUANTILES or cfg['feature_count'] != len(FEATURES)
+            or cfg['threshold_history_months'] != 3 or cfg['threshold_min_history'] != 100
+            or cfg['max_rule_terms'] != 2 or pd.Timestamp(cfg['split']) != SPLIT
+            or pd.Timestamp(cfg['start']) != START or cfg['round_trip_cost'] != .002):
+        raise ValueError('configured search differs from implemented frozen contract')
+
+
 def check_committed():
     paths=[Path(__file__),Path('tests/evaluation/test_spike_10r_search.py'),EXP/'config.json',EXP/'PROJECT_PLAN.md',
            Path('yoyo/evaluation/spike_high_r_entry_report.py'),Path('yoyo/evaluation/spike_six_filter_statistics.py')]
@@ -334,6 +385,7 @@ def check_committed():
 def run(dataset,output,phase):
     dependencies=check_committed()
     cfg=json.loads((EXP/'config.json').read_text())
+    validate_config(cfg)
     c,controls,_=load_candidates(dataset)
     matrix,ranks,thresholds=calibrate(c)
     if phase=='select':

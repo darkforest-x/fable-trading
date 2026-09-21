@@ -108,3 +108,22 @@ def test_selection_rejects_terms_changed_after_discovery():
     altered['selected'][0]['choice']['terms']=[119]
     with pytest.raises(ValueError,match='canonical'):
         s.validate_selection(c,m,config(),altered)
+
+
+def test_config_cannot_claim_other_quantiles_than_implemented():
+    import json
+    import pytest
+    cfg=json.loads((s.EXP/'config.json').read_text())
+    s.validate_config(cfg)
+    cfg['quantiles']=[.05,.2,.4]
+    with pytest.raises(ValueError,match='frozen contract'):
+        s.validate_config(cfg)
+
+
+def test_completed_stream_coverage_keeps_legitimate_zero_long_streams():
+    import pytest
+    s.validate_stream_coverage(['nonempty','empty'],['nonempty','empty'],['nonempty'])
+    with pytest.raises(ValueError,match='coverage'):
+        s.validate_stream_coverage(['nonempty'],['nonempty','empty'],['nonempty'])
+    with pytest.raises(ValueError,match='coverage'):
+        s.validate_stream_coverage(['nonempty','empty'],['nonempty','empty'],['foreign'])
