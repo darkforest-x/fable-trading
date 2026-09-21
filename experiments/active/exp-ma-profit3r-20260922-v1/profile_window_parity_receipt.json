@@ -1,0 +1,1882 @@
+{
+  "adapter_sha256": "5ed24cc69b7637c8a8886f44c428c87b8941bb0f4d25f2165439855e732194fc",
+  "builder_commit": "90a46e10b46288d7b3b158e95f4b69201ecb9f90",
+  "builder_sha256": "c9bfd20c5e859168ea2a857abd18f90a56668331cc8bd43ac0cfc520041580b7",
+  "exact_profiles": 180,
+  "miner_sha256": "a44f8933155a0b12488fd848c979a9914a8c78f742917344348e7c35352a5132",
+  "mismatches": 0,
+  "production_eligible": false,
+  "rule_dependency_sha256": {
+    "yoyo/datasets/fifteen_minute_launch_candidates.py": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e",
+    "yoyo/datasets/ma_launch_owner_autofill10000.py": "3a97cf40cf93b76ad42d3d997eb404b1875678f87c255cfa05974ab002ebfef9",
+    "yoyo/datasets/ma_launch_owner_autofill_review.py": "9a1b585857a0e25545acb05de94d61912c3da27d02369fb2d35ec73837376ce9",
+    "yoyo/datasets/ma_launch_owner_perfect_filter.py": "83dc92926ec74db508b7aef94e5d7ca286884fb6e00649261686106cfec048ce",
+    "yoyo/datasets/ma_launch_snapshot_scan.py": "0b16cbb95f9a9c62ed40699e4f53b50221f6fa79548768b37dae024ad2b954d4"
+  },
+  "selection_sha256": "ff69a5ebae9ace199c3d198505709acc5c5f8121fa81f957e4d25805d4ecf1cf",
+  "sources": [
+    {
+      "adapter_profile_seconds": 0.17925154300000035,
+      "bar_minutes": 1,
+      "candidate_indices": [
+        0,
+        4,
+        8,
+        13,
+        17,
+        22,
+        26,
+        30,
+        35,
+        39,
+        44,
+        48,
+        53,
+        57,
+        61,
+        66,
+        70,
+        75,
+        79,
+        84,
+        88,
+        92,
+        97,
+        101,
+        106,
+        110,
+        115,
+        119,
+        123,
+        128,
+        132,
+        137,
+        141,
+        145,
+        150,
+        154,
+        159,
+        163,
+        168,
+        172,
+        176,
+        181,
+        185,
+        190,
+        194,
+        199,
+        203,
+        207,
+        212,
+        216,
+        221,
+        225,
+        230,
+        234,
+        238,
+        243,
+        247,
+        252,
+        256,
+        261
+      ],
+      "candidates_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/binance_um_0GUSDT_1m_c30e7034ea81551b/source_nms_60m.jsonl",
+      "candidates_sha256": "9a19d1f8a37735304be0ef30971ff236ebbac66c683d323e9adc23fc06f810da",
+      "loaded_rows": 501506,
+      "manifest_path": "experiments/active/exp-ma-profit3r-20260922-v1/sources_archive_1m_batch01.json",
+      "manifest_sha256": "54fc1dd4019c8e5a6d2c7bd6e12a9ef65a90ae1b5049a53334b2558f1e7eb4fb",
+      "master_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/master_sources_archive_1m_batch01.json",
+      "master_sha256": "3d2e7a4606b7ecb2cd978f4e32e01bdb3725706978ac42cb29fac42320ea4f64",
+      "original_profile_seconds": 0.5836831629999972,
+      "results": [
+        {
+          "adapter_error": null,
+          "confirmation_index": 1995,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::1995::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 8116,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::8116::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 13464,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::13464::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 24192,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::24192::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 27735,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::27735::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 34614,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::34614::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 37005,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::37005::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 40304,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::40304::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 50090,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::50090::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 62094,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::62094::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 64932,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::64932::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 70483,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::70483::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 75387,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::75387::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 76654,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::76654::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 82946,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::82946::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 95420,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::95420::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 103838,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::103838::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 115242,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::115242::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 121232,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::121232::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 128511,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::128511::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 134490,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::134490::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 142753,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::142753::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 153398,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::153398::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 158353,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::158353::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 177287,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::177287::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 179137,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::179137::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 197669,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::197669::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 207893,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::207893::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 218043,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::218043::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 231662,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::231662::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 240364,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::240364::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 250823,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::250823::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 256519,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::256519::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 265097,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::265097::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 269970,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::269970::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 274167,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::274167::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 277228,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::277228::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 279351,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::279351::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 280843,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::280843::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 297097,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::297097::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 305614,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::305614::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 313414,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::313414::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 315754,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::315754::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 323416,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::323416::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 328603,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::328603::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 336574,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::336574::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 345289,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::345289::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 359172,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::359172::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 372224,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::372224::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 384811,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::384811::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 399351,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::399351::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 409591,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::409591::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 417938,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::417938::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 434771,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::434771::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 442503,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::442503::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 449768,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::449768::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 457635,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::457635::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 478118,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::SHORT::478118::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 490645,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::490645::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 501505,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::1m::LONG::501505::5"
+        }
+      ],
+      "source_path": "experiments/active/exp-ma-profit3r-20260922-v1/inputs/binance_1m_import/batch_01/series/binance_um_0GUSDT_1m_501615.csv",
+      "source_sha256": "01a523cbdcb70a82a56c4fded8bbff977744f2a886d9efc27bae7eecbb354a23",
+      "symbol": "0GUSDT",
+      "tested_profiles": 60
+    },
+    {
+      "adapter_profile_seconds": 0.17612067200000414,
+      "bar_minutes": 3,
+      "candidate_indices": [
+        0,
+        1,
+        3,
+        4,
+        6,
+        7,
+        9,
+        10,
+        12,
+        13,
+        15,
+        16,
+        18,
+        20,
+        21,
+        23,
+        24,
+        26,
+        27,
+        29,
+        30,
+        32,
+        33,
+        35,
+        37,
+        38,
+        40,
+        41,
+        43,
+        44,
+        46,
+        47,
+        49,
+        50,
+        52,
+        53,
+        55,
+        57,
+        58,
+        60,
+        61,
+        63,
+        64,
+        66,
+        67,
+        69,
+        70,
+        72,
+        74,
+        75,
+        77,
+        78,
+        80,
+        81,
+        83,
+        84,
+        86,
+        87,
+        89,
+        91
+      ],
+      "candidates_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/binance_um_0GUSDT_3m_d9f160dd82735967/source_nms_60m.jsonl",
+      "candidates_sha256": "2daf8ea459b268d88167771ae201854ec6cd38d7e87669cab84f00e4ec03b4d3",
+      "loaded_rows": 165609,
+      "manifest_path": "experiments/active/exp-ma-profit3r-20260922-v1/sources_archive_3m.json",
+      "manifest_sha256": "32459db50a2b1b593d8c312eafc5a2a7840d400b2fe7ec4d45ee4929498e6ca9",
+      "master_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/master_sources_archive_3m.json",
+      "master_sha256": "3db0a779735e5ab92f5e6099d2d9ea7399d568ca77064b4543cdc5e96f0ea276",
+      "original_profile_seconds": 0.26532858599999987,
+      "results": [
+        {
+          "adapter_error": null,
+          "confirmation_index": 2318,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::2318::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 5066,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::5066::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 8602,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::8602::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 13884,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::13884::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 17536,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::17536::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 18026,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::18026::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 21908,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::21908::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 26189,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::26189::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 30108,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::30108::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 30809,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::30809::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 33983,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::33983::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 34954,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::34954::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 42075,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::42075::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 43270,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::43270::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 45001,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::45001::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 49013,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::49013::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 50587,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::50587::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 52326,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::52326::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 52485,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::52485::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 52980,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::52980::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 53830,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::53830::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 61471,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::61471::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 62771,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::62771::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 66951,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::66951::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 69757,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::69757::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 72140,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::72140::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 73009,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::73009::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 74825,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::74825::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 79833,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::79833::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 80339,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::80339::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 81521,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::81521::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 82969,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::82969::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 86378,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::86378::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 86792,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::86792::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 90939,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::90939::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 91854,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::91854::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 97575,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::97575::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 101537,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::101537::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 102840,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::102840::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 104088,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::104088::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 105109,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::105109::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 105575,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::105575::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 108741,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::108741::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 112194,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::112194::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 112463,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::112463::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 118529,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::118529::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 119308,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::119308::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 120113,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::120113::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 128136,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::128136::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 129133,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::129133::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 131516,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::131516::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 131932,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::131932::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 132980,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::132980::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 136789,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::136789::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 144992,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::144992::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 145145,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::145145::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 149725,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::149725::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 149978,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::149978::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 164970,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::LONG::164970::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 165608,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::3m::SHORT::165608::5"
+        }
+      ],
+      "source_path": "experiments/active/exp-ma-profit3r-20260922-v1/inputs/binance_3m_full/series/binance_um_0GUSDT_3m_167205.csv",
+      "source_sha256": "34960193287f40512d8e51d698020e026162af21b1c1d4a0010ccf100b8ba136",
+      "symbol": "0GUSDT",
+      "tested_profiles": 60
+    },
+    {
+      "adapter_profile_seconds": 0.1356192550000035,
+      "bar_minutes": 5,
+      "candidate_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47,
+        48,
+        49,
+        50,
+        51,
+        52,
+        53,
+        54,
+        55,
+        56,
+        57,
+        58,
+        60
+      ],
+      "candidates_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/binance_um_0GUSDT_5m_f44d904199862814/source_nms_60m.jsonl",
+      "candidates_sha256": "1d0e73cf2ccb7184add511a30abbf22f285059e7916cfcb0fb09ab341ce419ff",
+      "loaded_rows": 64737,
+      "manifest_path": "experiments/active/exp-ma-profit3r-20260922-v1/sources_local_5m.json",
+      "manifest_sha256": "b6a23a15f3332385817e363158b21bfaf15c88474117ca891e2507b34ce1ea3f",
+      "master_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/master_sources_local_5m.json",
+      "master_sha256": "0d5cc4a0a38aaf942c7f1e740c59222d6ecb4ae3295f5da9ada7269e06854136",
+      "original_profile_seconds": 0.13872925199999742,
+      "results": [
+        {
+          "adapter_error": null,
+          "confirmation_index": 489,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::489::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 1392,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::1392::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 1821,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::1821::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 1879,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::1879::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 2527,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::2527::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 3041,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::3041::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 3126,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::3126::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 3378,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::3378::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 4290,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::4290::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 6552,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::6552::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 8332,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::8332::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 9313,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::9313::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 14625,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::14625::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 15120,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::15120::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 16408,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::16408::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 18102,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::18102::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 18126,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::18126::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 18529,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::18529::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 20183,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::20183::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 20975,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::20975::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 21403,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::21403::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 24773,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::24773::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 25249,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::25249::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 25962,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::25962::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 27510,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::27510::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 27936,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::27936::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 31953,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::31953::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 31979,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::31979::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 32749,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::32749::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 35372,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::35372::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 37831,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::37831::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 38161,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::38161::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 38275,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::38275::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 39003,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::39003::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 40464,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::40464::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 41218,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::41218::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 41257,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::41257::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 42083,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::42083::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 43807,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::43807::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 44175,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::44175::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 45319,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::45319::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 45618,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::45618::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 46669,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::46669::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 46766,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::46766::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 48595,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::48595::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 49213,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::49213::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 49328,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::49328::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 49783,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::49783::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 50765,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::50765::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 51524,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::51524::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 52234,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::52234::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 52368,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::52368::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 53907,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::53907::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 60924,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::60924::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 61086,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::61086::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 61807,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::61807::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 62166,
+          "core_bars": 5,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::62166::5"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 62583,
+          "core_bars": 4,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::62583::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 62854,
+          "core_bars": 4,
+          "direction": "LONG",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::LONG::62854::4"
+        },
+        {
+          "adapter_error": null,
+          "confirmation_index": 64736,
+          "core_bars": 5,
+          "direction": "SHORT",
+          "equal": true,
+          "original_error": null,
+          "profile_key": "scan::binance_um::0GUSDT::5m::SHORT::64736::5"
+        }
+      ],
+      "source_path": "data/kline_preholdout_binance_um5m/series/binance_um_0GUSDT_5m_64899.csv",
+      "source_sha256": "8e8d9c1b388dc720a6496ba014517152b0c554816fb320c278c40cbd8c2e2349",
+      "symbol": "0GUSDT",
+      "tested_profiles": 60
+    }
+  ],
+  "status": "passed",
+  "timing_scope": "profile function calls only; excludes reading, feature calculation, weak discovery and scoring",
+  "training_eligible": false
+}
