@@ -89,6 +89,7 @@ def test_long_running_peak_changes_only_the_anchor_and_emits_next_bar_evidence()
     event = events.iloc[0]
     assert (event.highest_known, event.anchor, event.protection_after) == pytest.approx((106., 106., 102.))
     assert event.available_at == context.cache["bars"].index[8]
+    assert event.effective_next_bar
 
 
 def test_current_low_is_checked_before_a_new_peak_protection_can_apply() -> None:
@@ -175,6 +176,7 @@ def test_source_cache_is_not_mutated_and_baseline_control_selection_is_identical
     before = {key: item.copy(deep=True) for key, item in context.cache.items() if isinstance(item, (pd.DataFrame, pd.Series))}
     value = prepared(context)
     targets = high_r.replay_serial(value, peak_long=False)[0].assign(arm="v9")
+    high_r.replay_serial(value, peak_long=True)
     expected = random_controls(value, targets)
     actual = high_r.matched_controls(value, targets, peak_long=False)
     pd.testing.assert_frame_equal(actual, expected)

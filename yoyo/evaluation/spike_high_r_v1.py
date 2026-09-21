@@ -83,6 +83,7 @@ def _close_update(position: dict[str, object], *, high: float, low: float, close
         "stream_key": prepared.context.key, "bar_open": stamp,
         "event_time": stamp + pd.Timedelta(minutes=prepared.context.minutes),
         "available_at": stamp + pd.Timedelta(minutes=prepared.context.minutes),
+        "effective_next_bar": True,
         "execution_phase": "close", "event_kind": "protection_update",
         "reason": "high_anchor_trail4atr_next_bar" if side == 1 else "close_anchor_trail4atr_next_bar",
         "protection_before": before, "protection_after": after,
