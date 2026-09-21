@@ -18,6 +18,97 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-launch-synthetic-preview20-20260921-report
+    artifact_type: report
+    role: procedural_style_preview_qa_and_limitations
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
+    source_path: analysis/p0_ma_launch_synthetic_preview20_20260921.md
+    sha256: 47b70be18a13c30f36ca2b1a5c2fa38184e25d268c68271589de53e7020775f5
+    size_bytes: 4648
+    storage_uri: repo://analysis/p0_ma_launch_synthetic_preview20_20260921.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-synthetic-preview20-20260921-plan
+    artifact_type: config
+    role: procedural_style_preview_only_not_training_data
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
+    source_path: experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/plan_v2.json
+    sha256: dd38b26b5442e665c9eff9ede11352c60dc29e50508fb95ec784afecab8ef2ae
+    size_bytes: 9297
+    storage_uri: repo://experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/plan_v2.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Synthetic OHLC only;20 positive prototypes, no labels or model evaluation. No real market time; legacy
+      holdout enum not applicable.
+  - artifact_id: ma-launch-synthetic-preview20-20260921-manifest
+    artifact_type: manifest
+    role: procedural_style_preview_only_not_training_data
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
+    source_path: experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/preview_v2/manifest.json
+    sha256: a705b609b05e0c940f23014de5852292da10c97577810074bb0f8e51ce3e5f7b
+    size_bytes: 28495
+    storage_uri: repo://experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/preview_v2/manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Synthetic OHLC only;20 positive prototypes, no labels or model evaluation. No real market time; legacy
+      holdout enum not applicable.
+  - artifact_id: ma-launch-synthetic-preview20-20260921-bundle
+    artifact_type: dataset
+    role: procedural_style_preview_only_not_training_data
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
+    source_path: experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/ma_launch_20_synthetic_examples.zip
+    sha256: 8baca35b0afd53a0890c10f8dfc6e4d2aad50e73594c031371e78de9a72b150e
+    size_bytes: 7914945
+    storage_uri: repo://experiments/active/exp-ma-launch-synthetic-preview20-20260921-v1/ma_launch_20_synthetic_examples.zip
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Synthetic OHLC only;20 positive prototypes, no labels or model evaluation. No real market time; legacy
+      holdout enum not applicable.
+  - artifact_id: ma-launch-owner-preview20-20260921-manifest
+    artifact_type: manifest
+    role: historical_visual_preview_retained_after_owner_synthetic_clarification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4181a000fb
+    source_path: experiments/active/exp-ma-launch-owner-preview20-20260921-v1/preview_v2/manifest.json
+    sha256: 01dec4a845fb6920c67fef2d76d65f4d95248645ed7a5e224f114a342975e28e
+    size_bytes: 28146
+    storage_uri: repo://experiments/active/exp-ma-launch-owner-preview20-20260921-v1/preview_v2/manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-owner-preview20-20260921-report
+    artifact_type: report
+    role: historical_visual_preview_retained_after_owner_synthetic_clarification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4181a000fb
+    source_path: analysis/p0_ma_launch_owner_preview20_20260921.md
+    sha256: 55d24429fedeae2bea895c75b6c98c4ba7f78accce81b07556c27b069b61750a
+    size_bytes: 4653
+    storage_uri: repo://analysis/p0_ma_launch_owner_preview20_20260921.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-owner-preview20-20260921-plan
+    artifact_type: config
+    role: frozen_real_history_visual_preview_source_plan
+    source_repo: darkforest-x/fable-trading
+    source_commit: dddfd50a65
+    source_path: experiments/active/exp-ma-launch-owner-preview20-20260921-v1/plan.json
+    sha256: 3e24db26425cf48a7b8dd85dbadadbafae54b07acdd808b511f814351d0192d7
+    size_bytes: 5395
+    storage_uri: repo://experiments/active/exp-ma-launch-owner-preview20-20260921-v1/plan.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: No training qualification. Date access open by Owner; legacy holdout status is not used as a permission gate.
   - artifact_id: spike-10r-top50-telegram-20260921-delivery
     artifact_type: manifest
     role: owner_requested_retrospective_ranked_winner_chart_delivery

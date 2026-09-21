@@ -1,0 +1,70 @@
+{
+  "synthetic_cases": 20,
+  "real_market_rows": 0,
+  "deterministic_cases": 20,
+  "valid_ohlc_cases": 20,
+  "families": {
+    "quiet_range": 4,
+    "pullback_convergence": 4,
+    "small_wave_range": 4,
+    "volatility_compression": 4,
+    "shallow_prelaunch_dip": 4
+  },
+  "independent_ma_formula_checks_max_absolute_error": 1.4210854715202004e-13,
+  "continuous_T0_close_cases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "T_plus_3_gain_pct_range": [
+    1.0413894453985995,
+    2.6758941030370798
+  ],
+  "future_removed_prefix_image_equal_cases": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "pngs_decoded": 40,
+  "unique_png_hashes": 40,
+  "dimensions": [
+    1600,
+    900
+  ],
+  "visual_review": "All20 full images inspected through two overviews. Regular positive prototypes for style review; not Owner-confirmed Gold.",
+  "null_control": "All20 early images recomputed after physically removing rows after T+3 are byte-equal. This checks future-price independence of prefix pixels, not predictive value."
+}

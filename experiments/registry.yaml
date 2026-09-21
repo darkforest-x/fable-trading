@@ -14,6 +14,43 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-launch-synthetic-preview20-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
+    status: active
+    question: Do20 procedural MA-launch prototypes match the Owner requested chart style?
+    single_variable: Illustration generation for style review; not a comparative model experiment.
+    result: Generated20 deterministic cases across5 families;40 PNGs and20 OHLC exports.20/20 prefix images remain
+      byte-identical after removing future rows. Awaiting Owner style review.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_ma_launch_synthetic_preview20_20260921.md
+    artifacts:
+    - ma-launch-synthetic-preview20-20260921-plan
+    - ma-launch-synthetic-preview20-20260921-manifest
+    - ma-launch-synthetic-preview20-20260921-bundle
+    - ma-launch-synthetic-preview20-20260921-report
+    notes: v2 preserves v1 and fixes exact launch-close continuity; future release is intentionally constructed. No
+      detection accuracy or economic claims.
+  - experiment_id: exp-ma-launch-owner-preview20-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 05c4b359b56ae25b6722ccfc9b294ab482136ba5
+    status: superseded
+    question: Can 20 real historical sideways-to-upward six-MA examples match the four Owner screenshots?
+    single_variable: Retrospective visual reference retrieval only; no model or economic comparison.
+    result: Prepared 20 real events from 70 read-only sources; 40 paired views, exact source joins and three
+      prefix-pixel checks passed. Owner clarified synthetic generation, so current delivery moved to exp-ma-launch-synthetic-preview20-20260921-v1;
+      real gallery retained.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_ma_launch_owner_preview20_20260921.md
+    artifacts:
+    - ma-launch-owner-preview20-20260921-plan
+    - ma-launch-owner-preview20-20260921-manifest
+    - ma-launch-owner-preview20-20260921-report
+    notes: Date restriction removed 2026-09-19. Selection uses future; no Gold or production claim.
   - experiment_id: exp-spike-5r-followthrough-20260921-v6
     source_repo: darkforest-x/fable-trading
     source_commit: 828f300ccdd7f8be9104a392e12e2a6cfa63c9db
