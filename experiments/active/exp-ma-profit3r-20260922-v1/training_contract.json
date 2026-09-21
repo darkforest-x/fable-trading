@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "original_plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+  "quota_scope": "train_independent_retained_events",
+  "minimum_train_winners": 3000,
+  "maximum_train_winners": 5000,
+  "quota_interpretation": "The requested 3000–5000 original training examples count independent training winners. Validation/test are additional later-time full resolved pools, not removed to fill training. This refines the initially ambiguous all-split quota without changing discovery, labels, costs, or cutoffs.",
+  "cluster_rule": "Canonical asset and direction, representatives more than 4 hours apart across venue/timeframe; choose by morphology quality before profit labels.",
+  "selection": "Stable event SHA order if more than 5000 train winners; never select on net R magnitude.",
+  "reference_exclusion": "Exclude val/test same canonical asset within 4h of any frozen calibration reference anchor.",
+  "group_a_views_per_train_event": 1,
+  "group_b_views_per_train_event": 2,
+  "base_plan": "plan.json",
+  "training_requires_capacity_gate": true,
+  "production_eligible": false
+}
