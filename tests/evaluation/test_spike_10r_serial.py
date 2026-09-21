@@ -34,3 +34,11 @@ def test_missing_rejects_and_string_false_is_not_truthy_permission():
     assert apply_gate(p,{}).allowed.tolist()==[False,True,False]
     with pytest.raises(ValueError,match='nonboolean'):
         apply_gate(p,{'x:101:1':'False'})
+
+
+def test_serial_recall_excludes_newly_opened_winners_from_retention():
+    from yoyo.evaluation.spike_10r_serial import serial_retention
+    old=pd.DataFrame(dict(event_key=['a','b','c'],net_r=[12.,15.,-1.],valid_entry=True,censored=False))
+    new=pd.DataFrame(dict(event_key=['a','d','e'],net_r=[12.,13.,14.],valid_entry=True,censored=False))
+    got=serial_retention(new,old)
+    assert got==dict(retained_gt10=1,lost_gt10=1,gained_gt10=2,recall=.5,gt10_count_ratio=1.5)

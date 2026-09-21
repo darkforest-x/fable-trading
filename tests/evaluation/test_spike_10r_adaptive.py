@@ -48,3 +48,15 @@ def test_objective_matches_fixed_selection_on_same_mature_rows():
     assert got['rule']==selected[0]['choice']['rule']
     assert got['terms']==selected[0]['choice']['terms']
     assert got['precision']==selected[0]['choice']['precision']
+
+
+def test_parent_choices_cannot_be_changed_to_shrink_holm_family(tmp_path):
+    import pytest
+    (tmp_path/'selection.json').write_text('{"selected": []}')
+    (tmp_path/'comparison.csv').write_text('rule,precision\nx,0.1\n')
+    receipt={'files':{name:s.digest(tmp_path/name) for name in ('selection.json','comparison.csv')}}
+    (tmp_path/'evaluation_receipt.json').write_text(json.dumps(receipt))
+    a.verify_parent(tmp_path)
+    (tmp_path/'selection.json').write_text('{"selected": ["changed"]}')
+    with pytest.raises(ValueError,match='evidence drift'):
+        a.verify_parent(tmp_path)

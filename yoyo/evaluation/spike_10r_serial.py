@@ -44,6 +44,16 @@ def apply_gate(prepared, lookup):
     return replace(prepared,allowed=allowed)
 
 
+def serial_retention(part, baseline):
+    """Count retained original winners by identity, separating newly opened wins."""
+    def winners(frame):
+        return set(frame.loc[frame.valid_entry & ~frame.censored & frame.net_r.gt(10),'event_key'])
+    old,new=winners(baseline),winners(part)
+    return dict(retained_gt10=len(old & new),lost_gt10=len(old-new),gained_gt10=len(new-old),
+                recall=len(old & new)/len(old) if old else np.nan,
+                gt10_count_ratio=len(new)/len(old) if old else np.nan)
+
+
 def one(args):
     source, gates, output, identity=args
     key=source['key']
@@ -182,7 +192,7 @@ def run(dataset,analysis,output,workers,adaptive=None):
             clock=dict(search.periods(part))[period]
             s=part.loc[clock]
             rows.append(dict(period=period,rule=name,**search.metrics(s,u),
-                        **search.control_statistics(s,controls,period),**search.rate_interval(u,s)))
+                        **search.control_statistics(s,controls,period),**search.rate_interval(u,s),**serial_retention(s,u)))
     table=pd.DataFrame(rows)
     later=table.period.eq('later') & ~table.rule.eq('original_all')
     for what in ('tail','net'):

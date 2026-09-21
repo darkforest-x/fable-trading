@@ -94,6 +94,18 @@ def build(c,matrix,cfg):
     return admitted,decisions
 
 
+def verify_parent(parent_analysis):
+    """Bind both parent choices and comparisons before forming the Holm family."""
+    receipt=json.loads((parent_analysis/'evaluation_receipt.json').read_text())
+    for required in ('comparison.csv','selection.json'):
+        if required not in receipt['files']:
+            raise ValueError('parent required artifact missing')
+    for name,sha in receipt['files'].items():
+        if s.digest(parent_analysis/name)!=sha:
+            raise ValueError('parent evidence drift')
+    return receipt
+
+
 def run(dataset,parent_analysis,output):
     deps=[Path(__file__),Path('tests/evaluation/test_spike_10r_adaptive.py'),EXP/'PROJECT_PLAN.md',EXP/'config.json',
           Path(s.__file__),s.EXP/'config.json']
@@ -107,9 +119,7 @@ def run(dataset,parent_analysis,output):
     c,controls,_=s.load_candidates(dataset)
     cfg=json.loads((s.EXP/'config.json').read_text())
     s.validate_config(cfg)
-    parent_receipt=json.loads((parent_analysis/'evaluation_receipt.json').read_text())
-    if s.digest(parent_analysis/'comparison.csv')!=parent_receipt['files']['comparison.csv']:
-        raise ValueError('parent evidence drift')
+    verify_parent(parent_analysis)
     matrix,ranks,_=s.calibrate(c)
     admitted,months=build(c,matrix,cfg)
     output.mkdir(parents=True)
