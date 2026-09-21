@@ -96,7 +96,9 @@ def _postlaunch_log_path(
     gain = np.log1p(0.13 + 0.114 * ((case_id - 1) / 19.0))
     # Two acceleration phases and a short consolidation keep the result from
     # looking like a straight, translated line across all twenty examples.
-    release = gain * (0.48 * _smoothstep(x / 0.45) + 0.52 * _smoothstep((x - 0.17) / 0.83))
+    release = gain * (0.10 * (1.0 - np.exp(-35.0 * x))
+                      + 0.40 * _smoothstep(x / 0.45)
+                      + 0.50 * _smoothstep((x - 0.17) / 0.83))
     pause_center = 0.41 + 0.045 * (case_id % 4)
     pause = -0.011 * np.exp(-((x - pause_center) / 0.075) ** 2)
     wave = 0.0032 * np.sin(2.0 * np.pi * ((2.0 + (case_id % 3) * 0.35) * x + case_id * 0.19))
@@ -167,6 +169,9 @@ def generate_case(case_id: int) -> tuple[pd.DataFrame, dict[str, Any]]:
 
     prelaunch = _prelaunch_log_path(case_id, pre_bars, rng)
     postlaunch = _postlaunch_log_path(case_id, post_bars, rng)
+    # Join the regimes at the actual preceding close; resetting to 100 would
+    # create an artificial gap unrelated to the intended release morphology.
+    postlaunch += prelaunch[-1]
     log_close = np.concatenate((warmup, prelaunch, postlaunch))
     close = _BASE_PRICE * np.exp(log_close)
     df = _build_ohlcv(close, rng)

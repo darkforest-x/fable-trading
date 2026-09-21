@@ -27,9 +27,11 @@ DIRECTORY=ROOT/"experiments/active"/EXPERIMENT
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument("--output-name",default="preview_v1")
+    parser.add_argument("--plan-name",default="plan.json")
     args=parser.parse_args();out=DIRECTORY/args.output_name
+    plan_path=DIRECTORY/args.plan_name
     paths=["yoyo/datasets/ma_launch_synthetic_series.py","yoyo/datasets/ma_launch_synthetic_preview20.py",
-           "yoyo/datasets/ma_launch_preview20.py",str((DIRECTORY/"plan.json").relative_to(ROOT))]
+           "yoyo/datasets/ma_launch_preview20.py",str(plan_path.relative_to(ROOT))]
     dirty=subprocess.check_output(["git","status","--porcelain","--",*paths],cwd=ROOT,text=True)
     if dirty:raise RuntimeError("Commit exact generator, renderer and plan before generation")
     if out.exists():raise RuntimeError("Refuse to overwrite an existing preview")
@@ -64,7 +66,8 @@ def main():
           "generated_at":datetime.now(timezone.utc).isoformat(),"synthetic_events":20,
           "price_source":"procedural_simulation_only","real_market_rows":0,
           "generator_sha256":digest(ROOT/paths[0]),"renderer_sha256":digest(ROOT/paths[2]),
-          "plan_sha256":digest(DIRECTORY/"plan.json"),"manifest_sha256":digest(out/"manifest.json"),
+          "plan_sha256":digest(plan_path),"plan_path":str(plan_path.relative_to(ROOT)),
+          "manifest_sha256":digest(out/"manifest.json"),
           "training_eligible":False,"production_eligible":False})
     print(out/"index.html")
 
