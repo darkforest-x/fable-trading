@@ -23,8 +23,28 @@ from yoyo.evaluation.spike_v8_six_filters import _committed
 
 def load_serial(folder):
     receipt = new.verify_output(folder, 'receipt.json')
+    if (not receipt.get('complete') or receipt.get('streams') != 3531
+            or not receipt.get('baseline_parity') or not receipt.get('candidate_economic_parity')):
+        raise ValueError('serial completion or parity not certified')
+    # Certify the adjacent prediction/evaluation chain, not only trade bytes.
+    prediction = folder.parent/'prediction_v1'
+    evaluation = folder.parent/'evaluation_v1'
+    pr_path = prediction/'prediction_receipt.json'
+    er_path = evaluation/'evaluation_receipt.json'
+    if (s.digest(pr_path) != receipt['prediction_receipt_sha256']
+            or s.digest(er_path) != receipt['evaluation_receipt_sha256']):
+        raise ValueError('serial prediction/evaluation receipt drift')
+    pr = new.verify_output(prediction, 'prediction_receipt.json')
+    er = new.verify_output(evaluation, 'evaluation_receipt.json')
+    if (er['prediction_receipt_sha256'] != s.digest(pr_path)
+            or er['dataset_receipt_sha256'] != pr['dataset_receipt_sha256']):
+        raise ValueError('prediction/evaluation lineage mismatch')
+    source_path = new.serial.SOURCE/'statistics/full_v1/statistics_receipt.json'
+    if s.digest(source_path) != receipt['source_statistics_sha256']:
+        raise ValueError('serial source statistics drift')
+    source = json.loads(source_path.read_text())
     pins = receipt['stream_receipts']
-    if len(pins) != 3531:
+    if len(pins) != 3531 or set(pins) != {r['key'] for r in source['source_receipts']}:
         raise ValueError('incomplete serial coverage')
     for key, sha in pins.items():
         root = folder/'streams'/key

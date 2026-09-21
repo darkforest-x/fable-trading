@@ -10388,13 +10388,13 @@ experiments:
     status: rejected
     question: Does targeting strict realized netR-over5 improve causal tail selection compared with the fixed10R model and risk baselines?
     single_variable: Prediction target only changes from strictnetRover10 to strictnetRover5;dataset features models clocks risk exits costs unchanged.
-    result: Complete3531stream14arm replay. Strict5Rbaseline662of24568;newbestlogistic10pct84of2517,retains72andloses590,net-4.23bp. All8newmodelgatesfail;all8precisionworse thanV4scoredat5R. Oldrisk127of3138and+20.08bp.
+    result: Complete3531stream14arm replay. Strict5Rbaseline662of24568;newbestlogistic10pct84of2517,retains72andloses590,net-4.23bp. All8newmodelgatesfail;7of8precisionworse thanV4scoredat5R,theotherstillbeloworiginal. Oldrisk127of3138and+20.08bp.
     holdout_consumed: false
     training_eligible: true
     production_eligible: false
-    canonical_report: analysis/p1_spike_5r_model_v5_20260921.md
+    canonical_report: analysis/p1_spike_5r_model_v5_20260921_final.md
     artifacts:
     - spike-5r-model-20260921-v5-delivery
     reuse_allowed: false
     notes: Owner20260921 或者大于5r extends the same dataset-and-two-model offline experiment only. AUTHORIZATION binds prior approval;no globaltraining orproduction exception.
-      Builder7482247precedesallprediction;2x2strict5and10targetcomparisoncontrolsidentical. 20focusedand108relatedpass;newnumericprobabilityerror2.22e-16. Notion3e28856479af81eea861d838b90d45a7.
+      Builder7482247precedesallprediction;2x2strict5and10targetcomparisoncontrolsidentical. 25focusedand108relatedpass;newnumericprobabilityerror2.22e-16. Notion3e28856479af81eea861d838b90d45a7.

@@ -16,7 +16,7 @@ from yoyo.evaluation import spike_10r_search as s
 from yoyo.evaluation.spike_v8_six_filters import _committed
 
 EXP = m.EXP
-REPORT = Path('analysis/p1_spike_5r_model_v5_20260921.md')
+REPORT = Path('analysis/p1_spike_5r_model_v5_20260921_final.md')
 NOTION = 'https://app.notion.com/p/3e28856479af81eea861d838b90d45a7'
 
 
@@ -44,7 +44,7 @@ def verify_all():
     checks = {}
     for folder, filename in [('prediction_v1','prediction_receipt.json'),
                              ('evaluation_v1','evaluation_receipt.json'),
-                             ('serial_v1','receipt.json'),('target_comparison_v1','receipt.json')]:
+                             ('serial_v1','receipt.json'),('target_comparison_v2','receipt.json')]:
         root = EXP/folder
         r = m.verify_output(root, filename)
         for path, expected in r.get('input_receipts', {}).items():
@@ -71,7 +71,7 @@ def verify_all():
 def main():
     if not _committed([Path(__file__)]):
         raise ValueError('commit delivery builder before report generation')
-    if REPORT.exists() or (EXP/'delivery_manifest.json').exists():
+    if REPORT.exists() or (EXP/'delivery_manifest_v2.json').exists():
         raise ValueError('refuse to overwrite completed report')
     checks = verify_all()
     full = pd.read_csv(EXP/'serial_v1/comparison.csv')
@@ -82,7 +82,7 @@ def main():
     independent = pd.read_csv(EXP/'evaluation_v1/comparison.csv')
     diag = pd.read_csv(EXP/'evaluation_v1/score_diagnostics.csv')
     diag = diag.loc[diag.period.eq('oof')]
-    cross = pd.read_csv(EXP/'target_comparison_v1/target_comparison.csv')
+    cross = pd.read_csv(EXP/'target_comparison_v2/target_comparison.csv')
     cross = cross.loc[cross.period.eq('oof')]
     old5 = cross.loc[cross.trained_target_r.eq(10) & cross.evaluation_target_r.eq(5)].set_index('rule')
     new5 = cross.loc[cross.trained_target_r.eq(5) & cross.evaluation_target_r.eq(5)].set_index('rule')
@@ -143,7 +143,7 @@ Owner要求“或者大于5r”后，已按**最终扣费净R严格大于5**重�
          f'{percent(old10.loc[name,"recall"])} → {percent(new10.loc[name,"recall"])}',
          f'{percent(old10.loc[name,"random_precision"])} → {percent(new10.loc[name,"random_precision"])}']
         for name in m.model_policies()])
-    text += '\n\n两种目标的全部时期、全部14路径及随机收益列保留于`target_comparison_v1/target_comparison.csv`。>10是副指标，未用于改参数或选择上线策略。\n\n'
+    text += '\n\n两种目标的全部时期、全部14路径及随机收益列保留于`target_comparison_v2/target_comparison.csv`。>10是副指标，未用于改参数或选择上线策略。\n\n'
     text += '## 时间稳定性\n\n'
     subset = full.loc[full.period.ne('oof') & full.rule.isin(['original_all','logistic_top20','lightgbm_top20','prior_v21_risk_decile'])].copy()
     subset['rule'] = subset.period+' / '+subset.rule
@@ -161,11 +161,13 @@ Owner要求“或者大于5r”后，已按**最终扣费净R严格大于5**重�
     text += f'''## 验证与风险诚实声明
 
 - 全部3,531流完成，原版逐笔parity与共同候选经济parity通过；父数据SHA `a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68`。新旧6条非模型控制路径完全一致，证明未暗改风险/退出/成本。
-- 18项模型/研究/统计专项通过，2项比较器控制路径测试通过，108项相关边界/因果/数值门通过。注册表此前4项全仓失败源于两条旧source_commit缺失，V4留有HEAD复现证据，本轮未伪填历史或宣称全仓全绿。
+- 18项模型/研究/统计专项通过，7项比较器控制路径与上游receipt篡改测试通过，108项相关边界/因果/数值门通过。注册表此前4项全仓失败源于两条旧source_commit缺失，V4留有HEAD复现证据，本轮未伪填历史或宣称全仓全绿。
 - 实际新模型仍出现NumPy/sklearn matmul运行警告；保留原日志，独立逐元素重建四季所有目标/校准概率，最大差{numeric_checks['maximum_abs_saved_vs_manual_probability']:.3g}，新训练独立梯度最大绝对值{numeric_checks['maximum_abs_independent_training_gradient']:.3g}。仅支持这批冻结分数可用于离线评价，未解决底层警告根因。
 - 更低的成功门槛增加标签样本量，却可能加入更难用现有特征区别的走势；本轮观察支持“仅改标签不够”，不能据此断言5R在所有方法下不可预测。
 - 同币跨场所与重叠路径相关，月块统计不能消除所有依赖；原源池可能含幸存者偏差。历史反复研究有选择偏差，按时间分割不恢复盲测。
 - 每笔固定20bp未建模额外资金费、成交深度、杠杆强平或账户多币同时持仓；不能从这些均值直接换算100U滚仓收益，也不存在必赢保证。未改Pine/TV/生产指针/真金账户。
+
+独立代码审查指出初版比较器仅验交易与叶文件，未向上重验预测/评价receipt。已补齐上游SHA、完成标记、parity和源流集合校验，新增5项拒绝测试；比较统计另写v2，初版报告/manifest保留为交付前草稿。只重计统计，不重训或回放价格。注册表source_commit已更正为实际含V5源码的7482247。
 
 ## 完整复现顺序
 
@@ -177,7 +179,7 @@ Owner要求“或者大于5r”后，已按**最终扣费净R严格大于5**重�
 .venv/bin/python -m yoyo.evaluation.spike_5r_model_study --phase predict --dataset experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1 --output {EXP}/prediction_v1
 .venv/bin/python -m yoyo.evaluation.spike_5r_model_study --phase evaluate --dataset experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1 --prediction {EXP}/prediction_v1 --output {EXP}/evaluation_v1
 .venv/bin/python -m yoyo.evaluation.spike_5r_model_study --phase serial --dataset experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1 --prediction {EXP}/prediction_v1 --evaluation {EXP}/evaluation_v1 --output {EXP}/serial_v1 --workers 6
-.venv/bin/python -m yoyo.evaluation.spike_5r_target_comparison --dataset experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1 --output {EXP}/target_comparison_v1
+.venv/bin/python -m yoyo.evaluation.spike_5r_target_comparison --dataset experiments/active/exp-spike-10r-discovery-20260921-v3/dataset_v1 --output {EXP}/target_comparison_v2
 PYTHONPATH=. .venv/bin/python {EXP}/build_delivery.py
 ```
 
@@ -194,11 +196,11 @@ Notion研究记录：[{NOTION}]({NOTION})。技术依据：[sklearn1.6评价指�
     REPORT.write_text(text)
     paths = [REPORT, Path(__file__)]
     paths += [p for p in EXP.rglob('*') if p.is_file() and 'streams' not in p.parts
-              and '__pycache__' not in p.parts and p.name != 'delivery_manifest.json']
+              and '__pycache__' not in p.parts and p.name != 'delivery_manifest_v2.json']
     paths += m.dependencies()
     paths += [Path('yoyo/evaluation/spike_5r_target_comparison.py'),
               Path('tests/evaluation/test_spike_5r_target_comparison.py')]
-    s.dump(EXP/'delivery_manifest.json',dict(experiment_id=EXP.name, status=status,
+    s.dump(EXP/'delivery_manifest_v2.json',dict(experiment_id=EXP.name, status=status,
         generated_at=pd.Timestamp.now(tz='UTC').isoformat(),
         builder_commit_before_predictions='7482247bdc',
         reporter_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
