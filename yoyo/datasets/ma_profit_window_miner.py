@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 from functools import partial
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -22,7 +23,7 @@ from yoyo.datasets.ma_profit_profile_window import extract_profile_window
 
 ROOT = miner.ROOT
 ADAPTER = ROOT / "yoyo/datasets/ma_profit_profile_window.py"
-CONTRACT_NAME = "profile_window_contract.json"
+CONTRACT_NAME = "profile_window_contract_v2.json"
 IMPLEMENTATION_ID = "bounded_strict_profile_v1"
 _BASE_BINDING = miner._receipt_binding
 _BASE_OUTPUT_DIR = miner._source_output_dir
@@ -41,6 +42,7 @@ def implementation(plan_path: Path) -> dict[str, Any]:
         "change_scope": "strict_profile_array_window_only",
         "plan_sha256": miner.sha256_file(Path(plan_path)),
         "adapter_sha256": miner.sha256_file(ADAPTER),
+        "driver_sha256": miner.sha256_file(Path(__file__)),
         "miner_sha256": miner.sha256_file(Path(miner.__file__)),
         "rule_dependency_sha256": miner._rule_dependency_hashes(),
     }
@@ -57,6 +59,19 @@ def implementation(plan_path: Path) -> dict[str, Any]:
             or proof.get("rule_dependency_sha256") != expected["rule_dependency_sha256"]
             or int(proof.get("exact_profiles", 0)) < 20 or proof.get("mismatches") != 0):
         raise miner.ProfitMinerError("profile-window equivalence evidence is incomplete")
+    for prefix, proof_field in (("parity_builder", "builder_sha256"), ("parity_selection", "selection_sha256")):
+        path = miner._repo_path(contract[prefix + "_path"])
+        actual = miner.sha256_file(path)
+        if actual != contract.get(prefix + "_sha256") or actual != proof.get(proof_field):
+            raise miner.ProfitMinerError("profile-window parity builder/selection drift")
+    full_path = miner._repo_path(contract["full_source_parity_receipt_path"])
+    if miner.sha256_file(full_path) != contract.get("full_source_parity_receipt_sha256"):
+        raise miner.ProfitMinerError("profile-window full-source proof SHA drift")
+    full = json.loads(full_path.read_text())
+    checks = full.get("artifact_checks", [])
+    if (full.get("status") != "passed" or len(checks) != 7 or any(item.get("exact") is not True for item in checks)
+            or full.get("profile_implementation", {}).get("adapter_sha256") != expected["adapter_sha256"]):
+        raise miner.ProfitMinerError("profile-window full-source equivalence is incomplete")
     return {
         "implementation_id": IMPLEMENTATION_ID,
         "driver_sha256": miner.sha256_file(Path(__file__)),
@@ -114,10 +129,21 @@ def build(plan_path: Path, sources_path: Path, *, workers: int = 2,
     if master_path.exists():
         raise FileExistsError(f"refusing to overwrite completed source master: {master_path}")
     impl = implementation(plan_path)
+    if output_name == "source_scans":
+        # Shared collection root is reserved for the single controller. An
+        # independent audit must name a different output root explicitly.
+        lock = plan_path.parent / "queue.lock"
+        state = json.loads(lock.read_text()) if lock.is_file() else {}
+        if (state.get("pid") != os.getppid()
+                or state.get("binding", {}).get("plan_sha256") != miner.sha256_file(plan_path)):
+            raise miner.ProfitMinerError("shared source_scans requires the live queue parent lock")
     contract_path = plan_path.parent / CONTRACT_NAME
     contract = json.loads(contract_path.read_text())
     frozen = [Path(__file__), ADAPTER, contract_path,
-              miner._repo_path(contract["parity_receipt_path"]), plan_path, sources_path]
+              miner._repo_path(contract["parity_receipt_path"]),
+              miner._repo_path(contract["parity_builder_path"]),
+              miner._repo_path(contract["parity_selection_path"]),
+              miner._repo_path(contract["full_source_parity_receipt_path"]), plan_path, sources_path]
     names = [miner._relative(path) for path in frozen]
     subprocess.check_output(["git", "ls-files", "--error-unmatch", "--", *names], cwd=ROOT, text=True)
     miner._assert_committed(frozen)

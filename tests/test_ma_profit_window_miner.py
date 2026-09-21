@@ -125,7 +125,9 @@ def _build_fixture_files(tmp_path: Path) -> tuple[Path, Path, Path]:
     plan.write_text("{}\n")
     sources.write_text("{}\n")
     proof.write_text("{}\n")
-    (tmp_path / window.CONTRACT_NAME).write_text(json.dumps({"parity_receipt_path": str(proof)}))
+    (tmp_path / window.CONTRACT_NAME).write_text(json.dumps({"parity_receipt_path": str(proof),
+        "parity_builder_path": str(proof), "parity_selection_path": str(proof),
+        "full_source_parity_receipt_path": str(proof)}))
     return plan, sources, proof
 
 
@@ -183,26 +185,56 @@ def _proof_contract(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[Pa
     plan = tmp_path / "plan.json"
     plan.write_text('{"plan":"fixture"}\n')
     proof = tmp_path / "parity.json"
+    builder, selection = tmp_path / "parity_builder.py", tmp_path / "selection.json"
+    builder.write_text("# frozen fixture builder\n")
+    selection.write_text('{"fixture":true}\n')
     proof_payload = {
         "status": "passed", "adapter_sha256": miner.sha256_file(window.ADAPTER),
         "miner_sha256": miner.sha256_file(Path(miner.__file__)),
         "rule_dependency_sha256": miner._rule_dependency_hashes(),
         "exact_profiles": 20, "mismatches": 0,
+        "builder_sha256": miner.sha256_file(builder), "selection_sha256": miner.sha256_file(selection),
     }
     proof.write_text(json.dumps(proof_payload))
+    full = tmp_path / "full_source.json"
+    full.write_text(json.dumps({"status": "passed", "artifact_checks": [{"exact": True}] * 7,
+                               "profile_implementation": {"adapter_sha256": miner.sha256_file(window.ADAPTER)}}))
     contract = {
         "implementation_id": window.IMPLEMENTATION_ID,
         "change_scope": "strict_profile_array_window_only",
         "plan_sha256": miner.sha256_file(plan),
         "adapter_sha256": miner.sha256_file(window.ADAPTER),
+        "driver_sha256": miner.sha256_file(Path(window.__file__)),
         "miner_sha256": miner.sha256_file(Path(miner.__file__)),
         "rule_dependency_sha256": miner._rule_dependency_hashes(),
         "parity_receipt_path": str(proof),
         "parity_receipt_sha256": miner.sha256_file(proof),
+        "parity_builder_path": str(builder), "parity_builder_sha256": miner.sha256_file(builder),
+        "parity_selection_path": str(selection), "parity_selection_sha256": miner.sha256_file(selection),
+        "full_source_parity_receipt_path": str(full), "full_source_parity_receipt_sha256": miner.sha256_file(full),
     }
     (tmp_path / window.CONTRACT_NAME).write_text(json.dumps(contract))
     monkeypatch.setattr(miner, "_repo_path", lambda value: Path(value))
     return plan, proof, contract
+
+
+@pytest.mark.parametrize("kind", ["driver", "builder", "selection"])
+def test_frozen_driver_and_parity_builder_selection_cannot_drift(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, kind: str):
+    plan, _proof, contract = _proof_contract(tmp_path, monkeypatch)
+    assert window.implementation(plan)["driver_sha256"] == miner.sha256_file(Path(window.__file__))
+    if kind == "driver":
+        contract["driver_sha256"] = "0" * 64
+        (tmp_path / window.CONTRACT_NAME).write_text(json.dumps(contract))
+    else:
+        Path(contract[f"parity_{kind}_path"]).write_text("changed\n")
+    with pytest.raises(miner.ProfitMinerError, match="drift"):
+        window.implementation(plan)
+
+
+def test_default_shared_root_rejects_an_independent_launcher(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(window, "implementation", lambda _plan: _impl())
+    with pytest.raises(miner.ProfitMinerError, match="live queue parent lock"):
+        window.build(tmp_path / "plan.json", tmp_path / "sources.json")
 
 
 @pytest.mark.parametrize("kind", ["missing", "damaged", "wrong_adapter_proof"])
