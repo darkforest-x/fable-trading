@@ -1,0 +1,36 @@
+{
+  "source_commit": "d2aa13403d8896d6231dd617a9cfbf523d3008e3",
+  "focused": {
+    "passed": 15,
+    "warnings": 34,
+    "seconds": 2.77,
+    "log": "focused_tests.log"
+  },
+  "related": {
+    "passed": 108,
+    "seconds": 36.06,
+    "log": "related_tests.log"
+  },
+  "extra_registry_preflight": {
+    "passed": 18,
+    "failed": 4,
+    "preexisting_HEAD_reproduced": true,
+    "evidence": "registry_preexisting_failures.json"
+  },
+  "serial": {
+    "streams": 3531,
+    "arms": 14,
+    "baseline_parity": true,
+    "candidate_economic_parity": true,
+    "original_cache_post_hash_check": true
+  },
+  "reviews": {
+    "static": "static_review.json",
+    "numerical": "numerical_warning_audit.json"
+  },
+  "limits": [
+    "Numerical matmul RuntimeWarning rootcause unresolved; saved probabilities independently reproduced",
+    "All historical data exposed,not blind",
+    "No production promotion; all8 model policies fail research gate"
+  ]
+}

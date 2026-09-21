@@ -1,0 +1,19 @@
+{
+  "unmodified_parent_commit": "fa783fbc0aebff5bfd3d2faafba8c3c26baf6b82",
+  "preexisting_failures": [
+    {
+      "path": "artifacts/registry.yaml",
+      "id": "spike-v8-total2-1h-native-20260914-delivery",
+      "exists_in_unmodified_HEAD": true,
+      "error": "spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'"
+    },
+    {
+      "path": "experiments/registry.yaml",
+      "id": "exp-eth-ma120-longest-runs-20260914-v1",
+      "exists_in_unmodified_HEAD": true,
+      "error": "exp-eth-ma120-longest-runs-20260914-v1: missing required field 'source_commit'"
+    }
+  ],
+  "new_experiment_contract_valid": true,
+  "tests": "4 registry tests fail on preexisting missing source_commit,18 preflight tests pass"
+}

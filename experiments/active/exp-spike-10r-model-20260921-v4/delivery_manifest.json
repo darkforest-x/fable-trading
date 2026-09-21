@@ -1,0 +1,312 @@
+{
+  "experiment_id": "exp-spike-10r-model-20260921-v4",
+  "status": "complete,rejected at research gate",
+  "source_commit": "d2aa13403d8896d6231dd617a9cfbf523d3008e3",
+  "builder_commit_before_predictions": "d2aa13403d8896d6231dd617a9cfbf523d3008e3",
+  "generated_at": "2026-09-21T11:16:33.586274+00:00",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reuse_allowed": false,
+  "owner_offline_training_exception": "AUTHORIZATION.json;only fixedtwo-model20featureexperiment",
+  "source_dataset_receipt_sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+  "hash_checks": {
+    "prediction_v1": {
+      "files_hashed": 33,
+      "dependencies_hashed": 13,
+      "stream_receipts_hashed": 0,
+      "stream_files_hashed": 0,
+      "all_match": true
+    },
+    "evaluation_v1": {
+      "files_hashed": 5,
+      "dependencies_hashed": 13,
+      "stream_receipts_hashed": 0,
+      "stream_files_hashed": 0,
+      "all_match": true
+    },
+    "serial_v1": {
+      "files_hashed": 2,
+      "dependencies_hashed": 18,
+      "stream_receipts_hashed": 3531,
+      "stream_files_hashed": 3531,
+      "all_match": true
+    }
+  },
+  "files": {
+    "analysis/p1_spike_10r_model_v4_20260921.md": {
+      "sha256": "c4fff904781585b20c05d58971868cacb9d9de3e502166adf48ed2f4d137e52b",
+      "size_bytes": 17464
+    },
+    "docs/learnings/rare-event-probabilities-need-calibration-before-confidence-gates.md": {
+      "sha256": "08ebd67ae2056fb6c17db4af0cf7a6d3e67e9c65afd04001b8f6baef55e1b6b5",
+      "size_bytes": 1153
+    },
+    "docs/learnings/score-threshold-calibration-needs-unfitted-past-rows.md": {
+      "sha256": "c1dcbab84e655779a93f42d3823f389adcda1ea2965564b089aac78dea75a85d",
+      "size_bytes": 1164
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/AUTHORIZATION.json": {
+      "sha256": "9fed1bf8264f73873c3b5a6b3d184bc3d77867e77a94f84a8a70a3012cdc2ebb",
+      "size_bytes": 632
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/PROJECT_PLAN.md": {
+      "sha256": "84677829728cf8a9c2683e5b04703486dbc1868bcc3d828c6662d88765520b0d",
+      "size_bytes": 4712
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/config.json": {
+      "sha256": "7b5ede7f41ca601fd340b29f8b5da5b6ae4fe4e6299009462f0e99f75ca90ae4",
+      "size_bytes": 960
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/delivery_hash_validation.json": {
+      "sha256": "8c16324b9e1162c2fbb29473b5f4fb2594e25e01df04530422fc4676ab821712",
+      "size_bytes": 501
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluate_v1.log": {
+      "sha256": "c09805e892518cbea211f2a1b76153cf6c3a5e4f75a31eb423e17b8f4ecf3681",
+      "size_bytes": 7710
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/comparison.csv": {
+      "sha256": "7e0faf0273d076ce50781a4cb0d801fed4197189134b3ab7e60d2c0558379666",
+      "size_bytes": 32662
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/evaluation_receipt.json": {
+      "sha256": "5dd8ad0980ddca40e973a78b9ea09c7e141c639fe8e43063256d01bffd0f5179",
+      "size_bytes": 2526
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/groups.csv": {
+      "sha256": "f3f070a23ce1bb684c9475a626bf1741e38b2e0ad6cbd84616e4e054531e2270",
+      "size_bytes": 393501
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/probability_calibration.csv": {
+      "sha256": "36e238e97aafe902e7064052eb7bc8e4fd819eebe120221a47f03065ad84eeff",
+      "size_bytes": 7476
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/score_diagnostics.csv": {
+      "sha256": "11755a5c636df216bd6985968f2c01133cfeb9cdd5be4e46fd82af7cb8eed6bb",
+      "size_bytes": 7965
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/evaluation_v1/serial_trigger.json": {
+      "sha256": "36d228d7b366ade68a55002886d50c156eef1967d4368831a26c8ac2287f2114",
+      "size_bytes": 518
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/focused_tests.log": {
+      "sha256": "876f6b45a4bea1db742eb3cc6f88f65c9a603945f85e7e95728917df1cbce7ab",
+      "size_bytes": 112
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/notion_receipt.json": {
+      "sha256": "fd426694d11d70ce2c0ade70270bda5e1b2ee471d5288d9b26552c2b00d897ab",
+      "size_bytes": 180
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/numerical_warning_audit.json": {
+      "sha256": "cffe97537044d5d4fa41153a91a9ca44ad82460d723a32a436a390f4bdc71823",
+      "size_bytes": 7627
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/predict_v1.log": {
+      "sha256": "208c8f9364bc6831673b2a224610417ef536e84e23d7a5d4b312f8e30839224f",
+      "size_bytes": 10803
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/calibration_scores.csv.gz": {
+      "sha256": "d66aa4f3171bd37d0b6d4beac3c1aa66c58361e4f6ac2cbdcf3c8183732b7ec7",
+      "size_bytes": 1122242
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/decisions.csv.gz": {
+      "sha256": "ea0c2c6e9f2dcd9206322e0b7e53b268ddf9e930d2ca338e2673aa992066a15f",
+      "size_bytes": 558999
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/folds.json": {
+      "sha256": "63bb6eef95ea62286712074ff8e13c249484a152e07ac6f2b51a4be601ba27a8",
+      "size_bytes": 2394
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/lightgbm/metadata.json": {
+      "sha256": "6e8638be38177f62965bc88686ddab6087b0a0480e61d02381303a4bd5507d49",
+      "size_bytes": 1366
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/lightgbm/model.txt": {
+      "sha256": "58bacb2f3847dee8423230ba79dc6595da96cecd51394b0bf322c5c001a65624",
+      "size_bytes": 129681
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/lightgbm/preprocessing.pkl": {
+      "sha256": "44ea8ecfc8e13e137722f6e3c90b6417d63fa35c46d42a3ff0da15cfa4800e50",
+      "size_bytes": 810
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/logistic/metadata.json": {
+      "sha256": "a7bf6fea5328691289861a9940ba59cef17133f7f24bd946d4bddd4d0aacb6a6",
+      "size_bytes": 1366
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/logistic/model.pkl": {
+      "sha256": "9ee1ccc3b313f0c02e8931d45a7a74a40fc6c1393356d05c8d15b0c6baeaffbe",
+      "size_bytes": 862
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/logistic/preprocessing.pkl": {
+      "sha256": "8501c03b74d127dffc4a3c861f318a5e412761f0027ee2c3396462a238fa1bb3",
+      "size_bytes": 1701
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2025Q4/training_members.csv.gz": {
+      "sha256": "5ffcc054bf4dd1ba01b2079f925804f22bcc2069a2fecb0a9608ba089eee2e74",
+      "size_bytes": 276888
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/lightgbm/metadata.json": {
+      "sha256": "ec7769ed5401f9ee4d46aac14cd797ff3773827c2a8622fef1dda7d3b80e03c3",
+      "size_bytes": 1367
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/lightgbm/model.txt": {
+      "sha256": "fd96b806dd6c68fc103e07a2336a03f61690ca82f0fc46d205f0286e7b30952c",
+      "size_bytes": 137977
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/lightgbm/preprocessing.pkl": {
+      "sha256": "e90c3d4be4cad9ca30d2fb93238afd6ad9ce40200e2b442d4f803e3d656a591f",
+      "size_bytes": 810
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/logistic/metadata.json": {
+      "sha256": "f228a09c033d30d15fb6f2b41dbd7c5cf5d708cc92a8ecdb16adc480f8d87b1b",
+      "size_bytes": 1367
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/logistic/model.pkl": {
+      "sha256": "c79bffbcc246cc86c04dbfb940f76797aaa85f139d09e2f1666e60c7ef0d0d9d",
+      "size_bytes": 862
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/logistic/preprocessing.pkl": {
+      "sha256": "8c07bdee194972b62957279f3065878b96fa8772d238db40df2f7fbadda07445",
+      "size_bytes": 1701
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q1/training_members.csv.gz": {
+      "sha256": "81e9eb71eb83bb438d0ae821d75f38cc48c29a453ba09b21d378099b07eb099c",
+      "size_bytes": 356953
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/lightgbm/metadata.json": {
+      "sha256": "8836a6fe9299abd189c71ae375b04855832f9de854e7f76b69e9b8e8b23c1918",
+      "size_bytes": 1361
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/lightgbm/model.txt": {
+      "sha256": "08e02af8af57fdaa1e212a5f47527439844c04bbacfd0a342a2cf980ae44e109",
+      "size_bytes": 134578
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/lightgbm/preprocessing.pkl": {
+      "sha256": "b9e1ae9e4714fafa5c7627156371861ab08438cac8c62ffcb65122b7eccb83c8",
+      "size_bytes": 810
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/logistic/metadata.json": {
+      "sha256": "d7012ede9678e09566861af2cc1392adac991f29623c4a429a56b1e1d8b618ab",
+      "size_bytes": 1361
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/logistic/model.pkl": {
+      "sha256": "533f7a2184fe06c0bd49469fd956e983d2a58e061b28f876e250e46588d4f538",
+      "size_bytes": 862
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/logistic/preprocessing.pkl": {
+      "sha256": "ce274a69e251ac08cf47e71bb5cebd15556009ff5074f1c96150a6264e0b0807",
+      "size_bytes": 1701
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q2/training_members.csv.gz": {
+      "sha256": "d4160c0efff6f6a3f1d5d8cf4aa58a52ce2464cf2f9989c45f1e5c2a8712baf0",
+      "size_bytes": 397511
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/lightgbm/metadata.json": {
+      "sha256": "ae6aae341377ac0f1fb9c2108f13bd6722ea425eb6d418a8482873acc6c66c54",
+      "size_bytes": 1352
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/lightgbm/model.txt": {
+      "sha256": "3b5974d76e9aa5d5c6dee4b14168b3b285edc4c52fcee6ecbd998a2c1e329a24",
+      "size_bytes": 137736
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/lightgbm/preprocessing.pkl": {
+      "sha256": "2567faa220092b7b76c96d0342a24a0187285f896a46e66b7c2f4e79c9b90f9c",
+      "size_bytes": 810
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/logistic/metadata.json": {
+      "sha256": "452a4d0846152f36c822cfd16308d7e03aeafd7383c08f098dcbe8b806b4bcc6",
+      "size_bytes": 1352
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/logistic/model.pkl": {
+      "sha256": "4f137ac4ffcd6875656a1c46d66042a0d4330ae63183ff59e72541efe395e3da",
+      "size_bytes": 862
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/logistic/preprocessing.pkl": {
+      "sha256": "27d14ec55c5e2db4ab238882798a13966781f702619b3e19a8b05a50f43b9d87",
+      "size_bytes": 1701
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/models/2026Q3/training_members.csv.gz": {
+      "sha256": "fc541afb94ff05ef27f0da920b543d1f975c96e189b4317eb0ff4268738c5e1e",
+      "size_bytes": 445092
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/prediction_receipt.json": {
+      "sha256": "f46fa69786b400b82830f4713aa29daf85ac0888fbd68682b4437beb12b6bcb6",
+      "size_bytes": 6270
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/scores.csv.gz": {
+      "sha256": "a531bce9e9bc7aefc03da953a228d2ed2834e869f3582c98ede6bbf0e7be3f9b",
+      "size_bytes": 1440800
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/prediction_v1/thresholds.csv": {
+      "sha256": "e61cc3f285c8e14fc5dd5bb62280b3aabbcec9f8939a62c737ee60642159ab81",
+      "size_bytes": 5464
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/preflight_tests.log": {
+      "sha256": "96247044d4c3db29ca0a280355a294bde68d5a0942590e6aa5e546a6ebcabfae",
+      "size_bytes": 7068
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/registry_preexisting_failures.json": {
+      "sha256": "795996b973a58f340aa153e3c8aadf1192ea73df1d5837fb243fb27ed4819e46",
+      "size_bytes": 749
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/related_tests.log": {
+      "sha256": "d029586347759feb45e89081371edc6ca68de65ca9cc22c6fbd31849dfaa58f7",
+      "size_bytes": 181
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/serial_v1/comparison.csv": {
+      "sha256": "8ffa22018e0e7fa38fb757dfc786db4649a2917397f51bd87f3ae600099686e0",
+      "size_bytes": 34464
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/serial_v1/receipt.json": {
+      "sha256": "9e0b1bf6239fa65eb77bf7e936b8b354184815053ecdd1b0e404a9536a5a1746",
+      "size_bytes": 365641
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/serial_v1/trades.csv.gz": {
+      "sha256": "87e6b8616a3964bdaa0a4bdf34d68dbf18162895c80557123c95d87ccefefa34",
+      "size_bytes": 7016629
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/serial_v1.log": {
+      "sha256": "71601b5384521e3b35378f4dc076b808cd9817b479fdf71becea7c41c5b8031a",
+      "size_bytes": 54993
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/static_review.json": {
+      "sha256": "20fca2d7bbca5f2818361662ea0d2af0a0c877f85f205503367e96fb82e0443d",
+      "size_bytes": 788
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/study_tests_initial.log": {
+      "sha256": "6e51bd3a7f7ee800da7606034fc5c13a1e8fb3b6daa16522c2fc2995afad6e6b",
+      "size_bytes": 111
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/validation.json": {
+      "sha256": "f8abe2574cdf7b1b3d558fdf61a90be1bc687d3e12d3fba24bc44728f9d730be",
+      "size_bytes": 945
+    },
+    "experiments/active/exp-spike-10r-model-20260921-v4/wif_case.json": {
+      "sha256": "3f6288686e9522712106e731c188ec8484e3ffab7bb1f375fd98e5644496aa1b",
+      "size_bytes": 1008
+    },
+    "tests/evaluation/test_spike_10r_model_study.py": {
+      "sha256": "2a6befb1a9053bc2c68fc74f4734acbd24858d5289493d67f669f3fc2f8afe1a",
+      "size_bytes": 6000
+    },
+    "tests/evaluation/test_spike_10r_models.py": {
+      "sha256": "394ccc4c8c5c710b431bfff5c87062e5f3acf53adfd967c299a4e22a9964bca6",
+      "size_bytes": 5236
+    },
+    "yoyo/evaluation/spike_10r_model_study.py": {
+      "sha256": "dc5baff5a32b6a3af9c9add4d2b2e297f37d9e1c5b02299df84dad36e5827661",
+      "size_bytes": 24080
+    },
+    "yoyo/evaluation/spike_10r_models.py": {
+      "sha256": "bb2f21c8c78d106e41d2adc839af6d544222cf94381af484f37e93fdfe9b3180",
+      "size_bytes": 13599
+    }
+  },
+  "storage": "Merged score/trade tables,serialized models and per-stream leaves remain local and hash-bound; source/config/receipts/summary tables are committed.",
+  "limits": [
+    "Historically exposeddata,notblindvalidation",
+    "Numerical warning rootcause unresolved; stored logistic predictions independently reconstructed to1.53e-16",
+    "Globalregistry4tests fail duepreexistingmissing source_commit; newrecordcontractvalid",
+    "No portfolio/funding/depth/liquidation model orliveauthorization"
+  ]
+}
