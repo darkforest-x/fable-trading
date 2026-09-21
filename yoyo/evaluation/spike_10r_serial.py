@@ -90,11 +90,14 @@ def one(args):
     return receipt
 
 
-def run(dataset,analysis,output,workers):
+def run(dataset,analysis,output,workers,adaptive=None):
     dependencies=[Path(__file__),Path('tests/evaluation/test_spike_10r_serial.py'),Path(search.__file__),
                   EXP/'PROJECT_PLAN.md',EXP/'config.json',Path(engine.__file__),Path(base.__file__),
                   Path('yoyo/evaluation/spike_v9_full_replay.py'),Path('yoyo/evaluation/spike_v7_fast.py'),
                   Path('yoyo/evaluation/spike_v8_replay.py'),Path('yoyo/evaluation/spike_high_r_entry_report.py')]
+    if adaptive is not None:
+        from yoyo.evaluation import spike_10r_adaptive as adaptive_engine
+        dependencies.extend([Path(adaptive_engine.__file__),adaptive_engine.EXP/'config.json',adaptive_engine.EXP/'PROJECT_PLAN.md'])
     if not _committed(dependencies):
         raise ValueError('commit serial builder before replay')
     receipt=json.loads((analysis/'evaluation_receipt.json').read_text())
@@ -112,6 +115,22 @@ def run(dataset,analysis,output,workers):
     names=sorted({x['choice']['rule'] for x in selection['selected'] if x['choice']})
     if d.event_key.duplicated().any() or set(d.event_key)!=set(candidates.event_key):
         raise ValueError('decision universe mismatch')
+    if adaptive is not None:
+        ar=json.loads((adaptive/'receipt.json').read_text())
+        if (ar['dataset_receipt_sha256']!=search.digest(dataset/'receipt.json') or
+                ar['parent_evaluation_receipt_sha256']!=search.digest(analysis/'evaluation_receipt.json')):
+            raise ValueError('adaptive source differs')
+        for name,sha in ar['files'].items():
+            if search.digest(adaptive/name)!=sha:
+                raise ValueError('adaptive artifact drift')
+        for path,sha in ar['dependencies'].items():
+            if search.digest(Path(path))!=sha:
+                raise ValueError('adaptive builder drift')
+        ad=pd.read_csv(adaptive/'decisions.csv.gz')
+        if ad.event_key.duplicated().any() or set(ad.event_key)!=set(candidates.event_key):
+            raise ValueError('adaptive candidate universe mismatch')
+        d=d.merge(ad.rename(columns={'admitted':adaptive_engine.NAME}),on='event_key',validate='one_to_one')
+        names.append(adaptive_engine.NAME)
     for name in names:
         d[name]=strict_bool(d[name])
     pin=SOURCE/'statistics/full_v1/statistics_receipt.json'
@@ -123,7 +142,8 @@ def run(dataset,analysis,output,workers):
         raise ValueError('serial stream coverage mismatch')
     dependency_hashes={str(p):search.digest(p) for p in dependencies}
     import hashlib
-    identity=hashlib.sha256((search.digest(analysis/'evaluation_receipt.json')+json.dumps(dependency_hashes,sort_keys=True)).encode()).hexdigest()
+    identity=hashlib.sha256((search.digest(analysis/'evaluation_receipt.json')+
+        (search.digest(adaptive/'receipt.json') if adaptive is not None else '')+json.dumps(dependency_hashes,sort_keys=True)).encode()).hexdigest()
     output.mkdir(parents=True,exist_ok=True)
     if (output/'receipt.json').exists():
         raise ValueError('refuse to overwrite completed serial check')
@@ -187,5 +207,6 @@ if __name__=='__main__':
     p.add_argument('--analysis',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--workers',type=int,default=6)
+    p.add_argument('--adaptive',type=Path)
     a=p.parse_args()
-    run(a.dataset,a.analysis,a.output,a.workers)
+    run(a.dataset,a.analysis,a.output,a.workers,a.adaptive)
