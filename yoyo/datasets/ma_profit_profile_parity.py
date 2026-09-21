@@ -29,12 +29,15 @@ def audit(selection_path: Path, output: Path) -> dict:
         raise FileExistsError(f"refusing to overwrite parity audit: {output}")
     selection = json.loads(selection_path.read_text())
     frozen = [Path(__file__), ADAPTER, Path(miner.__file__), *miner.RULE_DEPENDENCY_PATHS, selection_path,
-              *(miner._repo_path(row["candidates_path"]) for row in selection["sources"])]
+              *(miner._repo_path(row[key]) for row in selection["sources"] for key in ("manifest_path", "master_path"))]
     names = [miner._relative(path) for path in frozen]
     subprocess.check_output(["git", "ls-files", "--error-unmatch", "--", *names], cwd=ROOT, text=True)
     commit = miner._assert_committed(frozen)
     results, exact, mismatches = [], 0, 0
     for spec in selection["sources"]:
+        for prefix in ("manifest", "master"):
+            if miner.sha256_file(miner._repo_path(spec[prefix + "_path"])) != spec[prefix + "_sha256"]:
+                raise ValueError("parity frozen manifest/master SHA drift")
         source, candidates = miner._repo_path(spec["source_path"]), miner._repo_path(spec["candidates_path"])
         if miner.sha256_file(source) != spec["source_sha256"] or miner.sha256_file(candidates) != spec["candidates_sha256"]:
             raise ValueError("parity source/candidate SHA drift")
