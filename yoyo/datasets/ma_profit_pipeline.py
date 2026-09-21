@@ -94,10 +94,26 @@ def prepare_legacy(plan_path):
     print(json.dumps({'events': len(events), 'sources': len(sources)}), flush=True)
 
 
+def _known_input_continuous(frame, start_i, end_i, minutes):
+    """Whether the MA warmup through c+5 is one uninterrupted known bar sequence."""
+
+    timestamps = pd.to_datetime(frame.open_time.iloc[start_i:end_i + 1], utc=True)
+    expected = pd.Timedelta(minutes=int(minutes))
+    return len(timestamps) == end_i - start_i + 1 and bool((timestamps.diff().iloc[1:] == expected).all())
+
+
 def split_for_event(frame, start_i, end_i, minutes, plan):
     support_i = start_i - 11
-    if support_i - 1200 < 0:
+    input_start_i = support_i - 1200
+    if input_start_i < 0:
         return 'purged', 'insufficient_1200bar_warmup'
+    # MA initialization and the c+5 decision are known input.  A missing bar
+    # anywhere in that region would distort fixed-interval MA/window semantics.
+    input_end_i = end_i + 5
+    if input_end_i >= len(frame):
+        return 'purged', 'missing_confirmation'
+    if not _known_input_continuous(frame, input_start_i, input_end_i, minutes):
+        return 'purged', 'known_input_gap'
     # Earlier prices used only to initialize MAs are legitimately known history.
     # The rendered event interval and future label must not cross split cuts.
     support_start = pd.Timestamp(frame.open_time.iloc[support_i])

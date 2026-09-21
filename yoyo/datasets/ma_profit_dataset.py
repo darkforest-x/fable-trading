@@ -156,6 +156,14 @@ def _window_asset(
     return encoded.tobytes(), box, {"window_start_i": start_i, "window_end_i": end_i, "visible_end_open_time_utc": pd.Timestamp(frame["open_time"].iloc[end_i]).isoformat(), "feature_support_start_i": support_start_i, "feature_support_start_utc": pd.Timestamp(frame["open_time"].iloc[support_start_i]).isoformat()}
 
 
+def _known_input_continuous(times: pd.Series, start_i: int, end_i: int, minutes: int) -> bool:
+    """Check the 1,200-bar MA support through c+5 without inspecting label future."""
+
+    window = times.iloc[start_i:end_i + 1]
+    expected = pd.Timedelta(minutes=int(minutes))
+    return len(window) == end_i - start_i + 1 and bool((window.diff().iloc[1:] == expected).all())
+
+
 def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, Any]]:
     """Create A plus train-only B render variants for one ledger event, entirely in memory."""
 
@@ -184,6 +192,8 @@ def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, 
     support_start = start_i - 11 - SUPPORT_BARS
     if support_start < 0:
         raise ProfitDatasetError("insufficient 1200-bar MA support")
+    if not _known_input_continuous(times, support_start, decision_i, bar_minutes):
+        raise ProfitDatasetError("known input gap")
     # The source group may have been loaded through a later event, but this
     # event's rendered input has no access beyond its own confirmation close.
     frame = frame.iloc[:decision_i + 1].copy()
