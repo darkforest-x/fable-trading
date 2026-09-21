@@ -1,0 +1,100 @@
+{
+  "unblinded_at": "2026-09-21T12:25:33.240726+00:00",
+  "source_commit": "96ff84c09f9a9d10c4bb69f5cce8fc89e681e210",
+  "pack_receipt_sha256": "42214921b982af5863d5503fc5b5095cd0147beb885a332994cfbbaf01ee9b70",
+  "label_freezes": {
+    "astra": {
+      "reviewer": "Astra parent",
+      "frozen_at": "2026-09-21T12:15:58.304469+00:00",
+      "rows": 400,
+      "sha256": "2d1f97db9cc335c5b9f629e14f4aed1830ebd8c119b6e07d6d7f837ed70e7b87",
+      "private_outcomes_read": false,
+      "visual_method": "Actually viewed sheets001-050 at original detail; judgments entered per exposure"
+    },
+    "luna": {
+      "frozen_at": "2026-09-21T12:23:48Z",
+      "csv_sha256": "0cc1f77172d1f9f360b8e97fb43c29a312b85b55eddf14a6c3dfea9a6da01ce7",
+      "rows": 421,
+      "private_outcomes_read": false
+    },
+    "astra_overlap": {
+      "frozen_at": "2026-09-21T12:22:08.975688+00:00",
+      "path": "experiments/active/exp-spike-10r-visual-20260921-v1/review_v1/astra_overlap.csv",
+      "sha256": "329312cc3620ab7b8254629ca59cf54f452e14d0efd4cdf9bc22e1e017988ed6",
+      "rows": 64,
+      "private_outcomes_read": false
+    }
+  },
+  "unique_events": 757,
+  "exposures": 805,
+  "cohort_counts": {
+    "winner_gt10": 448,
+    "matched_nonwinner": 309
+  },
+  "time_start": "2024-09-10 16:00:00+00:00",
+  "time_end": "2026-09-09 07:30:00+00:00",
+  "overlap": {
+    "n": 80,
+    "exact_agreement": 0.525,
+    "kappa": 0.3003452243958573,
+    "strict_p_agreement": 0.975,
+    "broad_pd_agreement": 0.7625
+  },
+  "hidden_repeats": {
+    "n": 48,
+    "exact_agreement": 0.6041666666666666,
+    "kappa": 0.40740740740740733,
+    "strict_p_agreement": 1.0,
+    "broad_pd_agreement": 0.7291666666666666
+  },
+  "hidden_repeats_by_reader": {
+    "False": {
+      "n": 28,
+      "exact_agreement": 0.39285714285714285,
+      "kappa": 0.08108108108108104,
+      "strict_p_agreement": 1.0,
+      "broad_pd_agreement": 0.6071428571428571
+    },
+    "True": {
+      "n": 20,
+      "exact_agreement": 0.9,
+      "kappa": 0.8507462686567164,
+      "strict_p_agreement": 1.0,
+      "broad_pd_agreement": 0.9
+    }
+  },
+  "assets_by_cohort": {
+    "matched_nonwinner": 177,
+    "winner_gt10": 220
+  },
+  "episodes": [
+    {
+      "cohort": "matched_nonwinner",
+      "episodes": 274,
+      "event_count": 309,
+      "equal_episode_strict_rate": 0.0036496350364963502,
+      "equal_episode_broad_rate": 0.3351581508515815
+    },
+    {
+      "cohort": "winner_gt10",
+      "episodes": 284,
+      "event_count": 448,
+      "equal_episode_strict_rate": 0.013908450704225353,
+      "equal_episode_broad_rate": 0.328462441314554
+    }
+  ],
+  "statistical_scope": "Exploratory retrospective visual association; outcome sampling and correlated events do not establish prospective prediction or trading edge.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": {
+    "paired.csv": "ef75241dfde1b96515c359b511ce71c68af218fd1b5f182fdef7a9f25d1aad21",
+    "quarter.csv": "55edac1e0380662d83db550626f4e6260529e6b581a7b35e1075e6976422c45c",
+    "overlap_labels.csv": "abf87d563b1f9da850368478057f14cc64e82348d68f035e16b3ba2629816bb2",
+    "cohort.csv": "91550ab0f94342b34af7f96972d125fe74b53512e8d4612f6e8746cf4c6569b4",
+    "timeframe.csv": "0eba69f06347b46787b150510db468fa0747345740f4f0fcba6c0e678cc61297",
+    "episodes.csv": "8af4c93159af1a094bbc09c10a4ee30950e612a105705e799106ea7a2b280e8f",
+    "reader.csv": "c920b052d6c43ea5bf4490969ec924fc3560f4a5cec178d6534d071a60a222ef",
+    "all_candidates.csv": "b40e7254deabf402a1dfca42532470f2f63057d96cad91a06e6bf53bae23cd36",
+    "hidden_repeats.csv": "30f5fc2f57ee1c9542462b5cd700e3562ead37c87526003d3fb8cbe501369cdd"
+  }
+}
