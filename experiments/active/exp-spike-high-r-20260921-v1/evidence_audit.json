@@ -1,0 +1,254 @@
+{
+  "audit_scope": {
+    "experiment": "exp-spike-high-r-20260921-v1",
+    "mode": "read-only saved reports, manifests, code, and saved outcomes",
+    "raw_price_or_cache_replay": false,
+    "new_experiment_or_variant": false
+  },
+  "status": "failed",
+  "decision": "reject_candidate_for_primary_goal",
+  "decision_basis": "The registered later-period strict net R>10 goal failed: 210 -> 152 (-58). Full-period strict net R>10 also fell 367 -> 259 (-108). Later total net R improved by 170.559207R, but the saved month-block test is p=0.29724 and later mean net return remains negative.",
+  "source_hashes": {
+    "source_statistics_receipt_sha256": "c13feddd2cc8bde66ee738b51e583971b99d06b8cb566d8293077abaafdace0b",
+    "source_trades_sha256": "55f4b9d0ec98e38da37f8c2a43bee73a2d65f98e232deeb181d3ee1ffd83a748",
+    "source_controls_sha256": "d2864a942825b19f569fca7f3dec12ae7245d6433229ed6cdb7d98f6df1fb179",
+    "source_summary_sha256": "d513574006a15fe902a5262fbadbab75701a43cd2c19c81182ff8c0d29ccb800",
+    "run_v2_manifest_sha256": "7cf9ba2d3e7d2084191fa3b47562c12866abf53336f86b775b92d56998a2cd2a",
+    "run_v2_identity_sha256": "a7db2cb6c2b3050e8bd5989767c03da34c02e68bffde21b68f1f464f10cc3db7",
+    "statistics_receipt_sha256": "ede6cd93e063f1ecd977d34952ded8daf65e035cdfdaa37602cbd0367301c5da",
+    "builder_sha256": "1d58940fca9af9309d58bea539237e9e5e40626c18273a3d68811741e2317ed8",
+    "builder_commit": "bdaec68c7a297b60821834f09daa4f7253b730e6",
+    "run_identity": "9923566edbd85d808967158bf21e53c05933d58705659197d3c952754881b5ee",
+    "statistics_files": {
+      "summary.csv": "7fdd530a39ea5a8dd1f67b508c95f7796033fead6d8a0882dffb8666674299ea",
+      "paired_long_events.csv.gz": "f610a696a9fa6e2d648d831607fb859e78a6af81326263cc996045f7f9e747f2",
+      "long_trades.csv.gz": "b428ea3eb998d341f4d8a078324ed95501060967d1f91dc8592d86b38b081056",
+      "high_r_changes.csv": "cc6a72b09b597b52237da79a340deaa417b944d5a17fb8c78299399a5e3a3b0f",
+      "per_asset.csv": "43c952ed3c2fb4cc542a95242ddded1c16fbddd2e35dc81c4846b87b32beb84b",
+      "diagnostic.json": "0ffd61dd889f1cfc63fa02f98b77fbaf83d5ddaafc1794c564fcd204e4abbcba",
+      "contrasts.csv": "64932e9e4ca38eab8660d909c115f6f996db9fdc1ddd3da468eca86e03e0b697",
+      "controls.csv.gz": "881c56e7dc8d35b5969249d4f0b5f55ddd64f2525ab9de729368b33eb4326038"
+    }
+  },
+  "run_integrity": {
+    "expected_streams": 3531,
+    "selected_streams": 3531,
+    "completed_streams": 3531,
+    "failures": 0,
+    "unique_manifest_keys": 3531,
+    "completion_hash_bad": 0,
+    "completion_identity_or_status_bad": 0,
+    "baseline_parity_false": 0,
+    "saved_artifact_hash_bad": 0,
+    "statistics_receipt_file_hash_bad": 0,
+    "statistics_receipt_source_manifest_matches_run_manifest": true,
+    "completion_artifact_counts": {
+      "controls.csv.gz": 3531,
+      "events.csv.gz": 3531,
+      "trades.csv.gz": 3531,
+      "fills.csv.gz": 3531
+    }
+  },
+  "counts": {
+    "source_v9_long_events": 41814,
+    "baseline_events": 41814,
+    "new_events": 41862,
+    "baseline_closed": 41700,
+    "new_closed": 41768,
+    "baseline_censored": 114,
+    "new_censored": 94,
+    "baseline_winners": 12230,
+    "baseline_gt10": 367,
+    "new_gt10": 259,
+    "baseline_mfe_gt10": 1164,
+    "new_recorded_mfe_gt10": 740,
+    "paired_rows": 41862,
+    "paired_common_rows": 41814,
+    "baseline_only_rows": 0,
+    "new_only_rows": 48,
+    "retained_gt10": 194,
+    "lost_gt10": 173,
+    "gained_gt10": 65,
+    "neither_tail_rows": 41430
+  },
+  "period_table": [
+    {
+      "period": "full",
+      "baseline": {
+        "events": 41814,
+        "closed": 41700,
+        "censored": 114,
+        "gt10": 367,
+        "total_net_r": 1697.590199745233,
+        "mean_net_bp": 2.821062248868,
+        "matched_pairs": 41644,
+        "unmatched": 170
+      },
+      "high_r_v1": {
+        "events": 41862,
+        "closed": 41768,
+        "censored": 94,
+        "gt10": 259,
+        "total_net_r": 1084.396694665743,
+        "mean_net_bp": -4.965523168682,
+        "matched_pairs": 41719,
+        "unmatched": 143
+      },
+      "delta_new_minus_baseline": {
+        "gt10": -108,
+        "total_net_r": -613.19350507949,
+        "mean_net_bp": -7.786585417549
+      }
+    },
+    {
+      "period": "earlier",
+      "baseline": {
+        "events": 15807,
+        "closed": 15807,
+        "censored": 0,
+        "gt10": 146,
+        "total_net_r": 3353.070258275566,
+        "mean_net_bp": 67.407643442187,
+        "matched_pairs": 15694,
+        "unmatched": 113
+      },
+      "high_r_v1": {
+        "events": 15893,
+        "closed": 15893,
+        "censored": 0,
+        "gt10": 104,
+        "total_net_r": 2896.514878156382,
+        "mean_net_bp": 50.03698011429,
+        "matched_pairs": 15794,
+        "unmatched": 99
+      },
+      "delta_new_minus_baseline": {
+        "gt10": -42,
+        "total_net_r": -456.555380119184,
+        "mean_net_bp": -17.370663327897
+      }
+    },
+    {
+      "period": "later",
+      "baseline": {
+        "events": 25681,
+        "closed": 25567,
+        "censored": 114,
+        "gt10": 210,
+        "total_net_r": -2328.761870772769,
+        "mean_net_bp": -43.354517938953,
+        "matched_pairs": 25513,
+        "unmatched": 168
+      },
+      "high_r_v1": {
+        "events": 25710,
+        "closed": 25616,
+        "censored": 94,
+        "gt10": 152,
+        "total_net_r": -2158.202663479373,
+        "mean_net_bp": -42.635343296784,
+        "matched_pairs": 25568,
+        "unmatched": 142
+      },
+      "delta_new_minus_baseline": {
+        "gt10": -58,
+        "total_net_r": 170.559207293396,
+        "mean_net_bp": 0.719174642169
+      }
+    }
+  ],
+  "max_errors": {
+    "baseline_numeric_parity_abs_error": 0.0,
+    "baseline_string_or_time_mismatch_rows": 0,
+    "summary_recompute_max_abs_total_net_r_difference": 9.094947017729e-13,
+    "summary_recompute_max_abs_mean_net_bp_difference": 2.84217094304e-14,
+    "economic_net_return_minus_gross_minus_cost": 6.678685382511e-16,
+    "economic_net_r_identity": 1.127098414599e-12,
+    "economic_gross_r_identity": 1.087130385713e-12,
+    "initial_risk_fraction_identity": 1.264544025048e-13,
+    "tail_status_recompute_mismatch_rows": 0,
+    "censored_rows_counted_as_gt10": 0,
+    "control_target_net_r_abs_error": 0.0,
+    "control_target_net_return_abs_error": 0.0,
+    "control_target_censor_flag_mismatch_rows": 0,
+    "control_matched_flag_mismatch_rows": 0,
+    "control_period_summary_max_count_difference": 0,
+    "control_period_summary_max_excess_r_difference": 9.020562075e-17,
+    "control_period_summary_max_random_p_difference": 0.0
+  },
+  "checks": {
+    "baseline_reconciliation": {
+      "status": "pass",
+      "reference": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/trades.csv.gz",
+      "result": "The V9 long source and generated baseline have the same 41,814 event keys; all checked economic, time, identity, censoring, and exit fields match exactly within the stated floating-point bound."
+    },
+    "aggregate_recalculation": {
+      "status": "pass",
+      "reference": "statistics_v1/long_trades.csv.gz and statistics_v1/summary.csv",
+      "result": "Independent full/earlier/later/crossing counts, strict net-R tails, total net R, and mean net bp reproduce the saved summary."
+    },
+    "economic_identity": {
+      "status": "pass",
+      "reference": "config.json round_trip_cost=0.002 and saved closed outcomes",
+      "result": "For both arms, net_return=gross_return-0.002 and net_r=net_return/initial_risk_frac; all closed rows are finite and all censored rows have nonfinite economic outcomes."
+    },
+    "tail_classification": {
+      "status": "pass",
+      "reference": "statistics_v1/paired_long_events.csv.gz and statistics_v1/diagnostic.json",
+      "result": "Recomputed strict >10 statuses exactly: retained 194, lost 173, gained 65, neither 41,430. No censored row contributes to either arm's strict >10 count."
+    },
+    "time_split": {
+      "status": "pass",
+      "reference": "config.json split=2025-09-10T00:00:00Z and spike_high_r_report.py periods()",
+      "result": "Earlier contains only entry<split and exit<split. Crossing rows are explicit (326 baseline, 259 new) and have zero overlap with earlier; no entry or exit timestamps are missing."
+    },
+    "saved_completion_aggregate": {
+      "status": "pass",
+      "reference": "run_v2 per-stream completion.json summaries",
+      "result": "Summed per-stream baseline/new long events, closed rows, total net R, and strict >10 counts reproduce long_trades.csv.gz; net-R sum difference is 2.274e-13."
+    },
+    "matched_control_saved_target_mapping": {
+      "status": "pass",
+      "reference": "source statistics/full_v1/controls.csv.gz and statistics_v1/controls.csv.gz",
+      "result": "The 41,814 source V9 long control rows and generated baseline control rows match field-for-field. All 83,676 generated control rows map one-to-one to target outcomes; target outcome/censor values and matched flags are exact. For all 41,814 common baseline/new targets, stream, side, month, target vol_bin, and selected control timestamp match (NaT treated as equal)."
+    },
+    "matched_control_denominators": {
+      "status": "pass",
+      "reference": "statistics_v1/summary.csv and independent control join",
+      "result": "Full/earlier/later matched-pair and unmatched denominators, paired excess R, and saved random p values reproduce; full matched pairs are 41,644/41,719 and later matched pairs are 25,513/25,568."
+    }
+  },
+  "control_evidence_limit": {
+    "status": "unverifiable",
+    "claim": "Every random control candidate is in the same contemporaneous ATR/close volatility bucket.",
+    "reason": "The saved controls contain the target vol_bin but do not contain the selected control candidate's ATR/close or control-side vol_bin. Proving this would require reopening raw price/cache evidence, which is outside this audit scope. The common-target selection identity and saved source-baseline parity are checked, but this bucket-membership claim is not marked passed.",
+    "missing_control_signal_rows": 2,
+    "non_censored_unmatched_rows_with_finite_control_outcome": 0
+  },
+  "findings": [
+    "The primary later-period high-R count gate fails by 58 trades; the full-period count also falls by 108.",
+    "The later total net-R improvement is not a demonstrated success: saved delta is +170.559207R, month-block p=0.29724, and mean net bp remains -43.354518 -> -42.635343.",
+    "The earlier period loses 42 strict >10 trades and 456.555380R; full-period total net R falls 613.193505R and mean net bp changes from +2.821062 to -4.965523.",
+    "The arithmetic, baseline parity, strict-tail classification, fixed-cost identity, and explicit crossing exclusion are internally consistent. This supports the negative rejection conclusion but does not prove execution quality or alpha.",
+    "No conclusion about real execution, current market behavior, funding, slippage, liquidation, or causal alpha is supported by these saved outcomes."
+  ],
+  "unverifiable": [
+    "Control-side volatility-bucket membership, as described above.",
+    "The validation.json claim that raw source caches were unchanged before/after was treated as reported evidence only; raw caches were not opened or rehashed in this bounded audit.",
+    "The validation.json report of 108 related checks was not treated as an independently rerun result here."
+  ],
+  "supporting_references": [
+    "experiments/active/exp-spike-high-r-20260921-v1/PROJECT_PLAN.md",
+    "experiments/active/exp-spike-high-r-20260921-v1/config.json",
+    "experiments/active/exp-spike-high-r-20260921-v1/run_v2/manifest.json",
+    "experiments/active/exp-spike-high-r-20260921-v1/statistics_v1/receipt.json",
+    "experiments/active/exp-spike-high-r-20260921-v1/statistics_v1/summary.csv",
+    "experiments/active/exp-spike-high-r-20260921-v1/statistics_v1/paired_long_events.csv.gz",
+    "experiments/active/exp-spike-high-r-20260921-v1/statistics_v1/controls.csv.gz",
+    "experiments/active/exp-spike-high-r-20260921-v1/statistics_v1/diagnostic.json",
+    "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/trades.csv.gz",
+    "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/controls.csv.gz",
+    "yoyo/evaluation/spike_high_r_report.py:13-24,39-137",
+    "yoyo/evaluation/spike_high_r_v1.py:53-77,121-205,254-312"
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "builder_commit": "bdaec68c7a297b60821834f09daa4f7253b730e6",
+  "full_replay_streams": 3531,
+  "failures": 0,
+  "all_baseline_parity": true,
+  "all_source_caches_before_after_sha_equal": true,
+  "focused_tests": {
+    "count": 21,
+    "result": "passed",
+    "log_sha256": "18dc034f51326ef913818c057d93e6838d21c6efe6623f36f193319acb42969c"
+  },
+  "related_checks": {
+    "count": 108,
+    "result": "passed",
+    "command": ".venv/bin/python -m pytest tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_experiment_isolation.py tests/causality/test_continuity_and_availability.py tests/parity/test_numeric_baseline_parity.py -q"
+  },
+  "review_findings_resolved": [
+    "pin original V9 statistics receipt in frozen config",
+    "assert actual imported execution constants and clock against frozen plan"
+  ],
+  "historical_data_validity": "existing authenticated frozen history; no claim of current exchange mark/tier/funding realism",
+  "decision": "reject candidate; target high-R frequency declined",
+  "production_eligible": false,
+  "training_eligible": false,
+  "independent_audit": {
+    "path": "experiments/active/exp-spike-high-r-20260921-v1/evidence_audit.json",
+    "arithmetic_baseline_tail_and_period_checks": "pass",
+    "strategy_primary_goal": "failed",
+    "scope_limits": [
+      "saved outcomes only; no raw-cache audit of control ATR bucket or before/after hashes",
+      "108 related tests not independently rerun"
+    ]
+  }
+}

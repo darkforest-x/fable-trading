@@ -2,6 +2,8 @@
 
 Python 离线研究版本，针对高R利润兑现，只更换多头追踪锚点。当前结果以最终研究报告为准，不是默认策略或100U滚仓资金报告。
 
+**结果：拒绝此候选。** 全3,531流完成，净>10R多单367→259，净>20R100→57；胜率提高却损失大趋势。后段仍亏，原版保留。正式输出run_v2/statistics_v1，run_v1为先前3流功能检查。完整原因为下方研究报告。
+
 - 实现：`yoyo/evaluation/spike_high_r_v1.py`
 - 固定规则：`PROJECT_PLAN.md`、`config.json`
 - 回放：`yoyo/evaluation/spike_high_r_study.py`

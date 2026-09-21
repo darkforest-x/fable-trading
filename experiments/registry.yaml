@@ -10279,17 +10279,19 @@ experiments:
 
   - experiment_id: exp-spike-high-r-20260921-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: cbe6640111cadcfb7b26e8abb562efa149ff2f4f
-    status: active
+    source_commit: bdaec68c7a297b60821834f09daa4f7253b730e6
+    status: rejected
     question: Can a causal running-high long trail capture more realized netR-over10 trades than current-close V9 without sacrificing later-period aggregate economics?
     single_variable: Long trailing anchor only;completed-bar current close becomes running highest high since entry,with original2R-close arm and4ATR distance.
-    result: Pre-registered;367 realized netR-over10 versus1164 recorded gross-MFE-over10 among41700 closed long events. New replay pending.
+    result: All3531 streams completed with originalV9 parity. Long netR-over10 falls367to259,retaining194,losing173,gaining65;
+      netR-over20 falls100to57. Later-year highR210to152 and netR remains-2158.20;reject replacement despite higher winrate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_high_r_20260921.md
-    artifacts: []
+    artifacts:
+    - spike-high-r-20260921-delivery
     reuse_allowed: false
     notes: Full3531 frozen streams including losses and empty streams;original both-side serial path,primary long-only reporting.
       Original admission,risk,cost andshort exits unchanged. Same-policy matched random controls;no training,promote,Pine or livechanges.
-      Source commit initially names pre-implementation baseline;final delivery will bind actual builder. Notion3e28856479af81e0bf7ed272ebb818a0.
+      Frozen builder precedes fullrun_v2;21 focused tests and108 related gates pass. Notion3e28856479af81e0bf7ed272ebb818a0 rejected.

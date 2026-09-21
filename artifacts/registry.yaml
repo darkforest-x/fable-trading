@@ -31890,3 +31890,21 @@ artifacts:
     notes: 1376 hashed files;367 trades209 assets339 streams;1101 independent wallet/LP audits2199 legs;15 focused tests,zero market failures.
       WIF screenshot two-add7521.8737U and BEAT maximum1174044.9156U are flat5pct/zero-funding/continuous-quantity oracle labels.
       Original exit bar excluded,chosen exit bar low required;historical mark/tiers/funding/depth unknown,not exchange-solvency certification.
+
+  - artifact_id: spike-high-r-20260921-delivery
+    artifact_type: manifest
+    role: causal_long_peak_anchor_exit_intervention_full_v9_rejected
+    source_repo: darkforest-x/fable-trading
+    source_commit: bdaec68c7a297b60821834f09daa4f7253b730e6
+    generator_commit: bdaec68c7a297b60821834f09daa4f7253b730e6
+    source_path: experiments/active/exp-spike-high-r-20260921-v1/delivery_manifest.json
+    sha256: f9ca29c89c707eaf4a42dd58862b980df6004897a252ea9357986c48400c0237
+    size_bytes: 6449
+    storage_uri: repo://experiments/active/exp-spike-high-r-20260921-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: All3531 streams,originalV9 exact parity,zero failures;29 direct hashes plus3531 completion receipts bind14124 stream artifacts.
+      Long netR-over10 declines367to259,retaining194,losing173,gaining65;later210to152 andnegative netR;candidate rejected.
+      Twentyone focused and108 related checks pass;independent saved-outcome arithmetic,tail andcontrol-target audit pass.
+      Control-side ATR membership andrawcache/test reruns outside independent audit;no causalalpha,live orrollingcash claim.
