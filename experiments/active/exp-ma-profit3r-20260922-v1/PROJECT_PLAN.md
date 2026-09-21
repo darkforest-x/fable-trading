@@ -10,3 +10,5 @@ Owner explicitly authorized the complete offline pipeline and RTX3060 training o
 6. Evaluate full later candidate pool including failures;save costs,matched controls and limits. No promotion.
 
 Coupled contract repairs and data/training stages are explicitly authorized. Optional risk/horizon clarification remains open;otherwise apply disclosed defaults.
+
+Expansion addendum: prepare a separately frozen official 1m archive on the3060 machine while the original six timeframe batches finish onMac. `extension_1m.json` reuses the same655-symbol exchange snapshot and unchanged2019-09 through2026-08 historical ceiling. No morphology, entry, stop, cost or horizon changes. Compressed storage must preserve sourceCSV SHA; timeframe-specific evaluation is required because12h spans different numbers of bars. Independent-event capacity still controls training.
