@@ -1,0 +1,36 @@
+{
+  "probed_at_local": "2026-09-22",
+  "scope": "read-only LAN RTX 3060 connectivity and training-environment diagnostic",
+  "ssh": {
+    "attempted_alias": "3060",
+    "alias_result": "unreachable route to configured non-LAN hostname; not used",
+    "connected_target": "Administrator@192.168.1.2",
+    "hostname": "WIN-ZZC"
+  },
+  "host": {
+    "os": "Windows 11 Pro build 26200",
+    "training_root": "C:\\fable",
+    "c_drive_free_gib": 96.0
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3060",
+    "total_mib": 12288,
+    "free_mib": 10981,
+    "driver": "610.88",
+    "cuda_available": true,
+    "training_processes": 0,
+    "display_processes_present": true
+  },
+  "versions": {
+    "remote": {"torch": "2.8.0+cu126", "ultralytics": "8.4.89", "numpy": "2.0.2", "pandas": "2.3.3"},
+    "mac_constraints_ci": {"torch": "2.8.0", "ultralytics": "8.4.89", "numpy": "2.0.2", "pandas": "2.3.3"},
+    "torchvision": "0.23.0",
+    "pip_check": "No broken requirements found.",
+    "parity": true
+  },
+  "controlled_entry": {
+    "local_and_remote_train_dense_sha256": "92b58d629e78cae261b7ab5d5ad50db35f9c10535577f95642bc7c703e2204c6",
+    "cuda_nms_check": true
+  },
+  "result": "environment is available for a separately authorized, committed experiment launch; no training was started"
+}

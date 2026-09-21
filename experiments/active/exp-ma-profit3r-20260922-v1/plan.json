@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "status": "preregistered",
+  "owner_authorization": {
+    "conversation_date": "2026-09-22",
+    "request": "Automatically filter the original1043 events for profitable1:3 outcomes, expand to3000-5000 independent events, process original single-view and limited-position multi-view datasets, train both on RTX3060. Start goal mode, use lighter subagents, all needed permissions granted.",
+    "training_authorized": true,
+    "research_gate_exception": true,
+    "all_historical_data_authorized": true,
+    "coupled_data_pipeline_changes_authorized": true,
+    "promote_or_deploy": false,
+    "live_money": false
+  },
+  "question": "Can original Grade-A events supply3000-5000 independent+3R positives, and does limited causal position diversity improve later full-pool YOLO detection?",
+  "label_contract": {
+    "confirmation_bars": 5,
+    "entry": "next_bar_open_after_confirmation_close",
+    "stop": "long=min(core.low),short=max(core.high),known before entry",
+    "r_definition": "abs(entry-stop),linear price risk",
+    "target_r": 3.0,
+    "retention": "TP before SL within horizon,gross_r>=3 within numerical tolerance,and net return after0.002round-trip cost>0",
+    "round_trip_cost": 0.002,
+    "horizon_hours": 12,
+    "same_bar": "SL first",
+    "gap": "SL worse open;TP barrier conservative",
+    "missing_future": "unknown not negative",
+    "note": "3R is conventional price-risk R;net R separately reported.Optional owner clarification requested.Do not use MFE as realised profit."
+  },
+  "discovery": {
+    "legacy_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/manifest.jsonl",
+    "legacy_expected_positive_events": 1043,
+    "morphology": "original frozen PERFECT_CANDIDATE gates,reference threshold,and CLOSE discovery MAs",
+    "scan_order_minutes": [
+      15,
+      5,
+      30,
+      60,
+      240,
+      3
+    ],
+    "data_end_exclusive": "2026-09-21T16:00:00Z",
+    "minimum_independent_winners": 3000,
+    "maximum_dataset_winners": 5000,
+    "stop_rule": "Complete each frozen source batch.Stop expansion at>=3000 unique retained events after purge.If>5000 select by outcome-blind event hash stratified by split.Never loosen gates or multiply views to reach capacity.",
+    "dedup": "same canonical asset/direction within4h across venues/timeframes;select representative before profit labels",
+    "universe": "all available USDT perpetual histories,no same-window movers ranking",
+    "fallback": "extend official historical sources;report actual capacity if target remains infeasible"
+  },
+  "splits": {
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "evaluation": "All resolved original-rule candidates in later pools,including losing/timeout negatives;unknown excluded and counted.No winner-only precision or economics."
+  },
+  "render": {
+    "width": 1280,
+    "height": 742,
+    "ma": "HL2 SMA/EMA20/60/120",
+    "classes": {
+      "0": "profitable_dense_long",
+      "1": "profitable_dense_short"
+    },
+    "core_geometry": "original4/5bar indices,wicks+causal6MA envelope,4pct padding",
+    "group_a": {
+      "views_per_event": 1,
+      "pre_core_bars": [
+        9
+      ],
+      "post_core_bars": 5
+    },
+    "group_b": {
+      "views_per_event": 2,
+      "pre_core_bars": [
+        7,
+        11
+      ],
+      "post_core_bars": 5
+    },
+    "visible_end": "confirmation close;no entry or future-label bars",
+    "training_population": "Retained positive events only as requested;failed events preserved for full-pool evaluation.",
+    "common_validation_test": "same single-view inputs and labels for both arms"
+  },
+  "proposed_training": {
+    "host": "Administrator@192.168.1.2",
+    "remote_root": "C:/fable",
+    "gpu": "RTX3060",
+    "base_model": "models/yolo11s.pt",
+    "imgsz": 1280,
+    "batch": 8,
+    "optimizer": "AdamW",
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "seed": 0,
+    "deterministic": true,
+    "epochs": 40,
+    "patience": 0,
+    "workers": 2,
+    "all_spatial_color_mix_augmentations_disabled": true,
+    "comparison_note": "Same epochs for practical recipes;B has2x input exposures.Report explicitly;not pure-position causal attribution.Freeze final args after dataset audit."
+  },
+  "evaluation": {
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "hit_iou": 0.5,
+    "primary": [
+      "event precision/recall on full resolved pool",
+      "false firing on failed events",
+      "3R fraction among detections",
+      "matched same-source-time-volatility random control",
+      "net mean and topdecile returns after costs"
+    ],
+    "secondary": [
+      "mAP50",
+      "mAP50_95",
+      "direction/timeframe strata",
+      "ROC-AUC on event scores",
+      "permutation p"
+    ],
+    "no_production_claim": true
+  },
+  "safety": {
+    "new_branch": false,
+    "worktree": false,
+    "change_global_thresholds": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "original_inputs_read_only": true
+  },
+  "planned_report": "analysis/p1_ma_profit3r_20260922.md"
+}
