@@ -1,0 +1,47 @@
+{
+  "batches": {
+    "1m_batch01": {
+      "manifest_path": "sources_archive_1m_batch01.json",
+      "manifest_sha256": "54fc1dd4019c8e5a6d2c7bd6e12a9ef65a90ae1b5049a53334b2558f1e7eb4fb",
+      "master_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/master_sources_archive_1m_batch01.json",
+      "master_sha256": "3d2e7a4606b7ecb2cd978f4e32e01bdb3725706978ac42cb29fac42320ea4f64",
+      "summary_commit": "cdc33ee2a4d893d552b957daa475691e9c74e367",
+      "summary_path": "queue_summary_1m_batch01.json",
+      "summary_sha256": "21f1ed7058677f2f445f8b137ee25564162997e6a530da9efe257aa16326c07c"
+    },
+    "3m": {
+      "manifest_path": "sources_archive_3m.json",
+      "manifest_sha256": "32459db50a2b1b593d8c312eafc5a2a7840d400b2fe7ec4d45ee4929498e6ca9",
+      "master_path": "experiments/active/exp-ma-profit3r-20260922-v1/source_scans/master_sources_archive_3m.json",
+      "master_sha256": "3db0a779735e5ab92f5e6099d2d9ea7399d568ca77064b4543cdc5e96f0ea276",
+      "summary_commit": "c5b7c30776281c5021d42fa4bcb678010ce9b2d9",
+      "summary_path": "queue_summary_3m.json",
+      "summary_sha256": "0acfe0c0c0f4105badeba3f30613317b1b9bc3b054ff7280d5c46077c4367242"
+    }
+  },
+  "binding": {
+    "cohort_sha256": "276f165df6791df94ae6dc54d9b1470be9f7435b846945975063a60680a6af36",
+    "config_sha256": "23841e35e2b1115d60389a3850d97793ae94e69c1628109b0e9701e706eefe86",
+    "controller_sha256": "c9cc9384bb38e5992b2e9fb08ea3be2ce4e42cc47297d55489f9924b5cd81d30",
+    "incremental_labeler_sha256": "9619d4c34a21a307e648b0a70e0cd19b0ec3f0b00b6afb231e456572ac1dbeb8",
+    "pipeline_sha256": "ef813dfcbbd7e8d354869f3c369b1f4f222a055ad42556b05b9435d1b0d05811",
+    "plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+    "reader_sha256": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e",
+    "resolver_sha256": "8dd974e72612c2c9d479ab803be7766ee9e5e380df51b7f34fc1705c894d46d1",
+    "training_contract_sha256": "e9383f4b66e209370cb6e5faf30ee7b8b186d8368fe9c65e2324a79ad23adad8"
+  },
+  "rounds": [
+    {
+      "after_batch": "3m",
+      "capacity_gate": false,
+      "collection_commit": "a89f19940054c9efced9c0d98a837fec57f8c1ec",
+      "outcome_commit": "2f55788c08c20f7c857ee23dbc483a390abec234",
+      "selection_commit": "29a4f3be9e39127d2269e7cce87d6eb525b80869",
+      "selection_receipt_path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_001/selection_receipt.json",
+      "selection_receipt_sha256": "8cb0f71288b44eaaa59b8e2e783725c1ee83ed680063c477ba0be005796d5d38",
+      "tag": "queue_round_001"
+    }
+  ],
+  "schema_version": 2,
+  "status": "idle"
+}
