@@ -10,6 +10,7 @@ No production cache, trading endpoint, or credentials are used.
 from __future__ import annotations
 import argparse, csv, gzip, hashlib, json, threading, time
 from collections import deque
+from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 import numpy as np
@@ -40,7 +41,7 @@ def bounded_local(path, minutes, cutoff, earliest):
         previous=None
         for raw in reader:
             s=raw[idx[name]]
-            ms=int(s) if name=='ts' or s.isdigit() else int(pd.Timestamp(s).timestamp()*1000)
+            ms=int(s) if name=='ts' or s.isdigit() else int(datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()*1000)
             if previous is not None and ms<=previous:raise ValueError('not ascending')
             previous=ms
             if ms+minutes*60000>cutoff:boundary=1;break
@@ -55,13 +56,19 @@ def canonical(rows):
     return f
 
 def aggregate(f, source_minutes, target_minutes, cutoff):
+    if target_minutes % source_minutes:raise ValueError('noninteger resampling ratio')
     if target_minutes==source_minutes:return f.copy()
-    duration=target_minutes*60000; needed=target_minutes//source_minutes; out=[]
-    for bucket,g in f.groupby((f.ts//duration)*duration,sort=True):
-        expected=np.arange(bucket,bucket+duration,source_minutes*60000)
-        if bucket+duration>cutoff or len(g)!=needed or not np.array_equal(g.ts.to_numpy(),expected):continue
-        out.append([bucket,g.open.iloc[0],g.high.max(),g.low.min(),g.close.iloc[-1],g.volume.sum()])
-    return canonical(out)
+    duration=target_minutes*60000; needed=target_minutes//source_minutes
+    if f.empty:return f.copy()
+    g=f.groupby((f.ts//duration)*duration,sort=True)
+    out=g.agg(ts=('ts','first'),last_ts=('ts','last'),count=('ts','size'),
+              open=('open','first'),high=('high','max'),low=('low','min'),close=('close','last'),volume=('volume',lambda x:x.sum()))
+    # Unique sorted inputs + exact count and endpoints imply every grid member.
+    aligned=(f.ts % (source_minutes*60000)).eq(0).groupby((f.ts//duration)*duration).all()
+    valid=(out['count']==needed)&(out.ts==out.index)&(out.last_ts==out.index+duration-source_minutes*60000)&(out.index+duration<=cutoff)&aligned
+    out=out.loc[valid,['ts',*COLS[2:]]].reset_index(drop=True)
+    out.insert(1,'open_time',pd.to_datetime(out.ts,unit='ms',utc=True))
+    return out
 
 class Client:
     def __init__(self,venue,output):
@@ -147,15 +154,20 @@ def run(plan_path):
         dest=output/f'{venue}_{market}_{minutes}m.csv'
         if dest.exists():
             # Resume only exact same derived bytes.
-            expected=f.to_csv(index=False)
-            if dest.read_text()!=expected:raise ValueError('immutable input changed '+str(dest))
+            prior=pd.read_csv(dest)
+            if len(prior)!=len(f) or not np.array_equal(prior.ts.to_numpy(),f.ts.to_numpy()):raise ValueError('immutable input changed '+str(dest))
+            if not np.allclose(prior[COLS[2:]].to_numpy(float),f[COLS[2:]].to_numpy(float),rtol=1e-14,atol=0):raise ValueError('immutable prices changed '+str(dest))
         else:f.to_csv(dest,index=False)
         desc={'path':str(dest.relative_to(ROOT)),'symbol':asset,'market':market,'venue':venue,'bar_minutes':minutes,'prefix_sha256':hashlib.sha256(dest.read_bytes()).hexdigest(),'rows':len(f),'origin':origin}
         specs.append(desc);coverage.append({**desc,'last_close_utc':str(pd.Timestamp(int(f.ts.max())+minutes*60000,unit='ms',tz='UTC')) if len(f) else None})
     for asset,(_,task,f) in sorted(choices.items()):
         p,venue,market,_=task
         for minutes in (30,60,240):
-            g=aggregate(f,30,minutes,cutoff);g=g[g.ts>=start-1200*minutes*60000].reset_index(drop=True)
+            existing=output/f'{venue}_{market}_{minutes}m.csv'
+            if existing.exists():
+                g=pd.read_csv(existing);validate(g,minutes,cutoff)
+            else:
+                g=aggregate(f,30,minutes,cutoff);g=g[g.ts>=start-1200*minutes*60000].reset_index(drop=True)
             save(g,asset,venue,market,minutes,str(p))
     dump(out/'high_timeframe_sources.json',specs)
     dump(out/'universe.json',[{'asset':a,'venue':v[1][1],'market':v[1][2]} for a,v in sorted(choices.items())])

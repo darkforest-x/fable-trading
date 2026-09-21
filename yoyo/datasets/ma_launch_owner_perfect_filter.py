@@ -167,6 +167,7 @@ def extract_profile(
     *,
     core_shift: int = 0,
     bar_minutes: int = 15,
+    visibility_end_exclusive: pd.Timestamp | None = None,
 ) -> ShapeProfile:
     """Extract one profile from the exact row geometry.
 
@@ -176,7 +177,9 @@ def extract_profile(
     boundary null and shifts only the two core edges; the original ATR anchor
     stays fixed so the paired null changes one variable.  No row at or after
     :data:`HOLDOUT_START` can be present in ``frame`` because the caller uses
-    ``read_preholdout_prefix``.
+    ``read_preholdout_prefix``.  ``visibility_end_exclusive`` permits a
+    historical as-of scanner to use its own exclusive source-visibility cutoff;
+    omission preserves the legacy :data:`HOLDOUT_START` boundary.
     """
 
     start_i, end_i, anchor_i = _row_indices(row)
@@ -187,8 +190,15 @@ def extract_profile(
         raise PerfectFilterError(f"unsupported core length {core_len}")
     if start_i - 12 < 0 or end_i + 5 >= len(frame) or anchor_i >= len(frame):
         raise PerfectFilterError("profile window falls outside pre-holdout frame")
-    if pd.Timestamp(frame["open_time"].iloc[end_i + 5]) >= HOLDOUT_START:
-        raise PerfectFilterError("profile touches holdout")
+    visibility_limit = (
+        HOLDOUT_START
+        if visibility_end_exclusive is None
+        else pd.Timestamp(visibility_end_exclusive)
+    )
+    if visibility_limit.tzinfo is None:
+        raise PerfectFilterError("visibility cutoff must include a timezone")
+    if pd.Timestamp(frame["open_time"].iloc[end_i + 5]) >= visibility_limit:
+        raise PerfectFilterError("profile touches visibility cutoff")
     time_stop = max(end_i + 5, anchor_i)
     times = pd.to_datetime(
         frame["open_time"].iloc[start_i - 12 : time_stop + 1], utc=True
