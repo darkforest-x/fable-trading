@@ -256,8 +256,6 @@ def _per_asset(trades: pd.DataFrame, selected: pd.DataFrame, failures: pd.DataFr
     coverage["failed_trades"] = coverage.failed_trades.fillna(0).astype(int)
     coverage["asset_complete"] = coverage.failed_trades.eq(0)
     if trades.empty:
-        return coverage.assign(event_key=pd.NA, arm=pd.NA, status="incomplete_failure")
-    if trades.empty:
         # _aggregate has already established that every selected event failed.
         result = coverage.loc[~coverage.asset_complete].copy()
         result["event_key"] = pd.NA

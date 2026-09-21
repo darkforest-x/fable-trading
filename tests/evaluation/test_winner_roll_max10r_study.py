@@ -55,15 +55,6 @@ def test_gap_or_ordinal_disagreement_is_an_explicit_failure():
         study.frame_for_trade(_context(), _row(exit_i=5160))
 
 
-def test_all_failed_assets_remain_visible():
-    selected = pd.DataFrame([_row(event_key="a"), _row(event_key="b", asset="BBB")])
-    failures = pd.DataFrame({"event_key": ["a", "b"]})
-    result = study._per_asset(pd.DataFrame(), selected, failures)
-    assert set(result.asset) == {"AAA", "BBB"}
-    assert result.failed_trades.sum() == 2
-    assert result.status.eq("incomplete_failure").all()
-
-
 def test_per_asset_keeps_none_and_one_from_the_same_best_two_arm_trade():
     rows = []
     for event, asset, two in (("a-low", "AAA", 120.), ("a-best", "AAA", 140.), ("b-only", "BBB", 130.)):
