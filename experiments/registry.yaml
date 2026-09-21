@@ -10184,18 +10184,22 @@ experiments:
 
   - experiment_id: exp-winner-pyramiding-20260921-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 8d88e79181ea298752752f0e9f466708c0ddd886
-    status: active
+    source_commit: 0ef98a41eca8032bc0df913311c710383587bf42
+    status: inconclusive
     question: Does removing the two-add cap improve net outcomes under one common causal profitable-pyramiding policy?
     single_variable: Successful add count limit zero,two,unlimited;shared1h long entries,structural clock,stops,costs and funding rules.
-    result: Protocol frozen before replay;29 prior Binance sources,V9 long proxy,chronological segments and matched random timing controls.
+    result: Completed29 symbols,451 entries/449 closed. Later0/2/unlimited netR -14.3286/-21.5970/-19.9304.
+      Only4 later events exceed2 adds;1 improves and3 worsen,delta1.6666R/monthly p0.5. No default replacement.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_winner_pyramiding_20260921.md
-    artifacts: []
+    artifacts:
+    - winner-pyramiding-20260921-run-v1
     reuse_allowed: false
     notes: Screenshot venue/date/signal unknown;not screenshot replay. Method units100capital/1grossrisk/1x exposure,not an all-in leveraged portfolio.
+      Prior-studied later data nonblind;15 focused tests pass,full gates479pass/8preexisting failures.1353 ledgers verified;max7 adds.
+      Notion3e28856479af814d8d00fc5276c0da66. No training,promotion,defaults,Pine or account actions.
 
   - experiment_id: exp-spike-h1-sma60-release-20260920-v1
     source_repo: darkforest-x/fable-trading
