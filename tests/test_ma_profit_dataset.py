@@ -27,6 +27,18 @@ def test_variants_are_distinct_but_share_causal_right_edge_and_future_is_irrelev
     assert [label_line(x) for x in assets] == [label_line(x) for x in changed_assets]
 
 
+def test_compact_discovery_metadata_preserves_all_three_images_and_labels():
+    from yoyo.datasets.ma_profit_cohort import compact_event
+    frame = source()
+    full = row(frame) | {"features": {"unused": [1, 2, 3]}, "strict_metrics": {"unused": 99}, "quality_score": .8}
+    # Projection occurs before label/split computation; the same resolver
+    # result is appended to both representations afterwards.
+    compact = compact_event(full) | {"split": full["split"], "profit": full["profit"]}
+    original_assets, compact_assets = event_assets(frame, full), event_assets(frame, compact)
+    assert [asset["png"] for asset in original_assets] == [asset["png"] for asset in compact_assets]
+    assert [label_line(asset) for asset in original_assets] == [label_line(asset) for asset in compact_assets]
+
+
 def test_nonwinner_train_is_excluded_but_val_is_single_empty_label_candidate():
     frame0 = source()
     assert event_assets(frame0, row(frame0, "train", False)) == []

@@ -239,7 +239,29 @@ def _pin_source(row: Mapping[str, Any], known_sha: str | None = None) -> dict[st
     return {"source_path": source, "sha256": actual, **{key: row[key] for key in ("bar_minutes", "venue", "symbol") if key in row}}
 
 
-def collect(plan: Path, source_manifest_paths: Sequence[str | Path], output_dir: Path) -> dict[str, Any]:
+COMPACT_EVENT_FIELDS = (
+    "event_id", "cluster_id", "frozen_event_id", "origin", "origin_event_id",
+    "canonical_asset", "symbol", "venue", "direction", "bar_minutes",
+    "source_path", "source_sha256", "source_core_start_i", "source_core_end_i",
+    "core_bars", "core_start_time", "core_end_time", "quality_score", "quality_tier",
+    "reference_gate_pass", "hard_gate_pass", "training_eligible", "production_eligible",
+    "cluster_member_count", "cluster_first_core_end_utc", "cluster_last_core_end_utc",
+    "cluster_members", "reason", "representative_origin_event_id",
+)
+
+
+def compact_event(row: Mapping[str, Any]) -> dict[str, Any]:
+    """Project only after NMS; detail remains in SHA-pinned discovery receipts.
+
+    Preserve every label, split, render, baseline and source-identity input.
+    The source OHLC and core timestamps determine geometry, not the old proposal
+    box or discovery feature vectors.  This function does not select events.
+    """
+    return {**{key: row[key] for key in COMPACT_EVENT_FIELDS if key in row},
+            "full_collection_row_sha256": _json_sha(dict(row))}
+
+
+def collect(plan: Path, source_manifest_paths: Sequence[str | Path], output_dir: Path, *, compact_events: bool = False) -> dict[str, Any]:
     """Freeze SHA-pinned Grade-A candidates and emit label-compatible sources."""
 
     if Path(output_dir).exists():
@@ -276,12 +298,17 @@ def collect(plan: Path, source_manifest_paths: Sequence[str | Path], output_dir:
                 pinned_sources[str(row["source_path"])] = _pin_source(row)
                 candidates.append(_origin_row(row, origin))
     frozen, exclusions = _freeze(candidates)
+    if compact_events:
+        frozen = [compact_event(row) for row in frozen]
+        exclusions = [compact_event(row) for row in exclusions]
     output_dir = Path(output_dir)
     events_path, exclusions_path, sources_path = output_dir / "frozen_events.jsonl", output_dir / "collection_exclusions.jsonl", output_dir / "frozen_sources.json"
     events_sha = _write_jsonl(events_path, frozen)
     exclusions_sha = _write_jsonl(exclusions_path, exclusions)
     sources_sha = _write_json(sources_path, {"schema_version": 1, "experiment_id": EXPERIMENT_ID, "sources": [pinned_sources[key] for key in sorted(pinned_sources)], "inputs": inputs, "candidate_rows_before_clustering": len(candidates), "frozen_clusters": len(frozen)})
     receipt = {"schema_version": 1, "experiment_id": EXPERIMENT_ID, "plan_sha256": _sha(plan_path), "training_contract_sha256": contract_input["sha256"] if contract_input else None, "inputs": inputs, "cluster_rule": "same canonical asset and direction; quality-sorted 4h NMS; retained representatives are strictly more than 4h apart; each rejected row is assigned once to its nearest selected representative", "profit_used_for_collection": False, "frozen_events_path": _relative(events_path), "frozen_events_sha256": events_sha, "collection_exclusions_path": _relative(exclusions_path), "collection_exclusions_sha256": exclusions_sha, "frozen_sources_path": _relative(sources_path), "frozen_sources_sha256": sources_sha, "frozen_clusters": len(frozen)}
+    if compact_events:
+        receipt["event_projection"] = {"schema": "post_nms_lineage_v1", "fields": list(COMPACT_EVENT_FIELDS), "full_row_sha256": "SHA256 of sorted compact JSON before projection; full discovery detail remains in input receipt-pinned strictGradeA.jsonl or legacy caches", "selection_changed": False}
     _write_json(output_dir / "collection_receipt.json", receipt)
     return receipt
 
@@ -439,6 +466,7 @@ def main() -> None:
     collect_parser.add_argument("--plan", required=True, type=Path)
     collect_parser.add_argument("--sources", required=True, action="append", type=Path)
     collect_parser.add_argument("--out", required=True, type=Path)
+    collect_parser.add_argument("--compact-events", action="store_true", help="project redundant discovery detail after NMS while retaining row SHA and source lineage")
     select_parser = subparsers.add_parser("select")
     select_parser.add_argument("--plan", required=True, type=Path)
     select_parser.add_argument("--events", required=True, type=Path)
@@ -451,7 +479,7 @@ def main() -> None:
         raise ProfitCohortError(f"missing committed training contract: {contract}")
     if args.command == "collect":
         _formal_guard([plan, contract, *(_path(path) for path in args.sources)])
-        result = collect(plan, args.sources, args.out)
+        result = collect(plan, args.sources, args.out, compact_events=args.compact_events)
     else:
         _formal_guard([plan, contract, _path(args.events), _path(args.reference_exclusion)])
         result = select_training_cohort(plan, args.events, args.reference_exclusion, args.out)

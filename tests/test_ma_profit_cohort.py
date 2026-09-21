@@ -49,6 +49,15 @@ def test_collect_uses_quality_sorted_nms_and_label_compatible_sources(tmp_path, 
     sources = json.loads((tmp_path / "out/frozen_sources.json").read_text())
     assert sources["sources"][0]["source_path"] == "input.csv"
     assert sources["sources"][0]["sha256"] == "source"
+    compact_receipt = cohort.collect(plan_path, [manifest], tmp_path / "compact", compact_events=True)
+    compact_rows = [json.loads(line) for line in (tmp_path / "compact/frozen_events.jsonl").read_text().splitlines()]
+    assert [row["event_id"] for row in compact_rows] == [row["event_id"] for row in frozen]
+    for original, projected in zip(frozen, compact_rows):
+        assert projected == cohort.compact_event(original)
+        assert projected["full_collection_row_sha256"] == cohort._json_sha(original)
+        assert projected["cluster_members"] == original["cluster_members"]
+        assert projected["quality_score"] == original["quality_score"]
+    assert compact_receipt["event_projection"]["selection_changed"] is False
 
 
 def test_collection_is_independent_of_profit_fields() -> None:
