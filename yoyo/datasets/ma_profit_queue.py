@@ -23,6 +23,8 @@ ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-ma-profit3r-20260922-v1"
 PLAN = EXP / "plan.json"
 SCAN = EXP / "source_scans"
+PROFILE_DRIVER = ROOT / "yoyo/datasets/ma_profit_window_miner.py"
+PROFILE_ADAPTER = ROOT / "yoyo/datasets/ma_profit_profile_window.py"
 MAX_COMMIT_BYTES = 95 * 1024 * 1024
 WORKERS = 2
 RULES = [ROOT / part for part in (
@@ -112,11 +114,39 @@ def rule_hashes() -> dict[str, str]:
     return {str(path.relative_to(ROOT)): sha(path) for path in RULES[1:]}
 
 
-def _matching_source_receipts(manifest: Path) -> dict[str, Path]:
-    """Find exactly one complete receipt for every manifest source and pin it."""
+def _window_miner():
+    """Import the isolated driver only when profile lineage is needed."""
+    from yoyo.datasets import ma_profit_window_miner
+    return ma_profit_window_miner
+
+
+def profile_paths() -> tuple[Path, Path, Path, Path]:
+    """Resolve the driver-selected contract name; never pin a stale v1 filename."""
+    driver = _window_miner()
+    contract = EXP / driver.CONTRACT_NAME
+    try:
+        parity = ROOT / str(json.loads(contract.read_text())["parity_receipt_path"])
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        raise QueueError("invalid profile-window contract") from exc
+    return PROFILE_DRIVER, PROFILE_ADAPTER, contract, parity
+
+
+def profile_implementation() -> dict[str, Any]:
+    """Load the frozen profile proof only when a new master needs it."""
+    return _window_miner().implementation(PLAN)
+
+
+def _profile_code_sha(implementation: Mapping[str, Any]) -> str:
+    original = json_sha({"miner": sha(RULES[0]), "rules": rule_hashes()})
+    return json_sha({"original_code_sha256": original, "profile_implementation": implementation})
+
+
+def _matching_source_receipts(manifest: Path, *, expected_implementation: Mapping[str, Any] | None) -> dict[str, Path]:
+    """Find one receipt/source with the master implementation and immutable rules."""
     expected = {str(row["source_path"]): str(row["sha256"]) for row in source_specs(manifest)}
     found: dict[str, list[Path]] = {key: [] for key in expected}
     wanted_rules = rule_hashes()
+    expected_code = None if expected_implementation is None else _profile_code_sha(expected_implementation)
     for receipt_path in SCAN.rglob("receipt.json"):
         try:
             receipt = json.loads(receipt_path.read_text())
@@ -126,19 +156,27 @@ def _matching_source_receipts(manifest: Path) -> dict[str, Path]:
         source = str(binding.get("source_path", ""))
         if source not in expected:
             continue
-        if (receipt.get("status") == "completed" and binding.get("source_sha256") == expected[source]
+        if not (receipt.get("status") == "completed" and binding.get("source_sha256") == expected[source]
                 and binding.get("plan_sha256") == sha(PLAN)
                 and binding.get("miner_sha256") == sha(RULES[0])
                 and binding.get("rule_dependency_sha256") == wanted_rules):
-            found[source].append(receipt_path)
+            continue
+        implementation = binding.get("profile_implementation")
+        if expected_implementation is None:
+            if implementation is not None:
+                continue
+        elif implementation != expected_implementation or binding.get("code_sha256") != expected_code:
+            continue
+        found[source].append(receipt_path)
     missing = sorted(source for source, paths in found.items() if len(paths) != 1)
     if missing:
         raise QueueError("source receipt coverage/drift: " + ", ".join(missing[:5]))
     return {source: paths[0] for source, paths in found.items()}
 
 
-def validate_master(master: Path, manifest: Path, *, check_receipts: bool = True) -> dict[str, Any]:
-    """Verify that one master covers exactly the immutable manifest source set."""
+def validate_master(master: Path, manifest: Path, *, check_receipts: bool = True,
+                    expected_implementation: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """Verify exact source coverage and the selected legacy/profile implementation."""
     data = json.loads(Path(master).read_text())
     expected_rows = source_specs(manifest)
     expected_paths = {str(row["source_path"]) for row in expected_rows}
@@ -146,6 +184,11 @@ def validate_master(master: Path, manifest: Path, *, check_receipts: bool = True
         raise QueueError("plan or manifest SHA drift")
     if data.get("miner_sha256") != sha(RULES[0]) or data.get("rule_dependency_sha256") != rule_hashes():
         raise QueueError("miner or rule dependency SHA drift")
+    implementation = data.get("profile_implementation")
+    if implementation is not None:
+        expected_implementation = expected_implementation or profile_implementation()
+        if implementation != expected_implementation:
+            raise QueueError("profile implementation drift or unknown master")
     summaries = data.get("source_summaries")
     summary_paths = {str(row.get("source_path", "")) for row in summaries} if isinstance(summaries, list) else set()
     if (not data.get("source_coverage_complete") or data.get("failed_sources") or data.get("errors")
@@ -154,7 +197,7 @@ def validate_master(master: Path, manifest: Path, *, check_receipts: bool = True
             or summary_paths != expected_paths or len(summaries) != len(expected_rows)):
         raise QueueError("incomplete, failed, or source-set drift")
     if check_receipts:
-        _matching_source_receipts(manifest)
+        _matching_source_receipts(manifest, expected_implementation=implementation if implementation is not None else None)
     return data
 
 
@@ -196,6 +239,11 @@ def binding() -> dict[str, str]:
              "incremental_labeler_sha256": sha(ROOT / "yoyo/datasets/ma_profit_incremental_labels.py"),
              "resolver_sha256": sha(ROOT / "yoyo/contracts/ma_profit_filter.py"),
              "reader_sha256": sha(ROOT / "yoyo/datasets/fifteen_minute_launch_candidates.py")}
+    driver, adapter, contract, parity = profile_paths()
+    files.update({"profile_window_driver_sha256": sha(driver),
+                  "profile_window_adapter_sha256": sha(adapter),
+                  "profile_window_contract_sha256": sha(contract),
+                  "profile_window_parity_receipt_sha256": sha(parity)})
     files["config_sha256"] = json_sha(queue_config())
     return files
 
@@ -231,7 +279,7 @@ def wait_until(predicate: Callable[[], bool], description: str, *, once: bool = 
 
 def no_active_miner(output: Callable[[Sequence[str]], str] = command_output) -> None:
     try:
-        pids = output(["pgrep", "-f", "yoyo.datasets.ma_profit_miner"]).strip()
+        pids = output(["pgrep", "-f", "yoyo.datasets.ma_profit_(window_)?miner"]).strip()
     except subprocess.CalledProcessError:
         return
     if pids:
@@ -242,14 +290,16 @@ def run_miner(manifest: Path, *, runner: Callable[..., Any] = subprocess.run,
               output: Callable[[Sequence[str]], str] = command_output) -> None:
     branch_main(output)
     no_active_miner(output)
-    runner([sys.executable, "-m", "yoyo.datasets.ma_profit_miner", "--plan", str(PLAN),
+    for path in profile_paths():
+        ensure_committed(path, output=output)
+    runner([sys.executable, "-m", "yoyo.datasets.ma_profit_window_miner", "--plan", str(PLAN),
             "--sources", str(manifest), "--workers", str(WORKERS)], cwd=ROOT, check=True)
 
 
 def _compact(master: Path, data: Mapping[str, Any]) -> dict[str, Any]:
     keys = ("attempted_sources", "completed_sources", "failed_sources", "source_coverage_complete",
             "strict_grade_a_before_cross_timeframe_dedup", "plan_sha256", "miner_sha256",
-            "rule_dependency_sha256", "sources_manifest_sha256", "training_gate_pass")
+            "rule_dependency_sha256", "sources_manifest_sha256", "training_gate_pass", "profile_implementation")
     return {**{key: data.get(key) for key in keys}, "master_path": str(master.relative_to(ROOT)),
             "master_sha256": sha(master)}
 
@@ -348,13 +398,20 @@ def frozen_manifests(scanned: Mapping[str, Mapping[str, Any]]) -> list[Path]:
 
 
 def validate_collection_inputs(manifests: Iterable[Path], *, output: Callable[[Sequence[str]], str] = command_output) -> None:
-    """Recheck every prior batch before a new frozen cohort consumes it."""
+    """Recheck prior masters; load the profile proof at most once per collection round."""
+    expected_implementation: dict[str, Any] | None = None
     for manifest in manifests:
         ensure_committed(manifest, output=output)
         master = SCAN / f"master_{Path(manifest).stem}.json"
         if not master.exists():
             raise QueueError(f"collection input has no master: {manifest}")
-        validate_master(master, manifest)
+        try:
+            uses_profile = json.loads(master.read_text()).get("profile_implementation") is not None
+        except (OSError, ValueError) as exc:
+            raise QueueError(f"invalid collection master: {master}") from exc
+        if uses_profile and expected_implementation is None:
+            expected_implementation = profile_implementation()
+        validate_master(master, manifest, expected_implementation=expected_implementation)
 
 
 def _relative(path: Path) -> str:

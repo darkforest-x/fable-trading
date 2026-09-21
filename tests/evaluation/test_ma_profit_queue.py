@@ -23,7 +23,7 @@ def _configure(monkeypatch, tmp_path):
     (exp / "training_contract.json").write_text('{"minimum_train_winners":3000}\n')
     (exp / "reference_exclusion.json").write_text('[]\n')
     for name in ("ma_profit_pipeline.py", "ma_profit_cohort.py", "ma_profit_incremental_labels.py",
-                 "fifteen_minute_launch_candidates.py"):
+                 "fifteen_minute_launch_candidates.py", "ma_profit_window_miner.py", "ma_profit_profile_window.py"):
         path = root / "yoyo" / "datasets" / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(name)
@@ -42,6 +42,12 @@ def _configure(monkeypatch, tmp_path):
     monkeypatch.setattr(q, "SCAN", scan)
     monkeypatch.setattr(q, "RULES", rules)
     monkeypatch.setattr(q, "BASE_MANIFESTS", ())
+    monkeypatch.setattr(q, "PROFILE_DRIVER", root / "yoyo/datasets/ma_profit_window_miner.py")
+    monkeypatch.setattr(q, "PROFILE_ADAPTER", root / "yoyo/datasets/ma_profit_profile_window.py")
+    contract = exp / q._window_miner().CONTRACT_NAME
+    parity = exp / "profile_window_parity_fixture.json"
+    parity.write_text("fixture parity")
+    contract.write_text(json.dumps({"parity_receipt_path": str(parity.relative_to(root))}))
     return root, exp, scan, plan, rules
 
 
@@ -51,18 +57,37 @@ def _manifest(exp, name="sources.json", paths=("input/a.csv", "input/b.csv")):
     return path
 
 
-def _master(scan, manifest, plan, rules, *, root, paths=("input/a.csv", "input/b.csv"), failed=0):
+def _master(scan, manifest, plan, rules, *, root, paths=("input/a.csv", "input/b.csv"), failed=0, implementation=None):
     scan.mkdir(parents=True, exist_ok=True)
     path = scan / f"master_{manifest.stem}.json"
-    path.write_text(json.dumps({
+    payload = {
         "plan_sha256": _digest(plan), "sources_manifest_sha256": _digest(manifest),
         "miner_sha256": _digest(rules[0]),
         "rule_dependency_sha256": {str(rule.relative_to(root)): _digest(rule) for rule in rules[1:]},
         "source_coverage_complete": not failed, "failed_sources": failed, "errors": [] if not failed else [{"x": "bad"}],
         "completed_sources": len(paths) - failed, "attempted_sources": len(paths),
         "source_summaries": [{"source_path": source} for source in paths],
-    }))
+    }
+    if implementation is not None:
+        payload["profile_implementation"] = implementation
+    path.write_text(json.dumps(payload))
     return path
+
+
+def _source_receipts(scan, manifest, plan, rules, *, root, implementation=None):
+    for index, row in enumerate(q.source_specs(manifest)):
+        binding = {
+            "source_path": row["source_path"], "source_sha256": row["sha256"],
+            "plan_sha256": _digest(plan), "miner_sha256": _digest(rules[0]),
+            "rule_dependency_sha256": {str(rule.relative_to(root)): _digest(rule) for rule in rules[1:]},
+            "code_sha256": q.json_sha({"miner": _digest(rules[0]), "rules": {str(rule.relative_to(root)): _digest(rule) for rule in rules[1:]}}),
+        }
+        if implementation is not None:
+            binding["profile_implementation"] = implementation
+            binding["code_sha256"] = q._profile_code_sha(implementation)
+        receipt = scan / f"fixture_{index}" / "receipt.json"
+        receipt.parent.mkdir(parents=True, exist_ok=True)
+        receipt.write_text(json.dumps({"status": "completed", "binding": binding}))
 
 
 def _git_output(args, **_kwargs):
@@ -215,8 +240,13 @@ def test_run_miner_uses_active_interpreter_and_rejects_parallel_pid(tmp_path, mo
     def runner(args, **kwargs):
         calls.append((args, kwargs))
 
+    frozen = []
+    monkeypatch.setattr(q, "ensure_committed", lambda path, **_kwargs: frozen.append(path) or "commit")
     q.run_miner(manifest, runner=runner, output=_git_output)
-    assert calls[0][0][0] == sys.executable
+    args = calls[0][0]
+    assert args[0] == sys.executable
+    assert args[args.index("-m") + 1] == "yoyo.datasets.ma_profit_window_miner"
+    assert frozen == list(q.profile_paths())
 
     def active(args, **_kwargs):
         if args[0] == "pgrep":
@@ -555,3 +585,59 @@ def test_round_three_requires_prior_incremental_receipt(tmp_path, monkeypatch):
     _write_label(exp, plan, prior_cohort, prior_outcomes, capacity=False)
     with pytest.raises(q.QueueError, match="partial downstream stage"):
         q.prior_incremental_inputs("queue_round_003", output=_git_output)
+
+
+def test_legacy_master_and_receipts_remain_valid_without_profile_implementation(tmp_path, monkeypatch):
+    root, exp, scan, plan, rules = _configure(monkeypatch, tmp_path)
+    manifest = _manifest(exp)
+    master = _master(scan, manifest, plan, rules, root=root)
+    _source_receipts(scan, manifest, plan, rules, root=root)
+    monkeypatch.setattr(q, "profile_implementation", lambda: (_ for _ in ()).throw(AssertionError("legacy must not load proof")))
+    assert q.validate_master(master, manifest).get("profile_implementation") is None
+
+
+def test_profile_master_and_every_source_receipt_must_share_expected_implementation(tmp_path, monkeypatch):
+    root, exp, scan, plan, rules = _configure(monkeypatch, tmp_path)
+    manifest = _manifest(exp)
+    implementation = {"implementation_id": "bounded_strict_profile_v1", "adapter_sha256": "a" * 64,
+                      "driver_sha256": "d" * 64, "contract_sha256": "c" * 64, "parity_receipt_sha256": "p" * 64}
+    monkeypatch.setattr(q, "profile_implementation", lambda: implementation)
+    master = _master(scan, manifest, plan, rules, root=root, implementation=implementation)
+    _source_receipts(scan, manifest, plan, rules, root=root, implementation=implementation)
+    assert q.validate_master(master, manifest)["profile_implementation"] == implementation
+    receipt = scan / "fixture_1" / "receipt.json"
+    payload = json.loads(receipt.read_text())
+    payload["binding"]["profile_implementation"] = {**implementation, "adapter_sha256": "0" * 64}
+    receipt.write_text(json.dumps(payload))
+    with pytest.raises(q.QueueError, match="source receipt coverage/drift"):
+        q.validate_master(master, manifest)
+
+
+def test_profile_master_rejects_unknown_implementation_and_effective_code_sha_drift(tmp_path, monkeypatch):
+    root, exp, scan, plan, rules = _configure(monkeypatch, tmp_path)
+    manifest = _manifest(exp)
+    implementation = {"implementation_id": "bounded_strict_profile_v1", "adapter_sha256": "a" * 64,
+                      "driver_sha256": "d" * 64, "contract_sha256": "c" * 64, "parity_receipt_sha256": "p" * 64}
+    monkeypatch.setattr(q, "profile_implementation", lambda: implementation)
+    unknown = {**implementation, "adapter_sha256": "0" * 64}
+    master = _master(scan, manifest, plan, rules, root=root, implementation=unknown)
+    with pytest.raises(q.QueueError, match="profile implementation drift"):
+        q.validate_master(master, manifest, check_receipts=False)
+    master = _master(scan, manifest, plan, rules, root=root, implementation=implementation)
+    _source_receipts(scan, manifest, plan, rules, root=root, implementation=implementation)
+    receipt = scan / "fixture_0" / "receipt.json"
+    payload = json.loads(receipt.read_text())
+    payload["binding"]["code_sha256"] = "drift"
+    receipt.write_text(json.dumps(payload))
+    with pytest.raises(q.QueueError, match="source receipt coverage/drift"):
+        q.validate_master(master, manifest)
+
+
+def test_run_miner_refuses_missing_profile_proof_before_starting_driver(tmp_path, monkeypatch):
+    root, exp, _scan, _plan, _rules = _configure(monkeypatch, tmp_path)
+    manifest = _manifest(exp)
+    missing = exp / "missing_profile_proof.json"
+    actual_paths = q.profile_paths()
+    monkeypatch.setattr(q, "profile_paths", lambda: (*actual_paths[:3], missing))
+    with pytest.raises(q.QueueError, match="missing frozen input"):
+        q.run_miner(manifest, runner=lambda *_args, **_kwargs: pytest.fail("driver must not start"), output=_git_output)
