@@ -100,7 +100,7 @@ def fetch(client,symbol,minutes,start,cutoff):
     for _ in range(10):
         if cursor<=earliest:break
         if client.venue=='binance':
-            params={'symbol':symbol,'interval':f'{minutes}m','endTime':cursor-1,'startTime':earliest,'limit':1500}
+            params={'symbol':symbol,'interval':f'{minutes}m' if minutes<60 else f'{minutes//60}h','endTime':cursor-1,'startTime':earliest,'limit':1500}
         else:params={'instId':symbol,'bar':f'{minutes}m','after':cursor,'before':earliest-1,'limit':300}
         raw,receipt=client.get(params);receipts.append(receipt)
         if not raw:break
