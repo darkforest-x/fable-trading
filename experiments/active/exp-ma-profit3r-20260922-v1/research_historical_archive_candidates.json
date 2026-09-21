@@ -1,0 +1,1144 @@
+{
+  "schema_version": 1,
+  "status": "research_only",
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "sampled_at_utc": "2026-09-21T21:22:03.849969Z",
+  "requested_archive_range": {
+    "start_month": "2019-09",
+    "end_month": "2026-08"
+  },
+  "archive_source": "Binance Vision USDⓈ-M Futures monthly klines; S3 ListObjectsV2 metadata only",
+  "sourceURLs": [
+    "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2F&delimiter=%2F&max-keys=1000",
+    "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2F{SYMBOL}%2F{INTERVAL}%2F&max-keys=1000"
+  ],
+  "frozen_snapshot": {
+    "admitted_path": "experiments/active/exp-ma-profit3r-20260922-v1/inputs/binance_3m_full/admitted_symbols.json",
+    "admitted_sha256": "98d89105624ee75494c1c1ee6e88b625a1d483776e0144515f9c07de37f63cfd",
+    "admitted_count": 655,
+    "exchange_info_path": "experiments/active/exp-ma-profit3r-20260922-v1/inputs/binance_3m_full/exchange_info.json",
+    "exchange_info_sha256": "ad95af684884cce2326747e93e24a68c59cd571c1c0892985563d988e4de6afe",
+    "exchange_info_snapshot_mtime_utc": "2026-09-21T17:33:12.906252Z",
+    "exchange_info_server_time_ms": 1789999200498,
+    "exchange_info_symbol_count": 905,
+    "current_exchange_info_used": "local frozen snapshot; no live API request"
+  },
+  "archive_inventory": {
+    "root_prefix": "data/futures/um/monthly/klines/",
+    "root_listing_pages": 2,
+    "root_page_key_counts": [
+      1000,
+      18
+    ],
+    "root_page_common_prefix_counts": [
+      1000,
+      18
+    ],
+    "common_prefix_count": 1018,
+    "strict_usdt_directory_count": 864,
+    "strict_usdt_in_frozen_admitted": 654,
+    "strict_usdt_extra_count": 210,
+    "extra_current_tradifi_perpetual_count": 179,
+    "historical_candidates_absent_current_exchange_info_count": 31,
+    "candidate_definition": "strict archive directory basename ending in USDT, minus frozen admitted symbols, minus every symbol present in the frozen current exchange_info snapshot",
+    "identity_rule": "retain exact archive directory symbol only; do not infer aliases or current identity"
+  },
+  "verification": {
+    "candidate_count": 31,
+    "interval_listing_requests": 62,
+    "all_interval_listings_single_page": true,
+    "all_months_have_matching_checksum": true,
+    "intervals_with_internal_missing_months": 0,
+    "intervals_with_unmatched_checksum": 0,
+    "intervals_with_objects_after_2026_08": 0,
+    "downloaded_kline_zip_files": 0,
+    "note": "All requests were S3 list metadata requests; no K-line ZIP or CHECKSUM body was downloaded."
+  },
+  "candidates": [
+    {
+      "archive_symbol": "1000BTTCUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2F1000BTTCUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 8,
+          "months": 4,
+          "checksums": 4,
+          "first_month": "2022-01",
+          "last_month": "2022-04",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2F1000BTTCUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 8,
+          "months": 4,
+          "checksums": 4,
+          "first_month": "2022-01",
+          "last_month": "2022-04",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "AERGOUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAERGOUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 44,
+          "months": 22,
+          "checksums": 22,
+          "first_month": "2024-09",
+          "last_month": "2026-06",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAERGOUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 44,
+          "months": 22,
+          "checksums": 22,
+          "first_month": "2024-09",
+          "last_month": "2026-06",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "AKROUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAKROUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 34,
+          "months": 17,
+          "checksums": 17,
+          "first_month": "2021-01",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAKROUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 34,
+          "months": 17,
+          "checksums": 17,
+          "first_month": "2021-01",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "ANCUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FANCUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 6,
+          "months": 3,
+          "checksums": 3,
+          "first_month": "2022-03",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FANCUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 6,
+          "months": 3,
+          "checksums": 3,
+          "first_month": "2022-03",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "ANTUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FANTUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 60,
+          "months": 30,
+          "checksums": 30,
+          "first_month": "2021-12",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FANTUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 60,
+          "months": 30,
+          "checksums": 30,
+          "first_month": "2021-12",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "AUDIOUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAUDIOUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 68,
+          "months": 34,
+          "checksums": 34,
+          "first_month": "2021-08",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FAUDIOUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 68,
+          "months": 34,
+          "checksums": 34,
+          "first_month": "2021-08",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BDXNUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBDXNUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 20,
+          "months": 10,
+          "checksums": 10,
+          "first_month": "2025-06",
+          "last_month": "2026-03",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBDXNUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 20,
+          "months": 10,
+          "checksums": 10,
+          "first_month": "2025-06",
+          "last_month": "2026-03",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BLUEBIRDUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBLUEBIRDUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 38,
+          "months": 19,
+          "checksums": 19,
+          "first_month": "2022-11",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBLUEBIRDUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 38,
+          "months": 19,
+          "checksums": 19,
+          "first_month": "2022-11",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BTCSTUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTCSTUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 128,
+          "months": 64,
+          "checksums": 64,
+          "first_month": "2021-03",
+          "last_month": "2026-06",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTCSTUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 128,
+          "months": 64,
+          "checksums": 64,
+          "first_month": "2021-03",
+          "last_month": "2026-06",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BTSUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTSUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 80,
+          "months": 40,
+          "checksums": 40,
+          "first_month": "2021-02",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTSUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 80,
+          "months": 40,
+          "checksums": 40,
+          "first_month": "2021-02",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BTTUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTTUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 20,
+          "months": 10,
+          "checksums": 10,
+          "first_month": "2021-04",
+          "last_month": "2022-01",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBTTUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 20,
+          "months": 10,
+          "checksums": 10,
+          "first_month": "2021-04",
+          "last_month": "2022-01",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "BZRXUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBZRXUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2020-09",
+          "last_month": "2021-12",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FBZRXUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2020-09",
+          "last_month": "2021-12",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "COCOSUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FCOCOSUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2023-02",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FCOCOSUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2023-02",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "DODOUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FDODOUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2021-02",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FDODOUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 32,
+          "months": 16,
+          "checksums": 16,
+          "first_month": "2021-02",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "DOTECOUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FDOTECOUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 4,
+          "months": 2,
+          "checksums": 2,
+          "first_month": "2021-01",
+          "last_month": "2021-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FDOTECOUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 4,
+          "months": 2,
+          "checksums": 2,
+          "first_month": "2021-01",
+          "last_month": "2021-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "EOSUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FEOSUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 130,
+          "months": 65,
+          "checksums": 65,
+          "first_month": "2020-01",
+          "last_month": "2025-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FEOSUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 130,
+          "months": 65,
+          "checksums": 65,
+          "first_month": "2020-01",
+          "last_month": "2025-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "FOOTBALLUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FFOOTBALLUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 42,
+          "months": 21,
+          "checksums": 21,
+          "first_month": "2022-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FFOOTBALLUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 42,
+          "months": 21,
+          "checksums": 21,
+          "first_month": "2022-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "FRONTUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FFRONTUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 26,
+          "months": 13,
+          "checksums": 13,
+          "first_month": "2023-09",
+          "last_month": "2024-09",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FFRONTUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 26,
+          "months": 13,
+          "checksums": 13,
+          "first_month": "2023-09",
+          "last_month": "2024-09",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "GALUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FGALUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 54,
+          "months": 27,
+          "checksums": 27,
+          "first_month": "2022-05",
+          "last_month": "2024-07",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FGALUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 54,
+          "months": 27,
+          "checksums": 27,
+          "first_month": "2022-05",
+          "last_month": "2024-07",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "HNTUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FHNTUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 90,
+          "months": 45,
+          "checksums": 45,
+          "first_month": "2020-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FHNTUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 90,
+          "months": 45,
+          "checksums": 45,
+          "first_month": "2020-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "KEEPUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FKEEPUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 18,
+          "months": 9,
+          "checksums": 9,
+          "first_month": "2021-06",
+          "last_month": "2022-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FKEEPUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 18,
+          "months": 9,
+          "checksums": 9,
+          "first_month": "2021-06",
+          "last_month": "2022-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "LENDUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FLENDUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 10,
+          "months": 5,
+          "checksums": 5,
+          "first_month": "2020-07",
+          "last_month": "2020-11",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FLENDUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 10,
+          "months": 5,
+          "checksums": 5,
+          "first_month": "2020-07",
+          "last_month": "2020-11",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "LUNAUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FLUNAUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 34,
+          "months": 17,
+          "checksums": 17,
+          "first_month": "2021-01",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FLUNAUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 34,
+          "months": 17,
+          "checksums": 17,
+          "first_month": "2021-01",
+          "last_month": "2022-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "MATICUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FMATICUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 96,
+          "months": 48,
+          "checksums": 48,
+          "first_month": "2020-10",
+          "last_month": "2024-09",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FMATICUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 96,
+          "months": 48,
+          "checksums": 48,
+          "first_month": "2020-10",
+          "last_month": "2024-09",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "MBLUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FMBLUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 14,
+          "months": 7,
+          "checksums": 7,
+          "first_month": "2023-11",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FMBLUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 14,
+          "months": 7,
+          "checksums": 7,
+          "first_month": "2023-11",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "NUUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FNUUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 10,
+          "months": 5,
+          "checksums": 5,
+          "first_month": "2021-10",
+          "last_month": "2022-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FNUUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 10,
+          "months": 5,
+          "checksums": 5,
+          "first_month": "2021-10",
+          "last_month": "2022-02",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "RNDRUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FRNDRUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 36,
+          "months": 18,
+          "checksums": 18,
+          "first_month": "2023-02",
+          "last_month": "2024-07",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FRNDRUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 36,
+          "months": 18,
+          "checksums": 18,
+          "first_month": "2023-02",
+          "last_month": "2024-07",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "SRMUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FSRMUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 90,
+          "months": 45,
+          "checksums": 45,
+          "first_month": "2020-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FSRMUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 90,
+          "months": 45,
+          "checksums": 45,
+          "first_month": "2020-09",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "SXPUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FSXPUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 142,
+          "months": 71,
+          "checksums": 71,
+          "first_month": "2020-07",
+          "last_month": "2026-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FSXPUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 142,
+          "months": 71,
+          "checksums": 71,
+          "first_month": "2020-07",
+          "last_month": "2026-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "TOMOUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FTOMOUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 88,
+          "months": 44,
+          "checksums": 44,
+          "first_month": "2020-10",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FTOMOUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 88,
+          "months": 44,
+          "checksums": 44,
+          "first_month": "2020-10",
+          "last_month": "2024-05",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    },
+    {
+      "archive_symbol": "YFIIUSDT",
+      "current_exchange_info_match": false,
+      "identity": "archive_symbol_only",
+      "monthly": {
+        "1m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FYFIIUSDT%2F1m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 40,
+          "months": 20,
+          "checksums": 20,
+          "first_month": "2020-09",
+          "last_month": "2022-04",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        },
+        "3m": {
+          "listingURL": "https://s3-ap-northeast-1.amazonaws.com/data.binance.vision/?list-type=2&prefix=data%2Ffutures%2Fum%2Fmonthly%2Fklines%2FYFIIUSDT%2F3m%2F&max-keys=1000",
+          "listing_pages": 1,
+          "objects_listed": 40,
+          "months": 20,
+          "checksums": 20,
+          "first_month": "2020-09",
+          "last_month": "2022-04",
+          "internal_missing_months": [],
+          "zip_without_checksum": [],
+          "checksum_without_zip": [],
+          "months_excluded_after_cutoff": [],
+          "unparsed_objects": []
+        }
+      }
+    }
+  ]
+}
