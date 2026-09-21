@@ -1,0 +1,18 @@
+{
+  "source_path": "data/kline_preholdout_binance_um5m/series/binance_um_0GUSDT_5m_64899.csv",
+  "probe_rows": 20000,
+  "regular_csv": {
+    "bytes": 1522250,
+    "physical_bytes": 1523712,
+    "sha256": "2497d27a9213dae851e0e4408666e59111b4d5f96f4923058c83fbda2d07f7dd"
+  },
+  "apfs_transparent_csv": {
+    "bytes": 1522250,
+    "physical_bytes": 507904,
+    "sha256": "2497d27a9213dae851e0e4408666e59111b4d5f96f4923058c83fbda2d07f7dd"
+  },
+  "unchanged_reader_dataframe_equal": true,
+  "command": "/usr/bin/ditto --hfsCompression SRC.csv DEST.csv",
+  "used_in_training": false,
+  "purpose": "storage feasibility only; no market statistics"
+}
