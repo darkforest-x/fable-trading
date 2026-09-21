@@ -17,19 +17,21 @@ experiments:
   - experiment_id: exp-spike-5r-followthrough-20260921-v6
     source_repo: darkforest-x/fable-trading
     source_commit: 828f300ccdd7f8be9104a392e12e2a6cfa63c9db
-    status: active
+    status: rejected
     question: Do completed-bar confirmation, market context, formation process or two
       additions improve final net5R precision and net returns over all49207 original
       long requests?
     single_variable: Separate prespecified arms; frozen source stop/exit/cost for entries;
       structure0-vs-original and structure2-vs-structure0 isolate stop and add changes.
-    result: Pre-registered offline replay; no market outcomes generated yet. No ML fitting
-      or production changes.
+    result: All49207 requests and3169 nonempty streams complete;16 new arms all fail.
+      Lateroriginal801of30115gt5;bestnewBTC4h576of20070gt5 withnet-22.02bp;oldrisk134of3551.
+      Originalpaths3256confirmedgiveback,44079nevergt5. Twoaddsraise537vs473tailsbutlose5.08bpmean.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    canonical_report: experiments/active/exp-spike-5r-followthrough-20260921-v6/PROJECT_PLAN.md
-    artifacts: []
+    canonical_report: analysis/p1_spike_5r_followthrough_20260921.md
+    artifacts:
+    - spike-5r-followthrough-20260921-v6-delivery
     reuse_allowed: false
     notes: All history authorized and exposed; temporal replication only. Independent
       candidates not portfolio. SamevenueBTC missing remains unknown. Owner1000U liquidation

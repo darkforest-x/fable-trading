@@ -1,0 +1,27 @@
+{
+  "source_manifest_sha256": "0b8f2b447fcf469c51fdd3d58f0ca6616a935390c634bb7cce05555ecadcdf67",
+  "source_dataset_receipt_sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+  "source_dataset_candidates_sha256": "935b9141bf1a476f0f507785678d599b99f3d40e49fe3513d7fc8e724afb49b6",
+  "source_commit": "fdd251a54a574e3d52692b18b5b0c8176655552d",
+  "dependencies": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_5r_followthrough_report.py": "b83d793ed1a90ccd46956670c4d47a273ee6470fb87c639b89dba0d6733652d1",
+    "tests/evaluation/test_spike_5r_followthrough_report.py": "b5a1683a1662c1b7e1186fd480aa84af898cc427efcc006b85b5d571a6e61ed8",
+    "experiments/active/exp-spike-5r-followthrough-20260921-v6/config.json": "5206f3a86e5ed427445b08bf6709e3e975b920b96c1efa03be3279dc4bf3161d"
+  },
+  "source_candidates": 49207,
+  "baseline_closed": 49070,
+  "baseline_gt5": 1703,
+  "passed_arms": [],
+  "files": {
+    "ranking.csv.gz": "7a874355a4a8b7678a95a7f247d6df9a1c1723771b31246bc0e94ea70b1c3771",
+    "thresholds.csv.gz": "284273a856b501f04c9f5ec24f90d5e0ee8a541d91a826de8fc2310e7c502964",
+    "gate_flags.csv.gz": "3cf885e28c0ad6779a43aa49e28767c685aa1de3cf1e536aed6ef7640c7a63b1",
+    "comparison.csv.gz": "890207da641db693fdf5ecba7a23f26cc0edf3f1f6ea95230332007f3d536319",
+    "path_groups.csv": "93f64e338ea411dba9e88010e84244e5b18468a4fda5297f11ded5f2e0a90fa0",
+    "parent_comparisons.csv.gz": "93e6724d704ec2ae2c0dff92248ad9398c6d97d6698454e93448dc18bd7860e8",
+    "research_gates.csv.gz": "79b8d5493ec1dbffa60fba089f56a8780c25c5322ff2c36cbc8b5be890770092"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "scope": "Independent candidate paths, not a serial portfolio or prospective unseen test. Passed arms require further serial verification."
+}
