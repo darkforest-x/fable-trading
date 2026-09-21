@@ -10295,3 +10295,19 @@ experiments:
     notes: Full3531 frozen streams including losses and empty streams;original both-side serial path,primary long-only reporting.
       Original admission,risk,cost andshort exits unchanged. Same-policy matched random controls;no training,promote,Pine or livechanges.
       Frozen builder precedes fullrun_v2;21 focused tests and108 related gates pass. Notion3e28856479af81e0bf7ed272ebb818a0 rejected.
+
+  - experiment_id: exp-spike-high-r-entry-20260921-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: f19684c0de
+    status: active
+    question: Can a causal prior20 high breakout gate improve V9 long net-positive win rate and realized netR-over10 precision with positive later-period economics?
+    single_variable: Long admission only;completed signal close strictly above preceding20 contiguous completed-bar highs. Original exits and shorts unchanged.
+    result: Preregistered before market replay;full3531 streams,all losses and censored events included. No parameter search or model training.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_high_r_entry_v2_20260921.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner shifted priority to win rate and10R precision;tail recall and missed winners remain mandatory. No future outcome admission or live claim.
+      Source commit initially names previous delivery;final record binds committed builder.
