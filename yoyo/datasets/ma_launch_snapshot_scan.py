@@ -155,13 +155,14 @@ def scan_weak_source(
     feature_scales = np.asarray(similarity["feature_scales"], dtype=float)
     bar_minutes = int(spec["bar_minutes"])
     counts: Counter[str] = Counter()
+    max_pre = max(int(v) for v in autofill["render"]["pre_core_context_bars"])
     weak: list[dict[str, Any]] = []
     for confirm_i in closed_confirmation_indices(frame["open_time"], bar_minutes=bar_minutes, start_utc=start, end_utc=end):
         c = int(confirm_i) - 5
         for direction, sign in (("LONG", 1.0), ("SHORT", -1.0)):
             for core_bars in (4, 5):
                 start_i, anchor_i = c - core_bars + 1, c + 2
-                if start_i < 12 or anchor_i >= len(frame) or segment[start_i - 12] != segment[confirm_i]:
+                if start_i < max_pre or anchor_i >= len(frame) or segment[start_i - max_pre] != segment[confirm_i]:
                     counts["gap_or_boundary"] += 1; continue
                 atr = float(arrays["atr"][anchor_i])
                 if not np.isfinite(atr) or atr <= 0:
