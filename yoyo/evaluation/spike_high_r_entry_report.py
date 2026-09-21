@@ -197,6 +197,11 @@ def ranking_diagnostics(long, controls):
 def evaluate_gate(summary, rates):
     """Apply the preregistered later-period gate without selecting new parameters."""
     rows = summary.loc[summary.dimension.eq("all") & summary.period.eq("later")].set_index("arm")
+    arms = ("baseline", "high_r_entry_v2")
+    if any(arm not in rows.index for arm in arms) or any(rows.loc[arm].get("closed", 0) <= 0 for arm in arms):
+        return dict(status="rejected", checks={"later_closed_samples_in_both_arms": False},
+                    failed_checks=["later_closed_samples_in_both_arms"],
+                    production_eligible=False, training_eligible=False)
     old, new = rows.loc["baseline"], rows.loc["high_r_entry_v2"]
     rate = rates.loc[rates.period.eq("later")].iloc[0]
     checks = {
@@ -224,7 +229,8 @@ def run(source, output):
     for col in ("timeframe_min", "venue"):
         groups.extend((col, str(key), part) for key, part in long.groupby(col))
     for dimension, group, table in groups:
-        for arm, one_arm in table.groupby("arm"):
+        for arm in ("baseline", "high_r_entry_v2"):
+            one_arm = table.loc[table.arm.eq(arm)]
             for period, part in periods(one_arm):
                 rows.append(dict(dimension=dimension, group=group, arm=arm, period=period,
                                  **metrics(part), **control_metrics(part, c, period)))

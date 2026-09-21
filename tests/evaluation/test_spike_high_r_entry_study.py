@@ -105,8 +105,16 @@ def test_higher_rates_do_not_pass_when_economics_remain_negative():
     from yoyo.evaluation.spike_high_r_entry_report import evaluate_gate
     rows = pd.DataFrame(dict(dimension=["all"]*2, period=["later"]*2,
         arm=["baseline", "high_r_entry_v2"], win_rate=[.3,.4], gt10_rate=[.01,.02],
-        mean_net_bp=[-20.,-1.], paired_excess_r=[0.,.1], random_p=[1.,.001]))
+        mean_net_bp=[-20.,-1.], paired_excess_r=[0.,.1], random_p=[1.,.001], closed=[100,50]))
     rates = pd.DataFrame(dict(period=["later"], win_rate_ci_low=[.01], gt10_rate_ci_low=[.001]))
     got = evaluate_gate(rows, rates)
     assert got["status"] == "rejected"
     assert got["failed_checks"] == ["mean_net_bp_positive"]
+
+
+def test_empty_treatment_later_period_is_explicit_rejection():
+    from yoyo.evaluation.spike_high_r_entry_report import evaluate_gate
+    rows = pd.DataFrame(dict(dimension=["all"], period=["later"], arm=["baseline"], closed=[100]))
+    got = evaluate_gate(rows, pd.DataFrame())
+    assert got["status"] == "rejected"
+    assert got["failed_checks"] == ["later_closed_samples_in_both_arms"]
