@@ -1,0 +1,31 @@
+{
+  "experiment_id": "exp-ma-launch-followup50-20260922-v1",
+  "owner_request": "那这1043的找出来的那个时刻的后续走势如何呢 给我抽样50张图看看后面12h的走势；使用子代理去做",
+  "source_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/manifest.jsonl",
+  "source_manifest_sha256": "ec93d6bfd04cc84a24a34cd745af2c74943f9a75e664831060619511ba60f6d7",
+  "dataset_root": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1",
+  "selection_path": "experiments/active/exp-ma-launch-followup50-20260922-v1/selection.jsonl",
+  "selection_sha256": "e5a2da6cef85f2877e562d30ee047431bf6c984bf58f47521ab9a12f137d02f9",
+  "output_dir": "experiments/active/exp-ma-launch-followup50-20260922-v1/review",
+  "population_events": 1043,
+  "sample_size": 50,
+  "seed": 20260922,
+  "selection_method": "random.Random(20260922).sample(sorted(unique positive event_id),50); representative nearest post_bars=5, ties variant_index then image_path; no outcome ranking/replacement",
+  "pre_confirmation_bars": 64,
+  "future_bars": 48,
+  "bar_minutes": 15,
+  "image_width": 1920,
+  "image_height": 1000,
+  "moving_average_price_source": "hl2",
+  "time_zone": "Asia/Shanghai",
+  "t0_definition": "close of source_core_end_i+5; earliest completion of original selection confirmation, not recorded online detection",
+  "future_interval": "indexes core_end_i+6 through core_end_i+53,48 consecutive15m bars,ending exactly12h after t0",
+  "non_training_review_only": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "Original event selection conditions on first5postcore bars; cannot infer unbiased predictive value.",
+    "Random sampling is for visual review, not a random train/validation split.",
+    "No replacement for missing/corrupt future history and no new market download."
+  ]
+}
