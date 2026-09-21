@@ -1,0 +1,11 @@
+{
+  "experiment_id": "exp-spike-10r-visual-20260921-v1",
+  "dataset_receipt_sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+  "seed": 921601,
+  "blind_repeats": 48,
+  "winner_definition": "valid closed original V9 long candidate, final net_r > 10",
+  "control_definition": "net_r <= 10, same stream/UTC quarter/ATR fraction bucket, no replacement, >= max(24 bars,24 hours) apart",
+  "chart": "128-bar overview and 32-bar detail ending at original signal close; frozen close SMA/EMA20/60/120; 8 cards per sheet",
+  "training_eligible": false,
+  "production_eligible": false
+}
