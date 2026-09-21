@@ -50,9 +50,8 @@ def run(source,dataset,output):
         universe=baseline.loc[clock]
         for name,part in t.groupby('rule'):
             selected=part.loc[dict(s.periods(part))[period]]
-            rows.append(dict(period=period,rule=name,**s.metrics(selected,universe),
-                **s.control_statistics(selected,controls,period),**s.rate_interval(universe,selected),
-                **serial_retention(selected,universe)))
+            rows.append(dict(period=period,rule=name,**(s.metrics(selected,universe) | serial_retention(selected,universe)),
+                **s.control_statistics(selected,controls,period),**s.rate_interval(universe,selected)))
     comparison=pd.DataFrame(rows)
     later=comparison.period.eq('later') & ~comparison.rule.eq('original_all')
     for what in ('tail','net'):

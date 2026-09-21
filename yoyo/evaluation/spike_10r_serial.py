@@ -191,8 +191,8 @@ def run(dataset,analysis,output,workers,adaptive=None):
         for name,part in trades.groupby('rule'):
             clock=dict(search.periods(part))[period]
             s=part.loc[clock]
-            rows.append(dict(period=period,rule=name,**search.metrics(s,u),
-                        **search.control_statistics(s,controls,period),**search.rate_interval(u,s),**serial_retention(s,u)))
+            rows.append(dict(period=period,rule=name,**(search.metrics(s,u) | serial_retention(s,u)),
+                        **search.control_statistics(s,controls,period),**search.rate_interval(u,s)))
     table=pd.DataFrame(rows)
     later=table.period.eq('later') & ~table.rule.eq('original_all')
     for what in ('tail','net'):
