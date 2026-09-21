@@ -10276,3 +10276,20 @@ experiments:
       Flat5pct MMR,40x ceiling,0.1pct each-side fees,zero funding,last-trade low proxy,continuous quantity;original exit bar excluded.
       Fifteen focused checks;1101 independent wallet and fixed-schedule LP audits passed. Min maintenance surplus0.01U;funding,tiers,depth unknown.
       Notion3e28856479af81f79733e014f135ee1f;false training/production. Builder committed before replay;old strategy/Pine unchanged.
+
+  - experiment_id: exp-spike-high-r-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cbe6640111cadcfb7b26e8abb562efa149ff2f4f
+    status: active
+    question: Can a causal running-high long trail capture more realized netR-over10 trades than current-close V9 without sacrificing later-period aggregate economics?
+    single_variable: Long trailing anchor only;completed-bar current close becomes running highest high since entry,with original2R-close arm and4ATR distance.
+    result: Pre-registered;367 realized netR-over10 versus1164 recorded gross-MFE-over10 among41700 closed long events. New replay pending.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_high_r_20260921.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Full3531 frozen streams including losses and empty streams;original both-side serial path,primary long-only reporting.
+      Original admission,risk,cost andshort exits unchanged. Same-policy matched random controls;no training,promote,Pine or livechanges.
+      Source commit initially names pre-implementation baseline;final delivery will bind actual builder. Notion3e28856479af81e0bf7ed272ebb818a0.
