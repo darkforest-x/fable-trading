@@ -45,10 +45,26 @@ def dump(path, value):
     Path(path).write_text(json.dumps(value, ensure_ascii=False, indent=2, default=str) + "\n")
 
 
+def validate_contract(cfg):
+    """Fail if imported defaults no longer implement this frozen experiment."""
+    spec = base.ExecutionSpec()
+    expected = dict(arm_r=cfg["arm_r"], trail_atr=cfg["trail_atr"],
+                    round_trip_cost=cfg["round_trip_cost"], stop_bars=5,
+                    stop_buffer_atr=.2, risk_floor_atr=2.)
+    if any(getattr(spec, name) != value for name, value in expected.items()):
+        raise ValueError("execution contract differs from frozen plan")
+    if base.ENTRY_COST != .001 or base.EXIT_COST != .001:
+        raise ValueError("execution cost differs from frozen plan")
+    for field, value in (("start", base.START), ("split", base.SPLIT), ("end", base.END)):
+        if pd.Timestamp(cfg[field]) != value:
+            raise ValueError("execution window differs from frozen plan")
+
+
 def verified_sources():
     """Bind the full stream list and statistics files to their frozen receipt."""
     path = STATS / "statistics_receipt.json"
     cfg = json.loads((EXP / "config.json").read_text())
+    validate_contract(cfg)
     if digest(path) != cfg["statistics_receipt_sha256"]:
         raise ValueError("frozen statistics receipt identity changed")
     receipt = json.loads(path.read_text())

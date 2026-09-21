@@ -50,9 +50,19 @@ def test_month_signflip_known_exact_null():
 
 
 def test_statistics_receipt_is_pinned_not_self_authenticating(tmp_path, monkeypatch):
+    cfg = json.loads((study.EXP / "config.json").read_text())
     monkeypatch.setattr(study, "STATS", tmp_path)
     monkeypatch.setattr(study, "EXP", tmp_path)
-    (tmp_path / "config.json").write_text(json.dumps({"statistics_receipt_sha256": "0"*64, "expected_streams": 3531}))
+    cfg["statistics_receipt_sha256"] = "0"*64
+    (tmp_path / "config.json").write_text(json.dumps(cfg))
     (tmp_path / "statistics_receipt.json").write_text(json.dumps({"source_receipts": [], "files": {}}))
     with pytest.raises(ValueError, match="identity changed"):
         study.verified_sources()
+
+
+def test_imported_execution_constants_cannot_drift_from_plan(monkeypatch):
+    cfg = json.loads((study.EXP / "config.json").read_text())
+    study.validate_contract(cfg)
+    monkeypatch.setattr(study.base, "ENTRY_COST", .002)
+    with pytest.raises(ValueError, match="cost differs"):
+        study.validate_contract(cfg)
