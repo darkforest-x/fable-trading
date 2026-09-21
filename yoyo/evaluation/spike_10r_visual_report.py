@@ -28,7 +28,8 @@ def digest(path):
 
 def frozen_labels(path, receipt_path, expected_ids):
     receipt = json.loads(Path(receipt_path).read_text())
-    if receipt['sha256'] != digest(path) or receipt['private_outcomes_read'] is not False:
+    recorded_hash = receipt.get('sha256', receipt.get('csv_sha256'))
+    if recorded_hash != digest(path) or receipt['private_outcomes_read'] is not False:
         raise ValueError('labels are not frozen before outcome access')
     labels = pd.read_csv(path)
     if (labels.visual_id.duplicated().any() or set(labels.visual_id) != set(expected_ids)

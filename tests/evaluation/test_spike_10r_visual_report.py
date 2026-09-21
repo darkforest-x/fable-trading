@@ -7,11 +7,12 @@ import pytest
 from yoyo.evaluation.spike_10r_visual_report import agreement, digest, frozen_labels, paired_comparison
 
 
-def test_frozen_labels_reject_edits(tmp_path):
+@pytest.mark.parametrize('hash_field', ['sha256','csv_sha256'])
+def test_frozen_labels_reject_edits(tmp_path, hash_field):
     path = tmp_path/'labels.csv'
     path.write_text('visual_id,class,reason,reviewer\nV0001,P,Compact,astra\n')
     receipt = tmp_path/'freeze.json'
-    receipt.write_text(json.dumps(dict(sha256=digest(path),private_outcomes_read=False,rows=1)))
+    receipt.write_text(json.dumps({hash_field:digest(path),'private_outcomes_read':False,'rows':1}))
     frozen_labels(path,receipt,['V0001'])
     path.write_text(path.read_text().replace(',P,',',N,'))
     with pytest.raises(ValueError,match='frozen'):
