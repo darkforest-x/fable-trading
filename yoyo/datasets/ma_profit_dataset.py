@@ -98,6 +98,30 @@ def label_line(asset: Mapping[str, Any]) -> str:
     )
 
 
+def asset_stem(event_id: str, variant: str) -> str:
+    """Keep arbitrary source event identities out of Windows filesystem names."""
+
+    return "event_" + hashlib.sha256(event_id.encode("utf-8")).hexdigest()[:32] + "_" + variant
+
+
+def _cohort_controls(plan: Mapping[str, Any], events_path: Path) -> tuple[dict[str, Any], list[Path]]:
+    """Require a frozen, independently counted training cohort before rendering."""
+
+    from yoyo.datasets.ma_profit_cohort import verify_selected_cohort
+
+    paths: dict[str, Path] = {}
+    for stem in ("training_contract", "selection_receipt"):
+        raw = str(plan.get(stem + "_path", ""))
+        if not raw:
+            raise ProfitDatasetError(f"missing {stem}_path")
+        path = Path(raw)
+        paths[stem] = path if path.is_absolute() else ROOT / path
+        if sha256_file(paths[stem]) != plan.get(stem + "_sha256"):
+            raise ProfitDatasetError(f"{stem} SHA drift")
+    receipt = verify_selected_cohort(events_path, paths["selection_receipt"], paths["training_contract"])
+    return receipt, list(paths.values())
+
+
 def arms_for_asset(split: str, variant: str) -> tuple[str, ...]:
     """Route one view into the preregistered A/B training recipes."""
 
@@ -182,14 +206,15 @@ def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, 
 
 
 def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
-    """Build a new root from committed controls; it intentionally has no quota filling."""
+    """Build a new root only after frozen cohort capacity and independence pass."""
 
     plan, events_path, output = json.loads(plan_path.read_text()), events_path.resolve(), output.resolve()
     if output.exists():
         raise FileExistsError(f"refusing to overwrite dataset root: {output}")
     if sha256_file(events_path) != str(plan["events_sha256"]):
         raise ProfitDatasetError("frozen event ledger SHA drift")
-    commit = _committed([Path(__file__), plan_path.resolve(), events_path])
+    _, control_paths = _cohort_controls(plan, events_path)
+    commit = _committed([Path(__file__), ROOT / "yoyo/datasets/ma_profit_cohort.py", plan_path.resolve(), events_path, *control_paths])
     rows = _jsonl(events_path)
     if not rows: raise ProfitDatasetError("empty event ledger")
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -243,7 +268,7 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
         frame, _ = read_preholdout_prefix(source_file, end_exclusive=max_close, bar_minutes=bar_minutes)
         for row in source_rows:
             for asset in event_assets(frame, row):
-                stem = f"{row['event_id']}_{asset['variant']}"
+                stem = asset_stem(str(row['event_id']), str(asset['variant']))
                 arms = arms_for_asset(str(row["split"]), str(asset["variant"]))
                 if not arms:
                     continue
@@ -252,7 +277,7 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
                 (output / image_rel).write_bytes(asset["png"])
                 label = label_line(asset)
                 (output / label_rel).write_text(label)
-                manifest.append({"arms": list(arms), "event_id": row["event_id"], "split": row["split"], "variant": asset["variant"], "direction": row["direction"], "source_path": source_path, "source_sha256": source_sha, "image_path": image_rel, "image_sha256": hashlib.sha256(asset["png"]).hexdigest(), "label_path": label_rel, "label_sha256": sha256_file(output / label_rel), "class_id": asset["class_id"] if asset["positive"] else None, "box": asset["box"] if asset["positive"] else None, "visible_end_open_time_utc": asset["visible"]["visible_end_open_time_utc"], "visible_end_close_time_utc": asset["visible"]["visible_end_close_time_utc"], "decision_at_utc": asset["visible"]["decision_at_utc"], "feature_support_start_i": asset["visible"]["feature_support_start_i"], "feature_support_start_utc": asset["visible"]["feature_support_start_utc"], "label_horizon_end_utc": asset["label_horizon_end_utc"], "training_eligible": False, "production_eligible": False})
+                manifest.append({"arms": list(arms), "event_id": row["event_id"], "cluster_id": row["cluster_id"], "canonical_asset": row["canonical_asset"], "core_end_time": row["core_end_time"], "bar_minutes": bar_minutes, "split": row["split"], "variant": asset["variant"], "direction": row["direction"], "source_path": source_path, "source_sha256": source_sha, "image_path": image_rel, "image_sha256": hashlib.sha256(asset["png"]).hexdigest(), "label_path": label_rel, "label_sha256": sha256_file(output / label_rel), "class_id": asset["class_id"] if asset["positive"] else None, "box": asset["box"] if asset["positive"] else None, "visible_end_open_time_utc": asset["visible"]["visible_end_open_time_utc"], "visible_end_close_time_utc": asset["visible"]["visible_end_close_time_utc"], "decision_at_utc": asset["visible"]["decision_at_utc"], "feature_support_start_i": asset["visible"]["feature_support_start_i"], "feature_support_start_utc": asset["visible"]["feature_support_start_utc"], "label_horizon_end_utc": asset["label_horizon_end_utc"], "training_eligible": False, "production_eligible": False})
                 for arm in arms:
                     arm_images[arm][str(row["split"])].append(f"./{image_rel}")
                     arm_events[arm][str(row["split"])].add(str(row["event_id"]))
@@ -272,6 +297,11 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
             f"names: [{names['0']}, {names['1']}]\n"
         )
     summary = {"builder_commit": commit, "plan_sha256": sha256_file(plan_path), "events_sha256": sha256_file(events_path), "images": dict(counts), "arms": {arm: {split: {"images": len(arm_images[arm][split]), "events": len(arm_events[arm][split])} for split in ("train", "val", "test")} for arm in ("A", "B")}, "training_authorized": plan.get("owner_authorization", {}).get("training_authorized", False), "training_eligible": False, "production_eligible": False, "ma_source": "hl2", "support_bars": SUPPORT_BARS}
+    summary.update({
+        "manifest_sha256": sha256_file(output / "manifest.jsonl"),
+        "training_contract_sha256": plan["training_contract_sha256"],
+        "selection_receipt_sha256": plan["selection_receipt_sha256"],
+    })
     _write_json(output / "summary.json", summary)
     return summary
 

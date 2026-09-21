@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 
 from yoyo.datasets import ma_profit_dataset
-from yoyo.datasets.ma_profit_dataset import arms_for_asset, build, event_assets, label_line
+from yoyo.datasets.ma_profit_dataset import arms_for_asset, asset_stem, build, event_assets, label_line
 
 
 def source(n=1300):
@@ -13,7 +13,7 @@ def source(n=1300):
 
 
 def row(frame, split="train", retained=True, c=1250, event_id="event"):
-    return {"event_id": event_id, "symbol": "X", "direction": "LONG", "source_path": "unused.csv", "bar_minutes": 15, "core_start_time": frame.open_time.iloc[c - 3].isoformat(), "core_end_time": frame.open_time.iloc[c].isoformat(), "split": split, "profit": {"retained": retained, "outcome": "TP" if retained else "SL", "decision_close_time_utc": (frame.open_time.iloc[c + 5] + pd.Timedelta(minutes=15)).isoformat(), "label_window_end_utc": "2025-01-15T00:00:00+00:00"}}
+    return {"event_id": event_id, "cluster_id": event_id, "canonical_asset": "X", "symbol": "X", "direction": "LONG", "source_path": "unused.csv", "bar_minutes": 15, "core_start_time": frame.open_time.iloc[c - 3].isoformat(), "core_end_time": frame.open_time.iloc[c].isoformat(), "split": split, "profit": {"retained": retained, "outcome": "TP" if retained else "SL", "decision_close_time_utc": (frame.open_time.iloc[c + 5] + pd.Timedelta(minutes=15)).isoformat(), "label_window_end_utc": "2025-01-15T00:00:00+00:00"}}
 
 
 def test_variants_are_distinct_but_share_causal_right_edge_and_future_is_irrelevant():
@@ -56,20 +56,21 @@ def test_build_writes_disjoint_train_lists_and_shared_evaluation_lists(tmp_path,
     events = tmp_path / "events.jsonl"
     events.write_text("".join(json.dumps(item) + "\n" for item in rows))
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps({"events_sha256": hashlib.sha256(events.read_bytes()).hexdigest(), "render": {"classes": {"0": "profitlong", "1": "profitshort"}}, "owner_authorization": {"training_authorized": True}}))
+    plan.write_text(json.dumps({"events_sha256": hashlib.sha256(events.read_bytes()).hexdigest(), "render": {"classes": {"0": "profitlong", "1": "profitshort"}}, "owner_authorization": {"training_authorized": True}, "training_contract_sha256": "fixture-contract", "selection_receipt_sha256": "fixture-receipt"}))
     monkeypatch.setattr(ma_profit_dataset, "_committed", lambda _: "fixture-commit")
+    monkeypatch.setattr(ma_profit_dataset, "_cohort_controls", lambda *_: ({}, []))
 
     summary = build(plan, events, tmp_path / "out")
 
     out = tmp_path / "out"
     train_a, train_b = (out / "train_A.txt").read_text().splitlines(), (out / "train_B.txt").read_text().splitlines()
-    assert len(train_a) == 1 and train_a[0].endswith("train_A.png")
-    assert len(train_b) == 2 and all("train_B" in item for item in train_b)
+    assert len(train_a) == 1 and train_a[0].endswith(asset_stem("train", "A") + ".png")
+    assert len(train_b) == 2 and {item.rsplit("_", 1)[-1] for item in train_b} == {"B1.png", "B2.png"}
     assert not set(train_a) & set(train_b)
     assert "val: val.txt" in (out / "data_A.yaml").read_text()
     assert "val: val.txt" in (out / "data_B.yaml").read_text()
-    assert (out / "val.txt").read_text().splitlines() == ["./images/val/val_A.png"]
-    assert (out / "labels" / "val" / "val_A.txt").read_text() == ""
+    assert (out / "val.txt").read_text().splitlines() == ["./images/val/" + asset_stem("val", "A") + ".png"]
+    assert (out / "labels" / "val" / (asset_stem("val", "A") + ".txt")).read_text() == ""
     assert summary["arms"]["A"]["train"] == {"images": 1, "events": 1}
     assert summary["arms"]["B"]["train"] == {"images": 2, "events": 1}
 
@@ -85,6 +86,14 @@ def test_build_rejects_ledger_source_sha_drift(tmp_path, monkeypatch):
     plan = tmp_path / "plan.json"
     plan.write_text(json.dumps({"events_sha256": hashlib.sha256(events.read_bytes()).hexdigest()}))
     monkeypatch.setattr(ma_profit_dataset, "_committed", lambda _: "fixture-commit")
+    monkeypatch.setattr(ma_profit_dataset, "_cohort_controls", lambda *_: ({}, []))
 
     with pytest.raises(ma_profit_dataset.ProfitDatasetError, match="source SHA drift"):
         build(plan, events, tmp_path / "out")
+
+
+def test_source_id_cannot_create_windows_reserved_or_nested_paths():
+    for identity in ("scan::BTC/USDT:2026-01-01T12:00Z", "CON", "../../escape"):
+        name = asset_stem(identity, "A")
+        assert not any(char in name for char in '<>:"/\\|?*')
+        assert name.startswith("event_") and name.endswith("_A")
