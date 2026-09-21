@@ -1,0 +1,67 @@
+{
+  "builder_commit": "c2ad6432123c44bf0d1b25f31e2e0e91ab24747b",
+  "input_events_sha256": "88397a282be11165e2b49d45177985c29ccd3bbfbb8ea05ad6f01e89a02d72e2",
+  "source_manifest_sha256": "79b7915010a8d48d49f66f6cd5d660371ed834356dcddc7b1e5a1c7d55c50197",
+  "plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+  "frozen_inputs": {
+    "events": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/cohort_queue_round_005/frozen_events.jsonl",
+      "sha256": "88397a282be11165e2b49d45177985c29ccd3bbfbb8ea05ad6f01e89a02d72e2"
+    },
+    "sources": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/cohort_queue_round_005/frozen_sources.json",
+      "sha256": "79b7915010a8d48d49f66f6cd5d660371ed834356dcddc7b1e5a1c7d55c50197"
+    },
+    "plan": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/plan.json",
+      "sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266"
+    }
+  },
+  "original_implementation": {
+    "pipeline": "ef813dfcbbd7e8d354869f3c369b1f4f222a055ad42556b05b9435d1b0d05811",
+    "resolver": "8dd974e72612c2c9d479ab803be7766ee9e5e380df51b7f34fc1705c894d46d1",
+    "reader": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e"
+  },
+  "runtime": {
+    "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]",
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "platform": "macOS-26.5.2-arm64-arm-64bit"
+  },
+  "events": 9052,
+  "lineage_errors": 0,
+  "outcomes": {
+    "TIMEOUT": 2824,
+    "SL": 4974,
+    "TP": 1245,
+    "INVALID": 4,
+    "UNKNOWN": 5
+  },
+  "retained_before_purge": 1245,
+  "retained_by_split": {
+    "train": 1023,
+    "purged": 5,
+    "val": 125,
+    "test": 92
+  },
+  "all_by_split": {
+    "train": 7158,
+    "purged": 112,
+    "val": 1056,
+    "test": 726
+  },
+  "gross_r_target": 3.0,
+  "cost": 0.002,
+  "outcomes_sha256": "c6b3625640c07de06696fba5a5607bd00a595f20951c6cca7993a0a3e5714899",
+  "reuse": {
+    "status": "accepted",
+    "cache_dir": "experiments/active/exp-ma-profit3r-20260922-v1/outcomes_queue_round_004",
+    "cached_events": 8846,
+    "frozen_events": "experiments/active/exp-ma-profit3r-20260922-v1/cohort_queue_round_004/frozen_events.jsonl",
+    "legacy_input_binding": false,
+    "implementation_evidence": "explicit",
+    "hits": 8846,
+    "misses": 206
+  },
+  "production_eligible": false
+}
