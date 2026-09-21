@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp-profitable-roll-v03-20260921-v1",
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "capital": 100.0,
+  "initial_requested_gross_risk": 100.0,
+  "leverage": 40.0,
+  "fee_each_side": 0.001,
+  "synthetic_maintenance_rate": 0.05,
+  "synthetic_max_quantity": 1e30,
+  "arms": {"none": 0, "two": 2, "continuous": null, "continuous_unprotected": null},
+  "winner_examples": 5,
+  "winner_selection": "Old closed actual no-add netR descending;one per non-WIF coin,before new replay outcomes",
+  "seed": 921263,
+  "bootstrap_reps": 4000,
+  "entry_pool": "Frozen prior29 actual and matched random entries;independent per-event100U accounts",
+  "cross_asset_execution": "Explicit synthetic flat5% MMR/40x ceiling,last-price mark proxy,no funding;not exchange-realistic returns",
+  "training_eligible": false,
+  "production_eligible": false
+}

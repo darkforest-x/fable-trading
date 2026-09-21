@@ -1,0 +1,29 @@
+# V0.3: causal profitable pyramiding with maintenance admission
+
+Owner request 2026-09-21: implement the rolling strategy in code or Pine; inspect other historically profitable coins and backtest portability. Choose Python first because this task needs explicit per-leg fees, funding, tier changes and unknown liquidation chronology. No Pine delivery or live adapter is implied; the entry indicator is not invented. Preserve earlier research and WIF code/results. This is a new offline candidate, never production promotion or an account instruction.
+
+## Frozen scope before market replay
+
+Two datasets remain separate. (A) Exact identified OKX WIF screenshot: same entry0.1402,stop0.1362,requested25000coins,100U,40x; actual hourly mark and funding, CURRENT tiers explicitly not historical proof. (B) Frozen29 Binance1h pool from exp-winner-pyramiding-20260921-v1: reuse every existing actual/random entry and initial stop, not only winners. Preserve original earlier/later boundaries2025-09-10 and input hashes. Historical mark/funding/leverage brackets are absent for this pool; evaluate a clearly hypothetical flat5% maintenance scenario with40x leverage ceiling, last price as mark proxy and no funding. It is a mathematical management benchmark, not a Binance execution certificate. No OKX tiers are applied to Binance prices.
+
+Each entry independently starts100U, with requested initial quantity100/(entry-stop), clipped by quantity rules, opening margin and projected-stop maintenance. Quantity step/min/order maximum/minnotional come from archived exchange_info, not claimed historical specifications. For WIF requested quantity remains25000; report clipping explicitly. A changed initial quantity must never be hidden behind the prior22043U number. No cross-trade compounding or shared100U portfolio; paths may overlap when exits differ from prior research.
+
+Only structure protection is used, matching the WIF case: lower close starts pullback and freezes running high, laterclose>high confirms; newstop=pullbacklow-tick, active nextbar. Add at nextopen only after original2R, raisedstop, price>lastfill. Retain at least max(previous committed profit,half pre-add netstop profit,0). Fees remain WIF per-side0.1% of actual filled notional; this differs from the old1x pool's fixed-entry-notional exit reserve, so old-to-new totals are not a single-variable causal comparison. No ATR/short exit, peak selling, parameter search, new entry detector or score.
+
+## New safety admission and controlled arms
+
+For initial entry and guarded adds, define stressed mark at protection as S-max(currenttradeopen-currentmarkopen,0)-oneprice_tick. Post-fill total equity there must cover whole-position maintenance margin and estimated close fee at that quantity's tier. Also enforce current initial margin/fee headroom, step,minquantity,minnotional,max order quantity. These are conditional modeled buffers, not guarantees against future mark dislocation,gaps or slippage.
+
+Arms share the same guarded initial quantity and structural clock: none(0),two(2),continuous(unlimited). Auxiliary continuous_unprotected disables ONLY the new add-maintenance admission, retaining the guarded initial quantity and all other rules. Its contrast against continuous isolates the new gate. Firsttwo fills in two/continuous must match whenever both paths survive. Different exits caused by failed maintenance remain failures, not deleted observations.
+
+Observed independent mark crossing and stop in one unresolved bar is ambiguous, final_balance=null, with explicitly labeled hypothetical stop balance. In last-price-proxy mode, equal price paths and an active stop above the maintenance threshold permit the model to hit protection first on a continuous downward bar; opening gaps are checked separately. Funding is paid before an add at the same timestamp. Missing/incomplete hours are censored, never forward-filled. Actual order handling/partial fills/latency are outside this research engine.
+
+## Winner examples, controls and decision
+
+Before new outcomes are computed, freeze five different non-WIF coins with the greatest OLD no-add actual closed netR, at most one event percoin. This selection is deliberately retrospective to answer Owner's winner examples; it must not become a coin selector or evidence of general returns. Show their old no-add baseline, new none/two/continuous balances, add counts and exit prices with actual same-period matched random controls. Also include WIF exactcase separately. Report every full-pool outcome, failures,rejections,censoring and unknown maintenance events by time segment and coin.
+
+Use original matched random entries, excluding true signal times as frozen earlier. Compute common-complete matched contrasts and calendar-month blocked comparisons, not individual-trade independent p values. Planned later claims: continuous versus two; continuous versus random, Holm across the two. Flat5% scenario conclusions cannot override unknown real leverage tiers/funding. AUC, prediction topdecile and feature-classification metrics are not applicable; no model or predictive score is fit. Do not relabel selected winners as a predictive topdecile. Preserve old negative broad-pool conclusions alongside this new result.
+
+## Delivery and provenance
+
+Pure module yoyo/evaluation/profitable_roll_v03.py; runnable CLI yoyo/evaluation/profitable_roll_v03_study.py; focused synthetic checks; run_v1 ledgers/summaries/selected examples/input receipts. Commit source/tests/config/this protocol before running market outcomes. Kline cache remains read-only; public WIF data stays memory/stdin only, with hashes and execution evidence persisted. No branches/worktrees/dependency changes, active/default risk or cost changes, live orders or keys. New registry rows default training_eligible=false and production_eligible=false. Markdown report, learning and deduplicated Notion research entry; no automatic HTML.
