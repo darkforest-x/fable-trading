@@ -22,10 +22,14 @@ def _configure(monkeypatch, tmp_path):
     plan.write_text('{"experiment_id":"x"}\n')
     (exp / "training_contract.json").write_text('{"minimum_train_winners":3000}\n')
     (exp / "reference_exclusion.json").write_text('[]\n')
-    for name in ("ma_profit_pipeline.py", "ma_profit_cohort.py"):
+    for name in ("ma_profit_pipeline.py", "ma_profit_cohort.py", "ma_profit_incremental_labels.py",
+                 "fifteen_minute_launch_candidates.py"):
         path = root / "yoyo" / "datasets" / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(name)
+    resolver = root / "yoyo" / "contracts" / "ma_profit_filter.py"
+    resolver.parent.mkdir(parents=True, exist_ok=True)
+    resolver.write_text("resolver")
     rules = []
     for index, name in enumerate(("ma_profit_miner.py", "snapshot.py", "perfect.py", "autofill.py", "review.py", "candidates.py")):
         path = root / "yoyo" / "datasets" / name
@@ -117,7 +121,7 @@ def _write_collection(root, exp, plan, manifests, cohort, *, count=1):
     }) + "\n")
 
 
-def _write_label(exp, plan, cohort, outcomes, *, capacity):
+def _write_label(exp, plan, cohort, outcomes, *, capacity, reuse=None):
     outcomes.mkdir(parents=True, exist_ok=True)
     events, sources = cohort / "frozen_events.jsonl", cohort / "frozen_sources.json"
     rows, errors, summary = outcomes / "outcomes.jsonl", outcomes / "lineage_errors.jsonl", outcomes / "summary.json"
@@ -126,9 +130,13 @@ def _write_label(exp, plan, cohort, outcomes, *, capacity):
                  "profit": _event(index, retained=capacity)["profit"]} for index, row in enumerate(frozen)]
     rows.write_text("".join(json.dumps(row) + "\n" for row in labelled))
     errors.write_text('')
-    summary.write_text(json.dumps({"plan_sha256": _digest(plan), "input_events_sha256": _digest(events),
-                                   "source_manifest_sha256": _digest(sources), "outcomes_sha256": _digest(rows),
-                                   "lineage_errors": 0}) + "\n")
+    payload = {"plan_sha256": _digest(plan), "input_events_sha256": _digest(events),
+               "source_manifest_sha256": _digest(sources), "outcomes_sha256": _digest(rows),
+               "lineage_errors": 0}
+    if reuse is not None:
+        (outcomes / "reuse_receipt.json").write_text(json.dumps(reuse) + "\n")
+        payload["reuse"] = {**reuse, "hits": 1, "misses": 0}
+    summary.write_text(json.dumps(payload) + "\n")
 
 
 def _write_selection(root, exp, outcomes, selection, *, capacity, forged=False):
@@ -159,10 +167,14 @@ def _valid_stage_runner(root, exp, plan, manifests, *, capacity):
         output = Path(args[args.index("--out") + 1])
         if module == "yoyo.datasets.ma_profit_cohort" and "collect" in args:
             _write_collection(root, exp, plan, manifests, output, count=3000 if capacity else 1)
-        elif module == "yoyo.datasets.ma_profit_pipeline":
-            _write_label(exp, plan, exp / "cohort_queue_round_001", output, capacity=capacity)
+        elif module in {"yoyo.datasets.ma_profit_pipeline", "yoyo.datasets.ma_profit_incremental_labels"}:
+            cohort = Path(args[args.index("--events") + 1]).parent
+            reuse = None
+            if module == "yoyo.datasets.ma_profit_incremental_labels":
+                reuse = {"status": "accepted", "cache_dir": args[args.index("--reuse-label-dir") + 1]}
+            _write_label(exp, plan, cohort, output, capacity=capacity, reuse=reuse)
         elif module == "yoyo.datasets.ma_profit_cohort" and "select" in args:
-            _write_selection(root, exp, exp / "outcomes_queue_round_001", output, capacity=capacity)
+            _write_selection(root, exp, Path(args[args.index("--events") + 1]).parent, output, capacity=capacity)
         else:
             raise AssertionError(args)
     return runner
@@ -490,3 +502,56 @@ def test_selection_rejects_self_hashed_duplicate_event_id(tmp_path, monkeypatch)
     receipt.write_text(json.dumps(payload))
     with pytest.raises(q.QueueError, match="selection ledger event identity"):
         q.validate_selection_stage(outcomes, selection)
+
+def test_round_two_uses_explicit_incremental_cache_and_freezes_receipt(tmp_path, monkeypatch):
+    root, exp, _scan, plan, _rules = _configure(monkeypatch, tmp_path)
+    manifests = [_manifest(exp, "sources_archive_1m_batch01.json")]
+    prior_cohort, prior_outcomes = exp / "cohort_queue_round_001", exp / "outcomes_queue_round_001"
+    _write_collection(root, exp, plan, manifests, prior_cohort)
+    _write_label(exp, plan, prior_cohort, prior_outcomes, capacity=False)
+    calls, commits = [], []
+    base_runner = _valid_stage_runner(root, exp, plan, manifests, capacity=False)
+
+    def runner(args, **kwargs):
+        calls.append(args)
+        base_runner(args, **kwargs)
+
+    result = q.run_downstream(manifests, "queue_round_002", runner=runner, output=_git_output,
+                              commit_fn=lambda paths: commits.append([path.name for path in paths]) or "new",
+                              input_validator=lambda paths: None)
+    label = next(call for call in calls if "yoyo.datasets.ma_profit_incremental_labels" in call)
+    assert result["capacity_gate"] is False
+    assert label[label.index("--reuse-label-dir") + 1] == str(prior_outcomes)
+    assert label[label.index("--reuse-events") + 1] == str(prior_cohort / "frozen_events.jsonl")
+    assert label[label.index("--reuse-sources") + 1] == str(prior_cohort / "frozen_sources.json")
+    assert ["outcomes.jsonl", "lineage_errors.jsonl", "summary.json", "reuse_receipt.json"] in commits
+
+
+def test_round_two_fails_closed_without_complete_frozen_prior_label(tmp_path, monkeypatch):
+    _root, exp, _scan, _plan, _rules = _configure(monkeypatch, tmp_path)
+    manifests = [_manifest(exp, "sources_archive_1m_batch01.json")]
+    calls = []
+    with pytest.raises(q.QueueError, match="complete frozen prior cohort and outcomes"):
+        q.run_downstream(manifests, "queue_round_002", runner=lambda *args, **kwargs: calls.append(args),
+                         output=_git_output, commit_fn=lambda paths: "unused", input_validator=lambda paths: None)
+    assert not calls
+
+
+def test_incremental_wrapper_drift_invalidates_queue_binding(tmp_path, monkeypatch):
+    root, _exp, _scan, _plan, _rules = _configure(monkeypatch, tmp_path)
+    state = q.load_state()
+    q.save_state(state)
+    wrapper = root / "yoyo" / "datasets" / "ma_profit_incremental_labels.py"
+    wrapper.write_text("changed wrapper")
+    with pytest.raises(q.QueueError, match="queue binding drift"):
+        q.load_state()
+
+
+def test_round_three_requires_prior_incremental_receipt(tmp_path, monkeypatch):
+    root, exp, _scan, plan, _rules = _configure(monkeypatch, tmp_path)
+    manifests = [_manifest(exp, "sources_archive_1m_batch01.json")]
+    prior_cohort, prior_outcomes = exp / "cohort_queue_round_002", exp / "outcomes_queue_round_002"
+    _write_collection(root, exp, plan, manifests, prior_cohort)
+    _write_label(exp, plan, prior_cohort, prior_outcomes, capacity=False)
+    with pytest.raises(q.QueueError, match="partial downstream stage"):
+        q.prior_incremental_inputs("queue_round_003", output=_git_output)

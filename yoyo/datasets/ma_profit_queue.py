@@ -192,7 +192,10 @@ def binding() -> dict[str, str]:
     files = {"controller_sha256": sha(Path(__file__)), "plan_sha256": sha(PLAN),
              "training_contract_sha256": sha(EXP / "training_contract.json"),
              "pipeline_sha256": sha(ROOT / "yoyo/datasets/ma_profit_pipeline.py"),
-             "cohort_sha256": sha(ROOT / "yoyo/datasets/ma_profit_cohort.py")}
+             "cohort_sha256": sha(ROOT / "yoyo/datasets/ma_profit_cohort.py"),
+             "incremental_labeler_sha256": sha(ROOT / "yoyo/datasets/ma_profit_incremental_labels.py"),
+             "resolver_sha256": sha(ROOT / "yoyo/contracts/ma_profit_filter.py"),
+             "reader_sha256": sha(ROOT / "yoyo/datasets/fifteen_minute_launch_candidates.py")}
     files["config_sha256"] = json_sha(queue_config())
     return files
 
@@ -393,7 +396,7 @@ def validate_collection_stage(cohort: Path, manifests: Iterable[Path]) -> None:
         raise QueueError("collection receipt manifest input drift")
 
 
-def validate_label_stage(cohort: Path, outcomes: Path) -> None:
+def validate_label_stage(cohort: Path, outcomes: Path, *, require_reuse_receipt: bool = False) -> None:
     """Require the label summary to attest to the exact frozen cohort files."""
     events, sources = cohort / "frozen_events.jsonl", cohort / "frozen_sources.json"
     output, errors, summary_path = outcomes / "outcomes.jsonl", outcomes / "lineage_errors.jsonl", outcomes / "summary.json"
@@ -407,6 +410,24 @@ def validate_label_stage(cohort: Path, outcomes: Path) -> None:
         raise QueueError("label summary lineage/SHA drift")
     _bind_event_rows(_jsonl_rows(events), _jsonl_rows(output), upstream_label="frozen events",
                      downstream_label="outcomes", exact=True, compare_profit=False)
+    if require_reuse_receipt:
+        receipt_path = outcomes / "reuse_receipt.json"
+        try:
+            receipt = json.loads(receipt_path.read_text())
+        except (OSError, ValueError) as exc:
+            raise QueueError("invalid incremental reuse receipt") from exc
+        reuse = summary.get("reuse")
+        if (not isinstance(reuse, Mapping) or not isinstance(receipt, Mapping)
+                or receipt.get("status") != "accepted"
+                or any(receipt.get(key) != reuse.get(key) for key in ("status", "cache_dir"))):
+            raise QueueError("incremental reuse receipt/summary drift")
+
+
+def _round_number(tag: str) -> int:
+    prefix = "queue_round_"
+    if not tag.startswith(prefix) or not tag[len(prefix):].isdigit() or int(tag[len(prefix):]) < 1:
+        raise QueueError(f"invalid downstream round tag: {tag}")
+    return int(tag[len(prefix):])
 
 
 IMMUTABLE_EVENT_FIELDS = (
@@ -505,6 +526,26 @@ def frozen_stage(paths: Iterable[Path], *, output: Callable[[Sequence[str]], str
     return commits.pop()
 
 
+def prior_incremental_inputs(tag: str, *, output: Callable[[Sequence[str]], str]) -> tuple[Path, Path, Path]:
+    """Return committed prior cohort/outcomes or fail before a later label run."""
+
+    number = _round_number(tag)
+    if number < 2:
+        raise QueueError("round001 has no prior incremental label input")
+    prior_tag = f"queue_round_{number - 1:03d}"
+    cohort, outcomes = EXP / f"cohort_{prior_tag}", EXP / f"outcomes_{prior_tag}"
+    cohort_paths = [cohort / name for name in ("frozen_events.jsonl", "frozen_sources.json",
+                                                "collection_exclusions.jsonl", "collection_receipt.json")]
+    outcome_names = ["outcomes.jsonl", "lineage_errors.jsonl", "summary.json"]
+    if number > 2:
+        outcome_names.append("reuse_receipt.json")
+    outcome_paths = [outcomes / name for name in outcome_names]
+    if not frozen_stage(cohort_paths, output=output) or not frozen_stage(outcome_paths, output=output):
+        raise QueueError("incremental label requires a complete frozen prior cohort and outcomes")
+    validate_label_stage(cohort, outcomes, require_reuse_receipt=number > 2)
+    return cohort / "frozen_events.jsonl", cohort / "frozen_sources.json", outcomes
+
+
 def run_downstream(manifests: list[Path], tag: str, *, runner: Callable[..., Any] = subprocess.run,
                    output: Callable[[Sequence[str]], str] = command_output,
                    commit_fn: Callable[[Iterable[Path]], str] | None = None,
@@ -513,6 +554,10 @@ def run_downstream(manifests: list[Path], tag: str, *, runner: Callable[..., Any
     commit_fn = commit_fn or (lambda paths: commit_exact(paths, runner=runner, output=output))
     (input_validator or (lambda paths: validate_collection_inputs(paths, output=output)))(manifests)
     cohort, outcomes, selection = (EXP / f"cohort_{tag}", EXP / f"outcomes_{tag}", EXP / f"selection_{tag}")
+    incremental = _round_number(tag) >= 2
+    prior_events = prior_sources = prior_outcomes = None
+    if incremental:
+        prior_events, prior_sources, prior_outcomes = prior_incremental_inputs(tag, output=output)
     collection_paths = [cohort / name for name in ("frozen_events.jsonl", "frozen_sources.json", "collection_exclusions.jsonl", "collection_receipt.json")]
     collection_commit = frozen_stage(collection_paths, output=output)
     if not collection_commit:
@@ -523,14 +568,23 @@ def run_downstream(manifests: list[Path], tag: str, *, runner: Callable[..., Any
         runner(collect, cwd=ROOT, check=True)
         collection_commit = commit_fn(collection_paths)
     validate_collection_stage(cohort, manifests)
-    outcome_paths = [outcomes / name for name in ("outcomes.jsonl", "lineage_errors.jsonl", "summary.json")]
+    outcome_names = ["outcomes.jsonl", "lineage_errors.jsonl", "summary.json"]
+    if incremental:
+        outcome_names.append("reuse_receipt.json")
+    outcome_paths = [outcomes / name for name in outcome_names]
     outcome_commit = frozen_stage(outcome_paths, output=output)
     if not outcome_commit:
-        runner([sys.executable, "-m", "yoyo.datasets.ma_profit_pipeline", "label", "--plan", str(PLAN),
-                "--events", str(cohort / "frozen_events.jsonl"), "--sources", str(cohort / "frozen_sources.json"),
-                "--out", str(outcomes)], cwd=ROOT, check=True)
+        if incremental:
+            runner([sys.executable, "-m", "yoyo.datasets.ma_profit_incremental_labels", "--plan", str(PLAN),
+                    "--events", str(cohort / "frozen_events.jsonl"), "--sources", str(cohort / "frozen_sources.json"),
+                    "--out", str(outcomes), "--reuse-label-dir", str(prior_outcomes),
+                    "--reuse-events", str(prior_events), "--reuse-sources", str(prior_sources)], cwd=ROOT, check=True)
+        else:
+            runner([sys.executable, "-m", "yoyo.datasets.ma_profit_pipeline", "label", "--plan", str(PLAN),
+                    "--events", str(cohort / "frozen_events.jsonl"), "--sources", str(cohort / "frozen_sources.json"),
+                    "--out", str(outcomes)], cwd=ROOT, check=True)
         outcome_commit = commit_fn(outcome_paths)
-    validate_label_stage(cohort, outcomes)
+    validate_label_stage(cohort, outcomes, require_reuse_receipt=incremental)
     selection_paths = [selection / name for name in ("selection_ledger.jsonl", "dataset_ledger.jsonl", "selection_receipt.json")]
     selection_commit = frozen_stage(selection_paths, output=output)
     if not selection_commit:
