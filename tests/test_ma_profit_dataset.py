@@ -46,6 +46,20 @@ def test_nonwinner_train_is_excluded_but_val_is_single_empty_label_candidate():
     assert len(assets) == 1 and assets[0]["variant"] == "A" and not assets[0]["positive"]
 
 
+@pytest.mark.parametrize("outcome", ["SL", "TIMEOUT"])
+def test_future_profit_label_changes_supervision_but_not_input_pixels(outcome):
+    frame = source()
+    winner = row(frame, "val", True)
+    nonwinner = row(frame, "val", False)
+    nonwinner["profit"].update({"outcome": outcome, "gross_r": -1.0, "net_r": -1.02})
+    positive = event_assets(frame, winner)[0]
+    negative = event_assets(frame, nonwinner)[0]
+    assert positive["png"] == negative["png"]
+    assert positive["box"] == negative["box"]
+    assert label_line(positive).strip()
+    assert label_line(negative) == ""
+
+
 def test_arms_keep_variants_and_shared_evaluation_views_separate():
     assert arms_for_asset("train", "A") == ("A",)
     assert arms_for_asset("train", "B1") == arms_for_asset("train", "B2") == ("B",)
