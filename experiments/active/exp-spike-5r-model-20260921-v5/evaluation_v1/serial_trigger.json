@@ -1,0 +1,25 @@
+{
+  "needed": true,
+  "triggered_by": [
+    "logistic_top10",
+    "logistic_top20",
+    "lightgbm_top10",
+    "lightgbm_top20"
+  ],
+  "replay_policies": [
+    "logistic_top1",
+    "logistic_top5",
+    "logistic_top10",
+    "logistic_top20",
+    "lightgbm_top1",
+    "lightgbm_top5",
+    "lightgbm_top10",
+    "lightgbm_top20",
+    "risk_top1",
+    "risk_top5",
+    "risk_top10",
+    "risk_top20",
+    "prior_v21_risk_decile"
+  ],
+  "meaning": "Exploratory serial check, not acceptance or selection of a best policy"
+}

@@ -1,0 +1,38 @@
+{
+  "code_review": {
+    "scope": "V5 target-only model/study/statistics/comparison versus immutable V4",
+    "findings": [
+      {
+        "issue": "registry source_commit initially pointed at preregistration parent",
+        "resolution": "updated to first V5 builder commit 7482247bdc64c94a601fa8b53447444d9c3bded1"
+      },
+      {
+        "issue": "comparison did not dereference prediction/evaluation receipts",
+        "resolution": "complete upstream chain, completion/parity flags, source stream-set checks; 5 added rejection tests; re-evaluate only into target_comparison_v2"
+      }
+    ],
+    "other_confirmed_blockers": []
+  },
+  "tests": {
+    "model_study_statistics": 18,
+    "target_comparison_final": 7,
+    "related_boundaries_causality_numeric": 108,
+    "total_distinct_passed": 133,
+    "global_registry_known_failures": "V4 registry_preexisting_failures.json: four failures from two historical missing source_commit records, not rerun or repaired in V5"
+  },
+  "generation_notes": [
+    {
+      "phase": "ad_hoc diagnostic",
+      "outcome": "duplicate recall keyword in dict constructor; corrected unpacking, no data or artifact mutation"
+    },
+    {
+      "phase": "initial report build",
+      "outcome": "KeyError on differing numeric-audit field name; corrected reporter before report creation, model and market outputs unchanged"
+    },
+    {
+      "phase": "comparison review",
+      "outcome": "initial report/manifest and comparison_v1 retained as pre-delivery draft; final report and manifest_v2 use receipt-complete comparison_v2"
+    }
+  ],
+  "source_commit": "ffe9d0c9703fc9003bee5088f9236ffa2486b10e"
+}
