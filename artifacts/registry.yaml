@@ -18,6 +18,78 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-launch-followup50-20260922-manifest
+    artifact_type: manifest
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: experiments/active/exp-ma-launch-followup50-20260922-v1/review/manifest.json
+    sha256: 652816d82c78837a43a894bc9057fe570a9982cea4e26640cb98848a990288ad
+    size_bytes: 109704
+    storage_uri: repo://experiments/active/exp-ma-launch-followup50-20260922-v1/review/manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-followup50-20260922-qa
+    artifact_type: report
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: experiments/active/exp-ma-launch-followup50-20260922-v1/independent_qa.json
+    sha256: 003665ab72997785765cb4376abc6796b188a6490e445e9aa1dac10c9413d919
+    size_bytes: 550
+    storage_uri: repo://experiments/active/exp-ma-launch-followup50-20260922-v1/independent_qa.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-followup50-20260922-bundle
+    artifact_type: dataset
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: experiments/active/exp-ma-launch-followup50-20260922-v1/ma_launch_50_events_12h.zip
+    sha256: e80719252c34c3aa6f6b62f9efa5a83f16b4e5d6ab3f7fc79a93e5d796803076
+    size_bytes: 11636692
+    storage_uri: file://experiments/active/exp-ma-launch-followup50-20260922-v1/ma_launch_50_events_12h.zip
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-followup50-20260922-report
+    artifact_type: report
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: analysis/p1_ma_launch_followup50_20260922.md
+    sha256: 5eed1d99c6f024a3ac2fd901406dd55f302ddb595d73a7570c432cf8c37ac7e2
+    size_bytes: 5806
+    storage_uri: repo://analysis/p1_ma_launch_followup50_20260922.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-followup50-20260922-plan
+    artifact_type: config
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: experiments/active/exp-ma-launch-followup50-20260922-v1/plan.json
+    sha256: fd00652cd1cf2ce337b62c2f57e73b2bb65bcc05efd952a8e86ce921da1b9802
+    size_bytes: 1863
+    storage_uri: repo://experiments/active/exp-ma-launch-followup50-20260922-v1/plan.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+  - artifact_id: ma-launch-followup50-20260922-selection
+    artifact_type: manifest
+    role: historical_followup_visual_review_only
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    source_path: experiments/active/exp-ma-launch-followup50-20260922-v1/selection.jsonl
+    sha256: e5a2da6cef85f2877e562d30ee047431bf6c984bf58f47521ab9a12f137d02f9
+    size_bytes: 72917
+    storage_uri: repo://experiments/active/exp-ma-launch-followup50-20260922-v1/selection.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
   - artifact_id: ma-launch-synthetic-preview20-20260921-report
     artifact_type: report
     role: procedural_style_preview_qa_and_limitations

@@ -14,6 +14,28 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-launch-followup50-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1e5d2f896ea874718d36f2c098d6a199c2fe838
+    status: active
+    question: Show50 sampled unique Grade-A events and real12h following earliest five-bar confirmation.
+    single_variable: Historical visual review, no comparative training or economic experiment.
+    result: Rendered50unique1920x1000charts+50byte-identical original copies+50CSV. Exact48bar12h windows50/50;47source
+      hashes;100original image/label hashes unchanged;600MA endpoint checks maxerror1.46e-11;browser ALL50/LONG22/SHORT28
+      and modal passed. Awaiting Owner review.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_launch_followup50_20260922.md
+    artifacts:
+    - ma-launch-followup50-20260922-plan
+    - ma-launch-followup50-20260922-selection
+    - ma-launch-followup50-20260922-manifest
+    - ma-launch-followup50-20260922-qa
+    - ma-launch-followup50-20260922-bundle
+    - ma-launch-followup50-20260922-report
+    notes: Seed20260922;22LONG28SHORT;47train3val. T0=core+5bar close, not an observed online detection time. No labels
+      changed.
   - experiment_id: exp-ma-launch-synthetic-preview20-20260921-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7a6e6c7b108e9981e46001f21680a02083be747c
