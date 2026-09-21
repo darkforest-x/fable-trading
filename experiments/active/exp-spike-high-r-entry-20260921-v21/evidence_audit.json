@@ -1,0 +1,112 @@
+{
+  "status": "pass",
+  "auditor": "root, not independent agent",
+  "checks": {
+    "aggregate_arithmetic": "pass",
+    "common_events_unchanged": 4947,
+    "selected_control_metadata_matches": 47113,
+    "all_stream_receipts_and_leaf_hashes": 3531,
+    "gate_decisions": {
+      "candidates": 49207,
+      "known": 44606,
+      "passed": 5701,
+      "reasons": {
+        "risk_above_cutoff": 38905,
+        "insufficient_history": 4601,
+        "passed": 5701
+      }
+    }
+  },
+  "metrics": [
+    {
+      "arm": "baseline",
+      "period": "full",
+      "closed": 41700,
+      "gt10": 367,
+      "win_rate": 0.2932853717026379,
+      "gt10_rate": 0.00880095923261391,
+      "total_r": 1697.5901997452327,
+      "mean_net_bp": 2.8210622488676553
+    },
+    {
+      "arm": "baseline",
+      "period": "later",
+      "closed": 25567,
+      "gt10": 210,
+      "win_rate": 0.26432510658270425,
+      "gt10_rate": 0.008213712989400398,
+      "total_r": -2328.7618707727693,
+      "mean_net_bp": -43.35451793895306
+    },
+    {
+      "arm": "high_r_entry_v21",
+      "period": "full",
+      "closed": 5286,
+      "gt10": 96,
+      "win_rate": 0.3333333333333333,
+      "gt10_rate": 0.018161180476730987,
+      "total_r": 1645.2243566094353,
+      "mean_net_bp": 48.99685548675401
+    },
+    {
+      "arm": "high_r_entry_v21",
+      "period": "later",
+      "closed": 3312,
+      "gt10": 57,
+      "win_rate": 0.2807971014492754,
+      "gt10_rate": 0.017210144927536232,
+      "total_r": 268.5783652364087,
+      "mean_net_bp": 9.273002708599286
+    }
+  ],
+  "tail_status": {
+    "neither": 41789,
+    "lost": 282,
+    "retained": 85,
+    "gained": 11
+  },
+  "wif_screenshot_event": [
+    {
+      "event_key": "okx_60m_d567226c051c9c20:20551:1",
+      "asset_old": "WIF",
+      "venue_old": "okx",
+      "symbol_old": "WIF-USDT-SWAP",
+      "timeframe_min_old": 60.0,
+      "entry_time_old": "2026-08-19 18:00:00+00:00",
+      "exit_time_old": "2026-08-22 05:00:00+00:00",
+      "censored_old": false,
+      "net_r_old": 14.329900000000086,
+      "mfe_r_old": 22.350000000000136,
+      "net_return_old": 0.4088416547788873,
+      "exit_reason_old": "trailing_stop",
+      "score_old": -0.0285306704707558,
+      "gate_known_old": true,
+      "gate_passed_old": false,
+      "reference_risk_fraction_old": 0.0285306704707558,
+      "volume_ratio_old": 4.045180397812884,
+      "asset_new": null,
+      "venue_new": null,
+      "symbol_new": null,
+      "timeframe_min_new": null,
+      "entry_time_new": null,
+      "exit_time_new": null,
+      "censored_new": null,
+      "net_r_new": null,
+      "mfe_r_new": null,
+      "net_return_new": null,
+      "exit_reason_new": null,
+      "score_new": null,
+      "gate_known_new": null,
+      "gate_passed_new": null,
+      "reference_risk_fraction_new": null,
+      "volume_ratio_new": null,
+      "_merge": "left_only",
+      "tail_status": "lost"
+    }
+  ],
+  "limits": [
+    "No raw-price rerun in this arithmetic audit",
+    "Source hypothesis selected after exposed historical diagnostic",
+    "No account solvency, leverage or live execution certification"
+  ]
+}

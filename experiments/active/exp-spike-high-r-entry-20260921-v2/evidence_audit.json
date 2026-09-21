@@ -1,0 +1,177 @@
+{
+  "audit_type": "bounded_read_only_evidence_audit",
+  "experiment": "exp-spike-high-r-entry-20260921-v2",
+  "audit_date": "2026-09-21",
+  "scope": {
+    "allowed_paths": [
+      "PROJECT_PLAN.md",
+      "validation.json",
+      "run_v1/",
+      "statistics_v1/"
+    ],
+    "read_only_evidence": true,
+    "market_rerun": false,
+    "raw_market_data_opened": false,
+    "code_or_strategy_modified": false
+  },
+  "source_status": {
+    "run_manifest": {
+      "path": "run_v1/manifest.json",
+      "sha256": "d006e9625314e18936340377ccc1ab3e33d51ca5a3540dfe0a9bf800422a72b7",
+      "complete": true,
+      "selected": 3531,
+      "completed": 3531,
+      "expected": 3531,
+      "failures": 0,
+      "receipt_count": 3531,
+      "unique_receipt_hashes": 3531,
+      "valid_sha256_receipts": 3531,
+      "run_identity_matches_started_json": true,
+      "source_receipt_sha256_matches_identity_json": true
+    },
+    "statistics_receipt": {
+      "path": "statistics_v1/receipt.json",
+      "source_manifest_sha256": "d006e9625314e18936340377ccc1ab3e33d51ca5a3540dfe0a9bf800422a72b7",
+      "source_manifest_hash_matches": true,
+      "all_listed_output_hashes_match": true,
+      "builder_sha256": "f3919f818eca646d43ea4244a8c408a54417059afdc7148bafce6e3878029d9f"
+    },
+    "trade_stream_coverage": {
+      "manifest_streams": 3531,
+      "unique_stream_keys_in_long_trades": 3169,
+      "manifest_only_streams": 362,
+      "trade_only_streams": 0,
+      "interpretation": "The allowed trade ledger has no rows for 362 receipt keys; the allowed artifacts do not include a zero-candidate per-stream report, so this coverage gap is not independently explainable here."
+    }
+  },
+  "recomputed_trade_metrics": {
+    "source": "statistics_v1/long_trades.csv.gz",
+    "cutoff_utc": "2025-09-10T00:00:00Z",
+    "period_definition": {
+      "earlier": "exit_time < cutoff",
+      "later": "entry_time >= cutoff",
+      "crossing": "entry_time < cutoff <= exit_time",
+      "closed_denominator": "censored == false",
+      "strict_gt10": "net_r > 10 among closed trades"
+    },
+    "baseline": {
+      "full": {"events": 41814, "closed": 41700, "censored": 114, "wins": 12230, "win_rate": 0.293285371702638, "strict_net_gt10": 367, "strict_net_gt10_rate": 0.008800959232614},
+      "earlier": {"events": 15807, "closed": 15807, "censored": 0, "wins": 5218, "win_rate": 0.330106914658063, "strict_net_gt10": 146, "strict_net_gt10_rate": 0.009236414246853},
+      "later": {"events": 25681, "closed": 25567, "censored": 114, "wins": 6758, "win_rate": 0.264325106582704, "strict_net_gt10": 210, "strict_net_gt10_rate": 0.0082137129894},
+      "crossing": {"events": 326, "closed": 326, "censored": 0, "wins": 254, "win_rate": 0.779141104294479, "strict_net_gt10": 11, "strict_net_gt10_rate": 0.033742331288344}
+    },
+    "high_r_entry_v2": {
+      "full": {"events": 22047, "closed": 21988, "censored": 59, "wins": 6642, "win_rate": 0.302073858468255, "strict_net_gt10": 180, "strict_net_gt10_rate": 0.008186283427324},
+      "earlier": {"events": 8925, "closed": 8925, "censored": 0, "wins": 3021, "win_rate": 0.338487394957983, "strict_net_gt10": 75, "strict_net_gt10_rate": 0.008403361344538},
+      "later": {"events": 12902, "closed": 12843, "censored": 59, "wins": 3447, "win_rate": 0.268395234758234, "strict_net_gt10": 100, "strict_net_gt10_rate": 0.007786342754808},
+      "crossing": {"events": 220, "closed": 220, "censored": 0, "wins": 174, "win_rate": 0.790909090909091, "strict_net_gt10": 5, "strict_net_gt10_rate": 0.022727272727273}
+    },
+    "summary_reconciliation": {
+      "all_period_rows_match_summary_csv": true,
+      "arithmetic_notes": [
+        "Baseline full events = 41700 closed + 114 censored; V2 full events = 21988 closed + 59 censored.",
+        "Full win-rate delta is +0.008788486765617; full strict-net>10 rate delta is -0.000614675805290.",
+        "Later win-rate delta is +0.004070128175530; later strict-net>10 rate delta is -0.000427370234592."
+      ]
+    }
+  },
+  "high_r_tail_changes": {
+    "source": "statistics_v1/high_r_changes.csv",
+    "baseline_strict_net_gt10": 367,
+    "v2_strict_net_gt10": 180,
+    "retained": 145,
+    "lost": 222,
+    "gained": 35,
+    "change_rows": 402,
+    "retained_of_baseline_rate": 0.395095367847411,
+    "lost_of_baseline_rate": 0.604904632152589,
+    "retained_of_v2_rate": 0.805555555555556,
+    "gained_of_v2_rate": 0.194444444444444,
+    "set_recomputation_matches_csv": true
+  },
+  "same_event_economic_parity": {
+    "source": "statistics_v1/paired_long_events.csv.gz",
+    "merge_counts": {"both": 19192, "left_only": 22622, "right_only": 2855},
+    "common_event_keys": 19192,
+    "common_closed": 19137,
+    "common_censored": 55,
+    "nan_safe_exact_equality": {
+      "net_r": true,
+      "net_return": true,
+      "mfe_r": true,
+      "censored": true,
+      "exit_time": true,
+      "exit_reason": true,
+      "entry_time": true,
+      "score": true,
+      "reference_risk_fraction": true,
+      "volume_ratio": true
+    },
+    "net_r_sum_old": 369.226155656038,
+    "net_r_sum_new": 369.226155656038,
+    "net_return_sum_old": -9.471201967461,
+    "net_return_sum_new": -9.471201967461,
+    "max_absolute_net_r_delta": 0.0,
+    "max_absolute_net_return_delta": 0.0
+  },
+  "matched_controls": {
+    "source": "statistics_v1/controls.csv.gz",
+    "rows": 63861,
+    "matched_rows": 63596,
+    "unmatched_rows": 265,
+    "matched_by_arm": {"baseline": 41644, "high_r_entry_v2": 21952},
+    "unmatched_by_arm": {"baseline": 170, "high_r_entry_v2": 95},
+    "unmatched_reasons": {"censored_pair": 262, "no_exact_match": 2, "initial_position_unavailable": 1},
+    "matched_target_control_month_equal": 63596,
+    "matched_target_control_vol_bin_equal": 63596,
+    "matched_month_bin_mismatches": 0,
+    "matched_selected_timestamp_nulls": 0,
+    "matched_selected_numeric_nonfinite": 0,
+    "matched_control_atr_fraction_min": 0.000322581270651,
+    "matched_control_atr_fraction_max": 0.160163728152566,
+    "matched_control_net_r_all_finite": true,
+    "matched_target_net_r_all_finite": true,
+    "matched_control_net_return_all_finite": true,
+    "matched_target_net_return_all_finite": true,
+    "interpretation": "Month/bin parity is verified for selected matched controls only. Two rows have no selected control and null control month/bin; unmatched rows are retained as documented rather than silently filled."
+  },
+  "rate_contrast_reconciliation": {
+    "source": "statistics_v1/rate_contrasts.csv",
+    "deltas_recomputed_from_summary": true,
+    "periods": {
+      "full": {"win_rate_delta": 0.008788486765617, "win_rate_ci": [-0.00110356519527, 0.019159847345688], "win_rate_signflip_p": 0.2859, "gt10_rate_delta": -0.00061467580529, "gt10_rate_ci": [-0.001565359373316, 0.000286263870398], "gt10_signflip_p": 0.9793},
+      "earlier": {"win_rate_delta": 0.00838048029992, "win_rate_ci": [-0.009575748919135, 0.025825669281874], "win_rate_signflip_p": 0.38623046875, "gt10_rate_delta": -0.000833052902315, "gt10_rate_ci": [-0.002218610714697, 0.000508620668965], "gt10_signflip_p": 0.829345703125},
+      "later": {"win_rate_delta": 0.00407012817553, "win_rate_ci": [-0.004422688575854, 0.012444873638764], "win_rate_signflip_p": 0.247436523438, "gt10_rate_delta": -0.000427370234592, "gt10_rate_ci": [-0.001615113965139, 0.000645819518944], "gt10_signflip_p": 0.9580078125},
+      "crossing": {"win_rate_delta": 0.011767986614612, "win_rate_ci": [0.001643335362142, 0.0625], "win_rate_signflip_p": 0.25, "gt10_rate_delta": -0.011015058561071, "gt10_rate_ci": [-0.011898965307365, 0.0], "gt10_signflip_p": 1.0}
+    }
+  },
+  "verdict_reconciliation": {
+    "source": "statistics_v1/verdict.json",
+    "status": "rejected",
+    "production_eligible": false,
+    "training_eligible": false,
+    "failed_checks": ["gt10_precision_increases", "win_rate_ci_positive", "gt10_precision_ci_positive", "mean_net_bp_positive", "matched_excess_positive", "matched_random_p_below_001"],
+    "later_gate_evidence": {
+      "v2_mean_net_bp": -42.396727836286,
+      "v2_paired_excess_r": -0.053370353871,
+      "v2_random_p": 0.891357421875,
+      "v2_gt10_rate": 0.007786342754808,
+      "baseline_gt10_rate": 0.0082137129894,
+      "v2_win_rate_ci_low": -0.004422688575854,
+      "v2_gt10_rate_ci_low": -0.001615113965139
+    },
+    "aggregate_caution": "The full V2 mean net bp is +3.832439229455 and full paired excess is +0.028074298330, but the required later-period gate is negative; the full aggregate cannot override the rejected verdict."
+  },
+  "ranking_diagnostic_boundary": {
+    "source": "statistics_v1/ranking_diagnostics.csv and diagnostic.json",
+    "breakout_score_full_auc_gt10": 0.468286880577,
+    "breakout_score_full_top_decile_n": 4170,
+    "is_live_entry_threshold": false,
+    "reason": "AUC/top-decile ranking uses the realized strict netR>10 outcome label and is explicitly a batch diagnostic; it is not a causal production admission rule."
+  },
+  "limits": [
+    "This audit recalculated supplied ledgers and manifests only; it did not rerun the market replay or inspect raw market data.",
+    "Manifest completion and hashes support artifact provenance, but do not independently prove the contents of the 362 receipt streams absent from long_trades.",
+    "No causal live-performance claim follows from the AUC/top-decile diagnostic, the exposed historical replay, or the full-period aggregate alone."
+  ]
+}

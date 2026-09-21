@@ -11,3 +11,5 @@ See PROJECT_PLAN.md and config.json for the frozen contract. Run only after comm
 ```
 
 Not trained, not promoted, not a live 10R guarantee. Reused historical data is not blind validation.
+
+Result (2026-09-21): Rejected: full win rate rises to30.21% but netR>10 precision falls to0.8186%;later economics remain negative. Full3531 streams completed withzero failures. See analysis/p1_spike_high_r_entry_v2_20260921.md.

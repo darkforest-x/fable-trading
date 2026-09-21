@@ -1,0 +1,19 @@
+{
+  "status": "rejected",
+  "checks": {
+    "win_rate_increases": true,
+    "gt10_precision_increases": true,
+    "win_rate_ci_positive": false,
+    "gt10_precision_ci_positive": false,
+    "mean_net_bp_positive": true,
+    "matched_excess_positive": true,
+    "matched_random_p_below_001": false
+  },
+  "failed_checks": [
+    "win_rate_ci_positive",
+    "gt10_precision_ci_positive",
+    "matched_random_p_below_001"
+  ],
+  "production_eligible": false,
+  "training_eligible": false
+}

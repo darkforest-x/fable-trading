@@ -31908,3 +31908,36 @@ artifacts:
       Long netR-over10 declines367to259,retaining194,losing173,gaining65;later210to152 andnegative netR;candidate rejected.
       Twentyone focused and108 related checks pass;independent saved-outcome arithmetic,tail andcontrol-target audit pass.
       Control-side ATR membership andrawcache/test reruns outside independent audit;no causalalpha,live orrollingcash claim.
+
+  - artifact_id: spike-high-r-entry-20260921-v2-delivery
+    artifact_type: manifest
+    role: causal_high_r_entry_filter_full_v9_v2_rejected_at_acceptance_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: b2e5a24dbd8dcfd5ab0019866a533c5280dfa79a
+    generator_commit: b2e5a24dbd8dcfd5ab0019866a533c5280dfa79a
+    source_path: experiments/active/exp-spike-high-r-entry-20260921-v2/delivery_manifest.json
+    sha256: 4002c6c03aa7dffa91e1dcf213836af23305e8301a69f100d403cfbb0782aba5
+    size_bytes: 7860
+    storage_uri: repo://experiments/active/exp-spike-high-r-entry-20260921-v2/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 35 direct hashes plus3531 stream receipts bind17655 output files. All3531 streams complete,zero failures,baseline exact parity.
+      Prior20 breakout raises fullwin29.33to30.21pct butlowers10Rprecision0.8801to0.8186pct;rejected.20focused and108related checks pass;independent arithmetic audit retained.
+
+  - artifact_id: spike-high-r-entry-20260921-v21-delivery
+    artifact_type: manifest
+    role: causal_high_r_entry_filter_full_v9_v21_rejected_at_acceptance_gate
+    source_repo: darkforest-x/fable-trading
+    source_commit: f69d1e52e615325ae9c2f454319322418eb4cc18
+    generator_commit: f69d1e52e615325ae9c2f454319322418eb4cc18
+    source_path: experiments/active/exp-spike-high-r-entry-20260921-v21/delivery_manifest.json
+    sha256: 2a47a9e3dda5689f985fd63b26c2d764dea69cc01924b1ffa5fbe88ccd642ee0
+    size_bytes: 9122
+    storage_uri: repo://experiments/active/exp-spike-high-r-entry-20260921-v21/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 41 direct hashes plus3531 stream receipts bind17655 output files. All3531 streams complete,zero failures,baseline exact parity.
+      Past-only riskdecile raises fullwin29.33to33.33pct and10Rprecision0.8801to1.8161pct;later CIs crosszero andrandomp0.22144. Originaltail85retained282lost11new,WIFlost.
+      Hypothesis selected after exposed diagnostic;22focused pass,107related plus1directory-race retry pass. Root audit only,no live or10R guarantee.

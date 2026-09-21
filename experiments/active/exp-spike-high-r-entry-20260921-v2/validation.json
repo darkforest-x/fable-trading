@@ -1,0 +1,29 @@
+{
+  "source_commit": "b2e5a24dbd8dcfd5ab0019866a533c5280dfa79a",
+  "focused": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_spike_high_r_entry_v2.py tests/evaluation/test_spike_high_r_entry_study.py -q",
+    "passed": 20,
+    "seconds": 0.47
+  },
+  "related": {
+    "command": ".venv/bin/python -m pytest tests/boundaries/test_layer_imports.py tests/boundaries/test_yoyo_package_is_local.py tests/boundaries/test_experiment_isolation.py tests/causality/test_continuity_and_availability.py tests/parity/test_numeric_baseline_parity.py -q",
+    "passed": 108,
+    "seconds": 31.48
+  },
+  "review": {
+    "role": "budget-reviewer",
+    "model": "gpt-5.6-terra",
+    "effort": "high",
+    "scope": "runner,report,tests,plan,config static review",
+    "findings_fixed": [
+      "Empty later treatment arm must emit explicit rejected verdict, not crash",
+      "Config must describe long entry changes and unchanged exits"
+    ],
+    "result": "no remaining concrete blocker",
+    "limitation": "Reviewer did not run tests or market replay"
+  },
+  "causality_fix": "Check gap[start+1:i+1], since gap[start] marks an edge outside the rebuilt20bar window; regression included",
+  "production_eligible": false,
+  "training_eligible": false,
+  "test_evidence": "Counts and durations copied from root execution tool outputs; not independently repeated by reviewer."
+}

@@ -1,0 +1,8 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/spike_high_r_entry_report.py:106: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  t, c = pd.concat(ts, ignore_index=True), pd.concat(cs, ignore_index=True)
+            arm period  closed  win_rate  gt10  gt10_rate      total_r  mean_net_bp  paired_excess_r  random_p
+       baseline   full   41700  0.293285   367   0.008801  1697.590200     2.821062         0.058014  0.133900
+       baseline  later   25567  0.264325   210   0.008214 -2328.761871   -43.354518        -0.020714  0.732056
+high_r_entry_v2   full   21988  0.302074   180   0.008186  1151.906847     3.832439         0.028074  0.315700
+high_r_entry_v2  later   12843  0.268395   100   0.007786 -1167.908410   -42.396728        -0.053370  0.891357
+{"original_closed_longs": 41700, "original_winners": 12230, "original_net_gt10": 367, "recorded_mfe_gt10": 1164, "tail_status": {"neither": 44267, "lost": 222, "retained": 145, "gained": 35}, "short_events": {"baseline": 40468, "high_r_entry_v2": 40468}, "metric_limit": "Strict realized netR>10 is an outcome label, never an entry input; ranking diagnostics are not live admission thresholds"}

@@ -1,0 +1,21 @@
+{
+  "focused_tests": {
+    "passed": 22,
+    "seconds": 0.43,
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_spike_high_r_entry_v21.py tests/evaluation/test_spike_high_r_risk_study.py -q"
+  },
+  "related_tests": {
+    "initial_passed": 107,
+    "initial_failed": 1,
+    "cause": "Concurrent pathlib.rglob saw a staging directory after atomic rename; no policy assertion failed",
+    "retry_passed": 1,
+    "retry_test": "tests/boundaries/test_experiment_isolation.py::test_no_experiment_names_a_production_pointer",
+    "retry_seconds": 11.04
+  },
+  "review": "V2.1 core and calibration reviewed/recomputed by root; extra independent delegate unavailable due thread limit; V2 static audit not claimed to cover this version",
+  "full_streams": 3531,
+  "failures": 0,
+  "baseline_parity_all": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -11,3 +11,5 @@ Research only: original V9 long reference risk must be at or below the preceding
 ```
 
 Production/training eligibility remains false. See PROJECT_PLAN.md for the chronological acceptance contract.
+
+Result (2026-09-21): Acceptance gate not passed: full win rate33.33%,netR>10 precision1.8161%;later28.08% and1.7210%,butrate CIs crosszero andmatchedrandomp0.22144. WIF example and282 originalhighR events are lost. Full3531 streams completed withzero failures. See analysis/p1_spike_high_r_entry_v21_20260921.md.

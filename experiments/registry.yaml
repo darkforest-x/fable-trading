@@ -10298,32 +10298,34 @@ experiments:
 
   - experiment_id: exp-spike-high-r-entry-20260921-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: f19684c0de
-    status: active
+    source_commit: b2e5a24dbd8dcfd5ab0019866a533c5280dfa79a
+    status: rejected
     question: Can a causal prior20 high breakout gate improve V9 long net-positive win rate and realized netR-over10 precision with positive later-period economics?
     single_variable: Long admission only;completed signal close strictly above preceding20 contiguous completed-bar highs. Original exits and shorts unchanged.
-    result: Preregistered before market replay;full3531 streams,all losses and censored events included. No parameter search or model training.
+    result: Full3531 streams,zero failures,baseline exact parity. Winrate29.33to30.21pct but netR-over10 precision0.8801to0.8186pct;later mean netbp-42.40 andrandomp0.89136. Rejected.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_high_r_entry_v2_20260921.md
-    artifacts: []
+    artifacts:
+    - spike-high-r-entry-20260921-v2-delivery
     reuse_allowed: false
     notes: Owner shifted priority to win rate and10R precision;tail recall and missed winners remain mandatory. No future outcome admission or live claim.
-      Source commit initially names previous delivery;final record binds committed builder.
+      Builder precedes replay;20 focused and108 related gates pass. Independent numerical audit retained;not production.
 
   - experiment_id: exp-spike-high-r-entry-20260921-v21
     source_repo: darkforest-x/fable-trading
-    source_commit: b2e5a24dbd8dcfd5ab0019866a533c5280dfa79a
-    status: active
+    source_commit: f69d1e52e615325ae9c2f454319322418eb4cc18
+    status: rejected
     question: Can a causal previous-three-month lower-risk-decile gate improve V9 long win rate and netR-over10 precision with positive later economics?
     single_variable: Long admission only;signal reference risk <= previous3 full calendar months per-timeframe tenth percentile,minimum100 candidates. Original exits unchanged.
-    result: Frozen before causal calibration/replay;hypothesis chosen after exposed V2 single-feature diagnostic,not blind validation. No parameter search or model training.
+    result: Full3531 streams,zero failures,baseline parity. Winrate29.33to33.33pct andnetR-over10 precision0.8801to1.8161pct;later28.08pct and1.7210pct withpositive9.27bp,butboth rate-CIs crosszero andrandomp0.22144. Rejected at gate;researchcandidate only.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_high_r_entry_v21_20260921.md
-    artifacts: []
+    artifacts:
+    - spike-high-r-entry-20260921-v21-delivery
     reuse_allowed: false
     notes: Independent from failed20bar breakout;does not combine with high-anchor exits. Full3531 streams,all losers and censored paths retained.
-      Source commit initially names prior builder;final delivery binds actual version. No production preset or account changes.
+      Builder andpast-only calibration committed before replay;22 focused pass,related107pass plus1directory-race retry pass. WIF example rejected;no production/account changes.
