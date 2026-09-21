@@ -1,0 +1,94 @@
+{
+  "experiment_id": "exp-spike-v126-visual-20260922-v1",
+  "date": "2026-09-22",
+  "source_commit": "18722beb0f57f860dc8b8da2db234f2912af021b",
+  "parent": {
+    "path": "yoyo/evaluation/pine/spike_burst_v12_5.pine",
+    "sha256": "be7adb778ef552cb61606d9290c0a5ba6957b56b5f5f2f56e4c5ac943c1dde0e",
+    "size_bytes": 157936
+  },
+  "source": {
+    "path": "yoyo/evaluation/pine/spike_burst_v12_6.pine",
+    "sha256": "8a72c18b65e50862ca6dee4e4d58cac4c1e1c7d38ccd3718e7f0228e970ee2db",
+    "size_bytes": 164292
+  },
+  "parent_retained_unchanged": true,
+  "editor_full_source_equal": true,
+  "editor_source_characters": 148787,
+  "tradingview": {
+    "private_script_title": "SPIKE V12.6 · 自适应视觉",
+    "revision": 1,
+    "chart": "https://www.tradingview.com/chart/AlGc61US/",
+    "chart_symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "15m",
+    "layout_saved": true,
+    "authoritative_save_state": "All changes saved",
+    "final_background": "white",
+    "final_inputs": "V12.6 defaults; minimal=false; custom break color=false",
+    "native_compile_and_visible_execution": true,
+    "desktop_instance_sync_verified": false
+  },
+  "checks": {
+    "focused_and_related_passed": 26,
+    "source_contract_new": 2,
+    "related_existing": 24,
+    "parent_visual_replacements_reversed": 35,
+    "qa": [
+      "input defaults",
+      "full mode",
+      "minimal mode",
+      "black background / white marks",
+      "white background / black marks",
+      "custom orange break candles",
+      "defaults restored"
+    ]
+  },
+  "qa_evidence": [
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/custom_break_minimal.png",
+      "sha256": "3a3b2ae1b8db63f6fd7d3e4786226c49ff26e7781c79b606aa45f61e9be30745",
+      "size_bytes": 152962
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/dark_minimal.png",
+      "sha256": "4a3f7e0b828465cbf9ab2646b0c38336211dc4bd244fed1e7d23d905ded8833d",
+      "size_bytes": 125627
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/defaults.png",
+      "sha256": "88ad5c5457c944500bf1c974354479de4f617d905abc6a450b99fbf199c9fd6f",
+      "size_bytes": 154199
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/defaults.txt",
+      "sha256": "a8c872f55dcdb63ff5d8dbf709edec3d2957484fb8b84a8cfde632e147b54a69",
+      "size_bytes": 32138
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/final_layout.txt",
+      "sha256": "425132d361e34a83f7859d79fa25a907f9881f9527bff68c832b655f28e15fc8",
+      "size_bytes": 11595
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/final_light_full.png",
+      "sha256": "80053ba7aa6c43f788202842e5fe4aeeb534538c67a1131b2256f4deabb89e23",
+      "size_bytes": 164189
+    },
+    {
+      "path": "output/qa/spike_v12_6_visual_20260922/light_minimal.png",
+      "sha256": "eb72d544c0098d1087799fed9c22c6b12eff76c4c60f17843d2997fcc0444b81",
+      "size_bytes": 152166
+    }
+  ],
+  "notion": "https://app.notion.com/p/3e28856479af81b686e9fbad52560b34",
+  "report": "analysis/p1_spike_v12_6_visual_20260922.md",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limits": [
+    "No new profitability experiment or performance claim.",
+    "PEPE screenshot event not uniquely located without entry timestamp.",
+    "Stops, entries, costs and risk rules unchanged; alerts not migrated.",
+    "Minimal mode leaves an empty native indicator pane; user can collapse it.",
+    "Source equivalence is not a full-history native execution ledger comparison."
+  ]
+}
