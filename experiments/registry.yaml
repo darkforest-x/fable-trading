@@ -10236,3 +10236,23 @@ experiments:
     notes: One selected winner,no edge inference;126price/mark hours,31fundings,60price/mark minutes. Seven synthetic checks and6ledger audits.
       Historical risk tiers unverified;current-tier sensitivity only. Raw candles memory-only,no local cache writes. No live/default changes.
       Notion3e28856479af81d8b4dbeb16ebd1a41a. Primary builder9fe06ba865 committed before outputs;minute audit9b79e1e7f5 before diagnosis.
+
+  - experiment_id: exp-profitable-roll-v03-20260921-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 57d35d41f0d5ba648475af62e1cee61f82bcb43d
+    status: inconclusive
+    question: Can maintenance-aware unlimited profitable rolling transfer beyond the selected WIF winner?
+    single_variable: Within new common entries and guarded initial quantities,successful add cap0,2,unlimited;auxiliary arm disables only add maintenance guard.
+    result: Frozen29 actual451 plus random451,3608 ledgers. Later160 actual continuous mean net-3.5845U,two-3.0832U,none-1.3838U.
+      Five retrospective winners show3 higher and2 lower continuous balances;WIF guarded17134 initial,7adds final balance unresolved.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_profitable_roll_v03_20260921.md
+    artifacts:
+    - profitable-roll-v03-20260921-delivery
+    reuse_allowed: false
+    notes: Python offline engine/CLI implemented,not a full entry indicator or live bot. Cross-asset5pct MMR/last-price/no-funding profile is hypothetical.
+      WIF historical mark/funding with current tiers;one-tick admission buffer consumed by later funding. Peak22043U remains old hindsight only.
+      20 focused tests,3608 independent path audits,CLI smoke;related gates488pass/8preexisting failures. Notion3e28856479af81e9aac0defed646bbc4.
+      No branches,training,promote,Pine publication,default parameter changes,account actions or raw local candle writes.

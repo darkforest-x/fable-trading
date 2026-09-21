@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "arm": "none",
+      "legs": 1,
+      "accounting_pass": true,
+      "status": "complete",
+      "final_balance": 1060.1221947200004,
+      "conditional_stop_balance": 1060.1221947200004
+    },
+    {
+      "arm": "two",
+      "legs": 3,
+      "accounting_pass": true,
+      "status": "complete",
+      "final_balance": 2104.064278345001,
+      "conditional_stop_balance": 2104.064278345001
+    },
+    {
+      "arm": "continuous",
+      "legs": 8,
+      "accounting_pass": true,
+      "status": "ambiguous",
+      "final_balance": null,
+      "conditional_stop_balance": 2523.77341307
+    },
+    {
+      "arm": "continuous_unprotected",
+      "legs": 8,
+      "accounting_pass": true,
+      "status": "ambiguous",
+      "final_balance": null,
+      "conditional_stop_balance": 2179.9002499099965
+    }
+  ],
+  "method": "Independent sum of entry/add q*price, fees and funding at stop0.1967;no claim of actual stop execution"
+}
