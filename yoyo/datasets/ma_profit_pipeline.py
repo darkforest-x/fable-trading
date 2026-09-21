@@ -122,6 +122,7 @@ def label(plan_path, events_path, sources_path, output):
     commit = committed([Path(__file__), ROOT / 'yoyo/contracts/ma_profit_filter.py',
                         plan_path, events_path, sources_path])
     plan = json.loads(plan_path.read_text())
+    args = plan['label_contract']
     specs = json.loads(sources_path.read_text())
     if isinstance(specs, dict):
         specs = specs['sources']
@@ -142,7 +143,6 @@ def label(plan_path, events_path, sources_path, output):
             if s < 0 or e < s or e - s + 1 != int(event['core_bars']):
                 errors.append({'event_id': event['event_id'], 'error': 'core_timestamp_lineage'})
                 continue
-            args = plan['label_contract']
             profit = resolve_ma_profit_event(frame, int(s), int(e), event['direction'],
                 bar_minutes=minutes, confirmation_bars=args['confirmation_bars'],
                 horizon_hours=args['horizon_hours'], target_r=args['target_r'], round_trip_cost=args['round_trip_cost'])
