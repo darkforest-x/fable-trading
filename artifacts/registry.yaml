@@ -31873,3 +31873,20 @@ artifacts:
     notes: 110 hashed files,3608 cross-asset ledgers,4319 entry/add legs;20 synthetic checks and CLI smoke pass.
       Cross-asset flat5pct MMR,last-price proxy,no funding is synthetic. WIF continuous final balance remains null.
       Current risk tiers not historical proof;selected old winners not a coin selector;no production changes or raw local OHLC.
+
+  - artifact_id: winner-roll-max10r-20260921-delivery
+    artifact_type: manifest
+    role: conditional_two_add_maximum_balance_labels_for_full_v9_net_r_over10_long_winners
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1b25dcbab9d84b88cfea82e50b34b7e0196b9e61
+    generator_commit: 1b25dcbab9d84b88cfea82e50b34b7e0196b9e61
+    source_path: experiments/active/exp-winner-roll-max10r-20260921-v1/delivery_manifest.json
+    sha256: cca23d3a0446500a51f9f1954d04ec051cf4da388ab9c852f3ec7dd3cfdef952
+    size_bytes: 315832
+    storage_uri: repo://experiments/active/exp-winner-roll-max10r-20260921-v1/delivery_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 1376 hashed files;367 trades209 assets339 streams;1101 independent wallet/LP audits2199 legs;15 focused tests,zero market failures.
+      WIF screenshot two-add7521.8737U and BEAT maximum1174044.9156U are flat5pct/zero-funding/continuous-quantity oracle labels.
+      Original exit bar excluded,chosen exit bar low required;historical mark/tiers/funding/depth unknown,not exchange-solvency certification.

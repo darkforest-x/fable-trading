@@ -10259,16 +10259,20 @@ experiments:
 
   - experiment_id: exp-winner-roll-max10r-20260921-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: a0464d16e3884f2653d70309a6c2a84a88d8af7d
-    status: in_progress
+    source_commit: 1b25dcbab9d84b88cfea82e50b34b7e0196b9e61
+    status: inconclusive
     question: What conditional historical balance can independent100U accounts reach on the367 full-V9 long winners above10netR with at mosttwo adds?
     single_variable: Add cap0,1,2 under the same fully enumerated future-informed timing and continuous-quantity optimization domain.
-    result: Protocol and optimizer committed before market replay;strict filter selects367 trades209 assets339 streams.
+    result: All367 trades209 assets339 streams completed;1101 arm ledgers2199 legs,zero failures. WIF screenshot two-add oracle7521.8737U;
+      BEAT maximum1174044.9156U. These are conditional future-informed balances,not real exchange executable or solvency-certified returns.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_winner_roll_max10r_20260921.md
-    artifacts: []
+    artifacts:
+    - winner-roll-max10r-20260921-delivery
     reuse_allowed: false
     notes: Owner explicitly selected old full V9 then narrowed to netR>10. Conditional oracle labels only;not a causal strategy or actual exchange solvency certificate.
       Flat5pct MMR,40x ceiling,0.1pct each-side fees,zero funding,last-trade low proxy,continuous quantity;original exit bar excluded.
+      Fifteen focused checks;1101 independent wallet and fixed-schedule LP audits passed. Min maintenance surplus0.01U;funding,tiers,depth unknown.
+      Notion3e28856479af81f79733e014f135ee1f;false training/production. Builder committed before replay;old strategy/Pine unchanged.
