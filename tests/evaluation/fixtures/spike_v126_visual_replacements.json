@@ -1,0 +1,142 @@
+[
+  [
+    "SPIKE V12.5",
+    "SPIKE V12.6"
+  ],
+  [
+    "· 上级方向线",
+    "· 自适应视觉"
+  ],
+  [
+    "\"V12.4 事件码",
+    "\"V12.6 事件码"
+  ],
+  [
+    "bool v10OnlyJoint = input.bool(false, \"仅显示突破+spike 信号\", group=gView, tooltip=\"含「突破+spike（上级突破）」。只控制显示，不改变信号计算或预警。隐藏普通多空、单独突破、普通价格标签/染色及V9盈亏框；保留联合标记、对应趋势线、均线和IMACD。\", display=display.none)",
+    "bool v10OnlyJoint = input.bool(false, \"仅显示突破+spike 信号\", group=gView, tooltip=\"含「突破+spike（上级突破）」。只控制显示，不改变信号计算或预警。隐藏普通多空、单独突破、普通价格标签/染色及V9盈亏框；保留联合标记、对应趋势线、均线和IMACD。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showLabels = input.bool(true, \"确认信号与价格\", group=gView, tooltip=\"只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。\", display=display.none)",
+    "bool showLabels = input.bool(true, \"确认信号与价格\", group=gView, tooltip=\"只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showRisk = input.bool(true, \"风险区与保护线\", group=gView, tooltip=\"确认收盘开启风险参考；同向重复不重置。反向确认在收盘结束旧参考，新风险有效时开启反向参考；本根先触及原保护时以原保护结算。\", display=display.none)",
+    "bool showRisk = input.bool(true, \"风险区与保护线\", group=gView, tooltip=\"确认收盘开启风险参考；同向重复不重置。反向确认在收盘结束旧参考，新风险有效时开启反向参考；本根先触及原保护时以原保护结算。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showPanel = input.bool(true, \"显示状态面板\", group=gView, display=display.none)",
+    "bool showPanel = input.bool(true, \"显示状态面板\", group=gView, display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showMilestones = input.bool(true, \"R 参考与里程碑\", group=gView, tooltip=\"入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。\", display=display.none)",
+    "bool showMilestones = input.bool(true, \"R 参考与里程碑\", group=gView, tooltip=\"入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showExitLabels = input.bool(false, \"退出文字\", group=gView, display=display.none)",
+    "bool showExitLabels = input.bool(false, \"退出文字\", group=gView, display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showBb = input.bool(true, \"显示 BB 压缩通道\", group=gBb, display=display.none)",
+    "bool showBb = input.bool(true, \"显示 BB 压缩通道\", group=gBb, display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showH1Sma60 = input.bool(true, \"显示1小时方向线\", group=gH1Sma, tooltip=\"在15分钟主图显示已完成1小时SMA60。仅控制线的显示，不改变过滤。\", display=display.none)",
+    "bool showH1Sma60 = input.bool(true, \"显示1小时方向线\", group=gH1Sma, tooltip=\"在15分钟主图显示已完成1小时SMA60。仅控制线的显示，不改变过滤。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showM15Ema120 = input.bool(true, \"显示15分钟方向线\", group=gM15Ema, tooltip=\"在5分钟主图显示已完成15分钟EMA120。仅控制线的显示，不改变过滤。\", display=display.none)",
+    "bool showM15Ema120 = input.bool(true, \"显示15分钟方向线\", group=gM15Ema, tooltip=\"在5分钟主图显示已完成15分钟EMA120。仅控制线的显示，不改变过滤。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool v10ShowABC = input.bool(true, \"显示 A/B/C（RT=回踩）\", group=v10JointGroup, display=display.none)",
+    "bool v10ShowABC = input.bool(true, \"显示 A/B/C（RT=回踩）\", group=v10JointGroup, display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool v10Debug = input.bool(false, \"核对：最近8次 SPIKE 配对说明\", group=v10JointGroup, tooltip=\"仅说明这次SPIKE与主线的关系，不把未来结果当作当时已知信息。\", display=display.none)",
+    "bool v10Debug = input.bool(false, \"核对：最近8次 SPIKE 配对说明\", group=v10JointGroup, tooltip=\"仅说明这次SPIKE与主线的关系，不把未来结果当作当时已知信息。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool v112ShowAllLines = input.bool(false, \"诊断：显示本周期全部有效候选线\", group=v112Group, tooltip=\"画出程序此刻候选池里所有未突破的下降线（虚线，编号），并在面板显示最近一次找线的结果：入池/重复/实体穿线/针刺/容量。用来查“为什么这条线没画出来”。\", display=display.none)",
+    "bool v112ShowAllLines = input.bool(false, \"诊断：显示本周期全部有效候选线\", group=v112Group, tooltip=\"画出程序此刻候选池里所有未突破的下降线（虚线，编号），并在面板显示最近一次找线的结果：入池/重复/实体穿线/针刺/容量。用来查“为什么这条线没画出来”。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool rrShow = input.bool(true, \"显示盈亏双框\", group=rrGroup, tooltip=\"红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。\", display=display.none)",
+    "bool rrShow = input.bool(true, \"显示盈亏双框\", group=rrGroup, tooltip=\"红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。\", display=display.none) and not v126Minimal"
+  ],
+  [
+    "bool showMas = input.bool(true, \"六条均线\", group=gView, display=display.none)",
+    "bool showMas = input.bool(true, \"六条均线\", group=gView, display=display.none) or v126Minimal"
+  ],
+  [
+    "bool v10ShowLine = input.bool(true, \"显示当前候选主线（最多一条）\", group=v10JointGroup, tooltip=\"只控制当前候选线，不会隐藏已经显示的突破+spike所对应的历史趋势线。\", display=display.none)",
+    "bool v10ShowLine = input.bool(true, \"显示当前候选主线（最多一条）\", group=v10JointGroup, tooltip=\"只控制当前候选线，不会隐藏已经显示的突破+spike所对应的历史趋势线。\", display=display.none) or v126Minimal"
+  ],
+  [
+    "bool v10ShowBreak = input.bool(true, \"显示单独突破\", group=v10JointGroup, display=display.none)",
+    "bool v10ShowBreak = input.bool(true, \"显示单独突破\", group=v10JointGroup, display=display.none) or v126Minimal"
+  ],
+  [
+    "bool v10ShowJoint = input.bool(true, \"显示突破+spike\", group=v10JointGroup, tooltip=\"开启仅显示模式时，强制显示联合标记。联合标记和对应趋势线一起创建和清理。\", display=display.none)",
+    "bool v10ShowJoint = input.bool(true, \"显示突破+spike\", group=v10JointGroup, tooltip=\"开启仅显示模式时，强制显示联合标记。联合标记和对应趋势线一起创建和清理。\", display=display.none) or v126Minimal"
+  ],
+  [
+    "bool v11ShowHtfLine = input.bool(true, \"显示上级周期当前候选线\", group=v11Group, display=display.none)",
+    "bool v11ShowHtfLine = input.bool(true, \"显示上级周期当前候选线\", group=v11Group, display=display.none) or v126Minimal"
+  ],
+  [
+    "bool v11ShowHtfBreak = input.bool(true, \"显示上级周期突破提示\", group=v11Group, display=display.none)",
+    "bool v11ShowHtfBreak = input.bool(true, \"显示上级周期突破提示\", group=v11Group, display=display.none) or v126Minimal"
+  ],
+  [
+    "color v10LineColor = input.color(color.white, \"主线颜色\", group=v10JointGroup, display=display.none)",
+    "color v126LocalManual = input.color(color.white, \"主线自定义颜色（关闭自动后生效）\", group=v10JointGroup, display=display.none)\ncolor v10LineColor = v126AutoContrast ? v126Contrast : v126LocalManual"
+  ],
+  [
+    "color v11HtfColor = input.color(#9DB7FF, \"上级周期线颜色\", group=v11Group, display=display.none)",
+    "color v126HtfManual = input.color(#9DB7FF, \"上级线自定义颜色（关闭自动后生效）\", group=v11Group, display=display.none)\ncolor v11HtfColor = v126AutoContrast ? v126Contrast : v126HtfManual"
+  ],
+  [
+    "    label signalTag = label.new",
+    "    label signalTag = v126Minimal ? na : label.new"
+  ],
+  [
+    "    label htfTag = label.new",
+    "    label htfTag = v126Minimal ? na : label.new"
+  ],
+  [
+    "        label tag = label.new",
+    "        label tag = v126Minimal ? na : label.new"
+  ],
+  [
+    "                label.set_text(group.tag, group.breakCaption + \" · \" + str.tostring(group.breakCount))\n                label.set_tooltip(group.tag, \"同一B点附近 \" + str.tostring(group.breakCount) + \" 条候选突破，不代表多笔入场。\\n仅合并显示，事件/预警/配对不变。显示首条冻结线，标记位于首次确认K。\\n\\n\" + group.breakDetails)",
+    "                if not na(group.tag)\n                    label.set_text(group.tag, group.breakCaption + \" · \" + str.tostring(group.breakCount))\n                    label.set_tooltip(group.tag, \"同一B点附近 \" + str.tostring(group.breakCount) + \" 条候选突破，不代表多笔入场。\\n仅合并显示，事件/预警/配对不变。显示首条冻结线，标记位于首次确认K。\\n\\n\" + group.breakDetails)"
+  ],
+  [
+    "plotshape(not v10OnlyJoint and",
+    "plotshape(not v126Minimal and not v10OnlyJoint and"
+  ],
+  [
+    "plot(not v10OnlyJoint and",
+    "plot(not v126Minimal and not v10OnlyJoint and"
+  ],
+  [
+    "hline(0, \"零轴\", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1)",
+    "hline(0, \"零轴\", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1, display=v126Minimal ? display.none : display.all)"
+  ],
+  [
+    "plot(shownMd,",
+    "plot(v126Minimal ? na : shownMd,"
+  ],
+  [
+    "plot(shownSb,",
+    "plot(v126Minimal ? na : shownSb,"
+  ],
+  [
+    "barcolor(not v10OnlyJoint and signalSide != 0 ? signalColor : na, title=\"确认关键K线\")",
+    "barcolor(v126CandleTone, title=\"突破 / Pin Bar / 确认K线\")"
+  ],
+  [
+    "plotcandle(not v10OnlyJoint and signalSide != 0 ? open : na, high, low, close, title=\"确认K线实体与影线\", color=signalColor, wickcolor=signalColor, bordercolor=signalColor, editable=false, force_overlay=true, display=display.pane)",
+    "plotcandle(not na(v126CandleTone) ? open : na, high, low, close, title=\"突破 / Pin Bar 实体与影线\", color=v126CandleTone, wickcolor=v126CandleTone, bordercolor=v126CandleTone, editable=false, force_overlay=true, display=display.pane)"
+  ]
+]
