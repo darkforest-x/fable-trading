@@ -162,7 +162,7 @@ Owner要求“或者大于5r”后，已按**最终扣费净R严格大于5**重�
 
 - 全部3,531流完成，原版逐笔parity与共同候选经济parity通过；父数据SHA `a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68`。新旧6条非模型控制路径完全一致，证明未暗改风险/退出/成本。
 - 18项模型/研究/统计专项通过，2项比较器控制路径测试通过，108项相关边界/因果/数值门通过。注册表此前4项全仓失败源于两条旧source_commit缺失，V4留有HEAD复现证据，本轮未伪填历史或宣称全仓全绿。
-- 实际新模型仍出现NumPy/sklearn matmul运行警告；保留原日志，独立逐元素重建四季所有目标/校准概率，最大差{numeric_checks['maximum_abs_saved_vs_independent_probability']:.3g}，新训练独立梯度最大绝对值{numeric_checks['maximum_abs_independent_training_gradient']:.3g}。仅支持这批冻结分数可用于离线评价，未解决底层警告根因。
+- 实际新模型仍出现NumPy/sklearn matmul运行警告；保留原日志，独立逐元素重建四季所有目标/校准概率，最大差{numeric_checks['maximum_abs_saved_vs_manual_probability']:.3g}，新训练独立梯度最大绝对值{numeric_checks['maximum_abs_independent_training_gradient']:.3g}。仅支持这批冻结分数可用于离线评价，未解决底层警告根因。
 - 更低的成功门槛增加标签样本量，却可能加入更难用现有特征区别的走势；本轮观察支持“仅改标签不够”，不能据此断言5R在所有方法下不可预测。
 - 同币跨场所与重叠路径相关，月块统计不能消除所有依赖；原源池可能含幸存者偏差。历史反复研究有选择偏差，按时间分割不恢复盲测。
 - 每笔固定20bp未建模额外资金费、成交深度、杠杆强平或账户多币同时持仓；不能从这些均值直接换算100U滚仓收益，也不存在必赢保证。未改Pine/TV/生产指针/真金账户。
