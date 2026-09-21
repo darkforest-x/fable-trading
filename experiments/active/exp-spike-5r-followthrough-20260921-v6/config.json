@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-5r-followthrough-20260921-v6",
+  "source_receipt_sha256": "a100b21e5f6343d5b5fba6a759701d5a359e6641cd534107c55c76d7a6cf4a68",
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-09-10T00:00:00Z",
+  "round_trip_cost": 0.002,
+  "delay_bars": [1, 2],
+  "delay_stop": "Original signal-defined stop price retained; actual later next-open fill reprices risk. Cancel completed waiting stop/reverse/gap.",
+  "context_arms": ["btc_return_pos", "btc_htf_up", "symbol_htf_up", "symbol_htf_slope_pos", "relative_strength_pos", "ma_contraction", "platform_long", "expansion_now", "no_failed_breaks"],
+  "threshold_history_months": 3,
+  "threshold_min_candidates": 100,
+  "dynamic_quantile": 0.5,
+  "risk_baseline_quantile": 0.1,
+  "ranking_quantile": 0.9,
+  "two_adds": {"capital": 100, "gross_risk_budget": 1, "leverage_cap": 1, "max_adds": 2, "comparison": "existing identical structural stop policy with zero adds"},
+  "seed": 921621,
+  "research_gate": {"later_closed": 250, "later_gt5": 20, "later_gt5_recall": 0.1, "later_months": 6, "later_assets": 20, "mean_net_bp_positive": true, "precision_exceeds_original_and_old_risk": true, "rate_difference_ci_low_positive": true, "monthly_null_holm_p_below": 0.01},
+  "disclosure": "All historical data are owner-authorized and previously exposed. Temporal replication, not untouched confirmation. Independent overlapping requests are not a serial portfolio; qualifying arms require serial follow-up before any executable-strategy claim.",
+  "training_eligible": false,
+  "production_eligible": false
+}
