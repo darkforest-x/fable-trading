@@ -86,7 +86,7 @@ def built(tmp_path, monkeypatch):
     refs=tmp_path/'refs.json';redo.write_json(refs,{'events':[]})
     manual=tmp_path/'manual.jsonl';redo.write_rows(manual,[])
     files={'old_manifest':parentroot/'manifest.jsonl','old_summary':parentroot/'summary.json','old_ledger':oldledger,'candidate_ledger':pool,'reference_exclusion':refs,'manual_rows':manual}
-    plan=tmp_path/'plan.json';redo.write_json(plan,{'schema_version':1,'experiment_id':'exp-ma-profit3r-negatives-20260922-v2','owner_authorization':{'training_authorized':True},'inputs':{k:{'path':str(p),'sha256':redo.sha256(p)} for k,p in files.items()},'negative_policy':{'population':'all_resolved_parent_train_nonwinners','protection_hours':4,'ratio_cap':None},'parent_dataset_root':str(parentroot),'expected_positive_train_events':1,'splits':{'train_end_exclusive':'2026-01-01T00:00:00Z'}})
+    plan=tmp_path/'plan.json';redo.write_json(plan,{'schema_version':1,'experiment_id':'exp-ma-profit3r-negatives-20260922-v2','owner_authorization':{'training_authorized':True,'promote':False,'live_money':False},'training_eligible':False,'production_eligible':False,'inputs':{k:{'path':str(p),'sha256':redo.sha256(p)} for k,p in files.items()},'negative_policy':{'population':'all_resolved_parent_train_nonwinners','protection_hours':4,'ratio_cap':None},'parent_dataset_root':str(parentroot),'expected_positive_train_events':1,'splits':{'train_end_exclusive':'2026-01-01T00:00:00Z'}})
     selection=tmp_path/'selection';redo.select(plan,selection)
     output=tmp_path/'redo';redo.build(plan,selection,output)
     return plan,selection,output,parentroot

@@ -69,6 +69,8 @@ def checked_plan(path: Path) -> tuple[dict, dict[str, Path]]:
         raise NegativeRedoError("unknown redo contract")
     if not p.get("owner_authorization", {}).get("training_authorized"):
         raise NegativeRedoError("missing redo authorization")
+    if p.get("training_eligible") is not False or p.get("production_eligible") is not False or p["owner_authorization"].get("promote") is not False or p["owner_authorization"].get("live_money") is not False:
+        raise NegativeRedoError("offline-only safety contract drift")
     inputs = {k: resolve(v["path"]) for k, v in p["inputs"].items()}
     for k, v in inputs.items():
         if sha256(v) != p["inputs"][k]["sha256"]:
@@ -319,6 +321,8 @@ def audit(plan_path: Path, dataset: Path, selection: Path) -> dict:
     if rows(selection/"negatives.jsonl") != expected_negatives or rows(selection/"exclusions.jsonl") != expected_excluded:
         raise NegativeRedoError("selected negative population drift")
     omitted = rows(dataset/"build_exclusions.jsonl")
+    if omitted:
+        raise NegativeRedoError("build exclusions require investigation before training; do not silently shrink the selected population")
     omitted_ids = {r["event_id"] for r in omitted}
     new_ids = {r["event_id"] for r in ledger[len(original_ledger):]}
     if len(omitted_ids) != len(omitted) or omitted_ids & new_ids or omitted_ids | new_ids != set(candidate_map) or omitted != summary["build_excluded"]:
