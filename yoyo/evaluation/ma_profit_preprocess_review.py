@@ -26,17 +26,17 @@ def main() -> None:
     args = p.parse_args()
     if args.out.exists() or not torch.cuda.is_available():
         raise RuntimeError('new diagnostic output and CUDA required')
-    manifest = [json.loads(s) for s in (args.dataset/'manifest.jsonl').read_text().splitlines()]
+    manifest = [json.loads(s) for s in (args.dataset/'manifest.jsonl').read_text(encoding='utf-8').splitlines()]
     rows = sorted([r for r in manifest if r['split']=='val' and r['variant']=='A'], key=lambda r:r['event_id'])
     selected = [r for positive in (True, False) for r in [x for x in rows if (x.get('box') is not None)==positive][:4]]
     records = []
     for arm in ('A','B'):
         parent = args.evaluation/f'arm_{arm}'
-        meta = json.loads((parent/'receipt.json').read_text())
+        meta = json.loads((parent/'receipt.json').read_text(encoding='utf-8'))
         model_path = Path(meta['model_path'])
         if meta['status']!='completed' or sha(model_path)!=meta['model_sha256'] or sha(args.dataset/'manifest.jsonl')!=meta['manifest_sha256']:
             raise RuntimeError('frozen input binding drift')
-        originals = {r['event_id']:r for r in [json.loads(s) for s in (parent/'predictions_val.jsonl').read_text().splitlines()]}
+        originals = {r['event_id']:r for r in [json.loads(s) for s in (parent/'predictions_val.jsonl').read_text(encoding='utf-8').splitlines()]}
         model = YOLO(str(model_path))
         for rect in (True, False):
             for row in selected:
@@ -54,7 +54,7 @@ def main() -> None:
                 delta = max((abs(a[k]-b[k]) for a,b in zip(boxes,originals_boxes) for k in ('cx_norm','cy_norm','w_norm','h_norm','confidence','class_id')),default=0.) if len(boxes)==len(originals_boxes) else None
                 records.append({'arm':arm,'event_id':row['event_id'],'retained':row.get('box') is not None,'rect':rect,'tensor_shape':tensor_shape,'half':bool(model.predictor.args.half),'score':max((b['confidence'] for b in same),default=0.),'hit':row.get('box') is not None and any(b['confidence']>=.25 and iou_xywh(b,row['box'])>=.5 for b in same),'max_iou':max((iou_xywh(b,row['box']) for b in same),default=0.) if row.get('box') else None,'box_count':len(boxes),'max_difference_from_frozen_prediction':delta,'boxes':boxes,'model_sha256':meta['model_sha256']})
     args.out.mkdir(parents=True)
-    (args.out/'diagnostic.json').write_text(json.dumps({'status':'completed','purpose':'padding sensitivity diagnostic only; formal evaluation unchanged','selection':'first four val positives and four val failures in event_id order','manifest_sha256':sha(args.dataset/'manifest.jsonl'),'code_sha256':sha(Path(__file__)),'records':records,'production_eligible':False},indent=2)+'\n')
+    (args.out/'diagnostic.json').write_text(json.dumps({'status':'completed','purpose':'padding sensitivity diagnostic only; formal evaluation unchanged','selection':'first four val positives and four val failures in event_id order','manifest_sha256':sha(args.dataset/'manifest.jsonl'),'code_sha256':sha(Path(__file__)),'records':records,'production_eligible':False},indent=2)+'\n', encoding='utf-8')
     print(json.dumps({'status':'completed','records':len(records)}))
 
 
