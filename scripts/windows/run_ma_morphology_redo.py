@@ -175,6 +175,8 @@ def validate_preflight_contract(
         raise MorphologyTrainingError("dataset eligibility flags drifted")
     if dict(audit_result) != contract.get("dataset_audit"):
         raise MorphologyTrainingError("local morphology audit differs from launch contract")
+    if audit_result.get("status") != "passed":
+        raise MorphologyTrainingError("morphology audit did not pass")
     if audit_result.get("pilot") is not False or audit_result.get("per_sample_owner_gold") is not False:
         raise MorphologyTrainingError("audit must honestly retain pilot/per-sample owner-gold false")
     manifest = dataset / "manifest.jsonl"
@@ -216,6 +218,8 @@ def validate_results_shape(results_csv: Path, *, epochs: int = 40) -> dict[str, 
         raise MorphologyTrainingError("unreadable results.csv") from exc
     if len(result) != epochs:
         raise MorphologyTrainingError(f"results.csv has {len(result)} rows, expected {epochs}")
+    if "epoch" not in result or result["epoch"].tolist() != list(range(1, epochs + 1)):
+        raise MorphologyTrainingError("results.csv epoch sequence is not exactly 1 through 40")
     numeric = result.select_dtypes(include="number")
     if numeric.empty or not numeric.apply(lambda column: column.map(math.isfinite).all()).all():
         raise MorphologyTrainingError("results.csv has no finite numeric training metrics")

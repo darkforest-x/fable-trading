@@ -91,7 +91,7 @@ def test_preflight_rejects_pilot_quarantine_or_semantics_drift(tmp_path: Path, m
 
 def test_results_shape_requires_exactly_40_finite_epochs(tmp_path: Path) -> None:
     complete = tmp_path / "complete.csv"
-    pd.DataFrame({"epoch": range(40), "metric": [0.1] * 40}).to_csv(complete, index=False)
+    pd.DataFrame({"epoch": range(1,41), "metric": [0.1] * 40}).to_csv(complete, index=False)
     assert validate_results_shape(complete) == {"epochs": 40, "columns": ["epoch", "metric"], "sha256": sha(complete)}
 
     short = tmp_path / "short.csv"
@@ -100,9 +100,14 @@ def test_results_shape_requires_exactly_40_finite_epochs(tmp_path: Path) -> None
         validate_results_shape(short)
 
     nonfinite = tmp_path / "nonfinite.csv"
-    pd.DataFrame({"epoch": range(40), "metric": [float("nan")] * 40}).to_csv(nonfinite, index=False)
+    pd.DataFrame({"epoch": range(1,41), "metric": [float("nan")] * 40}).to_csv(nonfinite, index=False)
     with pytest.raises(MorphologyTrainingError, match="finite"):
         validate_results_shape(nonfinite)
+
+    duplicate = tmp_path / "duplicate.csv"
+    pd.DataFrame({"epoch": [1] * 40, "metric": [0.1] * 40}).to_csv(duplicate, index=False)
+    with pytest.raises(MorphologyTrainingError, match="epoch sequence"):
+        validate_results_shape(duplicate)
 
 
 def test_windows_yaml_freezes_morphology_class_names(tmp_path: Path) -> None:

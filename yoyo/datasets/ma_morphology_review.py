@@ -25,6 +25,36 @@ def margin(event: dict) -> float:
     return min(m['min_close_six_ma_spread'],m['min_hl2_six_ma_spread'])/m['required_spread']
 
 
+def audit_positive_splits() -> dict:
+    """Recheck original positive temporal/cluster geometry without trusting flags."""
+    p=load_plan(DEFAULT_PLAN)
+    ledger=[r for r in rows(ROOT/p['inputs']['old_ledger']['path']) if r['profit']['retained']]
+    by_id={r['event_id']:r for r in ledger}
+    manifest=[r for r in rows(ROOT/p['inputs']['old_manifest']['path']) if r['event_id'] in by_id]
+    boundaries=[utc(p['splits'][k]) for k in ('train_end_exclusive','validation_end_exclusive','test_end_exclusive')]
+    cluster_split={};ranges=defaultdict(list);strata=defaultdict(int)
+    for row in manifest:
+        event=by_id[row['event_id']]
+        lo,hi={'train':(None,boundaries[0]),'val':tuple(boundaries[:2]),'test':tuple(boundaries[1:])}[row['split']]
+        step=pd.Timedelta(minutes=row['bar_minutes'])
+        start=utc(event['core_start_time'])-step*{'A':9,'B1':7,'B2':11}[row['variant']]
+        decision=utc(event['core_end_time'])+step*6
+        end=utc(event['profit']['label_window_end_utc'])
+        if (lo is not None and start<lo) or end>=hi or end!=decision+pd.Timedelta(hours=12):raise ValueError('Positive crosses temporal split')
+        if utc(row['decision_at_utc'])!=decision or utc(row['visible_end_close_time_utc'])!=decision:raise ValueError('Positive decision drift')
+        if row['class_id']!={'LONG':0,'SHORT':1}[event['direction']]:raise ValueError('Positive direction drift')
+        if row['feature_support_start_i']!=event['source_core_start_i']-1211:raise ValueError('Positive support drift')
+        key=row['cluster_id']
+        if cluster_split.setdefault(key,row['split'])!=row['split']:raise ValueError('Positive cluster split leakage')
+        if row['variant']=='A':
+            ranges[row['split']].append((start,end))
+            strata[f"{row['split']}|{row['bar_minutes']}m|{row['direction']}"]+=1
+    return {'status':'passed','positive_events':len(by_id),'physical_positive_images':len(manifest),
+        'plan_sha256':sha(DEFAULT_PLAN),'parent_manifest_sha256':p['inputs']['old_manifest']['sha256'],
+        'unique_clusters':len(cluster_split),'strata':dict(sorted(strata.items())),
+        'split_ranges':{k:{'first_visible_start_utc':min(a for a,b in v).isoformat(),'last_label_end_utc':max(b for a,b in v).isoformat(),'events':len(v)} for k,v in sorted(ranges.items())}}
+
+
 def select(ledger: list[dict]) -> list[dict]:
     buckets=defaultdict(list)
     for row in ledger:
@@ -109,6 +139,7 @@ def prepare(dataset: Path, output: Path) -> dict:
         'pairs':len(selected),'selection':'minimum margin in every split/timeframe/paired-direction stratum',
         'raw_replay':evidence,'raw_source_sha256':{str(k.relative_to(ROOT)):v for k,v in hashes.items()},
         'positive_control_accepted':0,'sample_owner_confirmed':False}
+    receipt['positive_split_audit']=audit_positive_splits()
     write_json(output/'selection.json',receipt)
     return {k:v for k,v in receipt.items() if k not in ('raw_replay','raw_source_sha256')}
 
