@@ -1,0 +1,26 @@
+/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_report.py:82: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  return identity, {name: pd.concat(parts, ignore_index=True) if parts else pd.DataFrame() for name, parts in frames.items()}
+/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_report.py:82: FutureWarning: The behavior of DataFrame concatenation with empty or all-NA entries is deprecated. In a future version, this will no longer exclude empty or all-NA columns when determining the result dtypes. To retain the old behavior, exclude the relevant entries before the concat operation.
+  return identity, {name: pd.concat(parts, ignore_index=True) if parts else pd.DataFrame() for name, parts in frames.items()}
+Traceback (most recent call last):
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 197, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/runpy.py", line 87, in _run_code
+    exec(code, run_globals)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_audit.py", line 115, in <module>
+    audit(args.input,args.output)
+  File "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_audit.py", line 68, in audit
+    closed = t.loc[~t.censored].copy()
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexing.py", line 1192, in __getitem__
+    return self._getitem_axis(maybe_callable, axis=axis)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexing.py", line 1421, in _getitem_axis
+    return self._getitem_iterable(key, axis=axis)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexing.py", line 1361, in _getitem_iterable
+    keyarr, indexer = self._get_listlike_indexer(key, axis)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexing.py", line 1559, in _get_listlike_indexer
+    keyarr, indexer = ax._get_indexer_strict(key, axis_name)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexes/base.py", line 6212, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "/Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/pandas/core/indexes/base.py", line 6261, in _raise_if_missing
+    raise KeyError(f"None of [{key}] are in the [{axis_name}]")
+KeyError: "None of [Index([-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,\n       ...\n       -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],\n      dtype='object', length=37876)] are in the [index]"

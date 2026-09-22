@@ -1,0 +1,36 @@
+{
+  "checks": "505 passed / 8 failed; failures outside this experiment owned files",
+  "failure_groups": {
+    "cross_repo_path": 1,
+    "legacy_registry_missing_source_commit": 5,
+    "historical_migration_hash_drift": 2
+  },
+  "experiment_commits": [
+    "9102b22819",
+    "1ca8683d14",
+    "6a59f3475d"
+  ],
+  "outside_files": {
+    "yoyo/evaluation/ma_morphology_reuse_recover.py": {
+      "current_sha256": "f20eb3b3b072ec20de97f534b795666a31d9a8e20c4f743938787e19872094b9",
+      "start_HEAD_sha256": "f20eb3b3b072ec20de97f534b795666a31d9a8e20c4f743938787e19872094b9",
+      "changed_in_experiment_commits": false
+    },
+    "yoyo/layers/l1_detection/candidates.py": {
+      "current_sha256": "133a97a71a1aa973a053dbd97be9c2b8497008192d6a7738abd9b15a04bf993b",
+      "start_HEAD_sha256": "8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd",
+      "changed_in_experiment_commits": false
+    },
+    "yoyo/layers/l1_detection/render.py": {
+      "current_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+      "start_HEAD_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+      "changed_in_experiment_commits": false
+    },
+    "artifacts/registry.yaml": {
+      "current_sha256": "bb8f93dd228effc88a39889770113448af325b1e28a1989c967fac60702aa3f5",
+      "start_HEAD_sha256": "ec75234f6e1a12b7926bcc54a87bdc04e6607cbe4d6804c9d2ccafcaec0d7aec",
+      "changed_in_experiment_commits": false
+    }
+  },
+  "test_log_sha256": "029c4cdeb011ea4d3bac7c0f4f549b16f7f580c34c380137c30d174d44bfa93f"
+}

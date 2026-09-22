@@ -32377,3 +32377,19 @@ artifacts:
     production_eligible: false
     notes: 638streams/9301candidates; old baseline/status/control parity and65107BTC decisions pass;504 direct arithmetic checks. All24later conditions fail. EarlierH1SMA240
       loses later.23focused pass;420extended pass,2outside-scope L1 hash failures. Notion3e38856479af81519395d61310f7c9ba.
+
+  - artifact_id: spike-v126-htf-recheck-20260922-delivery
+    artifact_type: manifest
+    role: v126_joint_h1_recheck_full_archive_no_adoption
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9ff0ee7ffb0013c7217b81ae4a51008ea6fa581d
+    source_path: artifacts/spike_v126_htf_recheck_20260922.json
+    sha256: 82cb613f59945c4ceb18224343ec41f25c2414867b64619ea3e46dda9d7e630b
+    size_bytes: 5780
+    storage_uri: repo://artifacts/spike_v126_htf_recheck_20260922.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 638 streams / 18956 candidates; 22 rejects, no new trades; ordinary net win and meanR worsen, two gt5 winners lost. 43 focused checks;
+      505 extended pass / 8 outside-scope failures. audit_v4 and 30 independent metric identities pass; summary_v3 final. Native pivot parity unverified;
+      no Pine or live changes.

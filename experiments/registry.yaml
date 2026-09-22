@@ -10638,3 +10638,24 @@ experiments:
     artifacts: [spike-joint-btc-gate-20260922-delivery]
     reuse_allowed: false
     notes: Builder36c2d439 precedes replay;23focused pass,420extended pass with2outside-scope L1 hash failures. Independent65107decision audit passes. Notion3e38856479af81519395d61310f7c9ba; no monitor/Pine/account change or production eligibility.
+
+  - experiment_id: exp-spike-v126-htf-recheck-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1ca8683d149f13793be04bd8bf7db2838bc6477b
+    status: inconclusive
+    question: Does rechecking the existing own-symbol completed H1 SMA60 at the first V12.6 joint increase net-profit win rate while retaining large
+      realized winners?
+    single_variable: Current15m joint close > H1 SMA60 known at chart open; unchanged V9, merged geometry/pairing, independent serial books, next-open
+      original exits and20bp cost.
+    result: 638/638 and18956candidates; only22rejected. Full net win28.6786to28.6696pct,meanR-0.090655to-0.091099; later also worsens. Netgt5 482to480,gt10
+      remains133; no new trades. Not adopted; native Pine parity unresolved.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v126_htf_recheck_20260922.md
+    artifacts:
+    - spike-v126-htf-recheck-20260922-delivery
+    reuse_allowed: false
+    notes: Owner20260922 accepts net-win priority with tail preservation. Prior erroneous BB20 ETH smoke and two audit dtype errors retained; corrected
+      BB200 full run and audit_v4 pass. summary_v3 fixes full-period control maturity; later inference unchanged. Notion3e38856479af81bdacf6d31de35a1d6e;
+      no training/default/Pine/account changes.

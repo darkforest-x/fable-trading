@@ -1,0 +1,82 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-v126-htf-recheck-20260922-v1",
+    "schema": "spike-v126-htf-recheck-v1",
+    "parent_input_identity": "experiments/active/exp-spike-v112-support-20260919-v1/results/run_v1/identity.json",
+    "expected_symbols": 638,
+    "timeframes": {
+      "15m": 15
+    },
+    "arms": [
+      "baseline",
+      "joint_h1_recheck"
+    ],
+    "start": "2024-09-10T00:00:00+00:00",
+    "split": "2025-09-10T00:00:00+00:00",
+    "end": "2026-05-01T00:00:00+00:00",
+    "chart_warmup_bars": 1500,
+    "higher_warmup_bars": 1500,
+    "higher_minutes": 60,
+    "sma_length": 60,
+    "roundtrip_cost": 0.002,
+    "arm_r": 2.0,
+    "trail_atr": 4.0,
+    "control_seed": 922126,
+    "bootstrap_seed": 922127,
+    "bootstrap_reps": 2000,
+    "permutation_seed": 922128,
+    "permutation_reps": 10000,
+    "comparison_family": 4,
+    "native_pine_parity_required_for_delivery": true,
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "inputs": {
+    "ETHUSDT": "8041770149cff3551f84966b1b5f3641f2f731dc3ae7c7d0bfeaf7b24dcd64e8"
+  },
+  "input_paths": {
+    "ETHUSDT": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/series/binance_um_ETHUSDT_5m_665856.csv"
+  },
+  "source": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/__init__.py": "a29dd367b750b396ce7f95d4aadd061b5c55d6ae0ac3ad72a8555c1e7d43dc13",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_accounts.py": "ce3f225c479a42d3b5fd269e554bb8999eeb069446f73a2128e77dea0321dbe5",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_policy_study.py": "f52d73309e0a28a26b0d9daa445c2a4484003dd4f32ec2f47b1e039c365c430c",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4.py": "f32891e5d29394c5c27730d58302ac39911b5ff9b7899ed8d625dde96d778c16",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_increment.py": "a18fb5f2dc4e5ef7c78085eceaf0caab1714e25d6ccff212d3036ff8c874abbe",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_study.py": "55f06bdaa20fb2f21877c42b73e29e9cfbffde707ac9a85bed520ab2a811d0f7",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_support_study.py": "9aca98efdc162e2eea17bef0a6df5675f44c49ff93272f96d544598021abf176",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_box_study.py": "e9dd1bb73055808ec70fa4f451cb8831b9f6673e1008ffba3837d3e2d4828333",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_study.py": "02ba6b26c03e08284852e0224ea272320e0fc3d9b26e8a075a5725b665e61c66",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_engine.py": "9fc887b02f7543df4f33905c0f63084958704c6d796a38fd4b5ad236dfb30a11",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_recheck.py": "76868b1c10be9b792fb2219dda160c5f8708ac68ac347c50038ae68ee26e977d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v12_local_touch.py": "f8469ecc0440f977623093800aa78da2b699279977e0909349f23d7dd4465008",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py": "820d5f8374b9c7589477f499ab4c7a3b5b56024190d10d944c7c624533fdb8d7",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study_post.py": "334772aa325660b5ae9abbf93db4ddbc9e8908d6becb2ddd7e7dd2d1d3866e9a",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_episode_study.py": "f18e2548bf8487e224acd48b4a7931d629bc5401bd3f64e94c4695c3368ae110",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_lowtf_study.py": "f1b2349926ef9b92731f838e9e4e559207f42e16db499cc396a9eec1a0674463",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_six_filters.py": "365cef00b81151e51d11fddda061be3630cba1abf80a8be4cf4616fb14e71bfd",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9.py": "7bdee0dfbe783fdcfcae78a6ba3db4a11c4b035b6cc153edfb9cb21ecf161d4d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma.py": "6bfd45a4381faeeb56830c11619615e7afb7785fa809cb2554416497cd78483e",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/trendline_break.py": "5eab890adae46b28818aec2a79a1c04d7a377a5e7960cce76506b3c6087a01dc",
+    "yoyo/evaluation/pine/spike_burst_v12_6.pine": "8a72c18b65e50862ca6dee4e4d58cac4c1e1c7d38ccd3718e7f0228e970ee2db",
+    "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/config.json": "5800c81c5e332e7938be03cbdf498226f90296ab1de3a70e21f43479ab520e4a",
+    "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/PROJECT_PLAN.md": "ed9825d2839c9642330fe2100f4b8c06accc39064676d1edc17d315c434c9645",
+    "tests/evaluation/test_spike_v126_engine.py": "721bbad8140e5a5ba9c3e90d149e292413f02c65e1a7926bf447a0b7dbf33a9f",
+    "tests/evaluation/test_spike_v126_htf_recheck.py": "f5a57368b1337e7ed5ad92bc50abbf72eed0157fa3fc93f8ab4aa765ba3377c3"
+  },
+  "symbols": [
+    "ETHUSDT"
+  ],
+  "metadata_sha256": "dccd2fa8bc4b1bb567e4e2d6117f154a57bc2f260b4b898a8c6869585598602c",
+  "subset": true,
+  "python": "Python 3.9.6",
+  "numpy": "2.0.2",
+  "pandas": "2.3.3"
+}

@@ -1,0 +1,35 @@
+{
+  "status": "pass",
+  "symbols": 638,
+  "candidate_rows": 18956,
+  "status_rows": 37912,
+  "trade_rows": 37876,
+  "closed_rows": 37846,
+  "control_rows": 37876,
+  "shared_executions": 18927,
+  "candidate_h1_rejected": 22,
+  "source_hashes_verified": 32,
+  "source_commit_verified": "883fa5ca6d5153d6fe6b595a2ba492c11578b41e",
+  "identity_sha256": "e44c0ed28882dbbd1fc8597ebd1b7e26996cbaff8d9cad426b05f42f12637d83",
+  "manifest_sha256": "71475bf2c5c209db49b354077f1babdd4cc16399b9798a37359903728a6e9589",
+  "audit_source_sha256": "85e36589ab02ace924b0c43fe70a5724d8f0f7487f619c831e490e3718d8410c",
+  "checks": [
+    "receipt_and_leaf_hashes",
+    "full_universe",
+    "unique_joint_per_box",
+    "two_complete_status_books",
+    "h1_direction_and_available_clock",
+    "reference_break_and_fill_chronology",
+    "serial_no_overlap",
+    "20bp_cost",
+    "R_denominator",
+    "long_price_return",
+    "same_event_same_execution",
+    "control_inventory"
+  ],
+  "limitations": [
+    "no_native_TradingView_pivot_parity",
+    "H1 numerical implementation covered by causal synthetic checks; this audit checks saved direction and timestamps",
+    "event_R_is_not_account_equity"
+  ]
+}
