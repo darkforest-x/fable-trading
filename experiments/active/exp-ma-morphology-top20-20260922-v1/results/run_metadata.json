@@ -1,0 +1,24 @@
+{
+  "cpu_threads": 4,
+  "cutoff_utc": "2026-09-22T13:11:18.737000+00:00",
+  "day_start_utc": "2026-09-21T16:00:00+00:00",
+  "detector": {
+    "augment": false,
+    "batch_size": 8,
+    "conf": 0.25,
+    "imgsz": 1280,
+    "iou": 0.5,
+    "rect": true
+  },
+  "device": "mps",
+  "inputs": {
+    "coverage_path": "experiments/active/exp-ma-morphology-top20-20260922-v1/inputs/coverage.json",
+    "coverage_sha256": "c01c7d71a3546c82570e006ba97ab5674f497e164deccdded7f65053d5a3d34d",
+    "ranking_path": "experiments/active/exp-ma-morphology-top20-20260922-v1/inputs/ranking.json",
+    "ranking_sha256": "b79a1f697c7891a91b9a001e3a04f0401a46a8ed7de4d35139256e6b0c57fa14"
+  },
+  "model_path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/arm_A_best.pt",
+  "model_sha256": "17aee5679b73dfd9183339c580c2caac323fc2b6c0759da38827834d72f2742b",
+  "schema": "ma-gainers-raw-predictions-v1",
+  "semantic_notice": "Raw predictions only; model input includes core+5 confirmation and is not a fresh signal."
+}

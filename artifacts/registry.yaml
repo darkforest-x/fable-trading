@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-top20-20260922-delivery
+    artifact_type: manifest
+    role: frozen_current_board_raw_model_scan_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6a205ea1d0
+    source_path: experiments/active/exp-ma-morphology-top20-20260922-v1/delivery_receipt.json
+    sha256: 0ff1d811defbf9fb2bc6576e292f906c0a6a99f8851c412fcd77eebb1511426c
+    size_bytes: 2138
+    storage_uri: repo://experiments/active/exp-ma-morphology-top20-20260922-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen OKX Sep22 Beijing21h11 top20 with 5250 scored and630 skipped windows.773 raw boxes,92 display-only overlap regions,16 coins with intraday detections,5 with latest21h00 detections.822 saved input images have verified pixel parity. No gold accuracy or trading conclusion; current-board retrospective review only.
   - artifact_id: ma-launch-owner1500-morph-v6-dataset
     artifact_type: dataset
     role: offline_selected_launch_shapes_and_verified_clear_backgrounds
