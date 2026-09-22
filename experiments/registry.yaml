@@ -10680,3 +10680,21 @@ experiments:
     notes: OKX monthly 1m archive plus confirmed API tail, 0 missing minutes; run_v1 identity e65dcd04, summary module ddcea13f01 precedes summary_v1.
       bp excess table is a labelled post-hoc diagnostic. V12.6 Python port without native Pine parity. Notion not synced (no connector in session).
       Learning docs/learnings/r-excess-over-random-is-biased-when-control-stops-are-narrower.md.
+
+  - experiment_id: exp-spike-bp-random-audit-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7a15319281fae69edf5532cbf92dcab3749af082
+    status: negative
+    question: Do frozen SPIKE matched-random advantages (V10.4 multi-timeframe joint, V9 full, V12.6 15m) survive when excess is measured in
+      scale-invariant net bp instead of net R?
+    single_variable: Same closed matched pairs; comparison unit R to bp; pre-registered bp_confirmed / r_only / not_significant rule.
+    result: 357863 pairs, 32 full-period cells; bp_confirmed 0, r_only 1 (V8 30m), not_significant 31. Cost-R gap only 0.010-0.035R at 15m+.
+      V10.4 joint 1h R +0.244 p0.011, bp +69.9 [-20.7,182.8] p0.105, both halves positive; V9 30m, V10.4 15m, V12.6 15m later bp negative.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_bp_random_audit_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Read-only audit, no replay or redraw; entry-time fold and entry-month blocks differ slightly from source reports. Notion not synced (no
+      connector in session). Learning scope note appended to docs/learnings/r-excess-over-random-is-biased-when-control-stops-are-narrower.md.

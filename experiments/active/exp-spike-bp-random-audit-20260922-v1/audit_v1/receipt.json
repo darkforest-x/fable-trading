@@ -1,0 +1,56 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-bp-random-audit-20260922-v1",
+    "split": "2025-09-10T00:00:00+00:00",
+    "round_trip_cost": 0.002,
+    "bootstrap": 2000,
+    "flips": 10000,
+    "seed": 922115,
+    "sources": {
+      "v104": {
+        "trades": "experiments/active/exp-spike-v10-4-joint-multitf-20260918-v1/statistics/run_v1/trades.csv.gz",
+        "controls": "experiments/active/exp-spike-v10-4-joint-multitf-20260918-v1/statistics/run_v1/controls.csv.gz"
+      },
+      "v9": {
+        "controls": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/controls.csv.gz"
+      },
+      "v126": {
+        "run": "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/results/run_v2"
+      }
+    },
+    "verdict": {
+      "bp_confirmed": "full bp excess ci_low > 0 and p < 0.01 and later bp excess > 0",
+      "r_only": "R excess p < 0.01 without bp_confirmed",
+      "not_significant": "neither"
+    },
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "inputs": {
+    "v104": {
+      "trades": "51ea9e863cc282cfb4cc6e542fe082824caf03550548e30c7ace5705f67d3fcc",
+      "controls": "b99a68e534f124d64e6686c3375511da9e27f3189845a783320c76250d9cb531"
+    },
+    "v9": {
+      "controls": "d2864a942825b19f569fca7f3dec12ae7245d6433229ed6cdb7d98f6df1fb179"
+    },
+    "v126_manifest": "71475bf2c5c209db49b354077f1babdd4cc16399b9798a37359903728a6e9589"
+  },
+  "pairs": 357863,
+  "pairs_by_study": {
+    "v104": 143764,
+    "v126": 37816,
+    "v9": 176283
+  },
+  "source_commit": "7a15319281fae69edf5532cbf92dcab3749af082",
+  "code": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_bp_random_audit.py": "d50e1ef3568f52a780796667725daa712dc490468f6854601057868e9ebb0903",
+    "experiments/active/exp-spike-bp-random-audit-20260922-v1/config.json": "7234d1a3820f9a0dc67c1605ac0694f317355bf672011561fec027a106cfc5f0",
+    "experiments/active/exp-spike-bp-random-audit-20260922-v1/PROJECT_PLAN.md": "33277603671c64a9e8475389b9ed5a5902516464f70b6ead5432f21013d4e6ef",
+    "tests/evaluation/test_spike_bp_random_audit.py": "b28c831e6768a74f2bddae00472e671ca933a40cccd1c424e08699c0da179836"
+  },
+  "files": {
+    "summary.csv": "2dc29992ad0587628b50b84ce0ddd30e14840bb0f0cb7b4611712e5d78499c17",
+    "verdicts.csv": "b774ecd00d1d7e1d098253662dd79ea22fdbc55706a5e9fea684e35923e76d21"
+  }
+}

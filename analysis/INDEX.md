@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **631** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **632** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -16,6 +16,7 @@
 | 2026-09-22 | [`p1_ma_profit3r_20260922.md`](p1_ma_profit3r_20260922.md) | 3R 盈利事件扩展与两组 YOLO：阶段过程记录（已完成） | 自动导入在第十批 GAIBUSDT 的 `no_data` 终态停止，原失败日志和错误回执保留。十个月请求归档均缺失的原始审计、源审计 SHA 和可用性裁决先冻结于 `29626e0b6bbca3d1732ff6120d264cee2c461d7c`。原请求仍为25币；本批仅处理有完整审计的2... |
 | 2026-09-22 | [`p1_ma_profit3r_negative_semantics_correction_20260922.md`](p1_ma_profit3r_negative_semantics_correction_20260922.md) | MA3R 负例语义纠正：停止 v5 训练，保留失败记录 |  |
 | 2026-09-22 | [`p1_ma_profit3r_owner1500_v4_results_20260922.md`](p1_ma_profit3r_owner1500_v4_results_20260922.md) | 1506个3R赢家、两组YOLO训练与完整后段评估：已完成，盈利筛选未达标 | 按Owner最新“到1500个就处理并训练”的授权，保留1506个去重train赢家，A单图1506张、B有限双视图3012张，RTX3060各完整训练40轮。6812张物理图片包含两个训练臂及共享val/test，全部审计通过。用户指出的图像扁平问题已在开训前改为可见范围价格轴，旧图与旧计划保留。 |
+| 2026-09-22 | [`p1_spike_bp_random_audit_20260922.md`](p1_spike_bp_random_audit_20260922.md) | SPIKE“跑赢随机”结论的收益率（bp）复核 | 日期：2026-09-22。实验：`exp-spike-bp-random-audit-20260922-v1`。状态：**完成；32 个结论单元没有一个在 bp 口径通过，V10.4 1h 联合仍是最强候选但未达 p<0.01**。 |
 | 2026-09-22 | [`p1_spike_joint_btc_gate_20260922.md`](p1_spike_joint_btc_gate_20260922.md) | 突破＋SPIKE：BTC 全局均线入场门对照（2026-09-22） |  |
 | 2026-09-22 | [`p1_spike_joint_notifications_20260922.md`](p1_spike_joint_notifications_20260922.md) | 突破+spike 双通道通知接入（2026-09-22） | 旧版联合信号只进入 `spike-lines-v1.sqlite3` 展示账本，没有通知队列，主服务也未启动 TG 发送线程。 |
 | 2026-09-22 | [`p1_spike_lowtf_v1_v126_20260922.md`](p1_spike_lowtf_v1_v126_20260922.md) | SPIKE V1 与 V12.6：OKX ETH/BTC 1m、3m、5m 对照回放 | 同一份 OKX 1m 数据、同一时间窗（2024-02-01 至 2026-09-22 14:00 UTC）、同一 0.2% 往返成本下，V1 与 V12.6 在 1m/3m/5m 的全期、前段、后段全部净亏。只有 V1 原版 5m 前段 65 笔 +4.76R 是正数，后段 44 笔 −34... |
@@ -947,6 +948,7 @@
 - [`p1_spike_5r_model_v5_20260921_final.md`](p1_spike_5r_model_v5_20260921_final.md) — SPIKE 5R Model V5：降低标签门槛没有自动提高筛选能力
 - [`p1_spike_account_growth_20260913.md`](p1_spike_account_growth_20260913.md) — SPIKE 账户冻结回放技术报告
 - [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) — SPIKE V1 / V8：沪深主板近三年日线与周线
+- [`p1_spike_bp_random_audit_20260922.md`](p1_spike_bp_random_audit_20260922.md) — SPIKE“跑赢随机”结论的收益率（bp）复核
 - [`p1_spike_burst_early_warning_20260910.md`](p1_spike_burst_early_warning_20260910.md) — SPIKE V3：结构早预警与动能确认分层
 - [`p1_spike_burst_launch_recall_20260910.md`](p1_spike_burst_launch_recall_20260910.md) — SPIKE V2：渐进启动补漏与全池召回验证
 - [`p1_spike_burst_noise_20260910.md`](p1_spike_burst_noise_20260910.md) — SPIKE：频繁信号的定位与单项降噪实测
