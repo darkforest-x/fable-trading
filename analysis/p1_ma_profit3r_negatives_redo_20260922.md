@@ -1,4 +1,4 @@
-# MA 3R 训练负例修复：数据审计完成，准备3060训练
+# MA 3R 训练负例修复：A组已进入3060训练，结果待完成
 
 Owner 在发现 A/B 训练负例为零后要求“重新做吧”。本轮是两组离线重训的明确授权；不改变生产资格或部署。原 `exp-ma-profit3r-20260922-v1` 失败结果保留。其 plan 把 positive-only 归为 Owner 要求是不正确的解释，“只用原版”仅区分视图增强。
 
@@ -64,6 +64,14 @@ Builder提交 `bfcd47fb8d` 先于构建。原7839个训练SL/TIMEOUT候选中15�
 远端60640个文件传输SHA通过，3060开训预检再次通过60568个PNG/TXT，环境为torch2.8.0+cu126/ultralytics8.4.89/numpy2.0.2/pandas2.3.3。第一次detached调度PID6448返回后退出，日志为空且无job/training回执，未进入训练；保留 `remote_launch.json` 失败观察。
 
 依据本仓既有WMI启动证据，使用已提交 `run_supervised.py` 生成并校验 `launch_wmi.cmd`，WMI返回PID5360；随后核对该进程在SSH断开后仍在、job_receipt=running。首次读取响应遇非UTF-8 stderr解码异常，经只读远端回执确认已执行，未重复启动。真实启动回执是 `recovery_launch.json`，原冻结数据/模型/训练评估脚本不变；仍须等待实际epoch和完成回执，不能只因PID存在就宣称训练成功。
+
+后续实际业务验证：`first_training_observation.json` 保存A组第1/40轮、181/1167批次、GPU76%/5950MiB和running训练回执。至此已证明真正进入GPU训练，尚未证明任一组完成。Windows同一任务将依次执行A/B各40轮与原val/test评估；Mac的watch进程等待完成后下载并计算原匹配随机对照。
+
+本次调度恢复实际命令（任务特定的一次性恢复，检测既有任务/命令文件会拒绝重发）：
+
+```bash
+PYTHONPATH=/Users/zhangzc/fable-trading .venv/bin/python -u experiments/active/exp-ma-profit3r-negatives-20260922-v2/run_supervised.py
+```
 
 ## 风险与诚实声明
 
