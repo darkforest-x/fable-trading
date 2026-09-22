@@ -1,0 +1,19 @@
+{
+  "checked_at_utc": "2026-09-22T04:03:13.547414+00:00",
+  "dataset": "datasets/ma_profit3r_owner1500_v4",
+  "manifest_sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+  "audit_receipt_sha256": "10585791b9ab646738d3249ead50460c9ce13ef10dbc97660320bedda284fc68",
+  "contact_sheet_sha256": "d96a4cdf9088e012e012eb26975f29d97462017e1f4d7ce5ed8180dfc1707a00",
+  "root_actual_visual_inspection": true,
+  "reviewed_events": 6,
+  "reviewed_views": 18,
+  "observations": [
+    "All six preselected events show legible candles and moving averages after visible-range fitting.",
+    "A/B1/B2 retain the same last candle, with limited left-context changes.",
+    "No circles, outcome captions, boxes or future-review charts are burned into training pixels.",
+    "Long/short direction is preserved; unchanged short windows still have wide candles, and local fitting also enlarges MA separation."
+  ],
+  "decision": "Allow the authorized offline A/B training after the same v4 dataset passes Windows preflight.",
+  "production_eligible": false,
+  "scope": "Rendering integrity and visible scale review only; not owner per-event gold approval, model accuracy, or live performance."
+}
