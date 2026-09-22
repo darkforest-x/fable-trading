@@ -86,7 +86,8 @@ def audit(root: Path, output: Path):
     b=t.loc[t.arm.eq('joint_h1_recheck')].set_index('trade_key')
     shared=a.index.intersection(b.index)
     cols=['entry_price','initial_stop','initial_risk','initial_risk_frac','exit_price','gross_return','net_return','net_r','exit_i']
-    np.testing.assert_allclose(a.loc[shared,cols],b.loc[shared,cols],atol=1e-12,equal_nan=True)
+    np.testing.assert_allclose(a.loc[shared,cols].to_numpy(dtype=float),
+        b.loc[shared,cols].to_numpy(dtype=float),atol=1e-12,equal_nan=True)
     assert a.loc[shared,'exit_reason'].equals(b.loc[shared,'exit_reason'])
     assert set(zip(c.arm,c.trade_key)) == entered_keys
     assert not c.duplicated(['arm','trade_key']).any()
