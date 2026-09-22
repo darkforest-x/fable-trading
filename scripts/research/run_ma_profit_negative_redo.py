@@ -33,7 +33,10 @@ def stage() -> None:
     dataset=ROOT/'datasets'/plan['dataset_name']
     files={ROOT/x['path'] for x in launch['files']}
     files.update(ROOT/x['path'] for x in plan['inputs'].values())
-    files.update(p for p in dataset.rglob('*') if p.is_file())
+    # Local review links are browsing aids, never GPU training inputs.
+    files.update(p for p in dataset.rglob('*')
+                 if p.is_file() and not p.is_symlink()
+                 and 'review' not in p.relative_to(dataset).parts)
     files.update(p for p in (EXP/'selection').iterdir() if p.is_file())
     files.add(EXP/'launch_contract.json')
     manifest={p.relative_to(ROOT).as_posix():sha256(p) for p in files}
