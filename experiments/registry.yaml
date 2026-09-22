@@ -10557,3 +10557,18 @@ experiments:
     - spike-ma-stop-20260922-delivery
     reuse_allowed: false
     notes: Owner explicitly authorizes stop research20260922. Scope is V9 risk-box mechanism, not V12 new bk geometry or OKX screenshot replication. 47checks;both rescues40 andharms28 baseline longs. Notion created after recovered exact-key deduplication.
+
+  - experiment_id: exp-spike-ma-confirm-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a7f558ef71438dc65da2385a391443d931ffbc4a
+    status: inconclusive
+    question: Does completed-H1 SMA60 close or body confirmation improve stop exits, and how does a fixed gross 2R target compare?
+    single_variable: Prespecified stop-rule edges and profit-rule edges across eight policies, with original and prior MA-touch parity.
+    result: All 29 streams and both parent ledgers match; 83 checks. Later long body trail has -64.03R versus MA touch -32.03R and 14 losses below -2 reference R; fixed 2R reduces full pooled returns. Confirmatory monthly resolution insufficient; no default replacement.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_ma_confirm_20260922.md
+    artifacts: [spike-ma-confirm-20260922-delivery]
+    reuse_allowed: false
+    notes: Body/close R is reference risk and is not a hard loss cap. Eight later months cannot resolve the thirty-test confirmatory family. No Pine or production changes.

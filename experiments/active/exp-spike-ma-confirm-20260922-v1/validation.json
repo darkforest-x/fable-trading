@@ -1,0 +1,17 @@
+{
+  "source_commit": "a7f558ef71438dc65da2385a391443d931ffbc4a",
+  "distinct_tests_passed": 83,
+  "new_tests": 36,
+  "related_existing_tests": 47,
+  "commands": [
+    ".venv/bin/python -m pytest -q tests/evaluation/test_spike_ma_confirm.py tests/evaluation/test_spike_ma_confirm_study.py tests/evaluation/test_spike_ma_stop.py tests/evaluation/test_spike_ma_stop_study.py tests/evaluation/test_spike_v9_htf_sma.py tests/test_spike_v1_v8_be05.py tests/evaluation/test_spike_v112_execution_ablation.py"
+  ],
+  "execution_note": "Combined initial81 passed; two new widened fixed-entry cases then added and all36 new tests passed. Distinct total83, not81+36.",
+  "pre_run_findings": [
+    "Static review caught duplicate whole-bar step; split open and intrabar/close before price replay.",
+    "Test expectation for fixed trusted rows corrected to unknown MA at entry, not unknown at already-authorized signal.",
+    "Exact month-sign resolution reported; small later sample cannot satisfy thirty-test confirmatory family."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -1,0 +1,1161 @@
+{
+  "experiment_id": "exp-spike-ma-confirm-20260922-v1",
+  "source_commit": "a7f558ef71438dc65da2385a391443d931ffbc4a",
+  "source_before_replay": true,
+  "symbols": 29,
+  "baseline_entries": 2701,
+  "baseline_and_prior_htf_parity": true,
+  "tests": {
+    "source_commit": "a7f558ef71438dc65da2385a391443d931ffbc4a",
+    "distinct_tests_passed": 83,
+    "new_tests": 36,
+    "related_existing_tests": 47,
+    "commands": [
+      ".venv/bin/python -m pytest -q tests/evaluation/test_spike_ma_confirm.py tests/evaluation/test_spike_ma_confirm_study.py tests/evaluation/test_spike_ma_stop.py tests/evaluation/test_spike_ma_stop_study.py tests/evaluation/test_spike_v9_htf_sma.py tests/test_spike_v1_v8_be05.py tests/evaluation/test_spike_v112_execution_ablation.py"
+    ],
+    "execution_note": "Combined initial81 passed; two new widened fixed-entry cases then added and all36 new tests passed. Distinct total83, not81+36.",
+    "pre_run_findings": [
+      "Static review caught duplicate whole-bar step; split open and intrabar/close before price replay.",
+      "Test expectation for fixed trusted rows corrected to unknown MA at entry, not unknown at already-authorized signal.",
+      "Exact month-sign resolution reported; small later sample cannot satisfy thirty-test confirmatory family."
+    ],
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "scope": "V9 plus H1 SMA60, Binance archive, not native V12 bk replay",
+  "pine_unchanged": "V12.6",
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/PROJECT_PLAN.md",
+      "sha256": "108a09f35a34f61c9895fa9c00d35ffe55708052144a6adabd3777bde7048ea5",
+      "size_bytes": 4180
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/delivery_summary.txt",
+      "sha256": "2b165b5fea00cb87af5cda15a46dbd2cb6d50702a725c6d07250a7dc9467963e",
+      "size_bytes": 259
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/handoff_addition.md",
+      "sha256": "64013cdc9793a27f89fb5b81e535bdd2758983b64b09cc85d18b14b0111a5284",
+      "size_bytes": 1192
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/independent_review.md",
+      "sha256": "83b70f8e31d1f5b93fc6590e8b4149a3c1f01628f5b7c1d150eec0a007ed08dd",
+      "size_bytes": 1229
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/ledger_verification.json",
+      "sha256": "1d7bf829c0b5a18c91cae2b33a2155730c381a46dad96c22499d86f7a914db8f",
+      "size_bytes": 156
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/notion_sync.json",
+      "sha256": "73d3f2d01949ddb6eb80906dc686bddfcf8b4fcfa5a06511981a000ff05b3ffa",
+      "size_bytes": 235
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/completion.json",
+      "sha256": "8364c371b22263781629892684441fe7a7e3288c1c8a1dec2d9f193c1ec5a8af",
+      "size_bytes": 3421
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/controls.csv.gz",
+      "sha256": "9ba20ca102aa7ed4c1053681cbca939d021b6860b70b687c9e5a04bbf871e63e",
+      "size_bytes": 595407
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/fixed.csv.gz",
+      "sha256": "cb4cc031845ada782ae4b00bae889538364bc92c293aad2f76f125ae09d70e5d",
+      "size_bytes": 988475
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/identity.json",
+      "sha256": "3c771b1181f2bd160090ff93994c86d241e61de7162c39453ec332d7cc5f29d9",
+      "size_bytes": 17192
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/completion.json",
+      "sha256": "37cc1b33451ecb458d551b3d6ea3183f00ce5352d61095a65353fc91e7458f31",
+      "size_bytes": 960
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/controls.csv.gz",
+      "sha256": "1718eba9c2fbcfa1f4a26a3b29317fb473d271b43dd06312e09185d62938febc",
+      "size_bytes": 24141
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/events.csv.gz",
+      "sha256": "199284c93a27ac6f2a899298da789f8977b2a38a11edc52233e26a86c18f671a",
+      "size_bytes": 3936
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/fills.csv.gz",
+      "sha256": "ac4ecf7b82f1fbe5278bd321d467ae09c62340fd433124de9b2f633865264189",
+      "size_bytes": 38832
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/fixed.csv.gz",
+      "sha256": "41392432e762ca554612058b8893994a83edcdc16aaf966f757dea45c9680daa",
+      "size_bytes": 41798
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/1000PEPEUSDT/trades.csv.gz",
+      "sha256": "f73162369e8ff5c4069402f72986f17be63adac7f450bc03e83de94b9437416d",
+      "size_bytes": 123017
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/completion.json",
+      "sha256": "5414108ad229907fc4cdb9220395bd534ff70ab9ad1f102e45d089de412d523b",
+      "size_bytes": 956
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/controls.csv.gz",
+      "sha256": "d97547b297e378f3ae11f85b2ec4c7aeea147735930ce9f8dab129feb12ad6a2",
+      "size_bytes": 27129
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/events.csv.gz",
+      "sha256": "93b12a78167496025e94d830a1232dcd0ec9480fbf72f50a752b1de0157c7b0d",
+      "size_bytes": 6786
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/fills.csv.gz",
+      "sha256": "b9a5224271119f6951555d52b7edd49f83eccd50e96e143b4bdf9309671fbf0a",
+      "size_bytes": 41703
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/fixed.csv.gz",
+      "sha256": "89277e942f6fe20c0402542ddd713bd10a98d3e015709a537b3d52c31e6dc550",
+      "size_bytes": 43729
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AAVEUSDT/trades.csv.gz",
+      "sha256": "deef33e6a06619fbbbd924cf63a604e1251e712b6e93d62bb3a478757e89bb53",
+      "size_bytes": 132557
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/completion.json",
+      "sha256": "9dc354e4f9210e096b42192f51425a726ed36d25fa02e30fe7c5e62dd0faa50f",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/controls.csv.gz",
+      "sha256": "4cccb1253d712f37f29521d9c87e5589a1697436a70941421989911b566b6c0e",
+      "size_bytes": 22471
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/events.csv.gz",
+      "sha256": "ae0ca14ee9badc88a6b540439f5f42cf901d86c9d5024c75cfeb8f58b0dd6cfc",
+      "size_bytes": 3679
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/fills.csv.gz",
+      "sha256": "1ed4c08cc9ebde0eda666fcbc9c8e5390410d3dc8f34449404dec2433a1f74cb",
+      "size_bytes": 33589
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/fixed.csv.gz",
+      "sha256": "6f12829423169d0291b46ddacdc2d64ba55352fe297a84d6fef3f9e1453ea15d",
+      "size_bytes": 36360
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/AEROUSDT/trades.csv.gz",
+      "sha256": "15cb7567156de6407b1dfb210d71b07edfa6215d90db63f952bde690e990289d",
+      "size_bytes": 106671
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/completion.json",
+      "sha256": "368f5810ffea5e7be8dcbfc1747e7bc1033da733f46d6fc199217b822927c99f",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/controls.csv.gz",
+      "sha256": "f0df8a1170276d33f859065d2e2969897d8c0d6892269dc90c276337f7b78011",
+      "size_bytes": 21636
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/events.csv.gz",
+      "sha256": "252d00f84698f40d9d5e0ae002ef20e8cae471452db0492ff959a827732b77db",
+      "size_bytes": 3969
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/fills.csv.gz",
+      "sha256": "6f01e48d0d56c5cae7aa926f205bd6931e9e158fdaa436b9827331e12ecabc87",
+      "size_bytes": 34337
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/fixed.csv.gz",
+      "sha256": "100f941f39e985d5d114519f298ac7088e42adf93eb8d7722178f73a10d34896",
+      "size_bytes": 36891
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/API3USDT/trades.csv.gz",
+      "sha256": "ed917cbfdd715c74309dcbd2fd10dea47e4cf6b5d040f54141b91708f63ad7a0",
+      "size_bytes": 108044
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/completion.json",
+      "sha256": "63ed8b17652ea12eb80566ef6c647a2e03b423d6205f3baa84ccbec6f1a6d320",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/controls.csv.gz",
+      "sha256": "b8d816b25990ea7e967cac379a0db8ea24413a10704d3d5aab793b32ecbc6c14",
+      "size_bytes": 25954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/events.csv.gz",
+      "sha256": "665fa31d13af44148547d124856f21613e4695b7c44abea2d5053a9bf608727d",
+      "size_bytes": 4233
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/fills.csv.gz",
+      "sha256": "c01ed7562a8632666587aeafc57f4aeab4d769cdd604129308143c9e63edf52d",
+      "size_bytes": 39863
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/fixed.csv.gz",
+      "sha256": "06c13ea76cdfd7edd8d89552db9099b378970764c7eedba033d42eca4f8bc417",
+      "size_bytes": 42112
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/APTUSDT/trades.csv.gz",
+      "sha256": "a1b4127d2398168bd94e9b8db0a995b222bd63486646f9e647eb16a528f4ae42",
+      "size_bytes": 127556
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/completion.json",
+      "sha256": "bd75aaeba460f366353304fc88ea45cae7acf1551da14e3c65784ad8b0031f90",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/controls.csv.gz",
+      "sha256": "4915c25dcfb7a37ee49466a9cc8cf642750e18b6489eeebc066f5e636c743096",
+      "size_bytes": 23698
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/events.csv.gz",
+      "sha256": "64707b2412aeb17857419b30e438880968f583a39197fa6dd11a0ed468f924c8",
+      "size_bytes": 5522
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/fills.csv.gz",
+      "sha256": "35887c268da5747269904d65a532abbb6bc405051ac735252b31bb5a5912bf65",
+      "size_bytes": 37183
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/fixed.csv.gz",
+      "sha256": "b9c83af8e21612bc212d0e7855a05d0f4894b3371dd131e225992778e2554852",
+      "size_bytes": 40777
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARBUSDT/trades.csv.gz",
+      "sha256": "38c021d664e1a69dc05b2ac55b228e39684fdf0ccaea025165b84c13b88976be",
+      "size_bytes": 120985
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/completion.json",
+      "sha256": "dceced6fecb02baf930a44c021f0a5da3b5e79b856994a5215f4246e478fb85c",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/controls.csv.gz",
+      "sha256": "93d0cf01c5d533f89f63787c73bc6ed6729114322570fb4e000cde51e92ef9ff",
+      "size_bytes": 23010
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/events.csv.gz",
+      "sha256": "8e36d9217562d0243469cf3698ab71e6c066b9e498bdbb7a8e96d518316b527a",
+      "size_bytes": 3953
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/fills.csv.gz",
+      "sha256": "74aa87c8935a1f5d0239469ddb5a8bd068e8fe00bd8e85e0e11f8bc99812e9c8",
+      "size_bytes": 37786
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/fixed.csv.gz",
+      "sha256": "1bb91fc08877c23249406138c98d155bfb8f8088357685678889ef0825db862e",
+      "size_bytes": 39188
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ARUSDT/trades.csv.gz",
+      "sha256": "812a1c31b3394976976fb6ae490a9a059fd5319d36e5cd25d68f87adb3221b0f",
+      "size_bytes": 116633
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/completion.json",
+      "sha256": "e4f8e3923dec934c8965f15ef7e619b0207ff070cec4cf14f2341a1663df892b",
+      "size_bytes": 956
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/controls.csv.gz",
+      "sha256": "9ca341f2ead4d23b887878ef2a1a32959334d01a1cbeb74eebf34576c703872f",
+      "size_bytes": 25522
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/events.csv.gz",
+      "sha256": "cd742f597da0174e7f9a25099cd8004e4315b619a0c2d7e007cdbad2da8bbee3",
+      "size_bytes": 5921
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/fills.csv.gz",
+      "sha256": "d381e5e52cdaa100f0ca296192bcb3c7ea571a66e452394a493c93a74dd9f161",
+      "size_bytes": 39179
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/fixed.csv.gz",
+      "sha256": "c8db8e430146bf16a713fdfd225e8b172a4e38c1b5932e7a22bf6b83253af5db",
+      "size_bytes": 42094
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BOMEUSDT/trades.csv.gz",
+      "sha256": "0ed964a50b47557f360e8f652c4ca173f086e29e13c0ac6919a762ae9276eeb0",
+      "size_bytes": 122606
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/completion.json",
+      "sha256": "4c2678e8ae16712175b15d83c825becc72c24b314d2267c9230c76da53613291",
+      "size_bytes": 953
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/controls.csv.gz",
+      "sha256": "f8e1b2bb7d51aba1cbec2f8ea6daf2377266f751e8c13495f4417e8f40a9a616",
+      "size_bytes": 19055
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/events.csv.gz",
+      "sha256": "e26af12faa0ba79631f5db86c489888d7c191529114785442ddf8e44b1b8d47b",
+      "size_bytes": 3438
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/fills.csv.gz",
+      "sha256": "e94d4df7b5131171ce8e65dce52dbcaa39b1e20e4c295516d21fc0dfcdf37427",
+      "size_bytes": 31506
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/fixed.csv.gz",
+      "sha256": "6a1709cb1886e2318fae7baa86eaf631e8f5298c25934b645c009b99b1670264",
+      "size_bytes": 34059
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/BTCUSDT/trades.csv.gz",
+      "sha256": "53f0b55e60fd81b68c290ac0b7da9b9c6916a71f539b1af9e02fd84d672c1261",
+      "size_bytes": 100696
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/completion.json",
+      "sha256": "335eaa1ffbb602dcc341f0cbf842cdad2fb1085023aab27b384e18f38b237fbb",
+      "size_bytes": 956
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/controls.csv.gz",
+      "sha256": "65b95fdc152e6f71fc12a453c77279fb4aedb1604667242d465a8156f1dd1052",
+      "size_bytes": 25442
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/events.csv.gz",
+      "sha256": "8a25832d034e21d8a275337cf340d38c5ab671fd8fb95b8e59840595e8a09d01",
+      "size_bytes": 5620
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/fills.csv.gz",
+      "sha256": "1b99a1d91e88cdf23620f3af93a730836e7a8919770185e5b0d77f486dddd5d8",
+      "size_bytes": 40120
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/fixed.csv.gz",
+      "sha256": "3052b8b2a8ae66a2f1065efb51e3f8f16706758c6a2f378c356d7e7aebd9286e",
+      "size_bytes": 42534
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/DASHUSDT/trades.csv.gz",
+      "sha256": "6bbe6356d189d555cbc0e7fada375c75998cd531b6b963f4c73920e97055ef32",
+      "size_bytes": 123968
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/completion.json",
+      "sha256": "fabc4f7c9edfe0a3747e7721b35e20fb1b76fa5c05deda9a57535e82373d885d",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/controls.csv.gz",
+      "sha256": "5be8693702b3acbae072530c5ba9ffc27cfb040af1b35840da6660f95d4ac798",
+      "size_bytes": 22968
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/events.csv.gz",
+      "sha256": "b9869e10df4e9946dfaed9d46620009e824cc7fff65d8db4014bf0aca123f2ad",
+      "size_bytes": 3784
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/fills.csv.gz",
+      "sha256": "6b16c519212ece9529af47e2e76dcc3ccbe0ab7a4f05f6aed6c66611af52e4f1",
+      "size_bytes": 35227
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/fixed.csv.gz",
+      "sha256": "0078d2006aff704e4387a0a1e87bceafc989d29fe250b8e8543da0d22c5a5c66",
+      "size_bytes": 39811
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ENAUSDT/trades.csv.gz",
+      "sha256": "e0608e1c925664260e60f0dc0d54d71b9c1c158cd5166c09944069d3f0de6459",
+      "size_bytes": 112423
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/completion.json",
+      "sha256": "e11fec163bb95aad18feae7ab76d69e2503420bb8b747e6074cdb305337e599f",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/controls.csv.gz",
+      "sha256": "8cfd0a63bdde56ecf059b251488772a04f1fbc9cf1ddcea8c0d4130fed5d01c4",
+      "size_bytes": 22573
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/events.csv.gz",
+      "sha256": "5e651f5fc8cf2e7206f61698a14ab17e65e71cd32c65f0bb13e303214d794faf",
+      "size_bytes": 3965
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/fills.csv.gz",
+      "sha256": "87e2cad719e72eb9101baaf7bf413c744be853f706cd26e73e20ca9b1d413884",
+      "size_bytes": 36429
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/fixed.csv.gz",
+      "sha256": "21d8859b738308a886ca9a0134dff68070b87f3e5d7830387cfae680335f2129",
+      "size_bytes": 37226
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ETHUSDT/trades.csv.gz",
+      "sha256": "10f4c90eb50be10864ecfabe7def5d6a4ada58cfe3dd6d34f0167064c8ea4942",
+      "size_bytes": 116251
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/completion.json",
+      "sha256": "33db35416330b0b01234d6fbf14b49dcdd6d934709370bedd1fc9bd82bb2cb13",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/controls.csv.gz",
+      "sha256": "51e1037fedcafe4a578804acdcb788980d17bd807e26e825e4eb79481c96052a",
+      "size_bytes": 25826
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/events.csv.gz",
+      "sha256": "dff405425a12317190e4e4086d7be937e9b61033bb2be858b1748072411bb986",
+      "size_bytes": 5297
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/fills.csv.gz",
+      "sha256": "79e3dddbe164692f1d1977cd42b776ffa9306d2205981f1276d33af7621c9766",
+      "size_bytes": 40984
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/fixed.csv.gz",
+      "sha256": "f74a116e6a1d7a7196977f58ea5cfa125eb9a7a47717ad0239373a6b1b51149a",
+      "size_bytes": 44858
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/FILUSDT/trades.csv.gz",
+      "sha256": "80963b6504e6fd6a9e5fdcc3f0630c9308291ca34f1827aa24eb43d85be5ae6e",
+      "size_bytes": 130675
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/completion.json",
+      "sha256": "2fa9a2778d0d3b782fc0d8ebcdcd2b0541cf0fdaab5caccfc4759df547734c9a",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/controls.csv.gz",
+      "sha256": "bef4cf73a73e033a0cdc8874f550262126e31948e1c3f0f57af97df0fbae461c",
+      "size_bytes": 14764
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/events.csv.gz",
+      "sha256": "858db86e866211eedb9d93fa2c333fee4538867c7c4c8c692e7a0d057b3daa8e",
+      "size_bytes": 3008
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/fills.csv.gz",
+      "sha256": "c6b8abf88138178fad042dc03dd76baf92ff1ffa5aa914a56af6ce0d6bb5c24f",
+      "size_bytes": 23807
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/fixed.csv.gz",
+      "sha256": "035e24152681a79120225df65a3548728e726b2780b344619a690c3bab729e88",
+      "size_bytes": 26009
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/HYPEUSDT/trades.csv.gz",
+      "sha256": "fbca119b79740f3d4597f8a306960f6f4cb50c0816e2d28cb07c73209d108f1f",
+      "size_bytes": 76767
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/completion.json",
+      "sha256": "1c70f6c101010fe91f542f9f711e803cb4fe4a90bde4424625fbcc45a88f6f87",
+      "size_bytes": 953
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/controls.csv.gz",
+      "sha256": "82d25cf9ab3f3fbbb95924593048931b7d6d6acd1ee4e55802e6381fb02627ec",
+      "size_bytes": 16513
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/events.csv.gz",
+      "sha256": "2a67ab5d9468f0d8e4b7031bfbfdf00d0d0c55febc0fd518e9d6afad259c327b",
+      "size_bytes": 2896
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/fills.csv.gz",
+      "sha256": "a0ba17061f7cee5790c81ad44f8fb06e2720f38d9857584355a4654de00e277f",
+      "size_bytes": 27070
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/fixed.csv.gz",
+      "sha256": "1c994fda80537e4e1044573c66780eb4cd97de74705975565e3e6b06b17dcc60",
+      "size_bytes": 29996
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/JUPUSDT/trades.csv.gz",
+      "sha256": "4376aaee9bcc109ae492c2fe53acb7b26a148942a488f06a21c1e75231623896",
+      "size_bytes": 83774
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/completion.json",
+      "sha256": "31752b2c7d494894cc12c62a0dd16131ecc7cfc57f644cda3ea80e7b7d388388",
+      "size_bytes": 957
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/controls.csv.gz",
+      "sha256": "97d423f49106af127f308f79c86cc24e516246da354facaa8df8296c32e604e8",
+      "size_bytes": 16437
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/events.csv.gz",
+      "sha256": "9822e2f5a2f03ef00c43e4c9d92afa49b2d8b3fd84470b20e9a9b71c074516f7",
+      "size_bytes": 3455
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/fills.csv.gz",
+      "sha256": "a50766df518d0478428d86c964e49fec8148decd8e9bb531aaabcfc5d9e82553",
+      "size_bytes": 27417
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/fixed.csv.gz",
+      "sha256": "505606f15ed6dc52f77260bfe1c0c696964649eaa414612f1ebe6e824f2a9649",
+      "size_bytes": 28383
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/MUBARAKUSDT/trades.csv.gz",
+      "sha256": "4a04f0ea04df0ce5a75efaac526d9140541ed996c31330725c60f22dda9905f0",
+      "size_bytes": 82766
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/completion.json",
+      "sha256": "1b3c345c8bc27c28b9cb567a497c1b47a804f4e169fabc73968beae2801ca840",
+      "size_bytes": 956
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/controls.csv.gz",
+      "sha256": "212f12ed4abd1a93f6df017a36e57ea50999282c6af23d664f2f296d4eda512b",
+      "size_bytes": 22176
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/events.csv.gz",
+      "sha256": "761a4f3216e9e7050488650ca254d6f22a2b88aff65208d4a6e4f0dbd53d7b6e",
+      "size_bytes": 3891
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/fills.csv.gz",
+      "sha256": "f13b7239ada3b82eeceb7db57f09cb3516847550e0d876f16bb87a76e47405b4",
+      "size_bytes": 34249
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/fixed.csv.gz",
+      "sha256": "6fefa617e6cd4e9c8586bf08054d5114b1883731ddc1ca0a5f1c4ab9beba5a98",
+      "size_bytes": 35517
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/NEARUSDT/trades.csv.gz",
+      "sha256": "a37b7deca42de885b84b7a425363bcee8628f523b8cb9d400fe1cd568e64e9ab",
+      "size_bytes": 102925
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/completion.json",
+      "sha256": "5c617feea77909bb4f2739afe1efed379d2164045238e92cd813c9dcda68015f",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/controls.csv.gz",
+      "sha256": "970b74e7c02c391f9e657251e51a7a685650797d9c84760812ee746ddb9f9f4c",
+      "size_bytes": 24646
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/events.csv.gz",
+      "sha256": "6c0773058f9007b9ddff6649c01d53b154b943e71d43b9e685fad326b6b55c4a",
+      "size_bytes": 4952
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/fills.csv.gz",
+      "sha256": "778051c9f5dcd5ff2833f82e44069a7e2619ec7b037b73f3ed0d0a8ffd6ce202",
+      "size_bytes": 38862
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/fixed.csv.gz",
+      "sha256": "72d1b7a5c5b71b289b6e0470f86a18dcf5f008b022ca65d5aaaa3d436e15f397",
+      "size_bytes": 40566
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ONEUSDT/trades.csv.gz",
+      "sha256": "23d4a5cbbe9961ad765133b8acc7ed471c982d63c1c8bc675e6afc91eaaf823b",
+      "size_bytes": 123719
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/completion.json",
+      "sha256": "8f58cb455e59001652c4a44415282f6f68d2698a93e554549d1c45d27db8d47f",
+      "size_bytes": 953
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/controls.csv.gz",
+      "sha256": "27e9c17e0a8a4bfb83d97698625ccd3189d0a311a12b099305bf0be1a728a72f",
+      "size_bytes": 22198
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/events.csv.gz",
+      "sha256": "71d794cf6933372adc459d7dc17a8ca00779aa1100ac743668ffde65da39a4b3",
+      "size_bytes": 4174
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/fills.csv.gz",
+      "sha256": "310486bd9141af904fb4899aad111d1deff8f52e1fcbbd868c66a15e80569df5",
+      "size_bytes": 33259
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/fixed.csv.gz",
+      "sha256": "4fc79a8b53454d73124c59a81eb483f8930cd5e135b581175c1438dde64e06bf",
+      "size_bytes": 35131
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/OPUSDT/trades.csv.gz",
+      "sha256": "f79e52aff14b32f5d2b894d9b0a383aa23dd0ac9ae823b74437e7f65289f2d78",
+      "size_bytes": 106818
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/completion.json",
+      "sha256": "c6c7034b65f9b476a339026269810b6526315e2f76e2eae1dfcf1262724faee1",
+      "size_bytes": 956
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/controls.csv.gz",
+      "sha256": "ee77fc01478a757d796b97073b48122a929d1f012cc76fc39c7d21a98dd85df8",
+      "size_bytes": 22552
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/events.csv.gz",
+      "sha256": "1876de9b14a235cb30801ff496317d7c852bdef7121cc08ec73efdb7540ae748",
+      "size_bytes": 3814
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/fills.csv.gz",
+      "sha256": "a0cf2ca3db139492466d9acc2fbce01b99bf6ebeca00878fdd654e157cfc7867",
+      "size_bytes": 34427
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/fixed.csv.gz",
+      "sha256": "a5203e33b97b890f0896ee886f2db69120c12ad1c2062f6568b9c92c5177c37d",
+      "size_bytes": 37157
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PENDLEUSDT/trades.csv.gz",
+      "sha256": "cbfb7187bac36cfc49e2c145374f5aedef24ae57db6fd50a16ff315753ee9657",
+      "size_bytes": 111287
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/completion.json",
+      "sha256": "319a7536fca44475d4775fe9e1915a9aaadf69de34065cce8917c4fdeaca171b",
+      "size_bytes": 958
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/controls.csv.gz",
+      "sha256": "1fc0c4d029eb3b404c8a17afea084c4c7869585edb367b5f3ad80625e8ae802a",
+      "size_bytes": 4406
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/events.csv.gz",
+      "sha256": "7099cc22b2f3ccd1ea7021efdc0780facc7cd3816c98429f53a1adad286c83ec",
+      "size_bytes": 1430
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/fills.csv.gz",
+      "sha256": "1b19cc60af0c5d77d0ae05e4b95b236c89ad5cffca251af8fd98c1728684f4fd",
+      "size_bytes": 6188
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/fixed.csv.gz",
+      "sha256": "9cc7f77b5331baa8df5d4f7b3cd03406f649d6dbb9c8e64f5d07579d3f2a3c40",
+      "size_bytes": 9659
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PIEVERSEUSDT/trades.csv.gz",
+      "sha256": "b25da1a1401b0fb72f5c4f3df23e9b181cd1b786cce5469476119fe92c07d9aa",
+      "size_bytes": 15610
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/completion.json",
+      "sha256": "76ff48261c92586e3371f56f7278b6b597c9d03355a5d471975e6ef0bb51750b",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/controls.csv.gz",
+      "sha256": "67017c79fffe857f58e70ba0812b78a307fdc7b89f06ce22255da2a44227600f",
+      "size_bytes": 11921
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/events.csv.gz",
+      "sha256": "dd19b338a7fefcb000bf7cb0aa630c993866c8795aef6aec9f2874034b6f1039",
+      "size_bytes": 2380
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/fills.csv.gz",
+      "sha256": "96a481825408f9d5b7079d609a103658f787b338c6aa0ce8a93ad475091fc08c",
+      "size_bytes": 21454
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/fixed.csv.gz",
+      "sha256": "aac4658647a0cc831844c8357e011e6aae5039220aede084b5e840181b52e7f4",
+      "size_bytes": 21748
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/PUMPUSDT/trades.csv.gz",
+      "sha256": "2a0ca401810167542ba7880aeee04fa592db29af55d3cfad22260abd777d1929",
+      "size_bytes": 64941
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/completion.json",
+      "sha256": "2ce9d893af300c5661226d73b86b55aba4115a64bd4906c55ebe302976724f13",
+      "size_bytes": 953
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/controls.csv.gz",
+      "sha256": "d030d3c6fa5139fecab99f44cfbd4328337d0c8304b508bfcfa09857c2546553",
+      "size_bytes": 21216
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/events.csv.gz",
+      "sha256": "10e4f12bcc688c8f61ab0d96f24e2a5d83abc89c1df335ea88d9f8c5ed3d449b",
+      "size_bytes": 4067
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/fills.csv.gz",
+      "sha256": "60bb37a9695c70327bf198d0ec8a5818324f722d3045e0d7bb0e863d82b890ef",
+      "size_bytes": 33204
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/fixed.csv.gz",
+      "sha256": "6bfc3c1988d665c20ee6954a95d636dcfbfd458699a0584dddaefb57ebd84a49",
+      "size_bytes": 36000
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/SOLUSDT/trades.csv.gz",
+      "sha256": "a2bc95c3c48675c6f99d35bfdc0ee4cb5ffa384d220e93f788870b444ca62fa3",
+      "size_bytes": 105742
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/completion.json",
+      "sha256": "9cc5c2e0f55fbeb62153616328c1479747532f39ec6445cceee66a4223fdcdf4",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/controls.csv.gz",
+      "sha256": "647e5b3bb25f86ea285911e02dc077fcd62fb3262ed04a7d9507d1ec7caa3726",
+      "size_bytes": 24706
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/events.csv.gz",
+      "sha256": "12438d5c3a38994a703afdc20078158b990abe5e208fdd53f89ffd827124f55e",
+      "size_bytes": 5805
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/fills.csv.gz",
+      "sha256": "2df34d1dd53f5c8034d54666de92ef9d37f25829a89831fef8444b2a3a0fa785",
+      "size_bytes": 37383
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/fixed.csv.gz",
+      "sha256": "4036196e170ff0013a9051862fe6c0f7d3906808f76df1dcc87b1ce9c43a83ec",
+      "size_bytes": 38881
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/UNIUSDT/trades.csv.gz",
+      "sha256": "11758617ddadf02e0ac7416ec27a68139bc9d26a9cefc1a25df30dde457ec801",
+      "size_bytes": 116617
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/completion.json",
+      "sha256": "31d76620a01ace79ee0dd7cbf130b264d83f49837d4b0830857a049f8a95712b",
+      "size_bytes": 957
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/controls.csv.gz",
+      "sha256": "fe3c2e7810f001dd8b3ca299aa348a3552a836241e06f31a871f96bdac60e8d9",
+      "size_bytes": 12540
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/events.csv.gz",
+      "sha256": "5a72caff6c3b425f8796db9ca11239a6cffc8874ab98476b15e38bb2fdd4e3b1",
+      "size_bytes": 2504
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/fills.csv.gz",
+      "sha256": "247116cd062629ff79b3194ae88fa55a5597013fd613c9231be0a576748545ae",
+      "size_bytes": 21233
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/fixed.csv.gz",
+      "sha256": "a5c523dbe174efeea01212525da1d35517ca990b7d5951ccb03f8c3bdd1f91b8",
+      "size_bytes": 22122
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/USELESSUSDT/trades.csv.gz",
+      "sha256": "cc669a5554d9599e019f8a95c9af97cd8c166764a0aa873ba2ce63472c7b9253",
+      "size_bytes": 65003
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/completion.json",
+      "sha256": "c638fb50193a39a92c007d082c5c24b1904fe2e88e23b2ed12c3987a042878f1",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/controls.csv.gz",
+      "sha256": "f3f0f84276a094ce0a7c51170184f3d21fe75543df8803e20e5a5076cb25ff46",
+      "size_bytes": 23554
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/events.csv.gz",
+      "sha256": "e5877f7f2d0b969e9b88ce3b2e498f9374626328bb656420d6f859c6b78ac2a8",
+      "size_bytes": 3944
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/fills.csv.gz",
+      "sha256": "409ad9e2d18a683aa972e5a67f20e7308605f3ea6938848e0305a1192c75058d",
+      "size_bytes": 36743
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/fixed.csv.gz",
+      "sha256": "e897cfda6801342727a13d601e79168b0eac12bfc2036c0d4045c5d3d7e6393d",
+      "size_bytes": 37594
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/WIFUSDT/trades.csv.gz",
+      "sha256": "45ac13a6b7fd699cd8aacb72d15a4d5f668251c00e16f8f2fe1c2a6cd185b1a7",
+      "size_bytes": 115123
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/completion.json",
+      "sha256": "d1b50fb94496e4a5449d66b88dfee5352ef79d2e2d48c9a3a39c98cd7ad8a290",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/controls.csv.gz",
+      "sha256": "6c4e5dcc8d90a32f9a73342a3c877964455a80e06beba36753117463ca632dbb",
+      "size_bytes": 22472
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/events.csv.gz",
+      "sha256": "77f577155cadfea92f8664e0cdf483e938d485fcfff11818d26012731316b716",
+      "size_bytes": 4963
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/fills.csv.gz",
+      "sha256": "304b909d42f1de6a968197be06d73f2023d9a22a16d2c89acf75cdb330e96c38",
+      "size_bytes": 33279
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/fixed.csv.gz",
+      "sha256": "ebe598533cbb39efce03dce19e31dc79331127fd4e408fc9d6caa478fc813be9",
+      "size_bytes": 32921
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/XTZUSDT/trades.csv.gz",
+      "sha256": "15774a7f2c330d7dc8b9fd069aea924ba1dddb32b5251a2ac40587dfafd6d2f9",
+      "size_bytes": 100307
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/completion.json",
+      "sha256": "8bae12fc8cc8febdf76c320f580b13e0fbda88ce568a08bfc0cfd586839cf4c7",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/controls.csv.gz",
+      "sha256": "cf84084dd0b8e64ba405d719acb2f3da0f1c341928a7f1919c686c64a43614cb",
+      "size_bytes": 26925
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/events.csv.gz",
+      "sha256": "1b6eb4063ea4b467af3476c96ac278f4967022433d772302cc107aaf40d0bde2",
+      "size_bytes": 5830
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/fills.csv.gz",
+      "sha256": "128bc820c01e20c115f92bda554fb087056cf5fd361d4ada7605b612ca640555",
+      "size_bytes": 41244
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/fixed.csv.gz",
+      "sha256": "0d9b9602ae620948906750016e17e4d004d0305a7feb892716c128aa0163375d",
+      "size_bytes": 42794
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZECUSDT/trades.csv.gz",
+      "sha256": "76a4b75fbd193fd66fa131573b467c15e86ce62fd78ea23aed691b6b9846f3fe",
+      "size_bytes": 129903
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/completion.json",
+      "sha256": "7b1f2a80cc70ba156c1d391f72f6c76f11991e150bb3d0ee0d96f7a9a2c02b22",
+      "size_bytes": 954
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/controls.csv.gz",
+      "sha256": "5ab9f50673eee8d56fa4e385d251e5e4b2297744ca526cc36d268a623c51103b",
+      "size_bytes": 28442
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/events.csv.gz",
+      "sha256": "75177a200a0f2e41de3a458da6f4950bad6a33eda4f0030c54555ef1a5bc38a0",
+      "size_bytes": 6748
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/fills.csv.gz",
+      "sha256": "380fcdefa465ce5f8ac1a7e8408e9bf58a3d8bb8430db4b1719f79d0600da3ee",
+      "size_bytes": 42108
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/fixed.csv.gz",
+      "sha256": "2c90e33fcfe5298bd537302358737380c57d071777c97d3449a1dd46ae844561",
+      "size_bytes": 44396
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/rejected.csv.gz",
+      "sha256": "e4b2450bf83a9a64c3ddba57d44b626924f36f81ebb45409e7607e7ec6dc63b2",
+      "size_bytes": 70
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/streams/ZENUSDT/trades.csv.gz",
+      "sha256": "24310b03c962ad67c85686204910d4fe9d42be0eeee72f6a86c06024901d8198",
+      "size_bytes": 133357
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/run_v1/trades.csv.gz",
+      "sha256": "d7052769b951860f680e8268b761b86aad9b33aa787b36dc182f3dd6f3d5361c",
+      "size_bytes": 2933864
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/attribution.csv",
+      "sha256": "1fd6941c09a22711ca459f97572893672029c126c738bf60f9d72d8dd27bd9b7",
+      "size_bytes": 7025
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/by_symbol.csv",
+      "sha256": "fb451182860049ef4112418bc0856d37786f57da33fbfdf8e8cf4cbc4a1c7d5c",
+      "size_bytes": 173969
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/censored.csv",
+      "sha256": "53a74199163e93ffd2933f17cbb86d8a70517b33c10cdac2f055ae33266f0d25",
+      "size_bytes": 1426
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/effects.csv",
+      "sha256": "cff1992f94c803336cae8ec78ef854c9bd3134e4a49691d443b73a023a3e6215",
+      "size_bytes": 44842
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/exit_reasons.csv",
+      "sha256": "caded79fc04ea67385c0af89da860d6f01ad50037ed9f439fc15933bd2c26d00",
+      "size_bytes": 18234
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/gates.csv",
+      "sha256": "5df87690d10c971de7782b1144c0d48a631115466bfa1f3446f36da4f3d0c00e",
+      "size_bytes": 855
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/receipt.json",
+      "sha256": "1717ef2d9c4d1a507ab6f147d6454e3d00ed734ff04f7cfbfc61f5345d967667",
+      "size_bytes": 955
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/statistics/summary.csv",
+      "sha256": "d6ba6fab64b3333ff6fc9b5628ca03ec8896c70e0ed28a68186ca66d66826ef5",
+      "size_bytes": 35303
+    },
+    {
+      "path": "experiments/active/exp-spike-ma-confirm-20260922-v1/validation.json",
+      "sha256": "180058614e8a22f0eeace44199ae9f21a5ca6e7d3cbed236d99637726bf601d9",
+      "size_bytes": 1088
+    },
+    {
+      "path": "analysis/p1_spike_ma_confirm_20260922.md",
+      "sha256": "f051dac895753e4884e6daad55c73fe0bef85da3bcfeadd8b4a63f48c4fe2189",
+      "size_bytes": 13304
+    },
+    {
+      "path": "docs/learnings/close-confirmed-exits-need-one-pass-per-bar.md",
+      "sha256": "56cd3d4d17e129181db3b5f4feaf7da0c912f35c36e2bf2d9df2547b46740c82",
+      "size_bytes": 1471
+    }
+  ]
+}
