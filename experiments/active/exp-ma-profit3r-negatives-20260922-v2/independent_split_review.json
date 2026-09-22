@@ -1,0 +1,42 @@
+{
+  "status": "passed",
+  "reviewer": "negative_sources_redo",
+  "role": "budget-mapper Luna Max",
+  "scope": "frozen selected negatives plus preserved parent ledger; not a completed pixel audit",
+  "selection_sha256": "58433f041b1d86786e93ad8d9d639c448b5c526050128a05964d090cfeb45905",
+  "new_train_negative_events": 7824,
+  "new_train_negative_outcomes": {
+    "SL": 5595,
+    "TIMEOUT": 2229
+  },
+  "cross_split_conflicts": {
+    "event_id": 0,
+    "cluster_id": 0,
+    "origin_event_id": 0
+  },
+  "intersection_with_old_dataset_event_ids": 0,
+  "train_cutoff_utc": "2026-01-01T00:00:00Z",
+  "new_negative_latest_decision_close_utc": "2025-12-31T11:11:00Z",
+  "new_negative_latest_label_end_utc": "2025-12-31T23:11:00Z",
+  "new_negative_time_geometry_violations": 0,
+  "parent_val": {
+    "events": 1305,
+    "variants": [
+      "A"
+    ],
+    "arms": [
+      "A",
+      "B"
+    ]
+  },
+  "parent_test": {
+    "events": 989,
+    "variants": [
+      "A"
+    ],
+    "arms": [
+      "A",
+      "B"
+    ]
+  }
+}
