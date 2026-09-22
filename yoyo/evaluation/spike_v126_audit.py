@@ -39,6 +39,9 @@ def audit(root: Path, output: Path):
         if hashlib.sha256(blob).hexdigest() != expected:
             raise ValueError(f'replay source was not in its launch commit: {path}')
     d, t, s, c = (tables[k] for k in ('decisions','trades','statuses','controls'))
+    # Concatenating schema-only empty streams can promote booleans to object;
+    # bitwise ~ on Python bool objects yields -1/-2 instead of a row mask.
+    t['censored']=t.censored.astype(bool)
     assert not d.trade_key.duplicated().any()
     assert not d.duplicated(['stream_symbol','box_entry_i']).any()
     assert not t.duplicated(['arm','trade_key']).any()
