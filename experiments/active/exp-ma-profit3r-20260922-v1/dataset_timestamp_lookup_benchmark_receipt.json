@@ -9,7 +9,8 @@
   "ledger_sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797",
   "benchmark_command": [
     ".venv/bin/python",
-    "experiments/active/exp-ma-profit3r-20260922-v1/dataset_timestamp_lookup_benchmark.py",
+    "-m",
+    "yoyo.datasets.ma_profit_timestamp_benchmark",
     "--ledger",
     "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl",
     "--baseline-commit",
