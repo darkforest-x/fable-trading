@@ -44,7 +44,8 @@ def main() -> None:
                 if sha(image_path)!=row['image_sha256']:
                     raise RuntimeError('image drift')
                 result = model.predict(str(image_path),imgsz=1280,conf=.001,iou=.70,device=0,augment=False,agnostic_nms=False,max_det=300,rect=rect,verbose=False)[0]
-                tensor_shape = list(model.predictor.preprocess([result.orig_img]).shape)
+                tensor = model.predictor.preprocess([result.orig_img])
+                tensor_shape = list(tensor.shape)
                 boxes=[]
                 for xywh,confidence,class_id in zip(result.boxes.xywhn.cpu().tolist(),result.boxes.conf.cpu().tolist(),result.boxes.cls.cpu().tolist()):
                     boxes.append(dict(zip(('cx_norm','cy_norm','w_norm','h_norm'),xywh),confidence=float(confidence),class_id=int(class_id)))
@@ -52,7 +53,7 @@ def main() -> None:
                 same=[b for b in boxes if b['class_id']==wanted]
                 originals_boxes = originals[row['event_id']]['boxes']
                 delta = max((abs(a[k]-b[k]) for a,b in zip(boxes,originals_boxes) for k in ('cx_norm','cy_norm','w_norm','h_norm','confidence','class_id')),default=0.) if len(boxes)==len(originals_boxes) else None
-                records.append({'arm':arm,'event_id':row['event_id'],'retained':row.get('box') is not None,'rect':rect,'tensor_shape':tensor_shape,'half':bool(model.predictor.args.half),'score':max((b['confidence'] for b in same),default=0.),'hit':row.get('box') is not None and any(b['confidence']>=.25 and iou_xywh(b,row['box'])>=.5 for b in same),'max_iou':max((iou_xywh(b,row['box']) for b in same),default=0.) if row.get('box') else None,'box_count':len(boxes),'max_difference_from_frozen_prediction':delta,'boxes':boxes,'model_sha256':meta['model_sha256']})
+                records.append({'arm':arm,'event_id':row['event_id'],'retained':row.get('box') is not None,'rect':rect,'tensor_shape':tensor_shape,'tensor_dtype':str(tensor.dtype),'score':max((b['confidence'] for b in same),default=0.),'hit':row.get('box') is not None and any(b['confidence']>=.25 and iou_xywh(b,row['box'])>=.5 for b in same),'max_iou':max((iou_xywh(b,row['box']) for b in same),default=0.) if row.get('box') else None,'box_count':len(boxes),'max_difference_from_frozen_prediction':delta,'boxes':boxes,'model_sha256':meta['model_sha256']})
     args.out.mkdir(parents=True)
     (args.out/'diagnostic.json').write_text(json.dumps({'status':'completed','purpose':'padding sensitivity diagnostic only; formal evaluation unchanged','selection':'first four val positives and four val failures in event_id order','manifest_sha256':sha(args.dataset/'manifest.jsonl'),'code_sha256':sha(Path(__file__)),'records':records,'production_eligible':False},indent=2)+'\n', encoding='utf-8')
     print(json.dumps({'status':'completed','records':len(records)}))
