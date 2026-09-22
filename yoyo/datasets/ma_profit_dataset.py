@@ -170,10 +170,14 @@ def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, 
     profit = dict(row["profit"])
     core_start_time, core_end_time = _utc(row["core_start_time"]), _utc(row["core_end_time"])
     times = pd.to_datetime(frame["open_time"], utc=True)
-    positions = {stamp: index for index, stamp in enumerate(times)}
-    if core_start_time not in positions or core_end_time not in positions:
+    # The former Python dict materialized every timestamp in a multi-million
+    # row source for every event.  ``dict`` keeps the last duplicate, so take
+    # the last vectorized equality match to preserve that exact lookup rule.
+    start_matches = np.flatnonzero(times == core_start_time)
+    end_matches = np.flatnonzero(times == core_end_time)
+    if not len(start_matches) or not len(end_matches):
         raise ProfitDatasetError(f"core timestamp absent: {row['event_id']}")
-    start_i, end_i = positions[core_start_time], positions[core_end_time]
+    start_i, end_i = int(start_matches[-1]), int(end_matches[-1])
     if end_i - start_i + 1 not in {4, 5}:
         raise ProfitDatasetError(f"core length drift: {row['event_id']}")
     bar_minutes = int(row["bar_minutes"])

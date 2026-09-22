@@ -123,3 +123,32 @@ def test_source_id_cannot_create_windows_reserved_or_nested_paths():
         name = asset_stem(identity, "A")
         assert not any(char in name for char in '<>:"/\\|?*')
         assert name.startswith("event_") and name.endswith("_A")
+
+
+def test_timestamp_lookup_uses_last_duplicate_like_the_previous_dict(monkeypatch):
+    frame = source(1320)
+    original_start, original_end = 1240, 1243
+    duplicate_start, duplicate_end = 1300, 1303
+    frame.loc[duplicate_start:duplicate_end, "open_time"] = list(
+        frame.open_time.iloc[original_start:original_end + 1]
+    )
+    item = row(frame, c=original_end)
+    item["profit"]["decision_close_time_utc"] = (
+        frame.open_time.iloc[duplicate_end + 5] + pd.Timedelta(minutes=15)
+    ).isoformat()
+
+    monkeypatch.setattr(ma_profit_dataset, "_known_input_continuous", lambda *_: True)
+    monkeypatch.setattr(
+        ma_profit_dataset,
+        "_window_asset",
+        lambda _frame, **kwargs: (b"fixture", {}, {
+            "visible_end_open_time_utc": _frame.open_time.iloc[-1].isoformat(),
+            "feature_support_start_i": kwargs["support_start_i"],
+            "feature_support_start_utc": "fixture-support",
+        }),
+    )
+
+    assets = event_assets(frame, item)
+    assert [(asset["core_start_i"], asset["core_end_i"]) for asset in assets] == [
+        (duplicate_start, duplicate_end),
+    ] * 3
