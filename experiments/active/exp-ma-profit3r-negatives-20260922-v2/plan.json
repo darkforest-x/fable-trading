@@ -1,0 +1,146 @@
+{
+  "dataset_name": "ma_profit3r_owner1500_neg_v5",
+  "evaluation": {
+    "confidence": 0.25,
+    "hit_iou": 0.5,
+    "nms_iou": 0.7,
+    "no_production_claim": true,
+    "primary": [
+      "event precision/recall on full resolved pool",
+      "false firing on failed events",
+      "3R fraction among detections",
+      "matched same-source-time-volatility random control",
+      "net mean and topdecile returns after costs"
+    ],
+    "secondary": [
+      "mAP50",
+      "mAP50_95",
+      "direction/timeframe strata",
+      "ROC-AUC on event scores",
+      "permutation p"
+    ]
+  },
+  "expected_positive_train_events": 1506,
+  "experiment_id": "exp-ma-profit3r-negatives-20260922-v2",
+  "honesty": [
+    "Already-inspected val/test are a controlled redo benchmark, not untouched final confirmation.",
+    "B has twice A image exposure; not pure position attribution.",
+    "Internal validation padding retained; formal economics use same single-image path as prior.",
+    "Core+5 research model, not approved tip/live detector."
+  ],
+  "inputs": {
+    "base_model": {
+      "path": "models/yolo11s.pt",
+      "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5"
+    },
+    "candidate_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_ledger.jsonl",
+      "sha256": "81d60c351642dfcb8055c5e1391b31828b71b7f36f7beb6083a50ab646cb652f"
+    },
+    "manual_rows": {
+      "path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl",
+      "sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9"
+    },
+    "old_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl",
+      "sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797"
+    },
+    "old_manifest": {
+      "path": "datasets/ma_profit3r_owner1500_v4/manifest.jsonl",
+      "sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d"
+    },
+    "old_summary": {
+      "path": "datasets/ma_profit3r_owner1500_v4/summary.json",
+      "sha256": "7958b02aac398cd8280e5666fb71282209493ca041f8c4c08edbb081a8fb4982"
+    },
+    "parent_dataset_plan": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/dataset_plan_owner1500_v4.json",
+      "sha256": "e199302dd9b4cbc27c0113171b28afa2828ec9e80879bbb606d604e6c9c6d2ac"
+    },
+    "parent_plan": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/plan.json",
+      "sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266"
+    },
+    "reference_exclusion": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json",
+      "sha256": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a"
+    }
+  },
+  "label_contract": {
+    "confirmation_bars": 5,
+    "entry": "next_bar_open_after_confirmation_close",
+    "gap": "SL worse open;TP barrier conservative",
+    "horizon_hours": 12,
+    "missing_future": "unknown not negative",
+    "note": "3R is conventional price-risk R;net R separately reported.Optional owner clarification requested.Do not use MFE as realised profit.",
+    "r_definition": "abs(entry-stop),linear price risk",
+    "retention": "TP before SL within horizon,gross_r>=3 within numerical tolerance,and net return after0.002round-trip cost>0",
+    "round_trip_cost": 0.002,
+    "same_bar": "SL first",
+    "stop": "long=min(core.low),short=max(core.high),known before entry",
+    "target_r": 3.0
+  },
+  "negative_policy": {
+    "population": "all_resolved_parent_train_nonwinners",
+    "protection_hours": 4,
+    "ratio_cap": null
+  },
+  "negative_semantics": "SL/TIMEOUT negatives are for profitable_dense target only; morphology remains unadjudicated. Profitable TIMEOUT below3R is still target-negative. UNKNOWN/INVALID excluded. No manual shape label is overwritten.",
+  "owner_authorization": {
+    "live_money": false,
+    "promote": false,
+    "request": "训练图片没加负样本？ → 重新做吧，",
+    "research_gate_exception": true,
+    "scope": "redo two offline A/B runs with explicitly labelled training negatives on RTX3060",
+    "training_authorized": true
+  },
+  "parent_dataset_root": "datasets/ma_profit3r_owner1500_v4",
+  "planned_report": "analysis/p1_ma_profit3r_negatives_redo_20260922.md",
+  "production_eligible": false,
+  "protection": "Longest pre11 through c+5 view cannot intersect frozen parent positive core +/-4h, reference69 +/-4h, or full manual221 review window +/-4h. No relaxation for counts.",
+  "sampling_note": "Complete eligible original candidate population, not random cross-symbol backgrounds or forced1:1. Original gates and mining chronology retained.",
+  "schema_version": 1,
+  "single_variable": "Add guarded outcome-target negatives. Preserve parent PNG/TXT, event/split, target, costs, rendering, args, base and evaluation/control recipes.",
+  "splits": {
+    "evaluation": "All resolved original-rule candidates in later pools,including losing/timeout negatives;unknown excluded and counted.No winner-only precision or economics.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "training_args": {
+    "auto_augment": null,
+    "batch": 8,
+    "bgr": 0.0,
+    "cache": false,
+    "copy_paste": 0.0,
+    "cutmix": 0.0,
+    "degrees": 0.0,
+    "deterministic": true,
+    "device": "0",
+    "epochs": 40,
+    "erasing": 0.0,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "mixup": 0.0,
+    "mosaic": 0.0,
+    "multi_scale": 0.0,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "perspective": 0.0,
+    "plots": false,
+    "rect": true,
+    "scale": 0.0,
+    "seed": 0,
+    "shear": 0.0,
+    "translate": 0.0,
+    "workers": 2
+  },
+  "training_eligible": false
+}
