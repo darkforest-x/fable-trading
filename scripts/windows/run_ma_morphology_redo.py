@@ -409,11 +409,11 @@ def evaluate_common_images(model: Any, *, dataset: Path, run_dir: Path, arm: str
 
 def run_training(
     *, plan_path: Path, dataset: Path, run_root: Path, launch_contract_path: Path, train: bool,
-    audit_fn: Callable[[Path, Path], Mapping[str, Any]] = audit_dataset,
+    audit_fn: Callable[..., Mapping[str, Any]] = audit_dataset,
 ) -> dict[str, Any]:
     """Preflight or execute both arms without ever overwriting a run directory."""
 
-    audit_result = audit_fn(plan_path, dataset)
+    audit_result = audit_fn(plan_path, dataset, write_receipt=False)
     preflight = validate_preflight_contract(
         plan_path=plan_path, dataset=dataset, launch_contract_path=launch_contract_path,
         audit_result=audit_result,

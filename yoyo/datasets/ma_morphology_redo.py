@@ -321,7 +321,8 @@ def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
     return summary
 
 
-def audit(plan_path: Path, output: Path) -> dict:
+def audit(plan_path: Path, output: Path, *, write_receipt: bool = True) -> dict:
+    """Recheck every control and sample; remote preflight can stay read-only."""
     p = load_plan(plan_path)
     summary = read_json(output/'summary.json')
     if summary['status']!='completed' or summary['plan_sha256']!=sha(plan_path):raise ValueError('Plan/build receipt mismatch')
@@ -385,7 +386,8 @@ def audit(plan_path: Path, output: Path) -> dict:
     result={'status':'passed','manifest_sha256':summary['manifest_sha256'],'ledger_sha256':summary['ledger_sha256'],
         'counts':summary['counts'],'verified_files':2*len(manifest),'pilot':summary['pilot'],'original_positive_files_preserved':True,
         'morphology_evidence_verified_from_ledger':True,'per_sample_owner_gold':False}
-    write_json(output/'audit.json',result)
+    if write_receipt:
+        write_json(output/'audit.json',result)
     return result
 
 
