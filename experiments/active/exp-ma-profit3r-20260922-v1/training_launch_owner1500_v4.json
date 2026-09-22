@@ -1,0 +1,32 @@
+{
+  "launched_at_utc": "2026-09-22T04:07:15.699288+00:00",
+  "host": "Administrator@192.168.1.2",
+  "local_driver_pid": 51652,
+  "remote_argv": [
+    "C:/fable/.venv/Scripts/python.exe",
+    "-u",
+    "-m",
+    "scripts.windows.train_ma_profit3r_owner1500_scalev4_20260922",
+    "--cohort-receipt",
+    "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\selection_queue_round_017\\selection_receipt.json",
+    "--contract",
+    "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\training_contract_owner1500_v2.json",
+    "--dataset",
+    "C:\\fable\\datasets\\ma_profit3r_owner1500_v4",
+    "--dataset-plan",
+    "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\dataset_plan_owner1500_v4.json",
+    "--model",
+    "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\yolo11s.pt",
+    "--plan",
+    "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\plan.json",
+    "--run-root",
+    "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4",
+    "--train"
+  ],
+  "remote_cwd": "C:/fable",
+  "dataset_manifest_sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+  "preflight_receipt_sha256": "597d86f6801b734b7f0c2310af39c8d242304b29142a277a7a9924606af32d96",
+  "sleep_inhibition": "Temporary Mac caffeinate and Windows thread ES_SYSTEM_REQUIRED for job lifetime only",
+  "production_eligible": false,
+  "note": "Dispatch record only; log, process and epoch evidence are required to confirm actual training."
+}

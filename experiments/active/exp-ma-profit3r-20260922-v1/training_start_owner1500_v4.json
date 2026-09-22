@@ -1,0 +1,39 @@
+{
+  "status": "preflight_passed",
+  "train_requested": true,
+  "arms": {
+    "A": {
+      "directory_exists": true,
+      "completed_epochs": 1,
+      "latest": {
+        "epoch": "1",
+        "time": "91.661",
+        "train/box_loss": "0.57905",
+        "train/cls_loss": "4.26812",
+        "train/dfl_loss": "1.06771",
+        "metrics/precision(B)": "0.00958",
+        "metrics/recall(B)": "0.03226",
+        "metrics/mAP50(B)": "0.00064",
+        "metrics/mAP50-95(B)": "0.00047",
+        "val/box_loss": "1.26293",
+        "val/cls_loss": "4.99899",
+        "val/dfl_loss": "1.42738",
+        "lr/pg0": "3.3157e-05",
+        "lr/pg1": "3.3157e-05",
+        "lr/pg2": "0.0668762"
+      }
+    },
+    "B": {
+      "directory_exists": false,
+      "completed_epochs": 0,
+      "latest": null
+    }
+  },
+  "gpu": "NVIDIA GeForce RTX 3060, 6032 MiB, 99 %",
+  "manifest_sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+  "observed_at_utc": "2026-09-22T04:10:32.920564+00:00",
+  "latest_training_batch_log": "2/40      4.77G     0.1594     0.1711     0.7459          8       1280: 55% \u2501\u2501\u2501\u2501\u2501\u2501\u2578\u2500\u2500\u2500\u2500\u2500 105/189 4.1it/s 27.0s<20.5s",
+  "launcher_sha256": "450eee2273bcee26c975334d1d4a7ec4f15d5621b9468904c8d9a6d0730ee45f",
+  "evidence_scope": "Actual CUDA training start and intermediate progress, not final model quality or completed A/B training.",
+  "production_eligible": false
+}
