@@ -466,7 +466,10 @@ def report(run_dir: Path, out: Path) -> None:
             if digest(d / name) != sha:
                 raise ValueError(f"artifact changed: {d / name}")
         trades.append(pd.read_csv(d / "trades.csv.gz"))
-        c = pd.read_csv(d / "controls.csv.gz") if (d / "controls.csv.gz").stat().st_size > 30 else pd.DataFrame()
+        try:  # streams without trades write a column-less controls file
+            c = pd.read_csv(d / "controls.csv.gz")
+        except pd.errors.EmptyDataError:
+            c = pd.DataFrame()
         if len(c):
             ctrls.append(c)
     t = pd.concat(trades, ignore_index=True)
