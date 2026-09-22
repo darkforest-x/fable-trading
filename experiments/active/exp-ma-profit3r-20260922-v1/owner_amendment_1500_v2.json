@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "recorded_at_utc": "2026-09-22T00:46:34Z",
+  "owner_request": "到1500个就开始处理 处理好了直接去训练吧",
+  "authorized_minimum_train_winners": 1500,
+  "maximum_train_winners": 5000,
+  "quota_scope": "train_independent_retained_events",
+  "original_plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+  "original_training_contract_sha256": "e9383f4b66e209370cb6e5faf30ee7b8b186d8368fe9c65e2324a79ad23adad8",
+  "only_capacity_changed": true,
+  "training_authorized": true,
+  "production_eligible": false,
+  "stop_rule": "Complete the current frozen batch, stop expansion at >=1500 independent retained training winners, then build and audit the original A/B recipes and train on RTX3060.",
+  "unchanged": ["morphology", "global quality-first 4h deduplication", "gross 3R first-passage profit label", "0.002 round-trip cost", "12h horizon", "chronological splits and purges", "A one view and B two views per training event", "same causal right edge", "full resolved later evaluation pools", "no automatic production promotion"]
+}

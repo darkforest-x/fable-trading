@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "original_plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+  "quota_scope": "train_independent_retained_events",
+  "minimum_train_winners": 1500,
+  "maximum_train_winners": 5000,
+  "quota_interpretation": "Owner explicitly revised the start threshold to 1500 independent retained TRAIN events. Stop after the first completed frozen batch reaching this threshold; evaluation pools are additional. Original maximum 5000 and every label, split, rendering, and training rule are unchanged.",
+  "cluster_rule": "Canonical asset and direction, representatives more than 4 hours apart across venue/timeframe; choose by morphology quality before profit labels.",
+  "selection": "Stable event SHA order if more than 5000 train winners; never select on net R magnitude.",
+  "reference_exclusion": "Exclude val/test same canonical asset within 4h of any frozen calibration reference anchor.",
+  "group_a_views_per_train_event": 1,
+  "group_b_views_per_train_event": 2,
+  "base_plan": "plan.json",
+  "training_requires_capacity_gate": true,
+  "production_eligible": false,
+  "original_training_contract_sha256": "e9383f4b66e209370cb6e5faf30ee7b8b186d8368fe9c65e2324a79ad23adad8",
+  "owner_amendment_path": "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json",
+  "owner_amendment_sha256": "d0e4c72520a1f63802d4192df048ee0fa9ebf3105609caaa968c63bc161bd691"
+}
