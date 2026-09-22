@@ -8,6 +8,7 @@ context and are physically distinct from the exact model inputs.
 from __future__ import annotations
 
 from collections import defaultdict
+import hashlib
 import html
 import json
 from pathlib import Path
@@ -20,6 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
 import pandas as pd
+import cv2
 
 from yoyo.datasets.ma_profit_dataset import add_hl2_mas
 
@@ -124,6 +126,21 @@ def main():
     rank = json.loads((inputs/"ranking.json").read_text())
     summary = json.loads((out/"summary.json").read_text())
     rows = [json.loads(line) for line in (out/"predictions.jsonl").read_text().splitlines()]
+    image_audit=[]
+    for row in rows:
+        if row.get("status") != "scored":
+            continue
+        assert row["tensor_geometry"]["observed_preprocess_shape"] == [768,1280]
+        raw = out/"raw"/(row["stem"]+".png")
+        if raw.exists():
+            image = cv2.imread(str(raw))
+            assert image.shape == (742,1280,3)
+            ok, encoded = cv2.imencode(".png",image,[cv2.IMWRITE_PNG_COMPRESSION,3])
+            assert ok and hashlib.sha256(encoded.tobytes()).hexdigest()==row["input_png_sha256"]
+            image_audit.append({"stem":row["stem"],"input_encoded_sha256":row["input_png_sha256"],
+                                "saved_png_sha256":hashlib.sha256(raw.read_bytes()).hexdigest(),
+                                "decoded_bgr_pixel_sha256":hashlib.sha256(image.tobytes()).hexdigest(),"input_pixel_parity":True})
+    (out/"image_provenance.json").write_text(json.dumps({"status":"passed","images":image_audit},indent=2))
     groups = grouped_regions(rows)
     by_stream = defaultdict(list)
     for group in groups:
@@ -160,6 +177,8 @@ def main():
                 detail.append(f'<article><a target="_blank" href="{image}"><img loading="lazy" src="{image}"></a>'
                               f'<p>#{group["region_id"]} {"多头" if group["direction"]=="long" else "空头"} · {b["confidence"]:.3f}'
                               f'<br>首次检出 {bj(group["first_seen_utc"])} · 代表图截至 {bj(r["decision_time_utc"])}'
+                              f'<br>框内K线 {bj(b["predicted_core_start_open_time_utc"])} — {bj(b["predicted_core_end_close_time_utc"])}'
+                              f' · 框右侧还有{r["window_end_i"]-b["predicted_core_end_i"]}根'
                               f'<br>同区段原始框 {group["observations"]} 个 · <a target="_blank" href="raw/{r["stem"]}.png">无框模型输入</a></p></article>')
             latest_imgs=[]
             for item in stream["latest_rows"]:
@@ -168,7 +187,7 @@ def main():
                     latest_imgs.append(f'<a href="{image}" target="_blank">最新{item["n_bars"]}根窗：{"有框" if item["detected"] else "无框"}</a>')
             body.append(f'<details><summary>{minutes}分钟 · {directions(selected)} · 最新窗 {"/".join(latest_sides) or "无框"}</summary>'
                         f'<p>{" ｜ ".join(latest_imgs)}</p><a target="_blank" href="{chart}"><img loading="lazy" class="overview" src="{chart}"></a>'
-                        f'<p>上图是审核总览，包含检出后的当日走势；下方才是每次实际模型输入和预测框。蓝框多头，紫框空头。</p>'
+                        f'<p>上图是审核总览，包含检出后的当日走势：蓝框多头、紫框空头。下方是实际模型输入与预测框：绿框多头、橙红框空头。</p>'
                         f'<div class="grid">{"".join(detail) or "今日无达到0.25阈值的预测框。"}</div></details>')
         status="；".join(latest) or "无检出（历史不足项另列）"
         table.append(f'<tr><td>{coin["rank"]}</td><td><a href="#{symbol}">{symbol.replace("-USDT-SWAP","")}</a></td><td>+{coin["change_today_pct"]:.2f}%</td>'+"".join(f"<td>{c}</td>" for c in cells)+f"<td>{status}</td></tr>")
