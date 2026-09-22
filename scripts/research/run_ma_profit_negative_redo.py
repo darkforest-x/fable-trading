@@ -19,6 +19,73 @@ EXP=ROOT/'experiments/active/exp-ma-profit3r-negatives-20260922-v2'
 OLD=ROOT/'experiments/active/exp-ma-profit3r-20260922-v1'
 REMOTE_EXP='C:/fable/'+EXP.relative_to(ROOT).as_posix()
 RUN='C:/fable/runs/ma_profit3r_owner1500_neg_v5'
+EVALUATOR_PATH = 'scripts/windows/evaluate_ma_profit3r_20260922.py'
+METRICS_PATH = 'yoyo/evaluation/ma_profit_model_metrics.py'
+CONTROL_METRICS_PATH = 'yoyo/evaluation/ma_profit_control_metrics.py'
+CONTROL_ARTIFACTS = {'matched_metrics_val.json', 'matched_metrics_test.json'}
+
+
+def _launch_file_sha(launch: dict, path: str) -> str:
+    matches = [item.get('sha256') for item in launch.get('files', [])
+               if isinstance(item, dict) and item.get('path') == path]
+    if len(matches) != 1 or not isinstance(matches[0], str):
+        raise RuntimeError('launch contract missing frozen file: ' + path)
+    return matches[0]
+
+
+def _validate_evaluation_receipt(receipt: dict, expected: dict) -> None:
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        raise RuntimeError('evaluation binding failed')
+
+
+def _expected_control_inputs(plan: dict, evaluation: Path, receipt: dict) -> dict[str, str]:
+    """Return the exact input set emitted by the frozen controls runner."""
+    ledger = ROOT / plan['inputs']['old_ledger']['path']
+    if sha256(ledger) != plan['inputs']['old_ledger']['sha256']:
+        raise RuntimeError('old evaluation ledger drift')
+    paths = [
+        ROOT / CONTROL_METRICS_PATH,
+        ledger,
+        evaluation / 'receipt.json',
+        OLD / 'matched_controls_owner1500_v2/receipt.json',
+        OLD / 'matched_controls_owner1500_v2/frozen_events.jsonl',
+        OLD / 'matched_controls_owner1500_v2/frozen_sources.json',
+        OLD / 'matched_control_outcomes_owner1500_v2/summary.json',
+        OLD / 'matched_control_outcomes_owner1500_v2/outcomes.jsonl',
+    ]
+    artifacts = receipt.get('artifacts')
+    splits = receipt.get('splits')
+    if not isinstance(artifacts, dict) or splits != ['val', 'test']:
+        raise RuntimeError('evaluation receipt split/artifact contract failed')
+    for split in splits:
+        name = f'events_{split}.jsonl'
+        digest = artifacts.get(name)
+        event_path = evaluation / name
+        if not isinstance(digest, str) or sha256(event_path) != digest:
+            raise RuntimeError('evaluation event artifact drift: ' + name)
+        paths.append(event_path)
+    return {str(path.resolve()): sha256(path) for path in paths}
+
+
+def _validate_control_receipt(receipt: dict, *, arm: str, expected_inputs: dict[str, str]) -> None:
+    if receipt.get('status') != 'completed' or receipt.get('arm') != arm:
+        raise RuntimeError('control receipt failed')
+    rows = receipt.get('inputs')
+    if not isinstance(rows, list):
+        raise RuntimeError('control receipt inputs missing')
+    actual: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get('path'), str) or not isinstance(row.get('sha256'), str):
+            raise RuntimeError('malformed control receipt input')
+        key = str(Path(row['path']).resolve())
+        if key in actual:
+            raise RuntimeError('duplicate control receipt input')
+        actual[key] = row['sha256']
+    if actual != expected_inputs:
+        raise RuntimeError('control receipt input binding failed')
+    artifacts = receipt.get('artifacts')
+    if not isinstance(artifacts, dict) or set(artifacts) != CONTROL_ARTIFACTS:
+        raise RuntimeError('control receipt artifact contract failed')
 
 
 def state(status: str, **kw):
@@ -114,18 +181,25 @@ def collect() -> None:
     records=remote(f"files={outputs!r};emit({{k:{{'path':v,'sha256':sha(v),'bytes':Path(v).stat().st_size}} for k,v in files.items()}})")
     for name,r in records.items():copy_file(r['path'],EXP/name,r['sha256'])
     write_json(EXP/'download_inventory.json',records)
+    launch=read_json(EXP/'launch_contract.json')
+    for item in launch['files']:
+        if sha256(ROOT/item['path'])!=item['sha256']:
+            raise RuntimeError('local frozen launch input/code drift: '+item['path'])
     plan=read_json(EXP/'plan.json');manifest_sha=sha256(ROOT/'datasets'/plan['dataset_name']/'manifest.jsonl')
+    evaluator_sha=_launch_file_sha(launch,EVALUATOR_PATH)
+    metrics_sha=_launch_file_sha(launch,METRICS_PATH)
     for a in ('A','B'):
         evaluation=EXP/'evaluation'/f'arm_{a}';receipt=read_json(evaluation/'receipt.json')
-        expected={'status':'completed','arm':a,'model_sha256':sha256(EXP/'trained'/f'arm_{a}'/'weights/best.pt'),'manifest_sha256':manifest_sha,'ledger_sha256':plan['inputs']['old_ledger']['sha256']}
-        if any(receipt.get(k)!=v for k,v in expected.items()):raise RuntimeError('evaluation binding failed')
+        expected={'status':'completed','arm':a,'model_sha256':sha256(EXP/'trained'/f'arm_{a}'/'weights/best.pt'),'manifest_sha256':manifest_sha,'ledger_sha256':plan['inputs']['old_ledger']['sha256'],'runner_sha256':evaluator_sha,'metrics_code_sha256':metrics_sha}
+        _validate_evaluation_receipt(receipt,expected)
         for name,h in receipt['artifacts'].items():
             if Path(name).name!=name or sha256(evaluation/name)!=h:raise RuntimeError('evaluation artifact SHA failed')
+        expected_inputs=_expected_control_inputs(plan,evaluation,receipt)
         out=EXP/'controls'/f'arm_{a}'
         if not out.exists():
             subprocess.run([str(ROOT/'.venv/bin/python'),'-m','yoyo.evaluation.ma_profit_control_metrics','--evaluation',str(evaluation),'--ledger',str(ROOT/plan['inputs']['old_ledger']['path']),'--controls',str(OLD/'matched_controls_owner1500_v2'),'--outcomes',str(OLD/'matched_control_outcomes_owner1500_v2'),'--out',str(out)],cwd=ROOT,check=True)
         c=read_json(out/'receipt.json')
-        if c['status']!='completed' or c['arm']!=a:raise RuntimeError('control receipt failed')
+        _validate_control_receipt(c,arm=a,expected_inputs=expected_inputs)
         for name,h in c['artifacts'].items():
             if sha256(out/name)!=h:raise RuntimeError('control artifact SHA failed')
     state('completed',training='trained',evaluation='evaluation',controls='controls')

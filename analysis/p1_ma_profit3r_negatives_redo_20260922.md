@@ -22,6 +22,8 @@ Owner 追问先看负例及验证集后，按实际 PNG 和 TXT 复核：验证�
 
 这些正负标签表示当前3R收益目标，不是逐张由Owner确认的形态金标。旧人工标注及真实tip验收是另一项证据；本轮core+5研究窗口不得冒充tip输入或以内部mAP替代那项验收。
 
+人工221条账本在本仓 `datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl`；原图实际位于只读归档 `/Users/zhangzc/yoyo-trading/datasets/dataset_v3_2_reviewed_core_v1/`，不能把账本相对路径直接拼成本仓不存在的图片目录。该套原人工val为28张（8正/20负），train为193张（71正/122负）。子代理核对221张PNG存在、可解码且图片SHA与账本一致，主任务复核目录计数并抽查一张val图片SHA。28条flip_pos_to_neg记录的label_sha仍为翻转前旧值，而实际TXT为空；若将来复用这些标签，需另行建立正确的派生标签清单，不可声称原标签哈希全部通过。本轮仅以其时间窗口作保护，未使用这些标签训练或改写旧归档。
+
 本地查看目录为 `datasets/ma_profit3r_owner1500_neg_v5/review/`，含train_positive_A、train_negatives_A、val_positive、val_negative、test_positive、test_negative。它们仅为指向原图的查看软链接，不在训练加载清单，不上传3060。训练负例生成中时该目录仅是已生成图片的快照，完整计数以最终manifest和实际加载清单审计为准。
 
 ## 复现命令

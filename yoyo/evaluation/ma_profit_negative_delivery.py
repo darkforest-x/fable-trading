@@ -8,6 +8,71 @@ from yoyo.datasets.ma_profit_negative_redo import ROOT, read_json, rows, sha256,
 
 EXP=ROOT/'experiments/active/exp-ma-profit3r-negatives-20260922-v2'
 OLD=ROOT/'experiments/active/exp-ma-profit3r-20260922-v1'
+EVALUATOR_PATH = 'scripts/windows/evaluate_ma_profit3r_20260922.py'
+METRICS_PATH = 'yoyo/evaluation/ma_profit_model_metrics.py'
+CONTROL_METRICS_PATH = 'yoyo/evaluation/ma_profit_control_metrics.py'
+CONTROL_ARTIFACTS = {'matched_metrics_val.json', 'matched_metrics_test.json'}
+
+
+def _launch_file_sha(launch: dict, path: str) -> str:
+    matches = [item.get('sha256') for item in launch.get('files', [])
+               if isinstance(item, dict) and item.get('path') == path]
+    if len(matches) != 1 or not isinstance(matches[0], str):
+        raise RuntimeError('launch contract missing frozen file: ' + path)
+    return matches[0]
+
+
+def _validate_evaluation_receipt(receipt: dict, expected: dict) -> None:
+    if any(receipt.get(key) != value for key, value in expected.items()):
+        raise RuntimeError('eval contract drift')
+
+
+def _expected_control_inputs(plan: dict, evaluation: Path, receipt: dict) -> dict[str, str]:
+    """Match the exact local input schema written by ma_profit_control_metrics."""
+    ledger = ROOT / plan['inputs']['old_ledger']['path']
+    if sha256(ledger) != plan['inputs']['old_ledger']['sha256']:
+        raise RuntimeError('old evaluation ledger drift')
+    paths = [
+        ROOT / CONTROL_METRICS_PATH,
+        ledger,
+        evaluation / 'receipt.json',
+        OLD / 'matched_controls_owner1500_v2/receipt.json',
+        OLD / 'matched_controls_owner1500_v2/frozen_events.jsonl',
+        OLD / 'matched_controls_owner1500_v2/frozen_sources.json',
+        OLD / 'matched_control_outcomes_owner1500_v2/summary.json',
+        OLD / 'matched_control_outcomes_owner1500_v2/outcomes.jsonl',
+    ]
+    artifacts = receipt.get('artifacts')
+    if not isinstance(artifacts, dict) or receipt.get('splits') != ['val', 'test']:
+        raise RuntimeError('evaluation receipt split/artifact contract failed')
+    for split in ('val', 'test'):
+        name = f'events_{split}.jsonl'
+        event_path = evaluation / name
+        if not isinstance(artifacts.get(name), str) or sha256(event_path) != artifacts[name]:
+            raise RuntimeError('evaluation event artifact drift: ' + name)
+        paths.append(event_path)
+    return {str(path.resolve()): sha256(path) for path in paths}
+
+
+def _validate_control_receipt(receipt: dict, *, arm: str, expected_inputs: dict[str, str]) -> None:
+    if receipt.get('status') != 'completed' or receipt.get('arm') != arm:
+        raise RuntimeError('controls incomplete')
+    rows = receipt.get('inputs')
+    if not isinstance(rows, list):
+        raise RuntimeError('control receipt inputs missing')
+    actual: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get('path'), str) or not isinstance(row.get('sha256'), str):
+            raise RuntimeError('malformed control receipt input')
+        key = str(Path(row['path']).resolve())
+        if key in actual:
+            raise RuntimeError('duplicate control receipt input')
+        actual[key] = row['sha256']
+    if actual != expected_inputs:
+        raise RuntimeError('control receipt input binding failed')
+    artifacts = receipt.get('artifacts')
+    if not isinstance(artifacts, dict) or set(artifacts) != CONTROL_ARTIFACTS:
+        raise RuntimeError('control receipt artifact contract failed')
 
 
 def main() -> None:
@@ -19,6 +84,11 @@ def main() -> None:
     inputs=set()
     def record(path):inputs.add(path);return read_json(path)
     plan=record(EXP/'plan.json');launch=record(EXP/'launch_contract.json');inventory=record(EXP/'download_inventory.json')
+    for item in launch['files']:
+        if sha256(ROOT/item['path'])!=item['sha256']:
+            raise RuntimeError('local frozen launch input/code drift: '+item['path'])
+    evaluator_sha=_launch_file_sha(launch,EVALUATOR_PATH)
+    metrics_sha=_launch_file_sha(launch,METRICS_PATH)
     for name,r in inventory.items():
         p=EXP/name
         if not p.resolve().is_relative_to(EXP) or sha256(p)!=r['sha256'] or p.stat().st_size!=r['bytes']:raise RuntimeError('download drift')
@@ -35,16 +105,15 @@ def main() -> None:
         if [int(float(r['epoch'])) for r in epoch_rows]!=list(range(1,41)):raise RuntimeError('epoch sequence drift')
         summary['arms'][arm]={'epochs':40,'best_sha256':sha256(weight),'csv_max_map_row':max(epoch_rows,key=lambda r:float(r['metrics/mAP50-95(B)']))}
         evdir=EXP/f'evaluation/arm_{arm}';ev=record(evdir/'receipt.json')
-        expect={'status':'completed','arm':arm,'model_sha256':sha256(weight),'manifest_sha256':training['audit']['manifest_sha256'],'ledger_sha256':sha256(ledger),'splits':['val','test'],'confidence':.001,'nms_iou':.70,'imgsz':1280,'device':0,'augment':False,'max_det':300,'agnostic_nms':False}
-        if any(ev.get(k)!=v for k,v in expect.items()):raise RuntimeError('eval contract drift')
+        expect={'status':'completed','arm':arm,'model_sha256':sha256(weight),'manifest_sha256':training['audit']['manifest_sha256'],'ledger_sha256':sha256(ledger),'splits':['val','test'],'confidence':.001,'nms_iou':.70,'imgsz':1280,'device':0,'augment':False,'max_det':300,'agnostic_nms':False,'runner_sha256':evaluator_sha,'metrics_code_sha256':metrics_sha}
+        _validate_evaluation_receipt(ev,expect)
         for name,h in ev['artifacts'].items():
             p=evdir/name;inputs.add(p)
             if Path(name).name!=name or sha256(p)!=h:raise RuntimeError('eval bytes drift')
+        expected_control_inputs=_expected_control_inputs(plan,evdir,ev)
         cdir=EXP/f'controls/arm_{arm}';cr=record(cdir/'receipt.json')
-        if cr['status']!='completed' or cr['arm']!=arm:raise RuntimeError('controls incomplete')
-        for r in cr['inputs']:
-            p=Path(r['path']);inputs.add(p)
-            if sha256(p)!=r['sha256']:raise RuntimeError('control input drift')
+        _validate_control_receipt(cr,arm=arm,expected_inputs=expected_control_inputs)
+        inputs.update(Path(path) for path in expected_control_inputs)
         for name,h in cr['artifacts'].items():
             p=cdir/name;inputs.add(p)
             if sha256(p)!=h:raise RuntimeError('control output drift')
