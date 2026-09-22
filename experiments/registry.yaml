@@ -10541,3 +10541,19 @@ experiments:
     - spike-v126-visual-20260922-delivery
     reuse_allowed: false
     notes: Parent V12.5 retained; full source equivalence after reversing visual changes. PEPE exact event remains unlocated without entry time; no stop alteration or profit claim. Notion3e28856479af81b686e9fbad52560b34.
+
+  - experiment_id: exp-spike-ma-stop-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5bc63327bea26df90911e67576173291e8de7fd0
+    status: rejected
+    question: Does widening the initial V9 stop beyond chart SMA120 or completed H1 SMA60 improve the existing29-symbol15m replay?
+    single_variable: Initial stop anchor only; baseline, SMA120, H1 SMA60 and both. Same direction gate, next-open fills, 2R arm, 4ATR trail and20bp cost.
+    result: All29 streams complete and2701 baseline entries match. Long full both31.42to32.07pct,netR-9.61to10.95;later still loses and netbp worsens. Three preset gates fail;no default replacement.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_ma_stop_20260922.md
+    artifacts:
+    - spike-ma-stop-20260922-delivery
+    reuse_allowed: false
+    notes: Owner explicitly authorizes stop research20260922. Scope is V9 risk-box mechanism, not V12 new bk geometry or OKX screenshot replication. 47checks;both rescues40 andharms28 baseline longs. Notion created after recovered exact-key deduplication.
