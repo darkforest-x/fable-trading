@@ -1,0 +1,267 @@
+........................................................................ [ 15%]
+........................................................................ [ 30%]
+F..............FFFFF.................................................... [ 45%]
+........................................................................ [ 60%]
+......................................F..F.............................. [ 75%]
+........................................................................ [ 90%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+_________ test_no_file_names_a_sibling_repository_in_a_path_expression _________
+
+    def test_no_file_names_a_sibling_repository_in_a_path_expression():
+        offenders: dict[str, list[str]] = {}
+        for path in _python_files():
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                continue
+            hits = []
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+                    continue
+                if any(repo == node.value or node.value.endswith(f"/{repo}") for repo in SIBLING_REPOS):
+                    hits.append(node.value)
+            relative = str(path.relative_to(REPO))
+            if hits and relative not in ALLOWED_TO_NAME_SOURCES:
+                offenders[relative] = sorted(set(hits))
+>       assert not offenders, (
+            f"these files build a path to a repository that is being archived: {offenders}. "
+            "Everything they need is in this repository now."
+        )
+E       AssertionError: these files build a path to a repository that is being archived: {'yoyo/evaluation/ma_morphology_reuse_recover.py': ['archive/consolidated/yoyo-trading']}. Everything they need is in this repository now.
+E       assert not {'yoyo/evaluation/ma_morphology_reuse_recover.py': ['archive/consolidated/yoyo-trading']}
+
+tests/boundaries/test_no_cross_repository_bridges.py:113: AssertionError
+_________________ test_an_unregistered_teacher_cannot_be_used __________________
+
+    def test_an_unregistered_teacher_cannot_be_used():
+        with pytest.raises(TeacherRegistrationError, match="not in artifacts/registry.yaml"):
+>           resolve_teacher_artifact("some-weight-nobody-registered", root=REPO)
+
+tests/boundaries/test_teacher_proposals_are_isolated.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/layers/l1_detection/teacher/protocol.py:67: in resolve_teacher_artifact
+    records = {record.artifact_id: record for record in load_artifact_registry(root=root)}
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+________ test_a_registered_teacher_resolves_and_its_bytes_are_verified _________
+
+    def test_a_registered_teacher_resolves_and_its_bytes_are_verified():
+>       record = resolve_teacher_artifact("owner-v10-chain", root=REPO)
+
+tests/boundaries/test_teacher_proposals_are_isolated.py:132: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/layers/l1_detection/teacher/protocol.py:67: in resolve_teacher_artifact
+    records = {record.artifact_id: record for record in load_artifact_registry(root=root)}
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+_ test_a_teacher_whose_bytes_moved_on_another_machine_needs_an_explicit_waiver _
+
+    def test_a_teacher_whose_bytes_moved_on_another_machine_needs_an_explicit_waiver():
+        """The 3060's 59 weights are registered but not present here."""
+        with pytest.raises(TeacherRegistrationError, match="does not exist|no sha256"):
+>           resolve_teacher_artifact("yolo-xx-detector-weights-3060", root=REPO)
+
+tests/boundaries/test_teacher_proposals_are_isolated.py:141: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/layers/l1_detection/teacher/protocol.py:67: in resolve_teacher_artifact
+    records = {record.artifact_id: record for record in load_artifact_registry(root=root)}
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+_____________ test_a_non_teacher_artifact_is_refused_as_a_teacher ______________
+
+    def test_a_non_teacher_artifact_is_refused_as_a_teacher():
+        with pytest.raises(TeacherRegistrationError, match="role="):
+>           resolve_teacher_artifact("yoyo-eth-mvp-report", root=REPO)
+
+tests/boundaries/test_teacher_proposals_are_isolated.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/layers/l1_detection/teacher/protocol.py:67: in resolve_teacher_artifact
+    records = {record.artifact_id: record for record in load_artifact_registry(root=root)}
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+___________ test_the_provenance_block_always_carries_the_same_fields ___________
+
+    def test_the_provenance_block_always_carries_the_same_fields():
+>       record = resolve_teacher_artifact("owner-v10-chain", root=REPO)
+
+tests/boundaries/test_teacher_proposals_are_isolated.py:154: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+yoyo/layers/l1_detection/teacher/protocol.py:67: in resolve_teacher_artifact
+    records = {record.artifact_id: record for record in load_artifact_registry(root=root)}
+yoyo/artifacts/registry.py:91: in load_artifact_registry
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/artifacts/registry.py:91: in <listcomp>
+    records = [ArtifactRecord.from_mapping(row) for row in _rows(raw, "artifacts", resolved)]
+yoyo/contracts/artifacts.py:141: in from_mapping
+    source_commit=str(_require(raw, "source_commit", record_id)),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+record = {'artifact_id': 'spike-v8-total2-1h-native-20260914-delivery', 'artifact_type': 'manifest', 'generator_commit': '1b450ccaf9', 'holdout_status': 'holdout_consumed', ...}
+key = 'source_commit', record_id = 'spike-v8-total2-1h-native-20260914-delivery'
+
+    def _require(record: Dict[str, Any], key: str, record_id: str) -> Any:
+        if key not in record or record[key] in (None, ""):
+>           raise RegistryError(record_id, f"missing required field {key!r}")
+E           yoyo.contracts.artifacts.RegistryError: spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'
+
+yoyo/contracts/artifacts.py:71: RegistryError
+_ test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/candidates.py] _
+
+entry = {'decision': 'DIRECT_PORT', 'destination_path': 'yoyo/layers/l1_detection/candidates.py', 'destination_sha256': '8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd', 'holdout_consumed': False, ...}
+
+    @pytest.mark.parametrize(
+        "entry",
+        COPIED or [None],
+        ids=lambda e: (e["destination_path"] if e else "<empty ledger>"),
+    )
+    def test_a_ported_file_still_has_its_recorded_hash(entry):
+        if entry is None:
+            pytest.skip("no copied entries in the ledger yet")
+        destination = REPO / entry["destination_path"]
+        assert destination.is_file(), (
+            f"{entry['destination_path']} is in the migration ledger but not on disk"
+        )
+        actual = _sha256(destination)
+>       assert actual == entry["destination_sha256"], (
+            f"{entry['destination_path']} has changed since it was ported "
+            f"({entry['decision']} from {entry['source_repo']}@{entry['source_commit'][:12]}). "
+            "If the edit was intended, re-record it in the ledger; if it was not, this is "
+            "the drift the ledger exists to catch."
+        )
+E       AssertionError: yoyo/layers/l1_detection/candidates.py has changed since it was ported (DIRECT_PORT from darkforest-x/yoyo-trading@784766de45a3). If the edit was intended, re-record it in the ledger; if it was not, this is the drift the ledger exists to catch.
+E       assert '133a97a71a1a...9b15a04bf993b' == '8c2594ef2cbc...6b117d0c326dd'
+E         
+E         - 8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd
+E         + 133a97a71a1aa973a053dbd97be9c2b8497008192d6a7738abd9b15a04bf993b
+
+tests/parity/test_migration_ledger_parity.py:77: AssertionError
+_ test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/render.py] _
+
+entry = {'decision': 'DIRECT_PORT', 'destination_path': 'yoyo/layers/l1_detection/render.py', 'destination_sha256': '0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7', 'holdout_consumed': False, ...}
+
+    @pytest.mark.parametrize(
+        "entry",
+        COPIED or [None],
+        ids=lambda e: (e["destination_path"] if e else "<empty ledger>"),
+    )
+    def test_a_ported_file_still_has_its_recorded_hash(entry):
+        if entry is None:
+            pytest.skip("no copied entries in the ledger yet")
+        destination = REPO / entry["destination_path"]
+        assert destination.is_file(), (
+            f"{entry['destination_path']} is in the migration ledger but not on disk"
+        )
+        actual = _sha256(destination)
+>       assert actual == entry["destination_sha256"], (
+            f"{entry['destination_path']} has changed since it was ported "
+            f"({entry['decision']} from {entry['source_repo']}@{entry['source_commit'][:12]}). "
+            "If the edit was intended, re-record it in the ledger; if it was not, this is "
+            "the drift the ledger exists to catch."
+        )
+E       AssertionError: yoyo/layers/l1_detection/render.py has changed since it was ported (DIRECT_PORT from darkforest-x/yoyo-trading@784766de45a3). If the edit was intended, re-record it in the ledger; if it was not, this is the drift the ledger exists to catch.
+E       assert 'def5b7317c13...0336a1a3c0eea' == '0962812feea5...ae3e580ead3e7'
+E         
+E         - 0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7
+E         + def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea
+
+tests/parity/test_migration_ledger_parity.py:77: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    prop = Group((name + Suppress("=") + comma_separated(value)) | oneOf(_CONSTANTS))
+
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/boundaries/test_no_cross_repository_bridges.py::test_no_file_names_a_sibling_repository_in_a_path_expression
+FAILED tests/boundaries/test_teacher_proposals_are_isolated.py::test_an_unregistered_teacher_cannot_be_used
+FAILED tests/boundaries/test_teacher_proposals_are_isolated.py::test_a_registered_teacher_resolves_and_its_bytes_are_verified
+FAILED tests/boundaries/test_teacher_proposals_are_isolated.py::test_a_teacher_whose_bytes_moved_on_another_machine_needs_an_explicit_waiver
+FAILED tests/boundaries/test_teacher_proposals_are_isolated.py::test_a_non_teacher_artifact_is_refused_as_a_teacher
+FAILED tests/boundaries/test_teacher_proposals_are_isolated.py::test_the_provenance_block_always_carries_the_same_fields
+FAILED tests/parity/test_migration_ledger_parity.py::test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/candidates.py]
+FAILED tests/parity/test_migration_ledger_parity.py::test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/render.py]
+8 failed, 468 passed, 14 warnings in 79.02s (0:01:19)

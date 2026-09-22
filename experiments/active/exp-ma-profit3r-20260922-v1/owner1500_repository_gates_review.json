@@ -1,0 +1,50 @@
+{
+  "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+  "findings": [
+    {
+      "cause": "Historical archive path literal in yoyo/evaluation/ma_morphology_reuse_recover.py:43-45",
+      "current_experiment_dependency": false,
+      "failures": 1,
+      "introduced_commit": "e06b10d6c0",
+      "status": "unresolved_repository_boundary_failure",
+      "test": "boundaries/test_no_cross_repository_bridges.py"
+    },
+    {
+      "cause": "Historical artifact spike-v8-total2-1h-native-20260914-delivery lacks required source_commit; registry parsing fails before teacher-specific assertions",
+      "current_experiment_dependency": false,
+      "failures": 5,
+      "introduced_commit": "6dd6c851e2",
+      "status": "unresolved_repository_registry_schema_failure",
+      "test": "boundaries/test_teacher_proposals_are_isolated.py"
+    },
+    {
+      "cause": "Pre-existing shared-worktree resolve_predict_device wrapper differs from recorded DIRECT_PORT bytes",
+      "current_experiment_dependency": false,
+      "failures": 1,
+      "head_sha256": "8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd",
+      "status": "unresolved_other_worktree_edit",
+      "test": "parity/test_migration_ledger_parity.py[candidates.py]",
+      "worktree_sha256": "133a97a71a1aa973a053dbd97be9c2b8497008192d6a7738abd9b15a04bf993b"
+    },
+    {
+      "cause": "Historical fixed_transform optional argument addition not reflected in migration ledger",
+      "current_experiment_dependency": true,
+      "default_path_ast_equal": true,
+      "default_path_receipt": "experiments/active/exp-ma-profit3r-20260922-v1/owner1500_renderer_default_path_receipt.json",
+      "default_path_receipt_sha256": "c5a6a768e2216d9cc4f497bbc5fc1cbe3da75933de386e44706c9348732e84ab",
+      "failures": 1,
+      "introduced_commit": "5b782fb2ee",
+      "status": "unresolved_ledger_drift_with_default_runtime_path_verified",
+      "test": "parity/test_migration_ledger_parity.py[render.py]"
+    }
+  ],
+  "log_path": "experiments/active/exp-ma-profit3r-20260922-v1/owner1500_repository_gates.log",
+  "log_sha256": "ae946d8afe94f3dd91b7dfa3b72851cabb458056eedad9370350866f5fc61129",
+  "recorded_at_utc": "2026-09-22T02:25:03.255552+00:00",
+  "result": {
+    "elapsed_seconds": 79.02,
+    "failed": 8,
+    "passed": 468
+  },
+  "scope": "Repository gates are not green. No test, allowlist, migration ledger, teacher contract, or other worktree edit was changed to hide these failures. This record distinguishes those unresolved failures from the frozen offline experiment dataset/endpoint/label/CUDA audits, which remain independently required. No production eligibility or deployment is implied."
+}

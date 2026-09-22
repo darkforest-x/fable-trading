@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "b37791a1b829ac8887689725eed7f3a97798e11e",
+  "baseline_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+  "caller": "ma_profit_dataset._window_asset calls render_chart(window,width=WIDTH,height=HEIGHT), omitting fixed_transform",
+  "checked_at_utc": "2026-09-22T02:24:02.689999+00:00",
+  "current_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+  "default_path_full_module_ast_equal": true,
+  "module_path": "yoyo/layers/l1_detection/render.py",
+  "normalization": [
+    "Remove function docstring in both versions",
+    "Confirm new fixed_transform argument default is None, then remove only that argument",
+    "In current render_chart replace if fixed_transform is None by its unchanged true branch"
+  ],
+  "scope": "Proves the historical optional-argument addition preserves the default code path used here; does not repair the global migration ledger or claim all repository gates pass."
+}
