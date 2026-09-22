@@ -1,0 +1,27 @@
+{
+  "implementation_commit": "788ed2cbc8",
+  "audit_builder_commit": "7309d9bf6d",
+  "target_dataset": "datasets/ma_profit3r_owner1500_v4",
+  "dataset_plan_sha256": "e199302dd9b4cbc27c0113171b28afa2828ec9e80879bbb606d604e6c9c6d2ac",
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests/test_ma_profit_dataset.py tests/test_train_ma_profit3r.py tests/evaluation/test_ma_profit_input_continuity.py -q",
+    "passed": 39,
+    "seconds": 2.99,
+    "scope": [
+      "future-OHLC mutation invariance",
+      "profit label blindness",
+      "new pixel extent",
+      "new transform core-box geometry",
+      "render policy mismatch rejection",
+      "frozen capacity and input continuity"
+    ]
+  },
+  "review": {
+    "agent": "scale_policy_review",
+    "role": "budget-reviewer",
+    "finding": "No reproducible blocking defect in static review",
+    "limits": "No independent dataset build or training by reviewer"
+  },
+  "dataset_generation": "running; source/hash and completed output audit still required",
+  "production_eligible": false
+}
