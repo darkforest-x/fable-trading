@@ -75,3 +75,57 @@ def test_selection_ignores_later_results_and_rejects_negative_bp():
     assert {r["selected_gate"] for r in select_earlier(t)} == {"h1_sma120"}
     t.loc[t.gate.eq("h1_sma120"), "mean_net_bp"] = -1.
     assert {r["selected_gate"] for r in select_earlier(t)} == {"none"}
+
+
+def test_unselected_later_winner_is_only_descriptive():
+    from yoyo.evaluation.spike_joint_btc_report import decision_flags
+    got = decision_flags('same_sma60', 'h1_sma120', {'positive': True, 'significant': True})
+    assert got['descriptive_conditions_met'] and not got['passed']
+    assert decision_flags('h1_sma120', 'h1_sma120', {'positive': True})['passed']
+    assert not decision_flags('h1_sma120', 'none', {'positive': True})['passed']
+
+
+def test_report_rejects_same_count_but_wrong_window_or_control_time():
+    from yoyo.evaluation.spike_joint_btc_report import validate_window, END
+    frame = pd.DataFrame({'signal_close': [SPLIT], 'timeframe': ['15m'],
+                          'control_signal_bar_open': [SPLIT]})
+    validate_window(frame)
+    frame.loc[0, 'signal_close'] = END
+    with pytest.raises(ValueError, match='event outside'):
+        validate_window(frame)
+    frame.loc[0, 'signal_close'] = SPLIT
+    frame.loc[0, 'control_signal_bar_open'] = END
+    with pytest.raises(ValueError, match='control outside'):
+        validate_window(frame)
+
+
+def test_fixed_calendar_grid_retains_inactive_months():
+    a = pd.DataFrame({'net_r': [1., -1.], 'month': ['01', '02'], 'week': ['w1', 'w2']})
+    b = a.iloc[[0]]
+    got = differences(a, b, 'net_r', months=['01', '02', '03'])
+    assert got['months'] == 3
+    assert got['empty_baseline_months'] == 1 and got['empty_filtered_months'] == 2
+    assert got['valid_reps'] < 2000
+
+
+def test_independent_parent_audit_handles_empty_legacy_control_schema(tmp_path, monkeypatch):
+    import yoyo.evaluation.spike_joint_btc_report as report
+    from yoyo.evaluation.spike_joint_btc_gate import _empty
+    p = tmp_path / 'streams' / 'EMPTY'
+    p.mkdir(parents=True)
+    tables = _empty()
+    pd.DataFrame(columns=['timeframe', 'signal_i', 'signal_bar_open', 'box_any_status']).to_csv(p / 'decisions.csv.gz', index=False)
+    tables['trades'].to_csv(p / 'trades.csv.gz', index=False)
+    pd.DataFrame(columns=['trade_key', 'arm', 'matched', 'reason']).to_csv(p / 'controls.csv.gz', index=False)
+    monkeypatch.setattr(report, 'SOURCE', tmp_path)
+    report.validate_parent_symbol('EMPTY', tmp_path, tables)
+
+
+@pytest.mark.parametrize('empty_baseline', [False, True])
+def test_entirely_empty_arm_retains_predeclared_month_grid(empty_baseline):
+    one = pd.DataFrame({'net_r': [1.], 'month': ['01'], 'week': ['w1']})
+    empty = one.iloc[:0]
+    a, b = (empty, one) if empty_baseline else (one, empty)
+    got = differences(a, b, 'net_r', months=['01', '02'])
+    assert got['months'] == 2 and got['valid_reps'] == 0 and np.isnan(got['ci_low'])
+    assert got['empty_baseline_months' if empty_baseline else 'empty_filtered_months'] == 2

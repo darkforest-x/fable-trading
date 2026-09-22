@@ -23,6 +23,7 @@ START = pd.Timestamp("2024-09-10T00:00:00Z")
 END = pd.Timestamp("2026-05-01T00:00:00Z")
 GATES = ("none", "same_sma60", "same_sma120", "same_sma240", "h1_sma60", "h1_sma120", "h1_sma240")
 EXITS = ("price", "rsi7")
+SOURCE = Path("experiments/active/exp-spike-v112-support-20260919-v1/results/run_v1")
 PERIODS = ("full", "earlier", "later")
 SEED, REPS, PSEED, PREPS, FAMILY = 91509, 2000, 92201, 10000, 24
 
@@ -131,27 +132,31 @@ def metrics(t: pd.DataFrame, period: str) -> dict:
             "censored_total": int(t.status.ne("closed").sum())}
 
 
-def differences(a: pd.DataFrame, b: pd.DataFrame, column: str) -> dict:
+def differences(a: pd.DataFrame, b: pd.DataFrame, column: str, *, months: list[str] | None = None) -> dict:
     """Candidate minus baseline with each arm's own denominator in each draw."""
-    if not len(a) or not len(b):
-        return {"metric": column, "delta_mean": np.nan, "ci_low": np.nan, "ci_high": np.nan,
-                "delta_sum": float(b[column].sum() - a[column].sum()), "sum_ci_low": np.nan,
-                "sum_ci_high": np.nan, "months": 0, "weeks": 0, "p": np.nan}
     aa = a.groupby("month")[column].agg(["sum", "count"])
     bb = b.groupby("month")[column].agg(["sum", "count"])
-    months = sorted(set(aa.index) | set(bb.index))
+    months = sorted(set(aa.index) | set(bb.index)) if months is None else months
+    if not months:
+        return {"metric": column, "delta_mean": np.nan, "ci_low": np.nan, "ci_high": np.nan,
+                "delta_sum": 0., "sum_ci_low": np.nan, "sum_ci_high": np.nan,
+                "months": 0, "weeks": 0, "p": np.nan, "valid_reps": 0,
+                "empty_baseline_months": 0, "empty_filtered_months": 0}
+    missing_a, missing_b = len(set(months) - set(aa.index)), len(set(months) - set(bb.index))
     aa, bb = aa.reindex(months, fill_value=0), bb.reindex(months, fill_value=0)
     draws = np.random.default_rng(SEED).integers(0, len(months), (REPS, len(months)))
     an, bn = aa["count"].to_numpy()[draws].sum(1), bb["count"].to_numpy()[draws].sum(1)
     asum, bsum = aa["sum"].to_numpy()[draws].sum(1), bb["sum"].to_numpy()[draws].sum(1)
     valid = (an > 0) & (bn > 0)
-    low, high = np.quantile((bsum / np.maximum(bn, 1) - asum / np.maximum(an, 1))[valid], [.025, .975])
+    low, high = (np.quantile((bsum / np.maximum(bn, 1) - asum / np.maximum(an, 1))[valid], [.025, .975])
+                 if len(months) >= 2 and valid.any() else (np.nan, np.nan))
     slo, shi = np.quantile(bsum - asum, [.025, .975])
     aw, bw = a.groupby("week")[column].sum(), b.groupby("week")[column].sum()
     weeks = sorted(set(aw.index) | set(bw.index))
-    contrib = bw.reindex(weeks, fill_value=0) / len(b) - aw.reindex(weeks, fill_value=0) / len(a)
+    contrib = (bw.reindex(weeks, fill_value=0) / len(b) - aw.reindex(weeks, fill_value=0) / len(a)) if len(a) and len(b) else np.array([np.nan])
     return {"metric": column, "delta_mean": b[column].mean() - a[column].mean(),
             "ci_low": float(low), "ci_high": float(high), "months": len(months), "valid_reps": int(valid.sum()),
+            "empty_baseline_months": missing_a, "empty_filtered_months": missing_b,
             "delta_sum": b[column].sum() - a[column].sum(), "sum_ci_low": float(slo), "sum_ci_high": float(shi),
             "weeks": len(weeks), "p": sign_flip(contrib)}
 
@@ -197,6 +202,50 @@ def select_earlier(summary: pd.DataFrame) -> list[dict]:
     return rows
 
 
+def decision_flags(gate: str, selected_gate: str, checks: dict) -> dict:
+    """Only the frozen earlier selection can pass as the selected policy."""
+    selected = gate == selected_gate and gate != "none"
+    return {"selected_from_earlier": selected, "descriptive_conditions_met": all(checks.values()),
+            "passed": selected and all(checks.values())}
+
+
+def validate_window(frame: pd.DataFrame) -> None:
+    if not frame.signal_close.ge(START).all() or not frame.signal_close.lt(END).all():
+        raise ValueError("event outside frozen signal-close window")
+    if "control_signal_bar_open" in frame:
+        known = frame.control_signal_bar_open.notna()
+        stamp = pd.to_datetime(frame.loc[known, "control_signal_bar_open"], utc=True, format="mixed")
+        close = stamp + pd.to_timedelta(frame.loc[known, "timeframe"].map({"15m": 15, "1h": 60}), unit="m")
+        if not close.ge(START).all() or not close.lt(END).all():
+            raise ValueError("control outside frozen signal-close window")
+
+
+def validate_parent_symbol(symbol: str, directory: Path, tables: dict) -> None:
+    """Independently compare parent facts; receipt booleans are not evidence."""
+    from yoyo.evaluation.spike_v10_4_increment_report import PARITY
+    from yoyo.evaluation.spike_v112_support_report import compare
+    from yoyo.evaluation.spike_v112_execution_report import control_contract
+    parent = SOURCE / "streams" / symbol
+    old_s = pd.read_csv(parent / "decisions.csv.gz")
+    new_s = tables["statuses"].query("exit_rule == 'price' and gate == 'none'")
+    def candidate_keys(frame, status_column):
+        return {(str(r.timeframe), int(r.signal_i), pd.Timestamp(r.signal_bar_open), str(getattr(r, status_column))) for r in frame.itertuples()}
+    if len(old_s) != len(new_s) or candidate_keys(old_s, "box_any_status") != candidate_keys(new_s, "status"):
+        raise ValueError("parent candidate identity/timestamp/status mismatch")
+    expected_keys = {f"binance_um:{symbol}:{r.timeframe}:box_any:{int(r.signal_i)}" for r in old_s.itertuples()}
+    if set(new_s.trade_key) != expected_keys:
+        raise ValueError("parent candidate trade-key mismatch")
+    old_t = pd.read_csv(parent / "trades.csv.gz").query("arm == 'box_any'")
+    new_t = tables["trades"].query("exit_rule == 'price' and gate == 'none'")
+    fields = [*PARITY, "initial_risk_frac", "gross_return", "net_return", "status"]
+    if not compare(old_t, new_t, fields, "independent_parent")["passed"]:
+        raise ValueError("parent baseline trade economics mismatch")
+    old_c = pd.read_csv(parent / "controls.csv.gz").query("arm == 'box_any'")
+    new_c = tables["controls"].query("exit_rule == 'price' and gate == 'none'")
+    if len(old_c) or len(new_c):
+        control_contract(old_c, new_c)
+
+
 def load(run: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     manifest = json.loads((run / "manifest.json").read_text())
     identity = json.loads((run / "identity.json").read_text())
@@ -204,6 +253,11 @@ def load(run: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     ih = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     assert ih == manifest["run_identity"]
     assert {p.name for p in (run / "streams").iterdir()} == set(identity["inputs"])
+    assert digest(SOURCE / "manifest.json") == identity["source_manifest_sha256"]
+    assert digest(SOURCE / "identity.json") == identity["source_identity_sha256"]
+    assert identity["inputs"] == identity["source_identity"]["inputs"]
+    for key in ("btc_input", "exchange_info"):
+        assert digest(Path(identity[key]["path"])) == identity[key]["sha256"]
     parts = {name: [] for name in ("trades", "controls", "statuses")}
     receipt_hashes = {}
     for symbol in sorted(identity["inputs"]):
@@ -213,11 +267,18 @@ def load(run: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
         assert r["baseline_parity"]["passed"] and r["control_parity"]["passed"] and r["candidate_status_parity"]
         for name, sha in r["files"].items():
             assert digest(directory / name) == sha
+        assert digest(SOURCE / "streams" / symbol / "completion.json") == identity["source_receipts"][symbol]
+        parent_receipt = json.loads((SOURCE / "streams" / symbol / "completion.json").read_text())
+        for name, sha in parent_receipt["files"].items():
+            assert digest(SOURCE / "streams" / symbol / name) == sha
+        symbol_tables = {}
         for name in parts:
             assert f"{name}.csv.gz" in r["files"]
             table = pd.read_csv(directory / f"{name}.csv.gz")
+            symbol_tables[name] = table
             if len(table):
                 parts[name].append(table)
+        validate_parent_symbol(symbol, directory, symbol_tables)
         receipt_hashes[symbol] = digest(directory / "completion.json")
     tables = {k: pd.concat(v, ignore_index=True) for k, v in parts.items()}
     t, c = tables["trades"], tables["controls"]
@@ -228,7 +289,14 @@ def load(run: Path) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     t = add_dates(t.merge(c[keep], on=keys, validate="one_to_one"))
     t["matched"] = booleans(t.matched)
     s = add_dates(tables["statuses"])
-    assert len(s.loc[s.exit_rule.eq("price") & s.gate.eq("none")]) == 9301
+    validate_window(t)
+    validate_window(s)
+    base_status = s.loc[s.exit_rule.eq("price") & s.gate.eq("none")]
+    key_fields = ["trade_key", "timeframe", "signal_i", "signal_bar_open"]
+    expected_candidates = set(map(tuple, base_status[key_fields].values))
+    assert len(base_status) == len(expected_candidates) == 9301
+    for _, group in s.groupby(["exit_rule", "gate"]):
+        assert len(group) == 9301 and set(map(tuple, group[key_fields].values)) == expected_candidates
     assert len(t.loc[t.exit_rule.eq("price") & t.gate.eq("none")]) == 9287
     # Exactly equal 1h gates, including decisions and occupied/censored status.
     for exit_rule in EXITS:
@@ -254,6 +322,13 @@ def main(run: Path, out: Path) -> None:
     from yoyo.evaluation.spike_v8_six_filters import _committed
     assert _committed((Path(__file__), Path("tests/evaluation/test_spike_joint_btc_report.py"), EXP / "PROJECT_PLAN.md", EXP / "config.json"))
     assert not out.exists(), "Keep previous statistics immutable; use a new output directory."
+    config = json.loads((EXP / "config.json").read_text())
+    expected = {"gates": list(GATES), "exit_rules": list(EXITS), "bootstrap_seed": SEED, "bootstrap_reps": REPS,
+                "permutation_seed": PSEED, "permutation_reps": PREPS, "comparison_family": FAMILY}
+    for key, value in expected.items():
+        assert config[key] == value, key
+    for key, value in (("start", START), ("split", SPLIT), ("end_exclusive", END)):
+        assert pd.Timestamp(config[key]) == value, key
     t, s, evidence = load(run)
     rows, diffs, attrs = [], [], []
     for tf in ("15m", "1h", "pooled"):
@@ -268,7 +343,9 @@ def main(run: Path, out: Path) -> None:
                     if gate != "none":
                         a, b = period_rows(base, period), period_rows(part, period)
                         for column in ("net_r", "net_bp"):
-                            diffs.append({**key, **differences(a, b, column)})
+                            lo, hi = (START, SPLIT) if period == "earlier" else (SPLIT, END) if period == "later" else (START, END)
+                            months = pd.date_range(lo.replace(day=1), (hi - pd.Timedelta(nanoseconds=1)).replace(day=1).normalize(), freq="MS").strftime("%Y-%m").tolist()
+                            diffs.append({**key, **differences(a, b, column, months=months)})
                         attrs.append({**key, **attribution(a, b)})
     summary, delta = pd.DataFrame(rows), pd.DataFrame(diffs)
     for period in PERIODS:
@@ -279,6 +356,7 @@ def main(run: Path, out: Path) -> None:
             mask = summary.period.eq(period) & summary.gate.ne("none") & summary.timeframe.ne("pooled")
             summary.loc[mask, f"random_p_{endpoint}_holm"] = holm(summary.loc[mask, f"random_p_{endpoint}"], FAMILY)
     selected = select_earlier(summary)
+    selected_by_exit = {r["exit_rule"]: r["selected_gate"] for r in selected}
     decisions = []
     for row in summary.loc[summary.period.eq("later") & summary.gate.ne("none") & summary.timeframe.ne("pooled")].itertuples():
         dr = delta.loc[delta.period.eq("later") & delta.timeframe.eq(row.timeframe) & delta.exit_rule.eq(row.exit_rule)
@@ -292,7 +370,7 @@ def main(run: Path, out: Path) -> None:
                   "random_bp_holm_lt_001": row.random_p_bp_holm < .01,
                   "quality_r_holm_lt_001": dr.p_holm < .01, "quality_bp_holm_lt_001": db.p_holm < .01}
         decisions.append({"timeframe": row.timeframe, "exit_rule": row.exit_rule, "gate": row.gate,
-                          **checks, "passed": all(checks.values())})
+                          **checks, **decision_flags(row.gate, selected_by_exit[row.exit_rule], checks)})
     out.mkdir(parents=True)
     summary.to_csv(out / "metrics.csv", index=False)
     delta.to_csv(out / "differences.csv", index=False)
