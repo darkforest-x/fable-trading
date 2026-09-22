@@ -1,0 +1,75 @@
+{
+  "dataset_path": "datasets/ma_profit3r_owner1500_v3",
+  "dataset_summary": {
+    "arms": {
+      "A": {
+        "test": {
+          "events": 989,
+          "images": 989
+        },
+        "train": {
+          "events": 1506,
+          "images": 1506
+        },
+        "val": {
+          "events": 1305,
+          "images": 1305
+        }
+      },
+      "B": {
+        "test": {
+          "events": 989,
+          "images": 989
+        },
+        "train": {
+          "events": 1506,
+          "images": 3012
+        },
+        "val": {
+          "events": 1305,
+          "images": 1305
+        }
+      }
+    },
+    "builder_commit": "50dd55bf3979ed5acb4fd691da18f5764a38a2c2",
+    "events_sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797",
+    "images": {
+      "A_test_images": 989,
+      "A_train_images": 1506,
+      "A_val_images": 1305,
+      "B_test_images": 989,
+      "B_train_images": 3012,
+      "B_val_images": 1305
+    },
+    "ma_source": "hl2",
+    "manifest_sha256": "35f943ccdf6a8c80d0b29df58d1c4f8f719e113e96c331c20f1004296986f140",
+    "plan_sha256": "4c313c39785b91370de31d4e1ff8f5c76c16a9d40d14225f09af9520c03220e5",
+    "production_eligible": false,
+    "selection_receipt_sha256": "4407bd9bc01f7f320841efe3b459d86d2367f15a991223ed0df46bd55465e6d8",
+    "support_bars": 1200,
+    "training_authorized": true,
+    "training_contract_sha256": "7f760ff2582ea7226ecabc1bd45127f98933b3b027f17a147db15a615a3b0456",
+    "training_eligible": false
+  },
+  "schema_version": 1,
+  "trainer_validate_dataset": {
+    "arms": {
+      "A": {
+        "test": 989,
+        "train": 1506,
+        "val": 1305
+      },
+      "B": {
+        "test": 989,
+        "train": 3012,
+        "val": 1305
+      }
+    },
+    "manifest_rows": 6812,
+    "manifest_sha256": "35f943ccdf6a8c80d0b29df58d1c4f8f719e113e96c331c20f1004296986f140",
+    "verified_files": 13624
+  },
+  "v2_interrupted_inventory_path": "experiments/active/exp-ma-profit3r-20260922-v1/dataset_owner1500_v2_interrupted_inventory.json",
+  "v2_snapshot_files_verified": 5392,
+  "v2_snapshot_sha_parity": true
+}
