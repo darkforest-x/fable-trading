@@ -12,6 +12,7 @@ import argparse
 from collections import defaultdict
 import math
 from pathlib import Path
+import os
 
 import pandas as pd
 from PIL import Image, ImageDraw
@@ -141,6 +142,16 @@ def prepare(dataset: Path, output: Path) -> dict:
         'positive_control_accepted':0,'sample_owner_confirmed':False}
     receipt['positive_split_audit']=audit_positive_splits()
     write_json(output/'selection.json',receipt)
+    browse=dataset/'review_links'
+    if browse.exists():raise FileExistsError(browse)
+    for row in manifest:
+        for arm in row['arms']:
+            kind='backgrounds' if row['class_id'] is None else 'positives'
+            directory=browse/arm/row['split']/kind
+            directory.mkdir(parents=True,exist_ok=True)
+            source=(dataset/row['image_path']).resolve()
+            (directory/source.name).symlink_to(os.path.relpath(source,directory))
+    (browse/'README.txt').write_text('Browsing links only; these are the same training PNGs, not extra independent events.\nA: one view/event. B: two views/train event. Validation/test are shared.\n',encoding='utf-8')
     return {k:v for k,v in receipt.items() if k not in ('raw_replay','raw_source_sha256')}
 
 
