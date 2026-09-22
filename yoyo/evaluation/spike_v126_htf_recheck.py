@@ -134,14 +134,7 @@ def pine_facts(bars, base, asset, tick):
     c, atr = frame.close.to_numpy(), frame.atr.to_numpy()
     edge = np.where(side == 1, frame.ropeHigh, frame.ropeLow)
     distance = side * (c-edge) / np.where(atr > 0, atr, np.nan)
-    basis = frame.close.rolling(20, min_periods=20).mean()
-    width = 4*frame.close.rolling(20, min_periods=20).std(ddof=0)/basis.abs()
-    threshold = width.shift().rolling(500, min_periods=500).quantile(.10, interpolation='linear')
-    compressed = (ages+1 >= 520) & width.le(threshold)
-    prior = pd.Series(False, index=frame.index)
-    for offset in range(1, 11):
-        prior |= compressed.shift(offset, fill_value=False) & compressed.shift(offset+1, fill_value=False) & compressed.shift(offset+2, fill_value=False)
-    bb = ((ages+1 >= 532) & threshold.notna() & prior).to_numpy(bool)
+    bb = bb_admission(frame.close, ages+1)
     rv = frame.rv.to_numpy()
     clock = frame.index + pd.Timedelta(minutes=MINUTES)
     bundle = (asset not in ('', 'USDC')) & np.isfinite(rv) & (rv >= 0) & (rv <= 50) & np.asarray(clock.dayofweek != 6)
@@ -182,6 +175,22 @@ def structure_parents(close, known, legacy, highs, lows, confirmed):
                 pending = False
         high[i], low[i] = hi, lo
     return high, low
+
+
+def bb_admission(close, segment_bars):
+    """Pine default BB200; preceding 500 widths and preceding 12-bar runs.
+
+    The rolling series spans chart bars, but admission requires 712 consecutive
+    valid candles after a gap. No current/future compression enters the run.
+    """
+    basis = close.rolling(200, min_periods=200).mean()
+    width = 4*close.rolling(200, min_periods=200).std(ddof=0)/basis.abs()
+    threshold = width.shift().rolling(500, min_periods=500).quantile(.10, interpolation='linear')
+    compressed = (np.asarray(segment_bars) >= 700) & width.le(threshold)
+    prior = pd.Series(False, index=close.index)
+    for offset in range(1, 11):
+        prior |= compressed.shift(offset, fill_value=False) & compressed.shift(offset+1, fill_value=False) & compressed.shift(offset+2, fill_value=False)
+    return ((np.asarray(segment_bars) >= 712) & threshold.notna() & prior).to_numpy(bool)
 
 
 def joint_permission(close, h1):

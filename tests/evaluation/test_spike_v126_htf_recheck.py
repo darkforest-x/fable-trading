@@ -2,7 +2,7 @@
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.spike_v126_htf_recheck import complete_bars, joint_permission, serial, pine_facts, structure_parents
+from yoyo.evaluation.spike_v126_htf_recheck import complete_bars, joint_permission, serial, pine_facts, structure_parents, bb_admission
 from yoyo.evaluation import spike_v10_4_study as old
 from yoyo.evaluation.spike_v9_htf_sma import confirmed_sma, side_gate
 
@@ -95,3 +95,15 @@ def test_structure_parent_resets_pending_but_preserves_consumed_parent():
         [95,np.nan,95,np.nan,np.nan], [False,False,True,False,False])
     np.testing.assert_allclose(high,[105,np.nan,105,105,np.nan],equal_nan=True)
     np.testing.assert_allclose(low,[95,np.nan,95,95,np.nan],equal_nan=True)
+
+
+def test_bb200_requires_712_consecutive_bars_and_cannot_use_current_run():
+    close=pd.Series(np.full(900,100.))
+    admission=bb_admission(close,np.arange(1,901))
+    assert not admission[:711].any()
+    assert admission[711:].all()
+    from yoyo.evaluation.spike_v7_fast import v7_diagnostics
+    bars=sample(900)
+    old_diag=v7_diagnostics(bars,data_gap=pd.Series(False,index=bars.index))
+    expected=(old_diag.v7_ready & old_diag.prior_squeeze_run3).to_numpy()
+    np.testing.assert_array_equal(bb_admission(bars.close,np.arange(1,901)),expected)
