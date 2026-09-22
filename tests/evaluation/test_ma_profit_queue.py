@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 import yoyo.datasets.ma_profit_queue as q
+from yoyo.datasets.ma_profit_training_contract import EXPERIMENT_ID, OWNER_V2_REQUEST
 
 
 def _digest(path):
@@ -19,8 +20,26 @@ def _configure(monkeypatch, tmp_path):
     scan = exp / "source_scans"
     plan = exp / "plan.json"
     plan.parent.mkdir(parents=True)
-    plan.write_text('{"experiment_id":"x"}\n')
-    (exp / "training_contract.json").write_text('{"minimum_train_winners":3000}\n')
+    plan.write_text(json.dumps({"experiment_id": EXPERIMENT_ID}) + "\n")
+    original = exp / "training_contract.json"
+    original.write_text(json.dumps({
+        "experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events",
+        "original_plan_sha256": _digest(plan), "minimum_train_winners": 3000, "maximum_train_winners": 5000,
+    }) + "\n")
+    amendment = exp / "owner_amendment_1500_v2.json"
+    amendment.write_text(json.dumps({
+        "schema_version": 1, "experiment_id": EXPERIMENT_ID, "owner_request": OWNER_V2_REQUEST,
+        "authorized_minimum_train_winners": 1500, "maximum_train_winners": 5000,
+        "quota_scope": "train_independent_retained_events", "original_plan_sha256": _digest(plan),
+        "original_training_contract_sha256": _digest(original), "only_capacity_changed": True,
+        "training_authorized": True, "production_eligible": False,
+    }, ensure_ascii=False) + "\n", encoding="utf-8")
+    (exp / q.TRAINING_CONTRACT_NAME).write_text(json.dumps({
+        "schema_version": 2, "experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events",
+        "original_plan_sha256": _digest(plan), "minimum_train_winners": 1500, "maximum_train_winners": 5000,
+        "original_training_contract_sha256": _digest(original),
+        "owner_amendment_path": str(amendment.relative_to(root)), "owner_amendment_sha256": _digest(amendment),
+    }) + "\n")
     (exp / "reference_exclusion.json").write_text('[]\n')
     for name in ("ma_profit_pipeline.py", "ma_profit_cohort.py", "ma_profit_incremental_labels.py",
                  "fifteen_minute_launch_candidates.py", "ma_profit_window_miner.py", "ma_profit_profile_window.py"):
@@ -164,7 +183,7 @@ def _write_label(exp, plan, cohort, outcomes, *, capacity, reuse=None):
     summary.write_text(json.dumps(payload) + "\n")
 
 
-def _write_selection(root, exp, outcomes, selection, *, capacity, forged=False):
+def _write_selection(root, exp, outcomes, selection, *, capacity, forged=False, legacy=False):
     selection.mkdir(parents=True, exist_ok=True)
     ledger, dataset, receipt_path = selection / "selection_ledger.jsonl", selection / "dataset_ledger.jsonl", selection / "selection_receipt.json"
     outcome_rows = [json.loads(line) for line in (outcomes / "outcomes.jsonl").read_text().splitlines() if line.strip()]
@@ -179,8 +198,8 @@ def _write_selection(root, exp, outcomes, selection, *, capacity, forged=False):
     actual = sum(row["split"] == "train" and row["profit"]["retained"] for row in rows)
     receipt_path.write_text(json.dumps({
         "selection_ledger_sha256": _digest(ledger), "dataset_ledger_sha256": _digest(dataset),
-        "selected_events_sha256": _digest(dataset), "training_contract_sha256": _digest(exp / "training_contract.json"),
-        "minimum_train_winners": 3000, "maximum_train_winners": 5000, "capacity_gate": actual >= 3000,
+        "selected_events_sha256": _digest(dataset), "training_contract_sha256": _digest(exp / ("training_contract.json" if legacy else q.TRAINING_CONTRACT_NAME)),
+        "minimum_train_winners": 3000 if legacy else 1500, "maximum_train_winners": 5000, "capacity_gate": actual >= (3000 if legacy else 1500),
         "train_retained_winners_actual": actual, "train_retained_winners_selected": len(kept),
         "inputs": [{"path": str((outcomes / "outcomes.jsonl").relative_to(root)), "sha256": _digest(outcomes / "outcomes.jsonl")}],
     }) + "\n")
@@ -328,7 +347,7 @@ def test_downstream_commits_each_stage_and_capacity_stops(tmp_path, monkeypatch)
         commit_calls.append([path.name for path in paths])
         return f"c{len(commit_calls)}"
 
-    result = q.run_downstream(manifests, "queue_round_001", runner=runner, commit_fn=commit, input_validator=lambda paths: None)
+    result = q.run_downstream(manifests, "queue_round_001", runner=runner, output=_git_output, commit_fn=commit, input_validator=lambda paths: None)
     assert result["capacity_gate"] is True
     assert commit_calls == [
         ["frozen_events.jsonl", "frozen_sources.json", "collection_exclusions.jsonl", "collection_receipt.json"],
@@ -340,6 +359,8 @@ def test_downstream_commits_each_stage_and_capacity_stops(tmp_path, monkeypatch)
     assert [call[call.index("-m") + 1] for call in command_calls] == [
         "yoyo.datasets.ma_profit_cohort", "yoyo.datasets.ma_profit_pipeline", "yoyo.datasets.ma_profit_cohort",
     ]
+    select = command_calls[-1]
+    assert select[select.index("--training-contract") + 1] == str(exp / q.TRAINING_CONTRACT_NAME)
     assert all(call[0] == sys.executable for call in command_calls)
     assert (exp / "queue_ready.json").exists()
 
@@ -478,6 +499,16 @@ def test_self_hashed_fabricated_selection_winners_are_rejected(tmp_path, monkeyp
     _write_selection(root, exp, outcomes, selection, capacity=True, forged=True)
     with pytest.raises(q.QueueError, match="selection ledger event identities"):
         q.validate_selection_stage(outcomes, selection)
+
+
+def test_historical_original_contract_selection_remains_valid(tmp_path, monkeypatch):
+    root, exp, _scan, plan, _rules = _configure(monkeypatch, tmp_path)
+    manifests = [_manifest(exp, "sources_archive_1m_batch01.json")]
+    cohort, outcomes, selection = (exp / "cohort_queue_round_001", exp / "outcomes_queue_round_001", exp / "selection_queue_round_001")
+    _write_collection(root, exp, plan, manifests, cohort)
+    _write_label(exp, plan, cohort, outcomes, capacity=False)
+    _write_selection(root, exp, outcomes, selection, capacity=False, legacy=True)
+    assert q.validate_selection_stage(outcomes, selection)["minimum_train_winners"] == 3000
 
 
 def test_label_rejects_self_hashed_immutable_frozen_field_drift(tmp_path, monkeypatch):

@@ -17,8 +17,16 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import pandas as pd
 
+from yoyo.datasets.ma_profit_training_contract import (
+    ORIGINAL_CONTRACT_NAME,
+    TrainingContractError,
+    contract_inputs,
+    validate_training_contract,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
+TRAINING_CONTRACT_HELPER = ROOT / "yoyo/datasets/ma_profit_training_contract.py"
 EXPERIMENT_ID = "exp-ma-profit3r-20260922-v1"
 GAP = pd.Timedelta(hours=4)
 DEFAULT_BINANCE_SCORED = ROOT / "experiments/active/exp-15m-ma-launch-owner-grade-a8000-v1/results/binance_scored.jsonl"
@@ -115,17 +123,16 @@ def _is_grade_a(row: Mapping[str, Any]) -> bool:
     return str(row.get("quality_tier")) == "PERFECT_CANDIDATE" and row.get("reference_gate_pass") is not False
 
 
-def _training_contract(plan_path: Path, *, required: bool) -> tuple[dict[str, Any] | None, dict[str, str] | None]:
-    path = plan_path.parent / "training_contract.json"
+def _training_contract(plan_path: Path, *, required: bool, contract_path: Path | str | None = None) -> tuple[dict[str, Any] | None, dict[str, str] | None]:
+    path = _path(contract_path) if contract_path is not None else plan_path.parent / ORIGINAL_CONTRACT_NAME
     if not path.exists():
         if required:
             raise ProfitCohortError(f"missing training contract: {path}")
         return None, None
-    contract = json.loads(path.read_text(encoding="utf-8"))
-    if contract.get("experiment_id") != EXPERIMENT_ID or contract.get("quota_scope") != "train_independent_retained_events":
-        raise ProfitCohortError(f"invalid training contract: {path}")
-    if contract.get("original_plan_sha256") != _sha(plan_path):
-        raise ProfitCohortError(f"training contract plan SHA drift: {path}")
+    try:
+        contract = validate_training_contract(plan_path, path, repo_root=ROOT)
+    except TrainingContractError as exc:
+        raise ProfitCohortError(str(exc)) from exc
     return contract, {"path": _relative(path), "sha256": _sha(path)}
 
 
@@ -351,7 +358,7 @@ def _selected_projection(row: Mapping[str, Any]) -> dict[str, Any]:
     return {key: row[key] for key in ("event_id", "cluster_id", "split", "canonical_asset", "direction", "core_end_time")}
 
 
-def select_training_cohort(plan: Path | Mapping[str, Any], labelled_events: Sequence[Mapping[str, Any]] | Path | str, reference_exclusion: Sequence[Mapping[str, Any]] | Path | str, out: Path) -> dict[str, Any]:
+def select_training_cohort(plan: Path | Mapping[str, Any], labelled_events: Sequence[Mapping[str, Any]] | Path | str, reference_exclusion: Sequence[Mapping[str, Any]] | Path | str, out: Path, *, training_contract: Path | str | None = None) -> dict[str, Any]:
     """Gate actual label output; never recompute or overwrite pipeline splits."""
 
     if Path(out).exists():
@@ -363,13 +370,13 @@ def select_training_cohort(plan: Path | Mapping[str, Any], labelled_events: Sequ
         plan_path = _path(plan)
         plan_payload = json.loads(plan_path.read_text(encoding="utf-8"))
         plan_input = {"path": _relative(plan_path), "sha256": _sha(plan_path)}
-        contract, contract_input = _training_contract(plan_path, required=True)
+        contract, contract_input = _training_contract(plan_path, required=True, contract_path=training_contract)
     if plan_payload.get("experiment_id") != EXPERIMENT_ID:
         raise ProfitCohortError("wrong experiment plan")
     plan_min, plan_max = int(plan_payload["discovery"]["minimum_independent_winners"]), int(plan_payload["discovery"]["maximum_dataset_winners"])
     minimum, maximum = (int(contract["minimum_train_winners"]), int(contract["maximum_train_winners"])) if contract else (plan_min, plan_max)
-    if (minimum, maximum) != (plan_min, plan_max) or (minimum, maximum) != (3000, 5000):
-        raise ProfitCohortError("training quota must remain the pinned 3000/5000 contract")
+    if contract is None and ((minimum, maximum) != (plan_min, plan_max) or (minimum, maximum) != (3000, 5000)):
+        raise ProfitCohortError("in-memory training quota must remain the pinned 3000/5000 contract")
     labels, labels_input = _load_rows(labelled_events)
     references, references_input = _reference_neighborhoods(reference_exclusion)
     seen_clusters: set[str] = set()
@@ -404,7 +411,7 @@ def select_training_cohort(plan: Path | Mapping[str, Any], labelled_events: Sequ
     selection_path, dataset_path = out / "selection_ledger.jsonl", out / "dataset_ledger.jsonl"
     selection_sha, dataset_sha = _write_jsonl(selection_path, selection_ledger), _write_jsonl(dataset_path, dataset_ledger)
     events = [_selected_projection(row) for row in dataset_ledger]
-    receipt = {"schema_version": 1, "experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "capacity_gate": capacity_gate, "train_retained_winners_actual": len(train_winners), "train_retained_winners_selected": len(chosen_clusters), "minimum_train_winners": minimum, "maximum_train_winners": maximum, "capacity_semantics": "3000-5000 applies only to retained independent train winners; resolved val/test events are never removed by the train cap", "production_dataset_allowed": capacity_gate, "training_contract_sha256": contract_input["sha256"] if contract_input else None, "selection_ledger_path": _relative(selection_path), "selection_ledger_sha256": selection_sha, "dataset_ledger_path": _relative(dataset_path), "dataset_ledger_sha256": dataset_sha, "selected_events_sha256": dataset_sha, "events": events, "inputs": [item for item in (plan_input, contract_input, labels_input, references_input) if item]}
+    receipt = {"schema_version": 1, "experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "capacity_gate": capacity_gate, "train_retained_winners_actual": len(train_winners), "train_retained_winners_selected": len(chosen_clusters), "minimum_train_winners": minimum, "maximum_train_winners": maximum, "capacity_semantics": f"{minimum}-{maximum} applies only to retained independent train winners; resolved val/test events are never removed by the train cap", "production_dataset_allowed": capacity_gate, "training_contract_sha256": contract_input["sha256"] if contract_input else None, "selection_ledger_path": _relative(selection_path), "selection_ledger_sha256": selection_sha, "dataset_ledger_path": _relative(dataset_path), "dataset_ledger_sha256": dataset_sha, "selected_events_sha256": dataset_sha, "events": events, "inputs": [item for item in (plan_input, contract_input, labels_input, references_input) if item]}
     _write_json(out / "selection_receipt.json", receipt)
     return receipt
 
@@ -422,7 +429,12 @@ def verify_selected_cohort(ledger_path: Path | str, receipt_path: Path | str, tr
         raise ProfitCohortError("selection receipt training contract SHA drift")
     if not receipt.get("capacity_gate"):
         raise ProfitCohortError("selection capacity gate is closed")
-    if (receipt.get("minimum_train_winners"), receipt.get("maximum_train_winners"), contract.get("minimum_train_winners"), contract.get("maximum_train_winners")) != (3000, 5000, 3000, 5000):
+    try:
+        validated_contract = validate_training_contract(contract_file.parent / "plan.json", contract_file, repo_root=ROOT)
+    except TrainingContractError as exc:
+        raise ProfitCohortError(str(exc)) from exc
+    minimum, maximum = validated_contract["minimum_train_winners"], validated_contract["maximum_train_winners"]
+    if (receipt.get("minimum_train_winners"), receipt.get("maximum_train_winners"), contract.get("minimum_train_winners"), contract.get("maximum_train_winners")) != (minimum, maximum, minimum, maximum):
         raise ProfitCohortError("selection quota drift")
     if receipt.get("quota_scope") != "train_independent_retained_events" or contract.get("quota_scope") != "train_independent_retained_events":
         raise ProfitCohortError("selection quota scope drift")
@@ -444,7 +456,7 @@ def verify_selected_cohort(ledger_path: Path | str, receipt_path: Path | str, tr
         if any(_event_time(right) - _event_time(left) <= GAP for left, right in zip(ordered, ordered[1:])):
             raise ProfitCohortError("representatives are not strictly more than 4h apart")
     train = [row for row in ledger if row["split"] == "train"]
-    if not (3000 <= len(train) <= 5000) or any(not _is_retained_winner(row) for row in train):
+    if not (minimum <= len(train) <= maximum) or any(not _is_retained_winner(row) for row in train):
         raise ProfitCohortError("selected train winners violate capacity contract")
     if len(train) != receipt.get("train_retained_winners_selected"):
         raise ProfitCohortError("selection receipt train count drift")
@@ -456,7 +468,7 @@ def _formal_guard(paths: Sequence[Path]) -> None:
 
     from yoyo.datasets.ma_profit_pipeline import committed
 
-    committed([Path(__file__), *paths])
+    committed([Path(__file__), TRAINING_CONTRACT_HELPER, *paths])
 
 
 def main() -> None:
@@ -471,18 +483,23 @@ def main() -> None:
     select_parser.add_argument("--plan", required=True, type=Path)
     select_parser.add_argument("--events", required=True, type=Path)
     select_parser.add_argument("--reference-exclusion", required=True, type=Path)
+    select_parser.add_argument("--training-contract", type=Path, help="approved original or owner-v2 capacity contract")
     select_parser.add_argument("--out", required=True, type=Path)
     args = parser.parse_args()
     plan = _path(args.plan)
-    contract = plan.parent / "training_contract.json"
+    contract = plan.parent / ORIGINAL_CONTRACT_NAME if args.command == "collect" else _path(args.training_contract) if args.training_contract else plan.parent / ORIGINAL_CONTRACT_NAME
     if not contract.exists():
         raise ProfitCohortError(f"missing committed training contract: {contract}")
     if args.command == "collect":
         _formal_guard([plan, contract, *(_path(path) for path in args.sources)])
         result = collect(plan, args.sources, args.out, compact_events=args.compact_events)
     else:
-        _formal_guard([plan, contract, _path(args.events), _path(args.reference_exclusion)])
-        result = select_training_cohort(plan, args.events, args.reference_exclusion, args.out)
+        try:
+            controls = contract_inputs(plan, contract, repo_root=ROOT)
+        except TrainingContractError as exc:
+            raise ProfitCohortError(str(exc)) from exc
+        _formal_guard([plan, *controls, _path(args.events), _path(args.reference_exclusion)])
+        result = select_training_cohort(plan, args.events, args.reference_exclusion, args.out, training_contract=contract)
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
 
 

@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 import pytest
 import pandas as pd
 
 import yoyo.datasets.ma_profit_cohort as cohort
 from yoyo.contracts.ma_profit_filter import resolve_ma_profit_event
+from yoyo.datasets.ma_profit_training_contract import OWNER_V2_REQUEST
+from yoyo.datasets.ma_profit_training_contract import _repo_relative
 
 
 def _plan() -> dict:
@@ -78,6 +80,63 @@ def _write_pinned_plan(tmp_path: Path) -> tuple[Path, Path]:
     contract_path = tmp_path / "training_contract.json"
     contract_path.write_text(json.dumps({"experiment_id": cohort.EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "minimum_train_winners": 3000, "maximum_train_winners": 5000, "original_plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest()}), encoding="utf-8")
     return plan_path, contract_path
+
+
+def test_owner_v2_amendment_path_is_portable_on_windows() -> None:
+    root = PureWindowsPath("C:/fable")
+    amendment = root / "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json"
+    assert _repo_relative(amendment, root) == "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json"
+
+
+def _write_owner_v2_controls(root: Path) -> tuple[Path, Path]:
+    exp = root / "experiment"; exp.mkdir(parents=True)
+    plan_path = exp / "plan.json"
+    plan_path.write_text(json.dumps(_plan(), sort_keys=True), encoding="utf-8")
+    original = exp / "training_contract.json"
+    original.write_text(json.dumps({"experiment_id": cohort.EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "minimum_train_winners": 3000, "maximum_train_winners": 5000, "original_plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest()}), encoding="utf-8")
+    amendment = exp / "owner_amendment_1500_v2.json"
+    amendment.write_text(json.dumps({"schema_version": 1, "experiment_id": cohort.EXPERIMENT_ID, "owner_request": OWNER_V2_REQUEST, "authorized_minimum_train_winners": 1500, "maximum_train_winners": 5000, "quota_scope": "train_independent_retained_events", "original_plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(), "original_training_contract_sha256": hashlib.sha256(original.read_bytes()).hexdigest(), "only_capacity_changed": True, "training_authorized": True, "production_eligible": False}, ensure_ascii=False), encoding="utf-8")
+    owner_v2 = exp / "training_contract_owner1500_v2.json"
+    owner_v2.write_text(json.dumps({"schema_version": 2, "experiment_id": cohort.EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "minimum_train_winners": 1500, "maximum_train_winners": 5000, "original_plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(), "original_training_contract_sha256": hashlib.sha256(original.read_bytes()).hexdigest(), "owner_amendment_path": str(amendment.relative_to(root)), "owner_amendment_sha256": hashlib.sha256(amendment.read_bytes()).hexdigest()}), encoding="utf-8")
+    return plan_path, owner_v2
+
+
+def test_owner_v2_opens_at_1500_and_rejects_unapproved_lower_contract(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "repo"
+    monkeypatch.setattr(cohort, "ROOT", root)
+    plan_path, owner_v2 = _write_owner_v2_controls(root)
+    labels = [_label(index, "train", symbol=f"COIN{index}USDT") for index in range(1499)]
+    below = cohort.select_training_cohort(plan_path, labels, [], root / "detached/below", training_contract=owner_v2)
+    assert below["capacity_gate"] is False
+    labels.append(_label(1499, "train", symbol="COIN1499USDT"))
+    accepted_out = root / "detached/at"
+    accepted = cohort.select_training_cohort(plan_path, labels, [], accepted_out, training_contract=owner_v2)
+    assert accepted["capacity_gate"] is True
+    assert accepted["minimum_train_winners"] == 1500
+    assert cohort.verify_selected_cohort(accepted_out / "dataset_ledger.jsonl", accepted_out / "selection_receipt.json", owner_v2)["selected_train_winners"] == 1500
+    unapproved = plan_path.parent / "training_contract_unapproved.json"
+    unapproved.write_bytes(owner_v2.read_bytes())
+    with pytest.raises(cohort.ProfitCohortError, match="unapproved training contract path"):
+        cohort.select_training_cohort(plan_path, labels, [], root / "detached/rejected", training_contract=unapproved)
+
+
+def test_in_memory_or_v2_with_mutated_original_contract_cannot_lower_capacity(tmp_path, monkeypatch) -> None:
+    root = tmp_path / "repo"
+    monkeypatch.setattr(cohort, "ROOT", root)
+    plan_path, owner_v2 = _write_owner_v2_controls(root)
+    lowered_plan = _plan(); lowered_plan["discovery"]["minimum_independent_winners"] = 1499
+    with pytest.raises(cohort.ProfitCohortError, match="pinned 3000/5000"):
+        cohort.select_training_cohort(lowered_plan, [], [], root / "in_memory")
+    original = plan_path.parent / "training_contract.json"
+    payload = json.loads(original.read_text()); payload["minimum_train_winners"] = 2999
+    original.write_text(json.dumps(payload), encoding="utf-8")
+    amendment = plan_path.parent / "owner_amendment_1500_v2.json"
+    amendment_payload = json.loads(amendment.read_text()); amendment_payload["original_training_contract_sha256"] = hashlib.sha256(original.read_bytes()).hexdigest()
+    amendment.write_text(json.dumps(amendment_payload, ensure_ascii=False), encoding="utf-8")
+    owner_payload = json.loads(owner_v2.read_text()); owner_payload["original_training_contract_sha256"] = hashlib.sha256(original.read_bytes()).hexdigest(); owner_payload["owner_amendment_sha256"] = hashlib.sha256(amendment.read_bytes()).hexdigest()
+    owner_v2.write_text(json.dumps(owner_payload), encoding="utf-8")
+    with pytest.raises(cohort.ProfitCohortError, match="original training contract binding drift"):
+        cohort.select_training_cohort(plan_path, [], [], root / "v2_rejected", training_contract=owner_v2)
 
 
 def test_capacity_gate_rejects_2999_and_keeps_selection_ledger(tmp_path) -> None:

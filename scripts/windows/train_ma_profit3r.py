@@ -15,6 +15,13 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Mapping
 
+from yoyo.datasets.ma_profit_training_contract import (
+    OWNER_V2_CONTRACT_NAME,
+    TrainingContractError,
+    contract_inputs,
+    validate_training_contract,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 ARMS = ("A", "B")
@@ -50,6 +57,31 @@ def _json(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ProfitTrainingError(f"JSON object required: {path}")
     return value
+
+
+def validate_capacity_contract(plan_path: Path, contract_path: Path) -> tuple[int, int]:
+    """Accept only the original 3000/5000 control or its owner-bound v2 amendment."""
+
+    contract = _json(contract_path)
+    minimum, maximum = contract.get("minimum_train_winners"), contract.get("maximum_train_winners")
+    if Path(contract_path).name == OWNER_V2_CONTRACT_NAME:
+        try:
+            validated = validate_training_contract(plan_path, contract_path, repo_root=ROOT)
+        except TrainingContractError as exc:
+            raise ProfitTrainingError(str(exc)) from exc
+        return int(validated["minimum_train_winners"]), int(validated["maximum_train_winners"])
+    if not isinstance(minimum, int) or not isinstance(maximum, int) or (minimum, maximum) != (3000, 5000):
+        raise ProfitTrainingError("contract must freeze train_event_min=3000 and train_event_max=5000")
+    return minimum, maximum
+
+
+def capacity_contract_inputs(plan_path: Path, contract_path: Path) -> list[Path]:
+    """Expose every v2 lineage control for the Windows caller's committed-input guard."""
+
+    try:
+        return contract_inputs(plan_path, contract_path, repo_root=ROOT)
+    except TrainingContractError as exc:
+        raise ProfitTrainingError(str(exc)) from exc
 
 
 def _jsonl(path: Path) -> list[dict[str, Any]]:
@@ -185,9 +217,7 @@ def validate_dataset(
         raise ProfitTrainingError("dataset plan selection receipt SHA drift")
     if not cohort.get("capacity_gate") or cohort.get("dataset_ledger_sha256") != dataset_plan.get("events_sha256") or cohort.get("selected_events_sha256") != dataset_plan.get("events_sha256") or cohort.get("training_contract_sha256") != sha256_file(contract_path):
         raise ProfitTrainingError("cohort capacity or frozen ledger binding failed")
-    minimum, maximum = contract.get("minimum_train_winners"), contract.get("maximum_train_winners")
-    if not isinstance(minimum, int) or not isinstance(maximum, int) or (minimum, maximum) != (3000, 5000):
-        raise ProfitTrainingError("contract must freeze train_event_min=3000 and train_event_max=5000")
+    minimum, maximum = validate_capacity_contract(plan_path, contract_path)
     manifest_path = root / "manifest.jsonl"
     if not manifest_path.is_file():
         raise ProfitTrainingError("dataset manifest.jsonl is missing")

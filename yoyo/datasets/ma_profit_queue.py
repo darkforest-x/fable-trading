@@ -19,6 +19,13 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Iterable, Mapping, Sequence
 
+from yoyo.datasets.ma_profit_training_contract import (
+    OWNER_V2_CONTRACT_NAME,
+    TrainingContractError,
+    contract_inputs,
+    validate_training_contract,
+)
+
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / "experiments/active/exp-ma-profit3r-20260922-v1"
 PLAN = EXP / "plan.json"
@@ -27,6 +34,8 @@ PROFILE_DRIVER = ROOT / "yoyo/datasets/ma_profit_window_miner.py"
 PROFILE_ADAPTER = ROOT / "yoyo/datasets/ma_profit_profile_window.py"
 MAX_COMMIT_BYTES = 95 * 1024 * 1024
 WORKERS = 2
+TRAINING_CONTRACT_NAME = OWNER_V2_CONTRACT_NAME
+TRAINING_CONTRACT_HELPER = ROOT / "yoyo/datasets/ma_profit_training_contract.py"
 RULES = [ROOT / part for part in (
     "yoyo/datasets/ma_profit_miner.py",
     "yoyo/datasets/ma_launch_snapshot_scan.py",
@@ -233,7 +242,8 @@ def queue_config() -> dict[str, Any]:
 
 def binding() -> dict[str, str]:
     files = {"controller_sha256": sha(Path(__file__)), "plan_sha256": sha(PLAN),
-             "training_contract_sha256": sha(EXP / "training_contract.json"),
+             "training_contract_sha256": sha(training_contract_path()),
+             "training_contract_helper_sha256": sha(TRAINING_CONTRACT_HELPER),
              "pipeline_sha256": sha(ROOT / "yoyo/datasets/ma_profit_pipeline.py"),
              "cohort_sha256": sha(ROOT / "yoyo/datasets/ma_profit_cohort.py"),
              "incremental_labeler_sha256": sha(ROOT / "yoyo/datasets/ma_profit_incremental_labels.py"),
@@ -246,6 +256,35 @@ def binding() -> dict[str, str]:
                   "profile_window_parity_receipt_sha256": sha(parity)})
     files["config_sha256"] = json_sha(queue_config())
     return files
+
+
+def training_contract_path() -> Path:
+    """The queue selects the owner-approved v2 capacity control for new rounds."""
+    return EXP / TRAINING_CONTRACT_NAME
+
+
+def selected_training_controls() -> tuple[dict[str, Any], list[Path]]:
+    try:
+        contract = validate_training_contract(PLAN, training_contract_path(), repo_root=ROOT)
+        return contract, contract_inputs(PLAN, training_contract_path(), repo_root=ROOT)
+    except TrainingContractError as exc:
+        raise QueueError(str(exc)) from exc
+
+
+def validate_selected_training_contract() -> dict[str, Any]:
+    return selected_training_controls()[0]
+
+
+def _selection_contract(receipt: Mapping[str, Any]) -> tuple[Path, dict[str, Any]]:
+    """Accept frozen historical 3000 receipts while requiring v2 for new ones."""
+    original = EXP / "training_contract.json"
+    selected = training_contract_path()
+    receipt_sha = receipt.get("training_contract_sha256")
+    if receipt_sha == sha(original):
+        return original, {"minimum_train_winners": 3000, "maximum_train_winners": 5000}
+    if receipt_sha == sha(selected):
+        return selected, validate_selected_training_contract()
+    raise QueueError("selection receipt uses an unapproved training contract")
 
 
 def state_path() -> Path:
@@ -540,10 +579,11 @@ def validate_selection_stage(outcomes: Path, selection: Path) -> dict[str, Any]:
         receipt = json.loads(receipt_path.read_text())
     except (OSError, ValueError) as exc:
         raise QueueError("invalid selection receipt") from exc
+    contract_path, contract = _selection_contract(receipt)
     if (receipt.get("selection_ledger_sha256") != sha(selection_path)
             or receipt.get("dataset_ledger_sha256") != sha(dataset_path)
             or receipt.get("selected_events_sha256") != sha(dataset_path)
-            or receipt.get("training_contract_sha256") != sha(EXP / "training_contract.json")
+            or receipt.get("training_contract_sha256") != sha(contract_path)
             or not _input_has_sha(receipt.get("inputs"), outcomes / "outcomes.jsonl")):
         raise QueueError("selection ledger/input SHA drift")
     outcome_rows, all_rows, kept_rows = _jsonl_rows(outcomes / "outcomes.jsonl"), _jsonl_rows(selection_path), _jsonl_rows(dataset_path)
@@ -561,7 +601,7 @@ def validate_selection_stage(outcomes: Path, selection: Path) -> dict[str, Any]:
     minimum, maximum = int(receipt.get("minimum_train_winners", -1)), int(receipt.get("maximum_train_winners", -1))
     expected_gate = actual >= minimum
     selected = sum(row.get("split") == "train" and _retained_winner(row) for row in kept_rows)
-    if (minimum, maximum) != (3000, 5000) or receipt.get("train_retained_winners_actual") != actual or bool(receipt.get("capacity_gate")) != expected_gate:
+    if (minimum, maximum) != (contract["minimum_train_winners"], contract["maximum_train_winners"]) or receipt.get("train_retained_winners_actual") != actual or bool(receipt.get("capacity_gate")) != expected_gate:
         raise QueueError("selection capacity calculation drift")
     expected_selected = min(actual, maximum) if expected_gate else 0
     if receipt.get("train_retained_winners_selected") != selected or selected != expected_selected or (not expected_gate and kept_rows):
@@ -609,6 +649,9 @@ def run_downstream(manifests: list[Path], tag: str, *, runner: Callable[..., Any
                    input_validator: Callable[[Iterable[Path]], None] | None = None) -> dict[str, Any]:
     """Run and freeze collect → label → select; returns a capacity decision."""
     commit_fn = commit_fn or (lambda paths: commit_exact(paths, runner=runner, output=output))
+    _contract, controls = selected_training_controls()
+    for control in controls:
+        ensure_committed(control, output=output)
     (input_validator or (lambda paths: validate_collection_inputs(paths, output=output)))(manifests)
     cohort, outcomes, selection = (EXP / f"cohort_{tag}", EXP / f"outcomes_{tag}", EXP / f"selection_{tag}")
     incremental = _round_number(tag) >= 2
@@ -647,6 +690,7 @@ def run_downstream(manifests: list[Path], tag: str, *, runner: Callable[..., Any
     if not selection_commit:
         runner([sys.executable, "-m", "yoyo.datasets.ma_profit_cohort", "select", "--plan", str(PLAN),
                 "--events", str(outcomes / "outcomes.jsonl"), "--reference-exclusion", str(EXP / "reference_exclusion.json"),
+                "--training-contract", str(training_contract_path()),
                 "--out", str(selection)], cwd=ROOT, check=True)
         selection_commit = commit_fn(selection_paths)
     receipt_path = selection / "selection_receipt.json"

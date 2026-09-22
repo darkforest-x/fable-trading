@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 import cv2
 import numpy as np
+from yoyo.datasets.ma_profit_training_contract import EXPERIMENT_ID, OWNER_V2_REQUEST
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,6 +81,23 @@ def test_dataset_validation_rejects_subquota_training_cohort(tmp_path):
 
     with pytest.raises(subject.ProfitTrainingError, match="outside 3000..5000"):
         subject.validate_dataset(tmp_path, plan, dataset_plan, contract, cohort)
+
+
+def test_windows_runner_accepts_only_bound_owner_v2_capacity(tmp_path, monkeypatch):
+    root = tmp_path / "repo"; exp = root / "experiment"; exp.mkdir(parents=True)
+    monkeypatch.setattr(subject, "ROOT", root)
+    plan = exp / "plan.json"
+    _json(plan, {"experiment_id": EXPERIMENT_ID})
+    original = exp / "training_contract.json"
+    _json(original, {"experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "original_plan_sha256": _sha(plan), "minimum_train_winners": 3000, "maximum_train_winners": 5000})
+    amendment = exp / "owner_amendment_1500_v2.json"
+    _json(amendment, {"schema_version": 1, "experiment_id": EXPERIMENT_ID, "owner_request": OWNER_V2_REQUEST, "authorized_minimum_train_winners": 1500, "maximum_train_winners": 5000, "quota_scope": "train_independent_retained_events", "original_plan_sha256": _sha(plan), "original_training_contract_sha256": _sha(original), "only_capacity_changed": True, "training_authorized": True, "production_eligible": False})
+    owner_v2 = exp / "training_contract_owner1500_v2.json"
+    _json(owner_v2, {"schema_version": 2, "experiment_id": EXPERIMENT_ID, "quota_scope": "train_independent_retained_events", "original_plan_sha256": _sha(plan), "minimum_train_winners": 1500, "maximum_train_winners": 5000, "original_training_contract_sha256": _sha(original), "owner_amendment_path": str(amendment.relative_to(root)), "owner_amendment_sha256": _sha(amendment)})
+    assert subject.validate_capacity_contract(plan, owner_v2) == (1500, 5000)
+    payload = json.loads(owner_v2.read_text()); payload["minimum_train_winners"] = 1499; _json(owner_v2, payload)
+    with pytest.raises(subject.ProfitTrainingError, match="exactly 1500/5000"):
+        subject.validate_capacity_contract(plan, owner_v2)
 
 
 @pytest.mark.parametrize("image_bytes,label,match", [
