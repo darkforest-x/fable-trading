@@ -1,0 +1,85 @@
+{
+  "observed_unix": 1790069853.363813,
+  "matching_processes": [
+    {
+      "ProcessId": 5360,
+      "ParentProcessId": 17360,
+      "CommandLine": "cmd.exe /d /c \"C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\launch_wmi.cmd\"",
+      "CreationDate": "/Date(1790065920515)/"
+    },
+    {
+      "ProcessId": 18392,
+      "ParentProcessId": 5360,
+      "CommandLine": "\\??\\C:\\Windows\\system32\\conhost.exe 0x4",
+      "CreationDate": "/Date(1790065920522)/"
+    },
+    {
+      "ProcessId": 13428,
+      "ParentProcessId": 5360,
+      "CommandLine": "C:\\fable\\.venv\\Scripts\\python.exe  -u -m scripts.windows.run_ma_profit_negative_redo --experiment \"C:/fable/experiments/active/exp-ma-profit3r-negatives-20260922-v2\" --run-root \"C:/fable/runs/ma_profit3r_owner1500_neg_v5\" ",
+      "CreationDate": "/Date(1790065920557)/"
+    },
+    {
+      "ProcessId": 6056,
+      "ParentProcessId": 13428,
+      "CommandLine": "\"C:\\Program Files\\Python39\\python.exe\" -u -m scripts.windows.run_ma_profit_negative_redo --experiment \"C:/fable/experiments/active/exp-ma-profit3r-negatives-20260922-v2\" --run-root \"C:/fable/runs/ma_profit3r_owner1500_neg_v5\" ",
+      "CreationDate": "/Date(1790065920565)/"
+    },
+    {
+      "ProcessId": 11092,
+      "ParentProcessId": 6056,
+      "CommandLine": "C:\\fable\\.venv\\Scripts\\python.exe -u -m scripts.windows.train_ma_profit_negative_redo --plan C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\plan.json --dataset C:\\fable\\datasets\\ma_profit3r_owner1500_neg_v5 --selection C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\selection --run-root C:\\fable\\runs\\ma_profit3r_owner1500_neg_v5 --launch-contract C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\launch_contract.json --train",
+      "CreationDate": "/Date(1790065921052)/"
+    },
+    {
+      "ProcessId": 7260,
+      "ParentProcessId": 11092,
+      "CommandLine": "\"C:\\Program Files\\Python39\\python.exe\" -u -m scripts.windows.train_ma_profit_negative_redo --plan C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\plan.json --dataset C:\\fable\\datasets\\ma_profit3r_owner1500_neg_v5 --selection C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\selection --run-root C:\\fable\\runs\\ma_profit3r_owner1500_neg_v5 --launch-contract C:\\fable\\experiments\\active\\exp-ma-profit3r-negatives-20260922-v2\\launch_contract.json --train",
+      "CreationDate": "/Date(1790065921060)/"
+    },
+    {
+      "ProcessId": 18256,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=3112)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066163213)/"
+    },
+    {
+      "ProcessId": 7920,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=3344)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066165536)/"
+    },
+    {
+      "ProcessId": 19996,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=3724)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066168369)/"
+    },
+    {
+      "ProcessId": 14036,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=3384)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066170512)/"
+    },
+    {
+      "ProcessId": 3664,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=4072)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066172668)/"
+    },
+    {
+      "ProcessId": 10868,
+      "ParentProcessId": 7260,
+      "CommandLine": "\"C:\\fable\\.venv\\Scripts\\python.exe\" \"-c\" \"from multiprocessing.spawn import spawn_main; spawn_main(parent_pid=7260, pipe_handle=3412)\" \"--multiprocessing-fork\"",
+      "CreationDate": "/Date(1790066174806)/"
+    }
+  ],
+  "progress": {
+    "A": {
+      "completed_epochs": 8
+    },
+    "B": {
+      "completed_epochs": 0
+    }
+  }
+}

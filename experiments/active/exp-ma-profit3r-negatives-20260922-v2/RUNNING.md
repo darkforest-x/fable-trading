@@ -1,13 +1,17 @@
 # Negative redo: continuation entry
 
+## STOPPED — label semantics rejected by Owner, 2026-09-22
+
+This supersedes the continuation instructions below. Windows training was stopped after A completed 8 epochs and before B started. PID5360 identity was revalidated; taskkill /T returned 0 and no matching job processes remained. See label_semantics_stop.json and analysis/p1_ma_profit3r_negative_semantics_correction_20260922.md. Do not resume this recipe, collect it as completed, or call its empty-label candidates morphology negatives. Preserve all files. Local monitoring stays paused. Historical notes below describe the state before this correction.
+
 This is a pointer to evidence, not proof that a process is still alive. Recheck current state before acting.
 
-- Goal remains active; do not complete until both40-epoch arms, evaluation, local collection and final report are verified. No promotion/deployment.
+- Owner requested monitoring and automatic follow-ups paused on 2026-09-22; Windows training/evaluation continues independently. Local collection is deferred until resumed. Goal is not complete; do not complete until both40-epoch arms, evaluation, local collection and final report are verified. No promotion/deployment.
 - Dataset: datasets/ma_profit3r_owner1500_neg_v5. Build and local/3060 preflight passed. Actual A9330=1506positive+7824negative; B18660=3012positive+15648negative. Shared val1305=175+1130; test989=160+829.
 - Remote: Administrator@192.168.1.2, C:/fable/runs/ma_profit3r_owner1500_neg_v5. Frozen job handles A, then B, then both external evaluations.
 - Actual successful dispatch: recovery_launch.json, WMI supervisorPID5360. First detachedPID6448 exited without job state; remote_launch.json explicitly records failure. WMI tool response had a local encoding error, but remote job was verified live; NEVER retry that dispatch.
 - WMI command and Python job survive SSH closure. Model/recipe/input SHA remain frozen. Do not edit any launch_contract.files while work is running.
-- Local watcher: exec session73686, observed OS PID34284. It polls and collects on completion. Mac awake guard: exec session4304. These IDs must be revalidated, not assumed live.
+- Local watcher PID34284 was stopped at Owner request; task Mac awake guard PID32830 was also stopped. Do not restart monitoring unless Owner requests it.
 - Latest recorded progress: A completed2/40; B not started. One A epoch about7.5minutes; two arms likely take many hours. Do not call initial metrics final results.
 
 ## Read-only status
@@ -17,11 +21,11 @@ This is a pointer to evidence, not proof that a process is still alive. Recheck 
 tail -3 experiments/active/exp-ma-profit3r-negatives-20260922-v2/watch.log
 ```
 
-Snapshot receipts alone do not prove liveness; inspect the named Windows process or fresh log/CSV progression. SSH observation failures are not proof of training failure; inspect before any retry. The existing watcher is sufficient: do not start duplicates.
+Snapshot receipts alone do not prove liveness; inspect the named Windows process or fresh log/CSV progression. SSH observation failures are not proof of training failure; inspect before any retry. Monitoring is paused at Owner request: do not poll or restart the watcher automatically.
 
 ## After completion
 
-1. Verify Windows job_receipt/training_receipt completed and A/B CSV contain exactlyepochs1..40, best/last hashes and proper3060 environment. Watcher should download, evaluate frozen random controls and set local job_status completed. If watcher died but Windows completed, use the driver's collect command, not start.
+1. Verify Windows job_receipt/training_receipt completed and A/B CSV contain exactlyepochs1..40, best/last hashes and proper3060 environment. After Owner resumes, use the driver's collect command to download completed Windows results and evaluate frozen random controls; do not use start.
 2. Run `.venv/bin/python -m yoyo.evaluation.ma_profit_negative_delivery`; inspect actual resulting metrics and receipts, not only the command exit code. Frozen delivery module validates evaluator/metric SHA and exact per-arm controls inputs.
 3. Add recovery_launch/launch_wmi/first_training_observation evidence to a supplementary execution manifest or final report; frozen delivery automatically includes original dispatch record only, which honestly says exited_before_job_started.
 4. Final report: analysis/p1_ma_profit3r_negatives_redo_20260922.md. Compare same previous-v4 A/B, quality_score and matched random controls; include negative failure outcomes. CSV highestmAP row is not proven checkpoint epoch. Candidate direction is supplied by rules; score does not use future profit or GT IoU.
