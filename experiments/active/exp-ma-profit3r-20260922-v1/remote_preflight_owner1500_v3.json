@@ -1,0 +1,83 @@
+{
+  "args": {
+    "cohort_receipt": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\selection_queue_round_017\\selection_receipt.json",
+    "contract": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\training_contract_owner1500_v2.json",
+    "dataset": "C:\\fable\\datasets\\ma_profit3r_owner1500_v3",
+    "dataset_plan": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\dataset_plan_owner1500_v2.json",
+    "model": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\yolo11s.pt",
+    "plan": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\plan.json",
+    "remote_dataset_root": null,
+    "run_root": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v3",
+    "train": false
+  },
+  "arms": {},
+  "audit": {
+    "arms": {
+      "A": {
+        "test": 989,
+        "train": 1506,
+        "val": 1305
+      },
+      "B": {
+        "test": 989,
+        "train": 3012,
+        "val": 1305
+      }
+    },
+    "manifest_rows": 6812,
+    "manifest_sha256": "35f943ccdf6a8c80d0b29df58d1c4f8f719e113e96c331c20f1004296986f140",
+    "verified_files": 13624
+  },
+  "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+  "data_yaml_sha256": {
+    "A": "79412fa94255e9687eb54905e7d3807b46f4c128e58542537cbc415263c145da",
+    "B": "48b6b05653324a8c8e2e249447ef68b8e3c3567833a3fc00e7820b4d99ddc010"
+  },
+  "environment": {
+    "free_vram_bytes": 11801722880,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "total_vram_bytes": 12884377600,
+    "versions": {
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "torch": "2.8.0+cu126",
+      "ultralytics": "8.4.89"
+    }
+  },
+  "status": "preflight_passed",
+  "train_requested": false,
+  "training_args": {
+    "auto_augment": null,
+    "batch": 8,
+    "bgr": 0.0,
+    "cache": false,
+    "copy_paste": 0.0,
+    "cutmix": 0.0,
+    "degrees": 0.0,
+    "deterministic": true,
+    "device": "0",
+    "epochs": 40,
+    "erasing": 0.0,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "mixup": 0.0,
+    "mosaic": 0.0,
+    "multi_scale": 0.0,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "perspective": 0.0,
+    "plots": false,
+    "rect": true,
+    "scale": 0.0,
+    "seed": 0,
+    "shear": 0.0,
+    "translate": 0.0,
+    "workers": 2
+  }
+}
