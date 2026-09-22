@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "purpose": "Record frozen parity and timing evidence for the MA-profit dataset timestamp lookup optimization before any replacement build.",
+  "candidate_commit": "250ba87495405748d3e14722f22dc488991e1a6c",
+  "candidate_module_path": "yoyo/datasets/ma_profit_dataset.py",
+  "candidate_module_sha256": "2ced509a8ea64c62a2041a37a2be6f3a3a0f2aa4642f5adbd8f8bb50c3dfc27b",
+  "baseline_commit": "f0b54f2c20",
+  "ledger_path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl",
+  "ledger_sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797",
+  "benchmark_command": [
+    ".venv/bin/python",
+    "experiments/active/exp-ma-profit3r-20260922-v1/dataset_timestamp_lookup_benchmark.py",
+    "--ledger",
+    "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl",
+    "--baseline-commit",
+    "f0b54f2c20",
+    "--positive-event-id",
+    "cluster_820ab9958d1bdae88e348119",
+    "--negative-event-id",
+    "cluster_940a8cf178b96541c815d6f8",
+    "--repeats",
+    "2"
+  ],
+  "measurement": {
+    "baseline_seconds": [1.6102262090000004, 1.5330079160000007],
+    "candidate_seconds": [0.1577704999999998, 0.15612608299999842],
+    "median_speedup": 10.206129846834498,
+    "timing_scope": "Complete event_assets call, including causal rendering, on the same already-loaded frame."
+  },
+  "positive_parity": {
+    "event_id": "cluster_820ab9958d1bdae88e348119",
+    "source_path": "experiments/active/exp-ma-profit3r-20260922-v1/inputs/binance_1m_import/batch_13/series/binance_um_IOSTUSDT_1m_3432475.csv",
+    "source_bytes": 294033760,
+    "source_prefix_rows": 1234264,
+    "variants": ["A", "B1", "B2"],
+    "png_bytes_equal": true,
+    "all_metadata_equal": true
+  },
+  "negative_parity": {
+    "event_id": "cluster_940a8cf178b96541c815d6f8",
+    "source_path": "data/kline_fetched/okx_ANIME_USDT_SWAP_15m_41816.csv",
+    "variants": ["A"],
+    "png_bytes_equal": true,
+    "all_metadata_equal": true
+  },
+  "conclusion": "The optimization is output-equivalent for the recorded positive and resolved-negative events and materially reduces the measured complete-call cost."
+}
