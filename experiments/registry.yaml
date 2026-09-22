@@ -10698,3 +10698,38 @@ experiments:
     reuse_allowed: false
     notes: Read-only audit, no replay or redraw; entry-time fold and entry-month blocks differ slightly from source reports. Notion not synced (no
       connector in session). Learning scope note appended to docs/learnings/r-excess-over-random-is-biased-when-control-stops-are-narrower.md.
+
+  - experiment_id: exp-ma-morph-v6-econ-audit-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4fd2dc5cfd5f2e1984428d85c0fa536feb64a9b0
+    status: negative
+    question: Is the morphology v6 arm-A top-decile positive net return (val +12.0bp, test +15.2bp) robust to time clustering, concentration
+      and score monotonicity?
+    single_variable: Same frozen economic outputs; inference changed to UTC-day block bootstrap and ISO-week sign flip on bp excess, plus
+      concentration and decile checks.
+    result: Pooled 230 trades +13.4bp, day-block CI [-34.8,60.5], median -93.4bp, drop best 3 -> -14.0bp, excess over random +32.9bp week p0.108;
+      Spearman 0.059/0.047. Verdict not_robust.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_morph_v6_econ_audit_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Read-only; reconciles reported top10 membership and means exactly. Notion not synced (no connector in session).
+
+  - experiment_id: exp-spike-v104-1h-forward-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 71a8e2a7055bad9d310d5920f3457d52a13066d1
+    status: inconclusive
+    question: Does V10.4 joint 1h (original exit and 0.3/0.5/1.0R targets) reach >=77% net win rate with positive expectancy and beat
+      matched random on Binance data after 2026-05-01?
+    single_variable: Pre-registered one-shot forward window with four exit arms on the frozen signal.
+    result: Stopped by owner at 229/638 symbols downloaded; full test not run. Labelled preview on 121 symbols failed both criteria (TP0.3R
+      win 79.8pct but -0.013R per trade; original exit excess +3.9bp p0.49).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: experiments/active/exp-spike-v104-1h-forward-20260922-v1/STATUS.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Download resumable per symbol. Preview is not the registered test and must not be quoted as its result.
