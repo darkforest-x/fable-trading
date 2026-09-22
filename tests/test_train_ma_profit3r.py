@@ -49,7 +49,16 @@ def test_selection_receipt_rejects_cluster_leakage():
         ]})
 
 
-def test_dataset_validation_rejects_subquota_training_cohort(tmp_path):
+@pytest.mark.parametrize("policy_case,match", [
+    ("legacy", "outside 3000..5000"),
+    ("valid_visible", "outside 3000..5000"),
+    ("unknown", "unknown render price_scale"),
+    ("summary_mismatch", "summary price_scale"),
+    ("mixed", "manifest price_scale"),
+    ("missing_bounds", "price bounds missing"),
+    ("nonfinite_bounds", "price bounds must be finite"),
+])
+def test_dataset_validation_rejects_subquota_or_render_policy_drift(tmp_path, policy_case, match):
     plan = tmp_path / "plan.json"
     _json(plan, {"experiment_id": "profit", "owner_authorization": {"training_authorized": True}, "safety": {"training_eligible": False}})
     contract = tmp_path / "contract.json"
@@ -66,6 +75,15 @@ def test_dataset_validation_rejects_subquota_training_cohort(tmp_path):
                      "image_path": image.relative_to(tmp_path).as_posix(), "image_sha256": _sha(image),
                      "label_path": label.relative_to(tmp_path).as_posix(), "label_sha256": _sha(label),
                      "visible_end_close_time_utc": "2025-01-01T00:00:00+00:00", "decision_at_utc": "2025-01-01T00:00:00+00:00"})
+    if policy_case != "legacy":
+        for item in rows:
+            item.update({"price_scale": "visible_range_v1", "price_min": 99.0, "price_max": 101.0})
+        if policy_case == "mixed":
+            rows[-1]["price_scale"] = "legacy_min_rel_span_v1"
+        if policy_case == "missing_bounds":
+            del rows[-1]["price_max"]
+        if policy_case == "nonfinite_bounds":
+            rows[-1]["price_max"] = float("inf")
     manifest = tmp_path / "manifest.jsonl"
     manifest.write_text("".join(json.dumps(row) + "\n" for row in rows), encoding="utf-8")
     for name, paths in (("train_A.txt", ["./images/train/event_A.png"]), ("train_B.txt", ["./images/train/event_B1.png", "./images/train/event_B2.png"]), ("val.txt", []), ("test.txt", [])):
@@ -76,10 +94,16 @@ def test_dataset_validation_rejects_subquota_training_cohort(tmp_path):
     dataset_plan = tmp_path / "dataset_plan.json"
     _json(dataset_plan, {"experiment_id": "profit", "original_plan_sha256": _sha(plan), "training_contract_sha256": _sha(contract), "selection_receipt_sha256": _sha(cohort), "events_sha256": events_sha})
     summary_payload = json.loads(summary.read_text())
+    if policy_case != "legacy":
+        dataset_plan_payload = json.loads(dataset_plan.read_text())
+        dataset_plan_payload["render"] = {"price_scale": "unknown_policy" if policy_case == "unknown" else "visible_range_v1"}
+        _json(dataset_plan, dataset_plan_payload)
+        if policy_case != "summary_mismatch":
+            summary_payload["price_scale"] = "visible_range_v1"
     summary_payload["plan_sha256"] = _sha(dataset_plan)
     _json(summary, summary_payload)
 
-    with pytest.raises(subject.ProfitTrainingError, match="outside 3000..5000"):
+    with pytest.raises(subject.ProfitTrainingError, match=match):
         subject.validate_dataset(tmp_path, plan, dataset_plan, contract, cohort)
 
 

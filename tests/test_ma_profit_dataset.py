@@ -1,5 +1,7 @@
 import hashlib
 import json
+import cv2
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -27,6 +29,51 @@ def test_variants_are_distinct_but_share_causal_right_edge_and_future_is_irrelev
     assert [label_line(x) for x in assets] == [label_line(x) for x in changed_assets]
 
 
+def test_visible_range_policy_is_causal_and_expands_low_amplitude_window():
+    frame0 = source()
+    # Keep all prices near 100: legacy's relative floor dominates this window.
+    for column in ("open", "high", "low", "close"):
+        frame0[column] = 100 + (frame0[column] - frame0[column].iloc[0]) * .001
+    visible = event_assets(frame0, row(frame0), "visible_range_v1")
+    legacy = event_assets(frame0, row(frame0), "legacy_min_rel_span_v1")
+    assert legacy == event_assets(frame0, row(frame0))
+    assert visible[0]["png"] != legacy[0]["png"]
+    def content_height(asset):
+        pixels = cv2.imdecode(np.frombuffer(asset["png"], np.uint8), cv2.IMREAD_COLOR)
+        ys = np.where(np.any(pixels < 245, axis=2))[0]
+        return int(ys.max() - ys.min() + 1)
+    assert content_height(visible[0]) > 600
+    assert content_height(legacy[0]) < 50
+    changed = frame0.copy()
+    changed.loc[1256:, ["open", "high", "low", "close"]] *= 9
+    assert visible == event_assets(changed, row(changed), "visible_range_v1")
+
+
+def test_visible_range_core_box_uses_the_new_price_to_pixel_mapping():
+    frame = source()
+    assets = event_assets(frame, row(frame), "visible_range_v1")
+    core_start, core_end = 1247, 1250
+    support = core_start - 11 - 1200
+    causal = ma_profit_dataset.add_hl2_mas(frame.iloc[support:core_end + 6].reset_index(drop=True))
+    core = causal.iloc[core_start - support:core_end - support + 1]
+    values = np.concatenate([core.high, core.low, core.loc[:, list(ma_profit_dataset.SIX_MA_COLUMNS)].to_numpy().ravel()])
+    low, high = float(values.min()), float(values.max())
+    padding = (high - low) * .04
+    for asset in assets:
+        price_min, price_max = asset["visible"]["price_min"], asset["visible"]["price_max"]
+        # Independent coordinate equation; reusing legacy boxes fails this check.
+        y0 = max(0, int(12 + (price_max - high - padding) / (price_max - price_min) * 718))
+        y1 = min(742, int(12 + (price_max - low + padding) / (price_max - price_min) * 718))
+        assert asset["box"]["y0"] == y0
+        assert asset["box"]["y1"] == y1
+        assert float(label_line(asset).split()[4]) == pytest.approx((y1 - y0) / 742, abs=1e-8)
+
+
+def test_unknown_price_scale_fails_closed():
+    with pytest.raises(ma_profit_dataset.ProfitDatasetError, match="unknown render price_scale"):
+        event_assets(source(), row(source()), "unknown")
+
+
 def test_compact_discovery_metadata_preserves_all_three_images_and_labels():
     from yoyo.datasets.ma_profit_cohort import compact_event
     frame = source()
@@ -46,14 +93,15 @@ def test_nonwinner_train_is_excluded_but_val_is_single_empty_label_candidate():
     assert len(assets) == 1 and assets[0]["variant"] == "A" and not assets[0]["positive"]
 
 
+@pytest.mark.parametrize("price_scale", ["legacy_min_rel_span_v1", "visible_range_v1"])
 @pytest.mark.parametrize("outcome", ["SL", "TIMEOUT"])
-def test_future_profit_label_changes_supervision_but_not_input_pixels(outcome):
+def test_future_profit_label_changes_supervision_but_not_input_pixels(outcome, price_scale):
     frame = source()
     winner = row(frame, "val", True)
     nonwinner = row(frame, "val", False)
     nonwinner["profit"].update({"outcome": outcome, "gross_r": -1.0, "net_r": -1.02})
-    positive = event_assets(frame, winner)[0]
-    negative = event_assets(frame, nonwinner)[0]
+    positive = event_assets(frame, winner, price_scale=price_scale)[0]
+    negative = event_assets(frame, nonwinner, price_scale=price_scale)[0]
     assert positive["png"] == negative["png"]
     assert positive["box"] == negative["box"]
     assert label_line(positive).strip()
@@ -66,7 +114,8 @@ def test_arms_keep_variants_and_shared_evaluation_views_separate():
     assert arms_for_asset("val", "A") == arms_for_asset("test", "A") == ("A", "B")
 
 
-def test_build_writes_disjoint_train_lists_and_shared_evaluation_lists(tmp_path, monkeypatch):
+@pytest.mark.parametrize("price_scale", ["legacy_min_rel_span_v1", "visible_range_v1"])
+def test_build_writes_disjoint_train_lists_and_shared_evaluation_lists(tmp_path, monkeypatch, price_scale):
     frame = source(1400)
     source_path = tmp_path / "source.csv"
     frame.to_csv(source_path, index=False)
@@ -82,7 +131,7 @@ def test_build_writes_disjoint_train_lists_and_shared_evaluation_lists(tmp_path,
     events = tmp_path / "events.jsonl"
     events.write_text("".join(json.dumps(item) + "\n" for item in rows))
     plan = tmp_path / "plan.json"
-    plan.write_text(json.dumps({"events_sha256": hashlib.sha256(events.read_bytes()).hexdigest(), "render": {"classes": {"0": "profitlong", "1": "profitshort"}}, "owner_authorization": {"training_authorized": True}, "training_contract_sha256": "fixture-contract", "selection_receipt_sha256": "fixture-receipt"}))
+    plan.write_text(json.dumps({"events_sha256": hashlib.sha256(events.read_bytes()).hexdigest(), "render": {"price_scale": price_scale, "classes": {"0": "profitlong", "1": "profitshort"}}, "owner_authorization": {"training_authorized": True}, "training_contract_sha256": "fixture-contract", "selection_receipt_sha256": "fixture-receipt"}))
     monkeypatch.setattr(ma_profit_dataset, "_committed", lambda _: "fixture-commit")
     monkeypatch.setattr(ma_profit_dataset, "_cohort_controls", lambda *_: ({}, []))
 
@@ -99,6 +148,11 @@ def test_build_writes_disjoint_train_lists_and_shared_evaluation_lists(tmp_path,
     assert (out / "labels" / "val" / (asset_stem("val", "A") + ".txt")).read_text() == ""
     assert summary["arms"]["A"]["train"] == {"images": 1, "events": 1}
     assert summary["arms"]["B"]["train"] == {"images": 2, "events": 1}
+    assert summary.get("price_scale", "legacy_min_rel_span_v1") == price_scale
+    manifest = [json.loads(line) for line in (out / "manifest.jsonl").read_text().splitlines()]
+    assert all(item.get("price_scale", "legacy_min_rel_span_v1") == price_scale for item in manifest)
+    if price_scale == "visible_range_v1":
+        assert all(item["price_min"] < item["price_max"] for item in manifest)
 
 
 def test_build_rejects_ledger_source_sha_drift(tmp_path, monkeypatch):

@@ -25,6 +25,8 @@ from yoyo.datasets.ma_profit_training_contract import (
 
 ROOT = Path(__file__).resolve().parents[2]
 ARMS = ("A", "B")
+LEGACY_PRICE_SCALE = "legacy_min_rel_span_v1"
+VISIBLE_RANGE_PRICE_SCALE = "visible_range_v1"
 SAFE_AUG = {
     "fliplr": 0.0, "flipud": 0.0, "mosaic": 0.0, "mixup": 0.0,
     "copy_paste": 0.0, "hsv_h": 0.0, "hsv_s": 0.0, "hsv_v": 0.0,
@@ -199,6 +201,9 @@ def validate_dataset(
 
     root = dataset_root.resolve()
     plan, dataset_plan = _json(plan_path), _json(dataset_plan_path)
+    price_scale = dataset_plan.get("render", {}).get("price_scale", LEGACY_PRICE_SCALE)
+    if price_scale not in {LEGACY_PRICE_SCALE, VISIBLE_RANGE_PRICE_SCALE}:
+        raise ProfitTrainingError(f"unknown render price_scale: {price_scale!r}")
     contract, cohort = _json(contract_path), _json(cohort_receipt_path)
     experiment_id = str(plan.get("experiment_id", ""))
     if not experiment_id or any(value.get("experiment_id") != experiment_id for value in (dataset_plan, contract, cohort)):
@@ -223,6 +228,8 @@ def validate_dataset(
         raise ProfitTrainingError("dataset manifest.jsonl is missing")
     manifest_sha = sha256_file(manifest_path)
     summary = _json(root / "summary.json")
+    if summary.get("price_scale", LEGACY_PRICE_SCALE) != price_scale:
+        raise ProfitTrainingError("summary price_scale differs from dataset plan")
     if str(summary.get("manifest_sha256", "")) != manifest_sha:
         raise ProfitTrainingError("summary manifest SHA drift")
     bindings = {
@@ -243,6 +250,15 @@ def validate_dataset(
     all_paths: set[str] = set()
     image_hash_splits: dict[str, str] = {}
     for row in rows:
+        if row.get("price_scale", LEGACY_PRICE_SCALE) != price_scale:
+            raise ProfitTrainingError("manifest price_scale differs from dataset plan")
+        if price_scale == VISIBLE_RANGE_PRICE_SCALE:
+            try:
+                price_min, price_max = float(row["price_min"]), float(row["price_max"])
+            except (KeyError, TypeError, ValueError) as exc:
+                raise ProfitTrainingError("manifest price bounds missing or invalid") from exc
+            if not math.isfinite(price_min) or not math.isfinite(price_max) or price_min >= price_max:
+                raise ProfitTrainingError("manifest price bounds must be finite and increasing")
         event_id, split = str(row.get("event_id", "")), str(row.get("split", ""))
         arms = tuple(str(value) for value in row.get("arms", ()))
         if not event_id or split not in {"train", "val", "test"} or not arms or any(arm not in ARMS for arm in arms):
@@ -307,6 +323,7 @@ def validate_dataset(
             raise ProfitTrainingError(f"{arm} image lists disagree with manifest")
     return {
         "manifest_sha256": manifest_sha,
+        "price_scale": price_scale,
         "manifest_rows": len(rows),
         "verified_files": len(all_paths),
         "arms": {arm: {split: len(arm_samples[arm][split]) for split in arm_samples[arm]} for arm in ARMS},

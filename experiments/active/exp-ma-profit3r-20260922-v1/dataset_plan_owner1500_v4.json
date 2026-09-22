@@ -1,0 +1,164 @@
+{
+  "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+  "discovery": {
+    "data_end_exclusive": "2026-09-21T16:00:00Z",
+    "dedup": "same canonical asset/direction within4h across venues/timeframes;select representative before profit labels",
+    "fallback": "extend official historical sources;report actual capacity if target remains infeasible",
+    "legacy_expected_positive_events": 1043,
+    "legacy_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_hl2_v1/manifest.jsonl",
+    "maximum_dataset_winners": 5000,
+    "minimum_independent_winners": 3000,
+    "morphology": "original frozen PERFECT_CANDIDATE gates,reference threshold,and CLOSE discovery MAs",
+    "scan_order_minutes": [
+      15,
+      5,
+      30,
+      60,
+      240,
+      3
+    ],
+    "stop_rule": "Complete each frozen source batch.Stop expansion at>=3000 unique retained events after purge.If>5000 select by outcome-blind event hash stratified by split.Never loosen gates or multiply views to reach capacity.",
+    "universe": "all available USDT perpetual histories,no same-window movers ranking"
+  },
+  "evaluation": {
+    "confidence": 0.25,
+    "hit_iou": 0.5,
+    "nms_iou": 0.7,
+    "no_production_claim": true,
+    "primary": [
+      "event precision/recall on full resolved pool",
+      "false firing on failed events",
+      "3R fraction among detections",
+      "matched same-source-time-volatility random control",
+      "net mean and topdecile returns after costs"
+    ],
+    "secondary": [
+      "mAP50",
+      "mAP50_95",
+      "direction/timeframe strata",
+      "ROC-AUC on event scores",
+      "permutation p"
+    ]
+  },
+  "events_sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797",
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "label_contract": {
+    "confirmation_bars": 5,
+    "entry": "next_bar_open_after_confirmation_close",
+    "gap": "SL worse open;TP barrier conservative",
+    "horizon_hours": 12,
+    "missing_future": "unknown not negative",
+    "note": "3R is conventional price-risk R;net R separately reported.Optional owner clarification requested.Do not use MFE as realised profit.",
+    "r_definition": "abs(entry-stop),linear price risk",
+    "retention": "TP before SL within horizon,gross_r>=3 within numerical tolerance,and net return after0.002round-trip cost>0",
+    "round_trip_cost": 0.002,
+    "same_bar": "SL first",
+    "stop": "long=min(core.low),short=max(core.high),known before entry",
+    "target_r": 3.0
+  },
+  "original_plan_sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266",
+  "owner_amendment_path": "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json",
+  "owner_amendment_sha256": "d0e4c72520a1f63802d4192df048ee0fa9ebf3105609caaa968c63bc161bd691",
+  "owner_authorization": {
+    "all_historical_data_authorized": true,
+    "conversation_date": "2026-09-22",
+    "coupled_data_pipeline_changes_authorized": true,
+    "live_money": false,
+    "promote_or_deploy": false,
+    "request": "Automatically filter the original1043 events for profitable1:3 outcomes, expand to3000-5000 independent events, process original single-view and limited-position multi-view datasets, train both on RTX3060. Start goal mode, use lighter subagents, all needed permissions granted.",
+    "research_gate_exception": true,
+    "training_authorized": true
+  },
+  "planned_report": "analysis/p1_ma_profit3r_20260922.md",
+  "proposed_training": {
+    "all_spatial_color_mix_augmentations_disabled": true,
+    "base_model": "models/yolo11s.pt",
+    "batch": 8,
+    "comparison_note": "Same epochs for practical recipes;B has2x input exposures.Report explicitly;not pure-position causal attribution.Freeze final args after dataset audit.",
+    "deterministic": true,
+    "epochs": 40,
+    "gpu": "RTX3060",
+    "host": "Administrator@192.168.1.2",
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "remote_root": "C:/fable",
+    "seed": 0,
+    "workers": 2
+  },
+  "question": "Can original Grade-A events supply3000-5000 independent+3R positives, and does limited causal position diversity improve later full-pool YOLO detection?",
+  "render": {
+    "classes": {
+      "0": "profitable_dense_long",
+      "1": "profitable_dense_short"
+    },
+    "common_validation_test": "same single-view inputs and labels for both arms",
+    "core_geometry": "original4/5bar indices,wicks+causal6MA envelope,4pct padding",
+    "group_a": {
+      "post_core_bars": 5,
+      "pre_core_bars": [
+        9
+      ],
+      "views_per_event": 1
+    },
+    "group_b": {
+      "post_core_bars": 5,
+      "pre_core_bars": [
+        7,
+        11
+      ],
+      "views_per_event": 2
+    },
+    "height": 742,
+    "ma": "HL2 SMA/EMA20/60/120",
+    "price_scale": "visible_range_v1",
+    "training_population": "Retained positive events only as requested;failed events preserved for full-pool evaluation.",
+    "visible_end": "confirmation close;no entry or future-label bars",
+    "width": 1280
+  },
+  "render_revision": {
+    "caveat": "Local fit magnifies MA separation along with candles. This is an offline rendering correction, not proven deployment parity or a profitability claim. A/B left-context variation also changes local price bounds.",
+    "decision": "Fix the diagnosed rendering defect within the authorized data-processing task; change the per-visible-window price axis only.",
+    "original_training_dataset_preserved": "datasets/ma_profit3r_owner1500_v3",
+    "parent_dataset_plan_path": "experiments/active/exp-ma-profit3r-20260922-v1/dataset_plan_owner1500_v2.json",
+    "parent_dataset_plan_sha256": "4c313c39785b91370de31d4e1ff8f5c76c16a9d40d14225f09af9520c03220e5",
+    "preserved": [
+      "event cohort",
+      "profit labels",
+      "time splits",
+      "A pre9/post5",
+      "B pre7/pre11/post5",
+      "1200-bar causal MA support",
+      "1280x742 canvas",
+      "colors",
+      "training recipes"
+    ],
+    "price_bounds": "min/max of visible low/high and six causal HL2 MAs; 6 percent of that absolute span padding at each edge; no relative-price 6 percent floor.",
+    "production_eligible": false,
+    "trigger_owner_message": "训练图片被压缩了？怎么看起来那么扁",
+    "version": 4
+  },
+  "safety": {
+    "change_global_thresholds": false,
+    "new_branch": false,
+    "original_inputs_read_only": true,
+    "production_eligible": false,
+    "training_eligible": false,
+    "worktree": false
+  },
+  "schema_version": 1,
+  "selection_receipt_path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_receipt.json",
+  "selection_receipt_sha256": "4407bd9bc01f7f320841efe3b459d86d2367f15a991223ed0df46bd55465e6d8",
+  "splits": {
+    "evaluation": "All resolved original-rule candidates in later pools,including losing/timeout negatives;unknown excluded and counted.No winner-only precision or economics.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "status": "preregistered",
+  "training_contract_path": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract_owner1500_v2.json",
+  "training_contract_sha256": "7f760ff2582ea7226ecabc1bd45127f98933b3b027f17a147db15a615a3b0456"
+}

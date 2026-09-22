@@ -12,6 +12,7 @@ import argparse
 import hashlib
 import json
 import subprocess
+from dataclasses import replace
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable, Mapping
@@ -28,6 +29,7 @@ from yoyo.layers.l1_detection import render as chart_render
 
 ROOT = Path(__file__).resolve().parents[2]
 WIDTH, HEIGHT, SUPPORT_BARS = 1280, 742, 1200
+LEGACY_PRICE_SCALE, VISIBLE_RANGE_PRICE_SCALE = "legacy_min_rel_span_v1", "visible_range_v1"
 UP_BLUE, DOWN_PURPLE = (232, 120, 40), (174, 60, 107)  # BGR
 
 
@@ -134,7 +136,7 @@ def arms_for_asset(split: str, variant: str) -> tuple[str, ...]:
 
 def _window_asset(
     frame: pd.DataFrame, *, core_start_i: int, core_end_i: int, pre_bars: int, post_bars: int,
-    support_start_i: int,
+    support_start_i: int, price_scale: str = LEGACY_PRICE_SCALE,
 ) -> tuple[bytes, dict[str, Any], dict[str, Any]]:
     """Render one no-future window and return PNG bytes plus its exact core box."""
 
@@ -147,13 +149,32 @@ def _window_asset(
     window = causal.iloc[local_start:local_end + 1].reset_index(drop=True)
     if len(window) != pre_bars + (core_end_i - core_start_i + 1) + post_bars:
         raise ProfitDatasetError("window bar count drift")
-    image, transform = chart_render.render_chart(window, width=WIDTH, height=HEIGHT)
+    if price_scale == VISIBLE_RANGE_PRICE_SCALE:
+        values = pd.concat([window["low"], window["high"], *(window[c] for c in SIX_MA_COLUMNS)]).dropna()
+        if values.empty or not np.isfinite(values.to_numpy(dtype=float)).all():
+            raise ProfitDatasetError("visible price range must be finite")
+        lo, hi = float(values.min()), float(values.max())
+        span = hi - lo
+        if span == 0:
+            # A flat view is valid; give it a deterministic numerical envelope.
+            span = max(abs(lo) * 1e-6, 1e-9)
+            lo, hi = lo - span / 2, hi + span / 2
+        transform = chart_render.make_chart_transform(window, width=WIDTH, height=HEIGHT)
+        transform = replace(transform, price_min=lo - span * .06, price_max=hi + span * .06)
+        image, transform = chart_render.render_chart(window, width=WIDTH, height=HEIGHT, fixed_transform=transform)
+    elif price_scale == LEGACY_PRICE_SCALE:
+        image, transform = chart_render.render_chart(window, width=WIDTH, height=HEIGHT)
+    else:
+        raise ProfitDatasetError(f"unknown render price_scale: {price_scale!r}")
     image = _recolor_candles(image)
     ok, encoded = cv2.imencode(".png", image, [cv2.IMWRITE_PNG_COMPRESSION, 3])
     if not ok:
         raise ProfitDatasetError("PNG encoding failed")
     box = core_box(transform, window, start_local=pre_bars, end_local=pre_bars + core_end_i - core_start_i)
-    return encoded.tobytes(), box, {"window_start_i": start_i, "window_end_i": end_i, "visible_end_open_time_utc": pd.Timestamp(frame["open_time"].iloc[end_i]).isoformat(), "feature_support_start_i": support_start_i, "feature_support_start_utc": pd.Timestamp(frame["open_time"].iloc[support_start_i]).isoformat()}
+    visible = {"window_start_i": start_i, "window_end_i": end_i, "visible_end_open_time_utc": pd.Timestamp(frame["open_time"].iloc[end_i]).isoformat(), "feature_support_start_i": support_start_i, "feature_support_start_utc": pd.Timestamp(frame["open_time"].iloc[support_start_i]).isoformat()}
+    if price_scale != LEGACY_PRICE_SCALE:
+        visible.update({"price_scale": price_scale, "price_min": transform.price_min, "price_max": transform.price_max})
+    return encoded.tobytes(), box, visible
 
 
 def _known_input_continuous(times: pd.Series, start_i: int, end_i: int, minutes: int) -> bool:
@@ -164,9 +185,11 @@ def _known_input_continuous(times: pd.Series, start_i: int, end_i: int, minutes:
     return len(window) == end_i - start_i + 1 and bool((window.diff().iloc[1:] == expected).all())
 
 
-def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, Any]]:
+def event_assets(frame: pd.DataFrame, row: Mapping[str, Any], price_scale: str = LEGACY_PRICE_SCALE) -> list[dict[str, Any]]:
     """Create A plus train-only B render variants for one ledger event, entirely in memory."""
 
+    if price_scale not in {LEGACY_PRICE_SCALE, VISIBLE_RANGE_PRICE_SCALE}:
+        raise ProfitDatasetError(f"unknown render price_scale: {price_scale!r}")
     profit = dict(row["profit"])
     core_start_time, core_end_time = _utc(row["core_start_time"]), _utc(row["core_end_time"])
     times = pd.to_datetime(frame["open_time"], utc=True)
@@ -207,7 +230,7 @@ def event_assets(frame: pd.DataFrame, row: Mapping[str, Any]) -> list[dict[str, 
         raise ProfitDatasetError(f"unsupported direction: {row['direction']!r}")
     result = []
     for variant, pre, post in variants:
-        png, box, visible = _window_asset(frame, core_start_i=start_i, core_end_i=end_i, pre_bars=pre, post_bars=post, support_start_i=support_start)
+        png, box, visible = _window_asset(frame, core_start_i=start_i, core_end_i=end_i, pre_bars=pre, post_bars=post, support_start_i=support_start, price_scale=price_scale)
         visible["visible_end_close_time_utc"] = (
             _utc(visible["visible_end_open_time_utc"]) + pd.Timedelta(minutes=bar_minutes)
         ).isoformat()
@@ -223,6 +246,9 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
     """Build a new root only after frozen cohort capacity and independence pass."""
 
     plan, events_path, output = json.loads(plan_path.read_text()), events_path.resolve(), output.resolve()
+    price_scale = plan.get("render", {}).get("price_scale", LEGACY_PRICE_SCALE)
+    if price_scale not in {LEGACY_PRICE_SCALE, VISIBLE_RANGE_PRICE_SCALE}:
+        raise ProfitDatasetError(f"unknown render price_scale: {price_scale!r}")
     if output.exists():
         raise FileExistsError(f"refusing to overwrite dataset root: {output}")
     if sha256_file(events_path) != str(plan["events_sha256"]):
@@ -281,7 +307,7 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
         source_sha = source_hashes[source_path]
         frame, _ = read_preholdout_prefix(source_file, end_exclusive=max_close, bar_minutes=bar_minutes)
         for row in source_rows:
-            for asset in event_assets(frame, row):
+            for asset in event_assets(frame, row, price_scale=price_scale):
                 stem = asset_stem(str(row['event_id']), str(asset['variant']))
                 arms = arms_for_asset(str(row["split"]), str(asset["variant"]))
                 if not arms:
@@ -292,6 +318,8 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
                 label = label_line(asset)
                 (output / label_rel).write_text(label)
                 manifest.append({"arms": list(arms), "event_id": row["event_id"], "cluster_id": row["cluster_id"], "canonical_asset": row["canonical_asset"], "core_end_time": row["core_end_time"], "bar_minutes": bar_minutes, "split": row["split"], "variant": asset["variant"], "direction": row["direction"], "source_path": source_path, "source_sha256": source_sha, "image_path": image_rel, "image_sha256": hashlib.sha256(asset["png"]).hexdigest(), "label_path": label_rel, "label_sha256": sha256_file(output / label_rel), "class_id": asset["class_id"] if asset["positive"] else None, "box": asset["box"] if asset["positive"] else None, "visible_end_open_time_utc": asset["visible"]["visible_end_open_time_utc"], "visible_end_close_time_utc": asset["visible"]["visible_end_close_time_utc"], "decision_at_utc": asset["visible"]["decision_at_utc"], "feature_support_start_i": asset["visible"]["feature_support_start_i"], "feature_support_start_utc": asset["visible"]["feature_support_start_utc"], "label_horizon_end_utc": asset["label_horizon_end_utc"], "training_eligible": False, "production_eligible": False})
+                if price_scale != LEGACY_PRICE_SCALE:
+                    manifest[-1].update({key: asset["visible"][key] for key in ("price_scale", "price_min", "price_max")})
                 for arm in arms:
                     arm_images[arm][str(row["split"])].append(f"./{image_rel}")
                     arm_events[arm][str(row["split"])].add(str(row["event_id"]))
@@ -316,6 +344,8 @@ def build(plan_path: Path, events_path: Path, output: Path) -> dict[str, Any]:
         "training_contract_sha256": plan["training_contract_sha256"],
         "selection_receipt_sha256": plan["selection_receipt_sha256"],
     })
+    if price_scale != LEGACY_PRICE_SCALE:
+        summary["price_scale"] = price_scale
     _write_json(output / "summary.json", summary)
     return summary
 
