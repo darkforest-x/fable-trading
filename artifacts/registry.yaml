@@ -32255,3 +32255,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Eight policies with serial, fixed-entry, matched-random ledgers and reference-risk tails; no native V12 bk parity claim.
+
+  - artifact_id: spike-joint-btc-gate-20260922-delivery
+    artifact_type: manifest
+    role: btc_regime_entry_gate_full_archive_comparison_rejected
+    source_repo: darkforest-x/fable-trading
+    source_commit: 36c2d439126274364d4f3b856114cfea07173b24
+    source_path: artifacts/spike_joint_btc_gate_20260922.json
+    sha256: 8ca6fdbe90fe0cc25be3e1ed867eb3acfd2158430b20330f6c8e2f4524ee7d49
+    size_bytes: 7546
+    storage_uri: repo://artifacts/spike_joint_btc_gate_20260922.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 638streams/9301candidates; old baseline/status/control parity and65107BTC decisions pass;504 direct arithmetic checks. All24later conditions fail. EarlierH1SMA240
+      loses later.23focused pass;420extended pass,2outside-scope L1 hash failures. Notion3e38856479af81519395d61310f7c9ba.

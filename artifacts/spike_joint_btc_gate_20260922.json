@@ -1,0 +1,169 @@
+{
+  "experiment_id": "exp-spike-joint-btc-gate-20260922-v1",
+  "status": "rejected",
+  "generator_commit": "36c2d439126274364d4f3b856114cfea07173b24",
+  "generated_at": "2026-09-22",
+  "run_identity": "58da0a7a35611086441d6449e7d8a14d39459ed9dbfffe6c39f29c082b62160f",
+  "symbols": 638,
+  "joint_candidates": 9301,
+  "timeframes": [
+    "15m",
+    "1h"
+  ],
+  "source_window": {
+    "start": "2024-09-10T00:00:00Z",
+    "split": "2025-09-10T00:00:00Z",
+    "end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "exit_rules": [
+    "price",
+    "rsi7"
+  ],
+  "earlier_selections": [
+    {
+      "exit_rule": "price",
+      "exploratory_top": "h1_sma240",
+      "selected_gate": "h1_sma240",
+      "criterion": "earlier mature pooled mean net R, positive R and bp",
+      "earlier_score_r": 0.08631631427802611,
+      "earlier_score_bp": 7.6909758918598
+    },
+    {
+      "exit_rule": "rsi7",
+      "exploratory_top": "h1_sma240",
+      "selected_gate": "h1_sma240",
+      "criterion": "earlier mature pooled mean net R, positive R and bp",
+      "earlier_score_r": 0.08522211384250927,
+      "earlier_score_bp": 7.852151026304283
+    }
+  ],
+  "later_research_conditions_passed": 0,
+  "baseline_parity": "638 streams: candidate/status, trade economics and random controls independently reconciled",
+  "btc_audit_decisions": 65107,
+  "local_arithmetic_checks": 504,
+  "tests": {
+    "focused_passed": 23,
+    "extended_passed": 420,
+    "extended_failed": 2,
+    "failure_evidence": "experiments/active/exp-spike-joint-btc-gate-20260922-v1/external_test_failures.json"
+  },
+  "file_hashes": {
+    "analysis/p1_spike_joint_btc_gate_20260922.md": {
+      "sha256": "19a52771e01013b896b1fc8a48774f542fe533a57dd4d76ce0ea0bb4892054aa",
+      "size_bytes": 20087
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/PROJECT_PLAN.md": {
+      "sha256": "8303aca8bf93a0e81ed87e7b3ff9977403ab7ab0aee6bc1d4bb0d39dc64f4662",
+      "size_bytes": 7188
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/config.json": {
+      "sha256": "6d611cde4e7f677a4390e4814e49956c83a847ca0a950f951f4fc749b23a4216",
+      "size_bytes": 846
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/btc_data_audit.json": {
+      "sha256": "c3a419329ca1f225bcd3db4c62e0cf5e1f37d98ee19ff2ec311b1dfb923d8b36",
+      "size_bytes": 952
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/decision_audit.json": {
+      "sha256": "442c5db21e41735754ced04c37b3886a08f72eda19706da1198102dceacad1db",
+      "size_bytes": 6387
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/local_arithmetic_audit.json": {
+      "sha256": "c1d6b74e5e7fc005560b0dc466fbd0a12f6955560bc33d414a40b8af296aeb64",
+      "size_bytes": 391
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/delivery_integrity.json": {
+      "sha256": "2644ac6b747b39091e2e8d4bd850420f9c246b6b857b6e4394d0dea2c1f76f50",
+      "size_bytes": 361
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/external_test_failures.json": {
+      "sha256": "0f69eded7ecfa66919bc6945236f9dbb7001a4468b3eff033b20e01e52bc10ec",
+      "size_bytes": 985
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/notion_sync.json": {
+      "sha256": "71d967780b8dca618a522e324157de5710525e9008e82b79697f02f8d3a6cfb6",
+      "size_bytes": 288
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/verification.log": {
+      "sha256": "cbdf87e6aed4d8ba6c49d001605b5775cabe3416f598b226e644ffa0b2ebeeeb",
+      "size_bytes": 6584
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1.log": {
+      "sha256": "606636415a13b177aaab7b5404d3eb1f91b4dfb0c2608c2b76877aeb4108f90d",
+      "size_bytes": 578
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/evaluation_started.json": {
+      "sha256": "55e84f5834ec1c9379eb8b4d987266a76ccc98a2e32135aa6a2cdeb7d7728f3e",
+      "size_bytes": 192
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/identity.json": {
+      "sha256": "5ef3448e75f5b8295b615669f116b7c590e1d952fe346508710d29622396f1a9",
+      "size_bytes": 182486
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/manifest.json": {
+      "sha256": "aabc9e3c1cca09e55e3460fc0604407f0c08fcba769b88fbf9e107d724c14881",
+      "size_bytes": 286
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/attribution.csv": {
+      "sha256": "5b83f5237fdeb220673cbdaf37bc04a57dee57d7ebfc065d6b9a4538f51f5b72",
+      "size_bytes": 15072
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/differences.csv": {
+      "sha256": "b4269773d625a438ac0e9f195776a5a49533a02917e2b8998171ab94eea9d74d",
+      "size_bytes": 40548
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/manifest.json": {
+      "sha256": "bb07261724e3232b768e636fd268c6508241b74d0a9fc83e2750e1d633aaa1f9",
+      "size_bytes": 55385
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/metrics.csv": {
+      "sha256": "eabb0c09a7f4bae447f67a039062dc4ad92b06037930258dcbdb8b40f7a68422",
+      "size_bytes": 49754
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/monthly.csv": {
+      "sha256": "b3bec2d9c2c944e08b9599d8c5db417050fa8633d2acc10416f03e07c58d0510",
+      "size_bytes": 49809
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/research_gates.csv": {
+      "sha256": "3e6d908cb54146f3d36a3a870a429fb7df877f12a1032c1bb2febf3fc5aa33e4",
+      "size_bytes": 2622
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/selection.json": {
+      "sha256": "e56a393a8643915f2fd811ad60940ad9d5ba68c50d530538e851c0e984224a8f",
+      "size_bytes": 526
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/status_counts.csv": {
+      "sha256": "a87b9caa2e3c54f10e0644a4e55df06ee9db4519af75dabcd6f7eaa4d5995997",
+      "size_bytes": 4193
+    },
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/statistics_v1/tables.md": {
+      "sha256": "56d52de24fcf75e104fab23d5531de1a1362be971efb9791529c21c985db8537",
+      "size_bytes": 16810
+    },
+    "docs/learnings/deployed-signal-identity-precedes-backtest-reuse.md": {
+      "sha256": "b76fa251d9fa95c9ec6b09013028e34e70bd8e11654823b88bd8aca379df948f",
+      "size_bytes": 1649
+    },
+    "docs/learnings/empty-ledgers-and-unknown-fields-are-distinct-evidence.md": {
+      "sha256": "37632fa29d0a6fcfe4627de07dc3072ac7fd86a942007b416e6557bcc5c182dc",
+      "size_bytes": 1270
+    },
+    "docs/learnings/zero-trade-months-remain-in-a-gate-comparison.md": {
+      "sha256": "77cf9d52fb51d674ad23f1068b54011eb9cc82435d58913b3a61e72002dd28b6",
+      "size_bytes": 1435
+    },
+    "docs/learnings/entry-gates-must-improve-trade-quality-not-only-loss-totals.md": {
+      "sha256": "5bba44a97d225835c46ff7d73987e7c3caad0e33d8d50eb398bf8d28ebce2842",
+      "size_bytes": 1430
+    }
+  },
+  "local_stream_storage": {
+    "path": "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/streams",
+    "receipt_count": 638,
+    "payload_files": 2552,
+    "git_policy": "Large event leaves remain local; statistics manifest records every receipt hash and receipts hash all payloads. Root metadata and summary evidence are committed."
+  },
+  "notion_url": "https://app.notion.com/p/3e38856479af81519395d61310f7c9ba",
+  "training_eligible": false,
+  "production_eligible": false
+}

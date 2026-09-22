@@ -1,0 +1,99 @@
+........................................................................ [ 17%]
+........................................................................ [ 34%]
+........................................................................ [ 51%]
+........................................................F..F............ [ 68%]
+........................................................................ [ 85%]
+..............................................................           [100%]
+=================================== FAILURES ===================================
+_ test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/candidates.py] _
+
+entry = {'decision': 'DIRECT_PORT', 'destination_path': 'yoyo/layers/l1_detection/candidates.py', 'destination_sha256': '8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd', 'holdout_consumed': False, ...}
+
+    @pytest.mark.parametrize(
+        "entry",
+        COPIED or [None],
+        ids=lambda e: (e["destination_path"] if e else "<empty ledger>"),
+    )
+    def test_a_ported_file_still_has_its_recorded_hash(entry):
+        if entry is None:
+            pytest.skip("no copied entries in the ledger yet")
+        destination = REPO / entry["destination_path"]
+        assert destination.is_file(), (
+            f"{entry['destination_path']} is in the migration ledger but not on disk"
+        )
+        actual = _sha256(destination)
+>       assert actual == entry["destination_sha256"], (
+            f"{entry['destination_path']} has changed since it was ported "
+            f"({entry['decision']} from {entry['source_repo']}@{entry['source_commit'][:12]}). "
+            "If the edit was intended, re-record it in the ledger; if it was not, this is "
+            "the drift the ledger exists to catch."
+        )
+E       AssertionError: yoyo/layers/l1_detection/candidates.py has changed since it was ported (DIRECT_PORT from darkforest-x/yoyo-trading@784766de45a3). If the edit was intended, re-record it in the ledger; if it was not, this is the drift the ledger exists to catch.
+E       assert '133a97a71a1a...9b15a04bf993b' == '8c2594ef2cbc...6b117d0c326dd'
+E         
+E         - 8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd
+E         + 133a97a71a1aa973a053dbd97be9c2b8497008192d6a7738abd9b15a04bf993b
+
+tests/parity/test_migration_ledger_parity.py:77: AssertionError
+_ test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/render.py] _
+
+entry = {'decision': 'DIRECT_PORT', 'destination_path': 'yoyo/layers/l1_detection/render.py', 'destination_sha256': '0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7', 'holdout_consumed': False, ...}
+
+    @pytest.mark.parametrize(
+        "entry",
+        COPIED or [None],
+        ids=lambda e: (e["destination_path"] if e else "<empty ledger>"),
+    )
+    def test_a_ported_file_still_has_its_recorded_hash(entry):
+        if entry is None:
+            pytest.skip("no copied entries in the ledger yet")
+        destination = REPO / entry["destination_path"]
+        assert destination.is_file(), (
+            f"{entry['destination_path']} is in the migration ledger but not on disk"
+        )
+        actual = _sha256(destination)
+>       assert actual == entry["destination_sha256"], (
+            f"{entry['destination_path']} has changed since it was ported "
+            f"({entry['decision']} from {entry['source_repo']}@{entry['source_commit'][:12]}). "
+            "If the edit was intended, re-record it in the ledger; if it was not, this is "
+            "the drift the ledger exists to catch."
+        )
+E       AssertionError: yoyo/layers/l1_detection/render.py has changed since it was ported (DIRECT_PORT from darkforest-x/yoyo-trading@784766de45a3). If the edit was intended, re-record it in the ledger; if it was not, this is the drift the ledger exists to catch.
+E       assert 'def5b7317c13...0336a1a3c0eea' == '0962812feea5...ae3e580ead3e7'
+E         
+E         - 0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7
+E         + def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea
+
+tests/parity/test_migration_ledger_parity.py:77: AssertionError
+=============================== warnings summary ===============================
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:64: PyparsingDeprecationWarning: 'oneOf' deprecated - use 'one_of'
+    prop = Group((name + Suppress("=") + comma_separated(value)) | oneOf(_CONSTANTS))
+
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:85: PyparsingDeprecationWarning: 'parseString' deprecated - use 'parse_string'
+    parse = parser.parseString(pattern)
+
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_fontconfig_pattern.py:89: PyparsingDeprecationWarning: 'resetCache' deprecated - use 'reset_cache'
+    parser.resetCache()
+
+.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45
+  /Users/zhangzc/fable-trading/.venv/lib/python3.9/site-packages/matplotlib/_mathtext.py:45: PyparsingDeprecationWarning: 'enablePackrat' deprecated - use 'enable_packrat'
+    ParserElement.enablePackrat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/parity/test_migration_ledger_parity.py::test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/candidates.py]
+FAILED tests/parity/test_migration_ledger_parity.py::test_a_ported_file_still_has_its_recorded_hash[yoyo/layers/l1_detection/render.py]
+2 failed, 420 passed, 14 warnings in 3.11s

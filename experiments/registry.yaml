@@ -10575,15 +10575,15 @@ experiments:
 
   - experiment_id: exp-spike-joint-btc-gate-20260922-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 9f588ec153
-    status: active
+    source_commit: 36c2d439126274364d4f3b856114cfea07173b24
+    status: rejected
     question: Does a completed BTC perpetual close above same-chart or fixed H1 SMA improve the existing SPIKE box_any joint entry?
     single_variable: Global entry permission only; predeclared SMA60/120/240 within separate unchanged price and current RSI7 exit strata.
-    result: Planned; no market replay or profitability conclusion yet.
+    result: All638 streams and9301 candidate identities complete; historical baseline trades, statuses and controls match. All24 later gate conditions fail. RSI7 H1 SMA120 reduces15m trade count but worsens mean netR; earlier-selected H1 SMA240 remains negative later.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_joint_btc_gate_20260922.md
-    artifacts: []
+    artifacts: [spike-joint-btc-gate-20260922-delivery]
     reuse_allowed: false
-    notes: Owner20260922 authorizes offline comparison; same638Binance archive,15m/1h,all9301candidates. No monitor/Pine or account change.
+    notes: Builder36c2d439 precedes replay;23focused pass,420extended pass with2outside-scope L1 hash failures. Independent65107decision audit passes. Notion3e38856479af81519395d61310f7c9ba; no monitor/Pine/account change or production eligibility.

@@ -1,0 +1,153 @@
+{
+  "audit_type": "independent_btc_decision_value_audit",
+  "result": "PASS",
+  "runtime_model_effort": {
+    "verified": false,
+    "reason": "No runtime model/effort evidence is exposed in this task context; budget-evidence Luna Max runtime identity is unverified."
+  },
+  "scope": {
+    "full_replay_manifest": "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/manifest.json",
+    "manifest_complete": true,
+    "manifest_symbols": 638,
+    "manifest_completed": 638,
+    "manifest_errors": {},
+    "run_identity": "58da0a7a35611086441d6449e7d8a14d39459ed9dbfffe6c39f29c082b62160f",
+    "stream_dirs": 638,
+    "empty_streams": 23,
+    "nonempty_streams": 615,
+    "unique_events": 9301,
+    "decision_rows": 65107,
+    "decision_rows_expected_from_events": 65107,
+    "decision_rows_equal_to_seven_gates_per_event": true,
+    "decision_rows_by_timeframe": {"15m": 49665, "1h": 15442},
+    "events_by_timeframe": {"15m": 7095, "1h": 2206},
+    "rows_by_timeframe_gate": {
+      "15m|none": 7095,
+      "15m|same_sma60": 7095,
+      "15m|same_sma120": 7095,
+      "15m|same_sma240": 7095,
+      "15m|h1_sma60": 7095,
+      "15m|h1_sma120": 7095,
+      "15m|h1_sma240": 7095,
+      "1h|none": 2206,
+      "1h|same_sma60": 2206,
+      "1h|same_sma120": 2206,
+      "1h|same_sma240": 2206,
+      "1h|h1_sma60": 2206,
+      "1h|h1_sma120": 2206,
+      "1h|h1_sma240": 2206
+    }
+  },
+  "evidence": [
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/config.json",
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/PROJECT_PLAN.md",
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/manifest.json",
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/identity.json",
+    "experiments/active/exp-spike-joint-btc-gate-20260922-v1/run_v1/streams/*/decisions.csv.gz",
+    "yoyo/evaluation/spike_joint_btc_gate.py (DECISION_COLUMNS and gate contract)",
+    "data/kline_preholdout_binance_um5m/series/binance_um_BTCUSDT_5m_665856.csv"
+  ],
+  "provenance": {
+    "btc_source_sha256": "b609b006d30c1db0aba54bad31f16e7b533c95005a977f43ce0033931f226322",
+    "btc_sha256_matches_run_identity": true,
+    "gate_code_sha256": "5a607edaa172546bb6c292a211461a5dc42b2d9b6f82b0c34524eb517df321cb",
+    "gate_code_sha256_matches_run_identity": true,
+    "stream_dir_set_equals_run_identity_inputs": true,
+    "tested_gate_used_as_oracle": false,
+    "read_trade_or_return_artifacts": false
+  },
+  "btc_source_5m": {
+    "rows": 665856,
+    "unique_open_times": 665856,
+    "monotonic_open_time": true,
+    "open_time_min": "2020-01-01T00:00:00+00:00",
+    "open_time_max": "2026-04-30T23:55:00+00:00",
+    "non_5m_gaps": 0,
+    "nulls_in_ohlcv": 0,
+    "bucket_ranges": {
+      "15m": {
+        "bucket_count": 221952,
+        "complete_count": 221952,
+        "incomplete_count": 0,
+        "first_bucket_open": "2020-01-01T00:00:00+00:00",
+        "last_bucket_open": "2026-04-30T23:45:00+00:00",
+        "raw_bars_per_bucket": 3
+      },
+      "60m": {
+        "bucket_count": 55488,
+        "complete_count": 55488,
+        "incomplete_count": 0,
+        "first_bucket_open": "2020-01-01T00:00:00+00:00",
+        "last_bucket_open": "2026-04-30T23:00:00+00:00",
+        "raw_bars_per_bucket": 12
+      }
+    }
+  },
+  "decision_time_boundaries": {
+    "signal_close": {
+      "15m": {"min": "2024-09-10T14:30:00+00:00", "max": "2026-04-30T22:00:00+00:00", "rows": 49665},
+      "1h": {"min": "2024-09-10T19:00:00+00:00", "max": "2026-04-30T12:00:00+00:00", "rows": 15442}
+    },
+    "emitted_btc_source_close_time": {
+      "15m": {"min": "2024-09-10T14:30:00+00:00", "max": "2026-04-30T22:00:00+00:00", "rows": 21285},
+      "60m": {"min": "2024-09-10T14:00:00+00:00", "max": "2026-04-30T22:00:00+00:00", "rows": 34521}
+    },
+    "emitted_nonnull_reference_rows": 55806
+  },
+  "independent_recompute": {
+    "method": "From the allowed BTC 5m CSV, independently aggregate epoch-aligned complete 15m/60m buckets, compute trailing contiguous close SMAs of 60/120/240 buckets, select the latest bucket with close_time <= signal_close, and evaluate strict close > SMA. none is known/pass with not_applicable and null BTC fields.",
+    "rows_checked": 65107,
+    "fields_checked": [
+      "signal_close_consistency",
+      "gate_pass",
+      "gate_known",
+      "gate_reason",
+      "btc_timeframe",
+      "btc_source_bar_open",
+      "btc_source_close_time",
+      "btc_source_close",
+      "btc_sma",
+      "btc_staleness_seconds"
+    ],
+    "difference_counts": {
+      "signal_close_consistency": 0,
+      "gate_pass": 0,
+      "gate_known": 0,
+      "gate_reason": 0,
+      "btc_timeframe": 0,
+      "btc_source_bar_open": 0,
+      "btc_source_close_time": 0,
+      "btc_source_close": 0,
+      "btc_sma": 0,
+      "btc_staleness_seconds": 0
+    },
+    "gate_known_difference_count": 0,
+    "gate_pass_difference_count": 0,
+    "gate_reason_difference_count": 0,
+    "max_abs_difference": {"btc_source_close": 0.0, "btc_sma": 4.3655745685100555e-11, "btc_staleness_seconds": 0.0},
+    "max_relative_difference": {"btc_source_close": 0.0, "btc_sma": 4.840549919075898e-16, "btc_staleness_seconds": 0.0},
+    "tolerances": {"price_and_sma_abs": 1e-08, "price_and_sma_relative": 1e-12, "staleness_abs": 1e-09, "timestamps": "exact UTC equality"},
+    "future_source_close_emitted": 0,
+    "future_source_close_independent": 0,
+    "referenced_bucket_outside_raw_range": 0,
+    "incomplete_reference_bucket": 0,
+    "structural_issue_count": 0,
+    "issue_examples": []
+  },
+  "boundary_checks": {
+    "all_638_streams_present": true,
+    "manifest_complete_and_zero_errors": true,
+    "all_btc_15m_buckets_complete": true,
+    "all_btc_60m_buckets_complete": true,
+    "all_emitted_reference_buckets_in_raw_range": true,
+    "all_emitted_reference_close_times_asof": true,
+    "all_sma_windows_end_at_closed_source_bucket": true,
+    "all_decision_values_match_independent_recompute": true,
+    "all_structural_checks_pass": true
+  },
+  "unverifiable": [
+    "This bounded audit verifies emitted BTC decision values and causal timestamps only; it does not verify trade outcomes, statistics, or economic conclusions.",
+    "Runtime model/effort identity (budget-evidence Luna Max) is not exposed here and is explicitly unverified.",
+    "No external Binance/TradingView/OKX parity is established beyond the supplied BTC archive."
+  ]
+}
