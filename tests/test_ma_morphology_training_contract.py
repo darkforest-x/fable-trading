@@ -133,3 +133,18 @@ def test_morphology_metrics_do_not_pool_validation_and_test() -> None:
     assert testing["background_false_positive_rate_conf025_iou05"] == 1.0
     assert testing["positive_matched_class_spatial_hit_rate_conf025_iou05"] is None
     assert testing["low_conf_all_class_event_score_roc_auc"] is None
+
+
+def test_remote_preflight_leaves_frozen_audit_bytes_untouched(tmp_path, monkeypatch):
+    from scripts.windows import run_ma_morphology_redo as runner
+    frozen=tmp_path/'audit.json'
+    frozen.write_bytes(b'{"status":"passed"}\r\n')
+    original,stamp=frozen.read_bytes(),frozen.stat().st_mtime_ns
+    def audit_fn(_plan,_dataset,*,write_receipt=True):
+        if write_receipt:frozen.write_bytes(b'{"status":"passed"}\n')
+        return {'status':'passed'}
+    monkeypatch.setattr(runner,'validate_preflight_contract',lambda **kw:dict(kw['audit_result']))
+    receipt=runner.run_training(plan_path=tmp_path/'plan.json',dataset=tmp_path,run_root=tmp_path/'new_run',launch_contract_path=tmp_path/'launch.json',train=False,audit_fn=audit_fn)
+    assert receipt['status']=='preflight_passed'
+    assert frozen.read_bytes()==original
+    assert frozen.stat().st_mtime_ns==stamp

@@ -119,6 +119,12 @@ def _audit_and_review(plan: Mapping[str, Any]) -> tuple[dict[str, Any], dict[str
         raise OrchestrationError("audit/review are not bound to current manifest")
     if review.get("status") != "passed_rendering_spot_check":
         raise OrchestrationError("passed rendering spot-check required")
+    selection = EXP / "visual_review" / "selection.json"
+    if review.get("selection_sha256") != sha(selection):
+        raise OrchestrationError("visual review selection changed")
+    for page in read_json(selection)["pages"]:
+        if sha(selection.parent / page["path"]) != page["sha256"]:
+            raise OrchestrationError("review sheet changed")
     if plan.get("training_eligible") is not False or plan.get("production_eligible") is not False:
         raise OrchestrationError("plan offline flags drift")
     return audit, review
@@ -428,9 +434,37 @@ def collect() -> None:
     write_json(EXP / "download_inventory.json", records); _state("collected", files=len(records))
 
 
+def finish() -> None:
+    """Bounded plain-Python completion transfer; never wakes an LLM or retrains.
+
+    This is one job's completion continuation, not a repeating Codex automation.
+    A disconnected SSH session can retry reads only; WMI submission is never
+    repeated. Stop immediately on a failed remote receipt, or after 12 hours.
+    """
+    deadline=time.monotonic()+12*3600
+    while time.monotonic()<deadline:
+        try:
+            current=snapshot()
+        except (OrchestrationError,subprocess.TimeoutExpired) as exc:
+            write_json(EXP/'completion_transfer_status.json',{'status':'waiting_for_connection','error':repr(exc),'updated_unix':time.time()})
+            time.sleep(180)
+            continue
+        job=current.get('job',{});training=current.get('training',{})
+        if job.get('status')=='failed' or training.get('status')=='failed':
+            write_json(EXP/'completion_transfer_status.json',{'status':'remote_failed','job':job,'updated_unix':time.time()})
+            raise OrchestrationError('Remote job failed; retained outputs, no automatic retry')
+        if job.get('status')=='completed':
+            collect()
+            write_json(EXP/'completion_transfer_status.json',{'status':'completed','updated_unix':time.time()})
+            return
+        write_json(EXP/'completion_transfer_status.json',{'status':'waiting_for_job','progress':current.get('progress'),'updated_unix':time.time()})
+        time.sleep(180)
+    raise OrchestrationError('Completion transfer reached 12h limit; remote job was not killed or restarted')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("freeze", "stage", "start", "snapshot", "collect"))
+    parser.add_argument("mode", choices=("freeze", "stage", "start", "snapshot", "collect", "finish"))
     args = parser.parse_args()
     if args.mode == "snapshot": print(json.dumps(snapshot(), indent=2, sort_keys=True))
     else: globals()[args.mode]()
