@@ -1,0 +1,97 @@
+{
+  "args": {
+    "cohort_receipt": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\selection_queue_round_017\\selection_receipt.json",
+    "contract": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\training_contract_owner1500_v2.json",
+    "dataset": "C:\\fable\\datasets\\ma_profit3r_owner1500_v4",
+    "dataset_plan": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\dataset_plan_owner1500_v4.json",
+    "model": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\yolo11s.pt",
+    "plan": "C:\\fable\\experiments\\active\\exp-ma-profit3r-20260922-v1\\plan.json",
+    "remote_dataset_root": null,
+    "run_root": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4",
+    "train": true
+  },
+  "arms": {
+    "A": {
+      "best": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_A\\weights\\best.pt",
+      "last": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_A\\weights\\last.pt",
+      "results_csv": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_A\\results.csv",
+      "status": "completed"
+    },
+    "B": {
+      "best": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_B\\weights\\best.pt",
+      "last": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_B\\weights\\last.pt",
+      "results_csv": "C:\\fable\\runs\\ma_profit3r_owner1500_20260922_v4\\arm_B\\results.csv",
+      "status": "completed"
+    }
+  },
+  "audit": {
+    "arms": {
+      "A": {
+        "test": 989,
+        "train": 1506,
+        "val": 1305
+      },
+      "B": {
+        "test": 989,
+        "train": 3012,
+        "val": 1305
+      }
+    },
+    "manifest_rows": 6812,
+    "manifest_sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+    "price_scale": "visible_range_v1",
+    "verified_files": 13624
+  },
+  "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+  "data_yaml_sha256": {
+    "A": "256b157c20023852436e7fe51d04b3a0a6b52d4bcf2db2d8ad96430b88cc2172",
+    "B": "b27496a8445c83f8ee63c066ba51995285f665c2ee18c5140a005cbcac6008a2"
+  },
+  "environment": {
+    "free_vram_bytes": 11801722880,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "total_vram_bytes": 12884377600,
+    "versions": {
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "torch": "2.8.0+cu126",
+      "ultralytics": "8.4.89"
+    }
+  },
+  "status": "completed",
+  "train_requested": true,
+  "training_args": {
+    "auto_augment": null,
+    "batch": 8,
+    "bgr": 0.0,
+    "cache": false,
+    "copy_paste": 0.0,
+    "cutmix": 0.0,
+    "degrees": 0.0,
+    "deterministic": true,
+    "device": "0",
+    "epochs": 40,
+    "erasing": 0.0,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "mixup": 0.0,
+    "mosaic": 0.0,
+    "multi_scale": 0.0,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "perspective": 0.0,
+    "plots": false,
+    "rect": true,
+    "scale": 0.0,
+    "seed": 0,
+    "shear": 0.0,
+    "translate": 0.0,
+    "workers": 2
+  }
+}

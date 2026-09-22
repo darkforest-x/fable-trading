@@ -1,0 +1,1122 @@
+{
+  "status": "completed",
+  "purpose": "padding sensitivity diagnostic only; formal evaluation unchanged",
+  "selection": "first four val positives and four val failures in event_id order",
+  "manifest_sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+  "code_sha256": "9273002df11d58fac17f622bd131c2ebf2c549a47c1ee3277f2b63da0ca101c2",
+  "records": [
+    {
+      "arm": "A",
+      "event_id": "cluster_015b630b21e825a7e210c638",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9756084084510803,
+      "hit": true,
+      "max_iou": 0.9875129986098202,
+      "box_count": 3,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6090742945671082,
+          "cy_norm": 0.38967224955558777,
+          "w_norm": 0.255615234375,
+          "h_norm": 0.30849429965019226,
+          "confidence": 0.9756084084510803,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.6089029908180237,
+          "cy_norm": 0.32119297981262207,
+          "w_norm": 0.2559245228767395,
+          "h_norm": 0.45439043641090393,
+          "confidence": 0.027507854625582695,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.9036232233047485,
+          "cy_norm": 0.5057221055030823,
+          "w_norm": 0.1927535980939865,
+          "h_norm": 0.6602880954742432,
+          "confidence": 0.0028918308671563864,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_02eb05ebbd3d0befdf8381cc",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.987302303314209,
+      "hit": true,
+      "max_iou": 0.9905329760547026,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.609000027179718,
+          "cy_norm": 0.6257973909378052,
+          "w_norm": 0.2556951642036438,
+          "h_norm": 0.42058321833610535,
+          "confidence": 0.987302303314209,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_03745d10f6b1061321954d41",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9806821346282959,
+      "hit": true,
+      "max_iou": 0.9950257491459944,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6091704368591309,
+          "cy_norm": 0.3012300729751587,
+          "w_norm": 0.2553962767124176,
+          "h_norm": 0.3717080056667328,
+          "confidence": 0.9806821346282959,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_04cbba08140988d1e96ef740",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9838144183158875,
+      "hit": true,
+      "max_iou": 0.9902521777707477,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6149570345878601,
+          "cy_norm": 0.4803191125392914,
+          "w_norm": 0.21252499520778656,
+          "h_norm": 0.4731167256832123,
+          "confidence": 0.9838144183158875,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_000f90a7264d43704170aa18",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9791178703308105,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.614956796169281,
+          "cy_norm": 0.5750966668128967,
+          "w_norm": 0.21260634064674377,
+          "h_norm": 0.278402715921402,
+          "confidence": 0.9791178703308105,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_002001017499dfcbf6d75a22",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9860289692878723,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6090523600578308,
+          "cy_norm": 0.3274354636669159,
+          "w_norm": 0.25575724244117737,
+          "h_norm": 0.5612812042236328,
+          "confidence": 0.9860289692878723,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_0056743c1afcde4e1ff7b521",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9700092673301697,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6148545145988464,
+          "cy_norm": 0.8025519251823425,
+          "w_norm": 0.21254311501979828,
+          "h_norm": 0.15112106502056122,
+          "confidence": 0.9700092673301697,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.37287023663520813,
+          "cy_norm": 0.8182388544082642,
+          "w_norm": 0.2293771356344223,
+          "h_norm": 0.15250135958194733,
+          "confidence": 0.005944635719060898,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_006aa29c82490a95ee767c60",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9903141856193542,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6148698925971985,
+          "cy_norm": 0.6110407710075378,
+          "w_norm": 0.21258488297462463,
+          "h_norm": 0.4361906945705414,
+          "confidence": 0.9903141856193542,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_015b630b21e825a7e210c638",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9778452515602112,
+      "hit": true,
+      "max_iou": 0.9838413471601631,
+      "box_count": 3,
+      "max_difference_from_frozen_prediction": 1,
+      "boxes": [
+        {
+          "cx_norm": 0.6090663075447083,
+          "cy_norm": 0.3936004042625427,
+          "w_norm": 0.25561124086380005,
+          "h_norm": 0.2997141480445862,
+          "confidence": 0.9778452515602112,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.9036033749580383,
+          "cy_norm": 0.5028159022331238,
+          "w_norm": 0.1927933692932129,
+          "h_norm": 0.6470866799354553,
+          "confidence": 0.007878119125962257,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.6088517308235168,
+          "cy_norm": 0.3220030963420868,
+          "w_norm": 0.25596314668655396,
+          "h_norm": 0.4527389407157898,
+          "confidence": 0.003267022082582116,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_02eb05ebbd3d0befdf8381cc",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9876044988632202,
+      "hit": true,
+      "max_iou": 0.992716820095807,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.000822901725769043,
+      "boxes": [
+        {
+          "cx_norm": 0.6090080142021179,
+          "cy_norm": 0.6253411769866943,
+          "w_norm": 0.2556869685649872,
+          "h_norm": 0.4197603166103363,
+          "confidence": 0.9876044988632202,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_03745d10f6b1061321954d41",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9816537499427795,
+      "hit": true,
+      "max_iou": 0.9958104441519633,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0009716153144836426,
+      "boxes": [
+        {
+          "cx_norm": 0.6091696619987488,
+          "cy_norm": 0.3013755679130554,
+          "w_norm": 0.2554014325141907,
+          "h_norm": 0.3717624843120575,
+          "confidence": 0.9816537499427795,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_04cbba08140988d1e96ef740",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9848393201828003,
+      "hit": true,
+      "max_iou": 0.9897791514488082,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0010249018669128418,
+      "boxes": [
+        {
+          "cx_norm": 0.6149619221687317,
+          "cy_norm": 0.4802487790584564,
+          "w_norm": 0.21253471076488495,
+          "h_norm": 0.47332116961479187,
+          "confidence": 0.9848393201828003,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_000f90a7264d43704170aa18",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9788045883178711,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0003132820129394531,
+      "boxes": [
+        {
+          "cx_norm": 0.6149526834487915,
+          "cy_norm": 0.575141191482544,
+          "w_norm": 0.21261043846607208,
+          "h_norm": 0.2783176600933075,
+          "confidence": 0.9788045883178711,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_002001017499dfcbf6d75a22",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9862484335899353,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.00021946430206298828,
+      "boxes": [
+        {
+          "cx_norm": 0.6090378165245056,
+          "cy_norm": 0.32734885811805725,
+          "w_norm": 0.2558131217956543,
+          "h_norm": 0.5613068342208862,
+          "confidence": 0.9862484335899353,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_0056743c1afcde4e1ff7b521",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9402625560760498,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.24195542931556702,
+      "boxes": [
+        {
+          "cx_norm": 0.6147558093070984,
+          "cy_norm": 0.8022169470787048,
+          "w_norm": 0.21241645514965057,
+          "h_norm": 0.1509542465209961,
+          "confidence": 0.9402625560760498,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.6148256659507751,
+          "cy_norm": 0.8588672280311584,
+          "w_norm": 0.21279096603393555,
+          "h_norm": 0.2822655439376831,
+          "confidence": 0.0378992073237896,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "A",
+      "event_id": "cluster_006aa29c82490a95ee767c60",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9901779294013977,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.00013625621795654297,
+      "boxes": [
+        {
+          "cx_norm": 0.6148670315742493,
+          "cy_norm": 0.6110692620277405,
+          "w_norm": 0.21257781982421875,
+          "h_norm": 0.43614980578422546,
+          "confidence": 0.9901779294013977,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_015b630b21e825a7e210c638",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.009272822178900242,
+      "hit": false,
+      "max_iou": 0.9829397878123529,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.6089780926704407,
+          "cy_norm": 0.31960347294807434,
+          "w_norm": 0.25515279173851013,
+          "h_norm": 0.4496350586414337,
+          "confidence": 0.009272822178900242,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.5317338109016418,
+          "cy_norm": 0.30935734510421753,
+          "w_norm": 0.19399356842041016,
+          "h_norm": 0.4689715802669525,
+          "confidence": 0.002871493110433221,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_02eb05ebbd3d0befdf8381cc",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.0,
+      "hit": false,
+      "max_iou": 0.0,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.27918264269828796,
+          "cy_norm": 0.7541102170944214,
+          "w_norm": 0.1445760726928711,
+          "h_norm": 0.38438817858695984,
+          "confidence": 0.016591185703873634,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_03745d10f6b1061321954d41",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.17200593650341034,
+      "hit": false,
+      "max_iou": 0.4589709311090247,
+      "box_count": 4,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.2665156424045563,
+          "cy_norm": 0.2379554659128189,
+          "w_norm": 0.16891637444496155,
+          "h_norm": 0.30579674243927,
+          "confidence": 0.17200593650341034,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.525424599647522,
+          "cy_norm": 0.298611044883728,
+          "w_norm": 0.204478457570076,
+          "h_norm": 0.38192033767700195,
+          "confidence": 0.03763100877404213,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.776519775390625,
+          "cy_norm": 0.49545496702194214,
+          "w_norm": 0.25304126739501953,
+          "h_norm": 0.7322123646736145,
+          "confidence": 0.007086637895554304,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.48845693469047546,
+          "cy_norm": 0.28451815247535706,
+          "w_norm": 0.24034452438354492,
+          "h_norm": 0.3599987030029297,
+          "confidence": 0.0026841480284929276,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_04cbba08140988d1e96ef740",
+      "retained": true,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9276391863822937,
+      "hit": false,
+      "max_iou": 0.20275563224659646,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.4996207356452942,
+          "cy_norm": 0.39308667182922363,
+          "w_norm": 0.20423530042171478,
+          "h_norm": 0.2861390709877014,
+          "confidence": 0.9276391863822937,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_000f90a7264d43704170aa18",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.0019480091286823153,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 3,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.49997568130493164,
+          "cy_norm": 0.6024236679077148,
+          "w_norm": 0.20751753449440002,
+          "h_norm": 0.2524283230304718,
+          "confidence": 0.012645554728806019,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.5012949109077454,
+          "cy_norm": 0.5981831550598145,
+          "w_norm": 0.20489120483398438,
+          "h_norm": 0.25956135988235474,
+          "confidence": 0.0019480091286823153,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.32300886511802673,
+          "cy_norm": 0.720329999923706,
+          "w_norm": 0.19490575790405273,
+          "h_norm": 0.40336212515830994,
+          "confidence": 0.0016646008007228374,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_002001017499dfcbf6d75a22",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.062393683940172195,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.2786191999912262,
+          "cy_norm": 0.2361292988061905,
+          "w_norm": 0.15109406411647797,
+          "h_norm": 0.18211673200130463,
+          "confidence": 0.062393683940172195,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.6085711717605591,
+          "cy_norm": 0.41159960627555847,
+          "w_norm": 0.2457222044467926,
+          "h_norm": 0.3846374452114105,
+          "confidence": 0.01474310364574194,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_0056743c1afcde4e1ff7b521",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.8561822175979614,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.49869680404663086,
+          "cy_norm": 0.8122600317001343,
+          "w_norm": 0.2035549134016037,
+          "h_norm": 0.136072039604187,
+          "confidence": 0.8561822175979614,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.2985078692436218,
+          "cy_norm": 0.8377755284309387,
+          "w_norm": 0.15610003471374512,
+          "h_norm": 0.11668259650468826,
+          "confidence": 0.009742790833115578,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_006aa29c82490a95ee767c60",
+      "retained": false,
+      "rect": true,
+      "tensor_shape": [
+        1,
+        3,
+        768,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.06796601414680481,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 3,
+      "max_difference_from_frozen_prediction": 0.0,
+      "boxes": [
+        {
+          "cx_norm": 0.4989410936832428,
+          "cy_norm": 0.6875147819519043,
+          "w_norm": 0.2062080353498459,
+          "h_norm": 0.27212053537368774,
+          "confidence": 0.15221098065376282,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.4986962378025055,
+          "cy_norm": 0.6868609189987183,
+          "w_norm": 0.2061283439397812,
+          "h_norm": 0.27387988567352295,
+          "confidence": 0.06796601414680481,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.2455640584230423,
+          "cy_norm": 0.7833128571510315,
+          "w_norm": 0.26825863122940063,
+          "h_norm": 0.32175397872924805,
+          "confidence": 0.023513570427894592,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_015b630b21e825a7e210c638",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.009910652413964272,
+      "hit": false,
+      "max_iou": 0.9874481844591313,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.0020028650760650635,
+      "boxes": [
+        {
+          "cx_norm": 0.6089469790458679,
+          "cy_norm": 0.31900501251220703,
+          "w_norm": 0.25518637895584106,
+          "h_norm": 0.4516379237174988,
+          "confidence": 0.009910652413964272,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.5317449569702148,
+          "cy_norm": 0.310403972864151,
+          "w_norm": 0.1940406858921051,
+          "h_norm": 0.46715977787971497,
+          "confidence": 0.0010849072132259607,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_02eb05ebbd3d0befdf8381cc",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.0,
+      "hit": false,
+      "max_iou": 0.0,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.05521497130393982,
+      "boxes": [
+        {
+          "cx_norm": 0.27861976623535156,
+          "cy_norm": 0.7801983952522278,
+          "w_norm": 0.14621801674365997,
+          "h_norm": 0.43960314989089966,
+          "confidence": 0.009554348886013031,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_03745d10f6b1061321954d41",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.022260868921875954,
+      "hit": false,
+      "max_iou": 0.4559007881847643,
+      "box_count": 4,
+      "max_difference_from_frozen_prediction": 0.259364515542984,
+      "boxes": [
+        {
+          "cx_norm": 0.5244580507278442,
+          "cy_norm": 0.29908567667007446,
+          "w_norm": 0.2065587043762207,
+          "h_norm": 0.3823656737804413,
+          "confidence": 0.022260868921875954,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.26606008410453796,
+          "cy_norm": 0.24065734446048737,
+          "w_norm": 0.16941528022289276,
+          "h_norm": 0.30163130164146423,
+          "confidence": 0.015434403903782368,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.775343120098114,
+          "cy_norm": 0.4842566251754761,
+          "w_norm": 0.25580188632011414,
+          "h_norm": 0.7118169665336609,
+          "confidence": 0.003886979538947344,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.4731816351413727,
+          "cy_norm": 0.2790016531944275,
+          "w_norm": 0.20898590981960297,
+          "h_norm": 0.3474101126194,
+          "confidence": 0.0020600291900336742,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_04cbba08140988d1e96ef740",
+      "retained": true,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.9307191371917725,
+      "hit": false,
+      "max_iou": 0.20243226460367847,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": 0.0030799508094787598,
+      "boxes": [
+        {
+          "cx_norm": 0.499722957611084,
+          "cy_norm": 0.39324885606765747,
+          "w_norm": 0.2039337456226349,
+          "h_norm": 0.28552672266960144,
+          "confidence": 0.9307191371917725,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_000f90a7264d43704170aa18",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.001395941129885614,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": null,
+      "boxes": [
+        {
+          "cx_norm": 0.49989554286003113,
+          "cy_norm": 0.6032611131668091,
+          "w_norm": 0.20733796060085297,
+          "h_norm": 0.2506886422634125,
+          "confidence": 0.00938612874597311,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.5013891458511353,
+          "cy_norm": 0.5980497598648071,
+          "w_norm": 0.20475199818611145,
+          "h_norm": 0.25990116596221924,
+          "confidence": 0.001395941129885614,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_002001017499dfcbf6d75a22",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.014038128778338432,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 0.33097895979881287,
+      "boxes": [
+        {
+          "cx_norm": 0.608955979347229,
+          "cy_norm": 0.41160809993743896,
+          "w_norm": 0.24995766580104828,
+          "h_norm": 0.38456791639328003,
+          "confidence": 0.014038128778338432,
+          "class_id": 1
+        },
+        {
+          "cx_norm": 0.2775922119617462,
+          "cy_norm": 0.2359917312860489,
+          "w_norm": 0.15277095139026642,
+          "h_norm": 0.18397237360477448,
+          "confidence": 0.013650182634592056,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_0056743c1afcde4e1ff7b521",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.39288103580474854,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 2,
+      "max_difference_from_frozen_prediction": 1,
+      "boxes": [
+        {
+          "cx_norm": 0.5000751614570618,
+          "cy_norm": 0.8355224132537842,
+          "w_norm": 0.20233939588069916,
+          "h_norm": 0.18805637955665588,
+          "confidence": 0.39288103580474854,
+          "class_id": 0
+        },
+        {
+          "cx_norm": 0.4985021650791168,
+          "cy_norm": 0.8701464533805847,
+          "w_norm": 0.20441535115242004,
+          "h_norm": 0.2597070634365082,
+          "confidence": 0.046385038644075394,
+          "class_id": 0
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    },
+    {
+      "arm": "B",
+      "event_id": "cluster_006aa29c82490a95ee767c60",
+      "retained": false,
+      "rect": false,
+      "tensor_shape": [
+        1,
+        3,
+        1280,
+        1280
+      ],
+      "tensor_dtype": "torch.float32",
+      "score": 0.0,
+      "hit": false,
+      "max_iou": null,
+      "box_count": 1,
+      "max_difference_from_frozen_prediction": null,
+      "boxes": [
+        {
+          "cx_norm": 0.4989352226257324,
+          "cy_norm": 0.6869766712188721,
+          "w_norm": 0.20631234347820282,
+          "h_norm": 0.2711658775806427,
+          "confidence": 0.15529164671897888,
+          "class_id": 1
+        }
+      ],
+      "model_sha256": "8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503"
+    }
+  ],
+  "production_eligible": false
+}

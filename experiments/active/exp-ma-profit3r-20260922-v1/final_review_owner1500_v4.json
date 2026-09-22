@@ -1,0 +1,28 @@
+{
+  "time_utc": "2026-09-22T06:24:39.097571+00:00",
+  "report_sha256": "91497bd9bd76223bf0504090808488ff7a1feaa8cfa471067b28ef0fec57f8fc",
+  "training_review": {
+    "agent": "budget-mapper Luna Max /root/historical_extension_path",
+    "nine_files_sha_size_verified": true,
+    "A_B_epochs_each": 40,
+    "recipe_identical_except_data_name_save_dir": true,
+    "csv_max_fitness_epochs": {
+      "A": 18,
+      "B": 2
+    },
+    "not_checkpoint_epoch_claim": true
+  },
+  "metric_review": {
+    "agent": "budget-reviewer Terra High /root/handoff_review",
+    "scope": "Independently recomputed N/labels/trigger rates/top10 returns/win rates/TP rates/pairwise AUC from saved events; checked evaluation/control receipt SHAs and paired differences. No inference rerun.",
+    "A_B_same_val_ids": 1305,
+    "A_B_same_test_ids": 989,
+    "discrepancies": []
+  },
+  "report_review": {
+    "result": "deliverable; no concrete numerical/unit/causal wording error",
+    "limits": "Retrospective candidate pool, overlapping 12h outcomes, one seed, double B exposure, incomplete train-val/predict parity diagnostic; not production."
+  },
+  "research_decision": "rejected",
+  "production_eligible": false
+}

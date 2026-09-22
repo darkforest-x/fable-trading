@@ -1,0 +1,1123 @@
+{
+  "matched_random_control": {
+    "status": "pending_separate_frozen_controls"
+  },
+  "model": {
+    "all": {
+      "events": 989,
+      "mean_gross_bp": -17.921664313331217,
+      "mean_gross_r": -0.04616555048916392,
+      "mean_net_bp": -37.92166431333122,
+      "mean_net_r": -0.22668882066490015,
+      "net_profitable_rate": 0.29322548028311424,
+      "tp_rate": 0.16177957532861476
+    },
+    "detection": {
+      "box_precision": 0.16161616161616163,
+      "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+      "event_precision": 0.16161616161616163,
+      "event_recall": 1.0,
+      "failure_same_direction_trigger_rate": 1.0,
+      "failure_trigger_rate": 1.0,
+      "false_positive_boxes": 830,
+      "fn": 0,
+      "fp": 830,
+      "tp": 160,
+      "wrong_direction_false_positive_boxes": 0,
+      "wrong_direction_false_positive_events": 0
+    },
+    "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+    "events": 989,
+    "failed_events": 829,
+    "ranking_permutation": {
+      "draws": 1999,
+      "p_greater_or_equal": 0.382,
+      "seed": 0,
+      "status": "diagnostic_only"
+    },
+    "retained_events": 160,
+    "roc_auc": 0.5157192400482509,
+    "status": "ok",
+    "top10": {
+      "events": 99,
+      "mean_gross_bp": -8.694345585759581,
+      "mean_gross_r": -0.1276743749366655,
+      "mean_net_bp": -28.694345585759585,
+      "mean_net_r": -0.3173371592691091,
+      "net_profitable_rate": 0.24242424242424243,
+      "selection_status": "score_ranked_with_id_tiebreak",
+      "tp_rate": 0.16161616161616163
+    },
+    "triggered_any": {
+      "events": 989,
+      "mean_gross_bp": -17.921664313331217,
+      "mean_gross_r": -0.04616555048916392,
+      "mean_net_bp": -37.92166431333122,
+      "mean_net_r": -0.22668882066490015,
+      "net_profitable_rate": 0.29322548028311424,
+      "tp_rate": 0.16177957532861476
+    },
+    "triggered_candidate_direction": {
+      "events": 989,
+      "mean_gross_bp": -17.921664313331217,
+      "mean_gross_r": -0.04616555048916392,
+      "mean_net_bp": -37.92166431333122,
+      "mean_net_r": -0.22668882066490015,
+      "net_profitable_rate": 0.29322548028311424,
+      "tp_rate": 0.16177957532861476
+    }
+  },
+  "quality_score_baseline": {
+    "all": {
+      "events": 989,
+      "mean_gross_bp": -17.921664313331213,
+      "mean_gross_r": -0.0461655504891639,
+      "mean_net_bp": -37.92166431333122,
+      "mean_net_r": -0.22668882066490012,
+      "net_profitable_rate": 0.29322548028311424,
+      "tp_rate": 0.16177957532861476
+    },
+    "detection": {
+      "status": "not_applicable_no_preregistered_quality_threshold"
+    },
+    "events": 989,
+    "failed_events": 829,
+    "ranking_permutation": {
+      "draws": 1999,
+      "p_greater_or_equal": 0.722,
+      "seed": 0,
+      "status": "diagnostic_only"
+    },
+    "retained_events": 160,
+    "roc_auc": 0.46785283474065137,
+    "status": "ok",
+    "top10": {
+      "events": 99,
+      "mean_gross_bp": -36.53480887219412,
+      "mean_gross_r": -0.09941972207122696,
+      "mean_net_bp": -56.53480887219411,
+      "mean_net_r": -0.23260783114768166,
+      "net_profitable_rate": 0.32323232323232326,
+      "selection_status": "score_ranked_with_id_tiebreak",
+      "tp_rate": 0.10101010101010101
+    }
+  },
+  "strata": {
+    "direction=LONG": {
+      "model": {
+        "all": {
+          "events": 510,
+          "mean_gross_bp": -20.54242623984125,
+          "mean_gross_r": -0.042043829572111134,
+          "mean_net_bp": -40.54242623984125,
+          "mean_net_r": -0.22385006024856166,
+          "net_profitable_rate": 0.2803921568627451,
+          "tp_rate": 0.16862745098039217
+        },
+        "detection": {
+          "box_precision": 0.16829745596868884,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.16829745596868884,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 425,
+          "fn": 0,
+          "fp": 425,
+          "tp": 86,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 510,
+        "failed_events": 424,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.4185,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 86,
+        "roc_auc": 0.5106680561649847,
+        "status": "ok",
+        "top10": {
+          "events": 51,
+          "mean_gross_bp": -12.939548220248945,
+          "mean_gross_r": -0.13294453354480149,
+          "mean_net_bp": -32.93954822024894,
+          "mean_net_r": -0.29011152860061457,
+          "net_profitable_rate": 0.2549019607843137,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.1568627450980392
+        },
+        "triggered_any": {
+          "events": 510,
+          "mean_gross_bp": -20.54242623984125,
+          "mean_gross_r": -0.042043829572111134,
+          "mean_net_bp": -40.54242623984125,
+          "mean_net_r": -0.22385006024856166,
+          "net_profitable_rate": 0.2803921568627451,
+          "tp_rate": 0.16862745098039217
+        },
+        "triggered_candidate_direction": {
+          "events": 510,
+          "mean_gross_bp": -20.54242623984125,
+          "mean_gross_r": -0.042043829572111134,
+          "mean_net_bp": -40.54242623984125,
+          "mean_net_r": -0.22385006024856166,
+          "net_profitable_rate": 0.2803921568627451,
+          "tp_rate": 0.16862745098039217
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 510,
+          "mean_gross_bp": -20.54242623984125,
+          "mean_gross_r": -0.04204382957211111,
+          "mean_net_bp": -40.542426239841255,
+          "mean_net_r": -0.2238500602485617,
+          "net_profitable_rate": 0.2803921568627451,
+          "tp_rate": 0.16862745098039217
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 510,
+        "failed_events": 424,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.7965,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 86,
+        "roc_auc": 0.4737000877577885,
+        "status": "ok",
+        "top10": {
+          "events": 51,
+          "mean_gross_bp": -55.516424298928236,
+          "mean_gross_r": -0.12008325529158569,
+          "mean_net_bp": -75.51642429892826,
+          "mean_net_r": -0.25651606298986723,
+          "net_profitable_rate": 0.27450980392156865,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.11764705882352941
+        }
+      }
+    },
+    "direction=SHORT": {
+      "model": {
+        "all": {
+          "events": 479,
+          "mean_gross_bp": -15.1312914896984,
+          "mean_gross_r": -0.05055402161170445,
+          "mean_net_bp": -35.1312914896984,
+          "mean_net_r": -0.2297113004401248,
+          "net_profitable_rate": 0.3068893528183716,
+          "tp_rate": 0.1544885177453027
+        },
+        "detection": {
+          "box_precision": 0.1544885177453027,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.1544885177453027,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 405,
+          "fn": 0,
+          "fp": 405,
+          "tp": 74,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 479,
+        "failed_events": 405,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.7995,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 74,
+        "roc_auc": 0.5206539873206539,
+        "status": "ok",
+        "top10": {
+          "events": 48,
+          "mean_gross_bp": -50.93124872323767,
+          "mean_gross_r": -0.4361718748193548,
+          "mean_net_bp": -70.93124872323766,
+          "mean_net_r": -0.6397729092248708,
+          "net_profitable_rate": 0.22916666666666666,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0625
+        },
+        "triggered_any": {
+          "events": 479,
+          "mean_gross_bp": -15.1312914896984,
+          "mean_gross_r": -0.05055402161170445,
+          "mean_net_bp": -35.1312914896984,
+          "mean_net_r": -0.2297113004401248,
+          "net_profitable_rate": 0.3068893528183716,
+          "tp_rate": 0.1544885177453027
+        },
+        "triggered_candidate_direction": {
+          "events": 479,
+          "mean_gross_bp": -15.1312914896984,
+          "mean_gross_r": -0.05055402161170445,
+          "mean_net_bp": -35.1312914896984,
+          "mean_net_r": -0.2297113004401248,
+          "net_profitable_rate": 0.3068893528183716,
+          "tp_rate": 0.1544885177453027
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 479,
+          "mean_gross_bp": -15.131291489698397,
+          "mean_gross_r": -0.050554021611704435,
+          "mean_net_bp": -35.1312914896984,
+          "mean_net_r": -0.22971130044012483,
+          "net_profitable_rate": 0.3068893528183716,
+          "tp_rate": 0.1544885177453027
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 479,
+        "failed_events": 405,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.7515,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 74,
+        "roc_auc": 0.4591925258591925,
+        "status": "ok",
+        "top10": {
+          "events": 48,
+          "mean_gross_bp": -44.00018257596087,
+          "mean_gross_r": -0.22819121299682762,
+          "mean_net_bp": -64.00018257596088,
+          "mean_net_r": -0.3611813342500434,
+          "net_profitable_rate": 0.3333333333333333,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0625
+        }
+      }
+    },
+    "split=test": {
+      "model": {
+        "all": {
+          "events": 989,
+          "mean_gross_bp": -17.921664313331217,
+          "mean_gross_r": -0.04616555048916392,
+          "mean_net_bp": -37.92166431333122,
+          "mean_net_r": -0.22668882066490015,
+          "net_profitable_rate": 0.29322548028311424,
+          "tp_rate": 0.16177957532861476
+        },
+        "detection": {
+          "box_precision": 0.16161616161616163,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.16161616161616163,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 830,
+          "fn": 0,
+          "fp": 830,
+          "tp": 160,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 989,
+        "failed_events": 829,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.382,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 160,
+        "roc_auc": 0.5157192400482509,
+        "status": "ok",
+        "top10": {
+          "events": 99,
+          "mean_gross_bp": -8.694345585759581,
+          "mean_gross_r": -0.1276743749366655,
+          "mean_net_bp": -28.694345585759585,
+          "mean_net_r": -0.3173371592691091,
+          "net_profitable_rate": 0.24242424242424243,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.16161616161616163
+        },
+        "triggered_any": {
+          "events": 989,
+          "mean_gross_bp": -17.921664313331217,
+          "mean_gross_r": -0.04616555048916392,
+          "mean_net_bp": -37.92166431333122,
+          "mean_net_r": -0.22668882066490015,
+          "net_profitable_rate": 0.29322548028311424,
+          "tp_rate": 0.16177957532861476
+        },
+        "triggered_candidate_direction": {
+          "events": 989,
+          "mean_gross_bp": -17.921664313331217,
+          "mean_gross_r": -0.04616555048916392,
+          "mean_net_bp": -37.92166431333122,
+          "mean_net_r": -0.22668882066490015,
+          "net_profitable_rate": 0.29322548028311424,
+          "tp_rate": 0.16177957532861476
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 989,
+          "mean_gross_bp": -17.921664313331213,
+          "mean_gross_r": -0.0461655504891639,
+          "mean_net_bp": -37.92166431333122,
+          "mean_net_r": -0.22668882066490012,
+          "net_profitable_rate": 0.29322548028311424,
+          "tp_rate": 0.16177957532861476
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 989,
+        "failed_events": 829,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.722,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 160,
+        "roc_auc": 0.46785283474065137,
+        "status": "ok",
+        "top10": {
+          "events": 99,
+          "mean_gross_bp": -36.53480887219412,
+          "mean_gross_r": -0.09941972207122696,
+          "mean_net_bp": -56.53480887219411,
+          "mean_net_r": -0.23260783114768166,
+          "net_profitable_rate": 0.32323232323232326,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.10101010101010101
+        }
+      }
+    },
+    "timeframe=15m": {
+      "model": {
+        "all": {
+          "events": 49,
+          "mean_gross_bp": -12.39805030788434,
+          "mean_gross_r": 0.044690039872270014,
+          "mean_net_bp": -32.39805030788434,
+          "mean_net_r": -0.03926244479184071,
+          "net_profitable_rate": 0.4489795918367347,
+          "tp_rate": 0.02040816326530612
+        },
+        "detection": {
+          "box_precision": 0.02040816326530612,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.02040816326530612,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 48,
+          "fn": 0,
+          "fp": 48,
+          "tp": 1,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 49,
+        "failed_events": 48,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.4955,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 0.2916666666666667,
+        "status": "ok",
+        "top10": {
+          "events": 5,
+          "mean_gross_bp": -13.874912165978241,
+          "mean_gross_r": -0.40678873770869606,
+          "mean_net_bp": -33.874912165978216,
+          "mean_net_r": -0.4796374134098789,
+          "net_profitable_rate": 0.2,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        },
+        "triggered_any": {
+          "events": 49,
+          "mean_gross_bp": -12.39805030788434,
+          "mean_gross_r": 0.044690039872270014,
+          "mean_net_bp": -32.39805030788434,
+          "mean_net_r": -0.03926244479184071,
+          "net_profitable_rate": 0.4489795918367347,
+          "tp_rate": 0.02040816326530612
+        },
+        "triggered_candidate_direction": {
+          "events": 49,
+          "mean_gross_bp": -12.39805030788434,
+          "mean_gross_r": 0.044690039872270014,
+          "mean_net_bp": -32.39805030788434,
+          "mean_net_r": -0.03926244479184071,
+          "net_profitable_rate": 0.4489795918367347,
+          "tp_rate": 0.02040816326530612
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 49,
+          "mean_gross_bp": -12.398050307884331,
+          "mean_gross_r": 0.04469003987226999,
+          "mean_net_bp": -32.39805030788433,
+          "mean_net_r": -0.039262444791840725,
+          "net_profitable_rate": 0.4489795918367347,
+          "tp_rate": 0.02040816326530612
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 49,
+        "failed_events": 48,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.0195,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 0.7291666666666666,
+        "status": "ok",
+        "top10": {
+          "events": 5,
+          "mean_gross_bp": 337.9266368152166,
+          "mean_gross_r": 0.7311051216588679,
+          "mean_net_bp": 317.9266368152166,
+          "mean_net_r": 0.6844254363053023,
+          "net_profitable_rate": 0.8,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        }
+      }
+    },
+    "timeframe=1m": {
+      "model": {
+        "all": {
+          "events": 383,
+          "mean_gross_bp": 2.841414094278871,
+          "mean_gross_r": 0.06341440666176176,
+          "mean_net_bp": -17.158585905721132,
+          "mean_net_r": -0.1897308225971893,
+          "net_profitable_rate": 0.2819843342036554,
+          "tp_rate": 0.24804177545691905
+        },
+        "detection": {
+          "box_precision": 0.24739583333333334,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.24739583333333334,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 289,
+          "fn": 0,
+          "fp": 289,
+          "tp": 95,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 383,
+        "failed_events": 288,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.6915,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 95,
+        "roc_auc": 0.5108187134502924,
+        "status": "ok",
+        "top10": {
+          "events": 39,
+          "mean_gross_bp": -20.161330284826015,
+          "mean_gross_r": -0.1797008547008546,
+          "mean_net_bp": -40.161330284826015,
+          "mean_net_r": -0.44359803295470673,
+          "net_profitable_rate": 0.20512820512820512,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.20512820512820512
+        },
+        "triggered_any": {
+          "events": 383,
+          "mean_gross_bp": 2.841414094278871,
+          "mean_gross_r": 0.06341440666176176,
+          "mean_net_bp": -17.158585905721132,
+          "mean_net_r": -0.1897308225971893,
+          "net_profitable_rate": 0.2819843342036554,
+          "tp_rate": 0.24804177545691905
+        },
+        "triggered_candidate_direction": {
+          "events": 383,
+          "mean_gross_bp": 2.841414094278871,
+          "mean_gross_r": 0.06341440666176176,
+          "mean_net_bp": -17.158585905721132,
+          "mean_net_r": -0.1897308225971893,
+          "net_profitable_rate": 0.2819843342036554,
+          "tp_rate": 0.24804177545691905
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 383,
+          "mean_gross_bp": 2.841414094278866,
+          "mean_gross_r": 0.06341440666176175,
+          "mean_net_bp": -17.15858590572113,
+          "mean_net_r": -0.18973082259718932,
+          "net_profitable_rate": 0.2819843342036554,
+          "tp_rate": 0.24804177545691905
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 383,
+        "failed_events": 288,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.9245,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 95,
+        "roc_auc": 0.43157894736842106,
+        "status": "ok",
+        "top10": {
+          "events": 39,
+          "mean_gross_bp": -54.190451327479025,
+          "mean_gross_r": -0.18846695070099315,
+          "mean_net_bp": -74.19045132747901,
+          "mean_net_r": -0.3857705800219487,
+          "net_profitable_rate": 0.28205128205128205,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.1282051282051282
+        }
+      }
+    },
+    "timeframe=240m": {
+      "model": {
+        "all": {
+          "events": 10,
+          "mean_gross_bp": -121.46026954026074,
+          "mean_gross_r": -0.12236495196190109,
+          "mean_net_bp": -141.46026954026075,
+          "mean_net_r": -0.14042334426589198,
+          "net_profitable_rate": 0.2,
+          "tp_rate": 0.0
+        },
+        "detection": {
+          "box_precision": 0.0,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.0,
+          "event_recall": null,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 10,
+          "fn": 0,
+          "fp": 10,
+          "tp": 0,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 10,
+        "failed_events": 10,
+        "ranking_permutation": {
+          "reason": "single_class_labels_or_constant_score",
+          "status": "not_identifiable"
+        },
+        "retained_events": 0,
+        "roc_auc": null,
+        "status": "ok",
+        "top10": {
+          "events": 1,
+          "mean_gross_bp": -225.68093385214019,
+          "mean_gross_r": -0.3676056338028162,
+          "mean_net_bp": -245.68093385214016,
+          "mean_net_r": -0.4001830985915485,
+          "net_profitable_rate": 0.0,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        },
+        "triggered_any": {
+          "events": 10,
+          "mean_gross_bp": -121.46026954026074,
+          "mean_gross_r": -0.12236495196190109,
+          "mean_net_bp": -141.46026954026075,
+          "mean_net_r": -0.14042334426589198,
+          "net_profitable_rate": 0.2,
+          "tp_rate": 0.0
+        },
+        "triggered_candidate_direction": {
+          "events": 10,
+          "mean_gross_bp": -121.46026954026074,
+          "mean_gross_r": -0.12236495196190109,
+          "mean_net_bp": -141.46026954026075,
+          "mean_net_r": -0.14042334426589198,
+          "net_profitable_rate": 0.2,
+          "tp_rate": 0.0
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 10,
+          "mean_gross_bp": -121.46026954026077,
+          "mean_gross_r": -0.12236495196190109,
+          "mean_net_bp": -141.46026954026075,
+          "mean_net_r": -0.14042334426589195,
+          "net_profitable_rate": 0.2,
+          "tp_rate": 0.0
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 10,
+        "failed_events": 10,
+        "ranking_permutation": {
+          "reason": "single_class_labels_or_constant_score",
+          "status": "not_identifiable"
+        },
+        "retained_events": 0,
+        "roc_auc": null,
+        "status": "ok",
+        "top10": {
+          "events": 1,
+          "mean_gross_bp": -119.13104414856173,
+          "mean_gross_r": -0.20481927710843106,
+          "mean_net_bp": -139.13104414856173,
+          "mean_net_r": -0.23920481927710582,
+          "net_profitable_rate": 0.0,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        }
+      }
+    },
+    "timeframe=30m": {
+      "model": {
+        "all": {
+          "events": 87,
+          "mean_gross_bp": -24.66519948385439,
+          "mean_gross_r": -0.06869703714015375,
+          "mean_net_bp": -44.66519948385438,
+          "mean_net_r": -0.12481279319648816,
+          "net_profitable_rate": 0.3448275862068966,
+          "tp_rate": 0.022988505747126436
+        },
+        "detection": {
+          "box_precision": 0.022988505747126436,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.022988505747126436,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 85,
+          "fn": 0,
+          "fp": 85,
+          "tp": 2,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 87,
+        "failed_events": 85,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.507,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 2,
+        "roc_auc": 0.6470588235294118,
+        "status": "ok",
+        "top10": {
+          "events": 9,
+          "mean_gross_bp": -43.30980557219432,
+          "mean_gross_r": 0.035229326643538665,
+          "mean_net_bp": -63.309805572194314,
+          "mean_net_r": -0.015404228492820415,
+          "net_profitable_rate": 0.5555555555555556,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        },
+        "triggered_any": {
+          "events": 87,
+          "mean_gross_bp": -24.66519948385439,
+          "mean_gross_r": -0.06869703714015375,
+          "mean_net_bp": -44.66519948385438,
+          "mean_net_r": -0.12481279319648816,
+          "net_profitable_rate": 0.3448275862068966,
+          "tp_rate": 0.022988505747126436
+        },
+        "triggered_candidate_direction": {
+          "events": 87,
+          "mean_gross_bp": -24.66519948385439,
+          "mean_gross_r": -0.06869703714015375,
+          "mean_net_bp": -44.66519948385438,
+          "mean_net_r": -0.12481279319648816,
+          "net_profitable_rate": 0.3448275862068966,
+          "tp_rate": 0.022988505747126436
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 87,
+          "mean_gross_bp": -24.66519948385438,
+          "mean_gross_r": -0.06869703714015375,
+          "mean_net_bp": -44.66519948385439,
+          "mean_net_r": -0.12481279319648816,
+          "net_profitable_rate": 0.3448275862068966,
+          "tp_rate": 0.022988505747126436
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 87,
+        "failed_events": 85,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.5185,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 2,
+        "roc_auc": 0.4764705882352941,
+        "status": "ok",
+        "top10": {
+          "events": 9,
+          "mean_gross_bp": -52.031070194933186,
+          "mean_gross_r": -0.018635701793287926,
+          "mean_net_bp": -72.03107019493319,
+          "mean_net_r": -0.05272840247814378,
+          "net_profitable_rate": 0.3333333333333333,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        }
+      }
+    },
+    "timeframe=3m": {
+      "model": {
+        "all": {
+          "events": 403,
+          "mean_gross_bp": -26.044498956981013,
+          "mean_gross_r": -0.15859562885846973,
+          "mean_net_bp": -46.04449895698102,
+          "mean_net_r": -0.3316800826498063,
+          "net_profitable_rate": 0.2630272952853598,
+          "tp_rate": 0.1488833746898263
+        },
+        "detection": {
+          "box_precision": 0.1488833746898263,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.1488833746898263,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 343,
+          "fn": 0,
+          "fp": 343,
+          "tp": 60,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 403,
+        "failed_events": 343,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.122,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 60,
+        "roc_auc": 0.5559766763848396,
+        "status": "ok",
+        "top10": {
+          "events": 41,
+          "mean_gross_bp": 21.859431981746827,
+          "mean_gross_r": 0.0646204103392652,
+          "mean_net_bp": 1.8594319817468368,
+          "mean_net_r": -0.14107792350588977,
+          "net_profitable_rate": 0.2682926829268293,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.24390243902439024
+        },
+        "triggered_any": {
+          "events": 403,
+          "mean_gross_bp": -26.044498956981013,
+          "mean_gross_r": -0.15859562885846973,
+          "mean_net_bp": -46.04449895698102,
+          "mean_net_r": -0.3316800826498063,
+          "net_profitable_rate": 0.2630272952853598,
+          "tp_rate": 0.1488833746898263
+        },
+        "triggered_candidate_direction": {
+          "events": 403,
+          "mean_gross_bp": -26.044498956981013,
+          "mean_gross_r": -0.15859562885846973,
+          "mean_net_bp": -46.04449895698102,
+          "mean_net_r": -0.3316800826498063,
+          "net_profitable_rate": 0.2630272952853598,
+          "tp_rate": 0.1488833746898263
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 403,
+          "mean_gross_bp": -26.044498956981013,
+          "mean_gross_r": -0.15859562885846978,
+          "mean_net_bp": -46.04449895698101,
+          "mean_net_r": -0.3316800826498062,
+          "net_profitable_rate": 0.2630272952853598,
+          "tp_rate": 0.1488833746898263
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 403,
+        "failed_events": 343,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.298,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 60,
+        "roc_auc": 0.4887755102040816,
+        "status": "ok",
+        "top10": {
+          "events": 41,
+          "mean_gross_bp": -2.6365995440262644,
+          "mean_gross_r": -0.19656997211668834,
+          "mean_net_bp": -22.636599544026264,
+          "mean_net_r": -0.3180031284668006,
+          "net_profitable_rate": 0.34146341463414637,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.07317073170731707
+        }
+      }
+    },
+    "timeframe=5m": {
+      "model": {
+        "all": {
+          "events": 4,
+          "mean_gross_bp": 43.167192105193564,
+          "mean_gross_r": 0.6792774369461435,
+          "mean_net_bp": 23.16719210519355,
+          "mean_net_r": 0.48705216671535106,
+          "net_profitable_rate": 0.5,
+          "tp_rate": 0.25
+        },
+        "detection": {
+          "box_precision": 0.25,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.25,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 3,
+          "fn": 0,
+          "fp": 3,
+          "tp": 1,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 4,
+        "failed_events": 3,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.7485,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 0.0,
+        "status": "ok",
+        "top10": {
+          "events": 1,
+          "mean_gross_bp": -75.18796992481101,
+          "mean_gross_r": -1.0,
+          "mean_net_bp": -95.187969924811,
+          "mean_net_r": -1.2660000000000036,
+          "net_profitable_rate": 0.0,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        },
+        "triggered_any": {
+          "events": 4,
+          "mean_gross_bp": 43.167192105193564,
+          "mean_gross_r": 0.6792774369461435,
+          "mean_net_bp": 23.16719210519355,
+          "mean_net_r": 0.48705216671535106,
+          "net_profitable_rate": 0.5,
+          "tp_rate": 0.25
+        },
+        "triggered_candidate_direction": {
+          "events": 4,
+          "mean_gross_bp": 43.167192105193564,
+          "mean_gross_r": 0.6792774369461435,
+          "mean_net_bp": 23.16719210519355,
+          "mean_net_r": 0.48705216671535106,
+          "net_profitable_rate": 0.5,
+          "tp_rate": 0.25
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 4,
+          "mean_gross_bp": 43.167192105193564,
+          "mean_gross_r": 0.6792774369461435,
+          "mean_net_bp": 23.16719210519355,
+          "mean_net_r": 0.48705216671535106,
+          "net_profitable_rate": 0.5,
+          "tp_rate": 0.25
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 4,
+        "failed_events": 3,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.2415,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 1.0,
+        "status": "ok",
+        "top10": {
+          "events": 1,
+          "mean_gross_bp": 316.6783954961288,
+          "mean_gross_r": 3.0,
+          "mean_net_bp": 296.67839549612876,
+          "mean_net_r": 2.810533333333333,
+          "net_profitable_rate": 1.0,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 1.0
+        }
+      }
+    },
+    "timeframe=60m": {
+      "model": {
+        "all": {
+          "events": 53,
+          "mean_gross_bp": -85.31214673899119,
+          "mean_gross_r": -0.07052903218845204,
+          "mean_net_bp": -105.31214673899119,
+          "mean_net_r": -0.106088069741484,
+          "net_profitable_rate": 0.37735849056603776,
+          "tp_rate": 0.018867924528301886
+        },
+        "detection": {
+          "box_precision": 0.018867924528301886,
+          "counting_note": "tp/fn count candidate events; fp counts events with at least one unmatched box. An event may contribute both tp and fp. box_precision counts every unmatched box.",
+          "event_precision": 0.018867924528301886,
+          "event_recall": 1.0,
+          "failure_same_direction_trigger_rate": 1.0,
+          "failure_trigger_rate": 1.0,
+          "false_positive_boxes": 52,
+          "fn": 0,
+          "fp": 52,
+          "tp": 1,
+          "wrong_direction_false_positive_boxes": 0,
+          "wrong_direction_false_positive_events": 0
+        },
+        "economics_direction_note": "Returns always follow the original candidate direction; wrong-direction-only fires are not claimed as executable trades.",
+        "events": 53,
+        "failed_events": 52,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.058,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 1.0,
+        "status": "ok",
+        "top10": {
+          "events": 6,
+          "mean_gross_bp": 260.64763614130845,
+          "mean_gross_r": 0.48190400283989376,
+          "mean_net_bp": 240.64763614130845,
+          "mean_net_r": 0.44356494331806634,
+          "net_profitable_rate": 0.5,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.16666666666666666
+        },
+        "triggered_any": {
+          "events": 53,
+          "mean_gross_bp": -85.31214673899119,
+          "mean_gross_r": -0.07052903218845204,
+          "mean_net_bp": -105.31214673899119,
+          "mean_net_r": -0.106088069741484,
+          "net_profitable_rate": 0.37735849056603776,
+          "tp_rate": 0.018867924528301886
+        },
+        "triggered_candidate_direction": {
+          "events": 53,
+          "mean_gross_bp": -85.31214673899119,
+          "mean_gross_r": -0.07052903218845204,
+          "mean_net_bp": -105.31214673899119,
+          "mean_net_r": -0.106088069741484,
+          "net_profitable_rate": 0.37735849056603776,
+          "tp_rate": 0.018867924528301886
+        }
+      },
+      "quality_score_baseline": {
+        "all": {
+          "events": 53,
+          "mean_gross_bp": -85.31214673899119,
+          "mean_gross_r": -0.07052903218845205,
+          "mean_net_bp": -105.31214673899117,
+          "mean_net_r": -0.10608806974148398,
+          "net_profitable_rate": 0.37735849056603776,
+          "tp_rate": 0.018867924528301886
+        },
+        "detection": {
+          "status": "not_applicable_no_preregistered_quality_threshold"
+        },
+        "events": 53,
+        "failed_events": 52,
+        "ranking_permutation": {
+          "draws": 1999,
+          "p_greater_or_equal": 0.959,
+          "seed": 0,
+          "status": "diagnostic_only"
+        },
+        "retained_events": 1,
+        "roc_auc": 0.5961538461538461,
+        "status": "ok",
+        "top10": {
+          "events": 6,
+          "mean_gross_bp": -381.411216288136,
+          "mean_gross_r": -0.24812646695560883,
+          "mean_net_bp": -401.411216288136,
+          "mean_net_r": -0.27816504093538535,
+          "net_profitable_rate": 0.16666666666666666,
+          "selection_status": "score_ranked_with_id_tiebreak",
+          "tp_rate": 0.0
+        }
+      }
+    }
+  }
+}
