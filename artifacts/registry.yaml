@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-launch-owner1500-morph-v6-dataset
+    artifact_type: dataset
+    role: offline_selected_launch_shapes_and_verified_clear_backgrounds
+    source_repo: darkforest-x/fable-trading
+    source_commit: f490d6f24b6f13843a056b1e3335cb24b1a8d893
+    source_path: datasets/ma_launch_owner1500_morph_v6/manifest.jsonl
+    sha256: ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5
+    size_bytes: 17156294
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/ma_launch_owner1500_morph_v6/manifest.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized offline correction.1841 retained original positive events and1841 same-source clear backgrounds; 19412 PNG/TXT files audited. A train1506+1506,B3012+3012; shared val175+175,test160+160. Not Owner per-sample gold; hard negatives unadjudicated. Separate full-candidate economic evaluation required. Holdout enum is legacy only.
   - artifact_id: ma-profit3r-owner1500-v4-dataset
     artifact_type: dataset
     role: causal_3r_winner_training_and_full_later_candidate_pool
