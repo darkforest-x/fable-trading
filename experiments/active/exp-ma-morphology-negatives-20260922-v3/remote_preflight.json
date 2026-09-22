@@ -1,0 +1,174 @@
+{
+  "environment": {
+    "free_vram_bytes": 11801722880,
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "total_vram_bytes": 12884377600,
+    "versions": {
+      "numpy": "2.0.2",
+      "pandas": "2.3.3",
+      "torch": "2.8.0+cu126",
+      "ultralytics": "8.4.89"
+    }
+  },
+  "runner": {
+    "arms": {},
+    "preflight": {
+      "base_model": "C:\\fable\\models\\yolo11s.pt",
+      "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+      "dataset_audit": {
+        "counts": {
+          "A": {
+            "test": {
+              "negative": 160,
+              "positive": 160
+            },
+            "train": {
+              "negative": 1506,
+              "positive": 1506
+            },
+            "val": {
+              "negative": 175,
+              "positive": 175
+            }
+          },
+          "B": {
+            "test": {
+              "negative": 160,
+              "positive": 160
+            },
+            "train": {
+              "negative": 3012,
+              "positive": 3012
+            },
+            "val": {
+              "negative": 175,
+              "positive": 175
+            }
+          }
+        },
+        "ledger_sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2",
+        "manifest_sha256": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5",
+        "morphology_evidence_verified_from_ledger": true,
+        "original_positive_files_preserved": true,
+        "per_sample_owner_gold": false,
+        "pilot": false,
+        "status": "passed",
+        "verified_files": 19412
+      },
+      "experiment_id": "exp-ma-morphology-negatives-20260922-v3",
+      "launch_files": {
+        "constraints-ci.txt": "5daeb33b717cc6ed97dba948bf42687fa8f76af26825e34964024ca553a3f331",
+        "datasets/ma_launch_owner1500_morph_v6/audit.json": "9cab4031a1adfcfbe4f34542ac434b4878977dee1c6c81bf87a72a10c9143503",
+        "datasets/ma_launch_owner1500_morph_v6/data_A.yaml": "9ff42913769632441eca8a27d8d2c39c014cf2ec4a3561c3ee343e0581ae5b1f",
+        "datasets/ma_launch_owner1500_morph_v6/data_B.yaml": "e0b4cedf5494ddd15f4b0b07fdb572a477aa89522985b0a5b6ea5f80ec32d8ad",
+        "datasets/ma_launch_owner1500_morph_v6/dataset_ledger.jsonl": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2",
+        "datasets/ma_launch_owner1500_morph_v6/manifest.jsonl": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5",
+        "datasets/ma_launch_owner1500_morph_v6/negative_evidence.jsonl": "1219f9d69731b967e5e8a82a66486c9f5452a0f7d717c451dc36b85bc860851b",
+        "datasets/ma_launch_owner1500_morph_v6/progress.json": "5ff781112f51115a79749e799f3a2d92831a967e0a0665c721d103facb3bb630",
+        "datasets/ma_launch_owner1500_morph_v6/quarantine.jsonl": "c77a15ce541cc9f4fee91c8b2cd21715697e0a7e117227b3e66a64c927a39015",
+        "datasets/ma_launch_owner1500_morph_v6/shortages.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "datasets/ma_launch_owner1500_morph_v6/summary.json": "56783eccdbee6b835dcfc09c9d59a77c0864b4467ed251a17d19cbc76c35996a",
+        "datasets/ma_launch_owner1500_morph_v6/test.txt": "6bd17b805e1b2af8ff966287e020cadf3a6ff484e6c2a8ec2b8868be31e7e30b",
+        "datasets/ma_launch_owner1500_morph_v6/train_A.txt": "92abe2466c1a27009ebd01bf9d1a9ba4acfc384f50823b3835d6b5e94851ba67",
+        "datasets/ma_launch_owner1500_morph_v6/train_B.txt": "9c79d5ea6d5e6411cc290f3a0a4427a0e819baf23f1d3042e675b3e472886fd5",
+        "datasets/ma_launch_owner1500_morph_v6/val.txt": "9648e469474ca13366fc4cf35e8e5f3bc5207eca4c801d4ea24b6ff7703b34ea",
+        "datasets/ma_profit3r_owner1500_v4/manifest.jsonl": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d",
+        "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9",
+        "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3",
+        "experiments/active/exp-ma-morphology-negatives-20260922-v3/launch_wmi.cmd": "a367ebad75c8513572710673bf49b9dda8bce17c0c9669325ca14f73a9e6bd4e",
+        "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96",
+        "experiments/active/exp-ma-morphology-negatives-20260922-v3/visual_review/review.json": "c8143689af649c003898ca432d0a9ea833985dcd5e45857fbdd6f930948c31df",
+        "experiments/active/exp-ma-morphology-negatives-20260922-v3/visual_review/selection.json": "63376e447a963150ba0ea12e88e536b8f8a26843760975ce1c551d5496271acd",
+        "experiments/active/exp-ma-profit3r-20260922-v1/delivery_owner1500_v4/summary.json": "a976ddd798bfc549864c1145b60b400baa8e011e53177e869c759c91d9609d03",
+        "experiments/active/exp-ma-profit3r-20260922-v1/matched_control_outcomes_owner1500_v2/outcomes.jsonl": "a57cf103479591ac54d78bfeb04cf3876cc607ff9f6b710f049bd221ed5be86e",
+        "experiments/active/exp-ma-profit3r-20260922-v1/matched_control_outcomes_owner1500_v2/summary.json": "09111c9b7a5c1d5a605c62544bca1e7ff6db825d6644082af79919f4a6613d02",
+        "experiments/active/exp-ma-profit3r-20260922-v1/matched_controls_owner1500_v2/frozen_events.jsonl": "22d21034b4bce07e321dfe0b190aa06eab08f625be0604d441be9c262d23f10a",
+        "experiments/active/exp-ma-profit3r-20260922-v1/matched_controls_owner1500_v2/frozen_sources.json": "32b6d1159fe31417a65de534cde21cd2b2f0736eab80e643a56982df2d91480d",
+        "experiments/active/exp-ma-profit3r-20260922-v1/matched_controls_owner1500_v2/receipt.json": "dea54ab8a9fd508a67a053d7434d07dbb70e8b506e3c31d321ba24c4be1fa93c",
+        "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a",
+        "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797",
+        "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_ledger.jsonl": "81d60c351642dfcb8055c5e1391b31828b71b7f36f7beb6083a50ab646cb652f",
+        "models/yolo11s.pt": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+        "scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "scripts/research/run_ma_morphology_redo.py": "fb3fe1d632f8c84c7f37e7db9cd725ab5142b1700dfaaca2505212b373e28140",
+        "scripts/research/watch_ma_profit3r_owner1500_v4.py": "53192d94c25c0cb3e6a711c28e1a6405454ef6a2eb955f3242eab2f4828e8607",
+        "scripts/windows/complete_ma_morphology_redo.py": "d00fb8fcc208f58d8d0316d23f1060825bac55c9e3ee3d0896a9faab491e177d",
+        "scripts/windows/evaluate_ma_profit3r_20260922.py": "92c8c4bf39b7fde05c352f946bfe552a5de62b93a45a2dfdf98504661fbfa619",
+        "scripts/windows/run_ma_morphology_redo.py": "16383bcaedc066ce9bbde708f9abea9f170d2511a76a1e835bb4d74b81908e33",
+        "scripts/windows/run_ma_profit_negative_redo.py": "1434889fca1b359e4ddaf155ffa9c9ba305efa8747efa2ae2b1cc2045ff50e77",
+        "scripts/windows/train_ma_profit3r.py": "450eee2273bcee26c975334d1d4a7ec4f15d5621b9468904c8d9a6d0730ee45f",
+        "scripts/windows/train_ma_profit_negative_redo.py": "a568c55e93c4a8d8669bd03e312df3a2ce1a29d984a3de47d40fa380379afbd0",
+        "yoyo/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/data/bars.py": "6cab5de48eff1dbb8b2062d767fa36c41f65ff612fb743d17ef97e10705b97b4",
+        "yoyo/data/loader.py": "3fa4be64a9a7d5cf1d41a9a3447d714d4cca33363a5ed11e45f5bc45e87d6f93",
+        "yoyo/data/universe.py": "d5c1a6556592ad5e16671342f73239d06925487f5544d04e3d4d5dbbb38ad7ff",
+        "yoyo/datasets/__init__.py": "ab9b3511b16abdb4c368de7e01e3d4d06b2e4b64f22ccc18203f393ccc4ee97f",
+        "yoyo/datasets/fifteen_minute_launch_candidates.py": "b31fe35bfeff8626889691bf404a87223fb18dedcf7b52841f1c618821de976e",
+        "yoyo/datasets/ma_launch_owner_recrop_review.py": "368a5fb24724f295b95f8667882f4bb854e2bd621045bc58b24abf9811a54a17",
+        "yoyo/datasets/ma_morphology_background.py": "0bc5f05ffb485e3335a3f0706c5696e7349969a8b61f1be2130b0735fa3cf177",
+        "yoyo/datasets/ma_morphology_redo.py": "ebcaa6cfb7a0c4504f5b47c3407d6d4c66ae80dcca886ac7eeb77e7730bbd103",
+        "yoyo/datasets/ma_morphology_review.py": "53a4c3f64119946f06779278e66272ce59a3b8e620d9186de1b112ad7c282780",
+        "yoyo/datasets/ma_profit_cohort.py": "9283aa35d21ce8c7719a1e0afefe3de99233745b1ee7fde932eee050aec69bbb",
+        "yoyo/datasets/ma_profit_dataset.py": "c345c53f1758b6895f95d4900c648bd2ea27ce264c2a1e996b44c5056b7effd5",
+        "yoyo/datasets/ma_profit_negative_redo.py": "1c0ca41b60942308a7fa524e7ed02bcab752c23c05c181663245e92583c467f0",
+        "yoyo/datasets/ma_profit_training_contract.py": "909994b9876b41f8fb6e5544b008d0bb10249a349fbb7946981c8519bd73b022",
+        "yoyo/datasets/ma_rope_filter.py": "13881d859f80b8e3ed95df883afba16b467e68e43b4a99de354d0f3d26ec435d",
+        "yoyo/evaluation/__init__.py": "a29dd367b750b396ce7f95d4aadd061b5c55d6ae0ac3ad72a8555c1e7d43dc13",
+        "yoyo/evaluation/ma_morphology_delivery.py": "7f7c873861ab7a8a7fe209d69e2fbcf5e2d8fcc93d5e8d7cddac708101e948d5",
+        "yoyo/evaluation/ma_morphology_economics.py": "d01126b70d99db4bb680e1ff7ae9a660a8e1af5bcd7bf17690b7e056c752cfbe",
+        "yoyo/evaluation/ma_profit_control_metrics.py": "db723507dc21ebb1b6eed3bdf044386ce2dd93c977358d32e03159006f33fada",
+        "yoyo/evaluation/ma_profit_model_metrics.py": "5968d33e61d65e6dcac15c0967d695d47c1a2e786ec9d09af9673f967a570066",
+        "yoyo/layers/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/layers/l1_detection/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/layers/l1_detection/data.py": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+        "yoyo/layers/l1_detection/render.py": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+        "yoyo/layers/l2_judgment/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/layers/l2_judgment/pine_cross_features.py": "9df52f0b3018775c557e649480c80b4a23df44989e61153f8e278c48d3e95ff9",
+        "yoyo/layers/l2_judgment/pine_dense_start.py": "78c2c3eadf48adf0c039f50ec2e0f9b3f5110eb87357dfe46688dd373e1a97f0",
+        "yoyo/layers/l3_backtest/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "yoyo/layers/l3_backtest/pine_allin_v7.py": "dd35630f53c91ac59079037b99980270a52751f8777e170c387fa29d6f89f2a9"
+      },
+      "plan_sha256": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96",
+      "review_manifest_sha256": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5",
+      "review_path": "C:\\fable\\experiments\\active\\exp-ma-morphology-negatives-20260922-v3\\visual_review\\review.json",
+      "review_sha256": "c8143689af649c003898ca432d0a9ea833985dcd5e45857fbdd6f930948c31df",
+      "training_args": {
+        "auto_augment": null,
+        "batch": 8,
+        "bgr": 0.0,
+        "cache": false,
+        "copy_paste": 0.0,
+        "cutmix": 0.0,
+        "degrees": 0.0,
+        "deterministic": true,
+        "device": "0",
+        "epochs": 40,
+        "erasing": 0.0,
+        "fliplr": 0.0,
+        "flipud": 0.0,
+        "hsv_h": 0.0,
+        "hsv_s": 0.0,
+        "hsv_v": 0.0,
+        "imgsz": 1280,
+        "lr0": 0.0001,
+        "lrf": 0.01,
+        "mixup": 0.0,
+        "mosaic": 0.0,
+        "multi_scale": 0.0,
+        "optimizer": "AdamW",
+        "patience": 0,
+        "perspective": 0.0,
+        "plots": false,
+        "rect": true,
+        "scale": 0.0,
+        "seed": 0,
+        "shear": 0.0,
+        "translate": 0.0,
+        "workers": 2
+      }
+    },
+    "status": "preflight_passed",
+    "train_requested": false
+  }
+}

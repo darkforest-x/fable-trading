@@ -20,7 +20,7 @@ experiments:
     status: active
     question: Can visible morphology-only backgrounds correct the MA3R detector dataset without treating trade failures as absent shapes?
     single_variable: Owner-authorized semantic correction of training and shared evaluation labels; preserve selected winner pixels/boxes and fixed A/B recipe.
-    result: Full dataset audited;1841 original positive and1841 morphology-only clear background events, zero shortages. A train1506+1506;B3012+3012; shared val175+175,test160+160.27 strata visually reviewed and raw-replayed. GPU transfer underway; no new training result.
+    result: Full dataset audited;1841 original positive and1841 morphology-only clear background events, zero shortages. A train1506+1506;B3012+3012; shared val175+175,test160+160.27 strata visually reviewed and raw-replayed. GPU SHA preflight passed and RTX3060 A epoch1/40 observed at100percent utilization; B and separated evaluations queued. No completed result yet.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
