@@ -1,0 +1,21 @@
+{
+  "status": "evidence_review_complete",
+  "direct_profit_baseline_available": false,
+  "sources": [
+    {
+      "report": "analysis/p1_15m_ma_launch_owner_yolo_neg30000_train960_20260828.md",
+      "mAP50": 0.9462,
+      "mAP50_95": 0.7923,
+      "fixed_negative_trigger_rate": 0.00845,
+      "comparability": "Historical detection background only: different population, 15m-only, morphological labels, 960 input, no profitability evaluation."
+    },
+    {
+      "report": "analysis/p1_15m_ma_launch_owner_grade_a8000_neg24000_hl2_train1280_20260903.md",
+      "close_mAP50_95": 0.78602,
+      "hl2_mAP50_95": 0.77609,
+      "comparability": "Recipe background only: YOLO11s/1280/40 epochs, but 1043 events with post2-9 variants, different population and morphological labels, no profitability evaluation."
+    }
+  ],
+  "current_comparison": "Compare frozen v4 A/B on identical val/test causal A images, plus quality_score baseline and preregistered matched controls. B has twice the training image exposure; differences are not a pure position effect.",
+  "verification": "Root read cited reports metric sections; Luna Max mapped lineage. No historical data or model was rerun."
+}
