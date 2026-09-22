@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-morphology-top20-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e921523202
+    status: active
+    question: What does the unchanged morphology A checkpoint detect on today's OKX UTC+8 top20 gainers?
+    single_variable: No model or threshold change; retrospective current-board coverage on native15m30m1h closed-bar windows.
+    result: Owner selected UTC+8-day top20. Freeze public ranks and causal inputs; no completed scan yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_morphology_top20_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Current rank does not establish point-in-time selection; core+5 confirmation is not fresh tip. High periods have sparse training support.
   - experiment_id: exp-ma-morphology-negatives-20260922-v3
     source_repo: darkforest-x/fable-trading
     source_commit: c39c070e9925c10faca19b2a335a41e721014a67
