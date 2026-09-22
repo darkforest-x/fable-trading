@@ -19,6 +19,8 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
+from yoyo.evaluation.spike_v10_4_study import SPLIT
+
 
 TABLES = ("decisions", "trades", "statuses", "controls", "reference_boxes", "breaks")
 ARMS = ("baseline", "joint_h1_recheck")
@@ -310,6 +312,8 @@ def build(input_dir: Path, output: Path) -> dict[str, Any]:
     config = identity.get("config", {})
     if identity.get("subset") is not False or len(identity["symbols"]) != config.get("expected_symbols"):
         raise ValueError("full frozen universe required; smoke/subset cannot be an aggregate report")
+    if config.get("split") != SPLIT.isoformat():
+        raise ValueError("frozen split differs from runner control strata")
     for field in ("start", "split", "end", "bootstrap_seed", "bootstrap_reps", "permutation_seed", "permutation_reps"):
         if field not in config: raise ValueError(f"identity config missing {field}")
     closed = _closed(frames["trades"], pd.Timestamp(config["split"]))

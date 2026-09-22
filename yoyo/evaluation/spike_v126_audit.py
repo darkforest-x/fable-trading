@@ -8,22 +8,36 @@ archives or production state are modified.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import re
+import subprocess
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_v126_htf_report import load_run, sha
+from yoyo.evaluation.spike_v10_4_study import SPLIT
 
 
 def audit(root: Path, output: Path):
     identity, tables = load_run(root)
     if identity['subset'] or len(identity['symbols']) != identity['config']['expected_symbols']:
         raise ValueError('full frozen universe required')
+    if identity['config']['split'] != SPLIT.isoformat():
+        raise ValueError('frozen split mismatch')
+    # Historical receipts name the committed source actually used at launch,
+    # rather than requiring every future working tree to stay byte-identical.
+    source_commit=json.loads((root/'started.json').read_text())['source_commit']
+    if not re.fullmatch('[0-9a-f]{40}',source_commit):
+        raise ValueError('invalid source commit')
+    repository=Path(__file__).resolve().parents[2]
     for path, expected in identity['source'].items():
-        if sha(Path(path)) != expected:
-            raise ValueError(f'replay source has changed: {path}')
+        relative=Path(path).resolve().relative_to(repository)
+        blob=subprocess.check_output(['git','show',f'{source_commit}:{relative}'],cwd=repository)
+        if hashlib.sha256(blob).hexdigest() != expected:
+            raise ValueError(f'replay source was not in its launch commit: {path}')
     d, t, s, c = (tables[k] for k in ('decisions','trades','statuses','controls'))
     assert not d.trade_key.duplicated().any()
     assert not d.duplicated(['stream_symbol','box_entry_i']).any()
@@ -79,6 +93,7 @@ def audit(root: Path, output: Path):
         'trade_rows':len(t),'closed_rows':len(closed),'control_rows':len(c),'shared_executions':len(shared),
         'candidate_h1_rejected':int((~d.h1_pass).sum()),
         'source_hashes_verified':len(identity['source']),
+        'source_commit_verified':source_commit,
         'identity_sha256':sha(root/'identity.json'),'manifest_sha256':sha(root/'manifest.json'),
         'audit_source_sha256':sha(Path(__file__)),
         'checks':['receipt_and_leaf_hashes','full_universe','unique_joint_per_box','two_complete_status_books',

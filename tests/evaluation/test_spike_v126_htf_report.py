@@ -113,3 +113,20 @@ def test_receipt_complete_smoke_is_not_full_research(tmp_path):
     with pytest.raises(ValueError,match='full frozen universe'):
         build(run,tmp_path/'report')
     assert not (tmp_path/'report').exists()
+
+
+def test_changed_split_cannot_relabel_frozen_control_strata(tmp_path):
+    run=_write_run(tmp_path / 'run')
+    identity=json.loads((run/'identity.json').read_text())
+    identity['config']['split']='2025-10-01T00:00:00+00:00'
+    (run/'identity.json').write_text(json.dumps(identity))
+    run_hash=hashlib.sha256(json.dumps(identity,sort_keys=True).encode()).hexdigest()
+    receipt_path=run/'streams/AAA/receipt.json'
+    receipt=json.loads(receipt_path.read_text());receipt['run_identity']=run_hash
+    receipt_path.write_text(json.dumps(receipt))
+    manifest=json.loads((run/'manifest.json').read_text());manifest['run_identity']=run_hash
+    manifest['receipts']['AAA']=sha(receipt_path)
+    (run/'manifest.json').write_text(json.dumps(manifest))
+    with pytest.raises(ValueError,match='frozen split'):
+        build(run,tmp_path/'report')
+    assert not (tmp_path/'report').exists()

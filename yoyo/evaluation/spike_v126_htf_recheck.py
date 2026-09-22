@@ -405,7 +405,8 @@ def run(out,workers=4,symbols=None):
     spec = source.ExecutionSpec()
     if (spec.round_trip_cost,spec.arm_r,spec.trail_atr) != (.002,2.,4.):
         raise ValueError('execution contract changed')
-    if config['arms'] != list(ARMS) or config['start'] != START.isoformat() or config['end'] != END.isoformat():
+    if (config['arms'] != list(ARMS) or config['start'] != START.isoformat()
+            or config['end'] != END.isoformat() or config['split'] != SPLIT.isoformat()):
         raise ValueError('frozen specification mismatch')
     allfiles = source.series_files()
     parent = json.loads(Path(config['parent_input_identity']).read_text())
