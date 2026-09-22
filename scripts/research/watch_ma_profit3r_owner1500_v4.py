@@ -186,7 +186,7 @@ def controls(arm: str, evaluation: Path) -> None:
     required += [EXP / 'matched_controls_owner1500_v2' / name for name in ('receipt.json', 'frozen_events.jsonl', 'frozen_sources.json')]
     required += [EXP / 'matched_control_outcomes_owner1500_v2' / name for name in ('summary.json', 'outcomes.jsonl')]
     if not out.exists():
-        subprocess.run([sys.executable, '-m', 'yoyo.evaluation.ma_profit_control_metrics', '--evaluation', str(evaluation),
+        subprocess.run([str(ROOT / '.venv/bin/python'), '-m', 'yoyo.evaluation.ma_profit_control_metrics', '--evaluation', str(evaluation),
                         '--ledger', str(EXP / 'selection_queue_round_017/dataset_ledger.jsonl'),
                         '--controls', str(EXP / 'matched_controls_owner1500_v2'), '--outcomes', str(EXP / 'matched_control_outcomes_owner1500_v2'),
                         '--out', str(out)], check=True, cwd=ROOT)
