@@ -10659,3 +10659,24 @@ experiments:
     notes: Owner20260922 accepts net-win priority with tail preservation. Prior erroneous BB20 ETH smoke and two audit dtype errors retained; corrected
       BB200 full run and audit_v4 pass. summary_v3 fixes full-period control maturity; later inference unchanged. Notion3e38856479af81bdacf6d31de35a1d6e;
       no training/default/Pine/account changes.
+
+  - experiment_id: exp-spike-lowtf-v1-v126-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1a178d154ebdb0e2eec24d581ee7dce4403a076f
+    status: rejected
+    question: How do original SPIKE V1 and current V12.6 perform on OKX ETH/BTC 1m, 3m and 5m under one data source, window and 20bp cost, and
+      do they beat matched random entries; separately, the last two months through 2026-09-22.
+    single_variable: Descriptive three-arm comparison. v1_common vs v126 differ only in entry signal (shared V12.6 exit); v1_native vs v1_common
+      differ only in exit.
+    result: All arms, timeframes and folds net negative except V1 native 5m earlier (+4.76R, later -34.91R). Full mean net R v126 -1.253/-0.745/-0.452,
+      V1 native -0.833/-0.617/-0.277 for 1m/3m/5m; gross bp near zero; cost 0.33-1.32R per trade. Last two months V1 native 40 trades -23.54R.
+      Pre-registered R excess over random significant at 1m but caused by narrower random stops; bp excess all CIs cross zero.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_lowtf_v1_v126_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: OKX monthly 1m archive plus confirmed API tail, 0 missing minutes; run_v1 identity e65dcd04, summary module ddcea13f01 precedes summary_v1.
+      bp excess table is a labelled post-hoc diagnostic. V12.6 Python port without native Pine parity. Notion not synced (no connector in session).
+      Learning docs/learnings/r-excess-over-random-is-biased-when-control-stops-are-narrower.md.

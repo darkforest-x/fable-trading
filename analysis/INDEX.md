@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **623** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **631** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,12 +10,19 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
+| 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |
+| 2026-09-22 | [`p1_ma_morphology_top20_20260922.md`](p1_ma_morphology_top20_20260922.md) | A组模型扫描今日OKX涨幅前20：完成记录 |  |
 | 2026-09-22 | [`p1_ma_profit3r_20260922.md`](p1_ma_profit3r_20260922.md) | 3R 盈利事件扩展与两组 YOLO：阶段过程记录（已完成） | 自动导入在第十批 GAIBUSDT 的 `no_data` 终态停止，原失败日志和错误回执保留。十个月请求归档均缺失的原始审计、源审计 SHA 和可用性裁决先冻结于 `29626e0b6bbca3d1732ff6120d264cee2c461d7c`。原请求仍为25币；本批仅处理有完整审计的2... |
+| 2026-09-22 | [`p1_ma_profit3r_negative_semantics_correction_20260922.md`](p1_ma_profit3r_negative_semantics_correction_20260922.md) | MA3R 负例语义纠正：停止 v5 训练，保留失败记录 |  |
 | 2026-09-22 | [`p1_ma_profit3r_owner1500_v4_results_20260922.md`](p1_ma_profit3r_owner1500_v4_results_20260922.md) | 1506个3R赢家、两组YOLO训练与完整后段评估：已完成，盈利筛选未达标 | 按Owner最新“到1500个就处理并训练”的授权，保留1506个去重train赢家，A单图1506张、B有限双视图3012张，RTX3060各完整训练40轮。6812张物理图片包含两个训练臂及共享val/test，全部审计通过。用户指出的图像扁平问题已在开训前改为可见范围价格轴，旧图与旧计划保留。 |
 | 2026-09-22 | [`p1_spike_joint_btc_gate_20260922.md`](p1_spike_joint_btc_gate_20260922.md) | 突破＋SPIKE：BTC 全局均线入场门对照（2026-09-22） |  |
 | 2026-09-22 | [`p1_spike_joint_notifications_20260922.md`](p1_spike_joint_notifications_20260922.md) | 突破+spike 双通道通知接入（2026-09-22） | 旧版联合信号只进入 `spike-lines-v1.sqlite3` 展示账本，没有通知队列，主服务也未启动 TG 发送线程。 |
+| 2026-09-22 | [`p1_spike_lowtf_v1_v126_20260922.md`](p1_spike_lowtf_v1_v126_20260922.md) | SPIKE V1 与 V12.6：OKX ETH/BTC 1m、3m、5m 对照回放 | 同一份 OKX 1m 数据、同一时间窗（2024-02-01 至 2026-09-22 14:00 UTC）、同一 0.2% 往返成本下，V1 与 V12.6 在 1m/3m/5m 的全期、前段、后段全部净亏。只有 V1 原版 5m 前段 65 笔 +4.76R 是正数，后段 44 笔 −34... |
 | 2026-09-22 | [`p1_spike_ma_confirm_20260922.md`](p1_spike_ma_confirm_20260922.md) | SPIKE 高周期线实体确认止损与固定2R对照（2026-09-22） | 每event一次固定随机抽样，同币/方向/月/时间分段/因果波动桶/H1方向门，公共事件跨8臂共享抽样；随机也用各臂同退出同成本。失败不补抽。全组匹配覆盖98.9761%–100%；共同SMA120和H1可用掩码与父实验一致。早段退出和控制跨切点排除，所有删失保留，完整72行统计与逐币、退出原... |
 | 2026-09-22 | [`p1_spike_ma_stop_20260922.md`](p1_spike_ma_stop_20260922.md) | SPIKE 均线外侧初始止损：29币15m固定对照（2026-09-22） | 结论：已实现并实际回测；对用户关注的多头，不建议现在把SMA120或两线外侧止损设为全局默认。更宽止损确实能救回部分回踩单，但更晚的保护和占仓代价会伤害其他交易。空头差异及结构条件只能作为后续单独验证假设，不在本轮结果出来后追加筛选直到盈利。训练/生产资格false，无订单或实盘参数改变。 |
+| 2026-09-22 | [`p1_spike_v126_htf_recheck_20260922.md`](p1_spike_v126_htf_recheck_20260922.md) | SPIKE V12.6：联合时重检 H1 SMA60 的全量研究 | 这项建议未提高扣费盈利胜率，不采用为 V12.6 默认条件。** 638/638 流完成、零回放错误；18,956 个联合候选中仅22个被拒绝。全期胜率28.6786%→28.6696%，后段24.3752%→24.3456%；平均净R也均变差。被删22笔中8笔盈利、14笔亏损，合计净+6.3... |
+| 2026-09-22 | [`p1_spike_v126_net_win_tail_audit_20260922.md`](p1_spike_v126_net_win_tail_audit_20260922.md) | SPIKE V12.6：扣费胜率与大盈利保留的优化审查 | Owner最初询问本金2万元、每单账户盈利200%、复利达到500万元的100%胜率模型，随后明确选择：**优先提高扣费后的盈利胜率，同时保留大盈利机会**。 |
 | 2026-09-22 | [`p1_spike_v12_6_visual_20260922.md`](p1_spike_v12_6_visual_20260922.md) | SPIKE V12.6：自适应趋势线与K线着色（2026-09-22） |  |
 | 2026-09-21 | [`p1_profitable_roll_v03_20260921.md`](p1_profitable_roll_v03_20260921.md) | 盈利滚仓 V0.3：Python 实现与跨币种回放 | 已实现独立 Python 管理器、单笔 CSV CLI、完整样本回放和逐腿账本审计。不限加仓次数可以编码，但没有证据表明它普遍优于最多两次。五个事后旧赢家中，AERO/BOME/PENDLE 连续版更高，ENA/ZEN 更低；完整后段 160 笔的连续版平均净亏 3.5845U，两次版亏 3.... |
 | 2026-09-21 | [`p1_spike_10r_discovery_v3_20260921.md`](p1_spike_10r_discovery_v3_20260921.md) | SPIKE 10R V3 / V3.1：全原始信号的10R命中率研究 | Owner明确“需要从原始所有的信号中，提高出10r的胜率，想尽一切办法”。本轮主指标是**筛选后最终扣费净R>10的比例**，普通赚钱胜率不是优化目标。全部亏单、未达10R、原持仓期间没开的候选都在母体内。10R是未来结果标签，不能用它决定此前是否入场；没有改变原R分母或缩小止损造高R。 |
@@ -552,6 +559,7 @@
 | — | [`p1_imacd_yolo_followthrough_20260908.md`](p1_imacd_yolo_followthrough_20260908.md) | IMACD + YOLO 后续走势：24根统计与完整事后图 |  |
 | — | [`p1_imacd_yolo_timeframes_20260908.md`](p1_imacd_yolo_timeframes_20260908.md) | IMACD → YOLO 的1H/4H迁移：先核对确认与等待时钟 |  |
 | — | [`p1_ma_launch_followup50_20260922.md`](p1_ma_launch_followup50_20260922.md) | 1,043个形态事件抽样50个：确认之后12小时的真实走势 |  |
+| — | [`p1_ma_profit3r_negatives_redo_20260922.md`](p1_ma_profit3r_negatives_redo_20260922.md) | MA 3R 训练负例修复：A组已进入3060训练，结果待完成 |  |
 | — | [`p1_ma_shift_stoch_eth_month_20260915.md`](p1_ma_shift_stoch_eth_month_20260915.md) | ETH 近一月：15分钟颜色 × 5分钟 Stoch |  |
 | — | [`p1_ma_stoch_exit_optimization_20260915.md`](p1_ma_stoch_exit_optimization_20260915.md) | ETH：退出、止盈、止损优化 v1 |  |
 | — | [`p1_ma_stoch_exit_optimization_v2_20260915.md`](p1_ma_stoch_exit_optimization_v2_20260915.md) | ETH止盈止损第二轮：更宽止损与不同获利退出 |  |
@@ -898,8 +906,13 @@
 - [`p1_ma_launch_followup50_20260922.md`](p1_ma_launch_followup50_20260922.md) — 1,043个形态事件抽样50个：确认之后12小时的真实走势
 - [`p1_ma_launch_label_leakage_and_edge_20260830.md`](p1_ma_launch_label_leakage_and_edge_20260830.md) — MA 密集启动：标签泄漏与真实 edge（2026-08-30）
 - [`p1_ma_launch_rules_20260819_window_20260922.md`](p1_ma_launch_rules_20260819_window_20260922.md) — 2026-08-19 18:00–22:00 双均线密集启动规则回放
+- [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) — MA 形态负例纠正 v6：数据通过，3060 A组训练中
+- [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) — A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱
 - [`p1_ma_morphology_reuse_20260920.md`](p1_ma_morphology_reuse_20260920.md) — 历史 YOLO / L2 资产能否用于识别 Owner 六线密集
+- [`p1_ma_morphology_top20_20260922.md`](p1_ma_morphology_top20_20260922.md) — A组模型扫描今日OKX涨幅前20：完成记录
 - [`p1_ma_profit3r_20260922.md`](p1_ma_profit3r_20260922.md) — 3R 盈利事件扩展与两组 YOLO：阶段过程记录（已完成）
+- [`p1_ma_profit3r_negative_semantics_correction_20260922.md`](p1_ma_profit3r_negative_semantics_correction_20260922.md) — MA3R 负例语义纠正：停止 v5 训练，保留失败记录
+- [`p1_ma_profit3r_negatives_redo_20260922.md`](p1_ma_profit3r_negatives_redo_20260922.md) — MA 3R 训练负例修复：A组已进入3060训练，结果待完成
 - [`p1_ma_profit3r_owner1500_v4_results_20260922.md`](p1_ma_profit3r_owner1500_v4_results_20260922.md) — 1506个3R赢家、两组YOLO训练与完整后段评估：已完成，盈利筛选未达标
 - [`p1_ma_rope_prefilter_20260821.md`](p1_ma_rope_prefilter_20260821.md) — P1 · 六均线“拧成一股绳”代码预筛与数据扩充入口（2026-08-21）
 - [`p1_ma_shift_stoch_eth_month_20260915.md`](p1_ma_shift_stoch_eth_month_20260915.md) — ETH 近一月：15分钟颜色 × 5分钟 Stoch
@@ -961,6 +974,7 @@
 - [`p1_spike_joint_rsi_entry_count_fix_20260920.md`](p1_spike_joint_rsi_entry_count_fix_20260920.md) — 突破＋SPIKE RSI7：纠正为从每笔实际开仓开始计数
 - [`p1_spike_joint_rsi_exit_20260920.md`](p1_spike_joint_rsi_exit_20260920.md) — 突破＋SPIKE新增RSI退出：实现准备（2026-09-20）
 - [`p1_spike_joint_rsi_exit_release_20260920.md`](p1_spike_joint_rsi_exit_release_20260920.md) — 突破＋SPIKE：同周期连续第7个RSI大菱形退出
+- [`p1_spike_lowtf_v1_v126_20260922.md`](p1_spike_lowtf_v1_v126_20260922.md) — SPIKE V1 与 V12.6：OKX ETH/BTC 1m、3m、5m 对照回放
 - [`p1_spike_ma_confirm_20260922.md`](p1_spike_ma_confirm_20260922.md) — SPIKE 高周期线实体确认止损与固定2R对照（2026-09-22）
 - [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) — SPIKE 六均线密集：单项拆分与语义反例
 - [`p1_spike_ma_stop_20260922.md`](p1_spike_ma_stop_20260922.md) — SPIKE 均线外侧初始止损：29币15m固定对照（2026-09-22）
@@ -988,6 +1002,8 @@
 - [`p1_spike_v11_box_joint_20260918.md`](p1_spike_v11_box_joint_20260918.md) — SPIKE V11.1「多头框内突破就算」单独回测：不加限制后更差，1h 明显差于 V10.4
 - [`p1_spike_v11_box_trade_book_20260919.md`](p1_spike_v11_box_trade_book_20260919.md) — 突破+spike 逐笔明细 + 抽样 50 张图（框内规则）
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
+- [`p1_spike_v126_htf_recheck_20260922.md`](p1_spike_v126_htf_recheck_20260922.md) — SPIKE V12.6：联合时重检 H1 SMA60 的全量研究
+- [`p1_spike_v126_net_win_tail_audit_20260922.md`](p1_spike_v126_net_win_tail_audit_20260922.md) — SPIKE V12.6：扣费胜率与大盈利保留的优化审查
 - [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
 - [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
 - [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) — SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20）
