@@ -189,7 +189,10 @@ def main():
                         f'<p>{" ｜ ".join(latest_imgs)}</p><a target="_blank" href="{chart}"><img loading="lazy" class="overview" src="{chart}"></a>'
                         f'<p>上图是审核总览，包含检出后的当日走势：蓝框多头、紫框空头。下方是实际模型输入与预测框：绿框多头、橙红框空头。</p>'
                         f'<div class="grid">{"".join(detail) or "今日无达到0.25阈值的预测框。"}</div></details>')
-        status="；".join(latest) or "无检出（历史不足项另列）"
+        missing_periods=[str(m)+"m" for m in (15,30,60) if streams[(symbol,m)]["status"]!="ok"]
+        status="；".join(latest) or ("未评估" if len(missing_periods)==3 else "无检出")
+        if missing_periods:
+            status+="；"+"/".join(missing_periods)+"历史不足"
         table.append(f'<tr><td>{coin["rank"]}</td><td><a href="#{symbol}">{symbol.replace("-USDT-SWAP","")}</a></td><td>+{coin["change_today_pct"]:.2f}%</td>'+"".join(f"<td>{c}</td>" for c in cells)+f"<td>{status}</td></tr>")
         sections.append(f'<section id="{symbol}" data-symbol="{symbol}"><h2>#{coin["rank"]} {symbol} · 今日 +{coin["change_today_pct"]:.2f}%</h2>{"".join(body)}</section>')
         coin_summary.append({**coin,"regions":len(coin_groups),"latest_detections":latest,
@@ -200,7 +203,8 @@ def main():
     pd.DataFrame(flat).to_csv(out/"board_summary.csv",index=False)
     page='''<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>A组 · 今日涨幅前20扫描</title>
 <style>body{font:15px/1.65 -apple-system,BlinkMacSystemFont,sans-serif;background:#f3f6fa;color:#202d41;margin:0}main{max-width:1500px;margin:auto;padding:30px}h1{font-size:29px}h2{font-size:23px}h3{font-size:18px}a{color:#286bd3}header,section{background:white;padding:24px;border-radius:14px;margin:20px 0}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid #e3e8ef;padding:10px;text-align:left}th{background:#eef3fa}small,p{color:#596679}summary{cursor:pointer;padding:13px;background:#edf3fb;border-radius:8px;margin:12px 0}.overview{width:100%;height:auto}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.grid img{width:100%;height:auto;border:1px solid #e3e8ef}article p{font-size:13px}.note{border-left:4px solid #b87617;padding:10px 15px;background:#fff7e9}.toolbar{position:sticky;top:0;background:#f3f6fa;padding:12px;z-index:2}select,button{padding:8px;font:inherit}@media(max-width:800px){.grid{grid-template-columns:1fr}main{padding:10px}header,section{padding:12px}table{font-size:12px}}</style><main>'''
-    page+=f'<header><h1>A组模型 · 今日涨幅前20</h1><p>OKX USDT 永续 · 快照 {html.escape(rank["snapshot_beijing"])} · 相对北京时间零点涨幅<br>15分 / 30分 / 1小时，逐个已收盘窗口扫描；模型阈值0.25，A权重不变。</p><p class="note">这是模型原始检出，不是人工认可或盈利信号。相邻窗口重叠框合并为阅览区段，不能当独立事件数。当前涨幅榜回看不代表当时能选中这些币；30分/1小时训练样本极少。历史不足不算未检出。</p><p><a href="board_summary.csv">下载榜单CSV</a> · <a href="predictions.jsonl">全部原始预测（含无框）</a> · <a href="run_metadata.json">模型与扫描参数</a></p></header>'
+    latest_close=max(r["decision_time_utc"] for r in rows if r.get("status")=="scored")
+    page+=f'<header><h1>A组模型 · 今日涨幅前20</h1><p>OKX USDT 永续 · 快照 {html.escape(rank["snapshot_beijing"])} · 相对北京时间零点涨幅<br>15分 / 30分 / 1小时，逐个已收盘窗口扫描；最新收盘窗截至北京时间 {bj(latest_close)}。模型阈值0.25，A权重不变。</p><p class="note">这是模型原始检出，不是人工认可或盈利信号。相邻窗口重叠框合并为阅览区段，不能当独立事件数。当前涨幅榜回看不代表当时能选中这些币；30分/1小时训练样本极少。历史不足不算未检出。</p><p><a href="board_summary.csv">下载榜单CSV</a> · <a href="predictions.jsonl">全部原始预测（含无框）</a> · <a href="run_metadata.json">模型与扫描参数</a></p></header>'
     page+='<div style="overflow:auto"><table><thead><tr><th>排名</th><th>合约</th><th>今日涨幅</th><th>15m 区段</th><th>30m 区段</th><th>1h 区段</th><th>最新收盘窗</th></tr></thead><tbody>'+"".join(table)+'</tbody></table></div>'
     page+='<div class="toolbar">筛选合约 <select id="filter"><option value="">全部20名</option>'+"".join(f'<option value="{r["symbol"]}">{r["rank"]}. {r["symbol"]}</option>' for r in rank["ranked"])+ '</select></div>'+"".join(sections)
     page+='''</main><script>document.querySelector('#filter').onchange=e=>document.querySelectorAll('section').forEach(s=>s.hidden=!!e.target.value&&s.dataset.symbol!==e.target.value);</script></html>'''
