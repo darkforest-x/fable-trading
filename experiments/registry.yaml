@@ -20,12 +20,12 @@ experiments:
     status: active
     question: Can visible morphology-only backgrounds correct the MA3R detector dataset without treating trade failures as absent shapes?
     single_variable: Owner-authorized semantic correction of training and shared evaluation labels; preserve selected winner pixels/boxes and fixed A/B recipe.
-    result: Preregistered; retain1506/175/160 selected positive events and find same-source-timeframe-time-block clear backgrounds. Dense nonwinner candidates remain quarantined; no new training result.
+    result: Full dataset audited;1841 original positive and1841 morphology-only clear background events, zero shortages. A train1506+1506;B3012+3012; shared val175+175,test160+160.27 strata visually reviewed and raw-replayed. GPU transfer underway; no new training result.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_ma_morphology_negatives_20260922.md
-    artifacts: []
+    artifacts: [ma-launch-owner1500-morph-v6-dataset]
     reuse_allowed: false
     notes: Owner explicitly authorized correction and offline RTX3060 retraining on2026-09-22. Full visible non-dense evidence required; hard negatives review-only. No production or promotion.
   - experiment_id: exp-ma-profit3r-negatives-20260922-v2
