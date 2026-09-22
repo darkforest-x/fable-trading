@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "images_and_original_and_copied_labels_checked": 670,
+  "dimensions": [
+    1280,
+    742
+  ],
+  "splits": {
+    "val": {
+      "image_count": 350,
+      "positive_count": 175,
+      "list_set_equal": true
+    },
+    "test": {
+      "image_count": 320,
+      "positive_count": 160,
+      "list_set_equal": true
+    }
+  },
+  "positive_box_center_x_distribution": {
+    "train": {
+      "0.608984": 704,
+      "0.614844": 802
+    },
+    "val": {
+      "0.608984": 77,
+      "0.614844": 98
+    },
+    "test": {
+      "0.614844": 90,
+      "0.608984": 70
+    }
+  },
+  "source_commit": "67e83a572f",
+  "inference_recipe_unchanged_except_dataset_pad": true,
+  "frozen_training_files_modified": false
+}

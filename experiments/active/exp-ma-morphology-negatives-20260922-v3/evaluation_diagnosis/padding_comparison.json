@@ -1,0 +1,168 @@
+{
+  "weight_sha256": "17aee5679b73dfd9183339c580c2caac323fc2b6c0759da38827834d72f2742b",
+  "ultralytics": "8.4.89",
+  "torch": "2.8.0",
+  "device": "cpu",
+  "runs": {
+    "default_pad05_val": {
+      "metrics": {
+        "metrics/precision(B)": 0.15322839704465147,
+        "metrics/recall(B)": 0.4742984526619459,
+        "metrics/mAP50(B)": 0.08650225245657701,
+        "metrics/mAP50-95(B)": 0.05515697643056464,
+        "fitness": 0.05515697643056464
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_000be00a9743dcf50c355f865721e3c5_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_b168dd25ee79eb8e348cbb4f477b0e3c_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_b0b8091c2c59f7ea117606f8cf9f6f60_A.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "prediction_sha256": "be5472e8fae5953ddba0d1cbfe895c5408709f386e26ed55be57eb14ee49f48e"
+    },
+    "default_pad05_test": {
+      "metrics": {
+        "metrics/precision(B)": 0.12339662977867204,
+        "metrics/recall(B)": 0.3958202388434946,
+        "metrics/mAP50(B)": 0.054957792207792205,
+        "metrics/mAP50-95(B)": 0.033373984343137944,
+        "fitness": 0.033373984343137944
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_0054737a8b499088dadd3dcc51c74b87_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_a6394c971aebdc8b5e36e436318cceaa_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_a6076cb0ef719bb5abdb3b54a1471412_A.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "prediction_sha256": "0815e09bd38ecaa4358f142b8b05b62931d8758c10323620a8b148e93ec1bc55"
+    },
+    "aligned_pad0_val": {
+      "metrics": {
+        "metrics/precision(B)": 0.9987938515745068,
+        "metrics/recall(B)": 0.9946236559139785,
+        "metrics/mAP50(B)": 0.99465,
+        "metrics/mAP50-95(B)": 0.9911379121697651,
+        "fitness": 0.9911379121697651
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_000be00a9743dcf50c355f865721e3c5_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_b168dd25ee79eb8e348cbb4f477b0e3c_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/val/event_b0b8091c2c59f7ea117606f8cf9f6f60_A.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "prediction_sha256": "f955db6ea23a35e1beac5606e725ed3910813230e431b571dbbbe8fa0741a870"
+    },
+    "aligned_pad0_test": {
+      "metrics": {
+        "metrics/precision(B)": 0.9911605136028653,
+        "metrics/recall(B)": 0.9990795356330322,
+        "metrics/mAP50(B)": 0.995,
+        "metrics/mAP50-95(B)": 0.9929233678901654,
+        "fitness": 0.9929233678901654
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_0054737a8b499088dadd3dcc51c74b87_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_a6394c971aebdc8b5e36e436318cceaa_A.png",
+          "/Users/zhangzc/fable-trading/experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/data/images/test/event_a6076cb0ef719bb5abdb3b54a1471412_A.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "prediction_sha256": "1533eda2b256017da1b5e26d78e066d667cd17a9f5c676b1567cb50ba03269ca"
+    }
+  }
+}

@@ -57,6 +57,7 @@ class RecordingValidator(DetectionValidator):
     def finalize_metrics(self):
         super().finalize_metrics()
         (self.save_dir / "geometry.json").write_text(json.dumps(self.geometry, indent=2))
+        self.metrics.diagnostic_save_dir = str(self.save_dir)
 
 
 class AlignedValidator(RecordingValidator):
@@ -69,6 +70,10 @@ def main():
     torch.set_num_threads(4)
     rows = [json.loads(line) for line in (DATA / "manifest.jsonl").read_text().splitlines()]
     rows = [r for r in rows if r["split"] in ("val", "test") and r["variant"] == "A"]
+    for split in ("val", "test"):
+        listed = {(DATA / line.strip()).resolve() for line in (DATA / f"{split}.txt").read_text().splitlines() if line.strip()}
+        selected = {(DATA / r["image_path"]).resolve() for r in rows if r["split"] == split}
+        assert selected == listed, f"manifest/list mismatch for {split}"
     snapshot = json.loads((OUT / "remote_snapshot.json").read_text())
     weight = OUT / "arm_A_best.pt"
     digest = hashlib.sha256(weight.read_bytes()).hexdigest()
@@ -76,6 +81,7 @@ def main():
     # Isolated labels prevent diagnostic Ultralytics caches touching frozen data.
     data_copy = OUT / "data"
     for row in rows:
+        assert hashlib.sha256((DATA / row["image_path"]).read_bytes()).hexdigest() == row["image_sha256"]
         image, label = data_copy / row["image_path"], data_copy / row["label_path"]
         image.parent.mkdir(parents=True, exist_ok=True)
         label.parent.mkdir(parents=True, exist_ok=True)
@@ -84,6 +90,9 @@ def main():
         original = DATA / row["label_path"]
         assert hashlib.sha256(original.read_bytes()).hexdigest() == row["label_sha256"]
         shutil.copyfile(original, label)
+    for split in ("val", "test"):
+        expected = {Path(r["image_path"]).name for r in rows if r["split"] == split}
+        assert {p.name for p in (data_copy / "images" / split).iterdir()} == expected
     yaml = OUT / "diagnostic.yaml"
     yaml.write_text(f"path: {data_copy}\ntrain: images/val\nval: images/val\ntest: images/test\nnames: [dense_launch_long, dense_launch_short]\n")
     output = {"weight_sha256": digest, "ultralytics": ultralytics.__version__,
@@ -97,7 +106,7 @@ def main():
                 rect=True, workers=0, augment=False, plots=False, verbose=False,
                 save_json=True, project=str(OUT / "runs"), name=run, exist_ok=False,
             )
-            result_dir = OUT / "runs" / run
+            result_dir = Path(metrics.diagnostic_save_dir)
             output["runs"][run] = {
                 "metrics": metrics.results_dict,
                 "geometry": json.loads((result_dir / "geometry.json").read_text()),
