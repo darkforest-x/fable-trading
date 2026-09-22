@@ -18,6 +18,87 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-profit3r-owner1500-v4-dataset
+    artifact_type: dataset
+    role: causal_3r_winner_training_and_full_later_candidate_pool
+    source_repo: darkforest-x/fable-trading
+    source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
+    source_path: datasets/ma_profit3r_owner1500_v4/manifest.jsonl
+    sha256: f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d
+    size_bytes: 11100371
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/ma_profit3r_owner1500_v4/manifest.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner1500 offline experiment completed; 1506 train events, A/B40 epochs, full chronological val/test and
+      matched controls. Both fail positive net top-decile criterion; not production. Legacy holdout discipline retired
+      by Owner; enum retained for schema only. Identity frozen by source commit; large PNG/weights remain local and
+      on3060.
+  - artifact_id: ma-profit3r-owner1500-v4-arm-a-best
+    artifact_type: weights
+    role: research_rejected_profit_winner_detector_one_view
+    source_repo: darkforest-x/fable-trading
+    source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
+    source_path: experiments/active/exp-ma-profit3r-20260922-v1/trained_owner1500_v4/arm_A/weights/best.pt
+    sha256: 546a267dd9743b0b981a554c988088c9d033b266718f7983252e4ab2eaa239a4
+    size_bytes: 19245914
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-ma-profit3r-20260922-v1/trained_owner1500_v4/arm_A/weights/best.pt
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner1500 offline experiment completed; 1506 train events, A/B40 epochs, full chronological val/test and
+      matched controls. Both fail positive net top-decile criterion; not production. Legacy holdout discipline retired
+      by Owner; enum retained for schema only. Identity frozen by source commit; large PNG/weights remain local and
+      on3060.
+  - artifact_id: ma-profit3r-owner1500-v4-arm-b-best
+    artifact_type: weights
+    role: research_rejected_profit_winner_detector_two_views
+    source_repo: darkforest-x/fable-trading
+    source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
+    source_path: experiments/active/exp-ma-profit3r-20260922-v1/trained_owner1500_v4/arm_B/weights/best.pt
+    sha256: 8a8cc335f5b0c9f0444252bb0455fadaaedae66044ee7950259036a4ed58d503
+    size_bytes: 19245914
+    storage_uri: file:///Users/zhangzc/fable-trading/experiments/active/exp-ma-profit3r-20260922-v1/trained_owner1500_v4/arm_B/weights/best.pt
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner1500 offline experiment completed; 1506 train events, A/B40 epochs, full chronological val/test and
+      matched controls. Both fail positive net top-decile criterion; not production. Legacy holdout discipline retired
+      by Owner; enum retained for schema only. Identity frozen by source commit; large PNG/weights remain local and
+      on3060.
+  - artifact_id: ma-profit3r-owner1500-v4-delivery
+    artifact_type: manifest
+    role: completed_training_evaluation_controls_integrity_manifest
+    source_repo: darkforest-x/fable-trading
+    source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
+    source_path: experiments/active/exp-ma-profit3r-20260922-v1/delivery_owner1500_v4/manifest.json
+    sha256: 15c1ad32de2efe96c7d3ba871a24cc77a97daa5651305ae72e305b1b6818e754
+    size_bytes: 11435
+    storage_uri: repo://experiments/active/exp-ma-profit3r-20260922-v1/delivery_owner1500_v4/manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner1500 offline experiment completed; 1506 train events, A/B40 epochs, full chronological val/test and
+      matched controls. Both fail positive net top-decile criterion; not production. Legacy holdout discipline retired
+      by Owner; enum retained for schema only. Identity frozen by source commit; large PNG/weights remain local and
+      on3060.
+  - artifact_id: ma-profit3r-owner1500-v4-report
+    artifact_type: report
+    role: completed_negative_profit_filter_experiment_report
+    source_repo: darkforest-x/fable-trading
+    source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
+    source_path: analysis/p1_ma_profit3r_owner1500_v4_results_20260922.md
+    sha256: 91497bd9bd76223bf0504090808488ff7a1feaa8cfa471067b28ef0fec57f8fc
+    size_bytes: 17842
+    storage_uri: repo://analysis/p1_ma_profit3r_owner1500_v4_results_20260922.md
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner1500 offline experiment completed; 1506 train events, A/B40 epochs, full chronological val/test and
+      matched controls. Both fail positive net top-decile criterion; not production. Legacy holdout discipline retired
+      by Owner; enum retained for schema only. Identity frozen by source commit; large PNG/weights remain local and
+      on3060.
+
   - artifact_id: ma-launch-rules-aug19-window-20260922-delivery
     artifact_type: manifest
     role: bounded_historical_six_timeframe_grade_a_rule_replay_with_review_charts

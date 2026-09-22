@@ -1,0 +1,37 @@
+{
+  "time_utc": "2026-09-22T06:29:08.408254+00:00",
+  "result_commit": "199f66dc16522b06aa418b7ba9867f73e00549f8",
+  "requirements": [
+    {
+      "requirement": "Reconcile original events and apply frozen 3R first-passage labels",
+      "evidence": "legacy_outcomes/summary.json:1043 events,55 retained,lineage_errors0; plan.json gross3R,cost.002,12h,next-open/core-stop"
+    },
+    {
+      "requirement": "Expand until owner-amended1500 unique eligible training events",
+      "evidence": "owner_amendment_1500_v2.json;selection_queue_round_017/dataset_ledger.jsonl:1506train;metadata in trained_owner1500_v4/training_receipt.json"
+    },
+    {
+      "requirement": "A one view,B limited two views; same cutoff/time splits and audited image correction",
+      "evidence": "dataset_plan_owner1500_v4.json;dataset_owner1500_v4_audit/receipt.json;A1506/B3012/sharedval1305/test989;6812PNG+labels;oldbytes preserved"
+    },
+    {
+      "requirement": "Actual3060 A/B training",
+      "evidence": "training_receipt completed;actual CSV1..40 each;remote original SSH exit0;9file SHA/size inventory;best and last present both hosts"
+    },
+    {
+      "requirement": "Full later-pool and frozen matched-control evaluation with losses preserved",
+      "evidence": "evaluation_owner1500_v4 arm_A/B completed receipts and events;control_comparison_owner1500_v4 completed;11441 control outcomes;independent event recomputation"
+    },
+    {
+      "requirement": "Record limitations,failed attempts,results and artifacts",
+      "evidence": "analysis/p1_ma_profit3r_owner1500_v4_results_20260922.md;final_review_owner1500_v4.json;delivery_owner1500_v4/manifest.json46 files;five registered artifact identities;Notion final update"
+    },
+    {
+      "requirement": "No promote,deployment,trading",
+      "evidence": "All deliverables/registrations production_eligible=false;operational scripts only train,evaluate and copy into experiment-owned paths;no production command invoked"
+    }
+  ],
+  "research_outcome": "negative/rejected; requested training and evaluation complete, no profitability success claimed",
+  "known_unrelated_repository_gates": "468passed/8pre-existing failures, documented; not represented as green",
+  "not_a_full_train_val_predict_parity_claim": true
+}
