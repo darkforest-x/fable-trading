@@ -158,13 +158,13 @@ def _remote_audits(host: str, remote_root: str, symbols: list[str], binding: Map
 from pathlib import Path
 root=Path({remote_root!r})
 expected={dict(binding)!r}
-actual=json.loads((root/'run_binding.json').read_text())
+actual=json.loads((root/'run_binding.json').read_text(encoding='utf-8'))
 assert actual==expected, 'remote run binding drift'
 answer={{}}
 for symbol in {symbols!r}:
  p=root/'compressed_audits'/(symbol+'.json')
  if not p.exists(): continue
- row=json.loads(p.read_text())
+ row=json.loads(p.read_text(encoding='utf-8'))
  assert row['symbol']==symbol, 'remote symbol drift'
  if row.get('status')=='complete':
   source=root/'audits'/(symbol+'.json')

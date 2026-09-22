@@ -1,3 +1,12 @@
+import base64
+import contextlib
+import hashlib
+import io
+import json
+import re
+from pathlib import Path
+from types import SimpleNamespace
+
 import pytest
 
 from yoyo.data.ma_profit_import_queue import QueueError, frozen_sources, require_ready, terminal_statuses
@@ -30,6 +39,49 @@ def test_wait_partial_then_ready_and_terminal_is_not_retried(monkeypatch):
     with pytest.raises(QueueError, match='no_data'):
         q.wait_ready(lambda: {'A': audit('A', 'no_data')}, ['A'])
     assert sleeps == [50]
+
+
+def test_remote_audits_reads_utf8_json_under_cp936_default(tmp_path, monkeypatch):
+    """The remote Windows default encoding must not alter a non-ASCII audit symbol."""
+    import yoyo.data.ma_profit_import_queue as q
+
+    symbol = "币安人生USDT"
+    remote_root = tmp_path / "remote"
+    (remote_root / "compressed_audits").mkdir(parents=True)
+    (remote_root / "audits").mkdir()
+    binding = {"config_sha256": "frozen"}
+    (remote_root / "run_binding.json").write_text(json.dumps(binding), encoding="utf-8")
+    source = remote_root / "audits" / f"{symbol}.json"
+    source.write_text(json.dumps({"symbol": symbol}, ensure_ascii=False), encoding="utf-8")
+    source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
+    compressed = remote_root / "compressed_audits" / f"{symbol}.json"
+    compressed.write_text(
+        json.dumps(
+            {"symbol": symbol, "status": "complete", "source_audit_sha256": source_sha},
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+
+    original_read_text = Path.read_text
+
+    def cp936_default(self, encoding=None, errors=None):
+        return original_read_text(self, encoding="cp936" if encoding is None else encoding, errors=errors)
+
+    def remote_process(args, **kwargs):
+        command = args[-1]
+        encoded = re.search(r"b64decode\('([^']+)'\)", command).group(1)
+        script = base64.b64decode(encoded).decode("utf-8")
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            exec(script, {"__name__": "__main__"})
+        return SimpleNamespace(returncode=0, stdout=output.getvalue().encode("utf-8"), stderr=b"")
+
+    monkeypatch.setattr(Path, "read_text", cp936_default)
+    monkeypatch.setattr(q.subprocess, "run", remote_process)
+    rows = q._remote_audits("host", str(remote_root), [symbol], binding)
+    assert rows[symbol]["symbol"] == symbol
+    assert rows[symbol]["source_audit_sha256"] == source_sha
 
 
 def _completed_import(tmp_path, monkeypatch):
