@@ -1,0 +1,27 @@
+{
+  "experiment_id": "exp-spike-bp-random-audit-20260922-v1",
+  "split": "2025-09-10T00:00:00+00:00",
+  "round_trip_cost": 0.002,
+  "bootstrap": 2000,
+  "flips": 10000,
+  "seed": 922115,
+  "sources": {
+    "v104": {
+      "trades": "experiments/active/exp-spike-v10-4-joint-multitf-20260918-v1/statistics/run_v1/trades.csv.gz",
+      "controls": "experiments/active/exp-spike-v10-4-joint-multitf-20260918-v1/statistics/run_v1/controls.csv.gz"
+    },
+    "v9": {
+      "controls": "experiments/active/exp-spike-v9-full-backtest-20260915-v1/statistics/full_v1/controls.csv.gz"
+    },
+    "v126": {
+      "run": "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/results/run_v2"
+    }
+  },
+  "verdict": {
+    "bp_confirmed": "full bp excess ci_low > 0 and p < 0.01 and later bp excess > 0",
+    "r_only": "R excess p < 0.01 without bp_confirmed",
+    "not_significant": "neither"
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
