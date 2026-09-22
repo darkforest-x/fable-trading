@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-morphology-negatives-20260922-v3",
+  "dataset_name": "ma_launch_owner1500_morph_v6",
+  "created_date": "2026-09-22",
+  "owner_authorization": {
+    "request": "你这负样本弄的不对啊 负样本怎么大部分也是均线密集的？ → 去做吧 开始目标模式",
+    "training_authorized": true,
+    "research_gate_exception": true,
+    "coupled_semantic_correction_authorized": true,
+    "promote": false,
+    "live_money": false
+  },
+  "inputs": {
+    "old_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/dataset_ledger.jsonl",
+      "sha256": "e70c09343565e2c7376b6b9e897466965a8a07d1a2134f2520769c23f0b9d797"
+    },
+    "old_manifest": {
+      "path": "datasets/ma_profit3r_owner1500_v4/manifest.jsonl",
+      "sha256": "f0207e44d955fda18e27e0a258f077065db8f995f7fc5f1c0d223201d9fecd4d"
+    },
+    "candidate_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_ledger.jsonl",
+      "sha256": "81d60c351642dfcb8055c5e1391b31828b71b7f36f7beb6083a50ab646cb652f"
+    },
+    "manual_rows": {
+      "path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl",
+      "sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9"
+    },
+    "reference_exclusion": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json",
+      "sha256": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a"
+    },
+    "base_model": {
+      "path": "models/yolo11s.pt",
+      "sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5"
+    },
+    "legacy_negative_protocol": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json",
+      "sha256": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    }
+  },
+  "parent_dataset_root": "datasets/ma_profit3r_owner1500_v4",
+  "label_semantics": {
+    "classes": {
+      "0": "dense_launch_long",
+      "1": "dense_launch_short"
+    },
+    "positive_selection": "Keep existing 1506/175/160 profitable Grade-A events with original image/box bytes; profit is selection metadata, not evidence to erase nonwinner morphology. Existing positives are rule-labelled, not per-sample Owner gold.",
+    "negative_selection": "Morphology-only visible whole-window non-dense proof plus known-candidate/manual exclusion. No return/TP/SL/TIMEOUT enters negative eligibility.",
+    "unadjudicated": "Every prior nonwinner candidate remains quarantined for morphology; no automatic reversal to positive.",
+    "evaluation_scope": "Matched case-control evaluation on selected winner-pattern positives and verified clear backgrounds; not unconditional morphology recall or proof of profitability. Separate full-candidate economic evaluation retains outcome labels only as trading labels.",
+    "hard_negatives": "Dense near misses and manual labels with differing windows are review-only until applicable visible morphology evidence is verified; no forced hard-negative quota."
+  },
+  "negative_sampling": {
+    "events_per_positive_soft_target": 1,
+    "search_radius_days": 7,
+    "candidate_step_minutes_minimum": 60,
+    "same_source": true,
+    "same_symbol": true,
+    "same_timeframe": true,
+    "same_calendar_halfyear": true,
+    "same_split": true,
+    "protection_hours": 4,
+    "reuse": false,
+    "overlap": false,
+    "capacity_failure": "Record shortage; never weaken morphology proof/protection/time split or borrow another source.",
+    "whole_visible_ma_spread_atr_min": 1.6,
+    "threshold_origin": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json#negative_sampling.easy_definition.ma_spread_end_atr_min_any",
+    "whole_view_rule": "On every bar of widest pre11/core4-5/post5 view, both CLOSE and HL2 six-MA spreads must be >=1.6 times maximum causal ATR14 across that view. Existing easy threshold made stricter across entire visible window.",
+    "minimum_activity": 4
+  },
+  "render": {
+    "width": 1280,
+    "height": 742,
+    "ma": "HL2 SMA/EMA20/60/120",
+    "support_bars": 1200,
+    "price_scale": "visible_range_v1",
+    "A": {
+      "pre": 9,
+      "post": 5
+    },
+    "B1": {
+      "pre": 7,
+      "post": 5
+    },
+    "B2": {
+      "pre": 11,
+      "post": 5
+    },
+    "all_train_augmentations_off": true
+  },
+  "splits": {
+    "evaluation": "Common corrected val/test for A/B; exclude all unadjudicated outcome-negative rows. Positive parent event split retained; negatives require whole visible and12h safety interval inside split, and same halfyear/source as paired positive.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "training_args": {
+    "auto_augment": null,
+    "batch": 8,
+    "bgr": 0.0,
+    "cache": false,
+    "copy_paste": 0.0,
+    "cutmix": 0.0,
+    "degrees": 0.0,
+    "deterministic": true,
+    "device": "0",
+    "epochs": 40,
+    "erasing": 0.0,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "mixup": 0.0,
+    "mosaic": 0.0,
+    "multi_scale": 0.0,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "perspective": 0.0,
+    "plots": false,
+    "rect": true,
+    "scale": 0.0,
+    "seed": 0,
+    "shear": 0.0,
+    "translate": 0.0,
+    "workers": 2
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "previous_rejected_experiment": "exp-ma-profit3r-negatives-20260922-v2",
+  "planned_report": "analysis/p1_ma_morphology_negatives_20260922.md"
+}
