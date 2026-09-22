@@ -8,7 +8,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.spike_v126_htf_report import TABLES, _matched, build, sha
+from yoyo.evaluation.spike_v126_htf_report import TABLES, _matched, _metric_row, build, sha
 
 
 def _write_run(root: Path) -> Path:
@@ -87,6 +87,11 @@ def test_earlier_paired_control_requires_its_own_mature_exit():
     controls = pd.DataFrame({"trade_key": ["x"], "arm": ["baseline"], "matched": [True], "control_net_r": [1.],
                              "control_net_return": [.01], "control_exit_time": ["2025-09-11T00:00:00Z"]})
     assert _matched(frame, controls, pd.Timestamp("2025-09-10", tz="UTC")).empty
+    # A control settled later than the split is nevertheless mature for the
+    # full report window, so it must not be silently removed there.
+    split=pd.Timestamp("2025-09-10",tz="UTC")
+    assert _metric_row(frame,controls,'baseline','full',split)['matched_n']==1
+    assert _metric_row(frame,controls,'baseline','earlier',split)['matched_n']==0
 
 
 def test_changed_ledger_is_rejected_before_any_summary(tmp_path):

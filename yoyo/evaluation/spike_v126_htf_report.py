@@ -146,7 +146,7 @@ def _matched(frame: pd.DataFrame, controls: pd.DataFrame, split: pd.Timestamp | 
 
 def _metric_row(frame: pd.DataFrame, controls: pd.DataFrame, arm: str, period: str, split: pd.Timestamp | None = None) -> dict[str, Any]:
     values = _metric(frame)
-    paired = _matched(frame, controls, split)
+    paired = _matched(frame, controls, split if period == 'earlier' else None)
     values.update({"arm": arm, "period": period, "matched_n": len(paired),
                    "paired_target_win_rate": float((paired.net_r > 0).mean()) if len(paired) else math.nan,
                    "random_win_rate": float((paired.control_net_r > 0).mean()) if len(paired) else math.nan,
