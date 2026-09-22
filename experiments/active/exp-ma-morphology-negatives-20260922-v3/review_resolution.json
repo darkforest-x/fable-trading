@@ -1,0 +1,17 @@
+{
+  "remaining": "Full output audit and raw replay required before training.",
+  "resolved_findings": [
+    {
+      "decision": "not a frozen-contract violation",
+      "reason": "Known candidate cores plus4h protected; ordinary earlier context may overlap within same split. No evidence of core or cross-split infringement.",
+      "topic": "candidate pre-context overlap"
+    },
+    {
+      "decision": "not a contradiction",
+      "reason": "Capacity shortage is recorded without relaxing rules; a split with zero negatives correctly fails training usability audit.",
+      "topic": "shortage vs required evaluation population"
+    }
+  ],
+  "reviewer": "budget-mapper / Luna Max",
+  "scope": "builder, screen, plan; no full data execution"
+}
