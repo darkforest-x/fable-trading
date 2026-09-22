@@ -16,6 +16,14 @@ Owner 在发现 A/B 训练负例为零后要求“重新做吧”。本轮是两
 
 训练后同表报告事件定位/误报、val/test AUC、固定top10毛/净bp与胜率、quality_score单特征、置换p与同币时间波动匹配随机控制。已看过的val/test只作为重做的受控比较，不冒充未接触过的终审。B曝光翻倍、12h标签重叠、内置val padding与单图路径差异保持披露。不依据本轮结果再调参。
 
+## Owner 查看入口与验证集口径
+
+Owner 追问先看负例及验证集后，按实际 PNG 和 TXT 复核：验证集175正/1130负，共1305；测试集160正/829负，共989。两组共享原验证和测试清单，训练结束后的测试分数不参与选权重。时间边界沿用 UTC 2026-01-01/2026-05-01，同一事件的视图不跨集合。
+
+这些正负标签表示当前3R收益目标，不是逐张由Owner确认的形态金标。旧人工标注及真实tip验收是另一项证据；本轮core+5研究窗口不得冒充tip输入或以内部mAP替代那项验收。
+
+本地查看目录为 `datasets/ma_profit3r_owner1500_neg_v5/review/`，含train_positive_A、train_negatives_A、val_positive、val_negative、test_positive、test_negative。它们仅为指向原图的查看软链接，不在训练加载清单，不上传3060。训练负例生成中时该目录仅是已生成图片的快照，完整计数以最终manifest和实际加载清单审计为准。
+
 ## 复现命令
 
 ```bash
