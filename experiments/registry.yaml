@@ -10572,3 +10572,18 @@ experiments:
     artifacts: [spike-ma-confirm-20260922-delivery]
     reuse_allowed: false
     notes: Body/close R is reference risk and is not a hard loss cap. Eight later months cannot resolve the thirty-test confirmatory family. No Pine or production changes.
+
+  - experiment_id: exp-spike-joint-btc-gate-20260922-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9f588ec153
+    status: planned
+    question: Does a completed BTC perpetual close above same-chart or fixed H1 SMA improve the existing SPIKE box_any joint entry?
+    single_variable: Global entry permission only; predeclared SMA60/120/240 within separate unchanged price and current RSI7 exit strata.
+    result: Planned; no market replay or profitability conclusion yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_joint_btc_gate_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner20260922 authorizes offline comparison; same638Binance archive,15m/1h,all9301candidates. No monitor/Pine or account change.

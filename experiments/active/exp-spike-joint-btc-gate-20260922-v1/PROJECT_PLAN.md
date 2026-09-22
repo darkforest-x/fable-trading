@@ -1,0 +1,35 @@
+# SPIKE joint BTC regime gate — pre-specified offline comparison
+
+Owner request (2026-09-22): test a global BTCUSDT perpetual condition for SPIKE + breakout longs: BTC above same-timeframe SMA120 or fixed 1h SMA120; assess a better simple reference against existing backtests. This authorizes offline gate comparisons, no live integration or training.
+
+## Frozen estimand and scope
+
+- Parent: `exp-spike-v112-support-20260919-v1/results/run_v1`, **box_any** candidates and historical price-exit ledger (not box_support, not plain V9, not V10.4 six-bar joint).
+- Reuse all 638 Binance USD-M archive symbols and all original 9,301 joint candidates, including previously occupied, invalid or censored cases. 15m and 1h charts, existing local/higher first-break-per-reference-box semantics; a rejected first break consumes its box and cannot retry.
+- Signal-close window: 2024-09-10T00:00Z <= close < 2026-05-01T00:00Z. Earlier/later split remains 2025-09-10T00:00Z. Earlier selection only uses exits strictly before the split. No cross-split outcome may select a candidate. All historical data is authorized; the old archive end is retained solely for comparator parity, not a holdout restriction.
+- BTC reference: Binance BTCUSDT USD-M perpetual from the same archived 5m source. This is not an assertion of OKX/TradingView price parity. Complete epoch-aligned 15m/1h buckets only; unavailable/gapped SMA windows fail closed and are counted. No new fetching.
+- Two separate exit strata: `price` = exact published original; `rsi7` = current additional same-chart RSI/SAR exit, continuous same-color strong-diamond count starting at each actual entry, opposite color resets to one, exactly seventh bearish strong diamond next-open full exit, original protection/reverse precedence unchanged. Gate effects compare WITHIN exit stratum; do not credit an exit change to BTC filtering.
+- Original next-open entries, initial 5-bar/ATR stop, close-2R arm, close-4ATR trail, raw V9 reverse, ticks, gap censoring, cost 0.002 stay unchanged. BTC only permits entry, never independently exits a position.
+
+## Pre-specified gate candidates
+
+`none`; `same_sma60`, `same_sma120`, `same_sma240`; `h1_sma60`, `h1_sma120`, `h1_sma240`.
+Primary hypotheses: same_sma120 and h1_sma120. Neighbors 60/240 test a faster/slower simple reference; no EMA, slope, distance, conjunction or post-result search this round.
+At the joint signal close, use the most recent BTC candle whose close timestamp is <= that decision timestamp. Compare that **closed BTC close** strictly > its SMA over N contiguous closed BTC candles. Never use an unfinished H1 close, later bar, chart asset close, or stale BTC bar at/after the next expected BTC close. SMA includes its own last completed candle. Unknown is rejected, not interpreted as below. On 1h charts, same and h1 variants must be identical.
+Every arm replays all candidates with independent per-symbol/per-timeframe occupancy. Not an account model or cross-symbol single position. Memoizing an identical event's exit is permitted because outcomes cannot depend on the chosen entry gate.
+
+## Controls and inference
+
+- For every executed event/arm, deterministic matched random long entry from same symbol x chart timeframe x UTC calendar month x temporal fold x ATR/close bucket, with the **same BTC permission gate**, same own-entry risk/exit/cost. Exclude the target signal bar; keep unmatched/censored rows explicitly. Controls are paired event references, not a tradable serial portfolio. Preserve the original seed 91918 and box_any trade_key for baseline-control parity where its pool is unchanged.
+- Main metrics: closed/censored/rejected counts, win rate, mean and total net R, mean gross/net bp, PF, exit-time ordered equal-risk realized cumulative-R drawdown, realized >5R/>10R counts and retention. R sums are not compounded account returns. Both random-reference mean and matched excess accompany directional tables.
+- Full/earlier/later and separate 15m/1h plus descriptive pooled tables. Earlier selected candidate among six = largest pooled mean net R, tie break lexicographic, minimum 100 mature closed events and at least 30 per timeframe. If no candidate has positive mean net R AND net bp, select `none` as recommendation; still identify exploratory top score. Never re-select on later data.
+- Calendar-month paired bootstrap (2,000 draws, seed 91509) recomputes arm-specific denominators, keeps cross-asset dependence; 95% CI for delta mean net R, mean net bp and total R. Only common calendar blocks; retain empty-arm counts explicitly.
+- UTC calendar-week block sign-flip (10,000 draws, seed 92201) tests mean-quality difference using unequal-denominator contributions `filtered_week_sum / filtered_total_n - baseline_week_sum / baseline_total_n`, and matched excess using paired weekly excess sums. Holm adjustment across all 24 chart x gate x exit comparisons (duplicate H1 tests conservatively retained) per endpoint/fold. Monthly effects also reported for stability; these exposed historical samples are not blind OOS and weekly blocks are an assumption, not proof of independence.
+- A provisional better gate requires later mean net R AND net bp positive, positive net-R and net-bp quality deltas with monthly CIs above zero, positive matched excess in both units and Holm p<0.01 for both quality and matched-excess endpoints, plus no hidden data/causality/parity defect. Failure or inadequate evidence means unverified, not parameter retuning. Selection and all failures remain visible. No automatic promote even if a research condition passes.
+- AUC and top-decile are inapplicable: deterministic binary entry gate, no trained probability model or decile-ranking strategy. This is not permission to alter financial success criteria for L2 models.
+
+## Reproducibility and verification
+
+Commit builder, focused tests, this plan and config BEFORE market replay. Fingerprint executable dependencies, BTC archive, parent manifest/identity/receipts, OHLC source archives and exchange metadata. Validate parent candidate count/timestamps and baseline trade/status/control parity; resume only matching hashed outputs. Verify strict as-of H1 boundary, SMA warmup/gap rejection, prefix causality, same==H1 for 1h, occupancy release, unchanged outcomes for shared events, RSI entry-local semantics, and future BTC perturbation independence. Preserve original sources and prior reports.
+
+Deliver: immutable per-event decisions/trades/controls, receipts/manifest, statistics tables, `analysis/p1_spike_joint_btc_gate_20260922.md`, a focused learning, registry entries and a deduplicated Notion research record. `training_eligible=false`, `production_eligible=false`. No Pine/script/version, running monitor, account, order, or notification changes.
