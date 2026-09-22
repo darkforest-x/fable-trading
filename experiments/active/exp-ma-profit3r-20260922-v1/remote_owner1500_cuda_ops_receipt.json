@@ -1,0 +1,48 @@
+{
+  "checked_at_utc": "2026-09-22T02:07:09.815063+00:00",
+  "dataset_destination": "C:/fable/datasets/ma_profit3r_owner1500_v2",
+  "destinations_absent_at_check": true,
+  "local": {
+    "cpu_nms": [
+      0
+    ],
+    "torch": "2.8.0",
+    "torchvision": "0.23.0"
+  },
+  "nms_input": {
+    "boxes": [
+      [
+        0,
+        0,
+        10,
+        10
+      ],
+      [
+        1,
+        1,
+        9,
+        9
+      ]
+    ],
+    "expected_kept": [
+      0
+    ],
+    "iou_threshold": 0.5,
+    "scores": [
+      0.9,
+      0.8
+    ]
+  },
+  "remote": {
+    "cuda_nms": [
+      0
+    ],
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "host": "Administrator@192.168.1.2",
+    "torch": "2.8.0+cu126",
+    "torchvision": "0.23.0+cu126"
+  },
+  "remote_disk_free_bytes_at_check": 64001433600,
+  "run_destination": "C:/fable/runs/ma_profit3r_owner1500_20260922_v2",
+  "scope": "Actual CPU/CUDA torchvision NMS and empty destination checks only. Dataset transfer and training remain pending."
+}
