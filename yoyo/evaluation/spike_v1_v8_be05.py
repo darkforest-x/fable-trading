@@ -22,6 +22,7 @@ from pathlib import Path
 import subprocess
 from time import perf_counter, time_ns
 from dataclasses import dataclass
+from collections.abc import Callable
 
 import numpy as np
 import pandas as pd
@@ -155,7 +156,8 @@ def _close_updates(position: dict[str, object], *, high: float, low: float, clos
         position["protection"] = max(before, candidate) if side == 1 else min(before, candidate)
 
 
-def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, prepared: PreparedArm | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, prepared: PreparedArm | None = None,
+                  initial_transform: Callable[[dict[str, object], int, int], dict[str, object] | None] | None = None) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Replay the clean serial contract, clearing an intent when its owner closes.
 
     ``pending_reverse`` belongs to the position that scheduled it.  Every
@@ -218,6 +220,8 @@ def replay_serial(context: base.StreamContext, *, arm: str, enable_be: bool, pre
             signal_i, side = pending_entry
             if position is None and side != ended_side:
                 made = base._initial_position_fast(frame.index, oa, ha, la, ca, aa, gap, signal_i, side, spec)
+                if made is not None and initial_transform is not None:
+                    made = initial_transform(made, signal_i, side)
                 if made is not None:
                     made["initial_risk_frac"] = float(made["initial_risk"]) / float(made["entry_price"])
                     original_i = ordinal.get(frame.index[signal_i])
