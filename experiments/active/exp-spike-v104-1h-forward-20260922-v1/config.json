@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-spike-v104-1h-forward-20260922-v1",
+  "timeframe": "1h",
+  "window_start": "2026-05-01T00:00:00+00:00",
+  "data_end": "2026-09-22T14:00:00+00:00",
+  "archive_months": [
+    "2026-05",
+    "2026-06",
+    "2026-07",
+    "2026-08"
+  ],
+  "rest_start": "2026-09-01T00:00:00+00:00",
+  "data_dir": "data/kline_binance_um5m_forward_20260922",
+  "arms": {
+    "original": null,
+    "tp_0.3r": 0.3,
+    "tp_0.5r": 0.5,
+    "tp_1.0r": 1.0
+  },
+  "round_trip_cost": 0.002,
+  "win_rate_target": 0.77,
+  "vol_bins": [
+    0.005,
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "control_seed": 922116,
+  "flips": 10000,
+  "bootstrap": 2000,
+  "stat_seed": 922117,
+  "p_threshold": 0.01,
+  "training_eligible": false,
+  "production_eligible": false,
+  "warmup_bars": 1500
+}
