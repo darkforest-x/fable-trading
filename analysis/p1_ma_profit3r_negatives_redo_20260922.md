@@ -1,4 +1,4 @@
-# MA 3R 训练负例修复：已预注册，尚未训练
+# MA 3R 训练负例修复：数据审计完成，准备3060训练
 
 Owner 在发现 A/B 训练负例为零后要求“重新做吧”。本轮是两组离线重训的明确授权；不改变生产资格或部署。原 `exp-ma-profit3r-20260922-v1` 失败结果保留。其 plan 把 positive-only 归为 Owner 要求是不正确的解释，“只用原版”仅区分视图增强。
 
@@ -35,6 +35,32 @@ Owner 追问先看负例及验证集后，按实际 PNG 和 TXT 复核：验证�
 .venv/bin/python -m yoyo.datasets.ma_profit_negative_redo audit --plan experiments/active/exp-ma-profit3r-negatives-20260922-v2/plan.json --selection experiments/active/exp-ma-profit3r-negatives-20260922-v2/selection --out datasets/ma_profit3r_owner1500_neg_v5
 ```
 
+审计结果保存为实验目录 `local_audit.json`；运行 `python -m yoyo.datasets.ma_profit_negative_preview` 后实际查看contact sheet与原图，再填写 `visual_review/review.json`，不能自动假定人工检查已发生。当前已冻结版本接续命令如下，已有产物时拒绝覆盖：
+
+```bash
+.venv/bin/python -m scripts.research.run_ma_profit_negative_redo freeze
+.venv/bin/python -m scripts.research.run_ma_profit_negative_redo stage
+.venv/bin/python -m scripts.research.run_ma_profit_negative_redo start
+.venv/bin/python -m scripts.research.run_ma_profit_negative_redo watch
+.venv/bin/python -m yoyo.evaluation.ma_profit_negative_delivery
+```
+
+## 构建与开训前证据
+
+Builder提交 `bfcd47fb8d` 先于构建。原7839个训练SL/TIMEOUT候选中15个与保护范围冲突，选定7824个；实际构建全部7824，无额外跳过。最终30284张物理PNG，11624个独立事件；A/B共用val/test，B训练每事件两视图。实际标签及加载清单审计通过60568个PNG/TXT，保留父集6812图/标签及其事件、split、manifest行。
+
+| 集合 | 正事件 | 负事件 | A图片 | B图片 |
+|---|---:|---:|---:|---:|
+| train | 1506 | 7824 | 9330 | 18660 |
+| val | 175 | 1130 | 1305 | 1305 |
+| test | 160 | 829 | 989 | 989 |
+
+新增训练负例5595 SL、2229 TIMEOUT；最新决策UTC2025-12-31 11:11，最晚标签结束23:11，均早于2026-01-01切点。独立Luna核对event_id、cluster_id、origin_event_id无跨集合冲突，记录 `independent_split_review.json`。分周期/方向数量在 `population_strata.json`，并非每个周期方向都有充足正样本；不能用总体指标覆盖稀少或无正例的分层。
+
+渲染检查为28格代表性contact sheet和3张原尺寸图，保持1280×742、六均线、审核框不进入原图；它不是Owner逐样本金标确认。原图和全部负例的查看软链接已完整生成。
+
+专项测试原46项通过；后续收集/交付的冻结评估器和对照输入绑定测试通过，自包含fixture验证错组评估回执被拒。全仓相关门曾运行468通过/8失败：1个既有归档路径引用、5个既有注册表source_commit缺失、2个L1迁移哈希差异。没有掩盖或修复其他任务的变更，也不宣称全仓全绿；本轮离线授权不改变生产资格。
+
 ## 风险与诚实声明
 
-当前未训练，不能提供新模型收益数字。阶段属于监督总体与输入完整性修复，收益/AUC/p尚不适用；严格对照为旧6812文件及事件/split逐一字节一致、改变未来OHLC或收益标签不改变像素、故意篡改实际标签/loader触发拒绝。重新训练会如实保留失败，不承诺补负例必然赚钱。最终统计和3060实际运行回执补在本报告。
+当前尚未取得新训练结果，不能提供新模型收益数字。阶段属于监督总体与输入完整性修复，收益/AUC/p尚不适用；严格对照为旧6812文件及事件/split逐一字节一致、改变未来OHLC或收益标签不改变像素、故意篡改实际标签/loader触发拒绝。重新训练会如实保留失败，不承诺补负例必然赚钱。3060实际运行回执和结果完成后补在本报告。
