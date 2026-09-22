@@ -78,3 +78,28 @@ def test_cross_start_walks_back_through_the_uninterrupted_run_only():
     changed = close.copy(); changed[10] = -1
     assert cross_start(changed, 10., 9., 0, 10, 0, 9) == 7
     assert line_value(10., 9., 0, 10, 5) == 9.5
+
+
+def test_default_rule_needs_all_three_non_inferiority_checks():
+    import pandas as pd
+    from yoyo.evaluation.spike_v127_held_age_report import default_rule
+    rows = []
+    for arm, full_r, later_r, n, gt5 in (("baseline", -.09, -.23, 1000, 25), ("held_age_8", -.08, -.22, 800, 20)):
+        rows += [{"arm": arm, "period": "full", "mean_net_r": full_r, "n": n, "gt5_final_net_r": gt5},
+                 {"arm": arm, "period": "later", "mean_net_r": later_r, "n": n // 2, "gt5_final_net_r": gt5 // 2}]
+    assert default_rule(pd.DataFrame(rows))["default_on"]
+    rows[3]["mean_net_r"] = -.24
+    verdict = default_rule(pd.DataFrame(rows))
+    assert not verdict["default_on"] and verdict["checks"] == {"mean_net_r_full": True, "mean_net_r_later": False, "gt5_rate_full": True}
+
+
+def test_latency_measures_bars_from_cross_close_and_chase_in_r():
+    import pandas as pd
+    from yoyo.evaluation.spike_v127_held_age_report import latency
+    decisions = pd.DataFrame([{"trade_key": "k", "arm": arm, "order": "break-first", "pair_source": "chart",
+        "signal_close": "2025-01-01T03:00Z", "cross_close_time": "2025-01-01T01:00Z", "cross_close": 100.} for arm in ("baseline", "held_age_8")])
+    trades = pd.DataFrame([{"trade_key": "k", "arm": arm, "order": "break-first", "signal_close": "2025-01-01T03:00Z",
+        "censored": False, "entry_price": 104., "initial_stop": 96.} for arm in ("baseline", "held_age_8")])
+    out = latency({"decisions": decisions, "trades": trades}, pd.Timestamp("2025-09-10", tz="UTC"))
+    row = out.loc[out.arm.eq("baseline") & out.group.eq("all")].iloc[0]
+    assert row.lag_bars_median == 8 and row.chase_r_median == .5 and row.missing_cross == 0
