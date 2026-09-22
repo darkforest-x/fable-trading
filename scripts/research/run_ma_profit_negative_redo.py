@@ -13,7 +13,7 @@ import tarfile
 import time
 
 from scripts.research.watch_ma_profit3r_owner1500_v4 import remote, copy_file, HOST
-from yoyo.datasets.ma_profit_negative_redo import ROOT, sha256, read_json, write_json
+from yoyo.datasets.ma_profit_negative_redo import ROOT, sha256, read_json, write_json, checked_plan
 
 EXP=ROOT/'experiments/active/exp-ma-profit3r-negatives-20260922-v2'
 OLD=ROOT/'experiments/active/exp-ma-profit3r-20260922-v1'
@@ -93,6 +93,36 @@ def state(status: str, **kw):
     write_json(temp,{'status':status,'updated_unix':time.time(),**kw})
     temp.replace(EXP/'job_status.json')
     print(json.dumps({'status':status,**kw}),flush=True)
+
+
+def freeze() -> None:
+    """Bind the completed local audit and observed review to the GPU launch."""
+    target=EXP/'launch_contract.json'
+    if target.exists():raise FileExistsError(target)
+    if subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip()!='main':
+        raise RuntimeError('main required')
+    if subprocess.check_output(['git','status','--porcelain','--',str(Path(__file__).resolve().relative_to(ROOT))],cwd=ROOT,text=True).strip():
+        raise RuntimeError('commit launch builder before freeze')
+    plan,inputs=checked_plan(EXP/'plan.json');dataset=ROOT/'datasets'/plan['dataset_name']
+    audited=read_json(EXP/'local_audit.json');summary=read_json(dataset/'summary.json')
+    if audited['status']!='passed' or summary['status']!='completed' or audited['actual_label_counts']!=summary['counts']:
+        raise RuntimeError('completed local dataset audit required')
+    if audited['manifest_sha256']!=sha256(dataset/'manifest.jsonl') or audited['ledger_sha256']!=sha256(dataset/'dataset_ledger.jsonl'):
+        raise RuntimeError('audited dataset metadata drift')
+    selection=read_json(EXP/'visual_review/selection.json');review=read_json(EXP/'visual_review/review.json')
+    if selection['manifest_sha256']!=audited['manifest_sha256'] or review['status']!='passed_rendering_spot_check' or review['selection_sha256']!=sha256(EXP/'visual_review/selection.json') or review['contact_sheet_sha256']!=sha256(EXP/'visual_review/contact_sheet.png'):
+        raise RuntimeError('rendering review is not bound to this dataset')
+    files={ROOT/p for p in read_json(EXP/'code_probe_files.json')}
+    for p,h in read_json(EXP/'code_probe_files.json').items():
+        if sha256(ROOT/p)!=h:raise RuntimeError('probed code drift: '+p)
+    files.update(inputs.values())
+    files.update(ROOT/p for p in ('scripts/research/run_ma_profit_negative_redo.py','yoyo/evaluation/ma_profit_negative_delivery.py','yoyo/evaluation/ma_profit_control_metrics.py','yoyo/datasets/ma_profit_negative_preview.py'))
+    files.update(EXP/p for p in ('plan.json','local_audit.json','independent_split_review.json','population_strata.json','visual_review/review.json','visual_review/selection.json','environment_probe.json','selection/receipt.json','selection/negatives.jsonl','selection/exclusions.jsonl'))
+    files.update(dataset/p for p in ('manifest.jsonl','summary.json','dataset_ledger.jsonl','build_exclusions.jsonl','train_A.txt','train_B.txt','val.txt','test.txt','data_A.yaml','data_B.yaml'))
+    files.update(OLD/p for p in ('matched_controls_owner1500_v2/receipt.json','matched_controls_owner1500_v2/frozen_events.jsonl','matched_controls_owner1500_v2/frozen_sources.json','matched_control_outcomes_owner1500_v2/summary.json','matched_control_outcomes_owner1500_v2/outcomes.jsonl','delivery_owner1500_v4/summary.json'))
+    records=[{'path':p.relative_to(ROOT).as_posix(),'sha256':sha256(p)} for p in sorted(files)]
+    write_json(target,{'status':'frozen_after_local_audit','plan_sha256':sha256(EXP/'plan.json'),'dataset_audit':audited,'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'files':records})
+    state('frozen',files=len(records),verified_dataset_files=audited['verified_files'])
 
 
 def stage() -> None:
@@ -218,7 +248,7 @@ def watch() -> None:
 
 
 def main() -> None:
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=('stage','start','snapshot','collect','watch'));args=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('mode',choices=('freeze','stage','start','snapshot','collect','watch'));args=p.parse_args()
     try:
         if args.mode=='snapshot':print(json.dumps(snapshot()),flush=True)
         else:globals()[args.mode]()
