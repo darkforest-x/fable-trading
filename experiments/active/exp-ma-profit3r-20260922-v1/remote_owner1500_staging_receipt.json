@@ -1,0 +1,51 @@
+{
+  "status": "staged_verified",
+  "files": [
+    {
+      "source": "scripts/windows/train_ma_profit3r.py",
+      "remote_relative_path": "scripts/windows/train_ma_profit3r_owner1500_20260922.py",
+      "sha256": "4ffb7bb53083b077e9e40abd04a67091cfc91463f064ca738f636522f926978e"
+    },
+    {
+      "source": "yoyo/datasets/ma_profit_training_contract.py",
+      "remote_relative_path": "yoyo/datasets/ma_profit_training_contract.py",
+      "sha256": "909994b9876b41f8fb6e5544b008d0bb10249a349fbb7946981c8519bd73b022"
+    },
+    {
+      "source": "experiments/active/exp-ma-profit3r-20260922-v1/plan.json",
+      "remote_relative_path": "experiments/active/exp-ma-profit3r-20260922-v1/plan.json",
+      "sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266"
+    },
+    {
+      "source": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract.json",
+      "remote_relative_path": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract.json",
+      "sha256": "e9383f4b66e209370cb6e5faf30ee7b8b186d8368fe9c65e2324a79ad23adad8"
+    },
+    {
+      "source": "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json",
+      "remote_relative_path": "experiments/active/exp-ma-profit3r-20260922-v1/owner_amendment_1500_v2.json",
+      "sha256": "d0e4c72520a1f63802d4192df048ee0fa9ebf3105609caaa968c63bc161bd691"
+    },
+    {
+      "source": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract_owner1500_v2.json",
+      "remote_relative_path": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract_owner1500_v2.json",
+      "sha256": "7f760ff2582ea7226ecabc1bd45127f98933b3b027f17a147db15a615a3b0456"
+    }
+  ],
+  "capacity": [
+    1500,
+    5000
+  ],
+  "environment": {
+    "versions": {
+      "torch": "2.8.0+cu126",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
+    "gpu": "NVIDIA GeForce RTX 3060",
+    "free_vram_bytes": 11801722880,
+    "total_vram_bytes": 12884377600
+  },
+  "scope": "Code, controls, pinned environment and capacity only; dataset/training not yet started."
+}
