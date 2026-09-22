@@ -1,0 +1,37 @@
+{
+  "capacity_gate": false,
+  "capacity_semantics": "1500-5000 applies only to retained independent train winners; resolved val/test events are never removed by the train cap",
+  "dataset_ledger_path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_016/dataset_ledger.jsonl",
+  "dataset_ledger_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "events": [],
+  "experiment_id": "exp-ma-profit3r-20260922-v1",
+  "inputs": [
+    {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/plan.json",
+      "sha256": "773983090a7c8dfd716d8e59e6f96e3695df2b946de32258976e8f3aaf306266"
+    },
+    {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/training_contract_owner1500_v2.json",
+      "sha256": "7f760ff2582ea7226ecabc1bd45127f98933b3b027f17a147db15a615a3b0456"
+    },
+    {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/outcomes_queue_round_016/outcomes.jsonl",
+      "sha256": "5f3b5407ff49f1219e02498835e304c76e2ef8124e5389dc70086c6813d341b4"
+    },
+    {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json",
+      "sha256": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a"
+    }
+  ],
+  "maximum_train_winners": 5000,
+  "minimum_train_winners": 1500,
+  "production_dataset_allowed": false,
+  "quota_scope": "train_independent_retained_events",
+  "schema_version": 1,
+  "selected_events_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "selection_ledger_path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_016/selection_ledger.jsonl",
+  "selection_ledger_sha256": "21f4ad151169fcde5b85dc11f0206cc3677b6421becb06b7911e70225c1695c1",
+  "train_retained_winners_actual": 1464,
+  "train_retained_winners_selected": 0,
+  "training_contract_sha256": "7f760ff2582ea7226ecabc1bd45127f98933b3b027f17a147db15a615a3b0456"
+}
