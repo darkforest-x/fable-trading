@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-ma-profit3r-negatives-20260922-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: bbe5b8d0aa078104adecd8f070c8e0997ea2d2ba
+    status: active
+    question: Does adding guarded resolved outcome-target negatives repair the positive-only MA3R A/B training recipe?
+    single_variable: Add train SL/TIMEOUT non-retained events from the same frozen candidate pool; preserve all parent positive and evaluation pixels, labels, splits, base, recipes and costs.
+    result: Preregistered Owner-authorized redo; original1506 train winners retained; negatives and actual loader labels must pass audit before RTX3060 training.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_profit3r_negatives_redo_20260922.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner requested redo after discovering zero training negatives. This is an offline experiment exception, not a production approval. Existing val/test are reused comparison sets, not untouched confirmation.
   - experiment_id: exp-ma-profit3r-20260922-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 199f66dc16522b06aa418b7ba9867f73e00549f8
