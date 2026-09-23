@@ -63,6 +63,24 @@ and notice; the chart supports pan, zoom, crosshair and resetting the view.
 Its time axis uses UTC+8. Uploaded images and saved inference snapshots retain
 their original pixels when the interface theme changes.
 
+Version 0.8.0 adds the selected SPIKE source signal arrow and confirmation time
+to the interactive chart. Signal timestamps are candle-close timestamps, so the
+arrow is placed at the exact matching candle-open timestamp (close minus one
+interval). Missing/off-window or unconfirmed source candles get no invented
+marker. These are source annotations, not AI verdicts. Browser model capture
+removes the arrows synchronously and restores them after capture, including on
+failure; the background renderer also remains free of signal annotations.
+Lightweight Charts is a plotting library, not a Pine interpreter: displaying the
+full Pine study would require porting each relevant output or viewing the original
+script in TradingView. The existing six MA series retain SPIKE's supplied values.
+
+Browser connection errors now identify an unreachable local API and mark the
+automatic switch as unsynchronized instead of presenting its cached state as
+current. Existing GET polling restores the switch, chart and candidate list
+after reconnection; status metadata also refreshes every 30 seconds. Provider
+HTTP errors remain distinct from local transport failure. Recovery does not
+resubmit paid recognition requests, and stale charts remain ineligible.
+
 Version 0.4.0 assesses the rightmost current state, not whether a setup occurred
 somewhere in the visible history. New responses use schema version 2 with
 `assessment_scope=current_right_edge` and `current_state`: converging, launching,

@@ -24,6 +24,10 @@ const state = {
   tab: 'workspace',
   status: null,
   statusError: '',
+  statusErrorIsTransport: false,
+  statusPolling: false,
+  apiReachable: null,
+  apiTransportError: '',
   signals: [],
   signalsLoading: true,
   signalsRequestToken: 0,
@@ -32,6 +36,7 @@ const state = {
   signalsWarning: '',
   automatic: null,
   automaticError: '',
+  automaticStale: false,
   automaticActionError: '',
   automaticBySignal: new Map(),
   automaticLoading: false,
@@ -139,11 +144,17 @@ function showInlineSuccess(id, message) {
 
 async function readResponse(response) {
   const contentType = response.headers.get('content-type') || '';
-  let payload;
+  let bodyText;
+  try {
+    bodyText = await response.text();
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error;
+    if (isFetchTransportFailure(error)) throw localApiTransportError();
+    throw error;
+  }
+  let payload = bodyText;
   if (contentType.includes('application/json')) {
-    try { payload = await response.json(); } catch { payload = null; }
-  } else {
-    try { payload = await response.text(); } catch { payload = ''; }
+    try { payload = bodyText ? JSON.parse(bodyText) : null; } catch { payload = null; }
   }
   if (!response.ok) {
     const detail = payload && typeof payload === 'object' ? payload.detail || payload.message : payload;
@@ -154,10 +165,31 @@ async function readResponse(response) {
   return payload;
 }
 
+function isFetchTransportFailure(error) {
+  if (error?.name === 'NetworkError') return true;
+  return error instanceof TypeError && /fetch|network|connection|load failed/i.test(error.message || '');
+}
+
+function localApiTransportError() {
+  const unavailable = new Error('本机 API 暂不可达，正在恢复连接。');
+  unavailable.name = 'LocalApiTransportError';
+  unavailable.code = 'LOCAL_API_UNREACHABLE';
+  markApiUnreachable(unavailable.message);
+  return unavailable;
+}
+
 async function apiJson(path, options = {}) {
   const headers = new Headers(options.headers || {});
   if (options.body !== undefined && !headers.has('content-type')) headers.set('content-type', 'application/json');
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  } catch (error) {
+    if (error?.name === 'AbortError') throw error;
+    if (isFetchTransportFailure(error)) throw localApiTransportError();
+    throw error;
+  }
+  markApiReachable();
   return readResponse(response);
 }
 
@@ -364,6 +396,30 @@ function setHealth(ok, message) {
   if (text) text.textContent = message;
 }
 
+function markApiUnreachable(message) {
+  const changed = state.apiReachable !== false;
+  state.apiReachable = false;
+  state.apiTransportError = message;
+  if (typeof state.automatic?.enabled === 'boolean') state.automaticStale = true;
+  setHealth(false, '本地 API 未连接 · 正在恢复连接');
+  if (changed) {
+    renderAutomaticControls();
+    if (state.tab === 'settings') renderSettings();
+  }
+}
+
+function markApiReachable() {
+  const changed = state.apiReachable !== true;
+  state.apiReachable = true;
+  state.apiTransportError = '';
+  if (state.statusErrorIsTransport) {
+    state.statusError = '';
+    state.statusErrorIsTransport = false;
+  }
+  setHealth(true, '本地 API 已连接');
+  if (changed && state.tab === 'settings') renderSettings();
+}
+
 function renderEligibility() {
   const target = byId('eligibility-badges');
   if (!target) return;
@@ -485,17 +541,22 @@ function automaticReviewMarkup(signalId) {
 function renderAutomaticControls() {
   const automatic = state.automatic;
   const toggle = byId('automatic-toggle');
-  const pending = state.automaticLoading || state.automaticSaving || typeof automatic?.enabled !== 'boolean';
-  const error = state.automaticActionError || state.automaticError || asText(automatic?.error, '');
-  toggle.disabled = pending;
-  toggle.classList.toggle('is-enabled', automatic?.enabled === true);
-  toggle.classList.toggle('is-disabled', automatic?.enabled === false);
-  toggle.setAttribute('aria-pressed', String(automatic?.enabled === true));
-  toggle.setAttribute('aria-label', automatic?.enabled === true ? '暂停自动识别' : '开启自动识别');
+  const hasKnownState = typeof automatic?.enabled === 'boolean';
+  const stale = state.automaticStale || state.apiReachable === false;
+  const pending = state.automaticLoading || state.automaticSaving || !hasKnownState;
+  const error = state.automaticActionError || state.automaticError || asText(automatic?.error, '')
+    || (stale ? '自动识别状态显示为上次读取结果；连接恢复后会同步。' : '');
+  toggle.disabled = pending || stale;
+  toggle.classList.toggle('is-enabled', !stale && automatic?.enabled === true);
+  toggle.classList.toggle('is-disabled', !stale && automatic?.enabled === false);
+  toggle.setAttribute('aria-pressed', stale ? 'mixed' : String(automatic?.enabled === true));
+  toggle.setAttribute('aria-label', stale ? '自动识别状态未同步，暂时无法切换'
+    : automatic?.enabled === true ? '暂停自动识别' : '开启自动识别');
   byId('automatic-toggle-state').textContent = state.automaticSaving ? '保存中…'
-    : automatic?.enabled === true ? '已开启'
-      : automatic?.enabled === false ? '已暂停'
-        : state.automaticLoading ? '读取中…' : '不可用';
+    : stale && hasKnownState ? `状态未同步 · 上次${automatic.enabled ? '已开启' : '已暂停'}`
+      : automatic?.enabled === true ? '已开启'
+        : automatic?.enabled === false ? '已暂停'
+          : state.automaticLoading ? '读取中…' : '不可用';
   const hasPolicy = Number.isFinite(Number(automatic?.post_signal_bars))
     && Number.isFinite(Number(automatic?.poll_interval_seconds));
   byId('automatic-policy').textContent = hasPolicy
@@ -564,11 +625,13 @@ async function loadAutomatic({ quiet = false } = {}) {
       items,
       error: asText(payload.error, ''),
     };
+    state.automaticStale = false;
     state.automaticError = '';
     state.automaticActionError = '';
     for (const job of items) rememberAutomaticJob(job);
   } catch (error) {
     if (token !== state.automaticRequestToken) return;
+    state.automaticStale = true;
     state.automaticError = error.message || '自动识别状态读取失败。';
   } finally {
     if (token === state.automaticRequestToken) {
@@ -1147,13 +1210,18 @@ function renderSettings() {
     const key = credentialSummary(state.status.credential_source);
     byId('model-config-summary').textContent = `${state.status.model || state.model} · ${key.configured ? '密钥已保存' : '待配置密钥'}`;
     byId('api-key-input').placeholder = key.configured ? '已保存在本机；更换时才需填写' : '粘贴智谱 API Key 后保存';
-    statusTarget.innerHTML = `<div class="status-line"><strong>本地 API</strong><span>已连接</span></div>
+    const connectionLabel = state.apiReachable === false ? '未连接 · 正在恢复连接' : '已连接';
+    const connectionError = state.apiReachable === false
+      ? `<div class="inline-error">${escapeHtml(state.apiTransportError || '未收到本机 API 响应。')}</div>`
+      : state.statusError ? `<div class="inline-error">${escapeHtml(state.statusError)}</div>` : '';
+    statusTarget.innerHTML = `<div class="status-line"><strong>本地 API</strong><span>${connectionLabel}</span></div>${connectionError}
       <div class="status-line"><strong>当前模型</strong><code>${escapeHtml(asText(state.status.model, state.model))}</code></div>
       <div class="status-line"><strong>凭据来源</strong><span class="status-key ${key.configured ? '' : 'is-missing'}">${escapeHtml(key.label)}</span></div>
       <div class="status-line"><strong>SPIKE 数据源</strong><span>${state.status.spike?.available === true ? `可用 · ${escapeHtml(asText(state.status.spike.count, ''))} 条 · ${escapeHtml(sourceLabel(state.status.spike.source))}` : state.status.spike?.available === false ? '当前不可用' : '状态未返回'}</span></div>`;
     if (!modelInput.matches(':focus')) modelInput.value = state.status.model || state.model;
   } else if (state.statusError) {
-    statusTarget.innerHTML = `<div class="inline-error">无法读取本机 API 状态：${escapeHtml(state.statusError)}</div>`;
+    const label = state.apiReachable === false ? '本机 API 暂不可达' : '无法读取本机 API 状态';
+    statusTarget.innerHTML = `<div class="inline-error">${label}：${escapeHtml(state.statusError)}</div>`;
   } else {
     statusTarget.innerHTML = '<div class="status-loading"><span class="spinner" aria-hidden="true"></span>正在读取服务状态…</div>';
   }
@@ -1228,23 +1296,30 @@ function renderAll() {
 }
 
 async function loadStatus() {
+  if (state.statusPolling) return;
+  state.statusPolling = true;
   try {
     const status = await apiJson('/status');
     if (!status || typeof status !== 'object') throw new Error('本地 API 状态格式无效。');
     state.status = status;
     state.statusError = '';
+    state.statusErrorIsTransport = false;
     state.model = asText(status.model, state.model || DEFAULT_MODEL);
     if (!state.criteriaEdited && typeof status.default_criteria === 'string' && status.default_criteria.trim()) {
       state.criteria = status.default_criteria;
       byId('criteria-input').value = status.default_criteria;
       byId('criteria-count').textContent = `${status.default_criteria.length} 字`;
     }
-    setHealth(true, '本地 API 已连接');
   } catch (error) {
     state.statusError = error.message || '无法连接本地 API。';
-    setHealth(false, '本地 API 未连接');
+    state.statusErrorIsTransport = error.code === 'LOCAL_API_UNREACHABLE';
+    if (state.apiReachable !== false) setHealth(true, '本地 API 已连接');
+  } finally {
+    state.statusPolling = false;
+    renderEligibility();
+    renderSignalSource();
+    renderSettings();
   }
-  renderAll();
 }
 
 async function loadSignals({ quiet = false } = {}) {
@@ -2043,10 +2118,12 @@ setInterval(() => {
 }, 5_000);
 setInterval(() => {
   if (!document.hidden && state.tab === 'workspace' && !state.analysisLoading) loadSignals({ quiet: true });
+  if (!document.hidden) loadStatus();
 }, 30_000);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) pauseLivePolling();
   else {
+    loadStatus();
     loadAutomatic({ quiet: true });
     pollLiveChart();
     if (state.tab === 'workspace') loadSignals({ quiet: true });

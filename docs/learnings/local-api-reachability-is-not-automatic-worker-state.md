@@ -1,0 +1,7 @@
+# Local API reachability and automatic worker state are separate facts
+
+- **问题**：The workbench retained an old “connected” badge and automatic-review state after browser requests failed, while the visible chart was already stale. The screenshot did not establish whether the server worker had stopped.
+- **死胡同**：Treating every API error as a disconnection, or interpreting an unreadable worker state as paused, would mislabel provider failures and could encourage duplicate paid calls. Empty service logs cannot establish the original outage cause.
+- **有效路径**：Classify fetch/body-stream transport failures separately from HTTP, provider and JSON errors. Mark automatic state as stale and disable its switch until a fresh GET succeeds. Reuse the existing 5/10/30-second polling for worker state, chart and status/signals; never retry a paid POST as connection recovery.
+- **通用规则**：A successful HTTP response proves transport reachability, not task success. A cached process setting is a last-known value, not a current observation. Refresh each stale resource independently and keep stale market snapshots ineligible for recognition.
+- **牵连**：`yoyo/vision_research/static/app.js`, `tests/vision_research/api_transport.test.cjs`; browser CDP offline/online verification showed disconnected status, disabled unsynchronized switch and ineligible old chart, followed by automatic recovery of header, switch, latest chart and candidates. Both local service logs were empty, so no server-crash attribution was made.

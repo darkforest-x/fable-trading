@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const chartPath = path.join(__dirname, '../../yoyo/vision_research/static/chart.js');
 const chartSource = fs.readFileSync(chartPath, 'utf8')
   .replace(/^export function /gm, 'function ')
-  + '\n;globalThis.__chartApi = { showChart, fitChart, captureChart, destroyChart };';
+  + '\n;globalThis.__chartApi = { showChart, fitChart, captureChart, destroyChart, applyChartTheme };';
 
 const candleRows = Array.from({ length: 120 }, (_, index) => ({
   t: 1_700_000_000_000 + index * 60_000,
@@ -27,6 +27,9 @@ function createHarness() {
   let range = null;
   let seriesBarCount = 0;
   let screenshotCalls = 0;
+  let markers = [];
+  let capturedMarkers = null;
+  let screenshotFailure = false;
   const screenshotDataUrl = 'data:image/png;base64,c2NyZWVuc2hvdA==';
   const scale = {
     getVisibleLogicalRange: () => range && { ...range },
@@ -38,6 +41,7 @@ function createHarness() {
   };
   const series = {
     setData: (rows) => { seriesBarCount = rows.length; },
+    setMarkers: (value) => { markers = JSON.parse(JSON.stringify(value)); },
     applyOptions: () => {},
   };
   const chart = {
@@ -47,6 +51,8 @@ function createHarness() {
     remove: () => {},
     takeScreenshot: () => {
       screenshotCalls += 1;
+      capturedMarkers = JSON.parse(JSON.stringify(markers));
+      if (screenshotFailure) throw new Error('screenshot failed');
       return { width: 800, height: 600, toDataURL: () => screenshotDataUrl };
     },
     timeScale: () => scale,
@@ -77,6 +83,9 @@ function createHarness() {
     getRange: () => range && { ...range },
     screenshotCalls: () => screenshotCalls,
     screenshotDataUrl,
+    markers: () => markers,
+    capturedMarkers: () => capturedMarkers,
+    failScreenshot: () => { screenshotFailure = true; },
   };
 }
 
@@ -150,4 +159,69 @@ test('fitChart restores a capturable tail viewport after panning', () => {
   const capture = harness.api.captureChart();
   assert.ok(harness.getRange().to >= candleRows.length - 1 + 0.5);
   assert.equal(capture.viewport.last_bar_open_ms, candleRows.at(-1).t);
+});
+
+function signalChart(side = 'short') {
+  return { candles: candleRows, chart_sha256: 'b'.repeat(64),
+    provenance: { id: 'source-signal', time_boundary: 'live_observation', side,
+      timeframe_min: 1, signal_bar_close_ms: candleRows.at(-3).t + 60_000 } };
+}
+
+test('source signal is anchored to its closed candle, not the next candle at close time', () => {
+  const harness = createHarness();
+  for (const side of ['short', 'long']) {
+    const data = signalChart(side);
+    harness.api.showChart(data, side);
+    const [marker] = harness.markers();
+    assert.equal(marker.time, candleRows.at(-3).t / 1000);
+    assert.equal(marker.position, side === 'long' ? 'belowBar' : 'aboveBar');
+    assert.equal(marker.shape, side === 'long' ? 'arrowUp' : 'arrowDown');
+    assert.match(marker.text, side === 'long' ? /做多/ : /做空/);
+    const closeTime = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit', hour12: false }).format(data.provenance.signal_bar_close_ms);
+    assert.ok(marker.text.endsWith(closeTime));
+  }
+});
+
+test('markers remain display-only and are restored after capture or capture failure', () => {
+  const harness = createHarness();
+  harness.api.showChart(signalChart(), 'one');
+  const original = harness.markers();
+  harness.api.captureChart();
+  assert.deepEqual(harness.capturedMarkers(), []);
+  assert.deepEqual(harness.markers(), original);
+  harness.failScreenshot();
+  assert.throws(() => harness.api.captureChart(), /screenshot failed/);
+  assert.deepEqual(harness.capturedMarkers(), []);
+  assert.deepEqual(harness.markers(), original);
+});
+
+test('same-price refresh and theme refresh retain current source marker semantics', () => {
+  const harness = createHarness();
+  const data = signalChart();
+  harness.api.showChart(data, 'one');
+  harness.api.applyChartTheme();
+  assert.equal(harness.markers().length, 1);
+  data.provenance.side = 'long';
+  harness.api.showChart(data, 'one');
+  assert.equal(harness.markers()[0].shape, 'arrowUp');
+  data.candles = candleRows.slice(-2);
+  data.chart_sha256 = 'c'.repeat(64);
+  harness.api.showChart(data, 'one');
+  assert.deepEqual(harness.markers(), []);
+});
+
+test('no source marker is invented for replay, unknown directions, gaps, or a forming source bar', () => {
+  const harness = createHarness();
+  const cases = [
+    data => { data.provenance.time_boundary = 'historical_replay'; },
+    data => { data.provenance.side = 'unknown'; },
+    data => { data.provenance.signal_bar_close_ms += 1; },
+    data => { data.candles = data.candles.map((row, i) => ({ ...row, is_closed: i !== 117 })); },
+  ];
+  cases.forEach((modify, i) => {
+    const data = signalChart();
+    modify(data);
+    harness.api.showChart(data, 'invalid-' + i);
+    assert.deepEqual(harness.markers(), []);
+  });
 });
