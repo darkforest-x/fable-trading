@@ -219,7 +219,7 @@ class ReplayResearch:
         observations = []
         for (value,) in raw:
             obs = json.loads(value)
-            observations.append({k: obs.get(k) for k in ("id", "cursor_ms", "image_url", "human", "run_id", "status")})
+            observations.append({k: obs.get(k) for k in ("id", "cursor_ms", "image_url", "human", "run_id", "status", "comparison_requested")})
         return {**{k: session[k] for k in ("id", "symbol", "timeframe", "mode", "created_at", "seen_until_ms", "source_label")},
                 "cursor_ms": self._cursor(session),
                 "first_cursor_ms": session["rows"][session["first_cursor_index"]]["t"] + session["duration_ms"],
@@ -272,7 +272,8 @@ class ReplayResearch:
             obs = self._get("replay_observations", identity)
             session = self._get("replay_sessions", obs["session_id"])
             return {**obs, "case": self._case_view(session),
-                    "run": self.store.get(obs["run_id"]) if obs.get("run_id") else None}
+                    "run": self.store.get(obs["run_id"]) if obs.get("run_id") else None,
+                    "comparison": self.comparisons.public(identity) if hasattr(self, "comparisons") else None}
 
     def freeze(self, identity, body, model):
         with self.lock:
@@ -300,7 +301,7 @@ class ReplayResearch:
                    "image_sha256": image.sha256, "chart_sha256": chart["chart_sha256"], "chart": chart,
                    "criteria": criteria, "model": model, "prompt_version": PROMPT_VERSION,
                    "reference_revision": refs["revision"], "references": refs["items"],
-                   "human": None, "run_id": None, "followups": [], "status": "frozen",
+                   "human": None, "run_id": None, "followups": [], "status": "frozen", "comparison_requested": False,
                    "case_id": session.get("case_record", {}).get("id"),
                    "independence": ("outcome_known_before_judgment" if self._exposed(session.get("case_record"))
                                     else "future_seen_in_session" if session["seen_until_ms"] > self._cursor(session)
@@ -318,7 +319,7 @@ class ReplayResearch:
                     return self.observation(identity)
                 raise ReplayConflict("首次独立判断已经保存，不可覆盖；可在回访备注中补充更正。")
             session = self._get("replay_sessions", obs["session_id"])
-            if (obs["run_id"] or session["seen_until_ms"] > obs["cursor_ms"]
+            if (obs["run_id"] or obs.get("comparison_requested") or session["seen_until_ms"] > obs["cursor_ms"]
                     or session.get("ai_exposed_until_ms", -1) >= obs["cursor_ms"]):
                 raise ReplayConflict("已请求过 AI 或看过后续行情，不能再补记为首次独立判断。")
             obs["human"] = {**body.model_dump(), "created_at": utc_now()}
@@ -334,7 +335,7 @@ class ReplayResearch:
             self._expect(session, body.expected_cursor_ms)
             if self._cursor(session) <= obs["cursor_ms"]:
                 raise ReplayConflict("请先向前回放至少一根 K 线，再保存后续观察。")
-            if not obs["human"] and not obs["run_id"]:
+            if not obs["human"] and not obs["run_id"] and not obs.get("comparison_requested"):
                 raise ReplayConflict("请先完成当时的判断，再追加回访。")
             chart = self._chart(session)
             previous = next((f for f in obs["followups"] if f["cursor_ms"] == self._cursor(session) and f["note"] == body.note), None)
@@ -429,7 +430,9 @@ class ReplayResearch:
 def install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange, review_context,
                           model_name, history=None, cases=None):
     from .replay_data import LocalReplayHistory
+    from .comparison import ReplayComparison
     replay = ReplayResearch(store, history or LocalReplayHistory(), cases=cases)
+    replay.comparisons = ReplayComparison(replay)
     app.state.replay = replay
 
     async def body(request, model):
@@ -504,6 +507,25 @@ def install_replay_routes(app, store, provider, inference_lock, read_json, captu
     @app.post("/api/replay/observations/{identity}/followup")
     async def followup(identity: str, request: Request):
         return await call(replay.followup, identity, await body(request, Followup))
+
+    @app.post("/api/replay/observations/{identity}/comparison")
+    async def prepare_comparison(identity: str, request: Request):
+        await body(request, Input)
+        return await call(replay.comparisons.prepare, identity, review_context)
+
+    @app.post("/api/replay/observations/{identity}/comparison/{mode}/analyze")
+    async def analyze_comparison(identity: str, mode: str, request: Request):
+        await body(request, Input)
+        return await call(replay.comparisons.inference, identity, mode, provider, inference_lock,
+                          capture_exchange, review_context)
+
+    @app.get("/api/replay/observations/{identity}/comparison/export")
+    async def export_comparison(identity: str):
+        value = await call(replay.observation, identity)
+        if value["comparison"] is None:
+            raise HTTPException(409, "请先准备这张冻结图的三组对照。")
+        return Response(_json(value), media_type="application/json",
+                        headers={"Content-Disposition": f'attachment; filename="replay-comparison-{value["id"]}.json"'})
 
     @app.get("/api/replay/observations/{identity}/export")
     async def export(identity: str):

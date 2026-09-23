@@ -9,7 +9,7 @@ const sourcePath = path.join(root, 'yoyo/vision_research/static/replay.js');
 const htmlPath = path.join(root, 'yoyo/vision_research/static/index.html');
 const source = fs.readFileSync(sourcePath, 'utf8')
   .replace(/^export function /gm, 'function ')
-  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, buildReplayCasesQuery, buildReplayCaseSessionBody, visibleReplayCaseOutcome, canRevealReplayCaseOutcome, replayCaseJudgmentOutcomeKnown, replayTargetValueForSession, replayOutcomeCodeLabel, canSaveFirstJudgment, canAnalyzeObservation, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel };';
+  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, buildReplayCasesQuery, buildReplayCaseSessionBody, visibleReplayCaseOutcome, canRevealReplayCaseOutcome, replayCaseJudgmentOutcomeKnown, replayTargetValueForSession, replayOutcomeCodeLabel, canSaveFirstJudgment, canAnalyzeObservation, comparisonCanPrepare, comparisonCanRunArm, comparisonArmStatusLabel, comparisonFailedMeansUnknown, replayObservationHasJudgmentOrComparison, comparisonResponseIsCurrent, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel };';
 
 function loadApi() {
   const context = vm.createContext({ URLSearchParams });
@@ -91,11 +91,54 @@ test('first judgment and model gates reflect future exposure and loaded frozen i
   assert.equal(api.canSaveFirstJudgment(session, observation), true);
   assert.equal(api.canSaveFirstJudgment({ ...session, seen_until_ms: 101 }, observation), false);
   assert.equal(api.canSaveFirstJudgment(session, { ...observation, run_id: 'run-1' }), false);
+  assert.equal(api.canSaveFirstJudgment(session, { ...observation, comparison_requested: true }), false);
+  assert.equal(api.canSaveFirstJudgment(session, { ...observation, comparison: { arms: [] } }), true);
   assert.equal(api.canAnalyzeObservation(session, observation, { id: 'obs-1', status: 'loading' }), false);
   assert.equal(api.canAnalyzeObservation(session, observation, { id: 'obs-1', status: 'error' }), false);
   assert.equal(api.canAnalyzeObservation(session, observation, { id: 'obs-1', status: 'loaded' }), false);
   assert.equal(api.canAnalyzeObservation(session, { ...observation, human: { current_state: 'unclear' } }, { id: 'obs-1', status: 'loaded' }), true);
   assert.equal(api.canAnalyzeObservation({ mode: 'free' }, observation, { id: 'obs-1', status: 'loaded' }), true);
+});
+
+test('input comparison is bound to one verified frozen observation and enforces per-arm gates', () => {
+  const api = loadApi();
+  const session = { id: 'session-1', mode: 'blind' };
+  const observation = {
+    id: 'obs-1', mode: 'blind', image_url: '/api/images/obs-1',
+    comparison: {
+      observation_id: 'obs-1', data_sha256: 'abc123', input_window: { bar_count: 120 },
+      arms: ['vision', 'text', 'hybrid'].map((mode) => ({ mode, status: 'pending' })),
+    },
+  };
+  assert.equal(api.comparisonCanPrepare(session, observation, { id: 'obs-1', status: 'loaded' }), true);
+  assert.equal(api.comparisonCanRunArm('text', session, observation, { id: 'obs-1', status: 'loaded' }), false);
+  const judged = { ...observation, human: { current_state: 'launching' } };
+  assert.equal(api.comparisonCanPrepare(session, judged, { id: 'obs-1', status: 'loaded' }), true);
+  assert.equal(api.comparisonCanPrepare(session, judged, { id: 'obs-1', status: 'error' }), false);
+  assert.equal(api.comparisonCanRunArm('text', session, judged, { id: 'obs-1', status: 'error' }), false);
+  assert.equal(api.comparisonCanRunArm('text', session, judged, { id: 'obs-1', status: 'loaded' }), true);
+  assert.equal(api.comparisonCanRunArm('vision', session, judged, { id: 'obs-1', status: 'error' }), false);
+  assert.equal(api.comparisonCanRunArm('hybrid', session, judged, { id: 'obs-1', status: 'loaded' }), true);
+  assert.equal(api.comparisonCanRunArm('text', session, { ...judged, comparison: { ...judged.comparison, observation_id: 'obs-2' } }, { id: 'obs-1', status: 'loaded' }), false);
+  assert.equal(api.comparisonCanRunArm('text', session, { ...judged, comparison: { ...judged.comparison, data_sha256: '' } }, { id: 'obs-1', status: 'loaded' }), false);
+  const consumed = { ...judged, comparison: { ...judged.comparison, arms: [{ mode: 'text', status: 'failed' }] } };
+  assert.equal(api.comparisonCanRunArm('text', session, consumed, { id: 'obs-1', status: 'loaded' }), false);
+  assert.equal(api.comparisonArmStatusLabel('failed'), '失败');
+  assert.equal(api.comparisonFailedMeansUnknown('failed'), true);
+  assert.equal(api.comparisonFailedMeansUnknown('interrupted'), true);
+  assert.equal(api.comparisonFailedMeansUnknown('completed'), false);
+  assert.equal(api.replayObservationHasJudgmentOrComparison({ comparison: { arms: [] } }), false);
+  assert.equal(api.replayObservationHasJudgmentOrComparison({ comparison_requested: true }), true);
+  assert.equal(api.replayObservationHasJudgmentOrComparison({ human: { current_state: 'unclear' } }), true);
+});
+
+test('comparison responses cannot update a switched session or observation', () => {
+  const api = loadApi();
+  const request = { token: 8, sessionId: 'session-1', observationId: 'obs-1' };
+  assert.equal(api.comparisonResponseIsCurrent(request, { ...request }), true);
+  assert.equal(api.comparisonResponseIsCurrent(request, { ...request, observationId: 'obs-2' }), false);
+  assert.equal(api.comparisonResponseIsCurrent(request, { ...request, sessionId: 'session-2' }), false);
+  assert.equal(api.comparisonResponseIsCurrent(request, { ...request, token: 9 }), false);
 });
 
 test('later followup disclosure does not rewrite the original independence sequence', () => {
@@ -108,6 +151,8 @@ test('later followup disclosure does not rewrite the original independence seque
   };
   assert.equal(api.independenceLabel(judged, session), '人工判断先于模型；其后已推进后续行情');
   assert.equal(api.independenceLabel({ ...judged, human: null, independence: 'future_seen_in_session' }, session), '冻结时已看过后续行情');
+  assert.equal(api.independenceLabel({ ...judged, comparison_requested: true }, session), '人工判断先于模型；其后已推进后续行情；首次人工判断后请求图文输入对照');
+  assert.equal(api.independenceLabel({ ...judged, human: null, comparison_requested: true }, session), '已请求图文输入对照，不能补录独立判断');
 });
 
 test('coverage default starts within the latest 500 bars but never before replayable data', () => {

@@ -73,7 +73,7 @@
 .replay-play-controls select { min-height: 38px; padding: 5px 9px; border: 1px solid var(--border); color: var(--text); background: var(--surface); }
 .replay-free-jump { padding-top: 9px; border-top: 1px solid var(--border); }
 .replay-free-jump .replay-field { width: auto; min-width: 210px; flex: 1 1 210px; }
-.replay-workflow-panel,.replay-history-panel { padding: 20px; }
+.replay-workflow-panel,.replay-history-panel,.replay-comparison-panel { padding: 20px; }
 .replay-workflow-grid { display: grid; grid-template-columns: minmax(230px,.78fr) minmax(0,1.22fr); align-items: start; gap: 20px; }
 .replay-freeze-section,.replay-observation-section { min-width: 0; }
 .replay-freeze-section .panel-heading,.replay-observation-section > .panel-heading,.replay-ai-card > .panel-heading,.replay-followup-card > .panel-heading { margin-bottom: 8px; }
@@ -113,6 +113,29 @@
 .replay-followup-list { padding: 10px 12px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
 .replay-followup-list h4 { margin-bottom: 4px; font-size: 14px; }
 .replay-source-note { color: var(--text-muted); font-size: 12px; }
+.replay-comparison-panel { display: grid; gap: 10px; }
+.replay-comparison-panel > .panel-heading { align-items: flex-start; margin-bottom: 0; }
+.replay-comparison-panel .field-help { margin: 6px 0 0; font-size: 13px; }
+.replay-comparison-disclaimer,.replay-comparison-failure { padding: 9px 11px; border-radius: 8px; color: var(--text-soft); background: var(--surface-soft); font-size: 13px; }
+.replay-comparison-model-warning { padding: 9px 11px; border-radius: 8px; color: var(--danger, #b42318); background: var(--surface-soft); font-size: 13px; }
+.replay-comparison-failure { color: var(--danger, #b42318); }
+.replay-comparison-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.replay-comparison-summary,.replay-comparison-progress { color: var(--text-soft); font-size: 13px; overflow-wrap: anywhere; }
+.replay-comparison-progress { font-weight: 600; }
+.replay-comparison-arms { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.replay-comparison-arm { display: grid; align-content: start; gap: 9px; min-width: 0; padding: 13px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.replay-comparison-arm .panel-heading { align-items: flex-start; gap: 8px; margin: 0; }
+.replay-comparison-arm h4 { color: var(--text-soft); font-size: 14px; }
+.replay-comparison-arm p { color: var(--text-soft); font-size: 13px; overflow-wrap: anywhere; }
+.replay-comparison-arm .replay-source-note { color: var(--text-muted); font-size: 12px; }
+.replay-comparison-verdict { color: var(--accent); font-weight: 650; }
+.replay-comparison-reasons { color: var(--text-soft); font-size: 12px; }
+.replay-comparison-reasons summary,.replay-comparison-input summary { color: var(--text-muted); cursor: pointer; }
+.replay-comparison-reasons h5 { margin: 9px 0 4px; color: var(--text); font-size: 12px; }
+.replay-comparison-reasons ul { margin: 4px 0; padding-left: 18px; }
+.replay-comparison-input { min-width: 0; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.replay-comparison-input pre { max-height: 360px; margin: 9px 0 0; overflow: auto; color: var(--text-soft); font-size: 11px; white-space: pre; }
+.replay-comparison-panel a[aria-disabled="true"] { opacity: .55; pointer-events: none; }
 
 @media (max-width: 1040px) {
   .replay-layout { grid-template-columns: minmax(0,1fr); }
@@ -141,7 +164,8 @@
   .replay-free-jump { display: grid; grid-template-columns: minmax(0,1fr) auto; }
   .replay-free-jump label { grid-column: 1/-1; }
   .replay-free-jump .replay-field { width: 100%; min-width: 0; }
-  .replay-workflow-panel,.replay-history-panel { padding: 16px; }
+  .replay-workflow-panel,.replay-history-panel,.replay-comparison-panel { padding: 16px; }
+  .replay-comparison-arms { grid-template-columns: minmax(0,1fr); }
   .replay-case-outcome-panel { padding: 16px; }
   .replay-case-r-metrics { gap: 5px; }
   .replay-case-r-metrics > div { padding: 8px 6px; }

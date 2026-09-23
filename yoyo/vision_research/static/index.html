@@ -338,6 +338,28 @@
                 </div>
               </section>
 
+              <section class="panel replay-comparison-panel" aria-labelledby="replay-comparison-heading">
+                <div class="panel-heading"><div><h3 id="replay-comparison-heading">图文输入对照</h3><p class="field-help">同一冻结观察、120 根 OHLC + 6 条均线、同模型和规则，不带参考图。三组统一只判断形态，不画框。</p></div><span class="source-chip">每组最多手动调用一次</span></div>
+                <p id="replay-comparison-observation" class="replay-source-note">先冻结一个时点，或从会话观察历史中打开已有观察。</p>
+                <p id="replay-comparison-blind-gate" class="field-help" hidden>盲审需先保存人工判断才能调用任一模型对照组；可以先准备免费对照包，准备不会触发 AI 暴露，也不会锁住首次判断入口。</p>
+                <p id="replay-comparison-image-gate" class="replay-comparison-model-warning" role="status" hidden></p>
+                <p class="replay-comparison-disclaimer">准备对照包不调用模型、不产生模型调用费用。失败或中断不代表“不符合”，且不自动重试；三组结果一致也不证明判断准确或能够盈利。</p>
+                <div class="replay-comparison-actions">
+                  <button id="replay-comparison-prepare" class="button button-secondary" type="button" disabled>准备图文输入对照</button>
+                  <a id="replay-comparison-export" class="button button-secondary" href="#" download hidden>导出完整对照包</a>
+                </div>
+                <div id="replay-comparison-error" class="inline-error" role="alert" hidden></div>
+                <p id="replay-comparison-summary" class="replay-comparison-summary">对照包尚未准备。</p>
+                <p id="replay-comparison-order" class="replay-source-note">建议顺序：未提供 · 实际顺序：尚无记录</p>
+                <p id="replay-comparison-progress" class="replay-comparison-progress">已完成 0 / 3 · 尚无一致性结论</p>
+                <p id="replay-comparison-model-warning" class="replay-comparison-model-warning" role="status" hidden></p>
+                <div id="replay-comparison-arms" class="replay-comparison-arms"></div>
+                <details class="replay-comparison-input">
+                  <summary>查看冻结数值、版本与校验信息</summary>
+                  <pre id="replay-comparison-packet">准备对照包后可查看数值输入。</pre>
+                </details>
+              </section>
+
               <section class="panel replay-history-panel" aria-labelledby="replay-history-heading">
                 <div class="panel-heading"><div><h3 id="replay-history-heading">会话观察历史</h3><p class="field-help">选择一条冻结观察，查看原图、初始人工判断、模型判断与回访。</p></div></div>
                 <div id="replay-observations-error" class="inline-error" role="alert" hidden></div>

@@ -23,6 +23,11 @@ const EXIT_REASON_LABELS = {
   take_profit: '止盈', target: '止盈', time_exit: '时间退出', timeout: '超时退出',
   boundary_mark: '样本边界标记', data_gap_censored: '数据缺口删失',
 };
+const COMPARISON_MODES = ['vision', 'text', 'hybrid'];
+const COMPARISON_MODE_LABELS = { vision: '纯图像', text: '纯数值', hybrid: '图像 + 数值' };
+const COMPARISON_STATUS_LABELS = {
+  pending: '待调用', running: '调用中', completed: '已完成', failed: '失败', interrupted: '已中断',
+};
 
 export function shanghaiInputToMs(value) {
   const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(String(value || ''));
@@ -94,11 +99,45 @@ export function replayCaseJudgmentOutcomeKnown(caseInfo, observation) {
 
 export function canSaveFirstJudgment(session, observation) {
   if (!session || !observation || observation.human || observation.run_id) return false;
+  if (observation.comparison_requested) return false;
   if (observation.independence === 'future_seen_in_session'
       || observation.independence === 'ai_requested_before_human_judgment') return false;
   const seenUntil = Number(session.seen_until_ms);
   const cursor = Number(observation.cursor_ms);
   return !(Number.isFinite(seenUntil) && Number.isFinite(cursor) && seenUntil > cursor);
+}
+
+export function comparisonCanPrepare(session, observation, imageState) {
+  if (!session || !observation?.id) return false;
+  return Boolean(observation.image_url && imageState?.id === observation.id && imageState.status === 'loaded');
+}
+
+export function comparisonCanRunArm(mode, session, observation, imageState) {
+  const comparison = observation?.comparison;
+  if (!COMPARISON_MODES.includes(mode) || !session || !observation?.id
+      || comparison?.observation_id !== observation.id
+      || !comparison?.data_sha256 || Number(comparison?.input_window?.bar_count) !== 120) return false;
+  const arm = Array.isArray(comparison.arms) ? comparison.arms.find((item) => item.mode === mode) : null;
+  if (!arm || arm.status !== 'pending') return false;
+  if ((session.mode === 'blind' || observation.mode === 'blind') && !observation.human) return false;
+  return Boolean(observation.image_url && imageState?.id === observation.id && imageState.status === 'loaded');
+}
+
+export function comparisonArmStatusLabel(status) {
+  return Object.hasOwn(COMPARISON_STATUS_LABELS, status) ? COMPARISON_STATUS_LABELS[status] : '状态未提供';
+}
+
+export function comparisonFailedMeansUnknown(status) {
+  return status === 'failed' || status === 'interrupted';
+}
+
+export function replayObservationHasJudgmentOrComparison(observation) {
+  return Boolean(observation?.human || observation?.run_id || observation?.comparison_requested);
+}
+
+export function comparisonResponseIsCurrent(request, current) {
+  return Boolean(request && current && request.token === current.token
+    && request.sessionId === current.sessionId && request.observationId === current.observationId);
 }
 
 export function canAnalyzeObservation(session, observation, imageState) {
@@ -186,6 +225,7 @@ const state = {
   session: null, activeObservation: null, observationError: '',
   imageState: { id: null, status: 'empty' },
   errors: { freeze: '', human: '', ai: '', followup: '', observations: '' },
+  comparisonError: '',
   defaultCriteria: '', criteriaEdited: false,
   busy: '', globalError: '', notice: '',
   observationRequestToken: 0, sessionRequestToken: 0, sessionListRequestToken: 0, pendingSessionId: null, operationToken: 0,
@@ -620,6 +660,7 @@ function observations() {
 function observationExposure(observation) {
   if (observation?.human) return '人工判断已保存';
   if (observation?.run_id) return '已调用模型';
+  if (observation?.comparison_requested) return '已请求图文输入对照';
   const seenUntil = Number(state.session?.seen_until_ms);
   const cursor = Number(observation?.cursor_ms);
   if (Number.isFinite(seenUntil) && Number.isFinite(cursor) && seenUntil > cursor) return '后续 K 线已显示';
@@ -627,19 +668,23 @@ function observationExposure(observation) {
 }
 
 export function independenceLabel(observation, session) {
-  if (observation?.independence === 'outcome_known_before_judgment') return '历史结果类别在判断前已知，仅作学习标签';
+  let label;
+  if (observation?.independence === 'outcome_known_before_judgment') label = '历史结果类别在判断前已知，仅作学习标签';
+  if (!label && observation?.comparison_requested && !observation?.human) label = '已请求图文输入对照，不能补录独立判断';
   const seenUntil = Number(session?.seen_until_ms);
   const cursor = Number(observation?.cursor_ms);
   const laterSeen = Number.isFinite(seenUntil) && Number.isFinite(cursor) && seenUntil > cursor;
-  if (observation?.independence === 'ai_requested_before_human_judgment') {
-    return laterSeen ? '模型先于人工判断；其后已推进后续行情' : '模型先于人工判断查看';
+  if (!label && observation?.independence === 'ai_requested_before_human_judgment') {
+    label = laterSeen ? '模型先于人工判断；其后已推进后续行情' : '模型先于人工判断查看';
   }
-  if (observation?.independence === 'future_seen_in_session') return '冻结时已看过后续行情';
-  if (observation?.independence === 'before_ai_and_later_bars_in_this_session' || observation?.human) {
-    return laterSeen ? '人工判断先于模型；其后已推进后续行情' : '人工判断先于模型';
+  if (!label && observation?.independence === 'future_seen_in_session') label = '冻结时已看过后续行情';
+  if (!label && (observation?.independence === 'before_ai_and_later_bars_in_this_session' || observation?.human)) {
+    label = laterSeen ? '人工判断先于模型；其后已推进后续行情' : '人工判断先于模型';
   }
-  if (laterSeen) return '已看过后续行情，不能补录独立判断';
-  return observation?.mode === 'blind' ? '盲审观察，尚未判断' : '自由回放观察';
+  if (!label && laterSeen) label = '已看过后续行情，不能补录独立判断';
+  if (!label) label = observation?.mode === 'blind' ? '盲审观察，尚未判断' : '自由回放观察';
+  if (observation?.comparison_requested && observation?.human) label += '；首次人工判断后请求图文输入对照';
+  return label;
 }
 
 function renderObservations() {
@@ -656,7 +701,7 @@ function renderObservations() {
       const stateText = item.human ? STATE_LABELS[item.human.current_state] || '已判断' : observationExposure(item);
       return `<button class="replay-observation-item ${selected ? 'is-selected' : ''}" type="button" data-replay-observation="${escapeHtml(item.id)}" aria-current="${selected ? 'true' : 'false'}" ${state.busy ? 'disabled' : ''}>
         <strong>${escapeHtml(formatTime(item.cursor_ms))}</strong>
-        <span>${escapeHtml(stateText)}${item.human?.side ? ` · ${escapeHtml(SIDE_LABELS[item.human.side] || item.human.side)}` : ''}${item.run_id ? ' · 含模型结果' : ''}</span>
+        <span>${escapeHtml(stateText)}${item.human?.side ? ` · ${escapeHtml(SIDE_LABELS[item.human.side] || item.human.side)}` : ''}${item.run_id ? ' · 含模型结果' : ''}${item.comparison_requested ? ' · 已请求图文对照' : ''}</span>
       </button>`;
     }).join('');
   }
@@ -695,6 +740,7 @@ function setActiveObservation(observation) {
   if (state.activeObservation?.id !== observation?.id) {
     resetObservationDrafts();
     state.imageState = { id: observation?.id || null, status: observation?.image_url ? 'loading' : 'empty' };
+    state.comparisonError = '';
   }
   state.activeObservation = observation || null;
 }
@@ -739,8 +785,11 @@ function renderHuman() {
   const allowed = canSaveFirstJudgment(session, observation);
   const blind = session?.mode === 'blind' || observation?.mode === 'blind';
   const outcomeKnown = replayCaseJudgmentOutcomeKnown(session?.case, observation);
+  const exposedBeforeHuman = !observation?.human && Boolean(observation?.comparison_requested || observation?.run_id
+    || observation?.independence === 'ai_requested_before_human_judgment');
   byId('replay-human-heading').textContent = outcomeKnown ? '历史结果已知 · 学习标签'
-    : blind ? '盲审人工标签（先于 AI）' : '自由回放人工判断（与 AI 分开记录）';
+    : exposedBeforeHuman ? '模型已先接触 · 不可补独立人工标签'
+      : blind ? '盲审人工标签（先于 AI）' : '自由回放人工判断（与 AI 分开记录）';
   if (!observation) {
     setHidden(existing, true);
     setHidden(form, true);
@@ -756,7 +805,9 @@ function renderHuman() {
     showInline('replay-human-error', state.errors.human);
   } else if (!allowed) {
     const seenLater = Number(session?.seen_until_ms) > Number(observation.cursor_ms);
-    const message = seenLater
+    const message = observation.comparison_requested
+      ? '已准备或请求图文输入对照；首次人工判断应先于对照，因此不能在此后补录独立标签。'
+      : seenLater
       ? '后续 K 线已显示，不能再补记这张原图的独立判断；可在回访备注中补充观察。'
       : observation.run_id ? '模型已调用，首次人工判断已锁定；请用回访备注记录补充意见。'
         : '这条观察不能再保存为首次判断。';
@@ -815,14 +866,133 @@ function renderAi() {
   setHidden(byId('replay-ai-status'), false);
 }
 
+function comparisonOrderText(value) {
+  if (!Array.isArray(value)) return '未提供';
+  const labels = value.filter((mode) => COMPARISON_MODES.includes(mode)).map((mode) => COMPARISON_MODE_LABELS[mode]);
+  return labels.length ? labels.join(' → ') : '尚无记录';
+}
+
+function comparisonRunDetails(run, arm) {
+  const status = arm.status || run?.status || 'pending';
+  if (status === 'unprepared') return '<p class="replay-empty">先准备对照包；准备不会调用模型。</p>';
+  const usage = run?.usage || {};
+  const inputTokens = usage.input_tokens ?? usage.prompt_tokens ?? run?.input_tokens;
+  const outputTokens = usage.output_tokens ?? usage.completion_tokens ?? run?.output_tokens;
+  const totalTokens = usage.total_tokens ?? run?.total_tokens;
+  const tokenParts = [inputTokens !== undefined ? `输入 ${inputTokens}` : '', outputTokens !== undefined ? `输出 ${outputTokens}` : '', totalTokens !== undefined ? `合计 ${totalTokens}` : '']
+    .filter(Boolean);
+  const latency = Number(run?.latency_ms ?? run?.duration_ms ?? run?.elapsed_ms);
+  const metrics = [Number.isFinite(latency) ? `耗时 ${(latency / 1000).toFixed(2)} 秒` : '', tokenParts.length ? `Token ${tokenParts.join(' / ')}` : 'Token 未提供']
+    .filter(Boolean).join(' · ');
+  if (comparisonFailedMeansUnknown(status)) {
+    return `<p class="replay-comparison-failure">${status === 'failed' ? '本次调用失败' : '本次调用已中断'}，不代表模型判断为“不符合”；按一次调用原则不自动重试。${run?.error ? ` ${escapeHtml(run.error)}` : ''}</p><p class="replay-source-note">${escapeHtml(metrics || '耗时与 Token 未提供')}</p>`;
+  }
+  if (status !== 'completed' || !run) return '<p class="replay-empty">尚无已完成的判断结果。</p>';
+  const decision = run.decision || {};
+  const verdict = VERDICT_LABELS[decision.verdict] || '未判定';
+  const currentState = STATE_LABELS[decision.current_state] || decision.current_state || '';
+  const side = decision.side ? SIDE_LABELS[decision.side] || decision.side : '';
+  const evidence = safeArray(decision.evidence);
+  const risks = safeArray(decision.risks);
+  const list = (items) => items.length ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<p>未提供。</p>';
+  return `<p class="replay-comparison-verdict">${escapeHtml(verdict)}${currentState ? ` · ${escapeHtml(currentState)}` : ''}${side ? ` · ${escapeHtml(side)}` : ''}</p>
+    <p>${escapeHtml(decision.summary || '模型未提供判断理由。')}</p>
+    <details class="replay-comparison-reasons"><summary>查看依据与不确定性</summary><h5>可观察依据</h5>${list(evidence)}<h5>不确定性与风险</h5>${list(risks)}</details>
+    <p class="replay-source-note">${escapeHtml(metrics || '耗时与 Token 未提供')}</p>`;
+}
+
+function renderComparison() {
+  const observation = state.activeObservation;
+  const session = state.session;
+  const packageInfo = observation?.comparison;
+  const blindNeedsHuman = Boolean(observation && (session?.mode === 'blind' || observation.mode === 'blind') && !observation.human);
+  const imageMissing = Boolean(observation && (!observation.image_url
+    || state.imageState.id === observation.id && state.imageState.status === 'error'));
+  const prepare = byId('replay-comparison-prepare');
+  prepare.disabled = Boolean(state.busy) || !comparisonCanPrepare(session, observation, state.imageState);
+  prepare.textContent = state.busy === 'comparison_prepare' ? '正在准备对照包…'
+    : packageInfo ? '刷新对照状态' : '准备图文输入对照';
+  showInline('replay-comparison-error', state.comparisonError || '');
+  setHidden(byId('replay-comparison-blind-gate'), !blindNeedsHuman);
+  const imageGate = byId('replay-comparison-image-gate');
+  imageGate.textContent = imageMissing
+    ? '原冻结图缺失或无法载入，无法复现三组对照；纯图像、纯数值和图文组均已拦截。'
+    : observation && state.imageState.id === observation.id && state.imageState.status !== 'loaded'
+      ? '正在验证原冻结图；载入成功前不能准备或调用三组对照。' : '';
+  setHidden(imageGate, !observation || !imageMissing && !(state.imageState.id === observation.id && state.imageState.status !== 'loaded'));
+  byId('replay-comparison-observation').textContent = observation
+    ? `${observation.symbol || session?.symbol || ''} · ${observation.timeframe || session?.timeframe || ''} · 冻结于 ${formatTime(observation.cursor_ms)}`
+    : '先冻结一个时点，或从会话观察历史中打开已有观察。';
+  const exportLink = byId('replay-comparison-export');
+  const exportable = Boolean(observation?.id && packageInfo);
+  exportLink.href = exportable
+    ? `${REPLAY_BASE}/observations/${encodeURIComponent(observation.id)}/comparison/export` : '#';
+  exportLink.download = exportable ? `replay-comparison-${observation.id}.json` : '';
+  exportLink.setAttribute('aria-disabled', exportable ? 'false' : 'true');
+  setHidden(exportLink, !exportable);
+
+  const summary = byId('replay-comparison-summary');
+  const packet = byId('replay-comparison-packet');
+  const modelWarning = packageInfo?.returned_models_consistent === false
+    ? '警告：三组返回的实际模型不一致，不能按同模型输入对照解读。' : '';
+  showInline('replay-comparison-model-warning', modelWarning, 'error');
+  if (!packageInfo) {
+    summary.textContent = observation
+      ? '对照包尚未准备。准备操作不调用模型、不产生模型调用费用。'
+      : '暂无冻结观察。';
+    packet.textContent = '准备对照包后可查看数值输入。';
+    byId('replay-comparison-order').textContent = '建议顺序：未提供 · 实际顺序：尚无记录';
+    byId('replay-comparison-progress').textContent = '已完成 0 / 3 · 尚无一致性结论';
+  } else {
+    const inputWindow = packageInfo.input_window || {};
+    summary.textContent = `${packageInfo.model || '模型未提供'} · 同一识别规则 · ${inputWindow.bar_count ?? '未提供'} 根冻结行情 · ${formatTime(inputWindow.start_ms)} 至 ${formatTime(inputWindow.end_ms)}`;
+    byId('replay-comparison-order').textContent = `建议顺序：${comparisonOrderText(packageInfo.recommended_order)} · 实际顺序：${comparisonOrderText(packageInfo.execution_order)}`;
+    const completed = Number.isFinite(Number(packageInfo.completed_count)) ? Number(packageInfo.completed_count)
+      : (Array.isArray(packageInfo.arms) ? packageInfo.arms.filter((arm) => arm.status === 'completed').length : 0);
+    const agreement = packageInfo.agreement === true ? '三组分类标签相同' : packageInfo.agreement === false ? '三组分类标签有差异' : '尚未形成三组完整分类结果';
+    const modelConsistency = packageInfo.returned_models_consistent === true ? ' · 返回模型一致'
+      : packageInfo.returned_models_consistent === false ? ' · 返回模型不一致' : '';
+    byId('replay-comparison-progress').textContent = `已完成 ${completed} / 3 · ${agreement}${modelConsistency}（仅描述分类结果，不证明准确或盈利）`;
+    packet.textContent = packageInfo.market_packet && typeof packageInfo.market_packet === 'object'
+      ? JSON.stringify({ protocol_version: packageInfo.protocol_version, model: packageInfo.model,
+        data_sha256: packageInfo.data_sha256, image_sha256: packageInfo.image_sha256,
+        criteria_sha256: packageInfo.criteria_sha256, reference_policy: packageInfo.reference_policy,
+        market_packet: packageInfo.market_packet }, null, 2) : '服务端未返回数值输入预览。';
+  }
+
+  const arms = Array.isArray(packageInfo?.arms) ? packageInfo.arms : [];
+  byId('replay-comparison-arms').innerHTML = COMPARISON_MODES.map((mode) => {
+    const arm = arms.find((item) => item.mode === mode) || { mode, status: packageInfo ? 'pending' : 'unprepared', run_id: null, run: null };
+    const run = arm.run || null;
+    const prepared = Boolean(packageInfo);
+    const status = arm.status || run?.status || (prepared ? 'pending' : 'unprepared');
+    const attempted = Boolean(arm.run_id) || ['running', 'completed', 'failed', 'interrupted'].includes(status);
+    const imageMode = mode === 'text' ? '无图，只读同一份冻结数值输入' : mode === 'vision' ? '只传一张冻结原图' : '传一张冻结原图和同一份 JSON 数值输入';
+    const canRun = comparisonCanRunArm(mode, session, observation, state.imageState);
+    const disabled = Boolean(state.busy) || !canRun;
+    const buttonText = state.busy === `comparison_${mode}` ? '正在调用…'
+      : !observation ? '先冻结观察' : !prepared ? '先准备对照包'
+        : status === 'pending' ? '手动调用一次' : status === 'running' ? '调用进行中'
+          : attempted ? '此组已尝试，不可重试' : '状态暂不可用';
+    const statusText = !prepared ? '待准备' : comparisonArmStatusLabel(status);
+    const imageBlock = observation && imageMissing
+      ? '<p class="replay-comparison-failure">原冻结图缺失或无法载入（可能返回 404），无法复现三组对照；此组已拦截。</p>' : '';
+    return `<article class="replay-comparison-arm">
+      <div class="panel-heading"><div><h4>${escapeHtml(COMPARISON_MODE_LABELS[mode])}</h4><p class="replay-source-note">${escapeHtml(imageMode)}</p></div><span class="source-chip">${escapeHtml(statusText)}</span></div>
+      <button class="button button-secondary replay-full-width" type="button" data-comparison-arm="${mode}" ${disabled ? 'disabled' : ''}>${escapeHtml(buttonText)}</button>
+      ${imageBlock}${comparisonRunDetails(run, arm)}
+    </article>`;
+  }).join('');
+}
+
 function renderFollowups() {
   const observation = state.activeObservation;
   const session = state.session;
   const cursor = Number(session?.cursor_ms);
   const observationCursor = Number(observation?.cursor_ms);
   const later = Boolean(observation && Number.isFinite(cursor) && Number.isFinite(observationCursor) && cursor > observationCursor);
-  const eligible = later && Boolean(observation?.human || observation?.run_id);
-  byId('replay-followup-eligibility').textContent = !observation ? '先选择观察' : eligible ? `当前 ${formatTime(cursor)}` : later ? '需先保存判断或调用模型' : '先推进到更晚时间';
+  const eligible = later && replayObservationHasJudgmentOrComparison(observation);
+  byId('replay-followup-eligibility').textContent = !observation ? '先选择观察' : eligible ? `当前 ${formatTime(cursor)}` : later ? '需先保存判断、调用模型或对照组' : '先推进到更晚时间';
   byId('replay-save-followup').disabled = Boolean(state.busy) || !eligible;
   showInline('replay-followup-error', state.errors.followup);
   const target = byId('replay-followup-list');
@@ -941,6 +1111,7 @@ function renderSession() {
   renderReplayCaseOutcome();
   renderHuman();
   renderAi();
+  renderComparison();
   renderFollowups();
   renderObservations();
 }
@@ -952,7 +1123,7 @@ function renderReplay() {
   renderSessions();
   renderSession();
   byId('replay-status').textContent = state.busy
-    ? ({ create: '正在创建会话…', session: '正在恢复会话…', move: '正在读取历史前缀…', freeze: '正在保存冻结图…', judgment: '正在保存人工判断…', analyze: '正在请求一次模型判断…', followup: '正在保存回访…', observation: '正在读取观察…', outcome: '正在揭晓历史交易结果…' })[state.busy] || '正在处理…'
+    ? ({ create: '正在创建会话…', session: '正在恢复会话…', move: '正在读取历史前缀…', freeze: '正在保存冻结图…', judgment: '正在保存人工判断…', analyze: '正在请求一次模型判断…', comparison_prepare: '正在准备冻结输入对照包…', comparison_vision: '正在调用纯图像组…', comparison_text: '正在调用纯数值组…', comparison_hybrid: '正在调用图文组…', followup: '正在保存回访…', observation: '正在读取观察…', outcome: '正在揭晓历史交易结果…' })[state.busy] || '正在处理…'
     : state.session ? `${state.session.mode === 'blind' ? '盲审' : '自由回放'} · ${observations().length} 条冻结观察 · 推进不调用模型`
       : state.catalog.length ? `${state.catalog.length} 项历史行情可用 · 北京时间` : '等待历史数据目录';
   showInline('replay-error', state.globalError);
@@ -1307,6 +1478,7 @@ function addObservationSummary(observation) {
   items.push({
     id: observation.id, cursor_ms: observation.cursor_ms, image_url: observation.image_url,
     human: observation.human, run_id: observation.run_id, status: observation.status,
+    comparison_requested: Boolean(observation.comparison_requested),
   });
   items.sort((left, right) => Number(left.cursor_ms) - Number(right.cursor_ms));
   state.session = { ...state.session, observations: items };
@@ -1331,6 +1503,81 @@ async function loadObservation(id) {
     if (operationIsCurrent(operation) && tokenValue === state.observationRequestToken) state.errors.observations = error.message || '冻结观察读取失败。';
   } finally {
     if (operation.ticket === state.operationToken && tokenValue === state.observationRequestToken) finishBusy(operation);
+  }
+}
+
+function sameComparisonResponse(operation, observationToken, observationId) {
+  return comparisonResponseIsCurrent(
+    { token: operation?.ticket, sessionId: operation?.sessionId, observationId },
+    { token: state.operationToken, sessionId: state.session?.id || null, observationId: state.activeObservation?.id },
+  ) && state.busy === operation?.action && observationToken === state.observationRequestToken;
+}
+
+async function prepareComparison() {
+  const observation = state.activeObservation;
+  const session = state.session;
+  if (!comparisonCanPrepare(session, observation, state.imageState) || state.busy) {
+    if (observation && (!observation.image_url || state.imageState.id === observation.id && state.imageState.status === 'error')) {
+      state.comparisonError = '原冻结图缺失或无法载入，无法复现三组对照。';
+      renderReplay();
+    }
+    return;
+  }
+  pauseReplay();
+  const observationId = observation.id;
+  const observationToken = state.observationRequestToken;
+  const operation = setBusy('comparison_prepare', { sessionId: session.id });
+  if (!operation) return;
+  state.comparisonError = '';
+  try {
+    const updated = await postJson(`/replay/observations/${encodeURIComponent(observationId)}/comparison`, {});
+    if (!sameComparisonResponse(operation, observationToken, observationId)) return;
+    setActiveObservation(updated);
+    addObservationSummary(updated);
+    state.notice = updated.comparison_requested
+      ? '对照状态已刷新；已有请求和结果保留，没有新增模型调用。'
+      : '冻结输入对照包已准备；尚未调用模型。三组可分别手动调用一次。';
+    renderReplay();
+  } catch (error) {
+    if (sameComparisonResponse(operation, observationToken, observationId)) {
+      state.comparisonError = error.message || '图文输入对照包准备失败。';
+    }
+  } finally {
+    finishBusy(operation);
+  }
+}
+
+async function analyzeComparisonArm(mode) {
+  const observation = state.activeObservation;
+  const session = state.session;
+  if (!comparisonCanRunArm(mode, session, observation, state.imageState) || state.busy) {
+    if (observation && (!observation.image_url || state.imageState.id === observation.id && state.imageState.status === 'error')) {
+      state.comparisonError = '原冻结图缺失或无法载入，无法复现三组对照；所有组已拦截。';
+    } else if (observation && (session?.mode === 'blind' || observation.mode === 'blind') && !observation.human) {
+      state.comparisonError = '盲审观察必须先保存人工判断，之后才能调用对照组。';
+    }
+    renderReplay();
+    return;
+  }
+  pauseReplay();
+  const observationId = observation.id;
+  const observationToken = state.observationRequestToken;
+  const operation = setBusy(`comparison_${mode}`, { sessionId: session.id });
+  if (!operation) return;
+  state.comparisonError = '';
+  try {
+    const updated = await postJson(`/replay/observations/${encodeURIComponent(observationId)}/comparison/${mode}/analyze`, {});
+    if (!sameComparisonResponse(operation, observationToken, observationId)) return;
+    setActiveObservation(updated);
+    addObservationSummary(updated);
+    state.notice = `${COMPARISON_MODE_LABELS[mode]}组请求已返回；该组只调用一次，不自动重试。`;
+    renderReplay();
+  } catch (error) {
+    if (sameComparisonResponse(operation, observationToken, observationId)) {
+      state.comparisonError = `${error.message || '对照组请求失败。'} 已提交的组不会自动重试；请刷新观察确认服务端状态。`;
+    }
+  } finally {
+    finishBusy(operation);
   }
 }
 
@@ -1409,8 +1656,8 @@ async function saveFollowup() {
   const observation = state.activeObservation;
   const session = state.session;
   if (!observation || !session || state.busy) return;
-  if (Number(session.cursor_ms) <= Number(observation.cursor_ms) || (!observation.human && !observation.run_id)) {
-    state.errors.followup = '请先完成原观察判断，并将游标移到更晚时间。';
+  if (Number(session.cursor_ms) <= Number(observation.cursor_ms) || !replayObservationHasJudgmentOrComparison(observation)) {
+    state.errors.followup = '请先完成原观察判断、调用模型或图文对照，并将游标移到更晚时间。';
     renderReplay();
     return;
   }
@@ -1520,6 +1767,11 @@ function attachEvents() {
   byId('replay-human-side').addEventListener('change', () => renderReplay());
   byId('replay-save-human').addEventListener('click', saveJudgment);
   byId('replay-analyze').addEventListener('click', analyzeObservation);
+  byId('replay-comparison-prepare').addEventListener('click', prepareComparison);
+  byId('replay-comparison-arms').addEventListener('click', (event) => {
+    const button = event.target.closest('[data-comparison-arm]');
+    if (button) analyzeComparisonArm(button.dataset.comparisonArm);
+  });
   byId('replay-save-followup').addEventListener('click', saveFollowup);
   byId('replay-speed').addEventListener('change', () => {
     if (replayPlayback.isRunning()) {

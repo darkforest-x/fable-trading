@@ -369,6 +369,7 @@ function isAutomaticTerminal(status) {
 
 function sourceLabel(source) {
   const labels = {
+    historical_replay: '历史回放', historical_replay_comparison: '回放图文输入对照',
     local: '本地数据', spike: 'SPIKE', spike_automatic: 'SPIKE 自动识别', spike_capture: 'SPIKE 图表快照', cache: '本机缓存', database: '本地数据库',
     local_config: '本机已保存 · 重启保留', environment: '后端环境变量', env: '后端环境变量', session: '本机进程会话',
     memory: '本机进程会话', process: '本机进程会话', upload: '本地上传图表', unset: '未配置', none: '未配置',
@@ -935,8 +936,9 @@ function renderResult() {
   const referenceNames = Array.isArray(run.references) ? run.references.map((reference) => asText(reference?.name, '参考图')).filter(Boolean) : [];
   const criteria = asText(run.criteria, '记录中没有保存形态规则。');
   const requestSource = sourceLabel(run.source || (run.symbol ? 'spike' : 'upload'));
+  const inputMode = { vision: '纯图像', text: '纯数值（未发送图片）', hybrid: '图像 + 数值' }[run.input_mode];
   const requestContext = `<details class="request-context"><summary>识别详情</summary><dl>
-    <dt>图片来源</dt><dd>${escapeHtml(requestSource)} · ${escapeHtml(asText(run.image_name, state.selectedImage?.name || '图片名称未返回'))}</dd>
+    <dt>输入来源</dt><dd>${escapeHtml(requestSource)} · ${escapeHtml(inputMode || asText(run.image_name, state.selectedImage?.name || '图片名称未返回'))}</dd>
     <dt>参考图</dt><dd>${referenceNames.length ? escapeHtml(referenceNames.join('、')) : '未使用参考图'}</dd>
     <dt>检测范围</dt><dd>${currentScope ? '图中最右端当前盘口；旧形态不代表当前符合' : '旧版整图判断，不代表当前盘口有效'}</dd>
     <dt>本次规则</dt><dd>${escapeHtml(criteria)}</dd>
