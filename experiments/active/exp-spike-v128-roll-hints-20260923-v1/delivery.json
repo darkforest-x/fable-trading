@@ -1,0 +1,75 @@
+{
+  "generated_at": "2026-09-23T04:23:17.607063+00:00",
+  "source_commit": "34b8b6ca080fd826b26f3e4580d01d6ec6dae468",
+  "probe_builder_commit": "0ca64dc9dc052557c767360aac901b9cb42046c5",
+  "files": {
+    "yoyo/evaluation/pine/spike_burst_v12_6.pine": {
+      "sha256": "8a72c18b65e50862ca6dee4e4d58cac4c1e1c7d38ccd3718e7f0228e970ee2db",
+      "size_bytes": 164292
+    },
+    "yoyo/evaluation/pine/spike_burst_v12_7.pine": {
+      "sha256": "ef4e8c5df3ea0423835c869e07b24734856ce968038748a5b80a4afa63f2d1c5",
+      "size_bytes": 165620
+    },
+    "yoyo/evaluation/pine/spike_burst_v12_8.pine": {
+      "sha256": "c20a46493c5a35311f1f3fa1f4b743dd5ea20fb418c907bc9ebe09350a3f28b3",
+      "size_bytes": 176550
+    },
+    "tests/evaluation/test_spike_v12_8_pine_contract.py": {
+      "sha256": "2cd94bf3a784e60ea0b11a6ec4075f9784227e23a822a83da6e447f0f6c94469",
+      "size_bytes": 3924
+    },
+    "tests/evaluation/fixtures/spike_v128_roll_hint_replacements.json": {
+      "sha256": "b87ee3de5e4d06d68c58a48a3fc83e82fd5833c6c0cd0bc98ff731f55d0bf8ad",
+      "size_bytes": 94
+    },
+    "scripts/build_spike_v128_native_probe.py": {
+      "sha256": "954cc3b5061364afd84b45564384de486c2453abcd6812270866c89cda67476e",
+      "size_bytes": 4241
+    },
+    "experiments/active/exp-spike-v128-roll-hints-20260923-v1/native_probe.pine": {
+      "sha256": "b2916574b17e2f8d33be4853361edf5c8a2b248fb584797cc620b398a85661ba",
+      "size_bytes": 11671
+    }
+  },
+  "scope": "long H1 structure chart candidates only; original V12.6 entries and exits unchanged",
+  "tests": {
+    "source_contracts_passed": 10,
+    "full_parent_byte_recovery": true,
+    "native_probe_checked_bars": 10961,
+    "native_probe_scenarios": [
+      "two candidate cap, continued reference updates, later reference touch pause, frame reset",
+      "no candidates below initial 2R",
+      "hour gap stops hints"
+    ],
+    "native_probe_adapter": "synthetic H1 and inherited frame inputs; not a market data test",
+    "native_probe_final_source_relation": "identical extracted state after normalizing only table anchor bottom_center -> bottom_right"
+  },
+  "tradingview": {
+    "private_script_name": "SPIKE V12.8 · 两次加仓提示",
+    "revision": 2,
+    "saved_at_beijing": "2026-09-23 12:20:49",
+    "compile_passed": true,
+    "existing_warning": "Shadowing built-in variable second, inherited parent code",
+    "verified_chart": "OKX:ETHUSDT.P",
+    "smoke_periods": [
+      "15m",
+      "1h",
+      "4h unsupported status"
+    ],
+    "final_chart_period": "15m",
+    "published": false,
+    "real_market_event_parity": false,
+    "observed_evidence": [
+      "12:15:09 native QA completed and added to chart",
+      "12:15:36 data window: Synthetic bars checked 10,961.00",
+      "12:18:34 final indicator added afresh with IMACD pane",
+      "12:20:49 private SPIKE V12.8 saved; revision button 2",
+      "12:22:25 4h status: 仅支持60m或60整除分钟图"
+    ]
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "new_economic_backtest": false,
+  "account_actions": false
+}

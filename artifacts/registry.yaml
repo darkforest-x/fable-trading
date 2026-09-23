@@ -32423,3 +32423,18 @@ artifacts:
     notes: 638 streams, 18956 vs 13694 candidates, max break-first age 600 vs 8. Latency median 13 -> 2 bars; later segment not improved;
       preregistered default rule fails, so the V12.7 switch ships off. Independent audit_v1 passes including V12.6 run_v2 baseline parity
       and metric recomputation. Native TradingView parity still unverified; no script created.
+
+  - artifact_id: spike-v128-roll-hints-20260923-delivery
+    artifact_type: manifest
+    role: v128_display_only_two_h1_add_candidates
+    source_repo: darkforest-x/fable-trading
+    source_commit: 34b8b6ca080fd826b26f3e4580d01d6ec6dae468
+    source_path: experiments/active/exp-spike-v128-roll-hints-20260923-v1/delivery.json
+    sha256: 99af5594f4a5b4db025c49508091b2a65c7caa8f6cc50b1887f0cd3c48cd3e84
+    size_bytes: 3070
+    storage_uri: repo://experiments/active/exp-spike-v128-roll-hints-20260923-v1/delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Source identities, native save/compile receipt and synthetic probe evidence. Final source changes probe only by table
+      anchor; no new profitability or production claim.

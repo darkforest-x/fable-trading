@@ -10774,3 +10774,23 @@ experiments:
       (9630 removed events summing -1011R); common 9304 executions identical, quality delta 0. V12.7 Pine ships the cap as an opt-in
       switch defaulting OFF per the preregistered rule; no TradingView script created (owner stopped browser use). 50 focused pass;
       468 extended pass / 8 pre-existing outside-scope failures. Notion not synced (no connector in session).
+
+  - experiment_id: exp-spike-v128-roll-hints-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 34b8b6ca080fd826b26f3e4580d01d6ec6dae468
+    status: accepted
+    question: Can two completed-H1 structural add candidates be displayed on V12.6 without changing its signals or exits?
+    single_variable: Add isolated chart-hint state only; original V12.6 execution-reference rules remain byte-identical after
+      removal.
+    result: 10 source contracts pass. Native Pine synthetic probe checks 10961 repeated-scenario bars; cap2, continued structure
+      updates, touch pause, 2R rejection, gap and reset pass. New private V12.8 revision2 compiles; ETH15m/H1 and unsupported4h
+      checked.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p0_spike_v128_roll_hints_20260923.md
+    artifacts:
+    - spike-v128-roll-hints-20260923-delivery
+    reuse_allowed: false
+    notes: Accepted for display-only engineering scope. Candidates are not accepted fills. No quantities, margin, profit admission, economic backtest or account actions.
+      Existing second-shadow warning retained. Native market-event parity unverified; old V12.6 and separate V12.7 preserved.

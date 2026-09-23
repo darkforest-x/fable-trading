@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **634** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **636** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,7 +10,9 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-23 | [`p0_spike_v128_roll_hints_20260923.md`](p0_spike_v128_roll_hints_20260923.md) | SPIKE V12.8：V12.6 上的两次加仓候选提示 |  |
 | 2026-09-23 | [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) | 均线密集启动：规则移植为 Pine 指标 V1 / V2 | Owner 2026-09-22 问“能写成pine脚本？”并在 2026-09-23 要求“把相似度和评分也移植进去”。V1 只移植两组硬性条件；V2 追加两层相似度与 Grade-A 质量分，与研究扫描一一对应。 |
+| 2026-09-23 | [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) | SPIKE V12.7 候选：先突破后V9加时限的全量回测 | 延迟大幅下降，总亏损减少，但后段每笔净R没有改善，因此按运行前写死的规则，V12.7 里这个时限默认关闭、保留为开关。 |
 | 2026-09-22 | [`p1_ma_morph_v6_econ_audit_20260922.md`](p1_ma_morph_v6_econ_audit_20260922.md) | 形态模型 v6 A 组：高分前 10% 正收益的稳健性复核 | 原报告数字完全复算：验证 top10 131 笔 +12.00bp/笔、测试 99 笔 +15.25bp/笔，成员与原 `top10_event_ids` 一致。 |
 | 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
 | 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |
@@ -734,6 +736,7 @@
 - [`p0_spike_burst_risk_display_20260910.md`](p0_spike_burst_risk_display_20260910.md) — SPIKE 强劲爆发 V1：盈亏框恢复验收
 - [`p0_spike_gainers_audit_20260909.md`](p0_spike_gainers_audit_20260909.md) — Spike 涨幅榜信号核对 · 2026-09-09
 - [`p0_spike_ma_drift_short_indicator_20260914.md`](p0_spike_ma_drift_short_indicator_20260914.md) — SPIKE · 均线下压预警 V1
+- [`p0_spike_v128_roll_hints_20260923.md`](p0_spike_v128_roll_hints_20260923.md) — SPIKE V12.8：V12.6 上的两次加仓候选提示
 - [`p0_spike_v1_monitor_migration_20260911.md`](p0_spike_v1_monitor_migration_20260911.md) — SPIKE V1 Mac monitor migration：信号浏览、冻结回放图与服务验收记录
 - [`p0_spike_v1_okx_133_review_20260911.md`](p0_spike_v1_okx_133_review_20260911.md) — SPIKE Burst V1 · OKX 133 笔逐笔图册（2026-09-11）
 - [`p0_spike_v1_plus_evidence_20260912.md`](p0_spike_v1_plus_evidence_20260912.md) — SPIKE V1 加强版：先纠正回测口径，再验证退出与过热过滤
@@ -1010,6 +1013,7 @@
 - [`p1_spike_v11_mtf_joint_20260918.md`](p1_spike_v11_mtf_joint_20260918.md) — SPIKE V11 回测：加入上级周期突破，15m 和 1h 都没有变好，「突破+spike（上级突破）」后段反而最弱
 - [`p1_spike_v126_htf_recheck_20260922.md`](p1_spike_v126_htf_recheck_20260922.md) — SPIKE V12.6：联合时重检 H1 SMA60 的全量研究
 - [`p1_spike_v126_net_win_tail_audit_20260922.md`](p1_spike_v126_net_win_tail_audit_20260922.md) — SPIKE V12.6：扣费胜率与大盈利保留的优化审查
+- [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) — SPIKE V12.7 候选：先突破后V9加时限的全量回测
 - [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
 - [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
 - [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) — SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20）

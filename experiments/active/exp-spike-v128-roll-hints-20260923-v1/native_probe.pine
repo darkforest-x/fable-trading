@@ -1,0 +1,196 @@
+//@version=6
+indicator("SPIKE V12.8 QA · synthetic only", overlay=true, max_labels_count=100)
+// THIS IS A TEST HARNESS. Prices below are artificial; no market interpretation.
+const int V128_H1_MS = 3600000
+int qa_step = bar_index % 16
+int qa_cycle = int(math.floor(bar_index / 16))
+int qa_scenario = qa_cycle % 3
+int qa_time = 1704067200000 + (qa_cycle * 16 + qa_step) * V128_H1_MS
+int qa_time_close = qa_time + V128_H1_MS
+var array<float> qa_closes = array.from(100.0,110.0,105.0,121.0,130.0,125.0,141.0,150.0,145.0,161.0,150.0,150.0,100.0,100.0,100.0,100.0)
+var array<float> qa_highs = array.from(101.0,111.0,111.0,122.0,131.0,131.0,142.0,151.0,151.0,162.0,163.0,151.0,101.0,101.0,101.0,101.0)
+var array<float> qa_lows = array.from(99.0,99.0,104.0,105.0,120.0,124.0,125.0,140.0,144.0,145.0,142.0,149.0,99.0,99.0,99.0,99.0)
+float qa_close = array.get(qa_closes,qa_step)
+float qa_high = array.get(qa_highs,qa_step)
+float qa_low = array.get(qa_lows,qa_step)
+float qa_open = qa_close
+bool v128Enabled = true
+bool v128Supported = true
+bool v128ChartIsH1 = true
+bool v126Minimal = true
+bool dataGap = false
+bool pricesValid = true
+bool referenceStarted = qa_step == 0
+int trendSide = qa_step < 12 ? 1 : 0
+int entryBar = bar_index - qa_step
+float entry = 100.0
+float initialStop = 90.0
+float risk = qa_scenario == 1 ? 100.0 : 10.0
+float atr = 1.0
+color bull = color.teal
+color muted = color.gray
+color gold = color.orange
+color ink = chart.fg_color
+float v128H1Open = qa_open
+float v128H1High = qa_high
+float v128H1Low = qa_low
+float v128H1Close = qa_close
+int v128H1Time = qa_time + (qa_scenario == 2 and qa_step >= 4 ? V128_H1_MS : 0)
+int v128H1CloseTime = v128H1Time + V128_H1_MS
+bool v128H1Valid = true
+var int v128FrameEntryBar = na
+var int v128FrameConfirmTime = na
+var int v128LastHourClose = na
+var int v128CandidateCount = 0
+var int v128StructuralSetBar = na
+var float v128LastCandidatePrice = na
+var float v128StructuralStop = na
+var float v128RunningHigh = na
+var float v128PreviousClose = na
+var float v128PullbackLow = na
+var float v128FrozenHurdle = na
+var bool v128Seeded = false
+var bool v128InPullback = false
+var bool v128EpisodeInvalid = false
+var bool v128EpisodePaused = false
+var bool v128HasStructuralProposal = false
+var array<label> v128CandidateTags = array.new<label>()
+var table v128Status = table.new(position.bottom_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+
+bool v128CandidateEvent = false
+bool v128FrameLong = trendSide == 1 and not na(entryBar) and not na(entry) and not na(initialStop) and not na(risk) and entry > 0 and initialStop > 0 and risk > 0
+
+if barstate.isconfirmed
+    if not v128Enabled or not v128Supported or dataGap or not pricesValid or not v128FrameLong
+        v128FrameEntryBar := na
+        v128FrameConfirmTime := na
+        v128LastHourClose := na
+        v128CandidateCount := 0
+        v128StructuralSetBar := na
+        v128LastCandidatePrice := na
+        v128StructuralStop := na
+        v128RunningHigh := na
+        v128PreviousClose := na
+        v128PullbackLow := na
+        v128FrozenHurdle := na
+        v128Seeded := false
+        v128InPullback := false
+        v128EpisodeInvalid := false
+        v128EpisodePaused := false
+        v128HasStructuralProposal := false
+    else if referenceStarted or na(v128FrameEntryBar) or v128FrameEntryBar != entryBar
+        // Bind once to the original V9 frame.  The first eligible H1 must begin
+        // at or after this confirmation qa_close, so a partly pre-entry hour is never read.
+        v128FrameEntryBar := entryBar
+        v128FrameConfirmTime := qa_time_close
+        v128LastHourClose := na
+        v128CandidateCount := 0
+        v128StructuralSetBar := na
+        v128LastCandidatePrice := entry
+        v128StructuralStop := initialStop
+        v128RunningHigh := entry
+        v128PreviousClose := na
+        v128PullbackLow := na
+        v128FrozenHurdle := na
+        v128Seeded := false
+        v128InPullback := false
+        v128EpisodeInvalid := false
+        v128EpisodePaused := false
+        v128HasStructuralProposal := false
+    else
+        // A reference is only guidance.  From the next chart bar onward, a touch
+        // pauses this frame's candidates but cannot alter inherited exits/protection.
+        if v128HasStructuralProposal and not v128EpisodePaused and not na(v128StructuralSetBar) and bar_index > v128StructuralSetBar and qa_low <= v128StructuralStop
+            v128EpisodePaused := true
+
+        bool v128NewHour = v128H1Valid and (na(v128LastHourClose) or v128H1CloseTime != v128LastHourClose)
+        if v128NewHour
+            int v128ExpectedFirstHour = int(math.ceil(v128FrameConfirmTime * 1.0 / V128_H1_MS) * V128_H1_MS)
+            bool v128BeforeFrame = v128H1Time < v128ExpectedFirstHour
+            bool v128FirstGap = not v128Seeded and not v128BeforeFrame and v128H1Time > v128ExpectedFirstHour
+            bool v128LaterGap = v128Seeded and not na(v128LastHourClose) and v128H1CloseTime != v128LastHourClose + V128_H1_MS
+            v128LastHourClose := v128H1CloseTime
+
+            if v128FirstGap or v128LaterGap
+                v128EpisodeInvalid := true
+            else if not v128BeforeFrame and not v128EpisodeInvalid and not v128EpisodePaused
+                if not v128Seeded
+                    v128RunningHigh := math.max(entry, v128H1High)
+                    v128PreviousClose := v128H1Close
+                    v128Seeded := true
+                else if not v128InPullback
+                    if v128H1Close < v128PreviousClose
+                        v128InPullback := true
+                        v128FrozenHurdle := v128RunningHigh
+                        v128PullbackLow := v128H1Low
+                    else
+                        v128RunningHigh := math.max(v128RunningHigh, v128H1High)
+                else
+                    v128PullbackLow := math.min(v128PullbackLow, v128H1Low)
+                    if v128H1Close > v128FrozenHurdle
+                        float v128Proposal = math.floor(v128PullbackLow / syminfo.mintick) * syminfo.mintick - syminfo.mintick
+                        bool v128Improves = v128Proposal > v128StructuralStop and v128Proposal > 0 and v128Proposal < v128H1Close
+                        // Lower charts learn a completed H1 on this first available
+                        // chart qa_close.  If its qa_low already broke the new reference,
+                        // suppress the candidate and pause rather than backdating it.
+                        bool v128AvailabilityCross = not v128ChartIsH1 and v128Improves and qa_low <= v128Proposal
+                        if v128Improves
+                            v128StructuralStop := v128Proposal
+                            v128StructuralSetBar := bar_index
+                            v128HasStructuralProposal := true
+                        if v128AvailabilityCross
+                            v128EpisodePaused := true
+
+                        bool v128CandidateEligible = v128Improves and not v128AvailabilityCross and trendSide == 1 and qa_close >= entry + 2.0 * risk and v128H1Close >= entry + 2.0 * risk and qa_close > v128LastCandidatePrice and qa_close > v128Proposal
+                        if v128CandidateEligible and v128CandidateCount < 2
+                            v128CandidateCount += 1
+                            v128LastCandidatePrice := qa_close
+                            v128CandidateEvent := true
+                            if not v126Minimal
+                                if array.size(v128CandidateTags) >= 30
+                                    label.delete(array.shift(v128CandidateTags))
+                                string v128Tip = "V12.8 加仓候选" + str.tostring(v128CandidateCount) + "（图表提示，不是交易）\n原V9多头确认：" + str.format_time(v128FrameConfirmTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n已完成H1：" + str.format_time(v128H1CloseTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n本图确认收盘参考：" + str.tostring(qa_close, format.mintick) + "\nH1收盘参考：" + str.tostring(v128H1Close, format.mintick) + "\n结构保护提案：" + str.tostring(v128Proposal, format.mintick) + "\n未核验整仓净利润、保证金或实际成交；原ATR保护/退出不变。"
+                                array.push(v128CandidateTags, label.new(bar_index, math.max(syminfo.mintick, qa_low - atr * 0.25), "add候选" + str.tostring(v128CandidateCount), style=label.style_label_up, color=color.new(bull, 82), textcolor=bull, size=size.small, tooltip=v128Tip, force_overlay=true))
+
+                        // One completed pullback-break consumes one structural event,
+                        // even if price/cap/availability suppresses its candidate.
+                        v128RunningHigh := math.max(v128RunningHigh, v128H1High)
+                        v128InPullback := false
+                        v128PullbackLow := na
+                        v128FrozenHurdle := na
+                v128PreviousClose := v128H1Close
+
+if barstate.islast
+    if v128Enabled and not v126Minimal
+        string v128StatusText = not v128Supported ? "仅支持60m或60整除分钟图" : v126Minimal ? "极简模式：候选/参考隐藏" : not v128FrameLong ? "等待原始V9多头参考" : v128EpisodeInvalid ? "H1断档：本框候选停用" : v128EpisodePaused ? "结构参考已触及；原退出不变" : not v128Seeded ? "等待完整入场后H1" : "候选 " + str.tostring(v128CandidateCount) + "/2 · 结构参考 " + str.tostring(v128StructuralStop, format.mintick)
+        table.cell(v128Status, 0, 0, "V12.8 滚仓提示", text_color=muted, text_size=size.tiny)
+        table.cell(v128Status, 1, 0, v128StatusText, text_color=v128EpisodeInvalid or v128EpisodePaused ? gold : ink, text_size=size.tiny, tooltip="结构参考不参与原ATR保护或退出；不含数量、保证金、利润或实际成交核验。")
+        table.cell(v128Status, 0, 1, "H1结构", text_color=muted, text_size=size.tiny)
+        table.cell(v128Status, 1, 1, v128HasStructuralProposal ? str.tostring(v128StructuralStop, format.mintick) + " · 非执行参考" : "尚无已提升参考", text_color=ink, text_size=size.tiny)
+    else
+        table.clear(v128Status, 0, 0, 1, 1)
+
+var int qa_checks = 0
+if barstate.isconfirmed
+    if qa_scenario == 0
+        int expectedCount = qa_step >= 12 ? 0 : qa_step >= 6 ? 2 : qa_step >= 3 ? 1 : 0
+        if v128CandidateCount != expectedCount
+            runtime.error("QA normal candidate count, step=" + str.tostring(qa_step))
+        if qa_step == 9 and math.abs(v128StructuralStop - (144.0 - syminfo.mintick)) > syminfo.mintick * 0.1
+            runtime.error("QA reference stopped updating after candidate two")
+        if qa_step == 10 and not v128EpisodePaused
+            runtime.error("QA prior reference touch did not pause hints")
+        if qa_step == 9 and v128CandidateEvent
+            runtime.error("QA third candidate emitted")
+    if qa_scenario == 1 and v128CandidateCount != 0
+        runtime.error("QA below-2R candidate emitted")
+    if qa_scenario == 2 and qa_step >= 4 and qa_step < 12
+        if not v128EpisodeInvalid or v128CandidateCount != 1
+            runtime.error("QA hour gap failed closed")
+    if qa_step >= 12 and (v128CandidateCount != 0 or not na(v128FrameEntryBar))
+        runtime.error("QA exit failed to reset frame")
+    qa_checks += 1
+var table qa_result = table.new(position.top_left,1,1)
+if barstate.islast
+    table.cell(qa_result,0,0,"V12.8 native state QA PASS · checked bars " + str.tostring(qa_checks),text_color=color.teal)
+plot(qa_checks,"Synthetic bars checked",display=display.data_window)
