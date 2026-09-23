@@ -1,0 +1,42 @@
+{
+  "focused": "50 passed (experiment + parent V12.6/V12 contracts)",
+  "extended": "468 passed / 8 failed in tests/boundaries tests/causality tests/parity; all failures outside this experiment files and identical to the 2026-09-22 V12.6 round",
+  "failure_groups": {
+    "cross_repo_path": 1,
+    "legacy_registry_missing_source_commit": 5,
+    "historical_migration_hash_drift": 2
+  },
+  "experiment_commits": [
+    "24275187d7",
+    "fe534ef35c",
+    "2437ce8d8f"
+  ],
+  "start_HEAD": "b00f5e0da4",
+  "outside_files": {
+    "yoyo/layers/l1_detection/candidates.py": {
+      "current_sha256": "133a97a71a1aa973a053dbd97be9c2b8497008192d6a7738abd9b15a04bf993b",
+      "start_HEAD_sha256": "8c2594ef2cbc45686e8155dc8581c6c3ab92a8388b29b3801556b117d0c326dd",
+      "changed_in_experiment_commits": false
+    },
+    "yoyo/layers/l1_detection/render.py": {
+      "current_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+      "start_HEAD_sha256": "def5b7317c13e37fc43657243a7cc900bc3fafee71bdf2e405e0336a1a3c0eea",
+      "changed_in_experiment_commits": false
+    },
+    "artifacts/registry.yaml": {
+      "current_sha256": "f437e6fd6a2a56a3c5692ccb5faadcb9fd14b85d76267c95ea1a8642bcbb52e6",
+      "start_HEAD_sha256": "1253e7ebf53d43cb9db0bd7db82ecf96f489dc7d12a31aaf4922cbfa9757b61c",
+      "changed_in_experiment_commits": false
+    },
+    "experiments/registry.yaml": {
+      "current_sha256": "472d38871cd7e9b5376500ea7d0a5284c4e74555e95c0832ad4e73bc8dfa63bd",
+      "start_HEAD_sha256": "cc7689ef8066b4c6487bd64cea75e600e2c0137649274ac6062224a71078b456",
+      "changed_in_experiment_commits": false
+    }
+  },
+  "not_verified": [
+    "native TradingView compilation or chart run of spike_burst_v12_7.pine",
+    "native pivot tie semantics",
+    "timeframes other than 15m"
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "symbols": 638,
+  "candidate_rows": 32650,
+  "status_rows": 32650,
+  "trade_rows": 32626,
+  "closed_rows": 32603,
+  "control_rows": 32626,
+  "shared_executions": 9312,
+  "candidates_per_arm": {
+    "baseline": 18956,
+    "held_age_8": 13694
+  },
+  "break_first_per_arm": {
+    "baseline": 13739,
+    "held_age_8": 4109
+  },
+  "max_break_first_age": {
+    "baseline": 600,
+    "held_age_8": 8
+  },
+  "baseline_parity_trades": 18949,
+  "independent_metric_recomputation": {
+    "rows": 6,
+    "columns": 6,
+    "summary_sha256": "b21068dec3c2f4370888181de02de66143b6243eb20c98d3791d3a4484214a3b"
+  },
+  "source_hashes_verified": 32,
+  "source_commit_verified": "d34c3ecf754c672f1d0a160155e2ad004a814bfb",
+  "identity_sha256": "5422d1047e2d9260a5f6a8133401615c60a9208c5e6004570262706970bb61bc",
+  "manifest_sha256": "39e6dafa7c661bae48f873c68fb01d910497a9a2d5977c714c8b16504f514bcf",
+  "audit_source_sha256": "35166d26f913859c1b6a072304655528cbb968607ef5aa9a9c319506fcf91992",
+  "checks": [
+    "receipt_and_leaf_hashes",
+    "launch_commit_source_blobs",
+    "full_universe",
+    "unique_joint_per_box_per_arm",
+    "complete_status_book_per_arm",
+    "held_age_contract",
+    "crossing_break_and_fill_chronology",
+    "serial_no_overlap",
+    "20bp_cost",
+    "R_denominator",
+    "long_price_return",
+    "same_event_same_execution",
+    "control_inventory",
+    "v126_run_v2_baseline_parity",
+    "independent_metric_identities"
+  ],
+  "limitations": [
+    "no_native_TradingView_pivot_parity",
+    "event_R_is_not_account_equity",
+    "historical_window_already_examined_not_a_blind_forward_test"
+  ]
+}

@@ -1,0 +1,26 @@
+[
+ [
+  "// New private version: show completed H1 SMA60 on 15m by default; preserve V12.4 filters.\n",
+  "// New private version V12.7: optional bar cap between a held break and its pairing V9.\n"
+ ],
+ [
+  "indicator(\"SPIKE V12.6 · 自适应视觉\", shorttitle=\"SPIKE V12.6\",",
+  "indicator(\"SPIKE V12.7 · 突破时限\", shorttitle=\"SPIKE V12.7\","
+ ],
+ [
+  "收回线上或线下、数据断档、超过本图最长存活根数即永久取消。",
+  "收回线上或线下、数据断档、超过本图最长存活根数（或下方V12.7最长间隔）即永久取消。"
+ ],
+ [
+  "if held.joined or bar_index - held.brokenBar > v10Life or heldY <= 0 or close <= heldY",
+  "if held.joined or bar_index - held.brokenBar > v127HeldLife or heldY <= 0 or close <= heldY"
+ ],
+ [
+  "if bar_index - held.visibleBar > v10Life or y <= 0 or close <= y",
+  "if bar_index - held.visibleBar > v127HeldLife or y <= 0 or close <= y"
+ ],
+ [
+  "\" · 持线待V9 \" + str.tostring(array.size(v12Held) + array.size(v12HeldHtf))",
+  "\" · 持线待V9 \" + str.tostring(array.size(v12Held) + array.size(v12HeldHtf)) + (v127CapHeld ? \"（≤\" + str.tostring(v127HeldLife) + \"根）\" : \"\")"
+ ]
+]

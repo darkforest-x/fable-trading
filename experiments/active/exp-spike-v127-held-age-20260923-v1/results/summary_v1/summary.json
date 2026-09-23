@@ -1,0 +1,51 @@
+{
+  "auc": "not_applicable_no_model_score",
+  "baseline_parity": {
+    "baseline_trades": 18949,
+    "controls_same": true,
+    "field_mismatches": {
+      "censored": 0,
+      "entry_time": 0,
+      "exit_reason": 0,
+      "exit_time": 0,
+      "initial_stop": 0,
+      "net_r": 0,
+      "net_return": 0
+    },
+    "pass": true,
+    "reference": "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/results/run_v2",
+    "reference_trades": 18949,
+    "same_trade_keys": true
+  },
+  "closed_rows": 32603,
+  "drawdown_basis": "exit_ordered_event_r_nonaccount",
+  "files": {
+    "inference.csv": "1f5f8b81293ce2853d35b152c4e451b85bac1f0e38e5e1f15562b16220534f26",
+    "latency.csv": "118fa9e35fee02f2d5a7710c08c463ccc88a3011a70f3b948f01a9d3cf3f77e3",
+    "metrics.csv": "b21068dec3c2f4370888181de02de66143b6243eb20c98d3791d3a4484214a3b",
+    "monthly.csv": "7d032487e3a4144e53c1b4d882a5d3fc92cf2415c3aec41b759ca6a6079b6786",
+    "paired_attribution.csv": "41220d8e0f1b5ead89608d572439f7237e315077815939ae96a606a0eac18dda",
+    "tail_retention.csv": "d2a56f7130d4985b1db348654e8f2ccf48ec43dd25ef6e13865a51e75737f2c1"
+  },
+  "input": "experiments/active/exp-spike-v127-held-age-20260923-v1/results/run_v1",
+  "input_identity_sha256": "5422d1047e2d9260a5f6a8133401615c60a9208c5e6004570262706970bb61bc",
+  "input_manifest_sha256": "39e6dafa7c661bae48f873c68fb01d910497a9a2d5977c714c8b16504f514bcf",
+  "native_pine_parity": false,
+  "production_eligible": false,
+  "report_source_sha256": "2fa36e756c36c2b96a0c290bebd56c77caec5def3f583f8667c63ff707dffbcc",
+  "top_decile": "not_applicable_no_ranker",
+  "training_eligible": false,
+  "v127_default_rule": {
+    "checks": {
+      "gt5_rate_full": true,
+      "mean_net_r_full": true,
+      "mean_net_r_later": false
+    },
+    "default_on": false,
+    "gt5_rate_full": {
+      "baseline": 0.02545685011091159,
+      "held_age_8": 0.027946448167386055
+    },
+    "rule": "treatment mean_net_r >= baseline in full AND later, AND full gt5 rate >= baseline"
+  }
+}

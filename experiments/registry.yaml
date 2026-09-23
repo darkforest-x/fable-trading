@@ -10752,3 +10752,25 @@ experiments:
     reuse_allowed: false
     notes: box_height_norm gate not ported (scanner writes 0.0); family prefilter ties break by pack order; cross-venue 4h NMS replaced by a
       per-direction 4h cooldown. No economic claim; SPIKE versions untouched. Notion not synced (no connector in session).
+
+  - experiment_id: exp-spike-v127-held-age-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d34c3ecf754c672f1d0a160155e2ad004a814bfb
+    status: negative
+    question: Does capping the age of held break evidence (600 -> 8 chart bars) cut joint-signal latency without hurting net-profit
+      win rate, per-trade net R or large winners on 638-symbol 15m history?
+    single_variable: Held break evidence life in pair_events only; box-first pairing, V9 admission, geometry, stops, exits and 20bp unchanged.
+    result: Latency median 13 -> 2 bars, break-first 57 -> 4, chase 0.564R -> 0.229R. Full 18934 -> 13669 closed, win 28.68 -> 29.10pct,
+      mean net R -0.0907 -> -0.0641, sum -1716 -> -876R. Later win unchanged 24.38pct, mean net R -0.2325 -> -0.2354, net bp -40.2 -> -47.9,
+      random excess -0.019 -> -0.024R, four later Holm p all 1. gt5 482 -> 382, gt10 133 -> 107. Preregistered default rule fails on later mean R.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v127_held_age_20260923.md
+    artifacts:
+    - spike-v127-held-age-20260923-delivery
+    reuse_allowed: false
+    notes: Baseline arm reproduces V12.6 run_v2 baseline trades and controls field by field. Improvement is entirely fewer stale pairs
+      (9630 removed events summing -1011R); common 9304 executions identical, quality delta 0. V12.7 Pine ships the cap as an opt-in
+      switch defaulting OFF per the preregistered rule; no TradingView script created (owner stopped browser use). 50 focused pass;
+      468 extended pass / 8 pre-existing outside-scope failures. Notion not synced (no connector in session).

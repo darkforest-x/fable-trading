@@ -32140,6 +32140,20 @@ artifacts:
     production_eligible: false
     notes: 38 checks,Luna Max review,native V12.3 revision2/V9.1 revision1 compilation and15m/1h observations;no disk screenshots or full event parity.
 
+  - artifact_id: spike-v12-5-h1-line-20260920-delivery
+    artifact_type: manifest
+    role: v12_5_default_15m_h1_sma60_plot_and_ui_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: e793ce26c009136f87999efc388ac6ff3cc39ed2
+    source_path: artifacts/spike_v12_5_h1_line_20260920.json
+    sha256: e98af3d6d691a66dbb79aa2c974cc1db09d9cfb62858a434270412d2553b1351
+    size_bytes: 1989
+    storage_uri: repo://artifacts/spike_v12_5_h1_line_20260920.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Private revision3; display-only source equivalence and full UI clipboard roundtrip; defaults and 15m/5m screenshots. Desktop input timed out; delivery verified in Chrome. No profitability claim.
+
   - artifact_id: wif-screenshot-roll-20260921-delivery
     artifact_type: manifest
     role: matched_okx_wif_case_roll_accounting_and_minute_maintenance_conflict_audit
@@ -32393,3 +32407,19 @@ artifacts:
     notes: 638 streams / 18956 candidates; 22 rejects, no new trades; ordinary net win and meanR worsen, two gt5 winners lost. 43 focused checks;
       505 extended pass / 8 outside-scope failures. audit_v4 and 30 independent metric identities pass; summary_v3 final. Native pivot parity unverified;
       no Pine or live changes.
+
+  - artifact_id: spike-v127-held-age-20260923-delivery
+    artifact_type: manifest
+    role: v127_held_age_cap_full_archive_default_off
+    source_repo: darkforest-x/fable-trading
+    source_commit: d34c3ecf754c672f1d0a160155e2ad004a814bfb
+    source_path: artifacts/spike_v127_held_age_20260923.json
+    sha256: 13f5b2ea073cf916b9c8b038475cf04005878af560268fa42969e40767dfb670
+    size_bytes: 6803
+    storage_uri: repo://artifacts/spike_v127_held_age_20260923.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 638 streams, 18956 vs 13694 candidates, max break-first age 600 vs 8. Latency median 13 -> 2 bars; later segment not improved;
+      preregistered default rule fails, so the V12.7 switch ships off. Independent audit_v1 passes including V12.6 run_v2 baseline parity
+      and metric recomputation. Native TradingView parity still unverified; no script created.

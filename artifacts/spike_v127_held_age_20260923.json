@@ -1,0 +1,197 @@
+{
+  "experiment_id": "exp-spike-v127-held-age-20260923-v1",
+  "status": "negative_for_adoption_default_off_switch_delivered",
+  "run_identity": "cc3160ba0e0d8b09defa4b1b355bb5faca101f8c0d7bca926323c337e2fd191e",
+  "run_source_commit": "d34c3ecf754c672f1d0a160155e2ad004a814bfb",
+  "generator_commit": "24275187d74e212de659f962f03973168e7e4f23",
+  "single_variable": "held break evidence life 600 -> 8 chart bars (break-first pairing only)",
+  "headline": {
+    "closed_trades": [
+      18934,
+      13669
+    ],
+    "win_rate": [
+      0.286786,
+      0.291023
+    ],
+    "mean_net_r_full": [
+      -0.090655,
+      -0.064102
+    ],
+    "mean_net_r_later": [
+      -0.23245,
+      -0.235409
+    ],
+    "sum_net_r_full": [
+      -1716.4686,
+      -876.1614
+    ],
+    "gt5_full": [
+      482,
+      382
+    ],
+    "gt10_full": [
+      133,
+      107
+    ],
+    "median_lag_bars": [
+      13.0,
+      2.0
+    ],
+    "median_chase_r": [
+      0.564,
+      0.229
+    ],
+    "later_holm_p": [
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "v127_default_rule": {
+    "checks": {
+      "gt5_rate_full": true,
+      "mean_net_r_full": true,
+      "mean_net_r_later": false
+    },
+    "default_on": false,
+    "gt5_rate_full": {
+      "baseline": 0.02545685011091159,
+      "held_age_8": 0.027946448167386055
+    },
+    "rule": "treatment mean_net_r >= baseline in full AND later, AND full gt5 rate >= baseline"
+  },
+  "baseline_parity": {
+    "baseline_trades": 18949,
+    "controls_same": true,
+    "field_mismatches": {
+      "censored": 0,
+      "entry_time": 0,
+      "exit_reason": 0,
+      "exit_time": 0,
+      "initial_stop": 0,
+      "net_r": 0,
+      "net_return": 0
+    },
+    "pass": true,
+    "reference": "experiments/active/exp-spike-v126-htf-recheck-20260922-v1/results/run_v2",
+    "reference_trades": 18949,
+    "same_trade_keys": true
+  },
+  "audit": {
+    "status": "pass",
+    "symbols": 638,
+    "candidates_per_arm": {
+      "baseline": 18956,
+      "held_age_8": 13694
+    },
+    "break_first_per_arm": {
+      "baseline": 13739,
+      "held_age_8": 4109
+    },
+    "max_break_first_age": {
+      "baseline": 600,
+      "held_age_8": 8
+    },
+    "shared_executions": 9312,
+    "source_commit_verified": "d34c3ecf754c672f1d0a160155e2ad004a814bfb"
+  },
+  "sources": {
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/config.json": {
+      "sha256": "deab005102418b5d164623bd1124184e2d5a340bd203be021f5038a606b884e3",
+      "size_bytes": 1153
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/PROJECT_PLAN.md": {
+      "sha256": "ebe5d5ef56480a5ffba1669a0d75840aa92af5d7afde9a3d65b40a24b0654d86",
+      "size_bytes": 3928
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/run_v1/identity.json": {
+      "sha256": "5422d1047e2d9260a5f6a8133401615c60a9208c5e6004570262706970bb61bc",
+      "size_bytes": 148761
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/run_v1/started.json": {
+      "sha256": "6043a2f34aa849b5f2004c934b83029c71b105da2401c9025f8b4369f95242ba",
+      "size_bytes": 204
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/run_v1/manifest.json": {
+      "sha256": "39e6dafa7c661bae48f873c68fb01d910497a9a2d5977c714c8b16504f514bcf",
+      "size_bytes": 64138
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/audit_v1.json": {
+      "sha256": "29f546ec58438006ee7688d34076e0af49da5457ea1eb374a524001e46901d6a",
+      "size_bytes": 1629
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/inference.csv": {
+      "sha256": "1f5f8b81293ce2853d35b152c4e451b85bac1f0e38e5e1f15562b16220534f26",
+      "size_bytes": 7205
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/latency.csv": {
+      "sha256": "118fa9e35fee02f2d5a7710c08c463ccc88a3011a70f3b948f01a9d3cf3f77e3",
+      "size_bytes": 648
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/metrics.csv": {
+      "sha256": "b21068dec3c2f4370888181de02de66143b6243eb20c98d3791d3a4484214a3b",
+      "size_bytes": 2340
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/monthly.csv": {
+      "sha256": "7d032487e3a4144e53c1b4d882a5d3fc92cf2415c3aec41b759ca6a6079b6786",
+      "size_bytes": 14032
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/paired_attribution.csv": {
+      "sha256": "41220d8e0f1b5ead89608d572439f7237e315077815939ae96a606a0eac18dda",
+      "size_bytes": 2797759
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/summary.json": {
+      "sha256": "214cecb0c275173d85ed2e67071c719cc663c02551fbaa7bffc7d7c0cb43bb5f",
+      "size_bytes": 2007
+    },
+    "experiments/active/exp-spike-v127-held-age-20260923-v1/results/summary_v1/tail_retention.csv": {
+      "sha256": "d2a56f7130d4985b1db348654e8f2ccf48ec43dd25ef6e13865a51e75737f2c1",
+      "size_bytes": 94201
+    },
+    "yoyo/evaluation/spike_v127_held_age.py": {
+      "sha256": "f4607bc9fe0d58dce825263179fadb449f64e2f0c7c47a29871113f38a8a6b43",
+      "size_bytes": 15632
+    },
+    "yoyo/evaluation/spike_v127_held_age_report.py": {
+      "sha256": "2fa36e756c36c2b96a0c290bebd56c77caec5def3f583f8667c63ff707dffbcc",
+      "size_bytes": 7647
+    },
+    "yoyo/evaluation/spike_v127_audit.py": {
+      "sha256": "35166d26f913859c1b6a072304655528cbb968607ef5aa9a9c319506fcf91992",
+      "size_bytes": 9554
+    },
+    "yoyo/evaluation/pine/spike_burst_v12_7.pine": {
+      "sha256": "ef4e8c5df3ea0423835c869e07b24734856ce968038748a5b80a4afa63f2d1c5",
+      "size_bytes": 165620
+    },
+    "yoyo/evaluation/pine/spike_burst_v12_6.pine": {
+      "sha256": "8a72c18b65e50862ca6dee4e4d58cac4c1e1c7d38ccd3718e7f0228e970ee2db",
+      "size_bytes": 164292
+    },
+    "tests/evaluation/test_spike_v127_held_age.py": {
+      "sha256": "1eac015275471d142bd2285a9f2f89bccb0d56057310bca5903a100c9108362e",
+      "size_bytes": 5746
+    },
+    "tests/evaluation/test_spike_v12_7_pine_contract.py": {
+      "sha256": "5bc5dc7a51dd0d5b140b290d951c076a7fe63cf24068fd5056da2f494cd63bf6",
+      "size_bytes": 2565
+    },
+    "analysis/p1_spike_v127_held_age_20260923.md": {
+      "sha256": "7634875579389f474588b0b710acc8fe53641b430fe60e13fe1feff6db2ca459",
+      "size_bytes": 14811
+    }
+  },
+  "native_pine_parity": false,
+  "tradingview_script_created": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "15m only",
+    "historical window already examined; later segment is not a blind forward test",
+    "single cap value 8 preregistered, no neighbourhood search",
+    "event R is not account equity",
+    "Pine V12.7 not compiled or loaded in TradingView in this session"
+  ]
+}
