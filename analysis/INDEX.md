@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **633** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **634** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -10,6 +10,7 @@
 
 | 日期 | 报告 | 标题 | 结论(原文摘录) |
 |---|---|---|---|
+| 2026-09-23 | [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) | 均线密集启动：规则移植为 Pine 指标 V1 / V2 | Owner 2026-09-22 问“能写成pine脚本？”并在 2026-09-23 要求“把相似度和评分也移植进去”。V1 只移植两组硬性条件；V2 追加两层相似度与 Grade-A 质量分，与研究扫描一一对应。 |
 | 2026-09-22 | [`p1_ma_morph_v6_econ_audit_20260922.md`](p1_ma_morph_v6_econ_audit_20260922.md) | 形态模型 v6 A 组：高分前 10% 正收益的稳健性复核 | 原报告数字完全复算：验证 top10 131 笔 +12.00bp/笔、测试 99 笔 +15.25bp/笔，成员与原 `top10_event_ids` 一致。 |
 | 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
 | 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |
@@ -905,6 +906,7 @@
 - [`p1_local_signal_v2_stagea_gap_to_owner_target_20260811.md`](p1_local_signal_v2_stagea_gap_to_owner_target_20260811.md) — Local Signal V2：昨晚 3060 Stage A 与 Owner 最终目标差距复盘
 - [`p1_local_signal_v2_stagea_position_eval_20260811.md`](p1_local_signal_v2_stagea_position_eval_20260811.md) — Local Signal V2 Stage A 训练与分位置诊断（2026-08-11）
 - [`p1_local_signal_v2_stageb_cold_report.md`](p1_local_signal_v2_stageb_cold_report.md) — P1 — Local Signal V2 Stage B 冷启动（owner_lsv2_stageb_cold）
+- [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) — 均线密集启动：规则移植为 Pine 指标 V1 / V2
 - [`p1_ma_launch_followup50_20260922.md`](p1_ma_launch_followup50_20260922.md) — 1,043个形态事件抽样50个：确认之后12小时的真实走势
 - [`p1_ma_launch_label_leakage_and_edge_20260830.md`](p1_ma_launch_label_leakage_and_edge_20260830.md) — MA 密集启动：标签泄漏与真实 edge（2026-08-30）
 - [`p1_ma_launch_rules_20260819_window_20260922.md`](p1_ma_launch_rules_20260819_window_20260922.md) — 2026-08-19 18:00–22:00 双均线密集启动规则回放

@@ -1,5 +1,13 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：均线密集启动规则已移植为 Pine V1/V2（2026-09-23）
+
+- Owner“写”“把相似度和评分也移植进去”。V1 只含两组硬性条件（13+26）；V2 追加第一道最近邻相似度（50 样例，阈值0.5）与第二道分段lock-step/DTW/DDTW相似度＋六轴质量分（门槛0.3611898959，距离尺度1.1995844783）。渲染box_height_norm门未移植（扫描器本身写0）。
+- 一致性：90个冻结候选全部通过硬门；6个候选按Pine嵌入精度复现账本quality_score，最大差5e-5，A级判定一致；生成文件＝模板＋数据包重渲染逐字节相同；分段距离/最近邻与冻结研究函数一致1e-12。12项测试通过。
+- V1仅硬门的信号约为研究候选10倍（AAVE 15m 12:1、APT 15m 20:2）；V2开“只显示A级”回到研究口径。本轮无收益结论。
+- 交付`yoyo/evaluation/pine/ma_dense_launch_v1.pine`、`..._v2.template.pine`、`..._v2.pine`（114KB）、`ma_dense_launch_references.py`、`ma_dense_launch_v1_reference.py`、reference_pack.json。报告`analysis/p1_ma_dense_launch_pine_20260923.md`；实验已注册。
+- **未做**：TradingView原生编译与逐事件对账（需Owner同意用浏览器登录其账号保存私有脚本）。未改SPIKE/监控/账户；Notion未同步（无连接器）。
+
 ## 最新：YOLO形态v6 A组高分前10%正收益复核为不稳健；V10.4前瞻检验被叫停（2026-09-22）
 
 - Owner“先测试yolo模型”。v6 A组原经济评估（RESULTS.md：val top10 +12.0bp、test +15.2bp）完全复算；合并230笔+13.4bp，但日块95%区间[−34.8,+60.5]、中位−93.4bp、去最好3笔−14.0bp、相对随机超额+32.9bp周块p0.108，Spearman约0.05。预注册判定not_robust。报告`analysis/p1_ma_morph_v6_econ_audit_20260922.md`；代码4fd2dc5cfd先于结果。形态模型可作识别/可视化，不作交易信号。

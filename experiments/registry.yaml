@@ -10733,3 +10733,22 @@ experiments:
     artifacts: []
     reuse_allowed: false
     notes: Download resumable per symbol. Preview is not the registered test and must not be quoted as its result.
+
+  - experiment_id: exp-ma-dense-launch-pine-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72a5b29a8215a00bd6165f9c92f38f22339c2c8a
+    status: completed
+    question: Can the frozen Grade-A dense-launch scanner (hard gates, nearest-reference similarity and quality score) be reproduced as a
+      TradingView Pine indicator without changing any threshold?
+    single_variable: Rule transcription only; V1 ports the two hard-gate sets, V2 adds both similarity layers and the six-axis score.
+    result: Delivered V1, V2 template and generated V2 (114KB, 109 reference rows) plus a Python mirror. 90 frozen candidates pass the hard
+      gates; 6 reproduce their ledger quality_score within 5e-5 with Pine-precision references; V1 alone emits about 10x the research
+      candidates. Native TradingView compile and event-level parity not done.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_ma_dense_launch_pine_20260923.md
+    artifacts: []
+    reuse_allowed: false
+    notes: box_height_norm gate not ported (scanner writes 0.0); family prefilter ties break by pack order; cross-venue 4h NMS replaced by a
+      per-direction 4h cooldown. No economic claim; SPIKE versions untouched. Notion not synced (no connector in session).
