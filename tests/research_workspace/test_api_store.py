@@ -92,6 +92,36 @@ def test_cross_origin_cannot_write_experiment(workspace):
     assert {p.name for p in (workspace["root"] / "experiments" / "active").iterdir()} == {PARENT, "exp-fixture-v1"}
 
 
+def test_yolo_registration_and_nested_evidence_survive_reopen(workspace):
+    client, root = workspace["client"], workspace["root"]
+    before = (root / "experiments/registry.yaml").read_bytes()
+    response = client.post("/api/research/experiments", headers=_same_origin_headers(),
+                           json={**_experiment_payload(), "workflow": "yolo"})
+    assert response.status_code == 201
+    record = response.json()
+    exp_id = record["experiment_id"]
+    assert record["workflow"] == "yolo"
+    assert not record["training_eligible"] and not record["production_eligible"]
+    assert (root / "experiments/registry.yaml").read_bytes().startswith(before)
+    folder = root / "experiments/active" / exp_id / "collected/training/arm_A"
+    folder.mkdir(parents=True)
+    csv = folder / "results.csv"
+    csv.write_text("epoch,metrics/recall(B)\n1,0.25\n2,0.4\n")
+    with workspace["make_client"]() as reopened:
+        overview = reopened.get("/api/research/yolo").json()
+        item = next(x for x in overview["items"] if x["id"] == exp_id)
+        assert item["workflow_classification"] == "explicit"
+        detail = reopened.get("/api/research/experiments/" + exp_id).json()
+        assert detail["yolo_evidence"]["training_runs"][0]["last_epoch"] == "2"
+        source = reopened.get("/api/research/file", params=dict(
+            experiment_id=exp_id, path=csv.relative_to(root).as_posix()))
+        assert source.status_code == 200 and source.text == csv.read_text()
+        assert reopened.get("/api/research/jobs").json()["items"] == []
+    bad = client.post("/api/research/experiments", headers=_same_origin_headers(),
+                      json={**_experiment_payload(), "workflow": "train-now"})
+    assert bad.status_code == 422
+
+
 @pytest.mark.parametrize(
     ("path", "payload"),
     [

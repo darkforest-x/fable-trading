@@ -17,7 +17,7 @@ import subprocess
 import sys
 import time
 
-from .catalog import Catalog
+from .yolo import YoloCatalog as Catalog
 from .registrations import register_result
 from .store import WorkspaceStore, now
 

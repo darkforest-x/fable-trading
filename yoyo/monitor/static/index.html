@@ -13,6 +13,8 @@
   <link rel="stylesheet" href="/static/research.css">
   <script src="/static/research.js" defer></script>
   <script src="/static/vision-module.js" defer></script>
+  <link rel="stylesheet" href="/static/yolo-workflow.css">
+  <script src="/static/yolo-workflow.js" defer></script>
   <script src="/static/app.js" defer></script>
 </head>
 <body>
@@ -27,6 +29,7 @@
       <nav class="nav-list">
         <button class="nav-item" data-view="research" aria-label="研究总览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3ZM12 3h5v5h-5ZM3 12h5v5H3ZM12 12h5v5h-5Z"/></svg><span>研究总览</span></button>
         <button class="nav-item" data-view="factors" aria-label="因子库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 10h12M4 16h12M7 2v4M13 8v4M8 14v4"/></svg><span>因子库</span></button>
+        <button class="nav-item" data-view="yolo" aria-label="YOLO 工作流"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><rect x="6" y="6" width="8" height="8" rx="1"/></svg><span>YOLO 工作流</span></button>
         <button class="nav-item" data-view="experiments" aria-label="实验登记"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"/></svg><span>实验登记</span></button>
         <button class="nav-item" data-view="backtests" aria-label="回测任务"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"/></svg><span>回测任务</span></button>
         <button class="nav-item" data-view="ashare" aria-label="A股回测"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V4M3 17h14M6 13l3-4 3 2 5-7"/></svg><span>A股回测</span></button>
@@ -153,6 +156,7 @@
           <p class="research-caption">任务独立于行情扫描运行。历史研究已在实验登记中保留；运行成功与策略结论分别记录。</p>
           <div class="research-table-wrap"><table class="research-table"><thead><tr><th>任务</th><th>实验 / 范围</th><th>运行状态</th><th>创建时间</th><th></th></tr></thead><tbody id="job-rows"></tbody></table></div>
         </section>
+        <section id="yolo-view" class="view-panel research-panel hidden"><div id="yolo-workspace"><p class="research-empty">正在读取 YOLO 工作流…</p></div></section>
         <section id="vision-view" class="view-panel hidden"><p id="vision-module-error" role="alert"></p><div id="vision-module"></div></section>
         <footer class="page-footer"><span>SPIKE <span class="footer-separator">/</span> 让趋势自己走出来。</span><span>启动与模型确认分阶段通知 · 信号价格不等于成交价格</span></footer>
       </main>

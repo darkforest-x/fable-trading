@@ -14,6 +14,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
+from typing import Literal
 from urllib.parse import urlsplit
 
 import httpx
@@ -24,7 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from yoyo.contracts.artifacts import ExperimentRecord
 
-from .catalog import Catalog
+from .yolo import YoloCatalog, overview as yolo_overview
 from .store import WorkspaceStore, now
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +56,7 @@ class Experiment(StrictModel):
     question: str = Field(min_length=5, max_length=4000)
     single_variable: str = Field(min_length=3, max_length=4000)
     factor_ids: list[str] = Field(default_factory=list, max_length=40)
+    workflow: Literal["research", "yolo"] = "research"
 
 
 class RunRequest(StrictModel):
@@ -80,6 +82,7 @@ def register_experiment(root, store, payload):
                   source_commit=commit, result="预登记；尚未运行或形成结论。",
                   question=payload.question, single_variable=payload.single_variable,
                   title=payload.title, factor_ids=payload.factor_ids, artifacts=[],
+                  workflow=payload.workflow,
                   training_eligible=False, production_eligible=False, holdout_consumed=False,
                   reuse_allowed=False, notes="工作台预登记；尚未运行或验证。", created_at=now())
     ExperimentRecord.from_mapping(record)
@@ -119,7 +122,7 @@ def start_worker(store, root):
 
 def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     root = Path(root).resolve()
-    catalog = Catalog(root)
+    catalog = YoloCatalog(root)
     store = WorkspaceStore(Path(runtime) / "research_workspace")
     app.state.research_store = store
     api = APIRouter(prefix="/api/research", dependencies=[Depends(same_origin)])
@@ -159,6 +162,12 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     @api.get("/factors")
     def factors():
         return {"items": all_factors()}
+
+    @api.get("/yolo")
+    def yolo_workflow():
+        monitor = getattr(app.state, "monitor", None)
+        snapshot = monitor.status() if monitor is not None else None
+        return yolo_overview(catalog, snapshot)
 
     @api.post("/factors", status_code=201)
     def create_factor(payload: Factor):
