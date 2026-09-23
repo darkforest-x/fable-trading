@@ -49,13 +49,23 @@ in the local SQLite store across refreshes and service restarts. Each recognitio
 keeps the reference revision and images it actually used. Unsaved edits must be
 saved first, and stale revisions are rejected rather than silently substituted.
 
-On its first start, the service installs the existing boxed exemplars bundled in
-`default_references/`. The manifest records original paths, hashes, core geometry
-and confirmation level. Pixels and boxes are copied unchanged; normalization
-only strips container metadata. These charts include later context and are
+On its first start, the service installs five boxed exemplars bundled in
+`default_references_v3/`: AUCTION/CHZ long, FIL/TRUST/JELLYJELLY short.
+Each box excludes the first launch candle. FIL/TRUST retain their right boundary
+and tighten the left by one candle; MEME and the previous long examples are
+replaced. The old `default_references/` pack remains unchanged.
+The manifest records original images, frozen OHLC prefix hashes, individual
+core/launch candle bounds, and confirmation level. These charts include later context and are
 retrospective references, not decision-time samples or individually adjudicated
 gold geometry. Click a reference to inspect it at full size. An edited or
 deliberately cleared library is never automatically reseeded.
+
+Rebuild with `.venv/bin/python -m yoyo.vision_research.reference_pack` from a
+checkout where the output directory does not yet exist. Commit the builder and
+`references_v3.json` first; existing output is never overwritten. Selection and
+new box geometry remain pending individual Owner review, even where an earlier
+sample's general shape was accepted. The source V7 pool used retrospective
+continuation gates, so selection is not evidence of predictive accuracy.
 
 Select a candidate or upload a PNG/JPEG/WEBP image, edit the criteria, then
 explicitly start recognition. The interactive chart is captured at that moment

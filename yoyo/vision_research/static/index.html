@@ -147,7 +147,7 @@
           <section class="panel global-references">
             <div class="panel-heading"><h2>形态参考 <span id="references-total">0 张</span></h2><button id="add-reference" class="button button-secondary" type="button">添加参考图</button></div>
             <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
-            <p class="field-help">默认图沿用已有核心区域红框，包含核心 K 线与均线。它们是历史回看示例，框外后续走势不作为判断依据；点击图片可放大。</p>
+            <p class="field-help">红框只圈启动前的均线密集区，不包含第一根启动 K 线。这组图供形态对照，仍待逐张确认；框外后续走势不作为判断依据。点击图片可放大。</p>
             <div id="reference-list" class="reference-list" aria-live="polite"></div>
             <div id="references-error" class="inline-error" role="alert" hidden></div>
             <div class="reference-save-row"><span id="references-status" role="status">正在读取…</span><button id="reload-references" class="button button-quiet" type="button">重新载入</button><button id="save-references" class="button button-primary" type="button" disabled>保存全局参考图</button></div>

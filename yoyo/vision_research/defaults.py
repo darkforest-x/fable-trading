@@ -1,6 +1,6 @@
 """Install existing boxed research exemplars only into a never-edited library.
 
-The manifest preserves original geometry and confirmation provenance. These
+The manifest records original/revised geometry and confirmation provenance. These
 retrospective exemplars are not causal input samples or new training labels.
 """
 
@@ -15,7 +15,7 @@ from .schemas import MAX_REFERENCES
 from .store import ReferenceRevisionConflict, ResearchStore
 
 DEFAULT_PACK = (Path(__file__).resolve().parents[2] / "experiments" / "active" /
-                "exp-spike-gemini-vision-20260923-v1" / "default_references")
+                "exp-spike-gemini-vision-20260923-v1" / "default_references_v3")
 
 
 def install_default_references(store: ResearchStore, pack: Path = DEFAULT_PACK):

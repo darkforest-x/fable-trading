@@ -32533,3 +32533,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Main2023-onward638-symbol15m/1h baseline/retest plus BTCETH2020-onward. CSV summaries and source receipts; no report requested. Retrospective diagnostic only; adjusted tests do not establish clock edge.
+
+  - artifact_id: spike-vision-prelaunch-references-v3
+    artifact_type: manifest
+    role: retrospective_prelaunch_visual_references
+    source_repo: darkforest-x/fable-trading
+    source_commit: de56ed2b787abe13732f324525b358d535bb8a3d
+    source_path: experiments/active/exp-spike-gemini-vision-20260923-v1/default_references_v3/manifest.json
+    sha256: 0402224385d5f1a17d039b8fdf69c942f50acf008fc6838d843ebe8cdabf300c
+    size_bytes: 16853
+    storage_uri: repo://experiments/active/exp-spike-gemini-vision-20260923-v1/default_references_v3/manifest.json
+    config_hash: 6e28fa5f5525886894287dcd66ee6ee98d1c229efe992443d1d340f41e2ada1a
+    data_cutoff: '2026-04-13T22:45:00Z'
+    training_eligible: false
+    production_eligible: false
+    notes: Five real OHLC charts with individually frozen pre-launch bounds; AUCTION and CHZ longs, FIL and TRUST narrowed shorts, JELLYJELLY replacing MEME. Assistant selection and revised geometry pending Owner confirmation. Retrospective V7 pool uses continuation gates; no accuracy or profitability claim. Prior pack preserved.

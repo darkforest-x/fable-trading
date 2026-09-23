@@ -150,7 +150,7 @@ def test_rejects_models_without_the_supported_multi_image_contract(client):
     assert client.get("/api/status").json()["api_key_configured"] is False
 
 
-def test_zhipu_adapter_runs_with_all_eight_defaults_and_preserves_identity(tmp_path):
+def test_zhipu_adapter_runs_with_all_defaults_and_preserves_identity(tmp_path):
     requests = []
 
     def respond(request):
@@ -169,17 +169,23 @@ def test_zhipu_adapter_runs_with_all_eight_defaults_and_preserves_identity(tmp_p
     app = create_app(tmp_path, source=EmptySource(), provider_factory=factory, seed_defaults=True)
     with TestClient(app, base_url="http://127.0.0.1") as client:
         configure(client)
-        revision = client.get("/api/references").json()["revision"]
+        library = client.get("/api/references").json()
+        revision = library["revision"]
+        assert len(library["items"]) > 4
         response = client.post("/api/analyze", json={"image_data_url": image_url("white"),
                                                      "reference_revision": revision})
         assert response.status_code == 200
         run = response.json()
         assert run["status"] == "completed" and run["provider"] == "zhipu"
-        assert run["model"] == "glm-5.3-flash" and len(run["references"]) == 8
+        assert run["model"] == "glm-5.3-flash"
+        assert run["references"] == library["items"]
         assert len(requests) == 1 and str(requests[0].url) == CHAT_COMPLETIONS_URL
         assert requests[0].headers["authorization"] == "Bearer " + KEY
         parts = json.loads(requests[0].content)["messages"][0]["content"]
-        assert len([p for p in parts if p["type"] == "image_url"]) == 9
+        images = [p for p in parts if p["type"] == "image_url"]
+        assert len(images) == len(library["items"]) + 1
+        sent_hashes = [image_from_data_url(p["image_url"]["url"], "sent").sha256 for p in images]
+        assert sent_hashes[1:] == [item["sha256"] for item in library["items"]]
         exported = client.get(f"/api/runs/{run['id']}/export")
         assert exported.json()["provider"] == "zhipu" and KEY not in exported.text
 
