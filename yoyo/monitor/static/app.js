@@ -16,6 +16,8 @@
       period: "all", outcome: "all", sort: "newest", performanceVersion: "current", ledger: null, revision: 0 },
   };
   const titles = {
+    platform: ["体系总览", "从真实登记的组件与来源，查看数据、研究、评估和前向运行之间的连接。"],
+    models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
@@ -251,14 +253,14 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "system", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["signals", "watch", "lines", "shadow", "system", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
-    const researchView = ["research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
+    const researchView = ["platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
     $("exchange-mark").textContent = researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
@@ -280,6 +282,8 @@
       if (signalView(state.view)) refresh();
     }
     window.SpikeResearch?.setView(state.view);
+    window.SpikePlatform?.setActive(state.view === "platform");
+    window.SpikeModels?.setActive(state.view === "models");
     window.SpikeDatasets?.setActive(state.view === "datasets");
     window.SpikeStrategies?.setActive(state.view === "strategies");
     window.SpikePaper?.setActive(state.view === "paper");
@@ -881,6 +885,8 @@
     return "/api/signals?view=ledger&" + Object.entries(pairs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   }
   async function refresh(trigger = "manual") {
+    if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
+    if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
     if (state.view === "strategies") { if (trigger !== "periodic") await window.SpikeStrategies?.refresh(); return; }
@@ -1091,7 +1097,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });
