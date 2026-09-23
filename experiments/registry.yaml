@@ -10844,3 +10844,18 @@ experiments:
     artifacts: [spike-v128-expansion-entry-20260923-delivery]
     reuse_allowed: false
     notes: Jul23-Sep23 fixed 638-contract pool and 15m/1h. Inherits parent opening positions; no warmup-filtering claim.
+
+  - experiment_id: exp-spike-v128-retest-entry-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder
+    status: running
+    question: Does ordered breakout-retest-rebreak entry reduce frequency and improve realized V12.8 win rate and high R?
+    single_variable: Entry timing via three distinct closed bars and a fixed 24-bar observation deadline.
+    result: Preregistered before market construction; retain original stop, exits and 20bp cost.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v128_retest_entry_20260923.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Fixed parent 638-contract universe, 15m/1h, ordinary both-side and joint long; no production changes.
