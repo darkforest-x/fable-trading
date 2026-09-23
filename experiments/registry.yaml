@@ -10794,3 +10794,20 @@ experiments:
     reuse_allowed: false
     notes: Accepted for display-only engineering scope. Candidates are not accepted fills. No quantities, margin, profit admission, economic backtest or account actions.
       Existing second-shadow warning retained. Native market-event parity unverified; old V12.6 and separate V12.7 preserved.
+
+  - experiment_id: exp-spike-v128-recent-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3489d2a8cd37cf4bbabbebde7865e70134bafe84
+    status: active
+    question: How many V12.8 signals and profitable excursions ending in stops occurred over the last two months on 15m
+      and 1h?
+    single_variable: Frozen-rule descriptive time-window measurement; no entry, exit, cost or sizing changes.
+    result: Plan frozen before replay; data preparation and research implementation underway.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v128_recent_20260923.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Fixed historical Binance 638-contract universe; explicit coverage, censoring, matched random controls and V12.6
+      identity baseline. Native event parity unverified.
