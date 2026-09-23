@@ -320,6 +320,8 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
             raise HTTPException(404, "文件不可读")
         return FileResponse(target, filename=target.name)
 
+    from .paper_api import install as install_paper
+    install_paper(api, app, root, Path(runtime), store, all_factors, catalog.experiments, launch_worker)
     app.include_router(api)
 
     @app.api_route("/api/vision/{path:path}", methods=["GET", "POST", "PUT"], dependencies=[Depends(same_origin)])
