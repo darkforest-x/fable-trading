@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-spike-v128-expansion-entry-20260923-v1",
+  "parent_run": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1",
+  "start": "2026-07-23T00:00:00Z",
+  "split": "2026-08-23T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "timeframes": [15, 60],
+  "feature": "spike_atr_pct_ratio96",
+  "ratio_window_bars": 96,
+  "ratio_mean_includes_current": true,
+  "rank_history_days": 30,
+  "quantiles": [0.2, 0.4, 0.6, 0.8],
+  "primary_policy": "high20",
+  "quantile_ties": "lower_bin_strictly_above_q80_required",
+  "initial_position_policy": "carry_parent_position_at_window_start",
+  "round_trip_cost": 0.002,
+  "control_seed": 923128,
+  "control_pools": ["all", "high20"],
+  "statistics_seed": 923230,
+  "bootstrap": 2000,
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -10829,3 +10829,18 @@ experiments:
     notes: Fixed historical Binance 638-contract universe; explicit coverage, censoring, matched random controls and V12.6
       identity baseline. 583 fully ready contracts; 55 have flat zero-volume recent inputs. Native event parity unverified.
       Rejected describes unsupported positive edge, not failed execution. Historical-data restriction was canceled by owner.
+
+  - experiment_id: exp-spike-v128-expansion-entry-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e519462d9c
+    status: active
+    question: Can causal within-symbol volatility expansion reduce V12.8 entries while improving net win rate and realized high R?
+    single_variable: Strictly above prior 30-day 80th percentile of SPIKE ATR-percent divided by its rolling 96-bar mean.
+    result: One-axis exploratory plan frozen before feature-conditioned outcomes; original exits and costs unchanged.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v128_expansion_entry_20260923.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Jul23-Sep23 fixed 638-contract pool and 15m/1h. Inherits parent opening positions; no warmup-filtering claim.
