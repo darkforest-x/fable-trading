@@ -60,3 +60,14 @@ def test_control_failure_not_redrawn_and_gate_constrains_pool(monkeypatch):
 def test_parent_parity_rejects_changed_execution():
     before=pd.DataFrame({'trade_key':['x'],'net_r':[1.]})
     with pytest.raises(AssertionError):study.assert_parity(before.assign(net_r=2.),before,['trade_key'],['net_r'])
+
+
+def test_resume_rejects_wrong_timeframe_and_parent_receipt(tmp_path):
+    import json
+    r={'run_identity':'run','input_sha256':'input','status':'complete','symbol':'X','minutes':15,
+       'parent_receipt_sha256':'parent','files':{}}
+    (tmp_path/'receipt.json').write_text(json.dumps(r))
+    with pytest.raises(ValueError,match='identity mismatch'):
+        study.validate_receipt(tmp_path,'run','input','X',60,'parent')
+    with pytest.raises(ValueError,match='identity mismatch'):
+        study.validate_receipt(tmp_path,'run','input','X',15,'changed')

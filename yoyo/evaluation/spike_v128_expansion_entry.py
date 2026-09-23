@@ -144,9 +144,10 @@ def authenticated_parent(folder, identity, manifest, symbol, minutes):
     return parent._validate_receipt(folder,manifest['run_identity'],identity['inputs'][symbol])
 
 
-def validate_receipt(folder, run_identity, input_sha):
+def validate_receipt(folder, run_identity, input_sha, symbol, minutes, parent_sha):
     r=json.loads((folder/'receipt.json').read_text())
-    if r['run_identity']!=run_identity or r['input_sha256']!=input_sha or r['status']!='complete':
+    if (r['run_identity']!=run_identity or r['input_sha256']!=input_sha or r['status']!='complete' or
+            r['symbol']!=symbol or r['minutes']!=minutes or r['parent_receipt_sha256']!=parent_sha):
         raise ValueError('study receipt identity mismatch')
     if set(r['files'])!={n+'.csv.gz' for n in TABLES}: raise ValueError('study receipt inventory mismatch')
     for name,sha in r['files'].items():
@@ -157,12 +158,13 @@ def validate_receipt(folder, run_identity, input_sha):
 def worker(args):
     symbol,minutes,path,meta,output,cfg,ident,pident,pmanifest,input_sha=args
     final=Path(output)/'streams'/f'{symbol}_{minutes}m'
-    if (final/'receipt.json').exists(): return validate_receipt(final,ident,input_sha)
-    staging=final.with_name('.'+final.name+'.staging')
-    if staging.exists(): raise ValueError(f'incomplete staging retained: {staging}')
     folder=Path(cfg['parent_run'])/'streams'/final.name
     pr=authenticated_parent(folder,pident,pmanifest,symbol,minutes)
     if parent.digest(Path(path))!=input_sha: raise ValueError('input changed')
+    if (final/'receipt.json').exists():
+        return validate_receipt(final,ident,input_sha,symbol,minutes,parent.digest(folder/'receipt.json'))
+    staging=final.with_name('.'+final.name+'.staging')
+    if staging.exists(): raise ValueError(f'incomplete staging retained: {staging}')
     started=time.perf_counter(); pcfg=pident['config']; merged=pcfg|cfg
     raw=pd.read_csv(path,usecols=['ts','open','high','low','close','volume'])
     index=pd.DatetimeIndex(pd.to_datetime(raw.ts.to_numpy(),unit='ms',utc=True))
@@ -229,7 +231,7 @@ def run(output,workers=8,symbols=None):
         if parent.digest(Path(name))!=sha: raise ValueError(f'parent code changed: {name}')
     for name in ('start','split','end','timeframes','round_trip_cost','control_seed'):
         if cfg[name]!=pi['config'][name]: raise ValueError(f'parent contract changed: {name}')
-    declared=(Path(__file__),TEST,CONFIG,EXP/'PROJECT_PLAN.md')
+    declared=(Path(__file__),TEST,CONFIG,EXP/'PROJECT_PLAN.md',Path('yoyo/evaluation/spike_v128_recent_report.py'))
     if not _committed(declared): raise ValueError('commit builder, tests, config and plan before market construction')
     mpath=Path(pi['input_manifest']); metadata=pi['symbol_meta_source']
     if parent.digest(mpath)!=pi['input_manifest_sha256'] or parent.digest(Path(metadata['path']))!=metadata['sha256']:
