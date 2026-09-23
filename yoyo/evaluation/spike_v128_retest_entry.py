@@ -78,6 +78,11 @@ def delayed_attempt(prepared, i, side, cfg, policy='retest'):
     return status,result,trace
 
 
+def attach_execution(event, result):
+    """Execution-engine generic identity must not replace experimental event identity."""
+    return result | event | {'trail_armed':bool(result['close_peak_r']>=2.)}
+
+
 def select_serial(rows, policy, frame_length, carry=(-1,None)):
     """Chronological confirmations arbitrate occupancy; an occupied confirmation expires."""
     flat_from,holder=carry;trades=[];statuses=[]
@@ -95,14 +100,23 @@ def select_serial(rows, policy, frame_length, carry=(-1,None)):
 
 def controls_for(prepared, outcomes, cfg):
     """One original-stratum random anchor, then the same policy; never redraw failures."""
-    baseline=[r for r in outcomes if r['policy']=='baseline' and pd.notna(r.get('exit_i'))]
+    baseline=[dict(censored=False,net_return=0.,**{k:v for k,v in r.items() if k not in ('censored','net_return')}) |
+              {'censored':r.get('censored',False),'net_return':r.get('net_return',0.)}
+              for r in outcomes if r['policy']=='baseline']
     original=parent.matched_controls(prepared,baseline,cfg)
     bykey={(r['trade_key'],r['policy']):r for r in outcomes};result=[];cache={}
     minutes=prepared.context.minutes;close=prepared.frame.index+pd.Timedelta(minutes=minutes)
     for c in original.to_dict('records'):
         c['control_pool']='baseline';c['target_status']=bykey[c['trade_key'],'baseline']['status']
+        if c['target_status']!='closed':
+            c['matched']=False
+            if not c['target_status'].startswith('censored'): c['reason']='target_nofill'
         c['target_decision_time']=bykey[c['trade_key'],'baseline']['decision_time']
-        c['control_status']='closed' if c['matched'] else c['reason']
+        chosen=c['control_sig']
+        control_key=(int(chosen),int(c['side']),'baseline') if pd.notna(chosen) else None
+        if control_key is not None and control_key not in cache:
+            cache[control_key]=(*parent.attempt(prepared,control_key[0],control_key[1]),{})
+        c['control_status']='empty_stratum' if control_key is None else cache[control_key][0]
         c['control_decision_time']=c['control_signal_close'];c['control_anchor_i']=c['control_sig']
         result.append(c)
         for policy in ('wait3','retest'):
@@ -179,7 +193,7 @@ def worker(args):
                 'signal_close':frame.index[actual_i]+pd.Timedelta(minutes=minutes),
                 'trade_key':f"{key}:{event['arm']}:{stamp.isoformat()}",'policy':policy,'status':status} | trace
             row['decision_time']=frame.index[decision]+pd.Timedelta(minutes=minutes)
-            if result is not None: row |= result | {'trail_armed':bool(result['close_peak_r']>=2.)}
+            if result is not None: row=attach_execution(row,result)
             outcomes.append(row)
     trades=[];statuses=[];carries={}
     for arm in parent.ARMS:

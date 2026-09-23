@@ -68,6 +68,7 @@ def test_failed_confirmation_control_is_not_redrawn(monkeypatch):
     original=pd.DataFrame([{'trade_key':'x','control_sig':6,'side':1,'matched':True,'reason':'matched',
                            'control_signal_close':p.frame.index[6]}])
     monkeypatch.setattr(study.parent,'matched_controls',lambda *a:original)
+    monkeypatch.setattr(study.parent,'attempt',lambda *a: ('expired',None))
     def delayed(p,i,side,cfg,policy):
         calls.append((i,policy));return 'expired',None,{'decision_i':9,'confirmation_i':None}
     monkeypatch.setattr(study,'delayed_attempt',delayed)
@@ -75,3 +76,27 @@ def test_failed_confirmation_control_is_not_redrawn(monkeypatch):
     assert calls==[(6,'wait3'),(6,'retest')]
     assert controls.loc[controls.control_pool=='retest','control_status'].item()=='expired'
     assert not controls.loc[controls.control_pool=='retest','matched'].item()
+
+
+def test_controls_include_unfilled_anchor(monkeypatch):
+    p=prepared();seen=[]
+    rows=[{'trade_key':'nofill','policy':policy,'signal_i':4,'side':1,'arm':'joint','symbol':'X',
+           'status':'risk_invalid','decision_time':p.frame.index[4]} for policy in study.POLICIES]
+    def sample(p,targets,cfg):
+        seen.extend(targets)
+        return pd.DataFrame([{'trade_key':'nofill','control_sig':6,'side':1,'matched':True,'reason':'matched',
+                              'control_signal_close':p.frame.index[6]}])
+    monkeypatch.setattr(study.parent,'matched_controls',sample)
+    monkeypatch.setattr(study.parent,'attempt',lambda *a:('closed',{}))
+    monkeypatch.setattr(study,'delayed_attempt',lambda *a:('expired',None,{'decision_i':9,'confirmation_i':None}))
+    c=study.controls_for(p,rows,CFG)
+    assert len(seen)==1 and seen[0]['net_return']==0 and seen[0]['censored'] is False
+    assert c.control_pool.tolist()==list(study.POLICIES) and not c.matched.any()
+
+
+def test_execution_metadata_cannot_overwrite_policy_arm_or_event_key():
+    event={'policy':'retest','arm':'joint','trade_key':'original-anchor','signal_i':7,'status':'closed'}
+    raw={'policy':'baseline','arm':'v8','trade_key':'engine-fixed','signal_i':7,'close_peak_r':3.,'net_r':2.}
+    result=study.attach_execution(event,raw)
+    assert result['policy']=='retest' and result['arm']=='joint' and result['trade_key']=='original-anchor'
+    assert result['net_r']==2 and result['trail_armed']
