@@ -11,6 +11,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 from pathlib import Path
+from urllib.parse import quote
 
 import pandas as pd
 
@@ -22,6 +23,11 @@ EXP = Path('experiments/active/exp-spike-v128-recent-20260923-v1')
 CONFIG = EXP / 'config.json'
 OLD_RECENT = Path('data/kline_binance_um5m_forward_20260922')
 COLS = ['ts', 'open', 'high', 'low', 'close', 'volume']
+
+
+def fetch_rest(symbol, start, end):
+    """Encode a Unicode contract identifier for the inherited URL interpolator."""
+    return prior.fetch_rest(quote(symbol, safe=''), start, end)
 
 
 def merge_rows(frames, start, end):
@@ -78,7 +84,7 @@ def fetch_one(symbol, old_path, cfg):
     rest_start = pd.Timestamp(cfg['rest_start'])
     if cached is not None and len(cached):
         rest_start = max(rest_start, pd.Timestamp(int(cached.ts.max()), unit='ms', tz='UTC') + pd.Timedelta(minutes=5))
-    rest = prior.fetch_rest(symbol, rest_start, end)
+    rest = fetch_rest(symbol, rest_start, end)
     if rest is not None and len(rest):
         frames.append(rest[COLS])
     combined = merge_rows(frames, start, end)
