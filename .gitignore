@@ -1,6 +1,12 @@
 # 数据目录：只放软链接或临时提取数据，不入库（仅仓库根目录，勿匹配 src/data）
 /data/
 
+# Local dataset-store compatibility aliases; payloads remain outside Git.
+/experiments/active/exp-ma-profit3r-20260922-v1/inputs
+/experiments/active/exp-spike-burst-three-year-20260910-v1/data
+/experiments/active/exp-spike-burst-three-year-20260910-v1/data_tradable
+/experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/data
+
 # 检测层数据集与训练产物（样本/权重不入库，元数据入库）
 # 2026-08-10: 这里原本是目录级的 `datasets/`。git 不会下降进被排除的目录，
 # 所以 `!datasets/*/manifest.jsonl` 这类否定规则永远不生效——manifest / summary /

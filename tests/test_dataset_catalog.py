@@ -156,7 +156,7 @@ def test_ancestor_symlink_cannot_relocate_external_input(tmp_path):
 def test_unknown_and_nested_venues_do_not_merge(tmp_path):
     from yoyo.data.dataset_catalog import market_metadata
     folder=tmp_path/'experiments/active/exp-mixed/inputs';folder.mkdir(parents=True)
-    unknown=folder/'ETH_USDT_5m.csv';unknown.write_text(CSV)
+    unknown=folder/'ETH_USDT_SWAP_5m.csv';unknown.write_text(CSV)
     assert market_metadata(unknown,str(unknown))['exchange'] is None
     for ex in ('binance','okx'):
         sub=folder/ex;sub.mkdir();(sub/unknown.name).write_text(CSV)
@@ -165,6 +165,6 @@ def test_unknown_and_nested_venues_do_not_merge(tmp_path):
     entry=DatasetCatalog(tmp_path).detail(key)
     assert entry['dataset']['exchanges']==['binance','okx']
     with pytest.raises(ValueError,match='身份不唯一'):
-        read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT',timeframe='5m',start='2026-01-01',end='2026-01-01T00:10:00Z')
-    result=read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT',timeframe='5m',exchange='binance',start='2026-01-01',end='2026-01-01T00:10:00Z')
+        read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT_SWAP',timeframe='5m',start='2026-01-01',end='2026-01-01T00:10:00Z')
+    result=read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT_SWAP',timeframe='5m',exchange='binance',start='2026-01-01',end='2026-01-01T00:10:00Z')
     assert len(result)==2

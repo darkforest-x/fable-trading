@@ -154,9 +154,10 @@ def market_metadata(path, identity_path):
                 values = next(csv.reader([tail[-1]]))
                 if len(values) == len(reader.fieldnames):
                     end = _timestamp(dict(zip(reader.fieldnames, values)).get(tc))
+        market = "swap" if "SWAP" in symbol or re.search(r"binance[_/-]um(?:\d|[/_-])", context.lower()) else "spot" if re.search(r"(?:^|[/_-])spot(?:[/_-]|$)", context.lower()) else "unknown"
         info.update(symbol=symbol, exchange=ex, timeframe=tf, start=first_time, end=end,
                     time_column=tc, volume_column=vc,
-                    market="swap" if "SWAP" in symbol or ex == "binance" and "um" in context.lower() else "unknown")
+                    market=market)
     except (OSError, UnicodeError, ValueError, csv.Error, EOFError):
         pass
     return info
@@ -276,7 +277,8 @@ class DatasetCatalog:
 
     @staticmethod
     def _example(db, item):
-        row=db.execute("SELECT symbol,timeframe,exchange,start,end FROM files WHERE dataset_id=? AND symbol IS NOT NULL AND timeframe IS NOT NULL AND exchange IS NOT NULL AND start IS NOT NULL ORDER BY symbol,path LIMIT 1",(item["id"],)).fetchone()
+        row=db.execute("SELECT symbol,timeframe,exchange,start,end FROM files WHERE dataset_id=? AND symbol IS NOT NULL AND timeframe IS NOT NULL AND exchange IS NOT NULL AND market IN ('spot','swap') AND start IS NOT NULL ORDER BY symbol,path LIMIT 1",(item["id"],)).fetchone()
+        item["backtest_ready"] = row is not None
         if row is not None:
             step={"1m":1,"2m":2,"3m":3,"5m":5,"15m":15,"30m":30,"1H":60,"2H":120,"4H":240,"1D":1440}.get(row["timeframe"])
             if step:
@@ -348,7 +350,7 @@ def read_market_data(*, dataset_id, symbol, timeframe, start, end, exchange=None
     with closing(cat._connect()) as db:
         rows=[dict(x) for x in db.execute("SELECT * FROM files WHERE dataset_id=? AND symbol=? AND timeframe=?",(dataset_id,symbol,timeframe))]
     if exchange: rows=[x for x in rows if x["exchange"]==exchange]
-    if not rows or len({(x["exchange"],x["market"]) for x in rows})!=1 or not rows[0]["exchange"]:
+    if not rows or len({(x["exchange"],x["market"]) for x in rows})!=1 or not rows[0]["exchange"] or rows[0]["market"] not in {"spot","swap"}:
         raise ValueError("本地数据源缺失或交易所/市场身份不唯一；请选择明确数据集。")
     frames=[]
     for row in rows:
