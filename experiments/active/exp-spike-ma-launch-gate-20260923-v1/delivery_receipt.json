@@ -1,0 +1,55 @@
+{
+  "experiment_id": "exp-spike-ma-launch-gate-20260923-v1",
+  "source_commit": "5dc60ec7f18427de676e777f552b91dc8047c95a",
+  "statistics_source_commit": "52231c21dbc043abdfc55f4ea69ef5927d93381b",
+  "files": {
+    "run_v1/identity.json": {
+      "sha256": "f02c179b6e863f9b8f67693e44bd7a46e60bfe9ba6df03e9a1abae86d960bdef",
+      "size_bytes": 149566
+    },
+    "run_v1/manifest.json": {
+      "sha256": "1127a30868be920780bd6a324807ca517c636615becd535a5b04ca997ed8f4ed",
+      "size_bytes": 64063
+    },
+    "run_v1/started.json": {
+      "sha256": "21329f8319b641f3b4f7253b35af8d176f639e5355c936bca548fad662986066",
+      "size_bytes": 204
+    },
+    "statistics_v1/summary.json": {
+      "sha256": "5c97e7842dd6a299620150397cc73bbd221f0aa0664f7f02b6238dfbc8799251",
+      "size_bytes": 2365
+    },
+    "statistics_v1/metrics.csv": {
+      "sha256": "97a47fd30d13028c9c754e243c5a6aeec6cdc97e33a3def3d1d5b573a41eaba4",
+      "size_bytes": 9041
+    },
+    "statistics_v1/tail_retention.csv": {
+      "sha256": "63ef562daa60911f0dc3217d31e1662c1bd4c0587f474d6717d6dcbe2eceb4e1",
+      "size_bytes": 1475
+    },
+    "statistics_v1/closed_trades.csv.gz": {
+      "sha256": "7f7940a38527ca72002ecbf8a8ad8894cbbefbb53b13697bf004562456edc4ce",
+      "size_bytes": 1698381
+    },
+    "boundary_checks.log": {
+      "sha256": "3a33ad72ba60ef8474c266784b06fd33dff343a07fad5019a6c6591af15c93db",
+      "size_bytes": 17667
+    },
+    "INTERPRETATION.md": {
+      "sha256": "00b5b99d321df4fac9cadeb0027b126c056f5f07c09d4c553cd1bcdeee7798a2",
+      "size_bytes": 1996
+    }
+  },
+  "symbols": 638,
+  "candidates": 51370,
+  "focused_tests": 14,
+  "repository_gates": {
+    "passed": 468,
+    "failed": 8,
+    "existing_failure_set": true
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "native_pine_parity": false,
+  "scope": "Current SPIKE original long+short15m intersected at current signal close with frozen morphology; no future winner filter. Too few strict events for stable inference."
+}

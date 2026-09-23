@@ -1,0 +1,66 @@
+{
+  "experiment_id": "exp-spike-ma-launch-gate-20260923-v1",
+  "complete": true,
+  "symbols": 638,
+  "subset": false,
+  "candidates": 51370,
+  "passed_candidates": {
+    "baseline": 51370,
+    "ma_density_only": 15135,
+    "ma_hard": 59,
+    "ma_grade_a": 6
+  },
+  "ma_unknown": 0,
+  "inference": [
+    {
+      "arm": "ma_hard",
+      "pairs": 37,
+      "estimate_bp": -51.55736532742679,
+      "p_raw": 0.6871312868713129,
+      "weeks": 19,
+      "method": "one-sided approximate weekly clustered paired sign-flip; not a randomized trial",
+      "delta_vs_baseline": {
+        "estimate_bp": -38.90790552766707,
+        "low95": -111.56936165926963,
+        "high95": 44.44595210492628,
+        "valid_draws": 4000,
+        "calendar_months": 8
+      },
+      "later_n": 37,
+      "mean_net_bp": -49.0550283413193,
+      "p_holm": 1.0,
+      "passed": false
+    },
+    {
+      "arm": "ma_grade_a",
+      "pairs": 3,
+      "estimate_bp": -876.9355388063773,
+      "p_raw": 0.8775122487751225,
+      "weeks": 3,
+      "method": "one-sided approximate weekly clustered paired sign-flip; not a randomized trial",
+      "delta_vs_baseline": {
+        "estimate_bp": -216.58645943119947,
+        "low95": -265.5189897609497,
+        "high95": -185.9503845305357,
+        "valid_draws": 3578,
+        "calendar_months": 8
+      },
+      "later_n": 3,
+      "mean_net_bp": -226.7335822448517,
+      "p_holm": 1.0,
+      "passed": false
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "native_pine_parity": false,
+  "risk_notice": "Retrospective rules selected in2026; no unseen forward claim. Fixed filters, AUC/top-decile not applicable.",
+  "code_sha256": "6e238a59e4439dbe84f58caaf6929cffd896637ad3b88de7c5b2e484b2d6803c",
+  "statistics_source_commit": "52231c21dbc043abdfc55f4ea69ef5927d93381b",
+  "statistics_sources": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_ma_launch_report.py": "6e238a59e4439dbe84f58caaf6929cffd896637ad3b88de7c5b2e484b2d6803c",
+    "tests/evaluation/test_spike_ma_launch_report.py": "3deb7a8f2efc07d9597d97c653e64073d5c0fe093992239efa4e5d3543c5b29a",
+    "experiments/active/exp-spike-ma-launch-gate-20260923-v1/INTERPRETATION.md": "00b5b99d321df4fac9cadeb0027b126c056f5f07c09d4c553cd1bcdeee7798a2"
+  },
+  "input_manifest_sha256": "1127a30868be920780bd6a324807ca517c636615becd535a5b04ca997ed8f4ed"
+}

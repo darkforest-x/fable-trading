@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-ma-launch-gate-20260923-delivery
+    artifact_type: manifest
+    role: offline_spike_original_two_sided_morphology_gate_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5dc60ec7f18427de676e777f552b91dc8047c95a
+    source_path: experiments/active/exp-spike-ma-launch-gate-20260923-v1/delivery_receipt.json
+    sha256: 3c8584d137612da4b7e9479938631e34668abaadf1316e6cb29854c89e7a0a61
+    size_bytes: 2003
+    storage_uri: repo://experiments/active/exp-spike-ma-launch-gate-20260923-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen638-symbol15m replay.51370 raw candidates,59 hard-gate and6 full-reference candidates. Later37 hard trades lose49.06bp each;3 full-reference trades lose226.73bp each. Both primary Holm p1; too sparse for stable inference. No live or native Pine parity claim. Receipt binds inputs, trades, shared controls and statistics.
   - artifact_id: ma-morphology-top20-20260922-delivery
     artifact_type: manifest
     role: frozen_current_board_raw_model_scan_review

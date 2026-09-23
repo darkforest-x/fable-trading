@@ -16,16 +16,16 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-ma-launch-gate-20260923-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3489d2a8cd
-    status: active
+    source_commit: 5dc60ec7f18427de676e777f552b91dc8047c95a
+    status: inconclusive
     question: Does adding frozen training-selection morphology improve current SPIKE raw long and short entries?
     single_variable: Entry eligibility only; unchanged raw reversals, next-open execution, 2R-arm4ATR trailing and20bp cost.
-    result: Preregistered638-symbol15m baseline versus hard morphology and full GradeA, with density-only attribution; no completed run yet.
+    result: Completed638-symbol15m comparison.51370 candidates reduce to59 hard and6 GradeA. Later baseline20600 closed at-10.15bp versus hard37 at-49.06bp and GradeA3 at-226.73bp; both primary Holm p1 and below100-trade minimum. No eligibility pass; early positive hard results dominated by two contemporaneous winners.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_ma_launch_gate_20260923.md
-    artifacts: []
+    artifacts: [spike-ma-launch-gate-20260923-delivery]
     reuse_allowed: false
     notes: Owner authorized offline test. Current V12.6 facts equal V12.8 entry lineage; not breakout joints. Reference examples were selected later than historical replay; no forward or production claim.
   - experiment_id: exp-ma-morphology-top20-20260922-v1

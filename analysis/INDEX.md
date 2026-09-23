@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **636** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **638** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -13,6 +13,7 @@
 | 2026-09-23 | [`p0_spike_v128_roll_hints_20260923.md`](p0_spike_v128_roll_hints_20260923.md) | SPIKE V12.8：V12.6 上的两次加仓候选提示 |  |
 | 2026-09-23 | [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) | 均线密集启动：规则移植为 Pine 指标 V1 / V2 | Owner 2026-09-22 问“能写成pine脚本？”并在 2026-09-23 要求“把相似度和评分也移植进去”。V1 只移植两组硬性条件；V2 追加两层相似度与 Grade-A 质量分，与研究扫描一一对应。 |
 | 2026-09-23 | [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) | SPIKE V12.7 候选：先突破后V9加时限的全量回测 | 延迟大幅下降，总亏损减少，但后段每笔净R没有改善，因此按运行前写死的规则，V12.7 里这个时限默认关闭、保留为开关。 |
+| 2026-09-23 | [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) | SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测 |  |
 | 2026-09-22 | [`p1_ma_morph_v6_econ_audit_20260922.md`](p1_ma_morph_v6_econ_audit_20260922.md) | 形态模型 v6 A 组：高分前 10% 正收益的稳健性复核 | 原报告数字完全复算：验证 top10 131 笔 +12.00bp/笔、测试 99 笔 +15.25bp/笔，成员与原 `top10_event_ids` 一致。 |
 | 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
 | 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |
@@ -583,6 +584,7 @@
 | — | [`p1_spike_eth3m_ict_sessions_20260914.md`](p1_spike_eth3m_ict_sessions_20260914.md) | ETH3m V8：只在ICT指定时段开仓 |  |
 | — | [`p1_spike_eth_martingale_20260914.md`](p1_spike_eth_martingale_20260914.md) | ETH V8 止损后倍投：1000 USDT 有限资金研究 | 开发搜索共比较 40 次，涉及 34 个周期×参数组合（去掉周期后为 25 组不同参数）；候选期末余额最高 923.32U。所有开发候选期末余额是否低于 1000U：是。 |
 | — | [`p1_spike_exit_policy_20260912.md`](p1_spike_exit_policy_20260912.md) | SPIKE V1／V6／V7：退出规则与账户风险比较 | 这轮没有找到可直接替换原退出的“最优系统”。** 第一年选中的6个非基线退出方案，在第二年有0个提高了同周期基线收益；因此不部署推保本、分批止盈或提前退出。保留原基线作为研究参照。 |
+| — | [`p1_spike_ma_launch_gate_20260923.md`](p1_spike_ma_launch_gate_20260923.md) | 将 YOLO 训练选图规则叠加到 SPIKE：全币历史比较 | 结论：当前 SPIKE 原始多空信号与完整选图形态在同一收盘时点取交集，信号几乎消失，后段没有改善。硬规则全期59笔的正收益集中在早期；后段37笔仍亏损。完整相似度组全期只有6笔，不能支持稳定胜率判断。保留此次负面结果，不修改指标默认值。 |
 | — | [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) | SPIKE 市场广度：冻结候选的匹配随机对照整合报告 | 冻结的 `joint_delta_60m > 0` **应拒绝作为统一硬过滤**：6 个 cohort 的 matched 配对差值净R跨组合方向翻转，全部 6 个 paired p 均不显著（最小 p=0.2964），且至少一个 cohort 丢失了原有 ≥10R 候选。此结论只拒绝这条冻结... |
 | — | [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) | SPIKE V7／V8 五条降噪路线：执行与验收报告 | 五条建议已经逐项执行。结果不是“再叠五个过滤条件”，而是把可证实的用途分开： |
 | — | [`p1_spike_pepe_owner_notes_20260910.md`](p1_spike_pepe_owner_notes_20260910.md) | PEPE 4H：Owner 批注与 V4 确认含义核对 |  |
@@ -986,6 +988,7 @@
 - [`p1_spike_lowtf_v1_v126_20260922.md`](p1_spike_lowtf_v1_v126_20260922.md) — SPIKE V1 与 V12.6：OKX ETH/BTC 1m、3m、5m 对照回放
 - [`p1_spike_ma_confirm_20260922.md`](p1_spike_ma_confirm_20260922.md) — SPIKE 高周期线实体确认止损与固定2R对照（2026-09-22）
 - [`p1_spike_ma_density_20260920.md`](p1_spike_ma_density_20260920.md) — SPIKE 六均线密集：单项拆分与语义反例
+- [`p1_spike_ma_launch_gate_20260923.md`](p1_spike_ma_launch_gate_20260923.md) — 将 YOLO 训练选图规则叠加到 SPIKE：全币历史比较
 - [`p1_spike_ma_stop_20260922.md`](p1_spike_ma_stop_20260922.md) — SPIKE 均线外侧初始止损：29币15m固定对照（2026-09-22）
 - [`p1_spike_market_breadth_20260913.md`](p1_spike_market_breadth_20260913.md) — SPIKE 市场广度：冻结候选的匹配随机对照整合报告
 - [`p1_spike_noise_reduction_execution_20260913.md`](p1_spike_noise_reduction_execution_20260913.md) — SPIKE V7／V8 五条降噪路线：执行与验收报告
@@ -1014,6 +1017,7 @@
 - [`p1_spike_v126_htf_recheck_20260922.md`](p1_spike_v126_htf_recheck_20260922.md) — SPIKE V12.6：联合时重检 H1 SMA60 的全量研究
 - [`p1_spike_v126_net_win_tail_audit_20260922.md`](p1_spike_v126_net_win_tail_audit_20260922.md) — SPIKE V12.6：扣费胜率与大盈利保留的优化审查
 - [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) — SPIKE V12.7 候选：先突破后V9加时限的全量回测
+- [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) — SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测
 - [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
 - [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
 - [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) — SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20）
