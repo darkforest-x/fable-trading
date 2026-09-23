@@ -4,7 +4,13 @@ import json
 
 import pytest
 
-from yoyo.vision_research.reference_pack import SPEC, validate_bounds
+from yoyo.vision_research.reference_pack import SPEC, sha256, validate_bounds
+
+
+def test_source_hash_works_on_the_project_python(tmp_path):
+    path = tmp_path / "source"
+    path.write_bytes(b"abc")
+    assert sha256(path) == "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
 
 
 @pytest.mark.parametrize("change", [
