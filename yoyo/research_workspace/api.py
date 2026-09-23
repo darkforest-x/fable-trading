@@ -19,11 +19,12 @@ from urllib.parse import urlsplit
 
 import httpx
 import yaml
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Query
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from yoyo.contracts.artifacts import ExperimentRecord
+from yoyo.data.dataset_catalog import DatasetCatalog, dataset_id, launch_index
 
 from .yolo import YoloCatalog, overview as yolo_overview
 from .store import WorkspaceStore, now
@@ -125,6 +126,7 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     catalog = YoloCatalog(root)
     store = WorkspaceStore(Path(runtime) / "research_workspace")
     app.state.research_store = store
+    datasets = DatasetCatalog(root)
     api = APIRouter(prefix="/api/research", dependencies=[Depends(same_origin)])
 
     def find_experiment(exp_id):
@@ -139,6 +141,35 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
             entries[key] = dict(entries.get(key, {"id": key, "status": "hypothesis"}), **value,
                                 training_eligible=False, production_eligible=False)
         return list(entries.values())
+
+    @api.get("/datasets")
+    def dataset_overview():
+        return datasets.overview()
+
+    @api.post("/datasets/reindex", status_code=202)
+    def dataset_reindex():
+        if datasets.overview()["maintenance"]["status"] == "running":
+            raise HTTPException(409, "数据集索引正在更新。")
+        if launch_worker:
+            return launch_index(root)
+        return {"status": "idle"}
+
+    @api.get("/datasets/{dataset_id}")
+    def dataset_detail(dataset_id: str, limit: int = Query(50, ge=1, le=100), offset: int = Query(0, ge=0)):
+        try:
+            return datasets.detail(dataset_id, limit, offset)
+        except KeyError:
+            raise HTTPException(404, "数据集未登记，请刷新索引。")
+
+    @api.get("/datasets/{dataset_id}/file")
+    def dataset_file(dataset_id: str, path: str):
+        try:
+            target = datasets.file(dataset_id, path)
+        except KeyError:
+            raise HTTPException(404, "文件未列入此数据集。")
+        except ValueError as error:
+            raise HTTPException(409, str(error))
+        return FileResponse(target, filename=target.name)
 
     def validate_links(ids, available):
         if any(x not in available for x in ids):
@@ -224,6 +255,7 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
             symbols = sorted(str(x["symbol"]) for x in json.loads(manifest.read_text()).get("streams", []))
         return {"items": [
             {"id": "spike-v128-frozen", "name": "SPIKE V12.8 冻结规则重放", "experiment_id": PARENT,
+             "dataset_id": dataset_id("data/research/spike_v128_recent_20260923"),
              "description": "已有两月快照；15m / 1h，原退出、20bp 成本和匹配随机对照。最多 10 个合约，逐个运行。",
              "available": bool(symbols), "symbols": symbols, "start": "2026-07-23T00:00:00Z", "end": "2026-09-23T04:00:00Z"},
             {"id": "verify-evidence", "name": "现有证据快照与哈希核验", "available": True,
