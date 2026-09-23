@@ -10912,3 +10912,35 @@ experiments:
     artifacts: [spike-vision-prelaunch-references-v3]
     reuse_allowed: false
     notes: Independent loopback workbench in yoyo/vision_research; local review worker reads SPIKE without starting or altering scanner workers. Provider switch code d46bdde251; live run 577fd09c249d40a5b43f3036213906d9. Original eight-reference pack preserved; current V3 has five individually reviewed pre-launch references, installed as library revision4 (AUCTION/CHZ long; FIL/TRUST/JELLYJELLY short), geometry pending Owner review; credentials persist only in ignored private settings. Live charts poll same-source public OKX candles every 10s with provisional-bar labeling; default post-signal research window 12 bars and immutable observation snapshots. Live snapshot run 9cef1192dba4430eadac969603117e0e completed with uncertain verdict in 13.38s using the then-current 3-reference library; not an accuracy evaluation. No scanner or production gate changes. No report requested.
+
+
+  - experiment_id: exp-open-factor-library-20260924-v1
+    title: 开源因子库：14 项计算接入与因果核验
+    source_repo: darkforest-x/fable-trading
+    source_commit: 22e3976f94d6a2cd5620d42b524fec9915fbdd9a
+    status: active
+    question: 能否按固定开源定义因果计算 14 项研究因子，并在统一工作台追踪来源及后续研究？
+    single_variable: 工程接入与公式核验；不涉及策略或多因子收益实验。后续经济检验需逐因子另登记。
+    result: 已完成 14 项源码适配、独立公式及因果边界核验，ETHUSDT 5m 共 89904 根计算通过，缺失值仅为声明的预热区间。收益、胜率、筛选增量与跨币适用性均未验证。
+    factor_ids:
+    - oss.qlib.kmid2
+    - oss.qlib.kup2
+    - oss.qlib.klow2
+    - oss.qlib.ksft2
+    - oss.qlib.std20
+    - oss.qlib.rsv20
+    - oss.qlib.corr20
+    - oss.qlib.cord20
+    - oss.qlib.sumd20
+    - oss.qlib.vstd20
+    - oss.qlib.wvma20
+    - oss.qlib.vsumd20
+    - oss.qtpylib.chop14
+    - oss.ta.cmf20
+    artifacts: [open-factor-library-20260924-v1-calculation]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: 收盘可知；完整预热；NaN不补零；20bp成本与原始退出不变。AUC/收益/匹配随机在本工程核验中不适用，独立公式对照和未来扰动作为计算零假设核验。
+    created_at: '2026-09-24'

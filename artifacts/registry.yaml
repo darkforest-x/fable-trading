@@ -32577,3 +32577,21 @@ artifacts:
     production_eligible: false
     notes: workspace experiment_id=exp-spike-v128-recent-20260923-v1; recipe=spike-v128-frozen.
       流程完成只表示任务运行结束，不代表研究验证、统计结论或资格变更。
+
+
+  - artifact_id: open-factor-library-20260924-v1-calculation
+    artifact_type: manifest
+    role: open_source_factor_calculation_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 22e3976f94d6a2cd5620d42b524fec9915fbdd9a
+    source_path: experiments/active/exp-open-factor-library-20260924-v1/calculation_receipt.json
+    generator_commit: 22e3976f94d6a2cd5620d42b524fec9915fbdd9a
+    sha256: 1e7f3005273a872c70b8cdbf2382b769ec9529e6f1e5ed2e343abadd2aa77dd8
+    size_bytes: 2304
+    storage_uri: repo://experiments/active/exp-open-factor-library-20260924-v1/calculation_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Engineering calculation only: 89904 ETHUSDT 5m bars, 14 factors. Missing
+      values are exactly declared warmup. No economic validation. Full output remains
+      in ignored data/research/open_factors_20260924; receipt includes its hash.'

@@ -1,0 +1,38 @@
+{
+  "experiment_id": "exp-open-factor-library-20260924-v1",
+  "builder_commit": "22e3976f94d6a2cd5620d42b524fec9915fbdd9a",
+  "factor_ids": [
+    "oss.qlib.kmid2",
+    "oss.qlib.kup2",
+    "oss.qlib.klow2",
+    "oss.qlib.ksft2",
+    "oss.qlib.std20",
+    "oss.qlib.rsv20",
+    "oss.qlib.corr20",
+    "oss.qlib.cord20",
+    "oss.qlib.sumd20",
+    "oss.qlib.vstd20",
+    "oss.qlib.wvma20",
+    "oss.qlib.vsumd20",
+    "oss.qtpylib.chop14",
+    "oss.ta.cmf20"
+  ],
+  "command": [
+    ".venv/bin/python",
+    "-m",
+    "yoyo.research_workspace.open_factors",
+    "--input",
+    "data/research/spike_v128_recent_20260923/series/ETHUSDT.csv.gz",
+    "--time-column",
+    "ts",
+    "--time-unit",
+    "ms",
+    "--output",
+    "data/research/open_factors_20260924/ethusdt_5m_v1.csv",
+    "--receipt",
+    "experiments/active/exp-open-factor-library-20260924-v1/calculation_receipt.json"
+  ],
+  "scope": "Engineering calculation and causality verification only; no return study or trading rule changes.",
+  "training_eligible": false,
+  "production_eligible": false
+}
