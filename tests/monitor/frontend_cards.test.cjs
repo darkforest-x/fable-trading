@@ -26,6 +26,27 @@ const shortLive = Object.freeze({ ...rawLive, id: "short-live-eth-60-2", symbol:
   direction: "short", timeframe_min: 60, signal_close_time: "2026-09-11T02:00:00Z" });
 const yoloLive = Object.freeze({ ...shortLive, id: "yolo-live-eth-60-3", confirmation: "yolo" });
 
+test("personal observation action copies signal identity without prices, fills, or opening TradingView", () => {
+  const start = app.indexOf("  function activateRow(event, type)");
+  const end = app.indexOf('  ["click", "keydown"].forEach', start);
+  assert.ok(start > 0 && end > start);
+  const received = [], views = [];
+  const context = {
+    window: { SpikeManual: { fromSignal: (value) => received.push(value) } },
+    setView: (view) => views.push(view),
+  };
+  vm.runInNewContext(app.slice(start, end) + "\nthis.run = activateRow;", context);
+  const button = { dataset: { manualSymbol: "BTC-USDT-SWAP", manualSide: "short", manualTimeframe: "1H",
+    manualRef: 'signal:id1 · replay · bar_close_ms=123' } };
+  const event = { type: "click", target: { closest: () => button }, preventDefault() {} };
+  context.run(event, "signal");
+  assert.deepEqual(JSON.parse(JSON.stringify(received)), [{ symbol: "BTC-USDT-SWAP", side: "short",
+    timeframe: "1H", signal_ref: 'signal:id1 · replay · bar_close_ms=123' }]);
+  assert.deepEqual(views, ["manual"]);
+  context.run({ ...event, type: "keydown" }, "signal");
+  assert.equal(received.length, 1);
+});
+
 function element() {
   return { disabled: false, classList: { add() {}, remove() {}, toggle() {} }, textContent: "", innerHTML: "",
     style: {}, setAttribute() {}, removeAttribute() {}, closest: () => ({ open: false }) };

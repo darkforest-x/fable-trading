@@ -179,6 +179,15 @@ class ResearchPlatform:
                  components=[C("paper", "模拟实盘", "runner", "paper", "选择插件、暂停 / 恢复、版本快照。", "yoyo/research_workspace/paper_worker.py"),
                              C("signals", "信号中心", "observation", "signals", "实时观察与通知；不等同模拟成交。", "yoyo/monitor")]),
         ]
-        return dict(layers=layers, summary=summary, pipelines=deepcopy(ROUTES), sources=SOURCES,
+        business_lines = [
+            dict(id="personal", name="个人交易系统", view="manual",
+                 description="本人判断与执行；个人规则 → 盘前计划 → 机会筛选 → 实际成交登记 → 复盘。独立积累人工交易证据。"),
+            dict(id="research", name="策略研究", view="research",
+                 description="外部思路与市场观察进入假设、因子、模型和实验，保留失败结论。"),
+            dict(id="systematic", name="自动策略验证", view="paper",
+                 description="版本化策略回测与前向模拟；运行完成不代表盈利通过或实盘准入。"),
+        ]
+        return dict(layers=layers, summary=summary, business_lines=business_lines,
+                    pipelines=deepcopy(ROUTES), sources=SOURCES,
                     cross_cutting=["实验登记与失败记录", "数据 / 代码 / 模型版本", "时间边界与因果检查", "训练与生产准入独立管理"],
                     generated_at=now())

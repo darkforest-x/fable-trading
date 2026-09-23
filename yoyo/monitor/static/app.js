@@ -16,7 +16,8 @@
       period: "all", outcome: "all", sort: "newest", performanceVersion: "current", ledger: null, revision: 0 },
   };
   const titles = {
-    platform: ["体系总览", "从真实登记的组件与来源，查看数据、研究、评估和前向运行之间的连接。"],
+    platform: ["体系总览", "个人交易、策略研究与自动策略验证，共用数据、特征与模型。"],
+    manual: ["个人交易系统", "本人看图、判断和执行；在这里保存规则、盘前计划、实际成交与复盘。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
@@ -253,15 +254,15 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "system", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["signals", "watch", "lines", "shadow", "system", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
-    const researchView = ["platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
-    $("exchange-mark").textContent = researchView ? "研究" : "OKX";
+    const researchView = ["manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
+    $("exchange-mark").textContent = state.view === "manual" ? "个人" : researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
     $("bark-header").classList.toggle("hidden", researchView);
@@ -283,6 +284,7 @@
     }
     window.SpikeResearch?.setView(state.view);
     window.SpikePlatform?.setActive(state.view === "platform");
+    window.SpikeManual?.setActive(state.view === "manual");
     window.SpikeModels?.setActive(state.view === "models");
     window.SpikeDatasets?.setActive(state.view === "datasets");
     window.SpikeStrategies?.setActive(state.view === "strategies");
@@ -376,7 +378,7 @@
       ? (item.source !== "higher" ? lineFacts(item, "本周期线", item.tick) : "") + (higher ? lineFacts(item.higher_line, "上级线", item.tick) : "")
       : lineFacts(item, "突破的线", item.tick);
     const delay = finite(item.detect_delay_ms) && item.display_state !== "history" ? ` · 收盘后 ${escapeHTML(duration(Math.max(0, Number(item.detect_delay_ms))))} 发现` : "";
-    return `<article class="shadow-event-card lines-card long ${stateClass}${outcome ? " " + outcome.className : ""}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span>${performance}<dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
+    return `<article class="shadow-event-card lines-card long ${stateClass}${outcome ? " " + outcome.className : ""}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span>${performance}<dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>${manualObservationButton({...item, side: item.side || "long"})}</article>`;
   }
   function renderLines() {
     const lines = state.lines;
@@ -626,6 +628,11 @@
     $("stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(row.timeframe)}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
     $("stats-basis").textContent = `按原始信号收盘日归属 · 北京时间 · 周一开始 · 全部筛选条件生效 · ${state.errors[sourceKey()] ? "同步失败，保留上次快照" : data ? `更新 ${clockTime(data.as_of_ms)}` : "等待同步"}`;
   }
+  function manualObservationButton(item) {
+    if (!/^[A-Z0-9]{2,24}-USDT-SWAP$/.test(item.symbol || "") || !["long", "short"].includes(item.side)) return "";
+    const ref = `${item.kind || "signal"}:${item.id} · ${item.source || "live"} · bar_close_ms=${item.bar_close_ms ?? "unknown"}`;
+    return `<button type="button" class="research-button manual-observe-button" data-manual-observe data-manual-symbol="${escapeHTML(item.symbol)}" data-manual-side="${escapeHTML(item.side)}" data-manual-timeframe="${escapeHTML(timeframeLabel(item.timeframe))}" data-manual-ref="${escapeHTML(ref)}">加入个人观察</button>`;
+  }
   function signalCardHTML(item, now = signalClock()) {
     const confirmed = isConfirmed(item), original = originalSignal(item), direct = directReceipt(item);
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
@@ -645,6 +652,7 @@
       <span class="card-context"><span>${"信号 K 线"}</span><strong>${item.is_closed ? "V9 已确认" : "待确认"}</strong></span>
       <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
+      ${manualObservationButton(item)}
     </article>`;
   }
   function applySignalFilters() {
@@ -886,6 +894,7 @@
   }
   async function refresh(trigger = "manual") {
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
+    if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
     if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
@@ -1066,6 +1075,16 @@
   $("lines-search").addEventListener("input", (event) => { state.lines.search = event.target.value; state.lines.limit = 24; renderLines(); reloadLinesLedger(); });
   $("load-more-lines").addEventListener("click", () => { state.lines.limit += 24; renderLines(); });
   function activateRow(event, type) {
+    const manualButton = event.target.closest("[data-manual-observe]");
+    if (manualButton) {
+      if (event.type !== "click") return;
+      event.preventDefault();
+      window.SpikeManual?.fromSignal({ symbol: manualButton.dataset.manualSymbol,
+        side: manualButton.dataset.manualSide, timeframe: manualButton.dataset.manualTimeframe,
+        signal_ref: manualButton.dataset.manualRef });
+      setView("manual");
+      return;
+    }
     const cardClass = type === "signal" ? ".signal-card" : type === "shadow" || type === "lines" ? ".shadow-event-card" : ".watch-card";
     const row = event.target.closest("[data-tradingview-action]") || event.target.closest(cardClass)?.querySelector("[data-tradingview-action]");
     if (!row) return;
@@ -1097,7 +1116,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });

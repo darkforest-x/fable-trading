@@ -110,7 +110,7 @@ test("platform overview loads once, renders reported asset counts, and safely li
   await p.platform.setActive(true);
   assert.deepEqual(calls, ["/api/research/platform", "/api/research/pipelines"]);
   const html = p.element("platform-workspace").innerHTML;
-  assert.match(html, /共用数据、特征和模型，按策略组织回测与前向验证/);
+  assert.match(html, /个人交易、策略研究和自动策略验证，共用一套基础能力/);
   assert.match(html, /197 数据集/);
   assert.match(html, /模型已经准确或策略已经通过/);
   assert.match(html, /目录 &lt;script&gt;/);
@@ -299,7 +299,7 @@ test("pipeline plans create/update by revision and only start modes explicitly a
 test("navigation groups and hooks include platform/model views while preserving VLM research wording", () => {
   const nav = page.match(/<nav class="nav-list"[\s\S]*?<\/nav>/)?.[0] || "";
   const labels = [...nav.matchAll(/class="sidebar-label nav-group-label"[^>]*>([^<]+)/g)].map((match) => match[1]);
-  assert.deepEqual(labels, ["基础能力", "研究开发", "验证与运行", "运维"]);
+  assert.deepEqual(labels, ["个人交易", "基础能力", "研究开发", "验证与运行", "运维"]);
   assert.ok(nav.indexOf('data-view="platform"') < nav.indexOf('data-view="datasets"'));
   assert.ok(nav.indexOf('data-view="models"') < nav.indexOf('data-view="research"'));
   assert.ok(nav.indexOf('data-view="backtests"') < nav.indexOf('data-view="paper"'));

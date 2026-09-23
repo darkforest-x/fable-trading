@@ -24,7 +24,7 @@
       return url.protocol === "https:" && !url.username && !url.password ? url.href : "";
     } catch { return ""; }
   };
-  const routeViews = new Set(["platform", "models", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision", "signals", "joints", "breaks", "system"]);
+  const routeViews = new Set(["manual", "platform", "models", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision", "signals", "joints", "breaks", "system"]);
   const routeNames = { platform: "体系总览", models: "模型中心", datasets: "数据集", factors: "因子库", strategies: "策略库", paper: "模拟实盘", experiments: "实验登记", backtests: "回测任务", yolo: "YOLO 工作流", vision: "VLM 工作流", signals: "信号中心", joints: "突破+spike", breaks: "趋势线突破", system: "运行状态" };
   const summaryNames = { datasets: "数据集", factors: "因子", models: "模型", strategies: "策略", experiments: "实验", backtest_runs: "回测运行", paper_runs: "模拟运行" };
   const statusNames = { research: "研究中", hypothesis: "待验证", implemented: "已实现", active: "登记中", ready: "已登记", review: "待复核", rejected: "已否定", archived: "已归档", missing: "缺失", verified: "身份校验通过", inspected: "已检查", review_required: "需要复核", incomplete: "信息不完整", stale: "校验记录过期", pass: "通过", mismatch: "不匹配", unknown: "未知", not_rehashed: "未重新计算哈希", declared_only: "仅登记声明", computed: "本次计算", disabled: "未执行", failed: "校验失败" };
@@ -94,7 +94,9 @@
     }).join("");
     const crossCutting = arr(data.cross_cutting);
     const pipelines = arr(data.pipelines);
-    root.innerHTML = `<div class="platform-hero research-objective"><span class="research-kicker">SPIKE · 研究与运行</span><h2>共用数据、特征和模型，按策略组织回测与前向验证</h2><p>下面展示体系组件与各层资产登记。架构关系不代表模型已经准确或策略已经通过。</p></div>
+    root.innerHTML = `<div class="platform-hero research-objective"><span class="research-kicker">SPIKE · 交易与研究</span><h2>个人交易、策略研究和自动策略验证，共用一套基础能力</h2><p>人工决策形成交易日志，研究形成可检验规则，自动策略独立验证。各条业务线保留自己的证据与结果；架构关系不代表模型已经准确或策略已经通过。</p></div>
+      <div class="platform-section-heading"><div><h2>三条业务线</h2><p>个人交易系统持续建设，与自动策略是否通过独立管理。</p></div></div>
+      <div class="platform-pipeline-list">${arr(data.business_lines).map((line) => `<article class="platform-pipeline"><h3>${esc(line.name)}</h3><p>${esc(line.description)}</p><a class="research-button" href="#${routeViews.has(line.view) ? esc(line.view) : "platform"}">进入${esc(line.name)} ↗</a></article>`).join("")}</div>
       <div class="platform-summary">${summaryMarkup(data.summary || {})}</div>
       <div class="platform-section-heading"><div><h2>研究与运行链路</h2><p>数据 → 特征 / 标签 → 模型 → 策略 → 评估 / 回测 → 前向运行</p></div><button type="button" class="research-button" data-platform-refresh${platformState.loading ? " disabled" : ""}>${platformState.loading ? "正在刷新…" : "刷新体系"}</button></div>
       ${layers.length ? `<div class="platform-layer-grid">${layers.map(layerMarkup).join("")}</div>` : `<p class="research-empty">体系接口尚未登记架构层。</p>`}

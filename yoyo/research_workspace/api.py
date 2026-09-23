@@ -333,6 +333,8 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     paper = install_paper(api, app, root, Path(runtime), store, all_factors, catalog.experiments, launch_worker)
     from .platform_api import install as install_platform
     install_platform(api, app, root, catalog, datasets, store, all_factors, recipes, create_job, paper)
+    from .manual_api import install as install_manual
+    install_manual(api, app, store)
     app.include_router(api)
 
     @app.api_route("/api/vision/{path:path}", methods=["GET", "POST", "PUT"], dependencies=[Depends(same_origin)])
