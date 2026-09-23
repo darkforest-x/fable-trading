@@ -570,10 +570,12 @@ function renderAi() {
   const run = observation?.run;
   if (!run) {
     setHidden(result, false);
-    result.innerHTML = observation?.run_id
+    result.innerHTML = state.busy === 'analyze'
+      ? '<p>正在等待模型响应，冻结输入已保存。请勿重复提交；刷新后可恢复观察查看进度。</p>'
+      : observation?.run_id
       ? '<p>模型调用记录已关联；当前接口尚未返回完整结果，请刷新观察记录。</p>'
       : '<p>尚未调用模型。推进游标不会自动发送模型请求。</p>';
-    byId('replay-ai-status').textContent = observation?.run_id ? '模型记录' : '未调用';
+    byId('replay-ai-status').textContent = state.busy === 'analyze' ? '正在等待模型' : observation?.run_id ? '模型记录' : '未调用';
     setHidden(byId('replay-ai-status'), !observation);
     return;
   }
@@ -581,14 +583,14 @@ function renderAi() {
   const evidence = safeArray(decision.evidence);
   const risks = safeArray(decision.risks);
   const list = (items) => items.length ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<p>未提供。</p>';
-  const verdict = VERDICT_LABELS[decision.verdict] || (run.status === 'completed' ? '未判定' : run.status === 'failed' ? '识别失败' : '处理中');
+  const verdict = VERDICT_LABELS[decision.verdict] || (run.status === 'completed' ? '未判定' : run.status === 'failed' ? '识别失败' : run.status === 'interrupted' ? '调用已中断' : '处理中');
   const currentState = STATE_LABELS[decision.current_state] || '';
   result.innerHTML = `<span class="replay-ai-verdict">${escapeHtml(verdict)}${currentState ? ` · ${escapeHtml(currentState)}` : ''}${decision.side ? ` · ${escapeHtml(SIDE_LABELS[decision.side] || decision.side)}` : ''}</span>
     <p>${escapeHtml(decision.summary || run.error || '模型未返回摘要。')}</p>
     <div><h5>可观察证据</h5>${list(evidence)}</div><div><h5>不确定性与风险</h5>${list(risks)}</div>
     <p class="replay-source-note">${escapeHtml(run.model || observation.model || '模型未提供')} · ${escapeHtml(formatTime(Date.parse(run.created_at)))}</p>`;
   setHidden(result, false);
-  byId('replay-ai-status').textContent = run.status === 'completed' ? '已完成' : run.status === 'failed' ? '失败' : '处理中';
+  byId('replay-ai-status').textContent = run.status === 'completed' ? '已完成' : run.status === 'failed' ? '失败' : run.status === 'interrupted' ? '已中断' : '处理中';
   setHidden(byId('replay-ai-status'), false);
 }
 
