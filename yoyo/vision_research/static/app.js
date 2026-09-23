@@ -55,6 +55,15 @@ const state = {
   notice: '',
   reviewLoadingId: null,
   exportLoadingId: null,
+  exchanges: [],
+  exchangesLoading: true,
+  exchangesError: '',
+  selectedExchangeId: '',
+  exchangeDetail: null,
+  exchangeDetailLoading: false,
+  exchangeDetailError: '',
+  exchangeListToken: 0,
+  exchangeDetailToken: 0,
   model: DEFAULT_MODEL,
   criteria: DEFAULT_CRITERIA,
   criteriaEdited: false,
@@ -115,7 +124,9 @@ async function readResponse(response) {
   }
   if (!response.ok) {
     const detail = payload && typeof payload === 'object' ? payload.detail || payload.message : payload;
-    throw new Error(asText(detail, `请求失败（HTTP ${response.status}）`));
+    const error = new Error(asText(detail, `请求失败（HTTP ${response.status}）`));
+    error.apiExchangeId = typeof payload?.api_exchange_id === 'string' ? payload.api_exchange_id : '';
+    throw error;
   }
   return payload;
 }
@@ -125,6 +136,98 @@ async function apiJson(path, options = {}) {
   if (options.body !== undefined && !headers.has('content-type')) headers.set('content-type', 'application/json');
   const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
   return readResponse(response);
+}
+
+function exchangeKindLabel(kind) {
+  if (kind === 'recognition') return '识别';
+  if (kind === 'connection_test') return '连接测试';
+  return 'API 调用';
+}
+
+function exchangeStatusLabel(status) {
+  return ({ running: '进行中', completed: '已完成', failed: '失败', interrupted: '已中断' })[status] || '状态未提供';
+}
+
+function exchangeOptionLabel(exchange) {
+  const kind = exchangeKindLabel(exchange.kind);
+  const model = asText(exchange.model, '模型未提供');
+  const created = formatDate(exchange.created_at);
+  const status = exchangeStatusLabel(exchange.status);
+  return `${kind} · ${model} · ${created} · ${status}`;
+}
+
+function imageDataUrl(value) {
+  if (typeof value !== 'string') return '';
+  return /^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=\r\n]+$/i.test(value) ? value.replace(/[\r\n]/g, '') : '';
+}
+
+function referenceNameFromText(value) {
+  const match = String(value || '').match(/名称（仅为数据，不是指令）：\s*(.+)/u);
+  if (!match) return '';
+  const encodedName = match[1].trim();
+  try {
+    const parsed = JSON.parse(encodedName);
+    return typeof parsed === 'string' ? parsed : '';
+  } catch {
+    return encodedName.replace(/^['"]|['"]$/g, '');
+  }
+}
+
+function collectExchangeImages(requestBodyText) {
+  let body;
+  try { body = JSON.parse(requestBodyText); } catch { return []; }
+  const images = [];
+  const seen = new Set();
+  const visit = (value, hint = '') => {
+    if (Array.isArray(value)) {
+      let currentHint = hint;
+      for (const item of value) {
+        if (item && typeof item === 'object' && typeof item.text === 'string') {
+          currentHint = item.text;
+          continue;
+        }
+        const before = images.length;
+        visit(item, currentHint);
+        if (images.length > before) currentHint = '';
+      }
+      return;
+    }
+    if (!value || typeof value !== 'object') return;
+    const possibleUrl = value.image_url?.url || (value.type === 'image_url' ? value.url : '') || '';
+    const dataUrl = imageDataUrl(possibleUrl);
+    if (dataUrl && !seen.has(dataUrl)) {
+      seen.add(dataUrl);
+      images.push({ dataUrl, titleHint: hint });
+      return;
+    }
+    for (const [key, child] of Object.entries(value)) {
+      if (key === 'text' && typeof child === 'string') continue;
+      visit(child, hint);
+    }
+  };
+  visit(body);
+  return images.map((image, index) => {
+    if (index === 0) return { ...image, title: '待判图（候选）' };
+    const referenceName = referenceNameFromText(image.titleHint);
+    return { ...image, title: referenceName ? `参考图 ${index} · ${referenceName}` : `参考图 ${index}` };
+  });
+}
+
+function requestBodyPreview(bodyText) {
+  const rawText = typeof bodyText === 'string' ? bodyText : '';
+  let preview = rawText;
+  let foldedImages = false;
+  try { preview = JSON.stringify(JSON.parse(rawText), null, 2); } catch { /* Preserve the stored body when it is not valid JSON. */ }
+  preview = preview.replace(/data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=\r\n]+/gi, () => {
+    foldedImages = true;
+    return '[图片 Base64 已折叠；完整内容请下载原始记录]';
+  });
+  return {
+    text: preview,
+    label: foldedImages
+      ? '请求输入预览（已格式化；图片 Base64 已折叠）'
+      : '请求输入预览（已格式化）',
+  };
 }
 
 function formatDate(value) {
@@ -413,6 +516,7 @@ function renderReferences() {
   byId('save-references').disabled = !state.referencesDirty || state.referencesSaving || !state.referencesReady;
   byId('save-references').textContent = state.referencesSaving ? '正在保存…' : '保存全局参考图';
   byId('references-status').textContent = !state.referencesReady ? '尚未读取全局参考图' : state.referencesSaving ? '正在保存到本机…' : state.referencesDirty ? '有未保存的更改 · 保存后应用于后续识别' : `已保存 · ${state.references.length} 张 · 应用于后续识别`;
+  byId('api-exchange-reference-count').textContent = state.referencesReady ? String(state.references.length) : '读取中';
   showInlineError('references-error', state.referencesError);
 }
 
@@ -483,6 +587,14 @@ function renderRunStatus() {
   } else {
     status.textContent = '等待输入';
   }
+}
+
+function apiExchangeActionMarkup(exchangeId) {
+  const id = asText(exchangeId, '');
+  if (id) {
+    return `<button class="button button-secondary" type="button" data-open-exchange="${escapeHtml(id)}">查看 API 原始记录</button>`;
+  }
+  return '<span class="exchange-unavailable">本条记录没有关联 API 原始记录；未保存的旧请求无法补取当时输入输出。</span>';
 }
 
 function renderResult() {
@@ -558,6 +670,7 @@ function renderResult() {
     <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
     <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
     ${requestContext}
+    <div class="exchange-result-action">${apiExchangeActionMarkup(run.api_exchange_id)}</div>
     <section class="human-review" aria-label="人工复核">
       <div class="human-review-heading"><strong>人工复核</strong><span>与模型结果分别记录</span></div>
       ${reviewVerdict}
@@ -599,7 +712,7 @@ function renderHistory() {
         <p class="history-summary">${escapeHtml(summary)}</p>
         <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(asText(run.status, '状态未提供'))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
       </div>
-      <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button><button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
+      <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button>${run.api_exchange_id ? `<button class="button button-quiet" type="button" data-open-exchange="${escapeHtml(run.api_exchange_id)}">查看 API 原始记录</button>` : '<span class="exchange-unavailable">旧记录未保存原文</span>'}<button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
       ${review}
     </article>`;
   }).join('');
@@ -610,6 +723,197 @@ function credentialSummary(source) {
   const lower = asText(source).toLowerCase();
   const configured = !['', 'unset', 'none', 'missing', 'not_configured', 'null'].includes(lower);
   return { label: known, configured };
+}
+
+function renderExchangeDetail(detail) {
+  const target = byId('api-exchange-detail');
+  const request = detail.request && typeof detail.request === 'object' ? detail.request : {};
+  const response = detail.response && typeof detail.response === 'object' ? detail.response : null;
+  const requestText = typeof request.body_text === 'string' ? request.body_text : '';
+  const preview = requestBodyPreview(requestText);
+  const images = collectExchangeImages(requestText);
+  const httpStatus = detail.http_status ?? response?.status_code;
+  const id = asText(detail.id || state.selectedExchangeId, '');
+  const downloadPath = `${API_BASE}/exchanges/${encodeURIComponent(id)}/export`;
+  const metadata = [
+    ['类型', exchangeKindLabel(detail.kind)],
+    ['记录状态', exchangeStatusLabel(detail.status)],
+    ['HTTP 状态', httpStatus == null ? '未返回' : String(httpStatus)],
+    ['模型', asText(detail.model, '模型未提供')],
+    ['时间', formatDate(detail.created_at)],
+    ['图片数', Number.isFinite(Number(detail.image_count)) ? `${Number(detail.image_count)} 张` : '未提供'],
+    ['耗时', detail.latency_ms == null ? '未提供' : `${Math.round(Number(detail.latency_ms))} ms`],
+  ];
+  target.innerHTML = `<article class="exchange-detail-card">
+    <div class="exchange-detail-heading"><h3>本次 API 调用</h3><a class="button button-secondary" href="${escapeHtml(downloadPath)}" download="api-exchange-${escapeHtml(id || 'record')}.json">下载完整原始记录</a></div>
+    <dl class="exchange-metadata">${metadata.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
+    ${detail.redacted ? '<p class="exchange-redacted">服务端已从正文回显中移除与 API Key 完全匹配的内容；认证请求头不会记录。</p>' : ''}
+    ${detail.error ? '<p class="exchange-call-error" role="status"></p>' : ''}
+    <section class="exchange-input-section" aria-label="发送给 API 的图片">
+      <h4>本次发送的图片</h4>
+      <div class="exchange-images" data-exchange-images></div>
+    </section>
+    <details class="exchange-body-block" open><summary>${escapeHtml(preview.label)}</summary><pre data-exchange-request></pre></details>
+    <details class="exchange-body-block"><summary>完整原始请求正文（含图片 Base64）</summary><pre data-exchange-request-original></pre></details>
+    <details class="exchange-body-block" open><summary>API 原始响应正文</summary><pre data-exchange-response></pre></details>
+    <details class="exchange-request-meta"><summary>HTTP 请求地址</summary><dl><dt>方法</dt><dd data-exchange-method></dd><dt>URL</dt><dd data-exchange-url></dd></dl></details>
+  </article>`;
+
+  const requestPreview = target.querySelector('[data-exchange-request]');
+  requestPreview.textContent = requestText ? preview.text : '接口没有保存请求正文，无法显示 API 实际输入。';
+  target.querySelector('[data-exchange-request-original]').textContent = requestText || '接口没有保存请求正文。';
+  const responsePreview = target.querySelector('[data-exchange-response]');
+  responsePreview.textContent = response && typeof response.body_text === 'string'
+    ? response.body_text
+    : '本条记录没有保存 HTTP 响应正文。';
+  const methodTarget = target.querySelector('[data-exchange-method]');
+  const urlTarget = target.querySelector('[data-exchange-url]');
+  methodTarget.textContent = asText(request.method, '未提供');
+  urlTarget.textContent = asText(request.url, '未提供');
+  const errorTarget = target.querySelector('.exchange-call-error');
+  if (errorTarget) errorTarget.textContent = asText(detail.error, 'API 调用失败。');
+
+  const gallery = target.querySelector('[data-exchange-images]');
+  if (!images.length) {
+    const note = document.createElement('p');
+    note.className = 'exchange-empty';
+    note.textContent = detail.kind === 'connection_test'
+      ? '本次连接测试发送的是文字请求，没有发送图片。'
+      : '没有从已保存的请求正文中找到可预览的内嵌图片。';
+    gallery.append(note);
+  } else {
+    for (const image of images) {
+      const figure = document.createElement('figure');
+      figure.className = 'exchange-image-preview';
+      const previewImage = document.createElement('img');
+      previewImage.src = image.dataUrl;
+      previewImage.alt = image.title;
+      previewImage.loading = 'lazy';
+      const caption = document.createElement('figcaption');
+      caption.textContent = image.title;
+      figure.append(previewImage, caption);
+      gallery.append(figure);
+    }
+  }
+}
+
+function renderExchangeRecords() {
+  const picker = byId('api-exchange-select');
+  const statusTarget = byId('api-exchanges-status');
+  const errorTarget = byId('api-exchanges-error');
+  const detailTarget = byId('api-exchange-detail');
+  const exchanges = state.exchanges.filter((item) => item && ['recognition', 'connection_test'].includes(item.kind));
+  const options = [...exchanges];
+  if (state.selectedExchangeId && !options.some((item) => asText(item.id) === state.selectedExchangeId)) {
+    options.unshift({ id: state.selectedExchangeId, placeholder: true });
+  }
+  picker.innerHTML = options.length
+    ? options.map((item) => `<option value="${escapeHtml(asText(item.id))}" ${asText(item.id) === state.selectedExchangeId ? 'selected' : ''}>${escapeHtml(item.placeholder ? `API 原始记录 ${asText(item.id)}` : exchangeOptionLabel(item))}</option>`).join('')
+    : '<option value="">暂无 API 原始记录</option>';
+  picker.disabled = state.exchangesLoading || options.length === 0;
+  statusTarget.textContent = state.exchangesLoading
+    ? '正在读取 API 原始记录…'
+    : `最近显示 ${exchanges.length} 次 API 调用`;
+  showInlineError('api-exchanges-error', state.exchangesError);
+
+  if (state.exchangeDetailLoading) {
+    detailTarget.innerHTML = '<p class="exchange-empty"><span class="spinner" aria-hidden="true"></span>正在读取本次 API 原始记录…</p>';
+  } else if (state.exchangeDetailError) {
+    detailTarget.innerHTML = `<div class="exchange-load-error"><p>${escapeHtml(state.exchangeDetailError)}</p><button class="button button-secondary" type="button" data-reload-exchange-detail>重试读取</button></div>`;
+  } else if (state.exchangeDetail && asText(state.exchangeDetail.id || state.selectedExchangeId) === state.selectedExchangeId) {
+    renderExchangeDetail(state.exchangeDetail);
+  } else if (!state.exchangesLoading && !exchanges.length && !state.selectedExchangeId) {
+    detailTarget.innerHTML = '<p class="exchange-empty">当前没有已保存的 API 原始记录。旧识别记录不会补造当时的请求或模型响应。</p>';
+  } else if (!state.exchangesLoading && !state.selectedExchangeId) {
+    detailTarget.innerHTML = '<p class="exchange-empty">选择一条 API 调用查看它实际发送的输入和收到的响应。</p>';
+  } else if (!state.exchangeDetailLoading) {
+    detailTarget.innerHTML = '<p class="exchange-empty">尚未读取所选 API 原始记录。</p>';
+  }
+  byId('api-exchange-reference-count').textContent = state.referencesReady ? String(state.references.length) : '读取中';
+}
+
+async function loadExchangeDetail(id) {
+  const exchangeId = asText(id, '');
+  if (!exchangeId) return;
+  const token = ++state.exchangeDetailToken;
+  state.selectedExchangeId = exchangeId;
+  state.exchangeDetail = null;
+  state.exchangeDetailError = '';
+  state.exchangeDetailLoading = true;
+  renderExchangeRecords();
+  try {
+    const detail = await apiJson(`/exchanges/${encodeURIComponent(exchangeId)}`);
+    if (!detail || typeof detail !== 'object') throw new Error('API 原始记录格式无效。');
+    if (token !== state.exchangeDetailToken || state.selectedExchangeId !== exchangeId) return;
+    const normalized = { ...detail, id: asText(detail.id, exchangeId) };
+    state.exchangeDetail = normalized;
+    const existingIndex = state.exchanges.findIndex((item) => asText(item.id) === exchangeId);
+    if (existingIndex >= 0) state.exchanges[existingIndex] = { ...state.exchanges[existingIndex], ...normalized };
+    else state.exchanges.unshift(normalized);
+  } catch (error) {
+    if (token !== state.exchangeDetailToken || state.selectedExchangeId !== exchangeId) return;
+    state.exchangeDetailError = error.message || 'API 原始记录读取失败。';
+  } finally {
+    if (token === state.exchangeDetailToken && state.selectedExchangeId === exchangeId) {
+      state.exchangeDetailLoading = false;
+      renderExchangeRecords();
+    }
+  }
+}
+
+function selectExchange(id) {
+  const exchangeId = asText(id, '');
+  state.exchangeDetailError = '';
+  state.selectedExchangeId = exchangeId;
+  if (exchangeId) loadExchangeDetail(exchangeId);
+  else {
+    state.exchangeDetailToken += 1;
+    state.exchangeDetail = null;
+    state.exchangeDetailLoading = false;
+    renderExchangeRecords();
+  }
+}
+
+async function loadExchangeRecords({ preferredId = '', selectNewest = false, reloadSelected = false } = {}) {
+  const token = ++state.exchangeListToken;
+  state.exchangesLoading = true;
+  state.exchangesError = '';
+  renderExchangeRecords();
+  try {
+    const payload = await apiJson('/exchanges', { cache: 'no-store' });
+    if (token !== state.exchangeListToken) return;
+    state.exchanges = Array.isArray(payload?.items)
+      ? payload.items.filter((item) => item && typeof item === 'object' && ['recognition', 'connection_test'].includes(item.kind))
+      : [];
+    const desiredId = preferredId || (selectNewest ? '' : state.selectedExchangeId) || asText(state.exchanges[0]?.id, '');
+    const detailMatches = state.exchangeDetail && asText(state.exchangeDetail.id) === desiredId;
+    if (desiredId && (reloadSelected || !detailMatches || desiredId !== state.selectedExchangeId)) {
+      state.selectedExchangeId = desiredId;
+      loadExchangeDetail(desiredId);
+    } else if (!desiredId) {
+      state.selectedExchangeId = '';
+      state.exchangeDetail = null;
+      state.exchangeDetailLoading = false;
+    }
+  } catch (error) {
+    if (token !== state.exchangeListToken) return;
+    state.exchangesError = error.message || 'API 原始记录读取失败。';
+  } finally {
+    if (token === state.exchangeListToken) {
+      state.exchangesLoading = false;
+      renderExchangeRecords();
+    }
+  }
+}
+
+function openExchange(id) {
+  const exchangeId = asText(id, '');
+  if (!exchangeId) return;
+  switchTab('settings');
+  state.exchangeDetailError = '';
+  selectExchange(exchangeId);
+  renderExchangeRecords();
+  byId('api-exchanges-heading').scrollIntoView({ block: 'start' });
 }
 
 function renderSettings() {
@@ -641,7 +945,13 @@ function renderSettings() {
     output.className = `connection-result ${state.lastConnection.ok ? 'is-ok' : 'is-bad'}`;
     output.textContent = `${state.lastConnection.ok ? '连接成功' : '连接未通过'} · ${asText(state.lastConnection.model, state.model)} · ${asText(state.lastConnection.message, '')}`;
     setVisible(output, true);
+    const exchangeButton = byId('open-last-connection-exchange');
+    exchangeButton.dataset.openExchange = asText(state.lastConnection.apiExchangeId, '');
+    setVisible(exchangeButton, Boolean(state.lastConnection.apiExchangeId));
+  } else {
+    setVisible(byId('open-last-connection-exchange'), false);
   }
+  renderExchangeRecords();
 }
 
 function renderNotice() {
@@ -1229,12 +1539,25 @@ async function testConnection() {
   renderSettings();
   try {
     const result = await apiJson('/connection-test', { method: 'POST', body: '{}' });
-    state.lastConnection = { ok: result?.ok === true, model: result?.model || state.model, message: result?.message || '' };
+    state.lastConnection = {
+      ok: result?.ok === true,
+      model: result?.model || state.model,
+      message: result?.message || '',
+      apiExchangeId: asText(result?.api_exchange_id, ''),
+    };
   } catch (error) {
-    state.lastConnection = { ok: false, model: state.model, message: error.message || '连接测试失败。' };
+    state.lastConnection = {
+      ok: false, model: state.model, message: error.message || '连接测试失败。',
+      apiExchangeId: error.apiExchangeId || '',
+    };
   } finally {
     state.connectionTesting = false;
     renderSettings();
+    await loadExchangeRecords({
+      preferredId: state.lastConnection?.apiExchangeId || '',
+      selectNewest: !state.lastConnection?.apiExchangeId,
+      reloadSelected: true,
+    });
   }
 }
 
@@ -1287,6 +1610,16 @@ document.addEventListener('click', (event) => {
     openRun(openRunButton.dataset.openRun);
     return;
   }
+  const openExchangeButton = event.target.closest('[data-open-exchange]');
+  if (openExchangeButton) {
+    openExchange(openExchangeButton.dataset.openExchange);
+    return;
+  }
+  const reloadExchangeButton = event.target.closest('[data-reload-exchange-detail]');
+  if (reloadExchangeButton) {
+    loadExchangeDetail(state.selectedExchangeId);
+    return;
+  }
   const exportButton = event.target.closest('[data-export-run]');
   if (exportButton) exportRun(exportButton.dataset.exportRun);
 });
@@ -1332,6 +1665,8 @@ byId('criteria-input').addEventListener('input', (event) => {
 });
 byId('config-form').addEventListener('submit', saveConfig);
 byId('connection-test').addEventListener('click', testConnection);
+byId('reload-api-exchanges').addEventListener('click', () => loadExchangeRecords({ reloadSelected: true }));
+byId('api-exchange-select').addEventListener('change', (event) => selectExchange(event.target.value));
 
 const dropZone = byId('drop-zone');
 const chartFileInput = byId('chart-file');
@@ -1359,7 +1694,7 @@ dropZone.addEventListener('drop', (event) => {
 
 byId('criteria-count').textContent = `${byId('criteria-input').value.length} 字`;
 renderAll();
-Promise.allSettled([loadStatus(), loadSignals(), loadRuns(), loadReferences()]);
+Promise.allSettled([loadStatus(), loadSignals(), loadRuns(), loadReferences(), loadExchangeRecords()]);
 
 byId('save-references').addEventListener('click', saveReferences);
 byId('reload-references').addEventListener('click', loadReferences);
