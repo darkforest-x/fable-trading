@@ -1,3 +1,5 @@
+// Use the unified workspace module scope when mounted; keep standalone tests pure.
+const document = typeof window !== "undefined" && window.SpikeVision ? window.SpikeVision.document : globalThis.document;
 // TradingView 4.2 uses a confirmed SPIKE seed plus a separate live observation.
 // API: https://tradingview.github.io/lightweight-charts/docs/4.2/api/interfaces/IChartApi
 let chart;

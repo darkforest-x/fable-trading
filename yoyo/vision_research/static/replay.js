@@ -1,5 +1,7 @@
+// Use the unified workspace module scope when mounted; keep standalone tests pure.
+const document = typeof window !== "undefined" && window.SpikeVision ? window.SpikeVision.document : globalThis.document;
 /* Historical replay UI. All chart rows and frozen images come from the replay API. */
-const API_BASE = '/api';
+const API_BASE = typeof window !== 'undefined' && window.SpikeVision ? '/api/vision' : '/api';
 const REPLAY_BASE = `${API_BASE}/replay`;
 const UTC8_OFFSET_MS = 8 * 60 * 60 * 1000;
 const MA_KEYS = ['sma20', 'ema20', 'sma60', 'ema60', 'sma120', 'ema120'];
@@ -749,7 +751,7 @@ function apiImageUrl(value) {
   if (typeof value !== 'string' || !value.trim()) return '';
   try {
     const parsed = new URL(value, window.location.href);
-    if (parsed.origin !== window.location.origin || !parsed.pathname.startsWith('/api/images/')) return '';
+    if (parsed.origin !== window.location.origin || !parsed.pathname.startsWith(`${API_BASE}/images/`)) return '';
     return parsed.href;
   } catch { return ''; }
 }

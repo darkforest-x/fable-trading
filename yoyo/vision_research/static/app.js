@@ -1,7 +1,9 @@
+// Use the unified workspace module scope when mounted; keep standalone tests pure.
+const document = typeof window !== "undefined" && window.SpikeVision ? window.SpikeVision.document : globalThis.document;
 import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
 import { exchangeConversation } from './conversation.js';
 import { initReplay, setReplayActive } from './replay.js';
-const API_BASE = '/api';
+const API_BASE = typeof window !== 'undefined' && window.SpikeVision ? '/api/vision' : '/api';
 const DEFAULT_MODEL = 'glm-5.3-flash';
 const DEFAULT_CRITERIA = '只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。';
 const MAX_IMAGE_BYTES = 5_000_000;
@@ -1719,7 +1721,7 @@ function safeApiImageUrl(raw) {
   if (!raw || typeof raw !== 'string') return null;
   try {
     const parsed = new URL(raw, window.location.origin);
-    if (parsed.origin !== window.location.origin || !parsed.pathname.startsWith('/api/')) return null;
+    if (parsed.origin !== window.location.origin || !parsed.pathname.startsWith(`${API_BASE}/`)) return null;
     return `${parsed.pathname}${parsed.search}`;
   } catch {
     return null;

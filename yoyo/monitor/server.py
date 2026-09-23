@@ -321,6 +321,9 @@ def create_app(runtime=None, start_monitor=True):
         except DesktopOpenError as error:
             raise HTTPException(error.status_code, str(error)) from error
 
+    from yoyo.research_workspace.api import install as install_research_workspace
+    install_research_workspace(app, runtime)
+
     app.mount("/static", StaticFiles(directory=str(STATIC), check_dir=False), name="static")
     return app
 

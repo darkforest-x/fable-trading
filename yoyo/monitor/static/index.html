@@ -10,6 +10,9 @@
   <link rel="stylesheet" href="/static/styles.css">
   <link rel="stylesheet" href="/static/ashare-backtest.css">
   <script src="/static/ashare-backtest.js" defer></script>
+  <link rel="stylesheet" href="/static/research.css">
+  <script src="/static/research.js" defer></script>
+  <script src="/static/vision-module.js" defer></script>
   <script src="/static/app.js" defer></script>
 </head>
 <body>
@@ -18,7 +21,7 @@
     <aside class="sidebar" aria-label="主导航">
       <a class="brand" href="#signals" aria-label="spike 信号中心">
         <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M4 22V9h6v9h6V5h8v17"/></svg></span>
-        <span class="brand-word">spike<span>MARKET OBSERVATORY</span></span>
+        <span class="brand-word">spike<span>RESEARCH WORKSPACE</span></span>
       </a>
       <div class="sidebar-label">工作空间</div>
       <nav class="nav-list">
@@ -29,6 +32,11 @@
         <button class="nav-item" data-view="breaks" aria-label="趋势线突破"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 4l16 7"/><path d="M5 17l4-5 3 2 5-8"/></svg><span>趋势线突破</span><span class="nav-count" title="24 小时趋势线突破数" id="nav-breaks-count">—</span></button>
         <button class="nav-item" data-view="shadow" aria-label="前向影子"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15V9l4 3 3-7 3 8 4-5v7"/><path d="M3 17h14"/></svg><span>前向影子</span><span class="nav-count" id="nav-shadow-count">—</span></button>
         <button class="nav-item" data-view="ashare" aria-label="A股回测"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V4M3 17h14M6 13l3-4 3 2 5-7"/></svg><span>A股回测</span></button>
+        <button class="nav-item" data-view="research" aria-label="研究总览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3ZM12 3h5v5h-5ZM3 12h5v5H3ZM12 12h5v5h-5Z"/></svg><span>研究总览</span></button>
+        <button class="nav-item" data-view="factors" aria-label="因子库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 10h12M4 16h12M7 2v4M13 8v4M8 14v4"/></svg><span>因子库</span></button>
+        <button class="nav-item" data-view="experiments" aria-label="实验登记"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"/></svg><span>实验登记</span></button>
+        <button class="nav-item" data-view="backtests" aria-label="回测任务"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"/></svg><span>回测任务</span></button>
+        <button class="nav-item" data-view="vision" aria-label="视觉研究"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5h16v12H2ZM5 14l4-5 3 3 3-5"/></svg><span>视觉研究</span></button>
         <button class="nav-item" data-view="system" aria-label="运行状态"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="5" rx="1.5"/><rect x="3" y="12" width="14" height="5" rx="1.5"/><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"/></svg><span>运行状态</span></button>
       </nav>
       <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div>SPIKE V9<small>V9 多空启动 → YOLO 补充确认</small></div></div>
@@ -128,10 +136,29 @@
 
         <section id="system-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2>运行状态</h2></div><span class="quiet-text">Mac 扫描 · 公开行情 · Bark</span></div><div class="system-grid"><article class="panel system-card scan-card"><div class="system-card-heading"><h3>行情扫描</h3><span id="scan-state-badge" class="neutral-badge">等待连接</span></div><div class="scan-progress"><div id="scan-progress-fill"></div></div><dl class="system-facts" id="scan-facts"></dl></article><article class="panel system-card"><div class="system-card-heading"><h3>Bark 推送</h3><span id="bark-state-badge" class="neutral-badge">等待连接</span></div><p class="system-card-description" id="bark-description">读取 Bark 通道状态…</p><dl class="system-facts" id="bark-facts"></dl></article><article class="panel system-card runtime-card"><div class="system-card-heading"><h3>Mac 监控服务</h3><span class="neutral-badge" id="service-version">—</span></div><dl class="system-facts" id="runtime-facts"></dl><p class="system-footnote">本页面展示指标事件与运行状态，不执行交易。监控需要 Mac 保持开机并联网。</p></article></div><details class="health-details panel"><summary>查看诊断信息<span>仅运行数据</span></summary><pre id="health-json">尚未读取诊断信息。</pre></details></section>
 
+        <div id="research-error" class="research-error hidden" role="alert"></div>
+        <section id="research-view" class="view-panel research-panel hidden"><div id="research-overview"><p class="research-empty">正在读取实验注册表…</p></div></section>
+        <section id="factors-view" class="view-panel research-panel hidden">
+          <div class="research-toolbar"><div><input id="factor-search" type="search" aria-label="搜索因子" placeholder="搜索因子、公式或来源…"><select id="factor-category" aria-label="因子类别"><option value="">全部类别</option></select><span id="factor-count" class="research-caption"></span></div><button id="new-factor" class="research-button primary">＋ 登记因子</button></div>
+          <div class="research-table-wrap"><table class="research-table"><thead><tr><th>因子</th><th>类别</th><th>定义</th><th>研究状态</th><th>关联实验</th><th></th></tr></thead><tbody id="factor-rows"></tbody></table></div>
+          <p class="research-caption">代码特征代表已实现，不代表已经证明盈利。研究状态与训练、实盘资格分别记录。</p>
+        </section>
+        <section id="experiments-view" class="view-panel research-panel hidden">
+          <div class="research-toolbar"><div><input id="experiment-search" type="search" aria-label="搜索实验" placeholder="搜索问题、因子、结论或实验编号…"><select id="experiment-status" aria-label="实验结论"><option value="">全部结论</option><option value="active">研究中</option><option value="rejected">已否定</option><option value="inconclusive">证据不足</option><option value="completed">已完成</option><option value="accepted">历史记录：通过</option><option value="superseded">已替代</option></select><span id="experiment-count" class="research-caption"></span></div><div><button id="compare-experiments" class="research-button" disabled>对照查看</button><button id="new-experiment" class="research-button primary">＋ 登记实验</button></div></div>
+          <div class="research-table-wrap"><table class="research-table experiment-table"><thead><tr><th>对照</th><th>实验 / 研究问题</th><th>原始结论</th><th>唯一变化</th><th>登记产物</th><th></th></tr></thead><tbody id="experiment-rows"></tbody></table></div><p id="experiment-limit" class="research-caption"></p>
+        </section>
+        <section id="backtests-view" class="view-panel research-panel hidden">
+          <div class="research-toolbar"><div><h2>离线回测队列</h2><span class="research-caption">排队 → 运行 → 结果复核</span></div><button id="new-backtest" class="research-button primary" disabled>＋ 新建回测</button></div>
+          <div class="research-callout"><strong>SPIKE V12.8 冻结规则重放</strong><p id="backtest-recipe-detail"></p><span id="backtest-availability"></span></div>
+          <p class="research-caption">任务独立于行情扫描运行。历史研究已在实验登记中保留；运行成功与策略结论分别记录。</p>
+          <div class="research-table-wrap"><table class="research-table"><thead><tr><th>任务</th><th>实验 / 范围</th><th>运行状态</th><th>创建时间</th><th></th></tr></thead><tbody id="job-rows"></tbody></table></div>
+        </section>
+        <section id="vision-view" class="view-panel hidden"><p id="vision-module-error" role="alert"></p><div id="vision-module"></div></section>
         <footer class="page-footer"><span>SPIKE <span class="footer-separator">/</span> 让趋势自己走出来。</span><span>启动与模型确认分阶段通知 · 信号价格不等于成交价格</span></footer>
       </main>
     </div>
   </div>
+  <dialog id="research-dialog" aria-label="研究记录详情"><div id="research-dialog-content"></div></dialog>
   <div id="tradingview-status" class="action-status hidden" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>

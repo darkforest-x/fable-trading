@@ -264,7 +264,11 @@ def test_cross_origin_host_and_request_formats_are_rejected(client):
     assert client.get("/api/status", headers={"Host": "evil.example"}).status_code == 400
     assert client.post("/api/config", content="bad", headers={"Content-Type": "text/plain"}).status_code == 415
     assert client.post("/api/config", content="x" * 5000, headers={"Content-Type": "application/json"}).status_code == 413
-    assert client.get("/").headers["x-frame-options"] == "DENY"
+    frontdoor = client.get("/", follow_redirects=False)
+    assert frontdoor.status_code == 307
+    assert frontdoor.headers["location"] == "http://127.0.0.1:8766/#vision"
+    assert frontdoor.headers["x-frame-options"] == "DENY"
+    assert client.get("/index.html").headers["x-frame-options"] == "DENY"
 
 
 def test_restart_marks_in_flight_result_unknown(tmp_path):

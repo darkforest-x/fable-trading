@@ -23,7 +23,7 @@ from typing import Literal, Optional
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Query, Request
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
 from starlette.concurrency import run_in_threadpool
@@ -561,6 +561,10 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
     from .replay import install_replay_routes
     install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange,
                           current_review_context, lambda: status()["model"], history=replay_history, cases=replay_cases)
+
+    @app.get("/")
+    def unified_workspace():
+        return RedirectResponse("http://127.0.0.1:8766/#vision", status_code=307)
 
     static = Path(__file__).parent / "static"
     app.mount("/", StaticFiles(directory=static, html=True), name="workbench")
