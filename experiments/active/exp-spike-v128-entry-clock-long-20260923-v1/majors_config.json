@@ -1,0 +1,62 @@
+{
+  "experiment_id": "exp-spike-v128-entry-clock-long-20260923-v1-majors",
+  "start": "2020-01-01T00:00:00Z",
+  "split": "2023-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "warmup_start": "2020-01-01T00:00:00Z",
+  "timeframes": [
+    15,
+    60
+  ],
+  "round_trip_cost": 0.002,
+  "control_seed": 923128,
+  "stat_seed": 923129,
+  "vol_bins": [
+    0.005,
+    0.01,
+    0.02,
+    0.05,
+    0.1
+  ],
+  "bootstrap": 2000,
+  "flips": 10000,
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_manifest": "data/research/spike_v128_recent_20260923/manifest.json",
+  "input_manifest": "data/research/spike_v128_entry_clock_majors_20260923/manifest.json",
+  "parent_run": "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/majors_baseline_v1",
+  "max_wait_bars": 24,
+  "diagnostic_wait_bars": 3,
+  "initial_position_policy": "carry_parent_position_at_window_start",
+  "timezone": "Asia/Shanghai",
+  "arms": [
+    "v9_both",
+    "joint"
+  ],
+  "policies": [
+    "baseline",
+    "retest"
+  ],
+  "rank_min_closed": 30,
+  "rank_min_weeks": 6,
+  "rank_min_each_half": 10,
+  "early_rank_min_closed": 15,
+  "early_rank_min_weeks": 3,
+  "statistics_seed": 923234,
+  "primary_test_slots": 48,
+  "old_window_start": "2026-07-23T00:00:00Z",
+  "notes": [
+    "Observation-horizon extension only; 2023-2024 selection, 2025 onward retrospective evaluation, plus monthly and annual slices.",
+    "Calendar month and year use actual Beijing entry time; unresolved/cross-cut trades explicitly retained.",
+    "The existing 638-symbol archive is not a point-in-time universe; preserve symbol coverage and fixed-incumbent sensitivity.",
+    "Existing frozen exchangeInfo tick sizes are reused; historical tick changes are not reconstructed.",
+    "No chart hint rendering or strategy-time gate adoption. Reports are not requested.",
+    "Replay starts flat at the available archive boundary; all policies warm their own serial history before analysis_start. The first incomplete/early-history month is separately tested for sensitivity."
+  ],
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "analysis_start": "2020-02-01T00:00:00Z",
+  "analysis_split": "2023-01-01T00:00:00Z"
+}

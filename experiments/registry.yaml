@@ -10874,3 +10874,13 @@ experiments:
     artifacts: [spike-v128-entry-clock-20260923-delivery]
     reuse_allowed: false
     notes: Baseline and retest, ordinary/joint15m and1h; existing random pairs retained only at the same entry-clock bucket, no redraw.
+
+  - experiment_id: exp-spike-v128-entry-clock-long-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    status: in_progress
+    question: Do Beijing entry-clock rankings persist over 2023 onward and longer BTC/ETH history?
+    single_variable: Extend the observation horizon of the unchanged V12.8 baseline and retest policies.
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    notes: Local same-source Binance history; independent policy warmup, monthly/yearly and fixed-incumbent comparisons. No report requested. Archived universe and tick metadata are not point-in-time.
