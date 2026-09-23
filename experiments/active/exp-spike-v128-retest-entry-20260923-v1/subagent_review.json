@@ -1,0 +1,27 @@
+{
+  "agent": "/root/delayed_confirmation_prior",
+  "actual_model": "gpt-6-luna",
+  "actual_reasoning_effort": "max",
+  "runtime_evidence": "/Users/zhangzc/.codex/sessions/2026/09/23/rollout-2026-09-23T15-43-47-01a0cd38-814d-7df1-a4e6-face0a96753e.jsonl turn_context and thread_spawn agent_path checked by parent and child",
+  "completed": [
+    "Read-only prior evidence review covering V6 retest2 and V3/V12.6/V12.7/V8/V39 boundaries",
+    "Implemented assigned pure causal state machine and16 synthetic tests",
+    "Read-only review of parent runner/report: found missing no-fill control requests",
+    "Checked fix of control coverage and engine identity override;25 focused tests pass"
+  ],
+  "findings_fixed": [
+    "Every original candidate now gets one random anchor, including no-fill requests",
+    "Experimental policy/arm/event identity takes precedence over engine generic metadata"
+  ],
+  "additional_independent_market_hand_calculation": {
+    "status": "not_completed",
+    "verified_market_events": 0,
+    "reason": "Optional extra BTC/ETH numerical audit was stopped at delivery closeout; do not claim completed independent market replay."
+  },
+  "scope_limits": [
+    "State-machine author and subsequent subagent reviewer are the same agent; not a blind independent-author audit",
+    "Full-market parent parity and ledger arithmetic are parent verification, not a second independent trading engine"
+  ],
+  "parent_verification": "verification.json",
+  "production_eligible": false
+}

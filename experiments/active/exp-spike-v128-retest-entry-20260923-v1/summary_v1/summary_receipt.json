@@ -1,0 +1,50 @@
+{
+  "config": {
+    "bootstrap": 2000,
+    "control_pools": [
+      "baseline",
+      "wait3",
+      "retest"
+    ],
+    "control_seed": 923128,
+    "diagnostic_wait_bars": 3,
+    "end": "2026-09-23T04:00:00Z",
+    "experiment_id": "exp-spike-v128-retest-entry-20260923-v1",
+    "initial_position_policy": "carry_parent_position_at_window_start",
+    "max_wait_bars": 24,
+    "parent_run": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1",
+    "primary_policy": "retest",
+    "production_eligible": false,
+    "round_trip_cost": 0.002,
+    "split": "2026-08-23T00:00:00Z",
+    "start": "2026-07-23T00:00:00Z",
+    "statistics_seed": 923231,
+    "timeframes": [
+      15,
+      60
+    ],
+    "training_eligible": false
+  },
+  "files": {
+    "candidate_outcomes.csv.gz": "bdf4e2f6fc614a16cb3c1752bf332fda228e13c5aed59dd4ba2b7c4c7a9111d4",
+    "controls.csv.gz": "befa91ba0bae1622db1d0b53274796704c8b44b47b14d42c0c826026d9eed17a",
+    "funnel.csv": "4539f060b23be74ee63f8b93c8ba230ed1291b8d7b32cd94e2dac0730a0f78f6",
+    "policy_comparison.csv": "4b6943cb2f0484d142a05f1667f9b77fb6128b3333e9c57a4454af451c503a71",
+    "price_cost.csv": "f2f55740c865a88d382e61e25fd2738df648e54fa8512497f5426b85633ccd1b",
+    "request_comparison.csv": "61b2d1eee16b548523a7812638713cb406d20790b9871d8c6643f5dd35c20a03",
+    "serial_statuses.csv.gz": "18e6e94ab7cda49ddb91ff052d2452fbaceb27754e5fdcd97e2421f27755a6f2",
+    "serial_trades.csv.gz": "0a0678f483eb8439f9e9bbfe6233b00f600f5fffc173c286cb7cdb1a51624fa5",
+    "subgroups.csv": "f66f1767a239ab2a66db6669f8b0c529c7ae6011d8ea22aeb1a1375ac0fae67f",
+    "summary.csv": "8a6be57e70d3e32f13baabf11d5b587a2bdade822124b6495ef1f011f30ffaff",
+    "tail_retention.csv": "3ec510e16f4d4f68ab869cffb0181546c31f92685a9fd7c787c5623ed62f4d7b"
+  },
+  "parent_parity_streams": 1276,
+  "run": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/run_v1",
+  "run_manifest_sha256": "1f626d9ad56388553caf99f84569132a242c5e9d67cd6eb5d1a703b2e0a4e183",
+  "source": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_report.py": "da702400a3c998cf2d7a1e12459ed608c51951c3d12c6489ce0c657735d6b312",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_report.py": "4e052537ae6a7e8f67a97533ab3e73b8791de18307617c0d139a9dde68dd5a6b",
+    "tests/evaluation/test_spike_v128_retest_report.py": "b5050f25e9e2e7684a39568b61cabee412b04f65c96efd169dd1a19cd592edc1"
+  },
+  "streams": 1276
+}

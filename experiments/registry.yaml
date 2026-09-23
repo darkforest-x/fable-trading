@@ -10847,15 +10847,15 @@ experiments:
 
   - experiment_id: exp-spike-v128-retest-entry-20260923-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder
-    status: running
+    source_commit: e0d48bcf8b7407837eef5dcd584a68e7835f0c5f
+    status: rejected
     question: Does ordered breakout-retest-rebreak entry reduce frequency and improve realized V12.8 win rate and high R?
     single_variable: Entry timing via three distinct closed bars and a fixed 24-bar observation deadline.
-    result: Preregistered before market construction; retain original stop, exits and 20bp cost.
+    result: Complete1276-stream replay; entries fall84.95%-87.95% and pooled win rises, but all four later netR are negative and ge5R density falls. Same-confirmation random excess is negative in all four primary cells, Holm p1; reject default adoption.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v128_retest_entry_20260923.md
-    artifacts: []
+    artifacts: [spike-v128-retest-entry-20260923-delivery]
     reuse_allowed: false
     notes: Fixed parent 638-contract universe, 15m/1h, ordinary both-side and joint long; no production changes.

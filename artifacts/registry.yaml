@@ -32486,3 +32486,19 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: 1276 streams complete; parent baseline and all-pool controls match exactly. Provenance fix rerun preserves all5104 ledger hashes. Full-history assets local archived; no Pine, exit, cost, training or live change.
+
+  - artifact_id: spike-v128-retest-entry-20260923-delivery
+    artifact_type: manifest
+    role: ordered_retest_entry_research_rejected_as_default
+    source_repo: darkforest-x/fable-trading
+    source_commit: e0d48bcf8b7407837eef5dcd584a68e7835f0c5f
+    source_path: experiments/active/exp-spike-v128-retest-entry-20260923-v1/delivery.json
+    sha256: 0ea096eae714d587b1769435c99c9fe1b3403fc5a39d54ff857fa0b72a910868
+    size_bytes: 2930
+    storage_uri: repo://experiments/active/exp-spike-v128-retest-entry-20260923-v1/delivery.json
+    config_hash: 11bc7514bd8782970c46d246ccdddfba0f20fd0aca800678ed1a719f7c22ea4d
+    data_cutoff: "2026-09-23T04:00:00Z"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Complete1276 streams with exact parent parity. Pooled win improves but ge5R density falls and all later netR negative; failed smokes retained. No Pine or live changes.

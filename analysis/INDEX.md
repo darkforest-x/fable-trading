@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **639** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **640** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -15,6 +15,7 @@
 | 2026-09-23 | [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) | SPIKE V12.7 候选：先突破后V9加时限的全量回测 | 延迟大幅下降，总亏损减少，但后段每笔净R没有改善，因此按运行前写死的规则，V12.7 里这个时限默认关闭、保留为开关。 |
 | 2026-09-23 | [`p1_spike_v128_expansion_entry_20260923.md`](p1_spike_v128_expansion_entry_20260923.md) | SPIKE V12.8：相对波动扩张入场门（2026-09-23） |  |
 | 2026-09-23 | [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) | SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测 | 普通 SPIKE 在本窗的候选信号为 **15m 7,060 个、1h 1,615 个**，已平仓净胜率分别为 **26.87% 和 34.43%**。联合多头另有 **15m 2,790 个、1h 689 个**，净胜率分别为 **27.38% 和 37.96%**。两种信号族重叠，不能相加... |
+| 2026-09-23 | [`p1_spike_v128_retest_entry_20260923.md`](p1_spike_v128_retest_entry_20260923.md) | SPIKE V12.8：突破回踩再突破，降频但未保住高 R（2026-09-23） | 结论：**完成全部638合约、15m/1h回测；这版确认规则暂不接入默认。** 它将成交减少84.95%–87.95%，全期净胜率提高约1.52–7.79个百分点，15m全期平均净R也改善；但≥5R比例四组均下降，后段四组平均净R全部为负，四项主要同确认随机对照均为负超额、Holm p均1。确... |
 | 2026-09-22 | [`p1_ma_morph_v6_econ_audit_20260922.md`](p1_ma_morph_v6_econ_audit_20260922.md) | 形态模型 v6 A 组：高分前 10% 正收益的稳健性复核 | 原报告数字完全复算：验证 top10 131 笔 +12.00bp/笔、测试 99 笔 +15.25bp/笔，成员与原 `top10_event_ids` 一致。 |
 | 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
 | 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |
@@ -1020,6 +1021,7 @@
 - [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) — SPIKE V12.7 候选：先突破后V9加时限的全量回测
 - [`p1_spike_v128_expansion_entry_20260923.md`](p1_spike_v128_expansion_entry_20260923.md) — SPIKE V12.8：相对波动扩张入场门（2026-09-23）
 - [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) — SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测
+- [`p1_spike_v128_retest_entry_20260923.md`](p1_spike_v128_retest_entry_20260923.md) — SPIKE V12.8：突破回踩再突破，降频但未保住高 R（2026-09-23）
 - [`p1_spike_v12_1_focus_view_20260920.md`](p1_spike_v12_1_focus_view_20260920.md) — SPIKE V12.1 简洁看盘
 - [`p1_spike_v12_2_history_regions_20260920.md`](p1_spike_v12_2_history_regions_20260920.md) — SPIKE V12.2：保留历史区域，只整理局部重复线
 - [`p1_spike_v12_4_5m_filter_20260920.md`](p1_spike_v12_4_5m_filter_20260920.md) — SPIKE V12.4：5m加入已完成15m EMA120过滤（2026-09-20）

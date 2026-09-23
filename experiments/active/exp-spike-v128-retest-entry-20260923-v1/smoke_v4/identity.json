@@ -1,0 +1,54 @@
+{
+  "code": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_entry.py": "68a9868ca841dbf334aa1d35151ca80251f4d05ffc8bf969338cc75ceddbf145",
+    "experiments/active/exp-spike-v128-retest-entry-20260923-v1/PROJECT_PLAN.md": "797470f661f510d887d74c2c0f1f1e210d3d4cd924ee7d3a3d19629a97af5619",
+    "experiments/active/exp-spike-v128-retest-entry-20260923-v1/config.json": "11bc7514bd8782970c46d246ccdddfba0f20fd0aca800678ed1a719f7c22ea4d",
+    "tests/evaluation/test_spike_v128_retest_entry.py": "365b070bebe4ac86d988da28790051381416ac4af83e83ae6b5dbf64f4b5da28",
+    "tests/evaluation/test_spike_v128_retest_state.py": "03ab610075bdf75a30dea5ab2f64a6a0a9b34beb3d820d06c27eff59bc322c18",
+    "yoyo/evaluation/spike_v128_expansion_entry.py": "fb27723a7070669a5182adc0de5b8634652b1b6e7795c279359d8dc14b0fad5d",
+    "yoyo/evaluation/spike_v128_recent_report.py": "4aa1efafaf202207aed24f38557fac7878f8a8489d0988703633819c0ac2b57a",
+    "yoyo/evaluation/spike_v128_retest_state.py": "af6d18af0fd201a12f55d5f68e18b04e200cf87bcf6694746ce7c5b7a408574c"
+  },
+  "config": {
+    "bootstrap": 2000,
+    "control_pools": [
+      "baseline",
+      "wait3",
+      "retest"
+    ],
+    "control_seed": 923128,
+    "diagnostic_wait_bars": 3,
+    "end": "2026-09-23T04:00:00Z",
+    "experiment_id": "exp-spike-v128-retest-entry-20260923-v1",
+    "initial_position_policy": "carry_parent_position_at_window_start",
+    "max_wait_bars": 24,
+    "parent_run": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1",
+    "primary_policy": "retest",
+    "production_eligible": false,
+    "round_trip_cost": 0.002,
+    "split": "2026-08-23T00:00:00Z",
+    "start": "2026-07-23T00:00:00Z",
+    "statistics_seed": 923231,
+    "timeframes": [
+      15,
+      60
+    ],
+    "training_eligible": false
+  },
+  "config_sha256": "11bc7514bd8782970c46d246ccdddfba0f20fd0aca800678ed1a719f7c22ea4d",
+  "inputs": {
+    "BTCUSDT": "05c0fd096bc48ae535a20baa365bbcd938138d25eaa5a5ca538e3e10395670ee",
+    "ETHUSDT": "6ab362ad4dc8bb9c548a8c129c6c7b876d8c065fd46d6c50e85c2c3a117f1144"
+  },
+  "parent_identity_sha256": "53f225455e2c7ce396d62db527eac690ef75ad79a45e07f8bce4e86c0750bece",
+  "parent_manifest_sha256": "5292a493ec320feedab877fdabfb806731cc1d3f60a360bfe854212a2bfb5e8f",
+  "subset": true,
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "timeframes": [
+    15,
+    60
+  ]
+}

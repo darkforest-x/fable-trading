@@ -1,0 +1,56 @@
+{
+  "experiment_id": "exp-spike-v128-retest-entry-20260923-v1",
+  "status": "completed_rejected_as_universal_entry_gate",
+  "generated_at": "2026-09-23T08:27:08.510699+00:00",
+  "initial_plan_and_builder_commit": "ace7b08e0c",
+  "runner_source_commit": "e0d48bcf8b7407837eef5dcd584a68e7835f0c5f",
+  "reporter_source_commit": "ace7b08e0c",
+  "completed_streams": 1276,
+  "stream_errors": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "native_market_event_parity_verified": false,
+  "config": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/config.json",
+    "sha256": "11bc7514bd8782970c46d246ccdddfba0f20fd0aca800678ed1a719f7c22ea4d",
+    "size_bytes": 671
+  },
+  "parent_manifest": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1/manifest.json",
+    "sha256": "5292a493ec320feedab877fdabfb806731cc1d3f60a360bfe854212a2bfb5e8f",
+    "size_bytes": 137988
+  },
+  "final_run_identity": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/run_v1/identity.json",
+    "sha256": "d30273067896af5fcb78b699d5dc591061f948025c139526420d785eecce364f",
+    "size_bytes": 65981
+  },
+  "final_run_manifest": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/run_v1/manifest.json",
+    "sha256": "1f626d9ad56388553caf99f84569132a242c5e9d67cd6eb5d1a703b2e0a4e183",
+    "size_bytes": 112439
+  },
+  "summary_receipt": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/summary_v1/summary_receipt.json",
+    "sha256": "ce01b5e037bbb706e7952e659d4ce1fc93d9c8f6e44b1e3ffb28eb69973ea178",
+    "size_bytes": 2446
+  },
+  "verification": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/verification.json",
+    "sha256": "6780180c0197bad49c0ff169279e9f923014a97c01f0a2c167de29759007444e",
+    "size_bytes": 1334
+  },
+  "bulk_archive": {
+    "path": "archive/consolidated/spike_v128_retest_entry_20260923/replay_and_ledgers_v1.tar",
+    "sha256": "676a67c71f1d009d0b9360b898413d78489ce5a821799a7fa3fad9fa08c68acf",
+    "size_bytes": 43211264
+  },
+  "storage_note": "Full replay, successful smoke, failed smoke manifests, aggregate ledgers and tables retained in local tar, not Git. Source-only clones require restoring authenticated parent raw inputs and parent replay assets. All identities/manifests and compact summaries committed.",
+  "finding": "Entries fall84.95%-87.95%, pooled win rates rise, but ge5R density falls in all four cells and later netR is negative in all four. Primary same-confirmation matched bp excess is negative in all four, Holm p1. No default adoption.",
+  "notion_url": "https://app.notion.com/p/3e48856479af81d8a1eece7071453496",
+  "subagent_review": {
+    "path": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/subagent_review.json",
+    "sha256": "90f3612233691bd90637dd9632c089d936db07f5f128dddd12ba6e60ebb2a6c8",
+    "size_bytes": 1503
+  }
+}
