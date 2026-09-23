@@ -6,6 +6,17 @@ const MAX_IMAGE_BYTES = 5_000_000;
 const MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024;
 const MAX_REFERENCES = 49; // Zhipu vision allows 50 total images including the candidate.
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
+const LIVE_WINDOW_OPTIONS = [6, 12, 24, 48];
+const LIVE_WINDOW_STORAGE_KEY = 'spike-vision-post-signal-bars';
+
+function loadPostSignalBars() {
+  try {
+    const value = Number(localStorage.getItem(LIVE_WINDOW_STORAGE_KEY));
+    return LIVE_WINDOW_OPTIONS.includes(value) ? value : 12;
+  } catch {
+    return 12;
+  }
+}
 
 const state = {
   tab: 'workspace',
@@ -13,6 +24,8 @@ const state = {
   statusError: '',
   signals: [],
   signalsLoading: true,
+  signalsRequestToken: 0,
+  signalsPolling: false,
   signalsError: '',
   signalsWarning: '',
   runs: [],
@@ -22,6 +35,10 @@ const state = {
   selectedImage: null,
   imageToken: 0,
   imageAbort: null,
+  chartAbort: null,
+  chartRefreshToken: 0,
+  captureInProgress: false,
+  postSignalBars: loadPostSignalBars(),
   references: [],
   referenceRevision: null,
   referencesReady: false,
@@ -115,6 +132,48 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return asText(value, '时间未提供');
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
+}
+
+function formatMarketTime(value, withSeconds = false) {
+  const stamp = Number(value);
+  if (!Number.isFinite(stamp) || stamp <= 0) return '时间未提供';
+  return new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', ...(withSeconds ? { second: '2-digit' } : {}), hour12: false,
+  }).format(new Date(stamp));
+}
+
+function formatMarketClock(value, withSeconds = false) {
+  const stamp = Number(value);
+  if (!Number.isFinite(stamp) || stamp <= 0) return '时间未提供';
+  return new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai', hour: '2-digit', minute: '2-digit',
+    ...(withSeconds ? { second: '2-digit' } : {}), hour12: false,
+  }).format(new Date(stamp));
+}
+
+function liveSnapshotInfo(image, now = Date.now()) {
+  const provenance = image?.chartData?.provenance;
+  if (!provenance || provenance.time_boundary !== 'live_observation') return null;
+  const observed = Number(provenance.observed_at_ms);
+  const expires = Number(provenance.recognition_expires_ms);
+  const signalClose = Number(provenance.signal_bar_close_ms ?? image?.signal?.bar_close_ms);
+  const duration = Number(image?.signal?.timeframe_min) * 60_000;
+  const rows = image?.chartData?.candles || [];
+  const postBarsSeen = rows.filter((row) => Number(row.t) >= signalClose).length;
+  const fresh = Number.isFinite(observed) && now >= observed && now - observed <= 90_000;
+  const expired = Number.isFinite(expires) && now >= expires;
+  const stale = provenance.source_stale === true || image?.liveRefreshError === true;
+  const usable = provenance.recognition_eligible === true && !stale && fresh && !expired
+    && /^[a-f0-9]{32}$/i.test(String(image?.chartData?.snapshot_id || ''))
+    && /^[a-f0-9]{64}$/i.test(String(image?.chartData?.chart_sha256 || ''))
+    && Number(provenance.post_signal_bars) === state.postSignalBars
+    && !image?.frozen && !image?.error;
+  return {
+    provenance, observed, expires, signalClose, duration, postBarsSeen,
+    windowBars: Number(provenance.post_signal_bars) || state.postSignalBars,
+    fresh, expired, stale, usable,
+  };
 }
 
 function sideLabel(side) {
@@ -219,6 +278,62 @@ function renderSignals() {
   }).join('');
 }
 
+function renderLiveControls(image) {
+  const liveControls = byId('live-chart-controls');
+  const liveStatus = byId('live-chart-status');
+  const isSignal = image?.source === 'signal' && image.signal;
+  setVisible(liveControls, Boolean(isSignal));
+  if (!isSignal) {
+    setVisible(liveStatus, false);
+    return;
+  }
+
+  const windowSelect = byId('recognition-window');
+  windowSelect.value = String(state.postSignalBars);
+  windowSelect.disabled = Boolean(state.analysisLoading || state.captureInProgress || image.loading || image.frozen);
+  const refreshButton = byId('refresh-live-chart');
+  refreshButton.disabled = Boolean(state.analysisLoading || state.captureInProgress || image.loading || image.chartRefreshing || image.frozen);
+  refreshButton.textContent = image.chartRefreshing ? '正在刷新…' : '↻ 立即刷新';
+
+  const info = liveSnapshotInfo(image);
+  let message;
+  let className = 'is-waiting';
+  if (image.loading && !image.chartData) {
+    message = '正在读取实时行情…';
+  } else if (image.frozen) {
+    message = `本次识别快照 · ${formatMarketClock(info?.observed, true)} · 返回实时图表后继续更新。`;
+  } else if (image.chartRefreshing) {
+    message = info?.usable ? `正在更新 · 当前快照 ${formatMarketClock(info.observed, true)} · 末根${info.provenance.last_bar_closed ? '已收盘' : '未收盘'}` : '正在读取新行情…';
+  } else if (image.liveRefreshMessage) {
+    message = `${image.liveRefreshMessage} 当前显示上次快照，不可识别。`;
+    className = 'is-stale';
+  } else if (!info) {
+    message = image.error ? `实时图表不可用：${image.error}` : '等待实时行情快照。';
+    className = image.error ? 'is-stale' : 'is-waiting';
+  } else {
+    const updated = formatMarketClock(info.provenance.observed_at_ms, true);
+    if (info.expired) {
+      message = `识别窗口已于 ${formatMarketTime(info.expires)} 结束；可扩大范围后刷新。`;
+      className = 'is-stale';
+    } else if (info.stale) {
+      message = `行情滞后 · 显示上次快照（${updated}），已禁用识别。`;
+      className = 'is-stale';
+    } else if (!info.fresh) {
+      message = `快照超过 90 秒未更新（${updated}），已禁用识别。`;
+      className = 'is-stale';
+    } else if (info.usable) {
+      message = `每 10 秒更新 · 更新于 ${updated} · 末根 K 线${info.provenance.last_bar_closed === false ? '未收盘' : '已收盘'}`;
+      className = 'is-ready';
+    } else {
+      message = `当前快照不可识别 · 更新于 ${updated}`;
+      className = 'is-waiting';
+    }
+  }
+  liveStatus.className = `live-chart-status ${className}`;
+  liveStatus.textContent = message;
+  setVisible(liveStatus, true);
+}
+
 function renderImage() {
   const image = state.selectedImage;
   const liveChart = Boolean(image?.chartData && !image.loading && !image.error && !image.frozen);
@@ -231,6 +346,7 @@ function renderImage() {
   setVisible(byId('fit-chart'), liveChart);
   setVisible(byId('resume-chart'), Boolean(image?.chartData && image.frozen));
   byId('resume-chart').disabled = state.analysisLoading;
+  byId('resume-chart').textContent = '返回实时图表并刷新';
   setVisible(byId('image-display'), Boolean(image?.previewUrl && !image.loading && !image.error && !liveChart));
   byId('clear-input').disabled = !image;
   byId('image-heading').textContent = image?.signal ? `${image.signal.symbol.replace(/-SWAP$/, '')} · ${image.signal.timeframe}` : image?.name || '图表工作台';
@@ -238,13 +354,19 @@ function renderImage() {
   chip.textContent = image?.source === 'signal' ? 'SPIKE' : image?.source === 'history' ? '识别快照' : '上传图片';
   setVisible(chip, Boolean(image));
   const summary = byId('selection-summary');
-  summary.textContent = image?.signal ? `截至 ${formatDate(image.signal.signal_at)} · ${image.chartData?.candles.length || ''} 根已收盘 K 线` : '';
+  const liveInfo = liveSnapshotInfo(image);
+  summary.textContent = image?.signal
+    ? liveInfo
+      ? `信号 ${formatMarketTime(liveInfo.signalClose)} · 后续 ${liveInfo.postBarsSeen}/${liveInfo.windowBars} 根 · 可识别至 ${formatMarketTime(liveInfo.expires)}`
+      : `截至信号收盘 ${formatDate(image.signal.signal_at)} · ${image.chartData?.candles.length || ''} 根`
+    : '';
   setVisible(summary, Boolean(image?.signal));
   const preview = byId('chart-preview');
   if (image?.previewUrl && preview.getAttribute('src') !== image.previewUrl) preview.src = image.previewUrl;
   if (!image) preview.removeAttribute('src');
   preview.alt = image?.name ? `图表：${image.name}` : '当前图表';
-  byId('chart-context').textContent = liveChart ? '拖动平移 · 滚轮缩放 · UTC+8 · 截至信号时点' : image?.frozen ? '本次发送的图表快照' : image?.source === 'history' ? '当次发送的原始图片' : '支持拖放图片';
+  byId('chart-context').textContent = liveChart ? '拖动平移 · 滚轮缩放 · UTC+8 · 实时观察，含可能未收盘 K 线' : image?.frozen ? '本次发送的冻结图表快照' : image?.source === 'history' ? '当次发送的原始图片' : '支持拖放图片';
+  renderLiveControls(image);
   if (liveChart) showChart(image.chartData, image.key);
   renderOverlay();
 }
@@ -365,11 +487,23 @@ function renderRunStatus() {
 
 function renderResult() {
   renderRunStatus();
-  const canAnalyze = Boolean(state.selectedImage && !state.selectedImage.loading && !state.selectedImage.error
-    && (state.selectedSignal || (state.selectedImage.source === 'upload' && state.selectedImage.dataUrl))
+  const image = state.selectedImage;
+  const liveInfo = image?.source === 'signal' ? liveSnapshotInfo(image) : null;
+  const sourceReady = image?.source === 'signal' ? Boolean(liveInfo?.usable)
+    : image?.source === 'upload' && Boolean(image.dataUrl);
+  const canAnalyze = Boolean(image && !image.loading && !image.error && sourceReady
+    && !state.captureInProgress
     && !state.analysisLoading && state.referencesReady && !state.referencesDirty && !state.referencesSaving);
   byId('analyze-button').disabled = !canAnalyze;
-  byId('analyze-button').querySelector('.button-label').textContent = state.analysisLoading ? '正在识别…' : state.referencesDirty ? '请先保存参考图' : '开始识别';
+  const analyzeLabel = state.analysisLoading ? '正在识别…'
+    : state.referencesDirty ? '请先保存参考图'
+      : image?.frozen && image.source === 'signal' ? '返回实时图表后再次识别'
+        : image?.chartRefreshing && !liveInfo?.usable ? '正在更新行情…'
+          : image?.source === 'signal' && liveInfo?.expired ? '识别窗口已结束，可扩大范围'
+            : image?.source === 'signal' && liveInfo?.stale ? '行情滞后，暂不可识别'
+              : image?.source === 'signal' && !liveInfo?.usable ? '等待可识别的实时快照'
+                : '开始识别';
+  byId('analyze-button').querySelector('.button-label').textContent = analyzeLabel;
   setVisible(byId('analyze-button').querySelector('.button-spinner'), state.analysisLoading);
   showInlineError('analyze-error', state.analysisError);
 
@@ -404,6 +538,7 @@ function renderResult() {
     <dt>本次规则</dt><dd>${escapeHtml(criteria)}</dd>
     <dt>模型</dt><dd>${escapeHtml(model)}</dd>
     <dt>时间</dt><dd>${escapeHtml(created)}</dd>
+    ${run.provenance?.time_boundary === 'live_observation' ? `<dt>行情快照</dt><dd>信号 ${escapeHtml(formatMarketTime(run.provenance.signal_bar_close_ms))} · 观察 ${escapeHtml(formatMarketTime(run.provenance.observed_at_ms, true))} · 末根${run.provenance.last_bar_closed ? '已收盘' : '未收盘'}</dd>` : ''}
     ${latency ? `<dt>耗时</dt><dd>${escapeHtml(latency)}</dd>` : ''}
     ${usage ? `<dt>用量</dt><dd>${escapeHtml(usage)}</dd>` : ''}
     ${run.image_sha256 ? `<dt>图片 SHA-256</dt><dd class="hash-value">${escapeHtml(run.image_sha256)}</dd>` : ''}
@@ -565,21 +700,132 @@ async function loadStatus() {
   renderAll();
 }
 
-async function loadSignals() {
-  state.signalsLoading = true;
-  state.signalsError = '';
-  renderSignals();
+async function loadSignals({ quiet = false } = {}) {
+  if (quiet && state.signalsPolling) return;
+  const token = ++state.signalsRequestToken;
+  state.signalsPolling = true;
+  if (!quiet) {
+    state.signalsLoading = true;
+    state.signalsError = '';
+    renderSignals();
+  }
   try {
-    const payload = await apiJson('/signals');
-    state.signals = Array.isArray(payload?.items) ? payload.items.filter((item) => item && typeof item === 'object') : [];
+    const payload = await apiJson('/signals', { cache: 'no-store' });
+    if (token !== state.signalsRequestToken) return;
+    const items = Array.isArray(payload?.items) ? payload.items.filter((item) => item && typeof item === 'object') : [];
+    state.signals = items;
     state.signalsWarning = asText(payload?.warning, '');
     state.signalsError = '';
+    const selectedId = asText(state.selectedSignal?.id);
+    const freshSelected = items.find((item) => asText(item.id) === selectedId);
+    if (freshSelected) {
+      state.selectedSignal = freshSelected;
+      if (state.selectedImage?.key === `signal:${selectedId}`) state.selectedImage.signal = freshSelected;
+    }
   } catch (error) {
-    state.signals = [];
-    state.signalsError = error.message || '候选信号读取失败。';
+    if (token !== state.signalsRequestToken) return;
+    if (quiet) state.signalsWarning = error.message || '候选列表更新失败，保留上次数据。';
+    else {
+      state.signals = [];
+      state.signalsError = error.message || '候选信号读取失败。';
+    }
   } finally {
-    state.signalsLoading = false;
-    renderSignals();
+    if (token === state.signalsRequestToken) {
+      state.signalsPolling = false;
+      state.signalsLoading = false;
+      renderSignals();
+    }
+  }
+}
+
+function cancelLiveChartRequest() {
+  state.chartRefreshToken += 1;
+  state.chartAbort?.abort();
+  state.chartAbort = null;
+}
+
+async function refreshSelectedLiveChart({ manual = false, initial = false } = {}) {
+  const image = state.selectedImage;
+  const signal = state.selectedSignal;
+  if (!signal || image?.source !== 'signal' || state.analysisLoading || state.captureInProgress || image?.frozen) return false;
+  if (!initial && image.loading) return false;
+  if (!manual && (image.chartRefreshing || state.chartAbort)) return false;
+  if (!manual && (state.tab !== 'workspace' || document.hidden)) return false;
+
+  cancelLiveChartRequest();
+  const token = state.chartRefreshToken;
+  const key = image.key;
+  const id = asText(signal.id);
+  const controller = new AbortController();
+  state.chartAbort = controller;
+  state.selectedImage = { ...image, loading: initial || image.loading, chartRefreshing: !initial, error: '', liveRefreshMessage: '' };
+  renderWorkspace();
+
+  const stillCurrent = () => token === state.chartRefreshToken
+    && state.selectedImage?.key === key
+    && state.selectedImage?.source === 'signal'
+    && !state.selectedImage?.frozen
+    && !state.analysisLoading
+    && !state.captureInProgress && state.tab === 'workspace' && !document.hidden;
+  try {
+    const query = new URLSearchParams({ mode: 'live', post_signal_bars: String(state.postSignalBars) });
+    const data = await apiJson(`/signals/${encodeURIComponent(id)}/chart?${query}`, {
+      signal: controller.signal, cache: 'no-store',
+    });
+    if (!stillCurrent()) return false;
+    if (!Array.isArray(data?.candles) || !data.candles.length
+        || data?.provenance?.time_boundary !== 'live_observation'
+        || !/^[a-f0-9]{32}$/i.test(String(data?.snapshot_id || ''))
+        || !/^[a-f0-9]{64}$/i.test(String(data?.chart_sha256 || ''))) {
+      throw new Error('实时图表快照格式无效，已暂停识别。');
+    }
+    const current = state.selectedImage;
+    const changed = current.chartData?.chart_sha256 && current.chartData.chart_sha256 !== data.chart_sha256;
+    if (changed) {
+      state.activeRun = null;
+      state.activeRunInputKey = null;
+    }
+    state.selectedImage = {
+      ...current, loading: false, chartRefreshing: false, error: '',
+      chartData: data, chartSha256: data.chart_sha256, frozen: false,
+      previewUrl: null, dataUrl: null, liveRefreshMessage: '', liveRefreshError: false,
+    };
+    state.chartAbort = null;
+    if (initial) {
+      byId('candidates-panel').classList.remove('is-open');
+      byId('toggle-candidates').setAttribute('aria-expanded', 'false');
+    }
+    renderWorkspace();
+    return true;
+  } catch (error) {
+    if (error.name === 'AbortError' || token !== state.chartRefreshToken) return false;
+    if (!stillCurrent()) return false;
+    const current = state.selectedImage;
+    if (current.chartData) {
+      const staleData = {
+        ...current.chartData,
+        provenance: { ...current.chartData.provenance, source_stale: true, recognition_eligible: false },
+      };
+      state.selectedImage = {
+        ...current, loading: false, chartRefreshing: false, chartData: staleData,
+        chartSha256: staleData.chart_sha256, liveRefreshMessage: error.message || '实时行情读取失败',
+        liveRefreshError: true,
+      };
+    } else {
+      state.selectedImage = {
+        ...current, loading: false, chartRefreshing: false,
+        error: error.message || '实时图表读取失败。', liveRefreshMessage: '', liveRefreshError: true,
+      };
+    }
+    state.chartAbort = null;
+    renderWorkspace();
+    return false;
+  } finally {
+    if (token === state.chartRefreshToken && state.selectedImage?.key === key
+        && state.selectedImage.chartRefreshing) {
+      state.selectedImage = { ...state.selectedImage, loading: false, chartRefreshing: false };
+      renderWorkspace();
+    }
   }
 }
 
@@ -607,6 +853,7 @@ function clearActiveImage({ keepNotice = false } = {}) {
   state.imageToken += 1;
   state.imageAbort?.abort();
   state.imageAbort = null;
+  cancelLiveChartRequest();
   destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = null;
@@ -622,10 +869,11 @@ async function selectSignal(signal) {
   if (!signal?.id) return;
   const id = asText(signal.id);
   if (state.selectedSignal?.id === signal.id && state.selectedImage?.loading) return;
+  if (state.selectedSignal?.id === signal.id && state.selectedImage?.chartData) return;
   state.imageToken += 1;
-  const token = state.imageToken;
   state.imageAbort?.abort();
-  state.imageAbort = new AbortController();
+  state.imageAbort = null;
+  cancelLiveChartRequest();
   destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = signal;
@@ -636,20 +884,7 @@ async function selectSignal(signal) {
   state.notice = '';
   showMessage(workspaceErrorEl, '');
   renderWorkspace();
-  try {
-    const data = await apiJson(`/signals/${encodeURIComponent(id)}/chart`, { signal: state.imageAbort.signal });
-    if (token !== state.imageToken || state.selectedImage?.key !== `signal:${id}`) return;
-    state.selectedImage = { ...state.selectedImage, loading: false, chartData: data, chartSha256: data.chart_sha256, frozen: false };
-    byId('candidates-panel').classList.remove('is-open');
-    byId('toggle-candidates').setAttribute('aria-expanded', 'false');
-
-    renderWorkspace();
-  } catch (error) {
-    if (error.name === 'AbortError') return;
-    if (token !== state.imageToken || state.selectedImage?.key !== `signal:${id}`) return;
-    state.selectedImage = { ...state.selectedImage, loading: false, error: error.message || '候选图表读取失败。' };
-    renderWorkspace();
-  }
+  await refreshSelectedLiveChart({ initial: true });
 }
 
 function inferMime(file) {
@@ -695,6 +930,7 @@ async function addPrimaryImage(file) {
   const token = state.imageToken;
   state.imageAbort?.abort();
   state.imageAbort = null;
+  cancelLiveChartRequest();
   destroyChart();
   revokeImage(state.selectedImage);
   const key = `upload:${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
@@ -756,16 +992,34 @@ async function analyze() {
   }
   const image = state.selectedImage;
   const signal = state.selectedSignal;
-  if (image.loading || image.error || (!signal && !image.dataUrl)) return;
+  if (image.loading || image.error || state.captureInProgress || (!signal && !image.dataUrl)) return;
   let capture = null;
   if (signal && image.chartData) {
+    const liveInfo = liveSnapshotInfo(image);
+    if (!liveInfo?.usable) {
+      state.analysisError = image.frozen ? '当前显示的是已发送快照；返回实时图表并刷新后才能再次识别。'
+        : liveInfo?.expired ? '已超出当前信号后识别窗口；可扩大范围并刷新。'
+          : liveInfo?.stale ? '行情滞后，当前图表不可识别；请刷新实时图表。'
+            : '实时快照已过期或无效；请刷新图表后再识别。';
+      renderResult();
+      return;
+    }
+    cancelLiveChartRequest();
+    image.chartRefreshing = false;
+    state.captureInProgress = true;
+    let captureFailure = '';
     try {
-      capture = image.frozen ? image.dataUrl : captureChart();
+      capture = captureChart();
       image.previewUrl = capture;
       image.dataUrl = capture;
       image.frozen = true;
     } catch (error) {
-      state.analysisError = error.message;
+      captureFailure = error.message || '图表截图失败。';
+    } finally {
+      state.captureInProgress = false;
+    }
+    if (captureFailure) {
+      state.analysisError = captureFailure;
       renderResult();
       return;
     }
@@ -783,6 +1037,7 @@ async function analyze() {
     image_name: signal ? null : image.name,
     chart_capture_data_url: capture,
     expected_chart_sha256: signal ? image.chartSha256 : null,
+    chart_snapshot_id: signal ? image.chartData?.snapshot_id || null : null,
     reference_revision: state.referenceRevision,
     criteria: byId('criteria-input').value.trim() || DEFAULT_CRITERIA,
     model: state.model || null,
@@ -804,6 +1059,9 @@ async function analyze() {
     state.analysisLoading = false;
     renderWorkspace();
     renderHistory();
+    if (state.selectedSignal && state.selectedImage?.source === 'signal' && state.selectedImage.loading) {
+      refreshSelectedLiveChart({ initial: true });
+    }
   }
 }
 
@@ -826,6 +1084,7 @@ async function openRun(id) {
   const token = state.imageToken;
   state.imageAbort?.abort();
   state.imageAbort = new AbortController();
+  cancelLiveChartRequest();
   destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = null;
@@ -982,6 +1241,8 @@ async function testConnection() {
 function switchTab(tab) {
   if (!['workspace', 'references', 'history', 'settings'].includes(tab)) return;
   state.tab = tab;
+  if (tab !== 'workspace') pauseLivePolling();
+  if (tab === 'workspace') pollLiveChart();
   if (tab === 'references' && !state.referencesDirty && !state.referencesSaving) loadReferences();
   renderAll();
   byId(`tab-${tab}-button`).focus({ preventScroll: true });
@@ -1110,9 +1371,44 @@ byId('resume-chart').addEventListener('click', () => {
   if (state.analysisLoading || !state.selectedImage?.chartData) return;
   state.selectedImage.frozen = false;
   state.activeRunInputKey = null;
-  renderImage();
+  state.activeRun = null;
+  state.analysisError = '';
+  refreshSelectedLiveChart({ manual: true });
 });
 byId('toggle-candidates').addEventListener('click', () => {
   const expanded = byId('candidates-panel').classList.toggle('is-open');
   byId('toggle-candidates').setAttribute('aria-expanded', String(expanded));
 });
+
+function pauseLivePolling() {
+  cancelLiveChartRequest();
+  if (state.selectedImage?.chartRefreshing) state.selectedImage.chartRefreshing = false;
+}
+
+function pollLiveChart() {
+  if (document.hidden || state.tab !== 'workspace' || state.analysisLoading || state.captureInProgress
+      || state.selectedImage?.frozen || state.chartAbort) return;
+  refreshSelectedLiveChart({ initial: Boolean(state.selectedImage?.loading) });
+}
+
+byId('refresh-live-chart').addEventListener('click', () => refreshSelectedLiveChart({ manual: true }));
+byId('recognition-window').addEventListener('change', (event) => {
+  const value = Number(event.target.value);
+  if (!LIVE_WINDOW_OPTIONS.includes(value) || state.analysisLoading || state.selectedImage?.frozen) return;
+  state.postSignalBars = value;
+  try { localStorage.setItem(LIVE_WINDOW_STORAGE_KEY, String(value)); } catch { /* Session preference still works. */ }
+  state.analysisError = '';
+  refreshSelectedLiveChart({ manual: true });
+});
+setInterval(pollLiveChart, 10_000);
+setInterval(() => {
+  if (!document.hidden && state.tab === 'workspace' && !state.analysisLoading) loadSignals({ quiet: true });
+}, 30_000);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseLivePolling();
+  else {
+    pollLiveChart();
+    if (state.tab === 'workspace') loadSignals({ quiet: true });
+  }
+});
+window.addEventListener('pagehide', pauseLivePolling);

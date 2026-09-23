@@ -1,10 +1,14 @@
-// TradingView 4.2 uses only the server's closed, causal SPIKE window.
+// TradingView 4.2 uses a confirmed SPIKE seed plus a separate live observation.
 // API: https://tradingview.github.io/lightweight-charts/docs/4.2/api/interfaces/IChartApi
 let chart;
 let candles;
 let movingAverages = [];
 let observer;
 let activeKey;
+let activeDataHash;
+let candleCount = 0;
+let firstCandleTimeMs;
+let candleIntervalMs;
 const keys = ['sma20', 'ema20', 'sma60', 'ema60', 'sma120', 'ema120'];
 const host = () => document.getElementById('tradingview-chart');
 const token = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -32,7 +36,19 @@ export function applyChartTheme() {
 }
 
 export function showChart(data, key) {
-  if (activeKey === key && chart) return;
+  if (activeKey === key && chart) {
+    if (data?.chart_sha256 && data.chart_sha256 === activeDataHash) return;
+    const scale = chart.timeScale();
+    const logicalRange = scale.getVisibleLogicalRange();
+    const followedTail = !logicalRange || logicalRange.to >= candleCount - 1.5;
+    const oldCount = candleCount;
+    const oldFirst = firstCandleTimeMs;
+    const oldInterval = candleIntervalMs;
+    updateSeries(data);
+    preserveLogicalRange(scale, logicalRange, oldCount, oldFirst, oldInterval, followedTail);
+    activeDataHash = data?.chart_sha256;
+    return;
+  }
   destroyChart();
   if (!window.LightweightCharts) throw new Error('TradingView 图表组件未载入，请刷新页面。');
   const container = host();
@@ -44,12 +60,10 @@ export function showChart(data, key) {
   const minimum = Math.min(...data.candles.map(row => row.l));
   const precision = Math.min(10, Math.max(2, 4 - Math.floor(Math.log10(minimum))));
   candles = chart.addCandlestickSeries({ borderVisible: false, priceFormat: { type: 'price', precision, minMove: 10 ** -precision } });
-  candles.setData(data.candles.map(row => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
   movingAverages = keys.map((field) => {
-    const series = chart.addLineSeries({ lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
-    series.setData(data.candles.map(row => Number.isFinite(row[field]) ? { time: row.t / 1000, value: row[field] } : { time: row.t / 1000 }));
-    return series;
+    return chart.addLineSeries({ lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false });
   });
+  updateSeries(data);
   applyChartTheme();
   chart.timeScale().fitContent();
   observer = new ResizeObserver(() => {
@@ -57,6 +71,39 @@ export function showChart(data, key) {
   });
   observer.observe(container);
   activeKey = key;
+  activeDataHash = data?.chart_sha256;
+}
+
+function updateSeries(data) {
+  const rows = Array.isArray(data?.candles) ? data.candles : [];
+  if (!rows.length || !candles) return;
+  candles.setData(rows.map(row => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
+  movingAverages.forEach((series, index) => {
+    const field = keys[index];
+    series.setData(rows.map(row => Number.isFinite(row[field])
+      ? { time: row.t / 1000, value: row[field] }
+      : { time: row.t / 1000 }));
+  });
+  candleCount = rows.length;
+  firstCandleTimeMs = Number(rows[0].t);
+  candleIntervalMs = rows.length > 1 ? Number(rows[1].t) - Number(rows[0].t) : undefined;
+}
+
+function preserveLogicalRange(scale, range, oldLength, oldFirst, oldInterval, followedTail) {
+  const length = candleCount;
+  if (!range || !length) return;
+  const width = range.to - range.from;
+  if (followedTail) {
+    const rightOffset = range.to - (oldLength - 1);
+    const to = length - 1 + rightOffset;
+    try { scale.setVisibleLogicalRange({ from: to - width, to }); } catch { /* Keep the chart library's valid range. */ }
+    return;
+  }
+  const delta = oldInterval > 0 && Number.isFinite(oldFirst)
+    ? (firstCandleTimeMs - oldFirst) / oldInterval
+    : 0;
+  try { scale.setVisibleLogicalRange({ from: range.from - delta, to: range.to - delta }); }
+  catch { /* Keep the chart library's valid range. */ }
 }
 
 export function fitChart() { chart?.timeScale().fitContent(); }
@@ -73,7 +120,8 @@ export function captureChart() {
 export function destroyChart() {
   observer?.disconnect();
   chart?.remove();
-  chart = null; candles = null; observer = null; activeKey = null; movingAverages = [];
+  chart = null; candles = null; observer = null; activeKey = null; activeDataHash = null;
+  candleCount = 0; firstCandleTimeMs = undefined; candleIntervalMs = undefined; movingAverages = [];
 }
 
 new MutationObserver(applyChartTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

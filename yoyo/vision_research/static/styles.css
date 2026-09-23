@@ -168,3 +168,12 @@ input,textarea { padding: 10px 12px; border: 1px solid var(--border-strong); col
 .reference-viewer-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
 .reference-viewer-heading h2 { font-size: 18px; margin: 0; }
 #reference-viewer-image { display: block; width: 100%; height: auto; }
+
+.live-chart-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 0 20px 12px; }
+.live-chart-controls label { display: flex; align-items: center; gap: 10px; white-space: nowrap; color: var(--text-muted); }
+.live-chart-controls select { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; }
+.live-chart-controls .button { min-height: 36px; padding: 6px 10px; }
+.live-chart-status { color: var(--text-muted); font-size: 14px; }
+.live-chart-status.is-ready { color: var(--accent); }
+.live-chart-status.is-stale { color: var(--danger); }
+@media (max-width: 820px) { .live-chart-controls { padding: 0 14px 12px; gap: 8px; } .live-chart-status { flex-basis: 100%; } }

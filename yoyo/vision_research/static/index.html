@@ -83,6 +83,11 @@
                 </div>
               </div>
               <div id="selection-summary" class="selection-summary" hidden></div>
+              <div id="live-chart-controls" class="live-chart-controls" hidden>
+                <label for="recognition-window">识别范围 <select id="recognition-window" aria-label="信号后识别范围"><option value="6">信号后 6 根</option><option value="12" selected>信号后 12 根</option><option value="24">信号后 24 根</option><option value="48">信号后 48 根</option></select></label>
+                <button id="refresh-live-chart" class="button button-quiet" type="button">↻ 立即刷新</button>
+                <span id="live-chart-status" class="live-chart-status" role="status"></span>
+              </div>
               <div id="chart-legend" class="chart-legend" hidden>
                 <span class="ma-sma20">SMA 20</span><span class="ma-ema20">EMA 20</span><span class="ma-sma60">SMA 60</span><span class="ma-ema60">EMA 60</span><span class="ma-sma120">SMA 120</span><span class="ma-ema120">EMA 120</span>
               </div>

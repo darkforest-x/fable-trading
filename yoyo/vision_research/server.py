@@ -17,10 +17,10 @@ import threading
 import time
 import uuid
 from pathlib import Path
-from typing import Optional
+from typing import Literal, Optional
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import ValidationError
@@ -145,8 +145,11 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
                                  "X-Visible-End-Ms": str(provenance["visible_end_ms"])})
 
     @app.get("/api/signals/{signal_id}/chart")
-    def signal_chart(signal_id: str):
+    def signal_chart(signal_id: str, mode: Literal["signal_close", "live"] = "signal_close",
+                     post_signal_bars: int = Query(default=12, ge=1, le=96)):
         try:
+            if mode == "live":
+                return spike.live_chart(signal_id, post_signal_bars)
             return spike.signal_chart(signal_id)
         except SourceError as exc:
             raise HTTPException(409, str(exc))
@@ -240,7 +243,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
                 provenance = dict(chart["provenance"])
                 image = image_from_data_url(body.chart_capture_data_url,
                                             provenance["symbol"] + "-" + provenance["timeframe"] + "-capture.png")
-                provenance.update(chart_sha256=chart["chart_sha256"],
+                provenance.update(chart_snapshot_id=chart.get("snapshot_id"),
+                                  chart_sha256=chart["chart_sha256"],
                                   chart_candles=chart["candles"],
                                   render_version=CHART_CAPTURE_RENDER_VERSION,
                                   pixel_origin="browser_capture",
@@ -307,7 +311,10 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         chart_snapshot = None
         if body.signal_id and (body.chart_capture_data_url or body.expected_chart_sha256):
             try:
-                chart_snapshot = await run_in_threadpool(spike.signal_chart, body.signal_id)
+                if body.chart_snapshot_id:
+                    chart_snapshot = await run_in_threadpool(spike.chart_snapshot, body.signal_id, body.chart_snapshot_id)
+                else:
+                    chart_snapshot = await run_in_threadpool(spike.signal_chart, body.signal_id)
             except SourceError as exc:
                 raise HTTPException(409, str(exc))
             if (body.expected_chart_sha256 and

@@ -1,8 +1,9 @@
 """Read SPIKE's existing local API without importing or starting its workers.
 
 The input uses only closed OHLC bars and causal SMA/EMA values whose close is
-at or before the selected signal close. The visible window is the last 120 bars;
-axis bounds are computed from those bars only. Future performance fields,
+at or before the selected signal close in historical mode. Live research mode
+explicitly extends to a newly observed endpoint, including an unconfirmed bar.
+The visible window is the last 120 bars; axis bounds use those bars only. Future performance fields,
 notification receipts, stops and signal annotations never enter model input.
 """
 
@@ -13,6 +14,8 @@ import io
 import json
 import math
 import threading
+import time
+import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict
 from urllib.parse import urlsplit
@@ -133,12 +136,15 @@ def chart_sha256(rows):
 
 
 class SpikeSource:
-    def __init__(self, base_url="http://127.0.0.1:8766", transport=None):
+    def __init__(self, base_url="http://127.0.0.1:8766", transport=None, live_market=None, clock=None):
         url = urlsplit(base_url)
         if url.scheme != "http" or url.hostname not in {"127.0.0.1", "localhost", "::1"} or url.username or url.password or url.query or url.fragment or url.path not in {"", "/"}:
             raise ValueError("SPIKE source must be a local loopback HTTP origin")
         self.base_url = base_url.rstrip("/")
         self.transport = transport
+        self.clock = clock or (lambda: int(time.time() * 1000))
+        self.live_market = live_market
+        self._snapshots = {}
         self._signals = {}
         self._charts = {}
         self._images = {}
@@ -215,6 +221,61 @@ class SpikeSource:
             self._images = {key: value for key, value in self._images.items()
                             if key in self._charts}
         return json.loads(json.dumps(existing))
+
+    def live_chart(self, signal_id, post_signal_bars=12):
+        from .live import LiveMarket, live_rows
+
+        if type(post_signal_bars) is not int or not 1 <= post_signal_bars <= 96:
+            raise SourceError("识别范围须为信号后 1–96 根 K 线")
+        with self._lock:
+            signal = self._signals.get(signal_id)
+        if signal is None:
+            self.list_signals()
+            with self._lock:
+                signal = self._signals.get(signal_id)
+        if signal is None:
+            raise SourceError("找不到这条 SPIKE 候选，请刷新列表")
+        payload = self._get("/api/chart", {"symbol": signal["symbol"], "timeframe": signal["timeframe"]})
+        if payload.get("symbol") != signal["symbol"] or payload.get("timeframe") != signal["timeframe"]:
+            raise SourceError("SPIKE 图表与候选标的不一致")
+        raw = (self.live_market or LiveMarket()).candles(signal)
+        observed = self.clock()
+        rows, stale = live_rows(payload, signal, raw, observed)
+        duration = signal["timeframe_min"] * 60_000
+        expiry = signal["bar_close_ms"] + post_signal_bars * duration
+        last_close = rows[-1]["t"] + duration
+        eligible = signal["bar_close_ms"] <= observed < expiry and not stale
+        provenance = dict(signal, signal_bar_close_ms=signal["bar_close_ms"],
+                          observed_at_ms=observed, visible_start_ms=rows[0]["t"],
+                          visible_end_ms=min(observed, last_close),
+                          last_bar_closed=rows[-1]["is_closed"], last_bar_close_ms=last_close,
+                          bar_count=len(rows), time_boundary="live_observation",
+                          render_version="spike-vision-live-v1", overlay="none",
+                          market_source="okx_public_candles", ma_seed_end_ms=payload["candles"][-1]["t"] + duration,
+                          post_signal_bars=post_signal_bars, recognition_expires_ms=expiry,
+                          recognition_eligible=eligible, source_stale=stale)
+        result = {"candles": rows, "provenance": provenance, "snapshot_id": uuid.uuid4().hex,
+                  "colors": json.loads(json.dumps(CHART_COLORS)), "chart_sha256": chart_sha256(rows)}
+        with self._lock:
+            self._snapshots = {key: value for key, value in self._snapshots.items()
+                               if observed - value["provenance"]["observed_at_ms"] <= 90_000}
+            self._snapshots[result["snapshot_id"]] = result
+            self._snapshots = dict(list(self._snapshots.items())[-256:])
+        return json.loads(json.dumps(result))
+
+    def chart_snapshot(self, signal_id, snapshot_id):
+        """Retrieve immutable observation; never replace it with fresher candles."""
+        with self._lock:
+            chart = self._snapshots.get(snapshot_id)
+            if chart is None or chart["provenance"]["id"] != signal_id:
+                raise SourceError("图表快照已失效，请刷新实时图表后再识别")
+            p = chart["provenance"]
+            now = self.clock()
+            if not 0 <= now - p["observed_at_ms"] <= 90_000:
+                raise SourceError("图表已超过 90 秒未更新，请刷新后再识别")
+            if not p["recognition_eligible"] or now >= p["recognition_expires_ms"]:
+                raise SourceError("已超出信号后识别范围或行情已过期，请调整范围并刷新")
+            return json.loads(json.dumps(chart))
 
     def signal_image(self, signal_id):
         with self._lock:

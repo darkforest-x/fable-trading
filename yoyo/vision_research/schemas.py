@@ -81,6 +81,7 @@ class AnalyzeRequest(BaseModel):
     image_name: Optional[str] = Field(default=None, max_length=160)
     expected_image_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     expected_chart_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    chart_snapshot_id: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{32}$")
     reference_revision: Optional[int] = Field(default=None, ge=0)
     references: Optional[List[ReferenceRequest]] = Field(default=None, max_length=MAX_REFERENCES)
     criteria: str = Field(default=DEFAULT_CRITERIA, min_length=10, max_length=8000)
@@ -94,6 +95,8 @@ class AnalyzeRequest(BaseModel):
             raise ValueError("A browser chart capture must include a SPIKE candidate")
         if self.expected_chart_sha256 and not self.signal_id:
             raise ValueError("A chart hash must include a SPIKE candidate")
+        if self.chart_snapshot_id and not (self.signal_id and self.chart_capture_data_url and self.expected_chart_sha256):
+            raise ValueError("A live snapshot requires a candidate, capture and chart hash")
         if self.references is not None and self.reference_revision is not None:
             raise ValueError("reference_revision applies only when using saved global references")
         return self

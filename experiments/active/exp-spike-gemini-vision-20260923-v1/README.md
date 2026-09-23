@@ -69,12 +69,32 @@ the HTTP status, an allowlisted provider error code and elapsed time without
 storing provider response text. Documented billing, authentication and quota errors remain distinguishable;
 unknown HTTP statuses remain visible for diagnosis. Requests are not retried.
 
-SPIKE input charts use up to 120 closed bars ending exactly at the selected
-signal close, with existing causal SMA/EMA values and no signal annotations.
-Insufficient historical cache produces an error, never a newer substitute
-chart. The chart endpoint exposes only those causal OHLC/MA rows. Browser
-captures retain the source rows and their SHA-256 in the record; their pixels
-are explicitly unverified browser input, not an attestation of numerical parity.
+The workspace polls the selected chart every 10 seconds while visible. The
+candidate list refreshes every 30 seconds. Live charts combine SPIKE's confirmed
+MA seed with the same OKX public candle endpoint, including the forming candle.
+Only the selected market is fetched; no scanner, notifications or market files
+are written. SMA uses trailing closes and EMA continues the confirmed seed;
+each provisional update starts again from that seed. Missing or revised
+confirmed bars cause an explicit error rather than fabricated/fallback prices.
+
+Recognition defaults to the 12 bars after signal close (15m = 3h, 30m = 6h,
+1H = 12h, 4H = 48h). The page can select 6/12/24/48 bars; the API accepts 1–96.
+Expired signals remain viewable; recognition requires widening the range.
+This is a research UI window, independent of production freshness gates.
+No recurring model calls are made. After recognition, the submitted image stays
+frozen until returning to the live chart; later prices never rewrite that run.
+
+`GET /api/signals/{id}/chart?mode=live&post_signal_bars=12` returns an immutable
+snapshot ID alongside up to 120 OHLC/MA rows. `POST /api/analyze` binds the
+capture to `chart_snapshot_id` and `expected_chart_sha256`; it checks the
+90-second snapshot lifetime and recognition expiry at submission. Refreshes
+in another request do not replace a selected snapshot. Records distinguish
+signal close, actual observation time, forming/closed state and visible end;
+a forming candle's future scheduled close is not the observation time.
+The original `mode=signal_close` (API default) and image endpoint keep their
+historical causal semantics. Browser pixels remain explicitly unverified
+input, not an attestation of numerical parity, even when the source row hash
+and snapshot identity are validated.
 Uploaded-image time boundaries are unverified. Images are decoded,
 oriented and stripped of metadata without silent resizing; the stored image
 is what the model sees. Limits: under 5 MB/image, 6 million pixels, 12 MiB combined.
