@@ -149,6 +149,8 @@ def pine_rows(values: Sequence[Sequence[float]], decimals: int) -> str:
 
 TEMPLATE = Path("yoyo/evaluation/pine/ma_dense_launch_v2.template.pine")
 GENERATED = Path("yoyo/evaluation/pine/ma_dense_launch_v2.pine")
+TEMPLATE_V21 = Path("yoyo/evaluation/pine/ma_dense_launch_v2_1.template.pine")
+GENERATED_V21 = Path("yoyo/evaluation/pine/ma_dense_launch_v2_1.pine")
 
 
 def render_pine(pack: Mapping[str, Any], template: str) -> str:
@@ -202,12 +204,13 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--decimals", type=int, default=DECIMALS)
     parser.add_argument("--emit-pine", type=Path, default=None)
+    parser.add_argument("--template", type=Path, default=None)
     args = parser.parse_args()
     pack = build_pack(args.decimals)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(pack, ensure_ascii=False, indent=1) + "\n")
     if args.emit_pine is not None:
-        args.emit_pine.write_text(render_pine(pack, TEMPLATE.read_text()))
+        args.emit_pine.write_text(render_pine(pack, (args.template or TEMPLATE).read_text()))
     print(json.dumps({"stage1_references": len(pack["stage1"]["features"]),
                       "anchors": len(pack["stage2"]["anchors"]), "bad": len(pack["stage2"]["bad"]),
                       "family": len(pack["stage2"]["family"]), "distance_scale": pack["stage2"]["distance_scale"],

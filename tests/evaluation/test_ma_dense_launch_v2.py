@@ -110,3 +110,17 @@ def test_frozen_candidates_reproduce_their_recorded_quality_score():
         assert out is not None and out["hard_gates"] and out["stage1_similarity"], row["event_id"]
         assert out["quality_score"] == pytest.approx(float(row["quality_score"]), abs=5e-5), row["event_id"]
         assert out["grade_a"] == (str(row["quality_tier"]) == "PERFECT_CANDIDATE"), row["event_id"]
+
+
+def test_v2_1_regenerates_and_adds_the_funnel_without_changing_the_rules():
+    generated = refs.GENERATED_V21.read_text()
+    assert generated == refs.render_pine(json.loads(PACK.read_text()), refs.TEMPLATE_V21.read_text())
+    assert "均线密集启动 V2.1" in generated and "__" not in generated
+    # diagnostics and display switches only; the gate expressions stay identical to V2
+    for fragment in ("quality >= 0.3611898959", "endSpread <= 0.95", "s1dist <= 0.5000000000",
+                     "p2 >= 1.0", "touchRate >= 0.4"):
+        assert fragment in generated, fragment
+    assert "var array<int> FUNNEL" in generated and generated.count("array.set(FUNNEL") == 6
+    assert "maSource" in generated and "projectLines" in generated
+    body = [line for line in generated.split("\n") if line and not line.startswith((" ", "\t"))]
+    assert len(body) < 170, len(body)
