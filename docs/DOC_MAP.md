@@ -9,9 +9,8 @@
 | [`ROADMAP.md`](../ROADMAP.md) | **阶段与门**（P0–P5 的通过条件） | 阶段推进时 |
 | [`docs/PROJECT_CHARTER.md`](PROJECT_CHARTER.md) | **结构与流程**：东西放哪、一轮怎么走 | 几乎不变 |
 
-**写新文档之前先问：这属于上面哪一段？** 答不上来就说明它该进
-`analysis/pXX_report.md`（单次实验）或 `docs/learnings/`（非平凡教训），
-而不是变成第五份权威文档——五个仓各有一份 HANDOFF 的教训刚付过。
+**默认直接在对话中汇报，不为每次任务另建报告。** Owner明确要求的实验报告放入
+`analysis/pXX_report.md`，非平凡教训按独立规则放入 `docs/learnings/`；不再自动生成或转换报告。
 
 本文件是**索引**，不是内容。
 

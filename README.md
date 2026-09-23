@@ -57,7 +57,7 @@ TP5/SL2 三重障碍出场 → 前向验证(100 笔新鲜裁决,事后检出剔�
 2. **成功标准是 top-decile 扣成本净收益 + 置换检验 p<0.01**,AUC 只是参考量
 3. **冻结评估尺子是清单不是规则**:`datasets/owner_eval_frozen/MANIFEST.json`
    (47 币种从未参训);训过尺子币种的模型会被晋升门自动拒绝
-4. **每轮实验交付 `analysis/pXX_report.md`**,必含复现命令与"风险与诚实声明"
+4. **默认在对话中汇报，只有 owner 明确要求才生成报告**；保留必要证据与复现信息，不自动写 Markdown、转 HTML 或调用 build-report
 5. **每个非平凡问题解决后写 `docs/learnings/` 笔记**(40+ 篇,含
    "optimizer=auto 炸掉所有续训"、"新鲜度门必须从管道时序推导"、"tip 分布错位"等)
 
@@ -96,7 +96,7 @@ PYTHONPATH=. .venv/bin/python scripts/benchmark_check.py
 | `src/costs.py` | 成本路由表(owner 管控,唯一来源) |
 | `src/webapp/` | FastAPI 看板(总览/回测/前向/探索/ops) |
 | `scripts/` | 流水线与实验脚本;**跑过的实验脚本冻结不改**(保复现) |
-| `analysis/` | 每轮实验报告(p0 → p3),结论以此为准 |
+| `analysis/` | 历史及 owner 明确要求的实验报告；不再逐轮强制生成 |
 | `docs/learnings/` | 事故与反直觉结论笔记 |
 | `docs/archive/` | 已被取代的历史文档(只增不删) |
 | `models/` | 冻结工件、ACTIVE 指针、owner_best 检测权重、yolo11* 冷启动基座 |

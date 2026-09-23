@@ -33,8 +33,8 @@ P0/P1 通过前禁止任何新训练与 promote。
 
 `docs/DOC_MAP.md` 是索引，不是内容。
 
-**写东西之前先问：这属于上面哪一段？** 答不上来就是它不该被写成新文档，
-而应该进 `analysis/pXX_report.md`（单次实验）或 `docs/learnings/`（非平凡教训）。
+**默认在对话中汇报，不为每轮实验另建报告。** Owner明确要求单次实验报告时放入
+`analysis/pXX_report.md`；非平凡教训仍按独立的learning规则处理。现有原始结果和必要复现记录可直接引用。
 
 ---
 
@@ -86,7 +86,7 @@ experiments/active/<experiment_id>/
 | owner 审核工具 | `tools/review/` |
 | 金标行、审核裁决 | `datasets/annotations/` |
 | 数据集身份文件 | `datasets/manifests/` |
-| 单次实验报告 | `analysis/pXX_*.md` → 转 HTML 交付 |
+| Owner明确要求的单次实验报告 | `analysis/pXX_*.md`；不自动转 HTML |
 | 非平凡教训 | `docs/learnings/`（只增不改） |
 | 归档仓的历史结论 | `experiments/historical/` |
 | 大体积产物（图片/权重/runs） | `archive/consolidated/`，**不入 git** |
@@ -139,14 +139,15 @@ experiments/active/<experiment_id>/
 ③ 先落 builder  提交生成器与测试，再跑生成器，再提交小型产物
               （产物 generated_at 早于 builder 入库时间 = 复现声明未经验证）
 ④ 跑          单变量：一次只改一个东西
-⑤ 报告        analysis/pXX_*.md，必备节见下
-⑥ 转 HTML     python3 scripts/md_to_html.py analysis/pXX_*.md --out-dir analysis/html
-⑦ 交付        给 owner 的是 HTML 的可打开链接，不是 .md 路径
-⑧ 回填注册表  status → accepted / rejected / inconclusive / superseded + result
-⑨ learnings   非平凡问题跑 extract-approach，写 docs/learnings/
+⑤ 汇报        默认在对话中给结论、关键证据与必要限制；保留必要原始结果和复现信息
+⑥ 回填注册表  status → accepted / rejected / inconclusive / superseded + result
+⑦ learnings   非平凡问题跑 extract-approach，写 docs/learnings/
 ```
 
-### 报告必备节（缺一不可）
+### 研究证据标准（不要求另建报告或固定章节）
+
+Owner于2026-09-23彻底取消逐轮报告要求。只有明确要求报告或指定文档产物时才生成；
+不自动调用build-report、不自动转HTML或发布网站，无需每轮重新确认。以下证据可在对话与已有实验产物中体现。
 
 - [ ] 复现命令（从零跑通的完整序列）
 - [ ] 数据统计（候选数 / 正类率 / 时间范围 / val 样本数）
