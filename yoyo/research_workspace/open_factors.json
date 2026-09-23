@@ -1,0 +1,505 @@
+{
+  "schema_version": 1,
+  "implementation_version": "1.0.0",
+  "factors": [
+    {
+      "id": "oss.qlib.kmid2",
+      "name": "实体占比（带方向）",
+      "category": "candle_structure",
+      "definition": "当根带方向实体 / 当根振幅。",
+      "expression": "(close-open)/(high-low+1e-12)",
+      "inputs": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 1,
+      "warmup_bars": 1,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 1 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "保留 Qlib 原始当根公式及 1e-12 分母保护；不做全样本归一化、缺失填充或空头翻转。",
+      "hypothesis": "识别密集区离开时是否出现有方向的实体，而非仅有影线。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "KMID2",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 1
+    },
+    {
+      "id": "oss.qlib.kup2",
+      "name": "上影线占比",
+      "category": "candle_structure",
+      "definition": "当根上影线 / 当根振幅。",
+      "expression": "(high-max(open,close))/(high-low+1e-12)",
+      "inputs": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 1,
+      "warmup_bars": 1,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 1 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "保留 Qlib 原始当根公式及 1e-12 分母保护；不做全样本归一化、缺失填充或空头翻转。",
+      "hypothesis": "检验向上突破后上影线是否反映拒绝；方向解释需结合原信号。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "KUP2",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 1
+    },
+    {
+      "id": "oss.qlib.klow2",
+      "name": "下影线占比",
+      "category": "candle_structure",
+      "definition": "当根下影线 / 当根振幅。",
+      "expression": "(min(open,close)-low)/(high-low+1e-12)",
+      "inputs": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 1,
+      "warmup_bars": 1,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 1 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "保留 Qlib 原始当根公式及 1e-12 分母保护；不做全样本归一化、缺失填充或空头翻转。",
+      "hypothesis": "检验向下突破后下影线是否反映拒绝；方向解释需结合原信号。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "KLOW2",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 1
+    },
+    {
+      "id": "oss.qlib.ksft2",
+      "name": "收盘压力位置",
+      "category": "candle_structure",
+      "definition": "收盘在当根高低区间中的带方向位置，通常介于 -1 与 1。",
+      "expression": "(2*close-high-low)/(high-low+1e-12)",
+      "inputs": [
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 1,
+      "warmup_bars": 1,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 1 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "保留 Qlib 原始当根公式及 1e-12 分母保护；不做全样本归一化、缺失填充或空头翻转。",
+      "hypothesis": "区分临近收盘仍维持方向的启动与盘中冲高/下探后的回撤。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "KSFT2",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 1
+    },
+    {
+      "id": "oss.qlib.std20",
+      "name": "收盘离散度 STD20",
+      "category": "volatility",
+      "definition": "20 根收盘价样本标准差 / 当前收盘价。",
+      "expression": "Std(close,20)/close",
+      "inputs": [
+        "close"
+      ],
+      "lookback_bars": 20,
+      "warmup_bars": 20,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 20 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 根完整收盘窗口；标准差 ddof=1，分母为当前收盘价，不加 epsilon。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "刻画密集阶段的价格离散度；需验证能否补充既有 ATR 及均线带宽。",
+      "redundant_with": [
+        "l2.atr_pct",
+        "l2.ma_spread_pct"
+      ],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "STD20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.rsv20",
+      "name": "20 根区间位置 RSV20",
+      "category": "price_position",
+      "definition": "当前收盘在含当根的 20 根高低区间中的位置。",
+      "expression": "(close-Min(low,20))/(Max(high,20)-Min(low,20)+1e-12)",
+      "inputs": [
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 20,
+      "warmup_bars": 20,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 20 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 根完整高低窗口，包含当前根；区间分母保留 +1e-12。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "区分密集区中部的触发和接近近端边界的触发；当前根包含在通道内。",
+      "redundant_with": [
+        "l2.drawdown24"
+      ],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "RSV20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.corr20",
+      "name": "价格与成交量相关 CORR20",
+      "category": "volume_price",
+      "definition": "20 根收盘价与 log(成交量+1) 的 Pearson 相关。",
+      "expression": "Corr(close,Log(volume+1),20)",
+      "inputs": [
+        "close",
+        "volume"
+      ],
+      "lookback_bars": 20,
+      "warmup_bars": 20,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 20 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 对完整 close 与 log(volume+1)；保留上游 std 接近零（ddof=1，atol=2e-5）时相关值为 NaN 的规则。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "检验启动之前及当根价格与成交量是否同步变化。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "CORR20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.cord20",
+      "name": "价格变化与量变化相关 CORD20",
+      "category": "volume_price",
+      "definition": "20 个价格比率与对数成交量比率的相关，需要 21 根原始数据。",
+      "expression": "Corr(close/Ref(close,1),Log(volume/Ref(volume,1)+1),20)",
+      "inputs": [
+        "close",
+        "volume"
+      ],
+      "lookback_bars": 21,
+      "warmup_bars": 21,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 21 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 对完整变动数据需 21 根原始数据；保留上游 std 接近零（ddof=1，atol=2e-5）时为 NaN 的规则。前根零量的无定义比率保留 NaN，其窗口不出值，不做填充。",
+      "hypothesis": "区分价格变化有量能配合与量价背离；不预设正相关必然更优。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "CORD20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.sumd20",
+      "name": "方向效率 SUMD20",
+      "category": "momentum",
+      "definition": "净方向变动 / 绝对价格路程；保留原始市场方向，不自动翻转空头。",
+      "expression": "(Sum(max(close-Ref(close,1),0),20)-Sum(max(Ref(close,1)-close,0),20))/(Sum(abs(close-Ref(close,1)),20)+1e-12)",
+      "inputs": [
+        "close"
+      ],
+      "lookback_bars": 21,
+      "warmup_bars": 21,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 21 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 个完整价格变动需 21 根原始数据；保留绝对路径分母 +1e-12。原始市场方向，不自动翻转空头。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "衡量最近 20 次收盘变动的方向一致性，区分单向推进和反复震荡。",
+      "redundant_with": [
+        "l2.ret_24"
+      ],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "SUMD20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.vstd20",
+      "name": "成交量离散 VSTD20",
+      "category": "volume",
+      "definition": "20 根成交量标准差 / 当前成交量（不是平均成交量）。",
+      "expression": "Std(volume,20)/(volume+1e-12)",
+      "inputs": [
+        "volume"
+      ],
+      "lookback_bars": 20,
+      "warmup_bars": 20,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 20 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 根完整量窗口；标准差 ddof=1，分母保留当前成交量 +1e-12，不改成均量。零量时可产生极值。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "区分稳定放量与忽大忽小的成交量；零量时分母极小可能产生极值。",
+      "redundant_with": [
+        "l2.volume_ratio",
+        "l2.volume_z"
+      ],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "VSTD20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.wvma20",
+      "name": "量加权价格变化离散 WVMA20",
+      "category": "volume_price",
+      "definition": "绝对收盘收益率 × 成交量的 20 根变异系数。",
+      "expression": "Std(abs(close/Ref(close,1)-1)*volume,20)/(Mean(abs(close/Ref(close,1)-1)*volume,20)+1e-12)",
+      "inputs": [
+        "close",
+        "volume"
+      ],
+      "lookback_bars": 21,
+      "warmup_bars": 21,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 21 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 个完整量价变动需 21 根原始数据；标准差 ddof=1，分母为该量价序列的均值 +1e-12。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "检验量价变化是持续出现还是集中在少数异常根。",
+      "redundant_with": [],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "WVMA20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qlib.vsumd20",
+      "name": "成交量方向效率 VSUMD20",
+      "category": "volume",
+      "definition": "20 次成交量净变化 / 绝对成交量变化之和。",
+      "expression": "(Sum(max(volume-Ref(volume,1),0),20)-Sum(max(Ref(volume,1)-volume,0),20))/(Sum(abs(volume-Ref(volume,1)),20)+1e-12)",
+      "inputs": [
+        "volume"
+      ],
+      "lookback_bars": 21,
+      "warmup_bars": 21,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；最多使用截至当前根的 21 根。若输入索引为开盘时间，仍需等本根收盘才能使用。窗口包含当前根。尚未检验收益或生产适用性。",
+      "adaptation": "20 个完整量变动需 21 根原始数据；保留绝对量变动分母 +1e-12。相比 Qlib 的部分窗口，必须完整预热。",
+      "hypothesis": "区分成交量连续增加与反复跳变，补充单根量比。",
+      "redundant_with": [
+        "l2.volume_ratio"
+      ],
+      "upstream": {
+        "project": "Qlib Alpha158",
+        "name": "VSUMD20",
+        "commit": "a7d5a9b500de5df053e32abf00f6a679546636eb",
+        "url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/contrib/data/loader.py",
+        "operators_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/qlib/data/ops.py",
+        "license": "MIT",
+        "license_url": "https://github.com/microsoft/qlib/blob/a7d5a9b500de5df053e32abf00f6a679546636eb/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false,
+      "window_bars": 20
+    },
+    {
+      "id": "oss.qtpylib.chop14",
+      "name": "路径震荡 CHOP14",
+      "category": "path_structure",
+      "definition": "14 根真实波幅总路径 / 14 根高低区间，取对数归一化。",
+      "expression": "100*log10(Sum(TR,14)/(Max(high,14)-Min(low,14)))/log10(14)",
+      "inputs": [
+        "high",
+        "low",
+        "close"
+      ],
+      "lookback_bars": 15,
+      "window_bars": 14,
+      "warmup_bars": 15,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；需要 15 根完整原始数据，仅使用当前根及之前数据。开盘时间索引不等于当时可知。未检验收益或生产适用性。",
+      "adaptation": "按 QTPyLib 公式独立适配；上游首根 TR 以 high-low 回退，本地强制完整前收盘：14 个 TR 需 15 根原始数据。零区间返回 NaN，不填充。没有套用 CHOP 的交易阈值。",
+      "hypothesis": "衡量密集区内路径的曲折度，检验是否能区分持续震荡与方向启动。",
+      "redundant_with": [
+        "l2.atr_pct",
+        "oss.qlib.sumd20"
+      ],
+      "upstream": {
+        "project": "QTPyLib",
+        "name": "CHOP14",
+        "commit": "2c1af0eef85fb3205d8fcefc41a421b074b371de",
+        "url": "https://github.com/ranaroussi/qtpylib/blob/2c1af0eef85fb3205d8fcefc41a421b074b371de/qtpylib/indicators.py#L601-L605",
+        "license": "Apache-2.0",
+        "license_url": "https://github.com/ranaroussi/qtpylib/blob/2c1af0eef85fb3205d8fcefc41a421b074b371de/LICENSE.txt"
+      },
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    {
+      "id": "oss.ta.cmf20",
+      "name": "量加权收盘压力 CMF20",
+      "category": "volume_price",
+      "definition": "成交量加权的收盘区间位置，使用 20 根完整窗口。",
+      "expression": "Sum(((2*close-high-low)/(high-low))*volume,20)/Sum(volume,20)",
+      "inputs": [
+        "high",
+        "low",
+        "close",
+        "volume"
+      ],
+      "lookback_bars": 20,
+      "window_bars": 20,
+      "warmup_bars": 20,
+      "implementation_version": "1.0.0",
+      "status": "implemented",
+      "stage": "hypothesis",
+      "source_path": "yoyo/research_workspace/open_factors.py",
+      "experiment_ids": [],
+      "causality": "单标的、单周期、已收盘 K 线；需要 20 根完整原始数据，仅使用当前根及之前数据。开盘时间索引不等于当时可知。未检验收益或生产适用性。",
+      "adaptation": "采用 ta 默认 20 根、fillna=False；零振幅根的乘数按上游记为 0，零总成交量窗口返回 NaN。保持原始方向，不将输出解释成真实主动买卖量。",
+      "hypothesis": "检验启动时收盘靠近方向一侧是否获得持续量能配合；CMF不是实际买卖盘资金流。",
+      "redundant_with": [
+        "oss.qlib.ksft2",
+        "oss.qlib.vsumd20"
+      ],
+      "upstream": {
+        "project": "ta",
+        "name": "CMF20",
+        "commit": "a890410710a6e483c9ba08da7f3dd5089e4b9dff",
+        "url": "https://github.com/bukosabino/ta/blob/a890410710a6e483c9ba08da7f3dd5089e4b9dff/ta/volume.py#L99-L151",
+        "license": "MIT",
+        "license_url": "https://github.com/bukosabino/ta/blob/a890410710a6e483c9ba08da7f3dd5089e4b9dff/LICENSE"
+      },
+      "training_eligible": false,
+      "production_eligible": false
+    }
+  ]
+}

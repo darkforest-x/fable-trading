@@ -4,8 +4,26 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const statusNames = { planned:'待开始', negative:'负面结论', active:'研究中', accepted:'历史记录：通过', rejected:'已否定', inconclusive:'证据不足', completed:'已完成', superseded:'已替代', archived:'已归档', hypothesis:'待验证', implemented:'已实现', research:'研究因子', review:'待复核', queued:'排队中', running:'运行中', failed:'运行失败', interrupted:'已中断', cancelled:'已取消' };
-  const categoryNames={ma_spread:'均线带宽',dense_state:'密集状态',price_position:'价格位置',trend_order:'趋势排列',volume:'成交量',volatility:'波动',momentum:'动量',band_structure:'通道结构',entry_structure:'入场结构',entry_timing:'入场时机',visual_gate:'视觉形态',training_morphology:'训练形态'};
+  const categoryNames={ma_spread:'均线带宽',dense_state:'密集状态',price_position:'价格位置',trend_order:'趋势排列',volume:'成交量',volume_price:'量价配合',volatility:'波动',momentum:'动量',band_structure:'通道结构',entry_structure:'入场结构',entry_timing:'入场时机',visual_gate:'视觉形态',training_morphology:'训练形态',candle_structure:'K线结构',path_structure:'路径结构'};
   const categoryLabel=(x)=>categoryNames[x]||x||'未分类';
+  const hasUpstream=(f)=>Boolean(f?.upstream&&typeof f.upstream==='object'&&!Array.isArray(f.upstream)&&Object.keys(f.upstream).length);
+  const upstreamProject=(f)=>String(f?.upstream?.project||'').trim();
+  function githubUrl(value) {
+    try {
+      const url=new URL(String(value||''));
+      if(url.protocol!=='https:'||url.hostname!=='github.com'||url.username||url.password||url.port)return '';
+      const parts=url.pathname.split('/').filter(Boolean);
+      if(parts.length<2||parts.slice(0,2).some(x=>x==='.'||x==='..'))return '';
+      return url.href;
+    } catch { return ''; }
+  }
+  function githubCommitUrl(sourceUrl,commit) {
+    const source=githubUrl(sourceUrl);
+    if(!source||! /^[a-f\d]{7,64}$/i.test(String(commit||'')))return '';
+    const url=new URL(source),[owner,repo]=url.pathname.split('/').filter(Boolean);
+    return `https://github.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commit/${encodeURIComponent(commit)}`;
+  }
+  const githubLink=(value,label)=>{const url=githubUrl(value);return url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`:'<span class="research-missing">链接未提供或不符合 HTTPS GitHub 规则</span>';};
   const stages = ['hypothesis','review','inconclusive','rejected','archived'];
   const badge = (s) => `<span class="research-badge status-${esc(s)}">${esc(statusNames[s] || s || '未记录')}</span>`;
   const state = { view:null, factors:[], experiments:[], jobs:[], recipes:[], selected:new Set(), loaded:false, loading:false, revision:0, detail:null, job:null };
@@ -44,13 +62,28 @@
     const categories=[...new Set(state.factors.map(f=>f.category||'未分类'))];
     const selected=$('factor-category').value;
     $('factor-category').innerHTML=options([['','全部类别'],...categories.map(x=>[x,categoryLabel(x)])],selected);
+    ensureFactorSourceFilter();
     renderFactors(); renderExperiments(); renderJobs();
   }
+  function ensureFactorSourceFilter() {
+    const category=$('factor-category');
+    const projects=[...new Set(state.factors.filter(hasUpstream).map(upstreamProject).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'zh-CN'));
+    let filter=$('factor-source');
+    if(!projects.length) { filter?.remove(); return; }
+    if(!filter) {
+      filter=document.createElement('select');
+      filter.id='factor-source';
+      filter.setAttribute('aria-label','开源因子来源');
+      category.after(filter);
+    }
+    const selected=filter.value;
+    filter.innerHTML=options([['','全部来源'],...projects.map(project=>[project,project])],selected);
+  }
   function renderFactors() {
-    const q=$('factor-search').value.trim().toLowerCase(),category=$('factor-category').value;
-    const items=state.factors.filter(f=>(!category||f.category===category)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
+    const q=$('factor-search').value.trim().toLowerCase(),category=$('factor-category').value,source=$('factor-source')?.value||'';
+    const items=state.factors.filter(f=>(!category||f.category===category)&&(!source||upstreamProject(f)===source)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
     $('factor-count').textContent=`${items.length} / ${state.factors.length} 个因子`;
-    $('factor-rows').innerHTML=items.map(f=>`<tr><td><button class="research-text-button" data-factor="${esc(f.id)}">${esc(f.name||f.id)}</button><small class="research-mono">${esc(f.id)}</small></td><td>${esc(categoryLabel(f.category))}</td><td class="research-description">${esc(f.definition)}</td><td>${badge(f.stage||f.status)}</td><td>${(f.experiment_ids||[]).length}</td><td><button class="research-button" data-factor="${esc(f.id)}">管理 →</button></td></tr>`).join('') || '<tr><td colspan="6" class="research-empty">没有匹配的因子。可以新建一个待验证假设。</td></tr>';
+    $('factor-rows').innerHTML=items.map(f=>`<tr><td><button class="research-text-button" data-factor="${esc(f.id)}">${esc(f.name||f.id)}</button><small class="research-mono">${esc(f.id)}</small>${hasUpstream(f)?`<small class="research-factor-project">来源：${esc(upstreamProject(f)||'未记录')}</small>`:''}</td><td>${esc(categoryLabel(f.category))}</td><td class="research-description">${esc(f.definition)}</td><td>${badge(f.stage||f.status)}${hasUpstream(f)?'<small class="research-factor-claim">已实现 · 收益待验证</small>':''}</td><td>${(f.experiment_ids||[]).length}</td><td><button class="research-button" data-factor="${esc(f.id)}">管理 →</button></td></tr>`).join('') || '<tr><td colspan="6" class="research-empty">没有匹配的因子。可以新建一个待验证假设。</td></tr>';
   }
   function renderExperiments() {
     const q=$('experiment-search').value.trim().toLowerCase(),status=$('experiment-status').value;
@@ -69,9 +102,23 @@
     $('backtest-availability').textContent=r?.available?`冻结快照可用 · ${r.symbols.length} 个合约 · 2026-07-23 至 2026-09-23`:'冻结输入缺失，不能启动重放。';
   }
   function experimentOptions(selected) { return options(state.experiments.map(e=>[e.experiment_id,title(e)]),selected); }
+  function upstreamDetails(f) {
+    const u=f.upstream||{},commit=String(u.commit||''),commitUrl=githubCommitUrl(u.url,commit);
+    const inputs=Array.isArray(f.inputs)?f.inputs:[];
+    const related=Array.isArray(f.redundant_with)?f.redundant_with:[];
+    const commitValue=commitUrl?`<a href="${esc(commitUrl)}" target="_blank" rel="noopener noreferrer"><code>${esc(commit)}</code> ↗</a>`:`<code>${esc(commit||'未记录')}</code>`;
+    return `<div class="research-factor-claim-banner"><strong>已实现 · 收益待验证</strong><span>因子实现已登记，收益证据尚未建立；训练与生产资格仍以独立审批为准。</span></div>
+      <section class="research-factor-section"><h3>研究假设</h3><p>${esc(f.hypothesis||'尚未记录研究假设。')}</p></section>
+      <section class="research-factor-section"><h3>输入、窗口与可知时点</h3><dl class="research-facts"><dt>输入列</dt><dd>${inputs.length?`<ul class="research-factor-inputs">${inputs.map(x=>`<li><code>${esc(x)}</code></li>`).join('')}</ul>`:'未记录'}</dd><dt>回看窗口</dt><dd>${Number.isInteger(f.lookback_bars)?`需要 ${f.lookback_bars} 根完整原始 K 线`:'未记录'}</dd><dt>预热窗口</dt><dd>${Number.isInteger(f.warmup_bars)?`需要 ${f.warmup_bars} 根完整原始 K 线`:'未记录'}</dd><dt>收盘可知性</dt><dd>${esc(f.causality||'待核对')}</dd></dl></section>
+      <section class="research-factor-section"><h3>精确公式</h3><pre class="research-factor-formula">${esc(f.expression||'未记录')}</pre></section>
+      <section class="research-factor-section"><h3>适配差异</h3><p>${esc(f.adaptation||'未记录')}</p>${f.implementation_version?`<p class="research-caption">实现版本：${esc(f.implementation_version)}</p>`:''}${related.length?`<p class="research-caption">可能冗余：${related.map(esc).join('、')}</p>`:''}</section>
+      <section class="research-factor-section"><h3>上游来源</h3><dl class="research-facts"><dt>项目</dt><dd>${esc(u.project||'未记录')}${u.name?` · ${esc(u.name)}`:''}</dd><dt>固定版本 SHA</dt><dd>${commitValue}</dd><dt>源码</dt><dd>${githubLink(u.url,'查看上游源码')}</dd>${u.operators_url?`<dt>算子定义</dt><dd>${githubLink(u.operators_url,'查看上游算子')}</dd>`:''}<dt>License</dt><dd>${esc(u.license||'未记录')} · ${githubLink(u.license_url,'查看 license 文件')}</dd></dl></section>
+      <section class="research-factor-section"><h3>本地登记</h3><dl class="research-facts"><dt>类别</dt><dd>${esc(categoryLabel(f.category))}</dd><dt>定义</dt><dd>${esc(f.definition||'未记录')}</dd><dt>本地实现</dt><dd class="research-mono">${esc(f.source_path||'未记录')}${f.source_line?':'+esc(f.source_line):''}</dd></dl></section>`;
+  }
   function factorDetail(id) {
     const f=state.factors.find(x=>x.id===id);if(!f)return;
-    dialog(heading(f.name||f.id,f.id)+`<dl class="research-facts"><dt>类别</dt><dd>${esc(categoryLabel(f.category))}</dd><dt>定义 / 公式</dt><dd>${esc(f.definition)}</dd><dt>可知时点与限制</dt><dd>${esc(f.causality||'待核对')}</dd><dt>实现来源</dt><dd class="research-mono">${esc(f.source_path||'手工登记的研究假设')}${f.source_line?':'+f.source_line:''}</dd></dl><form id="factor-note-form" data-id="${esc(id)}" data-revision="${f.revision||0}">${stageSelect(f.stage)}<label>关联实验<select name="experiment_ids" multiple size="5">${state.experiments.map(e=>`<option value="${esc(e.experiment_id)}" ${(f.experiment_ids||[]).includes(e.experiment_id)?'selected':''}>${esc(title(e))}</option>`).join('')}</select><small>按住 Command / Ctrl 可多选；已关联实验可直接在下方打开。</small></label><div class="research-links">${(f.experiment_ids||[]).map(x=>`<button type="button" class="research-button" data-experiment="${esc(x)}">${esc(title(state.experiments.find(e=>e.experiment_id===x)||{id:x}))} ↗</button>`).join('')}</div><label>研究笔记<textarea name="notes" rows="5" maxlength="12000">${esc(f.notes||'')}</textarea></label><div class="research-form-footer"><span>笔记按版本保存，不改变训练或实盘资格。</span><button class="research-button primary" type="submit">保存研究状态</button></div></form>`);
+    const details=hasUpstream(f)?upstreamDetails(f):`<dl class="research-facts"><dt>类别</dt><dd>${esc(categoryLabel(f.category))}</dd><dt>定义 / 公式</dt><dd>${esc(f.definition)}</dd><dt>可知时点与限制</dt><dd>${esc(f.causality||'待核对')}</dd><dt>实现来源</dt><dd class="research-mono">${esc(f.source_path||'手工登记的研究假设')}${f.source_line?':'+f.source_line:''}</dd></dl>`;
+    dialog(heading(f.name||f.id,f.id)+details+`<form id="factor-note-form" data-id="${esc(id)}" data-revision="${f.revision||0}">${stageSelect(f.stage)}<label>关联实验<select name="experiment_ids" multiple size="5">${state.experiments.map(e=>`<option value="${esc(e.experiment_id)}" ${(f.experiment_ids||[]).includes(e.experiment_id)?'selected':''}>${esc(title(e))}</option>`).join('')}</select><small>按住 Command / Ctrl 可多选；已关联实验可直接在下方打开。</small></label><div class="research-links">${(f.experiment_ids||[]).map(x=>`<button type="button" class="research-button" data-experiment="${esc(x)}">${esc(title(state.experiments.find(e=>e.experiment_id===x)||{id:x}))} ↗</button>`).join('')}</div><label>研究笔记<textarea name="notes" rows="5" maxlength="12000">${esc(f.notes||'')}</textarea></label><div class="research-form-footer"><span>笔记按版本保存，不改变训练或实盘资格。</span><button class="research-button primary" type="submit">保存研究状态</button></div></form>`);
   }
   function newFactor() {
     dialog(heading('登记因子','先写清楚假设、输入列与可知时点。')+`<form id="new-factor-form"><div class="research-form-grid"><label>因子名称<input name="name" required minlength="2" maxlength="100" placeholder="例如：距均线边缘的 ATR 距离"></label><label>类别<input name="category" required maxlength="50" placeholder="价格位置 / 波动 / 形态"></label></div><label>定义与输入窗口<textarea name="definition" required minlength="5" maxlength="4000" rows="3" placeholder="写清使用的列、计算方法和回看窗口"></textarea></label><label>可知时点与适用边界<textarea name="causality" required minlength="5" maxlength="2000" rows="3" placeholder="在信号 bar 收盘可计算？是否有未来筛选、事后标签或镜像限制？"></textarea></label><button class="research-button primary" type="submit">保存为待验证假设</button></form>`);
@@ -167,7 +214,9 @@
     if(el.dataset.compare) { if(el.checked&&state.selected.size>=3){el.checked=false;showError('一次最多对照 3 个实验。');return;} if(el.checked)state.selected.add(el.dataset.compare);else state.selected.delete(el.dataset.compare);renderExperiments(); }
     if(el.dataset.evidenceSelect){const prefix=el.dataset.evidenceSelect;const data=prefix==='job-evidence'?state.job?.result:state.detail;$(`${prefix}-table`).innerHTML=tableMarkup(data?.tables[Number(el.value)]);}
   });
-  ['factor-search','factor-category'].forEach(id=>$(id).addEventListener('input',renderFactors));
+  $('factor-category').addEventListener('change',renderFactors);
+  $('factor-search').addEventListener('input',renderFactors);
+  document.addEventListener('change',(event)=>{if(event.target.id==='factor-source')renderFactors();});
   ['experiment-search','experiment-status'].forEach(id=>$(id).addEventListener('input',renderExperiments));
   setInterval(async()=>{if(state.view==='backtests'&&!document.hidden){try{state.jobs=(await api('/jobs')).items;renderJobs();}catch(error){showError(error);}}},4000);
   window.SpikeResearch={setView(view){state.view=view;if(['research','factors','experiments','backtests'].includes(view))refresh();},refresh};

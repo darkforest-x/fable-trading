@@ -1,0 +1,22 @@
+Open research factor adapters, implementation version 1.0.0 (2026-09-24)
+
+Qlib Alpha158 expressions and operator semantics:
+Copyright (c) Microsoft Corporation. MIT License (qlib-MIT.txt).
+https://github.com/microsoft/qlib/tree/a7d5a9b500de5df053e32abf00f6a679546636eb
+Adaptations: one 20-bar window, complete warmup, explicit invalid-input
+rejection, undefined results remain NaN, no Qlib runtime dependency.
+
+QTPyLib chopiness / true_range definitions:
+Copyright 2016-2018 Ran Aroussi. Apache License 2.0 (qtpylib-Apache-2.0.txt).
+https://github.com/ranaroussi/qtpylib/tree/2c1af0eef85fb3205d8fcefc41a421b074b371de
+Adaptations: independent vectorized implementation; require a prior close for
+every true range (15 raw bars for CHOP14); zero channel range stays NaN.
+
+Technical Analysis Library (ta), ChaikinMoneyFlowIndicator definition:
+See original copyright and MIT License in ta-MIT.txt.
+https://github.com/bukosabino/ta/tree/a890410710a6e483c9ba08da7f3dd5089e4b9dff
+Adaptations: independent vectorized formula with window=20, no forward fill,
+zero-range candle multiplier=0, zero-total-volume window stays NaN.
+
+Only these selected research definitions are adapted. No upstream trading
+engine, data feed, model, or dependency environment is imported.

@@ -149,3 +149,29 @@ def test_invalid_experiment_path_cannot_escape_root(tmp_path):
     assert result["tables"] == []
     assert result["files"] == []
     assert any("不在允许" in note for note in result["notes"])
+
+
+def test_open_factors_keep_source_identity_and_separate_eligibility(tmp_path):
+    root = _root(tmp_path, _experiment_yaml() + '    factor_ids: [oss.qlib.kmid2, l2.ret_4]\n')
+    target = root / catalog_module.OPEN_FACTORS
+    target.parent.mkdir(parents=True)
+    source = Path(__file__).resolve().parents[2] / catalog_module.OPEN_FACTORS
+    manifest = json.loads(source.read_text())
+    # A manifest cannot grant either gate through this read-only catalog.
+    manifest["factors"][0]["training_eligible"] = True
+    manifest["factors"][0]["production_eligible"] = True
+    target.write_text(json.dumps(manifest))
+    records = [f for f in Catalog(root).factors() if f["id"].startswith("oss.")]
+    assert len(records) == 14
+    assert {r["upstream"]["project"] for r in records} == {"Qlib Alpha158", "QTPyLib", "ta"}
+    assert all(not f["training_eligible"] and not f["production_eligible"] for f in records)
+    assert next(f for f in records if f["id"] == "oss.qlib.kmid2")["experiment_ids"] == ["exp-fixture-v1"]
+    manifest["factors"].append(manifest["factors"][0])
+    target.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="duplicate open factor"):
+        Catalog(root).factors()
+    manifest["factors"].pop()
+    manifest["factors"][0]["upstream"]["commit"] = "main"
+    target.write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="full commit"):
+        Catalog(root).factors()

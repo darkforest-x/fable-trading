@@ -26,6 +26,7 @@ import yaml
 EXPERIMENT_REGISTRY = Path("experiments/registry.yaml")
 ARTIFACT_REGISTRY = Path("artifacts/registry.yaml")
 FEATURE_SOURCE = Path("yoyo/layers/l2_judgment/features.py")
+OPEN_FACTORS = Path("yoyo/research_workspace/open_factors.json")
 MAX_JSON_BYTES = 1_000_000
 MAX_CSV_BYTES = 2_000_000
 MAX_TABLE_ROWS = 300
@@ -371,7 +372,7 @@ class Catalog:
         return factors
 
     def factors(self) -> list[dict[str, Any]]:
-        """Return literal implemented L2 features plus explicitly linked research factors."""
+        """Read model, research and source-pinned factor metadata without computing."""
         causal_note = (
             "features.py 声明第 i 根特征只使用截至 i 的数据；空头方向列从同根指标映射。"
             "这里记录实现的输入边界，不能视为收益优势或实盘验证。"
@@ -394,7 +395,34 @@ class Catalog:
                 "training_eligible": False,
                 "production_eligible": False,
             })
-        factors.extend(self._research_factor_records(self._experiment_rows()))
+        experiments = self._experiment_rows()
+        factors.extend(self._research_factor_records(experiments))
+        path = self._safe_path(self.root / OPEN_FACTORS, base=self.root)
+        if path is not None and path.is_file():
+            if path.stat().st_size > MAX_JSON_BYTES:
+                raise ValueError("open factor metadata exceeds catalog size limit")
+            imported = json.loads(path.read_text(encoding="utf-8"))
+            if imported.get("schema_version") != 1 or not isinstance(imported.get("factors"), list):
+                raise ValueError("invalid open factor metadata schema")
+            ids = {factor["id"] for factor in factors}
+            for factor in imported["factors"]:
+                if not isinstance(factor, dict) or not str(factor.get("id", "")).startswith("oss."):
+                    raise ValueError("invalid open factor id")
+                if factor["id"] in ids:
+                    raise ValueError("duplicate open factor id")
+                upstream = factor.get("upstream", {})
+                if not re.fullmatch(r"[a-f0-9]{40}", str(upstream.get("commit", ""))):
+                    raise ValueError("open factor source must be pinned to a full commit")
+                ids.add(factor["id"])
+                factors.append(dict(factor, training_eligible=False, production_eligible=False))
+        # Preregistering an experiment against factors must show the backlink
+        # on those factors, including new imports, without a second manual edit.
+        indexed = {factor["id"]: factor for factor in factors}
+        for experiment in experiments:
+            for factor_id in experiment.get("factor_ids") or []:
+                factor = indexed.get(factor_id)
+                if factor is not None and experiment["id"] not in factor["experiment_ids"]:
+                    factor["experiment_ids"].append(experiment["id"])
         return factors
 
     def _artifact_rows(self) -> list[dict[str, Any]]:
