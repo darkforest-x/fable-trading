@@ -247,6 +247,8 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m yoyo.evaluation.spi
 
 新增模块行为测试当前20项通过（回放7、提示7、数据3、统计3），另有既有父版和层间约束组合检查通过；不同组合存在重叠，不把各次通过数相加。已独立复核全部闭合交易算术、状态分母、汇总哈希与匹配均值；主p值和Holm由父代理独立枚举复算。BTC/ETH正式六份账本均与原试跑逐字节一致。首次取数635/638成功，三个中文币名URL编码失败，修复后638/638成功；原失败记录保留。详见 `review_notes.md`、`data_failure_v1.json`、`pvalue_audit.json`。
 
+最终报告另经独立 evidence 子代理逐表核对，PASS；未发现分母、净bp/R、浮盈下界、提示计数或原生一致性声明的实质矛盾。已同步 [Notion研究记录](https://app.notion.com/p/3e48856479af81b7a051d9d3cefb096e)，状态“完成”、非生产；数据库自编号EXP-99，正文唯一键仍为本实验ID。
+
 ## 下一步选项
 
 1. 原生 TradingView 与 Python 逐事件核对信号、参考框和 H1 候选。属于一致性补证，本轮未把未验证移植宣称为原生回测。
