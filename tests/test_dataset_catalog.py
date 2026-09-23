@@ -141,3 +141,30 @@ def test_api_dataset_pagination_origin_and_download(tmp_path):
         assert client.get(base+'/file',params={'path':rel}).text==CSV
         assert client.get(base+'/file',params={'path':'../secrets'}).status_code==404
         assert client.get('/api/research/datasets/missing').status_code==404
+
+
+def test_ancestor_symlink_cannot_relocate_external_input(tmp_path):
+    outside=tmp_path.parent/(tmp_path.name+'-outside');(outside/'inputs').mkdir(parents=True)
+    (outside/'inputs/bars.csv').write_text(CSV)
+    (tmp_path/'experiments/active').mkdir(parents=True)
+    (tmp_path/'experiments/active/exp-outside').symlink_to(outside,target_is_directory=True)
+    with pytest.raises(ValueError,match='ancestor'):
+        move_dataset('experiments/active/exp-outside/inputs',root=tmp_path)
+    assert (outside/'inputs/bars.csv').read_text()==CSV
+
+
+def test_unknown_and_nested_venues_do_not_merge(tmp_path):
+    from yoyo.data.dataset_catalog import market_metadata
+    folder=tmp_path/'experiments/active/exp-mixed/inputs';folder.mkdir(parents=True)
+    unknown=folder/'ETH_USDT_5m.csv';unknown.write_text(CSV)
+    assert market_metadata(unknown,str(unknown))['exchange'] is None
+    for ex in ('binance','okx'):
+        sub=folder/ex;sub.mkdir();(sub/unknown.name).write_text(CSV)
+    build_index(tmp_path)
+    key=dataset_id('experiments/active/exp-mixed/inputs')
+    entry=DatasetCatalog(tmp_path).detail(key)
+    assert entry['dataset']['exchanges']==['binance','okx']
+    with pytest.raises(ValueError,match='身份不唯一'):
+        read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT',timeframe='5m',start='2026-01-01',end='2026-01-01T00:10:00Z')
+    result=read_market_data(root=tmp_path,dataset_id=key,symbol='ETH_USDT',timeframe='5m',exchange='binance',start='2026-01-01',end='2026-01-01T00:10:00Z')
+    assert len(result)==2

@@ -38,6 +38,22 @@ def _save(path, value):
     tmp.write_text(json.dumps(value,ensure_ascii=False,indent=2)+"\n");os.replace(tmp,path)
 
 
+def assert_no_open_writers(paths):
+    """Refuse observable local writers; never stop a research/production process."""
+    if sys.platform != "darwin": return
+    checked=[Path(p).resolve() for p in paths]
+    result=subprocess.run(["lsof","-n","-P","-F","pan"],capture_output=True,text=True,timeout=30)
+    if result.returncode not in (0,1):raise ValueError("Cannot verify local dataset writers")
+    mode="";busy=[]
+    for line in result.stdout.splitlines():
+        if line.startswith("p"):mode=""
+        elif line.startswith("a"):mode=line[1:]
+        elif line.startswith("n/") and mode in {"w","u"}:
+            name=Path(line[1:])
+            if any(name==p or name.is_relative_to(p) for p in checked):busy.append(str(name))
+    if busy:raise ValueError("Open dataset writers detected: "+", ".join(busy[:5]))
+
+
 def move_dataset(relative, *, root=ROOT):
     """Move one explicit offline directory; do not follow external cache links."""
     root=Path(root).resolve(); old=root/relative
@@ -46,6 +62,12 @@ def move_dataset(relative, *, root=ROOT):
     research_input = re.fullmatch(r"experiments/active/[^/]+/(inputs|data|data_tradable)", relative)
     if not (relative.startswith("data/kline_") or relative.startswith("data/research/") or research_input):
         raise ValueError("Only named local market datasets may move")
+    for parent in old.parents:
+        if parent == root: break
+        if parent.is_symlink(): raise ValueError("Source ancestor symlink cannot move")
+    if not old.resolve().is_relative_to(root): raise ValueError("Source symlink escapes repository")
+    for parent in (root/"data/crypto/market", root/"data/crypto", root/"data"):
+        if parent.is_symlink(): raise ValueError("Destination ancestor symlink cannot move")
     if old.is_symlink():
         if old.resolve().is_relative_to(root/"data/crypto/market"):return dict(status="already_managed",source=relative)
         raise ValueError("External and pre-existing symlinks cannot move")
@@ -66,6 +88,7 @@ def move_dataset(relative, *, root=ROOT):
             _save(journal,previous);return previous
     if not old.is_dir():raise ValueError("Source directory missing")
     if new.exists() or new.is_symlink():raise ValueError("Destination already exists")
+    assert_no_open_writers([old])
     identities=[];links=[];total=0
     for current,dirs,files in os.walk(old,followlinks=False):
         for name in dirs+files:
@@ -136,6 +159,7 @@ def clone_duplicate(source, target):
 def deduplicate(*, root=ROOT, minimum_bytes=65536):
     """Limit cleanup to indexed local datasets, same basename/size and full SHA."""
     root=Path(root).resolve();home=location(root)
+    assert_no_open_writers([root/item["path"] for item in sources(root) if item["storage"]!="external"])
     receipt_path=home/"maintenance.json"
     receipt=json.loads(receipt_path.read_text()) if receipt_path.is_file() else dict(deduplicated_bytes=0,files=0)
     completed=set()

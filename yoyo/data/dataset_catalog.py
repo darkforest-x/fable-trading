@@ -12,7 +12,7 @@ import argparse
 from collections import Counter
 from contextlib import closing
 import csv
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import fcntl
 import gzip
 import hashlib
@@ -60,7 +60,8 @@ def sources(root=ROOT):
         view = root / "data/crypto" / category / dataset_id(rel)
         if storage == "in_place" and view.is_symlink() and view.resolve() == resolved:
             canonical = view.relative_to(root).as_posix()
-        result.append(dict(id=dataset_id(rel), name=path.name, category=category,
+        display = path.parent.name + " / " + path.name if rel.startswith("experiments/") else path.name
+        result.append(dict(id=dataset_id(rel), name=display, category=category,
                            category_label=CATEGORIES[category], path=canonical,
                            original_paths=[rel], storage=storage))
     data = root / "data"
@@ -87,7 +88,7 @@ def sources(root=ROOT):
         if p.is_dir():
             add(p, "archives")
     # Only named inputs, not backtest outputs or trading account exports.
-    for pattern in ("experiments/active/*/inputs", "experiments/active/*/inputs_*", "experiments/active/*/sources", "experiments/active/*/sources_*", "experiments/active/*/source_data", "experiments/active/*/data", "analysis/output/*/kline_snapshot", "analysis/output/*/cache", "analysis/output/*/klines"):
+    for pattern in ("experiments/active/*/inputs", "experiments/active/*/inputs_*", "experiments/active/*/sources", "experiments/active/*/sources_*", "experiments/active/*/source_data", "experiments/active/*/data", "experiments/active/*/data_tradable", "analysis/output/*/kline_snapshot", "analysis/output/*/cache", "analysis/output/*/klines"):
         for p in sorted(root.glob(pattern)):
             if p.is_dir():
                 add(p, "research")
@@ -135,7 +136,8 @@ def market_metadata(path, identity_path):
         match = re.search(r"(?:okx_|gate_|binance_)?([A-Z0-9]+(?:[_-]USDT(?:[_-]SWAP)?|USDT))", path.name)
         if not match: return info
         symbol = match[1]
-        ex = "binance" if "binance" in context.lower() else "gate" if "gate_" in context.lower() else "okx" if "okx" in context.lower() or "_USDT" in symbol else None
+        venues = {v for v in ("binance", "gate", "okx") if re.search(r"(?:^|[/_-])"+v+r"(?:[/_-]|$)", context.lower())}
+        ex = next(iter(venues)) if len(venues) == 1 else None
         tf = None
         if second_time:
             minutes = (datetime.fromisoformat(second_time) - datetime.fromisoformat(first_time)).total_seconds() / 60
@@ -229,7 +231,8 @@ def build_index(root=ROOT):
                             try: st=path.stat()
                             except OSError: missing += 1; continue
                             suffix = ".csv.gz" if path.name.endswith(".csv.gz") else path.suffix.lower() or "[none]"
-                            info = market_metadata(path, item["original_paths"][0] + "/" + path.name) if item["category"] != "vision" else {}
+                            relative = path.relative_to(root / item["path"]) if (root / item["path"]).is_dir() else Path(path.name)
+                            info = market_metadata(path, item["original_paths"][0] + "/" + str(relative)) if item["category"] != "vision" else {}
                             if info.get("symbol") and path.name in receipts:
                                 for key, value in receipts[path.name].items():
                                     if value is not None and not info.get(key) or key == "market" and info.get(key) == "unknown":
@@ -243,7 +246,7 @@ def build_index(root=ROOT):
                             if info.get("end"): ends.append(info["end"])
                             if count % 10000 == 0: db.commit()
                     item.update(file_count=count,total_bytes=size,formats=sorted(formats),exchanges=sorted(exchanges),
-                                timeframes=sorted(timeframes),symbols_count=len(symbols),start=min(starts) if starts else None,
+                                timeframes=sorted(timeframes),symbols=sorted(symbols),symbols_count=len(symbols),start=min(starts) if starts else None,
                                 end=max(ends) if ends else None, missing_count=missing,
                                 backtest_ready=bool(symbols and timeframes and exchanges),
                                 notes=["文件逻辑大小；不等于内存或 APFS 共享后的实际物理占用。", "版本与原始时间切分保留，索引不授予训练或生产资格。"])
@@ -271,6 +274,18 @@ class DatasetCatalog:
         db.row_factory=sqlite3.Row
         return db
 
+    @staticmethod
+    def _example(db, item):
+        row=db.execute("SELECT symbol,timeframe,exchange,start,end FROM files WHERE dataset_id=? AND symbol IS NOT NULL AND timeframe IS NOT NULL AND exchange IS NOT NULL AND start IS NOT NULL ORDER BY symbol,path LIMIT 1",(item["id"],)).fetchone()
+        if row is not None:
+            step={"1m":1,"2m":2,"3m":3,"5m":5,"15m":15,"30m":30,"1H":60,"2H":120,"4H":240,"1D":1440}.get(row["timeframe"])
+            if step:
+                start=datetime.fromisoformat(row["start"])
+                end=start+timedelta(minutes=step*2)
+                if row["end"]: end=min(end,datetime.fromisoformat(row["end"])+timedelta(minutes=step))
+                item["example"]=dict(symbol=row["symbol"],timeframe=row["timeframe"],exchange=row["exchange"],start=start.isoformat(),end=end.isoformat())
+        return item
+
     def overview(self):
         state=dict(status="idle",error=None)
         if (self.home/"status.json").is_file():
@@ -281,7 +296,8 @@ class DatasetCatalog:
         items=[];generated=None
         if (self.home/"index.sqlite3").is_file():
             with closing(self._connect()) as db:
-                items=[json.loads(x[0]) for x in db.execute("SELECT metadata FROM datasets ORDER BY id")]
+                items=[self._example(db,json.loads(x[0])) for x in db.execute("SELECT metadata FROM datasets ORDER BY id")]
+                items.sort(key=lambda x:(list(CATEGORIES).index(x["category"]),x["storage"]!="managed",x["name"]))
                 generated=db.execute("SELECT value FROM info WHERE key='generated_at'").fetchone()[0]
         counts=Counter(x["category"] for x in items)
         receipt=self.home/"maintenance.json"
@@ -297,7 +313,7 @@ class DatasetCatalog:
         with closing(self._connect()) as db:
             row=db.execute("SELECT metadata FROM datasets WHERE id=?",(key,)).fetchone()
             if row is None: raise KeyError(key)
-            dataset=json.loads(row[0])
+            dataset=self._example(db,json.loads(row[0]))
             files=[dict(x) for x in db.execute("SELECT * FROM files WHERE dataset_id=? ORDER BY symbol IS NULL, path LIMIT ? OFFSET ?",(key,limit,offset))]
             return dict(dataset=dataset,files=files,total=dataset["file_count"],limit=limit,offset=offset)
 
