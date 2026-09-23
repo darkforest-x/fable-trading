@@ -1,0 +1,58 @@
+{
+  "code": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_entry.py": "e6732341f8924e04604de57b7ffdbbefb368b5ac38ed7d33767f468d56ba6574",
+    "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/PROJECT_PLAN.md": "0bc21f8905ba473d2dd9dd86554499b0e8570efeb5b2755037c25fc07c80ab83",
+    "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/config.json": "5f176f31ed1c3ead358a406550fb7e5775a76618c7b22dcacdd8594ffe72cd3f",
+    "tests/evaluation/test_spike_v128_expansion_entry.py": "990cf3697128f812e95ab9807c6516f5fb03d9ed2990cdac2123a6bd35884f0d"
+  },
+  "config": {
+    "bootstrap": 2000,
+    "control_pools": [
+      "all",
+      "high20"
+    ],
+    "control_seed": 923128,
+    "end": "2026-09-23T04:00:00Z",
+    "experiment_id": "exp-spike-v128-expansion-entry-20260923-v1",
+    "feature": "spike_atr_pct_ratio96",
+    "initial_position_policy": "carry_parent_position_at_window_start",
+    "parent_run": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1",
+    "primary_policy": "high20",
+    "production_eligible": false,
+    "quantile_ties": "lower_bin_strictly_above_q80_required",
+    "quantiles": [
+      0.2,
+      0.4,
+      0.6,
+      0.8
+    ],
+    "rank_history_days": 30,
+    "ratio_mean_includes_current": true,
+    "ratio_window_bars": 96,
+    "round_trip_cost": 0.002,
+    "split": "2026-08-23T00:00:00Z",
+    "start": "2026-07-23T00:00:00Z",
+    "statistics_seed": 923230,
+    "timeframes": [
+      15,
+      60
+    ],
+    "training_eligible": false
+  },
+  "config_sha256": "5f176f31ed1c3ead358a406550fb7e5775a76618c7b22dcacdd8594ffe72cd3f",
+  "inputs": {
+    "BTCUSDT": "05c0fd096bc48ae535a20baa365bbcd938138d25eaa5a5ca538e3e10395670ee",
+    "ETHUSDT": "6ab362ad4dc8bb9c548a8c129c6c7b876d8c065fd46d6c50e85c2c3a117f1144"
+  },
+  "parent_identity_sha256": "53f225455e2c7ce396d62db527eac690ef75ad79a45e07f8bce4e86c0750bece",
+  "parent_manifest_sha256": "5292a493ec320feedab877fdabfb806731cc1d3f60a360bfe854212a2bfb5e8f",
+  "subset": true,
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "timeframes": [
+    15,
+    60
+  ]
+}

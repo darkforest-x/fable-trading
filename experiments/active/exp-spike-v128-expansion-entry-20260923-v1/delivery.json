@@ -1,0 +1,57 @@
+{
+  "experiment_id": "exp-spike-v128-expansion-entry-20260923-v1",
+  "status": "completed_rejected_as_universal_entry_gate",
+  "generated_at": "2026-09-23T07:29:15.548933+00:00",
+  "runner_source_commit": "f8c848d2875083067c12c023a5e3184243c09da6",
+  "initial_runner_and_statistics_commit": "b252a37b8e",
+  "plan_commit": "2451b2cdf2",
+  "completed_streams": 1276,
+  "parent_parity_streams": 1276,
+  "stream_errors": 0,
+  "unknown_feature_candidates": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "native_market_event_parity_verified": false,
+  "config": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/config.json",
+    "sha256": "5f176f31ed1c3ead358a406550fb7e5775a76618c7b22dcacdd8594ffe72cd3f",
+    "size_bytes": 808
+  },
+  "parent_run_manifest": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1/manifest.json",
+    "sha256": "5292a493ec320feedab877fdabfb806731cc1d3f60a360bfe854212a2bfb5e8f",
+    "size_bytes": 137988
+  },
+  "final_run_manifest": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/run_v2/manifest.json",
+    "sha256": "bb180a4f53afbcc64cfab4b92c1bab075d2c29d27a0a91e3fd62f0ab773fa32d",
+    "size_bytes": 112439
+  },
+  "final_run_identity": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/run_v2/identity.json",
+    "sha256": "b840d840f81f2eb12a7fdd088cacb49c91330b24440e9b53729ad1d41bf15ccf",
+    "size_bytes": 65827
+  },
+  "summary_receipt": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/summary_v1/receipt.json",
+    "sha256": "7d14cfe79120f363f3d8db3661457a7873174452f7df11e4f06dcd19e2a4343a",
+    "size_bytes": 1858
+  },
+  "rerun_parity_audit": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/rerun_parity_audit.json",
+    "sha256": "f25f9d3407163f8de5fbf7f2df873d24d183f1ea555977b1b0f999a6c9e7e47f",
+    "size_bytes": 525
+  },
+  "bulk_archive": {
+    "path": "archive/consolidated/spike_v128_expansion_entry_20260923/replay_and_ledgers_v1_v2.tar",
+    "sha256": "756c60a3278228999661dfcb4d88619eddec459eee5aee0ecfdf37cfdbdac851",
+    "size_bytes": 63708672
+  },
+  "storage_note": "Both full runs, all per-stream receipts/ledgers and summary tables are retained in the local archive, outside Git. Original raw inputs remain under data/research as referenced by the parent input manifest. Source-only clones require restoring these assets; compact tables and identities are committed.",
+  "finding": "Entries fall 66.6%-74.9%, but 15m quality does not improve; 1h pooled improvement reverses in the later period. All four primary Holm p-values equal 1. No adoption or parameter change.",
+  "independent_audit": {
+    "path": "experiments/active/exp-spike-v128-expansion-entry-20260923-v1/independent_audit.json",
+    "sha256": "7dd6049ad9b4ef47e304bd806d9722c1723492c18bf96069ff5a228f35fe852f",
+    "size_bytes": 1115
+  }
+}

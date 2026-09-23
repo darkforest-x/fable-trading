@@ -10832,15 +10832,15 @@ experiments:
 
   - experiment_id: exp-spike-v128-expansion-entry-20260923-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: e519462d9c
-    status: active
+    source_commit: f8c848d2875083067c12c023a5e3184243c09da6
+    status: rejected
     question: Can causal within-symbol volatility expansion reduce V12.8 entries while improving net win rate and realized high R?
     single_variable: Strictly above prior 30-day 80th percentile of SPIKE ATR-percent divided by its rolling 96-bar mean.
-    result: One-axis exploratory plan frozen before feature-conditioned outcomes; original exits and costs unchanged.
+    result: 1276 streams complete, exact parent parity. Entries decrease66.6%-74.9%;15m quality worsens and1h pooled improvement reverses later. Later1h joint win30.83%to22.92%,mean netR0.024to-0.409; all four primary Holm p1. Reject universal high20 default gate.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v128_expansion_entry_20260923.md
-    artifacts: []
+    artifacts: [spike-v128-expansion-entry-20260923-delivery]
     reuse_allowed: false
     notes: Jul23-Sep23 fixed 638-contract pool and 15m/1h. Inherits parent opening positions; no warmup-filtering claim.

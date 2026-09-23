@@ -32470,3 +32470,19 @@ artifacts:
     notes: 1276 streams complete; 583 ready contracts and 55 flat zero-volume inputs. Frozen local archive and all receipts
       hashed. Four matched bp excesses negative; native Pine event parity unverified. No added-position PnL. Historical-data
       restriction canceled by owner; legacy holdout vocabulary does not imply a current access restriction.
+
+  - artifact_id: spike-v128-expansion-entry-20260923-delivery
+    artifact_type: manifest
+    role: causal_relative_volatility_entry_gate_rejected
+    source_repo: darkforest-x/fable-trading
+    source_commit: f8c848d2875083067c12c023a5e3184243c09da6
+    source_path: experiments/active/exp-spike-v128-expansion-entry-20260923-v1/delivery.json
+    sha256: 80b98d198faea5363e12849fca2a2368fadb82fa796abdf0a98fc72ce506a450
+    size_bytes: 2941
+    storage_uri: repo://experiments/active/exp-spike-v128-expansion-entry-20260923-v1/delivery.json
+    config_hash: 5f176f31ed1c3ead358a406550fb7e5775a76618c7b22dcacdd8594ffe72cd3f
+    data_cutoff: "2026-09-23T04:00:00Z"
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 1276 streams complete; parent baseline and all-pool controls match exactly. Provenance fix rerun preserves all5104 ledger hashes. Full-history assets local archived; no Pine, exit, cost, training or live change.

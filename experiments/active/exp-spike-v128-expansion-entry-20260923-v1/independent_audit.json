@@ -1,0 +1,40 @@
+{
+  "agent": "/root/expansion_review_luna6",
+  "runtime_verified": {
+    "model": "gpt-6-luna",
+    "effort": "max"
+  },
+  "scope_symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "USUSDT"
+  ],
+  "scope_timeframes": [
+    15,
+    60
+  ],
+  "runs": [
+    "run_v1",
+    "run_v2"
+  ],
+  "per_run": {
+    "candidates_checked": 79,
+    "feature_mismatches": 0,
+    "max_ratio_absolute_error": 4.44e-16,
+    "high20_random_bars_checked": 73,
+    "gate_violations": 0,
+    "serial_trades_checked": 95,
+    "high20_serial_trades": 24,
+    "risk_arithmetic_violations": 0,
+    "max_net_r_arithmetic_error": 1.14e-13,
+    "max_risk_fraction_error": 6.26e-15
+  },
+  "sequence_check": {
+    "stream": "USUSDT_15m",
+    "run": "run_v2",
+    "status_or_blocker_mismatches": 0,
+    "trade_key_mismatches": 0,
+    "parent_baseline_key_mismatches": 0
+  },
+  "limitations": "Six sampled streams had no pre-window affecting carry; actual carry not covered by this sample. Carry has synthetic behavioral coverage and all-stream parent baseline parity. This is independent audit evidence, not additional independent market observations."
+}
