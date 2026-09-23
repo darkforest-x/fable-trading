@@ -94,3 +94,25 @@ def test_missing_stream_cannot_be_reported_as_complete(tmp_path):
     save(tmp_path / "replay/identity.json", identity)
     with pytest.raises(ValueError, match="身份或范围"):
         summarize_replay(tmp_path)
+
+
+def test_evidence_queue_completes_only_after_registering_result(tmp_path, monkeypatch):
+    import yaml
+    from yoyo.research_workspace import registrations
+    monkeypatch.setattr(registrations, "_git_head", lambda root: "b" * 40)
+    root = tmp_path / "repo"
+    exp = root / "experiments/active/exp-fixture"
+    exp.mkdir(parents=True)
+    (root / "experiments/registry.yaml").write_text(
+        "experiments:\n  - experiment_id: exp-fixture\n    status: active\n    artifacts: []\n")
+    (root / "artifacts").mkdir()
+    (root / "artifacts/registry.yaml").write_text("artifacts:\n  - artifact_id: existing\n")
+    (exp / "config.json").write_text('{"cost_bp":20}')
+    store = WorkspaceStore(tmp_path / "runtime")
+    job = store.create_job("exp-fixture", "verify-evidence", {}, exp / "workspace_runs")
+    run(root, store.runtime)
+    assert store.job(job["id"])["status"] == "completed"
+    artifact = yaml.safe_load((root / "artifacts/registry.yaml").read_text())["artifacts"][-1]
+    assert artifact["artifact_id"] == "workspace-run-" + job["id"]
+    assert artifact["sha256"] == digest(Path(job["output"]) / "result.json")
+    assert artifact["production_eligible"] is False

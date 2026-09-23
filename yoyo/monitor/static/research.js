@@ -4,7 +4,7 @@
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const statusNames = { planned:'待开始', negative:'负面结论', active:'研究中', accepted:'历史记录：通过', rejected:'已否定', inconclusive:'证据不足', completed:'已完成', superseded:'已替代', archived:'已归档', hypothesis:'待验证', implemented:'已实现', research:'研究因子', review:'待复核', queued:'排队中', running:'运行中', failed:'运行失败', interrupted:'已中断', cancelled:'已取消' };
-  const categoryNames={ma_spread:'均线带宽',dense_state:'密集状态',price_position:'价格位置',trend_order:'趋势排列',volume:'成交量',volatility:'波动',momentum:'动量',band_structure:'通道结构',entry_structure:'入场结构',entry_timing:'入场时机',visual_gate:'视觉形态'};
+  const categoryNames={ma_spread:'均线带宽',dense_state:'密集状态',price_position:'价格位置',trend_order:'趋势排列',volume:'成交量',volatility:'波动',momentum:'动量',band_structure:'通道结构',entry_structure:'入场结构',entry_timing:'入场时机',visual_gate:'视觉形态',training_morphology:'训练形态'};
   const categoryLabel=(x)=>categoryNames[x]||x||'未分类';
   const stages = ['hypothesis','review','inconclusive','rejected','archived'];
   const badge = (s) => `<span class="research-badge status-${esc(s)}">${esc(statusNames[s] || s || '未记录')}</span>`;
@@ -37,7 +37,7 @@
     if (!state.loaded) return;
     const o=state.overview;
     $('research-overview').innerHTML=`<div class="research-objective"><span class="research-kicker">研究目标</span><h2>${esc(o.objective)}</h2><p>均线密集 → 启动识别 → 因子筛选 → 回测对照 → 前向观察</p></div>
-      <div class="research-metrics"><button data-research-nav="factors"><small>已整理因子</small><strong>${o.factor_count}</strong><span>代码特征与研究假设</span></button><button data-research-nav="experiments"><small>登记实验</small><strong>${o.experiment_count}</strong><span>原始结论与历史版本</span></button><button data-research-nav="experiments" data-filter-status="rejected"><small>否定 / 证据不足</small><strong>${(o.statuses.rejected||0)+(o.statuses.inconclusive||0)+(o.statuses.negative||0)}</strong><span>保留失败证据，避免重复试错</span></button><button data-research-nav="backtests"><small>待完成任务</small><strong>${state.jobs.filter(j=>['queued','running'].includes(j.status)).length}</strong><span>独立离线队列</span></button></div>
+      <div class="research-metrics"><button data-research-nav="factors"><small>已整理因子</small><strong>${o.factor_count}</strong><span>代码特征与研究假设</span></button><button data-research-nav="experiments"><small>登记实验</small><strong>${o.experiment_count}</strong><span>原始结论与历史版本</span></button><button data-research-nav="experiments" data-filter-status="negative-results"><small>否定 / 证据不足</small><strong>${(o.statuses.rejected||0)+(o.statuses.inconclusive||0)+(o.statuses.negative||0)}</strong><span>保留失败证据，避免重复试错</span></button><button data-research-nav="backtests"><small>待完成任务</small><strong>${state.jobs.filter(j=>['queued','running'].includes(j.status)).length}</strong><span>独立离线队列</span></button></div>
       <div class="research-flow">${[['01','定义因子','记录公式、窗口和可知时点','factors'],['02','登记实验','明确问题与唯一变化','experiments'],['03','运行回测','冻结成本、时间与原始数据','backtests'],['04','复核证据','核对前后段及随机对照','experiments'],['05','视觉验证','回放图表、参考图与人工判断','vision']].map(([n,t,d,v])=>`<button data-research-nav="${v}"><span>${n}</span><strong>${t}</strong><small>${d}</small><b>↗</b></button>`).join('')}</div>
       <div class="research-section-heading"><h2>近期研究</h2><button class="research-button" data-research-nav="experiments">查看全部 →</button></div><div class="research-recent">${o.recent.map(e=>`<button data-experiment="${esc(e.experiment_id)}"><div>${badge(e.status)}<span class="research-mono">${esc(e.experiment_id)}</span></div><h3>${esc(title(e))}</h3><p>${esc(e.question || e.result || '尚未记录研究问题')}</p><span class="research-open">查看问题、单变量与证据 →</span></button>`).join('')}</div>
       <div class="research-provenance"><span>工作流参考</span>${o.sources.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>`).join('')}<span>研究完成不等于通过验证；实盘资格独立审批。</span></div>`;
@@ -54,7 +54,7 @@
   }
   function renderExperiments() {
     const q=$('experiment-search').value.trim().toLowerCase(),status=$('experiment-status').value;
-    const items=state.experiments.filter(e=>(!status||e.status===status)&&(!q||JSON.stringify(e).toLowerCase().includes(q)));
+    const items=state.experiments.filter(e=>(!status||(status==='negative-results'?['rejected','inconclusive','negative'].includes(e.status):e.status===status))&&(!q||JSON.stringify(e).toLowerCase().includes(q)));
     $('experiment-count').textContent=`${items.length} / ${state.experiments.length} 个实验`;
     $('compare-experiments').disabled=state.selected.size<2;
     $('compare-experiments').textContent=`对照查看${state.selected.size?` (${state.selected.size})`:''}`;

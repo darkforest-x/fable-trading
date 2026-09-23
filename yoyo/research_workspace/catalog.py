@@ -59,6 +59,10 @@ _SENSITIVE_KEY_PARTS = (
 )
 
 _LATEST_TITLES = {
+    "exp-ma-dense-launch-pine-20260923-v1": "密集启动：TradingView 指标复现",
+    "exp-spike-v127-held-age-20260923-v1": "SPIKE：突破证据时效上限",
+    "exp-spike-v128-roll-hints-20260923-v1": "SPIKE V12.8：滚动结构提示",
+    "exp-spike-v128-recent-20260923-v1": "SPIKE V12.8：近两月原版回测与止损复盘",
     "exp-spike-v128-bb-slope-20260924-v1": "SPIKE V12.8：BB200 方向斜率研究",
     "exp-spike-ma-launch-gate-20260923-v1": "SPIKE：训练形态门历史筛选",
     "exp-spike-v128-expansion-entry-20260923-v1": "SPIKE V12.8：高波动扩张门",
