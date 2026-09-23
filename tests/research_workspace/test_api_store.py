@@ -55,6 +55,7 @@ def workspace(tmp_path, monkeypatch):
     static = tmp_path / "vision-assets"
     static.mkdir()
     monkeypatch.setattr(api_module, "VISION", static)
+    monkeypatch.setattr(api_module.subprocess, "check_output", lambda *a, **k: "a" * 40)
 
     def make_client(vision_transport=None):
         app = FastAPI()
@@ -162,6 +163,8 @@ def test_experiment_append_preserves_original_registry_bytes_and_stays_ineligibl
     assert created["status"] == "active"
     assert created["training_eligible"] is False
     assert created["production_eligible"] is False
+    from yoyo.contracts.artifacts import ExperimentRecord
+    assert ExperimentRecord.from_mapping(created).source_commit == "a" * 40
     spec = workspace["root"] / "experiments" / "active" / created["experiment_id"] / "workspace_spec.json"
     assert json.loads(spec.read_text(encoding="utf-8"))["production_eligible"] is False
     assert updated.startswith(original)
@@ -175,6 +178,11 @@ def test_file_route_serves_catalogued_files_and_rejects_unlisted_paths(workspace
     allowed = workspace["client"].get("/api/research/file", params=params)
     assert allowed.status_code == 200
     assert allowed.json() == {"mode": "fixture"}
+
+    config.write_text('{"mode":"fixture","apiKey":"never-download"}', encoding="utf-8")
+    assert workspace["client"].get("/api/research/file", params=params).status_code == 404
+    detail = workspace["client"].get("/api/research/experiments/exp-fixture-v1").json()
+    assert detail["config"][params["path"]] == {"mode": "fixture"}
 
     params["path"] = "../../outside.json"
     denied = workspace["client"].get("/api/research/file", params=params)

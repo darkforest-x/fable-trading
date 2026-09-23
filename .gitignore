@@ -267,3 +267,8 @@ experiments/active/exp-pine-eth-15m-v1/results-docker/**
 
 # Long-horizon SPIKE replays: keep compact run identities and summaries in git.
 /experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/*_v1/streams/**
+
+# Local workspace queue locks; generated ledgers stay outside versioned summaries.
+/artifacts/.workspace-artifact-registry.lock
+/experiments/active/*/workspace_runs/*/replay/streams/**
+/experiments/active/*/workspace_runs/*/run.log

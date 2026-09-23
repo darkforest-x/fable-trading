@@ -18,6 +18,7 @@ import sys
 import time
 
 from .catalog import Catalog
+from .registrations import register_result
 from .store import WorkspaceStore, now
 
 
@@ -120,7 +121,8 @@ def execute(store, root, job, lock_fd=None):
     if job["recipe"] != "spike-v128-frozen":
         raise ValueError("未知回测适配器")
     # Preserve the repository's builder-before-artifacts rule for this wrapper.
-    for source in ("yoyo/research_workspace/worker.py", "tests/research_workspace/test_worker.py"):
+    for source in ("yoyo/research_workspace/worker.py", "tests/research_workspace/test_worker.py",
+                   "yoyo/research_workspace/registrations.py", "tests/research_workspace/test_registrations.py"):
         check = subprocess.run(["git", "diff", "--exit-code", "HEAD", "--", source], cwd=root, capture_output=True)
         tracked = subprocess.run(["git", "ls-files", "--error-unmatch", source], cwd=root, capture_output=True)
         if check.returncode or tracked.returncode:
@@ -168,6 +170,8 @@ def run(root, runtime):
             try:
                 execute(store, Path(root), job, lock.fileno())
                 cancelled = store.job(job["id"])["cancel_requested"]
+                if not cancelled:
+                    register_result(Path(root), job)
                 store.finish(job["id"], "cancelled" if cancelled else "completed")
             except Exception as error:
                 store.finish(job["id"], "failed", str(error))

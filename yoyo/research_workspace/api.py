@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
+from yoyo.contracts.artifacts import ExperimentRecord
 
 from .catalog import Catalog
 from .store import WorkspaceStore, now
@@ -74,11 +75,14 @@ def same_origin(request: Request):
 def register_experiment(root, store, payload):
     """Append one active preregistration without rewriting historical YAML."""
     exp_id = "exp-workspace-" + uuid.uuid4().hex[:16]
+    commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     record = dict(experiment_id=exp_id, source_repo="darkforest-x/fable-trading", status="active",
+                  source_commit=commit, result="预登记；尚未运行或形成结论。",
                   question=payload.question, single_variable=payload.single_variable,
                   title=payload.title, factor_ids=payload.factor_ids, artifacts=[],
                   training_eligible=False, production_eligible=False, holdout_consumed=False,
                   reuse_allowed=False, notes="工作台预登记；尚未运行或验证。", created_at=now())
+    ExperimentRecord.from_mapping(record)
     registry = Path(root) / "experiments/registry.yaml"
     with (store.runtime / "registry.lock").open("a+") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX)
@@ -91,6 +95,9 @@ def register_experiment(root, store, payload):
         (folder / "workspace_spec.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n")
         extra = yaml.safe_dump([record], allow_unicode=True, sort_keys=False)
         text = old + b"\n\n" + "\n".join("  " + line for line in extra.splitlines()).encode() + b"\n"
+        updated = yaml.safe_load(text)
+        if updated.get("experiments") != parsed["experiments"] + [record]:
+            raise ValueError("预登记未能保留原实验列表，未替换注册表。")
         temp = registry.with_name(".workspace-registry-" + uuid.uuid4().hex + ".tmp")
         try:
             temp.write_bytes(text)
@@ -189,7 +196,8 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     def evidence(exp_id: str):
         find_experiment(exp_id)
         return dict(catalog.evidence(exp_id), annotation=store.notes("experiment").get(exp_id),
-                    history=store.history("experiment", exp_id))
+                    history=store.history("experiment", exp_id),
+                    jobs=[j for j in store.jobs() if j["experiment_id"] == exp_id])
 
     @api.put("/experiments/{exp_id}/note")
     def experiment_note(exp_id: str, payload: Note):
