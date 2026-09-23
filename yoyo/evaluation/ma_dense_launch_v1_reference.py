@@ -70,6 +70,34 @@ def add_features(frame: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+_PREPARED: dict[int, tuple[pd.DataFrame, dict]] = {}
+
+
+def prepare(frame: pd.DataFrame) -> dict:
+    """Column arrays for one frame, cached so a scan does not re-copy them per bar.
+
+    Only the most recent frame is kept, and the cache holds its DataFrame so an
+    id cannot be reused by a different object while the entry lives.
+    """
+    key = id(frame)
+    hit = _PREPARED.get(key)
+    if hit is not None and hit[0] is frame:
+        return hit[1]
+    columns = [f"{kind}{period}" for kind in ("sma", "ema") for period in MA_PERIODS]
+    arrays = {k: frame[k].to_numpy(float) for k in ("open", "high", "low", "close", "atr")}
+    arrays["mas"] = frame[columns].to_numpy(float)
+    arrays["ma_low"] = arrays["mas"].min(axis=1)
+    arrays["ma_high"] = arrays["mas"].max(axis=1)
+    arrays["ma_mid"] = arrays["mas"].mean(axis=1)
+    arrays["body_high"] = np.maximum(arrays["open"], arrays["close"])
+    arrays["body_low"] = np.minimum(arrays["open"], arrays["close"])
+    arrays["finite"] = np.isfinite(np.column_stack([arrays["open"], arrays["high"], arrays["low"],
+                                                    arrays["close"], arrays["mas"]])).all(axis=1)
+    _PREPARED.clear()
+    _PREPARED[key] = (frame, arrays)
+    return arrays
+
+
 @dataclass(frozen=True)
 class Decision:
     """One evaluation at a confirmation bar; ``metrics`` mirrors the Pine names."""
@@ -108,20 +136,19 @@ def evaluate(frame: pd.DataFrame, confirm_i: int, direction: str, core_bars: int
     anchor_i = end_i + 2
     if start_i - 12 < 0 or confirm_i >= len(frame):
         return None
-    columns = [f"{kind}{period}" for kind in ("sma", "ema") for period in MA_PERIODS]
-    window = frame.iloc[start_i - 12: confirm_i + 1]
-    if not np.isfinite(window[["open", "high", "low", "close", *columns]].to_numpy(float)).all():
+    arrays = prepare(frame)
+    if not arrays["finite"][start_i - 12: confirm_i + 1].all():
         return None
-    atr = float(frame["atr"].iloc[anchor_i])
+    atr = float(arrays["atr"][anchor_i])
     if not np.isfinite(atr) or atr <= 0:
         return None
-    o, h, l, c = (frame[k].to_numpy(float) for k in ("open", "high", "low", "close"))
-    mas = frame[columns].to_numpy(float)
+    o, h, l, c = arrays["open"], arrays["high"], arrays["low"], arrays["close"]
+    mas = arrays["mas"]
     core = np.arange(start_i, end_i + 1)
     pre = np.arange(start_i - 12, start_i)
     post = np.arange(end_i + 1, end_i + 6)
-    ma_low, ma_high = mas.min(axis=1), mas.max(axis=1)
-    body_high, body_low = np.maximum(o, c), np.minimum(o, c)
+    ma_low, ma_high = arrays["ma_low"], arrays["ma_high"]
+    body_high, body_low = arrays["body_high"], arrays["body_low"]
     close_dist = np.maximum(np.maximum(ma_low[core] - c[core], c[core] - ma_high[core]), 0.0) / atr
     body_dist = np.maximum(np.maximum(ma_low[core] - body_high[core], body_low[core] - ma_high[core]), 0.0) / atr
     progress = sign * (c[post] - c[end_i]) / atr
@@ -275,12 +302,12 @@ def profiles(frame: pd.DataFrame, confirm_i: int, direction: str, core_bars: int
     sign = 1.0 if direction == "LONG" else -1.0
     end_i = confirm_i - 5
     start_i = end_i - core_bars + 1
-    atr = float(frame["atr"].iloc[end_i + 2])
-    columns = [f"{kind}{period}" for kind in ("sma", "ema") for period in MA_PERIODS]
-    o, h, l, c = (frame[k].to_numpy(float) for k in ("open", "high", "low", "close"))
-    mas = frame[columns].to_numpy(float)
-    body_high, body_low = np.maximum(o, c), np.minimum(o, c)
-    ma_low, ma_high, ma_mid = mas.min(axis=1), mas.max(axis=1), mas.mean(axis=1)
+    arrays = prepare(frame)
+    atr = float(arrays["atr"][end_i + 2])
+    o, h, l, c = arrays["open"], arrays["high"], arrays["low"], arrays["close"]
+    mas = arrays["mas"]
+    body_high, body_low = arrays["body_high"], arrays["body_low"]
+    ma_low, ma_high, ma_mid = arrays["ma_low"], arrays["ma_high"], arrays["ma_mid"]
     core = np.arange(start_i, end_i + 1)
     span = np.arange(start_i, end_i + 6)
     origin = float(mas[start_i].mean())
