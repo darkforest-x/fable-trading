@@ -1,0 +1,2999 @@
+//@version=6
+// New private version: show completed H1 SMA60 on 15m by default; preserve V12.4 filters.
+// Owner authorized the filter release; historical ranking is not validated profitability.
+// V11：在V10.4基础上，本图SPIKE可以与上级周期的下降线突破配对（15分看1小时、1小时看4小时），
+// 配成的仍叫「突破+spike」，标注（上级突破）；本图没有自己的SPIKE时，上级突破只是提示，不算信号。
+// 突破后的趋势线继续向右延伸，并默认标出A/B/C与突破点。
+// 上级周期突破只在上级K线收盘后的第一根本图K线才可见（lookahead_on + [1]），不回填、不重绘。
+// V11.2：默认「多头框内」规则——本图V9多头框开着时出现突破（本周期或上级）就是突破+spike，每框一次、不限根数、不做当根检查；
+// 可选：突破时提示加仓（止损沿用原框）；N根内没出突破则盈亏参考提前结束（未突破离场）。
+// 这是指标，不下单；本地检查不等于TradingView编译或行情验证。
+// V12: preserve the major-three-pivot family, add two major anchors plus a local touch.
+// Local C is admitted only at its right-confirmation close, using already known A/B.
+// V12 revision: persist a confirmed break while every chart close remains above
+// its frozen line, then pair at the next eligible V9. HTF geometry uses HTF bars;
+// held evidence deliberately uses CHART closes/lifetime because V9 is on this chart.
+// Break labels and lines share bounded lifetime; exit R uses the ended frame.
+// Both families share history validation, break confirmation and unchanged V9 box pairing.
+// V12.2: retain historical regions; cap only lines sharing one frozen A-anchor region.
+indicator("SPIKE V12.8 · 两次加仓提示", shorttitle="SPIKE V12.8", overlay=false, max_labels_count=500, max_boxes_count=150, max_lines_count=400, max_polylines_count=100, max_bars_back=2000, explicit_plot_zorder=true, behind_chart=false)
+// HTF anchor timestamps can outlive the search window: 1500 search + 1500 life.
+max_bars_back(time, 3100)
+
+// ───────────── 原有参数与显示 ─────────────
+
+const int maLen = 34
+const int sigLen = 9
+const int denseLen = 12
+const float denseWidth = 3.0
+const int denseCrosses = 2
+const int breakoutLookback = 12
+const int cooldownBars = 12
+const int confirmMaxAge = 3
+const float minAdvance = 1.5
+const float minVolume = 1.5
+const float minBody = 0.55
+const float minEnd = 0.75
+const int stopLen = 5
+const float stopBuffer = 0.2
+const float riskFloor = 2.0
+const float armR = 2.0
+const float trailAtr = 4.0
+const float maxRopeDistanceAtr = 3.0
+const float maxVolumeRatio = 50.0
+const float roundTripCost = 0.002
+
+string gView = "01 · 显示"
+
+// BEGIN V126 INPUTS
+// Presentation only. No input below participates in admission, pairing or exits.
+bool v126Minimal = input.bool(false, "仅六均线＋趋势线主线", group=gView, tooltip="隐藏信号文字、A/B/C、BB、盈亏框、上级均线、面板和IMACD；保留本周期/上级主趋势线及历史区域。K线着色仍由独立开关控制。副图空白区域需手动折叠。", display=display.none)
+bool v126AutoContrast = input.bool(true, "趋势线自动适配背景", group=gView, tooltip="浅色背景用黑色，深色背景用白色；关闭后使用本周期/上级线自定义颜色。历史透明度仍生效。", display=display.none)
+color v126Contrast = (0.2126 * color.r(chart.bg_color) + 0.7152 * color.g(chart.bg_color) + 0.0722 * color.b(chart.bg_color)) >= 128 ? color.black : color.white
+bool v126PaintBreak = input.bool(true, "突破站稳K线着色", group=gView, tooltip="从已确认突破当根开始计数，不回填此前确认中的K线；收盘跌回冻结趋势线或数据断档即停止。本周期和上级突破均支持。同一B点8根内的重复确认不延长着色窗口。仅显示变化。", display=display.none)
+int v126BreakBars = input.int(3, "突破着色根数（含确认当根）", minval=1, maxval=20, group=gView, display=display.none)
+bool v126CustomBreak = input.bool(false, "突破K线使用自定义颜色", group=gView, tooltip="关闭时跟随对应趋势线颜色。", display=display.none)
+color v126BreakColor = input.color(#E6A23C, "突破K线自定义色", group=gView, display=display.none)
+bool v126PaintPin = input.bool(true, "Pin Bar 独立着色", group=gView, tooltip="仅已收盘K：实体≤全长30%，主影线≥60%，反侧影线≤20%，全长至少4个最小跳动。不要求阳线或阴线；仅标形状，不代表已确认反转或流动性扫单。", display=display.none)
+color v126LowerPinColor = input.color(#009688, "Pin Bar 长下影", group=gView, display=display.none)
+color v126UpperPinColor = input.color(#D65A8A, "Pin Bar 长上影", group=gView, display=display.none)
+bool v126PinPriority = input.bool(false, "Pin Bar 优先于突破着色", group=gView, tooltip="默认突破颜色优先，其次Pin Bar，最后普通V9确认色。开启后Pin Bar优先。", display=display.none)
+
+// END V126 INPUTS
+bool v10OnlyJoint = input.bool(false, "仅显示突破+spike 信号", group=gView, tooltip="含「突破+spike（上级突破）」。只控制显示，不改变信号计算或预警。隐藏普通多空、单独突破、普通价格标签/染色及V9盈亏框；保留联合标记、对应趋势线、均线和IMACD。", display=display.none) and not v126Minimal
+
+// 为联合标记预留对象配额：普通价格标签40个，退出标签20个。
+const int SIGNAL_TAG_LIMIT = 40
+const int EXIT_TAG_LIMIT = 20
+
+bool showMas = input.bool(true, "六条均线", group=gView, display=display.none) or v126Minimal
+bool showLabels = input.bool(true, "确认信号与价格", group=gView, tooltip="只显示完成实体支撑、原确认关联与主线转强后的最终信号，标在实际完成K线上，不回填。", display=display.none) and not v126Minimal
+bool showRisk = input.bool(true, "风险区与保护线", group=gView, tooltip="确认收盘开启风险参考；同向重复不重置。反向确认在收盘结束旧参考，新风险有效时开启反向参考；本根先触及原保护时以原保护结算。", display=display.none) and not v126Minimal
+bool showPanel = input.bool(true, "显示状态面板", group=gView, display=display.none) and not v126Minimal
+bool showMilestones = input.bool(true, "R 参考与里程碑", group=gView, tooltip="入场即预先显示 1R、2R、3R 参考价；达到后仍分别标记 3R、5R、10R。均不是固定止盈。", display=display.none) and not v126Minimal
+bool showExitLabels = input.bool(false, "退出文字", group=gView, display=display.none) and not v126Minimal
+color signalColor = input.color(color.white, "信号 K 线颜色（实体 / 影线）", group=gView, display=display.none)
+
+color bull = #008F82
+color bear = #D34B66
+color gold = #AD7B29
+color blue = #4679C9
+color ink = chart.fg_color
+color muted = color.new(ink, 40)
+
+// ───────────── BB 通道与过滤 ─────────────
+
+string gBb = "02 · BB 压缩通道"
+
+bool useBbFilter = input.bool(true, "仅保留近期持续压缩后的信号", group=gBb, tooltip="信号前12根内须有连续3根带宽处于此前500根最低10%区域。不要求信号当根扩张；原V6反向确认仍可结束已有风险参考。关闭仅跳过BB条件，距离门和V9三条过滤仍独立生效。", display=display.none)
+
+// V12 displays the historical compression zones by default.
+bool showBb = input.bool(true, "显示 BB 压缩通道", group=gBb, display=display.none) and not v126Minimal
+int bbLength = input.int(200, "SMA 长度", minval=2, group=gBb, display=display.none)
+float bbMult = input.float(2.0, "标准差倍数", minval=0.1, step=0.1, group=gBb, display=display.none)
+bool bbOnlyCompressed = input.bool(true, "仅显示压缩段", group=gBb, display=display.none)
+bool bbShowBasis = input.bool(false, "显示中线", group=gBb, display=display.none)
+color bbChannelColor = input.color(color.new(#7D8490, 48), "通道颜色", group=gBb, display=display.none)
+color bbCompressionColor = input.color(#AD7B29, "压缩颜色", group=gBb, display=display.none)
+
+string gV8 = "03 · V8 噪音过滤"
+
+bool useOverheatFilter = input.bool(true, "过滤离六线超过 3ATR 的迟到信号", group=gV8, tooltip="只影响新入场确认：多头收盘离六线最高边、空头收盘离六线最低边超过3ATR时不显示、不报警。原始反向确认仍可结束已有参考。", display=display.none)
+
+// BEGIN CONFIRMED H1 SMA60 INPUT
+string gH1Sma = "03 · 15m 上级方向过滤"
+bool useH1Sma60 = input.bool(true, "15分钟启用1小时 SMA60 方向过滤", group=gH1Sma, tooltip="仅15分钟生效：确认收盘价高于上一根已收盘1小时SMA60才开多，低于才开空。等于或均线未就绪时不入场。原始反向确认仍结束旧参考，其他周期不变。", display=display.none)
+bool showH1Sma60 = input.bool(true, "显示1小时方向线", group=gH1Sma, tooltip="在15分钟主图显示已完成1小时SMA60。仅控制线的显示，不改变过滤。", display=display.none) and not v126Minimal
+// END CONFIRMED H1 SMA60 INPUT
+// BEGIN CONFIRMED H1 SMA60 HELPER
+// Source: TradingView Other timeframes and data, confirmed HTF values.
+// Inputs: native H1 OHLCV and clock; only 60 consecutive valid completed hours.
+// Offset INSIDE security so developing H1 data never enters admission.
+f_h1Sma60() =>
+    bool valid = not na(open) and not na(high) and not na(low) and not na(close) and not na(volume) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high) and volume >= 0
+    var int contiguous = 0
+    contiguous := not valid ? 0 : time == time_close[1] ? contiguous + 1 : 1
+    float average = ta.sma(close, 60)
+    float knownAverage = contiguous >= 60 ? average : na
+    [knownAverage[1], time_close[1]]
+// END CONFIRMED H1 SMA60 HELPER
+// BEGIN CONFIRMED M15 EMA120 INPUT
+string gM15Ema = "03 · 5m 上级方向过滤"
+bool useM15Ema120 = input.bool(true, "5分钟启用15分钟 EMA120 方向过滤", group=gM15Ema, tooltip="仅5分钟生效：确认收盘价高于上一根已完成15分钟EMA120才开多，低于才开空；相等或均线未就绪不新入场。使用已完成上级K线，原始反向确认仍结束旧参考。", display=display.none)
+bool showM15Ema120 = input.bool(true, "显示15分钟方向线", group=gM15Ema, tooltip="在5分钟主图显示已完成15分钟EMA120。仅控制线的显示，不改变过滤。", display=display.none) and not v126Minimal
+// END CONFIRMED M15 EMA120 INPUT
+// BEGIN CONFIRMED M15 EMA120 HELPER
+// Source: TradingView confirmed HTF idiom and spike_v9_5m_15m_ma.confirmed_ma.
+// Inputs: native M15 OHLCV and clock. First-close seed, alpha 2/121,
+// 1200 consecutive valid bars before admission; invalid/missing bars reset it.
+// Return the PRIOR higher bar, so its close is known at the chart bar OPEN.
+f_m15Ema120() =>
+    bool valid = not na(open) and not na(high) and not na(low) and not na(close) and not na(volume) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high) and volume >= 0
+    var int contiguous = 0
+    contiguous := not valid ? 0 : time == time_close[1] ? contiguous + 1 : 1
+    var float average = na
+    float alpha = 2.0 / 121.0
+    average := not valid ? na : contiguous == 1 ? close : alpha * close + (1.0 - alpha) * average[1]
+    float knownAverage = contiguous >= 1200 ? average : na
+    [knownAverage[1], time_close[1]]
+// END CONFIRMED M15 EMA120 HELPER
+// ───────────── 原有工具函数 ─────────────
+
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+f_path(int side, float entry, float risk, float priorProtection, float priorPeak, bool wasArmed, float o, float h, float l, float c, float a, float activationR, float distanceAtr, float tick) =>
+    bool stopped = side == 1 ? l <= priorProtection : h >= priorProtection
+    float exitPrice = stopped ? (side == 1 ? math.min(o, priorProtection) : math.max(o, priorProtection)) : na
+    float currentR = side * ((stopped ? exitPrice : c) - entry) / risk
+    float peakR = stopped ? priorPeak : math.max(priorPeak, side * ((side == 1 ? h : l) - entry) / risk)
+    bool armed = wasArmed or (not stopped and currentR >= activationR)
+    float protection = priorProtection
+
+    if not stopped and armed and a > 0
+        float raw = c - side * distanceAtr * a
+        float candidate = side == 1 ? math.floor(raw / tick) * tick : math.ceil(raw / tick) * tick
+        protection := side == 1 ? math.max(priorProtection, candidate) : math.min(priorProtection, candidate)
+
+    [not stopped, protection, peakR, currentR, exitPrice, armed]
+
+f_smma(float source, int length) =>
+    float seed = ta.sma(source, length)
+    var float value = na
+    value := na(value[1]) ? seed : (value[1] * (length - 1) + source) / length
+    value
+
+f_flip(float a, float b) =>
+    float d = a - b
+    (d > 0 and d[1] <= 0) or (d < 0 and d[1] >= 0) ? 1.0 : 0.0
+
+f_directionalCandle(int side, float o, float h, float l, float c, float bodyGate, float endGate) =>
+    float span = h - l
+    bool known = span > 0 and not na(o) and not na(h) and not na(l) and not na(c)
+    float body = known ? math.abs(c - o) / span : na
+    float endPosition = known ? (side == 1 ? (c - l) / span : (h - c) / span) : na
+    bool direction = side == 1 ? c > o : side == -1 ? c < o : false
+    known and direction and body >= bodyGate and endPosition >= endGate
+
+// ───────────── 数据与 BB 背景 ─────────────
+
+bool pricesValid = not na(open) and not na(high) and not na(low) and not na(close) and low > 0 and high >= math.max(open, close, low) and low <= math.min(open, close, high)
+bool dataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+bool bbDataGap = not barstate.isfirst and (time != time_close[1] or not pricesValid or not pricesValid[1])
+
+var int bbSegmentBars = 0
+bbSegmentBars := not pricesValid ? 0 : bbDataGap ? 1 : bbSegmentBars + 1
+
+float bbBasis = ta.sma(close, bbLength)
+float bbStdev = ta.stdev(close, bbLength, true)
+float bbUpper = bbBasis + bbMult * bbStdev
+float bbLower = bbBasis - bbMult * bbStdev
+float bbWidth = bbBasis != 0 ? (bbUpper - bbLower) / math.abs(bbBasis) : na
+
+bool bbBandReady = pricesValid and bbSegmentBars >= bbLength and not na(bbBasis) and not na(bbStdev)
+float bbPriorWidthP10 = ta.percentile_linear_interpolation(bbWidth[1], 500, 10)
+bool bbReady = bbBandReady and bbSegmentBars >= bbLength + 500 and not na(bbPriorWidthP10)
+bool bbCompressed = bbReady and bbWidth <= bbPriorWidthP10
+bool bbAdmissionReady = bbReady and bbSegmentBars >= bbLength + 500 + 12
+
+bool bbRecentCompression = false
+
+for bbOffset = 1 to 10
+    bbRecentCompression := bbRecentCompression or (bbCompressed[bbOffset] and bbCompressed[bbOffset + 1] and bbCompressed[bbOffset + 2])
+
+bool bbEntryAllowed = not useBbFilter or (bbAdmissionReady and bbRecentCompression)
+
+var int segmentIndex = -1
+segmentIndex := dataGap or not pricesValid ? 0 : segmentIndex + 1
+
+bool resetVolume = barstate.isfirst or dataGap
+
+float tr = ta.tr(true)
+float smHigh = f_smma(high, maLen)
+float smLow = f_smma(low, maLen)
+float ema1 = ta.ema(hlc3, maLen)
+float middle = 2.0 * ema1 - ta.ema(ema1, maLen)
+float md = middle > smHigh ? middle - smHigh : middle < smLow ? middle - smLow : 0.0
+float sb = ta.sma(md, sigLen)
+float atr = f_smma(tr, 14)
+
+// ───────────── 六均线与量能 ─────────────
+
+float s20 = ta.sma(close, 20)
+float e20 = ta.ema(close, 20)
+float s60 = ta.sma(close, 60)
+float e60 = ta.ema(close, 60)
+float s120 = ta.sma(close, 120)
+float e120 = ta.ema(close, 120)
+
+float ropeHigh = math.max(s20, e20, s60, e60, s120, e120)
+float ropeLow = math.min(s20, e20, s60, e60, s120, e120)
+
+float width = atr > 0 ? (ropeHigh - ropeLow) / atr : na
+float flips = f_flip(s20,e20) + f_flip(s20,s60) + f_flip(s20,e60) + f_flip(s20,s120) + f_flip(s20,e120) + f_flip(e20,s60) + f_flip(e20,e60) + f_flip(e20,s120) + f_flip(e20,e120) + f_flip(s60,e60) + f_flip(s60,s120) + f_flip(s60,e120) + f_flip(e60,s120) + f_flip(e60,e120) + f_flip(s120,e120)
+float pastWidth = ta.sma(width[1], denseLen)
+float pastCrosses = math.sum(flips[1], denseLen)
+
+bool baseReady = pricesValid and bar_index >= math.max(340, 10 * maLen) and atr[1] > 0 and not na(sb) and not na(pastWidth)
+bool ready = baseReady and segmentIndex >= breakoutLookback
+
+var array<float> validVolumes = array.new<float>()
+
+if resetVolume
+    array.clear(validVolumes)
+
+if not na(volume) and volume >= 0
+    array.push(validVolumes, volume)
+    if array.size(validVolumes) > 20
+        array.shift(validVolumes)
+
+float volumeMedian = array.size(validVolumes) == 20 ? array.median(validVolumes) : na
+float rv = volumeMedian[1] > 0 and not na(volume) ? volume / volumeMedian[1] : na
+float expansion = atr[1] > 0 ? tr / atr[1] : na
+float recentLow = ta.lowest(low, stopLen)
+
+// ───────────── 原有密集与启动字段 ─────────────
+
+bool dense = baseReady and segmentIndex >= denseLen and pastWidth <= denseWidth and pastCrosses >= denseCrosses
+float denseHitsRaw = math.sum(dense[1] ? 1.0 : 0.0, breakoutLookback)
+float denseHits = segmentIndex >= breakoutLookback ? denseHitsRaw : na
+bool recentDense = denseHits > 0
+
+float priorHigh = ta.highest(high[1], breakoutLookback)
+float priorLow = ta.lowest(low[1], breakoutLookback)
+float move3 = close - close[3]
+float advance3 = atr[3] > 0 ? move3 / atr[3] : na
+
+float volumeBase3 = volumeMedian[3]
+float volumeSum3 = math.sum(volume, 3)
+bool volumeKnown3 = not na(volume) and not na(volume[1]) and not na(volume[2])
+float volumeRatio3 = volumeKnown3 and volumeBase3 > 0 ? volumeSum3 / (3.0 * volumeBase3) : na
+
+float trSum3 = math.sum(tr, 3)
+float efficiency3 = trSum3 > 0 ? move3 / trSum3 : na
+float closePosition = high > low ? (close - low) / (high - low) : na
+
+bool aboveSix = close > ropeHigh
+bool earlyRaw = ready and close > priorHigh and close > math.max(s20, e20)
+bool confirmQuality = ready and recentDense and advance3 >= minAdvance and volumeRatio3 >= minVolume and md >= sb and middle > middle[1]
+
+float recentHigh = ta.highest(high, stopLen)
+bool earlyShortRaw = ready and close < priorLow and close < math.min(s20, e20)
+bool confirmShortQuality = ready and recentDense and advance3 <= -minAdvance and volumeRatio3 >= minVolume and md <= sb and middle < middle[1]
+
+bool longCandleShape = f_directionalCandle(1, open, high, low, close, minBody, minEnd)
+bool shortCandleShape = f_directionalCandle(-1, open, high, low, close, minBody, minEnd)
+
+bool longEvidenceNow = longCandleShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortEvidenceNow = shortCandleShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+
+bool longLaunchWindowShape = longCandleShape or longCandleShape[1] or longCandleShape[2]
+bool shortLaunchWindowShape = shortCandleShape or shortCandleShape[1] or shortCandleShape[2]
+
+int longLaunchWindowShapeBar = longCandleShape ? bar_index : longCandleShape[1] ? bar_index - 1 : longCandleShape[2] ? bar_index - 2 : na
+int shortLaunchWindowShapeBar = shortCandleShape ? bar_index : shortCandleShape[1] ? bar_index - 1 : shortCandleShape[2] ? bar_index - 2 : na
+
+bool longLegacySeedEvidence = longLaunchWindowShape and advance3 >= minAdvance and volumeRatio3 >= minVolume
+bool shortLegacySeedEvidence = shortLaunchWindowShape and advance3 <= -minAdvance and volumeRatio3 >= minVolume
+
+if barstate.isfirst and (not chart.is_standard or timeframe.isticks)
+    runtime.error("请使用普通时间 K 线，合成K线不支持。")
+
+// ───────────── 原始多头确认 ─────────────
+
+var bool previousEarlyRaw = false
+var int lastAcceptedBar = na
+var int parentBar = na
+var float parentHigh = na
+var float parentLow = na
+var float parentPrice = na
+var bool parentConfirmed = false
+
+bool legacyEarlySignal = false
+bool legacyConfirmedSignal = false
+
+int legacyConfirmationAge = na
+float legacyConfirmationParentPrice = na
+float legacyConfirmationParentHigh = na
+float legacyConfirmationParentLow = na
+
+if barstate.isconfirmed
+    if dataGap
+        lastAcceptedBar := na
+        previousEarlyRaw := false
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+
+    bool cooldownPassed = na(lastAcceptedBar) or bar_index - lastAcceptedBar >= cooldownBars
+    legacyEarlySignal := earlyRaw and not previousEarlyRaw and cooldownPassed
+    previousEarlyRaw := earlyRaw
+
+    if legacyEarlySignal
+        lastAcceptedBar := bar_index
+        parentBar := bar_index
+        parentHigh := priorHigh
+        parentLow := priorLow
+        parentPrice := close
+        parentConfirmed := false
+
+    int age = na(parentBar) ? na : bar_index - parentBar
+
+    if not na(age) and age > confirmMaxAge
+        parentBar := na
+        parentHigh := na
+        parentLow := na
+        parentPrice := na
+        parentConfirmed := false
+
+    if not na(parentBar) and not parentConfirmed and age >= 0 and age <= confirmMaxAge and close > parentHigh and confirmQuality
+        legacyConfirmedSignal := true
+        legacyConfirmationAge := age
+        legacyConfirmationParentPrice := parentPrice
+        legacyConfirmationParentHigh := parentHigh
+        legacyConfirmationParentLow := parentLow
+        parentConfirmed := true
+
+// ───────────── 原始空头确认 ─────────────
+
+var bool previousEarlyShortRaw = false
+var int lastShortAcceptedBar = na
+var int shortParentBar = na
+var float shortParentHigh = na
+var float shortParentLow = na
+var float shortParentPrice = na
+var bool shortParentConfirmed = false
+
+bool legacyShortEarlySignal = false
+bool legacyShortConfirmedSignal = false
+
+int legacyShortConfirmationAge = na
+float legacyShortConfirmationParentPrice = na
+float legacyShortConfirmationParentHigh = na
+float legacyShortConfirmationParentLow = na
+
+if barstate.isconfirmed
+    if dataGap
+        lastShortAcceptedBar := na
+        previousEarlyShortRaw := false
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+
+    bool shortCooldownPassed = na(lastShortAcceptedBar) or bar_index - lastShortAcceptedBar >= cooldownBars
+    legacyShortEarlySignal := earlyShortRaw and not previousEarlyShortRaw and shortCooldownPassed
+    previousEarlyShortRaw := earlyShortRaw
+
+    if legacyShortEarlySignal
+        lastShortAcceptedBar := bar_index
+        shortParentBar := bar_index
+        shortParentHigh := priorHigh
+        shortParentLow := priorLow
+        shortParentPrice := close
+        shortParentConfirmed := false
+
+    int shortAge = na(shortParentBar) ? na : bar_index - shortParentBar
+
+    if not na(shortAge) and shortAge > confirmMaxAge
+        shortParentBar := na
+        shortParentHigh := na
+        shortParentLow := na
+        shortParentPrice := na
+        shortParentConfirmed := false
+
+    if not na(shortParentBar) and not shortParentConfirmed and shortAge >= 0 and shortAge <= confirmMaxAge and close < shortParentLow and confirmShortQuality
+        legacyShortConfirmedSignal := true
+        legacyShortConfirmationAge := shortAge
+        legacyShortConfirmationParentPrice := shortParentPrice
+        legacyShortConfirmationParentHigh := shortParentHigh
+        legacyShortConfirmationParentLow := shortParentLow
+        shortParentConfirmed := true
+
+// ───────────── 多头结构确认 ─────────────
+
+var int bodySupportBar = na
+var int legacyBar = na
+var float legacyParentHigh = na
+var float legacyParentLow = na
+var bool structurePending = false
+var bool launchEvidence = false
+var int launchEvidenceBar = na
+
+bool confirmedSignal = false
+bool consumedLaunchEvidence = false
+int consumedLaunchEvidenceBar = na
+int confirmationAge = na
+string pendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteAtr = not na(atr) and atr > 0
+    bool knownStructure = ready and pricesValid and finiteAtr and not na(md) and not na(sb) and not na(ropeHigh) and not na(middle)
+
+    if dataGap or not knownStructure
+        bodySupportBar := na
+        legacyBar := na
+        legacyParentHigh := na
+        legacyParentLow := na
+        structurePending := false
+        launchEvidence := false
+        launchEvidenceBar := na
+        pendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyAbove = math.min(open, close) > ropeHigh
+
+        if close <= ropeHigh
+            bodySupportBar := na
+        else if fullBodyAbove
+            bodySupportBar := bar_index
+
+        if legacyConfirmedSignal and not na(legacyConfirmationParentHigh) and not na(legacyConfirmationParentLow) and legacyConfirmationParentLow <= legacyConfirmationParentHigh
+            legacyBar := bar_index
+            legacyParentHigh := legacyConfirmationParentHigh
+            legacyParentLow := legacyConfirmationParentLow
+            structurePending := true
+            launchEvidence := longLegacySeedEvidence
+            launchEvidenceBar := longLegacySeedEvidence ? longLaunchWindowShapeBar : na
+        else if structurePending and longEvidenceNow
+            launchEvidence := true
+            launchEvidenceBar := bar_index
+
+        if structurePending and (na(legacyParentHigh) or na(legacyParentLow) or close < legacyParentLow)
+            legacyBar := na
+            legacyParentHigh := na
+            legacyParentLow := na
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "parent_broken"
+        else if structurePending and launchEvidence and not na(bodySupportBar) and not na(legacyParentHigh) and not na(legacyParentLow) and not na(md[1]) and close > ropeHigh and close > legacyParentHigh and md > sb and md > md[1]
+            confirmedSignal := true
+            consumedLaunchEvidence := launchEvidence
+            consumedLaunchEvidenceBar := launchEvidenceBar
+            confirmationAge := bar_index - legacyBar
+            structurePending := false
+            launchEvidence := false
+            launchEvidenceBar := na
+            pendingWhy := "confirmed"
+        else
+            pendingWhy := not structurePending ? "await_legacy" : not launchEvidence ? "await_launch_evidence" : na(bodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+
+// ───────────── 空头结构确认 ─────────────
+
+var int shortBodySupportBar = na
+var int shortLegacyBar = na
+var float shortLegacyParentHigh = na
+var float shortLegacyParentLow = na
+var bool shortStructurePending = false
+var bool shortLaunchEvidence = false
+var int shortLaunchEvidenceBar = na
+
+bool confirmedShortSignal = false
+bool consumedShortLaunchEvidence = false
+int consumedShortLaunchEvidenceBar = na
+int shortConfirmationAge = na
+string shortPendingWhy = "idle"
+
+if barstate.isconfirmed
+    bool finiteShortAtr = not na(atr) and atr > 0
+    bool knownShortStructure = ready and pricesValid and finiteShortAtr and not na(md) and not na(sb) and not na(ropeLow) and not na(middle)
+
+    if dataGap or not knownShortStructure
+        shortBodySupportBar := na
+        shortLegacyBar := na
+        shortLegacyParentHigh := na
+        shortLegacyParentLow := na
+        shortStructurePending := false
+        shortLaunchEvidence := false
+        shortLaunchEvidenceBar := na
+        shortPendingWhy := dataGap ? "gap" : "unknown"
+    else
+        bool fullBodyBelow = math.max(open, close) < ropeLow
+
+        if close >= ropeLow
+            shortBodySupportBar := na
+        else if fullBodyBelow
+            shortBodySupportBar := bar_index
+
+        if legacyShortConfirmedSignal and not na(legacyShortConfirmationParentHigh) and not na(legacyShortConfirmationParentLow) and legacyShortConfirmationParentLow <= legacyShortConfirmationParentHigh
+            shortLegacyBar := bar_index
+            shortLegacyParentHigh := legacyShortConfirmationParentHigh
+            shortLegacyParentLow := legacyShortConfirmationParentLow
+            shortStructurePending := true
+            shortLaunchEvidence := shortLegacySeedEvidence
+            shortLaunchEvidenceBar := shortLegacySeedEvidence ? shortLaunchWindowShapeBar : na
+        else if shortStructurePending and shortEvidenceNow
+            shortLaunchEvidence := true
+            shortLaunchEvidenceBar := bar_index
+
+        if shortStructurePending and close > shortLegacyParentHigh
+            shortLegacyBar := na
+            shortLegacyParentHigh := na
+            shortLegacyParentLow := na
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "parent_broken"
+        else if shortStructurePending and shortLaunchEvidence and not na(shortBodySupportBar) and not na(shortLegacyParentHigh) and not na(shortLegacyParentLow) and not na(md[1]) and close < ropeLow and close < shortLegacyParentLow and md < sb and md < md[1]
+            confirmedShortSignal := true
+            consumedShortLaunchEvidence := shortLaunchEvidence
+            consumedShortLaunchEvidenceBar := shortLaunchEvidenceBar
+            shortConfirmationAge := bar_index - shortLegacyBar
+            shortStructurePending := false
+            shortLaunchEvidence := false
+            shortLaunchEvidenceBar := na
+            shortPendingWhy := "confirmed"
+        else
+            shortPendingWhy := not shortStructurePending ? "await_legacy" : not shortLaunchEvidence ? "await_launch_evidence" : na(shortBodySupportBar) ? "await_body" : na(md[1]) ? "await_md_turn" : "await_momentum"
+
+// ───────────── V9 最终过滤 ─────────────
+
+int rawSignalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+
+float ropeDistanceAtr = rawSignalSide == 1 and atr > 0 ? (close - ropeHigh) / atr : rawSignalSide == -1 and atr > 0 ? (ropeLow - close) / atr : na
+bool v8EntryAllowed = not useOverheatFilter or (not na(ropeDistanceAtr) and ropeDistanceAtr <= maxRopeDistanceAtr)
+
+string baseAsset = str.upper(syminfo.basecurrency)
+bool baseAssetKnown = not na(baseAsset) and str.length(baseAsset) > 0
+bool baseAllowed = baseAssetKnown and baseAsset != "USDC"
+
+bool volumeRatioKnown = not na(rv) and rv >= 0
+bool volumeAllowed = volumeRatioKnown and rv <= maxVolumeRatio
+
+bool entryClockKnown = not na(time_close)
+bool utcSunday = entryClockKnown and dayofweek(time_close, "UTC") == dayofweek.sunday
+bool calendarAllowed = entryClockKnown and not utcSunday
+
+// BEGIN CONFIRMED H1 SMA60 GATE
+bool h1SmaApplies = useH1Sma60 and timeframe.isminutes and timeframe.multiplier == 15
+[h1Sma60Raw, h1SmaCloseTime] = request.security(syminfo.tickerid, "60", f_h1Sma60(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+// Do not carry a stale higher bar over a missing hour. Chart OPEN matches study.
+bool h1SmaReady = not na(h1Sma60Raw) and h1Sma60Raw > 0 and h1SmaCloseTime == time("60")
+float h1Sma60 = h1SmaReady ? h1Sma60Raw : na
+bool h1SmaDirectionAllowed = rawSignalSide == 1 ? close > h1Sma60 : rawSignalSide == -1 ? close < h1Sma60 : false
+bool h1SmaEntryAllowed = not h1SmaApplies or (h1SmaReady and h1SmaDirectionAllowed)
+// END CONFIRMED H1 SMA60 GATE
+// BEGIN CONFIRMED M15 EMA120 GATE
+bool m15EmaApplies = useM15Ema120 and timeframe.isminutes and timeframe.multiplier == 5
+[m15Ema120Raw, m15EmaCloseTime] = request.security(syminfo.tickerid, "15", f_m15Ema120(), gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+// Refuse a stale higher value across a missing M15 bucket.
+bool m15EmaReady = not na(m15Ema120Raw) and m15Ema120Raw > 0 and m15EmaCloseTime == time("15")
+float m15Ema120 = m15EmaReady ? m15Ema120Raw : na
+bool m15EmaDirectionAllowed = rawSignalSide == 1 ? close > m15Ema120 : rawSignalSide == -1 ? close < m15Ema120 : false
+bool m15EmaEntryAllowed = not m15EmaApplies or (m15EmaReady and m15EmaDirectionAllowed)
+// END CONFIRMED M15 EMA120 GATE
+bool v9BundleAllowed = baseAllowed and volumeAllowed and calendarAllowed
+bool v9EntryAllowed = bbEntryAllowed and v8EntryAllowed and v9BundleAllowed and h1SmaEntryAllowed and m15EmaEntryAllowed
+
+string v9Reasons = ""
+v9Reasons += not baseAssetKnown ? "底层资产未知；" : not baseAllowed ? "底层USDC；" : ""
+v9Reasons += not volumeRatioKnown ? "量比未知；" : not volumeAllowed ? "量比>50；" : ""
+v9Reasons += not entryClockKnown ? "开仓时钟未知；" : utcSunday ? "UTC周日；" : ""
+v9Reasons += not bbEntryAllowed ? "BB条件未通过；" : ""
+v9Reasons += not v8EntryAllowed ? "距六线>3ATR或未知；" : ""
+// BEGIN CONFIRMED H1 SMA60 REASON
+v9Reasons += not h1SmaApplies ? "" : not h1SmaReady ? "1h SMA60未就绪；" : rawSignalSide == 1 and not h1SmaDirectionAllowed ? "多头未站上1h SMA60；" : rawSignalSide == -1 and not h1SmaDirectionAllowed ? "空头未跌破1h SMA60；" : ""
+// END CONFIRMED H1 SMA60 REASON
+// BEGIN CONFIRMED M15 EMA120 REASON
+v9Reasons += not m15EmaApplies ? "" : not m15EmaReady ? "15m EMA120未就绪；" : rawSignalSide == 1 and not m15EmaDirectionAllowed ? "多头未站上15m EMA120；" : rawSignalSide == -1 and not m15EmaDirectionAllowed ? "空头未跌破15m EMA120；" : ""
+// END CONFIRMED M15 EMA120 REASON
+v9Reasons := v9Reasons == "" ? "通过" : v9Reasons
+
+[signalReferenceStop, signalReferenceRisk, signalReferenceValid] = f_risk(rawSignalSide, close, rawSignalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+
+float signalReferenceRiskFraction = signalReferenceValid ? signalReferenceRisk / close : na
+float signalReferenceCostR = signalReferenceValid ? roundTripCost / signalReferenceRiskFraction : na
+
+var string lastV9Reasons = "尚无原始确认"
+var float lastV9Rv = na
+var float lastV9RiskFraction = na
+var float lastV9CostR = na
+
+if barstate.isconfirmed and rawSignalSide != 0
+    lastV9Reasons := v9Reasons
+    lastV9Rv := rv
+    lastV9RiskFraction := signalReferenceRiskFraction
+    lastV9CostR := signalReferenceCostR
+
+confirmedSignal := confirmedSignal and v9EntryAllowed
+confirmedShortSignal := confirmedShortSignal and v9EntryAllowed
+
+int signalSide = confirmedSignal ? 1 : confirmedShortSignal ? -1 : 0
+
+// ───────────── 原有风险参考与退出 ─────────────
+
+var int trendSide = 0
+var int entryBar = na
+var float entry = na
+var float initialStop = na
+var float risk = na
+var float protection = na
+var float peakR = 0.0
+var float currentR = na
+var bool trailArmed = false
+var array<label> exitTags = array.new<label>()
+
+bool referenceStarted = false
+bool exitReference = false
+bool referenceGap = false
+bool referenceReverse = false
+
+int exitSide = 0
+float exitPeakR = na
+float exitCurrentR = na
+float exitProtection = na
+float exitReferencePrice = na
+string exitReason = ""
+
+float visibleProtection = trendSide != 0 ? protection : na
+float visibleInitial = trendSide != 0 ? initialStop : na
+float visibleEntry = trendSide != 0 ? entry : na
+
+if barstate.isconfirmed
+    if dataGap and trendSide != 0
+        referenceGap := true
+        trendSide := 0
+        currentR := na
+        visibleProtection := na
+        visibleInitial := na
+        visibleEntry := na
+
+    bool endedThisBar = false
+
+    if ready and trendSide != 0 and bar_index > entryBar
+        int activeSide = trendSide
+
+        [alive, newProtection, newPeak, newCurrent, exitPrice, armed] = f_path(trendSide, entry, risk, protection, peakR, trailArmed, open, high, low, close, atr, armR, trailAtr, syminfo.mintick)
+
+        protection := newProtection
+        peakR := newPeak
+        currentR := newCurrent
+        trailArmed := armed
+
+        if not alive
+            exitReference := true
+            exitSide := activeSide
+            exitPeakR := peakR
+            exitCurrentR := currentR
+            exitProtection := protection
+            exitReferencePrice := exitPrice
+            exitReason := "保护触及"
+            endedThisBar := true
+            trendSide := 0
+
+            if showExitLabels and not v10OnlyJoint
+                string exitSideText = activeSide == 1 ? "多头" : "空头"
+
+                if array.size(exitTags) >= EXIT_TAG_LIMIT
+                    label.delete(array.shift(exitTags))
+
+                array.push(exitTags, label.new(bar_index, exitPrice, exitSideText + "保护触及 · 参考结束\n" + str.tostring(exitPrice, format.mintick), style=activeSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
+
+    bool oppositeStopSignal = endedThisBar and exitSide != 0 and rawSignalSide != exitSide
+
+    if rawSignalSide != 0 and (not endedThisBar or oppositeStopSignal) and rawSignalSide != trendSide
+        [newStop, newRisk, validRisk] = f_risk(rawSignalSide, close, rawSignalSide == 1 ? recentLow : recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+
+        if trendSide != 0
+            referenceReverse := true
+            exitReference := true
+            exitSide := trendSide
+            exitPeakR := peakR
+            exitCurrentR := currentR
+            exitProtection := protection
+            exitReferencePrice := close
+            exitReason := "反向确认"
+            trendSide := 0
+
+            if showExitLabels and not v10OnlyJoint
+                string exitSideText = exitSide == 1 ? "多头" : "空头"
+
+                if array.size(exitTags) >= EXIT_TAG_LIMIT
+                    label.delete(array.shift(exitTags))
+
+                array.push(exitTags, label.new(bar_index, close, exitSideText + "反向确认 · 参考结束\n" + str.tostring(close, format.mintick), style=exitSide == 1 ? label.style_label_down : label.style_label_up, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
+
+        if signalSide != 0 and validRisk
+            referenceStarted := true
+            trendSide := signalSide
+            entryBar := bar_index
+            entry := close
+            initialStop := newStop
+            risk := newRisk
+            protection := newStop
+            peakR := 0.0
+            currentR := 0.0
+            trailArmed := false
+
+// ───────────── 自动下降线参数 ─────────────
+
+// Major pivots and V9 risk rules retain V11.2 defaults; local C is a separate family.
+string v10LineGroup = "04 · 本周期自动下降线"
+
+bool v10Enabled = input.bool(true, "启用自动线与联合提示", group=v10LineGroup, display=display.none)
+int v12FallbackLookback = input.int(600, "搜索范围（K 数）", minval=100, maxval=1500, group=v10LineGroup, display=display.none)
+int v12FallbackLife = input.int(600, "三点确认后的最长存活（K 数）", minval=20, maxval=1500, group=v10LineGroup, tooltip="搜索范围限制选点历史；已确认线不再因A移出搜索范围立即失效。仍检查真实突破，最长存活从三点确认时计算。", display=display.none)
+
+int v12FallbackLeft = input.int(12, "高点左侧比较 K 数", minval=4, maxval=80, group=v10LineGroup, display=display.none)
+int v12FallbackRight = input.int(8, "高点右侧确认 K 数", minval=2, maxval=40, group=v10LineGroup, display=display.none)
+int v12FallbackMinGap = input.int(24, "独立反弹最小间隔", minval=5, maxval=200, group=v10LineGroup, display=display.none)
+int v12FallbackMinSpan = input.int(72, "三点最小跨度", minval=20, maxval=600, group=v10LineGroup, display=display.none)
+
+
+// Independent bar-count profiles; equal defaults preserve the audited geometry.
+bool v12ByTimeframe = input.bool(true, "使用分周期结构参数", group=v10LineGroup, tooltip="15m、30m、1h、4h分别设置。单位都是各自周期K数；上级请求使用上级自己的配置。默认保持已核验的几何参数，不代表参数已优化。", display=display.none)
+int v12Tf15Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 15m 结构参数", display=display.none)
+int v12Tf15MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 15m 结构参数", display=display.none)
+int v12Tf30Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 30m 结构参数", display=display.none)
+int v12Tf30MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 30m 结构参数", display=display.none)
+int v12Tf60Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 1h 结构参数", display=display.none)
+int v12Tf60MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 1h 结构参数", display=display.none)
+int v12Tf240Lookback = input.int(600, "搜索根数", minval=100, maxval=1500, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Life = input.int(600, "最长存活根数", minval=20, maxval=1500, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Left = input.int(12, "高点左侧根数", minval=4, maxval=80, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240Right = input.int(8, "高点右侧根数", minval=2, maxval=40, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240MinGap = input.int(24, "A-B最小间隔", minval=5, maxval=200, group="04 · 4h 结构参数", display=display.none)
+int v12Tf240MinSpan = input.int(72, "A-C最小跨度", minval=20, maxval=600, group="04 · 4h 结构参数", display=display.none)
+float v12TfSeconds = timeframe.in_seconds()
+int v10Lookback = not v12ByTimeframe ? v12FallbackLookback : v12TfSeconds == 900 ? v12Tf15Lookback : v12TfSeconds == 1800 ? v12Tf30Lookback : v12TfSeconds == 3600 ? v12Tf60Lookback : v12TfSeconds == 14400 ? v12Tf240Lookback : v12FallbackLookback
+int v10Life = not v12ByTimeframe ? v12FallbackLife : v12TfSeconds == 900 ? v12Tf15Life : v12TfSeconds == 1800 ? v12Tf30Life : v12TfSeconds == 3600 ? v12Tf60Life : v12TfSeconds == 14400 ? v12Tf240Life : v12FallbackLife
+int v10Left = not v12ByTimeframe ? v12FallbackLeft : v12TfSeconds == 900 ? v12Tf15Left : v12TfSeconds == 1800 ? v12Tf30Left : v12TfSeconds == 3600 ? v12Tf60Left : v12TfSeconds == 14400 ? v12Tf240Left : v12FallbackLeft
+int v10Right = not v12ByTimeframe ? v12FallbackRight : v12TfSeconds == 900 ? v12Tf15Right : v12TfSeconds == 1800 ? v12Tf30Right : v12TfSeconds == 3600 ? v12Tf60Right : v12TfSeconds == 14400 ? v12Tf240Right : v12FallbackRight
+int v10MinGap = not v12ByTimeframe ? v12FallbackMinGap : v12TfSeconds == 900 ? v12Tf15MinGap : v12TfSeconds == 1800 ? v12Tf30MinGap : v12TfSeconds == 3600 ? v12Tf60MinGap : v12TfSeconds == 14400 ? v12Tf240MinGap : v12FallbackMinGap
+int v10MinSpan = not v12ByTimeframe ? v12FallbackMinSpan : v12TfSeconds == 900 ? v12Tf15MinSpan : v12TfSeconds == 1800 ? v12Tf30MinSpan : v12TfSeconds == 3600 ? v12Tf60MinSpan : v12TfSeconds == 14400 ? v12Tf240MinSpan : v12FallbackMinSpan
+
+string v12Group = "04A · V12 主高点＋局部回踩"
+bool v12LocalEnabled = input.bool(true, "识别主高点＋局部回踩线", group=v12Group, tooltip="保留原三大高点找线；新增A/B两个已确认主高点，加较短反弹C贴线。只在C右侧确认完成后建线，不回填突破。", display=display.none)
+bool v12ReboundAtB = input.bool(true, "A-B 独立反弹按 B 点 ATR 衡量", group=v12Group, tooltip="仅用于局部回踩分支。谷底到B的反弹使用B点ATR，避免A点大冲击的ATR压制后续正常反弹。仍要求2ATR（或设置值）；关闭恢复较大端点ATR。原三主高点分支保持原口径。", display=display.none)
+int v12LocalLeft = input.int(2, "回踩高点左侧比较 K 数", minval=1, maxval=12, group=v12Group, display=display.none)
+int v12LocalRight = input.int(2, "回踩高点右侧确认 K 数", minval=1, maxval=12, group=v12Group, display=display.none)
+int v12LocalMinGap = input.int(4, "B 到回踩 C 最小间隔", minval=4, maxval=24, group=v12Group, tooltip="仅适用于辅助触点C。A-B仍用原独立反弹间隔，A-C仍用原最小跨度；两段仍要求原ATR回落。", display=display.none)
+
+float v10Pullback = input.float(2.0, "反弹之间最小回落（ATR）", minval=0.5, maxval=10, step=0.25, group=v10LineGroup, display=display.none)
+float v10Drop = input.float(1.0, "A 到 B 最小下降（ATR）", minval=0.1, step=0.1, group=v10LineGroup, display=display.none)
+float v10Touch = input.float(0.35, "第三点贴线误差（ATR）", minval=0.05, maxval=1.5, step=0.05, group=v10LineGroup, display=display.none)
+
+string v10PeakMode = input.string("双轨", "反弹高点取值", options=["双轨", "完整影线", "削尖影线", "实体上沿"], group=v10LineGroup, tooltip="双轨分别寻找完整影线与削尖影线的三点线，不混用价格口径；任一候选都必须通过实体/针刺检查。", display=display.none)
+
+float v10WickCap = input.float(0.60, "削尖模式：保留上影长度（ATR）", minval=0, maxval=3, step=0.05, group=v10LineGroup, display=display.none)
+float v10BodyTol = input.float(0.15, "建线前实体越线容差（ATR）", minval=0, maxval=0.5, step=0.05, group=v10LineGroup, display=display.none)
+float v10WickTol = input.float(0.35, "普通上影越线容差（ATR）", minval=0, maxval=1.5, step=0.05, group=v10LineGroup, display=display.none)
+int v10Needles = input.int(2, "最多允许几根孤立针刺", minval=0, maxval=5, group=v10LineGroup, display=display.none)
+float v10NeedleMax = input.float(3.0, "单次针刺最大越线（ATR）", minval=0.5, maxval=6, step=0.25, group=v10LineGroup, tooltip="针刺不得连续；超过实体容差仍淘汰。不是越长的影线越能被忽略。", display=display.none)
+
+string v10Scale = input.string("线性", "趋势线坐标", options=["线性", "对数"], group=v10LineGroup, tooltip="按图表价格坐标选择。程序不自动读取图表的对数开关；画线和突破计算采用相同公式。", display=display.none)
+
+int v10BreakBars = input.int(2, "突破：连续收盘确认根数", minval=1, maxval=5, group=v10LineGroup, display=display.none)
+float v10BreakBuffer = input.float(0.20, "突破缓冲（ATR）", minval=0, step=0.05, group=v10LineGroup, display=display.none)
+
+// ───────────── 联合与显示参数 ─────────────
+
+string v10JointGroup = "04B · 联合与显示"
+
+bool v122LocalTidy = input.bool(true, "整理同一区域的重复线", group=v10JointGroup, tooltip="保留不同历史区域。以同一个A高点附近的K线区间归组，同一簇默认最多3条，优先联合线、再保留近期普通线。不是全图3条；关闭恢复逐组历史。只整理显示，不改变事件或预警。", display=display.none)
+int v122RegionKeep = input.int(3, "同一主高点区域保留线数", minval=1, maxval=8, group=v10JointGroup, display=display.none)
+int v122RegionGap = input.int(2, "A点邻近范围（本图K数）", minval=0, maxval=12, group=v10JointGroup, tooltip="按本图周期换算时间；上级A点用上级K线区间。始终比较该簇最初的A区间，不链式扩大区域。A价差还须在该簇首次确认时冻结的1个本图ATR内；只影响显示归组。", display=display.none)
+int v122HistoryFade = input.int(74, "普通历史线透明度", minval=20, maxval=90, group=v10JointGroup, tooltip="数值越大越淡；历史线仍保留。", display=display.none)
+int v122JointFade = input.int(40, "联合历史线透明度", minval=0, maxval=85, group=v10JointGroup, display=display.none)
+
+int v10Window = input.int(6, "SPIKE 与突破最大间隔（0=同根）", minval=0, maxval=12, group=v10JointGroup, display=display.none)
+
+bool v10ShowLine = input.bool(true, "显示当前候选主线（最多一条）", group=v10JointGroup, tooltip="只控制当前候选线，不会隐藏已经显示的突破+spike所对应的历史趋势线。", display=display.none) or v126Minimal
+bool v10ShowBreak = input.bool(true, "显示单独突破", group=v10JointGroup, display=display.none) or v126Minimal
+bool v12CompactBreaks = input.bool(true, "合并同一 B 点附近的 bk 提示", group=v10JointGroup, tooltip="仅整理显示：同来源、同一B点及价格，距首次突破不超过8根本图K的普通突破合并为 bk · 数量。保留首次时间和首次趋势线，提示列出各条确认；不改变事件、预警或联合配对。关闭可逐条显示。", display=display.none)
+bool v10ShowJoint = input.bool(true, "显示突破+spike", group=v10JointGroup, tooltip="开启仅显示模式时，强制显示联合标记。联合标记和对应趋势线一起创建和清理。", display=display.none) or v126Minimal
+bool v10KeepStopped = input.bool(true, "失效后保留最近淡色线", group=v10JointGroup, display=display.none)
+
+bool v10ShowABC = input.bool(true, "显示 A/B/C（RT=回踩）", group=v10JointGroup, display=display.none) and not v126Minimal
+bool v10Debug = input.bool(false, "核对：最近8次 SPIKE 配对说明", group=v10JointGroup, tooltip="仅说明这次SPIKE与主线的关系，不把未来结果当作当时已知信息。", display=display.none) and not v126Minimal
+
+color v126LocalManual = input.color(color.white, "主线自定义颜色（关闭自动后生效）", group=v10JointGroup, display=display.none)
+color v10LineColor = v126AutoContrast ? v126Contrast : v126LocalManual
+color v10BreakColor = input.color(#4679C9, "突破颜色", group=v10JointGroup, display=display.none)
+color v10JointColor = input.color(#AD7B29, "联合颜色", group=v10JointGroup, display=display.none)
+
+int v10LineWidth = input.int(1, "主线宽度", minval=1, maxval=3, group=v10JointGroup, display=display.none)
+int v10Ahead = input.int(24, "向右预留 K 数", minval=0, maxval=200, group=v10JointGroup, display=display.none)
+
+int v10JointKeep = input.int(40, "历史信号与趋势线总保留组数", minval=1, maxval=40, group=v10JointGroup, tooltip="资源上限，与局部整理独立。不同历史区域共保留最近40组，可调小；线和标记整组保留。", display=display.none)
+int v10JointLineWidth = input.int(2, "联合趋势线线宽", minval=1, maxval=4, group=v10JointGroup, display=display.none)
+
+string v10TagSize = input.string("小", "突破+spike 标签大小", options=["小", "正常", "大"], group=v10JointGroup, display=display.none)
+float v10TagGap = input.float(0.8, "标签距K线（ATR）", minval=0.1, maxval=4.0, step=0.1, group=v10JointGroup, display=display.none)
+
+// ───────────── V11 上级周期与显示参数 ─────────────
+
+string v11Group = "04C · V11 上级周期突破"
+
+string v11SourceMode = input.string("本周期+上级周期", "突破来源", options=["本周期+上级周期", "仅上级周期", "仅本周期"], group=v11Group, tooltip="SPIKE始终来自本图周期。本周期=本图自己的下降线；上级周期=上级K线收盘确认的下降线突破。", display=display.none)
+string v11HtfChoice = input.string("自动", "上级周期", options=["自动", "手动"], group=v11Group, tooltip="自动：1分→5分，3/5分→15分，15分→1小时，30分→2小时，1小时→4小时，2/4小时→日线，日线→周线。", display=display.none)
+string v11HtfManual = input.timeframe("60", "手动上级周期", group=v11Group, tooltip="必须大于本图周期，否则上级来源自动停用。", display=display.none)
+bool v11ShowHtfLine = input.bool(true, "显示上级周期当前候选线", group=v11Group, display=display.none) or v126Minimal
+bool v11ShowHtfBreak = input.bool(true, "显示上级周期突破提示", group=v11Group, display=display.none) or v126Minimal
+int v11ExtendBars = input.int(0, "突破后趋势线继续向右延伸（本图K数）", minval=0, maxval=400, group=v11Group, tooltip="只影响画线：突破或联合之后，原A/B斜率继续向右画这么多根。", display=display.none)
+int v11AbcKeep = input.int(8, "历史信号组保留A/B/C的最近组数", minval=0, maxval=8, group=v11Group, tooltip="更早的组只保留线和标记，控制标签总数。", display=display.none)
+color v126HtfManual = input.color(#9DB7FF, "上级线自定义颜色（关闭自动后生效）", group=v11Group, display=display.none)
+color v11HtfColor = v126AutoContrast ? v126Contrast : v126HtfManual
+
+string v112Group = "04D · V11.2 规则与持仓管理"
+
+string v112Rule = input.string("多头框内", "突破+spike 规则", options=["多头框内", "V10.4 窗口"], group=v112Group, tooltip="多头框内：V9多头盈亏框开着时出现突破（本周期或上级）就算，每个框只算第一次，不限根数、不做当根检查。V10.4窗口：SPIKE与突破间隔≤配对窗口，第二个事件当根做全部检查。", display=display.none)
+bool v112UseBox = v112Rule == "多头框内"
+bool v12HoldPair = input.bool(true, "先突破、持续站上线后出现 V9 也算联合", group=v112Group, tooltip="用于多头框内规则。突破确认后每根收盘必须严格高于同一冻结线；收回线上或线下、数据断档、超过本图最长存活根数即永久取消。后来重新站上不恢复旧突破。仅在新的V9多头确认当根配对，不回填；每个框一次、每条已用突破不复用。", display=display.none)
+bool v112AddOnBreak = input.bool(true, "框内突破时提示加仓（止损沿用原框）", group=v112Group, display=display.none)
+bool v112EarlyExit = input.bool(false, "N 根内没出突破：盈亏参考提前结束", group=v112Group, tooltip="V9多头框开了N根仍没有任何突破（本周期或上级），在第N根收盘结束参考框，标「未突破离场」。只改参考框，不下单。", display=display.none)
+int v112ExitBars = input.int(6, "等待突破的根数 N", minval=1, maxval=500, group=v112Group, display=display.none)
+bool v112ShowAllLines = input.bool(false, "诊断：显示本周期全部有效候选线", group=v112Group, tooltip="画出程序此刻候选池里所有未突破的下降线（虚线，编号），并在面板显示最近一次找线的结果：入池/重复/实体穿线/针刺/容量。用来查“为什么这条线没画出来”。", display=display.none) and not v126Minimal
+
+// BEGIN V128 INPUTS
+// V12.8 is deliberately chart guidance only.  It never sizes, enters, exits,
+// changes the inherited ATR protection, or claims a realised profit.
+string v128Group = "04E · V12.8 两次加仓提示"
+bool v128Enabled = input.bool(true, "显示两次加仓候选与结构保护参考", group=v128Group, tooltip="只为原始V9多头参考显示最多两次候选。候选来自连续整点、已完成1小时回踩突破与原始2R门槛；没有数量、保证金、净利润或成交核验。旧的“框内突破时提示加仓”只提示趋势线突破且沿用原框止损，和本候选不同。原ATR保护、退出和既有预警完全不变。", display=display.none)
+const int V128_H1_MS = 60 * 60 * 1000
+bool v128Supported = timeframe.isminutes and timeframe.multiplier <= 60 and 60 % timeframe.multiplier == 0
+bool v128ChartIsH1 = timeframe.isminutes and timeframe.multiplier == 60
+// END V128 INPUTS
+// ───────────── 双轨高点 ─────────────
+
+const int V10_PIVOTS = 48
+const int V10_PER_BUCKET = 4
+const int V10_PER_TRACK_GROUP = 2
+const float V10_SWITCH_MARGIN = 0.10
+
+bool v10Log = v10Scale == "对数"
+float v10Atr = ta.atr(14)
+float v10Body = math.max(open, close)
+float v10Peak = v10PeakMode == "实体上沿" ? v10Body : math.min(high, v10Body + v10WickCap * v10Atr)
+
+// Snapshot ATR on every bar, before any conditional candidate search. Native Pine
+// replay showed derived-series history inside intermittent nested calls disagreeing
+// with raw OHLC at the same offset. Absolute-bar slots avoid call-history indexing.
+// request.security evaluates this bounded buffer separately in its own context.
+const int V12_HISTORY = 2001
+var array<float> v12AtrBars = array.new_float(V12_HISTORY, na)
+array.set(v12AtrBars, bar_index % V12_HISTORY, v10Atr)
+
+f_v12_atrAt(int absoluteBar) =>
+    int age = bar_index - absoluteBar
+    age >= 0 and age < V12_HISTORY and absoluteBar >= 0 ? array.get(v12AtrBars, absoluteBar % V12_HISTORY) : na
+
+// 两个序列逐根计算，分别在独立候选池中选点。
+float v10RawPivot = ta.pivothigh(high, v10Left, v10Right)
+float v10SoftPivot = ta.pivothigh(v10Peak, v10Left, v10Right)
+float v12RawTouch = ta.pivothigh(high, v12LocalLeft, v12LocalRight)
+float v12SoftTouch = ta.pivothigh(v10Peak, v12LocalLeft, v12LocalRight)
+int v12TouchGap = math.max(v12LocalMinGap, v12LocalRight + 1)
+
+bool v10UseRaw = v10PeakMode == "双轨" or v10PeakMode == "完整影线"
+bool v10UseSoft = v10PeakMode != "完整影线"
+
+int v10Gap = math.max(v10MinGap, v10Right + 1)
+int v10Span = math.max(v10MinSpan, 2 * v10Gap)
+
+if barstate.isfirst and v10Enabled and v10Lookback < v10Span + v10Right
+    runtime.error("V11 搜索范围不足，请增大范围或减小反弹间隔。")
+
+// ───────────── 结构对象 ─────────────
+
+// 确认后不调整锚点和斜率，不按第四/第五次触碰加分。
+type V10Line
+    int uid = 0
+    int ax = na
+    float ap = na
+    int bx = na
+    float bp = na
+    int cx = na
+    float cp = na
+    float wave = na
+    float fit = na
+    float score = na
+    int born = na
+    int phase = 1
+    int above = 0
+    int stopped = na
+    int source = 0
+    int kind = 0  // 0: three major pivots; 1: major A/B + local C.
+    int confirmedTime = na
+    int brokenBar = na
+    bool usable = false
+    bool joined = false
+    int spikeBar = na
+    float parentHigh = na
+    float parentLow = na
+
+f_v10_price(int barA, float priceA, int barB, float priceB, int targetBar) =>
+    float fraction = float(targetBar - barA) / (barB - barA)
+    v10Log ? math.exp(math.log(priceA) + (math.log(priceB) - math.log(priceA)) * fraction) : priceA + (priceB - priceA) * fraction
+
+method at(V10Line self, int targetBar) =>
+    f_v10_price(self.ax, self.ap, self.bx, self.bp, targetBar)
+
+// 跨度只用于容量分组，不作为触点加分。
+f_v10_bucket(int span) =>
+    span < v10Span * 2 ? 0 : span < v10Span * 4 ? 1 : 2
+
+f_v10_rank(array<V10Line> bag, V10Line item) =>
+    int bucket = f_v10_bucket(item.cx - item.ax)
+    int count = 0
+    int worst = na
+    float worstScore = -1.0
+
+    if array.size(bag) > 0
+        for i = 0 to array.size(bag) - 1
+            V10Line oldItem = array.get(bag, i)
+
+            if f_v10_bucket(oldItem.cx - oldItem.ax) == bucket
+                count += 1
+
+                if oldItem.score > worstScore
+                    worst := i
+                    worstScore := oldItem.score
+
+    if count < V10_PER_BUCKET
+        array.push(bag, item)
+    else if not na(worst) and item.score < worstScore
+        array.set(bag, worst, item)
+
+    0
+
+// 相同几何线换了触点组合，也不当作另一条线。
+f_v10_same(V10Line first, V10Line second) =>
+    bool same = first.ax == second.ax and first.bx == second.bx and math.abs(first.ap - second.ap) < syminfo.mintick * 0.5 and math.abs(first.bp - second.bp) < syminfo.mintick * 0.5
+
+    int leftEdge = math.max(first.ax, second.ax)
+    int rightEdge = math.min(first.cx, second.cx)
+
+    if not same and rightEdge - leftEdge >= v10Gap
+        float leftTol = math.max(syminfo.mintick, v10Touch * 0.5 * f_v12_atrAt(leftEdge))
+        float rightTol = math.max(syminfo.mintick, v10Touch * 0.5 * f_v12_atrAt(rightEdge))
+        float nowTol = math.max(syminfo.mintick, v10Touch * 0.5 * v10Atr)
+
+        same := math.abs(first.at(leftEdge) - second.at(leftEdge)) <= leftTol and math.abs(first.at(rightEdge) - second.at(rightEdge)) <= rightTol and math.abs(first.at(bar_index) - second.at(bar_index)) <= nowTol
+
+    same
+
+// 返回：0通过，1实体穿线，2针刺异常，3此前已突破。
+f_v10_validate(V10Line item) =>
+    int reason = 0
+    int spikes = 0
+    int previousSpike = na
+    int aboveRun = 0
+    int age = bar_index - item.ax
+
+    for step = 0 to age
+        int offset = age - step
+        float y = item.at(item.ax + step)
+        float a = math.max(nz(f_v12_atrAt(item.ax + step), syminfo.mintick), syminfo.mintick)
+
+        if math.max(open[offset], close[offset]) > y + v10BodyTol * a + syminfo.mintick * 0.0001
+            reason := 1
+            break
+
+        float pierce = (high[offset] - y) / a
+
+        if pierce > v10WickTol
+            spikes += 1
+
+            if spikes > v10Needles or pierce > math.max(v10NeedleMax, v10WickTol) or (not na(previousSpike) and step - previousSpike == 1)
+                reason := 2
+                break
+
+            previousSpike := step
+
+        aboveRun := close[offset] > y + v10BreakBuffer * a ? aboveRun + 1 : 0
+
+        if aboveRun >= v10BreakBars
+            reason := 3
+            break
+
+    [reason, spikes]
+
+// ───────────── 三点候选搜索 ─────────────
+
+// 最新确认高点作为C；A来自多个历史反弹。
+// 每个来源的三种跨度分别保留最多4条短名单。
+f_v10_search(array<int> xs, array<float> ps, array<float> ats, int sourceId) =>
+    array<V10Line> bag = array.new<V10Line>()
+    int n = array.size(xs)
+
+    if n >= 3
+        int c = n - 1
+        int cx = array.get(xs, c)
+        float cp = array.get(ps, c)
+        float ca = array.get(ats, c)
+
+        int oldest = array.get(xs, 0)
+        int total = cx - oldest
+
+        array<float> lows = array.new_float(total + 1, na)
+        float valley = na
+
+        // lows[x-oldest] = x 到 C-1 的最低价。
+        if total > 0
+            for step = 1 to total
+                int x = cx - step
+                valley := na(valley) ? low[bar_index - x] : math.min(valley, low[bar_index - x])
+                array.set(lows, x - oldest, valley)
+
+        for a = 0 to n - 3
+            int ax = array.get(xs, a)
+            float ap = array.get(ps, a)
+            float aa = array.get(ats, a)
+
+            if cx - ax >= v10Span and ap > cp
+                array<V10Line> localBag = array.new<V10Line>()
+
+                for b = a + 1 to c - 1
+                    int bx = array.get(xs, b)
+                    float bp = array.get(ps, b)
+                    float ba = array.get(ats, b)
+
+                    if bx - ax >= v10Gap and cx - bx >= v10Gap and ap > bp and bp > cp and ap - bp >= v10Drop * math.max(aa, ba)
+                        float atC = f_v10_price(ax, ap, bx, bp, cx)
+                        float atNow = f_v10_price(ax, ap, bx, bp, bar_index)
+                        float fit = math.abs(cp - atC) / ca
+
+                        if fit <= v10Touch and atNow > 0 and close <= atNow
+                            V10Line item = V10Line.new(ax=ax, ap=ap, bx=bx, bp=bp, cx=cx, cp=cp, fit=fit, born=bar_index, source=sourceId, confirmedTime=time_close)
+                            array.push(localBag, item)
+
+                if array.size(localBag) > 0
+                    array<float> prefix = array.new_float(cx - ax + 1, na)
+                    float localLow = na
+
+                    for step = 1 to cx - ax - 1
+                        float value = low[bar_index - ax - step]
+                        localLow := na(localLow) ? value : math.min(localLow, value)
+                        array.set(prefix, step, localLow)
+
+                    for item in localBag
+                        float ba = math.max(f_v12_atrAt(item.bx), syminfo.mintick)
+                        float ab = (math.min(item.ap, item.bp) - array.get(prefix, item.bx - ax - 1)) / math.max(aa, ba)
+                        float bc = (math.min(item.bp, cp) - array.get(lows, item.bx + 1 - oldest)) / math.max(ba, ca)
+
+                        if ab >= v10Pullback and bc >= v10Pullback
+                            item.wave := math.min(ab, bc)
+                            item.score := item.fit + 0.20 / (1.0 + item.wave)
+                            f_v10_rank(bag, item)
+
+    bag
+
+// ───────────── 候选池管理 ─────────────
+
+// A/B come only from the already-confirmed major pivot arrays. C is the local
+// pivot confirmed on this bar. Do not retry an old C after a later B becomes known.
+// Reads only A..current bar; the inherited validator rejects prior body/break damage.
+f_v12_searchLocal(array<int> xs, array<float> ps, array<float> ats, int sourceId, int cx, float cp, float ca) =>
+    array<V10Line> bag = array.new<V10Line>()
+    int n = array.size(xs)
+    if n >= 2 and not na(cp) and not na(ca) and ca > 0
+        for a = 0 to n - 2
+            int ax = array.get(xs, a)
+            float ap = array.get(ps, a)
+            float aa = array.get(ats, a)
+            if cx - ax >= v10Span and ap > cp
+                for b = a + 1 to n - 1
+                    int bx = array.get(xs, b)
+                    float bp = array.get(ps, b)
+                    float ba = array.get(ats, b)
+                    if bx < cx and bx + v10Right <= bar_index and bx - ax >= v10Gap and cx - bx >= v12TouchGap and ap > bp and bp > cp and ap - bp >= v10Drop * math.max(aa, ba)
+                        float atC = f_v10_price(ax, ap, bx, bp, cx)
+                        float atNow = f_v10_price(ax, ap, bx, bp, bar_index)
+                        float fit = math.abs(cp - atC) / ca
+                        if fit <= v10Touch and atNow > 0 and close <= atNow
+                            float abLow = na
+                            float bcLow = na
+                            for x = ax + 1 to cx - 1
+                                float value = low[bar_index - x]
+                                if x < bx
+                                    abLow := na(abLow) ? value : math.min(abLow, value)
+                                if x > bx
+                                    bcLow := na(bcLow) ? value : math.min(bcLow, value)
+                            float ab = (math.min(ap, bp) - abLow) / (v12ReboundAtB ? ba : math.max(aa, ba))
+                            float bc = (math.min(bp, cp) - bcLow) / math.max(ba, ca)
+                            if not na(ab) and not na(bc) and ab >= v10Pullback and bc >= v10Pullback
+                                V10Line item = V10Line.new(ax=ax, ap=ap, bx=bx, bp=bp, cx=cx, cp=cp, fit=fit, born=bar_index, source=sourceId, kind=1, confirmedTime=time_close)
+                                item.wave := math.min(ab, bc)
+                                item.score := item.fit + 0.20 / (1.0 + item.wave)
+                                f_v10_rank(bag, item)
+    bag
+
+f_v12_kindText(V10Line item) =>
+    item.kind == 1 ? "主高点＋局部回踩" : "三主高点"
+
+f_v10_addPivot(array<int> xs, array<float> ps, array<float> ats, int px, float price, float scale) =>
+    array.push(xs, px)
+    array.push(ps, price)
+    array.push(ats, scale)
+    0
+
+f_v10_prunePivots(array<int> xs, array<float> ps, array<float> ats) =>
+    while array.size(xs) > 0
+        if bar_index - array.get(xs, 0) > v10Lookback or array.size(xs) > V10_PIVOTS
+            array.shift(xs)
+            array.shift(ps)
+            array.shift(ats)
+        else
+            break
+
+    0
+
+// 返回：1入池，0重复，2实体拒绝，3针刺拒绝，4历史已突破，5容量拒绝。
+// Each family/source/span group has two slots (at most 24 total).
+// A local-touch candidate cannot evict a legacy-family line for capacity.
+f_v10_store(array<V10Line> pool, V10Line item) =>
+    int result = 0
+    bool duplicate = false
+
+    for known in pool
+        if f_v10_same(known, item)
+            duplicate := true
+            break
+
+    if not duplicate
+        [reason, spikes] = f_v10_validate(item)
+
+        if reason != 0
+            result := reason + 1
+        else
+            item.score += 0.05 * spikes
+
+            int groupCount = 0
+            int worstIndex = na
+            float worstScore = -1.0
+            int bucket = f_v10_bucket(item.cx - item.ax)
+
+            if array.size(pool) > 0
+                for i = 0 to array.size(pool) - 1
+                    V10Line known = array.get(pool, i)
+
+                    if known.kind == item.kind and known.source == item.source and f_v10_bucket(known.cx - known.ax) == bucket
+                        groupCount += 1
+
+                        bool pendingPair = known.usable or not na(known.spikeBar)
+
+                        if not pendingPair and known.score > worstScore
+                            worstIndex := i
+                            worstScore := known.score
+
+            bool room = groupCount < V10_PER_TRACK_GROUP
+
+            if not room and not na(worstIndex) and item.score < worstScore
+                array.remove(pool, worstIndex)
+                room := true
+
+            if room
+                array.push(pool, item)
+                result := 1
+            else
+                result := 5
+
+    result
+
+// ───────────── 独立结构状态 ─────────────
+
+var array<int> v10Xs = array.new_int()
+var array<float> v10Ps = array.new_float()
+var array<float> v10As = array.new_float()
+
+var array<int> v10SoftXs = array.new_int()
+var array<float> v10SoftPs = array.new_float()
+var array<float> v10SoftAs = array.new_float()
+
+var array<V10Line> v10Tracks = array.new<V10Line>()
+var array<V10Line> v12Held = array.new<V10Line>()
+const int V12_HELD_LIMIT = 24
+
+// 当前主线只控制画面，不决定后台结构是否有资格发信号。
+var V10Line v10Main = na
+var int v10Promotion = na
+var int v10Serial = 0
+var int v10SegmentStart = 0
+var int v10ClosedBar = na
+var polyline v10Drawing = na
+
+var array<label> v10Marks = array.new_label()
+var array<label> v10DebugMarks = array.new_label()
+
+var int v10ConsumedSpike = -1
+var int v10LastEventBar = na
+var int v10LastEventId = na
+
+var float v10LastJointPrice = na
+var int v10LastJointTime = na
+var string v10LastJointOrder = "—"
+
+var string v10SearchWhy = "等待已确认的独立反弹高点"
+var string v12SearchWhy = "局部回踩：等待确认"
+var int v12LastBreakTime = na
+var string v10PairWhy = "尚无配对事件"
+var string v10LastSpikeWhy = "尚无SPIKE多头确认"
+var int v10LastSpikeTime = na
+var int v10ActiveCount = 0
+var int v10WaitingCount = 0
+
+bool v10BornEvent = false
+bool v10BreakEvent = false
+bool v10JointEvent = false
+
+// 当根联合信号对应的结构，用于冻结绘图。
+V10Line v10JointLine = na
+
+// V11：最近一次本周期突破的结构，只用于画线。
+var V10Line v11LastBroken = na
+var polyline v11BrokenDrawing = na
+var array<label> v11BrokenMarks = array.new_label()
+var polyline v11HtfDrawing = na
+var polyline v11HtfActiveDrawing = na
+var array<label> v11HtfMarks = array.new_label()
+
+bool v10CanRun = pricesValid and not dataGap and not na(v10Atr) and v10Atr > 0
+float v10LongDistance = atr > 0 and not na(ropeHigh) ? (close - ropeHigh) / atr : na
+
+bool v10LongAlive = ready and pricesValid and atr > 0 and not na(ropeHigh) and close > ropeHigh and rawSignalSide != -1
+bool v10Momentum = not na(md[1]) and not na(sb) and md > sb and md > md[1]
+bool v10CurrentGate = bbEntryAllowed and v9BundleAllowed and (not useOverheatFilter or (not na(v10LongDistance) and v10LongDistance <= maxRopeDistanceAtr))
+
+// ───────────── V11 上级周期结构（在上级周期内独立运行） ─────────────
+
+bool v11UseChart = v11SourceMode != "仅上级周期"
+bool v11UseHtfSource = v11SourceMode != "仅本周期"
+
+f_v11_autoHtf() =>
+    int s = timeframe.in_seconds()
+    s <= 60 ? "5" : s <= 300 ? "15" : s <= 900 ? "60" : s <= 1800 ? "120" : s <= 3600 ? "240" : s <= 14400 ? "D" : s <= 86400 ? "W" : ""
+
+f_v11_tfLabel(string tf) =>
+    int s = tf == "" ? 0 : timeframe.in_seconds(tf)
+    s <= 0 ? "—" : s % 604800 == 0 ? str.tostring(math.round(s / 604800)) + "W" : s % 86400 == 0 ? str.tostring(math.round(s / 86400)) + "D" : s % 3600 == 0 ? str.tostring(math.round(s / 3600)) + "h" : str.tostring(math.round(s / 60)) + "m"
+
+string v11Htf = v11HtfChoice == "自动" ? f_v11_autoHtf() : v11HtfManual
+int v11HtfSeconds = v11Htf == "" ? 0 : timeframe.in_seconds(v11Htf)
+bool v11HtfOn = v10Enabled and v11UseHtfSource and v11HtfSeconds > timeframe.in_seconds()
+string v11HtfText = f_v11_tfLabel(v11Htf)
+int v11BarMs = timeframe.in_seconds() * 1000
+
+// 与本周期同一套找线、校验与突破判定，只是在上级K线上运行。
+// 配对不在这里做：SPIKE只来自本图。已突破的线直接离开上级候选池。
+f_v11_lineEngine() =>
+    var array<int> xs = array.new_int()
+    var array<float> ps = array.new_float()
+    var array<float> ats = array.new_float()
+    var array<int> sxs = array.new_int()
+    var array<float> sps = array.new_float()
+    var array<float> sats = array.new_float()
+    var array<V10Line> pool = array.new<V10Line>()
+    var int segStart = 0
+    var int bTime = na
+    var int bCloseTime = na
+    var int bAxT = na
+    var float bAp = na
+    var int bBxT = na
+    var float bBp = na
+    var int bCxT = na
+    var float bCp = na
+    var int bBornT = na
+    var int bSource = na
+    int aAxT = na
+    float aAp = na
+    int aBxT = na
+    float aBp = na
+    int aCxT = na
+    float aCp = na
+
+    if not v10CanRun
+        array.clear(xs)
+        array.clear(ps)
+        array.clear(ats)
+        array.clear(sxs)
+        array.clear(sps)
+        array.clear(sats)
+        array.clear(pool)
+        segStart := bar_index
+    else
+        V10Line winner = na
+
+        for item in pool
+            float y = item.at(bar_index)
+
+            if item.phase == 1
+                if bar_index - item.born > v10Life or y <= 0
+                    item.phase := 3
+                    item.stopped := bar_index
+                else if bar_index > item.born
+                    item.above := close > y + v10Atr * v10BreakBuffer ? item.above + 1 : 0
+
+                    if item.above >= v10BreakBars
+                        item.phase := 2
+                        item.stopped := bar_index
+                        item.brokenBar := bar_index
+
+                        if na(winner) or item.score < winner.score
+                            winner := item
+
+        if not na(winner)
+            bTime := time
+            bCloseTime := time_close
+            bAxT := time[bar_index - winner.ax]
+            bAp := winner.ap
+            bBxT := time[bar_index - winner.bx]
+            bBp := winner.bp
+            bCxT := time[bar_index - winner.cx]
+            bCp := winner.cp
+            bBornT := winner.confirmedTime
+            bSource := winner.source + 2 * winner.kind
+
+        bool rawNew = false
+        bool softNew = false
+        int pivotBar = bar_index - v10Right
+
+        if pivotBar - v10Left >= segStart and not na(f_v12_atrAt(pivotBar))
+            float pivotScale = math.max(f_v12_atrAt(pivotBar), syminfo.mintick)
+
+            if v10UseRaw and not na(v10RawPivot)
+                f_v10_addPivot(xs, ps, ats, pivotBar, v10RawPivot, pivotScale)
+                rawNew := true
+
+            if v10UseSoft and not na(v10SoftPivot)
+                f_v10_addPivot(sxs, sps, sats, pivotBar, v10SoftPivot, pivotScale)
+                softNew := true
+
+        f_v10_prunePivots(xs, ps, ats)
+        f_v10_prunePivots(sxs, sps, sats)
+
+        int dropIndex = array.size(pool) - 1
+
+        while dropIndex >= 0
+            if array.get(pool, dropIndex).phase != 1
+                array.remove(pool, dropIndex)
+
+            dropIndex -= 1
+
+        if rawNew or softNew
+            for sourceId = 0 to 1
+                bool admitted = sourceId == 0 ? rawNew : softNew
+
+                if admitted
+                    array<V10Line> shortList = sourceId == 0 ? f_v10_search(xs, ps, ats, 0) : f_v10_search(sxs, sps, sats, 1)
+
+                    for item in shortList
+                        f_v10_store(pool, item)
+
+        int touchBar = bar_index - v12LocalRight
+        bool touchSegment = touchBar - v12LocalLeft >= segStart
+        if v12LocalEnabled and touchSegment and not na(f_v12_atrAt(touchBar))
+            float touchScale = math.max(f_v12_atrAt(touchBar), syminfo.mintick)
+            for sourceId = 0 to 1
+                bool touchNow = sourceId == 0 ? v10UseRaw and not na(v12RawTouch) : v10UseSoft and not na(v12SoftTouch)
+                if touchNow
+                    array<V10Line> localList = sourceId == 0 ? f_v12_searchLocal(xs, ps, ats, 0, touchBar, v12RawTouch, touchScale) : f_v12_searchLocal(sxs, sps, sats, 1, touchBar, v12SoftTouch, touchScale)
+                    for item in localList
+                        f_v10_store(pool, item)
+
+        V10Line best = na
+
+        for item in pool
+            if item.phase == 1 and close <= item.at(bar_index) and (na(best) or item.score < best.score)
+                best := item
+
+        if not na(best)
+            aAxT := time[bar_index - best.ax]
+            aAp := best.ap
+            aBxT := time[bar_index - best.bx]
+            aBp := best.bp
+            aCxT := time[bar_index - best.cx]
+            aCp := best.cp
+
+    [bTime, bCloseTime, bAxT, bAp, bBxT, bBp, bCxT, bCp, bBornT, bSource, aAxT, aAp, aBxT, aBp, aCxT, aCp]
+
+// 只取上一根已收盘上级K线的结果：上级K线收盘后的第一根本图K线才看得到。
+f_v11_htfOutputs() =>
+    [t1, t2, t3, p4, t5, p6, t7, p8, t9, s10, t11, p12, t13, p14, t15, p16] = f_v11_lineEngine()
+    [t1[1], t2[1], t3[1], p4[1], t5[1], p6[1], t7[1], p8[1], t9[1], s10[1], t11[1], p12[1], t13[1], p14[1], t15[1], p16[1]]
+
+[htfBreakTime, htfBreakCloseTime, htfAxT, htfAp, htfBxT, htfBp, htfCxT, htfCp, htfBornT, htfSource, htfActAxT, htfActAp, htfActBxT, htfActBp, htfActCxT, htfActCp] = request.security(syminfo.tickerid, v11HtfOn ? v11Htf : timeframe.period, f_v11_htfOutputs(), lookahead=barmerge.lookahead_on)
+
+f_v11_timePrice(int ta, float pa, int tb, float pb, int t) =>
+    float fraction = float(t - ta) / (tb - ta)
+    v10Log ? math.exp(math.log(pa) + (math.log(pb) - math.log(pa)) * fraction) : pa + (pb - pa) * fraction
+
+f_v11_timePoints(int ta, float pa, int tb, float pb, int tEnd) =>
+    array<chart.point> pts = array.new<chart.point>()
+
+    if v10Log
+        for k = 0 to 40
+            int t = ta + int(math.round((tEnd - ta) * k / 40.0))
+            array.push(pts, chart.point.from_time(t, f_v11_timePrice(ta, pa, tb, pb, t)))
+    else
+        array.push(pts, chart.point.from_time(ta, pa))
+        array.push(pts, chart.point.from_time(tEnd, f_v11_timePrice(ta, pa, tb, pb, tEnd)))
+
+    pts
+
+// 本周期线的A/B/C、A点与突破点圆圈。
+f_v11_indexMarks(V10Line ln, int breakBar, color tone, string tip, bool withConfirm) =>
+    array<label> marks = array.new_label()
+    array.push(marks, label.new(ln.ax, ln.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.bx, ln.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.cx, ln.cp, ln.kind == 1 ? "C·RT" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(ln.ax, ln.ap, "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    if not na(breakBar)
+        array.push(marks, label.new(breakBar, ln.at(breakBar), "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    if withConfirm
+        array.push(marks, label.new(ln.born, ln.at(ln.born), "ok", style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    marks
+
+// 上级周期线的A/B/C与圆圈，按时间定位。
+f_v11_timeMarks(int axT, float ap, int bxT, float bp, int cxT, float cp, int breakT, int bornT, color tone, string tip, bool withConfirm) =>
+    array<label> marks = array.new_label()
+    array.push(marks, label.new(axT, ap, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(bxT, bp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(cxT, cp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+    array.push(marks, label.new(axT, ap, "·", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    if not na(breakT)
+        array.push(marks, label.new(breakT, f_v11_timePrice(axT, ap, bxT, bp, breakT), "·", xloc=xloc.bar_time, style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    if withConfirm and not na(bornT)
+        array.push(marks, label.new(bornT, f_v11_timePrice(axT, ap, bxT, bp, bornT), "ok", xloc=xloc.bar_time, style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+
+    marks
+
+// ───────────── 结构监测与联合判断 ─────────────
+
+if barstate.isconfirmed and v10Enabled
+    v10ClosedBar := bar_index
+
+    if not v10CanRun
+        if not na(v10Main) and v10Main.phase == 1
+            v10Main.phase := 3
+            v10Main.stopped := bar_index - 1
+
+        array.clear(v10Xs)
+        array.clear(v10Ps)
+        array.clear(v10As)
+
+        array.clear(v10SoftXs)
+        array.clear(v10SoftPs)
+        array.clear(v10SoftAs)
+
+        array.clear(v10Tracks)
+        array.clear(v12Held)
+
+        v10SegmentStart := bar_index
+        v10ActiveCount := 0
+        v10WaitingCount := 0
+        v10SearchWhy := "数据预热或断档：重新建立结构"
+        v12SearchWhy := "局部回踩：数据预热或断档，重新建立"
+        v10PairWhy := "数据未就绪"
+
+    else
+        // Retire evidence permanently at the first failed close; no resurrection.
+        if array.size(v12Held) > 0
+            for n = array.size(v12Held) - 1 to 0
+                V10Line held = array.get(v12Held, n)
+                float heldY = held.at(bar_index)
+                if held.joined or bar_index - held.brokenBar > v10Life or heldY <= 0 or close <= heldY
+                    array.remove(v12Held, n)
+
+        // 先监测此前已经成立的结构，再处理本根新结构。
+        V10Line breakWinner = na
+        V10Line jointWinner = na
+        int available = 0
+        bool pairAttempt = false
+        string failure = ""
+
+        for item in v10Tracks
+            float y = item.at(bar_index)
+
+            if item.phase == 1
+                if bar_index - item.born > v10Life or y <= 0
+                    item.phase := 3
+                    item.stopped := bar_index
+                    item.spikeBar := na
+                else if bar_index > item.born
+                    item.above := close > y + v10Atr * v10BreakBuffer ? item.above + 1 : 0
+
+                    if item.above >= v10BreakBars
+                        item.phase := 2
+                        item.stopped := bar_index
+                        item.brokenBar := bar_index
+                        item.usable := true
+                        if v112UseBox and v12HoldPair
+                            if array.size(v12Held) >= V12_HELD_LIMIT
+                                array.shift(v12Held)
+                            array.push(v12Held, item)
+
+                        if na(breakWinner) or item.score < breakWinner.score
+                            breakWinner := item
+
+            // 逐结构保存和取消SPIKE证据。
+            if not na(item.spikeBar)
+                if item.spikeBar <= v10ConsumedSpike or bar_index - item.spikeBar > v10Window
+                    item.spikeBar := na
+                else if not v10LongAlive or na(item.parentLow) or close < item.parentLow or (exitReference and exitSide == 1)
+                    item.spikeBar := na
+
+            if item.usable
+                if bar_index - item.brokenBar > v10Window or close <= y or rawSignalSide == -1
+                    item.usable := false
+                    item.spikeBar := na
+
+            bool knownBefore = item.born < bar_index
+            bool lineAvailable = knownBefore and not item.joined and (item.phase == 1 or item.usable)
+
+            if lineAvailable
+                available += 1
+
+            if confirmedSignal and lineAvailable
+                item.spikeBar := bar_index
+                item.parentHigh := legacyParentHigh
+                item.parentLow := legacyParentLow
+
+            if item.usable and not item.joined and not na(item.spikeBar) and item.spikeBar > v10ConsumedSpike
+                bool withinWindow = math.abs(item.spikeBar - item.brokenBar) <= v10Window
+                bool secondNow = bar_index == math.max(item.spikeBar, item.brokenBar)
+                bool bornBeforeBoth = item.born < math.min(item.spikeBar, item.brokenBar)
+                bool parentRecovered = not na(item.parentHigh) and close > item.parentHigh
+
+                if withinWindow and secondNow and bornBeforeBoth
+                    pairAttempt := true
+
+                    if v10LongAlive and v10Momentum and v10CurrentGate and parentRecovered
+                        if na(jointWinner) or item.score < jointWinner.score
+                            jointWinner := item
+                    else
+                        failure := not v10LongAlive ? "联合当根失去六线支撑" : not v10Momentum ? "联合当根动量未通过" : not parentRecovered ? "未站上原启动区间" : not bbEntryAllowed ? "联合当根BB过滤未通过" : not v9BundleAllowed ? "联合当根V9标的/量比/时段未通过" : "联合当根离六线过远"
+
+        v10BreakEvent := not na(breakWinner)
+
+        if v10BreakEvent
+            v10PairWhy := "结构#" + str.tostring(breakWinner.uid) + "突破；等待SPIKE"
+            v11LastBroken := breakWinner
+            v12LastBreakTime := time_close
+
+        if pairAttempt and na(jointWinner)
+            v10PairWhy := failure
+
+        // 同根多条结构联合时，只输出一个代表性信号。
+        // 同一SPIKE事件不会被多条结构重复消费。
+        if not v112UseBox and not na(jointWinner) and v11UseChart
+            v10JointEvent := true
+            v10JointLine := jointWinner
+            v10ConsumedSpike := jointWinner.spikeBar
+
+            v10LastJointPrice := close
+            v10LastJointTime := time_close
+            v10LastJointOrder := (jointWinner.spikeBar == jointWinner.brokenBar ? "同根" : jointWinner.spikeBar < jointWinner.brokenBar ? "SPIKE→突破" : "突破→SPIKE") + " · 线#" + str.tostring(jointWinner.uid)
+
+            jointWinner.joined := true
+            jointWinner.usable := false
+
+            for item in v10Tracks
+                if not na(item.spikeBar) and item.spikeBar <= v10ConsumedSpike
+                    item.spikeBar := na
+
+            v10PairWhy := "联合成立；不重置原盈亏框"
+
+        V10Line eventLine = not v112UseBox and not na(jointWinner) and v11UseChart ? jointWinner : breakWinner
+
+        if not na(eventLine)
+            if na(v10Main) or v10Main.uid != eventLine.uid
+                v10Promotion := bar_index
+
+            v10Main := eventLine
+            v10LastEventBar := bar_index
+            v10LastEventId := eventLine.uid
+
+        if confirmedSignal
+            if not v10JointEvent and not pairAttempt
+                v10PairWhy := available > 0 ? "SPIKE已确认，保存到提前成立的结构；等待突破" : "SPIKE存在：此前无有效结构，或结构已失效/配对超时"
+
+            v10LastSpikeTime := time_close
+            v10LastSpikeWhy := v10PairWhy
+
+            if v10Debug and not v10OnlyJoint
+                if array.size(v10DebugMarks) >= 8
+                    label.delete(array.shift(v10DebugMarks))
+
+                array.push(v10DebugMarks, label.new(bar_index, low - v10Atr * 2, v10PairWhy, style=label.style_label_up, color=color.new(chart.bg_color, 12), textcolor=chart.fg_color, size=size.tiny, force_overlay=true))
+
+        // 本根确认的新拐点，分别加入两个价格来源。
+        bool rawAdmitted = false
+        bool softAdmitted = false
+        int px = bar_index - v10Right
+        bool sameSegment = px - v10Left >= v10SegmentStart
+
+        if sameSegment and not na(f_v12_atrAt(px))
+            float pivotScale = math.max(f_v12_atrAt(px), syminfo.mintick)
+
+            if v10UseRaw and not na(v10RawPivot)
+                f_v10_addPivot(v10Xs, v10Ps, v10As, px, v10RawPivot, pivotScale)
+                rawAdmitted := true
+
+            if v10UseSoft and not na(v10SoftPivot)
+                f_v10_addPivot(v10SoftXs, v10SoftPs, v10SoftAs, px, v10SoftPivot, pivotScale)
+                softAdmitted := true
+
+        f_v10_prunePivots(v10Xs, v10Ps, v10As)
+        f_v10_prunePivots(v10SoftXs, v10SoftPs, v10SoftAs)
+
+        // 已失效结构独立清理，不清空全部高点。
+        int dropIndex = array.size(v10Tracks) - 1
+
+        while dropIndex >= 0
+            V10Line item = array.get(v10Tracks, dropIndex)
+
+            if item.phase != 1 and not item.usable
+                array.remove(v10Tracks, dropIndex)
+
+            dropIndex -= 1
+
+        if rawAdmitted or softAdmitted
+            int passed = 0
+            int duplicates = 0
+            int bodyReject = 0
+            int wickReject = 0
+            int breakReject = 0
+            int capacityReject = 0
+            int tested = 0
+
+            for sourceId = 0 to 1
+                bool admitted = sourceId == 0 ? rawAdmitted : softAdmitted
+
+                if admitted
+                    array<V10Line> shortList = sourceId == 0 ? f_v10_search(v10Xs, v10Ps, v10As, 0) : f_v10_search(v10SoftXs, v10SoftPs, v10SoftAs, 1)
+
+                    for item in shortList
+                        tested += 1
+                        int code = f_v10_store(v10Tracks, item)
+
+                        if code == 1
+                            v10Serial += 1
+                            item.uid := v10Serial
+                            passed += 1
+                            v10BornEvent := true
+                        else if code == 0
+                            duplicates += 1
+                        else if code == 2
+                            bodyReject += 1
+                        else if code == 3
+                            wickReject += 1
+                        else if code == 4
+                            breakReject += 1
+                        else
+                            capacityReject += 1
+
+            v10SearchWhy := tested == 0 ? "本次未找到满足间隔/回落/三点贴合的候选" : "入池 " + str.tostring(passed) + "；重复 " + str.tostring(duplicates) + "；实体 " + str.tostring(bodyReject) + "；针刺 " + str.tostring(wickReject) + "；历史已破 " + str.tostring(breakReject) + "；容量 " + str.tostring(capacityReject)
+
+        int touchBar = bar_index - v12LocalRight
+        bool touchSegment = touchBar - v12LocalLeft >= v10SegmentStart
+        if v12LocalEnabled and touchSegment and not na(f_v12_atrAt(touchBar))
+            bool rawTouchNow = v10UseRaw and not na(v12RawTouch)
+            bool softTouchNow = v10UseSoft and not na(v12SoftTouch)
+            if rawTouchNow or softTouchNow
+                float touchScale = math.max(f_v12_atrAt(touchBar), syminfo.mintick)
+                int tested = 0
+                int passed = 0
+                int duplicates = 0
+                int bodyReject = 0
+                int wickReject = 0
+                int breakReject = 0
+                int capacityReject = 0
+                for sourceId = 0 to 1
+                    bool touchNow = sourceId == 0 ? rawTouchNow : softTouchNow
+                    if touchNow
+                        array<V10Line> localList = sourceId == 0 ? f_v12_searchLocal(v10Xs, v10Ps, v10As, 0, touchBar, v12RawTouch, touchScale) : f_v12_searchLocal(v10SoftXs, v10SoftPs, v10SoftAs, 1, touchBar, v12SoftTouch, touchScale)
+                        for item in localList
+                            tested += 1
+                            int code = f_v10_store(v10Tracks, item)
+                            if code == 1
+                                v10Serial += 1
+                                item.uid := v10Serial
+                                passed += 1
+                                v10BornEvent := true
+                            else if code == 0
+                                duplicates += 1
+                            else if code == 2
+                                bodyReject += 1
+                            else if code == 3
+                                wickReject += 1
+                            else if code == 4
+                                breakReject += 1
+                            else
+                                capacityReject += 1
+                v12SearchWhy := "局部C " + str.format_time(time[v12LocalRight], "MM-dd HH:mm", "Asia/Shanghai") + (tested == 0 ? "：主点/间隔/回落/贴线未通过" : "：入池" + str.tostring(passed) + " 重复" + str.tostring(duplicates) + " 实体" + str.tostring(bodyReject) + " 针刺" + str.tostring(wickReject) + " 历史已破" + str.tostring(breakReject) + " 容量" + str.tostring(capacityReject))
+
+        // 当前候选主线的选择只影响画面，不影响独立结构的突破和配对。
+        V10Line best = na
+        bool mainInPool = false
+
+        v10ActiveCount := 0
+        v10WaitingCount := 0
+
+        for item in v10Tracks
+            if item.phase == 1
+                v10ActiveCount += 1
+
+                if close <= item.at(bar_index) and (na(best) or item.score < best.score)
+                    best := item
+
+            if item.usable
+                v10WaitingCount += 1
+
+            if not na(v10Main) and item.uid == v10Main.uid
+                mainInPool := true
+
+        bool holdEvent = not na(v10LastEventBar) and bar_index - v10LastEventBar <= v10Window + 1
+
+        if not holdEvent
+            if not na(best)
+                if na(v10Main) or v10Main.phase != 1 or not mainInPool
+                    v10Main := best
+                    v10Promotion := bar_index
+                else if best.uid != v10Main.uid and bar_index - v10Promotion >= v10Right and best.score + V10_SWITCH_MARGIN < v10Main.score
+                    v10Main := best
+                    v10Promotion := bar_index
+            else if not na(v10Main) and v10Main.phase == 1 and not mainInPool
+                v10Main.phase := 3
+                v10Main.stopped := bar_index
+
+// ───────────── V11 上级周期突破 + 本图SPIKE ─────────────
+
+// 规则与本周期配对相同：两事件间隔≤配对窗口（本图K数），第二个事件当根做全部检查；
+// 线必须在SPIKE之前就已被三点确认；同一SPIKE只消费一次（与本周期共用消费记录）。
+var int v11LastSeenBreak = na
+var int v11HtfBreakBar = na
+var int v11HtfBreakT = na
+var int v11HtfAxT = na
+var float v11HtfAp = na
+var int v11HtfBxT = na
+var float v11HtfBp = na
+var int v11HtfCxT = na
+var float v11HtfCp = na
+var int v11HtfBornT = na
+var int v11HtfSrc = na
+var bool v11HtfUsable = false
+var bool v11HtfJoined = false
+var int v11SpikeBar = na
+var int v11SpikeTime = na
+var float v11SpikeParentHigh = na
+var float v11SpikeParentLow = na
+var int v11LastHtfBreakTime = na
+var string v11HtfPairWhy = "尚无上级突破"
+
+bool v11HtfBreakKnown = false
+bool v11HtfJointEvent = false
+string v11HtfOrder = ""
+
+if barstate.isconfirmed and v11HtfOn
+    if dataGap or not pricesValid
+        v11HtfUsable := false
+        v11SpikeBar := na
+        v11HtfPairWhy := "数据断档：清空待配对"
+    else
+        // 1. 本图SPIKE证据的过期与取消（与本周期相同条件）。
+        if not na(v11SpikeBar)
+            if v11SpikeBar <= v10ConsumedSpike or bar_index - v11SpikeBar > v10Window
+                v11SpikeBar := na
+            else if not v10LongAlive or na(v11SpikeParentLow) or close < v11SpikeParentLow or (exitReference and exitSide == 1)
+                v11SpikeBar := na
+
+        // 2. 已知上级突破的可用性：超窗、收回线下或出现原始空头即失效。
+        if v11HtfUsable
+            float yNow = f_v11_timePrice(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time)
+
+            if bar_index - v11HtfBreakBar > v10Window or close <= yNow or rawSignalSide == -1
+                v11HtfUsable := false
+
+        // 3. 新的上级突破：只在上级K线收盘后的第一根本图K线登记；图表起点之前的旧突破只记录不使用。
+        if not na(htfBreakTime) and (na(v11LastSeenBreak) or htfBreakTime != v11LastSeenBreak)
+            v11LastSeenBreak := htfBreakTime
+
+            if not na(htfBreakCloseTime) and time - htfBreakCloseTime < v11BarMs
+                v11HtfBreakKnown := true
+                v11HtfBreakBar := bar_index
+                v11HtfBreakT := htfBreakTime
+                v11HtfAxT := htfAxT
+                v11HtfAp := htfAp
+                v11HtfBxT := htfBxT
+                v11HtfBp := htfBp
+                v11HtfCxT := htfCxT
+                v11HtfCp := htfCp
+                v11HtfBornT := htfBornT
+                v11HtfSrc := htfSource
+                v11HtfUsable := true
+                v11HtfJoined := false
+                v11LastHtfBreakTime := time
+                v11HtfPairWhy := v11HtfText + "突破；等待SPIKE"
+
+        // 4. 本图SPIKE（V9最终多头确认）。
+        if confirmedSignal
+            v11SpikeBar := bar_index
+            v11SpikeTime := time
+            v11SpikeParentHigh := legacyParentHigh
+            v11SpikeParentLow := legacyParentLow
+
+        // 5. 配对：较晚的事件当根检查。
+        if not v112UseBox and v11HtfUsable and not na(v11SpikeBar) and v11SpikeBar > v10ConsumedSpike
+            bool withinWindow = math.abs(v11SpikeBar - v11HtfBreakBar) <= v10Window
+            bool secondNow = bar_index == math.max(v11SpikeBar, v11HtfBreakBar)
+            bool knownBeforeSpike = not na(v11HtfBornT) and v11HtfBornT <= v11SpikeTime
+            bool parentRecovered = not na(v11SpikeParentHigh) and close > v11SpikeParentHigh
+
+            if withinWindow and secondNow and knownBeforeSpike
+                if v10LongAlive and v10Momentum and v10CurrentGate and parentRecovered
+                    v11HtfJointEvent := true
+                    v11HtfOrder := v11SpikeBar == v11HtfBreakBar ? "同根" : v11SpikeBar < v11HtfBreakBar ? "SPIKE→" + v11HtfText + "突破" : v11HtfText + "突破→SPIKE"
+                    v10ConsumedSpike := v11SpikeBar
+                    v11HtfUsable := false
+                    v11HtfJoined := true
+                    v11SpikeBar := na
+
+                    v10LastJointPrice := close
+                    v10LastJointTime := time_close
+                    v10LastJointOrder := v11HtfOrder + " · 上级线"
+                    v11HtfPairWhy := "突破+spike（上级突破）成立"
+                    v10PairWhy := v11HtfPairWhy
+                else
+                    v11HtfPairWhy := not v10LongAlive ? "联合当根失去六线支撑" : not v10Momentum ? "联合当根动量未通过" : not parentRecovered ? "未站上原启动区间" : not bbEntryAllowed ? "联合当根BB过滤未通过" : not v9BundleAllowed ? "联合当根V9标的/量比/时段未通过" : "联合当根离六线过远"
+
+// ───────────── V12 ordered pairing: box-first OR continuously held break-first ─────────────
+
+type V12HeldHtf
+    int ax
+    float ap
+    int bx
+    float bp
+    int cx
+    float cp
+    int born
+    int breakTime
+    int visibleBar
+    int source
+
+var array<V12HeldHtf> v12HeldHtf = array.new<V12HeldHtf>()
+var int v112BoxUsed = na
+var int v112BoxBroke = na
+var int v112DrawnLineUid = na
+bool v112BreakChart = v11UseChart and v10BreakEvent
+bool v112BreakHtf = v11HtfOn and v11HtfBreakKnown
+bool v112BoxJoint = false
+bool v112BoxJointHtf = false
+bool v112EarlyExitNow = false
+V10Line v12SelectedLine = v11LastBroken
+V12HeldHtf v12SelectedHtf = na
+bool v12BreakFirst = false
+
+if barstate.isconfirmed
+    if dataGap or not pricesValid or not v11HtfOn
+        array.clear(v12HeldHtf)
+    else
+        if v11HtfBreakKnown and v112UseBox and v12HoldPair
+            if array.size(v12HeldHtf) >= V12_HELD_LIMIT
+                array.shift(v12HeldHtf)
+            array.push(v12HeldHtf, V12HeldHtf.new(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBornT, v11HtfBreakT, bar_index, v11HtfSrc))
+        // Check the first visible chart close too: a stale HTF cross is not a hold.
+        if array.size(v12HeldHtf) > 0
+            for n = array.size(v12HeldHtf) - 1 to 0
+                V12HeldHtf held = array.get(v12HeldHtf, n)
+                float y = f_v11_timePrice(held.ax, held.ap, held.bx, held.bp, time)
+                if bar_index - held.visibleBar > v10Life or y <= 0 or close <= y
+                    array.remove(v12HeldHtf, n)
+
+// Existing V9 box first, new break second: preserve V11.2 behavior.
+if barstate.isconfirmed and v10Enabled and trendSide == 1 and (v112BreakChart or v112BreakHtf)
+    v112BoxBroke := entryBar
+
+if barstate.isconfirmed and v10Enabled and v112UseBox and trendSide == 1 and (na(v112BoxUsed) or v112BoxUsed != entryBar)
+    bool boxFirst = v112BreakChart or v112BreakHtf
+    if boxFirst
+        v112BoxJoint := true
+        v112BoxJointHtf := v112BreakHtf
+    else if v12HoldPair and confirmedSignal
+        // Only the new V9 event may complete a break-first pair. Select newest
+        // qualifying evidence, then lowest fit score for simultaneous chart lines.
+        V10Line heldBest = na
+        if v11UseChart
+            for held in v12Held
+                if not held.joined and held.brokenBar < bar_index and (na(heldBest) or held.brokenBar > heldBest.brokenBar or (held.brokenBar == heldBest.brokenBar and held.score < heldBest.score))
+                    heldBest := held
+        if v11HtfOn and array.size(v12HeldHtf) > 0
+            v12SelectedHtf := array.last(v12HeldHtf)
+        bool chooseHtf = not na(v12SelectedHtf) and (na(heldBest) or v12SelectedHtf.visibleBar >= heldBest.brokenBar)
+        v112BoxJoint := not na(heldBest) or not na(v12SelectedHtf)
+        v112BoxJointHtf := v112BoxJoint and chooseHtf
+        v12SelectedLine := heldBest
+        v12BreakFirst := v112BoxJoint
+
+    if v112BoxJoint
+        v112BoxUsed := entryBar
+        v112BoxBroke := entryBar
+        string boxOrder = v12BreakFirst ? "突破→连续站在线上→V9" : (v112BreakHtf ? "框内上级突破" : "框内突破") + " · V9后第" + str.tostring(bar_index - entryBar) + "根"
+        v10LastJointPrice := close
+        v10LastJointTime := time_close
+        v10LastJointOrder := boxOrder
+        v10PairWhy := "break+spike · " + boxOrder
+        if v112BoxJointHtf
+            v11HtfOrder := boxOrder
+            if not v12BreakFirst
+                v11HtfJoined := true
+        else if not na(v12SelectedLine)
+            v112DrawnLineUid := v12SelectedLine.uid
+            v12SelectedLine.joined := true
+        // All currently eligible breaks participated in this box's opportunity;
+        // do not recycle parallel equivalent lines into a later V9 box.
+        for held in v12Held
+            held.joined := true
+        array.clear(v12Held)
+        array.clear(v12HeldHtf)
+
+// Frozen event geometry, separate from the latest HTF-break display state.
+int v12JointAx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.ax : v11HtfAxT
+float v12JointAp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.ap : v11HtfAp
+int v12JointBx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.bx : v11HtfBxT
+float v12JointBp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.bp : v11HtfBp
+int v12JointCx = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.cx : v11HtfCxT
+float v12JointCp = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.cp : v11HtfCp
+int v12JointBorn = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.born : v11HtfBornT
+int v12JointBreak = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.breakTime : v11HtfBreakT
+int v12JointSource = v12BreakFirst and v112BoxJointHtf ? v12SelectedHtf.source : v11HtfSrc
+
+// N根内没出突破：在第N根收盘结束V9多头参考框（只改参考，不下单）。
+if barstate.isconfirmed and v10Enabled and v112EarlyExit and trendSide == 1 and bar_index > entryBar and bar_index - entryBar >= v112ExitBars and (na(v112BoxBroke) or v112BoxBroke != entryBar)
+    v112EarlyExitNow := true
+    exitReference := true
+    exitSide := 1
+    exitPeakR := peakR
+    exitCurrentR := currentR
+    exitProtection := protection
+    exitReferencePrice := close
+    exitReason := "未突破离场"
+    trendSide := 0
+
+bool v112ChartShow = v112UseBox ? v112BoxJoint and not v112BoxJointHtf : v10JointEvent
+bool v112HtfShow = v112UseBox ? v112BoxJoint and v112BoxJointHtf : v11HtfJointEvent
+V10Line v112ChartLine = v112UseBox ? v12SelectedLine : v10JointLine
+bool v11AnyJoint = v112ChartShow or v112HtfShow
+
+// BEGIN V128 ROLL_HINTS
+// H1 inputs are evaluated on every chart bar.  Lower charts receive only the
+// preceding completed H1 candle; do not use barstate.isconfirmed inside
+// request.security.  This is the confirmed-tuple pattern documented by Pine.
+// Source: https://www.tradingview.com/pine-script-docs/concepts/other-timeframes-and-data/#avoiding-repainting
+[v128RequestedOpen, v128RequestedHigh, v128RequestedLow, v128RequestedClose, v128RequestedTime, v128RequestedCloseTime] = request.security(syminfo.tickerid, "60", [open[1], high[1], low[1], close[1], time[1], time_close[1]], gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+float v128H1Open = v128ChartIsH1 ? open : v128RequestedOpen
+float v128H1High = v128ChartIsH1 ? high : v128RequestedHigh
+float v128H1Low = v128ChartIsH1 ? low : v128RequestedLow
+float v128H1Close = v128ChartIsH1 ? close : v128RequestedClose
+int v128H1Time = v128ChartIsH1 ? time : v128RequestedTime
+int v128H1CloseTime = v128ChartIsH1 ? time_close : v128RequestedCloseTime
+bool v128H1ClockReady = v128ChartIsH1 ? v128H1CloseTime <= time_close : v128H1CloseTime <= time
+bool v128H1Valid = not na(v128H1Open) and not na(v128H1High) and not na(v128H1Low) and not na(v128H1Close) and not na(v128H1Time) and not na(v128H1CloseTime) and v128H1Open > 0 and v128H1Low > 0 and v128H1High >= v128H1Low and v128H1High >= v128H1Open and v128H1High >= v128H1Close and v128H1Low <= v128H1Open and v128H1Low <= v128H1Close and v128H1CloseTime - v128H1Time == V128_H1_MS and v128H1ClockReady
+
+var int v128FrameEntryBar = na
+var int v128FrameConfirmTime = na
+var int v128LastHourClose = na
+var int v128CandidateCount = 0
+var int v128StructuralSetBar = na
+var float v128LastCandidatePrice = na
+var float v128StructuralStop = na
+var float v128RunningHigh = na
+var float v128PreviousClose = na
+var float v128PullbackLow = na
+var float v128FrozenHurdle = na
+var bool v128Seeded = false
+var bool v128InPullback = false
+var bool v128EpisodeInvalid = false
+var bool v128EpisodePaused = false
+var bool v128HasStructuralProposal = false
+var array<label> v128CandidateTags = array.new<label>()
+var table v128Status = table.new(position.bottom_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+
+bool v128CandidateEvent = false
+bool v128FrameLong = trendSide == 1 and not na(entryBar) and not na(entry) and not na(initialStop) and not na(risk) and entry > 0 and initialStop > 0 and risk > 0
+
+if barstate.isconfirmed
+    if not v128Enabled or not v128Supported or dataGap or not pricesValid or not v128FrameLong
+        v128FrameEntryBar := na
+        v128FrameConfirmTime := na
+        v128LastHourClose := na
+        v128CandidateCount := 0
+        v128StructuralSetBar := na
+        v128LastCandidatePrice := na
+        v128StructuralStop := na
+        v128RunningHigh := na
+        v128PreviousClose := na
+        v128PullbackLow := na
+        v128FrozenHurdle := na
+        v128Seeded := false
+        v128InPullback := false
+        v128EpisodeInvalid := false
+        v128EpisodePaused := false
+        v128HasStructuralProposal := false
+    else if referenceStarted or na(v128FrameEntryBar) or v128FrameEntryBar != entryBar
+        // Bind once to the original V9 frame.  The first eligible H1 must begin
+        // at or after this confirmation close, so a partly pre-entry hour is never read.
+        v128FrameEntryBar := entryBar
+        v128FrameConfirmTime := time_close
+        v128LastHourClose := na
+        v128CandidateCount := 0
+        v128StructuralSetBar := na
+        v128LastCandidatePrice := entry
+        v128StructuralStop := initialStop
+        v128RunningHigh := entry
+        v128PreviousClose := na
+        v128PullbackLow := na
+        v128FrozenHurdle := na
+        v128Seeded := false
+        v128InPullback := false
+        v128EpisodeInvalid := false
+        v128EpisodePaused := false
+        v128HasStructuralProposal := false
+    else
+        // A reference is only guidance.  From the next chart bar onward, a touch
+        // pauses this frame's candidates but cannot alter inherited exits/protection.
+        if v128HasStructuralProposal and not v128EpisodePaused and not na(v128StructuralSetBar) and bar_index > v128StructuralSetBar and low <= v128StructuralStop
+            v128EpisodePaused := true
+
+        bool v128NewHour = v128H1Valid and (na(v128LastHourClose) or v128H1CloseTime != v128LastHourClose)
+        if v128NewHour
+            int v128ExpectedFirstHour = int(math.ceil(v128FrameConfirmTime * 1.0 / V128_H1_MS) * V128_H1_MS)
+            bool v128BeforeFrame = v128H1Time < v128ExpectedFirstHour
+            bool v128FirstGap = not v128Seeded and not v128BeforeFrame and v128H1Time > v128ExpectedFirstHour
+            bool v128LaterGap = v128Seeded and not na(v128LastHourClose) and v128H1CloseTime != v128LastHourClose + V128_H1_MS
+            v128LastHourClose := v128H1CloseTime
+
+            if v128FirstGap or v128LaterGap
+                v128EpisodeInvalid := true
+            else if not v128BeforeFrame and not v128EpisodeInvalid and not v128EpisodePaused
+                if not v128Seeded
+                    v128RunningHigh := math.max(entry, v128H1High)
+                    v128PreviousClose := v128H1Close
+                    v128Seeded := true
+                else if not v128InPullback
+                    if v128H1Close < v128PreviousClose
+                        v128InPullback := true
+                        v128FrozenHurdle := v128RunningHigh
+                        v128PullbackLow := v128H1Low
+                    else
+                        v128RunningHigh := math.max(v128RunningHigh, v128H1High)
+                else
+                    v128PullbackLow := math.min(v128PullbackLow, v128H1Low)
+                    if v128H1Close > v128FrozenHurdle
+                        float v128Proposal = math.floor(v128PullbackLow / syminfo.mintick) * syminfo.mintick - syminfo.mintick
+                        bool v128Improves = v128Proposal > v128StructuralStop and v128Proposal > 0 and v128Proposal < v128H1Close
+                        // Lower charts learn a completed H1 on this first available
+                        // chart close.  If its low already broke the new reference,
+                        // suppress the candidate and pause rather than backdating it.
+                        bool v128AvailabilityCross = not v128ChartIsH1 and v128Improves and low <= v128Proposal
+                        if v128Improves
+                            v128StructuralStop := v128Proposal
+                            v128StructuralSetBar := bar_index
+                            v128HasStructuralProposal := true
+                        if v128AvailabilityCross
+                            v128EpisodePaused := true
+
+                        bool v128CandidateEligible = v128Improves and not v128AvailabilityCross and trendSide == 1 and close >= entry + 2.0 * risk and v128H1Close >= entry + 2.0 * risk and close > v128LastCandidatePrice and close > v128Proposal
+                        if v128CandidateEligible and v128CandidateCount < 2
+                            v128CandidateCount += 1
+                            v128LastCandidatePrice := close
+                            v128CandidateEvent := true
+                            if not v126Minimal
+                                if array.size(v128CandidateTags) >= 30
+                                    label.delete(array.shift(v128CandidateTags))
+                                string v128Tip = "V12.8 加仓候选" + str.tostring(v128CandidateCount) + "（图表提示，不是交易）\n原V9多头确认：" + str.format_time(v128FrameConfirmTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n已完成H1：" + str.format_time(v128H1CloseTime, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n本图确认收盘参考：" + str.tostring(close, format.mintick) + "\nH1收盘参考：" + str.tostring(v128H1Close, format.mintick) + "\n结构保护提案：" + str.tostring(v128Proposal, format.mintick) + "\n未核验整仓净利润、保证金或实际成交；原ATR保护/退出不变。"
+                                array.push(v128CandidateTags, label.new(bar_index, math.max(syminfo.mintick, low - atr * 0.25), "add候选" + str.tostring(v128CandidateCount), style=label.style_label_up, color=color.new(bull, 82), textcolor=bull, size=size.small, tooltip=v128Tip, force_overlay=true))
+
+                        // One completed pullback-break consumes one structural event,
+                        // even if price/cap/availability suppresses its candidate.
+                        v128RunningHigh := math.max(v128RunningHigh, v128H1High)
+                        v128InPullback := false
+                        v128PullbackLow := na
+                        v128FrozenHurdle := na
+                v128PreviousClose := v128H1Close
+
+if barstate.islast
+    if v128Enabled and not v126Minimal
+        string v128StatusText = not v128Supported ? "仅支持60m或60整除分钟图" : v126Minimal ? "极简模式：候选/参考隐藏" : not v128FrameLong ? "等待原始V9多头参考" : v128EpisodeInvalid ? "H1断档：本框候选停用" : v128EpisodePaused ? "结构参考已触及；原退出不变" : not v128Seeded ? "等待完整入场后H1" : "候选 " + str.tostring(v128CandidateCount) + "/2 · 结构参考 " + str.tostring(v128StructuralStop, format.mintick)
+        table.cell(v128Status, 0, 0, "V12.8 滚仓提示", text_color=muted, text_size=size.tiny)
+        table.cell(v128Status, 1, 0, v128StatusText, text_color=v128EpisodeInvalid or v128EpisodePaused ? gold : ink, text_size=size.tiny, tooltip="结构参考不参与原ATR保护或退出；不含数量、保证金、利润或实际成交核验。")
+        table.cell(v128Status, 0, 1, "H1结构", text_color=muted, text_size=size.tiny)
+        table.cell(v128Status, 1, 1, v128HasStructuralProposal ? str.tostring(v128StructuralStop, format.mintick) + " · 非执行参考" : "尚无已提升参考", text_color=ink, text_size=size.tiny)
+    else
+        table.clear(v128Status, 0, 0, 1, 1)
+// END V128 ROLL_HINTS
+if v112EarlyExitNow and showExitLabels and not v10OnlyJoint
+    if array.size(exitTags) >= EXIT_TAG_LIMIT
+        label.delete(array.shift(exitTags))
+
+    array.push(exitTags, label.new(bar_index, close, "未突破离场 · 参考结束\n" + str.tostring(close, format.mintick), style=label.style_label_down, color=color.new(chart.bg_color, 8), textcolor=ink, size=size.small, force_overlay=true))
+
+// ───────────── 当前候选主线绘制 ─────────────
+
+// 此对象只负责当前候选，不负责历史联合线。
+// 历史联合线在后面单独存档，不会被这里删除。
+if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
+    if not na(v10Drawing)
+        polyline.delete(v10Drawing)
+        v10Drawing := na
+
+    while array.size(v10Marks) > 0
+        label.delete(array.pop(v10Marks))
+
+    if v10ShowLine and not v10OnlyJoint and not na(v10Main) and not na(v10ClosedBar) and not (v10Main.joined and v10ShowJoint) and (v10Main.phase == 1 or (v10KeepStopped and v10Main.phase == 3))
+        int endBar = v10Main.phase == 1 ? v10ClosedBar + v10Ahead : v10Main.phase == 2 and not na(v10Main.brokenBar) ? v10Main.brokenBar + v11ExtendBars : v10Main.stopped
+
+        if not na(endBar) and endBar > v10Main.ax and v10ClosedBar - v10Main.ax < 9000
+            array<chart.point> points = array.new<chart.point>()
+
+            if v10Log
+                for x = v10Main.ax to endBar
+                    array.push(points, chart.point.from_index(x, v10Main.at(x)))
+            else
+                array.push(points, chart.point.from_index(v10Main.ax, v10Main.ap))
+                array.push(points, chart.point.from_index(endBar, v10Main.at(endBar)))
+
+            color tone = v10Main.phase == 1 ? v10LineColor : color.new(v10LineColor, 65)
+
+            v10Drawing := polyline.new(points, curved=false, closed=false, xloc=xloc.bar_index, line_color=tone, line_width=v10LineWidth, force_overlay=true)
+
+            if v10ShowABC
+                string sourceText = v10Main.source == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
+
+                string tip = "结构#" + str.tostring(v10Main.uid) + " · " + f_v12_kindText(v10Main) + " · " + sourceText + "\n三点实际确认：" + str.format_time(v10Main.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n本次切换显示K：" + str.tostring(v10Promotion) + "。后台确认不等于当时已显示；信号不回填。"
+
+                array.push(v10Marks, label.new(v10Main.ax, v10Main.ap, "A", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.bx, v10Main.bp, "B", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.cx, v10Main.cp, v10Main.kind == 1 ? "C·RT" : "C", style=label.style_label_down, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+                array.push(v10Marks, label.new(v10Main.born, v10Main.at(v10Main.born), "ok", style=label.style_none, color=color.new(tone, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
+
+                if v10Main.phase == 2 and not na(v10Main.brokenBar)
+                    array.push(v10Marks, label.new(v10Main.brokenBar, v10Main.at(v10Main.brokenBar), "·", style=label.style_label_center, color=color.new(tone, 100), textcolor=v10BreakColor, size=size.tiny, tooltip=tip, force_overlay=true))
+
+// ───────────── V11 最近突破线与上级周期线 ─────────────
+
+// Broken lines are archived together with their marker below.
+
+// 上级周期：最近一次突破的线（延伸）与当前候选线（虚线）。
+if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
+    if not na(v11HtfDrawing)
+        polyline.delete(v11HtfDrawing)
+        v11HtfDrawing := na
+
+    if not na(v11HtfActiveDrawing)
+        polyline.delete(v11HtfActiveDrawing)
+        v11HtfActiveDrawing := na
+
+    while array.size(v11HtfMarks) > 0
+        label.delete(array.pop(v11HtfMarks))
+
+    if v11HtfOn and not v10OnlyJoint
+        if v11ShowHtfLine and not na(htfActAxT) and not na(htfActBxT) and htfActBxT != htfActAxT
+            int activeEnd = time + v10Ahead * v11BarMs
+            v11HtfActiveDrawing := polyline.new(f_v11_timePoints(htfActAxT, htfActAp, htfActBxT, htfActBp, activeEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=color.new(v11HtfColor, 20), line_style=line.style_dashed, line_width=v10LineWidth, force_overlay=true)
+
+            if v10ShowABC
+                string activeTip = v11HtfText + " 当前候选下降线（未突破）"
+                array.push(v11HtfMarks, label.new(htfActAxT, htfActAp, "A", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
+                array.push(v11HtfMarks, label.new(htfActBxT, htfActBp, "B", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
+                array.push(v11HtfMarks, label.new(htfActCxT, htfActCp, "C", xloc=xloc.bar_time, style=label.style_label_down, color=color.new(v11HtfColor, 100), textcolor=color.new(v11HtfColor, 20), size=size.tiny, tooltip=activeTip, force_overlay=true))
+
+// 诊断：候选池里所有未突破的本周期下降线。
+var array<polyline> v112DiagLines = array.new<polyline>()
+var array<label> v112DiagMarks = array.new_label()
+
+if v10Enabled and (barstate.islastconfirmedhistory or barstate.islast)
+    while array.size(v112DiagLines) > 0
+        polyline.delete(array.pop(v112DiagLines))
+
+    while array.size(v112DiagMarks) > 0
+        label.delete(array.pop(v112DiagMarks))
+
+    if v112ShowAllLines
+        for item in v10Tracks
+            if item.phase == 1 and v10ClosedBar - item.ax < 9000
+                array<chart.point> diagPoints = array.new<chart.point>()
+                array.push(diagPoints, chart.point.from_index(item.ax, item.ap))
+                array.push(diagPoints, chart.point.from_index(v10ClosedBar + v10Ahead, item.at(v10ClosedBar + v10Ahead)))
+                array.push(v112DiagLines, polyline.new(diagPoints, curved=false, closed=false, xloc=xloc.bar_index, line_color=color.new(v10LineColor, 55), line_style=line.style_dotted, line_width=1, force_overlay=true))
+                string diagTip = "候选#" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + " · 分数 " + str.tostring(item.score, "#.###") + " · " + (item.source == 0 ? "完整影线" : "削尖影线") + "\n三点确认：" + str.format_time(item.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai")
+                array.push(v112DiagMarks, label.new(item.cx, item.cp, "#" + str.tostring(item.uid), style=label.style_label_down, color=color.new(v10LineColor, 100), textcolor=color.new(v10LineColor, 40), size=size.tiny, tooltip=diagTip, force_overlay=true))
+
+// ───────────── 联合信号与趋势线成组保留 ─────────────
+
+bool v10JointVisible = v10Enabled and (v10ShowJoint or v10OnlyJoint) and v112ChartShow
+bool v11HtfJointVisible = v10Enabled and (v10ShowJoint or v10OnlyJoint) and v112HtfShow
+
+
+// 联合信号不再使用无限历史plotshape。
+// 通过一组标签+趋势线共同保留，保证不会只剩标签却没有线。
+type V10SignalDrawing
+    polyline trend
+    label tag
+    array<label> marks
+    int breakContext = 0
+    int pivotB = na
+    float pivotPrice = na
+    int firstBreak = na
+    int breakCount = 1
+    string breakDetails = ""
+    string breakCaption = "bk"
+    int regionStart = na
+    int regionEnd = na
+    float regionPrice = na
+    float regionBand = na
+
+method erase(V10SignalDrawing self) =>
+    polyline.delete(self.trend)
+    label.delete(self.tag)
+
+    if not na(self.marks)
+        while array.size(self.marks) > 0
+            label.delete(array.pop(self.marks))
+
+// Freeze the first A interval in a region. Never grow it transitively through members.
+f_v122_region(array<V10SignalDrawing> history, int aStart, int aEnd, float aPrice) =>
+    int regionStart = aStart
+    int regionEnd = aEnd
+    float regionPrice = aPrice
+    float regionBand = math.max(nz(v10Atr, syminfo.mintick), 2 * syminfo.mintick)
+    int pad = v122RegionGap * v11BarMs
+    if v122LocalTidy
+        for group in history
+            if aStart < group.regionEnd + pad and aEnd > group.regionStart - pad and math.abs(aPrice - group.regionPrice) <= group.regionBand
+                regionStart := group.regionStart
+                regionEnd := group.regionEnd
+                regionPrice := group.regionPrice
+                regionBand := group.regionBand
+                break
+    [regionStart, regionEnd, regionPrice, regionBand]
+
+// Only the newly inserted region is capped. Unrelated historical regions survive.
+f_v11_trimAbc(array<V10SignalDrawing> history, int keep) =>
+    if v122LocalTidy and array.size(history) > 0
+        V10SignalDrawing newest = array.last(history)
+        int regionCount = 0
+        for group in history
+            if group.regionStart == newest.regionStart and group.regionEnd == newest.regionEnd and group.regionPrice == newest.regionPrice
+                regionCount += 1
+        while regionCount > v122RegionKeep
+            int victim = na
+            // Retain joint evidence preferentially; within each class discard the oldest.
+            for n = 0 to array.size(history) - 1
+                V10SignalDrawing group = array.get(history, n)
+                if group.regionStart == newest.regionStart and group.regionEnd == newest.regionEnd and group.regionPrice == newest.regionPrice
+                    if na(victim)
+                        victim := n
+                    if group.breakContext != 0
+                        victim := n
+                        break
+            if not na(victim)
+                V10SignalDrawing removed = array.remove(history, victim)
+                removed.erase()
+            regionCount -= 1
+
+    // Apply resource capacity only after local replacement; never evict another
+    // region merely to insert a fourth line that will immediately be removed.
+    while array.size(history) > v10JointKeep
+        V10SignalDrawing oldest = array.shift(history)
+        oldest.erase()
+
+    int cut = array.size(history) - keep - 1
+    if cut >= 0
+        for n = 0 to cut
+            V10SignalDrawing aged = array.get(history, n)
+            if not na(aged.marks)
+                while array.size(aged.marks) > 0
+                    label.delete(array.pop(aged.marks))
+
+    // Keep ABC on one representative per region, without hiding historical lines.
+    if v122LocalTidy and array.size(history) > 0
+        array<string> seenRegions = array.new_string()
+        for n = array.size(history) - 1 to 0
+            V10SignalDrawing group = array.get(history, n)
+            string regionKey = str.tostring(group.regionStart) + ":" + str.tostring(group.regionEnd) + ":" + str.tostring(group.regionPrice, format.mintick)
+            if array.includes(seenRegions, regionKey)
+                while array.size(group.marks) > 0
+                    label.delete(array.pop(group.marks))
+            else
+                array.push(seenRegions, regionKey)
+    0
+
+// Presentation only: never move the first event or replace its frozen line.
+// Each update contains only confirmations known on the current closed bar.
+f_v12_mergeBreak(array<V10SignalDrawing> history, int context, int pivotB, float pivotPrice, int eventBar, string detail) =>
+    bool merged = false
+    if v12CompactBreaks and array.size(history) > 0
+        for n = array.size(history) - 1 to 0
+            V10SignalDrawing group = array.get(history, n)
+            // A joint separates display episodes and is never folded into bk.
+            if group.breakContext == 0
+                break
+            if group.breakContext == context and group.pivotB == pivotB and group.pivotPrice == pivotPrice and eventBar >= group.firstBreak and eventBar - group.firstBreak <= 8
+                group.breakCount += 1
+                group.breakDetails += "\n\n" + detail
+                if not na(group.tag)
+                    label.set_text(group.tag, group.breakCaption + " · " + str.tostring(group.breakCount))
+                    label.set_tooltip(group.tag, "同一B点附近 " + str.tostring(group.breakCount) + " 条候选突破，不代表多笔入场。\n仅合并显示，事件/预警/配对不变。显示首条冻结线，标记位于首次确认K。\n\n" + group.breakDetails)
+                merged := true
+                break
+    merged
+
+var array<V10SignalDrawing> v10SignalHistory = array.new<V10SignalDrawing>()
+
+if v10JointVisible and not na(v112ChartLine)
+    // Local replacement precedes the global resource limit inside trimAbc.
+
+    // 冻结原A/B斜率，穿过联合确认当根继续向右延伸。
+    array<chart.point> eventPoints = array.new<chart.point>()
+    int eventEnd = bar_index + v11ExtendBars
+
+    if v10Log
+        for x = v112ChartLine.ax to eventEnd
+            array.push(eventPoints, chart.point.from_index(x, v112ChartLine.at(x)))
+    else
+        array.push(eventPoints, chart.point.from_index(v112ChartLine.ax, v112ChartLine.ap))
+        array.push(eventPoints, chart.point.from_index(eventEnd, v112ChartLine.at(eventEnd)))
+
+    // 不受“显示当前候选线”和“保留失效线”开关影响。
+    polyline frozenTrend = polyline.new(eventPoints, curved=false, closed=false, xloc=xloc.bar_index, line_color=color.new(v10LineColor, v122JointFade), line_width=v10JointLineWidth, force_overlay=true)
+
+    string caption = "bk+spike"
+    string tagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
+    string sourceText = v112ChartLine.source == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
+
+    string tagTip = "突破+spike · 结构#" + str.tostring(v112ChartLine.uid) + " · " + f_v12_kindText(v112ChartLine) + " · " + sourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n结构提前确认：" + str.format_time(v112ChartLine.confirmedTime, "MM-dd HH:mm", "Asia/Shanghai") + "\n" + v10LastJointOrder + "\n对应线固定保留。旧V9风险参考不重置；此价格不代表成交。" + (v112UseBox and v112AddOnBreak and not v12BreakFirst and bar_index > entryBar ? "\n加仓提示：止损沿用原框 " + str.tostring(initialStop, format.mintick) : "")
+
+    float tagY = math.max(syminfo.mintick, low - v10Atr * v10TagGap)
+
+    label signalTag = v126Minimal ? na : label.new(
+         bar_index,
+         tagY,
+         caption,
+         xloc=xloc.bar_index,
+         yloc=yloc.price,
+         style=label.style_none,
+         color=color.new(v10JointColor, 100),
+         textcolor=v10JointColor,
+         size=tagSize,
+         textalign=text.align_center,
+         tooltip=tagTip,
+         text_formatting=text.format_bold,
+         force_overlay=true)
+
+    array<label> jointMarks = v10ShowABC and v11AbcKeep > 0 ? f_v11_indexMarks(v112ChartLine, v112ChartLine.brokenBar, color.new(v10LineColor, 55), tagTip, false) : array.new_label()
+    [regionStart, regionEnd, regionPrice, regionBand] = f_v122_region(v10SignalHistory, time[bar_index - v112ChartLine.ax], time[bar_index - v112ChartLine.ax] + v11BarMs, v112ChartLine.ap)
+    array.push(v10SignalHistory, V10SignalDrawing.new(frozenTrend, signalTag, jointMarks, 0, na, na, bar_index, 1, tagTip, caption, regionStart, regionEnd, regionPrice, regionBand))
+    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+
+// 上级周期突破 + 本图SPIKE：同样整组保留线、标签与A/B/C。
+if v11HtfJointVisible and not na(v12JointAx) and not na(v12JointBx) and v12JointBx != v12JointAx
+
+    int htfEnd = time + v11ExtendBars * v11BarMs
+    polyline htfTrend = polyline.new(f_v11_timePoints(v12JointAx, v12JointAp, v12JointBx, v12JointBp, htfEnd), curved=false, closed=false, xloc=xloc.bar_time, line_color=color.new(v11HtfColor, v122JointFade), line_width=v10JointLineWidth, force_overlay=true)
+
+    // Same compact typography for chart and HTF joint confirmations.
+    string htfCaption = "bk+spike"
+    string htfTagSize = v10TagSize == "小" ? size.small : v10TagSize == "大" ? size.large : size.normal
+    string htfSourceText = v12JointSource % 2 == 0 ? "完整影线" : v10PeakMode == "实体上沿" ? "实体上沿" : "削尖影线"
+    string htfTip = "突破+spike（上级突破 · " + v11HtfText + "） · " + (v12JointSource >= 2 ? "主高点＋局部回踩 · " : "三主高点 · ") + htfSourceText + "\n联合确认：" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n联合收盘价：" + str.tostring(close, format.mintick) + "\n上级结构三点确认：" + str.format_time(v12JointBorn, "MM-dd HH:mm", "Asia/Shanghai") + "\n上级突破K开盘：" + str.format_time(v12JointBreak, "MM-dd HH:mm", "Asia/Shanghai") + "（收盘后本图才可见）\n" + v11HtfOrder + "\n旧V9风险参考不重置；此价格不代表成交。"
+
+    label htfTag = v126Minimal ? na : label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), htfCaption, xloc=xloc.bar_index, yloc=yloc.price, style=label.style_none, color=color.new(v10JointColor, 100), textcolor=v11HtfColor, size=htfTagSize, textalign=text.align_center, tooltip=htfTip, text_formatting=text.format_bold, force_overlay=true)
+
+    array<label> htfJointMarks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v12JointAx, v12JointAp, v12JointBx, v12JointBp, v12JointCx, v12JointCp, v12JointBreak, v12JointBorn, color.new(v11HtfColor, 55), htfTip, false) : array.new_label()
+    [regionStart, regionEnd, regionPrice, regionBand] = f_v122_region(v10SignalHistory, v12JointAx, v12JointAx + int(timeframe.in_seconds(v11Htf) * 1000), v12JointAp)
+    array.push(v10SignalHistory, V10SignalDrawing.new(htfTrend, htfTag, htfJointMarks, 0, na, na, bar_index, 1, htfTip, htfCaption, regionStart, regionEnd, regionPrice, regionBand))
+    f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+
+
+// Ordinary breaks can form a presentation group; signal events remain untouched.
+if not v10OnlyJoint and v10Enabled and v10ShowBreak and v10BreakEvent and not v10JointVisible and not na(v11LastBroken)
+    V10Line item = v11LastBroken
+    string tip = "本周期 bk · #" + str.tostring(item.uid) + " · " + f_v12_kindText(item) + "\n确认收盘 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(time[bar_index - item.ax], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.ap, format.mintick) + "\nB " + str.format_time(time[bar_index - item.bx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.bp, format.mintick) + "\nC " + str.format_time(time[bar_index - item.cx], "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(item.cp, format.mintick)
+    bool merged = f_v12_mergeBreak(v10SignalHistory, 1, item.bx, item.bp, bar_index, tip)
+    if not merged
+        int endBar = bar_index + v11ExtendBars
+        array<chart.point> points = array.new<chart.point>()
+        if v10Log
+            for x = item.ax to endBar
+                array.push(points, chart.point.from_index(x, item.at(x)))
+        else
+            array.push(points, chart.point.from_index(item.ax, item.ap))
+            array.push(points, chart.point.from_index(endBar, item.at(endBar)))
+        polyline trend = polyline.new(points, xloc=xloc.bar_index, line_color=color.new(v10LineColor, v122HistoryFade), line_width=v10LineWidth, force_overlay=true)
+        label tag = v126Minimal ? na : label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * v10TagGap), "bk", style=label.style_none, textcolor=color.new(v10BreakColor, 25), size=size.tiny, tooltip=tip, force_overlay=true)
+        array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_indexMarks(item, item.brokenBar, color.new(v10LineColor, 65), tip, false) : array.new_label()
+        [regionStart, regionEnd, regionPrice, regionBand] = f_v122_region(v10SignalHistory, time[bar_index - item.ax], time[bar_index - item.ax] + v11BarMs, item.ap)
+        array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks, 1, item.bx, item.bp, bar_index, 1, tip, "bk", regionStart, regionEnd, regionPrice, regionBand))
+        f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+
+if not v10OnlyJoint and v11HtfOn and v11ShowHtfBreak and v11HtfBreakKnown and not v11HtfJointVisible
+    string tip = v11HtfText + " bk · 上级K已收盘，本图可见 " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + "\nA " + str.format_time(v11HtfAxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfAp, format.mintick) + "\nB " + str.format_time(v11HtfBxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfBp, format.mintick) + "\nC " + str.format_time(v11HtfCxT, "MM-dd HH:mm", "Asia/Shanghai") + " @" + str.tostring(v11HtfCp, format.mintick)
+    bool merged = f_v12_mergeBreak(v10SignalHistory, 2, v11HtfBxT, v11HtfBp, bar_index, tip)
+    if not merged
+        polyline trend = polyline.new(f_v11_timePoints(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, time + v11ExtendBars * v11BarMs), xloc=xloc.bar_time, line_color=color.new(v11HtfColor, v122HistoryFade), line_width=v10LineWidth, force_overlay=true)
+        string caption = "bk " + v11HtfText
+        label tag = v126Minimal ? na : label.new(bar_index, math.max(syminfo.mintick, low - v10Atr * (v10TagGap + (v10BreakEvent ? 0.6 : 0))), caption, style=label.style_none, textcolor=color.new(v11HtfColor, 25), size=size.tiny, tooltip=tip, force_overlay=true)
+        array<label> marks = v10ShowABC and v11AbcKeep > 0 ? f_v11_timeMarks(v11HtfAxT, v11HtfAp, v11HtfBxT, v11HtfBp, v11HtfCxT, v11HtfCp, v11HtfBreakT, v11HtfBornT, color.new(v11HtfColor, 65), tip, false) : array.new_label()
+        [regionStart, regionEnd, regionPrice, regionBand] = f_v122_region(v10SignalHistory, v11HtfAxT, v11HtfAxT + int(timeframe.in_seconds(v11Htf) * 1000), v11HtfAp)
+        array.push(v10SignalHistory, V10SignalDrawing.new(trend, tag, marks, 2, v11HtfBxT, v11HtfBp, bar_index, 1, tip, caption, regionStart, regionEnd, regionPrice, regionBand))
+        f_v11_trimAbc(v10SignalHistory, v11AbcKeep)
+
+// 事件码：1结构确认，2突破，4联合，8上级突破可见，16上级突破+spike；同根可以相加。
+plot(barstate.isconfirmed ? (v10BornEvent ? 1 : 0) + (v10BreakEvent ? 2 : 0) + (v112ChartShow ? 4 : 0) + (v11HtfBreakKnown ? 8 : 0) + (v112HtfShow ? 16 : 0) : na, "V12.8 事件码（1结构/2突破/4联合/8上级突破/16上级联合）", display=display.data_window)
+plot(v11AnyJoint ? close : na, "突破+spike 实际收盘价", display=display.data_window)
+
+alertcondition(v10BreakEvent, "SPIKE V12.8 本周期下降线突破", "SPIKE V12.8 已确认下降结构突破 | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
+
+alertcondition(v11HtfBreakKnown, "SPIKE V12.8 上级周期下降线突破", "SPIKE V12.8 上级周期下降线突破（上级K已收盘） | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
+
+alertcondition(v10Enabled and v112HtfShow, "SPIKE V12.8 突破+spike（上级突破）", "SPIKE V12.8 突破+spike（上级突破） | {{exchange}}:{{ticker}} | {{interval}} | 联合收盘 {{close}} | 不代表成交")
+
+alertcondition(v11AnyJoint, "SPIKE V12.8 突破+spike 联合确认（任一来源）", "SPIKE V12.8 突破+spike | {{exchange}}:{{ticker}} | {{interval}} | 联合收盘 {{close}} | 不代表成交")
+
+// ───────────── 普通信号显示 ─────────────
+
+// 只显示模式不会改写confirmedSignal和confirmedShortSignal。
+plotshape(not v126Minimal and not v10OnlyJoint and confirmedSignal and not v10JointVisible and not v11HtfJointVisible, title="确认多头", style=shape.triangleup, location=location.belowbar, color=bull, size=size.tiny, force_overlay=true, display=display.pane)
+
+plotshape(not v126Minimal and not v10OnlyJoint and confirmedShortSignal, title="确认空头", style=shape.triangledown, location=location.abovebar, color=bear, size=size.tiny, force_overlay=true, display=display.pane)
+
+var array<label> signalTags = array.new<label>()
+
+if barstate.isconfirmed and not v10OnlyJoint and signalSide != 0 and showLabels and not v10JointVisible and not v11HtfJointVisible
+    string trackingTip = referenceStarted ? "本根开启盈亏参考。" : trendSide != 0 ? "已有盈亏参考继续跟踪，本根确认不会重置原框。" : "本根未开启盈亏参考。"
+    string signalSideText = signalSide == 1 ? "多头" : "空头"
+
+    string tip = signalSideText + "确认收盘：" + str.tostring(close, format.mintick) + "\n" + str.format_time(time_close, "yyyy-MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n" + trackingTip + "\n资产类型：" + syminfo.type + " · 底层：" + baseAsset + "\n收盘量比：" + str.tostring(rv, "#.##") + "\n确认价参考风险：" + str.tostring(signalReferenceRiskFraction * 100, "#.####") + "% · 成本：" + str.tostring(signalReferenceCostR, "#.####") + "R（往返0.2%）"
+
+    if array.size(signalTags) >= SIGNAL_TAG_LIMIT
+        label.delete(array.shift(signalTags))
+
+    array.push(signalTags, label.new(bar_index, signalSide == 1 ? low - atr * 0.35 : high + atr * 0.35, str.tostring(close, format.mintick), style=signalSide == 1 ? label.style_label_up : label.style_label_down, color=color.new(signalSide == 1 ? bull : bear, 91), textcolor=signalSide == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
+
+// ───────────── 原有盈亏框 ─────────────
+
+string rrGroup = "05 · 趋势盈亏框"
+
+bool rrShow = input.bool(true, "显示盈亏双框", group=rrGroup, tooltip="红框为冻结初始风险；绿框先显示3R观察位，随后随已确认峰值扩展。没有固定止盈。价格均为信号收盘参考，并非实际成交。", display=display.none) and not v126Minimal
+
+int rrKeep = input.int(30, "保留盈亏框组数", minval=1, maxval=30, group=rrGroup, tooltip="保留最近30组完整历史框、出场R虚线与价格标签，避免平台对象上限导致缺线。仅清理超出组数的最旧参考；信号箭头本身不受此限制。", display=display.none)
+
+int rrAhead = input.int(12, "当前框向右展示根数", minval=2, maxval=60, group=rrGroup, tooltip="仅影响当前框的视觉宽度，不改变任何信号或持有规则；保护触及后固定在该根收盘。", display=display.none)
+
+f_rrPriceTag(int stamp, float price, string caption, color tone, string tip, bool hide = false) =>
+    label.new(stamp, price, caption, xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, hide ? 100 : 12), textcolor=hide ? color.new(tone, 100) : tone, size=size.small, tooltip=tip, force_overlay=true)
+
+type RRDrawing
+    box riskBox
+    box rewardBox
+    label entryTag
+    label stopTag
+    label peakTag
+    array<line> targetLines
+    array<line> milestoneLines
+    array<label> milestoneTags
+    int side
+    int startedAt
+    float entryPrice
+    float stopPrice
+    float distance
+    float maximum
+    bool hidden = false
+    line exitLine = na
+    label exitTag = na
+
+method deleteDrawings(RRDrawing group) =>
+    box.delete(group.riskBox)
+    box.delete(group.rewardBox)
+    label.delete(group.entryTag)
+    label.delete(group.stopTag)
+    label.delete(group.peakTag)
+    line.delete(group.exitLine)
+    label.delete(group.exitTag)
+
+    for slot = 0 to 2
+        line.delete(array.get(group.targetLines, slot))
+        line.delete(array.get(group.milestoneLines, slot))
+        label.delete(array.get(group.milestoneTags, slot))
+
+// 仅显示突破+spike时，V9盈亏框先隐藏创建；框内出现突破+spike才显示，没出就随框结束删除。
+method reveal(RRDrawing group, array<label> targetTags) =>
+    if not na(group.riskBox)
+        box.set_border_color(group.riskBox, color.new(bear, 45))
+        box.set_bgcolor(group.riskBox, color.new(bear, 92))
+
+    if not na(group.rewardBox)
+        box.set_border_color(group.rewardBox, color.new(bull, 45))
+        box.set_bgcolor(group.rewardBox, color.new(bull, 92))
+
+    if not na(group.entryTag)
+        label.set_color(group.entryTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.entryTag, ink)
+
+    if not na(group.stopTag)
+        label.set_color(group.stopTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.stopTag, bear)
+
+    if not na(group.peakTag)
+        label.set_color(group.peakTag, color.new(chart.bg_color, 12))
+        label.set_textcolor(group.peakTag, bull)
+
+    for slot = 0 to 2
+        line targetLine = array.get(group.targetLines, slot)
+        label targetTag = array.get(targetTags, slot)
+
+        if not na(targetLine)
+            line.set_color(targetLine, color.new(bull, 72))
+
+        if not na(targetTag)
+            label.set_color(targetTag, color.new(chart.bg_color, 12))
+            label.set_textcolor(targetTag, bull)
+
+    group.hidden := false
+    0
+
+var array<RRDrawing> rrHistory = array.new<RRDrawing>()
+var RRDrawing activeRR = na
+var array<line> rrTargetLines = array.new<line>(3, na)
+var array<label> rrTargetTags = array.new<label>(3, na)
+
+// ───────────── 原有参考绘图更新 ─────────────
+
+if barstate.isconfirmed
+    int rrBarMillis = na(time_close) ? int(timeframe.in_seconds() * 1000) : time_close - time
+    int rrCloseTime = na(time_close) ? time + rrBarMillis : time_close
+    int rrRightTime = rrCloseTime + rrAhead * rrBarMillis
+
+    if referenceGap and not na(activeRR)
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, time_close[1])
+
+            if not na(activeRR.rewardBox)
+                box.set_right(activeRR.rewardBox, time_close[1])
+
+            label.set_x(activeRR.entryTag, time_close[1])
+            label.set_x(activeRR.stopTag, time_close[1])
+
+            if not na(activeRR.peakTag)
+                label.set_x(activeRR.peakTag, time_close[1])
+
+        for targetSlot = 0 to 2
+            label.delete(array.get(rrTargetTags, targetSlot))
+
+        rrTargetLines := array.new<line>(3, na)
+        rrTargetTags := array.new<label>(3, na)
+        activeRR := na
+
+    if not na(activeRR) and not exitReference and activeRR.hidden and activeRR.side == 1 and v11AnyJoint
+        activeRR.reveal(rrTargetTags)
+
+    if not na(activeRR)
+        bool ended = exitReference
+
+        float groupPeakR = ended ? exitPeakR : peakR
+        float groupCurrentR = ended ? exitCurrentR : currentR
+        float groupProtection = ended ? exitProtection : protection
+
+        int edge = ended ? rrCloseTime : rrRightTime
+        activeRR.maximum := math.max(activeRR.maximum, nz(groupPeakR, 0.0))
+
+        float extentR = math.max(3.0, activeRR.maximum)
+        float extent = activeRR.entryPrice + activeRR.side * extentR * activeRR.distance
+        string endingText = ended ? " · " + exitReason : ""
+
+        string reference = "确认收盘参考，不是实际成交。已确认峰值 " + str.tostring(activeRR.maximum, "#.##") + "R；当前路径 " + str.tostring(groupCurrentR, "#.##") + "R。峰值未兑现；无固定止盈。" + endingText
+
+        if not na(activeRR.riskBox)
+            box.set_right(activeRR.riskBox, edge)
+            label.set_x(activeRR.entryTag, edge)
+            label.set_x(activeRR.stopTag, edge)
+            label.set_text(activeRR.entryTag, str.tostring(activeRR.entryPrice, format.mintick))
+            label.set_tooltip(activeRR.entryTag, reference)
+            label.set_tooltip(activeRR.stopTag, reference + " 冻结初始风险；当前保护 " + str.tostring(groupProtection, format.mintick))
+
+        if not na(activeRR.rewardBox) and extent > 0
+            box.set_right(activeRR.rewardBox, edge)
+            box.set_top(activeRR.rewardBox, math.max(activeRR.entryPrice, extent))
+            box.set_bottom(activeRR.rewardBox, math.min(activeRR.entryPrice, extent))
+            label.set_xy(activeRR.peakTag, edge, extent)
+
+            label.set_text(activeRR.peakTag, showMilestones and activeRR.maximum < 3.0 ? "" : (activeRR.maximum >= 3.0 ? "峰值 " + str.tostring(activeRR.maximum, "#.##") + "R · " : "3R 观察位 · ") + str.tostring(extent, format.mintick))
+
+            label.set_tooltip(activeRR.peakTag, reference)
+
+        for targetSlot = 0 to 2
+            line targetLine = array.get(rrTargetLines, targetSlot)
+            label targetTag = array.get(rrTargetTags, targetSlot)
+
+            if not na(targetLine)
+                line.set_x2(targetLine, edge)
+
+            if not na(targetTag)
+                label.set_x(targetTag, edge)
+
+        for slot = 0 to 2
+            float level = slot == 0 ? 3.0 : slot == 1 ? 5.0 : 10.0
+            float levelPrice = activeRR.entryPrice + activeRR.side * level * activeRR.distance
+
+            if showMilestones and not v10OnlyJoint and activeRR.maximum >= level and levelPrice > 0 and na(array.get(activeRR.milestoneLines, slot))
+                if slot == 0
+                    line.delete(array.get(rrTargetLines, 2))
+                    label.delete(array.get(rrTargetTags, 2))
+                    array.set(rrTargetLines, 2, na)
+                    array.set(rrTargetTags, 2, na)
+
+                string hitTip = "收盘确认已触及 " + str.tostring(level, "#") + "R · " + str.format_time(time_close, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间。虚线为冻结入场风险计算的价位，不是止盈指令。"
+
+                line guide = line.new(activeRR.startedAt, levelPrice, rrCloseTime, levelPrice, xloc=xloc.bar_time, color=color.new(bull, 35), style=line.style_dashed, width=1, force_overlay=true)
+
+                label tag = v126Minimal ? na : label.new(time, levelPrice, str.tostring(level, "#") + "R 已达", xloc=xloc.bar_time, style=label.style_label_left, color=color.new(bull, 88), textcolor=bull, size=size.tiny, tooltip=hitTip, force_overlay=true)
+
+                array.set(activeRR.milestoneLines, slot, guide)
+                array.set(activeRR.milestoneTags, slot, tag)
+
+            line guide = array.get(activeRR.milestoneLines, slot)
+
+            if not na(guide)
+                line.set_x2(guide, rrCloseTime)
+
+        if ended
+            if showRisk and rrShow and not activeRR.hidden and not na(exitReferencePrice)
+                float grossR = activeRR.side * (exitReferencePrice - activeRR.entryPrice) / activeRR.distance
+                float netR = grossR - activeRR.entryPrice * roundTripCost / activeRR.distance
+                color exitTone = grossR >= 0 ? bull : bear
+                string exitTip = exitReason + " · " + str.format_time(rrCloseTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京\n参考出场 " + str.tostring(exitReferencePrice, format.mintick) + "\n毛 " + str.tostring(grossR, "#.##") + "R · 扣0.2%成本 " + str.tostring(netR, "#.##") + "R；不是实际成交。"
+                activeRR.exitLine := line.new(activeRR.startedAt, exitReferencePrice, rrCloseTime, exitReferencePrice, xloc=xloc.bar_time, color=exitTone, style=line.style_dashed, width=2, force_overlay=true)
+                activeRR.exitTag := label.new(rrCloseTime, exitReferencePrice, "exit " + (grossR > 0 ? "+" : "") + str.tostring(grossR, "#.##") + "R", xloc=xloc.bar_time, style=label.style_none, textcolor=exitTone, size=size.small, tooltip=exitTip, force_overlay=true)
+            for targetSlot = 0 to 2
+                label.delete(array.get(rrTargetTags, targetSlot))
+
+            if activeRR.hidden
+                activeRR.deleteDrawings()
+
+            rrTargetLines := array.new<line>(3, na)
+            rrTargetTags := array.new<label>(3, na)
+            activeRR := na
+
+    if referenceStarted
+        int rrNewSide = trendSide
+        float rrNewDistance = rrNewSide * (entry - initialStop)
+
+        bool rrValid = not na(entry) and not na(initialStop) and entry > 0 and initialStop > 0 and rrNewDistance > 0
+
+        if rrValid
+            while array.size(rrHistory) >= rrKeep
+                RRDrawing oldest = array.shift(rrHistory)
+                oldest.deleteDrawings()
+
+            activeRR := RRDrawing.new(na, na, na, na, na, array.new<line>(3, na), array.new<line>(3, na), array.new<label>(3, na), rrNewSide, time, entry, initialStop, rrNewDistance, 0.0)
+
+            array.push(rrHistory, activeRR)
+
+            // 仅联合模式下隐藏旧V9参考图形，不修改参考状态和退出。
+            if showRisk and rrShow
+                bool rrHide = v10OnlyJoint and not (v11AnyJoint and rrNewSide == 1)
+                activeRR.hidden := rrHide
+                float observation = entry + rrNewSide * 3.0 * rrNewDistance
+                string sideText = rrNewSide == 1 ? "多头" : "空头"
+
+                string tip = sideText + "确认收盘参考，不是实际成交。初始风险冻结；3R仅为观察位，不触发止盈。绿色框为走势参考，峰值未兑现。"
+
+                activeRR.riskBox := box.new(time, math.max(entry, initialStop), rrRightTime, math.min(entry, initialStop), xloc=xloc.bar_time, border_color=color.new(bear, rrHide ? 100 : 45), border_width=1, bgcolor=color.new(bear, rrHide ? 100 : 92), force_overlay=true)
+
+                activeRR.rewardBox := observation > 0 ? box.new(time, math.max(entry, observation), rrRightTime, math.min(entry, observation), xloc=xloc.bar_time, border_color=color.new(bull, rrHide ? 100 : 45), border_width=1, bgcolor=color.new(bull, rrHide ? 100 : 92), force_overlay=true) : na
+
+                activeRR.entryTag := f_rrPriceTag(rrRightTime, entry, str.tostring(entry, format.mintick), ink, tip, rrHide)
+                activeRR.stopTag := f_rrPriceTag(rrRightTime, initialStop, "sl · " + str.tostring(initialStop, format.mintick), bear, tip, rrHide)
+
+                activeRR.peakTag := observation > 0 ? f_rrPriceTag(rrRightTime, observation, (showMilestones ? "" : "3R 观察位 · " + str.tostring(observation, format.mintick)), bull, tip, rrHide) : na
+
+                if showMilestones
+                    rrTargetLines := activeRR.targetLines
+                    rrTargetTags := array.new<label>(3, na)
+
+                    for targetSlot = 0 to 2
+                        float targetR = targetSlot + 1.0
+                        float targetPrice = entry + rrNewSide * targetR * rrNewDistance
+
+                        if targetPrice > 0
+                            string targetTip = "预先显示的 " + str.tostring(targetR, "#") + "R 参考价，基于冻结初始风险；不是止盈指令。"
+
+                            line targetLine = line.new(time, targetPrice, rrRightTime, targetPrice, xloc=xloc.bar_time, color=color.new(bull, rrHide ? 100 : 72), style=line.style_dashed, width=1, force_overlay=true)
+
+                            label targetTag = label.new(rrRightTime, targetPrice, str.tostring(targetR, "#") + "R · " + str.tostring(targetPrice, format.mintick), xloc=xloc.bar_time, yloc=yloc.price, style=label.style_label_left, color=color.new(chart.bg_color, rrHide ? 100 : 12), textcolor=color.new(bull, rrHide ? 100 : 0), size=size.tiny, tooltip=targetTip, force_overlay=true)
+
+                            array.set(rrTargetLines, targetSlot, targetLine)
+                            array.set(rrTargetTags, targetSlot, targetTag)
+
+// ───────────── IMACD 副图 ─────────────
+
+float shownMd = barstate.isconfirmed ? md : md[1]
+float shownSb = barstate.isconfirmed ? sb : sb[1]
+
+hline(0, "零轴", color=color.new(ink, 38), linestyle=hline.style_solid, linewidth=1, display=v126Minimal ? display.none : display.all)
+
+plot(v126Minimal ? na : shownMd, "IMACD 主线", blue, 2, display=display.pane + display.data_window)
+plot(v126Minimal ? na : shownSb, "IMACD 信号线", #CB882A, 2, display=display.pane + display.data_window)
+
+plot(not v126Minimal and not v10OnlyJoint and confirmedSignal ? md : na, "多头确认点", bull, 4, plot.style_circles, display=display.pane + display.data_window)
+plot(not v126Minimal and not v10OnlyJoint and confirmedShortSignal ? md : na, "空头确认点", bear, 4, plot.style_circles, display=display.pane + display.data_window)
+
+// ───────────── 主图六均线 ─────────────
+
+plot(showMas ? s20 : na, "SMA20", color.new(bull, 38), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e20 : na, "EMA20", color.new(bull, 58), 1, force_overlay=true, display=display.pane + display.data_window)
+
+plot(showMas ? s60 : na, "SMA60", color.new(blue, 40), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e60 : na, "EMA60", color.new(blue, 60), 1, force_overlay=true, display=display.pane + display.data_window)
+
+plot(showMas ? s120 : na, "SMA120", color.new(ink, 48), 1, force_overlay=true, display=display.pane + display.data_window)
+plot(showMas ? e120 : na, "EMA120", color.new(ink, 66), 1, force_overlay=true, display=display.pane + display.data_window)
+
+// ───────────── BB 图形 ─────────────
+
+float bbUpperShown = showBb and (not bbOnlyCompressed or bbCompressed) and bbBandReady ? bbUpper : na
+float bbLowerShown = showBb and (not bbOnlyCompressed or bbCompressed) and bbBandReady ? bbLower : na
+float bbBasisShown = showBb and bbShowBasis and (not bbOnlyCompressed or bbCompressed) and bbBandReady ? bbBasis : na
+
+pBbUpper = plot(bbUpperShown, "BB 上轨", bbChannelColor, 1, plot.style_linebr, force_overlay=true, display=display.pane)
+pBbLower = plot(bbLowerShown, "BB 下轨", bbChannelColor, 1, plot.style_linebr, force_overlay=true, display=display.pane)
+
+plot(bbBasisShown, "BB 中线", bbChannelColor, 1, plot.style_linebr, force_overlay=true, display=display.pane)
+
+fill(pBbUpper, pBbLower, color=showBb and bbCompressed ? color.new(bbCompressionColor, 90) : na, title="BB 压缩区")
+
+// ───────────── 风险参考与普通信号染色 ─────────────
+
+bool protectionOverlapsInitial = not na(visibleProtection) and not na(visibleInitial) and visibleProtection == visibleInitial
+
+color protectionColor = rrShow and protectionOverlapsInitial ? na : trailArmed ? bull : bear
+color initialColor = rrShow ? na : color.new(bear, 55)
+
+pProtect = plot(showRisk and not v10OnlyJoint ? visibleProtection : na, "本根有效保护", protectionColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+
+pInitial = plot(showRisk and not v10OnlyJoint ? visibleInitial : na, "冻结初始止损", initialColor, 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+
+pEntry = plot(showRisk and not v10OnlyJoint ? visibleEntry : na, "确认收盘参考", color.new(ink, 60), 1, plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+
+fill(pInitial, pEntry, color.new(bear, 94), title="初始风险区")
+
+// BEGIN V126 COLOR_STATE
+// Uses only closed chart OHLC and already-confirmed frozen trendline anchors.
+// A display episode never changes V9/BK signals, stop state, or alert conditions.
+var V10Line v126LocalLine = na
+var int v126LocalStart = na
+var int v126LocalB = na
+var float v126LocalBp = na
+var int v126HtfStart = na
+var int v126HtfA = na
+var float v126HtfAp = na
+var int v126HtfB = na
+var float v126HtfBp = na
+bool v126LocalPaint = false
+bool v126HtfPaint = false
+if barstate.isconfirmed
+    if dataGap or not pricesValid
+        v126LocalLine := na
+        v126LocalStart := na
+        v126HtfStart := na
+    else
+        if v10Enabled and v11UseChart and v10BreakEvent and not na(v11LastBroken)
+            bool sameEpisode = not na(v126LocalStart) and v126LocalB == v11LastBroken.bx and v126LocalBp == v11LastBroken.bp and bar_index - v126LocalStart <= 8
+            if not sameEpisode
+                v126LocalLine := v11LastBroken.copy()
+                v126LocalStart := bar_index
+                v126LocalB := v11LastBroken.bx
+                v126LocalBp := v11LastBroken.bp
+        if v11HtfBreakKnown
+            bool sameEpisode = not na(v126HtfStart) and v126HtfB == v11HtfBxT and v126HtfBp == v11HtfBp and bar_index - v126HtfStart <= 8
+            if not sameEpisode
+                v126HtfStart := bar_index
+                v126HtfA := v11HtfAxT
+                v126HtfAp := v11HtfAp
+                v126HtfB := v11HtfBxT
+                v126HtfBp := v11HtfBp
+        if not na(v126LocalLine) and not na(v126LocalStart)
+            float y = v126LocalLine.at(bar_index)
+            if y <= 0 or close <= y
+                v126LocalLine := na
+            else
+                v126LocalPaint := bar_index - v126LocalStart < v126BreakBars
+        if not na(v126HtfA) and not na(v126HtfStart)
+            float y = f_v11_timePrice(v126HtfA, v126HtfAp, v126HtfB, v126HtfBp, time)
+            if y <= 0 or close <= y
+                v126HtfA := na
+            else
+                v126HtfPaint := bar_index - v126HtfStart < v126BreakBars
+
+// Geometry only: no pivots, future candles, volume or outcome information.
+float v126Range = high - low
+float v126Body = math.abs(close - open)
+float v126Lower = math.min(open, close) - low
+float v126Upper = high - math.max(open, close)
+bool v126PinReady = barstate.isconfirmed and pricesValid and v126Range >= 4 * syminfo.mintick and v126Body <= 0.30 * v126Range
+bool v126LowerPin = v126PinReady and v126Lower >= 0.60 * v126Range and v126Upper <= 0.20 * v126Range
+bool v126UpperPin = v126PinReady and v126Upper >= 0.60 * v126Range and v126Lower <= 0.20 * v126Range
+color v126PinTone = v126PaintPin ? (v126LowerPin ? v126LowerPinColor : v126UpperPin ? v126UpperPinColor : na) : na
+color v126BreakTone = v126PaintBreak and (v126LocalPaint or v126HtfPaint) ? (v126CustomBreak ? v126BreakColor : v126LocalPaint ? v10LineColor : v11HtfColor) : na
+color v126LegacyTone = not v126Minimal and not v10OnlyJoint and signalSide != 0 ? signalColor : na
+color v126CandleTone = v126PinPriority and not na(v126PinTone) ? v126PinTone : not na(v126BreakTone) ? v126BreakTone : not na(v126PinTone) ? v126PinTone : v126LegacyTone
+
+// END V126 COLOR_STATE
+barcolor(v126CandleTone, title="突破 / Pin Bar / 确认K线")
+
+plotcandle(not na(v126CandleTone) ? open : na, high, low, close, title="突破 / Pin Bar 实体与影线", color=v126CandleTone, wickcolor=v126CandleTone, bordercolor=v126CandleTone, editable=false, force_overlay=true, display=display.pane)
+
+// ───────────── 数据窗口 ─────────────
+
+float pendingWhyCode = pendingWhy == "await_legacy" ? 1 : pendingWhy == "await_body" ? 2 : pendingWhy == "await_md_turn" ? 3 : pendingWhy == "await_momentum" ? 4 : pendingWhy == "confirmed" ? 5 : pendingWhy == "parent_broken" ? 6 : pendingWhy == "gap" ? 7 : pendingWhy == "unknown" ? 8 : pendingWhy == "await_launch_evidence" ? 9 : 0
+
+float shortPendingWhyCode = shortPendingWhy == "await_legacy" ? 1 : shortPendingWhy == "await_body" ? 2 : shortPendingWhy == "await_md_turn" ? 3 : shortPendingWhy == "await_momentum" ? 4 : shortPendingWhy == "confirmed" ? 5 : shortPendingWhy == "parent_broken" ? 6 : shortPendingWhy == "gap" ? 7 : shortPendingWhy == "unknown" ? 8 : shortPendingWhy == "await_launch_evidence" ? 9 : 0
+
+plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
+plot(barstate.isconfirmed ? denseHits : na, "前12根密集命中", display=display.data_window)
+plot(barstate.isconfirmed ? advance3 : na, "三根净进展 ATR", display=display.data_window)
+plot(barstate.isconfirmed ? volumeRatio3 : na, "三根量比", display=display.data_window)
+plot(barstate.isconfirmed ? ropeDistanceAtr : na, "V9 离六线距离 ATR", display=display.data_window)
+// BEGIN CONFIRMED H1 SMA60 DATA
+plot(h1SmaApplies ? h1Sma60 : na, "15m过滤 · 已确认1h SMA60", color=#C18CFA, linewidth=2, style=plot.style_stepline, force_overlay=true, display=showH1Sma60 ? display.pane + display.data_window : display.data_window)
+// END CONFIRMED H1 SMA60 DATA
+// BEGIN CONFIRMED M15 EMA120 DATA
+plot(m15EmaApplies ? m15Ema120 : na, "5m过滤 · 已确认15m EMA120", color=#C18CFA, linewidth=2, style=plot.style_stepline, force_overlay=true, display=showM15Ema120 ? display.pane + display.data_window : display.data_window)
+// END CONFIRMED M15 EMA120 DATA
+plot(barstate.isconfirmed ? (v9EntryAllowed ? 1 : 0) : na, "V9 全部入场过滤通过", display=display.data_window)
+plot(barstate.isconfirmed and signalSide != 0 ? close : na, "确认实际收盘价", display=display.data_window)
+plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
+
+float referenceExitCode = exitReference ? (referenceReverse ? 2.0 : v112EarlyExitNow ? 3.0 : 1.0) : 0.0
+
+plot(barstate.isconfirmed ? referenceExitCode : na, "参考结束事件（1保护 / 2反向 / 3未突破离场）", display=display.data_window)
+plot(barstate.isconfirmed and exitReference ? exitReferencePrice : na, "V6 参考结束价格", display=display.data_window)
+
+// BEGIN V128 DATA_WINDOW
+// These three plots are the complete V12.8 plot budget: one overlay reference
+// plus count/event data-window exports.  They stay well below Pine's 64-plot cap.
+plot(v128Enabled and v128Supported and v128FrameLong and v128HasStructuralProposal and not v128EpisodePaused and not v128EpisodeInvalid and not v126Minimal ? v128StructuralStop : na, "滚仓结构保护参考（不参与退出）", color=color.new(gold, 18), linewidth=1, style=plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
+plot(barstate.isconfirmed and v128Enabled ? v128CandidateCount : na, "V12.8 滚仓候选累计数（最多2）", display=display.data_window)
+plot(barstate.isconfirmed and v128Enabled ? (v128CandidateEvent ? 1 : 0) : na, "V12.8 滚仓候选事件（1=候选）", display=display.data_window)
+// END V128 DATA_WINDOW
+// ───────────── 状态面板 ─────────────
+
+var table panel = table.new(position.top_right, 2, 17, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+
+if barstate.islast and showPanel
+    string stateText = (v10OnlyJoint ? "仅联合显示 · " : "") + (trendSide == 1 ? "V9多头参考" : trendSide == -1 ? "V9空头参考" : "当前无跟踪参考")
+
+    table.cell(panel, 0, 0, "SPIKE V12.8", text_color=ink, text_size=size.small)
+    table.cell(panel, 1, 0, stateText, text_color=trendSide == 1 ? bull : trendSide == -1 ? bear : muted, text_size=size.small)
+
+    table.cell(panel, 0, 1, "参考 / 峰值", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 1, na(currentR) ? "—" : str.tostring(currentR, "#.##") + "R / " + str.tostring(peakR, "#.##") + "R", text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 2, "资产类型 / 底层", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 2, syminfo.type + " / " + (baseAssetKnown ? baseAsset : "未知"), text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 3, "最近原始确认", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 3, lastV9Reasons, text_color=lastV9Reasons == "通过" ? bull : gold, text_size=size.tiny)
+
+    table.cell(panel, 0, 4, "确认量比", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 4, na(lastV9Rv) ? "未知" : str.tostring(lastV9Rv, "#.##"), text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 5, "确认价参考风险", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 5, na(lastV9RiskFraction) ? "—" : str.tostring(lastV9RiskFraction * 100, "#.####") + "%", text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 6, "往返0.2%参考成本", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 6, na(lastV9CostR) ? "—" : str.tostring(lastV9CostR, "#.####") + "R", text_color=ink, text_size=size.tiny)
+
+    string v10StateText = not v10Enabled ? "未启用" : "有效结构 " + str.tostring(v10ActiveCount) + "；已破待配对 " + str.tostring(v10WaitingCount)
+
+    string v10RecentText = na(v10LastJointTime) ? "—" : str.format_time(v10LastJointTime, "MM-dd HH:mm", "Asia/Shanghai") + " · " + str.tostring(v10LastJointPrice, format.mintick) + " · " + v10LastJointOrder
+
+    string v10SpikeText = na(v10LastSpikeTime) ? "—" : str.format_time(v10LastSpikeTime, "MM-dd HH:mm", "Asia/Shanghai") + " · " + v10LastSpikeWhy
+
+    table.cell(panel, 0, 7, "本周期结构 / 候选", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 7, v10StateText + " / " + str.tostring(array.size(v10Tracks)), text_color=v10JointColor, text_size=size.tiny, tooltip=v10SearchWhy)
+
+    string currentPairWhy = not v10Enabled ? "未启用" : not v112UseBox ? v10PairWhy : trendSide != 1 ? "无有效V9多头框；突破单独显示" : v112BoxUsed == entryBar ? "当前多头框已计第一次突破" : "多头框有效；等待首次突破"
+    table.cell(panel, 0, 8, "当前配对原因", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 8, currentPairWhy, text_color=ink, text_size=size.tiny, tooltip=v10SearchWhy)
+
+    table.cell(panel, 0, 9, "最近SPIKE · 北京", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 9, v10SpikeText, text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 10, "最近联合 · 北京", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 10, v10RecentText, text_color=ink, text_size=size.tiny)
+
+    string v11HtfState = not v11UseHtfSource ? "未启用" : not v11HtfOn ? "上级周期无效（须大于本图）" : v11HtfText + " · " + (na(v11LastHtfBreakTime) ? "尚无突破" : "最近突破可见 " + str.format_time(v11LastHtfBreakTime, "MM-dd HH:mm", "Asia/Shanghai")) + " · " + v11HtfPairWhy
+    table.cell(panel, 0, 11, "上级周期 · " + v112Rule, text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 11, v11HtfState, text_color=v11HtfColor, text_size=size.tiny)
+
+    if v112ShowAllLines
+        table.cell(panel, 0, 12, "诊断 · 最近一次找线", text_color=muted, text_size=size.tiny)
+        table.cell(panel, 1, 12, v10SearchWhy + " · 当前候选 " + str.tostring(v10ActiveCount), text_color=ink, text_size=size.tiny)
+
+    string latestBreakText = na(v12LastBreakTime) or na(v11LastBroken) ? "尚无突破" : str.format_time(v12LastBreakTime, "MM-dd HH:mm", "Asia/Shanghai") + " · " + f_v12_kindText(v11LastBroken)
+    table.cell(panel, 0, 13, "最近本周期突破 · 北京", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 13, latestBreakText, text_color=v10BreakColor, text_size=size.tiny)
+    table.cell(panel, 0, 14, "V12 局部回踩找线", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 14, v12LocalEnabled ? v12SearchWhy : "未启用", text_color=ink, text_size=size.tiny)
+
+    table.cell(panel, 0, 15, "本周期结构参数（K数）", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 15, timeframe.period + " · 高点 " + str.tostring(v10Left) + "/" + str.tostring(v10Right) + " · 间隔 " + str.tostring(v10Gap) + " · 跨度 " + str.tostring(v10Span) + " · 持线待V9 " + str.tostring(array.size(v12Held) + array.size(v12HeldHtf)), text_color=ink, text_size=size.tiny)
+
+    // BEGIN CONFIRMED H1 SMA60 PANEL
+    string h1SmaStatus = not useH1Sma60 ? "关闭" : not h1SmaApplies ? "仅15m启用" : not h1SmaReady ? "等待完整60小时" : str.tostring(h1Sma60, format.mintick) + (close > h1Sma60 ? " · 仅允许多头" : close < h1Sma60 ? " · 仅允许空头" : " · 等于均线，暂停入场")
+    table.cell(panel, 0, 16, "15m · 1h SMA60", text_color=muted, text_size=size.tiny)
+    table.cell(panel, 1, 16, h1SmaStatus, text_color=ink, text_size=size.tiny)
+    // END CONFIRMED H1 SMA60 PANEL
+    // BEGIN CONFIRMED M15 EMA120 PANEL
+    if timeframe.isminutes and timeframe.multiplier == 5
+        string m15EmaStatus = not useM15Ema120 ? "关闭" : not m15EmaReady ? "等待完整15m历史" : str.tostring(m15Ema120, format.mintick) + (close > m15Ema120 ? " · 收盘在线上才允许多头" : close < m15Ema120 ? " · 收盘在线下才允许空头" : " · 等于均线，暂停入场")
+        table.cell(panel, 0, 16, "5m · 15m EMA120", text_color=muted, text_size=size.tiny)
+        table.cell(panel, 1, 16, m15EmaStatus, text_color=ink, text_size=size.tiny)
+    // END CONFIRMED M15 EMA120 PANEL
+
+// ───────────── 原有结构与参考预警 ─────────────
+
+// “仅显示”不改变这些预警条件。
+// 只接收联合通知时，创建预警应选择“突破+spike 联合确认”。
+alertcondition(signalSide != 0, "SPIKE V12.8 结构确认", "SPIKE V12.8 结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+
+alertcondition(confirmedSignal, "SPIKE V12.8 多头结构确认", "SPIKE V12.8 多头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+
+alertcondition(confirmedShortSignal, "SPIKE V12.8 空头结构确认", "SPIKE V12.8 空头结构确认 | {{exchange}}:{{ticker}} | {{interval}} | 实际确认收盘 {{close}}")
+
+alertcondition(v112EarlyExitNow, "SPIKE V12.8 未突破离场", "SPIKE V12.8 多头框N根内未出突破，参考结束 | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
+
+alertcondition(exitReference and not referenceReverse and not v112EarlyExitNow, "SPIKE 参考保护触及", "SPIKE 参考保护已触及 | {{exchange}}:{{ticker}} | {{interval}} | 已收盘确认，请查看参考价")
+
+alertcondition(referenceReverse, "SPIKE 参考反向结束", "SPIKE 参考反向结束 | {{exchange}}:{{ticker}} | {{interval}} | 反向确认收盘 {{close}}")
+// BEGIN V128 ALERT
+// Chart notification only: no order, sizing, protection, or exit action follows.
+alertcondition(v128CandidateEvent, "SPIKE V12.8 加仓候选（图表提示）", "SPIKE V12.8 加仓候选 | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}} | 图表提示，未核验整仓净利润、保证金或实际成交；原ATR保护/退出不变")
+// END V128 ALERT
