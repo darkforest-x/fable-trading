@@ -205,7 +205,7 @@ def worker(args):
     sframe=pd.DataFrame(statuses) if statuses else pd.DataFrame(columns=EVENT_COLUMNS+('blocking_trade',))
     base=tframe[tframe.policy.eq('baseline')];basestatus=sframe[sframe.policy.eq('baseline')]
     assert_parity(base,oldtrades,'trade_key',[c for c in oldtrades if c!='trade_key'])
-    assert_parity(basestatus,oldstatuses,'trade_key',['status','blocking_trade','signal_i'] if len(oldstatuses) else [])
+    assert_parity(basestatus,oldstatuses,['arm','signal_i'],['status','blocking_trade'] if len(oldstatuses) else [])
     controls=controls_for(prepared,outcomes,merged)
     oldsubset=controls[controls.control_pool.eq('baseline') & controls.trade_key.isin(base.trade_key)]
     assert_parity(oldsubset,oldcontrols,'trade_key',[c for c in oldcontrols if c!='trade_key'])
