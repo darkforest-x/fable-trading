@@ -32502,3 +32502,19 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Complete1276 streams with exact parent parity. Pooled win improves but ge5R density falls and all later netR negative; failed smokes retained. No Pine or live changes.
+
+  - artifact_id: spike-v128-entry-clock-20260923-delivery
+    artifact_type: manifest
+    role: beijing_actual_entry_clock_descriptive_ranking
+    source_repo: darkforest-x/fable-trading
+    source_commit: cdc60c6fea9570c3cb3bc542cae51b3aa6bf6fd7
+    source_path: experiments/active/exp-spike-v128-entry-clock-20260923-v1/delivery.json
+    sha256: ebc68518d1bcc5ffb087aed2b8d0ce4eb9c91547ea623ba36aa533b0bfa52923
+    size_bytes: 3823
+    storage_uri: repo://experiments/active/exp-spike-v128-entry-clock-20260923-v1/delivery.json
+    config_hash: ca02ecdfdba0826a39c61111caa9e2a4e9670123f3770b5bccdd1de53d5ca52f
+    data_cutoff: '2026-09-23T04:00:00Z'
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Actual Beijing clock slices of authenticated baseline/retest trades. Final summary_v2, failed v1 receipt preserved; CSVs identical. Historical champions unstable, retest15m20-24 observation only. No trading-time gate replay or production change.

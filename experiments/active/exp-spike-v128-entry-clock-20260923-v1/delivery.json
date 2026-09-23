@@ -1,0 +1,92 @@
+{
+  "experiment_id": "exp-spike-v128-entry-clock-20260923-v1",
+  "builder_commit": "cdc60c6fea9570c3cb3bc542cae51b3aa6bf6fd7",
+  "status": "complete_descriptive_edge_unconfirmed",
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_summary_receipt_sha256": "ce01b5e037bbb706e7952e659d4ce1fc93d9c8f6e44b1e3ffb28eb69973ea178",
+  "canonical_summary": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v2",
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/config.json",
+      "sha256": "ca02ecdfdba0826a39c61111caa9e2a4e9670123f3770b5bccdd1de53d5ca52f",
+      "size_bytes": 925
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/PROJECT_PLAN.md",
+      "sha256": "41749f8c9ddcb19d2f3649b878d435e0736ac7f43819db6188f2afcdceef3f29",
+      "size_bytes": 4730
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/verification.json",
+      "sha256": "99e25446ac11ab7b18190d2452c501110ff5386d2110a8f91de71cb892d65ee4",
+      "size_bytes": 601
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/subagent_review.md",
+      "sha256": "d3090b603a0a5f7fd6a4b620a4db7949c4813e1b037ed1619e215c9198777cbc",
+      "size_bytes": 1818
+    },
+    {
+      "path": "analysis/p1_spike_v128_entry_clock_20260923.md",
+      "sha256": "e6d0cb88c2d6bce1c7f510fac6fd8cce25c36e9380d9727ca97cc992d30c4002",
+      "size_bytes": 16662
+    },
+    {
+      "path": "docs/learnings/entry-clock-champions-can-be-one-week-market-effects.md",
+      "sha256": "79c66c5c28c28aee14c29c41032c2edd1235c79dbd243209ede77df6bfe16e29",
+      "size_bytes": 1452
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v2/buckets.csv",
+      "sha256": "6842f6ffb712d1f0d4f331691bd70196ec22c6f7234b5ffd0f588bbbe76c376f",
+      "size_bytes": 420333
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v2/earlier_selected_later.csv",
+      "sha256": "c0b8ee913c08e9de1603342e7906892ce589a34cd90c571cbe6a748f3f242948",
+      "size_bytes": 13057
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v2/receipt.json",
+      "sha256": "fe9bc69d94df9c3084eb4448820267ca29a6f38ba6e185915db5bdbad50c62b4",
+      "size_bytes": 3196
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v2/winners.csv",
+      "sha256": "18ed4d25be48ecccbacf15798b43c6b0234433dbde0c13507af4210f4400b0ef",
+      "size_bytes": 21385
+    }
+  ],
+  "failed_summary_v1": {
+    "reason": "Final JSON receipt rejected numpy.int64; CSVs complete. Native int cast then full rerun, all three CSVs byte-identical. Preserved locally.",
+    "files": [
+      {
+        "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v1/buckets.csv",
+        "sha256": "6842f6ffb712d1f0d4f331691bd70196ec22c6f7234b5ffd0f588bbbe76c376f",
+        "size_bytes": 420333
+      },
+      {
+        "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v1/earlier_selected_later.csv",
+        "sha256": "c0b8ee913c08e9de1603342e7906892ce589a34cd90c571cbe6a748f3f242948",
+        "size_bytes": 13057
+      },
+      {
+        "path": "experiments/active/exp-spike-v128-entry-clock-20260923-v1/summary_v1/winners.csv",
+        "sha256": "18ed4d25be48ecccbacf15798b43c6b0234433dbde0c13507af4210f4400b0ef",
+        "size_bytes": 21385
+      }
+    ]
+  },
+  "validation": {
+    "tests_passed": 12,
+    "independent_stdlib_buckets": 240,
+    "source_groups_reconciled": 8,
+    "primary_holm_slots": 48
+  },
+  "subagent": {
+    "model": "gpt-6-luna",
+    "reasoning": "max",
+    "scope": "UTC Sunday / historical ICT documentation; actual model verified"
+  }
+}

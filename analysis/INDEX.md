@@ -1,6 +1,6 @@
 # analysis/ 报告索引（自动生成,勿手改）
 
-共 **640** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
+共 **641** 篇。重跑刷新:`PYTHONPATH=. .venv/bin/python scripts/gen_analysis_index.py`
 
 > **动手前先在这里搜一遍**——这个索引存在的原因是:曾经差点重跑 owner 已标完的 2525 个
 > 多空框(`p_owner_side_feature_verdict.md` 早有结论),也曾两个会话各自做了一遍同样的
@@ -13,6 +13,7 @@
 | 2026-09-23 | [`p0_spike_v128_roll_hints_20260923.md`](p0_spike_v128_roll_hints_20260923.md) | SPIKE V12.8：V12.6 上的两次加仓候选提示 |  |
 | 2026-09-23 | [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) | 均线密集启动：规则移植为 Pine 指标 V1 / V2 | Owner 2026-09-22 问“能写成pine脚本？”并在 2026-09-23 要求“把相似度和评分也移植进去”。V1 只移植两组硬性条件；V2 追加两层相似度与 Grade-A 质量分，与研究扫描一一对应。 |
 | 2026-09-23 | [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) | SPIKE V12.7 候选：先突破后V9加时限的全量回测 | 延迟大幅下降，总亏损减少，但后段每笔净R没有改善，因此按运行前写死的规则，V12.7 里这个时限默认关闭、保留为开关。 |
+| 2026-09-23 | [`p1_spike_v128_entry_clock_20260923.md`](p1_spike_v128_entry_clock_20260923.md) | SPIKE V12.8：北京时间几点入场更好 |  |
 | 2026-09-23 | [`p1_spike_v128_expansion_entry_20260923.md`](p1_spike_v128_expansion_entry_20260923.md) | SPIKE V12.8：相对波动扩张入场门（2026-09-23） |  |
 | 2026-09-23 | [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) | SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测 | 普通 SPIKE 在本窗的候选信号为 **15m 7,060 个、1h 1,615 个**，已平仓净胜率分别为 **26.87% 和 34.43%**。联合多头另有 **15m 2,790 个、1h 689 个**，净胜率分别为 **27.38% 和 37.96%**。两种信号族重叠，不能相加... |
 | 2026-09-23 | [`p1_spike_v128_retest_entry_20260923.md`](p1_spike_v128_retest_entry_20260923.md) | SPIKE V12.8：突破回踩再突破，降频但未保住高 R（2026-09-23） | 结论：**完成全部638合约、15m/1h回测；这版确认规则暂不接入默认。** 它将成交减少84.95%–87.95%，全期净胜率提高约1.52–7.79个百分点，15m全期平均净R也改善；但≥5R比例四组均下降，后段四组平均净R全部为负，四项主要同确认随机对照均为负超额、Holm p均1。确... |
@@ -1019,6 +1020,7 @@
 - [`p1_spike_v126_htf_recheck_20260922.md`](p1_spike_v126_htf_recheck_20260922.md) — SPIKE V12.6：联合时重检 H1 SMA60 的全量研究
 - [`p1_spike_v126_net_win_tail_audit_20260922.md`](p1_spike_v126_net_win_tail_audit_20260922.md) — SPIKE V12.6：扣费胜率与大盈利保留的优化审查
 - [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) — SPIKE V12.7 候选：先突破后V9加时限的全量回测
+- [`p1_spike_v128_entry_clock_20260923.md`](p1_spike_v128_entry_clock_20260923.md) — SPIKE V12.8：北京时间几点入场更好
 - [`p1_spike_v128_expansion_entry_20260923.md`](p1_spike_v128_expansion_entry_20260923.md) — SPIKE V12.8：相对波动扩张入场门（2026-09-23）
 - [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) — SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测
 - [`p1_spike_v128_retest_entry_20260923.md`](p1_spike_v128_retest_entry_20260923.md) — SPIKE V12.8：突破回踩再突破，降频但未保住高 R（2026-09-23）

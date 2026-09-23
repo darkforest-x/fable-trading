@@ -10862,15 +10862,15 @@ experiments:
 
   - experiment_id: exp-spike-v128-entry-clock-20260923-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder
-    status: running
+    source_commit: cdc60c6fea9570c3cb3bc542cae51b3aa6bf6fd7
+    status: completed
     question: Which Beijing entry-clock buckets have the highest historical V12.8 net win rate and per-trade returns?
     single_variable: Fixed local entry-clock partition of existing serial trades; no strategy or execution changes.
-    result: Frozen4h and1h cuts, sample guards and earlier-selection/later-check before clock-conditioned outcomes.
+    result: Baseline1h00-04 pooled champion fails later and without best week. Ordinary15m retest20-24 remains weakly positive later (80closed,42.50percent,+13.89bp,+0.077R), but sparse same-clock controls and zero-crossing interval do not establish edge. All calculable primary Holm p1.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v128_entry_clock_20260923.md
-    artifacts: []
+    artifacts: [spike-v128-entry-clock-20260923-delivery]
     reuse_allowed: false
     notes: Baseline and retest, ordinary/joint15m and1h; existing random pairs retained only at the same entry-clock bucket, no redraw.

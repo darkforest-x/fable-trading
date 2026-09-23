@@ -1,0 +1,111 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-v128-entry-clock-20260923-v1",
+    "source_run": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/run_v1",
+    "source_summary": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/summary_v1",
+    "source_summary_receipt_sha256": "ce01b5e037bbb706e7952e659d4ce1fc93d9c8f6e44b1e3ffb28eb69973ea178",
+    "timezone": "Asia/Shanghai",
+    "timeframes": [
+      15,
+      60
+    ],
+    "arms": [
+      "v9_both",
+      "joint"
+    ],
+    "policies": [
+      "baseline",
+      "retest"
+    ],
+    "start": "2026-07-23T00:00:00Z",
+    "split": "2026-08-23T00:00:00Z",
+    "end": "2026-09-23T04:00:00Z",
+    "round_trip_cost": 0.002,
+    "bucket_hours": [
+      4,
+      1
+    ],
+    "rank_min_closed": 30,
+    "rank_min_weeks": 6,
+    "rank_min_each_half": 10,
+    "early_rank_min_closed": 15,
+    "early_rank_min_weeks": 3,
+    "bootstrap": 2000,
+    "statistics_seed": 923234,
+    "production_eligible": false,
+    "training_eligible": false
+  },
+  "generated_at": "2026-09-23T08:45:33.505506+00:00",
+  "source": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_entry_clock.py": "5c42aebb8b7f4ae95c9fe3a54d6a739c64b9b892cff3a7b7267f169e73ffafb9",
+    "experiments/active/exp-spike-v128-entry-clock-20260923-v1/config.json": "ca02ecdfdba0826a39c61111caa9e2a4e9670123f3770b5bccdd1de53d5ca52f",
+    "tests/evaluation/test_spike_v128_entry_clock.py": "000bd64290924fd14f8541decc873d682245557f0259b9d876677572d3a7eb72",
+    "experiments/active/exp-spike-v128-entry-clock-20260923-v1/PROJECT_PLAN.md": "41749f8c9ddcb19d2f3649b878d435e0736ac7f43819db6188f2afcdceef3f29"
+  },
+  "reconciled": [
+    {
+      "timeframe_min": 15,
+      "arm": "joint",
+      "policy": "baseline",
+      "closed": 2736,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "joint",
+      "policy": "retest",
+      "closed": 327,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "v9_both",
+      "policy": "baseline",
+      "closed": 5842,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "v9_both",
+      "policy": "retest",
+      "closed": 776,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "joint",
+      "policy": "baseline",
+      "closed": 656,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "joint",
+      "policy": "retest",
+      "closed": 76,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "v9_both",
+      "policy": "baseline",
+      "closed": 1281,
+      "source_metrics_match": true
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "v9_both",
+      "policy": "retest",
+      "closed": 183,
+      "source_metrics_match": true
+    }
+  ],
+  "files": {
+    "buckets.csv": "6842f6ffb712d1f0d4f331691bd70196ec22c6f7234b5ffd0f588bbbe76c376f",
+    "earlier_selected_later.csv": "c0b8ee913c08e9de1603342e7906892ce589a34cd90c571cbe6a748f3f242948",
+    "winners.csv": "18ed4d25be48ecccbacf15798b43c6b0234433dbde0c13507af4210f4400b0ef"
+  },
+  "closed": 11877,
+  "taken": 12131,
+  "primary_test_slots": 48
+}
