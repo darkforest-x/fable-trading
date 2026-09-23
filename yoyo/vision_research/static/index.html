@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f1f5f7" />
+    <meta name="theme-color" content="#f4f7f9" />
     <title>SPIKE · 视觉研究工作台</title>
     <script src="/theme.js"></script>
     <link rel="stylesheet" href="/styles.css" />
@@ -14,33 +14,25 @@
   <body>
     <a class="skip-link" href="#main-content">跳到主要内容</a>
     <div class="app-frame">
-      <header class="topbar">
+      <aside class="app-sidebar" aria-label="应用导航">
         <a class="brand" href="#" aria-label="SPIKE 视觉研究工作台首页">
-          <span class="brand-copy">
-            <strong>SPIKE</strong>
-            <span>视觉研究</span>
-          </span>
+          <span class="brand-mark"><span class="ui-icon icon-chart" aria-hidden="true"></span></span>
+          <span class="brand-copy"><strong>SPIKE</strong><span>视觉研究</span></span>
         </a>
-        <nav class="primary-nav" aria-label="主要页面" role="tablist">
-          <button class="nav-tab is-active" id="tab-workspace-button" type="button" role="tab" aria-selected="true" aria-controls="tab-workspace" data-tab="workspace">
-            工作台
-          </button>
-          <button class="nav-tab" id="tab-references-button" type="button" role="tab" aria-selected="false" aria-controls="tab-references" data-tab="references" tabindex="-1">全局参考图</button>
-          <button class="nav-tab" id="tab-history-button" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history" tabindex="-1">
-            识别记录<span id="history-count" class="nav-count" hidden>0</span>
-          </button>
-          <button class="nav-tab" id="tab-settings-button" type="button" role="tab" aria-selected="false" aria-controls="tab-settings" data-tab="settings" tabindex="-1">
-            模型设置
-          </button>
+        <nav class="primary-nav" aria-label="主要页面" role="tablist" aria-orientation="vertical">
+          <button class="nav-tab is-active" id="tab-workspace-button" type="button" role="tab" aria-selected="true" aria-controls="tab-workspace" data-tab="workspace"><span class="ui-icon icon-chart" aria-hidden="true"></span><span>工作台</span></button>
+          <button class="nav-tab" id="tab-references-button" type="button" role="tab" aria-selected="false" aria-controls="tab-references" data-tab="references" tabindex="-1"><span class="ui-icon icon-images" aria-hidden="true"></span><span>全局参考图</span></button>
+          <button class="nav-tab" id="tab-history-button" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history" tabindex="-1"><span class="ui-icon icon-history" aria-hidden="true"></span><span>识别记录</span><span id="history-count" class="nav-count" hidden>0</span></button>
+          <button class="nav-tab" id="tab-settings-button" type="button" role="tab" aria-selected="false" aria-controls="tab-settings" data-tab="settings" tabindex="-1"><span class="ui-icon icon-settings" aria-hidden="true"></span><span>模型设置</span></button>
         </nav>
-        <div class="topbar-meta">
-          <span id="api-health" class="health-pill" role="status" aria-live="polite">
-            <span class="health-dot" aria-hidden="true"></span><span>正在连接本地 API…</span>
-          </span>
-          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式">
-            <span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">浅色</span>
-          </button>
+        <div class="sidebar-bottom">
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式"><span class="theme-icon ui-icon icon-sun" aria-hidden="true"></span><span class="theme-label">浅色</span></button>
+          <span class="sidebar-caption">本机研究工作台</span>
         </div>
+      </aside>
+      <header class="topbar">
+        <div class="page-identity"><h1 id="page-title">视觉工作台</h1><p id="page-description">从候选信号到形态判断</p></div>
+        <div class="topbar-meta"><span id="api-health" class="health-pill" role="status" aria-live="polite"><span class="health-dot" aria-hidden="true"></span><span>正在连接本地 API…</span></span></div>
       </header>
 
       <main id="main-content" class="main-content">
@@ -56,14 +48,14 @@
                   <h2 id="candidate-heading">候选信号</h2>
                 </div>
                 <button id="refresh-signals" class="icon-button" type="button" aria-label="刷新候选信号" title="刷新候选信号">
-                  <span aria-hidden="true">↻</span>
+                  <span class="ui-icon icon-refresh" aria-hidden="true"></span>
                 </button>
               </div>
               <div id="signal-source" class="source-caption">等待读取候选来源…</div>
               <label class="search-box" for="signal-search">
-                <span class="search-icon" aria-hidden="true">⌕</span>
+                <span class="search-icon ui-icon icon-search" aria-hidden="true"></span>
                 <span class="sr-only">搜索候选</span>
-                <input id="signal-search" type="search" placeholder="搜索币种、周期或方向" autocomplete="off" />
+                <input id="signal-search" type="search" placeholder="搜索币种 / 周期" autocomplete="off" />
                 <kbd>/</kbd>
               </label>
               <div id="signals-error" class="inline-error" role="alert" hidden></div>
@@ -74,18 +66,18 @@
 
             <section class="panel image-panel" aria-labelledby="image-heading">
               <div class="chart-toolbar">
-                <div class="chart-title"><h1 id="image-heading">图表工作台</h1><span id="input-source-chip" class="source-chip" hidden></span></div>
+                <div class="chart-title"><h2 id="image-heading">选择图表，开始研究</h2><span id="input-source-chip" class="source-chip" hidden></span></div>
                 <div class="chart-tools">
-                  <button id="fit-chart" class="button button-quiet" type="button" hidden>重置视图</button>
+                  <button id="fit-chart" class="button button-quiet" type="button" hidden><span class="ui-icon icon-expand" aria-hidden="true"></span>重置</button>
                   <button id="resume-chart" class="button button-quiet" type="button" hidden>返回交互图表</button>
-                  <button id="upload-chart" class="button button-secondary" type="button">上传图表</button>
+                  <button id="upload-chart" class="button button-secondary" type="button"><span class="ui-icon icon-upload" aria-hidden="true"></span>上传图表</button>
                   <button id="clear-input" class="button button-quiet" type="button" disabled>清除</button>
                 </div>
               </div>
               <div id="selection-summary" class="selection-summary" hidden></div>
               <div id="live-chart-controls" class="live-chart-controls" hidden>
                 <label for="recognition-window">识别范围 <select id="recognition-window" aria-label="信号后识别范围"><option value="6">信号后 6 根</option><option value="12" selected>信号后 12 根</option><option value="24">信号后 24 根</option><option value="48">信号后 48 根</option></select></label>
-                <button id="refresh-live-chart" class="button button-quiet" type="button">↻ 立即刷新</button>
+                <button id="refresh-live-chart" class="button button-quiet" type="button"><span class="ui-icon icon-refresh" aria-hidden="true"></span>刷新</button>
                 <span id="live-chart-status" class="live-chart-status" role="status"></span>
               </div>
               <div id="chart-legend" class="chart-legend" hidden>
@@ -93,10 +85,10 @@
               </div>
               <div id="drop-zone" class="drop-zone" aria-label="图表画布，可拖放图片">
                 <input id="chart-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" />
-                <div id="empty-stage" class="empty-stage">
-                  <h2>选择一条候选信号</h2>
-                  <p>查看 K 线和均线，或上传自己的图表。</p>
-                  <button id="empty-upload" class="button button-secondary" type="button">选择图片</button>
+                <div id="empty-stage" class="empty-stage"><span class="empty-stage-icon"><span class="ui-icon icon-chart" aria-hidden="true"></span></span>
+                  <h3>先选一张图表</h3>
+                  <p>从左侧选择候选信号，<br />或上传图表进行形态识别。</p>
+                  <button id="empty-upload" class="button button-secondary" type="button"><span class="ui-icon icon-upload" aria-hidden="true"></span>上传图表</button>
                   <span class="file-guidance">PNG、JPEG、WEBP · 小于 5 MB</span>
                 </div>
                 <div id="image-loading" class="stage-message" role="status" hidden><span class="spinner" aria-hidden="true"></span><span>正在载入图表…</span></div>
@@ -106,8 +98,8 @@
               </div>
               <div class="chart-caption"><span id="chart-context">拖动平移 · 滚轮缩放</span><a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" title="TradingView Lightweight Charts™ · Copyright (с) 2023 TradingView, Inc.">TradingView Lightweight Charts™</a></div>
               <div class="analysis-controls">
-                <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button">全局参考图 · <span id="reference-count">0</span> 张</button><span class="privacy-inline">当前图表、参考图及规则将发送至 智谱</span></div>
-                <button id="analyze-button" class="button button-primary" type="button" disabled><span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
+                <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button"><span class="ui-icon icon-images" aria-hidden="true"></span>全局参考图 · <span id="reference-count">0</span> 张</button><span class="privacy-inline">识别时发送当前图表、参考图与规则至智谱</span></div>
+                <button id="analyze-button" class="button button-primary" type="button" disabled><span class="ui-icon icon-arrow-right" aria-hidden="true"></span><span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
               </div>
               <div id="analyze-error" class="inline-error" role="alert" hidden></div>
             </section>
@@ -143,9 +135,9 @@
         </section>
 
         <section id="tab-references" class="tab-panel" role="tabpanel" aria-labelledby="tab-references-button" tabindex="0" hidden>
-          <div class="page-heading"><div><h1>全局参考图</h1><p class="page-subtitle">保存一次，后续识别共用。切换候选、刷新页面和重启服务都会保留。</p></div></div>
+          <div class="page-heading"><p class="page-subtitle">统一形态标准。保存后，所有候选识别共用这组参考图。</p><span class="section-tag">全局共享</span></div>
           <section class="panel global-references">
-            <div class="panel-heading"><h2>形态参考 <span id="references-total">0 张</span></h2><button id="add-reference" class="button button-secondary" type="button">添加参考图</button></div>
+            <div class="panel-heading"><h2>形态参考 <span id="references-total">0 张</span></h2><button id="add-reference" class="button button-secondary" type="button"><span class="ui-icon icon-upload" aria-hidden="true"></span>添加参考图</button></div>
             <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
             <p class="field-help">红框只圈启动前的均线密集区，不包含第一根启动 K 线。这组图供形态对照，仍待逐张确认；框外后续走势不作为判断依据。点击图片可放大。</p>
             <div id="reference-list" class="reference-list" aria-live="polite"></div>
@@ -157,8 +149,8 @@
 
         <section id="tab-history" class="tab-panel" role="tabpanel" aria-labelledby="tab-history-button" tabindex="0" hidden>
           <div class="page-heading history-page-heading">
-            <div><h1>识别记录</h1><p class="page-subtitle">查看识别结果与人工复核。</p></div>
-            <button id="refresh-runs" class="button button-secondary" type="button">↻ 刷新记录</button>
+            <p class="page-subtitle">每一次判断，都保留图表快照与原始依据。</p>
+            <button id="refresh-runs" class="button button-secondary" type="button"><span class="ui-icon icon-refresh" aria-hidden="true"></span>刷新记录</button>
           </div>
           <div id="history-error" class="notice notice-error" role="alert" hidden></div>
           <div id="history-list" class="history-list" aria-live="polite">
@@ -167,9 +159,7 @@
         </section>
 
         <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-settings-button" tabindex="0" hidden>
-          <div class="page-heading">
-            <div><h1>模型设置</h1><p class="page-subtitle">设置智谱视觉模型与密钥。</p></div>
-          </div>
+          <div class="settings-layout">
           <div class="settings-grid">
             <section class="panel settings-card" aria-labelledby="model-config-heading">
               <h2 id="model-config-heading">模型与凭据</h2>
@@ -194,7 +184,7 @@
                 <span class="soft-badge">生产资格：未读取</span><span class="soft-badge">训练资格：未读取</span>
               </div>
               <div class="recipient-card">
-                <span class="recipient-icon" aria-hidden="true">↗</span>
+                <span class="recipient-icon ui-icon icon-arrow-up-right" aria-hidden="true"></span>
                 <div><strong>图片接收方</strong><p>智谱 BigModel 官方 API</p><code>open.bigmodel.cn</code></div>
               </div>
               <div id="connection-result" class="connection-result" role="status" aria-live="polite" hidden></div>
@@ -206,7 +196,7 @@
           <section class="panel api-exchanges-card" aria-labelledby="api-exchanges-heading">
             <div class="panel-heading api-exchanges-heading-row">
               <div><h2 id="api-exchanges-heading">API 原始记录</h2><p class="settings-copy">每次识别都会新发一条独立请求，包含 1 张待判图和当前全部全局参考图（目前 <span id="api-exchange-reference-count">读取中</span> 张）。保存参考图只免去重复上传，不表示模型已记住图片。</p></div>
-              <button id="reload-api-exchanges" class="button button-secondary" type="button">↻ 重新载入</button>
+              <button id="reload-api-exchanges" class="button button-secondary" type="button"><span class="ui-icon icon-refresh" aria-hidden="true"></span>重新载入</button>
             </div>
             <p class="field-help api-exchange-privacy">原始记录从本功能上线后开始保存。API 密钥不写入记录；图片 Base64 在请求预览中折叠，下载文件保留完整原始请求。</p>
             <div class="api-exchanges-controls">
@@ -217,6 +207,7 @@
             <div id="api-exchanges-error" class="inline-error" role="alert" hidden></div>
             <div id="api-exchange-detail" class="api-exchange-detail" aria-live="polite"><p class="exchange-empty">正在读取 API 原始记录…</p></div>
           </section>
+          </div>
         </section>
       </main>
     </div>

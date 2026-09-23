@@ -75,6 +75,14 @@ const signalsEl = byId('signal-list');
 const resultEl = byId('result-content');
 const historyEl = byId('history-list');
 const workspaceErrorEl = byId('workspace-error');
+let renderedResultMarkup = '';
+
+function updateResultMarkup(markup) {
+  // Keep disclosure state and unsaved review text across unrelated UI renders.
+  if (markup === renderedResultMarkup) return;
+  resultEl.innerHTML = markup;
+  renderedResultMarkup = markup;
+}
 
 function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -146,6 +154,11 @@ function exchangeKindLabel(kind) {
 
 function exchangeStatusLabel(status) {
   return ({ running: '进行中', completed: '已完成', failed: '失败', interrupted: '已中断' })[status] || '状态未提供';
+}
+
+function runStatusLabel(status) {
+  return ({ running: '进行中', completed: '已完成', failed: '失败', interrupted: '已中断' })[status]
+    || (status ? asText(status) : '状态未提供');
 }
 
 function exchangeOptionLabel(exchange) {
@@ -374,8 +387,8 @@ function renderSignals() {
     const timeframe = asText(item.timeframe, '周期未提供');
     const side = sideLabel(item.side);
     const time = item.signal_at ? new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(item.signal_at)) : '时间未提供';
-    return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(id)}">
-      <span class="signal-topline"><strong>${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
+    return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(timeframe)}">
+      <span class="signal-topline"><strong class="signal-name">${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
       <span class="signal-meta"><span class="signal-side ${sideClass}">${escapeHtml(side.replace('方向', ''))}</span><time>${escapeHtml(time)}</time></span>
     </button>`;
   }).join('');
@@ -396,7 +409,13 @@ function renderLiveControls(image) {
   windowSelect.disabled = Boolean(state.analysisLoading || state.captureInProgress || image.loading || image.frozen);
   const refreshButton = byId('refresh-live-chart');
   refreshButton.disabled = Boolean(state.analysisLoading || state.captureInProgress || image.loading || image.chartRefreshing || image.frozen);
-  refreshButton.textContent = image.chartRefreshing ? '正在刷新…' : '↻ 立即刷新';
+  const refreshLabel = image.chartRefreshing ? '刷新中…' : '刷新';
+  const refreshLabelElement = refreshButton.querySelector('.button-label');
+  const refreshTextNode = Array.from(refreshButton.childNodes).find((node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim());
+  if (refreshLabelElement) refreshLabelElement.textContent = refreshLabel;
+  else if (refreshTextNode) refreshTextNode.textContent = refreshLabel;
+  else if (refreshButton.querySelector('.ui-icon')) refreshButton.append(document.createTextNode(refreshLabel));
+  else refreshButton.textContent = refreshLabel;
 
   const info = liveSnapshotInfo(image);
   let message;
@@ -461,7 +480,7 @@ function renderImage() {
   summary.textContent = image?.signal
     ? liveInfo
       ? `信号 ${formatMarketTime(liveInfo.signalClose)} · 后续 ${liveInfo.postBarsSeen}/${liveInfo.windowBars} 根 · 可识别至 ${formatMarketTime(liveInfo.expires)}`
-      : `截至信号收盘 ${formatDate(image.signal.signal_at)} · ${image.chartData?.candles.length || ''} 根`
+      : `信号 ${formatDate(image.signal.signal_at)} · 正在加载行情`
     : '';
   setVisible(summary, Boolean(image?.signal));
   const preview = byId('chart-preview');
@@ -507,7 +526,7 @@ function renderReferences() {
   list.innerHTML = state.references.length ? state.references.map((reference, index) => `<div class="reference-thumb">
     <button class="reference-preview" type="button" data-preview-reference="${index}" aria-label="查看大图 ${escapeHtml(reference.name)}"><img src="${escapeHtml(reference.previewUrl)}" alt="参考图 ${index + 1}：${escapeHtml(reference.name)}" /></button>
     <span class="reference-label" title="${escapeHtml(reference.name)}">${escapeHtml(reference.name)}</span>
-    <button class="reference-remove" type="button" data-remove-reference="${index}" aria-label="移除参考图 ${escapeHtml(reference.name)}" ${state.referencesSaving ? 'disabled' : ''}>×</button>
+    <button class="reference-remove" type="button" data-remove-reference="${index}" aria-label="移除参考图 ${escapeHtml(reference.name)}" ${state.referencesSaving ? 'disabled' : ''}>移除</button>
   </div>`).join('') : '<span class="reference-empty">添加形态参考图，作为所有识别共用的对照。</span>';
   byId('reference-count').textContent = state.referencesReady ? String(state.references.length) : '—';
   byId('references-total').textContent = `${state.references.length} 张`;
@@ -620,17 +639,17 @@ function renderResult() {
   showInlineError('analyze-error', state.analysisError);
 
   if (!state.activeRun) {
-    resultEl.innerHTML = `<div class="result-empty">
+    updateResultMarkup(`<div class="result-empty">
       <h3>${state.analysisLoading ? '正在分析图表…' : '等待识别'}</h3>
-      <p>${state.analysisLoading ? '通常需要 60–90 秒。' : state.selectedImage ? '点击「开始识别」查看分析。' : '选择图表后，分析结果会显示在这里。'}</p></div>`;
+      <p>${state.analysisLoading ? '结果会显示在这里。' : state.selectedImage ? '点击「开始识别」。' : '选择图表开始。'}</p></div>`);
     return;
   }
   const run = state.activeRun;
   const decision = run.decision || {};
   const verdict = decision.verdict;
   const verdictClass = verdict === 'no_match' ? 'no-match' : verdict === 'uncertain' ? 'uncertain' : '';
+  const completed = run.status === 'completed';
   const incomplete = run.status && run.status !== 'completed';
-  const mark = incomplete ? '!' : verdict === 'match' ? '✓' : verdict === 'no_match' ? '×' : '…';
   const headingLabel = incomplete ? '识别未完成' : verdictLabel(verdict);
   const evidence = safeList(decision.evidence);
   const risks = safeList(decision.risks);
@@ -657,29 +676,29 @@ function renderResult() {
   </dl></details>`;
   const reviewVerdict = human ? `<div class="review-verdict">人工复核：${escapeHtml(verdictLabel(human.verdict))}${human.note ? ` · ${escapeHtml(human.note)}` : ''}<br><span>${escapeHtml(formatDate(human.reviewed_at))}</span></div>` : '';
   const runId = asText(run.id, '');
-  const reviewControls = incomplete ? '<p class="review-locked">只有已完成的识别可以人工复核。</p>' : `<label class="sr-only" for="review-note">人工复核备注</label>
+  const reviewControls = !completed ? '<p class="review-locked">只有已完成的识别可以人工复核。</p>' : `<label class="sr-only" for="review-note">人工复核备注</label>
       <textarea id="review-note" class="review-note" maxlength="1200" placeholder="可选：记录边界或依据">${human?.note ? escapeHtml(human.note) : ''}</textarea>
       <div class="review-buttons" role="group" aria-label="记录人工复核结论">
         <button type="button" data-review-verdict="accepted" data-review-run="${escapeHtml(runId)}">接受</button>
         <button type="button" data-review-verdict="rejected" data-review-run="${escapeHtml(runId)}">拒绝</button>
         <button type="button" data-review-verdict="uncertain" data-review-run="${escapeHtml(runId)}">不确定</button>
       </div>`;
-  resultEl.innerHTML = `<article class="decision-card">
-    <div class="decision-topline"><span class="decision-label"><span class="decision-mark ${incomplete ? 'failed' : verdictClass}" aria-hidden="true">${mark}</span>${escapeHtml(headingLabel)}</span><span class="side-tag">${escapeHtml(sideLabel(decision.side))}</span></div>
+  updateResultMarkup(`<article class="decision-card" data-result-run="${escapeHtml(runId)}">
+    <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span><span class="side-tag">${escapeHtml(sideLabel(decision.side))}</span></div>
     <p class="result-summary">${escapeHtml(asText(decision.summary, run.error || '模型未返回摘要。'))}</p>
     <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
     <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
     ${requestContext}
     <div class="exchange-result-action">${apiExchangeActionMarkup(run.api_exchange_id)}</div>
-    <section class="human-review" aria-label="人工复核">
-      <div class="human-review-heading"><strong>人工复核</strong><span>与模型结果分别记录</span></div>
+    <details class="human-review" aria-label="人工复核">
+      <summary class="human-review-heading"><strong>人工复核</strong><span>与模型结果分别记录</span></summary>
       ${reviewVerdict}
       ${reviewControls}
-    </section>
-  </article>`;
-  if (state.reviewLoadingId === runId) {
-    resultEl.querySelectorAll('[data-review-verdict]').forEach((button) => { button.disabled = true; });
-  }
+    </details>
+  </article>`);
+  resultEl.querySelectorAll('[data-review-verdict]').forEach((button) => {
+    button.disabled = state.reviewLoadingId === runId;
+  });
   renderOverlay();
 }
 
@@ -701,21 +720,27 @@ function renderHistory() {
     const verdict = decision.verdict;
     const verdictClass = verdict === 'no_match' ? 'no-match' : verdict === 'uncertain' ? 'uncertain' : '';
     const model = asText(run.model, '模型未提供');
-    const symbol = asText(run.symbol || run.signal?.symbol, '自定义图片');
-    const timeframe = asText(run.timeframe || run.signal?.timeframe, '周期未提供');
+    const symbol = asText(run.symbol || run.signal?.symbol, '');
+    const timeframe = asText(run.timeframe || run.signal?.timeframe, '');
+    const title = symbol ? `${symbol} · ${timeframe || '周期未提供'}` : asText(run.image_name, '自定义图片');
+    const imageUrl = safeApiImageUrl(run.image_url);
+    const thumbnail = imageUrl ? `<div class="history-thumbnail"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" /></div>` : '';
     const review = run.review ? `<div class="history-review"><span>人工复核</span><strong>${escapeHtml(verdictLabel(run.review.verdict))}</strong>${run.review.note ? `<span>${escapeHtml(run.review.note)}</span>` : ''}<time>${escapeHtml(formatDate(run.review.reviewed_at))}</time></div>` : '';
     const runId = asText(run.id, '');
     const summary = asText(decision.summary, run.error || '无摘要');
     const isExporting = state.exportLoadingId === runId;
     return `<article class="history-card">
-      <div class="history-main"><div class="history-head"><h2>${escapeHtml(symbol)} · ${escapeHtml(timeframe)}</h2><span class="verdict-pill ${verdictClass}">${escapeHtml(verdictLabel(verdict))}</span></div>
+      ${thumbnail}<div class="history-main"><div class="history-head"><h2>${escapeHtml(title)}</h2><span class="verdict-pill ${verdictClass}">${escapeHtml(verdictLabel(verdict))}</span></div>
         <p class="history-summary">${escapeHtml(summary)}</p>
-        <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(asText(run.status, '状态未提供'))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
+        <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(runStatusLabel(run.status))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
       </div>
       <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button>${run.api_exchange_id ? `<button class="button button-quiet" type="button" data-open-exchange="${escapeHtml(run.api_exchange_id)}">查看 API 原始记录</button>` : '<span class="exchange-unavailable">旧记录未保存原文</span>'}<button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
       ${review}
     </article>`;
   }).join('');
+  historyEl.querySelectorAll('.history-thumbnail img').forEach((image) => {
+    image.addEventListener('error', () => image.closest('.history-thumbnail')?.remove(), { once: true });
+  });
 }
 
 function credentialSummary(source) {
@@ -753,9 +778,13 @@ function renderExchangeDetail(detail) {
       <h4>本次发送的图片</h4>
       <div class="exchange-images" data-exchange-images></div>
     </section>
-    <details class="exchange-body-block" open><summary>${escapeHtml(preview.label)}</summary><pre data-exchange-request></pre></details>
-    <details class="exchange-body-block"><summary>完整原始请求正文（含图片 Base64）</summary><pre data-exchange-request-original></pre></details>
-    <details class="exchange-body-block" open><summary>API 原始响应正文</summary><pre data-exchange-response></pre></details>
+    <div class="exchange-body-grid">
+      <div class="exchange-body-column">
+        <details class="exchange-body-block" open><summary>${escapeHtml(preview.label)}</summary><pre data-exchange-request></pre></details>
+        <details class="exchange-body-block"><summary>完整原始请求正文（含图片 Base64）</summary><pre data-exchange-request-original></pre></details>
+      </div>
+      <details class="exchange-body-block" open><summary>API 原始响应正文</summary><pre data-exchange-response></pre></details>
+    </div>
     <details class="exchange-request-meta"><summary>HTTP 请求地址</summary><dl><dt>方法</dt><dd data-exchange-method></dd><dt>URL</dt><dd data-exchange-url></dd></dl></details>
   </article>`;
 
@@ -988,6 +1017,17 @@ function renderAll() {
     const panel = byId(`tab-${id}`);
     setVisible(panel, state.tab === id);
   }
+  const pageHeadings = {
+    workspace: ['研究工作台', '从候选信号到形态判断，查看图表并运行识别。'],
+    references: ['参考图库', '管理后续识别共用的形态参考图。'],
+    history: ['识别记录', '查看历史结果、人工复核与 API 原始记录。'],
+    settings: ['API 设置', '配置本机模型连接并查看 API 调用记录。'],
+  };
+  const [title, description] = pageHeadings[state.tab] || pageHeadings.workspace;
+  const pageTitle = byId('page-title');
+  const pageDescription = byId('page-description');
+  if (pageTitle) pageTitle.textContent = title;
+  if (pageDescription) pageDescription.textContent = description;
 }
 
 async function loadStatus() {
@@ -1403,8 +1443,14 @@ async function openRun(id) {
   state.analysisError = '';
   state.notice = '';
   const imageUrl = safeApiImageUrl(run.image_url);
-  state.selectedImage = imageUrl ? { key: `run:${id}`, name: asText(run.symbol || run.id, '历史图表'), source: 'history', signal: null, loading: true, previewUrl: null, dataUrl: null } : null;
+  const runSymbol = asText(run.symbol || run.signal?.symbol, '');
+  const runTimeframe = asText(run.timeframe || run.signal?.timeframe, '');
+  const imageName = runSymbol
+    ? `${runSymbol.replace(/-SWAP$/, '')}${runTimeframe ? ` · ${runTimeframe}` : ''}`
+    : asText(run.image_name, '历史图表');
+  state.selectedImage = imageUrl ? { key: `run:${id}`, name: imageName, source: 'history', signal: null, loading: true, previewUrl: null, dataUrl: null } : null;
   renderAll();
+  window.scrollTo(0, 0);
   if (!imageUrl) {
     state.notice = '这条识别记录没有同源图表预览；结果仍可查看和人工复核。';
     renderNotice();
@@ -1563,15 +1609,22 @@ async function testConnection() {
 
 function switchTab(tab) {
   if (!['workspace', 'references', 'history', 'settings'].includes(tab)) return;
+  const changed = state.tab !== tab;
   state.tab = tab;
   if (tab !== 'workspace') pauseLivePolling();
   if (tab === 'workspace') pollLiveChart();
   if (tab === 'references' && !state.referencesDirty && !state.referencesSaving) loadReferences();
   renderAll();
+  if (changed) window.scrollTo(0, 0);
   byId(`tab-${tab}-button`).focus({ preventScroll: true });
 }
 
 document.addEventListener('click', (event) => {
+  if (event.target.closest('.brand')) {
+    event.preventDefault();
+    switchTab('workspace');
+    return;
+  }
   const tabButton = event.target.closest('[data-tab]');
   if (tabButton) {
     switchTab(tabButton.dataset.tab);
@@ -1626,13 +1679,13 @@ document.addEventListener('click', (event) => {
 
 document.addEventListener('keydown', (event) => {
   const tabButton = event.target.closest('[data-tab]');
-  if (tabButton && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+  if (tabButton && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const tabs = Array.from(document.querySelectorAll('.nav-tab[data-tab]'));
     let index = tabs.indexOf(tabButton);
     if (event.key === 'Home') index = 0;
     else if (event.key === 'End') index = tabs.length - 1;
-    else index = (index + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length;
+    else index = (index + (['ArrowRight', 'ArrowDown'].includes(event.key) ? 1 : tabs.length - 1)) % tabs.length;
     switchTab(tabs[index].dataset.tab);
   }
   if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey) {

@@ -14,13 +14,13 @@
     currentTheme = theme;
     root.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]').content =
-      theme === 'dark' ? '#0a1016' : '#f1f5f7';
+      theme === 'dark' ? '#0a1016' : '#f4f7f9';
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;
     const action = theme === 'light' ? '切换到深色模式' : '切换到浅色模式';
     toggle.setAttribute('aria-label', action);
     toggle.title = action;
-    toggle.querySelector('.theme-icon').textContent = theme === 'light' ? '☀' : '☾';
+    toggle.querySelector('.theme-icon').className = `theme-icon ui-icon icon-${theme === 'light' ? 'sun' : 'moon'}`;
     toggle.querySelector('.theme-label').textContent = theme === 'light' ? '浅色' : '深色';
   }
 

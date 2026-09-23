@@ -27,7 +27,12 @@ is unavailable, image upload still works.
 
 The chart is the primary workspace, with a narrow candidate list and results
 below. Page and interactive chart use the same SPIKE palette and system font.
-The top-right light/dark switch remembers the choice in browser storage.
+Version 0.3.0 groups the workbench, shared references, history and model settings
+in a persistent sidebar. Its light/dark switch remembers the choice in browser
+storage. On narrow screens navigation moves above the chart, and the candidate
+list collapses. History includes original image thumbnails; evidence and raw API
+inputs/outputs remain accessible without mixing them into the main chart tools.
+Lucide 0.468.0 SVG icons are bundled with their license under `static/vendor/lucide/`.
 TradingView Lightweight Charts 4.2.0 is bundled locally, including its license
 and notice; the chart supports pan, zoom, crosshair and resetting the view.
 Its time axis uses UTC+8. Uploaded images and saved inference snapshots retain
