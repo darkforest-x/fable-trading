@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-ma-dense-launch-backtest-20260923-v1",
+  "symbols": {
+    "BTC_USDT_SWAP": {"paths": ["data/kline_lowtf_20260922/okx_BTC_USDT_SWAP_1m_1402560.csv", "data/kline_lowtf_20260922/okx_api_BTC_USDT_SWAP_1m_20260831T1600_20260922T1400.csv"]},
+    "ETH_USDT_SWAP": {"paths": ["data/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv", "data/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv"]}
+  },
+  "timeframes_min": [1, 3, 5, 15, 30, 60],
+  "window_start": "2024-09-23T00:00:00+00:00",
+  "window_end": "2026-09-22T14:00:00+00:00",
+  "reference_pack": "experiments/active/exp-ma-dense-launch-pine-20260923-v1/reference_pack.json",
+  "r_multiple": 3.0,
+  "horizon_hours": 12.0,
+  "round_trip_cost": 0.002,
+  "dedupe_minutes": 240,
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008],
+  "control_seed": 923101,
+  "bootstrap": 2000,
+  "flips": 10000,
+  "p_threshold": 0.01,
+  "training_eligible": false,
+  "production_eligible": false
+}
