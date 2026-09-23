@@ -2,6 +2,7 @@
 
 ## 最新：SPIKE + 智谱视觉研究工作台（2026-09-23）
 
+- 0.2.1 修复 JSON 输出兼容：当前 `glm-5.3-flash` 显式请求 `json_object`，只拆完整单一 JSON/无语言代码围栏，仍严格校验结束状态、字段与框；不修补截断、不自动重试。NEIRO 20:31旧失败原文缺失，确切语法原因不可追溯；同一待判图+原3张参考+原规则在部署后run `d107e463615e41da9dc16f74d6f4d148` 实测HTTP200/完整JSON，约13.98秒，原图/参考哈希一致，旧记录未改。185项相关/边界测试通过；模型与low档不变，不能将格式修复当识别准确率提升。
 - 0.2.0 新增“模型设置 → API 原始记录”：在解析前保存实际序列化请求正文及完整 HTTP 响应，支持图片预览、完整 Base64 原文、下载、错误和历史跳转；Key 不落账，旧记录不补造原文。实测 EGLD 15m run `6f4a440f5ea94b93a8cfacbc07321dbf` 为待判图+5张参考图，HTTP200、8,817 tokens、cached_tokens=0；请求图片哈希逐项对应运行快照，导出与原文一致。173项相关/边界测试通过，浏览器明暗主题及记录切换通过。当前每次仍是独立 Chat Completions 请求并重发全部参考图，未接入 Responses 会话续聊；只验证工程链路。
 - 入口 `experiments/active/exp-spike-gemini-vision-20260923-v1/`，应用 `yoyo/vision_research/`；本机 `http://127.0.0.1:8771`，由 `.venv/bin/python -m yoyo.vision_research.manage start` 管理用户 LaunchAgent。只读现有 SPIKE 8766及同源OKX公共行情；实际子代理 GPT-6 Luna/max 已核实。
 - TradingView Lightweight Charts 4.2.0 为主画布，可平移缩放；同一套 SPIKE 明暗配色与字体。工作台每10秒刷新当前120根K线（包含明确标注的未收盘bar），每30秒刷新候选；默认信号后12根内可手动识别，页面可调6/12/24/48根。不可变snapshot绑定当次OHLC/MA、观察时间与截图，90秒TTL，服务端同时检查窗口到期；返回实时图表再刷新。历史signal_close API与旧识别记录保持原语义，上传图片时间边界不作验证声明。

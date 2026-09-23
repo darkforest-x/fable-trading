@@ -95,7 +95,7 @@ def test_analyze_sends_candidate_then_eight_references_as_png_data_urls() -> Non
     assert body["max_tokens"] == MAX_OUTPUT_TOKENS
     assert body["thinking"] == {"type": "enabled"}
     assert body["reasoning_effort"] == "low"
-    assert "response_format" not in body
+    assert body["response_format"] == {"type": "json_object"}
     assert "tools" not in body
 
     parts = body["messages"][0]["content"]
@@ -144,6 +144,7 @@ def test_check_connection_uses_one_minimal_text_completion_and_reports_token_use
     assert bodies[0]["messages"] == [{"role": "user", "content": "请只回复 OK。"}]
     assert bodies[0]["max_tokens"] == CONNECTION_TEST_MAX_TOKENS
     assert bodies[0]["stream"] is False
+    assert "response_format" not in bodies[0]  # The connection test requests plain OK.
     assert "thinking" in bodies[0]  # GLM-5.3 Flash only supports enabled thinking.
     assert "少量 token" in result["message"]
     assert "尚未验证图片审阅" in result["message"]
@@ -244,6 +245,48 @@ def test_invalid_json_and_decision_geometry_are_rejected(content: str, expected_
         with pytest.raises(ZhipuError) as caught:
             adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
     assert caught.value.code == expected_code
+
+
+@pytest.mark.parametrize("wrapper", ["{}", " \n{}\n ", "```json\n{}\n```", "```\r\n{}\r\n```", "```JSON  \n{}\n```"])
+def test_complete_json_with_only_presentation_wrapping_is_accepted(wrapper: str) -> None:
+    original = decision_text(summary="Keep literal braces {x}, quotes and backticks ` unchanged.")
+    content = wrapper.format(original)
+    seen = []
+    def respond(request):
+        seen.append(request)
+        return httpx.Response(200, json=completion(content))
+    with client(respond) as adapter:
+        result = adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+        assert result["decision"] == json.loads(original)
+        assert json.loads(adapter.last_exchange["response"]["body_text"])["choices"][0]["message"]["content"] == content
+    assert len(seen) == 1
+
+
+@pytest.mark.parametrize("content", [
+    "Here is the answer:\n" + decision_text(),
+    decision_text() + "\nExtra explanation",
+    decision_text() + "\n" + decision_text(verdict="no_match"),
+    "```json\n" + decision_text(),
+    "```json\n" + decision_text()[:-1] + "\n```",
+    "```python\n" + decision_text() + "\n```",
+])
+def test_wrapping_compatibility_never_repairs_or_extracts_ambiguous_content(content: str) -> None:
+    with client(lambda request: httpx.Response(200, json=completion(content))) as adapter:
+        with pytest.raises(ZhipuError) as caught:
+            adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+    assert caught.value.code == "invalid_json"
+
+
+def test_fenced_json_still_requires_valid_decision_and_normal_finish() -> None:
+    for content, finish, expected in [
+        (decision_text(box_2d=[900, 800, 100, 200]), "stop", "invalid_decision"),
+        (decision_text(), "length", "truncated_response"),
+    ]:
+        payload = completion("```json\n" + content + "\n```", finish_reason=finish)
+        with client(lambda request: httpx.Response(200, json=payload)) as adapter:
+            with pytest.raises(ZhipuError) as caught:
+                adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+        assert caught.value.code == expected
 
 
 def test_redirect_is_not_followed() -> None:

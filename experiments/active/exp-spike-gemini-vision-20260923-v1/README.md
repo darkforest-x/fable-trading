@@ -93,6 +93,17 @@ run-list response. The UI folds Base64 only for the readable request preview;
 the export retains it. Records survive restart, with unfinished requests marked
 interrupted. A run's `api_exchange_id` identifies its exact API exchange.
 
+Version 0.2.1 requests `response_format: {"type": "json_object"}` for
+`glm-5.3-flash` only. Its model guide advertises structured output while the
+generic API guide labels that parameter text-only; the combination was verified
+with a real four-image request on 2026-09-23. Other model IDs retain their current
+request format. The parser also accepts one complete JSON object wrapped in a
+single JSON/unlabelled Markdown code fence. It never repairs truncation, extracts
+an answer from surrounding prose, or treats reasoning as the final answer.
+Finish-state and strict Decision/box validation still apply, and the recorded raw
+response is unchanged. The old NEIRO 20:31 failure predates raw logging, so its
+precise formatting defect is unknown; fresh replays are separate records.
+
 Each current recognition remains independent: one candidate and all saved
 references are included on every request. Saving references locally avoids
 re-uploading them by hand, but creates no server-side conversation. Zhipu's
@@ -151,8 +162,8 @@ Provider sources: [chat completions](https://docs.bigmodel.cn/api-reference/цибх
 [GLM-5.3-Flash vision](https://docs.bigmodel.cn/cn/guide/models/vlm/glm-5.3-flash).
 The default is `glm-5.3-flash`; its thinking mode cannot be disabled. The client
 uses a bounded reasoning budget and validates the returned JSON against the
-local `Decision` schema. Vision requests do not assume support for text-only
-`response_format` fields. No provider-side storage opt-out is asserted.
+local `Decision` schema. JSON mode is limited to the live-verified model as
+described above. No provider-side storage opt-out is asserted.
 Saved credentials include the provider identity; legacy Gemini keys are never
 sent to BigModel. The supplied owner key stays in ignored private local settings.
 Offline contract tests do not establish live access or recognition quality.

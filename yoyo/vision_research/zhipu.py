@@ -1,8 +1,9 @@
 """Narrow Zhipu Chat Completions adapter for manual chart review.
 
 Requests contain one candidate image followed by optional reference images.
-The vision endpoint receives a prompt-embedded JSON schema, then the response
-is parsed and checked locally with ``Decision``. No tools, retries, redirects,
+The vision endpoint receives a prompt-embedded JSON schema; GLM-5.3-Flash also
+uses live-verified JSON mode. Responses are checked locally with ``Decision``.
+No tools, retries, redirects,
 or trading integration are used. No conversation IDs or stored provider state
 are reused.
 """
@@ -29,8 +30,9 @@ from .images import MAX_PIXELS, MAX_TOTAL_IMAGE_BYTES
 
 CHAT_COMPLETIONS_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 # Official request and vision examples: https://docs.bigmodel.cn/api-reference/模型-api/对话补全
-# The vision request schema does not list response_format, so JSON is prompted
-# and validated locally rather than sending the text-only structured-output field.
+# GLM-5.3-Flash's model guide lists structured output, but the generic API guide
+# still calls response_format text-only. A 2026-09-23 four-image live request
+# accepted json_object. Enable it only for that verified model, not all vision IDs.
 MAX_TIMEOUT_SECONDS = 90.0
 MAX_OUTPUT_TOKENS = 8192
 CONNECTION_TEST_MAX_TOKENS = 1024
@@ -38,9 +40,10 @@ MAX_IMAGE_BYTES = 5_000_000  # Provider requires less than 5 MB per image.
 MAX_CRITERIA_CHARS = 8000
 ALLOWED_MIME_TYPES = frozenset({"image/png"})
 _MODEL_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,99}\Z")
-PROMPT_VERSION = "spike-vision-zhipu-v1"
+PROMPT_VERSION = "spike-vision-zhipu-v2"
+_JSON_FENCE = re.compile(r"```(?:json)?[ \t]*\r?\n(?P<body>[\s\S]*?)\r?\n```", re.IGNORECASE)
 
-# Zhipu's vision request schema does not expose response_format. Keep the
+# JSON mode guarantees neither Decision fields nor their geometry. Keep the
 # expected structure in the prompt and enforce it locally with Decision.
 _REVIEW_INSTRUCTIONS = """你是 SPIKE 视觉研究工作台中的人工辅助形态审阅器。
 待判图片是内容中的第一张图片；之后的图片都是参考材料，只帮助理解用户标准，不能自动视为正例，也不能改变待判图的证据。
@@ -197,6 +200,29 @@ def _thinking_options(model: str) -> dict[str, Any]:
         # the supported minimum effort; disabled is not supported by GLM-5.3.
         return {"thinking": {"type": "enabled"}, "reasoning_effort": "low"}
     return {}
+
+
+def _parse_decision(text: str) -> dict[str, Any]:
+    """Accept one complete JSON answer, optionally in one Markdown code fence.
+
+    Remove only presentation wrapping; never extract a substring from prose,
+    repair truncated JSON, coerce fields, or fall back to reasoning_content.
+    The original HTTP response remains unchanged in the exchange trace.
+    """
+    content = text.strip()
+    fenced = _JSON_FENCE.fullmatch(content)
+    if fenced:
+        content = fenced.group("body")
+    try:
+        decoded = json.loads(content)
+    except (TypeError, ValueError) as exc:
+        raise ZhipuError(
+            "invalid_json", "智谱已返回内容，但回复无法解析为完整 JSON；请查看本次 API 原始记录。"
+        ) from exc
+    try:
+        return Decision.model_validate(decoded).model_dump(mode="json")
+    except ValidationError as exc:
+        raise ZhipuError("invalid_decision", "智谱返回内容不符合图片审阅结果结构。") from exc
 
 
 class ZhipuClient:
@@ -367,6 +393,8 @@ class ZhipuClient:
             "max_tokens": MAX_OUTPUT_TOKENS,
             "stream": False,
         }
+        if self.model == "glm-5.3-flash":
+            request_body["response_format"] = {"type": "json_object"}
         request_body.update(_thinking_options(self.model))
 
         started = time.perf_counter()
@@ -379,14 +407,7 @@ class ZhipuClient:
         text = message.get("content")
         if not isinstance(text, str) or not text.strip():
             raise ZhipuError("no_result", "智谱完成了请求，但没有返回图片审阅文本。")
-        try:
-            decoded = json.loads(text)
-        except (TypeError, ValueError, json.JSONDecodeError) as exc:
-            raise ZhipuError("invalid_json", "智谱返回内容不是有效的结构化 JSON。") from exc
-        try:
-            decision = Decision.model_validate(decoded).model_dump(mode="json")
-        except ValidationError as exc:
-            raise ZhipuError("invalid_decision", "智谱返回内容不符合图片审阅结果结构。") from exc
+        decision = _parse_decision(text)
 
         response_id = payload.get("id")
         if not isinstance(response_id, str) or not response_id:
