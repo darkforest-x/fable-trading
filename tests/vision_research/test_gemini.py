@@ -168,8 +168,59 @@ def test_http_errors_are_safe_and_rate_limit_is_not_retried(status_code: int, co
             client.analyze(image("candidate.png", b"candidate"), [], "只看可见形态。")
 
     assert caught.value.code == code
+    assert caught.value.http_status == status_code
+    assert f"HTTP {status_code}" in str(caught.value)
     assert "provider-secret-body" not in str(caught.value)
     assert len(seen) == 1
+
+
+@pytest.mark.parametrize(
+    ("status", "provider_code", "expected_code", "hint"),
+    [(402, "payment_required", "payment_required", "预付款余额不足"),
+     (416, "out_of_range", "out_of_range", "超出允许范围"),
+     (422, "invalid_request", "invalid_request", "参数"),
+     (400, "failed_precondition", "invalid_request", "结算"),
+     (429, "quota_exceeded", "rate_limited", "配额已用完")],
+)
+def test_provider_diagnostics_distinguish_billing_and_request_errors(status, provider_code, expected_code, hint):
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(status, json={"error": {
+            "code": provider_code, "message": "provider-secret-body", "details": "test-key"}})
+
+    with make_client(respond) as client:
+        with pytest.raises(GeminiError) as caught:
+            client.analyze(image("candidate.png", b"candidate"), [], "只看可见形态。")
+    exc = caught.value
+    assert exc.diagnostics() == {"code": expected_code, "http_status": status, "provider_code": provider_code}
+    assert hint in str(exc) and f"HTTP {status}" in str(exc)
+    assert "provider-secret-body" not in str(exc) and "test-key" not in str(exc)
+    assert len(calls) == 1
+
+
+@pytest.mark.parametrize("body", [
+    {"error": {"code": "provider-secret-code", "message": "provider-secret-message"}},
+    {"error": []}, ["provider-secret-value"], None,
+])
+def test_unknown_http_errors_keep_status_without_reflecting_untrusted_fields(body):
+    with make_client(lambda request: httpx.Response(451, json=body)) as client:
+        with pytest.raises(GeminiError) as caught:
+            client.check_connection()
+    assert caught.value.diagnostics() == {"code": "provider_error", "http_status": 451, "provider_code": None}
+    assert "HTTP 451" in str(caught.value)
+    assert "provider-secret" not in str(caught.value)
+
+
+def test_non_json_payment_error_still_reports_http_402():
+    with make_client(lambda request: httpx.Response(402, text="private-html")) as client:
+        with pytest.raises(GeminiError) as caught:
+            client.check_connection()
+    assert caught.value.http_status == 402
+    assert caught.value.provider_code is None
+    assert "预付款余额不足" in str(caught.value)
+    assert "private-html" not in str(caught.value)
 
 
 def test_timeout_is_safe_and_does_not_retry() -> None:

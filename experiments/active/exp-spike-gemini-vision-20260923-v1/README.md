@@ -37,6 +37,10 @@ reference images, edit the criteria, then explicitly start recognition. Only
 this action sends selected pixels and criteria to Google's
 `generativelanguage.googleapis.com` API. No search, order or notification tools
 are available to the model. Connection testing checks key/model access only.
+It does not verify inference quota or billing. Failed recognition records retain
+the HTTP status, an allowlisted provider error code and elapsed time without
+storing provider response text. HTTP 402 indicates depleted Prepay credits;
+unknown HTTP statuses remain visible for diagnosis. Requests are not retried.
 
 SPIKE input charts use up to 120 closed bars ending exactly at the selected
 signal close, with existing causal SMA/EMA values and no signal annotations.

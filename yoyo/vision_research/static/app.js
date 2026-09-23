@@ -91,7 +91,7 @@ async function readResponse(response) {
     try { payload = await response.text(); } catch { payload = ''; }
   }
   if (!response.ok) {
-    const detail = payload && typeof payload === 'object' ? payload.detail : payload;
+    const detail = payload && typeof payload === 'object' ? payload.detail || payload.message : payload;
     throw new Error(asText(detail, `请求失败（HTTP ${response.status}）`));
   }
   return payload;
@@ -357,7 +357,7 @@ function renderResult() {
   const risksHtml = risks.length ? `<ul class="result-list">${risks.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未列出风险说明。</span>';
   const model = asText(run.model, state.status?.model || state.model);
   const created = formatDate(run.created_at);
-  const latency = Number.isFinite(Number(run.latency_ms)) ? `${Math.round(Number(run.latency_ms))} ms` : '';
+  const latency = run.latency_ms != null && Number.isFinite(Number(run.latency_ms)) ? `${Math.round(Number(run.latency_ms))} ms` : '';
   const usage = run.usage && typeof run.usage === 'object' ? Object.entries(run.usage).map(([key, value]) => `${key}: ${asText(value)}`).join(' · ') : '';
   const referenceNames = Array.isArray(run.references) ? run.references.map((reference) => asText(reference?.name, '参考图')).filter(Boolean) : [];
   const criteria = asText(run.criteria, '记录中没有保存形态规则。');

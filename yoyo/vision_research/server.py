@@ -14,6 +14,7 @@ import json
 import os
 import re
 import threading
+import time
 import uuid
 from pathlib import Path
 from typing import Optional
@@ -159,7 +160,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
         try:
             return await run_in_threadpool(client.check_connection)
         except GeminiError as exc:
-            return JSONResponse({"ok": False, "model": status()["model"], "message": str(exc)}, status_code=502)
+            return JSONResponse({"ok": False, "model": status()["model"], "message": str(exc),
+                                 "error_details": exc.diagnostics()}, status_code=502)
         finally:
             client.close()
             inference_lock.release()
@@ -188,17 +190,24 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             "criteria": body.criteria, "criteria_sha256": hashlib.sha256(body.criteria.encode()).hexdigest(),
             "prompt_version": "spike-vision-v1", "schema_version": 1, "provenance": provenance,
             "references": [{"name": item.name, "sha256": item.sha256, "image_url": store.put_image(item)} for item in references],
-            "decision": None, "usage": {}, "latency_ms": None, "error": None, "review": None,
+            "decision": None, "usage": {}, "latency_ms": None, "error": None,
+            "error_details": None, "review": None,
             "review_history": [], "training_eligible": False, "production_eligible": False,
         }
         store.save(record)
+        started = time.perf_counter()
         try:
             result = client.analyze(image=image, references=references, criteria=body.criteria)
             record.update(result, status="completed", completed_at=utc_now())
         except GeminiError as exc:
-            record.update(status="failed", error=str(exc), completed_at=utc_now())
+            record.update(status="failed", error=str(exc), error_details=exc.diagnostics(),
+                          latency_ms=round((time.perf_counter() - started) * 1000, 3),
+                          completed_at=utc_now())
         except Exception:
-            record.update(status="failed", error="识别请求异常；结果未知，未自动重试", completed_at=utc_now())
+            record.update(status="failed", error="识别请求异常；结果未知，未自动重试",
+                          error_details={"code": "internal_error", "http_status": None, "provider_code": None},
+                          latency_ms=round((time.perf_counter() - started) * 1000, 3),
+                          completed_at=utc_now())
         store.save(record)
         return record
 

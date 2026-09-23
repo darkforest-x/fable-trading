@@ -122,6 +122,28 @@ def test_failed_provider_is_recorded_without_retry(client):
     assert client.post(f"/api/runs/{run['id']}/review", json={"verdict": "accepted"}).status_code == 409
 
 
+def test_safe_provider_diagnostics_survive_record_and_export(client, monkeypatch):
+    configure(client)
+
+    def payment_error(*args, **kwargs):
+        raise GeminiError("payment_required", "预付款余额不足（HTTP 402 · payment_required）",
+                          http_status=402, provider_code="payment_required")
+
+    monkeypatch.setattr(FakeProvider, "analyze", payment_error)
+    monkeypatch.setattr(FakeProvider, "check_connection", payment_error)
+    diagnostic = {"code": "payment_required", "http_status": 402, "provider_code": "payment_required"}
+    run = client.post("/api/analyze", json={"image_data_url": image_url()}).json()
+    assert run["status"] == "failed"
+    assert run["error_details"] == diagnostic
+    assert run["latency_ms"] is not None and run["latency_ms"] >= 0
+    saved = client.get(f"/api/runs/{run['id']}/export")
+    assert saved.json()["error_details"] == diagnostic and KEY not in saved.text
+    probe = client.post("/api/connection-test", json={})
+    assert probe.status_code == 502
+    assert probe.json()["error_details"] == diagnostic
+    assert "HTTP 402" in probe.json()["message"] and KEY not in probe.text
+
+
 def test_invalid_or_ambiguous_inputs_never_reach_provider(client):
     configure(client)
     cases = [

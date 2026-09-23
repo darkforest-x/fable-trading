@@ -57,28 +57,81 @@ box_2d 若有值，使用待判图的 0..1000 归一化坐标，顺序为 [ymin,
 class GeminiError(Exception):
     """A provider failure with a safe user-facing Chinese message and code."""
 
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, *, http_status: int | None = None,
+                 provider_code: str | None = None):
         self.code = code
         self.message = message
+        self.http_status = http_status
+        self.provider_code = provider_code
         super().__init__(message)
+
+    def diagnostics(self) -> dict[str, Any]:
+        """Return only safe classifications, never a raw provider response."""
+        return {"code": self.code, "http_status": self.http_status,
+                "provider_code": self.provider_code}
+
+
+# Only documented machine codes can cross the provider boundary. The message
+# field can reflect request data, so it is never persisted or shown verbatim.
+# Source: https://ai.google.dev/gemini-api/docs/api-errors
+_PROVIDER_ERRORS = {
+    "invalid_request": "Gemini 拒绝了请求参数，请检查图片与结构化输出配置。",
+    "failed_precondition": "Gemini 项目尚未满足调用条件，请检查项目结算及服务配置。",
+    "out_of_range": "Gemini 请求参数超出允许范围，请检查输入与生成参数。",
+    "parameter_unknown": "Gemini 不支持请求中的某个参数，需要更新接口配置。",
+    "authentication": "Gemini API Key 缺失、无效或已失效。",
+    "payment_required": "Gemini 预付款余额不足，请在 Google AI Studio 检查此 Key 所属项目的结算账户；充值前重复请求不会成功。",
+    "permission_denied": "当前 API Key 没有访问此资源的权限，请检查项目与密钥限制。",
+    "not_found": "Gemini 请求的资源不存在，请检查接口路径。",
+    "model_not_found": "指定的 Gemini 模型不存在或当前 API Key 无权访问；请核对模型 ID。",
+    "already_exists": "Gemini 请求与已有资源冲突。",
+    "aborted": "Gemini 因请求冲突中止了处理；没有自动重试。",
+    "rate_limit_exceeded": "Gemini 请求达到速率限制，请稍后再试。",
+    "quota_exceeded": "Gemini 项目配额已用完，请检查额度与重置时间。",
+    "too_many_requests": "Gemini 请求过于频繁，请稍后再试。",
+    "cancelled": "Gemini 请求已取消。",
+    "api_error": "Gemini 服务内部出错，请稍后再试。",
+    "unimplemented": "Gemini 暂不支持此接口功能。",
+    "service_unavailable": "Gemini 服务暂时不可用，请稍后再试。",
+    "deadline_exceeded": "Gemini 服务处理超时；没有自动重试。",
+}
 
 
 def _request_error(response: httpx.Response) -> GeminiError:
-    """Map a provider HTTP status without reflecting its response body."""
+    """Preserve the HTTP status and an allowlisted code, discarding raw text."""
     status = response.status_code
-    if status == 400:
-        return GeminiError("invalid_request", "Gemini 拒绝了请求参数，请检查输入图片和结构化输出配置。")
-    if status == 401 or status == 403:
-        return GeminiError("authentication_failed", "Gemini API Key 无效或没有访问此模型的权限。")
-    if status == 404:
-        return GeminiError("model_not_found", "指定的 Gemini 模型不存在或当前 API Key 无权访问；请核对模型 ID。")
-    if status == 429:
-        return GeminiError("rate_limited", "Gemini 请求过于频繁或额度暂不可用，请稍后再试。")
+    provider_code = None
+    try:
+        payload = response.json()
+        error = payload.get("error") if isinstance(payload, dict) else None
+        value = error.get("code") if isinstance(error, dict) else None
+        if isinstance(value, str) and value in _PROVIDER_ERRORS:
+            provider_code = value
+    except ValueError:
+        pass
+    code, message = {
+        400: ("invalid_request", _PROVIDER_ERRORS["invalid_request"]),
+        401: ("authentication_failed", _PROVIDER_ERRORS["authentication"]),
+        402: ("payment_required", _PROVIDER_ERRORS["payment_required"]),
+        403: ("authentication_failed", _PROVIDER_ERRORS["permission_denied"]),
+        404: ("model_not_found", _PROVIDER_ERRORS["model_not_found"]),
+        408: ("timeout", _PROVIDER_ERRORS["deadline_exceeded"]),
+        409: ("conflict", _PROVIDER_ERRORS["aborted"]),
+        413: ("input_too_large", "Gemini 拒绝了过大的请求，请减少图片大小或参考图数量。"),
+        415: ("unsupported_image_type", "Gemini 不支持本次请求的媒体格式。"),
+        416: ("out_of_range", _PROVIDER_ERRORS["out_of_range"]),
+        422: ("invalid_request", "Gemini 无法处理请求内容，请检查图片和接口参数。"),
+        429: ("rate_limited", "Gemini 达到速率或配额限制，请检查项目额度。"),
+    }.get(status, ("provider_error", "Gemini 请求失败；请按错误码检查服务状态。"))
     if 300 <= status < 400:
-        return GeminiError("redirect_rejected", "Gemini 返回了重定向；为保护 API Key，本请求已停止。")
-    if status >= 500:
-        return GeminiError("provider_unavailable", "Gemini 服务暂时不可用，请稍后再试。")
-    return GeminiError("provider_error", "Gemini 请求未成功，请检查服务状态后重试。")
+        code, message = "redirect_rejected", "Gemini 返回了重定向；为保护 API Key，本请求已停止。"
+    elif status >= 500:
+        code, message = "provider_unavailable", _PROVIDER_ERRORS["service_unavailable"]
+    if provider_code and not 300 <= status < 400:
+        message = _PROVIDER_ERRORS[provider_code]
+    diagnostic = f"HTTP {status}" + (f" · {provider_code}" if provider_code else "")
+    return GeminiError(code, f"{message}（{diagnostic}）", http_status=status,
+                       provider_code=provider_code)
 
 
 def _validate_image(image: ImageInput, label: str) -> None:
