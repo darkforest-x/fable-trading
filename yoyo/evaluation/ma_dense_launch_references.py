@@ -183,12 +183,18 @@ def render_pine(pack: Mapping[str, Any], template: str) -> str:
 
 
 def _pool(target: str, rows: Sequence[Sequence[float]], decimals: int) -> str:
-    """One `array.from` call; continuation lines use a two-space indent, as Pine requires."""
+    """Reference rows live inside their own function; the main body keeps one line each.
+
+    TradingView limits both a single scope's length (CE10205) and the main
+    body's (CE10295), and continuation lines may not be indented by a multiple
+    of four, hence the six-space rows.
+    """
     literals = ['"' + ",".join(f"{float(v):.{decimals}f}" for v in row) + '"' for row in rows]
     if len(literals) == 1:
         return f"var array<float> {target} = f_parse(array.from({literals[0]}))"
-    body = ",\n  ".join(literals)
-    return f"var array<float> {target} = f_parse(array.from(\n  {body}))"
+    body = ",\n      ".join(literals)
+    return (f"f_pool_{target.lower()}() =>\n    f_parse(array.from(\n      {body}))\n\n"
+            f"var array<float> {target} = f_pool_{target.lower()}()")
 
 
 def main() -> None:

@@ -42,13 +42,20 @@ def test_generated_pine_matches_template_and_pack():
     generated = refs.GENERATED.read_text()
     assert generated == refs.render_pine(json.loads(PACK.read_text()), refs.TEMPLATE.read_text())
     assert "__DATA__" not in generated and "__PERFECT_THRESHOLD__" not in generated
-    # data arrives as five `array.from` statements, not a long if block (Pine CE10205)
+    # TradingView caps a single scope (CE10205) and the main body (CE10295):
+    # each pool parses inside its own function and the main body keeps one line per pool.
     assert "f_load(" not in generated and "if barstate.isfirst" not in generated
-    for name in ("S1SCALE", "S1REF", "S2ANCHOR", "S2BAD", "S2FAMILY"):
-        assert generated.count(f"var array<float> {name} = f_parse(array.from(") == 1, name
-    assert sum(line.startswith('  "') for line in generated.split("\n")) == 50 + 2 + 6 + 50
-    assert "PERFECT_THRESHOLD = 0.3611898959" in generated
-    assert "DIST_SCALE = 1.1995844783" in generated
+    for name in ("S1REF", "S2ANCHOR", "S2BAD", "S2FAMILY"):
+        assert generated.count(f"var array<float> {name} = f_pool_{name.lower()}()") == 1, name
+    assert generated.count("var array<float> S1SCALE = f_parse(array.from(") == 1
+    assert sum(line.startswith('      "') for line in generated.split("\n")) == 50 + 2 + 6 + 50
+    body = [line for line in generated.split("\n") if line and not line.startswith((" ", "\t"))]
+    assert len(body) < 160, len(body)
+    # functions may not assign to globals, so mutable counters live in arrays
+    assert "var array<int> COUNT" in generated and "nSig += 1" not in generated
+    # constants are inlined at their use sites to keep the main body short
+    assert "quality >= 0.3611898959" in generated
+    assert generated.count("1.1995844783") >= 3
 
 
 def test_mirror_distances_match_the_frozen_research_functions():
