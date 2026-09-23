@@ -111,13 +111,6 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
-function formatPrice(value) {
-  if (value === null || value === undefined || value === '') return '';
-  const numeric = Number(value);
-  if (Number.isFinite(numeric)) return new Intl.NumberFormat('zh-CN', { maximumSignificantDigits: 8 }).format(numeric);
-  return asText(value);
-}
-
 function sideLabel(side) {
   return ({ long: '做多方向', short: '做空方向', unknown: '方向未确定' })[side] || (side ? asText(side) : '方向未返回');
 }
@@ -168,14 +161,11 @@ function renderEligibility() {
 function renderSignalSource() {
   const caption = byId('signal-source');
   const spike = state.status?.spike;
-  const parts = [];
-  if (spike?.source) parts.push(`来源：${sourceLabel(spike.source)}`);
-  if (spike && Number.isFinite(Number(spike.count))) parts.push(`${Number(spike.count)} 条`);
-  if (state.signalsLoading) parts.unshift('正在读取候选');
-  else if (state.signalsError) parts.unshift('读取失败');
-  else if (spike?.available === false) parts.unshift('数据源当前不可用');
-  else if (!parts.length) parts.push('本机 SPIKE 候选');
-  caption.textContent = parts.join(' · ');
+  caption.textContent = state.signalsLoading ? '正在读取候选…'
+    : state.signalsError ? '读取失败'
+      : spike?.available === false ? 'SPIKE 暂不可用'
+        : `SPIKE · ${state.signals.length} 条信号`;
+  caption.title = spike?.source ? `来源：${sourceLabel(spike.source)}` : '';
 
   const warning = state.signalsWarning || spike?.warning || '';
   if (warning) {
@@ -216,11 +206,9 @@ function renderSignals() {
     const timeframe = asText(item.timeframe, '周期未提供');
     const side = sideLabel(item.side);
     const time = item.signal_at ? formatDate(item.signal_at) : '时间未提供';
-    const price = formatPrice(item.price);
-    return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选">
-      <span class="signal-topline"><strong>${escapeHtml(symbol)}</strong><span class="signal-id">${escapeHtml(id || 'ID 未提供')}</span></span>
-      <span class="signal-meta"><span>${escapeHtml(timeframe)}</span><span class="signal-side ${sideClass}">${escapeHtml(side)}</span></span>
-      <span class="signal-bottomline"><time>${escapeHtml(time)}</time>${price ? `<span class="signal-price">${escapeHtml(price)}</span>` : ''}</span>
+    return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(id)}">
+      <span class="signal-topline"><strong>${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
+      <span class="signal-meta"><span class="signal-side ${sideClass}">${escapeHtml(side.replace('方向', ''))}</span><time>${escapeHtml(time)}</time></span>
     </button>`;
   }).join('');
 }
@@ -237,6 +225,7 @@ function renderImage() {
   const box = byId('box-overlay');
 
   byId('clear-input').disabled = !image;
+  setVisible(chip, Boolean(image));
   if (!image) {
     setVisible(empty, true);
     setVisible(loading, false);
@@ -256,8 +245,8 @@ function renderImage() {
   setVisible(display, Boolean(image.previewUrl) && !image.loading && !image.error);
   if (image.previewUrl && preview.src !== image.previewUrl) preview.src = image.previewUrl;
   preview.alt = image.name ? `当前图表：${image.name}` : '当前选择的图表';
-  chip.textContent = image.source === 'signal' ? `SPIKE 候选 · ${image.signal?.symbol || image.signal?.id || ''}`
-    : image.source === 'history' ? `识别记录 · ${image.name || ''}` : image.name;
+  chip.textContent = image.source === 'signal' ? 'SPIKE 候选'
+    : image.source === 'history' ? '历史记录' : image.name;
   chip.classList.toggle('is-upload', image.source === 'upload');
   if (image.source === 'signal' && image.signal) {
     const sig = image.signal;
@@ -314,6 +303,7 @@ function renderReferences() {
 function renderRunStatus() {
   const status = byId('run-status');
   status.className = 'run-status';
+  setVisible(status, Boolean(state.analysisLoading || state.analysisError || state.activeRun));
   if (state.analysisLoading) {
     status.textContent = '正在识别';
     status.classList.add('is-running');
@@ -348,9 +338,9 @@ function renderResult() {
   showInlineError('analyze-error', state.analysisError);
 
   if (!state.activeRun) {
-    resultEl.innerHTML = `<div class="result-empty"><span class="result-empty-icon" aria-hidden="true">◌</span>
-      <h3>${state.selectedImage ? '可以开始识别' : '尚无识别结果'}</h3>
-      <p>${state.selectedImage ? '点击下方按钮后才会发送请求；当前不会自动调用模型。' : '载入图表后，手动启动一次识别。模型不会自动调用。'}</p></div>`;
+    resultEl.innerHTML = `<div class="result-empty">
+      <h3>${state.analysisLoading ? '正在分析图表…' : '等待识别'}</h3>
+      <p>${state.analysisLoading ? '通常需要 60–90 秒。' : state.selectedImage ? '点击「开始识别」查看分析。' : '选择图表后，分析结果会显示在这里。'}</p></div>`;
     return;
   }
   const run = state.activeRun;
@@ -366,18 +356,20 @@ function renderResult() {
   const evidenceHtml = evidence.length ? `<ul class="result-list">${evidence.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未返回可观察证据。</span>';
   const risksHtml = risks.length ? `<ul class="result-list">${risks.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未列出风险说明。</span>';
   const model = asText(run.model, state.status?.model || state.model);
-  const symbol = asText(run.symbol || run.signal?.symbol || state.selectedSignal?.symbol, '未关联候选');
-  const timeframe = asText(run.timeframe || run.signal?.timeframe || state.selectedSignal?.timeframe, '周期未提供');
   const created = formatDate(run.created_at);
   const latency = Number.isFinite(Number(run.latency_ms)) ? `${Math.round(Number(run.latency_ms))} ms` : '';
   const usage = run.usage && typeof run.usage === 'object' ? Object.entries(run.usage).map(([key, value]) => `${key}: ${asText(value)}`).join(' · ') : '';
   const referenceNames = Array.isArray(run.references) ? run.references.map((reference) => asText(reference?.name, '参考图')).filter(Boolean) : [];
   const criteria = asText(run.criteria, '记录中没有保存形态规则。');
   const requestSource = sourceLabel(run.source || (run.symbol ? 'spike' : 'upload'));
-  const requestContext = `<details class="request-context"><summary>查看本次输入与规则</summary><dl>
+  const requestContext = `<details class="request-context"><summary>识别详情</summary><dl>
     <dt>图片来源</dt><dd>${escapeHtml(requestSource)} · ${escapeHtml(asText(run.image_name, state.selectedImage?.name || '图片名称未返回'))}</dd>
     <dt>参考图</dt><dd>${referenceNames.length ? escapeHtml(referenceNames.join('、')) : '未使用参考图'}</dd>
     <dt>本次规则</dt><dd>${escapeHtml(criteria)}</dd>
+    <dt>模型</dt><dd>${escapeHtml(model)}</dd>
+    <dt>时间</dt><dd>${escapeHtml(created)}</dd>
+    ${latency ? `<dt>耗时</dt><dd>${escapeHtml(latency)}</dd>` : ''}
+    ${usage ? `<dt>用量</dt><dd>${escapeHtml(usage)}</dd>` : ''}
     ${run.image_sha256 ? `<dt>图片 SHA-256</dt><dd class="hash-value">${escapeHtml(run.image_sha256)}</dd>` : ''}
   </dl></details>`;
   const reviewVerdict = human ? `<div class="review-verdict">人工复核：${escapeHtml(verdictLabel(human.verdict))}${human.note ? ` · ${escapeHtml(human.note)}` : ''}<br><span>${escapeHtml(formatDate(human.reviewed_at))}</span></div>` : '';
@@ -394,7 +386,6 @@ function renderResult() {
     <p class="result-summary">${escapeHtml(asText(decision.summary, run.error || '模型未返回摘要。'))}</p>
     <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
     <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
-    <div class="run-meta"><span>${escapeHtml(symbol)} · ${escapeHtml(timeframe)}</span><span>${escapeHtml(model)}</span><span>${escapeHtml(created)}</span>${latency ? `<span>${escapeHtml(latency)}</span>` : ''}${usage ? `<span>${escapeHtml(usage)}</span>` : ''}</div>
     ${requestContext}
     <section class="human-review" aria-label="人工复核">
       <div class="human-review-heading"><strong>人工复核</strong><span>与模型结果分别记录</span></div>
