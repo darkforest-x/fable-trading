@@ -19,7 +19,8 @@ import zipfile
 from fastapi import HTTPException, Query
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Literal
+from typing import Literal, Optional
+from yoyo.contracts.research import PipelineRef
 
 from .paper_store import PaperStore, FILL_POLICY, STEP_MS, clock_ms
 from .strategies import catalog, get_plugin
@@ -38,6 +39,7 @@ class RunRequest(BaseModel):
     symbols: list[str] = Field(min_length=1, max_length=20)
     timeframes: list[str] = Field(min_length=1, max_length=4)
     request_id: str = Field(min_length=16, max_length=100, pattern=r"^[A-Za-z0-9-]+$")
+    pipeline_ref: Optional[PipelineRef] = None
 
 
 class StrategyNote(BaseModel):
@@ -144,6 +146,14 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
         tfs = sorted(set(payload.timeframes))
         if len(tfs) != len(payload.timeframes) or set(tfs) - set(strategy["timeframes"]):
             raise HTTPException(400, "所选周期未由此插件支持")
+        pipeline = None
+        if payload.pipeline_ref:
+            try:
+                pipeline = app.state.research_platform.admit(payload.pipeline_ref, "paper", payload)
+            except KeyError as exc:
+                raise HTTPException(404, str(exc))
+            except ValueError as exc:
+                raise HTTPException(409, str(exc))
         try:
             from .paper_source import MonitorSource
             source = MonitorSource(monitor_runtime)
@@ -169,6 +179,8 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
                     "funding_included": False, "orderbook_slippage_included": False,
                     "position_policy": "one_position_per_symbol_timeframe_independent_unit_notional",
                     "production_eligible": False}
+            if pipeline:
+                spec["pipeline"] = pipeline
             run = store.create(strategy, spec, payload.request_id, at=clock_ms())
         except (ValueError, OSError, KeyError) as exc:
             raise HTTPException(409, str(exc))
@@ -209,3 +221,4 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
 
     if launch_worker and store.runs(active_only=True):
         launch(store, root, monitor_runtime)
+    return {"strategies": strategies, "create": create}

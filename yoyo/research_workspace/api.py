@@ -14,7 +14,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Optional
 from urllib.parse import urlsplit
 
 import httpx
@@ -24,6 +24,7 @@ from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 from yoyo.contracts.artifacts import ExperimentRecord
+from yoyo.contracts.research import PipelineRef
 from yoyo.data.dataset_catalog import DatasetCatalog, dataset_id, launch_index
 
 from .yolo import YoloCatalog, overview as yolo_overview
@@ -64,6 +65,7 @@ class RunRequest(StrictModel):
     recipe: str = Field(pattern="^(spike-v128-frozen|verify-evidence)$")
     experiment_id: str = Field(min_length=1, max_length=180)
     symbols: list[str] = Field(default_factory=lambda: ["ETHUSDT"], min_length=1, max_length=10)
+    pipeline_ref: Optional[PipelineRef] = None
 
 
 def same_origin(request: Request):
@@ -274,8 +276,15 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
                 raise HTTPException(400, "此重放适配器仅支持已登记的 V12.8 两月冻结实验。")
             if len(set(payload.symbols)) != len(payload.symbols) or any(x not in recipe["symbols"] for x in payload.symbols):
                 raise HTTPException(400, "合约必须来自冻结数据清单，且不能重复。")
-        spec = payload.model_dump()
+        spec = payload.model_dump(exclude_none=True)
         spec.update(cost_bp=20, training_eligible=False, production_eligible=False)
+        if payload.pipeline_ref:
+            try:
+                spec["pipeline"] = app.state.research_platform.admit(payload.pipeline_ref, "backtest", payload)
+            except KeyError as error:
+                raise HTTPException(404, str(error))
+            except ValueError as error:
+                raise HTTPException(409, str(error))
         output_root = root / "experiments/active" / payload.experiment_id / "workspace_runs"
         try:
             job = store.create_job(payload.experiment_id, payload.recipe, spec, output_root)
@@ -321,7 +330,9 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
         return FileResponse(target, filename=target.name)
 
     from .paper_api import install as install_paper
-    install_paper(api, app, root, Path(runtime), store, all_factors, catalog.experiments, launch_worker)
+    paper = install_paper(api, app, root, Path(runtime), store, all_factors, catalog.experiments, launch_worker)
+    from .platform_api import install as install_platform
+    install_platform(api, app, root, catalog, datasets, store, all_factors, recipes, create_job, paper)
     app.include_router(api)
 
     @app.api_route("/api/vision/{path:path}", methods=["GET", "POST", "PUT"], dependencies=[Depends(same_origin)])

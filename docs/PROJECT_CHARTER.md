@@ -11,11 +11,40 @@
 验证一个交易假设：**K 线多均线「密集后启动」形态，在启动初期可被识别，
 且其中一小部分在扣除成本后可交易。**
 
-两层：YOLO 检测「长得像的」（L1）→ LightGBM 排序「值得进的」（L2）→ 回测（L3）→ 执行（L4）。
+原有模型路线：YOLO 检测「长得像的」（L1）→ LightGBM 排序「值得进的」（L2）→ 回测（L3）→ 执行（L4）。
 外加一套防自欺的实验纪律——**那套纪律是这个项目真正的资产**，模型换了好几版，纪律没换。
 
 当前阶段：**P0（形态定义与重复标注稳定性）→ P1（Gold Dataset）**。
 P0/P1 通过前禁止任何新训练与 promote。
+
+### 通用研究平台（2026-09-24）
+
+工作台按六层组织，原有四层代码继续保留；模型路线只是平台支持的一种研究组合。
+
+| 层 | 共用职责 | 入口与实现 |
+|---|---|---|
+| 数据 | 行情、图像、标签和事件谱系；本地目录与按需读取 | 数据集；`yoyo/data/` |
+| 特征与标签 | 因子定义、特征顺序、方向语义、独立标签与时间边界 | 因子库；L2 feature/label 模块 |
+| 模型 | YOLO 形态候选、VLM 结构化观察、LightGBM 数值判断及数值基线 | 模型中心；YOLO / VLM 工作流 |
+| 策略 | 选择能力、组合决策、登记入场退出与运行适配器 | 策略库；`yoyo/research_workspace/strategies.py` |
+| 评估与回测 | 时间切分、识别指标、原成本、匹配对照与失败证据 | 回测任务；现有 evaluation 与 backtest 模块 |
+| 前向运行 | 实际观察时点、模拟成交、运行生命周期与信号观察 | 模拟实盘与信号中心；独立 paper worker |
+
+实验登记、版本、来源与准入贯穿六层。YOLO 和 VLM 并行；LightGBM 可以消费契约匹配的数值特征，
+不能因为归入同一模型层就把三者输出视作可互换。`yoyo/contracts/research.py` 定义组合引用，
+`yoyo/research_workspace/platform.py` 在层外编排目录与适配器；四层禁止互相 import 的规则保持有效。
+
+体系总览可保存版本化研究流程，关联数据集、因子、模型、策略和实验。保存计划允许尚未接通的组合，
+运行必须另过适配器检查：不能忽略用户选择的模型或因子，也不能用实时行情替换用户选择的历史数据。
+获准运行时将流程版本及摘要固化到原有回测 / 模拟任务，不修改旧结果，不改成本或退出协议。
+
+模型中心只读目录和受限元数据，保留拒绝、未知语义、缺失工件等状态。工程身份核验不代表模型精度、
+盈利能力或生产准入；浏览不加载权重，不自动训练、promote 或切换 ACTIVE。
+
+架构参考：[Qlib 的研究任务组合](https://qlib.readthedocs.io/en/stable/component/workflow.html)、
+[MLflow 的模型血缘与版本](https://mlflow.org/docs/latest/ml/model-registry/)、
+[LEAN 的策略模块](https://www.quantconnect.com/docs/v2/writing-algorithms/algorithm-framework/overview)。
+复用这些职责划分，当前由本仓已有引擎执行，不引入第二套训练或交易运行环境。
 
 ---
 
@@ -82,6 +111,7 @@ experiments/active/<experiment_id>/
 | 执行 | `yoyo/layers/l4_execution/` |
 | 切分、匹配对照、置换检验、经济门 | `yoyo/evaluation/` |
 | 产物登记与血统 | `yoyo/artifacts/` |
+| 共用目录、研究组合、模型版本与运行适配 | `yoyo/research_workspace/`；统一前端在 `yoyo/monitor/static/` |
 | 一次性实验脚本 | `scripts/`（可复用的提进 `yoyo/`） |
 | owner 审核工具 | `tools/review/` |
 | 金标行、审核裁决 | `datasets/annotations/` |
