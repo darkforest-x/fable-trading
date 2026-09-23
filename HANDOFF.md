@@ -1,5 +1,13 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：SPIKE + Gemini视觉研究工作台（2026-09-23）
+
+- Owner要求单独目录、复用现有SPIKE、接Gemini并编写前端；两名子代理的实际模型已核对为GPT-6 Luna/max。入口`experiments/active/exp-spike-gemini-vision-20260923-v1/`，应用`yoyo/vision_research/`；启动`.venv/bin/python -m yoyo.vision_research.server --port 8771`，本机`http://127.0.0.1:8771`。
+- 手动选择SPIKE候选或上传图片、最多4张参考图、编辑规则、结构化判断、独立人工复核和JSON导出。只读调用现有8766服务，图表右端严格停在所选信号收盘；不足缓存明确拒绝。Key仅进程内/环境变量，模型默认`gemini-3.8-flash`，可在设置页修改，Gemini请求`store=false`且不自动重试。
+- 后端builder先提交`b277357335`再生成真实SPIKE输入QA；33项专项测试通过，桌面/390px浏览器验证候选载图、上传、设置、空记录与缺Key提示。扩展检查124通过/4失败，失败为历史注册表缺`source_commit`；本次实验行单独通过契约检查。未安装新包，httpx沿用已安装0.28.1并登记依赖。
+- **尚无API Key，未进行真实Gemini图片调用，也未验证形态准确率或交易效果**。Owner图稍后提供；下一步在本机设置Key并用固定确认图验证。当前只是研究工具，训练/生产资格false，现有SPIKE扫描/通知/执行不变。Notion资料SRC-22已追加工程路径，保留待验证。未生成实验报告。
+
+
 ## 交付偏好已更新（Owner，2026-09-23）
 
 Owner明确要求彻底删除“每次都弄报告”的原则。默认直接在对话中汇报，只有明确要求报告或指定文档产物时才生成；不自动写Markdown、转HTML/PDF、发布网站或因技能默认流程调用build-report，也不每轮询问。必要原始结果、复现信息和实验登记按工作需要保留。仓库规则、章程、README与全局指令已同步。

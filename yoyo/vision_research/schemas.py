@@ -68,6 +68,7 @@ class AnalyzeRequest(BaseModel):
     signal_id: Optional[str] = Field(default=None, max_length=100)
     image_data_url: Optional[str] = Field(default=None, max_length=12_000_000)
     image_name: Optional[str] = Field(default=None, max_length=160)
+    expected_image_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     references: List[ReferenceRequest] = Field(default_factory=list, max_length=4)
     criteria: str = Field(default=DEFAULT_CRITERIA, min_length=10, max_length=8000)
     model: Optional[str] = Field(default=None, max_length=100)

@@ -10884,3 +10884,17 @@ experiments:
     production_eligible: false
     artifacts: []
     notes: Local same-source Binance history; independent policy warmup, monthly/yearly and fixed-incumbent comparisons. No report requested. Archived universe and tick metadata are not point-in-time.
+
+  - experiment_id: exp-spike-gemini-vision-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b277357335
+    status: active
+    result: Engineering workbench implemented; live Gemini inference and recognition quality pending API key and owner images.
+    holdout_consumed: false
+    question: Can a manually reviewed Gemini vision API classify the owner's SPIKE chart patterns reliably?
+    single_variable: Engineering setup only; later frozen-image model comparisons must be registered separately.
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Independent loopback workbench in yoyo/vision_research; reads the existing SPIKE API without starting workers. Owner images and live API validation pending. No report requested.

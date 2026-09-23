@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#11171c" />
+    <title>SPIKE · 视觉研究工作台</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到主要内容</a>
+    <div class="app-frame">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="SPIKE 视觉研究工作台首页">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span class="brand-copy">
+            <strong>SPIKE</strong>
+            <span>视觉研究工作台</span>
+          </span>
+        </a>
+        <div class="topbar-meta">
+          <span class="environment-label"><span class="environment-dot" aria-hidden="true"></span>本机研究环境</span>
+          <span id="api-health" class="health-pill" role="status" aria-live="polite">
+            <span class="health-dot" aria-hidden="true"></span><span>正在连接本地 API…</span>
+          </span>
+        </div>
+      </header>
+
+      <nav class="primary-nav" aria-label="主要页面" role="tablist">
+        <button class="nav-tab is-active" id="tab-workspace-button" type="button" role="tab" aria-selected="true" aria-controls="tab-workspace" data-tab="workspace">
+          <span class="nav-icon" aria-hidden="true">⌖</span>工作台
+        </button>
+        <button class="nav-tab" id="tab-history-button" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history" tabindex="-1">
+          <span class="nav-icon" aria-hidden="true">▤</span>识别记录<span id="history-count" class="nav-count" hidden>0</span>
+        </button>
+        <button class="nav-tab" id="tab-settings-button" type="button" role="tab" aria-selected="false" aria-controls="tab-settings" data-tab="settings" tabindex="-1">
+          <span class="nav-icon" aria-hidden="true">⚙</span>模型设置
+        </button>
+        <span class="nav-spacer"></span>
+        <span class="nav-context">研究用途 · 识别结果需人工复核</span>
+      </nav>
+
+      <main id="main-content" class="main-content">
+        <section id="tab-workspace" class="tab-panel" role="tabpanel" aria-labelledby="tab-workspace-button" tabindex="0">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">SPIKE / GEMINI VISION</p>
+              <h1>形态识别工作台</h1>
+              <p class="page-subtitle">选择一条候选信号或上传图表，检查模型给出的可见证据，再记录人工判断。</p>
+            </div>
+            <div class="eligibility-badges" id="eligibility-badges" aria-label="模型资格状态">
+              <span class="soft-badge">生产资格：未读取</span><span class="soft-badge">训练资格：未读取</span>
+            </div>
+          </div>
+
+          <div id="workspace-notice" class="notice notice-info" role="status" aria-live="polite" hidden></div>
+          <div id="workspace-error" class="notice notice-error" role="alert" hidden></div>
+
+          <div class="workspace-grid">
+            <aside class="panel candidates-panel" aria-labelledby="candidate-heading">
+              <div class="panel-heading candidates-heading">
+                <div>
+                  <p class="eyebrow">SPIKE SIGNALS</p>
+                  <h2 id="candidate-heading">候选信号</h2>
+                </div>
+                <button id="refresh-signals" class="icon-button" type="button" aria-label="刷新候选信号" title="刷新候选信号">
+                  <span aria-hidden="true">↻</span>
+                </button>
+              </div>
+              <div id="signal-source" class="source-caption">等待读取候选来源…</div>
+              <label class="search-box" for="signal-search">
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <span class="sr-only">搜索候选</span>
+                <input id="signal-search" type="search" placeholder="搜索币种、周期或方向" autocomplete="off" />
+                <kbd>/</kbd>
+              </label>
+              <div id="signals-error" class="inline-error" role="alert" hidden></div>
+              <div id="signal-list" class="signal-list" aria-live="polite" aria-label="候选信号列表">
+                <div class="list-skeleton" aria-label="正在加载候选信号"><span></span><span></span><span></span></div>
+              </div>
+              <div class="candidate-footnote">候选只从本地 SPIKE 数据读取。列表为空时，也可以直接上传图表。</div>
+            </aside>
+
+            <section class="panel image-panel" aria-labelledby="image-heading">
+              <div class="panel-heading image-heading-row">
+                <div>
+                  <p class="eyebrow">INPUT / VISIBLE WINDOW</p>
+                  <h2 id="image-heading">图表输入</h2>
+                </div>
+                <span id="input-source-chip" class="source-chip">尚未选择图片</span>
+              </div>
+              <div id="selection-summary" class="selection-summary" hidden></div>
+              <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="选择或拖放一张图表图片">
+                <input id="chart-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" />
+                <div id="empty-stage" class="empty-stage">
+                  <div class="upload-glyph" aria-hidden="true">
+                    <svg viewBox="0 0 48 48" width="42" height="42" fill="none">
+                      <rect x="6" y="8" width="36" height="32" rx="7" stroke="currentColor" stroke-width="1.7" />
+                      <path d="m11 32 9-9 6 6 5-5 7 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M24 7v15m-5-5 5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </div>
+                  <h3>把图表放在这里</h3>
+                  <p>从候选信号载入，或选择一张本地图表</p>
+                  <span class="button button-secondary">选择图片</span>
+                  <span class="file-guidance">PNG、JPEG 或 WEBP · 单张最大 8 MB</span>
+                </div>
+                <div id="image-loading" class="stage-message" role="status" aria-live="polite" hidden>
+                  <span class="spinner" aria-hidden="true"></span><span>正在载入图表…</span>
+                </div>
+                <div id="image-error" class="stage-message stage-error" role="alert" hidden></div>
+                <div id="image-display" class="image-display" hidden>
+                  <div class="image-fit">
+                    <img id="chart-preview" alt="当前选择的图表" draggable="false" />
+                    <div id="box-overlay" class="box-overlay" aria-hidden="true" hidden></div>
+                  </div>
+                </div>
+              </div>
+              <div class="input-actions">
+                <div class="reference-area">
+                  <div class="reference-heading">
+                    <div><strong>参考图片</strong><span>可选 · 最多 4 张</span></div>
+                    <button id="add-reference" class="button button-quiet button-small" type="button">＋ 添加参考图</button>
+                    <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+                  </div>
+                  <div id="reference-list" class="reference-list" aria-live="polite">
+                    <span class="reference-empty">未添加参考图</span>
+                  </div>
+                </div>
+                <button id="clear-input" class="button button-quiet button-small" type="button" disabled>清除当前输入</button>
+              </div>
+              <p class="privacy-inline"><span aria-hidden="true">ⓘ</span>点击识别后，输入图片、参考图与规则会经本机后端发送至 Google Gemini API。</p>
+            </section>
+
+            <aside class="panel result-panel" aria-labelledby="result-heading">
+              <div class="panel-heading result-heading-row">
+                <div>
+                  <p class="eyebrow">MODEL OUTPUT</p>
+                  <h2 id="result-heading">识别结果</h2>
+                </div>
+                <span id="run-status" class="run-status">等待输入</span>
+              </div>
+              <div id="result-content" class="result-content">
+                <div class="result-empty">
+                  <span class="result-empty-icon" aria-hidden="true">◌</span>
+                  <h3>尚无识别结果</h3>
+                  <p>载入图表后，手动启动一次识别。模型不会自动调用。</p>
+                </div>
+              </div>
+              <div id="analyze-error" class="inline-error" role="alert" hidden></div>
+              <div class="result-actions">
+                <button id="analyze-button" class="button button-primary button-wide" type="button" disabled>
+                  <span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span>
+                </button>
+                <p class="action-caption">一次请求可能需要 60–90 秒；请勿重复提交。</p>
+              </div>
+            </aside>
+
+            <section class="panel criteria-panel" aria-labelledby="criteria-heading">
+              <div class="criteria-intro">
+                <p class="eyebrow">RESEARCH CRITERIA</p>
+                <h2 id="criteria-heading">形态参考规则</h2>
+                <p>规则会随本次识别一并提交；本页编辑不会保存到服务器。</p>
+              </div>
+              <div class="criteria-editor">
+                <label class="sr-only" for="criteria-input">本次形态参考规则</label>
+                <textarea id="criteria-input" rows="4" spellcheck="false">只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。</textarea>
+                <div class="criteria-hint"><span>仅用于研究观察</span><span id="criteria-count">0 字</span></div>
+              </div>
+            </section>
+          </div>
+
+          <footer class="workspace-footer">
+            <span>研究辅助工具 · 结果不代表交易建议或实盘信号</span>
+            <span>生产资格与训练资格由后端状态提供，不在此页面授予</span>
+          </footer>
+        </section>
+
+        <section id="tab-history" class="tab-panel" role="tabpanel" aria-labelledby="tab-history-button" tabindex="0" hidden>
+          <div class="page-heading history-page-heading">
+            <div><p class="eyebrow">RESEARCH LOG</p><h1>识别记录</h1><p class="page-subtitle">按时间查看本机 API 返回的识别结果与单独记录的人工复核。</p></div>
+            <button id="refresh-runs" class="button button-secondary" type="button">↻ 刷新记录</button>
+          </div>
+          <div class="history-disclaimer">模型判断与人工复核分开保存。识别结果不包含胜率或交易表现结论。</div>
+          <div id="history-error" class="notice notice-error" role="alert" hidden></div>
+          <div id="history-list" class="history-list" aria-live="polite">
+            <div class="history-empty"><span class="spinner" aria-hidden="true"></span>正在读取记录…</div>
+          </div>
+        </section>
+
+        <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-settings-button" tabindex="0" hidden>
+          <div class="page-heading">
+            <div><p class="eyebrow">LOCAL CONFIGURATION</p><h1>模型设置</h1><p class="page-subtitle">配置本机代理使用的 Gemini 模型。页面不会把 API 密钥写入浏览器存储。</p></div>
+          </div>
+          <div class="settings-grid">
+            <section class="panel settings-card" aria-labelledby="model-config-heading">
+              <p class="eyebrow">GEMINI MODEL</p>
+              <h2 id="model-config-heading">模型与凭据</h2>
+              <p class="settings-copy">默认模型为 <code>gemini-3.8-flash</code>，也可以输入其他 Gemini 模型 ID。</p>
+              <form id="config-form" autocomplete="off">
+                <label class="field-label" for="model-input">模型 ID</label>
+                <input id="model-input" name="model" type="text" value="gemini-3.8-flash" maxlength="120" autocomplete="off" spellcheck="false" />
+                <label class="field-label" for="api-key-input">API 密钥 <span class="optional-label">可选</span></label>
+                <input id="api-key-input" name="api_key" type="password" placeholder="粘贴后保存；保存后输入框会清空" autocomplete="new-password" spellcheck="false" />
+                <p class="field-help">密钥仅由本机后端进程暂存，不写入 localStorage、配置文件或识别记录。重启后需要重新配置；也可以由后端环境变量提供。</p>
+                <div id="config-error" class="inline-error" role="alert" hidden></div>
+                <div id="config-success" class="inline-success" role="status" aria-live="polite" hidden></div>
+                <button id="save-config" class="button button-primary" type="submit"><span class="button-label">保存设置</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
+              </form>
+            </section>
+            <section class="panel settings-card connection-card" aria-labelledby="connection-heading">
+              <p class="eyebrow">CONNECTION</p>
+              <h2 id="connection-heading">服务状态</h2>
+              <div id="settings-status" class="settings-status">
+                <div class="status-loading"><span class="spinner" aria-hidden="true"></span>正在读取服务状态…</div>
+              </div>
+              <div class="recipient-card">
+                <span class="recipient-icon" aria-hidden="true">↗</span>
+                <div><strong>图片接收方</strong><p>Google 官方 Gemini API</p><code>generativelanguage.googleapis.com</code></div>
+              </div>
+              <p class="settings-copy">前端仅向本机同源 API 发送请求。选择并提交图片后，本机后端可能将内容转发给上述接收方以完成识别。</p>
+              <div id="connection-result" class="connection-result" role="status" aria-live="polite" hidden></div>
+              <button id="connection-test" class="button button-secondary" type="button"><span class="button-label">测试 Gemini 连接</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
+              <p class="field-help">测试只会在你点击后调用；请先确认后端已配置凭据。</p>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

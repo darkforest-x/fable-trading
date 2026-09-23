@@ -3,6 +3,8 @@ import base64
 import hashlib
 import io
 import json
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from fastapi.testclient import TestClient
 from PIL import Image, PngImagePlugin
@@ -157,3 +159,35 @@ def test_actual_image_validation_and_metadata_removal():
             image_from_bytes(raw)
     with pytest.raises(ValueError):
         image_from_data_url("data:image/svg+xml;base64,PHN2Zz4=")
+
+
+def test_changed_preview_is_rejected_before_inference(client):
+    configure(client)
+    response = client.post("/api/analyze", json={"image_data_url": image_url(), "expected_image_sha256": "a" * 64})
+    assert response.status_code == 400 and "图表已变化" in response.json()["detail"]
+    assert client.get("/api/runs").json()["items"] == []
+
+
+def test_overlapping_requests_do_not_create_duplicate_paid_calls(client, monkeypatch):
+    configure(client)
+    entered, release = threading.Event(), threading.Event()
+    original = FakeProvider.analyze
+    calls = []
+
+    def slow(self, **kwargs):
+        calls.append(1)
+        entered.set()
+        assert release.wait(5)
+        return original(self, **kwargs)
+
+    monkeypatch.setattr(FakeProvider, "analyze", slow)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        pending = executor.submit(client.post, "/api/analyze", json={"image_data_url": image_url()})
+        try:
+            assert entered.wait(5)
+            other = client.post("/api/analyze", json={"image_data_url": image_url()})
+            assert other.status_code == 409
+        finally:
+            release.set()
+        assert pending.result().json()["status"] == "completed"
+    assert len(calls) == 1 and all(instance.closed for instance in FakeProvider.instances)

@@ -173,6 +173,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             image = image_from_data_url(body.image_data_url, body.image_name or "upload.png")
             provenance = {"time_boundary": "unverified_upload", "bar_count": None}
             symbol, timeframe, image_source = "", "", "upload"
+        if body.expected_image_sha256 and image.sha256 != body.expected_image_sha256:
+            raise ValueError("图表已变化，请重新载入后再识别，避免发送与预览不同的图片")
         references = [image_from_data_url(item.data_url, item.name) for item in body.references]
         if sum(len(item.data) for item in [image, *references]) > MAX_TOTAL_IMAGE_BYTES:
             raise ValueError("待判图和参考图合计不能超过 12 MB")
