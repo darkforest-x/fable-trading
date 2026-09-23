@@ -1,3 +1,3 @@
-"""SPIKE vision research: isolated manual inference, without execution hooks."""
+"""SPIKE vision research: isolated manual and automatic reviews without execution hooks."""
 
-VERSION = "0.5.0"
+VERSION = "0.6.0"

@@ -51,6 +51,19 @@
                   <span class="ui-icon icon-refresh" aria-hidden="true"></span>
                 </button>
               </div>
+              <button id="automatic-toggle" class="automatic-toggle" type="button" aria-pressed="false" aria-label="自动识别状态读取中" disabled>
+                <span>自动识别</span><strong id="automatic-toggle-state">读取中…</strong>
+              </button>
+              <div id="automatic-policy" class="automatic-policy" hidden></div>
+              <div class="automatic-counts" aria-label="自动识别任务数量">
+                <span>排队 <strong id="automatic-count-queued">—</strong></span>
+                <span>运行 <strong id="automatic-count-running">—</strong></span>
+                <span>完成 <strong id="automatic-count-completed">—</strong></span>
+                <span>失败 <strong id="automatic-count-failed">—</strong></span>
+                <span>跳过 <strong id="automatic-count-skipped">—</strong></span>
+                <span>中断 <strong id="automatic-count-interrupted">—</strong></span>
+              </div>
+              <div id="automatic-error" class="inline-error automatic-error" role="alert" hidden></div>
               <div id="signal-source" class="source-caption">等待读取候选来源…</div>
               <label class="search-box" for="signal-search">
                 <span class="search-icon ui-icon icon-search" aria-hidden="true"></span>

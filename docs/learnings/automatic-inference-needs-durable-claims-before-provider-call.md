@@ -1,0 +1,7 @@
+# Automatic inference must claim a signal durably before calling a paid provider
+
+- **问题**：A new SPIKE signal must trigger one automatic vision review and keep its result on the matching card, even when no browser is open.
+- **死胡同**：Browser polling or an in-memory set alone cannot enforce one attempt: multiple tabs and restarts each forget what was sent. Retrying an interrupted call also risks charging again when the provider completed but the local response was lost. These alternatives were rejected before implementation; no duplicate paid-call experiment was needed.
+- **有效路径**：Use a SQLite primary key per signal, commit a running claim and run ID before invoking the provider, and share the manual-inference mutex. Reconcile a saved terminal run on restart; otherwise retain an interrupted outcome without retry. Keep the actual snapshot and exchange linked to the result.
+- **通用规则**：Place deduplication at the persistent side-effect boundary, not at UI refresh. Distinguish successful completion, known failure and unknown outcome. Test restart ambiguity and concurrent claim attempts before enabling real calls.
+- **牵连**：`yoyo/vision_research/automatic.py`, `server.py`, `auto_chart.py`, and candidate card polling. The owner-authorized automatic queue uses the independent 12-bar research window; it does not alter production freshness gates, scanner workers, labels or execution. Fixed server-rendered images retain their own renderer provenance instead of claiming TradingView pixel parity.

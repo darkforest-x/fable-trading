@@ -29,6 +29,17 @@ const state = {
   signalsPolling: false,
   signalsError: '',
   signalsWarning: '',
+  automatic: null,
+  automaticError: '',
+  automaticActionError: '',
+  automaticBySignal: new Map(),
+  automaticLoading: false,
+  automaticPolling: false,
+  automaticRequestToken: 0,
+  automaticSaving: false,
+  automaticRefreshRequestedRunIds: new Set(),
+  automaticRefreshPendingRunIds: new Set(),
+  automaticRefreshScheduled: false,
   runs: [],
   runsLoading: true,
   runsError: '',
@@ -310,9 +321,22 @@ function verdictLabel(verdict) {
   return ({ match: '符合', no_match: '不符合', uncertain: '不确定', accepted: '接受', rejected: '拒绝' })[verdict] || '未返回判断';
 }
 
+function automaticStatusLabel(status) {
+  return ({ queued: '排队中', running: '识别中', completed: '已完成', failed: '失败', skipped: '已跳过', interrupted: '已中断' })[status]
+    || asText(status, '状态未提供');
+}
+
+function automaticVerdictClass(verdict) {
+  return ({ match: 'is-match', no_match: 'is-no-match', uncertain: 'is-uncertain' })[verdict] || '';
+}
+
+function isAutomaticTerminal(status) {
+  return ['completed', 'failed', 'skipped', 'interrupted'].includes(status);
+}
+
 function sourceLabel(source) {
   const labels = {
-    local: '本地数据', spike: 'SPIKE', spike_capture: 'SPIKE 图表快照', cache: '本机缓存', database: '本地数据库',
+    local: '本地数据', spike: 'SPIKE', spike_automatic: 'SPIKE 自动识别', spike_capture: 'SPIKE 图表快照', cache: '本机缓存', database: '本地数据库',
     local_config: '本机已保存 · 重启保留', environment: '后端环境变量', env: '后端环境变量', session: '本机进程会话',
     memory: '本机进程会话', process: '本机进程会话', upload: '本地上传图表', unset: '未配置', none: '未配置',
   };
@@ -374,8 +398,119 @@ function getFilteredSignals() {
     .some((value) => asText(value).toLowerCase().includes(needle)));
 }
 
+function automaticJobTime(job) {
+  let label = '';
+  let value = null;
+  if (Number(job.observed_at_ms) > 0) {
+    label = '判断于';
+    value = Number(job.observed_at_ms);
+  } else if (job.status === 'queued') {
+    label = '加入于';
+    value = job.created_at;
+  } else if (job.status === 'running' && job.started_at) {
+    label = '开始于';
+    value = job.started_at;
+  }
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  const formatted = new Intl.DateTimeFormat('zh-CN', {
+    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
+  }).format(date);
+  return `${label} ${formatted}`;
+}
+
+function automaticJobSummary(job) {
+  const error = asText(job.error, '');
+  const summary = asText(job.decision?.summary, '');
+  if (error) return error;
+  if (summary) return summary;
+  return ({
+    queued: '已进入后端自动识别队列。',
+    running: '正在按自动识别规则判断当前盘口。',
+    failed: '自动识别失败，未返回错误详情。',
+    skipped: '本次自动识别已跳过，未返回原因。',
+    interrupted: '自动识别已中断，未返回原因。',
+    completed: '没有可展示的识别摘要。',
+  })[job.status] || '没有可展示的识别摘要。';
+}
+
+function rememberAutomaticJob(job) {
+  if (!job || typeof job !== 'object') return;
+  const signalId = asText(job.signal_id, '');
+  if (!signalId) return;
+  const previous = state.automaticBySignal.get(signalId);
+  let next = { ...previous, ...job };
+  if (isAutomaticTerminal(previous?.status) && !isAutomaticTerminal(job.status)) next = { ...job, ...previous };
+  state.automaticBySignal.set(signalId, next);
+  if (isAutomaticTerminal(next.status) && next.run_id) requestAutomaticRecordRefresh(next.run_id);
+}
+
+function automaticJobForRun(runId) {
+  const id = asText(runId, '');
+  if (!id) return null;
+  for (const job of state.automaticBySignal.values()) {
+    if (asText(job.run_id, '') === id) return job;
+  }
+  return null;
+}
+
+function runFailureReason(run) {
+  const automaticError = automaticJobForRun(run?.id)?.error;
+  return asText(run?.error, '') || asText(run?.error_details?.message, '')
+    || asText(run?.error_details?.detail, '') || asText(automaticError, '');
+}
+
+function automaticReviewMarkup(signalId) {
+  const job = state.automaticBySignal.get(signalId);
+  if (!job) return '';
+  const verdict = asText(job.decision?.verdict, '');
+  const verdictClass = automaticVerdictClass(verdict);
+  const statusClass = job.status === 'completed' && verdictClass ? verdictClass
+    : ['queued', 'running', 'failed', 'skipped', 'interrupted'].includes(job.status) ? `is-${job.status}` : '';
+  const statusText = job.status === 'completed' && verdict ? verdictLabel(verdict) : automaticStatusLabel(job.status);
+  const runId = asText(job.run_id, '');
+  const jobTime = automaticJobTime(job);
+  const action = ['completed', 'failed'].includes(job.status) && runId
+    ? `<button type="button" class="automatic-open-run" data-open-run="${escapeHtml(runId)}">查看结果</button>` : '';
+  const footer = jobTime || action ? `<div class="automatic-review-footer">${jobTime ? `<time>${escapeHtml(jobTime)}</time>` : ''}${action}</div>` : '';
+  return `<div class="automatic-review" aria-label="自动识别结果">
+    <div class="automatic-review-heading"><span class="automatic-status ${statusClass}"${job.status === 'completed' && verdict ? ' title="自动识别已完成"' : ''}>${escapeHtml(statusText)}</span></div>
+    <p class="automatic-review-summary">${escapeHtml(automaticJobSummary(job))}</p>
+    ${footer}
+  </div>`;
+}
+
+function renderAutomaticControls() {
+  const automatic = state.automatic;
+  const toggle = byId('automatic-toggle');
+  const pending = state.automaticLoading || state.automaticSaving || typeof automatic?.enabled !== 'boolean';
+  const error = state.automaticActionError || state.automaticError || asText(automatic?.error, '');
+  toggle.disabled = pending;
+  toggle.classList.toggle('is-enabled', automatic?.enabled === true);
+  toggle.classList.toggle('is-disabled', automatic?.enabled === false);
+  toggle.setAttribute('aria-pressed', String(automatic?.enabled === true));
+  toggle.setAttribute('aria-label', automatic?.enabled === true ? '暂停自动识别' : '开启自动识别');
+  byId('automatic-toggle-state').textContent = state.automaticSaving ? '保存中…'
+    : automatic?.enabled === true ? '已开启'
+      : automatic?.enabled === false ? '已暂停'
+        : state.automaticLoading ? '读取中…' : '不可用';
+  const hasPolicy = Number.isFinite(Number(automatic?.post_signal_bars))
+    && Number.isFinite(Number(automatic?.poll_interval_seconds));
+  byId('automatic-policy').textContent = hasPolicy
+    ? `信号后 ${Number(automatic.post_signal_bars)} 根 · 每 ${Number(automatic.poll_interval_seconds)} 秒扫描`
+    : '';
+  setVisible(byId('automatic-policy'), hasPolicy);
+  for (const name of ['queued', 'running', 'completed', 'failed', 'skipped', 'interrupted']) {
+    const count = automatic?.counts?.[name];
+    byId(`automatic-count-${name}`).textContent = count !== null && count !== undefined && Number.isFinite(Number(count)) ? String(Number(count)) : '—';
+  }
+  showInlineError('automatic-error', error);
+}
+
 function renderSignals() {
   renderSignalSource();
+  renderAutomaticControls();
   showInlineError('signals-error', state.signalsError);
   if (state.signalsLoading && !state.signals.length) {
     signalsEl.innerHTML = '<div class="list-skeleton" aria-label="正在加载候选信号"><span></span><span></span><span></span></div>';
@@ -397,11 +532,69 @@ function renderSignals() {
     const timeframe = asText(item.timeframe, '周期未提供');
     const side = sideLabel(item.side);
     const time = item.signal_at ? new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(item.signal_at)) : '时间未提供';
-    return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(timeframe)}">
-      <span class="signal-topline"><strong class="signal-name">${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
-      <span class="signal-meta"><span class="signal-side ${sideClass}">${escapeHtml(side.replace('方向', ''))}</span><time>${escapeHtml(time)}</time></span>
-    </button>`;
+    return `<article class="signal-item ${selected ? 'is-selected' : ''}">
+      <button class="signal-select" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(timeframe)}">
+        <span class="signal-topline"><strong class="signal-name">${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
+        <span class="signal-meta"><span class="signal-side ${sideClass}">${escapeHtml(side.replace('方向', ''))}</span><time>${escapeHtml(time)}</time></span>
+      </button>
+      ${automaticReviewMarkup(id)}
+    </article>`;
   }).join('');
+}
+
+async function loadAutomatic({ quiet = false } = {}) {
+  if (quiet && state.automaticPolling) return;
+  const token = ++state.automaticRequestToken;
+  state.automaticPolling = true;
+  if (!quiet) {
+    state.automaticLoading = true;
+    renderAutomaticControls();
+  }
+  try {
+    const payload = await apiJson('/automatic', { cache: 'no-store' });
+    if (token !== state.automaticRequestToken) return;
+    if (!payload || typeof payload !== 'object' || typeof payload.enabled !== 'boolean') {
+      throw new Error('自动识别状态格式无效。');
+    }
+    const items = Array.isArray(payload.items) ? payload.items.filter((item) => item && typeof item === 'object') : [];
+    state.automatic = {
+      ...payload,
+      counts: payload.counts && typeof payload.counts === 'object' ? payload.counts : {},
+      items,
+      error: asText(payload.error, ''),
+    };
+    state.automaticError = '';
+    state.automaticActionError = '';
+    for (const job of items) rememberAutomaticJob(job);
+  } catch (error) {
+    if (token !== state.automaticRequestToken) return;
+    state.automaticError = error.message || '自动识别状态读取失败。';
+  } finally {
+    if (token === state.automaticRequestToken) {
+      state.automaticPolling = false;
+      state.automaticLoading = false;
+      renderSignals();
+    }
+  }
+}
+
+async function toggleAutomaticRecognition() {
+  if (typeof state.automatic?.enabled !== 'boolean' || state.automaticSaving) return;
+  state.automaticSaving = true;
+  state.automaticActionError = '';
+  renderAutomaticControls();
+  try {
+    await apiJson('/automatic', {
+      method: 'POST',
+      body: JSON.stringify({ enabled: !state.automatic.enabled }),
+    });
+    await loadAutomatic();
+  } catch (error) {
+    state.automaticActionError = error.message || '自动识别设置保存失败。';
+  } finally {
+    state.automaticSaving = false;
+    renderSignals();
+  }
 }
 
 function renderLiveControls(image) {
@@ -655,6 +848,7 @@ function renderResult() {
   }
   const run = state.activeRun;
   const decision = run.decision || {};
+  const failureReason = runFailureReason(run);
   const verdict = decision.verdict;
   const verdictClass = verdict === 'no_match' ? 'no-match' : verdict === 'uncertain' ? 'uncertain' : '';
   const completed = run.status === 'completed';
@@ -700,7 +894,7 @@ function renderResult() {
       </div>`;
   updateResultMarkup(`<article class="decision-card" data-result-run="${escapeHtml(runId)}">
     <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span><span class="side-tag">${escapeHtml(sideText)}</span></div>
-    <p class="result-summary">${escapeHtml(asText(decision.summary, run.error || '模型未返回摘要。'))}</p>
+    <p class="result-summary">${escapeHtml(asText(decision.summary, failureReason || '模型未返回摘要。'))}</p>
     <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
     <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
     ${requestContext}
@@ -1064,6 +1258,7 @@ async function loadSignals({ quiet = false } = {}) {
     const payload = await apiJson('/signals', { cache: 'no-store' });
     if (token !== state.signalsRequestToken) return;
     const items = Array.isArray(payload?.items) ? payload.items.filter((item) => item && typeof item === 'object') : [];
+    for (const signal of items) rememberAutomaticJob(signal.ai_review);
     state.signals = items;
     state.signalsWarning = asText(payload?.warning, '');
     state.signalsError = '';
@@ -1087,6 +1282,25 @@ async function loadSignals({ quiet = false } = {}) {
       renderSignals();
     }
   }
+}
+
+function requestAutomaticRecordRefresh(runId) {
+  const id = asText(runId, '');
+  if (!id || state.automaticRefreshRequestedRunIds.has(id)) return;
+  state.automaticRefreshRequestedRunIds.add(id);
+  state.automaticRefreshPendingRunIds.add(id);
+  scheduleAutomaticRecordRefresh();
+}
+
+function scheduleAutomaticRecordRefresh() {
+  if (state.automaticRefreshScheduled || !state.automaticRefreshPendingRunIds.size) return;
+  state.automaticRefreshScheduled = true;
+  window.setTimeout(() => {
+    state.automaticRefreshScheduled = false;
+    if (state.runsLoading || !state.automaticRefreshPendingRunIds.size) return;
+    state.automaticRefreshPendingRunIds.clear();
+    Promise.allSettled([loadRuns(), loadExchangeRecords()]);
+  }, 0);
 }
 
 function cancelLiveChartRequest() {
@@ -1194,6 +1408,7 @@ async function loadRuns() {
     state.runsLoading = false;
     renderHistory();
     renderExchangeRecords();
+    scheduleAutomaticRecordRefresh();
   }
 }
 
@@ -1666,7 +1881,9 @@ document.addEventListener('click', (event) => {
   }
   const openRunButton = event.target.closest('[data-open-run]');
   if (openRunButton) {
-    openRun(openRunButton.dataset.openRun);
+    const runId = openRunButton.dataset.openRun;
+    if (state.runs.some((run) => asText(run.id) === runId)) openRun(runId);
+    else loadRuns().then(() => openRun(runId));
     return;
   }
   const selectExchangeButton = event.target.closest('[data-select-exchange]');
@@ -1722,6 +1939,7 @@ document.addEventListener('keydown', (event) => {
 
 byId('signal-search').addEventListener('input', renderSignals);
 byId('refresh-signals').addEventListener('click', loadSignals);
+byId('automatic-toggle').addEventListener('click', toggleAutomaticRecognition);
 byId('refresh-runs').addEventListener('click', loadRuns);
 byId('analyze-button').addEventListener('click', analyze);
 byId('clear-input').addEventListener('click', () => clearActiveImage());
@@ -1769,7 +1987,7 @@ dropZone.addEventListener('drop', (event) => {
 
 byId('criteria-count').textContent = `${byId('criteria-input').value.length} 字`;
 renderAll();
-Promise.allSettled([loadStatus(), loadSignals(), loadRuns(), loadReferences(), loadExchangeRecords()]);
+Promise.allSettled([loadStatus(), loadSignals(), loadAutomatic(), loadRuns(), loadReferences(), loadExchangeRecords()]);
 
 byId('save-references').addEventListener('click', saveReferences);
 byId('reload-references').addEventListener('click', loadReferences);
@@ -1816,11 +2034,15 @@ byId('recognition-window').addEventListener('change', (event) => {
 });
 setInterval(pollLiveChart, 10_000);
 setInterval(() => {
+  if (!document.hidden) loadAutomatic({ quiet: true });
+}, 5_000);
+setInterval(() => {
   if (!document.hidden && state.tab === 'workspace' && !state.analysisLoading) loadSignals({ quiet: true });
 }, 30_000);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) pauseLivePolling();
   else {
+    loadAutomatic({ quiet: true });
     pollLiveChart();
     if (state.tab === 'workspace') loadSignals({ quiet: true });
   }

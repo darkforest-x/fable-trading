@@ -1,4 +1,4 @@
-"""Loopback SPIKE/Zhipu research workbench, with no scanner or execution hooks.
+"""Loopback SPIKE/Zhipu reviews, with no scanner or execution hooks.
 
 FastAPI serves static UI and bounded JSON uploads on one origin. Credentials
 are saved in owner-authorized private local settings, never in the research ledger.
@@ -16,6 +16,7 @@ import re
 import threading
 import time
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal, Optional
@@ -29,6 +30,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import VERSION
+from .automatic import AutomaticReviews, POST_SIGNAL_BARS
 from .defaults import install_default_references
 from .zhipu import PROMPT_VERSION, ZhipuClient, ZhipuError
 from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes, image_from_data_url
@@ -98,9 +100,20 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
 
 
 def create_app(runtime: Optional[Path] = None, source=None, provider_factory=ZhipuClient,
-               seed_defaults: bool = False):
+               seed_defaults: bool = False, automatic_worker: bool = False):
+    @asynccontextmanager
+    async def lifespan(app):
+        # https://fastapi.tiangolo.com/advanced/events/
+        if automatic_worker:
+            automatic.start()
+        try:
+            yield
+        finally:
+            if automatic_worker:
+                await run_in_threadpool(automatic.stop)
+
     app = FastAPI(title="SPIKE Vision Lab", version=VERSION, docs_url=None, redoc_url=None,
-                  openapi_url=None)
+                  openapi_url=None, lifespan=lifespan)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]"])
     runtime = Path(runtime or os.environ.get("VISION_RESEARCH_RUNTIME", DEFAULT_RUNTIME))
     store = ResearchStore(runtime)
@@ -157,7 +170,24 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
 
     @app.get("/api/signals")
     def signals():
-        return spike.list_signals()
+        payload = spike.list_signals()
+        jobs = {item["signal_id"]: item for item in automatic.snapshot()["items"]}
+        return {**payload, "items": [{**item, "ai_review": jobs.get(item["id"])}
+                                     for item in payload.get("items", [])]}
+
+    @app.get("/api/automatic")
+    def automatic_status():
+        return automatic.snapshot()
+
+    @app.post("/api/automatic")
+    async def configure_automatic(request: Request):
+        payload = await read_json(request, 4096)
+        if set(payload) != {"enabled"} or type(payload["enabled"]) is not bool:
+            raise HTTPException(400, "请提供自动识别开关状态")
+        automatic.set_enabled(payload["enabled"])
+        if payload["enabled"]:
+            await run_in_threadpool(automatic.discover_once)
+        return automatic.snapshot()
 
     @app.get("/api/signals/{signal_id}/image")
     def signal_image(signal_id: str):
@@ -277,8 +307,12 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             inference_lock.release()
 
     def analyze_sync(body: AnalyzeRequest, client, references, reference_revision,
-                     reference_source, chart_snapshot):
-        if body.signal_id:
+                     reference_source, chart_snapshot, prepared=None, run_id=None):
+        if prepared is not None:
+            image, provenance = prepared
+            symbol, timeframe = provenance["symbol"], provenance["timeframe"]
+            image_source = "spike_automatic"
+        elif body.signal_id:
             if body.chart_capture_data_url:
                 chart = chart_snapshot
                 if chart is None:
@@ -315,8 +349,9 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             raise ValueError("待判图不能同时作为参考图")
         review_context = current_review_context(provenance, chart_snapshot, body.chart_viewport)
         record = {
-            "id": uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
+            "id": run_id or uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
             "provider": "zhipu",
+            "automatic": prepared is not None, "signal_id": body.signal_id,
             "symbol": symbol, "timeframe": timeframe, "source": image_source,
             "image_url": store.put_image(image), "image_name": image.name, "image_sha256": image.sha256,
             "image_width": image.width, "image_height": image.height,
@@ -350,6 +385,61 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         store.save(record)
         return record
 
+    def saved_references():
+        snapshot = store.get_references()
+        images = []
+        for saved in snapshot["items"]:
+            name = saved.get("image_url", "").rsplit("/", 1)[-1]
+            if name != saved.get("sha256", "") + ".png":
+                raise ValueError("已保存的参考图记录损坏，请重新保存参考图")
+            path = store.image_path(name)
+            image = image_from_bytes(path.read_bytes(), saved.get("name", "reference"))
+            if image.sha256 != saved["sha256"]:
+                raise ValueError("已保存的参考图内容不匹配，请重新保存参考图")
+            images.append(image)
+        return images, snapshot["revision"]
+
+    def automatically_review(signal, run_id):
+        from .auto_chart import RENDER_VERSION, render_live_chart
+
+        # A manual review may have finished while this signal was queued.
+        for prior in store.list():
+            if (prior.get("provenance", {}).get("id") == signal["id"]
+                    and prior.get("status") == "completed"
+                    and prior.get("analysis_scope") == "current_right_edge"
+                    and prior.get("provenance", {}).get("time_boundary") == "live_observation"):
+                return prior
+        chart = spike.live_chart(signal["id"], POST_SIGNAL_BARS)
+        provenance = chart["provenance"]
+        if (not provenance.get("recognition_eligible") or provenance.get("source_stale")
+                or provenance.get("id") != signal["id"]):
+            raise SourceError("盘口快照过期或不对应当前信号，未调用模型。")
+        image = render_live_chart(chart)
+        # Validate again after rendering; never send a stale queued snapshot.
+        spike.chart_snapshot(signal["id"], chart["snapshot_id"])
+        provenance = dict(provenance, chart_snapshot_id=chart["snapshot_id"],
+                          chart_sha256=chart["chart_sha256"], chart_candles=chart["candles"],
+                          render_version=RENDER_VERSION, pixel_origin="server_render",
+                          pixel_attestation="server_render_from_snapshot",
+                          capture_pixels_attested_to_ohlc=False)
+        references, revision = saved_references()
+        client = provider()
+        try:
+            body = AnalyzeRequest(signal_id=signal["id"], criteria=DEFAULT_CRITERIA)
+            return analyze_sync(body, client, references, revision, "global", chart,
+                                prepared=(image, provenance), run_id=run_id)
+        finally:
+            client.close()
+
+    def has_credentials():
+        with config_lock:
+            return bool(config["api_key"])
+
+    automatic = AutomaticReviews(store, spike, automatically_review, inference_lock,
+                                 has_credentials, enabled_default=automatic_worker,
+                                 clock=getattr(spike, "clock", None))
+    app.state.automatic = automatic
+
     @app.post("/api/analyze")
     async def analyze(request: Request):
         payload = await read_json(request)
@@ -380,21 +470,10 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
                     raise HTTPException(409, "截图视口与盘口快照不一致，请回到最新盘口后重新识别")
         try:
             if body.references is None:
-                reference_snapshot = store.get_references()
+                selected_references, reference_revision = saved_references()
                 if (body.reference_revision is not None and
-                        body.reference_revision != reference_snapshot["revision"]):
+                        body.reference_revision != reference_revision):
                     raise ReferenceRevisionConflict("参考图版本已更新，请重新载入后再识别")
-                selected_references = []
-                for saved in reference_snapshot["items"]:
-                    image_name = saved.get("image_url", "").rsplit("/", 1)[-1]
-                    if image_name != saved.get("sha256", "") + ".png":
-                        raise ValueError("已保存的参考图记录损坏，请重新保存参考图")
-                    path = store.image_path(image_name)
-                    image = image_from_bytes(path.read_bytes(), saved.get("name", "reference"))
-                    if image.sha256 != saved["sha256"]:
-                        raise ValueError("已保存的参考图内容不匹配，请重新保存参考图")
-                    selected_references.append(image)
-                reference_revision = reference_snapshot["revision"]
                 reference_source = "global"
             else:
                 selected_references = [image_from_data_url(item.data_url, item.name)
@@ -490,7 +569,7 @@ def main():
     parser.add_argument("--runtime", type=Path, default=None)
     args = parser.parse_args()
     import uvicorn
-    uvicorn.run(create_app(runtime=args.runtime, seed_defaults=True), host="127.0.0.1", port=args.port,
+    uvicorn.run(create_app(runtime=args.runtime, seed_defaults=True, automatic_worker=True), host="127.0.0.1", port=args.port,
                 access_log=False, log_level="warning")
 
 

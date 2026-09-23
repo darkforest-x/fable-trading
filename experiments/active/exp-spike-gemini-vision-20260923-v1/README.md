@@ -12,7 +12,7 @@ From the repository root on macOS (persistent local service):
 ```
 
 The user LaunchAgent survives terminal/chat closure, restarts a crashed process,
-and starts after login. It only serves this manual workbench. Use `manage status`,
+and starts after login. It serves this research workbench and its local automatic review queue. Use `manage status`,
 `manage restart`, or `manage stop` to inspect, restart, or stop it for the current
 login session. Its plist contains no API key. Logs are in
 `~/Library/Logs/Fable/SpikeVisionResearch/`.
@@ -52,7 +52,7 @@ is rejected locally with a return-to-market action. The browser sends
 compares it with the immutable snapshot before calling the provider. This is
 client-declared metadata, not proof of pixel/OHLC correspondence. Observation
 and signal times accompany the prompt; uploaded charts retain unverified time
-bounds. This is still manual visual research, with no production integration.
+bounds. This remains visual research, with no production integration.
 
 Set `ZHIPU_API_KEY` (or `BIGMODEL_API_KEY`) in the server environment, or enter it
 in the local settings page. Saving writes a private `runtime/private/settings.json`
@@ -91,8 +91,7 @@ continuation gates, so selection is not evidence of predictive accuracy.
 Select a candidate or upload a PNG/JPEG/WEBP image, edit the criteria, then
 explicitly start recognition. The interactive chart is captured at that moment
 and shown as the exact submitted snapshot; return to the chart to pan/zoom again.
-Only
-this action sends selected pixels and criteria to Zhipu's
+Manual recognition and the automatic queue send selected pixels and criteria to Zhipu's
 `https://open.bigmodel.cn/api/paas/v4/chat/completions` API. No search, order or notification tools
 are available to the model. Connection testing sends one short text completion with a small token budget;
 it consumes model usage and does not establish image-recognition quality. Failed recognition records retain
@@ -145,8 +144,8 @@ historical image context is free. Inspect actual `cached_tokens` in the raw usag
 The workspace polls the selected chart every 10 seconds while visible. The
 candidate list refreshes every 30 seconds. Live charts combine SPIKE's confirmed
 MA seed with the same OKX public candle endpoint, including the forming candle.
-Only the selected market is fetched; no scanner, notifications or market files
-are written. SMA uses trailing closes and EMA continues the confirmed seed;
+The selected market and automatically queued candidates are fetched; no scanner,
+notifications or market files are written. SMA uses trailing closes and EMA continues the confirmed seed;
 each provisional update starts again from that seed. Missing or revised
 confirmed bars cause an explicit error rather than fabricated/fallback prices.
 
@@ -154,8 +153,36 @@ Recognition defaults to the 12 bars after signal close (15m = 3h, 30m = 6h,
 1H = 12h, 4H = 48h). The page can select 6/12/24/48 bars; the API accepts 1–96.
 Expired signals remain viewable; recognition requires widening the range.
 This is a research UI window, independent of production freshness gates.
-No recurring model calls are made. After recognition, the submitted image stays
+After recognition, the submitted image stays
 frozen until returning to the live chart; later prices never rewrite that run.
+
+Version 0.6.0 starts a durable automatic queue in the local service. It reads
+SPIKE candidates every 30 seconds and reviews each eligible signal ID once,
+including currently eligible unreviewed candidates on first activation. Closing
+the page does not stop it. The candidate cards show queue state, verdict, short
+reason and observation time; their result action opens the exact saved image.
+The header can pause/resume the queue, with the setting preserved across restart.
+The UI polls queue state every five seconds while visible; it never initiates
+model requests from its refresh loop.
+
+Automatic reviews use the fixed 12-bar research window, default current-edge
+criteria and saved global references. A compatible completed manual review is
+reused. Each job is claimed in SQLite before invoking the provider; browser
+refreshes and multiple tabs do not trigger additional calls. Manual and automatic
+inference share a single lock. A queued candidate that expires is skipped.
+Billing, authentication and rate-limit errors pause the queue. Other failed or
+interrupted attempts remain visible and are never automatically retried; an
+unknown provider outcome after restart cannot be claimed as a successful result.
+
+The background worker renders an immutable live OHLC/MA snapshot using a fixed
+1440×800 light canvas (`spike-vision-auto-light-v1`), so it works without a browser.
+It preserves the supplied MA values, visible right edge, UTC+8 observation time
+and forming-bar state; it adds no signal box or result label. Its pixels are
+explicitly recorded as a server render, not as a TradingView capture or proof of
+pixel parity with the browser. The interactive workbench continues to use
+TradingView. `/api/automatic` exposes compact status; POST with `{ "enabled":
+true/false }` toggles discovery and pending processing. Already-running requests
+finish when paused. Saved PNGs, run IDs and raw API traces remain linked.
 
 `GET /api/signals/{id}/chart?mode=live&post_signal_bars=12` returns an immutable
 snapshot ID alongside up to 120 OHLC/MA rows. `POST /api/analyze` binds the

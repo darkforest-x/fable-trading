@@ -10890,7 +10890,7 @@ experiments:
     source_repo: darkforest-x/fable-trading
     source_commit: b277357335
     status: active
-    result: Zhipu glm-5.3-flash workbench 0.2.0 captures and displays original API request and response bodies. Live candidate plus five current references returned HTTP200 in 10.8 seconds with 8817 total tokens and zero cached tokens; API chain verified, recognition quality unvalidated.
+    result: Zhipu glm-5.3-flash workbench 0.6.0 adds a durable once-per-signal automatic review queue and per-card results, retaining readable conversations and original API bodies. Live candidate plus five current references returned HTTP200 in 10.8 seconds with 8817 total tokens and zero cached tokens; API chain verified, recognition quality unvalidated.
     holdout_consumed: false
     question: Can a manually reviewed vision API classify the owner's SPIKE chart patterns reliably?
     single_variable: Engineering setup only; later frozen-image model comparisons must be registered separately.
@@ -10898,4 +10898,4 @@ experiments:
     production_eligible: false
     artifacts: [spike-vision-prelaunch-references-v3]
     reuse_allowed: false
-    notes: Independent loopback workbench in yoyo/vision_research; reads SPIKE without starting workers. Provider switch code d46bdde251; live run 577fd09c249d40a5b43f3036213906d9. Original eight-reference pack preserved; current V3 has five individually reviewed pre-launch references, installed as library revision4 (AUCTION/CHZ long; FIL/TRUST/JELLYJELLY short), geometry pending Owner review; credentials persist only in ignored private settings. Live charts poll same-source public OKX candles every 10s with provisional-bar labeling; default post-signal research window 12 bars and immutable observation snapshots. Live snapshot run 9cef1192dba4430eadac969603117e0e completed with uncertain verdict in 13.38s using the then-current 3-reference library; not an accuracy evaluation. No scanner or production gate changes. No report requested.
+    notes: Independent loopback workbench in yoyo/vision_research; local review worker reads SPIKE without starting or altering scanner workers. Provider switch code d46bdde251; live run 577fd09c249d40a5b43f3036213906d9. Original eight-reference pack preserved; current V3 has five individually reviewed pre-launch references, installed as library revision4 (AUCTION/CHZ long; FIL/TRUST/JELLYJELLY short), geometry pending Owner review; credentials persist only in ignored private settings. Live charts poll same-source public OKX candles every 10s with provisional-bar labeling; default post-signal research window 12 bars and immutable observation snapshots. Live snapshot run 9cef1192dba4430eadac969603117e0e completed with uncertain verdict in 13.38s using the then-current 3-reference library; not an accuracy evaluation. No scanner or production gate changes. No report requested.
