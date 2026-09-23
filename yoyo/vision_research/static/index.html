@@ -159,7 +159,8 @@
         </section>
 
         <section id="tab-settings" class="tab-panel" role="tabpanel" aria-labelledby="tab-settings-button" tabindex="0" hidden>
-          <div class="settings-layout">
+          <details class="model-config-drawer">
+          <summary><span><span class="ui-icon icon-settings" aria-hidden="true"></span>模型配置</span><span id="model-config-summary">正在读取配置…</span></summary>
           <div class="settings-grid">
             <section class="panel settings-card" aria-labelledby="model-config-heading">
               <h2 id="model-config-heading">模型与凭据</h2>
@@ -188,25 +189,23 @@
                 <div><strong>图片接收方</strong><p>智谱 BigModel 官方 API</p><code>open.bigmodel.cn</code></div>
               </div>
               <div id="connection-result" class="connection-result" role="status" aria-live="polite" hidden></div>
-              <button id="open-last-connection-exchange" class="button button-quiet" type="button" hidden>查看本次 API 原始记录</button>
+              <button id="open-last-connection-exchange" class="button button-quiet" type="button" hidden>查看本次对话</button>
               <p class="field-help">连接测试会发送一条简短文字请求，产生少量模型用量。</p>
               <button id="connection-test" class="button button-secondary" type="button"><span class="button-label">测试智谱连接</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
             </section>
           </div>
-          <section class="panel api-exchanges-card" aria-labelledby="api-exchanges-heading">
-            <div class="panel-heading api-exchanges-heading-row">
-              <div><h2 id="api-exchanges-heading">API 原始记录</h2><p class="settings-copy">每次识别都会新发一条独立请求，包含 1 张待判图和当前全部全局参考图（目前 <span id="api-exchange-reference-count">读取中</span> 张）。保存参考图只免去重复上传，不表示模型已记住图片。</p></div>
-              <button id="reload-api-exchanges" class="button button-secondary" type="button"><span class="ui-icon icon-refresh" aria-hidden="true"></span>重新载入</button>
-            </div>
-            <p class="field-help api-exchange-privacy">原始记录从本功能上线后开始保存。API 密钥不写入记录；图片 Base64 在请求预览中折叠，下载文件保留完整原始请求。</p>
-            <div class="api-exchanges-controls">
-              <label class="field-label" for="api-exchange-select">最近的 API 调用</label>
-              <select id="api-exchange-select" aria-label="选择 API 原始记录" disabled><option value="">正在读取…</option></select>
-              <span id="api-exchanges-status" class="live-chart-status" role="status" aria-live="polite">正在读取 API 原始记录…</span>
-            </div>
-            <div id="api-exchanges-error" class="inline-error" role="alert" hidden></div>
-            <div id="api-exchange-detail" class="api-exchange-detail" aria-live="polite"><p class="exchange-empty">正在读取 API 原始记录…</p></div>
-          </section>
+          </details>
+          <div class="conversation-layout">
+            <aside class="conversation-sidebar" aria-labelledby="api-exchanges-heading">
+              <div class="conversation-list-heading"><h2 id="api-exchanges-heading">对话记录</h2><button id="reload-api-exchanges" class="icon-button" type="button" aria-label="刷新对话记录" title="刷新对话记录"><span class="ui-icon icon-refresh" aria-hidden="true"></span></button></div>
+              <span id="api-exchanges-status" class="conversation-count" role="status" aria-live="polite">正在读取…</span>
+              <div id="api-exchanges-error" class="inline-error" role="alert" hidden></div>
+              <nav id="api-exchange-list" class="conversation-list" aria-label="选择对话"></nav>
+            </aside>
+            <section class="conversation-main" aria-label="模型对话">
+              <div id="api-exchange-detail" class="api-exchange-detail" aria-live="polite"><p class="exchange-empty">正在读取对话…</p></div>
+              <div class="conversation-footer"><span>每次识别是一段独立对话</span><button class="button button-secondary" type="button" data-tab="workspace">去工作台识别<span class="ui-icon icon-arrow-right" aria-hidden="true"></span></button></div>
+            </section>
           </div>
         </section>
       </main>

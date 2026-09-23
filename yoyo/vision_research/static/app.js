@@ -1,4 +1,5 @@
 import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
+import { exchangeConversation } from './conversation.js';
 const API_BASE = '/api';
 const DEFAULT_MODEL = 'glm-5.3-flash';
 const DEFAULT_CRITERIA = '只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。';
@@ -76,6 +77,8 @@ const resultEl = byId('result-content');
 const historyEl = byId('history-list');
 const workspaceErrorEl = byId('workspace-error');
 let renderedResultMarkup = '';
+let renderedExchangeDetail = null;
+let renderedExchangeTitle = '';
 
 function updateResultMarkup(markup) {
   // Keep disclosure state and unsaved review text across unrelated UI renders.
@@ -165,12 +168,15 @@ function currentStateLabel(value) {
   return ({ converging: '当前仍在密集，尚未启动', launching: '当前正在启动', extended: '当前已离开密集区', no_setup: '当前无该形态', unclear: '当前状态不清楚' })[value] || '';
 }
 
-function exchangeOptionLabel(exchange) {
-  const kind = exchangeKindLabel(exchange.kind);
-  const model = asText(exchange.model, '模型未提供');
-  const created = formatDate(exchange.created_at);
-  const status = exchangeStatusLabel(exchange.status);
-  return `${kind} · ${model} · ${created} · ${status}`;
+function exchangeTitle(exchange) {
+  if (exchange.kind === 'connection_test') return '连接测试';
+  const run = state.runs.find((item) => item.id === exchange.run_id || item.api_exchange_id === exchange.id);
+  const symbol = run?.symbol || run?.signal?.symbol;
+  return symbol ? `${symbol} · ${run.timeframe || run.signal?.timeframe || ''}` : (run?.image_name || '图表识别');
+}
+
+function chatParagraphs(text) {
+  return String(text || '').split(/\n\s*\n/).filter(Boolean).map((part) => `<p>${escapeHtml(part).replace(/\n/g, '<br>')}</p>`).join('');
 }
 
 function imageDataUrl(value) {
@@ -194,7 +200,6 @@ function collectExchangeImages(requestBodyText) {
   let body;
   try { body = JSON.parse(requestBodyText); } catch { return []; }
   const images = [];
-  const seen = new Set();
   const visit = (value, hint = '') => {
     if (Array.isArray(value)) {
       let currentHint = hint;
@@ -210,10 +215,11 @@ function collectExchangeImages(requestBodyText) {
       return;
     }
     if (!value || typeof value !== 'object') return;
-    const possibleUrl = value.image_url?.url || (value.type === 'image_url' ? value.url : '') || '';
+    const inline = value.inlineData || value.inline_data;
+    const possibleUrl = value.image_url?.url || (value.type === 'image_url' ? value.url : '')
+      || (inline?.data ? `data:${inline.mimeType || inline.mime_type};base64,${inline.data}` : '');
     const dataUrl = imageDataUrl(possibleUrl);
-    if (dataUrl && !seen.has(dataUrl)) {
-      seen.add(dataUrl);
+    if (dataUrl) {
       images.push({ dataUrl, titleHint: hint });
       return;
     }
@@ -539,7 +545,6 @@ function renderReferences() {
   byId('save-references').disabled = !state.referencesDirty || state.referencesSaving || !state.referencesReady;
   byId('save-references').textContent = state.referencesSaving ? '正在保存…' : '保存全局参考图';
   byId('references-status').textContent = !state.referencesReady ? '尚未读取全局参考图' : state.referencesSaving ? '正在保存到本机…' : state.referencesDirty ? '有未保存的更改 · 保存后应用于后续识别' : `已保存 · ${state.references.length} 张 · 应用于后续识别`;
-  byId('api-exchange-reference-count').textContent = state.referencesReady ? String(state.references.length) : '读取中';
   showInlineError('references-error', state.referencesError);
 }
 
@@ -615,7 +620,7 @@ function renderRunStatus() {
 function apiExchangeActionMarkup(exchangeId) {
   const id = asText(exchangeId, '');
   if (id) {
-    return `<button class="button button-secondary" type="button" data-open-exchange="${escapeHtml(id)}">查看 API 原始记录</button>`;
+    return `<button class="button button-secondary" type="button" data-open-exchange="${escapeHtml(id)}">查看模型对话</button>`;
   }
   return '<span class="exchange-unavailable">本条记录没有关联 API 原始记录；未保存的旧请求无法补取当时输入输出。</span>';
 }
@@ -744,7 +749,7 @@ function renderHistory() {
         <p class="history-summary">${escapeHtml(summary)}</p>
         <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(runStatusLabel(run.status))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
       </div>
-      <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button>${run.api_exchange_id ? `<button class="button button-quiet" type="button" data-open-exchange="${escapeHtml(run.api_exchange_id)}">查看 API 原始记录</button>` : '<span class="exchange-unavailable">旧记录未保存原文</span>'}<button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
+      <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button>${run.api_exchange_id ? `<button class="button button-quiet" type="button" data-open-exchange="${escapeHtml(run.api_exchange_id)}">查看模型对话</button>` : '<span class="exchange-unavailable">旧记录未保存原文</span>'}<button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
       ${review}
     </article>`;
   }).join('');
@@ -762,113 +767,98 @@ function credentialSummary(source) {
 
 function renderExchangeDetail(detail) {
   const target = byId('api-exchange-detail');
-  const request = detail.request && typeof detail.request === 'object' ? detail.request : {};
-  const response = detail.response && typeof detail.response === 'object' ? detail.response : null;
+  const title = exchangeTitle(detail);
+  // Background status refreshes must not collapse text or jump the conversation.
+  if (renderedExchangeDetail === detail && renderedExchangeTitle === title && target.querySelector('.conversation-thread')) return;
+  renderedExchangeDetail = detail;
+  renderedExchangeTitle = title;
+  const chat = exchangeConversation(detail);
+  const compactRequest = chat.requestText.length > 140
+    ? (chat.requestText.match(/^[\s\S]{1,140}?[。！？\n]/u)?.[0] || `${chat.requestText.slice(0,120)}…`).trim()
+    : chat.requestText;
+  const request = detail.request || {};
   const requestText = typeof request.body_text === 'string' ? request.body_text : '';
-  const preview = requestBodyPreview(requestText);
   const images = collectExchangeImages(requestText);
-  const httpStatus = detail.http_status ?? response?.status_code;
-  const id = asText(detail.id || state.selectedExchangeId, '');
-  const downloadPath = `${API_BASE}/exchanges/${encodeURIComponent(id)}/export`;
-  const metadata = [
-    ['类型', exchangeKindLabel(detail.kind)],
-    ['记录状态', exchangeStatusLabel(detail.status)],
-    ['HTTP 状态', httpStatus == null ? '未返回' : String(httpStatus)],
-    ['模型', asText(detail.model, '模型未提供')],
-    ['时间', formatDate(detail.created_at)],
-    ['图片数', Number.isFinite(Number(detail.image_count)) ? `${Number(detail.image_count)} 张` : '未提供'],
-    ['耗时', detail.latency_ms == null ? '未提供' : `${Math.round(Number(detail.latency_ms))} ms`],
-  ];
-  target.innerHTML = `<article class="exchange-detail-card">
-    <div class="exchange-detail-heading"><h3>本次 API 调用</h3><a class="button button-secondary" href="${escapeHtml(downloadPath)}" download="api-exchange-${escapeHtml(id || 'record')}.json">下载完整原始记录</a></div>
-    <dl class="exchange-metadata">${metadata.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join('')}</dl>
-    ${detail.redacted ? '<p class="exchange-redacted">服务端已从正文回显中移除与 API Key 完全匹配的内容；认证请求头不会记录。</p>' : ''}
-    ${detail.error ? '<p class="exchange-call-error" role="status"></p>' : ''}
-    <section class="exchange-input-section" aria-label="发送给 API 的图片">
-      <h4>本次发送的图片</h4>
-      <div class="exchange-images" data-exchange-images></div>
-    </section>
-    <div class="exchange-body-grid">
-      <div class="exchange-body-column">
-        <details class="exchange-body-block" open><summary>${escapeHtml(preview.label)}</summary><pre data-exchange-request></pre></details>
-        <details class="exchange-body-block"><summary>完整原始请求正文（含图片 Base64）</summary><pre data-exchange-request-original></pre></details>
-      </div>
-      <details class="exchange-body-block" open><summary>API 原始响应正文</summary><pre data-exchange-response></pre></details>
+  const id = asText(detail.id || state.selectedExchangeId);
+  const preview = requestBodyPreview(requestText);
+  const decision = chat.decision;
+  const completed = detail.status === 'completed';
+  const status = exchangeStatusLabel(detail.status);
+  const latency = detail.latency_ms == null ? '' : `用时 ${(Number(detail.latency_ms) / 1000).toFixed(1)} 秒`;
+  const meta = [asText(detail.model), chat.effort ? `推理 ${chat.effort}` : '', latency, chat.usageText].filter(Boolean);
+  const imageButton = (image, index) => `<button class="chat-image ${index === 0 ? 'chat-image-primary' : ''}" type="button" data-exchange-image="${index}" aria-label="放大${escapeHtml(image.title)}"><img src="${escapeHtml(image.dataUrl)}" alt="${escapeHtml(image.title)}" loading="lazy"><span>${escapeHtml(image.title)}</span></button>`;
+  const list = (items) => `<ul>${safeList(items).map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const answer = decision ? `
+    <div class="chat-verdict"><strong>${escapeHtml(verdictLabel(decision.verdict))}</strong><span>${escapeHtml(currentStateLabel(decision.current_state) || sideLabel(decision.side))}</span></div>
+    ${chatParagraphs(decision.summary)}
+    ${safeList(decision.evidence).length ? `<section class="chat-evidence"><h4>判断依据</h4>${list(decision.evidence)}</section>` : ''}
+    ${safeList(decision.risks).length ? `<section class="chat-risks"><h4>需要留意</h4>${list(decision.risks)}</section>` : ''}
+  ` : chatParagraphs(chat.responseText);
+  target.innerHTML = `<article class="conversation-thread">
+    <header class="conversation-thread-heading"><div><h2>${escapeHtml(title)}</h2><time>${escapeHtml(formatDate(detail.created_at))}</time></div><span class="conversation-state ${completed ? '' : 'is-incomplete'}">${escapeHtml(status)}</span></header>
+    <div class="conversation-messages">
+      <section class="chat-turn chat-user" aria-label="发送给模型的内容">
+        <div class="chat-speaker">你 <span>· ${escapeHtml(exchangeKindLabel(detail.kind))}</span></div>
+        <div class="chat-user-bubble">
+          ${images.length ? `<div class="chat-attachments">${imageButton(images[0], 0)}${images.length > 1 ? `<details class="chat-reference-images"><summary>随附 ${images.length - 1} 张参考图</summary><div class="chat-reference-gallery">${images.slice(1).map((image, index) => imageButton(image, index + 1)).join('')}</div></details>` : ''}</div>` : ''}
+          <div class="chat-request">${chatParagraphs(compactRequest)}</div>
+          ${compactRequest !== chat.requestText ? `<details class="chat-disclosure chat-prompt"><summary>完整识别要求</summary><div class="chat-plain-text">${escapeHtml(chat.requestText)}</div></details>` : ''}
+        </div>
+      </section>
+      <section class="chat-turn chat-assistant" aria-label="模型回答">
+        <div class="chat-speaker">智谱 <span>· ${escapeHtml(asText(detail.model, '模型'))}</span></div>
+        ${chat.reasoningText ? '<details class="chat-disclosure chat-thinking"><summary>查看思考过程</summary><div class="chat-plain-text" data-chat-reasoning></div></details>' : ''}
+        ${chat.errorText ? `<div class="chat-error" role="status">${chatParagraphs(chat.errorText)}</div>` : ''}
+        <div class="chat-answer">${answer || `<p class="chat-muted">${detail.status === 'running' ? '正在等待模型回答…' : '本次没有可展示的回答。'}</p>`}</div>
+        <div class="chat-meta">${meta.map((item) => `<span>${escapeHtml(item)}</span>`).join('')}</div>
+      </section>
+      <details class="chat-disclosure chat-technical"><summary>技术详情与原始记录</summary>
+        <div class="chat-technical-content">
+          <p>HTTP ${escapeHtml(asText(detail.http_status, '未返回'))}${detail.redacted ? ' · 密钥回显已隐藏' : ''} · 原始输入输出保留如下</p>
+          <a class="button button-secondary" href="${API_BASE}/exchanges/${encodeURIComponent(id)}/export" download="api-exchange-${escapeHtml(id)}.json"><span class="ui-icon icon-download" aria-hidden="true"></span>下载完整记录</a>
+          <details class="chat-disclosure"><summary>发送的完整提示词</summary><div class="chat-plain-text" data-chat-prompt></div></details>
+          <details class="exchange-body-block"><summary>请求 JSON（图片已折叠）</summary><pre data-exchange-request></pre></details>
+          <details class="exchange-body-block"><summary>完整请求（含图片 Base64）</summary><pre data-exchange-request-original></pre></details>
+          <details class="exchange-body-block"><summary>原始响应 JSON</summary><pre data-exchange-response></pre></details>
+          <p class="chat-endpoint" data-chat-endpoint></p>
+        </div>
+      </details>
     </div>
-    <details class="exchange-request-meta"><summary>HTTP 请求地址</summary><dl><dt>方法</dt><dd data-exchange-method></dd><dt>URL</dt><dd data-exchange-url></dd></dl></details>
   </article>`;
-
-  const requestPreview = target.querySelector('[data-exchange-request]');
-  requestPreview.textContent = requestText ? preview.text : '接口没有保存请求正文，无法显示 API 实际输入。';
-  target.querySelector('[data-exchange-request-original]').textContent = requestText || '接口没有保存请求正文。';
-  const responsePreview = target.querySelector('[data-exchange-response]');
-  responsePreview.textContent = response && typeof response.body_text === 'string'
-    ? response.body_text
-    : '本条记录没有保存 HTTP 响应正文。';
-  const methodTarget = target.querySelector('[data-exchange-method]');
-  const urlTarget = target.querySelector('[data-exchange-url]');
-  methodTarget.textContent = asText(request.method, '未提供');
-  urlTarget.textContent = asText(request.url, '未提供');
-  const errorTarget = target.querySelector('.exchange-call-error');
-  if (errorTarget) errorTarget.textContent = asText(detail.error, 'API 调用失败。');
-
-  const gallery = target.querySelector('[data-exchange-images]');
-  if (!images.length) {
-    const note = document.createElement('p');
-    note.className = 'exchange-empty';
-    note.textContent = detail.kind === 'connection_test'
-      ? '本次连接测试发送的是文字请求，没有发送图片。'
-      : '没有从已保存的请求正文中找到可预览的内嵌图片。';
-    gallery.append(note);
-  } else {
-    for (const image of images) {
-      const figure = document.createElement('figure');
-      figure.className = 'exchange-image-preview';
-      const previewImage = document.createElement('img');
-      previewImage.src = image.dataUrl;
-      previewImage.alt = image.title;
-      previewImage.loading = 'lazy';
-      const caption = document.createElement('figcaption');
-      caption.textContent = image.title;
-      figure.append(previewImage, caption);
-      gallery.append(figure);
-    }
-  }
+  target.querySelector('[data-chat-prompt]').textContent = chat.requestFullText || '本条记录没有保存完整提示词。';
+  const reasoning = target.querySelector('[data-chat-reasoning]');
+  if (reasoning) reasoning.textContent = chat.reasoningText;
+  target.querySelector('[data-exchange-request]').textContent = requestText ? preview.text : '未保存请求正文。';
+  target.querySelector('[data-exchange-request-original]').textContent = requestText || '未保存请求正文。';
+  target.querySelector('[data-exchange-response]').textContent = detail.response?.body_text || '未收到响应正文。';
+  target.querySelector('[data-chat-endpoint]').textContent = `${request.method || ''} ${request.url || ''}`;
 }
 
 function renderExchangeRecords() {
-  const picker = byId('api-exchange-select');
+  const list = byId('api-exchange-list');
   const statusTarget = byId('api-exchanges-status');
-  const errorTarget = byId('api-exchanges-error');
   const detailTarget = byId('api-exchange-detail');
   const exchanges = state.exchanges.filter((item) => item && ['recognition', 'connection_test'].includes(item.kind));
   const options = [...exchanges];
   if (state.selectedExchangeId && !options.some((item) => asText(item.id) === state.selectedExchangeId)) {
     options.unshift({ id: state.selectedExchangeId, placeholder: true });
   }
-  picker.innerHTML = options.length
-    ? options.map((item) => `<option value="${escapeHtml(asText(item.id))}" ${asText(item.id) === state.selectedExchangeId ? 'selected' : ''}>${escapeHtml(item.placeholder ? `API 原始记录 ${asText(item.id)}` : exchangeOptionLabel(item))}</option>`).join('')
-    : '<option value="">暂无 API 原始记录</option>';
-  picker.disabled = state.exchangesLoading || options.length === 0;
-  statusTarget.textContent = state.exchangesLoading
-    ? '正在读取 API 原始记录…'
-    : `最近显示 ${exchanges.length} 次 API 调用`;
+  const markup = options.map((item) => `<button class="conversation-item ${asText(item.id) === state.selectedExchangeId ? 'is-selected' : ''}" type="button" data-select-exchange="${escapeHtml(asText(item.id))}" ${asText(item.id) === state.selectedExchangeId ? 'aria-current="true"' : ''}><strong>${escapeHtml(item.placeholder ? '正在读取对话…' : exchangeTitle(item))}</strong><span><time>${escapeHtml(formatDate(item.created_at))}</time><span class="${item.status === 'failed' ? 'is-failed' : ''}">${escapeHtml(exchangeStatusLabel(item.status))}</span></span></button>`).join('');
+  if (list.innerHTML !== markup) list.innerHTML = markup || '<p class="conversation-list-empty">还没有对话</p>';
+  statusTarget.textContent = state.exchangesLoading ? '正在读取…' : `${exchanges.length} 段对话`;
   showInlineError('api-exchanges-error', state.exchangesError);
-
+  byId('reload-api-exchanges').disabled = state.exchangesLoading;
   if (state.exchangeDetailLoading) {
-    detailTarget.innerHTML = '<p class="exchange-empty"><span class="spinner" aria-hidden="true"></span>正在读取本次 API 原始记录…</p>';
+    detailTarget.innerHTML = '<p class="exchange-empty"><span class="spinner" aria-hidden="true"></span>正在读取对话…</p>';
   } else if (state.exchangeDetailError) {
     detailTarget.innerHTML = `<div class="exchange-load-error"><p>${escapeHtml(state.exchangeDetailError)}</p><button class="button button-secondary" type="button" data-reload-exchange-detail>重试读取</button></div>`;
   } else if (state.exchangeDetail && asText(state.exchangeDetail.id || state.selectedExchangeId) === state.selectedExchangeId) {
     renderExchangeDetail(state.exchangeDetail);
   } else if (!state.exchangesLoading && !exchanges.length && !state.selectedExchangeId) {
-    detailTarget.innerHTML = '<p class="exchange-empty">当前没有已保存的 API 原始记录。旧识别记录不会补造当时的请求或模型响应。</p>';
-  } else if (!state.exchangesLoading && !state.selectedExchangeId) {
-    detailTarget.innerHTML = '<p class="exchange-empty">选择一条 API 调用查看它实际发送的输入和收到的响应。</p>';
+    detailTarget.innerHTML = '<div class="conversation-empty"><h2>从一张图表开始</h2><p>在工作台完成识别后，这里会显示发送的图片和 AI 的回答。</p></div>';
   } else if (!state.exchangeDetailLoading) {
-    detailTarget.innerHTML = '<p class="exchange-empty">尚未读取所选 API 原始记录。</p>';
+    detailTarget.innerHTML = '<p class="exchange-empty">选择一段对话，查看图片与回答。</p>';
   }
-  byId('api-exchange-reference-count').textContent = state.referencesReady ? String(state.references.length) : '读取中';
 }
 
 async function loadExchangeDetail(id) {
@@ -960,6 +950,7 @@ function renderSettings() {
   const modelInput = byId('model-input');
   if (state.status) {
     const key = credentialSummary(state.status.credential_source);
+    byId('model-config-summary').textContent = `${state.status.model || state.model} · ${key.configured ? '密钥已保存' : '待配置密钥'}`;
     byId('api-key-input').placeholder = key.configured ? '已保存在本机；更换时才需填写' : '粘贴智谱 API Key 后保存';
     statusTarget.innerHTML = `<div class="status-line"><strong>本地 API</strong><span>已连接</span></div>
       <div class="status-line"><strong>当前模型</strong><code>${escapeHtml(asText(state.status.model, state.model))}</code></div>
@@ -1017,7 +1008,7 @@ function renderAll() {
   renderWorkspace();
   renderHistory();
   renderSettings();
-  for (const button of document.querySelectorAll('[data-tab]')) {
+  for (const button of document.querySelectorAll('.nav-tab[data-tab]')) {
     const active = button.dataset.tab === state.tab;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-selected', String(active));
@@ -1031,7 +1022,7 @@ function renderAll() {
     workspace: ['研究工作台', '从候选信号到形态判断，查看图表并运行识别。'],
     references: ['参考图库', '管理后续识别共用的形态参考图。'],
     history: ['识别记录', '查看历史结果、人工复核与 API 原始记录。'],
-    settings: ['API 设置', '配置本机模型连接并查看 API 调用记录。'],
+    settings: ['模型对话', '查看每一次识别的图片与回答。'],
   };
   const [title, description] = pageHeadings[state.tab] || pageHeadings.workspace;
   const pageTitle = byId('page-title');
@@ -1202,6 +1193,7 @@ async function loadRuns() {
   } finally {
     state.runsLoading = false;
     renderHistory();
+    renderExchangeRecords();
   }
 }
 
@@ -1677,6 +1669,22 @@ document.addEventListener('click', (event) => {
     openRun(openRunButton.dataset.openRun);
     return;
   }
+  const selectExchangeButton = event.target.closest('[data-select-exchange]');
+  if (selectExchangeButton) {
+    selectExchange(selectExchangeButton.dataset.selectExchange);
+    return;
+  }
+  const exchangeImageButton = event.target.closest('[data-exchange-image]');
+  if (exchangeImageButton) {
+    const image = collectExchangeImages(state.exchangeDetail?.request?.body_text || '')[Number(exchangeImageButton.dataset.exchangeImage)];
+    if (image) {
+      byId('reference-viewer-title').textContent = image.title;
+      byId('reference-viewer-image').src = image.dataUrl;
+      byId('reference-viewer-image').alt = image.title;
+      byId('reference-viewer').showModal();
+    }
+    return;
+  }
   const openExchangeButton = event.target.closest('[data-open-exchange]');
   if (openExchangeButton) {
     openExchange(openExchangeButton.dataset.openExchange);
@@ -1692,7 +1700,7 @@ document.addEventListener('click', (event) => {
 });
 
 document.addEventListener('keydown', (event) => {
-  const tabButton = event.target.closest('[data-tab]');
+  const tabButton = event.target.closest('.nav-tab[data-tab]');
   if (tabButton && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
     const tabs = Array.from(document.querySelectorAll('.nav-tab[data-tab]'));
@@ -1732,8 +1740,8 @@ byId('criteria-input').addEventListener('input', (event) => {
 });
 byId('config-form').addEventListener('submit', saveConfig);
 byId('connection-test').addEventListener('click', testConnection);
-byId('reload-api-exchanges').addEventListener('click', () => loadExchangeRecords({ reloadSelected: true }));
-byId('api-exchange-select').addEventListener('change', (event) => selectExchange(event.target.value));
+byId('reload-api-exchanges').addEventListener('click', () => Promise.allSettled([loadRuns(), loadExchangeRecords({ reloadSelected: true })]));
+
 
 const dropZone = byId('drop-zone');
 const chartFileInput = byId('chart-file');

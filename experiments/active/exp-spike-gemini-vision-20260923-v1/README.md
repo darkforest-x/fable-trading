@@ -99,7 +99,15 @@ it consumes model usage and does not establish image-recognition quality. Failed
 the HTTP status, an allowlisted provider error code and elapsed time. Documented billing, authentication and quota errors remain distinguishable;
 unknown HTTP statuses remain visible for diagnosis. Requests are not retried.
 
-Model Settings now includes an API exchange viewer. From version 0.2.0 onward,
+Model Settings presents API exchanges as readable conversations from version
+0.5.0: a record list, submitted chart and reference attachments, the saved
+criteria, and the model's answer. Model configuration, full prompts, reasoning,
+and raw JSON are collapsed by default. Structured answers are rendered as
+conclusions, evidence and caveats; a failed exchange is never promoted to a
+successful decision by the display adapter. This is a view of independent
+recognition requests, not a new multi-turn chat API.
+
+From version 0.2.0 onward,
 recognition and connection tests preserve the serialized request body before
 sending and the full response body before JSON/decision validation. This includes
 provider errors, reasoning fields and detailed token usage. Authorization headers
