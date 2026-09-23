@@ -2032,7 +2032,7 @@ var bool v128EpisodeInvalid = false
 var bool v128EpisodePaused = false
 var bool v128HasStructuralProposal = false
 var array<label> v128CandidateTags = array.new<label>()
-var table v128Status = table.new(position.bottom_right, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
+var table v128Status = table.new(position.bottom_center, 2, 2, bgcolor=color.new(chart.bg_color, 8), border_width=0)
 
 bool v128CandidateEvent = false
 bool v128FrameLong = trendSide == 1 and not na(entryBar) and not na(entry) and not na(initialStop) and not na(risk) and entry > 0 and initialStop > 0 and risk > 0
