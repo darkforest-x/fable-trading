@@ -21,10 +21,12 @@
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
     joints: ["突破+spike", "V9 多头框还开着时出现的第一次趋势线突破，本周期或上级周期都算（V11.2 默认「多头框内」）。"],
     breaks: ["趋势线突破", "15m、1H、4H、日线自己的三点下降线被收盘突破：连续 2 根收在线上 0.2 ATR。"],
-    shadow: ["前向影子", "V7 与 V8 在相同新收盘数据上并行记录，积累未参与调参的新样本。"],
+    shadow: ["旧版影子记录", "已退役的 V7 / V8 独立观察记录，仅供历史对照；新运行统一进入模拟实盘。"],
     research: ["研究总览", "围绕均线密集系统，跟踪因子、实验、回测与视觉判断。"],
     datasets: ["数据集", "统一管理币圈数据目录，核对覆盖、整理状态与回测读取入口。"],
     factors: ["因子库", "定义、可知时点、实现来源与研究结论，一处追踪。"],
+    strategies: ["策略库", "登记策略规则、研究状态与关联，为后续模拟观察保留版本记录。"],
+    paper: ["模拟实盘", "只观察创建任务之后的新信号，按未来开盘模拟，不向交易所下单。"],
     experiments: ["实验登记", "保留每次问题、唯一变化、原始结果与失败证据。"],
     backtests: ["回测任务", "冻结参数与数据，独立运行，留存逐笔与随机对照。"],
     yolo: ["YOLO 工作流", "样本、标注、数据集、训练与评估，沿同一条研究流程追踪。"],
@@ -249,14 +251,14 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "system", "research", "datasets", "factors", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "research", "datasets", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["signals", "watch", "lines", "shadow", "system", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
-    const researchView = ["research", "datasets", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view);
+    const researchView = ["research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
     $("exchange-mark").textContent = researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
@@ -279,6 +281,8 @@
     }
     window.SpikeResearch?.setView(state.view);
     window.SpikeDatasets?.setActive(state.view === "datasets");
+    window.SpikeStrategies?.setActive(state.view === "strategies");
+    window.SpikePaper?.setActive(state.view === "paper");
     window.SpikeYolo?.setActive(state.view === "yolo");
     window.SpikeVisionModule?.setActive(state.view === "vision").catch(() => {});
     $("research-error").classList.add("hidden");
@@ -714,7 +718,8 @@
     $("shadow-event-count").textContent = configured ? number(status.events) : "—";
     $("shadow-v8-count").textContent = configured ? number(status.v8_admitted) : "—";
     $("shadow-cell-count").textContent = configured ? number(cells) : "—";
-    $("nav-shadow-count").textContent = configured ? number(status.events) : "—";
+    const navShadowCount = $("nav-shadow-count");
+    if (navShadowCount) navShadowCount.textContent = configured ? number(status.events) : "—";
     $("shadow-event-detail").textContent = configured ? `${number(status.path_bars)} 根前向路径 K 线` : "影子服务尚未启用";
     $("shadow-v8-detail").textContent = configured && numeric(status.events) > 0
       ? `保留率 ${percentage(numeric(status.v8_admitted) / numeric(status.events))} · 距六线边缘 ≤ 3 ATR`
@@ -878,6 +883,8 @@
   async function refresh(trigger = "manual") {
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
+    if (state.view === "strategies") { if (trigger !== "periodic") await window.SpikeStrategies?.refresh(); return; }
+    if (state.view === "paper") { await window.SpikePaper?.refresh(trigger); return; }
     if (state.view === "yolo") { if (trigger !== "periodic") await window.SpikeYolo?.refresh(); return; }
     if (state.view === "vision") return;
     if (state.view === "shadow") { await loadShadow(); return; }
@@ -1084,7 +1091,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "research", "datasets", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });

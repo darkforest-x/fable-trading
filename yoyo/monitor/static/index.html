@@ -15,6 +15,8 @@
   <script src="/static/vision-module.js" defer></script>
   <link rel="stylesheet" href="/static/yolo-workflow.css">
   <script src="/static/yolo-workflow.js" defer></script>
+  <link rel="stylesheet" href="/static/strategies.css">
+  <script src="/static/strategies.js" defer></script>
   <script src="/static/app.js" defer></script>
 </head>
 <body>
@@ -30,16 +32,15 @@
         <button class="nav-item" data-view="research" aria-label="研究总览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3ZM12 3h5v5h-5ZM3 12h5v5H3ZM12 12h5v5h-5Z"/></svg><span>研究总览</span></button>
         <button class="nav-item" data-view="datasets" aria-label="数据集"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="4" rx="6.5" ry="2.5"/><path d="M3.5 4v5c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V4M3.5 9v5c0 1.4 2.9 2.5 6.5 2.5 1.1 0 2.1-.1 3-.3"/><path d="M13 15.5h5m-2.5-2.5v5"/></svg><span>数据集</span></button>
         <button class="nav-item" data-view="factors" aria-label="因子库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 10h12M4 16h12M7 2v4M13 8v4M8 14v4"/></svg><span>因子库</span></button>
+        <button class="nav-item" data-view="strategies" aria-label="策略库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16V5h14v11M6 12l2-3 2 2 4-5"/><path d="M5 18h10"/></svg><span>策略库</span></button>
         <button class="nav-item" data-view="yolo" aria-label="YOLO 工作流"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><rect x="6" y="6" width="8" height="8" rx="1"/></svg><span>YOLO 工作流</span></button>
         <button class="nav-item" data-view="experiments" aria-label="实验登记"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"/></svg><span>实验登记</span></button>
         <button class="nav-item" data-view="backtests" aria-label="回测任务"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"/></svg><span>回测任务</span></button>
+        <button class="nav-item" data-view="paper" aria-label="模拟实盘"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 13l3-3 2 2 3-5"/><path d="M6 6h.1M10 6h.1M14 6h.1"/></svg><span>模拟实盘</span></button>
         <button class="nav-item" data-view="vision" aria-label="视觉研究"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5h16v12H2ZM5 14l4-5 3 3 3-5"/></svg><span>视觉研究</span></button>
-        <button class="nav-item" data-view="shadow" aria-label="前向影子"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 15V9l4 3 3-7 3 8 4-5v7"/><path d="M3 17h14"/></svg><span>前向影子</span><span class="nav-count" id="nav-shadow-count">—</span></button>
         <button class="nav-item active" data-view="signals" aria-label="信号中心" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 11h4l3-7 3 12 3-6h3"/></svg><span>信号中心</span><span class="nav-count" title="24 小时指标启动数" id="nav-signal-count">—</span></button>
-        <button class="nav-item" data-view="watch" aria-label="蓄势观察"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5Z"/><circle cx="10" cy="10" r="2"/></svg><span>蓄势观察</span></button>
         <button class="nav-item" data-view="joints" aria-label="突破+spike"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5l7 4 9-3"/><path d="M4 17l4-6 3 3 6-9"/></svg><span>突破+spike</span><span class="nav-count" title="24 小时突破+spike 数" id="nav-joints-count">—</span></button>
         <button class="nav-item" data-view="breaks" aria-label="趋势线突破"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 4l16 7"/><path d="M5 17l4-5 3 2 5-8"/></svg><span>趋势线突破</span><span class="nav-count" title="24 小时趋势线突破数" id="nav-breaks-count">—</span></button>
-        <button class="nav-item" data-view="warmup" aria-label="预热历史"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 10a7 7 0 1 0 2-5"/><path d="M3 4v4h4M10 6v4l3 2"/></svg><span>预热历史</span></button>
         <button class="nav-item" data-view="system" aria-label="运行状态"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="5" rx="1.5"/><rect x="3" y="12" width="14" height="5" rx="1.5"/><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"/></svg><span>运行状态</span></button>
       </nav>
       <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div>SPIKE V9<small>V9 多空启动 → YOLO 补充确认</small></div></div>
@@ -75,6 +76,7 @@
           <p class="ledger-basis" id="stats-basis">按原始信号收盘日归属 · 北京时间 · 周一开始</p>
           <div class="section-toolbar"><div class="section-title"><h2 id="signal-section-title">指标启动 · 全部周期</h2><span class="subtle-count" id="filtered-count">—</span></div><span class="quiet-text" id="signal-window-note">最近 2,000 条 · 每 15 秒同步</span></div>
           <div class="signal-mode-bar"><div class="segmented signal-scope" role="group" aria-label="信号确认阶段"><button type="button" data-signal-scope="direct" class="selected" aria-pressed="true">V9 启动</button><button type="button" data-signal-scope="confirmed" aria-pressed="false">YOLO 补充确认</button></div><div class="segmented source-scope" id="signal-source-scope" role="group" aria-label="信号来源"><button type="button" data-signal-source="live" class="selected" aria-pressed="true">实时</button><button type="button" data-signal-source="replay" aria-pressed="false">历史回放</button></div><span class="quiet-text" id="signal-scope-note">实时原始启动与 YOLO 补充确认均独立去重通知；历史回放没有通知。</span></div>
+          <div class="signal-related-links"><span>旧视图：</span><a href="#watch">蓄势观察</a><a href="#warmup">预热历史</a></div>
           <div id="warmup-notice" class="warmup-notice hidden" role="status">保留的服务回执仅作历史事实显示；这里不推断、补发或触发通知。</div>
           <div class="filters"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="symbol-search" type="search" placeholder="搜索合约，例如 BTC" aria-label="搜索合约" autocomplete="off" spellcheck="false"><kbd>/</kbd></label><div class="segmented" aria-label="信号周期"><button data-timeframe="all" class="selected" aria-pressed="true">全部</button><button data-timeframe="15" aria-pressed="false">15m</button><button data-timeframe="30" aria-pressed="false">30m</button><button data-timeframe="60" aria-pressed="false">1H</button><button data-timeframe="240" aria-pressed="false">4H</button></div><label class="ledger-select"><span>方向</span><select id="side-filter" aria-label="信号方向"><option value="all">全部方向</option><option value="long">多头 ↑</option><option value="short">空头 ↓</option></select></label></div>
           <div class="ledger-filter-row"><label class="ledger-select"><span>状态</span><select id="outcome-filter" aria-label="信号状态"><option value="all">全部状态</option><option value="active">运行中</option><option value="profit">已止盈 / 保护退出</option><option value="loss">已止损</option><option value="breakeven">保本退出</option><option value="unknown">等待计算</option></select></label><label class="ledger-select"><span>排序</span><select id="sort-filter" aria-label="信号排序"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="quiet-text">R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。</span></div>
@@ -129,6 +131,8 @@
 
         <div id="research-error" class="research-error hidden" role="alert"></div>
         <section id="research-view" class="view-panel research-panel hidden"><div id="research-overview"><p class="research-empty">正在读取实验注册表…</p></div></section>
+        <section id="strategies-view" class="view-panel research-panel hidden"><div id="strategies-workspace"><p class="research-empty">正在读取策略登记…</p></div></section>
+        <section id="paper-view" class="view-panel research-panel hidden"><div id="paper-workspace"><p class="research-empty">正在读取模拟任务…</p></div></section>
         <section id="datasets-view" class="view-panel research-panel hidden"><div id="datasets-workspace"><p class="research-empty">正在读取数据集目录…</p></div></section>
         <section id="factors-view" class="view-panel research-panel hidden">
           <div class="research-toolbar"><div><input id="factor-search" type="search" aria-label="搜索因子" placeholder="搜索因子、公式或来源…"><select id="factor-category" aria-label="因子类别"><option value="">全部类别</option></select><span id="factor-count" class="research-caption"></span></div><button id="new-factor" class="research-button primary">＋ 登记因子</button></div>
