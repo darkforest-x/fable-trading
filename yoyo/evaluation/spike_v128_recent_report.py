@@ -136,6 +136,38 @@ def grouped_metrics(frame, keys):
     return pd.DataFrame(rows)
 
 
+def plot_outcomes(summary, output):
+    """Export descriptive results with denominators and ambiguous-stop wicks separated."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.5), constrained_layout=True)
+    labels = [f"{int(row.timeframe_min)}m {'SPIKE L/S' if row.arm == 'v9_both' else 'bk+spike L'}"
+              for row in summary.itertuples()]
+    x = np.arange(len(summary))
+    rates = summary.win_rate.to_numpy()*100
+    axes[0].bar(x, rates, color=['#466e9e' if 'SPIKE' in s else '#dc9056' for s in labels])
+    axes[0].set(xticks=x, xticklabels=labels, ylabel='Closed-trade net win rate (%)', ylim=(0, 100),
+                title='After the frozen 20 bp round-trip cost')
+    for i, row in enumerate(summary.itertuples()):
+        axes[0].text(i, rates[i]+2, f'{row.win_rate:.1%}\nn={row.closed:,}', ha='center', fontsize=10)
+    levels = ('0r','1r','2r','3r','5r')
+    for row, label in zip(summary.itertuples(), labels):
+        values = [getattr(row, f'float_to_stop_loss_{level}') / row.closed * 100 for level in levels]
+        axes[1].plot(np.arange(5), values, marker='o', label=label)
+    axes[1].set(xticks=np.arange(5), xticklabels=['>0R', '>=1R', '>=2R', '>=3R', '>=5R'],
+                xlabel='Established favourable excursion before exit',
+                ylabel='Net-losing stop exits / all closed trades (%)', title='Profit given back before a losing stop')
+    axes[1].legend(fontsize=8)
+    for ax in axes:
+        ax.grid(axis='y', alpha=.18); ax.set_axisbelow(True)
+        ax.tick_params(axis='x', labelsize=8)
+        ax.spines[['top','right']].set_visible(False)
+    fig.suptitle('SPIKE V12.8 | 2026-07-23 to 2026-09-23 04:00 UTC\nResearch replay; stop-bar wick order is excluded from established profit', fontsize=12)
+    fig.savefig(output/'outcomes.png', dpi=170)
+    plt.close(fig)
+
+
 def build(root, output):
     """All stream ledger hashes must match their completed receipt before reading."""
     root, output = Path(root), Path(output)
@@ -181,6 +213,7 @@ def build(root, output):
              'weekly': keys+['week'], 'periods': keys+['period'], 'symbols': keys+['symbol']}
     for name, group_keys in views.items():
         grouped_metrics(closed, group_keys).to_csv(output/f'{name}.csv', index=False)
+    plot_outcomes(grouped_metrics(closed, keys), output)
     grouped_metrics(closed.loc[closed.symbol.isin(['BTCUSDT', 'ETHUSDT'])], keys+['symbol']).to_csv(output/'btc_eth.csv', index=False)
     closed.sort_values('net_r', ascending=False).to_csv(output/'all_closed_trades.csv.gz', index=False, compression='gzip')
     closed.loc[closed.loss & closed.protective_stop & (closed.mfe_known_r>0)].sort_values('mfe_known_r', ascending=False).to_csv(output/'floating_profit_stop_losses.csv', index=False)
@@ -197,12 +230,25 @@ def build(root, output):
             if view == 'symbols':
                 continue
             for key, group in matched.groupby(group_keys):
+                if view == 'periods' and key[-1] == 'earlier':
+                    control_exit = pd.to_datetime(group.control_exit_time, utc=True)
+                    group = group.loc[control_exit < pd.Timestamp(cfg['split'])]
+                if group.empty:
+                    continue
                 rows.append(dict(zip(group_keys, key)) | {'view':view,'matched':len(group),
                             'target_net_bp':float(group.net_bp.mean()),
                             'control_net_bp':float(group.control_net_return.mean()*1e4),
                             'control_win_rate':float((group.control_net_return>0).mean())}
                             | block_inference(group.excess_bp, group.week, cfg['stat_seed'], cfg['bootstrap']))
-    pd.DataFrame(rows).to_csv(output/'random_comparison.csv', index=False)
+    comparison = pd.DataFrame(rows)
+    if len(comparison):
+        comparison['p_holm_primary_four'] = np.nan
+        primary = comparison.loc[comparison.view == 'summary'].dropna(subset=['p_one_sided']).sort_values('p_one_sided')
+        running = 0.
+        for rank, (idx, row) in enumerate(primary.iterrows()):
+            running = max(running, min(1., row.p_one_sided*(len(primary)-rank)))
+            comparison.loc[idx, 'p_holm_primary_four'] = running
+    comparison.to_csv(output/'random_comparison.csv', index=False)
     receipt = {'input_run':str(root), 'input_manifest_sha256':digest(root/'manifest.json'),
                'input_identity_sha256':digest(root/'identity.json'), 'stream_count':len(receipts),
                'trade_rows':len(trades), 'closed':len(closed), 'censored':int(trades.censored.sum()),
