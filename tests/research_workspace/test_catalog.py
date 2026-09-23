@@ -124,6 +124,7 @@ def test_evidence_is_bounded_hashes_files_and_skips_escaping_symlinks(tmp_path):
     table = result["tables"][0]
     assert table["path"] == "experiments/active/exp-fixture-v1/summary_v1/metrics.csv"
     assert len(table["rows"]) == MAX_TABLE_ROWS
+    assert table["rows"][0] == {"metric": "ok", "value": "1"}
     assert table["total_rows"] == 305
     assert table["truncated"] is True
     assert len(table["sha256"]) == 64

@@ -79,14 +79,14 @@
   function newExperiment() {
     dialog(heading('登记单变量实验','预登记写入现有 experiments/registry.yaml；结果默认未验证。')+`<form id="new-experiment-form"><label>实验名称<input name="title" required minlength="2" maxlength="150" placeholder="例如：密集启动的价格位置筛选"></label><label>要回答的问题<textarea name="question" required minlength="5" maxlength="4000" rows="3"></textarea></label><label>唯一变化<textarea name="single_variable" required minlength="3" maxlength="4000" rows="3" placeholder="相对基线只改变什么？其余成本、退出与数据范围保持什么？"></textarea></label><label>关联因子<select name="factor_ids" multiple size="5">${state.factors.map(f=>`<option value="${esc(f.id)}">${esc(f.name||f.id)}</option>`).join('')}</select></label><button class="research-button primary" type="submit">保存预登记</button></form>`);
   }
-  const columnLabels={timeframe_min:'周期（分钟）',arm:'策略组',policy:'方案',period:'时间段',closed:'已平仓',n:'样本数',win_rate:'净胜率',mean_net_bp:'平均净 bp',mean_net_r:'平均净 R',mean_gross_bp:'平均毛 bp',net_gt5r:'净 >5R',net_gt10r:'净 >10R',control_net_bp:'随机对照净 bp',target_net_bp:'配对目标净 bp',mean_excess_bp:'配对超额 bp',p_holm_primary_four:'Holm p',ci95_low_bp:'超额区间下界 bp',ci95_high_bp:'超额区间上界 bp',p_holm:'Holm p',p_one_sided:'单侧 p',matched:'配对数',view:'统计视角',sum_net_r:'累计净 R（非账户）'};
+  const columnLabels={symbol:'合约',feature:'因子',feature_role:'研究角色',cohort:'样本段',bucket:'分组',n_closed:'已平仓',n_censored:'未结束',net_win_rate:'净胜率',matched_control_n:'配对数',matched_target_net_bp:'配对目标净 bp',paired_excess_bp:'配对超额 bp',timeframe_min:'周期（分钟）',arm:'策略组',policy:'方案',period:'时间段',closed:'已平仓',n:'样本数',win_rate:'净胜率',mean_net_bp:'平均净 bp',mean_net_r:'平均净 R',mean_gross_bp:'平均毛 bp',net_gt5r:'净 >5R',net_gt10r:'净 >10R',control_net_bp:'随机对照净 bp',target_net_bp:'配对目标净 bp',mean_excess_bp:'配对超额 bp',p_holm_primary_four:'Holm p',ci95_low_bp:'超额区间下界 bp',ci95_high_bp:'超额区间上界 bp',p_holm:'Holm p',p_one_sided:'单侧 p',matched:'配对数',view:'统计视角',sum_net_r:'累计净 R（非账户）'};
   function cell(value,key) {
     if(value===null||value===undefined||value==='')return '<span class="research-missing">未记录</span>';
     if(key==='period'&&['earlier','later'].includes(value))return value==='earlier'?'前段':'后段';
     if(key==='arm'&&['v9_both','joint'].includes(value))return value==='v9_both'?'普通多空':'联合多头';
     const n=Number(value);
     if(Number.isFinite(n)&&typeof value!=='boolean'&&String(value).trim()!==''&& !['arm','policy','period','view'].includes(key)) {
-      if(key==='win_rate'||key==='control_win_rate')return `${(n*100).toFixed(2)}%`;
+      if(key==='win_rate'||key==='control_win_rate'||key==='net_win_rate')return `${(n*100).toFixed(2)}%`;
       if(/bp|_r$/.test(key))return `<span class="${n<0?'research-negative':n>0?'research-positive':''}">${n.toFixed(2)}</span>`;
       if(/^p_/.test(key))return n.toFixed(4);
       return Number.isInteger(n)?n.toLocaleString('zh-CN'):n.toFixed(4);
@@ -96,9 +96,9 @@
   function tableMarkup(table) {
     if(!table?.rows?.length)return '<div class="research-empty">这张表没有可显示的记录。</div>';
     const preferred=Object.keys(columnLabels).filter(c=>table.columns.includes(c));
-    const keys=preferred.length>=3?preferred:table.columns;
+    const keys=['summary','periods'].includes(table.name)&&preferred.length>=3?preferred:table.columns;
     const full=table.columns.filter(c=>!keys.includes(c));
-    return `<div class="research-table-wrap"><table class="research-table evidence-table"><thead><tr>${keys.map(c=>`<th>${esc(columnLabels[c]||c)}</th>`).join('')}</tr></thead><tbody>${table.rows.map(r=>`<tr>${keys.map(k=>`<td>${cell(r[k],k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="research-caption">原始记录 ${table.total_rows ?? table.rows.length} 行${table.truncated?' · 当前仅显示前 300 行':''} · 缺失值不作零处理</p>${full.length?`<details class="research-json"><summary>展开全部原始字段（${table.columns.length} 列）</summary><div class="research-table-wrap"><table class="research-table evidence-table"><thead><tr>${table.columns.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${table.rows.map(r=>`<tr>${table.columns.map(k=>`<td>${cell(r[k],k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`:''}`;
+    return `<div class="research-table-wrap research-evidence-scroll"><table class="research-table evidence-table"><thead><tr>${keys.map(c=>`<th>${esc(columnLabels[c]||c)}</th>`).join('')}</tr></thead><tbody>${table.rows.map(r=>`<tr>${keys.map(k=>`<td>${cell(r[k],k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div><p class="research-caption">原始记录 ${table.total_rows ?? table.rows.length} 行${table.truncated?' · 当前仅显示前 300 行':''} · 缺失值不作零处理</p>${full.length?`<details class="research-json"><summary>展开全部原始字段（${table.columns.length} 列）</summary><div class="research-table-wrap research-evidence-scroll"><table class="research-table evidence-table"><thead><tr>${table.columns.map(k=>`<th>${esc(k)}</th>`).join('')}</tr></thead><tbody>${table.rows.map(r=>`<tr>${table.columns.map(k=>`<td>${cell(r[k],k)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`:''}`;
   }
   function evidenceMarkup(data,prefix='evidence') {
     const tables=data.tables||[];

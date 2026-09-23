@@ -601,12 +601,19 @@ class Catalog:
                         csv.field_size_limit(MAX_CSV_BYTES)
                         reader = csv.reader(io.StringIO(text, newline=""))
                         columns = next(reader, [])
-                        rows: list[list[str]] = []
+                        if len(set(columns)) != len(columns):
+                            raise csv.Error("duplicate column names cannot be mapped without losing values")
+                        rows: list[dict[str, Any]] = []
                         total_rows = 0
                         for row in reader:
                             total_rows += 1
+                            if len(row) > len(columns):
+                                raise csv.Error("row contains more values than the header")
                             if len(rows) < MAX_TABLE_ROWS:
-                                rows.append(row)
+                                # The shared UI reads by column key, just like
+                                # new worker summaries. Missing cells stay null.
+                                rows.append({key: row[i] if i < len(row) else None
+                                             for i, key in enumerate(columns)})
                     finally:
                         csv.field_size_limit(previous_limit)
             except (OSError, UnicodeError, csv.Error) as exc:
