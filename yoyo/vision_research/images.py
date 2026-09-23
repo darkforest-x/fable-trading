@@ -16,7 +16,7 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 
 from .schemas import ImageInput
 
-MAX_IMAGE_BYTES = 8 * 1024 * 1024
+MAX_IMAGE_BYTES = 5_000_000
 MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024
 MAX_PIXELS = 6_000_000
 DATA_URL = re.compile(r"^data:(image/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)$")
@@ -24,8 +24,8 @@ DATA_URL = re.compile(r"^data:(image/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=]+)
 
 def image_from_bytes(data: bytes, name: str = "chart.png") -> ImageInput:
     """Decode actual format, orient pixels, and encode a metadata-free PNG."""
-    if not data or len(data) > MAX_IMAGE_BYTES:
-        raise ValueError("图片为空或超过 8 MB")
+    if not data or len(data) >= MAX_IMAGE_BYTES:
+        raise ValueError("图片为空或达到 5 MB，请使用小于 5 MB 的图片")
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
@@ -35,8 +35,8 @@ def image_from_bytes(data: bytes, name: str = "chart.png") -> ImageInput:
                 if getattr(source, "n_frames", 1) != 1:
                     raise ValueError("请使用静态图片")
                 width, height = source.size
-                if width < 32 or height < 32 or width * height > MAX_PIXELS:
-                    raise ValueError("图片须至少 32×32，且不超过 600 万像素")
+                if width < 32 or height < 32 or max(width, height) > 6000 or width * height > MAX_PIXELS:
+                    raise ValueError("图片须至少 32×32，单边不超过 6000，且不超过 600 万像素")
                 source.load()
                 oriented = ImageOps.exif_transpose(source).convert("RGBA")
                 clean = Image.new("RGB", oriented.size, "white")
@@ -48,8 +48,8 @@ def image_from_bytes(data: bytes, name: str = "chart.png") -> ImageInput:
     except (UnidentifiedImageError, OSError, Image.DecompressionBombError,
             Image.DecompressionBombWarning) as exc:
         raise ValueError("图片无法解码或尺寸过大") from exc
-    if len(pixels) > MAX_IMAGE_BYTES:
-        raise ValueError("无损处理后的图片超过 8 MB，请裁去无关区域")
+    if len(pixels) >= MAX_IMAGE_BYTES:
+        raise ValueError("无损处理后的图片达到 5 MB，请裁去无关区域")
     clean_name = re.sub(r"[\x00-\x1f/\\]", "_", name)[:160] or "chart.png"
     return ImageInput(clean_name, "image/png", pixels,
                       hashlib.sha256(pixels).hexdigest(), width, height)
@@ -60,7 +60,7 @@ def image_from_data_url(value: str, name: str = "chart.png") -> ImageInput:
     if not match:
         raise ValueError("图片必须是 PNG、JPEG 或 WEBP 的 Base64 数据")
     if len(match.group(2)) > (MAX_IMAGE_BYTES * 4 // 3) + 4:
-        raise ValueError("单张图片不能超过 8 MB")
+        raise ValueError("单张图片须小于 5 MB")
     try:
         data = base64.b64decode(match.group(2), validate=True)
     except (ValueError, base64.binascii.Error) as exc:

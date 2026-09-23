@@ -1,9 +1,9 @@
-"""Loopback SPIKE/Gemini research workbench, with no scanner or execution hooks.
+"""Loopback SPIKE/Zhipu research workbench, with no scanner or execution hooks.
 
 FastAPI serves static UI and bounded JSON uploads on one origin. Credentials
 are saved in owner-authorized private local settings, never in the research ledger.
 Sources: https://fastapi.tiangolo.com/tutorial/static-files/
-https://www.starlette.io/threadpool/ and https://ai.google.dev/gemini-api/docs/get-started
+https://www.starlette.io/threadpool/ and https://docs.bigmodel.cn/api-reference/模型-api/对话补全
 """
 
 from __future__ import annotations
@@ -29,9 +29,9 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import VERSION
 from .defaults import install_default_references
-from .gemini import PROMPT_VERSION, GeminiClient, GeminiError
+from .zhipu import PROMPT_VERSION, ZhipuClient, ZhipuError
 from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes, image_from_data_url
-from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL,
+from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL, VISION_MODELS,
                       ReferencesRequest, ReviewRequest)
 from .source import SourceError, SpikeSource
 from .settings import LocalSettings
@@ -50,8 +50,8 @@ class SnapshotConflict(Exception):
 
 def validate_model(model: str) -> str:
     model = model.strip()
-    if not re.fullmatch(r"gemini-[A-Za-z0-9._-]{1,90}", model):
-        raise ValueError("请填写 Gemini 模型 ID，例如 gemini-3.8-flash")
+    if model not in VISION_MODELS:
+        raise ValueError("请填写支持多图输入的智谱视觉模型 ID，例如 glm-5.3-flash")
     return model
 
 
@@ -72,7 +72,7 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
     return value
 
 
-def create_app(runtime: Optional[Path] = None, source=None, provider_factory=GeminiClient,
+def create_app(runtime: Optional[Path] = None, source=None, provider_factory=ZhipuClient,
                seed_defaults: bool = False):
     app = FastAPI(title="SPIKE Vision Lab", version=VERSION, docs_url=None, redoc_url=None,
                   openapi_url=None)
@@ -84,11 +84,14 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
     settings = LocalSettings(runtime)
     saved = settings.load()
     spike = source or SpikeSource(os.environ.get("SPIKE_READONLY_URL", "http://127.0.0.1:8766"))
-    env_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
-    configured_key = saved.get("api_key") or env_key.strip()
+    # Never send a saved Gemini credential to a different provider on upgrade.
+    saved_provider = saved.get("provider", "gemini")
+    current_saved = saved if saved_provider == "zhipu" else {}
+    env_key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("BIGMODEL_API_KEY") or ""
+    configured_key = current_saved.get("api_key") or env_key.strip()
     config = {"api_key": configured_key,
-              "model": validate_model(saved.get("model") or os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)),
-              "credential_source": "local_config" if saved.get("api_key") else "environment" if configured_key else "none"}
+              "model": validate_model(current_saved.get("model") or os.environ.get("ZHIPU_MODEL", DEFAULT_MODEL)),
+              "credential_source": "local_config" if current_saved.get("api_key") else "environment" if configured_key else "none"}
     inference_lock = threading.Lock()
     config_lock = threading.Lock()
     app.state.store, app.state.source = store, spike
@@ -119,7 +122,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
         with config_lock:
             public = {"model": config["model"], "api_key_configured": bool(config["api_key"]),
                       "credential_source": config["credential_source"]}
-        return dict(public, app_name="SPIKE Vision Lab", version=VERSION, spike=spike.status(),
+        return dict(public, provider="zhipu", provider_name="智谱", app_name="SPIKE Vision Lab", version=VERSION, spike=spike.status(),
                     production_eligible=False, training_eligible=False, default_criteria=DEFAULT_CRITERIA)
 
     @app.get("/api/status")
@@ -189,7 +192,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             update = ConfigRequest.model_validate(payload)
             model = validate_model(update.model)
             key = update.api_key.strip() if update.api_key is not None else None
-            if key is not None and (len(key) < 20 or not re.fullmatch(r"[A-Za-z0-9_-]+", key)):
+            if key is not None and (len(key) < 20 or not re.fullmatch(r"[A-Za-z0-9_.-]+", key)):
                 raise ValueError("API Key 格式不正确")
         except (ValidationError, ValueError):
             raise HTTPException(400, "模型或 Key 格式不正确，请检查输入")
@@ -208,7 +211,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             key = config["api_key"]
             chosen_model = model or config["model"]
         if not key:
-            raise HTTPException(503, "请先在模型设置中配置 Gemini API Key")
+            raise HTTPException(503, "请先在模型设置中配置智谱 API Key")
         return provider_factory(api_key=key, model=chosen_model)
 
     @app.post("/api/connection-test")
@@ -220,7 +223,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             raise HTTPException(409, "当前有识别请求运行中，请稍后再试")
         try:
             return await run_in_threadpool(client.check_connection)
-        except GeminiError as exc:
+        except ZhipuError as exc:
             return JSONResponse({"ok": False, "model": status()["model"], "message": str(exc),
                                  "error_details": exc.diagnostics()}, status_code=502)
         finally:
@@ -263,6 +266,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             raise ValueError("待判图不能同时作为参考图")
         record = {
             "id": uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
+            "provider": "zhipu",
             "symbol": symbol, "timeframe": timeframe, "source": image_source,
             "image_url": store.put_image(image), "image_name": image.name, "image_sha256": image.sha256,
             "image_width": image.width, "image_height": image.height,
@@ -279,7 +283,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
         try:
             result = client.analyze(image=image, references=references, criteria=body.criteria)
             record.update(result, status="completed", completed_at=utc_now())
-        except GeminiError as exc:
+        except ZhipuError as exc:
             record.update(status="failed", error=str(exc), error_details=exc.diagnostics(),
                           latency_ms=round((time.perf_counter() - started) * 1000, 3),
                           completed_at=utc_now())
@@ -397,7 +401,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Start the local SPIKE/Gemini vision workbench")
+    parser = argparse.ArgumentParser(description="Start the local SPIKE/Zhipu vision workbench")
     parser.add_argument("--port", type=int, default=8771)
     parser.add_argument("--runtime", type=Path, default=None)
     args = parser.parse_args()

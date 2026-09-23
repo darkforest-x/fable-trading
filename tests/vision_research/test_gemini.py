@@ -9,13 +9,14 @@ import httpx
 import pytest
 
 from yoyo.vision_research.gemini import (
+    DEFAULT_MODEL,
     INTERACTIONS_URL,
     MAX_OUTPUT_TOKENS,
     MODELS_URL,
     GeminiClient,
     GeminiError,
 )
-from yoyo.vision_research.schemas import DEFAULT_MODEL, Decision, ImageInput
+from yoyo.vision_research.schemas import Decision, ImageInput
 
 
 def image(name: str, data: bytes, mime_type: str = "image/png") -> ImageInput:

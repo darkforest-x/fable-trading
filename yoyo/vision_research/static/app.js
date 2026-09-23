@@ -1,10 +1,10 @@
 import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
 const API_BASE = '/api';
-const DEFAULT_MODEL = 'gemini-3.8-flash';
+const DEFAULT_MODEL = 'glm-5.3-flash';
 const DEFAULT_CRITERIA = '只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。';
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5_000_000;
 const MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024;
-const MAX_REFERENCES = 3599; // Gemini allows 3,600 total images including the candidate.
+const MAX_REFERENCES = 49; // Zhipu vision allows 50 total images including the candidate.
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 const state = {
@@ -482,6 +482,7 @@ function renderSettings() {
   const modelInput = byId('model-input');
   if (state.status) {
     const key = credentialSummary(state.status.credential_source);
+    byId('api-key-input').placeholder = key.configured ? '已保存在本机；更换时才需填写' : '粘贴智谱 API Key 后保存';
     statusTarget.innerHTML = `<div class="status-line"><strong>本地 API</strong><span>已连接</span></div>
       <div class="status-line"><strong>当前模型</strong><code>${escapeHtml(asText(state.status.model, state.model))}</code></div>
       <div class="status-line"><strong>凭据来源</strong><span class="status-key ${key.configured ? '' : 'is-missing'}">${escapeHtml(key.label)}</span></div>
@@ -497,7 +498,7 @@ function renderSettings() {
   setVisible(byId('save-config').querySelector('.button-spinner'), state.configLoading);
   byId('save-config').disabled = state.configLoading;
   const testLabel = byId('connection-test').querySelector('.button-label');
-  testLabel.textContent = state.connectionTesting ? '正在测试…' : '测试 Gemini 连接';
+  testLabel.textContent = state.connectionTesting ? '正在测试…' : '测试智谱连接';
   setVisible(byId('connection-test').querySelector('.button-spinner'), state.connectionTesting);
   byId('connection-test').disabled = state.connectionTesting;
   if (state.lastConnection) {
@@ -661,7 +662,7 @@ function validateFile(file) {
   if (!file) throw new Error('没有选择图片文件。');
   const mime = inferMime(file);
   if (!mime || !ALLOWED_TYPES.has(mime)) throw new Error('仅支持 PNG、JPEG 或 WEBP 图片。');
-  if (file.size > MAX_IMAGE_BYTES) throw new Error('图片超过 8 MB，请选择较小的图片。');
+  if (file.size >= MAX_IMAGE_BYTES) throw new Error('图片须小于 5 MB，请选择较小的图片。');
   return mime;
 }
 
@@ -733,7 +734,7 @@ async function addReferenceFiles(files) {
       state.referencesDirty = true;
     } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
-  if (files.length > selected.length) errors.push('图片数量超过 Gemini 单次请求上限。');
+  if (files.length > selected.length) errors.push('智谱单次最多 50 张图（含待判图），请减少参考图数量。');
   state.referencesError = errors.join(' ');
   byId('reference-file').value = '';
   renderReferences(); renderResult();
@@ -932,7 +933,7 @@ async function saveConfig(event) {
   showInlineSuccess('config-success', '');
   const model = byId('model-input').value.trim();
   if (!model) {
-    showInlineError('config-error', '请填写 Gemini 模型 ID。');
+    showInlineError('config-error', '请填写智谱视觉模型 ID。');
     byId('model-input').focus();
     return;
   }

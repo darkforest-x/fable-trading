@@ -1,11 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
-## 最新：SPIKE + Gemini视觉研究工作台（2026-09-23）
+## 最新：SPIKE + 智谱视觉研究工作台（2026-09-23）
 
 - 入口 `experiments/active/exp-spike-gemini-vision-20260923-v1/`，应用 `yoyo/vision_research/`；本机 `http://127.0.0.1:8771`，由 `.venv/bin/python -m yoyo.vision_research.manage start` 管理用户 LaunchAgent。只读现有 SPIKE 8766；实际子代理 GPT-6 Luna/max 已核实。
 - TradingView Lightweight Charts 4.2.0 为主画布，可平移缩放；同一套 SPIKE 明暗配色与字体。显示至所选信号收盘的最多120根因果 K 线及六条均线，识别保存当时画布和原始数据摘要。上传图片时间边界不作验证声明。
-- 全局参考图库持久保存在独立 SQLite，识别保存引用版本；取消原4张上限，按合计12MiB和Google总图数上限校验。默认包直接复用已有核心红框原图，来源/哈希/确认层级见 `default_references/manifest.json`；只是回看示例，不是逐框金标。仅初始化未编辑的库，后续删改不会被覆盖。
-- Owner 已授权 Key 本机持久保存：`runtime/private/settings.json`（目录0700、文件0600、Git忽略）原子写入，启动自动读取；输入留空保留旧值，账本/导出/状态接口不返回 Key。旧版内存值无法回读，升级后需最后保存一次。默认模型 `gemini-3.8-flash`，Google 请求 `store=false`，不自动重试。
+- 全局参考图库持久保存在独立 SQLite，识别保存引用版本；取消原4张上限，按合计12MiB、单张小于5MB和智谱50张总图数上限校验。默认包已扩充8张（3多5空），直接复用已有核心红框原图，来源/哈希/确认层级见 `default_references/manifest.json`；只是回看示例，不是逐框金标。仅初始化未编辑的库，后续删改不会被覆盖。
+- Owner 已授权 Key 本机持久保存：`runtime/private/settings.json`（目录0700、文件0600、Git忽略）原子写入，启动自动读取；输入留空保留旧值，账本/导出/状态接口不返回 Key。Owner 已要求换为智谱并提供 Key；已在本机固定保存，默认 `glm-5.3-flash`，调用官方 `open.bigmodel.cn/api/paas/v4/chat/completions`，不自动重试。配置带 provider，旧 Gemini 凭据不会发给智谱。
 - 之前模型访问测试成功，但两次真实图片请求失败，旧记录未保留HTTP码，不能推断具体原因。现在失败记录保留HTTP状态和白名单机器码；仍未确认成功图片推理、识别准确率或交易效果。训练/生产资格false，SPIKE扫描/通知/执行不变。
 
 ## 交付偏好已更新（Owner，2026-09-23）

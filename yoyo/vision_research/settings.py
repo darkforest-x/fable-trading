@@ -1,4 +1,4 @@
-"""Persist owner-authorized local Gemini settings outside the inference ledger.
+"""Persist owner-authorized local model settings outside the inference ledger.
 
 Only the local server reads this private file. Atomic replacement avoids partial
 credentials after interruption; API responses never include the saved secret.
@@ -26,7 +26,7 @@ class LocalSettings:
             self.directory.chmod(0o700)
             self.path.chmod(0o600)
             data = json.loads(self.path.read_text())
-            if not isinstance(data, dict) or set(data) - {"api_key", "model"}:
+            if not isinstance(data, dict) or set(data) - {"api_key", "model", "provider"}:
                 raise ValueError()
             if any(not isinstance(value, str) for value in data.values()):
                 raise ValueError()
@@ -45,7 +45,7 @@ class LocalSettings:
                                              prefix=".settings-", delete=False) as stream:
                 temporary = Path(stream.name)
                 os.fchmod(stream.fileno(), 0o600)
-                json.dump({"api_key": api_key, "model": model}, stream)
+                json.dump({"provider": "zhipu", "api_key": api_key, "model": model}, stream)
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(temporary, self.path)

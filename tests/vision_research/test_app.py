@@ -6,17 +6,18 @@ import json
 import threading
 from concurrent.futures import ThreadPoolExecutor
 
+import httpx
 from fastapi.testclient import TestClient
 from PIL import Image, PngImagePlugin
 import pytest
 
-from yoyo.vision_research.gemini import GeminiError
+from yoyo.vision_research.zhipu import CHAT_COMPLETIONS_URL, ZhipuClient, ZhipuError
 from yoyo.vision_research.images import image_from_bytes, image_from_data_url
 from yoyo.vision_research.server import create_app
 from yoyo.vision_research.source import SourceError
 from yoyo.vision_research.store import ResearchStore
 
-KEY = "test-secret-never-persist-this-key"
+KEY = "test-zhipu-private-key.test-secret-value"
 
 
 def image_url(color="navy"):
@@ -75,7 +76,7 @@ class FakeProvider:
     def analyze(self, image, references, criteria):
         self.received_references = [(item.name, item.sha256) for item in references]
         if self.failure:
-            raise GeminiError("quota", "额度暂不可用")
+            raise ZhipuError("quota", "额度暂不可用")
         assert hashlib.sha256(image.data).hexdigest() == image.sha256
         return {"decision": {"verdict": "uncertain", "side": "unknown", "summary": "测试结果",
                              "evidence": ["画面不清"], "risks": [], "box_2d": None},
@@ -85,9 +86,9 @@ class FakeProvider:
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
-    monkeypatch.delenv("GEMINI_MODEL", raising=False)
+    monkeypatch.delenv("ZHIPU_API_KEY", raising=False)
+    monkeypatch.delenv("BIGMODEL_API_KEY", raising=False)
+    monkeypatch.delenv("ZHIPU_MODEL", raising=False)
     FakeProvider.instances, FakeProvider.failure = [], False
     app = create_app(tmp_path, source=EmptySource(), provider_factory=FakeProvider)
     with TestClient(app, base_url="http://127.0.0.1") as client:
@@ -117,10 +118,70 @@ def test_key_is_private_persisted_and_never_returned_or_in_ledger(client, tmp_pa
     fresh = create_app(tmp_path, source=EmptySource(), provider_factory=FakeProvider)
     with TestClient(fresh, base_url="http://127.0.0.1") as other:
         assert other.get("/api/status").json()["api_key_configured"] is True
+        assert other.get("/api/status").json()["provider"] == "zhipu"
         assert other.get("/api/status").json()["credential_source"] == "local_config"
         assert other.post("/api/connection-test", json={}).json()["ok"] is True
         assert other.get("/private/settings.json").status_code == 404
         assert KEY not in other.get("/api/runs").text
+
+
+def test_provider_change_does_not_reuse_a_legacy_gemini_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("ZHIPU_API_KEY", raising=False)
+    monkeypatch.delenv("BIGMODEL_API_KEY", raising=False)
+    monkeypatch.setenv("GEMINI_API_KEY", "wrong-provider-env-secret")
+    private = tmp_path / "private"
+    private.mkdir()
+    path = private / "settings.json"
+    path.write_text(json.dumps({"api_key": "wrong-provider-saved-secret", "model": "gemini-3.8-flash"}))
+    app = create_app(tmp_path, source=EmptySource(), provider_factory=FakeProvider)
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        status = client.get("/api/status").json()
+        assert status["provider"] == "zhipu"
+        assert status["model"] == "glm-5.3-flash"
+        assert status["api_key_configured"] is False
+        assert client.post("/api/connection-test", json={}).status_code == 503
+        assert "wrong-provider" not in client.get("/api/status").text
+    assert json.loads(path.read_text())["model"] == "gemini-3.8-flash"
+
+
+def test_rejects_models_without_the_supported_multi_image_contract(client):
+    assert client.post("/api/config", json={"model": "glm-5", "api_key": KEY}).status_code == 400
+    assert client.post("/api/config", json={"model": "gemini-3.8-flash", "api_key": KEY}).status_code == 400
+    assert client.get("/api/status").json()["api_key_configured"] is False
+
+
+def test_zhipu_adapter_runs_with_all_eight_defaults_and_preserves_identity(tmp_path):
+    requests = []
+
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(200, json={
+            "id": "offline-zhipu-integration", "model": "glm-5.3-flash",
+            "choices": [{"finish_reason": "stop", "message": {"content": json.dumps({
+                "verdict": "uncertain", "side": "unknown", "summary": "Offline fixture",
+                "evidence": [], "risks": ["Not a recognition-quality test"], "box_2d": None,
+            })}}], "usage": {"total_tokens": 12},
+        })
+
+    def factory(api_key, model):
+        return ZhipuClient(api_key, model, transport=httpx.MockTransport(respond))
+
+    app = create_app(tmp_path, source=EmptySource(), provider_factory=factory, seed_defaults=True)
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        configure(client)
+        revision = client.get("/api/references").json()["revision"]
+        response = client.post("/api/analyze", json={"image_data_url": image_url("white"),
+                                                     "reference_revision": revision})
+        assert response.status_code == 200
+        run = response.json()
+        assert run["status"] == "completed" and run["provider"] == "zhipu"
+        assert run["model"] == "glm-5.3-flash" and len(run["references"]) == 8
+        assert len(requests) == 1 and str(requests[0].url) == CHAT_COMPLETIONS_URL
+        assert requests[0].headers["authorization"] == "Bearer " + KEY
+        parts = json.loads(requests[0].content)["messages"][0]["content"]
+        assert len([p for p in parts if p["type"] == "image_url"]) == 9
+        exported = client.get(f"/api/runs/{run['id']}/export")
+        assert exported.json()["provider"] == "zhipu" and KEY not in exported.text
 
 
 def test_completed_run_review_and_export_preserve_original_decision(client):
@@ -158,7 +219,7 @@ def test_safe_provider_diagnostics_survive_record_and_export(client, monkeypatch
     configure(client)
 
     def payment_error(*args, **kwargs):
-        raise GeminiError("payment_required", "预付款余额不足（HTTP 402 · payment_required）",
+        raise ZhipuError("payment_required", "预付款余额不足（HTTP 402 · payment_required）",
                           http_status=402, provider_code="payment_required")
 
     monkeypatch.setattr(FakeProvider, "analyze", payment_error)
@@ -213,6 +274,15 @@ def test_actual_image_validation_and_metadata_removal():
             image_from_bytes(raw)
     with pytest.raises(ValueError):
         image_from_data_url("data:image/svg+xml;base64,PHN2Zz4=")
+
+
+def test_zhipu_upload_limit_is_checked_before_decoding():
+    with pytest.raises(ValueError, match="5 MB"):
+        image_from_bytes(b"x" * 5_000_000)
+    output = io.BytesIO()
+    Image.new("RGB", (6001, 32), "navy").save(output, "PNG")
+    with pytest.raises(ValueError, match="6000"):
+        image_from_bytes(output.getvalue())
 
 
 def test_changed_preview_is_rejected_before_inference(client):
@@ -304,7 +374,7 @@ def test_failed_private_settings_write_preserves_the_previous_key(client, monkey
     def fail_save(self, api_key, model):
         raise RuntimeError("本机模型配置未能保存，请检查目录权限")
     monkeypatch.setattr(LocalSettings, "save", fail_save)
-    response = client.post("/api/config", json={"api_key": "replacement-secret-value-123456", "model": "gemini-test"})
+    response = client.post("/api/config", json={"api_key": "replacement-secret-value-123456", "model": "glm-5.3-flashx"})
     assert response.status_code == 500
     assert "replacement-secret" not in response.text
     assert (tmp_path / "private" / "settings.json").read_bytes() == before
@@ -312,7 +382,7 @@ def test_failed_private_settings_write_preserves_the_previous_key(client, monkey
 
 
 def test_browser_chart_capture_is_tied_to_the_causal_chart_snapshot(tmp_path, monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("ZHIPU_API_KEY", raising=False)
     source = CaptureSource()
     app = create_app(tmp_path, source=source, provider_factory=FakeProvider)
     with TestClient(app, base_url="http://127.0.0.1") as client:

@@ -18,8 +18,11 @@ from urllib.parse import quote
 
 import httpx
 
-from yoyo.vision_research.schemas import DEFAULT_MODEL, MAX_REFERENCES, Decision, ImageInput
+from yoyo.vision_research.schemas import Decision, ImageInput
 from .images import MAX_TOTAL_IMAGE_BYTES
+
+DEFAULT_MODEL = "gemini-3.8-flash"
+MAX_REFERENCES = 3599
 
 INTERACTIONS_URL = "https://generativelanguage.googleapis.com/v1beta/interactions"
 MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models/"

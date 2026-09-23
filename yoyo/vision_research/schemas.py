@@ -1,7 +1,7 @@
 """Bounded request/result contracts for manual visual pattern research.
 
-Gemini's JSON mode is only a transport contract, not a correctness guarantee.
-Source: https://ai.google.dev/gemini-api/docs/structured-output
+Structured model output is a transport contract, not a correctness guarantee.
+Source: https://docs.bigmodel.cn/api-reference/模型-api/对话补全
 No market feature is computed here; uploaded images have unverified time bounds.
 """
 
@@ -12,10 +12,11 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-DEFAULT_MODEL = "gemini-3.8-flash"
-# Google's documented 3,600 image/request ceiling includes the candidate.
-# The much smaller aggregate byte limit normally constrains the workbench first.
-MAX_REFERENCES = 3599
+DEFAULT_MODEL = "glm-5.3-flash"
+# Documented vision families below accept 50 total images, including the candidate.
+VISION_MODELS = frozenset({"glm-5.3-flash", "glm-5.3-flashx", "glm-5v-turbo",
+                           "glm-4.6v", "glm-4.6v-flash", "glm-4.6v-flashx"})
+MAX_REFERENCES = 49
 DEFAULT_CRITERIA = (
     "只判断当前可见的双均线密集启动形态，不能利用未来涨跌。"
     "观察均线是否先持续收拢，再出现有方向的启动。"
