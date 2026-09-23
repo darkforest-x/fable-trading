@@ -174,17 +174,21 @@ def render_pine(pack: Mapping[str, Any], template: str) -> str:
     out = template
     for key, value in constants.items():
         out = out.replace(key, repr(int(value)) if isinstance(value, int) else f"{float(value):.10f}")
-    lines = [_load_line("S1SCALE", stage1["feature_scales"], decimals)]
-    for features, sequence in zip(stage1["features"], stage1["sequences"]):
-        lines.append(_load_line("S1REF", list(features) + [v for channel in sequence for v in channel], decimals))
+    blocks = [_pool("S1SCALE", [stage1["feature_scales"]], decimals),
+              _pool("S1REF", [list(f) + [v for ch in s for v in ch]
+                              for f, s in zip(stage1["features"], stage1["sequences"])], decimals)]
     for name, key in (("S2ANCHOR", "anchors"), ("S2BAD", "bad"), ("S2FAMILY", "family")):
-        for sequence in stage2[key]:
-            lines.append(_load_line(name, [v for channel in sequence for v in channel], decimals))
-    return out.replace("__DATA__", "\n".join(lines))
+        blocks.append(_pool(name, [[v for channel in sequence for v in channel] for sequence in stage2[key]], decimals))
+    return out.replace("__DATA__", "\n".join(blocks))
 
 
-def _load_line(target: str, values: Sequence[float], decimals: int) -> str:
-    return f'    f_load({target}, "' + ",".join(f"{float(v):.{decimals}f}" for v in values) + '")'
+def _pool(target: str, rows: Sequence[Sequence[float]], decimals: int) -> str:
+    """One `array.from` call; continuation lines use a two-space indent, as Pine requires."""
+    literals = ['"' + ",".join(f"{float(v):.{decimals}f}" for v in row) + '"' for row in rows]
+    if len(literals) == 1:
+        return f"var array<float> {target} = f_parse(array.from({literals[0]}))"
+    body = ",\n  ".join(literals)
+    return f"var array<float> {target} = f_parse(array.from(\n  {body}))"
 
 
 def main() -> None:

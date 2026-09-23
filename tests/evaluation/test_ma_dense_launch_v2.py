@@ -42,9 +42,11 @@ def test_generated_pine_matches_template_and_pack():
     generated = refs.GENERATED.read_text()
     assert generated == refs.render_pine(json.loads(PACK.read_text()), refs.TEMPLATE.read_text())
     assert "__DATA__" not in generated and "__PERFECT_THRESHOLD__" not in generated
-    assert generated.count("f_load(S1REF") == 50
-    assert generated.count("f_load(S2FAMILY") == 50
-    assert generated.count("f_load(S2ANCHOR") == 2 and generated.count("f_load(S2BAD") == 6
+    # data arrives as five `array.from` statements, not a long if block (Pine CE10205)
+    assert "f_load(" not in generated and "if barstate.isfirst" not in generated
+    for name in ("S1SCALE", "S1REF", "S2ANCHOR", "S2BAD", "S2FAMILY"):
+        assert generated.count(f"var array<float> {name} = f_parse(array.from(") == 1, name
+    assert sum(line.startswith('  "') for line in generated.split("\n")) == 50 + 2 + 6 + 50
     assert "PERFECT_THRESHOLD = 0.3611898959" in generated
     assert "DIST_SCALE = 1.1995844783" in generated
 

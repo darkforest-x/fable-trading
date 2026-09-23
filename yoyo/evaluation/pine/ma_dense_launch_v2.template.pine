@@ -84,18 +84,15 @@ f_quantile(array<float> values, float q) =>
     v
 
 // ---------------------------------------------------------------- frozen reference data
-var array<float> S1REF = array.new<float>()
-var array<float> S1SCALE = array.new<float>()
-var array<float> S2ANCHOR = array.new<float>()
-var array<float> S2BAD = array.new<float>()
-var array<float> S2FAMILY = array.new<float>()
+// One statement per pool: `var` runs the parse once, on the first bar.
+f_parse(array<string> rows) =>
+    array<float> out = array.new<float>()
+    for i = 0 to array.size(rows) - 1
+        array<string> parts = str.split(array.get(rows, i), ",")
+        for j = 0 to array.size(parts) - 1
+            array.push(out, str.tonumber(array.get(parts, j)))
+    out
 
-f_load(array<float> target, string payload) =>
-    array<string> parts = str.split(payload, ",")
-    for i = 0 to array.size(parts) - 1
-        array.push(target, str.tonumber(array.get(parts, i)))
-
-if barstate.isfirst
 __DATA__
 
 // ---------------------------------------------------------------- distance helpers
