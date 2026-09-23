@@ -78,7 +78,9 @@ def start():
             PLIST.chmod(0o600)
         if launchctl("bootstrap", f"gui/{os.getuid()}", str(PLIST)).returncode:
             raise RuntimeError("Workbench service could not be loaded; inspect the service logs.")
-    for _ in range(20):
+    # Allow for launchd's 10-second throttle plus Python startup. A five-second
+    # probe window reported false failures even though the service came up.
+    for _ in range(80):
         if healthy():
             return
         time.sleep(0.25)
