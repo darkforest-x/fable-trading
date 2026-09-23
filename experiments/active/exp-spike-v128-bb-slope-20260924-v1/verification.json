@@ -1,0 +1,210 @@
+{
+  "screenshot_sources": [
+    {
+      "path": "/var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/codex-clipboard-a81aad08-a2aa-46b1-bd65-ac12eed7aa37.png",
+      "sha256": "61a574f1a3fc87a81820b8d3f371a0af74203c85393f6c74a4ceed9e5ff14725"
+    },
+    {
+      "path": "/var/folders/fr/fq9wwmwx3xn63_cdk_v8nvt00000gn/T/codex-clipboard-f3416b6a-716d-409f-bf4c-f8408a4794cf.png",
+      "sha256": "7a00ab9c5340128cec873fc58fd79acf28bd6d80a9a91bf8f6e019ee301c9456"
+    }
+  ],
+  "smoke_vs_full_15m": {
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/statuses.csv.gz": "2160aeab7b9978cc73a986202037c6a2a7a1ba0974778c41eed9ca2c2cef67b6",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/candidates.csv.gz": "bba7446ed280d32190640c32bea7e46111200b19c4b0d5c8d81e1acda0e011a7",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/controls.csv.gz": "31df36246c3fdc8c90c7a2db247d41bc07648125165dbe2a4e49203ce19de343",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/trades.csv.gz": "cd4b74ab179e89fa031a009fa9e4f12aaf9c4bd452c8f00259985b7a78d34677",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/screenshot_windows.csv.gz": "8025320c33d176cc796621b2137b0b7bc8eb3ff24627efb83598d5245f925657",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/statuses.csv.gz": "68c541957e6d8cca580b8bce4b42718cebc3c6c74df283d9730738dc0cfbea73",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/candidates.csv.gz": "482e37c3f36d24b2966a3d883f779effeb89f9a1f2fe1bcc85d8793cc7dbe2d9",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/controls.csv.gz": "f9c12319034344e31ba2d2daa3038cbb32283b9617e6f2d56b140ac3c93bc260",
+    "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/trades.csv.gz": "f3cac86137826211f7c7d59cc13054710d2b0567e7632d6695186a446d86c59c"
+  },
+  "stream_count": 14,
+  "trade_records": 15507,
+  "censored": 1,
+  "manifest_sha256": "d2a05b9820488a77dd04612a6707fe5525d6319dd8bf148a4fa0f9a202d175f4",
+  "versions": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3",
+    "scipy": "1.13.1"
+  },
+  "native_pine_full_parity": false,
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v128_bb_slope data",
+    ".venv/bin/python -m yoyo.evaluation.spike_v128_bb_slope run --workers 3",
+    ".venv/bin/python -m yoyo.evaluation.spike_v128_bb_slope_stats --run experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1 --config experiments/active/exp-spike-v128-bb-slope-20260924-v1/config.json --output experiments/active/exp-spike-v128-bb-slope-20260924-v1/summary_v1"
+  ],
+  "screenshot_case_verification": [
+    {
+      "trade_key": "okx:ETH_USDT_SWAP:15m:v9_both:2026-09-09T04:45:00+00:00",
+      "signal_close": "2026-09-09 04:45:00+00:00",
+      "side": 1,
+      "entry_price": 2511.17,
+      "initial_stop": 2483.76,
+      "initial_risk": 27.41,
+      "censored": false,
+      "exit_time": "2026-09-09 10:45:00+00:00",
+      "exit_reason": "initial_stop",
+      "net_r": -1.183230208,
+      "mfe_known_r": 0.4315943086,
+      "pre12_opp": 0.017275933,
+      "pre12_trend": -0.0130248353,
+      "pre12_inward": 0.0303007683,
+      "pre3_opp": 0.0126032924,
+      "pre24_opp": 0.0161151569
+    },
+    {
+      "trade_key": "okx:ETH_USDT_SWAP:15m:v9_both:2026-09-23T11:45:00+00:00",
+      "signal_close": "2026-09-23 11:45:00+00:00",
+      "side": -1,
+      "entry_price": 2718.3,
+      "initial_stop": 2740.36,
+      "initial_risk": 22.06,
+      "censored": true,
+      "exit_time": "2026-09-23 15:45:00+00:00",
+      "exit_reason": "boundary_mark",
+      "net_r": null,
+      "mfe_known_r": 3.3223028105,
+      "pre12_opp": 0.1208049068,
+      "pre12_trend": -0.0335584064,
+      "pre12_inward": 0.1543633132,
+      "pre3_opp": 0.0352238807,
+      "pre24_opp": 0.107391419
+    }
+  ],
+  "focused_tests": {
+    "passed": 99,
+    "warnings": 2,
+    "test_command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v128_bb_slope.py tests/evaluation/test_spike_v128_recent.py tests/evaluation/test_spike_lowtf_v1_v126.py tests/evaluation/test_spike_v126_htf_recheck.py tests/boundaries/test_layer_imports.py",
+    "total_with_statistics": 104
+  },
+  "inherited_joint_lowtf_ledger_overlap": [
+    {
+      "stream": "BTC_USDT_SWAP_1m",
+      "old_closed": 1237,
+      "common": 1237,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    },
+    {
+      "stream": "BTC_USDT_SWAP_3m",
+      "old_closed": 529,
+      "common": 529,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    },
+    {
+      "stream": "BTC_USDT_SWAP_5m",
+      "old_closed": 250,
+      "common": 250,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    },
+    {
+      "stream": "ETH_USDT_SWAP_1m",
+      "old_closed": 1494,
+      "common": 1494,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    },
+    {
+      "stream": "ETH_USDT_SWAP_3m",
+      "old_closed": 514,
+      "common": 514,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    },
+    {
+      "stream": "ETH_USDT_SWAP_5m",
+      "old_closed": 241,
+      "common": 241,
+      "mismatches": {
+        "entry_price": 0,
+        "initial_stop": 0,
+        "exit_price": 0,
+        "net_return": 0,
+        "net_r": 0
+      }
+    }
+  ],
+  "independently_recomputed_later_ordinary_summary_rows": 70,
+  "bound_sources_unchanged": 39,
+  "tail_diagnostics": [
+    {
+      "timeframe_min": 15,
+      "bucket": "low",
+      "n": 20,
+      "median_net_bp": -25.12438736446,
+      "drop_best_mean_net_bp": 128.50397462420025,
+      "drop_best_three_mean_net_bp": 72.22094996667659,
+      "interpretation": "Retrospective influence diagnostic, not an entry-filter replay"
+    },
+    {
+      "timeframe_min": 15,
+      "bucket": "high",
+      "n": 24,
+      "median_net_bp": -48.3186881734285,
+      "drop_best_mean_net_bp": -16.99339284172087,
+      "drop_best_three_mean_net_bp": -48.87661791401381,
+      "interpretation": "Retrospective influence diagnostic, not an entry-filter replay"
+    },
+    {
+      "timeframe_min": 60,
+      "bucket": "high",
+      "n": 7,
+      "median_net_bp": -167.329953249488,
+      "drop_best_mean_net_bp": -111.48937885773285,
+      "drop_best_three_mean_net_bp": -272.96596016114427,
+      "interpretation": "Retrospective influence diagnostic, not an entry-filter replay"
+    }
+  ],
+  "outcome_selected_counterexamples": [
+    {
+      "trade_key": "okx:ETH_USDT_SWAP:15m:v9_both:2026-02-04T13:00:00+00:00",
+      "side": -1,
+      "pre12_opp": -0.0005480263173459,
+      "net_r": 10.048275862068882,
+      "net_return": 0.1377102095407935
+    },
+    {
+      "trade_key": "okx:ETH_USDT_SWAP:15m:v9_both:2026-02-17T15:15:00+00:00",
+      "side": -1,
+      "pre12_opp": 0.1581970003080223,
+      "net_r": -1.0736580486884308,
+      "net_return": -0.0291524977325947
+    },
+    {
+      "trade_key": "okx:ETH_USDT_SWAP:15m:v9_both:2026-03-04T07:00:00+00:00",
+      "side": 1,
+      "pre12_opp": -0.0010332945013317,
+      "net_r": 5.322189736955579,
+      "net_return": 0.062359011929002
+    }
+  ]
+}

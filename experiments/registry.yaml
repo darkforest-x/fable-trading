@@ -16,15 +16,15 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v128-bb-slope-20260924-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: main
-    status: active
+    source_commit: 087cf9fe3d8581331a4e49379a00af54f6a02e62
+    status: inconclusive
     question: Does direction-aligned BB200 opposite-boundary contraction before a SPIKE V12.8 signal improve net win rate across seven timeframes?
-    single_variable: Observed pre-signal BB slope stratification only; original entries, serial occupancy, exits and20bp cost unchanged.
-    result: Pending registered OKX ETH/BTC replay and frozen earlier-third/later-period comparison.
+    single_variable: Observed pre-signal BB slope stratification only; original entries, serial occupancy, exits and 20bp cost unchanged.
+    result: Completed14 streams and15506 closed ledger records. ETH15m later small/large slope win45.0/37.5percent and mean net190.93/6.66bp; large matched random-36.38bp. Six calculable primary tests fail corrected significance;4h too sparse. Hourly apparent advantage below controls and tail-dependent. No universal steep-slope filter supported; cross-asset differences and sparse higher periods prevent a general causal conclusion.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts: [spike-v128-bb-slope-20260924-delivery]
     reuse_allowed: false
     notes: Owner requested detailed multi-timeframe analysis from two ETH15m screenshots. Research ledgers only, no new admission gate or native Pine parity claim; no report requested.
   - experiment_id: exp-spike-ma-launch-gate-20260923-v1

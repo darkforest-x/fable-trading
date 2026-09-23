@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v128-bb-slope-20260924-delivery
+    artifact_type: manifest
+    role: offline_spike_v128_bb_slope_stratification
+    source_repo: darkforest-x/fable-trading
+    source_commit: 087cf9fe3d8581331a4e49379a00af54f6a02e62
+    source_path: experiments/active/exp-spike-v128-bb-slope-20260924-v1/delivery_receipt.json
+    sha256: 7f30848704750b3ac0c500efab9baf0f07975c63d46a85c5361e369cb62ba577
+    size_bytes: 7838
+    storage_uri: repo://experiments/active/exp-spike-v128-bb-slope-20260924-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Two-symbol seven-timeframe retrospective slope strata; ordinary and joint ledgers overlap. Small groups include negative slopes. Six calculable ETH primary tests fail multiplicity correction;4h lacks exchangeable blocks. No new filter replay or full native Pine parity. Legacy holdout enum only; no production claim.
   - artifact_id: spike-ma-launch-gate-20260923-delivery
     artifact_type: manifest
     role: offline_spike_original_two_sided_morphology_gate_comparison

@@ -1,0 +1,305 @@
+{
+  "censored_trade_rows": 1,
+  "closed_trade_rows": 15506,
+  "config_path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/config.json",
+  "config_sha256": "9acfae05db4949aa96ce4d24c3a80fc08ea6c27a8b7fae5dbc3fe34328cbd46e",
+  "control_rule": "only matched, closed targets with finite control return; earlier/later require control signal and exit to stay within the same fold",
+  "fold_counts": {
+    "crosscut": 1,
+    "earlier": 9453,
+    "later": 6053
+  },
+  "generated_at": "2026-09-23T16:37:05+00:00",
+  "inputs": [
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_1m/trades.csv.gz",
+      "sha256": "6f6f5b9f8d05729dc8ab4590e11406713582ad60fa803869e18117dbe9574abe"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_1m/controls.csv.gz",
+      "sha256": "7ef7d6396d78410021ccc34a8071228cbf6cabc68de631ded8e32976aa98aba3"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_3m/trades.csv.gz",
+      "sha256": "eb4e65cdd49310caa6f333649b4570d9309633c184f6327bea1543a3bf217282"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_3m/controls.csv.gz",
+      "sha256": "164935a647231dc0b57cb116a4fbac4f0cc460e997ab622707152d5254a11cc5"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_5m/trades.csv.gz",
+      "sha256": "ac2692c71d865c2116df7b845ac8aa413487231dbcbb3a75e7f00f3d73bd9fde"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_5m/controls.csv.gz",
+      "sha256": "26f9728371f3f0448059d836b2ddda28daed8091e6eb506691578f981c241373"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/trades.csv.gz",
+      "sha256": "cd4b74ab179e89fa031a009fa9e4f12aaf9c4bd452c8f00259985b7a78d34677"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/controls.csv.gz",
+      "sha256": "31df36246c3fdc8c90c7a2db247d41bc07648125165dbe2a4e49203ce19de343"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_30m/trades.csv.gz",
+      "sha256": "a47a133949bd4118911e42d0f195b84fac72d78e78b1840bbcff6a215245bfae"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_30m/controls.csv.gz",
+      "sha256": "5b2cb289e410bde4f678e74c6e0dd20738899c8b64d4a57b711b36870b684cc9"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_60m/trades.csv.gz",
+      "sha256": "6f5ad31685d83efc409a0e7f60c86ab2f622fd1a50820babc044b74c837f4a45"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_60m/controls.csv.gz",
+      "sha256": "28db99c026c8d0d7f47eea1f1450889ff1ffafb07d8d1801bb7808200d7e371b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_240m/trades.csv.gz",
+      "sha256": "d90dad76dd09fa5e3fefbcaf6a9e526d765e4f5b69c3ad6bc59409ee6a788e26"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_240m/controls.csv.gz",
+      "sha256": "4088b3d41c96632c45d52a37795b13bee5f79de6d623cf661d50c2c1de6f5dc2"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_1m/trades.csv.gz",
+      "sha256": "8fc4737050cee938f41e81fb731e2faff4c0f25c260891df8c276dc70fcf5e28"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_1m/controls.csv.gz",
+      "sha256": "bbc792c0fc6ddd9307a977b6c1f37cbb290c9d3ac1c75d2a15cc8dfd68f7c9d8"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_3m/trades.csv.gz",
+      "sha256": "29cf049df93c39d04e0427c7c987185ed75e65f8c727d6dfa2a35357456e92d5"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_3m/controls.csv.gz",
+      "sha256": "cc39a326ad569533309446e5eac3452e68ab695557475a0b46c3bb90970e182f"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_5m/trades.csv.gz",
+      "sha256": "14e7f1a6972a2af5361ee409fe4c4a7d01dee11782ff81204d6ec07b7849a2ba"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_5m/controls.csv.gz",
+      "sha256": "6edffdb94b25abf379c2f3c3ef238e2f58c71ec2c4b8a45bf7ba564df184c506"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/trades.csv.gz",
+      "sha256": "f3cac86137826211f7c7d59cc13054710d2b0567e7632d6695186a446d86c59c"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/controls.csv.gz",
+      "sha256": "f9c12319034344e31ba2d2daa3038cbb32283b9617e6f2d56b140ac3c93bc260"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_30m/trades.csv.gz",
+      "sha256": "8fd3718a9cd1be24965e3881b91067d2346b3ef6d07f5f6cc898d11ea633b892"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_30m/controls.csv.gz",
+      "sha256": "1ca6945693551148890aabc3afe43e1de4546906e0c32715fb6f6de648d53c8b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_60m/trades.csv.gz",
+      "sha256": "16fdf33435742fe5000fc0ed92d2624154b5571ac5e0c1c050b93c43feba502b"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_60m/controls.csv.gz",
+      "sha256": "2bc3481b717351625a68a8ee4322ef0439d2d354c494ce5fba3d455d92dee5c2"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_240m/trades.csv.gz",
+      "sha256": "c143fbeaa99b026224e57ebb8de6eefdbbac94fde1223f25d091d360405e52e8"
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_240m/controls.csv.gz",
+      "sha256": "89d0be537a85aeef7184024b34e2613938e17a92660ead2f2c567cfe52457f22"
+    }
+  ],
+  "outputs": {
+    "cohort_metrics.csv": {
+      "rows": 2940,
+      "sha256": "2fb521b988288243bbbf7c4c0a621d570792bb695cd98cebb9d86f1ff92ad596"
+    },
+    "feature_diagnostics.csv": {
+      "rows": 588,
+      "sha256": "d7c018f622ff57201969cd4a2dc9c4fa6ebfa7c905a1f94ca4f79af9dde21ad9"
+    },
+    "primary_inference.csv": {
+      "rows": 7,
+      "sha256": "47acdfbfeb4936c5bec1c5ebb1aef276dae351b9bda3813129b6964502213b79"
+    },
+    "side_metrics.csv": {
+      "rows": 672,
+      "sha256": "cf41a449aeecb1de1466b3babcb0d994c26436f2dfc1f19b6f3c5bc4104ff69d"
+    },
+    "thresholds.csv": {
+      "rows": 196,
+      "sha256": "0b8f51a413db725738bb66ecbab647bf3b3970ac79689a978b38da47e03d9f7d"
+    }
+  },
+  "primary_definition": "ETH v9_both pre12_opp later high-minus-low tercile; thresholds from closed wholly earlier trades; UTC signal-week cluster bootstrap; side x UTC signal-week permutation; Holm separately across configured timeframes",
+  "return_units": {
+    "basis_points": "return fraction * 10000",
+    "gross_return": "fraction of notional",
+    "net_r": "net return / initial_risk_frac",
+    "net_return": "fraction of notional"
+  },
+  "run_dir": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1",
+  "run_identity": "3ac272f85b669d5d485a73b5f6b811a87dbc4c57f250c76f789ff7a6c9ea7f27",
+  "run_identity_sha256": "e32f08ec7467f37a1b1a771a64fcc2f389aed5a4104e2252365fd3f308de5ba3",
+  "run_manifest_sha256": "d2a05b9820488a77dd04612a6707fe5525d6319dd8bf148a4fa0f9a202d175f4",
+  "sources": [
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_bb_slope_stats.py",
+      "sha256": "6275a5a8d9f1a885d7a3e260ee152aaf3ae697e602279df68c1fb891c0bd92dd"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/tests/evaluation/test_spike_v128_bb_slope_stats.py",
+      "sha256": "1360b4173ed29722f2faddfee118d7eeb250a10852e1f18cf30942dd0eaca377"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pine/spike_burst_v12_8.pine",
+      "sha256": "c20a46493c5a35311f1f3fa1f4b743dd5ea20fb418c907bc9ebe09350a3f28b3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_bb_slope.py",
+      "sha256": "760550d7811f7aa90971400a9869abc26786bba109e164f13c06b04411c2cd28"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent.py",
+      "sha256": "c31d459b64109a442da7e1fd4bdbb41c1e338613dd812fae1448202faf57cf52"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_recheck.py",
+      "sha256": "542f5377f8a8a7fbdafb0ae20c6da8540e2a69b005baf5ed39417ea2e2c6b95d"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py",
+      "sha256": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py",
+      "sha256": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0"
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py",
+      "sha256": "820d5f8374b9c7589477f499ab4c7a3b5b56024190d10d944c7c624533fdb8d7"
+    }
+  ],
+  "statistics_file_commit": "61c43afe0511e14a1934fd4141f511684548d1e3",
+  "statistics_git_commit": "61c43afe0511e14a1934fd4141f511684548d1e3",
+  "statistics_source_sha256": "6275a5a8d9f1a885d7a3e260ee152aaf3ae697e602279df68c1fb891c0bd92dd",
+  "statistics_test_source_sha256": "1360b4173ed29722f2faddfee118d7eeb250a10852e1f18cf30942dd0eaca377",
+  "stream_receipts": [
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_1m/receipt.json",
+      "sha256": "8b5338e9b76c617d4e761fa62f3cbcc892c4cbab326100b024f82d9f23ca9c34",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 1,
+      "trade_rows": 5087
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_3m/receipt.json",
+      "sha256": "0f37a253922f9d768be4dc3e1fdf5c2a3a9c70c88447ee0319a36604d0d23a2d",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 3,
+      "trade_rows": 1727
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_5m/receipt.json",
+      "sha256": "e86021e0fc3ee62faecf32de22ff93b7bf330638edc2760b878c381c2fa47bdf",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 5,
+      "trade_rows": 790
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_15m/receipt.json",
+      "sha256": "08e87404e74e98e7c1ac7d72e88cbed650036504194fda8b368e693ff9d12dae",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 15,
+      "trade_rows": 234
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_30m/receipt.json",
+      "sha256": "bd034d67884f561b560fcfd6d50cb27e97e838e5f165ebe1b5cc481985ce01f8",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 30,
+      "trade_rows": 148
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_60m/receipt.json",
+      "sha256": "f667a2e6de10ddccff1165e1725849ab152f0deb01b5f7486e29a35dedfd8265",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 60,
+      "trade_rows": 82
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/ETH_USDT_SWAP_240m/receipt.json",
+      "sha256": "95522d4078661f00de3fca5decaf9ec1112774c87ef4fa31a47f72cf93054490",
+      "symbol": "ETH_USDT_SWAP",
+      "timeframe_min": 240,
+      "trade_rows": 27
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_1m/receipt.json",
+      "sha256": "7b8bc9aeb72755f60e038911b33c6bdaa4aaab7dcd8f818dce49e02ccabf1be5",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 1,
+      "trade_rows": 4412
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_3m/receipt.json",
+      "sha256": "bb4a63dba15861d4506ddd2cfd7e753df184985691dd5455152d873d1ef348f3",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 3,
+      "trade_rows": 1750
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_5m/receipt.json",
+      "sha256": "d004ff9057deca4e24074d484dfb753ffe0d8e32cbc542f754c40a2505ed8d0c",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 5,
+      "trade_rows": 785
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_15m/receipt.json",
+      "sha256": "3e2433162a4db307844c401f3ee057944c84a7bf6d807395ad1fbf92d0f817a7",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 15,
+      "trade_rows": 199
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_30m/receipt.json",
+      "sha256": "f9888165734313b7f29eca0087394226997586f7445240b6ae7dc55bc77fa767",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 30,
+      "trade_rows": 167
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_60m/receipt.json",
+      "sha256": "10f81c15769c03b0784dd0da27e8fa62d7b0d2ee83b83894a02b8e15e0c3c025",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 60,
+      "trade_rows": 82
+    },
+    {
+      "path": "experiments/active/exp-spike-v128-bb-slope-20260924-v1/run_v1/streams/BTC_USDT_SWAP_240m/receipt.json",
+      "sha256": "2a189f68cb95948898bcf92404949b2ef66ca4ce65d02c90c6814b58d89404a4",
+      "symbol": "BTC_USDT_SWAP",
+      "timeframe_min": 240,
+      "trade_rows": 17
+    }
+  ],
+  "threshold_rule": "linear q=1/3 and q=2/3 from closed earlier trades only; low <= q1, middle <= q2, high > q2; top10 diagnostic uses early q90",
+  "trade_rows_in_window": 15507,
+  "version": "spike-v128-bb-slope-stats-v1"
+}
