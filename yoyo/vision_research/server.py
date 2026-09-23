@@ -100,7 +100,7 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
 
 
 def create_app(runtime: Optional[Path] = None, source=None, provider_factory=ZhipuClient,
-               seed_defaults: bool = False, automatic_worker: bool = False, replay_history=None):
+               seed_defaults: bool = False, automatic_worker: bool = False, replay_history=None, replay_cases=None):
     @asynccontextmanager
     async def lifespan(app):
         # https://fastapi.tiangolo.com/advanced/events/
@@ -560,7 +560,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
 
     from .replay import install_replay_routes
     install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange,
-                          current_review_context, lambda: status()["model"], history=replay_history)
+                          current_review_context, lambda: status()["model"], history=replay_history, cases=replay_cases)
 
     static = Path(__file__).parent / "static"
     app.mount("/", StaticFiles(directory=static, html=True), name="workbench")

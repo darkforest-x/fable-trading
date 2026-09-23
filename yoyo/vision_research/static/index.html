@@ -184,6 +184,25 @@
           <div id="replay-status" class="replay-status" role="status" aria-live="polite">正在读取历史数据目录…</div>
           <div class="replay-layout">
             <aside class="panel replay-sidebar" aria-label="回放设置与会话">
+              <section class="replay-cases-section" aria-labelledby="replay-cases-heading">
+                <div class="panel-heading"><h3 id="replay-cases-heading">历史信号案例</h3></div>
+                <label class="field-label" for="replay-case-dataset">案例数据集</label>
+                <select id="replay-case-dataset" class="replay-field"><option value="">读取案例数据集…</option></select>
+                <label class="field-label" for="replay-case-bucket">结果类别</label>
+                <select id="replay-case-bucket" class="replay-field"><option value="all">全部（混合盲审）</option></select>
+                <p class="field-help">默认混合盲审，不披露未来结果。按结果筛选会提前知道类别；筛选结果仅用于学习，不作为独立盲审标签。≥3R、≥5R、>10R 统计门槛彼此重叠。</p>
+                <label class="field-label" for="replay-case-symbol">币种筛选</label>
+                <input id="replay-case-symbol" class="replay-field" type="search" placeholder="例如 BTCUSDT" autocomplete="off" />
+                <label class="field-label" for="replay-case-timeframe">周期筛选</label>
+                <input id="replay-case-timeframe" class="replay-field" type="text" placeholder="例如 15m" autocomplete="off" />
+                <div id="replay-case-counts" class="replay-case-counts" aria-label="案例分类统计"></div>
+                <div class="replay-case-pagination">
+                  <span id="replay-case-page-status" role="status" aria-live="polite">等待案例列表…</span>
+                  <div><button id="replay-case-prev" class="button button-quiet" type="button" disabled>上一页</button><button id="replay-case-next" class="button button-quiet" type="button" disabled>下一页</button></div>
+                </div>
+                <div id="replay-case-list" class="replay-case-list"><p class="replay-empty">正在读取历史信号案例…</p></div>
+                <div id="replay-case-warning" class="inline-error" role="status" hidden></div>
+              </section>
               <section class="replay-create-section" aria-labelledby="replay-create-heading">
                 <div class="panel-heading"><h3 id="replay-create-heading">开始回放</h3></div>
                 <label class="field-label" for="replay-symbol">币种</label>
@@ -244,6 +263,20 @@
                     <input id="replay-target-time" class="replay-field" type="datetime-local" step="60" />
                     <button id="replay-jump" class="button button-secondary" type="button" disabled>跳转</button>
                   </div>
+                </div>
+              </section>
+
+              <section class="panel replay-case-outcome-panel" aria-labelledby="replay-case-outcome-heading">
+                <div class="panel-heading"><div><h3 id="replay-case-outcome-heading">历史交易结果</h3><p class="field-help">仅来自历史策略账本，不等同模型预测收益；结果默认隐藏，手动揭晓会登记暴露。MFE 表示毛路径浮盈，与净收益不同。</p></div></div>
+                <p id="replay-case-outcome-empty" class="replay-empty">选择历史信号案例并创建回放后，可在这里手动揭晓结果。</p>
+                <div id="replay-case-outcome-content" hidden>
+                  <p id="replay-case-outcome-meta" class="replay-source-note"></p>
+                  <p id="replay-case-outcome-known" class="replay-case-outcome-known"></p>
+                  <p id="replay-case-outcome-warning" class="replay-case-outcome-warning" hidden></p>
+                  <p id="replay-case-open-note" class="replay-case-open-note" hidden></p>
+                  <button id="replay-case-outcome-reveal" class="button button-secondary" type="button">揭晓历史结果</button>
+                  <div id="replay-case-outcome-result" class="replay-case-outcome-result" hidden></div>
+                  <div id="replay-case-outcome-error" class="inline-error" role="alert" hidden></div>
                 </div>
               </section>
 

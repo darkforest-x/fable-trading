@@ -26,6 +26,7 @@ from .schemas import DEFAULT_CRITERIA
 from .source import CHART_COLORS, SourceError, chart_sha256, render_chart
 from .store import utc_now
 from .zhipu import PROMPT_VERSION, ZhipuError
+from .replay_cases import PUBLIC_KEYS, V128, HistoricalCaseCatalog, in_bucket
 
 
 class ReplayConflict(ValueError):
@@ -41,6 +42,11 @@ class NewSession(Input):
     timeframe: str = Field(min_length=1, max_length=8)
     start_ms: int = Field(ge=0)
     mode: Literal["free", "blind"] = "free"
+
+
+class CaseSession(Input):
+    mode: Literal["free", "blind"] = "blind"
+    selection_bucket: Literal["all", "ge3", "ge5", "gt10", "loss", "other", "open"] = "all"
 
 
 class Move(Input):
@@ -79,10 +85,13 @@ def _json(value):
 
 
 class ReplayResearch:
-    def __init__(self, store, history):
+    def __init__(self, store, history, cases=None):
         self.store, self.history = store, history
+        self.cases = cases or HistoricalCaseCatalog()
         self.lock = threading.RLock()
         with store.connect() as db:
+            db.execute("CREATE TABLE IF NOT EXISTS replay_case_exposures "
+                       "(event_key TEXT PRIMARY KEY, created_at TEXT NOT NULL, reason TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS replay_sessions "
                        "(id TEXT PRIMARY KEY, created_at TEXT NOT NULL, record TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS replay_observations "
@@ -121,6 +130,77 @@ class ReplayResearch:
         if self._cursor(session) != expected:
             raise ReplayConflict("回放位置已在其他操作中改变，请刷新当前会话后再试。")
 
+    def _exposed(self, case):
+        if not case:
+            return False
+        with self.store.connect() as db:
+            return db.execute("SELECT 1 FROM replay_case_exposures WHERE event_key=?",
+                              (case["exposure_key"],)).fetchone() is not None
+
+    def _expose(self, case, reason):
+        with self.store.connect() as db:
+            db.execute("INSERT OR IGNORE INTO replay_case_exposures VALUES(?,?,?)",
+                       (case["exposure_key"], utc_now(), reason))
+
+    def _case_view(self, session):
+        case = session.get("case_record")
+        if not case:
+            return None
+        known = self._exposed(case)
+        return {**{k: case[k] for k in PUBLIC_KEYS}, "dataset": case["dataset"],
+                "ledger_sha256": case["ledger_sha256"], "original_event_key": case["native_key"],
+                "selection_bucket": session["selection_bucket"], "outcome_known": known,
+                "outcome_revealed": bool(session.get("outcome_revealed_at")),
+                "outcome_revealed_at": session.get("outcome_revealed_at"),
+                "outcome": case["outcome"] if session.get("outcome_revealed_at") else None,
+                "warning": ("该行情曾显示结果分类或后续信息；新判断仅作学习，不计独立盲审。" if known
+                            else "结果暂未揭晓；先在信号收盘时保存判断。")}
+
+    def case_list(self, dataset=V128, bucket="all", symbol="", timeframe="", offset=0, limit=20):
+        with self.lock:
+            result = self.cases.list(dataset, bucket, symbol, timeframe, offset, limit)
+            if bucket != "all":
+                for item in result["items"]:
+                    self._expose(self.cases.get(item["id"]), "result_bucket:" + bucket)
+            return result
+
+    def create_case(self, identity, body):
+        with self.lock:
+            case = self.cases.get(identity)
+            if not in_bucket(case, body.selection_bucket):
+                raise ReplayConflict("该案例不在所选结果分组内，请刷新列表。")
+            if body.selection_bucket != "all":
+                self._expose(case, "result_bucket:" + body.selection_bucket)
+            data = self.cases.load_history(case)
+            session = {**data, "id": uuid.uuid4().hex, "created_at": utc_now(),
+                       "symbol": case["symbol"], "timeframe": case["timeframe"],
+                       "mode": "free" if self._exposed(case) else body.mode,
+                       "case_record": case, "selection_bucket": body.selection_bucket,
+                       "outcome_revealed_at": None}
+            session["seen_until_ms"] = self._cursor(session)
+            if self._cursor(session) != case["signal_close_ms"]:
+                raise ReplayConflict("行情没有精确停在信号收盘，已拒绝创建替代时点。")
+            self._save_session(session)
+            return self.public_session(session)
+
+    def reveal_outcome(self, identity):
+        with self.lock:
+            session = self._get("replay_sessions", identity)
+            case = session.get("case_record")
+            if not case:
+                raise ReplayConflict("这个会话没有关联历史信号结果。")
+            if session["mode"] == "blind":
+                with self.store.connect() as db:
+                    rows = db.execute("SELECT record FROM replay_observations WHERE session_id=? AND cursor_ms=?",
+                                      (identity, case["signal_close_ms"])).fetchall()
+                if not any(json.loads(r[0]).get("human") for r in rows):
+                    raise ReplayConflict("请先冻结信号时点并保存自己的判断，再揭晓历史结果。")
+            if not session.get("outcome_revealed_at"):
+                session["outcome_revealed_at"] = utc_now()
+                self._expose(case, "historical_outcome_revealed")
+                self._save_session(session)
+            return self.public_session(session)
+
     def _chart(self, session):
         index = session["cursor_index"]
         rows = session["rows"][index - 119:index + 1]
@@ -144,7 +224,7 @@ class ReplayResearch:
                 "cursor_ms": self._cursor(session),
                 "first_cursor_ms": session["rows"][session["first_cursor_index"]]["t"] + session["duration_ms"],
                 "last_cursor_ms": session["rows"][-1]["t"] + session["duration_ms"],
-                "chart": self._chart(session), "observations": observations}
+                "chart": self._chart(session), "observations": observations, "case": self._case_view(session)}
 
     def sessions(self):
         with self.store.connect() as db:
@@ -182,13 +262,17 @@ class ReplayResearch:
                 raise ReplayConflict("先独立判断模式只允许向前推进，回看请另建自由回放。")
             session["cursor_index"] = target
             session["seen_until_ms"] = max(session["seen_until_ms"], self._cursor(session))
+            if session.get("case_record") and self._cursor(session) > session["case_record"]["signal_close_ms"]:
+                self._expose(session["case_record"], "later_market_bars")
             self._save_session(session)
             return self.public_session(session)
 
     def observation(self, identity):
         with self.lock:
             obs = self._get("replay_observations", identity)
-            return {**obs, "run": self.store.get(obs["run_id"]) if obs.get("run_id") else None}
+            session = self._get("replay_sessions", obs["session_id"])
+            return {**obs, "case": self._case_view(session),
+                    "run": self.store.get(obs["run_id"]) if obs.get("run_id") else None}
 
     def freeze(self, identity, body, model):
         with self.lock:
@@ -217,7 +301,9 @@ class ReplayResearch:
                    "criteria": criteria, "model": model, "prompt_version": PROMPT_VERSION,
                    "reference_revision": refs["revision"], "references": refs["items"],
                    "human": None, "run_id": None, "followups": [], "status": "frozen",
-                   "independence": ("future_seen_in_session" if session["seen_until_ms"] > self._cursor(session)
+                   "case_id": session.get("case_record", {}).get("id"),
+                   "independence": ("outcome_known_before_judgment" if self._exposed(session.get("case_record"))
+                                    else "future_seen_in_session" if session["seen_until_ms"] > self._cursor(session)
                                     else "ai_requested_before_human_judgment" if session.get("ai_exposed_until_ms", -1) >= self._cursor(session)
                                     else "not_yet_judged"),
                    "training_eligible": False, "production_eligible": False}
@@ -236,7 +322,8 @@ class ReplayResearch:
                     or session.get("ai_exposed_until_ms", -1) >= obs["cursor_ms"]):
                 raise ReplayConflict("已请求过 AI 或看过后续行情，不能再补记为首次独立判断。")
             obs["human"] = {**body.model_dump(), "created_at": utc_now()}
-            obs["independence"] = "before_ai_and_later_bars_in_this_session"
+            obs["independence"] = ("outcome_known_before_judgment" if self._exposed(session.get("case_record"))
+                                   else "before_ai_and_later_bars_in_this_session")
             self._save_obs(obs)
             return self.observation(identity)
 
@@ -340,9 +427,9 @@ class ReplayResearch:
 
 
 def install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange, review_context,
-                          model_name, history=None):
+                          model_name, history=None, cases=None):
     from .replay_data import LocalReplayHistory
-    replay = ReplayResearch(store, history or LocalReplayHistory())
+    replay = ReplayResearch(store, history or LocalReplayHistory(), cases=cases)
     app.state.replay = replay
 
     async def body(request, model):
@@ -362,6 +449,20 @@ def install_replay_routes(app, store, provider, inference_lock, read_json, captu
     @app.get("/api/replay/catalog")
     async def catalog():
         return await call(replay.history.catalog)
+
+    @app.get("/api/replay/cases")
+    async def case_list(dataset: str = V128, bucket: str = "all", symbol: str = "", timeframe: str = "",
+                        offset: int = 0, limit: int = 20):
+        return await call(replay.case_list, dataset, bucket, symbol, timeframe, offset, limit)
+
+    @app.post("/api/replay/cases/{identity}/sessions")
+    async def create_case(identity: str, request: Request):
+        return await call(replay.create_case, identity, await body(request, CaseSession))
+
+    @app.post("/api/replay/sessions/{identity}/outcome")
+    async def outcome(identity: str, request: Request):
+        await body(request, Input)
+        return await call(replay.reveal_outcome, identity)
 
     @app.get("/api/replay/coverage")
     async def coverage(symbol: str, timeframe: str):

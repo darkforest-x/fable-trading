@@ -9,10 +9,10 @@ const sourcePath = path.join(root, 'yoyo/vision_research/static/replay.js');
 const htmlPath = path.join(root, 'yoyo/vision_research/static/index.html');
 const source = fs.readFileSync(sourcePath, 'utf8')
   .replace(/^export function /gm, 'function ')
-  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, canSaveFirstJudgment, canAnalyzeObservation, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel };';
+  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, buildReplayCasesQuery, buildReplayCaseSessionBody, visibleReplayCaseOutcome, canRevealReplayCaseOutcome, replayCaseJudgmentOutcomeKnown, replayTargetValueForSession, replayOutcomeCodeLabel, canSaveFirstJudgment, canAnalyzeObservation, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel };';
 
 function loadApi() {
-  const context = vm.createContext({});
+  const context = vm.createContext({ URLSearchParams });
   vm.runInContext(source, context, { filename: sourcePath });
   return context.__replayApi;
 }
@@ -45,6 +45,43 @@ test('blind movement is forward-only and chart rows remain exactly server suppli
 
   const rows = [{ t: 1, c: 10 }, { t: 2, c: 11 }, { t: 3, c: 12 }];
   assert.equal(api.disclosedReplayRows({ chart: { candles: rows } }), rows);
+});
+
+test('case filters build a stable query and result-filtered cases always use free replay', () => {
+  const api = loadApi();
+  assert.equal(api.buildReplayCasesQuery({ bucket: 'ge5', symbol: 'BTC/USDT', timeframe: '15m', offset: 20, limit: 20, dataset: 'gold set' }),
+    'bucket=ge5&symbol=BTC%2FUSDT&timeframe=15m&offset=20&limit=20&dataset=gold+set');
+  assert.deepEqual({ ...api.buildReplayCaseSessionBody('all') }, { mode: 'blind', selection_bucket: 'all' });
+  assert.deepEqual({ ...api.buildReplayCaseSessionBody('all', 'free') }, { mode: 'free', selection_bucket: 'all' });
+  assert.deepEqual({ ...api.buildReplayCaseSessionBody('ge5', 'blind') }, { mode: 'free', selection_bucket: 'ge5' });
+  assert.deepEqual({ ...api.buildReplayCaseSessionBody('unknown', 'blind') }, { mode: 'blind', selection_bucket: 'all' });
+});
+
+test('case outcomes stay hidden until the server marks them revealed', () => {
+  const api = loadApi();
+  const hidden = { selection_bucket: 'all', outcome_revealed: false, outcome: { net_r: 7 } };
+  assert.equal(api.visibleReplayCaseOutcome(hidden), null);
+  assert.equal(api.canRevealReplayCaseOutcome(hidden), true);
+  assert.deepEqual({ ...api.visibleReplayCaseOutcome({ ...hidden, outcome_revealed: true }) }, { net_r: 7 });
+  assert.equal(api.canRevealReplayCaseOutcome({ selection_bucket: 'open', outcome_revealed: false }), true);
+  assert.equal(api.independenceLabel({ independence: 'outcome_known_before_judgment' }, {}), '历史结果类别在判断前已知，仅作学习标签');
+  assert.equal(api.replayCaseJudgmentOutcomeKnown({ outcome_known: true }, { human: { current_state: 'launching' }, independence: 'before_ai_and_later_bars_in_this_session' }), false);
+  assert.equal(api.replayCaseJudgmentOutcomeKnown({ outcome_known: true }, { independence: 'outcome_known_before_judgment' }), true);
+});
+
+test('jump draft belongs to a session and resets only when switching sessions', () => {
+  const api = loadApi();
+  const draft = '2026-09-24T12:30';
+  assert.equal(api.replayTargetValueForSession('ksm-session', 'ksm-session', draft, 1000), draft);
+  assert.equal(api.replayTargetValueForSession('ksm-session', 'ptb-session', draft, 1000), api.msToShanghaiInput(1000));
+  assert.equal(api.replayTargetValueForSession('ksm-session', null, draft, 1000), draft);
+});
+
+test('common outcome codes display in Chinese while unknown codes remain visible', () => {
+  const api = loadApi();
+  assert.equal(api.replayOutcomeCodeLabel('status', 'closed'), '已结束');
+  assert.equal(api.replayOutcomeCodeLabel('exit_reason', 'trailing_stop'), '追踪止损');
+  assert.equal(api.replayOutcomeCodeLabel('exit_reason', 'custom_exit_v2'), 'custom_exit_v2');
 });
 
 test('first judgment and model gates reflect future exposure and loaded frozen image', () => {

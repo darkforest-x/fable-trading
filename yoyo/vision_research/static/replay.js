@@ -8,6 +8,21 @@ const STATE_LABELS = {
 };
 const VERDICT_LABELS = { match: '符合', no_match: '不符合', uncertain: '不确定' };
 const SIDE_LABELS = { long: '多', short: '空', unknown: '未知 / 不适用' };
+const CASE_BUCKET_LABELS = {
+  all: '全部（混合盲审）', ge3: '净收益 ≥3R', ge5: '净收益 ≥5R', gt10: '净收益 >10R',
+  loss: '净亏损', other: '其他已结束', open: '未结束',
+};
+const CASE_COUNT_KEYS = ['all', 'ge3', 'ge5', 'gt10', 'loss', 'other', 'open'];
+const OUTCOME_STATUS_LABELS = {
+  closed: '已结束', censored: '观察期结束仍未平仓（删失）', open: '尚未结束',
+};
+const EXIT_REASON_LABELS = {
+  initial_stop: '初始止损', trailing_stop: '追踪止损',
+  initial_stop_gap: '初始止损跳空', trailing_stop_gap: '追踪止损跳空',
+  opposite_v6_next_open: 'V6 反向信号后次开盘退出',
+  take_profit: '止盈', target: '止盈', time_exit: '时间退出', timeout: '超时退出',
+  boundary_mark: '样本边界标记', data_gap_censored: '数据缺口删失',
+};
 
 export function shanghaiInputToMs(value) {
   const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(String(value || ''));
@@ -37,6 +52,44 @@ export function buildReplayMoveBody(session, movement) {
     return { expected_cursor_ms: Number(session.cursor_ms), target_ms: Number(movement.target_ms) };
   }
   return null;
+}
+
+export function buildReplayCasesQuery({ dataset = '', bucket = 'all', symbol = '', timeframe = '', offset = 0, limit = 20 } = {}) {
+  const values = { bucket, symbol, timeframe, offset, limit };
+  if (dataset) values.dataset = dataset;
+  return new URLSearchParams(values).toString();
+}
+
+export function buildReplayCaseSessionBody(bucket = 'all', mode = 'blind') {
+  const selectionBucket = Object.hasOwn(CASE_BUCKET_LABELS, bucket) ? bucket : 'all';
+  const requestedMode = mode === 'free' ? 'free' : 'blind';
+  return { mode: selectionBucket === 'all' ? requestedMode : 'free', selection_bucket: selectionBucket };
+}
+
+export function visibleReplayCaseOutcome(caseInfo) {
+  return caseInfo?.outcome_revealed && caseInfo.outcome && typeof caseInfo.outcome === 'object'
+    ? caseInfo.outcome : null;
+}
+
+export function canRevealReplayCaseOutcome(caseInfo) {
+  return Boolean(caseInfo && !caseInfo.outcome_revealed);
+}
+
+export function replayTargetValueForSession(ownerId, sessionId, currentValue, cursorMs) {
+  if (!sessionId || ownerId === sessionId) return currentValue;
+  return msToShanghaiInput(cursorMs);
+}
+
+export function replayOutcomeCodeLabel(kind, code) {
+  if (code === null || code === undefined || code === '') return '未提供';
+  const labels = kind === 'status' ? OUTCOME_STATUS_LABELS : kind === 'exit_reason' ? EXIT_REASON_LABELS : {};
+  return Object.hasOwn(labels, code) ? labels[code] : String(code);
+}
+
+export function replayCaseJudgmentOutcomeKnown(caseInfo, observation) {
+  if (observation?.independence === 'outcome_known_before_judgment') return true;
+  if (observation?.human) return false;
+  return Boolean(caseInfo?.outcome_known || (caseInfo?.selection_bucket && caseInfo.selection_bucket !== 'all'));
 }
 
 export function canSaveFirstJudgment(session, observation) {
@@ -126,6 +179,8 @@ export function createReplayPlayback({ schedule, cancel, shouldContinue, step, g
 
 const state = {
   catalog: [], catalogWarning: '', catalogError: '', catalogLoading: false,
+  caseBrowser: { datasets: [], dataset: '', bucket: 'all', symbol: '', timeframe: '', items: [], total: 0, offset: 0, limit: 20, counts: {}, warning: '', loading: false, error: '' },
+  caseRequestToken: 0, caseOutcomeError: '',
   coverage: { pending: false, error: '', firstClose: null, lastClose: null, sourceLabel: '', segments: [], selectedIndex: null },
   sessions: [], sessionsError: '', sessionsLoading: false,
   session: null, activeObservation: null, observationError: '',
@@ -147,6 +202,8 @@ let replayThemeObserver = null;
 let chartDataHash = '';
 let coverageRequestToken = 0;
 let startTimeEdited = false;
+let caseFilterTimer = null;
+let replayTargetSessionId = null;
 const replayPlayback = createReplayPlayback({
   shouldContinue: () => Boolean(replayActive && !document.hidden && state.session && !state.busy
     && Number(state.session.cursor_ms) < Number(state.session.last_cursor_ms)),
@@ -167,6 +224,24 @@ function formatTime(value, seconds = false) {
     timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', ...(seconds ? { second: '2-digit' } : {}), hour12: false,
   }).format(new Date(time));
+}
+
+function formatOutcomeTime(value) {
+  if (value === null || value === undefined || value === '') return '未提供';
+  if (typeof value === 'number' && Number.isFinite(value)) return formatTime(value < 10_000_000_000 ? value * 1000 : value);
+  const raw = String(value).trim();
+  if (/^\d{1,13}$/.test(raw)) {
+    const numericTime = Number(raw);
+    return formatTime(raw.length <= 10 ? numericTime * 1000 : numericTime);
+  }
+  const parsed = Date.parse(raw);
+  return Number.isFinite(parsed) ? formatTime(parsed) : raw;
+}
+
+function formatR(value) {
+  if (value === null || value === undefined || value === '') return '未提供';
+  const amount = Number(value);
+  return Number.isFinite(amount) ? `${amount > 0 ? '+' : ''}${amount.toFixed(2)}R` : '未提供';
 }
 
 function setHidden(element, hidden) {
@@ -218,12 +293,12 @@ function sameObservationResponse(operation, observationToken, sessionId) {
   ) && observationToken === state.observationRequestToken && state.busy === 'observation';
 }
 
-function setBusy(action) {
+function setBusy(action, { sessionId = state.session?.id || null } = {}) {
   if (state.busy) return null;
   state.busy = action;
   const ticket = ++state.operationToken;
   renderReplay();
-  return { action, ticket, sessionId: state.session?.id || null };
+  return { action, ticket, sessionId };
 }
 
 function operationIsCurrent(operation) {
@@ -395,6 +470,149 @@ function renderSessions() {
   byId('replay-refresh-sessions').disabled = state.sessionsLoading || Boolean(state.busy);
 }
 
+function renderCaseBrowser() {
+  const browser = state.caseBrowser;
+  const datasets = byId('replay-case-dataset');
+  const bucket = byId('replay-case-bucket');
+  const symbol = byId('replay-case-symbol');
+  const timeframe = byId('replay-case-timeframe');
+  if (!datasets || !bucket || !symbol || !timeframe) return;
+
+  datasets.innerHTML = browser.datasets.length
+    ? browser.datasets.map((item) => `<option value="${escapeHtml(item.id)}" ${item.available ? '' : 'disabled'}>${escapeHtml(item.label || item.id)} · ${escapeHtml(item.count ?? 0)} 条${item.available ? '' : ' · 不可用'}</option>`).join('')
+    : '<option value="">读取案例数据集…</option>';
+  if (browser.dataset && browser.datasets.some((item) => item.id === browser.dataset)) datasets.value = browser.dataset;
+  else if (browser.datasets.length && !browser.dataset) datasets.value = browser.datasets.find((item) => item.available)?.id || browser.datasets[0].id;
+  datasets.disabled = Boolean(state.busy) || browser.loading || !browser.datasets.some((item) => item.available);
+
+  bucket.innerHTML = Object.entries(CASE_BUCKET_LABELS)
+    .map(([key, label]) => `<option value="${key}">${escapeHtml(label)}</option>`).join('');
+  bucket.value = Object.hasOwn(CASE_BUCKET_LABELS, browser.bucket) ? browser.bucket : 'all';
+  bucket.disabled = Boolean(state.busy) || browser.loading;
+  if (symbol.value !== browser.symbol) symbol.value = browser.symbol;
+  if (timeframe.value !== browser.timeframe) timeframe.value = browser.timeframe;
+  symbol.disabled = Boolean(state.busy);
+  timeframe.disabled = Boolean(state.busy);
+
+  const counts = browser.counts || {};
+  byId('replay-case-counts').innerHTML = CASE_COUNT_KEYS.map((key) => `<span class="replay-case-count"><strong>${escapeHtml(counts[key] ?? 0)}</strong>${escapeHtml(CASE_BUCKET_LABELS[key])}</span>`).join('');
+  const start = browser.total ? browser.offset + 1 : 0;
+  const end = Math.min(browser.offset + browser.limit, browser.total);
+  byId('replay-case-page-status').textContent = browser.loading
+    ? '正在读取历史信号案例…' : `${start}–${end} / ${browser.total} 条`;
+  byId('replay-case-prev').disabled = Boolean(state.busy) || browser.loading || browser.offset <= 0;
+  byId('replay-case-next').disabled = Boolean(state.busy) || browser.loading || browser.offset + browser.limit >= browser.total;
+
+  if (browser.loading && !browser.items.length) {
+    byId('replay-case-list').innerHTML = '<p class="replay-empty">正在读取历史信号案例…</p>';
+  } else if (!browser.items.length) {
+    byId('replay-case-list').innerHTML = `<p class="replay-empty">${escapeHtml(browser.error || '没有符合筛选条件的历史信号案例。')}</p>`;
+  } else {
+    byId('replay-case-list').innerHTML = browser.items.map((item) => {
+      const description = [
+        `${escapeHtml(SIDE_LABELS[item.side] || item.side || '方向未知')} · ${escapeHtml(item.family || '形态未分类')}`,
+        `信号收盘 ${escapeHtml(formatTime(item.signal_close_ms))}`,
+        item.source_label ? `来源 ${escapeHtml(item.source_label)}` : '',
+      ].filter(Boolean).join(' · ');
+      return `<article class="replay-case-item">
+        <div><strong>${escapeHtml(item.symbol)} · ${escapeHtml(item.timeframe)}</strong><span>${description}</span></div>
+        <button class="button button-secondary" type="button" data-replay-case-id="${escapeHtml(item.id)}" ${state.busy || browser.loading ? 'disabled' : ''}>回放此信号</button>
+      </article>`;
+    }).join('');
+  }
+  const bucketNote = browser.bucket === 'all'
+    ? '默认混合盲审：案例列表不显示未来交易结果。'
+    : `当前按“${CASE_BUCKET_LABELS[browser.bucket]}”筛选，类别在判断前已知；这些案例仅用于学习，不作为独立盲审标签。`;
+  const selectedDataset = browser.datasets.find((item) => item.id === browser.dataset);
+  const warning = [...new Set([browser.error, browser.warning, selectedDataset?.warning, bucketNote]
+    .map((item) => String(item || '').trim()).filter(Boolean))].join(' ');
+  showInline('replay-case-warning', warning, browser.error ? 'error' : 'info');
+}
+
+function renderReplayCaseOutcome() {
+  const caseInfo = state.session?.case;
+  const empty = byId('replay-case-outcome-empty');
+  const content = byId('replay-case-outcome-content');
+  setHidden(empty, Boolean(caseInfo));
+  setHidden(content, !caseInfo);
+  if (!caseInfo) {
+    showInline('replay-case-outcome-error', '');
+    return;
+  }
+
+  const known = Boolean(caseInfo.outcome_known || (caseInfo.selection_bucket && caseInfo.selection_bucket !== 'all'));
+  const caseMeta = byId('replay-case-outcome-meta');
+  caseMeta.textContent = [
+    caseInfo.symbol || state.session.symbol,
+    caseInfo.timeframe || state.session.timeframe,
+    caseInfo.family,
+    caseInfo.source_label ? `来源 ${caseInfo.source_label}` : '',
+    caseInfo.signal_close_ms ? `信号收盘 ${formatTime(caseInfo.signal_close_ms)}` : '',
+  ].filter(Boolean).join(' · ');
+  const knownNote = byId('replay-case-outcome-known');
+  const observation = state.activeObservation;
+  const preservedJudgment = Boolean(observation?.human && !replayCaseJudgmentOutcomeKnown(caseInfo, observation));
+  knownNote.textContent = preservedJudgment
+    ? '当前结果已知，但这条人工判断在揭晓结果或推进游标前已保存；原有独立性记录保持不变。后续新观察按已知结果处理。'
+    : known
+      ? caseInfo.selection_bucket && caseInfo.selection_bucket !== 'all'
+        ? '此案例按历史结果类别筛选，判断前已知结果类别；本次人工判断仅作学习标签。'
+        : '此案例的历史结果在判断前已知；本次人工判断仅作学习标签。'
+      : '结果仍隐藏。盲审请在信号时点先保存人工判断；揭晓后会记录结果暴露。';
+  knownNote.classList.toggle('is-known', known);
+  const warning = byId('replay-case-outcome-warning');
+  warning.textContent = typeof caseInfo.warning === 'string' ? caseInfo.warning : '';
+  setHidden(warning, !warning.textContent || state.notice.trim() === warning.textContent.trim());
+  const outcome = visibleReplayCaseOutcome(caseInfo);
+  const censored = caseInfo.selection_bucket === 'open' || outcome?.status === 'open' || outcome?.status === 'censored';
+  const openNote = byId('replay-case-open-note');
+  openNote.textContent = censored
+    ? outcome
+      ? '观察期结束时仍未平仓（删失），不代表净亏损；当前仅展示已知入场与毛浮盈，净 R 尚未确定。'
+      : '观察期结束时仍未平仓（删失），不代表净亏损。可揭晓已知入场与浮盈，净 R 尚未确定。'
+    : '';
+  setHidden(openNote, !censored);
+
+  const revealButton = byId('replay-case-outcome-reveal');
+  const revealable = canRevealReplayCaseOutcome(caseInfo);
+  setHidden(revealButton, Boolean(outcome));
+  revealButton.disabled = Boolean(state.busy) || !revealable;
+  revealButton.textContent = state.busy === 'outcome' ? '正在揭晓…'
+    : '揭晓历史结果';
+  const result = byId('replay-case-outcome-result');
+  if (outcome) {
+    const cost = outcome.cost_bps !== null && outcome.cost_bps !== undefined && outcome.cost_bps !== ''
+      && Number.isFinite(Number(outcome.cost_bps)) ? `${Number(outcome.cost_bps).toFixed(2)} bps` : '未提供';
+    const resultIsCensored = censored || outcome.status === 'open' || outcome.status === 'censored';
+    const ambiguousStopBar = Boolean(outcome.stop_bar_excursion_ambiguous);
+    const confirmedMfe = formatR(outcome.mfe_r);
+    const netR = resultIsCensored ? '尚未确定' : formatR(outcome.net_r);
+    const statusLabel = resultIsCensored
+      ? OUTCOME_STATUS_LABELS.censored : replayOutcomeCodeLabel('status', outcome.status);
+    result.innerHTML = `<div class="replay-case-r-metrics">
+        <div><span>净收益</span><strong>${escapeHtml(netR)}</strong></div>
+        <div><span>毛收益</span><strong>${escapeHtml(formatR(outcome.gross_r))}</strong></div>
+        <div><span>已确认毛浮盈</span><strong>${escapeHtml(confirmedMfe)}</strong></div>
+      </div>
+      <dl class="replay-case-outcome-details">
+        <div><dt>入场时间</dt><dd>${escapeHtml(formatOutcomeTime(outcome.entry_time))}</dd></div>
+        <div><dt>退出时间</dt><dd>${escapeHtml(formatOutcomeTime(outcome.exit_time))}</dd></div>
+        <div><dt>退出原因</dt><dd>${escapeHtml(replayOutcomeCodeLabel('exit_reason', outcome.exit_reason))}</dd></div>
+        <div><dt>状态 / 成本</dt><dd>${escapeHtml(statusLabel)} · ${escapeHtml(cost)}</dd></div>
+      </dl>
+      ${ambiguousStopBar ? `<p class="replay-case-ambiguity">止损柱内顺序不明，浮盈上界 ${escapeHtml(formatR(outcome.mfe_upper_r))}。</p>` : ''}
+      ${outcome.meaning ? `<p>${escapeHtml(outcome.meaning)}</p>` : ''}
+      <p class="replay-source-note">历史策略账本记录；不等同模型预测收益。结果已揭晓并登记暴露。</p>`;
+    setHidden(result, false);
+  } else {
+    result.innerHTML = caseInfo.outcome_revealed
+      ? '<p>本案例已揭晓，但服务端没有提供可展示的结果明细。</p>'
+      : '<p>历史交易结果默认隐藏。揭晓只读取历史策略账本，并不代表模型预测。</p>';
+    setHidden(result, Boolean(revealable));
+  }
+  showInline('replay-case-outcome-error', state.caseOutcomeError);
+}
+
 function observations() {
   return Array.isArray(state.session?.observations) ? state.session.observations : [];
 }
@@ -409,6 +627,7 @@ function observationExposure(observation) {
 }
 
 export function independenceLabel(observation, session) {
+  if (observation?.independence === 'outcome_known_before_judgment') return '历史结果类别在判断前已知，仅作学习标签';
   const seenUntil = Number(session?.seen_until_ms);
   const cursor = Number(observation?.cursor_ms);
   const laterSeen = Number.isFinite(seenUntil) && Number.isFinite(cursor) && seenUntil > cursor;
@@ -519,7 +738,9 @@ function renderHuman() {
   const form = byId('replay-human-form');
   const allowed = canSaveFirstJudgment(session, observation);
   const blind = session?.mode === 'blind' || observation?.mode === 'blind';
-  byId('replay-human-heading').textContent = blind ? '盲审人工标签（先于 AI）' : '自由回放人工判断（与 AI 分开记录）';
+  const outcomeKnown = replayCaseJudgmentOutcomeKnown(session?.case, observation);
+  byId('replay-human-heading').textContent = outcomeKnown ? '历史结果已知 · 学习标签'
+    : blind ? '盲审人工标签（先于 AI）' : '自由回放人工判断（与 AI 分开记录）';
   if (!observation) {
     setHidden(existing, true);
     setHidden(form, true);
@@ -703,7 +924,11 @@ function renderSession() {
   byId('replay-speed').disabled = moving || !hasSession;
   const start = byId('replay-start-time');
   const jump = byId('replay-target-time');
-  if (hasSession && !jump.value) jump.value = msToShanghaiInput(session.cursor_ms);
+  if (!hasSession) replayTargetSessionId = null;
+  else {
+    jump.value = replayTargetValueForSession(replayTargetSessionId, session.id, jump.value, session.cursor_ms);
+    replayTargetSessionId = session.id;
+  }
   if (!hasSession && !start.value) start.value = msToShanghaiInput(Date.now());
 
   const stateLabel = byId('replay-human-state');
@@ -713,6 +938,7 @@ function renderSession() {
   byId('replay-save-followup').textContent = state.busy === 'followup' ? '正在保存…' : '保存回访';
   showInline('replay-observations-error', state.errors.observations || state.observationError);
   if (hasSession && replayActive) updateReplayChart(session);
+  renderReplayCaseOutcome();
   renderHuman();
   renderAi();
   renderFollowups();
@@ -722,10 +948,11 @@ function renderSession() {
 function renderReplay() {
   if (!initialized) return;
   renderCatalog();
+  renderCaseBrowser();
   renderSessions();
   renderSession();
   byId('replay-status').textContent = state.busy
-    ? ({ create: '正在创建会话…', session: '正在恢复会话…', move: '正在读取历史前缀…', freeze: '正在保存冻结图…', judgment: '正在保存人工判断…', analyze: '正在请求一次模型判断…', followup: '正在保存回访…', observation: '正在读取观察…' })[state.busy] || '正在处理…'
+    ? ({ create: '正在创建会话…', session: '正在恢复会话…', move: '正在读取历史前缀…', freeze: '正在保存冻结图…', judgment: '正在保存人工判断…', analyze: '正在请求一次模型判断…', followup: '正在保存回访…', observation: '正在读取观察…', outcome: '正在揭晓历史交易结果…' })[state.busy] || '正在处理…'
     : state.session ? `${state.session.mode === 'blind' ? '盲审' : '自由回放'} · ${observations().length} 条冻结观察 · 推进不调用模型`
       : state.catalog.length ? `${state.catalog.length} 项历史行情可用 · 北京时间` : '等待历史数据目录';
   showInline('replay-error', state.globalError);
@@ -820,6 +1047,39 @@ async function loadCatalog() {
   }
 }
 
+async function loadReplayCases() {
+  const browser = state.caseBrowser;
+  const tokenValue = ++state.caseRequestToken;
+  browser.loading = true;
+  browser.error = '';
+  renderReplay();
+  const query = buildReplayCasesQuery(browser);
+  try {
+    const payload = await apiJson(`/replay/cases?${query}`);
+    if (tokenValue !== state.caseRequestToken) return;
+    browser.datasets = Array.isArray(payload.datasets)
+      ? payload.datasets.filter((item) => item && typeof item.id === 'string') : [];
+    if (typeof payload.dataset === 'string') browser.dataset = payload.dataset;
+    browser.items = Array.isArray(payload.items) ? payload.items.filter((item) => item && typeof item === 'object' && item.id) : [];
+    browser.total = Math.max(0, Number(payload.total) || 0);
+    browser.offset = Math.max(0, Number(payload.offset) || 0);
+    browser.limit = Math.max(1, Number(payload.limit) || 20);
+    browser.counts = payload.counts && typeof payload.counts === 'object' ? payload.counts : {};
+    browser.warning = typeof payload.warning === 'string' ? payload.warning : '';
+  } catch (error) {
+    if (tokenValue === state.caseRequestToken) {
+      browser.items = [];
+      browser.total = 0;
+      browser.error = error.message || '历史信号案例读取失败。';
+    }
+  } finally {
+    if (tokenValue === state.caseRequestToken) {
+      browser.loading = false;
+      renderReplay();
+    }
+  }
+}
+
 async function loadSessions(preferredId = '') {
   const tokenValue = ++state.sessionListRequestToken;
   state.sessionsLoading = true;
@@ -854,6 +1114,7 @@ async function loadSession(id) {
   const ticket = operation.ticket;
   state.globalError = '';
   state.observationError = '';
+  state.caseOutcomeError = '';
   try {
     const session = await apiJson(`/replay/sessions/${encodeURIComponent(id)}`);
     if (!sameSessionResponse(operation, tokenValue, id)) return;
@@ -888,7 +1149,7 @@ async function createSession() {
     return;
   }
   pauseReplay();
-  const operation = setBusy('create');
+  const operation = setBusy('create', { sessionId: null });
   if (!operation) return;
   state.globalError = '';
   state.notice = '';
@@ -896,6 +1157,7 @@ async function createSession() {
     const session = await postJson('/replay/sessions', { symbol, timeframe, start_ms: startMs, mode });
     if (operation.ticket !== state.operationToken || state.busy !== 'create') return;
     state.session = session;
+    state.caseOutcomeError = '';
     setActiveObservation(null);
     state.errors = { freeze: '', human: '', ai: '', followup: '', observations: '' };
     state.observationError = '';
@@ -912,6 +1174,65 @@ async function createSession() {
     finishBusy(operation);
   }
   if (!state.busy) loadSessions(state.session?.id || '');
+}
+
+async function createCaseSession(caseId) {
+  const browser = state.caseBrowser;
+  const item = browser.items.find((candidate) => candidate.id === caseId);
+  if (!item || state.busy) return;
+  pauseReplay();
+  const body = buildReplayCaseSessionBody(browser.bucket, byId('replay-mode').value);
+  const operation = setBusy('create', { sessionId: null });
+  if (!operation) return;
+  state.globalError = '';
+  state.caseOutcomeError = '';
+  state.notice = '';
+  try {
+    const session = await postJson(`/replay/cases/${encodeURIComponent(caseId)}/sessions`, body);
+    if (operation.ticket !== state.operationToken || state.busy !== 'create') return;
+    state.session = session;
+    setActiveObservation(null);
+    state.errors = { freeze: '', human: '', ai: '', followup: '', observations: '' };
+    state.observationError = '';
+    state.sessionRequestToken += 1;
+    state.pendingSessionId = session.id;
+    state.observationRequestToken += 1;
+    const caseWarning = typeof session.case?.warning === 'string' ? session.case.warning.trim() : '';
+    state.notice = body.selection_bucket !== 'all'
+      ? caseWarning || '结果筛选已让你预先知道案例类别；本次按自由回放创建，人工判断只作学习标签。'
+      : session.mode === 'blind'
+        ? caseWarning || '历史案例已从信号收盘时点开始盲审回放。列表未披露未来结果；可先保存人工判断，再手动揭晓。'
+        : session.case?.outcome_known
+          ? caseWarning || '历史案例已从信号收盘时点开始自由回放；该事件此前已有结果暴露，不能再作为独立盲审。'
+          : '历史案例已从信号收盘时点开始自由回放；自由回放不代表独立盲审。';
+    renderReplay();
+  } catch (error) {
+    if (operation.ticket === state.operationToken) state.globalError = error.message || '无法创建历史案例回放。';
+  } finally {
+    finishBusy(operation);
+  }
+  if (!state.busy) loadSessions(state.session?.id || '');
+}
+
+async function revealCaseOutcome() {
+  const session = state.session;
+  if (!session?.case || state.busy) return;
+  pauseReplay();
+  const operation = setBusy('outcome', { sessionId: session.id });
+  if (!operation) return;
+  state.caseOutcomeError = '';
+  state.globalError = '';
+  try {
+    const updated = await postJson(`/replay/sessions/${encodeURIComponent(session.id)}/outcome`, {});
+    if (!operationIsCurrent(operation)) return;
+    state.session = updated;
+    state.notice = '历史交易结果已揭晓并记录结果暴露；这是历史策略账本，不等同模型预测收益。';
+    renderReplay();
+  } catch (error) {
+    if (operationIsCurrent(operation)) state.caseOutcomeError = error.message || '历史交易结果未能揭晓。';
+  } finally {
+    finishBusy(operation);
+  }
 }
 
 async function moveReplay(movement, { fromPlayback = false } = {}) {
@@ -1034,7 +1355,9 @@ async function saveJudgment() {
     if (!operationIsCurrent(operation)) return;
     setActiveObservation(updated);
     addObservationSummary(updated);
-    state.notice = '首次人工判断已保存；模型判断仍需你单独手动调用。';
+    state.notice = updated.independence === 'outcome_known_before_judgment'
+      ? '人工判断已作为历史结果已知案例的学习标签保存；它不构成独立盲审。模型判断仍需你单独手动调用。'
+      : '首次人工判断已保存；模型判断仍需你单独手动调用。';
     byId('replay-human-state').value = '';
     byId('replay-human-side').value = 'unknown';
     byId('replay-human-note').value = '';
@@ -1137,6 +1460,42 @@ function updateModeHelp() {
 }
 
 function attachEvents() {
+  byId('replay-case-dataset').addEventListener('change', () => {
+    state.caseBrowser.dataset = byId('replay-case-dataset').value;
+    state.caseBrowser.offset = 0;
+    loadReplayCases();
+  });
+  byId('replay-case-bucket').addEventListener('change', () => {
+    state.caseBrowser.bucket = byId('replay-case-bucket').value;
+    state.caseBrowser.offset = 0;
+    loadReplayCases();
+  });
+  const updateCaseTextFilter = () => {
+    state.caseBrowser.symbol = byId('replay-case-symbol').value.trim();
+    state.caseBrowser.timeframe = byId('replay-case-timeframe').value.trim();
+    state.caseBrowser.offset = 0;
+    if (caseFilterTimer) clearTimeout(caseFilterTimer);
+    caseFilterTimer = setTimeout(() => {
+      caseFilterTimer = null;
+      loadReplayCases();
+    }, 300);
+  };
+  byId('replay-case-symbol').addEventListener('input', updateCaseTextFilter);
+  byId('replay-case-timeframe').addEventListener('input', updateCaseTextFilter);
+  byId('replay-case-prev').addEventListener('click', () => {
+    state.caseBrowser.offset = Math.max(0, state.caseBrowser.offset - state.caseBrowser.limit);
+    loadReplayCases();
+  });
+  byId('replay-case-next').addEventListener('click', () => {
+    if (state.caseBrowser.offset + state.caseBrowser.limit >= state.caseBrowser.total) return;
+    state.caseBrowser.offset += state.caseBrowser.limit;
+    loadReplayCases();
+  });
+  byId('replay-case-list').addEventListener('click', (event) => {
+    const item = event.target.closest('[data-replay-case-id]');
+    if (item) createCaseSession(item.dataset.replayCaseId);
+  });
+  byId('replay-case-outcome-reveal').addEventListener('click', revealCaseOutcome);
   byId('replay-symbol').addEventListener('change', () => { renderCatalog(); loadCoverage(); });
   byId('replay-timeframe').addEventListener('change', () => { renderCatalog(); loadCoverage(); });
   byId('replay-segment-select').addEventListener('change', selectCoverageSegment);
@@ -1215,6 +1574,7 @@ export function initReplay() {
   if (!byId('replay-start-time').value) byId('replay-start-time').value = msToShanghaiInput(Date.now());
   renderReplay();
   loadCatalog();
+  loadReplayCases();
   loadSessions();
 }
 
