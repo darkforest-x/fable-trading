@@ -5,6 +5,15 @@ The original experiment ID is retained; new requests use BigModel, while prior
 Gemini records retain their original model and results.
 Application source and frontend: `yoyo/vision_research/`.
 
+Version 0.10.0 allows 300 seconds of response-read inactivity for Zhipu calls
+while retaining max reasoning. Connection, write and pool waits remain bounded
+at 15, 30 and 5 seconds respectively. These HTTPX limits apply per operation,
+not to total wall time. Timeout errors identify their phase; a provider HTTP 408
+does not claim a local elapsed duration. Calls are never automatically retried.
+The 90-second input-snapshot freshness check still runs before submission;
+waiting longer does not turn an old input into a fresh observation. Manual
+recognition explains that responses may take minutes and refer to the sent snapshot.
+
 Version 0.9.0 restores the project's existing morphology definitions in the
 default criteria (`pattern_rules.py`), with source pointers to the six-MA audit,
 Review50 decisions and model-first launch analysis. Reviews distinguish group

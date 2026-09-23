@@ -223,20 +223,75 @@ def test_http_errors_are_safe_and_never_retried(status: int, error_code: object,
     assert caught.value.diagnostics()["provider_code"] == (str(error_code) if error_code in (1000, 1308) else None)
 
 
-def test_timeout_is_safe_and_never_retried() -> None:
+@pytest.mark.parametrize(
+    ("exception_type", "phase", "message_fragment"),
+    [(httpx.ReadTimeout, "read", "连续 300 秒未收到数据"),
+     (httpx.ConnectTimeout, "connect", "连接等待上限 15 秒"),
+     (httpx.WriteTimeout, "write", "发送停顿上限 30 秒"),
+     (httpx.PoolTimeout, "pool", "本次请求未发送"),
+     (httpx.TimeoutException, "unknown", "网络请求超时")],
+)
+def test_timeout_is_safe_and_never_retried(exception_type, phase, message_fragment) -> None:
     requests: list[httpx.Request] = []
 
     def respond(request: httpx.Request) -> httpx.Response:
         requests.append(request)
-        raise httpx.ReadTimeout("private-provider-timeout")
+        raise exception_type("private-provider-timeout test-api-key")
 
     with client(respond) as adapter:
         with pytest.raises(ZhipuError) as caught:
             adapter.check_connection()
 
     assert caught.value.code == "timeout"
+    assert caught.value.diagnostics()["timeout_phase"] == phase
+    assert message_fragment in str(caught.value)
     assert "private-provider-timeout" not in str(caught.value)
+    assert "test-api-key" not in str(caught.value)
+    assert adapter.last_exchange["error"] == str(caught.value)
+    assert adapter.last_exchange["response"] is None
     assert len(requests) == 1
+
+
+@pytest.mark.parametrize("operation", ["recognition", "connection_check"])
+def test_max_reasoning_waits_longer_for_response_without_relaxing_connection(operation) -> None:
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json=completion())
+
+    with client(respond) as adapter:
+        if operation == "recognition":
+            adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+        else:
+            adapter.check_connection()
+
+    assert len(requests) == 1
+    assert requests[0].extensions["timeout"] == {
+        "connect": 15.0, "read": 300.0, "write": 30.0, "pool": 5.0,
+    }
+    assert json.loads(requests[0].content)["reasoning_effort"] == "max"
+
+
+def test_provider_http_timeout_does_not_claim_a_local_wait_duration() -> None:
+    requests: list[httpx.Request] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(408, json={"error": {"message": "private-provider-timeout"}})
+
+    with client(respond) as adapter:
+        with pytest.raises(ZhipuError) as caught:
+            adapter.check_connection()
+
+    assert len(requests) == 1
+    assert caught.value.code == "timeout"
+    assert caught.value.http_status == 408
+    assert "HTTP 408" in str(caught.value)
+    assert "秒" not in str(caught.value)
+    assert "private-provider-timeout" not in str(caught.value)
+    assert "timeout_phase" not in caught.value.diagnostics()
+    assert adapter.last_exchange["response"]["status_code"] == 408
 
 
 @pytest.mark.parametrize(

@@ -124,6 +124,31 @@ def test_timeout_has_input_and_no_invented_response(tmp_path):
         assert KEY not in json.dumps(detail)
 
 
+def test_recognition_timeout_keeps_phase_and_sent_input_after_restart(tmp_path):
+    calls = []
+
+    def timeout(request):
+        calls.append(request)
+        raise httpx.ReadTimeout("secret transport diagnostic " + KEY)
+
+    with make_client(tmp_path, timeout) as client:
+        run = client.post("/api/analyze", json={"image_data_url": picture()}).json()
+        assert run["status"] == "failed"
+        assert run["error_details"] == {
+            "code": "timeout", "http_status": None, "provider_code": None, "timeout_phase": "read",
+        }
+        assert "连续 300 秒未收到数据" in run["error"]
+        assert len(calls) == 1
+
+    reopened = ResearchStore(tmp_path)
+    assert reopened.get(run["id"]) == run
+    detail = reopened.get_exchange(run["api_exchange_id"])
+    assert detail["status"] == "failed" and detail["error"] == run["error"]
+    assert detail["request"]["body_text"] == calls[0].content.decode()
+    assert detail["response"] is None
+    assert KEY not in json.dumps(detail) and KEY not in json.dumps(run)
+
+
 def test_restart_keeps_legacy_runs_untouched_and_marks_pending_trace(tmp_path):
     store = ResearchStore(tmp_path)
     legacy = {"id": "legacy", "created_at": "2026-09-23", "status": "completed", "decision": {"summary": "old"}}

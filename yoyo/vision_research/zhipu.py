@@ -34,7 +34,14 @@ CHAT_COMPLETIONS_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 # GLM-5.3-Flash's model guide lists structured output, but the generic API guide
 # still calls response_format text-only. A 2026-09-23 four-image live request
 # accepted json_object. Enable it only for that verified model, not all vision IDs.
-MAX_TIMEOUT_SECONDS = 90.0
+# Max-reasoning calls have completed in 87 seconds locally. Allow slower
+# responses without also waiting minutes for an unavailable connection.
+# HTTPX budgets are per operation/inactivity interval, not total wall time:
+# https://www.python-httpx.org/advanced/timeouts/
+READ_TIMEOUT_SECONDS = 300.0
+CONNECT_TIMEOUT_SECONDS = 15.0
+WRITE_TIMEOUT_SECONDS = 30.0
+POOL_TIMEOUT_SECONDS = 5.0
 MAX_OUTPUT_TOKENS = 8192
 CONNECTION_TEST_MAX_TOKENS = 1024
 MAX_IMAGE_BYTES = 5_000_000  # Provider requires less than 5 MB per image.
@@ -77,17 +84,21 @@ class ZhipuError(Exception):
     """Provider failure with a safe user-facing Chinese message and code."""
 
     def __init__(self, code: str, message: str, *, http_status: int | None = None,
-                 provider_code: str | None = None):
+                 provider_code: str | None = None, timeout_phase: str | None = None):
         self.code = code
         self.message = message
         self.http_status = http_status
         self.provider_code = provider_code
+        self.timeout_phase = timeout_phase
         super().__init__(message)
 
     def diagnostics(self) -> dict[str, Any]:
         """Return only classifications and allowlisted provider codes."""
-        return {"code": self.code, "http_status": self.http_status,
-                "provider_code": self.provider_code}
+        details = {"code": self.code, "http_status": self.http_status,
+                   "provider_code": self.provider_code}
+        if self.timeout_phase is not None:
+            details["timeout_phase"] = self.timeout_phase
+        return details
 
 
 # Only official documented business codes are allowed into diagnostics. The
@@ -136,7 +147,7 @@ _HTTP_ERRORS: dict[int, tuple[str, str]] = {
     402: ("payment_required", "智谱账户余额不足，请检查账户额度。"),
     403: ("permission_denied", "当前智谱 API Key 无权访问该模型或接口。"),
     404: ("model_not_found", "指定的智谱模型不存在或当前 Key 无权访问。"),
-    408: ("timeout", "智谱请求超过 90 秒，已停止等待；没有自动重试。"),
+    408: ("timeout", "智谱服务返回请求超时（HTTP 408）；结果未知，没有自动重试。"),
     409: ("conflict", "智谱服务因请求冲突中止了处理。"),
     413: ("input_too_large", "智谱拒绝了过大的请求，请减少图片大小或参考图数量。"),
     415: ("unsupported_image_type", "智谱不支持本次请求的图片格式。"),
@@ -249,7 +260,10 @@ class ZhipuClient:
         self.trace_callback: Callable[[dict[str, Any]], None] | None = None
         self.last_exchange: dict[str, Any] | None = None
         self._client = httpx.Client(
-            timeout=httpx.Timeout(MAX_TIMEOUT_SECONDS),
+            timeout=httpx.Timeout(
+                connect=CONNECT_TIMEOUT_SECONDS, read=READ_TIMEOUT_SECONDS,
+                write=WRITE_TIMEOUT_SECONDS, pool=POOL_TIMEOUT_SECONDS,
+            ),
             follow_redirects=False,
             headers={
                 "Accept": "application/json",
@@ -292,8 +306,25 @@ class ZhipuClient:
         try:
             response = self._client.send(request)
         except httpx.TimeoutException as exc:
-            self.last_exchange["error"] = "请求超时，未收到完整响应；没有自动重试。"
-            raise ZhipuError("timeout", "智谱请求超过 90 秒，已停止等待；没有自动重试。") from exc
+            phase, message = "unknown", "智谱网络请求超时；结果未知，没有自动重试。"
+            if isinstance(exc, httpx.ReadTimeout):
+                phase = "read"
+                message = (f"等待智谱响应时连续 {READ_TIMEOUT_SECONDS:g} 秒未收到数据，"
+                           "已停止等待；结果未知，没有自动重试。")
+            elif isinstance(exc, httpx.ConnectTimeout):
+                phase = "connect"
+                message = (f"连接智谱服务超时（连接等待上限 {CONNECT_TIMEOUT_SECONDS:g} 秒）；"
+                           "请检查网络，没有自动重试。")
+            elif isinstance(exc, httpx.WriteTimeout):
+                phase = "write"
+                message = (f"向智谱发送图片与规则超时（发送停顿上限 {WRITE_TIMEOUT_SECONDS:g} 秒）；"
+                           "结果未知，没有自动重试。")
+            elif isinstance(exc, httpx.PoolTimeout):
+                phase = "pool"
+                message = (f"等待本地智谱连接超时（等待上限 {POOL_TIMEOUT_SECONDS:g} 秒）；"
+                           "本次请求未发送，没有自动重试。")
+            self.last_exchange["error"] = message
+            raise ZhipuError("timeout", message, timeout_phase=phase) from exc
         except httpx.RequestError as exc:
             self.last_exchange["error"] = "网络请求失败，未收到完整响应；没有自动重试。"
             raise ZhipuError("network_error", "无法连接智谱服务，请检查网络后重试。") from exc

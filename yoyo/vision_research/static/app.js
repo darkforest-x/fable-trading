@@ -906,8 +906,8 @@ function renderResult() {
 
   if (!state.activeRun) {
     updateResultMarkup(`<div class="result-empty">
-      <h3>${state.analysisLoading ? '正在分析图表…' : '等待识别'}</h3>
-      <p>${state.analysisLoading ? '正在检查图表最右端。' : state.selectedImage ? '只判断最右端当前形态，左侧历史仅作背景。' : '选择图表，检查最右端当前形态。'}</p></div>`);
+      <h3>${state.analysisLoading ? '正在等待模型响应…' : '等待识别'}</h3>
+      <p>${state.analysisLoading ? '可能需要数分钟，请勿重复提交。结果对应本次发送时的图表快照。' : state.selectedImage ? '只判断最右端当前形态，左侧历史仅作背景。' : '选择图表，检查最右端当前形态。'}</p></div>`);
     return;
   }
   const run = state.activeRun;
