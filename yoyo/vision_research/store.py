@@ -32,6 +32,8 @@ class ResearchStore:
                        "(id TEXT PRIMARY KEY, created_at TEXT NOT NULL, record TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS global_references "
                        "(id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, items TEXT NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS api_exchanges "
+                       "(id TEXT PRIMARY KEY, created_at TEXT NOT NULL, summary TEXT NOT NULL, record TEXT NOT NULL)")
             db.execute("INSERT OR IGNORE INTO global_references(id,revision,items) VALUES(1,0,'[]')")
             rows = db.execute("SELECT id,record FROM runs").fetchall()
             for run_id, raw in rows:
@@ -40,6 +42,16 @@ class ResearchStore:
                     record.update(status="interrupted", error="服务重启，上一请求结果未知；未自动重试")
                     db.execute("UPDATE runs SET record=? WHERE id=?",
                                (json.dumps(record, ensure_ascii=False), run_id))
+            for exchange_id, raw_summary in db.execute("SELECT id,summary FROM api_exchanges").fetchall():
+                summary = json.loads(raw_summary)
+                if summary.get("status") != "running":
+                    continue
+                raw = db.execute("SELECT record FROM api_exchanges WHERE id=?", (exchange_id,)).fetchone()[0]
+                record = json.loads(raw)
+                record.update(status="interrupted", error="服务重启，请求完成情况未知；没有自动重试。")
+                summary["status"] = "interrupted"
+                db.execute("UPDATE api_exchanges SET summary=?,record=? WHERE id=?",
+                           (json.dumps(summary, ensure_ascii=False), json.dumps(record, ensure_ascii=False), exchange_id))
 
     def connect(self):
         return sqlite3.connect(str(self.database), timeout=10)
@@ -102,6 +114,37 @@ class ResearchStore:
             rows = db.execute("SELECT record FROM runs ORDER BY created_at DESC LIMIT ?",
                               (limit,)).fetchall()
         return [json.loads(row[0]) for row in rows]
+
+    def save_exchange(self, record: Dict[str, Any]):
+        """Keep large exact bodies outside run lists and compact exchange lists."""
+        summary = {key: record.get(key) for key in (
+            "id", "created_at", "kind", "run_id", "model", "status", "http_status",
+            "image_count", "latency_ms",
+        )}
+        with self.connect() as db:
+            db.execute("INSERT INTO api_exchanges(id,created_at,summary,record) VALUES(?,?,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET summary=excluded.summary,record=excluded.record",
+                       (record["id"], record["created_at"], json.dumps(summary, ensure_ascii=False),
+                        json.dumps(record, ensure_ascii=False)))
+
+    def get_exchange(self, exchange_id: str):
+        with self.connect() as db:
+            row = db.execute("SELECT record FROM api_exchanges WHERE id=?", (exchange_id,)).fetchone()
+        return json.loads(row[0]) if row else None
+
+    def list_exchanges(self, limit: int = 200):
+        with self.connect() as db:
+            rows = db.execute("SELECT summary FROM api_exchanges ORDER BY created_at DESC LIMIT ?",
+                              (limit,)).fetchall()
+        return [json.loads(row[0]) for row in rows]
+
+    def finish_exchange(self, exchange_id: str | None, status: str, error: str | None = None):
+        record = self.get_exchange(exchange_id) if exchange_id else None
+        if record is None:
+            return None
+        record.update(status=status, error=error, completed_at=utc_now())
+        self.save_exchange(record)
+        return exchange_id
 
     def review(self, run_id: str, verdict: str, note: str):
         with self.connect() as db:

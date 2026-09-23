@@ -75,9 +75,32 @@ this action sends selected pixels and criteria to Zhipu's
 `https://open.bigmodel.cn/api/paas/v4/chat/completions` API. No search, order or notification tools
 are available to the model. Connection testing sends one short text completion with a small token budget;
 it consumes model usage and does not establish image-recognition quality. Failed recognition records retain
-the HTTP status, an allowlisted provider error code and elapsed time without
-storing provider response text. Documented billing, authentication and quota errors remain distinguishable;
+the HTTP status, an allowlisted provider error code and elapsed time. Documented billing, authentication and quota errors remain distinguishable;
 unknown HTTP statuses remain visible for diagnosis. Requests are not retried.
+
+Model Settings now includes an API exchange viewer. From version 0.2.0 onward,
+recognition and connection tests preserve the serialized request body before
+sending and the full response body before JSON/decision validation. This includes
+provider errors, reasoning fields and detailed token usage. Authorization headers
+are never recorded; any echo of the active API key in a body is replaced and the
+trace marked redacted. A timeout has an input but no fabricated output. Old runs
+have no raw trace and are not reconstructed from their parsed decisions.
+
+`GET /api/exchanges` returns compact metadata; `/api/exchanges/{id}` loads the
+full bodies and `/api/exchanges/{id}/export` downloads them with image Base64.
+Large raw bodies are kept in a separate local SQLite table, not in the normal
+run-list response. The UI folds Base64 only for the readable request preview;
+the export retains it. Records survive restart, with unfinished requests marked
+interrupted. A run's `api_exchange_id` identifies its exact API exchange.
+
+Each current recognition remains independent: one candidate and all saved
+references are included on every request. Saving references locally avoids
+re-uploading them by hand, but creates no server-side conversation. Zhipu's
+[Responses API](https://docs.bigmodel.cn/cn/guide/develop/responses/introduction)
+offers `store` / `previous_response_id` continuation; it is not enabled here.
+[Context caching](https://docs.bigmodel.cn/cn/guide/capabilities/cache) can reduce
+repeated computation, but is not permanent image memory or a guarantee that
+historical image context is free. Inspect actual `cached_tokens` in the raw usage.
 
 The workspace polls the selected chart every 10 seconds while visible. The
 candidate list refreshes every 30 seconds. Live charts combine SPIKE's confirmed

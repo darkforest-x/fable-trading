@@ -217,6 +217,15 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             raise HTTPException(503, "请先在模型设置中配置智谱 API Key")
         return provider_factory(api_key=key, model=chosen_model)
 
+    def capture_exchange(client, kind, run_id=None):
+        if not hasattr(client, "trace_callback"):
+            return None
+        exchange_id = uuid.uuid4().hex
+        metadata = {"id": exchange_id, "created_at": utc_now(), "kind": kind,
+                    "run_id": run_id, "model": client.model, "provider": "zhipu", "status": "running"}
+        client.trace_callback = lambda exchange: store.save_exchange({**metadata, **exchange})
+        return exchange_id
+
     @app.post("/api/connection-test")
     async def connection_test(request: Request):
         await read_json(request, 4096)
@@ -224,11 +233,20 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         if not inference_lock.acquire(blocking=False):
             client.close()
             raise HTTPException(409, "当前有识别请求运行中，请稍后再试")
+        exchange_id = capture_exchange(client, "connection_test")
         try:
-            return await run_in_threadpool(client.check_connection)
+            result = await run_in_threadpool(client.check_connection)
+            result["api_exchange_id"] = store.finish_exchange(exchange_id, "completed")
+            return result
         except ZhipuError as exc:
+            saved_id = store.finish_exchange(exchange_id, "failed", str(exc))
             return JSONResponse({"ok": False, "model": status()["model"], "message": str(exc),
-                                 "error_details": exc.diagnostics()}, status_code=502)
+                                 "error_details": exc.diagnostics(), "api_exchange_id": saved_id}, status_code=502)
+        except Exception:
+            message = "连接测试异常；结果未知，没有自动重试"
+            saved_id = store.finish_exchange(exchange_id, "failed", message)
+            return JSONResponse({"ok": False, "message": message,
+                                 "api_exchange_id": saved_id}, status_code=502)
         finally:
             client.close()
             inference_lock.release()
@@ -282,6 +300,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             "error_details": None, "review": None,
             "review_history": [], "training_eligible": False, "production_eligible": False,
         }
+        record["api_exchange_id"] = capture_exchange(client, "recognition", record["id"])
         store.save(record)
         started = time.perf_counter()
         try:
@@ -296,6 +315,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
                           error_details={"code": "internal_error", "http_status": None, "provider_code": None},
                           latency_ms=round((time.perf_counter() - started) * 1000, 3),
                           completed_at=utc_now())
+        record["api_exchange_id"] = store.finish_exchange(record["api_exchange_id"], record["status"],
+                                                         record.get("error"))
         store.save(record)
         return record
 
@@ -367,6 +388,25 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
     @app.get("/api/runs")
     def runs():
         return {"items": store.list()}
+
+    @app.get("/api/exchanges")
+    def exchanges():
+        return {"items": store.list_exchanges()}
+
+    @app.get("/api/exchanges/{exchange_id}")
+    def get_exchange(exchange_id: str):
+        if not re.fullmatch(r"[a-f0-9]{32}", exchange_id):
+            raise HTTPException(404, "API 原始记录不存在")
+        record = store.get_exchange(exchange_id)
+        if record is None:
+            raise HTTPException(404, "API 原始记录不存在；旧请求没有保存原始正文")
+        return record
+
+    @app.get("/api/exchanges/{exchange_id}/export")
+    def export_exchange(exchange_id: str):
+        return Response(json.dumps(get_exchange(exchange_id), ensure_ascii=False, indent=2),
+                        media_type="application/json",
+                        headers={"Content-Disposition": f'attachment; filename="spike-api-{exchange_id}.json"'})
 
     @app.get("/api/runs/{run_id}")
     def get_run(run_id: str):

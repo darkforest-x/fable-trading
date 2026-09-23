@@ -13,7 +13,7 @@ import hashlib
 import json
 import re
 import time
-from typing import Any, List
+from typing import Any, Callable, List
 
 import httpx
 from pydantic import ValidationError
@@ -77,7 +77,8 @@ class ZhipuError(Exception):
 
 
 # Only official documented business codes are allowed into diagnostics. The
-# provider's message/body can contain user data and is never echoed.
+# Normal error messages use this allowlist. The owner-requested raw exchange
+# viewer stores response bodies separately, with the active credential removed.
 _PROVIDER_ERRORS: dict[str, tuple[str, str]] = {
     "1000": ("authentication_failed", "智谱 API Key 无效或认证失败。"),
     "1001": ("authentication_failed", "智谱请求缺少有效的 Bearer API Key。"),
@@ -208,6 +209,9 @@ class ZhipuClient:
                 or model not in VISION_MODELS):
             raise ZhipuError("invalid_model", "智谱视觉模型 ID 无效或不在支持列表中。")
         self.model = model
+        self._api_key = api_key.strip()
+        self.trace_callback: Callable[[dict[str, Any]], None] | None = None
+        self.last_exchange: dict[str, Any] | None = None
         self._client = httpx.Client(
             timeout=httpx.Timeout(MAX_TIMEOUT_SECONDS),
             follow_redirects=False,
@@ -230,12 +234,46 @@ class ZhipuClient:
         self.close()
 
     def _send(self, json_body: dict[str, Any]) -> httpx.Response:
+        # Capture the serialized HTTP body, not a later reconstruction from the
+        # parsed decision. Authentication headers never enter the trace.
+        request = self._client.build_request("POST", CHAT_COMPLETIONS_URL, json=json_body)
+        body_text = request.content.decode("utf-8")
+        clean_body = body_text.replace(self._api_key, "[API_KEY_REDACTED]")
+        self.last_exchange = {
+            "request": {"method": request.method, "url": str(request.url), "body_text": clean_body},
+            "response": None, "http_status": None, "error": None,
+            "redacted": clean_body != body_text, "latency_ms": None,
+            "image_count": sum(
+                part.get("type") == "image_url"
+                for message in json_body.get("messages", [])
+                if isinstance(message.get("content"), list)
+                for part in message["content"] if isinstance(part, dict)
+            ),
+        }
+        if self.trace_callback:
+            self.trace_callback(self.last_exchange)
+        started = time.perf_counter()
         try:
-            return self._client.post(CHAT_COMPLETIONS_URL, json=json_body)
+            response = self._client.send(request)
         except httpx.TimeoutException as exc:
+            self.last_exchange["error"] = "请求超时，未收到完整响应；没有自动重试。"
             raise ZhipuError("timeout", "智谱请求超过 90 秒，已停止等待；没有自动重试。") from exc
         except httpx.RequestError as exc:
+            self.last_exchange["error"] = "网络请求失败，未收到完整响应；没有自动重试。"
             raise ZhipuError("network_error", "无法连接智谱服务，请检查网络后重试。") from exc
+        else:
+            raw = response.text
+            cleaned = raw.replace(self._api_key, "[API_KEY_REDACTED]")
+            self.last_exchange.update(
+                response={"status_code": response.status_code, "body_text": cleaned},
+                http_status=response.status_code,
+                redacted=self.last_exchange["redacted"] or cleaned != raw,
+            )
+            return response
+        finally:
+            self.last_exchange["latency_ms"] = round((time.perf_counter() - started) * 1000, 3)
+            if self.trace_callback:
+                self.trace_callback(self.last_exchange)
 
     @staticmethod
     def _json_payload(response: httpx.Response, what: str) -> dict[str, Any]:
