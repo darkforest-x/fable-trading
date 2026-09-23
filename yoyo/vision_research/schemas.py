@@ -13,18 +13,13 @@ from typing import List, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .pattern_rules import DEFAULT_CRITERIA
+
 DEFAULT_MODEL = "glm-5.3-flash"
 # Documented vision families below accept 50 total images, including the candidate.
 VISION_MODELS = frozenset({"glm-5.3-flash", "glm-5.3-flashx", "glm-5v-turbo",
                            "glm-4.6v", "glm-4.6v-flash", "glm-4.6v-flashx"})
 MAX_REFERENCES = 49
-DEFAULT_CRITERIA = (
-    "只判断图表最右端的当前盘口：均线仍在密集、正在启动，还是已经离开密集区。"
-    "左侧历史形态只作背景，不能因为以前出现过密集启动就判断当前符合。"
-    "只有右端正在发生先收拢后启动才可判符合；已经明显发散或远离则不符合。"
-    "仍在收拢而未启动、标准或画面不清楚时回答不确定。"
-    "逐项说明图中可观察的支持和反对证据，不猜测看不清的精确价格。"
-)
 
 
 @dataclass(frozen=True)

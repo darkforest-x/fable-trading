@@ -223,6 +223,13 @@ def test_automatic_api_uses_frozen_live_image_references_and_raw_trace(tmp_path,
         assert client.get(run['image_url']).headers['content-type'] == 'image/png'
         trace = client.get('/api/exchanges/' + run['api_exchange_id']).json()
         assert len(sent) == 1 and sent[0]['reasoning_effort'] == 'max'
+        from yoyo.vision_research.schemas import DEFAULT_CRITERIA
+        from yoyo.vision_research.zhipu import PROMPT_VERSION
+        assert client.get('/api/status').json()['default_criteria'] == run['criteria'] == DEFAULT_CRITERIA
+        assert run['prompt_version'] == PROMPT_VERSION
+        parts = sent[0]['messages'][0]['content']
+        assert json.dumps(DEFAULT_CRITERIA, ensure_ascii=False) in parts[0]['text']
+        assert sum('项目保存的参考说明' in part.get('text', '') for part in parts) == 5
         assert json.loads(trace['request']['body_text']) == sent[0]
         assert KEY not in json.dumps(trace)
         assert client.post('/api/automatic', json={"enabled": 1}).status_code == 400

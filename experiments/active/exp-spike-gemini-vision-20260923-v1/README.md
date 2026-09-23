@@ -5,6 +5,23 @@ The original experiment ID is retained; new requests use BigModel, while prior
 Gemini records retain their original model and results.
 Application source and frontend: `yoyo/vision_research/`.
 
+Version 0.9.0 restores the project's existing morphology definitions in the
+default criteria (`pattern_rules.py`), with source pointers to the six-MA audit,
+Review50 decisions and model-first launch analysis. Reviews distinguish group
+convergence, pre-launch core, initial release and current extension; neither a
+cross count nor a first crossing of the entire bundle substitutes for this
+sequence. The prompt requests relevant evidence gaps without requiring volume
+or exact prices under the default visual criterion. It retains the current-edge
+schema, max reasoning, original images and 12-bar review window.
+
+Prompt `spike-vision-zhipu-v4-project-rules` also adds selection explanations and
+confirmation limits to the five known references, matched by normalized PNG
+hash. Renamed images keep their own explanation; replaced/custom images cannot
+inherit it by filename. Prior FIL semantic approval does not approve its new box,
+and the other proposals remain pending review. The retrospective 3–5-bar/core+5
+protocols and unvalidated ATR cutoffs are not imported as live thresholds. Old
+results remain unchanged; this is a prompt integration, not an accuracy claim.
+
 Version 0.7.0 adds **验证回放** at `http://127.0.0.1:8771/#replay`.
 Select a native local market/period, a continuous historical range and a Beijing
 start time. Free replay supports backward/forward steps and time seeks; the

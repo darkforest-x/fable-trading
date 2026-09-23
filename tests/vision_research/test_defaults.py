@@ -9,6 +9,8 @@ import pytest
 
 from yoyo.vision_research.defaults import DEFAULT_PACK, install_default_references
 from yoyo.vision_research.store import ResearchStore
+from yoyo.vision_research.images import image_from_bytes
+from yoyo.vision_research.pattern_rules import reference_note
 
 
 def make_pack(path):
@@ -58,3 +60,16 @@ def test_shipped_defaults_retain_source_pixels_and_provenance(tmp_path):
         with Image.open(DEFAULT_PACK / entry["file"]) as original:
             with Image.open(store.image_path(saved["sha256"] + ".png")) as normalized:
                 assert original.convert("RGB").tobytes() == normalized.tobytes()
+
+
+def test_reference_descriptions_match_the_shipped_pack_and_confirmation_level():
+    manifest = json.loads((DEFAULT_PACK / "manifest.json").read_text())
+    for entry in manifest["items"]:
+        normalized = image_from_bytes((DEFAULT_PACK / entry["file"]).read_bytes(), entry["name"])
+        note = reference_note(normalized.sha256)
+        assert note, f"Missing reference guidance for {entry['name']}"
+        assert f"{entry['core_bars']}根" in note
+        assert "框坐标仍待逐样本确认" in note
+        assert ("原样本形态曾获Owner认可" in note) is entry["owner_semantic_verdict"]
+        assert ("尚未获Owner逐样本认可" in note) is not entry["owner_semantic_verdict"]
+    assert reference_note("0" * 64) == ""

@@ -127,6 +127,31 @@ def test_analyze_sends_candidate_then_eight_references_as_png_data_urls() -> Non
     assert PROMPT_VERSION
 
 
+def test_project_reference_notes_follow_image_identity_not_names() -> None:
+    from yoyo.vision_research.defaults import DEFAULT_PACK
+    from yoyo.vision_research.images import image_from_bytes
+    from yoyo.vision_research.pattern_rules import reference_note
+    from yoyo.vision_research.schemas import DEFAULT_CRITERIA
+
+    known = image_from_bytes((DEFAULT_PACK / "03_FIL_USDT_SWAP_SHORT_core.png").read_bytes(), "renamed.png")
+    impostor = image("FIL · 空头密集核心", b"unrelated-image-bytes")
+    seen = []
+
+    def respond(request):
+        seen.append(json.loads(request.content))
+        return httpx.Response(200, json=completion())
+
+    with client(respond) as adapter:
+        adapter.analyze(image("candidate.png", b"candidate"), [impostor, known], DEFAULT_CRITERIA)
+    parts = seen[0]["messages"][0]["content"]
+    assert json.dumps(DEFAULT_CRITERIA, ensure_ascii=False) in parts[0]["text"]
+    assert "项目保存的参考说明" not in parts[2]["text"]
+    assert reference_note(known.sha256) in parts[4]["text"]
+    assert base64.b64decode(parts[5]["image_url"]["url"].split(",", 1)[1]) == known.data
+    assert "原形态认可不等于本次新框坐标已确认" in parts[4]["text"]
+    assert reference_note(impostor.sha256) == ""
+
+
 def test_check_connection_uses_one_minimal_text_completion_and_reports_token_use() -> None:
     seen: list[httpx.Request] = []
     bodies: list[dict] = []
