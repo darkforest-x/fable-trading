@@ -3,11 +3,21 @@
 Independent local workbench for Gemini visual judgments and owner review.
 Application source and frontend: `yoyo/vision_research/`.
 
-From the repository root:
+From the repository root on macOS (persistent local service):
 
 ```bash
-.venv/bin/python -m yoyo.vision_research.server --port 8771
+.venv/bin/python -m yoyo.vision_research.manage start
 ```
+
+The user LaunchAgent survives terminal/chat closure, restarts a crashed process,
+and starts after login. It only serves this manual workbench. Use `manage status`,
+`manage restart`, or `manage stop` to inspect, restart, or stop it for the current
+login session. Its plist contains no API key. Logs are in
+`~/Library/Logs/Fable/SpikeVisionResearch/`.
+
+For foreground development on any supported OS, run
+`.venv/bin/python -m yoyo.vision_research.server --port 8771` instead, and keep that
+terminal running. Do not run both launch modes on the same port.
 
 Open http://127.0.0.1:8771. The existing SPIKE service on port 8766 is read-only;
 this command does not start or change its scanner or notifications. If SPIKE
