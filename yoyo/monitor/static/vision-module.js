@@ -8,7 +8,7 @@
   async function mount() {
     host = native.getElementById('vision-module');
     const response = await fetch('/vision-assets/index.html');
-    if (!response.ok) throw new Error('视觉工作台界面暂不可读');
+    if (!response.ok) throw new Error('VLM 工作流界面暂不可读');
     const page = new DOMParser().parseFromString(await response.text(), 'text/html');
     page.querySelectorAll('script, .skip-link, .brand, .sidebar-bottom').forEach((el) => el.remove());
     shadow = host.attachShadow({ mode: 'open' });
@@ -60,7 +60,7 @@
     async setActive(value) {
       active = value;
       if (active && !loaded) loaded = mount().catch((error) => {
-        native.getElementById('vision-module-error').textContent = error.message || '视觉模块加载失败，请刷新页面。';
+        native.getElementById('vision-module-error').textContent = error.message || 'VLM 工作流加载失败，请刷新页面。';
         throw error;
       });
       if (active) await loaded;

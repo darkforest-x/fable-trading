@@ -1286,7 +1286,7 @@ function renderAll() {
     setVisible(panel, state.tab === id);
   }
   const pageHeadings = {
-    workspace: ['研究工作台', '从候选信号到形态判断，查看图表并运行识别。'],
+    workspace: ['VLM 工作流', '使用视觉语言模型研究图表形态，与 YOLO 并行验证。'],
     replay: ['验证／历史回放', '逐步揭示历史行情，保留当时的判断与后续观察。'],
     references: ['参考图库', '管理后续识别共用的形态参考图。'],
     history: ['识别记录', '查看历史结果、人工复核与 API 原始记录。'],
