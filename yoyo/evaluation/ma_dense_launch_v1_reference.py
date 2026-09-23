@@ -365,6 +365,13 @@ def evaluate_full(frame: pd.DataFrame, confirm_i: int, direction: str, core_bars
     decision = evaluate(frame, confirm_i, direction, core_bars)
     if decision is None:
         return None
+    if not decision.signal:
+        # The similarity layers only ever refine hard-gate passers, and they are
+        # the expensive part, so a failed gate short-circuits here.
+        return {"hard_gates": False, "stage1_distance": float("nan"), "stage1_similarity": False,
+                "good_distance": float("nan"), "bad_distance": float("nan"), "family_distance": float("nan"),
+                "quality_score": float("nan"), "grade_a": False,
+                "core_high": decision.core_high, "core_low": decision.core_low}
     features, seq1, seq2 = profiles(frame, confirm_i, direction, core_bars)
     stage1, stage2 = pack["stage1"], pack["stage2"]
     scales = np.asarray(stage1["feature_scales"], float)
