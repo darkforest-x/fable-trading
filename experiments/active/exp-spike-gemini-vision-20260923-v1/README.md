@@ -5,6 +5,31 @@ The original experiment ID is retained; new requests use BigModel, while prior
 Gemini records retain their original model and results.
 Application source and frontend: `yoyo/vision_research/`.
 
+Version 0.7.0 adds **验证回放** at `http://127.0.0.1:8771/#replay`.
+Select a native local market/period, a continuous historical range and a Beijing
+start time. Free replay supports backward/forward steps and time seeks; the
+independent-judgment mode only moves forward and requires a first human label
+before requesting AI for a frozen observation. Play/pause never calls AI.
+Only 120 disclosed, closed candles leave the server. All six averages use a
+causal seed from the same continuous source segment; gaps and inadequate warmup
+are explicit errors. No online source substitution or resampling is performed.
+
+Freeze stores a fixed 1440×800 chart, rules, model and reference revision. The
+shown PNG is the exact model input. Each observation allows one durable API
+attempt; repeated clicks, refreshes and restarts do not automatically retry it.
+First human labels cannot be overwritten or backfilled after AI/future exposure.
+Later charts and close-price changes append as followups and never replace the
+original input. They are descriptive observations, not simulated trade PnL.
+Sessions and observations persist in the local research SQLite store; each
+observation has a JSON export. Self-selected history is not a random evaluation
+cohort and these labels do not automatically become Owner gold. Training and
+production eligibility remain false.
+
+The ordered work list is `docs/protocol/vision_validation_task_list.md` and the
+replay HTTP contract is `REPLAY_API.md`. Run replay checks with
+`.venv/bin/python -m pytest tests/vision_research/test_replay.py tests/vision_research/test_replay_data.py -q`
+and frontend checks with `node --test tests/vision_research/replay_ui.test.cjs`.
+
 From the repository root on macOS (persistent local service):
 
 ```bash

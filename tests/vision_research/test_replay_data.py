@@ -49,6 +49,15 @@ def visible_hash(rows):
     return hashlib.sha256(payload).hexdigest()
 
 
+def test_numeric_open_time_must_agree_with_ts(tmp_path):
+    rows = bars(320)
+    rows[12]["open_time"] = rows[12]["ts"] + PERIOD_MS
+    write_bars(tmp_path, "ETH_USDT_SWAP", "15m", rows)
+    with pytest.raises(SourceError) as error:
+        make_source(tmp_path).coverage("ETH-USDT-SWAP", "15m")
+    assert error.value.code == "timestamp_conflict"
+
+
 def test_catalog_separates_spot_swap_and_timeframes_and_loads_real_csv_schema(tmp_path):
     spot = bars(320, offset=0)
     swap = bars(320, offset=500)

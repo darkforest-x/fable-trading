@@ -8,6 +8,7 @@
     <title>SPIKE · 视觉研究工作台</title>
     <script src="/theme.js"></script>
     <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/replay.css" />
     <script defer src="/vendor/lightweight-charts.standalone.production.js"></script>
     <script type="module" src="/app.js"></script>
   </head>
@@ -23,6 +24,7 @@
           <button class="nav-tab is-active" id="tab-workspace-button" type="button" role="tab" aria-selected="true" aria-controls="tab-workspace" data-tab="workspace"><span class="ui-icon icon-chart" aria-hidden="true"></span><span>工作台</span></button>
           <button class="nav-tab" id="tab-references-button" type="button" role="tab" aria-selected="false" aria-controls="tab-references" data-tab="references" tabindex="-1"><span class="ui-icon icon-images" aria-hidden="true"></span><span>全局参考图</span></button>
           <button class="nav-tab" id="tab-history-button" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history" tabindex="-1"><span class="ui-icon icon-history" aria-hidden="true"></span><span>识别记录</span><span id="history-count" class="nav-count" hidden>0</span></button>
+          <button class="nav-tab" id="tab-replay-button" type="button" role="tab" aria-selected="false" aria-controls="tab-replay" data-tab="replay" tabindex="-1"><span class="ui-icon icon-history" aria-hidden="true"></span><span>验证回放</span></button>
           <button class="nav-tab" id="tab-settings-button" type="button" role="tab" aria-selected="false" aria-controls="tab-settings" data-tab="settings" tabindex="-1"><span class="ui-icon icon-settings" aria-hidden="true"></span><span>模型设置</span></button>
         </nav>
         <div class="sidebar-bottom">
@@ -168,6 +170,149 @@
           <div id="history-error" class="notice notice-error" role="alert" hidden></div>
           <div id="history-list" class="history-list" aria-live="polite">
             <div class="history-empty"><span class="spinner" aria-hidden="true"></span>正在读取记录…</div>
+          </div>
+        </section>
+
+        <section id="tab-replay" class="tab-panel replay-panel" role="tabpanel" aria-labelledby="tab-replay-button" tabindex="0" hidden>
+          <div class="page-heading replay-page-heading">
+            <div><h2>历史验证回放</h2><p class="page-subtitle">冻结某一时点的标准图，先记录人工判断，再按需查看模型与后续走势。</p></div>
+            <span class="section-tag">研究用途</span>
+          </div>
+          <div id="replay-error" class="notice notice-error" role="alert" aria-live="assertive" hidden></div>
+          <div id="replay-notice" class="notice notice-info" role="status" aria-live="polite" hidden></div>
+          <div id="replay-status" class="replay-status" role="status" aria-live="polite">正在读取历史数据目录…</div>
+          <div class="replay-layout">
+            <aside class="panel replay-sidebar" aria-label="回放设置与会话">
+              <section class="replay-create-section" aria-labelledby="replay-create-heading">
+                <div class="panel-heading"><h3 id="replay-create-heading">开始回放</h3></div>
+                <label class="field-label" for="replay-symbol">币种</label>
+                <select id="replay-symbol" class="replay-field" disabled><option value="">正在读取目录…</option></select>
+                <label class="field-label" for="replay-timeframe">周期</label>
+                <select id="replay-timeframe" class="replay-field" disabled><option value="">选择币种</option></select>
+                <div id="replay-coverage" class="replay-coverage" role="status" aria-live="polite">选择币种与周期后读取本地可回放范围。</div>
+                <label class="field-label" for="replay-segment-select">连续历史区间</label>
+                <select id="replay-segment-select" class="replay-field" disabled><option value="">读取可用区间…</option></select>
+                <label class="field-label" for="replay-start-time">开始时间（北京时间）</label>
+                <input id="replay-start-time" class="replay-field" type="datetime-local" step="60" />
+                <label class="field-label" for="replay-mode">回放方式</label>
+                <select id="replay-mode" class="replay-field">
+                  <option value="blind">盲审：先人工判断，再看模型或后续走势</option>
+                  <option value="free">自由回放：可前后跳转，不代表随机盲测</option>
+                </select>
+                <p id="replay-mode-help" class="field-help">盲审可以向前逐根或播放；冻结样本后，先保存人工判断才能调用模型。继续推进后，旧观察不能再补记为独立判断。</p>
+                <button id="replay-create-session" class="button button-primary replay-full-width" type="button" disabled>创建回放会话</button>
+                <div id="replay-catalog-warning" class="inline-error" role="status" hidden></div>
+              </section>
+              <section class="replay-sessions-section" aria-labelledby="replay-sessions-heading">
+                <div class="panel-heading"><h3 id="replay-sessions-heading">恢复历史会话</h3><button id="replay-refresh-sessions" class="icon-button" type="button" aria-label="刷新回放会话" title="刷新回放会话"><span class="ui-icon icon-refresh" aria-hidden="true"></span></button></div>
+                <div id="replay-sessions-error" class="inline-error" role="alert" hidden></div>
+                <div id="replay-session-list" class="replay-session-list"><p class="replay-empty">暂无回放会话。</p></div>
+              </section>
+            </aside>
+
+            <div class="replay-main">
+              <section class="panel replay-chart-panel" aria-labelledby="replay-chart-heading">
+                <div class="chart-toolbar replay-toolbar">
+                  <div class="chart-title"><h3 id="replay-chart-heading">选择或创建一个回放会话</h3><span id="replay-mode-badge" class="source-chip" hidden></span></div>
+                  <span id="replay-cursor-label" class="replay-cursor-label">尚未载入历史图表</span>
+                </div>
+                <div class="replay-legend" aria-label="均线图例"><span class="ma-sma20">SMA 20</span><span class="ma-ema20">EMA 20</span><span class="ma-sma60">SMA 60</span><span class="ma-ema60">EMA 60</span><span class="ma-sma120">SMA 120</span><span class="ma-ema120">EMA 120</span></div>
+                <div id="replay-chart-stage" class="replay-chart-stage">
+                  <div id="replay-chart-empty" class="replay-chart-empty"><h3>历史行情只展示到当前游标</h3><p>向前或向后移动后，图表会按服务端返回的已披露前缀更新。</p></div>
+                  <div id="replay-chart" class="replay-chart" role="img" aria-label="历史回放 K 线与均线图表" hidden></div>
+                  <div id="replay-standard-image" class="replay-standard-image" hidden><img id="replay-standard-image-src" alt="冻结回放输入：服务器标准图" /></div>
+                </div>
+                <div class="chart-caption replay-chart-caption"><span id="replay-chart-caption">图表显示已披露的历史前缀 · 北京时间</span><span>服务器标准图是识别实际输入</span></div>
+                <div class="replay-controls" aria-label="历史回放控制">
+                  <div class="replay-step-controls" role="group" aria-label="移动历史游标">
+                    <button class="button button-secondary" type="button" data-replay-step="-10" aria-label="向前回到更早 10 根 K 线">−10</button>
+                    <button class="button button-secondary" type="button" data-replay-step="-5" aria-label="向前回到更早 5 根 K 线">−5</button>
+                    <button class="button button-secondary" type="button" data-replay-step="-1" aria-label="向前回到更早 1 根 K 线">−1</button>
+                    <button class="button button-secondary" type="button" data-replay-step="1" aria-label="向后揭示 1 根 K 线">+1</button>
+                    <button class="button button-secondary" type="button" data-replay-step="5" aria-label="向后揭示 5 根 K 线">+5</button>
+                    <button class="button button-secondary" type="button" data-replay-step="10" aria-label="向后揭示 10 根 K 线">+10</button>
+                  </div>
+                  <div class="replay-play-controls">
+                    <label for="replay-speed">播放速度</label>
+                    <select id="replay-speed" aria-label="历史回放播放速度"><option value="2000">慢</option><option value="1000" selected>正常</option><option value="400">快</option></select>
+                    <button id="replay-play" class="button button-secondary" type="button" disabled>播放</button>
+                    <button id="replay-pause" class="button button-quiet" type="button" disabled>暂停</button>
+                  </div>
+                  <div id="replay-free-jump" class="replay-free-jump" hidden>
+                    <label for="replay-target-time">跳转到（北京时间）</label>
+                    <input id="replay-target-time" class="replay-field" type="datetime-local" step="60" />
+                    <button id="replay-jump" class="button button-secondary" type="button" disabled>跳转</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="panel replay-workflow-panel" aria-label="冻结、人工判断和模型复核">
+                <div class="replay-workflow-grid">
+                  <section class="replay-freeze-section" aria-labelledby="replay-freeze-heading">
+                    <div class="panel-heading"><h3 id="replay-freeze-heading">冻结当前时点</h3><span id="replay-observation-status" class="source-chip" hidden></span></div>
+                    <p class="field-help">冻结后会保存服务端标准图；模型看到的就是这张原图。前端不会自行裁掉已下载 K 线。</p>
+                    <label class="field-label" for="replay-criteria">本次识别规则</label>
+                    <textarea id="replay-criteria" class="replay-field replay-criteria" rows="4" spellcheck="false" placeholder="正在读取默认规则…"></textarea>
+                    <button id="replay-freeze" class="button button-secondary replay-full-width" type="button" disabled>冻结当前图表</button>
+                    <div id="replay-frozen-error" class="inline-error" role="alert" hidden></div>
+                  </section>
+                  <section class="replay-observation-section" aria-labelledby="replay-observation-heading">
+                    <div class="panel-heading"><h3 id="replay-observation-heading">当前观察</h3><span id="replay-observation-time" class="replay-muted"></span></div>
+                    <div id="replay-observation-empty" class="replay-observation-empty">冻结一个时点后，服务器原图、人工判断和模型结果会显示在这里。</div>
+                    <figure id="replay-observation-figure" class="replay-observation-figure" hidden>
+                      <figcaption>冻结输入 · AI 实际看到的服务器标准图</figcaption>
+                      <img id="replay-observation-image" alt="冻结回放输入：模型实际看到的标准图" />
+                    </figure>
+                    <div class="replay-observation-actions">
+                      <a id="replay-view-original" class="button button-secondary" href="#" target="_blank" rel="noopener noreferrer" hidden>查看原图</a>
+                      <a id="replay-export-observation" class="button button-secondary" href="#" download hidden>导出记录</a>
+                    </div>
+                    <p id="replay-image-status" class="field-help" role="status" aria-live="polite" hidden></p>
+                    <p id="replay-observation-meta" class="replay-observation-meta" hidden></p>
+                    <div class="replay-human-card">
+                      <h4 id="replay-human-heading">人工判断</h4>
+                      <div id="replay-human-existing" class="replay-human-existing" hidden></div>
+                      <div id="replay-human-form">
+                        <label class="field-label" for="replay-human-state">形态状态</label>
+                        <select id="replay-human-state" class="replay-field">
+                          <option value="">选择判断</option><option value="converging">仍在收敛</option><option value="launching">正在启动</option><option value="extended">已经延伸</option><option value="no_setup">没有形态</option><option value="unclear">不确定</option>
+                        </select>
+                        <label class="field-label" for="replay-human-side">方向</label>
+                        <select id="replay-human-side" class="replay-field"><option value="unknown">未知 / 不适用</option><option value="long">多</option><option value="short">空</option></select>
+                        <label class="field-label" for="replay-human-note">依据备注</label>
+                        <textarea id="replay-human-note" class="replay-field" rows="3" maxlength="1200" placeholder="记录可见依据与不确定性"></textarea>
+                        <button id="replay-save-human" class="button button-primary replay-full-width" type="button" disabled>保存人工判断</button>
+                      </div>
+                      <div id="replay-human-error" class="inline-error" role="alert" hidden></div>
+                    </div>
+                    <div class="replay-ai-card">
+                      <div class="panel-heading"><h4>模型复核</h4><span id="replay-ai-status" class="source-chip" hidden></span></div>
+                      <p id="replay-blind-gate" class="field-help" hidden>这条冻结观察必须先保存人工判断才能调用模型；播放和推进游标不会自动调用模型。</p>
+                      <button id="replay-analyze" class="button button-secondary replay-full-width" type="button" disabled>手动调用模型</button>
+                      <div id="replay-ai-error" class="inline-error" role="alert" hidden></div>
+                      <div id="replay-ai-result" class="replay-ai-result" hidden></div>
+                    </div>
+                    <div class="replay-followup-card">
+                      <div class="panel-heading"><h4>后续回访</h4><span id="replay-followup-eligibility" class="replay-muted"></span></div>
+                      <p class="field-help">先把会话游标移到更晚时间，再记录观察。回访只描述价格变化，不计算交易盈亏。</p>
+                      <label class="field-label" for="replay-followup-note">回访备注</label>
+                      <textarea id="replay-followup-note" class="replay-field" rows="3" maxlength="1200" placeholder="记录后来发生了什么"></textarea>
+                      <button id="replay-save-followup" class="button button-secondary replay-full-width" type="button" disabled>保存回访</button>
+                      <div id="replay-followup-error" class="inline-error" role="alert" hidden></div>
+                    </div>
+                  </section>
+                </div>
+              </section>
+
+              <section class="panel replay-history-panel" aria-labelledby="replay-history-heading">
+                <div class="panel-heading"><div><h3 id="replay-history-heading">会话观察历史</h3><p class="field-help">选择一条冻结观察，查看原图、初始人工判断、模型判断与回访。</p></div></div>
+                <div id="replay-observations-error" class="inline-error" role="alert" hidden></div>
+                <div class="replay-history-layout">
+                  <div id="replay-observation-list" class="replay-observation-list"><p class="replay-empty">选择会话后显示观察历史。</p></div>
+                  <div id="replay-followup-list" class="replay-followup-list"><p class="replay-empty">选择观察后显示回访记录。</p></div>
+                </div>
+              </section>
+            </div>
           </div>
         </section>
 

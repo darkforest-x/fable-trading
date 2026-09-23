@@ -1,5 +1,6 @@
 import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
 import { exchangeConversation } from './conversation.js';
+import { initReplay, setReplayActive } from './replay.js';
 const API_BASE = '/api';
 const DEFAULT_MODEL = 'glm-5.3-flash';
 const DEFAULT_CRITERIA = '只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。';
@@ -1208,12 +1209,13 @@ function renderAll() {
     button.setAttribute('aria-selected', String(active));
     button.tabIndex = active ? 0 : -1;
   }
-  for (const id of ['workspace', 'references', 'history', 'settings']) {
+  for (const id of ['workspace', 'replay', 'references', 'history', 'settings']) {
     const panel = byId(`tab-${id}`);
     setVisible(panel, state.tab === id);
   }
   const pageHeadings = {
     workspace: ['研究工作台', '从候选信号到形态判断，查看图表并运行识别。'],
+    replay: ['验证／历史回放', '逐步揭示历史行情，保留当时的判断与后续观察。'],
     references: ['参考图库', '管理后续识别共用的形态参考图。'],
     history: ['识别记录', '查看历史结果、人工复核与 API 原始记录。'],
     settings: ['模型对话', '查看每一次识别的图片与回答。'],
@@ -1829,13 +1831,14 @@ async function testConnection() {
 }
 
 function switchTab(tab) {
-  if (!['workspace', 'references', 'history', 'settings'].includes(tab)) return;
+  if (!['workspace', 'replay', 'references', 'history', 'settings'].includes(tab)) return;
   const changed = state.tab !== tab;
   state.tab = tab;
   if (tab !== 'workspace') pauseLivePolling();
   if (tab === 'workspace') pollLiveChart();
   if (tab === 'references' && !state.referencesDirty && !state.referencesSaving) loadReferences();
   renderAll();
+  setReplayActive(tab === 'replay');
   if (changed) window.scrollTo(0, 0);
   byId(`tab-${tab}-button`).focus({ preventScroll: true });
 }
@@ -1986,7 +1989,9 @@ dropZone.addEventListener('drop', (event) => {
 });
 
 byId('criteria-count').textContent = `${byId('criteria-input').value.length} 字`;
+initReplay();
 renderAll();
+if (window.location.hash === '#replay') switchTab('replay');
 Promise.allSettled([loadStatus(), loadSignals(), loadAutomatic(), loadRuns(), loadReferences(), loadExchangeRecords()]);
 
 byId('save-references').addEventListener('click', saveReferences);

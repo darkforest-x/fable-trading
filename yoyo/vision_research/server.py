@@ -100,7 +100,7 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
 
 
 def create_app(runtime: Optional[Path] = None, source=None, provider_factory=ZhipuClient,
-               seed_defaults: bool = False, automatic_worker: bool = False):
+               seed_defaults: bool = False, automatic_worker: bool = False, replay_history=None):
     @asynccontextmanager
     async def lifespan(app):
         # https://fastapi.tiangolo.com/advanced/events/
@@ -557,6 +557,10 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         except FileNotFoundError:
             raise HTTPException(404, "图片不存在")
         return FileResponse(path, media_type="image/png")
+
+    from .replay import install_replay_routes
+    install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange,
+                          current_review_context, lambda: status()["model"], history=replay_history)
 
     static = Path(__file__).parent / "static"
     app.mount("/", StaticFiles(directory=static, html=True), name="workbench")

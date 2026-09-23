@@ -145,7 +145,14 @@ class LocalReplayHistory:
             if not math.isfinite(numeric_ts) or not numeric_ts.is_integer():
                 raise SourceError("bad_timestamp", "本地行情含无效时间戳，无法回放")
             stamp = int(numeric_ts)
-            if not re.fullmatch(r"[+-]?\d+(?:\.0+)?", open_text):
+            if re.fullmatch(r"[+-]?\d+(?:\.0+)?", open_text):
+                try:
+                    open_stamp = int(float(open_text))
+                except (ValueError, OverflowError) as exc:
+                    raise SourceError("bad_timestamp", "本地行情含无效 open_time，无法回放") from exc
+                if open_stamp != stamp:
+                    raise SourceError("timestamp_conflict", "本地行情 open_time 与 ts 不一致，无法回放")
+            else:
                 try:
                     parsed = pd.Timestamp(open_text)
                     if pd.isna(parsed):
