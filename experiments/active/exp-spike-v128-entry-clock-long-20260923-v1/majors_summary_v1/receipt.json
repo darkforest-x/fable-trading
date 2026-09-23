@@ -1,0 +1,166 @@
+{
+  "status": "complete",
+  "config": {
+    "experiment_id": "exp-spike-v128-entry-clock-long-20260923-v1-majors",
+    "start": "2020-01-01T00:00:00Z",
+    "split": "2023-01-01T00:00:00Z",
+    "end": "2026-09-23T04:00:00Z",
+    "warmup_start": "2020-01-01T00:00:00Z",
+    "timeframes": [
+      15,
+      60
+    ],
+    "round_trip_cost": 0.002,
+    "control_seed": 923128,
+    "stat_seed": 923129,
+    "vol_bins": [
+      0.005,
+      0.01,
+      0.02,
+      0.05,
+      0.1
+    ],
+    "bootstrap": 2000,
+    "flips": 10000,
+    "training_eligible": false,
+    "production_eligible": false,
+    "source_manifest": "data/research/spike_v128_recent_20260923/manifest.json",
+    "input_manifest": "data/research/spike_v128_entry_clock_majors_20260923/manifest.json",
+    "parent_run": "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/majors_baseline_v1",
+    "max_wait_bars": 24,
+    "diagnostic_wait_bars": 3,
+    "initial_position_policy": "carry_parent_position_at_window_start",
+    "timezone": "Asia/Shanghai",
+    "arms": [
+      "v9_both",
+      "joint"
+    ],
+    "policies": [
+      "baseline",
+      "retest"
+    ],
+    "rank_min_closed": 30,
+    "rank_min_weeks": 6,
+    "rank_min_each_half": 10,
+    "early_rank_min_closed": 15,
+    "early_rank_min_weeks": 3,
+    "statistics_seed": 923234,
+    "primary_test_slots": 48,
+    "old_window_start": "2026-07-23T00:00:00Z",
+    "notes": [
+      "Observation-horizon extension only; 2023-2024 selection, 2025 onward retrospective evaluation, plus monthly and annual slices.",
+      "Calendar month and year use actual Beijing entry time; unresolved/cross-cut trades explicitly retained.",
+      "The existing 638-symbol archive is not a point-in-time universe; preserve symbol coverage and fixed-incumbent sensitivity.",
+      "Existing frozen exchangeInfo tick sizes are reused; historical tick changes are not reconstructed.",
+      "No chart hint rendering or strategy-time gate adoption. Reports are not requested.",
+      "Replay starts flat at the available archive boundary; all policies warm their own serial history before analysis_start. The first incomplete/early-history month is separately tested for sensitivity."
+    ],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT"
+    ],
+    "analysis_start": "2020-02-01T00:00:00Z",
+    "analysis_split": "2023-01-01T00:00:00Z"
+  },
+  "generated_at": "2026-09-23T09:38:37.652585+00:00",
+  "run_identity": "122e0b454173d2b7c77005480cba68686c6f6ffffd301ecdc951740ba56915e8",
+  "parent_run": "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/majors_baseline_v1",
+  "source_hashes": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_long_clock.py": "058b163ea9454c0fea2c1eb5d2b927886b95666bbe7793c87c8cd8bae3a26412",
+    "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/majors_config.json": "91d9db419123a964b981e899b91fa72248802dce43302f5ee728b890882f2e4e",
+    "tests/evaluation/test_spike_v128_long_clock.py": "7b114a9b853ffd4e8d01e9f64d8e9f182214bba887d70c8d3d6b77095d699076",
+    "/Users/zhangzc/fable-trading/yoyo/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/Users/zhangzc/fable-trading/yoyo/data/binance_um_archives.py": "d48cf7284dd424000f2272f4f261f4d6e4d407dba1ae4665ec59e655e84c950a",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/__init__.py": "a29dd367b750b396ce7f95d4aadd061b5c55d6ae0ac3ad72a8555c1e7d43dc13",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_progressive.py": "cec81a33997bd39272762bd70a451ceb5bf218da0e7fc0606271d165437fde08",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py": "678cb55b25925833927dba8c714a59e3cba81de9c9adca84a1bf2f8347ce3fd3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v6_structure.py": "e84690c02e7b03291cc3037eab37ac495cc2ece79326e24411cfa72aa1214d4b",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_accounts.py": "ce3f225c479a42d3b5fd269e554bb8999eeb069446f73a2128e77dea0321dbe5",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_policy_study.py": "f52d73309e0a28a26b0d9daa445c2a4484003dd4f32ec2f47b1e039c365c430c",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v104_forward.py": "8f56b4d5d7080908ed6b628744acba74df9888cae6abfa12a2e5beaab1da1d29",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4.py": "f32891e5d29394c5c27730d58302ac39911b5ff9b7899ed8d625dde96d778c16",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_increment.py": "a18fb5f2dc4e5ef7c78085eceaf0caab1714e25d6ccff212d3036ff8c874abbe",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_study.py": "55f06bdaa20fb2f21877c42b73e29e9cfbffde707ac9a85bed520ab2a811d0f7",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_support_study.py": "9aca98efdc162e2eea17bef0a6df5675f44c49ff93272f96d544598021abf176",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_box_study.py": "e9dd1bb73055808ec70fa4f451cb8831b9f6673e1008ffba3837d3e2d4828333",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_study.py": "02ba6b26c03e08284852e0224ea272320e0fc3d9b26e8a075a5725b665e61c66",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_engine.py": "9fc887b02f7543df4f33905c0f63084958704c6d796a38fd4b5ad236dfb30a11",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_recheck.py": "542f5377f8a8a7fbdafb0ae20c6da8540e2a69b005baf5ed39417ea2e2c6b95d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_entry_clock.py": "5c42aebb8b7f4ae95c9fe3a54d6a739c64b9b892cff3a7b7267f169e73ffafb9",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_entry.py": "fb27723a7070669a5182adc0de5b8634652b1b6e7795c279359d8dc14b0fad5d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_report.py": "da702400a3c998cf2d7a1e12459ed608c51951c3d12c6489ce0c657735d6b312",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_hint_replay.py": "7e992bc2c422521717aa4d6881b919aac331a8e86d013ce96f4d44741185a41b",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent.py": "c31d459b64109a442da7e1fd4bdbb41c1e338613dd812fae1448202faf57cf52",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent_report.py": "4aa1efafaf202207aed24f38557fac7878f8a8489d0988703633819c0ac2b57a",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_entry.py": "68a9868ca841dbf334aa1d35151ca80251f4d05ffc8bf969338cc75ceddbf145",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_state.py": "af6d18af0fd201a12f55d5f68e18b04e200cf87bcf6694746ce7c5b7a408574c",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v12_local_touch.py": "f8469ecc0440f977623093800aa78da2b699279977e0909349f23d7dd4465008",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py": "820d5f8374b9c7589477f499ab4c7a3b5b56024190d10d944c7c624533fdb8d7",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py": "31f02fdd44f677e227deb6a5560114d2277c206c42c8400ecef3ec864d4046c0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study.py": "ba8db5027680e259f0c7572e3d31b1fa709481869fd48679e004daec262d3fd4",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study_post.py": "334772aa325660b5ae9abbf93db4ddbc9e8908d6becb2ddd7e7dd2d1d3866e9a",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_episode_study.py": "f18e2548bf8487e224acd48b4a7931d629bc5401bd3f64e94c4695c3368ae110",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py": "f0cfe9e2fb6d16a71632728bdfca3f65160f21dbb5afff4d23e61d1acab3bdc0",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_lowtf_study.py": "f1b2349926ef9b92731f838e9e4e559207f42e16db499cc396a9eec1a0674463",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_replay.py": "afe934b3b81f9e949edc55b2cb3a6dc18c076224bd8135b894bfc0a58eb3ada3",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_six_filters.py": "365cef00b81151e51d11fddda061be3630cba1abf80a8be4cf4616fb14e71bfd",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9.py": "7bdee0dfbe783fdcfcae78a6ba3db4a11c4b035b6cc153edfb9cb21ecf161d4d",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma.py": "6bfd45a4381faeeb56830c11619615e7afb7785fa809cb2554416497cd78483e",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/trendline_break.py": "5eab890adae46b28818aec2a79a1c04d7a377a5e7960cce76506b3c6087a01dc"
+  },
+  "authenticated_inputs": {
+    "config_sha256": "91d9db419123a964b981e899b91fa72248802dce43302f5ee728b890882f2e4e",
+    "replay_identity_sha256": "1de9b0ef9f4dca4afaedd76d34acafc94edceef9899a8de11d6c8c843cc90136",
+    "replay_manifest_sha256": "f605d426f16b1dabef356c6f1a7ccc01e6a437382e3a038cbc82556e313920e9",
+    "parent_identity_sha256": "dbf9a3fd675f59f2a5c5b20a819f208ae429170eaf27259b70fe18fd4924aeba",
+    "parent_manifest_sha256": "eda6504c9a2a5deaf4b77ffe23855efe47a07d59b0de98f757173516663fb957",
+    "input_manifest_sha256": "65e12cb5223dcaacd19fa6a5f8071f57eedd319b349e8749110f5ed874c37062",
+    "symbol_metadata_snapshot": {
+      "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/exchange_info.json",
+      "sha256": "dccd2fa8bc4b1bb567e4e2d6117f154a57bc2f260b4b898a8c6869585598602c"
+    },
+    "upstream_source_manifest": "data/research/spike_v128_recent_20260923/manifest.json",
+    "source_data_files_rehashed": false,
+    "input_hashes_checked_against_manifest": true,
+    "parent_stream_receipts": {
+      "BTCUSDT_15m": "951dc8d68ef80da5c86881c33b964e32cdac1161124b7c0a9f6a9cf40010f26b",
+      "BTCUSDT_60m": "d4a1054c30260c8cce86fdcc6191fbb51d1122c747580fe5fd2c0a875516f854",
+      "ETHUSDT_15m": "b0895b5f28dc168512a9dbfb987511b8f46340d97f41ca95f9c443ee2f7dade6",
+      "ETHUSDT_60m": "378a0a5de2cf8bfc25c31a3af5d3b7f90876beebe5ccd30f20b280d07f276384"
+    },
+    "retest_stream_receipts": {
+      "BTCUSDT_15m": "3f4279e10d4ed08d9103d07251c4326ad13d9b9e2c0748cc7cfcae9a8c5013c4",
+      "BTCUSDT_60m": "7649a327c3161a6a6ea0ea217200e1d532cf0631be1e9e2145e86190135a8d67",
+      "ETHUSDT_15m": "74011ef4e2524ea2889d44762479c87da30bf15d815504546e07721a9bc82b26",
+      "ETHUSDT_60m": "b07e77e96274163ef84db11a6ee17c2fdbf0c9f44d4cb1fba529ca98ac8b021d"
+    }
+  },
+  "stream_count": 4,
+  "trade_rows_in_replay": 3091,
+  "trade_rows_in_analysis": 1659,
+  "closed_analysis_trades": 1658,
+  "censored_analysis_trades": 1,
+  "control_rows_in_replay": 4959,
+  "control_rows_in_analysis": 1427,
+  "fixed_incumbent_symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ],
+  "warnings": [
+    "Calendar performance is assigned by actual Beijing entry time; calendar controls are restricted to the same month/year and clock bucket.",
+    "Monthly/yearly net outcomes include later exits; period_end_known_closed separately counts outcomes closed before that entry period ended.",
+    "The final partial calendar period is marked incomplete and may be right-censored.",
+    "Historical clock winners are fixed candidates; no winner is validated or promoted by this summary.",
+    "Earlier-selected/later-displayed results are retrospective time cohorts, not an untouched validation set.",
+    "Source availability counts use first/last span metadata and do not assert continuous ready bars or a point-in-time universe."
+  ],
+  "files": {
+    "buckets.csv": "2ff6e4b01f0aac0cb44f703759c716cfd214c470f2d30d4640f80bec5aa3d0b4",
+    "calendar_periods.csv": "e17d74fda346498d4f90569b77ed20a798836f0838fd8d8bf9bcaf4ea30e69c7",
+    "earlier_selected_later.csv": "20b9fab788adc83157f2db6a777d1d51e4a97b02f63031d0ae1444f4443e6c0b",
+    "fixed_incumbent_summary.csv": "832a2219425c0933e409563484aea5db02c9c3ba75a0ee35dd4eb63013cf30a8",
+    "historical_incumbents.csv": "a25fc1568585236298b27b10d380052219e569d3ba5419911b54091029f6ecaf",
+    "symbol_coverage.csv": "4365a60bdd47cbd6e599b1941963b926f5123400ebcaae1e274f4d41764c4a71",
+    "winners.csv": "042d18bf825077bddda63070de584bdc764387b1bddd8ca8630f7679e03deba6"
+  }
+}

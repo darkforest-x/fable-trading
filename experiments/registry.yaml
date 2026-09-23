@@ -10877,13 +10877,14 @@ experiments:
 
   - experiment_id: exp-spike-v128-entry-clock-long-20260923-v1
     source_repo: darkforest-x/fable-trading
-    status: in_progress
+    status: completed
     question: Do Beijing entry-clock rankings persist over 2023 onward and longer BTC/ETH history?
     single_variable: Extend the observation horizon of the unchanged V12.8 baseline and retest policies.
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts: [spike-v128-entry-clock-long-20260923-delivery]
     notes: Local same-source Binance history; independent policy warmup, monthly/yearly and fixed-incumbent comparisons. No report requested. Archived universe and tick metadata are not point-in-time.
+    result: Main1276 streams plus4 BTCETH long-history streams complete with exact parent parity. All48 primary Holm p1; clock champions depend on calendar and universe. Ordinary15m retest20-24 pooled +0.1191R but fixed135 cohort -0.0189R. No production adoption.
 
   - experiment_id: exp-spike-gemini-vision-20260923-v1
     source_repo: darkforest-x/fable-trading
