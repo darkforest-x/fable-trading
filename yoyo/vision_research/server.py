@@ -29,15 +29,21 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import VERSION
 from .gemini import GeminiClient, GeminiError
-from .images import MAX_TOTAL_IMAGE_BYTES, image_from_data_url
-from .schemas import AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL, ReviewRequest
+from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes, image_from_data_url
+from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL,
+                      ReferencesRequest, ReviewRequest)
 from .source import SourceError, SpikeSource
-from .store import ResearchStore, utc_now
+from .store import ReferenceRevisionConflict, ResearchStore, utc_now
 
 ROOT = Path(__file__).resolve().parents[2]
 EXPERIMENT_ID = "exp-spike-gemini-vision-20260923-v1"
 DEFAULT_RUNTIME = ROOT / "experiments" / "active" / EXPERIMENT_ID / "runtime"
 MAX_BODY_BYTES = 18 * 1024 * 1024
+CHART_CAPTURE_RENDER_VERSION = "tradingview-lightweight-charts-4.2.0"
+
+
+class SnapshotConflict(Exception):
+    """Raised when the chart rows shown to the user no longer match the request."""
 
 
 def validate_model(model: str) -> str:
@@ -125,6 +131,47 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
                         headers={"X-Image-SHA256": image.sha256,
                                  "X-Visible-End-Ms": str(provenance["visible_end_ms"])})
 
+    @app.get("/api/signals/{signal_id}/chart")
+    def signal_chart(signal_id: str):
+        try:
+            return spike.signal_chart(signal_id)
+        except SourceError as exc:
+            raise HTTPException(409, str(exc))
+
+    @app.get("/api/references")
+    def references():
+        return store.get_references()
+
+    @app.put("/api/references")
+    async def replace_references(request: Request):
+        payload = await read_json(request)
+        try:
+            body = ReferencesRequest.model_validate(payload)
+        except ValidationError:
+            raise HTTPException(400, "参考图最多四张，请检查图片和版本号")
+        items, images, names, hashes = [], [], set(), set()
+        try:
+            for submitted in body.references:
+                image = image_from_data_url(submitted.data_url, submitted.name)
+                normalized_name = image.name.strip()
+                if not normalized_name or normalized_name.casefold() in names:
+                    raise ValueError("参考图名称不能为空且不能重复")
+                if image.sha256 in hashes:
+                    raise ValueError("不能重复保存相同的参考图片")
+                names.add(normalized_name.casefold())
+                hashes.add(image.sha256)
+                images.append(image)
+            if sum(len(image.data) for image in images) > MAX_TOTAL_IMAGE_BYTES:
+                raise ValueError("参考图合计不能超过 12 MB")
+            for image in images:
+                items.append({"name": image.name, "sha256": image.sha256,
+                              "image_url": store.put_image(image)})
+            return store.replace_references(items, body.expected_revision)
+        except ReferenceRevisionConflict as exc:
+            raise HTTPException(409, str(exc))
+        except ValueError as exc:
+            raise HTTPException(400, str(exc))
+
     @app.post("/api/config")
     async def configure(request: Request):
         payload = await read_json(request, 4096)
@@ -166,18 +213,36 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             client.close()
             inference_lock.release()
 
-    def analyze_sync(body: AnalyzeRequest, client):
+    def analyze_sync(body: AnalyzeRequest, client, references, reference_revision,
+                     reference_source, chart_snapshot):
         if body.signal_id:
-            image, provenance = spike.signal_image(body.signal_id)
-            symbol, timeframe = provenance["symbol"], provenance["timeframe"]
-            image_source = "spike"
+            if body.chart_capture_data_url:
+                chart = chart_snapshot
+                if chart is None:
+                    raise SourceError("缺少候选图表快照，请重新载入候选")
+                provenance = dict(chart["provenance"])
+                image = image_from_data_url(body.chart_capture_data_url,
+                                            provenance["symbol"] + "-" + provenance["timeframe"] + "-capture.png")
+                provenance.update(chart_sha256=chart["chart_sha256"],
+                                  chart_candles=chart["candles"],
+                                  render_version=CHART_CAPTURE_RENDER_VERSION,
+                                  pixel_origin="browser_capture",
+                                  pixel_attestation="unverified",
+                                  capture_pixels_attested_to_ohlc=False)
+                symbol, timeframe, image_source = provenance["symbol"], provenance["timeframe"], "spike_capture"
+            else:
+                if body.expected_chart_sha256:
+                    if chart_snapshot is None or chart_snapshot["chart_sha256"] != body.expected_chart_sha256:
+                        raise SnapshotConflict("候选图表数据已变化，请重新载入后再识别")
+                image, provenance = spike.signal_image(body.signal_id)
+                symbol, timeframe = provenance["symbol"], provenance["timeframe"]
+                image_source = "spike"
         else:
             image = image_from_data_url(body.image_data_url, body.image_name or "upload.png")
             provenance = {"time_boundary": "unverified_upload", "bar_count": None}
             symbol, timeframe, image_source = "", "", "upload"
         if body.expected_image_sha256 and image.sha256 != body.expected_image_sha256:
             raise ValueError("图表已变化，请重新载入后再识别，避免发送与预览不同的图片")
-        references = [image_from_data_url(item.data_url, item.name) for item in body.references]
         if sum(len(item.data) for item in [image, *references]) > MAX_TOTAL_IMAGE_BYTES:
             raise ValueError("待判图和参考图合计不能超过 12 MB")
         if image.sha256 in {item.sha256 for item in references}:
@@ -190,6 +255,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             "criteria": body.criteria, "criteria_sha256": hashlib.sha256(body.criteria.encode()).hexdigest(),
             "prompt_version": "spike-vision-v1", "schema_version": 1, "provenance": provenance,
             "references": [{"name": item.name, "sha256": item.sha256, "image_url": store.put_image(item)} for item in references],
+            "reference_source": reference_source, "reference_revision": reference_revision,
             "decision": None, "usage": {}, "latency_ms": None, "error": None,
             "error_details": None, "review": None,
             "review_history": [], "training_eligible": False, "production_eligible": False,
@@ -220,14 +286,55 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
                 body.model = validate_model(body.model)
         except (ValidationError, ValueError):
             raise HTTPException(400, "请选择一张待判图，检查模型与形态规则，参考图最多四张")
+        chart_snapshot = None
+        if body.signal_id and (body.chart_capture_data_url or body.expected_chart_sha256):
+            try:
+                chart_snapshot = await run_in_threadpool(spike.signal_chart, body.signal_id)
+            except SourceError as exc:
+                raise HTTPException(409, str(exc))
+            if (body.expected_chart_sha256 and
+                    chart_snapshot["chart_sha256"] != body.expected_chart_sha256):
+                raise HTTPException(409, "候选图表数据已变化，请重新载入后再截取")
+        try:
+            if body.references is None:
+                reference_snapshot = store.get_references()
+                if (body.reference_revision is not None and
+                        body.reference_revision != reference_snapshot["revision"]):
+                    raise ReferenceRevisionConflict("参考图版本已更新，请重新载入后再识别")
+                selected_references = []
+                for saved in reference_snapshot["items"]:
+                    image_name = saved.get("image_url", "").rsplit("/", 1)[-1]
+                    if image_name != saved.get("sha256", "") + ".png":
+                        raise ValueError("已保存的参考图记录损坏，请重新保存参考图")
+                    path = store.image_path(image_name)
+                    image = image_from_bytes(path.read_bytes(), saved.get("name", "reference"))
+                    if image.sha256 != saved["sha256"]:
+                        raise ValueError("已保存的参考图内容不匹配，请重新保存参考图")
+                    selected_references.append(image)
+                reference_revision = reference_snapshot["revision"]
+                reference_source = "global"
+            else:
+                selected_references = [image_from_data_url(item.data_url, item.name)
+                                       for item in body.references]
+                reference_revision = None
+                reference_source = "request"
+            if sum(len(image.data) for image in selected_references) > MAX_TOTAL_IMAGE_BYTES:
+                raise ValueError("参考图合计不能超过 12 MB")
+        except ReferenceRevisionConflict as exc:
+            raise HTTPException(409, str(exc))
+        except (ValueError, FileNotFoundError, KeyError) as exc:
+            raise HTTPException(400, str(exc))
         client = provider(body.model)
         if not inference_lock.acquire(blocking=False):
             client.close()
             raise HTTPException(409, "已有识别请求运行中，请等待结果，避免重复计费")
         try:
-            return await run_in_threadpool(analyze_sync, body, client)
+            return await run_in_threadpool(analyze_sync, body, client, selected_references,
+                                           reference_revision, reference_source, chart_snapshot)
         except (ValueError, SourceError) as exc:
             raise HTTPException(400, str(exc))
+        except SnapshotConflict as exc:
+            raise HTTPException(409, str(exc))
         finally:
             client.close()
             inference_lock.release()

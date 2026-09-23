@@ -4,10 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f4f7f5" />
+    <meta name="theme-color" content="#f1f5f7" />
     <title>SPIKE · 视觉研究工作台</title>
     <script src="/theme.js"></script>
     <link rel="stylesheet" href="/styles.css" />
+    <script defer src="/vendor/lightweight-charts.standalone.production.js"></script>
     <script type="module" src="/app.js"></script>
   </head>
   <body>
@@ -24,6 +25,7 @@
           <button class="nav-tab is-active" id="tab-workspace-button" type="button" role="tab" aria-selected="true" aria-controls="tab-workspace" data-tab="workspace">
             工作台
           </button>
+          <button class="nav-tab" id="tab-references-button" type="button" role="tab" aria-selected="false" aria-controls="tab-references" data-tab="references" tabindex="-1">全局参考图</button>
           <button class="nav-tab" id="tab-history-button" type="button" role="tab" aria-selected="false" aria-controls="tab-history" data-tab="history" tabindex="-1">
             识别记录<span id="history-count" class="nav-count" hidden>0</span>
           </button>
@@ -43,18 +45,12 @@
 
       <main id="main-content" class="main-content">
         <section id="tab-workspace" class="tab-panel" role="tabpanel" aria-labelledby="tab-workspace-button" tabindex="0">
-          <div class="page-heading">
-            <div>
-              <h1>图表识别</h1>
-              <p class="page-subtitle">选一条信号，或上传图表，交给 Gemini 分析。</p>
-            </div>
-          </div>
-
           <div id="workspace-notice" class="notice notice-info" role="status" aria-live="polite" hidden></div>
           <div id="workspace-error" class="notice notice-error" role="alert" hidden></div>
 
+          <button id="toggle-candidates" class="button button-secondary mobile-candidates-toggle" type="button" aria-expanded="false" aria-controls="candidates-panel">选择候选信号</button>
           <div class="workspace-grid">
-            <aside class="panel candidates-panel" aria-labelledby="candidate-heading">
+            <aside class="panel candidates-panel" id="candidates-panel" aria-labelledby="candidate-heading">
               <div class="panel-heading candidates-heading">
                 <div>
                   <h2 id="candidate-heading">候选信号</h2>
@@ -77,56 +73,36 @@
             </aside>
 
             <section class="panel image-panel" aria-labelledby="image-heading">
-              <div class="panel-heading image-heading-row">
-                <div>
-                  <h2 id="image-heading">图表</h2>
+              <div class="chart-toolbar">
+                <div class="chart-title"><h1 id="image-heading">图表工作台</h1><span id="input-source-chip" class="source-chip" hidden></span></div>
+                <div class="chart-tools">
+                  <button id="fit-chart" class="button button-quiet" type="button" hidden>重置视图</button>
+                  <button id="resume-chart" class="button button-quiet" type="button" hidden>返回交互图表</button>
+                  <button id="upload-chart" class="button button-secondary" type="button">上传图表</button>
+                  <button id="clear-input" class="button button-quiet" type="button" disabled>清除</button>
                 </div>
-                <span id="input-source-chip" class="source-chip">尚未选择图片</span>
               </div>
               <div id="selection-summary" class="selection-summary" hidden></div>
-              <div id="drop-zone" class="drop-zone" role="button" tabindex="0" aria-label="选择或拖放一张图表图片">
+              <div id="chart-legend" class="chart-legend" hidden>
+                <span class="ma-sma20">SMA 20</span><span class="ma-ema20">EMA 20</span><span class="ma-sma60">SMA 60</span><span class="ma-ema60">EMA 60</span><span class="ma-sma120">SMA 120</span><span class="ma-ema120">EMA 120</span>
+              </div>
+              <div id="drop-zone" class="drop-zone" aria-label="图表画布，可拖放图片">
                 <input id="chart-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" />
                 <div id="empty-stage" class="empty-stage">
-                  <div class="upload-glyph" aria-hidden="true">
-                    <svg viewBox="0 0 48 48" width="42" height="42" fill="none">
-                      <rect x="6" y="8" width="36" height="32" rx="7" stroke="currentColor" stroke-width="1.7" />
-                      <path d="m11 32 9-9 6 6 5-5 7 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                      <path d="M24 7v15m-5-5 5-5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                  </div>
-                  <h3>拖入图表，或点击上传</h3>
-                  <span class="button button-secondary">选择图片</span>
-                  <span class="file-guidance">PNG、JPEG 或 WEBP · 单张最大 8 MB</span>
+                  <h2>从左侧选择一条信号</h2>
+                  <p>查看 K 线和均线，或上传自己的图表。</p>
+                  <button id="empty-upload" class="button button-secondary" type="button">选择图片</button>
+                  <span class="file-guidance">PNG、JPEG、WEBP · 最大 8 MB</span>
                 </div>
-                <div id="image-loading" class="stage-message" role="status" aria-live="polite" hidden>
-                  <span class="spinner" aria-hidden="true"></span><span>正在载入图表…</span>
-                </div>
+                <div id="image-loading" class="stage-message" role="status" hidden><span class="spinner" aria-hidden="true"></span><span>正在载入图表…</span></div>
                 <div id="image-error" class="stage-message stage-error" role="alert" hidden></div>
-                <div id="image-display" class="image-display" hidden>
-                  <div class="image-fit">
-                    <img id="chart-preview" alt="当前选择的图表" draggable="false" />
-                    <div id="box-overlay" class="box-overlay" aria-hidden="true" hidden></div>
-                  </div>
-                </div>
+                <div id="tradingview-chart" class="tradingview-chart" role="img" aria-label="TradingView K线与均线交互图表" hidden></div>
+                <div id="image-display" class="image-display" hidden><div class="image-fit"><img id="chart-preview" alt="当前选择的图表" draggable="false" /><div id="box-overlay" class="box-overlay" aria-hidden="true" hidden></div></div></div>
               </div>
-              <div class="input-actions">
-                <details class="reference-area reference-options">
-                  <summary>参考图 <span>可选 · 最多 4 张</span></summary>
-                  <div class="reference-heading">
-                    <button id="add-reference" class="button button-quiet button-small" type="button">＋ 添加参考图</button>
-                    <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
-                  </div>
-                  <div id="reference-list" class="reference-list" aria-live="polite">
-                    <span class="reference-empty">未添加参考图</span>
-                  </div>
-                </details>
-                <button id="clear-input" class="button button-quiet button-small" type="button" disabled>清除图片</button>
-              </div>
+              <div class="chart-caption"><span id="chart-context">拖动平移 · 滚轮缩放</span><a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" title="TradingView Lightweight Charts™ · Copyright (с) 2023 TradingView, Inc.">TradingView Lightweight Charts™</a></div>
               <div class="analysis-controls">
-                <button id="analyze-button" class="button button-primary button-wide" type="button" disabled>
-                  <span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span>
-                </button>
-                <p class="privacy-inline">图表、参考图和规则将发送至 Google Gemini。</p>
+                <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button">全局参考图 · <span id="reference-count">0</span> 张</button><span class="privacy-inline">当前图表、参考图及规则将发送至 Google Gemini</span></div>
+                <button id="analyze-button" class="button button-primary" type="button" disabled><span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
               </div>
               <div id="analyze-error" class="inline-error" role="alert" hidden></div>
             </section>
@@ -159,6 +135,18 @@
           <footer class="workspace-footer">
             <span>研究辅助工具 · 结果不代表交易建议或实盘信号</span>
           </footer>
+        </section>
+
+        <section id="tab-references" class="tab-panel" role="tabpanel" aria-labelledby="tab-references-button" tabindex="0" hidden>
+          <div class="page-heading"><div><h1>全局参考图</h1><p class="page-subtitle">保存一次，后续识别共用。切换候选、刷新页面和重启服务都会保留。</p></div></div>
+          <section class="panel global-references">
+            <div class="panel-heading"><h2>形态参考 <span id="references-total">0 / 4</span></h2><button id="add-reference" class="button button-secondary" type="button">添加参考图</button></div>
+            <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+            <div id="reference-list" class="reference-list" aria-live="polite"></div>
+            <div id="references-error" class="inline-error" role="alert" hidden></div>
+            <div class="reference-save-row"><span id="references-status" role="status">正在读取…</span><button id="reload-references" class="button button-quiet" type="button">重新载入</button><button id="save-references" class="button button-primary" type="button" disabled>保存全局参考图</button></div>
+            <p class="field-help">最多 4 张。保存仅写入本机；点击「开始识别」时才发送至 Gemini。历史记录保留当次使用的参考图。</p>
+          </section>
         </section>
 
         <section id="tab-history" class="tab-panel" role="tabpanel" aria-labelledby="tab-history-button" tabindex="0" hidden>

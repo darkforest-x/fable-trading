@@ -8,7 +8,9 @@ notification receipts, stops and signal annotations never enter model input.
 
 from __future__ import annotations
 
+import hashlib
 import io
+import json
 import math
 import threading
 from datetime import datetime, timezone
@@ -22,6 +24,9 @@ from .images import image_from_bytes
 
 MA_COLORS = {"sma20": "#e4b657", "ema20": "#f0d593", "sma60": "#739de7",
              "ema60": "#a3c2fa", "sma120": "#bd87db", "ema120": "#ddc1ef"}
+CANDLE_COLORS = {"up": "#3db6a0", "down": "#df6d79"}
+CHART_COLORS = {"background": "#10151e", "grid": "#232d3c", "text": "#8999b0",
+                "candles": CANDLE_COLORS, "moving_averages": MA_COLORS}
 
 
 class SourceError(Exception):
@@ -44,16 +49,18 @@ def causal_candles(payload: Dict[str, Any], signal: Dict[str, Any]):
         if not isinstance(row, dict) or not finite(row.get("t")):
             raise SourceError("SPIKE K线时间格式不完整")
         t = int(row["t"])
+        if t + duration > cutoff:
+            continue
         if previous is not None and t <= previous:
             raise SourceError("SPIKE K线时间重复或未排序")
         previous = t
-        if t + duration > cutoff:
-            continue
         if not all(finite(row.get(k)) for k in ("o", "h", "l", "c")):
             raise SourceError("SPIKE K线含无效价格")
         if row["l"] > min(row["o"], row["c"]) or row["h"] < max(row["o"], row["c"]) or row["l"] <= 0:
             raise SourceError("SPIKE K线价格关系异常")
-        rows.append({key: row.get(key) for key in ("t", "o", "h", "l", "c", *MA_COLORS)})
+        item = {key: row.get(key) for key in ("t", "o", "h", "l", "c")}
+        item.update({key: row.get(key) if finite(row.get(key)) else None for key in MA_COLORS})
+        rows.append(item)
     rows = rows[-120:]
     if len(rows) < 30 or int(rows[-1]["t"]) + duration != cutoff:
         raise SourceError("当前缓存不足以还原这条候选的决策时点，请换一条候选或上传图片")
@@ -119,6 +126,12 @@ def render_chart(rows, symbol: str, timeframe: str, cutoff: int):
     return output.getvalue()
 
 
+def chart_sha256(rows):
+    """Hash the exact normalized OHLC/MA rows offered to the chart renderer."""
+    raw = json.dumps(rows, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return hashlib.sha256(raw).hexdigest()
+
+
 class SpikeSource:
     def __init__(self, base_url="http://127.0.0.1:8766", transport=None):
         url = urlsplit(base_url)
@@ -127,6 +140,7 @@ class SpikeSource:
         self.base_url = base_url.rstrip("/")
         self.transport = transport
         self._signals = {}
+        self._charts = {}
         self._images = {}
         self._lock = threading.RLock()
         self.warning = ""
@@ -174,12 +188,12 @@ class SpikeSource:
         return {"available": self.available, "count": len(self._signals), "source": self.base_url,
                 "warning": self.warning}
 
-    def signal_image(self, signal_id):
+    def signal_chart(self, signal_id):
         with self._lock:
-            cached = self._images.get(signal_id)
+            cached = self._charts.get(signal_id)
             signal = self._signals.get(signal_id)
         if cached:
-            return cached
+            return json.loads(json.dumps(cached))
         if not signal:
             self.list_signals()
             signal = self._signals.get(signal_id)
@@ -189,11 +203,29 @@ class SpikeSource:
         if payload.get("symbol") != signal["symbol"] or payload.get("timeframe") != signal["timeframe"]:
             raise SourceError("SPIKE 图表与候选标的不一致")
         rows = causal_candles(payload, signal)
-        raw = render_chart(rows, signal["symbol"], signal["timeframe"], signal["bar_close_ms"])
-        image = image_from_bytes(raw, signal["symbol"] + "-" + signal["timeframe"] + ".png")
         provenance = dict(signal, visible_start_ms=rows[0]["t"], visible_end_ms=signal["bar_close_ms"],
                           bar_count=len(rows), render_version="spike-vision-clean-v1",
                           time_boundary="signal_close", overlay="none")
+        result = {"candles": rows, "provenance": provenance,
+                  "colors": json.loads(json.dumps(CHART_COLORS)),
+                  "chart_sha256": chart_sha256(rows)}
+        with self._lock:
+            existing = self._charts.setdefault(signal_id, result)
+            self._charts = dict(list(self._charts.items())[-100:])
+            self._images = {key: value for key, value in self._images.items()
+                            if key in self._charts}
+        return json.loads(json.dumps(existing))
+
+    def signal_image(self, signal_id):
+        with self._lock:
+            cached = self._images.get(signal_id)
+        if cached:
+            return cached
+        chart = self.signal_chart(signal_id)
+        provenance = chart["provenance"]
+        raw = render_chart(chart["candles"], provenance["symbol"], provenance["timeframe"],
+                           provenance["bar_close_ms"])
+        image = image_from_bytes(raw, provenance["symbol"] + "-" + provenance["timeframe"] + ".png")
         result = (image, provenance)
         with self._lock:
             existing = self._images.setdefault(signal_id, result)

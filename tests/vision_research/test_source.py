@@ -1,5 +1,7 @@
 """Causal rendering and read-only SPIKE reuse regressions."""
 import copy
+import hashlib
+import json
 
 import httpx
 import pytest
@@ -55,12 +57,44 @@ def test_source_only_gets_whitelisted_data_and_freezes_image():
     source = SpikeSource(transport=httpx.MockTransport(handle))
     item = source.list_signals()["items"][0]
     assert "performance" not in item and "is_closed" not in item
+    chart = source.signal_chart(item["id"])
+    assert chart["candles"] == causal_candles(payload, signal)
+    canonical = json.dumps(chart["candles"], sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    assert chart["chart_sha256"] == hashlib.sha256(canonical).hexdigest()
+    assert chart["provenance"]["visible_end_ms"] == signal["bar_close_ms"]
+    assert chart["colors"]["candles"]["up"]
+    chart["candles"][0]["c"] = -1
+    assert source.signal_chart(item["id"])["candles"][0]["c"] != -1
     image, provenance = source.signal_image(item["id"])
     payload["candles"][0]["h"] = 99999
     assert source.signal_image(item["id"])[0].sha256 == image.sha256
+    assert source.signal_chart(item["id"])["candles"][0]["h"] != 99999
     assert provenance["visible_end_ms"] == signal["bar_close_ms"]
     assert provenance["overlay"] == "none"
     assert calls == [("GET", "/api/signals"), ("GET", "/api/chart")]
+
+
+def test_future_bar_order_and_values_do_not_change_chart_rows():
+    payload, signal = market()
+    before = causal_candles(payload, signal)
+    changed = copy.deepcopy(payload)
+    changed["candles"][60:] = list(reversed(changed["candles"][60:]))
+    for index, row in enumerate(changed["candles"][60:]):
+        row.update(t=10**15 + index, o=-999, h=1e30, l=-1e30, c=1e29, ema20=float("nan"))
+    assert causal_candles(changed, signal) == before
+
+
+def test_chart_rejects_a_different_target_from_the_signal():
+    payload, signal = market()
+    payload["symbol"] = "OTHER-USDT"
+
+    def handle(request):
+        return httpx.Response(200, json={"items": [signal]} if request.url.path == "/api/signals" else payload)
+
+    source = SpikeSource(transport=httpx.MockTransport(handle))
+    item = source.list_signals()["items"][0]
+    with pytest.raises(SourceError, match="标的不一致"):
+        source.signal_chart(item["id"])
 
 
 def test_source_failure_does_not_substitute_a_different_source():

@@ -30,6 +30,9 @@ class ResearchStore:
             db.execute("PRAGMA journal_mode=WAL")
             db.execute("CREATE TABLE IF NOT EXISTS runs "
                        "(id TEXT PRIMARY KEY, created_at TEXT NOT NULL, record TEXT NOT NULL)")
+            db.execute("CREATE TABLE IF NOT EXISTS global_references "
+                       "(id INTEGER PRIMARY KEY CHECK(id=1), revision INTEGER NOT NULL, items TEXT NOT NULL)")
+            db.execute("INSERT OR IGNORE INTO global_references(id,revision,items) VALUES(1,0,'[]')")
             rows = db.execute("SELECT id,record FROM runs").fetchall()
             for run_id, raw in rows:
                 record = json.loads(raw)
@@ -44,9 +47,36 @@ class ResearchStore:
     def put_image(self, image: ImageInput) -> str:
         path = self.images / (image.sha256 + ".png")
         if not path.exists():
-            with path.open("xb") as handle:
-                handle.write(image.data)
+            try:
+                with path.open("xb") as handle:
+                    handle.write(image.data)
+            except FileExistsError:
+                pass
         return "/api/images/" + path.name
+
+    def get_references(self):
+        with self.connect() as db:
+            row = db.execute("SELECT revision,items FROM global_references WHERE id=1").fetchone()
+        if row is None:
+            return {"items": [], "revision": 0}
+        return {"items": json.loads(row[1]), "revision": row[0]}
+
+    def replace_references(self, items, expected_revision=None):
+        """Atomically point the durable global set at already-stored image objects."""
+        with self.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            row = db.execute("SELECT revision,items FROM global_references WHERE id=1").fetchone()
+            revision, raw = row if row is not None else (0, "[]")
+            current = json.loads(raw)
+            if expected_revision is not None and expected_revision != revision:
+                raise ReferenceRevisionConflict("参考图已在其他页面更新，请重新载入后再保存")
+            if current == items:
+                return {"items": current, "revision": revision}
+            revision += 1
+            db.execute("INSERT INTO global_references(id,revision,items) VALUES(1,?,?) "
+                       "ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,items=excluded.items",
+                       (revision, json.dumps(items, ensure_ascii=False)))
+        return {"items": items, "revision": revision}
 
     def image_path(self, name: str) -> Path:
         if not re.fullmatch(r"[a-f0-9]{64}\.png", name):
@@ -88,3 +118,7 @@ class ResearchStore:
             db.execute("UPDATE runs SET record=? WHERE id=?",
                        (json.dumps(record, ensure_ascii=False), run_id))
         return record
+
+
+class ReferenceRevisionConflict(Exception):
+    """Raised when a client tries to replace a newer global reference set."""

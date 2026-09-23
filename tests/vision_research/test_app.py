@@ -13,6 +13,7 @@ import pytest
 from yoyo.vision_research.gemini import GeminiError
 from yoyo.vision_research.images import image_from_bytes, image_from_data_url
 from yoyo.vision_research.server import create_app
+from yoyo.vision_research.source import SourceError
 from yoyo.vision_research.store import ResearchStore
 
 KEY = "test-secret-never-persist-this-key"
@@ -34,6 +35,28 @@ class EmptySource:
         return {"available": False, "count": 0, "warning": "offline test"}
 
 
+class CaptureSource(EmptySource):
+    chart = {
+        "candles": [{"t": 900000, "o": 1, "h": 2, "l": 0.5, "c": 1.5, "sma20": None,
+                     "ema20": 1.2, "sma60": None, "ema60": None, "sma120": None, "ema120": None}],
+        "provenance": {"id": "signal-1", "symbol": "TEST-USDT", "timeframe": "15m",
+                       "bar_close_ms": 1800000, "visible_start_ms": 900000,
+                       "visible_end_ms": 1800000, "time_boundary": "signal_close", "overlay": "none"},
+        "colors": {"candles": {"up": "#3db6a0", "down": "#df6d79"}},
+        "chart_sha256": "a" * 64,
+    }
+
+    def signal_chart(self, signal_id):
+        if signal_id != "signal-1":
+            raise SourceError("candidate missing")
+        return self.chart
+
+    def signal_image(self, signal_id):
+        if signal_id != "signal-1":
+            raise SourceError("candidate missing")
+        return image_from_data_url(image_url()), self.chart["provenance"]
+
+
 class FakeProvider:
     instances = []
     failure = False
@@ -50,6 +73,7 @@ class FakeProvider:
         return {"ok": True, "model": self.model, "message": "metadata only"}
 
     def analyze(self, image, references, criteria):
+        self.received_references = [(item.name, item.sha256) for item in references]
         if self.failure:
             raise GeminiError("quota", "额度暂不可用")
         assert hashlib.sha256(image.data).hexdigest() == image.sha256
@@ -188,6 +212,97 @@ def test_changed_preview_is_rejected_before_inference(client):
     response = client.post("/api/analyze", json={"image_data_url": image_url(), "expected_image_sha256": "a" * 64})
     assert response.status_code == 400 and "图表已变化" in response.json()["detail"]
     assert client.get("/api/runs").json()["items"] == []
+
+
+def test_global_references_persist_and_each_run_keeps_its_reference_snapshot(client, tmp_path):
+    configure(client)
+    assert client.get("/api/references").json() == {"items": [], "revision": 0}
+    saved = client.put("/api/references", json={
+        "references": [{"name": "setup A", "data_url": image_url("teal")}],
+        "expected_revision": 0,
+    })
+    assert saved.status_code == 200
+    snapshot = saved.json()
+    assert snapshot["revision"] == 1 and snapshot["items"][0]["name"] == "setup A"
+    assert client.get(snapshot["items"][0]["image_url"]).status_code == 200
+
+    fresh = create_app(tmp_path, source=EmptySource(), provider_factory=FakeProvider)
+    with TestClient(fresh, base_url="http://127.0.0.1") as restarted:
+        assert restarted.get("/api/references").json() == snapshot
+
+    run = client.post("/api/analyze", json={
+        "image_data_url": image_url("white"), "reference_revision": 1,
+    })
+    assert run.status_code == 200
+    run = run.json()
+    assert run["reference_source"] == "global" and run["reference_revision"] == 1
+    assert run["references"] == snapshot["items"]
+    assert FakeProvider.instances[-1].received_references == [("setup A", snapshot["items"][0]["sha256"])]
+
+    explicit_none = client.post("/api/analyze", json={
+        "image_data_url": image_url("black"), "references": [], "reference_revision": None,
+    })
+    assert explicit_none.status_code == 200
+    assert explicit_none.json()["reference_source"] == "request"
+    assert explicit_none.json()["references"] == []
+    assert FakeProvider.instances[-1].received_references == []
+
+    cleared = client.put("/api/references", json={"references": [], "expected_revision": 1})
+    assert cleared.status_code == 200 and cleared.json() == {"items": [], "revision": 2}
+    assert client.get(f"/api/runs/{run['id']}").json()["references"] == snapshot["items"]
+    assert client.put("/api/references", json={"references": [], "expected_revision": 1}).status_code == 409
+
+
+def test_reference_duplicates_and_stale_analyze_revision_are_rejected(client):
+    configure(client)
+    duplicate = image_url("purple")
+    response = client.put("/api/references", json={"references": [
+        {"name": "same", "data_url": duplicate}, {"name": "same", "data_url": image_url("orange")},
+    ]})
+    assert response.status_code == 400
+    assert client.get("/api/references").json() == {"items": [], "revision": 0}
+    assert client.put("/api/references", json={"references": [
+        {"name": "one", "data_url": duplicate}, {"name": "two", "data_url": duplicate},
+    ]}).status_code == 400
+    assert client.put("/api/references", json={
+        "references": [{"name": "one", "data_url": duplicate}], "expected_revision": 0,
+    }).status_code == 200
+
+    stale = client.post("/api/analyze", json={
+        "image_data_url": image_url(), "reference_revision": 0,
+    })
+    assert stale.status_code == 409
+    assert client.get("/api/runs").json()["items"] == []
+
+
+def test_browser_chart_capture_is_tied_to_the_causal_chart_snapshot(tmp_path, monkeypatch):
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    source = CaptureSource()
+    app = create_app(tmp_path, source=source, provider_factory=FakeProvider)
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        configure(client)
+        chart = client.get("/api/signals/signal-1/chart")
+        assert chart.status_code == 200 and chart.json() == source.chart
+        response = client.post("/api/analyze", json={
+            "signal_id": "signal-1", "chart_capture_data_url": image_url("gold"),
+            "expected_chart_sha256": "a" * 64,
+        })
+        assert response.status_code == 200
+        run = response.json()
+        assert run["source"] == "spike_capture"
+        assert run["provenance"]["render_version"] == "tradingview-lightweight-charts-4.2.0"
+        assert run["provenance"]["pixel_origin"] == "browser_capture"
+        assert run["provenance"]["pixel_attestation"] == "unverified"
+        assert run["provenance"]["capture_pixels_attested_to_ohlc"] is False
+        assert run["provenance"]["chart_sha256"] == "a" * 64
+        assert run["provenance"]["chart_candles"] == source.chart["candles"]
+        clients_before_stale = len(FakeProvider.instances)
+        assert client.post("/api/analyze", json={
+            "signal_id": "signal-1", "chart_capture_data_url": image_url("gold"),
+            "expected_chart_sha256": "b" * 64,
+        }).status_code == 409
+        assert len(FakeProvider.instances) == clients_before_stale
+        assert len(client.get("/api/runs").json()["items"]) == 1
 
 
 def test_overlapping_requests_do_not_create_duplicate_paid_calls(client, monkeypatch):

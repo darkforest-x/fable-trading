@@ -1,3 +1,4 @@
+import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
 const API_BASE = '/api';
 const DEFAULT_MODEL = 'gemini-3.8-flash';
 const DEFAULT_CRITERIA = '只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。';
@@ -22,6 +23,11 @@ const state = {
   imageToken: 0,
   imageAbort: null,
   references: [],
+  referenceRevision: null,
+  referencesReady: false,
+  referencesDirty: false,
+  referencesSaving: false,
+  referencesError: '',
   activeRun: null,
   activeRunInputKey: null,
   analysisLoading: false,
@@ -121,7 +127,7 @@ function verdictLabel(verdict) {
 
 function sourceLabel(source) {
   const labels = {
-    local: '本地数据', spike: 'SPIKE', cache: '本机缓存', database: '本地数据库',
+    local: '本地数据', spike: 'SPIKE', spike_capture: 'SPIKE 图表快照', cache: '本机缓存', database: '本地数据库',
     environment: '后端环境变量', env: '后端环境变量', session: '本机进程会话',
     memory: '本机进程会话', process: '本机进程会话', upload: '本地上传图表', unset: '未配置', none: '未配置',
   };
@@ -205,7 +211,7 @@ function renderSignals() {
     const symbol = asText(item.symbol, '未知币种');
     const timeframe = asText(item.timeframe, '周期未提供');
     const side = sideLabel(item.side);
-    const time = item.signal_at ? formatDate(item.signal_at) : '时间未提供';
+    const time = item.signal_at ? new Intl.DateTimeFormat('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(new Date(item.signal_at)) : '时间未提供';
     return `<button class="signal-item ${selected ? 'is-selected' : ''}" type="button" data-signal-id="${escapeHtml(id)}" aria-pressed="${selected}" aria-label="载入 ${escapeHtml(symbol)} ${escapeHtml(timeframe)} ${escapeHtml(side)} 候选" title="${escapeHtml(symbol)} · ${escapeHtml(id)}">
       <span class="signal-topline"><strong>${escapeHtml(symbol.replace(/-SWAP$/, ''))}</strong><span class="signal-timeframe">${escapeHtml(timeframe)}</span></span>
       <span class="signal-meta"><span class="signal-side ${sideClass}">${escapeHtml(side.replace('方向', ''))}</span><time>${escapeHtml(time)}</time></span>
@@ -215,46 +221,31 @@ function renderSignals() {
 
 function renderImage() {
   const image = state.selectedImage;
-  const empty = byId('empty-stage');
-  const loading = byId('image-loading');
-  const error = byId('image-error');
-  const display = byId('image-display');
-  const preview = byId('chart-preview');
-  const chip = byId('input-source-chip');
-  const summary = byId('selection-summary');
-  const box = byId('box-overlay');
-
+  const liveChart = Boolean(image?.chartData && !image.loading && !image.error && !image.frozen);
+  setVisible(byId('empty-stage'), !image);
+  setVisible(byId('image-loading'), Boolean(image?.loading));
+  setVisible(byId('image-error'), Boolean(image?.error));
+  byId('image-error').textContent = image?.error || '';
+  setVisible(byId('tradingview-chart'), liveChart);
+  setVisible(byId('chart-legend'), liveChart);
+  setVisible(byId('fit-chart'), liveChart);
+  setVisible(byId('resume-chart'), Boolean(image?.chartData && image.frozen));
+  byId('resume-chart').disabled = state.analysisLoading;
+  setVisible(byId('image-display'), Boolean(image?.previewUrl && !image.loading && !image.error && !liveChart));
   byId('clear-input').disabled = !image;
+  byId('image-heading').textContent = image?.signal ? `${image.signal.symbol.replace(/-SWAP$/, '')} · ${image.signal.timeframe}` : image?.name || '图表工作台';
+  const chip = byId('input-source-chip');
+  chip.textContent = image?.source === 'signal' ? 'SPIKE' : image?.source === 'history' ? '识别快照' : '上传图片';
   setVisible(chip, Boolean(image));
-  if (!image) {
-    setVisible(empty, true);
-    setVisible(loading, false);
-    setVisible(error, false);
-    setVisible(display, false);
-    setVisible(summary, false);
-    chip.textContent = '尚未选择图片';
-    chip.classList.remove('is-upload');
-    setVisible(box, false);
-    preview.removeAttribute('src');
-    return;
-  }
-  setVisible(empty, false);
-  setVisible(loading, Boolean(image.loading));
-  setVisible(error, Boolean(image.error));
-  if (image.error) error.textContent = image.error;
-  setVisible(display, Boolean(image.previewUrl) && !image.loading && !image.error);
-  if (image.previewUrl && preview.src !== image.previewUrl) preview.src = image.previewUrl;
-  preview.alt = image.name ? `当前图表：${image.name}` : '当前选择的图表';
-  chip.textContent = image.source === 'signal' ? 'SPIKE 候选'
-    : image.source === 'history' ? '历史记录' : image.name;
-  chip.classList.toggle('is-upload', image.source === 'upload');
-  if (image.source === 'signal' && image.signal) {
-    const sig = image.signal;
-    summary.textContent = `${asText(sig.symbol, '未知币种')} · ${asText(sig.timeframe, '周期未提供')} · ${sideLabel(sig.side)} · ${formatDate(sig.signal_at)}`;
-    setVisible(summary, true);
-  } else {
-    setVisible(summary, false);
-  }
+  const summary = byId('selection-summary');
+  summary.textContent = image?.signal ? `截至 ${formatDate(image.signal.signal_at)} · ${image.chartData?.candles.length || ''} 根已收盘 K 线` : '';
+  setVisible(summary, Boolean(image?.signal));
+  const preview = byId('chart-preview');
+  if (image?.previewUrl && preview.getAttribute('src') !== image.previewUrl) preview.src = image.previewUrl;
+  if (!image) preview.removeAttribute('src');
+  preview.alt = image?.name ? `图表：${image.name}` : '当前图表';
+  byId('chart-context').textContent = liveChart ? '拖动平移 · 滚轮缩放 · UTC+8 · 截至信号时点' : image?.frozen ? '本次发送的图表快照' : image?.source === 'history' ? '当次发送的原始图片' : '支持拖放图片';
+  if (liveChart) showChart(image.chartData, image.key);
   renderOverlay();
 }
 
@@ -272,7 +263,7 @@ function renderOverlay() {
   const boxElement = byId('box-overlay');
   const image = state.selectedImage;
   const box = normalizedBox(state.activeRun);
-  const canShow = Boolean(image && box && state.activeRunInputKey === image.key && image.previewUrl && !image.loading && !image.error);
+  const canShow = Boolean(image && box && state.activeRunInputKey === image.key && image.previewUrl && !image.loading && !image.error && (!image.chartData || image.frozen));
   if (!canShow) {
     setVisible(boxElement, false);
     return;
@@ -288,16 +279,61 @@ function renderOverlay() {
 
 function renderReferences() {
   const list = byId('reference-list');
-  if (!state.references.length) {
-    list.innerHTML = '<span class="reference-empty">未添加参考图</span>';
-    return;
-  }
-  list.innerHTML = state.references.map((reference, index) => `<div class="reference-thumb" title="${escapeHtml(reference.name)}">
+  list.innerHTML = state.references.length ? state.references.map((reference, index) => `<div class="reference-thumb">
     <img src="${escapeHtml(reference.previewUrl)}" alt="参考图 ${index + 1}：${escapeHtml(reference.name)}" />
-    <span class="reference-label">${escapeHtml(reference.name)}</span>
-    <button class="reference-remove" type="button" data-remove-reference="${index}" aria-label="移除参考图 ${escapeHtml(reference.name)}">×</button>
-  </div>`).join('');
-  byId('add-reference').disabled = state.references.length >= MAX_REFERENCES;
+    <span class="reference-label" title="${escapeHtml(reference.name)}">${escapeHtml(reference.name)}</span>
+    <button class="reference-remove" type="button" data-remove-reference="${index}" aria-label="移除参考图 ${escapeHtml(reference.name)}" ${state.referencesSaving ? 'disabled' : ''}>×</button>
+  </div>`).join('') : '<span class="reference-empty">添加形态参考图，作为所有识别共用的对照。</span>';
+  byId('reference-count').textContent = state.referencesReady ? String(state.references.length) : '—';
+  byId('references-total').textContent = `${state.references.length} / 4`;
+  byId('reload-references').disabled = state.referencesSaving;
+  byId('add-reference').disabled = !state.referencesReady || state.referencesSaving || state.references.length >= MAX_REFERENCES;
+  byId('save-references').disabled = !state.referencesDirty || state.referencesSaving || !state.referencesReady;
+  byId('save-references').textContent = state.referencesSaving ? '正在保存…' : '保存全局参考图';
+  byId('references-status').textContent = !state.referencesReady ? '尚未读取全局参考图' : state.referencesSaving ? '正在保存到本机…' : state.referencesDirty ? '有未保存的更改 · 保存后应用于后续识别' : `已保存 · ${state.references.length} 张 · 应用于后续识别`;
+  showInlineError('references-error', state.referencesError);
+}
+
+async function loadReferences() {
+  try {
+    const data = await apiJson('/references');
+    state.references = data.items.map(item => ({ ...item, previewUrl: safeApiImageUrl(item.image_url) }));
+    state.referenceRevision = data.revision;
+    state.referencesReady = true;
+    state.referencesDirty = false;
+    state.referencesError = '';
+  } catch (error) {
+    state.referencesError = error.message || '全局参考图读取失败。';
+    state.referencesReady = false;
+  }
+  renderReferences();
+  renderResult();
+}
+
+async function saveReferences() {
+  if (state.referencesSaving || !state.referencesReady) return;
+  state.referencesSaving = true;
+  state.referencesError = '';
+  renderReferences();
+  renderResult();
+  try {
+    const references = await Promise.all(state.references.map(async item => {
+      if (item.dataUrl) return { name: item.name, data_url: item.dataUrl };
+      const response = await fetch(safeApiImageUrl(item.image_url));
+      if (!response.ok) throw new Error('已保存的参考图读取失败，请重新载入。');
+      return { name: item.name, data_url: await readFileDataUrl(await response.blob(), 'image/png') };
+    }));
+    const data = await apiJson('/references', { method: 'PUT', body: JSON.stringify({ references, expected_revision: state.referenceRevision }) });
+    state.references = data.items.map(item => ({ ...item, previewUrl: safeApiImageUrl(item.image_url) }));
+    state.referenceRevision = data.revision;
+    state.referencesDirty = false;
+  } catch (error) {
+    state.referencesError = error.message || '参考图未保存。';
+  } finally {
+    state.referencesSaving = false;
+    renderReferences();
+    renderResult();
+  }
 }
 
 function renderRunStatus() {
@@ -331,9 +367,9 @@ function renderResult() {
   renderRunStatus();
   const canAnalyze = Boolean(state.selectedImage && !state.selectedImage.loading && !state.selectedImage.error
     && (state.selectedSignal || (state.selectedImage.source === 'upload' && state.selectedImage.dataUrl))
-    && !state.analysisLoading);
+    && !state.analysisLoading && state.referencesReady && !state.referencesDirty && !state.referencesSaving);
   byId('analyze-button').disabled = !canAnalyze;
-  byId('analyze-button').querySelector('.button-label').textContent = state.analysisLoading ? '正在识别…' : '开始识别';
+  byId('analyze-button').querySelector('.button-label').textContent = state.analysisLoading ? '正在识别…' : state.referencesDirty ? '请先保存参考图' : '开始识别';
   setVisible(byId('analyze-button').querySelector('.button-spinner'), state.analysisLoading);
   showInlineError('analyze-error', state.analysisError);
 
@@ -502,7 +538,7 @@ function renderAll() {
     button.setAttribute('aria-selected', String(active));
     button.tabIndex = active ? 0 : -1;
   }
-  for (const id of ['workspace', 'history', 'settings']) {
+  for (const id of ['workspace', 'references', 'history', 'settings']) {
     const panel = byId(`tab-${id}`);
     setVisible(panel, state.tab === id);
   }
@@ -570,6 +606,7 @@ function clearActiveImage({ keepNotice = false } = {}) {
   state.imageToken += 1;
   state.imageAbort?.abort();
   state.imageAbort = null;
+  destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = null;
   state.selectedImage = null;
@@ -588,6 +625,7 @@ async function selectSignal(signal) {
   const token = state.imageToken;
   state.imageAbort?.abort();
   state.imageAbort = new AbortController();
+  destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = signal;
   state.selectedImage = { key: `signal:${id}`, name: `${asText(signal.symbol, '候选')} · ${asText(signal.timeframe, '')}`, source: 'signal', signal, loading: true, previewUrl: null, dataUrl: null };
@@ -598,35 +636,12 @@ async function selectSignal(signal) {
   showMessage(workspaceErrorEl, '');
   renderWorkspace();
   try {
-    const response = await fetch(`${API_BASE}/signals/${encodeURIComponent(id)}/image`, { signal: state.imageAbort.signal });
-    const contentType = response.headers.get('content-type') || '';
-    if (!response.ok || contentType.includes('application/json')) {
-      let detail = `候选图表读取失败（HTTP ${response.status}）。`;
-      if (contentType.includes('application/json')) {
-        try {
-          const payload = await response.json();
-          detail = asText(payload?.detail, detail);
-        } catch { /* Keep the HTTP description. */ }
-      }
-      throw new Error(detail);
-    }
-    const blob = await response.blob();
-    if (!ALLOWED_TYPES.has(blob.type) && blob.type !== 'image/avif') {
-      throw new Error(`候选图片格式无法显示${blob.type ? `（${blob.type}）` : ''}。`);
-    }
-    const previewUrl = URL.createObjectURL(blob);
-    await verifyImageUrl(previewUrl);
-    if (token !== state.imageToken || state.selectedImage?.key !== `signal:${id}`) {
-      URL.revokeObjectURL(previewUrl);
-      return;
-    }
-    state.selectedImage = {
-      ...state.selectedImage,
-      loading: false,
-      previewUrl,
-      byteSize: blob.size,
-      sha256: response.headers.get('X-Image-SHA256') || null,
-    };
+    const data = await apiJson(`/signals/${encodeURIComponent(id)}/chart`, { signal: state.imageAbort.signal });
+    if (token !== state.imageToken || state.selectedImage?.key !== `signal:${id}`) return;
+    state.selectedImage = { ...state.selectedImage, loading: false, chartData: data, chartSha256: data.chart_sha256, frozen: false };
+    byId('candidates-panel').classList.remove('is-open');
+    byId('toggle-candidates').setAttribute('aria-expanded', 'false');
+
     renderWorkspace();
   } catch (error) {
     if (error.name === 'AbortError') return;
@@ -679,6 +694,7 @@ async function addPrimaryImage(file) {
   const token = state.imageToken;
   state.imageAbort?.abort();
   state.imageAbort = null;
+  destroyChart();
   revokeImage(state.selectedImage);
   const key = `upload:${crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
   state.selectedSignal = null;
@@ -706,48 +722,32 @@ async function addPrimaryImage(file) {
 }
 
 async function addReferenceFiles(files) {
-  const remaining = MAX_REFERENCES - state.references.length;
-  if (remaining <= 0) {
-    state.notice = '参考图片最多添加 4 张。';
-    renderNotice();
-    byId('reference-file').value = '';
-    return;
-  }
-  const selected = Array.from(files).slice(0, remaining);
-  const rejected = Math.max(0, files.length - selected.length);
-  const added = [];
+  if (state.referencesSaving || !state.referencesReady) return;
+  const selected = Array.from(files).slice(0, MAX_REFERENCES - state.references.length);
   const errors = [];
-  let pendingBytes = Number(state.selectedImage?.byteSize || 0)
-    + state.references.reduce((total, reference) => total + Number(reference.byteSize || 0), 0);
   for (const file of selected) {
     try {
-      const mime = validateFile(file);
-      if (pendingBytes + file.size > MAX_TOTAL_IMAGE_BYTES) {
-        throw new Error('待判图与参考图合计不能超过 12 MB。');
-      }
-      const dataUrl = await readFileDataUrl(file, mime);
+      const dataUrl = await readFileDataUrl(file, validateFile(file));
       await verifyImageUrl(dataUrl);
-      added.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: file.name, dataUrl, previewUrl: dataUrl, byteSize: file.size });
-      pendingBytes += file.size;
-    } catch (error) {
-      errors.push(`${file.name}: ${error.message}`);
-    }
+      state.references.push({ name: file.name, dataUrl, previewUrl: dataUrl, byteSize: file.size });
+      state.referencesDirty = true;
+    } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
-  state.references.push(...added);
-  if (rejected) errors.push(`超过最多 4 张的限制，忽略 ${rejected} 张。`);
-  state.notice = errors.length ? errors.join(' ') : added.length ? `已添加 ${added.length} 张参考图；识别时会与主图一并发送。` : '';
+  if (files.length > selected.length) errors.push('参考图最多 4 张。');
+  state.referencesError = errors.join(' ');
   byId('reference-file').value = '';
-  renderWorkspace();
+  renderReferences(); renderResult();
 }
 
 function removeReference(index) {
-  if (!Number.isInteger(index) || index < 0 || index >= state.references.length) return;
+  if (state.referencesSaving || !Number.isInteger(index) || index < 0 || index >= state.references.length) return;
   state.references.splice(index, 1);
-  renderReferences();
+  state.referencesDirty = true;
+  renderReferences(); renderResult();
 }
 
 async function analyze() {
-  if (state.analysisLoading || !state.selectedImage) return;
+  if (state.analysisLoading || !state.selectedImage || !state.referencesReady || state.referencesDirty || state.referencesSaving) return;
   if (state.selectedImage.source === 'history') {
     state.notice = '历史记录只供查看和人工复核；选择新候选或上传图片后可开始新的识别。';
     renderNotice();
@@ -756,12 +756,18 @@ async function analyze() {
   const image = state.selectedImage;
   const signal = state.selectedSignal;
   if (image.loading || image.error || (!signal && !image.dataUrl)) return;
-  const totalImageBytes = Number(image.byteSize || 0)
-    + state.references.reduce((total, reference) => total + Number(reference.byteSize || 0), 0);
-  if (totalImageBytes > MAX_TOTAL_IMAGE_BYTES) {
-    state.analysisError = '待判图与参考图合计超过 12 MB，请移除部分参考图后重试。';
-    renderResult();
-    return;
+  let capture = null;
+  if (signal && image.chartData) {
+    try {
+      capture = image.frozen ? image.dataUrl : captureChart();
+      image.previewUrl = capture;
+      image.dataUrl = capture;
+      image.frozen = true;
+    } catch (error) {
+      state.analysisError = error.message;
+      renderResult();
+      return;
+    }
   }
   const inputKey = image.key;
   state.analysisLoading = true;
@@ -769,13 +775,14 @@ async function analyze() {
   state.activeRun = null;
   state.activeRunInputKey = null;
   state.notice = '';
-  renderResult();
+  renderWorkspace();
   const payload = {
     signal_id: signal ? asText(signal.id) : null,
     image_data_url: signal ? null : image.dataUrl,
     image_name: signal ? null : image.name,
-    expected_image_sha256: signal ? image.sha256 || null : null,
-    references: state.references.map(({ name, dataUrl }) => ({ name, data_url: dataUrl })),
+    chart_capture_data_url: capture,
+    expected_chart_sha256: signal ? image.chartSha256 : null,
+    reference_revision: state.referenceRevision,
     criteria: byId('criteria-input').value.trim() || DEFAULT_CRITERIA,
     model: state.model || null,
   };
@@ -818,6 +825,7 @@ async function openRun(id) {
   const token = state.imageToken;
   state.imageAbort?.abort();
   state.imageAbort = new AbortController();
+  destroyChart();
   revokeImage(state.selectedImage);
   state.selectedSignal = null;
   state.activeRun = run;
@@ -971,8 +979,9 @@ async function testConnection() {
 }
 
 function switchTab(tab) {
-  if (!['workspace', 'history', 'settings'].includes(tab)) return;
+  if (!['workspace', 'references', 'history', 'settings'].includes(tab)) return;
   state.tab = tab;
+  if (tab === 'references' && !state.referencesDirty && !state.referencesSaving) loadReferences();
   renderAll();
   byId(`tab-${tab}-button`).focus({ preventScroll: true });
 }
@@ -1013,7 +1022,7 @@ document.addEventListener('keydown', (event) => {
   const tabButton = event.target.closest('[data-tab]');
   if (tabButton && ['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
     event.preventDefault();
-    const tabs = Array.from(document.querySelectorAll('[data-tab]'));
+    const tabs = Array.from(document.querySelectorAll('.nav-tab[data-tab]'));
     let index = tabs.indexOf(tabButton);
     if (event.key === 'Home') index = 0;
     else if (event.key === 'End') index = tabs.length - 1;
@@ -1054,7 +1063,7 @@ byId('connection-test').addEventListener('click', testConnection);
 const dropZone = byId('drop-zone');
 const chartFileInput = byId('chart-file');
 dropZone.addEventListener('click', (event) => {
-  if (event.target === chartFileInput || event.target.closest('a,button,input,select,textarea')) return;
+  if (state.selectedImage || event.target === chartFileInput || event.target.closest('a,button,input,select,textarea')) return;
   chartFileInput.click();
 });
 dropZone.addEventListener('keydown', (event) => {
@@ -1077,4 +1086,21 @@ dropZone.addEventListener('drop', (event) => {
 
 byId('criteria-count').textContent = `${byId('criteria-input').value.length} 字`;
 renderAll();
-Promise.allSettled([loadStatus(), loadSignals(), loadRuns()]);
+Promise.allSettled([loadStatus(), loadSignals(), loadRuns(), loadReferences()]);
+
+byId('save-references').addEventListener('click', saveReferences);
+byId('reload-references').addEventListener('click', loadReferences);
+byId('open-references').addEventListener('click', () => switchTab('references'));
+byId('upload-chart').addEventListener('click', () => chartFileInput.click());
+byId('empty-upload').addEventListener('click', () => chartFileInput.click());
+byId('fit-chart').addEventListener('click', fitChart);
+byId('resume-chart').addEventListener('click', () => {
+  if (state.analysisLoading || !state.selectedImage?.chartData) return;
+  state.selectedImage.frozen = false;
+  state.activeRunInputKey = null;
+  renderImage();
+});
+byId('toggle-candidates').addEventListener('click', () => {
+  const expanded = byId('candidates-panel').classList.toggle('is-open');
+  byId('toggle-candidates').setAttribute('aria-expanded', String(expanded));
+});

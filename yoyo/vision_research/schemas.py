@@ -63,13 +63,22 @@ class ReferenceRequest(BaseModel):
     data_url: str = Field(max_length=12_000_000)
 
 
+class ReferencesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    references: List[ReferenceRequest] = Field(max_length=4)
+    expected_revision: Optional[int] = Field(default=None, ge=0)
+
+
 class AnalyzeRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     signal_id: Optional[str] = Field(default=None, max_length=100)
     image_data_url: Optional[str] = Field(default=None, max_length=12_000_000)
+    chart_capture_data_url: Optional[str] = Field(default=None, max_length=12_000_000)
     image_name: Optional[str] = Field(default=None, max_length=160)
     expected_image_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
-    references: List[ReferenceRequest] = Field(default_factory=list, max_length=4)
+    expected_chart_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
+    reference_revision: Optional[int] = Field(default=None, ge=0)
+    references: Optional[List[ReferenceRequest]] = Field(default=None, max_length=4)
     criteria: str = Field(default=DEFAULT_CRITERIA, min_length=10, max_length=8000)
     model: Optional[str] = Field(default=None, max_length=100)
 
@@ -77,6 +86,12 @@ class AnalyzeRequest(BaseModel):
     def one_image_source(self):
         if bool(self.signal_id) == bool(self.image_data_url):
             raise ValueError("Choose either a SPIKE candidate or an uploaded image")
+        if self.chart_capture_data_url and not self.signal_id:
+            raise ValueError("A browser chart capture must include a SPIKE candidate")
+        if self.expected_chart_sha256 and not self.signal_id:
+            raise ValueError("A chart hash must include a SPIKE candidate")
+        if self.references is not None and self.reference_revision is not None:
+            raise ValueError("reference_revision applies only when using saved global references")
         return self
 
 

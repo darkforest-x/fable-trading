@@ -14,7 +14,7 @@
     currentTheme = theme;
     root.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]').content =
-      theme === 'dark' ? '#11171b' : '#f4f7f5';
+      theme === 'dark' ? '#0a1016' : '#f1f5f7';
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;
     const action = theme === 'light' ? '切换到深色模式' : '切换到浅色模式';
