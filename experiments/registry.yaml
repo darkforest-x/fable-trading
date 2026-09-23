@@ -10859,3 +10859,18 @@ experiments:
     artifacts: [spike-v128-retest-entry-20260923-delivery]
     reuse_allowed: false
     notes: Fixed parent 638-contract universe, 15m/1h, ordinary both-side and joint long; no production changes.
+
+  - experiment_id: exp-spike-v128-entry-clock-20260923-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending_builder
+    status: running
+    question: Which Beijing entry-clock buckets have the highest historical V12.8 net win rate and per-trade returns?
+    single_variable: Fixed local entry-clock partition of existing serial trades; no strategy or execution changes.
+    result: Frozen4h and1h cuts, sample guards and earlier-selection/later-check before clock-conditioned outcomes.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    canonical_report: analysis/p1_spike_v128_entry_clock_20260923.md
+    artifacts: []
+    reuse_allowed: false
+    notes: Baseline and retest, ordinary/joint15m and1h; existing random pairs retained only at the same entry-clock bucket, no redraw.

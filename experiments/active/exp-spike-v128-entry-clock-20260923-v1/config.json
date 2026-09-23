@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-spike-v128-entry-clock-20260923-v1",
+  "source_run": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/run_v1",
+  "source_summary": "experiments/active/exp-spike-v128-retest-entry-20260923-v1/summary_v1",
+  "source_summary_receipt_sha256": "ce01b5e037bbb706e7952e659d4ce1fc93d9c8f6e44b1e3ffb28eb69973ea178",
+  "timezone": "Asia/Shanghai",
+  "timeframes": [
+    15,
+    60
+  ],
+  "arms": [
+    "v9_both",
+    "joint"
+  ],
+  "policies": [
+    "baseline",
+    "retest"
+  ],
+  "start": "2026-07-23T00:00:00Z",
+  "split": "2026-08-23T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "round_trip_cost": 0.002,
+  "bucket_hours": [
+    4,
+    1
+  ],
+  "rank_min_closed": 30,
+  "rank_min_weeks": 6,
+  "rank_min_each_half": 10,
+  "early_rank_min_closed": 15,
+  "early_rank_min_weeks": 3,
+  "bootstrap": 2000,
+  "statistics_seed": 923234,
+  "production_eligible": false,
+  "training_eligible": false
+}
