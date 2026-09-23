@@ -136,6 +136,78 @@ def grouped_metrics(frame, keys):
     return pd.DataFrame(rows)
 
 
+def coverage_table(receipts):
+    """Expose every authenticated stream's usable recent-window coverage.
+
+    Receipt summaries are the runner's only statement about reconstructed bars.
+    A stream with no candidates or no taken trade must therefore remain a row
+    here instead of disappearing during ledger aggregation.
+    """
+    required = ('symbol', 'minutes', 'window_bars_expected', 'window_bars_actual',
+                'window_gap_count', 'chart_gaps', 'partial_chart_buckets',
+                'partial_higher_buckets', 'valid_ready_window_bars', 'first', 'last')
+    rows = []
+    for receipt in receipts:
+        summary = receipt.get('summary')
+        if not isinstance(summary, dict) or any(key not in summary for key in required):
+            raise ValueError('stream receipt lacks coverage summary')
+        symbol, minutes = str(summary['symbol']), int(summary['minutes'])
+        if receipt.get('symbol') != symbol or int(receipt.get('minutes')) != minutes:
+            raise ValueError('stream receipt identity disagrees with coverage summary')
+        expected, actual = int(summary['window_bars_expected']), int(summary['window_bars_actual'])
+        gaps, ready = int(summary['window_gap_count']), int(summary['valid_ready_window_bars'])
+        if expected < 0 or actual < 0 or gaps < 0 or ready < 0:
+            raise ValueError('stream coverage contains a negative count')
+        if actual == 0:
+            coverage_status = 'no_recent_data'
+        elif actual != expected or gaps or ready != expected:
+            coverage_status = 'partial'
+        else:
+            coverage_status = 'complete'
+        rows.append({'stream_key': f'{symbol}_{minutes}m', 'symbol': symbol, 'timeframe_min': minutes,
+                     'window_bars_expected': expected, 'window_bars_actual': actual,
+                     'window_gap_count': gaps, 'chart_gaps': int(summary['chart_gaps']),
+                     'partial_chart_buckets': int(summary['partial_chart_buckets']),
+                     'partial_higher_buckets': int(summary['partial_higher_buckets']),
+                     'valid_ready_window_bars': ready, 'first': summary['first'], 'last': summary['last'],
+                     'coverage_status': coverage_status})
+    return pd.DataFrame(rows).sort_values(['symbol', 'timeframe_min']).reset_index(drop=True)
+
+
+def coverage_summary(coverage):
+    """Return report-receipt counts without dropping incomplete or empty streams."""
+    statuses = coverage.coverage_status.value_counts()
+    return {'stream_count': int(len(coverage)),
+            'complete_streams': int(statuses.get('complete', 0)),
+            'partial_streams': int(statuses.get('partial', 0)),
+            'no_recent_data_streams': int(statuses.get('no_recent_data', 0)),
+            'window_bars_expected': int(coverage.window_bars_expected.sum()),
+            'window_bars_actual': int(coverage.window_bars_actual.sum()),
+            'valid_ready_window_bars': int(coverage.valid_ready_window_bars.sum()),
+            'window_gap_count': int(coverage.window_gap_count.sum()),
+            'chart_gaps': int(coverage.chart_gaps.sum()),
+            'partial_chart_buckets': int(coverage.partial_chart_buckets.sum()),
+            'partial_higher_buckets': int(coverage.partial_higher_buckets.sum())}
+
+
+def arm_counts(statuses, trades):
+    """Count each observed arm from status and trade ledgers without inventing absent arms."""
+    columns = ['timeframe_min', 'arm', 'candidates', 'taken', 'closed', 'censored']
+    if statuses.empty:
+        return pd.DataFrame(columns=columns)
+    keys = ['timeframe_min', 'arm']
+    candidates = statuses.groupby(keys, dropna=False).size().rename('candidates').reset_index()
+    if trades.empty:
+        return candidates.assign(taken=0, closed=0, censored=0)[columns]
+    taken = (trades.groupby(keys, dropna=False).size().rename('taken').reset_index())
+    settled = (trades.assign(censored=trades.censored.astype(bool)).groupby(keys, dropna=False)
+              .agg(closed=('censored', lambda values: int((~values).sum())),
+                   censored=('censored', lambda values: int(values.sum())))
+              .reset_index())
+    return candidates.merge(taken, on=keys, how='left').merge(settled, on=keys, how='left').fillna(0).astype(
+        {'candidates': int, 'taken': int, 'closed': int, 'censored': int})[columns]
+
+
 def plot_outcomes(summary, output):
     """Export descriptive results with denominators and ambiguous-stop wicks separated."""
     import matplotlib
@@ -171,6 +243,7 @@ def plot_outcomes(summary, output):
 def build(root, output):
     """All stream ledger hashes must match their completed receipt before reading."""
     root, output = Path(root), Path(output)
+    report_invoked_at = pd.Timestamp.now(tz='UTC').isoformat()
     manifest = json.loads((root/'manifest.json').read_text())
     if not manifest.get('complete'):
         raise ValueError('incomplete replay manifest')
@@ -206,29 +279,46 @@ def build(root, output):
               else pd.DataFrame() for n, xs in tables.items()}
     cfg = identity['config']
     trades = enrich(tables['trades'], pd.Timestamp(cfg['split']))
-    closed = trades.loc[~trades.censored.astype(bool)].copy()
+    censored = trades.get('censored', pd.Series(False, index=trades.index)).astype(bool)
+    closed = trades.loc[~censored].copy()
     output.mkdir(parents=True, exist_ok=False)
+    coverage = coverage_table(receipts)
+    coverage.to_csv(output/'coverage.csv', index=False)
     keys = ['timeframe_min', 'arm']
     views = {'summary': keys, 'direction': keys+['side'], 'monthly': keys+['month'],
              'weekly': keys+['week'], 'periods': keys+['period'], 'symbols': keys+['symbol']}
     for name, group_keys in views.items():
         grouped_metrics(closed, group_keys).to_csv(output/f'{name}.csv', index=False)
-    plot_outcomes(grouped_metrics(closed, keys), output)
-    grouped_metrics(closed.loc[closed.symbol.isin(['BTCUSDT', 'ETHUSDT'])], keys+['symbol']).to_csv(output/'btc_eth.csv', index=False)
-    closed.sort_values('net_r', ascending=False).to_csv(output/'all_closed_trades.csv.gz', index=False, compression='gzip')
-    closed.loc[closed.loss & closed.protective_stop & (closed.mfe_known_r>0)].sort_values('mfe_known_r', ascending=False).to_csv(output/'floating_profit_stop_losses.csv', index=False)
+    summary = grouped_metrics(closed, keys)
+    if not summary.empty:
+        plot_outcomes(summary, output)
+    btc_eth = closed.loc[closed.symbol.isin(['BTCUSDT', 'ETHUSDT'])] if 'symbol' in closed else pd.DataFrame()
+    grouped_metrics(btc_eth, keys+['symbol']).to_csv(output/'btc_eth.csv', index=False)
+    if 'net_r' in closed:
+        closed.sort_values('net_r', ascending=False).to_csv(
+            output/'all_closed_trades.csv.gz', index=False, compression='gzip')
+    else:
+        closed.to_csv(output/'all_closed_trades.csv.gz', index=False, compression='gzip')
+    if {'loss', 'protective_stop', 'mfe_known_r'} <= set(closed):
+        floating = closed.loc[closed.loss & closed.protective_stop & (closed.mfe_known_r > 0)].sort_values('mfe_known_r', ascending=False)
+    else:
+        floating = pd.DataFrame()
+    floating.to_csv(output/'floating_profit_stop_losses.csv', index=False)
     for name in ('decisions', 'statuses', 'controls', 'frames', 'hints'):
         tables[name].to_csv(output/f'{name}.csv.gz', index=False, compression='gzip')
     status = tables['statuses']
-    status.groupby(keys+['status']).size().rename('count').reset_index().to_csv(output/'status_counts.csv', index=False)
+    if status.empty:
+        status_counts = pd.DataFrame(columns=keys + ['status', 'count'])
+    else:
+        status_counts = status.groupby(keys+['status']).size().rename('count').reset_index()
+    status_counts.to_csv(output/'status_counts.csv', index=False)
+    arm_counts(status, trades).to_csv(output/'arm_counts.csv', index=False)
     rows = []
     controls = tables['controls']
     if len(controls):
         matched = controls.loc[controls.matched.astype(bool)].merge(closed, on='trade_key', suffixes=('_ctrl',''), validate='one_to_one')
         matched['excess_bp'] = (matched.net_return - matched.control_net_return)*1e4
         for view, group_keys in views.items():
-            if view == 'symbols':
-                continue
             for key, group in matched.groupby(group_keys):
                 if view == 'periods' and key[-1] == 'earlier':
                     control_exit = pd.to_datetime(group.control_exit_time, utc=True)
@@ -251,7 +341,10 @@ def build(root, output):
     comparison.to_csv(output/'random_comparison.csv', index=False)
     receipt = {'input_run':str(root), 'input_manifest_sha256':digest(root/'manifest.json'),
                'input_identity_sha256':digest(root/'identity.json'), 'stream_count':len(receipts),
-               'trade_rows':len(trades), 'closed':len(closed), 'censored':int(trades.censored.sum()),
+               'coverage_summary':coverage_summary(coverage),
+               'trade_rows':len(trades), 'closed':len(closed), 'censored':int(censored.sum()),
+               'report_builder':str(Path(__file__).resolve()), 'report_builder_sha256':digest(Path(__file__)),
+               'report_invoked_at':report_invoked_at,
                'files':{p.name:digest(p) for p in output.iterdir() if p.is_file()},
                'generated_at':pd.Timestamp.now(tz='UTC').isoformat()}
     (output/'receipt.json').write_text(json.dumps(receipt, indent=2)+'\n')
