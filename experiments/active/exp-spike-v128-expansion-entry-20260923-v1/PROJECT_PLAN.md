@@ -35,3 +35,7 @@ Report full, earlier, later, and crossing-boundary strata; earlier comparison re
 Lower frequency alone is not a success. Report whether net win rate, average net R/bp and realized high-R rates jointly improve, plus the cost in lost large winners; no unapproved absolute target or automatic promote. New training, Pine defaults, trading thresholds, exit rules, cost and real positions remain unchanged.
 
 Builder and behavioral tests must be committed before running market construction. Focused tests cover feature prefix invariance/gap reset/ties, initial occupancy, filtered-event serial admission and failed-control censoring. Smoke BTC/ETH then the fixed 638 pool; all stream receipts hash inputs and outputs. A failed trial remains preserved.
+
+## Prior-evidence addendum before any new market construction
+
+The bounded historical review found `analysis/p0_pine_eth_15m_start_label_audit_20260821.md` had already rejected a fixed `atr_pct_ratio96 >= 1.0` gate for ETH15m: development 2023 win rate 14.46% to12.77%, 2024 19.28% to8.16%. This study is therefore a new causal partition/current V12.8-window check of an already researched axis, not a first discovery. The original whole-pool qcut and L2 result are not deployable evidence. No change to the sole high20 policy follows from this review.
