@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#11171c" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f4f7f5" />
     <title>SPIKE · 视觉研究工作台</title>
+    <script src="/theme.js"></script>
     <link rel="stylesheet" href="/styles.css" />
     <script type="module" src="/app.js"></script>
   </head>
@@ -25,6 +26,9 @@
           <span id="api-health" class="health-pill" role="status" aria-live="polite">
             <span class="health-dot" aria-hidden="true"></span><span>正在连接本地 API…</span>
           </span>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="切换到深色模式" title="切换到深色模式">
+            <span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">浅色</span>
+          </button>
         </div>
       </header>
 

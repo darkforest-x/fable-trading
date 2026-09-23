@@ -23,6 +23,10 @@ Open http://127.0.0.1:8771. The existing SPIKE service on port 8766 is read-only
 this command does not start or change its scanner or notifications. If SPIKE
 is unavailable, image upload still works.
 
+The interface defaults to a light palette. The top-right theme switch supports
+light/dark modes and remembers the choice in browser storage; chart and reference
+image pixels are unchanged by the interface theme.
+
 Set `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) in the server environment, or enter it
 in the local settings page. Page-entered keys live only in process memory and
 must be entered again after a restart. They are never saved in browser storage,
@@ -52,6 +56,7 @@ production signal. No accuracy or trading outcome is asserted.
 ```bash
 .venv/bin/python -m pytest tests/vision_research -q
 node --check yoyo/vision_research/static/app.js
+node --check yoyo/vision_research/static/theme.js
 ```
 
 Provider sources: [images](https://ai.google.dev/gemini-api/docs/image-understanding),
