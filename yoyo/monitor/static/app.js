@@ -22,7 +22,6 @@
     joints: ["突破+spike", "V9 多头框还开着时出现的第一次趋势线突破，本周期或上级周期都算（V11.2 默认「多头框内」）。"],
     breaks: ["趋势线突破", "15m、1H、4H、日线自己的三点下降线被收盘突破：连续 2 根收在线上 0.2 ATR。"],
     shadow: ["前向影子", "V7 与 V8 在相同新收盘数据上并行记录，积累未参与调参的新样本。"],
-    ashare: ["A股回测", "沪深主板近三年 · 固定 V1 / V8 · 日线与周线对照。"],
     research: ["研究总览", "围绕均线密集系统，跟踪因子、实验、回测与视觉判断。"],
     factors: ["因子库", "定义、可知时点、实现来源与研究结论，一处追踪。"],
     experiments: ["实验登记", "保留每次问题、唯一变化、原始结果与失败证据。"],
@@ -249,20 +248,19 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "ashare", "system", "research", "factors", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "ashare", "joints", "breaks", "research", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["signals", "watch", "lines", "shadow", "system", "research", "factors", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "research", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
     });
     const researchView = ["research", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view);
-    $("exchange-mark").textContent = researchView ? "研究" : state.view === "ashare" ? "A股" : "OKX";
-    $("market-scope").textContent = researchView ? "本机工作台" : state.view === "ashare" ? "沪深主板" : "全市场永续";
-    $("connection-label").classList.toggle("hidden", researchView || state.view === "ashare");
-    $("bark-header").classList.toggle("hidden", researchView || state.view === "ashare");
-    $("telegram-header")?.classList.toggle("hidden", researchView || state.view === "ashare");
-    if (state.view === "ashare") $("sidebar-runtime").textContent = "历史回测独立运行";
+    $("exchange-mark").textContent = researchView ? "研究" : "OKX";
+    $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
+    $("connection-label").classList.toggle("hidden", researchView);
+    $("bark-header").classList.toggle("hidden", researchView);
+    $("telegram-header")?.classList.toggle("hidden", researchView);
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
@@ -286,7 +284,6 @@
     // Signals never load the expensive market overview.  Watch opts in once.
     if (state.view === "watch") loadMarkets();
     if (state.view === "shadow") loadShadow();
-    if (state.view === "ashare") window.SpikeAshare.load();
     if (linesView(state.view)) {
       const kind = state.view === "joints" ? "joint" : "break";
       if (state.lines.kind !== kind) Object.assign(state.lines, { kind, items: [], timeframe: "all", limit: 24 });
@@ -880,7 +877,6 @@
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
     if (state.view === "yolo") { if (trigger !== "periodic") await window.SpikeYolo?.refresh(); return; }
     if (state.view === "vision") return;
-    if (state.view === "ashare") { await window.SpikeAshare.load(); return; }
     if (state.view === "shadow") { await loadShadow(); return; }
     if (state.syncing) { queueRefresh(trigger); return; }
     const revision = state.signalQueryRevision, view = state.view, source = signalQuerySource(), key = sourceKey();
@@ -1085,7 +1081,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "ashare", "research", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "research", "factors", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });

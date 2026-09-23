@@ -193,14 +193,10 @@
 | 2026-09-03 | [`p1_crypto_grade_a_yolo_mtf_latest_20260903.md`](p1_crypto_grade_a_yolo_mtf_latest_20260903.md) | P1：最新加密行情四周期 Grade-A YOLO 排序图审（2026-09-03） | 按 Owner 本轮要求，冻结 OKX 当时全部合资格 USDT 永续合约，使用同一份 Grade-A full40 |
 | 2026-09-03 | [`p1_pine_v12f_grade_a_yolo_backtest_20260903.md`](p1_pine_v12f_grade_a_yolo_backtest_20260903.md) | P1：ETH 15m Pine V12F × Grade-A YOLO 延迟融合回测（2026-09-03） | 主方案失败。** 在 `2025-01-01` 至 `2026-03-01`（右开）的 ETH-USDT-SWAP 15m |
 | 2026-09-03 | [`p1_pine_v12f_grade_a_yolo_fusion_20260903.md`](p1_pine_v12f_grade_a_yolo_fusion_20260903.md) | P1：ETH 15m Pine V12F × Grade-A YOLO 区间融合审计（2026-09-03） | Pine V12F 与当前 Grade-A YOLO 已完成**研究态接线**，匹配不要求精确落在同一根 K 线： |
-| 2026-09-02 | [`p1_15m_ashare_grade_a_yolo_latest_20260902.md`](p1_15m_ashare_grade_a_yolo_latest_20260902.md) | P1：最新全 A 股 15m Grade-A YOLO 跨市场扫描（2026-09-02） |  |
-| 2026-09-02 | [`p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md`](p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md) | 最新全 A 股 15m 命中：普通沪深主板账户过滤版（2026-09-02） |  |
 | 2026-09-02 | [`p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.md`](p1_15m_ma_launch_owner_yolo_causal_semantic_gate_20260902.md) | P1：YOLO 提案 + 因果语义门配对验证（2026-09-02） | 模型没有白训练，但它不再有资格单独作最终裁决。本轮把 1280 full40 YOLO 保留为**位置与方向提案层**，在其后增加一层完全确定的数值语义复核：六均线是否仍密集、K 线是否仍贴近均线、核心与启动方向是否一致，以及检测窗口里已经可见的 post 确认是否达标。 |
 | 2026-09-02 | [`p1_15m_six_ma_smoothness_visibility_audit_20260902.md`](p1_15m_six_ma_smoothness_visibility_audit_20260902.md) | 15m 六均线平滑度与像素可见度审计（2026-09-02） | 1. **YOLO 图像层早已不是“双均线”，而是六条线**：`close` 上的 |
 | 2026-09-02 | [`p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.md`](p1_4h_ma_launch_yolo_halfmonth_owner_rejection_20260902.md) | P1：4h YOLO 半月语义门 Owner 终审否决（2026-09-02） | Owner 看完第 7 次 4h holdout 交付的 34 张完整未来 K 线图后，给出批次裁决：**“都不太行”**。 |
 | 2026-09-02 | [`p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md`](p1_4h_ma_launch_yolo_halfmonth_semantic_gate_20260902.md) | P1：4h YOLO 最近半个月因果语义门复扫（2026-09-02） | Owner 明确回复“批准”后，本轮按同一 Grade-A full40 native-1280 checkpoint 记录为 |
-| 2026-09-02 | [`p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md) | A 股普通主板 1h / 会话 4h 多头扫描（2026-09-02） | 截至 **2026-09-02 15:00 CST** 的已完成行情，本轮在普通账户可搜索的沪深主板池中交付 |
-| 2026-09-02 | [`p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md) | A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02） | 本轮**没有产生信号结果，也不能解释为“零多头”**。冻结的 Eastmoney 60m 接口虽然接受 |
 | 2026-09-02 | [`p3_15m_ma_launch_l2_feature_addition_20260902.md`](p3_15m_ma_launch_l2_feature_addition_20260902.md) | 15m L2 因果特征增量实验（2026-09-02） | 最终裁决：**REJECT**。LONG tune 入选 **full_110**，SHORT tune 入选 **plus_ma_family**。本轮只允许在旧 28 列上增加特征；候选、标签、时间切分、模型参数、成本和匹配对照均保持不变。 |
 | 2026-09-02 | [`p3_15m_ma_launch_l2_feature_group_ablation_20260902.md`](p3_15m_ma_launch_l2_feature_group_ablation_20260902.md) | 15m L2 28 特征分组消融（2026-09-02） | 本轮最终裁决：**REJECT**。LONG 在 tune 期选中 **ma_plus_trend_volume_volatility**，SHORT 选中 **ma_plus_trend**。28 个特征不是先验真理，而是旧基线；当前 YOLO 候选上是否应该保留，必须由时间外经济结果决定。 |
 | 2026-09-02 | [`p3_15m_ma_launch_l2_reference_augmentation_20260902.md`](p3_15m_ma_launch_l2_reference_augmentation_20260902.md) | 15m L2 历史参考事件扩充实验（2026-09-02） | 本轮裁决：**REJECT_REFERENCE_AUGMENTATION**。这次真正把旧 10,000 正图与 10,000 匹配负图的事件血缘接回 K 线；原形态正负标签没有冒充盈亏，而是逐事件重新计算固定 TP5/SL2/72 收益。参考事件只加入训练，真实 L1 的 tune 与 fi... |
@@ -488,7 +484,6 @@
 | — | [`p0_eth4h_exit_exploration_20260907.md`](p0_eth4h_exit_exploration_20260907.md) | ETH4h R2：保本与慢均线方向的有限探索 |  |
 | — | [`p0_eth4h_trend_candidate_20260907.md`](p0_eth4h_trend_candidate_20260907.md) | ETH 4H Trend R1：保守仓位候选策略 | ```json |
 | — | [`p0_imacd_15m_monitor_20260908.md`](p0_imacd_15m_monitor_20260908.md) | IMACD 新增 15 分钟监听：三周期已运行 |  |
-| — | [`p0_imacd_ashare_daily_long_20260909.md`](p0_imacd_ashare_daily_long_20260909.md) | Spike 沪深主板日线多头：冻结参数与样本外检验 |  |
 | — | [`p0_imacd_bark_monitor_20260908.md`](p0_imacd_bark_monitor_20260908.md) | IMACD 新增 Bark 信号推送 |  |
 | — | [`p0_imacd_gold_multitimeframe_20260908.md`](p0_imacd_gold_multitimeframe_20260908.md) | IMACD 黄金多周期验收：两种报价、16 个运行组合 |  |
 | — | [`p0_imacd_mac_monitor_20260908.md`](p0_imacd_mac_monitor_20260908.md) | IMACD · Mac 全市场监控交付记录 |  |
@@ -578,7 +573,6 @@
 | — | [`p1_owner_okx_history_20260916.md`](p1_owner_okx_history_20260916.md) | 你的交易复盘与执行系统 | 这份记录里的交易总体亏损，暂不支持“已经能够稳定盈利”。** 2024 年 2 月 23 日至 2026 年 9 月 13 日，4,898 条 USDT 持仓记录重构净损益 **-14,828.48 USDT**；另有一条 BTC 币本位记录单独列示。这里评价的是这份文件，不是你全部资产或所有账户。 |
 | — | [`p1_owner_short_gold_center_dataset_20260811.md`](p1_owner_short_gold_center_dataset_20260811.md) | P1 Owner空头金标中心裁切全量数据集 | Owner确认“不要Codex重新手割；从最早金标红框中心取几根K线作为橙框”后，已将该合同扩到完整Owner-short母池。 |
 | — | [`p1_spike_5r_followthrough_20260921.md`](p1_spike_5r_followthrough_20260921.md) | SPIKE V6：全原始信号的路径、等待确认、环境与两次加仓 | 49,207个原始多头请求、3,169条非空行情流全部回放完成；原始3,531流中362条没有请求，并非运行失败。16个预先固定的新方案中，**0个通过全部研究门**。原版和旧风险十分位另作为2个基线，合计18臂。 |
-| — | [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) | SPIKE V1 / V8：沪深主板近三年日线与周线 | 结论：四组单笔平均净收益均为负，且全部低于本次固定匹配随机对照；本样本不支持这四组入场规则具有正向超额。** 这是已采集样本的描述性历史结论，不能推断完整主板、共享账户或未来实盘表现。 |
 | — | [`p1_spike_burst_early_warning_20260910.md`](p1_spike_burst_early_warning_20260910.md) | SPIKE V3：结构早预警与动能确认分层 |  |
 | — | [`p1_spike_burst_launch_recall_20260910.md`](p1_spike_burst_launch_recall_20260910.md) | SPIKE V2：渐进启动补漏与全池召回验证 | V2 在**最多延后1根收盘确认**的主口径下，召回 10.84%（180/1660）；V1为 0.84%（14/1660）。**尚未达到80%目标。**这个分母来自全池独立价格事件，不是三张成功截图，也不是全部上涨币种。 |
 | — | [`p1_spike_burst_noise_20260910.md`](p1_spike_burst_noise_20260910.md) | SPIKE：频繁信号的定位与单项降噪实测 |  |
@@ -693,7 +687,6 @@
 - [`p0_eth4h_trend_candidate_20260907.md`](p0_eth4h_trend_candidate_20260907.md) — ETH 4H Trend R1：保守仓位候选策略
 - [`p0_gold_ma_indicator_20260914.md`](p0_gold_ma_indicator_20260914.md) — 金标形态指标：目标纠偏与首轮回放（2026-09-14）
 - [`p0_imacd_15m_monitor_20260908.md`](p0_imacd_15m_monitor_20260908.md) — IMACD 新增 15 分钟监听：三周期已运行
-- [`p0_imacd_ashare_daily_long_20260909.md`](p0_imacd_ashare_daily_long_20260909.md) — Spike 沪深主板日线多头：冻结参数与样本外检验
 - [`p0_imacd_bark_monitor_20260908.md`](p0_imacd_bark_monitor_20260908.md) — IMACD 新增 Bark 信号推送
 - [`p0_imacd_gold_multitimeframe_20260908.md`](p0_imacd_gold_multitimeframe_20260908.md) — IMACD 黄金多周期验收：两种报价、16 个运行组合
 - [`p0_imacd_ma_mtf_20260907.md`](p0_imacd_ma_mtf_20260907.md) — IMACD＋六均线密集＋多周期：找到有效改进，也找到过滤大趋势的原因
@@ -759,8 +752,6 @@
 - [`p15_h5_vol_adaptive.md`](p15_h5_vol_adaptive.md) — P1.5 H5：波动率自适应障碍
 - [`p15_h9_report.md`](p15_h9_report.md) — P1.5 R1'：H9 高层趋势过滤复测与推广
 - [`p1_15m_arbusdt_screenshot_model_probe_20260901.md`](p1_15m_arbusdt_screenshot_model_probe_20260901.md) — ARBUSDT 截图：15m Grade-A 模型单样本检测回放（2026-09-01）
-- [`p1_15m_ashare_grade_a_yolo_latest_20260902.md`](p1_15m_ashare_grade_a_yolo_latest_20260902.md) — P1：最新全 A 股 15m Grade-A YOLO 跨市场扫描（2026-09-02）
-- [`p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md`](p1_15m_ashare_grade_a_yolo_latest_standard_retail_20260902.md) — 最新全 A 股 15m 命中：普通沪深主板账户过滤版（2026-09-02）
 - [`p1_15m_grade_a_assisted_future40_20260907.md`](p1_15m_grade_a_assisted_future40_20260907.md) — YOLO 人工审核简化与未来 40 根对照
 - [`p1_15m_grade_a_labelstudio_manual_20260907.md`](p1_15m_grade_a_labelstudio_manual_20260907.md) — 完整 YOLO 数据已转入 Label Studio 手工标注
 - [`p1_15m_grade_a_owner_calibration_20260907.md`](p1_15m_grade_a_owner_calibration_20260907.md) — YOLO 提准第一步：盲审校准包与单变量训练准备
@@ -812,8 +803,6 @@
 - [`p1_altcoin_1d_k1k2_market_context_20260905.md`](p1_altcoin_1d_k1k2_market_context_20260905.md) — 山寨币日线 K1→K2：市场广度共振 V3 与趋势接管诊断
 - [`p1_altseason_donchian_ewmac_20260910.md`](p1_altseason_donchian_ewmac_20260910.md) — 山寨强势行情：Donchian 与 EWMAC 固定规则回测
 - [`p1_altseason_multivenue_20260910.md`](p1_altseason_multivenue_20260910.md) — spike · 跨交易所山寨趋势研究：从抓到启动，到留下利润
-- [`p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.md) — A 股普通主板 1h / 会话 4h 多头扫描（2026-09-02）
-- [`p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md`](p1_ashare_grade_a_yolo_1h4h_long_source_preflight_failure_20260902.md) — A 股 1h / 会话 4h 多头扫描：数据源预检失败（2026-09-02）
 - [`p1_b2_short_l2_backtest_20260811.md`](p1_b2_short_l2_backtest_20260811.md) — Local Signal V2 B2：候选密度与收益诊断
 - [`p1_bico_194r_exit_case_20260910.md`](p1_bico_194r_exit_case_20260910.md) — BICO 194R：最高浮盈与可执行退出
 - [`p1_btc_bb_stoch_holdout_acceptance_20260917.md`](p1_btc_bb_stoch_holdout_acceptance_20260917.md) — BTC 5m · BB × Stoch 最终验收（holdout）
@@ -959,7 +948,6 @@
 - [`p1_spike_5r_model_v5_20260921.md`](p1_spike_5r_model_v5_20260921.md) — SPIKE 5R Model V5：降低标签门槛没有自动提高筛选能力
 - [`p1_spike_5r_model_v5_20260921_final.md`](p1_spike_5r_model_v5_20260921_final.md) — SPIKE 5R Model V5：降低标签门槛没有自动提高筛选能力
 - [`p1_spike_account_growth_20260913.md`](p1_spike_account_growth_20260913.md) — SPIKE 账户冻结回放技术报告
-- [`p1_spike_ashare_v1_v8_three_year_20260913.md`](p1_spike_ashare_v1_v8_three_year_20260913.md) — SPIKE V1 / V8：沪深主板近三年日线与周线
 - [`p1_spike_bp_random_audit_20260922.md`](p1_spike_bp_random_audit_20260922.md) — SPIKE“跑赢随机”结论的收益率（bp）复核
 - [`p1_spike_burst_early_warning_20260910.md`](p1_spike_burst_early_warning_20260910.md) — SPIKE V3：结构早预警与动能确认分层
 - [`p1_spike_burst_launch_recall_20260910.md`](p1_spike_burst_launch_recall_20260910.md) — SPIKE V2：渐进启动补漏与全池召回验证

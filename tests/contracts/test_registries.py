@@ -188,7 +188,6 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         # Owner allowed all dates; V2.5 used charts only for display engineering QA.
         "exp-imacd-pine-lifecycle-20260908-v1",
         "exp-imacd-pane-readability-20260908-v1",
-        "exp-ashare-grade-a-yolo-1h4h-long-sina-20260902-v2",
         "exp-btc-4h-ma-launch-similarity-top20-v2",
         "exp-btc-4h-ma-launch-similarity-v1",
         "exp-15m-ma-launch-owner-yolo-recent5d-rawbox-v2",
@@ -202,7 +201,6 @@ def test_holdout_consumption_is_declared_per_experiment_not_assumed():
         "exp-15m-ma-launch-owner-grade-a8000-eth30d-20260829-v1",
         "exp-15m-ma-launch-owner-grade-a8000-hot3d-20260829-v1",
         "exp-15m-ma-launch-owner-grade-a8000-hot3d-1280-20260830-v1",
-        "exp-15m-ashare-grade-a-yolo-latest-20260902-v1",
         "exp-4h-ma-launch-yolo-halfmonth-semantic-gate-20260902-v1",
         "exp-crypto-grade-a-yolo-mtf-latest-20260903-v1",
         "exp-1h-filusdt-grade-a-recent5d-probe-20260903-v1",

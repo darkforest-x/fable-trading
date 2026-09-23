@@ -763,7 +763,7 @@ Owner 明确“前端信号，和 bark 信号通知改成 v9 的”“之前的�
 运行命令 `.venv/bin/python -m yoyo.monitor.v9_migration --apply`（停止服务后首次执行）；
 证据 `output/qa/spike_v9_switch_20260915/`，实际备份与回执在 ImpulseMonitor 运行目录。
 另修复失效 Xcode Python 链接，改用现有 CommandLineTools Python 3.9.6，未改包版本。
-仅监控信号切换；独立 V7/V8 影子研究、A股结果、forward_log、ACTIVE、订单和研究资格未变。
+仅监控信号切换；独立 V7/V8 影子研究、forward_log、ACTIVE、订单和研究资格未变。
 
 
 ## 最新：ETH V9 全周期开仓时 YOLO 检测已完成（2026-09-15）
@@ -845,14 +845,6 @@ Owner要求北京时间9月1日至9月14日21:19全部交易，确认OKX。固�
 - 本版rejected，不启用；不是交易所强平模拟。13项专项测试通过，18行账户与逐笔对账；全套113通过、4项因其他注册记录缺source_commit失败，原日志保留。报告：`analysis/html/p1_spike_eth_martingale_20260914.html`，实验：`experiments/active/exp-spike-eth-martingale-20260914-v1/`。
 - 选择f4aa4530bc先于最终评估，holdout第1次收据保留。继续新资金规则需另立版本，不能在已评估holdout上追调。Notion：<https://app.notion.com/p/3db8856479af81bf9c94f5e9f483e621>。
 
-## SPIKE V1/V8 A股日线/周线回测已收尾（2026-09-14）
-
-- Owner 明确“就这样 数据够了”后停止新增采集和重试。冻结 2,587 只成功源收据全部处理；43 只取数失败、650 只未采集、评估隔离 0，合计 3,280。沪市覆盖 1,708、深市 879；未采集均在深市，不能外推全主板。
-- 2023-09-13 至 2026-09-11，V1日线/V8日线/V1周线/V8周线自然平仓 276/1843/69/472，单笔平均净收益 −0.993%/−0.325%/−10.125%/−0.871%，均低于固定匹配随机对照（p均1.0）。日线累计净R微正与百分比均值负使用不同风险权重，不是账户盈利。
-- 原固定指标、止损、0.2%成本不变；四组各 holdout #1。2,587逐流输入/输出SHA核对通过；单根新股仅补记未就绪覆盖，未重算指标或收益。取数停止收据和错误原文均保留。
-- 前端菜单 `http://127.0.0.1:8766/#ashare` 已显示完成和部分覆盖，提供报告、逐笔、周期覆盖及全池采集清单。HTML：`analysis/html/p1_spike_ashare_v1_v8_three_year_20260913.html`。实验：`experiments/active/exp-spike-ashare-v1-v8-three-year-20260913-v1`。
-- 研究结论登记 rejected，不训练、不promote、不改变实时监控、通知或订单。Notion：<https://app.notion.com/p/3da8856479af81cc9db8f1c806b443b5>。若继续新规则或再次使用holdout，需Owner另行决策；不得自动恢复采集。
-
 ## SPIKE V7／V8 五条降噪路线已执行（2026-09-13）
 
 - Owner 要求的市场状态、跨所确认／事件折叠、早期失败退出、组合容量／相关性风险和前向影子均已落地并逐项裁决。历史覆盖 Binance／OKX／Gate 3,531 条 30m／1H／4H 数据流；复用验证历史已非盲，四个新历史配置各记录授权 holdout-era 使用 #1。
@@ -868,15 +860,6 @@ Owner要求北京时间9月1日至9月14日21:19全部交易，确认OKX。固�
 - 三政策全部rejected：D开发+19.20%、验证-2.87%；E+14.75%/-6.15%；D_E+10.12%/-3.71%。匹配随机D+23.55%/+3.01%。D强势时段贡献+10.37pp/-2.22pp；不能借上涨片段宣布选时优势。
 - 8082e988先提交builder再跑一次；167检查、38120事件/24105实际接受的模拟交易、25564匹配及资金/统计独立复核通过。固定0.2%入场名义往返成本未含完整funding；没有新训练、实盘或部署。
 - 交付：`analysis/html/p1_altseason_donchian_ewmac_20260910.html`；实验`experiments/active/exp-altseason-donchian-ewmac-20260910-v1`。完整大CSV本地保留并逐项注册哈希；报告排版修订没有重跑策略。下一步若研究新规则需另行预注册；不得将本配置改写成已验证盈利系统。
-
-## 独立沪深主板日线多头研究完成（2026-09-09）
-
-- Owner明确普通账户：只沪深主板日线多头，排除创业板/科创板/北交所，新开仓排除当日ST；不改币圈指标、监控、通知或订单。
-- 冻结200只主板，197只研究可用；开发2020–21、验证2022–23、首次最终2024–25。选择仍为基础MA34/9、focus12/band0.1、quality1、structure10、stop3ATR、trail4ATR、1.5R激活，无固定止盈。
-- 最终净收益-2.2874%、最大回撤12.1290%、45自然平仓、胜率37.7778%；全部49匹配随机对照均更高，实验盈利结论rejected，不推广为已验证系统。实际初始风险中位13.04%，1.5R激活要求中位涨19.56%，这是后续研究机制线索而非新盈利证据。
-- 145项专用测试；浮点止损尺度不变性缺陷已修，首轮开发/验证作废留档，OOS只1次。离线审计复现602份源收据、1412冻结文件前后hash不变。
-- TradingView已保存私有脚本「SPIKE A股主板 · 日线趋势」并在SSE_DLY:600519标准日线编译运行；原布局未保存。技术当前图不用于收益评分。
-- 交付：`analysis/html/p0_imacd_ashare_daily_long_20260909.html`；源码`yoyo/evaluation/pine/imacd_ashare_daily_long_v1.pine`；冻结证据`experiments/active/exp-imacd-ashare-daily-long-20260909-v1/results/`。量化输入字节已冻结，不能据已消费2024–25反复调参后再称首次样本外。
 
 ## Spike 短周期仅前端、Bark 只保留长周期（2026-09-09 22:00:54）
 
@@ -2383,39 +2366,6 @@ USDT 永续 277 币宇宙、Grade-A full40 native-1280 checkpoint、W18/W19、�
 4h 批次“都不太行”的裁决继续有效；更高周期是 OOD completed-history 审核候选，不是
 允许交易的信号。未训练、调门、promote、部署、改 ACTIVE/frozen/forward、发 Telegram
 或下单，`production_eligible=false`。
-
-## ⚡ 当前真相（2026-09-02 — 普通主板 1h/会话4h LONG 扫描已完成）
-
-Owner 授权 Grade-A full40 native-1280 checkpoint 的 1h holdout **#11**、会话 4h
-holdout **#12**，并批准 Eastmoney 在线端点不可达时只用同日冻结缓存做 parity。冻结普通
-沪深主板 3,111 只；Sina 60m 日期因果 QFQ 快照中 1h 可用 3,021、4h 可用 2,903。
-35,072 个 W18/W19 窗口经 373 原框 → 346 结构框 → 52 语义框 → 20 去重审计事件，按
-Owner 口径仅交付 **1h 12 LONG + 4h 4 LONG**，另 4 SHORT 排除。16 张图、6 位代码及
-完整来源审计见 `analysis/html/p1_ashare_grade_a_yolo_1h4h_long_sina_20260902.html`。
-
-离线复验通过 3,021 份 K 线、5,892,102 行 QFQ 算术、346 个输入像素/语义决定及 16 张
-图的 SHA 检查，网络读取和推理均为 0。该模型由 crypto 15m 训练，在 A 股 1h/4h 上仍是
-OOD completed-history 研究筛选，不是收益或实时买入信号，`production_eligible=false`。
-没有训练、调门、promote、部署、改 ACTIVE/frozen/forward、发 Telegram 或下单。
-
-## ⚡ 当前真相（2026-09-02 — 最新全 A 股扫描已完成，仅作 OOD 图册）
-
-Owner 要求用现有模型扫描“最新大 A”并给出命中图。本轮先在 main 提交预注册与 builder
-`062956425c`，随后冻结 2026-09-02 11:30 CST 已完成的沪深京 15m 前复权快照。5,908 只
-宇宙中 5,494 只通过最新尾根与 last-160 同源日程 parity（92.99%），414 只 fail-closed；
-W18/W19 共 10,988 张输入，经 288 原框 → 281 结构框 → 47 语义框 → 31 去重事件，最终
-**8 LONG / 23 SHORT**。独立 replay 的 K 线 SHA、像素、语义决定与 31 张图全部通过。
-
-这批是 crypto checkpoint 迁移到 A 股的**分布外 completed-history 研究提案**，不是交易
-信号：全部需要 post7–9，7/8 LONG 又集中在仅占池 6.1% 的北交所，明显有市场 shortcut
-风险。A 股普通现货也不能把 SHORT 当直接卖空指令。完整自包含交付：
-`analysis/html/p1_15m_ashare_grade_a_yolo_latest_20260902.html`；31 张原图包：
-`experiments/active/exp-15m-ashare-grade-a-yolo-latest-20260902-v1/results/ashare_signal_charts_31.zip`。
-
-这是 Grade-A full40 native-1280 checkpoint holdout 使用 **#8**。未训练、调参、promote、
-部署、改 ACTIVE/frozen/forward、发 Telegram 或下单，`production_eligible=false`。后续若
-要继续，正确入口是 Owner 先审 31 张形态或另建 A 股时间切分 Gold；不得拿这次已消费的
-快照看结果调门重扫。
 
 ## ⚡ 当前真相（2026-09-02 — 新增因果特征有改善迹象，但未过升级门）
 
