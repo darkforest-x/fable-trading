@@ -204,7 +204,8 @@ def authenticate(cfg):
         got = describe(d, cfg); old = source.loc[key]
         for metric in ('taken', 'closed', 'censored', 'win_rate', 'mean_net_r', 'mean_net_bp'):
             np.testing.assert_allclose(got[metric], old[metric], rtol=1e-10, atol=1e-10)
-        reconciled.append(dict(zip(KEYS, key)) | {'closed': got['closed'], 'source_metrics_match': True})
+        reconciled.append(dict(zip(KEYS, (int(key[0]), key[1], key[2]))) |
+                          {'closed': got['closed'], 'source_metrics_match': True})
     controls = prepare_controls(pd.read_csv(root/'controls.csv.gz', low_memory=False), cfg['timezone'])
     return trades, controls, reconciled
 
