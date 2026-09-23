@@ -32451,3 +32451,22 @@ artifacts:
     production_eligible: false
     notes: Source identities, native save/compile receipt and synthetic probe evidence. Final source changes probe only by table
       anchor; no new profitability or production claim.
+
+  - artifact_id: spike-v128-recent-20260923-delivery
+    artifact_type: manifest
+    role: v128_recent_15m_1h_descriptive_replay_and_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1387ad9355a032884506f0d679133cedf2ae1a3d
+    source_path: experiments/active/exp-spike-v128-recent-20260923-v1/delivery.json
+    sha256: 10c72936d8d77e76b4d3d2ffe9c317513b8c983113a5cc7a9b8bb576bb0dbfbc
+    size_bytes: 3007
+    storage_uri: repo://experiments/active/exp-spike-v128-recent-20260923-v1/delivery.json
+    generator_commit: a95a348d1ac1c2881001c0a539ed432219492bb2
+    config_hash: bc0d9886ffa60c53197febb99af23b45fe784392feeb1e2dffe2cde84b82426a
+    data_cutoff: '2026-09-23T04:00:00Z'
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 1276 streams complete; 583 ready contracts and 55 flat zero-volume inputs. Frozen local archive and all receipts
+      hashed. Four matched bp excesses negative; native Pine event parity unverified. No added-position PnL. Historical-data
+      restriction canceled by owner; legacy holdout vocabulary does not imply a current access restriction.

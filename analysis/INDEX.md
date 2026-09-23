@@ -13,7 +13,7 @@
 | 2026-09-23 | [`p0_spike_v128_roll_hints_20260923.md`](p0_spike_v128_roll_hints_20260923.md) | SPIKE V12.8：V12.6 上的两次加仓候选提示 |  |
 | 2026-09-23 | [`p1_ma_dense_launch_pine_20260923.md`](p1_ma_dense_launch_pine_20260923.md) | 均线密集启动：规则移植为 Pine 指标 V1 / V2 | Owner 2026-09-22 问“能写成pine脚本？”并在 2026-09-23 要求“把相似度和评分也移植进去”。V1 只移植两组硬性条件；V2 追加两层相似度与 Grade-A 质量分，与研究扫描一一对应。 |
 | 2026-09-23 | [`p1_spike_v127_held_age_20260923.md`](p1_spike_v127_held_age_20260923.md) | SPIKE V12.7 候选：先突破后V9加时限的全量回测 | 延迟大幅下降，总亏损减少，但后段每笔净R没有改善，因此按运行前写死的规则，V12.7 里这个时限默认关闭、保留为开关。 |
-| 2026-09-23 | [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) | SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测 |  |
+| 2026-09-23 | [`p1_spike_v128_recent_20260923.md`](p1_spike_v128_recent_20260923.md) | SPIKE V12.8：近两个月 15 分钟与 1 小时详细回测 | 普通 SPIKE 在本窗的候选信号为 **15m 7,060 个、1h 1,615 个**，已平仓净胜率分别为 **26.87% 和 34.43%**。联合多头另有 **15m 2,790 个、1h 689 个**，净胜率分别为 **27.38% 和 37.96%**。两种信号族重叠，不能相加... |
 | 2026-09-22 | [`p1_ma_morph_v6_econ_audit_20260922.md`](p1_ma_morph_v6_econ_audit_20260922.md) | 形态模型 v6 A 组：高分前 10% 正收益的稳健性复核 | 原报告数字完全复算：验证 top10 131 笔 +12.00bp/笔、测试 99 笔 +15.25bp/笔，成员与原 `top10_event_ids` 一致。 |
 | 2026-09-22 | [`p1_ma_morphology_negatives_20260922.md`](p1_ma_morphology_negatives_20260922.md) | MA 形态负例纠正 v6：数据通过，3060 A组训练中 |  |
 | 2026-09-22 | [`p1_ma_morphology_padding_diagnosis_20260922.md`](p1_ma_morphology_padding_diagnosis_20260922.md) | A 组评估冲突：验证补边不同，固定画布模型对 16 像素位移脆弱 |  |

@@ -10811,17 +10811,21 @@ experiments:
 
   - experiment_id: exp-spike-v128-recent-20260923-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3489d2a8cd37cf4bbabbebde7865e70134bafe84
-    status: active
+    source_commit: 1387ad9355a032884506f0d679133cedf2ae1a3d
+    status: rejected
     question: How many V12.8 signals and profitable excursions ending in stops occurred over the last two months on 15m
       and 1h?
     single_variable: Frozen-rule descriptive time-window measurement; no entry, exit, cost or sizing changes.
-    result: Plan frozen before replay; data preparation and research implementation underway.
+    result: Descriptive replay complete for 1276 streams. Positive-edge interpretation rejected in this window; all four
+      matched mean net-bp excesses are negative and Holm p-values are 1. Ordinary 15m and 1h candidates 7060/1615,
+      closed 5842/1281, net win rates 26.8744/34.4262 percent. Joint candidates 2790/689, closed 2736/656.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     canonical_report: analysis/p1_spike_v128_recent_20260923.md
-    artifacts: []
+    artifacts:
+      - spike-v128-recent-20260923-delivery
     reuse_allowed: false
     notes: Fixed historical Binance 638-contract universe; explicit coverage, censoring, matched random controls and V12.6
-      identity baseline. Native event parity unverified.
+      identity baseline. 583 fully ready contracts; 55 have flat zero-volume recent inputs. Native event parity unverified.
+      Rejected describes unsupported positive edge, not failed execution. Historical-data restriction was canceled by owner.

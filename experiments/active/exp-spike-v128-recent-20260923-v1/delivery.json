@@ -1,0 +1,63 @@
+{
+  "experiment_id": "exp-spike-v128-recent-20260923-v1",
+  "generated_at": "2026-09-23T05:57:49.003847+00:00",
+  "status": "completed_descriptive_replay_no_validated_positive_excess",
+  "runner_source_commit": "1387ad9355a032884506f0d679133cedf2ae1a3d",
+  "audit_source_commit": "a95a348d1ac1c2881001c0a539ed432219492bb2",
+  "training_eligible": false,
+  "production_eligible": false,
+  "native_market_event_parity_verified": false,
+  "window": {
+    "start": "2026-07-23T00:00:00Z",
+    "end_exclusive": "2026-09-23T04:00:00Z",
+    "timeframes_minutes": [
+      15,
+      60
+    ]
+  },
+  "data_scope": {
+    "archived_contract_pool": 638,
+    "complete_ready_contracts": 583,
+    "flat_zero_volume_contracts": 55,
+    "completed_streams": 1276,
+    "stream_errors": 0
+  },
+  "source_identities_verified": 34,
+  "input_manifest": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/input_manifest.json",
+    "sha256": "15a251d5e6ea017702b6c3c644a41369a6b0809403d9ee17017ba2a52067db70",
+    "size_bytes": 2339697
+  },
+  "run_manifest": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1/manifest.json",
+    "sha256": "5292a493ec320feedab877fdabfb806731cc1d3f60a360bfe854212a2bfb5e8f",
+    "size_bytes": 137988
+  },
+  "run_identity": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1/identity.json",
+    "sha256": "53f225455e2c7ce396d62db527eac690ef75ad79a45e07f8bce4e86c0750bece",
+    "size_bytes": 69948
+  },
+  "summary_receipt": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/summary_v1/receipt.json",
+    "sha256": "51398e989705a70f2fd8c5c4ba878f8dcddc28840f10c01754dc84cd24229f42",
+    "size_bytes": 2773
+  },
+  "input_diagnostics_receipt": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/input_diagnostics_v1/receipt.json",
+    "sha256": "848dd6546faa5747205d27927239db910842846dd379729952f622cee48f7ff7",
+    "size_bytes": 561
+  },
+  "independent_pvalue_audit": {
+    "path": "experiments/active/exp-spike-v128-recent-20260923-v1/pvalue_audit.json",
+    "sha256": "8ea21e31d544beaa741af5f638de262856f955e940166ab1640981f82afc1f15",
+    "size_bytes": 832
+  },
+  "bulk_archive": {
+    "path": "archive/consolidated/spike_v128_recent_20260923/frozen_replay_and_ledgers_v1.tar",
+    "sha256": "b6c79f100c2d0a914c7c64d8571434b3e98e26b8488640f5a67cc3124de4c579",
+    "size_bytes": 36648960
+  },
+  "storage_note": "Large raw-market inputs remain under ignored data/research; complete generated ledgers remain locally at experiment paths and in the tar archive, outside git. Compact tables, plot, run identity/manifest and receipts are committed. Input source paths and hashes are in the archived input manifest. A source-only clone cannot reproduce the exact frozen inputs without those assets.",
+  "result_note": "Four groups overlap and cannot be summed as unique trades. Every paired mean net-bp excess is negative; four Holm p-values equal 1. Hints have no sizing, added fills or portfolio PnL."
+}
