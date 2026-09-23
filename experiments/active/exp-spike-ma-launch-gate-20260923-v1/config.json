@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-spike-ma-launch-gate-20260923-v1",
+  "baseline": "SPIKE V12.6/V12.8 original gated long+short; not breakout joints",
+  "arms": [
+    "baseline",
+    "ma_density_only",
+    "ma_hard",
+    "ma_grade_a"
+  ],
+  "primary_arms": [
+    "ma_hard",
+    "ma_grade_a"
+  ],
+  "minutes": 15,
+  "expected_symbols": 638,
+  "start": "2024-09-10T00:00:00Z",
+  "split": "2025-09-10T00:00:00Z",
+  "end": "2026-05-01T00:00:00Z",
+  "parent_input_identity": "experiments/active/exp-spike-v112-support-20260919-v1/results/run_v1/identity.json",
+  "reference_pack": "experiments/active/exp-ma-dense-launch-pine-20260923-v1/reference_pack.json",
+  "core_selection": "stage1 hard+distance<=0.5 for each core, pick minimum(distance,core_bars), then selected core stage2; no fallback",
+  "confirmation_bars": 5,
+  "chart_warmup_bars": 1500,
+  "higher_warmup_bars": 1500,
+  "seed": 923223,
+  "bootstrap_reps": 4000,
+  "permutation_reps": 10000,
+  "roundtrip_cost": 0.002,
+  "arm_r": 2.0,
+  "trail_atr": 4.0,
+  "minimum_later_closed": 100,
+  "primary_holm_family": 2,
+  "training_eligible": false,
+  "production_eligible": false
+}
