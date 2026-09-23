@@ -183,8 +183,9 @@ node --test tests/vision_research/chart_capture.test.cjs
 Provider sources: [chat completions](https://docs.bigmodel.cn/api-reference/模型-api/对话补全),
 [GLM-5.3-Flash vision](https://docs.bigmodel.cn/cn/guide/models/vlm/glm-5.3-flash).
 The default is `glm-5.3-flash`; its thinking mode cannot be disabled. The client
-uses a bounded reasoning budget and validates the returned JSON against the
-local `Decision` schema. JSON mode is limited to the live-verified model as
+uses owner-selected `reasoning_effort=max` from version 0.4.1 for GLM-5.3
+Flash/FlashX, with the existing output-token and timeout limits, and validates
+the returned JSON against the local `CurrentDecision` schema. JSON mode is limited to the live-verified model as
 described above. No provider-side storage opt-out is asserted.
 Saved credentials include the provider identity; legacy Gemini keys are never
 sent to BigModel. The supplied owner key stays in ignored private local settings.

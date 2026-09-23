@@ -96,7 +96,7 @@ def test_analyze_sends_candidate_then_eight_references_as_png_data_urls() -> Non
     assert body["stream"] is False
     assert body["max_tokens"] == MAX_OUTPUT_TOKENS
     assert body["thinking"] == {"type": "enabled"}
-    assert body["reasoning_effort"] == "low"
+    assert body["reasoning_effort"] == "max"
     assert body["response_format"] == {"type": "json_object"}
     assert "tools" not in body
 
@@ -148,6 +148,7 @@ def test_check_connection_uses_one_minimal_text_completion_and_reports_token_use
     assert bodies[0]["stream"] is False
     assert "response_format" not in bodies[0]  # The connection test requests plain OK.
     assert "thinking" in bodies[0]  # GLM-5.3 Flash only supports enabled thinking.
+    assert bodies[0]["reasoning_effort"] == "max"
     assert "少量 token" in result["message"]
     assert "尚未验证图片审阅" in result["message"]
 

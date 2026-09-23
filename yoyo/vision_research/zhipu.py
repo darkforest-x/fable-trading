@@ -204,9 +204,8 @@ def _image_part(image: ImageInput) -> dict[str, Any]:
 def _thinking_options(model: str) -> dict[str, Any]:
     """Use documented GLM-5.3 settings; leave other vision models at defaults."""
     if model in {"glm-5.3-flash", "glm-5.3-flashx"}:
-        # Official vision docs require thinking enabled for this family. Low is
-        # the supported minimum effort; disabled is not supported by GLM-5.3.
-        return {"thinking": {"type": "enabled"}, "reasoning_effort": "low"}
+        # The owner selected max effort. This family requires thinking enabled.
+        return {"thinking": {"type": "enabled"}, "reasoning_effort": "max"}
     return {}
 
 
