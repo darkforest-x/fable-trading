@@ -9,7 +9,7 @@ const sourcePath = path.join(root, 'yoyo/vision_research/static/replay.js');
 const htmlPath = path.join(root, 'yoyo/vision_research/static/index.html');
 const source = fs.readFileSync(sourcePath, 'utf8')
   .replace(/^export function /gm, 'function ')
-  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, buildReplayCasesQuery, buildReplayCaseSessionBody, visibleReplayCaseOutcome, canRevealReplayCaseOutcome, replayCaseJudgmentOutcomeKnown, replayTargetValueForSession, replayOutcomeCodeLabel, canSaveFirstJudgment, canAnalyzeObservation, comparisonCanPrepare, comparisonCanRunArm, comparisonArmStatusLabel, comparisonFailedMeansUnknown, replayObservationHasJudgmentOrComparison, comparisonResponseIsCurrent, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel };';
+  + '\n;globalThis.__replayApi = { shanghaiInputToMs, msToShanghaiInput, validReplayStep, buildReplayMoveBody, buildReplayCasesQuery, buildReplayCaseSessionBody, visibleReplayCaseOutcome, canRevealReplayCaseOutcome, replayCaseJudgmentOutcomeKnown, replayTargetValueForSession, replayOutcomeCodeLabel, canSaveFirstJudgment, canAnalyzeObservation, comparisonCanPrepare, comparisonCanRunArm, comparisonArmStatusLabel, comparisonFailedMeansUnknown, replayObservationHasJudgmentOrComparison, comparisonResponseIsCurrent, disclosedReplayRows, replayResponseIsCurrent, createReplayPlayback, defaultStartForSegment, independenceLabel, replaySignalMarkers, replayPriceFormat, replaySignalObservation, replayRequiresHuman };';
 
 function loadApi() {
   const context = vm.createContext({ URLSearchParams });
@@ -249,4 +249,52 @@ test('stale request results cannot cross token or session boundaries', () => {
   assert.equal(api.replayResponseIsCurrent({ token: 2, sessionId: 'a' }, { token: 2, sessionId: 'a' }), true);
   assert.equal(api.replayResponseIsCurrent({ token: 1, sessionId: 'a' }, { token: 2, sessionId: 'a' }), false);
   assert.equal(api.replayResponseIsCurrent({ token: 2, sessionId: 'a' }, { token: 2, sessionId: 'b' }), false);
+});
+
+
+test('signal marker belongs to its close bar and never invents a future or out-of-window candle', () => {
+  const api = loadApi();
+  const close = Date.parse('2026-09-18T13:00:00Z');
+  const session = { timeframe: '1H', cursor_ms: close, case: { signal_close_ms: close, side: 'long' },
+    chart: { candles: [{ t: close - 3600000, c: .00024 }] } };
+  const markers = api.replaySignalMarkers(session, '#123456');
+  assert.equal(markers.length, 1);
+  assert.equal(markers[0].time, (close - 3600000) / 1000);
+  assert.equal(markers[0].shape, 'arrowUp');
+  assert.equal(api.replaySignalMarkers({ ...session, cursor_ms: close - 1 }, '#123456').length, 0);
+  assert.equal(api.replaySignalMarkers({ ...session, chart: { candles: [] } }, '#123456').length, 0);
+  assert.equal(api.replaySignalMarkers({ ...session, case: null }, '#123456').length, 0);
+  assert.equal(api.replaySignalMarkers({ ...session, case: { ...session.case, side: 'short' } }, '#123456')[0].shape, 'arrowDown');
+});
+
+test('small coin prices retain meaningful decimals without reading any future prices', () => {
+  const api = loadApi();
+  const format = api.replayPriceFormat([{ o: .00024, h: .00025, l: .00023, c: .000245 }]);
+  assert.equal(format.precision, 8);
+  assert.equal((.000245).toFixed(format.precision), '0.00024500');
+  assert.equal(api.replayPriceFormat([{ o: 60000, h: 61000, l: 59000, c: 60500 }]).precision, 2);
+});
+
+test('signal CTA reuses an existing failed attempt instead of a new uncalled observation', () => {
+  const api = loadApi();
+  const session = { id: 's', case: { signal_close_ms: 1000 }, observations: [
+    { id: 'failed', cursor_ms: 1000, run_id: 'r', status: 'failed' },
+    { id: 'other', cursor_ms: 2000 }, { id: 'new', cursor_ms: 1000 },
+  ] };
+  const active = { id: 'new', session_id: 's', cursor_ms: 1000 };
+  assert.equal(api.replaySignalObservation(session, active).id, 'failed');
+  const detailed = { id: 'failed', session_id: 's', cursor_ms: 1000, run: { status: 'failed' } };
+  assert.equal(api.replaySignalObservation(session, detailed), detailed);
+  assert.equal(api.replaySignalObservation(null, detailed), null);
+});
+
+test('only explicit retrospective learning bypasses the blind session human gate', () => {
+  const api = loadApi();
+  const session = { mode: 'blind', seen_until_ms: 2000 };
+  const observation = { id: 'o', cursor_ms: 1000, mode: 'free', image_url: '/api/images/o' };
+  assert.equal(api.replayRequiresHuman(session, observation), true);
+  const learning = { ...observation, retrospective_learning: true, independence: 'future_seen_in_session' };
+  assert.equal(api.replayRequiresHuman(session, learning), false);
+  assert.equal(api.canAnalyzeObservation(session, learning, { id: 'o', status: 'loaded' }), true);
+  assert.equal(api.canSaveFirstJudgment(session, learning), false);
 });

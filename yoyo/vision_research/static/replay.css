@@ -51,6 +51,15 @@
 .replay-case-outcome-details dd { margin: 3px 0 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .replay-main { display: grid; gap: 16px; min-width: 0; }
 .replay-chart-panel { overflow: hidden; }
+.replay-signal-guide { display: grid; gap: 10px; padding: 18px 20px; border-bottom: 1px solid var(--border); background: var(--accent-soft); }
+.replay-signal-heading,.replay-signal-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.replay-signal-heading { justify-content: space-between; }
+.replay-signal-heading strong { color: var(--text); font-size: 15px; }
+#replay-signal-title,#replay-observation-heading { scroll-margin-top: 120px; }
+.replay-signal-guide p { margin: 0; font-size: 13px; line-height: 1.55; }
+.replay-signal-guide .field-help { color: var(--text-soft); }
+.replay-signal-result { padding: 10px 12px; border-radius: 8px; background: var(--surface); color: var(--text); overflow-wrap: anywhere; }
+.replay-signal-actions .button { white-space: normal; }
 .replay-toolbar { align-items: flex-start; padding-bottom: 12px; }
 .replay-toolbar .chart-title { display: grid; gap: 6px; }
 .replay-cursor-label { flex: 0 0 auto; padding: 4px 8px; border-radius: 6px; color: var(--text-soft); background: var(--surface-soft); font-size: 13px; font-variant-numeric: tabular-nums; }

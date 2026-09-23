@@ -417,7 +417,7 @@ function markApiReachable() {
     state.statusError = '';
     state.statusErrorIsTransport = false;
   }
-  setHealth(true, '本地 API 已连接');
+  setHealth(true, '本地服务已连接');
   if (changed && state.tab === 'settings') renderSettings();
 }
 
@@ -1315,7 +1315,7 @@ async function loadStatus() {
   } catch (error) {
     state.statusError = error.message || '无法连接本地 API。';
     state.statusErrorIsTransport = error.code === 'LOCAL_API_UNREACHABLE';
-    if (state.apiReachable !== false) setHealth(true, '本地 API 已连接');
+    if (state.apiReachable !== false) setHealth(true, '本地服务已连接');
   } finally {
     state.statusPolling = false;
     renderEligibility();
@@ -1868,7 +1868,7 @@ async function saveConfig(event) {
     state.status = status;
     state.statusError = '';
     state.model = asText(status.model, model);
-    setHealth(true, '本地 API 已连接');
+    setHealth(true, '本地服务已连接');
     showInlineSuccess('config-success', '模型与密钥已保存在本机，重启后自动读取。');
   } catch (error) {
     showInlineError('config-error', error.message || '保存设置失败。');

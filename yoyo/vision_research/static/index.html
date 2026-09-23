@@ -232,6 +232,18 @@
 
             <div class="replay-main">
               <section class="panel replay-chart-panel" aria-labelledby="replay-chart-heading">
+                <div class="replay-signal-guide" aria-label="当前历史信号与 AI 识别">
+                  <div class="replay-signal-heading"><strong id="replay-signal-title">先从左侧选择一个历史信号</strong><span id="replay-signal-ai-status" class="source-chip" role="status" aria-live="polite">AI 尚未调用</span></div>
+                  <p id="replay-signal-position" class="replay-source-note">选择案例 → 识别信号当时的图 → 播放后续行情。</p>
+                  <div class="replay-signal-actions">
+                    <button id="replay-signal-analyze" class="button button-primary" type="button" disabled>识别这个信号 · 调用一次 AI</button>
+                    <button id="replay-signal-return" class="button button-secondary" type="button" disabled>回到信号</button>
+                    <button id="replay-signal-input" class="button button-quiet" type="button" hidden>查看 AI 输入与详情</button>
+                  </div>
+                  <p id="replay-signal-help" class="field-help">播放只推进行情；点击识别才调用智谱。顶部 API 连接状态不代表已经识别。</p>
+                  <p id="replay-signal-result" class="replay-signal-result" role="status" aria-live="polite" hidden></p>
+                  <div id="replay-signal-error" class="inline-error" role="alert" hidden></div>
+                </div>
                 <div class="chart-toolbar replay-toolbar">
                   <div class="chart-title"><h3 id="replay-chart-heading">选择或创建一个回放会话</h3><span id="replay-mode-badge" class="source-chip" hidden></span></div>
                   <span id="replay-cursor-label" class="replay-cursor-label">尚未载入历史图表</span>

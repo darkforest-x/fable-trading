@@ -59,6 +59,23 @@ def create_case(client, cases, bucket="all", mode="blind"):
     return r.json()
 
 
+def advance(client, session, bars):
+    steps = [10] * (bars // 10) + [5] * ((bars % 10) // 5) + [1] * (bars % 5)
+    for step in steps:
+        response = move(client, session, step)
+        assert response.status_code == 200, response.text
+        session = response.json()
+    return session
+
+
+def freeze_at_signal(client, session, retrospective=False, expected_cursor_ms=None):
+    return client.post(
+        f'/api/replay/sessions/{session["id"]}/freeze',
+        json={"expected_cursor_ms": session["cursor_ms"] if expected_cursor_ms is None else expected_cursor_ms,
+              "at_signal": True, "retrospective": retrospective},
+    )
+
+
 def test_blind_case_omits_future_results_and_unlocks_only_after_judgment(cases_client):
     client, cases, _ = cases_client
     listing = client.get('/api/replay/cases').json()
@@ -196,3 +213,99 @@ def test_catalog_rejects_altered_ledger_and_source_before_loading_pickle(tmp_pat
         HistoricalCaseCatalog(tmp_path)._load(V9)
     with pytest.raises(SourceError):
         c.load_history(case)
+
+
+def test_at_signal_freeze_after_playback_uses_exact_120_bar_prefix_without_moving_cursor(cases_client):
+    client, cases, app = cases_client
+    session = advance(client, create_case(client, cases, mode="free"), 52)
+    signal_ms = cases.item["signal_close_ms"]
+    assert session["cursor_ms"] == signal_ms + 52 * DURATION
+
+    response = freeze_at_signal(client, session)
+    assert response.status_code == 200, response.text
+    obs = response.json()
+    assert obs["cursor_ms"] == signal_ms
+    assert obs["mode"] == "free"
+    assert obs["retrospective_learning"] is False
+    assert obs["chart"]["provenance"]["observed_at_ms"] == signal_ms
+    assert obs["chart"]["provenance"]["visible_end_ms"] == signal_ms
+    assert len(obs["chart"]["candles"]) == 120
+    assert obs["chart"]["candles"][-1]["t"] + DURATION == signal_ms
+
+    stored_session = app.state.replay._get("replay_sessions", session["id"])
+    target_index = next(i for i, row in enumerate(stored_session["rows"])
+                        if row["t"] + DURATION == signal_ms)
+    assert obs["chart"]["candles"] == stored_session["rows"][target_index - 119:target_index + 1]
+    assert client.get(f'/api/replay/sessions/{session["id"]}').json()["cursor_ms"] == session["cursor_ms"]
+
+    # Rows after the signal may change without changing the frozen model input.
+    for row in stored_session["rows"][target_index + 1:]:
+        for field in ("o", "h", "l", "c"):
+            row[field] *= 999
+    app.state.replay._save_session(stored_session)
+    reread = client.get(f'/api/replay/observations/{obs["id"]}').json()
+    assert reread["chart"] == obs["chart"]
+    assert reread["image_sha256"] == obs["image_sha256"]
+
+    result = analyze(client, obs)
+    assert result.status_code == 200, result.text
+    assert Provider.calls[0]["image"].sha256 == obs["image_sha256"]
+    assert result.json()["run"]["provenance"]["visible_end_ms"] == signal_ms
+
+
+def test_at_signal_rejects_noncase_nonexact_unreached_and_stale_cursor(cases_client):
+    client, cases, app = cases_client
+    ordinary = client.post("/api/replay/sessions", json={"symbol": "ETH-USDT-SWAP", "timeframe": "15m",
+                                                           "mode": "free", "start_ms": START + 201 * DURATION}).json()
+    assert freeze_at_signal(client, ordinary).status_code == 409
+
+    session = create_case(client, cases, mode="free")
+    earlier = move(client, session, -1).json()
+    assert freeze_at_signal(client, earlier).status_code == 409
+    current = move(client, earlier, 1).json()
+    stale = freeze_at_signal(client, current, expected_cursor_ms=current["cursor_ms"] - DURATION)
+    assert stale.status_code == 409
+
+    stored = app.state.replay._get("replay_sessions", current["id"])
+    stored["case_record"]["signal_close_ms"] += 1
+    app.state.replay._save_session(stored)
+    nonexact = freeze_at_signal(client, current)
+    assert nonexact.status_code == 409
+
+
+def test_retrospective_blind_signal_is_explicit_free_learning_and_cannot_be_human_labelled(cases_client):
+    client, cases, app = cases_client
+    session = create_case(client, cases)
+    original = freeze(client, session)
+
+    # Existing persisted observations use this pre-feature identity payload.
+    legacy_identity = hashlib.sha256(json.dumps(
+        [session["id"], original["chart_sha256"], original["criteria"],
+         app.state.replay.store.get_references(), original["model"], original["prompt_version"]],
+        ensure_ascii=False, allow_nan=False, separators=(",", ":"),
+    ).encode()).hexdigest()
+    stored_original = app.state.replay._get("replay_observations", original["id"])
+    stored_original["identity_key"] = legacy_identity
+    app.state.replay._save_obs(stored_original)
+    assert freeze_at_signal(client, session).json()["id"] == original["id"]
+
+    later = move(client, session, 1).json()
+
+    assert freeze_at_signal(client, later).status_code == 409
+    response = freeze_at_signal(client, later, retrospective=True)
+    assert response.status_code == 200, response.text
+    retrospective = response.json()
+    assert retrospective["id"] != original["id"]
+    assert retrospective["mode"] == "free"
+    assert retrospective["retrospective_learning"] is True
+    assert retrospective["independence"] == "future_seen_in_session"
+    assert retrospective["cursor_ms"] == cases.item["signal_close_ms"]
+    assert judge(client, retrospective).status_code == 409
+
+    result = analyze(client, retrospective)
+    assert result.status_code == 200
+    assert result.json()["independence"] == "future_seen_in_session"
+    again = freeze_at_signal(client, later, retrospective=True)
+    assert again.json()["id"] == retrospective["id"]
+    assert analyze(client, retrospective).json()["run_id"] == result.json()["run_id"]
+    assert len(Provider.calls) == 1

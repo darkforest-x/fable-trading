@@ -67,7 +67,7 @@ test('an HTTP provider or validation error keeps local API marked reachable', as
   await assert.rejects(harness.api.apiJson('/analyze'), /模型返回内容格式无效/);
   assert.equal(harness.state.apiReachable, true);
   assert.equal(harness.state.automaticStale, false);
-  assert.equal(harness.healthText.textContent, '本地 API 已连接');
+  assert.equal(harness.healthText.textContent, '本地服务已连接');
 });
 
 test('malformed JSON after an HTTP response remains a format result, not offline', async () => {
@@ -78,7 +78,7 @@ test('malformed JSON after an HTTP response remains a format result, not offline
 
   assert.equal(await harness.api.apiJson('/status'), null);
   assert.equal(harness.state.apiReachable, true);
-  assert.equal(harness.healthText.textContent, '本地 API 已连接');
+  assert.equal(harness.healthText.textContent, '本地服务已连接');
 });
 
 test('transport failure while reading a response body marks API unavailable', async () => {

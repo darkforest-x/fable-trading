@@ -119,7 +119,7 @@ export function comparisonCanRunArm(mode, session, observation, imageState) {
       || !comparison?.data_sha256 || Number(comparison?.input_window?.bar_count) !== 120) return false;
   const arm = Array.isArray(comparison.arms) ? comparison.arms.find((item) => item.mode === mode) : null;
   if (!arm || arm.status !== 'pending') return false;
-  if ((session.mode === 'blind' || observation.mode === 'blind') && !observation.human) return false;
+  if (replayRequiresHuman(session, observation) && !observation.human) return false;
   return Boolean(observation.image_url && imageState?.id === observation.id && imageState.status === 'loaded');
 }
 
@@ -142,12 +142,49 @@ export function comparisonResponseIsCurrent(request, current) {
 
 export function canAnalyzeObservation(session, observation, imageState) {
   if (!session || !observation?.id || !observation.image_url || observation.run_id || observation.run) return false;
-  if ((session.mode === 'blind' || observation.mode === 'blind') && !observation.human) return false;
+  if (replayRequiresHuman(session, observation) && !observation.human) return false;
   return imageState?.id === observation.id && imageState.status === 'loaded';
 }
 
 export function disclosedReplayRows(session) {
   return Array.isArray(session?.chart?.candles) ? session.chart.candles : [];
+}
+
+export function replayRequiresHuman(session, observation) {
+  if (observation?.retrospective_learning === true && observation.mode === 'free') return false;
+  return session?.mode === 'blind' || observation?.mode === 'blind';
+}
+
+export function replaySignalObservation(session, activeObservation) {
+  const cutoff = Number(session?.case?.signal_close_ms);
+  if (!Number.isSafeInteger(cutoff) || cutoff <= 0) return null;
+  const items = (session.observations || []).filter((item) => Number(item.cursor_ms) === cutoff);
+  const active = activeObservation?.session_id === session.id && Number(activeObservation.cursor_ms) === cutoff
+    ? activeObservation : null;
+  // An existing attempt takes precedence: the main CTA must not spend again after a failed request.
+  const attempted = items.filter((item) => item.run_id).at(-1);
+  if (attempted) return active?.id === attempted.id ? active : attempted;
+  return active || items.at(-1) || null;
+}
+
+export function replaySignalMarkers(session, color) {
+  const cutoff = Number(session?.case?.signal_close_ms);
+  const duration = timeframeDurationMs(session?.timeframe);
+  const open = cutoff - duration;
+  if (!Number.isSafeInteger(cutoff) || !duration || cutoff > Number(session?.cursor_ms)
+      || !['long', 'short'].includes(session?.case?.side)
+      || !disclosedReplayRows(session).some((row) => Number(row.t) === open)) return [];
+  const short = session.case.side === 'short';
+  return [{ time: open / 1000, position: short ? 'aboveBar' : 'belowBar',
+    shape: short ? 'arrowDown' : 'arrowUp', color, text: short ? 'SPIKE 原信号 · 空' : 'SPIKE 原信号 · 多' }];
+}
+
+export function replayPriceFormat(rows) {
+  const values = rows.flatMap((row) => [row.o, row.h, row.l, row.c])
+    .filter((value) => Number.isFinite(value) && value > 0);
+  const minimum = values.length ? Math.min(...values) : 1;
+  const precision = Math.min(10, Math.max(2, 4 - Math.floor(Math.log10(minimum))));
+  return { type: 'price', precision, minMove: 10 ** -precision };
 }
 
 export function replayResponseIsCurrent(request, current) {
@@ -228,6 +265,7 @@ const state = {
   comparisonError: '',
   defaultCriteria: '', criteriaEdited: false,
   busy: '', globalError: '', notice: '',
+  signalPhase: '', signalError: '',
   observationRequestToken: 0, sessionRequestToken: 0, sessionListRequestToken: 0, pendingSessionId: null, operationToken: 0,
 };
 
@@ -783,7 +821,7 @@ function renderHuman() {
   const existing = byId('replay-human-existing');
   const form = byId('replay-human-form');
   const allowed = canSaveFirstJudgment(session, observation);
-  const blind = session?.mode === 'blind' || observation?.mode === 'blind';
+  const blind = replayRequiresHuman(session, observation);
   const outcomeKnown = replayCaseJudgmentOutcomeKnown(session?.case, observation);
   const exposedBeforeHuman = !observation?.human && Boolean(observation?.comparison_requested || observation?.run_id
     || observation?.independence === 'ai_requested_before_human_judgment');
@@ -833,7 +871,7 @@ function renderAi() {
   const gate = byId('replay-blind-gate');
   const button = byId('replay-analyze');
   const hasRun = Boolean(observation?.run_id || observation?.run);
-  const blindNeedsHuman = Boolean((state.session?.mode === 'blind' || observation?.mode === 'blind')
+  const blindNeedsHuman = Boolean(replayRequiresHuman(state.session, observation)
     && !observation?.human);
   button.disabled = Boolean(state.busy) || !canAnalyzeObservation(state.session, observation, state.imageState) || hasRun || blindNeedsHuman;
   button.textContent = state.busy === 'analyze' ? '正在请求模型…' : hasRun ? '本观察已调用模型' : '手动调用模型';
@@ -905,7 +943,7 @@ function renderComparison() {
   const observation = state.activeObservation;
   const session = state.session;
   const packageInfo = observation?.comparison;
-  const blindNeedsHuman = Boolean(observation && (session?.mode === 'blind' || observation.mode === 'blind') && !observation.human);
+  const blindNeedsHuman = Boolean(observation && replayRequiresHuman(session, observation) && !observation.human);
   const imageMissing = Boolean(observation && (!observation.image_url
     || state.imageState.id === observation.id && state.imageState.status === 'error'));
   const prepare = byId('replay-comparison-prepare');
@@ -1019,11 +1057,58 @@ function renderFollowups() {
   target.querySelectorAll('img').forEach((image) => image.addEventListener('error', () => image.remove(), { once: true }));
 }
 
+function renderSignalGuide() {
+  const session = state.session;
+  const signal = session?.case;
+  const observation = replaySignalObservation(session, state.activeObservation);
+  const run = observation?.run;
+  const attempted = Boolean(observation?.run_id);
+  const running = state.busy === 'signal' && state.signalPhase === 'analyze'
+    || run?.status === 'running' || observation?.status === 'running';
+  const failed = ['failed', 'interrupted'].includes(run?.status || observation?.status);
+  const duration = timeframeDurationMs(session?.timeframe);
+  const delta = signal && duration ? Math.round((Number(session.cursor_ms) - Number(signal.signal_close_ms)) / duration) : 0;
+  const futureSeen = signal && Number(session.seen_until_ms) > Number(signal.signal_close_ms);
+  const signalInView = replaySignalMarkers(session, '').length > 0;
+  const blindNeedsHuman = session?.mode === 'blind' && !futureSeen && !observation?.human && !attempted;
+  const pending = Boolean(state.busy);
+  byId('replay-signal-title').textContent = signal
+    ? `SPIKE 原信号 · ${SIDE_LABELS[signal.side] || '未知'} · ${formatTime(signal.signal_close_ms)}`
+    : session ? '当前是自由选时回放，尚未绑定历史信号' : '先从左侧选择一个历史信号';
+  byId('replay-signal-position').textContent = signal
+    ? `${signal.family || '历史策略信号'} · ${delta === 0 ? '现在正停在信号收盘' : delta > 0 ? `当前已到信号后 ${delta} 根 K 线` : `距离信号还有 ${-delta} 根 K 线`} · ${signalInView ? '图中箭头标记原策略信号' : delta < 0 ? '信号尚未进入图中' : '信号已不在当前 120 根图内，可回看冻结输入'}`
+    : '选择案例 → 识别信号当时的图 → 播放后续行情。';
+  byId('replay-signal-ai-status').textContent = running ? 'AI 调用中…'
+    : failed ? 'AI 调用失败' : attempted ? 'AI 已调用' : 'AI 尚未调用';
+  const action = byId('replay-signal-analyze');
+  action.textContent = state.busy === 'signal'
+    ? state.signalPhase === 'analyze' ? '正在调用智谱…' : '正在读取信号输入…'
+    : attempted ? (running ? '刷新 AI 调用状态' : '查看 AI 结果')
+      : blindNeedsHuman ? '先记录我的判断，再调用 AI'
+        : session?.mode === 'blind' && futureSeen ? '以学习模式识别信号 · 调用一次 AI'
+          : '识别这个信号 · 调用一次 AI';
+  action.disabled = pending || !signal || delta < 0;
+  byId('replay-signal-return').disabled = pending || !signal || delta === 0 || session.mode === 'blind' && delta > 0;
+  byId('replay-signal-input').hidden = !observation;
+  byId('replay-signal-input').disabled = pending;
+  byId('replay-signal-help').textContent = signal
+    ? delta < 0 ? '先播放到信号收盘，再识别。当播放到该信号时会自动暂停。'
+      : blindNeedsHuman ? '盲审先记录你的判断。点击上方按钮会冻结信号图并打开判断表单；保存后再点击调用 AI。'
+        : `${futureSeen ? '你已看过后续行情，本次仅作学习。' : ''}AI 只看信号收盘及以前的 120 根 K 线；播放不调用模型，已有调用不自动重试。`
+    : '从左侧历史信号案例点击进入；自由选时回放可在下方冻结当前图表。顶部 API 已连接不代表 AI 已识别。';
+  const result = byId('replay-signal-result');
+  result.textContent = run?.decision
+    ? `AI：${VERDICT_LABELS[run.decision.verdict] || '未判定'} · ${STATE_LABELS[run.decision.current_state] || '状态未提供'}。${run.decision.summary || ''}`
+    : failed ? `本次未取得有效判断：${(run?.error || '打开调用记录查看原因').replace(/[。.]$/, '')}。失败不代表形态不符合。`
+      : attempted ? '已有调用记录，点击“查看 AI 结果”读取详情；不会重新请求模型。' : '';
+  result.hidden = !result.textContent;
+  showInline('replay-signal-error', state.signalError);
+}
+
 function renderSession() {
   const session = state.session;
   const observation = state.activeObservation;
   const hasSession = Boolean(session);
-  const frozenHere = Boolean(observation?.image_url && Number(observation.cursor_ms) === Number(session?.cursor_ms));
   const mode = session?.mode;
   byId('replay-chart-heading').textContent = hasSession ? `${session.symbol} · ${session.timeframe}` : '选择或创建一个回放会话';
   byId('replay-mode-badge').textContent = mode === 'blind' ? '盲审 · 只向前' : mode === 'free' ? '自由回放' : '';
@@ -1031,28 +1116,25 @@ function renderSession() {
   byId('replay-cursor-label').textContent = hasSession
     ? `当前游标 ${formatTime(session.cursor_ms)} · 已看至 ${formatTime(session.seen_until_ms)}`
     : '尚未载入历史图表';
-  byId('replay-chart-caption').textContent = frozenHere
-    ? '冻结输入 · 服务器标准图 · 与本次模型输入相同'
-    : hasSession ? '当前历史前缀 · 只绘制 API 返回的已披露 K 线 · 北京时间' : '图表显示已披露的历史前缀 · 北京时间';
+  byId('replay-chart-caption').textContent = hasSession ? '当前历史前缀 · SPIKE 箭头是原策略信号，AI 结论显示在上方 · 北京时间' : '图表显示已披露的历史前缀 · 北京时间';
   setHidden(byId('replay-chart-empty'), hasSession);
   const chartElement = byId('replay-chart');
   const standardImageElement = byId('replay-standard-image');
-  setHidden(chartElement, !hasSession || frozenHere || !replayActive);
+  setHidden(chartElement, !hasSession || !replayActive);
   const standardImage = byId('replay-standard-image-src');
   const observationImage = byId('replay-observation-image');
-  const hasStandard = frozenHere && bindObservationImage(standardImage, observation, '冻结回放输入：服务器标准图');
-  setHidden(standardImageElement, !hasStandard);
-  if (!frozenHere) standardImage.removeAttribute('src');
+  setHidden(standardImageElement, true);
+  standardImage.removeAttribute('src');
   byId('replay-freeze').disabled = Boolean(state.busy) || !hasSession;
   byId('replay-freeze').textContent = state.busy === 'freeze' ? '正在冻结…' : '冻结当前图表';
   byId('replay-observation-status').textContent = observation ? observation.status || '已冻结' : '';
   setHidden(byId('replay-observation-status'), !observation);
   byId('replay-observation-time').textContent = observation ? formatTime(observation.cursor_ms) : '';
   setHidden(byId('replay-observation-empty'), Boolean(observation));
-  const imageAvailable = Boolean(observation && !frozenHere
+  const imageAvailable = Boolean(observation
     && bindObservationImage(observationImage, observation, '冻结回放输入：模型实际看到的标准图'));
   if (!imageAvailable) observationImage.removeAttribute('src');
-  setHidden(byId('replay-observation-figure'), !imageAvailable || frozenHere);
+  setHidden(byId('replay-observation-figure'), !imageAvailable);
   const originalUrl = observation?.id ? apiImageUrl(observation.image_url) : '';
   const originalLink = byId('replay-view-original');
   originalLink.href = originalUrl || '#';
@@ -1108,6 +1190,7 @@ function renderSession() {
   byId('replay-save-followup').textContent = state.busy === 'followup' ? '正在保存…' : '保存回访';
   showInline('replay-observations-error', state.errors.observations || state.observationError);
   if (hasSession && replayActive) updateReplayChart(session);
+  renderSignalGuide();
   renderReplayCaseOutcome();
   renderHuman();
   renderAi();
@@ -1145,6 +1228,9 @@ function chartPalette() {
 
 function updateReplaySeries(rows) {
   if (!replayCandles) return;
+  const priceFormat = replayPriceFormat(rows);
+  replayCandles.applyOptions({ priceFormat });
+  replayAverages.forEach((series) => series.applyOptions({ priceFormat }));
   replayCandles.setData(rows.map((row) => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
   replayAverages.forEach((series, index) => {
     const field = MA_KEYS[index];
@@ -1176,8 +1262,12 @@ function updateReplayChart(session) {
     });
     replayResizeObserver.observe(host);
   }
-  if (session.chart?.chart_sha256 && session.chart.chart_sha256 === chartDataHash) return;
+  if (session.chart?.chart_sha256 && session.chart.chart_sha256 === chartDataHash) {
+    replayCandles.setMarkers(replaySignalMarkers(session, token('--accent')));
+    return;
+  }
   updateReplaySeries(rows);
+  replayCandles.setMarkers(replaySignalMarkers(session, token('--accent')));
   replayChart.applyOptions(chartPalette());
   replayChart.timeScale().fitContent();
   chartDataHash = session.chart?.chart_sha256 || '';
@@ -1188,6 +1278,7 @@ function applyReplayTheme() {
   replayChart.applyOptions(chartPalette());
   replayCandles?.applyOptions({ upColor: token('--chart-up'), downColor: token('--chart-down'), wickUpColor: token('--chart-up'), wickDownColor: token('--chart-down') });
   replayAverages.forEach((series, index) => series.applyOptions({ color: token(`--ma-${MA_KEYS[index]}`) }));
+  replayCandles?.setMarkers(replaySignalMarkers(state.session, token('--accent')));
 }
 
 function teardownReplayChart() {
@@ -1286,6 +1377,7 @@ async function loadSession(id) {
   state.globalError = '';
   state.observationError = '';
   state.caseOutcomeError = '';
+  state.signalError = '';
   try {
     const session = await apiJson(`/replay/sessions/${encodeURIComponent(id)}`);
     if (!sameSessionResponse(operation, tokenValue, id)) return;
@@ -1301,6 +1393,8 @@ async function loadSession(id) {
   } finally {
     if (ticket === state.operationToken && tokenValue === state.sessionRequestToken) finishBusy(operation);
   }
+  const signalObservation = replaySignalObservation(state.session, null);
+  if (state.session?.id === id && signalObservation && !state.busy) await loadObservation(signalObservation.id);
 }
 
 async function createSession() {
@@ -1329,6 +1423,7 @@ async function createSession() {
     if (operation.ticket !== state.operationToken || state.busy !== 'create') return;
     state.session = session;
     state.caseOutcomeError = '';
+    state.signalError = '';
     setActiveObservation(null);
     state.errors = { freeze: '', human: '', ai: '', followup: '', observations: '' };
     state.observationError = '';
@@ -1357,6 +1452,7 @@ async function createCaseSession(caseId) {
   if (!operation) return;
   state.globalError = '';
   state.caseOutcomeError = '';
+  state.signalError = '';
   state.notice = '';
   try {
     const session = await postJson(`/replay/cases/${encodeURIComponent(caseId)}/sessions`, body);
@@ -1383,6 +1479,7 @@ async function createCaseSession(caseId) {
     finishBusy(operation);
   }
   if (!state.busy) loadSessions(state.session?.id || '');
+  if (state.session?.case?.id === caseId) byId('replay-signal-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function revealCaseOutcome() {
@@ -1423,6 +1520,11 @@ async function moveReplay(movement, { fromPlayback = false } = {}) {
     state.notice = session.seen_until_ms > body.expected_cursor_ms
       ? '游标已推进。若某条更早观察尚未保存人工判断，现在不能再补记为独立判断。' : '';
     if (Number(session.cursor_ms) >= Number(session.last_cursor_ms)) state.notice = '已到本次连续历史范围末端。';
+    if (fromPlayback && Number(body.expected_cursor_ms) < Number(session.case?.signal_close_ms)
+        && Number(session.cursor_ms) >= Number(session.case.signal_close_ms)) {
+      replayPlayback.pause();
+      state.notice = '已到原策略信号，播放已暂停。点击图表上方的识别按钮进行判断。';
+    }
     renderReplay();
     return true;
   } catch (error) {
@@ -1431,6 +1533,99 @@ async function moveReplay(movement, { fromPlayback = false } = {}) {
   } finally {
     finishBusy(operation);
   }
+}
+
+async function reviewSignal() {
+  const session = state.session;
+  if (!session?.case || state.busy || Number(session.cursor_ms) < Number(session.case.signal_close_ms)) return;
+  pauseReplay();
+  state.signalError = '';
+  const existing = replaySignalObservation(session, state.activeObservation);
+  if (existing?.run_id) {
+    await loadObservation(existing.id);
+    state.signalError = state.errors.observations || '';
+    renderReplay();
+    return;
+  }
+  const criteria = byId('replay-criteria').value.trim();
+  if (criteria.length < 10 && !existing) {
+    state.signalError = '请先在下方填写至少 10 个字符的识别规则。';
+    renderReplay();
+    byId('replay-criteria').focus();
+    return;
+  }
+  const retrospective = session.mode === 'blind' && Number(session.seen_until_ms) > Number(session.case.signal_close_ms);
+  state.signalPhase = 'freeze';
+  const operation = setBusy('signal');
+  let observation = null;
+  let needsHuman = false;
+  try {
+    if (existing) observation = await apiJson(`/replay/observations/${encodeURIComponent(existing.id)}`);
+    if (!operationIsCurrent(operation)) return;
+    if (!observation || retrospective && observation.mode === 'blind' && !observation.human) {
+      const references = await apiJson('/references');
+      if (!operationIsCurrent(operation)) return;
+      observation = await postJson(`/replay/sessions/${encodeURIComponent(session.id)}/freeze`, {
+        expected_cursor_ms: Number(session.cursor_ms), criteria,
+        reference_revision: Number(references.revision), at_signal: true, retrospective,
+      });
+    }
+    if (!operationIsCurrent(operation)) return;
+    setActiveObservation(observation);
+    addObservationSummary(observation);
+    needsHuman = replayRequiresHuman(session, observation) && !observation.human;
+    if (needsHuman) {
+      state.notice = '信号时点已冻结。先记录你的判断，保存后再点击图表上方按钮调用 AI。';
+      return;
+    }
+    if (!observation.run_id) {
+      state.signalPhase = 'analyze';
+      renderReplay();
+      observation = await postJson(`/replay/observations/${encodeURIComponent(observation.id)}/analyze`, {});
+      if (!operationIsCurrent(operation)) return;
+      setActiveObservation(observation);
+      addObservationSummary(observation);
+    }
+    state.notice = '信号识别请求已完成。AI 输入截止原信号收盘；可继续播放查看后续行情。';
+  } catch (error) {
+    if (operationIsCurrent(operation)) {
+      state.signalError = error.message || '读取信号或调用模型失败。';
+      // A lost HTTP response may follow a persisted attempt. Recover its receipt without another call.
+      if (observation?.id) {
+        try {
+          const recovered = await apiJson(`/replay/observations/${encodeURIComponent(observation.id)}`);
+          if (operationIsCurrent(operation)) { setActiveObservation(recovered); addObservationSummary(recovered); }
+        } catch { /* Keep the original actionable error. */ }
+      }
+    }
+  } finally {
+    state.signalPhase = '';
+    finishBusy(operation);
+    if (needsHuman && state.session?.id === session.id) {
+      byId('replay-human-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      byId('replay-human-state').focus({ preventScroll: true });
+    }
+    loadSessions(session.id);
+  }
+}
+
+async function returnToSignal() {
+  const session = state.session;
+  if (!session?.case || state.busy) return;
+  const cutoff = Number(session.case.signal_close_ms);
+  if (session.mode === 'blind') {
+    // A blind replay cannot go backwards; forward playback pauses exactly at its signal.
+    if (Number(session.cursor_ms) < cutoff) startReplay();
+    return;
+  }
+  await moveReplay({ target_ms: cutoff });
+}
+
+async function showSignalInput() {
+  const observation = replaySignalObservation(state.session, state.activeObservation);
+  if (!observation || state.busy) return;
+  if (state.activeObservation?.id !== observation.id) await loadObservation(observation.id);
+  byId('replay-observation-heading').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function freezeCurrent() {
@@ -1553,7 +1748,7 @@ async function analyzeComparisonArm(mode) {
   if (!comparisonCanRunArm(mode, session, observation, state.imageState) || state.busy) {
     if (observation && (!observation.image_url || state.imageState.id === observation.id && state.imageState.status === 'error')) {
       state.comparisonError = '原冻结图缺失或无法载入，无法复现三组对照；所有组已拦截。';
-    } else if (observation && (session?.mode === 'blind' || observation.mode === 'blind') && !observation.human) {
+    } else if (observation && replayRequiresHuman(session, observation) && !observation.human) {
       state.comparisonError = '盲审观察必须先保存人工判断，之后才能调用对照组。';
     }
     renderReplay();
@@ -1628,7 +1823,7 @@ async function analyzeObservation() {
     renderReplay();
     return;
   }
-  if ((state.session?.mode === 'blind' || observation.mode === 'blind') && !observation.human) {
+  if (replayRequiresHuman(state.session, observation) && !observation.human) {
     state.errors.ai = '盲审观察必须先保存人工判断。';
     renderReplay();
     return;
@@ -1743,6 +1938,9 @@ function attachEvents() {
     if (item) createCaseSession(item.dataset.replayCaseId);
   });
   byId('replay-case-outcome-reveal').addEventListener('click', revealCaseOutcome);
+  byId('replay-signal-analyze').addEventListener('click', reviewSignal);
+  byId('replay-signal-return').addEventListener('click', returnToSignal);
+  byId('replay-signal-input').addEventListener('click', showSignalInput);
   byId('replay-symbol').addEventListener('change', () => { renderCatalog(); loadCoverage(); });
   byId('replay-timeframe').addEventListener('change', () => { renderCatalog(); loadCoverage(); });
   byId('replay-segment-select').addEventListener('change', selectCoverageSegment);
@@ -1827,7 +2025,9 @@ export function initReplay() {
   renderReplay();
   loadCatalog();
   loadReplayCases();
-  loadSessions();
+  loadSessions().then(() => {
+    if (!state.session && !state.busy && state.sessions[0]?.id) loadSession(state.sessions[0].id);
+  });
 }
 
 export function setReplayActive(active) {

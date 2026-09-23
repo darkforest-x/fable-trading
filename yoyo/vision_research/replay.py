@@ -18,7 +18,7 @@ from typing import Literal
 
 from fastapi import HTTPException, Request
 from fastapi.responses import Response
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, ValidationError, model_validator
 from starlette.concurrency import run_in_threadpool
 
 from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes
@@ -67,6 +67,14 @@ class Freeze(Input):
     expected_cursor_ms: int = Field(ge=0)
     criteria: str = Field(default=DEFAULT_CRITERIA, min_length=10, max_length=8000)
     reference_revision: int | None = Field(default=None, ge=0)
+    at_signal: StrictBool = False
+    retrospective: StrictBool = False
+
+    @model_validator(mode="after")
+    def retrospective_requires_signal(self):
+        if self.retrospective and not self.at_signal:
+            raise ValueError("Retrospective mode requires a historical signal")
+        return self
 
 
 class Judgment(Input):
@@ -201,16 +209,20 @@ class ReplayResearch:
                 self._save_session(session)
             return self.public_session(session)
 
-    def _chart(self, session):
-        index = session["cursor_index"]
+    def _chart_at(self, session, index):
+        if index < max(119, session["first_cursor_index"]) or index >= len(session["rows"]):
+            raise ReplayConflict("信号时点之前不足120根有效K线，无法冻结。")
         rows = session["rows"][index - 119:index + 1]
-        cutoff = self._cursor(session)
+        cutoff = rows[-1]["t"] + session["duration_ms"]
         return {"candles": rows, "chart_sha256": chart_sha256(rows), "colors": CHART_COLORS,
                 "provenance": {"symbol": session["symbol"], "timeframe": session["timeframe"],
                                "time_boundary": "historical_replay", "observed_at_ms": cutoff,
                                "visible_end_ms": cutoff, "visible_start_ms": rows[0]["t"],
                                "last_bar_closed": True, "bar_count": len(rows),
                                "render_version": "replay-fixed-v1", "source_label": session["source_label"]}}
+
+    def _chart(self, session):
+        return self._chart_at(session, session["cursor_index"])
 
     def public_session(self, session):
         with self.store.connect() as db:
@@ -279,33 +291,62 @@ class ReplayResearch:
         with self.lock:
             session = self._get("replay_sessions", identity)
             self._expect(session, body.expected_cursor_ms)
+            target_index = session["cursor_index"]
+            target_cursor_ms = self._cursor(session)
+            retrospective_learning = False
+            if body.at_signal:
+                case = session.get("case_record")
+                if not case:
+                    raise ReplayConflict("只有关联历史案例的回放才能按原信号时点冻结。")
+                target_cursor_ms = case["signal_close_ms"]
+                if target_cursor_ms > self._cursor(session) or target_cursor_ms > session["seen_until_ms"]:
+                    raise ReplayConflict("请先播放到原信号收盘后，再冻结该历史信号。")
+                target_index = next((i for i, row in enumerate(session["rows"])
+                                     if row["t"] + session["duration_ms"] == target_cursor_ms), -1)
+                if target_index < 0:
+                    raise ReplayConflict("原信号收盘不在本次连续行情中，不能替换到邻近时点。")
+                if target_index < max(119, session["first_cursor_index"]):
+                    raise ReplayConflict("原信号之前不足120根有效K线，无法冻结。")
+                future_seen = session["seen_until_ms"] > target_cursor_ms
+                if session["mode"] == "blind" and future_seen:
+                    if not body.retrospective:
+                        raise ReplayConflict("盲审会话已看过信号后的行情；仅作学习请显式选择回顾识别。")
+                    retrospective_learning = True
+                elif body.retrospective:
+                    raise ReplayConflict("只有已经看过信号后行情的盲审会话，才能使用回顾识别。")
             refs = self.store.get_references()
             if body.reference_revision is not None and refs["revision"] != body.reference_revision:
                 raise ReplayConflict("参考图已变化，请重新载入参考版本后冻结。")
             criteria = body.criteria.strip()
             if len(criteria) < 10:
                 raise ReplayConflict("请填写至少 10 个字符的形态标准。")
-            chart = self._chart(session)
-            identity_key = hashlib.sha256(_json([identity, chart["chart_sha256"], criteria, refs, model, PROMPT_VERSION]).encode()).hexdigest()
+            chart = self._chart_at(session, target_index)
+            effective_mode = "free" if retrospective_learning else session["mode"]
+            identity_parts = [identity, chart["chart_sha256"], criteria, refs, model, PROMPT_VERSION]
+            if retrospective_learning:
+                identity_parts.extend([effective_mode, "retrospective_learning"])
+            identity_key = hashlib.sha256(_json(identity_parts).encode()).hexdigest()
             with self.store.connect() as db:
                 existing = db.execute("SELECT record FROM replay_observations WHERE session_id=? AND cursor_ms=?",
-                                      (identity, self._cursor(session))).fetchall()
+                                      (identity, target_cursor_ms)).fetchall()
             for (raw,) in existing:
                 prior = json.loads(raw)
                 if prior.get("identity_key") == identity_key:
                     return self.observation(prior["id"])
-            image = image_from_bytes(render_chart(chart["candles"], session["symbol"], session["timeframe"], self._cursor(session)), "replay.png")
+            image = image_from_bytes(render_chart(chart["candles"], session["symbol"], session["timeframe"], target_cursor_ms), "replay.png")
+            seen_future = session["seen_until_ms"] > target_cursor_ms
             obs = {"id": uuid.uuid4().hex, "session_id": identity, "identity_key": identity_key,
-                   "symbol": session["symbol"], "timeframe": session["timeframe"], "cursor_ms": self._cursor(session),
-                   "mode": session["mode"], "created_at": utc_now(), "image_url": self.store.put_image(image),
+                   "symbol": session["symbol"], "timeframe": session["timeframe"], "cursor_ms": target_cursor_ms,
+                   "mode": effective_mode, "retrospective_learning": retrospective_learning,
+                   "created_at": utc_now(), "image_url": self.store.put_image(image),
                    "image_sha256": image.sha256, "chart_sha256": chart["chart_sha256"], "chart": chart,
                    "criteria": criteria, "model": model, "prompt_version": PROMPT_VERSION,
                    "reference_revision": refs["revision"], "references": refs["items"],
                    "human": None, "run_id": None, "followups": [], "status": "frozen", "comparison_requested": False,
                    "case_id": session.get("case_record", {}).get("id"),
-                   "independence": ("outcome_known_before_judgment" if self._exposed(session.get("case_record"))
-                                    else "future_seen_in_session" if session["seen_until_ms"] > self._cursor(session)
-                                    else "ai_requested_before_human_judgment" if session.get("ai_exposed_until_ms", -1) >= self._cursor(session)
+                   "independence": ("future_seen_in_session" if seen_future
+                                    else "outcome_known_before_judgment" if self._exposed(session.get("case_record"))
+                                    else "ai_requested_before_human_judgment" if session.get("ai_exposed_until_ms", -1) >= target_cursor_ms
                                     else "not_yet_judged"),
                    "training_eligible": False, "production_eligible": False}
             self._save_obs(obs)
@@ -386,7 +427,7 @@ class ReplayResearch:
                 session = self._get("replay_sessions", obs["session_id"])
                 session["ai_exposed_until_ms"] = max(session.get("ai_exposed_until_ms", -1), obs["cursor_ms"])
                 self._save_session(session)
-                if obs["human"] is None:
+                if obs["human"] is None and obs.get("independence") != "future_seen_in_session":
                     obs["independence"] = "ai_requested_before_human_judgment"
                 self._save_obs(obs)
             except BaseException:
