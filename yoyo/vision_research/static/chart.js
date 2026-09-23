@@ -110,11 +110,37 @@ export function fitChart() { chart?.timeScale().fitContent(); }
 
 export function captureChart() {
   if (!chart) throw new Error('图表尚未准备好。');
+  const scale = chart.timeScale();
+  const range = scale.getVisibleLogicalRange();
+  const lastIndex = candleCount - 1;
+  const validRange = range
+    && Number.isFinite(range.from)
+    && Number.isFinite(range.to)
+    && range.from <= range.to;
+  if (!validRange || lastIndex < 0
+      || range.from > lastIndex - 0.5
+      || range.to < lastIndex + 0.5) {
+    throw new Error('当前视图没有完整显示最新K线，请先点「回到盘口」后再识别。');
+  }
+  const lastBarOpenMs = candleCount === 1
+    ? firstCandleTimeMs
+    : firstCandleTimeMs + lastIndex * candleIntervalMs;
+  if (!Number.isFinite(lastBarOpenMs)) {
+    throw new Error('当前视图没有完整显示最新K线，请先点「回到盘口」后再识别。');
+  }
   // The library screenshot excludes the crosshair and captures the visible plot.
   // Store these pixels before changing layout or awaiting any network operation.
   const canvas = chart.takeScreenshot();
   if (canvas.width * canvas.height > 6_000_000) throw new Error('图表截图超过 600 万像素，请缩小浏览器窗口后再识别。');
-  return canvas.toDataURL('image/png');
+  return {
+    dataUrl: canvas.toDataURL('image/png'),
+    viewport: {
+      from: range.from,
+      to: range.to,
+      bar_count: candleCount,
+      last_bar_open_ms: lastBarOpenMs,
+    },
+  };
 }
 
 export function destroyChart() {

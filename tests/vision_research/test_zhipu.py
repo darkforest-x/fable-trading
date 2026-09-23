@@ -32,6 +32,8 @@ def image(name: str, data: bytes) -> ImageInput:
 
 def decision_text(**overrides: object) -> str:
     decision = {
+        "assessment_scope": "current_right_edge",
+        "current_state": "launching",
         "verdict": "match",
         "side": "long",
         "summary": "均线收拢后出现向上启动。",
@@ -316,3 +318,48 @@ def test_constructor_and_local_input_limits_fail_before_network() -> None:
             adapter.analyze(image("candidate.png", b"candidate"), [], " ")
     assert caught.value.code == "invalid_criteria"
     assert calls == []
+
+@pytest.mark.parametrize('fields', [
+    {'current_state': 'extended'},
+    {'current_state': 'converging'},
+    {'current_state': 'unclear'},
+    {'current_state': 'no_setup'},
+    {'assessment_scope': 'whole_chart'},
+    {'verdict': 'no_match', 'current_state': 'extended', 'box_2d': [100, 100, 500, 300]},
+])
+def test_current_scope_rejects_historical_match_and_box_claims(fields):
+    raw = completion(decision_text(**fields))
+    with client(lambda request: httpx.Response(200, json=raw)) as adapter:
+        with pytest.raises(ZhipuError) as caught:
+            adapter.analyze(image('candidate.png', b'candidate'), [], '只判断最右端当前形态。')
+        assert caught.value.code == 'invalid_decision'
+        assert json.loads(adapter.last_exchange['response']['body_text']) == raw
+
+
+def test_extended_right_edge_is_no_match_and_observation_context_is_sent():
+    seen = []
+    content = decision_text(verdict='no_match', current_state='extended', box_2d=None,
+                            summary='当前右端已经远离旧密集区。')
+    def respond(request):
+        seen.append(json.loads(request.content))
+        return httpx.Response(200, json=completion(content))
+    context = {'observed_at': '2026-09-23T21:36:03+08:00', 'last_bar_closed': False,
+               'time_boundary': 'live_observation', 'rightmost_bar_open_at': '2026-09-23T21:30:00+08:00'}
+    with client(respond) as adapter:
+        result = adapter.analyze(image('candidate.png', b'candidate'), [], '只判断最右端。', context=context)
+    assert result['decision']['verdict'] == 'no_match'
+    assert result['decision']['box_2d'] is None
+    prompt = seen[0]['messages'][0]['content'][0]['text']
+    assert json.dumps(context, ensure_ascii=False) in prompt
+    assert '不能把右端变化排除为' in prompt
+    assert len(seen) == 1
+
+
+def test_old_whole_chart_response_cannot_be_relabelled_as_current_scope():
+    old = json.loads(decision_text())
+    del old['assessment_scope']
+    del old['current_state']
+    with client(lambda request: httpx.Response(200, json=completion(json.dumps(old)))) as adapter:
+        with pytest.raises(ZhipuError) as caught:
+            adapter.analyze(image('candidate.png', b'candidate'), [], '只判断最右端。')
+    assert caught.value.code == 'invalid_decision'

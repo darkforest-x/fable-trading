@@ -73,13 +73,15 @@ class FakeProvider:
     def check_connection(self):
         return {"ok": True, "model": self.model, "message": "metadata only"}
 
-    def analyze(self, image, references, criteria):
+    def analyze(self, image, references, criteria, context=None):
+        self.received_context = context
         self.received_references = [(item.name, item.sha256) for item in references]
         if self.failure:
             raise ZhipuError("quota", "额度暂不可用")
         assert hashlib.sha256(image.data).hexdigest() == image.sha256
         return {"decision": {"verdict": "uncertain", "side": "unknown", "summary": "测试结果",
-                             "evidence": ["画面不清"], "risks": [], "box_2d": None},
+                             "evidence": ["画面不清"], "risks": [], "box_2d": None,
+                             "assessment_scope": "current_right_edge", "current_state": "unclear"},
                 "usage": {"total_tokens": 12}, "model": self.model,
                 "response_id": "mock-1", "latency_ms": 1}
 
@@ -160,6 +162,7 @@ def test_zhipu_adapter_runs_with_all_defaults_and_preserves_identity(tmp_path):
             "choices": [{"finish_reason": "stop", "message": {"content": json.dumps({
                 "verdict": "uncertain", "side": "unknown", "summary": "Offline fixture",
                 "evidence": [], "risks": ["Not a recognition-quality test"], "box_2d": None,
+                "assessment_scope": "current_right_edge", "current_state": "unclear",
             })}}], "usage": {"total_tokens": 12},
         })
 

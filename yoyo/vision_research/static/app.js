@@ -1,7 +1,7 @@
 import { showChart, fitChart, captureChart, destroyChart } from './chart.js';
 const API_BASE = '/api';
 const DEFAULT_MODEL = 'glm-5.3-flash';
-const DEFAULT_CRITERIA = '只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。';
+const DEFAULT_CRITERIA = '只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。';
 const MAX_IMAGE_BYTES = 5_000_000;
 const MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024;
 const MAX_REFERENCES = 49; // Zhipu vision allows 50 total images including the candidate.
@@ -159,6 +159,10 @@ function exchangeStatusLabel(status) {
 function runStatusLabel(status) {
   return ({ running: '进行中', completed: '已完成', failed: '失败', interrupted: '已中断' })[status]
     || (status ? asText(status) : '状态未提供');
+}
+
+function currentStateLabel(value) {
+  return ({ converging: '当前仍在密集，尚未启动', launching: '当前正在启动', extended: '当前已离开密集区', no_setup: '当前无该形态', unclear: '当前状态不清楚' })[value] || '';
 }
 
 function exchangeOptionLabel(exchange) {
@@ -633,7 +637,7 @@ function renderResult() {
           : image?.source === 'signal' && liveInfo?.expired ? '识别窗口已结束，可扩大范围'
             : image?.source === 'signal' && liveInfo?.stale ? '行情滞后，暂不可识别'
               : image?.source === 'signal' && !liveInfo?.usable ? '等待可识别的实时快照'
-                : '开始识别';
+                : '识别当前盘口';
   byId('analyze-button').querySelector('.button-label').textContent = analyzeLabel;
   setVisible(byId('analyze-button').querySelector('.button-spinner'), state.analysisLoading);
   showInlineError('analyze-error', state.analysisError);
@@ -641,7 +645,7 @@ function renderResult() {
   if (!state.activeRun) {
     updateResultMarkup(`<div class="result-empty">
       <h3>${state.analysisLoading ? '正在分析图表…' : '等待识别'}</h3>
-      <p>${state.analysisLoading ? '结果会显示在这里。' : state.selectedImage ? '点击「开始识别」。' : '选择图表开始。'}</p></div>`);
+      <p>${state.analysisLoading ? '正在检查图表最右端。' : state.selectedImage ? '只判断最右端当前形态，左侧历史仅作背景。' : '选择图表，检查最右端当前形态。'}</p></div>`);
     return;
   }
   const run = state.activeRun;
@@ -650,7 +654,12 @@ function renderResult() {
   const verdictClass = verdict === 'no_match' ? 'no-match' : verdict === 'uncertain' ? 'uncertain' : '';
   const completed = run.status === 'completed';
   const incomplete = run.status && run.status !== 'completed';
-  const headingLabel = incomplete ? '识别未完成' : verdictLabel(verdict);
+  const currentScope = run.analysis_scope === 'current_right_edge';
+  const headingLabel = incomplete ? '识别未完成' : `${currentScope ? '' : '旧版整图判断 · '}${verdictLabel(verdict)}`;
+  const stateLabel = currentStateLabel(decision.current_state);
+  const sideText = stateLabel
+    ? `${stateLabel}${['long', 'short'].includes(decision.side) ? ` · ${sideLabel(decision.side)}` : ''}`
+    : sideLabel(decision.side);
   const evidence = safeList(decision.evidence);
   const risks = safeList(decision.risks);
   const human = run.review;
@@ -666,6 +675,7 @@ function renderResult() {
   const requestContext = `<details class="request-context"><summary>识别详情</summary><dl>
     <dt>图片来源</dt><dd>${escapeHtml(requestSource)} · ${escapeHtml(asText(run.image_name, state.selectedImage?.name || '图片名称未返回'))}</dd>
     <dt>参考图</dt><dd>${referenceNames.length ? escapeHtml(referenceNames.join('、')) : '未使用参考图'}</dd>
+    <dt>检测范围</dt><dd>${currentScope ? '图中最右端当前盘口；旧形态不代表当前符合' : '旧版整图判断，不代表当前盘口有效'}</dd>
     <dt>本次规则</dt><dd>${escapeHtml(criteria)}</dd>
     <dt>模型</dt><dd>${escapeHtml(model)}</dd>
     <dt>时间</dt><dd>${escapeHtml(created)}</dd>
@@ -684,7 +694,7 @@ function renderResult() {
         <button type="button" data-review-verdict="uncertain" data-review-run="${escapeHtml(runId)}">不确定</button>
       </div>`;
   updateResultMarkup(`<article class="decision-card" data-result-run="${escapeHtml(runId)}">
-    <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span><span class="side-tag">${escapeHtml(sideLabel(decision.side))}</span></div>
+    <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span><span class="side-tag">${escapeHtml(sideText)}</span></div>
     <p class="result-summary">${escapeHtml(asText(decision.summary, run.error || '模型未返回摘要。'))}</p>
     <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
     <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
@@ -730,7 +740,7 @@ function renderHistory() {
     const summary = asText(decision.summary, run.error || '无摘要');
     const isExporting = state.exportLoadingId === runId;
     return `<article class="history-card">
-      ${thumbnail}<div class="history-main"><div class="history-head"><h2>${escapeHtml(title)}</h2><span class="verdict-pill ${verdictClass}">${escapeHtml(verdictLabel(verdict))}</span></div>
+      ${thumbnail}<div class="history-main"><div class="history-head"><h2>${escapeHtml(title)}</h2><span class="verdict-pill ${verdictClass}">${escapeHtml(verdictLabel(verdict))}</span><span class="source-chip">${run.analysis_scope === 'current_right_edge' ? '当前盘口' : '旧版整图'}</span></div>
         <p class="history-summary">${escapeHtml(summary)}</p>
         <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(runStatusLabel(run.status))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
       </div>
@@ -1344,6 +1354,7 @@ async function analyze() {
   const signal = state.selectedSignal;
   if (image.loading || image.error || state.captureInProgress || (!signal && !image.dataUrl)) return;
   let capture = null;
+  let chartViewport = null;
   if (signal && image.chartData) {
     const liveInfo = liveSnapshotInfo(image);
     if (!liveInfo?.usable) {
@@ -1359,7 +1370,9 @@ async function analyze() {
     state.captureInProgress = true;
     let captureFailure = '';
     try {
-      capture = captureChart();
+      const captured = captureChart();
+      capture = captured.dataUrl;
+      chartViewport = captured.viewport;
       image.previewUrl = capture;
       image.dataUrl = capture;
       image.frozen = true;
@@ -1388,6 +1401,7 @@ async function analyze() {
     chart_capture_data_url: capture,
     expected_chart_sha256: signal ? image.chartSha256 : null,
     chart_snapshot_id: signal ? image.chartData?.snapshot_id || null : null,
+    chart_viewport: chartViewport,
     reference_revision: state.referenceRevision,
     criteria: byId('criteria-input').value.trim() || DEFAULT_CRITERIA,
     model: state.model || null,
@@ -1754,7 +1768,11 @@ byId('reload-references').addEventListener('click', loadReferences);
 byId('open-references').addEventListener('click', () => switchTab('references'));
 byId('upload-chart').addEventListener('click', () => chartFileInput.click());
 byId('empty-upload').addEventListener('click', () => chartFileInput.click());
-byId('fit-chart').addEventListener('click', fitChart);
+byId('fit-chart').addEventListener('click', () => {
+  fitChart();
+  state.analysisError = '';
+  renderResult();
+});
 byId('resume-chart').addEventListener('click', () => {
   if (state.analysisLoading || !state.selectedImage?.chartData) return;
   state.selectedImage.frozen = false;

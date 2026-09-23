@@ -16,6 +16,7 @@ import re
 import threading
 import time
 import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Literal, Optional
 from urllib.parse import urlsplit
@@ -46,6 +47,30 @@ CHART_CAPTURE_RENDER_VERSION = "tradingview-lightweight-charts-4.2.0"
 
 class SnapshotConflict(Exception):
     """Raised when the chart rows shown to the user no longer match the request."""
+
+
+def current_review_context(provenance, chart=None, viewport=None):
+    """Locate the observation's right edge using only its immutable snapshot.
+
+    Reads provenance times and the final candle's opening time. No prices or
+    future rows are added. Uploaded images have an explicitly unverified time.
+    """
+    context = {"assessment_scope": "current_right_edge",
+               "time_boundary": provenance.get("time_boundary", "unverified_upload"),
+               "timezone": "Asia/Shanghai"}
+    for name in ("symbol", "timeframe", "last_bar_closed"):
+        if name in provenance:
+            context[name] = provenance[name]
+    times = {"observed_at": provenance.get("observed_at_ms"),
+             "spike_signal_at": provenance.get("signal_bar_close_ms", provenance.get("bar_close_ms"))}
+    if chart and chart.get("candles"):
+        times["rightmost_bar_open_at"] = chart["candles"][-1]["t"]
+    for name, value in times.items():
+        if isinstance(value, (int, float)):
+            context[name] = datetime.fromtimestamp(value / 1000, timezone(timedelta(hours=8))).isoformat()
+    if viewport is not None:
+        context["browser_declared_viewport"] = viewport.model_dump(by_alias=True)
+    return context
 
 
 def validate_model(model: str) -> str:
@@ -268,6 +293,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
                                   pixel_origin="browser_capture",
                                   pixel_attestation="unverified",
                                   capture_pixels_attested_to_ohlc=False)
+                if body.chart_viewport is not None:
+                    provenance["browser_declared_viewport"] = body.chart_viewport.model_dump(by_alias=True)
                 symbol, timeframe, image_source = provenance["symbol"], provenance["timeframe"], "spike_capture"
             else:
                 if body.expected_chart_sha256:
@@ -286,6 +313,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             raise ValueError("待判图和参考图合计不能超过 12 MB")
         if image.sha256 in {item.sha256 for item in references}:
             raise ValueError("待判图不能同时作为参考图")
+        review_context = current_review_context(provenance, chart_snapshot, body.chart_viewport)
         record = {
             "id": uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
             "provider": "zhipu",
@@ -293,7 +321,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             "image_url": store.put_image(image), "image_name": image.name, "image_sha256": image.sha256,
             "image_width": image.width, "image_height": image.height,
             "criteria": body.criteria, "criteria_sha256": hashlib.sha256(body.criteria.encode()).hexdigest(),
-            "prompt_version": PROMPT_VERSION, "schema_version": 1, "provenance": provenance,
+            "prompt_version": PROMPT_VERSION, "schema_version": 2, "provenance": provenance,
+            "analysis_scope": "current_right_edge", "review_context": review_context,
             "references": [{"name": item.name, "sha256": item.sha256, "image_url": store.put_image(item)} for item in references],
             "reference_source": reference_source, "reference_revision": reference_revision,
             "decision": None, "usage": {}, "latency_ms": None, "error": None,
@@ -304,7 +333,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         store.save(record)
         started = time.perf_counter()
         try:
-            result = client.analyze(image=image, references=references, criteria=body.criteria)
+            result = client.analyze(image=image, references=references, criteria=body.criteria,
+                                    context=review_context)
             record.update(result, status="completed", completed_at=utc_now())
         except ZhipuError as exc:
             record.update(status="failed", error=str(exc), error_details=exc.diagnostics(),
@@ -330,6 +360,8 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         except (ValidationError, ValueError):
             raise HTTPException(400, "请选择一张待判图，检查模型、形态规则和参考图格式")
         chart_snapshot = None
+        if body.chart_snapshot_id and body.chart_viewport is None:
+            raise HTTPException(409, "盘口识别需要最新的图表视口信息，请刷新页面后重新识别")
         if body.signal_id and (body.chart_capture_data_url or body.expected_chart_sha256):
             try:
                 if body.chart_snapshot_id:
@@ -341,6 +373,11 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
             if (body.expected_chart_sha256 and
                     chart_snapshot["chart_sha256"] != body.expected_chart_sha256):
                 raise HTTPException(409, "候选图表数据已变化，请重新载入后再截取")
+            if body.chart_viewport is not None:
+                rows = chart_snapshot["candles"]
+                if (body.chart_viewport.bar_count != len(rows)
+                        or body.chart_viewport.last_bar_open_ms != rows[-1]["t"]):
+                    raise HTTPException(409, "截图视口与盘口快照不一致，请回到最新盘口后重新识别")
         try:
             if body.references is None:
                 reference_snapshot = store.get_references()

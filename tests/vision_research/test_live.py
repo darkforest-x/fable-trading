@@ -152,7 +152,9 @@ def test_live_api_uses_selected_snapshot_after_newer_poll_and_exports_actual_tim
         second = client.get("/api/signals/live-test/chart?mode=live").json()
         assert first["chart_sha256"] != second["chart_sha256"]
         body = dict(signal_id="live-test", chart_snapshot_id=first["snapshot_id"],
-                    expected_chart_sha256=first["chart_sha256"], chart_capture_data_url=image_url())
+                    expected_chart_sha256=first["chart_sha256"], chart_capture_data_url=image_url(),
+                    chart_viewport={"from": -0.5, "to": len(first["candles"]) + 3.0,
+                                    "bar_count": len(first["candles"]), "last_bar_open_ms": first["candles"][-1]["t"]})
         response = client.post("/api/analyze", json=body)
         assert response.status_code == 200, response.text
         run = response.json()
@@ -160,6 +162,9 @@ def test_live_api_uses_selected_snapshot_after_newer_poll_and_exports_actual_tim
         assert run["provenance"]["chart_candles"] == first["candles"]
         assert run["provenance"]["observed_at_ms"] == first["provenance"]["observed_at_ms"]
         assert run["provenance"]["chart_snapshot_id"] == first["snapshot_id"]
+        assert run["analysis_scope"] == "current_right_edge"
+        assert FakeProvider.instances[-1].received_context == run["review_context"]
+        assert run["provenance"]["browser_declared_viewport"] == body["chart_viewport"]
         assert not run["production_eligible"] and not run["training_eligible"]
         assert client.get(f"/api/runs/{run['id']}/export").json()["provenance"] == run["provenance"]
         count = len(client.get("/api/runs").json()["items"])
@@ -185,3 +190,26 @@ def test_public_market_adapter_only_calls_fixed_okx_read_endpoint():
     bad = LiveMarket(transport=httpx.MockTransport(lambda request: httpx.Response(503)))
     with pytest.raises(SourceError):
         bad.candles({"symbol": "BTC-USDT-SWAP", "timeframe": "15m"})
+
+
+def test_current_edge_viewport_must_match_live_snapshot_before_provider_call(tmp_path):
+    source, _, _, _, _ = source_fixture()
+    FakeProvider.failure = False
+    with TestClient(create_app(tmp_path, source=source, provider_factory=FakeProvider), base_url='http://127.0.0.1') as client:
+        configure(client)
+        chart = client.get('/api/signals/live-test/chart?mode=live').json()
+        rows = chart['candles']
+        body = dict(signal_id='live-test', chart_snapshot_id=chart['snapshot_id'],
+                    expected_chart_sha256=chart['chart_sha256'], chart_capture_data_url=image_url())
+        calls = len(FakeProvider.instances)
+        assert client.post('/api/analyze', json=body).status_code == 409
+        valid = {'from': -0.5, 'to': len(rows) + 3.0, 'bar_count': len(rows), 'last_bar_open_ms': rows[-1]['t']}
+        for viewport, status in [
+            ({**valid, 'to': len(rows) - 2.0}, 400),
+            ({**valid, 'from': len(rows) - 1.2}, 400),
+            ({**valid, 'bar_count': len(rows) - 1}, 409),
+            ({**valid, 'last_bar_open_ms': rows[-2]['t']}, 409),
+        ]:
+            assert client.post('/api/analyze', json={**body, 'chart_viewport': viewport}).status_code == status
+        assert len(FakeProvider.instances) == calls
+        assert client.get('/api/runs').json()['items'] == []

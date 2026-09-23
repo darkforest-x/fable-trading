@@ -38,6 +38,22 @@ and notice; the chart supports pan, zoom, crosshair and resetting the view.
 Its time axis uses UTC+8. Uploaded images and saved inference snapshots retain
 their original pixels when the interface theme changes.
 
+Version 0.4.0 assesses the rightmost current state, not whether a setup occurred
+somewhere in the visible history. New responses use schema version 2 with
+`assessment_scope=current_right_edge` and `current_state`: converging, launching,
+extended, no_setup, or unclear. Only a current launch may match. Extended/absent
+setups cannot carry an old core box; convergence alone remains uncertain. The
+12-bar window is permission to recheck, not a claim that the original setup
+remains current. Existing runs are labelled as legacy whole-chart judgments.
+
+Before capture, the complete latest candle must be visible. A panned-away view
+is rejected locally with a return-to-market action. The browser sends
+`chart_viewport` (logical from/to, row count, final bar opening time); the server
+compares it with the immutable snapshot before calling the provider. This is
+client-declared metadata, not proof of pixel/OHLC correspondence. Observation
+and signal times accompany the prompt; uploaded charts retain unverified time
+bounds. This is still manual visual research, with no production integration.
+
 Set `ZHIPU_API_KEY` (or `BIGMODEL_API_KEY`) in the server environment, or enter it
 in the local settings page. Saving writes a private `runtime/private/settings.json`
 (mode 0600, directory 0700) atomically. The server reloads it after a restart;
@@ -161,6 +177,7 @@ production signal. No accuracy or trading outcome is asserted.
 node --check yoyo/vision_research/static/app.js
 node --check yoyo/vision_research/static/theme.js
 node --check yoyo/vision_research/static/chart.js
+node --test tests/vision_research/chart_capture.test.cjs
 ```
 
 Provider sources: [chat completions](https://docs.bigmodel.cn/api-reference/模型-api/对话补全),

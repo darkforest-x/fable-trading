@@ -38,7 +38,8 @@ def make_client(tmp_path, handler, seed=False):
 
 def raw_response():
     decision = {"verdict": "uncertain", "side": "unknown", "summary": "可见证据不足",
-                "evidence": [], "risks": [], "box_2d": None}
+                "evidence": [], "risks": [], "box_2d": None,
+                "assessment_scope": "current_right_edge", "current_state": "unclear"}
     return json.dumps({"id": "original-response-id", "model": "glm-5.3-flash",
                        "choices": [{"finish_reason": "stop", "message": {
                            "role": "assistant", "content": json.dumps(decision, ensure_ascii=False),

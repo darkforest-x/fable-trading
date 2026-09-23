@@ -68,7 +68,7 @@
               <div class="chart-toolbar">
                 <div class="chart-title"><h2 id="image-heading">选择图表，开始研究</h2><span id="input-source-chip" class="source-chip" hidden></span></div>
                 <div class="chart-tools">
-                  <button id="fit-chart" class="button button-quiet" type="button" hidden><span class="ui-icon icon-expand" aria-hidden="true"></span>重置</button>
+                  <button id="fit-chart" class="button button-quiet" type="button" hidden><span class="ui-icon icon-expand" aria-hidden="true"></span>回到盘口</button>
                   <button id="resume-chart" class="button button-quiet" type="button" hidden>返回交互图表</button>
                   <button id="upload-chart" class="button button-secondary" type="button"><span class="ui-icon icon-upload" aria-hidden="true"></span>上传图表</button>
                   <button id="clear-input" class="button button-quiet" type="button" disabled>清除</button>
@@ -76,7 +76,7 @@
               </div>
               <div id="selection-summary" class="selection-summary" hidden></div>
               <div id="live-chart-controls" class="live-chart-controls" hidden>
-                <label for="recognition-window">识别范围 <select id="recognition-window" aria-label="信号后识别范围"><option value="6">信号后 6 根</option><option value="12" selected>信号后 12 根</option><option value="24">信号后 24 根</option><option value="48">信号后 48 根</option></select></label>
+                <label for="recognition-window">复查期限 <select id="recognition-window" aria-label="信号后识别范围"><option value="6">信号后 6 根</option><option value="12" selected>信号后 12 根</option><option value="24">信号后 24 根</option><option value="48">信号后 48 根</option></select></label>
                 <button id="refresh-live-chart" class="button button-quiet" type="button"><span class="ui-icon icon-refresh" aria-hidden="true"></span>刷新</button>
                 <span id="live-chart-status" class="live-chart-status" role="status"></span>
               </div>
@@ -99,7 +99,7 @@
               <div class="chart-caption"><span id="chart-context">拖动平移 · 滚轮缩放</span><a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" title="TradingView Lightweight Charts™ · Copyright (с) 2023 TradingView, Inc.">TradingView Lightweight Charts™</a></div>
               <div class="analysis-controls">
                 <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button"><span class="ui-icon icon-images" aria-hidden="true"></span>全局参考图 · <span id="reference-count">0</span> 张</button><span class="privacy-inline">识别时发送当前图表、参考图与规则至智谱</span></div>
-                <button id="analyze-button" class="button button-primary" type="button" disabled><span class="ui-icon icon-arrow-right" aria-hidden="true"></span><span class="button-label">开始识别</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
+                <button id="analyze-button" class="button button-primary" type="button" disabled><span class="ui-icon icon-arrow-right" aria-hidden="true"></span><span class="button-label">识别当前盘口</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
               </div>
               <div id="analyze-error" class="inline-error" role="alert" hidden></div>
             </section>
@@ -114,7 +114,7 @@
               <div id="result-content" class="result-content">
                 <div class="result-empty">
                   <h3>等待识别</h3>
-                  <p>选择图表后点击「开始识别」。</p>
+                  <p>只判断最右端当前形态，左侧历史仅作背景。</p>
                 </div>
               </div>
             </aside>
@@ -123,7 +123,7 @@
               <summary class="criteria-summary">识别规则 <span>可选调整</span></summary>
               <div class="criteria-editor">
                 <label class="sr-only" for="criteria-input">本次形态参考规则</label>
-                <textarea id="criteria-input" rows="4" spellcheck="false">只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。</textarea>
+                <textarea id="criteria-input" rows="4" spellcheck="false">只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。</textarea>
                 <div class="criteria-hint"><span>仅用于本次识别</span><span id="criteria-count">0 字</span></div>
               </div>
             </details>
