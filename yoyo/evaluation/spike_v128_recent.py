@@ -42,6 +42,7 @@ PLAN = EXP / "PROJECT_PLAN.md"
 MANIFEST = Path("data/research/spike_v128_recent_20260923/manifest.json")
 TEST = Path("tests/evaluation/test_spike_v128_recent.py")
 PINE = Path("yoyo/evaluation/pine/spike_burst_v12_6.pine")
+PINE_V128 = Path("yoyo/evaluation/pine/spike_burst_v12_8.pine")
 TABLES = ("decisions", "trades", "statuses", "controls", "frames", "hints")
 ARMS = ("v9_both", "joint")
 VERSION = "spike-v128-recent-20260923-v1"
@@ -402,7 +403,7 @@ def run(output: Path, *, workers: int = 4, symbols: list[str] | None = None,
     cfg = _config()
     roots = (Path(__file__), Path(source.__file__), Path(fixed.__file__), Path("yoyo/evaluation/spike_v126_engine.py"), Path("yoyo/evaluation/spike_v126_htf_recheck.py"), Path("yoyo/evaluation/spike_v128_hint_replay.py"))
     code = _local_transitive_python(roots)
-    declared = tuple(dict.fromkeys((Path(__file__), TEST, CONFIG, PLAN, PINE, *code)))
+    declared = tuple(dict.fromkeys((Path(__file__), TEST, CONFIG, PLAN, PINE, PINE_V128, *code)))
     if not _committed(declared):
         raise ValueError("commit runner, tests, config, plan, Pine, and transitive source before replay")
     input_manifest = Path(input_manifest)
