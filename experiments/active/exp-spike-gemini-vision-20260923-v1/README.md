@@ -32,14 +32,28 @@ Its time axis uses UTC+8. Uploaded images and saved inference snapshots retain
 their original pixels when the interface theme changes.
 
 Set `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) in the server environment, or enter it
-in the local settings page. Page-entered keys live only in process memory and
-must be entered again after a restart. They are never saved in browser storage,
-exports or the database. `GEMINI_MODEL` overrides the default model.
+in the local settings page. Saving writes a private `runtime/private/settings.json`
+(mode 0600, directory 0700) atomically. The server reloads it after a restart;
+leaving the key input blank preserves the saved value. Saved settings take
+precedence over environment values. Keys never appear in browser storage,
+exports or the research database. Unsaved environment configuration remains
+supported; `GEMINI_MODEL` overrides the built-in default when no setting is saved.
 
-Save up to four reusable images on the Global References page. The set persists
+Manage reusable images on the Global References page; there is no four-image
+cap. Gemini permits 3,600 images per request (candidate plus references), while
+this workbench limits the combined decoded PNG data to 12 MiB to leave room for
+Base64 and JSON within Google's 20 MB inline request limit. The set persists
 in the local SQLite store across refreshes and service restarts. Each recognition
 keeps the reference revision and images it actually used. Unsaved edits must be
 saved first, and stale revisions are rejected rather than silently substituted.
+
+On its first start, the service installs the existing boxed exemplars bundled in
+`default_references/`. The manifest records original paths, hashes, core geometry
+and confirmation level. Pixels and boxes are copied unchanged; normalization
+only strips container metadata. These charts include later context and are
+retrospective references, not decision-time samples or individually adjudicated
+gold geometry. Click a reference to inspect it at full size. An edited or
+deliberately cleared library is never automatically reseeded.
 
 Select a candidate or upload a PNG/JPEG/WEBP image, edit the criteria, then
 explicitly start recognition. The interactive chart is captured at that moment

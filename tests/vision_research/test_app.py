@@ -100,7 +100,7 @@ def configure(client):
     assert KEY not in response.text
 
 
-def test_key_required_and_not_stored_or_returned(client, tmp_path):
+def test_key_is_private_persisted_and_never_returned_or_in_ledger(client, tmp_path):
     assert client.get("/api/status").json()["api_key_configured"] is False
     assert client.post("/api/connection-test", json={}).status_code == 503
     assert not FakeProvider.instances
@@ -109,10 +109,18 @@ def test_key_required_and_not_stored_or_returned(client, tmp_path):
     assert FakeProvider.instances[-1].closed
     for path in tmp_path.rglob("*"):
         if path.is_file():
-            assert KEY.encode() not in path.read_bytes()
+            if path == tmp_path / "private" / "settings.json":
+                assert path.stat().st_mode & 0o777 == 0o600
+                assert json.loads(path.read_text())["api_key"] == KEY
+            else:
+                assert KEY.encode() not in path.read_bytes()
     fresh = create_app(tmp_path, source=EmptySource(), provider_factory=FakeProvider)
     with TestClient(fresh, base_url="http://127.0.0.1") as other:
-        assert other.get("/api/status").json()["api_key_configured"] is False
+        assert other.get("/api/status").json()["api_key_configured"] is True
+        assert other.get("/api/status").json()["credential_source"] == "local_config"
+        assert other.post("/api/connection-test", json={}).json()["ok"] is True
+        assert other.get("/private/settings.json").status_code == 404
+        assert KEY not in other.get("/api/runs").text
 
 
 def test_completed_run_review_and_export_preserve_original_decision(client):
@@ -273,6 +281,34 @@ def test_reference_duplicates_and_stale_analyze_revision_are_rejected(client):
     })
     assert stale.status_code == 409
     assert client.get("/api/runs").json()["items"] == []
+
+
+def test_more_than_four_global_references_are_retained_and_used(client):
+    configure(client)
+    colors = ["red", "green", "blue", "yellow", "purple", "orange"]
+    saved = client.put("/api/references", json={"references": [
+        {"name": color, "data_url": image_url(color)} for color in colors
+    ], "expected_revision": 0})
+    assert saved.status_code == 200
+    run = client.post("/api/analyze", json={"image_data_url": image_url("white"),
+                                           "reference_revision": saved.json()["revision"]})
+    assert run.status_code == 200
+    assert [item["name"] for item in run.json()["references"]] == colors
+    assert len(FakeProvider.instances[-1].received_references) == 6
+
+
+def test_failed_private_settings_write_preserves_the_previous_key(client, monkeypatch, tmp_path):
+    from yoyo.vision_research.settings import LocalSettings
+    configure(client)
+    before = (tmp_path / "private" / "settings.json").read_bytes()
+    def fail_save(self, api_key, model):
+        raise RuntimeError("本机模型配置未能保存，请检查目录权限")
+    monkeypatch.setattr(LocalSettings, "save", fail_save)
+    response = client.post("/api/config", json={"api_key": "replacement-secret-value-123456", "model": "gemini-test"})
+    assert response.status_code == 500
+    assert "replacement-secret" not in response.text
+    assert (tmp_path / "private" / "settings.json").read_bytes() == before
+    assert client.post("/api/connection-test", json={}).json()["ok"] is True
 
 
 def test_browser_chart_capture_is_tied_to_the_causal_chart_snapshot(tmp_path, monkeypatch):

@@ -4,7 +4,7 @@ const DEFAULT_MODEL = 'gemini-3.8-flash';
 const DEFAULT_CRITERIA = '只判断当前可见的双均线密集启动形态，不能利用未来涨跌；先密集后启动，不能确定则拒判；说明对应可观察证据。';
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
 const MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024;
-const MAX_REFERENCES = 4;
+const MAX_REFERENCES = 3599; // Gemini allows 3,600 total images including the candidate.
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 
 const state = {
@@ -128,7 +128,7 @@ function verdictLabel(verdict) {
 function sourceLabel(source) {
   const labels = {
     local: '本地数据', spike: 'SPIKE', spike_capture: 'SPIKE 图表快照', cache: '本机缓存', database: '本地数据库',
-    environment: '后端环境变量', env: '后端环境变量', session: '本机进程会话',
+    local_config: '本机已保存 · 重启保留', environment: '后端环境变量', env: '后端环境变量', session: '本机进程会话',
     memory: '本机进程会话', process: '本机进程会话', upload: '本地上传图表', unset: '未配置', none: '未配置',
   };
   return labels[source] || asText(source, '来源未提供');
@@ -280,12 +280,12 @@ function renderOverlay() {
 function renderReferences() {
   const list = byId('reference-list');
   list.innerHTML = state.references.length ? state.references.map((reference, index) => `<div class="reference-thumb">
-    <img src="${escapeHtml(reference.previewUrl)}" alt="参考图 ${index + 1}：${escapeHtml(reference.name)}" />
+    <button class="reference-preview" type="button" data-preview-reference="${index}" aria-label="查看大图 ${escapeHtml(reference.name)}"><img src="${escapeHtml(reference.previewUrl)}" alt="参考图 ${index + 1}：${escapeHtml(reference.name)}" /></button>
     <span class="reference-label" title="${escapeHtml(reference.name)}">${escapeHtml(reference.name)}</span>
     <button class="reference-remove" type="button" data-remove-reference="${index}" aria-label="移除参考图 ${escapeHtml(reference.name)}" ${state.referencesSaving ? 'disabled' : ''}>×</button>
   </div>`).join('') : '<span class="reference-empty">添加形态参考图，作为所有识别共用的对照。</span>';
   byId('reference-count').textContent = state.referencesReady ? String(state.references.length) : '—';
-  byId('references-total').textContent = `${state.references.length} / 4`;
+  byId('references-total').textContent = `${state.references.length} 张`;
   byId('reload-references').disabled = state.referencesSaving;
   byId('add-reference').disabled = !state.referencesReady || state.referencesSaving || state.references.length >= MAX_REFERENCES;
   byId('save-references').disabled = !state.referencesDirty || state.referencesSaving || !state.referencesReady;
@@ -733,7 +733,7 @@ async function addReferenceFiles(files) {
       state.referencesDirty = true;
     } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
-  if (files.length > selected.length) errors.push('参考图最多 4 张。');
+  if (files.length > selected.length) errors.push('图片数量超过 Gemini 单次请求上限。');
   state.referencesError = errors.join(' ');
   byId('reference-file').value = '';
   renderReferences(); renderResult();
@@ -953,7 +953,7 @@ async function saveConfig(event) {
     state.statusError = '';
     state.model = asText(status.model, model);
     setHealth(true, '本地 API 已连接');
-    showInlineSuccess('config-success', '设置已发送至本机 API。密钥输入框已清空；密钥不会保存在此页面。');
+    showInlineSuccess('config-success', '模型与密钥已保存在本机，重启后自动读取。');
   } catch (error) {
     showInlineError('config-error', error.message || '保存设置失败。');
   } finally {
@@ -996,6 +996,17 @@ document.addEventListener('click', (event) => {
   if (signalButton) {
     const item = state.signals.find((signal) => asText(signal.id) === signalButton.dataset.signalId);
     if (item) selectSignal(item);
+    return;
+  }
+  const previewReferenceButton = event.target.closest('[data-preview-reference]');
+  if (previewReferenceButton) {
+    const reference = state.references[Number(previewReferenceButton.dataset.previewReference)];
+    if (reference) {
+      byId('reference-viewer-title').textContent = reference.name;
+      byId('reference-viewer-image').src = reference.previewUrl;
+      byId('reference-viewer-image').alt = reference.name;
+      byId('reference-viewer').showModal();
+    }
     return;
   }
   const removeReferenceButton = event.target.closest('[data-remove-reference]');

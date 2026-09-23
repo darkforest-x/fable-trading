@@ -1,7 +1,7 @@
 """Loopback SPIKE/Gemini research workbench, with no scanner or execution hooks.
 
 FastAPI serves static UI and bounded JSON uploads on one origin. Credentials
-stay in process memory or inherited environment, never in the research ledger.
+are saved in owner-authorized private local settings, never in the research ledger.
 Sources: https://fastapi.tiangolo.com/tutorial/static-files/
 https://www.starlette.io/threadpool/ and https://ai.google.dev/gemini-api/docs/get-started
 """
@@ -28,11 +28,13 @@ from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from . import VERSION
-from .gemini import GeminiClient, GeminiError
+from .defaults import install_default_references
+from .gemini import PROMPT_VERSION, GeminiClient, GeminiError
 from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes, image_from_data_url
 from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL,
                       ReferencesRequest, ReviewRequest)
 from .source import SourceError, SpikeSource
+from .settings import LocalSettings
 from .store import ReferenceRevisionConflict, ResearchStore, utc_now
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -70,15 +72,23 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
     return value
 
 
-def create_app(runtime: Optional[Path] = None, source=None, provider_factory=GeminiClient):
+def create_app(runtime: Optional[Path] = None, source=None, provider_factory=GeminiClient,
+               seed_defaults: bool = False):
     app = FastAPI(title="SPIKE Vision Lab", version=VERSION, docs_url=None, redoc_url=None,
                   openapi_url=None)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "[::1]"])
-    store = ResearchStore(Path(runtime or os.environ.get("VISION_RESEARCH_RUNTIME", DEFAULT_RUNTIME)))
+    runtime = Path(runtime or os.environ.get("VISION_RESEARCH_RUNTIME", DEFAULT_RUNTIME))
+    store = ResearchStore(runtime)
+    if seed_defaults:
+        install_default_references(store)
+    settings = LocalSettings(runtime)
+    saved = settings.load()
     spike = source or SpikeSource(os.environ.get("SPIKE_READONLY_URL", "http://127.0.0.1:8766"))
     env_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY") or ""
-    config = {"api_key": env_key.strip(), "model": validate_model(os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)),
-              "credential_source": "environment" if env_key.strip() else "none"}
+    configured_key = saved.get("api_key") or env_key.strip()
+    config = {"api_key": configured_key,
+              "model": validate_model(saved.get("model") or os.environ.get("GEMINI_MODEL", DEFAULT_MODEL)),
+              "credential_source": "local_config" if saved.get("api_key") else "environment" if configured_key else "none"}
     inference_lock = threading.Lock()
     config_lock = threading.Lock()
     app.state.store, app.state.source = store, spike
@@ -148,7 +158,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
         try:
             body = ReferencesRequest.model_validate(payload)
         except ValidationError:
-            raise HTTPException(400, "参考图最多四张，请检查图片和版本号")
+            raise HTTPException(400, "请检查参考图格式、数量和版本号")
         items, images, names, hashes = [], [], set(), set()
         try:
             for submitted in body.references:
@@ -184,9 +194,13 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
         except (ValidationError, ValueError):
             raise HTTPException(400, "模型或 Key 格式不正确，请检查输入")
         with config_lock:
-            config["model"] = model
-            if key is not None:
-                config.update(api_key=key, credential_source="session")
+            chosen_key = key if key is not None else config["api_key"]
+            try:
+                settings.save(chosen_key, model)
+            except RuntimeError as exc:
+                raise HTTPException(500, str(exc))
+            config.update(model=model, api_key=chosen_key,
+                          credential_source="local_config" if chosen_key else "none")
         return status()
 
     def provider(model=None):
@@ -253,7 +267,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             "image_url": store.put_image(image), "image_name": image.name, "image_sha256": image.sha256,
             "image_width": image.width, "image_height": image.height,
             "criteria": body.criteria, "criteria_sha256": hashlib.sha256(body.criteria.encode()).hexdigest(),
-            "prompt_version": "spike-vision-v1", "schema_version": 1, "provenance": provenance,
+            "prompt_version": PROMPT_VERSION, "schema_version": 1, "provenance": provenance,
             "references": [{"name": item.name, "sha256": item.sha256, "image_url": store.put_image(item)} for item in references],
             "reference_source": reference_source, "reference_revision": reference_revision,
             "decision": None, "usage": {}, "latency_ms": None, "error": None,
@@ -285,7 +299,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Gem
             if body.model:
                 body.model = validate_model(body.model)
         except (ValidationError, ValueError):
-            raise HTTPException(400, "请选择一张待判图，检查模型与形态规则，参考图最多四张")
+            raise HTTPException(400, "请选择一张待判图，检查模型、形态规则和参考图格式")
         chart_snapshot = None
         if body.signal_id and (body.chart_capture_data_url or body.expected_chart_sha256):
             try:
@@ -388,7 +402,7 @@ def main():
     parser.add_argument("--runtime", type=Path, default=None)
     args = parser.parse_args()
     import uvicorn
-    uvicorn.run(create_app(runtime=args.runtime), host="127.0.0.1", port=args.port,
+    uvicorn.run(create_app(runtime=args.runtime, seed_defaults=True), host="127.0.0.1", port=args.port,
                 access_log=False, log_level="warning")
 
 

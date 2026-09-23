@@ -89,7 +89,7 @@
               <div id="drop-zone" class="drop-zone" aria-label="图表画布，可拖放图片">
                 <input id="chart-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" />
                 <div id="empty-stage" class="empty-stage">
-                  <h2>从左侧选择一条信号</h2>
+                  <h2>选择一条候选信号</h2>
                   <p>查看 K 线和均线，或上传自己的图表。</p>
                   <button id="empty-upload" class="button button-secondary" type="button">选择图片</button>
                   <span class="file-guidance">PNG、JPEG、WEBP · 最大 8 MB</span>
@@ -140,12 +140,13 @@
         <section id="tab-references" class="tab-panel" role="tabpanel" aria-labelledby="tab-references-button" tabindex="0" hidden>
           <div class="page-heading"><div><h1>全局参考图</h1><p class="page-subtitle">保存一次，后续识别共用。切换候选、刷新页面和重启服务都会保留。</p></div></div>
           <section class="panel global-references">
-            <div class="panel-heading"><h2>形态参考 <span id="references-total">0 / 4</span></h2><button id="add-reference" class="button button-secondary" type="button">添加参考图</button></div>
+            <div class="panel-heading"><h2>形态参考 <span id="references-total">0 张</span></h2><button id="add-reference" class="button button-secondary" type="button">添加参考图</button></div>
             <input id="reference-file" class="visually-hidden" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+            <p class="field-help">默认图沿用已有核心区域红框，包含核心 K 线与均线。它们是历史回看示例，框外后续走势不作为判断依据；点击图片可放大。</p>
             <div id="reference-list" class="reference-list" aria-live="polite"></div>
             <div id="references-error" class="inline-error" role="alert" hidden></div>
             <div class="reference-save-row"><span id="references-status" role="status">正在读取…</span><button id="reload-references" class="button button-quiet" type="button">重新载入</button><button id="save-references" class="button button-primary" type="button" disabled>保存全局参考图</button></div>
-            <p class="field-help">最多 4 张。保存仅写入本机；点击「开始识别」时才发送至 Gemini。历史记录保留当次使用的参考图。</p>
+            <p class="field-help">可继续添加参考图；待判图与参考图合计不超过 12 MB。保存仅写入本机，识别时发送至 Gemini。历史记录保留当次参考图。</p>
           </section>
         </section>
 
@@ -173,7 +174,7 @@
                 <input id="model-input" name="model" type="text" value="gemini-3.8-flash" maxlength="120" autocomplete="off" spellcheck="false" />
                 <label class="field-label" for="api-key-input">API 密钥 <span class="optional-label">可选</span></label>
                 <input id="api-key-input" name="api_key" type="password" placeholder="粘贴后保存；保存后输入框会清空" autocomplete="new-password" spellcheck="false" />
-                <p class="field-help">密钥仅在本机进程中暂存，重启服务后需重新填写。留空可保留当前密钥。</p>
+                <p class="field-help">密钥保存在本机私有配置中，重启后自动读取。只需填写一次；留空会保留已保存的密钥。</p>
                 <div id="config-error" class="inline-error" role="alert" hidden></div>
                 <div id="config-success" class="inline-success" role="status" aria-live="polite" hidden></div>
                 <button id="save-config" class="button button-primary" type="submit"><span class="button-label">保存设置</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
@@ -198,5 +199,9 @@
         </section>
       </main>
     </div>
+    <dialog id="reference-viewer" aria-labelledby="reference-viewer-title">
+      <div class="reference-viewer-heading"><h2 id="reference-viewer-title">参考图</h2><form method="dialog"><button class="button button-secondary" type="submit">关闭</button></form></div>
+      <img id="reference-viewer-image" alt="参考图" />
+    </dialog>
   </body>
 </html>

@@ -284,7 +284,7 @@ def test_invalid_image_criteria_and_reference_counts_fail_before_http() -> None:
         cases = [
             (lambda: client.analyze(mismatched, [], "只看可见形态。"), "image_hash_mismatch"),
             (lambda: client.analyze(candidate, [], ""), "invalid_criteria"),
-            (lambda: client.analyze(candidate, [candidate] * 5, "只看可见形态。"), "too_many_references"),
+            (lambda: client.analyze(candidate, [candidate] * 3600, "只看可见形态。"), "too_many_references"),
             (lambda: client.analyze(ImageInput("x.gif", "image/gif", b"x", hashlib.sha256(b"x").hexdigest(), 1, 1), [], "只看可见形态。"), "unsupported_image_type"),
         ]
         for call, expected_code in cases:
@@ -294,3 +294,16 @@ def test_invalid_image_criteria_and_reference_counts_fail_before_http() -> None:
         assert calls == []
     finally:
         client.close()
+
+
+def test_six_references_are_sent_in_order_without_the_old_four_image_cap():
+    observed = []
+    references = [image(f"reference-{i}.png", f"reference {i}".encode()) for i in range(6)]
+    def respond(request):
+        observed.append(json.loads(request.content))
+        return httpx.Response(200, json=completed_body())
+    with make_client(respond) as client:
+        client.analyze(image("candidate.png", b"candidate"), references, "只判断可见均线形态。")
+    images = [part for part in observed[0]["input"] if part["type"] == "image"]
+    assert len(images) == 7
+    assert [base64.b64decode(part["data"]) for part in images[1:]] == [ref.data for ref in references]

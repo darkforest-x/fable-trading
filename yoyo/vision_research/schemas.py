@@ -13,6 +13,9 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 DEFAULT_MODEL = "gemini-3.8-flash"
+# Google's documented 3,600 image/request ceiling includes the candidate.
+# The much smaller aggregate byte limit normally constrains the workbench first.
+MAX_REFERENCES = 3599
 DEFAULT_CRITERIA = (
     "只判断当前可见的双均线密集启动形态，不能利用未来涨跌。"
     "观察均线是否先持续收拢，再出现有方向的启动。"
@@ -65,7 +68,7 @@ class ReferenceRequest(BaseModel):
 
 class ReferencesRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    references: List[ReferenceRequest] = Field(max_length=4)
+    references: List[ReferenceRequest] = Field(max_length=MAX_REFERENCES)
     expected_revision: Optional[int] = Field(default=None, ge=0)
 
 
@@ -78,7 +81,7 @@ class AnalyzeRequest(BaseModel):
     expected_image_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     expected_chart_sha256: Optional[str] = Field(default=None, pattern=r"^[a-f0-9]{64}$")
     reference_revision: Optional[int] = Field(default=None, ge=0)
-    references: Optional[List[ReferenceRequest]] = Field(default=None, max_length=4)
+    references: Optional[List[ReferenceRequest]] = Field(default=None, max_length=MAX_REFERENCES)
     criteria: str = Field(default=DEFAULT_CRITERIA, min_length=10, max_length=8000)
     model: Optional[str] = Field(default=None, max_length=100)
 
