@@ -44,7 +44,21 @@ def fingerprint(value):
 
 
 def read_table(path):
-    frame = pd.read_csv(path)
+    try:
+        frame = pd.read_csv(path)
+    except pd.errors.EmptyDataError:
+        frame = pd.DataFrame()
+    # Parent empty streams predate typed empty-table contracts. Add headers,
+    # never observations; populated malformed streams still fail normally.
+    if frame.empty:
+        for col in ('trade_key', 'arm', 'symbol', 'timeframe_min', 'signal_i', 'signal_close', 'side',
+                    'status', 'policy', 'blocking_trade', 'entry_time', 'entry_price', 'initial_stop',
+                    'initial_risk', 'exit_i', 'exit_time', 'exit_price', 'exit_reason', 'gross_return',
+                    'net_return', 'gross_r', 'net_r', 'censored', 'control_pool', 'matched',
+                    'control_sig', 'control_signal_close', 'control_exit_time', 'control_net_return',
+                    'control_net_r', 'control_censored'):
+            if col not in frame:
+                frame[col] = pd.Series(dtype=object)
     for col in ('signal_close', 'entry_time', 'exit_time', 'control_signal_close', 'control_exit_time'):
         if col in frame:
             frame[col] = pd.to_datetime(frame[col], utc=True)

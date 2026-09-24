@@ -132,3 +132,12 @@ def test_receipt_cannot_hide_changed_bytes(tmp_path):
     path.write_text('changed')
     with pytest.raises(ValueError, match='changed stream artifact'):
         study.verified_receipt(folder, manifest)
+
+
+def test_empty_legacy_csv_gets_headers_without_inventing_observations(tmp_path):
+    path = tmp_path/'empty.csv.gz'
+    pd.DataFrame().to_csv(path, index=False)
+    result = study.read_table(path)
+    assert result.empty
+    assert result[result.signal_close >= pd.Timestamp('2025-01-01', tz='UTC')].empty
+    assert result[result.arm.eq('v9_both')].empty
