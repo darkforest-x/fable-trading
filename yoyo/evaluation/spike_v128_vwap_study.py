@@ -206,6 +206,20 @@ def validate_run(path):
     return ident, manifest
 
 
+def validate_parent_contract(cfg, identity, manifest):
+    """Reject horizon, random-seed or cost drift even for a valid parent hash."""
+    original = identity['config']
+    for name in ('timeframes', 'round_trip_cost', 'control_seed', 'split', 'end'):
+        if cfg[name] != original[name]:
+            raise ValueError(f'parent contract differs: {name}')
+    if not (pd.Timestamp(original['start']) <= pd.Timestamp(cfg['analysis_start'])
+            < pd.Timestamp(cfg['split']) < pd.Timestamp(cfg['end'])):
+        raise ValueError('analysis window outside parent horizon')
+    expected = {f'{s}_{m}m' for s in identity['symbols'] for m in cfg['timeframes']}
+    if set(manifest['receipts']) != expected:
+        raise ValueError('parent stream inventory differs')
+
+
 def verified_receipt(folder, manifest, *, input_sha=None):
     key = folder.name
     if digest(folder/'receipt.json') != manifest['receipts'][key]:
@@ -258,6 +272,7 @@ def feature_worker(task):
             raise ValueError('multiple random draws per candidate')
         outcomes = attach_features(outcomes, feature, minutes)
         controls = attach_features(controls, feature, minutes, controls=True)
+        verified_receipt(cached, cached_manifest, input_sha=source['sha256'])
         folder = Path(output)/'features'/key
         if folder.exists():
             raise ValueError('refusing to overwrite feature stream')
@@ -346,6 +361,8 @@ def run(output, workers=4, symbols=None):
         raise ValueError('commit study, statistics, tests and plan before reading outcomes')
     pi, pm = validate_run(cfg['baseline_run'])
     ci, cm = validate_run(cfg['cached_run'])
+    validate_parent_contract(cfg, pi, pm)
+    validate_parent_contract(cfg, ci, cm)
     for parent_identity in (pi, ci):
         for path, sha in parent_identity['code'].items():
             if digest(Path(path)) != sha:

@@ -141,3 +141,16 @@ def test_empty_legacy_csv_gets_headers_without_inventing_observations(tmp_path):
     assert result.empty
     assert result[result.signal_close >= pd.Timestamp('2025-01-01', tz='UTC')].empty
     assert result[result.arm.eq('v9_both')].empty
+
+
+def test_authentic_parent_with_different_random_clock_is_not_compatible():
+    cfg = {'timeframes': [15, 60], 'round_trip_cost': .002, 'control_seed': 9,
+           'split': '2025-01-01T00:00:00Z', 'end': '2026-01-01T00:00:00Z',
+           'analysis_start': '2023-01-01T00:00:00Z'}
+    identity = {'config': cfg | {'start': '2022-11-01T00:00:00Z'}, 'symbols': ['BTCUSDT']}
+    manifest = {'receipts': {'BTCUSDT_15m': 'a', 'BTCUSDT_60m': 'b'}}
+    study.validate_parent_contract(cfg, identity, manifest)
+    with pytest.raises(ValueError, match='control_seed'):
+        study.validate_parent_contract(cfg | {'control_seed': 10}, identity, manifest)
+    with pytest.raises(ValueError, match='inventory'):
+        study.validate_parent_contract(cfg, identity, {'receipts': {'BTCUSDT_15m': 'a'}})
