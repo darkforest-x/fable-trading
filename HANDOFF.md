@@ -1,5 +1,11 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新：ISRG 再次证明原生与后台元数据口径不一致（2026-09-24）
+
+- Owner再次指出ISRG30m16:30收盘395.56有Bark、图上无信号。事件`5300ec9405ab95353af46f15`，Bark/TG各sent一次；后台确有空头，不是重发。原生同品种30m的V12.8面板为`crypto / 未知`，极简/仅联合均false、确认及空头样式开启。
+- 固定1364根闭合K线及tick.01，仅后台base从ISRG改None，同根空头由passed变为base_asset_unknown，证明OKX元数据补值与Pine未知拒绝的语义差异足以致错。原生面板BB未过只是最近原始确认，未对应本次当根，不可当成该bar证据；其余原生数值仍未逐根核对。
+- 只完成定位，没有修复算法、改门槛、暂停/重启服务或改通知订阅。四个运行监控模块启动SHA吻合磁盘，桌面恢复BTC1H。证据`data/research/spike_v128_isrg_parity_20260924/`、learning `docs/learnings/cross-platform-parity-includes-metadata-authority.md`；Notion `3e58856479af814b8b60d697134cad37`。下一步以原生为准统一身份输入和未知语义，再做OHLC历史/IMACD/BB/最终事件双边对账；不可声称图表已一致。
+
 ## 最新：VWAP / TWAP 距离筛选完整回测，拒绝作为默认条件（2026-09-24）
 
 - Owner 要求研究并回测。复用冻结 Binance638 合约5m数据聚合15m/1H，2023–2024原始候选特征中位数定门、2025-01至2026-09-23后段固定检验；仅改入场准入。原下一开盘、反向退出、止损/追踪、风险及20bp不变，各组重新回放占仓，切点继承共同原版仓位。
