@@ -179,3 +179,13 @@ test('truncated, missing, and unsaved records remain undecided and readable', ()
   assert.equal(missing.decision, null);
   assert.equal(missing.errorText, '本次 API 调用已中断。');
 });
+
+test('Zhipu usage explains thinking consumption even when no final JSON was generated', () => {
+  const response = { ...zhipuResponse(''), usage: {
+    prompt_tokens: 10195, completion_tokens: 8192, total_tokens: 18387,
+    completion_tokens_details: { reasoning_tokens: 8190 },
+  } };
+  const result = exchangeConversation(detail({ status: 'failed', response, error: '输出达到长度上限。' }));
+  assert.equal(result.decision, null);
+  assert.equal(result.usageText, '输入 10195 · 输出 8192 · 合计 18387 · 思考 8190 tokens');
+});

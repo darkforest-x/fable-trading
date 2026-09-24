@@ -317,6 +317,62 @@ def test_length_finish_reason_is_reported_as_truncated_even_if_json_parses() -> 
     assert caught.value.code == "truncated_response"
 
 
+@pytest.mark.parametrize("model, expected", [
+    ("glm-5.3-flash", 32768), ("glm-5.3-flashx", 32768),
+    ("glm-5v-turbo", 8192), ("glm-4.6v", 8192),
+    ("glm-4.6v-flash", 8192), ("glm-4.6v-flashx", 8192),
+])
+def test_review_budget_is_model_specific_without_reducing_max_thinking(model, expected) -> None:
+    bodies = []
+
+    def respond(request):
+        bodies.append(json.loads(request.content))
+        return httpx.Response(200, json=completion())
+
+    with client(respond, model=model) as adapter:
+        adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+    assert len(bodies) == 1
+    assert bodies[0]["max_tokens"] == expected
+    if model.startswith("glm-5.3"):
+        assert bodies[0]["thinking"] == {"type": "enabled"}
+        assert bodies[0]["reasoning_effort"] == "max"
+
+
+@pytest.mark.parametrize("content", ["", '{"verdict":"uncertain"'])
+def test_thinking_exhaustion_retains_numeric_diagnostics_without_retry(content) -> None:
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(200, json=completion(content, finish_reason="length", payload_overrides={
+            "usage": {"completion_tokens": 8192, "completion_tokens_details": {
+                "reasoning_tokens": 8190, "private_detail": "not persisted"}},
+        }))
+
+    with client(respond) as adapter:
+        with pytest.raises(ZhipuError) as caught:
+            adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+    assert len(calls) == 1
+    assert caught.value.code == "truncated_response"
+    assert caught.value.diagnostics()["output"] == {
+        "max_tokens": MAX_OUTPUT_TOKENS, "completion_tokens": 8192,
+        "reasoning_tokens": 8190, "content_chars": len(content),
+    }
+    assert "其中思考 8,190" in str(caught.value)
+    assert "尚未输出最终 JSON" in str(caught.value) if not content else "JSON 结果未完成" in str(caught.value)
+
+
+def test_success_usage_keeps_reasoning_count_separate_from_total_completion() -> None:
+    payload = completion(payload_overrides={"usage": {
+        "completion_tokens": 9000, "completion_tokens_details": {"reasoning_tokens": 8600},
+        "prompt_tokens": 100, "total_tokens": 9100,
+    }})
+    with client(lambda request: httpx.Response(200, json=payload)) as adapter:
+        result = adapter.analyze(image("candidate.png", b"candidate"), [], "只判断可见形态。")
+    assert result["usage"] == {"completion_tokens": 9000, "reasoning_tokens": 8600,
+                              "prompt_tokens": 100, "total_tokens": 9100}
+
+
 @pytest.mark.parametrize(
     ("content", "expected_code"),
     [("not json", "invalid_json"),

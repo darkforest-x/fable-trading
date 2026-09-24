@@ -50,7 +50,12 @@ READ_TIMEOUT_SECONDS = 300.0
 CONNECT_TIMEOUT_SECONDS = 15.0
 WRITE_TIMEOUT_SECONDS = 30.0
 POOL_TIMEOUT_SECONDS = 5.0
-MAX_OUTPUT_TOKENS = 8192
+# GLM-5.3 reasoning and final JSON consume the same observed output budget.
+# Local failures used 8,190 reasoning tokens out of 8,192 completion tokens,
+# leaving no answer. Keep the owner's max effort; give that family 32K total.
+# Official ceiling is 131,072: https://docs.bigmodel.cn/cn/guide/start/concept-param
+MAX_OUTPUT_TOKENS = 32768
+LEGACY_OUTPUT_TOKENS = 8192
 CONNECTION_TEST_MAX_TOKENS = 1024
 MAX_IMAGE_BYTES = 5_000_000  # Provider requires less than 5 MB per image.
 MAX_CRITERIA_CHARS = 8000
@@ -98,12 +103,14 @@ class ZhipuError(Exception):
     """Provider failure with a safe user-facing Chinese message and code."""
 
     def __init__(self, code: str, message: str, *, http_status: int | None = None,
-                 provider_code: str | None = None, timeout_phase: str | None = None):
+                 provider_code: str | None = None, timeout_phase: str | None = None,
+                 output_details: dict[str, int] | None = None):
         self.code = code
         self.message = message
         self.http_status = http_status
         self.provider_code = provider_code
         self.timeout_phase = timeout_phase
+        self.output_details = output_details
         super().__init__(message)
 
     def diagnostics(self) -> dict[str, Any]:
@@ -112,6 +119,8 @@ class ZhipuError(Exception):
                    "provider_code": self.provider_code}
         if self.timeout_phase is not None:
             details["timeout_phase"] = self.timeout_phase
+        if self.output_details is not None:
+            details["output"] = self.output_details
         return details
 
 
@@ -235,6 +244,11 @@ def _thinking_options(model: str) -> dict[str, Any]:
         # The owner selected max effort. This family requires thinking enabled.
         return {"thinking": {"type": "enabled"}, "reasoning_effort": "max"}
     return {}
+
+
+def _output_token_budget(model: str) -> int:
+    """Increase only the GLM-5.3 max-thinking family; retain other models' budget."""
+    return MAX_OUTPUT_TOKENS if model in {"glm-5.3-flash", "glm-5.3-flashx"} else LEGACY_OUTPUT_TOKENS
 
 
 def _parse_decision(text: str, decision_model=CurrentDecision,
@@ -368,7 +382,7 @@ class ZhipuClient:
         return payload
 
     @staticmethod
-    def _first_choice(payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    def _first_choice(payload: dict[str, Any], *, max_tokens: int | None = None) -> tuple[dict[str, Any], dict[str, Any]]:
         choices = payload.get("choices")
         if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
             raise ZhipuError("no_result", "智谱完成了请求，但没有返回图片审阅结果。")
@@ -379,7 +393,33 @@ class ZhipuClient:
         if finish_reason in {"sensitive", "content_filter", "blocked"}:
             raise ZhipuError("safety_blocked", "智谱安全策略拦截了这次图片审阅。")
         if finish_reason == "length":
-            raise ZhipuError("truncated_response", "智谱输出达到长度上限，JSON 结果可能不完整；没有自动重试。")
+            # Thinking and answer tokens share the output budget. Preserve only
+            # numeric diagnostics; never substitute reasoning for the decision.
+            usage = payload.get("usage")
+            usage = usage if isinstance(usage, dict) else {}
+            completion_details = usage.get("completion_tokens_details")
+            completion_details = completion_details if isinstance(completion_details, dict) else {}
+            output = {key: value for key, value in {
+                "max_tokens": max_tokens,
+                "completion_tokens": usage.get("completion_tokens"),
+                "reasoning_tokens": completion_details.get("reasoning_tokens"),
+            }.items() if type(value) is int and value >= 0}
+            message = choice.get("message")
+            content = message.get("content") if isinstance(message, dict) else None
+            if isinstance(content, str):
+                output["content_chars"] = len(content)
+            counts = []
+            if "max_tokens" in output:
+                counts.append(f"本次上限 {output['max_tokens']:,} token")
+            if "completion_tokens" in output:
+                counts.append(f"已使用 {output['completion_tokens']:,}")
+            if "reasoning_tokens" in output:
+                counts.append(f"其中思考 {output['reasoning_tokens']:,}")
+            budget = "（" + "，".join(counts) + "）" if counts else ""
+            result = "尚未输出最终 JSON" if content == "" else "JSON 结果未完成"
+            raise ZhipuError("truncated_response",
+                             f"智谱输出达到长度上限{budget}；{result}。本次未采纳为识别结果，也未自动重试。",
+                             output_details=output)
         if finish_reason in {"network_error", "model_context_window_exceeded"}:
             raise ZhipuError("incomplete_response", "智谱未完成这次请求；没有自动重试。")
         if finish_reason == "tool_calls":
@@ -404,7 +444,7 @@ class ZhipuClient:
         if not response.is_success:
             raise _request_error(response)
         payload = self._json_payload(response, result_name)
-        _, message = self._first_choice(payload)
+        _, message = self._first_choice(payload, max_tokens=request_body.get("max_tokens"))
         text = message.get("content")
         if not isinstance(text, str) or not text.strip():
             raise ZhipuError("no_result", f"智谱完成了请求，但没有返回{result_name}文本。")
@@ -422,6 +462,10 @@ class ZhipuClient:
             }
         else:
             usage = {}
+        token_details = raw_usage.get("completion_tokens_details") if isinstance(raw_usage, dict) else None
+        reasoning_tokens = token_details.get("reasoning_tokens") if isinstance(token_details, dict) else None
+        if type(reasoning_tokens) is int and reasoning_tokens >= 0:
+            usage["reasoning_tokens"] = reasoning_tokens
         response_model = payload.get("model")
         return {
             "decision": decision,
@@ -444,7 +488,7 @@ class ZhipuClient:
         if not response.is_success:
             raise _request_error(response)
         payload = self._json_payload(response, "文本补全结果")
-        _, message = self._first_choice(payload)
+        _, message = self._first_choice(payload, max_tokens=CONNECTION_TEST_MAX_TOKENS)
         if not isinstance(message.get("content"), str) or not message["content"].strip():
             raise ZhipuError("invalid_response", "智谱未返回文本补全内容。")
         return {
@@ -485,7 +529,7 @@ class ZhipuClient:
         request_body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": content}],
-            "max_tokens": MAX_OUTPUT_TOKENS,
+            "max_tokens": _output_token_budget(self.model),
             "stream": False,
         }
         if self.model == "glm-5.3-flash":
@@ -529,7 +573,7 @@ class ZhipuClient:
         request_body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": content}],
-            "max_tokens": MAX_OUTPUT_TOKENS,
+            "max_tokens": _output_token_budget(self.model),
             "stream": False,
         }
         if self.model == "glm-5.3-flash":

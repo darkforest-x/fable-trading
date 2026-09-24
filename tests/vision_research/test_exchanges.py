@@ -149,6 +149,29 @@ def test_recognition_timeout_keeps_phase_and_sent_input_after_restart(tmp_path):
     assert KEY not in json.dumps(detail) and KEY not in json.dumps(run)
 
 
+def test_reasoning_truncation_diagnostics_and_original_response_survive_restart(tmp_path):
+    payload = json.loads(raw_response())
+    payload["choices"][0].update(finish_reason="length")
+    payload["choices"][0]["message"]["content"] = ""
+    payload["usage"] = {"completion_tokens": 8192, "completion_tokens_details": {"reasoning_tokens": 8190}}
+    raw = json.dumps(payload)
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(200, text=raw)
+
+    with make_client(tmp_path, respond) as client:
+        run = client.post("/api/analyze", json={"image_data_url": picture()}).json()
+        assert run["status"] == "failed" and run["decision"] is None
+        assert run["error_details"]["output"]["reasoning_tokens"] == 8190
+        assert "尚未输出最终 JSON" in run["error"]
+    reopened = ResearchStore(tmp_path)
+    assert reopened.get(run["id"])["error_details"] == run["error_details"]
+    assert reopened.get_exchange(run["api_exchange_id"])["response"]["body_text"] == raw
+    assert len(calls) == 1
+
+
 def test_restart_keeps_legacy_runs_untouched_and_marks_pending_trace(tmp_path):
     store = ResearchStore(tmp_path)
     legacy = {"id": "legacy", "created_at": "2026-09-23", "status": "completed", "decision": {"summary": "old"}}

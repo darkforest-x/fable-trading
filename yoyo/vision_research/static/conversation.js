@@ -239,7 +239,9 @@ function usageSummary(payload) {
   const output = token('completion_tokens', 'total_output_tokens', 'candidatesTokenCount');
   const total = token('total_tokens', 'totalTokenCount');
   const cached = token('total_cached_tokens', 'cachedContentTokenCount');
-  const thoughts = token('total_thought_tokens', 'thoughtsTokenCount');
+  const reasoning = usage.completion_tokens_details?.reasoning_tokens;
+  const thoughts = Number.isInteger(reasoning) && reasoning >= 0
+    ? reasoning : token('total_thought_tokens', 'thoughtsTokenCount');
   const chunks = [];
   if (input !== null) chunks.push(`输入 ${input}`);
   if (output !== null) chunks.push(`输出 ${output}`);
