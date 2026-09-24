@@ -25,6 +25,9 @@
   }
   const githubLink=(value,label)=>{const url=githubUrl(value);return url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`:'<span class="research-missing">链接未提供或不符合 HTTPS GitHub 规则</span>';};
   const stages = ['hypothesis','review','inconclusive','rejected','archived'];
+  // Filter the effective research status shown on each row, including overrides.
+  const factorStatus = (factor) => factor.stage || factor.status || 'unrecorded';
+  const factorStatusLabel = (status) => status === 'unrecorded' ? '未记录' : statusNames[status] || status;
   const badge = (s) => `<span class="research-badge status-${esc(s)}">${esc(statusNames[s] || s || '未记录')}</span>`;
   const state = { view:null, factors:[], experiments:[], jobs:[], recipes:[], selected:new Set(), loaded:false, loading:false, revision:0, detail:null, job:null };
   const date = (s) => s ? new Date(s).toLocaleString('zh-CN', {hour12:false,timeZone:'Asia/Shanghai'}) : '—';
@@ -63,6 +66,7 @@
     const selected=$('factor-category').value;
     $('factor-category').innerHTML=options([['','全部类别'],...categories.map(x=>[x,categoryLabel(x)])],selected);
     ensureFactorSourceFilter();
+    ensureFactorStatusFilter();
     renderFactors(); renderExperiments(); renderJobs();
   }
   function ensureFactorSourceFilter() {
@@ -79,11 +83,28 @@
     const selected=filter.value;
     filter.innerHTML=options([['','全部来源'],...projects.map(project=>[project,project])],selected);
   }
+  function ensureFactorStatusFilter() {
+    let filter=$('factor-status');
+    if(!filter) {
+      filter=document.createElement('select');
+      filter.id='factor-status';
+      filter.setAttribute('aria-label','因子研究状态');
+      ($('factor-source')||$('factor-category')).after(filter);
+    }
+    const selected=filter.value;
+    const counts=new Map();
+    state.factors.forEach(f=>{const status=factorStatus(f);counts.set(status,(counts.get(status)||0)+1);});
+    // Keep a selected status at zero after a refresh instead of broadening the query.
+    if(selected&&!counts.has(selected))counts.set(selected,0);
+    const order=['implemented','research','hypothesis','review','inconclusive','rejected','archived'];
+    const statuses=[...counts.keys()].sort((a,b)=>(order.indexOf(a)<0?order.length:order.indexOf(a))-(order.indexOf(b)<0?order.length:order.indexOf(b))||a.localeCompare(b));
+    filter.innerHTML=options([['','全部研究状态'],...statuses.map(status=>[status,`${factorStatusLabel(status)}（${counts.get(status)}）`])],selected);
+  }
   function renderFactors() {
-    const q=$('factor-search').value.trim().toLowerCase(),category=$('factor-category').value,source=$('factor-source')?.value||'';
-    const items=state.factors.filter(f=>(!category||f.category===category)&&(!source||upstreamProject(f)===source)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
+    const q=$('factor-search').value.trim().toLowerCase(),category=$('factor-category').value,source=$('factor-source')?.value||'',status=$('factor-status')?.value||'';
+    const items=state.factors.filter(f=>(!category||f.category===category)&&(!source||upstreamProject(f)===source)&&(!status||factorStatus(f)===status)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
     $('factor-count').textContent=`${items.length} / ${state.factors.length} 个因子`;
-    $('factor-rows').innerHTML=items.map(f=>`<tr><td><button class="research-text-button" data-factor="${esc(f.id)}">${esc(f.name||f.id)}</button><small class="research-mono">${esc(f.id)}</small>${hasUpstream(f)?`<small class="research-factor-project">来源：${esc(upstreamProject(f)||'未记录')}</small>`:''}</td><td>${esc(categoryLabel(f.category))}</td><td class="research-description">${esc(f.definition)}</td><td>${badge(f.stage||f.status)}${hasUpstream(f)?'<small class="research-factor-claim">已实现 · 收益待验证</small>':''}</td><td>${(f.experiment_ids||[]).length}</td><td><button class="research-button" data-factor="${esc(f.id)}">管理 →</button></td></tr>`).join('') || '<tr><td colspan="6" class="research-empty">没有匹配的因子。可以新建一个待验证假设。</td></tr>';
+    $('factor-rows').innerHTML=items.map(f=>`<tr><td><button class="research-text-button" data-factor="${esc(f.id)}">${esc(f.name||f.id)}</button><small class="research-mono">${esc(f.id)}</small>${hasUpstream(f)?`<small class="research-factor-project">来源：${esc(upstreamProject(f)||'未记录')}</small>`:''}</td><td>${esc(categoryLabel(f.category))}</td><td class="research-description">${esc(f.definition)}</td><td>${badge(f.stage||f.status)}${hasUpstream(f)?'<small class="research-factor-claim">已实现 · 收益待验证</small>':''}</td><td>${(f.experiment_ids||[]).length}</td><td><button class="research-button" data-factor="${esc(f.id)}">管理 →</button></td></tr>`).join('') || '<tr><td colspan="6" class="research-empty">没有匹配的因子，请调整筛选条件或搜索词。</td></tr>';
   }
   function renderExperiments() {
     const q=$('experiment-search').value.trim().toLowerCase(),status=$('experiment-status').value;
@@ -221,7 +242,7 @@
   });
   $('factor-category').addEventListener('change',renderFactors);
   $('factor-search').addEventListener('input',renderFactors);
-  document.addEventListener('change',(event)=>{if(event.target.id==='factor-source')renderFactors();});
+  document.addEventListener('change',(event)=>{if(['factor-source','factor-status'].includes(event.target.id))renderFactors();});
   ['experiment-search','experiment-status'].forEach(id=>$(id).addEventListener('input',renderExperiments));
   setInterval(async()=>{if(state.view==='backtests'&&!document.hidden){try{state.jobs=(await api('/jobs')).items;renderJobs();}catch(error){showError(error);}}},4000);
   window.SpikeResearch={setView(view){state.view=view;if(['research','factors','experiments','backtests'].includes(view))refresh();},refresh,openExperiment:experimentDetail};
