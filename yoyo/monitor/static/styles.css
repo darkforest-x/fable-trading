@@ -385,6 +385,9 @@ h1, h2, h3, p {
   min-height:100vh;
 }
 
+/* Route changes focus the main landmark for keyboard/screen-reader context. */
+main[tabindex="-1"]:focus { outline:none; }
+
 .sidebar {
   position:fixed;
   inset:0 auto 0 0;
@@ -393,7 +396,7 @@ h1, h2, h3, p {
   border-right:1px solid var(--line-soft);
   display:flex;
   flex-direction:column;
-  padding:28px 14px 20px;
+  padding:20px 14px 16px;
   z-index:20;
 }
 
@@ -401,7 +404,7 @@ h1, h2, h3, p {
   display:flex;
   align-items:center;
   gap:10px;
-  margin:0 5px 40px;
+  margin:0 5px 22px;
 }
 
 .brand-mark {
@@ -449,7 +452,10 @@ h1, h2, h3, p {
 .nav-list {
   display:flex;
   flex-direction:column;
-  gap:6px;
+  gap:3px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--line) transparent;
+  scroll-padding:6px;
 }
 
 .nav-item {
@@ -457,8 +463,8 @@ h1, h2, h3, p {
   display:flex;
   align-items:center;
   gap:10px;
-  padding:11px 10px;
-  min-height:46px;
+  padding:8px 10px;
+  min-height:38px;
   border-radius:9px;
   color:var(--muted);
   text-align:left;
@@ -494,8 +500,8 @@ h1, h2, h3, p {
 
 .sidebar-strategy {
   margin-top:auto;
-  margin-bottom:20px;
-  padding:18px 5px;
+  margin-bottom:8px;
+  padding:12px 5px;
   display:flex;
   align-items:center;
   gap:8px;
@@ -505,10 +511,10 @@ h1, h2, h3, p {
 
 .sidebar-strategy small {
   display:block;
-  font-size:12px;
+  font-size:10px;
   letter-spacing:.2px;
   color:var(--dim);
-  margin-top:7px;
+  margin-top:5px;
 }
 
 .strategy-orbit {
@@ -1599,13 +1605,13 @@ h2 {
 @media(min-width:1500px) {
   .signal-card-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }
 }
-@media(max-width:1240px) {
+@media(max-width:1023px) {
   .sidebar { width:72px; padding:25px 10px 19px; align-items:center; }
   .workspace { margin-left:72px; width:calc(100% - 72px); }
-  .brand { margin:0 0 40px; }
+  .brand { margin:0 0 22px; }
   .brand-word, .sidebar-label, .nav-item>span, .sidebar-strategy>div, .sidebar-bottom>div { display:none; }
-  .nav-list { width:100%; gap:10px; }
-  .nav-item { justify-content:center; padding:12px 0; }
+  .nav-list { width:100%; gap:4px; }
+  .nav-item { justify-content:center; padding:9px 0; }
   .sidebar-strategy { padding:12px 0; }
   .sidebar-bottom { width:100%; justify-content:center; padding-top:20px; }
   .market-scope, .metric-unit { display:none; }
@@ -1639,8 +1645,8 @@ h2 {
   .action-status { right:16px; bottom:calc(82px + env(safe-area-inset-bottom)); }
   .sidebar { inset:auto 0 0; width:100%; height:calc(68px + env(safe-area-inset-bottom)); flex-direction:row; padding:0 12px env(safe-area-inset-bottom); border-top:1px solid var(--line); border-right:0; background:var(--mobile-sidebar); backdrop-filter:blur(14px); }
   .brand, .sidebar-strategy, .sidebar-bottom { display:none; }
-  .nav-list { height:100%; display:flex; flex-direction:row; align-items:center; justify-content:space-around; gap:4px; }
-  .nav-item { flex:1; flex-direction:column; gap:5px; min-height:57px; padding:7px 10px; font-size:12px; background:transparent; }
+  .app-shell .sidebar .nav-list { height:100%; display:flex; flex-direction:row; align-items:center; justify-content:flex-start; gap:4px; overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; }
+  .sidebar .nav-item { flex:0 0 auto; min-width:76px; white-space:nowrap; flex-direction:column; gap:5px; min-height:57px; padding:7px 10px; font-size:11px; background:transparent; }
   .nav-item.active { background:var(--mobile-nav-active); }
   .nav-item>span:not(.nav-count) { display:block; }
   .nav-item svg { width:19px; height:19px; }

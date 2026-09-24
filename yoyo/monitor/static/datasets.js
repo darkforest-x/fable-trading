@@ -7,7 +7,7 @@
   const DATASET_PAGE_SIZE = 12;
   const state = {
     active:false, loading:false, loaded:false, data:null, error:'', notice:'',
-    query:'', category:'', page:1, detail:null, detailRevision:0, reindexing:false, copyFor:'', copyMessage:'',
+    query:'', category:'', missingOnly:false, page:1, detail:null, detailRevision:0, reindexing:false, copyFor:'', copyMessage:'',
   };
   const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;',
@@ -42,6 +42,27 @@
   function categoryName(id) {
     return state.data?.categories?.find((category)=>category.id===id)?.label || id || '未分类';
   }
+  function itemMissingCount(item) {
+    const value=item?.missing_count;
+    if (value===null||value===undefined||value==='') return null;
+    const parsed=Number(value);
+    return Number.isFinite(parsed)&&parsed>=0 ? Math.floor(parsed) : null;
+  }
+  function perItemMissingCountsAvailable() {
+    const items=arr(state.data?.items);
+    return items.length>0&&items.every((item)=>itemMissingCount(item)!==null);
+  }
+  function affectedDatasets() {
+    return arr(state.data?.items).filter((item)=>itemMissingCount(item)>0);
+  }
+  function categoryFiltersHTML() {
+    const categories=arr(state.data?.categories), items=arr(state.data?.items);
+    return `<button type="button" class="dataset-category-filter ${state.category?'':'selected'}" data-dataset-category="" aria-pressed="${state.category?'false':'true'}"><span>全部分类</span><strong>${esc(number(items.length,'0'))}</strong></button>${categories.map((category)=>`<button type="button" class="dataset-category-filter ${state.category===category.id?'selected':''}" data-dataset-category="${esc(category.id)}" aria-pressed="${state.category===category.id?'true':'false'}"><span>${esc(category.label||category.id)}</span><strong>${esc(number(category.count))}</strong></button>`).join('')}`;
+  }
+  function renderCategoryFilters() {
+    const grid=root?.querySelector('.dataset-category-grid');
+    if (grid) grid.innerHTML=categoryFiltersHTML();
+  }
   function storageName(storage) {
     return ({managed:'集中管理',in_place:'原位保留',external:'外部引用'})[storage] || '未登记';
   }
@@ -63,7 +84,8 @@
     return items.filter((item)=>{
       const categoryMatch=!state.category||item.category===state.category;
       const queryMatch=!query||JSON.stringify(item).toLowerCase().includes(query);
-      return categoryMatch&&queryMatch;
+      const missingMatch=!state.missingOnly||itemMissingCount(item)>0;
+      return categoryMatch&&queryMatch&&missingMatch;
     });
   }
   function sampleCode(item) {
@@ -107,8 +129,9 @@
     const coverage=`开始 ${date(item.start)} · 结束 ${date(item.end)}`;
     const ready=item.backtest_ready===true;
     const example=ready?sampleCode(item):'';
-    return `<article class="dataset-card">
-      <div class="dataset-card-top"><span class="dataset-category-tag">${esc(category)}</span><span class="dataset-storage-tag">${esc(storageName(item.storage))}</span></div>
+    const missing=itemMissingCount(item), hasMissing=missing!==null&&missing>0;
+    return `<article class="dataset-card${hasMissing?' has-missing-files':''}">
+      <div class="dataset-card-top"><span class="dataset-category-tag">${esc(category)}</span><span class="dataset-storage-tag">${esc(storageName(item.storage))}</span>${hasMissing?`<span class="dataset-missing-tag">${esc(number(missing,'0'))} 个缺失文件</span>`:''}</div>
       <h3>${esc(item.name||item.id||'未命名数据集')}</h3><p class="dataset-id">${esc(item.id||'')}</p>
       <p class="dataset-path"><span>目录位置</span><code>${esc(item.path||'未知')}</code></p>
       <div class="dataset-metrics"><span>文件 <strong>${esc(number(item.file_count))}</strong></span><span>逻辑大小 <strong>${esc(bytes(item.total_bytes))}</strong></span><span>格式 <strong>${esc(listText(item.formats))}</strong></span></div>
@@ -135,8 +158,9 @@
     if (pagination) pagination.innerHTML=items.length>DATASET_PAGE_SIZE?`<span>显示 ${esc(number(pageStart+1,'0'))}–${esc(number(Math.min(pageStart+visiblePage.length,items.length),'0'))} / ${esc(number(items.length,'0'))} 个数据集 · 第 ${esc(number(state.page,'0'))} / ${esc(number(pageCount,'0'))} 页</span><div><button type="button" class="research-button" data-dataset-list-page="prev" ${state.page<=1?'disabled':''}>上一页</button><button type="button" class="research-button" data-dataset-list-page="next" ${state.page>=pageCount?'disabled':''}>下一页</button></div>`:'';
     if (!items.length) {
       const hasItems=arr(state.data.items).length>0;
-      const copy=!state.data.indexed?'数据目录尚未建立索引；建立索引不会移动或删除数据。':hasItems?'没有符合筛选条件的数据集。':'当前已索引目录没有数据集。';
-      list.innerHTML=`<div class="dataset-empty"><strong>${esc(!state.data.indexed?'等待数据目录索引':hasItems?'没有匹配的数据集':'目录索引为空')}</strong><p>${esc(copy)}</p></div>`;
+      const hasFilters=Boolean(state.query.trim()||state.category||state.missingOnly);
+      const copy=!state.data.indexed?'数据目录尚未建立索引；建立索引不会移动或删除数据。':hasItems?'当前筛选条件下没有匹配的数据集。':'当前已索引目录没有数据集。';
+      list.innerHTML=`<div class="dataset-empty"><strong>${esc(!state.data.indexed?'等待数据目录索引':hasItems?'没有匹配的数据集':'目录索引为空')}</strong><p>${esc(copy)}</p>${hasItems&&hasFilters?'<button type="button" class="research-button" data-dataset-reset>清除筛选，显示全部数据集</button>':''}</div>`;
       return;
     }
     list.innerHTML=visiblePage.map(itemCard).join('');
@@ -153,16 +177,20 @@
     }
     const data=state.data, summary=data.summary||{}, categories=arr(data.categories), maintenance=data.maintenance||{};
     const status=maintenance.status==='running'?'正在重新索引':maintenance.status==='failed'?'索引失败':data.indexed?'目录已索引':'尚未建立索引';
+    const missingTotal=Number(summary.missing_count), missingAvailable=perItemMissingCountsAvailable(), affectedCount=affectedDatasets().length;
+    const missingMismatch=missingAvailable&&Number.isFinite(missingTotal)&&affectedDatasets().reduce((sum,item)=>sum+itemMissingCount(item),0)!==missingTotal;
+    const missingAction=missingAvailable&&affectedCount>0?`<button type="button" class="research-button" data-dataset-missing-filter aria-pressed="${state.missingOnly?'true':'false'}">${state.missingOnly?'取消缺失筛选':`查看受影响数据集（${esc(number(affectedCount,'0'))}）`}</button>`:'';
+    const missingNote=missingTotal>0&&!missingAvailable?'<small>当前目录没有逐数据集缺失数，无法定位受影响条目。</small>':missingMismatch?'<small>汇总与逐数据集缺失数不一致，请刷新目录或重新索引核对。</small>':'';
     root.innerHTML=`<div class="datasets-workspace">
-      <header class="datasets-hero"><div><span class="datasets-kicker">研究基础设施 / 数据目录</span><h1>币圈数据集</h1><p>统一查看已整理、原位保留与外部引用的数据目录，核对文件清单、覆盖范围和回测读取入口。</p><p class="datasets-generated">目录状态：<strong>${esc(status)}</strong> · 生成时间：${esc(date(data.generated_at))}</p></div><div class="datasets-actions"><button type="button" class="research-button" data-dataset-refresh ${state.loading?'disabled':''}>刷新目录</button><button type="button" class="research-button primary" data-dataset-reindex ${state.reindexing||maintenance.status==='running'?'disabled':''}>${state.reindexing?'正在提交…':'重新索引'}</button></div></header>
+      <header class="datasets-hero"><div><span class="datasets-kicker">研究基础设施 / 数据目录</span><h2>币圈数据集</h2><p>统一查看已整理、原位保留与外部引用的数据目录，核对文件清单、覆盖范围和回测读取入口。</p><p class="datasets-generated">目录状态：<strong>${esc(status)}</strong> · 生成时间：${esc(date(data.generated_at))}</p></div><div class="datasets-actions"><button type="button" class="research-button" data-dataset-refresh ${state.loading?'disabled':''}>刷新目录</button><button type="button" class="research-button primary" data-dataset-reindex ${state.reindexing||maintenance.status==='running'?'disabled':''}>${state.reindexing?'正在提交…':'重新索引'}</button></div></header>
       ${state.error?`<p class="dataset-inline-error" role="alert">目录刷新失败：${esc(state.error)}</p>`:''}
       ${maintenance.status==='running'?'<p class="dataset-indexing" role="status">索引任务正在运行；点击“刷新目录”查看最新状态。</p>':''}
       ${maintenance.status==='failed'?`<p class="dataset-inline-error" role="alert">索引任务失败：${esc(text(maintenance.error,'未返回错误详情'))}</p>`:''}
       ${state.notice?`<p class="dataset-notice" role="status">${esc(state.notice)}</p>`:''}
-      <section class="dataset-summary" aria-label="数据集目录统计"><article><span>数据集</span><strong>${esc(number(summary.dataset_count))}</strong></article><article><span>索引文件</span><strong>${esc(number(summary.file_count))}</strong></article><article><span>文件逻辑大小</span><strong>${esc(bytes(summary.total_bytes))}</strong></article><article><span>集中行情大小</span><strong>${esc(bytes(summary.managed_bytes))}</strong></article><article><span>已处理重复块</span><strong>${esc(bytes(summary.duplicate_bytes))}</strong></article><article><span>缺失文件</span><strong>${esc(number(summary.missing_count))}</strong></article></section>
+      <section class="dataset-summary" aria-label="数据集目录统计"><article><span>数据集</span><strong>${esc(number(summary.dataset_count))}</strong></article><article><span>索引文件</span><strong>${esc(number(summary.file_count))}</strong></article><article><span>文件逻辑大小</span><strong>${esc(bytes(summary.total_bytes))}</strong></article><article><span>集中行情大小</span><strong>${esc(bytes(summary.managed_bytes))}</strong></article><article><span>已处理重复块</span><strong>${esc(bytes(summary.duplicate_bytes))}</strong></article><article class="dataset-summary-missing"><div><span>缺失文件</span><strong>${esc(number(summary.missing_count))}</strong></div>${missingAction}${missingNote}</article></section>
       <p class="dataset-storage-note">文件逻辑大小按目录文件统计；APFS 的 COW 共享会使物理占用不同。集中行情大小是集中管理目录的逻辑统计。已处理重复块表示已完成 COW 去重的字节数，反映整理状态。</p>
       <section class="dataset-category-section"><div class="dataset-section-heading"><div><h2>数据分类</h2><p>按索引登记的分类浏览；没有分类的条目仍可通过“全部”查看。</p></div></div>
-        <div class="dataset-category-grid"><button type="button" class="dataset-category-filter ${state.category?'':'selected'}" data-dataset-category=""><span>全部分类</span><strong>${esc(number(arr(data.items).length,'0'))}</strong></button>${categories.map((category)=>`<button type="button" class="dataset-category-filter ${state.category===category.id?'selected':''}" data-dataset-category="${esc(category.id)}"><span>${esc(category.label||category.id)}</span><strong>${esc(number(category.count))}</strong></button>`).join('')}</div>
+        <div class="dataset-category-grid">${categoryFiltersHTML()}</div>
       </section>
       <section class="dataset-list-section"><div class="dataset-section-heading"><div><h2>数据集目录</h2><p id="dataset-result-count"></p></div><div class="dataset-filters"><label><span class="sr-only">搜索数据集</span><input id="dataset-search" type="search" value="${esc(state.query)}" placeholder="搜索名称、币种、路径或备注…" autocomplete="off"></label><label><span class="sr-only">筛选分类</span><select id="dataset-category"><option value="">全部分类</option>${categories.map((category)=>`<option value="${esc(category.id)}" ${state.category===category.id?'selected':''}>${esc(category.label||category.id)}</option>`).join('')}</select></label></div></div><div id="dataset-records" class="dataset-record-grid"></div><div id="dataset-list-pagination" class="dataset-list-pagination" aria-label="数据集目录分页"></div></section>
       <p class="dataset-footer-note">数据集目录为只读浏览；回测读取入口按目录登记状态展示。整理、去重与保留情况以索引事实为准。</p>
@@ -236,7 +264,7 @@
       if (event.target.id==='dataset-search') { state.query=event.target.value; state.page=1; clearDetail(); renderItems(); }
     });
     root.addEventListener('change',(event)=>{
-      if (event.target.id==='dataset-category') { state.category=event.target.value; state.page=1; clearDetail(); renderItems(); }
+      if (event.target.id==='dataset-category') { state.category=event.target.value; state.page=1; clearDetail(); renderCategoryFilters(); renderItems(); }
     });
     root.addEventListener('click',async(event)=>{
       const button=event.target.closest('button');
@@ -246,9 +274,17 @@
       if (button.matches('[data-dataset-category]')) {
         state.category=button.dataset.datasetCategory||''; state.page=1; clearDetail();
         const select=root.querySelector('#dataset-category'); if (select) select.value=state.category;
-        const grid=root.querySelector('.dataset-category-grid');
-        if (grid) grid.innerHTML=`<button type="button" class="dataset-category-filter ${state.category?'':'selected'}" data-dataset-category=""><span>全部分类</span><strong>${esc(number(arr(state.data?.items).length,'0'))}</strong></button>${arr(state.data?.categories).map((category)=>`<button type="button" class="dataset-category-filter ${state.category===category.id?'selected':''}" data-dataset-category="${esc(category.id)}"><span>${esc(category.label||category.id)}</span><strong>${esc(number(category.count))}</strong></button>`).join('')}`;
+        renderCategoryFilters();
         renderItems(); return;
+      }
+      if (button.matches('[data-dataset-missing-filter]')) {
+        state.missingOnly=!state.missingOnly; state.page=1; clearDetail(); render(); return;
+      }
+      if (button.matches('[data-dataset-reset]')) {
+        state.query=''; state.category=''; state.missingOnly=false; state.page=1; clearDetail();
+        const search=root.querySelector('#dataset-search'); if (search) search.value='';
+        const select=root.querySelector('#dataset-category'); if (select) select.value='';
+        render(); return;
       }
       if (button.matches('[data-dataset-list-page]')) {
         state.page=Math.max(1,state.page+(button.dataset.datasetListPage==='next'?1:-1));

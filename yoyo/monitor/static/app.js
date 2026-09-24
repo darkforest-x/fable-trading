@@ -36,6 +36,7 @@
     vision: ["VLM 工作流", "视觉语言模型的参考图、形态判断、人工复核与历史回放，与 YOLO 并行研究。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
+  const workspaceView = (view = state.view) => ["manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
   const eventNames = { tv_start: "V9 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -250,6 +251,8 @@
     }
   }
   function setView(view, updateHash = true) {
+    // The accessibility skip target is an anchor, not another application view.
+    if (view === "main") { $("main").focus?.({ preventScroll: true }); return; }
     const previousView = state.view;
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
@@ -260,13 +263,19 @@
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
+      button.title = titles[button.dataset.view]?.[0] || "";
+      if (active) button.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     });
-    const researchView = ["manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view);
+    const researchView = workspaceView();
     $("exchange-mark").textContent = state.view === "manual" ? "个人" : researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
     $("bark-header").classList.toggle("hidden", researchView);
     $("telegram-header")?.classList.toggle("hidden", researchView);
+    $("model-gate-notice").classList.toggle("hidden", researchView || !$("model-gate-notice").textContent);
+    // The embedded VLM owns its chart, references and history refresh actions.
+    $("refresh-button").classList.toggle("hidden", state.view === "vision");
+    $("refresh-button").setAttribute("aria-label", researchView ? `刷新${titles[state.view][0]}` : "立即刷新监控数据");
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
@@ -274,7 +283,12 @@
     $("signal-scope-note").classList.toggle("hidden", state.view === "warmup");
     $("warmup-notice").classList.toggle("hidden", state.view !== "warmup");
     document.title = `spike · ${titles[state.view][0]}`;
-    if (updateHash) history.replaceState(null, "", `#${state.view}`);
+    if (updateHash && location.hash !== `#${state.view}`) history.pushState(null, "", `#${state.view}`);
+    if (previousView !== state.view) {
+      window.scrollTo?.({ top: 0, behavior: "auto" });
+      $("main").focus?.({ preventScroll: true });
+    }
+    if (researchView || state.view === "shadow") refreshShellStatus();
     const changesWarmupScope = previousView === "warmup" || state.view === "warmup";
     const entersSignalView = !signalView(previousView) && signalView(state.view);
     if (changesWarmupScope || entersSignalView) {
@@ -796,9 +810,11 @@
   function renderStatus() {
     const status = state.status;
     const online = status !== null && !state.errors.status;
-    $("connection-label").className = `live-indicator ${online ? "online" : "offline"}`;
+    $("connection-label").classList.toggle("online", online);
+    $("connection-label").classList.toggle("offline", !online);
     $("connection-label").innerHTML = `<i></i>${online ? "已连接" : state.errors.status ? "连接中断" : "连接中"}`;
     $("local-light").classList.toggle("online", online);
+    if (!status) $("sidebar-runtime").textContent = state.errors.status ? "连接中断 · 自动重连" : "正在连接服务";
     if (!status) return;
     const scan = status.scan || {};
     const counts = status.counts || {};
@@ -859,7 +875,7 @@
     const gateIdle = gate.status === "idle" && gate.loaded !== true && Number(gate.queue_depth || 0) === 0;
     const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格V9 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；V9 启动不受影响。${gateImpact}` : "";
     $("model-gate-notice").textContent = gateNotice;
-    $("model-gate-notice").classList.toggle("hidden", !gateNotice);
+    $("model-gate-notice").classList.toggle("hidden", workspaceView() || !gateNotice);
     runtimeFacts.push(["模型检测", gate.last_error ? "检测异常 · 暂无模型确认" : gate.loaded === true ? "已加载" : "等待加载"]);
     runtimeFacts.push(["通知阶段", notificationPolicy()]);
     if (gate.profile_id || gate.profile) runtimeFacts.push(["模型配置", gate.profile_id || gate.profile]);
@@ -884,6 +900,28 @@
   function queueRefresh(trigger) {
     state.refreshQueued = trigger === "manual" ? "manual" : (state.refreshQueued || trigger);
   }
+  let statusRequest = null, shellStatusRequest = null;
+  function fetchStatus() {
+    if (!statusRequest) statusRequest = api("/api/status").finally(() => { statusRequest = null; });
+    return statusRequest;
+  }
+  function refreshShellStatus(force = false) {
+    if (shellStatusRequest) return shellStatusRequest;
+    if (!force && state.statusReceivedAt && Date.now() - state.statusReceivedAt < 15000) return Promise.resolve();
+    shellStatusRequest = (async () => {
+      try {
+        state.status = await fetchStatus();
+        state.statusReceivedAt = Date.now();
+        delete state.errors.status;
+      } catch (error) {
+        state.errors.status = error.message || "请求失败";
+      } finally {
+        renderStatus(); renderErrors();
+        shellStatusRequest = null;
+      }
+    })();
+    return shellStatusRequest;
+  }
   function ledgerPath() {
     const pairs = { source: signalQuerySource(), confirmation: state.signalScope === "confirmed" ? "yolo" : "raw",
       period: state.period, outcome: state.outcome, sort: state.sort,
@@ -893,6 +931,9 @@
     return "/api/signals?view=ledger&" + Object.entries(pairs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   }
   async function refresh(trigger = "manual") {
+    if (document.hidden && trigger === "periodic") return;
+    // Research pages need the shared connection state, not the signal ledger.
+    if (workspaceView() || state.view === "shadow") refreshShellStatus(trigger === "manual");
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
     if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
     if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
@@ -911,7 +952,7 @@
     try {
       const requests = [{ key: "status", path: "/api/status" }];
       if (signalView()) requests.push({ key, path: ledgerPath() });
-      const results = await Promise.allSettled(requests.map((request) => api(request.path)));
+      const results = await Promise.allSettled(requests.map((request) => request.key === "status" ? fetchStatus() : api(request.path)));
       if (revision !== state.signalQueryRevision || view !== state.view || source !== signalQuerySource() || key !== sourceKey()) return;
       results.forEach((result, index) => {
         const current = requests[index].key;

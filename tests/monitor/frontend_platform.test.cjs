@@ -121,6 +121,11 @@ test("platform overview loads once, renders reported asset counts, and safely li
   assert.match(html, /危险来源/);
   assert.doesNotMatch(html, /href="javascript:/);
   assert.match(html, /实验登记与失败记录/);
+  assert.match(html, /内置研究路线/);
+  assert.match(html, /可在下方版本化流程中使用模板/);
+  assert.doesNotMatch(html, /仅展示已登记流程，不在此页运行任务/);
+  assert.match(html, /登记目录/);
+  assert.match(html, /可用/);
 });
 
 test("views preserve loading, recoverable error, and honest empty states", async () => {
@@ -250,6 +255,8 @@ test("pipeline plans create/update by revision and only start modes explicitly a
   assert.match(html, /已接通/);
   assert.match(html, /回测固定周期/);
   assert.match(html, /15m \+ 1H/);
+  assert.match(html, /从已保存版本 v1 启动/);
+  assert.match(html, /运行使用已保存的流程配置；编辑后请先保存版本/);
   assert.match(html, /class="pipeline-paper-timeframes" hidden/);
   assert.ok(html.indexOf("</form>") < html.indexOf("<form data-pipeline-run-form"), "run form must be a sibling of the edit form");
 
@@ -279,10 +286,15 @@ test("pipeline plans create/update by revision and only start modes explicitly a
   assert.match(html, /只读取触发信号的合约，不会额外下载行情/);
   assert.match(html, /class="pipeline-paper-symbols" hidden/);
   assert.match(html, /name="symbols" value="BTCUSDT" required/);
+  assert.match(html, /回测合约/);
+  assert.match(html, /逗号分隔，例如 BTCUSDT/);
+  assert.match(html, /<select name="timeframes" multiple size="4" disabled>/);
   const backtestBlock = { hidden: false }, paperBlock = { hidden: true };
   const backtestSymbolsBlock = { hidden: false }, paperUniverseBlock = { hidden: true };
   const paperSymbolsBlock = { hidden: true }, paperSymbolsInput = { disabled: true, required: false };
   const backtestSymbolsInput = { disabled: false, required: true };
+  const paperScope = { disabled: true, value: "okx_all_usdt" };
+  const paperTimeframes = { disabled: true, selectedOptions: [{ value: "15m" }] };
   const modeSelect = { value: "backtest" };
   const runFormNode = { querySelector: (selector) => ({
     ".pipeline-backtest-timeframes": backtestBlock,
@@ -292,6 +304,8 @@ test("pipeline plans create/update by revision and only start modes explicitly a
     ".pipeline-paper-symbols": paperSymbolsBlock,
     'input[name="paper_symbols"]': paperSymbolsInput,
     'input[name="symbols"]': backtestSymbolsInput,
+    'select[name="symbol_scope"]': paperScope,
+    'select[name="timeframes"]': paperTimeframes,
     'select[name="mode"]': modeSelect,
   })[selector] || null };
   modeSelect.value = "paper";
@@ -302,15 +316,22 @@ test("pipeline plans create/update by revision and only start modes explicitly a
   assert.equal(backtestSymbolsInput.disabled, true);
   assert.equal(backtestSymbolsInput.required, false);
   assert.equal(paperUniverseBlock.hidden, false);
+  assert.equal(paperScope.disabled, false);
+  assert.equal(paperTimeframes.disabled, false);
+  paperScope.value = "custom";
   workspace.listeners.change({ target: { name: "symbol_scope", value: "custom", closest: () => runFormNode } });
   assert.equal(paperSymbolsBlock.hidden, false);
   assert.equal(paperSymbolsInput.disabled, false);
   assert.equal(paperSymbolsInput.required, true);
-  const paperDraft = { name: "paper_symbols", value: "SOL-USDT-SWAP" };
+  paperSymbolsInput.name = "paper_symbols";
+  paperSymbolsInput.value = "SOL-USDT-SWAP";
+  const paperDraft = paperSymbolsInput;
   workspace.listeners.input({ target: paperDraft });
+  paperScope.value = "okx_all_usdt";
   workspace.listeners.change({ target: { name: "symbol_scope", value: "okx_all_usdt", closest: () => runFormNode } });
   assert.equal(paperSymbolsBlock.hidden, true);
   assert.equal(paperSymbolsInput.disabled, true);
+  paperScope.value = "custom";
   workspace.listeners.change({ target: { name: "symbol_scope", value: "custom", closest: () => runFormNode } });
   assert.equal(paperDraft.value, "SOL-USDT-SWAP", "switching scope must preserve the custom symbols draft");
   assert.equal(backtestSymbolsBlock.hidden, true, "paper scope changes must leave the backtest input hidden");
@@ -322,6 +343,8 @@ test("pipeline plans create/update by revision and only start modes explicitly a
   assert.equal(backtestSymbolsInput.disabled, false);
   assert.equal(backtestSymbolsInput.required, true);
   assert.equal(paperUniverseBlock.hidden, true);
+  assert.equal(paperScope.disabled, true);
+  assert.equal(paperTimeframes.disabled, true);
   const runForm = { dataset: { pipelineId: current.id, revision: "2" }, values: {
     mode: "backtest", symbols: "BTCUSDT, ethusdt", timeframes: ["15m"],
   } };
@@ -357,6 +380,125 @@ test("pipeline plans create/update by revision and only start modes explicitly a
     expected_revision: 2, mode: "paper", symbol_scope: "custom", symbols: customSymbols, timeframes: ["15m", "1H"],
     request_id: "00000000-0000-4000-8000-000000000001",
   });
+});
+
+test("pipeline run preferences survive request errors and refreshes, with a safe mode fallback when a gate closes", async () => {
+  let current = plan({ validation: { status: "ready", blockers: [], backtest: { allowed: true }, paper: { allowed: true } } });
+  let holdNextRefresh = false;
+  let finishRefresh;
+  const p = harness(async (url, init = {}) => {
+    const method = init.method || "GET";
+    if (url === "/api/research/platform") return response(overview());
+    if (url === "/api/research/pipelines" && method === "GET") {
+      if (holdNextRefresh) {
+        holdNextRefresh = false;
+        return new Promise((resolve) => { finishRefresh = resolve; });
+      }
+      return response({ items: [current], templates: [], options });
+    }
+    if (url.endsWith("/runs")) throw new Error("模拟任务服务暂不可用");
+    throw new Error(`unexpected request ${method} ${url}`);
+  });
+  await p.platform.setActive(true);
+  const workspace = p.element("platform-workspace");
+  workspace.listeners.click(closestEvent("[data-pipeline-select]", { dataset: { pipelineSelect: current.id } }));
+  let html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /<option value="backtest" selected>回测<\/option>/);
+  assert.match(html, /<option value="15m" selected>15m<\/option>/);
+
+  const runForm = { dataset: { pipelineId: current.id, revision: "1" }, values: {
+    mode: "paper", symbol_scope: "custom", paper_symbols: "SOL-USDT-SWAP", timeframes: ["30m", "4H"],
+  } };
+  workspace.listeners.submit(closestEvent("form[data-pipeline-run-form]", runForm));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /模拟任务服务暂不可用/);
+  assert.match(html, /<option value="paper" selected>模拟<\/option>/);
+  assert.match(html, /<option value="custom" selected>自选合约<\/option>/);
+  assert.match(html, /name="paper_symbols" value="SOL-USDT-SWAP" autocomplete="off" required/);
+  assert.match(html, /<option value="30m" selected>30m<\/option>/);
+  assert.match(html, /<option value="4H" selected>4H<\/option>/);
+
+  holdNextRefresh = true;
+  workspace.listeners.click(closestEvent("[data-pipeline-refresh]", {}));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /正在刷新…/);
+  assert.match(html, /<option value="paper" selected>模拟<\/option>/);
+  assert.match(html, /<option value="30m" selected>30m<\/option>/);
+  finishRefresh(response({ items: [current], templates: [], options }));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /<option value="paper" selected>模拟<\/option>/);
+  assert.match(html, /name="paper_symbols" value="SOL-USDT-SWAP" autocomplete="off" required/);
+  assert.match(html, /<option value="4H" selected>4H<\/option>/);
+
+  current = plan({ ...current, revision: 2, validation: { status: "blocked", blockers: [], backtest: { allowed: true }, paper: { allowed: false } } });
+  await p.platform.refresh();
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /<option value="backtest" selected>回测<\/option>/);
+  assert.doesNotMatch(html, /<option value="paper" selected>/);
+});
+
+test("pipeline plan edits survive registry loading/errors, refresh revisions, and save failures", async () => {
+  let current = plan({ validation: { status: "ready", blockers: [], backtest: { allowed: true }, paper: { allowed: false } } });
+  let holdNextRefresh = false;
+  let failNextSave = false;
+  let rejectRefresh;
+  const p = harness(async (url, init = {}) => {
+    const method = init.method || "GET";
+    if (url === "/api/research/platform") return response(overview());
+    if (url === "/api/research/pipelines" && method === "GET") {
+      if (holdNextRefresh) {
+        holdNextRefresh = false;
+        return new Promise((resolve, reject) => { rejectRefresh = reject; });
+      }
+      return response({ items: [current], templates: [], options });
+    }
+    if (url === `/api/research/pipelines/${current.id}` && method === "PUT") {
+      if (failNextSave) { failNextSave = false; throw new Error("revision conflict"); }
+      return response(current);
+    }
+    throw new Error(`unexpected request ${method} ${url}`);
+  });
+  await p.platform.setActive(true);
+  const workspace = p.element("platform-workspace");
+  workspace.listeners.click(closestEvent("[data-pipeline-select]", { dataset: { pipelineSelect: current.id } }));
+  const editForm = { dataset: { pipelineId: current.id, revision: "1" }, values: {
+    name: "本地未保存计划", route: "rules", dataset_ids: ["dataset-1"], factor_ids: [], model_ids: [],
+    strategy_id: "spike-v128", experiment_id: "exp-1", notes: "刷新期间保留", stage: "research",
+  } };
+  workspace.listeners.input({ target: {
+    name: "name", value: editForm.values.name,
+    closest: (selector) => selector === "form[data-pipeline-form]" ? editForm : null,
+  } });
+
+  holdNextRefresh = true;
+  workspace.listeners.click(closestEvent("[data-pipeline-refresh]", {}));
+  let html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /正在刷新…/);
+  assert.match(html, /value="本地未保存计划"/);
+  rejectRefresh(new Error("目录读取失败"));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /目录读取失败/);
+  assert.match(html, /data-pipeline-id="pipeline-0123456789abcdef" data-revision="1"/);
+  assert.match(html, /value="本地未保存计划"/);
+  assert.match(html, /<textarea[^>]*>刷新期间保留<\/textarea>/);
+
+  current = plan({ ...current, revision: 2 });
+  workspace.listeners.click(closestEvent("[data-pipeline-refresh]", {}));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /value="本地未保存计划"/);
+  assert.match(html, /data-pipeline-id="pipeline-0123456789abcdef" data-revision="1"/);
+
+  failNextSave = true;
+  workspace.listeners.submit(closestEvent("form[data-pipeline-form]", editForm));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  html = p.element("platform-pipelines").innerHTML;
+  assert.match(html, /revision conflict/);
+  assert.match(html, /value="本地未保存计划"/);
+  assert.match(html, /<textarea[^>]*>刷新期间保留<\/textarea>/);
 });
 
 test("navigation groups and hooks include platform/model views while preserving VLM research wording", () => {

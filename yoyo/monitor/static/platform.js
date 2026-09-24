@@ -27,11 +27,12 @@
   const routeViews = new Set(["manual", "platform", "models", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision", "signals", "joints", "breaks", "system"]);
   const routeNames = { platform: "体系总览", models: "模型中心", datasets: "数据集", factors: "因子库", strategies: "策略库", paper: "模拟实盘", experiments: "实验登记", backtests: "回测任务", yolo: "YOLO 工作流", vision: "VLM 工作流", signals: "信号中心", joints: "突破+spike", breaks: "趋势线突破", system: "运行状态" };
   const summaryNames = { datasets: "数据集", factors: "因子", models: "模型", strategies: "策略", experiments: "实验", backtest_runs: "回测运行", paper_runs: "模拟运行" };
-  const statusNames = { research: "研究中", hypothesis: "待验证", implemented: "已实现", active: "登记中", ready: "已登记", review: "待复核", rejected: "已否定", archived: "已归档", missing: "缺失", verified: "身份校验通过", inspected: "已检查", review_required: "需要复核", incomplete: "信息不完整", stale: "校验记录过期", pass: "通过", mismatch: "不匹配", unknown: "未知", not_rehashed: "未重新计算哈希", declared_only: "仅登记声明", computed: "本次计算", disabled: "未执行", failed: "校验失败" };
+  const statusNames = { available: "可用", research: "研究中", hypothesis: "待验证", implemented: "已实现", active: "登记中", ready: "已登记", review: "待复核", rejected: "已否定", archived: "已归档", missing: "缺失", verified: "身份校验通过", inspected: "已检查", review_required: "需要复核", incomplete: "信息不完整", stale: "校验记录过期", pass: "通过", mismatch: "不匹配", unknown: "未知", not_rehashed: "未重新计算哈希", declared_only: "仅登记声明", computed: "本次计算", disabled: "未执行", failed: "校验失败" };
+  const componentKinds = { registry: "登记目录", transform: "数据转换" };
   const stageNames = { research: "研究中", rejected: "已否定", archived: "已归档" };
   const platformState = { active: false, loaded: false, loading: false, error: "", data: null };
   const modelState = { active: false, loaded: false, loading: false, error: "", items: [], families: [], gates: {}, family: "all", query: "", saving: new Set(), auditing: new Set(), auditErrors: {} };
-  const pipelineState = { loaded: false, loading: false, saving: false, running: false, runError: "", runSymbols: "BTCUSDT", paperSymbolScope: "okx_all_usdt", paperSymbols: "", error: "", items: [], templates: [], options: {}, selectedId: "", draft: null };
+  const pipelineState = { loaded: false, loading: false, saving: false, running: false, runError: "", runMode: "", runTimeframes: ["15m"], runSymbols: "BTCUSDT", paperSymbolScope: "okx_all_usdt", paperSymbols: "", error: "", items: [], templates: [], options: {}, selectedId: "", draft: null };
 
   async function api(path, options = {}) {
     const response = await fetch(path, {
@@ -55,7 +56,7 @@
   }
   function componentMarkup(component) {
     const view = safeViewLink(component.view);
-    return `<article class="platform-component"><div class="platform-component-heading"><strong>${esc(component.name || component.id || "未命名模块")}</strong><span class="research-badge">${esc(display(component.kind))}</span></div><p>${esc(display(component.description))}</p><div class="platform-component-meta"><span>${esc(statusNames[component.status] || display(component.status))}</span>${component.source_path ? `<code>${esc(component.source_path)}</code>` : ""}</div>${view}</article>`;
+    return `<article class="platform-component"><div class="platform-component-heading"><strong>${esc(component.name || component.id || "未命名模块")}</strong><span class="research-badge">${esc(componentKinds[component.kind] || display(component.kind))}</span></div><p>${esc(display(component.description))}</p><div class="platform-component-meta"><span>${esc(statusNames[component.status] || display(component.status))}</span>${component.source_path ? `<code>${esc(component.source_path)}</code>` : ""}</div>${view}</article>`;
   }
   const layerCountUnits = { data: "数据集", dataset: "数据集", datasets: "数据集", features: "因子", feature: "因子", factors: "因子", labels: "标签", feature_label: "因子 / 标签", feature_labels: "因子 / 标签", model: "模型", models: "模型", strategy: "策略", strategies: "策略", evaluation: "回测任务", backtest: "回测任务", backtests: "回测任务", forward: "模拟运行", paper: "模拟运行", runtime: "模拟运行" };
   function layerMarkup(layer, index) {
@@ -101,13 +102,14 @@
       <div class="platform-section-heading"><div><h2>研究与运行链路</h2><p>数据 → 特征 / 标签 → 模型 → 策略 → 评估 / 回测 → 前向运行</p></div><button type="button" class="research-button" data-platform-refresh${platformState.loading ? " disabled" : ""}>${platformState.loading ? "正在刷新…" : "刷新体系"}</button></div>
       ${layers.length ? `<div class="platform-layer-grid">${layers.map(layerMarkup).join("")}</div>` : `<p class="research-empty">体系接口尚未登记架构层。</p>`}
       <div class="platform-lower-grid"><section class="platform-support"><div class="platform-section-heading"><div><h2>跨层约束</h2><p>贯穿各层的共同约束。</p></div></div>${crossCutting.length ? `<ul>${crossCutting.map((item) => `<li>${esc(display(item))}</li>`).join("")}</ul>` : `<p class="platform-muted">暂无跨层约束登记。</p>`}</section>
-      <section class="platform-support"><div class="platform-section-heading"><div><h2>登记流程</h2><p>仅展示已登记流程，不在此页运行任务。</p></div></div>${pipelines.length ? `<div class="platform-pipeline-list">${pipelines.map(pipelineMarkup).join("")}</div>` : `<p class="platform-muted">流程信息尚未提供。</p>`}</section></div>
+      <section class="platform-support"><div class="platform-section-heading"><div><h2>内置研究路线</h2><p>展示路线说明；可在下方版本化流程中使用模板、关联登记项并按验证门启动任务。</p></div></div>${pipelines.length ? `<div class="platform-pipeline-list">${pipelines.map(pipelineMarkup).join("")}</div>` : `<p class="platform-muted">路线信息尚未提供。</p>`}</section></div>
       <div class="platform-provenance"><strong>体系来源</strong>${sources ? `<ul>${sources}</ul>` : `<span class="platform-muted">未登记外部来源。</span>`}</div>
       <section id="platform-pipelines" class="platform-pipeline-registry">${pipelineRegistryHTML()}</section>`;
     bindPlatformEvents(root);
   }
   async function refreshPlatform() {
     if (platformState.loading) return;
+    captureVisiblePipelineDraft();
     platformState.loading = true;
     pipelineState.loading = true;
     platformState.error = "";
@@ -157,21 +159,61 @@
       return `<p><span>${label}：</span>${gateStatus}${gate?.reason ? ` · ${esc(gate.reason)}` : ""}</p>`;
     }).join("")}</div><div class="model-research-links"><a class="research-button" href="#backtests">进入回测任务 ↗</a><a class="research-button" href="#paper">进入模拟实盘 ↗</a></div>`;
   }
+  function pipelineDraftFromForm(form) {
+    const values = new FormData(form);
+    return {
+      id: String(form.dataset.pipelineId || ""), revision: form.dataset.revision ?? "",
+      name: String(values.get("name") || ""), route: String(values.get("route") || "rules"),
+      dataset_ids: values.getAll("dataset_ids"), factor_ids: values.getAll("factor_ids"), model_ids: values.getAll("model_ids"),
+      strategy_id: values.get("strategy_id") || "", experiment_id: values.get("experiment_id") || "",
+      notes: values.get("notes") || "", stage: values.get("stage") || "research",
+    };
+  }
+  function capturePipelineDraft(form) {
+    if (form) pipelineState.draft = pipelineDraftFromForm(form);
+  }
+  function captureVisiblePipelineDraft() {
+    if (pipelineState.saving) return;
+    const form = $("platform-workspace")?.querySelector?.('form[data-pipeline-form]');
+    capturePipelineDraft(form);
+  }
+  function capturePipelineRunPreferences(form, modeOverride) {
+    if (!form?.querySelector) return;
+    const mode = modeOverride ?? form.querySelector('select[name="mode"]')?.value;
+    if (mode) pipelineState.runMode = String(mode);
+    const scope = form.querySelector('select[name="symbol_scope"]');
+    if (scope) pipelineState.paperSymbolScope = String(scope.value || "okx_all_usdt");
+    const symbols = form.querySelector('input[name="symbols"]');
+    const paperSymbols = form.querySelector('input[name="paper_symbols"]');
+    if (symbols) pipelineState.runSymbols = String(symbols.value || "");
+    if (paperSymbols) pipelineState.paperSymbols = String(paperSymbols.value || "");
+    const timeframes = form.querySelector('select[name="timeframes"]');
+    if (timeframes && !timeframes.disabled && timeframes.selectedOptions) {
+      pipelineState.runTimeframes = Array.from(timeframes.selectedOptions, (option) => String(option.value));
+    }
+  }
   function pipelineRunFormHTML(item) {
     const gates = item.validation || {};
     const modes = [["backtest", "回测", gates.backtest], ["paper", "模拟", gates.paper]].filter(([, , gate]) => gate?.allowed === true);
     if (!modes.length) return `<div class="pipeline-run"><strong>运行受限</strong><p>当前验证门没有允许的运行方式。计划仍可保存、关联和归档。</p><a class="research-button" href="#backtests">回测任务 ↗</a><a class="research-button" href="#paper">模拟实盘 ↗</a></div>`;
     const firstMode = modes[0][0];
+    const selectedMode = modes.some(([id]) => id === pipelineState.runMode) ? pipelineState.runMode : firstMode;
+    pipelineState.runMode = selectedMode;
     const hasPaper = modes.some(([id]) => id === "paper");
     const customScope = pipelineState.paperSymbolScope === "custom";
-    const customSymbolsActive = customScope && firstMode === "paper";
-    const paperUniverse = hasPaper ? `<div class="pipeline-paper-universe"${firstMode === "paper" ? "" : " hidden"}><label>模拟观察范围<select name="symbol_scope"><option value="okx_all_usdt"${customScope ? "" : " selected"}>OKX 全部 USDT 永续（默认）</option><option value="custom"${customScope ? " selected" : ""}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label><label class="pipeline-paper-symbols"${customSymbolsActive ? "" : " hidden"}>合约 <small>逗号分隔，最多 2000 个，例如 BTC-USDT-SWAP</small><input name="paper_symbols" value="${esc(pipelineState.paperSymbols)}" autocomplete="off"${customSymbolsActive ? " required" : " disabled"}></label></div>` : "";
-    return `<div class="pipeline-run"><h4>从此流程启动</h4><p>只有已接通的方式会出现在选择框；运行由你点击触发。</p>${pipelineState.runError ? `<div class="research-error" role="alert">${esc(pipelineState.runError)}</div>` : ""}<form data-pipeline-run-form data-pipeline-id="${esc(item.id)}" data-revision="${esc(item.revision ?? "")}"><label class="pipeline-backtest-symbols"${firstMode === "backtest" ? "" : " hidden"}>合约 <small>逗号分隔；回测示例 BTCUSDT</small><input name="symbols" value="${esc(pipelineState.runSymbols)}"${firstMode === "backtest" ? " required" : " disabled"}></label><label>运行方式<select name="mode">${modes.map(([id, label]) => `<option value="${id}"${id === firstMode ? " selected" : ""}>${label}</option>`).join("")}</select></label>${paperUniverse}<div class="pipeline-backtest-timeframes"${firstMode === "backtest" ? "" : " hidden"}><strong>回测固定周期</strong><span>15m + 1H（由冻结回测引擎决定）</span></div><label class="pipeline-paper-timeframes"${firstMode === "paper" ? "" : " hidden"}>模拟观察周期<select name="timeframes" multiple size="4">${["15m", "30m", "1H", "4H"].map((timeframe) => `<option value="${timeframe}"${timeframe === "15m" ? " selected" : ""}>${timeframe}</option>`).join("")}</select><small>可多选。</small></label><button class="research-button primary" type="submit"${pipelineState.running ? " disabled" : ""}>${pipelineState.running ? "正在提交…" : modes.length === 1 ? `启动${modes[0][1]}` : "启动选定运行"}</button></form></div>`;
+    const paperModeActive = selectedMode === "paper";
+    const customSymbolsActive = customScope && paperModeActive;
+    const selectedTimeframes = new Set(arr(pipelineState.runTimeframes).map(String));
+    const paperUniverse = hasPaper ? `<div class="pipeline-paper-universe"${paperModeActive ? "" : " hidden"}><label>模拟观察范围<select name="symbol_scope"${paperModeActive ? "" : " disabled"}><option value="okx_all_usdt"${customScope ? "" : " selected"}>OKX 全部 USDT 永续（默认）</option><option value="custom"${customScope ? " selected" : ""}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label><label class="pipeline-paper-symbols"${customSymbolsActive ? "" : " hidden"}>自选观察合约 <small>逗号分隔，最多 2000 个，例如 BTC-USDT-SWAP</small><input name="paper_symbols" value="${esc(pipelineState.paperSymbols)}" autocomplete="off"${customSymbolsActive ? " required" : " disabled"}></label></div>` : "";
+    return `<div class="pipeline-run"><h4>从已保存版本 v${esc(item.revision ?? "?")} 启动</h4><p>运行使用已保存的流程配置；编辑后请先保存版本。</p>${pipelineState.runError ? `<div class="research-error" role="alert">${esc(pipelineState.runError)}</div>` : ""}<form data-pipeline-run-form data-pipeline-id="${esc(item.id)}" data-revision="${esc(item.revision ?? "")}"><label class="pipeline-backtest-symbols"${selectedMode === "backtest" ? "" : " hidden"}>回测合约 <small>逗号分隔，例如 BTCUSDT</small><input name="symbols" value="${esc(pipelineState.runSymbols)}"${selectedMode === "backtest" ? " required" : " disabled"}></label><label>运行方式<select name="mode">${modes.map(([id, label]) => `<option value="${id}"${id === selectedMode ? " selected" : ""}>${label}</option>`).join("")}</select></label>${paperUniverse}<div class="pipeline-backtest-timeframes"${selectedMode === "backtest" ? "" : " hidden"}><strong>回测固定周期</strong><span>15m + 1H</span></div><label class="pipeline-paper-timeframes"${paperModeActive ? "" : " hidden"}>模拟观察周期<select name="timeframes" multiple size="4"${paperModeActive ? "" : " disabled"}>${["15m", "30m", "1H", "4H"].map((timeframe) => `<option value="${timeframe}"${selectedTimeframes.has(timeframe) ? " selected" : ""}>${timeframe}</option>`).join("")}</select><small>可多选。</small></label><button class="research-button primary" type="submit"${pipelineState.running ? " disabled" : ""}>${pipelineState.running ? "正在提交…" : modes.length === 1 ? `启动${modes[0][1]}` : "启动选定运行"}</button></form></div>`;
   }
   function pipelineRegistryHTML() {
     const pipelines = pipelineState.items;
     const selected = selectedPipeline();
-    const draft = selected || pipelineState.draft || {};
+    const draft = pipelineState.draft || selected || {};
+    const formId = selected?.id || draft.id || "";
+    const formRevision = selected ? (pipelineState.draft?.revision ?? selected.revision ?? "") : (draft.revision ?? "");
+    const editing = Boolean(formId);
     const options = pipelineState.options || {};
     const pipelineButtons = pipelines.length ? `<div class="pipeline-record-list">${pipelines.map((item) => `<button class="pipeline-record${String(item.id) === String(pipelineState.selectedId) ? " selected" : ""}" type="button" data-pipeline-select="${esc(item.id)}"><span><strong>${esc(item.name || item.id)}</strong><small>${esc(routeLabels[item.route] || item.route || "未记录路线")} · v${esc(item.revision ?? "?")}</small></span><span class="research-badge">${esc(stageNames[item.stage] || item.stage || "未记录")}</span></button>`).join("")}</div>` : `<p class="platform-muted">尚无已登记流程。</p>`;
     const loadState = pipelineState.loading && !pipelineState.loaded ? `<p class="research-empty">正在读取研究流程…</p>` : pipelineState.error ? `<div class="research-error" role="alert">${esc(pipelineState.error)} <button type="button" class="research-button" data-pipeline-refresh>重试流程目录</button></div>` : "";
@@ -179,7 +221,7 @@
       const route = routeLabels[template.route] ? template.route : routeLabels[template.id] ? template.id : "";
       return `<article><strong>${esc(template.name || template.id)}</strong><p>${esc(template.description || "未提供说明")}</p>${route ? `<button type="button" class="research-button" data-pipeline-template="${esc(template.id)}">套用到计划</button>` : ""}</article>`;
     }).join("")}</div>` : "";
-    const form = pipelineState.loaded ? `<div class="pipeline-edit-stack"><form class="pipeline-form" data-pipeline-form data-pipeline-id="${esc(selected?.id || "")}" data-revision="${esc(selected?.revision ?? "")}"><div class="pipeline-form-heading"><h3>${selected ? `编辑：${esc(selected.name || selected.id)}` : "创建研究流程计划"}</h3><button class="research-button" type="button" data-pipeline-new>新建计划</button></div><label>流程名称<input name="name" required maxlength="120" value="${esc(draft.name || "")}" placeholder="例如：突破形态验证流程"></label><label>路线<select name="route">${Object.entries(routeLabels).map(([route, label]) => `<option value="${route}"${(draft.route || "rules") === route ? " selected" : ""}>${label}</option>`).join("")}</select></label><div class="pipeline-ref-grid">${multiSelect("dataset_ids", "数据集", options.datasets, draft.dataset_ids)}${multiSelect("factor_ids", "因子", options.factors, draft.factor_ids)}${multiSelect("model_ids", "模型", options.models, draft.model_ids)}</div><div class="pipeline-ref-grid">${singleSelect("strategy_id", "策略", options.strategies, draft.strategy_id)}${singleSelect("experiment_id", "关联实验", options.experiments, draft.experiment_id)}<label>登记阶段<select name="stage"><option value="research"${(draft.stage || "research") === "research" ? " selected" : ""}>研究中</option><option value="archived"${draft.stage === "archived" ? " selected" : ""}>已归档</option></select></label></div><label>流程备注<textarea name="notes" rows="3" maxlength="12000">${esc(draft.notes || "")}</textarea></label>${selected ? `<div class="pipeline-validation"><div><h4>路线与运行检查</h4><p>阻塞状态不妨碍保存研究计划；可用方式需由接口明确允许并再次点击确认。</p></div>${pipelineValidationHTML(selected.validation)}</div>` : `<p class="research-caption">保存后由服务校验路线的适配器与资格；当前不会自动运行。</p>`}<div class="pipeline-save-row"><span class="research-caption">关联数据、因子、模型、策略和实验，仅用于版本化研究计划。</span><button class="research-button primary" type="submit"${pipelineState.saving ? " disabled" : ""}>${pipelineState.saving ? "正在保存…" : selected ? "保存版本" : "保存计划"}</button></div></form>${selected ? pipelineRunFormHTML(selected) : ""}</div>` : "";
+    const form = pipelineState.loaded ? `<div class="pipeline-edit-stack"><form class="pipeline-form" data-pipeline-form data-pipeline-id="${esc(formId)}" data-revision="${esc(formRevision)}"><div class="pipeline-form-heading"><h3>${editing ? `编辑：${esc(draft.name || formId)}` : "创建研究流程计划"}</h3><button class="research-button" type="button" data-pipeline-new>新建计划</button></div><label>流程名称<input name="name" required maxlength="120" value="${esc(draft.name || "")}" placeholder="例如：突破形态验证流程"></label><label>路线<select name="route">${Object.entries(routeLabels).map(([route, label]) => `<option value="${route}"${(draft.route || "rules") === route ? " selected" : ""}>${label}</option>`).join("")}</select></label><div class="pipeline-ref-grid">${multiSelect("dataset_ids", "数据集", options.datasets, draft.dataset_ids)}${multiSelect("factor_ids", "因子", options.factors, draft.factor_ids)}${multiSelect("model_ids", "模型", options.models, draft.model_ids)}</div><div class="pipeline-ref-grid">${singleSelect("strategy_id", "策略", options.strategies, draft.strategy_id)}${singleSelect("experiment_id", "关联实验", options.experiments, draft.experiment_id)}<label>登记阶段<select name="stage"><option value="research"${(draft.stage || "research") === "research" ? " selected" : ""}>研究中</option><option value="archived"${draft.stage === "archived" ? " selected" : ""}>已归档</option></select></label></div><label>流程备注<textarea name="notes" rows="3" maxlength="12000">${esc(draft.notes || "")}</textarea></label>${selected ? `<div class="pipeline-validation"><div><h4>路线与运行检查</h4><p>阻塞状态不妨碍保存研究计划；可用方式需由接口明确允许并再次点击确认。</p></div>${pipelineValidationHTML(selected.validation)}</div>` : `<p class="research-caption">保存后由服务校验路线的适配器与资格；当前不会自动运行。</p>`}<div class="pipeline-save-row"><span class="research-caption">关联数据、因子、模型、策略和实验，仅用于版本化研究计划。</span><button class="research-button primary" type="submit"${pipelineState.saving ? " disabled" : ""}>${pipelineState.saving ? "正在保存…" : editing ? "保存版本" : "保存计划"}</button></div></form>${selected ? pipelineRunFormHTML(selected) : ""}</div>` : "";
     return `<div class="platform-section-heading"><div><h2>版本化研究流程</h2><p>计划可保存，即使路线因缺少适配器而受阻；明确允许的方式可从此处单独启动。</p></div><button type="button" class="research-button" data-pipeline-refresh${pipelineState.loading ? " disabled" : ""}>${pipelineState.loading ? "正在刷新…" : "刷新流程"}</button></div>${loadState}${templates}<div class="pipeline-registry-grid"><div><h3>已登记流程</h3>${pipelineButtons}</div><div>${form}</div></div>`;
   }
   function renderPipelineRegistry() {
@@ -188,6 +230,7 @@
   }
   async function refreshPipelines() {
     if (pipelineState.loading) return;
+    captureVisiblePipelineDraft();
     pipelineState.loading = true;
     pipelineState.error = "";
     renderPipelineRegistry();
@@ -210,7 +253,7 @@
     if (root.dataset.bound) return;
     root.dataset.bound = "true";
     root.addEventListener("click", (event) => {
-      if (event.target.closest?.("[data-platform-refresh]")) { refreshPlatform(); return; }
+      if (event.target.closest?.("[data-platform-refresh]")) { captureVisiblePipelineDraft(); refreshPlatform(); return; }
       if (event.target.closest?.("[data-pipeline-refresh]")) { refreshPipelines(); return; }
       if (event.target.closest?.("[data-pipeline-new]")) { pipelineState.selectedId = ""; pipelineState.draft = null; renderPipelineRegistry(); return; }
       const template = event.target.closest?.("[data-pipeline-template]");
@@ -240,13 +283,16 @@
     root.addEventListener("input", (event) => {
       if (event.target.name === "symbols") pipelineState.runSymbols = event.target.value;
       if (event.target.name === "paper_symbols") pipelineState.paperSymbols = event.target.value;
+      capturePipelineDraft(event.target.closest?.("form[data-pipeline-form]"));
+      capturePipelineRunPreferences(event.target.closest?.("form[data-pipeline-run-form]"));
     });
     root.addEventListener("change", (event) => {
       const form = event.target.closest?.("form[data-pipeline-run-form]");
-      if (!form) return;
+      if (!form) { capturePipelineDraft(event.target.closest?.("form[data-pipeline-form]")); return; }
       if (event.target.name === "symbol_scope") {
         pipelineState.paperSymbolScope = event.target.value;
         const mode = form.querySelector('select[name="mode"]')?.value || "backtest";
+        capturePipelineRunPreferences(form, mode);
         const customSymbols = form.querySelector(".pipeline-paper-symbols");
         const input = form.querySelector('input[name="paper_symbols"]');
         const active = event.target.value === "custom" && mode === "paper";
@@ -254,7 +300,10 @@
         if (input) { input.disabled = !active; input.required = active; }
         return;
       }
+      if (event.target.name === "timeframes") { capturePipelineRunPreferences(form); return; }
       if (event.target.name !== "mode") return;
+      pipelineState.runMode = event.target.value;
+      capturePipelineRunPreferences(form, event.target.value);
       const backtest = form.querySelector(".pipeline-backtest-timeframes");
       const paper = form.querySelector(".pipeline-paper-timeframes");
       const backtestSymbols = form.querySelector(".pipeline-backtest-symbols");
@@ -262,6 +311,8 @@
       const customSymbols = form.querySelector(".pipeline-paper-symbols");
       const backtestSymbolsInput = form.querySelector('input[name="symbols"]');
       const customSymbolsInput = form.querySelector('input[name="paper_symbols"]');
+      const paperScope = form.querySelector('select[name="symbol_scope"]');
+      const paperTimeframes = form.querySelector('select[name="timeframes"]');
       if (backtest) backtest.hidden = event.target.value !== "backtest";
       if (paper) paper.hidden = event.target.value !== "paper";
       if (backtestSymbols) backtestSymbols.hidden = event.target.value !== "backtest";
@@ -270,15 +321,18 @@
       const activeCustom = event.target.value === "paper" && pipelineState.paperSymbolScope === "custom";
       if (customSymbols) customSymbols.hidden = !activeCustom;
       if (customSymbolsInput) { customSymbolsInput.disabled = !activeCustom; customSymbolsInput.required = activeCustom; }
+      if (paperScope) paperScope.disabled = event.target.value !== "paper";
+      if (paperTimeframes) paperTimeframes.disabled = event.target.value !== "paper";
     });
   }
   async function savePipeline(form) {
     if (pipelineState.saving) return;
-    const values = new FormData(form);
+    const draft = pipelineDraftFromForm(form);
+    pipelineState.draft = draft;
     const id = form.dataset.pipelineId;
-    const payload = { name: String(values.get("name") || "").trim(), route: values.get("route"),
-      dataset_ids: values.getAll("dataset_ids"), factor_ids: values.getAll("factor_ids"), model_ids: values.getAll("model_ids"),
-      strategy_id: values.get("strategy_id") || "", experiment_id: values.get("experiment_id") || "", notes: values.get("notes") || "", stage: values.get("stage") || "research" };
+    const payload = { name: String(draft.name || "").trim(), route: draft.route,
+      dataset_ids: draft.dataset_ids, factor_ids: draft.factor_ids, model_ids: draft.model_ids,
+      strategy_id: draft.strategy_id, experiment_id: draft.experiment_id, notes: draft.notes, stage: draft.stage };
     if (id) payload.expected_revision = finite(form.dataset.revision) ? Number(form.dataset.revision) : form.dataset.revision;
     pipelineState.saving = true;
     renderPipelineRegistry();
@@ -306,6 +360,13 @@
     const id = form.dataset.pipelineId;
     const mode = String(values.get("mode") || "");
     const symbolScope = mode === "paper" ? String(values.get("symbol_scope") || "okx_all_usdt") : "";
+    pipelineState.runMode = mode;
+    if (mode === "backtest") pipelineState.runSymbols = String(values.get("symbols") || "");
+    if (mode === "paper") {
+      pipelineState.paperSymbolScope = symbolScope;
+      if (symbolScope === "custom") pipelineState.paperSymbols = String(values.get("paper_symbols") || "");
+      pipelineState.runTimeframes = values.getAll("timeframes").map(String);
+    }
     const rawSymbols = mode === "paper" ? values.get("paper_symbols") : values.get("symbols");
     const symbols = mode === "paper" && symbolScope === "okx_all_usdt"
       ? null

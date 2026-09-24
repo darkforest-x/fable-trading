@@ -157,8 +157,8 @@
     const summary=data.summary||{};
     root.innerHTML=`<div class="yolo-workflow">
       <header class="yolo-hero">
-        <div><span class="yolo-kicker">研究工作流 / YOLO</span><h1>YOLO 实验工作台</h1><p>按数据、训练、识别和经济验证分类浏览实验。分类支持一项实验跨多个阶段检索，不表示阶段已经完成。</p><p class="yolo-generated">目录生成时间：${esc(date(data.generated_at))}</p></div>
-        <div class="yolo-hero-actions"><button type="button" class="research-button primary" data-yolo-register>＋ 登记 YOLO 实验</button><a class="research-button" href="#vision">视觉复核 →</a><a class="research-button" href="#shadow">前向影子 →</a></div>
+        <div><span class="yolo-kicker">研究工作流 / YOLO</span><h2>YOLO 实验工作台</h2><p>按数据、训练、识别和经济验证分类浏览实验。分类支持一项实验跨多个阶段检索，不表示阶段已经完成。</p><p class="yolo-generated">目录生成时间：${esc(date(data.generated_at))}</p></div>
+        <div class="yolo-hero-actions"><button type="button" class="research-button primary" data-yolo-register>＋ 登记 YOLO 实验</button><a class="research-button" href="#vision">VLM 工作流 →</a><a class="research-button" href="#paper">模拟实盘 →</a></div>
       </header>
       ${state.actionError?`<p class="yolo-inline-error" role="alert">${esc(state.actionError)}</p>`:''}
       <section class="yolo-summary" aria-label="YOLO 研究目录数量"><article><span>实验记录</span><strong>${esc(count(summary.experiments,items.length))}</strong></article><article><span>登记产物</span><strong>${esc(count(summary.artifacts))}</strong></article><article><span>工作流阶段</span><strong>${esc(count(stages.length,'0'))}</strong></article></section>

@@ -92,6 +92,9 @@ test("category and search filters reset directory pagination and keep filtered t
   assert.match(p.element("#dataset-records").innerHTML, /dataset-24/);
   await click(p.listeners.click, "[data-dataset-category]", { datasetCategory: "ohlcv" });
   assert.match(p.element("#dataset-result-count").textContent, /筛选结果 27 \/ 全部 30/);
+  assert.equal(p.element("#dataset-category").value, "ohlcv");
+  assert.match(p.element(".dataset-category-grid").innerHTML, /data-dataset-category="ohlcv" aria-pressed="true"/);
+  assert.match(p.element(".dataset-category-grid").innerHTML, /data-dataset-category="funding" aria-pressed="false"/);
   assert.match(p.element("#dataset-list-pagination").innerHTML, /第 1 \/ 3 页/);
   assert.match(p.element("#dataset-records").innerHTML, /dataset-0/);
   assert.doesNotMatch(p.element("#dataset-records").innerHTML, /dataset-24/);
@@ -107,6 +110,59 @@ test("category and search filters reset directory pagination and keep filtered t
   assert.match(p.element("#dataset-records").innerHTML, /没有匹配的数据集/);
   assert.match(p.element("#dataset-result-count").textContent, /筛选结果 0 \/ 全部 30/);
   assert.equal(p.element("#dataset-list-pagination").innerHTML, "");
+  assert.match(p.element("#dataset-records").innerHTML, /data-dataset-reset/);
+  p.listeners.input({ target: { id: "dataset-search", value: "" } });
+  p.element("#dataset-category").value = "funding";
+  p.listeners.change({ target: { id: "dataset-category", value: "funding" } });
+  assert.match(p.element(".dataset-category-grid").innerHTML, /data-dataset-category="funding" aria-pressed="true"/);
+  assert.match(p.element(".dataset-category-grid").innerHTML, /data-dataset-category="" aria-pressed="false"/);
+  assert.match(p.element("#dataset-result-count").textContent, /筛选结果 3 \/ 全部 30/);
+  p.element("#dataset-search").value = "not found";
+  p.listeners.input({ target: { id: "dataset-search", value: "not found" } });
+  await click(p.listeners.click, "[data-dataset-reset]");
+  assert.equal(p.element("#dataset-search").value, "");
+  assert.equal(p.element("#dataset-category").value, "");
+  assert.match(p.element("#dataset-result-count").textContent, /筛选结果 30 \/ 全部 30/);
+});
+
+test("missing-file summary locates affected datasets only when per-dataset counts exist", async () => {
+  const items = [
+    dataset({ id: "complete", name: "Complete market", missing_count: 0 }),
+    dataset({ id: "missing-one", name: "Market with one missing file", missing_count: 1 }),
+    dataset({ id: "missing-two", name: "Market with several missing files", missing_count: 6 }),
+  ];
+  const p = harness(async () => response(catalog(items, {
+    summary: { dataset_count: 3, file_count: 12, total_bytes: 4096, managed_bytes: 4096, duplicate_bytes: 0, missing_count: 7 },
+  })));
+  await p.api.setActive(true);
+  assert.match(p.root.innerHTML, /查看受影响数据集（2）/);
+  assert.match(p.element("#dataset-records").innerHTML, /class="dataset-card has-missing-files"/);
+  assert.match(p.element("#dataset-records").innerHTML, /6 个缺失文件/);
+  assert.match(p.root.innerHTML, /<h2>币圈数据集<\/h2>/);
+  assert.doesNotMatch(p.root.innerHTML, /<h1/);
+
+  await click(p.listeners.click, "[data-dataset-missing-filter]");
+  assert.match(p.root.innerHTML, /data-dataset-missing-filter aria-pressed="true">取消缺失筛选/);
+  assert.match(p.element("#dataset-result-count").textContent, /筛选结果 2 \/ 全部 3/);
+  assert.doesNotMatch(p.element("#dataset-records").innerHTML, /Complete market|>complete</);
+  assert.match(p.element("#dataset-records").innerHTML, /missing-one/);
+  assert.match(p.element("#dataset-records").innerHTML, /missing-two/);
+  p.element("#dataset-search").value = "no such dataset";
+  p.listeners.input({ target: { id: "dataset-search", value: "no such dataset" } });
+  assert.match(p.element("#dataset-records").innerHTML, /当前筛选条件下没有匹配的数据集/);
+  await click(p.listeners.click, "[data-dataset-reset]");
+  assert.equal(p.element("#dataset-search").value, "");
+  assert.match(p.element("#dataset-result-count").textContent, /筛选结果 3 \/ 全部 3/);
+  assert.match(p.element("#dataset-records").innerHTML, /Complete market/);
+  assert.match(p.root.innerHTML, /data-dataset-missing-filter aria-pressed="false">查看受影响数据集（2）/);
+
+  const unbroken = harness(async () => response(catalog([dataset()], {
+    summary: { dataset_count: 1, file_count: 2, total_bytes: 2048, managed_bytes: 2048, duplicate_bytes: 0, missing_count: 5 },
+  })));
+  await unbroken.api.setActive(true);
+  assert.match(unbroken.root.innerHTML, /没有逐数据集缺失数，无法定位受影响条目/);
+  assert.doesNotMatch(unbroken.root.innerHTML, /data-dataset-missing-filter/);
+  assert.doesNotMatch(unbroken.element("#dataset-records").innerHTML, /个缺失文件/);
 });
 
 test("ready dataset without a concrete example gets replaceable parameters, not aggregate dates", async () => {
