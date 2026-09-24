@@ -1,0 +1,224 @@
+{
+  "experiment_id": "exp-spike-v128-vwap-20260924-v1",
+  "generated_at": "2026-09-24T09:13:47.039214+00:00",
+  "source_commit": "b410410ea034b8fc7e3f61afc980cd44e080bb18",
+  "status": "rejected",
+  "decision_scope": "Reject adoption of the tested UTC-session absolute-distance median entry gate; not all VWAP uses.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "run": "run_v1",
+  "summary": "summary_v1",
+  "symbols": 638,
+  "streams": 1276,
+  "deduplicated_raw_candidates_in_analysis_window": 116836,
+  "later_raw_baseline_closed_by_timeframe": {
+    "15m": 50818,
+    "1h": 14337
+  },
+  "arithmetic_audit": {
+    "status": "passed",
+    "streams": 1276,
+    "metric_rows_verified": 36,
+    "manifest_sha256": "d207b3bdd5211da94a9a6fbde173ae2624c77141bbc64a010aa8bba9ff2e44d2",
+    "metrics_sha256": "85a1d1d548e5af633d7a547165a79acf1ec0b54e5ea239435e069f524bb19c76",
+    "checker_sha256": "c42bb8fa82ac54be5d9618413f5c0e5616e62fa82bd9af092c19aa213f61ea71",
+    "later_raw_gate_overlap": [
+      {
+        "timeframe_min": 15,
+        "candidates": 60366,
+        "both": 28522,
+        "vwap_only": 2531,
+        "twap_only": 2264,
+        "neither": 27049
+      },
+      {
+        "timeframe_min": 60,
+        "candidates": 17625,
+        "both": 7699,
+        "vwap_only": 957,
+        "twap_only": 939,
+        "neither": 8030
+      }
+    ]
+  },
+  "primary_tests": [
+    {
+      "timeframe_min": 15,
+      "feature": "vwap",
+      "paired_closed": 21557,
+      "weeks": 91,
+      "target_mean_net_bp": -20.923983228443735,
+      "random_mean_net_bp": -15.55655712546902,
+      "mean_excess_bp": -5.367426102974715,
+      "p_one_sided": 0.7643235676432357,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 15,
+      "feature": "twap",
+      "paired_closed": 21763,
+      "weeks": 91,
+      "target_mean_net_bp": -20.319556835339526,
+      "random_mean_net_bp": -19.086089535326437,
+      "mean_excess_bp": -1.2334673000130916,
+      "p_one_sided": 0.5561443855614439,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 60,
+      "feature": "vwap",
+      "paired_closed": 6817,
+      "weeks": 90,
+      "target_mean_net_bp": 8.297502740559656,
+      "random_mean_net_bp": 56.85272033578568,
+      "mean_excess_bp": -48.55521759522602,
+      "p_one_sided": 0.9959004099590041,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 60,
+      "feature": "twap",
+      "paired_closed": 6998,
+      "weeks": 90,
+      "target_mean_net_bp": 3.616778284341147,
+      "random_mean_net_bp": 42.18046403762799,
+      "mean_excess_bp": -38.56368575328684,
+      "p_one_sided": 0.9827017298270173,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    }
+  ],
+  "tests": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v128_vwap_study.py tests/evaluation/test_spike_v128_vwap_stats.py",
+    "passed": 20
+  },
+  "smoke_history": [
+    {
+      "run": "smoke_v1",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT"
+      ],
+      "status": "failed",
+      "reason": "Earlier raw 1h VWAP feature support98 below frozen100. No cutoff lowered; failed directory preserved."
+    },
+    {
+      "run": "smoke_v2",
+      "symbols": [
+        "BTCUSDT",
+        "ETHUSDT",
+        "SOLUSDT",
+        "XRPUSDT"
+      ],
+      "status": "passed",
+      "streams": 8,
+      "metric_rows_independently_reconciled": 36
+    }
+  ],
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v128_vwap_study --output experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_v2 --symbols BTCUSDT ETHUSDT SOLUSDT XRPUSDT --workers 2",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 VECLIB_MAXIMUM_THREADS=1 nice -n 10 .venv/bin/python -m yoyo.evaluation.spike_v128_vwap_study --output experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1 --workers 4",
+    "OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -m yoyo.evaluation.spike_v128_vwap_stats --run experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1 --output experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1",
+    "OPENBLAS_NUM_THREADS=1 .venv/bin/python -m yoyo.evaluation.spike_v128_vwap_check --run experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1 --summary experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1 --output experiments/active/exp-spike-v128-vwap-20260924-v1/audit_v1.json"
+  ],
+  "reproduction_note": "Run from repository root on an independent empty output path; writers reject existing output paths. Large immutable stream ledgers remain local, linked by committed receipt-map hashes. Frozen plan retains original failed two-symbol smoke command; successful revised symbol scope recorded here.",
+  "limits": [
+    "Retrospective history already used for research, not untouched or forward validation",
+    "Fixed 638-contract Binance archive and tick snapshot are not a point-in-time market universe",
+    "Native TradingView/Python parity unresolved; do not extrapolate to OKX alerts",
+    "HLC3 bar-volume VWAP approximation; no tick VWAP, quote-volume or holder-cost claim",
+    "TWAP here is a price feature, not a split-order execution backtest",
+    "One session anchor, one preregistered median gate, no outcome-optimized parameter sweep",
+    "Earlier gate performance uses a fitted threshold and is descriptive; later starts with common baseline carry",
+    "No funding or dynamic impact beyond inherited fixed20bp, no portfolio allocation or return claim"
+  ],
+  "evidence": {
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/config.json": {
+      "sha256": "3dc04cd9691207d8192c8623c02c26fe783ed1e329d8c13b49086cd8c138b171",
+      "size_bytes": 2565
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/PROJECT_PLAN.md": {
+      "sha256": "2ed6d05c41d45d39ed01978587d9408e4781daf982a87c9ea9bfdfc212a8ca18",
+      "size_bytes": 4635
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1/identity.json": {
+      "sha256": "b16f2e6565c310b00de06dd8ff90da48d3f1d553584d4801fd6d5b5f89868cd9",
+      "size_bytes": 73197
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1/manifest.json": {
+      "sha256": "d207b3bdd5211da94a9a6fbde173ae2624c77141bbc64a010aa8bba9ff2e44d2",
+      "size_bytes": 112555
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1/feature_manifest.json": {
+      "sha256": "6f88ed04ab794c4b6f24008b6078d0d9e018ef335fa7d5f3db327d91fcd6622c",
+      "size_bytes": 112439
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/run_v1/thresholds.json": {
+      "sha256": "e1a5d657461ad537485739b20908b9338062fe31f27c861889f5f66673011988",
+      "size_bytes": 446
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/audit_v1.json": {
+      "sha256": "9d2b3c2167fbbf45928b602eb2a7bb5ea09662afeb5ea0b3ab7da77f8c3db02c",
+      "size_bytes": 691
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_v1/identity.json": {
+      "sha256": "3635ec995edb02c3943f65b2e263720df36c1abe2458b010b8f355f1408f40fd",
+      "size_bytes": 9586
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_v1/feature_manifest.json": {
+      "sha256": "cb9c1dc45e2bd48ae8b5a114f047fa50310092a32be7fbaf833da0742d352131",
+      "size_bytes": 493
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_v2/identity.json": {
+      "sha256": "f9f74a968d09889314e81aa2cff537570557b2c0461ecaccc377eb71cfd5b586",
+      "size_bytes": 9782
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_v2/manifest.json": {
+      "sha256": "385a358506a8e329d2a847c9f19780b9ad24ddf96bd872b3816c30c794165f62",
+      "size_bytes": 958
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_summary_v2/summary.json": {
+      "sha256": "11ba1a3356252e32b2ba0796a277f7534fe506f10491032d000a029653de81c7",
+      "size_bytes": 3720
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/smoke_audit_v2.json": {
+      "sha256": "1705f9d6daa6ae740db8d996afe1ce28e0e8d1dffdb97c395858657b77893958",
+      "size_bytes": 669
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/notion_receipt.json": {
+      "sha256": "79baac2c0c80a09dcfe699f305802bc513c3aa70f8ab97099d4550403565a76f",
+      "size_bytes": 322
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/controls.csv": {
+      "sha256": "ccdca279e73bf71cc68d6e4bcf7b7a69c18a2d412c4f5c879bd870b81438c371",
+      "size_bytes": 18472
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/diagnostics.csv": {
+      "sha256": "08d8bffcdfc9bcc42ed98857cd8d3adc76a2ab0cc62ed8ac073b09a481688a0e",
+      "size_bytes": 2638
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/direction_year.csv": {
+      "sha256": "7cfbfa1fbda231ae27befd627976711c0e7949fa7d23cf91b7b891f6c23e2d30",
+      "size_bytes": 30498
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/metrics.csv": {
+      "sha256": "85a1d1d548e5af633d7a547165a79acf1ec0b54e5ea239435e069f524bb19c76",
+      "size_bytes": 13324
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/policy_comparison.csv": {
+      "sha256": "a30c46101db3981235982cb0051fe20544894e6b5d9e6a0e9920d95125f2acac",
+      "size_bytes": 4622
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/status_counts.csv": {
+      "sha256": "f3ea92f9ff2d4dbab116eed85092db6e66144024c8c8675b70f62d8283dde711",
+      "size_bytes": 5707
+    },
+    "experiments/active/exp-spike-v128-vwap-20260924-v1/summary_v1/summary.json": {
+      "sha256": "8895b39a86f0025d4c7a5e686c37cfc83312bb64fe6fb3f231d3ab920feb526e",
+      "size_bytes": 3738
+    }
+  }
+}

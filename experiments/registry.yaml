@@ -16,15 +16,15 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: c1ee050eb9
-    status: active
+    source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18
+    status: rejected
     question: Does causal UTC-session VWAP distance improve SPIKE V12.8 entry quality beyond TWAP and matched random entries?
     single_variable: Entry admission by absolute session-average distance divided by unchanged ATR; earlier raw feature median fixed before later replay.
-    result: Design frozen; all-candidate cached executions authenticated and serial occupancy replayed separately. No result or default adoption yet.
+    result: Completed638 symbols and1276 streams; independent36-row arithmetic audit passed. Later raw15m baseline/VWAP/TWAP net-7.70/-12.67/-10.54bp;1h -5.37/+18.27/+11.56bp. Same-gate random excess -5.37/-1.23/-48.56/-38.56bp and all four Holm p1. Win rates do not improve. Reject this median-distance default; not a rejection of all VWAP uses.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts: [spike-v128-vwap-20260924-delivery]
     reuse_allowed: false
     notes: Owner requested research and backtest. 638-contract frozen Binance15m/1h universe, 2023-2024 feature calibration and2025 onward retrospective evaluation. Original20bp and exits preserved; no native Pine parity or OKX performance claim; no report requested.
   - experiment_id: exp-spike-v128-bb-slope-20260924-v1

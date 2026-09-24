@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v128-vwap-20260924-delivery
+    artifact_type: manifest
+    role: offline_spike_v128_session_vwap_twap_entry_admission
+    source_repo: darkforest-x/fable-trading
+    source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18
+    source_path: experiments/active/exp-spike-v128-vwap-20260924-v1/delivery_receipt.json
+    sha256: f70a47eb37bcdf66526fab890fccd9f94f85ac4e44dcdcc1626f3f1ce7b5a470
+    size_bytes: 9800
+    storage_uri: repo://experiments/active/exp-spike-v128-vwap-20260924-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen638 Binance contracts15m/1h; no native TradingView or OKX performance claim. Earlier feature medians frozen for later serial replay with common baseline carry and same-gate random controls. All four primary Holm p1; tested admission rejected. Raw candidates and exits authenticated;36 metrics independently reconciled. Legacy holdout enum only.
   - artifact_id: spike-v128-bb-slope-20260924-delivery
     artifact_type: manifest
     role: offline_spike_v128_bb_slope_stratification

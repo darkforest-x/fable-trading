@@ -1,0 +1,114 @@
+{
+  "run_identity": "9062d16d90ed3ec5af1a206ecd65ac68b35b8b3a6b7a334ced50bda1a0293231",
+  "identity_sha256": "b16f2e6565c310b00de06dd8ff90da48d3f1d553584d4801fd6d5b5f89868cd9",
+  "manifest_sha256": "d207b3bdd5211da94a9a6fbde173ae2624c77141bbc64a010aa8bba9ff2e44d2",
+  "thresholds_sha256": "e1a5d657461ad537485739b20908b9338062fe31f27c861889f5f66673011988",
+  "complete": true,
+  "full_universe": true,
+  "streams": 1276,
+  "symbols": 638,
+  "timeframes": [
+    15,
+    60
+  ],
+  "analysis_start": "2023-01-01T00:00:00Z",
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "round_trip_cost": 0.002,
+  "thresholds": {
+    "15": {
+      "twap": {
+        "n": 29858,
+        "q10": 1.0264021898788227,
+        "q50": 2.3604866199401786
+      },
+      "vwap": {
+        "n": 29858,
+        "q10": 0.9263898653870482,
+        "q50": 2.2038177906159557
+      }
+    },
+    "60": {
+      "twap": {
+        "n": 8987,
+        "q10": 0.5340247433041947,
+        "q50": 1.8146554852329435
+      },
+      "vwap": {
+        "n": 8987,
+        "q10": 0.42874633553203334,
+        "q50": 1.5314432900657209
+      }
+    }
+  },
+  "closed_metrics_exclude": "censored outcomes and early signals exiting at/after split",
+  "all_period_definition": "mature earlier closed trades plus later closed trades; early cross-split exits excluded",
+  "session_feature_limit": "daily UTC-anchor distance varies with elapsed session time; this estimates the preregistered feature, not an anchor-independent VWAP effect",
+  "primary_alpha": 0.01,
+  "primary_tests": [
+    {
+      "timeframe_min": 15,
+      "feature": "vwap",
+      "paired_closed": 21557,
+      "weeks": 91,
+      "target_mean_net_bp": -20.923983228443735,
+      "random_mean_net_bp": -15.55655712546902,
+      "mean_excess_bp": -5.367426102974715,
+      "p_one_sided": 0.7643235676432357,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 15,
+      "feature": "twap",
+      "paired_closed": 21763,
+      "weeks": 91,
+      "target_mean_net_bp": -20.319556835339526,
+      "random_mean_net_bp": -19.086089535326437,
+      "mean_excess_bp": -1.2334673000130916,
+      "p_one_sided": 0.5561443855614439,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 60,
+      "feature": "vwap",
+      "paired_closed": 6817,
+      "weeks": 90,
+      "target_mean_net_bp": 8.297502740559656,
+      "random_mean_net_bp": 56.85272033578568,
+      "mean_excess_bp": -48.55521759522602,
+      "p_one_sided": 0.9959004099590041,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    },
+    {
+      "timeframe_min": 60,
+      "feature": "twap",
+      "paired_closed": 6998,
+      "weeks": 90,
+      "target_mean_net_bp": 3.616778284341147,
+      "random_mean_net_bp": 42.18046403762799,
+      "mean_excess_bp": -38.56368575328684,
+      "p_one_sided": 0.9827017298270173,
+      "holm_p": 1.0,
+      "positive_after_cost_and_holm": false
+    }
+  ],
+  "output_files": [
+    "metrics.csv",
+    "controls.csv",
+    "policy_comparison.csv",
+    "status_counts.csv",
+    "diagnostics.csv",
+    "direction_year.csv"
+  ],
+  "output_sha256": {
+    "metrics.csv": "85a1d1d548e5af633d7a547165a79acf1ec0b54e5ea239435e069f524bb19c76",
+    "controls.csv": "ccdca279e73bf71cc68d6e4bcf7b7a69c18a2d412c4f5c879bd870b81438c371",
+    "policy_comparison.csv": "a30c46101db3981235982cb0051fe20544894e6b5d9e6a0e9920d95125f2acac",
+    "status_counts.csv": "f3ea92f9ff2d4dbab116eed85092db6e66144024c8c8675b70f62d8283dde711",
+    "diagnostics.csv": "08d8bffcdfc9bcc42ed98857cd8d3adc76a2ab0cc62ed8ac073b09a481688a0e",
+    "direction_year.csv": "7cfbfa1fbda231ae27befd627976711c0e7949fa7d23cf91b7b891f6c23e2d30"
+  }
+}
