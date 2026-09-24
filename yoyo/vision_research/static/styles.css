@@ -296,6 +296,12 @@ textarea { resize: vertical; line-height: 1.65; }
 .conversation-main .exchange-empty,.conversation-main .exchange-load-error,.conversation-empty { padding: 60px 32px; }
 .conversation-empty { text-align: center; color: var(--text-muted); }
 .conversation-empty h2 { color: var(--text); margin-bottom: 12px; }
+.model-config-drawer #config-form select { width: 100%; min-height: 42px; padding: 8px 10px; font-size: 15px; }
+.model-config-drawer #config-form :is(input,select):disabled { opacity: .65; cursor: not-allowed; }
+.model-config-drawer #api-key-help { margin-left: 5px; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+#config-selection-status { padding: 10px 12px; border-radius: 7px; background: var(--surface-soft); }
+.recipient-card code { display: block; overflow-wrap: anywhere; }
+.conversation-item > span > span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (max-width: 1240px) {
   .conversation-layout { grid-template-columns: 210px minmax(0,1fr); }
   .conversation-messages { padding: 24px; }

@@ -384,7 +384,7 @@ def test_failed_private_settings_write_preserves_the_previous_key(client, monkey
     from yoyo.vision_research.settings import LocalSettings
     configure(client)
     before = (tmp_path / "private" / "settings.json").read_bytes()
-    def fail_save(self, api_key, model):
+    def fail_save(self, api_key, model, **kwargs):
         raise RuntimeError("本机模型配置未能保存，请检查目录权限")
     monkeypatch.setattr(LocalSettings, "save", fail_save)
     response = client.post("/api/config", json={"api_key": "replacement-secret-value-123456", "model": "glm-5.3-flashx"})

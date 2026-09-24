@@ -278,6 +278,26 @@ def _parse_decision(text: str, decision_model=CurrentDecision,
 class ZhipuClient:
     """One-request Zhipu REST boundary matching the Gemini client interface."""
 
+    def _endpoint_url(self) -> str:
+        """Return the fixed provider endpoint; subclasses may pin another host."""
+        return CHAT_COMPLETIONS_URL
+
+    def _request_error(self, response: httpx.Response) -> ZhipuError:
+        """Map a provider response without exposing its body or credentials."""
+        return _request_error(response)
+
+    def _thinking_options(self) -> dict[str, Any]:
+        return _thinking_options(self.model)
+
+    def _output_token_budget(self) -> int:
+        return _output_token_budget(self.model)
+
+    def _connection_token_budget(self) -> int:
+        return CONNECTION_TEST_MAX_TOKENS
+
+    def _json_mode_enabled(self) -> bool:
+        return self.model == "glm-5.3-flash"
+
     def __init__(self, api_key: str, model: str = DEFAULT_MODEL, transport: Any = None):
         if not isinstance(api_key, str) or not api_key.strip():
             raise ZhipuError("missing_api_key", "请先配置有效的智谱 API Key。")
@@ -315,7 +335,7 @@ class ZhipuClient:
     def _send(self, json_body: dict[str, Any]) -> httpx.Response:
         # Capture the serialized HTTP body, not a later reconstruction from the
         # parsed decision. Authentication headers never enter the trace.
-        request = self._client.build_request("POST", CHAT_COMPLETIONS_URL, json=json_body)
+        request = self._client.build_request("POST", self._endpoint_url(), json=json_body)
         body_text = request.content.decode("utf-8")
         clean_body = body_text.replace(self._api_key, "[API_KEY_REDACTED]")
         self.last_exchange = {
@@ -442,7 +462,7 @@ class ZhipuClient:
         response = self._send(request_body)
         latency_ms = round((time.perf_counter() - started) * 1000, 3)
         if not response.is_success:
-            raise _request_error(response)
+            raise self._request_error(response)
         payload = self._json_payload(response, result_name)
         _, message = self._first_choice(payload, max_tokens=request_body.get("max_tokens"))
         text = message.get("content")
@@ -480,15 +500,15 @@ class ZhipuClient:
         body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": "请只回复 OK。"}],
-            "max_tokens": CONNECTION_TEST_MAX_TOKENS,
+            "max_tokens": self._connection_token_budget(),
             "stream": False,
         }
-        body.update(_thinking_options(self.model))
+        body.update(self._thinking_options())
         response = self._send(body)
         if not response.is_success:
-            raise _request_error(response)
+            raise self._request_error(response)
         payload = self._json_payload(response, "文本补全结果")
-        _, message = self._first_choice(payload, max_tokens=CONNECTION_TEST_MAX_TOKENS)
+        _, message = self._first_choice(payload, max_tokens=self._connection_token_budget())
         if not isinstance(message.get("content"), str) or not message["content"].strip():
             raise ZhipuError("invalid_response", "智谱未返回文本补全内容。")
         return {
@@ -529,12 +549,12 @@ class ZhipuClient:
         request_body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": content}],
-            "max_tokens": _output_token_budget(self.model),
+            "max_tokens": self._output_token_budget(),
             "stream": False,
         }
-        if self.model == "glm-5.3-flash":
+        if self._json_mode_enabled():
             request_body["response_format"] = {"type": "json_object"}
-        request_body.update(_thinking_options(self.model))
+        request_body.update(self._thinking_options())
 
         return self._complete_decision(request_body, CurrentDecision, "图片审阅结果")
 
@@ -573,12 +593,12 @@ class ZhipuClient:
         request_body: dict[str, Any] = {
             "model": self.model,
             "messages": [{"role": "user", "content": content}],
-            "max_tokens": _output_token_budget(self.model),
+            "max_tokens": self._output_token_budget(),
             "stream": False,
         }
-        if self.model == "glm-5.3-flash":
+        if self._json_mode_enabled():
             request_body["response_format"] = {"type": "json_object"}
-        request_body.update(_thinking_options(self.model))
+        request_body.update(self._thinking_options())
         result = self._complete_decision(request_body, ComparisonDecision, "对照分类结果")
         result.update(
             comparison_version=COMPARISON_VERSION,

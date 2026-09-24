@@ -1083,8 +1083,9 @@ function renderSignalGuide() {
   byId('replay-signal-ai-status').textContent = running ? 'AI 调用中…'
     : failed ? 'AI 调用失败' : attempted ? 'AI 已调用' : 'AI 尚未调用';
   const action = byId('replay-signal-analyze');
+  const activeProviderName = document?.documentElement?.dataset?.activeProviderName || '当前已保存的模型服务';
   action.textContent = state.busy === 'signal'
-    ? state.signalPhase === 'analyze' ? '正在调用智谱…' : '正在读取信号输入…'
+    ? state.signalPhase === 'analyze' ? `正在调用${activeProviderName}…` : '正在读取信号输入…'
     : attempted ? (running ? '刷新 AI 调用状态' : '查看 AI 结果')
       : blindNeedsHuman ? '先记录我的判断，再调用 AI'
         : session?.mode === 'blind' && futureSeen ? '以学习模式识别信号 · 调用一次 AI'

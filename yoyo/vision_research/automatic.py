@@ -74,7 +74,7 @@ class AutomaticReviews:
         if not self.enabled() or self.stop_event.is_set():
             return
         if not self.configured():
-            self.error = "尚未配置智谱 API Key，自动识别等待配置。"
+            self.error = "尚未配置当前模型供应商与地域的 API Key，自动识别等待配置。"
             return
         payload = self.source.list_signals()
         self.last_scan_at = utc_now()

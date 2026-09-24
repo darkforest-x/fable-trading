@@ -8,7 +8,7 @@ const DEFAULT_MODEL = 'glm-5.3-flash';
 const DEFAULT_CRITERIA = '只判断图表最右端当前盘口；左侧旧形态只作背景。区分仍在密集、正在启动与已经远离，只有当前启动才可判符合，不能确定则拒判。';
 const MAX_IMAGE_BYTES = 5_000_000;
 const MAX_TOTAL_IMAGE_BYTES = 12 * 1024 * 1024;
-const MAX_REFERENCES = 49; // Zhipu vision allows 50 total images including the candidate.
+const MAX_REFERENCES = 49; // The review endpoint accepts 50 total images including the candidate.
 const ALLOWED_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp']);
 const LIVE_WINDOW_OPTIONS = [6, 12, 24, 48];
 const LIVE_WINDOW_STORAGE_KEY = 'spike-vision-post-signal-bars';
@@ -85,6 +85,8 @@ const state = {
   exchangeListToken: 0,
   exchangeDetailToken: 0,
   model: DEFAULT_MODEL,
+  configDraft: null,
+  configDraftInitialized: false,
   criteria: DEFAULT_CRITERIA,
   criteriaEdited: false,
 };
@@ -116,6 +118,110 @@ function asText(value, fallback = '') {
   if (value === null || value === undefined || value === '') return fallback;
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
   try { return JSON.stringify(value); } catch { return fallback; }
+}
+
+const FALLBACK_PROVIDER_SPECS = [
+  { id: 'zhipu', name: '智谱', default_model: DEFAULT_MODEL, models: [DEFAULT_MODEL], default_region: 'default', regions: { default: '默认' }, endpoints: { default: '' } },
+  {
+    id: 'qwen', name: '通义千问（Qwen）', default_model: 'qwen3-vl-plus',
+    models: ['qwen3-vl-plus', 'qwen-vl-max'], default_region: 'beijing',
+    regions: { beijing: '北京', singapore: '新加坡' },
+    endpoints: {
+      beijing: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      singapore: 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1',
+    }, key_help_url: 'https://help.aliyun.com/en/model-studio/get-api-key',
+  },
+];
+const HISTORICAL_PROVIDER_NAMES = { gemini: 'Gemini', zhipu: '智谱', qwen: '通义千问（Qwen）' };
+
+function providerSpecs(status = state.status) {
+  const specs = Array.isArray(status?.providers) ? status.providers.filter((item) => item && item.id) : [];
+  return specs.length ? specs : FALLBACK_PROVIDER_SPECS;
+}
+
+function providerSpec(providerId, status = state.status) {
+  return providerSpecs(status).find((item) => item.id === providerId)
+    || FALLBACK_PROVIDER_SPECS.find((item) => item.id === providerId)
+    || { id: providerId || 'zhipu', name: providerId || '模型服务', default_model: DEFAULT_MODEL, models: [DEFAULT_MODEL], default_region: 'default', regions: {}, endpoints: {} };
+}
+
+function configFromStatus(status = state.status) {
+  const provider = asText(status?.provider, 'zhipu');
+  const spec = providerSpec(provider, status);
+  return {
+    provider,
+    region: asText(status?.region, asText(spec.default_region, 'default')),
+    model: asText(status?.model, asText(spec.default_model, DEFAULT_MODEL)),
+  };
+}
+
+function configMatchesStatus(draft, status = state.status) {
+  if (!draft || !status) return false;
+  const saved = configFromStatus(status);
+  return draft.provider === saved.provider && draft.region === saved.region && draft.model === saved.model;
+}
+
+function providerDisplayName(providerId, providerName = '', status = state.status) {
+  if (providerName) return providerName;
+  const id = asText(providerId, 'zhipu');
+  const advertised = providerSpecs(status).find((item) => item.id === id);
+  if (advertised?.name) return advertised.name;
+  const fallback = FALLBACK_PROVIDER_SPECS.find((item) => item.id === id);
+  return asText(fallback?.name, HISTORICAL_PROVIDER_NAMES[id] || id);
+}
+
+function providerRegions(spec) {
+  const regions = spec?.regions;
+  if (Array.isArray(regions)) {
+    return regions.map((item) => typeof item === 'string' ? [item, item] : [asText(item?.id), asText(item?.name, asText(item?.id))])
+      .filter(([id]) => id);
+  }
+  if (regions && typeof regions === 'object') return Object.entries(regions).map(([id, name]) => [id, asText(name, id)]);
+  const fallbackRegion = asText(spec?.default_region, 'default');
+  return [[fallbackRegion, fallbackRegion]];
+}
+
+function providerModels(spec) {
+  const models = Array.isArray(spec?.models) ? spec.models.map((item) => typeof item === 'string' ? item : asText(item?.id)).filter(Boolean) : [];
+  const defaultModel = asText(spec?.default_model, DEFAULT_MODEL);
+  return models.includes(defaultModel) ? models : [defaultModel, ...models];
+}
+
+function providerEndpoint(spec, region) {
+  const endpoints = spec?.endpoints;
+  if (endpoints && typeof endpoints === 'object') return asText(endpoints[region]);
+  return '';
+}
+
+function safeHelpUrl(value) {
+  try {
+    const url = new URL(String(value || ''));
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function ensureConfigDraft(status = state.status) {
+  if (!state.configDraftInitialized && status) {
+    state.configDraft = configFromStatus(status);
+    state.configDraftInitialized = true;
+  }
+  return state.configDraft || configFromStatus(status);
+}
+
+function providerNameForRecord(record) {
+  // Records created before provider metadata was added are known Zhipu history.
+  return providerDisplayName(record?.provider, record?.provider_name, state.status);
+}
+
+function syncProviderDisclosure() {
+  const savedName = providerDisplayName(state.status?.provider, state.status?.provider_name);
+  const disclosure = byId('active-provider-disclosure');
+  if (disclosure) disclosure.textContent = `识别时发送当前图表、参考图与规则至已保存的 ${savedName} 服务`;
+  const referencesDisclosure = byId('references-provider-disclosure');
+  if (referencesDisclosure) referencesDisclosure.textContent = `已保存的 ${savedName} 服务`;
+  if (document?.documentElement?.dataset) document.documentElement.dataset.activeProviderName = savedName;
 }
 
 function setVisible(element, visible) {
@@ -932,6 +1038,7 @@ function renderResult() {
   const evidenceHtml = evidence.length ? `<ul class="result-list">${evidence.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未返回可观察证据。</span>';
   const risksHtml = risks.length ? `<ul class="result-list">${risks.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未列出风险说明。</span>';
   const model = asText(run.model, state.status?.model || state.model);
+  const providerName = providerNameForRecord(run);
   const created = formatDate(run.created_at);
   const latency = run.latency_ms != null && Number.isFinite(Number(run.latency_ms)) ? `${Math.round(Number(run.latency_ms))} ms` : '';
   const usage = run.usage && typeof run.usage === 'object' ? Object.entries(run.usage).map(([key, value]) => `${key}: ${asText(value)}`).join(' · ') : '';
@@ -943,6 +1050,7 @@ function renderResult() {
     <dt>输入来源</dt><dd>${escapeHtml(requestSource)} · ${escapeHtml(inputMode || asText(run.image_name, state.selectedImage?.name || '图片名称未返回'))}</dd>
     <dt>参考图</dt><dd>${referenceNames.length ? escapeHtml(referenceNames.join('、')) : '未使用参考图'}</dd>
     <dt>检测范围</dt><dd>${currentScope ? '图中最右端当前盘口；旧形态不代表当前符合' : '旧版整图判断，不代表当前盘口有效'}</dd>
+    <dt>服务商</dt><dd>${escapeHtml(providerName)}</dd>
     <dt>本次规则</dt><dd>${escapeHtml(criteria)}</dd>
     <dt>模型</dt><dd>${escapeHtml(model)}</dd>
     <dt>时间</dt><dd>${escapeHtml(created)}</dd>
@@ -997,6 +1105,7 @@ function renderHistory() {
     const verdict = decision.verdict;
     const verdictClass = verdict === 'no_match' ? 'no-match' : verdict === 'uncertain' ? 'uncertain' : '';
     const model = asText(run.model, '模型未提供');
+    const providerName = providerNameForRecord(run);
     const symbol = asText(run.symbol || run.signal?.symbol, '');
     const timeframe = asText(run.timeframe || run.signal?.timeframe, '');
     const title = symbol ? `${symbol} · ${timeframe || '周期未提供'}` : asText(run.image_name, '自定义图片');
@@ -1009,7 +1118,7 @@ function renderHistory() {
     return `<article class="history-card">
       ${thumbnail}<div class="history-main"><div class="history-head"><h2>${escapeHtml(title)}</h2><span class="verdict-pill ${verdictClass}">${escapeHtml(verdictLabel(verdict))}</span><span class="source-chip">${run.analysis_scope === 'current_right_edge' ? '当前盘口' : '旧版整图'}</span></div>
         <p class="history-summary">${escapeHtml(summary)}</p>
-        <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(model)}</span><span>${escapeHtml(runStatusLabel(run.status))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
+        <div class="history-meta"><time>${escapeHtml(formatDate(run.created_at))}</time><span>${escapeHtml(providerName)} · ${escapeHtml(model)}</span><span>${escapeHtml(runStatusLabel(run.status))}</span>${run.latency_ms ? `<span>${escapeHtml(Math.round(Number(run.latency_ms)))} ms</span>` : ''}</div>
       </div>
       <div class="history-actions"><button class="button button-secondary" type="button" data-open-run="${escapeHtml(runId)}">查看 / 复核</button>${run.api_exchange_id ? `<button class="button button-quiet" type="button" data-open-exchange="${escapeHtml(run.api_exchange_id)}">查看模型对话</button>` : '<span class="exchange-unavailable">旧记录未保存原文</span>'}<button class="button button-quiet" type="button" data-export-run="${escapeHtml(runId)}" ${isExporting ? 'disabled' : ''}>${isExporting ? '导出中…' : '导出 JSON'}</button></div>
       ${review}
@@ -1068,7 +1177,7 @@ function renderExchangeDetail(detail) {
         </div>
       </section>
       <section class="chat-turn chat-assistant" aria-label="模型回答">
-        <div class="chat-speaker">智谱 <span>· ${escapeHtml(asText(detail.model, '模型'))}</span></div>
+        <div class="chat-speaker">${escapeHtml(providerNameForRecord(detail))} <span>· ${escapeHtml(asText(detail.model, '模型'))}</span></div>
         ${chat.reasoningText ? '<details class="chat-disclosure chat-thinking"><summary>查看思考过程</summary><div class="chat-plain-text" data-chat-reasoning></div></details>' : ''}
         ${chat.errorText ? `<div class="chat-error" role="status">${chatParagraphs(chat.errorText)}</div>` : ''}
         <div class="chat-answer">${answer || `<p class="chat-muted">${detail.status === 'running' ? '正在等待模型回答…' : '本次没有可展示的回答。'}</p>`}</div>
@@ -1105,7 +1214,7 @@ function renderExchangeRecords() {
   if (state.selectedExchangeId && !options.some((item) => asText(item.id) === state.selectedExchangeId)) {
     options.unshift({ id: state.selectedExchangeId, placeholder: true });
   }
-  const markup = options.map((item) => `<button class="conversation-item ${asText(item.id) === state.selectedExchangeId ? 'is-selected' : ''}" type="button" data-select-exchange="${escapeHtml(asText(item.id))}" ${asText(item.id) === state.selectedExchangeId ? 'aria-current="true"' : ''}><strong>${escapeHtml(item.placeholder ? '正在读取对话…' : exchangeTitle(item))}</strong><span><time>${escapeHtml(formatDate(item.created_at))}</time><span class="${item.status === 'failed' ? 'is-failed' : ''}">${escapeHtml(exchangeStatusLabel(item.status))}</span></span></button>`).join('');
+  const markup = options.map((item) => `<button class="conversation-item ${asText(item.id) === state.selectedExchangeId ? 'is-selected' : ''}" type="button" data-select-exchange="${escapeHtml(asText(item.id))}" ${asText(item.id) === state.selectedExchangeId ? 'aria-current="true"' : ''}><strong>${escapeHtml(item.placeholder ? '正在读取对话…' : exchangeTitle(item))}</strong><span><time>${escapeHtml(formatDate(item.created_at))}</time><span>${escapeHtml(providerNameForRecord(item))}</span><span class="${item.status === 'failed' ? 'is-failed' : ''}">${escapeHtml(exchangeStatusLabel(item.status))}</span></span></button>`).join('');
   if (list.innerHTML !== markup) list.innerHTML = markup || '<p class="conversation-list-empty">还没有对话</p>';
   statusTarget.textContent = state.exchangesLoading ? '正在读取…' : `${exchanges.length} 段对话`;
   showInlineError('api-exchanges-error', state.exchangesError);
@@ -1209,34 +1318,99 @@ function openExchange(id) {
 
 function renderSettings() {
   const statusTarget = byId('settings-status');
-  const modelInput = byId('model-input');
+  const providerSelect = byId('provider-select');
+  const regionField = byId('qwen-region-field');
+  const regionSelect = byId('region-select');
+  const modelSelect = byId('model-input');
+  const keyInput = byId('api-key-input');
+  const draft = ensureConfigDraft();
+  const selectedSpec = providerSpec(draft.provider);
+  const savedConfig = configFromStatus(state.status);
+  const savedSpec = providerSpec(savedConfig.provider);
+  const hasKeyDraft = Boolean(keyInput.value.trim());
+  const matchesSaved = Boolean(state.status) && configMatchesStatus(draft, state.status) && !hasKeyDraft;
+  const selectedProviderName = providerDisplayName(draft.provider, selectedSpec.name);
+  const savedProviderName = providerDisplayName(state.status?.provider, state.status?.provider_name);
+  const selectedRegionName = providerRegions(selectedSpec).find(([id]) => id === draft.region)?.[1] || draft.region;
+  const savedRegionName = providerRegions(savedSpec).find(([id]) => id === savedConfig.region)?.[1] || savedConfig.region;
+
+  const providerOptions = [...providerSpecs()];
+  if (!providerOptions.some((item) => item.id === selectedSpec.id)) providerOptions.push(selectedSpec);
+  providerSelect.innerHTML = providerOptions.map((item) => `<option value="${escapeHtml(asText(item.id))}">${escapeHtml(providerDisplayName(item.id, item.name))}</option>`).join('');
+  providerSelect.value = draft.provider;
+
+  const regions = providerRegions(selectedSpec);
+  regionSelect.innerHTML = regions.map(([id, name]) => `<option value="${escapeHtml(id)}">${escapeHtml(name)}</option>`).join('');
+  if (!regions.some(([id]) => id === draft.region)) {
+    regionSelect.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(draft.region)}">${escapeHtml(draft.region)} · 当前</option>`);
+  }
+  regionSelect.value = draft.region;
+  regionField.hidden = draft.provider !== 'qwen';
+
+  const models = providerModels(selectedSpec);
+  if (!models.includes(draft.model)) models.unshift(draft.model);
+  modelSelect.innerHTML = models.map((model) => `<option value="${escapeHtml(model)}">${escapeHtml(model)}</option>`).join('');
+  modelSelect.value = draft.model;
+  for (const control of [providerSelect, regionSelect, modelSelect]) control.disabled = state.configLoading || !state.status;
+
   if (state.status) {
     const key = credentialSummary(state.status.credential_source);
-    byId('model-config-summary').textContent = `${state.status.model || state.model} · ${key.configured ? '密钥已保存' : '待配置密钥'}`;
-    byId('api-key-input').placeholder = key.configured ? '已保存在本机；更换时才需填写' : '粘贴智谱 API Key 后保存';
+    const keyConfigured = typeof state.status.api_key_configured === 'boolean' ? state.status.api_key_configured : key.configured;
+    const savedKeyLabel = keyConfigured ? key.label : '待配置密钥';
+    byId('model-config-summary').textContent = `已保存 · ${savedProviderName} · ${savedConfig.model}`;
+    byId('config-selection-status').textContent = matchesSaved
+      ? `所选设置与当前已保存配置一致：${selectedProviderName} · ${draft.model}`
+      : `尚未保存：选择为 ${selectedProviderName} · ${selectedRegionName} · ${draft.model}。当前仍使用已保存的 ${savedProviderName} · ${savedConfig.model}。`;
+    keyInput.placeholder = matchesSaved && keyConfigured ? '已保存在本机；留空会保留当前密钥' : `粘贴与所选服务商及地域匹配的 API Key 后保存`;
     const connectionLabel = state.apiReachable === false ? '未连接 · 正在恢复连接' : '已连接';
     const connectionError = state.apiReachable === false
       ? `<div class="inline-error">${escapeHtml(state.apiTransportError || '未收到本机 API 响应。')}</div>`
       : state.statusError ? `<div class="inline-error">${escapeHtml(state.statusError)}</div>` : '';
     statusTarget.innerHTML = `<div class="status-line"><strong>本地 API</strong><span>${connectionLabel}</span></div>${connectionError}
+      <div class="status-line"><strong>当前服务商</strong><span>${escapeHtml(savedProviderName)}</span></div>
+      ${state.status.region ? `<div class="status-line"><strong>当前地域</strong><span>${escapeHtml(savedRegionName)}</span></div>` : ''}
+      <div class="status-line"><strong>当前接收端点</strong><code>${escapeHtml(asText(state.status.endpoint, providerEndpoint(savedSpec, savedConfig.region) || '由本机服务配置'))}</code></div>
       <div class="status-line"><strong>当前模型</strong><code>${escapeHtml(asText(state.status.model, state.model))}</code></div>
-      <div class="status-line"><strong>凭据来源</strong><span class="status-key ${key.configured ? '' : 'is-missing'}">${escapeHtml(key.label)}</span></div>
+      <div class="status-line"><strong>凭据来源</strong><span class="status-key ${keyConfigured ? '' : 'is-missing'}">${escapeHtml(savedKeyLabel)}</span></div>
       <div class="status-line"><strong>SPIKE 数据源</strong><span>${state.status.spike?.available === true ? `可用 · ${escapeHtml(asText(state.status.spike.count, ''))} 条 · ${escapeHtml(sourceLabel(state.status.spike.source))}` : state.status.spike?.available === false ? '当前不可用' : '状态未返回'}</span></div>`;
-    if (!modelInput.matches(':focus')) modelInput.value = state.status.model || state.model;
   } else if (state.statusError) {
     const label = state.apiReachable === false ? '本机 API 暂不可达' : '无法读取本机 API 状态';
     statusTarget.innerHTML = `<div class="inline-error">${label}：${escapeHtml(state.statusError)}</div>`;
+    byId('model-config-summary').textContent = '尚未读取已保存配置';
+    byId('config-selection-status').textContent = '连接本机服务后才能读取或修改模型配置。';
   } else {
     statusTarget.innerHTML = '<div class="status-loading"><span class="spinner" aria-hidden="true"></span>正在读取服务状态…</div>';
+    byId('model-config-summary').textContent = '正在读取配置…';
+    byId('config-selection-status').textContent = '等待读取当前配置。';
   }
+
+  const selectedEndpoint = providerEndpoint(selectedSpec, draft.region) || (draft.provider === savedConfig.provider && draft.region === savedConfig.region ? asText(state.status?.endpoint) : '');
+  byId('recipient-provider-name').textContent = matchesSaved ? savedProviderName : `${selectedProviderName}（待保存）`;
+  byId('recipient-endpoint').textContent = selectedEndpoint || (matchesSaved ? asText(state.status?.endpoint, '由本机服务配置') : '保存后由本机服务切换');
+  byId('recipient-heading').textContent = matchesSaved ? '当前已保存接收方' : '保存后将使用的接收方';
+
+  const regionKeyUrl = safeHelpUrl(selectedSpec.key_help_url);
+  const keyHelp = byId('api-key-help');
+  keyHelp.hidden = !regionKeyUrl;
+  keyHelp.href = regionKeyUrl || '#';
+  byId('api-key-help-note').textContent = draft.provider === 'qwen'
+    ? draft.region === 'beijing'
+      ? '请创建北京地域 DashScope 按量付费 API Key，并确保与端点地域一致；Coding Plan 密钥不能代替该 API Key。'
+      : `请创建与${selectedRegionName}端点相同地域的 DashScope API Key。`
+    : '请创建与所选服务商及地域匹配的 API Key。';
+
   const label = byId('save-config').querySelector('.button-label');
   label.textContent = state.configLoading ? '正在保存…' : '保存设置';
   setVisible(byId('save-config').querySelector('.button-spinner'), state.configLoading);
   byId('save-config').disabled = state.configLoading;
   const testLabel = byId('connection-test').querySelector('.button-label');
-  testLabel.textContent = state.connectionTesting ? '正在测试…' : '测试智谱连接';
+  testLabel.textContent = state.connectionTesting ? '正在测试…' : matchesSaved ? `测试${savedProviderName}连接` : '先保存所选设置后再测试';
   setVisible(byId('connection-test').querySelector('.button-spinner'), state.connectionTesting);
-  byId('connection-test').disabled = state.connectionTesting;
+  byId('connection-test').disabled = state.connectionTesting || state.configLoading || !matchesSaved;
+  byId('connection-test-help').textContent = matchesSaved
+    ? '连接测试会发送一条简短请求到当前已保存的服务，产生少量模型用量。'
+    : '测试连接只针对已保存配置；请先保存当前选择。测试请求会产生少量模型用量。';
+  syncProviderDisclosure();
   if (state.lastConnection) {
     const output = byId('connection-result');
     output.className = `connection-result ${state.lastConnection.ok ? 'is-ok' : 'is-bad'}`;
@@ -1305,10 +1479,19 @@ async function loadStatus() {
   try {
     const status = await apiJson('/status');
     if (!status || typeof status !== 'object') throw new Error('本地 API 状态格式无效。');
+    const previousSaved = state.status ? configFromStatus(state.status) : null;
+    const preserveDraft = Boolean(previousSaved && state.configDraftInitialized && !configMatchesStatus(state.configDraft, state.status));
+    const savedProfileChanged = Boolean(previousSaved && (previousSaved.provider !== asText(status.provider, 'zhipu')
+      || previousSaved.region !== configFromStatus(status).region));
     state.status = status;
     state.statusError = '';
     state.statusErrorIsTransport = false;
     state.model = asText(status.model, state.model || DEFAULT_MODEL);
+    if (!preserveDraft) {
+      state.configDraft = configFromStatus(status);
+      state.configDraftInitialized = true;
+      if (savedProfileChanged) byId('api-key-input').value = '';
+    }
     if (!state.criteriaEdited && typeof status.default_criteria === 'string' && status.default_criteria.trim()) {
       state.criteria = status.default_criteria;
       byId('criteria-input').value = status.default_criteria;
@@ -1618,7 +1801,7 @@ async function addReferenceFiles(files) {
       state.referencesDirty = true;
     } catch (error) { errors.push(`${file.name}: ${error.message}`); }
   }
-  if (files.length > selected.length) errors.push('智谱单次最多 50 张图（含待判图），请减少参考图数量。');
+  if (files.length > selected.length) errors.push('单次最多 50 张图（含待判图），请减少参考图数量。');
   state.referencesError = errors.join(' ');
   byId('reference-file').value = '';
   renderReferences(); renderResult();
@@ -1843,20 +2026,57 @@ async function exportRun(runId) {
   }
 }
 
+function onConfigProviderChange(event) {
+  const provider = event.currentTarget.value;
+  const spec = providerSpec(provider);
+  const firstRegion = providerRegions(spec)[0]?.[0] || asText(spec.default_region, 'default');
+  state.configDraft = {
+    provider,
+    region: asText(spec.default_region, firstRegion),
+    model: asText(spec.default_model, providerModels(spec)[0] || DEFAULT_MODEL),
+  };
+  state.configDraftInitialized = true;
+  byId('api-key-input').value = '';
+  state.lastConnection = null;
+  showInlineError('config-error', '');
+  showInlineSuccess('config-success', '');
+  renderSettings();
+}
+
+function onConfigRegionChange(event) {
+  if (!state.configDraft) return;
+  state.configDraft = { ...state.configDraft, region: event.currentTarget.value };
+  byId('api-key-input').value = '';
+  state.lastConnection = null;
+  showInlineError('config-error', '');
+  showInlineSuccess('config-success', '');
+  renderSettings();
+}
+
+function onConfigModelChange(event) {
+  if (!state.configDraft) return;
+  state.configDraft = { ...state.configDraft, model: event.currentTarget.value };
+  state.lastConnection = null;
+  showInlineError('config-error', '');
+  showInlineSuccess('config-success', '');
+  renderSettings();
+}
+
 async function saveConfig(event) {
   event.preventDefault();
   if (state.configLoading) return;
   showInlineError('config-error', '');
   showInlineSuccess('config-success', '');
-  const model = byId('model-input').value.trim();
+  const draft = ensureConfigDraft();
+  const model = asText(draft.model).trim();
   if (!model) {
-    showInlineError('config-error', '请填写智谱视觉模型 ID。');
+    showInlineError('config-error', '请选择视觉模型。');
     byId('model-input').focus();
     return;
   }
   const keyInput = byId('api-key-input');
   const apiKey = keyInput.value;
-  const payload = { model };
+  const payload = { provider: draft.provider, region: draft.region, model };
   if (apiKey.trim()) payload.api_key = apiKey;
   const body = JSON.stringify(payload);
   keyInput.value = '';
@@ -1870,6 +2090,8 @@ async function saveConfig(event) {
     state.status = status;
     state.statusError = '';
     state.model = asText(status.model, model);
+    state.configDraft = configFromStatus(status);
+    state.configDraftInitialized = true;
     setHealth(true, '本地服务已连接');
     showInlineSuccess('config-success', '模型与密钥已保存在本机，重启后自动读取。');
   } catch (error) {
@@ -1881,7 +2103,7 @@ async function saveConfig(event) {
 }
 
 async function testConnection() {
-  if (state.connectionTesting) return;
+  if (state.connectionTesting || !state.status || !configMatchesStatus(state.configDraft, state.status) || byId('api-key-input').value.trim()) return;
   state.connectionTesting = true;
   state.lastConnection = null;
   renderSettings();
@@ -2039,6 +2261,10 @@ byId('criteria-input').addEventListener('input', (event) => {
   byId('criteria-count').textContent = `${event.target.value.length} 字`;
 });
 byId('config-form').addEventListener('submit', saveConfig);
+byId('provider-select').addEventListener('change', onConfigProviderChange);
+byId('region-select').addEventListener('change', onConfigRegionChange);
+byId('model-input').addEventListener('change', onConfigModelChange);
+byId('api-key-input').addEventListener('input', renderSettings);
 byId('connection-test').addEventListener('click', testConnection);
 byId('reload-api-exchanges').addEventListener('click', () => Promise.allSettled([loadRuns(), loadExchangeRecords({ reloadSelected: true })]));
 

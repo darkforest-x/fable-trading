@@ -1,4 +1,4 @@
-"""Loopback SPIKE/Zhipu reviews, with no scanner or execution hooks.
+"""Loopback SPIKE visual reviews, with no scanner or execution hooks.
 
 FastAPI serves static UI and bounded JSON uploads on one origin. Credentials
 are saved in owner-authorized private local settings, never in the research ledger.
@@ -32,9 +32,10 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from . import VERSION
 from .automatic import AutomaticReviews, POST_SIGNAL_BARS
 from .defaults import install_default_references
-from .zhipu import PROMPT_VERSION, ZhipuClient, ZhipuError
+from .zhipu import ZhipuClient, ZhipuError
+from .providers import PROVIDERS, client_identity, profile_id, prompt_version, provider_for_model, region_for
 from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes, image_from_data_url
-from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL, VISION_MODELS,
+from .schemas import (AnalyzeRequest, ConfigRequest, DEFAULT_CRITERIA, DEFAULT_MODEL,
                       ReferencesRequest, ReviewRequest)
 from .source import SourceError, SpikeSource
 from .settings import LocalSettings
@@ -77,8 +78,7 @@ def current_review_context(provenance, chart=None, viewport=None):
 
 def validate_model(model: str) -> str:
     model = model.strip()
-    if model not in VISION_MODELS:
-        raise ValueError("请填写支持多图输入的智谱视觉模型 ID，例如 glm-5.3-flash")
+    provider_for_model(model)
     return model
 
 
@@ -100,7 +100,7 @@ async def read_json(request: Request, limit: int = MAX_BODY_BYTES):
 
 
 def create_app(runtime: Optional[Path] = None, source=None, provider_factory=ZhipuClient,
-               seed_defaults: bool = False, automatic_worker: bool = False, replay_history=None, replay_cases=None):
+               seed_defaults: bool = False, automatic_worker: bool = False, replay_history=None, replay_cases=None, qwen_factory=None):
     @asynccontextmanager
     async def lifespan(app):
         # https://fastapi.tiangolo.com/advanced/events/
@@ -122,14 +122,51 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
     settings = LocalSettings(runtime)
     saved = settings.load()
     spike = source or SpikeSource(os.environ.get("SPIKE_READONLY_URL", "http://127.0.0.1:8766"))
-    # Never send a saved Gemini credential to a different provider on upgrade.
+    # Legacy unknown-provider keys are never migrated to a new destination.
+    profiles = {}
+    def local_profile(value):
+        provider_id = value["provider"]
+        region = region_for(provider_id, value.get("region"))
+        model = validate_model(value.get("model") or PROVIDERS[provider_id]["default_model"])
+        if provider_for_model(model) != provider_id:
+            raise ValueError("保存的供应商与模型不匹配")
+        return {"provider": provider_id, "region": region, "model": model,
+                "api_key": value.get("api_key", ""),
+                "credential_source": "local_config" if value.get("api_key") else "none"}
+    for identity, value in saved.get("profiles", {}).items():
+        item = local_profile(value)
+        if identity != profile_id(item["provider"], item["region"]):
+            raise ValueError("保存的密钥地域与配置不匹配")
+        profiles[identity] = item
     saved_provider = saved.get("provider", "gemini")
-    current_saved = saved if saved_provider == "zhipu" else {}
-    env_key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("BIGMODEL_API_KEY") or ""
-    configured_key = current_saved.get("api_key") or env_key.strip()
-    config = {"api_key": configured_key,
-              "model": validate_model(current_saved.get("model") or os.environ.get("ZHIPU_MODEL", DEFAULT_MODEL)),
-              "credential_source": "local_config" if current_saved.get("api_key") else "environment" if configured_key else "none"}
+    if saved_provider in PROVIDERS:
+        item = local_profile(saved)
+        profiles[profile_id(item["provider"], item["region"])] = item
+    else:
+        item = None
+
+    def configured_profile(provider_id, region):
+        identity = profile_id(provider_id, region)
+        saved_profile = profiles.get(identity, {})
+        if saved_profile.get("api_key"):
+            return dict(saved_profile)
+        if provider_id == "qwen":
+            env_region = os.environ.get("DASHSCOPE_REGION", "beijing")
+            key = os.environ.get("DASHSCOPE_API_KEY", "") if env_region == region else ""
+            model = saved_profile.get("model") or os.environ.get("QWEN_MODEL") or PROVIDERS[provider_id]["default_model"]
+        else:
+            key = os.environ.get("ZHIPU_API_KEY") or os.environ.get("BIGMODEL_API_KEY") or ""
+            model = saved_profile.get("model") or os.environ.get("ZHIPU_MODEL") or DEFAULT_MODEL
+        model = validate_model(model)
+        if provider_for_model(model) != provider_id:
+            raise ValueError("环境配置的供应商与模型不匹配")
+        return {"provider": provider_id, "region": region, "model": model, "api_key": key.strip(),
+                "credential_source": "environment" if key.strip() else "none"}
+
+    initial_provider = saved_provider if item else "qwen" if os.environ.get("DASHSCOPE_API_KEY") else "zhipu"
+    initial_region = item["region"] if item else region_for(initial_provider,
+        os.environ.get("DASHSCOPE_REGION", "beijing") if initial_provider == "qwen" else None)
+    config = configured_profile(initial_provider, initial_region)
     inference_lock = threading.Lock()
     config_lock = threading.Lock()
     app.state.store, app.state.source = store, spike
@@ -158,9 +195,13 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
 
     def status():
         with config_lock:
+            provider_id, region = config["provider"], config["region"]
             public = {"model": config["model"], "api_key_configured": bool(config["api_key"]),
-                      "credential_source": config["credential_source"]}
-        return dict(public, provider="zhipu", provider_name="智谱", app_name="SPIKE Vision Lab", version=VERSION, spike=spike.status(),
+                      "credential_source": config["credential_source"], "provider": provider_id,
+                      "region": region, "provider_name": PROVIDERS[provider_id]["name"],
+                      "endpoint": PROVIDERS[provider_id]["endpoints"][region]}
+        return dict(public, providers=[dict(spec, id=name) for name, spec in PROVIDERS.items()],
+                    app_name="SPIKE Vision Lab", version=VERSION, spike=spike.status(),
                     production_eligible=False, training_eligible=False, default_criteria=DEFAULT_CRITERIA)
 
     @app.get("/api/status")
@@ -248,36 +289,59 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         payload = await read_json(request, 4096)
         try:
             update = ConfigRequest.model_validate(payload)
-            model = validate_model(update.model)
             key = update.api_key.strip() if update.api_key is not None else None
             if key is not None and (len(key) < 20 or not re.fullmatch(r"[A-Za-z0-9_.-]+", key)):
                 raise ValueError("API Key 格式不正确")
         except (ValidationError, ValueError):
             raise HTTPException(400, "模型或 Key 格式不正确，请检查输入")
         with config_lock:
-            chosen_key = key if key is not None else config["api_key"]
             try:
-                settings.save(chosen_key, model)
+                target_provider = update.provider or (provider_for_model(update.model.strip())
+                    if update.model else config["provider"])
+                target_region = region_for(target_provider, update.region or (
+                    config["region"] if target_provider == config["provider"] else None))
+                target = configured_profile(target_provider, target_region)
+                model = validate_model(update.model or target["model"])
+                if provider_for_model(model) != target_provider:
+                    raise ValueError("模型不属于所选供应商")
+            except ValueError as exc:
+                raise HTTPException(400, str(exc))
+            chosen_key = key if key is not None else target["api_key"]
+            target.update(model=model, api_key=chosen_key,
+                          credential_source="local_config" if chosen_key else "none")
+            next_profiles = {**profiles, profile_id(target_provider, target_region): target}
+            persisted = {identity: {field: value[field] for field in ("provider", "region", "model", "api_key")}
+                         for identity, value in next_profiles.items()}
+            try:
+                settings.save(chosen_key, model, provider=target_provider, region=target_region, profiles=persisted)
             except RuntimeError as exc:
                 raise HTTPException(500, str(exc))
-            config.update(model=model, api_key=chosen_key,
-                          credential_source="local_config" if chosen_key else "none")
+            profiles.clear()
+            profiles.update(next_profiles)
+            config.update(target)
         return status()
 
     def provider(model=None):
         with config_lock:
-            key = config["api_key"]
-            chosen_model = model or config["model"]
-        if not key:
-            raise HTTPException(503, "请先在模型设置中配置智谱 API Key")
-        return provider_factory(api_key=key, model=chosen_model)
+            current = dict(config)
+        chosen_model = validate_model(model or current["model"])
+        provider_id = provider_for_model(chosen_model)
+        if provider_id != current["provider"]:
+            raise HTTPException(409, "该记录的模型属于另一供应商，请先在模型设置中切换，再执行识别")
+        if not current["api_key"]:
+            raise HTTPException(503, f"请先在模型设置中配置{PROVIDERS[provider_id]['name']}当前地域的 API Key")
+        if provider_id == "qwen":
+            from .qwen import QwenClient
+            factory = qwen_factory or QwenClient
+            return factory(api_key=current["api_key"], model=chosen_model, region=current["region"])
+        return provider_factory(api_key=current["api_key"], model=chosen_model)
 
     def capture_exchange(client, kind, run_id=None):
         if not hasattr(client, "trace_callback"):
             return None
         exchange_id = uuid.uuid4().hex
         metadata = {"id": exchange_id, "created_at": utc_now(), "kind": kind,
-                    "run_id": run_id, "model": client.model, "provider": "zhipu", "status": "running"}
+                    "run_id": run_id, "model": client.model, **client_identity(client), "status": "running"}
         client.trace_callback = lambda exchange: store.save_exchange({**metadata, **exchange})
         return exchange_id
 
@@ -291,11 +355,12 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         exchange_id = capture_exchange(client, "connection_test")
         try:
             result = await run_in_threadpool(client.check_connection)
+            result.update(client_identity(client))
             result["api_exchange_id"] = store.finish_exchange(exchange_id, "completed")
             return result
         except ZhipuError as exc:
             saved_id = store.finish_exchange(exchange_id, "failed", str(exc))
-            return JSONResponse({"ok": False, "model": status()["model"], "message": str(exc),
+            return JSONResponse({"ok": False, "model": client.model, **client_identity(client), "message": str(exc),
                                  "error_details": exc.diagnostics(), "api_exchange_id": saved_id}, status_code=502)
         except Exception:
             message = "连接测试异常；结果未知，没有自动重试"
@@ -350,13 +415,13 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         review_context = current_review_context(provenance, chart_snapshot, body.chart_viewport)
         record = {
             "id": run_id or uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
-            "provider": "zhipu",
+            **client_identity(client),
             "automatic": prepared is not None, "signal_id": body.signal_id,
             "symbol": symbol, "timeframe": timeframe, "source": image_source,
             "image_url": store.put_image(image), "image_name": image.name, "image_sha256": image.sha256,
             "image_width": image.width, "image_height": image.height,
             "criteria": body.criteria, "criteria_sha256": hashlib.sha256(body.criteria.encode()).hexdigest(),
-            "prompt_version": PROMPT_VERSION, "schema_version": 2, "provenance": provenance,
+            "prompt_version": prompt_version(client.model), "schema_version": 2, "provenance": provenance,
             "analysis_scope": "current_right_edge", "review_context": review_context,
             "references": [{"name": item.name, "sha256": item.sha256, "image_url": store.put_image(item)} for item in references],
             "reference_source": reference_source, "reference_revision": reference_revision,
@@ -559,8 +624,12 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
         return FileResponse(path, media_type="image/png")
 
     from .replay import install_replay_routes
+    def replay_model_selection():
+        with config_lock:
+            return {key: config[key] for key in ("model", "region")}
+
     install_replay_routes(app, store, provider, inference_lock, read_json, capture_exchange,
-                          current_review_context, lambda: status()["model"], history=replay_history, cases=replay_cases)
+                          current_review_context, replay_model_selection, history=replay_history, cases=replay_cases)
 
     @app.get("/")
     def unified_workspace():
@@ -572,7 +641,7 @@ def create_app(runtime: Optional[Path] = None, source=None, provider_factory=Zhi
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Start the local SPIKE/Zhipu vision workbench")
+    parser = argparse.ArgumentParser(description="Start the local SPIKE vision workbench")
     parser.add_argument("--port", type=int, default=8771)
     parser.add_argument("--runtime", type=Path, default=None)
     args = parser.parse_args()

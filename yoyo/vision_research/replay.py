@@ -25,7 +25,8 @@ from .images import MAX_TOTAL_IMAGE_BYTES, image_from_bytes
 from .schemas import DEFAULT_CRITERIA
 from .source import CHART_COLORS, SourceError, chart_sha256, render_chart
 from .store import utc_now
-from .zhipu import PROMPT_VERSION, ZhipuError
+from .zhipu import ZhipuError
+from .providers import client_identity, prompt_version, provider_for_model, region_for
 from .replay_cases import PUBLIC_KEYS, V128, HistoricalCaseCatalog, in_bucket
 
 
@@ -287,7 +288,10 @@ class ReplayResearch:
                     "run": self.store.get(obs["run_id"]) if obs.get("run_id") else None,
                     "comparison": self.comparisons.public(identity) if hasattr(self, "comparisons") else None}
 
-    def freeze(self, identity, body, model):
+    def freeze(self, identity, body, model, region=None):
+        provider_id = provider_for_model(model)
+        region = region_for(provider_id, region)
+        version = prompt_version(model)
         with self.lock:
             session = self._get("replay_sessions", identity)
             self._expect(session, body.expected_cursor_ms)
@@ -322,7 +326,9 @@ class ReplayResearch:
                 raise ReplayConflict("请填写至少 10 个字符的形态标准。")
             chart = self._chart_at(session, target_index)
             effective_mode = "free" if retrospective_learning else session["mode"]
-            identity_parts = [identity, chart["chart_sha256"], criteria, refs, model, PROMPT_VERSION]
+            identity_parts = [identity, chart["chart_sha256"], criteria, refs, model, version]
+            if provider_id == "qwen":
+                identity_parts.append(region)
             if retrospective_learning:
                 identity_parts.extend([effective_mode, "retrospective_learning"])
             identity_key = hashlib.sha256(_json(identity_parts).encode()).hexdigest()
@@ -340,7 +346,8 @@ class ReplayResearch:
                    "mode": effective_mode, "retrospective_learning": retrospective_learning,
                    "created_at": utc_now(), "image_url": self.store.put_image(image),
                    "image_sha256": image.sha256, "chart_sha256": chart["chart_sha256"], "chart": chart,
-                   "criteria": criteria, "model": model, "prompt_version": PROMPT_VERSION,
+                   "criteria": criteria, "model": model, "prompt_version": version,
+                   "provider": provider_id, "provider_region": region,
                    "reference_revision": refs["revision"], "references": refs["items"],
                    "human": None, "run_id": None, "followups": [], "status": "frozen", "comparison_requested": False,
                    "case_id": session.get("case_record", {}).get("id"),
@@ -399,9 +406,12 @@ class ReplayResearch:
                 return self.observation(identity)
             if obs["mode"] == "blind" and obs["human"] is None:
                 raise ReplayConflict("请先保存你自己的判断，再交给 AI。")
-            if obs["prompt_version"] != PROMPT_VERSION:
+            if obs["prompt_version"] != prompt_version(obs["model"]):
                 raise ReplayConflict("识别协议已升级；请新建观察使用新版本，旧记录保留。")
             client = provider(obs["model"])
+            if obs.get("provider_region", "default") != client_identity(client)["provider_region"]:
+                client.close()
+                raise ReplayConflict("冻结观察的服务地域与当前配置不同，请切换到原地域后再识别。")
             if not inference_lock.acquire(blocking=False):
                 client.close()
                 raise ReplayConflict("当前有识别请求运行中，请稍后点击；尚未发起本次调用。")
@@ -412,11 +422,11 @@ class ReplayResearch:
                     raise ReplayConflict("冻结输入和参考图合计超过 12 MB，请减少参考图后重新冻结。")
                 context = review_context(obs["chart"]["provenance"], obs["chart"])
                 run = {"id": uuid.uuid4().hex, "created_at": utc_now(), "status": "running", "model": client.model,
-                       "provider": "zhipu", "symbol": obs["symbol"], "timeframe": obs["timeframe"],
+                       **client_identity(client), "symbol": obs["symbol"], "timeframe": obs["timeframe"],
                        "source": "historical_replay", "replay_observation_id": identity, "image_url": obs["image_url"],
                        "image_name": image.name, "image_sha256": image.sha256, "image_width": image.width, "image_height": image.height,
                        "criteria": obs["criteria"], "criteria_sha256": hashlib.sha256(obs["criteria"].encode()).hexdigest(),
-                       "prompt_version": PROMPT_VERSION, "schema_version": 2, "provenance": obs["chart"]["provenance"],
+                       "prompt_version": obs["prompt_version"], "schema_version": 2, "provenance": obs["chart"]["provenance"],
                        "analysis_scope": "current_right_edge", "review_context": context,
                        "references": obs["references"], "reference_source": "replay_frozen", "reference_revision": obs["reference_revision"],
                        "decision": None, "usage": {}, "latency_ms": None, "error": None, "review": None,
@@ -530,7 +540,10 @@ def install_replay_routes(app, store, provider, inference_lock, read_json, captu
 
     @app.post("/api/replay/sessions/{identity}/freeze")
     async def freeze(identity: str, request: Request):
-        return await call(replay.freeze, identity, await body(request, Freeze), model_name())
+        selection = model_name()
+        model = selection["model"] if isinstance(selection, dict) else selection
+        region = selection.get("region") if isinstance(selection, dict) else None
+        return await call(replay.freeze, identity, await body(request, Freeze), model, region)
 
     @app.get("/api/replay/observations/{identity}")
     async def observation(identity: str):

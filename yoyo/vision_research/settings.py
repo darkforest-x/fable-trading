@@ -26,15 +26,24 @@ class LocalSettings:
             self.directory.chmod(0o700)
             self.path.chmod(0o600)
             data = json.loads(self.path.read_text())
-            if not isinstance(data, dict) or set(data) - {"api_key", "model", "provider"}:
+            if not isinstance(data, dict) or set(data) - {"api_key", "model", "provider", "region", "profiles"}:
                 raise ValueError()
-            if any(not isinstance(value, str) for value in data.values()):
+            if any(not isinstance(value, str) for key, value in data.items() if key != "profiles"):
                 raise ValueError()
+            profiles = data.get("profiles", {})
+            if not isinstance(profiles, dict):
+                raise ValueError()
+            for name, profile in profiles.items():
+                if (not isinstance(name, str) or not isinstance(profile, dict)
+                        or set(profile) != {"provider", "region", "model", "api_key"}
+                        or any(not isinstance(value, str) for value in profile.values())):
+                    raise ValueError()
             return data
         except (OSError, ValueError):
             raise RuntimeError("本机模型配置无法读取，请检查 private/settings.json") from None
 
-    def save(self, api_key: str, model: str):
+    def save(self, api_key: str, model: str, *, provider: str = "zhipu",
+             region: str = "default", profiles: dict | None = None):
         temporary = None
         try:
             if self.directory.is_symlink() or self.path.is_symlink():
@@ -45,7 +54,8 @@ class LocalSettings:
                                              prefix=".settings-", delete=False) as stream:
                 temporary = Path(stream.name)
                 os.fchmod(stream.fileno(), 0o600)
-                json.dump({"provider": "zhipu", "api_key": api_key, "model": model}, stream)
+                json.dump({"provider": provider, "region": region, "api_key": api_key,
+                           "model": model, "profiles": profiles or {}}, stream)
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(temporary, self.path)

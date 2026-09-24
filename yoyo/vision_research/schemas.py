@@ -148,5 +148,7 @@ class ReviewRequest(BaseModel):
 
 class ConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    model: str = Field(default=DEFAULT_MODEL, min_length=1, max_length=100)
+    provider: Optional[Literal["zhipu", "qwen"]] = None
+    region: Optional[Literal["default", "beijing", "singapore"]] = None
+    model: Optional[str] = Field(default=None, min_length=1, max_length=100)
     api_key: Optional[str] = Field(default=None, min_length=1, max_length=512)

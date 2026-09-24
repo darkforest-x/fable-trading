@@ -114,7 +114,7 @@
               </div>
               <div class="chart-caption"><span id="chart-context">拖动平移 · 滚轮缩放</span><a href="https://www.tradingview.com/" target="_blank" rel="noopener noreferrer" title="TradingView Lightweight Charts™ · Copyright (с) 2023 TradingView, Inc.">TradingView Lightweight Charts™</a></div>
               <div class="analysis-controls">
-                <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button"><span class="ui-icon icon-images" aria-hidden="true"></span>全局参考图 · <span id="reference-count">0</span> 张</button><span class="privacy-inline">识别时发送当前图表、参考图与规则至智谱</span></div>
+                <div class="analysis-context"><button id="open-references" class="button button-quiet" type="button"><span class="ui-icon icon-images" aria-hidden="true"></span>全局参考图 · <span id="reference-count">0</span> 张</button><span id="active-provider-disclosure" class="privacy-inline">识别时发送当前图表、参考图与规则至已保存的模型服务</span></div>
                 <button id="analyze-button" class="button button-primary" type="button" disabled><span class="ui-icon icon-arrow-right" aria-hidden="true"></span><span class="button-label">识别当前盘口</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
               </div>
               <div id="analyze-error" class="inline-error" role="alert" hidden></div>
@@ -159,7 +159,7 @@
             <div id="reference-list" class="reference-list" aria-live="polite"></div>
             <div id="references-error" class="inline-error" role="alert" hidden></div>
             <div class="reference-save-row"><span id="references-status" role="status">正在读取…</span><button id="reload-references" class="button button-quiet" type="button">重新载入</button><button id="save-references" class="button button-primary" type="button" disabled>保存全局参考图</button></div>
-            <p class="field-help">最多 49 张参考图；单张小于 5 MB，待判图与参考图合计不超过 12 MB。保存仅写入本机，识别时发送至 智谱。历史记录保留当次参考图。</p>
+            <p class="field-help">最多 49 张参考图；单张小于 5 MB，待判图与参考图合计不超过 12 MB。保存仅写入本机，识别时发送至 <span id="references-provider-disclosure">已保存的模型服务</span>。历史记录保留当次参考图。</p>
           </section>
         </section>
 
@@ -240,7 +240,7 @@
                     <button id="replay-signal-return" class="button button-secondary" type="button" disabled>回到信号</button>
                     <button id="replay-signal-input" class="button button-quiet" type="button" hidden>查看 AI 输入与详情</button>
                   </div>
-                  <p id="replay-signal-help" class="field-help">播放只推进行情；点击识别才调用智谱。顶部 API 连接状态不代表已经识别。</p>
+                  <p id="replay-signal-help" class="field-help">播放只推进行情；点击识别才会调用当前已保存的模型服务。顶部 API 连接状态不代表已经识别。</p>
                   <p id="replay-signal-result" class="replay-signal-result" role="status" aria-live="polite" hidden></p>
                   <div id="replay-signal-error" class="inline-error" role="alert" hidden></div>
                 </div>
@@ -390,13 +390,21 @@
           <div class="settings-grid">
             <section class="panel settings-card" aria-labelledby="model-config-heading">
               <h2 id="model-config-heading">模型与凭据</h2>
-              <p class="settings-copy">默认模型为 <code>glm-5.3-flash</code>，也可以输入其他支持多图的智谱视觉模型 ID。</p>
+              <p class="settings-copy">选择服务商、地域与该服务商支持的视觉模型。切换服务商或地域后需保存，才会更改后续图表的接收方。</p>
               <form id="config-form" autocomplete="off">
+                <label class="field-label" for="provider-select">模型服务商</label>
+                <select id="provider-select" name="provider" autocomplete="off" disabled></select>
+                <div id="qwen-region-field" hidden>
+                  <label class="field-label" for="region-select">Qwen 服务地域</label>
+                  <select id="region-select" name="region" autocomplete="off" disabled></select>
+                </div>
                 <label class="field-label" for="model-input">模型 ID</label>
-                <input id="model-input" name="model" type="text" value="glm-5.3-flash" maxlength="120" autocomplete="off" spellcheck="false" />
+                <select id="model-input" name="model" autocomplete="off" disabled></select>
+                <p id="config-selection-status" class="field-help" role="status" aria-live="polite">等待读取当前配置。</p>
                 <label class="field-label" for="api-key-input">API 密钥 <span class="optional-label">可选</span></label>
                 <input id="api-key-input" name="api_key" type="password" placeholder="粘贴后保存；保存后输入框会清空" autocomplete="new-password" spellcheck="false" />
-                <p class="field-help">密钥保存在本机私有配置中，重启后自动读取。只需填写一次；留空会保留已保存的密钥。</p>
+                <p class="field-help">密钥由本机服务保存，浏览器不会持久化。留空只保留当前所选服务商与地域已保存的密钥。<a id="api-key-help" href="#" target="_blank" rel="noopener noreferrer" hidden>API Key 创建说明</a></p>
+                <p id="api-key-help-note" class="field-help">请创建与所选服务商及地域匹配的 API Key。</p>
                 <div id="config-error" class="inline-error" role="alert" hidden></div>
                 <div id="config-success" class="inline-success" role="status" aria-live="polite" hidden></div>
                 <button id="save-config" class="button button-primary" type="submit"><span class="button-label">保存设置</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
@@ -412,12 +420,12 @@
               </div>
               <div class="recipient-card">
                 <span class="recipient-icon ui-icon icon-arrow-up-right" aria-hidden="true"></span>
-                <div><strong>图片接收方</strong><p>智谱 BigModel 官方 API</p><code>open.bigmodel.cn</code></div>
+                <div><strong id="recipient-heading">当前已保存接收方</strong><p id="recipient-provider-name">读取中…</p><code id="recipient-endpoint">读取中…</code></div>
               </div>
               <div id="connection-result" class="connection-result" role="status" aria-live="polite" hidden></div>
               <button id="open-last-connection-exchange" class="button button-quiet" type="button" hidden>查看本次对话</button>
-              <p class="field-help">连接测试会发送一条简短文字请求，产生少量模型用量。</p>
-              <button id="connection-test" class="button button-secondary" type="button"><span class="button-label">测试智谱连接</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
+              <p id="connection-test-help" class="field-help">连接测试会发送一条简短请求到当前已保存的服务，产生少量模型用量。</p>
+              <button id="connection-test" class="button button-secondary" type="button" disabled><span class="button-label">测试当前服务连接</span><span class="button-spinner spinner" aria-hidden="true" hidden></span></button>
             </section>
           </div>
           </details>

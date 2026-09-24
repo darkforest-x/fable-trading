@@ -18,6 +18,7 @@ from .comparison_input import COMPARISON_VERSION, INPUT_MODES, build_market_pack
 from .replay import ReplayConflict, _json
 from .store import utc_now
 from .zhipu import ZhipuError
+from .providers import client_identity, provider_for_model
 
 
 class ReplayComparison:
@@ -79,6 +80,8 @@ class ReplayComparison:
             order = orders[int(hashlib.sha256(observation_id.encode()).hexdigest(), 16) % len(orders)]
             group = {"id": uuid.uuid4().hex, "observation_id": observation_id, "created_at": utc_now(),
                      "protocol_version": COMPARISON_VERSION, "model": obs["model"],
+                     "provider": obs.get("provider", provider_for_model(obs["model"])),
+                     "provider_region": obs.get("provider_region", "default"),
                      "criteria": obs["criteria"], "criteria_sha256": hashlib.sha256(obs["criteria"].encode()).hexdigest(),
                      "chart_sha256": obs["chart_sha256"], "image_sha256": obs["image_sha256"],
                      "image_url": obs["image_url"], "data_sha256": sha, "market_packet": packet,
@@ -116,13 +119,16 @@ class ReplayComparison:
             # by text mode: the shared paired input must still be reproducible.
             image = self.replay._stored_image(obs)
             client = provider(group["model"])
+            if group.get("provider_region", "default") != client_identity(client)["provider_region"]:
+                client.close()
+                raise ReplayConflict("对照组的服务地域与当前配置不同，请切换到原地域后继续。")
             if not inference_lock.acquire(blocking=False):
                 client.close()
                 raise ReplayConflict("当前有模型请求运行中；本组尚未调用，请稍后点击。")
             try:
                 has_image = mode in {"vision", "hybrid"}
                 run = {"id": uuid.uuid4().hex, "created_at": utc_now(), "status": "running",
-                       "model": group["model"], "requested_model": group["model"], "provider": "zhipu",
+                       "model": group["model"], "requested_model": group["model"], **client_identity(client),
                        "source": "historical_replay_comparison", "replay_observation_id": observation_id,
                        "comparison_id": group["id"], "input_mode": mode,
                        "symbol": obs["symbol"], "timeframe": obs["timeframe"],
