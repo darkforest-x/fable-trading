@@ -16,7 +16,7 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-builder-commit
+    source_commit: c1ee050eb9
     status: active
     question: Does causal UTC-session VWAP distance improve SPIKE V12.8 entry quality beyond TWAP and matched random entries?
     single_variable: Entry admission by absolute session-average distance divided by unchanged ATR; earlier raw feature median fixed before later replay.
