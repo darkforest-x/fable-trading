@@ -108,7 +108,7 @@ test("paper form submits selected real options and run actions preserve distinct
   let heartbeat = null;
   const run = () => ({ id: "run-1", strategy_id: "spike-v12", strategy_name: "SPIKE", strategy_version: "V12.8", status, created_ms: 1800000000000,
     admit_after_ms: 1800000001000, heartbeat_ms: heartbeat, error: status === "error" ? "worker failed" : null,
-    spec: { symbols: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"], timeframes: ["15m"], cost_bp: 20, entry_rule: "实际观察后下一次未来开盘", exit_rule: "登记退出规则", exit_fill_policy: "precommitted-closed-bar-rules-event-time-v1", source_hash: "abc123" },
+    spec: { symbol_scope: "okx_all_usdt", symbols: null, timeframes: ["15m"], cost_bp: 20, entry_rule: "实际观察后下一次未来开盘", exit_rule: "登记退出规则", exit_fill_policy: "precommitted-closed-bar-rules-event-time-v1", source_hash: "abc123" },
     metrics: { accepted: 2, closed: 1, open: 1, pending: 0, skipped: 3, net_r: 0.4, win_rate: 1 }, revision: 2 });
   const p = harness(async (url, options = {}) => {
     calls.push({ url, method: options.method || "GET", body: options.body });
@@ -123,21 +123,24 @@ test("paper form submits selected real options and run actions preserve distinct
     throw new Error(`unexpected request ${options.method || "GET"} ${url}`);
   });
   await p.paper.setActive(true);
-  assert.match(p.paperRoot.innerHTML, /BTC \/ ETH/);
+  assert.match(p.paperRoot.innerHTML, /OKX 全部 USDT 永续（默认）/);
+  assert.match(p.paperRoot.innerHTML, /只读取触发信号的合约，不会额外下载行情/);
+  assert.doesNotMatch(p.paperRoot.innerHTML, /name="symbols"/);
   assert.match(p.paperRoot.innerHTML, /固定往返成本 20 bp/);
   assert.match(p.paperRoot.innerHTML, /统计使用 R，不代表账户收益/);
   assert.match(p.paperRoot.innerHTML, /不计资金费和盘口滑点/);
   assert.match(p.paperRoot.innerHTML, /只有任务创建后的新观察会进入记录/);
   assert.match(p.paperRoot.innerHTML, /等待后台启动/);
 
-  const form = { values: { strategy_id: "spike-v12", symbols: "BTC-USDT-SWAP, ETH-USDT-SWAP", timeframes: ["15m", "1H"] } };
+  const form = { values: { strategy_id: "spike-v12", symbol_scope: "okx_all_usdt", timeframes: ["15m", "1H"] } };
   p.listeners["paper:submit"]({ target: { closest: (selector) => selector === "form[data-paper-create]" ? form : null }, preventDefault() {} });
   await new Promise((resolve) => setTimeout(resolve, 0));
   const create = calls.find((call) => call.method === "POST" && call.url === "/api/research/paper/runs");
   assert.ok(create);
   assert.deepEqual(JSON.parse(create.body), {
-    strategy_id: "spike-v12", symbols: ["BTC-USDT-SWAP", "ETH-USDT-SWAP"], timeframes: ["15m", "1H"], request_id: "request-uuid-1",
+    strategy_id: "spike-v12", symbol_scope: "okx_all_usdt", symbols: null, timeframes: ["15m", "1H"], request_id: "request-uuid-1",
   });
+  assert.match(p.paperRoot.innerHTML, /观察设置 OKX 全部 USDT 永续/);
   assert.match(p.paperRoot.innerHTML, /data-run-action="pause"/);
   assert.match(p.paperRoot.innerHTML, /合计 R 0\.40/);
   assert.match(p.paperRoot.innerHTML, /暂停只停止新的入场/);
@@ -208,7 +211,50 @@ test("paper decisions preserve within-bar time precision and stopped trades as c
   assert.match(p.paperRoot.innerHTML, /截尾（无模拟平仓）/);
   assert.match(p.paperRoot.innerHTML, /停止时未模拟平仓；未记录退出时间/);
   assert.match(p.paperRoot.innerHTML, /已实现 R · 未平仓截尾/);
+  assert.match(p.paperRoot.innerHTML, /观察设置 BTC-USDT-SWAP/);
   assert.doesNotMatch(p.paperRoot.innerHTML, /停止时未模拟平仓[^<]*.*已实现 R<\/dt><dd>0\.000/);
+});
+
+test("paper custom scope retains its draft and accepts more than 20 symbols up to 2000", async () => {
+  const calls = [];
+  const p = harness(async (url, options = {}) => {
+    calls.push({ url, method: options.method || "GET", body: options.body });
+    if (url === "/api/research/strategies") return response({ items: [strategy()], sources: [] });
+    if (url === "/api/research/paper/runs" && options.method === "POST") return response({ id: "custom-run", status: "running" }, 201);
+    if (url === "/api/research/paper/runs") return response({ items: [], now_ms: 1800000002000 });
+    throw new Error(`unexpected request ${options.method || "GET"} ${url}`);
+  });
+  await p.paper.setActive(true);
+  const formNode = {};
+  p.listeners["paper:change"]({ target: { name: "symbol_scope", value: "custom", closest: () => formNode } });
+  const draftInput = { name: "symbols", value: "SOL-USDT-SWAP, XRP-USDT-SWAP", closest: () => formNode };
+  p.listeners["paper:input"]({ target: draftInput });
+  p.listeners["paper:change"]({ target: { name: "symbol_scope", value: "okx_all_usdt", closest: () => formNode } });
+  assert.doesNotMatch(p.paperRoot.innerHTML, /name="symbols"/);
+  p.listeners["paper:change"]({ target: { name: "symbol_scope", value: "custom", closest: () => formNode } });
+  assert.match(p.paperRoot.innerHTML, /name="symbols" value="SOL-USDT-SWAP, XRP-USDT-SWAP"/);
+  assert.match(p.paperRoot.innerHTML, /最多 2000 个/);
+
+  const symbols = Array.from({ length: 21 }, (_, index) => `COIN${index}-USDT-SWAP`);
+  const customForm = { values: { strategy_id: "spike-v12", symbol_scope: "custom", symbols: symbols.join(", "), timeframes: ["15m"] } };
+  p.listeners["paper:submit"]({ target: { closest: (selector) => selector === "form[data-paper-create]" ? customForm : null }, preventDefault() {} });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const create = calls.find((call) => call.method === "POST" && call.url === "/api/research/paper/runs");
+  assert.ok(create);
+  const payload = JSON.parse(create.body);
+  assert.equal(payload.symbol_scope, "custom");
+  assert.deepEqual(payload.symbols, symbols);
+
+  const tooManySymbols = Array.from({ length: 2001 }, (_, index) => `COIN${index}-USDT-SWAP`).join(", ");
+  const tooManyForm = { values: { strategy_id: "spike-v12", symbol_scope: "custom", symbols: tooManySymbols, timeframes: ["15m"] } };
+  p.listeners["paper:submit"]({ target: { closest: (selector) => selector === "form[data-paper-create]" ? tooManyForm : null }, preventDefault() {} });
+  assert.match(p.paperRoot.innerHTML, /自选合约最多 2000 个/);
+  assert.equal(calls.filter((call) => call.method === "POST" && call.url === "/api/research/paper/runs").length, 1);
+
+  const invalidForm = { values: { strategy_id: "spike-v12", symbol_scope: "custom", symbols: "BTCUSDT", timeframes: ["15m"] } };
+  p.listeners["paper:submit"]({ target: { closest: (selector) => selector === "form[data-paper-create]" ? invalidForm : null }, preventDefault() {} });
+  assert.match(p.paperRoot.innerHTML, /合约格式应为 BTC-USDT-SWAP/);
+  assert.equal(calls.filter((call) => call.method === "POST" && call.url === "/api/research/paper/runs").length, 1);
 });
 
 test("primary nav uses strategy and paper views while old watch, warmup, and shadow views remain reachable", () => {

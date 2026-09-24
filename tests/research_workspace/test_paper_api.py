@@ -26,6 +26,9 @@ def client(tmp_path, monkeypatch):
     class FakeSource:
         def __init__(self,runtime): pass
         def checkpoint(self,symbol,tf,now):return {'candles':[{'t':now-900000,'o':1,'h':2,'l':.5,'c':1,'v':1}], 'tick':.1,'updated_ms':now}
+        def events(self, plugin, at, symbols, timeframes):
+            assert symbols is None
+            return []
     monkeypatch.setattr(paper_source,'MonitorSource',FakeSource)
     monkeypatch.setattr(workspace_api,'VISION',static)
     app=FastAPI();workspace_api.install(app,runtime=tmp_path/'runtime',root=root,launch_worker=False)
@@ -118,3 +121,49 @@ def test_missing_closed_candles_beyond_delivery_budget_rejects_run(client, monke
     monkeypatch.setattr(paper_source, 'MonitorSource', StaleSource)
     assert c.post('/api/research/paper/runs', json=request(), headers=HEADERS).status_code == 409
     assert not store.runs()
+
+
+def test_default_full_universe_is_dynamic_and_does_not_load_every_checkpoint(client, monkeypatch):
+    c, store, _ = client
+    calls = []
+    class AllSource:
+        def __init__(self, runtime): pass
+        def events(self, plugin, at, symbols, timeframes):
+            calls.append((symbols, timeframes))
+            return []
+        def checkpoint(self, *args):
+            pytest.fail('All-market admission must not materialize every OHLC history')
+    monkeypatch.setattr(paper_source, 'MonitorSource', AllSource)
+    payload = request()
+    del payload['symbols']
+    result = c.post('/api/research/paper/runs', json=payload, headers=HEADERS)
+    assert result.status_code == 201, result.text
+    spec = result.json()['spec']
+    assert spec['symbols'] is None and spec['symbol_scope'] == 'okx_all_usdt'
+    assert spec['universe_policy'] == 'dynamic_monitor_usdt_perpetuals'
+    assert calls == [(None, ['15m'])]
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).json()['id'] == result.json()['id']
+
+
+def test_full_scope_and_custom_lists_cannot_silently_override_one_another(client):
+    c, store, _ = client
+    payload = request(symbol_scope='okx_all_usdt')
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).status_code == 400
+    payload.update(symbol_scope='custom', symbols=None)
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).status_code == 400
+    payload.update(symbol_scope='okx_all_usdt', symbols=[])
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).status_code == 422
+    payload.update(symbols=None)
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).status_code == 201
+
+
+def test_custom_universe_accepts_more_than_twenty_without_expanding_old_lists(client):
+    c, store, _ = client
+    payload = request()
+    payload['symbols'] = [f'ASSET{i}-USDT-SWAP' for i in range(50)]
+    result = c.post('/api/research/paper/runs', json=payload, headers=HEADERS)
+    assert result.status_code == 201, result.text
+    assert result.json()['spec']['symbol_scope'] == 'custom'
+    assert set(result.json()['spec']['symbols']) == set(payload['symbols'])
+    payload['symbols'].append(payload['symbols'][0])
+    assert c.post('/api/research/paper/runs', json=payload, headers=HEADERS).status_code == 400

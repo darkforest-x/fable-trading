@@ -71,3 +71,32 @@ def test_event_ahead_of_checkpoint_waits_without_recording_an_intent(setup):
     worker.tick(store, Path('.'), src, r, at=2800000, manifest={'hash':'abc'})
     assert store.decisions(r['id'])['total'] == 0
     assert '等待信号对应' in store.run(r['id'])['error']
+
+
+@pytest.mark.parametrize('full_market', [False, True])
+def test_worker_preserves_universe_and_reads_only_signal_markets(setup, full_market):
+    store, original, src = setup
+    symbols = None if full_market else ['SOL-USDT-SWAP']
+    spec = dict(original['spec'], symbols=symbols)
+    if full_market:
+        spec['symbol_scope'] = 'okx_all_usdt'
+    # The custom case deliberately has no scope field, matching historical runs.
+    run = store.create({'id':'spike-v128','name':'SPIKE','version':'12.8'},
+                       spec, 'universe-request-12345', at=1000000)
+    src.items = [dict(src.items[0], symbol='SOL-USDT-SWAP')]
+    reads = []
+    def events(plugin, cursor, selected, timeframes):
+        assert selected == symbols
+        assert cursor == 1000000 and timeframes == ['15m']
+        return src.items
+    original_checkpoint = src.checkpoint
+    def checkpoint(symbol, timeframe, at):
+        reads.append(symbol)
+        return original_checkpoint(symbol, timeframe, at)
+    src.events, src.checkpoint = events, checkpoint
+    worker.tick(store, Path('.'), src, run, at=1900000, manifest={'hash':'abc'})
+    decision = store.decisions(run['id'])['decisions'][0]
+    assert decision['symbol'] == 'SOL-USDT-SWAP'
+    assert decision['status'] == 'pending'
+    assert decision['scheduled_entry_ms'] == 2700000
+    assert reads == ['SOL-USDT-SWAP']

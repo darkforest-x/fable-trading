@@ -83,6 +83,8 @@ def install(api, app, root, catalog, datasets, store, factors, recipes, create_j
         try:
             ref = PipelineRef(id=pipeline_id, revision=payload.expected_revision)
             if payload.mode == "backtest":
+                if payload.symbol_scope == "okx_all_usdt" or not payload.symbols:
+                    raise ValueError("冻结历史回测需明确指定合约；全市场范围仅用于向前模拟。")
                 if len(payload.symbols) > 10:
                     raise ValueError("单次回测最多 10 个合约。")
                 if payload.timeframes is not None and sorted(payload.timeframes) != ["15m", "1H"]:
@@ -93,7 +95,7 @@ def install(api, app, root, catalog, datasets, store, factors, recipes, create_j
                 # before storing a job, so direct API callers share this gate.
                 result = create_job(request)
             else:
-                request = PaperRequest(strategy_id=plan["strategy_id"], symbols=payload.symbols,
+                request = PaperRequest(strategy_id=plan["strategy_id"], symbols=payload.symbols, symbol_scope=payload.symbol_scope,
                                        timeframes=payload.timeframes or ["15m"], request_id=payload.request_id, pipeline_ref=ref)
                 result = paper["create"](request)
         except ValueError as error:

@@ -225,7 +225,7 @@ test("pipeline plans create/update by revision and only start modes explicitly a
       current = plan({ ...current, ...body, revision: 2, validation: { status: "blocked", blockers: ["因子适配器尚未实现"], backtest: { allowed: false, reason: "不接受额外因子" }, paper: { allowed: false, reason: "不接受额外因子" } } });
       return response(current);
     }
-    if (url === "/api/research/pipelines/pipeline-0123456789abcdef/runs") return response({ kind: "backtest", run: { id: "job-1" } }, 202);
+    if (url === "/api/research/pipelines/pipeline-0123456789abcdef/runs") return response({ kind: JSON.parse(init.body).mode, run: { id: "job-1" } }, 202);
     throw new Error(`unexpected request ${method} ${url}`);
   });
   await p.platform.setActive(true);
@@ -275,14 +275,53 @@ test("pipeline plans create/update by revision and only start modes explicitly a
   html = p.element("platform-pipelines").innerHTML;
   assert.match(html, /name="timeframes"/);
   assert.match(html, /模拟观察周期/);
+  assert.match(html, /OKX 全部 USDT 永续（默认）/);
+  assert.match(html, /只读取触发信号的合约，不会额外下载行情/);
+  assert.match(html, /class="pipeline-paper-symbols" hidden/);
+  assert.match(html, /name="symbols" value="BTCUSDT" required/);
   const backtestBlock = { hidden: false }, paperBlock = { hidden: true };
-  const runFormNode = { querySelector: (selector) => selector === ".pipeline-backtest-timeframes" ? backtestBlock : paperBlock };
+  const backtestSymbolsBlock = { hidden: false }, paperUniverseBlock = { hidden: true };
+  const paperSymbolsBlock = { hidden: true }, paperSymbolsInput = { disabled: true, required: false };
+  const backtestSymbolsInput = { disabled: false, required: true };
+  const modeSelect = { value: "backtest" };
+  const runFormNode = { querySelector: (selector) => ({
+    ".pipeline-backtest-timeframes": backtestBlock,
+    ".pipeline-paper-timeframes": paperBlock,
+    ".pipeline-backtest-symbols": backtestSymbolsBlock,
+    ".pipeline-paper-universe": paperUniverseBlock,
+    ".pipeline-paper-symbols": paperSymbolsBlock,
+    'input[name="paper_symbols"]': paperSymbolsInput,
+    'input[name="symbols"]': backtestSymbolsInput,
+    'select[name="mode"]': modeSelect,
+  })[selector] || null };
+  modeSelect.value = "paper";
   workspace.listeners.change({ target: { name: "mode", value: "paper", closest: () => runFormNode } });
   assert.equal(backtestBlock.hidden, true);
   assert.equal(paperBlock.hidden, false);
+  assert.equal(backtestSymbolsBlock.hidden, true);
+  assert.equal(backtestSymbolsInput.disabled, true);
+  assert.equal(backtestSymbolsInput.required, false);
+  assert.equal(paperUniverseBlock.hidden, false);
+  workspace.listeners.change({ target: { name: "symbol_scope", value: "custom", closest: () => runFormNode } });
+  assert.equal(paperSymbolsBlock.hidden, false);
+  assert.equal(paperSymbolsInput.disabled, false);
+  assert.equal(paperSymbolsInput.required, true);
+  const paperDraft = { name: "paper_symbols", value: "SOL-USDT-SWAP" };
+  workspace.listeners.input({ target: paperDraft });
+  workspace.listeners.change({ target: { name: "symbol_scope", value: "okx_all_usdt", closest: () => runFormNode } });
+  assert.equal(paperSymbolsBlock.hidden, true);
+  assert.equal(paperSymbolsInput.disabled, true);
+  workspace.listeners.change({ target: { name: "symbol_scope", value: "custom", closest: () => runFormNode } });
+  assert.equal(paperDraft.value, "SOL-USDT-SWAP", "switching scope must preserve the custom symbols draft");
+  assert.equal(backtestSymbolsBlock.hidden, true, "paper scope changes must leave the backtest input hidden");
+  modeSelect.value = "backtest";
   workspace.listeners.change({ target: { name: "mode", value: "backtest", closest: () => runFormNode } });
   assert.equal(backtestBlock.hidden, false);
   assert.equal(paperBlock.hidden, true);
+  assert.equal(backtestSymbolsBlock.hidden, false);
+  assert.equal(backtestSymbolsInput.disabled, false);
+  assert.equal(backtestSymbolsInput.required, true);
+  assert.equal(paperUniverseBlock.hidden, true);
   const runForm = { dataset: { pipelineId: current.id, revision: "2" }, values: {
     mode: "backtest", symbols: "BTCUSDT, ethusdt", timeframes: ["15m"],
   } };
@@ -294,6 +333,30 @@ test("pipeline plans create/update by revision and only start modes explicitly a
     request_id: "00000000-0000-4000-8000-000000000001",
   });
   assert.equal(p.window.location.hash, "#backtests");
+
+  const allPaperForm = { dataset: { pipelineId: current.id, revision: "2" }, values: {
+    mode: "paper", symbol_scope: "okx_all_usdt", timeframes: ["15m"],
+  } };
+  workspace.listeners.submit(closestEvent("form[data-pipeline-run-form]", allPaperForm));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const paperCalls = calls.filter((call) => call.method === "POST" && call.url.endsWith("/runs"));
+  assert.deepEqual(JSON.parse(paperCalls[1].body), {
+    expected_revision: 2, mode: "paper", symbol_scope: "okx_all_usdt", symbols: null, timeframes: ["15m"],
+    request_id: "00000000-0000-4000-8000-000000000001",
+  });
+  assert.equal(p.window.location.hash, "#paper");
+
+  const customSymbols = Array.from({ length: 21 }, (_, index) => `COIN${index}-USDT-SWAP`);
+  const customPaperForm = { dataset: { pipelineId: current.id, revision: "2" }, values: {
+    mode: "paper", symbol_scope: "custom", paper_symbols: customSymbols.join(", "), timeframes: ["15m", "1H"],
+  } };
+  workspace.listeners.submit(closestEvent("form[data-pipeline-run-form]", customPaperForm));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const customCall = calls.filter((call) => call.method === "POST" && call.url.endsWith("/runs"))[2];
+  assert.deepEqual(JSON.parse(customCall.body), {
+    expected_revision: 2, mode: "paper", symbol_scope: "custom", symbols: customSymbols, timeframes: ["15m", "1H"],
+    request_id: "00000000-0000-4000-8000-000000000001",
+  });
 });
 
 test("navigation groups and hooks include platform/model views while preserving VLM research wording", () => {

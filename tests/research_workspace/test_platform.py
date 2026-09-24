@@ -134,6 +134,10 @@ def test_paper_plan_uses_live_source_and_preserves_composition(workspace, monkey
         def checkpoint(self, symbol, tf, at):
             return {"candles": [{"t": at - 900000}], "tick": .1}
 
+        def events(self, plugin, at, symbols, timeframes):
+            assert symbols is None
+            return []
+
     monkeypatch.setattr(paper_source, "MonitorSource", Source)
     plan = create(client, dataset_ids=[])
     assert plan["validation"]["paper"]["allowed"]
@@ -152,6 +156,20 @@ def test_paper_plan_uses_live_source_and_preserves_composition(workspace, monkey
                request_id="isolated-request-other", pipeline_ref={"id": plan["id"], "revision": 1})
     assert client.post("/api/research/paper/runs", json=bad, headers=HEADERS).status_code == 409
     assert len(app.state.paper_store.runs()) == 1
+    full = run(client, plan, mode="paper", symbols=None, symbol_scope="okx_all_usdt",
+               request_id="isolated-full-market-12345")
+    assert full.status_code == 202, full.text
+    assert full.json()["run"]["spec"]["symbol_scope"] == "okx_all_usdt"
+    assert full.json()["run"]["spec"]["symbols"] is None
+
+
+def test_backtest_cannot_inherit_the_full_market_paper_default(workspace):
+    client, app, _ = workspace
+    plan = create(client)
+    for values in ({"symbols": None}, {"symbol_scope": "okx_all_usdt"}):
+        result = run(client, plan, **values)
+        assert result.status_code == 409
+    assert not app.state.research_store.jobs()
 
 
 def test_model_annotation_routes_are_versioned_and_no_promotion(workspace):

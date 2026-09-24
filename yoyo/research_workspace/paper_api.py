@@ -36,7 +36,8 @@ SOURCES = [
 class RunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     strategy_id: str = Field(min_length=1, max_length=100)
-    symbols: list[str] = Field(min_length=1, max_length=20)
+    symbol_scope: Optional[Literal["okx_all_usdt", "custom"]] = None
+    symbols: Optional[list[str]] = Field(default=None, min_length=1, max_length=2000)
     timeframes: list[str] = Field(min_length=1, max_length=4)
     request_id: str = Field(min_length=16, max_length=100, pattern=r"^[A-Za-z0-9-]+$")
     pipeline_ref: Optional[PipelineRef] = None
@@ -140,8 +141,15 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
         strategy = selected(payload.strategy_id)
         if not strategy.get("paper_supported"):
             raise HTTPException(409, strategy.get("notes") or "此策略尚未接入完整模拟适配器")
-        symbols = sorted(set(payload.symbols))
-        if len(symbols) != len(payload.symbols) or any(not re.fullmatch(r"[A-Z0-9]{1,25}-USDT-SWAP", s) for s in symbols):
+        # Missing selection means the whole USDT universe, not a hidden BTC/ETH
+        # fallback. Older clients with an explicit list retain that exact scope.
+        scope = payload.symbol_scope or ("custom" if payload.symbols is not None else "okx_all_usdt")
+        if scope == "okx_all_usdt" and payload.symbols is not None:
+            raise HTTPException(400, "全市场模式不接受自选合约列表，请切换为自选合约")
+        if scope == "custom" and not payload.symbols:
+            raise HTTPException(400, "自选模式需至少填写一个 OKX USDT 永续合约")
+        symbols = sorted(set(payload.symbols)) if payload.symbols is not None else None
+        if symbols is not None and (len(symbols) != len(payload.symbols) or any(not re.fullmatch(r"[A-Z0-9]{1,25}-USDT-SWAP", s) for s in symbols)):
             raise HTTPException(400, "请选择不重复的 OKX USDT 永续合约，例如 BTC-USDT-SWAP")
         tfs = sorted(set(payload.timeframes))
         if len(tfs) != len(payload.timeframes) or set(tfs) - set(strategy["timeframes"]):
@@ -158,7 +166,12 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
             from .paper_source import MonitorSource
             source = MonitorSource(monitor_runtime)
             at = clock_ms()
-            for symbol in symbols:
+            if scope == "okx_all_usdt":
+                # Validate the existing signal reader without decoding every
+                # market's history. The worker validates each event's causal
+                # checkpoint before admission; later listings are included.
+                source.events(get_plugin(payload.strategy_id), at, None, tfs)
+            for symbol in symbols or []:
                 for tf in tfs:
                     checkpoint = source.checkpoint(symbol, tf, at)
                     if not checkpoint or not checkpoint["candles"]:
@@ -170,7 +183,8 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
                         raise ValueError(f"{symbol} {tf} 行情已过期，请等监控恢复后创建运行")
             manifest = source_manifest(root)
             freeze_sources(root, store, manifest)
-            spec = {"symbols": symbols, "timeframes": tfs, "cost_bp": 20,
+            spec = {"symbol_scope": scope, "symbols": symbols, "timeframes": tfs, "cost_bp": 20,
+                    "universe_policy": "dynamic_monitor_usdt_perpetuals" if scope == "okx_all_usdt" else "explicit_symbols",
                     "entry_rule": strategy["entry_rule"], "exit_rule": strategy["exit_rule"],
                     "fill_policy": FILL_POLICY, "exit_fill_policy": "precommitted-closed-bar-rules-event-time-v1",
                     "data_source": {"venue": "okx", "kind": "existing_monitor_closed_checkpoints"},

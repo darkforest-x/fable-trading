@@ -117,6 +117,39 @@ def test_raw_source_paginates_tied_detection_times_without_omissions(tmp_path):
     assert len(ids) == len(set(ids)) == 2_005
 
 
+def test_full_universe_includes_new_usdt_markets_and_keeps_custom_scope(tmp_path):
+    db = _raw_database(tmp_path / "monitor.sqlite3")
+    close = time.time_ns() // 1_000_000 // PERIOD * PERIOD - PERIOD
+    detected = close + 1_000
+
+    def insert(symbol, stamp):
+        event = _raw_payload(symbol, symbol=symbol, close_ms=close, detected_ms=stamp)
+        db.execute("INSERT INTO markets VALUES(?,?,?)", (symbol, "15m", json.dumps({"tick_size": .01})))
+        db.execute("INSERT INTO events VALUES(?,?,?,?,?,?,?,?)", (
+            event["id"], symbol, "15m", event["kind"], event["side"], close, stamp, json.dumps(event),
+        ))
+        db.commit()
+
+    symbols = [f"ASSET{i}-USDT-SWAP" for i in range(35)]
+    for symbol in symbols + ["BTC-USD-SWAP"]:
+        insert(symbol, detected)
+    source = MonitorSource(tmp_path)
+    plugin = get_plugin("spike-v128")
+    first = source.events(plugin, detected, None, ["15m"])
+    assert {event["symbol"] for event in first} == set(symbols)
+
+    insert("NEWCOIN-USDT-SWAP", detected + 1)
+    next_page = source.events(plugin, first[-1]["cursor"], None, ["15m"])
+    assert [event["symbol"] for event in next_page] == ["NEWCOIN-USDT-SWAP"]
+    assert [event["symbol"] for event in source.events(plugin, detected, [symbols[0]])] == [symbols[0]]
+    assert source.events(plugin, detected, []) == []
+
+    # Large custom universes must not become one SQL variable per symbol.
+    large_custom = [f"ABSENT{i}-USDT-SWAP" for i in range(1999)] + [symbols[-1]]
+    assert [event["symbol"] for event in source.events(plugin, detected, large_custom)] == [symbols[-1]]
+    db.close()
+
+
 def test_joint_source_uses_its_actual_schema_and_signal_stop(tmp_path):
     path = tmp_path / "spike-lines-v1.sqlite3"
     db = sqlite3.connect(path)

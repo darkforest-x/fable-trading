@@ -31,7 +31,7 @@
   const stageNames = { research: "研究中", rejected: "已否定", archived: "已归档" };
   const platformState = { active: false, loaded: false, loading: false, error: "", data: null };
   const modelState = { active: false, loaded: false, loading: false, error: "", items: [], families: [], gates: {}, family: "all", query: "", saving: new Set(), auditing: new Set(), auditErrors: {} };
-  const pipelineState = { loaded: false, loading: false, saving: false, running: false, runError: "", runSymbols: "BTCUSDT", error: "", items: [], templates: [], options: {}, selectedId: "", draft: null };
+  const pipelineState = { loaded: false, loading: false, saving: false, running: false, runError: "", runSymbols: "BTCUSDT", paperSymbolScope: "okx_all_usdt", paperSymbols: "", error: "", items: [], templates: [], options: {}, selectedId: "", draft: null };
 
   async function api(path, options = {}) {
     const response = await fetch(path, {
@@ -162,7 +162,11 @@
     const modes = [["backtest", "回测", gates.backtest], ["paper", "模拟", gates.paper]].filter(([, , gate]) => gate?.allowed === true);
     if (!modes.length) return `<div class="pipeline-run"><strong>运行受限</strong><p>当前验证门没有允许的运行方式。计划仍可保存、关联和归档。</p><a class="research-button" href="#backtests">回测任务 ↗</a><a class="research-button" href="#paper">模拟实盘 ↗</a></div>`;
     const firstMode = modes[0][0];
-    return `<div class="pipeline-run"><h4>从此流程启动</h4><p>只有已接通的方式会出现在选择框；运行由你点击触发。</p>${pipelineState.runError ? `<div class="research-error" role="alert">${esc(pipelineState.runError)}</div>` : ""}<form data-pipeline-run-form data-pipeline-id="${esc(item.id)}" data-revision="${esc(item.revision ?? "")}"><label>运行方式<select name="mode">${modes.map(([id, label]) => `<option value="${id}">${label}</option>`).join("")}</select></label><label>合约 <small>逗号分隔；回测示例 BTCUSDT，模拟示例 BTC-USDT-SWAP</small><input name="symbols" value="${esc(pipelineState.runSymbols)}" required></label><div class="pipeline-backtest-timeframes"${firstMode === "backtest" ? "" : " hidden"}><strong>回测固定周期</strong><span>15m + 1H（由冻结回测引擎决定）</span></div><label class="pipeline-paper-timeframes"${firstMode === "paper" ? "" : " hidden"}>模拟观察周期<select name="timeframes" multiple size="4">${["15m", "30m", "1H", "4H"].map((timeframe) => `<option value="${timeframe}"${timeframe === "15m" ? " selected" : ""}>${timeframe}</option>`).join("")}</select><small>可多选。</small></label><button class="research-button primary" type="submit"${pipelineState.running ? " disabled" : ""}>${pipelineState.running ? "正在提交…" : modes.length === 1 ? `启动${modes[0][1]}` : "启动选定运行"}</button></form></div>`;
+    const hasPaper = modes.some(([id]) => id === "paper");
+    const customScope = pipelineState.paperSymbolScope === "custom";
+    const customSymbolsActive = customScope && firstMode === "paper";
+    const paperUniverse = hasPaper ? `<div class="pipeline-paper-universe"${firstMode === "paper" ? "" : " hidden"}><label>模拟观察范围<select name="symbol_scope"><option value="okx_all_usdt"${customScope ? "" : " selected"}>OKX 全部 USDT 永续（默认）</option><option value="custom"${customScope ? " selected" : ""}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label><label class="pipeline-paper-symbols"${customSymbolsActive ? "" : " hidden"}>合约 <small>逗号分隔，最多 2000 个，例如 BTC-USDT-SWAP</small><input name="paper_symbols" value="${esc(pipelineState.paperSymbols)}" autocomplete="off"${customSymbolsActive ? " required" : " disabled"}></label></div>` : "";
+    return `<div class="pipeline-run"><h4>从此流程启动</h4><p>只有已接通的方式会出现在选择框；运行由你点击触发。</p>${pipelineState.runError ? `<div class="research-error" role="alert">${esc(pipelineState.runError)}</div>` : ""}<form data-pipeline-run-form data-pipeline-id="${esc(item.id)}" data-revision="${esc(item.revision ?? "")}"><label class="pipeline-backtest-symbols"${firstMode === "backtest" ? "" : " hidden"}>合约 <small>逗号分隔；回测示例 BTCUSDT</small><input name="symbols" value="${esc(pipelineState.runSymbols)}"${firstMode === "backtest" ? " required" : " disabled"}></label><label>运行方式<select name="mode">${modes.map(([id, label]) => `<option value="${id}"${id === firstMode ? " selected" : ""}>${label}</option>`).join("")}</select></label>${paperUniverse}<div class="pipeline-backtest-timeframes"${firstMode === "backtest" ? "" : " hidden"}><strong>回测固定周期</strong><span>15m + 1H（由冻结回测引擎决定）</span></div><label class="pipeline-paper-timeframes"${firstMode === "paper" ? "" : " hidden"}>模拟观察周期<select name="timeframes" multiple size="4">${["15m", "30m", "1H", "4H"].map((timeframe) => `<option value="${timeframe}"${timeframe === "15m" ? " selected" : ""}>${timeframe}</option>`).join("")}</select><small>可多选。</small></label><button class="research-button primary" type="submit"${pipelineState.running ? " disabled" : ""}>${pipelineState.running ? "正在提交…" : modes.length === 1 ? `启动${modes[0][1]}` : "启动选定运行"}</button></form></div>`;
   }
   function pipelineRegistryHTML() {
     const pipelines = pipelineState.items;
@@ -233,13 +237,39 @@
       event.preventDefault();
       savePipeline(form);
     });
+    root.addEventListener("input", (event) => {
+      if (event.target.name === "symbols") pipelineState.runSymbols = event.target.value;
+      if (event.target.name === "paper_symbols") pipelineState.paperSymbols = event.target.value;
+    });
     root.addEventListener("change", (event) => {
-      if (event.target.name !== "mode" || !event.target.closest?.("form[data-pipeline-run-form]")) return;
-      const form = event.target.closest("form[data-pipeline-run-form]");
+      const form = event.target.closest?.("form[data-pipeline-run-form]");
+      if (!form) return;
+      if (event.target.name === "symbol_scope") {
+        pipelineState.paperSymbolScope = event.target.value;
+        const mode = form.querySelector('select[name="mode"]')?.value || "backtest";
+        const customSymbols = form.querySelector(".pipeline-paper-symbols");
+        const input = form.querySelector('input[name="paper_symbols"]');
+        const active = event.target.value === "custom" && mode === "paper";
+        if (customSymbols) customSymbols.hidden = !active;
+        if (input) { input.disabled = !active; input.required = active; }
+        return;
+      }
+      if (event.target.name !== "mode") return;
       const backtest = form.querySelector(".pipeline-backtest-timeframes");
       const paper = form.querySelector(".pipeline-paper-timeframes");
+      const backtestSymbols = form.querySelector(".pipeline-backtest-symbols");
+      const paperUniverse = form.querySelector(".pipeline-paper-universe");
+      const customSymbols = form.querySelector(".pipeline-paper-symbols");
+      const backtestSymbolsInput = form.querySelector('input[name="symbols"]');
+      const customSymbolsInput = form.querySelector('input[name="paper_symbols"]');
       if (backtest) backtest.hidden = event.target.value !== "backtest";
       if (paper) paper.hidden = event.target.value !== "paper";
+      if (backtestSymbols) backtestSymbols.hidden = event.target.value !== "backtest";
+      if (paperUniverse) paperUniverse.hidden = event.target.value !== "paper";
+      if (backtestSymbolsInput) { backtestSymbolsInput.disabled = event.target.value !== "backtest"; backtestSymbolsInput.required = event.target.value === "backtest"; }
+      const activeCustom = event.target.value === "paper" && pipelineState.paperSymbolScope === "custom";
+      if (customSymbols) customSymbols.hidden = !activeCustom;
+      if (customSymbolsInput) { customSymbolsInput.disabled = !activeCustom; customSymbolsInput.required = activeCustom; }
     });
   }
   async function savePipeline(form) {
@@ -275,10 +305,18 @@
     const values = new FormData(form);
     const id = form.dataset.pipelineId;
     const mode = String(values.get("mode") || "");
-    const symbols = [...new Set(String(values.get("symbols") || "").split(/[\s,，]+/).map((symbol) => symbol.trim().toUpperCase()).filter(Boolean))];
+    const symbolScope = mode === "paper" ? String(values.get("symbol_scope") || "okx_all_usdt") : "";
+    const rawSymbols = mode === "paper" ? values.get("paper_symbols") : values.get("symbols");
+    const symbols = mode === "paper" && symbolScope === "okx_all_usdt"
+      ? null
+      : [...new Set(String(rawSymbols || "").split(/[\s,，]+/).map((symbol) => symbol.trim().toUpperCase()).filter(Boolean))];
     const timeframes = mode === "backtest" ? ["15m", "1H"] : values.getAll("timeframes").map(String);
     if (!id || !["backtest", "paper"].includes(mode)) { pipelineState.runError = "流程或运行方式无效。"; renderPipelineRegistry(); return; }
-    if (!symbols.length) { pipelineState.runError = "请输入至少一个合约。"; renderPipelineRegistry(); return; }
+    if (mode === "paper" && !["okx_all_usdt", "custom"].includes(symbolScope)) { pipelineState.runError = "模拟观察范围无效。"; renderPipelineRegistry(); return; }
+    if (mode === "backtest" && !symbols.length) { pipelineState.runError = "请输入至少一个合约。"; renderPipelineRegistry(); return; }
+    if (mode === "paper" && symbolScope === "custom" && !symbols.length) { pipelineState.runError = "请输入至少一个自选合约。"; renderPipelineRegistry(); return; }
+    if (mode === "paper" && symbolScope === "custom" && symbols.length > 2000) { pipelineState.runError = "自选合约最多 2000 个。"; renderPipelineRegistry(); return; }
+    if (mode === "paper" && symbolScope === "custom" && symbols.some((symbol) => !/^[A-Z0-9]{1,25}-USDT-SWAP$/.test(symbol))) { pipelineState.runError = "合约格式应为 BTC-USDT-SWAP 这样的永续合约编号。"; renderPipelineRegistry(); return; }
     if (!timeframes.length) { pipelineState.runError = "模拟运行至少选择一个周期。"; renderPipelineRegistry(); return; }
     const revision = form.dataset.revision;
     pipelineState.running = true;
@@ -286,7 +324,8 @@
     renderPipelineRegistry();
     try {
       const result = await api(`/api/research/pipelines/${encodeURIComponent(id)}/runs`, { method: "POST", body: JSON.stringify({
-        expected_revision: finite(revision) ? Number(revision) : revision, mode, symbols, timeframes, request_id: requestId(),
+        expected_revision: finite(revision) ? Number(revision) : revision, mode,
+        ...(mode === "paper" ? { symbol_scope: symbolScope, symbols } : { symbols }), timeframes, request_id: requestId(),
       }) });
       const kind = result?.kind || mode;
       const destination = kind === "paper" ? "#paper" : "#backtests";

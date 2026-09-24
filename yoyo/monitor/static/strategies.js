@@ -18,7 +18,7 @@
     return body;
   };
   const strategyState = { active: false, loaded: false, loading: false, error: "", items: [], sources: [], query: "", stage: "all", pending: new Set() };
-  const paperState = { active: false, loaded: false, loading: false, error: "", items: [], nowMs: null, selectedStrategyId: "", symbols: "BTC-USDT-SWAP, ETH-USDT-SWAP", timeframes: ["15m"], selectedRunId: "", detail: null, detailOffset: 0, detailRevision: 0, detailLoading: false, detailError: "", pendingRunId: "", creating: false };
+  const paperState = { active: false, loaded: false, loading: false, error: "", items: [], nowMs: null, selectedStrategyId: "", symbolScope: "okx_all_usdt", symbols: "", timeframes: ["15m"], selectedRunId: "", detail: null, detailOffset: 0, detailRevision: 0, detailLoading: false, detailError: "", pendingRunId: "", creating: false };
 
   const strategyLabel = (value) => ({ research: "研究中", rejected: "已否定", archived: "已归档", active: "已登记", implemented: "已实现", draft: "草稿", paper_supported: "支持模拟（未验证）", unsupported_exit_contract: "模拟退出规则未就绪" }[value] || String(value || "未记录"));
   const sideLabel = (value) => ({ both: "多空", long: "多头", short: "空头" }[value] || String(value || "未记录"));
@@ -169,7 +169,8 @@
     const action = status === "running" ? actionButton("pause", "暂停新增入场") : status === "paused" ? actionButton("resume", "恢复新增入场") : "";
     const stop = ["running", "paused", "error"].includes(status)
       ? '<button class="research-button paper-stop" type="button" data-run-action="stop" data-run-id="' + escapeHTML(runId) + '"' + (pending ? ' disabled' : '') + '>停止并保留未平仓截尾</button>' : "";
-    const symbols = Array.isArray(run.spec?.symbols) ? run.spec.symbols.join("、") : "";
+    const allMarket = run.spec?.symbol_scope === "okx_all_usdt";
+    const symbols = allMarket ? "OKX 全部 USDT 永续" : Array.isArray(run.spec?.symbols) ? run.spec.symbols.join("、") : "";
     const timeframes = Array.isArray(run.spec?.timeframes) ? run.spec.timeframes.join("、") : "";
     const cost = finite(run.spec?.cost_bp) ? escapeHTML(run.spec.cost_bp) + " bp" : "未记录";
     return '<article class="paper-run-card' + (selected ? ' selected' : '') + '"><button class="paper-run-select" type="button" data-run-select="' + escapeHTML(runId) + '"><span><strong>' +
@@ -251,9 +252,11 @@
     const choicesMarkup = strategyChoices();
     const selected = selectedStrategy();
     const details = selected ? `<div class="paper-selected-rule"><strong>所选策略</strong><span>${escapeHTML(selected.name || selected.id)} · ${escapeHTML(selected.version || "")}</span><small>入场：${escapeHTML(selected.entry_rule || "未记录")} · 退出：${escapeHTML(selected.exit_rule || "未记录")}</small></div>` : "";
+    const allMarket = paperState.symbolScope === "okx_all_usdt";
+    const customSymbols = allMarket ? "" : `<label>合约 <small>逗号分隔，最多 2000 个，例如 BTC-USDT-SWAP</small><input name="symbols" value="${escapeHTML(paperState.symbols)}" autocomplete="off" required></label>`;
     root.innerHTML = `<div class="paper-intro research-callout"><strong>前向模拟，不向交易所下单</strong><p>服务实际观察信号后，才按下一次未来开盘记录模拟入场，再按策略原退出规则跟踪。统计使用 R，不代表账户收益；模拟不计资金费和盘口滑点。暂停只停止新的入场，已有模拟仓位继续跟踪；停止时未平仓记录会保留为截尾，不会补造平仓。登记、暂停和停止不会训练或提升策略。</p><p><a href="#shadow">查看保留的 V7 / V8 前向影子旧视图 ↗</a></p></div>
-      <div class="research-toolbar paper-toolbar"><div><h2>新建模拟运行</h2><span class="research-caption">默认 BTC / ETH · 固定往返成本 20 bp · 最多 20 个合约</span></div><button type="button" class="research-button" data-paper-refresh${paperState.loading ? " disabled" : ""}>${paperState.loading ? "正在刷新…" : "刷新任务"}</button></div>
-      <form class="paper-create-form" data-paper-create><label>策略<select name="strategy_id" required${choices.length ? "" : " disabled"}>${choicesMarkup || `<option value="">没有登记为可模拟的策略</option>`}</select></label><label>合约 <small>逗号分隔，最多 20 个，例如 BTC-USDT-SWAP</small><input name="symbols" value="${escapeHTML(paperState.symbols)}" autocomplete="off" required></label><fieldset class="paper-timeframes"><legend>观察周期</legend>${["15m", "30m", "1H", "4H"].map((timeframe) => `<label><input type="checkbox" name="timeframes" value="${timeframe}"${paperState.timeframes.includes(timeframe) ? " checked" : ""}> ${timeframe === "1Dutc" ? "日线" : timeframe}</label>`).join("")}</fieldset><button class="research-button primary" type="submit"${!choices.length || paperState.creating ? " disabled" : ""}>${paperState.creating ? "正在启动…" : "启动模拟"}</button><span class="research-caption">没有历史回填；只有任务创建后的新观察会进入记录。</span></form>
+      <div class="research-toolbar paper-toolbar"><div><h2>新建模拟运行</h2><span class="research-caption">默认观察 OKX 全部 USDT 永续 · 固定往返成本 20 bp</span></div><button type="button" class="research-button" data-paper-refresh${paperState.loading ? " disabled" : ""}>${paperState.loading ? "正在刷新…" : "刷新任务"}</button></div>
+      <form class="paper-create-form" data-paper-create><label>策略<select name="strategy_id" required${choices.length ? "" : " disabled"}>${choicesMarkup || `<option value="">没有登记为可模拟的策略</option>`}</select></label><label>观察范围<select name="symbol_scope"><option value="okx_all_usdt"${allMarket ? " selected" : ""}>OKX 全部 USDT 永续（默认）</option><option value="custom"${allMarket ? "" : " selected"}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label>${customSymbols}<fieldset class="paper-timeframes"><legend>观察周期</legend>${["15m", "30m", "1H", "4H"].map((timeframe) => `<label><input type="checkbox" name="timeframes" value="${timeframe}"${paperState.timeframes.includes(timeframe) ? " checked" : ""}> ${timeframe === "1Dutc" ? "日线" : timeframe}</label>`).join("")}</fieldset><button class="research-button primary" type="submit"${!choices.length || paperState.creating ? " disabled" : ""}>${paperState.creating ? "正在启动…" : "启动模拟"}</button><span class="research-caption">没有历史回填；只有任务创建后的新观察会进入记录。</span></form>
       ${details}${paperResultsHTML()}
       <section class="paper-detail-section" aria-label="模拟决策记录">${renderPaperDetail()}</section>`;
     bindPaperEvents(root);
@@ -318,20 +321,26 @@
     if (paperState.creating) return;
     const values = new FormData(form);
     const strategyId = String(values.get("strategy_id") || "");
-    const symbols = [...new Set(String(values.get("symbols") || "").split(/[\s,，]+/).map((value) => value.trim().toUpperCase()).filter(Boolean))];
+    const symbolScope = String(values.get("symbol_scope") || "okx_all_usdt");
+    const symbols = symbolScope === "custom"
+      ? [...new Set(String(values.get("symbols") || "").split(/[\s,，]+/).map((value) => value.trim().toUpperCase()).filter(Boolean))]
+      : null;
     const timeframes = values.getAll("timeframes").map(String);
     if (!strategyId) { paperState.error = "请先选择登记为可模拟的策略。"; renderPaper(); return; }
-    if (!symbols.length || symbols.length > 20) { paperState.error = "请输入 1 至 20 个合约。"; renderPaper(); return; }
+    if (!["okx_all_usdt", "custom"].includes(symbolScope)) { paperState.error = "观察范围无效。"; renderPaper(); return; }
+    if (symbolScope === "custom" && !symbols.length) { paperState.error = "请输入至少一个自选合约。"; renderPaper(); return; }
+    if (symbolScope === "custom" && symbols.length > 2000) { paperState.error = "自选合约最多 2000 个。"; renderPaper(); return; }
     if (!timeframes.length) { paperState.error = "请至少选择一个观察周期。"; renderPaper(); return; }
-    if (symbols.some((symbol) => !/^[A-Z0-9]{1,25}-USDT-SWAP$/.test(symbol))) { paperState.error = "合约格式应为 BTC-USDT-SWAP 这样的永续合约编号。"; renderPaper(); return; }
-    paperState.symbols = symbols.join(", ");
+    if (symbolScope === "custom" && symbols.some((symbol) => !/^[A-Z0-9]{1,25}-USDT-SWAP$/.test(symbol))) { paperState.error = "合约格式应为 BTC-USDT-SWAP 这样的永续合约编号。"; renderPaper(); return; }
+    paperState.symbolScope = symbolScope;
+    if (symbolScope === "custom") paperState.symbols = symbols.join(", ");
     paperState.timeframes = timeframes;
     paperState.selectedStrategyId = strategyId;
     paperState.creating = true;
     paperState.error = "";
     renderPaper();
     try {
-      const run = await request("/api/research/paper/runs", { method: "POST", body: JSON.stringify({ strategy_id: strategyId, symbols, timeframes, request_id: requestId() }) });
+      const run = await request("/api/research/paper/runs", { method: "POST", body: JSON.stringify({ strategy_id: strategyId, symbol_scope: symbolScope, symbols, timeframes, request_id: requestId() }) });
       paperState.selectedRunId = run.id;
       paperState.detailOffset = 0;
       paperState.detail = null;
@@ -371,6 +380,7 @@
       const form = event.target.closest?.("form[data-paper-create]");
       if (!form) return;
       if (event.target.name === "strategy_id") paperState.selectedStrategyId = event.target.value;
+      if (event.target.name === "symbol_scope") { paperState.symbolScope = event.target.value; renderPaper(); return; }
       if (event.target.name === "timeframes") {
         const selected = [...form.querySelectorAll('input[name="timeframes"]:checked')].map((input) => input.value);
         paperState.timeframes = selected;

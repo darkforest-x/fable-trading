@@ -221,6 +221,8 @@ class MonitorSource:
 
         Pass the final event's ``cursor`` back as ``after_ms`` to continue a
         page. No outcome/performance field participates in admission or fill.
+        With symbols=None, include the monitor's whole USDT perpetual universe,
+        including new symbols as they appear. An empty list selects nothing.
         """
         if isinstance(plugin, str):
             plugin = get_plugin(plugin)
@@ -247,8 +249,12 @@ class MonitorSource:
             values.append(tf)
         where.append("(" + " OR ".join(timeframe_clauses) + ")")
         if selected is not None:
-            where.append("symbol IN (" + ",".join("?" for _ in selected) + ")")
-            values.extend(selected)
+            # One JSON parameter avoids SQLite variable limits for a large
+            # explicit universe. This reader already requires SQLite JSON1.
+            where.append("symbol IN (SELECT value FROM json_each(?))")
+            values.append(json.dumps(selected))
+        else:
+            where.append("symbol LIKE '%-USDT-SWAP'")
         if plugin.id == "spike-v128":
             where.extend(("json_extract(payload,'$.source')='live'",
                           "json_extract(payload,'$.confirmation')='raw'",

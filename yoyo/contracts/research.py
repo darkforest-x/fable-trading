@@ -42,6 +42,7 @@ class PipelineDefinition(ResearchContract):
 class PipelineRun(ResearchContract):
     expected_revision: int = Field(ge=1)
     mode: Literal["backtest", "paper"]
-    symbols: list[str] = Field(min_length=1, max_length=20)
+    symbol_scope: Optional[Literal["okx_all_usdt", "custom"]] = None
+    symbols: Optional[list[str]] = Field(default=None, min_length=1, max_length=2000)
     timeframes: Optional[list[str]] = Field(default=None, min_length=1, max_length=4)
     request_id: str = Field(min_length=16, max_length=100, pattern=r"^[A-Za-z0-9-]+$")
