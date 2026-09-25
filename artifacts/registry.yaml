@@ -32228,3 +32228,19 @@ artifacts:
     notes: SPIKE V13.0 separate private TradingView revision2; fixed original stop,24bar wait,20bp. Synthetic native QA
       and102 local tests; source round-trip equals local SHA19f02986ecc3ba546d8b74b8b728887b0736808f37b4a7a5921023c1c6bc2ea8.
       Initial74plot failure retained; ten legacy data-window diagnostics retired. No new market backtest.
+
+  - artifact_id: ma-morphology-v6-20260925-early-review20
+    artifact_type: manifest
+    role: early_observation_diagnostics_not_training_labels
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2ba7e02fc189543343852081e4d028a00cf77a08
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_review20_v1/review_manifest.json
+    sha256: 33e9da6115cf98cc2721e1e3aa0937898ba9be5d77c64a34609c4187ef6ebaaa
+    size_bytes: 169933
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_review20_v1/review_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Same20cases,120causal observation prefixes; old post5 pixels reproduced exactly. Original physical boxes projected,
+      not relabeled. All10positive post0 boxes exceed the legacy canvas and are explicitly flagged. Future context separate;
+      earlier classes unadjudicated, zero training labels generated. No training or model promotion.

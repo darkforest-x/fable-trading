@@ -112,11 +112,14 @@ experiments:
     - ma-morphology-v6-positions-20260925-preparation
     - ma-morphology-v6-positions-20260925-review10
     - ma-morphology-v6-positions-20260925-learning-design-audit
+    - ma-morphology-v6-20260925-early-review20
     reuse_allowed: false
     notes: Current entry is early_detection_contract_v1.json; old position_plan.json and learning_design_audit_v1.json are historical.
       Do not replace fixed post5 with another global tuple, move labels independently, or append future candles to spread positions.
       Measure first valid detection delay in bars/minutes and price already travelled, alongside false alarms and misses. A later
-      confirmed or3R-selected positive is not automatically an earlier-prefix positive. Training recipe and model state remain unchanged.
+      confirmed or3R-selected positive is not automatically an earlier-prefix positive. early_review20_v1 now provides120 diagnostic
+      prefixes for the same20cases; no training labels generated. All10 original positive boxes exceed the legacy canvas at post0,
+      explicitly flagged for renderer correction. Training recipe and model state remain unchanged.
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18
