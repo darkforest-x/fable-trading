@@ -1,0 +1,45 @@
+{
+  "candidate_policy": "Consider old train events for the shared multi-timeframe negative pool after label, render, source, protection and split checks; a15m origin is not an exclusion. Inventory is not label approval.",
+  "direct_png_reuse_ready": false,
+  "distribution_diagnostics": [
+    "Keep timeframe/source metadata to measure stratified errors and possible label-correlated visual differences; unequal timeframe counts alone do not reject reuse."
+  ],
+  "grade_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+  "model_scope": "one shared visual morphology detector across timeframes",
+  "negative_event_kinds": {
+    "easy": 1043,
+    "hard": 2086
+  },
+  "negative_event_splits": {
+    "train": 2664,
+    "val": 465
+  },
+  "negative_events": 3129,
+  "negative_images": 24000,
+  "negative_periods": {
+    "15": 3129
+  },
+  "positive_periods": {
+    "1": 885,
+    "3": 626,
+    "5": 266,
+    "15": 58,
+    "30": 4,
+    "60": 2
+  },
+  "production_eligible": false,
+  "reasons": [
+    "Existing Grade-A image geometry, colors/MA representation and 7/8 variants differ from new HL2 three-view inputs.",
+    "Old val overlaps new validation/test calendar; cannot promote it into training.",
+    "Hard labels mean no launch, not no density or loss; reuse only under explicit dense-launch semantics and observable post-five criteria.",
+    "Re-render and recheck source identity, candidate/gold overlap, chronological partition and complete visible-window label coverage."
+  ],
+  "schema": "grade-a-v6-negative-compatibility-v2",
+  "source_paths": 499,
+  "source_paths_existing": 499,
+  "source_sha_audit_performed": false,
+  "timeframe_difference_is_exclusion": false,
+  "training_eligible": false,
+  "training_ready": false,
+  "v6_ledger_sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2"
+}

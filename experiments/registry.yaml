@@ -57,19 +57,21 @@ experiments:
     single_variable: Owner-requested preparation of three-view augmentation and audited negative reuse; original event
       membership, core geometry, confirmation clock and render source remain frozen. No training or threshold change
       at registration.
-    result: Positive preparation complete and audited:1841events/5523images(4518train/525val/480test),4853 reused
-      hardlinks plus670 new renders.140 frozen gzip/CSV sources verified to recover176 tiny prefixes. Grade-A negative
-      direct import not ready:15m-only population,41old-window protection conflicts and incomplete historical source
-      hashes. No training started.
+    result: Positive preparation complete and audited:1841events/5523images(4518train/525val/480test). Owner clarified
+      one shared visual model:timeframe differences alone do not exclude Grade-A negative reuse. negative_reuse_audit_v2
+      and evaluation_contract_v2 supersede the earlier period-based restriction. Label,render,source,protection and
+      chronological checks remain;41old-window protection conflicts recorded. No training started.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
     artifacts:
     - ma-morphology-v6-threeview-20260925-positive-dataset
     - ma-morphology-v6-threeview-20260925-preparation
+    - ma-morphology-v6-threeview-20260925-shared-timeframe-policy
     reuse_allowed: false
-    notes: This continues v6 with explicit Grade-A lineage;does not replace the notification checkpoint.No new report
-      required.
+    notes: Continue v6 with at most3views per event. Keep original evidence snapshots and use evaluation_contract_v2
+      as current reuse policy; legacy period-matching coverage is not total usable-negative capacity. Training/production
+      remain unapproved;notification model unchanged.
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18

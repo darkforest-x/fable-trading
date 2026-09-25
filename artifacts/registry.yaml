@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-threeview-20260925-shared-timeframe-policy
+    artifact_type: config
+    role: shared_visual_model_timeframe_pooling_correction
+    source_repo: darkforest-x/fable-trading
+    source_commit: 469d4ffb3ae38a4ce668055607d4e185e87fa73d
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract_v2.json
+    sha256: f23521551d4f24f62d05662d4d9c5bdaeb5bec2cdf50377ce345341548170c0b
+    size_bytes: 3779
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract_v2.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner clarified shared visual morphology across timeframes. Supersedes same-timeframe negative eligibility
+      in evaluation_contract.json; original dataset and evidence bytes are unchanged. Period tags are for provenance/error
+      analysis, not a class or rejection rule. Remaining label/render/protection/split checks still apply.
   - artifact_id: owner-manual-trading-system-20260925-v3-delivery
     artifact_type: manifest
     role: manual_workflow_notion_and_workspace_delivery
