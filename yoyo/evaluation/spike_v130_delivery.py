@@ -49,8 +49,20 @@ def render() -> str:
     text = text.replace(marker, INPUTS + marker)
     # The parent reference is still calculated for joint-anchor generation.
     # Its visuals/hints must not masquerade as delayed-trade references.
+    # Pine counts data-window plots and alertcondition calls toward 64, even
+    # when hidden. Retire ten duplicate legacy diagnostics (not calculations,
+    # visible drawings or alerts) to reserve the ten V13 outputs. Native run
+    # rejected the initial combined source at 74 plots (RE10140).
+    retired_diagnostics = (
+        '"收盘量比 RV"', '"前12根密集命中"', '"三根净进展 ATR"',
+        '"三根量比"', '"V9 离六线距离 ATR"', '"V9 全部入场过滤通过"',
+        '"确认参考起点"', '"参考结束事件（1保护 / 2反向 / 3未突破离场）"',
+        '"V12.8 滚仓候选累计数（最多2）"', '"V12.8 滚仓候选事件（1=候选）"',
+    )
     lines = []
     for line in text.splitlines():
+        if line.startswith("plot(") and any(title in line for title in retired_diagnostics):
+            continue
         if line.startswith(("bool showRisk =", "bool showExitLabels =", "bool showMilestones =", "bool v128Enabled =")):
             line += " and not v130Retest"
         if line.startswith("label signalTag ="):

@@ -2889,32 +2889,22 @@ float pendingWhyCode = pendingWhy == "await_legacy" ? 1 : pendingWhy == "await_b
 
 float shortPendingWhyCode = shortPendingWhy == "await_legacy" ? 1 : shortPendingWhy == "await_body" ? 2 : shortPendingWhy == "await_md_turn" ? 3 : shortPendingWhy == "await_momentum" ? 4 : shortPendingWhy == "confirmed" ? 5 : shortPendingWhy == "parent_broken" ? 6 : shortPendingWhy == "gap" ? 7 : shortPendingWhy == "unknown" ? 8 : shortPendingWhy == "await_launch_evidence" ? 9 : 0
 
-plot(barstate.isconfirmed ? rv : na, "收盘量比 RV", display=display.data_window)
-plot(barstate.isconfirmed ? denseHits : na, "前12根密集命中", display=display.data_window)
-plot(barstate.isconfirmed ? advance3 : na, "三根净进展 ATR", display=display.data_window)
-plot(barstate.isconfirmed ? volumeRatio3 : na, "三根量比", display=display.data_window)
-plot(barstate.isconfirmed ? ropeDistanceAtr : na, "V9 离六线距离 ATR", display=display.data_window)
 // BEGIN CONFIRMED H1 SMA60 DATA
 plot(h1SmaApplies ? h1Sma60 : na, "15m过滤 · 已确认1h SMA60", color=#C18CFA, linewidth=2, style=plot.style_stepline, force_overlay=true, display=showH1Sma60 ? display.pane + display.data_window : display.data_window)
 // END CONFIRMED H1 SMA60 DATA
 // BEGIN CONFIRMED M15 EMA120 DATA
 plot(m15EmaApplies ? m15Ema120 : na, "5m过滤 · 已确认15m EMA120", color=#C18CFA, linewidth=2, style=plot.style_stepline, force_overlay=true, display=showM15Ema120 ? display.pane + display.data_window : display.data_window)
 // END CONFIRMED M15 EMA120 DATA
-plot(barstate.isconfirmed ? (v9EntryAllowed ? 1 : 0) : na, "V9 全部入场过滤通过", display=display.data_window)
 plot(barstate.isconfirmed and signalSide != 0 ? close : na, "确认实际收盘价", display=display.data_window)
-plot(barstate.isconfirmed ? (referenceStarted ? 1 : 0) : na, "确认参考起点", display=display.data_window)
 
 float referenceExitCode = exitReference ? (referenceReverse ? 2.0 : v112EarlyExitNow ? 3.0 : 1.0) : 0.0
 
-plot(barstate.isconfirmed ? referenceExitCode : na, "参考结束事件（1保护 / 2反向 / 3未突破离场）", display=display.data_window)
 plot(barstate.isconfirmed and exitReference ? exitReferencePrice : na, "V6 参考结束价格", display=display.data_window)
 
 // BEGIN V128 DATA_WINDOW
 // These three plots are the complete V12.8 plot budget: one overlay reference
 // plus count/event data-window exports.  They stay well below Pine's 64-plot cap.
 plot(v128Enabled and v128Supported and v128FrameLong and v128HasStructuralProposal and not v128EpisodePaused and not v128EpisodeInvalid and not v126Minimal ? v128StructuralStop : na, "滚仓结构保护参考（不参与退出）", color=color.new(gold, 18), linewidth=1, style=plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)
-plot(barstate.isconfirmed and v128Enabled ? v128CandidateCount : na, "V12.8 滚仓候选累计数（最多2）", display=display.data_window)
-plot(barstate.isconfirmed and v128Enabled ? (v128CandidateEvent ? 1 : 0) : na, "V12.8 滚仓候选事件（1=候选）", display=display.data_window)
 // END V128 DATA_WINDOW
 // ───────────── 状态面板 ─────────────
 
