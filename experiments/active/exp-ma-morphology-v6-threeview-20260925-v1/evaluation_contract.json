@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "stage": "preparation",
+  "training_ready": false,
+  "positive_unit": "1841 independent parent events; at most P7/P9/P11 per event; no cross-split derived views",
+  "negative_policy": {
+    "direct_grade_a_png_import": false,
+    "grade_a_train_events": "15m candidate identities only, subject to source, render, temporal, exclusion and visible-label checks",
+    "grade_a_validation_events_into_training": false,
+    "other_timeframes": "Require negatives with matching source, symbol, timeframe, time block and split; no fixed quota may weaken exclusion",
+    "hard_negative_target": "Dense but no qualifying visible launch is a candidate under launch semantics; unresolved dense examples remain review-only",
+    "prohibited_label": "Future SL, timeout or failure to reach3R does not by itself establish an empty morphology label"
+  },
+  "training_recipe": {
+    "source": "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json#training_args",
+    "base_model": "models/yolo11s.pt",
+    "base_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+    "change_optimizer_or_thresholds": false,
+    "image_augmentation": "All flips, color, mosaic, mixup and geometric transforms remain disabled; only the three deterministic OHLC crops differ",
+    "new_training_yaml": "Create only after a complete audited positive-and-negative manifest is frozen"
+  },
+  "recognition_evaluation": {
+    "fixed_reference": "Original P9 val/test events; preserve image and label hashes",
+    "position_robustness": "Paired P7/P9/P11 results on the same val/test events; report event-level and per-position results without treating views as independent events",
+    "padding_robustness": "Repeat inherited native-padding and aligned-padding protocols; retain failures under either path, because v6A had a documented padding collapse",
+    "negative_strata": "Report clear-background and reviewed dense-no-launch false detections separately by timeframe; no unconditional false-positive claim from a selected case-control pool",
+    "baseline": "Re-evaluate the existing v6A checkpoint on identical frozen inputs and settings; historical Grade-A metrics from a different dataset are not a direct comparator",
+    "continuous_replay": "Keep raw boxes, causal event grouping and any separate semantic/strategy gates visible as distinct stages; never report raw boxes as executable signals"
+  },
+  "trading_evaluation": "Recognition improvement is not trading success. Any later trading claim needs unchanged20bp cost, matched random controls and separate forward evidence.",
+  "production_eligible": false,
+  "active_checkpoint_change": false
+}
