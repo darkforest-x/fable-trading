@@ -3117,7 +3117,7 @@ if v130Retest and barstate.isconfirmed
         v130ReversePending := false
         v130Scheduled := na
         array.clear(v130Queue)
-        v130LastStatus := "数据断档：等待新候选"
+        v130LastStatus := (not pricesValid ? "OHLC无效" : "数据断档") + "：等待新候选"
         if not na(v130RiskBox)
             box.set_right(v130RiskBox, bar_index - 1)
             box.set_right(v130RewardBox, bar_index - 1)
@@ -3133,8 +3133,8 @@ if v130Retest and barstate.isconfirmed
             v130ReversePending := false
 
         // A selected confirmation only becomes a reference on its next bar.
-        // This is a modelled open, not a broker fill. Rollback repeats the same
-        // deterministic operation on each realtime update; no intrabar commit.
+        // This is a modelled open, not a broker fill. The completed entry bar
+        // audits that open and the whole bar's protection path together.
         if not na(v130Scheduled) and bar_index == v130ScheduledBar + 1 and v130Side == 0
             float distance = v130Scheduled.side * (open - v130Scheduled.stop)
             if open > 0 and distance > 0
@@ -3153,6 +3153,7 @@ if v130Retest and barstate.isconfirmed
                 v130LastStatus := "次开参考已建立"
                 if v130ShowRisk and not v126Minimal
                     while array.size(v130Boxes) >= 40
+                        box.delete(array.shift(v130Boxes))
                         box.delete(array.shift(v130Boxes))
                     float target = math.max(syminfo.mintick, v130Entry + v130Side * 3.0 * v130Risk)
                     v130RiskBox := box.new(bar_index, math.max(v130Entry, v130InitialStop), bar_index + 1, math.min(v130Entry, v130InitialStop), border_color=color.new(bear, 55), bgcolor=color.new(bear, 93), force_overlay=true)
@@ -3185,8 +3186,9 @@ if v130Retest and barstate.isconfirmed
                 v130ReversePending := rawSignalSide == -v130Side
 
         if v130Side != 0 and not na(v130RiskBox)
-            box.set_right(v130RiskBox, bar_index + (v130Exited ? 0 : 1))
-            box.set_right(v130RewardBox, bar_index + (v130Exited ? 0 : 1))
+            int rightEdge = v130Exited ? math.max(v130EntryBar + 1, bar_index) : bar_index + 1
+            box.set_right(v130RiskBox, rightEdge)
+            box.set_right(v130RewardBox, rightEdge)
         if v130Exited
             v130ExitNetR := (v130Side * (v130ExitPrice / v130Entry - 1) - roundTripCost) * v130Entry / v130Risk
             v130LastStatus := v130ExitReason + " · 净 " + str.tostring(v130ExitNetR, "#.##") + "R"
@@ -3259,8 +3261,8 @@ var table v130Panel = table.new(position.bottom_center, 2, 4, bgcolor=color.new(
 if barstate.islast and v130Retest and showPanel
     table.cell(v130Panel, 0, 0, "V13.0 · " + v130Arm, text_color=ink, text_size=size.small)
     table.cell(v130Panel, 1, 0, v130LastStatus, text_color=v130Side == 0 ? gold : bull, text_size=size.small)
-    table.cell(v130Panel, 0, 1, "等待 / 已确认 / 次开", text_color=muted, text_size=size.tiny)
-    table.cell(v130Panel, 1, 1, str.tostring(array.size(v130Queue)) + " / " + str.tostring(v130ConfirmedCount) + " / " + str.tostring(v130FillCount), text_color=ink, text_size=size.tiny)
+    table.cell(v130Panel, 0, 1, "等待 / 获准 / 次开 / 占仓跳过", text_color=muted, text_size=size.tiny)
+    table.cell(v130Panel, 1, 1, str.tostring(array.size(v130Queue)) + " / " + str.tostring(v130ConfirmedCount) + " / " + str.tostring(v130FillCount) + " / " + str.tostring(v130OccupiedCount), text_color=ink, text_size=size.tiny)
     table.cell(v130Panel, 0, 2, "最近确认 · 北京", text_color=muted, text_size=size.tiny)
     table.cell(v130Panel, 1, 2, na(v130LastConfirm) ? "—" : str.format_time(v130LastConfirm, "MM-dd HH:mm", "Asia/Shanghai") + " · " + str.tostring(v130LastConfirmPrice, format.mintick), text_color=ink, text_size=size.tiny)
     table.cell(v130Panel, 0, 3, "等待上限 / 历史研究", text_color=muted, text_size=size.tiny)
