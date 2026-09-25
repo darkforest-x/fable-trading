@@ -29,7 +29,9 @@ experiments:
     - owner-manual-trading-system-20260925-v3-delivery
     reuse_allowed: false
     notes: Evolves Manual-v2. Mechanical signal profitability is not a prerequisite for building a human process. Includes do/wait/skip, causal structure
-      anchors,1h/15m/5m roles,4R branches,order expiry,risk budgets and refusal review. No report requested.
+      anchors,1h/15m/5m roles,holding decision branches,order expiry,risk budgets and refusal review. No report requested.
+    correction: Manual-v3.1 removes the invented fixed4R checkpoint. Current protocol and correction receipt are protocol_v3_1.json and correction_receipt_v3_1.json in the same experiment directory; original delivery files remain historical.
+
   - experiment_id: exp-spike-manual-system-20260925-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d22b606a80a80bf4d566da588d2f4f54d935ae82
