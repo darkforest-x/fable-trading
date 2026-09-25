@@ -87,7 +87,7 @@ def _link_checked(source: Path, dest: Path, expected: str) -> None:
     os.link(source, dest)
 
 
-def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
+def build(plan_path: Path, output: Path, pilot: int = 0, recovery_path: Path | None = None) -> dict:
     plan = json.loads(plan_path.read_text())
     if plan['views'] != {'pre_bars': [7, 9, 11], 'post_bars': 5, 'maximum_per_event': 3}:
         raise ValueError('Three-view contract drift')
@@ -98,6 +98,7 @@ def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
         if sha(ROOT / identity['path']) != identity['sha256']:
             raise ValueError('Frozen input SHA drift: ' + identity['path'])
     parent = ROOT / plan['parent_dataset']
+    recovery = json.loads(recovery_path.read_text())['events'] if recovery_path else {}
     events = [x for x in rows(ROOT / plan['inputs']['ledger']['path']) if x.get('morphology_label') == 'selected_grade_a_launch']
     if len(events) != 1841 or len({x['event_id'] for x in events}) != 1841:
         raise ValueError('Positive event population changed')
@@ -123,8 +124,17 @@ def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
         new = {}
         if pilot or not all(available.values()):
             source = ROOT / event['source_path']
+            recovered = None
+            if not source.exists():
+                recovered = recovery.get(event['event_id'])
+                if not recovered or recovered['source_path'] != event['source_path'] or recovered['source_sha256'] != event['source_sha256']:
+                    raise ValueError('Missing verified original source/prefix: ' + event['event_id'])
+                relative = Path(recovered['path'])
+                if relative.is_absolute() or '..' in relative.parts:
+                    raise ValueError('Recovered prefix escapes repository')
+                source = ROOT / relative
             if str(source) not in checked_sources:
-                if sha(source) != event['source_sha256']:
+                if sha(source) != (recovered['sha256'] if recovered else event['source_sha256']):
                     raise ValueError('Source SHA drift: ' + str(source))
                 checked_sources.add(str(source))
             step = pd.Timedelta(minutes=int(event['bar_minutes']))
@@ -166,6 +176,7 @@ def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
                 'label_horizon_end_utc': event['profit']['label_window_end_utc'],
                 'image_path': image_rel, 'image_sha256': image_sha, 'label_path': label_rel, 'label_sha256': label_sha, 'box': box,
                 'parent_image_path': old_row['image_path'] if old_row else None,
+                'source_recovery_manifest': str(recovery_path.relative_to(ROOT)) if recovery_path and event['event_id'] in recovery else None,
                 'geometry_source': 'original_event_core_with_unchanged_renderer_rule',
                 'positive_selection': 'parent_3R_retained_rule_candidate', 'sample_owner_confirmed': False,
                 'training_eligible': False, 'production_eligible': False})
@@ -177,6 +188,7 @@ def build(plan_path: Path, output: Path, pilot: int = 0) -> dict:
         'plan_sha256': sha(plan_path), 'positive_events': len(events), 'positive_images': len(manifest),
         'counts': dict(Counter(x['split'] for x in manifest)), 'reused_images': reused, 'newly_rendered_images': rendered,
         'manifest_sha256': sha(output / 'positive_manifest.jsonl'), 'events_sha256': sha(output / 'positive_events.jsonl'),
+        'recovery_manifest_sha256': sha(recovery_path) if recovery_path else None,
         'training_ready': False, 'negative_status': 'requires_separate_compatibility_and_label_audit',
         'training_eligible': False, 'production_eligible': False}
     write_json(output / 'preparation_receipt.json', receipt)
@@ -227,14 +239,52 @@ def audit(output: Path) -> dict:
             'training_ready': False, 'negative_gate_complete': False}
 
 
+def negative_inventory(plan_path: Path, output: Path) -> dict:
+    """Record why old negative image bytes are not a ready mixed-timeframe pool."""
+    plan = json.loads(plan_path.read_text())
+    grade_manifest = ROOT / 'datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl'
+    negatives = [x for x in rows(grade_manifest) if x.get('sample_kind') == 'negative']
+    unique = {x['negative_event_id']: x for x in negatives}
+    positive = [x for x in rows(ROOT / plan['inputs']['ledger']['path']) if x.get('morphology_label') == 'selected_grade_a_launch']
+    period_counts = Counter()
+    for row in unique.values():
+        minutes = int((utc(row['core_end_time']) - utc(row['core_start_time'])).total_seconds() / 60 / (row['core_bars'] - 1))
+        period_counts[minutes] += 1
+    positive_periods = Counter(x['bar_minutes'] for x in positive)
+    source_paths = {x['source_path'] for x in unique.values()}
+    result = {'schema': 'grade-a-v6-negative-compatibility-v1',
+        'grade_manifest_sha256': sha(grade_manifest), 'v6_ledger_sha256': plan['inputs']['ledger']['sha256'],
+        'negative_images': len(negatives), 'negative_events': len(unique),
+        'negative_event_splits': dict(Counter(x['split'] for x in unique.values())),
+        'negative_event_kinds': dict(Counter(x['negative_kind'] for x in unique.values())),
+        'negative_periods': dict(period_counts), 'positive_periods': dict(positive_periods),
+        'source_paths': len(source_paths), 'source_paths_existing': sum((ROOT / x).exists() for x in source_paths),
+        'source_sha_audit_performed': False, 'direct_png_reuse_ready': False, 'training_ready': False,
+        'reasons': ['Existing Grade-A image geometry, colors/MA representation and 7/8 variants differ from new HL2 three-view inputs.',
+                    'Old negatives are 15m-only; using them as all multi-timeframe negatives creates an unmatched population.',
+                    'Old val overlaps new validation/test calendar; cannot promote it into training.',
+                    'Hard labels mean no launch, not no density or loss; reuse only under explicit dense-launch semantics and observable post-five criteria.',
+                    'Re-render and recheck source identity, candidate/gold overlap, chronological partition and complete visible-window label coverage.'],
+        'candidate_policy': 'Consider old train event identities as a 15m negative candidate pool; do not copy PNGs or treat this inventory as label approval.',
+        'training_eligible': False, 'production_eligible': False}
+    write_json(output, result)
+    return result
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=['build', 'audit'])
+    parser.add_argument('action', choices=['build', 'audit', 'audit-negatives'])
     parser.add_argument('--plan', type=Path, default=DEFAULT_PLAN)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--pilot', type=int, default=0, help='events per split')
+    parser.add_argument('--recovery', type=Path)
     args = parser.parse_args()
-    result = build(args.plan, args.output, args.pilot) if args.action == 'build' else audit(args.output)
+    if args.action == 'build':
+        result = build(args.plan, args.output, args.pilot, args.recovery.resolve() if args.recovery else None)
+    elif args.action == 'audit-negatives':
+        result = negative_inventory(args.plan, args.output)
+    else:
+        result = audit(args.output)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 
