@@ -10896,3 +10896,22 @@ experiments:
     reuse_allowed: false
     notes: 收盘可知；完整预热；NaN不补零；20bp成本与原始退出不变。AUC/收益/匹配随机在本工程核验中不适用，独立公式对照和未来扰动作为计算零假设核验。
     created_at: '2026-09-24'
+
+  - experiment_id: exp-spike-v130-retest-delivery-20260925-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: efbe8cb3a6b0be4621a54671c793dc69c19fba1b
+    status: accepted
+    question: Can the frozen SPIKE retest policy be delivered as a separate V13.0 Pine research indicator without changing
+      parent anchors or stops?
+    single_variable: Engineering port of the existing entry-timing rule; no new economic experiment or parameter selection.
+    result: Engineering delivery accepted:102 local checks,20 native core cases and6 lifecycle scenarios passed; full private
+      revision2 runs on15m/1h. Existing long history shows15m relative improvement, not stable prospective edge.
+    canonical_report: experiments/active/exp-spike-v130-retest-delivery-20260925-v1/delivery_receipt.json
+    artifacts:
+    - spike-v130-retest-delivery-20260925-v1
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Original V12.8 source/private script retained. V13 defaults to ordinary-both retest, optional joint-long or
+      original-reference mode. Native market parity and live execution not claimed. No standalone report requested.

@@ -32179,3 +32179,19 @@ artifacts:
     notes: 'Engineering calculation only: 89904 ETHUSDT 5m bars, 14 factors. Missing
       values are exactly declared warmup. No economic validation. Full output remains
       in ignored data/research/open_factors_20260924; receipt includes its hash.'
+
+  - artifact_id: spike-v130-retest-delivery-20260925-v1
+    artifact_type: manifest
+    role: versioned_pine_delivery_native_qa_and_frozen_comparison_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: efbe8cb3a6b0be4621a54671c793dc69c19fba1b
+    source_path: experiments/active/exp-spike-v130-retest-delivery-20260925-v1/delivery_receipt.json
+    sha256: 96afbf3396c7faf3037cb5dbed828228244ee5343525f83e9c3ac5b46b4d6c8a
+    size_bytes: 7777
+    storage_uri: repo://experiments/active/exp-spike-v130-retest-delivery-20260925-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: SPIKE V13.0 separate private TradingView revision2; fixed original stop,24bar wait,20bp. Synthetic native QA
+      and102 local tests; source round-trip equals local SHA19f02986ecc3ba546d8b74b8b728887b0736808f37b4a7a5921023c1c6bc2ea8.
+      Initial74plot failure retained; ten legacy data-window diagnostics retired. No new market backtest.

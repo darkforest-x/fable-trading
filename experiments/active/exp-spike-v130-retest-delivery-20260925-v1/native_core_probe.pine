@@ -1,0 +1,499 @@
+//@version=6
+indicator("SPIKE V13.0 QA core", overlay=true)
+// BEGIN V130 RETEST CORE
+// Source: spike_v128_retest_state.confirmation; only completed chart bars.
+// Pine execution/rollback: https://www.tradingview.com/pine-script-docs/language/execution-model/
+// Stage 0=breakout, 1=retest, 2=rebreak. Result 0=pending, 1=confirmed,
+// 2=expired, 3=gap, 4=opposite, 5=stop, 6=lost level, 7=invalid anchor open.
+f_v130_step(int stage, float extreme, int side, float level, float stop, int age, float o, float h, float l, float c, bool gap, int rawSide, int limit) =>
+    int nextStage = stage
+    float nextExtreme = extreme
+    int result = 0
+    if gap
+        result := 3
+    else if age == 1 and (o <= 0 or side * (o - stop) <= 0)
+        result := 7
+    else if rawSide == -side
+        result := 4
+    else if (side == 1 ? l <= stop : h >= stop)
+        result := 5
+    else if stage > 0 and side * (c - level) <= 0
+        result := 6
+    else if age > limit
+        result := 2
+    else if stage == 0
+        if side * (c - level) > 0
+            nextStage := 1
+            nextExtreme := side == 1 ? h : l
+    else if stage == 1
+        if (side == 1 ? l <= level : h >= level)
+            nextStage := 2
+        else
+            nextExtreme := side == 1 ? math.max(extreme, h) : math.min(extreme, l)
+    else if side * (c - extreme) > 0
+        result := 1
+    if result == 0 and age >= limit
+        result := 2
+    [nextStage, nextExtreme, result]
+
+type V130Candidate
+    int anchor
+    int anchorTime
+    int side
+    float level
+    float stop
+    int stage = 0
+    float extreme = na
+    int breakout = na
+    int retest = na
+
+f_v130_reason(int code) =>
+    code == 2 ? "24根到期" : code == 3 ? "数据断档" : code == 4 ? "原始反向信号" : code == 5 ? "原止损触及" : code == 6 ? "收盘失守原价位" : code == 7 ? "原次开风险无效" : "等待确认"
+// END V130 RETEST CORE
+
+var int checks = 0
+if barstate.isfirst
+    array<float> a0_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a0_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a0_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a0_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a0_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a0_raw_side = array.from(0,0,0,0,0,0,0)
+    int s0 = 0
+    float e0 = na
+    int r0 = 0
+    int d0 = 0
+    for j = 1 to 6
+        if r0 == 0
+            [s, e, r] = f_v130_step(s0, e0, 1, 10.0, 7.0, j, array.get(a0_open_,j), array.get(a0_high,j), array.get(a0_low,j), array.get(a0_close,j), array.get(a0_gap,j), array.get(a0_raw_side,j), 24)
+            s0 := s
+            e0 := e
+            r0 := r
+            d0 := j
+    if r0 != 1 or d0 != 5
+        runtime.error("core 1:normal status/clock")
+    if e0 != 15.0
+        runtime.error("core 1:normal extreme")
+    checks += 1
+    array<float> a1_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a1_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a1_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a1_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a1_gap = array.from(false,false,false,false,false,true,false)
+    array<int> a1_raw_side = array.from(0,0,0,0,0,0,0)
+    int s1 = 0
+    float e1 = na
+    int r1 = 0
+    int d1 = 0
+    for j = 1 to 6
+        if r1 == 0
+            [s, e, r] = f_v130_step(s1, e1, 1, 10.0, 7.0, j, array.get(a1_open_,j), array.get(a1_high,j), array.get(a1_low,j), array.get(a1_close,j), array.get(a1_gap,j), array.get(a1_raw_side,j), 24)
+            s1 := s
+            e1 := e
+            r1 := r
+            d1 := j
+    if r1 != 3 or d1 != 5
+        runtime.error("core 1:gap status/clock")
+    if e1 != 15.0
+        runtime.error("core 1:gap extreme")
+    checks += 1
+    array<float> a2_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a2_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a2_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a2_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a2_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a2_raw_side = array.from(0,0,0,0,0,-1,0)
+    int s2 = 0
+    float e2 = na
+    int r2 = 0
+    int d2 = 0
+    for j = 1 to 6
+        if r2 == 0
+            [s, e, r] = f_v130_step(s2, e2, 1, 10.0, 7.0, j, array.get(a2_open_,j), array.get(a2_high,j), array.get(a2_low,j), array.get(a2_close,j), array.get(a2_gap,j), array.get(a2_raw_side,j), 24)
+            s2 := s
+            e2 := e
+            r2 := r
+            d2 := j
+    if r2 != 4 or d2 != 5
+        runtime.error("core 1:opposite status/clock")
+    if e2 != 15.0
+        runtime.error("core 1:opposite extreme")
+    checks += 1
+    array<float> a3_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a3_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a3_low = array.from(8.0,10.2,11.0,12.0,10.0,6.0,12.0)
+    array<float> a3_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a3_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a3_raw_side = array.from(0,0,0,0,0,0,0)
+    int s3 = 0
+    float e3 = na
+    int r3 = 0
+    int d3 = 0
+    for j = 1 to 6
+        if r3 == 0
+            [s, e, r] = f_v130_step(s3, e3, 1, 10.0, 7.0, j, array.get(a3_open_,j), array.get(a3_high,j), array.get(a3_low,j), array.get(a3_close,j), array.get(a3_gap,j), array.get(a3_raw_side,j), 24)
+            s3 := s
+            e3 := e
+            r3 := r
+            d3 := j
+    if r3 != 5 or d3 != 5
+        runtime.error("core 1:stop status/clock")
+    if e3 != 15.0
+        runtime.error("core 1:stop extreme")
+    checks += 1
+    array<float> a4_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a4_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a4_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a4_close = array.from(9.0,11.0,13.0,14.0,10.0,16.0,19.0)
+    array<bool> a4_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a4_raw_side = array.from(0,0,0,0,0,0,0)
+    int s4 = 0
+    float e4 = na
+    int r4 = 0
+    int d4 = 0
+    for j = 1 to 6
+        if r4 == 0
+            [s, e, r] = f_v130_step(s4, e4, 1, 10.0, 7.0, j, array.get(a4_open_,j), array.get(a4_high,j), array.get(a4_low,j), array.get(a4_close,j), array.get(a4_gap,j), array.get(a4_raw_side,j), 24)
+            s4 := s
+            e4 := e
+            r4 := r
+            d4 := j
+    if r4 != 6 or d4 != 4
+        runtime.error("core 1:level_equal status/clock")
+    if e4 != 15.0
+        runtime.error("core 1:level_equal extreme")
+    checks += 1
+    array<float> a5_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a5_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a5_low = array.from(8.0,10.0,11.0,12.0,10.0,11.0,12.0)
+    array<float> a5_close = array.from(9.0,10.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a5_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a5_raw_side = array.from(0,0,0,0,0,0,0)
+    int s5 = 0
+    float e5 = na
+    int r5 = 0
+    int d5 = 0
+    for j = 1 to 6
+        if r5 == 0
+            [s, e, r] = f_v130_step(s5, e5, 1, 10.0, 7.0, j, array.get(a5_open_,j), array.get(a5_high,j), array.get(a5_low,j), array.get(a5_close,j), array.get(a5_gap,j), array.get(a5_raw_side,j), 24)
+            s5 := s
+            e5 := e
+            r5 := r
+            d5 := j
+    if r5 != 1 or d5 != 5
+        runtime.error("core 1:break_equal status/clock")
+    if e5 != 15.0
+        runtime.error("core 1:break_equal extreme")
+    checks += 1
+    array<float> a6_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a6_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a6_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a6_close = array.from(9.0,11.0,13.0,14.0,11.0,15.0,19.0)
+    array<bool> a6_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a6_raw_side = array.from(0,0,0,0,0,0,0)
+    int s6 = 0
+    float e6 = na
+    int r6 = 0
+    int d6 = 0
+    for j = 1 to 6
+        if r6 == 0
+            [s, e, r] = f_v130_step(s6, e6, 1, 10.0, 7.0, j, array.get(a6_open_,j), array.get(a6_high,j), array.get(a6_low,j), array.get(a6_close,j), array.get(a6_gap,j), array.get(a6_raw_side,j), 24)
+            s6 := s
+            e6 := e
+            r6 := r
+            d6 := j
+    if r6 != 1 or d6 != 6
+        runtime.error("core 1:rebreak_equal status/clock")
+    if e6 != 15.0
+        runtime.error("core 1:rebreak_equal extreme")
+    checks += 1
+    array<float> a7_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a7_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a7_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a7_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a7_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a7_raw_side = array.from(0,0,0,0,0,0,0)
+    int s7 = 0
+    float e7 = na
+    int r7 = 0
+    int d7 = 0
+    for j = 1 to 6
+        if r7 == 0
+            [s, e, r] = f_v130_step(s7, e7, 1, 10.0, 7.0, j, array.get(a7_open_,j), array.get(a7_high,j), array.get(a7_low,j), array.get(a7_close,j), array.get(a7_gap,j), array.get(a7_raw_side,j), 4)
+            s7 := s
+            e7 := e
+            r7 := r
+            d7 := j
+    if r7 != 2 or d7 != 4
+        runtime.error("core 1:limit4 status/clock")
+    if e7 != 15.0
+        runtime.error("core 1:limit4 extreme")
+    checks += 1
+    array<float> a8_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a8_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a8_low = array.from(8.0,10.2,11.0,12.0,10.0,11.0,12.0)
+    array<float> a8_close = array.from(9.0,11.0,13.0,14.0,11.0,16.0,19.0)
+    array<bool> a8_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a8_raw_side = array.from(0,0,0,0,0,0,0)
+    int s8 = 0
+    float e8 = na
+    int r8 = 0
+    int d8 = 0
+    for j = 1 to 6
+        if r8 == 0
+            [s, e, r] = f_v130_step(s8, e8, 1, 10.0, 7.0, j, array.get(a8_open_,j), array.get(a8_high,j), array.get(a8_low,j), array.get(a8_close,j), array.get(a8_gap,j), array.get(a8_raw_side,j), 5)
+            s8 := s
+            e8 := e
+            r8 := r
+            d8 := j
+    if r8 != 1 or d8 != 5
+        runtime.error("core 1:limit5 status/clock")
+    if e8 != 15.0
+        runtime.error("core 1:limit5 extreme")
+    checks += 1
+    array<float> a9_open_ = array.from(9.0,10.5,12.0,13.0,12.0,12.0,13.0)
+    array<float> a9_high = array.from(10.0,12.0,14.0,15.0,19.0,17.0,20.0)
+    array<float> a9_low = array.from(8.0,9.0,11.0,12.0,10.0,11.0,12.0)
+    array<float> a9_close = array.from(9.0,11.0,13.0,14.0,18.0,16.0,19.0)
+    array<bool> a9_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a9_raw_side = array.from(0,0,0,0,0,0,0)
+    int s9 = 0
+    float e9 = na
+    int r9 = 0
+    int d9 = 0
+    for j = 1 to 6
+        if r9 == 0
+            [s, e, r] = f_v130_step(s9, e9, 1, 10.0, 7.0, j, array.get(a9_open_,j), array.get(a9_high,j), array.get(a9_low,j), array.get(a9_close,j), array.get(a9_gap,j), array.get(a9_raw_side,j), 24)
+            s9 := s
+            e9 := e
+            r9 := r
+            d9 := j
+    if r9 != 1 or d9 != 5
+        runtime.error("core 1:same_bar status/clock")
+    if e9 != 15.0
+        runtime.error("core 1:same_bar extreme")
+    checks += 1
+    array<float> a10_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a10_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a10_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a10_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a10_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a10_raw_side = array.from(0,0,0,0,0,0,0)
+    int s10 = 0
+    float e10 = na
+    int r10 = 0
+    int d10 = 0
+    for j = 1 to 6
+        if r10 == 0
+            [s, e, r] = f_v130_step(s10, e10, -1, 20.0, 23.0, j, array.get(a10_open_,j), array.get(a10_high,j), array.get(a10_low,j), array.get(a10_close,j), array.get(a10_gap,j), array.get(a10_raw_side,j), 24)
+            s10 := s
+            e10 := e
+            r10 := r
+            d10 := j
+    if r10 != 1 or d10 != 5
+        runtime.error("core -1:normal status/clock")
+    if e10 != 15.0
+        runtime.error("core -1:normal extreme")
+    checks += 1
+    array<float> a11_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a11_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a11_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a11_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a11_gap = array.from(false,false,false,false,false,true,false)
+    array<int> a11_raw_side = array.from(0,0,0,0,0,0,0)
+    int s11 = 0
+    float e11 = na
+    int r11 = 0
+    int d11 = 0
+    for j = 1 to 6
+        if r11 == 0
+            [s, e, r] = f_v130_step(s11, e11, -1, 20.0, 23.0, j, array.get(a11_open_,j), array.get(a11_high,j), array.get(a11_low,j), array.get(a11_close,j), array.get(a11_gap,j), array.get(a11_raw_side,j), 24)
+            s11 := s
+            e11 := e
+            r11 := r
+            d11 := j
+    if r11 != 3 or d11 != 5
+        runtime.error("core -1:gap status/clock")
+    if e11 != 15.0
+        runtime.error("core -1:gap extreme")
+    checks += 1
+    array<float> a12_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a12_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a12_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a12_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a12_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a12_raw_side = array.from(0,0,0,0,0,1,0)
+    int s12 = 0
+    float e12 = na
+    int r12 = 0
+    int d12 = 0
+    for j = 1 to 6
+        if r12 == 0
+            [s, e, r] = f_v130_step(s12, e12, -1, 20.0, 23.0, j, array.get(a12_open_,j), array.get(a12_high,j), array.get(a12_low,j), array.get(a12_close,j), array.get(a12_gap,j), array.get(a12_raw_side,j), 24)
+            s12 := s
+            e12 := e
+            r12 := r
+            d12 := j
+    if r12 != 4 or d12 != 5
+        runtime.error("core -1:opposite status/clock")
+    if e12 != 15.0
+        runtime.error("core -1:opposite extreme")
+    checks += 1
+    array<float> a13_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a13_high = array.from(22.0,19.8,19.0,18.0,20.0,24.0,18.0)
+    array<float> a13_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a13_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a13_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a13_raw_side = array.from(0,0,0,0,0,0,0)
+    int s13 = 0
+    float e13 = na
+    int r13 = 0
+    int d13 = 0
+    for j = 1 to 6
+        if r13 == 0
+            [s, e, r] = f_v130_step(s13, e13, -1, 20.0, 23.0, j, array.get(a13_open_,j), array.get(a13_high,j), array.get(a13_low,j), array.get(a13_close,j), array.get(a13_gap,j), array.get(a13_raw_side,j), 24)
+            s13 := s
+            e13 := e
+            r13 := r
+            d13 := j
+    if r13 != 5 or d13 != 5
+        runtime.error("core -1:stop status/clock")
+    if e13 != 15.0
+        runtime.error("core -1:stop extreme")
+    checks += 1
+    array<float> a14_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a14_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a14_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a14_close = array.from(21.0,19.0,17.0,16.0,20.0,14.0,11.0)
+    array<bool> a14_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a14_raw_side = array.from(0,0,0,0,0,0,0)
+    int s14 = 0
+    float e14 = na
+    int r14 = 0
+    int d14 = 0
+    for j = 1 to 6
+        if r14 == 0
+            [s, e, r] = f_v130_step(s14, e14, -1, 20.0, 23.0, j, array.get(a14_open_,j), array.get(a14_high,j), array.get(a14_low,j), array.get(a14_close,j), array.get(a14_gap,j), array.get(a14_raw_side,j), 24)
+            s14 := s
+            e14 := e
+            r14 := r
+            d14 := j
+    if r14 != 6 or d14 != 4
+        runtime.error("core -1:level_equal status/clock")
+    if e14 != 15.0
+        runtime.error("core -1:level_equal extreme")
+    checks += 1
+    array<float> a15_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a15_high = array.from(22.0,20.0,19.0,18.0,20.0,19.0,18.0)
+    array<float> a15_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a15_close = array.from(21.0,20.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a15_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a15_raw_side = array.from(0,0,0,0,0,0,0)
+    int s15 = 0
+    float e15 = na
+    int r15 = 0
+    int d15 = 0
+    for j = 1 to 6
+        if r15 == 0
+            [s, e, r] = f_v130_step(s15, e15, -1, 20.0, 23.0, j, array.get(a15_open_,j), array.get(a15_high,j), array.get(a15_low,j), array.get(a15_close,j), array.get(a15_gap,j), array.get(a15_raw_side,j), 24)
+            s15 := s
+            e15 := e
+            r15 := r
+            d15 := j
+    if r15 != 1 or d15 != 5
+        runtime.error("core -1:break_equal status/clock")
+    if e15 != 15.0
+        runtime.error("core -1:break_equal extreme")
+    checks += 1
+    array<float> a16_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a16_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a16_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a16_close = array.from(21.0,19.0,17.0,16.0,19.0,15.0,11.0)
+    array<bool> a16_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a16_raw_side = array.from(0,0,0,0,0,0,0)
+    int s16 = 0
+    float e16 = na
+    int r16 = 0
+    int d16 = 0
+    for j = 1 to 6
+        if r16 == 0
+            [s, e, r] = f_v130_step(s16, e16, -1, 20.0, 23.0, j, array.get(a16_open_,j), array.get(a16_high,j), array.get(a16_low,j), array.get(a16_close,j), array.get(a16_gap,j), array.get(a16_raw_side,j), 24)
+            s16 := s
+            e16 := e
+            r16 := r
+            d16 := j
+    if r16 != 1 or d16 != 6
+        runtime.error("core -1:rebreak_equal status/clock")
+    if e16 != 15.0
+        runtime.error("core -1:rebreak_equal extreme")
+    checks += 1
+    array<float> a17_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a17_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a17_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a17_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a17_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a17_raw_side = array.from(0,0,0,0,0,0,0)
+    int s17 = 0
+    float e17 = na
+    int r17 = 0
+    int d17 = 0
+    for j = 1 to 6
+        if r17 == 0
+            [s, e, r] = f_v130_step(s17, e17, -1, 20.0, 23.0, j, array.get(a17_open_,j), array.get(a17_high,j), array.get(a17_low,j), array.get(a17_close,j), array.get(a17_gap,j), array.get(a17_raw_side,j), 4)
+            s17 := s
+            e17 := e
+            r17 := r
+            d17 := j
+    if r17 != 2 or d17 != 4
+        runtime.error("core -1:limit4 status/clock")
+    if e17 != 15.0
+        runtime.error("core -1:limit4 extreme")
+    checks += 1
+    array<float> a18_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a18_high = array.from(22.0,19.8,19.0,18.0,20.0,19.0,18.0)
+    array<float> a18_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a18_close = array.from(21.0,19.0,17.0,16.0,19.0,14.0,11.0)
+    array<bool> a18_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a18_raw_side = array.from(0,0,0,0,0,0,0)
+    int s18 = 0
+    float e18 = na
+    int r18 = 0
+    int d18 = 0
+    for j = 1 to 6
+        if r18 == 0
+            [s, e, r] = f_v130_step(s18, e18, -1, 20.0, 23.0, j, array.get(a18_open_,j), array.get(a18_high,j), array.get(a18_low,j), array.get(a18_close,j), array.get(a18_gap,j), array.get(a18_raw_side,j), 5)
+            s18 := s
+            e18 := e
+            r18 := r
+            d18 := j
+    if r18 != 1 or d18 != 5
+        runtime.error("core -1:limit5 status/clock")
+    if e18 != 15.0
+        runtime.error("core -1:limit5 extreme")
+    checks += 1
+    array<float> a19_open_ = array.from(21.0,19.5,18.0,17.0,18.0,18.0,17.0)
+    array<float> a19_high = array.from(22.0,21.0,19.0,18.0,20.0,19.0,18.0)
+    array<float> a19_low = array.from(20.0,18.0,16.0,15.0,11.0,13.0,10.0)
+    array<float> a19_close = array.from(21.0,19.0,17.0,16.0,12.0,14.0,11.0)
+    array<bool> a19_gap = array.from(false,false,false,false,false,false,false)
+    array<int> a19_raw_side = array.from(0,0,0,0,0,0,0)
+    int s19 = 0
+    float e19 = na
+    int r19 = 0
+    int d19 = 0
+    for j = 1 to 6
+        if r19 == 0
+            [s, e, r] = f_v130_step(s19, e19, -1, 20.0, 23.0, j, array.get(a19_open_,j), array.get(a19_high,j), array.get(a19_low,j), array.get(a19_close,j), array.get(a19_gap,j), array.get(a19_raw_side,j), 24)
+            s19 := s
+            e19 := e
+            r19 := r
+            d19 := j
+    if r19 != 1 or d19 != 5
+        runtime.error("core -1:same_bar status/clock")
+    if e19 != 15.0
+        runtime.error("core -1:same_bar extreme")
+    checks += 1
+var table result = table.new(position.top_left,1,1)
+if barstate.islast
+    table.cell(result,0,0,"V13 core PASS " + str.tostring(checks) + "/20",text_color=color.teal)
+plot(checks,"QA cases",display=display.data_window)

@@ -1,0 +1,332 @@
+//@version=6
+indicator("SPIKE V13.0 QA lifecycle", overlay=true)
+int step = bar_index % 24
+int scenario = int(math.floor(bar_index / 24)) % 6
+bool enabled = bar_index >= 24
+bool mirror = scenario == 1
+var array<float> os = array.from(100.,101.5,103.,104.,107.,109.,114.,117.,132.,128.,128.,128.,128.,128.,128.,128.,100.,100.,100.,100.,100.,100.,100.,100.)
+var array<float> hs = array.from(101.,104.,107.,120.,110.,115.,118.,134.,133.,129.,129.,129.,129.,129.,129.,129.,101.,101.,101.,101.,101.,101.,101.,101.)
+var array<float> ls = array.from(99.,101.2,102.,101.,104.,108.,113.,116.,127.,127.,127.,127.,127.,127.,127.,127.,99.,99.,99.,99.,99.,99.,99.,99.)
+var array<float> cs = array.from(100.,103.,106.,102.,108.,114.,117.,132.,128.,128.,128.,128.,128.,128.,128.,128.,100.,100.,100.,100.,100.,100.,100.,100.)
+float oo = array.get(os,step)
+float hh = array.get(hs,step)
+float ll = array.get(ls,step)
+float cc = array.get(cs,step)
+// Scenario 2: stop on entry bar. 3: raw reverse at 6, exit at 7 open.
+// 4: gap at 6 censors. 5: candidate confirmed while already occupied.
+ll := scenario == 2 and step == 5 ? 97. : ll
+if scenario == 5
+    if step == 7
+        oo := 117.
+        hh := 119.
+        ll := 114.
+        cc := 117.
+    if step == 8
+        oo := 118.
+        hh := 121.
+        ll := 117.
+        cc := 120.
+float qa_open = mirror ? 200. - oo : oo
+float qa_high = mirror ? 200. - ll : hh
+float qa_low = mirror ? 200. - hh : ll
+float qa_close = mirror ? 200. - cc : cc
+int qa_time_close = time_close
+bool dataGap = step == 16 or (scenario == 4 and step == 6)
+bool pricesValid = true
+float recentLow = step == 5 and scenario == 5 ? 101. : 99.
+float recentHigh = 101.
+float atr = 1.
+const float riskFloor = 2.
+const float stopBuffer = 0.2
+const int stopLen = 5
+const int V130_WAIT = 24
+const float armR = 2.
+const float trailAtr = 4.
+const float roundTripCost = 0.002
+bool v130Retest = enabled
+bool v130ShowRisk = false
+bool v130ShowLevels = false
+bool v126Minimal = true
+bool showLabels = false
+bool showPanel = false
+string v130Arm = "普通多空"
+int signalSide = enabled and (step == 0 or (scenario == 5 and step == 5)) ? (mirror ? -1 : 1) : 0
+int rawSignalSide = scenario == 3 and step == 6 ? -1 : signalSide
+bool v11AnyJoint = false
+color bear = color.red
+color bull = color.teal
+
+f_risk(int side, float entry, float extreme, float a, float floorAtr, float bufferAtr, float tick) =>
+    bool known = (side == 1 or side == -1) and entry > 0 and a > 0 and tick > 0 and not na(extreme)
+    float candidate = side == 1 ? math.min(extreme - bufferAtr * a, entry - floorAtr * a) : math.max(extreme + bufferAtr * a, entry + floorAtr * a)
+    float stop = known ? (side == 1 ? math.floor(candidate / tick) * tick : math.ceil(candidate / tick) * tick) : na
+    float risk = side * (entry - stop)
+    bool valid = known and stop > 0 and risk > 0
+    [valid ? stop : na, valid ? risk : na, valid]
+
+// BEGIN V130 RETEST CORE
+// Source: spike_v128_retest_state.confirmation; only completed chart bars.
+// Pine execution/rollback: https://www.tradingview.com/pine-script-docs/language/execution-model/
+// Stage 0=breakout, 1=retest, 2=rebreak. Result 0=pending, 1=confirmed,
+// 2=expired, 3=gap, 4=opposite, 5=stop, 6=lost level, 7=invalid anchor open.
+f_v130_step(int stage, float extreme, int side, float level, float stop, int age, float o, float h, float l, float c, bool gap, int rawSide, int limit) =>
+    int nextStage = stage
+    float nextExtreme = extreme
+    int result = 0
+    if gap
+        result := 3
+    else if age == 1 and (o <= 0 or side * (o - stop) <= 0)
+        result := 7
+    else if rawSide == -side
+        result := 4
+    else if (side == 1 ? l <= stop : h >= stop)
+        result := 5
+    else if stage > 0 and side * (c - level) <= 0
+        result := 6
+    else if age > limit
+        result := 2
+    else if stage == 0
+        if side * (c - level) > 0
+            nextStage := 1
+            nextExtreme := side == 1 ? h : l
+    else if stage == 1
+        if (side == 1 ? l <= level : h >= level)
+            nextStage := 2
+        else
+            nextExtreme := side == 1 ? math.max(extreme, h) : math.min(extreme, l)
+    else if side * (c - extreme) > 0
+        result := 1
+    if result == 0 and age >= limit
+        result := 2
+    [nextStage, nextExtreme, result]
+
+type V130Candidate
+    int anchor
+    int anchorTime
+    int side
+    float level
+    float stop
+    int stage = 0
+    float extreme = na
+    int breakout = na
+    int retest = na
+
+f_v130_reason(int code) =>
+    code == 2 ? "24根到期" : code == 3 ? "数据断档" : code == 4 ? "原始反向信号" : code == 5 ? "原止损触及" : code == 6 ? "收盘失守原价位" : code == 7 ? "原次开风险无效" : "等待确认"
+// END V130 RETEST CORE
+
+// BEGIN V130 RETEST LAYER
+// Keep the parent's candidate/reference engine intact: its state defines joint
+// anchors. Feeding delayed entries into that engine would change the hypothesis.
+// Objects persist at closed bars; no varip state or retrospective arrow offsets.
+// Source: https://www.tradingview.com/pine-script-docs/language/objects/
+var array<V130Candidate> v130Queue = array.new<V130Candidate>()
+var V130Candidate v130Scheduled = na
+var int v130ScheduledBar = na
+var int v130Side = 0
+var int v130EntryBar = na
+var float v130Entry = na
+var float v130InitialStop = na
+var float v130Risk = na
+var float v130Protection = na
+var float v130Peak = 0.0
+var bool v130Armed = false
+var bool v130ReversePending = false
+var string v130LastStatus = "等待原始候选"
+var int v130LastAnchor = na
+var int v130LastConfirm = na
+var float v130LastConfirmPrice = na
+var int v130ConfirmedCount = 0
+var int v130OccupiedCount = 0
+var int v130CanceledCount = 0
+var int v130FillCount = 0
+var array<label> v130Tags = array.new<label>()
+var array<box> v130Boxes = array.new<box>()
+var box v130RiskBox = na
+var box v130RewardBox = na
+bool v130Confirmed = false
+int v130ConfirmedSide = 0
+bool v130Entered = false
+bool v130Exited = false
+bool v130GapEnded = false
+float v130ExitPrice = na
+float v130ExitNetR = na
+string v130ExitReason = ""
+float v130BarProtection = v130Side != 0 ? v130Protection : na
+
+// Evaluate stop geometry at the ORIGINAL anchor qa_close, including that bar's
+// five-bar extreme and ATR. The next qa_open validates risk but never moves stop.
+[v130LongStop, v130LongRisk, v130LongValid] = f_risk(1, qa_close, recentLow, atr, riskFloor, stopBuffer, 0.01)
+[v130ShortStop, v130ShortRisk, v130ShortValid] = f_risk(-1, qa_close, recentHigh, atr, riskFloor, stopBuffer, 0.01)
+int v130BarsSinceGap = ta.barssince(dataGap)
+// The original five-bar window rejects a gap even at its oldest included bar.
+bool v130StopHistoryValid = pricesValid and bar_index >= stopLen - 1 and (na(v130BarsSinceGap) or v130BarsSinceGap >= stopLen)
+
+if v130Retest and barstate.isconfirmed
+    if dataGap or not pricesValid
+        v130GapEnded := v130Side != 0
+        v130Side := 0
+        v130ReversePending := false
+        v130Scheduled := na
+        array.clear(v130Queue)
+        v130LastStatus := (not pricesValid ? "OHLC无效" : "数据断档") + "：等待新候选"
+        if not na(v130RiskBox)
+            box.set_right(v130RiskBox, bar_index - 1)
+            box.set_right(v130RewardBox, bar_index - 1)
+            v130RiskBox := na
+            v130RewardBox := na
+    else
+        // A raw opposite CLOSE schedules exit at the following OPEN. A gap
+        // through protection uses that qa_open too, before the new bar's range.
+        if v130Side != 0 and v130ReversePending
+            v130Exited := true
+            v130ExitPrice := qa_open
+            v130ExitReason := (v130Side == 1 ? qa_open <= v130Protection : qa_open >= v130Protection) ? "开盘越过保护" : "原始反向后次开"
+            v130ReversePending := false
+
+        // A selected confirmation only becomes a reference on its next bar.
+        // This is a modelled qa_open, not a broker fill. The completed entry bar
+        // audits that qa_open and the whole bar's protection path together.
+        if not na(v130Scheduled) and bar_index == v130ScheduledBar + 1 and v130Side == 0
+            float distance = v130Scheduled.side * (qa_open - v130Scheduled.stop)
+            if qa_open > 0 and distance > 0
+                v130Side := v130Scheduled.side
+                v130EntryBar := bar_index
+                v130Entry := qa_open
+                v130InitialStop := v130Scheduled.stop
+                v130Risk := distance
+                v130Protection := v130InitialStop
+                v130BarProtection := v130InitialStop
+                v130Peak := 0.0
+                v130Armed := false
+                v130ReversePending := false
+                v130Entered := true
+                v130FillCount += 1
+                v130LastStatus := "次开参考已建立"
+                if v130ShowRisk and not v126Minimal
+                    while array.size(v130Boxes) >= 40
+                        box.delete(array.shift(v130Boxes))
+                        box.delete(array.shift(v130Boxes))
+                    float target = math.max(0.01, v130Entry + v130Side * 3.0 * v130Risk)
+                    v130RiskBox := box.new(bar_index, math.max(v130Entry, v130InitialStop), bar_index + 1, math.min(v130Entry, v130InitialStop), border_color=color.new(bear, 55), bgcolor=color.new(bear, 93), force_overlay=true)
+                    v130RewardBox := box.new(bar_index, math.max(v130Entry, target), bar_index + 1, math.min(v130Entry, target), border_color=color.new(bull, 65), bgcolor=color.new(bull, 95), force_overlay=true)
+                    array.push(v130Boxes, v130RiskBox)
+                    array.push(v130Boxes, v130RewardBox)
+                if showLabels and not v126Minimal
+                    string tip = "原信号：" + str.format_time(v130Scheduled.anchorTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n原冻结价位：" + str.tostring(v130Scheduled.level, format.mintick) + "\n原绝对止损：" + str.tostring(v130InitialStop, format.mintick) + "\n次开模型参考：" + str.tostring(qa_open, format.mintick) + "\n初始风险：" + str.tostring(v130Risk, format.mintick) + "\n不是账户成交；止损不移到回踩低点。"
+                    array.push(v130Tags, label.new(bar_index, qa_open, "次开 " + str.tostring(qa_open, format.mintick), style=v130Side == 1 ? label.style_label_up : label.style_label_down, color=color.new(v130Side == 1 ? bull : bear, 86), textcolor=v130Side == 1 ? bull : bear, size=size.tiny, tooltip=tip, force_overlay=true))
+            else
+                v130LastStatus := "确认后次开风险无效"
+        v130Scheduled := na
+
+        // Include the ENTRY bar. Test the protection already active at its
+        // qa_open before qa_close-based 2R activation / 4ATR ratcheting for NEXT bar.
+        if v130Side != 0 and not v130Exited
+            bool stopTouched = v130Side == 1 ? qa_low <= v130Protection : qa_high >= v130Protection
+            if stopTouched
+                v130Exited := true
+                v130ExitPrice := v130Side == 1 ? math.min(qa_open, v130Protection) : math.max(qa_open, v130Protection)
+                v130ExitReason := "保护触及"
+            else
+                v130Peak := math.max(v130Peak, v130Side * ((v130Side == 1 ? qa_high : qa_low) - v130Entry) / v130Risk)
+                float closeR = v130Side * (qa_close - v130Entry) / v130Risk
+                v130Armed := v130Armed or closeR >= armR
+                if v130Armed and atr > 0
+                    float rawProtection = qa_close - v130Side * trailAtr * atr
+                    float nextProtection = v130Side == 1 ? math.floor(rawProtection / 0.01) * 0.01 : math.ceil(rawProtection / 0.01) * 0.01
+                    v130Protection := v130Side == 1 ? math.max(v130Protection, nextProtection) : math.min(v130Protection, nextProtection)
+                v130ReversePending := rawSignalSide == -v130Side
+
+        if v130Side != 0 and not na(v130RiskBox)
+            int rightEdge = v130Exited ? math.max(v130EntryBar + 1, bar_index) : bar_index + 1
+            box.set_right(v130RiskBox, rightEdge)
+            box.set_right(v130RewardBox, rightEdge)
+        if v130Exited
+            v130ExitNetR := (v130Side * (v130ExitPrice / v130Entry - 1) - roundTripCost) * v130Entry / v130Risk
+            v130LastStatus := v130ExitReason + " · 净 " + str.tostring(v130ExitNetR, "#.##") + "R"
+            if v130ShowRisk and not v126Minimal
+                array.push(v130Tags, label.new(bar_index, v130ExitPrice, "结束 " + str.tostring(v130ExitNetR, "#.##") + "R", style=label.style_none, textcolor=v130ExitNetR > 0 ? bull : bear, size=size.tiny, tooltip=v130ExitReason + "；扣固定0.2%往返成本的模型净R，不是账户收益。", force_overlay=true))
+            v130Side := 0
+            v130ReversePending := false
+            v130RiskBox := na
+            v130RewardBox := na
+
+        // Oldest anchor wins simultaneous confirmations. Every anchor advances
+        // independently, including during an existing position; occupied
+        // confirmations expire rather than being carried to a later free bar.
+        int q = 0
+        while q < array.size(v130Queue)
+            V130Candidate item = array.get(v130Queue, q)
+            int age = bar_index - item.anchor
+            [stage, extreme, result] = f_v130_step(item.stage, item.extreme, item.side, item.level, item.stop, age, qa_open, qa_high, qa_low, qa_close, false, rawSignalSide, V130_WAIT)
+            if stage == 1 and item.stage == 0
+                item.breakout := bar_index
+            if stage == 2 and item.stage == 1
+                item.retest := bar_index
+            item.stage := stage
+            item.extreme := extreme
+            if result == 1
+                if v130Side == 0 and na(v130Scheduled)
+                    v130Scheduled := item.copy()
+                    v130ScheduledBar := bar_index
+                    v130Confirmed := true
+                    v130ConfirmedSide := item.side
+                    v130ConfirmedCount += 1
+                    v130LastAnchor := item.anchorTime
+                    v130LastConfirm := qa_time_close
+                    v130LastConfirmPrice := qa_close
+                    v130LastStatus := "回踩再突破已确认；等待次开"
+                    if showLabels and not v126Minimal
+                        string tip = "回踩再突破确认，尚未成交。\n原信号：" + str.format_time(item.anchorTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n等待：" + str.tostring(age) + "根\n冻结价位：" + str.tostring(item.level, format.mintick) + "\n首段极值：" + str.tostring(item.extreme, format.mintick) + "\n确认收盘：" + str.tostring(qa_close, format.mintick) + "\n下一根开盘建立模型参考；三个步骤不同K线。"
+                        array.push(v130Tags, label.new(bar_index, item.side == 1 ? qa_low - atr * 0.4 : qa_high + atr * 0.4, (item.side == 1 ? "回踩多" : "回踩空") + " · " + str.tostring(qa_close, format.mintick), style=item.side == 1 ? label.style_label_up : label.style_label_down, color=color.new(item.side == 1 ? bull : bear, 80), textcolor=item.side == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
+                else
+                    v130OccupiedCount += 1
+            else if result > 1
+                v130CanceledCount += 1
+                if v130Side == 0 and na(v130Scheduled)
+                    v130LastStatus := f_v130_reason(result)
+            if result != 0
+                array.remove(v130Queue, q)
+            else
+                q += 1
+
+        int anchorSide = v130Arm == "联合多头" ? (v11AnyJoint ? 1 : 0) : signalSide
+        bool anchorValid = anchorSide == 1 ? v130LongValid : anchorSide == -1 ? v130ShortValid : false
+        if anchorSide != 0 and anchorValid and v130StopHistoryValid
+            array.push(v130Queue, V130Candidate.new(bar_index, qa_time_close, anchorSide, anchorSide == 1 ? qa_high : qa_low, anchorSide == 1 ? v130LongStop : v130ShortStop))
+
+    while array.size(v130Tags) > 60
+        label.delete(array.shift(v130Tags))
+
+
+var int checked = 0
+if enabled and barstate.isconfirmed
+    if step == 4 and (not v130Confirmed or v130ConfirmedSide != (mirror ? -1 : 1) or v130Side != 0)
+        runtime.error("lifecycle confirmation clock / direction")
+    if step == 5
+        float expectedEntry = mirror ? 91. : 109.
+        float expectedStop = mirror ? 102. : 98.
+        if not v130Entered or math.abs(v130Entry - expectedEntry) > 0.0001 or math.abs(v130InitialStop - expectedStop) > 0.0001 or math.abs(v130Risk - 11.) > 0.0001
+            runtime.error("lifecycle next-open / frozen stop / R")
+        if scenario == 2 and (not v130Exited or v130ExitPrice != 98.)
+            runtime.error("lifecycle entry-bar stop")
+    if scenario == 3 and step == 6 and (v130Side != 1 or not v130ReversePending or v130Exited)
+        runtime.error("lifecycle raw reverse scheduled")
+    if scenario == 3 and step == 7 and (not v130Exited or v130ExitPrice != 117.)
+        runtime.error("lifecycle raw reverse next open")
+    if scenario == 4 and step == 6 and (not v130GapEnded or v130Exited or v130Side != 0 or array.size(v130Queue) != 0)
+        runtime.error("lifecycle gap must censor")
+    if (scenario == 0 or scenario == 1) and step == 7
+        if not v130Armed or math.abs(v130Protection - (mirror ? 72. : 128.)) > 0.0001 or v130Exited
+            runtime.error("lifecycle close trail effective next bar")
+    if (scenario == 0 or scenario == 1) and step == 8
+        float expected = (19. - 0.002 * (mirror ? 91. : 109.)) / 11.
+        if not v130Exited or math.abs(v130ExitNetR - expected) > 0.0001
+            runtime.error("lifecycle stop and exact net cost")
+    if scenario == 5 and step == 8 and (v130Confirmed or not na(v130Scheduled) or v130Side != 1 or v130OccupiedCount <= nz(v130OccupiedCount[1]))
+        runtime.error("lifecycle occupied confirmation must expire")
+    checked += 1
+var table result = table.new(position.top_left,1,1)
+if barstate.islast
+    table.cell(result,0,0,"V13 lifecycle PASS · " + str.tostring(checked) + " bars / 6 scenarios",text_color=color.teal)
+plot(checked,"QA checked bars",display=display.data_window)

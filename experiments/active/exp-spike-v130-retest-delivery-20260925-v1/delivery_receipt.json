@@ -1,0 +1,153 @@
+{
+  "experiment_id": "exp-spike-v130-retest-delivery-20260925-v1",
+  "status": "complete",
+  "generated_at": "2026-09-25T12:47:42.093325+00:00",
+  "source_commit": "efbe8cb3a6b0be4621a54671c793dc69c19fba1b",
+  "question": "Deliver the already studied retest rule as a separate SPIKE V13.0 Pine indicator and reconcile relative improvement versus evidence of stable edge.",
+  "engineering_only": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "rules": {
+    "source_arms": [
+      "ordinary_both",
+      "joint_long"
+    ],
+    "default_arm": "ordinary_both",
+    "max_wait_bars": 24,
+    "steps": "Distinct completed bars: close beyond original high/low; touch and hold; close beyond pre-retest first-leg extreme. Next open is the model entry.",
+    "stop": "Frozen original anchor-close absolute stop; entry R recomputed from next open.",
+    "exit": "Entry bar included; prior active protection first, close-based 2R/4ATR protection effective next bar; raw opposite close exits next open.",
+    "cost": 0.002
+  },
+  "local_checks": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v130_delivery.py tests/evaluation/test_spike_v128_retest_state.py tests/evaluation/test_spike_v128_retest_entry.py tests/evaluation/test_spike_v128_retest_report.py tests/boundaries/test_layer_imports.py",
+    "passed": 102,
+    "builder_check": "python -m yoyo.evaluation.spike_v130_delivery --check"
+  },
+  "native_checks": {
+    "platform": "TradingView Pine v6 / Chrome UI",
+    "core_probe": "PASS 20/20 using Python frozen confirmation oracle",
+    "lifecycle_probe": "PASS, six repeated synthetic scenarios: long, short, entry-bar stop, raw reversal next-open, gap censor, occupied confirmation expiry",
+    "full_indicator": "Compiled and running on OKX:BTCUSDT.P 15m and 1h; ordinary and joint source inputs exercised.",
+    "first_failure": "RE10140:74 plots. Retired ten old data-window exports only; initial screenshot and source commit preserved.",
+    "source_round_trip_verified": true,
+    "private_script_name": "SPIKE V13.0 · 回踩再突破",
+    "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+    "published_publicly": false,
+    "alerts_created": false,
+    "market_parity_claimed": false,
+    "private_script_revision": 2
+  },
+  "economic_evidence": {
+    "two_month_experiment": "exp-spike-v128-retest-entry-20260923-v1",
+    "long_experiment": "exp-spike-v128-entry-clock-long-20260923-v1",
+    "long_table_filter": {
+      "kind": "overall",
+      "bucket": 0,
+      "period": "all"
+    },
+    "long_period_utc": [
+      "2023-01-01",
+      "2026-09-23T04:00:00Z"
+    ],
+    "timeframes_min": [
+      15,
+      60
+    ],
+    "conclusion": "15m ordinary and joint full-window win rate and mean net returns improve over baseline in both existing studies. 1h is not uniformly improved. Larger winners become rarer; retrospective averages do not establish stable prospective edge.",
+    "no_new_market_backtest": true
+  },
+  "limitations": [
+    "Synthetic native tests establish scoped engineering behavior, not native-market parity with archived Binance data.",
+    "The next-open reference is audited at the completed entry-bar close; the decision alert occurs at the preceding confirmation close. It is not an account fill.",
+    "Parent candidate/joint engine is preserved; original-reference mode is available. Old data-window diagnostic exports are partly retired to fit the platform limit.",
+    "Existing historical evidence uses a frozen 638-symbol universe and tick metadata, fixed 20bp cost, retrospective time splits and incomplete matched-control coverage.",
+    "No training, production gate, scanner, live orders or notifications changed."
+  ],
+  "subagent_review": {
+    "agent": "/root/retest_comparison_evidence",
+    "model": "gpt-6-luna",
+    "reasoning_effort": "max",
+    "scope": "Read-only frozen evidence reconciliation and scoped Pine implementation review",
+    "actual_configuration_verified_from_turn_context": true
+  },
+  "notion_correction": "https://app.notion.com/p/3e48856479af81d8a1eece7071453496",
+  "files": {
+    "yoyo/evaluation/spike_v130_delivery.py": {
+      "sha256": "1989d287a28738291d26c9e7d9fb96db06fb43c4de934a637bc78a64cd0dd559",
+      "bytes": 6574
+    },
+    "yoyo/evaluation/spike_v130_probe.py": {
+      "sha256": "52156b084736f67be2fbee41816e8e5ee3b22588cbf51f3b939e077677742ce1",
+      "bytes": 10519
+    },
+    "yoyo/evaluation/pine/spike_burst_v12_8.pine": {
+      "sha256": "c20a46493c5a35311f1f3fa1f4b743dd5ea20fb418c907bc9ebe09350a3f28b3",
+      "bytes": 176550
+    },
+    "yoyo/evaluation/pine/spike_burst_v13_0.pine": {
+      "sha256": "19f02986ecc3ba546d8b74b8b728887b0736808f37b4a7a5921023c1c6bc2ea8",
+      "bytes": 194434
+    },
+    "yoyo/evaluation/pine/spike_v130_retest_core.pine": {
+      "sha256": "d9b10aef7cba2cef26dc40d67096db06ef1ea881113c9ebe346fe7b709575c3b",
+      "bytes": 1852
+    },
+    "yoyo/evaluation/pine/spike_v130_retest_layer.pine": {
+      "sha256": "319c6825f8b8c5f65f29e026d928feda2a10ad4dd7aede17b8fba73cc586157f",
+      "bytes": 14777
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/core_pass.png": {
+      "sha256": "3dbe61128f82cfbab616d6001067c24a2095d30ef0a00bc125807f6bca33c7f3",
+      "bytes": 173642
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/initial_plot_limit_error.png": {
+      "sha256": "70f3ae52736fea8604b2d708204f4558de3b48f3881a06ae7b60a3d0211ffa51",
+      "bytes": 175534
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/lifecycle_pass.png": {
+      "sha256": "5848821f13e6cb2c33d66105ddcb63af1c341856850ad9beae99cc7345c5255b",
+      "bytes": 174351
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/native_core_expected.json": {
+      "sha256": "f68858bf822208a5fa78dcaf19af4a104cb6752d80a0f3de896c1bcd5acf12c8",
+      "bytes": 5823
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/native_core_probe.pine": {
+      "sha256": "517071aba050769e94ae76684ebba9b2edee12bc1dee36d891927a40dfac82e1",
+      "bytes": 21939
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/native_lifecycle_probe.pine": {
+      "sha256": "4274de3ff762915f0dc5731f4ac90640f5c15110310c6498386b11fc9c165c75",
+      "bytes": 18226
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/test_final.txt": {
+      "sha256": "2809dd48570b0c80633e94edefb6a22937c4037e69c8b81301e53d58ca516fb5",
+      "bytes": 180
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/v13_15m_ordinary.png": {
+      "sha256": "759559f5b8f0ef5d0f8298768bcac8930c08d1b10b215b04ba1523b2c7acf45c",
+      "bytes": 182243
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/v13_1h_joint.png": {
+      "sha256": "191a5a1e7760df6d595bf4349c4373eea7c5475a6ffbafe602a65a7a501e2236",
+      "bytes": 166496
+    },
+    "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/summary_v1/buckets.csv": {
+      "sha256": "a201de0500a1ca152130ec9600df2202ae64558aaca8238ea9d4f69bf65a6d95",
+      "bytes": 483346
+    },
+    "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/summary_v1/receipt.json": {
+      "sha256": "33bcc581422d41b345c2068e894d4b1c4690df44f527d6b432335c35c761a76b",
+      "bytes": 242976
+    },
+    "experiments/active/exp-spike-v128-retest-entry-20260923-v1/summary_v1/summary.csv": {
+      "sha256": "8a6be57e70d3e32f13baabf11d5b587a2bdade822124b6495ef1f011f30ffaff",
+      "bytes": 36754
+    },
+    "experiments/active/exp-spike-v130-retest-delivery-20260925-v1/v13_saved_revision2.png": {
+      "sha256": "8c8f6460758de694bfc5f083cf906d28c653f4baba464d2c36779740f98ae1cf",
+      "bytes": 160125
+    }
+  }
+}
