@@ -1,0 +1,51 @@
+{
+  "start_inclusive": "2026-07-25 00:00:00+00:00",
+  "end_exclusive": "2026-09-25 00:00:00+00:00",
+  "timezone_display": "Asia/Shanghai",
+  "cohort": "actual entry during two calendar months",
+  "policy": "baseline",
+  "costs": "unchanged fixed 20bp round trip; no realized funding series",
+  "source_commit": "9899a1939e6fa276b64426849ee5c45c1a336cd0",
+  "inputs": {
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/receipt.json": "5ec641e7ca8789c3d3a085dac069d622ccd3e969f6ec11b9851f688d2d8906ed",
+    "yoyo/evaluation/spike_recent_two_months.py": "613b8077ecb7cbc36f52e5abc8cd113f75e09a35f74366caeeaf9c9795ffc46c",
+    "yoyo/evaluation/spike_v128_recent_report.py": "4aa1efafaf202207aed24f38557fac7878f8a8489d0988703633819c0ac2b57a",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_trades.csv.gz": "b1bc0418e6ed18066adddf7b02c33844c2ee913ff88b1dd53865b01c2a1d6251",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_statuses.csv.gz": "5dbddd4b722435782f9c7a94703b32bbf98a23dffafd012f0c4cc7e2e1aad3e6",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_controls.csv.gz": "9332c477c6016d5c03fd7722501e5383d61d8dec664b299dd932c492c2ae082b"
+  },
+  "files": {
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/trades.csv": "89f581e204e43ddd42280f520836b7c9e5ed643e88047f4cf60e3ca3cf65d7c8",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/signal_statuses.csv": "a289e3d7282969feb77163d3f5a711e0b4bf1a0a572da37e12f47b420ee5369a",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/carry_in.csv": "029b6616f64150711b23b86a981fae24d4cd181fbf09c7d21ac7ff0490d0c9fe",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/metrics.csv": "bb7644e904d8f7475290e60617353fcf2591c02a4423443337f949304939aeec",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/by_side.csv": "be5bca1a7b53c9901fda9b6202369bb7d7c1edb967f3f0e6b58f62e797692fa4",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/by_month.csv": "158abed2e26a68e98bd9afd41b3cc1d42a35a28aa1106777ca35ed586283a2ab",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/by_exit.csv": "c38bf693c6c71f1193d258c61149d0542417c1847ea93147a2265f0d86714e05",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/overlapping_entries.csv": "8d617540e7fb9000ddd967228cafda8e1ae535380e1d856cd8e1091c68867ef3",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/普通交易逐笔.csv": "55b63b6f56342c3e72eddbcb4729523bdd5ea59ccec073d16d3ae935663fe286",
+    "experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/联合交易逐笔.csv": "843afe9695f915f3f6abb6eab3460e2430966fba7dfd22d5857054fbfb54aa99"
+  },
+  "trades": 143,
+  "signals": 157,
+  "censored": 0,
+  "carry_in": 1,
+  "exact_cross_arm_overlap_pairs": 37,
+  "ordinary_trades": 94,
+  "joint_trades": 49,
+  "human_system_results_available": false,
+  "native_full_pine_parity": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "interpretation": [
+    "Arms are overlapping independent ledgers, not a portfolio.",
+    "Max drawdown is additive closed-trade R within each stream.",
+    "Conservative known MFE excludes unknowable exit-stop-bar wick order.",
+    "Random controls match symbol/side/week/ATR bucket and may overlap.",
+    "Comparative inference uses price bp, since control initial risk differs.",
+    "Boundary controls excluded; compare matched target subset only.",
+    "No trained predictor: AUC, top-decile and ranking permutation are inapplicable.",
+    "Partial July and September are labelled; monthly totals are not equal-duration comparisons.",
+    "This descriptive slice adds no filter, sizing or exit policy."
+  ]
+}

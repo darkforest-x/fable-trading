@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-manual-system-20260925-recent-two-months
+    artifact_type: manifest
+    role: descriptive_recent_two_month_spike_ledger_slice
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9899a1939e6fa276b64426849ee5c45c1a336cd0
+    source_path: experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/receipt.json
+    sha256: 73aa1f7c6ae509dd0e35996495ffcab4d306d7549afc8c945342c706373b9843
+    size_bytes: 3947
+    storage_uri: repo://experiments/active/exp-spike-manual-system-20260925-v1/recent_two_months_v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Entry cohort2026-07-25T00Z through2026-09-25T00Z;94ordinary and49overlapping joint trades. No human-system results. Preserves20bp costs and original rules; paired comparison uses price bp. Closed-trade R drawdown is not portfolio drawdown.
   - artifact_id: ma-morphology-v6-threeview-20260925-complete-dataset
     artifact_type: dataset
     role: shared_timeframe_three_view_complete_training_dataset

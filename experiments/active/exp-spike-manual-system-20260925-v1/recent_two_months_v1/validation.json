@@ -1,0 +1,125 @@
+{
+  "method": "Independent standard-library CSV aggregate against source ledger, without importing builder or pandas",
+  "groups": [
+    {
+      "group": [
+        "joint",
+        "BTCUSDT",
+        "5"
+      ],
+      "n": 14,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "joint",
+        "BTCUSDT",
+        "15"
+      ],
+      "n": 6,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "joint",
+        "BTCUSDT",
+        "60"
+      ],
+      "n": 1,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "joint",
+        "ETHUSDT",
+        "5"
+      ],
+      "n": 19,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "joint",
+        "ETHUSDT",
+        "15"
+      ],
+      "n": 7,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "joint",
+        "ETHUSDT",
+        "60"
+      ],
+      "n": 2,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "BTCUSDT",
+        "5"
+      ],
+      "n": 26,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "BTCUSDT",
+        "15"
+      ],
+      "n": 8,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "BTCUSDT",
+        "60"
+      ],
+      "n": 3,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "ETHUSDT",
+        "5"
+      ],
+      "n": 43,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "ETHUSDT",
+        "15"
+      ],
+      "n": 11,
+      "counts_wins_totalR_maxMFE_verified": true
+    },
+    {
+      "group": [
+        "ordinary",
+        "ETHUSDT",
+        "60"
+      ],
+      "n": 3,
+      "counts_wins_totalR_maxMFE_verified": true
+    }
+  ],
+  "all_input_output_hashes_verified": true,
+  "zero_parameter_changes": true,
+  "scoped_registry_contracts": "passed",
+  "full_registry_preexisting_failure": "spike-v8-total2-1h-native-20260914-delivery: missing source_commit",
+  "notion_record": "https://app.notion.com/p/3e68856479af816996d8c89ed96bac00",
+  "notion_recent_content_readback_verified": true,
+  "independent_review": {
+    "mfe_semantics": "known is conservative lower bound; upper may include post-stop wick; no MAE claimed",
+    "control_reuse_ordinary": 1,
+    "extreme_trades_raw_path_and_math_verified": 3,
+    "native_pine_full_event_parity": false
+  }
+}
