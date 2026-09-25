@@ -1,0 +1,24 @@
+{
+  "path": "yoyo/evaluation/pine/spike_burst_v12_8.pine",
+  "sha256": "c20a46493c5a35311f1f3fa1f4b743dd5ea20fb418c907bc9ebe09350a3f28b3",
+  "source_commit": "34b8b6ca080fd826b26f3e4580d01d6ec6dae468",
+  "observed_event_semantics": [
+    {
+      "line": 2893,
+      "source": "float referenceExitCode = exitReference ? (referenceReverse ? 2.0 : v112EarlyExitNow ? 3.0 : 1.0) : 0.0"
+    },
+    {
+      "line": 2895,
+      "source": "plot(barstate.isconfirmed ? referenceExitCode : na, \"参考结束事件（1保护 / 2反向 / 3未突破离场）\", display=display.data_window)"
+    },
+    {
+      "line": 2901,
+      "source": "plot(v128Enabled and v128Supported and v128FrameLong and v128HasStructuralProposal and not v128EpisodePaused and not v128EpisodeInvalid and not v126Minimal ? v128StructuralStop : na, \"滚仓结构保护参考（不参与退出）\", color=color.new(gold, 18), linewidth=1, style=plot.style_linebr, force_overlay=true, display=display.pane + display.data_window)"
+    },
+    {
+      "line": 2903,
+      "source": "plot(barstate.isconfirmed and v128Enabled ? (v128CandidateEvent ? 1 : 0) : na, \"V12.8 滚仓候选事件（1=候选）\", display=display.data_window)"
+    }
+  ],
+  "boundary": "Read-only source interpretation, not a new replay or proof of native TradingView parity."
+}

@@ -1,0 +1,123 @@
+{
+  "edits": [
+    {
+      "old_str": "H结构已破坏但T原K还未破坏：暂停新开原方向，已有仓位记受阻/背景变差；按事先选定的退出合同和预写的H失效条件管理，不能事后新增“必须等H回来”。",
+      "new_str": "H背景变化独立记录，不与T持仓状态混为一项。H由趋势转过渡、H收盘穿过盘前标出的背景关键区、H已经形成反向高低点，是三种不同事实，分别记录时点与锚点。背景原条件不再满足时暂停新开原方向；已有仓位的T状态不因此自动改为受阻。只有开仓前明确写入合同的H终止条件成立才据此退出，否则继续按T和原合同管理。"
+    },
+    {
+      "old_str": "或向上尝试突破事前P/摆动高点后收盘重新落回该位以下；空单镜像。",
+      "new_str": "或T最高价达到/越过事前P或摆动高点而同根T收盘回到该位以下；上一T收盘在该位上方、当前T收盘跌回下方也算，空单镜像。未触及该位而仅仅收低，不算这类失败。"
+    },
+    {
+      "old_str": "同时满足多个状态时优先级：终止/失效 > 受阻 > 推进 > 正常回撤或等待发展。恢复推进也不自动补回已经减掉的仓位。",
+      "new_str": "动作优先级：真实硬保护或已发生的成交 → 所选退出合同定义的终止条件/K失效 → 已启用的可选减仓 → 状态观察。对合同S，SPIKE参考结束是复核事件，不自动当作终止。状态同时出现时，失效高于受阻，受阻高于推进，再到正常回撤/等待发展。恢复推进不自动补回已减仓位。"
+    },
+    {
+      "old_str": "同一参考段普通信号后来获得联合确认，是同一机会证据的更新，不重复算两笔。",
+      "new_str": "同一参考段普通信号后来获得联合确认，是同一机会证据的更新，不重复算两笔。票上写reference_id（交易所/合约/T/方向/参考起点）、attempt_id和signal_sources；升级提醒追加到原票，不另开并行票。退出后若确有新结构和新触发，创建新的attempt并关联旧票。工作台不会自动去重，下单前须人工检索同reference_id的现有记录。"
+    },
+    {
+      "old_str": "工作台字段映射：thesis写背景与论点，trigger写P/执行/期限，invalidation写K与失效条件，exit_plan写合同及管理分支，signal_ref写来源事件；管理细节追加到manage事件notes。管理事件提交时间与实际动作时间分开写；截图链接或路径写入notes，当前没有结构化K/P/L、自动分批盈亏或自动预算拦截。",
+      "new_str": "工作台字段映射：thesis写背景与论点，trigger写P/执行/期限，invalidation写K及可选H终止条件，exit_plan写合同及管理分支，signal_ref写reference_id/attempt_id/来源；截图链接写入文本。等待时编辑观察/计划字段并追加说明、保留版本；已确认撤单或到期放弃记skip并写原因。持仓后的部分平仓与改保护记manage，在notes手写真实动作时间、数量、成交价、费用和剩余量；其提交时间不等于成交时间，manage不能传occurred_at。最后全部平仓才记close，净收益汇总所有成交腿及费用。\n当前没有结构化K/P/L/H标记、去重、订单取消/过期/分批状态、自动分批盈亏或自动预算拦截；初始止损在API也并非必填。因此“保存成功”不代表风险卡完整、订单已取消或仓位已获保护，必须人工对真实场所逐项核对。"
+    }
+  ],
+  "template": {
+    "protocol_id": "spike-manual-workflow-v4-20260925",
+    "note": "Blank planning templates; no trade observations or user risk choices are pre-filled.",
+    "pre_session": {
+      "venue": null,
+      "tv_symbol": null,
+      "chart_type": "standard_candles",
+      "pine_version": "V12.8",
+      "settings_snapshot": null,
+      "timezone": null,
+      "background_timeframe": null,
+      "management_timeframe": null,
+      "execution_timeframe": null,
+      "last_closed_h_bar": null,
+      "last_closed_t_bar": null,
+      "background_facts": null,
+      "background_interpretation": null,
+      "zones": [],
+      "available_until": null,
+      "single_trade_risk_amount": null,
+      "total_risk_limit": null,
+      "common_theme_risk_limit": null,
+      "stop_new_entry_conditions": null,
+      "offline_plan": null,
+      "background_key_zone": null
+    },
+    "candidate": {
+      "signal_ref": null,
+      "reference_start_time": null,
+      "signal_event_type": null,
+      "signal_confirmed_at": null,
+      "observed_at": null,
+      "setup": null,
+      "decision": null,
+      "facts": null,
+      "interpretation": null,
+      "action": null,
+      "what_would_change_decision": null,
+      "next_check": null,
+      "K": null,
+      "P": null,
+      "L": null,
+      "planned_entry_band": null,
+      "initial_stop_source": null,
+      "planned_stop": null,
+      "estimated_net_room": null,
+      "estimated_stop_loss": null,
+      "space_judgment": null,
+      "space_judgment_reason": null,
+      "missing_conditions": [],
+      "candidate_expires_at": null,
+      "order_expires_at": null,
+      "execution_mode": null,
+      "exit_contract": null,
+      "partial_exit_plan": null,
+      "risk_budget_usdt": null,
+      "evidence_refs": [],
+      "reference_id": null,
+      "attempt_id": null,
+      "signal_sources": [],
+      "optional_h_termination_condition": null
+    },
+    "management": {
+      "actual_action_time": null,
+      "submitted_at": null,
+      "latest_closed_t_bar": null,
+      "holding_state": null,
+      "facts": null,
+      "interpretation": null,
+      "action": null,
+      "position_quantity_before": null,
+      "actual_quantity_changed": null,
+      "actual_fill_price": null,
+      "actual_fees": null,
+      "quantity_remaining": null,
+      "K": null,
+      "actual_protection_S": null,
+      "protection_confirmed": null,
+      "reference_end_event": null,
+      "exit_contract": null,
+      "what_would_change_decision": null,
+      "next_check": null,
+      "evidence_refs": [],
+      "h_background_change_facts": null
+    },
+    "review": {
+      "decision_id": null,
+      "protocol_version": "Manual-v4 · SPIKE V12.8 · 2026-09-25",
+      "rule_adherence": null,
+      "evidence_available_at_time": null,
+      "selection_counterfactual": null,
+      "entry_cost_difference": null,
+      "exit_counterfactual": null,
+      "counterfactual_assumptions": null,
+      "opportunity_sequence_difference": null,
+      "actual_net_pnl": null,
+      "one_definition_to_review": null
+    }
+  }
+}
