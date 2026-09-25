@@ -18,6 +18,22 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-positions-20260925-learning-design-audit
+    artifact_type: manifest
+    role: learning_design_blockers_distinct_from_asset_integrity
+    source_repo: darkforest-x/fable-trading
+    source_commit: fde929a8a6d6faf6b7cd6309c4845b2f4e657e72
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/learning_design_audit_v1.json
+    sha256: 5c3acf9301c7925c8dba634db9b441b73e963603e3642a1f8fdf4a09ac623d97
+    size_bytes: 5130
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/learning_design_audit_v1.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 'Corrected dataset is not accepted for training design: fixed x templates; train hard negatives267/6408images and corrected
+      test hard negatives0.1841positive events remain3R-selected rule candidates. Old v6A replay766/773boxes are post5; existing
+      padding failure unresolved. Metadata-only horizontal template control is not detector mAP. Prior integrity receipts remain
+      valid historical facts.'
   - artifact_id: ma-morphology-v6-positions-20260925-dataset
     artifact_type: dataset
     role: corrected_three_actual_positions_with_fixed_reference_evaluation
