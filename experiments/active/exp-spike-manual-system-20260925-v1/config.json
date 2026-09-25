@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-spike-manual-system-20260925-v1",
+  "start": "2021-09-25T00:00:00Z",
+  "split": "2024-09-25T00:00:00Z",
+  "end": "2026-09-25T00:00:00Z",
+  "warmup_start": "2020-01-01T00:00:00Z",
+  "symbols": ["BTCUSDT", "ETHUSDT"],
+  "timeframes": [5, 15, 60],
+  "venue": "binance_um",
+  "input_manifest": "data/research/spike_v128_entry_clock_majors_20260923/manifest.json",
+  "data_dir": "data/research/spike_manual_system_20260925",
+  "round_trip_cost": 0.002,
+  "control_seed": 925128,
+  "stat_seed": 925129,
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032],
+  "policies": ["baseline", "htf_slope", "take_4r"],
+  "htf_slope_definition": "Direction times the difference between the latest two completed higher-timeframe SMA60 values is strictly positive; HTF 5m->15m,15m->60m,60m->240m. Both values known at chart bar open.",
+  "four_r_definition": "Add a resting gross4R limit to unchanged initial stop, close2R arm4ATR trail and next-open raw reversal; ambiguous OHLC stop and target uses stop first and is flagged.",
+  "arms": ["ordinary", "joint"],
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": ["Each treatment changes one decision only; do not combine them.", "Historical exploration, not untouched or forward validation.", "No account leverage or capital assumptions; R uses actual next-open entry and frozen initial stop.", "Binance data are not OKX performance; fixed archived tick sizes may differ from historical ticks.", "Pivot-tie native parity remains a separate limitation of joint signals.", "Add hints are not executed positions. No invented add-on profit.", "No new Markdown/HTML report requested; retain reproducible code and machine-readable per-trade evidence."]
+}
