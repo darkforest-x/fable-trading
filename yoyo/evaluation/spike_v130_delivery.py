@@ -42,6 +42,7 @@ bool v130ShowRisk = input.bool(true, "显示回踩风险参考", group=gV130, to
 def render() -> str:
     """Apply bounded presentation edits without altering the parent engines."""
     text = PARENT.read_text()
+    text = text.replace("//@version=6\n", "//@version=6\n// V13.0: frozen-anchor breakout/retest/rebreak; confirmed close, next-open model.\n// Dedicated delayed-entry risk state; preserve prior candidate and trend engines.\n", 1)
     text = text.replace('SPIKE V12.8 · 两次加仓提示', 'SPIKE V13.0 · 回踩再突破')
     text = text.replace('shorttitle="SPIKE V12.8"', 'shorttitle="SPIKE V13.0"')
     marker = "// ───────────── 原有参数与显示 ─────────────"
@@ -75,6 +76,10 @@ def render() -> str:
             line = line.replace("if barstate", "if v130LegacyVisible and barstate", 1)
         if line.startswith("color v126LegacyTone ="):
             line = line.replace("= not v126Minimal", "= v130LegacyVisible and not v126Minimal", 1)
+        if line == "if barstate.islast and showPanel":
+            line += " and not v130Retest"
+        if 'table.cell(panel, 0, 0, "SPIKE V12.8"' in line:
+            line = line.replace('"SPIKE V12.8"', '"V13.0 · 原版参考"')
         # Preserve parent alert choices with explicit 'original' provenance.
         if line.startswith("alertcondition("):
             line = line.replace("alertcondition(", "alertcondition(not v130Retest and ", 1)

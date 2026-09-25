@@ -1,4 +1,6 @@
 //@version=6
+// V13.0: frozen-anchor breakout/retest/rebreak; confirmed close, next-open model.
+// Dedicated delayed-entry risk state; preserve prior candidate and trend engines.
 // New private version: show completed H1 SMA60 on 15m by default; preserve V12.4 filters.
 // Owner authorized the filter release; historical ranking is not validated profitability.
 // V11：在V10.4基础上，本图SPIKE可以与上级周期的下降线突破配对（15分看1小时、1小时看4小时），
@@ -2910,10 +2912,10 @@ plot(v128Enabled and v128Supported and v128FrameLong and v128HasStructuralPropos
 
 var table panel = table.new(position.top_right, 2, 17, bgcolor=color.new(chart.bg_color, 8), border_width=0)
 
-if barstate.islast and showPanel
+if barstate.islast and showPanel and not v130Retest
     string stateText = (v10OnlyJoint ? "仅联合显示 · " : "") + (trendSide == 1 ? "V9多头参考" : trendSide == -1 ? "V9空头参考" : "当前无跟踪参考")
 
-    table.cell(panel, 0, 0, "SPIKE V12.8", text_color=ink, text_size=size.small)
+    table.cell(panel, 0, 0, "V13.0 · 原版参考", text_color=ink, text_size=size.small)
     table.cell(panel, 1, 0, stateText, text_color=trendSide == 1 ? bull : trendSide == -1 ? bear : muted, text_size=size.small)
 
     table.cell(panel, 0, 1, "参考 / 峰值", text_color=muted, text_size=size.tiny)
