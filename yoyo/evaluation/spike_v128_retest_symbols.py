@@ -107,7 +107,7 @@ def build(experiment: Path, output: Path):
             assert np.isclose(actual, expected[metric], rtol=1e-10, atol=1e-10), (key, metric)
         paired = (rows.mean_excess_bp.fillna(0) * rows.matched).sum() / rows.matched.sum()
         assert np.isclose(paired, expected.mean_excess_bp, rtol=1e-10, atol=1e-10), key
-        checks.append(dict(timeframe_min=minutes, arm=arm, policy=policy, closed=int(rows.closed.sum()), matched=int(rows.matched.sum())))
+        checks.append(dict(timeframe_min=int(minutes), arm=arm, policy=policy, closed=int(rows.closed.sum()), matched=int(rows.matched.sum())))
     index = ['symbol', 'timeframe_min', 'arm', 'window_bars_actual', 'window_bars_expected', 'valid_ready_window_bars', 'window_gap_count']
     fields = ['candidates', 'confirmations', 'taken', 'closed', 'censored', 'win_rate', 'mean_net_r',
               'mean_net_bp', 'sum_net_r', 'net_ge5r', 'matched', 'random_mean_net_bp',
