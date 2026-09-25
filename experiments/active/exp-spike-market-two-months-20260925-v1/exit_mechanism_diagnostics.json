@@ -1,0 +1,47 @@
+{
+  "source_replay_sha256": "3223e039f61ec0354ad08c601a405979e48a889c24e4836f70451cc23654b7ff",
+  "scope": "Descriptive counts from unchanged closed ordinary trades; close_peak and MFE are outcomes, not new filters.",
+  "groups": [
+    {
+      "timeframe_min": 5,
+      "mfe_ge2_then_loss": 895,
+      "wick_reached2_but_no_close_arm_then_loss": 538,
+      "close_armed_then_loss": 357,
+      "exit_reasons": {
+        "initial_stop": 10092,
+        "trailing_stop": 4352,
+        "opposite_v6_next_open": 1992,
+        "initial_stop_gap": 70,
+        "trailing_stop_gap": 24
+      },
+      "closed": 16530
+    },
+    {
+      "timeframe_min": 15,
+      "mfe_ge2_then_loss": 276,
+      "wick_reached2_but_no_close_arm_then_loss": 181,
+      "close_armed_then_loss": 95,
+      "exit_reasons": {
+        "initial_stop": 3599,
+        "trailing_stop": 1596,
+        "opposite_v6_next_open": 731,
+        "initial_stop_gap": 8,
+        "trailing_stop_gap": 1
+      },
+      "closed": 5935
+    },
+    {
+      "timeframe_min": 60,
+      "mfe_ge2_then_loss": 48,
+      "wick_reached2_but_no_close_arm_then_loss": 35,
+      "close_armed_then_loss": 13,
+      "exit_reasons": {
+        "initial_stop": 680,
+        "trailing_stop": 423,
+        "opposite_v6_next_open": 144,
+        "initial_stop_gap": 1
+      },
+      "closed": 1248
+    }
+  ]
+}

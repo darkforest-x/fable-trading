@@ -1,0 +1,75 @@
+{
+  "scope": "Same requested two-month window; all BTC/ETH ordinary and joint entries/fills/exits/censor flags/MFE; excludes changed random-control seed key and bar indexes from different warmup starts",
+  "source_sha256": "89f581e204e43ddd42280f520836b7c9e5ed643e88047f4cf60e3ca3cf65d7c8",
+  "numeric_columns": [
+    "side",
+    "entry_price",
+    "initial_stop",
+    "initial_risk",
+    "exit_price",
+    "gross_return",
+    "net_return",
+    "gross_r",
+    "net_r",
+    "mfe_known_r",
+    "mfe_upper_r"
+  ],
+  "exact_columns": [
+    "entry_time",
+    "exit_time",
+    "exit_reason",
+    "censored",
+    "stop_bar_excursion_ambiguous"
+  ],
+  "streams": [
+    {
+      "symbol": "BTCUSDT",
+      "minutes": 5,
+      "both_arm_rows_equal": 40,
+      "ordinary_rows": 26,
+      "ordinary_net_wins": 3,
+      "sha256": "a499d337cc347263551f1b425b0e1236038907ee7c0ba50477774486cd261082"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "minutes": 15,
+      "both_arm_rows_equal": 14,
+      "ordinary_rows": 8,
+      "ordinary_net_wins": 4,
+      "sha256": "b5df6d7975c1845bbfa7842bf0f210a22a524a2a62553f70cff9565a1395e06a"
+    },
+    {
+      "symbol": "BTCUSDT",
+      "minutes": 60,
+      "both_arm_rows_equal": 4,
+      "ordinary_rows": 3,
+      "ordinary_net_wins": 2,
+      "sha256": "d8c6080c403666347ce2f065a70e2769709ff3ab34586b74e533b2bdc267bf61"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "minutes": 5,
+      "both_arm_rows_equal": 62,
+      "ordinary_rows": 43,
+      "ordinary_net_wins": 5,
+      "sha256": "6913a4ea51c435172cf187c2b5cea40ecee7be6c1c50baf488ffa73855472572"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "minutes": 15,
+      "both_arm_rows_equal": 18,
+      "ordinary_rows": 11,
+      "ordinary_net_wins": 3,
+      "sha256": "fe54950639068573697b73c7bb9bd1441bc4007b78cbe420e2cdef371292f20e"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "minutes": 60,
+      "both_arm_rows_equal": 5,
+      "ordinary_rows": 3,
+      "ordinary_net_wins": 1,
+      "sha256": "dae67293f6f56806be56802448c390fc71f4ccfbaf110103158ad0bd767e8ee6"
+    }
+  ],
+  "passed": true
+}

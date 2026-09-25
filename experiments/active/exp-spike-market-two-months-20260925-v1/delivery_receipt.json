@@ -1,0 +1,63 @@
+{
+  "experiment_id": "exp-spike-market-two-months-20260925-v1",
+  "completed_at": "2026-09-25T12:41:03.674966+00:00",
+  "source_commit": "bf4d1021e3959057dd7a48b84df18fe49703379f",
+  "final_summary": "summary_v2",
+  "final_audit": "audit_v2.json",
+  "file_sha256": {
+    "experiments/active/exp-spike-market-two-months-20260925-v1/config.json": "242e5ea82f19d07b527b6aede6a732061af7cb29c1483272018c0451bdec093d",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/run_v1/manifest.json": "3223e039f61ec0354ad08c601a405979e48a889c24e4836f70451cc23654b7ff",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/run_v1/identity.json": "5e38229904614d9f6e826cdf84639a3bc924c79c3315537347e6146d92f490a0",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/summary_v2/receipt.json": "b0406e32a290a74d0149be61eb1fe4b2f38f97d4168dcbb7290a06a0081f39ac",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/audit_v2.json": "5cb553df1497f776c28edee672edd29d86062faae5bf070e60a195b9ebd63ab4",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/validation.json": "48c88ffa1b152ece8e49cf5f71f55741290778deb5f5b478dc6b472f0b3d1811",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/coverage_qa.json": "b3818c06b0e142c2bcb4af58a4e248f54468951dcba74f2ba16e0fa1e95b47f8",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/external_price_validation.json": "81783abb9720b05d782b84869849349b3ad4e9bcc6849d0f03e766bbe9a31b21",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/runner_parity.json": "b410afe12accae68d28140eabb6ad10e4cb6234242cd468725ac4683d5c4d9d4",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/two_coin_regression.json": "52e235163654edb980b8d91204ecb1c49690224bfc962be0223809b5c60779f5",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/archive_receipt.json": "9a81f1a24379c9696f828114ee40e27c763a24dd4e52cffa02fd228a2f49ada5",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/exit_mechanism_diagnostics.json": "d8fbd650150b539e2c146fc971e191e2d812e6be4f7bfd00ff8d1e6eb77492f2",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/numerical_boundary_correction.json": "e4f7e863b3c9ad903fbf31596c0be0d2fce83f1685c67e1b9a4002a987ed8dd9",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/notion_receipt.json": "4daa2857c4d0e1b2c546ee68e1587e9c1cfcc6a33d274a829dc3a8a74744b43a"
+  },
+  "raw_replay_archive": {
+    "path": "/Users/zhangzc/fable-trading/data/research/spike_market_two_months_20260925/replay_archive_v1.tar.gz",
+    "sha256": "4169e800b7b376a8571e06b105b48cff83ba53d76c5e2a63adcef72728fe08fa",
+    "size_bytes": 9216953,
+    "scope": "Full replay stream tables/receipts and run identity/manifest plus frozen input manifests/universe/exchangeInfo. Source OHLCV series stay in their hash-bound data paths; not duplicated in this archive."
+  },
+  "universe_symbols": 658,
+  "symbols_with_volume": 535,
+  "streams": 1974,
+  "ordinary": {
+    "signal_candidates": 28376,
+    "trades_taken": 23771,
+    "closed": 23713,
+    "censored_boundary": 58,
+    "wins": 6334
+  },
+  "joint": {
+    "trades_taken": 10390,
+    "closed": 10370,
+    "censored_boundary": 20,
+    "same_entry_overlap_with_ordinary": 8774
+  },
+  "validation_passed": true,
+  "reproduction_prerequisites": "Pinned source config, archived parent manifests and frozen OHLCV series under data/research with matching hashes. A live API refresh is a new data snapshot, not guaranteed byte-identical reproduction. Full stream ledgers are additionally archived for summary-only reconstruction.",
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.spike_market_two_months data --workers 6",
+    "OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 .venv/bin/python -m yoyo.evaluation.spike_market_two_months replay --workers 8",
+    ".venv/bin/python -m yoyo.evaluation.spike_market_two_months_summary experiments/active/exp-spike-market-two-months-20260925-v1 --output experiments/active/exp-spike-market-two-months-20260925-v1/summary_v2",
+    ".venv/bin/python -m yoyo.evaluation.spike_market_two_months_audit"
+  ],
+  "limitations": [
+    "Mechanical replay, zero prospective human decisions evaluated.",
+    "Native TradingView full event parity unverified.",
+    "Fixed20bp; no realised funding or dynamic depth/slippage.",
+    "Separate serial ledgers per symbol/timeframe/arm, not a capital-constrained portfolio.",
+    "Current+archived universe is not proof of complete point-in-time contract history.",
+    "Historical replay, not forward validation. AUC/top-decile do not apply without a predictive ranking model."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

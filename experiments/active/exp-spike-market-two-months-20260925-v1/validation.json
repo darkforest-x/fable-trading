@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "groups_reconciled": 6,
+  "metrics_reconciled": [
+    "counts",
+    "wins/losses",
+    "censoring",
+    "sum R",
+    "mean net bp",
+    "mean MFE",
+    "net float then loss",
+    "matched n and excess bp"
+  ],
+  "all_summary_v1_v2_metrics_equal": true,
+  "note": "The parser-boundary fix changes the independent audit2 counts to agree with summary; all six published summary aggregate rows are unchanged. Prior artifacts preserved.",
+  "ledger_rows": 34161,
+  "cn_rows": 34161,
+  "ordinary_joint_exact_entry_overlap": 8774,
+  "file_hashes": {
+    "experiments/active/exp-spike-market-two-months-20260925-v1/summary_v2/receipt.json": "b0406e32a290a74d0149be61eb1fe4b2f38f97d4168dcbb7290a06a0081f39ac",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/summary_v2/metrics.csv": "f3c153ff8776022b066081994a155b7b9ae896951b6d53200e59f3fbdd513c21",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/summary_v2/matched_comparison.csv": "b855afbe3565bcbb1456fdf26d01164ab7c02241bb96fc466611e779b33fec3c",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/audit_v2.json": "5cb553df1497f776c28edee672edd29d86062faae5bf070e60a195b9ebd63ab4",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/coverage_qa.json": "b3818c06b0e142c2bcb4af58a4e248f54468951dcba74f2ba16e0fa1e95b47f8",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/two_coin_regression.json": "52e235163654edb980b8d91204ecb1c49690224bfc962be0223809b5c60779f5",
+    "experiments/active/exp-spike-market-two-months-20260925-v1/external_price_validation.json": "81783abb9720b05d782b84869849349b3ad4e9bcc6849d0f03e766bbe9a31b21"
+  },
+  "focused_tests": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_spike_v128_recent.py tests/evaluation/test_spike_manual_system_study.py -q",
+    "passed": 12
+  },
+  "native_pine_full_parity": false,
+  "human_decisions_backtested": 0,
+  "production_eligible": false
+}

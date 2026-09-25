@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-market-two-months-20260925-delivery
+    artifact_type: manifest
+    role: all_market_spike_two_month_replay_and_independent_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: bf4d1021e3959057dd7a48b84df18fe49703379f
+    source_path: experiments/active/exp-spike-market-two-months-20260925-v1/delivery_receipt.json
+    sha256: 9d54eea88a71ac69acc2b5f7ed22e7768add30cfb65ef06dd8ecd063236641df
+    size_bytes: 4744
+    storage_uri: repo://experiments/active/exp-spike-market-two-months-20260925-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 658-contract union,1974 streams. Ordinary23771 taken/23713closed; joint10390/10370,8774 same-entry overlaps. Finalsummary_v2
+      and audit_v2 agree; numerical cost-boundary classification corrected with old outputs preserved. Full raw replay archive
+      is local and hash-bound. No human performance or native Pine full parity claim.
   - artifact_id: ma-morphology-v6-threeview-20260925-future-review20
     artifact_type: manifest
     role: owner_sample_review_with_future_context_and_original_label_boxes

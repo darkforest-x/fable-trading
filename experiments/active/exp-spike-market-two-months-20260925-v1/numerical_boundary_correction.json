@@ -1,0 +1,15 @@
+{
+  "superseded_summary": "summary_v1",
+  "superseded_audit": "audit_v1.json",
+  "final_summary": "summary_v2",
+  "final_audit": "audit_v2.json",
+  "affected_trades": [
+    "binance_um:NXPCUSDT:5m:v9_both:2026-07-31T00:40:00+00:00",
+    "binance_um:NXPCUSDT:5m:joint:2026-07-31T00:40:00+00:00"
+  ],
+  "problem": "CSV float parser rounding at exact MFE price return=0.002 made independent net-float classification differ by one per5m arm.",
+  "resolution": "Require MFE_R*risk_fraction-cost >1e-12 in price-return units in both reducers.",
+  "trade_replay_changed": false,
+  "trade_count_win_rate_pnl_changed": false,
+  "boundary_fixture_passed": true
+}
