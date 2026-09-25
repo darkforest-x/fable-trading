@@ -1,0 +1,83 @@
+{
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "owner_authorization": {
+    "request": "差不多了吧，去训练吧",
+    "date": "2026-09-26",
+    "training_authorized": true,
+    "research_gate_exception": true,
+    "scope": "One research retraining of v6 after implementing the reviewed early-window correction; no promotion or live model change.",
+    "sample_owner_confirmed": false
+  },
+  "parent_dataset": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1",
+  "dataset_output": "datasets/ma_launch_owner1500_morph_v6_early_20260926_v1",
+  "inputs": {
+    "parent_plan": {
+      "path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json",
+      "sha256": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96"
+    },
+    "parent_ledger": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/dataset_ledger.jsonl",
+      "sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2"
+    },
+    "grade_protocol": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json",
+      "sha256": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    },
+    "complete_parent_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/manifest.jsonl",
+      "sha256": "b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2"
+    }
+  },
+  "view_policy": {
+    "positive_end": "First post-core closed candle among1..5 beyond original core wick range in the original class direction and beyond all six displayed HL2 MAs; quarantine if absent. No outcome used for timing.",
+    "variants": "pre7/pre9/pre11 share that same earliest observation; at most3, no additional waiting for diversity.",
+    "negative_end": "Seeded deterministic draw from retained positive post-bar counts within the same chronological split; no outcome used.",
+    "negative_screen": "Retain old vetted negative lineage and veto any visible dense core4/5 with a directional close beyond its wick range and all six MAs. Existing Grade-A density maxima, normalized only by already-known core-end ATR14. Keep candidates distinct from manual gold.",
+    "render": "1280x742 blue/purple,HL2 SMA/EMA20/60/120;1200bar warmup;visible-range vertical scale;half candle slot on both x edges for complete candles/boxes. This containment correction is applied to both classes/all splits.",
+    "label": "Preserve actual original P9 TXT in bar/price coordinates. Earlier-window research candidates; not per-sample manual gold."
+  },
+  "review_event_ids": [
+    "cluster_e3c55d47b347f768f55b1a19",
+    "cluster_68c424841ef55f3875250b6a",
+    "cluster_3954655807219bea9da062fa",
+    "cluster_877ab857d2f0069befc2b171",
+    "cluster_8d481cfa91bb4180007b6018",
+    "cluster_8328ff20a8d27f2d24749d1c",
+    "cluster_c3b9f206bc789f806bb8c15f",
+    "cluster_7e121ab185126efa0f31ad09",
+    "cluster_927caf7765c800d5d7b03c0f",
+    "cluster_b2abd035d28e7a23e630cb88",
+    "grade-a-negative::d86858630752eb9e32324215",
+    "grade-a-negative::9f6d8409ff9d463e29083857",
+    "grade-a-negative::7b0f917fb1ec0abc1fd13c21",
+    "grade-a-negative::09f26515961d7c3a8743cdd7",
+    "grade-a-negative::743efcc6bb615ab0a441aad7",
+    "grade-a-negative::d7a1388226010713f3372219",
+    "grade-a-negative::9c5b7a48e8b47ca06266257f",
+    "grade-a-negative::ca6d6c6b4351e7db1aeb2c73",
+    "morphbg::HIGH::3::2024-03-06T00:30:00+00:00::5",
+    "morphbg::XLM::5::2025-02-09T14:55:00+00:00::5"
+  ],
+  "training_recipe_reference": {
+    "family": "YOLO11s",
+    "imgsz": 1280,
+    "epochs": 40,
+    "batch": 8,
+    "seed": 0,
+    "init": "same original YOLO11s base as both existing models;no old-checkpoint initialization without train/validation exposure audit"
+  },
+  "splits": {
+    "evaluation": "Common corrected val/test for A/B; exclude all unadjudicated outcome-negative rows. Positive parent event split retained; negatives require whole visible and12h safety interval inside split, and same halfyear/source as paired positive.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "limitations": [
+    "Outcome-selected positive provenance retained; no unconditional accuracy or profitability claim.",
+    "The early visible-launch rule is a dataset observation selector, not a new production strategy.",
+    "Evaluation must use the same new renderer/letterbox settings and separately test continuous replay false alarms and first detection delay."
+  ],
+  "production_eligible": false,
+  "training_eligible": false
+}

@@ -26,7 +26,7 @@ from typing import Any, Callable, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
-ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_detection_contract_v1.json")
+ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_plan_20260926.json")
 PENDING_DESIGN = "goal_correction_pending_dataset"
 RECIPE_PLAN = Path("experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json")
 CONSTRAINTS = Path("constraints-ci.txt")
@@ -185,6 +185,36 @@ def _read_manifest(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def _audit_early_row(row: Mapping[str, Any]) -> None:
+    """Bind each early observation to its actual clock, full canvas and evidence."""
+    pre,post,bars=row.get('pre_bars'),row.get('post_bars'),row.get('core_bars')
+    if pre not in (7,9,11) or type(post) is not int or not 1<=post<=5 or bars not in (4,5):
+        raise MorphologyTrainingError('invalid early window')
+    if row['variant']!=f'P{pre}' or row['visible_bars']!=pre+bars+post:
+        raise MorphologyTrainingError('early variant/bar count drift')
+    step=timedelta(minutes=int(row['bar_minutes']))
+    start=_parse_time(row['core_start_time'],'core_start_time');end=_parse_time(row['core_end_time'],'core_end_time')
+    if (end!=start+(bars-1)*step or _parse_time(row['decision_at_utc'],'decision_at_utc')!=end+(post+1)*step
+            or row['visible_end_close_time_utc']!=row['decision_at_utc']
+            or _parse_time(row['visible_start_utc'],'visible_start_utc')!=start-pre*step):
+        raise MorphologyTrainingError('early observation clock drift')
+    if row.get('source_replay_sha_matches') is not True:
+        raise MorphologyTrainingError('early source lacks original replay parity')
+    if row['sample_kind']=='positive' and row.get('earliest_launch_post')!=post:
+        raise MorphologyTrainingError('positive is not at its earliest qualifying observation')
+    if row['sample_kind']=='negative' and row.get('negative_early_screen_accepted') is not True:
+        raise MorphologyTrainingError('negative lacks early visible-screen evidence')
+    n=row['visible_bars'];left=12+1256/n/2;width=1256/n*(n-1)
+    if not math.isclose(row['chart_x_left'],left,abs_tol=1e-8) or not math.isclose(row['chart_plot_w'],width,abs_tol=1e-8):
+        raise MorphologyTrainingError('early full-candle x transform drift')
+    if row['class_id'] is not None:
+        box=row['box']
+        if not (-1<box['core_relative_left']<=0 and bars-1<=box['core_relative_right']<bars):
+            raise MorphologyTrainingError('early box lost inherited core bounds')
+        if not math.isclose(box['bar_left'],pre+box['core_relative_left'],abs_tol=1e-8) or not math.isclose(box['bar_right'],pre+box['core_relative_right'],abs_tol=1e-8):
+            raise MorphologyTrainingError('early box moved independently of core')
+
+
 def _load_split_boundaries(root: Path) -> dict[str, datetime]:
     plan = _read_json(root / ACTIVE_PLAN)
     splits = plan.get("splits")
@@ -220,6 +250,15 @@ def audit_dataset(
     if not isinstance(receipt.get("source_commit"), str) or not receipt["source_commit"].strip():
         raise MorphologyTrainingError("build receipt lacks source_commit")
     rows = _read_manifest(manifest_path)
+    early = receipt.get('early_contract') == 'case_first_visible_launch_v1'
+    if early:
+        active = _read_json(repo / ACTIVE_PLAN)
+        if active.get('frozen_manifest_sha256') != manifest_sha or not isinstance(active.get('expected_main_eval_counts'),dict):
+            raise MorphologyTrainingError('early dataset is not bound by the current frozen training plan')
+        expected_eval_counts = active['expected_main_eval_counts']
+        if sha256_file(root/'screening.jsonl') != receipt.get('screening_sha256'):
+            raise MorphologyTrainingError('early screening evidence changed')
+        screens = {r['event_id']:r for r in _read_manifest(root/'screening.jsonl')}
     positioning = receipt.get("position_contract") == "equal_length_actual_bar_shift_v1"
     allowed_variants = set(POSITION_VIEWS) | {"P9"} if positioning else set(VARIANTS)
     boundaries = dict(split_boundaries or _load_split_boundaries(repo))
@@ -278,6 +317,19 @@ def audit_dataset(
                 raise MorphologyTrainingError(f"event cluster crosses splits: {cluster}")
 
         decision = _parse_time(row["decision_at_utc"], "decision_at_utc")
+        if early:
+            _audit_early_row(row)
+            screen=screens.get(event_id,{})
+            if screen.get('post_bars') != row['post_bars']:
+                raise MorphologyTrainingError('early timing disagrees with frozen screen')
+            evidence=screen.get('evidence')
+            if kind=='positive':
+                if (not isinstance(evidence,list) or [e.get('post') for e in evidence]!=list(range(1,row['post_bars']+1))
+                        or not all(evidence[-1].get(k) is True for k in ('outside_original_core','beyond_all_six_mas'))
+                        or any(e.get('outside_original_core') and e.get('beyond_all_six_mas') for e in evidence[:-1])):
+                    raise MorphologyTrainingError('early positive lacks first-observation evidence')
+            elif not isinstance(evidence,dict) or evidence.get('accepted') is not True or evidence.get('ambiguous'):
+                raise MorphologyTrainingError('early negative screen did not pass')
         visible_start = _parse_time(row["visible_start_utc"], "visible_start_utc")
         visible_end = _parse_time(row["visible_end_close_time_utc"], "visible_end_close_time_utc")
         if positioning:
@@ -335,6 +387,14 @@ def audit_dataset(
                 image_hashes[actual] = identity
         _verify_image(image)
         _verify_label(label, row)
+        if early and class_id is not None:
+            _,cx,cy,w,h=map(float,label.read_text().split())
+            actual_box=[(cx-w/2)*1280,(cy-h/2)*742,(cx+w/2)*1280,(cy+h/2)*742]
+            if any(abs(a-b)>.0001 for a,b in zip(actual_box,row['box']['pixel_box'])):
+                raise MorphologyTrainingError('early TXT differs from original physical core projection')
+            for pixel,bar in ((actual_box[0],row['box']['bar_left']),(actual_box[2],row['box']['bar_right'])):
+                if abs((pixel-row['chart_x_left'])/row['chart_plot_w']*(row['visible_bars']-1)-bar)>.0001:
+                    raise MorphologyTrainingError('early TXT horizontal mapping drift')
         if positioning and variant in POSITION_VIEWS and class_id is not None:
             _, cx, cy, w, h = map(float, label.read_text().split())
             actual_box = [(cx-w/2)*1280, (cy-h/2)*742, (cx+w/2)*1280, (cy+h/2)*742]
