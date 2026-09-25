@@ -165,6 +165,25 @@ def main():
         'metrics':metrics, 'by_side':pd.DataFrame(side_rows),
         'by_month':pd.DataFrame(month_rows), 'by_exit':pd.DataFrame(exit_rows),
         'overlapping_entries':duplicates}
+    display = recent.copy()
+    display['side'] = display.side.map({1:'多', -1:'空'})
+    display['timeframe_min'] = display.timeframe_min.map({5:'5m',15:'15m',60:'1h'})
+    display['exit_reason'] = display.exit_reason.map({
+        'initial_stop':'初始止损', 'trailing_stop':'追踪止损',
+        'opposite_v6_next_open':'反向信号后下一开盘'})
+    display['initial_risk_frac'] *= 100
+    display['net_float_then_loss'] = display.mfe_known_net_r.gt(0) & display.net_r.lt(0)
+    display['manual_review'] = '尚未作出事前人工交易判断'
+    labels = {'trade_key':'交易标识', 'symbol':'合约', 'timeframe_min':'周期', 'side':'方向',
+        'entry_time_beijing':'入场北京时间', 'exit_time_beijing':'出场北京时间',
+        'entry_price':'入场价', 'initial_stop':'初始止损价', 'exit_price':'出场价',
+        'initial_risk_frac':'初始止损距离百分比', 'exit_reason':'退出原因',
+        'gross_r':'毛盈亏R', 'fee_r':'固定成本R', 'net_r':'净盈亏R',
+        'mfe_known_r':'可确认最大毛浮盈R', 'mfe_upper_r':'含退出K线歧义的毛浮盈上界R',
+        'close_peak_r':'最大收盘毛浮盈R', 'holding_hours':'持仓小时',
+        'net_float_then_loss':'曾有净浮盈但最终亏损', 'manual_review':'人工判断状态'}
+    for arm, name in [('ordinary','普通交易逐笔'),('joint','联合交易逐笔')]:
+        tables[name] = display[display.arm.eq(arm)].sort_values('entry_time')[list(labels)].rename(columns=labels)
     files = {}
     for name, frame in tables.items():
         path = OUT/f'{name}.csv'
