@@ -18,6 +18,50 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-positions-20260925-dataset
+    artifact_type: dataset
+    role: corrected_three_actual_positions_with_fixed_reference_evaluation
+    source_repo: darkforest-x/fable-trading
+    source_commit: c64bccb6495b26c08d41bb55580bc0e5046efcbf
+    source_path: datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2/manifest.jsonl
+    sha256: 8f29a6bc74a4ce9e3b260503b43a819d8c0c4483fa5366dff9c87fb6dcd28f40
+    size_bytes: 30616668
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2/manifest.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrects fixed post5 views. R5=11/5,R8=8/8,R11=5/11 with equal lengths and actual availability clocks.1841positive events/5523position
+      positives,7605position negatives;820frozen P9 evaluations kept separately.618negative events excluded at unchanged thresholds.
+      Local/3060 full audits agree;107tests passed; no training or activation.
+  - artifact_id: ma-morphology-v6-positions-20260925-preparation
+    artifact_type: manifest
+    role: corrected_position_dataset_local_and_rtx3060_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: c64bccb6495b26c08d41bb55580bc0e5046efcbf
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_preparation_receipt.json
+    sha256: e51bd050eec3502bd0963eb4c3fe3d231b5f7b87be0a3148b6178de39459108b
+    size_bytes: 9113
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_preparation_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Corrects fixed post5 views. R5=11/5,R8=8/8,R11=5/11 with equal lengths and actual availability clocks.1841positive events/5523position
+      positives,7605position negatives;820frozen P9 evaluations kept separately.618negative events excluded at unchanged thresholds.
+      Local/3060 full audits agree;107tests passed; no training or activation.
+  - artifact_id: ma-morphology-v6-positions-20260925-review10
+    artifact_type: manifest
+    role: same_ten_positive_events_actual_three_position_review
+    source_repo: darkforest-x/fable-trading
+    source_commit: df19eb2833bd1e5b3fd4dd22a97acd63a206c52b
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_review_v1/receipt.json
+    sha256: eefe78da7afbaf14cd76555d0e5d7e215b35597e7f78ffd1c4fbd33701cfc53e
+    size_bytes: 26746
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_review_v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Same prior ten positive events,30actual-box views plus future-only review context. Gallery geometry and clocks match full
+      dataset;50image hashes verified. Review overlays are not training input. HTML-only wording correction recorded separately.
   - artifact_id: spike-market-two-months-20260925-delivery
     artifact_type: manifest
     role: all_market_spike_two_month_replay_and_independent_audit

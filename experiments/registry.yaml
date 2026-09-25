@@ -83,23 +83,22 @@ experiments:
     notes: Binance USD-M2021-09-25 through2026-09-25 with2020 warmup; separate overlapping ordinary and long-joint ledgers. Historical exploration, not forward validation or full native Pine parity. No report requested.
   - experiment_id: exp-ma-morphology-v6-threeview-20260925-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 79b0440a5d68e14d6ab414e2f3db136c6f30409e
+    source_commit: c64bccb6495b26c08d41bb55580bc0e5046efcbf
     status: active
     workflow: yolo
     workflow_stages:
     - dataset
     - training
-    title: YOLO v6 延续：三窗口与 Grade-A 负例训练准备完成
-    question: Can the existing1841 v6 events support at most three causal views each, and can Grade-A negatives be
-      reused without image-style, temporal-split or label-semantic conflicts?
-    single_variable: Owner-requested preparation of three-view augmentation and audited negative reuse; original event
-      membership, core geometry, confirmation clock and render source remain frozen. No training or threshold change
-      at registration.
-    result: Complete14312-image dataset prepared locally and on RTX3060;5523positive images from1841events,
-      8789negatives including3936new Grade-A views from1312screened events. Train12522images(4518positive/8004negative),
-      including975hard-negative images. Fixed P9 reference val350/test320 preserved; extra Grade-A challenge148/2events
-      and paired position robustness separate. Both hosts match manifest SHA and full audit;90focused/boundary checks
-      pass. Training has not started; one shared-timeframe model and frozen YOLO11s1280/40/batch8 recipe.
+    title: YOLO v6 延续：三种真实位置已修正，数据准备完成
+    question: Can the existing1841 v6 events support at most three causal views each, and can Grade-A negatives be reused without
+      image-style, temporal-split or label-semantic conflicts?
+    single_variable: Owner-requested correction of render-window position at equal visible length. Original event/core label geometry
+      and training recipe retained; each view uses its actual later availability clock and negatives are re-screened over the expanded
+      union at unchanged thresholds.
+    result: Corrected13948-image package ready locally and on RTX3060:5523positive position images from1841events,7605negative position
+      images,plus820immutable P9 reference/challenge rows. Actual positions11/5,8/8,5/11; same visible length per event. Train10926images(4518positive/6408negative).618old
+      negative events excluded after expanded-window screening/protection checks. Full audits identical on both hosts;107focused/boundary
+      tests passed. No training or activation.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
@@ -110,10 +109,14 @@ experiments:
     - ma-morphology-v6-threeview-20260925-complete-dataset
     - ma-morphology-v6-threeview-20260925-training-preparation
     - ma-morphology-v6-threeview-20260925-future-review20
+    - ma-morphology-v6-positions-20260925-dataset
+    - ma-morphology-v6-positions-20260925-preparation
+    - ma-morphology-v6-positions-20260925-review10
     reuse_allowed: false
-    notes: Technical data/environment preparation complete; source images stay hash-bound and original receipts are
-      retained. Current training gates remain false because this step prepares but does not launch training. New
-      Grade-A latest test pool only2events; actual replay error rate is unmeasured. No live-model or notification change.
+    notes: Supersedes fixed-post5 dataset preparation; all previous artifacts remain historical. Parent P9 reference val350/test320
+      and Grade-A challenge148/2 retain identical membership,bytes and clocks. New corrected challenge test has one event; actual
+      replay error and profitability unmeasured. Source recovery verified1770bounded1m slices from312archives; no exchange refetch.
+      Delayed morphology confirmation,not fresh onset/tip training. Training eligibility remains false.
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18
