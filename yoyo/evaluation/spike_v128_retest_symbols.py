@@ -49,7 +49,7 @@ def build(experiment: Path, output: Path):
             if column in frame:
                 frame[column] = pd.to_datetime(frame[column], utc=True)
         for column in ['matched', 'censored', 'control_censored']:
-            if column in frame:
+            if name != 'summary' and column in frame:
                 frame[column] = report.stats.boolean(frame[column])
         if name != 'summary':
             key = ['trade_key', 'control_pool' if name == 'controls' else 'policy']
