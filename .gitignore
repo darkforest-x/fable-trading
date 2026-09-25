@@ -273,3 +273,10 @@ experiments/active/exp-pine-eth-15m-v1/results-docker/**
 /artifacts/.workspace-artifact-registry.lock
 /experiments/active/*/workspace_runs/*/replay/streams/**
 /experiments/active/*/workspace_runs/*/run.log
+
+# Five-year manual-system row ledgers are local, receipt-bound rebuild outputs.
+/experiments/active/exp-spike-manual-system-20260925-v1/run_v1/streams/*/*.csv.gz
+/experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_*.csv.gz
+/experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/paired_four_r.csv.gz
+/experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/逐笔复盘.csv
+/experiments/active/exp-spike-manual-system-20260925-v1/diagnostics_v1/逐笔决策复盘.csv

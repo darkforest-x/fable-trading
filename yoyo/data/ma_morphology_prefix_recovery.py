@@ -322,6 +322,7 @@ _REMOTE_SCRIPT = r'''#!/usr/bin/env python3
 from __future__ import annotations
 import argparse, csv, gzip, hashlib, json, os, re, shutil, tempfile
 from collections import defaultdict, deque
+from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -443,10 +444,16 @@ def process_archive(archive_path, events):
                     fields = parse_fields(raw_line)
                     stamp_column = time_column(fields)
                     continue
-                fields = parse_fields(raw_line)
-                if stamp_column >= len(fields):
-                    raise RecoveryError("timestamp column missing from row " + str(data_rows))
-                raw_time = fields[stamp_column].strip()
+                # Avoid parsing every OHLC field across millions of archived
+                # rows. Quoted or non-first time fields retain the CSV parser.
+                first_field = raw_line.split(b",", 1)[0].strip() if stamp_column == 0 else b""
+                if first_field.isdigit():
+                    raw_time = first_field.decode("ascii")
+                else:
+                    fields = parse_fields(raw_line)
+                    if stamp_column >= len(fields):
+                        raise RecoveryError("timestamp column missing from row " + str(data_rows))
+                    raw_time = fields[stamp_column].strip()
                 stamp_ms = token_to_ms(raw_time)
                 if data_rows == 0:
                     first_token = raw_time
@@ -535,6 +542,10 @@ def atomic_json(path, value):
     temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.replace(temporary, path)
 
+def archive_job(item):
+    key, events = item
+    return process_archive(key[0], events)
+
 def run(request_path, repo_root):
     request_path = Path(request_path)
     repo_root = Path(repo_root).resolve()
@@ -567,18 +578,20 @@ def run(request_path, repo_root):
     archive_results = {}
     event_states = {}
     try:
-        for group_index, (key, group_events) in enumerate(sorted(groups.items()), start=1):
-            result, row_count, csv_sha, first, last = process_archive(key[0], group_events)
-            archive_results[key[0]] = {"gzip_sha256": key[1], "csv_sha256": csv_sha, "rows": row_count,
-                                       "first_time": first, "last_time": last}
-            for event_id, state in result.items():
-                staged = tmp / ("event_" + str(len(archive_results)) + "_" + event_id + ".csv")
-                staged.write_bytes(bytes(state["payload"]))
-                state["staged_path"] = staged
-                event_states[event_id] = state
-                state.pop("payload", None)
-            print("archive %d/%d verified; events=%d csv_sha256=%s" %
-                  (group_index, len(groups), len(result), csv_sha), flush=True)
+        jobs = sorted(groups.items())
+        with ProcessPoolExecutor(max_workers=min(4, len(jobs))) as pool:
+            for group_index, ((key, _), completed) in enumerate(zip(jobs, pool.map(archive_job, jobs)), start=1):
+                result, row_count, csv_sha, first, last = completed
+                archive_results[key[0]] = {"gzip_sha256": key[1], "csv_sha256": csv_sha, "rows": row_count,
+                                           "first_time": first, "last_time": last}
+                for event_id, state in result.items():
+                    staged = tmp / ("event_" + str(len(archive_results)) + "_" + event_id + ".csv")
+                    staged.write_bytes(bytes(state["payload"]))
+                    state["staged_path"] = staged
+                    event_states[event_id] = state
+                    state.pop("payload", None)
+                print("archive %d/%d verified; events=%d csv_sha256=%s" %
+                      (group_index, len(groups), len(result), csv_sha), flush=True)
 
         manifest_events = {}
         receipt_events = {}

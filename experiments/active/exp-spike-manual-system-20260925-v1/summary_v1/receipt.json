@@ -1,0 +1,74 @@
+{
+  "baseline_trade_rows": 4147,
+  "config": {
+    "arms": [
+      "ordinary",
+      "joint"
+    ],
+    "control_seed": 925128,
+    "data_dir": "data/research/spike_manual_system_20260925",
+    "end": "2026-09-25T00:00:00Z",
+    "experiment_id": "exp-spike-manual-system-20260925-v1",
+    "four_r_definition": "Add a resting gross4R limit to unchanged initial stop, close2R arm4ATR trail and next-open raw reversal; ambiguous OHLC stop and target uses stop first and is flagged.",
+    "htf_slope_definition": "Direction times the difference between the latest two completed higher-timeframe SMA60 values is strictly positive; HTF 5m->15m,15m->60m,60m->240m. Both values known at chart bar open.",
+    "input_manifest": "data/research/spike_v128_entry_clock_majors_20260923/manifest.json",
+    "notes": [
+      "Each treatment changes one decision only; do not combine them.",
+      "Historical exploration, not untouched or forward validation.",
+      "No account leverage or capital assumptions; R uses actual next-open entry and frozen initial stop.",
+      "Binance data are not OKX performance; fixed archived tick sizes may differ from historical ticks.",
+      "Pivot-tie native parity remains a separate limitation of joint signals.",
+      "Add hints are not executed positions. No invented add-on profit.",
+      "No new Markdown/HTML report requested; retain reproducible code and machine-readable per-trade evidence."
+    ],
+    "policies": [
+      "baseline",
+      "htf_slope",
+      "take_4r"
+    ],
+    "production_eligible": false,
+    "round_trip_cost": 0.002,
+    "split": "2024-09-25T00:00:00Z",
+    "start": "2021-09-25T00:00:00Z",
+    "stat_seed": 925129,
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT"
+    ],
+    "timeframes": [
+      5,
+      15,
+      60
+    ],
+    "training_eligible": false,
+    "venue": "binance_um",
+    "vol_bins": [
+      0.0005,
+      0.001,
+      0.002,
+      0.004,
+      0.008,
+      0.016,
+      0.032
+    ],
+    "warmup_start": "2020-01-01T00:00:00Z"
+  },
+  "files": {
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_candidates.csv.gz": "e5fcb7918d537f4e0a4dec168d6f7d8325de39e40145375dde964e7ce8d69fae",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_controls.csv.gz": "9332c477c6016d5c03fd7722501e5383d61d8dec664b299dd932c492c2ae082b",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_statuses.csv.gz": "5dbddd4b722435782f9c7a94703b32bbf98a23dffafd012f0c4cc7e2e1aad3e6",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/all_trades.csv.gz": "b1bc0418e6ed18066adddf7b02c33844c2ee913ff88b1dd53865b01c2a1d6251",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/four_r_comparison.csv": "7b2a51f34b72b110245b4e379f830e1ebd21e86537afbd21b911dfc33d862249",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/metrics.csv": "9c6beaa4233df05122689bfd0d180894c7b2c17efe796d02046a0f375bedcc90",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/paired_four_r.csv.gz": "caf956876645750a9811d0e833768f37550c24b5a8662f7481642543075834f9",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/side_metrics.csv": "7fb10dd97b82ee315389a9e54ee7f923bc021cb084a844b4699dead706c0910f",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/single_feature_baseline.csv": "0a132214f46fcabdac60b8c0c0205ac34751f2af5a2e2a8b6ddfcd6a55358e3c",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/yearly.csv": "0b33fa68ff32bce7de58d8fd164cad16cd522c91725c3255862cbc15b5fd5a93",
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/逐笔复盘.csv": "d508c2938fded4eaa10f119671a5a809956712d3c27765bcc7be4ed20321614f"
+  },
+  "manual_visual_review_of_every_chart": false,
+  "no_portfolio_claim": true,
+  "production_eligible": false,
+  "run_manifest_sha256": "b6e2670334ac52b22bb7d8462862b9e43eae7392208ebdff8425eee592f609bd",
+  "training_eligible": false
+}

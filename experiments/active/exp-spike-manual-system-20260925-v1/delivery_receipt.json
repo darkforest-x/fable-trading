@@ -1,0 +1,89 @@
+{
+  "checks": {
+    "baseline_parent_ledger_equality": true,
+    "broader_repository_gates": {
+      "command": ".venv/bin/python -m pytest tests/boundaries tests/causality tests/parity -q",
+      "failed": 10,
+      "failures_outside_this_changeset": [
+        "AGENTS/CLAUDE text differs",
+        "charter treats API URL as filesystem path",
+        "ma_morphology_reuse_recover archived repository literal",
+        "five teacher registry tests blocked by old spike-v8-total2-1h-native-20260914-delivery missing source_commit",
+        "two L1 migration hashes differ"
+      ],
+      "passed": 467,
+      "unrelated_files_were_not_modified_to_silence_tests": true
+    },
+    "cost_and_r_identity_failures": 0,
+    "focused_tests_passed": 59,
+    "joint_pivot_tie_parity": false,
+    "native_pine_full_event_parity": false,
+    "next_open_failures": 0,
+    "ordinary_fact_static_review": "No blocking discrepancy identified; completed HTF and UTC close-time gates checked",
+    "paired_4r_later_exit_failures": 0,
+    "serial_overlap_failures": 0
+  },
+  "conclusion": "No stable profitable manual system established. Five-minute ledgers lose materially; 4R cap and HTF slope do not provide universal improvement. ETH1h positive full-period R is tail-sensitive and below matched controls.",
+  "counts": {
+    "all_policy_trade_rows": 11230,
+    "ambiguous_independent_events": 2,
+    "ambiguous_stop_target_rows": 4,
+    "baseline_rows": 4147,
+    "censored_rows": 0,
+    "extra_4r_entries": 9,
+    "joint_baseline_rows": 1286,
+    "ordinary_baseline_rows": 2861,
+    "streams": 6,
+    "target4_exits": 551
+  },
+  "diagnostics_source_commit": "ab5d2b2056750814fc5e0258a3f4ff491e95d574",
+  "experiment_id": "exp-spike-manual-system-20260925-v1",
+  "files": {
+    "data/research/spike_manual_system_20260925/manifest.json": {
+      "sha256": "462708d3e9c6fb17f61a16d99c1eb152f1cf892eaa42bf5f742246174e4603b9",
+      "size_bytes": 15977
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/config.json": {
+      "sha256": "bab5413ab23c375744ed5b95a5eeb42afd7de54a6f2d0bf3701c4b8114d31ab4",
+      "size_bytes": 1742
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/diagnostics_v1/high_auc_check.json": {
+      "sha256": "02bd1cee60cca6f8443a954e1eb17615436228918c8d8e42d7fe7a184d402bed",
+      "size_bytes": 472
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/diagnostics_v1/receipt.json": {
+      "sha256": "a6a64d6c4d823e6b6f1430f7c3668bb82373e9ea38ce790851ca968a4f1b0071",
+      "size_bytes": 1076
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/run_v1/identity.json": {
+      "sha256": "903144b9bdf8a4780cff3ccee29668c45af10d31ebf2f730eac5b09108708dfb",
+      "size_bytes": 25443
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/run_v1/manifest.json": {
+      "sha256": "b6e2670334ac52b22bb7d8462862b9e43eae7392208ebdff8425eee592f609bd",
+      "size_bytes": 8013
+    },
+    "experiments/active/exp-spike-manual-system-20260925-v1/summary_v1/receipt.json": {
+      "sha256": "5ec641e7ca8789c3d3a085dac069d622ccd3e969f6ec11b9851f688d2d8906ed",
+      "size_bytes": 4022
+    }
+  },
+  "notion_url": "https://app.notion.com/p/3e68856479af816996d8c89ed96bac00",
+  "qualification": {
+    "manual_visual_review_of_every_chart": false,
+    "production_eligible": false,
+    "profitable_system_validated": false,
+    "training_eligible": false
+  },
+  "replay_source_commit": "d22b606a80a80bf4d566da588d2f4f54d935ae82",
+  "reproduction": {
+    "commands": [
+      ".venv/bin/python -m yoyo.evaluation.spike_manual_system_study data",
+      ".venv/bin/python -m yoyo.evaluation.spike_manual_system_study replay --workers 3",
+      ".venv/bin/python -m yoyo.evaluation.spike_manual_system_study summary",
+      ".venv/bin/python -m yoyo.evaluation.spike_manual_diagnostics"
+    ],
+    "source_pin": "Use the recorded replay source commit and unchanged same-source data receipts; the runner deliberately refuses to overwrite outputs of a different identity."
+  },
+  "status": "inconclusive"
+}

@@ -17,14 +17,14 @@ experiments:
   - experiment_id: exp-spike-manual-system-20260925-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d22b606a80a80bf4d566da588d2f4f54d935ae82
-    status: active
+    status: inconclusive
     question: Can unchanged SPIKE V12.8 signals support a repeatable BTC/ETH manual system on five years of 5m/15m/1h bars, and does a 4R exit or completed-HTF slope gate improve outcomes?
     single_variable: Two separate one-variable treatments against the same parent; HTF SMA60 slope admission OR resting gross4R target. Original stops, reversals and20bp cost retained. Never combine treatments.
-    result: Frozen builder and focused tests committed before construction; six-stream replay pending.
+    result: Completed six five-year streams and11230 policy ledger rows;4147 parent rows include2861 ordinary and1286 overlapping long-joint records. Ordinary5m BTC/ETH mean netR -0.7222/-0.3303. ETH1h mean+0.1475R is below matched random+0.4850R and totalR turns negative without its best trade. Neither standalone4R cap nor completed-HTF slope gives stable general improvement; all36 later primary corrected p1. No profitable manual system established.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
-    artifacts: []
+    artifacts: [spike-manual-system-20260925-delivery]
     reuse_allowed: false
     notes: Binance USD-M2021-09-25 through2026-09-25 with2020 warmup; separate overlapping ordinary and long-joint ledgers. Historical exploration, not forward validation or full native Pine parity. No report requested.
   - experiment_id: exp-ma-morphology-v6-threeview-20260925-v1

@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-manual-system-20260925-delivery
+    artifact_type: manifest
+    role: five_year_spike_manual_entry_exit_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: d22b606a80a80bf4d566da588d2f4f54d935ae82
+    source_path: experiments/active/exp-spike-manual-system-20260925-v1/delivery_receipt.json
+    sha256: 69c42c383ba9fa43934dd9633aa7c82dedc9ab10d17d1955a207f17986262497
+    size_bytes: 4068
+    storage_uri: repo://experiments/active/exp-spike-manual-system-20260925-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Binance BTC/ETH5m15m1h five-year replay;4147 overlapping parent records and11230 total policy rows. No stable profitable system established. Receipt binds code/data/outputs and59 focused checks; global gates467pass10fail outside this changeset. Full native Pine parity remains unverified; joint pivot ties are a specific limitation. Legacy holdout enum only.
   - artifact_id: spike-v128-vwap-20260924-delivery
     artifact_type: manifest
     role: offline_spike_v128_session_vwap_twap_entry_admission

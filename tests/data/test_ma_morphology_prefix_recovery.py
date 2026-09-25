@@ -227,3 +227,36 @@ def test_frozen_request_rejects_modified_payload(tmp_path: Path) -> None:
 
 def test_remote_script_is_standalone_python() -> None:
     compile(render_remote_script(), "<remote recovery script>", "exec")
+
+
+def test_parallel_archives_preserve_raw_bytes_with_quoted_time_fallback(tmp_path: Path) -> None:
+    plain, _, _ = _synthetic_source()
+    lines = plain.splitlines(keepends=True)
+    quoted = lines[0] + b"".join(b'"' + line.split(b",", 1)[0] + b'",' + line.split(b",", 1)[1]
+                                  for line in lines[1:])
+    merged = None
+    expected = {}
+    for index, payload in enumerate((plain, quoted)):
+        archive = tmp_path / f"source_{index}.csv.gz"
+        compressed = gzip.compress(payload, mtime=0)
+        archive.write_bytes(compressed)
+        part = _event_request(payload, compressed, archive)
+        event = part['events'].pop('cluster_test_event')
+        event_id = f'cluster_parallel_{index}'
+        event['event_id'] = event_id
+        event['output_path'] = f"{part['output_prefix']}/val/{event_id}.csv"
+        part['events'][event_id] = event
+        if merged is None:
+            merged = part
+        else:
+            merged['events'].update(part['events'])
+        expected[event['output_path']] = b''.join(payload.splitlines(keepends=True)[:1221])
+    merged.pop('request_sha256')
+    merged['request_sha256'] = hashlib.sha256(
+        json.dumps(merged, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    result = _run_remote(tmp_path, merged)
+    assert result.returncode == 0, result.stderr
+    for path, payload in expected.items():
+        assert (tmp_path / path).read_bytes() == payload
+    receipt = json.loads((tmp_path / merged['output_prefix'] / 'recovery_receipt.json').read_text())
+    assert receipt['archive_count'] == receipt['event_count'] == 2
