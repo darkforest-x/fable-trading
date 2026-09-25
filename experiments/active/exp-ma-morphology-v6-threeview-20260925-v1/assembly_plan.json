@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "owner_request": "整理一下，准备去训练模型了；1841 positive events x at most 3 views; reuse Grade-A negatives after screening; one shared model across timeframes.",
+  "owner_authorization": {
+    "dataset_preparation": true,
+    "new_training_launched_by_this_plan": false,
+    "promote": false
+  },
+  "parent_dataset": "datasets/ma_launch_owner1500_morph_v6",
+  "positive_dataset": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1",
+  "dataset_output": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1",
+  "views": {
+    "pre": [
+      7,
+      9,
+      11
+    ],
+    "post": 5
+  },
+  "inputs": {
+    "positive_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/positive_manifest.jsonl",
+      "sha256": "60a1d8b61e375abc02f1f65dbcf1e854b0569b4df39dd6d9087716c08a11ae19"
+    },
+    "positive_receipt": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/preparation_receipt.json",
+      "sha256": "29144be97caa8fe6b2ac3abef5c4c99bbf9225cb053b1cbba5d0c3b5c9a58dcc"
+    },
+    "parent_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/manifest.jsonl",
+      "sha256": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5"
+    },
+    "parent_ledger": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/dataset_ledger.jsonl",
+      "sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2"
+    },
+    "parent_plan": {
+      "path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json",
+      "sha256": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96"
+    },
+    "grade_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "grade_protocol": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json",
+      "sha256": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    },
+    "evaluation_policy": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract_v2.json",
+      "sha256": "f23521551d4f24f62d05662d4d9c5bdaeb5bec2cdf50377ce345341548170c0b"
+    },
+    "protected_candidate_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_ledger.jsonl",
+      "sha256": "81d60c351642dfcb8055c5e1391b31828b71b7f36f7beb6083a50ab646cb652f"
+    },
+    "protected_manual_rows": {
+      "path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl",
+      "sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9"
+    },
+    "protected_reference_exclusion": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json",
+      "sha256": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a"
+    }
+  },
+  "negative_policy": {
+    "reference": "Preserve all original v6 proven clear backgrounds and their original split/view bytes.",
+    "grade_a": "Recompute frozen Grade-A hard/easy no-launch definitions on CLOSE and displayed HL2; reject ambiguity in every complete visible core4/5+post5 subwindow. No trade outcomes used.",
+    "source_identity": "Freeze current complete CSV SHA as a new version; recompute 9 legacy metrics at rtol1e-5/atol1e-6; do not assert unrecorded historical whole-source hash parity.",
+    "same_timeframe_required": false,
+    "protection": "Inclusive overlap against all current candidate/manual/reference exclusions, old Grade-A positives +/-4h, and inherited/new negative windows; canonical assets merge venues/timeframes.",
+    "chronology": "Inherited split boundaries plus12h safety; old Grade-A validation events never enter train.",
+    "label_status": "Rule-labelled screened candidates, not individually Owner-confirmed gold.",
+    "hard_quota": "No forced count; fail ready if no accepted training hard negatives."
+  },
+  "evaluation": {
+    "reference": "P9 only; original350 val /320 test images unchanged.",
+    "challenge": "New Grade-A held-out negatives separate from reference; never replace original validation.",
+    "position": "All variants grouped by event; no view treated as independent event."
+  },
+  "recipe": "Inherit parent_plan training_args unchanged; YOLO11s base model,1280,40epochs,batch8,seed0; all augmentation off.",
+  "limitations": [
+    "Screened negative labels are heuristic evidence, not per-image human gold.",
+    "Positives retain original outcome-selected population.",
+    "post5 confirmation morphology; not a tip-only detector."
+  ],
+  "production_eligible": false,
+  "training_eligible": false
+}
