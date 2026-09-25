@@ -77,3 +77,15 @@ def test_protection_includes_exact_boundary_contact():
     assert overlaps(10, 20, [(20, 30)])
     assert overlaps(30, 40, [(20, 30)])
     assert not overlaps(31, 40, [(20, 30)])
+
+
+def test_new_launch_in_extended_context_disqualifies_reused_empty_label():
+    frame, row = example()
+    original, _ = screen_negative(frame, row, PROTOCOL)
+    frame.loc[1224:, ['open', 'high', 'low', 'close']] += 3
+    assert screen_negative(frame, row, PROTOCOL)[0] == original
+    extended, _ = screen_negative(frame, row, PROTOCOL, post_bars=11)
+    assert not extended['accepted']
+    assert 'other_visible_dense_motion' in extended['reasons']
+    frame.loc[1227:, ['open', 'high', 'low', 'close']] *= 20
+    assert screen_negative(frame, row, PROTOCOL, post_bars=11)[0] == extended
