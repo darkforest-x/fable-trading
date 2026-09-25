@@ -245,7 +245,7 @@ def run(request_path, repo_root):
     for event_id, event in events.items():
         if event.get("event_id") != event_id:
             raise RecoveryError("event key/id mismatch: " + event_id)
-        if not re.fullmatch(r"[A-Za-z0-9_.-]{1,160}", event_id):
+        if not isinstance(event_id, str) or not event_id or len(event_id) > 300:
             raise RecoveryError("unsafe event id: " + event_id)
         relative = safe_relative(event["output_path"])
         if relative.parts[:len(output_prefix.parts)] != output_prefix.parts:
@@ -266,7 +266,7 @@ def run(request_path, repo_root):
                 archive_results[key[0]] = {"gzip_sha256": key[1], "csv_sha256": csv_sha, "rows": row_count,
                                            "first_time": first, "last_time": last}
                 for event_id, state in result.items():
-                    staged = tmp / ("event_" + str(len(archive_results)) + "_" + event_id + ".csv")
+                    staged = tmp / ("event_" + str(len(archive_results)) + "_" + hashlib.sha256(event_id.encode("utf-8")).hexdigest() + ".csv")
                     staged.write_bytes(bytes(state["payload"]))
                     state["staged_path"] = staged
                     event_states[event_id] = state
