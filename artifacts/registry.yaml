@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: owner-manual-trading-system-20260925-v4-delivery
+    artifact_type: manifest
+    role: manual_decision_workflow_refinement_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1c6729d1cf202a8612e0ff38ca7454439860c4b
+    source_path: experiments/active/exp-owner-manual-trading-system-20260925-v4/delivery_receipt.json
+    sha256: bac6a7b51ce656f5e1b0f37506ba09f1160da8152396af1f74eb70b7addc2ed3
+    size_bytes: 3760
+    storage_uri: repo://experiments/active/exp-owner-manual-trading-system-20260925-v4/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Receipt binds protocol,workspace payloads,blank cards,source event audit and review refinements. Notion page and current record revisions read
+      back; no real orders,activation or return validation. Legacy holdout enum lacks not-applicable.
   - artifact_id: ma-morphology-v6-threeview-20260925-shared-timeframe-policy
     artifact_type: config
     role: shared_visual_model_timeframe_pooling_correction
