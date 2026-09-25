@@ -1,0 +1,42 @@
+{
+  "status": "training_batches_verified",
+  "observed_unix": 1790355804.895119,
+  "launcher": {
+    "status": "process_launched",
+    "pid": 12468,
+    "launched_unix": 1790355667.923172,
+    "command_argv": [
+      "C:\\fable\\.venv\\Scripts\\python.exe",
+      "-u",
+      "-m",
+      "scripts.windows.run_v6_early_training",
+      "--dataset-root",
+      "C:\\fable\\datasets\\ma_launch_owner1500_morph_v6_early_20260926_v1",
+      "--preflight-dir",
+      "C:\\fable\\datasets\\ma_launch_owner1500_morph_v6_early_20260926_v1\\training_package",
+      "--expected-preflight-sha256",
+      "18ea0deb0df9c01204bef67796824fae43fd850dae8eca6f4e2621fa8465fc18"
+    ],
+    "preflight_sha256": "18ea0deb0df9c01204bef67796824fae43fd850dae8eca6f4e2621fa8465fc18",
+    "log": "C:\\fable\\datasets\\ma_launch_owner1500_morph_v6_early_20260926_v1\\training.log",
+    "production_eligible": false,
+    "active_model_changed": false
+  },
+  "job": {
+    "status": "training",
+    "pid": 20156,
+    "started_unix": 1790355668.0239413,
+    "preflight_sha256": "18ea0deb0df9c01204bef67796824fae43fd850dae8eca6f4e2621fa8465fc18",
+    "dataset": "C:\\fable\\datasets\\ma_launch_owner1500_morph_v6_early_20260926_v1",
+    "production_eligible": false,
+    "active_model_changed": false
+  },
+  "pid_alive": true,
+  "actual_args_match_frozen": true,
+  "args_sha256": "83ef7277e5526a7b03c80148ee40adf261e75eef0b88e0fc1ebb1fa385d06624",
+  "last_observed_batch": "1/40       4.7G      1.389      10.45      1.931          3       1280: 16% \u2501\u2578\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 246/1520 3.5it/s 1:23<6:03",
+  "gpu": "NVIDIA GeForce RTX 3060, 6224 MiB, 79 %",
+  "log_size_bytes": 53247,
+  "run_dir": "C:\\fable\\datasets\\ma_launch_owner1500_morph_v6_early_20260926_v1\\training_runs\\exp-ma-morphology-v6-threeview-20260925-v1",
+  "production_eligible": false
+}

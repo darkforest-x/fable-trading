@@ -1,5 +1,14 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新进度：v6低延迟研究训练已在3060启动（2026-09-26）
+
+- Owner本次明确授权“差不多了吧，去训练吧”。只授权这一次研究训练；生产资格仍false，未切换ACTIVE/监控模型。
+- 当前冻结计划 `experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_plan_20260926.json`。新数据 `datasets/ma_launch_owner1500_morph_v6_early_20260926_v1`，14,550图/4,850事件；1,837正事件/5,511正图，3,013负事件/9,039负图，排除144事件（4正/140负）。每事件按自身首次闭合启动证据确定后1至5根，三视图只变左侧7/9/11根；原核心坐标投影，完整右缘蜡烛。规则候选不冒充逐张人工金标。
+- 两机完整预检一致；manifest SHA `c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6`，remote preflight SHA `18ea0deb0df9c01204bef67796824fae43fd850dae8eca6f4e2621fa8465fc18`。训练12,153图，主验证349、主测试319；困难挑战另存（val129/test2），禁止将稀疏挑战集当稳健结论。
+- Windows `Administrator@192.168.1.2` / `C:/fable`，实际训练PID20156（venv启动进程12468）；已在SSH断开后确认存活，epoch1/40推进至246/1520批次，GPU79%，零损坏图。YOLO11s原始base、1280、batch8、40epochs、全部增强关闭；实际args.yaml逐字段与原冻结配方一致。97项相关测试和2项作业生命周期测试通过。
+- 远端数据目录内 `training_job.json` 持久记录运行/失败/完成；`training.log`为日志；结果目录 `training_runs/exp-ma-morphology-v6-threeview-20260925-v1`。入口 `scripts/windows/run_v6_early_training.py` 拒绝重复启动，禁止看到SSH断开就重开。核验回执在实验目录 `early_training_launch_20260926.json`；当前仍在训练，未取得最终权重/评估。
+- 下一步读取上述运行状态；完成后拉回best/last与results并核验，检查实际因果连续回放首次命中延迟、已走价格、漏检和误报，保留pad0/default验证差异。不能只凭mAP放行。下方“训练集尚未完成”等均为已被本条更新的历史进度。
+
 ## 最新：SPIKE V13.0 回踩再突破已交付（2026-09-25）
 
 - Owner要求解释回踩逻辑、跨周期详细对照并写V13.0。新源码 `yoyo/evaluation/pine/spike_burst_v13_0.pine`，TradingView另存私有“SPIKE V13.0 · 回踩再突破”修订2，原V12.8源码与私有脚本保留。默认普通多空回踩，可选联合多头或原版参考；保留历史趋势区域。

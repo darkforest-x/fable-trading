@@ -32244,3 +32244,19 @@ artifacts:
     notes: Same20cases,120causal observation prefixes; old post5 pixels reproduced exactly. Original physical boxes projected,
       not relabeled. All10positive post0 boxes exceed the legacy canvas and are explicitly flagged. Future context separate;
       earlier classes unadjudicated, zero training labels generated. No training or model promotion.
+
+  - artifact_id: ma-morphology-v6-early-20260926-training-launch
+    artifact_type: manifest
+    role: authorized_research_training_launch_and_bound_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5415a85c238dbda5f25eab7d1612534e4633dd0d
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_launch_20260926.json
+    sha256: 4d1a2323d13e2320dea1550b99e664d6842044ff447d0d87bdfa77d6ed13a66e
+    size_bytes: 1915
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_launch_20260926.json
+    holdout_status: unknown
+    training_eligible: true
+    production_eligible: false
+    notes: Owner authorized one research retraining on2026-09-26. Full dataset14550 images from4850 events, including1837 positives.
+      Local and remote audit agree; first training batches verified on RTX3060, epoch1of40, actual frozen args matched.
+      Effective args, build receipt, preflights and transfer identity are beside this receipt. Training is ongoing; latency and false alarms pending.
