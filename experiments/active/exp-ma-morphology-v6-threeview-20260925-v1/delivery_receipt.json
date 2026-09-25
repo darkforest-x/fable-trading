@@ -1,0 +1,129 @@
+{
+  "attempts": {
+    "pilot_v1": "Stopped: original1m source absent after prior storage cleanup; no image mismatch was bypassed",
+    "recovery_v1": "Stopped own sequential verifier to use four independent source workers; identical request retained",
+    "recovery_v2": "140 original gzip/CSV identities verified,176 slices copied and checked"
+  },
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "files": {
+    "environment_preflight.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/environment_preflight.json",
+      "sha256": "1857d87a331782dc9e081c86383fc3d26ade8b83e64c15f613e7d8ce56b222d4",
+      "size_bytes": 737
+    },
+    "evaluation_contract.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract.json",
+      "sha256": "b65b7198819ee6f453f0fe17c88f2e9364857dab7857bcff22d84ffa210dc343",
+      "size_bytes": 2732
+    },
+    "local_recovery_verification.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/local_recovery_verification.json",
+      "sha256": "8810d7e368905adcc59986c16b843d84a79e4c0a6bfc1f545ab1512be8fcf66d",
+      "size_bytes": 398
+    },
+    "negative_reuse_audit.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/negative_reuse_audit.json",
+      "sha256": "2c9acc1cbfa27767d33f0ab80c0b5f67742960600b8482ce8f0a457b77b17e42",
+      "size_bytes": 1578
+    },
+    "negative_reuse_deeper_audit.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/negative_reuse_deeper_audit.json",
+      "sha256": "73e2cca221e4ebbcf9d9d63e0e05ad9f3d84a219b746965db72d2f0708d2cee5",
+      "size_bytes": 10499
+    },
+    "plan.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/plan.json",
+      "sha256": "2b5d7ca8317565fa15cfc58a7474a100f9ff77a2e84abd467487b74d04f369d0",
+      "size_bytes": 3180
+    },
+    "positive_audit.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/positive_audit.json",
+      "sha256": "f5439f631bc255878ce94adf45ac4bd8a98c720c4f971d3c16fc7170f6632e03",
+      "size_bytes": 350
+    },
+    "preparation_receipt.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/preparation_receipt.json",
+      "sha256": "29144be97caa8fe6b2ac3abef5c4c99bbf9225cb053b1cbba5d0c3b5c9a58dcc",
+      "size_bytes": 830
+    },
+    "recover_prefixes_remote_v2.py": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/recover_prefixes_remote_v2.py",
+      "sha256": "e098bcbf8dba9a30383cd8a58b718f3d123542371d94d4f4edecadeb189c4d19",
+      "size_bytes": 17638
+    },
+    "recovery_request.json": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/recovery_request.json",
+      "sha256": "bac0dd099daf5c9b7a1e0cce4862293a244ca2228bcdb684af4e067f069098f2",
+      "size_bytes": 291184
+    }
+  },
+  "generated_at_utc": "2026-09-25T09:36:56.050976+00:00",
+  "negative_status": "Old15m bank cannot directly supply matching multi-timeframe negatives;41old-window protection conflicts;old source SHA incomplete;new visible-label screening and re-render required",
+  "new_images": 670,
+  "new_png_bytes": 32329733,
+  "positive_dataset_path": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1",
+  "positive_events": 1841,
+  "positive_images": 5523,
+  "positive_manifest_sha256": "60a1d8b61e375abc02f1f65dbcf1e854b0569b4df39dd6d9087716c08a11ae19",
+  "production_eligible": false,
+  "reproduction_commands": [
+    [
+      ".venv/bin/python",
+      "-m",
+      "yoyo.data.ma_morphology_prefix_recovery",
+      "freeze",
+      "--out",
+      "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/recovery_request.json",
+      "--output-prefix",
+      "data/crypto/research/ma_morphology_v6_threeview_20260925_prefixes"
+    ],
+    [
+      ".venv/bin/python",
+      "-m",
+      "yoyo.data.ma_morphology_prefix_recovery",
+      "write-remote-script",
+      "--out",
+      "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/recover_prefixes_remote_v2.py"
+    ],
+    [
+      ".venv/bin/python",
+      "-u",
+      "-m",
+      "yoyo.datasets.ma_morphology_threeview",
+      "build",
+      "--output",
+      "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1",
+      "--recovery",
+      "data/crypto/research/ma_morphology_v6_threeview_20260925_prefixes/recovery_manifest.json"
+    ]
+  ],
+  "reproduction_prerequisite": "Original frozen parent dataset remains available; upload frozen request and generated remote script to3060, execute with --repo-root C:/fable and copy request.output_prefix back to the same repository-relative directory. Output dataset must not already exist.",
+  "source_commit": "79b0440a5d68e14d6ab414e2f3db136c6f30409e",
+  "source_prefix_csv_bytes": 16942631,
+  "split_image_counts": {
+    "test": 480,
+    "train": 4518,
+    "val": 525
+  },
+  "status": "positive_prepared_negative_reuse_not_ready",
+  "training_eligible": false,
+  "training_ready": false,
+  "training_started": false,
+  "validation": {
+    "focused_tests_passed": 20,
+    "layer_boundary_tests_passed": 71,
+    "old_source_parity": "Original existing image/label hashes reproduced for every re-rendered evaluation event and all pilot views",
+    "pilot_v2_events": 6,
+    "pilot_v2_images": 18,
+    "positive_audit": "passed"
+  },
+  "verified_reused_hardlinks": 4853,
+  "views": {
+    "post": 5,
+    "pre": [
+      7,
+      9,
+      11
+    ]
+  }
+}

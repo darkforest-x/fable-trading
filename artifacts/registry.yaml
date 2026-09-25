@@ -18,6 +18,36 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-threeview-20260925-positive-dataset
+    artifact_type: dataset
+    role: positive_only_three_view_retraining_preparation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 79b0440a5d68e14d6ab414e2f3db136c6f30409e
+    source_path: datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/positive_manifest.jsonl
+    sha256: 60a1d8b61e375abc02f1f65dbcf1e854b0569b4df39dd6d9087716c08a11ae19
+    size_bytes: 11075385
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/positive_manifest.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 1841 original events,5523 positive images(4518train/525val/480test);pre7/9/11,post5 fixed.4853 checked
+      hardlinks,670 new images. Positive preparation only;no negative-bank approval,no training or live replacement.
+      Original P9 evaluation remains fixed;extra views are paired robustness cases. Legacy holdout enum only.
+  - artifact_id: ma-morphology-v6-threeview-20260925-preparation
+    artifact_type: manifest
+    role: positive_preparation_and_grade_a_negative_compatibility_audit
+    source_repo: darkforest-x/fable-trading
+    source_commit: 79b0440a5d68e14d6ab414e2f3db136c6f30409e
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/delivery_receipt.json
+    sha256: 6fa729016b8ca547687e4b2c328a491c64f3d82dc879231f22ca822848589bc4
+    size_bytes: 5542
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 1841 original events,5523 positive images(4518train/525val/480test);pre7/9/11,post5 fixed.4853 checked
+      hardlinks,670 new images. Positive preparation only;no negative-bank approval,no training or live replacement.
+      Original P9 evaluation remains fixed;extra views are paired robustness cases. Legacy holdout enum only.
   - artifact_id: spike-manual-system-20260925-delivery
     artifact_type: manifest
     role: five_year_spike_manual_entry_exit_evidence

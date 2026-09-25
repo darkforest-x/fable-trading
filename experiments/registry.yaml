@@ -29,7 +29,7 @@ experiments:
     notes: Binance USD-M2021-09-25 through2026-09-25 with2020 warmup; separate overlapping ordinary and long-joint ledgers. Historical exploration, not forward validation or full native Pine parity. No report requested.
   - experiment_id: exp-ma-morphology-v6-threeview-20260925-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 3764dced7d12e4e166edb30379c20866f6881ae6
+    source_commit: 79b0440a5d68e14d6ab414e2f3db136c6f30409e
     status: active
     workflow: yolo
     workflow_stages:
@@ -41,12 +41,16 @@ experiments:
     single_variable: Owner-requested preparation of three-view augmentation and audited negative reuse; original event
       membership, core geometry, confirmation clock and render source remain frozen. No training or threshold change
       at registration.
-    result: Preparation started;5523positive images planned(4518train/525val/480test). Negative compatibility and
-      full training readiness remain unverified.
+    result: Positive preparation complete and audited:1841events/5523images(4518train/525val/480test),4853 reused
+      hardlinks plus670 new renders.140 frozen gzip/CSV sources verified to recover176 tiny prefixes. Grade-A negative
+      direct import not ready:15m-only population,41old-window protection conflicts and incomplete historical source
+      hashes. No training started.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    artifacts: []
+    artifacts:
+    - ma-morphology-v6-threeview-20260925-positive-dataset
+    - ma-morphology-v6-threeview-20260925-preparation
     reuse_allowed: false
     notes: This continues v6 with explicit Grade-A lineage;does not replace the notification checkpoint.No new report
       required.
