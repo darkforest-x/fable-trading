@@ -69,16 +69,17 @@ experiments:
     workflow_stages:
     - dataset
     - training
-    title: YOLO v6 延续：三窗口与 Grade-A 负例兼容审核
+    title: YOLO v6 延续：三窗口与 Grade-A 负例训练准备完成
     question: Can the existing1841 v6 events support at most three causal views each, and can Grade-A negatives be
       reused without image-style, temporal-split or label-semantic conflicts?
     single_variable: Owner-requested preparation of three-view augmentation and audited negative reuse; original event
       membership, core geometry, confirmation clock and render source remain frozen. No training or threshold change
       at registration.
-    result: Positive preparation complete and audited:1841events/5523images(4518train/525val/480test). Owner clarified
-      one shared visual model:timeframe differences alone do not exclude Grade-A negative reuse. negative_reuse_audit_v2
-      and evaluation_contract_v2 supersede the earlier period-based restriction. Label,render,source,protection and
-      chronological checks remain;41old-window protection conflicts recorded. No training started.
+    result: Complete14312-image dataset prepared locally and on RTX3060;5523positive images from1841events,
+      8789negatives including3936new Grade-A views from1312screened events. Train12522images(4518positive/8004negative),
+      including975hard-negative images. Fixed P9 reference val350/test320 preserved; extra Grade-A challenge148/2events
+      and paired position robustness separate. Both hosts match manifest SHA and full audit;90focused/boundary checks
+      pass. Training has not started; one shared-timeframe model and frozen YOLO11s1280/40/batch8 recipe.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
@@ -86,10 +87,12 @@ experiments:
     - ma-morphology-v6-threeview-20260925-positive-dataset
     - ma-morphology-v6-threeview-20260925-preparation
     - ma-morphology-v6-threeview-20260925-shared-timeframe-policy
+    - ma-morphology-v6-threeview-20260925-complete-dataset
+    - ma-morphology-v6-threeview-20260925-training-preparation
     reuse_allowed: false
-    notes: Continue v6 with at most3views per event. Keep original evidence snapshots and use evaluation_contract_v2
-      as current reuse policy; legacy period-matching coverage is not total usable-negative capacity. Training/production
-      remain unapproved;notification model unchanged.
+    notes: Technical data/environment preparation complete; source images stay hash-bound and original receipts are
+      retained. Current training gates remain false because this step prepares but does not launch training. New
+      Grade-A latest test pool only2events; actual replay error rate is unmeasured. No live-model or notification change.
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18

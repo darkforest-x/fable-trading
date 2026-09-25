@@ -1,0 +1,182 @@
+{
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "status": "dataset_and_environment_prepared_training_not_started",
+  "source_commit": "24efaa429ac45487e6e20a5b9427350fa4033757",
+  "assembly_source_commit": "fa90429e95d7909f2fb775fd0a15df0c790fba31",
+  "dataset_root": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1",
+  "remote_dataset_root": "C:/fable/datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1",
+  "shared_timeframe_model": true,
+  "events": 4994,
+  "positive_events": 1841,
+  "positive_images": 5523,
+  "negative_images": 8789,
+  "total_images": 14312,
+  "train_positive_images": 4518,
+  "train_negative_images": 8004,
+  "train_images": 12522,
+  "grade_a_accepted_events": 1312,
+  "grade_a_rejected_events": 1817,
+  "grade_a_train_hard_events": 325,
+  "grade_a_train_hard_images": 975,
+  "maximum_views_per_event": 3,
+  "views_pre": [
+    7,
+    9,
+    11
+  ],
+  "post_bars": 5,
+  "reference_eval_counts": {
+    "val": 350,
+    "test": 320
+  },
+  "challenge_p9_counts": {
+    "val": 148,
+    "test": 2
+  },
+  "training_args": {
+    "auto_augment": null,
+    "batch": 8,
+    "bgr": 0.0,
+    "cache": false,
+    "copy_paste": 0.0,
+    "cutmix": 0.0,
+    "degrees": 0.0,
+    "deterministic": true,
+    "device": "0",
+    "epochs": 40,
+    "erasing": 0.0,
+    "fliplr": 0.0,
+    "flipud": 0.0,
+    "hsv_h": 0.0,
+    "hsv_s": 0.0,
+    "hsv_v": 0.0,
+    "imgsz": 1280,
+    "lr0": 0.0001,
+    "lrf": 0.01,
+    "mixup": 0.0,
+    "mosaic": 0.0,
+    "multi_scale": 0.0,
+    "optimizer": "AdamW",
+    "patience": 0,
+    "perspective": 0.0,
+    "plots": false,
+    "rect": true,
+    "scale": 0.0,
+    "seed": 0,
+    "shear": 0.0,
+    "translate": 0.0,
+    "workers": 2
+  },
+  "base_model_sha256": "85a76fe86dd8afe384648546b56a7a78580c7cb7b404fc595f97969322d502d5",
+  "local_and_remote_audits_identical": true,
+  "local_and_remote_list_membership_counts_identical": true,
+  "environment": {
+    "local": {
+      "versions": {
+        "torch": "2.8.0",
+        "torchvision": "0.23.0",
+        "ultralytics": "8.4.89",
+        "numpy": "2.0.2",
+        "pandas": "2.3.3"
+      },
+      "cuda_available": false,
+      "cuda_required": false
+    },
+    "remote": {
+      "versions": {
+        "torch": "2.8.0+cu126",
+        "torchvision": "0.23.0+cu126",
+        "ultralytics": "8.4.89",
+        "numpy": "2.0.2",
+        "pandas": "2.3.3"
+      },
+      "cuda_available": true,
+      "cuda_required": false
+    }
+  },
+  "asset_reuse": {
+    "hardlinked_original_images": 10376,
+    "new_negative_images": 3936,
+    "new_negative_image_bytes": 205877617,
+    "new_market_data_downloaded": false
+  },
+  "tests": {
+    "command": ".venv/bin/python -m pytest tests/test_ma_morphology_assembly.py tests/test_ma_morphology_threeview.py tests/test_ma_morphology_training_package.py tests/boundaries/test_layer_imports.py -q",
+    "passed": 90,
+    "controls": [
+      "future OHLC mutation leaves visible negative decision unchanged",
+      "visible dense launch is rejected as background",
+      "damaged asset hashes/orphan labels/wrong splits/missing negatives fail closed",
+      "old validation event cannot enter training"
+    ]
+  },
+  "artifacts": {
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/assembly_plan.json": {
+      "sha256": "4362c57bbc75dfc68317eb07fc39d8a6dbcd591e93ccf99f545d336c3f2865ca",
+      "size_bytes": 4817
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/grade_a_sources_v1.json": {
+      "sha256": "a422409fd10f2d07497bf123c05ceeeafc62ac23b2d2477f5276ec43a7d7541a",
+      "size_bytes": 100862
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/assembly_receipt_v1.json": {
+      "sha256": "97b8e14184c378e3d4e1966be9145cba595e1a456dbf6ada78ecfaa429c4b90b",
+      "size_bytes": 1664
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/local_preflight_v1.json": {
+      "sha256": "04450c544df374ee86023cc389ae931b27ca85c8d3e61717c3d71c5e1ebeb040",
+      "size_bytes": 5947
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/remote_preflight_v1.json": {
+      "sha256": "aa731fd390128271ff7d03f8a6a8836a1dbeb81372e2d6e026fd4d62b605316b",
+      "size_bytes": 5847
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/remote_config_v1.json": {
+      "sha256": "c3c7d792c828ae8b039daf190b83c4d38ab76ad80a5e9bbd8171f4698546ba97",
+      "size_bytes": 376
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/remote_transfer_v1.json": {
+      "sha256": "925c70de8111a4d404a5c06bb47306b53a6b05e31fcf495300f3f6e65c755476",
+      "size_bytes": 159
+    },
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/transfer_archive_v1.json": {
+      "sha256": "5cfc9d014cd8992959c351356c9f43354463ce25bd4c7dac739977c512274c51",
+      "size_bytes": 484
+    },
+    "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/manifest.jsonl": {
+      "sha256": "b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2",
+      "size_bytes": 24614885
+    },
+    "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/negative_screening.jsonl": {
+      "sha256": "9012fc7cb9e7e184ad2d85c8143d1d869e138677589b1194541748e9459f4a67",
+      "size_bytes": 4300841
+    },
+    "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/excluded_candidates.jsonl": {
+      "sha256": "445bd2bef587732d0f95776119e9ceaad2153de96ad47580bf6140bd4322832d",
+      "size_bytes": 181075
+    }
+  },
+  "reproduce": {
+    "freeze_sources": ".venv/bin/python -m yoyo.datasets.ma_morphology_assembly freeze-sources --output NEW_SOURCE_INVENTORY.json (commit it before build)",
+    "assemble": ".venv/bin/python -m yoyo.datasets.ma_morphology_assembly build --sources experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/grade_a_sources_v1.json --output NEW_EMPTY_OUTPUT_DIRECTORY",
+    "preflight": ".venv/bin/python -m yoyo.datasets.ma_morphology_training_package preflight --dataset-root datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1 --output-dir datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/training_package_new"
+  },
+  "training_started": false,
+  "training_authorized": false,
+  "production_eligible": false,
+  "active_model_changed": false,
+  "current_training_gate": [
+    "active v6 plan training_eligible is not true",
+    "active v6 plan has no explicit owner training authorization",
+    "registry training_eligible is not true"
+  ],
+  "next_execution_step": "On explicit start, record research training authorization in a new versioned plan/gate, preserve frozen dataset and recipe, regenerate preflight in a fresh directory, then use the explicit train command. Do not promote automatically.",
+  "limitations": [
+    "Rule-labelled event sample, not new per-sample Owner gold; positives retain their original outcome-selected population.",
+    "post5 confirmation morphology is not a tip-only detector.",
+    "Grade-A new test pool has only2 negative events (1hard/1easy); val has148. Continuous replay false-positive checks remain necessary.",
+    "Reference P7/P11 robustness lists contain positive events only; compare paired recall/boxes on them, not their mAP with balanced reference P9.",
+    "All negative screening is bounded by visible OHLC; legacy numeric rules are heuristic evidence and cannot prove all true visual targets are absent."
+  ],
+  "return_metrics": "Not applicable: dataset construction and execution preflight only; no model-training, recognition-performance or economic-performance claim."
+}

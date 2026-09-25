@@ -18,6 +18,36 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-threeview-20260925-complete-dataset
+    artifact_type: dataset
+    role: shared_timeframe_three_view_complete_training_dataset
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa90429e95d7909f2fb775fd0a15df0c790fba31
+    source_path: datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/manifest.jsonl
+    sha256: b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2
+    size_bytes: 24614885
+    storage_uri: file:///Users/zhangzc/fable-trading/datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/manifest.jsonl
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 14312images/4994events;5523positive/8789negative. At most3views per event. Local/3060 asset audits match;90tests
+      pass. Data and environment ready; no training or model activation. New Grade-A challenge test has2events; recognition
+      quality and profitability unmeasured.
+  - artifact_id: ma-morphology-v6-threeview-20260925-training-preparation
+    artifact_type: manifest
+    role: local_and_rtx3060_dataset_environment_preflight
+    source_repo: darkforest-x/fable-trading
+    source_commit: 24efaa429ac45487e6e20a5b9427350fa4033757
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/training_preparation_receipt.json
+    sha256: 3c92caf5306b32e15194a217766d5370daef314157092dc8f50bb444db426ac1
+    size_bytes: 7616
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/training_preparation_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 14312images/4994events;5523positive/8789negative. At most3views per event. Local/3060 asset audits match;90tests
+      pass. Data and environment ready; no training or model activation. New Grade-A challenge test has2events; recognition
+      quality and profitability unmeasured.
   - artifact_id: owner-manual-trading-system-20260925-v4-delivery
     artifact_type: manifest
     role: manual_decision_workflow_refinement_delivery

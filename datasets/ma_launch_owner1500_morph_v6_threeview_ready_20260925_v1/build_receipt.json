@@ -1,0 +1,45 @@
+{
+  "audit": {
+    "counts": {
+      "test:negative:grade_a_challenge": 6,
+      "test:negative:reference": 160,
+      "test:positive:reference": 480,
+      "train:negative:grade_a_challenge": 3486,
+      "train:negative:reference": 4518,
+      "train:positive:reference": 4518,
+      "val:negative:grade_a_challenge": 444,
+      "val:negative:reference": 175,
+      "val:positive:reference": 525
+    },
+    "events": 4994,
+    "images": 14312,
+    "max_views_per_event": 3,
+    "status": "passed"
+  },
+  "dataset_ready": true,
+  "exclusions_sha256": "445bd2bef587732d0f95776119e9ceaad2153de96ad47580bf6140bd4322832d",
+  "grade_a_events_accepted": 1312,
+  "grade_a_events_rejected": 1817,
+  "manifest_sha256": "b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2",
+  "pilot": false,
+  "plan_sha256": "4362c57bbc75dfc68317eb07fc39d8a6dbcd591e93ccf99f545d336c3f2865ca",
+  "production_eligible": false,
+  "rejection_counts": {
+    "candidate_or_gold_protection": 35,
+    "chronology_or_old_validation": 122,
+    "hl2_legacy_kind_not_reproduced": 54,
+    "hl2_legacy_kind_not_reproduced|other_visible_dense_motion": 34,
+    "inactive": 1,
+    "incomplete_context": 47,
+    "inherited_background_overlap": 1,
+    "other_visible_dense_motion": 1523
+  },
+  "screening_sha256": "9012fc7cb9e7e184ad2d85c8143d1d869e138677589b1194541748e9459f4a67",
+  "source_commit": "fa90429e95d7909f2fb775fd0a15df0c790fba31",
+  "sources_sha256": "a422409fd10f2d07497bf123c05ceeeafc62ac23b2d2477f5276ec43a7d7541a",
+  "train_grade_a_hard_images": 975,
+  "train_negative_images": 8004,
+  "train_positive_images": 4518,
+  "training_eligible": false,
+  "training_started": false
+}
