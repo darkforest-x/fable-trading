@@ -14,6 +14,8 @@ import subprocess
 import numpy as np
 import pandas as pd
 
+from yoyo.evaluation.spike_v128_recent_report import block_inference
+
 ROOT = Path('experiments/active/exp-spike-manual-system-20260925-v1')
 OUT = ROOT / 'recent_two_months_v1'
 START = pd.Timestamp('2026-07-25T00:00:00Z')
@@ -75,8 +77,14 @@ def describe(frame):
         matched_n=len(m), matched_target_mean_r=float(m.net_r.mean()) if len(m) else None,
         matched_random_mean_r=float(m.control_net_r.mean()) if len(m) else None,
         matched_excess_mean_r=float((m.net_r-m.control_net_r).mean()) if len(m) else None,
+        matched_target_mean_bp=float(m.net_bp.mean()) if len(m) else None,
+        matched_random_mean_bp=float(m.control_net_bp.mean()) if len(m) else None,
+        matched_excess_mean_bp=float((m.net_bp-m.control_net_bp).mean()) if len(m) else None,
         inherited_matches=int(f.matched.sum()),
         boundary_control_exclusions=int((f.matched & ~f.control_in_window).sum()))
+    # Random controls have their own risk distance: use price bp for inference.
+    inference = block_inference(m.net_bp-m.control_net_bp, m.utc_week, seed=925129)
+    result.update({f'paired_bp_{key}': value for key, value in inference.items()})
     # Descriptive excursion bands only; not proposed targets or exit rules.
     for level in [1, 2, 3, 5, 10]:
         hit = f.mfe_known_r.ge(level)
@@ -92,7 +100,11 @@ def main():
         raise ValueError('Commit builder before constructing results')
     receipt_path = ROOT/'summary_v1/receipt.json'
     receipt = json.loads(receipt_path.read_text())
-    inputs = {str(receipt_path): sha(receipt_path), str(own): sha(own)}
+    inference_path = Path('yoyo/evaluation/spike_v128_recent_report.py')
+    if subprocess.check_output(['git','show',f'HEAD:{inference_path}']) != inference_path.read_bytes():
+        raise ValueError('Uncommitted inference source')
+    inputs = {str(receipt_path): sha(receipt_path), str(own): sha(own),
+        str(inference_path): sha(inference_path)}
     frames = {}
     for name in ['all_trades', 'all_statuses', 'all_controls']:
         path = ROOT/'summary_v1'/f'{name}.csv.gz'
@@ -142,8 +154,15 @@ def main():
     event_keys = ['symbol', 'timeframe_min', 'side', 'entry_time']
     duplicates = recent[recent.duplicated(event_keys, keep=False)]
     OUT.mkdir(exist_ok=True)
+    metrics = pd.DataFrame(rows)
+    # One prespecified family for this descriptive request: six ordinary groups.
+    ordinary = metrics.index[metrics.arm.eq('ordinary')]
+    ordered = metrics.loc[ordinary, 'paired_bp_p_one_sided'].sort_values()
+    adjusted = np.minimum(1., np.maximum.accumulate(
+        ordered.to_numpy()*np.arange(len(ordered),0,-1)))
+    metrics.loc[ordered.index, 'paired_bp_p_holm_ordinary6'] = adjusted
     tables = {'trades':recent, 'signal_statuses':statuses, 'carry_in':carry,
-        'metrics':pd.DataFrame(rows), 'by_side':pd.DataFrame(side_rows),
+        'metrics':metrics, 'by_side':pd.DataFrame(side_rows),
         'by_month':pd.DataFrame(month_rows), 'by_exit':pd.DataFrame(exit_rows),
         'overlapping_entries':duplicates}
     files = {}
@@ -165,6 +184,7 @@ def main():
             'Max drawdown is additive closed-trade R within each stream.',
             'Conservative known MFE excludes unknowable exit-stop-bar wick order.',
             'Random controls match symbol/side/week/ATR bucket and may overlap.',
+            'Comparative inference uses price bp, since control initial risk differs.',
             'Boundary controls excluded; compare matched target subset only.',
             'No trained predictor: AUC, top-decile and ranking permutation are inapplicable.',
             'Partial July and September are labelled; monthly totals are not equal-duration comparisons.',
