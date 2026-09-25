@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: owner-manual-trading-system-20260925-v3-delivery
+    artifact_type: manifest
+    role: manual_workflow_notion_and_workspace_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3b5598032c7dd691e0693aba034501f043cbea7b
+    source_path: experiments/active/exp-owner-manual-trading-system-20260925-v3/delivery_receipt.json
+    sha256: 9113d49a8d76e89e39ece9c5a096fc9083000dcd82cdc8b190ef1b02075ea992
+    size_bytes: 3376
+    storage_uri: repo://experiments/active/exp-owner-manual-trading-system-20260925-v3/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Content-only workflow delivery. Receipt binds protocol,workspace payloads,Notion page and persisted IDs; no live orders or activation. Legacy holdout
+      enum lacks not-applicable. No new economic experiment.
   - artifact_id: ma-morphology-v6-threeview-20260925-positive-dataset
     artifact_type: dataset
     role: positive_only_three_view_retraining_preparation

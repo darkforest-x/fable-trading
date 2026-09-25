@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-owner-manual-trading-system-20260925-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3b5598032c7dd691e0693aba034501f043cbea7b
+    status: inconclusive
+    question: How should the owner consistently observe, admit, execute, manage and review SPIKE V12.8 signals manually?
+    single_variable: Workflow design and content delivery only; proposed human rules are not an economic experiment or production preset change.
+    result: Delivered14-section Manual-v3 in Notion and8draft principles plus2complete playbooks in the local manual workspace. Exact stored payloads and
+      visible UI verified. Workflow ready for review and replay; human profitability remains unmeasured.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+    - owner-manual-trading-system-20260925-v3-delivery
+    reuse_allowed: false
+    notes: Evolves Manual-v2. Mechanical signal profitability is not a prerequisite for building a human process. Includes do/wait/skip, causal structure
+      anchors,1h/15m/5m roles,4R branches,order expiry,risk budgets and refusal review. No report requested.
   - experiment_id: exp-spike-manual-system-20260925-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d22b606a80a80bf4d566da588d2f4f54d935ae82
