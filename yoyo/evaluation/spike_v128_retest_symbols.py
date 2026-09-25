@@ -56,7 +56,7 @@ def build(experiment: Path, output: Path):
             if frame.duplicated(key).any():
                 raise ValueError(f'Duplicate source identity: {name}')
         frames[name] = frame
-    groups = {name: dict(frame.groupby(['symbol', 'timeframe_min', 'arm']))
+    groups = {name: {key: part for key, part in frame.groupby(['symbol', 'timeframe_min', 'arm'])}
               for name, frame in frames.items() if name != 'summary'}
     split = pd.Timestamp(cfg['split'])
     records = []
