@@ -1,8 +1,9 @@
 """Fail-closed preflight and explicit training entry for the v6 morphology set.
 
-The default ``preflight`` command only validates the merged manifest/assets,
-freezes YOLO list files and ``data.yaml`` into a new output directory, and
-prints a training command. ``train`` is an explicit remote-only action; it
+The ``preflight`` command requires an explicit dataset and validates its assets.
+Withdrawn datasets remain auditable but receive no ready status or training
+command while the early-detection design has no selected dataset.
+``train`` is an explicit remote-only action; it
 requires a separately training-eligible v6 plan, pinned dependencies, CUDA,
 the original YOLO11s base SHA, and a fresh output directory. It never promotes
 weights or changes ACTIVE state.
@@ -25,8 +26,8 @@ from typing import Any, Callable, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DATASET = Path("datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2")
-ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_plan.json")
+ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_detection_contract_v1.json")
+PENDING_DESIGN = "goal_correction_pending_dataset"
 RECIPE_PLAN = Path("experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json")
 CONSTRAINTS = Path("constraints-ci.txt")
 EXPECTED_EVAL_COUNTS = {"val": 350, "test": 320}
@@ -137,7 +138,7 @@ def _verify_label(path: Path, row: Mapping[str, Any]) -> None:
 
 
 def _audit_position_row(row: Mapping[str, Any]) -> None:
-    """Reject fixed-right-edge crops, false availability clocks and detached boxes."""
+    """Verify the historical R5/R8/R11 assets, not their suitability for early detection."""
     pre, post = POSITION_VIEWS[row["variant"]]
     bars = row.get("core_bars")
     if bars not in (4, 5) or row.get("pre_bars") != pre or row.get("post_bars") != post or row.get("visible_bars") != pre + bars + post:
@@ -535,6 +536,10 @@ def _write_lines(path: Path, rows: list[dict[str, Any]], dataset_root: Path) -> 
 
 def _training_gate(repo_root: Path, active_plan: Mapping[str, Any]) -> tuple[bool, list[str]]:
     blockers: list[str] = []
+    if active_plan.get("status") == PENDING_DESIGN:
+        blockers.append("early-detection dataset design is unresolved; historical position plan withdrawn")
+    if "dataset_output" in active_plan and not active_plan["dataset_output"]:
+        blockers.append("no dataset selected for the current detection objective")
     if active_plan.get("training_eligible") is not True:
         blockers.append("active v6 plan training_eligible is not true")
     authorization = active_plan.get("owner_authorization")
@@ -569,7 +574,7 @@ def create_preflight(
     expected_eval_counts: Mapping[str, int] = EXPECTED_EVAL_COUNTS,
     split_boundaries: Mapping[str, datetime] | None = None,
 ) -> dict[str, Any]:
-    """Audit first; only after every gate passes, atomically write training inputs."""
+    """Audit assets and write bound lists; explicitly distinguish historical-only audits."""
     dataset = dataset_root.resolve()
     repo = repo_root.resolve()
     output = (output_dir or (dataset / "training_package")).resolve()
@@ -623,12 +628,17 @@ def create_preflight(
         )
         (stage / "data.yaml").write_text(data_yaml, encoding="utf-8")
         training_allowed, blockers = _training_gate(repo, contract["active_plan"])
+        historical_only = (contract["active_plan"].get("status") == PENDING_DESIGN
+                           or ("dataset_output" in contract["active_plan"] and not expected_dataset))
         argv = [sys.executable, "-m", "yoyo.datasets.ma_morphology_training_package", "train",
                 "--dataset-root", str(dataset), "--preflight-dir", str(output)]
         receipt = {
             "schema": "ma-morphology-training-preflight-v1",
-            "status": "dataset_ready" if training_allowed else "dataset_ready_training_blocked",
-            "dataset_ready": True,
+            "status": ("historical_dataset_audit_only" if historical_only else
+                       "dataset_ready" if training_allowed else "dataset_ready_training_blocked"),
+            "dataset_ready": not historical_only,
+            "asset_integrity_passed": True,
+            "historical_audit_only": historical_only,
             "training_eligible": training_allowed,
             "training_blockers": blockers,
             "dataset_root": str(dataset),
@@ -645,8 +655,8 @@ def create_preflight(
             "list_counts": list_counts,
             "list_sha256": {name: sha256_file(stage / name) for name in list_counts},
             "data_yaml_sha256": sha256_file(stage / "data.yaml"),
-            "training_command_argv": argv,
-            "training_command": shlex.join(argv),
+            "training_command_argv": None if historical_only else argv,
+            "training_command": None if historical_only else shlex.join(argv),
             "production_eligible": False,
             "active_model_changed": False,
         }
@@ -725,10 +735,11 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     preflight = sub.add_parser("preflight", help="audit the merged dataset and write lists/data.yaml")
-    preflight.add_argument("--dataset-root", type=Path, default=ROOT / DEFAULT_DATASET)
+    preflight.add_argument("--dataset-root", type=Path, required=True,
+                           help="explicit dataset to audit; no accepted default dataset")
     preflight.add_argument("--output-dir", type=Path)
     run = sub.add_parser("train", help="explicitly train on the remote CUDA host")
-    run.add_argument("--dataset-root", type=Path, default=ROOT / DEFAULT_DATASET)
+    run.add_argument("--dataset-root", type=Path, required=True)
     run.add_argument("--preflight-dir", type=Path)
     return parser
 

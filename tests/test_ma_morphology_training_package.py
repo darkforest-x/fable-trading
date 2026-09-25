@@ -161,6 +161,44 @@ def _audit(repo: Path, dataset: Path) -> dict:
     )
 
 
+@pytest.mark.parametrize("command", ["preflight", "train"])
+def test_cli_cannot_implicitly_select_withdrawn_position_dataset(command: str) -> None:
+    with pytest.raises(SystemExit) as exc:
+        package._parser().parse_args([command])
+    assert exc.value.code == 2
+
+
+def test_pending_detection_design_blocks_even_if_eligibility_flags_are_true(tmp_path: Path) -> None:
+    repo, _ = _make_dataset(tmp_path)
+    active = json.loads((repo / package.ACTIVE_PLAN).read_text())
+    active["status"] = package.PENDING_DESIGN
+    allowed, blockers = package._training_gate(repo, active)
+    assert allowed is False
+    assert any("design is unresolved" in reason for reason in blockers)
+    active.pop("status")
+    active["dataset_output"] = None
+    allowed, blockers = package._training_gate(repo, active)
+    assert allowed is False
+    assert any("no dataset selected" in reason for reason in blockers)
+
+
+def test_historical_audit_does_not_claim_training_ready_or_emit_training_command(tmp_path: Path) -> None:
+    repo, dataset = _make_dataset(tmp_path)
+    active = json.loads((repo / package.ACTIVE_PLAN).read_text())
+    active.update(status=package.PENDING_DESIGN, dataset_output=None)
+    _write_json(repo / package.ACTIVE_PLAN, active)
+    receipt = package.create_preflight(
+        dataset, repo_root=repo, env_result=_env(), expected_eval_counts={"val": 2, "test": 2},
+    )
+    assert receipt["status"] == "historical_dataset_audit_only"
+    assert receipt["asset_integrity_passed"] is True
+    assert receipt["historical_audit_only"] is True
+    assert receipt["dataset_ready"] is False
+    assert receipt["training_eligible"] is False
+    assert receipt["training_command"] is None
+    assert receipt["training_command_argv"] is None
+
+
 def test_preflight_writes_primary_and_challenge_lists_without_mixing_pools(tmp_path: Path) -> None:
     repo, dataset = _make_dataset(tmp_path)
     audit = _audit(repo, dataset)

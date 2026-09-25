@@ -89,17 +89,15 @@ experiments:
     workflow_stages:
     - dataset
     - training
-    title: YOLO v6：训练设计审计未通过，待整改
-    question: Can the existing1841 v6 events support at most three causal views each, and can Grade-A negatives be reused without
-      image-style, temporal-split or label-semantic conflicts?
-    single_variable: Owner-requested correction of render-window position at equal visible length. Original event/core label geometry
-      and training recipe retained; each view uses its actual later availability clock and negatives are re-screened over the expanded
-      union at unchanged thresholds.
-    result: Asset-only preparation previously passed on13948images, but learning design is NOT accepted. Corrected training positives
-      still have six rounded horizontal centers/two widths; crop-metadata-only templates recover all480test positive horizontal boxes
-      without images.267/6408train negatives are hard(89events), and corrected test hard negatives are absent.1841positive events
-      remain3R-selected rule candidates with no per-sample Owner confirmation. Existing v6A raw replay has766/773boxes at post5 and
-      documented padding sensitivity. New training has not started.
+    title: YOLO v6：回到低延迟识别目标，撤下后5/8/11根方案
+    question: How early can the current MA dense/launch state be detected near the observation right edge, with acceptable misses
+      and false alarms on continuous causal replay?
+    single_variable: Current correction is the detection objective and training entry only. No replacement dataset or model is built.
+      Next crop design must use case-specific early observation times and original core geometry, with at most three views per event.
+    result: R5/R8/R11 is withdrawn from the active training entry because adding post-core bars increases latency to satisfy a position
+      distribution goal. Near-right-edge concentration itself is consistent with the task; the prior horizontal-template baseline does
+      not disqualify it or measure false positives. Asset audits remain historical evidence. No current dataset is selected and no new
+      training has started. Earlier-prefix labels, difficult negatives, intended renderer and first-detection timing still need validation.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
@@ -115,11 +113,10 @@ experiments:
     - ma-morphology-v6-positions-20260925-review10
     - ma-morphology-v6-positions-20260925-learning-design-audit
     reuse_allowed: false
-    notes: Latest evidence is learning_design_audit_v1.json. Supersedes any interpretation of preparation receipts as training suitability;
-      does not rewrite historical files or discard datasets. Current candidates differ from the Grade-A notification adapter in MA
-      input,colors and viewport. Exact image-hash/event-ID split checks pass; visual near-duplicate audit and independently labeled
-      continuous replay acceptance remain incomplete. Old v6A trained40epochs in5908.98recorded seconds;B7829.46seconds. No model,monitor,notification
-      or threshold changes.
+    notes: Current entry is early_detection_contract_v1.json; old position_plan.json and learning_design_audit_v1.json are historical.
+      Do not replace fixed post5 with another global tuple, move labels independently, or append future candles to spread positions.
+      Measure first valid detection delay in bars/minutes and price already travelled, alongside false alarms and misses. A later
+      confirmed or3R-selected positive is not automatically an earlier-prefix positive. Training recipe and model state remain unchanged.
   - experiment_id: exp-spike-v128-vwap-20260924-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b410410ea034b8fc7e3f61afc980cd44e080bb18
