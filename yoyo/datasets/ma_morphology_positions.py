@@ -11,7 +11,8 @@ thresholds. Frozen P9 validation/test inputs remain separate reference rows.
 from __future__ import annotations
 
 import argparse
-from collections import Counter, defaultdict
+from collections import Counter, defaultdict, deque
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import json
 import os
@@ -84,6 +85,36 @@ def render_positions(frame: pd.DataFrame, row: dict, original_label: str) -> dic
     return result
 
 
+def _load_source_group(job):
+    """Read one frozen source; no screening, labels, or selection state mutates."""
+    source_path, group = job
+    path=ROOT/source_path
+    if path.is_file():
+        identities={r['source_sha256'] for r in group}
+        if len(identities)!=1 or sha(path) not in identities: raise ValueError('Source changed: '+source_path)
+        minutes={r['bar_minutes'] for r in group}
+        if len(minutes)!=1: raise ValueError('Mixed intervals in source')
+        step=pd.Timedelta(minutes=int(next(iter(minutes))))
+        frame=read_interval(path,min(utc(r['core_start_time']) for r in group)-1211*step,
+                            max(utc(r['core_end_time']) for r in group)+12*step)
+    else: frame=None
+    return source_path, group, frame
+
+
+def prefetched_groups(jobs, workers=3):
+    """Bound lookahead memory and preserve exact source/event processing order."""
+    pending=deque();iterator=iter(jobs)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for _ in range(workers):
+            job=next(iterator,None)
+            if job is not None:pending.append(pool.submit(_load_source_group,job))
+        while pending:
+            result=pending.popleft().result()
+            yield result
+            job=next(iterator,None)
+            if job is not None:pending.append(pool.submit(_load_source_group,job))
+
+
 def build(plan_path: Path, output: Path, pilot: bool=False) -> dict:
     plan=json.loads(plan_path.read_text())
     if plan['views'] != {k:list(v) for k,v in VIEWS.items()}: raise ValueError('Position contract drift')
@@ -130,17 +161,7 @@ def build(plan_path: Path, output: Path, pilot: bool=False) -> dict:
     for r in selected.values(): groups[r['source_path']].append(r)
     manifest,exclusions,screening=[],[],[]
     used=defaultdict(list)
-    for source_i,(source_path,group) in enumerate(sorted(groups.items()),1):
-        path=ROOT/source_path
-        if path.is_file():
-            identities={r['source_sha256'] for r in group}
-            if len(identities)!=1 or sha(path) not in identities: raise ValueError('Source changed: '+source_path)
-            minutes={r['bar_minutes'] for r in group}
-            if len(minutes)!=1: raise ValueError('Mixed intervals in source')
-            step=pd.Timedelta(minutes=int(next(iter(minutes))))
-            frame=read_interval(path,min(utc(r['core_start_time']) for r in group)-1211*step,
-                                max(utc(r['core_end_time']) for r in group)+12*step)
-        else: frame=None
+    for source_i,(source_path,group,frame) in enumerate(prefetched_groups(sorted(groups.items())),1):
         for r in sorted(group,key=lambda r:(r['core_start_time'],r['event_id'])):
             ident=r['event_id']; step=pd.Timedelta(minutes=int(r['bar_minutes']))
             lo=utc(r['core_start_time'])-11*step; hi=utc(r['core_end_time'])+12*step

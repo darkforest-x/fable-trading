@@ -58,3 +58,18 @@ def test_expanded_negative_screen_reads_the_new_visible_endpoint_only():
     extended=screen_window(frame,core_start_i=1211,core_end_i=1215,bar_minutes=3,post_bars=11)
     assert not extended['accepted'] and 'nonfinite_ohlc_in_support' in extended['reasons']
     with pytest.raises(ValueError):screen_window(frame,core_start_i=1211,core_end_i=1215,bar_minutes=3,post_bars=2)
+
+
+def test_bounded_prefetch_preserves_source_selection_order(monkeypatch):
+    from yoyo.datasets import ma_morphology_positions as module
+    import time
+    started=[]
+    def load(job):
+        started.append(job)
+        time.sleep(.015 if job==0 else .001)
+        return job
+    monkeypatch.setattr(module,'_load_source_group',load)
+    stream=module.prefetched_groups(range(9),workers=3)
+    assert next(stream)==0
+    assert set(started)=={0,1,2}
+    assert [0,*stream]==list(range(9))
