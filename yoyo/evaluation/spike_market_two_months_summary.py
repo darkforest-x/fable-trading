@@ -24,6 +24,8 @@ from yoyo.evaluation.spike_v128_recent_report import block_inference
 START = pd.Timestamp('2026-07-25T00:00:00Z')
 END = pd.Timestamp('2026-09-25T00:00:00Z')
 COST = 0.002
+# Numerical equality tolerance in price-return units, not a trading parameter.
+NET_FLOAT_EPS = 1e-12
 TIMEFRAMES = (5, 15, 60)
 ARMS = ('v9_both', 'joint')
 TABLES = ('trades', 'statuses', 'candidates', 'controls')
@@ -105,7 +107,7 @@ def _outcome_metrics(frame: pd.DataFrame, cost: float = COST) -> dict:
     fees_r = cost / _number(f, 'initial_risk_frac')
     mfe = _number(f, 'mfe_known_r')
     upper = _number(f, 'mfe_upper_r')
-    mfe_net = mfe - fees_r
+    net_float_positive = (mfe * _number(f, 'initial_risk_frac') - cost).gt(NET_FLOAT_EPS)
     wins, losses = net_r[net_r > 0], net_r[net_r < 0]
     out = {
         'trades_taken': int(all_n), 'closed_trades': int(len(f)),
@@ -139,8 +141,8 @@ def _outcome_metrics(frame: pd.DataFrame, cost: float = COST) -> dict:
         'mfe_upper_mean_r': _mean(upper),
         'stop_bar_excursion_ambiguous_n': (int(f['stop_bar_excursion_ambiguous'].map(_bool).sum())
                                            if 'stop_bar_excursion_ambiguous' in f else 0),
-        'net_floating_profit_then_loss_n': int((mfe_net.gt(0) & net_r.lt(0)).sum()),
-        'net_floating_profit_n': int(mfe_net.gt(0).sum()),
+        'net_floating_profit_then_loss_n': int((net_float_positive & net_r.lt(0)).sum()),
+        'net_floating_profit_n': int(net_float_positive.sum()),
         'mean_holding_hours': _mean(_number(f, 'holding_hours')),
         'median_holding_hours': _median(_number(f, 'holding_hours')),
     }
@@ -265,7 +267,8 @@ def _prepare_trades(trades: pd.DataFrame, cost: float = COST) -> pd.DataFrame:
     f['gross_bp'] = _number(f, 'gross_return') * 10_000
     f['fee_r'] = cost / _number(f, 'initial_risk_frac')
     f['mfe_known_net_r'] = _number(f, 'mfe_known_r') - f.fee_r
-    f['net_float_then_loss'] = f.mfe_known_net_r.gt(0) & _number(f, 'net_r').lt(0) & ~f._censored
+    f['net_float_then_loss'] = ((_number(f, 'mfe_known_r') * _number(f, 'initial_risk_frac') - cost).gt(NET_FLOAT_EPS)
+        & _number(f, 'net_r').lt(0) & ~f._censored)
     f['month_utc'] = f.signal_close.dt.strftime('%Y-%m')
     if 'holding_hours' not in f and {'entry_time', 'exit_time'} <= set(f):
         f['holding_hours'] = (f.exit_time - f.entry_time).dt.total_seconds() / 3600
@@ -657,6 +660,7 @@ def summarize(root: Path | str, output: Path | str | None = None) -> dict:
             'Matched comparisons use only matched controls whose signal and exit both fall within the requested window; inference is in net price bp with UTC-week blocks.',
             'Controls may be reused and their holding intervals may overlap; counts are included in matched_comparison.csv.',
             'Fixed round-trip cost is 20 bp; no realised funding series is available.',
+            'Net floating profit requires MFE price return minus cost > 1e-12; numerical equality at the cost boundary is not profit. Trading rules and costs are unchanged.',
             'Extreme rows are ranked independently by net price return and net R to expose denominator effects.',
             'Tail sensitivity removes the best one trade and best 1% by net price bp, not by net R.',
             'Exchange contract statuses are a current snapshot, not a historical count of active contracts during the replay window.',

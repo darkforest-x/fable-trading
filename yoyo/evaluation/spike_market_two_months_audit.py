@@ -80,7 +80,7 @@ def main():
             'censored':len(rows)-len(closed),'wins':sum(v>0 for v in net),'losses':sum(v<0 for v in net),
             'sum_net_r':math.fsum(net),'mean_net_bp':1e4*math.fsum(float(r['net_return']) for r in closed)/len(closed),
             'mfe_known_mean_r':math.fsum(float(r['mfe_known_r']) for r in closed)/len(closed),
-            'net_float_then_loss':sum(float(r['mfe_known_r'])>.002/float(r['initial_risk_frac']) and float(r['net_r'])<0 for r in closed),
+            'net_float_then_loss':sum(float(r['mfe_known_r'])*float(r['initial_risk_frac'])-.002>1e-12 and float(r['net_r'])<0 for r in closed),
             'matched_n':len(matched),'matched_excess_bp':1e4*math.fsum(float(r['net_return'])-r['_control_net_return'] for r in matched)/len(matched) if matched else None,
             'statuses':dict(status_counts[(arm,minutes)])})
     # Check both risk-normalized and actual-price extremes, never just a pretty winner.
@@ -109,7 +109,7 @@ def main():
         'method':'Independent standard-library reductions; raw OHLCV price/clock/MFE extreme checks',
         'groups':totals,'extreme_trades':extremes,'violations':violations,'passed':not violations,
         'native_pine_parity_verified':False,'production_eligible':False}
-    (EXP/'audit_v1.json').write_text(json.dumps(output,indent=2,ensure_ascii=False)+'\n')
+    (EXP/'audit_v2.json').write_text(json.dumps(output,indent=2,ensure_ascii=False)+'\n')
     print(json.dumps({'trades':len(seen),'groups':totals,'extremes_checked':len(extremes),'violations':violations[:20]},ensure_ascii=False))
     if violations:raise ValueError('Independent audit failed')
 
