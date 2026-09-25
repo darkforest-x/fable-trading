@@ -240,7 +240,7 @@ def audit(output: Path) -> dict:
 
 
 def negative_inventory(plan_path: Path, output: Path) -> dict:
-    """Record why old negative image bytes are not a ready mixed-timeframe pool."""
+    """Inventory reuse checks; timeframe metadata does not prohibit image pooling."""
     plan = json.loads(plan_path.read_text())
     grade_manifest = ROOT / 'datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl'
     negatives = [x for x in rows(grade_manifest) if x.get('sample_kind') == 'negative']
@@ -252,20 +252,22 @@ def negative_inventory(plan_path: Path, output: Path) -> dict:
         period_counts[minutes] += 1
     positive_periods = Counter(x['bar_minutes'] for x in positive)
     source_paths = {x['source_path'] for x in unique.values()}
-    result = {'schema': 'grade-a-v6-negative-compatibility-v1',
+    result = {'schema': 'grade-a-v6-negative-compatibility-v2',
         'grade_manifest_sha256': sha(grade_manifest), 'v6_ledger_sha256': plan['inputs']['ledger']['sha256'],
         'negative_images': len(negatives), 'negative_events': len(unique),
         'negative_event_splits': dict(Counter(x['split'] for x in unique.values())),
         'negative_event_kinds': dict(Counter(x['negative_kind'] for x in unique.values())),
         'negative_periods': dict(period_counts), 'positive_periods': dict(positive_periods),
+        'timeframe_difference_is_exclusion': False,
+        'model_scope': 'one shared visual morphology detector across timeframes',
+        'distribution_diagnostics': ['Keep timeframe/source metadata to measure stratified errors and possible label-correlated visual differences; unequal timeframe counts alone do not reject reuse.'],
         'source_paths': len(source_paths), 'source_paths_existing': sum((ROOT / x).exists() for x in source_paths),
         'source_sha_audit_performed': False, 'direct_png_reuse_ready': False, 'training_ready': False,
         'reasons': ['Existing Grade-A image geometry, colors/MA representation and 7/8 variants differ from new HL2 three-view inputs.',
-                    'Old negatives are 15m-only; using them as all multi-timeframe negatives creates an unmatched population.',
                     'Old val overlaps new validation/test calendar; cannot promote it into training.',
                     'Hard labels mean no launch, not no density or loss; reuse only under explicit dense-launch semantics and observable post-five criteria.',
                     'Re-render and recheck source identity, candidate/gold overlap, chronological partition and complete visible-window label coverage.'],
-        'candidate_policy': 'Consider old train event identities as a 15m negative candidate pool; do not copy PNGs or treat this inventory as label approval.',
+        'candidate_policy': 'Consider old train events for the shared multi-timeframe negative pool after label, render, source, protection and split checks; a15m origin is not an exclusion. Inventory is not label approval.',
         'training_eligible': False, 'production_eligible': False}
     write_json(output, result)
     return result
