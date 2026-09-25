@@ -1,0 +1,109 @@
+{
+  "source_summary_receipt_sha256": "ce01b5e037bbb706e7952e659d4ce1fc93d9c8f6e44b1e3ffb28eb69973ea178",
+  "source_config": {
+    "bootstrap": 2000,
+    "control_pools": [
+      "baseline",
+      "wait3",
+      "retest"
+    ],
+    "control_seed": 923128,
+    "diagnostic_wait_bars": 3,
+    "end": "2026-09-23T04:00:00Z",
+    "experiment_id": "exp-spike-v128-retest-entry-20260923-v1",
+    "initial_position_policy": "carry_parent_position_at_window_start",
+    "max_wait_bars": 24,
+    "parent_run": "experiments/active/exp-spike-v128-recent-20260923-v1/run_v1",
+    "primary_policy": "retest",
+    "production_eligible": false,
+    "round_trip_cost": 0.002,
+    "split": "2026-08-23T00:00:00Z",
+    "start": "2026-07-23T00:00:00Z",
+    "statistics_seed": 923231,
+    "timeframes": [
+      15,
+      60
+    ],
+    "training_eligible": false
+  },
+  "source_code": {
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_symbols.py": "d359e8b5575151b0d763bd560ef75acc82f22b36c5438f718ff978a4a32a3c55",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_report.py": "4e052537ae6a7e8f67a97533ab3e73b8791de18307617c0d139a9dde68dd5a6b",
+    "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_report.py": "da702400a3c998cf2d7a1e12459ed608c51951c3d12c6489ce0c657735d6b312"
+  },
+  "command": ".venv/bin/python -m yoyo.evaluation.spike_v128_retest_symbols --experiment experiments/active/exp-spike-v128-retest-entry-20260923-v1 --output experiments/active/exp-spike-v128-retest-entry-20260923-v1/symbol_detail_20260925_v2",
+  "symbols": 638,
+  "metric_rows": 5104,
+  "comparison_rows": 2552,
+  "aggregate_checks": [
+    {
+      "timeframe_min": 15,
+      "arm": "joint",
+      "policy": "baseline",
+      "closed": 2736,
+      "matched": 2697
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "joint",
+      "policy": "retest",
+      "closed": 327,
+      "matched": 49
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "v9_both",
+      "policy": "baseline",
+      "closed": 5842,
+      "matched": 5799
+    },
+    {
+      "timeframe_min": 15,
+      "arm": "v9_both",
+      "policy": "retest",
+      "closed": 776,
+      "matched": 138
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "joint",
+      "policy": "baseline",
+      "closed": 656,
+      "matched": 651
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "joint",
+      "policy": "retest",
+      "closed": 76,
+      "matched": 19
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "v9_both",
+      "policy": "baseline",
+      "closed": 1281,
+      "matched": 1269
+    },
+    {
+      "timeframe_min": 60,
+      "arm": "v9_both",
+      "policy": "retest",
+      "closed": 183,
+      "matched": 39
+    }
+  ],
+  "definitions": {
+    "venue": "Binance USD-M archived universe; not native TradingView parity",
+    "returns": "Closed trades only, fixed 20bp round-trip. R uses each trade initial risk; sums are not account returns.",
+    "random": "Same-policy closed-fill matched subset; unmatched stays NaN. Symbol p-values exploratory, not corrected across symbols.",
+    "periods": "UTC 2026-08-23 split by original anchor; earlier resolved before split, crossing positions separate.",
+    "zero_rows": "No trade is distinct from no ready market bars; inspect per-stream coverage.",
+    "scope": "Retrospective aggregation only; no new backtest, model score, AUC, or top-decile selection."
+  },
+  "files": {
+    "逐币原版回踩对照.csv": "3cd14e01458831826b0fa2624d64b8eaaf62cb00214ab859e5748e6a416e5dd0",
+    "trade_details_beijing.csv": "73183a16132d90640aa2f08078a8ca0a4fbbfee07b378457ca899a723b2aea74",
+    "symbol_metrics.csv": "0de72212b6a7ee032599fb310f402d29d0820cc76b8ba528a2988ff32e294bf3"
+  }
+}

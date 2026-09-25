@@ -1,0 +1,10 @@
+{
+  "status": "incomplete_export_not_final",
+  "failures": [
+    "Initial dict(groupby) construction rejected; changed to explicit iteration before artifact creation.",
+    "Boolean normalization mistakenly touched numeric summary counters; aggregate reconciliation rejected output before writing. Restricted normalization to event ledgers.",
+    "All aggregate checks and three CSV exports passed; receipt serialization rejected NumPy integer. Final exporter casts minute key to native int and reruns into v2."
+  ],
+  "strategy_changed": false,
+  "final_output": "../symbol_detail_20260925_v2"
+}

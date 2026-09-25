@@ -18,6 +18,23 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v128-retest-symbol-detail-20260925-v2
+    artifact_type: manifest
+    role: per_symbol_baseline_retest_comparison_and_trade_ledger
+    source_repo: darkforest-x/fable-trading
+    source_commit: e5c702587c9e30847a26b7fe5133bf6131e8826b
+    source_path: experiments/active/exp-spike-v128-retest-entry-20260923-v1/symbol_detail_20260925_v2/receipt.json
+    sha256: c09887492c3b3818a0de69a05c6548b3b77f825c9af2bd3203fb05df358243ee
+    size_bytes: 3718
+    storage_uri: repo://experiments/active/exp-spike-v128-retest-entry-20260923-v1/symbol_detail_20260925_v2/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen two-month ledgers only;638 symbols,5104 metric rows,2552 paired comparison rows.
+      Original aggregate counts,weighted returns,and matched excess reconcile;583 symbols have ready bars.
+      Includes zero-data coverage,zero-entry groups,censoring,matched random subsets,and Beijing trade times.
+      No new market replay or Pine parity;per-symbol results are descriptive and sparse.
+
   - artifact_id: ma-morphology-v6-positions-20260925-learning-design-audit
     artifact_type: manifest
     role: learning_design_blockers_distinct_from_asset_integrity
