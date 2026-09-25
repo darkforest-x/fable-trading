@@ -1,0 +1,50 @@
+// BEGIN V130 RETEST CORE
+// Source: spike_v128_retest_state.confirmation; only completed chart bars.
+// Pine execution/rollback: https://www.tradingview.com/pine-script-docs/language/execution-model/
+// Stage 0=breakout, 1=retest, 2=rebreak. Result 0=pending, 1=confirmed,
+// 2=expired, 3=gap, 4=opposite, 5=stop, 6=lost level, 7=invalid anchor open.
+f_v130_step(int stage, float extreme, int side, float level, float stop, int age, float o, float h, float l, float c, bool gap, int rawSide, int limit) =>
+    int nextStage = stage
+    float nextExtreme = extreme
+    int result = 0
+    if gap
+        result := 3
+    else if age == 1 and (o <= 0 or side * (o - stop) <= 0)
+        result := 7
+    else if rawSide == -side
+        result := 4
+    else if (side == 1 ? l <= stop : h >= stop)
+        result := 5
+    else if stage > 0 and side * (c - level) <= 0
+        result := 6
+    else if age > limit
+        result := 2
+    else if stage == 0
+        if side * (c - level) > 0
+            nextStage := 1
+            nextExtreme := side == 1 ? h : l
+    else if stage == 1
+        if (side == 1 ? l <= level : h >= level)
+            nextStage := 2
+        else
+            nextExtreme := side == 1 ? math.max(extreme, h) : math.min(extreme, l)
+    else if side * (c - extreme) > 0
+        result := 1
+    if result == 0 and age >= limit
+        result := 2
+    [nextStage, nextExtreme, result]
+
+type V130Candidate
+    int anchor
+    int anchorTime
+    int side
+    float level
+    float stop
+    int stage = 0
+    float extreme = na
+    int breakout = na
+    int retest = na
+
+f_v130_reason(int code) =>
+    code == 2 ? "24根到期" : code == 3 ? "数据断档" : code == 4 ? "原始反向信号" : code == 5 ? "原止损触及" : code == 6 ? "收盘失守原价位" : code == 7 ? "原次开风险无效" : "等待确认"
+// END V130 RETEST CORE

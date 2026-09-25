@@ -1,0 +1,209 @@
+// BEGIN V130 RETEST LAYER
+// Keep the parent's candidate/reference engine intact: its state defines joint
+// anchors. Feeding delayed entries into that engine would change the hypothesis.
+// Objects persist at closed bars; no varip state or retrospective arrow offsets.
+// Source: https://www.tradingview.com/pine-script-docs/language/objects/
+var array<V130Candidate> v130Queue = array.new<V130Candidate>()
+var V130Candidate v130Scheduled = na
+var int v130ScheduledBar = na
+var int v130Side = 0
+var int v130EntryBar = na
+var float v130Entry = na
+var float v130InitialStop = na
+var float v130Risk = na
+var float v130Protection = na
+var float v130Peak = 0.0
+var bool v130Armed = false
+var bool v130ReversePending = false
+var string v130LastStatus = "等待原始候选"
+var int v130LastAnchor = na
+var int v130LastConfirm = na
+var float v130LastConfirmPrice = na
+var int v130ConfirmedCount = 0
+var int v130OccupiedCount = 0
+var int v130CanceledCount = 0
+var int v130FillCount = 0
+var array<label> v130Tags = array.new<label>()
+var array<box> v130Boxes = array.new<box>()
+var box v130RiskBox = na
+var box v130RewardBox = na
+bool v130Confirmed = false
+int v130ConfirmedSide = 0
+bool v130Entered = false
+bool v130Exited = false
+bool v130GapEnded = false
+float v130ExitPrice = na
+float v130ExitNetR = na
+string v130ExitReason = ""
+float v130BarProtection = v130Side != 0 ? v130Protection : na
+
+// Evaluate stop geometry at the ORIGINAL anchor close, including that bar's
+// five-bar extreme and ATR. The next open validates risk but never moves stop.
+[v130LongStop, v130LongRisk, v130LongValid] = f_risk(1, close, recentLow, atr, riskFloor, stopBuffer, syminfo.mintick)
+[v130ShortStop, v130ShortRisk, v130ShortValid] = f_risk(-1, close, recentHigh, atr, riskFloor, stopBuffer, syminfo.mintick)
+int v130BarsSinceGap = ta.barssince(dataGap)
+// The original five-bar window rejects a gap even at its oldest included bar.
+bool v130StopHistoryValid = pricesValid and bar_index >= stopLen - 1 and (na(v130BarsSinceGap) or v130BarsSinceGap >= stopLen)
+
+if v130Retest and barstate.isconfirmed
+    if dataGap or not pricesValid
+        v130GapEnded := v130Side != 0
+        v130Side := 0
+        v130ReversePending := false
+        v130Scheduled := na
+        array.clear(v130Queue)
+        v130LastStatus := "数据断档：等待新候选"
+        if not na(v130RiskBox)
+            box.set_right(v130RiskBox, bar_index - 1)
+            box.set_right(v130RewardBox, bar_index - 1)
+            v130RiskBox := na
+            v130RewardBox := na
+    else
+        // A raw opposite CLOSE schedules exit at the following OPEN. A gap
+        // through protection uses that open too, before the new bar's range.
+        if v130Side != 0 and v130ReversePending
+            v130Exited := true
+            v130ExitPrice := open
+            v130ExitReason := (v130Side == 1 ? open <= v130Protection : open >= v130Protection) ? "开盘越过保护" : "原始反向后次开"
+            v130ReversePending := false
+
+        // A selected confirmation only becomes a reference on its next bar.
+        // This is a modelled open, not a broker fill. Rollback repeats the same
+        // deterministic operation on each realtime update; no intrabar commit.
+        if not na(v130Scheduled) and bar_index == v130ScheduledBar + 1 and v130Side == 0
+            float distance = v130Scheduled.side * (open - v130Scheduled.stop)
+            if open > 0 and distance > 0
+                v130Side := v130Scheduled.side
+                v130EntryBar := bar_index
+                v130Entry := open
+                v130InitialStop := v130Scheduled.stop
+                v130Risk := distance
+                v130Protection := v130InitialStop
+                v130BarProtection := v130InitialStop
+                v130Peak := 0.0
+                v130Armed := false
+                v130ReversePending := false
+                v130Entered := true
+                v130FillCount += 1
+                v130LastStatus := "次开参考已建立"
+                if v130ShowRisk and not v126Minimal
+                    while array.size(v130Boxes) >= 40
+                        box.delete(array.shift(v130Boxes))
+                    float target = math.max(syminfo.mintick, v130Entry + v130Side * 3.0 * v130Risk)
+                    v130RiskBox := box.new(bar_index, math.max(v130Entry, v130InitialStop), bar_index + 1, math.min(v130Entry, v130InitialStop), border_color=color.new(bear, 55), bgcolor=color.new(bear, 93), force_overlay=true)
+                    v130RewardBox := box.new(bar_index, math.max(v130Entry, target), bar_index + 1, math.min(v130Entry, target), border_color=color.new(bull, 65), bgcolor=color.new(bull, 95), force_overlay=true)
+                    array.push(v130Boxes, v130RiskBox)
+                    array.push(v130Boxes, v130RewardBox)
+                if showLabels and not v126Minimal
+                    string tip = "原信号：" + str.format_time(v130Scheduled.anchorTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n原冻结价位：" + str.tostring(v130Scheduled.level, format.mintick) + "\n原绝对止损：" + str.tostring(v130InitialStop, format.mintick) + "\n次开模型参考：" + str.tostring(open, format.mintick) + "\n初始风险：" + str.tostring(v130Risk, format.mintick) + "\n不是账户成交；止损不移到回踩低点。"
+                    array.push(v130Tags, label.new(bar_index, open, "次开 " + str.tostring(open, format.mintick), style=v130Side == 1 ? label.style_label_up : label.style_label_down, color=color.new(v130Side == 1 ? bull : bear, 86), textcolor=v130Side == 1 ? bull : bear, size=size.tiny, tooltip=tip, force_overlay=true))
+            else
+                v130LastStatus := "确认后次开风险无效"
+        v130Scheduled := na
+
+        // Include the ENTRY bar. Test the protection already active at its
+        // open before close-based 2R activation / 4ATR ratcheting for NEXT bar.
+        if v130Side != 0 and not v130Exited
+            bool stopTouched = v130Side == 1 ? low <= v130Protection : high >= v130Protection
+            if stopTouched
+                v130Exited := true
+                v130ExitPrice := v130Side == 1 ? math.min(open, v130Protection) : math.max(open, v130Protection)
+                v130ExitReason := "保护触及"
+            else
+                v130Peak := math.max(v130Peak, v130Side * ((v130Side == 1 ? high : low) - v130Entry) / v130Risk)
+                float closeR = v130Side * (close - v130Entry) / v130Risk
+                v130Armed := v130Armed or closeR >= armR
+                if v130Armed and atr > 0
+                    float rawProtection = close - v130Side * trailAtr * atr
+                    float nextProtection = v130Side == 1 ? math.floor(rawProtection / syminfo.mintick) * syminfo.mintick : math.ceil(rawProtection / syminfo.mintick) * syminfo.mintick
+                    v130Protection := v130Side == 1 ? math.max(v130Protection, nextProtection) : math.min(v130Protection, nextProtection)
+                v130ReversePending := rawSignalSide == -v130Side
+
+        if v130Side != 0 and not na(v130RiskBox)
+            box.set_right(v130RiskBox, bar_index + (v130Exited ? 0 : 1))
+            box.set_right(v130RewardBox, bar_index + (v130Exited ? 0 : 1))
+        if v130Exited
+            v130ExitNetR := (v130Side * (v130ExitPrice / v130Entry - 1) - roundTripCost) * v130Entry / v130Risk
+            v130LastStatus := v130ExitReason + " · 净 " + str.tostring(v130ExitNetR, "#.##") + "R"
+            if v130ShowRisk and not v126Minimal
+                array.push(v130Tags, label.new(bar_index, v130ExitPrice, "结束 " + str.tostring(v130ExitNetR, "#.##") + "R", style=label.style_none, textcolor=v130ExitNetR > 0 ? bull : bear, size=size.tiny, tooltip=v130ExitReason + "；扣固定0.2%往返成本的模型净R，不是账户收益。", force_overlay=true))
+            v130Side := 0
+            v130ReversePending := false
+            v130RiskBox := na
+            v130RewardBox := na
+
+        // Oldest anchor wins simultaneous confirmations. Every anchor advances
+        // independently, including during an existing position; occupied
+        // confirmations expire rather than being carried to a later free bar.
+        int q = 0
+        while q < array.size(v130Queue)
+            V130Candidate item = array.get(v130Queue, q)
+            int age = bar_index - item.anchor
+            [stage, extreme, result] = f_v130_step(item.stage, item.extreme, item.side, item.level, item.stop, age, open, high, low, close, false, rawSignalSide, V130_WAIT)
+            if stage == 1 and item.stage == 0
+                item.breakout := bar_index
+            if stage == 2 and item.stage == 1
+                item.retest := bar_index
+            item.stage := stage
+            item.extreme := extreme
+            if result == 1
+                if v130Side == 0 and na(v130Scheduled)
+                    v130Scheduled := item.copy()
+                    v130ScheduledBar := bar_index
+                    v130Confirmed := true
+                    v130ConfirmedSide := item.side
+                    v130ConfirmedCount += 1
+                    v130LastAnchor := item.anchorTime
+                    v130LastConfirm := time_close
+                    v130LastConfirmPrice := close
+                    v130LastStatus := "回踩再突破已确认；等待次开"
+                    if showLabels and not v126Minimal
+                        string tip = "回踩再突破确认，尚未成交。\n原信号：" + str.format_time(item.anchorTime, "MM-dd HH:mm", "Asia/Shanghai") + " 北京时间\n等待：" + str.tostring(age) + "根\n冻结价位：" + str.tostring(item.level, format.mintick) + "\n首段极值：" + str.tostring(item.extreme, format.mintick) + "\n确认收盘：" + str.tostring(close, format.mintick) + "\n下一根开盘建立模型参考；三个步骤不同K线。"
+                        array.push(v130Tags, label.new(bar_index, item.side == 1 ? low - atr * 0.4 : high + atr * 0.4, (item.side == 1 ? "回踩多" : "回踩空") + " · " + str.tostring(close, format.mintick), style=item.side == 1 ? label.style_label_up : label.style_label_down, color=color.new(item.side == 1 ? bull : bear, 80), textcolor=item.side == 1 ? bull : bear, size=size.small, tooltip=tip, force_overlay=true))
+                else
+                    v130OccupiedCount += 1
+            else if result > 1
+                v130CanceledCount += 1
+                if v130Side == 0 and na(v130Scheduled)
+                    v130LastStatus := f_v130_reason(result)
+            if result != 0
+                array.remove(v130Queue, q)
+            else
+                q += 1
+
+        int anchorSide = v130Arm == "联合多头" ? (v11AnyJoint ? 1 : 0) : signalSide
+        bool anchorValid = anchorSide == 1 ? v130LongValid : anchorSide == -1 ? v130ShortValid : false
+        if anchorSide != 0 and anchorValid and v130StopHistoryValid
+            array.push(v130Queue, V130Candidate.new(bar_index, time_close, anchorSide, anchorSide == 1 ? high : low, anchorSide == 1 ? v130LongStop : v130ShortStop))
+
+    while array.size(v130Tags) > 60
+        label.delete(array.shift(v130Tags))
+
+float v130WaitingLevel = array.size(v130Queue) > 0 ? array.get(v130Queue, 0).level : na
+float v130WaitingExtreme = array.size(v130Queue) > 0 ? array.get(v130Queue, 0).extreme : na
+// Separate break segments: avoid drawing a diagonal from an ended reference.
+plot(v130Retest and v130ShowRisk and not v126Minimal and (v130Side != 0 or v130Exited) ? v130BarProtection : na, "V13 本根有效保护", color=bear, style=plot.style_linebr, force_overlay=true)
+plot(v130Retest and v130ShowRisk and not v126Minimal and (v130Side != 0 or v130Exited) ? v130Entry : na, "V13 次开参考价", color=ink, style=plot.style_linebr, force_overlay=true)
+plot(v130Retest and v130ShowLevels and not v126Minimal ? v130WaitingLevel : na, "V13 待确认原价位", color=color.new(gold, 35), style=plot.style_circles, force_overlay=true)
+plot(v130Retest and v130ShowLevels and not v126Minimal ? v130WaitingExtreme : na, "V13 首段极值", color=color.new(blue, 45), style=plot.style_circles, force_overlay=true)
+plot(v130Retest and barstate.isconfirmed ? v130ConfirmedSide : na, "V13 回踩确认方向", display=display.data_window)
+plot(v130Retest and barstate.isconfirmed ? (v130Entered ? 1 : 0) : na, "V13 次开参考事件", display=display.data_window)
+plot(v130Retest and barstate.isconfirmed ? v130ExitNetR : na, "V13 结束净R（固定20bp）", display=display.data_window)
+
+var table v130Panel = table.new(position.bottom_center, 2, 4, bgcolor=color.new(chart.bg_color, 8))
+if barstate.islast and v130Retest and showPanel
+    table.cell(v130Panel, 0, 0, "V13.0 · " + v130Arm, text_color=ink, text_size=size.small)
+    table.cell(v130Panel, 1, 0, v130LastStatus, text_color=v130Side == 0 ? gold : bull, text_size=size.small)
+    table.cell(v130Panel, 0, 1, "等待 / 已确认 / 次开", text_color=muted, text_size=size.tiny)
+    table.cell(v130Panel, 1, 1, str.tostring(array.size(v130Queue)) + " / " + str.tostring(v130ConfirmedCount) + " / " + str.tostring(v130FillCount), text_color=ink, text_size=size.tiny)
+    table.cell(v130Panel, 0, 2, "最近确认 · 北京", text_color=muted, text_size=size.tiny)
+    table.cell(v130Panel, 1, 2, na(v130LastConfirm) ? "—" : str.format_time(v130LastConfirm, "MM-dd HH:mm", "Asia/Shanghai") + " · " + str.tostring(v130LastConfirmPrice, format.mintick), text_color=ink, text_size=size.tiny)
+    table.cell(v130Panel, 0, 3, "等待上限 / 历史研究", text_color=muted, text_size=size.tiny)
+    table.cell(v130Panel, 1, 3, "24根 · " + (timeframe.in_seconds() == 900 or timeframe.in_seconds() == 3600 ? "15m与1h已研究" : "本周期未回测"), text_color=muted, text_size=size.tiny)
+
+// Confirmed-bar alerts notify the decision, never a historical/actual fill.
+// Source: https://www.tradingview.com/pine-script-docs/concepts/bar-states/#barstateisconfirmed
+alertcondition(v130Retest and v130Confirmed, "SPIKE V13.0 回踩再突破确认", "SPIKE V13.0 回踩再突破确认 | {{exchange}}:{{ticker}} | {{interval}} | 确认收盘 {{close}} | 下一根开盘模型参考，非账户成交")
+alertcondition(v130Retest and v130ConfirmedSide == 1, "SPIKE V13.0 回踩多头", "SPIKE V13.0 回踩多头确认 | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
+alertcondition(v130Retest and v130ConfirmedSide == -1, "SPIKE V13.0 回踩空头", "SPIKE V13.0 回踩空头确认 | {{exchange}}:{{ticker}} | {{interval}} | 收盘 {{close}}")
+// END V130 RETEST LAYER
