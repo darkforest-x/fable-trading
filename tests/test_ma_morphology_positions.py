@@ -73,3 +73,16 @@ def test_bounded_prefetch_preserves_source_selection_order(monkeypatch):
     assert next(stream)==0
     assert set(started)=={0,1,2}
     assert [0,*stream]==list(range(9))
+
+
+def test_fast_recolor_matches_original_per_pixel_and_does_not_mutate_input():
+    from yoyo.layers.l1_detection import render as chart
+    rng=np.random.default_rng(25)
+    image=rng.integers(0,256,(742,1280,3),dtype=np.uint8)
+    image[::3,::3]=chart.CANDLE_GREEN
+    image[1::3,1::3]=chart.CANDLE_RED
+    unchanged=image.copy();expected=image.copy()
+    expected[np.all(expected==chart.CANDLE_GREEN,axis=2)]=renderer.UP_BLUE
+    expected[np.all(expected==chart.CANDLE_RED,axis=2)]=renderer.DOWN_PURPLE
+    assert np.array_equal(renderer._recolor_candles(image),expected)
+    assert np.array_equal(image,unchanged)

@@ -83,8 +83,11 @@ def _recolor_candles(image: np.ndarray) -> np.ndarray:
     """Keep the shared renderer geometry while applying the requested blue/purple candles."""
 
     output = image.copy()
-    output[np.all(output == chart_render.CANDLE_GREEN, axis=2)] = UP_BLUE
-    output[np.all(output == chart_render.CANDLE_RED, axis=2)] = DOWN_PURPLE
+    # Exact inclusive bounds preserve the old three-channel equality rule.
+    # OpenCV avoids two full H*W*3 Boolean arrays and axis reductions per PNG.
+    for original, target in ((chart_render.CANDLE_GREEN, UP_BLUE),
+                             (chart_render.CANDLE_RED, DOWN_PURPLE)):
+        output[cv2.inRange(output, original, original) != 0] = target
     return output
 
 
