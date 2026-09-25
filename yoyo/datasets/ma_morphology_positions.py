@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict, deque
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import hashlib
 import json
 import os
@@ -115,6 +115,64 @@ def prefetched_groups(jobs, workers=3):
             if job is not None:pending.append(pool.submit(_load_source_group,job))
 
 
+def _process_source_group(job):
+    """Independent source work; final overlap selection stays in the parent."""
+    source_path, group, reasons, recovery, grade_neg, protocol, parent = job
+    parent=Path(parent)
+    if any(r['event_id'] not in reasons for r in group):
+        _,_,frame=_load_source_group((source_path,group))
+    else: frame=None
+    results=[]
+    for r in sorted(group,key=lambda r:(r['core_start_time'],r['event_id'])):
+        ident=r['event_id'];step=pd.Timedelta(minutes=int(r['bar_minutes']))
+        reason=reasons.get(ident); recovered=None; evidence=None; rendered=None
+        if not reason:
+            if frame is None:
+                recovered=recovery[ident]
+                if recovered['full_csv_sha256_verified']!=r['source_sha256'] or recovered['post_rows']!=11: raise ValueError('Recovery source mismatch')
+                recovered_path=ROOT/recovered['path']
+                if sha(recovered_path)!=recovered['sha256']: raise ValueError('Recovery slice changed')
+                current=read_interval(recovered_path,utc(r['core_start_time'])-1211*step,utc(r['core_end_time'])+12*step)
+            else: current=frame
+            support=event_support(current,r)
+            if r['sample_kind']=='negative':
+                if r['negative_kind']=='whole_view_non_dense':
+                    evidence=screen_window(support,core_start_i=1211,core_end_i=1210+int(r['core_bars']),bar_minutes=int(r['bar_minutes']),post_bars=11)
+                else:
+                    evidence,_=screen_negative(support,grade_neg[r['legacy_negative_event_id']],protocol,post_bars=11)
+            if evidence is None or evidence['accepted']:
+                if sha(parent/r['label_path'])!=r['label_sha256'] or sha(parent/r['image_path'])!=r['image_sha256']: raise ValueError('Original training asset changed')
+                rendered=render_positions(support,r,(parent/r['label_path']).read_text())
+        results.append((r,reason,recovered,evidence,rendered))
+    return results
+
+
+def processed_groups(groups, parent_plan, protected, recovery, grade_neg, protocol, parent):
+    """Keep at most three source jobs/results resident and yield canonical order."""
+    def jobs():
+        for source_path, group in sorted(groups.items()):
+            reasons={}
+            for r in group:
+                step=pd.Timedelta(minutes=int(r['bar_minutes']))
+                lo=utc(r['core_start_time'])-11*step;hi=utc(r['core_end_time'])+12*step
+                reason=None
+                if not in_split(lo,hi,r['split'],parent_plan):reason='expanded_window_or_safety_crosses_split'
+                if r['sample_kind']=='negative' and overlaps(lo,hi,protected.get(canonical_asset(r['canonical_asset']),[])):
+                    reason='expanded_candidate_or_gold_protection'
+                if reason:reasons[r['event_id']]=reason
+            yield (source_path,group,reasons,{r['event_id']:recovery['events'][r['event_id']] for r in group if r['event_id'] in recovery['events']},
+                {r['legacy_negative_event_id']:grade_neg[r['legacy_negative_event_id']] for r in group if r.get('legacy_negative_event_id')},protocol,str(parent))
+    pending=deque();iterator=iter(jobs())
+    with ProcessPoolExecutor(max_workers=3) as pool:
+        for _ in range(3):
+            job=next(iterator,None)
+            if job is not None:pending.append(pool.submit(_process_source_group,job))
+        while pending:
+            yield pending.popleft().result()
+            job=next(iterator,None)
+            if job is not None:pending.append(pool.submit(_process_source_group,job))
+
+
 def build(plan_path: Path, output: Path, pilot: bool=False) -> dict:
     plan=json.loads(plan_path.read_text())
     if plan['views'] != {k:list(v) for k,v in VIEWS.items()}: raise ValueError('Position contract drift')
@@ -161,38 +219,20 @@ def build(plan_path: Path, output: Path, pilot: bool=False) -> dict:
     for r in selected.values(): groups[r['source_path']].append(r)
     manifest,exclusions,screening=[],[],[]
     used=defaultdict(list)
-    for source_i,(source_path,group,frame) in enumerate(prefetched_groups(sorted(groups.items())),1):
-        for r in sorted(group,key=lambda r:(r['core_start_time'],r['event_id'])):
-            ident=r['event_id']; step=pd.Timedelta(minutes=int(r['bar_minutes']))
-            lo=utc(r['core_start_time'])-11*step; hi=utc(r['core_end_time'])+12*step
-            reason=None; evidence=None
-            if not in_split(lo,hi,r['split'],parent_plan): reason='expanded_window_or_safety_crosses_split'
+    for source_i,processed in enumerate(processed_groups(groups,parent_plan,protected,recovery,grade_neg,protocol,parent),1):
+        for r,reason,recovered,evidence,rendered in processed:
+            ident=r['event_id'];step=pd.Timedelta(minutes=int(r['bar_minutes']))
+            lo=utc(r['core_start_time'])-11*step;hi=utc(r['core_end_time'])+12*step
             if r['sample_kind']=='negative':
                 asset=canonical_asset(r['canonical_asset'])
-                if overlaps(lo,hi,protected.get(asset,[])): reason='expanded_candidate_or_gold_protection'
-                elif overlaps(lo,hi,used[asset]): reason='expanded_negative_overlap'
+                if not reason and overlaps(lo,hi,used[asset]):reason='expanded_negative_overlap'
             if reason:
                 exclusions.append({'event_id':ident,'reason':reason,'sample_kind':r['sample_kind']});continue
-            recovered=None
-            if frame is None:
-                recovered=recovery['events'][ident]
-                if recovered['full_csv_sha256_verified']!=r['source_sha256'] or recovered['post_rows']!=11: raise ValueError('Recovery source mismatch')
-                recovered_path=ROOT/recovered['path']
-                if sha(recovered_path)!=recovered['sha256']: raise ValueError('Recovery slice changed')
-                current=read_interval(recovered_path,utc(r['core_start_time'])-1211*step,hi)
-            else: current=frame
-            support=event_support(current,r)
-            if r['sample_kind']=='negative':
-                if r['negative_kind']=='whole_view_non_dense':
-                    evidence=screen_window(support,core_start_i=1211,core_end_i=1210+int(r['core_bars']),bar_minutes=int(r['bar_minutes']),post_bars=11)
-                else:
-                    evidence,_=screen_negative(support,grade_neg[r['legacy_negative_event_id']],protocol,post_bars=11)
+            if evidence is not None:
                 screening.append({'event_id':ident,'screen':evidence})
                 if not evidence['accepted']:
                     exclusions.append({'event_id':ident,'reason':'|'.join(evidence['reasons']),'sample_kind':'negative'});continue
                 used[asset].append((lo,hi))
-            if sha(parent/r['label_path'])!=r['label_sha256'] or sha(parent/r['image_path'])!=r['image_sha256']: raise ValueError('Original training asset changed')
-            rendered=render_positions(support,r,(parent/r['label_path']).read_text())
             for variant,item in rendered.items():
                 stem=render.asset_stem(ident,variant)
                 ip,lp=f"images/{r['split']}/{stem}.png",f"labels/{r['split']}/{stem}.txt"
