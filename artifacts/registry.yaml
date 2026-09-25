@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: ma-morphology-v6-threeview-20260925-future-review20
+    artifact_type: manifest
+    role: owner_sample_review_with_future_context_and_original_label_boxes
+    source_repo: darkforest-x/fable-trading
+    source_commit: 76fb160c6548cd173b5c2ba8384a9fbd1304920c
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/review_future20_v2/review_manifest.json
+    sha256: bb8e246022f5805d2aea3aeb3db5a9fad8eb30846cc8fe23b7926edf04e104a8
+    size_bytes: 28617
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/review_future20_v2/review_manifest.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 20 fixed train events:10positive(5long/5short),10negative(5hard/5background). Each chart adds40future bars after
+      the original cutoff. Original training PNG/TXT hashes unchanged;20causal PNG replays match. Actual TXT boxes projected
+      through original bar/price geometry; review inputs are never training inputs. No performance or label-approval claim.
   - artifact_id: spike-manual-system-20260925-recent-two-months
     artifact_type: manifest
     role: descriptive_recent_two_month_spike_ledger_slice
