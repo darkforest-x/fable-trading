@@ -26,7 +26,7 @@ from yoyo.layers.l1_detection import render
 
 ROOT = Path(__file__).resolve().parents[2]
 EXP = ROOT / 'experiments/active/exp-ma-morphology-v6-threeview-20260925-v1'
-SELECTION = EXP / 'review20_selection.json'
+SELECTION = EXP / 'review20_selection_v2.json'
 RECOVERY = ROOT / 'data/crypto/research/ma_morphology_future_review20_20260925/raw_review_only/recovery_manifest.json'
 WIDTH, HEIGHT = 1800, 740
 
@@ -120,6 +120,16 @@ def type_name(row: dict) -> str:
             'whole_view_non_dense':'负样本 · 原 v6 非密集背景'}[row['negative_kind']]
 
 
+def resolve_geometry(row: dict, ledger: dict) -> dict:
+    """Legacy B1/B2 backgrounds omitted core fields; join their frozen ledger."""
+    if row.get('core_start_time') is not None and row.get('core_bars') is not None:
+        return row
+    event = ledger[row['event_id']]
+    for key in ('core_end_time','bar_minutes','source_sha256'):
+        if event[key] != row[key]: raise ValueError('Legacy ledger geometry identity drift')
+    return {**row,'core_start_time':event['core_start_time'],'core_bars':event['core_bars']}
+
+
 def draw_review(item: dict, assets: dict, target: Path) -> None:
     row = item['sample']
     canvas = Image.new('RGB', (WIDTH, HEIGHT+180), '#ffffff')
@@ -160,11 +170,15 @@ def build(selection_path: Path = SELECTION) -> dict:
     if out.exists(): raise FileExistsError(out)
     if sha(ds/'manifest.jsonl') != selection['manifest_sha256']: raise ValueError('Dataset manifest changed')
     current = {(r['event_id'],r['variant']):r for r in rows(ds/'manifest.jsonl')}
+    ledger_path=ROOT/selection['parent_ledger']['path']
+    if sha(ledger_path)!=selection['parent_ledger']['sha256']: raise ValueError('Parent ledger changed')
+    ledger={r['event_id']:r for r in rows(ledger_path)}
     recovery = json.loads(RECOVERY.read_text())['events']
     records=[];out.mkdir(parents=True)
     for item in selection['items']:
         row=item['sample'];ident=item['review_id']
         if current[(row['event_id'],row['variant'])] != row: raise ValueError('Selection changed')
+        row=resolve_geometry(row,ledger)
         image, label_file = ds/row['image_path'], ds/row['label_path']
         if sha(image)!=row['image_sha256'] or sha(label_file)!=row['label_sha256']: raise ValueError('Training asset changed')
         step=pd.Timedelta(minutes=row['bar_minutes'])
@@ -177,7 +191,7 @@ def build(selection_path: Path = SELECTION) -> dict:
         frame=read_interval(source,utc(row['core_start_time'])-1211*step,utc(row['decision_at_utc'])+40*step)
         label=label_file.read_text();assets=review_assets(frame,row,label)
         future_path=f'{ident}_future.png';overlay_path=f'{ident}_training_box.png'
-        draw_review(item,assets,out/future_path)
+        draw_review({**item,'sample':row},assets,out/future_path)
         original=Image.open(image).convert('RGB')
         if assets['box']: ImageDraw.Draw(original).rectangle(assets['box']['pixel_box'],outline='#e32942',width=5)
         original.save(out/overlay_path)

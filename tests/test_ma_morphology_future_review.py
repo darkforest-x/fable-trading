@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from yoyo.datasets import ma_profit_dataset as renderer
-from yoyo.datasets.ma_morphology_future_review import review_assets
+from yoyo.datasets.ma_morphology_future_review import review_assets, resolve_geometry
 
 
 def sample(positive=True):
@@ -44,3 +44,13 @@ def test_missing_future_bar_is_rejected_and_wrong_training_bytes_fail_closed():
     row['image_sha256']='0'*64
     with pytest.raises(ValueError,match='replay SHA mismatch'):
         review_assets(frame,row,label)
+
+
+def test_legacy_background_geometry_uses_bound_ledger_not_filename_guess():
+    _,row,_=sample(False);row['source_sha256']='f'*64
+    ledger={row['event_id']:dict(row)}
+    partial={k:v for k,v in row.items() if k not in ('core_start_time','core_bars')}
+    assert resolve_geometry(partial,ledger)==row
+    ledger[row['event_id']]['bar_minutes']=5
+    with pytest.raises(ValueError,match='identity drift'):
+        resolve_geometry(partial,ledger)
