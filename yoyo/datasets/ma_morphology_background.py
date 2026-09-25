@@ -99,10 +99,12 @@ def screen_window(
     core_end_i: int,
     bar_minutes: int,
     threshold: float = DEFAULT_THRESHOLD,
+    post_bars: int = WIDEST_POST_BARS,
 ) -> dict[str, Any]:
     """Screen one 4/5-bar candidate as a clearly non-dense background.
 
-    Inputs used are ``open_time`` and OHLC through ``core_end_i + 5`` only.
+    Inputs used are ``open_time`` and OHLC through ``core_end_i + post_bars`` only.
+    The default remains five; position augmentation may explicitly extend it.
     ATR14 is the inherited Pine-RMA implementation exposed by
     :func:`add_candidate_features`; close and HL2 each receive renderer-style
     SMA/EMA 20/60/120.  The maximum causal ATR14 across the full visible
@@ -112,6 +114,9 @@ def screen_window(
     """
 
     metrics = _base_metrics(threshold)
+    if type(post_bars) is not int or post_bars < 5:
+        raise ValueError("post_bars must retain at least five confirmation bars")
+    metrics["visible_post_bars"] = post_bars
     reasons: list[str] = []
     start = _integer(core_start_i)
     end = _integer(core_end_i)
@@ -131,7 +136,7 @@ def screen_window(
             decision_close_utc=None,
         )
     visible_start = start - WIDEST_PRE_BARS
-    visible_end = end + WIDEST_POST_BARS
+    visible_end = end + post_bars
     if minutes is None or minutes <= 0:
         reasons.append("invalid_bar_minutes")
     if not np.isfinite(numeric_threshold) or numeric_threshold <= 0:

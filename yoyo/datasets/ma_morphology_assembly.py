@@ -82,22 +82,26 @@ def _density(mask: dict, config: dict) -> np.ndarray:
             & (mask['minimum_close_to_ma_atr'] <= config['minimum_close_to_ma_atr_max']))
 
 
-def screen_negative(frame: pd.DataFrame, row: dict, protocol: dict) -> tuple[dict, pd.DataFrame]:
+def screen_negative(frame: pd.DataFrame, row: dict, protocol: dict, *, post_bars: int = 5) -> tuple[dict, pd.DataFrame]:
     """Check old class and all complete core+5 subwindows of the visible image.
 
     Uses open_time/OHLC and inherited ATR14, CLOSE/HL2 SMA/EMA20/60/120.
-    Only 1200 warmup bars + pre11 + core4/5 + post5 enter the indicators.
+    Only 1200 warmup bars + pre11 + core4/5 + explicit post_bars enter
+    the indicators. The inherited core classification still uses five bars;
+    every complete core+5 subwindow in an extended image is checked.
     Dense subwindows with observable movement outside the existing no-launch
     bounds are ambiguous and are not assigned an empty detection label.
     """
+    if type(post_bars) is not int or post_bars < 5:
+        raise ValueError("post_bars must retain original five-bar evidence")
     start_time, end_time = utc(row['core_start_time']), utc(row['core_end_time'])
     step = pd.Timedelta(minutes=15)
-    visible_start, decision = start_time - 11 * step, end_time + 6 * step
+    visible_start, decision = start_time - 11 * step, end_time + (post_bars + 1) * step
     support = frame.loc[(frame.open_time >= visible_start - 1200 * step)
                         & (frame.open_time < decision)].copy().reset_index(drop=True)
     n = int(row['core_bars'])
     reasons = []
-    if n not in (4, 5) or len(support) != 1211 + n + 5:
+    if n not in (4, 5) or len(support) != 1211 + n + post_bars:
         return {'accepted': False, 'reasons': ['incomplete_context']}, support
     if not support.open_time.diff().iloc[1:].eq(step).all():
         return {'accepted': False, 'reasons': ['known_gap']}, support

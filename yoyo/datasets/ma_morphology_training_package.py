@@ -25,14 +25,15 @@ from typing import Any, Callable, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_DATASET = Path("datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1")
-ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/plan.json")
+DEFAULT_DATASET = Path("datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2")
+ACTIVE_PLAN = Path("experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/position_plan.json")
 RECIPE_PLAN = Path("experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json")
 CONSTRAINTS = Path("constraints-ci.txt")
 EXPECTED_EVAL_COUNTS = {"val": 350, "test": 320}
 CLASSES = ("dense_launch_long", "dense_launch_short")
 SPLITS = ("train", "val", "test")
 VARIANTS = ("P7", "P9", "P11")
+POSITION_VIEWS = {"R5": (11, 5), "R8": (8, 8), "R11": (5, 11)}
 POOLS = ("reference", "grade_a_challenge")
 OFF_KEYS = (
     "bgr", "copy_paste", "cutmix", "degrees", "erasing", "fliplr", "flipud",
@@ -135,6 +136,33 @@ def _verify_label(path: Path, row: Mapping[str, Any]) -> None:
         raise MorphologyTrainingError(f"invalid normalized box geometry: {row['event_id']}")
 
 
+def _audit_position_row(row: Mapping[str, Any]) -> None:
+    """Reject fixed-right-edge crops, false availability clocks and detached boxes."""
+    pre, post = POSITION_VIEWS[row["variant"]]
+    bars = row.get("core_bars")
+    if bars not in (4, 5) or row.get("pre_bars") != pre or row.get("post_bars") != post or row.get("visible_bars") != pre + bars + post:
+        raise MorphologyTrainingError("position crop does not match the fixed equal-length contract")
+    step = timedelta(minutes=int(row["bar_minutes"]))
+    start = _parse_time(row["core_start_time"], "core_start_time")
+    end = _parse_time(row["core_end_time"], "core_end_time")
+    if end != start + (bars - 1) * step:
+        raise MorphologyTrainingError("position core clock drift")
+    decision = end + (post + 1) * step
+    if (_parse_time(row["decision_at_utc"], "decision_at_utc") != decision
+            or _parse_time(row["visible_end_close_time_utc"], "visible_end_close_time_utc") != decision
+            or _parse_time(row["visible_start_utc"], "visible_start_utc") != start - pre * step
+            or _parse_time(row["original_decision_at_utc"], "original_decision_at_utc") != end + 6 * step):
+        raise MorphologyTrainingError("position availability clock does not match actual right edge")
+    if row.get("source_replay_sha_matches") is not True:
+        raise MorphologyTrainingError("position source lacks original-image parity")
+    if row["class_id"] is not None:
+        box = row.get("box", {})
+        if not (-1 < box.get("core_relative_left", -9) <= 0 and bars - 1 <= box.get("core_relative_right", -9) < bars):
+            raise MorphologyTrainingError("position box does not bound the inherited core")
+        if not math.isclose(box["bar_left"], pre + box["core_relative_left"], abs_tol=1e-7) or not math.isclose(box["bar_right"], pre + box["core_relative_right"], abs_tol=1e-7):
+            raise MorphologyTrainingError("position box shifted independently of the data")
+
+
 def _read_manifest(path: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     try:
@@ -191,6 +219,8 @@ def audit_dataset(
     if not isinstance(receipt.get("source_commit"), str) or not receipt["source_commit"].strip():
         raise MorphologyTrainingError("build receipt lacks source_commit")
     rows = _read_manifest(manifest_path)
+    positioning = receipt.get("position_contract") == "equal_length_actual_bar_shift_v1"
+    allowed_variants = set(POSITION_VIEWS) | {"P9"} if positioning else set(VARIANTS)
     boundaries = dict(split_boundaries or _load_split_boundaries(repo))
 
     seen_keys: set[tuple[str, str]] = set()
@@ -212,7 +242,7 @@ def audit_dataset(
         event_id, split, variant = row["event_id"], row["split"], row["variant"]
         if not isinstance(event_id, str) or not event_id.strip() or split not in SPLITS:
             raise MorphologyTrainingError(f"invalid event/split at manifest row {index}")
-        if variant not in VARIANTS:
+        if variant not in allowed_variants:
             raise MorphologyTrainingError(f"unsupported variant at manifest row {index}: {variant!r}")
         kind, pool, class_id = row["sample_kind"], row["evaluation_pool"], row["class_id"]
         if kind not in ("positive", "negative") or pool not in POOLS:
@@ -228,10 +258,14 @@ def audit_dataset(
         meta = {"split": split, "sample_kind": kind, "class_id": class_id,
                 "evaluation_pool": pool, "decision_at_utc": row["decision_at_utc"],
                 "visible_end_close_time_utc": row["visible_end_close_time_utc"]}
+        if positioning:
+            meta.pop("decision_at_utc")
+            meta.pop("visible_end_close_time_utc")
         previous = event_meta.setdefault(event_id, meta)
         if previous != meta:
             raise MorphologyTrainingError(f"event crosses split or changes sample identity: {event_id}")
-        event_variants[event_id].add(variant)
+        if not (positioning and variant == "P9"):
+            event_variants[event_id].add(variant)
         if len(event_variants[event_id]) > 3:
             raise MorphologyTrainingError(f"event has more than three views: {event_id}")
         cluster = row.get("cluster_id")
@@ -245,6 +279,12 @@ def audit_dataset(
         decision = _parse_time(row["decision_at_utc"], "decision_at_utc")
         visible_start = _parse_time(row["visible_start_utc"], "visible_start_utc")
         visible_end = _parse_time(row["visible_end_close_time_utc"], "visible_end_close_time_utc")
+        if positioning:
+            if variant == "P9":
+                if split == "train" or not row.get("fixed_reference_only"):
+                    raise MorphologyTrainingError("P9 is immutable evaluation-only in the corrected set")
+            else:
+                _audit_position_row(row)
         if visible_start > visible_end or visible_end > decision:
             raise MorphologyTrainingError(f"visible input extends past decision time: {event_id}")
         if split == "train":
@@ -294,6 +334,14 @@ def audit_dataset(
                 image_hashes[actual] = identity
         _verify_image(image)
         _verify_label(label, row)
+        if positioning and variant in POSITION_VIEWS and class_id is not None:
+            _, cx, cy, w, h = map(float, label.read_text().split())
+            actual_box = [(cx-w/2)*1280, (cy-h/2)*742, (cx+w/2)*1280, (cy+h/2)*742]
+            if any(abs(a-b) > 0.0001 for a, b in zip(actual_box, row["box"]["pixel_box"])):
+                raise MorphologyTrainingError("TXT box differs from preserved core projection")
+            for pixel, bar in ((actual_box[0], row["box"]["bar_left"]), (actual_box[2], row["box"]["bar_right"])):
+                if abs((pixel - 12) / 1256 * (row["visible_bars"] - 1) - bar) > 0.0001:
+                    raise MorphologyTrainingError("TXT horizontal projection disagrees with candle coordinates")
         if image_rel in image_paths or label_rel in label_paths:
             raise MorphologyTrainingError(f"asset path reused by multiple manifest rows: {event_id}")
         image_paths.add(image_rel)
@@ -303,8 +351,24 @@ def audit_dataset(
             main_eval_counts[split] += 1
         if split in ("val", "test") and variant == "P9" and pool == "grade_a_challenge":
             challenge_counts[split] += 1
-        if split in ("val", "test") and variant in ("P7", "P11"):
+        if split in ("val", "test") and variant in (POSITION_VIEWS if positioning else ("P7", "P11")):
             stability_counts[(split, variant, pool)] += 1
+
+    if positioning:
+        for event_id, variants in event_variants.items():
+            if variants and variants != set(POSITION_VIEWS):
+                raise MorphologyTrainingError(f"event lacks all three real positions: {event_id}")
+        by_event = defaultdict(list)
+        for row in rows:
+            if row["class_id"] is not None and row["variant"] in POSITION_VIEWS:
+                by_event[row["event_id"]].append(row)
+        for event_id, positions in by_event.items():
+            geometry = {(r["box"]["core_relative_left"], r["box"]["core_relative_right"],
+                         r["box"]["price_high"], r["box"]["price_low"]) for r in positions}
+            if len(geometry) != 1 or len({r["original_label_sha256"] for r in positions}) != 1:
+                raise MorphologyTrainingError(f"position augmentation changed original geometry: {event_id}")
+            if {r["post_bars"] for r in positions} != {5, 8, 11} or len({r["visible_bars"] for r in positions}) != 1:
+                raise MorphologyTrainingError(f"fixed right anchor or unequal candle density: {event_id}")
 
     actual_images = {
         path.relative_to(root).as_posix()
@@ -354,7 +418,7 @@ def audit_dataset(
         "grade_a_challenge_p9_counts": dict(challenge_counts),
         "stability_view_counts": {
             f"{split}_{variant}_{pool}": stability_counts[(split, variant, pool)]
-            for split in ("val", "test") for variant in ("P7", "P11") for pool in POOLS
+            for split in ("val", "test") for variant in (POSITION_VIEWS if positioning else ("P7", "P11")) for pool in POOLS
         },
         "max_views_per_event": max(len(variants) for variants in event_variants.values()),
         "dataset_ready": True,
@@ -521,6 +585,10 @@ def create_preflight(
     environment = dict(env_result or check_environment(cuda_required=False, constraints_path=repo / CONSTRAINTS))
     contract = _load_training_contract(repo)
     manifest = _read_manifest(dataset / "manifest.jsonl")
+    expected_dataset = contract["active_plan"].get("dataset_output")
+    if expected_dataset and dataset != (repo / expected_dataset).resolve():
+        raise MorphologyTrainingError("dataset superseded: use the corrected active plan dataset")
+    positioning = _read_json(dataset / "build_receipt.json").get("position_contract") == "equal_length_actual_bar_shift_v1"
     train_rows = [r for r in manifest if r["split"] == "train"]
     val_rows = [r for r in manifest if r["split"] == "val" and r["variant"] == "P9" and r["evaluation_pool"] == "reference"]
     test_rows = [r for r in manifest if r["split"] == "test" and r["variant"] == "P9" and r["evaluation_pool"] == "reference"]
@@ -530,7 +598,7 @@ def create_preflight(
         f"robustness_{split}_{variant}_{pool}.txt": [
             r for r in manifest if r["split"] == split and r["variant"] == variant and r["evaluation_pool"] == pool
         ]
-        for split in ("val", "test") for variant in ("P7", "P11") for pool in POOLS
+        for split in ("val", "test") for variant in (POSITION_VIEWS if positioning else ("P7", "P11")) for pool in POOLS
     }
 
     output.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,139 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "owner_request": "2026-09-25: 修正：正例框总在倒数第五根；参考Grade-A做真实位置变化，每事件最多3种。",
+  "owner_authorization": {
+    "dataset_preparation": true,
+    "new_training_launched_by_this_plan": false,
+    "promote": false
+  },
+  "parent_dataset": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1",
+  "positive_dataset": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1",
+  "dataset_output": "datasets/ma_launch_owner1500_morph_v6_positions_ready_20260925_v2",
+  "views": {
+    "R5": [
+      11,
+      5
+    ],
+    "R8": [
+      8,
+      8
+    ],
+    "R11": [
+      5,
+      11
+    ]
+  },
+  "inputs": {
+    "positive_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/positive_manifest.jsonl",
+      "sha256": "60a1d8b61e375abc02f1f65dbcf1e854b0569b4df39dd6d9087716c08a11ae19"
+    },
+    "positive_receipt": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_20260925_v1/preparation_receipt.json",
+      "sha256": "29144be97caa8fe6b2ac3abef5c4c99bbf9225cb053b1cbba5d0c3b5c9a58dcc"
+    },
+    "parent_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/manifest.jsonl",
+      "sha256": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5"
+    },
+    "parent_ledger": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/dataset_ledger.jsonl",
+      "sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2"
+    },
+    "parent_plan": {
+      "path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json",
+      "sha256": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96"
+    },
+    "grade_manifest": {
+      "path": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+      "sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2"
+    },
+    "grade_protocol": {
+      "path": "experiments/active/exp-15m-ma-launch-owner-grade-a8000-neg24000-v1/preregistration.json",
+      "sha256": "ade69827853700967975c33dc1ccdd3d85c546d213755a19719736eb0e5c55f3"
+    },
+    "evaluation_policy": {
+      "path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/evaluation_contract_v2.json",
+      "sha256": "f23521551d4f24f62d05662d4d9c5bdaeb5bec2cdf50377ce345341548170c0b"
+    },
+    "protected_candidate_ledger": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/selection_queue_round_017/selection_ledger.jsonl",
+      "sha256": "81d60c351642dfcb8055c5e1391b31828b71b7f36f7beb6083a50ab646cb652f"
+    },
+    "protected_manual_rows": {
+      "path": "datasets/manifests/dataset_v3_2_reviewed_core_v1_rows.jsonl",
+      "sha256": "fe097d77fed028323dbcd7c1afa7240592eff11783232caa801cfd541af2b4e9"
+    },
+    "protected_reference_exclusion": {
+      "path": "experiments/active/exp-ma-profit3r-20260922-v1/reference_exclusion.json",
+      "sha256": "6208b34436133262bfa79e5ec932eb21ec8718b489f903cfce7c35be6cb2b35a"
+    },
+    "complete_parent_manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_threeview_ready_20260925_v1/manifest.jsonl",
+      "sha256": "b50fbda5384071bcde5a9f10632c36f9041ff4314ed026479ecac1bec78903d2"
+    }
+  },
+  "negative_policy": {
+    "reference": "Frozen P9 evaluation stays byte-identical. All augmented negatives are re-screened on pre11/post11 union with original thresholds; reject new visible ambiguity or overlap.",
+    "grade_a": "Recompute frozen Grade-A hard/easy no-launch definitions on CLOSE and displayed HL2; reject ambiguity in every complete visible core4/5+post5 subwindow. No trade outcomes used.",
+    "source_identity": "Freeze current complete CSV SHA as a new version; recompute 9 legacy metrics at rtol1e-5/atol1e-6; do not assert unrecorded historical whole-source hash parity.",
+    "same_timeframe_required": false,
+    "protection": "Inclusive overlap against all current candidate/manual/reference exclusions, old Grade-A positives +/-4h, and inherited/new negative windows; canonical assets merge venues/timeframes.",
+    "chronology": "Inherited split boundaries plus12h safety; old Grade-A validation events never enter train.",
+    "label_status": "Rule-labelled screened candidates, not individually Owner-confirmed gold.",
+    "hard_quota": "No forced count; fail ready if no accepted training hard negatives."
+  },
+  "evaluation": {
+    "reference": "350val/320test unchanged P9; new positional evaluation uses only corrected views and reports its exclusions.",
+    "challenge": "New Grade-A held-out negatives separate from reference; never replace original validation.",
+    "position": "R5/R8/R11 equal-length grouped views; frozen P9 benchmark rows are evaluation-only and excluded from three-view training count."
+  },
+  "recipe": "Inherit parent_plan training_args unchanged; YOLO11s base model,1280,40epochs,batch8,seed0; all augmentation off.",
+  "limitations": [
+    "Existing positives retain outcome-selected candidate provenance; not individually owner-confirmed gold.",
+    "Observations end at post5/8/11; these are delayed morphology recognition, not onset tip signals.",
+    "Negative union screening is conservative and can reduce counts; no forced ratio."
+  ],
+  "production_eligible": false,
+  "training_eligible": false,
+  "position_contract": "equal_length_actual_bar_shift_v1",
+  "training_recipe_reference": {
+    "family": "YOLO11s",
+    "imgsz": 1280,
+    "epochs": 40,
+    "batch": 8,
+    "seed": 0,
+    "init": "same original YOLO11s base as both existing models;no old-checkpoint initialization without train/validation exposure audit"
+  },
+  "splits": {
+    "evaluation": "Common corrected val/test for A/B; exclude all unadjudicated outcome-negative rows. Positive parent event split retained; negatives require whole visible and12h safety interval inside split, and same halfyear/source as paired positive.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "label_contract": "Actual P9 TXT physical core preserved. Different endpoints are distinct later observation clocks, not new events or onset signals. Minimum post5 retains original confirmation; no automatic new gold approval.",
+  "review_event_ids": [
+    "cluster_e3c55d47b347f768f55b1a19",
+    "cluster_68c424841ef55f3875250b6a",
+    "cluster_3954655807219bea9da062fa",
+    "cluster_877ab857d2f0069befc2b171",
+    "cluster_8d481cfa91bb4180007b6018",
+    "cluster_8328ff20a8d27f2d24749d1c",
+    "cluster_c3b9f206bc789f806bb8c15f",
+    "cluster_7e121ab185126efa0f31ad09",
+    "cluster_927caf7765c800d5d7b03c0f",
+    "cluster_b2abd035d28e7a23e630cb88",
+    "grade-a-negative::d86858630752eb9e32324215",
+    "grade-a-negative::9f6d8409ff9d463e29083857",
+    "grade-a-negative::7b0f917fb1ec0abc1fd13c21",
+    "grade-a-negative::09f26515961d7c3a8743cdd7",
+    "grade-a-negative::743efcc6bb615ab0a441aad7",
+    "grade-a-negative::d7a1388226010713f3372219",
+    "grade-a-negative::9c5b7a48e8b47ca06266257f",
+    "grade-a-negative::ca6d6c6b4351e7db1aeb2c73",
+    "morphbg::HIGH::3::2024-03-06T00:30:00+00:00::5",
+    "morphbg::XLM::5::2025-02-09T14:55:00+00:00::5"
+  ]
+}
