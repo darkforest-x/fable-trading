@@ -1,0 +1,13 @@
+{
+  "reason": "Execution-timeframe conflict must respect the execution mode chosen before entry.",
+  "edits": [
+    {
+      "old_str": "H向上、T多头条件完整、E反向：新开仓进入等待，等E完成所选执行触发且K仍有效；已有仓位依T管理，E反向本身不平仓。",
+      "new_str": "H向上、T多头条件完整、E反向：若事前选择E回踩执行，新开仓等待E触发且K仍有效；若事前选择T确认后直接执行，E单独反向不是新增否决，仍按T条件和允许价区核对。已有仓位依T管理，E反向本身不平仓。"
+    },
+    {
+      "old_str": "①H上升，T多头重启，E正在下跌：空仓等预选E触发；持仓按T和退出合同判断，E反向不是独立平仓命令。",
+      "new_str": "①H上升，T多头重启，E正在下跌：选E执行时空仓等待E触发；选T直接执行时核对T条件与允许价区。已有持仓按T和退出合同判断，E反向不是独立平仓命令。"
+    }
+  ]
+}
