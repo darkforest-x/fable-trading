@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-ma-morphology-v6-threeview-20260925-v1",
+  "parent_experiment": "exp-ma-morphology-negatives-20260922-v3",
+  "parent_dataset": "datasets/ma_launch_owner1500_morph_v6",
+  "owner_request": "2026-09-25: prepare retraining following Grade-A;1841 events,maximum3position variants=5523positive images;audit whether Grade-A negatives can be reused.",
+  "authorization_scope": "dataset preparation and training preflight;no production promotion,active model replacement or threshold changes",
+  "inputs": {
+    "ledger": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/dataset_ledger.jsonl",
+      "sha256": "3650046c10984394bb7e9f42f438260a7ce2955d48dee21452d3e3098b9c0ca2"
+    },
+    "manifest": {
+      "path": "datasets/ma_launch_owner1500_morph_v6/manifest.jsonl",
+      "sha256": "ebe8b1bc17923f14fddf16d32af391cf80517a7fba8a4849783d0316bc65caf5"
+    },
+    "parent_plan": {
+      "path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/plan.json",
+      "sha256": "8b189af6170f8767716c390896385003562b16018f9263015664c3f7782b8c96"
+    }
+  },
+  "views": {
+    "pre_bars": [
+      7,
+      9,
+      11
+    ],
+    "post_bars": 5,
+    "maximum_per_event": 3
+  },
+  "render": {
+    "ma": "HL2 SMA/EMA20/60/120",
+    "width": 1280,
+    "height": 742,
+    "warmup_bars_before_widest_view": 1200,
+    "price_scale": "visible_range_v1",
+    "augmentations": "all flips/color/mosaic/mixup disabled"
+  },
+  "splits": {
+    "evaluation": "Common corrected val/test for A/B; exclude all unadjudicated outcome-negative rows. Positive parent event split retained; negatives require whole visible and12h safety interval inside split, and same halfyear/source as paired positive.",
+    "rule": "Rendered input interval and complete12h label interval confined to one split; all variants/crossvenue-timeframe event clusters share split. Earlier1200bar MA-only warmup may predate validation/test start because it is already-known history. Purge rendered/label crossing intervals; require1200warmup bars.",
+    "test_end_exclusive": "2026-09-21T16:00:00Z",
+    "train_end_exclusive": "2026-01-01T00:00:00Z",
+    "validation_end_exclusive": "2026-05-01T00:00:00Z"
+  },
+  "expected_positive_images": {
+    "train": 4518,
+    "val": 525,
+    "test": 480
+  },
+  "label_contract": "Dense launch long/short;inherit original event core coordinates and original3Rpositive-selection provenance;not new per-sample gold. Changing precontext preserves decision close and profit label clock.",
+  "negative_reuse": "pending compatibility audit;no direct mixing of old PNG/empty labels before source/render/timing/split/overlap checks",
+  "validation": "Keep original P9 val/test as fixed reference;P7/P11 are paired robustness views,not independent extra events;report event-level and position-stratified results.",
+  "training_recipe_reference": {
+    "family": "YOLO11s",
+    "imgsz": 1280,
+    "epochs": 40,
+    "batch": 8,
+    "seed": 0,
+    "init": "same original YOLO11s base as both existing models;no old-checkpoint initialization without train/validation exposure audit"
+  },
+  "production_eligible": false,
+  "training_eligible": false
+}
