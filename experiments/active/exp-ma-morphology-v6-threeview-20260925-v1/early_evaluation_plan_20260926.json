@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "owner_request": "下一步吧",
+  "scope": "Offline frozen-checkpoint evaluation. No retraining, threshold tuning, promotion, notification or live execution changes.",
+  "dataset": "datasets/ma_launch_owner1500_morph_v6_early_20260926_v1",
+  "manifest_sha256": "c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6",
+  "models": {
+    "early_v6": {
+      "path": "datasets/ma_launch_owner1500_morph_v6_early_20260926_v1/training_runs/exp-ma-morphology-v6-threeview-20260925-v1/weights/best.pt",
+      "sha256": "df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c"
+    },
+    "old_v6a": {
+      "path": "experiments/active/exp-ma-morphology-negatives-20260922-v3/evaluation_diagnosis/arm_A_best.pt",
+      "sha256": "17aee5679b73dfd9183339c580c2caac323fc2b6c0759da38827834d72f2742b"
+    }
+  },
+  "static_validation": {
+    "splits": [
+      "val",
+      "test"
+    ],
+    "variant": "P9",
+    "pools": [
+      "reference",
+      "grade_a_challenge"
+    ],
+    "padding": [
+      0.5,
+      0.0
+    ],
+    "conf": 0.001,
+    "nms_iou": 0.7,
+    "zero_positive_pool_ap": "not_applicable; report negative image alarm counts"
+  },
+  "predict": {
+    "conf": 0.25,
+    "iou": 0.5,
+    "imgsz": 1280,
+    "rect": true,
+    "batch": 8,
+    "augment": false
+  },
+  "replay": {
+    "windows": [
+      14,
+      16,
+      17
+    ],
+    "window_selection": "Three most frequent visible lengths in TRAIN only, frozen before new model outputs; identical windows and pixels for old/new.",
+    "train_length_counts": {
+      "15": 1816,
+      "17": 1822,
+      "19": 74,
+      "12": 1735,
+      "14": 2215,
+      "16": 2229,
+      "13": 1748,
+      "18": 494,
+      "21": 6,
+      "20": 14
+    },
+    "geometry": "full edge candles,HL2 SMA/EMA20/60/120,1280x742,visible-only scaling;1200+ known warmup",
+    "continuous_source": "experiments/active/exp-ma-morphology-top20-20260922-v1/inputs",
+    "continuous_selection": "All frozen closed day endpoints in existing20-symbol15m/30m/1h snapshot, no fresh ranking or refetch; retrospective same-day gainers selection is not a causal trading universe.",
+    "event_cohort": "All333 retained positive P9 val/test events, chronological split retained; retrospective rule candidates, not human onset gold.",
+    "post_core_steps": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "target_iou": 0.5,
+    "valid_first_hit": "same-class 2D IoU>=0.5 at or after frozen earliest visible launch post. Earlier hits reported separately, not credited as causally warranted launch.",
+    "unmatched_continuous_boxes": "unadjudicated raw alarms, not automatically false positives",
+    "negative_validation": "Frozen P9 empty labels plus separately listed Grade-A challenge, not global market negatives",
+    "null_control": "Train-only median box templates by visible length, fixed majority positive class, applied to every heldout image including negatives; geometry control, not tradable strategy."
+  },
+  "production_eligible": false,
+  "training_eligible": false
+}
