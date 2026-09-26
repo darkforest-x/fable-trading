@@ -32260,3 +32260,18 @@ artifacts:
     notes: Owner authorized one research retraining on2026-09-26. Full dataset14550 images from4850 events, including1837 positives.
       Local and remote audit agree; first training batches verified on RTX3060, epoch1of40, actual frozen args matched.
       Effective args, build receipt, preflights and transfer identity are beside this receipt. Training is ongoing; latency and false alarms pending.
+
+  - artifact_id: ma-morphology-v6-early-20260926-training-completion
+    artifact_type: manifest
+    role: completed_research_training_weights_and_results_identity
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6c79e3e3a4
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_completion_20260926.json
+    sha256: eea5d053f62df9c965e19a8d4111feac993e0fa4965dd6a34be044669f466835
+    size_bytes: 4018
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_completion_20260926.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: All40epochs finished2026-09-26 05:15 Beijing in254.50minutes. Best/last/results returned and SHA verified;
+      weights stay under the ignored dataset training_runs directory. Best validation mAP50-95 epoch10; continuous causal replay pending.

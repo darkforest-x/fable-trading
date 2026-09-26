@@ -1,5 +1,12 @@
 # HANDOFF — 给下一个会话/模型的执行路线图
 
+## 最新进度：v6研究训练40轮完成，权重已回传（2026-09-26）
+
+- 3060于北京时间05:15完成40/40轮，总耗时254.50分钟，无运行报错。best/last、完整日志、results.csv及实际参数均已回传Mac并与远端SHA逐项一致。
+- 本地权重：`datasets/ma_launch_owner1500_morph_v6_early_20260926_v1/training_runs/exp-ma-morphology-v6-threeview-20260925-v1/weights/{best,last}.pt`；完成回执：`experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_training_completion_20260926.json`。
+- best SHA `df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c`；best按验证mAP50-95选自epoch10。训练结束自动验证349图/174框：P0.937、R0.824、mAP50 0.935、mAP50-95 0.729（日志四舍五入），不是连续行情误报率或延迟验收。
+- 当前状态 `training_completed_evaluation_pending`。下一步验证首次命中延迟、已走价格、漏检/误报、困难负例和pad/渲染敏感性；尚未回放验收，未切换ACTIVE或监控。下方训练中状态为历史记录，不要重复启动。
+
 ## 最新进度：v6低延迟研究训练已在3060启动（2026-09-26）
 
 - Owner本次明确授权“差不多了吧，去训练吧”。只授权这一次研究训练；生产资格仍false，未切换ACTIVE/监控模型。

@@ -89,14 +89,14 @@ experiments:
     workflow_stages:
     - dataset
     - training
-    title: YOLO v6：逐案例早期窗口，3060训练中
+    title: YOLO v6：40轮训练完成，待低延迟回放验收
     question: How early can the current MA dense/launch state be detected near the observation right edge, with acceptable misses
       and false alarms on continuous causal replay?
     single_variable: Owner-authorized research dataset correction, retaining the original YOLO11s training recipe. Case-specific first
       visible launch endpoint, three left-context crops, full edge candles and additional causal negative veto; not isolated causal attribution.
     result: Built14550 images from4850 events, including1837 positive events and3013 negative events;144 events excluded.
-      All three views share the earliest qualifying observation per event. Local and RTX3060 full preflight audits agree; training is running
-      with YOLO11s1280 batch8 for40epochs, verified actual batches in epoch1. Training12153 images and main validation349, zero corrupt files.
+      All three views share the earliest qualifying observation per event. Local and RTX3060 full preflight audits agree; all40epochs finished in254.50minutes.
+      Best and last weights plus results returned to Mac with matching SHA. Best validation mAP50-95 epoch10; continuous replay is pending.
       Earlier rule-selected candidates are not individually confirmed gold; first-hit delay and false alarms remain unevaluated.
     training_eligible: true
     production_eligible: false
@@ -114,6 +114,7 @@ experiments:
     - ma-morphology-v6-positions-20260925-learning-design-audit
     - ma-morphology-v6-20260925-early-review20
     - ma-morphology-v6-early-20260926-training-launch
+    - ma-morphology-v6-early-20260926-training-completion
     reuse_allowed: false
     notes: Owner explicitly requested training on2026-09-26. Current entry is early_training_plan_20260926.json and dataset
       ma_launch_owner1500_morph_v6_early_20260926_v1; frozen manifest c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6.
