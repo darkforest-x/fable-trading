@@ -89,16 +89,18 @@ experiments:
     workflow_stages:
     - dataset
     - training
-    title: YOLO v6：40轮训练完成，待低延迟回放验收
+    - evaluation
+    title: YOLO v6：低延迟离线回放完成，生产验收未通过
     question: How early can the current MA dense/launch state be detected near the observation right edge, with acceptable misses
       and false alarms on continuous causal replay?
     single_variable: Owner-authorized research dataset correction, retaining the original YOLO11s training recipe. Case-specific first
       visible launch endpoint, three left-context crops, full edge candles and additional causal negative veto; not isolated causal attribution.
-    result: Built14550 images from4850 events, including1837 positive events and3013 negative events;144 events excluded.
-      All three views share the earliest qualifying observation per event. Local and RTX3060 full preflight audits agree; all40epochs finished in254.50minutes.
-      Best and last weights plus results returned to Mac with matching SHA. Best validation mAP50-95 epoch10; continuous replay is pending.
-      Earlier rule-selected candidates are not individually confirmed gold; first-hit delay and false alarms remain unevaluated.
-    training_eligible: true
+    result: Research training completed40epochs. Offline16958 inputs per model scored with identical pixels and thresholds.
+      Test earliest-rule-anchor matches156of159 for early-v6 versus43of159 for old-v6A; by coreplus8 matches156 versus155.
+      New test1never-matched and2pre-anchor-only events. Paired324 val/test detections median1bar earlier;242earlier82same0later.
+      Market134of2625 endpoints alarm versus351old; no human-market FPR claim. Padding testmAP50 .966242to.876288 remains brittle.
+      Candidates remain rule-selected, challenge test negatives only2; diagnostic completion does not grant model acceptance.
+    training_eligible: false
     production_eligible: false
     holdout_consumed: false
     artifacts:
@@ -115,10 +117,13 @@ experiments:
     - ma-morphology-v6-20260925-early-review20
     - ma-morphology-v6-early-20260926-training-launch
     - ma-morphology-v6-early-20260926-training-completion
+    - ma-morphology-v6-early-20260926-evaluation
     reuse_allowed: false
     notes: Owner explicitly requested training on2026-09-26. Current entry is early_training_plan_20260926.json and dataset
       ma_launch_owner1500_morph_v6_early_20260926_v1; frozen manifest c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6.
-      Research gate exception is limited to this run. Original physical core geometry retained; no extra waiting for position variation.
+      Research gate exception was limited to the now-completed training run; no new training is authorized by this evaluation.
+      Evaluation entry is early_evaluation_delivery_20260926.json; Notion EXP-108.
+      Original physical core geometry retained; no extra waiting for position variation.
       Measure first valid detection delay in bars/minutes and price already travelled, alongside false alarms and misses.
       Old post5 and R5/R8/R11 artifacts are preserved as historical evidence. Production eligibility remains false.
   - experiment_id: exp-spike-v128-vwap-20260924-v1

@@ -32275,3 +32275,19 @@ artifacts:
     production_eligible: false
     notes: All40epochs finished2026-09-26 05:15 Beijing in254.50minutes. Best/last/results returned and SHA verified;
       weights stay under the ignored dataset training_runs directory. Best validation mAP50-95 epoch10; continuous causal replay pending.
+
+  - artifact_id: ma-morphology-v6-early-20260926-evaluation
+    artifact_type: manifest
+    role: frozen_model_causal_replay_padding_and_negative_diagnostics
+    source_repo: darkforest-x/fable-trading
+    source_commit: d72ece3b022131273b2043f479643bb08828e386
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_delivery_20260926.json
+    sha256: 4df5754dc187685f64732fd237d0951ba8fa2713853e9f5f5e238ac891eeeefb
+    size_bytes: 20719
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_delivery_20260926.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Two16958-image matched-input runs;333events,2625market endpoints,799static images. New test156of159
+      earliest-anchor matches,1never-matched,2pre-anchor-only. Padding brittleness and incomplete human gold remain.
+      No retraining, promotion, production switch or notification change. Raw predictions and hashes retained; Notion EXP-108.

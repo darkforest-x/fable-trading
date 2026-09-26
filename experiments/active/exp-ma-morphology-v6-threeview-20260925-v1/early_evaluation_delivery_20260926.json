@@ -1,0 +1,554 @@
+{
+  "status": "offline_diagnostics_complete_acceptance_not_granted",
+  "date": "2026-09-26",
+  "owner_request": "下一步吧",
+  "source_commit": "d72ece3b022131273b2043f479643bb08828e386",
+  "artifacts": {
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_summary_20260926_v1/summary.json": "ba96ffb62d931bb2e5eceb8b231d7a2715ae6601f5cf0b898b248775ffad6a7b",
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_validation_collected_20260926/validation.json": "9180b802e40a7a08a40aa8f898b2c09650830171bf374a522b9da2ed51927ef0",
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_replay_scores_collected_20260926/score_receipt.json": "a01d248e804d23d22a300ec8a91df1fd7e8177996a003122d48a0db53f9b06d8",
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_replay_build_receipt_20260926.json": "e1d502eefad0fa03b026d1220bd0b602aecdf9969bb8c389cca891f2a9c86cbd",
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_summary_20260926_v1/independent_reconciliation.json": "8c7d5ab1fa2fdd0937107e3d5d1592bd27f692b087b80a2b185a17a78b0600fc",
+    "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_review_20260926_v1/selection.json": "256de158b7c3bf7170656e86bf0a26046c438159aff5be99da541aa9d7dcb486"
+  },
+  "score_archive_sha256": "1f1ff96b9cb449c61fef2bbf7d0b67a60437f10922f41d60fb04c78d6e777831",
+  "results": {
+    "status": "diagnostics_complete_acceptance_not_granted",
+    "model_results": {
+      "early_v6": {
+        "static": {
+          "val_reference": {
+            "images": 349,
+            "positive_images": 174,
+            "negative_images": 175,
+            "tp": 163,
+            "fp_boxes": 17,
+            "fn": 11,
+            "precision": 0.9055555555555556,
+            "recall": 0.9367816091954023,
+            "negative_images_with_alarms": 1,
+            "negative_image_alarm_rate": 0.005714285714285714
+          },
+          "val_grade_a_challenge": {
+            "images": 129,
+            "positive_images": 0,
+            "negative_images": 129,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_reference": {
+            "images": 319,
+            "positive_images": 159,
+            "negative_images": 160,
+            "tp": 150,
+            "fp_boxes": 18,
+            "fn": 9,
+            "precision": 0.8928571428571429,
+            "recall": 0.9433962264150944,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_grade_a_challenge": {
+            "images": 2,
+            "positive_images": 0,
+            "negative_images": 2,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          }
+        },
+        "negative_strata": {
+          "val_grade_a_easy": {
+            "images": 102,
+            "positive_images": 0,
+            "negative_images": 102,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "val_grade_a_hard": {
+            "images": 27,
+            "positive_images": 0,
+            "negative_images": 27,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "val_whole_view_non_dense": {
+            "images": 175,
+            "positive_images": 0,
+            "negative_images": 175,
+            "tp": 0,
+            "fp_boxes": 1,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": null,
+            "negative_images_with_alarms": 1,
+            "negative_image_alarm_rate": 0.005714285714285714
+          },
+          "test_grade_a_easy": {
+            "images": 1,
+            "positive_images": 0,
+            "negative_images": 1,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_grade_a_hard": {
+            "images": 1,
+            "positive_images": 0,
+            "negative_images": 1,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_whole_view_non_dense": {
+            "images": 160,
+            "positive_images": 0,
+            "negative_images": 160,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          }
+        },
+        "latency": {
+          "val": {
+            "events": 174,
+            "detected_by_core_plus8": 172,
+            "missed_by_core_plus8": 2,
+            "recall_by_core_plus8": 0.9885057471264368,
+            "at_reference": 172,
+            "within_reference_plus1": 172,
+            "pre_reference_match_events": 63,
+            "pre_reference_only_events": 1,
+            "never_matched_events": 1,
+            "median_delay_bars_among_detected": 0.0,
+            "mean_delay_bars_among_detected": 0,
+            "median_delay_minutes_among_detected": 0.0,
+            "median_core_to_first_hit_bars_among_detected": 1.0,
+            "median_signed_price_move_from_core_pct_among_detected": 0.354633235195545,
+            "first_valid_post_histogram": {
+              "2": 36,
+              "1": 129,
+              "3": 2,
+              "4": 5
+            },
+            "per_step_matching_events": {
+              "0": 42,
+              "1": 161,
+              "2": 121,
+              "3": 63,
+              "4": 17,
+              "5": 11,
+              "6": 4,
+              "7": 8,
+              "8": 1
+            }
+          },
+          "test": {
+            "events": 159,
+            "detected_by_core_plus8": 156,
+            "missed_by_core_plus8": 3,
+            "recall_by_core_plus8": 0.9811320754716981,
+            "at_reference": 156,
+            "within_reference_plus1": 156,
+            "pre_reference_match_events": 70,
+            "pre_reference_only_events": 2,
+            "never_matched_events": 1,
+            "median_delay_bars_among_detected": 0.0,
+            "mean_delay_bars_among_detected": 0,
+            "median_delay_minutes_among_detected": 0.0,
+            "median_core_to_first_hit_bars_among_detected": 1.0,
+            "median_signed_price_move_from_core_pct_among_detected": 0.33394494048702983,
+            "first_valid_post_histogram": {
+              "1": 118,
+              "2": 34,
+              "3": 4
+            },
+            "per_step_matching_events": {
+              "0": 51,
+              "1": 148,
+              "2": 107,
+              "3": 53,
+              "4": 10,
+              "5": 8,
+              "6": 4,
+              "7": 7,
+              "8": 4
+            }
+          }
+        },
+        "market": {
+          "windows": 7875,
+          "streams": 53,
+          "closed_endpoints": 2625,
+          "windows_with_boxes": 286,
+          "window_alarm_rate": 0.03631746031746032,
+          "endpoints_with_boxes": 134,
+          "endpoint_alarm_rate": 0.05104761904761905,
+          "endpoints_with_predicted_core_within2_bars": 129,
+          "raw_boxes": 291,
+          "exact_distinct_predicted_core_spans": 186,
+          "raw_boxes_per_exact_span": 1.564516129032258,
+          "predicted_core_distance_histogram": {
+            "1": 221,
+            "2": 53,
+            "3": 16,
+            "7": 1
+          },
+          "false_positive_rate": null,
+          "false_positive_rate_reason": "No exhaustive human-adjudicated labels in these market windows."
+        }
+      },
+      "old_v6a": {
+        "static": {
+          "val_reference": {
+            "images": 349,
+            "positive_images": 174,
+            "negative_images": 175,
+            "tp": 27,
+            "fp_boxes": 34,
+            "fn": 147,
+            "precision": 0.4426229508196721,
+            "recall": 0.15517241379310345,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "val_grade_a_challenge": {
+            "images": 129,
+            "positive_images": 0,
+            "negative_images": 129,
+            "tp": 0,
+            "fp_boxes": 2,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": null,
+            "negative_images_with_alarms": 2,
+            "negative_image_alarm_rate": 0.015503875968992248
+          },
+          "test_reference": {
+            "images": 319,
+            "positive_images": 159,
+            "negative_images": 160,
+            "tp": 24,
+            "fp_boxes": 39,
+            "fn": 135,
+            "precision": 0.38095238095238093,
+            "recall": 0.1509433962264151,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_grade_a_challenge": {
+            "images": 2,
+            "positive_images": 0,
+            "negative_images": 2,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          }
+        },
+        "negative_strata": {
+          "val_grade_a_easy": {
+            "images": 102,
+            "positive_images": 0,
+            "negative_images": 102,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "val_grade_a_hard": {
+            "images": 27,
+            "positive_images": 0,
+            "negative_images": 27,
+            "tp": 0,
+            "fp_boxes": 2,
+            "fn": 0,
+            "precision": 0.0,
+            "recall": null,
+            "negative_images_with_alarms": 2,
+            "negative_image_alarm_rate": 0.07407407407407407
+          },
+          "val_whole_view_non_dense": {
+            "images": 175,
+            "positive_images": 0,
+            "negative_images": 175,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_grade_a_easy": {
+            "images": 1,
+            "positive_images": 0,
+            "negative_images": 1,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_grade_a_hard": {
+            "images": 1,
+            "positive_images": 0,
+            "negative_images": 1,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          },
+          "test_whole_view_non_dense": {
+            "images": 160,
+            "positive_images": 0,
+            "negative_images": 160,
+            "tp": 0,
+            "fp_boxes": 0,
+            "fn": 0,
+            "precision": null,
+            "recall": null,
+            "negative_images_with_alarms": 0,
+            "negative_image_alarm_rate": 0.0
+          }
+        },
+        "latency": {
+          "val": {
+            "events": 174,
+            "detected_by_core_plus8": 171,
+            "missed_by_core_plus8": 3,
+            "recall_by_core_plus8": 0.9827586206896551,
+            "at_reference": 40,
+            "within_reference_plus1": 106,
+            "pre_reference_match_events": 7,
+            "pre_reference_only_events": 0,
+            "never_matched_events": 3,
+            "median_delay_bars_among_detected": 1,
+            "mean_delay_bars_among_detected": 1.3391812865497077,
+            "median_delay_minutes_among_detected": 2,
+            "median_core_to_first_hit_bars_among_detected": 2,
+            "median_signed_price_move_from_core_pct_among_detected": 0.5490826302397167,
+            "first_valid_post_histogram": {
+              "7": 9,
+              "1": 14,
+              "2": 81,
+              "3": 61,
+              "5": 2,
+              "4": 3,
+              "8": 1
+            },
+            "per_step_matching_events": {
+              "0": 0,
+              "1": 17,
+              "2": 88,
+              "3": 144,
+              "4": 43,
+              "5": 45,
+              "6": 9,
+              "7": 121,
+              "8": 103
+            }
+          },
+          "test": {
+            "events": 159,
+            "detected_by_core_plus8": 155,
+            "missed_by_core_plus8": 4,
+            "recall_by_core_plus8": 0.9748427672955975,
+            "at_reference": 43,
+            "within_reference_plus1": 105,
+            "pre_reference_match_events": 3,
+            "pre_reference_only_events": 0,
+            "never_matched_events": 4,
+            "median_delay_bars_among_detected": 1,
+            "mean_delay_bars_among_detected": 1.1741935483870967,
+            "median_delay_minutes_among_detected": 1,
+            "median_core_to_first_hit_bars_among_detected": 2,
+            "median_signed_price_move_from_core_pct_among_detected": 0.44710903363480714,
+            "first_valid_post_histogram": {
+              "2": 72,
+              "4": 4,
+              "3": 51,
+              "7": 5,
+              "1": 21,
+              "5": 1,
+              "6": 1
+            },
+            "per_step_matching_events": {
+              "0": 0,
+              "1": 24,
+              "2": 85,
+              "3": 126,
+              "4": 35,
+              "5": 30,
+              "6": 5,
+              "7": 113,
+              "8": 97
+            }
+          }
+        },
+        "market": {
+          "windows": 7875,
+          "streams": 53,
+          "closed_endpoints": 2625,
+          "windows_with_boxes": 462,
+          "window_alarm_rate": 0.058666666666666666,
+          "endpoints_with_boxes": 351,
+          "endpoint_alarm_rate": 0.1337142857142857,
+          "endpoints_with_predicted_core_within2_bars": 35,
+          "raw_boxes": 589,
+          "exact_distinct_predicted_core_spans": 401,
+          "raw_boxes_per_exact_span": 1.4688279301745637,
+          "predicted_core_distance_histogram": {
+            "1": 6,
+            "2": 31,
+            "3": 85,
+            "4": 18,
+            "5": 10,
+            "6": 1,
+            "7": 8,
+            "8": 184,
+            "9": 2,
+            "11": 235,
+            "12": 2,
+            "14": 7
+          },
+          "false_positive_rate": null,
+          "false_positive_rate_reason": "No exhaustive human-adjudicated labels in these market windows."
+        }
+      }
+    },
+    "source_hashes": {
+      "manifest": "c1a4634be1287e0a3bc26f4c5b8b780dd4ebfc4b8305466834ca83ffbf351584",
+      "build_receipt": "e1d502eefad0fa03b026d1220bd0b602aecdf9969bb8c389cca891f2a9c86cbd",
+      "score_receipt": "a01d248e804d23d22a300ec8a91df1fd7e8177996a003122d48a0db53f9b06d8"
+    },
+    "limitations": [
+      "Positive anchors and negative labels are rule-selected research candidates, not individually adjudicated onset gold.",
+      "Continuous market sample is a frozen same-day top-gainers retrospective cohort, not a causal trading universe.",
+      "Main-event delay statistics are conditional on previously selected positive events and report censored misses explicitly.",
+      "A valid-launch miss can still have an earlier core match; pre-reference-only and never-matched counts are separate.",
+      "Old/new comparison uses identical early-model canvas and windows; this is not a native Grade-A production comparison.",
+      "Only two test Grade-A challenge negatives; no robust challenge-test false alarm estimate."
+    ],
+    "production_eligible": false,
+    "training_eligible": false,
+    "economic_metrics": "not_applicable_to_detection_diagnostics",
+    "paired_latency": {
+      "events": 333,
+      "both_detected": 324,
+      "new_only_detected": 4,
+      "old_only_detected": 2,
+      "new_earlier": 242,
+      "same_time": 82,
+      "new_later": 0,
+      "median_bars_saved_among_both_detected": 1.0
+    },
+    "position_template_null": {
+      "val": {
+        "images": 478,
+        "positive_images": 174,
+        "negative_images": 304,
+        "tp": 56,
+        "fp_boxes": 422,
+        "fn": 118,
+        "precision": 0.11715481171548117,
+        "recall": 0.3218390804597701,
+        "negative_images_with_alarms": 304,
+        "negative_image_alarm_rate": 1.0
+      },
+      "test": {
+        "images": 321,
+        "positive_images": 159,
+        "negative_images": 162,
+        "tp": 52,
+        "fp_boxes": 269,
+        "fn": 107,
+        "precision": 0.16199376947040497,
+        "recall": 0.3270440251572327,
+        "negative_images_with_alarms": 162,
+        "negative_image_alarm_rate": 1.0
+      }
+    }
+  },
+  "checks": {
+    "related_tests_passed": 83,
+    "after_latency_classification_revision_tests_passed": 9,
+    "raw_arithmetic_and_hash_reconciliation": "passed",
+    "review_images_visually_inspected": 2
+  },
+  "reproduction": {
+    "commands": [
+      ".venv/bin/python -m yoyo.evaluation.ma_early_replay build --output data/crypto/research/early_v6_evaluation_20260926_v1",
+      "C:/fable/.venv/Scripts/python.exe -m yoyo.evaluation.ma_early_replay score --inputs C:/fable/data/crypto/research/early_v6_evaluation_20260926_v1 --output C:/fable/experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_replay_scores_20260926_v1 --device 0",
+      ".venv/bin/python -m yoyo.evaluation.ma_early_evaluation_summary --inputs data/crypto/research/early_v6_evaluation_20260926_v1 --scores experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_replay_scores_collected_20260926 --output experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_summary_20260926_v1",
+      ".venv/bin/python -m yoyo.evaluation.ma_early_review_images --inputs data/crypto/research/early_v6_evaluation_20260926_v1 --scores experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_replay_scores_collected_20260926 --summary experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_summary_20260926_v1 --output experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_evaluation_review_20260926_v1"
+    ],
+    "prerequisites": "Frozen dataset, OHLC sources and both checkpoints bound in committed plan/build receipt; exact dependency contract. Copy identical inputs and source files to RTX3060; verify archived predictions on return. Each generator refuses an existing output: select fresh output paths for reruns."
+  },
+  "known_failed_attempts": [
+    "Windows validation v1 failed before inference on implicit GBK decoding; v2 uses explicit UTF-8 and completed."
+  ],
+  "remaining_acceptance_gaps": [
+    "Individually adjudicated onset/core labels and blind continuous-market TP/FP/FN assessment.",
+    "Padding robustness; test mAP50 decreases from0.966242 to0.876288.",
+    "Only2 Grade-A test negatives; cannot infer robust challenge false-positive rate.",
+    "Review early-only matches and onset-time disappearances without post-hoc latching."
+  ],
+  "notion": {
+    "status": "created_and_fetched_verified",
+    "unique_key": "exp-ma-morphology-v6-early-eval-20260926-v1",
+    "page_id": "3e788564-79af-81e6-b9ca-e10361da78da",
+    "url": "https://app.notion.com/p/3e78856479af81e6b9cae10361da78da",
+    "experiment_id": "EXP-108",
+    "research_status": "不确定",
+    "production_eligible": false,
+    "evidence_commit": "d72ece3b022131273b2043f479643bb08828e386"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "active_model_changed": false,
+  "new_training_started": false,
+  "notification_configuration_changed": false
+}
