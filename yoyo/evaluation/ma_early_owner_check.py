@@ -168,10 +168,71 @@ def summarize(inputs,scores):
     print(json.dumps(result,ensure_ascii=False),flush=True)
 
 
+def gallery(inputs,scores,out):
+    """Post-inference overlays; their pixels never enter either model."""
+    from PIL import Image, ImageDraw
+    from yoyo.evaluation.ma_early_review_images import panel,font
+    if out.exists():raise FileExistsError(out)
+    out.mkdir(parents=True)
+    rows=read_rows(inputs/'manifest.jsonl')
+    predictions={r['id']:r['boxes'] for r in read_rows(scores/'predictions.jsonl')}
+    selections=[]
+    for r in rows:
+        if r['cohort']=='owner_reference_current_renderer' and r['post']==1:
+            name=r['id']+'.png'
+            fig=panel(inputs,r,predictions[r['id']],f"历史认可参考 #{r['id'].split('_')[1]} · 当前画法 · 核心后1根")
+            fig.save(out/name)
+            selections.append({'id':r['id'],'file':name,'sha256':sha(out/name),'rule':'All three explicit references at post1'})
+    matches=[r for r in rows if r['cohort']=='legacy_owner_positive'
+        and any(b['class_id']==1 and iou(b['xyxy'],r['target_xyxy'])>=.5 for b in predictions[r['id']])]
+    if matches:
+        matches.sort(key=lambda r:r['id']);r=matches[len(matches)//2]
+        name='legacy_reference_hit.png'
+        panel(inputs,r,predictions[r['id']],'能识别的例子 · 历史人工正例 · 原始画法').save(out/name)
+        selections.append({'id':r['id'],'file':name,'sha256':sha(out/name),'rule':'Median matched legacy reference by ID'})
+    replay=ROOT/'data/crypto/research/early_v6_evaluation_20260926_v1'
+    replay_rows={r['id']:r for r in read_rows(replay/'manifest.jsonl')}
+    replay_scores={r['id']:r['boxes'] for r in read_rows(ROOT/EXP/'early_replay_scores_collected_20260926/early_v6.jsonl')}
+    key=json.loads((ROOT/EXP/'blind_review_20260926_v1/private/key.json').read_text(encoding='utf-8'))
+    reviewed=[]
+    for k in key[:4]:
+        r=replay_rows[k['source_id']];boxes=replay_scores[r['id']]
+        reviewed.append({'review_id':k['review_id'],'source_id':r['id'],'boxes':boxes,
+            'owner_verdict':'no','scope':'Each page-level 无 was recorded for both displayed rows; no future labels inferred'})
+        if boxes:
+            name='owner_rejected_'+k['review_id']+'.png'
+            r=dict(r,target_xyxy=None)
+            panel(replay,r,boxes,'你刚判为“无”的图 · 模型仍给出高置信度框').save(out/name)
+            selections.append({'id':r['id'],'file':name,'sha256':sha(out/name),'rule':'All alarms among four existing owner no verdicts'})
+    # Review every symbol's strongest alarm, exposing actual market behavior.
+    by_symbol={}
+    for ident,boxes in replay_scores.items():
+        r=replay_rows[ident]
+        if r['cohort']!='market' or not boxes:continue
+        candidate=(max(b['confidence'] for b in boxes),ident)
+        if candidate>by_symbol.get(r['symbol'],(-1,'')):by_symbol[r['symbol']]=candidate
+    panels=[]
+    for symbol,(_,ident) in sorted(by_symbol.items()):
+        r=replay_rows[ident]
+        fig=panel(replay,r,replay_scores[ident],'连续行情 · 每币最高置信度检测 · 未经人工裁决')
+        name='market_'+symbol+'.png';fig.save(out/name)
+        panels.append(fig.resize((640,418)))
+        selections.append({'id':ident,'file':name,'sha256':sha(out/name),'rule':'Highest confidence alarm per symbol; not representative precision sample'})
+    for start in range(0,len(panels),4):
+        canvas=Image.new('RGB',(1280,836),'#f1f4f5')
+        for i,fig in enumerate(panels[start:start+4]):canvas.paste(fig,((i%2)*640,(i//2)*418))
+        canvas.save(out/f'market_sheet_{start//4+1}.png')
+    write_json(out/'selection.json',{'items':selections,'owner_four':reviewed,
+        'input_manifest_sha256':sha(inputs/'manifest.jsonl'),
+        'prediction_sha256':sha(scores/'predictions.jsonl'),'rendered_after_inference':True})
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('command',choices=['build','score','summarize'])
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('command',choices=['build','score','summarize','gallery'])
     p.add_argument('--inputs',type=Path);p.add_argument('--output',type=Path,required=True);p.add_argument('--device',default='cpu')
+    p.add_argument('--scores',type=Path)
     a=p.parse_args()
     if a.command=='build':build(a.output.resolve())
     elif a.command=='score':score(a.inputs.resolve(),a.output.resolve(),a.device)
-    else:summarize(a.inputs.resolve(),a.output.resolve())
+    elif a.command=='summarize':summarize(a.inputs.resolve(),a.output.resolve())
+    else:gallery(a.inputs.resolve(),a.scores.resolve(),a.output.resolve())
