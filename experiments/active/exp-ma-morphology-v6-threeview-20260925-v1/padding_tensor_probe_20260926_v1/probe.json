@@ -1,0 +1,108 @@
+{
+  "status": "complete",
+  "image_id": "s_event_4323748cf35873c357e44b2ec22878d4_P9",
+  "image_sha256": "4f76e4a50f002cce02007744c3420e8c476c91ca1343568b7525ea07a66a3917",
+  "weight_sha256": "df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c",
+  "class_id": 0,
+  "target_xyxy": [
+    832.7857142857144,
+    127.53327626452193,
+    1163.0714285714287,
+    609.6140176149526
+  ],
+  "runs": [
+    {
+      "name": "baseline",
+      "side_padding": 0,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1280
+      ],
+      "tensor_sha256": "2f8ab06496541228836bb301b0bc40e46bf9b71db5b735ecb68eb5bae443c7c9",
+      "model_fp16": false,
+      "matching_score": 0.9847099184989929,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.9847099184989929,
+          "xyxy": [
+            833.1534423828125,
+            129.8879852294922,
+            1163.6649169921875,
+            607.0471801757812
+          ]
+        }
+      ]
+    },
+    {
+      "name": "padded",
+      "side_padding": 16,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1312
+      ],
+      "tensor_sha256": "fe3c5ea83ac16ed548b1b83456d9ea703c5b2f4a613aa785548446d9c1e4b982",
+      "model_fp16": false,
+      "matching_score": 0.004088172689080238,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.004088172689080238,
+          "xyxy": [
+            843.4542236328125,
+            128.71339416503906,
+            1164.2301025390625,
+            609.25732421875
+          ]
+        }
+      ]
+    },
+    {
+      "name": "restored",
+      "side_padding": 0,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1280
+      ],
+      "tensor_sha256": "2f8ab06496541228836bb301b0bc40e46bf9b71db5b735ecb68eb5bae443c7c9",
+      "model_fp16": false,
+      "matching_score": 0.9847099184989929,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.9847099184989929,
+          "xyxy": [
+            833.1534423828125,
+            129.8879852294922,
+            1163.6649169921875,
+            607.0471801757812
+          ]
+        }
+      ]
+    }
+  ],
+  "restoration_matches": true,
+  "actual_image_content_identical": true,
+  "environment": {
+    "versions": {
+      "torch": "2.8.0+cu126",
+      "torchvision": "0.23.0+cu126",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
+    "cuda_available": true,
+    "cuda_required": true
+  },
+  "saved_validation_failure_reproduced": true,
+  "scope": "Fixed tensor A/B/A: only16px left/right gray border. Boxes mapped back to original pixels. No retraining or threshold change.",
+  "plan_sha256": "acc8bce27b6321ab98457a53b36b03bf832ae992957fda66e08c720d72461359",
+  "code_sha256": "797c297bbc6d7cdeb18a4148f0b3255eb7865df5da2ef89f618f688056961bc6",
+  "production_eligible": false
+}

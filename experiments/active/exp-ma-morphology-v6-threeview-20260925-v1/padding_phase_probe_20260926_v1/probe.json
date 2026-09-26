@@ -1,0 +1,138 @@
+{
+  "status": "complete",
+  "image_id": "s_event_4323748cf35873c357e44b2ec22878d4_P9",
+  "image_sha256": "4f76e4a50f002cce02007744c3420e8c476c91ca1343568b7525ea07a66a3917",
+  "weight_sha256": "df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c",
+  "class_id": 0,
+  "target_xyxy": [
+    832.7857142857144,
+    127.53327626452193,
+    1163.0714285714287,
+    609.6140176149526
+  ],
+  "runs": [
+    {
+      "name": "left0",
+      "left_padding": 0,
+      "right_padding": 32,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1312
+      ],
+      "tensor_sha256": "63ea7f071c038ec3bb622f65d368921aa72cf3d05431189c49f683e80d4b1b23",
+      "model_fp16": false,
+      "matching_score": 0.0011482073459774256,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.0011482073459774256,
+          "xyxy": [
+            833.231689453125,
+            128.338134765625,
+            1163.068115234375,
+            602.050537109375
+          ]
+        }
+      ]
+    },
+    {
+      "name": "left16",
+      "left_padding": 16,
+      "right_padding": 16,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1312
+      ],
+      "tensor_sha256": "fe3c5ea83ac16ed548b1b83456d9ea703c5b2f4a613aa785548446d9c1e4b982",
+      "model_fp16": false,
+      "matching_score": 0.004088172689080238,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.004088172689080238,
+          "xyxy": [
+            843.4542236328125,
+            128.71339416503906,
+            1164.2301025390625,
+            609.25732421875
+          ]
+        }
+      ]
+    },
+    {
+      "name": "left32",
+      "left_padding": 32,
+      "right_padding": 0,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1312
+      ],
+      "tensor_sha256": "637820e97707e15b37ace514b77cb8e189826b9c66b6d2ba402f4dbae8c35fd4",
+      "model_fp16": false,
+      "matching_score": 0.984431803226471,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.984431803226471,
+          "xyxy": [
+            833.1550903320312,
+            129.91217041015625,
+            1163.653564453125,
+            607.0226440429688
+          ]
+        }
+      ]
+    },
+    {
+      "name": "restored_left0",
+      "left_padding": 0,
+      "right_padding": 32,
+      "tensor_shape": [
+        8,
+        3,
+        768,
+        1312
+      ],
+      "tensor_sha256": "63ea7f071c038ec3bb622f65d368921aa72cf3d05431189c49f683e80d4b1b23",
+      "model_fp16": false,
+      "matching_score": 0.0011482073459774256,
+      "boxes": [
+        {
+          "class_id": 0,
+          "confidence": 0.0011482073459774256,
+          "xyxy": [
+            833.231689453125,
+            128.338134765625,
+            1163.068115234375,
+            602.050537109375
+          ]
+        }
+      ]
+    }
+  ],
+  "restoration_matches": true,
+  "actual_image_content_identical": true,
+  "environment": {
+    "versions": {
+      "torch": "2.8.0+cu126",
+      "torchvision": "0.23.0+cu126",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
+    "cuda_available": true,
+    "cuda_required": true
+  },
+  "saved_validation_failure_reproduced": false,
+  "scope": "Fixed1312px canvas, vary only left/right allocation of32px total gray border.",
+  "phase_plan_sha256": "7b2f706aebacf8695c55e9a7b12b4e40463026b45f042cfb96602bcea2e39e06",
+  "plan_sha256": "acc8bce27b6321ab98457a53b36b03bf832ae992957fda66e08c720d72461359",
+  "code_sha256": "85e7f701ce5ca7c69d8ce5018f7e76a45dafe2fb257341558aaf34d5e1df8eaa",
+  "production_eligible": false
+}

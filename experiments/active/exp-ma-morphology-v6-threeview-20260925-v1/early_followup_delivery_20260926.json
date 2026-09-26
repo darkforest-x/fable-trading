@@ -1,0 +1,75 @@
+{
+  "status": "padding_mechanism_reproduced_blind_packet_awaiting_human_labels",
+  "date": "2026-09-26",
+  "owner_request": "下一步呢",
+  "evidence_sha256": {
+    "early_followup_plan_20260926.json": "acc8bce27b6321ab98457a53b36b03bf832ae992957fda66e08c720d72461359",
+    "early_padding_phase_plan_20260926.json": "7b2f706aebacf8695c55e9a7b12b4e40463026b45f042cfb96602bcea2e39e06",
+    "padding_followup_20260926_v1/summary.json": "f187de713f5a096d50823c2aaa43e8e0dd636f2356a4f4ef824f13171da328cd",
+    "padding_followup_20260926_v1/pairs.json": "b76601f07c365cda9328c35facac661540df7c1c30d33ad8afa89cf52d0be636",
+    "padding_tensor_probe_20260926_v1/probe.json": "f7b9d732e77aae1c33512602f3383ac669eeddb3904a284cab57ef1104da9cff",
+    "padding_phase_probe_20260926_v1/probe.json": "e24e7ae0b411f15f6519956330d856121c11ad134ec6a9b0946b062e9731ccb7",
+    "blind_review_20260926_v1/receipt.json": "ab898a5b469a1486b480720ce1fbf3c21ed8ffff7ecfff7c8b77b0e7156b772e",
+    "blind_review_20260926_v1/private/key.json": "c4358356f1a8de362c94a08912101005c6d541578e50edee84200f2469deb46e",
+    "blind_review_20260926_v1/reviewer/answers.json": "9c2e35892d0ac74d81d55ed7ee9e6b71c4008ff8666a2b26c29195463b5f3e35"
+  },
+  "builder_commits": [
+    "91a46d7b1d",
+    "071062aec7"
+  ],
+  "fixed_threshold": 0.25,
+  "probe_save_floor": 0.001,
+  "fixed_validation_nms_iou": 0.7,
+  "tests_passed": 11,
+  "blind_packet": {
+    "unique_cases": 23,
+    "review_tasks": 27,
+    "completed_human_labels": 0,
+    "reviewer_path": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/blind_review_20260926_v1/reviewer",
+    "selected_without_model_outputs": true,
+    "private_mapping_physically_separate": true,
+    "first_phone_page_visually_checked": true,
+    "target24_shortfall": "Only7 nonoverlapping60m windows fit the fixed selection; did not relax exclusions."
+  },
+  "findings": {
+    "test_positive_transition": {
+      "hit_to_hit": 110,
+      "hit_to_miss": 40,
+      "miss_to_hit": 4,
+      "miss_to_miss": 5
+    },
+    "test_positive_hits_no_side_padding": 150,
+    "test_positive_hits_with_side_padding": 114,
+    "probe_baseline_padded_restored": [
+      0.9847099184989929,
+      0.004088172689080238,
+      0.9847099184989929
+    ],
+    "fixed1312_width_left0_left16_left32": [
+      0.0011482073459774256,
+      0.004088172689080238,
+      0.984431803226471
+    ],
+    "all_restore_checks_passed": true
+  },
+  "scope_limits": [
+    "The model is sensitive to neutral input placement; this is not a coordinate-only overlay bug.",
+    "Constant-width probe is one preselected worst case, not population robustness.",
+    "The probe does not prove that fixed-position training is the only internal cause.",
+    "Blind sample comes from an existing same-day top-gainers snapshot, not an unbiased market universe.",
+    "No labels completed; precision, market FPR and reviewer repeat consistency remain unavailable.",
+    "Phase probe saved_validation_failure_reproduced flag is not applicable to the constant-width experiment; interpret its four individual runs."
+  ],
+  "known_failed_attempts": [
+    "First SSH probe failed before model inference because C:/fable was not the working directory; rerun explicitly set repository cwd and import path."
+  ],
+  "next_allowed_actions": [
+    "Collect blind shape/core/launch judgments, preserving uncertainty and separate reviewer identity.",
+    "Assess confirmed labels against frozen predictions; do not tune threshold on the blind sample.",
+    "Define any training correction only after label review; preserve near-right-edge low-latency inputs."
+  ],
+  "production_eligible": false,
+  "training_eligible": false,
+  "active_model_changed": false,
+  "notion_page": "https://app.notion.com/p/3e78856479af81e6b9cae10361da78da"
+}

@@ -1,0 +1,80 @@
+{
+  "scope": "Paired fixed .25 confidence, original validator NMS .7; not AP-optimal P/R.",
+  "counts": {
+    "val": {
+      "states": {
+        "negative": 304,
+        "hit_to_hit": 123,
+        "hit_to_miss": 40,
+        "miss_to_hit": 9,
+        "miss_to_miss": 2
+      },
+      "negative_alarm_images": {
+        "pad0": 1,
+        "pad05": 1
+      },
+      "loss_observations": {
+        "matching_box_below_confidence_threshold": 34,
+        "no_above_threshold_prediction": 6
+      }
+    },
+    "test": {
+      "states": {
+        "hit_to_miss": 40,
+        "negative": 162,
+        "miss_to_miss": 5,
+        "hit_to_hit": 110,
+        "miss_to_hit": 4
+      },
+      "negative_alarm_images": {
+        "pad0": 0,
+        "pad05": 0
+      },
+      "loss_observations": {
+        "matching_box_below_confidence_threshold": 26,
+        "no_above_threshold_prediction": 13,
+        "boxes_no_longer_match_original_core": 1
+      }
+    }
+  },
+  "selected_probe": {
+    "id": "s_event_4323748cf35873c357e44b2ec22878d4_P9",
+    "event_id": "cluster_68f6cbff9541ba2869707da5",
+    "split": "test",
+    "pool": "reference",
+    "symbol": "KAIA",
+    "class_id": 0,
+    "state": "hit_to_miss",
+    "matching_scores": {
+      "pad0": 0.98471,
+      "pad05": 0.00407
+    },
+    "loss_observation": "matching_box_below_confidence_threshold",
+    "above_threshold_boxes": {
+      "pad0": [
+        {
+          "class_id": 0,
+          "confidence": 0.98471,
+          "xyxy": [
+            833.153,
+            129.89,
+            1163.664,
+            607.05
+          ]
+        }
+      ],
+      "pad05": []
+    },
+    "target_xyxy": [
+      832.7857142857144,
+      127.53327626452193,
+      1163.0714285714287,
+      609.6140176149526
+    ]
+  },
+  "selection_rule": "Highest pad0 matching confidence among all test hit-to-miss images; diagnostic worst case, not representative.",
+  "plan_sha256": "acc8bce27b6321ab98457a53b36b03bf832ae992957fda66e08c720d72461359",
+  "code_sha256": "797c297bbc6d7cdeb18a4148f0b3255eb7865df5da2ef89f618f688056961bc6",
+  "pairs_sha256": "b76601f07c365cda9328c35facac661540df7c1c30d33ad8afa89cf52d0be636",
+  "production_eligible": false
+}
