@@ -119,12 +119,15 @@ def summarize(inputs, scores, output):
         negative_cases=[r['id'] for r in stat if r['class_id'] is None and pred[r['id']]]
         missing_cases=[r['id'] for r in stat if r['class_id'] is not None and not matched(r,pred[r['id']])]
         write_json(output/(name+'_review_candidates.json'),{'negative_alarms':negative_cases,'positive_misses':missing_cases})
-        result['model_results'][name]={'static':{},'latency':{},'market':market_metrics(market,pred)}
+        result['model_results'][name]={'static':{},'negative_strata':{},'latency':{},'market':market_metrics(market,pred)}
         for split in ('val','test'):
             for pool in ('reference','grade_a_challenge'):
                 selection=[r for r in stat if r['split']==split and r['pool']==pool]
                 result['model_results'][name]['static'][split+'_'+pool]=static_metrics(selection,pred)
             result['model_results'][name]['latency'][split]=latency_metrics([r for r in event_results if r['split']==split])
+            for kind in sorted({r['negative_kind'] for r in stat if r['class_id'] is None}):
+                result['model_results'][name]['negative_strata'][split+'_'+kind]=static_metrics(
+                    [r for r in stat if r['split']==split and r['negative_kind']==kind],pred)
     a,b=by_model['early_v6'],by_model['old_v6a'];assert set(a)==set(b)
     paired=[(a[k],b[k]) for k in a if a[k]['first_valid_post'] is not None and b[k]['first_valid_post'] is not None]
     result['paired_latency']={'events':len(a),'both_detected':len(paired),
