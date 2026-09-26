@@ -90,7 +90,7 @@ experiments:
     - dataset
     - training
     - evaluation
-    title: YOLO v6：低延迟离线回放完成，生产验收未通过
+    title: YOLO v6：补边故障复现，等待形态盲审
     question: How early can the current MA dense/launch state be detected near the observation right edge, with acceptable misses
       and false alarms on continuous causal replay?
     single_variable: Owner-authorized research dataset correction, retaining the original YOLO11s training recipe. Case-specific first
@@ -118,11 +118,14 @@ experiments:
     - ma-morphology-v6-early-20260926-training-launch
     - ma-morphology-v6-early-20260926-training-completion
     - ma-morphology-v6-early-20260926-evaluation
+    - ma-morphology-v6-early-20260926-padding-blind-followup
     reuse_allowed: false
     notes: Owner explicitly requested training on2026-09-26. Current entry is early_training_plan_20260926.json and dataset
       ma_launch_owner1500_morph_v6_early_20260926_v1; frozen manifest c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6.
       Research gate exception was limited to the now-completed training run; no new training is authorized by this evaluation.
-      Evaluation entry is early_evaluation_delivery_20260926.json; Notion EXP-108.
+      Evaluation entry is early_evaluation_delivery_20260926.json; latest early_followup_delivery_20260926.json, Notion EXP-108.
+      Padding test fixed-threshold hits150to114; reversible and constant-width probes confirm position sensitivity.
+      Blind queue23unique27tasks is prepared with0human labels; awaiting morphology judgments, not approved gold.
       Original physical core geometry retained; no extra waiting for position variation.
       Measure first valid detection delay in bars/minutes and price already travelled, alongside false alarms and misses.
       Old post5 and R5/R8/R11 artifacts are preserved as historical evidence. Production eligibility remains false.

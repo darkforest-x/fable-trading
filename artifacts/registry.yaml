@@ -32291,3 +32291,19 @@ artifacts:
     notes: Two16958-image matched-input runs;333events,2625market endpoints,799static images. New test156of159
       earliest-anchor matches,1never-matched,2pre-anchor-only. Padding brittleness and incomplete human gold remain.
       No retraining, promotion, production switch or notification change. Raw predictions and hashes retained; Notion EXP-108.
+
+  - artifact_id: ma-morphology-v6-early-20260926-padding-blind-followup
+    artifact_type: manifest
+    role: reversible_padding_diagnosis_and_unadjudicated_blind_review_queue
+    source_repo: darkforest-x/fable-trading
+    source_commit: c58e0d1bb2
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_followup_delivery_20260926.json
+    sha256: 9c9c78f955d70e5eb85da185570df31c2a5f7cbd2fae217d3d64731c2f94dd77
+    size_bytes: 3782
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_followup_delivery_20260926.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Fixed threshold test159 positive candidates lose40 hits and gain4 under padding. Tensor A/B/A reproduces
+      confidence collapse and restores; constant-width offset isolates position sensitivity in one selected case.
+      Blind queue23 unique windows plus4 repeats; zero human labels, no market FPR or qualification claim.
