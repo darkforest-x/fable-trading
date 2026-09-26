@@ -1,0 +1,686 @@
+{
+  "status": "complete",
+  "plan_sha256": "cf7651f4971f7e8ee425a2c03af692b215d44917f89b9e5ef9fdf3f06aeb046c",
+  "environment": {
+    "versions": {
+      "torch": "2.8.0+cu126",
+      "torchvision": "0.23.0+cu126",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
+    "cuda_available": true,
+    "cuda_required": true
+  },
+  "runs": {
+    "early_v6_pad05_val_reference": {
+      "images": 349,
+      "metrics": {
+        "metrics/precision(B)": 0.9379951511726308,
+        "metrics/recall(B)": 0.823399026197504,
+        "metrics/mAP50(B)": 0.9346519730769274,
+        "metrics/mAP50-95(B)": 0.7274834845084719,
+        "fitness": 0.7274834845084719
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f65c0b04b454433c7e4e0842310dd4e3_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f620d833971a52d0afc19daf04216a2c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f59b95197db959378486d8f77218984e_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "b1163b8c60a1d8051b5752df80ca345dda5b8d84b2392a0871b412bb15a09f6f",
+      "no_positive_targets": false
+    },
+    "early_v6_pad05_val_grade_a_challenge": {
+      "images": 129,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_001e96fa52a7e9e7df35cd8849c9305c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_01548f388cdd95fd168c272745ac5742_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_02fa6ad2025bfbe00106b9d53bea3297_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "fc120cf7a0aa1ca467e457c726a6603acb33b81a92222a29c479e3f6a12b3d0e",
+      "no_positive_targets": true
+    },
+    "early_v6_pad05_test_reference": {
+      "images": 319,
+      "metrics": {
+        "metrics/precision(B)": 0.8984430435302333,
+        "metrics/recall(B)": 0.7809891427807379,
+        "metrics/mAP50(B)": 0.8762884728687803,
+        "metrics/mAP50-95(B)": 0.7212969254159654,
+        "fitness": 0.7212969254159654
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_f0dfa7acc4c1025f5bf271ebac84dff7_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_efdee925b8425f131d3977bf3b49b975_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_eecc384c6a6d1e629de573f936d20de4_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "cb081fe06ca20a375ad1301ec7292a76ddbaa374fa2efbb22974de89dd65806e",
+      "no_positive_targets": false
+    },
+    "early_v6_pad05_test_grade_a_challenge": {
+      "images": 2,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_6c6ec5ae2a550f0dcc8bc207c484cb58_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_7fed502a7b75f8994d3efa7d1c33c51f_P9.png"
+        ],
+        "first_tensor_bchw": [
+          2,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "no_positive_targets": true
+    },
+    "early_v6_pad0_val_reference": {
+      "images": 349,
+      "metrics": {
+        "metrics/precision(B)": 0.890350988193381,
+        "metrics/recall(B)": 0.9606834422565879,
+        "metrics/mAP50(B)": 0.9527638145703716,
+        "metrics/mAP50-95(B)": 0.9176472862289643,
+        "fitness": 0.9176472862289643
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f65c0b04b454433c7e4e0842310dd4e3_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f620d833971a52d0afc19daf04216a2c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f59b95197db959378486d8f77218984e_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "c09a128ec3d707da1a773b54e0f614094361a14c1119970908c9466edd306b64",
+      "no_positive_targets": false
+    },
+    "early_v6_pad0_val_grade_a_challenge": {
+      "images": 129,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_001e96fa52a7e9e7df35cd8849c9305c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_01548f388cdd95fd168c272745ac5742_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_02fa6ad2025bfbe00106b9d53bea3297_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "5a63f1b2e3c19fcb32a3748512617a610fd37359ba088d124956b990e05c8f84",
+      "no_positive_targets": true
+    },
+    "early_v6_pad0_test_reference": {
+      "images": 319,
+      "metrics": {
+        "metrics/precision(B)": 0.9192404226238566,
+        "metrics/recall(B)": 0.9186312268393312,
+        "metrics/mAP50(B)": 0.9662422071200143,
+        "metrics/mAP50-95(B)": 0.9301603270439138,
+        "fitness": 0.9301603270439138
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_f0dfa7acc4c1025f5bf271ebac84dff7_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_efdee925b8425f131d3977bf3b49b975_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_eecc384c6a6d1e629de573f936d20de4_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "8a3f03aff50ace876afd57ccde473feb20830b0e01639ca430f3f46f864cae8e",
+      "no_positive_targets": false
+    },
+    "early_v6_pad0_test_grade_a_challenge": {
+      "images": 2,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_6c6ec5ae2a550f0dcc8bc207c484cb58_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_7fed502a7b75f8994d3efa7d1c33c51f_P9.png"
+        ],
+        "first_tensor_bchw": [
+          2,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "no_positive_targets": true
+    },
+    "old_v6a_pad05_val_reference": {
+      "images": 349,
+      "metrics": {
+        "metrics/precision(B)": 0.15080055060494096,
+        "metrics/recall(B)": 0.20082184517497348,
+        "metrics/mAP50(B)": 0.06860850225069878,
+        "metrics/mAP50-95(B)": 0.027247743506555795,
+        "fitness": 0.027247743506555795
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f65c0b04b454433c7e4e0842310dd4e3_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f620d833971a52d0afc19daf04216a2c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f59b95197db959378486d8f77218984e_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "539e5420111dd39ecd05afc5bfc1e62097c7db587591a9d53170447fb0644ed3",
+      "no_positive_targets": false
+    },
+    "old_v6a_pad05_val_grade_a_challenge": {
+      "images": 129,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_001e96fa52a7e9e7df35cd8849c9305c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_01548f388cdd95fd168c272745ac5742_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_02fa6ad2025bfbe00106b9d53bea3297_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "ce9099c0afb7490e9e8de5398d4476bfe87bb1bd2a74637d808dd8c4447d7e7d",
+      "no_positive_targets": true
+    },
+    "old_v6a_pad05_test_reference": {
+      "images": 319,
+      "metrics": {
+        "metrics/precision(B)": 0.1326774001192606,
+        "metrics/recall(B)": 0.16518282988871225,
+        "metrics/mAP50(B)": 0.05916671529169669,
+        "metrics/mAP50-95(B)": 0.02725931870605654,
+        "fitness": 0.02725931870605654
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_f0dfa7acc4c1025f5bf271ebac84dff7_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_efdee925b8425f131d3977bf3b49b975_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_eecc384c6a6d1e629de573f936d20de4_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "d8a1e50d83de1585d205c65541834ef3dc8e106e42d9e587052037b4ff343851",
+      "no_positive_targets": false
+    },
+    "old_v6a_pad05_test_grade_a_challenge": {
+      "images": 2,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.5,
+        "batch_shapes_hw": [
+          [
+            768,
+            1312
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_6c6ec5ae2a550f0dcc8bc207c484cb58_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_7fed502a7b75f8994d3efa7d1c33c51f_P9.png"
+        ],
+        "first_tensor_bchw": [
+          2,
+          3,
+          768,
+          1312
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            16,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "no_positive_targets": true
+    },
+    "old_v6a_pad0_val_reference": {
+      "images": 349,
+      "metrics": {
+        "metrics/precision(B)": 0.278968253968254,
+        "metrics/recall(B)": 0.4266967126193001,
+        "metrics/mAP50(B)": 0.19870462808256573,
+        "metrics/mAP50-95(B)": 0.06129513757202811,
+        "fitness": 0.06129513757202811
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f65c0b04b454433c7e4e0842310dd4e3_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f620d833971a52d0afc19daf04216a2c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_reference\\event_f59b95197db959378486d8f77218984e_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "342fe49978479fd92315dd86e9cbb129841cc88ed7959c8928f43282899c8a22",
+      "no_positive_targets": false
+    },
+    "old_v6a_pad0_val_grade_a_challenge": {
+      "images": 129,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_001e96fa52a7e9e7df35cd8849c9305c_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_01548f388cdd95fd168c272745ac5742_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\val_grade_a_challenge\\event_02fa6ad2025bfbe00106b9d53bea3297_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "77986058fa81e39653fe70c9810f4d5502a823877e3985938609490acb8b2f64",
+      "no_positive_targets": true
+    },
+    "old_v6a_pad0_test_reference": {
+      "images": 319,
+      "metrics": {
+        "metrics/precision(B)": 0.26037735849056604,
+        "metrics/recall(B)": 0.3885532591414944,
+        "metrics/mAP50(B)": 0.1661118671270913,
+        "metrics/mAP50-95(B)": 0.05470601064550146,
+        "fitness": 0.05470601064550146
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_f0dfa7acc4c1025f5bf271ebac84dff7_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_efdee925b8425f131d3977bf3b49b975_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_reference\\event_eecc384c6a6d1e629de573f936d20de4_P9.png"
+        ],
+        "first_tensor_bchw": [
+          8,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "2a65ca72b3157ea4f60033d10fd0548094d95c26b9478c3b99a818cb92c02bf0",
+      "no_positive_targets": false
+    },
+    "old_v6a_pad0_test_grade_a_challenge": {
+      "images": 2,
+      "metrics": {
+        "metrics/precision(B)": 0.0,
+        "metrics/recall(B)": 0.0,
+        "metrics/mAP50(B)": 0.0,
+        "metrics/mAP50-95(B)": 0.0,
+        "fitness": 0.0
+      },
+      "geometry": {
+        "dataset_pad": 0.0,
+        "batch_shapes_hw": [
+          [
+            768,
+            1280
+          ]
+        ],
+        "first_im_files": [
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_6c6ec5ae2a550f0dcc8bc207c484cb58_P9.png",
+          "C:\\fable\\experiments\\active\\exp-ma-morphology-v6-threeview-20260925-v1\\early_validation_20260926_v2\\data\\images\\test_grade_a_challenge\\event_7fed502a7b75f8994d3efa7d1c33c51f_P9.png"
+        ],
+        "first_tensor_bchw": [
+          2,
+          3,
+          768,
+          1280
+        ],
+        "first_ratio_pad": [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0,
+            13
+          ]
+        ]
+      },
+      "predictions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "no_positive_targets": true
+    }
+  },
+  "production_eligible": false
+}

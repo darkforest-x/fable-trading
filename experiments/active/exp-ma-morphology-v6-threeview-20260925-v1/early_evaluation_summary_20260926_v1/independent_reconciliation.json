@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "scored_id_and_threshold_audit": {
+    "early_v6": {
+      "prediction_rows": 16958,
+      "latency": {
+        "val": {
+          "events": 174,
+          "at_reference": 172
+        },
+        "test": {
+          "events": 159,
+          "at_reference": 156
+        }
+      },
+      "market_alarm_endpoints": 134
+    },
+    "old_v6a": {
+      "prediction_rows": 16958,
+      "latency": {
+        "val": {
+          "events": 174,
+          "at_reference": 40
+        },
+        "test": {
+          "events": 159,
+          "at_reference": 43
+        }
+      },
+      "market_alarm_endpoints": 351
+    }
+  },
+  "validation_prediction_hashes_verified": 16,
+  "event_future_mutation_checks": 333,
+  "source_manifest_sha256": "c1a4634be1287e0a3bc26f4c5b8b780dd4ebfc4b8305466834ca83ffbf351584",
+  "summary_sha256": "ba96ffb62d931bb2e5eceb8b231d7a2715ae6601f5cf0b898b248775ffad6a7b",
+  "zero_economic_metrics_expected": true,
+  "human_onset_gold": false,
+  "production_eligible": false
+}
