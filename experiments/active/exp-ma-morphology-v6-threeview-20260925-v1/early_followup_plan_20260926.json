@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "scope": "Offline evidence triage and blinded human review preparation. No labels adjudicated, retraining, threshold change, live model change or promotion.",
+  "input_manifest_sha256": "c1a4634be1287e0a3bc26f4c5b8b780dd4ebfc4b8305466834ca83ffbf351584",
+  "validation_receipt_sha256": "9180b802e40a7a08a40aa8f898b2c09650830171bf374a522b9da2ed51927ef0",
+  "confidence": 0.25,
+  "nms_iou": 0.7,
+  "target_iou": 0.5,
+  "padding_analysis": "All799 static images, new model only. Saved COCO categories1/2 map to internal0/1. Paired padding labels include losses and gains.",
+  "probe_selection": "Highest unpadded matching confidence among test hit-to-miss images. Diagnostic worst case, not a performance estimate.",
+  "blind_seed": "early-v6-human-review-20260926-v1",
+  "blind_per_timeframe": 8,
+  "blind_repeats": 4,
+  "blind_visible_start_not_before": "2026-09-21T16:00:00+00:00",
+  "blind_selection": "Window17 only; hash rank independent of predictions/outcomes. Round-robin60/30/15m, max2 endpoints per symbol, same-symbol visible intervals disjoint. Never change train/val/test splits.",
+  "reviewer_fields": [
+    "shape_present",
+    "direction",
+    "core_start_bar",
+    "core_end_bar",
+    "launch_visible",
+    "first_visible_launch_bar",
+    "comment",
+    "reviewer_id",
+    "reviewed_at"
+  ],
+  "qualification": "Not individual human gold until completed review; sampled top-gainers snapshot remains a biased universe. No market FPR until adjudicated.",
+  "production_eligible": false,
+  "training_eligible": false,
+  "blind_sample_count_policy": "Target up to24 unique cases. Actual shortfall must be retained; temporal exclusions and max2per-symbol are hard constraints."
+}
