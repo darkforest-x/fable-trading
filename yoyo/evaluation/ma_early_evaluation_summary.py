@@ -66,9 +66,13 @@ def latency_metrics(events):
         'at_reference':sum(r['delay_bars']==0 for r in hit),
         'within_reference_plus1':sum(r['delay_bars']<=1 for r in hit),
         'pre_reference_match_events':sum(r['pre_reference_match'] for r in events),
+        'pre_reference_only_events':sum(r['pre_reference_match'] and r['first_valid_post'] is None for r in events),
+        'never_matched_events':sum(r['first_any_match_post'] is None for r in events),
         'median_delay_bars_among_detected':median(r['delay_bars'] for r in hit) if hit else None,
         'mean_delay_bars_among_detected':mean(r['delay_bars'] for r in hit) if hit else None,
         'median_delay_minutes_among_detected':median(r['delay_minutes'] for r in hit) if hit else None,
+        'median_core_to_first_hit_bars_among_detected':median(r['first_valid_post'] for r in hit) if hit else None,
+        'median_signed_price_move_from_core_pct_among_detected':median(r['signed_price_move_from_core_pct'] for r in hit) if hit else None,
         'first_valid_post_histogram':dict(Counter(r['first_valid_post'] for r in hit)),
         'per_step_matching_events':{str(p):sum(p in r['matched_posts'] for r in events) for p in range(9)}}
 
@@ -107,6 +111,7 @@ def summarize(inputs, scores, output):
         'limitations':['Positive anchors and negative labels are rule-selected research candidates, not individually adjudicated onset gold.',
         'Continuous market sample is a frozen same-day top-gainers retrospective cohort, not a causal trading universe.',
         'Main-event delay statistics are conditional on previously selected positive events and report censored misses explicitly.',
+        'A valid-launch miss can still have an earlier core match; pre-reference-only and never-matched counts are separate.',
         'Old/new comparison uses identical early-model canvas and windows; this is not a native Grade-A production comparison.',
         'Only two test Grade-A challenge negatives; no robust challenge-test false alarm estimate.'],
         'production_eligible':False,'training_eligible':False,'economic_metrics':'not_applicable_to_detection_diagnostics'}

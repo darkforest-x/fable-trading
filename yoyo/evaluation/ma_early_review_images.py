@@ -68,7 +68,7 @@ def build(inputs,scores,summary,out):
             '待复核失败例 · 测试集规则负样本上的最高置信度告警')
         fig.save(out/name);selections.append({'type':'negative_alarm','file':name,'image_id':row['id'],
             'rule':'Highest-confidence new-model test empty-label alarm; not selected by price outcome','sha256':sha(out/name)})
-    missed=[r for r in a if r['split']=='test' and r['first_valid_post'] is None]
+    missed=[r for r in a if r['split']=='test' and r['first_any_match_post'] is None]
     if missed:
         event=min(missed,key=lambda r:r['event_id'])
         row=min((r for r in rows.values() if r['cohort']=='event' and r['event_id']==event['event_id'] and r['post']==r['reference_post']),key=lambda r:(abs(r['n']-14),r['id']))

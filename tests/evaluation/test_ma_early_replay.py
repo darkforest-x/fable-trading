@@ -64,6 +64,8 @@ def test_latency_keeps_misses_and_does_not_credit_pre_anchor_matches():
     events=latency_events(rows,predictions);metric=latency_metrics(events)
     assert metric['events']==2 and metric['detected_by_core_plus8']==1 and metric['missed_by_core_plus8']==1
     assert metric['pre_reference_match_events']==2
+    assert metric['pre_reference_only_events']==1
+    assert metric['never_matched_events']==0
     assert metric['median_delay_bars_among_detected']==2
     assert metric['median_delay_minutes_among_detected']==6
     assert metric['at_reference']==0
