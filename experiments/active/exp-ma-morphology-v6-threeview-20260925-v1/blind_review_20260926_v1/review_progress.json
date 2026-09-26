@@ -1,19 +1,23 @@
 {
-  "status": "human_review_in_progress",
+  "status": "paused_owner_requested_direct_model_testing",
   "review_tasks": 27,
-  "tasks_with_shape_judgment": 2,
-  "pending_tasks": 25,
+  "tasks_with_shape_judgment": 4,
+  "pending_tasks": 23,
   "completed_ids": [
     "R01",
-    "R02"
-  ],
-  "scope_interpretation_pending_correction_if_needed": true,
-  "latest_adjudication": "adjudications/owner_round_0001.json",
-  "next_page": "reviewer/page_02.png",
-  "next_review_ids": [
+    "R02",
     "R03",
     "R04"
   ],
+  "scope_interpretation_pending_correction_if_needed": true,
+  "latest_adjudication": "adjudications/owner_round_0002.json",
+  "next_page": "reviewer/page_03.png",
+  "next_review_ids": [
+    "R05",
+    "R06"
+  ],
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "next_action": "Use saved owner references and direct inference; do not request more page-by-page labels",
+  "owner_steering": "这样太麻烦了吧，你在做什么啊…我们最新的模型训练的如何呀…去测试一下？"
 }

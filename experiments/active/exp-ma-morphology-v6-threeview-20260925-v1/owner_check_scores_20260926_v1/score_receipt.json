@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "images": 386,
+  "environment": {
+    "versions": {
+      "torch": "2.8.0+cu126",
+      "torchvision": "0.23.0+cu126",
+      "ultralytics": "8.4.89",
+      "numpy": "2.0.2",
+      "pandas": "2.3.3"
+    },
+    "cuda_available": true,
+    "cuda_required": true
+  },
+  "weight": {
+    "path": "datasets/ma_launch_owner1500_morph_v6_early_20260926_v1/training_runs/exp-ma-morphology-v6-threeview-20260925-v1/weights/best.pt",
+    "sha256": "df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c"
+  },
+  "predict": {
+    "conf": 0.25,
+    "iou": 0.5,
+    "imgsz": 1280,
+    "rect": true,
+    "batch": 8,
+    "augment": false
+  },
+  "tensor_shape": [
+    768,
+    1280
+  ],
+  "manifest_sha256": "c0f9c3f2794cccc9333553a31beec9206d9575ddc3beb9cff993e72dce9159de",
+  "predictions_sha256": "9a36f08079c8d6f25f2215ef83eec56e7f2eca8210664988e1889124c9741c91"
+}

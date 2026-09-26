@@ -1,0 +1,85 @@
+{
+  "status": "direct_model_test_complete_not_accepted",
+  "weight": {
+    "path": "datasets/ma_launch_owner1500_morph_v6_early_20260926_v1/training_runs/exp-ma-morphology-v6-threeview-20260925-v1/weights/best.pt",
+    "sha256": "df6a49684ddcaed373ca4d8365f9d3ae4a2e0d4278aad01edbb762f46829231c"
+  },
+  "summary": {
+    "legacy_owner_positive": {
+      "images": 202,
+      "short_alarm": 17,
+      "any_alarm": 17,
+      "matched_short_target": 8,
+      "exact_train_image_overlap": 0,
+      "train_core_nearby": 0
+    },
+    "legacy_owner_short_negative": {
+      "images": 172,
+      "short_alarm": 0,
+      "any_alarm": 0,
+      "matched_short_target": 0,
+      "exact_train_image_overlap": 0,
+      "train_core_nearby": 1
+    },
+    "owner_reference_current_renderer": {
+      "images": 9,
+      "short_alarm": 6,
+      "any_alarm": 6,
+      "matched_short_target": 3,
+      "exact_train_image_overlap": 0,
+      "train_core_nearby": 0
+    },
+    "owner_reference_original": {
+      "images": 3,
+      "short_alarm": 0,
+      "any_alarm": 0,
+      "matched_short_target": 0,
+      "exact_train_image_overlap": 0,
+      "train_core_nearby": 0
+    }
+  },
+  "owner_four_negative_check": {
+    "images": 4,
+    "alarms": 1,
+    "case": "R02 USELESS 30m",
+    "confidence": 0.9699445366859436,
+    "scope": "Two page-level 无 replies were recorded as two no verdicts each; not a population false-positive estimate"
+  },
+  "references": {
+    "42": "post1 matches; post2 box no longer matches",
+    "44": "post2 matches; post0 wrong location and post1 no alarm",
+    "48": "post1 matches; post2 no alarm"
+  },
+  "continuous_replay": {
+    "previously_scored_endpoints": 2625,
+    "alarm_endpoints": 134,
+    "newly_visually_inspected_strongest_alarm_per_symbol": 14,
+    "labels": "assistant inspection only, not owner gold"
+  },
+  "limits": [
+    "Legacy positives use inherited center-cropped reference geometry, not new per-image confirmation",
+    "Legacy image rendering differs from current model inputs; 8/202 is compatibility, not overall recall",
+    "The three new-renderer references change HL2, crop and scale together; no single-cause attribution",
+    "172 negatives reject the old short target; no extrapolation to all long setups",
+    "No exact train image duplicates; one negative has a same-asset train core within one day; no proof of full independence",
+    "Detection outputs and raw coordinates are reproduced, not trading-performance evidence"
+  ],
+  "validation": {
+    "images_sha_checked": 386,
+    "dimensions_checked": 386,
+    "prediction_ids_unique_complete": true,
+    "prediction_hash_matches_remote_receipt": true,
+    "current_reference_future_mutation_checks": 9
+  },
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.ma_early_owner_check build --output <new-input-directory>",
+    ".venv/bin/python -m yoyo.evaluation.ma_early_owner_check score --inputs <input-directory> --output <new-score-directory> --device 0",
+    ".venv/bin/python -m yoyo.evaluation.ma_early_owner_check summarize --inputs <input-directory> --output <score-directory>",
+    ".venv/bin/python -m yoyo.evaluation.ma_early_owner_check gallery --inputs <input-directory> --scores <score-directory> --output <new-gallery-directory>"
+  ],
+  "score_directory": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/owner_check_scores_20260926_v1",
+  "gallery_directory": "experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/owner_check_gallery_20260926_v1",
+  "training_started": false,
+  "production_eligible": false,
+  "automatic_blind_label_requests_stopped": true
+}

@@ -1,0 +1,30 @@
+{
+  "builder_commit": "29efcd2c33fdcdf72f6851ee02e9b554e13f097a",
+  "images": 386,
+  "counts": {
+    "legacy_owner_positive": 202,
+    "legacy_owner_short_negative": 172,
+    "owner_reference_original": 3,
+    "owner_reference_current_renderer": 9
+  },
+  "sources": [
+    {
+      "path": "datasets/owner_short_gold_center_v1/positive_manifest.jsonl",
+      "sha256": "8f4119fbf634ec976077e8eb50b36e57ae3aa0471759cad04f2eaeaeacd6d21b"
+    },
+    {
+      "path": "analysis/output/owner_short_train_hardneg_newblocks200_v3/owner_review_labeled_manifest.jsonl",
+      "sha256": "9ddd17f887e6c09f314b3f5946eb77e5560037a992ca3238f66dc284eaea897b"
+    },
+    {
+      "path": "experiments/active/exp-15m-ma-launch-owner-strict-review50-v5/results/review_manifest.jsonl",
+      "sha256": "239eab3eae9f7ff635e6e755b7dc934cd29152b5665cbdb7f934739ea189a00c"
+    }
+  ],
+  "manifest_sha256": "c0f9c3f2794cccc9333553a31beec9206d9575ddc3beb9cff993e72dce9159de",
+  "plan_sha256": "cf7651f4971f7e8ee425a2c03af692b215d44917f89b9e5ef9fdf3f06aeb046c",
+  "training_manifest_sha256": "c863aa0f76a86220c4e8ba0d543814cbcecd3cf0b0f36e19acb68d72490400f6",
+  "purpose": "Reference compatibility, not an independent or current-renderer accuracy estimate",
+  "current_render_future_mutation_checks": 9,
+  "production_eligible": false
+}
