@@ -35,7 +35,7 @@ def run(output: Path, device: str):
     class PersistPredictions:
         def finalize_metrics(self):
             super().finalize_metrics()
-            (self.save_dir / 'raw_predictions.json').write_text(json.dumps(self.jdict))
+            (self.save_dir / 'raw_predictions.json').write_text(json.dumps(self.jdict), encoding='utf-8')
 
     class DefaultValidator(PersistPredictions, RecordingValidator):
         pass
@@ -44,13 +44,13 @@ def run(output: Path, device: str):
         pass
 
     env = check_environment(cuda_required=device == '0')
-    plan = json.loads((ROOT / PLAN).read_text())
+    plan = json.loads((ROOT / PLAN).read_text(encoding='utf-8'))
     dataset = ROOT / plan['dataset']
     assert sha(dataset / 'manifest.jsonl') == plan['manifest_sha256']
     if output.exists():
         raise FileExistsError(output)
     output.mkdir(parents=True)
-    rows = [json.loads(l) for l in (dataset / 'manifest.jsonl').open()]
+    rows = [json.loads(l) for l in (dataset / 'manifest.jsonl').open(encoding='utf-8')]
     rows = [r for r in rows if r['split'] in ('val', 'test') and r['variant'] == 'P9']
     pools = {}
     for split in ('val', 'test'):
@@ -69,7 +69,7 @@ def run(output: Path, device: str):
             yaml = output / (key + '.yaml')
             yaml.write_text('path: ' + json.dumps(str((output / 'data').resolve())) + '\n'
                 + f'train: images/{key}\nval: images/{key}\ntest: images/{key}\n'
-                + 'names: [dense_launch_long, dense_launch_short]\n')
+                + 'names: [dense_launch_long, dense_launch_short]\n', encoding='utf-8')
     torch.set_num_threads(4)
     results = {'status': 'running', 'plan_sha256': sha(ROOT / PLAN), 'environment': env,
                'runs': {}, 'production_eligible': False}
@@ -86,13 +86,13 @@ def run(output: Path, device: str):
                     save_json=True, project=str(output / 'runs'), name=name, exist_ok=False)
                 folder = Path(metrics.diagnostic_save_dir)
                 results['runs'][name] = {'images': len(selected), 'metrics': metrics.results_dict,
-                    'geometry': json.loads((folder / 'geometry.json').read_text()),
+                    'geometry': json.loads((folder / 'geometry.json').read_text(encoding='utf-8')),
                     'predictions_sha256': sha(folder / 'raw_predictions.json'),
                     'no_positive_targets': not any(r['class_id'] is not None for r in selected)}
-                (output / 'validation.json').write_text(json.dumps(results, indent=2) + '\n')
+                (output / 'validation.json').write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')
                 print('VALIDATION ' + json.dumps({name: results['runs'][name]}), flush=True)
     results['status'] = 'complete'
-    (output / 'validation.json').write_text(json.dumps(results, indent=2) + '\n')
+    (output / 'validation.json').write_text(json.dumps(results, indent=2) + '\n', encoding='utf-8')
     return results
 
 
