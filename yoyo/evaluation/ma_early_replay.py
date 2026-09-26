@@ -21,10 +21,6 @@ import cv2
 import numpy as np
 import pandas as pd
 
-from yoyo.datasets import ma_profit_dataset as renderer
-from yoyo.datasets.ma_morphology_future_review import transform
-from yoyo.datasets.ma_morphology_positions import _load_source_group, event_support
-from yoyo.datasets.ma_morphology_redo import read_interval
 from yoyo.evaluation.ma_early_validation import ROOT, PLAN, sha
 
 
@@ -38,6 +34,8 @@ def write_json(path, value):
 
 def render_window(frame, endpoint, n, minutes):
     """Read OHLC at [max(0,end-n+1-1202):end], never future or a target box."""
+    from yoyo.datasets import ma_profit_dataset as renderer
+    from yoyo.datasets.ma_morphology_future_review import transform
     start = endpoint - n + 1
     support = max(0, start - 1202)
     if n < 4 or start - support < 1200 or endpoint >= len(frame):
@@ -79,6 +77,8 @@ def persist_image(out, ident, png, metadata):
 
 
 def event_group(job):
+    from yoyo.datasets.ma_morphology_positions import _load_source_group, event_support
+    from yoyo.datasets.ma_morphology_redo import read_interval
     source, group, windows, out = job
     out = Path(out); records=[]; skipped=[]; parity=[]
     _, _, full = _load_source_group((source, group))
@@ -137,6 +137,7 @@ def market_stream(job):
 
 
 def build(out):
+    from yoyo.datasets import ma_profit_dataset as renderer
     plan=json.loads((ROOT/PLAN).read_text(encoding='utf-8'));dataset=ROOT/plan['dataset']
     commit=renderer._committed([Path(__file__),ROOT/PLAN,ROOT/'yoyo/evaluation/ma_early_validation.py'])
     assert sha(dataset/'manifest.jsonl')==plan['manifest_sha256']

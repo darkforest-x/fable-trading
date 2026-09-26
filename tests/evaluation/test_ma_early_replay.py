@@ -7,6 +7,7 @@ import pytest
 
 from yoyo.datasets.ma_morphology_early_dataset import render_known_prefixes
 from yoyo.evaluation.ma_early_replay import render_window, project_target, iou
+from yoyo.evaluation.ma_early_evaluation_summary import latency_events,latency_metrics,static_metrics
 
 
 def fixture():
@@ -49,3 +50,29 @@ def test_box_overlap_does_not_credit_disjoint_or_shifted_targets():
     assert iou([0,0,10,10],[0,0,10,10])==1
     assert iou([0,0,10,10],[10,0,20,10])==0
     assert iou([0,0,10,10],[5,0,15,10])==pytest.approx(1/3)
+
+
+def test_latency_keeps_misses_and_does_not_credit_pre_anchor_matches():
+    rows=[];predictions={};box={'class_id':0,'xyxy':[1,1,9,9],'confidence':.9}
+    for event in ('later_hit','never_valid'):
+        for post in range(5):
+            ident=f'{event}_{post}'
+            rows.append({'id':ident,'event_id':event,'reference_post':1,'post':post,'n':14,
+                'split':'test','symbol':'fixture','minutes':3,'class_id':0,'target_xyxy':[1,1,9,9],
+                'last_close':100+post,'core_close':100})
+            predictions[ident]=[box] if post==0 or event=='later_hit' and post==3 else []
+    events=latency_events(rows,predictions);metric=latency_metrics(events)
+    assert metric['events']==2 and metric['detected_by_core_plus8']==1 and metric['missed_by_core_plus8']==1
+    assert metric['pre_reference_match_events']==2
+    assert metric['median_delay_bars_among_detected']==2
+    assert metric['median_delay_minutes_among_detected']==6
+    assert metric['at_reference']==0
+
+
+def test_static_empty_label_alarms_and_wrong_class_are_not_true_positives():
+    rows=[{'id':'positive','class_id':0,'target_xyxy':[0,0,10,10]},
+          {'id':'negative','class_id':None,'target_xyxy':None}]
+    predictions={r['id']:[{'class_id':1,'xyxy':[0,0,10,10]}] for r in rows}
+    m=static_metrics(rows,predictions)
+    assert (m['tp'],m['fp_boxes'],m['fn'])==(0,2,1)
+    assert m['negative_image_alarm_rate']==1 and m['recall']==0
