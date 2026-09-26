@@ -206,7 +206,7 @@ def blind_packet(output):
         'human_labels_created':0,'training_eligible':False,'production_eligible':False})
 
 
-def padding_probe(audit, output, device):
+def padding_probe(audit, output, device, phase_plan=None):
     import cv2
     import numpy as np
     import torch
@@ -223,8 +223,15 @@ def padding_probe(audit, output, device):
     model=YOLO(str(weight)); rgb=cv2.cvtColor(cv2.imread(str(path)),cv2.COLOR_BGR2RGB)
     assert rgb.shape==(742,1280,3)
     runs=[]; tensors=[]
-    for name,side in [('baseline',0),('padded',16),('restored',0)]:
-        canvas=np.pad(rgb,((13,13),(side,side),(0,0)),constant_values=114)
+    arms=[('baseline',0,0),('padded',16,16),('restored',0,0)]
+    if phase_plan is not None:
+        control=json.loads(phase_plan.read_text(encoding='utf-8'))
+        assert control['source_audit_sha256']==sha(audit/'summary.json')
+        assert control['image_id']==row['id']
+        arms=[(a['name'],a['left'],a['right']) for a in control['arms']]
+        assert all(left+right==32 for _,left,right in arms)
+    for name,side,right in arms:
+        canvas=np.pad(rgb,((13,13),(side,right),(0,0)),constant_values=114)
         assert np.array_equal(canvas[13:-13,side:side+1280],rgb)
         tensor=torch.from_numpy(np.ascontiguousarray(canvas.transpose(2,0,1))).float()/255
         tensor=tensor.unsqueeze(0).repeat(8,1,1,1); tensors.append(tensor)
@@ -234,11 +241,11 @@ def padding_probe(audit, output, device):
             boxes.append({'class_id':int(cls),'confidence':score,
                 'xyxy':[max(0,min(1280,xy[0]-side)),max(0,min(742,xy[1]-13)),
                         max(0,min(1280,xy[2]-side)),max(0,min(742,xy[3]-13))]})
-        runs.append({'name':name,'side_padding':side,'tensor_shape':list(tensor.shape),
+        runs.append({'name':name,'left_padding':side,'right_padding':right,'tensor_shape':list(tensor.shape),
             'tensor_sha256':hashlib.sha256(tensor.numpy().tobytes()).hexdigest(),
             'model_fp16':bool(model.predictor.model.fp16),'matching_score':matching_score(row,boxes),'boxes':boxes})
-    assert torch.equal(tensors[0],tensors[2])
-    a,b,c=runs
+    assert torch.equal(tensors[0],tensors[-1])
+    a,b,c=runs[0],runs[1],runs[-1]
     restored=(len(a['boxes'])==len(c['boxes']) and all(x['class_id']==y['class_id'] and
         abs(x['confidence']-y['confidence'])<1e-5 and max(abs(v-w) for v,w in zip(x['xyxy'],y['xyxy']))<.01
         for x,y in zip(a['boxes'],c['boxes'])))
@@ -246,7 +253,9 @@ def padding_probe(audit, output, device):
         'weight_sha256':weight_plan['sha256'],'class_id':row['class_id'],'target_xyxy':row['target_xyxy'],
         'runs':runs,'restoration_matches':restored,'actual_image_content_identical':True,'environment':env,
         'saved_validation_failure_reproduced':a['matching_score']>=.25 and b['matching_score']<.25,
-        'scope':'Fixed tensor A/B/A: only16px left/right gray border. Boxes mapped back to original pixels. No retraining or threshold change.',
+        'scope':('Fixed1312px canvas, vary only left/right allocation of32px total gray border.' if phase_plan else
+                 'Fixed tensor A/B/A: only16px left/right gray border. Boxes mapped back to original pixels. No retraining or threshold change.'),
+        'phase_plan_sha256':sha(phase_plan) if phase_plan else None,
         'plan_sha256':sha(FOLLOWUP_PLAN),'code_sha256':sha(Path(__file__)),
         'production_eligible':False})
 
@@ -255,8 +264,10 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__); sub=p.add_subparsers(dest='command',required=True)
     for name in ('audit','blind','probe'):
         c=sub.add_parser(name); c.add_argument('--output',type=Path,required=True)
-        if name=='probe':c.add_argument('--audit',type=Path,required=True);c.add_argument('--device',default='cpu')
+        if name=='probe':
+            c.add_argument('--audit',type=Path,required=True);c.add_argument('--device',default='cpu')
+            c.add_argument('--phase-plan',type=Path)
     args=p.parse_args()
     if args.command=='audit':padding_audit(args.output.resolve())
     elif args.command=='blind':blind_packet(args.output.resolve())
-    else:padding_probe(args.audit.resolve(),args.output.resolve(),args.device)
+    else:padding_probe(args.audit.resolve(),args.output.resolve(),args.device,args.phase_plan.resolve() if args.phase_plan else None)
