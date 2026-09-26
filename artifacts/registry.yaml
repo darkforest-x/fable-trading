@@ -32307,3 +32307,20 @@ artifacts:
     notes: Fixed threshold test159 positive candidates lose40 hits and gain4 under padding. Tensor A/B/A reproduces
       confidence collapse and restores; constant-width offset isolates position sensitivity in one selected case.
       Blind queue23 unique windows plus4 repeats; zero human labels, no market FPR or qualification claim.
+
+  - artifact_id: ma-morphology-v6-early-20260926-owner-check
+    artifact_type: manifest
+    role: direct_owner_reference_compatibility_and_semantic_counterexample
+    source_repo: darkforest-x/fable-trading
+    source_commit: e26a2914a8b80eccf8c6e4cc04a72819f7b9af50
+    source_path: experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_owner_check_delivery_20260926.json
+    sha256: efa9bab48920f6003c8ab074fe6c2acb91e83b58645b084e0b78f3db9478db1a
+    size_bytes: 3601
+    storage_uri: repo://experiments/active/exp-ma-morphology-v6-threeview-20260925-v1/early_owner_check_delivery_20260926.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: New386-image frozen inference;202legacy owner positives only8target matches,172short negatives zero alarms.
+      Three current-rendered owner reference events each match at post1or2 but adjacent states are unstable.
+      One of four existing owner-no windows receives a0.969945long alarm. Compatibility and semantic counterexample,
+      not overall recall or market FPR. Sequential blind review stopped at owner request; no training or promotion.
