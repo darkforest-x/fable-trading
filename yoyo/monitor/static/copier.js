@@ -223,7 +223,7 @@
       ["累计", rText(s.sum_r)], ["平均盈利", rText(s.avg_win_r)], ["平均亏损", rText(s.avg_loss_r)],
       ["盈亏比(R)", s.profit_factor_r == null ? "—" : Number(s.profit_factor_r).toFixed(2)], ["最佳 / 最差", `${rText(s.best_r)} / ${rText(s.worst_r)}`],
       ["最大连亏", `${count(s.max_losing_streak)} 笔`], ["R 回撤", rText(s.max_drawdown_r == null ? null : -s.max_drawdown_r)],
-      ["平均 1R", `${amount(s.avg_risk_usdt)} U（${pct(s.avg_risk_pct)} 起始资金）`]];
+      ["平均 1R", `${amount(s.avg_risk_usdt)} U（${pct(s.avg_risk_pct)} 起始资金）${s.legacy_trades ? ` · 不含 ${count(s.legacy_trades)} 笔旧口径` : ""}`]];
     const total = Object.values(s.buckets || {}).reduce((a, b) => a + b, 0) || 1;
     const bars = Object.entries(s.buckets || {}).map(([label, n]) => `<div class="copier-rbar"><span>${esc(label)}</span>
       <i style="width:${Math.max(2, n / total * 100)}%" class="${label.startsWith("-") || label.startsWith("≤") ? "neg" : "pos"}"></i><b>${n}</b></div>`).join("");
@@ -245,14 +245,14 @@
     const openRows = open.map((o) => `<tr><td>${esc(clock(o.opened_at))}</td><td>${esc(o.trader)}</td><td>${esc(o.inst_id)}</td><td>${sidePill(o.side)}</td>
       <td class="num">${esc(o.entry_px)}<small>${o.leverage}x · ${amount(o.notional_usdt)} U</small></td><td class="num">${o.mark == null ? "—" : esc(o.mark)}</td>
       <td class="num">${esc(o.sl)}<small>强平 ${Number(o.liquidation_px).toPrecision(6)}</small></td><td class="num">${esc(o.tp)}</td>
-      <td class="num">${amount(o.risk_usdt)}<small>${pct(o.risk_pct_of_equity)} 账户 · 止损距 ${pct(o.stop_distance_pct)}</small></td>
+      <td class="num">${amount(o.risk_usdt)}<small>${pct(o.risk_pct_of_equity)} 账户 · 止损距 ${pct(o.stop_distance_pct)}${o.sizing === "legacy_margin" ? " · 旧口径" : ""}</small></td>
       <td class="num ${signedCls(o.unrealized_pnl)}">${amount(o.unrealized_pnl, true)}<small>${rText(o.current_r)}</small></td></tr>`).join("");
     const pendingRows = pending.map((o) => `<tr><td>${esc(clock(o.created_at))}</td><td>${esc(o.trader)}</td><td>${esc(o.inst_id)}</td><td>${sidePill(o.side)}</td>
       <td class="num">${esc(o.px)}</td><td class="num">${o.mark == null ? "—" : esc(o.mark)}</td><td class="num">${esc(o.sl)}</td><td class="num">${esc(o.tp)}</td>
       <td class="num">${amount(o.notional_usdt)}</td></tr>`).join("");
     const closedRows = closed.map((o) => `<tr><td>${esc(clock(o.closed_at))}</td><td>${esc(o.trader)}</td><td>${esc(o.inst_id)}</td><td>${sidePill(o.side)}</td>
       <td class="num">${esc(o.entry_px)} → ${o.exit_px == null ? "—" : Number(o.exit_px).toPrecision(6)}</td><td>${esc(CLOSE_REASONS[o.close_reason] || o.close_reason)}</td>
-      <td class="num ${signedCls(o.r)}">${rText(o.r)}<small>1R = ${amount(o.risk_usdt)} U</small></td><td class="num ${signedCls(o.net_pnl)}">${amount(o.net_pnl, true)}</td></tr>`).join("");
+      <td class="num ${signedCls(o.r)}">${rText(o.r)}<small>1R = ${amount(o.risk_usdt)} U${o.sizing === "legacy_margin" ? " · 旧口径" : ""}</small></td><td class="num ${signedCls(o.net_pnl)}">${amount(o.net_pnl, true)}</td></tr>`).join("");
     return `<section class="copier-panel"><h3>模拟持仓 (${open.length})</h3>${table(["开仓 · 北京", "交易者", "品种", "方向", "入场", "现价", "止损", "止盈", "1R (USDT)", "未实现 / 当前R"], openRows, "暂无模拟持仓")}</section>
       <section class="copier-panel"><h3>模拟挂单 (${pending.length})</h3>${table(["下单 · 北京", "交易者", "品种", "方向", "挂单价", "现价", "止损", "止盈", "名义 (USDT)"], pendingRows, "暂无模拟挂单")}</section>
       <section class="copier-panel"><h3>已平仓 (${closed.length})</h3>${table(["平仓 · 北京", "交易者", "品种", "方向", "入场 → 出场", "原因", "R", "净盈亏"], closedRows, "暂无已平仓的模拟交易")}</section>`;

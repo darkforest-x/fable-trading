@@ -230,3 +230,25 @@ def test_r_stats_report_one_r_and_streaks(db):
     assert s["win_rate"] == pytest.approx(1 / 3)
     assert s["buckets"]["≤-1R"] == 2 and s["buckets"]["≥5R"] == 0
     assert s["avg_risk_pct"] == pytest.approx(0.01, rel=0.05)
+
+
+def test_legacy_margin_trades_keep_their_r_but_leave_the_average_one_r(db):
+    from yoyo.copier.api.routes.paper import r_stats
+
+    market = FixedMarket({"BTC-USDT-SWAP": 100.0})
+    book = PaperBook(db)
+    for exit_px in (95.0, 110.0):
+        market.prices["BTC-USDT-SWAP"] = 100.0
+        open_signal(db, market)
+        pos = book.open_positions(CH)[0]
+        book.close(pos["id"], 100.0, exit_px, "manual_close")
+    closed = book.closed_positions()
+    sizing = book.sizing_by_message()
+    assert set(sizing.values()) == {"fixed_risk"}
+    legacy = max(closed, key=lambda p: p["id"])
+    sizing[legacy["message_id"]] = "legacy_margin"
+    with_legacy, without = r_stats(book, closed, 1000.0, sizing), r_stats(book, closed, 1000.0)
+    assert with_legacy["trades"] == without["trades"] == 2 and with_legacy["sum_r"] == without["sum_r"]
+    assert with_legacy["legacy_trades"] == 1 and without["legacy_trades"] == 0
+    oldest = min(closed, key=lambda p: p["id"])
+    assert with_legacy["avg_risk_usdt"] == pytest.approx(abs(oldest["entry_px"] - oldest["initial_sl"]) * oldest["qty"])

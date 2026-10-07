@@ -20,14 +20,14 @@ from yoyo.copier.store.sqlite import Database
 router = APIRouter(prefix="/paper", tags=["paper"])
 
 
-def _trade(book: PaperBook, p: dict[str, Any], names: dict[str, str]) -> dict[str, Any]:
+def _trade(book: PaperBook, p: dict[str, Any], names: dict[str, str], sizing: dict[int, str]) -> dict[str, Any]:
     net = p["realized_pnl"] - p["fees"]
     return {"id": p["id"], "channel_id": p["account"], "trader": names.get(p["account"], p["account"]),
             "inst_id": p["inst_id"], "side": p["side"], "entry_px": p["entry_px"], "exit_px": p["exit_px"],
             "qty": p["qty"], "notional_usdt": p["qty"] * p["entry_px"], "leverage": p["leverage"],
             "initial_sl": p["initial_sl"], "sl": p["sl"], "tp": p["tp"], "net_pnl": net, "fees": p["fees"],
             "r": book.r_multiple(p), "risk_usdt": risk_usdt(p), "close_reason": p["close_reason"], "opened_at": p["opened_at"],
-            "closed_at": p["closed_at"]}
+            "closed_at": p["closed_at"], "sizing": sizing.get(p["message_id"], "legacy_margin")}
 
 
 R_BUCKETS = ((-math.inf, -1.0, "≤-1R"), (-1.0, 0.0, "-1~0R"), (0.0, 1.0, "0~1R"), (1.0, 2.0, "1~2R"),
@@ -41,11 +41,19 @@ def risk_usdt(p: dict[str, Any], qty: float | None = None) -> float | None:
     return abs(p["entry_px"] - p["initial_sl"]) * (p["qty"] if qty is None else qty)
 
 
-def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float) -> dict[str, Any]:
-    """R-multiple statistics of closed paper trades (net of fees), oldest first."""
+def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float,
+            sizing: dict[int, str] | None = None) -> dict[str, Any]:
+    """R-multiple statistics of closed paper trades (net of fees), oldest first.
+
+    R itself does not depend on position size, so trades opened under the
+    pre-2026-10-07 margin sizing stay in every R figure. Only the average 1R
+    amount is a sizing fact, so it reads fixed-risk trades alone (owner default,
+    2026-10-07); ``legacy_trades`` counts the excluded ones.
+    """
     rows = sorted(closed, key=lambda p: (p["closed_at"] or "", p["id"]))
     rs = [r for r in (book.r_multiple(p) for p in rows) if r is not None]
-    risks = [x for x in (risk_usdt(p) for p in rows) if x]
+    fixed = [p for p in rows if sizing is None or sizing.get(p["message_id"]) == "fixed_risk"]
+    risks = [x for x in (risk_usdt(p) for p in fixed) if x]
     wins, losses = [r for r in rs if r > 0], [r for r in rs if r <= 0]
     streak = worst_streak = 0
     for r in rs:
@@ -66,13 +74,14 @@ def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float) -> dic
         "max_losing_streak": worst_streak, "max_drawdown_r": max_dd,
         "avg_risk_usdt": statistics.fmean(risks) if risks else None,
         "avg_risk_pct": (statistics.fmean(risks) / equity) if risks and equity > 0 else None,
-        "buckets": buckets,
+        "legacy_trades": len(rows) - len(fixed), "buckets": buckets,
     }
 
 
 @router.get("/summary")
 def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
     book = PaperBook(db)
+    sizing = book.sizing_by_message()
     names = {**channel_names(db), **CHANNEL_NAMES}
     routed = [cid for cid, ex in get_channel_exchange_map(db).items() if ex == PAPER]
     closed = book.closed_positions(limit=500)
@@ -82,7 +91,7 @@ def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
         mine = [p for p in closed if p["account"] == cid]
         rs = [r for r in (book.r_multiple(p) for p in mine) if r is not None]
         wins = sum(1 for p in mine if p["realized_pnl"] - p["fees"] > 0)
-        stats = r_stats(book, mine, book.starting_equity())
+        stats = r_stats(book, mine, book.starting_equity(), sizing)
         accounts.append({"channel_id": cid, "trader": names.get(cid, cid), "routed": cid in routed, "r_stats": stats,
                          "equity": bal["equity"], "total_usdt": bal["total_usdt"],
                          "unrealized_pnl": bal["unrealized_pnl"], "open_positions": bal["positions"],
@@ -94,7 +103,7 @@ def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
         upl = book.unrealized(p)
         one_r = risk_usdt(p, p["open_qty"])
         equity = book.balance(p["account"])["equity"]
-        open_rows.append({**_trade(book, p, names), "mark": mark, "unrealized_pnl": upl,
+        open_rows.append({**_trade(book, p, names, sizing), "mark": mark, "unrealized_pnl": upl,
                           "open_qty": p["open_qty"], "liquidation_px": book.liquidation_px(p),
                           "risk_usdt": one_r, "risk_pct_of_equity": (one_r / equity) if one_r and equity > 0 else None,
                           "current_r": (upl / one_r) if one_r else None,
@@ -104,10 +113,10 @@ def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
                 "mark": book.mark(o["inst_id"]), "sl": o["sl"], "tp": o["tp"], "created_at": o["created_at"]}
                for o in book.pending_orders()]
     return {"starting_equity": book.starting_equity(), "fee_rate_per_side": FEE_RATE, "poll_seconds": POLL_SECONDS,
-            "r_stats_all": r_stats(book, closed, book.starting_equity()),
+            "r_stats_all": r_stats(book, closed, book.starting_equity(), sizing),
             "risk_pct": paper_risk_pct(db),
             "sizing_note": (f"按固定风险开仓：每笔 1R = 该频道账户已实现权益的 {paper_risk_pct(db):.0%}，仓位 = 1R ÷ 入场到止损的距离。"
                             "仓位超过该频道杠杆允许的上限时按上限开仓，这笔实际风险会小于设定值并标为“已封顶”；没有止损的信号不开仓。"
-                            "10 月 7 日改口径之前开出的仓位仍按旧的保证金比例计算。"),
+                            "10 月 7 日改口径之前开出的仓位标“旧口径”：R 照常计入统计，平均 1R 金额只算固定风险的交易。"),
             "accounts": accounts, "open": open_rows, "pending": pending,
-            "closed": [_trade(book, p, names) for p in closed[:100]]}
+            "closed": [_trade(book, p, names, sizing) for p in closed[:100]]}

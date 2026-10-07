@@ -169,6 +169,19 @@ class PaperBook:
             self.fill(order_id, px)
         return self.order(order_id)
 
+    def sizing_by_message(self) -> dict[int, str]:
+        """Sizing rule each paper order was opened under; plans before 2026-10-07 carry none."""
+        with self._connect() as conn:
+            rows = conn.execute("SELECT message_id, response_json FROM orders WHERE okx_ord_id LIKE 'paper-%'").fetchall()
+        out: dict[int, str] = {}
+        for message_id, raw in rows:
+            try:
+                plan = (json.loads(raw or "{}") or {}).get("plan") or {}
+            except ValueError:
+                plan = {}
+            out[message_id] = plan.get("sizing") or "legacy_margin"
+        return out
+
     def link_order_row(self, order_id: int, order_row_id: int) -> None:
         with self._connect() as conn:
             conn.execute("UPDATE paper_orders SET order_row_id=? WHERE id=?", (order_row_id, order_id))
