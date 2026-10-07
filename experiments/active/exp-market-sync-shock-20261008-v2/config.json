@@ -1,0 +1,43 @@
+{
+  "experiment_id": "exp-market-sync-shock-20261008-v2",
+  "parent_experiment": "exp-market-sync-shock-20261007-v1",
+  "owner_request": "2026-10-08 不可能 肯定是哪里逻辑不对 再试试 (re: v1 no tradable follow-through)",
+  "question": "Do BTC/ETH-led market-wide sync shocks become tradable once v1's design choices are changed one at a time: direction read separately, wall-clock holds up to 24h, a trend exit, or a cluster of shock bars instead of one?",
+  "v1_audit": "8.19 1H event features and forward returns recomputed independently from raw 5m data match v1 exactly; 40 random v1 trades match raw data (0 mismatches). v1 pooled long and short shocks.",
+  "arms": {
+    "A_direction": "side +1 (long after up shocks) and -1 (short after down shocks) selected and read separately",
+    "B_hold": "fixed holds of 1/4/12/24 wall-clock hours for every detection timeframe",
+    "C_exit": "trend exit: stop 2ATR from entry, trail 3ATR from best close, close-based, 24h cap",
+    "D_event": "cluster: >=2 sync bars on the same side within the last 3 bars, fires on the 2nd"
+  },
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "start": "2023-01-01T00:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T00:00:00Z",
+  "timeframes": [5, 15, 30, 60],
+  "lookback": 96,
+  "universe_size": 50,
+  "grid": [
+    {"z_min": 2.0, "v_min": 2.0, "b_min": 0.6},
+    {"z_min": 2.0, "v_min": 2.0, "b_min": 0.75},
+    {"z_min": 2.0, "v_min": 3.0, "b_min": 0.6},
+    {"z_min": 2.0, "v_min": 3.0, "b_min": 0.75},
+    {"z_min": 3.0, "v_min": 2.0, "b_min": 0.6},
+    {"z_min": 3.0, "v_min": 2.0, "b_min": 0.75},
+    {"z_min": 3.0, "v_min": 3.0, "b_min": 0.6},
+    {"z_min": 3.0, "v_min": 3.0, "b_min": 0.75}
+  ],
+  "kinds": ["sync", "cluster"],
+  "hold_hours": [1, 4, 12, 24],
+  "trend_cap_hours": 24,
+  "cooldown_hours": 24,
+  "controls": 20,
+  "min_events": 30,
+  "round_trip_cost": 0.002,
+  "control_seed": 1008201,
+  "stat_seed": 1008202,
+  "flips": 10000,
+  "selection_metric": "per timeframe and side, max paired-diff t of the alt basket on events before select_before (>= min_events) across config x kind x exit; that cell is read once on later events",
+  "training_eligible": false,
+  "production_eligible": false
+}
