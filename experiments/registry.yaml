@@ -10930,3 +10930,15 @@ experiments:
     reuse_allowed: false
     notes: Original V12.8 source/private script retained. V13 defaults to ordinary-both retest, optional joint-long or
       original-reference mode. Native market parity and live execution not claimed. No standalone report requested.
+
+  - experiment_id: exp-spike-exit-giveback-20261007-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 881dcacbbc
+    status: active
+    question: Does tighter or earlier profit protection cut the open-profit giveback of SPIKE V12.8 ordinary and V13.0 retest trades without lowering net R after 0.2% round-trip cost, and is any gain specific to the signal versus matched random entries?
+    single_variable: Exit rule only; entries, sides, entry prices and initial stops frozen from exp-spike-v128-entry-clock-long-20260923-v1/retest_v1 (v9_both arm). Candidates each change one thing versus the incumbent 2R-armed 4ATR close trail (trail3, trail2, arm1, be1, lock1, half2).
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner request 2026-10-07 ("盈利回吐太多", both versions). Tightening-only candidates replay entry..recorded-exit bars and reuse recorded opposite-V6 exits; statistics keep only trades whose incumbent replay reproduces the recorded exit. Selection on exits before 2025-01-01, later exits reported only. Matched controls rebuilt per pool semantics. No Pine, monitor or production change. No report requested.
