@@ -835,7 +835,7 @@ experiments:
     notes: Owner permits any historical period and specifically names ETH 5m 15m 1h. This is historical exposure number1, not untouched validation. No live changes.
   - experiment_id: exp-spike-eth-lowtf-cost-diagnostic-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do fixed entry-risk-relative cost budgeting and frozen exit-path facts explain ETH V8 3m/5m low-timeframe losses without replaying a strategy?
     single_variable: One historical existing-trade subset label fee_R <= 0.5; four fee-R buckets are descriptive only, while ETH 3m 1R BE remains a separately frozen paired-exit explanation.
     result: ETH 3m later fee_R<=0.5 retains52/111 and changes mean netR from -0.237 to +0.015, but retains0/2 realized10R and is negative without its best trade. ETH 5m remains negative in both periods. The paired 1R break-even exit loses more trailing trend than it rescues from losses; no filter accepted.
@@ -9541,7 +9541,7 @@ experiments:
     notes: Authorized configuration-specific holdout-era use 1. Supplements rather than rebrands the earlier V7-only exit experiment; no online execution changes.
   - experiment_id: exp-spike-v8-ma-cycle-20260913-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do causal compression, directional launch, ordered expansion and reconsolidation states distinguish frozen V8 outcomes beyond static MA order?
     single_variable: Fixed lifecycle classification and two separately reported same-entry state cohorts; no parameter search or changed trading policy.
     result: Completed 3531 streams and 113295 events. Validation launch/expansion mean R remains negative with only 71/64 of 319 original realized 10R trades retained; matched effects are not positive. CORE exposes a missing same-direction re-expansion branch, so no live filter is accepted.
@@ -9554,7 +9554,7 @@ experiments:
     notes: Owner-authorized configuration-specific holdout-era use 1 on reused nonblind history. Future milestones are delay/cost diagnostics only; fixed states lack phase ground truth and do not create a new execution policy.
   - experiment_id: exp-spike-v8-eth3m-be-20260913-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Does moving ETH 3m V8 protection to entry after a 1R favorable touch improve the frozen low-timeframe result?
     single_variable: High-low 1R touch observed at bar close activates entry-price protection from the next bar; all admissions, original stops, trailing and costs unchanged.
     result: Frozen 111-entry baseline reproduced; BE changes net R from -26.282877 to -41.125801. Serial BE takes 119 trades for -35.474961R; 19 losses reduced but 9 original winners and 1 of 2 realized 10R trades lost. Not accepted for deployment.
@@ -9567,7 +9567,7 @@ experiments:
     notes: Owner explicitly requested this exit change after authorizing available dates. Completed configuration-specific holdout-era use 1 on reused nonblind data; full_v1 failed only during outcome aggregation and run_v2 reuses retained tables without a new OHLCV read; no live changes, no parameter search or assumed same-bar tick ordering.
   - experiment_id: exp-spike-v8-entry-evidence-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do recent BB-segment directional ordering, overlapping MA compression, or completed higher-timeframe opposition identify lower-quality V8 entries?
     single_variable: Three independent fixed same-entry cohort comparisons; no combined gate or parameter search. Highest realized-R cases illustrate outcomes separately from inferential comparisons.
     result: Completed 3531 streams and 113295 events. BB-segment ordering lifts validation win rate only from 28.86 to 29.31 percent while retaining 144 of 319 realized 10R trades; MA-overlap fails to generalize; explicit HTF opposition deletes 2.34 percent with negligible aggregate improvement. No uniform live gate accepted.
@@ -9580,7 +9580,7 @@ experiments:
     notes: Authorized fixed-configuration holdout-era use 1 on reused nonblind history. Nine causal/coverage tests pass. Matched net-R intervals include zero; low match coverage and timeframe-side interactions preclude a general improvement claim. Six extreme-profit cases and two explicitly relaxed losers are explanatory only. CSV-only postprocessing and random-context receipts are separate from the price scan.
   - experiment_id: exp-spike-v8-total2-1h-native-20260914-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Can frozen V8 be evaluated on authentic CRYPTOCAP TOTAL2 one-hour index history using the native chart strategy report?
     single_variable: No signal tuning; keep the frozen V8 Pine prefix and use a separately disclosed native execution harness.
     result: Native compiled run loads 1794 closed hours with one completed long from Aug 19 to Aug 22. Gross 38.928R and fixed 0.20-percent-cost sensitivity net 38.491R. Final screenshot reading and arithmetic checks supersede rejected manual receipts; no account-return or long-run win-rate inference.
@@ -10574,7 +10574,7 @@ experiments:
   - experiment_id: exp-spike-v126-visual-20260922-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 18722beb0f57f860dc8b8da2db234f2912af021b
-    status: active
+    status: completed
     question: Can theme-aware lines, confirmed-break and pinbar candle colors, and a minimal view improve readability without changing V12.5 trading state?
     single_variable: Owner-authorized presentation-only bundle; no entry, stop, cost or signal-rule change.
     result: New private V12.6 revision1 saved and compiled; full editor source matches. 26 checks pass, native light/dark/minimal/custom-color QA completed.
@@ -10731,7 +10731,7 @@ experiments:
   - experiment_id: exp-ma-dense-launch-pine-20260923-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 72a5b29a8215a00bd6165f9c92f38f22339c2c8a
-    status: active
+    status: completed
     question: Can the frozen Grade-A dense-launch scanner (hard gates, nearest-reference similarity and quality score) be reproduced as a
       TradingView Pine indicator without changing any threshold?
     single_variable: Rule transcription only; V1 ports the two hard-gate sets, V2 adds both similarity layers and the six-axis score.
@@ -10843,7 +10843,7 @@ experiments:
   - experiment_id: exp-spike-v128-entry-clock-20260923-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cdc60c6fea9570c3cb3bc542cae51b3aa6bf6fd7
-    status: active
+    status: completed
     question: Which Beijing entry-clock buckets have the highest historical V12.8 net win rate and per-trade returns?
     single_variable: Fixed local entry-clock partition of existing serial trades; no strategy or execution changes.
     result: Baseline1h00-04 pooled champion fails later and without best week. Ordinary15m retest20-24 remains weakly positive later (80closed,42.50percent,+13.89bp,+0.077R), but sparse same-clock controls and zero-crossing interval do not establish edge. All calculable primary Holm p1.
@@ -10857,7 +10857,7 @@ experiments:
 
   - experiment_id: exp-spike-v128-entry-clock-long-20260923-v1
     source_repo: darkforest-x/fable-trading
-    status: active
+    status: completed
     question: Do Beijing entry-clock rankings persist over 2023 onward and longer BTC/ETH history?
     single_variable: Extend the observation horizon of the unchanged V12.8 baseline and retest policies.
     training_eligible: false
