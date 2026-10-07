@@ -1,0 +1,128 @@
+:root {
+  color-scheme: dark;
+  --bg: #10141f;
+  --surface: #171f31;
+  --border: #2b3752;
+  --text: #f3f6fb;
+  --muted: #94a3b8;
+  --accent: #5eead4;
+  --red: #fb7185;
+}
+
+body {
+  width: 320px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+main {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+header,
+.switch-row,
+.stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page-state {
+  display: grid;
+  gap: 5px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 10px;
+}
+
+.page-state span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.page-state strong {
+  color: var(--text);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.page-state p {
+  max-height: 78px;
+  margin: 0;
+  overflow: auto;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+header span,
+.status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+input[type="url"] {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  padding: 8px;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #04201b;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 9px 10px;
+}
+
+button.secondary {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+  font-size: 12px;
+  text-align: center;
+}
+
+.stats {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  padding: 10px;
+}
+
+.error {
+  color: var(--red);
+  font-size: 12px;
+  margin: 0;
+  word-break: break-word;
+}
+
+.status {
+  margin: 0;
+  word-break: break-word;
+}

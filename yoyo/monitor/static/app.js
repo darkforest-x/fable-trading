@@ -18,6 +18,7 @@
   const titles = {
     platform: ["体系总览", "个人交易、策略研究与自动策略验证，共用数据、特征与模型。"],
     manual: ["个人交易系统", "本人看图、判断和执行；在这里保存规则、盘前计划、实际成交与复盘。"],
+    copier: ["Discord 跟单", "Discord 频道信号 → DeepSeek 解析 → 风控 → OKX / Gate 下单。切到实盘只能在本机由你确认。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
     signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
     warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
@@ -36,7 +37,7 @@
     vision: ["VLM 工作流", "视觉语言模型的参考图、形态判断、人工复核与历史回放，与 YOLO 并行研究。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const workspaceView = (view = state.view) => ["manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
+  const workspaceView = (view = state.view) => ["manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
   const eventNames = { tv_start: "V9 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -257,8 +258,8 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "system", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["signals", "watch", "lines", "shadow", "system", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -267,7 +268,7 @@
       if (active) button.scrollIntoView?.({ block: "nearest", inline: "nearest" });
     });
     const researchView = workspaceView();
-    $("exchange-mark").textContent = state.view === "manual" ? "个人" : researchView ? "研究" : "OKX";
+    $("exchange-mark").textContent = state.view === "manual" ? "个人" : state.view === "copier" ? "跟单" : researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
     $("bark-header").classList.toggle("hidden", researchView);
@@ -299,6 +300,7 @@
     window.SpikeResearch?.setView(state.view);
     window.SpikePlatform?.setActive(state.view === "platform");
     window.SpikeManual?.setActive(state.view === "manual");
+    window.SpikeCopier?.setActive(state.view === "copier");
     window.SpikeModels?.setActive(state.view === "models");
     window.SpikeDatasets?.setActive(state.view === "datasets");
     window.SpikeStrategies?.setActive(state.view === "strategies");
@@ -936,6 +938,7 @@
     if (workspaceView() || state.view === "shadow") refreshShellStatus(trigger === "manual");
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
     if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
+    if (state.view === "copier") { if (trigger !== "periodic") await window.SpikeCopier?.refresh(); return; }
     if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
@@ -1157,7 +1160,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });

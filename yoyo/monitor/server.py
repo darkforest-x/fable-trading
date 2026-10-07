@@ -86,6 +86,8 @@ def create_app(runtime=None, start_monitor=True):
     app = FastAPI(title="Fable Impulse Monitor", lifespan=lifespan, docs_url=None, redoc_url=None)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"])
     app.state.monitor = monitor
+    from yoyo.monitor.copier_proxy import install as install_copier
+    install_copier(app)
 
     @app.middleware("http")
     async def headers(request, call_next):

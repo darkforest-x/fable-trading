@@ -1,0 +1,35 @@
+# Discord copier service (yoyo/copier) -- its own venv, NOT the research venv.
+#
+#   /usr/bin/python3 -m venv .venv-copier
+#   .venv-copier/bin/pip install -r requirements-copier.txt
+#
+# Kept apart because python-okx pulls pytest/ruff/loguru, telethon and discord.py
+# bring their own async stacks, and none of that may move the torch / numpy /
+# pandas pins in requirements.txt (CLAUDE.md 铁律 6). Versions are the ones the
+# old ~/discord-okx-copier venv ran in production until 2026-09-14.
+#
+# Deliberately absent:
+#   okx-sdk  -- also installs an `okx/` package and silently overwrote python-okx's
+#               modules in the old venv; the code imports python-okx's API.
+#   discum   -- Discord user-token selfbot for the deprecated `user_poll` feature
+#               (off by default). Enabling that feature now fails at import.
+fastapi==0.128.8
+starlette==0.49.3
+uvicorn[standard]==0.39.0
+httpx==0.28.1
+pydantic==2.13.4
+pydantic-settings==2.11.0
+eval_type_backport==0.3.1
+PyYAML==6.0.3
+python-dotenv==1.2.1
+python-multipart==0.0.20
+python-jose[cryptography]==3.5.0
+passlib[bcrypt]==1.7.4
+bcrypt==5.0.0
+python-okx==0.4.1
+openai==2.37.0
+telethon==1.43.2
+discord.py==2.7.1
+websockets==15.0.1
+pytest==8.4.2
+pytest-asyncio==1.2.0

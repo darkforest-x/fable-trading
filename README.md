@@ -72,6 +72,8 @@ L1 detection → L2 judgment → L3 backtest → L4 execution
 Mac（开发 / 打标 / 评估 / 决策）       VPS（K 线与 forward_log 唯一写者）
 ├─ 统一工作台 127.0.0.1:8766          ├─ 看板 :8642
 │  （yoyo.monitor，LaunchAgent）       ├─ fable-forward.timer（15m 脉冲）
+├─ Discord 跟单 127.0.0.1:8080        │
+│  （yoyo.copier，.venv-copier）       │
 ├─ Label Studio :8081                 └─ 执行器（真金，仅 owner 授权）
 └─ git push → GitHub
 局域网 RTX 3060：YOLO 训练（scripts/train_on_3060.sh）
@@ -139,6 +141,7 @@ bash scripts/deploy_vps.sh
 | `yoyo/evaluation/` | 切分、匹配对照、置换检验、经济门 |
 | `yoyo/monitor/` | 信号中心、通知、统一工作台后端与前端（`static/`） |
 | `yoyo/research_workspace/` | 研究组合、模型目录、策略库、个人交易工作区 |
+| `yoyo/copier/` | Discord 跟单服务（真金；独立 venv，说明见其 README） |
 | `src/` | 转发壳（迁移期并存，不再添加） |
 | `scripts/` | 流水线与一次性实验脚本；跑过的实验脚本冻结不改 |
 | `experiments/` | `registry.yaml` 入口；`active/` 进行中；`historical/` 四个归档仓的结论 |

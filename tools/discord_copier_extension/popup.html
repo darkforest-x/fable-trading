@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Discord OKX Copier</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <strong>Discord OKX Copier</strong>
+        <span id="state">加载中</span>
+      </header>
+
+      <label class="switch-row">
+        <span>监听当前 Discord 网页</span>
+        <input id="enabled" type="checkbox" />
+      </label>
+
+      <label>
+        <span>本地提交接口</span>
+        <input id="endpoint" type="url" />
+      </label>
+
+      <div class="stats">
+        <span>已提交</span>
+        <strong id="submittedCount">0</strong>
+      </div>
+
+      <section class="page-state">
+        <span>当前频道</span>
+        <strong id="channelName">—</strong>
+        <span>最新可见信号</span>
+        <p id="latestSignal">—</p>
+      </section>
+
+      <p id="lastStatus" class="status"></p>
+      <p id="lastError" class="error"></p>
+
+      <button id="captureLatest" class="secondary" type="button">提交当前可见最新信号</button>
+      <button id="captureVisible" class="secondary" type="button">提交当前可见全部开仓信号</button>
+      <button id="save" type="button">保存</button>
+      <a href="http://127.0.0.1:5173/messages" target="_blank">打开信号台</a>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

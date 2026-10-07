@@ -47,3 +47,22 @@ jobs:
 
       - name: Run pytest
         run: python -m pytest tests -q
+
+  # The Discord copier runs from its own venv (requirements-copier.txt) so its
+  # exchange/Telegram/Discord stack cannot move the research pins above. Its
+  # tests are skipped in the job above and run here; they are offline by
+  # construction (tests/copier/conftest.py blocks lookups and proxies).
+  copier-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+      - name: Install copier dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-copier.txt
+      - name: Run copier tests
+        run: python -m pytest tests/copier -q

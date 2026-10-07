@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>当前持仓与订单</title>
+<!-- Screenshot target for admin_snapshot.capture_orders_card (selector .capture-orders-panel). -->
+<style>
+  :root { color-scheme: dark; --bg:#0a1016; --surface:#101922; --surface-2:#15212b; --line:#273440; --line-soft:#1c2833;
+    --text:#e8eef3; --muted:#9aaab8; --dim:#7a8d9e; --pos:#82dcba; --neg:#e997a0; --long:#90b9de; --long-bg:#1a2c3c;
+    --short:#c4a2d5; --short-bg:#30243b; --blue:#91a9c6; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--text);
+    font: 13px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
+  .capture-orders-panel { width: 820px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+  header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  h2 { margin: 18px 0 8px; font-size: 13px; color: var(--muted); font-weight: 550; }
+  .stamp, .mode { color: var(--dim); font-size: 11px; }
+  .mode.live { color: var(--neg); }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid var(--line-soft); text-align: left; font-variant-numeric: tabular-nums; }
+  th { color: var(--dim); background: var(--surface-2); font-size: 11px; font-weight: 550; }
+  tbody tr:last-child td { border-bottom: 0; }
+  .side { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; }
+  .side.long { color: var(--long); background: var(--long-bg); }
+  .side.short { color: var(--short); background: var(--short-bg); }
+  .positive { color: var(--pos); } .negative { color: var(--neg); }
+  .empty { color: var(--dim); text-align: center; }
+</style>
+</head>
+<body>
+<main id="root"><p class="empty">正在读取…</p></main>
+<script>
+(() => {
+  "use strict";
+  const esc = (v) => String(v ?? "-").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const amount = (v, signed) => {
+    const n = Number(v);
+    if (v == null || !Number.isFinite(n)) return "-";
+    const sign = signed && n > 0 ? "+" : signed && n < 0 ? "-" : "";
+    return sign + Math.abs(n).toFixed(2);
+  };
+  const isShort = (side) => ["sell", "short"].includes(String(side || "").toLowerCase());
+  const side = (s) => s ? `<span class="side ${isShort(s) ? "short" : "long"}">${isShort(s) ? "空" : "多"}</span>` : "-";
+  const types = {limit: "限价", market: "市价", conditional: "条件", trigger: "触发", post_only: "只挂单"};
+  const stamp = new Intl.DateTimeFormat("zh-CN", {timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit",
+    day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false}).format(new Date());
+  function render(card) {
+    const positions = card.positions.map(p => `<tr><td>${esc(p.trader)}</td><td>${esc(p.inst_id || "账户持仓")}</td>
+      <td>${side(p.side)}</td><td>${amount(p.notional_usdt)}</td>
+      <td class="${p.unrealized_pnl >= 0 ? "positive" : "negative"}">${amount(p.unrealized_pnl, true)}</td>
+      <td>${amount(p.margin_usdt)}</td><td>${esc(p.sl_trigger)}</td><td>${esc(p.tp_trigger)}</td></tr>`).join("")
+      || `<tr><td colspan="8" class="empty">暂无实时持仓</td></tr>`;
+    const pending = card.pending.map(o => `<tr><td>${esc(o.trader)}</td><td>${esc(o.inst_id)}</td><td>${side(o.side)}</td>
+      <td>${esc(types[String(o.ord_type || "").toLowerCase()] || o.ord_type)}</td><td>${esc(o.px)}</td>
+      <td>${amount(o.notional_usdt)}</td><td>挂单中</td></tr>`).join("")
+      || `<tr><td colspan="7" class="empty">暂无交易所挂单</td></tr>`;
+    document.getElementById("root").innerHTML = `<article class="capture-orders-panel">
+      <header><h1>当前持仓与订单</h1><span class="stamp">${esc(stamp)} 北京时间</span></header>
+      <div class="mode ${card.dry_run ? "" : "live"}">${card.kill_switch ? "已停止新开单" : card.dry_run ? "模拟模式：只记录不下单" : "实盘模式"} · 持仓 ${card.position_count} · 挂单 ${card.pending.length}</div>
+      <h2>持仓 (${card.position_count})</h2>
+      <table><thead><tr><th>交易者</th><th>品种</th><th>方向</th><th>持仓价值(USDT)</th><th>盈亏(USDT)</th><th>保证金(USDT)</th><th>止损</th><th>止盈</th></tr></thead><tbody>${positions}</tbody></table>
+      <h2>挂单 (${card.pending.length})</h2>
+      <table><thead><tr><th>交易者</th><th>品种</th><th>方向</th><th>类型</th><th>价格</th><th>名义金额(USDT)</th><th>状态</th></tr></thead><tbody>${pending}</tbody></table>
+    </article>`;
+  }
+  fetch("/api/dashboard/orders-card", {cache: "no-store"})
+    .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
+    .then(render)
+    .catch(e => { document.getElementById("root").innerHTML = `<p class="empty">读取失败：${esc(e.message)}</p>`; });
+})();
+</script>
+</body>
+</html>

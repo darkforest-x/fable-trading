@@ -1,0 +1,116 @@
+/* Discord copier view. Uses the shared theme tokens from styles.css only. */
+#copier-workspace { display:grid; gap:14px; }
+.copier-mode { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; padding:13px 16px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.copier-mode strong { color:var(--text); font-size:15px; }
+.copier-mode p { margin:4px 0 0; color:var(--muted); font-size:12px; line-height:1.6; }
+.copier-mode.sim { border-color:var(--notice-border); background:var(--notice-bg); }
+.copier-mode.sim strong { color:var(--notice-text); }
+.copier-mode.live { border-color:var(--negative-strong); background:var(--negative-bg); }
+.copier-mode.live strong { color:var(--negative-strong); }
+.copier-mode.halt { border-color:var(--positive-border); background:var(--positive-bg); }
+.copier-mode.halt strong { color:var(--positive-text); }
+.copier-mode-actions,.copier-form-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.copier-button { display:inline-flex; align-items:center; justify-content:center; min-height:34px; padding:6px 12px; border:1px solid var(--control-border); border-radius:7px; color:var(--text); background:var(--control-bg); font:inherit; font-size:12px; cursor:pointer; white-space:nowrap; }
+.copier-button:hover:not(:disabled) { background:var(--control-hover); }
+.copier-button:disabled { opacity:.5; cursor:default; }
+.copier-button.primary { border-color:var(--mint); color:var(--on-accent); background:var(--mint); font-weight:600; }
+.copier-button.danger { border-color:var(--negative-strong); color:var(--negative-text); background:var(--negative-bg); }
+.copier-button:focus-visible,.copier-switch:focus-visible,.copier-row-button:focus-visible { outline:2px solid var(--focus-border); outline-offset:2px; }
+.copier-link { padding:0; border:0; color:var(--blue); background:none; font:inherit; font-size:12px; cursor:pointer; }
+.copier-tabs { justify-self:start; }
+.copier-error { border-color:var(--negative-strong); color:var(--negative-text); background:var(--negative-bg); }
+.copier-flash { border-color:var(--positive-border); color:var(--positive-text); background:var(--positive-bg); }
+.copier-kpis { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+.copier-kpis div { min-width:0; padding:12px 14px; border:1px solid var(--line); border-radius:9px; background:var(--metric-bg); }
+.copier-kpis span { display:block; color:var(--dim); font-size:11px; }
+.copier-kpis strong { display:block; margin-top:4px; color:var(--text); font-size:20px; font-variant-numeric:tabular-nums; font-weight:600; }
+.copier-channels { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px; }
+.copier-channel { min-width:0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); cursor:pointer; transition:border-color .15s, background .15s; }
+.copier-channel:hover { border-color:var(--focus-border); background:var(--control-hover); }
+.copier-channel:focus-visible { outline:2px solid var(--focus-border); outline-offset:2px; }
+.copier-detail-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.copier-detail-head h2 { margin:0; color:var(--text); font-size:18px; }
+.copier-channel header { display:flex; align-items:center; gap:8px; }
+.copier-channel h3 { flex:1; min-width:0; margin:0; overflow:hidden; color:var(--text); font-size:14px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.copier-route { padding:2px 8px; border-radius:999px; color:var(--tag-text); background:var(--tag-bg); font-size:11px; white-space:nowrap; }
+.copier-dot { width:8px; height:8px; border-radius:50%; background:var(--neutral-dot); }
+.copier-dot.ok { background:var(--positive-dot); }
+.copier-dot.bad { background:var(--negative-strong); }
+.copier-channel dl { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:12px 0 0; }
+.copier-channel dt,.copier-facts dt { color:var(--dim); font-size:11px; }
+.copier-channel dd { margin:3px 0 0; color:var(--text); font-size:16px; font-variant-numeric:tabular-nums; font-weight:600; }
+.copier-channel dd small { color:var(--dim); font-size:10px; font-weight:400; }
+.copier-channel footer { display:flex; flex-direction:column; gap:3px; margin-top:12px; color:var(--muted); font-size:11px; }
+.pos { color:var(--positive-text) !important; }
+.neg { color:var(--negative-text) !important; }
+.copier-panel { min-width:0; padding:14px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.copier-panel h3 { margin:0 0 10px; color:var(--text); font-size:14px; font-weight:600; }
+.copier-panel-head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px; }
+.copier-panel-head h3 { flex:1; margin:0; }
+.copier-table-wrap { width:100%; overflow-x:auto; border:1px solid var(--line-soft); border-radius:8px; }
+.copier-table { width:100%; min-width:720px; border-collapse:collapse; text-align:left; }
+.copier-table th,.copier-table td { padding:9px 11px; border-bottom:1px solid var(--line-soft); color:var(--text-secondary); font-size:12px; vertical-align:top; }
+.copier-table th { color:var(--dim); background:var(--surface-2); font-size:11px; font-weight:550; white-space:nowrap; }
+.copier-table tbody tr:last-child td { border-bottom:0; }
+.copier-table td small { display:block; margin-top:3px; color:var(--dim); font-size:10px; }
+.copier-table .num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+.copier-summary { max-width:380px; overflow-wrap:anywhere; }
+.copier-row-button { cursor:pointer; }
+.copier-row-button:hover td { background:var(--control-hover); }
+.copier-detail td { background:var(--surface-2); }
+.copier-detail pre { margin:0; color:var(--text); font:inherit; font-size:12px; line-height:1.6; white-space:pre-wrap; overflow-wrap:anywhere; }
+.copier-detail dl,.copier-facts { display:flex; flex-wrap:wrap; gap:8px 22px; margin:10px 0 0; }
+.copier-detail dd,.copier-facts dd { margin:2px 0 0; color:var(--text); font-size:12px; }
+.copier-reject { margin:10px 0 0; color:var(--warning-text); font-size:12px; }
+.copier-side { display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; }
+.copier-side.long { color:var(--direction-long); background:var(--direction-long-bg); }
+.copier-side.short { color:var(--direction-short); background:var(--direction-short-bg); }
+.copier-status { display:inline-block; padding:2px 8px; border-radius:999px; color:var(--muted); background:var(--surface-2); font-size:11px; white-space:nowrap; }
+.copier-status.good { color:var(--positive-text); background:var(--positive-bg); }
+.copier-status.bad { color:var(--negative-text); background:var(--negative-bg); }
+.copier-status.warn { color:var(--warning-text); background:var(--warning-bg); }
+.copier-status.info { color:var(--text-secondary); background:var(--tag-bg); }
+.copier-empty { margin:0; padding:18px 12px; color:var(--dim); text-align:center; font-size:12px; }
+.copier-footnote { margin:0; color:var(--dim); font-size:11px; line-height:1.6; }
+.copier-filters { display:flex; flex-wrap:wrap; gap:8px; }
+.copier-filters label { display:grid; gap:5px; min-width:150px; color:var(--muted); font-size:11px; }
+.copier-filters select,.copier-form input[type=number] { width:100%; min-height:36px; padding:7px 10px; border:1px solid var(--control-border); border-radius:7px; color:var(--text); background:var(--control-bg); font:inherit; font-size:12px; }
+.copier-pager { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:10px; color:var(--dim); font-size:11px; }
+.copier-pager>div { display:flex; gap:7px; }
+.copier-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.copier-toggles { display:grid; gap:0; margin:0; padding:0; list-style:none; }
+.copier-toggles li { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--line-soft); }
+.copier-toggles li:last-child { border-bottom:0; }
+.copier-toggles strong { display:block; color:var(--text); font-size:13px; font-weight:550; }
+.copier-toggles small { display:block; margin-top:3px; color:var(--dim); font-size:11px; line-height:1.5; }
+.copier-switch { display:inline-flex; flex:none; align-items:center; gap:7px; padding:4px 9px 4px 5px; border:1px solid var(--control-border); border-radius:999px; color:var(--muted); background:var(--control-bg); font:inherit; font-size:11px; cursor:pointer; }
+.copier-switch:disabled { opacity:.55; cursor:wait; }
+.copier-switch>span { position:relative; display:block; width:26px; height:15px; border-radius:999px; background:var(--line); }
+.copier-switch>span::after { position:absolute; top:2px; left:2px; width:11px; height:11px; border-radius:50%; background:var(--text); content:""; transition:transform .15s; }
+.copier-switch.on { border-color:var(--positive-border); color:var(--positive-text); background:var(--positive-bg); }
+.copier-switch.on>span { background:var(--positive-dot); }
+.copier-switch.on>span::after { transform:translateX(11px); background:var(--surface); }
+.copier-form { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.copier-form label { display:grid; gap:5px; color:var(--muted); font-size:11px; }
+.copier-form label small { color:var(--dim); font-size:10px; line-height:1.5; }
+.copier-form .copier-check { display:flex; align-items:center; gap:8px; grid-column:1/-1; color:var(--text-secondary); font-size:12px; }
+.copier-form .copier-form-actions { grid-column:1/-1; }
+
+@media(max-width:900px) {
+  .copier-kpis { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .copier-settings { grid-template-columns:1fr; }
+}
+@media(max-width:560px) {
+  .copier-kpis { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .copier-form { grid-template-columns:1fr; }
+  .copier-filters label { flex:1 1 100%; }
+  .copier-mode-actions { width:100%; }
+}
+.copier-rfacts { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px 16px; margin:0 0 12px; }
+.copier-rfacts dt { color:var(--dim); font-size:11px; }
+.copier-rfacts dd { margin:3px 0 0; color:var(--text); font-size:14px; font-variant-numeric:tabular-nums; font-weight:600; }
+.copier-rdist { display:grid; gap:5px; }
+.copier-rbar { display:grid; grid-template-columns:64px 1fr 40px; align-items:center; gap:8px; color:var(--muted); font-size:11px; }
+.copier-rbar i { display:block; height:10px; border-radius:3px; background:var(--positive-dot); }
+.copier-rbar i.neg { background:var(--negative-strong); }
+.copier-rbar b { color:var(--text-secondary); font-weight:500; font-variant-numeric:tabular-nums; }

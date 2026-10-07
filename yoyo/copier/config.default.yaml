@@ -1,0 +1,53 @@
+# Discord 消息由浏览器扩展提交；不使用用户 Token 自动轮询。
+discord:
+  signal_channel_id: ""
+  allowed_author_names: []
+
+telegram:
+  enabled: true
+  channels_config_path: "config/telegram_channels.yaml"
+
+okx:
+  exchange: "okx"
+  inst_type: "SWAP"
+  td_mode: "cross"
+  position_mode: "net_mode"
+  default_leverage: 5
+  entry_policy: "mid"
+
+risk:
+  position_pct: 1.0
+  max_leverage: 5
+  require_stop_loss: true
+  max_open_positions: 3
+  max_position_per_symbol: 1
+  cooldown_minutes: 30
+  symbols_whitelist: [BTC, ETH, BNB, ZEC, SOL, LINK, XRP, DOGE, ADA]
+  dry_run: false
+  kill_switch: false
+  min_confidence: 0.8
+  max_daily_loss_usdt: 500
+
+deepseek:
+  model: "deepseek-chat"
+  base_url: "https://api.deepseek.com"
+  min_confidence: 0.8
+
+admin:
+  host: "127.0.0.1"
+  port: 8080
+  approval_mode: "auto"
+  require_auth: false
+
+user_listener:
+  enabled: false
+  use_pinned_list: true
+  pinned_config_path: "config/pinned_channels.yaml"
+  safe_mode: true
+  poll_interval_min_sec: 30
+  poll_interval_max_sec: 300
+  channel_gap_min_sec: 15
+  channel_gap_max_sec: 60
+  poll_limit: 3
+  max_channels: 12
+  channel_ids: []
