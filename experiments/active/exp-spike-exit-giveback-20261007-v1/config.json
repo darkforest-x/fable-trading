@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-spike-exit-giveback-20261007-v1",
+  "question": "Does a tighter or earlier profit protection reduce the open-profit giveback of SPIKE V12.8 ordinary and V13.0 retest trades without lowering net R after 0.2% round-trip cost, and is any gain specific to the signal versus matched random entries?",
+  "single_variable": "exit rule only; entries, sides, entry prices and initial stops frozen from exp-spike-v128-entry-clock-long-20260923-v1/retest_v1 (v9_both arm)",
+  "source_experiment": "exp-spike-v128-entry-clock-long-20260923-v1",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "start": "2023-01-01T00:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "timeframes": [15, 60],
+  "round_trip_cost": 0.002,
+  "stat_seed": 1007001,
+  "selection_metric": "mean_net_r on exits before select_before; later exits reported only",
+  "training_eligible": false,
+  "production_eligible": false
+}
