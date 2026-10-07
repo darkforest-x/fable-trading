@@ -10962,7 +10962,7 @@ experiments:
   - experiment_id: exp-market-sync-shock-20261007-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 908a9fd182
-    status: rejected
+    status: superseded
     result: 638-symbol Binance 5m (2023-01..2026-09), top-50 alts ranked on the prior month. Sync shocks (BTC and ETH same-side bar |z|>=2-3 on volume x2-3, >=60-75% of alts same side) are frequent (5m ~1.1-2.7k, 1H ~150-320 events per period) but show no tradable follow-through. Per timeframe the best alt-basket cell picked on <2025 failed on >=2025 - 5m reverse h6 -24.7bp net (vs control -4.5bp, p0.29), 15m reverse h3 -25.1bp (-5.0bp, p0.31), 30m reverse h12 -16.6bp (+9.7bp, p0.32), 1H continue h1 -14.6bp (+5.6bp, p0.75); every checked cell is negative after the 0.2% round trip. 1H continuation looked strong in 2023-24 (+27..48bp gross alts) and fell to +3..8bp after 2025. Lead events (fewer than half of alts following) almost never occur at >=5m (1-14 per cell), so alt catch-up is untestable without 1m data. The BTC engulfing subset is not consistently better. The owner's 2026-08-19 22:00 Beijing rally is detected (1H BTC z7.2, ETH z8.1, volume x12, 88% of alts up; +4.6% alts and +14.3% ETH over 12h) but is a tail outlier, not the average outcome.
     question: When BTC and ETH print a large same-direction bar on expanded volume and most liquid alts move the same way in that bar, does the move continue or revert after 0.2% round-trip cost versus matched random entries, and on which timeframe (5m/15m/30m/1H) is the regularity strongest?
     single_variable: Event definition only (z_min, v_min, b_min, sync/lead) per timeframe and horizon, fixed in config before results; selection on events before 2025-01-01, later events read once.
@@ -10970,4 +10970,17 @@ experiments:
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: false
-    notes: Owner Notion task 2026-10-07 (整个市场的异动, 参考 8.19). 3m not tested - no market-wide 1m/3m data on disk, 5m is the finest. Frozen universe includes delisted symbols. Controls are same-month, same BTC-volatility-tercile random bars with the same side and horizon; month-block sign-flip. Committed summary.csv, selected.csv, receipt.json and universe.json; events.csv and trades.csv.gz stay local. No report requested.
+    notes: Owner Notion task 2026-10-07 (整个市场的异动, 参考 8.19). 3m not tested - no market-wide 1m/3m data on disk, 5m is the finest. Frozen universe includes delisted symbols. Controls are same-month, same BTC-volatility-tercile random bars with the same side and horizon; month-block sign-flip. Committed summary.csv, selected.csv, receipt.json and universe.json; events.csv and trades.csv.gz stay local. No report requested. Superseded by exp-market-sync-shock-20261008-v2 after the owner rejected the verdict - v1 arithmetic re-checked exact, but pooling up and down shocks hid that 1H up shocks continue.
+
+  - experiment_id: exp-market-sync-shock-20261008-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1ea848c923
+    status: inconclusive
+    result: Pre-registered selection still fails - the best alt-basket cell per timeframe and side picked on <2025 does not hold on >=2025 (8 cells, none positive after cost with p<0.05). A post-hoc but structured pattern appears - all 22 of 475 cells positive after cost and above control in both periods are LONG after up shocks on 30m/1H, held 4-24h. Strongest - 1H up shock, long ETH, hold 12h - positive net in 4/4 years under all 8 configs (+15..+55bp net, 7/8 configs excess p<0.03; z3/v3/b0.75 n=126, +53.8bp net, median +32.8bp, win 58%, +22.8bp after dropping top 5, max cumulative DD 12.9%). BTC and alt basket weaker (+12..+43bp, gone after dropping top 10 in some configs). Short after down shocks loses (-20..-31bp). Holding 1h after a 1H shock is negative; the drift takes 12-24h. Edge is right-tail heavy (top days 2026-08-19, 2025-05-08, 2023-11-09, 2024-05-21, 2024-11-06). Found after looking - forward validation required before any use.
+    question: Do BTC/ETH-led market-wide sync shocks become tradable once v1's design choices are changed one at a time - direction read separately, wall-clock holds up to 24h, a trend exit, or a cluster of shock bars instead of one?
+    single_variable: One design choice per arm against v1 - A direction split, B wall-clock hold 1/4/12/24h, C trend exit (2ATR stop, 3ATR trail, 24h cap), D cluster of >=2 sync bars; data, universe, features, cost, controls and the 2025 split unchanged.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner pushback 2026-10-08 (不可能 肯定是哪里逻辑不对 再试试). v1 audit before v2 - 8.19 1H features and returns plus 40 random trades recomputed from raw 5m data match exactly. 24h cooldown per timeframe/config keeps events independent. Committed summary.csv, selected.csv, receipt.json; events.csv and trades.csv.gz stay local. No report requested.

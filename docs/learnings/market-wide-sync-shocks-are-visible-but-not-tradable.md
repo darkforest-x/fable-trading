@@ -6,3 +6,4 @@
 - **反直觉点**：想测“BTC/ETH 先动、山寨还没跟”的补涨，却发现在 5m 及以上，这种状态几乎不存在（每格 1–14 次）。山寨和 BTC 在同一根 5m K 里就动完了，领先滞后要用 1m 或更细的数据才看得到。
 - **通用规则**：Owner 拿一个大行情当例子时，先用规则检测它（验证规则能抓到），再看同规则全部事件的平均和对照。不要让单个尾部样本代表分布。想研究跨币领先滞后时，先确认数据粒度小于领先时差。
 - **牵连**：`yoyo/evaluation/market_sync_shock.py`、`experiments/active/exp-market-sync-shock-20261007-v1/`、[排名窗规则](symbol-ranking-window-must-end-before-the-trading-window.md)。
+- **更正（2026-10-08）**：本条标题的结论太早了。v1 把向上和向下的冲击混在一起统计，掩盖了方向不对称。v2 拆开后，1H 向上冲击做多、持有 12–24h，在 8 组阈值、4 个年份里扣费后都为正（ETH 最强），向下冲击做空则亏损。见 [按方向拆开](pooled-long-and-short-shocks-cancel-an-asymmetric-edge.md) 和 exp-market-sync-shock-20261008-v2。仍属事后发现，需前向验证。
