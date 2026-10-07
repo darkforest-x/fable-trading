@@ -10935,7 +10935,7 @@ experiments:
     source_repo: darkforest-x/fable-trading
     source_commit: 881dcacbbc
     status: active
-    result: Full run 638 symbols x 15m/60m, incumbent replay reproduced 100% of recorded exits (113753 signal, 88721 control trades). 60m both versions - trail 2ATR instead of 4ATR selected on <2025 and held on >=2025 (V12.8 +0.026R p0.011, V13 +0.039R p0.004; giveback from a 2R close peak ~2.1R->1.0R and 1.6R->0.76R), while the same change made matched random entries worse, so the gain is signal-specific. 15m - every tightening lowered mean net R in both periods; the V13 15m in-sample pick (lock1) reversed out of sample. V12.8 15m stays negative after cost under every exit, and 60m signals still trail matched random entries in mean R after 2025. No Pine or monitor change; parameter change awaits owner.
+    result: Full run 638 symbols x 15m/60m, incumbent replay reproduced 100% of recorded exits (113753 signal, 88721 control trades). 60m both versions - trail 2ATR instead of 4ATR selected on <2025 and held on >=2025 (V12.8 +0.026R p0.011, V13 +0.039R p0.004; giveback from a 2R close peak ~2.1R->1.0R and 1.6R->0.76R), while the same change made matched random entries worse, so the gain is signal-specific. 15m - every tightening lowered mean net R in both periods; the V13 15m in-sample pick (lock1) reversed out of sample. V12.8 15m stays negative after cost under every exit, and 60m signals still trail matched random entries in mean R after 2025. Owner approved the 1h change the same day - Pine V12.9/V13.1 shipped (5bc0f66598) and the local signal center switched to V13.1 on 15m/30m/1H/4H.
     question: Does tighter or earlier profit protection cut the open-profit giveback of SPIKE V12.8 ordinary and V13.0 retest trades without lowering net R after 0.2% round-trip cost, and is any gain specific to the signal versus matched random entries?
     single_variable: Exit rule only; entries, sides, entry prices and initial stops frozen from exp-spike-v128-entry-clock-long-20260923-v1/retest_v1 (v9_both arm). Candidates each change one thing versus the incumbent 2R-armed 4ATR close trail (trail3, trail2, arm1, be1, lock1, half2).
     training_eligible: false
@@ -10943,3 +10943,16 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner request 2026-10-07 ("盈利回吐太多", both versions). Tightening-only candidates replay entry..recorded-exit bars and reuse recorded opposite-V6 exits; statistics keep only trades whose incumbent replay reproduces the recorded exit. Selection on exits before 2025-01-01, later exits reported only. Matched controls rebuilt per pool semantics. No Pine, monitor or production change. No report requested.
+
+  - experiment_id: exp-market-sync-shock-20261007-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 908a9fd182
+    status: rejected
+    result: 638-symbol Binance 5m (2023-01..2026-09), top-50 alts ranked on the prior month. Sync shocks (BTC and ETH same-side bar |z|>=2-3 on volume x2-3, >=60-75% of alts same side) are frequent (5m ~1.1-2.7k, 1H ~150-320 events per period) but show no tradable follow-through. Per timeframe the best alt-basket cell picked on <2025 failed on >=2025 - 5m reverse h6 -24.7bp net (vs control -4.5bp, p0.29), 15m reverse h3 -25.1bp (-5.0bp, p0.31), 30m reverse h12 -16.6bp (+9.7bp, p0.32), 1H continue h1 -14.6bp (+5.6bp, p0.75); every checked cell is negative after the 0.2% round trip. 1H continuation looked strong in 2023-24 (+27..48bp gross alts) and fell to +3..8bp after 2025. Lead events (fewer than half of alts following) almost never occur at >=5m (1-14 per cell), so alt catch-up is untestable without 1m data. The BTC engulfing subset is not consistently better. The owner's 2026-08-19 22:00 Beijing rally is detected (1H BTC z7.2, ETH z8.1, volume x12, 88% of alts up; +4.6% alts and +14.3% ETH over 12h) but is a tail outlier, not the average outcome.
+    question: When BTC and ETH print a large same-direction bar on expanded volume and most liquid alts move the same way in that bar, does the move continue or revert after 0.2% round-trip cost versus matched random entries, and on which timeframe (5m/15m/30m/1H) is the regularity strongest?
+    single_variable: Event definition only (z_min, v_min, b_min, sync/lead) per timeframe and horizon, fixed in config before results; selection on events before 2025-01-01, later events read once.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner Notion task 2026-10-07 (整个市场的异动, 参考 8.19). 3m not tested - no market-wide 1m/3m data on disk, 5m is the finest. Frozen universe includes delisted symbols. Controls are same-month, same BTC-volatility-tercile random bars with the same side and horizon; month-block sign-flip. Committed summary.csv, selected.csv, receipt.json and universe.json; events.csv and trades.csv.gz stay local. No report requested.
