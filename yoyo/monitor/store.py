@@ -19,6 +19,8 @@ from pathlib import Path
 
 from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND, FRESH_MS,
                           DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
+from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
+                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
 
 
 def now_ms():
@@ -188,17 +190,32 @@ class Store:
 
     @staticmethod
     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
+        v130_candidate = (e.get("protocol") == V130_PROTOCOL or e.get("kind") == V130_KIND)
+        if v130_candidate:
+            if not is_v130_signal(e):
+                return False
+            # This stream has its own cold-start boundary.  It prevents a
+            # newly introduced identity from storing or queueing bars the
+            # ordinary scanner reconstructs during startup, even if another
+            # caller writes without first applying the shared V9 reset gate.
+            policy = db.execute("SELECT payload FROM meta WHERE key=?",
+                                ("notification_policy:" + V130_POLICY,)).fetchone()
+            if policy is None:
+                return False
+            activated = json.loads(policy[0]).get("activated_ms")
+            if type(activated) is not int or e["bar_close_ms"] <= activated:
+                return False
         reset = db.execute("SELECT payload FROM meta WHERE key='migration:spike-v9-reset-v1'").fetchone()
         if reset is not None:
             from yoyo.monitor.policy import is_model_signal, is_tv_start
-            if not (is_tv_start(e) or is_model_signal(e)):
+            if not (is_tv_start(e) or is_model_signal(e) or v130_candidate):
                 return False
             cutoff = json.loads(reset[0])["activated_ms"]
             original = e.get("indicator", e) if e.get("kind") == MODEL_KIND else e
-            if (e.get("protocol") not in (SIGNAL_PROTOCOL, MODEL_PROTOCOL)
-                    or e.get("source") != "live"
-                    or type(original.get("bar_close_ms")) is not int
+            if (e.get("source") != "live" or type(original.get("bar_close_ms")) is not int
                     or original["bar_close_ms"] <= cutoff):
+                return False
+            if not v130_candidate and e.get("protocol") not in (SIGNAL_PROTOCOL, MODEL_PROTOCOL):
                 return False
         cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
             e["id"], e["symbol"], e["timeframe"], e["kind"], e["side"],
@@ -390,8 +407,9 @@ class Store:
                     "performance_status", "performance", "notification_status", "bark_notification_status",
                     "near_zero_bars", "dense", "htf_side", "ready", "phase", "stale", "error",
                     "source_event_id", "display_only", "notification_eligible", "direction_profile",
-                    "strategy_version", "v9_admitted", "base_asset", "volume_ratio", "rope_distance_atr",
-                    "reference_cost_r", "risk_basis")
+                    "strategy_version", "v9_admitted", "v128_admitted", "h1_sma60", "v128_evidence", "base_asset", "volume_ratio", "rope_distance_atr",
+                    "reference_cost_r", "risk_basis", "anchor_close_ms", "breakout_close_ms", "retest_close_ms",
+                    "wait_bars", "reference_price", "trail_atr", "candidate_source")
             compact = {key: event[key] for key in keys if key in event}
             indicator = event.get("indicator")
             if isinstance(indicator, dict):
@@ -434,7 +452,7 @@ class Store:
 
     def displayed_start_count(self, since=0):
         """Count current display streams, including muted 15m, excluding warmup."""
-        receipt = self.get_meta("notification_policy:v9_bark_arm", {})
+        receipt = self.get_meta("notification_policy:v128_bark_arm", {})
         cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
         if type(cutoff) is not int or cutoff < 0:
             return 0
@@ -706,8 +724,17 @@ class Store:
 
     def _notification_filter(self, channel):
         clause, args = self._direct_filter(channel)
-        return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + ")",
-                [MODEL_KIND, MODEL_PROTOCOL] + args)
+        from yoyo.monitor.notification_policy import activation
+        v130_since = activation(self, channel, V130_POLICY)
+        v130_timeframe_since = self.timeframe_activation("15m", protocol=V130_POLICY)
+        if v130_since is None or v130_timeframe_since is None:
+            v130_clause, v130_args = "0", []
+        else:
+            v130_clause = ("(e.kind=? AND json_extract(e.payload,'$.protocol')=? "
+                           "AND e.timeframe='15m' AND e.close_ms>?)")
+            v130_args = [V130_KIND, V130_PROTOCOL, max(v130_since, v130_timeframe_since)]
+        return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + " OR " + v130_clause + ")",
+                [MODEL_KIND, MODEL_PROTOCOL] + args + v130_args)
 
     def notification_status(self, channel):
         """Current two-stage receipts; retain old raw receipts as historical only."""

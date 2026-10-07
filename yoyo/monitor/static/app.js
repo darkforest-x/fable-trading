@@ -4,7 +4,7 @@
 
   const $ = (id) => document.getElementById(id);
   const state = {
-    view: "signals", signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "direct", markets: [], status: null, health: null,
+    view: "signals", signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     shadowStatus: null, shadowEvents: [], shadowMarket: [], shadowLoaded: false, shadowLoading: false, shadowTimeframe: "all",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
@@ -16,14 +16,17 @@
       period: "all", outcome: "all", sort: "newest", performanceVersion: "current", ledger: null, revision: 0 },
   };
   const titles = {
-    platform: ["体系总览", "个人交易、策略研究与自动策略验证，共用数据、特征与模型。"],
-    manual: ["个人交易系统", "本人看图、判断和执行；在这里保存规则、盘前计划、实际成交与复盘。"],
+    platform: ["体系总览", "个人交易、学习输出、策略研究与自动策略验证，共用知识、数据与模型。"],
+    learning: ["学习中心", "围绕问题安排学习、复述与复习，把答案沉淀为自己的知识。"],
+    knowledge: ["知识库", "按领域组织概念、原则、假设与经验，保留来源、证据和适用边界。"],
+    content: ["内容工作室", "知识形成母稿，按平台编写文章、短帖与视频脚本，导出并登记发布记录。"],
+    manual: ["个人交易系统", "沉淀交易原则 → 核对后开单 → 记录与复盘。"],
     copier: ["Discord 跟单", "Discord 频道信号 → DeepSeek 解析 → 风控 → OKX / Gate 下单。切到实盘只能在本机由你确认。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
-    signals: ["信号中心", "指标启动与 YOLO 确认分开展示。Bark 通知周期以运行状态为准。"],
-    warmup: ["预热历史", "初次启动前的回算信号，仅供复盘，不触发通知。"],
+    signals: ["信号中心", "SPIKE V13.1 多空回踩再突破确认 · 15m/30m/1H/4H；通知按通知中心订阅。"],
+    warmup: ["预热历史", "V12.8 启用前按当前规则重算的信号，仅供复盘，不补发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
-    joints: ["突破+spike", "V9 多头框还开着时出现的第一次趋势线突破，本周期或上级周期都算（V11.2 默认「多头框内」）。"],
+    joints: ["突破+spike", "V12.8：有效多头参考框与本周期或上级趋势线配对，支持先启动后突破、先突破后启动。"],
     breaks: ["趋势线突破", "15m、1H、4H、日线自己的三点下降线被收盘突破：连续 2 根收在线上 0.2 ATR。"],
     shadow: ["旧版影子记录", "已退役的 V7 / V8 独立观察记录，仅供历史对照；新运行统一进入模拟实盘。"],
     research: ["研究总览", "围绕均线密集系统，跟踪因子、实验、回测与视觉判断。"],
@@ -35,10 +38,11 @@
     backtests: ["回测任务", "冻结参数与数据，独立运行，留存逐笔与随机对照。"],
     yolo: ["YOLO 工作流", "样本、标注、数据集、训练与评估，沿同一条研究流程追踪。"],
     vision: ["VLM 工作流", "视觉语言模型的参考图、形态判断、人工复核与历史回放，与 YOLO 并行研究。"],
+    notifications: ["通知中心", "分别查看 TG 与 Bark 渠道状态、来源订阅和历史回执。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const workspaceView = (view = state.view) => ["manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
-  const eventNames = { tv_start: "V9 启动", yolo_confirmed: "YOLO 补充确认" };
+  const workspaceView = (view = state.view) => ["learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
+  const eventNames = { tv_start: "V12.8 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
   // Server cursor pages are intentionally smaller than its 2,000-row safety cap.
@@ -69,43 +73,45 @@
   const modelProtocol = () => state.status?.runtime?.signal_kind === "yolo_confirmed" && typeof state.status?.protocol === "string";
   const isConfirmed = (item) => item?.confirmation === "yolo" || item?.confirmation === "raw_yolo";
   const isCandidate = (item) => item?.confirmation === "raw" || item?.confirmation === "raw_yolo";
-  // The monitor's current raw event kind is SPIKE V9.  Keep tv_start only for
+  // The current raw event kind is SPIKE V12.8. Keep older names only for
   // already-persisted legacy chart rows; it is not the current backend kind.
-  const isV1StartMarker = (event) => event?.kind === "spike_burst_v9" || event?.kind === "tv_start";
+  const isV1StartMarker = (event) => event?.kind === "spike_burst_v128" || event?.kind === "spike_burst_v9" || event?.kind === "tv_start";
   const isDirectRecord = (item) => isCandidate(item) && TV_INTERVALS.has(String(item.timeframe));
   const signalView = (view = state.view) => view === "signals" || view === "warmup";
   const signalQuerySource = () => state.view === "warmup" ? "warmup" : state.signalSource;
-  const displayScope = (item) => item?.display_scope === "warmup" ? "warmup" : item?.display_scope === "replay" || item?.source === "replay" ? "replay" : "live";
+  const displayScope = (item) => item?.display_scope === "legacy" ? "legacy" : item?.display_scope === "warmup" ? "warmup" : item?.display_scope === "replay" || item?.source === "replay" ? "replay" : "live";
   const isWarmupRecord = (item) => displayScope(item) === "warmup";
-  const sourceName = (item) => displayScope(item) === "warmup" ? "预热历史" : displayScope(item) === "replay" ? "历史回放" : "实时";
+  const sourceName = (item) => displayScope(item) === "legacy" ? "V9 旧版记录" : displayScope(item) === "warmup" ? "预热历史" : displayScope(item) === "replay" ? "历史回放" : "实时";
   const milliseconds = (value) => typeof value === "string" ? Date.parse(value) : Number(value);
   function normalizeV1Event(row, requestedScope = null) {
     const minutes = Number(row.timeframe_min ?? row.timeframe);
     const confirmation = row.confirmation;
     const close = milliseconds(row.signal_close_time ?? row.bar_close_ms);
     const direction = row.direction ?? row.side;
-    if (![5, 15, 30, 60, 240, 1440].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo"].includes(confirmation) || !["long", "short"].includes(direction) || !finite(close)) return null;
-    const rowScope = ["live", "warmup", "replay"].includes(row.display_scope) ? row.display_scope : requestedScope || row.source;
+    if (![5, 15, 30, 60, 240, 1440].includes(minutes) || !["live", "replay"].includes(row.source) || !["raw", "yolo", "raw_yolo", "retest"].includes(confirmation) || !["long", "short"].includes(direction) || !finite(close)) return null;
+    const rowScope = ["live", "warmup", "replay", "legacy"].includes(row.display_scope) ? row.display_scope : requestedScope || row.source;
     return { ...row, id: String(row.id ?? `${row.source}|${confirmation}|${row.venue}|${row.symbol}|${minutes}|${row.signal_close_time}`),
       source: row.source === "replay" ? "replay" : "live", confirmation, timeframe: String(minutes), timeframe_min: minutes,
       display_scope: rowScope,
-      kind: confirmation === "raw" ? "tv_start" : "yolo_confirmed", side: direction, bar_close_ms: close,
+      kind: confirmation === "raw" ? "tv_start" : confirmation === "retest" ? "v131_retest" : "yolo_confirmed", side: direction, bar_close_ms: close,
       bar_open_ms: milliseconds(row.signal_bar_open ?? row.bar_open_ms) || close - minutes * 60000,
       price: row.signal_close ?? row.price, is_closed: row.is_closed === true,
-      model: confirmation === "raw" ? row.model : { ...(row.model || {}), status: "confirmed" } };
+      model: confirmation === "yolo" || confirmation === "raw_yolo" ? { ...(row.model || {}), status: "confirmed" } : row.model };
   }
   const twoStage = () => state.status?.runtime?.notification_mode === "two_stage";
   const notificationChannels = () => {
     const configured = state.status?.runtime?.notification_channels;
-    const channels = Array.isArray(configured) ? configured : ["bark"];
+    const channels = Array.isArray(configured) ? configured : [];
     return ["telegram", "bark"].filter((channel) => channels.includes(channel) && (channel !== "telegram" || state.status?.telegram?.disabled_by_owner !== true));
   };
   // Only the policy-filtered direct endpoint supplies first-stage receipts.
   // Candidate history is deliberately not a receipt source.
   const directReceipt = (item) => isDirectRecord(item) ? state.directSignals.find((row) => sameEvent(row, item)) : null;
+  const isRetest = (item) => item?.confirmation === "retest";
+  const signalVersion = (item) => { const protocol = item?.protocol || item?.indicator?.protocol || ""; return protocol.includes("v130") ? "V13.1" : protocol.includes("v128") ? "V12.8" : "V9"; };
   const originalSignal = (item) => isConfirmed(item) ? item.indicator || {} : item;
-  const sourceItems = () => state.signalScope === "confirmed" ? state.signals : state.signalScope === "direct" ? state.directSignals : state.candidates;
-  const sourceKey = () => state.signalScope === "confirmed" ? "signals" : state.signalScope === "direct" ? "directSignals" : "candidates";
+  const sourceItems = () => state.signalScope === "confirmed" ? state.signals : ["direct", "retest"].includes(state.signalScope) ? state.directSignals : state.candidates;
+  const sourceKey = () => state.signalScope === "confirmed" ? "signals" : ["direct", "retest"].includes(state.signalScope) ? "directSignals" : "candidates";
   const modelState = (item) => modelStates[item.model?.status] || "等待模型状态";
   const DISPLAY_ONLY_NOTE = "仅前端 · Bark 已关闭";
   const runtimeTimeframes = (field) => {
@@ -114,18 +120,17 @@
     const normalized = values.map(uiTimeframe);
     return normalized.every((value) => value && TV_INTERVALS.has(value)) ? normalized : null;
   };
-  const displayOnlyTimeframes = () => runtimeTimeframes("display_only_timeframes") || (runtimeTimeframes("bark_timeframes") ? (runtimeTimeframes("timeframes") || []).filter((value) => !runtimeTimeframes("bark_timeframes").includes(value)) : []);
-  const isDisplayOnly = (item) => item?.display_only === true || displayOnlyTimeframes().includes(item?.timeframe);
+  const displayOnlyTimeframes = () => notificationChannels().includes("telegram") ? [] : runtimeTimeframes("display_only_timeframes") || (runtimeTimeframes("bark_timeframes") ? (runtimeTimeframes("timeframes") || []).filter((value) => !runtimeTimeframes("bark_timeframes").includes(value)) : []);
+  const isDisplayOnly = (item) => !notificationChannels().includes("telegram") && (item?.display_only === true || displayOnlyTimeframes().includes(item?.timeframe));
   const notificationPolicy = () => {
-    const muted = displayOnlyTimeframes(), bark = runtimeTimeframes("bark_timeframes");
-    const mutedNote = muted.length ? `${muted.map(timeframeLabel).join(" / ")} ${DISPLAY_ONLY_NOTE}；` : "";
-    const delivery = bark === null ? "Bark 通知周期尚未同步；以实际回执为准。" : !bark.length ? "当前所有周期的 Bark 推送均已关闭。" : twoStage() ? `${bark.map(timeframeLabel).join(" / ")} 收盘启动先推送 Bark，YOLO 通过后追加推送；历史箭头不补发。` : `${bark.map(timeframeLabel).join(" / ")} 仍按模型确认通知，分阶段通知规则尚未启用。`;
-    return mutedNote + delivery + " V9 多空均按同一规则推送。";
+    const channels = notificationChannels().map((channel) => channel === "telegram" ? "TG" : "Bark");
+    const delivery = channels.length ? `通知渠道：${channels.join(" + ")}；按通知中心来源订阅。` : "通知渠道状态待同步；以通知中心订阅和历史回执为准。";
+    return `${delivery} V13.1 多空回踩再突破，15m/30m/1H/4H；15m 候选须符合已完成 H1 SMA60 方向；1H 收盘 2R 后按 2ATR 追踪，其他周期 4ATR。历史记录不补发。`;
   };
   function candidateNotificationNote(item) {
     if (isDisplayOnly(item)) return DISPLAY_ONLY_NOTE;
     if (item.model?.status === "disabled") return "该周期已关闭 · 不再推送";
-    if (directReceipt(item)) return runtimeTimeframes("bark_timeframes")?.includes(item.timeframe) ? "启动通知见通道回执；YOLO 通过后追加通知" : "启动通知见通道回执；Bark 通知周期尚未同步";
+    if (directReceipt(item)) return "启动通知见通道回执；YOLO 通过后追加确认";
     return twoStage() ? "未关联新规则启动回执 · 不推断已发送" : "候选记录 · 当前等待模型后通知";
   }
   function modelReason(item) {
@@ -199,6 +204,20 @@
     const validSymbol = /^[A-Z0-9]{1,30}-(USDT|USDC|USD)-SWAP$/.test(symbol) || /^(?:OKX:)?[A-Z0-9]{1,30}(?:USDT|USDC|USD)(?:\.P)?$/.test(symbol);
     return validSymbol && Boolean(apiTimeframe(item?.timeframe));
   }
+  function remoteWorkspace() {
+    const host = typeof window !== "undefined" ? window.location?.hostname : "";
+    return Boolean(host && !["localhost", "127.0.0.1", "::1", "[::1]"].includes(host));
+  }
+  function tradingViewTargetLabel() {
+    return remoteWorkspace() ? "当前设备浏览器" : "本机 TradingView";
+  }
+  function remoteTradingViewURL(item) {
+    if (!canOpenTradingView(item)) return "";
+    const symbol = String(item.symbol).toUpperCase().replace(/^OKX:/, "").replace(/\.P$/, "")
+      .replace(/-SWAP$/, "").replace(/-/g, "");
+    const interval = { "5m": "5", "15m": "15", "30m": "30", "1H": "60", "4H": "240", "1Dutc": "1D" }[apiTimeframe(item.timeframe)];
+    return "https://www.tradingview.com/chart/?symbol=" + encodeURIComponent("OKX:" + symbol + ".P") + "&interval=" + interval;
+  }
   function renderTradingViewButtons() {
     document.querySelectorAll("[data-tradingview-action]").forEach((button) => {
       button.disabled = state.tradingViewPending || !canOpenTradingView({ symbol: button.dataset.tvSymbol, timeframe: button.dataset.tvTimeframe });
@@ -219,6 +238,11 @@
     if (state.tradingViewPending) return;
     if (!canOpenTradingView(item)) {
       tradingViewStatus("当前合约或周期不支持在 TradingView 打开。", "error");
+      return;
+    }
+    if (remoteWorkspace()) {
+      window.open(remoteTradingViewURL(item), "_blank", "noopener,noreferrer");
+      tradingViewStatus("已请求在当前设备浏览器打开 TradingView。", "");
       return;
     }
     const request = { symbol: item.symbol, timeframe: apiTimeframe(item.timeframe) };
@@ -258,8 +282,8 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["signals", "watch", "lines", "shadow", "system", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -273,14 +297,14 @@
     $("connection-label").classList.toggle("hidden", researchView);
     $("bark-header").classList.toggle("hidden", researchView);
     $("telegram-header")?.classList.toggle("hidden", researchView);
-    $("model-gate-notice").classList.toggle("hidden", researchView || !$("model-gate-notice").textContent);
+    $("model-gate-notice").classList.toggle("hidden", researchView || state.view === "retest" || state.signalScope === "retest" || !$("model-gate-notice").textContent);
     // The embedded VLM owns its chart, references and history refresh actions.
     $("refresh-button").classList.toggle("hidden", state.view === "vision");
     $("refresh-button").setAttribute("aria-label", researchView ? `刷新${titles[state.view][0]}` : "立即刷新监控数据");
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
     $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
-    $("signal-source-scope").classList.toggle("hidden", state.view === "warmup");
+    $("signal-source-scope").classList.toggle("hidden", state.view === "warmup" || state.signalScope === "retest");
     $("signal-scope-note").classList.toggle("hidden", state.view === "warmup");
     $("warmup-notice").classList.toggle("hidden", state.view !== "warmup");
     document.title = `spike · ${titles[state.view][0]}`;
@@ -289,7 +313,7 @@
       window.scrollTo?.({ top: 0, behavior: "auto" });
       $("main").focus?.({ preventScroll: true });
     }
-    if (researchView || state.view === "shadow") refreshShellStatus();
+    if (researchView || state.view === "shadow" || state.view === "notifications") refreshShellStatus();
     const changesWarmupScope = previousView === "warmup" || state.view === "warmup";
     const entersSignalView = !signalView(previousView) && signalView(state.view);
     if (changesWarmupScope || entersSignalView) {
@@ -301,12 +325,15 @@
     window.SpikePlatform?.setActive(state.view === "platform");
     window.SpikeManual?.setActive(state.view === "manual");
     window.SpikeCopier?.setActive(state.view === "copier");
+    window.SpikeKnowledge?.setView(state.view);
     window.SpikeModels?.setActive(state.view === "models");
     window.SpikeDatasets?.setActive(state.view === "datasets");
     window.SpikeStrategies?.setActive(state.view === "strategies");
     window.SpikePaper?.setActive(state.view === "paper");
     window.SpikeYolo?.setActive(state.view === "yolo");
     window.SpikeVisionModule?.setActive(state.view === "vision").catch(() => {});
+    window.SpikeNotifications?.setActive(state.view === "notifications");
+    window.SpikeV130?.setActive(state.view === "retest");
     $("research-error").classList.add("hidden");
     if (state.view === "system") loadHealth();
     // Signals never load the expensive market overview.  Watch opts in once.
@@ -344,8 +371,8 @@
     rsi_seventh_reverse_next_open: "RSI 第7个空头大菱形 · 全平" };
   const RSI_GLOBAL_LINES_BASIS = "v11_2_box_joint_rsi7_same_tf_streak_next_open_v1_net_cost";
   const RSI_LINES_BASIS = "v11_2_box_joint_rsi7_since_entry_same_tf_streak_next_open_v2_net_cost";
-  const linesSnapshot = () => ["baseline", "previous"].includes(state.lines.ledger?.selected_performance_version);
-  const linesSnapshotName = () => state.lines.ledger?.selected_performance_version === "previous" ? "修正前全局计数快照" : "原价格退出快照";
+  const linesSnapshot = () => ["baseline", "previous", "legacy"].includes(state.lines.ledger?.selected_performance_version);
+  const linesSnapshotName = () => state.lines.ledger?.selected_performance_version === "legacy" ? "V11.2 升级前记录" : state.lines.ledger?.selected_performance_version === "previous" ? "上一版退出快照" : "原价格退出快照";
   function rsiProgress(p) {
     if (p.performance_version !== RSI_LINES_BASIS && p.basis !== RSI_LINES_BASIS) return "";
     if (p.rsi_exit_pending) return " · 第7个空头大菱形已确认，待次根开盘全平";
@@ -394,17 +421,38 @@
       ? (item.source !== "higher" ? lineFacts(item, "本周期线", item.tick) : "") + (higher ? lineFacts(item.higher_line, "上级线", item.tick) : "")
       : lineFacts(item, "突破的线", item.tick);
     const delay = finite(item.detect_delay_ms) && item.display_state !== "history" ? ` · 收盘后 ${escapeHTML(duration(Math.max(0, Number(item.detect_delay_ms))))} 发现` : "";
-    return `<article class="shadow-event-card lines-card long ${stateClass}${outcome ? " " + outcome.className : ""}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span>${performance}<dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>${manualObservationButton({...item, side: item.side || "long"})}</article>`;
+    return `<article class="shadow-event-card lines-card long ${stateClass}${outcome ? " " + outcome.className : ""}${item.is_fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-line-id="${escapeHTML(item.id)}" data-tradingview-action="lines" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在${tradingViewTargetLabel()} 打开" aria-label="在${tradingViewTargetLabel()} 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">↑ ${escapeHTML(title)}</span><span class="shadow-v8-badge ${stateClass}">${item.is_fresh ? "新 · " : ""}${escapeHTML(stateName)}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span>${performance}${jointReceiptsHTML(item)}<dl class="shadow-event-facts">${facts}${geometry}</dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))} 收盘${delay}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>${manualObservationButton({...item, side: item.side || "long"})}</article>`;
+  }
+  function jointNotificationText(channels) {
+    if (!channels || !Object.keys(channels).length) return "已收盘 K 线 · 通知状态同步中 · 不下单";
+    const parts = ["bark", "telegram"].map((channel) => {
+      const value = channels[channel], name = channel === "bark" ? "Bark" : "TG";
+      if (!value?.configured) return `${name} 未配置`;
+      if (!value.enabled || value.activated_ms == null) return `${name} 待启用`;
+      return `${name} 已启用 · 成功 ${number(value.sent || 0)}${value.pending ? ` · 待发 ${number(value.pending)}` : ""}${value.unknown ? ` · 结果未知 ${number(value.unknown)}` : ""}${value.failed ? ` · 失败 ${number(value.failed)}` : ""}`;
+    });
+    return `${parts.join("；")} · 仅通知启用后新信号，收盘30分钟内 · 不下单`;
+  }
+  function jointReceiptsHTML(item) {
+    if (item.kind !== "joint" || linesSnapshot()) return "";
+    const labels = { sent: "已发送", pending: "待发送", sending: "发送中", unknown: "结果未知", failed: "发送失败", skipped: "已跳过", history: "未推送" };
+    return `<span class="notification-stack">${["bark", "telegram"].map((channel) => {
+      const value = item.notifications?.[channel]?.status || "history";
+      const label = value === "sent" ? "服务已接受" : labels[value] || "未推送";
+      return `<span class="row-status ${value === "sent" ? "sent" : "muted"}">${channel === "bark" ? "Bark" : "TG"} · ${escapeHTML(label)}</span>`;
+    }).join("")}</span>`;
   }
   function renderLines() {
     const lines = state.lines;
     const kind = lines.kind || (state.view === "joints" ? "joint" : "break");
     const status = lines.status || {};
     const configured = status.configured === true;
-    $("lines-policy-title").textContent = kind === "joint" ? "SPIKE V11.2 · 突破+spike（多头框内）" : "SPIKE V11.2 · 趋势线突破";
+    const lineVersion = linesSnapshot() ? "SPIKE V11.2 · 旧版归档" : "SPIKE V12.8";
+    $("lines-policy-title").textContent = `${lineVersion} · ${kind === "joint" ? "突破+spike" : "趋势线突破"}`;
+    $("lines-policy-text").textContent = kind === "joint" ? jointNotificationText(status.notifications) : "已收盘 K 线 · 与回测同一套代码 · 只显示 · 不推送 · 不下单";
     $("lines-rule-note").textContent = kind === "joint"
       ? "上级：15m 看 1H，30m 看 2H，1H 看 4H，4H 看日线 · 每个 V9 框只算第一次"
-      : "只看本周期自己的线 · 与 TV 指标同一套三点线规则";
+      : "本周期主高点与局部触点结构 · 已收盘确认";
     const policyVersion = lines.ledger?.basis || status.performance_policy?.version;
     const rsiPolicy = policyVersion === RSI_LINES_BASIS;
     $("lines-exit-rule").classList.toggle("hidden", kind !== "joint");
@@ -415,7 +463,9 @@
       : rsiPolicy
         ? "退出：从本仓开仓后开始计数 · 同周期大菱形连续同色、异色重置 · 第7个空头大菱形收盘确认，次根开盘全平 · 原保护先触发先退出"
         : policyVersion === RSI_GLOBAL_LINES_BASIS ? "旧全局计数仍在运行 · 正在修正为从本仓开仓后计数"
-          : "退出：原止损、4ATR跟随保护、V9反向退出 · 等待退出规则同步";
+          : status.protocol === "spike-v128-lines-monitor-v1"
+            ? "V12.8：原止损、2R启动4ATR跟随保护、原始反向确认退出 · 模拟参考"
+            : "退出：原止损、4ATR跟随保护、V9反向退出 · 等待退出规则同步";
     $("lines-timeframes").innerHTML = ["all", ...LINE_TIMEFRAMES[kind]].map((tf) => `<button type="button" data-lines-timeframe="${tf}" class="${lines.timeframe === tf ? "selected" : ""}" aria-pressed="${lines.timeframe === tf}">${tf === "all" ? "全部" : escapeHTML(timeframeLabel(tf))}</button>`).join("");
     $("lines-stats").classList.toggle("hidden", kind !== "joint");
     $("lines-ledger-filters").classList.toggle("hidden", kind !== "joint");
@@ -534,7 +584,7 @@
     }
     if (item?.source === "replay") return ["历史回放不通知", "muted"];
     const value = String(item[channel === "bark" ? "bark_notification_status" : "notification_status"] || "").toLowerCase();
-    if (["sent", "delivered", "success"].includes(value)) return [channel === "bark" ? "服务已接受" : "已发送", "sent"];
+    if (["sent", "delivered", "success"].includes(value)) return ["服务已接受", "sent"];
     if (["failed", "error", "dead"].includes(value)) return ["发送失败", "failed"];
     if (value === "unknown") return ["回执未知", "pending"];
     if (channel === "bark" && isDisplayOnly(item)) return [DISPLAY_ONLY_NOTE, "muted"];
@@ -550,7 +600,7 @@
     return notificationChannels().map((channel) => {
       const [label, className] = notification(item, channel);
       const name = channel === "bark" ? "Bark" : "TG";
-      const description = channel === "bark" && className === "sent" ? "Bark 服务已接受推送，不代表手机已收到或已读" : `${name} · ${label}`;
+      const description = className === "sent" ? `${name} 服务已接受推送，不代表手机已收到或已读` : `${name} · ${label}`;
       const policyNote = channel === "bark" && isDisplayOnly(item) && label !== DISPLAY_ONLY_NOTE ? `<span class="candidate-notice">当前${DISPLAY_ONLY_NOTE}</span>` : "";
       return `<span class="row-status ${className}" data-notification-channel="${channel}" title="${escapeHTML(description)}" aria-label="${escapeHTML(description)}"><span class="notification-channel">${name}</span><span>${escapeHTML(label)}</span></span>${policyNote}`;
     }).join("");
@@ -581,7 +631,7 @@
     if (!performance || !["active", "profit", "loss", "breakeven"].includes(performance.status)) return {
       className: "outcome-unknown", badge: "仅入场参考", value: "—", valueLabel: "当前 R",
       peak: "—", stop: finite(originalSignal(item)?.initial_stop) ? price(originalSignal(item).initial_stop) : "—",
-      stopLabel: "初始 SL", note: "V9 暂不计算持仓路径 R",
+      stopLabel: "初始 SL", note: "持仓路径暂不可用",
     };
     const status = String(performance.status || "active");
     const outcomeR = status === "active" ? performance.current_r : performance.exit_r;
@@ -601,10 +651,12 @@
     const loaded = Boolean(data), total = data?.total || 0;
     const confirmed = state.signalScope === "confirmed", warmup = state.view === "warmup";
     $("filtered-count").textContent = loaded ? `${number(total)} 条` : "—";
-    $("signal-section-title").textContent = confirmed ? "YOLO 补充确认" : "V9 启动 · 多空";
-    $("signal-scope-note").textContent = confirmed
-      ? "YOLO 追加确认关联原始 V9 启动，不重复计数。"
-      : "V9 多空过滤后启动；价格与止损为确认收盘参考，暂不计算持仓路径 R。";
+    const retest = state.signalScope === "retest" && !warmup;
+    $("signal-section-title").textContent = retest ? "V13.1 回踩确认 · 多空" : confirmed ? "YOLO 补充确认" : signalQuerySource() === "legacy" ? "V9 旧版记录 · 多空" : "V12.8 启动 · 多空";
+    $("signal-scope-note").textContent = retest
+      ? "突破 → 回踩守住 → 再突破收盘确认；次开盘参考、原止损，最多等待 24 根。价格与 R 为信号参考。"
+      : confirmed ? "YOLO 追加确认关联原始 SPIKE 启动，不重复计数。"
+      : signalQuerySource() === "legacy" ? "升级前的 V9 记录，结果停止更新，保留通知回执，不作为 V12.8 信号。" : "V12.8 默认规则；15m 收盘须符合已完成 H1 SMA60 方向。价格与 R 为信号参考。";
     $("signal-window-note").textContent = loaded ? `全量 ${number(total)} 条 · 第 ${state.page + 1} 页` : "正在读取全量统计";
     $("load-more-signals").classList.toggle("hidden", !data?.has_more);
     $("load-more-signals").disabled = state.syncing;
@@ -626,6 +678,18 @@
   }
   function renderLedgerStats() {
     const data = state.ledger, stats = data?.stats;
+    // Unknown outcomes belong in the denominator; an untracked cohort cannot
+    // establish that zero positions are active or closed. Use full-cohort
+    // statistics, never the current page of cards, to make this distinction.
+    const unknownCount = (row) => row ? numeric(row.unknown, Math.max(0, row.total - row.active - row.closed)) : 0;
+    const allUnknown = (row) => row?.total > 0 && unknownCount(row) === row.total;
+    const unavailable = allUnknown(stats), empty = stats?.total === 0;
+    const unknown = unknownCount(stats);
+    const notice = $("stats-availability");
+    notice.classList.toggle("hidden", !stats || unknown === 0);
+    notice.textContent = unavailable && state.status?.protocol === "spike-burst-v128-yolo-confirmation-v1"
+      ? `这 ${number(unknown)} 条 SPIKE 信号仅记录入场参考，尚未跟踪持仓与退出；运行状态、R 和胜率暂不可用。`
+      : `${number(unknown)} 条信号的持仓或退出状态未知，未计入运行中、已结束及胜率；未知不代表没有持仓。`;
     const setR = (id, value) => {
       const node = $(id);
       node.textContent = signedR(value);
@@ -634,39 +698,41 @@
     };
     setR("stats-realized", stats?.realized_r);
     setR("stats-floating", stats?.floating_r);
-    $("stats-closed-note").textContent = stats ? `${stats.measured_closed} 笔有 R / ${stats.closed} 笔已结束` : "等待统计";
-    $("stats-active-note").textContent = stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔运行中` : "等待统计";
+    $("stats-closed-note").textContent = unavailable ? "退出状态未知 · 暂无退出 R" : empty ? "当前筛选无信号" : stats ? `${stats.measured_closed} 笔有 R / ${stats.closed} 笔已结束` : "等待统计";
+    $("stats-active-note").textContent = unavailable ? "持仓状态未知 · 暂无浮动 R" : empty ? "当前筛选无信号" : stats ? `${stats.measured_active} 笔有 R / ${stats.active} 笔运行中` : "等待统计";
     $("stats-winrate").textContent = finite(stats?.win_rate) ? `${(stats.win_rate * 100).toFixed(1)}%` : "—";
-    $("stats-win-note").textContent = stats ? `盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}` : "只统计有退出 R 的信号";
+    $("stats-win-note").textContent = unavailable ? "暂无可计算胜率的退出记录" : empty ? "当前筛选无信号" : stats ? `盈利 ${stats.profit} · 亏损 ${stats.loss} · 保本 ${stats.breakeven}` : "只统计有退出 R 的信号";
     $("stats-total").textContent = stats ? number(stats.total) : "—";
-    $("stats-side-note").textContent = stats ? `多 ${stats.long} · 空 ${stats.short} · 缺 R ${stats.missing_r}` : "按原始启动去重";
+    $("stats-side-note").textContent = stats ? `多 ${stats.long} · 空 ${stats.short} · 状态未知 ${unknown}${unavailable ? "" : ` · 缺 R ${stats.missing_r}`}` : "每次确认计一条";
     const cellR = (r) => `<td class="${finite(r) && r > 0 ? "r-positive" : finite(r) && r < 0 ? "r-negative" : ""}">${escapeHTML(signedR(r))}</td>`;
-    $("stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(row.timeframe)}</th><td>${row.total}</td><td>${row.active}</td><td>${row.closed}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
+    $("stats-timeframes").innerHTML = (data?.by_timeframe || []).map((row) => `<tr><th scope="row">${escapeHTML(row.timeframe)}</th><td>${row.total}</td><td>${allUnknown(row) ? "—" : row.active}</td><td>${allUnknown(row) ? "—" : row.closed}</td><td>${unknownCount(row)}</td>${cellR(row.realized_r)}${cellR(row.floating_r)}<td>${finite(row.win_rate) ? `${(row.win_rate * 100).toFixed(1)}%` : "—"}</td></tr>`).join("");
     $("stats-basis").textContent = `按原始信号收盘日归属 · 北京时间 · 周一开始 · 全部筛选条件生效 · ${state.errors[sourceKey()] ? "同步失败，保留上次快照" : data ? `更新 ${clockTime(data.as_of_ms)}` : "等待同步"}`;
   }
   function manualObservationButton(item) {
     if (!/^[A-Z0-9]{2,24}-USDT-SWAP$/.test(item.symbol || "") || !["long", "short"].includes(item.side)) return "";
     const ref = `${item.kind || "signal"}:${item.id} · ${item.source || "live"} · bar_close_ms=${item.bar_close_ms ?? "unknown"}`;
-    return `<button type="button" class="research-button manual-observe-button" data-manual-observe data-manual-symbol="${escapeHTML(item.symbol)}" data-manual-side="${escapeHTML(item.side)}" data-manual-timeframe="${escapeHTML(timeframeLabel(item.timeframe))}" data-manual-ref="${escapeHTML(ref)}">加入个人观察</button>`;
+    return `<button type="button" class="research-button manual-observe-button" data-manual-observe data-manual-symbol="${escapeHTML(item.symbol)}" data-manual-side="${escapeHTML(item.side)}" data-manual-timeframe="${escapeHTML(timeframeLabel(item.timeframe))}" data-manual-ref="${escapeHTML(ref)}">按个人原则看这笔</button>`;
   }
   function signalCardHTML(item, now = signalClock()) {
     const confirmed = isConfirmed(item), original = originalSignal(item), direct = directReceipt(item);
     const side = item.side === "short" ? "short" : item.side === "long" ? "long" : "neutral";
     const venue = String(item.venue || "OKX").toUpperCase();
     const fresh = isFresh(item, now);
-    const status = confirmed ? "YOLO 补充确认" : "V9 启动", caption = "信号收盘价";
+    const retest = isRetest(item);
+    const status = retest ? "V13.1 回踩确认" : confirmed ? "YOLO 补充确认" : `${signalVersion(item)} 启动`, caption = retest ? "确认收盘价" : "信号收盘价";
     const outcome = performanceView(item);
-    return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${outcome.badge}，${shortDate(item.bar_close_ms)}，在本机 TradingView 打开`)}"></button>
+    return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在${tradingViewTargetLabel()} 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${outcome.badge}，${shortDate(item.bar_close_ms)}，在${tradingViewTargetLabel()} 打开`)}"></button>
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
-      <span class="signal-card-direction"><span class="card-direction-group"><span class="card-direction"><span class="direction-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${side === "short" ? "m3 6 6 6 4-4 8 10M15 18h6v-6" : side === "long" ? "m3 18 6-6 4 4 8-10M15 6h6v6" : "M5 12h14"}"/></svg></span><span class="direction-name">${sideName(item.side)}</span></span><span class="direction-stage">${confirmed ? "确认" : "启动"}</span></span><span class="card-recency">${isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
-      <span class="model-card-status"><span class="model-badge ${confirmed ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
+      <span class="signal-card-direction"><span class="card-direction-group"><span class="card-direction"><span class="direction-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${side === "short" ? "m3 6 6 6 4-4 8 10M15 18h6v-6" : side === "long" ? "m3 18 6-6 4 4 8-10M15 6h6v6" : "M5 12h14"}"/></svg></span><span class="direction-name">${sideName(item.side)}</span></span><span class="direction-stage">${confirmed || retest ? "确认" : "启动"}</span></span><span class="card-recency">${displayScope(item) === "legacy" ? "V9 旧版记录" : isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
+      <span class="model-card-status"><span class="model-badge ${confirmed || retest ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${retest ? `等待 ${escapeHTML(number(item.wait_bars))} 根 · ${finite(item.trail_atr) ? `${escapeHTML(item.trail_atr)}ATR 追踪` : "已收盘"}` : displayScope(item) === "legacy" ? "旧版归档 · 不补发" : isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
       <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
-      ${confirmed && item.indicator ? `<span class="card-origin">V9 ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
+      ${retest && finite(item.anchor_close_ms) ? `<span class="card-origin">原启动 ${escapeHTML(shortDate(item.anchor_close_ms))} · 回踩 ${escapeHTML(shortDate(item.retest_close_ms))}</span>` : ""}
+      ${confirmed && item.indicator ? `<span class="card-origin">${signalVersion(original)} ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="performance-badge">${escapeHTML(outcome.badge)}</span>
       <dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl>
       <span class="performance-note">${escapeHTML(outcome.note)} · 信号收盘参考，并非账户实际成交</span>
-      <span class="card-context"><span>${"信号 K 线"}</span><strong>${item.is_closed ? "V9 已确认" : "待确认"}</strong></span>
-      <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
+      <span class="card-context"><span>${"信号 K 线"}</span><strong>${item.is_closed ? `${signalVersion(item)} 已确认` : "待确认"}</strong></span>
+      <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : item.entry_reference === "next_open_reference_not_fill" ? "次开盘参考 · 非实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
       <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
       ${manualObservationButton(item)}
     </article>`;
@@ -723,7 +789,7 @@
     $("watch-rows").innerHTML = items.slice(0, state.watchLimit).map((item) => {
       const valid = !state.errors.markets && !item.error && !item.stale && item.ready !== false;
       const phaseClass = state.errors.markets ? "stale" : item.error ? "error" : item.stale ? "stale" : item.ready === false ? "loading" : item.focus === true ? "ready" : "";
-      return `<article class="watch-card"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
+      return `<article class="watch-card"><button type="button" class="card-primary-action" data-tradingview-action="watch" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在${tradingViewTargetLabel()} 打开" aria-label="在${tradingViewTargetLabel()} 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(quoteSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}，${escapeHTML(marketPhase(item))}"></button>
         <span class="watch-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
         <span class="watch-card-phase"><span class="phase-badge ${phaseClass}" title="${escapeHTML(item.error || (item.stale ? "当前保留过期行情，等待更新" : "当前结构尚不是启动信号"))}">${escapeHTML(state.errors.markets ? "缓存 · 待同步" : marketPhase(item))}</span><span class="card-status">${!valid ? "等待更新" : item.focus ? "已达蓄势门槛" : "观察中"}</span></span>
         <span class="watch-card-run"><strong>${valid ? escapeHTML(number(item.near_zero_bars)) : "—"}<small> 根</small></strong><span>当前近零蓄势</span></span>
@@ -779,7 +845,7 @@
     $("shadow-rows").innerHTML = events.map((item) => {
       const side = shadowSide(item.side);
       const admitted = item.v8_admitted === true;
-      return `<article class="shadow-event-card ${side} ${admitted ? "admitted" : "filtered"}"><button type="button" class="card-primary-action" data-shadow-id="${escapeHTML(item.id)}" data-tradingview-action="shadow" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在本机 TradingView 打开" aria-label="在本机 TradingView 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">${sideArrow(side)} ${sideName(side)} · V7</span><span class="shadow-v8-badge ${admitted ? "admitted" : "filtered"}">${admitted ? "V8 保留" : "V8 过滤"}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts"><div><dt>距六线边缘</dt><dd>${finite(item.rope_distance_atr) ? `${Number(item.rope_distance_atr).toFixed(2)} ATR` : "—"}</dd></div><div><dt>V8 原因</dt><dd>${admitted ? "未过热" : "超过 3 ATR"}</dd></div></dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
+      return `<article class="shadow-event-card ${side} ${admitted ? "admitted" : "filtered"}"><button type="button" class="card-primary-action" data-shadow-id="${escapeHTML(item.id)}" data-tradingview-action="shadow" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在${tradingViewTargetLabel()} 打开" aria-label="在${tradingViewTargetLabel()} 打开 ${escapeHTML(shortSymbol(item.symbol))} ${escapeHTML(timeframeLabel(item.timeframe))}"></button><span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>OKX · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span><span class="signal-card-direction"><span class="card-direction">${sideArrow(side)} ${sideName(side)} · V7</span><span class="shadow-v8-badge ${admitted ? "admitted" : "filtered"}">${admitted ? "V8 保留" : "V8 过滤"}</span></span><span class="card-price-label">信号收盘价</span><span class="card-price">${escapeHTML(price(item.close))}</span><dl class="shadow-event-facts"><div><dt>距六线边缘</dt><dd>${finite(item.rope_distance_atr) ? `${Number(item.rope_distance_atr).toFixed(2)} ATR` : "—"}</dd></div><div><dt>V8 原因</dt><dd>${admitted ? "未过热" : "超过 3 ATR"}</dd></div></dl><span class="card-footer"><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span></article>`;
     }).join("");
     renderTradingViewButtons();
     if (focusedId) Array.from($("shadow-rows").querySelectorAll("[data-shadow-id]"))
@@ -818,9 +884,17 @@
     $("local-light").classList.toggle("online", online);
     if (!status) $("sidebar-runtime").textContent = state.errors.status ? "连接中断 · 自动重连" : "正在连接服务";
     if (!status) return;
+    if ($("strategy-version")) $("strategy-version").textContent = status.runtime?.v130 ? "SPIKE V13.1" : status.protocol?.includes("v128") ? "SPIKE V12.8" : "SPIKE V9 · 等待升级";
     const scan = status.scan || {};
     const counts = status.counts || {};
-    const bark = status.bark;
+    const jointBark = status.joint_notifications?.bark;
+    const bark = status.bark ? { ...status.bark,
+      sent: numeric(status.bark.sent) + numeric(jointBark?.sent),
+      pending: numeric(status.bark.pending) + numeric(jointBark?.pending),
+      unknown: numeric(status.bark.unknown) + numeric(jointBark?.unknown),
+      failed: numeric(status.bark.failed) + numeric(jointBark?.failed),
+      last_success_ms: Math.max(numeric(status.bark.last_success_ms), numeric(jointBark?.last_success_ms)) || null,
+    } : jointBark;
     const runtime = status.runtime || {};
     const timeframes = Array.isArray(runtime.timeframes) ? runtime.timeframes : [];
     if (state.view === "signals") $("page-description").textContent = notificationPolicy();
@@ -829,8 +903,9 @@
     const directTimeframes = runtimeTimeframes("direct_timeframes");
     const directScopeTimeframes = $("direct-scope-timeframes");
     if (directScopeTimeframes) directScopeTimeframes.textContent = directTimeframes ? directTimeframes.map(timeframeLabel).join(" / ") : "周期待同步";
-    $("metric-signals").textContent = twoStage() ? number(counts.indicator_starts_24h) : "—";
-    $("nav-signal-count").textContent = twoStage() ? number(counts.indicator_starts_24h) : "—";
+    const retestCount = runtime.v130?.signals_24h;
+    $("metric-signals").textContent = finite(retestCount) ? number(retestCount) : "—";
+    $("nav-signal-count").textContent = finite(retestCount) ? number(retestCount) : "—";
     $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
@@ -844,7 +919,7 @@
       : total > 0 && complete >= total
         ? `已扫描 ${number(complete)} / ${number(total)} · 已覆盖，按收盘刷新`
         : "扫描状态待同步";
-    $("metric-signals-detail").textContent = modelProtocol() ? `另有 ${number(counts.signals_24h)} 条 YOLO 追加确认` : "模型口径待同步";
+    $("metric-signals-detail").textContent = "回踩再突破 · 已收盘确认";
     $("metric-scan-detail").textContent = scanning ? `扫描 ${number(complete)} / ${number(total)}` : scan.finished_at_ms ? `${ageLabel(scan.finished_at_ms)}更新` : "等待扫描";
     $("sidebar-runtime").textContent = online ? status.started_at_ms ? `已运行 ${duration(Date.now() - Number(status.started_at_ms))}` : "服务运行中" : "连接中断 · 自动重连";
     const scanDegraded = scan.status === "degraded" || scanErrorCount > 0;
@@ -858,8 +933,12 @@
     ]);
     const barkReady = Boolean(bark?.configured && bark?.enabled);
     const barkProblem = numeric(bark?.failed) > 0 || numeric(bark?.unknown) > 0;
-    $("bark-header").textContent = !bark ? "Bark · 待接入" : barkReady ? barkProblem ? "Bark · 异常" : "Bark · 已启用" : "Bark · 未启用";
+    $("bark-header").textContent = !bark ? "Bark · 待接入" : barkReady ? barkProblem ? `Bark · ${number(numeric(bark.failed) + numeric(bark.unknown))} 条待核实` : "Bark · 已启用" : "Bark · 未启用";
     $("bark-header").classList.toggle("good", barkReady && !barkProblem);
+    const telegramAvailable = notificationChannels().includes("telegram");
+    $("telegram-header").textContent = telegramAvailable ? "TG · 来源订阅已接入" : status.telegram?.configured ? "TG · 待启用" : "TG · 状态待同步";
+    $("telegram-header").classList.toggle("good", telegramAvailable);
+    $("joint-notification-facts").textContent = jointNotificationText(status.joint_notifications);
     $("bark-state-badge").textContent = !bark ? "状态待接入" : barkReady ? barkProblem ? "需检查发送结果" : "通知已启用" : bark.configured ? "通知已关闭" : "尚未配置";
     $("bark-state-badge").className = `neutral-badge ${barkReady && !barkProblem ? "good" : "warn"}`;
     $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? `${notificationPolicy()}${numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。" : ""}服务已接受不代表手机已收到或已读。` : bark.configured ? "Bark 已配置，当前发送开关关闭；前端继续记录信号。" : "Bark 尚未配置；前端继续记录信号。";
@@ -870,20 +949,21 @@
     if (runtime.host) runtimeFacts.push(["主机", runtime.host === "This Mac" ? "Mac（扫描与推送）" : runtime.host]);
     if (runtime.pid) runtimeFacts.push(["进程", runtime.pid]);
     if (runtime.data_dir) runtimeFacts.push(["数据位置", runtime.data_dir]);
-    if (runtime.signal_mode || runtime.strategy || status.strategy) runtimeFacts.push(["信号规则", runtime.signal_mode || runtime.strategy || status.strategy]);
+    const signalMode = runtime.signal_mode || runtime.strategy || status.strategy;
+    if (signalMode) runtimeFacts.push(["信号规则", String(signalMode).replace("Bark 启动与 YOLO 追加确认", "通知来源由通知中心配置")]);
     if (runtime.higher_mode) runtimeFacts.push(["高周期规则", runtime.higher_mode]);
     const gate = runtime.model_gate || {};
     const gateImpact = twoStage() ? `指标启动记录独立运行；仅 YOLO 追加确认需要模型通过。${notificationPolicy()}` : "模型确认通知暂不可用，候选保留等待。";
     const gateIdle = gate.status === "idle" && gate.loaded !== true && Number(gate.queue_depth || 0) === 0;
-    const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格V9 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；V9 启动不受影响。${gateImpact}` : "";
+    const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格 V12.8 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；V12.8 启动不受影响。${gateImpact}` : "";
     $("model-gate-notice").textContent = gateNotice;
-    $("model-gate-notice").classList.toggle("hidden", workspaceView() || !gateNotice);
+    $("model-gate-notice").classList.toggle("hidden", workspaceView() || state.view === "retest" || state.signalScope === "retest" || !gateNotice);
     runtimeFacts.push(["模型检测", gate.last_error ? "检测异常 · 暂无模型确认" : gate.loaded === true ? "已加载" : "等待加载"]);
     runtimeFacts.push(["通知阶段", notificationPolicy()]);
     if (gate.profile_id || gate.profile) runtimeFacts.push(["模型配置", gate.profile_id || gate.profile]);
     if (gate.last_error) runtimeFacts.push(["模型异常", String(gate.last_error)]);
     if (finite(gate.queue_depth ?? gate.queue)) runtimeFacts.push(["模型待检测", number(gate.queue_depth ?? gate.queue)]);
-    runtimeFacts.push(["确认方式", "原箭头出现后，在等待窗口内检测同一段结构"]);
+    runtimeFacts.push(["确认方式", "后台信号出现后，在等待窗口内检测同一段结构；未核验 TradingView 图上信号"]);
     runtimeFacts.push(["主图设置快照", TV_SETTINGS]);
     runtimeFacts.push(["参数同步", "固定快照；TradingView 参数修改后，需同步更新监控配置"]);
     if (finite(runtime.fresh_minutes)) runtimeFacts.push(["新鲜信号时限", `${runtime.fresh_minutes} 分钟`]);
@@ -925,7 +1005,8 @@
     return shellStatusRequest;
   }
   function ledgerPath() {
-    const pairs = { source: signalQuerySource(), confirmation: state.signalScope === "confirmed" ? "yolo" : "raw",
+    const retest = state.signalScope === "retest" && state.view === "signals";
+    const pairs = { source: retest ? "live" : signalQuerySource(), confirmation: retest ? "retest" : state.signalScope === "confirmed" ? "yolo" : "raw",
       period: state.period, outcome: state.outcome, sort: state.sort,
       offset: state.page * SIGNAL_PAGE_SIZE, limit: SIGNAL_PAGE_SIZE, search: state.search };
     if (state.timeframe !== "all") pairs.timeframe = apiTimeframe(state.timeframe);
@@ -934,8 +1015,19 @@
   }
   async function refresh(trigger = "manual") {
     if (document.hidden && trigger === "periodic") return;
+    if (state.view === "retest") {
+      await Promise.allSettled([refreshShellStatus(trigger === "manual"), window.SpikeV130?.refresh()]);
+      return;
+    }
+    if (state.view === "notifications") {
+      const pending = [refreshShellStatus(trigger === "manual")];
+      if (trigger !== "periodic") pending.push(window.SpikeNotifications?.refresh());
+      await Promise.allSettled(pending);
+      return;
+    }
     // Research pages need the shared connection state, not the signal ledger.
     if (workspaceView() || state.view === "shadow") refreshShellStatus(trigger === "manual");
+    if (["learning", "knowledge", "content"].includes(state.view)) { if (trigger !== "periodic") await window.SpikeKnowledge?.refresh(); return; }
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
     if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
     if (state.view === "copier") { if (trigger !== "periodic") await window.SpikeCopier?.refresh(); return; }
@@ -1160,7 +1252,11 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
       event.preventDefault();
-      if (["system", "shadow", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["learning", "knowledge", "content"].includes(state.view)) {
+        $(`${state.view}-workspace`)?.querySelector('input[type="search"]')?.focus();
+        return;
+      }
+      if (["system", "shadow", "notifications", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });
@@ -1169,7 +1265,7 @@
   setView(location.hash.slice(1) || "signals", false);
   setInterval(() => { $("local-clock").textContent = clockTime(Date.now()); }, 1000);
   $("local-clock").textContent = clockTime(Date.now());
-  if (state.view !== "warmup") refresh();
+  if (state.view !== "warmup" && state.view !== "notifications") refresh();
   setInterval(() => refresh("periodic"), 15000);
   loadLinesStatus();
   setInterval(() => { if (linesView()) loadLines(); else loadLinesStatus(); }, 15000);

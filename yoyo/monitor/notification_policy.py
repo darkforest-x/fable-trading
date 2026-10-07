@@ -1,4 +1,4 @@
-"""Owner's separate display and Bark delivery scopes for both signal stages.
+"""Owner's separate Telegram and Bark delivery scopes for both V12.8 stages.
 
 Only the immutable arrow bar (OHLC/IMACD at or before close) is used for a
 direct start. Model confirmation keeps its original causal proof and cutoff.
@@ -8,9 +8,12 @@ own cutover; enabling a daily stream cannot inherit any earlier period’s cutov
 """
 import re
 
-from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_PROTOCOL,
-                          MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES)
+from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_KIND, MODEL_PROTOCOL,
+                          MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES, BARK_ARM_KEY)
+from yoyo.monitor.joint_notifications import JOINT_POLICY, is_joint_event
 from yoyo.monitor.policy import finite, is_model_signal, is_tv_start, is_v1_short_display_signal
+from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
+                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
 
 
 def arm_v9_bark(store, activated_ms):
@@ -20,7 +23,7 @@ def arm_v9_bark(store, activated_ms):
     caller supplies the synchronized exchange clock before scanning a new bar;
     pre-cutover rows remain history and are never enqueued retrospectively.
     """
-    key = "notification_policy:v9_bark_arm"
+    key = BARK_ARM_KEY
     existing = store.get_meta(key)
     # A later owner-authorized timeframe needs its own fresh boundary. Keep
     # the original arm receipt immutable: the history UI relies on that date.
@@ -35,7 +38,42 @@ def arm_v9_bark(store, activated_ms):
     if existing is not None:
         return existing
     receipt = {"activated_ms": int(activated_ms), "protocols": [DIRECT_POLICY, MODEL_PROTOCOL],
-               "timeframes": list(BARK_TIMEFRAMES), "telegram": "disabled"}
+               "timeframes": list(BARK_TIMEFRAMES), "channel": "bark"}
+    store.set_meta(key, receipt)
+    return receipt
+
+
+def arm_v9_telegram(store, activated_ms):
+    """Create Telegram's own forward-only V12.8 cutover for both signal stages.
+
+    The receipt is distinct from Bark's immutable cutover. Repeated worker
+    starts preserve it; the first start records the synchronized exchange
+    clock and does not enqueue any existing event.
+    """
+    key = "notification_policy:v128_telegram_arm"
+    existing = store.get_meta(key)
+    if existing is not None:
+        return existing
+    if type(activated_ms) is not int or activated_ms < 0:
+        raise ValueError("invalid Telegram activation")
+    protocols = (DIRECT_POLICY, MODEL_PROTOCOL)
+    # Telegram's channel-level keys are separate from Bark. The dedicated arm
+    # receipt makes refreshing these keys a one-time cutover; the notification
+    # center adds route-specific cutovers when an owner later re-enables a topic.
+    for protocol in protocols:
+        store.activate_notification_policy(activated_ms, protocol=protocol, retire_obsolete=False)
+        # This unprefixed policy is Telegram's arm; Bark has a separate
+        # notification_policy:bark: key. Refresh it once at this new arm so an
+        # obsolete Telegram timestamp cannot authorize an older queued event.
+        policy_key = "notification_policy:" + protocol
+        policy = store.get_meta(policy_key, {})
+        policy["activated_ms"] = activated_ms
+        store.set_meta(policy_key, policy)
+        for timeframe in DIRECT_TIMEFRAMES:
+            if store.timeframe_activation(timeframe, protocol=protocol) is None:
+                store.activate_timeframe_policy(timeframe, activated_ms, protocol=protocol)
+    receipt = {"activated_ms": activated_ms, "protocols": list(protocols),
+               "timeframes": list(DIRECT_TIMEFRAMES), "channel": "telegram"}
     store.set_meta(key, receipt)
     return receipt
 
@@ -49,7 +87,8 @@ def activation(store, channel, protocol):
 
 
 def channel_enabled(store, channel):
-    return any(activation(store, channel, p) is not None for p in (MODEL_PROTOCOL, DIRECT_POLICY))
+    return any(activation(store, channel, p) is not None
+               for p in (MODEL_PROTOCOL, DIRECT_POLICY, JOINT_POLICY, V130_POLICY))
 
 
 def is_direct_start(event):
@@ -66,8 +105,71 @@ def is_direct_start(event):
     return start % step == 0 and end == start + step
 
 
+def model_candidate_error(store, event, now, channel):
+    """Check whether a raw V12.8 event may enter the independent YOLO stage.
+
+    Candidate work follows the confirmation topic's channel, timeframe and
+    subscription cutovers. It must not depend on whether the raw-start topic
+    is enabled for that same channel.
+    """
+    if channel not in ("telegram", "bark"):
+        raise ValueError("unsupported notification channel")
+    if not is_direct_start(event):
+        return "not_model_confirmed_signal"
+    timeframe = event["timeframe"]
+    if channel == "bark" and timeframe not in BARK_TIMEFRAMES:
+        return "bark_timeframe_muted_by_owner"
+    close = event["bar_close_ms"]
+    since = activation(store, channel, MODEL_PROTOCOL)
+    if since is None or close <= since:
+        return "before_bark_activation" if channel == "bark" else "before_notification_policy_activation"
+    timeframe_since = store.timeframe_activation(timeframe, protocol=MODEL_PROTOCOL)
+    if timeframe_since is None or close <= timeframe_since:
+        return "before_timeframe_activation"
+    if not 0 <= now - close <= FRESH_MS:
+        return "signal_expired"
+    # Project only the immutable raw close needed by the shared route gate.
+    # This is a policy check, not a fabricated or journaled model event.
+    route_event = {"protocol": MODEL_PROTOCOL, "kind": MODEL_KIND, "bar_close_ms": close,
+                   "indicator": {"bar_close_ms": close}}
+    return _routing_error(store, route_event, now, channel)
+
+
 def delivery_error(store, event, now, channel):
     """Return a stable rejection code, or None for a currently deliverable leg."""
+    if is_joint_event(event):
+        protocol = JOINT_POLICY
+        closes = (event["bar_close_ms"],)
+        detected = event["detected_at_ms"]
+        if not (closes[0] <= detected <= now and now - closes[0] <= FRESH_MS and now - detected <= FRESH_MS):
+            return "signal_expired"
+        since = activation(store, channel, protocol)
+        if since is None or closes[0] <= since:
+            return "before_bark_activation" if channel == "bark" else "before_notification_policy_activation"
+        # Joint streams have per-channel timeframes.  Old V9 stores retain
+        # their existing shared-timeframe interface and never take this path.
+        timeframe_since = store.timeframe_activation(event["timeframe"], protocol=protocol, channel=channel)
+        if timeframe_since is None or closes[0] <= timeframe_since:
+            return "before_timeframe_activation"
+        return _routing_error(store, event, now, channel)
+    if event.get("protocol") == V130_PROTOCOL or event.get("kind") == V130_KIND:
+        if channel not in ("telegram", "bark"):
+            raise ValueError("unsupported notification channel")
+        if not is_v130_signal(event):
+            return "not_v130_retest_signal"
+        close = event["bar_close_ms"]
+        detected = event["detected_at_ms"]
+        # Causality, freshness and channel cutovers are anchored only to the
+        # final closed retest confirmation.  The anchor may be hours older.
+        if not close <= detected <= now or not 0 <= now - close <= FRESH_MS:
+            return "signal_expired"
+        since = activation(store, channel, V130_POLICY)
+        if since is None or close <= since:
+            return "before_notification_policy_activation"
+        timeframe_since = store.timeframe_activation(event["timeframe"], protocol=V130_POLICY)
+        if timeframe_since is None or close <= timeframe_since:
+            return "before_timeframe_activation"
+        return _routing_error(store, event, now, channel)
     # Recheck at the sender boundary: a durable queue may predate withdrawal.
     if is_v1_short_display_signal(event):
         return "short_display_only"
@@ -91,8 +193,15 @@ def delivery_error(store, event, now, channel):
         return "before_timeframe_activation"
     if not 0 <= now - event["bar_close_ms"] <= FRESH_MS:
         return "signal_expired"
-    return None
+    return _routing_error(store, event, now, channel)
 
 
-# Retain the import name for older offline fixtures; policy identity is V9.
+def _routing_error(store, event, now, channel):
+    """Apply the shared topic subscription and its channel-specific cutover."""
+    from yoyo.monitor.notification_center import routing_error
+
+    return routing_error(store, event, now, channel)
+
+
+# Retain the import name for older offline fixtures; policy identity is V12.8.
 arm_v1_bark = arm_v9_bark

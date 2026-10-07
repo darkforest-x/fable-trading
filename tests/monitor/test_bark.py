@@ -49,7 +49,7 @@ def test_success_uses_private_post_and_does_not_consume_telegram(tmp_path):
     assert "100.5" in kwargs["json"]["body"] and "等待 2 根" in kwargs["json"]["subtitle"]
     assert kwargs["json"]["url"] == "https://www.tradingview.com/chart/"
     assert kwargs["json"]["body"].endswith("interval=60")
-    assert "原箭头 99.5" in kwargs["json"]["body"]
+    assert "原始信号 99.5" in kwargs["json"]["body"]
     assert "YOLO 确认" in kwargs["json"]["subtitle"]
     assert store.list_events()[0]["bark_notification_status"] == "sent"
     assert store.list_events()[0]["notification_status"] == "pending"

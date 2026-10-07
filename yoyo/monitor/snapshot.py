@@ -254,7 +254,7 @@ def render_signal(event: dict, candles: list[dict]) -> bytes:
     p.polygon([(arrow_x, tip_y), (arrow_x - 7, tip_y + (12 if up else -12)),
                (arrow_x + 7, tip_y + (12 if up else -12))], "#e5b76b" if model else accent)
     if model:
-        p.text((54, 700), f"原箭头 {event['indicator']['price']:.10g}" if chinese else f"ARROW {event['indicator']['price']:.10g}", 17, "#e5b76b")
+        p.text((54, 700), f"后台信号 {event['indicator']['price']:.10g}" if chinese else f"BACKEND SIGNAL {event['indicator']['price']:.10g}", 17, "#e5b76b")
         p.text((1026, 700), f"模型确认 {event['price']:.10g}" if chinese else f"MODEL CONFIRMED {event['price']:.10g}", 17, "#ad8bde", "rt")
     target_y = py(bars[-1]["c"])
     p.line([(target_x + 6, target_y), (923, target_y)], accent, 1.2)

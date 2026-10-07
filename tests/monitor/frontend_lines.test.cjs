@@ -37,7 +37,7 @@ function harness(fetchImpl = async () => response({})) {
     document: { getElementById: getElement, querySelectorAll: () => [] } };
   vm.runInNewContext(`${app.slice(0, cutoff)}
     renderErrors = () => {};
-    globalThis.__client = { state, loadLines, renderLines, renderLinesStats, linePerformanceView, rsiProgress, changeLinesPerformanceVersion };
+    globalThis.__client = { state, loadLines, renderLines, renderLinesStats, linePerformanceView, rsiProgress, changeLinesPerformanceVersion, jointReceiptsHTML };
   })();`, sandbox);
   const client = sandbox.__client;
   client.state.view = "joints";
@@ -46,6 +46,47 @@ function harness(fetchImpl = async () => response({})) {
 }
 const active = { status: "active", basis, performance_version: basis, current_r: 2.5, peak_r: 4,
   entry_price: 100, stop_price: 99, bars_held: 20, rsi_run_side: -1, rsi_run_count: 6, rsi_counter_known: true };
+
+test("V12.8 current rules and the V11.2 archive have separate identities", () => {
+  const client = harness();
+  const currentBasis = "v12_8_box_joint_original_v9_exit_next_open_serial_net_of_round_trip_cost";
+  client.state.lines.status = { configured: true, protocol: "spike-v128-lines-monitor-v1" };
+  client.state.lines.ledger = ledger({ basis: currentBasis });
+  client.renderLines();
+  assert.match(client.getElement("lines-policy-title").textContent, /V12\.8/);
+  assert.match(client.getElement("lines-exit-rule").textContent, /2R启动4ATR/);
+  assert.doesNotMatch(client.getElement("lines-exit-rule").textContent, /RSI|菱形/);
+  client.state.lines.ledger = ledger({ selected_performance_version: "legacy" });
+  client.renderLines();
+  assert.match(client.getElement("lines-policy-title").textContent, /V11\.2.*旧版归档/);
+  assert.match(client.linePerformanceView({ performance: active }).note, /不再更新/);
+});
+
+test("joint channel status never promises pushes for ordinary breakouts", () => {
+  const client = harness();
+  client.state.lines.status = { notifications: {
+    bark: { configured: true, enabled: true, activated_ms: snapshot, sent: 2 },
+    telegram: { configured: true, enabled: true, activated_ms: snapshot, sent: 1, unknown: 1 },
+  } };
+  client.renderLines();
+  assert.match(client.getElement("lines-policy-text").textContent, /Bark 已启用 · 成功 2/);
+  assert.match(client.getElement("lines-policy-text").textContent, /TG 已启用 · 成功 1 · 结果未知 1/);
+  assert.match(client.getElement("lines-policy-text").textContent, /启用后新信号，收盘30分钟内/);
+  client.state.lines.kind = "break";
+  client.renderLines();
+  assert.match(client.getElement("lines-policy-text").textContent, /只显示 · 不推送/);
+});
+
+test("joint cards show independent receipts and frozen snapshots omit current receipts", () => {
+  const client = harness();
+  const row = { kind: "joint", notifications: { bark: { status: "sent" }, telegram: { status: "unknown" } } };
+  assert.match(client.jointReceiptsHTML(row), /Bark · 服务已接受/);
+  assert.match(client.jointReceiptsHTML(row), /TG · 结果未知/);
+  assert.match(client.jointReceiptsHTML({ kind: "joint" }), /未推送/);
+  client.state.lines.performanceVersion = "baseline";
+  client.state.lines.ledger = ledger({ selected_performance_version: "baseline" });
+  assert.equal(client.jointReceiptsHTML(row), "");
+});
 
 test("ledger sends the selected version with the other filters", async () => {
   const paths = [];
@@ -125,9 +166,9 @@ test("previous global-count projection is also a frozen snapshot with an explici
   client.renderLines();
   const view = client.linePerformanceView({ performance: active });
   assert.match(view.badge, /快照时运行中/);
-  assert.match(view.note, /修正前全局计数快照，不再更新/);
+  assert.match(view.note, /上一版退出快照，不再更新/);
   assert.doesNotMatch(view.note, /入场后空头大菱形/);
-  assert.match(client.getElement("lines-exit-rule").textContent, /修正前全局计数快照/);
+  assert.match(client.getElement("lines-exit-rule").textContent, /上一版退出快照/);
 });
 
 test("the prior running global counter is not labelled as the corrected entry counter", () => {

@@ -50,7 +50,14 @@ const ticket = (overrides = {}) => ({
   ...overrides,
 });
 
+const principle = (overrides = {}) => ({
+  id: "manual-principle-aaaaaaaaaaaaaaaa", revision: 2, title: "等待条件 <script>",
+  body: "未达到自己的条件就继续等待。", category: "entry", status: "active", ...overrides,
+});
+
 const overview = (overrides = {}) => ({
+  principles: [principle()],
+  principle_templates: [{ id: "wait", title: "参考草稿", body: "先看条件", category: "entry", status: "draft" }],
   playbooks: [playbook()],
   sessions: [session()],
   tickets: [ticket()],
@@ -119,7 +126,12 @@ test("manual workspace separates real/practice and cohorts, preserves unknown Pn
   assert.equal(reads, 0);
   await h.api.setActive(true);
   assert.equal(reads, 1);
-  assert.match(h.root.innerHTML, /我的规则/);
+  assert.match(h.root.innerHTML, /01 交易原则/);
+  assert.match(h.root.innerHTML, /02 开单/);
+  assert.match(h.root.innerHTML, /03 记录与复盘/);
+  assert.match(h.root.innerHTML, /等待条件 &lt;script&gt;/);
+  assert.doesNotMatch(h.root.innerHTML, /data-manual-principle-form/);
+  click(h, "[data-manual-tab]", { manualTab: "playbooks" });
   assert.match(h.root.innerHTML, /规则 &lt;script&gt;/);
   assert.doesNotMatch(h.root.innerHTML, /<script>/);
   assert.match(h.root.innerHTML, /历史来源模板/);
@@ -243,7 +255,7 @@ test("first signal waits for data without claiming there are unsaved edits", asy
   resolveFetch(response(overview()));
   await settle();
   assert.match(h.root.innerHTML, /value="BTC-USDT-SWAP"/);
-  assert.match(h.root.innerHTML, /未保存的观察草稿/);
+  assert.match(h.root.innerHTML, /先核对自己的原则/);
   assert.doesNotMatch(h.root.innerHTML, /当前有未保存的编辑/);
 });
 
@@ -262,7 +274,7 @@ test("signal handoff keeps dirty drafts until the user explicitly switches to th
     symbol: "BTC-USDT-SWAP", side: "long", timeframe: "15m", signal_ref: "signal:7 · live · 123",
   }), true);
   assert.match(h.root.innerHTML, /已保留当前草稿和新信号/);
-  assert.match(h.root.innerHTML, /使用此信号新建观察/);
+  assert.match(h.root.innerHTML, /使用此信号准备开单/);
   click(h, "[data-manual-keep-draft]");
   assert.match(h.root.innerHTML, /value="ETH-USDT-SWAP"/);
   assert.equal(h.api.fromSignal({
@@ -271,8 +283,9 @@ test("signal handoff keeps dirty drafts until the user explicitly switches to th
   click(h, "[data-manual-use-signal]");
   assert.match(h.root.innerHTML, /value="BTC-USDT-SWAP"/);
   assert.match(h.root.innerHTML, /joint:3 · replay · 456/);
-  assert.match(h.root.innerHTML, /value="practice" selected/);
-  assert.match(h.root.innerHTML, /观察中（可不完整）/);
+  assert.match(h.root.innerHTML, /value="real" selected/);
+  assert.match(h.root.innerHTML, /正在遵守的原则/);
+  assert.doesNotMatch(h.root.innerHTML, /type="checkbox"[^>]* checked/);
 });
 
 test("version-snapshot history renders action notes and leaves missing closed PnL unknown", async () => {
@@ -304,4 +317,108 @@ test("version-snapshot history renders action notes and leaves missing closed Pn
   assert.match(h.root.innerHTML, /本人记录的保护确认（最新）/);
   assert.match(h.root.innerHTML, /本人确认保护单已设置/);
   assert.doesNotMatch(h.root.innerHTML, /r_basis/);
+});
+
+test("preparation requires current checks, then exposes navigation without recording a fill", async () => {
+  const calls = [];
+  let current = overview({ tickets: [] });
+  const h = harness(async (url, init = {}) => {
+    calls.push({ url, method: init.method || "GET", body: init.body });
+    if (url === "/api/research/manual") return response(current);
+    if (url.endsWith("/preparations")) {
+      const payload = JSON.parse(init.body);
+      const prepared = ticket({ ...payload, status: "watching", preparation: { checked_at: "2026-09-24T10:00:00Z", principles: [principle()] } });
+      current = overview({ tickets: [prepared] });
+      return response(prepared, 201);
+    }
+    throw new Error("unexpected " + url);
+  });
+  await h.api.setActive(true);
+  click(h, "[data-manual-tab]", { manualTab: "prepare" });
+  assert.doesNotMatch(h.root.innerHTML, /type="checkbox"[^>]* checked/);
+  assert.doesNotMatch(h.root.innerHTML, /href="https:\/\/www.okx.com\/trade-swap/);
+  const values = { symbol: "BTC-USDT-SWAP", side: "short", timeframe: "15m", mode: "real", notes: "清楚后再开", signal_ref: "signal:7" };
+  submit(h, form("preparation", values, { manualDraft: "preparation-new" }));
+  await settle();
+  assert.match(h.root.innerHTML, /请逐条核对当前版本/);
+  assert.equal(calls.filter(c => c.method === "POST").length, 0);
+  values["check_" + principle().id] = "2";
+  submit(h, form("preparation", values, { manualDraft: "preparation-new" }));
+  await settle();
+  const writes = calls.filter(c => c.method === "POST");
+  assert.equal(writes.length, 1);
+  assert.deepEqual(JSON.parse(writes[0].body).principles, [{ id: principle().id, revision: 2 }]);
+  assert.match(h.root.innerHTML, /href="https:\/\/www.okx.com\/trade-swap\/btc-usdt-swap" target="_blank" rel="noopener noreferrer"/);
+  assert.match(h.root.innerHTML, /成交后登记/);
+  assert.ok(calls.every(c => !c.url.includes("/events")));
+});
+
+test("refreshing a changed principle clears its previous acknowledgment and empty libraries cannot prepare", async () => {
+  let current = overview();
+  const h = harness(async () => response(current));
+  await h.api.setActive(true);
+  click(h, "[data-manual-tab]", { manualTab: "prepare" });
+  const draft = form("preparation", { symbol: "ETH-USDT-SWAP", ["check_" + principle().id]: "2" }, { manualDraft: "preparation-new" });
+  h.root.listeners.input({ target: { closest: () => draft } });
+  current = overview({ principles: [principle({ revision: 3, body: "修改后的条件" })] });
+  click(h, "[data-manual-refresh]");
+  await settle();
+  assert.match(h.root.innerHTML, /修改后的条件/);
+  assert.match(h.root.innerHTML, /value="ETH-USDT-SWAP"/);
+  assert.doesNotMatch(h.root.innerHTML, /type="checkbox"[^>]* checked/);
+  current = overview({ principles: [] });
+  click(h, "[data-manual-refresh]");
+  await settle();
+  assert.match(h.root.innerHTML, /还没有正在遵守的原则/);
+  assert.match(h.root.innerHTML, /disabled>已核对，准备开单/);
+});
+
+test("principle conflicts preserve the edited revision even after refreshing the current record", async () => {
+  const puts = [];
+  let current = principle();
+  const h = harness(async (url, init = {}) => {
+    if (url === "/api/research/manual") return response(overview({ principles: [current] }));
+    puts.push(JSON.parse(init.body));
+    return response({ detail: "revision conflict" }, 409);
+  });
+  await h.api.setActive(true);
+  click(h, "[data-manual-edit-principle]", { manualEditPrinciple: current.id });
+  const draft = form("principle", { title: "我的 <原则>", body: "新内容", category: "entry", status: "active", expected_revision: "2" }, {
+    manualDraft: "principle-" + current.id, recordId: current.id,
+  });
+  submit(h, draft);
+  await settle();
+  assert.equal(puts[0].expected_revision, 2);
+  assert.match(h.root.innerHTML, /我的 &lt;原则&gt;/);
+  current = principle({ revision: 3, body: "另一个页面更新" });
+  click(h, "[data-manual-refresh]");
+  await settle();
+  assert.match(h.root.innerHTML, /name="expected_revision" value="2"/);
+  assert.match(h.root.innerHTML, /这份草稿基于旧版本/);
+  click(h, "[data-manual-reload-principle]");
+  assert.match(h.root.innerHTML, /name="expected_revision" value="3"/);
+  assert.match(h.root.innerHTML, /另一个页面更新/);
+});
+
+test("review-to-principle is an unsaved draft while records retain checked principle snapshots", async () => {
+  let writes = 0;
+  const closed = ticket({ status: "closed", review: { notes: "追价后没有依据", lesson: "条件错过就等下一次" },
+    preparation: { checked_at: "2026-09-24T01:00:00Z", principles: [principle({ revision: 1, body: "开单当时的原则" })] },
+  });
+  const h = harness(async (url, init = {}) => {
+    if (init.method) writes++;
+    if (url === "/api/research/manual") return response(overview({ tickets: [closed] }));
+    if (url.endsWith(closed.id)) return response({ ...closed, history: [] });
+    throw new Error("unexpected " + url);
+  });
+  await h.api.setActive(true);
+  click(h, "[data-manual-tab]", { manualTab: "tickets" });
+  click(h, "[data-manual-select-ticket]", { manualSelectTicket: closed.id });
+  await settle();
+  assert.match(h.root.innerHTML, /开单当时的原则/);
+  click(h, "[data-manual-lesson-principle]", { manualLessonPrinciple: closed.id });
+  assert.match(h.root.innerHTML, /条件错过就等下一次/);
+  assert.match(h.root.innerHTML, /value="draft" selected/);
+  assert.match(h.root.innerHTML, new RegExp("个人交易复盘 " + closed.id));
+  assert.equal(writes, 0);
 });

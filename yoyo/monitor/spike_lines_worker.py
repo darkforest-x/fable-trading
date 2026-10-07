@@ -4,7 +4,8 @@ Reads the V9 scanner's closed-bar checkpoints from ``monitor.sqlite3`` read-only
 scanner stays the only writer of those candles) and fetches only daily ``1Dutc`` bars
 itself, which the scanner does not keep, from OKX public market data at a lower rate
 than the scanner. Results go to a separate SQLite book so a failure here cannot touch
-V9 events, Bark or the model gate. No notification, no order endpoint.
+V9 events or the model gate. Its own forward-only joint outboxes are seeded
+only with a first, fresh live joint insertion; there is no order endpoint.
 
 A cell (symbol, timeframe) is recomputed only when its own checkpoint or its higher
 timeframe's bars changed. Events are insert-only; an event first seen long after its
@@ -62,6 +63,8 @@ class LinesBook:
                 CREATE TABLE IF NOT EXISTS meta (key TEXT PRIMARY KEY, payload TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS daily (symbol TEXT PRIMARY KEY, payload BLOB NOT NULL, updated_ms INTEGER NOT NULL);
             """)
+            from yoyo.monitor.joint_notifications import JointNotificationStore
+            JointNotificationStore.initialize_schema(db)
 
     @contextmanager
     def connect(self):
@@ -114,17 +117,28 @@ class LinesBook:
             db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)", ("performance_policy", _json(policy)))
             return policy
 
-    def insert(self, events: list[dict]) -> int:
+    def insert(self, events: list[dict], now: int | None = None) -> int:
+        """Insert observations and atomically seed eligible new joint legs."""
         if not events:
             return 0
+        if now is None:
+            now = now_ms()
+        if type(now) is not int or now < 0:
+            raise ValueError("invalid insertion clock")
         with self.connect() as db:
-            before = db.total_changes
-            db.executemany("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)",
-                           [(e["id"], e["kind"], e["symbol"], e["timeframe"], e["bar_open_ms"], e["bar_close_ms"],
-                             e["detected_at_ms"], _json(e)) for e in events])
-            return db.total_changes - before
+            from yoyo.monitor.joint_notifications import JointNotificationStore
+            inserted = 0
+            for event in events:
+                cursor = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)",
+                                    (event["id"], event["kind"], event["symbol"], event["timeframe"],
+                                     event["bar_open_ms"], event["bar_close_ms"], event["detected_at_ms"],
+                                     _json(event)))
+                if cursor.rowcount == 1:
+                    inserted += 1
+                    JointNotificationStore.queue_new_event(db, event, now)
+            return inserted
 
-    def refresh_performance(self, symbol: str, timeframe: str, computed: dict[str, dict]) -> int:
+    def refresh_performance(self, symbol: str, timeframe: str, computed: dict[str, dict], *, protocol: str | None = None) -> int:
         """Rewrite joint positions from the latest replay; strand no stale open position."""
         changed = 0
         with self.connect() as db:
@@ -134,6 +148,8 @@ class LinesBook:
                               (symbol, timeframe)).fetchall()
             for event_id, payload in rows:
                 event = json.loads(payload)
+                if protocol is not None and event.get("protocol") != protocol:
+                    continue
                 new = computed.get(event_id)
                 if new is None:
                     old = event.get("performance") or {}
@@ -222,10 +238,12 @@ class LinesWorker:
         self.daily = self.book.load_daily()
         self.seen: dict[tuple[str, str], tuple] = {}
         self.performance_policy: dict | None = None
-        activation = self.book.get_meta("activation")
+        from yoyo.monitor.joint_notifications import JointNotificationStore
+        self.joint_notifications = JointNotificationStore(self.book.path)
+        activation = self.book.get_meta("activation:v128")
         if not isinstance(activation, dict) or type(activation.get("activated_ms")) is not int:
-            activation = {"activated_ms": now_ms(), "protocol": None}
-            self.book.set_meta("activation", activation)
+            activation = {"activated_ms": now_ms(), "protocol": "spike-v128-lines-monitor-v1"}
+            self.book.set_meta("activation:v128", activation)
         self.activated_ms = activation["activated_ms"]
 
     def refresh_universe(self) -> None:
@@ -264,10 +282,16 @@ class LinesWorker:
         return candles
 
     def pass_once(self) -> dict:
-        from yoyo.monitor import spike_lines as sl
+        from yoyo.monitor import v128_lines as sl
         started = now_ms()
         self.performance_policy = self.book.initialize_performance_policy(sl.BASIS, changed_at_ms=started)
         self.client.synchronize()
+        # Arm only after exchange-clock synchronization and before scanning, so
+        # cold-start history can never become newly deliverable.
+        synchronized = self.client.clock()
+        self.book.set_meta("joint_notification_clock", {"offset_ms": int(self.client.offset_ms),
+                                                          "synchronized_ms": synchronized})
+        self.joint_notifications.activate(("bark", "telegram"), synchronized)
         self.refresh_universe()
         stamps = self.primary.stamps()
         symbols = sorted({s for s, tf in stamps if s in self.instruments})
@@ -307,7 +331,9 @@ class LinesWorker:
                                         want_breaks=tf in sl.BREAK_TIMEFRAMES, want_joints=tf in sl.JOINT_TIMEFRAMES)
                     step = sl.MINUTES[tf] * 60_000
                     horizon = self.client.clock() - HISTORY_BARS * step
-                    detected = now_ms()
+                    # The notification cutover uses the synchronized exchange
+                    # clock; keep the insertion/freshness clock in that domain.
+                    detected = self.client.clock()
                     rows = []
                     for event in result["breaks"] + result["joints"]:
                         if event["bar_close_ms"] < horizon:
@@ -315,12 +341,12 @@ class LinesWorker:
                         event.update(symbol=symbol, venue="okx", base_asset=meta["base"], detected_at_ms=detected,
                                      id=sl.event_id(event["kind"], symbol, tf, event["bar_open_ms"]))
                         rows.append(event)
-                    scan["inserted"] += self.book.insert(rows)
+                    scan["inserted"] += self.book.insert(rows, now=detected)
                     if tf in sl.JOINT_TIMEFRAMES:
                         computed = {sl.event_id("joint", symbol, tf, e["bar_open_ms"]): e["performance"]
                                     for e in result["joints"]}
                         scan["positions_updated"] = scan.get("positions_updated", 0) + \
-                            self.book.refresh_performance(symbol, tf, computed)
+                           self.book.refresh_performance(symbol, tf, computed, protocol=sl.PROTOCOL)
                     self.seen[(symbol, tf)] = key
                 except Exception as exc:  # one bad cell must not stop the pass
                     scan["errors"] += 1

@@ -45,11 +45,12 @@ def queued(path, photo=True):
     return store
 
 
-def test_caption_keeps_confirmation_and_original_arrow_separate():
+def test_caption_keeps_confirmation_and_backend_origin_separate():
     text = message(event())
-    assert len(text.splitlines()) == 4 and len(text) < 200
+    assert len(text.splitlines()) == 5 and len(text) < 250
     assert '100.5' in text and '等待 2 根' in text and '15m' in text and '空头' in text
-    assert 'YOLO 确认' in text and '原箭头 99.5' in text
+    assert 'YOLO 确认' in text and '原始信号 99.5' in text
+    assert '后台信号' in text and '未核验 TradingView 图上信号' in text
     assert 'https' not in text and '高周期' not in text and '精确零轴' not in text
     assert markup(event())['inline_keyboard'][0][0]['url'].endswith('interval=15')
 

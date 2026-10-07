@@ -1,8 +1,8 @@
-"""Durable, causal SPIKE V9 -> YOLO-extra confirmation for notifications.
+"""Durable, causal SPIKE V12.8 -> YOLO-extra confirmation for notifications.
 
-The raw V9 signal remains authoritative.  YOLO reads only closed OHLCV and six
+The raw V12.8 signal remains authoritative. YOLO reads only closed OHLCV and six
 close-source moving averages in its p..p+9 causal window, and may add a later
-record; it never invalidates, delays, recolors, or replaces the raw V9 event.
+record; it never invalidates, delays, recolors, or replaces the raw event.
 """
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from collections import OrderedDict
 import logging
 import threading
 
-from yoyo.monitor.notification_policy import delivery_error
+from yoyo.monitor.notification_policy import activation, delivery_error, model_candidate_error
 from yoyo.monitor import (FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MODEL_PROFILE_ID,
                           MODEL_SHA256, MODEL_MAX_WAIT, MONITORED_TIMEFRAMES, TIMEFRAMES)
 from yoyo.monitor.policy import finite, is_tv_start, is_model_signal
@@ -138,7 +138,7 @@ class ModelGate:
 
         Columns used: t/md/c and detector's causal OHLC/MA prefix. Progress is
         persisted only after a complete inference; errors retry the endpoint.
-        Once md invalidates a candidate it cannot be revived by a later match.
+        Candidate confirmation remains bound to its original raw V12.8 close.
         """
         if timeframe not in MONITORED_TIMEFRAMES:
             return
@@ -154,9 +154,16 @@ class ModelGate:
             # its raw V9 leg was post-cutover at the original close. Evaluate
             # at that close, not at ``now``: a legitimate pending 4H candidate
             # may wait beyond the 30-minute raw freshness window.
-            raw_error = delivery_error(self.store, event, event["bar_close_ms"], "bark")
-            if raw_error is not None:
-                proof.update(status="disabled", reason="raw_not_eligible:" + raw_error)
+            # Candidate inference belongs to the confirmation topic. Recheck
+            # its channel route against the original bar's close, while the
+            # eventual confirmation sender separately checks current freshness.
+            candidate_errors = {
+                channel: model_candidate_error(self.store, event, event["bar_close_ms"], channel)
+                for channel in ("telegram", "bark")
+            }
+            if all(error is not None for error in candidate_errors.values()):
+                detail = ",".join(channel + ":" + candidate_errors[channel] for channel in ("telegram", "bark"))
+                proof.update(status="disabled", reason="confirmation_not_eligible:" + detail)
                 self.store.update_candidate(event["id"], proof)
                 continue
             cursor = proof.get("last_checked_close_ms")
@@ -207,16 +214,17 @@ class ModelGate:
     def _commit(self, original, event, candles):
         now = self.clock()
         stream = self.store.timeframe_activation(event["timeframe"], protocol=MODEL_PROTOCOL)
-        # The raw arrow must have cleared its own forward cutover, while the
-        # extra Bark leg is fresh by the later, exchange-confirmed YOLO bar.
+        # The raw arrow must have cleared the confirmation-stage cutover,
+        # while each channel's supplemental route is fresh at the later,
+        # exchange-confirmed YOLO bar.
         # A valid 1H/4H confirmation may deliberately arrive after the raw
         # 30-minute freshness window but still be new information to deliver.
         common = (stream is not None and original["bar_close_ms"] > stream and event["bar_close_ms"] > stream
                   and 0 <= now - event["bar_close_ms"] <= FRESH_MS)
-        tg = (self.store.get_meta("notification_policy:" + MODEL_PROTOCOL, {}).get("activated_ms")
-              if self.telegram_enabled else None)
+        tg = activation(self.store, "telegram", MODEL_PROTOCOL) if self.telegram_enabled else None
         bark = self.store.get_meta("notification_policy:bark:" + MODEL_PROTOCOL, {}).get("activated_ms")
-        notify = self.telegram_enabled and common and tg is not None and original["bar_close_ms"] > tg
+        notify = (self.telegram_enabled and common and tg is not None and original["bar_close_ms"] > tg
+                  and delivery_error(self.store, event, now, "telegram") is None)
         bark_notify = (common and bark is not None and original["bar_close_ms"] > bark
                        and delivery_error(self.store, event, now, "bark") is None)
         photo, error = None, None

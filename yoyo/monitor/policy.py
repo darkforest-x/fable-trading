@@ -5,7 +5,7 @@ import re
 from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, MODEL_KIND,
                           MODEL_PROTOCOL, MODEL_PROFILE_ID, MODEL_SHA256, SHORT_SIGNAL_KIND,
                           SHORT_SIGNAL_PROTOCOL,
-                          MODEL_MAX_WAIT, TIMEFRAMES, MONITORED_TIMEFRAMES)
+                          MODEL_MAX_WAIT, TIMEFRAMES, MONITORED_TIMEFRAMES, STRATEGY_VERSION)
 
 
 def finite(value):
@@ -13,10 +13,11 @@ def finite(value):
 
 
 def is_tv_start(event):
-    """Compatibility name: validate a closed, raw V9 signal in either direction."""
+    """Validate a current V12.8 observation, never an older queued signal."""
     return (event.get("protocol") == SIGNAL_PROTOCOL and event.get("kind") == SIGNAL_KIND
             and event.get("source") == "live" and event.get("confirmation") == "raw"
-            and event.get("strategy_version") == "spike-v9-entry-bundle-20260915-v1"
+            and event.get("strategy_version") == STRATEGY_VERSION
+            and event.get("v128_admitted") is True
             and event.get("v9_admitted") is True
             and event.get("side") in ("long", "short") and event.get("direction") == event.get("side")
             and event.get("confirmed") is True and event.get("is_closed") is True

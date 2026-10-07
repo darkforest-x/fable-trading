@@ -1,8 +1,8 @@
-"""Independent Mac scan loop: public OHLCV -> Pine-equivalent events -> outbox.
+"""Independent Mac scan loop: public OHLCV -> V12.8 events -> channel outboxes.
 
-The V9 monitor scans 15m/30m/1H/4H. All four periods send
-starts and extra confirmations via Bark from their own activation boundaries;
-Telegram is disabled. This is an indicator monitor, not an ACTIVE/model
+The monitor scans 15m/30m/1H/4H. Raw starts and YOLO confirmations have
+independent Telegram and Bark routes; joint notifications keep their own
+long-only source outboxes. This is an indicator monitor, not an ACTIVE/model
 promotion, broker position tracker, execution path or backtest. Existing VPS
 cadence, cache and freshness settings remain untouched.
 """
@@ -22,15 +22,18 @@ import time
 import uuid
 
 from yoyo.monitor import (FRESH_MS, TIMEFRAMES, VERSION, SIGNAL_PROTOCOL, SIGNAL_KIND,
-                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MODEL_MAX_WAIT,
+                          TV_PROFILE_ID, HIGHER_TIMEFRAME, MONITORED_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL,
                           DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
 from yoyo.monitor.policy import is_tv_start
-from yoyo.monitor.notification_policy import delivery_error, activation
+from yoyo.monitor.notification_policy import delivery_error, activation, model_candidate_error
 from yoyo.monitor.model_gate import ModelGate
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.store import now_ms
 from yoyo.monitor.telegram import TelegramWorker
 from yoyo.monitor.bark import BarkWorker
+from yoyo.monitor.v130_policy import (SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL,
+                                      TIMEFRAMES as V130_TIMEFRAMES, VERSION as V130_VERSION,
+                                      trail_atr as v130_trail)
 
 LOG = logging.getLogger("fable.monitor")
 PROTOCOL = MODEL_PROTOCOL
@@ -57,11 +60,14 @@ class Monitor:
         self.lock = threading.RLock()
         self.instruments = []
         self.universe_at = 0
-        self.telegram = TelegramWorker(store)
+        self.telegram = TelegramWorker(store, enabled=True)
         self.bark = BarkWorker(store)
+        self.joint_store = None
+        self.joint_bark = None
+        self.joint_telegram = None
         self.bark_since = None
         self.timeframe_since = {tf: store.timeframe_activation(tf, protocol=PROTOCOL) for tf in MONITORED_TIMEFRAMES}
-        self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event)
+        self.model_gate = ModelGate(store, lambda: self.client.clock(), self.stop_event, telegram_enabled=True)
         self.threads = []
         self.scan_process = None
         self.scan_generation = None
@@ -72,17 +78,25 @@ class Monitor:
         # refresher obtains a complete read snapshot.
         self.status_lock = threading.Lock()
         self.status_snapshot = self._starting_status()
+        self._channel_delivery_turn = {"telegram": 0, "bark": 0}
 
     def start(self):
         # Called only after server lifespan owns the singleton process lock.
         if self.store.get_meta("migration:spike-v9-reset-v1") is None:
             raise RuntimeError("v9_explicit_reset_required")
         self.store.recover_outbox()
-        self.store.retire_telegram_pending()
         self.store.retire_disabled_timeframes()
         self.store.retire_muted_bark_timeframes()
+        from yoyo.monitor.joint_notifications import JointNotificationStore
+        from yoyo.monitor.spike_lines_worker import DATABASE, LinesBook
+        LinesBook(self.store.path.parent / DATABASE)
+        self.joint_store = JointNotificationStore(self.store.path.parent / DATABASE)
+        self.joint_store.recover_outbox()
+        self.joint_bark = BarkWorker(self.joint_store)
+        self.joint_telegram = TelegramWorker(self.joint_store, enabled=True)
         for name, target in (("scan", self.run), ("model", self.run_model), ("lines", self.run_lines),
-                             ("bark", self.deliver_bark), ("status", self.refresh_status_forever)):
+                             ("telegram", self.deliver_telegram), ("bark", self.deliver_bark),
+                             ("status", self.refresh_status_forever)):
             thread = threading.Thread(target=target, name="impulse-" + name, daemon=True)
             self.threads.append(thread)
             thread.start()
@@ -136,7 +150,7 @@ class Monitor:
             self.stop_event.wait(self.interval)
 
     def run_lines(self):
-        """突破 / 突破+spike menus: own process and own SQLite book, display only (no Bark)."""
+        """Breakout and joint scanner with its own book and joint-only outboxes."""
         from yoyo.monitor.spike_lines_worker import lines_forever
         while not self.stop_event.is_set():
             if self.lines_process is None or not self.lines_process.is_alive():
@@ -145,19 +159,61 @@ class Monitor:
                 self.lines_process.start()
             self.stop_event.wait(self.interval)
 
-    def deliver_bark(self):
+    def _deliver_channel(self, channel):
+        """Serialize both source outboxes per transport and alternate priority."""
+        if channel not in ("telegram", "bark"):
+            raise ValueError("unsupported notification channel")
+        ordinary = self.telegram if channel == "telegram" else self.bark
+        joint = self.joint_telegram if channel == "telegram" else self.joint_bark
+        ordinary_arm = ("notification_policy:v128_telegram_arm" if channel == "telegram"
+                        else "notification_policy:v128_bark_arm")
         while not self.stop_event.is_set():
-            if not self.notification_ready.is_set():
-                if self.store.get_meta("notification_policy:v9_bark_arm") is None:
-                    self.stop_event.wait(3)
+            start = self._channel_delivery_turn[channel]
+            self._channel_delivery_turn[channel] = 1 - start
+            workers = ((ordinary, self.store, "ordinary"), (joint, self.joint_store, "joint"))
+            if start:
+                workers = tuple(reversed(workers))
+            worked = False
+            for worker, store, source in workers:
+                if worker is None or store is None:
                     continue
-                self.notification_ready.set()
-            try:
-                worked = self.bark.deliver_once(self.client.clock())
-            except Exception as exc:
-                LOG.error("bark worker failure: %s", type(exc).__name__)
-                worked = False
+                try:
+                    # A disabled or not-yet-armed ordinary channel must not
+                    # delay the independently armed joint stream. Keep this
+                    # read in the worker guard so transient DB errors cannot
+                    # terminate the whole channel loop.
+                    if source == "ordinary" and store.get_meta(ordinary_arm) is None:
+                        prefix = "notification_policy:" if channel == "telegram" else "notification_policy:bark:"
+                        if store.get_meta(prefix + "spike-burst-v130-retest-notifications-v1") is None:
+                            continue
+                    if source == "joint":
+                        clock = store.get_meta("joint_notification_clock", {})
+                        offset = clock.get("offset_ms") if isinstance(clock, dict) else None
+                        now = now_ms() + offset if type(offset) is int else self.client.clock()
+                    else:
+                        now = self.client.clock()
+                    worked = worker.deliver_once(now)
+                except Exception as exc:
+                    LOG.error("%s %s worker failure: %s", channel, source, type(exc).__name__)
+                    worked = False
+                if worked:
+                    break
             self.stop_event.wait(1.1 if worked else 3)
+
+    def deliver_telegram(self):
+        self._deliver_channel("telegram")
+
+    def deliver_bark(self):
+        self._deliver_channel("bark")
+
+    def joint_notification_status(self):
+        if self.joint_store is None:
+            return {}
+        from yoyo.monitor.joint_notifications import JOINT_POLICY
+        workers = {"bark": self.joint_bark, "telegram": self.joint_telegram}
+        return {channel: dict(worker.status(), delivery_format="text_with_chart_link",
+                              activated_ms=activation(self.joint_store, channel, JOINT_POLICY))
+                for channel, worker in workers.items()}
 
     def scan(self):
         start = now_ms()
@@ -165,10 +221,12 @@ class Monitor:
         if not self.notification_ready.is_set():
             # Use the same calibrated clock as candle closes and freshness.
             # A slow Mac clock must not turn a pre-upgrade close into a new bar.
-            # Retain the model-candidate history baseline without re-enabling TG.
+            # The dedicated receipt keeps Telegram's activation forward-only.
             self.notification_since = self.store.get_meta("notification_policy:" + PROTOCOL, {}).get("activated_ms", self.client.clock())
             if self.bark.creds:
                 self.bark_since = self.store.activate_bark_policy(self.client.clock(), protocol=PROTOCOL, retire_obsolete=False)
+            from yoyo.monitor.notification_policy import arm_v9_telegram
+            arm_v9_telegram(self.store, self.client.clock())
             self.timeframe_since = {tf: self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=PROTOCOL)
                                     for tf in MONITORED_TIMEFRAMES}
             # This is an additive delivery policy, not a new signal definition.
@@ -176,7 +234,8 @@ class Monitor:
             if self.bark.creds:
                 self.store.activate_bark_policy(self.client.clock(), protocol=DIRECT_POLICY, retire_obsolete=False)
             for tf in DIRECT_TIMEFRAMES:
-                self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=DIRECT_POLICY)
+                if self.store.timeframe_activation(tf, protocol=DIRECT_POLICY) is None:
+                    self.store.activate_timeframe_policy(tf, self.client.clock(), protocol=DIRECT_POLICY)
             self.notification_ready.set()
         if not self.instruments or start - self.universe_at >= 3600000:
             self.instruments = self.client.instruments()
@@ -218,7 +277,7 @@ class Monitor:
         LOG.info("scan complete: %s/%s pairs, %s errors, %.1fs", scan["completed"], scan["total"], scan["errors"], (end - start) / 1000)
 
     def scan_symbol(self, instrument):
-        from yoyo.monitor.v9_signals import analyze
+        from yoyo.monitor.v128_signals import analyze
         from yoyo.monitor.v9_worker import instrument_base
 
         symbol = instrument["instId"]
@@ -288,11 +347,10 @@ class Monitor:
                 inserted = self.record_arrow(event, result["chart"], now, stale=stale)
                 if isinstance(performance, dict):
                     self.store.update_event_payload(self.store.event_id(event), {"performance": performance})
-                timeframe_since = self.timeframe_since.get(timeframe)
-                first_channel = min(self.notification_since, self.bark_since) if self.bark_since is not None else self.notification_since
-                if (is_tv_start(event) and timeframe_since is not None
-                        and event["bar_close_ms"] > max(first_channel, timeframe_since)
-                        and now <= event["bar_close_ms"] + MODEL_MAX_WAIT * TIMEFRAMES[timeframe] + FRESH_MS):
+                eligible_model_channels = any(
+                    model_candidate_error(self.store, event, self.client.clock(), channel) is None
+                    for channel in ("telegram", "bark"))
+                if inserted and is_tv_start(event) and eligible_model_channels:
                     self.model_gate.register(event)
                 kept.append(event)
             with self.lock:
@@ -304,10 +362,12 @@ class Monitor:
         return errors
 
     def record_arrow(self, event, chart, now, *, stale=False):
-        """Journal one closed arrow and its independent Bark-only direct leg."""
+        """Journal one closed arrow with independent Telegram and Bark legs."""
+        telegram_notify = (not stale and self.telegram.enabled
+                           and delivery_error(self.store, event, now, "telegram") is None)
         bark_notify = (not stale and bool(self.bark.creds)
                        and delivery_error(self.store, event, now, "bark") is None)
-        return self.store.upsert_event(event, notify=False, bark_notify=bark_notify)
+        return self.store.upsert_event(event, notify=telegram_notify, bark_notify=bark_notify)
 
     def chart(self, symbol, timeframe):
         with self.lock:
@@ -315,6 +375,8 @@ class Monitor:
             if chart is None:
                 stored = self.store.get_market(symbol, timeframe)
                 if stored and stored.get("chart") is not None:
+                    if stored.get("protocol") != SIGNAL_PROTOCOL:
+                        return None
                     return self._stored_chart(symbol, timeframe, stored)
                 return None
             state = dict(chart["state"])
@@ -340,12 +402,13 @@ class Monitor:
             # Reuse the scanner's exact full-seed validator.  A UI-sized chart
             # must never seed the frozen recurrence.
             from yoyo.monitor.v9_worker import _valid_checkpoint
-            from yoyo.monitor.v9_signals import WARMUP, analyze
+            from yoyo.monitor.v128_signals import WARMUP, analyze
             tick = float(stored.get("tick_size"))
             if (not _valid_checkpoint(seed, timeframe) or len(seed) < WARMUP
                     or not math.isfinite(tick) or tick <= 0):
                 raise ValueError("incomplete checkpoint")
-            rebuilt = analyze(seed, [], timeframe, tick=tick, base_asset=stored.get("base_asset"), chart_limit=240)
+            higher_seed = self.store.load_candle_checkpoint(symbol, "1H") if timeframe == "15m" else []
+            rebuilt = analyze(seed, higher_seed, timeframe, tick=tick, base_asset=stored.get("base_asset"), chart_limit=240)
         except (TypeError, ValueError):
             fallback_state.update(chart_features_complete=False,
                                   error=fallback_state.get("error") or "cached_chart_features_unavailable")
@@ -360,7 +423,7 @@ class Monitor:
                 "scan": {"status": "starting", "completed": 0, "total": 0, "errors": 0},
                 "universe": {"count": 0, "scope": "OKX all live SWAP"}, "counts": {},
                 "runtime": {"host": "This Mac", "notification_only": True,
-                            "signal_mode": "SPIKE V9 多空 15m/30m/1H/4H；Bark 启动与 YOLO 追加确认"},
+                            "signal_mode": "SPIKE V12.8 多空 15m/30m/1H/4H；Telegram + Bark 启动与 YOLO 追加确认"},
                 "snapshot_at_ms": None, "stale": True}
 
     def _current_scan(self, scan):
@@ -373,7 +436,7 @@ class Monitor:
 
     def _collect_status(self):
         counts = self.store.market_phase_counts(MONITORED_TIMEFRAMES)
-        arm_receipt = self.store.get_meta("notification_policy:v9_bark_arm")
+        arm_receipt = self.store.get_meta("notification_policy:v128_bark_arm")
         model_status = self.store.get_meta("v9:model_gate")
         if model_status is None:
             model_status = self.model_gate.status()
@@ -383,13 +446,20 @@ class Monitor:
                     universe=self.store.get_meta("universe", {"count": 0, "scope": "OKX 全部在交易永续合约"}),
                     counts=dict(counts, signals_24h=self.store.count_since(self.client.clock() - 86400000, MODEL_KIND, PROTOCOL),
                                 indicator_starts_24h=self.store.displayed_start_count(self.client.clock() - 86400000)),
-                    telegram=self.telegram.status(), bark=self.bark.status(), runtime={"host": "This Mac", "notification_only": True,
+                    telegram=self.telegram.status(), bark=self.bark.status(),
+                    joint_notifications=self.joint_notification_status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
                     "candle_storage": "memory_only", "history_days": 7,
-                    "signal_mode": "SPIKE V9 多空 15m/30m/1H/4H；Bark 启动与 YOLO 追加确认", "signal_kind": MODEL_KIND,
+                    "signal_mode": "V13.1 普通多空回踩 15m/30m/1H/4H（1H 2ATR 追踪）；独立YOLO订阅保留", "signal_kind": MODEL_KIND,
+                    "v130": {"protocol": "spike-burst-v130-retest-monitor-v1", "strategy_version": V130_VERSION,
+                             "timeframes": list(V130_TIMEFRAMES), "trail_atr": {tf: v130_trail(tf) for tf in V130_TIMEFRAMES},
+                             "candidate_source": "ordinary_both", "orders_enabled": False,
+                             "signals_24h": self.store.count_since(self.client.clock() - 86400000, kind=V130_KIND, protocol=V130_PROTOCOL),
+                             "last_observation": self.store.get_meta("v130:last_observation", {}),
+                             "activation": self.store.get_meta("notification_policy:spike-burst-v130-retest-notifications-v1", {})},
                     "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
-                    "notification_channels": ["bark"],
+                    "notification_channels": ["telegram", "bark"],
                     "bark_timeframes": list(BARK_TIMEFRAMES),
                     "display_only_timeframes": [tf for tf in MONITORED_TIMEFRAMES if tf not in BARK_TIMEFRAMES],
                     "direct_notification_policy": DIRECT_POLICY,
@@ -398,11 +468,11 @@ class Monitor:
                     "model_gate": model_status,
                     "notification_armed": bool(arm_receipt),
                     "tv_profile": {"id": TV_PROFILE_ID, "direction": "both",
-                                   "sync_mode": "v9_source_contract", "chart_settings_verified": False},
+                                   "sync_mode": "v128_source_contract", "chart_settings_verified": False},
                     "notification_since_ms": self.notification_since,
                     "bark_notification_since_ms": self.bark_since,
                     "timeframe_notification_since_ms": dict(self.timeframe_since),
-                    "higher_mode": "V9 本周期 V7 压缩、V8 距离与三条准入过滤",
+                    "higher_mode": "V12.8：15m 额外要求已完成 H1 SMA60 方向一致；30m/1H/4H 保留本周期过滤",
                     "source_commit": self.source_commit, "startup_source_sha256": self.source_hashes,
                     "warmup_bars": 520, "launch_agent": "com.fable.impulse-monitor"})
 
@@ -451,7 +521,8 @@ class Monitor:
 
     def markets(self):
         rows = [r for r in self.store.list_market_summaries()
-                if r.get("active", True) and r.get("timeframe") in MONITORED_TIMEFRAMES]
+                if r.get("active", True) and r.get("timeframe") in MONITORED_TIMEFRAMES
+                and r.get("protocol") == SIGNAL_PROTOCOL]
         now = self.client.clock()
         for row in rows:
             duration = TIMEFRAMES[row["timeframe"]]

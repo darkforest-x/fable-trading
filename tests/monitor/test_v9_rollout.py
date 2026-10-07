@@ -1,4 +1,4 @@
-"""Synthetic V9 cutover, notification and public API regression checks.
+"""Synthetic current-version cutover, notification and public API regressions.
 
 No exchange candles, historical results, device keys or actual pushes are used.
 The destructive reset is exercised only against pytest's temporary databases.
@@ -8,10 +8,10 @@ import json
 
 import pytest
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES, MODEL_PROTOCOL
+from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES, MODEL_PROTOCOL, STRATEGY_VERSION
 from yoyo.monitor.bark import BarkWorker, message
 from yoyo.monitor.model_gate import pending_proof
-from yoyo.monitor.notification_policy import delivery_error
+from yoyo.monitor.notification_policy import delivery_error, arm_v9_bark
 from yoyo.monitor.policy import is_tv_start
 from yoyo.monitor.store import Store
 
@@ -21,8 +21,8 @@ NOW = 2_000_000 * STEP
 
 
 def event(close=NOW, side="long"):
-    return {"protocol": SIGNAL_PROTOCOL, "strategy_version": "spike-v9-entry-bundle-20260915-v1",
-            "v9_admitted": True, "kind": SIGNAL_KIND, "source": "live", "confirmation": "raw",
+    return {"protocol": SIGNAL_PROTOCOL, "strategy_version": STRATEGY_VERSION,
+            "v9_admitted": True, "v128_admitted": True, "kind": SIGNAL_KIND, "source": "live", "confirmation": "raw",
             "symbol": "ETH-USDT-SWAP", "venue": "okx", "timeframe": "15m", "timeframe_min": 15,
             "side": side, "direction": side, "bar_close_ms": close, "bar_open_ms": close - STEP,
             "signal_close_time": close, "is_closed": True, "confirmed": True, "ready": True,
@@ -87,8 +87,8 @@ def test_new_v9_both_sides_notify_once_through_mock_sender(tmp_path, side):
     assert worker.deliver_once(NOW)
     assert not worker.deliver_once(NOW)
     assert len(calls) == 1
-    assert calls[0][1]["title"].startswith("V9 · ")
-    assert calls[0][1]["group"] == "SPIKE V9"
+    assert calls[0][1]["title"].startswith("V12.8 · ")
+    assert calls[0][1]["group"] == "SPIKE V12.8"
     assert store.bark_status()["sent"] == 1
     # A later service start/reset request must not clear the new event again.
     store.reset_for_v9(NOW + STEP)
@@ -124,6 +124,7 @@ def test_api_and_ledger_only_show_post_reset_v9(tmp_path):
     app.state.monitor.client.clock = lambda: NOW
     store.upsert_event(event(NOW - STEP))
     store.reset_for_v9(NOW - 1)
+    arm_v9_bark(store, NOW - 1)
     store.upsert_event(event(side="short"))
     with TestClient(app) as client:
         rows = client.get("/api/signals?confirmation=raw").json()["items"]
@@ -134,7 +135,7 @@ def test_api_and_ledger_only_show_post_reset_v9(tmp_path):
             assert client.get("/api/signals?confirmation=raw&source=" + source).json()["items"] == []
         book = client.get("/api/signals?view=ledger&confirmation=raw").json()
         assert book["total"] == 1 and book["items"][0]["protocol"] == SIGNAL_PROTOCOL
-        assert "SPIKE V9" in client.get("/").text
+        assert "SPIKE V12.8" in client.get("/").text
 
 
 def test_short_yolo_uses_original_side_and_v9_identity(tmp_path):
@@ -161,6 +162,7 @@ def test_scanner_restarts_never_restore_old_events_or_queue_twice(tmp_path, monk
     from yoyo.monitor import v9_worker
     store = Store(tmp_path / "monitor.sqlite3")
     store.reset_for_v9(NOW - 1)
+    arm_v9_bark(store, NOW - 1)
     calls = []
 
     class Client:
@@ -171,7 +173,7 @@ def test_scanner_restarts_never_restore_old_events_or_queue_twice(tmp_path, monk
             step = TIMEFRAMES[timeframe]
             return [{"t": NOW - step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.}], 0
 
-    def analyze(candles, higher, timeframe, *, tick, base_asset, chart_limit):
+    def analyze(candles, higher, timeframe, *, tick, base_asset, chart_limit, _context=None):
         assert base_asset == "ETH"
         calls.append(timeframe)
         return {"state": {"phase": "ready", "ready": True, "timeframe": timeframe}, "chart": candles,

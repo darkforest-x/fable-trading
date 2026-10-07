@@ -1,5 +1,5 @@
-/* Personal manual-trading journal. This view records user-entered plans and fills;
- * it has no exchange client and never submits or synchronizes orders. */
+/* Principles first, manual execution second, records and reflection last.
+ * Exchange links only navigate; local preparations never imply an order fill. */
 (() => {
   "use strict";
 
@@ -19,7 +19,9 @@
   const fmtCount = (value) => finite(value) ? Number(value).toLocaleString("zh-CN") : "—";
   const recordLabel = (value) => value === null || value === undefined || value === "" ? "未记录" : String(value);
   const labels = {
-    tabs: { playbooks: "我的规则", sessions: "盘前计划", tickets: "机会与交易", review: "复盘" },
+    tabs: { principles: "01 交易原则", prepare: "02 开单", tickets: "03 记录与复盘" },
+    principleCategory: { mindset: "交易心态", context: "市场判断", entry: "入场选择", risk: "风险纪律", exit: "退出与管理" },
+    principleStatus: { draft: "待沉淀", active: "正在遵守", archived: "已归档" },
     playbookStatus: { draft: "草稿", ready: "本人确认可用", archived: "已归档" },
     ticketStatus: { watching: "观察中", planned: "已计划", open: "已成交（人工登记）", closed: "已平仓", skipped: "已放弃" },
     action: { open: "登记已成交", close: "登记全部平仓", skip: "记录放弃", review: "保存复盘", reconcile: "补记 / 更正", manage: "保存持仓记录" },
@@ -31,7 +33,9 @@
   const state = {
     active: false, bound: false, loading: false, loaded: false,
     loadError: "", actionError: "", actionMessage: "", data: null,
-    tab: "playbooks", selectedPlaybookId: "", playbookCreate: true,
+    tab: "principles", selectedPlaybookId: "", playbookCreate: true,
+    selectedPrincipleId: "", principleEditing: false, principleFilter: "all",
+    preparedTicketId: "", preparationDraftKey: "preparation-new", preparationCounter: 0,
     selectedSessionId: "", sessionCreate: true,
     selectedTicketId: "", ticketCreate: false, ticketDetail: null,
     detailLoading: false, detailError: "", savingKey: "",
@@ -168,16 +172,94 @@
   function signalPromptHTML() {
     if (!state.pendingSignal || !state.dirtyDrafts.size) return "";
     return '<div class="manual-signal-prompt" role="status"><div><strong>当前有未保存的编辑</strong>' +
-      '<p>已保留当前草稿和新信号。明确选择后才会切换到新机会表单。</p></div>' +
-      '<button type="button" class="research-button primary" data-manual-use-signal>使用此信号新建观察</button>' +
+      '<p>已保留当前草稿和新信号。明确选择后才会切换到开单准备。</p></div>' +
+      '<button type="button" class="research-button primary" data-manual-use-signal>使用此信号准备开单</button>' +
       '<button type="button" class="research-button" data-manual-keep-draft>保留当前草稿</button></div>';
   }
 
   function renderTabs() {
+    const active = { playbooks: "principles", sessions: "prepare", review: "tickets" }[state.tab] || state.tab;
     return '<nav class="manual-tabs" role="tablist" aria-label="个人手动交易工作区">' +
       Object.entries(labels.tabs).map(([id, label]) =>
-        '<button type="button" role="tab" data-manual-tab="' + id + '" aria-selected="' + (state.tab === id) + '"' +
-        (state.tab === id ? ' class="selected"' : "") + ">" + label + "</button>").join("") + "</nav>";
+        '<button type="button" role="tab" data-manual-tab="' + id + '" aria-selected="' + (active === id) + '"' +
+        (active === id ? ' class="selected"' : "") + ">" + label + "</button>").join("") + "</nav>";
+  }
+
+  function principleEditor() {
+    const record = arr(state.data?.principles).find(item => item.id === state.selectedPrincipleId);
+    const key = record ? "principle-" + record.id : "principle-new";
+    const draft = state.drafts[key] || {};
+    const revision = val(draft, 'expected_revision', null, record?.revision || 0);
+    return `<form class="manual-card manual-editor" data-manual-principle-form data-manual-draft="${key}" data-record-id="${esc(record?.id || '')}">
+      <input type="hidden" name="expected_revision" value="${esc(revision)}">
+      ${record && Number(revision)!==record.revision ? '<p class="research-error">这份草稿基于旧版本，保存前请核对最新原则。<button type="button" class="research-button" data-manual-reload-principle>放弃这份草稿，载入最新版本</button></p>' : ''}
+      <div class="manual-card-heading"><div><p class="manual-kicker">一条原则，一件事</p><h3>${record ? '修改原则' : '沉淀一条原则'}</h3></div><button type="button" class="research-button" data-manual-close-principle>收起</button></div>
+      <div class="manual-form-grid">${input('title', '原则名称', val(draft, 'title', record), {required:true,maxlength:120,placeholder:'用一句话说明你要遵守什么'})}
+      ${select('category','分类',val(draft,'category',record,'mindset'),Object.entries(labels.principleCategory).map(([value,label])=>({value,label})))}
+      ${textarea('body','具体怎么做',val(draft,'body',record),{required:true,maxlength:4000,rows:3})}
+      ${select('status','使用状态',val(draft,'status',record,'draft'),Object.entries(labels.principleStatus).map(([value,label])=>({value,label})),{help:'设为“正在遵守”后，每次开单前会列入核对。'})}</div>
+      <details class="manual-optional"><summary>依据与来源（选填）</summary><div class="manual-form-grid">
+      ${textarea('rationale','为什么保留这条原则',val(draft,'rationale',record),{maxlength:4000})}
+      ${input('source','来源或复盘引用',val(draft,'source',record),{maxlength:1000})}</div></details>
+      <div class="manual-form-footer"><span>${record ? '当前 v'+esc(record.revision)+' · 修改会保留旧版本' : '先保存想法，再决定是否遵守'}</span><button type="submit" class="research-button primary" ${state.savingKey===key?'disabled':''}>${state.savingKey===key?'正在保存…':'保存原则'}</button></div></form>`;
+  }
+
+  function renderPrinciples() {
+    const records = arr(state.data?.principles);
+    const active = records.filter(item=>item.status==='active');
+    const shown = state.principleFilter==='all' ? records : records.filter(item=>item.status===state.principleFilter);
+    const cards = shown.map(item=>`<article class="manual-principle-card ${item.status==='active'?'is-active':''}">
+      <div class="manual-section-heading"><span>${esc(labels.principleCategory[item.category] || item.category)}</span><span class="research-badge">${esc(labels.principleStatus[item.status] || item.status)}</span></div>
+      <h3>${esc(item.title)}</h3><p class="manual-principle-body">${esc(item.body)}</p>
+      ${item.rationale || item.source ? `<details class="manual-optional"><summary>依据与来源</summary><p>${esc(item.rationale || '')}</p><small>${esc(item.source || '')}</small></details>`:''}
+      <div class="manual-form-footer"><small>v${esc(item.revision)}</small><button type="button" class="research-button" data-manual-edit-principle="${esc(item.id)}">编辑原则</button></div></article>`).join('');
+    const templates = arr(state.data?.principle_templates);
+    return `<section class="manual-pane"><div class="manual-heading"><div><h2>我的交易原则</h2><p>把反复认可的判断留下来，让每一笔交易都有自己的依据。</p></div><button type="button" class="research-button primary" data-manual-new-principle>＋ 沉淀原则</button></div>
+      <div class="manual-principle-toolbar"><label>查看 <select data-manual-principle-filter aria-label="筛选原则状态">${[['all','全部原则'],...Object.entries(labels.principleStatus)].map(([value,label])=>`<option value="${value}" ${state.principleFilter===value?'selected':''}>${label}</option>`).join('')}</select></label><span>${active.length} 条正在遵守</span><button type="button" class="research-button" data-manual-tab="prepare">按原则准备开单 →</button></div>
+      ${state.principleEditing ? principleEditor() : ''}
+      ${shown.length ? `<div class="manual-principle-grid">${cards}</div>` : `<div class="manual-principle-empty"><h3>${records.length?'这个分类暂时没有原则':'先写下你真正想遵守的原则'}</h3><p>不必一次写成完整的交易手册。从市场判断、入场选择、风险纪律或一次复盘心得开始。</p><button type="button" class="research-button" data-manual-new-principle>写下第一条</button></div>`}
+      ${templates.length ? `<details class="manual-card manual-optional"><summary>参考草稿 · 选择后修改成自己的原则</summary><div class="manual-principle-grid">${templates.map(item=>`<article class="manual-template"><strong>${esc(item.title)}</strong><p>${esc(item.body)}</p><button type="button" class="research-button" data-manual-principle-template="${esc(item.id)}">编辑这条草稿</button></article>`).join('')}</div></details>`:''}
+      <div class="manual-support-row"><span>有需要时，再把原则展开成具体打法。</span><button type="button" class="research-button" data-manual-tab="playbooks">具体打法与历史模板</button></div></section>`;
+  }
+
+  function okxTradeUrl(symbol) {
+    return /^[A-Z0-9]{2,24}-USDT-SWAP$/.test(symbol || '')
+      ? 'https://www.okx.com/trade-swap/' + symbol.toLowerCase() : '';
+  }
+
+  function preparedCard(ticket) {
+    const href = okxTradeUrl(ticket.symbol);
+    const pending = ['watching','planned'].includes(ticket.status);
+    return `<article class="manual-card manual-ready-card"><div><p class="manual-kicker">${pending?'开单准备':'已有关联记录'}</p><h3>${esc(ticket.symbol)} · ${esc(labels.side[ticket.side])} · ${esc(ticket.timeframe)}</h3><p>${pending?'原则已核对。到交易所确认价格、仓位与订单，成交后回来登记。':'已有成交或放弃记录，可继续管理和复盘。'}</p></div>
+      ${ticket.preparation?.notes ? `<p class="manual-principle-body">${esc(ticket.preparation.notes)}</p>`:''}
+      <div class="manual-ready-actions">${pending && ticket.mode==='real' && href ? `<a class="research-button primary" href="${href}" target="_blank" rel="noopener noreferrer">打开 OKX 下单页 ↗</a>`:''}
+      <button type="button" class="research-button" data-manual-record-prepared="${esc(ticket.id)}">${pending?'成交后登记 / 放弃':'查看记录'}</button></div><small>核对时间 ${esc(ticket.preparation?.checked_at || ticket.created_at)} · ${arr(ticket.preparation?.principles).length} 条原则 · ${esc(labels.mode[ticket.mode])}</small></article>`;
+  }
+
+  function renderPreparation() {
+    const principles = arr(state.data?.principles).filter(item=>item.status==='active');
+    const key = state.preparationDraftKey;
+    const draft = state.drafts[key] || {};
+    const prepared = arr(state.data?.tickets).find(item=>item.id===state.preparedTicketId);
+    const pending = arr(state.data?.tickets).filter(item=>item.preparation && ['watching','planned'].includes(item.status) && item.id!==prepared?.id);
+    const checks = principles.map(item=> {
+      const name='check_'+item.id;
+      const checked = String(draft[name] || '') === String(item.revision);
+      return `<label class="manual-principle-check"><input type="checkbox" name="${esc(name)}" value="${esc(item.revision)}" ${checked?'checked':''} required><span><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span><small>${esc(labels.principleCategory[item.category])} · v${esc(item.revision)}</small></span></label>`;
+    }).join('');
+    return `<section class="manual-pane"><div class="manual-heading"><div><h2>开单前，过一遍自己的原则</h2><p>选择机会、核对原则，再去交易所执行。</p></div><a class="research-button" href="#signals">去信号中心看机会 ↗</a></div>
+      ${prepared ? preparedCard(prepared)+`<button type="button" class="research-button" data-manual-new-preparation>准备下一笔</button>` : `<form class="manual-card manual-editor" data-manual-preparation-form data-manual-draft="${key}">
+      <div class="manual-form-grid">${input('symbol','交易合约',draft.symbol || '',{required:true,maxlength:40,placeholder:'例如 BTC-USDT-SWAP'})}
+      ${select('side','交易方向',draft.side || 'long',[{value:'long',label:'做多'},{value:'short',label:'做空'}])}
+      ${input('timeframe','观察周期',draft.timeframe || '',{required:true,maxlength:20,placeholder:'例如 15m'})}
+      ${select('mode','本次用途',draft.mode || 'real',[{value:'real',label:'本人交易'},{value:'practice',label:'手工练习'}])}</div>
+      <div class="manual-checklist"><div class="manual-section-heading"><h3>正在遵守的原则</h3><button type="button" class="research-button" data-manual-tab="principles">维护原则</button></div>
+      ${principles.length ? checks : '<p class="manual-empty">还没有正在遵守的原则。先沉淀原则并启用，再准备开单。</p>'}</div>
+      ${textarea('notes','这笔交易的想法（选填）',draft.notes || '',{maxlength:4000,rows:2})}
+      <input type="hidden" name="signal_ref" value="${esc(draft.signal_ref || '')}">
+      <div class="manual-form-footer"><span>勾选表示本次已核对；开单页中的订单仍由你确认。</span><button type="submit" class="research-button primary" ${!principles.length || state.savingKey===key?'disabled':''}>${state.savingKey===key?'正在保存…':'已核对，准备开单'}</button></div></form>`}
+      ${pending.length ? `<details class="manual-card manual-optional"><summary>之前准备的机会 · ${pending.length} 笔待处理</summary><div class="manual-pane">${pending.map(preparedCard).join('')}</div></details>`:''}
+      <div class="manual-support-row"><span>想先整理今天的环境与关注点？</span><button type="button" class="research-button" data-manual-tab="sessions">盘前计划（可选）</button></div></section>`;
   }
 
   function playbookFields(draft, record) {
@@ -437,7 +519,10 @@
   function ticketSnapshotHTML(ticket) {
     const book = ticket.playbook_snapshot;
     const session = ticket.session_snapshot;
-    return '<div class="manual-snapshot-grid"><article><h4>规则快照</h4><p>' +
+    const principles = arr(ticket.preparation?.principles);
+    const checked = principles.length ? `<details class="manual-optional manual-principle-snapshot"><summary>开单前核对的原则 · ${principles.length} 条</summary><p>核对时间 ${esc(ticket.preparation.checked_at)}</p>${ticket.preparation.notes ? `<p>当时的想法：${esc(ticket.preparation.notes)}</p>`:''}${principles.map(item=>`<article><strong>${esc(item.title)} · v${esc(item.revision)}</strong><p>${esc(item.body)}</p></article>`).join('')}</details>` : '';
+    if (ticket.preparation && !book && !session) return checked;
+    return checked + '<div class="manual-snapshot-grid"><article><h4>打法快照</h4><p>' +
       esc(book ? (book.name || book.id) + " · v" + (book.revision ?? "?") : "未关联个人规则") +
       '</p><small>保存机会时固定的文字版本</small></article><article><h4>盘前计划快照</h4><p>' +
       esc(session ? (session.date || "日期未记录") + " · " + (session.title || session.id) : "未关联盘前计划") +
@@ -636,23 +721,26 @@
       esc(labels.mode[ticket.mode] || "手工记录") + " · v" + esc(ticket.revision ?? "?") + "</p><h3>" +
       esc(ticket.symbol || "未填写合约") + " · " + esc(labels.side[ticket.side] || ticket.side || "方向未填") +
       '</h3></div><span class="research-badge">' + esc(labels.ticketStatus[ticket.status] || ticket.status || "未记录") +
-      "</span></div>" + ticketSnapshotHTML(ticket) + ticketFacts(ticket) +
-      '<div class="manual-section-heading"><h4>事件历史</h4><span>追加记录保留原计划和前序版本</span></div>' +
-      historyHTML(history) + managementHTML(ticket.management) + ticketActions(ticket) + "</article>";
+      "</span></div>" + ticketSnapshotHTML(ticket) + ticketActions(ticket) +
+      (ticket.review?.lesson ? `<div class="manual-support-row"><span>${esc(ticket.review.lesson)}</span><button type="button" class="research-button" data-manual-lesson-principle="${esc(ticket.id)}">沉淀为原则草稿</button></div>`:'') +
+      '<details class="manual-optional"><summary>计划、成交与复盘详情</summary>' + ticketFacts(ticket) + '</details>' +
+      '<details class="manual-optional"><summary>事件历史与持仓管理</summary>' +
+      historyHTML(history) + managementHTML(ticket.management) + '</details></article>';
   }
 
   function renderTickets() {
     const records = arr(state.data?.tickets);
-    return '<section class="manual-pane"><div class="manual-heading"><div><h2>机会与交易</h2><p>只记录本人确认的想法、成交和平仓；所有状态都由本人手工登记。</p></div>' +
-      '<button type="button" class="research-button primary" data-manual-new-ticket>＋ 记录新机会</button></div>' +
+    return '<section class="manual-pane"><div class="manual-heading"><div><h2>记录与复盘</h2><p>交易之后补齐事实，再把值得保留的经验带回原则。</p></div>' +
+      '<div class="manual-ready-actions"><button type="button" class="research-button" data-manual-tab="review">待复盘</button>' +
+      '<button type="button" class="research-button" data-manual-new-ticket>＋ 补录机会 / 成交</button></div></div>' +
       ticketSummaryHTML() +
       '<div class="manual-ticket-layout"><aside class="manual-list-panel"><h3>机会记录 <span class="research-badge">' +
       fmtCount(records.length) + "</span></h3>" +
       (records.length ? '<div class="manual-record-list manual-ticket-list">' + records.map(ticketRow).join("") + "</div>" :
         '<p class="manual-empty">尚无机会记录。观察状态允许先保存不完整假设。</p>') +
       '<div class="manual-related-links"><span>关联信号页面</span><a href="#signals">信号中心 ↗</a><a href="#joints">突破 + spike ↗</a><a href="#breaks">趋势线突破 ↗</a></div></aside>' +
-      '<div class="manual-ticket-main">' + (state.ticketCreate || (records.find((item) => String(item.id) === String(state.selectedTicketId))?.status === "watching" ||
-        records.find((item) => String(item.id) === String(state.selectedTicketId))?.status === "planned") ? ticketEditor() : "") +
+      '<div class="manual-ticket-main">' + (state.ticketCreate || (!records.find((item) => String(item.id) === String(state.selectedTicketId))?.preparation && (records.find((item) => String(item.id) === String(state.selectedTicketId))?.status === "watching" ||
+        records.find((item) => String(item.id) === String(state.selectedTicketId))?.status === "planned")) ? ticketEditor() : "") +
       ticketDetailHTML() + "</div></div>" +
       '<p class="manual-callout">这本账没有交易所连接或自动下单功能。成交填写平均成交价、原始止损和基础币数量；初始价格风险不含费用、funding 与跳空。只有本人填写的净盈亏才进入结果汇总。</p>' +
       "</section>";
@@ -687,13 +775,15 @@
     if (!data && state.loading) body = '<p class="research-empty">正在读取个人手工记录…</p>';
     else if (!data) body = '<div class="research-error" role="alert">' + esc(state.loadError || "尚未读取个人手工记录。") +
       '</div><button type="button" class="research-button" data-manual-refresh>重新读取</button>';
+    else if (state.tab === "principles") body = renderPrinciples();
+    else if (state.tab === "prepare") body = renderPreparation();
     else if (state.tab === "playbooks") body = renderPlaybooks();
     else if (state.tab === "sessions") body = renderSessions();
     else if (state.tab === "tickets") body = renderTickets();
     else body = renderReview();
     root.innerHTML = '<div class="manual-workspace">' +
-      '<header class="manual-hero"><div><p class="manual-kicker">PERSONAL JOURNAL</p><h2>个人手动交易台</h2>' +
-      '<p>由本人记录规则、计划、成交与复盘；本页面不会下单、连接交易所或自动同步仓位。</p></div>' +
+      '<header class="manual-hero"><div><p class="manual-kicker">我的交易系统</p><h2>先有原则，再做交易</h2>' +
+      '<p>沉淀自己的判断，开单前逐条核对；交易后的记录与复盘，让原则逐渐清晰。</p></div>' +
       '<button type="button" class="research-button" data-manual-refresh' + (state.loading ? " disabled" : "") + ">" +
       (state.loading ? "读取中…" : "刷新记录") + "</button></header>" +
       (state.actionError || state.actionMessage ? formMessage() : "") +
@@ -728,7 +818,7 @@
         state.ticketCreate = false;
       }
       const selected = data.tickets.find((item) => String(item.id) === String(state.selectedTicketId));
-      if (state.tab === "tickets" && selected) await loadTicketDetail(selected.id, true);
+      if (["tickets", "review"].includes(state.tab) && selected) await loadTicketDetail(selected.id, true);
       else render();
     } catch (error) {
       state.loadError = error?.message || "读取个人手工记录失败。";
@@ -757,7 +847,7 @@
   }
 
   function activateTab(tab) {
-    if (!own(labels.tabs, tab)) return;
+    if (!own(labels.tabs, tab) && !["playbooks", "sessions", "review"].includes(tab)) return;
     state.tab = tab;
     state.actionError = "";
     state.actionMessage = "";
@@ -800,6 +890,42 @@
   function readyPlaybookFor(ref) {
     const book = currentPlaybook(ref);
     return book && book.status === "ready" ? book : null;
+  }
+
+  function principlePayload(form, record) {
+    const values = formValues(form);
+    const payload = Object.fromEntries(['title','body','category','status','rationale','source'].map(key=>[key,textValue(values,key)]));
+    if (payload.title.length < 2 || !payload.body) throw new Error('请写下原则名称和具体怎么做。');
+    if (record) payload.expected_revision = Number(values.expected_revision || record.revision);
+    return payload;
+  }
+
+  async function savePreparation(form) {
+    const key = form.dataset.manualDraft;
+    rememberForm(form);
+    const values = formValues(form);
+    const active = arr(state.data?.principles).filter(item=>item.status==='active');
+    if (!active.length) throw new Error('先启用至少一条自己认可的原则。');
+    const principles = active.map(item=>({id:item.id,revision:Number(values['check_'+item.id])}));
+    if (principles.some(item=> !item.revision || !active.some(p=>p.id===item.id && p.revision===item.revision))) {
+      throw new Error('请逐条核对当前版本的原则，未核对的原则不能自动通过。');
+    }
+    const payload = {symbol:textValue(values,'symbol').toUpperCase(),side:textValue(values,'side'),
+      timeframe:textValue(values,'timeframe'),mode:textValue(values,'mode'),notes:textValue(values,'notes'),
+      signal_ref:textValue(values,'signal_ref'),principles};
+    if (!okxTradeUrl(payload.symbol) || !payload.timeframe) throw new Error('请填写有效的 OKX 合约和观察周期。');
+    state.savingKey=key; state.actionError=''; state.actionMessage=''; render();
+    try {
+      const saved = await api(endpoint+'/preparations',{method:'POST',body:JSON.stringify(payload)});
+      delete state.drafts[key]; state.dirtyDrafts.delete(key);
+      state.preparedTicketId=saved.id; state.savingKey='';
+      state.actionMessage='开单准备已保存。现在可打开交易所；完成成交后再登记。';
+      await refresh();
+    } catch(error) {
+      state.savingKey='';
+      state.actionError=(error.status===409?'原则可能已更新，请刷新后重新核对。 ':'')+(error.message || '开单准备保存失败。');
+      render();
+    }
   }
 
   function playbookPayload(form, record) {
@@ -937,12 +1063,13 @@
     const key = form.dataset.manualDraft;
     rememberForm(form);
     const id = form.dataset.recordId || "";
-    const record = kind === "playbook" ? arr(state.data?.playbooks).find((item) => String(item.id) === String(id))
+    const record = kind === "principle" ? arr(state.data?.principles).find(item=>item.id===id)
+      : kind === "playbook" ? arr(state.data?.playbooks).find((item) => String(item.id) === String(id))
       : kind === "session" ? arr(state.data?.sessions).find((item) => String(item.id) === String(id))
         : arr(state.data?.tickets).find((item) => String(item.id) === String(id));
-    const payload = kind === "playbook" ? playbookPayload(form, record)
+    const payload = kind === "principle" ? principlePayload(form,record) : kind === "playbook" ? playbookPayload(form, record)
       : kind === "session" ? sessionPayload(form, record) : ticketPayload(form, record);
-    const collection = kind === "playbook" ? "playbooks" : kind === "session" ? "sessions" : "tickets";
+    const collection = kind === "principle" ? "principles" : kind === "playbook" ? "playbooks" : kind === "session" ? "sessions" : "tickets";
     const path = id ? endpoint + "/" + collection + "/" + encodeURIComponent(id) : endpoint + "/" + collection;
     const method = id ? "PUT" : "POST";
     state.savingKey = key;
@@ -954,7 +1081,9 @@
       const saved = result?.item || result?.record || result;
       delete state.drafts[key];
       state.dirtyDrafts.delete(key);
-      if (kind === "playbook" && saved?.id) {
+      if (kind === "principle" && saved?.id) {
+        state.selectedPrincipleId=saved.id; state.principleEditing=false; state.principleFilter='all'; state.tab='principles';
+      } else if (kind === "playbook" && saved?.id) {
         state.selectedPlaybookId = String(saved.id);
         state.playbookCreate = false;
       } else if (kind === "session" && saved?.id) {
@@ -968,7 +1097,7 @@
         state.tab = "tickets";
       }
       state.savingKey = "";
-      state.actionMessage = "已保存。所有成交、盈亏和风险数值均为本人手工记录。";
+      state.actionMessage = kind === 'principle' ? '原则已保存。正在遵守的原则会出现在开单核对中。' : "已保存。所有成交、盈亏和风险数值均为本人手工记录。";
       await refresh();
     } catch (error) {
       state.savingKey = "";
@@ -1036,18 +1165,16 @@
 
   function applySignalDraft(signal) {
     state.pendingSignal = null;
-    state.ticketCreate = true;
-    state.selectedTicketId = "";
-    state.ticketDetail = null;
-    state.ticketDraftKey = nextTicketDraftKey();
-    state.drafts[state.ticketDraftKey] = {
+    state.preparedTicketId = '';
+    state.preparationDraftKey = 'preparation-new-' + (++state.preparationCounter);
+    state.drafts[state.preparationDraftKey] = {
       symbol: signal.symbol, side: signal.side, timeframe: signal.timeframe,
-      signal_ref: signal.signal_ref, status: "watching", mode: "practice",
+      signal_ref: signal.signal_ref, mode: "real",
     };
-    state.dirtyDrafts.delete(state.ticketDraftKey);
-    state.tab = "tickets";
+    state.dirtyDrafts.delete(state.preparationDraftKey);
+    state.tab = "prepare";
     state.actionError = "";
-    state.actionMessage = "已填入一个未保存的观察草稿。价格、止损、数量和盈亏均保持空白。";
+    state.actionMessage = "机会已带入开单准备。先核对自己的原则，再决定是否开单。";
     render();
   }
 
@@ -1060,12 +1187,11 @@
     };
     if (!/^[A-Z0-9]{2,24}-USDT-SWAP$/.test(signal.symbol) ||
         !["long", "short"].includes(signal.side) || !signal.timeframe) {
-      state.tab = "tickets";
+      state.tab = "prepare";
       state.actionError = "无法创建观察草稿：请检查合约、方向和周期。";
       render();
       return false;
     }
-    state.tab = "tickets";
     state.actionError = "";
     state.actionMessage = "";
     if (state.dirtyDrafts.size) {
@@ -1077,6 +1203,7 @@
       applySignalDraft(signal);
       return true;
     }
+    state.tab = "prepare";
     state.pendingSignal = signal;
     render();
     if (!state.loading) refresh();
@@ -1092,6 +1219,40 @@
       const tab = target.closest?.("[data-manual-tab]");
       if (tab) { activateTab(tab.dataset.manualTab); return; }
       if (target.closest?.("[data-manual-refresh]")) { refresh(); return; }
+      if (target.closest?.('[data-manual-new-principle]')) {
+        state.selectedPrincipleId=''; state.principleEditing=true; state.tab='principles'; state.actionError=''; render(); return;
+      }
+      if (target.closest?.('[data-manual-close-principle]')) { state.principleEditing=false; render(); return; }
+      if (target.closest?.('[data-manual-reload-principle]')) {
+        const key='principle-'+state.selectedPrincipleId;
+        delete state.drafts[key]; state.dirtyDrafts.delete(key); state.actionError=''; render(); return;
+      }
+      const editPrinciple=target.closest?.('[data-manual-edit-principle]');
+      if (editPrinciple) {
+        state.selectedPrincipleId=editPrinciple.dataset.manualEditPrinciple; state.principleEditing=true; state.actionError=''; render(); return;
+      }
+      const principleTemplate=target.closest?.('[data-manual-principle-template]');
+      const lessonPrinciple=target.closest?.('[data-manual-lesson-principle]');
+      if (principleTemplate || lessonPrinciple) {
+        const template=principleTemplate ? arr(state.data?.principle_templates).find(item=>item.id===principleTemplate.dataset.manualPrincipleTemplate) : null;
+        const ticket=lessonPrinciple ? arr(state.data?.tickets).find(item=>item.id===lessonPrinciple.dataset.manualLessonPrinciple) : null;
+        const fields=template || (ticket?.review?.lesson ? {title:'复盘原则 · '+ticket.symbol,body:ticket.review.lesson,
+          category:'mindset',rationale:ticket.review.notes || '',source:'个人交易复盘 '+ticket.id} : null);
+        if (fields) {
+          if (state.dirtyDrafts.has('principle-new')) { state.actionError='有未保存的原则草稿，请先保存后再导入。'; render(); return; }
+          state.drafts['principle-new']={title:fields.title || '',body:fields.body || '',category:fields.category || 'mindset',
+            rationale:fields.rationale || '',source:fields.source || '',status:'draft'};
+          state.dirtyDrafts.add('principle-new'); state.selectedPrincipleId=''; state.principleEditing=true; state.tab='principles';
+          state.actionError=''; state.actionMessage='已带入原则草稿，修改并保存后再决定是否启用。'; render();
+        }
+        return;
+      }
+      if (target.closest?.('[data-manual-new-preparation]')) {
+        state.preparedTicketId=''; state.preparationDraftKey='preparation-new-'+(++state.preparationCounter);
+        state.actionError=''; state.actionMessage=''; render(); return;
+      }
+      const preparedRecord=target.closest?.('[data-manual-record-prepared]');
+      if (preparedRecord) { state.tab='tickets'; loadTicketDetail(preparedRecord.dataset.manualRecordPrepared); return; }
       if (target.closest?.("[data-manual-new-playbook]")) {
         state.selectedPlaybookId = ""; state.playbookCreate = true; state.actionError = ""; render(); return;
       }
@@ -1157,6 +1318,9 @@
       if (form) rememberForm(form);
     });
     root.addEventListener("change", (event) => {
+      if (event.target.matches?.('[data-manual-principle-filter]')) {
+        state.principleFilter=event.target.value; render(); return;
+      }
       const form = event.target.closest?.("form[data-manual-draft]");
       if (!form) return;
       if (event.target.name === "playbook_ref" && form.matches?.("[data-manual-ticket-form]")) {
@@ -1165,15 +1329,17 @@
       }
       rememberForm(form);
     });
-    root.addEventListener("submit", (event) => {
-      const form = event.target.closest?.("form[data-manual-playbook-form], form[data-manual-session-form], form[data-manual-ticket-form], form[data-manual-event-form]");
+    root.addEventListener("submit", async (event) => {
+      const form = event.target.closest?.("form[data-manual-principle-form], form[data-manual-preparation-form], form[data-manual-playbook-form], form[data-manual-session-form], form[data-manual-ticket-form], form[data-manual-event-form]");
       if (!form) return;
       event.preventDefault();
       try {
-        if (form.matches("[data-manual-playbook-form]")) saveRecord(form, "playbook");
-        else if (form.matches("[data-manual-session-form]")) saveRecord(form, "session");
-        else if (form.matches("[data-manual-ticket-form]")) saveRecord(form, "ticket");
-        else saveEvent(form);
+        if (form.matches('[data-manual-principle-form]')) await saveRecord(form,'principle');
+        else if (form.matches('[data-manual-preparation-form]')) await savePreparation(form);
+        else if (form.matches("[data-manual-playbook-form]")) await saveRecord(form, "playbook");
+        else if (form.matches("[data-manual-session-form]")) await saveRecord(form, "session");
+        else if (form.matches("[data-manual-ticket-form]")) await saveRecord(form, "ticket");
+        else await saveEvent(form);
       } catch (error) {
         rememberForm(form);
         state.actionError = error?.message || "无法保存这条记录。";

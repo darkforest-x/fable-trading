@@ -1,4 +1,5 @@
 import asyncio
+import os
 import tempfile
 from pathlib import Path
 
@@ -15,8 +16,9 @@ def test_latest_tunnel_url_uses_newest_log():
         new = Path(td) / "new.log"
         old.write_text("https://old-address.trycloudflare.com\n")
         new.write_text("https://new-address.trycloudflare.com\n")
-        old.touch()
-        new.touch()
+        # Explicit mtimes: two writes in the same instant tie on CI filesystems.
+        os.utime(old, (1_000, 1_000))
+        os.utime(new, (2_000, 2_000))
 
         assert latest_tunnel_url((old, new)) == "https://new-address.trycloudflare.com"
 

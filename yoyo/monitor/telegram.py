@@ -1,9 +1,8 @@
 """Telegram Bot API delivery with explicit receipts and conservative retries.
 
 Source: https://core.telegram.org/bots/api#sendphoto, #sendmessage and #responseparameters.
-The owner has disabled this channel: workers default off and never load
-credentials or claim outboxes while disabled. Explicit test opt-in retains
-delivery/receipt coverage. Credentials never enter API responses or logs.
+The ordinary V12.8 and joint adapters use separate outboxes on this channel.
+Credentials never enter API responses or logs.
 """
 from __future__ import annotations
 
@@ -13,8 +12,10 @@ import json
 import requests
 
 from yoyo.monitor import SIGNAL_KIND, TV_INTERVALS
+from yoyo.monitor.joint_notifications import JOINT_PROTOCOL
 from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
+from yoyo.monitor.v130_policy import SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL
 from yoyo.notify import _load
 
 
@@ -31,15 +32,35 @@ def message(event):
         return datetime.fromtimestamp(value / 1000, timezone(timedelta(hours=8))).strftime("%m-%d %H:%M")
     side = "🟢 多头" if event["side"] == "long" else "🔴 空头"
     symbol = event["symbol"].removesuffix("-SWAP")
+    if event.get("protocol") == JOINT_PROTOCOL and event.get("kind") == "joint":
+        source = {"chart": "本周期", "higher": "上级周期", "both": "本周期 + 上级周期"}.get(
+            event.get("source"), "本周期")
+        stop = event.get("reference_stop")
+        reference = "—" if not isinstance(stop, (int, float)) else f"{stop:.10g}"
+        return (f"突破+spike · {symbol} · {event['timeframe']} · {side}\n"
+                f"多头框内 · {source}突破\n"
+                f"收盘价 {event['price']:.10g} · {clock(event['bar_close_ms'])} 北京收盘\n"
+                f"原始 SPIKE 时间 {clock(event['v9_signal_close_ms'])} 北京时间\n"
+                f"参考止损（非成交价） {reference}")
+    if event.get("protocol") == V130_PROTOCOL and event.get("kind") == V130_KIND:
+        return (f"{symbol} · {event['timeframe']} · {side}\n"
+                f"V13.1 {event['timeframe']} 回踩再突破 · 后台确认\n"
+                f"锚点 {clock(event['anchor_close_ms'])} · 突破 {clock(event['breakout_close_ms'])}\n"
+                f"回踩 {clock(event['retest_close_ms'])} · 最终确认收盘 {clock(event['bar_close_ms'])}\n"
+                f"确认收盘价 {event['price']:.10g} · 参考价格 {event['reference_price']:.10g}\n"
+                f"风险参考 {event['risk']:.10g} · 初始止损 {event['initial_stop']:.10g}\n"
+                "次开参考，不代表成交；后台计算，未逐根核验 TradingView 图上信号")
     if event["kind"] == SIGNAL_KIND:
         return (f"{symbol} · {event['timeframe']} · {side}\n"
-                "指标启动 · 未经 YOLO 确认\n"
-                f"收盘价 {event['price']:.10g} · {clock(event['bar_close_ms'])} 北京时间")
+                "V12.8 后台信号 · 未经 YOLO 确认\n"
+                f"收盘价 {event['price']:.10g} · {clock(event['bar_close_ms'])} 北京时间\n"
+                "来源：后台计算；未核验 TradingView 图上信号")
     indicator, model = event["indicator"], event["model"]
     return (f"{symbol} · {event['timeframe']} · {side}\n"
-            f"YOLO 确认 · 等待 {model['wait_bars']} 根\n"
+            f"V12.8 后台信号 · YOLO 确认 · 等待 {model['wait_bars']} 根\n"
             f"确认 {event['price']:.10g} · {clock(event['bar_close_ms'])}\n"
-            f"原箭头 {indicator['price']:.10g} · {clock(indicator['bar_close_ms'])} 北京时间")
+            f"原始信号 {indicator['price']:.10g} · {clock(indicator['bar_close_ms'])} 北京时间\n"
+            "来源：后台计算；未核验 TradingView 图上信号")
 
 
 def markup(event):

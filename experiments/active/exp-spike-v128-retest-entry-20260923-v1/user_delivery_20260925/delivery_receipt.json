@@ -1,0 +1,162 @@
+{
+  "generated_on": "2026-09-25",
+  "workbook": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v128-retest-entry-20260923-v1/user_delivery_20260925/回测明细_20260723-20260923.xlsx",
+    "sha256": "e57a8ade8cc08d55da3227a9cd85ca693cccec6464a56a26c64b15d2dc39ae8a",
+    "sheets": [
+      {
+        "name": "普通15m",
+        "header_rows": 1,
+        "data_rows": 638
+      },
+      {
+        "name": "普通1h",
+        "header_rows": 1,
+        "data_rows": 638
+      },
+      {
+        "name": "联合15m",
+        "header_rows": 1,
+        "data_rows": 638
+      },
+      {
+        "name": "联合1h",
+        "header_rows": 1,
+        "data_rows": 638
+      },
+      {
+        "name": "逐笔交易",
+        "header_rows": 1,
+        "data_rows": 12131
+      },
+      {
+        "name": "说明",
+        "used_rows": 26,
+        "nonblank_rows": 24
+      }
+    ],
+    "sample_source_checks": {
+      "普通15m": [
+        {
+          "data_row_index_zero_based": 0,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 319,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 637,
+          "values_checked": 43
+        }
+      ],
+      "普通1h": [
+        {
+          "data_row_index_zero_based": 0,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 319,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 637,
+          "values_checked": 43
+        }
+      ],
+      "联合15m": [
+        {
+          "data_row_index_zero_based": 0,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 319,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 637,
+          "values_checked": 43
+        }
+      ],
+      "联合1h": [
+        {
+          "data_row_index_zero_based": 0,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 319,
+          "values_checked": 43
+        },
+        {
+          "data_row_index_zero_based": 637,
+          "values_checked": 43
+        }
+      ],
+      "逐笔交易": [
+        {
+          "data_row_index_zero_based": 0,
+          "values_checked": 19
+        },
+        {
+          "data_row_index_zero_based": 6065,
+          "values_checked": 19
+        },
+        {
+          "data_row_index_zero_based": 12130,
+          "values_checked": 19
+        }
+      ]
+    },
+    "filters_and_frozen_headers": true
+  },
+  "zip": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v128-retest-entry-20260923-v1/user_delivery_20260925/回测明细_20260723-20260923.zip",
+    "sha256": "55a73f2004b3324043c3570fda480daca2279b07d1a8361214170d929d813a8a",
+    "entries": [
+      "回测明细_20260723-20260923.xlsx",
+      "逐币原版回踩对照.csv",
+      "symbol_metrics.csv",
+      "trade_details_beijing.csv",
+      "receipt.json",
+      "config.json"
+    ]
+  },
+  "source_sha256": {
+    "逐币原版回踩对照.csv": "3cd14e01458831826b0fa2624d64b8eaaf62cb00214ab859e5748e6a416e5dd0",
+    "symbol_metrics.csv": "0de72212b6a7ee032599fb310f402d29d0820cc76b8ba528a2988ff32e294bf3",
+    "trade_details_beijing.csv": "73183a16132d90640aa2f08078a8ca0a4fbbfee07b378457ca899a723b2aea74"
+  },
+  "source_receipt": {
+    "symbols": 638,
+    "comparison_rows": 2552,
+    "metric_rows": 5104,
+    "trade_rows": 12131,
+    "ready_symbols": 583,
+    "trade_status_counts": {
+      "closed": 11877,
+      "censored_boundary": 254
+    }
+  },
+  "qa_preview": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v128-retest-entry-20260923-v1/user_delivery_20260925/qa_preview_说明.png",
+    "sha256": "c00dcab4356c26a09b17e201b776b0965e603061721150044e79b53038333f59",
+    "sheet": "说明",
+    "range": "A1:H26",
+    "visually_reviewed": true
+  },
+  "verification": {
+    "xlsx_reopened": true,
+    "source_samples_checked": true,
+    "formula_errors": 0,
+    "table_filters_verified": true,
+    "frozen_header_sheets": [
+      "普通15m",
+      "普通1h",
+      "联合15m",
+      "联合1h",
+      "逐笔交易"
+    ],
+    "zip_entries_verified": true,
+    "embedded_xlsx_matches_delivery_xlsx": true
+  }
+}

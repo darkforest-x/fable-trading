@@ -1,4 +1,4 @@
-"""Isolated YOLO-extra worker for persisted, causal SPIKE V9 candidates."""
+"""Isolated YOLO-extra worker for persisted, causal SPIKE V12.8 candidates."""
 from __future__ import annotations
 
 import threading
@@ -13,7 +13,7 @@ from yoyo.monitor.store import Store
 def model_forever(database: str, interval_seconds: float = 3.0) -> None:
     """Run model loading/inference outside the FastAPI interpreter.
 
-    The scanner persists only closed V9 charts and candidates. This worker
+    The scanner persists only closed V12.8 charts and candidates. This worker
     reads those records, so expensive Torch initialization cannot delay the
     loopback health or status endpoints and replay rows remain excluded.
     """
@@ -22,7 +22,7 @@ def model_forever(database: str, interval_seconds: float = 3.0) -> None:
         client.synchronize()
     except Exception:
         pass
-    gate = ModelGate(store, client.clock, stop)
+    gate = ModelGate(store, client.clock, stop, telegram_enabled=True)
     thread = threading.Thread(target=gate.run, name="spike-v9-yolo", daemon=True)
     thread.start()
     while True:

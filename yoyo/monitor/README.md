@@ -1,6 +1,77 @@
 # Fable · Impulse Monitor
 
-## 当前运行：SPIKE V9（2026-09-15）
+## 当前运行：SPIKE V12.8（2026-09-24，服务 1.19.0）
+
+Owner 要求信号中心使用最新 Pine 逻辑。普通信号生产者为 `v128_signals.py`：
+15m 追加 V12.8 默认的 H1 SMA60 方向门，取本图 K 线开盘时已经完成的连续 60 根 H1；
+多头严格高于、空头严格低于，缺小时或预热不足不出信号。其它监控周期保持原准入。
+独立突破/联合生产者为 `v128_lines.py`，使用 V12.6 有序配对引擎（V12.8 的父版）和
+V12.8 原价格退出；RSI 提前退出不属于该 Pine 版本。Python 趋势线 pivot 同值边界尚未
+完成 TradingView 原生逐事件对账，不宣称所有市场/设置完全一致。
+
+普通与联合账本均使用新协议和持久通知切点。旧 V9 普通信号、V11.2 联合记录及发送回执
+保留在旧版视图；新版预热重算不补发通知。重启不会重置切点。普通启动和 YOLO 补充确认
+均支持 Bark + Telegram，多空独立；联合信号继续支持双渠道，其原策略仅产生多头。
+30 分钟新鲜度与固定成本未调整。此次没有更改 Pine 源文件。
+
+## 本人公网访问试用（2026-09-24）
+
+使用 Cloudflare Quick Tunnel → Caddy 免登录网关 `127.0.0.1:8780` → 原工作台 `127.0.0.1:8766`。
+8771 继续通过统一工作台内部代理访问，不单独公开；监控与视觉服务无需改监听地址。
+Owner 于 2026-09-24 明确要求去掉登录；页面、API、图片和下载均无需账号密码。
+持有链接即可访问完整工作台。公网写请求仍先核对外部 HTTPS Origin，再转换为原有本机同源请求；
+浏览器遗留的 Authorization、Cookie 等凭据不传给后端。
+公网看图打开当前设备的 TradingView 网页，本机访问保留原桌面调用；网关拦截远程桌面打开接口。
+
+```bash
+brew install cloudflared caddy
+.venv/bin/python -m yoyo.monitor.public_tunnel start
+.venv/bin/python -m yoyo.monitor.public_tunnel status
+.venv/bin/python -m yoyo.monitor.public_tunnel stop
+```
+
+独立 LaunchAgent 负责重启，`stop` 仅移除这两项公网服务，原监控继续运行。配置和日志在
+`~/Library/Application Support/Fable/PublicTunnel/`；目录 0700，配置与入口说明 0600。
+`access.txt` 只记录地址与免登录说明，不入 Git；旧凭据文件不再读取或使用。
+`start` 先验证配置，有变化时仅重启 Caddy，保留正在运行的隧道和地址；重复执行不恢复登录。
+`status` 显示最近取得的 URL、`access_mode=no_login` 与匿名可用性 `gateway_ready`。
+隧道重建会产生新地址，Mac 需保持在线；Quick Tunnel 无 SLA、不支持浏览器 SSE，仅适合试用。
+当前 VLM 服务端聚合模型 SSE 后返回 JSON，因此不依赖浏览器 SSE 通道；真实付费调用未在本次公网测试中验证。
+
+## 统一通知中心（2026-09-24）
+
+入口为侧栏“运维 → 通知中心”（`/#notifications`）。三类来源为 SPIKE V12.8 启动、
+YOLO 补充确认、突破＋spike 联合信号，各自独立选择 Telegram / Bark。页面汇总渠道状态、
+订阅、累计服务接受回执及失败/未知状态；记录支持渠道、来源、发送状态、方向、周期、
+合约筛选和服务端分页。旧版回执单独标识，不冒充 V12.8 新通知。
+
+`notification_center.py` 管理运行目录内的 `notifications.sqlite3` 订阅表和修改审计，
+只读汇总原有普通/联合账本的四个 outbox。生产者与发送前检查使用同一订阅规则，
+每个渠道只有一个发送循环，轮流处理普通与联合队列。一个来源未就绪不会阻塞另一个。
+两渠道独立认领、持久化回执；同一事件不会因另一渠道成功而消失。
+
+本次首次启用普通 Telegram 时另存经过交易所校时的启用切点，保留 Bark 原切点。
+重启不重置；订阅重新开启以开启时点为新边界，不补发历史，YOLO 也校验原始启动时间。
+关闭不会撤回已开始的 HTTP 请求；429 仍限次重试，未知结果不自动重发。
+服务接受只说明 Telegram/Bark 接口接受请求，不代表设备收到或已读。
+
+API 为 `GET /api/notifications`、`GET /api/notifications/events` 和
+`PUT /api/notifications/routes/{topic}/{channel}`。写入只允许同源页面明确修改布尔开关，
+不开放密钥修改、历史重推或测试推送。已有私有凭据继续由原渠道适配器加载。
+
+以下章节记录先前版本的交付与操作背景；当前身份以本节、API 协议及事件源哈希为准。
+
+## 联合信号通知（2026-09-22，监控服务 1.16.0）
+
+Owner 授权“突破+spike”同时推送 Bark 和既有 TG 入口“Yolo均线密集交易系统”。
+联合信号在独立 lines 账本中保存双通道队列、启用切点和回执；只发启用后首次发现、
+收盘后30分钟内的 15m/30m/1H/4H 联合信号。历史、重复和普通趋势线突破不入队。
+两通道独立发送；429 限次重试，发送结果未知不自动重发。页面显示各自回执。
+V9 原始启动及 YOLO 追加仍保持原 Bark 范围，其 TG 继续关闭。通知不执行交易。
+本次双通道测试均获服务端接受；测试消息不计为行情信号。
+详见 `analysis/p1_spike_joint_notifications_20260922.md`。
+
+## 历史迁移：SPIKE V9（2026-09-15）
 
 Owner 已授权前端与 Bark 改为 V9，并删除此前信号。本次使用 V9 原始多空准入，
 保留 15m/30m/1H/4H 与两阶段 Bark，Telegram 关闭。算法依次使用 V6 结构、

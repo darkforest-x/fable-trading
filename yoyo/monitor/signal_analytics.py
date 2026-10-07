@@ -3,6 +3,8 @@
 The immutable original close assigns an observation to a Beijing calendar
 period. Current closed-bar performance is a mutable reference projection;
 YOLO confirmation reuses its original event's projection and is counted once.
+The V13.1 retest cohort (``confirmation="retest"``, the signal center since
+2026-10-07) carries its own projection and starts at its forward cutover.
 No future feature computation, strategy changes, or outbox writes occur here.
 """
 from __future__ import annotations
@@ -12,7 +14,10 @@ import unicodedata
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import (FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, SIGNAL_PROTOCOL,
+                          SHORT_SIGNAL_PROTOCOL, TIMEFRAMES, LEGACY_SIGNAL_PROTOCOL,
+                          LEGACY_SIGNAL_KIND, LEGACY_MODEL_PROTOCOL, BARK_ARM_KEY)
+from yoyo.monitor.v130_policy import POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL
 
 TZ = ZoneInfo("Asia/Shanghai")
 OUTCOMES = {"active", "profit", "loss", "breakeven", "unknown"}
@@ -81,31 +86,49 @@ def summarize(rows):
 
 def ledger(store, *, now, source="live", confirmation="raw", period="all", timeframe=None,
            side=None, search="", outcome="all", sort="newest", offset=0, limit=24):
-    if (source not in ("live", "warmup", "replay") or confirmation not in ("raw", "yolo")
+    if (source not in ("live", "warmup", "replay", "legacy") or confirmation not in ("raw", "yolo", "retest")
+            or (confirmation == "retest" and source != "live")
             or period not in ("all", "today", "week") or timeframe not in (None, *TIMEFRAMES)
             or side not in (None, "long", "short") or outcome not in ("all", *OUTCOMES)
             or sort not in ("newest", "oldest", "r_desc", "r_asc")):
         raise ValueError("unsupported ledger filter")
     cutoff = None
-    if source != "replay":
-        receipt = store.get_meta("notification_policy:v9_bark_arm", {})
+    own = confirmation == "retest"
+    if own:
+        # V13.1 has its own forward boundary; nothing before it is journaled.
+        receipt = store.get_meta("notification_policy:" + V130_POLICY, {})
         cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
         if type(cutoff) is not int or cutoff < 0:
-            raise RuntimeError("未找到 V9 首次启用时间，暂不混合展示实时与预热历史。")
-    rows = store.list_events(source="replay" if source == "replay" else "live",
-                             display_scope=None if source == "replay" else source,
-                             display_cutoff_ms=cutoff, summary=True, complete=True)
+            raise RuntimeError("V13.1 正在初始化，等待首次同步完成。")
+    elif source in ("live", "warmup"):
+        receipt = store.get_meta(BARK_ARM_KEY, {})
+        cutoff = receipt.get("activated_ms") if isinstance(receipt, dict) else None
+        if type(cutoff) is not int or cutoff < 0:
+            raise RuntimeError("V12.8 正在初始化，等待首次同步完成。")
+    legacy = source == "legacy"
+    raw_kind = LEGACY_SIGNAL_KIND if legacy else SIGNAL_KIND
+    raw_protocol = LEGACY_SIGNAL_PROTOCOL if legacy else SIGNAL_PROTOCOL
+    model_protocol = LEGACY_MODEL_PROTOCOL if legacy else MODEL_PROTOCOL
+    if own:
+        rows = [r for r in store.list_events(source="live", kind=V130_KIND, protocol=V130_PROTOCOL,
+                                             confirmation="retest", summary=True, complete=True)
+                if finite(r.get("bar_close_ms")) and r["bar_close_ms"] > cutoff]
+    else:
+        rows = store.list_events(source="replay" if source == "replay" else "live",
+                                 protocol=(raw_protocol, model_protocol),
+                                 display_scope=source if source in ("live", "warmup") else None,
+                                 display_cutoff_ms=cutoff, summary=True, complete=True)
     raw = {}
-    for r in rows:
-        if (r.get("kind") == SIGNAL_KIND and r.get("protocol") == SIGNAL_PROTOCOL
+    for r in ([] if own else rows):
+        if (r.get("kind") == raw_kind and r.get("protocol") == raw_protocol
                 and r.get("confirmation") in ("raw", "raw_yolo")):
             # Old combined rows cannot create a second raw observation or
             # constitute a current-protocol YOLO proof by their name alone.
             canonical_id = store.event_id(dict(r, confirmation="raw"))
             if canonical_id not in raw or r.get("confirmation") == "raw":
                 raw[canonical_id] = r
-    selected = list(raw.values()) if confirmation == "raw" else [r for r in rows if
-        r.get("kind") == MODEL_KIND and r.get("protocol") == MODEL_PROTOCOL and r.get("confirmation") == "yolo"]
+    selected = rows if own else list(raw.values()) if confirmation == "raw" else [r for r in rows if
+        r.get("kind") == MODEL_KIND and r.get("protocol") == model_protocol and r.get("confirmation") == "yolo"]
     start, query = period_start(now, period), search_key(search)
     unique = {}
     for row in selected:
@@ -126,7 +149,8 @@ def ledger(store, *, now, source="live", confirmation="raw", period="all", timef
             continue
         # Embedded confirmation-time snapshots are stale when their journal
         # origin is missing; retain the event for inspection with unknown R.
-        row = dict(row, performance=raw[key].get("performance") if key in raw else None, origin_close_ms=origin_close,
+        projection = row.get("performance") if own else raw[key].get("performance") if key in raw else None
+        row = dict(row, performance=projection, origin_close_ms=origin_close,
                    display_scope=source, is_fresh=source == "live" and 0 <= now - row["bar_close_ms"] <= FRESH_MS)
         status, value = performance(row)
         if isinstance(row["performance"], dict):

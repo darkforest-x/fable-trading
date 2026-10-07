@@ -1,0 +1,470 @@
+--- a/yoyo/monitor/service.py
++++ b/yoyo/monitor/service.py
+@@ -180,7 +180,9 @@
+                     # read in the worker guard so transient DB errors cannot
+                     # terminate the whole channel loop.
+                     if source == "ordinary" and store.get_meta(ordinary_arm) is None:
+-                        continue
++                        prefix = "notification_policy:" if channel == "telegram" else "notification_policy:bark:"
++                        if store.get_meta(prefix + "spike-burst-v130-retest-notifications-v1") is None:
++                            continue
+                     if source == "joint":
+                         clock = store.get_meta("joint_notification_clock", {})
+                         offset = clock.get("offset_ms") if isinstance(clock, dict) else None
+@@ -446,7 +448,11 @@
+                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
+                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
+                     "candle_storage": "memory_only", "history_days": 7,
+-                    "signal_mode": "SPIKE V12.8 多空 15m/30m/1H/4H；Telegram + Bark 启动与 YOLO 追加确认", "signal_kind": MODEL_KIND,
++                    "signal_mode": "V13.0 普通多空回踩仅15m；旧版记录与独立YOLO订阅保留", "signal_kind": MODEL_KIND,
++                    "v130": {"protocol": "spike-burst-v130-retest-monitor-v1", "timeframes": ["15m"],
++                             "candidate_source": "ordinary_both", "orders_enabled": False,
++                             "last_observation": self.store.get_meta("v130:last_observation", {}),
++                             "activation": self.store.get_meta("notification_policy:spike-burst-v130-retest-notifications-v1", {})},
+                     "notification_mode": "two_stage" if arm_receipt else "two_stage_disarmed", "direct_timeframes": list(DIRECT_TIMEFRAMES),
+                     "notification_channels": ["telegram", "bark"],
+                     "bark_timeframes": list(BARK_TIMEFRAMES),
+--- a/yoyo/monitor/server.py
++++ b/yoyo/monitor/server.py
+@@ -110,6 +110,21 @@
+     def status():
+         dispatch_trace("handler:/api/status")
+         return monitor.status()
++
++    @app.get("/api/v13/signals")
++    def v13_signals(limit: int = Query(100, ge=1, le=1000), symbol: str = None):
++        from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as protocol, SIGNAL_KIND as kind
++        arm = store.get_meta("notification_policy:spike-burst-v130-retest-notifications-v1", {})
++        rows = store.list_events(limit=limit, symbol=symbol, timeframe="15m", kind=kind,
++                                 protocol=protocol, source="live", confirmation="retest", summary=False)
++        clock = monitor.client.clock()
++        for row in rows:
++            row["is_fresh"] = 0 <= clock - row["bar_close_ms"] <= FRESH_MS
++        return {"items": rows, "protocol": protocol, "timeframes": ["15m"],
++                "candidate_source": "ordinary_both", "activation": arm,
++                "signals_24h": store.count_since(clock - 86400000, kind=kind, protocol=protocol),
++                "last_observation": store.get_meta("v130:last_observation", {}),
++                "now_ms": clock, "orders_enabled": False, "chart_parity_verified": False}
+ 
+     @app.get("/api/health")
+     @app.get("/healthz")
+--- a/yoyo/monitor/v9_worker.py
++++ b/yoyo/monitor/v9_worker.py
+@@ -98,6 +98,8 @@
+         cutoff = reset["activated_ms"]
+         arm_v9_bark(store, client.clock())
+         arm_v9_telegram(store, client.clock())
++        from yoyo.monitor.v130_policy import arm_v130
++        arm_v130(store, client.clock())
+         from yoyo.monitor.version_upgrade import record_upgrade
+         record_upgrade(store, client.clock())
+         if not self.instruments or started - self.universe_at >= 3_600_000:
+@@ -152,6 +154,9 @@
+                     higher = self.candles.get((symbol, "1H"), []) if timeframe == "15m" else []
+                     fingerprint = {"close_ms": close, "protocol": SIGNAL_PROTOCOL,
+                                    "higher_open_ms": higher[-1]["t"] if higher else None}
++                    if timeframe == "15m":
++                        from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as V130_PROTOCOL, SOURCE_SHA256
++                        fingerprint.update(v130_protocol=V130_PROTOCOL, v130_source_sha256=SOURCE_SHA256)
+                     unchanged = close is not None and store.get_meta(key) == fingerprint
+                     if not candles:
+                         raise RuntimeError("market_data_unavailable")
+@@ -169,8 +174,15 @@
+                     if not unchanged:
+                         analyze_started = time.monotonic()
+                         analyze_cpu_started = time.thread_time()
++                        context = {}
+                         result = analyze(candles, higher, timeframe, tick=float(instrument["tickSz"]),
+-                                         base_asset=instrument_base(instrument), chart_limit=240)
++                                         base_asset=instrument_base(instrument), chart_limit=240,
++                                         **({"_context": context} if timeframe == "15m" else {}))
++                        retest = None
++                        if timeframe == "15m":
++                            from yoyo.monitor.v130_worker import observe
++                            retest = observe(store, result, context, symbol=symbol,
++                                             tick=float(instrument["tickSz"]), clock=client.clock)
+                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
+                         analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
+                         # Warmup may calculate old decisions, but they cannot
+@@ -205,6 +217,9 @@
+                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
+                                      chart=[dict(row, burst=False, burst_up=False, burst_down=False) if row["t"] + TIMEFRAMES[timeframe] <= cutoff else row
+                                             for row in result["chart"]], events=events[-100:])
++                        if retest is not None:
++                            state["v130"] = retest["state"]
++                            state["v130_events"] = retest["events"][-100:]
+                         store.upsert_market(state); store.set_meta(key, fingerprint)
+                 except Exception as exc:
+                     scan["errors"] += 1
+--- a/yoyo/monitor/__init__.py
++++ b/yoyo/monitor/__init__.py
+@@ -1,6 +1,6 @@
+ """Owner-authorized, notification-only SPIKE V12.8 monitor."""
+ 
+-VERSION = "1.19.0"
++VERSION = "1.20.0"
+ STRATEGY_VERSION = "spike-v12.8-monitor-20260923-v1"
+ SIGNAL_PROTOCOL = "spike-burst-v128-monitor-v1"
+ SIGNAL_KIND = "spike_burst_v128"
+--- a/yoyo/monitor/v128_signals.py
++++ b/yoyo/monitor/v128_signals.py
+@@ -154,7 +154,8 @@
+ 
+ 
+ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, tick: float,
+-            base_asset: str | None, chart_limit: int | None = None) -> AnalysisResult:
++            base_asset: str | None, chart_limit: int | None = None,
++            _context: dict | None = None) -> AnalysisResult:
+     """Return V12.8 ordinary confirmation observations for closed candles.
+ 
+     15m entries require the strict directional close versus the prior completed
+@@ -212,6 +213,10 @@
+     else:
+         h1_gate_allowed = np.ones(len(built), dtype=bool)
+     v128_admitted = v9_admitted & h1_gate_allowed
++    # The notification-only V13 adapter shares this exact closed prefix. Keep
++    # pandas objects off the JSON/chart payload and avoid a second kernel pass.
++    if _context is not None:
++        _context.update(built=built, evidence=evidence, admitted=v128_admitted)
+ 
+     projection = project(built, evidence, minutes=step // 60_000, tick=float(tick),
+                          data_gap=built.attrs["data_gap"], admitted=v128_admitted)
+--- a/yoyo/monitor/static/index.html
++++ b/yoyo/monitor/static/index.html
+@@ -25,6 +25,8 @@
+   <script src="/static/notifications.js" defer></script>
+   <link rel="stylesheet" href="/static/knowledge.css">
+   <script src="/static/knowledge.js" defer></script>
++  <link rel="stylesheet" href="/static/v130.css">
++  <script src="/static/v130.js" defer></script>
+   <script src="/static/app.js" defer></script>
+ </head>
+ <body>
+@@ -54,6 +56,7 @@
+         <button class="nav-item" data-view="strategies" aria-label="策略库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16V5h14v11M6 12l2-3 2 2 4-5"/><path d="M5 18h10"/></svg><span>策略库</span></button>
+         <button class="nav-item" data-view="experiments" aria-label="实验登记"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"/></svg><span>实验登记</span></button>
+         <div class="sidebar-label nav-group-label" aria-hidden="true">验证与运行</div>
++        <button class="nav-item" data-view="retest" aria-label="V13 回踩 15m"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m2 16 5-8 4 4 7-10M2 12h16"/></svg><span>V13 回踩 · 15m</span></button>
+         <button class="nav-item" data-view="backtests" aria-label="回测任务"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"/></svg><span>回测任务</span></button>
+         <button class="nav-item" data-view="paper" aria-label="模拟实盘"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 13l3-3 2 2 3-5"/><path d="M6 6h.1M10 6h.1M14 6h.1"/></svg><span>模拟实盘</span></button>
+         <button class="nav-item active" data-view="signals" aria-label="信号中心" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 11h4l3-7 3 12 3-6h3"/></svg><span>信号中心</span><span class="nav-count" title="24 小时指标启动数" id="nav-signal-count">—</span></button>
+@@ -63,7 +66,7 @@
+         <button class="nav-item" data-view="notifications" aria-label="通知中心"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.5h12l-1.4-1.8V8a4.6 4.6 0 0 0-9.2 0v4.7L4 14.5Z"/><path d="M8 17h4"/></svg><span>通知中心</span></button>
+         <button class="nav-item" data-view="system" aria-label="运行状态"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="5" rx="1.5"/><rect x="3" y="12" width="14" height="5" rx="1.5"/><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"/></svg><span>运行状态</span></button>
+       </nav>
+-      <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div><span id="strategy-version">SPIKE · 连接中</span><small>V12.8 多空启动 → YOLO 补充确认</small></div></div>
++      <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div><span id="strategy-version">SPIKE · 连接中</span><small>V13 回踩确认 · 旧版记录保留</small></div></div>
+       <div class="sidebar-bottom"><span class="local-light" id="local-light"></span><div>Mac 监控<small id="sidebar-runtime">正在连接服务</small></div><span class="tiny-tag">MAC</span></div>
+     </aside>
+ 
+@@ -84,6 +87,7 @@
+           <article class="metric-card"><div class="metric-top"><span>全市场覆盖</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><ellipse cx="10" cy="10" rx="3" ry="7"/><path d="M3 10h14"/></svg></div><div class="metric-value"><span id="metric-universe">—</span><span class="metric-unit">个合约</span></div><div class="metric-bottom"><span class="period-dot"></span><span id="metric-timeframes">读取周期</span><span class="metric-separator">/</span><span id="metric-scan-detail">等待扫描</span></div></article>
+         </section>
+ 
++        <section id="retest-view" class="view-panel hidden"><div id="v130-workspace"><p class="research-empty">正在读取 V13 回踩监控…</p></div></section>
+         <section id="signals-view" class="view-panel">
+           <div class="ledger-heading"><h2>信号统计</h2><div class="segmented" role="group" aria-label="统计时间范围"><button data-ledger-period="today" aria-pressed="false">今天</button><button data-ledger-period="week" aria-pressed="false">本周</button><button data-ledger-period="all" class="selected" aria-pressed="true">全部</button></div></div>
+           <div class="notice hidden" id="stats-availability" role="status"></div>
+@@ -152,7 +156,7 @@
+         <section id="system-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2>运行状态</h2></div><span class="quiet-text">Mac 扫描 · 公开行情 · TG / Bark 通知渠道</span></div><div class="system-grid"><article class="panel system-card scan-card"><div class="system-card-heading"><h3>行情扫描</h3><span id="scan-state-badge" class="neutral-badge">等待连接</span></div><div class="scan-progress"><div id="scan-progress-fill"></div></div><dl class="system-facts" id="scan-facts"></dl></article><article class="panel system-card"><div class="system-card-heading"><h3>Bark 推送</h3><span id="bark-state-badge" class="neutral-badge">等待连接</span></div><p class="system-card-description" id="bark-description">读取 Bark 渠道状态…</p><dl class="system-facts" id="bark-facts"></dl><p class="system-card-description" id="joint-notification-facts">突破+spike 通知状态同步中…</p></article><article class="panel system-card runtime-card"><div class="system-card-heading"><h3>Mac 监控服务</h3><span class="neutral-badge" id="service-version">—</span></div><dl class="system-facts" id="runtime-facts"></dl><p class="system-footnote">本页面展示指标事件与运行状态，不执行交易。监控需要 Mac 保持开机并联网。</p></article></div><details class="health-details panel"><summary>查看诊断信息<span>仅运行数据</span></summary><pre id="health-json">尚未读取诊断信息。</pre></details></section>
+ 
+         <section id="notifications-view" class="view-panel hidden" aria-label="通知中心">
+-          <div class="notifications-view-heading"><div><h2>通知渠道与订阅</h2><p>SPIKE V12.8 普通启动支持多空，YOLO 为补充确认；突破 + spike 联合信号仅做多。各来源可分别选择 TG 与 Bark。</p></div><span id="notifications-updated" class="quiet-text">状态更新时间待同步</span></div>
++          <div class="notifications-view-heading"><div><h2>通知渠道与订阅</h2><p>V13 回踩确认仅 15m、支持多空。旧版启动、YOLO 与联合信号保留独立订阅及历史回执。</p></div><span id="notifications-updated" class="quiet-text">状态更新时间待同步</span></div>
+           <div id="notifications-notice" class="notification-notice hidden" role="status" aria-live="polite"></div>
+           <div id="notification-channel-cards" class="notification-channel-grid" aria-label="通知渠道状态"></div>
+           <section class="notification-routes-section" aria-labelledby="notification-routes-title">
+@@ -164,7 +168,7 @@
+             <div class="notification-filters" aria-label="通知历史筛选">
+               <label>搜索<input id="notification-filter-search" type="search" maxlength="48" placeholder="搜索币种或合约…" aria-label="搜索通知历史" autocomplete="off"></label>
+               <label>渠道<select id="notification-filter-channel" aria-label="按渠道筛选"><option value="">全部渠道</option><option value="telegram">Telegram（TG）</option><option value="bark">Bark</option></select></label>
+-              <label>来源<select id="notification-filter-topic" aria-label="按通知来源筛选"><option value="">全部来源</option><option value="spike_v128">SPIKE V12.8 普通启动</option><option value="yolo_confirmation">YOLO 补充确认</option><option value="joint">突破 + spike 联合信号</option><option value="legacy">旧版 SPIKE 历史</option></select></label>
++              <label>来源<select id="notification-filter-topic" aria-label="按通知来源筛选"><option value="">全部来源</option><option value="spike_v130">SPIKE V13.0 15m 回踩确认</option><option value="spike_v128">SPIKE V12.8 普通启动</option><option value="yolo_confirmation">YOLO 补充确认</option><option value="joint">突破 + spike 联合信号</option><option value="legacy">旧版 SPIKE 历史</option></select></label>
+               <label>状态<select id="notification-filter-status" aria-label="按通知状态筛选"><option value="">全部状态</option><option value="sent">服务已接受</option><option value="pending">待发送</option><option value="sending">发送中</option><option value="failed">发送失败</option><option value="unknown">结果未知</option><option value="skipped">已跳过</option></select></label>
+               <label>方向<select id="notification-filter-side" aria-label="按方向筛选"><option value="">全部方向</option><option value="long">多头</option><option value="short">空头</option></select></label>
+               <label>周期<select id="notification-filter-timeframe" aria-label="按周期筛选"><option value="">全部周期</option><option value="15m">15m</option><option value="30m">30m</option><option value="1H">1H</option><option value="4H">4H</option></select></label>
+--- a/yoyo/monitor/static/notifications.js
++++ b/yoyo/monitor/static/notifications.js
+@@ -5,8 +5,9 @@
+   const $ = (id) => document.getElementById(id);
+   const CHANNELS = ["telegram", "bark"];
+   const CHANNEL_NAMES = { telegram: "Telegram（TG）", bark: "Bark" };
+-  const TOPICS = ["spike_v128", "yolo_confirmation", "joint"];
++  const TOPICS = ["spike_v130", "spike_v128", "yolo_confirmation", "joint"];
+   const TOPIC_NAMES = {
++    spike_v130: "SPIKE V13.0 回踩 · 15m",
+     spike_v128: "SPIKE V12.8 普通启动",
+     yolo_confirmation: "YOLO 补充确认",
+     joint: "突破 + spike 联合信号",
+@@ -41,6 +42,7 @@
+     details_redacted: "详细原因已隐藏",
+   };
+   const KIND_NAMES = {
++    spike_burst_v130_retest: "V13.0 回踩再突破",
+     spike_burst_v128: "V12.8 普通启动", tv_start: "普通启动",
+     yolo_confirmed: "YOLO 补充确认", yolo_confirmation: "YOLO 补充确认",
+     joint: "突破 + spike 联合信号", spike_burst_v9: "旧版 SPIKE 信号",
+--- a/yoyo/monitor/static/app.js
++++ b/yoyo/monitor/static/app.js
+@@ -16,6 +16,7 @@
+       period: "all", outcome: "all", sort: "newest", performanceVersion: "current", ledger: null, revision: 0 },
+   };
+   const titles = {
++    retest: ["V13 回踩 · 15m", "普通多空：突破 → 回踩守住 → 再突破收盘确认。只通知启用后的新确认。"],
+     platform: ["体系总览", "个人交易、学习输出、策略研究与自动策略验证，共用知识、数据与模型。"],
+     learning: ["学习中心", "围绕问题安排学习、复述与复习，把答案沉淀为自己的知识。"],
+     knowledge: ["知识库", "按领域组织概念、原则、假设与经验，保留来源、证据和适用边界。"],
+@@ -280,8 +281,8 @@
+     const nextView = titles[view] ? view : "signals";
+     state.view = nextView;
+     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
+-    ["signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+-    $("primary-metrics").classList.toggle("hidden", ["shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
++    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
++    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+     document.querySelectorAll("[data-view]").forEach((button) => {
+       const active = button.dataset.view === state.view;
+       button.classList.toggle("active", active);
+@@ -295,7 +296,7 @@
+     $("connection-label").classList.toggle("hidden", researchView);
+     $("bark-header").classList.toggle("hidden", researchView);
+     $("telegram-header")?.classList.toggle("hidden", researchView);
+-    $("model-gate-notice").classList.toggle("hidden", researchView || !$("model-gate-notice").textContent);
++    $("model-gate-notice").classList.toggle("hidden", researchView || state.view === "retest" || !$("model-gate-notice").textContent);
+     // The embedded VLM owns its chart, references and history refresh actions.
+     $("refresh-button").classList.toggle("hidden", state.view === "vision");
+     $("refresh-button").setAttribute("aria-label", researchView ? `刷新${titles[state.view][0]}` : "立即刷新监控数据");
+@@ -330,6 +331,7 @@
+     window.SpikeYolo?.setActive(state.view === "yolo");
+     window.SpikeVisionModule?.setActive(state.view === "vision").catch(() => {});
+     window.SpikeNotifications?.setActive(state.view === "notifications");
++    window.SpikeV130?.setActive(state.view === "retest");
+     $("research-error").classList.add("hidden");
+     if (state.view === "system") loadHealth();
+     // Signals never load the expensive market overview.  Watch opts in once.
+@@ -876,7 +878,7 @@
+     $("local-light").classList.toggle("online", online);
+     if (!status) $("sidebar-runtime").textContent = state.errors.status ? "连接中断 · 自动重连" : "正在连接服务";
+     if (!status) return;
+-    if ($("strategy-version")) $("strategy-version").textContent = status.protocol?.includes("v128") ? "SPIKE V12.8" : "SPIKE V9 · 等待升级";
++    if ($("strategy-version")) $("strategy-version").textContent = status.runtime?.v130 ? "SPIKE V13.0 · 15m" : status.protocol?.includes("v128") ? "SPIKE V12.8" : "SPIKE V9 · 等待升级";
+     const scan = status.scan || {};
+     const counts = status.counts || {};
+     const jointBark = status.joint_notifications?.bark;
+@@ -948,7 +950,7 @@
+     const gateIdle = gate.status === "idle" && gate.loaded !== true && Number(gate.queue_depth || 0) === 0;
+     const gateNotice = !modelProtocol() ? "模型确认口径尚未同步，原始箭头不会显示为模型确认。" : gate.last_error ? `模型检测异常：${String(gate.last_error)}。${gateImpact}` : gate.status === "error" ? `部分候选检测异常，可在等待确认中查看。${gateImpact}` : gateIdle ? `YOLO 待命；当前没有合格 V12.8 候选，出现候选时才加载模型。${gateImpact}` : gate.loaded !== true ? `YOLO 模型正在加载；V12.8 启动不受影响。${gateImpact}` : "";
+     $("model-gate-notice").textContent = gateNotice;
+-    $("model-gate-notice").classList.toggle("hidden", workspaceView() || !gateNotice);
++    $("model-gate-notice").classList.toggle("hidden", workspaceView() || state.view === "retest" || !gateNotice);
+     runtimeFacts.push(["模型检测", gate.last_error ? "检测异常 · 暂无模型确认" : gate.loaded === true ? "已加载" : "等待加载"]);
+     runtimeFacts.push(["通知阶段", notificationPolicy()]);
+     if (gate.profile_id || gate.profile) runtimeFacts.push(["模型配置", gate.profile_id || gate.profile]);
+@@ -1005,6 +1007,10 @@
+   }
+   async function refresh(trigger = "manual") {
+     if (document.hidden && trigger === "periodic") return;
++    if (state.view === "retest") {
++      await Promise.allSettled([refreshShellStatus(trigger === "manual"), window.SpikeV130?.refresh()]);
++      return;
++    }
+     if (state.view === "notifications") {
+       const pending = [refreshShellStatus(trigger === "manual")];
+       if (trigger !== "periodic") pending.push(window.SpikeNotifications?.refresh());
+--- a/yoyo/monitor/store.py
++++ b/yoyo/monitor/store.py
+@@ -19,6 +19,8 @@
+ 
+ from yoyo.monitor import (SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES, MODEL_PROTOCOL, MODEL_KIND, FRESH_MS,
+                           DIRECT_POLICY, DIRECT_TIMEFRAMES, BARK_TIMEFRAMES)
++from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
++                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
+ 
+ 
+ def now_ms():
+@@ -188,17 +190,32 @@
+ 
+     @staticmethod
+     def _insert_event(db, e, notify, bark_notify, telegram_photo=None, photo_error=None):
++        v130_candidate = (e.get("protocol") == V130_PROTOCOL or e.get("kind") == V130_KIND)
++        if v130_candidate:
++            if not is_v130_signal(e):
++                return False
++            # This stream has its own cold-start boundary.  It prevents a
++            # newly introduced identity from storing or queueing bars the
++            # ordinary scanner reconstructs during startup, even if another
++            # caller writes without first applying the shared V9 reset gate.
++            policy = db.execute("SELECT payload FROM meta WHERE key=?",
++                                ("notification_policy:" + V130_POLICY,)).fetchone()
++            if policy is None:
++                return False
++            activated = json.loads(policy[0]).get("activated_ms")
++            if type(activated) is not int or e["bar_close_ms"] <= activated:
++                return False
+         reset = db.execute("SELECT payload FROM meta WHERE key='migration:spike-v9-reset-v1'").fetchone()
+         if reset is not None:
+             from yoyo.monitor.policy import is_model_signal, is_tv_start
+-            if not (is_tv_start(e) or is_model_signal(e)):
++            if not (is_tv_start(e) or is_model_signal(e) or v130_candidate):
+                 return False
+             cutoff = json.loads(reset[0])["activated_ms"]
+             original = e.get("indicator", e) if e.get("kind") == MODEL_KIND else e
+-            if (e.get("protocol") not in (SIGNAL_PROTOCOL, MODEL_PROTOCOL)
+-                    or e.get("source") != "live"
+-                    or type(original.get("bar_close_ms")) is not int
++            if (e.get("source") != "live" or type(original.get("bar_close_ms")) is not int
+                     or original["bar_close_ms"] <= cutoff):
++                return False
++            if not v130_candidate and e.get("protocol") not in (SIGNAL_PROTOCOL, MODEL_PROTOCOL):
+                 return False
+         cur = db.execute("INSERT OR IGNORE INTO events VALUES (?,?,?,?,?,?,?,?)", (
+             e["id"], e["symbol"], e["timeframe"], e["kind"], e["side"],
+@@ -706,8 +723,17 @@
+ 
+     def _notification_filter(self, channel):
+         clause, args = self._direct_filter(channel)
+-        return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + ")",
+-                [MODEL_KIND, MODEL_PROTOCOL] + args)
++        from yoyo.monitor.notification_policy import activation
++        v130_since = activation(self, channel, V130_POLICY)
++        v130_timeframe_since = self.timeframe_activation("15m", protocol=V130_POLICY)
++        if v130_since is None or v130_timeframe_since is None:
++            v130_clause, v130_args = "0", []
++        else:
++            v130_clause = ("(e.kind=? AND json_extract(e.payload,'$.protocol')=? "
++                           "AND e.timeframe='15m' AND e.close_ms>?)")
++            v130_args = [V130_KIND, V130_PROTOCOL, max(v130_since, v130_timeframe_since)]
++        return ("((e.kind=? AND json_extract(e.payload,'$.protocol')=?) OR " + clause + " OR " + v130_clause + ")",
++                [MODEL_KIND, MODEL_PROTOCOL] + args + v130_args)
+ 
+     def notification_status(self, channel):
+         """Current two-stage receipts; retain old raw receipts as historical only."""
+--- a/yoyo/monitor/notification_center.py
++++ b/yoyo/monitor/notification_center.py
+@@ -19,6 +19,8 @@
+ 
+ from yoyo.monitor import DIRECT_POLICY, MODEL_KIND, MODEL_PROTOCOL, SIGNAL_KIND, SIGNAL_PROTOCOL, MONITORED_TIMEFRAMES
+ from yoyo.monitor.joint_notifications import JOINT_POLICY, JOINT_PROTOCOL
++from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
++                                      SIGNAL_PROTOCOL as V130_PROTOCOL, TOPIC as V130_TOPIC)
+ 
+ DATABASE = "notifications.sqlite3"
+ CHANNELS = {"telegram": "Telegram", "bark": "Bark"}
+@@ -30,6 +32,9 @@
+                           "protocol": MODEL_PROTOCOL, "policy": MODEL_PROTOCOL, "sides": ["long", "short"]},
+     "joint": {"label": "突破＋spike 联合信号", "kind": "joint",
+               "protocol": JOINT_PROTOCOL, "policy": JOINT_POLICY, "sides": ["long"]},
++    V130_TOPIC: {"label": "SPIKE V13.0 15m 回踩确认", "kind": V130_KIND,
++                "protocol": V130_PROTOCOL, "policy": V130_POLICY,
++                "sides": ["long", "short"], "timeframes": ["15m"]},
+ }
+ NOTICE = ("订阅只影响后续新信号，不补发历史。关闭后，已经开始发送的请求可能完成。"
+           "结果未知不会自动重发；服务接受不代表设备收到或已读。统计包含旧版发送记录。")
+@@ -204,7 +209,8 @@
+                     since = arm.get("activated_ms")
+                     armed = type(since) is int and since >= 0
+                     routes.append({**row, "enabled": bool(row["enabled"]), "label": spec["label"],
+-                                   "sides": spec["sides"], "timeframes": list(MONITORED_TIMEFRAMES),
++                                   "sides": spec["sides"],
++                                   "timeframes": list(spec.get("timeframes", MONITORED_TIMEFRAMES)),
+                                    "activated_ms": max(row["activated_ms"], since) if armed else None, "armed": armed})
+         channels = []
+         for channel, name in CHANNELS.items():
+--- a/yoyo/monitor/notification_policy.py
++++ b/yoyo/monitor/notification_policy.py
+@@ -12,6 +12,8 @@
+                           MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES, BARK_ARM_KEY)
+ from yoyo.monitor.joint_notifications import JOINT_POLICY, is_joint_event
+ from yoyo.monitor.policy import finite, is_model_signal, is_tv_start, is_v1_short_display_signal
++from yoyo.monitor.v130_policy import (POLICY as V130_POLICY, SIGNAL_KIND as V130_KIND,
++                                      SIGNAL_PROTOCOL as V130_PROTOCOL, is_v130_signal)
+ 
+ 
+ def arm_v9_bark(store, activated_ms):
+@@ -86,7 +88,7 @@
+ 
+ def channel_enabled(store, channel):
+     return any(activation(store, channel, p) is not None
+-               for p in (MODEL_PROTOCOL, DIRECT_POLICY, JOINT_POLICY))
++               for p in (MODEL_PROTOCOL, DIRECT_POLICY, JOINT_POLICY, V130_POLICY))
+ 
+ 
+ def is_direct_start(event):
+@@ -148,6 +150,24 @@
+         # their existing shared-timeframe interface and never take this path.
+         timeframe_since = store.timeframe_activation(event["timeframe"], protocol=protocol, channel=channel)
+         if timeframe_since is None or closes[0] <= timeframe_since:
++            return "before_timeframe_activation"
++        return _routing_error(store, event, now, channel)
++    if event.get("protocol") == V130_PROTOCOL or event.get("kind") == V130_KIND:
++        if channel not in ("telegram", "bark"):
++            raise ValueError("unsupported notification channel")
++        if not is_v130_signal(event):
++            return "not_v130_retest_signal"
++        close = event["bar_close_ms"]
++        detected = event["detected_at_ms"]
++        # Causality, freshness and channel cutovers are anchored only to the
++        # final closed retest confirmation.  The anchor may be hours older.
++        if not close <= detected <= now or not 0 <= now - close <= FRESH_MS:
++            return "signal_expired"
++        since = activation(store, channel, V130_POLICY)
++        if since is None or close <= since:
++            return "before_notification_policy_activation"
++        timeframe_since = store.timeframe_activation("15m", protocol=V130_POLICY)
++        if timeframe_since is None or close <= timeframe_since:
+             return "before_timeframe_activation"
+         return _routing_error(store, event, now, channel)
+     # Recheck at the sender boundary: a durable queue may predate withdrawal.
+--- a/yoyo/monitor/telegram.py
++++ b/yoyo/monitor/telegram.py
+@@ -15,6 +15,7 @@
+ from yoyo.monitor.joint_notifications import JOINT_PROTOCOL
+ from yoyo.monitor.notification_policy import channel_enabled, delivery_error
+ from yoyo.monitor.store import now_ms
++from yoyo.monitor.v130_policy import SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL
+ from yoyo.notify import _load
+ 
+ 
+@@ -41,6 +42,14 @@
+                 f"收盘价 {event['price']:.10g} · {clock(event['bar_close_ms'])} 北京收盘\n"
+                 f"原始 SPIKE 时间 {clock(event['v9_signal_close_ms'])} 北京时间\n"
+                 f"参考止损（非成交价） {reference}")
++    if event.get("protocol") == V130_PROTOCOL and event.get("kind") == V130_KIND:
++        return (f"{symbol} · 15m · {side}\n"
++                "V13.0 15m 回踩再突破 · 后台确认\n"
++                f"锚点 {clock(event['anchor_close_ms'])} · 突破 {clock(event['breakout_close_ms'])}\n"
++                f"回踩 {clock(event['retest_close_ms'])} · 最终确认收盘 {clock(event['bar_close_ms'])}\n"
++                f"确认收盘价 {event['price']:.10g} · 参考价格 {event['reference_price']:.10g}\n"
++                f"风险参考 {event['risk']:.10g} · 初始止损 {event['initial_stop']:.10g}\n"
++                "次开参考，不代表成交；后台计算，未逐根核验 TradingView 图上信号")
+     if event["kind"] == SIGNAL_KIND:
+         return (f"{symbol} · {event['timeframe']} · {side}\n"
+                 "V12.8 后台信号 · 未经 YOLO 确认\n"
+--- a/yoyo/monitor/bark.py
++++ b/yoyo/monitor/bark.py
+@@ -29,6 +29,7 @@
+ from yoyo.monitor.joint_notifications import JOINT_PROTOCOL
+ from yoyo.monitor.notification_policy import channel_enabled, delivery_error
+ from yoyo.monitor.store import now_ms
++from yoyo.monitor.v130_policy import SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL
+ 
+ SERVER = "https://api.day.app"
+ TV_APP_URL = "https://www.tradingview.com/chart/"
+@@ -90,6 +91,17 @@
+                 f"参考止损（非成交价） {reference}")
+         return {"title": title, "subtitle": "突破+spike 联合监控", "body": body + f"\n\n网页备用：{web_url}",
+                 "group": "SPIKE lines", "level": "active", "isArchive": "1", "copy": f"OKX:{tv_symbol}",
++                "url": TV_APP_URL}
++    if event.get("protocol") == V130_PROTOCOL and event.get("kind") == V130_KIND:
++        body = (f"锚点 {time(event['anchor_close_ms'])} · 突破 {time(event['breakout_close_ms'])}\n"
++                f"回踩 {time(event['retest_close_ms'])} · 最终确认收盘 {time(event['bar_close_ms'])}\n"
++                f"确认收盘参考 {event['price']:.10g} · 参考价格 {event['reference_price']:.10g}\n"
++                f"风险参考 {event['risk']:.10g} · 初始止损 {event['initial_stop']:.10g}\n"
++                "次开参考，不代表成交；后台计算，未逐根核验 TradingView 图上信号")
++        return {"title": f"V13.0 · {symbol} · 15m · {side}",
++                "subtitle": "V13.0 15m 回踩再突破 · 后台确认",
++                "body": body + f"\n\n网页备用：{web_url}", "group": "SPIKE V13.0",
++                "level": "active", "isArchive": "1", "copy": f"OKX:{tv_symbol}",
+                 "url": TV_APP_URL}
+     if event["kind"] == SIGNAL_KIND:
+         subtitle = "V12.8 后台信号 · 未经 YOLO 确认"

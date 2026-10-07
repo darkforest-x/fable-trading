@@ -212,7 +212,7 @@ def test_model_image_draws_purple_core_and_both_clocks(monkeypatch):
     texts = " ".join(drawn["texts"])
     assert "YOLO" in texts
     assert "模型核心区" in texts or "MODEL CORE" in texts
-    assert "原箭头" in texts or "ARROW" in texts
+    assert "后台信号" in texts or "BACKEND SIGNAL" in texts
     assert "模型确认" in texts or "MODEL CONFIRMED" in texts
     assert any(outline == "#ad8bde" for _, outline in drawn["boxes"])
     assert any(color == "#e5b76b" and points[0][0] == points[1][0]

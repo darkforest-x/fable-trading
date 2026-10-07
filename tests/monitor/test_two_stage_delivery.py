@@ -98,11 +98,14 @@ def test_raw_then_model_are_distinct_once_only_notifications(tmp_path, channel, 
 
     assert len(calls) == 2
     direct_text, confirmed_text = [content(call, channel) for call in calls]
-    assert "指标启动 · 未经 YOLO 确认" in direct_text
+    assert "后台信号 · 未经 YOLO 确认" in direct_text
     assert "收盘价 99.5" in direct_text and "100.5" not in direct_text
     assert "原箭头" not in direct_text and "等待" not in direct_text
     assert f"YOLO 确认 · 等待 {wait} 根" in confirmed_text
-    assert "确认 100.5" in confirmed_text and "原箭头 99.5" in confirmed_text
+    assert "确认 100.5" in confirmed_text and "原始信号 99.5" in confirmed_text
+    for text in (direct_text, confirmed_text):
+        assert "来源：后台计算；未核验 TradingView 图上信号" in text
+        assert "原箭头" not in text
     assert "北京时间" in direct_text and "北京时间" in confirmed_text
     assert store.event_id(raw) != store.event_id(event)
     assert receipt(store, channel, raw)["status"] == receipt(store, channel, event)["status"] == "sent"

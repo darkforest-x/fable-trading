@@ -7,6 +7,7 @@ server acceptance, not an iPhone display/read receipt. Current direct-start or
 model-confirmation eligibility, channel cutover and shared freshness gate apply.
 No connectivity/startup messages are generated. Errors never include keys.
 
+Both ordinary V12.8 stages and joint alerts use this channel's own receipts.
 Mobile navigation uses TradingView's declared /chart/ Universal Link. Its
 apple-app-site-association explicitly excludes /chart/?symbol=... from iOS
 app routing (checked 2026-09-09); the exact symbol/timeframe URL stays in the
@@ -25,8 +26,10 @@ from urllib.parse import urlsplit
 import requests
 
 from yoyo.monitor import SIGNAL_KIND, MODEL_PROTOCOL, TV_INTERVALS, timeframe_label
+from yoyo.monitor.joint_notifications import JOINT_PROTOCOL
 from yoyo.monitor.notification_policy import channel_enabled, delivery_error
 from yoyo.monitor.store import now_ms
+from yoyo.monitor.v130_policy import SIGNAL_KIND as V130_KIND, SIGNAL_PROTOCOL as V130_PROTOCOL
 
 SERVER = "https://api.day.app"
 TV_APP_URL = "https://www.tradingview.com/chart/"
@@ -76,18 +79,44 @@ def message(event):
     tv_symbol = symbol.removesuffix("-SWAP").replace("-", "") + ".P"
     interval = TV_INTERVALS[event["timeframe"]]
     web_url = f"https://www.tradingview.com/chart/?symbol=OKX%3A{tv_symbol}&interval={interval}"
+    if event.get("protocol") == JOINT_PROTOCOL and event.get("kind") == "joint":
+        source = {"chart": "本周期", "higher": "上级周期", "both": "本周期 + 上级周期"}.get(
+            event.get("source"), "本周期")
+        stop = event.get("reference_stop")
+        reference = "—" if not isinstance(stop, (int, float)) else f"{stop:.10g}"
+        title = f"突破+spike · {symbol} · {timeframe_label(event['timeframe'])} · 向上 ↑"
+        body = (f"多头框内 · {source}突破\n"
+                f"收盘价 {event['price']:.10g} · {time(event['bar_close_ms'])} 北京收盘\n"
+                f"原始 SPIKE 时间 {time(event['v9_signal_close_ms'])} 北京时间\n"
+                f"参考止损（非成交价） {reference}")
+        return {"title": title, "subtitle": "突破+spike 联合监控", "body": body + f"\n\n网页备用：{web_url}",
+                "group": "SPIKE lines", "level": "active", "isArchive": "1", "copy": f"OKX:{tv_symbol}",
+                "url": TV_APP_URL}
+    if event.get("protocol") == V130_PROTOCOL and event.get("kind") == V130_KIND:
+        body = (f"锚点 {time(event['anchor_close_ms'])} · 突破 {time(event['breakout_close_ms'])}\n"
+                f"回踩 {time(event['retest_close_ms'])} · 最终确认收盘 {time(event['bar_close_ms'])}\n"
+                f"确认收盘参考 {event['price']:.10g} · 参考价格 {event['reference_price']:.10g}\n"
+                f"风险参考 {event['risk']:.10g} · 初始止损 {event['initial_stop']:.10g}\n"
+                "次开参考，不代表成交；后台计算，未逐根核验 TradingView 图上信号")
+        return {"title": f"V13.1 · {symbol} · {event['timeframe']} · {side}",
+                "subtitle": f"V13.1 {event['timeframe']} 回踩再突破 · 后台确认",
+                "body": body + f"\n\n网页备用：{web_url}", "group": "SPIKE V13.1",
+                "level": "active", "isArchive": "1", "copy": f"OKX:{tv_symbol}",
+                "url": TV_APP_URL}
     if event["kind"] == SIGNAL_KIND:
-        subtitle = "V9 启动 · 未经 YOLO 确认"
+        subtitle = "V12.8 后台信号 · 未经 YOLO 确认"
         body = f"收盘价 {event['price']:.10g} · {time(event['bar_close_ms'])} 北京时间"
     else:
         indicator, model = event["indicator"], event["model"]
-        subtitle = f"V9 · YOLO 确认 · 等待 {model['wait_bars']} 根"
+        subtitle = f"V12.8 后台信号 · YOLO 确认 · 等待 {model['wait_bars']} 根"
         body = (f"确认 {event['price']:.10g} · {time(event['bar_close_ms'])}\n"
-                f"原箭头 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
-    return {"title": f"V9 · {symbol} · {timeframe_label(event['timeframe'])} · {side}",
+                f"原始信号 {indicator['price']:.10g} · {time(indicator['bar_close_ms'])} 北京时间")
+    # The monitor observes OKX candles; it has no receipt from the user's Pine chart.
+    body += "\n来源：后台计算；未核验 TradingView 图上信号"
+    return {"title": f"V12.8 · {symbol} · {timeframe_label(event['timeframe'])} · {side}",
             "subtitle": subtitle,
             "body": body + f"\n\n网页备用：{web_url}",
-            "group": "SPIKE V9", "level": "active", "isArchive": "1",
+            "group": "SPIKE V12.8", "level": "active", "isArchive": "1",
             # Bark's long-press Copy action uses this value. Ordinary taps
             # only open the URL; do not promise clipboard changes on iOS.
             "copy": f"OKX:{tv_symbol}",

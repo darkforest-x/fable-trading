@@ -1,0 +1,10 @@
+.v130-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:20px}
+.v130-overview article{padding:20px;border:1px solid var(--border,#334155);border-radius:12px}
+.v130-overview span,.v130-table small{display:block;opacity:.68;font-size:12px;margin-top:6px}
+.v130-overview strong{display:block;font-size:20px;margin-top:10px}
+.v130-table-wrap{max-width:100%;overflow:auto}
+.v130-table{width:100%;border-collapse:collapse;text-align:left}
+.v130-table th,.v130-table td{padding:16px 12px;border-bottom:1px solid var(--border,#334155);white-space:nowrap}
+.v130-table th{font-size:12px;opacity:.7}
+#v130-workspace a{color:inherit;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:720px){.v130-overview{grid-template-columns:1fr}.v130-overview article{padding:14px}.v130-overview strong{font-size:18px}}

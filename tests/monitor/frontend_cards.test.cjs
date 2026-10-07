@@ -48,25 +48,37 @@ test("personal observation action copies signal identity without prices, fills, 
 });
 
 function element() {
-  return { disabled: false, classList: { add() {}, remove() {}, toggle() {} }, textContent: "", innerHTML: "",
+  const classes = new Set();
+  return { disabled: false, classList: { add: (name) => classes.add(name), remove: (name) => classes.delete(name),
+    contains: (name) => classes.has(name), toggle: (name, force) => {
+      const enabled = force ?? !classes.has(name);
+      if (enabled) classes.add(name); else classes.delete(name);
+      return enabled;
+    } }, textContent: "", innerHTML: "",
     style: {}, setAttribute() {}, removeAttribute() {}, closest: () => ({ open: false }) };
 }
 
-function harness(fetchImpl) {
+function harness(fetchImpl, window = undefined) {
+  const elements = new Map();
+  const getElement = (id) => {
+    if (!elements.has(id)) elements.set(id, element());
+    return elements.get(id);
+  };
   const instrumented = `${app.slice(0, cutoff)}
+  const renderSignalsView = renderSignals;
   renderErrors = renderStatus = renderSignals = renderWatch = () => {};
-  globalThis.__harness = { state, refresh, loadEarlierRawSignals, invalidateSignalQuery, performanceView, signalCardHTML, normalizeV1Event, ledgerPath };
+  globalThis.__harness = { state, refresh, loadEarlierRawSignals, invalidateSignalQuery, performanceView, signalCardHTML, normalizeV1Event, ledgerPath, renderLedgerStats, renderSignalsView, openTradingView, remoteTradingViewURL };
 })();`;
   const sandbox = {
-    AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
+    window, AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object, Math, RegExp, Error, TypeError, JSON, encodeURIComponent,
     // API's 12s abort guard is production behavior. Do not keep the Node test
     // process alive if a deliberately stale mocked request finishes after its
     // revision was discarded.
     fetch: fetchImpl, setTimeout: (...args) => { const timer = setTimeout(...args); timer.unref(); return timer; }, clearTimeout,
-    document: { getElementById: () => element(), querySelectorAll: () => [] },
+    document: { getElementById: getElement, querySelectorAll: () => [] },
   };
   vm.runInNewContext(instrumented, sandbox, { filename: "app-ledger-harness.js" });
-  return sandbox.__harness;
+  return { ...sandbox.__harness, getElement };
 }
 
 function jsonResponse(value) {
@@ -90,6 +102,7 @@ function query(pathname) {
 test("signal page keeps cards, TV entry, long/short filter, ledger stats, and source controls", () => {
   assert.match(page, /data-signal-source="live"/);
   assert.match(page, /data-signal-source="replay"/);
+  assert.match(page, /data-signal-source="legacy"/);
   assert.match(page, /id="side-filter"/);
   assert.match(page, /id="outcome-filter"/);
   assert.match(page, /id="sort-filter"/);
@@ -104,6 +117,48 @@ test("signal page keeps cards, TV entry, long/short filter, ledger stats, and so
   assert.match(app, /data-tradingview-action="signal"/);
   assert.match(app, /整卡打开 TradingView ↗/);
   assert.doesNotMatch(page, /detail-panel|chart-dialog|页内预览/);
+});
+
+test("card version comes from the event and archived V9 is never relabelled V12.8", () => {
+  const client = harness(async () => jsonResponse({}));
+  const current = client.normalizeV1Event({ ...rawLive, kind: "spike_burst_v128",
+    protocol: "spike-burst-v128-monitor-v1", display_scope: "warmup" });
+  assert.match(client.signalCardHTML(current), /V12\.8 已确认/);
+  const old = client.normalizeV1Event({ ...rawLive, kind: "spike_burst_v9",
+    protocol: "spike-burst-v9-monitor-v1", display_scope: "legacy" });
+  assert.match(client.signalCardHTML(old), /V9 已确认/);
+  assert.match(client.signalCardHTML(old), /旧版归档/);
+  assert.doesNotMatch(client.signalCardHTML(old), /V12\.8/);
+});
+
+test("the signal center defaults to the V13.1 retest cohort on live data only", () => {
+  const client = harness(async () => jsonResponse({}));
+  client.state.view = "signals";
+  client.renderSignalsView();
+  assert.equal(client.state.signalScope, "retest");
+  assert.match(client.getElement("signal-section-title").textContent, /V13\.1 回踩确认/);
+  const card = client.normalizeV1Event({ ...rawLive, kind: "spike_burst_v130_retest", confirmation: "retest",
+    protocol: "spike-burst-v130-retest-monitor-v1", entry_reference: "next_open_reference_not_fill",
+    anchor_close_ms: rawLive.bar_close_ms - 900000 * 6, retest_close_ms: rawLive.bar_close_ms - 900000,
+    wait_bars: 6, trail_atr: 4 });
+  const html = client.signalCardHTML(card);
+  assert.match(html, /V13\.1 回踩确认/);
+  assert.match(html, /4ATR 追踪/);
+  assert.match(html, /次开盘参考 · 非实际成交/);
+  assert.doesNotMatch(html, /V12\.8/);
+});
+
+test("entering current warmup from the legacy tab resets the displayed version context", () => {
+  const client = harness(async () => jsonResponse({}));
+  client.state.signalScope = "direct";
+  client.state.signalSource = "legacy";
+  client.state.view = "signals";
+  client.renderSignalsView();
+  assert.match(client.getElement("signal-section-title").textContent, /V9 旧版/);
+  client.state.view = "warmup";
+  client.renderSignalsView();
+  assert.match(client.getElement("signal-section-title").textContent, /V12\.8/);
+  assert.match(client.getElement("signal-scope-note").textContent, /H1 SMA60/);
 });
 
 test("ledger requests forward every filter, period, sort, source, and page parameter", async () => {
@@ -160,6 +215,51 @@ test("unknown outcome remains unavailable rather than being reported as zero R",
   assert.equal(view.value, "—");
   assert.equal(view.badge, "仅入场参考");
   assert.doesNotMatch(client.signalCardHTML(unknown), /0\.00R/);
+});
+
+test("untracked current cohort shows unknown counts even with an empty page", () => {
+  const client = harness(async () => jsonResponse({}));
+  const stats = { ...ledger().stats, total: 62, long: 16, short: 46, unknown: 62, missing_r: 62 };
+  client.state.status = { protocol: "spike-burst-v128-yolo-confirmation-v1" };
+  client.state.ledger = ledger([], { total: 62, stats, by_timeframe: [{ ...stats, timeframe: "15m" }] });
+  client.renderLedgerStats();
+  assert.equal(client.getElement("stats-total").textContent, "62");
+  assert.equal(client.getElement("stats-availability").classList.contains("hidden"), false);
+  assert.match(client.getElement("stats-availability").textContent, /62 条 SPIKE.*尚未跟踪持仓与退出/);
+  assert.match(client.getElement("stats-side-note").textContent, /多 16 · 空 46 · 状态未知 62/);
+  assert.match(client.getElement("stats-active-note").textContent, /持仓状态未知/);
+  assert.match(client.getElement("stats-closed-note").textContent, /退出状态未知/);
+  assert.doesNotMatch(client.getElement("stats-win-note").textContent, /盈利 0/);
+  assert.equal(client.getElement("stats-winrate").textContent, "—");
+  assert.match(client.getElement("stats-timeframes").innerHTML, /<td>62<\/td><td>—<\/td><td>—<\/td><td>62<\/td>/);
+});
+
+test("mixed outcomes retain measured R and disclose unknown observations", () => {
+  const client = harness(async () => jsonResponse({}));
+  const stats = { ...ledger().stats, total: 4, active: 1, closed: 2, unknown: 1, missing_r: 1,
+    long: 2, short: 2, measured_active: 1, measured_closed: 2, realized_r: 2, floating_r: -0.5,
+    profit: 1, loss: 1, win_rate: 0.5 };
+  client.state.ledger = ledger([], { stats, by_timeframe: [{ ...stats, timeframe: "1H" }] });
+  client.renderLedgerStats();
+  assert.match(client.getElement("stats-availability").textContent, /1 条信号的持仓或退出状态未知/);
+  assert.equal(client.getElement("stats-realized").textContent, "+2.00R");
+  assert.equal(client.getElement("stats-floating").textContent, "-0.50R");
+  assert.equal(client.getElement("stats-winrate").textContent, "50.0%");
+  assert.equal(client.getElement("stats-closed-note").textContent, "2 笔有 R / 2 笔已结束");
+  assert.match(client.getElement("stats-timeframes").innerHTML, /<td>4<\/td><td>1<\/td><td>2<\/td><td>1<\/td>/);
+});
+
+test("an empty filter clears the unknown warning without implying pending computation", () => {
+  const client = harness(async () => jsonResponse({}));
+  client.state.ledger = ledger([], { stats: { ...ledger().stats, total: 1, unknown: 1 } });
+  client.renderLedgerStats();
+  client.state.ledger = ledger();
+  client.renderLedgerStats();
+  assert.equal(client.getElement("stats-availability").classList.contains("hidden"), true);
+  assert.equal(client.getElement("stats-active-note").textContent, "当前筛选无信号");
+  assert.equal(client.getElement("stats-total").textContent, "0");
+  assert.match(page, /value="unknown">状态未知 \/ 未跟踪/);
+  assert.doesNotMatch(page, /value="unknown">等待计算/);
 });
 
 test("both long and short cards keep a whole-card TradingView action", () => {
@@ -241,4 +341,26 @@ test("client preserves display-only Bark state, Unicode search, and theme select
   assert.match(page, /id="theme-select"/);
   assert.match(page, /value="dark"/);
   assert.match(page, /value="light"/);
+});
+
+
+test("public workspace opens charts on the visitor device without contacting the Mac desktop", async () => {
+  const opens = [], requests = [];
+  const h = harness(async (url) => { requests.push(url); return jsonResponse({}); }, {
+    location: { hostname: "example.trycloudflare.com" }, open: (...args) => opens.push(args),
+  });
+  await h.openTradingView({ symbol: "BTC-USDT-SWAP", timeframe: "15m" });
+  assert.deepEqual(opens, [["https://www.tradingview.com/chart/?symbol=OKX%3ABTCUSDT.P&interval=15", "_blank", "noopener,noreferrer"]]);
+  assert.deepEqual(requests, []);
+  assert.equal(h.remoteTradingViewURL({symbol:"OKX:ETHUSDC.P",timeframe:"1D"}), "https://www.tradingview.com/chart/?symbol=OKX%3AETHUSDC.P&interval=1D");
+  assert.equal(h.remoteTradingViewURL({symbol:"https://evil.invalid",timeframe:"15m"}), "");
+});
+
+test("loopback workspace preserves its explicit desktop opener", async () => {
+  const requests = [];
+  const h = harness(async (url) => { requests.push(url); return jsonResponse({requested:true,verified:true,timeframe:"1H"}); }, {
+    location: { hostname: "127.0.0.1" }, open: () => { throw new Error("must not open browser"); },
+  });
+  await h.openTradingView({ symbol: "BTC-USDT-SWAP", timeframe: "1H" });
+  assert.deepEqual(requests, ["/api/tradingview/open"]);
 });

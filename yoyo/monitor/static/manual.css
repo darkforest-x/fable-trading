@@ -1,4 +1,4 @@
-/* Personal manual journal uses the same semantic palette and controls as research.css. */
+/* Principles, preparation and reflection share the workspace's semantic tokens. */
 .manual-workspace { min-width:0; color:var(--text); }
 .manual-hero { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; padding:24px 26px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(120deg,var(--mint-soft),var(--surface)); }
 .manual-hero h2 { margin:7px 0 8px; font-size:24px; font-weight:600; }
@@ -7,6 +7,43 @@
 .manual-tabs { display:flex; gap:6px; overflow-x:auto; margin:17px 0 20px; padding:5px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .manual-tabs button { flex:0 0 auto; padding:9px 16px; border:0; border-radius:7px; background:transparent; color:var(--muted); font:inherit; cursor:pointer; }
 .manual-tabs button:hover,.manual-tabs button.selected { background:var(--mint-soft); color:var(--text); }
+.manual-tabs button { flex:1; text-align:left; min-height:46px; }
+.manual-principle-toolbar,.manual-support-row,.manual-ready-actions { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.manual-principle-toolbar { color:var(--muted); font-size:13px; }
+.manual-principle-toolbar > button { margin-left:auto; }
+.manual-principle-toolbar select { margin-left:8px; padding:8px 12px; border:1px solid var(--control-border); border-radius:8px; background:var(--control-bg); color:var(--text); font:inherit; }
+.manual-principle-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr)); gap:16px; }
+.manual-principle-card { display:flex; flex-direction:column; gap:14px; min-width:0; padding:22px; border:1px solid var(--line); border-radius:12px; background:var(--surface); }
+.manual-principle-card.is-active { border-top:3px solid var(--mint); padding-top:20px; }
+.manual-principle-card h3 { margin:0; font-size:17px; line-height:1.6; overflow-wrap:anywhere; }
+.manual-principle-body { margin:0; flex:1; white-space:pre-wrap; overflow-wrap:anywhere; color:var(--muted); font-size:14px; line-height:1.8; }
+.manual-principle-empty { border:1px dashed var(--control-border); border-radius:12px; padding:38px 28px; background:var(--surface); }
+.manual-principle-empty h3 { margin:0 0 10px; font-size:20px; }
+.manual-principle-empty p { color:var(--muted); font-size:14px; line-height:1.8; max-width:650px; }
+.manual-optional { min-width:0; color:var(--muted); font-size:13px; line-height:1.8; }
+.manual-optional > summary { cursor:pointer; color:var(--text); font-weight:500; padding:7px 0; }
+.manual-optional[open] > summary { margin-bottom:14px; }
+.manual-optional p,.manual-optional small { white-space:pre-wrap; overflow-wrap:anywhere; }
+.manual-support-row { justify-content:space-between; padding:16px 0; color:var(--muted); font-size:13px; }
+.manual-checklist { display:grid; gap:0; }
+.manual-checklist > .manual-section-heading { margin-bottom:12px; }
+.manual-principle-check { display:flex; align-items:flex-start; gap:14px; padding:18px 0; border-top:1px solid var(--line); cursor:pointer; }
+.manual-principle-check > input { width:19px; height:19px; margin-top:4px; flex:0 0 auto; accent-color:var(--mint); }
+.manual-principle-check > span { display:grid; gap:5px; min-width:0; }
+.manual-principle-check strong { font-size:15px; line-height:1.6; }
+.manual-principle-check span span { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; color:var(--muted); line-height:1.7; }
+.manual-principle-check small { color:var(--dim); font-size:11px; }
+.manual-ready-card { display:grid; gap:18px; border-color:var(--focus-border); }
+.manual-ready-card h3 { font-size:19px; margin:5px 0 10px; }
+.manual-ready-card p,.manual-ready-card small { color:var(--muted); line-height:1.8; }
+.manual-ready-actions a { text-decoration:none; }
+.manual-principle-snapshot article { border-left:2px solid var(--line); padding:6px 16px; margin:12px 0; }
+@media(max-width:640px) {
+  .manual-tabs button { padding:10px 8px; font-size:12px; text-align:center; }
+  .manual-principle-toolbar > button { margin-left:0; }
+  .manual-principle-card { padding:18px; }
+  .manual-ready-actions > * { flex:1 1 auto; text-align:center; }
+}
 .manual-pane { display:grid; gap:16px; min-width:0; }
 .manual-heading,.manual-section-heading,.manual-card-heading { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
 .manual-heading { margin:0 0 2px; }

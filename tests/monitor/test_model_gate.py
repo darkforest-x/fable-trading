@@ -5,7 +5,7 @@ from copy import deepcopy
 import pytest
 
 from model_fixture import model_event
-from yoyo.monitor import (BARK_TIMEFRAMES, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES,
+from yoyo.monitor import (BARK_TIMEFRAMES, DIRECT_POLICY, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES,
                           TIMEFRAMES, FRESH_MS, MODEL_SHA256)
 from yoyo.monitor.model_gate import ModelGate, pending_proof
 from yoyo.monitor.store import Store
@@ -32,8 +32,7 @@ def scenario(tmp_path, tf='1H', wait=2, *, register=True):
     step = TIMEFRAMES[tf]
     p, end = 150 * step, (150+wait)*step
     raw = model_event(close=end+step, timeframe=tf, side='long', wait=wait)['indicator']
-    # The production gate now accepts only the frozen V1 closed raw-long
-    # contract.  Legacy IMACD fixture fields remain outside this focused suite.
+    # The production gate accepts only a current V12.8 closed raw event.
     raw.update(source='live', confirmation='raw', direction='long', side='long', venue='okx',
                timeframe_min=TIMEFRAMES[tf] // 60_000, is_closed=True, risk=2., initial_stop=98.,
                source_sha256='a' * 64, entry_reference='next_open', executable_entry_time=None)
@@ -48,12 +47,15 @@ def scenario(tmp_path, tf='1H', wait=2, *, register=True):
                     sma20=100.,ema20=100.,sma60=100.,ema60=100.,sma120=100.,ema120=100.)
                for t in range(p-30*step, end+step, step)]
     store = Store(tmp_path/'model.sqlite')
+    store.activate_notification_policy(0, protocol=DIRECT_POLICY, retire_obsolete=False)
+    store.activate_bark_policy(0, protocol=DIRECT_POLICY, retire_obsolete=False)
     store.activate_notification_policy(0, protocol=MODEL_PROTOCOL)
     store.activate_bark_policy(0, protocol=MODEL_PROTOCOL)
+    store.activate_timeframe_policy(tf, 0, protocol=DIRECT_POLICY)
     store.activate_timeframe_policy(tf, 0, protocol=MODEL_PROTOCOL)
     detector = Detector({end: [proposal]})
     clock = [end+step+1000]
-    # Synthetic legacy-enabled mode preserves existing dual-channel coverage.
+    # The controlled fixture explicitly enables both ordinary channel legs.
     gate = ModelGate(store, lambda: clock[0], threading.Event(), detector, telegram_enabled=True)
     if register:
         assert gate.register(raw)
@@ -103,6 +105,54 @@ def test_default_gate_records_confirmation_and_only_queues_permitted_bark(tmp_pa
     gate.process(raw['symbol'], tf, bars)
     assert store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 1
     assert store.bark_status()['pending'] == int(tf in BARK_TIMEFRAMES)
+
+
+def test_model_candidate_runs_when_raw_topics_are_off_but_confirmation_is_on(tmp_path):
+    from yoyo.monitor.notification_center import NotificationCenter
+    from yoyo.monitor.notification_policy import model_candidate_error
+
+    gate, store, detector, raw, bars, proposal, clock = scenario(tmp_path, wait=0, register=False)
+    center = NotificationCenter(tmp_path)
+    for channel in ("telegram", "bark"):
+        center.update_route("spike_v128", channel, False, raw["bar_close_ms"] - 1)
+        assert model_candidate_error(store, raw, raw["bar_close_ms"], channel) is None
+    assert gate.register(raw)
+    gate.process(raw['symbol'], raw['timeframe'], bars)
+    assert detector.calls == [raw['bar_open_ms']]
+    assert store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 1
+    assert store.telegram_status()["pending"] == 1
+    assert store.bark_status()["pending"] == 1
+
+
+def test_model_candidate_does_not_run_when_confirmation_topic_is_off(tmp_path):
+    from yoyo.monitor.notification_center import NotificationCenter
+    from yoyo.monitor.notification_policy import model_candidate_error
+
+    gate, store, detector, raw, bars, proposal, clock = scenario(tmp_path, wait=0, register=False)
+    center = NotificationCenter(tmp_path)
+    for channel in ("telegram", "bark"):
+        center.update_route("yolo_confirmation", channel, False, raw["bar_close_ms"] - 1)
+        assert model_candidate_error(store, raw, raw["bar_close_ms"], channel) == "subscription_disabled"
+    assert gate.register(raw)
+    gate.process(raw['symbol'], raw['timeframe'], bars)
+    assert detector.calls == []
+    candidate = store.list_candidates()[0]
+    assert candidate['model']['status'] == 'disabled'
+    assert candidate['model']['reason'].startswith('confirmation_not_eligible:')
+
+
+def test_confirmation_sends_are_blocked_if_its_route_is_disabled_after_admission(tmp_path):
+    from yoyo.monitor.notification_center import NotificationCenter
+
+    gate, store, detector, raw, bars, proposal, clock = scenario(tmp_path, wait=0)
+    center = NotificationCenter(tmp_path)
+    for channel in ("telegram", "bark"):
+        center.update_route("yolo_confirmation", channel, False, raw["bar_close_ms"] - 1)
+    gate.process(raw['symbol'], raw['timeframe'], bars)
+    assert detector.calls == []
+    assert store.event_count(MODEL_KIND, MODEL_PROTOCOL) == 0
+    assert store.telegram_status()["pending"] == 0
+    assert store.bark_status()["pending"] == 0
 
 
 @pytest.mark.parametrize('changes', [

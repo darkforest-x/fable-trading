@@ -1,0 +1,451 @@
+{
+  "activated_ms": 1790347067698,
+  "activated_beijing": "2026-09-25T22:37:47.698000+08:00",
+  "activation": {
+    "protocol": "spike-burst-v130-retest-monitor-v1",
+    "policy": "spike-burst-v130-retest-notifications-v1",
+    "timeframe": "15m",
+    "telegram_activated_ms": 1790347067698,
+    "bark_activated_ms": 1790347067698,
+    "timeframe_activated_ms": 1790347067698
+  },
+  "routes_before": [
+    {
+      "topic": "spike_v128",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": 1790222783569,
+      "updated_ms": 0,
+      "label": "SPIKE V12.8 启动",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "spike_v128",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": 1790168139890,
+      "updated_ms": 0,
+      "label": "SPIKE V12.8 启动",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "yolo_confirmation",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": 1790222783569,
+      "updated_ms": 0,
+      "label": "YOLO 补充确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "yolo_confirmation",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": 1790168139890,
+      "updated_ms": 0,
+      "label": "YOLO 补充确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "joint",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": 1790168135774,
+      "updated_ms": 0,
+      "label": "突破＋spike 联合信号",
+      "sides": [
+        "long"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "joint",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": 1790168135774,
+      "updated_ms": 0,
+      "label": "突破＋spike 联合信号",
+      "sides": [
+        "long"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "spike_v130",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": null,
+      "updated_ms": 0,
+      "label": "SPIKE V13.0 15m 回踩确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m"
+      ],
+      "armed": false
+    },
+    {
+      "topic": "spike_v130",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": null,
+      "updated_ms": 0,
+      "label": "SPIKE V13.0 15m 回踩确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m"
+      ],
+      "armed": false
+    }
+  ],
+  "routes_after": [
+    {
+      "topic": "spike_v128",
+      "channel": "telegram",
+      "enabled": false,
+      "activated_ms": 1790222783569,
+      "updated_ms": 1790347067698,
+      "label": "SPIKE V12.8 启动",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "spike_v128",
+      "channel": "bark",
+      "enabled": false,
+      "activated_ms": 1790168139890,
+      "updated_ms": 1790347067698,
+      "label": "SPIKE V12.8 启动",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "yolo_confirmation",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": 1790222783569,
+      "updated_ms": 0,
+      "label": "YOLO 补充确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "yolo_confirmation",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": 1790168139890,
+      "updated_ms": 0,
+      "label": "YOLO 补充确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "joint",
+      "channel": "telegram",
+      "enabled": false,
+      "activated_ms": 1790168135774,
+      "updated_ms": 1790347067698,
+      "label": "突破＋spike 联合信号",
+      "sides": [
+        "long"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "joint",
+      "channel": "bark",
+      "enabled": false,
+      "activated_ms": 1790168135774,
+      "updated_ms": 1790347067698,
+      "label": "突破＋spike 联合信号",
+      "sides": [
+        "long"
+      ],
+      "timeframes": [
+        "15m",
+        "30m",
+        "1H",
+        "4H"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "spike_v130",
+      "channel": "telegram",
+      "enabled": true,
+      "activated_ms": 1790347067698,
+      "updated_ms": 0,
+      "label": "SPIKE V13.0 15m 回踩确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m"
+      ],
+      "armed": true
+    },
+    {
+      "topic": "spike_v130",
+      "channel": "bark",
+      "enabled": true,
+      "activated_ms": 1790347067698,
+      "updated_ms": 0,
+      "label": "SPIKE V13.0 15m 回踩确认",
+      "sides": [
+        "long",
+        "short"
+      ],
+      "timeframes": [
+        "15m"
+      ],
+      "armed": true
+    }
+  ],
+  "scope": {
+    "timeframes": [
+      "15m"
+    ],
+    "candidate_source": "ordinary_both",
+    "fresh_minutes": 30,
+    "max_wait_bars": 24,
+    "notification_channels": [
+      "telegram",
+      "bark"
+    ],
+    "orders_enabled": false,
+    "chart_market_parity_verified": false
+  },
+  "validation": {
+    "focused_passed": 185,
+    "existing_suite_tests": 999,
+    "existing_suite_failures": 170,
+    "new_regressions_vs_pre_task_backup": 0,
+    "senders": "mock transports only; no synthetic market alerts sent to actual devices"
+  },
+  "deployment_status": "running_verified",
+  "history_backup": "pre_rollout_backup.json",
+  "unrelated_yolo_routes_preserved": true,
+  "source_sha256": {
+    "yoyo/monitor/v128_lines.py": "291621226411840a977179db65b8a22b831b255f66c1ea13793ccdbbb859fd26",
+    "yoyo/monitor/store.py": "2a2654918d134344498ede612ceff67100ded06b89e6d3ff1cab502b824105e8",
+    "yoyo/monitor/notification_center.py": "fb1e093aee7f1a73a28253b71639263bd3173faeafe262134f8cea7e4f52d17e",
+    "yoyo/monitor/okx.py": "2bbd7e3abd380fcd12bcf118274b3997775e652db43df29ebe919f87c415bcb4",
+    "yoyo/monitor/replay_import.py": "f22c7a2674832f72c42913950ae884ab8e12ca29636fcaae535cc91321cbb6da",
+    "yoyo/monitor/signals.py": "ba694d66f052c0bacf64397e6fa98e790ba0c81e3eb0e35e94ba54134b5324e1",
+    "yoyo/monitor/service.py": "f72ee48946637bb8b3af424cbe4025f7bc19fe86f8d1726feda4063ba07702ff",
+    "yoyo/monitor/v1_model_worker.py": "71a9e39fd1b98c174f043fc795ac5ffd186d5aa7b8b589b01962e750afd5aebb",
+    "yoyo/monitor/server.py": "61551663ef69e837543c4c61904fd9d6e49d1fe58bc9c0a7a122e621307a83ed",
+    "yoyo/monitor/v130_policy.py": "df9ad8aaee2f2bab8201824904650a17361268fb1260bed14b127d5933a9522b",
+    "yoyo/monitor/signal_analytics.py": "b21d8829dd292bd40587d07ad9986b7da1b4aad0e01be7a16d716d3fa39eaab1",
+    "yoyo/monitor/notification_policy.py": "e0444b7627807cf3617b954078b73b3dbba25683ca457827a0e324d1bbd8e887",
+    "yoyo/monitor/v130_signals.py": "3847d1d1e07a0666bc686bc84a5bc6082405e55804e1ccf71714878dfdd96280",
+    "yoyo/monitor/v9_migration.py": "3ce0e29a97910c0fad85876f4ecd5b9facd5bb9a4c70b3835255340192308271",
+    "yoyo/monitor/public_tunnel.py": "0680617a8107f02c0f9b0896f1a666d85b2f464edf9bab153f43bb64e89284eb",
+    "yoyo/monitor/joint_notifications.py": "5ea3060ed4fd495f9e24004a2b942363a92270f66a8fda80a4692d867e4b1ad0",
+    "yoyo/monitor/v9_worker.py": "481e58a065af40139796074a08e909ec83e4e6c85777ea3349bc72b77b2afd9f",
+    "yoyo/monitor/desktop_client.py": "0cd71b1267ada2cbf57b09870c0684e14dacecccdb29d4b1e4cb78f9ee3d2df6",
+    "yoyo/monitor/spike_lines.py": "eed09f6cf147feea241c740dd78e76d847881544da474f0c2c91f9fd2e471ce8",
+    "yoyo/monitor/spike_lines_api.py": "1b02b3e2028ddd79cef653fca1cada1f71122a2fd8295e3aa5c37bfa3a8656b9",
+    "yoyo/monitor/shadow_api.py": "b254f53da7d320f98409c7a8bfbddcd169e212ba973fb89ee1c22e4547947ccd",
+    "yoyo/monitor/v1_short_replay.py": "5828bc1916c0c03a3864b22bf801ab6470f8e98642016fa9b8957765a91e4a3f",
+    "yoyo/monitor/telegram.py": "19ab4dbdef4ff6df777cb0e4f95afee79599654ca24683f9a3ebf64f72360de0",
+    "yoyo/monitor/v9_signals.py": "1606def42379b2caa2e085fe4c939f4fc0ebcb5b1f942a9383bde225b34136fe",
+    "yoyo/monitor/acceptance.py": "3f8e71503ffff3318ecda3d0d3074e2f89702f398792e54dc33d279e93e461fe",
+    "yoyo/monitor/v130_worker.py": "41d38c7bc0f61b9ba75a240eb40455fbc250ea795cbeb9e0ddc4d3dc77b4da78",
+    "yoyo/monitor/policy.py": "252160bd52029ae602de605618054910c7d8a1fa89c44c813202c6a726aa1b26",
+    "yoyo/monitor/replay_chart.py": "ce5f9c809b42e4b4c1f48957eff699890c3f7d097780c6cadfb4350963384f96",
+    "yoyo/monitor/__init__.py": "d17cf68d091598324dc3935bb1a649fc82525d521d77fa0cec1ba4f69a175503",
+    "yoyo/monitor/desktop_tunnel.py": "6c0a1bbfbd9b23d06097d0b3e780fa2630b6fce33343cd5c8745fe141d98f6c0",
+    "yoyo/monitor/windows_tradingview.py": "fb1a3a527b6e56b5bd3663a3148e3d54e1e0fdeca6b7dd6afca61e245654800b",
+    "yoyo/monitor/replay_ledger.py": "1b46c437095f16926c91bed0612549e3cae14f0640cd801de2f6b8a469213547",
+    "yoyo/monitor/notification_api.py": "4194f233888ec08a85156402bffa7c12182bc1b7b6bf9083c11cb907ff69bd1c",
+    "yoyo/monitor/v78_shadow.py": "49db3ad294bb32047bc220e22cb1e7a747e3a03e9028b75ca381d5fbb1e101b3",
+    "yoyo/monitor/v128_signals.py": "2e8d0109571fc377cd748fdf33856ec38965daafdf3d8d559587abf04f380b41",
+    "yoyo/monitor/bark.py": "5de7b9621e18b755024feb9cf1c4faa4f92b452a113ac23dc6856df2786cb405",
+    "yoyo/monitor/v1_worker.py": "52d253cdc16a3db03083df5686253bc57f97818587d6e806996bf195ccd5dcc6",
+    "yoyo/monitor/version_upgrade.py": "7b2ff25cdfee5c7c05cad3b8c313ed42cfcc7a2317b2711cc751172f3497033b",
+    "yoyo/monitor/model_gate.py": "96dcbc1f6a2cb01506912f3ce476593217e355ff1598edafe06fb39839027592",
+    "yoyo/monitor/manage.py": "641c645296e27872b1a32a0bca1dc86756fe00902f8277d6b0928ab540fd17bd",
+    "yoyo/monitor/v9_performance.py": "789f54707289843c611a0a1afdcb18611ce777415d821137debfc93c8762257a",
+    "yoyo/monitor/yolo_detector.py": "62c07941560120ccb0aae2b56bd16cc36e3e99939b489ca3c9a9a76bb843eaa5",
+    "yoyo/monitor/spike_lines_worker.py": "f176d976cd8310464e44d5f0596f4d6ac5db386bb45344fbad2bf14a5ba1545d",
+    "yoyo/monitor/v78_shadow_manage.py": "7228930822a4152a58926338375c8d60f4c1cc00cc48866909abee48c6b5816d",
+    "yoyo/monitor/snapshot.py": "af64f7a96df43249e4c526fb8301e88e9c2d8b454bee541130ca383a0ca21326",
+    "yoyo/monitor/tradingview.py": "962033b84fa55fe0f73d8039a4e77c2336de012d049517b8dbab08c1630621de",
+    "yoyo/monitor/static/manual.js": "1406f1def765c0d6c27dfa859a99139ad5fcd2f15b2ea647eb45d1696ca29846",
+    "yoyo/monitor/static/datasets.js": "15d1b8a98eb399fc44afcbf2b025866d74bfccf82cedc2814b4901693c526398",
+    "yoyo/monitor/static/research.js": "1e42e707f7272d1e2d210874578e3ba6504d5d15aed2e39d71b53360836d0aab",
+    "yoyo/monitor/static/theme.js": "961cb3e014d9df9e263ebc12701fa9333ca55aa36b64cee3260e507142d8c39c",
+    "yoyo/monitor/static/strategies.js": "e2f2d8c5ed5fe0738c7100e8781b630a1c0b6e3c37b449521f1d8f9b8f5282a9",
+    "yoyo/monitor/static/v130.js": "aef829f1f1d1f3976e8948eab530639dd71a5c48e28c2b66c553dd9608accd54",
+    "yoyo/monitor/static/yolo-workflow.js": "e9444c4c4067fbc5da64d584749dc664170cdeef82100ee926278a6c2db4e69d",
+    "yoyo/monitor/static/knowledge.js": "56b2f630450d78a1fd7bb12eb7d1c1ad1acc998125e8c5e779e99170f720ec46",
+    "yoyo/monitor/static/vision-module.js": "43d4ac527bcb07d4a2d5fba22aa8084ad9e6b52cb2f7becd7b6d22ac8da6b5cc",
+    "yoyo/monitor/static/platform.js": "cd87cc9becc7d0085df42177ec85ec0f0eaac3a9bcd3d19aeba6d20bf79c1568",
+    "yoyo/monitor/static/notifications.js": "9bac08eda3b2b3e85874af87d1163ffef29a010c3bf3726d0ec0315cb6b730e5",
+    "yoyo/monitor/static/app.js": "357033e628adcaef013145370d80bc75503eacd506f7ba9405cfc64fe6f78149",
+    "yoyo/monitor/static/index.html": "661c7fcf7b77f78ec9ad79cad0ee8b4769bde54dda9bca3418e0b366015c30ce",
+    "yoyo/monitor/static/research.css": "c77f35b77a05c8b9e367c9462d01ecc652b403c3a89cd589598584953711ca8a",
+    "yoyo/monitor/static/platform.css": "3d998983642dbb167da2fe8794ec3c833d42f3e95f1bd3e0f7c5ac1251629ed7",
+    "yoyo/monitor/static/styles.css": "99ee6bc9d53367e481f66b2054224e9716cfd26a42caeed62c32eb87214debe5",
+    "yoyo/monitor/static/knowledge.css": "999645ec21c061d2cfebb8d227532e86b1bf888dba56fce587781925138e8d99",
+    "yoyo/monitor/static/v130.css": "1bb55e7df14a9b226af9bda5b5e66fa0055a8f4457a200c90b457c217853bced",
+    "yoyo/monitor/static/strategies.css": "221ab6b3da17c7f715a32f786cc8368ec1f302be393363038651037b7c8c042f",
+    "yoyo/monitor/static/datasets.css": "893e59e045dc86b7e8fff571b7274de2986c89357d8f6940f84fcaa55e59dce5",
+    "yoyo/monitor/static/yolo-workflow.css": "ba60224004021108a19d915e9d086a466ed384226b4fc7688e46b6f4d855043c",
+    "yoyo/monitor/static/manual.css": "557727912ec4de24c58a302b92e6012454a31cca689c935a7d55b0d0025a80d5",
+    "yoyo/monitor/static/notifications.css": "cea0bfecd62ff85473c9d64ece3aae817942fe6cde5ef2cb8ab11c7b3edf8662"
+  },
+  "version": "1.20.0",
+  "first_completed_scan": {
+    "status": "idle",
+    "generation": "e8dab31e99804e8784f75fb76cc0f84f",
+    "worker_pid": 25610,
+    "worker_started_at_ms": 1790347076866,
+    "started_at_ms": 1790347081349,
+    "finished_at_ms": 1790347159955,
+    "completed": 1968,
+    "total": 1968,
+    "errors": 0,
+    "error_samples": [],
+    "isolated": true,
+    "timing_ms": {
+      "cells": 1968,
+      "changed_cells": 492,
+      "unchanged_cells": 1476,
+      "fetch_total": 12.246,
+      "analyze_total": 58628.346,
+      "checkpoint_total": 8400.144,
+      "analyze_cpu_total": 57388.131,
+      "checkpoint_cpu_total": 7554.958,
+      "fetch_max": 0.069,
+      "analyze_max": 194.447,
+      "checkpoint_max": 28.343,
+      "analyze_cpu_max": 185.38,
+      "checkpoint_cpu_max": 24.4
+    },
+    "duration_seconds": 78.61,
+    "next_scan_ms": 1790347279955
+  },
+  "coverage": [
+    [
+      "15m",
+      492
+    ]
+  ],
+  "history_preservation": {
+    "monitor.sqlite3": {
+      "prior_rows": 2535,
+      "current_rows": 2540,
+      "missing_prior_ids": 0
+    },
+    "spike-lines-v1.sqlite3": {
+      "prior_rows": 5565,
+      "current_rows": 5566,
+      "missing_prior_ids": 0
+    }
+  },
+  "startup_source_hashes_match": true,
+  "live_ui_verified": true,
+  "current_v13_count": 0
+}

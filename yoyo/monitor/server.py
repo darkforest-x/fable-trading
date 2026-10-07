@@ -86,6 +86,9 @@ def create_app(runtime=None, start_monitor=True):
     app = FastAPI(title="Fable Impulse Monitor", lifespan=lifespan, docs_url=None, redoc_url=None)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"])
     app.state.monitor = monitor
+
+    from yoyo.monitor.notification_api import install as install_notifications
+    install_notifications(app, runtime, monitor)
     from yoyo.monitor.copier_proxy import install as install_copier
     install_copier(app)
 
@@ -109,6 +112,24 @@ def create_app(runtime=None, start_monitor=True):
     def status():
         dispatch_trace("handler:/api/status")
         return monitor.status()
+
+    @app.get("/api/v13/signals")
+    def v13_signals(limit: int = Query(100, ge=1, le=1000), symbol: str = None, timeframe: str = None):
+        from yoyo.monitor.v130_policy import TIMEFRAMES as periods
+        from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as protocol, SIGNAL_KIND as kind
+        if timeframe is not None and timeframe not in periods:
+            raise HTTPException(400, "不支持的周期。")
+        arm = store.get_meta("notification_policy:spike-burst-v130-retest-notifications-v1", {})
+        rows = store.list_events(limit=limit, symbol=symbol, timeframe=timeframe, kind=kind,
+                                 protocol=protocol, source="live", confirmation="retest", summary=False)
+        clock = monitor.client.clock()
+        for row in rows:
+            row["is_fresh"] = 0 <= clock - row["bar_close_ms"] <= FRESH_MS
+        return {"items": rows, "protocol": protocol, "timeframes": list(periods),
+                "candidate_source": "ordinary_both", "activation": arm,
+                "signals_24h": store.count_since(clock - 86400000, kind=kind, protocol=protocol),
+                "last_observation": store.get_meta("v130:last_observation", {}),
+                "now_ms": clock, "orders_enabled": False, "chart_parity_verified": False}
 
     @app.get("/api/health")
     @app.get("/healthz")
@@ -148,7 +169,7 @@ def create_app(runtime=None, start_monitor=True):
             raise HTTPException(400, "不支持的信号视图。")
         started_ns = time.monotonic_ns()
         dispatch_trace("handler:/api/signals")
-        if source not in (None, "live", "warmup", "replay") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
+        if source not in (None, "live", "warmup", "replay", "legacy") or confirmation not in (None, "raw", "yolo", "raw_yolo"):
             raise HTTPException(400, "unsupported source or confirmation")
         source = source or "live"
         display_scope = source if source in ("live", "warmup") else None
@@ -156,10 +177,10 @@ def create_app(runtime=None, start_monitor=True):
         if display_scope:
             # The one-time V9 arm receipt survives restarts and notification
             # setting changes. Migration timestamps can move on later cleanups.
-            receipt = store.get_meta("notification_policy:v9_bark_arm", {})
+            receipt = store.get_meta("notification_policy:v128_bark_arm", {})
             display_cutoff_ms = receipt.get("activated_ms") if isinstance(receipt, dict) else None
             if type(display_cutoff_ms) is not int or display_cutoff_ms < 0:
-                raise HTTPException(503, "未找到 V9 首次启用时间，暂不混合展示实时与预热历史。")
+                raise HTTPException(503, "V12.8 正在初始化，等待首次同步完成。")
         # The V9 UI filters by confirmation.  Infer its event kind when the
         # legacy `kind` parameter is omitted, rather than silently querying
         # only YOLO rows for `confirmation=raw`.
@@ -168,12 +189,17 @@ def create_app(runtime=None, start_monitor=True):
         if kind not in (None, MODEL_KIND, SIGNAL_KIND):
             raise HTTPException(400, "支持指标启动或 YOLO 确认信号。")
         direct = kind == SIGNAL_KIND
-        protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else None
+        protocol = SIGNAL_PROTOCOL if kind == SIGNAL_KIND else MODEL_PROTOCOL if kind == MODEL_KIND else (SIGNAL_PROTOCOL, MODEL_PROTOCOL)
+        if source == "legacy":
+            from yoyo.monitor import LEGACY_SIGNAL_KIND, LEGACY_SIGNAL_PROTOCOL, LEGACY_MODEL_PROTOCOL
+            kind = LEGACY_SIGNAL_KIND if confirmation == "raw" else MODEL_KIND if confirmation == "yolo" else None
+            protocol = (LEGACY_SIGNAL_PROTOCOL if confirmation == "raw" else LEGACY_MODEL_PROTOCOL
+                        if confirmation == "yolo" else (LEGACY_SIGNAL_PROTOCOL, LEGACY_MODEL_PROTOCOL))
         if (before_close_ms is None) != (before_id is None):
             raise HTTPException(400, "cursor requires both close time and event id")
         event_timing = {} if DISPATCH_TRACE else None
         rows = store.list_events(limit, symbol, timeframe, kind, side, protocol=protocol,
-                                 source="live" if display_scope else source, confirmation=confirmation,
+                                 source="live" if display_scope or source == "legacy" else source, confirmation=confirmation,
                                  before_close_ms=before_close_ms, before_id=before_id,
                                  timing=event_timing, summary=True,
                                  display_scope=display_scope, display_cutoff_ms=display_cutoff_ms)
@@ -190,7 +216,7 @@ def create_app(runtime=None, start_monitor=True):
         cursor = ({"close_ms": rows[-1]["bar_close_ms"], "event_id": rows[-1]["id"]}
                   if len(rows) == limit else None)
         dispatch_trace(f"signals:return={len(rows)}", started_ns=started_ns)
-        return {"items": rows, "total": len(rows), "kind": kind, "protocol": SIGNAL_PROTOCOL if direct else protocol,
+        return {"items": rows, "total": len(rows), "kind": kind, "protocol": protocol or (SIGNAL_PROTOCOL, MODEL_PROTOCOL),
                 "protocols": list(protocol) if isinstance(protocol, tuple) else ([protocol] if protocol else []),
                 "source": source, "confirmation": confirmation, "next_cursor": cursor,
                 "display_cutoff_ms": display_cutoff_ms}
@@ -254,7 +280,9 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/api/lines/status")
     def spike_lines_status():
         try:
-            return lines_status(lines_book, monitor.client.clock())
+            result = lines_status(lines_book, monitor.client.clock())
+            result["notifications"] = monitor.status().get("joint_notifications", {})
+            return result
         except LinesUnavailable as error:
             if str(error) == "lines_not_started":
                 return {"configured": False, "counts": {}, "activation": None, "scan": None}
@@ -272,7 +300,10 @@ def create_app(runtime=None, start_monitor=True):
             if str(error) != "lines_not_started":
                 raise HTTPException(503, "趋势线突破账本暂不可读。") from error
             rows = []
-        return {"items": rows, "total": len(rows), "kind": kind, "notification_eligible": False,
+        channels = monitor.status().get("joint_notifications", {})
+        enabled = kind == "joint" and any(c.get("enabled") and c.get("activated_ms") is not None
+                                          for c in channels.values())
+        return {"items": rows, "total": len(rows), "kind": kind, "notification_eligible": enabled,
                 "execution_eligible": False}
 
     @app.get("/api/lines/ledger")

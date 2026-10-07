@@ -1,4 +1,4 @@
-"""Isolated public-data V9 scanner; only new forward V9 raw rows may seed Bark."""
+"""Isolated V12.8 scanner, with native closed H1 inputs before each 15m pass."""
 from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import math
@@ -8,8 +8,9 @@ from pathlib import Path
 from yoyo.monitor import MONITORED_TIMEFRAMES, SIGNAL_PROTOCOL, TIMEFRAMES, V9_RESET_KEY
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.model_gate import pending_proof
-from yoyo.monitor.notification_policy import arm_v9_bark, delivery_error
-from yoyo.monitor.v9_signals import analyze
+from yoyo.monitor.notification_policy import (arm_v9_bark, arm_v9_telegram, delivery_error,
+                                              model_candidate_error)
+from yoyo.monitor.v128_signals import analyze
 from yoyo.monitor.store import Store, now_ms
 
 
@@ -69,8 +70,9 @@ class V9Scanner:
         """Fetch confirmed bars, replay only changed closed candles, persist read models.
 
         This runs in its own process so pandas/Pine replay cannot starve FastAPI.
-        Raw events may seed their own Bark stage only after the persisted
-        forward cutover; historical or replay rows never acquire a receipt.
+        Raw Telegram and Bark legs are queued independently after their
+        forward cutovers. YOLO candidates follow their own topic subscriptions;
+        historical or replay rows never acquire a receipt or candidate.
         """
         store, client = self.store, self.client
         started = now_ms()
@@ -95,6 +97,11 @@ class V9Scanner:
             raise RuntimeError("v9_explicit_reset_required")
         cutoff = reset["activated_ms"]
         arm_v9_bark(store, client.clock())
+        arm_v9_telegram(store, client.clock())
+        from yoyo.monitor.v130_policy import arm_v130
+        arm_v130(store, client.clock())
+        from yoyo.monitor.version_upgrade import record_upgrade
+        record_upgrade(store, client.clock())
         if not self.instruments or started - self.universe_at >= 3_600_000:
             self.instruments = client.instruments()
             self.universe_at = started
@@ -102,7 +109,10 @@ class V9Scanner:
         instruments = self.instruments
         scan.update(status="scanning", total=len(instruments) * len(MONITORED_TIMEFRAMES))
         store.set_meta("scan", scan)
-        cells = [(instrument, timeframe) for instrument in instruments for timeframe in MONITORED_TIMEFRAMES]
+        # H1 must finish before this symbol's 15m decision. A cold restart or
+        # an hour boundary must never make the direction gate use an old seed.
+        ordered_timeframes = ("1H",) + tuple(tf for tf in MONITORED_TIMEFRAMES if tf != "1H")
+        cells = [(instrument, timeframe) for instrument in instruments for timeframe in ordered_timeframes]
         with ThreadPoolExecutor(max_workers=8, thread_name_prefix="v9-okx") as pool:
             pending = {}
             cell_iter = iter(cells)
@@ -140,8 +150,14 @@ class V9Scanner:
                     has_candles = bool(candles)
                     self.candles[cell] = candles
                     close = candles[-1]["t"] + TIMEFRAMES[timeframe] if candles else None
-                    key = f"v9:last_closed:{symbol}:{timeframe}"
-                    unchanged = close is not None and store.get_meta(key) == close
+                    key = f"v128:last_closed:{symbol}:{timeframe}"
+                    higher = self.candles.get((symbol, "1H"), []) if timeframe == "15m" else []
+                    fingerprint = {"close_ms": close, "protocol": SIGNAL_PROTOCOL,
+                                   "higher_open_ms": higher[-1]["t"] if higher else None}
+                    # V13.1 rides on every period's V12.8 prefix (owner 2026-10-07).
+                    from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as V130_PROTOCOL, SOURCE_SHA256
+                    fingerprint.update(v130_protocol=V130_PROTOCOL, v130_source_sha256=SOURCE_SHA256)
+                    unchanged = close is not None and store.get_meta(key) == fingerprint
                     if not candles:
                         raise RuntimeError("market_data_unavailable")
                     # Checkpoint before replay/market writes.  A later process
@@ -158,8 +174,13 @@ class V9Scanner:
                     if not unchanged:
                         analyze_started = time.monotonic()
                         analyze_cpu_started = time.thread_time()
-                        result = analyze(candles, [], timeframe, tick=float(instrument["tickSz"]),
-                                         base_asset=instrument_base(instrument), chart_limit=240)
+                        context = {}
+                        result = analyze(candles, higher, timeframe, tick=float(instrument["tickSz"]),
+                                         base_asset=instrument_base(instrument), chart_limit=240,
+                                         _context=context)
+                        from yoyo.monitor.v130_worker import observe
+                        retest = observe(store, result, context, symbol=symbol, timeframe=timeframe,
+                                         tick=float(instrument["tickSz"]), clock=client.clock)
                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
                         analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
                         # Warmup may calculate old decisions, but they cannot
@@ -168,16 +189,21 @@ class V9Scanner:
                         events.sort(key=lambda event: (event["bar_close_ms"], event["side"], event["kind"]))
                         for event in events:
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
-                            # Raw V9 is its own Bark stage when a separately
-                            # armed direct policy permits this newly closed bar.
-                            raw_bark = delivery_error(store, event, client.clock(), "bark") is None
-                            inserted = store.upsert_event(event, bark_notify=raw_bark)
-                            # YOLO is only an extra stage for a raw event that
-                            # was eligible to notify at registration time. A
+                            # Each raw channel has an independent policy and
+                            # outbox. YOLO follows its own per-channel topic
+                            # subscription, even when both raw routes are off.
+                            delivery_now = client.clock()
+                            raw_telegram = delivery_error(store, event, delivery_now, "telegram") is None
+                            raw_bark = delivery_error(store, event, delivery_now, "bark") is None
+                            model_telegram = model_candidate_error(store, event, delivery_now, "telegram") is None
+                            model_bark = model_candidate_error(store, event, delivery_now, "bark") is None
+                            inserted = store.upsert_event(event, notify=raw_telegram, bark_notify=raw_bark)
+                            # YOLO is an independently subscribed extra stage
+                            # for a fresh raw event at registration time. A
                             # cold scan can rediscover an old closed bar within
                             # nine TF bars; retain that raw history but never
                             # load/infer it as if it were a new live candidate.
-                            if inserted and raw_bark:
+                            if inserted and (model_telegram or model_bark):
                                 store.register_candidate(event, pending_proof(event))
                             # Later closed bars move an open card's projection.
                             # This narrow payload merge never reopens the
@@ -189,7 +215,10 @@ class V9Scanner:
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
                                      chart=[dict(row, burst=False, burst_up=False, burst_down=False) if row["t"] + TIMEFRAMES[timeframe] <= cutoff else row
                                             for row in result["chart"]], events=events[-100:])
-                        store.upsert_market(state); store.set_meta(key, close)
+                        if retest is not None:
+                            state["v130"] = retest["state"]
+                            state["v130_events"] = retest["events"][-100:]
+                        store.upsert_market(state); store.set_meta(key, fingerprint)
                 except Exception as exc:
                     scan["errors"] += 1
                     if len(scan["error_samples"]) < 8: scan["error_samples"].append({"symbol":symbol,"timeframe":timeframe,"error":type(exc).__name__})

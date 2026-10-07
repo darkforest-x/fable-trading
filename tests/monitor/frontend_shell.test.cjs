@@ -10,7 +10,7 @@ const app = fs.readFileSync(path.join(__dirname, "../../yoyo/monitor/static/app.
 const cutoff = app.indexOf("  function redact(value)");
 const response = (value) => ({ ok: true, headers: { get: () => "application/json" }, json: async () => value });
 const status = () => ({ protocol: "spike-burst-v128-monitor-v1", started_at_ms: Date.now() - 60000,
-  runtime: { notification_mode: "two_stage", timeframes: ["15m"], model_gate: { loaded: true } },
+  runtime: { notification_mode: "two_stage", timeframes: ["15m"], model_gate: { loaded: true }, v130: { signals_24h: 44 } },
   counts: { indicator_starts_24h: 44 }, universe: { count: 491 } });
 
 function element() {
@@ -56,6 +56,18 @@ test("direct workspace entry loads shared status without downloading a signal le
   assert.equal(c.get("connection-label").classList.contains("hidden"), true);
   assert.equal(c.get("model-gate-notice").classList.contains("hidden"), true);
   assert.equal(c.get("refresh-button").attrs["aria-label"], "刷新模拟实盘");
+});
+
+test("direct notification entry and periodic refresh keep connection badges current", async () => {
+  const c = harness();
+  c.setView("notifications", false);
+  await c.refreshShellStatus();
+  assert.deepEqual(c.calls, ["/api/status"]);
+  assert.match(c.get("connection-label").innerHTML, /已连接/);
+  assert.match(c.get("sidebar-runtime").textContent, /已运行/);
+  c.state.statusReceivedAt = 0;
+  await c.refresh("periodic");
+  assert.deepEqual(c.calls, ["/api/status", "/api/status"]);
 });
 
 test("concurrent status refreshes share one request and recover visibly after failure", async () => {

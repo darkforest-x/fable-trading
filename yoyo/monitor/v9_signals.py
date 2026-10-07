@@ -21,20 +21,22 @@ from yoyo.evaluation.spike_burst_progressive import features
 from yoyo.evaluation.spike_v6_wvf_study import _data_gap
 from yoyo.evaluation.spike_v7_fast import v6_signals, v7_diagnostics
 from yoyo.evaluation.spike_v9 import VERSION as V9_STRATEGY_VERSION, v9_admissions
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, TIMEFRAMES
+from yoyo.monitor import TIMEFRAMES
 from yoyo.monitor.signals import AnalysisResult
 from yoyo.monitor.v9_performance import BASIS as PERFORMANCE_BASIS, project
 
 
 V9_PINE_SOURCE = Path(__file__).resolve().parents[1] / "evaluation/pine/spike_burst_v9.pine"
 V9_SOURCE_SHA256 = hashlib.sha256(V9_PINE_SOURCE.read_bytes()).hexdigest()
+V9_SIGNAL_PROTOCOL = "spike-burst-v9-monitor-v1"
+V9_SIGNAL_KIND = "spike_burst_v9"
 # V7 itself decides when its complete BB history is available.  This lower
 # bound prevents callers from presenting a short V1-sized history as V9-ready.
 V7_MINIMUM_WARMUP_BARS = 520
 # Existing monitor callers import ``WARMUP`` from signal adapters.
 WARMUP = V7_MINIMUM_WARMUP_BARS
 PROTOCOL = {
-    "version": SIGNAL_PROTOCOL,
+    "version": V9_SIGNAL_PROTOCOL,
     "source": "yoyo/evaluation/pine/spike_burst_v9.pine",
     "source_sha256": V9_SOURCE_SHA256,
     "signal": "confirmed_bar_close",
@@ -197,7 +199,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         side = "long" if side_values[i] == 1 else "short"
         close_ms = int(times[i]) + step
         events.append({
-                "protocol": SIGNAL_PROTOCOL, "kind": SIGNAL_KIND, "source": "live",
+                "protocol": V9_SIGNAL_PROTOCOL, "kind": V9_SIGNAL_KIND, "source": "live",
                 "confirmation": "raw", "direction": side, "side": side,
                 "strategy_version": V9_STRATEGY_VERSION, "v9_admitted": True,
                 "timeframe": timeframe, "timeframe_min": step // 60_000,
@@ -227,7 +229,7 @@ def analyze(candles: list[dict], higher: list[dict] | None, timeframe: str, *, t
         "ready": bool(v7_ready and len(built) >= V7_MINIMUM_WARMUP_BARS),
         "bars": len(built), "timeframe": timeframe, "direction": "both",
         "bar_open_ms": int(times[-1]), "bar_close_ms": int(times[-1]) + step,
-        "price": float(built.close.iloc[-1]), "protocol": SIGNAL_PROTOCOL,
+        "price": float(built.close.iloc[-1]), "protocol": V9_SIGNAL_PROTOCOL,
         "source_sha256": V9_SOURCE_SHA256, "performance": PERFORMANCE_BASIS,
         "base_asset": latest.base_asset,
         "v9_evidence": _evidence_row(latest),
