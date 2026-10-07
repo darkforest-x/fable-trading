@@ -10931,6 +10931,21 @@ experiments:
     notes: Original V12.8 source/private script retained. V13 defaults to ordinary-both retest, optional joint-long or
       original-reference mode. Native market parity and live execution not claimed. No standalone report requested.
 
+  - experiment_id: exp-spike-v130-monitor-20260925-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2aad61080e
+    status: active
+    result: Engineering rollout, not an economic test. 2026-09-25 V13.0 ordinary retest observed on 15m with restart-safe Telegram and Bark cutovers (rollout_receipt.json). 2026-10-07 the owner made the signal center V13.1 - the observer runs on 15m/30m/1H/4H, the 1H close trail is 2ATR and others keep 4ATR, and local signal history was cleared after a full backup (backups/before-v131-20261007T153712Z). The stack ran uncommitted until 2aad61080e.
+    question: Can the frozen ordinary V13 retest be observed on 15m with restart-safe Telegram and Bark notifications?
+    single_variable: Engineering adapter and notification cutover only; no new strategy optimization or economic experiment.
+    canonical_report: experiments/active/exp-spike-v130-monitor-20260925-v1/rollout_receipt.json
+    artifacts: [spike-v130-monitor-20260925-v1, spike-v128-retest-user-data-20260925-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner authorized 15m monitoring and notifications. Final confirmation freshness, independent protocol, existing scanner reuse. No account orders, model promotion, or native TradingView market parity claim. Existing historical results retain their limitations.
+
   - experiment_id: exp-spike-exit-giveback-20261007-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 881dcacbbc

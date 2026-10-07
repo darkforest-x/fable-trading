@@ -32245,6 +32245,34 @@ artifacts:
       not relabeled. All10positive post0 boxes exceed the legacy canvas and are explicitly flagged. Future context separate;
       earlier classes unadjudicated, zero training labels generated. No training or model promotion.
 
+  - artifact_id: spike-v130-monitor-20260925-v1
+    artifact_type: manifest
+    role: notification_only_rollout_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2aad61080e
+    source_path: experiments/active/exp-spike-v130-monitor-20260925-v1/rollout_receipt.json
+    sha256: 375ff64a12f9ed5ddcb900207921580093421deb5aca126470ed7c399cf72445
+    size_bytes: 15231
+    storage_uri: repo://experiments/active/exp-spike-v130-monitor-20260925-v1/rollout_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested notification-only integration or existing backtest data packaging; no new economic validation or account orders.
+
+  - artifact_id: spike-v128-retest-user-data-20260925-v1
+    artifact_type: manifest
+    role: validated_xlsx_and_csv_zip_delivery_receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2aad61080e
+    source_path: experiments/active/exp-spike-v128-retest-entry-20260923-v1/user_delivery_20260925/delivery_receipt.json
+    sha256: d8bbe69042c5e0300d3f7103946e23507b0bae842d0633dcd55290c815106bea
+    size_bytes: 4287
+    storage_uri: repo://experiments/active/exp-spike-v128-retest-entry-20260923-v1/user_delivery_20260925/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested notification-only integration or existing backtest data packaging; no new economic validation or account orders.
+
   - artifact_id: ma-morphology-v6-early-20260926-training-launch
     artifact_type: manifest
     role: authorized_research_training_launch_and_bound_preflight
