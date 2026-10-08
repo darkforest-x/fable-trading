@@ -1,0 +1,26 @@
+{
+  "experiment_id": "exp-market-sync-shock-20261008-v3",
+  "parent_experiment": "exp-market-sync-shock-20261008-v2",
+  "owner_request": "2026-10-08 继续做 v3 分层吧 (Notion #14 sub-task: v3 分层 - 按冲击强度 / 量比 / 同向比例看后续收益)",
+  "question": "Within one fixed event set, do stronger sync shocks (larger joint z, larger joint volume ratio, wider alt breadth) continue more over the next 4-24h than weaker ones, and does the ordering hold in both periods?",
+  "single_variable": "Conditioning only: events, outcomes and paired controls are v2's own rows for the loosest v2 config; each event is assigned to a tercile of one strength feature at a time. Data, features, universe, cost, controls and the 2025 split are unchanged.",
+  "source_results": "experiments/active/exp-market-sync-shock-20261008-v2/results_v2",
+  "event_set": {"config": "z2.0_v2.0_b0.6_sync", "kind": "sync", "timeframes": [30, 60], "sides": [1, -1]},
+  "features": {
+    "strength": "min(|btc_z|, |eth_z|) at the event bar (z = bar return / RMS of the previous 96 bar returns)",
+    "volume": "min(btc_vr, eth_vr) at the event bar (volume / median of the previous 96 bar volumes); recomputed with v1.causal_features on the same BTC-indexed bars",
+    "breadth": "share of the month's top-50 alts moving with the shock in the event bar (v2 events.csv)"
+  },
+  "bins": "terciles per feature, timeframe and side; edges from events before select_before only, frozen and applied to later events",
+  "exits": ["time_4h", "time_12h", "time_24h", "trend"],
+  "instruments": ["eth", "btc", "alts"],
+  "primary": {"minutes": 60, "side": 1, "exit": "time_12h", "instrument": "eth",
+              "read": "top-minus-bottom tercile paired excess (net minus control) per feature, in each period; positive in both periods = the feature orders the outcome"},
+  "select_before": "2025-01-01T00:00:00Z",
+  "round_trip_cost": 0.002,
+  "permutations": 10000,
+  "stat_seed": 1008301,
+  "flips": 10000,
+  "training_eligible": false,
+  "production_eligible": false
+}
