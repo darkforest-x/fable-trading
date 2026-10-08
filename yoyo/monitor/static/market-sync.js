@@ -11,6 +11,7 @@
   const fin = (v) => typeof v === "number" && Number.isFinite(v);
   const clock = (ms, year = false) => ms == null ? "—" : new Intl.DateTimeFormat("zh-CN", {timeZone: "Asia/Shanghai", ...(year ? {year: "numeric"} : {}), month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false}).format(new Date(ms));
   const pct = (v, d = 2) => fin(v) ? `${v >= 0 ? "+" : ""}${(v * 100).toFixed(d)}%` : "—";
+  const share = (v) => fin(v) ? `${Math.round(v * 100)}%` : "—";
   const bp = (v) => fin(v) ? `${v >= 0 ? "+" : ""}${v.toFixed(1)}bp` : "—";
   const num = (v, d = 2) => fin(v) ? v.toFixed(d) : "—";
   const tone = (v) => fin(v) ? (v > 0 ? "r-positive" : v < 0 ? "r-negative" : "") : "";
@@ -58,7 +59,7 @@
     const stateText = {ok: "正常", updating: "更新中", starting: "启动中", error: "出错"}[status.state] || "未运行";
     return `<div class="ms-overview">
       <article><span>当前查看的规则</span><strong>${tfLabel(state.tf)} ${state.kind === "sync" ? "单根" : "连续两根"} · ${esc(state.side === "all" ? "多空都看" : sideName(+state.side))}</strong><small>${esc(configLabel(state.config))} · 持有 ${esc(state.hold)} · ${esc(INSTRUMENTS[state.inst])}</small></article>
-      <article><span>最近一根 ${tfLabel(state.tf)} · 北京</span><strong>${latest ? esc(clock(latest.open_ms)) : "—"}</strong><small>${latest ? `BTC z ${num(latest.btc_z)} · ETH z ${num(latest.eth_z)} · 同涨 ${pct(latest.breadth_up, 0)}` : "等待首轮数据"}</small></article>
+      <article><span>最近一根 ${tfLabel(state.tf)} · 北京</span><strong>${latest ? esc(clock(latest.open_ms)) : "—"}</strong><small>${latest ? `BTC z ${num(latest.btc_z)} · ETH z ${num(latest.eth_z)} · 同涨 ${share(latest.breadth_up)}` : "等待首轮数据"}</small></article>
       <article><span>样本外记录（9/23 起）</span><strong>${forward.length} 次</strong><small>${fstats ? `已满 ${esc(state.hold)} ${fstats.n} 次 · 平均 ${bp(fstats.mean)}` : "还没有已结束的样本"}</small></article>
       <article><span>研究样本 2023-01 至 2026-09</span><strong>${hs ? `${hs.n} 次 · ${bp(hs.mean)}` : "—"}</strong><small>${hs ? `中位 ${bp(hs.median)} · 胜率 ${(hs.win * 100).toFixed(0)}% · 对照 ${bp(hs.ctrl)}` : "该组合没有事件"}</small></article>
     </div>
@@ -96,7 +97,7 @@
       return `<tr><td>${esc(clock(r.open_ms))}</td>
         <td class="${tone(r.btc_ret)}">${pct(r.btc_ret)}<small><span class="${hit(fin(r.btc_z) && Math.abs(r.btc_z) >= c.z)}">z ${num(r.btc_z)}</span> · <span class="${hit(fin(r.btc_vr) && r.btc_vr >= c.v)}">${num(r.btc_vr, 1)}×</span></small></td>
         <td class="${tone(r.eth_ret)}">${pct(r.eth_ret)}<small><span class="${hit(fin(r.eth_z) && Math.abs(r.eth_z) >= c.z)}">z ${num(r.eth_z)}</span> · <span class="${hit(fin(r.eth_vr) && r.eth_vr >= c.v)}">${num(r.eth_vr, 1)}×</span></small></td>
-        <td><span class="${hit(side > 0 && fin(r.breadth_up) && r.breadth_up >= c.b)}">${pct(r.breadth_up, 0)}</span> / <span class="${hit(side < 0 && fin(r.breadth_down) && r.breadth_down >= c.b)}">${pct(r.breadth_down, 0)}</span><small>${esc(r.n_alts)} 个山寨有数据</small></td>
+        <td><span class="${hit(side > 0 && fin(r.breadth_up) && r.breadth_up >= c.b)}">${share(r.breadth_up)}</span> / <span class="${hit(side < 0 && fin(r.breadth_down) && r.breadth_down >= c.b)}">${share(r.breadth_down)}</span><small>${esc(r.n_alts)} 个山寨有数据</small></td>
         <td>${label.startsWith("触发") ? `<strong class="ms-badge">${esc(label)}</strong>` : esc(label)}</td></tr>`;
     }).join("")}</tbody></table></div>`;
   }
@@ -116,7 +117,7 @@
     if (!events.length) return `<div class="empty-state"><h3>暂无符合条件的事件</h3><p>从 2026-08-01 起记录；换个阈值或方向看看。</p></div>${note}`;
     return `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>量比</th><th>同向</th>${HOLDS.map(h => `<th class="${h === state.hold ? "ms-focus" : ""}">${h} · ${esc(INSTRUMENTS[state.inst])}</th>`).join("")}<th>来源</th></tr></thead><tbody>${events.map(e => {
       const source = e.out_of_sample ? `<strong class="ms-badge">样本外</strong>` : research.has(`${e.open_ms}|${e.side}`) ? "研究期 · 已对上" : "研究期 · 研究里没有";
-      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×</td><td>${pct(e.breadth, 0)}</td>${HOLDS.map(h => {
+      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×</td><td>${share(e.breadth)}</td>${HOLDS.map(h => {
         const o = e.outcomes?.[h] || {}, v = o[state.inst];
         return `<td class="${h === state.hold ? "ms-focus " : ""}${tone(v)}">${o.started ? bp(v) : "待入场"}${o.started && !o.done ? "<small>进行中</small>" : ""}</td>`;
       }).join("")}<td>${source}</td></tr>`;
@@ -139,7 +140,7 @@
         <article><span>去掉最好 5 次</span><strong class="${tone(s.trimmed)}">${bp(s.trimmed)}</strong></article>
       </div>
       <div class="ms-years">${Object.entries(years).map(([y, xs]) => { const t = stats(xs); return `<span><b>${y}</b> ${t.n} 次 · <i class="${tone(t.mean)}">${bp(t.mean)}</i> · 胜率 ${(t.win * 100).toFixed(0)}%</span>`; }).join("")}</div>` : `<div class="empty-state"><h3>该组合没有研究事件</h3></div>`}
-      ${list.length ? `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>同向</th><th class="ms-focus">${esc(state.hold)} · ${esc(INSTRUMENTS[state.inst])}</th><th>对照</th></tr></thead><tbody>${list.map(r => `<tr><td>${esc(clock(r.time, true))}</td><td>${esc(sideName(r.side))}</td><td>${num(r.btc_z)} / ${num(r.eth_z)}</td><td>${pct(r.breadth, 0)}</td><td class="ms-focus ${tone(r.net)}">${bp(r.net)}</td><td class="${tone(r.ctrl)}">${bp(r.ctrl)}</td></tr>`).join("")}</tbody></table></div>
+      ${list.length ? `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>同向</th><th class="ms-focus">${esc(state.hold)} · ${esc(INSTRUMENTS[state.inst])}</th><th>对照</th></tr></thead><tbody>${list.map(r => `<tr><td>${esc(clock(r.time, true))}</td><td>${esc(sideName(r.side))}</td><td>${num(r.btc_z)} / ${num(r.eth_z)}</td><td>${share(r.breadth)}</td><td class="ms-focus ${tone(r.net)}">${bp(r.net)}</td><td class="${tone(r.ctrl)}">${bp(r.ctrl)}</td></tr>`).join("")}</tbody></table></div>
       ${rows.length > state.limit ? `<button type="button" class="load-more ms-more" id="ms-more">显示更多（共 ${rows.length} 次）</button>` : ""}` : ""}
       <p class="quiet-text">来源 ${esc(h.experiment_id)} @ ${esc(String(h.source_commit).slice(0, 10))}。对照为同月、同 BTC 波动档的 20 个随机入场，方向与持有相同。这些规律是看过数据后找到的，要靠样本外记录验证。</p>`;
   }
