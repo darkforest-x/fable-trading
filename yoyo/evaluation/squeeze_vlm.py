@@ -60,7 +60,7 @@ EXAMPLES = EXP / "examples.json"
 LEDGER = EXP / "vlm_ledger.jsonl"
 IMAGES = EXP / "images"
 VISION_RUNTIME = Path("experiments/active/exp-spike-gemini-vision-20260923-v1/runtime")
-WINDOW = 120
+WINDOW = 60  # owner's ALGO screenshot shows about 55 bars before the breakout
 LOOSE = ("bb", "volume")
 FROZEN_END_MS = pd.Timestamp("2026-09-23T00:00:00Z").value // 10**6
 INTERVAL = {5: "5m", 15: "15m", 30: "30m", 60: "1h", 240: "4h"}
@@ -104,11 +104,48 @@ def binance_bars(symbol: str, minutes: int, start_ms: int, end_ms: int, client=N
     return df.reindex(np.arange(df.index.min(), df.index.max() + step, step))
 
 
-def bars_until(symbol: str, minutes: int, signal_ms: int, history: int = 800) -> tuple[pd.DataFrame, int]:
+OKX_BAR = {5: "5m", 15: "15m", 30: "30m", 60: "1H", 240: "4H"}
+
+
+def okx_bars(inst: str, minutes: int, start_ms: int, end_ms: int, opener=None) -> pd.DataFrame:
+    """Confirmed OKX candles [start_ms, end_ms) for ``inst`` (e.g. ALGO-USDT-SWAP) on a gap-free grid."""
+    import urllib.request
+
+    opener = opener or (lambda url: json.load(urllib.request.urlopen(
+        urllib.request.Request(url, headers={"User-Agent": "fable-research"}), timeout=15)))
+    step = minutes * 60_000
+    rows, after = [], end_ms
+    while after > start_ms:
+        data = opener(f"https://www.okx.com/api/v5/market/history-candles?instId={inst}&bar={OKX_BAR[minutes]}"
+                      f"&after={after}&limit=100").get("data") or []
+        if not data:
+            break
+        rows += [r for r in data if r[8] == "1"]
+        oldest = int(data[-1][0])
+        if oldest >= after:
+            break
+        after = oldest
+    if not rows:
+        return pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
+    df = pd.DataFrame([[int(r[0]), *map(float, r[1:5]), float(r[6])] for r in rows],
+                      columns=["ts", "open", "high", "low", "close", "volume"]).drop_duplicates("ts").set_index("ts").sort_index()
+    df = df.loc[(df.index >= start_ms) & (df.index < end_ms)]
+    return df.reindex(np.arange(df.index.min(), df.index.max() + step, step))
+
+
+def okx_inst(symbol: str) -> str:
+    """ALGOUSDT -> ALGO-USDT-SWAP."""
+    return f"{symbol.removesuffix('USDT')}-USDT-SWAP"
+
+
+def bars_until(symbol: str, minutes: int, signal_ms: int, history: int = 800,
+               source: str = "binance") -> tuple[pd.DataFrame, int]:
     """Bars ending at the signal bar (inclusive) with enough history for MAs, BB and the window."""
     step = minutes * 60_000
     start_ms = signal_ms - history * step
-    if signal_ms + step <= FROZEN_END_MS:
+    if source == "okx":
+        bars = okx_bars(okx_inst(symbol), minutes, start_ms, signal_ms + step)
+    elif signal_ms + step <= FROZEN_END_MS:
         raw = v1.read_5m(symbol, pd.Timestamp(start_ms, unit="ms", tz="UTC"),
                          pd.Timestamp(signal_ms + step, unit="ms", tz="UTC"))
         bars = sb.full_bars(raw, minutes)
@@ -177,6 +214,29 @@ def sha256(data: bytes) -> str:
 
 # --------------------------------------------------------------------------- loose net
 
+def shape_stats(bars: pd.DataFrame, f: pd.DataFrame) -> dict[str, np.ndarray]:
+    """Scale-free shape of the signal bar against the bars before it (owner example 2026-10-08).
+
+    body_vs_med36    breakout body / median body of the 36 bars before (ALGO 5m example: 13.2)
+    range24_vs_body  high-low range of the 24 bars before / breakout body (example: 1.22)
+    vol_vs_med36     volume / median volume of the 36 bars before (example: 6.2)
+    ma_width_pct     six-MA spread / close on the bar before, in percent (example: 0.40)
+    """
+    o, h, l, c, v = (bars[k] for k in ("open", "high", "low", "close", "volume"))
+    body = (c - o).abs()
+    rng24 = h.shift().rolling(24, min_periods=24).max() - l.shift().rolling(24, min_periods=24).min()
+    return {"body_vs_med36": (body / body.shift().rolling(36, min_periods=36).median()).to_numpy(float),
+            "range24_vs_body": (rng24 / body).to_numpy(float),
+            "vol_vs_med36": (v / v.shift().rolling(36, min_periods=36).median()).to_numpy(float),
+            "ma_width_pct": (100 * (f.rope_hi - f.rope_lo) / f.close).shift().to_numpy(float)}
+
+
+def clean_squeeze(frame: pd.DataFrame, gate: dict) -> pd.Series:
+    """Candidates whose shape is near the owner's example (gate from config)."""
+    return ((frame.body_vs_med36 >= gate["min_body_vs_med36"]) & (frame.range24_vs_body <= gate["max_range24_vs_body"])
+            & (frame.vol_vs_med36 >= gate["min_vol_vs_med36"]))
+
+
 def loose_events(f: pd.DataFrame, allowed: np.ndarray) -> list[tuple[int, int]]:
     """Cooldown-filtered (bar, side) hits of the always-on candle plus BB compression and volume."""
     hits = []
@@ -233,7 +293,8 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
                "time": pd.to_datetime(index[ei], unit="ms", utc=True).strftime("%Y-%m-%dT%H:%M:%SZ"),
                "month": month[ei], "side": sd, "stop": stop, "risk_atr": risk_atr,
                "past_width": f.past_width.to_numpy()[ei], "past_flips": f.past_flips.to_numpy()[ei], "rv": f.rv.to_numpy()[ei],
-               "body_atr": np.abs(c[ei] - o[ei]) / f.prev_atr.to_numpy()[ei]}
+               "body_atr": np.abs(c[ei] - o[ei]) / f.prev_atr.to_numpy()[ei],
+               **{k: v[ei] for k, v in shape_stats(bars, f).items()}}
         for name in ("dense", "big_body", "engulf"):
             row[f"rule_{name}"] = np.array([bool(conds[s][name].iat[e]) for e, s in zip(ei, sd)])
         for target in (3, 5):
@@ -359,13 +420,15 @@ def example_signal_ms(ex: dict) -> int:
     return pd.Timestamp(ex["signal_open_bj"], tz="Asia/Shanghai").tz_convert("UTC").value // 10**6
 
 
-def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: str | None = None) -> pd.DataFrame:
+def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: str | None = None,
+               per_minutes: bool = False) -> pd.DataFrame:
     """Render owner examples, or a seeded random sample of candidates (optionally a ``query`` subset)."""
     rows = []
     name = name or which
     if which == "examples":
         for ex in load_examples():
-            bars, i = bars_until(ex["symbol"], int(ex["minutes"]), example_signal_ms(ex))
+            bars, i = bars_until(ex["symbol"], int(ex["minutes"]), example_signal_ms(ex),
+                                 source="okx" if ex.get("exchange", "").lower() == "okx" else "binance")
             png = render(bars, i, ex["symbol"], int(ex["minutes"]))
             path = IMAGES / "examples" / f"{ex['id']}.png"
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -377,7 +440,11 @@ def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: st
         if query:
             cands = cands.query(query).reset_index(drop=True)
         rng = np.random.default_rng(cfg["sample_seed"] + zlib.crc32(name.encode()) % 1000 * (name != "candidates"))
-        pick = cands.iloc[np.sort(rng.choice(len(cands), size=min(n, len(cands)), replace=False))]
+        if per_minutes:  # n per timeframe
+            pick = pd.concat([g.iloc[np.sort(rng.choice(len(g), size=min(n, len(g)), replace=False))]
+                              for _, g in cands.groupby("minutes")])
+        else:
+            pick = cands.iloc[np.sort(rng.choice(len(cands), size=min(n, len(cands)), replace=False))]
         for _, ev in pick.iterrows():
             bars, i = bars_until(ev.symbol, int(ev.minutes), int(ev.bar_open_ms))
             png = render(bars, i, ev.symbol, int(ev.minutes))
@@ -399,8 +466,6 @@ def review_sheets(name: str, picks: dict[str, int], effort: str, seed: int, per_
     shuffled together so the sheet order says nothing about the verdict. The key with verdicts
     and outcomes is written next to the sheets and is not shown to the owner before labelling.
     """
-    from PIL import Image, ImageDraw, ImageFont
-
     manifest = pd.read_csv(EXP / f"manifest_{name}.csv")
     rows = [r for r in read_ledger().values()
             if r["set"] == name and r["status"] == "ok" and r.get("reasoning_effort", "max") == effort]
@@ -413,6 +478,27 @@ def review_sheets(name: str, picks: dict[str, int], effort: str, seed: int, per_
     cands = pd.read_csv(EXP / "candidates.csv.gz")
     key = chosen.merge(cands, on="item_id", how="left", suffixes=("", "_cand"))
     out = EXP / "review" / name
+    numbered_sheets(chosen, out, per_sheet)
+    key.to_csv(out / "key_hidden.csv", index=False)
+    return key
+
+
+def plain_sheets(name: str, seed: int, per_sheet: int = 6) -> pd.DataFrame:
+    """Numbered sheets of a rendered manifest in shuffled order, without any VLM verdict."""
+    manifest = pd.read_csv(EXP / f"manifest_{name}.csv")
+    rng = np.random.default_rng(seed)
+    chosen = manifest.iloc[rng.permutation(len(manifest))].reset_index(drop=True)
+    chosen.insert(0, "number", np.arange(1, len(chosen) + 1))
+    key = chosen.merge(pd.read_csv(EXP / "candidates.csv.gz"), on="item_id", how="left")
+    out = EXP / "review" / name
+    numbered_sheets(chosen, out, per_sheet)
+    key.to_csv(out / "key_hidden.csv", index=False)
+    return key
+
+
+def numbered_sheets(chosen: pd.DataFrame, out: Path, per_sheet: int = 6) -> None:
+    from PIL import Image, ImageDraw, ImageFont
+
     out.mkdir(parents=True, exist_ok=True)
     font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 44)
     for start in range(0, len(chosen), per_sheet):
@@ -427,8 +513,6 @@ def review_sheets(name: str, picks: dict[str, int], effort: str, seed: int, per_
             draw.text((x + 14, y + 334), f"#{row.number}", fill="white", font=font)
             draw.rectangle([x, y, x + 719, y + 399], outline="#999999", width=2)
         sheet.save(out / f"sheet_{start // per_sheet + 1}.png")
-    key.to_csv(out / "key_hidden.csv", index=False)
-    return key
 
 
 def main() -> None:
@@ -440,6 +524,7 @@ def main() -> None:
     r.add_argument("--n", type=int, default=40)
     r.add_argument("--query", help="pandas query on candidates.csv.gz before sampling")
     r.add_argument("--name", help="manifest / set name (default: which)")
+    r.add_argument("--per-minutes", action="store_true", help="--n per timeframe")
     j = sub.add_parser("judge")
     j.add_argument("which", help="manifest name: candidates, examples or a render --name")
     rs = sub.add_parser("sheets")
@@ -448,6 +533,7 @@ def main() -> None:
     rs.add_argument("--other", type=int, default=9)
     rs.add_argument("--effort", default="low")
     rs.add_argument("--seed", type=int, default=1008702)
+    rs.add_argument("--plain", action="store_true", help="no VLM: shuffle the whole manifest")
     j.add_argument("--limit", type=int, required=True)
     j.add_argument("--no-references", action="store_true")
     j.add_argument("--effort", default="max")
@@ -466,10 +552,13 @@ def main() -> None:
             "by_minutes": frame.minutes.value_counts().to_dict(), "generated_at": pd.Timestamp.now(tz="UTC").isoformat()}, indent=1))
         print(len(frame))
     elif args.cmd == "render":
-        print(render_set(args.which, cfg, args.n, args.query, args.name).to_string(index=False))
+        print(render_set(args.which, cfg, args.n, args.query, args.name, args.per_minutes).to_string(index=False))
     elif args.cmd == "sheets":
-        key = review_sheets(args.name, {"match": args.match, "other": args.other}, args.effort, args.seed)
-        print(key[["number", "item_id", "verdict"]].to_string(index=False))
+        if args.plain:
+            print(plain_sheets(args.name, args.seed)[["number", "item_id"]].to_string(index=False))
+        else:
+            key = review_sheets(args.name, {"match": args.match, "other": args.other}, args.effort, args.seed)
+            print(key[["number", "item_id", "verdict"]].to_string(index=False))
     else:
         manifest = pd.read_csv(EXP / f"manifest_{args.which}.csv")
         refs = []

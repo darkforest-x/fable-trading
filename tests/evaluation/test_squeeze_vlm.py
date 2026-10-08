@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 
 import numpy as np
+import pytest
 import pandas as pd
 
 
@@ -139,3 +140,36 @@ def test_review_sheets_mix_groups_blind_and_keep_the_key(tmp_path, monkeypatch):
     assert len(key) == 7 and (key.verdict == "match").sum() == 4 and list(key.number) == list(range(1, 8))
     assert key.verdict.tolist() != sorted(key.verdict.tolist())  # groups are interleaved, not blocked
     assert (tmp_path / "review" / "screen" / "sheet_1.png").exists() and (tmp_path / "review" / "screen" / "key_hidden.csv").exists()
+
+
+def test_shape_stats_are_causal_and_match_the_definition():
+    b = bars(900, 11)
+    f = sb.features(b)
+    stats = sv.shape_stats(b, f)
+    later = b.copy()
+    later.iloc[801:, :] *= 2
+    again = sv.shape_stats(later, sb.features(later))
+    for k in stats:
+        np.testing.assert_allclose(stats[k][:801], again[k][:801], equal_nan=True)
+    i = 800
+    body = (b.close - b.open).abs().to_numpy()
+    assert stats["body_vs_med36"][i] == pytest.approx(body[i] / np.median(body[i - 36:i]))
+    rng = b.high.iloc[i - 24:i].max() - b.low.iloc[i - 24:i].min()
+    assert stats["range24_vs_body"][i] == pytest.approx(rng / body[i])
+    gate = {"min_body_vs_med36": 8, "max_range24_vs_body": 1.6, "min_vol_vs_med36": 4}
+    frame = pd.DataFrame({"body_vs_med36": [13.2, 5.0], "range24_vs_body": [1.22, 1.2], "vol_vs_med36": [6.2, 9.0]})
+    assert sv.clean_squeeze(frame, gate).tolist() == [True, False]
+
+
+def test_okx_bars_page_backwards_and_keep_confirmed_only():
+    step = 300_000
+    t0 = 1_791_000_000_000
+    rows = [[str(t0 + k * step), "1", "2", "0.5", "1.5", "10", "15", "20", "1"] for k in range(250)]
+    rows[-1][8] = "0"  # newest still forming
+    def opener(url):
+        after = int(url.split("after=")[1].split("&")[0])
+        page = [r for r in reversed(rows) if int(r[0]) < after][:100]
+        return {"data": page}
+    got = sv.okx_bars("ALGO-USDT-SWAP", 5, t0 + 10 * step, t0 + 250 * step, opener=opener)
+    assert got.index[0] == t0 + 10 * step and got.index[-1] == t0 + 248 * step
+    assert got.volume.iloc[0] == 15.0 and sv.okx_inst("ALGOUSDT") == "ALGO-USDT-SWAP"
