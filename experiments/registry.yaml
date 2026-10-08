@@ -11010,3 +11010,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-08 继续做环境过滤吧 (Notion #14 sub-task v3 过滤). Reuses v3.analyse (now takes the feature list; v3 behaviour unchanged). All 1228 events had a full 30-day environment. Reads v2 local events.csv/trades.csv.gz by sha256 (receipt). The veto families and the middle-tercile result are post-hoc and need forward events. No report requested.
+  - experiment_id: exp-market-sync-shock-20261008-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: 83c373db10
+    status: inconclusive
+    result: No exit rule beats the fixed 12h hold. Pre-registered read (1H up shocks, long ETH, 132 events before 2025 and 107 after) - every rule's paired difference against hold_12h has p >= 0.30 in both periods; the only rule positive in both is trail3_48h (stop 2ATR, trail 3ATR, 48h cap, +18 then +49bp, p 0.30 and 0.31; net +41 then +52bp), and before 2025 most of its gain is shared by the matched random entries (excess change +4bp). Across the 12 timeframe x side x instrument cells no rule beats hold_12h in both periods with p < 0.05 in either; trail3_48h leans positive (4 cells positive in both, 1 negative), every other rule leans negative (hold_24h 7 of 12 negative in both, split_4h_24h 6, the 24h trails and tp2 5, break-even 4). Shorts after down shocks should not be held to 24h - 30m BTC -28 then -25bp, 30m ETH -29 then -32bp, 1H ETH -40 then -19bp against the 12h exit. Per-cell exit selection on excess t before 2025 holds up in none of 12 cells after (4 positive, none p < 0.05). Trailing stops cut win rate to about 40% without raising the mean.
+    question: On the same sync-shock events, does any exit rule - trailing stop, break-even stop or scaling out - beat a fixed 12h hold, after cost and against matched random entries with the same exit, in both periods?
+    single_variable: Exit rule only - v2's loosest event set on 30m/1H recomputed with v2's code (1228 events, equal to v2 events.csv), next-open entry, 0.2% round trip, 20 matched controls per event with the same rule; eight pre-registered rules on one price path per instrument (ETH, BTC, v2's rebalanced alt index), events counted only with a complete 48h path (1225 of 1228).
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-08 接进菜单，然后继续做出场方式 (Notion #14 sub-task 出场方式). Reconciled with v2 - trail3_24h equals v2's trend exit (max |diff| 1e-16), fixed holds equal v2's time_12h/24h within float32 (1.5e-7; v1.Panel stores prices as float32). Alt fixed holds use the index path, not v2's per-alt buy-and-hold. The 48h-trail lean on 1H long ETH is post-hoc and needs forward events; the menu keeps hold_12h. No report requested.
