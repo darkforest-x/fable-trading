@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-owner-squeeze-vlm-20261008-v1",
+  "parent_experiment": "exp-owner-squeeze-breakout-20261008-v1",
+  "owner_request": "2026-10-08 Notion #40: 「要不用vlm吧 我感觉你手写的代码和我想要的不一致」「你先搭流水线，图我一会发你」",
+  "question": "Can a VLM, given the owner's five conditions and the owner's own example charts, pick the owner's squeeze breakouts out of a loose rule net well enough (agreement with held-out owner labels) that its picks can then be tested against matched random entries after cost?",
+  "stages": {
+    "candidates": "loose rule net = squeeze_breakout_v1 always-on breakout candle (direction, body/range >= 0.55, close beyond all six MAs and the 12-bar extreme) + BB compression + volume ratio >= 1.5; dense MAs, engulfing and big body are left to the VLM; 12-bar cooldown; 1H first",
+    "render": "120 closed bars ending at the signal bar; six close MAs SMA/EMA 20/60/120 (SMA solid, EMA dashed, legend), BB SMA200 +/- 2 population stdev, volume pane; no signal, label or outcome annotation; nothing after the signal bar; MAs and bands computed from bars up to the signal only; deterministic PNG",
+    "examples": "owner screenshots are read for symbol, timeframe, breakout bar time and the owner's verdict, recorded in examples.json with the screenshot sha256, and re-rendered with the same renderer from Binance USD-M data (frozen 5m series up to 2026-09-23, Binance public klines after); owner charts are OKX, so prices can differ slightly",
+    "judge": "Zhipu glm-5.3-flash through yoyo.vision_research.zhipu.ZhipuClient.analyze (prompt spike-vision-zhipu-v4-project-rules, right-edge launch semantics) with the owner criteria below and owner reference renders; one ledger row per (image, references, criteria, model, prompt); no automatic retry; failures stay unknown",
+    "evaluate": "agreement of VLM verdicts with owner labels on examples not used as references (split by event), against a label-shuffle null; only then a larger VLM run on candidates and an exit test with squeeze_breakout_v1.simulate_many (3R/5R, stop below the MAs, 0.2% cost, matched controls), select before 2025-01-01, check after"
+  },
+  "timeframes": [
+    60
+  ],
+  "window_bars": 120,
+  "criteria_version": "owner-squeeze-v1",
+  "vlm": {
+    "provider": "zhipu",
+    "model": "glm-5.3-flash",
+    "max_workers": 3
+  },
+  "universe": "monthly top-100 alts by previous-month quote volume plus BTCUSDT and ETHUSDT (as v1)",
+  "start": "2023-01-01T00:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T00:00:00Z",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "sample_seed": 1008701,
+  "training_eligible": false,
+  "production_eligible": false,
+  "round_trip_cost": 0.002,
+  "exits": "as v1: next-bar open entry, stop min/max six MAs -/+ 0.2 ATR, fixed 3R and 5R, stop first on a shared bar, 192-bar cap; 20 controls per candidate with ATR/price within 0.5-2x"
+}
