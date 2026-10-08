@@ -10997,3 +10997,16 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-08 继续做 v3 分层吧 (Notion #14 sub-task). Volume ratio recomputed with v1.causal_features; recomputed z matched v2 events.csv exactly. Reads v2 local events.csv/trades.csv.gz by sha256 (receipt). The 30m volume pattern was not the primary read and needs forward events before any use. No report requested.
+
+  - experiment_id: exp-market-sync-shock-20261008-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6daaa1c728
+    status: inconclusive
+    result: Pre-registered read is not significant - for 1H up shocks (same v2 loosest set as v3), ETH 12h high-minus-low tercile excess is BTC 30-day trend -14 then -66bp, 7-day trend +1 then +75bp, 30-day volatility +17 then +39bp (select then check, permutation p 0.27-0.99). The environment orders outcomes more often than shock strength did - 94 of 144 contrasts keep their sign (v3 78, chance about 72) - and two families are uniform across instruments and exits in both periods - up shocks after a strong 30-day BTC rally (top tercile, about +13%) do worst (30m 12 of 12 contrasts negative, 1H 7 negative and 5 mixed), and 1H down shocks in the top volatility tercile rebound hardest against a short (12 of 12 negative; e.g. alts 12h -131 then -184bp, p 0.043 and 0.031). These act as vetoes, not edges - no tercile is positive after cost and above control in both periods except the post-hoc middle 30-day-trend tercile of 1H up shocks (ETH 12h +33 then +82bp net, excess p 0.043 and 0.021), an inverted U like v3's volume. Dropping the top-trend tercile lifts the 1H up set's ETH 12h net from +6 to about +18bp after 2025 and leaves it at about +22bp before. 1H shorts after down shocks changed regime between periods (low-volatility tercile -22 then +99bp net).
+    question: Within one fixed event set, does the market environment before the shock - BTC's prior trend or its volatility level - separate sync shocks that continue from those that fade, in both periods?
+    single_variable: Conditioning on the pre-shock environment only - v2's own events, outcomes and paired controls for its loosest config on 30m/1H, split into terciles of one feature at a time (BTC 30-day return, 7-day return, 30-day hourly volatility, read at the last 1H close at or before the shock bar opens) with edges frozen on events before 2025-01-01; everything else unchanged.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-08 继续做环境过滤吧 (Notion #14 sub-task v3 过滤). Reuses v3.analyse (now takes the feature list; v3 behaviour unchanged). All 1228 events had a full 30-day environment. Reads v2 local events.csv/trades.csv.gz by sha256 (receipt). The veto families and the middle-tercile result are post-hoc and need forward events. No report requested.
