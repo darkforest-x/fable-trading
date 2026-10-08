@@ -5,7 +5,13 @@
   "prior_evidence": "SPIKE V9 already combines a six-MA dense rope, V7 BB compression, a volume ratio and a solid breakout candle; its two-year replay was gross positive but net negative in the later year after 0.2% cost (-2089R) with matched excess p 0.19 (exp-spike-v9-full-backtest-20260915-v1, exp-spike-v9-later-year-attribution-20260917-v1). New here: stop below the six MAs, fixed 3R/5R targets, an engulfing breakout of the dense zone, decision at the breakout close.",
   "data": "frozen Binance USD-M 5m series (data/research/spike_v128_entry_clock_long_20260923/series), complete-bucket resampling",
   "universe": "per month, top 100 alts by previous-month median daily quote volume (stables excluded) plus BTCUSDT and ETHUSDT; an event counts only if its symbol is in that month's universe",
-  "timeframes": [5, 15, 30, 60, 240],
+  "timeframes": [
+    5,
+    15,
+    30,
+    60,
+    240
+  ],
   "rule": {
     "bb": "SPIKE V7/V9 compression: BB SMA200 +/- 2 population stdev, width = (upper - lower) / basis; a bar is compressed when its width <= the linear 10th percentile of the previous 500 widths; the signal needs 3 consecutive compressed bars inside the 12 bars before it",
     "dense": "SPIKE dense rope: six close MAs SMA/EMA 20/60/120; width = (max MA - min MA) / ATR14; mean width over the 12 bars before the signal <= 3.0 and >= 2 pairwise MA order flips over those 12 bars",
@@ -18,12 +24,36 @@
   "ready_bars": 700,
   "entry": "next bar open",
   "stop": "long: min(six MAs at the signal bar) - 0.2 ATR14; short: max(six MAs) + 0.2 ATR14; skip when the entry is not beyond the stop",
-  "targets_r": [3, 5],
+  "targets_r": [
+    3,
+    5
+  ],
   "exit_path": "bar high/low from the entry bar; a gap through the stop or target fills at the open; stop first when both are touched in one bar; exit at the close after max_hold_bars; a missing bar before the exit drops the trade",
   "max_hold_bars": 192,
   "round_trip_cost": 0.002,
-  "controls": {"n": 20, "pool": "same symbol, timeframe and calendar month, ready bars with a complete path, not the event bar", "stop": "same stop distance in ATR units as the event (event risk / event ATR x control ATR)", "targets": "same R targets, cap and cost", "seed": 1008601},
-  "ablation": {"variants": ["no_bb", "no_dense", "no_engulf", "no_volume", "no_big_body"], "controls": 5, "target_r": 3},
+  "controls": {
+    "n": 20,
+    "pool": "same symbol, timeframe and calendar month, ready bars, not the event bar, ATR/price within 0.5-2x the event's",
+    "stop": "same stop distance in ATR units as the event (event risk / event ATR x control ATR)",
+    "targets": "same R targets, cap and cost",
+    "seed": 1008601,
+    "vol_band": [
+      0.5,
+      2.0
+    ],
+    "revision": "2026-10-08: the first run (source 1106e6b825) matched controls in ATR units without a volatility band; 23 of 61421 primary events drew frozen-price bars (ATR near 0, delisting months of AGIX/FTM/MKR/DEGO/BNX) whose cost/risk exploded and made mean excess unusable. Event results were unaffected; that output is kept in results_v1_unbanded_controls."
+  },
+  "ablation": {
+    "variants": [
+      "no_bb",
+      "no_dense",
+      "no_engulf",
+      "no_volume",
+      "no_big_body"
+    ],
+    "controls": 5,
+    "target_r": 3
+  },
   "start": "2023-01-01T00:00:00Z",
   "select_before": "2025-01-01T00:00:00Z",
   "end": "2026-09-23T00:00:00Z",
@@ -31,7 +61,10 @@
   "stat_seed": 1008602,
   "flips": 10000,
   "primary": "per timeframe, side and target: mean net R and excess over matched controls in each period; a timeframe qualifies only if both periods are positive after cost and excess is positive with month-block sign-flip p < 0.05 in at least one",
-  "descriptive": ["share of trades that never trade below the entry (owner remark), split by outcome", "net R by stop size bucket in percent of price"],
+  "descriptive": [
+    "share of trades that never trade below the entry (owner remark), split by outcome",
+    "net R by stop size bucket in percent of price"
+  ],
   "training_eligible": false,
   "production_eligible": false
 }

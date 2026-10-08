@@ -26,8 +26,8 @@ candle that breaks the dense zone, the stop sits below all six MAs, and the targ
 Entry is the next open; the stop is min(MAs) - 0.2 ATR for longs (mirrored for shorts); exits
 read bar highs and lows, stop first when both levels print in one bar, gaps fill at the open,
 and a trade still open after 192 bars closes at that close. Each event gets 20 random entries
-of the same symbol, timeframe and month with the same direction, the same stop distance in ATR
-units and the same targets and cost. Drop-one variants of the five owner conditions are read
+of the same symbol, timeframe and month, with ATR / price within 0.5-2x the event's, the same
+direction, the same stop distance in ATR units and the same targets and cost. Drop-one variants of the five owner conditions are read
 with 5 controls each at 3R.
 """
 from __future__ import annotations
@@ -57,6 +57,7 @@ DENSE_LEN, DENSE_WIDTH, DENSE_FLIPS = 12, 3.0, 2
 MIN_BODY_ATR, MIN_BODY_FRAC, BREAK_LOOKBACK = 1.0, 0.55, 12
 RV_LEN, MIN_RV = 20, 1.5
 STOP_BUFFER, READY, COOLDOWN, MAX_HOLD = 0.2, 700, 12, 192
+VOL_BAND = (0.5, 2.0)  # control ATR/price within this multiple of the event's
 CONDITIONS = ("bb", "dense", "big_body", "engulf", "volume")
 LEADERS = ("BTCUSDT", "ETHUSDT")
 
@@ -149,6 +150,17 @@ def with_cooldown(hits: list[tuple[int, int]], cooldown: int = COOLDOWN) -> list
     return out
 
 
+def control_candidates(pool: np.ndarray, atr_pct: np.ndarray, e: int, band: tuple[float, float] = VOL_BAND) -> np.ndarray:
+    """Pool bars other than ``e`` whose ATR / price lies within ``band`` times the event's.
+
+    Matching the stop in ATR units alone breaks on frozen-price bars (delisting months), where
+    ATR is near zero and cost / risk explodes; the band keeps controls in the event's regime.
+    """
+    ref = atr_pct[e]
+    keep = (pool != e) & (atr_pct[pool] >= band[0] * ref) & (atr_pct[pool] <= band[1] * ref)
+    return pool[keep]
+
+
 def simulate_many(o: np.ndarray, h: np.ndarray, l: np.ndarray, c: np.ndarray, entry_i: np.ndarray,
                   side: np.ndarray, stop: np.ndarray, target_r: float, cap: int, cost: float) -> dict:
     """Fixed stop / R-target exits from the open of ``entry_i``; arrays are bar series."""
@@ -216,6 +228,7 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
         allowed[n - 1:] = False  # entry needs a next bar
         o, h, l, c = (f[k].to_numpy(float) for k in ("open", "high", "low", "close"))
         atr = f.atr.to_numpy(float)
+        atr_pct = atr / c
         rope = {1: f.rope_lo.to_numpy(float), -1: f.rope_hi.to_numpy(float)}
         masks = {s: conditions(f, s) for s in (1, -1)}
         ready = ((f.seg >= READY) & (f.atr > 0)).to_numpy() & (index >= start_ms)
@@ -240,8 +253,7 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
             n_ctrl = cfg["controls"]["n"] if variant == "primary" else cfg["ablation"]["controls"]
             ctrl = np.full((len(ei), n_ctrl), -1)
             for k, e in enumerate(ei):
-                cand = pool_rows.get(month[e], np.empty(0, int))
-                cand = cand[cand != e]
+                cand = control_candidates(pool_rows.get(month[e], np.empty(0, int)), atr_pct, e)
                 if len(cand):
                     ctrl[k] = rng.choice(cand, size=n_ctrl)
             flat, ok = ctrl.ravel(), ctrl.ravel() >= 0

@@ -101,3 +101,11 @@ def test_features_are_causal():
     cut = sb.features(bars.iloc[:1200])
     cols = ["atr", "rope_hi", "rope_lo", "past_width", "past_flips", "bb_recent", "rv", "prior_high"]
     pd.testing.assert_frame_equal(full.iloc[:1200][cols], cut[cols])
+
+
+def test_controls_exclude_frozen_bars_and_other_regimes():
+    atr_pct = np.array([0.01, 0.0, 0.004, 0.006, 0.02, 0.021, 0.01])
+    pool = np.arange(7)
+    assert sb.control_candidates(pool, atr_pct, 0).tolist() == [3, 4, 6]  # 0.5x-2x of 1%, not itself
+    cfg = json.loads(sb.CONFIG.read_text())
+    assert tuple(cfg["controls"]["vol_band"]) == sb.VOL_BAND
