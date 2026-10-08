@@ -66,5 +66,6 @@
     "net R by stop size bucket in percent of price"
   ],
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "data_quality": "an event or control bar needs at most 10% zero-range (high == low) or zero-volume bars among the 50 bars before it; added 2026-10-08 after the candidate gallery showed a 1H ASTERUSDT 'breakout' out of days of a frozen 0.600 price (pre-listing / suspension), which trivially passes the BB and dense-MA tests"
 }

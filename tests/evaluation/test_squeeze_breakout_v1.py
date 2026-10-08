@@ -63,7 +63,7 @@ def test_bb_run_must_end_inside_the_twelve_bars_before():
 
 
 def frame(**over):
-    base = dict(open=100.0, high=103.2, low=99.9, close=103.0, atr=1.0, prev_atr=1.0, rope_hi=101.0, rope_lo=100.0,
+    base = dict(open=100.0, high=103.2, low=99.9, close=103.0, atr=1.0, prev_atr=1.0, rope_hi=101.0, rope_lo=100.0, frozen_share=0.0,
                 past_width=1.0, past_flips=3.0, bb_recent=True, rv=2.0, prior_high=102.0, prior_low=99.0,
                 prev_open=101.0, prev_close=100.5, seg=900)
     base.update(over)
@@ -109,3 +109,13 @@ def test_controls_exclude_frozen_bars_and_other_regimes():
     assert sb.control_candidates(pool, atr_pct, 0).tolist() == [3, 4, 6]  # 0.5x-2x of 1%, not itself
     cfg = json.loads(sb.CONFIG.read_text())
     assert tuple(cfg["controls"]["vol_band"]) == sb.VOL_BAND
+
+
+def test_frozen_price_history_blocks_an_event():
+    assert not sb.conditions(frame(frozen_share=0.4), 1)[0][0]
+    assert sb.conditions(frame(frozen_share=0.0), 1)[0][0]
+    n = 1000
+    c = np.r_[np.full(800, 0.6), 0.6 * np.exp(np.cumsum(np.full(200, 0.002)))]
+    bars = pd.DataFrame({"open": c, "close": c, "high": c, "low": c, "volume": 1.0})
+    f = sb.features(bars)
+    assert f.frozen_share.iloc[799] == 1.0 and f.frozen_share.iloc[n - 1] == 1.0  # open == close bars still have zero range

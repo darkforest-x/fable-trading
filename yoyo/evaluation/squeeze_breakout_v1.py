@@ -21,7 +21,9 @@ candle that breaks the dense zone, the stop sits below all six MAs, and the targ
   engulf    the body covers the previous body
   volume    volume / median of the 20 bars before >= 1.5
   always    candle in the trade direction, body / range >= 0.55, close beyond all six MAs and
-            beyond the 12-bar extreme before it; 12-bar cooldown; 700 contiguous ready bars
+            beyond the 12-bar extreme before it; 12-bar cooldown; 700 contiguous ready bars;
+            at most 10% zero-range or zero-volume bars among the 50 before (frozen
+            pre-listing / suspension prices pass every squeeze test trivially)
 
 Entry is the next open; the stop is min(MAs) - 0.2 ATR for longs (mirrored for shorts); exits
 read bar highs and lows, stop first when both levels print in one bar, gaps fill at the open,
@@ -58,6 +60,7 @@ MIN_BODY_ATR, MIN_BODY_FRAC, BREAK_LOOKBACK = 1.0, 0.55, 12
 RV_LEN, MIN_RV = 20, 1.5
 STOP_BUFFER, READY, COOLDOWN, MAX_HOLD = 0.2, 700, 12, 192
 VOL_BAND = (0.5, 2.0)  # control ATR/price within this multiple of the event's
+FROZEN_LEN, MAX_FROZEN = 50, 0.10  # data quality: zero-range or zero-volume bars before a bar
 CONDITIONS = ("bb", "dense", "big_body", "engulf", "volume")
 LEADERS = ("BTCUSDT", "ETHUSDT")
 
@@ -115,6 +118,8 @@ def features(bars: pd.DataFrame) -> pd.DataFrame:
         "prior_high": h.shift().rolling(BREAK_LOOKBACK, min_periods=BREAK_LOOKBACK).max(),
         "prior_low": l.shift().rolling(BREAK_LOOKBACK, min_periods=BREAK_LOOKBACK).min(),
         "prev_open": o.shift(), "prev_close": prev_c, "seg": seg,
+        "frozen_share": ((h == l) | (v <= 0)).astype(float).where(valid).shift()
+                        .rolling(FROZEN_LEN, min_periods=FROZEN_LEN).mean(),
     }, index=bars.index)
 
 
@@ -129,7 +134,7 @@ def conditions(f: pd.DataFrame, side: int) -> tuple[pd.Series, dict[str, pd.Seri
     else:
         direction, engulf = c < o, (c <= bottom) & (o >= top)
         breakout = (c < f.rope_lo) & (c < f.prior_low)
-    ready = (f.seg >= READY) & (f.atr > 0) & (f.prev_atr > 0)
+    ready = (f.seg >= READY) & (f.atr > 0) & (f.prev_atr > 0) & (f.frozen_share <= MAX_FROZEN)
     base = ready & direction & (body >= MIN_BODY_FRAC * (h - l)) & breakout
     conds = {"bb": f.bb_recent.astype(bool),
              "dense": (f.past_width <= DENSE_WIDTH) & (f.past_flips >= DENSE_FLIPS),
@@ -231,7 +236,7 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
         atr_pct = atr / c
         rope = {1: f.rope_lo.to_numpy(float), -1: f.rope_hi.to_numpy(float)}
         masks = {s: conditions(f, s) for s in (1, -1)}
-        ready = ((f.seg >= READY) & (f.atr > 0)).to_numpy() & (index >= start_ms)
+        ready = ((f.seg >= READY) & (f.atr > 0) & (f.frozen_share <= MAX_FROZEN)).to_numpy() & (index >= start_ms)
         ready[n - 1:] = False  # a control also needs a next-bar entry
         pool_rows = {mo: np.flatnonzero(ready & (month == mo)) for mo in months}
         rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(f"{symbol}|{minutes}".encode()))
