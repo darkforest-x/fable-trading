@@ -103,25 +103,26 @@ def stats(g: pd.DataFrame, seed: int, flips: int) -> dict:
             "sign_flip_p": v1.month_block_sign_flip(diff, g.month.to_numpy(), seed, flips)}
 
 
-def analyse(events: pd.DataFrame, trades: pd.DataFrame, cfg: dict) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def analyse(events: pd.DataFrame, trades: pd.DataFrame, cfg: dict,
+            features: tuple[str, ...] = FEATURES) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     split = pd.Timestamp(cfg["select_before"])
     events = events.assign(period=np.where(pd.to_datetime(events.time) < split, "select", "check"))
     edges_rows, binned = [], []
     for (minutes, side), g in events.groupby(["minutes", "side"]):
         g = g.copy()
         select = (g.period == "select").to_numpy()
-        for feature in FEATURES:
+        for feature in features:
             g[f"{feature}_bin"], edges = frozen_terciles(g[feature].to_numpy(), select)
             edges_rows.append({"minutes": minutes, "side": side, "feature": feature,
                                "edge_low_mid": edges[0], "edge_mid_high": edges[1]})
         binned.append(g)
     events = pd.concat(binned).sort_values(["minutes", "time"]).reset_index(drop=True)
     key = ["minutes", "time", "side"]
-    joined = trades.merge(events[key + ["period"] + [f"{f}_bin" for f in FEATURES] + list(FEATURES)], on=key)
+    joined = trades.merge(events[key + ["period"] + [f"{f}_bin" for f in features] + list(features)], on=key)
     rng = np.random.default_rng(cfg["stat_seed"])
     strata, contrasts = [], []
     for (minutes, side, exit_, inst), g in joined.groupby(["minutes", "side", "exit", "instrument"]):
-        for feature in FEATURES:
+        for feature in features:
             for period in ("select", "check"):
                 p = g.loc[g.period == period]
                 for b, name in enumerate(BIN_NAMES):

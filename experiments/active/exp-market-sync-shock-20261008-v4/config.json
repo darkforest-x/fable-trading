@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp-market-sync-shock-20261008-v4",
+  "parent_experiment": "exp-market-sync-shock-20261008-v3",
+  "owner_request": "2026-10-08 继续做环境过滤吧 (Notion #14 sub-task: v3 过滤 - 加市场环境（大趋势方向、波动档）)",
+  "question": "Within one fixed event set, does the market environment before the shock - BTC's prior trend or its volatility level - separate sync shocks that continue from those that fade, in both periods?",
+  "single_variable": "Conditioning on the pre-shock environment only: events, outcomes and paired controls are v2's own rows for its loosest config; each event gets a tercile of one environment feature at a time. Data, features, universe, cost, controls and the 2025 split are unchanged.",
+  "source_results": "experiments/active/exp-market-sync-shock-20261008-v2/results_v2",
+  "event_set": {"config": "z2.0_v2.0_b0.6_sync", "kind": "sync", "timeframes": [30, 60], "sides": [1, -1]},
+  "environment_clock": "BTC 1H closes from complete 5m buckets; for an event bar opening at t the last close used is the 1H bar closing at or before t, so the shock bar itself never enters the environment",
+  "features": {
+    "trend30": "BTC close / close 720 hours earlier - 1 (primary trend)",
+    "trend7": "BTC close / close 168 hours earlier - 1 (secondary trend)",
+    "vol30": "standard deviation of BTC 1H log returns over the previous 720 hours (volatility level)"
+  },
+  "bins": "terciles per feature, timeframe and side; edges from events before select_before only, frozen and applied to later events",
+  "exits": ["time_4h", "time_12h", "time_24h", "trend"],
+  "instruments": ["eth", "btc", "alts"],
+  "primary": {"minutes": 60, "side": 1, "exit": "time_12h", "instrument": "eth",
+              "read": "top-minus-bottom tercile paired excess per feature in each period; same sign in both periods = the environment orders the outcome"},
+  "secondary": {"minutes": 30, "side": 1, "exit": "time_24h", "instrument": "eth",
+                "read": "the v3 post-hoc candidate set (30m up shocks), read the same way"},
+  "select_before": "2025-01-01T00:00:00Z",
+  "round_trip_cost": 0.002,
+  "permutations": 10000,
+  "stat_seed": 1008401,
+  "flips": 10000,
+  "training_eligible": false,
+  "production_eligible": false
+}
