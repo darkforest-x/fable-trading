@@ -359,8 +359,10 @@ def example_signal_ms(ex: dict) -> int:
     return pd.Timestamp(ex["signal_open_bj"], tz="Asia/Shanghai").tz_convert("UTC").value // 10**6
 
 
-def render_set(which: str, cfg: dict, n: int) -> pd.DataFrame:
+def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: str | None = None) -> pd.DataFrame:
+    """Render owner examples, or a seeded random sample of candidates (optionally a ``query`` subset)."""
     rows = []
+    name = name or which
     if which == "examples":
         for ex in load_examples():
             bars, i = bars_until(ex["symbol"], int(ex["minutes"]), example_signal_ms(ex))
@@ -372,7 +374,9 @@ def render_set(which: str, cfg: dict, n: int) -> pd.DataFrame:
                          "owner_label": ex["owner_label"], "role": ex.get("role", "test")})
     else:
         cands = pd.read_csv(EXP / "candidates.csv.gz")
-        rng = np.random.default_rng(cfg["sample_seed"])
+        if query:
+            cands = cands.query(query).reset_index(drop=True)
+        rng = np.random.default_rng(cfg["sample_seed"] + zlib.crc32(name.encode()) % 1000 * (name != "candidates"))
         pick = cands.iloc[np.sort(rng.choice(len(cands), size=min(n, len(cands)), replace=False))]
         for _, ev in pick.iterrows():
             bars, i = bars_until(ev.symbol, int(ev.minutes), int(ev.bar_open_ms))
@@ -380,10 +384,51 @@ def render_set(which: str, cfg: dict, n: int) -> pd.DataFrame:
             path = IMAGES / "candidates" / f"{sha256(ev.item_id.encode())[:16]}.png"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(png)
-            rows.append({"item_id": ev.item_id, "set": "candidates", "path": str(path), "sha256": sha256(png)})
+            rows.append({"item_id": ev.item_id, "set": name, "path": str(path), "sha256": sha256(png)})
     manifest = pd.DataFrame(rows)
-    manifest.to_csv(EXP / f"manifest_{which}.csv", index=False)
+    if query:
+        manifest["query"] = query
+    manifest.to_csv(EXP / f"manifest_{name}.csv", index=False)
     return manifest
+
+
+def review_sheets(name: str, picks: dict[str, int], effort: str, seed: int, per_sheet: int = 6) -> pd.DataFrame:
+    """Blind numbered contact sheets for the owner from a judged manifest.
+
+    ``picks`` maps a VLM verdict group ("match" / "other") to how many to draw; the groups are
+    shuffled together so the sheet order says nothing about the verdict. The key with verdicts
+    and outcomes is written next to the sheets and is not shown to the owner before labelling.
+    """
+    from PIL import Image, ImageDraw, ImageFont
+
+    manifest = pd.read_csv(EXP / f"manifest_{name}.csv")
+    rows = [r for r in read_ledger().values()
+            if r["set"] == name and r["status"] == "ok" and r.get("reasoning_effort", "max") == effort]
+    judged = pd.DataFrame(rows).drop_duplicates("item_id").merge(manifest[["item_id", "path"]], on="item_id")
+    judged["group"] = np.where(judged.verdict.eq("match"), "match", "other")
+    rng = np.random.default_rng(seed)
+    chosen = pd.concat([g.iloc[rng.permutation(len(g))[: picks.get(k, 0)]] for k, g in judged.groupby("group")])
+    chosen = chosen.iloc[rng.permutation(len(chosen))].reset_index(drop=True)
+    chosen.insert(0, "number", np.arange(1, len(chosen) + 1))
+    cands = pd.read_csv(EXP / "candidates.csv.gz")
+    key = chosen.merge(cands, on="item_id", how="left", suffixes=("", "_cand"))
+    out = EXP / "review" / name
+    out.mkdir(parents=True, exist_ok=True)
+    font = ImageFont.truetype("/System/Library/Fonts/Hiragino Sans GB.ttc", 44)
+    for start in range(0, len(chosen), per_sheet):
+        part = chosen.iloc[start: start + per_sheet]
+        sheet = Image.new("RGB", (1440, 400 * ((len(part) + 1) // 2)), "white")
+        draw = ImageDraw.Draw(sheet)
+        for k, (_, row) in enumerate(part.iterrows()):
+            img = Image.open(row.path).convert("RGB").resize((720, 400))
+            x, y = 720 * (k % 2), 400 * (k // 2)
+            sheet.paste(img, (x, y))
+            draw.rectangle([x + 6, y + 6, x + 96, y + 62], fill="#111111")
+            draw.text((x + 14, y + 6), f"#{row.number}", fill="white", font=font)
+            draw.rectangle([x, y, x + 719, y + 399], outline="#999999", width=2)
+        sheet.save(out / f"sheet_{start // per_sheet + 1}.png")
+    key.to_csv(out / "key_hidden.csv", index=False)
+    return key
 
 
 def main() -> None:
@@ -393,8 +438,16 @@ def main() -> None:
     r = sub.add_parser("render")
     r.add_argument("which", choices=["candidates", "examples"])
     r.add_argument("--n", type=int, default=40)
+    r.add_argument("--query", help="pandas query on candidates.csv.gz before sampling")
+    r.add_argument("--name", help="manifest / set name (default: which)")
     j = sub.add_parser("judge")
-    j.add_argument("which", choices=["candidates", "examples"])
+    j.add_argument("which", help="manifest name: candidates, examples or a render --name")
+    rs = sub.add_parser("sheets")
+    rs.add_argument("name")
+    rs.add_argument("--match", type=int, default=15)
+    rs.add_argument("--other", type=int, default=9)
+    rs.add_argument("--effort", default="low")
+    rs.add_argument("--seed", type=int, default=1008702)
     j.add_argument("--limit", type=int, required=True)
     j.add_argument("--no-references", action="store_true")
     j.add_argument("--effort", default="max")
@@ -413,7 +466,10 @@ def main() -> None:
             "by_minutes": frame.minutes.value_counts().to_dict(), "generated_at": pd.Timestamp.now(tz="UTC").isoformat()}, indent=1))
         print(len(frame))
     elif args.cmd == "render":
-        print(render_set(args.which, cfg, args.n).to_string(index=False))
+        print(render_set(args.which, cfg, args.n, args.query, args.name).to_string(index=False))
+    elif args.cmd == "sheets":
+        key = review_sheets(args.name, {"match": args.match, "other": args.other}, args.effort, args.seed)
+        print(key[["number", "item_id", "verdict"]].to_string(index=False))
     else:
         manifest = pd.read_csv(EXP / f"manifest_{args.which}.csv")
         refs = []

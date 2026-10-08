@@ -121,3 +121,21 @@ def test_effort_is_part_of_the_ledger_key_but_max_keeps_old_keys():
     base = sv.ledger_key("a", ["r"], "glm-5.3-flash", "p")
     assert sv.ledger_key("a", ["r"], "glm-5.3-flash", "p", "max") == base
     assert sv.ledger_key("a", ["r"], "glm-5.3-flash", "p", "low") != base
+
+
+def test_review_sheets_mix_groups_blind_and_keep_the_key(tmp_path, monkeypatch):
+    monkeypatch.setattr(sv, "EXP", tmp_path)
+    items, ledger = [], {}
+    for k in range(12):
+        path = tmp_path / f"{k}.png"
+        path.write_bytes(sv.render(bars(seed=k), 700, f"S{k}", 60))
+        items.append({"item_id": f"S{k}", "path": str(path)})
+        ledger[str(k)] = {"item_id": f"S{k}", "set": "screen", "status": "ok", "reasoning_effort": "low",
+                          "verdict": "match" if k < 6 else "no_match"}
+    pd.DataFrame(items).to_csv(tmp_path / "manifest_screen.csv", index=False)
+    pd.DataFrame({"item_id": [f"S{k}" for k in range(12)], "net_r_3r": 0.0}).to_csv(tmp_path / "candidates.csv.gz", index=False)
+    monkeypatch.setattr(sv, "read_ledger", lambda path=None: ledger)
+    key = sv.review_sheets("screen", {"match": 4, "other": 3}, "low", seed=1)
+    assert len(key) == 7 and (key.verdict == "match").sum() == 4 and list(key.number) == list(range(1, 8))
+    assert key.verdict.tolist() != sorted(key.verdict.tolist())  # groups are interleaved, not blocked
+    assert (tmp_path / "review" / "screen" / "sheet_1.png").exists() and (tmp_path / "review" / "screen" / "key_hidden.csv").exists()
