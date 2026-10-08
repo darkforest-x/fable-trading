@@ -159,7 +159,7 @@ def bars_until(symbol: str, minutes: int, signal_ms: int, history: int = 800,
 
 # --------------------------------------------------------------------------- render
 
-def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = WINDOW) -> bytes:
+def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = WINDOW, venue: str = "币安永续") -> bytes:
     """PNG of the ``window`` bars ending at bar ``i``; indicators use bars <= i only."""
     past = bars.iloc[: i + 1]
     c = past.close
@@ -200,7 +200,7 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
     axv.set_yticks([])
     axv.set_ylabel("成交量", fontsize=9)
     ax.legend(loc="upper left", fontsize=8, ncol=7, frameon=False)
-    ax.set_title(f"{symbol}  {TF_NAME[minutes]}  币安永续  最右一根收盘于 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M}（北京时间）",
+    ax.set_title(f"{symbol}  {TF_NAME[minutes]}  {venue}  最右一根收盘于 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M}（北京时间）",
                  fontsize=11, loc="left")
     buf = io.BytesIO()
     fig.savefig(buf, format="png", dpi=100, metadata={"Software": None})
@@ -429,7 +429,8 @@ def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: st
         for ex in load_examples():
             bars, i = bars_until(ex["symbol"], int(ex["minutes"]), example_signal_ms(ex),
                                  source="okx" if ex.get("exchange", "").lower() == "okx" else "binance")
-            png = render(bars, i, ex["symbol"], int(ex["minutes"]))
+            png = render(bars, i, ex["symbol"], int(ex["minutes"]),
+                         venue="OKX 永续" if ex.get("exchange", "").lower() == "okx" else "币安永续")
             path = IMAGES / "examples" / f"{ex['id']}.png"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(png)
