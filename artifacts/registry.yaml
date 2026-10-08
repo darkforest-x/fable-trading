@@ -32352,3 +32352,19 @@ artifacts:
       Three current-rendered owner reference events each match at post1or2 but adjacent states are unstable.
       One of four existing owner-no windows receives a0.969945long alarm. Compatibility and semantic counterexample,
       not overall recall or market FPR. Sequential blind review stopped at owner request; no training or promotion.
+
+  - artifact_id: market-sync-shock-v2-menu-history-20261008
+    artifact_type: dataset
+    role: workbench_market_sync_menu_research_events
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa729ade16
+    source_path: experiments/active/exp-market-sync-shock-20261008-v2/results_v2/menu_history.json.gz
+    sha256: b04b3448b5d1d549b9a9f150cc43c10c9d057ea0637512070f4ee803dfb0839b
+    size_bytes: 674918
+    storage_uri: repo://experiments/active/exp-market-sync-shock-20261008-v2/results_v2/menu_history.json.gz
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Reshaped 30m/1H events of exp-market-sync-shock-20261008-v2 (8840 events, 32 timeframe/kind/config groups),
+      net bp per exit and instrument plus paired control, no recomputation. Read by the workbench 全市场异动 menu.
+      1H sync z3/v3/b0.75 up events 126, ETH 12h mean +53.8bp, matching the v2 summary.

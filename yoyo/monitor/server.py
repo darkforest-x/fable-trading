@@ -15,6 +15,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
+from yoyo.monitor import market_sync as market_sync_research
+from yoyo.monitor.market_sync import Observer as MarketSync
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
@@ -70,6 +72,7 @@ def create_app(runtime=None, start_monitor=True):
     shadow_book = runtime / SHADOW_DATABASE
     lines_book = lines_database(runtime)
     monitor = Monitor(store)
+    market_sync = MarketSync(runtime)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -78,8 +81,10 @@ def create_app(runtime=None, start_monitor=True):
             fcntl.flock(lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
             if start_monitor:
                 monitor.start()
+                market_sync.start()
             yield
         finally:
+            market_sync.close()
             monitor.close()
             lockfile.close()
 
@@ -112,6 +117,23 @@ def create_app(runtime=None, start_monitor=True):
     def status():
         dispatch_trace("handler:/api/status")
         return monitor.status()
+
+    @app.get("/api/market-sync")
+    def market_sync_snapshot():
+        return market_sync.snapshot()
+
+    @app.get("/api/market-sync/history")
+    def market_sync_history(group: str = Query(None, max_length=64)):
+        try:
+            return market_sync_research.history(group)
+        except FileNotFoundError:
+            raise HTTPException(status_code=503, detail="market_sync_history_missing") from None
+        except KeyError:
+            raise HTTPException(status_code=404, detail="unknown_group") from None
+
+    @app.get("/api/market-sync/iterations")
+    def market_sync_iterations():
+        return {"items": market_sync_research.iterations()}
 
     @app.get("/api/v13/signals")
     def v13_signals(limit: int = Query(100, ge=1, le=1000), symbol: str = None, timeframe: str = None):

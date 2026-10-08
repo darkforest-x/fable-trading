@@ -21,6 +21,7 @@
     knowledge: ["知识库", "按领域组织概念、原则、假设与经验，保留来源、证据和适用边界。"],
     content: ["内容工作室", "知识形成母稿，按平台编写文章、短帖与视频脚本，导出并登记发布记录。"],
     manual: ["个人交易系统", "沉淀交易原则 → 核对后开单 → 记录与复盘。"],
+    market: ["全市场异动", "BTC/ETH 带动的全市场同步冲击：实时状态、前向记录与研究历史。只记录，不下单、不推送。"],
     copier: ["Discord 跟单", "Discord 频道信号 → DeepSeek 解析 → 风控 → OKX / Gate 下单。切到实盘只能在本机由你确认。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
     signals: ["信号中心", "SPIKE V13.1 多空回踩再突破确认 · 15m/30m/1H/4H；通知按通知中心订阅。"],
@@ -41,7 +42,7 @@
     notifications: ["通知中心", "分别查看 TG 与 Bark 渠道状态、来源订阅和历史回执。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const workspaceView = (view = state.view) => ["learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
+  const workspaceView = (view = state.view) => ["learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
   const eventNames = { tv_start: "V12.8 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -282,8 +283,8 @@
     const nextView = titles[view] ? view : "signals";
     state.view = nextView;
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -325,6 +326,7 @@
     window.SpikePlatform?.setActive(state.view === "platform");
     window.SpikeManual?.setActive(state.view === "manual");
     window.SpikeCopier?.setActive(state.view === "copier");
+    window.SpikeMarketSync?.setActive(state.view === "market");
     window.SpikeKnowledge?.setView(state.view);
     window.SpikeModels?.setActive(state.view === "models");
     window.SpikeDatasets?.setActive(state.view === "datasets");
@@ -1031,6 +1033,7 @@
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
     if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
     if (state.view === "copier") { if (trigger !== "periodic") await window.SpikeCopier?.refresh(); return; }
+    if (state.view === "market") { await window.SpikeMarketSync?.refresh(); return; }
     if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
     if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
@@ -1256,7 +1259,7 @@
         $(`${state.view}-workspace`)?.querySelector('input[type="search"]')?.focus();
         return;
       }
-      if (["system", "shadow", "notifications", "manual", "copier", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
+      if (["system", "shadow", "notifications", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
       (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
     }
   });
