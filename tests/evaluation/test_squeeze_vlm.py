@@ -195,3 +195,13 @@ def test_htf_line_uses_completed_higher_bars_only():
     assert line.loc[t] == pytest.approx(done.iloc[-1])
     assert sv.confirmed_htf(b.iloc[:601], 5).loc[t] == pytest.approx(line.loc[t])
     assert sv.confirmed_htf(b, 60) is None
+
+
+def test_review_image_with_future_never_changes_the_vlm_image():
+    b = bars(900, 31)
+    i = 760
+    vlm = sv.render(b, i, "TESTUSDT", 60)
+    review = sv.render(b, i, "TESTUSDT", 60, after=60,
+                       trade={"entry": float(b.open.iloc[i + 1]), "stop": float(b.low.iloc[i]) * 0.99, "side": 1, "outcome": "x"})
+    assert review != vlm and sv.render(b, i, "TESTUSDT", 60) == vlm
+    assert sv.render(b, i, "TESTUSDT", 60, after=0) == vlm

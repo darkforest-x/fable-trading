@@ -157,6 +157,24 @@ def bars_until(symbol: str, minutes: int, signal_ms: int, history: int = 800,
     return bars, len(bars) - 1
 
 
+def bars_around(symbol: str, minutes: int, signal_ms: int, after: int, history: int = 800,
+                source: str = "binance") -> tuple[pd.DataFrame, int]:
+    """Bars from ``history`` before to ``after`` past the signal bar, for owner review images only."""
+    step = minutes * 60_000
+    start_ms, end_ms = signal_ms - history * step, signal_ms + (after + 1) * step
+    if source == "okx":
+        bars = okx_bars(okx_inst(symbol), minutes, start_ms, end_ms)
+    elif end_ms <= FROZEN_END_MS:
+        raw = v1.read_5m(symbol, pd.Timestamp(start_ms, unit="ms", tz="UTC"), pd.Timestamp(end_ms, unit="ms", tz="UTC"))
+        bars = sb.full_bars(raw, minutes)
+    else:
+        bars = binance_bars(symbol, minutes, start_ms, end_ms)
+    pos = np.flatnonzero(bars.index.to_numpy() == signal_ms)
+    if not len(pos):
+        raise ValueError(f"{symbol} {minutes}m has no bar at {pd.Timestamp(signal_ms, unit='ms', tz='UTC')}")
+    return bars, int(pos[0])
+
+
 # --------------------------------------------------------------------------- render
 
 # SPIKE V13.1 drawing (yoyo/evaluation/pine/spike_burst_v13_1.pine, plots near lines 2789-2902):
@@ -183,11 +201,18 @@ def confirmed_htf(past: pd.DataFrame, minutes: int) -> pd.Series | None:
     return line.reindex(past.index + minutes * 60_000, method="ffill").set_axis(past.index)
 
 
-def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = WINDOW, venue: str = "币安永续") -> bytes:
-    """SPIKE V13.1-style PNG of the ``window`` bars ending at bar ``i``; indicators use bars <= i only."""
-    past = bars.iloc[: i + 1]
+def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = WINDOW, venue: str = "币安永续",
+           after: int = 0, trade: dict | None = None) -> bytes:
+    """SPIKE V13.1-style PNG of the ``window`` bars ending at bar ``i``; indicators use bars <= i only.
+
+    ``after`` > 0 makes an owner review image instead: the same picture continued for ``after``
+    bars past the signal, with the signal marked and the optional ``trade`` (entry, stop, side,
+    outcome text) drawn as a 1:3 / 1:5 box. Review images never go to the VLM; with after=0 the
+    output is byte-identical to the VLM input.
+    """
+    past = bars.iloc[: i + 1 + after]
     c = past.close
-    lo = max(0, len(past) - window)
+    lo = max(0, i + 1 - window)
     w = past.iloc[lo:]
     x = np.arange(len(w))
     o, h, l, cl, v = (w[k].to_numpy(float) for k in ("open", "high", "low", "close", "volume"))
@@ -224,6 +249,21 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
     ymin, ymax = np.nanmin(np.concatenate(levels)), np.nanmax(np.concatenate(levels))
     pad = 0.06 * (ymax - ymin)
     ax.set_ylim(ymin - pad, ymax + pad)
+    if after > 0:
+        sig = i - lo
+        ax.axvline(sig + 0.5, color="#131722", linewidth=1.0, linestyle=(0, (4, 3)), alpha=0.7, zorder=4)
+        ax.text(sig + 0.7, ymin - pad * 0.6, " ← 信号K   之后的走势 →", fontsize=9, color="#131722", va="bottom", zorder=5)
+        if trade:
+            entry, stop, side = trade["entry"], trade["stop"], trade["side"]
+            risk = side * (entry - stop)
+            x0, x1 = sig + 0.5, min(len(w) - 0.5, sig + 0.5 + trade.get("bars", after))
+            ax.fill_between([x0, x1], [stop, stop], [entry, entry], color="#F23645", alpha=0.12, zorder=1, linewidth=0)
+            ax.fill_between([x0, x1], [entry, entry], [entry + side * 5 * risk] * 2, color="#089981", alpha=0.10, zorder=1, linewidth=0)
+            ax.hlines([entry, entry + side * 3 * risk], x0, x1, colors=["#131722", "#089981"], linestyles=["-", "--"], linewidth=1.0, zorder=4)
+            levels.append(np.array([stop, entry + side * 5 * risk]))
+            ymin, ymax = np.nanmin(np.concatenate(levels)), np.nanmax(np.concatenate(levels))
+            pad = 0.06 * (ymax - ymin)
+            ax.set_ylim(ymin - pad, ymax + pad)
     right = max(8, len(w) // 8)  # TradingView keeps empty space right of the last bar
     for a in (ax, axv):
         a.set_xlim(-1, len(w) + right)
@@ -239,9 +279,15 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
     ax.set_xticks(ticks, [stamps[t].strftime(fmt) for t in ticks], fontsize=9, color="#131722")
     ax.tick_params(axis="x", length=0)
     tf = {5: "5", 15: "15", 30: "30", 60: "1h", 240: "4h"}[minutes]
-    ax.text(0.005, 0.985, f"{symbol}.P · {tf} · {venue}    SPIKE V13.1    "
-            f"最右一根收盘 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M} 北京时间",
-            transform=ax.transAxes, fontsize=11, color="#131722", va="top")
+    if after > 0:
+        sig_close = stamps[i - lo] + pd.Timedelta(minutes=minutes)
+        ax.text(0.005, 0.985, f"{symbol}.P · {tf} · {venue}    SPIKE V13.1    信号K收盘 {sig_close:%Y-%m-%d %H:%M} 北京时间"
+                + (f"    {trade['outcome']}" if trade and trade.get("outcome") else ""),
+                transform=ax.transAxes, fontsize=11, color="#131722", va="top")
+    else:
+        ax.text(0.005, 0.985, f"{symbol}.P · {tf} · {venue}    SPIKE V13.1    "
+                f"最右一根收盘 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M} 北京时间",
+                transform=ax.transAxes, fontsize=11, color="#131722", va="top")
     if htf is not None:
         ax.text(0.005, 0.95, f"紫线 = 已确认 {HTF_LINE[minutes][3]}", transform=ax.transAxes, fontsize=9, color="#7E57C2", va="top")
     buf = io.BytesIO()
@@ -559,6 +605,44 @@ def plain_sheets(name: str, seed: int, per_sheet: int = 6) -> pd.DataFrame:
     return key
 
 
+KIND_CN = {"target": "止盈", "stop": "止损", "timeout": "到期平"}
+
+
+def future_sheets(name: str, after: int = 60, per_sheet: int = 6) -> pd.DataFrame:
+    """Owner review sheets with the move after each signal, numbered like the blind sheets.
+
+    The VLM input images of the same items are re-rendered first and must still match the
+    manifest sha256; review images live in their own folder and never enter the ledger.
+    """
+    key = pd.read_csv(EXP / "review" / name / "key_hidden.csv")
+    manifest = pd.read_csv(EXP / f"manifest_{name}.csv").set_index("item_id")
+    rows = []
+    for _, r in key.iterrows():
+        sym, m, tm, side = r.item_id.split("|")[:4]
+        minutes, signal_ms = int(m), pd.Timestamp(tm).value // 10**6
+        bars, i = bars_until(sym, minutes, signal_ms)
+        if sha256(render(bars, i, sym, minutes)) != manifest.at[r.item_id, "sha256"]:
+            raise ValueError(f"VLM input image changed for {r.item_id}")
+        full, j = bars_around(sym, minutes, signal_ms, after)
+        trade = None
+        if "stop" in r and np.isfinite(r.get("stop", np.nan)) and j + 1 < len(full):
+            outcome = []
+            for t in (3, 5):
+                if f"exit_{t}r" in r and isinstance(r[f"exit_{t}r"], str):
+                    outcome.append(f"{t}R {KIND_CN.get(r[f'exit_{t}r'], r[f'exit_{t}r'])} {r[f'net_r_{t}r']:+.1f}R")
+            trade = {"entry": float(full.open.iloc[j + 1]), "stop": float(r.stop), "side": int(side),
+                     "outcome": "；".join(outcome) + "（扣 0.2% 费）" if outcome else ""}
+        png = render(full, j, sym, minutes, after=min(after, len(full) - j - 1), trade=trade)
+        path = IMAGES / "review_future" / name / f"{int(r.number):03d}.png"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(png)
+        rows.append({"number": int(r.number), "item_id": r.item_id, "path": str(path), "sha256": sha256(png)})
+    out = pd.DataFrame(rows)
+    numbered_sheets(out, EXP / "review" / f"{name}_future", per_sheet)
+    out.to_csv(EXP / "review" / f"{name}_future" / "manifest_future.csv", index=False)
+    return out
+
+
 def numbered_sheets(chosen: pd.DataFrame, out: Path, per_sheet: int = 6) -> None:
     from PIL import Image, ImageDraw, ImageFont
 
@@ -597,6 +681,9 @@ def main() -> None:
     rs.add_argument("--effort", default="low")
     rs.add_argument("--seed", type=int, default=1008702)
     rs.add_argument("--plain", action="store_true", help="no VLM: shuffle the whole manifest")
+    rf = sub.add_parser("future", help="owner review sheets with the move after each signal")
+    rf.add_argument("name")
+    rf.add_argument("--after", type=int, default=60)
     j.add_argument("--limit", type=int, required=True)
     j.add_argument("--no-references", action="store_true")
     j.add_argument("--effort", default="max")
@@ -616,6 +703,8 @@ def main() -> None:
         print(len(frame))
     elif args.cmd == "render":
         print(render_set(args.which, cfg, args.n, args.query, args.name, args.per_minutes).to_string(index=False))
+    elif args.cmd == "future":
+        print(future_sheets(args.name, args.after)[["number", "item_id"]].to_string(index=False))
     elif args.cmd == "sheets":
         if args.plain:
             print(plain_sheets(args.name, args.seed)[["number", "item_id"]].to_string(index=False))
