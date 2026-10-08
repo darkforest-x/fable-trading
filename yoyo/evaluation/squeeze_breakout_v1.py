@@ -23,7 +23,7 @@ candle that breaks the dense zone, the stop sits below all six MAs, and the targ
   always    candle in the trade direction, body / range >= 0.55, close beyond all six MAs and
             beyond the 12-bar extreme before it; 12-bar cooldown; 700 contiguous ready bars;
             at most 10% zero-range or zero-volume bars among the 50 before (frozen
-            pre-listing / suspension prices pass every squeeze test trivially)
+            post-delisting padding would pass every squeeze test trivially)
 
 Entry is the next open; the stop is min(MAs) - 0.2 ATR for longs (mirrored for shorts); exits
 read bar highs and lows, stop first when both levels print in one bar, gaps fill at the open,

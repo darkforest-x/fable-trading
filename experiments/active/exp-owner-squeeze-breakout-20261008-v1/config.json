@@ -67,5 +67,5 @@
   ],
   "training_eligible": false,
   "production_eligible": false,
-  "data_quality": "an event or control bar needs at most 10% zero-range (high == low) or zero-volume bars among the 50 bars before it; added 2026-10-08 after the candidate gallery showed a 1H ASTERUSDT 'breakout' out of days of a frozen 0.600 price (pre-listing / suspension), which trivially passes the BB and dense-MA tests"
+  "data_quality": "an event or control bar needs at most 10% zero-range (high == low) or zero-volume bars among the 50 bars before it. Correction 2026-10-08: the gate was added because a 1H ASTERUSDT event looked like a breakout out of a frozen 0.600 price; the raw bars show real trading (10-70bp hourly ranges, 0.3-2M volume), so that event is genuine and stays. The gate removed one event; the frozen bars that do exist (whole post-delisting days of AGIX/DEGO/BNX) are what broke the unbanded controls."
 }
