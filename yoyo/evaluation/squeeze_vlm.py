@@ -423,8 +423,8 @@ def review_sheets(name: str, picks: dict[str, int], effort: str, seed: int, per_
             img = Image.open(row.path).convert("RGB").resize((720, 400))
             x, y = 720 * (k % 2), 400 * (k // 2)
             sheet.paste(img, (x, y))
-            draw.rectangle([x + 6, y + 6, x + 96, y + 62], fill="#111111")
-            draw.text((x + 14, y + 6), f"#{row.number}", fill="white", font=font)
+            draw.rectangle([x + 6, y + 332, x + 106, y + 392], fill="#111111")  # bottom-left keeps the title readable
+            draw.text((x + 14, y + 334), f"#{row.number}", fill="white", font=font)
             draw.rectangle([x, y, x + 719, y + 399], outline="#999999", width=2)
         sheet.save(out / f"sheet_{start // per_sheet + 1}.png")
     key.to_csv(out / "key_hidden.csv", index=False)
