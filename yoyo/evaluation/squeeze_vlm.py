@@ -260,8 +260,11 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
             ax.fill_between([x0, x1], [stop, stop], [entry, entry], color="#F23645", alpha=0.12, zorder=1, linewidth=0)
             ax.fill_between([x0, x1], [entry, entry], [entry + side * 5 * risk] * 2, color="#089981", alpha=0.10, zorder=1, linewidth=0)
             ax.hlines([entry, entry + side * 3 * risk], x0, x1, colors=["#131722", "#089981"], linestyles=["-", "--"], linewidth=1.0, zorder=4)
-            levels.append(np.array([stop, entry + side * 5 * risk]))
-            ymin, ymax = np.nanmin(np.concatenate(levels)), np.nanmax(np.concatenate(levels))
+            ymin, ymax = min(ymin, stop, entry), max(ymax, stop, entry)
+            span = ymax - ymin
+            target3 = entry + side * 3 * risk
+            if ymin - 0.6 * span <= target3 <= ymax + 0.6 * span:  # a far target stays off-chart, the box runs out
+                ymin, ymax = min(ymin, target3), max(ymax, target3)
             pad = 0.06 * (ymax - ymin)
             ax.set_ylim(ymin - pad, ymax + pad)
     right = max(8, len(w) // 8)  # TradingView keeps empty space right of the last bar
