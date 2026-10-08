@@ -156,3 +156,26 @@ def test_observer_cycle_and_api(tmp_path, monkeypatch):
     assert client.get("/api/market-sync/history", params={"group": "nope"}).status_code == 404
     ids = [r["experiment_id"] for r in client.get("/api/market-sync/iterations").json()["items"]]
     assert ids[:2] == ["exp-market-sync-shock-20261007-v1", "exp-market-sync-shock-20261008-v2"]
+
+
+def test_environment_matches_the_v4_study_and_vetoes_use_frozen_edges():
+    from yoyo.evaluation import market_sync_shock_v4 as v4
+
+    rng = np.random.default_rng(3)
+    t0 = START - 40 * 24 * HOUR
+    n = 900 * 12
+    ts = t0 + np.arange(n) * 300_000
+    close = 100 * np.exp(np.cumsum(rng.normal(0, 0.002, n)))
+    raw = pd.DataFrame({"ts": ts, "open": close, "high": close, "low": close, "close": close, "volume": 1.0})
+    raw = raw.loc[~((raw.ts >= t0 + 300 * HOUR) & (raw.ts < t0 + 301 * HOUR))]  # one missing hour
+    env = v4.btc_hourly(raw.reset_index(drop=True))
+    closes = {int(ms): float(c) for ms, c in env.close.items() if np.isfinite(c)}
+    for asof in (t0 + 760 * HOUR, t0 + 850 * HOUR, t0 + 899 * HOUR):
+        ours = live.environment(closes, asof)
+        for key in ("trend30", "trend7", "vol30"):
+            theirs = env.at[asof, key]
+            assert (math.isnan(ours[key]) and np.isnan(theirs)) or ours[key] == pytest.approx(theirs, rel=1e-9)
+    assert live.vetoes(60, 1, {"trend30": 0.14, "vol30": 0.001}) == ["rally"]
+    assert live.vetoes(60, 1, {"trend30": 0.10, "vol30": 0.009}) == []
+    assert live.vetoes(30, -1, {"trend30": 0.30, "vol30": 0.0055}) == ["high_vol"]
+    assert live.vetoes(60, -1, {"trend30": math.nan, "vol30": math.nan}) == []

@@ -27,6 +27,12 @@ Two known differences from the frozen study: the universe ranks on the kline quo
 delisted alt cannot enter. Events before RESEARCH_END overlap the study and are a
 reconciliation check, not new evidence; events from RESEARCH_END on are out of sample.
 
+Environment tags (owner 2026-10-08: "接进菜单"): each event also carries BTC's 30-day and 7-day
+return and 30-day hourly volatility, read at the last 1H close at or before the event bar opens
+(exp-market-sync-shock-20261008-v4), and two veto labels from v4's frozen top-tercile edges:
+an up shock after a strong 30-day BTC rally, and a down shock in high volatility. They label
+events for forward checking; nothing is filtered out.
+
 Binance USDT-M market data: https://developers.binance.com/docs/derivatives/usds-margined-futures/market-data/rest-api
 """
 from __future__ import annotations
@@ -70,6 +76,11 @@ COST = 0.002
 PRIMARY = {"minutes": 60, "kind": "sync", "config": "z3.0_v3.0_b0.75", "side": 1, "hold": "12h", "instrument": "eth"}
 OBSERVE_START_MS = 1785542400000   # 2026-08-01T00:00Z: events from here (covers 8.19 for reconciliation)
 BACKFILL_START_MS = 1785110400000  # 2026-07-27T00:00Z: 5 days of warmup before OBSERVE_START
+HOUR_MS = 3_600_000
+ENV_START_MS = BACKFILL_START_MS - 31 * 24 * HOUR_MS  # BTC 1h history for the 30-day environment
+# v4 top-tercile edges frozen on pre-2025 events (exp-market-sync-shock-20261008-v4 edges.csv).
+VETO_EDGES = {"rally": ("trend30", 1, {30: 0.12699048292180384, 60: 0.13114983449061102}),
+              "high_vol": ("vol30", -1, {30: 0.005424279086604813, 60: 0.00546888910589197})}
 RESEARCH_END_MS = 1790121600000    # 2026-09-23T00:00Z: v2 config "end"; later events are out of sample
 LATEST_BARS = 24
 PAGE = 1000                        # klines limit 1000 -> request weight 5
@@ -213,8 +224,36 @@ def outcome(series: dict, members: list[str], i: int, side: int, bars: int) -> d
     return out
 
 
+def environment(closes: dict[int, float], asof_ms: int) -> dict:
+    """BTC trend and volatility at the 1H close ``asof_ms`` (closes keyed by close time).
+
+    Same definitions as yoyo.evaluation.market_sync_shock_v4.btc_hourly: wall-clock hours,
+    a missing hour stays missing, volatility needs 700 of the 720 hourly log returns.
+    """
+    def ret(hours):
+        a, b = closes.get(asof_ms), closes.get(asof_ms - hours * HOUR_MS)
+        return a / b - 1.0 if a and b else math.nan
+    logs = []
+    for k in range(720):
+        a, b = closes.get(asof_ms - k * HOUR_MS), closes.get(asof_ms - (k + 1) * HOUR_MS)
+        if a and b:
+            logs.append(math.log(a / b))
+    return {"asof_ms": asof_ms, "trend30": ret(720), "trend7": ret(168),
+            "vol30": statistics.stdev(logs) if len(logs) >= 700 else math.nan}
+
+
+def vetoes(minutes: int, side: int, env: dict) -> list[str]:
+    """v4 veto labels: ``rally`` (up shock after a top-tercile 30-day rally), ``high_vol``."""
+    tags = []
+    for tag, (feature, for_side, edges) in VETO_EDGES.items():
+        value = env.get(feature)
+        if side == for_side and finite(value) and value >= edges[minutes]:
+            tags.append(tag)
+    return tags
+
+
 def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[str]], minutes: int,
-            *, observe_start_ms: int = OBSERVE_START_MS) -> dict:
+            *, observe_start_ms: int = OBSERVE_START_MS, btc_closes: dict[int, float] | None = None) -> dict:
     """Features, events and outcomes for one timeframe; all inputs on the BTC index."""
     per_hour = 60 // minutes
     btc = leader_features(series["BTCUSDT"])
@@ -229,6 +268,7 @@ def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[
                 if index[i] < observe_start_ms:
                     continue
                 members = universe.get(month_of(index[i]), [])
+                env = environment(btc_closes or {}, index[i] // HOUR_MS * HOUR_MS)
                 events.append({
                     "minutes": minutes, "kind": kind, "config": config_key(cfg), "open_ms": index[i],
                     "close_ms": index[i] + minutes * 60_000, "side": side,
@@ -236,6 +276,7 @@ def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[
                     "btc_vr": btc[i]["vr"], "eth_vr": eth[i]["vr"], "breadth": up[i] if side > 0 else down[i],
                     "n_alts": count[i], "out_of_sample": index[i] >= RESEARCH_END_MS,
                     "outcomes": {f"{h}h": outcome(series, members, i, side, h * per_hour) for h in HOLD_HOURS},
+                    "env": env, "vetoes": vetoes(minutes, side, env),
                 })
     latest = []
     for t in range(max(0, len(index) - LATEST_BARS), len(index)):
@@ -331,6 +372,11 @@ class Book:
 
     def connect(self):
         return sqlite3.connect(self.path, timeout=30)
+
+    def first_open(self, minutes: int, symbol: str) -> int | None:
+        with self.connect() as db:
+            row = db.execute("SELECT MIN(open_ms) FROM bars WHERE minutes=? AND symbol=?", (minutes, symbol)).fetchone()
+        return row[0]
 
     def last_open(self, minutes: int, symbol: str) -> int | None:
         with self.connect() as db:
@@ -443,6 +489,9 @@ class Observer:
         jobs = [(s, m, i) for m, i in INTERVALS.items() for s in sorted(symbols)]
         with ThreadPoolExecutor(WORKERS) as pool:
             list(pool.map(lambda job: self.fetch_bars(*job, server), jobs))
+        first = self.book.first_open(60, "BTCUSDT")
+        if first is not None and first > ENV_START_MS:  # one-off: 30 days of BTC 1h before the backfill
+            self.fetch_bars("BTCUSDT", 60, "1h", first, start=ENV_START_MS)
         snapshot = self.build({m: e["symbols"] for m, e in universes.items()}, universes)
         snapshot["requests"] = self.client.requests
         snapshot["skipped"] = dict(sorted(self.skipped.items())[:20])
@@ -479,10 +528,12 @@ class Observer:
             have = self.book.universes()
         return have
 
-    def fetch_bars(self, symbol: str, minutes: int, interval: str, server_ms: int) -> int:
+    def fetch_bars(self, symbol: str, minutes: int, interval: str, server_ms: int,
+                   start: int | None = None) -> int:
         step = minutes * 60_000
-        last = self.book.last_open(minutes, symbol)
-        start = BACKFILL_START_MS if last is None else last + step
+        if start is None:
+            last = self.book.last_open(minutes, symbol)
+            start = BACKFILL_START_MS if last is None else last + step
         added = 0
         while start + step <= server_ms:
             try:
@@ -501,6 +552,8 @@ class Observer:
         return added
 
     def build(self, universe: dict[str, list[str]], universes: dict[str, dict]):
+        btc_1h = self.book.bars(60, ENV_START_MS).get("BTCUSDT", {})
+        btc_closes = {ms + HOUR_MS: row[1] for ms, row in btc_1h.items() if row and row[1] and row[1] > 0}
         frames = {}
         for minutes in INTERVALS:
             raw = self.book.bars(minutes, BACKFILL_START_MS)
@@ -508,7 +561,8 @@ class Observer:
             series = {s: [rows.get(ms) for ms in index] for s, rows in raw.items()}
             if not index or "ETHUSDT" not in series:
                 continue
-            frames[str(minutes)] = analyse(index, series, universe, minutes)
+            frames[str(minutes)] = analyse(index, series, universe, minutes, btc_closes=btc_closes)
+        env_now = environment(btc_closes, max(btc_closes)) if btc_closes else {}
         events = [e for f in frames.values() for e in f["events"]]
         return clean({
             "generated_ms": int(time.time() * 1000),
@@ -522,6 +576,9 @@ class Observer:
             "universe": {m: {"size": len(e["symbols"]), "ranked_from": e["ranked_from"], "symbols": e["symbols"]}
                          for m, e in sorted(universes.items())},
             "latest": {m: f["latest"] for m, f in frames.items()},
+            "environment_now": env_now,
+            "veto_edges": {tag: {"feature": f, "side": sd, "edges": {str(k): v for k, v in e.items()}}
+                           for tag, (f, sd, e) in VETO_EDGES.items()},
             "bars": {m: f["bars"] for m, f in frames.items()},
             "events": sorted(events, key=lambda e: (e["open_ms"], e["minutes"])),
         })

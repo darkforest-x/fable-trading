@@ -8,6 +8,8 @@
   // Only the 30m up-shock high tier was better in both periods; the rest is a label, not a signal.
   const VOLUME_EDGES = {"30|1": [3.750, 5.399], "30|-1": [3.640, 5.592], "60|1": [3.274, 4.729], "60|-1": [3.543, 5.450]};
   const TIER_NAMES = ["低档", "中档", "高档"];
+  // v4 vetoes, computed by the observer (yoyo/monitor/market_sync.py VETO_EDGES): labels, not filters.
+  const VETO_NAMES = {rally: "大涨后·慎追", high_vol: "高波动·慎空"};
   const state = {active: false, pending: false, live: null, history: {}, iterations: null, error: null,
     tf: "60", kind: "sync", config: "z3.0_v3.0_b0.75", side: "1", hold: "12h", inst: "eth", vol: "all", limit: 30};
   const root = () => document.getElementById("market-sync-workspace");
@@ -59,6 +61,14 @@
       && (state.side === "all" || String(e.side) === state.side) && (state.vol === "all" || volumeTier(e) === 2));
   }
 
+  function envNow() {
+    const env = state.live?.snapshot?.environment_now, edges = state.live?.snapshot?.veto_edges;
+    if (!env || !fin(env.trend30)) return "";
+    const rally = edges && env.trend30 >= edges.rally.edges[state.tf], hot = edges && fin(env.vol30) && env.vol30 >= edges.high_vol.edges[state.tf];
+    const warn = [rally ? "现在追上涨冲击要慎重" : "", hot ? "现在空下跌冲击要慎重" : ""].filter(Boolean).join("；");
+    return `<small>BTC 30 天 ${pct(env.trend30, 1)} · 小时波动 ${pct(env.vol30, 2).replace("+", "")}${warn ? ` · <b class="ms-warn">${esc(warn)}</b>` : ""}</small>`;
+  }
+
   function overview() {
     const snap = state.live?.snapshot, status = state.live?.status || {};
     const latest = snap?.latest?.[state.tf]?.at(-1);
@@ -68,7 +78,7 @@
     const stateText = {ok: "正常", updating: "更新中", starting: "启动中", error: "出错"}[status.state] || "未运行";
     return `<div class="ms-overview">
       <article><span>当前查看的规则</span><strong>${tfLabel(state.tf)} ${state.kind === "sync" ? "单根" : "连续两根"} · ${esc(state.side === "all" ? "多空都看" : sideName(+state.side))}</strong><small>${esc(configLabel(state.config))} · 持有 ${esc(state.hold)} · ${esc(INSTRUMENTS[state.inst])}</small></article>
-      <article><span>最近一根 ${tfLabel(state.tf)} · 北京</span><strong>${latest ? esc(clock(latest.open_ms)) : "—"}</strong><small>${latest ? `BTC z ${num(latest.btc_z)} · ETH z ${num(latest.eth_z)} · 同涨 ${share(latest.breadth_up)}` : "等待首轮数据"}</small></article>
+      <article><span>最近一根 ${tfLabel(state.tf)} · 北京</span><strong>${latest ? esc(clock(latest.open_ms)) : "—"}</strong><small>${latest ? `BTC z ${num(latest.btc_z)} · ETH z ${num(latest.eth_z)} · 同涨 ${share(latest.breadth_up)}` : "等待首轮数据"}</small>${envNow()}</article>
       <article><span>样本外记录（9/23 起）</span><strong>${forward.length} 次</strong><small>${fstats ? `已满 ${esc(state.hold)} ${fstats.n} 次 · 平均 ${bp(fstats.mean)}` : "还没有已结束的样本"}</small></article>
       <article><span>研究样本 2023-01 至 2026-09</span><strong>${hs ? `${hs.n} 次 · ${bp(hs.mean)}` : "—"}</strong><small>${hs ? `中位 ${bp(hs.median)} · 胜率 ${(hs.win * 100).toFixed(0)}% · 对照 ${bp(hs.ctrl)}` : "该组合没有事件"}</small></article>
     </div>
@@ -122,13 +132,14 @@
     const missing = inOverlap.filter(r => !liveKeys.has(`${r[0]}|${r[1]}`)).length;
     const overlap = events.filter(e => !e.out_of_sample);
     const matched = overlap.filter(e => research.has(`${e.open_ms}|${e.side}`)).length;
-    const tierNote = `<p class="quiet-text">量比档 = BTC、ETH 量比的较小值，按 v3 在 2025 年前事件上冻结的三档划分（30m 上涨高档 ≥${VOLUME_EDGES["30|1"][1]}×，1H 上涨高档 ≥${VOLUME_EDGES["60|1"][1]}×）。v3 里只有 30m 上涨冲击的高量比档在 2025 前后都更好，属于事后发现，这里用来积累样本外记录。</p>`;
+    const vetoNote = `<p class="quiet-text">冲击前环境用冲击 K 线开盘前已收盘的 BTC 1H 数据。否决标签来自 v4（边界在 2025 年前冻结）：「大涨后·慎追」= 上涨冲击且 BTC 30 天涨幅在最高档（≥约 13%）；「高波动·慎空」= 下跌冲击且 BTC 30 天小时波动在最高档。只做标记，不剔除事件，用来积累样本外记录。</p>`;
+    const tierNote = vetoNote + `<p class="quiet-text">量比档 = BTC、ETH 量比的较小值，按 v3 在 2025 年前事件上冻结的三档划分（30m 上涨高档 ≥${VOLUME_EDGES["30|1"][1]}×，1H 上涨高档 ≥${VOLUME_EDGES["60|1"][1]}×）。v3 里只有 30m 上涨冲击的高量比档在 2025 前后都更好，属于事后发现，这里用来积累样本外记录。</p>`;
     const note = tierNote + (overlap.length || inOverlap.length
       ? `<p class="quiet-text">8/1–9/22 与研究重叠：实时重算 ${overlap.length} 次，其中 ${matched} 次研究里也有；研究有而实时没有 ${missing} 次。山寨池按 K 线成交额排名、只含仍在交易的合约，个别边缘事件可能不同。</p>` : "");
     if (!events.length) return `<div class="empty-state"><h3>暂无符合条件的事件</h3><p>从 2026-08-01 起记录；换个阈值或方向看看。</p></div>${note}`;
-    return `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>量比</th><th>同向</th>${HOLDS.map(h => `<th class="${h === state.hold ? "ms-focus" : ""}">${h} · ${esc(INSTRUMENTS[state.inst])}</th>`).join("")}<th>来源</th></tr></thead><tbody>${events.map(e => {
+    return `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>量比</th><th>同向</th><th>冲击前环境</th>${HOLDS.map(h => `<th class="${h === state.hold ? "ms-focus" : ""}">${h} · ${esc(INSTRUMENTS[state.inst])}</th>`).join("")}<th>来源</th></tr></thead><tbody>${events.map(e => {
       const source = e.out_of_sample ? `<strong class="ms-badge">样本外</strong>` : research.has(`${e.open_ms}|${e.side}`) ? "研究期 · 已对上" : "研究期 · 研究里没有";
-      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×${volumeTier(e) == null ? "" : volumeTier(e) === 2 ? `<small><span class="ms-badge">高档</span></small>` : `<small>${TIER_NAMES[volumeTier(e)]}</small>`}</td><td>${share(e.breadth)}</td>${HOLDS.map(h => {
+      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×${volumeTier(e) == null ? "" : volumeTier(e) === 2 ? `<small><span class="ms-badge">高档</span></small>` : `<small>${TIER_NAMES[volumeTier(e)]}</small>`}</td><td>${share(e.breadth)}</td><td>${fin(e.env?.trend30) ? `BTC 30天 ${pct(e.env.trend30, 1)}` : "—"}${(e.vetoes || []).map(v => `<small><span class="ms-badge ms-badge-warn">${esc(VETO_NAMES[v] || v)}</span></small>`).join("")}</td>${HOLDS.map(h => {
         const o = e.outcomes?.[h] || {}, v = o[state.inst];
         return `<td class="${h === state.hold ? "ms-focus " : ""}${tone(v)}">${o.started ? bp(v) : "待入场"}${o.started && !o.done ? "<small>进行中</small>" : ""}</td>`;
       }).join("")}<td>${source}</td></tr>`;
