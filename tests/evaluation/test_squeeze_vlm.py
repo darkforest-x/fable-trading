@@ -173,3 +173,11 @@ def test_okx_bars_page_backwards_and_keep_confirmed_only():
     got = sv.okx_bars("ALGO-USDT-SWAP", 5, t0 + 10 * step, t0 + 250 * step, opener=opener)
     assert got.index[0] == t0 + 10 * step and got.index[-1] == t0 + 248 * step
     assert got.volume.iloc[0] == 15.0 and sv.okx_inst("ALGOUSDT") == "ALGO-USDT-SWAP"
+
+
+@pytest.mark.skipif(not sv.SPIKE_LEDGER.exists(), reason="frozen SPIKE replay ledger not present")
+def test_spike_signals_are_the_original_v128_signals():
+    s = sv.spike_signals()
+    assert len(s) == 10713 and set(s.policy) == {"baseline"} and set(s.minutes) == {15, 60}
+    assert s.item_id.str.count("[|]").eq(4).all() and s.item_id.is_unique
+    assert (s.bar_open_ms % (15 * 60_000) == 0).all()

@@ -182,9 +182,14 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
         levels += [sma.to_numpy(float), ema.to_numpy(float)]
     basis, sd = c.rolling(sb.BB_LEN).mean().iloc[lo:], c.rolling(sb.BB_LEN).std(ddof=0).iloc[lo:]
     upper, lower = basis + sb.BB_MULT * sd, basis - sb.BB_MULT * sd
-    ax.plot(x, upper, color="#787b86", linewidth=1.0, label="BB200 ±2σ")
+    ax.plot(x, upper, color="#787b86", linewidth=1.0, label="BB200 ±2σ（金色底=压缩）")
     ax.plot(x, lower, color="#787b86", linewidth=1.0)
     ax.fill_between(x, lower, upper, color="#787b86", alpha=0.06)
+    width = (2 * sb.BB_MULT * c.rolling(sb.BB_LEN).std(ddof=0)) / c.rolling(sb.BB_LEN).mean().abs()
+    p10 = width.shift().rolling(sb.BB_HISTORY, min_periods=sb.BB_HISTORY).quantile(sb.BB_PCT, interpolation="linear")
+    squeezed = (width <= p10).iloc[lo:].to_numpy()
+    for k in np.flatnonzero(squeezed):  # SPIKE V7 compression channel colour
+        ax.axvspan(k - 0.5, k + 0.5, color="#AD7B29", alpha=0.10, linewidth=0)
     ymin, ymax = np.nanmin(np.concatenate(levels)), np.nanmax(np.concatenate(levels))
     pad = 0.05 * (ymax - ymin)
     ax.set_ylim(ymin - pad, ymax + pad)
@@ -420,6 +425,25 @@ def example_signal_ms(ex: dict) -> int:
     return pd.Timestamp(ex["signal_open_bj"], tz="Asia/Shanghai").tz_convert("UTC").value // 10**6
 
 
+SPIKE_LEDGER = Path("experiments/active/exp-spike-v128-retest-entry-20260923-v1/summary_v1/serial_trades.csv.gz")
+
+
+def spike_signals(policy: str = "baseline") -> pd.DataFrame:
+    """Historical SPIKE V12.8 signals from the frozen replay (Binance USD-M, 2026-07-23 to 09-23).
+
+    ``baseline`` rows are the original V12.8 signals (V9 dense-box spikes and joint breakout+spike)
+    that the V13.1 chart draws; ``retest`` rows are V13's later retest entries. The signal bar is
+    the bar the indicator marks; the chart is cut at its close.
+    """
+    t = pd.read_csv(SPIKE_LEDGER)
+    t = t.loc[t.policy.eq(policy)].copy()
+    t["minutes"] = t.timeframe_min.astype(int)
+    t["bar_open_ms"] = pd.to_datetime(t.signal_bar_open).astype("int64") // 10**6
+    t["time"] = pd.to_datetime(t.signal_bar_open).dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    t["item_id"] = t.symbol + "|" + t.minutes.astype(str) + "|" + t.time + "|" + t.side.astype(str) + "|" + t.arm
+    return t[["item_id", "symbol", "minutes", "bar_open_ms", "time", "side", "arm", "policy", "net_r", "exit_reason"]]
+
+
 def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: str | None = None,
                per_minutes: bool = False) -> pd.DataFrame:
     """Render owner examples, or a seeded random sample of candidates (optionally a ``query`` subset)."""
@@ -437,7 +461,7 @@ def render_set(which: str, cfg: dict, n: int, query: str | None = None, name: st
             rows.append({"item_id": ex["id"], "set": "examples", "path": str(path), "sha256": sha256(png),
                          "owner_label": ex["owner_label"], "role": ex.get("role", "test")})
     else:
-        cands = pd.read_csv(EXP / "candidates.csv.gz")
+        cands = spike_signals() if which == "spike" else pd.read_csv(EXP / "candidates.csv.gz")
         if query:
             cands = cands.query(query).reset_index(drop=True)
         rng = np.random.default_rng(cfg["sample_seed"] + zlib.crc32(name.encode()) % 1000 * (name != "candidates"))
@@ -490,7 +514,8 @@ def plain_sheets(name: str, seed: int, per_sheet: int = 6) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     chosen = manifest.iloc[rng.permutation(len(manifest))].reset_index(drop=True)
     chosen.insert(0, "number", np.arange(1, len(chosen) + 1))
-    key = chosen.merge(pd.read_csv(EXP / "candidates.csv.gz"), on="item_id", how="left")
+    source = spike_signals() if manifest["item_id"].str.count("[|]").max() >= 4 else pd.read_csv(EXP / "candidates.csv.gz")
+    key = chosen.merge(source, on="item_id", how="left")
     out = EXP / "review" / name
     numbered_sheets(chosen, out, per_sheet)
     key.to_csv(out / "key_hidden.csv", index=False)
@@ -521,7 +546,7 @@ def main() -> None:
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("scan").add_argument("--workers", type=int, default=8)
     r = sub.add_parser("render")
-    r.add_argument("which", choices=["candidates", "examples"])
+    r.add_argument("which", choices=["candidates", "examples", "spike"])
     r.add_argument("--n", type=int, default=40)
     r.add_argument("--query", help="pandas query on candidates.csv.gz before sampling")
     r.add_argument("--name", help="manifest / set name (default: which)")
