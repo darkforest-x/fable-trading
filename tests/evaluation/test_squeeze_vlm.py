@@ -115,3 +115,9 @@ def test_example_time_is_beijing_bar_open_and_criteria_cover_the_owner_condition
     cfg = json.loads(sv.CONFIG.read_text())
     assert cfg["criteria_version"] == sv.CRITERIA_VERSION and cfg["window_bars"] == sv.WINDOW
     assert cfg["round_trip_cost"] == 0.002
+
+
+def test_effort_is_part_of_the_ledger_key_but_max_keeps_old_keys():
+    base = sv.ledger_key("a", ["r"], "glm-5.3-flash", "p")
+    assert sv.ledger_key("a", ["r"], "glm-5.3-flash", "p", "max") == base
+    assert sv.ledger_key("a", ["r"], "glm-5.3-flash", "p", "low") != base

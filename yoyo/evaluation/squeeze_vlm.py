@@ -267,8 +267,9 @@ def scan(cfg: dict, workers: int = 8) -> pd.DataFrame:
 
 # --------------------------------------------------------------------------- judge
 
-def ledger_key(image_sha: str, ref_shas: list[str], model: str, prompt_version: str) -> str:
-    payload = json.dumps([image_sha, ref_shas, CRITERIA_VERSION, sha256(CRITERIA.encode()), model, prompt_version])
+def ledger_key(image_sha: str, ref_shas: list[str], model: str, prompt_version: str, effort: str = "max") -> str:
+    payload = json.dumps([image_sha, ref_shas, CRITERIA_VERSION, sha256(CRITERIA.encode()), model, prompt_version]
+                         + ([] if effort == "max" else [effort]))  # max keeps the pilot rows' keys
     return sha256(payload.encode())
 
 
@@ -280,7 +281,7 @@ def read_ledger(path: Path = LEDGER) -> dict[str, dict]:
 
 
 def judge(items: list[dict], refs: list[dict], *, model: str, client_factory, workers: int = 3,
-          ledger: Path = LEDGER) -> list[dict]:
+          ledger: Path = LEDGER, effort: str = "max") -> list[dict]:
     """Judge items ({item_id, set, path}) with reference renders ({item_id, path}); never re-bills a key."""
     from yoyo.vision_research.images import image_from_bytes
     from yoyo.vision_research.zhipu import PROMPT_VERSION, ZhipuError
@@ -292,7 +293,7 @@ def judge(items: list[dict], refs: list[dict], *, model: str, client_factory, wo
     todo = []
     for item in items:
         data = Path(item["path"]).read_bytes()
-        key = ledger_key(sha256(data), ref_shas, model, PROMPT_VERSION)
+        key = ledger_key(sha256(data), ref_shas, model, PROMPT_VERSION, effort)
         if key not in done and not any(t[0] == key for t in todo):
             todo.append((key, item, data))
     local = threading.local()
@@ -303,7 +304,7 @@ def judge(items: list[dict], refs: list[dict], *, model: str, client_factory, wo
             local.client = client_factory()
         row = {"key": key, "item_id": item["item_id"], "set": item["set"], "image_sha256": sha256(data),
                "reference_ids": [r["item_id"] for r in refs], "reference_sha256": ref_shas, "model": model,
-               "prompt_version": PROMPT_VERSION, "criteria_version": CRITERIA_VERSION,
+               "prompt_version": PROMPT_VERSION, "criteria_version": CRITERIA_VERSION, "reasoning_effort": effort,
                "requested_at": pd.Timestamp.now(tz="UTC").isoformat()}
         try:
             got = local.client.analyze(image_from_bytes(data, "candidate.png"), ref_images, CRITERIA,
@@ -326,9 +327,15 @@ def judge(items: list[dict], refs: list[dict], *, model: str, client_factory, wo
         return list(pool.map(one, todo))
 
 
-def zhipu_factory(model: str):
+def zhipu_factory(model: str, effort: str = "max"):
+    """Workbench Zhipu client; ``effort`` other than max overrides only reasoning_effort."""
     from yoyo.vision_research.settings import LocalSettings
     from yoyo.vision_research.zhipu import ZhipuClient
+
+    class EffortClient(ZhipuClient):
+        def _thinking_options(self):
+            options = super()._thinking_options()
+            return {**options, "reasoning_effort": effort} if options and effort != "max" else options
 
     settings = LocalSettings(VISION_RUNTIME).load()
     key = settings.get("api_key") if settings.get("provider") == "zhipu" else None
@@ -338,7 +345,7 @@ def zhipu_factory(model: str):
                 key = profile["api_key"]
     if not key:
         raise ValueError("no Zhipu API key in the vision workbench settings")
-    return lambda: ZhipuClient(key, model)
+    return lambda: EffortClient(key, model)
 
 
 # --------------------------------------------------------------------------- CLI
@@ -390,6 +397,8 @@ def main() -> None:
     j.add_argument("which", choices=["candidates", "examples"])
     j.add_argument("--limit", type=int, required=True)
     j.add_argument("--no-references", action="store_true")
+    j.add_argument("--effort", default="max")
+    j.add_argument("--ids", nargs="*", help="judge only these item ids")
     args = parser.parse_args()
     cfg = json.loads(CONFIG.read_text())
     if args.cmd == "scan":
@@ -411,9 +420,12 @@ def main() -> None:
         if not args.no_references:
             ex = pd.read_csv(EXP / "manifest_examples.csv")
             refs = ex.loc[ex.role.eq("reference")].to_dict("records")
-        items = manifest.loc[~manifest.item_id.isin([r["item_id"] for r in refs])].head(args.limit).to_dict("records")
-        rows = judge(items, refs, model=cfg["vlm"]["model"], client_factory=zhipu_factory(cfg["vlm"]["model"]),
-                     workers=cfg["vlm"]["max_workers"])
+        pool = manifest.loc[~manifest.item_id.isin([r["item_id"] for r in refs])]
+        if args.ids:
+            pool = pool.loc[pool.item_id.isin(args.ids)]
+        items = pool.head(args.limit).to_dict("records")
+        rows = judge(items, refs, model=cfg["vlm"]["model"], client_factory=zhipu_factory(cfg["vlm"]["model"], args.effort),
+                     workers=cfg["vlm"]["max_workers"], effort=args.effort)
         for row in rows:
             print(row["item_id"], row["status"], row.get("verdict"), row.get("current_state"), (row.get("summary") or row.get("error", ""))[:120])
 

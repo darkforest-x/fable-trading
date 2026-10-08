@@ -18,7 +18,8 @@
   "vlm": {
     "provider": "zhipu",
     "model": "glm-5.3-flash",
-    "max_workers": 3
+    "max_workers": 3,
+    "reasoning_effort": "max (owner's workbench choice); lower efforts are recorded per ledger row and only adopted if they agree with max on the same images"
   },
   "universe": "monthly top-100 alts by previous-month quote volume plus BTCUSDT and ETHUSDT (as v1)",
   "start": "2023-01-01T00:00:00Z",
