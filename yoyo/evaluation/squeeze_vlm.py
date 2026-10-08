@@ -60,7 +60,7 @@ EXAMPLES = EXP / "examples.json"
 LEDGER = EXP / "vlm_ledger.jsonl"
 IMAGES = EXP / "images"
 VISION_RUNTIME = Path("experiments/active/exp-spike-gemini-vision-20260923-v1/runtime")
-WINDOW = 60  # owner's ALGO screenshot shows about 55 bars before the breakout
+WINDOW = 80  # owner's ALGO screenshot shows about 55 bars before the breakout plus the move after it
 LOOSE = ("bb", "volume")
 FROZEN_END_MS = pd.Timestamp("2026-09-23T00:00:00Z").value // 10**6
 INTERVAL = {5: "5m", 15: "15m", 30: "30m", 60: "1h", 240: "4h"}
@@ -159,56 +159,93 @@ def bars_until(symbol: str, minutes: int, signal_ms: int, history: int = 800,
 
 # --------------------------------------------------------------------------- render
 
+# SPIKE V13.1 drawing (yoyo/evaluation/pine/spike_burst_v13_1.pine, plots near lines 2789-2902):
+# bull #008F82, blue #4679C9, ink = chart foreground; Pine transparency t -> alpha 1 - t/100.
+V13_MAS = (("s20", "#008F82", 0.62), ("e20", "#008F82", 0.42), ("s60", "#4679C9", 0.60),
+           ("e60", "#4679C9", 0.40), ("s120", "#131722", 0.52), ("e120", "#131722", 0.34))
+V13_BB, V13_SQUEEZE, V13_HTF = ("#7D8490", 0.52), ("#AD7B29", 0.10), "#C18CFA"
+TV_UP, TV_DOWN = "#089981", "#F23645"
+HTF_LINE = {5: (15, "ema", 120, "15m EMA120"), 15: (60, "sma", 60, "1h SMA60")}  # V13.1 filter lines
+
+
+def confirmed_htf(past: pd.DataFrame, minutes: int) -> pd.Series | None:
+    """V13.1's confirmed higher-timeframe line on each chart bar (completed HTF bars only)."""
+    if minutes not in HTF_LINE:
+        return None
+    htf, kind, n, _ = HTF_LINE[minutes]
+    k = htf // minutes
+    step = htf * 60_000
+    bucket = past.index.to_numpy() // step * step
+    g = past.close.groupby(bucket)
+    closes = g.last().where(g.count() == k)  # an incomplete bucket is never used
+    line = closes.rolling(n).mean() if kind == "sma" else closes.ewm(span=n, adjust=False, min_periods=n).mean()
+    line.index = line.index + step  # known from the HTF close on
+    return line.reindex(past.index + minutes * 60_000, method="ffill").set_axis(past.index)
+
+
 def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = WINDOW, venue: str = "币安永续") -> bytes:
-    """PNG of the ``window`` bars ending at bar ``i``; indicators use bars <= i only."""
+    """SPIKE V13.1-style PNG of the ``window`` bars ending at bar ``i``; indicators use bars <= i only."""
     past = bars.iloc[: i + 1]
     c = past.close
     lo = max(0, len(past) - window)
     w = past.iloc[lo:]
     x = np.arange(len(w))
     o, h, l, cl, v = (w[k].to_numpy(float) for k in ("open", "high", "low", "close", "volume"))
-    fig = plt.figure(figsize=(14.4, 8.0), dpi=100)
-    grid = fig.add_gridspec(4, 1, hspace=0.05, left=0.05, right=0.985, top=0.94, bottom=0.05)
-    ax, axv = fig.add_subplot(grid[:3, 0]), fig.add_subplot(grid[3, 0])
-    col = np.where(cl >= o, UP, DOWN)
-    ax.vlines(x, l, h, color=col, linewidth=0.8)
-    ax.bar(x, np.maximum(np.abs(cl - o), 1e-12), bottom=np.minimum(o, cl), color=col, width=0.7)
-    axv.bar(x, np.nan_to_num(v), color=col, width=0.7)
+    fig, ax = plt.subplots(figsize=(14.4, 8.0), dpi=100)
+    fig.subplots_adjust(left=0.01, right=0.93, top=0.95, bottom=0.06)
+    up = cl >= o
+    col = np.where(up, TV_UP, TV_DOWN)
+    axv = ax.twinx()  # TradingView volume overlay in the bottom of the price pane
+    axv.bar(x, np.nan_to_num(v), color=np.where(up, TV_UP, TV_DOWN), alpha=0.35, width=0.8)
+    axv.set_ylim(0, np.nanmax(v) * 4.5 if np.isfinite(np.nanmax(v)) and np.nanmax(v) > 0 else 1)
+    axv.set_yticks([])
+    ax.set_zorder(axv.get_zorder() + 1)
+    ax.patch.set_visible(False)
+    ax.vlines(x, l, h, color=col, linewidth=0.9, zorder=3)
+    ax.bar(x, np.maximum(np.abs(cl - o), 1e-12), bottom=np.minimum(o, cl), color=col, width=0.7, zorder=3)
+    mas = {f"s{n}": c.rolling(n).mean() for n in sb.MA_PERIODS} | {f"e{n}": c.ewm(span=n, adjust=False).mean() for n in sb.MA_PERIODS}
     levels = [l, h]
-    for n in sb.MA_PERIODS:
-        sma, ema = c.rolling(n).mean().iloc[lo:], c.ewm(span=n, adjust=False).mean().iloc[lo:]
-        ax.plot(x, sma, color=MA_COLOR[n], linewidth=1.1, label=f"SMA{n}")
-        ax.plot(x, ema, color=MA_COLOR[n], linewidth=1.1, linestyle="--", label=f"EMA{n}")
-        levels += [sma.to_numpy(float), ema.to_numpy(float)]
-    basis, sd = c.rolling(sb.BB_LEN).mean().iloc[lo:], c.rolling(sb.BB_LEN).std(ddof=0).iloc[lo:]
-    upper, lower = basis + sb.BB_MULT * sd, basis - sb.BB_MULT * sd
-    ax.plot(x, upper, color="#787b86", linewidth=1.0, label="BB200 ±2σ（金色底=压缩）")
-    ax.plot(x, lower, color="#787b86", linewidth=1.0)
-    ax.fill_between(x, lower, upper, color="#787b86", alpha=0.06)
-    width = (2 * sb.BB_MULT * c.rolling(sb.BB_LEN).std(ddof=0)) / c.rolling(sb.BB_LEN).mean().abs()
+    for key, colour, alpha in V13_MAS:
+        series = mas[key].iloc[lo:]
+        ax.plot(x, series, color=colour, alpha=alpha, linewidth=1.0, zorder=2)
+        levels.append(series.to_numpy(float))
+    basis, sd = c.rolling(sb.BB_LEN).mean(), c.rolling(sb.BB_LEN).std(ddof=0)
+    upper, lower = (basis + sb.BB_MULT * sd).iloc[lo:], (basis - sb.BB_MULT * sd).iloc[lo:]
+    ax.plot(x, upper, color=V13_BB[0], alpha=V13_BB[1], linewidth=1.0, zorder=2)
+    ax.plot(x, lower, color=V13_BB[0], alpha=V13_BB[1], linewidth=1.0, zorder=2)
+    width = (2 * sb.BB_MULT * sd) / basis.abs()
     p10 = width.shift().rolling(sb.BB_HISTORY, min_periods=sb.BB_HISTORY).quantile(sb.BB_PCT, interpolation="linear")
     squeezed = (width <= p10).iloc[lo:].to_numpy()
-    for k in np.flatnonzero(squeezed):  # SPIKE V7 compression channel colour
-        ax.axvspan(k - 0.5, k + 0.5, color="#AD7B29", alpha=0.10, linewidth=0)
+    ax.fill_between(x, lower, upper, where=squeezed, color=V13_SQUEEZE[0], alpha=V13_SQUEEZE[1], linewidth=0, step="mid", zorder=1)
+    htf = confirmed_htf(past, minutes)
+    if htf is not None:
+        ax.step(x, htf.iloc[lo:], where="post", color=V13_HTF, linewidth=2.0, zorder=2)
+        levels.append(htf.iloc[lo:].to_numpy(float))
     ymin, ymax = np.nanmin(np.concatenate(levels)), np.nanmax(np.concatenate(levels))
-    pad = 0.05 * (ymax - ymin)
+    pad = 0.06 * (ymax - ymin)
     ax.set_ylim(ymin - pad, ymax + pad)
-    stamps = pd.to_datetime(w.index.to_numpy(), unit="ms", utc=True).tz_convert("Asia/Shanghai")
-    ticks = list(range(len(w) - 1, -1, -20))[::-1]
-    fmt = "%m-%d %H:%M" if minutes < 240 else "%m-%d"
-    axv.set_xticks(ticks, [stamps[t].strftime(fmt) for t in ticks], fontsize=8)
-    ax.set_xticks(ticks, [])
+    right = max(8, len(w) // 8)  # TradingView keeps empty space right of the last bar
     for a in (ax, axv):
-        a.set_xlim(-1, len(w) + 1)
-        a.grid(alpha=0.15)
-        a.tick_params(axis="y", labelsize=8)
-    axv.set_yticks([])
-    axv.set_ylabel("成交量", fontsize=9)
-    ax.legend(loc="upper left", fontsize=8, ncol=7, frameon=False)
-    ax.set_title(f"{symbol}  {TF_NAME[minutes]}  {venue}  最右一根收盘于 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M}（北京时间）",
-                 fontsize=11, loc="left")
+        a.set_xlim(-1, len(w) + right)
+    ax.yaxis.tick_right()
+    ax.tick_params(axis="y", labelsize=9, colors="#131722", length=0)
+    ax.grid(color="#F0F3FA", linewidth=1.0)
+    for side in ("top", "left", "right", "bottom"):
+        ax.spines[side].set_visible(False)
+        axv.spines[side].set_visible(False)
+    stamps = pd.to_datetime(w.index.to_numpy(), unit="ms", utc=True).tz_convert("Asia/Shanghai")
+    ticks = list(range(len(w) - 1, -1, -16))[::-1]
+    fmt = "%H:%M" if minutes < 60 else "%m-%d %H:%M" if minutes < 240 else "%m-%d"
+    ax.set_xticks(ticks, [stamps[t].strftime(fmt) for t in ticks], fontsize=9, color="#131722")
+    ax.tick_params(axis="x", length=0)
+    tf = {5: "5", 15: "15", 30: "30", 60: "1h", 240: "4h"}[minutes]
+    ax.text(0.005, 0.985, f"{symbol}.P · {tf} · {venue}    SPIKE V13.1    "
+            f"最右一根收盘 {stamps[-1] + pd.Timedelta(minutes=minutes):%Y-%m-%d %H:%M} 北京时间",
+            transform=ax.transAxes, fontsize=11, color="#131722", va="top")
+    if htf is not None:
+        ax.text(0.005, 0.95, f"紫线 = 已确认 {HTF_LINE[minutes][3]}", transform=ax.transAxes, fontsize=9, color="#7E57C2", va="top")
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", dpi=100, metadata={"Software": None})
+    fig.savefig(buf, format="png", dpi=100, metadata={"Software": None}, facecolor="white")
     plt.close(fig)
     return buf.getvalue()
 

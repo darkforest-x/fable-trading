@@ -181,3 +181,17 @@ def test_spike_signals_are_the_original_v128_signals():
     assert len(s) == 10713 and set(s.policy) == {"baseline"} and set(s.minutes) == {15, 60}
     assert s.item_id.str.count("[|]").eq(4).all() and s.item_id.is_unique
     assert (s.bar_open_ms % (15 * 60_000) == 0).all()
+
+
+def test_htf_line_uses_completed_higher_bars_only():
+    b = bars(900, 21)
+    b.index = 1_700_000_100_000 // 900_000 * 900_000 + np.arange(900) * 300_000  # 5m bars aligned to 15m buckets
+    line = sv.confirmed_htf(b, 5)
+    closes = b.close.groupby(b.index // 900_000 * 900_000).last()
+    ema = closes.ewm(span=120, adjust=False, min_periods=120).mean()
+    t = b.index[600]
+    bucket = t // 900_000 * 900_000
+    done = ema.loc[ema.index + 900_000 <= t + 300_000]  # buckets closed by this bar's close
+    assert line.loc[t] == pytest.approx(done.iloc[-1])
+    assert sv.confirmed_htf(b.iloc[:601], 5).loc[t] == pytest.approx(line.loc[t])
+    assert sv.confirmed_htf(b, 60) is None
