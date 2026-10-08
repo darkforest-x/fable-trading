@@ -212,13 +212,15 @@ def reconcile(events: pd.DataFrame, trades: pd.DataFrame, cfg: dict) -> dict:
     old = pd.read_csv(V2_RESULTS / "trades.csv.gz")
     old = old.loc[old.config.eq(key) & old.minutes.isin(sel["timeframes"])]
     out: dict = {"v2_events": len(ref)}
-    for ours, theirs, names in (("trail3_24h", "trend", ("eth", "btc", "alts")),
-                                ("hold_12h", "time_12h", ("eth", "btc")), ("hold_24h", "time_24h", ("eth", "btc"))):
+    # v2's fixed holds read v1.Panel's float32 price matrix; its trend exit and v5 read float64 bars.
+    for ours, theirs, names, tol in (("trail3_24h", "trend", ("eth", "btc", "alts"), 1e-9),
+                                     ("hold_12h", "time_12h", ("eth", "btc"), 1e-6),
+                                     ("hold_24h", "time_24h", ("eth", "btc"), 1e-6)):
         a = trades.loc[trades.exit.eq(ours) & trades.instrument.isin(names), ["minutes", "instrument", "time", "gross"]]
         b = old.loc[old.exit.eq(theirs) & old.instrument.isin(names), ["minutes", "instrument", "time", "gross"]]
         m = a.merge(b, on=["minutes", "instrument", "time"], suffixes=("", "_v2")).dropna()
         gap = float((m.gross - m.gross_v2).abs().max()) if len(m) else math.nan
-        if not gap < 1e-9:
+        if not gap < tol:
             raise ValueError(f"{ours} differs from v2 {theirs}: max |diff| {gap}")
         out[f"{ours}_vs_v2_{theirs}"] = {"rows": len(m), "max_abs_diff": gap}
     return out
