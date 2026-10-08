@@ -4,8 +4,12 @@
   const HOLDS = ["1h", "4h", "12h", "24h"];
   const INSTRUMENTS = {eth: "ETH", btc: "BTC", alts: "山寨篮子"};
   const NOTION_TRACKER = "https://app.notion.com/p/nick-wiki/3f28856479af8068b0cef31b5baec989";
+  // Joint volume-ratio tercile edges, frozen on events before 2025 (exp-market-sync-shock-20261008-v3 edges.csv).
+  // Only the 30m up-shock high tier was better in both periods; the rest is a label, not a signal.
+  const VOLUME_EDGES = {"30|1": [3.750, 5.399], "30|-1": [3.640, 5.592], "60|1": [3.274, 4.729], "60|-1": [3.543, 5.450]};
+  const TIER_NAMES = ["低档", "中档", "高档"];
   const state = {active: false, pending: false, live: null, history: {}, iterations: null, error: null,
-    tf: "60", kind: "sync", config: "z3.0_v3.0_b0.75", side: "1", hold: "12h", inst: "eth", limit: 30};
+    tf: "60", kind: "sync", config: "z3.0_v3.0_b0.75", side: "1", hold: "12h", inst: "eth", vol: "all", limit: 30};
   const root = () => document.getElementById("market-sync-workspace");
   const esc = (v) => String(v ?? "—").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const fin = (v) => typeof v === "number" && Number.isFinite(v);
@@ -43,11 +47,16 @@
     return {rows, h};
   }
 
+  function volumeTier(e) {
+    const edges = VOLUME_EDGES[`${e.minutes}|${e.side}`], v = Math.min(e.btc_vr, e.eth_vr);
+    return edges && fin(v) ? edges.filter(x => v >= x).length : null;
+  }
+
   function liveEvents() {
     const snap = state.live?.snapshot;
     if (!snap) return [];
     return snap.events.filter(e => String(e.minutes) === state.tf && e.kind === state.kind && e.config === state.config
-      && (state.side === "all" || String(e.side) === state.side));
+      && (state.side === "all" || String(e.side) === state.side) && (state.vol === "all" || volumeTier(e) === 2));
   }
 
   function overview() {
@@ -78,6 +87,7 @@
       ${segmented("side", [["1", "上涨做多"], ["-1", "下跌做空"], ["all", "全部"]], state.side)}
       ${segmented("hold", HOLDS.map(h => [h, h]), state.hold)}
       ${segmented("inst", Object.entries(INSTRUMENTS), state.inst)}
+      ${segmented("vol", [["all", "全部量比"], ["high", "只看高量比"]], state.vol)}
       <label class="ms-select">阈值<select id="ms-config" aria-label="触发阈值">${grid.map(k => `<option value="${esc(k)}" ${k === state.config ? "selected" : ""}>${esc(configLabel(k))}</option>`).join("")}</select></label>
     </div>`;
   }
@@ -112,12 +122,13 @@
     const missing = inOverlap.filter(r => !liveKeys.has(`${r[0]}|${r[1]}`)).length;
     const overlap = events.filter(e => !e.out_of_sample);
     const matched = overlap.filter(e => research.has(`${e.open_ms}|${e.side}`)).length;
-    const note = overlap.length || inOverlap.length
-      ? `<p class="quiet-text">8/1–9/22 与研究重叠：实时重算 ${overlap.length} 次，其中 ${matched} 次研究里也有；研究有而实时没有 ${missing} 次。山寨池按 K 线成交额排名、只含仍在交易的合约，个别边缘事件可能不同。</p>` : "";
+    const tierNote = `<p class="quiet-text">量比档 = BTC、ETH 量比的较小值，按 v3 在 2025 年前事件上冻结的三档划分（30m 上涨高档 ≥${VOLUME_EDGES["30|1"][1]}×，1H 上涨高档 ≥${VOLUME_EDGES["60|1"][1]}×）。v3 里只有 30m 上涨冲击的高量比档在 2025 前后都更好，属于事后发现，这里用来积累样本外记录。</p>`;
+    const note = tierNote + (overlap.length || inOverlap.length
+      ? `<p class="quiet-text">8/1–9/22 与研究重叠：实时重算 ${overlap.length} 次，其中 ${matched} 次研究里也有；研究有而实时没有 ${missing} 次。山寨池按 K 线成交额排名、只含仍在交易的合约，个别边缘事件可能不同。</p>` : "");
     if (!events.length) return `<div class="empty-state"><h3>暂无符合条件的事件</h3><p>从 2026-08-01 起记录；换个阈值或方向看看。</p></div>${note}`;
     return `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>量比</th><th>同向</th>${HOLDS.map(h => `<th class="${h === state.hold ? "ms-focus" : ""}">${h} · ${esc(INSTRUMENTS[state.inst])}</th>`).join("")}<th>来源</th></tr></thead><tbody>${events.map(e => {
       const source = e.out_of_sample ? `<strong class="ms-badge">样本外</strong>` : research.has(`${e.open_ms}|${e.side}`) ? "研究期 · 已对上" : "研究期 · 研究里没有";
-      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×</td><td>${share(e.breadth)}</td>${HOLDS.map(h => {
+      return `<tr><td>${esc(clock(e.open_ms))}</td><td>${esc(sideName(e.side))}</td><td>${num(e.btc_z)} / ${num(e.eth_z)}</td><td>${num(e.btc_vr, 1)}× / ${num(e.eth_vr, 1)}×${volumeTier(e) == null ? "" : volumeTier(e) === 2 ? `<small><span class="ms-badge">高档</span></small>` : `<small>${TIER_NAMES[volumeTier(e)]}</small>`}</td><td>${share(e.breadth)}</td>${HOLDS.map(h => {
         const o = e.outcomes?.[h] || {}, v = o[state.inst];
         return `<td class="${h === state.hold ? "ms-focus " : ""}${tone(v)}">${o.started ? bp(v) : "待入场"}${o.started && !o.done ? "<small>进行中</small>" : ""}</td>`;
       }).join("")}<td>${source}</td></tr>`;
@@ -142,6 +153,7 @@
       <div class="ms-years">${Object.entries(years).map(([y, xs]) => { const t = stats(xs); return `<span><b>${y}</b> ${t.n} 次 · <i class="${tone(t.mean)}">${bp(t.mean)}</i> · 胜率 ${(t.win * 100).toFixed(0)}%</span>`; }).join("")}</div>` : `<div class="empty-state"><h3>该组合没有研究事件</h3></div>`}
       ${list.length ? `<div class="v130-table-wrap"><table class="v130-table ms-table"><thead><tr><th>信号K线 · 北京</th><th>方向</th><th>BTC / ETH z</th><th>同向</th><th class="ms-focus">${esc(state.hold)} · ${esc(INSTRUMENTS[state.inst])}</th><th>对照</th></tr></thead><tbody>${list.map(r => `<tr><td>${esc(clock(r.time, true))}</td><td>${esc(sideName(r.side))}</td><td>${num(r.btc_z)} / ${num(r.eth_z)}</td><td>${share(r.breadth)}</td><td class="ms-focus ${tone(r.net)}">${bp(r.net)}</td><td class="${tone(r.ctrl)}">${bp(r.ctrl)}</td></tr>`).join("")}</tbody></table></div>
       ${rows.length > state.limit ? `<button type="button" class="load-more ms-more" id="ms-more">显示更多（共 ${rows.length} 次）</button>` : ""}` : ""}
+      ${state.vol === "high" ? `<p class="quiet-text">研究历史没有逐条量比，这里仍显示全部事件。30m 上涨冲击高量比档的研究结果：ETH 24h 扣费后 2025 前 +75bp、2025 后 +102bp（v3）。</p>` : ""}
       <p class="quiet-text">来源 ${esc(h.experiment_id)} @ ${esc(String(h.source_commit).slice(0, 10))}。对照为同月、同 BTC 波动档的 20 个随机入场，方向与持有相同。这些规律是看过数据后找到的，要靠样本外记录验证。</p>`;
   }
 
