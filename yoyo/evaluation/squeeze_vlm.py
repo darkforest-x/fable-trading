@@ -131,7 +131,7 @@ def render(bars: pd.DataFrame, i: int, symbol: str, minutes: int, window: int = 
     x = np.arange(len(w))
     o, h, l, cl, v = (w[k].to_numpy(float) for k in ("open", "high", "low", "close", "volume"))
     fig = plt.figure(figsize=(14.4, 8.0), dpi=100)
-    grid = fig.add_gridspec(4, 1, hspace=0.05)
+    grid = fig.add_gridspec(4, 1, hspace=0.05, left=0.05, right=0.985, top=0.94, bottom=0.05)
     ax, axv = fig.add_subplot(grid[:3, 0]), fig.add_subplot(grid[3, 0])
     col = np.where(cl >= o, UP, DOWN)
     ax.vlines(x, l, h, color=col, linewidth=0.8)
