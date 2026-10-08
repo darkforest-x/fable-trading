@@ -10,6 +10,7 @@ from openai import AsyncOpenAI
 from yoyo.copier.ai.prefilter import obviously_not_a_signal
 from yoyo.copier.ai.prompts import SYSTEM_PROMPT, build_user_message
 from yoyo.copier.ai.schema import IntentResult
+from yoyo.copier.ai.text import split_own_text
 from yoyo.copier.config import app_config, env
 
 
@@ -31,8 +32,12 @@ class DeepseekClient:
         image_text: str | None = None,
         context: str | None = None,
     ) -> IntentResult:
+        # Intent comes from the author's own words; translations are dropped and
+        # reply/forward previews only inform the context (yoyo/copier/ai/text.py).
+        content, quoted = split_own_text(content)
         content = _clean_signal_text(content)
-        context = _clean_signal_text(context or "")
+        context = _clean_signal_text("\n".join(
+            part for part in (f"被回复或转发的消息: {quoted}" if quoted else "", context or "") if part))
         target_action = self._chartprime_target_action(content)
         if target_action:
             return target_action
@@ -45,6 +50,9 @@ class DeepseekClient:
         trade_action = self._trade_action_update(content, context)
         if trade_action:
             return self._normalize_result(content, trade_action)
+        filled_with_levels = _filled_open_with_levels(content)
+        if filled_with_levels:
+            return self._normalize_result(content, filled_with_levels)
         manual_filled_open = _manual_filled_open(content)
         if manual_filled_open:
             return self._normalize_result(content, manual_filled_open)
@@ -131,13 +139,18 @@ class DeepseekClient:
             pct = float((tp or explicit_close_pct or closed_pct).group(1))
             intent = "close" if pct >= 99 else "partial_close"
             move_to_be = _requests_break_even(lower)
+            # Trade-tracker reports ("TP1 (25%) - 75% remaining", then "Closed in
+            # profits (75%)") count percent of the original size, not of what is left.
+            notes = ["pct_of_original"] if (tp or closed_pct) and intent == "partial_close" else []
+            if move_to_be:
+                notes.append("break_even")
             return IntentResult(
                 should_act=True,
                 intent=intent,
                 confidence=0.99,
                 symbol=symbol,
                 close_pct=pct,
-                entry_note="break_even" if move_to_be else None,
+                entry_note="; ".join(notes) or None,
                 summary=f"{symbol} {'全部平仓' if intent == 'close' else f'部分平仓 {pct:g}%'}",
             )
 
@@ -151,8 +164,25 @@ class DeepseekClient:
                 summary=f"{symbol} 全部平仓",
             )
 
-        moved = re.search(r"\bstops?\s+moved\s+to\s+([0-9]+(?:\.[0-9]+)?)\b", lower)
-        if moved:
+        if re.search(r"\blimit\s+order\s+(?:cancell?ed|removed)\b", lower):
+            return IntentResult(
+                should_act=True,
+                intent="cancel",
+                confidence=0.99,
+                symbol=symbol,
+                summary=f"{symbol} 限价单已撤销，撤掉对应挂单",
+            )
+        candle = re.search(
+            r"\bstops?\s+moved\s+to\s+(?:(\d{1,2})\s*([mhd])|([mhd])\s*(\d{1,2}))\s*(?:candle\s*)?(?:close\s*)?"
+            r"(<|>|below|above|under|over)\s*\$?([0-9]*\.?[0-9]+)", lower)
+        moved = re.search(r"\bstops?\s+moved\s+to\s+\$?([0-9]*\.?[0-9]+)(?![0-9a-z.])", lower)
+        if candle:
+            count = candle.group(1) or candle.group(4)
+            unit = (candle.group(2) or candle.group(3)).upper()
+            direction = "below" if candle.group(5) in {"<", "below", "under"} else "above"
+            stop_loss = float(candle.group(6))
+            entry_note = f"{count}{unit} candle close {direction} {stop_loss:g}"
+        elif moved:
             stop_loss = float(moved.group(1))
             entry_note = None
         elif _requests_break_even(lower):
@@ -562,6 +592,42 @@ def _manual_fill_without_levels(text: str) -> tuple[str, str] | None:
     return symbol, side
 
 
+def _filled_open_with_levels(text: str) -> IntentResult | None:
+    """"Longed MET at 0.455 sl; 0.4375 (0.5% risk)" / "Longed BTC 83400 sl 81792".
+
+    Past tense means the author is already in at that price, so the follow is a market
+    entry with the author's stop; the quoted price stays as the reference entry.
+    """
+    cleaned = " ".join(str(text or "").split())
+    match = re.search(
+        r"\b(longed|shorted)\s+#?([A-Z][A-Z0-9]{0,14})\s+(?:(?:at|@)\s+)?\$?(" + PRICE_RE + r")"
+        r"\s*[,;]?\s*(?:sl|stop(?:\s*loss)?)[a-z]?\s*[:;]?\s*\$?(" + PRICE_RE + r")",
+        cleaned,
+        re.I,
+    )
+    if not match:
+        return None
+    symbol = match.group(2).upper()
+    if symbol in {"LONG", "SHORT", "ENTRY", "EXIT", "TARGET", "TARGETS", "RISK", "AT"}:
+        return None
+    side = "long" if match.group(1).lower() == "longed" else "short"
+    entry, stop = _price(match.group(3)), _price(match.group(4))
+    if (side == "long" and stop >= entry) or (side == "short" and stop <= entry):
+        return None  # levels that contradict the side go to the model instead of guessing
+    return IntentResult(
+        should_act=True,
+        intent="open",
+        confidence=0.97,
+        symbol=symbol,
+        side=side,
+        entry_low=entry,
+        entry_high=entry,
+        entry_note="market; author_filled",
+        stop_loss=stop,
+        summary=f"{symbol} {'做多' if side == 'long' else '做空'}已在 {entry:g} 成交，止损 {stop:g}，市价跟进",
+    )
+
+
 def _manual_filled_open(text: str) -> IntentResult | None:
     match = re.search(
         r"\b(longed|shorted)\s+#?([A-Z][A-Z0-9]{1,14})\b"
@@ -678,7 +744,7 @@ def _woods_shorthand_open(text: str) -> IntentResult | None:
 
 def _clean_signal_text(text: str) -> str:
     cleaned = "".join(ch for ch in str(text or "") if unicodedata.category(ch) != "Cf")
-    return cleaned.replace("：", ":")
+    return cleaned.replace("：", ":").replace("＜", "<").replace("＞", ">")
 
 
 def _normalize_entry_scale(symbol: str, first_entry: float, second_entry: float, stop_loss: float) -> tuple[float, float, float]:
@@ -696,7 +762,8 @@ def _clean_price_float(value: float) -> float:
 
 
 def _leading_update_symbol(text: str) -> str | None:
-    match = re.search(r"(?:^|\s)([A-Z0-9]{1,15})\s*:", text, re.I)
+    # A ticker starts with a letter (single-letter S/H exist); "3:1" or "08:00" is not one.
+    match = re.search(r"(?:^|\s)((?:1000)?[A-Z][A-Z0-9]{0,14})\s*:", text, re.I)
     if not match:
         return None
     token = match.group(1).upper()

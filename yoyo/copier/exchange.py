@@ -8,6 +8,7 @@ from yoyo.copier.config import env
 from yoyo.copier.risk.engine import RiskEngine
 from yoyo.copier.runtime_config import get_okx
 from yoyo.copier.store.sqlite import Database
+from yoyo.copier.ai.text import own_text
 
 CHANNEL_EXCHANGE_MAP_KEY = "exchange_channel_map"
 CHANNEL_LEVERAGE_MAP_KEY = "channel_leverage_map"
@@ -45,7 +46,8 @@ class TradingExecutor(Protocol):
 
 def should_use_market_entry(result: Any, mark: float, source_text: str = "") -> bool:
     note = str(getattr(result, "entry_note", "") or "").lower()
-    text = f"{source_text or ''} {note}".lower()
+    # A translator's "限价/市价" in the stored text must not flip the order type.
+    text = f"{own_text(source_text or '')} {note}".lower()
     if "market" in text or "市价" in text or "现价" in text:
         return True
     if "limit" in text or "限价" in text:

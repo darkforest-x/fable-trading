@@ -93,6 +93,19 @@ class PaperClient:
         result = self.book.close(pos["id"], close_pct, quote[0], "manual_close" if close_pct >= 100 else "partial_close")
         return {"ok": True, "paper": True, "closed_size": result["closed_qty"], "px": quote[0], "pnl": result["pnl"]}
 
+    def close_original_pct(self, inst_id: str, original_pct: float) -> dict[str, Any]:
+        """Close ``original_pct`` of the size first opened (trade-tracker percentages)."""
+        pos = self._position(inst_id)
+        if not pos:
+            return {"ok": False, "skipped": True, "error": "模拟盘无对应持仓"}
+        qty, open_qty = float(pos["qty"]), float(pos["open_qty"])
+        want = qty * float(original_pct) / 100
+        pct = 100.0 if open_qty <= 0 or want >= open_qty * 0.999 else want / open_qty * 100
+        result = self.close_position(inst_id, pct)
+        result["original_pct"] = float(original_pct)
+        result["close_pct_of_open"] = pct
+        return result
+
     def cancel_open_orders(self, inst_id: str) -> dict[str, Any]:
         orders = self.book.pending_orders(self.account, inst_id)
         for order in orders:

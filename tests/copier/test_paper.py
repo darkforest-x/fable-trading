@@ -252,3 +252,31 @@ def test_legacy_margin_trades_keep_their_r_but_leave_the_average_one_r(db):
     assert with_legacy["legacy_trades"] == 1 and without["legacy_trades"] == 0
     oldest = min(closed, key=lambda p: p["id"])
     assert with_legacy["avg_risk_usdt"] == pytest.approx(abs(oldest["entry_px"] - oldest["initial_sl"]) * oldest["qty"])
+
+
+def test_tracker_percent_of_original_closes_the_rest_after_tp1(db):
+    market = FixedMarket({"BTC-USDT-SWAP": 100.0})
+    open_signal(db, market)  # 2 units
+    client = PaperClient(db, CH, market=market)
+    assert client.close_original_pct("BTC-USDT-SWAP", 25)["closed_size"] == pytest.approx(0.5)
+    rest = client.close_original_pct("BTC-USDT-SWAP", 75)  # 75% of the original = all that is left
+    assert rest["ok"] and rest["closed_size"] == pytest.approx(1.5)
+    assert client.get_positions() == []
+
+
+def test_close_without_position_cancels_the_stale_entry(db, monkeypatch):
+    from yoyo.copier.router.action_router import ActionRouter
+
+    async def silent(*args, **kwargs):
+        return {"ok": True}
+
+    for name in ("notify_trade_pipeline", "notify_signal_detected", "notify_trade_update"):
+        monkeypatch.setattr(f"yoyo.copier.router.action_router.{name}", silent)
+    market = FixedMarket({"BTC-USDT-SWAP": 103.0})
+    monkeypatch.setattr("yoyo.copier.paper.client._MARKET", market)
+    open_signal(db, market, entry_note="limit")  # mark above the range -> resting limit
+    assert PaperBook(db).pending_orders(CH, "BTC-USDT-SWAP")
+    text = "BTC: Closed BE (100%) • Total R/R: 0.00R"
+    msg = db.insert_message("paper-close", CH, "kol", text)
+    asyncio.run(ActionRouter(db).process_message(msg, text, "kol"))
+    assert PaperBook(db).pending_orders(CH, "BTC-USDT-SWAP") == []

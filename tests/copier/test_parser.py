@@ -534,3 +534,75 @@ def test_chartprime_target_hit_is_executable_and_tracks_level():
     assert result.intent == "partial_close"
     assert result.symbol == "LINK"
     assert result.entry_note == "target_level:2"
+
+
+# Real messages from 2026-10-07/08 that the parser got wrong (owner report 2026-10-08).
+
+def _analyze_offline(text, author=""):
+    async def run():
+        client = DeepseekClient()
+        client.client = None  # deterministic rules only; anything else falls to the mock
+        return await client.analyze(text, author)
+    return asyncio.run(run())
+
+
+def test_translation_suffix_does_not_turn_a_filled_long_into_a_stop_out():
+    text = ("@Tareeq粉 Longed met at 0.455 sl; 0.4375 (0.5% risk, bybit) "
+            "------------------------------- 做多在 0.455 已达止损 (0.5% 风险，Bybit)")
+    result = _analyze_offline(text, "Tareeq")
+    assert (result.intent, result.should_act, result.symbol, result.side) == ("open", True, "MET", "long")
+    assert result.entry_low == 0.455 and result.stop_loss == 0.4375
+    assert "market" in result.entry_note  # the author is already in; a limit at 0.455 may never fill
+
+
+def test_longed_price_then_stop_keeps_entry_and_stop_apart():
+    btc = _analyze_offline("@John粉 Longed BTC 83400 sl 81792 ------------------------------- 做多 BTC 83400 止损 81792")
+    pump = _analyze_offline("@John粉 longed pump .00618 SL $.00592 ------------------------------- 做多后拉升，止盈0.00618，止损0.00592")
+    assert (btc.symbol, btc.entry_low, btc.stop_loss) == ("BTC", 83400, 81792)
+    assert (pump.symbol, pump.entry_low, pump.stop_loss) == ("PUMP", 0.00618, 0.00592)
+
+
+def test_quoted_reply_preview_is_context_not_an_instruction():
+    text = ("BTC is experiencing low buying volumes as we reported yesterday. We will open another short on the "
+            "retest of 84.5k ------------------------------- 正如我们昨日所述\n"
+            "@WG Bot 1970-01-01 08:00BTC: Closed in profits (100%) • Total R/R: 2.51R @Michele")
+    result = _analyze_offline(text, "MicheleTrading")
+    assert not (result.intent == "close" and result.should_act)
+
+
+def test_ratio_talk_is_not_a_ticker_update():
+    text = ("its around a 3:1 not and the 4:1 is at 85.8k where I would have closed half if I hadernt closed it now "
+            "------------------------------- 其比例约为 3:1")
+    result = _analyze_offline(text)
+    assert result.symbol != "3" and not (result.intent == "close" and result.should_act)
+
+
+def test_conditional_stop_move_keeps_symbol_and_level():
+    text = "@Tareeq粉 NEAR: Stops moved to 4H＜4.2 ------------------------------- NEAR： 止损位调整至 4 小时级别＜4.2"
+    result = _analyze_offline(text, "Tareeq")
+    assert (result.intent, result.symbol, result.stop_loss) == ("update_sl", "NEAR", 4.2)
+    assert "4H candle close below 4.2" in result.entry_note
+
+
+def test_limit_order_cancelled_always_cancels():
+    for symbol in ("HYPE", "BTC", "ZEC"):
+        result = _analyze_offline(f"@Woods粉 {symbol}: Limit order cancelled ------------------------------- {symbol}: 限价订单已取消")
+        assert (result.intent, result.should_act, result.symbol) == ("cancel", True, symbol)
+
+
+def test_tracker_close_percentages_refer_to_the_original_size():
+    client = DeepseekClient()
+    tp = client._trade_action_update("RAY: TP1 (25%) - 75% remaining")
+    rest = client._trade_action_update("RAY: Closed in profits (75%) • Total R/R: 2.20R")
+    assert tp.close_pct == 25 and "pct_of_original" in tp.entry_note
+    assert rest.close_pct == 75 and "pct_of_original" in rest.entry_note
+
+
+def test_split_own_text_handles_rule_on_its_own_line_and_previews():
+    from yoyo.copier.ai.text import split_own_text
+
+    own, quoted = split_own_text("@Eliz粉\n\nLimit doge 0.0879 0.085 stop 0.0819\n-------------------------------\n\n限价多吉币 0.0879")
+    assert own == "@Eliz粉\nLimit doge 0.0879 0.085 stop 0.0819" and quoted == ""
+    own, quoted = split_own_text("Took the eth short ------------------------------- 转而做空了 ETH\n"
+                                 "@Looch 1970-01-01 08:00@ mate did you take that BTC short?")
+    assert own == "Took the eth short" and quoted.startswith("@Looch 1970-01-01 08:00")

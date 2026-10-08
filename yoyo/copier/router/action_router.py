@@ -19,6 +19,7 @@ from yoyo.copier.notifications.telegram import (
 )
 from yoyo.copier.risk.engine import RiskEngine
 from yoyo.copier.store.sqlite import Database
+from yoyo.copier.ai.text import own_text
 
 logger = logging.getLogger(__name__)
 BLOCKED_TRADE_CHANNELS_KEY = "blocked_trade_channels"
@@ -230,9 +231,9 @@ class ActionRouter:
             return ""
         rows, _ = self.db.list_messages(page=1, per_page=8, channel_id=channel_id)
         context = [
-            str(row.get("content") or "").strip()
+            own_text(str(row.get("content") or "")).strip()
             for row in rows
-            if int(row.get("id") or 0) != message_id and str(row.get("content") or "").strip()
+            if int(row.get("id") or 0) != message_id and own_text(str(row.get("content") or "")).strip()
         ]
         return "\n---\n".join(reversed(context[:6]))
 
@@ -305,8 +306,18 @@ class ActionRouter:
                             )
                             result.close_pct = pct
                             execution = client.close_position(inst_id, pct)
+                    elif _pct_of_original(result) and hasattr(client, "close_original_pct"):
+                        execution = client.close_original_pct(inst_id, pct)
                     else:
                         execution = client.close_position(inst_id, pct)
+                    if (result.intent == "close" and execution.get("skipped")
+                            and hasattr(client, "cancel_open_orders")):
+                        # The author's trade is over; an entry still waiting for it is stale.
+                        canceled = client.cancel_open_orders(inst_id)
+                        if canceled.get("ok"):
+                            execution = {"ok": True, "paper": canceled.get("paper", False),
+                                         "canceled_count": canceled.get("canceled", canceled.get("canceled_count")),
+                                         "detail": "无持仓，已撤销该品种未成交的开仓挂单"}
                     stop_loss = result.stop_loss
                     if execution.get("ok") and _is_break_even(result):
                         stop_loss = _position_average(client, inst_id)
@@ -547,7 +558,7 @@ def _channel_trade_blocked(db: Database, channel_id: str) -> bool:
 
 
 def _execution_detail(result: IntentResult, execution: dict) -> str:
-    if execution.get("tracked_only"):
+    if execution.get("tracked_only") or (execution.get("detail") and execution.get("canceled_count") is not None):
         return str(execution.get("detail") or "交易更新已记录，未重复调用交易所下单")
     if result.intent == "cancel":
         return f"已撤销挂单 {execution.get('canceled_count', '-') } 笔"
@@ -560,6 +571,10 @@ def _execution_detail(result: IntentResult, execution: dict) -> str:
     if execution.get("stop_update"):
         detail += f"，剩余仓位止损更新至 {result.stop_loss:g}"
     return detail
+
+
+def _pct_of_original(result: IntentResult) -> bool:
+    return "pct_of_original" in str(result.entry_note or "").lower()
 
 
 def _is_break_even(result: IntentResult) -> bool:
