@@ -10984,3 +10984,16 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner pushback 2026-10-08 (不可能 肯定是哪里逻辑不对 再试试). v1 audit before v2 - 8.19 1H features and returns plus 40 random trades recomputed from raw 5m data match exactly. 24h cooldown per timeframe/config keeps events independent. Committed summary.csv, selected.csv, receipt.json; events.csv and trades.csv.gz stay local. No report requested.
+
+  - experiment_id: exp-market-sync-shock-20261008-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: '3748657858'
+    status: inconclusive
+    result: Pre-registered read fails - for 1H up shocks (v2 loosest set z2/v2/b0.6, 132 events before 2025 and 108 after), no strength feature orders ETH 12h excess in both periods (high minus low tercile, select then check - joint z -32 then +47bp, joint volume ratio -10 then +56bp, alt breadth -24 then -73bp, permutation p 0.31-0.79). Stronger shocks do not continue more on 1H, so v2's strict-cell advantage (z3/v3/b0.75 +53.8bp) is not explained by any one threshold; the loose 1H up set itself is weak (ETH 12h net +23bp before 2025, +6bp after). Across 144 contrasts 78 keep their sign, about chance. One post-hoc family is consistent - 30m up shocks ordered by joint volume ratio rise monotonically in both periods (ETH 24h low/mid/high excess -44/+31/+78bp before 2025 and -59/-14/+97bp after, high tercile >=5.4x net +75 and +102bp, contrast p 0.045 and 0.024; same sign for ETH 12h, alts 24h and BTC). Down shocks give no stable ordering and 1H shorts flipped sign between periods (ETH 12h -31bp then +51bp).
+    question: Within one fixed event set, do stronger sync shocks (larger joint z, larger joint volume ratio, wider alt breadth) continue more over the next 4-24h than weaker ones, in both periods?
+    single_variable: Conditioning only - v2's own events, outcomes and paired controls for its loosest config on 30m/1H, split into terciles of one feature at a time with edges frozen on events before 2025-01-01; data, features, universe, cost, controls and split unchanged.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-08 继续做 v3 分层吧 (Notion #14 sub-task). Volume ratio recomputed with v1.causal_features; recomputed z matched v2 events.csv exactly. Reads v2 local events.csv/trades.csv.gz by sha256 (receipt). The 30m volume pattern was not the primary read and needs forward events before any use. No report requested.
