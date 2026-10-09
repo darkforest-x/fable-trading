@@ -11070,3 +11070,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-09 你用 ethusdt.p 近两年的数据回测一下 找到最优参数. The best-parameter rule was committed in analyze.py before the run. Series data/research/htf_ma_reversion_okx_eth_5m_20261009/ETHUSDT.csv.gz sha256 20de43b2ebcfa07b08828e47dc7512e0b70bffb06f09d1663109b1d820741fcb (receipt.json beside it). Trades opened in the last 48h of the series are dropped as unfinished. trades.csv.gz local only, sha256 cd7ad912767e140a767ccc628b0a13caa7213905e93c866d967445200ad10b5f. No report requested.
+  - experiment_id: exp-htf-ma-reversion-20261009-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5d09fd956b
+    status: rejected
+    result: Waiting for a turn does not rescue the HTF-line reversion. 13 Binance symbols (480 cells) - no cell is net positive in both periods; all 16 pre-registered selections lose after 2025 (-0.07 to -0.68% per trade, excess -0.17 to +0.07R, best p 0.043 is a loss). Longs beat matched random entries before 2025 (mean excess +0.10R) but not after (-0.03R), the v1 pattern again; shorts trail random in both. OKX ETHUSDT.P two years (480 cells) - the first year's best by total net (15m short, 4x 1h ATR above the line, reclaim confirmation, swing stop, 5R, one entry) is +36.6% over 79 trades then -6.3% over 79 (excess +0.005R, p 0.99); all of the first year's top 10 lose in the second year; 1 of 480 cells is positive in both years. The owner-style cells (5m long, 5% from the line, 5R, either confirmation, one entry or re-entry) lose in both years (-18 to -55% summed). On the owner's 2026-10-08/09 sample night the prev_bar re-entry version stops twice and then makes the 5R target from 2421 (01:35 UTC+8), +1.5% net over 3 trades.
+    question: If the HTF-line reversion trade waits for a confirming close after the far touch and puts the stop just beyond the excursion's extreme, does it earn more than matched random entries after 0.2% cost, in both periods?
+    single_variable: Entry and stop only - confirmation (close back beyond the trigger, or beyond the previous bar's high/low) with the next-open entry and the stop 0.1% beyond the excursion's extreme, instead of v1-v3's touch fill and fixed stops; line, distances (5 percent, 3 ATR, 2 percentile levels), excursion, 2/3/5R, re-entry arm 0/3, controls, cost and splits as v1 (market) and v3 (ETH); Vix Fix dropped.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-09 开始 after the recommendation to stop buying the touch. Two configs (config_market.json, config_eth.json), one builder; analyze.py reuses v3's best-parameter rule unchanged. One ETH trade (2025-10-11 20:30 UTC) re-derived by hand (touch, confirmation, extreme, fill, stop) matched. Market run receipt HEAD e8fd51ab16 adds only the chart script on top of the builder commit. trades.csv.gz local only - results_market sha256 836f5d937b1103e06fd81737a120667a1c1dc974b793321839950382a26db42c, results_eth sha256 132c60d4a616fd66b260270c96e5ea3ec83b14beaa09767d931eb0e39a1f720d. No report requested.
