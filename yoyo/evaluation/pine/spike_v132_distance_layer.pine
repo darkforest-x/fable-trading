@@ -6,6 +6,9 @@
 // alert can fire before the bar closes. An excursion ends at a later bar's close back within the
 // chosen share of the threshold; its ray then stops at that bar and fades, and the last N per side
 // are kept. Display and alerts only: no V13.1 signal, filter, entry or risk path reads this layer.
+// No plot()/plotshape(): V13.1 already sits near Pine's 64-plot limit (the first V13.2 save added
+// a plot and two plotshapes with input colours and failed at runtime with RE10140, 74 plots), so the
+// start marks are labels kept and deleted together with their rays.
 // Fading this distance was backtested and rejected (exp-htf-ma-reversion-20261009-v1..v4); the
 // mark is an observation aid, not a validated entry.
 string gV132 = "V13.2 · 离线提示"
@@ -29,30 +32,37 @@ var float v132DnDev = na
 var int v132DnStartTime = na
 var line v132DnRay = na
 var label v132DnTag = na
+var label v132DnMark = na
 var array<line> v132DnHistory = array.new<line>()
+var array<label> v132DnMarks = array.new<label>()
 var bool v132UpActive = false
 var float v132UpExt = na
 var float v132UpDev = na
 var int v132UpStartTime = na
 var line v132UpRay = na
 var label v132UpTag = na
+var label v132UpMark = na
 var array<line> v132UpHistory = array.new<line>()
+var array<label> v132UpMarks = array.new<label>()
 bool v132DnStart = false
 bool v132UpStart = false
 
 f_v132TagText(string word, float price, float dev) =>
     word + " " + str.tostring(price, format.mintick) + " · 离线 " + str.tostring(dev * 100, "#.##") + "%"
 
-// Stop the live ray at this bar, fade it, drop its price tag and keep at most v132Keep per side.
-f_v132Retire(line ray, label tag, array<line> history, color tone) =>
+// Stop the live ray at this bar, fade it, drop its price tag and keep at most v132Keep rays and
+// start marks per side.
+f_v132Retire(line ray, label tag, label mark, array<line> history, array<label> marks, color tone) =>
     line.set_extend(ray, extend.none)
     line.set_x2(ray, time)
     line.set_color(ray, color.new(tone, 55))
     line.set_width(ray, 1)
     label.delete(tag)
     array.push(history, ray)
+    array.push(marks, mark)
     while array.size(history) > v132Keep
         line.delete(array.shift(history))
+        label.delete(array.shift(marks))
     true
 
 if v132Known and v132Sides != "仅线上方"
@@ -65,6 +75,7 @@ if v132Known and v132Sides != "仅线上方"
             v132DnDev := low / v132Line - 1
             v132DnRay := line.new(time, low, time + v132BarMs, low, xloc=xloc.bar_time, extend=extend.right, color=v132DnColor, width=2, force_overlay=true)
             v132DnTag := label.new(time + 3 * v132BarMs, low, f_v132TagText("最低", low, v132DnDev), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(v132DnColor, 15), textcolor=color.white, size=size.small, force_overlay=true)
+            v132DnMark := label.new(time, low, "离线", xloc=xloc.bar_time, yloc=yloc.belowbar, style=label.style_triangleup, color=v132DnColor, textcolor=v132DnColor, size=size.tiny, force_overlay=true)
     else
         if low < v132DnExt
             v132DnExt := low
@@ -74,7 +85,7 @@ if v132Known and v132Sides != "仅线上方"
         label.set_xy(v132DnTag, time + 3 * v132BarMs, v132DnExt)
         label.set_text(v132DnTag, f_v132TagText("最低", v132DnExt, v132DnDev))
         if barstate.isconfirmed and time > v132DnStartTime and close >= v132Line * (1 - v132EndDist)
-            f_v132Retire(v132DnRay, v132DnTag, v132DnHistory, v132DnColor)
+            f_v132Retire(v132DnRay, v132DnTag, v132DnMark, v132DnHistory, v132DnMarks, v132DnColor)
             v132DnActive := false
 
 if v132Known and v132Sides != "仅线下方"
@@ -87,6 +98,7 @@ if v132Known and v132Sides != "仅线下方"
             v132UpDev := high / v132Line - 1
             v132UpRay := line.new(time, high, time + v132BarMs, high, xloc=xloc.bar_time, extend=extend.right, color=v132UpColor, width=2, force_overlay=true)
             v132UpTag := label.new(time + 3 * v132BarMs, high, f_v132TagText("最高", high, v132UpDev), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(v132UpColor, 15), textcolor=color.white, size=size.small, force_overlay=true)
+            v132UpMark := label.new(time, high, "离线", xloc=xloc.bar_time, yloc=yloc.abovebar, style=label.style_triangledown, color=v132UpColor, textcolor=v132UpColor, size=size.tiny, force_overlay=true)
     else
         if high > v132UpExt
             v132UpExt := high
@@ -96,12 +108,8 @@ if v132Known and v132Sides != "仅线下方"
         label.set_xy(v132UpTag, time + 3 * v132BarMs, v132UpExt)
         label.set_text(v132UpTag, f_v132TagText("最高", v132UpExt, v132UpDev))
         if barstate.isconfirmed and time > v132UpStartTime and close <= v132Line * (1 + v132EndDist)
-            f_v132Retire(v132UpRay, v132UpTag, v132UpHistory, v132UpColor)
+            f_v132Retire(v132UpRay, v132UpTag, v132UpMark, v132UpHistory, v132UpMarks, v132UpColor)
             v132UpActive := false
-
-plotshape(v132DnStart, "V13.2 线下方离线", style=shape.triangleup, location=location.belowbar, color=v132DnColor, size=size.tiny, text="离线", textcolor=v132DnColor, force_overlay=true, display=display.pane)
-plotshape(v132UpStart, "V13.2 线上方离线", style=shape.triangledown, location=location.abovebar, color=v132UpColor, size=size.tiny, text="离线", textcolor=v132UpColor, force_overlay=true, display=display.pane)
-plot(v132Known ? 100 * (close / v132Line - 1) : na, "V13.2 收盘离线 %", display=display.data_window)
 
 if v132DnStart
     alert("SPIKE V13.2 线下方离线 ≥" + str.tostring(v132Pct) + "% | " + syminfo.tickerid + " | " + timeframe.period + " | 线 " + str.tostring(v132Line, format.mintick) + " | 最低 " + str.tostring(v132DnExt, format.mintick), alert.freq_once_per_bar)
