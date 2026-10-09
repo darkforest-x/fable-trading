@@ -57,3 +57,24 @@ def test_no_confirmation_after_the_excursion_ends():
     bars = toy()
     conf = np.array([1, 5, 9])
     assert v4.chain_confirmed([(1, 4)], conf, 1, bars, 1, 0.001, 2.0, 2, 0.0, 3) == []
+
+
+def test_daily_trend_reads_the_previous_completed_day():
+    import pandas as pd
+    closes = [10.0, 12.0, 8.0, 9.0]  # SMA2: nan, 11, 10, 8.5 -> states 0, +1, -1, +1
+    ts = np.arange(4 * 288) * 300_000
+    px = np.repeat(closes, 288)
+    raw = pd.DataFrame({"ts": ts, "open": px, "high": px, "low": px, "close": px, "volume": 1.0})
+    probe = np.array([0, 288, 2 * 288, 3 * 288 + 5]) * 300_000  # first bar of days 0..3 (+ a later bar)
+    assert v4.daily_trend(raw, probe, 2).tolist() == [0, 0, 1, -1]
+
+
+def test_v5_configs_add_only_the_trend_block():
+    v5 = v4.EXP.parent / "exp-htf-ma-reversion-20261010-v5"
+    for name in ("config_market.json", "config_eth.json"):
+        a = json.loads((v4.EXP / name).read_text())
+        b = json.loads((v5 / name).read_text())
+        changed = {k for k in a.keys() | b.keys() if a.get(k) != b.get(k)}
+        assert changed <= {"experiment_id", "owner_request", "question", "prior_evidence", "trend", "single_variable",
+                           "primary_read", "selection"}
+        assert b["trend"]["sma_days"] == 50 and b["trend"]["arms"] == ["with", "against"]

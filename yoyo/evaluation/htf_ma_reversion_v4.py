@@ -26,6 +26,12 @@ Controls (20 random open entries, same symbol, chart and month, HTF ATR / price 
 side, stop fraction, target and cost), the 0.2% round trip, the split and the summaries are v1's
 (htf_ma_reversion_v1). A confirmation reads the touching and confirming chart bars and earlier path
 bars only; the entry is the next bar's open. The Vix Fix gate is dropped (no effect in v1-v3).
+
+v5 (owner 2026-10-10 嗯 to "A: 大级别趋势过滤") reuses this builder with a config 'trend' block: the
+state is the last completed UTC daily close against its SMA (daily_trend, +1 above / -1 below); arm
+'with' keeps confirmations whose entry bar has state == side (longs in uptrends, shorts in
+downtrends), arm 'against' the opposite; controls are drawn only from bars with the trade's state.
+Without the block the scan is v4's, trade for trade.
 """
 from __future__ import annotations
 
@@ -95,6 +101,28 @@ def chain_confirmed(exc: list[tuple[int, int]], conf_idx: np.ndarray, side: int,
     return out
 
 
+def daily_trend(raw: pd.DataFrame, path_index: np.ndarray, sma_days: int) -> np.ndarray:
+    """+1 / -1 / 0 per path bar: the last completed UTC day's close against the SMA of daily closes.
+
+    Inputs: complete UTC daily buckets of the 5m series (all 288 bars present); a path bar on day D reads
+    day D-1 only, so the state is known at its open. Missing days or an unready SMA give 0.
+    """
+    day_ms = 86_400_000
+    daily = v2.resample_hl(raw, 1440)
+    if daily.empty:
+        return np.zeros(len(path_index), int)
+    grid = np.arange(daily.index.min(), daily.index.max() + day_ms, day_ms)
+    close = daily.close.reindex(grid)
+    sma = close.rolling(sma_days, min_periods=sma_days).mean()
+    state = np.sign((close - sma).to_numpy())
+    state = np.where(np.isfinite(state), state, 0).astype(int)
+    k = (path_index // day_ms * day_ms - day_ms - grid[0]) // day_ms
+    out = np.zeros(len(path_index), int)
+    ok = (k >= 0) & (k < len(grid))
+    out[ok] = state[k[ok]]
+    return out
+
+
 def scan_symbol(args: tuple) -> pd.DataFrame:
     """Confirmed-entry trades with matched controls for one symbol on both charts and the grid."""
     symbol, cfg = args
@@ -120,6 +148,12 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
         tradable = pidx >= start_ms
         pool_ok = tradable & np.isfinite(line_p) & np.isfinite(atr_pct) & np.isfinite(o)
         pools = {mo: np.flatnonzero(pool_ok & (month == mo)) for mo in np.unique(month[pool_ok])}
+        trend = cfg.get("trend")
+        arms = trend["arms"] if trend else [None]
+        if trend:
+            tstate = daily_trend(raw, pidx, trend["sma_days"])
+            pools_by_state = {s_: {mo: np.flatnonzero(pool_ok & (month == mo) & (tstate == s_))
+                                   for mo in np.unique(month[pool_ok])} for s_ in (1, -1)}
         window = int(cfg["distance"]["pctl"]["window_days"] * 1440 // minutes)
         levels = {"pct": cfg["distance"]["pct"]["levels"], "atr": cfg["distance"]["atr"]["levels"][chart_key],
                   "pctl": cfg["distance"]["pctl"]["levels"]}
@@ -137,24 +171,36 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
                     if not exc:
                         continue
                     for kind in cfg["confirm"]:
-                        conf_idx = np.flatnonzero(confirmations(kind, side, cc, ch, cl, tg))
-                        for target_r in cfg["targets_r"]:
-                            for max_re in cfg["reentry"]:
-                                got = chain_confirmed(exc, conf_idx, side, bars, per, buffer, target_r, cap, cost, max_re)
-                                if not got:
-                                    continue
-                                p0s, es, fills, att, ext = (np.array([g[i] for g in got]) for i in range(5))
-                                sim = {k: np.array([g[5][k] for g in got]) for k in got[0][5]}
-                                key = f"{symbol}|{minutes}|{measure}|{level}|{side}|{kind}|{target_r}|re{max_re}"
-                                rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
-                                ctrl = hr.draw_controls(es, pools, month, atr_pct, rng, n_ctrl)
-                                c_net, c_ok = hr.control_outcome(bars, ctrl, sim["risk_frac"], side, target_r, cap, cost)
-                                cell = {"symbol": symbol, "minutes": minutes, "side": side, "vix": False,
-                                        "measure": measure, "level": level, "stop": f"swing{100 * buffer:g}",
-                                        "target_r": target_r}
-                                frames.append(hr.trade_frame(cell, pidx, month, line_p, atr_pct, p0s, es, fills, sim,
-                                                             c_net, c_ok, {"conf": kind, "reentry": max_re,
-                                                                           "attempt": att, "extreme": ext}))
+                        conf_all = np.flatnonzero(confirmations(kind, side, cc, ch, cl, tg))
+                        for arm in arms:
+                            if arm is None:
+                                conf_idx, arm_pools = conf_all, pools
+                            else:
+                                need = side if arm == "with" else -side
+                                conf_idx = conf_all[tstate[np.minimum((conf_all + 1) * per, len(o) - 1)] == need]
+                                arm_pools = pools_by_state[need]
+                            for target_r in cfg["targets_r"]:
+                                for max_re in cfg["reentry"]:
+                                    got = chain_confirmed(exc, conf_idx, side, bars, per, buffer, target_r, cap, cost,
+                                                          max_re)
+                                    if not got:
+                                        continue
+                                    p0s, es, fills, att, ext = (np.array([g[i] for g in got]) for i in range(5))
+                                    sim = {k: np.array([g[5][k] for g in got]) for k in got[0][5]}
+                                    key = f"{symbol}|{minutes}|{measure}|{level}|{side}|{kind}|{target_r}|re{max_re}"
+                                    key += f"|{arm}" if arm else ""
+                                    rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
+                                    ctrl = hr.draw_controls(es, arm_pools, month, atr_pct, rng, n_ctrl)
+                                    c_net, c_ok = hr.control_outcome(bars, ctrl, sim["risk_frac"], side, target_r, cap,
+                                                                     cost)
+                                    cell = {"symbol": symbol, "minutes": minutes, "side": side, "vix": False,
+                                            "measure": measure, "level": level, "stop": f"swing{100 * buffer:g}",
+                                            "target_r": target_r}
+                                    extra = {"conf": kind, "reentry": max_re, "attempt": att, "extreme": ext}
+                                    if arm:
+                                        extra["trend"] = arm
+                                    frames.append(hr.trade_frame(cell, pidx, month, line_p, atr_pct, p0s, es, fills,
+                                                                 sim, c_net, c_ok, extra))
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
