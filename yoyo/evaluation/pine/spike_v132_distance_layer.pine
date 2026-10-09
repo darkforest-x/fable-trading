@@ -1,0 +1,113 @@
+// BEGIN V132 DISTANCE LAYER
+// V13.2 (owner 2026-10-09, Notion #44): mark when price runs more than the threshold away from the
+// V13.1 higher-timeframe line (5m: completed 15m EMA120, 15m: completed 1h SMA60), raise an alert,
+// and hold a horizontal ray at the excursion's extreme (below the line: lowest low, above: highest
+// high) that moves to every new extreme. The touch uses the live bar's low/high, so the mark and the
+// alert can fire before the bar closes. An excursion ends at a later bar's close back within the
+// chosen share of the threshold; its ray then stops at that bar and fades, and the last N per side
+// are kept. Display and alerts only: no V13.1 signal, filter, entry or risk path reads this layer.
+// Fading this distance was backtested and rejected (exp-htf-ma-reversion-20261009-v1..v4); the
+// mark is an observation aid, not a validated entry.
+string gV132 = "V13.2 · 离线提示"
+bool v132Enabled = input.bool(true, "离线提示与极值射线", group=gV132, tooltip="5分钟看已完成15分钟EMA120，15分钟看已完成1小时SMA60；其他周期不生效。只做提示和画线，不改任何信号、过滤、入场或止损。", display=display.none)
+float v132Pct = input.float(5.0, "离线阈值 %", minval=0.5, maxval=50.0, step=0.5, group=gV132, display=display.none)
+string v132Sides = input.string("线下方+线上方", "方向", options=["线下方+线上方", "仅线下方", "仅线上方"], group=gV132, tooltip="线下方：在最低点画射线，出现新低就移到新低。线上方：在最高点画射线，出现新高就移到新高。", display=display.none)
+float v132EndShare = input.float(50.0, "结束：收盘回到阈值的 %", minval=0.0, maxval=100.0, step=5.0, group=gV132, tooltip="阈值5%、这里50%：之后某根K线收盘回到离线2.5%以内，本次离线结束，射线停在那根K线并变淡。0 = 收盘回到线上才结束。", display=display.none)
+int v132Keep = input.int(20, "每个方向保留的历史射线", minval=0, maxval=40, group=gV132, display=display.none)
+color v132DnColor = input.color(#F23645, "线下方（最低点）颜色", group=gV132, display=display.none)
+color v132UpColor = input.color(#089981, "线上方（最高点）颜色", group=gV132, display=display.none)
+
+float v132Line = timeframe.isminutes and timeframe.multiplier == 5 ? m15Ema120 : timeframe.isminutes and timeframe.multiplier == 15 ? h1Sma60 : na
+bool v132Known = v132Enabled and not na(v132Line) and v132Line > 0
+float v132Thr = v132Pct / 100.0
+float v132EndDist = v132Thr * v132EndShare / 100.0
+int v132BarMs = timeframe.in_seconds() * 1000
+
+var bool v132DnActive = false
+var float v132DnExt = na
+var float v132DnDev = na
+var int v132DnStartTime = na
+var line v132DnRay = na
+var label v132DnTag = na
+var array<line> v132DnHistory = array.new<line>()
+var bool v132UpActive = false
+var float v132UpExt = na
+var float v132UpDev = na
+var int v132UpStartTime = na
+var line v132UpRay = na
+var label v132UpTag = na
+var array<line> v132UpHistory = array.new<line>()
+bool v132DnStart = false
+bool v132UpStart = false
+
+f_v132TagText(string word, float price, float dev) =>
+    word + " " + str.tostring(price, format.mintick) + " · 离线 " + str.tostring(dev * 100, "#.##") + "%"
+
+// Stop the live ray at this bar, fade it, drop its price tag and keep at most v132Keep per side.
+f_v132Retire(line ray, label tag, array<line> history, color tone) =>
+    line.set_extend(ray, extend.none)
+    line.set_x2(ray, time)
+    line.set_color(ray, color.new(tone, 55))
+    line.set_width(ray, 1)
+    label.delete(tag)
+    array.push(history, ray)
+    while array.size(history) > v132Keep
+        line.delete(array.shift(history))
+    true
+
+if v132Known and v132Sides != "仅线上方"
+    if not v132DnActive
+        if low <= v132Line * (1 - v132Thr)
+            v132DnActive := true
+            v132DnStart := true
+            v132DnStartTime := time
+            v132DnExt := low
+            v132DnDev := low / v132Line - 1
+            v132DnRay := line.new(time, low, time + v132BarMs, low, xloc=xloc.bar_time, extend=extend.right, color=v132DnColor, width=2, force_overlay=true)
+            v132DnTag := label.new(time + 3 * v132BarMs, low, f_v132TagText("最低", low, v132DnDev), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(v132DnColor, 15), textcolor=color.white, size=size.small, force_overlay=true)
+    else
+        if low < v132DnExt
+            v132DnExt := low
+            v132DnDev := low / v132Line - 1
+            line.set_xy1(v132DnRay, time, low)
+            line.set_xy2(v132DnRay, time + v132BarMs, low)
+        label.set_xy(v132DnTag, time + 3 * v132BarMs, v132DnExt)
+        label.set_text(v132DnTag, f_v132TagText("最低", v132DnExt, v132DnDev))
+        if barstate.isconfirmed and time > v132DnStartTime and close >= v132Line * (1 - v132EndDist)
+            f_v132Retire(v132DnRay, v132DnTag, v132DnHistory, v132DnColor)
+            v132DnActive := false
+
+if v132Known and v132Sides != "仅线下方"
+    if not v132UpActive
+        if high >= v132Line * (1 + v132Thr)
+            v132UpActive := true
+            v132UpStart := true
+            v132UpStartTime := time
+            v132UpExt := high
+            v132UpDev := high / v132Line - 1
+            v132UpRay := line.new(time, high, time + v132BarMs, high, xloc=xloc.bar_time, extend=extend.right, color=v132UpColor, width=2, force_overlay=true)
+            v132UpTag := label.new(time + 3 * v132BarMs, high, f_v132TagText("最高", high, v132UpDev), xloc=xloc.bar_time, style=label.style_label_left, color=color.new(v132UpColor, 15), textcolor=color.white, size=size.small, force_overlay=true)
+    else
+        if high > v132UpExt
+            v132UpExt := high
+            v132UpDev := high / v132Line - 1
+            line.set_xy1(v132UpRay, time, high)
+            line.set_xy2(v132UpRay, time + v132BarMs, high)
+        label.set_xy(v132UpTag, time + 3 * v132BarMs, v132UpExt)
+        label.set_text(v132UpTag, f_v132TagText("最高", v132UpExt, v132UpDev))
+        if barstate.isconfirmed and time > v132UpStartTime and close <= v132Line * (1 + v132EndDist)
+            f_v132Retire(v132UpRay, v132UpTag, v132UpHistory, v132UpColor)
+            v132UpActive := false
+
+plotshape(v132DnStart, "V13.2 线下方离线", style=shape.triangleup, location=location.belowbar, color=v132DnColor, size=size.tiny, text="离线", textcolor=v132DnColor, force_overlay=true, display=display.pane)
+plotshape(v132UpStart, "V13.2 线上方离线", style=shape.triangledown, location=location.abovebar, color=v132UpColor, size=size.tiny, text="离线", textcolor=v132UpColor, force_overlay=true, display=display.pane)
+plot(v132Known ? 100 * (close / v132Line - 1) : na, "V13.2 收盘离线 %", display=display.data_window)
+
+if v132DnStart
+    alert("SPIKE V13.2 线下方离线 ≥" + str.tostring(v132Pct) + "% | " + syminfo.tickerid + " | " + timeframe.period + " | 线 " + str.tostring(v132Line, format.mintick) + " | 最低 " + str.tostring(v132DnExt, format.mintick), alert.freq_once_per_bar)
+if v132UpStart
+    alert("SPIKE V13.2 线上方离线 ≥" + str.tostring(v132Pct) + "% | " + syminfo.tickerid + " | " + timeframe.period + " | 线 " + str.tostring(v132Line, format.mintick) + " | 最高 " + str.tostring(v132UpExt, format.mintick), alert.freq_once_per_bar)
+alertcondition(v132DnStart, "SPIKE V13.2 线下方离线", "SPIKE V13.2 线下方离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}} | 已在最低点画射线")
+alertcondition(v132UpStart, "SPIKE V13.2 线上方离线", "SPIKE V13.2 线上方离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}} | 已在最高点画射线")
+alertcondition(v132DnStart or v132UpStart, "SPIKE V13.2 离线提示（任一方向）", "SPIKE V13.2 离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}}")
+// END V132 DISTANCE LAYER
