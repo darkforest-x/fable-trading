@@ -145,3 +145,13 @@ def test_reentry_after_a_stop_stays_inside_the_excursion_and_arm_zero_matches_v1
     # re-entry at the first touch after the exit bar (bar 3, fills at its 99.8 open), then the target 102.794
     assert [(r[1], r[3], r[4]["kind"]) for r in again] == [(1, 0, "stop"), (3, 1, "target")]
     assert again[1][2] == pytest.approx(99.8)
+
+
+def test_series_dir_reader_validates_rows_like_the_frozen_reader(tmp_path):
+    rows = pd.DataFrame({"ts": [0, 300_000, 600_000, 900_000], "open": [10, 10, 10, 10.0],
+                         "high": [11, 9, 11, 11.0], "low": [9, 9.5, 9, 9.0], "close": [10, 10, 10, 10.0],
+                         "volume": [1, 1, 1, 1.0]})
+    rows.to_csv(tmp_path / "ETHUSDT.csv.gz", index=False)
+    got = hr.read_5m("ETHUSDT", pd.Timestamp(0, unit="ms", tz="UTC"), pd.Timestamp(900_000, unit="ms", tz="UTC"),
+                     str(tmp_path))
+    assert got.ts.tolist() == [0, 600_000]  # high < open dropped; the last bar ends after ``end``

@@ -1,0 +1,124 @@
+{
+  "experiment_id": "exp-htf-ma-reversion-20261009-v3",
+  "owner_request": "2026-10-09 Notion #44 follow-up: 你用 ethusdt.p 近两年的数据回测一下 找到最优参数 (after the v2 sample comparison; the owner's chart is OKX ETHUSDT.P 5m).",
+  "question": "On OKX ETHUSDT.P over the last two years, which parameters of the HTF-line reversion rule earn the most in the first year, and do they still earn after cost and beat matched random entries in the second year?",
+  "prior_evidence": "v1 (13 Binance symbols, stops 1.5%/3%/line-third) and v2 (stops 0.5-1.2%, re-entry arm) rejected: pre-registered selections lost after 2025. On the owner's 2026-10-08/09 sample the rule with re-entry reproduced the owner's box on its 4th attempt (+0.4% net over 4 trades).",
+  "data": "OKX ETH-USDT-SWAP 5m built by experiments/active/exp-htf-ma-reversion-20261009-v3/build_series.py (official 1m archive + API 1m to 2026-09-22 14:00Z aggregated to complete 5m buckets, then the 2026-10-09 history-candles 5m tail)",
+  "symbols": [
+    "ETHUSDT"
+  ],
+  "symbols_note": "ETH only, per the owner",
+  "charts": {
+    "5": {
+      "htf_minutes": 15,
+      "line": "EMA120 of completed 15m closes, first-close seed per contiguous run, ready after 1200 contiguous bars (V13.1 f_m15Ema120)"
+    },
+    "15": {
+      "htf_minutes": 60,
+      "line": "SMA60 of completed 1h closes, ready after 60 contiguous bars (V13.1 f_h1Sma60)"
+    }
+  },
+  "line_timing": "a chart bar inside HTF bucket B reads the line of HTF bar B-1 (V13.1 knownAverage[1] with lookahead_on); missing B-1 -> no line",
+  "distance": {
+    "pct": {
+      "levels": [
+        0.03,
+        0.035,
+        0.04,
+        0.045,
+        0.05,
+        0.055,
+        0.06,
+        0.07,
+        0.08
+      ],
+      "trigger": "long line*(1-d), short line*(1+d)"
+    },
+    "atr": {
+      "levels": {
+        "5": [
+          4,
+          5,
+          6,
+          7,
+          8,
+          10
+        ],
+        "15": [
+          3,
+          4,
+          5,
+          6,
+          8
+        ]
+      },
+      "trigger": "line -/+ k * Wilder ATR14 of the same completed HTF bar as the line"
+    },
+    "pctl": {
+      "levels": [
+        0.01,
+        0.005,
+        0.003,
+        0.001
+      ],
+      "window_days": 30,
+      "trigger": "long line*(1+Q_q(low/line-1)), short line*(1+Q_{1-q}(high/line-1)) over the completed chart bars of the previous 30 days (half the window required); the quantile must lie beyond the line"
+    }
+  },
+  "entry": "path = 5m bars for both charts; the trigger is constant inside a chart bar; a long fills at min(open, trigger) of the first 5m bar whose low reaches it (short mirrored) - a resting limit at the trigger",
+  "excursion": "one entry per excursion; an excursion starts at the first touch and ends at the first chart-bar close back within half the trigger distance of the line (close >= line - D/2 for longs); no line ends it; entries need no open position on that side (sides are separate books) and skip an excursion that starts while a trade is open",
+  "vix_fix": {
+    "params": {
+      "pd": 22,
+      "bbl": 20,
+      "mult": 2.0,
+      "lb": 50,
+      "ph": 0.85
+    },
+    "long": "CM_Williams_Vix_Fix on the chart timeframe evaluated at the fill price: HH = max(prior 21 chart closes, P), wvf = (HH-P)/HH*100, bands from the prior 19 (sma/population stdev) and 49 (rangeHigh) completed wvf plus the current one; on when wvf >= upper or wvf >= 0.85*max",
+    "short": "mirror, not part of the original indicator (unconfirmed): wvfT = (P-LL)/LL*100 with LL = min(prior 21 closes, P)",
+    "entry": "inside the excursion, the first 5m bar (low reaches the trigger) where the filter is on at min(open, trigger), else at the highest price between that and the bar low where it turns on (bisection, the filter is monotone in price); an excursion where it never turns on is not traded"
+  },
+  "stops": {
+    "pct0.5": "0.5% of the fill",
+    "pct0.6": "0.6% of the fill",
+    "pct0.8": "0.8% of the fill",
+    "pct1.0": "1.0% of the fill",
+    "pct1.2": "1.2% of the fill",
+    "pct1.5": "1.5% of the fill",
+    "pct2": "2% of the fill",
+    "pct3": "3% of the fill",
+    "line3": "one third of the fill's distance to the line at entry, so the 3R target is the line itself"
+  },
+  "targets_r": [
+    2,
+    3,
+    5
+  ],
+  "exit_path": "5m high/low; entry bar: stop if its low (short: high) reaches the stop, else target if its close is beyond the target; later bars: a gap through the stop or target fills at the open, stop first when both print in one bar; after 576 bars (48h) exit at that close; a missing bar before the exit drops the trade",
+  "max_hold_bars": 576,
+  "round_trip_cost": 0.002,
+  "controls": {
+    "n": 20,
+    "pool": "same symbol, chart timeframe and calendar month, 5m bars with a ready line, HTF ATR / price within 0.5-2x the trade's",
+    "entry": "open of the pool bar, same side, same stop fraction, same R target, cap and cost",
+    "seed": 20261009
+  },
+  "start": "2024-10-09T00:00:00Z",
+  "select_before": "2025-10-09T00:00:00Z",
+  "end": "2026-10-09T14:00:00Z",
+  "warmup_start": "2024-08-01T00:00:00Z",
+  "selection": "builder default (per chart x side x vix x re-entry arm, highest select-year excess t with >= 30 trades) is written to selection.csv; the owner's read is best_params.csv from analyze.py",
+  "pass_bar": "check period: mean net > 0 and mean excess > 0 with month-block sign-flip p < 0.01 (p < 0.05 = worth forward observation only)",
+  "stat_seed": 20261009,
+  "flips": 10000,
+  "reentry": [
+    0,
+    3
+  ],
+  "output_dir": "results",
+  "data_note": "trades whose 48h window runs past the series end (opened after about 2026-10-07 14:00Z) are dropped as unfinished",
+  "series_dir": "data/research/htf_ma_reversion_okx_eth_5m_20261009",
+  "best_params_rule": "pre-registered in analyze.py: among cells with >= 20 select-year trades, rank by select-year total net % (sum of per-trade net after 0.2% cost); the top cell is 'the best parameters'; its second-year numbers (net, win rate, excess over 20 matched random entries, month-block sign-flip p) are the verdict, together with the top 10 and the select-vs-check rank correlation over all cells; a full-two-year in-sample optimum is reported only as a contrast",
+  "reentry_rule": "arm 0 = v1 (one entry per excursion); arm 3 = after a stop, re-enter at the first 5m bar after the exit bar whose low (short: high) reaches the trigger again inside the same excursion, at most 3 re-entries; Vix Fix arms apply the same gate to each re-entry; the excursion end is unchanged (price only)"
+}

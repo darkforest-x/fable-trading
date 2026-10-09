@@ -31,7 +31,8 @@ v2 (owner sample 2026-10-09: ETH long box entry 2411, stop 2396, target 2491 - a
 about 5R) reuses this builder with its own config: stops 'pctX' are X% of the fill, and a
 config 'reentry' list adds arms that, after a stop, re-enter at the next touch inside the same
 excursion (at most N times; the excursion is still defined by price alone). Arm 0 is the v1
-path unchanged.
+path unchanged. v3 (owner: ETHUSDT.P, last two years, find the best parameters) adds a config
+'series_dir' so the run reads OKX ETH bars built by its own experiment.
 """
 from __future__ import annotations
 
@@ -342,6 +343,17 @@ def control_outcome(bars: tuple, ctrl: np.ndarray, risk_frac: np.ndarray, side: 
         return np.nanmean(cn, axis=1), np.isfinite(cn).sum(axis=1)
 
 
+def read_5m(symbol: str, start: pd.Timestamp, end: pd.Timestamp, series_dir: str | None = None) -> pd.DataFrame:
+    """v1's frozen Binance reader, or the same row validation on a config's own series directory (v3: OKX ETH)."""
+    if series_dir is None:
+        return v1.read_5m(symbol, start, end)
+    raw = pd.read_csv(Path(series_dir) / f"{symbol}.csv.gz", usecols=["ts", "open", "high", "low", "close", "volume"])
+    raw = raw.loc[(raw.ts >= start.value // 10**6) & (raw.ts + 300_000 <= end.value // 10**6)]
+    ok = ((raw[["open", "high", "low", "close"]] > 0).all(axis=1) & (raw.volume >= 0)
+          & (raw.high >= raw[["open", "close", "low"]].max(axis=1)) & (raw.low <= raw[["open", "close", "high"]].min(axis=1)))
+    return raw.loc[ok].drop_duplicates("ts").sort_values("ts").reset_index(drop=True)
+
+
 def chart_frames(raw: pd.DataFrame, minutes: int, htf_minutes: int) -> dict | None:
     """Gap-free chart, HTF and 5m path bars over the chart range, plus the HTF line on chart bars."""
     chart = v2.resample_hl(raw, minutes)
@@ -363,7 +375,7 @@ def chart_frames(raw: pd.DataFrame, minutes: int, htf_minutes: int) -> dict | No
 def scan_symbol(args: tuple) -> pd.DataFrame:
     """Trades with matched controls for one symbol on both charts and the whole grid."""
     symbol, cfg = args
-    raw = v1.read_5m(symbol, pd.Timestamp(cfg["warmup_start"]), pd.Timestamp(cfg["end"]))
+    raw = read_5m(symbol, pd.Timestamp(cfg["warmup_start"]), pd.Timestamp(cfg["end"]), cfg.get("series_dir"))
     if raw.empty:
         return pd.DataFrame()
     start_ms = pd.Timestamp(cfg["start"]).value // 10**6
