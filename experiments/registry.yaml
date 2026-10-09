@@ -11046,3 +11046,27 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-09 Notion task #44 高周期均线回归策略 (follow-up - no 1h chart, distance measures open, stops 1.5%/3% or own, both sides). Three ETH trades re-derived by hand (line, fill, exit, net) matched exactly. The owner's 2026-10-08 ETH example (line 2556, low 2405) lies after the frozen series end; local exchange access was down that day. trades.csv.gz local only, sha256 341c86ea676cb28021e8524ea6384966fcc7c39f785f19ff3303e3aaa412ba29. No report requested.
+  - experiment_id: exp-htf-ma-reversion-20261009-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 18ce417f47
+    status: rejected
+    result: No cell passes. Of 2160 cells (stops 0.5/0.6/0.8/1.0/1.2%, 2/3/5R, one entry per excursion or up to 3 re-entries after a stop, v1's distances, Vix Fix on/off, both sides, 5m/15m) 15 of 16 pre-registered selections lose after 2025 (check net -0.10 to -0.34R); the 16th (5m long, trailing 30-day 0.3% percentile, stop 1.0%, 3R, re-entry, Vix Fix) is flat - check net 0.000R with excess +0.25R (p 0.021), which fails the net bar. Only 3 cells are net positive in both periods, all 5m long percentile triggers with 1.0-1.2% stops, 3R and re-entry (check net +0.000 to +0.003R). Mean net across cells about -0.32R per trade with one entry and -0.27/-0.31R with re-entry; with stops this tight the 0.2% round trip alone is 0.17-0.4R. On the owner's OKX 2026-10-08/09 sample the rule (5% from the line, 0.6% stop, 5R) enters at 23:35 UTC+8 (2441) and stops at 00:00; with re-entry its 4th attempt (01:00, 2415, target at 10:45) is the owner's box, +0.4% net over the 4 trades.
+    question: With stops as tight as the owner's sample (0.5-1.2% of the fill) and optionally re-entering after a stop inside the same excursion, does the HTF-line reversion rule earn more than matched random entries after 0.2% cost, in both periods?
+    single_variable: Stop width (0.5-1.2% instead of v1's 1.5%/3%/line-third) plus a re-entry arm (0 = v1's one entry per excursion, 3 = up to three re-entries at the next touch after a stop, same excursion); data, distances, targets, cap, controls and split as v1.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-09 Notion #44 follow-up - 图画的太大了 (v1's 3%/9% boxes) and a TradingView sample (OKX ETHUSDT.P 5m long box 2411 / stop 2396 / target 2491, 应该是这样的). Builder arm 0 regenerates v1's ETH trades identically. The run's receipt HEAD (e6c816c607) adds only chart commits on top of the builder commit. Sample check uses data/research/htf_ma_reversion_okx_tail_20261009 (OKX history-candles 5m, sha256 d56524276811f431d04582153467770bce717ac6a4c972f3c9b9eeec1bec0b77). trades.csv.gz local only, sha256 b2f9962d811625d4b6793c631cc21d52bb6cad9ebd3be0b8c0c1e5e92b5fe66f. No report requested.
+  - experiment_id: exp-htf-ma-reversion-20261009-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: be1ff238b6
+    status: rejected
+    result: There is no stable best parameter set on OKX ETHUSDT.P. The pre-registered select-year best (total net, >= 20 trades) is 5m long, 4x 15m ATR below the line, stop 3%, 5R, Vix Fix on, one entry - +65.6% summed over 123 trades in 2024-10-09..2025-10-09, then -45.6% over 127 trades in the next year (-0.36% per trade, win 42%, excess over matched random -0.02R, p 0.87). All of the select top 10 lose in the check year (-28 to -50%); the Spearman correlation of select vs check total net over 7226 eligible cells is 0.22. 84 of 7992 cells are positive in both years, fewer than the ~117 expected if the years were independent at their positive shares (9.6% and 15.3%). The check year's own best cells are 15m shorts with the line-third stop - the opposite region, i.e. the first year's optimum mostly tracked ETH's rise and the second year's its fall. The owner-sample-like cell (5m long, 5%, 0.6% stop, 5R, re-entry) is -41.2% then -7.1% (119 trades each, win 13% and 21%). The two-year in-sample best (5m short, 3% from the line, stop 2%, 5R, Vix Fix, one entry) is +6.4% then +30.2% over 153 trades with excess p 0.29/0.16 and was found by looking at both years.
+    question: On OKX ETHUSDT.P over the last two years, which parameters of the HTF-line reversion rule earn the most in the first year, and do they still earn after cost and beat matched random entries in the second year?
+    single_variable: Data and search only - ETH alone on OKX 5m (official 1m archive aggregated to complete 5m buckets plus the 2026-10-09 history-candles tail, 0 missing slots, 903 overlap bars identical), a wider grid (9 percent levels 3-8%, 6/5 ATR levels, 4 percentile levels, stops 0.5-3% and line-third, 2/3/5R, re-entry 0/3, Vix Fix on/off, both sides, 5m/15m) and a one-year/one-year split; rule, exits and controls as v2.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-09 你用 ethusdt.p 近两年的数据回测一下 找到最优参数. The best-parameter rule was committed in analyze.py before the run. Series data/research/htf_ma_reversion_okx_eth_5m_20261009/ETHUSDT.csv.gz sha256 20de43b2ebcfa07b08828e47dc7512e0b70bffb06f09d1663109b1d820741fcb (receipt.json beside it). Trades opened in the last 48h of the series are dropped as unfinished. trades.csv.gz local only, sha256 cd7ad912767e140a767ccc628b0a13caa7213905e93c866d967445200ad10b5f. No report requested.
