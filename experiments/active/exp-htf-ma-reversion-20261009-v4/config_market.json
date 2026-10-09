@@ -1,0 +1,107 @@
+{
+  "experiment_id": "exp-htf-ma-reversion-20261009-v4",
+  "run": "market",
+  "owner_request": "2026-10-09 Notion #44: after v1-v3 were rejected the recommendation was to stop buying the touch and wait for the drop to stop, with the stop under the low (the owner's sample: entry about 2411 near the 2405 low, stop 2396, target 2491); owner: 开始.",
+  "question": "If the HTF-line reversion trade waits for a confirming close after the far touch and puts the stop just beyond the excursion's extreme, does it earn more than matched random entries after 0.2% cost, in both periods?",
+  "prior_evidence": "v1-v3 (touch entries) rejected: no selection survived its check period; on OKX ETH the first year's best lost 45.6% in the second year and all of the first year's top 10 lost. ETH's 5m distance from the 15m EMA120 reached -31% and +18.7% in two years, so touch entries are run over.",
+  "charts": {
+    "5": {
+      "htf_minutes": 15,
+      "line": "EMA120 of completed 15m closes, first-close seed per contiguous run, ready after 1200 contiguous bars (V13.1 f_m15Ema120)"
+    },
+    "15": {
+      "htf_minutes": 60,
+      "line": "SMA60 of completed 1h closes, ready after 60 contiguous bars (V13.1 f_h1Sma60)"
+    }
+  },
+  "line_timing": "a chart bar inside HTF bucket B reads the line of HTF bar B-1 (V13.1 knownAverage[1] with lookahead_on); missing B-1 -> no line",
+  "distance": {
+    "pct": {
+      "levels": [
+        0.03,
+        0.04,
+        0.05,
+        0.06,
+        0.08
+      ],
+      "trigger": "long line*(1-d), short line*(1+d)"
+    },
+    "atr": {
+      "levels": {
+        "5": [
+          4,
+          6,
+          8
+        ],
+        "15": [
+          3,
+          4,
+          6
+        ]
+      },
+      "trigger": "line -/+ k * Wilder ATR14 of the same completed HTF bar as the line"
+    },
+    "pctl": {
+      "levels": [
+        0.01,
+        0.003
+      ],
+      "window_days": 30,
+      "trigger": "long line*(1+Q_q(low/line-1)), short line*(1+Q_{1-q}(high/line-1)) over the completed chart bars of the previous 30 days (half the window required); the quantile must lie beyond the line"
+    }
+  },
+  "excursion": "an excursion starts at the first touch and ends at the first chart-bar close back within half the trigger distance of the line (close >= line - D/2 for longs); no line ends it; entries need no open position on that side (sides are separate books) and skip an excursion that starts while a trade is open",
+  "confirm": [
+    "reclaim",
+    "prev_bar"
+  ],
+  "confirm_rule": "reclaim = a chart-bar close back beyond the trigger; prev_bar = a chart-bar close beyond the previous chart bar's high (long) / low (short); at or after the touching chart bar, no later than the excursion's last bar; entry at the next chart bar's open",
+  "stop_buffer": 0.001,
+  "stop_rule": "the excursion's extreme from the touch through the confirming bar (long: lowest low) minus 0.1% of it; a fill at or beyond the stop waits for the next confirmation",
+  "targets_r": [
+    2,
+    3,
+    5
+  ],
+  "reentry": [
+    0,
+    3
+  ],
+  "reentry_rule": "arm 0: one trade per excursion; arm 3: after a stop, the next confirmation inside the same excursion with the extreme recomputed from the touch, at most 3 more",
+  "book": "one open trade per side; a confirmation whose entry bar is not after the last exit is skipped and the excursion stays eligible",
+  "vix_fix": "dropped (no effect in v1-v3)",
+  "exit_path": "5m high/low from the open entry bar; a gap through the stop or target fills at the open; stop first when both print in one bar; after 576 bars (48h) exit at that close; a missing bar before the exit drops the trade",
+  "max_hold_bars": 576,
+  "round_trip_cost": 0.002,
+  "controls": {
+    "n": 20,
+    "pool": "same symbol, chart timeframe and calendar month, 5m bars with a ready line, HTF ATR / price within 0.5-2x the trade's",
+    "entry": "open of the pool bar, same side, same stop fraction as the trade, same R target, cap and cost",
+    "seed": 20261009
+  },
+  "stat_seed": 20261009,
+  "flips": 10000,
+  "pass_bar": "check period: mean net > 0 and mean excess > 0 with month-block sign-flip p < 0.01 (p < 0.05 = worth forward observation only)",
+  "data": "frozen Binance USD-M 5m series (data/research/spike_v128_entry_clock_long_20260923/series), complete-bucket resampling",
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "SOLUSDT",
+    "XRPUSDT",
+    "DOGEUSDT",
+    "BNBUSDT",
+    "SUIUSDT",
+    "1000PEPEUSDT",
+    "ADAUSDT",
+    "LINKUSDT",
+    "AVAXUSDT",
+    "HYPEUSDT",
+    "ENAUSDT"
+  ],
+  "start": "2023-01-01T00:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T00:00:00Z",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "selection": "per chart x side x re-entry arm x confirmation, the cell (distance measure x level x target) with the highest t of mean excess among cells with >= 30 select-period trades; its check-period numbers are the read",
+  "output_dir": "results_market"
+}
