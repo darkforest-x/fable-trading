@@ -26,6 +26,12 @@ entry bar the stop counts if its low reaches it and the target only if the bar c
 afterwards gaps fill at the open, stop first on ties, 48h cap, 0.2% round trip. Each trade gets
 20 random open entries of the same symbol, chart timeframe and month with HTF ATR / price within
 0.5-2x, the same side, stop fraction, target and cost.
+
+v2 (owner sample 2026-10-09: ETH long box entry 2411, stop 2396, target 2491 - a 0.6% stop and
+about 5R) reuses this builder with its own config: stops 'pctX' are X% of the fill, and a
+config 'reentry' list adds arms that, after a stop, re-enter at the next touch inside the same
+excursion (at most N times; the excursion is still defined by price alone). Arm 0 is the v1
+path unchanged.
 """
 from __future__ import annotations
 
@@ -258,6 +264,84 @@ def take_sequential(start_p: np.ndarray, exit_i: np.ndarray, valid: np.ndarray) 
     return keep
 
 
+def stop_risk(rule: str, side: int, fill: np.ndarray, line_at_fill: np.ndarray) -> np.ndarray:
+    """Risk per unit of the fill: 'line3' = a third of the distance to the line, 'pctX' = X% of the fill."""
+    if rule == "line3":
+        return side * (line_at_fill - fill) / 3
+    if rule.startswith("pct"):
+        return fill * float(rule[3:]) / 100
+    raise ValueError(rule)
+
+
+def chain_with_reentry(exc: list[tuple[int, int]], first: list, touch_idx: np.ndarray, side: int, tp: np.ndarray,
+                       bars: tuple, chart_of: np.ndarray, per: int, vix: dict | None, rule: str, line_p: np.ndarray,
+                       target_r: float, cap: int, cost: float, max_re: int) -> list[tuple]:
+    """Trades in time order, one open per book; after a stop, re-enter at the next touch of the same excursion.
+
+    Returns (excursion start, entry bar, fill, attempt, outcome dict) per trade; with max_re = 0 this is
+    the v1 rule (first entry per excursion, excursions starting at or before the last exit skipped).
+    """
+    o, h, l, c = bars
+    out, last_exit = [], -1
+    for (p0, j_end), e in zip(exc, first):
+        if e is None or p0 <= last_exit:
+            continue
+        p, fill = e
+        end = min((j_end + 1) * per, len(o)) - 1
+        attempt = 0
+        while True:
+            fa = np.array([fill])
+            risk = stop_risk(rule, side, fa, line_p[[p]])
+            stop, target = fa - side * risk, fa + side * target_r * risk
+            sim = simulate(o, h, l, c, np.array([p]), fa, np.array([side]), stop, target, np.array([True]), cap, cost)
+            if not sim["valid"][0]:
+                break
+            out.append((p0, p, fill, attempt, {k: v[0] for k, v in sim.items()}))
+            last_exit = int(sim["exit_i"][0])
+            if sim["kind"][0] != "stop" or attempt >= max_re:
+                break
+            k = np.searchsorted(touch_idx, last_exit, side="right")
+            if k >= len(touch_idx) or touch_idx[k] > end:
+                break
+            nxt = find_entry(int(touch_idx[k]), j_end, side, tp, o, h, l, chart_of, per, vix)
+            if nxt is None:
+                break
+            p, fill = nxt
+            attempt += 1
+    return out
+
+
+def draw_controls(ps: np.ndarray, pools: dict, month: np.ndarray, atr_pct: np.ndarray, rng, n_ctrl: int) -> np.ndarray:
+    """Random pool bars per trade: same month, HTF ATR / price within VOL_BAND of the trade's (-1 = none)."""
+    ctrl = np.full((len(ps), n_ctrl), -1)
+    for i, p in enumerate(ps):
+        pool = pools.get(month[p], np.empty(0, int))
+        ref = atr_pct[p]
+        cand = pool[(pool != p) & (atr_pct[pool] >= VOL_BAND[0] * ref) & (atr_pct[pool] <= VOL_BAND[1] * ref)]
+        if len(cand):
+            ctrl[i] = rng.choice(cand, size=n_ctrl)
+    return ctrl
+
+
+def control_outcome(bars: tuple, ctrl: np.ndarray, risk_frac: np.ndarray, side: int, target_r: float, cap: int,
+                    cost: float) -> tuple[np.ndarray, np.ndarray]:
+    """Mean net of each trade's random open entries with its stop fraction, target, cap and cost."""
+    o, h, l, c = bars
+    n_ctrl = ctrl.shape[1]
+    flat, ok = ctrl.ravel(), ctrl.ravel() >= 0
+    cu = flat[ok]
+    cfrac = np.repeat(risk_frac, n_ctrl)[ok]
+    ce = o[cu]
+    cs = simulate(o, h, l, c, cu, ce, np.full(len(cu), side), ce * (1 - side * cfrac),
+                  ce * (1 + side * target_r * cfrac), np.zeros(len(cu), bool), cap, cost)
+    cn = np.full(len(flat), np.nan)
+    cn[ok] = cs["net"]
+    cn = cn.reshape(-1, n_ctrl)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)  # a trade whose controls all failed is NaN
+        return np.nanmean(cn, axis=1), np.isfinite(cn).sum(axis=1)
+
+
 def chart_frames(raw: pd.DataFrame, minutes: int, htf_minutes: int) -> dict | None:
     """Gap-free chart, HTF and 5m path bars over the chart range, plus the HTF line on chart bars."""
     chart = v2.resample_hl(raw, minutes)
@@ -284,6 +368,7 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
         return pd.DataFrame()
     start_ms = pd.Timestamp(cfg["start"]).value // 10**6
     cap, cost, n_ctrl = cfg["max_hold_bars"], cfg["round_trip_cost"], cfg["controls"]["n"]
+    arms = cfg.get("reentry", [0])
     frames = []
     for chart_key, spec in cfg["charts"].items():
         minutes = int(chart_key)
@@ -293,6 +378,7 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
         chart, path, per, line, atr = fr["chart"], fr["path"], fr["per"], fr["line"], fr["atr"]
         cl, ch, cc = (chart[k].to_numpy(float) for k in ("low", "high", "close"))
         o, h, l, c = (path[k].to_numpy(float) for k in ("open", "high", "low", "close"))
+        bars = (o, h, l, c)
         pidx = path.index.to_numpy()
         chart_of = np.arange(len(path)) // per
         line_p, atr_pct = line[chart_of], atr[chart_of] / o
@@ -315,9 +401,11 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
                         tp = tg[chart_of]
                         touch = tradable & ((l <= tp) if side > 0 else (h >= tp))
                     exc = excursions(touch, back, chart_of, per)
+                    touch_idx = np.flatnonzero(touch)
                     for use_vix in (False, True):
-                        got = [(p0,) + e for p0, j_end in exc
-                               if (e := find_entry(p0, j_end, side, tp, o, h, l, chart_of, per, vix if use_vix else None))]
+                        firsts = [find_entry(p0, j_end, side, tp, o, h, l, chart_of, per, vix if use_vix else None)
+                                  for p0, j_end in exc]
+                        got = [(p0,) + e for (p0, _), e in zip(exc, firsts) if e]
                         if not got:
                             continue
                         p0s = np.array([g[0] for g in got])
@@ -327,58 +415,66 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
                         sd = np.full(n, side)
                         lp = line_p[ps]
                         key = f"{symbol}|{minutes}|{measure}|{level}|{side}|{use_vix}"
-                        rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
-                        ctrl = np.full((n, n_ctrl), -1)
-                        for i, p in enumerate(ps):
-                            pool = pools.get(month[p], np.empty(0, int))
-                            ref = atr_pct[p]
-                            cand = pool[(pool != p) & (atr_pct[pool] >= VOL_BAND[0] * ref) & (atr_pct[pool] <= VOL_BAND[1] * ref)]
-                            if len(cand):
-                                ctrl[i] = rng.choice(cand, size=n_ctrl)
-                        for stop_rule in STOPS:
-                            if stop_rule == "line3":
-                                risk = side * (lp - fill) / 3
-                            else:
-                                risk = fill * (0.015 if stop_rule == "pct1.5" else 0.03)
+                        base = {"symbol": symbol, "minutes": minutes, "side": side, "vix": use_vix,
+                                "measure": measure, "level": level}
+                        if 0 in arms:
+                            rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
+                            ctrl = draw_controls(ps, pools, month, atr_pct, rng, n_ctrl)
+                        for stop_rule in cfg["stops"]:
+                            risk = stop_risk(stop_rule, side, fill, lp)
                             stop = fill - side * risk
                             for target_r in cfg["targets_r"]:
-                                target = fill + side * target_r * risk
-                                sim = simulate(o, h, l, c, ps, fill, sd, stop, target, np.ones(n, bool), cap, cost)
-                                keep = take_sequential(p0s, sim["exit_i"], sim["valid"])
-                                if not keep.any():
-                                    continue
-                                kc = ctrl[keep]
-                                flat, ok = kc.ravel(), kc.ravel() >= 0
-                                cu = flat[ok]
-                                cfrac = np.repeat(sim["risk_frac"][keep], n_ctrl)[ok]
-                                ce = o[cu]
-                                cstop = ce * (1 - side * cfrac)
-                                ctar = ce * (1 + side * target_r * cfrac)
-                                cs = simulate(o, h, l, c, cu, ce, np.full(len(cu), side), cstop, ctar,
-                                              np.zeros(len(cu), bool), cap, cost)
-                                cn = np.full(len(flat), np.nan)
-                                cn[ok] = cs["net"]
-                                cn = cn.reshape(-1, n_ctrl)
-                                with warnings.catch_warnings():
-                                    warnings.simplefilter("ignore", RuntimeWarning)
-                                    c_net = np.nanmean(cn, axis=1)
-                                kp = ps[keep]
-                                frames.append(pd.DataFrame({
-                                    "symbol": symbol, "minutes": minutes, "side": side, "vix": use_vix,
-                                    "measure": measure, "level": level, "stop": stop_rule, "target_r": target_r,
-                                    "start_time": pd.to_datetime(pidx[p0s[keep]], unit="ms", utc=True).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                    "time": pd.to_datetime(pidx[kp], unit="ms", utc=True).strftime("%Y-%m-%dT%H:%M:%SZ"),
-                                    "month": month[kp], "line": lp[keep], "fill": fill[keep],
-                                    "dev_pct": 100 * (fill[keep] / lp[keep] - 1), "atr_pct": 100 * atr_pct[kp],
-                                    "risk_frac": sim["risk_frac"][keep], "exit_kind": sim["kind"][keep],
-                                    "bars": sim["bars"][keep], "gross_ret": sim["gross"][keep], "net_ret": sim["net"][keep],
-                                    "net_r": sim["net"][keep] / sim["risk_frac"][keep],
-                                    "control_net_ret": c_net, "control_net_r": c_net / sim["risk_frac"][keep],
-                                    "controls_valid": np.isfinite(cn).sum(axis=1)}))
+                                cell = {**base, "stop": stop_rule, "target_r": target_r}
+                                if 0 in arms:
+                                    target = fill + side * target_r * risk
+                                    sim = simulate(o, h, l, c, ps, fill, sd, stop, target, np.ones(n, bool), cap, cost)
+                                    keep = take_sequential(p0s, sim["exit_i"], sim["valid"])
+                                    if keep.any():
+                                        c_net, c_ok = control_outcome(bars, ctrl[keep], sim["risk_frac"][keep], side,
+                                                                      target_r, cap, cost)
+                                        frames.append(trade_frame(
+                                            cell, pidx, month, line_p, atr_pct, p0s[keep], ps[keep], fill[keep],
+                                            {k: v[keep] for k, v in sim.items()}, c_net, c_ok,
+                                            {"reentry": 0, "attempt": 0} if "reentry" in cfg else {}))
+                                for max_re in (a for a in arms if a > 0):
+                                    chain = chain_with_reentry(exc, firsts, touch_idx, side, tp, bars, chart_of, per,
+                                                               vix if use_vix else None, stop_rule, line_p, target_r,
+                                                               cap, cost, max_re)
+                                    if not chain:
+                                        continue
+                                    cp0, cp, cfill, catt = (np.array([r[i] for r in chain]) for i in range(4))
+                                    csim = {k: np.array([r[4][k] for r in chain]) for k in chain[0][4]}
+                                    ck = f"{key}|{stop_rule}|{target_r}|re{max_re}"
+                                    rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(ck.encode()))
+                                    cctrl = draw_controls(cp, pools, month, atr_pct, rng, n_ctrl)
+                                    c_net, c_ok = control_outcome(bars, cctrl, csim["risk_frac"], side, target_r, cap, cost)
+                                    frames.append(trade_frame(cell, pidx, month, line_p, atr_pct, cp0, cp, cfill, csim,
+                                                              c_net, c_ok, {"reentry": max_re, "attempt": catt}))
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 
+def trade_frame(cell: dict, pidx, month, line_p, atr_pct, p0s, ps, fill, sim: dict, c_net, c_ok, extra: dict) -> pd.DataFrame:
+    """One row per kept trade with its outcome and matched-control mean."""
+    lp = line_p[ps]
+    return pd.DataFrame({
+        **cell, **extra,
+        "start_time": pd.to_datetime(pidx[p0s], unit="ms", utc=True).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "time": pd.to_datetime(pidx[ps], unit="ms", utc=True).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "month": month[ps], "line": lp, "fill": fill,
+        "dev_pct": 100 * (fill / lp - 1), "atr_pct": 100 * atr_pct[ps],
+        "risk_frac": sim["risk_frac"], "exit_kind": sim["kind"],
+        "bars": sim["bars"], "gross_ret": sim["gross"], "net_ret": sim["net"],
+        "net_r": sim["net"] / sim["risk_frac"],
+        "control_net_ret": c_net, "control_net_r": c_net / sim["risk_frac"],
+        "controls_valid": c_ok})
+
+
 CELL = ["minutes", "side", "vix", "measure", "level", "stop", "target_r"]
+
+
+def cell_keys(frame: pd.DataFrame) -> list[str]:
+    """v1 cells, plus the re-entry arm when the run has one."""
+    return CELL + (["reentry"] if "reentry" in frame.columns else [])
 
 
 def summarize(trades: pd.DataFrame, cfg: dict) -> pd.DataFrame:
@@ -387,12 +483,13 @@ def summarize(trades: pd.DataFrame, cfg: dict) -> pd.DataFrame:
     t["excess_r"] = t.net_r - t.control_net_r
     t["day"] = t.time.str[:10]
     rows = []
-    for key, g in t.groupby(CELL + ["period"], sort=True):
+    cell = cell_keys(t)
+    for key, g in t.groupby(cell + ["period"], sort=True):
         x = g.excess_r.to_numpy()
         sd = x.std(ddof=1) if len(x) > 2 else math.nan
         best_days = g.groupby("day").net_ret.sum().nlargest(5).index
         rest = g.loc[~g.day.isin(best_days)]
-        rows.append({**dict(zip(CELL + ["period"], key)), "trades": len(g), "symbols": g.symbol.nunique(),
+        rows.append({**dict(zip(cell + ["period"], key)), "trades": len(g), "symbols": g.symbol.nunique(),
                      "days": g.day.nunique(), "win_rate": float((g.net_ret > 0).mean()),
                      "target_rate": float((g.exit_kind == "target").mean()),
                      "timeout_rate": float((g.exit_kind == "timeout").mean()),
@@ -409,11 +506,12 @@ def summarize(trades: pd.DataFrame, cfg: dict) -> pd.DataFrame:
 def select_cells(summary: pd.DataFrame, min_trades: int = 30) -> pd.DataFrame:
     """Per chart x side x vix: the select-period cell with the highest excess t, and its check row."""
     sel = summary.loc[summary.period.eq("select") & (summary.trades >= min_trades)]
+    cell = cell_keys(summary)
     out = []
-    for key, g in sel.groupby(["minutes", "side", "vix"]):
+    for key, g in sel.groupby(["minutes", "side", "vix"] + cell[len(CELL):]):
         best = g.loc[g.t_excess.idxmax()]
-        chk = summary.loc[(summary[CELL] == best[CELL]).all(axis=1) & summary.period.eq("check")]
-        row = {**{k: best[k] for k in CELL}, "cells_tried": len(g)}
+        chk = summary.loc[(summary[cell] == best[cell]).all(axis=1) & summary.period.eq("check")]
+        row = {**{k: best[k] for k in cell}, "cells_tried": len(g)}
         for tag, r in (("select", best), ("check", chk.iloc[0] if len(chk) else None)):
             for f in ("trades", "win_rate", "mean_net_pct", "mean_net_r", "control_net_r", "excess_r", "p_excess",
                       "net_r_ex_best5_days"):
@@ -422,12 +520,13 @@ def select_cells(summary: pd.DataFrame, min_trades: int = 30) -> pd.DataFrame:
     return pd.DataFrame(out)
 
 
-def run(output: Path, *, symbols: list[str] | None = None, workers: int = 8) -> None:
-    sources = (Path(__file__), CONFIG, Path("tests/evaluation/test_htf_ma_reversion_v1.py"), Path(v1.__file__),
+def run(output: Path | None, *, symbols: list[str] | None = None, workers: int = 8, config: Path = CONFIG) -> None:
+    sources = (Path(__file__), config, Path("tests/evaluation/test_htf_ma_reversion_v1.py"), Path(v1.__file__),
                Path(v2.__file__))
     if symbols is None and not v1._committed(sources):
         raise ValueError("commit builder, tests and config before generating results")
-    cfg = json.loads(CONFIG.read_text())
+    cfg = json.loads(config.read_text())
+    output = output or config.parent / cfg.get("output_dir", "results_v1")
     began = time.perf_counter()
     jobs = symbols or cfg["symbols"]
     parts = []
@@ -454,11 +553,12 @@ def run(output: Path, *, symbols: list[str] | None = None, workers: int = 8) -> 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
-    parser.add_argument("--output", type=Path, default=EXP / "results_v1")
+    parser.add_argument("--config", type=Path, default=CONFIG)
+    parser.add_argument("--output", type=Path, help="default: the config's output_dir (v1: results_v1)")
     parser.add_argument("--symbols", nargs="*")
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()
-    run(args.output, symbols=args.symbols, workers=args.workers)
+    run(args.output, symbols=args.symbols, workers=args.workers, config=args.config)
 
 
 if __name__ == "__main__":

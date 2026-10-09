@@ -94,3 +94,54 @@ def test_vix_fix_is_monotone_in_price_and_bisection_finds_the_turn():
     turn = hr.bisect_on(1, 99.0, 90.0, args)
     assert hr.vix_on(turn, 1, *args) and not hr.vix_on(turn + 1e-6, 1, *args)
     assert not hr.vix_on(np.nan, 1, *args)
+
+
+V2 = hr.EXP.parent / "exp-htf-ma-reversion-20261009-v2" / "config.json"
+
+
+def test_v2_config_only_changes_stops_and_adds_reentry():
+    v1, v2 = json.loads(hr.CONFIG.read_text()), json.loads(V2.read_text())
+    changed = {k for k in v1.keys() | v2.keys() if v1.get(k) != v2.get(k)}
+    assert changed <= {"experiment_id", "owner_request", "question", "prior_evidence", "stops", "reentry",
+                       "reentry_rule", "output_dir", "selection", "data_note"}
+    assert v2["reentry"] == [0, 3] and list(v2["stops"]) == ["pct0.5", "pct0.6", "pct0.8", "pct1.0", "pct1.2"]
+
+
+def test_stop_risk_parses_percent_rules_and_the_line_third():
+    fill, line = np.array([100.0]), np.array([110.0])
+    assert hr.stop_risk("pct0.6", 1, fill, line)[0] == pytest.approx(0.6)
+    assert hr.stop_risk("pct3", 1, fill, line)[0] == pytest.approx(3.0)
+    assert hr.stop_risk("line3", 1, fill, line)[0] == pytest.approx(10 / 3)
+    assert hr.stop_risk("line3", -1, np.array([120.0]), line)[0] == pytest.approx(10 / 3)
+
+
+def toy_path():
+    # long trigger at 100 on every bar; one excursion over bars 1..9 (ends at chart bar 9)
+    o = np.array([105, 101, 100.5, 99.8, 100.2, 100.4, 101, 103, 106, 108.0])
+    h = o + 0.5
+    l = np.array([104, 99.9, 99.0, 99.5, 99.9, 100.1, 100.5, 102, 105, 107.0])
+    c = o + 0.2
+    trig = np.full(10, 100.0)
+    touch = l <= trig
+    back = np.zeros(10, bool)
+    back[9] = True
+    return (o, h, l, c), trig, touch, back
+
+
+def test_reentry_after_a_stop_stays_inside_the_excursion_and_arm_zero_matches_v1():
+    bars, trig, touch, back = toy_path()
+    exc = hr.excursions(touch, back, np.arange(10), 1)
+    assert exc == [(1, 9)]
+    first = [hr.find_entry(p0, j, 1, trig, bars[0], bars[1], bars[2], np.arange(10), 1, None) for p0, j in exc]
+    line = np.full(10, 110.0)
+    args = (exc, first, np.flatnonzero(touch), 1, trig, bars, np.arange(10), 1, None, "pct0.6", line, 5.0, 6, 0.0)
+    once = hr.chain_with_reentry(*args, 0)
+    # fill 100 on bar 1, stop 99.4 hit by bar 2's low 99.0
+    assert [(r[1], r[2], r[4]["kind"]) for r in once] == [(1, 100.0, "stop")]
+    vec = hr.simulate(*bars, np.array([1]), np.array([100.0]), np.array([1]), np.array([99.4]), np.array([103.0]),
+                      np.array([True]), 6, 0.0)
+    assert once[0][4]["net"] == pytest.approx(vec["net"][0]) and once[0][4]["exit_i"] == vec["exit_i"][0]
+    again = hr.chain_with_reentry(*args, 3)
+    # re-entry at the first touch after the exit bar (bar 3, fills at its 99.8 open), then the target 102.794
+    assert [(r[1], r[3], r[4]["kind"]) for r in again] == [(1, 0, "stop"), (3, 1, "target")]
+    assert again[1][2] == pytest.approx(99.8)
