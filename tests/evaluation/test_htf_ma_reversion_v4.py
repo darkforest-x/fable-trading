@@ -78,3 +78,28 @@ def test_v5_configs_add_only_the_trend_block():
         assert changed <= {"experiment_id", "owner_request", "question", "prior_evidence", "trend", "single_variable",
                            "primary_read", "selection"}
         assert b["trend"]["sma_days"] == 50 and b["trend"]["arms"] == ["with", "against"]
+
+
+def test_panic_needs_a_volume_burst_and_a_fast_move():
+    n = 40
+    volume = np.ones(n)
+    volume[30] = 5.0
+    close = np.full(n, 96.0)
+    close[27] = 99.0  # within half of the 5-point distance (>= 97.5) three bars before bar 30
+    line, trig = np.full(n, 100.0), np.full(n, 95.0)
+    flags = v4.panic_flags(volume, close, line, trig, 1, 10, 3.0, 3)
+    assert flags[30] and not flags[31]  # bar 31 still sees the burst but close[28] was already far
+    assert not v4.panic_flags(np.ones(n), close, line, trig, 1, 10, 3.0, 3)[30]  # no burst
+    short = v4.panic_flags(volume, 200 - close, 200 - line, 200 - trig, -1, 10, 3.0, 3)
+    assert short[30] and not short[31]  # mirrored above the line
+
+
+def test_v6_configs_add_only_the_panic_block():
+    v6 = v4.EXP.parent / "exp-htf-ma-reversion-20261010-v6"
+    for name in ("config_market.json", "config_eth.json"):
+        a = json.loads((v4.EXP / name).read_text())
+        b = json.loads((v6 / name).read_text())
+        changed = {k for k in a.keys() | b.keys() if a.get(k) != b.get(k)}
+        assert changed <= {"experiment_id", "owner_request", "question", "prior_evidence", "panic", "single_variable",
+                           "primary_read", "selection"}
+        assert b["panic"]["vol_ratio"] == 3.0 and b["panic"]["fast_bars"] == 12 and b["panic"]["arms"] == ["panic", "calm"]

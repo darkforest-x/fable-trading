@@ -32,6 +32,14 @@ state is the last completed UTC daily close against its SMA (daily_trend, +1 abo
 'with' keeps confirmations whose entry bar has state == side (longs in uptrends, shorts in
 downtrends), arm 'against' the opposite; controls are drawn only from bars with the trade's state.
 Without the block the scan is v4's, trade for trade.
+
+v6 (owner 2026-10-10 b: 只做恐慌衰竭) adds a config 'panic' block instead: an excursion counts as panic
+when, at its touching chart bar j0, (a) the largest volume of bars j0-2..j0 is at least vol_ratio x the
+median volume of the bars covering the previous volume_window_hours before j0-2, and (b) fast_bars
+chart bars before j0 the close was still within half the trigger distance of the line (the move to
+the trigger took at most fast_bars bars). Arm 'panic' keeps only such excursions, arm 'calm' the
+rest; every later step is v4's. Both inputs are complete by the close of j0, and confirmations are
+at or after j0.
 """
 from __future__ import annotations
 
@@ -123,6 +131,20 @@ def daily_trend(raw: pd.DataFrame, path_index: np.ndarray, sma_days: int) -> np.
     return out
 
 
+def panic_flags(volume: np.ndarray, close: np.ndarray, line: np.ndarray, trig: np.ndarray, side: int,
+                window: int, ratio: float, fast: int) -> np.ndarray:
+    """Per chart bar j: True when an excursion touching in bar j is a panic (volume burst and fast move)."""
+    v = pd.Series(volume)
+    median_before = v.rolling(window, min_periods=window // 2).median().shift(1).to_numpy()
+    burst = v.rolling(3, min_periods=3).max().to_numpy()
+    with np.errstate(invalid="ignore", divide="ignore"):
+        big = burst / np.r_[np.full(2, np.nan), median_before[:-2]] >= ratio
+        dist = side * (line - trig)
+        near = side * (close - (line - side * dist / 2)) >= 0
+    near_before = np.r_[np.zeros(fast, bool), near[:-fast]]
+    return big & near_before
+
+
 def scan_symbol(args: tuple) -> pd.DataFrame:
     """Confirmed-entry trades with matched controls for one symbol on both charts and the grid."""
     symbol, cfg = args
@@ -170,37 +192,52 @@ def scan_symbol(args: tuple) -> pd.DataFrame:
                     exc = hr.excursions(touch, back, chart_of, per)
                     if not exc:
                         continue
-                    for kind in cfg["confirm"]:
-                        conf_all = np.flatnonzero(confirmations(kind, side, cc, ch, cl, tg))
-                        for arm in arms:
-                            if arm is None:
-                                conf_idx, arm_pools = conf_all, pools
-                            else:
-                                need = side if arm == "with" else -side
-                                conf_idx = conf_all[tstate[np.minimum((conf_all + 1) * per, len(o) - 1)] == need]
-                                arm_pools = pools_by_state[need]
-                            for target_r in cfg["targets_r"]:
-                                for max_re in cfg["reentry"]:
-                                    got = chain_confirmed(exc, conf_idx, side, bars, per, buffer, target_r, cap, cost,
-                                                          max_re)
-                                    if not got:
-                                        continue
-                                    p0s, es, fills, att, ext = (np.array([g[i] for g in got]) for i in range(5))
-                                    sim = {k: np.array([g[5][k] for g in got]) for k in got[0][5]}
-                                    key = f"{symbol}|{minutes}|{measure}|{level}|{side}|{kind}|{target_r}|re{max_re}"
-                                    key += f"|{arm}" if arm else ""
-                                    rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
-                                    ctrl = hr.draw_controls(es, arm_pools, month, atr_pct, rng, n_ctrl)
-                                    c_net, c_ok = hr.control_outcome(bars, ctrl, sim["risk_frac"], side, target_r, cap,
-                                                                     cost)
-                                    cell = {"symbol": symbol, "minutes": minutes, "side": side, "vix": False,
-                                            "measure": measure, "level": level, "stop": f"swing{100 * buffer:g}",
-                                            "target_r": target_r}
-                                    extra = {"conf": kind, "reentry": max_re, "attempt": att, "extreme": ext}
-                                    if arm:
-                                        extra["trend"] = arm
-                                    frames.append(hr.trade_frame(cell, pidx, month, line_p, atr_pct, p0s, es, fills,
-                                                                 sim, c_net, c_ok, extra))
+                    panic = cfg.get("panic")
+                    if panic:
+                        pj = panic_flags(chart.volume.to_numpy(float), cc, line, tg, side,
+                                         int(panic["volume_window_hours"] * 60 // minutes), panic["vol_ratio"],
+                                         panic["fast_bars"])
+                        exc_sets = [(arm_p, [e for e in exc if bool(pj[e[0] // per]) == (arm_p == "panic")])
+                                    for arm_p in panic["arms"]]
+                    else:
+                        exc_sets = [(None, exc)]
+                    for parm, exc_use in exc_sets:
+                        if not exc_use:
+                            continue
+                        for kind in cfg["confirm"]:
+                            conf_all = np.flatnonzero(confirmations(kind, side, cc, ch, cl, tg))
+                            for arm in arms:
+                                if arm is None:
+                                    conf_idx, arm_pools = conf_all, pools
+                                else:
+                                    need = side if arm == "with" else -side
+                                    conf_idx = conf_all[tstate[np.minimum((conf_all + 1) * per, len(o) - 1)] == need]
+                                    arm_pools = pools_by_state[need]
+                                for target_r in cfg["targets_r"]:
+                                    for max_re in cfg["reentry"]:
+                                        got = chain_confirmed(exc_use, conf_idx, side, bars, per, buffer, target_r, cap, cost,
+                                                              max_re)
+                                        if not got:
+                                            continue
+                                        p0s, es, fills, att, ext = (np.array([g[i] for g in got]) for i in range(5))
+                                        sim = {k: np.array([g[5][k] for g in got]) for k in got[0][5]}
+                                        key = f"{symbol}|{minutes}|{measure}|{level}|{side}|{kind}|{target_r}|re{max_re}"
+                                        key += f"|{arm}" if arm else ""
+                                        key += f"|{parm}" if parm else ""
+                                        rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(key.encode()))
+                                        ctrl = hr.draw_controls(es, arm_pools, month, atr_pct, rng, n_ctrl)
+                                        c_net, c_ok = hr.control_outcome(bars, ctrl, sim["risk_frac"], side, target_r, cap,
+                                                                         cost)
+                                        cell = {"symbol": symbol, "minutes": minutes, "side": side, "vix": False,
+                                                "measure": measure, "level": level, "stop": f"swing{100 * buffer:g}",
+                                                "target_r": target_r}
+                                        extra = {"conf": kind, "reentry": max_re, "attempt": att, "extreme": ext}
+                                        if arm:
+                                            extra["trend"] = arm
+                                        if parm:
+                                            extra["panic"] = parm
+                                        frames.append(hr.trade_frame(cell, pidx, month, line_p, atr_pct, p0s, es, fills,
+                                                                     sim, c_net, c_ok, extra))
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
 

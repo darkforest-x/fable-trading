@@ -485,8 +485,8 @@ CELL = ["minutes", "side", "vix", "measure", "level", "stop", "target_r"]
 
 
 def cell_keys(frame: pd.DataFrame) -> list[str]:
-    """v1 cells, plus the re-entry arm (v2+), the confirmation kind (v4) and the trend arm (v5) when present."""
-    return CELL + [k for k in ("reentry", "conf", "trend") if k in frame.columns]
+    """v1 cells plus, when present, the re-entry arm (v2+), confirmation (v4), trend arm (v5), panic arm (v6)."""
+    return CELL + [k for k in ("reentry", "conf", "trend", "panic") if k in frame.columns]
 
 
 def summarize(trades: pd.DataFrame, cfg: dict) -> pd.DataFrame:
