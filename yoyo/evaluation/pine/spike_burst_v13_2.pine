@@ -3280,9 +3280,10 @@ alertcondition(v130Retest and v130ConfirmedSide == -1, "SPIKE V13.2 回踩空头
 // alert can fire before the bar closes. An excursion ends at a later bar's close back within the
 // chosen share of the threshold; its ray then stops at that bar and fades, and the last N per side
 // are kept. Display and alerts only: no V13.1 signal, filter, entry or risk path reads this layer.
-// No plot()/plotshape(): V13.1 already sits near Pine's 64-plot limit (the first V13.2 save added
-// a plot and two plotshapes with input colours and failed at runtime with RE10140, 74 plots), so the
-// start marks are labels kept and deleted together with their rays.
+// No plot-type output and no alertcondition(): V13.1 sits exactly at Pine's 64-plot limit and both
+// count against it (first save: 2 plotshapes + 1 plot + 3 alertconditions -> RE10140, 74 plots;
+// second save without the plots -> 67). Start marks are labels kept and deleted with their rays;
+// alerts use alert() only - create the alert with "Any alert() function call" (V13.1 has none).
 // Fading this distance was backtested and rejected (exp-htf-ma-reversion-20261009-v1..v4); the
 // mark is an observation aid, not a validated entry.
 string gV132 = "V13.2 · 离线提示"
@@ -3389,7 +3390,4 @@ if v132DnStart
     alert("SPIKE V13.2 线下方离线 ≥" + str.tostring(v132Pct) + "% | " + syminfo.tickerid + " | " + timeframe.period + " | 线 " + str.tostring(v132Line, format.mintick) + " | 最低 " + str.tostring(v132DnExt, format.mintick), alert.freq_once_per_bar)
 if v132UpStart
     alert("SPIKE V13.2 线上方离线 ≥" + str.tostring(v132Pct) + "% | " + syminfo.tickerid + " | " + timeframe.period + " | 线 " + str.tostring(v132Line, format.mintick) + " | 最高 " + str.tostring(v132UpExt, format.mintick), alert.freq_once_per_bar)
-alertcondition(v132DnStart, "SPIKE V13.2 线下方离线", "SPIKE V13.2 线下方离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}} | 已在最低点画射线")
-alertcondition(v132UpStart, "SPIKE V13.2 线上方离线", "SPIKE V13.2 线上方离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}} | 已在最高点画射线")
-alertcondition(v132DnStart or v132UpStart, "SPIKE V13.2 离线提示（任一方向）", "SPIKE V13.2 离线达到阈值 | {{exchange}}:{{ticker}} | {{interval}} | 现价 {{close}}")
 // END V132 DISTANCE LAYER

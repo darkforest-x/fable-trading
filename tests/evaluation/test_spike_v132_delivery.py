@@ -25,7 +25,8 @@ def test_every_alert_and_the_title_carry_v132():
     assert 'shorttitle="SPIKE V13.2"' in made and "max_lines_count=500" in made
     alerts = [line for line in made.splitlines() if line.startswith("alertcondition(")]
     assert alerts and all("SPIKE V13.1" not in a for a in alerts)
-    assert sum("SPIKE V13.2 线下方离线" in a or "SPIKE V13.2 线上方离线" in a for a in alerts) == 2
+    assert len(alerts) == sum(line.startswith("alertcondition(") for line in d.PARENT.read_text().splitlines())
+    assert made.count('alert("SPIKE V13.2 线下方离线') == 1 and made.count('alert("SPIKE V13.2 线上方离线') == 1
 
 
 def test_layer_only_writes_its_own_state_and_reads_the_v131_lines():
@@ -44,5 +45,9 @@ def test_layer_drawing_budget():
     assert layer.count("line.new(") == 2 and layer.count("label.new(") == 4
     assert 'maxval=40' in layer.split('"每个方向保留的历史射线"', 1)[1].split("\n", 1)[0]
     # V13.1 sits at Pine's plot limit: the layer must not add any plot-type output (RE10140 on the first save)
-    for call in ("plot(", "plotshape(", "plotchar(", "plotcandle(", "plotbar(", "bgcolor(", "barcolor(", "fill(", "hline("):
-        assert call not in layer.replace("// No plot()/plotshape()", "")
+    # V13.1 is exactly at Pine's 64-plot limit; plot-type calls and alertcondition() both count
+    # (RE10140: 74 plots on the first save, 67 with only the three alertconditions left)
+    code = "\n".join(line for line in layer.splitlines() if not line.lstrip().startswith("//"))
+    for call in ("plot(", "plotshape(", "plotchar(", "plotcandle(", "plotbar(", "bgcolor(", "barcolor(", "fill(",
+                 "hline(", "alertcondition("):
+        assert call not in code
