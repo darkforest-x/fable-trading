@@ -101,7 +101,7 @@ def draw(row: pd.Series, fr: dict, cfg: dict, out: Path) -> None:
     pos = np.linspace(0, len(w) - 1, 7).astype(int)
     ax.set_xticks(pos, [local(w.index[p]).strftime("%m-%d %H:%M") for p in pos])
     ax.grid(alpha=0.15)
-    ax.set_xlim(-1, len(w) + 6)
+    ax.set_xlim(-1, len(w) + max(6, int(0.14 * len(w))))  # room for the price labels at the box end
     ax.legend(loc="upper left", fontsize=7.5, framealpha=0.9)
     result = f"{row['出场']} · 持仓 {row['持仓小时']:.1f}h · 净 {row['净收益%']:+.2f}%（{row['净R']:+.2f}R）"
     ax.set_title(f"ETHUSDT.P · 15 · OKX    做空 #{row['序号']} {row['年段']} · 入场 {row['入场时间']} · {result}",
