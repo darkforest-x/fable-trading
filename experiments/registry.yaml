@@ -11154,3 +11154,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change. HTML via the 15m builder (--run run_v1/okx_variant), report_v1 local only. Doubling-stake overlay (martingale_variant.py, schemes and monthly restarts as the weekend experiment; run_v1/martingale_variant.json): OKX fixed 10/20/50U end 1440/1881/3202U (50U: DD 73%, 27% of 30 start months ruined; 10/20U never ruined); every doubling scheme is ruined from 2024-02 and in 47-90% of start months. Binance fixed 10/20/50U 1349/1698/2746U; 10U cap-3 doubling survives from 2021-09 (1825U, DD 78%) but is ruined in 64% of start months (median 61U); all other doubling schemes ruined.
+  - experiment_id: exp-spike-v129-eth15m-paramopt-20261011-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: Over a pre-registered 5x5x5 grid of SPIKE V12.9 density width, three-bar advance and volume-ratio thresholds, does the cell selected on Binance ETH 15m 2020-07..2024-01 beat the default and stay net positive on OKX ETH 15m and Binance ETH 15m 2024-02..2026-10?
+    single_variable: Signal-threshold triple only (both literal sites); every other V12.9 rule, exit and cost fixed; ordinary signals.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-11 做参数优化，先用15m ETH试 (threshold changes are the owner's decision). Selection rule (neighbourhood-smoothed mean R, >= 60 trades) and pass rule fixed in config.json before running; default must reproduce V12.9 signals exactly on both datasets. No Pine, monitor or account change.
