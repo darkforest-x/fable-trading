@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-spike-v129-eth5m-exit-20261010-v1",
+  "question": "Does any single tightening of the SPIKE V12.9 5m exit (selected on OKX ETH ordinary trades before 2025-10-10) raise mean net R after 0.2% round-trip cost on both OKX ETH 5m last twelve months and Binance ETH 5m 2021-09-25..2024-01-31, and is the gain specific to the signal versus matched random entries?",
+  "single_variable": "Exit rule only. Entries, sides, entry prices, initial stops and recorded opposite-signal exits are frozen from the parent ledgers; candidates only tighten protection or scale out earlier (spike_exit_giveback.POLICIES).",
+  "owner_approval": "2026-10-10 owner chose option 3 (5m exit single-variable test), which changes barrier parameters under study only; no Pine, monitor, preset or account change.",
+  "okx_experiment": "exp-spike-v129-eth5m-20261010-v1",
+  "okx_split": "2025-10-10T00:00:00+00:00",
+  "binance_ledger": "experiments/active/exp-spike-manual-system-20260925-v1/run_v1/streams/ETHUSDT_5m",
+  "binance_data": "data/research/spike_manual_system_20260925/ETHUSDT.csv.gz",
+  "binance_data_sha256": "1bd4c4ef5d934f22f5c42eeba7c5dcb6446db2ff3bec02adf115bf3a56996393",
+  "binance_end": "2024-02-01T00:00:00+00:00",
+  "selection": "Among non-incumbent candidates, the highest mean net R on OKX ordinary signal trades signalled before okx_split; it must beat the incumbent there, otherwise nothing is selected.",
+  "pass_rule": "Selected candidate: mean net R minus incumbent > 0 on OKX last twelve months and on Binance 2021-09..2024-01 ordinary signal trades, and pooled validation paired sign-flip p < 0.01 (two-sided). Joint trades and matched controls are reported, not used for selection.",
+  "side_cost": 0.001,
+  "stat_seed": 1010141,
+  "training_eligible": false,
+  "production_eligible": false
+}

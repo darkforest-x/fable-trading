@@ -11106,3 +11106,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 Notion #46 回测 ethusdt.p 5min级别的 给出详细回测数据. Owner's chart is OKX ETHUSDT.P. Builder yoyo/evaluation/spike_v129_eth5m.py must reproduce every closed joint trade of exp-spike-lowtf-v1-v126-20260922-v1 (ETH 5m v126 arm) exactly. Next-open fills; add hints not executed; pivot-tie native parity unverified. Data receipt data/research/spike_v129_eth5m_20261010/receipt.json; ledgers (trades/controls/statuses/candidates .csv.gz, trades_beijing.csv) local only, hashes in run_v1/receipt.json. Short-side replication check read the existing exp-spike-manual-system-20260925-v1 ETH 5m baseline ledger. No report requested.
+  - experiment_id: exp-spike-v129-eth5m-exit-20261010-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: Does any single tightening of the SPIKE V12.9 5m exit, selected on OKX ETH ordinary trades before 2025-10-10, raise mean net R after 0.2% cost on both OKX ETH 5m last twelve months and Binance ETH 5m 2021-09..2024-01, and is the gain signal-specific versus matched random entries?
+    single_variable: Exit rule only - spike_exit_giveback candidates (trail3, trail2, arm1, be1, lock1, half2) against the incumbent 2R-armed 4ATR close trail; entries, stops and recorded opposite exits frozen from exp-spike-v129-eth5m-20261010-v1 and exp-spike-manual-system-20260925-v1.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-10 chose option 3 (5m 出场单变量测试) after the pattern audit. Selection and pass rule fixed in config.json before results. No Pine, monitor, preset or account change. No report requested.
