@@ -11144,13 +11144,13 @@ experiments:
     notes: Owner 2026-10-10 15m去掉周末再回测一下. Post-hoc hypothesis seen in these same ledgers, so both samples are in-sample; only forward data can validate. No Pine, monitor or account change. HTML view via the 15m builder (--run run_v1/okx_no_weekend --compare run_v1/comparison.csv), output report_v1 local only.
   - experiment_id: exp-spike-v129-eth15m-hours-20261010-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
-    result: Pending.
+    source_commit: 210bb5be92
+    status: inconclusive
+    result: In-sample only. OKX ETH 15m - baseline 164 trades +14.6R, no-weekend 133 +35.0R, no-weekend+12-16 117 trades +42.7R (mean +0.37R, -12.7R without the best five, PF 1.55, R drawdown 30.4, longest loss run 18); before 2025-10-10 +3.6R (first non-negative), after +39.2R; excess over allowed-hour random +75.4bp p0.017. Binance ETH 15m 2021-09..2026-09 - baseline 267 -20.5R, no-weekend 205 +22.1R, variant 183 trades +32.3R (mean +0.18R, -13.5R ex top5, PF 1.25, longest loss run 18); before 2024-02 +4.9R, after +27.4R; excess over allowed-hour random -9.8bp p0.66, so on Binance the gain is a time-of-day effect that random entries share, not signal-specific. One control draw per trade is seed-sensitive (OKX baseline excess +19.9bp p0.19 under the weekend run's seed vs +41.7bp p0.035 here). Both filters were found in these ledgers; forward data is the only test.
     question: On top of the no-weekend 15m rule, does also dropping SPIKE V12.9 ordinary signals with a Beijing 12:00-16:00 close change OKX ETH 15m (2024-02..2026-10) and Binance ETH 15m (2021-09..2026-09) results, after 0.2% cost and against matched random entries from the same allowed hours?
     single_variable: Entry admission only, relative to the no-weekend arm - Beijing close hours 12-15 dropped; occupancy re-replayed; baseline and no-weekend arms recomputed side by side.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: false
-    notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change.
+    notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change. HTML via the 15m builder (--run run_v1/okx_variant), report_v1 local only.
