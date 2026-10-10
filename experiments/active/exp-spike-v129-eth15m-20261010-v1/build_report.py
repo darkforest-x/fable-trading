@@ -577,7 +577,8 @@ def build() -> Path:
     for label, g in samples:
         we = g.loc[g.wd >= 5].net_r
         wdys = g.loc[g.wd < 5].net_r
-        t_stat = (we.mean() - wdys.mean()) / math.sqrt(we.var() / len(we) + wdys.var() / len(wdys))
+        t_stat = ((we.mean() - wdys.mean()) / math.sqrt(we.var() / len(we) + wdys.var() / len(wdys))
+                  if len(we) > 1 and len(wdys) > 1 else math.nan)
         weekend_rows.append([label, len(we), (fmt(we.mean()), cls(we.mean())), (fmt(we.sum(), 1), cls(we.sum())), len(wdys),
                              (fmt(wdys.mean()), cls(wdys.mean())), (fmt(wdys.sum(), 1), cls(wdys.sum())),
                              fmt(we.mean() - wdys.mean()), f"{t_stat:.2f}"])
