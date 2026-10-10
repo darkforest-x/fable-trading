@@ -48,12 +48,16 @@ def main() -> None:
     btc = btc.loc[(btc.policy == "baseline") & (btc.arm == "ordinary") & ~btc.censored.astype(bool), COLS]
     btc = blockify(btc)
     btc["period"] = np.where(btc.signal_close < SPLIT5, "2021-09..2024-01", "2024-02..2026-09")
-    frames = []
+    frames, skipped = [], []
     for folder in sorted(LONG.glob("*_15m")):
         path = folder / "serial_trades.csv.gz"
         if not path.exists():
             continue
-        t = pd.read_csv(path, usecols=COLS + ["arm", "policy", "in_window", "censored"])
+        wanted = set(COLS) | {"arm", "policy", "in_window", "censored"}
+        t = pd.read_csv(path, usecols=lambda c: c in wanted)
+        if not wanted <= set(t.columns):
+            skipped.append(folder.name)  # streams with no trade rows carry a reduced header
+            continue
         t = t.loc[(t.arm == "v9_both") & (t.policy == "baseline") & t.in_window.astype(bool) & ~t.censored.astype(bool), COLS]
         if len(t):
             frames.append(t)
@@ -72,13 +76,13 @@ def main() -> None:
            "btc_5m_overall": table(btc, ["period"]).to_dict("records"),
            "pooled_15m": pooled.to_dict("records"), "pooled_15m_overall": table(m, ["period"]).to_dict("records"),
            "majors_15m": majors.to_dict("records"), "symbols_15m": int(m.symbol.nunique()), "trades_15m": int(len(m)),
-           "symbols_ge40": int(len(big[big >= 40])), "best_block_counts": best.to_dict(), "worst_block_counts": worst.to_dict(),
+           "symbols_ge40": int(len(big[big >= 40])), "skipped_streams": skipped, "best_block_counts": best.to_dict(), "worst_block_counts": worst.to_dict(),
            "share_symbols_block_above_own_avg": above.to_dict()}
     (HERE / "run_v1" / "hour_winrate_symbols.json").write_text(json.dumps(out, ensure_ascii=False, indent=1, default=float) + "\n")
     pd.set_option("display.width", 220)
     print("BTC 5m"); print(table(btc, ["period", "block"]).pivot_table(index="block", columns="period", values=["n", "win_rate", "mean_r"]).round(3))
     print(table(btc, ["period"]).round(3))
-    print(f"\n15m all symbols: {m.symbol.nunique()} symbols, {len(m)} trades")
+    print(f"\n15m all symbols: {m.symbol.nunique()} symbols, {len(m)} trades; skipped {len(skipped)} streams without trade columns")
     print(pooled.pivot_table(index="block", columns="period", values=["n", "win_rate", "mean_r"]).round(3))
     print(table(m, ["period"]).round(3))
     print(majors.pivot_table(index="block", columns="symbol", values="win_rate").round(2))
