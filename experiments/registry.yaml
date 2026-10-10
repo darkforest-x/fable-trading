@@ -11096,13 +11096,13 @@ experiments:
     notes: Owner 2026-10-10 嗯 to recommendation A. v4 scan unchanged without a trend block (ETH v4 trades regenerated exactly). Read fixed in analyze.py before results (arms.csv, with_selection.csv, eth_best.json). trades.csv.gz local only - results_market sha256 5fb7648ad027b5d318aafc63f5b37c9576ee98e125c1826dc23b540fb1054649, results_eth sha256 35f20a5a55aab266c7e22e25b0fe622cda77393970efe12f590e676880183587. No report requested.
   - experiment_id: exp-spike-v129-eth5m-20261010-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
-    result: Pending.
+    source_commit: 55a2dff008
+    status: completed
+    result: OKX ETHUSDT.P 5m 2024-02-01..2026-10-10, 20bp, next-open fills; all 241 closed joint trades of the 2026-09-22 OKX run reproduced exactly. Ordinary both-side 559 closed (135 skipped in position) - win 27.2%, mean net -0.180R (gross +0.216R, cost 0.396R), total -100.6R, PF 0.80, max 16 losses in a row, R drawdown 118; mean net -6.2bp vs matched random -19.9bp, excess +13.7bp CI -3.4..+32.0 p0.06. Long 275 -0.267R (-73.5R, excess -9.3bp p0.76). Short 284 -0.095R (-27.1R, +3.0bp net, excess +36.1bp CI 13.9..61.5, both halves positive) but the same Binance short ledger 2021-09..2024-01 shows no excess (+0.3bp p0.48, -0.44R) so the short lead is not replicated. Joint long 249 - win 28.9%, -0.259R, -64.5R, PF 0.72, excess +2.9bp p0.42. 2026 YTD joint +7.3R rests on one +29.45R trade (2026-08-19 16:40 BJ); without it -22.1R. Last 12 months ordinary -8.7R, joint -8.0R; last 30 days ordinary -1.2R (19), joint -1.4R (8). Break-even round-trip cost about 0.11% ordinary, 0.08% joint. No profitable 5m rule established.
     question: How did unchanged SPIKE V12.9 signals perform on OKX ETHUSDT.P 5m from 2024-02-01 to 2026-10-10 (ordinary both-side and long-only joint) after 0.2% round-trip cost and against matched random entries?
     single_variable: None - frozen-rule descriptive replay. On 5m V12.9 equals V12.8/V12.6 (4ATR trail, completed 15m EMA120 gate); only the data end moves to 2026-10-10 and the ordinary arm and controls are added to the 2026-09-22 OKX low-timeframe run.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: false
-    notes: Owner 2026-10-10 Notion #46 回测 ethusdt.p 5min级别的 给出详细回测数据. Owner's chart is OKX ETHUSDT.P. Builder yoyo/evaluation/spike_v129_eth5m.py must reproduce every closed joint trade of exp-spike-lowtf-v1-v126-20260922-v1 (ETH 5m v126 arm) exactly. Next-open fills; add hints not executed; pivot-tie native parity unverified. No report requested.
+    notes: Owner 2026-10-10 Notion #46 回测 ethusdt.p 5min级别的 给出详细回测数据. Owner's chart is OKX ETHUSDT.P. Builder yoyo/evaluation/spike_v129_eth5m.py must reproduce every closed joint trade of exp-spike-lowtf-v1-v126-20260922-v1 (ETH 5m v126 arm) exactly. Next-open fills; add hints not executed; pivot-tie native parity unverified. Data receipt data/research/spike_v129_eth5m_20261010/receipt.json; ledgers (trades/controls/statuses/candidates .csv.gz, trades_beijing.csv) local only, hashes in run_v1/receipt.json. Short-side replication check read the existing exp-spike-manual-system-20260925-v1 ETH 5m baseline ledger. No report requested.
