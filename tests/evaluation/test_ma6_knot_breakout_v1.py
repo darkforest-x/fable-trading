@@ -80,3 +80,23 @@ def test_the_owner_example_fires_every_variant():
     assert hits["confirm"] == ["23:05"]
     assert all(hits[v] == ["23:02"] for v in kb.VARIANTS if v != "confirm")
     assert got["past_flips"] == 10 and got["past_width"] == pytest.approx(0.672, abs=1e-3)
+
+
+def test_scan_output_feeds_the_shared_summary():
+    cfg = json.loads(kb.CONFIG.read_text())
+    rng = np.random.default_rng(1)
+    pieces = []
+    for k in range(40):  # tangled flat stretches, each ended by a sharp drop or rise
+        flat = 100 + 0.05 * np.sin(np.arange(60) * 2 * np.pi / 7) + rng.normal(0, 0.01, 60)
+        pieces.append(flat)
+        pieces.append(flat[-1] + (-1) ** k * np.arange(1, 21) * 0.3)
+        pieces.append(np.full(40, flat[-1] + (-1) ** k * 6.0) + rng.normal(0, 0.02, 40))
+    close = np.concatenate([100 + 0.05 * np.sin(np.arange(800) * 2 * np.pi / 7), *pieces])
+    raw = raw_1m(close, "2024-12-25")
+    bars = kb.bars_from(raw, 1, 1)
+    months = sorted(set(pd.to_datetime(bars.index, unit="ms").to_period("M").astype(str)))
+    frames = kb.scan_frame("TESTUSDT", 1, bars, kb.bars_from(raw, 1, 5), set(months), {**cfg, "start": "2024-12-25T00:00:00Z"})
+    trades = pd.concat(frames, ignore_index=True)
+    assert set(trades.variant) >= {"primary", "knot_v131"} and set(trades.target_r) == {3, 5}
+    summary = kb.sb.summarize(trades, cfg)
+    assert {"events", "mean_net_r", "excess_r", "p_excess"} <= set(summary.columns) and len(summary)

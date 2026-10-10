@@ -280,7 +280,7 @@ def scan_frame(symbol: str, minutes: int, bars: pd.DataFrame, htf: pd.DataFrame,
                 "past_flips": f.past_flips.to_numpy()[ei], "rv": f.rv.to_numpy()[ei], "close_pos": f.close_pos.to_numpy()[ei],
                 **{f"has_{a}": extra[a] for a in ADDED},
                 "exit_kind": got["kind"], "bars": got["bars"], "gross_r": got["gross_r"], "net_r": got["net_r"],
-                "net_ret": got["net_ret"], "mae_r": got["mae_r"],
+                "net_ret": got["net_ret"], "never_closed_below": got["never_closed_below"], "mae_r": got["mae_r"],
                 "control_net_r": c_r, "control_net_ret": c_b, "controls_valid": np.isfinite(cr).sum(axis=1)}))
     return frames
 
@@ -358,10 +358,10 @@ def run(output: Path, *, limit: int | None = None, workers: int = 6, workers_1m:
                 if (k + 1) % 25 == 0 or jobs is jobs_1m:
                     print(json.dumps({"done": k + 1, "of": len(jobs), "elapsed_s": round(time.perf_counter() - began, 1)}), flush=True)
     trades = pd.concat([p for p in parts if len(p)], ignore_index=True)
-    summary = sb.summarize(trades, cfg)
-    eth = sb.summarize(trades.loc[trades.symbol.eq("ETHUSDT") & trades.minutes.eq(1)], cfg)
     output.mkdir(parents=True, exist_ok=True)
     trades.to_csv(output / "trades.csv.gz", index=False, compression={"method": "gzip", "mtime": 0})
+    summary = sb.summarize(trades, cfg)
+    eth = sb.summarize(trades.loc[trades.symbol.eq("ETHUSDT") & trades.minutes.eq(1)], cfg)
     summary.to_csv(output / "summary.csv", index=False)
     eth.to_csv(output / "summary_eth_1m.csv", index=False)
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
