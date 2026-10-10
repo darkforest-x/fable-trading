@@ -104,7 +104,8 @@ def okx_sample() -> pd.DataFrame:
     trades.loc[~trades.trade_key.map(ctrl.matched).fillna(False).astype(bool), "excess_bp"] = np.nan
     trades["sample"] = np.where(pd.to_datetime(trades.signal_close, utc=True) < pd.Timestamp(cfg["split"]),
                                 "okx_earlier", "okx_last12m")
-    return pd.concat([trades, features(trades, facts, bars)], axis=1)
+    extra = features(trades, facts, bars)
+    return pd.concat([trades.drop(columns=[c for c in extra if c in trades]), extra], axis=1)
 
 
 def binance_sample() -> pd.DataFrame:
@@ -121,7 +122,9 @@ def binance_sample() -> pd.DataFrame:
     trades["excess_bp"] = trades.trade_key.map(ctrl.excess_bp)
     trades["arm"] = trades.arm.replace({"ordinary": "ordinary", "joint": "joint"})
     trades["sample"] = "binance_2021_2024"
-    return pd.concat([trades, features(trades, facts, base)], axis=1)
+    extra = features(trades, facts, base)
+    # The parent ledger already stores rv/momentum; keep one recomputed copy only.
+    return pd.concat([trades.drop(columns=[c for c in extra if c in trades]), extra], axis=1)
 
 
 def bucket_table(data: pd.DataFrame, cuts: dict) -> pd.DataFrame:
