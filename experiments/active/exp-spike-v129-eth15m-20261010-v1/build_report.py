@@ -641,7 +641,12 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 <div class="kpi"><span>前段 → 近 12 个月</span><b>{rc['earlier']['ordinary_all']['sum_net_r']:+.1f}R → {rc['last_12m']['ordinary_all']['sum_net_r']:+.1f}R</b><span>{rc['earlier']['ordinary_all']['closed']} 笔 → {rc['last_12m']['ordinary_all']['closed']} 笔</span></div>
 <div class="kpi"><span>最亏的星期</span><b class="neg">{worst_day[0]} {worst_day[5][0]}R</b><span>{worst_day[1]} 笔 · 每笔 {worst_day[4][0]}R</span></div>
 </div>
-<div class="note">结论：扣 0.2% 成本后 {k['ordinary_all']['closed']} 笔合计 {k['ordinary_all']['sum_net_r']:+.1f}R（每笔 {k['ordinary_all']['mean_net_r']:+.2f}R），但去掉最好的 5 笔是 {k['ordinary_all']['sum_net_r_without_top5']:+.1f}R；比同周、同波动的随机入场每笔多 {k['ordinary_all']['random_excess']['mean_excess_bp']:.1f}bp，{significance(k['ordinary_all']['random_excess']['p_one_sided'])}。前段（2024-02 → 2025-10）{rc['earlier']['ordinary_all']['sum_net_r']:+.1f}R，近 12 个月 {rc['last_12m']['ordinary_all']['sum_net_r']:+.1f}R，后者主要来自做空（{rc['last_12m']['ordinary_short']['sum_net_r']:+.1f}R），同期随机做空每笔 {rc['last_12m']['ordinary_short']['control_mean_net_r']:+.2f}R{'（ETH 在跌，随机做空也赚）' if rc['last_12m']['ordinary_short']['control_mean_net_r'] > 0 else ''}。多单全区间 {k['ordinary_long']['sum_net_r']:+.1f}R。15m 止损比 5m 宽（中位 {k['ordinary_all']['median_risk_bp'] / 100:.2f}%），手续费每笔只吃 {k['ordinary_all']['mean_fee_r']:.2f}R，这是它比 5m 好的主要原因。</div>
+<div class="note">结论：扣 0.2% 成本后 {k['ordinary_all']['closed']} 笔合计 {k['ordinary_all']['sum_net_r']:+.1f}R（每笔 {k['ordinary_all']['mean_net_r']:+.2f}R），但去掉最好的 5 笔是 {k['ordinary_all']['sum_net_r_without_top5']:+.1f}R；
+比同周、同波动的随机入场每笔多 {k['ordinary_all']['random_excess']['mean_excess_bp']:.1f}bp，{significance(k['ordinary_all']['random_excess']['p_one_sided'])}。
+前段（2024-02 → 2025-10）{rc['earlier']['ordinary_all']['sum_net_r']:+.1f}R，近 12 个月 {rc['last_12m']['ordinary_all']['sum_net_r']:+.1f}R，后者主要来自做空（{rc['last_12m']['ordinary_short']['sum_net_r']:+.1f}R），同期随机做空每笔 {rc['last_12m']['ordinary_short']['control_mean_net_r']:+.2f}R{'（ETH 在跌，随机做空也赚）' if rc['last_12m']['ordinary_short']['control_mean_net_r'] > 0 else ''}。
+多单全区间 {k['ordinary_long']['sum_net_r']:+.1f}R。
+15m 止损比 5m 宽（中位 {k['ordinary_all']['median_risk_bp'] / 100:.2f}%），手续费每笔只吃 {k['ordinary_all']['mean_fee_r']:.2f}R，这是它比 5m 好的主要原因。
+</div>
 
 {compare_section()}
 <h2 id="sum">总览（全区间）</h2>
