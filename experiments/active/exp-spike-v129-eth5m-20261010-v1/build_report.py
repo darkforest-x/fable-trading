@@ -201,33 +201,42 @@ def trade_chart(row, frame: pd.DataFrame, tick: float, arms: str, number: int, p
     e0, x0 = e - a, x - a
     mfe = float(row.mfe_known_r) if math.isfinite(row.mfe_known_r) else 0.0
     peak = entry + side * max(mfe, 0) * risk
+    xp = float(row.exit_price)
+    lo = min(l[idx].min(), stop, peak, xp)
+    hi = max(h[idx].max(), stop, peak, xp)
+    pad = (hi - lo) * .06
+    near = (hi - lo) * .03
+    box = {"facecolor": "white", "alpha": .82, "edgecolor": "none", "pad": 1.2}
     ax.add_patch(plt.Rectangle((e0 - .4, min(entry, stop)), x0 - e0 + .8, risk, color=DOWN, alpha=.16, lw=0))
     if mfe > 0:
         ax.add_patch(plt.Rectangle((e0 - .4, min(entry, peak)), x0 - e0 + .8, abs(peak - entry), color=UP, alpha=.13, lw=0))
     ax.hlines(stop, e0 - .4, x0 + .4, color=DOWN, lw=1)
     ax.hlines(entry, e0 - .4, x0 + .4, color="#374151", lw=1)
-    for k in (1, 2, 3, 5, 10):
-        if k <= max(3, mfe + .5):
-            y = entry + side * k * risk
-            ax.hlines(y, e0, x0, color=UP, lw=.7, ls=(0, (4, 4)), alpha=.55)
-            ax.text(x0 + .6, y, f"{k}R", fontsize=7, color=UP, va="center", alpha=.8)
+    last = entry
+    for k in (1, 2, 3, 5, 10, 20):
+        y = entry + side * k * risk
+        if k > max(3, mfe + .5) or abs(y - last) < near or not (lo - pad <= y <= hi + pad):
+            continue
+        ax.hlines(y, e0, x0, color=UP, lw=.7, ls=(0, (4, 4)), alpha=.55)
+        ax.text(x0 + .6, y, f"{k}R", fontsize=7, color=UP, va="center", alpha=.85)
+        last = y
     armed = prot != prot[0]
     if armed.any():
         pp = np.where(armed, prot, np.nan)
         ax.step(np.arange(e0, x0 + 1), pp, where="post", color="#0f766e", lw=1.4)
-    xp = float(row.exit_price)
-    ax.hlines(xp, e0, x0 + 3, color=UP if row.net_r > 0 else DOWN, lw=1.3, ls="--")
-    ax.text(x0 + 3.5, xp, f"离场 {row.net_r:+.2f}R", fontsize=8.5, va="center",
-            color=UP if row.net_r > 0 else DOWN, fontweight="bold")
-    ax.text(x0 + .6, stop, f"止损 {stop:.2f}", fontsize=8, color=DOWN, va="center")
-    ax.text(e0 - 1, entry, f"进场 {entry:.2f} ", fontsize=8, color="#374151", va="center", ha="right")
-    if mfe > 0:
-        ax.text(e0 + 1, peak, f"峰值 {mfe:.1f}R", fontsize=8, color=UP, va="bottom" if side == 1 else "top")
+    color = UP if row.net_r > 0 else DOWN
+    ax.hlines(xp, e0, x0 + 3, color=color, lw=1.3, ls="--")
+    if abs(xp - stop) < near:
+        ax.text(x0 + 3.5, xp, f"止损离场 {xp:.2f}  {row.net_r:+.2f}R", fontsize=8.5, va="center", color=DOWN,
+                fontweight="bold", bbox=box)
+    else:
+        ax.text(x0 + 3.5, xp, f"离场 {row.net_r:+.2f}R", fontsize=8.5, va="center", color=color, fontweight="bold", bbox=box)
+        ax.text(x0 + .6, stop, f"止损 {stop:.2f}", fontsize=8, color=DOWN, va="center", bbox=box)
+    ax.text(e0 - 1, entry, f"进场 {entry:.2f}", fontsize=8, color="#374151", va="center", ha="right", bbox=box)
+    if mfe > 0 and abs(peak - entry) >= near:
+        ax.text(e0 + 1, peak, f"峰值 {mfe:.1f}R", fontsize=8, color=UP, va="bottom" if side == 1 else "top", bbox=box)
     marker_y = l[sig] - .4 * atr[sig] if side == 1 else h[sig] + .4 * atr[sig]
     ax.scatter([sig - a], [marker_y], marker="^" if side == 1 else "v", s=70, color=UP if side == 1 else DOWN, zorder=5)
-    lo = min(l[idx].min(), stop, peak, xp)
-    hi = max(h[idx].max(), stop, peak, xp)
-    pad = (hi - lo) * .06
     ax.set_ylim(lo - pad, hi + pad)
     ax.set_xlim(-1, len(idx) + 9)
     ax.yaxis.tick_right()
