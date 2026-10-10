@@ -15,7 +15,10 @@ recorded exit price for every trailing-stop exit.
 Owner follow-up the same day: "去掉这个啊突破+spike" -- the joint arm is left out of the
 page (ledgers unchanged), and "整个2年的回测 哪个时间段亏损最多" adds the worst-period
 section: equity down-legs (15R zigzag), worst rolling 30/90/180 days and months, with
-the OKX ETH hourly close for market context.
+the OKX ETH hourly close for market context. Clarified "我说的是星期": the weekday
+section groups trades by the Beijing weekday of the signal close (OKX both periods
+and Binance 2021-09..2024-01) and shows the share of 5m bars the BB200 rule counts
+as compressed per weekday (its 500-bar window spans about 42 hours).
 
 Run: PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v129-eth5m-20261010-v1/build_report.py
 Output (local, untracked): experiments/active/exp-spike-v129-eth5m-20261010-v1/report_v1/
@@ -80,6 +83,10 @@ def load() -> dict:
     trades["hold_h"] = (trades.exit_time - trades.entry_time).dt.total_seconds() / 3600
     receipt = json.loads((RUN / "receipt.json").read_text())
     h1 = frame.close.resample("1h").last().dropna()
+    width = 4 * frame.close.rolling(200).std(ddof=0) / frame.close.rolling(200).mean()
+    threshold = width.shift().rolling(500).quantile(.10)
+    known = threshold.notna()
+    frame["bb_compressed"] = (width <= threshold).where(known)
     return {"cfg": cfg, "frame": frame, "h1": h1, "trades": trades, "receipt": receipt,
             "yearly": pd.read_csv(RUN / "yearly.csv"), "monthly": pd.read_csv(RUN / "monthly.csv"),
             "streaks": json.loads((RUN / "patterns_v1" / "streaks.json").read_text()),
@@ -496,6 +503,51 @@ def build() -> Path:
     qq = ts.groupby("quarter").agg(n=("net_r", "size"), r=("net_r", "sum"), w=("net_r", lambda r: (r > 0).mean()))
     quarter_rows = [[q, int(v.n), fmt(v.w, pct=True), (fmt(v.r, 1), cls(v.r))] for q, v in qq.iterrows()]
     dd_all = stats(ts)["dd"]
+    names = "一二三四五六日"
+    wk = trades.assign(wd=_bj(trades.signal_close).dayofweek, blk=(_bj(trades.signal_close).hour // 6) * 6)
+    week_rows = []
+    for wd, g in wk.groupby("wd"):
+        week_rows.append([f"周{names[wd]}", len(g), fmt((g.net_r > 0).mean(), pct=True), fmt(g.gross_r.mean()),
+                          (fmt(g.net_r.mean()), cls(g.net_r.mean())), (fmt(g.net_r.sum(), 1), cls(g.net_r.sum())),
+                          (fmt(g.loc[g.side == 1].net_r.sum(), 1), cls(g.loc[g.side == 1].net_r.sum())),
+                          (fmt(g.loc[g.side == -1].net_r.sum(), 1), cls(g.loc[g.side == -1].net_r.sum())),
+                          fmt(g.loc[g.matched].control_net_r.mean())])
+    bn_all = pd.read_csv(BINANCE_LEDGER / "trades.csv.gz")
+    bn_all = bn_all.loc[(bn_all.policy == "baseline") & (bn_all.arm == "ordinary") & ~bn_all.censored.astype(bool)].copy()
+    bn_all["signal_close"] = pd.to_datetime(bn_all.signal_close, utc=True)
+    bn_all = bn_all.loc[bn_all.signal_close < pd.Timestamp("2024-02-01T00:00:00Z")]
+    split = pd.Timestamp(cfg["split"])
+    samples = (("OKX 2024-02 → 2025-10", wk.loc[wk.signal_close < split]), ("OKX 近 12 个月", wk.loc[wk.signal_close >= split]),
+               ("币安 2021-09 → 2024-01", bn_all.assign(wd=_bj(bn_all.signal_close).dayofweek)))
+    week_cross = []
+    for wd in range(7):
+        row = [f"周{names[wd]}"]
+        for _, g in samples:
+            r = g.loc[g.wd == wd].net_r
+            row.append((f"{fmt(r.mean())}（{len(r)}）" if len(r) else "–", cls(r.mean()) if len(r) else ""))
+        week_cross.append(row)
+    weekend_rows = []
+    for label, g in samples:
+        we = g.loc[g.wd >= 5].net_r
+        wdys = g.loc[g.wd < 5].net_r
+        t_stat = (we.mean() - wdys.mean()) / math.sqrt(we.var() / len(we) + wdys.var() / len(wdys))
+        weekend_rows.append([label, len(we), (fmt(we.mean()), cls(we.mean())), (fmt(we.sum(), 1), cls(we.sum())), len(wdys),
+                             (fmt(wdys.mean()), cls(wdys.mean())), (fmt(wdys.sum(), 1), cls(wdys.sum())),
+                             fmt(we.mean() - wdys.mean()), f"{t_stat:.2f}"])
+    heat = wk.pivot_table(index="wd", columns="blk", values="net_r", aggfunc=["sum", "size"])
+    heat_rows = []
+    for wd in range(7):
+        row = [f"周{names[wd]}"]
+        for blk in (0, 6, 12, 18):
+            n_ = heat.get(("size", blk), pd.Series()).get(wd, np.nan)
+            v = heat.get(("sum", blk), pd.Series()).get(wd, np.nan)
+            row.append(("–", "") if pd.isna(n_) else (f"{fmt(v, 1)}（{int(n_)}）", cls(v)))
+        heat_rows.append(row)
+    bbw = frame.assign(wd=_bj(frame.index).dayofweek).dropna(subset=["bb_compressed"])
+    bb_rows = [[f"周{names[wd]}", f"{g.bb_compressed.mean() * 100:.0f}%", f"{g.volume.median():,.0f}",
+                f"{((g.high - g.low) / g.close).median() * 1e4:.0f} bp", int((wk.wd == wd).sum())]
+               for wd, g in bbw.groupby("wd")]
+    worst_day = min(week_rows, key=lambda r: float(r[5][0]))
 
     css = """
 :root{--bg:#f7f7f5;--card:#fff;--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--pos:#089981;--neg:#e11d48;--acc:#AD7B29}
@@ -522,13 +574,13 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 <main>
 <h1>SPIKE V12.9 · OKX ETHUSDT.P 5m 回测</h1>
 <p class="sub">回测区间 2024-02-01 至 2026-10-10 18:00（北京时间）· 下一根 5m 开盘价进场 · 止损 = 前 5 根极值外 0.2ATR（至少 2ATR）· 收盘浮盈到 2R 后启动 4ATR 跟踪止损 · 反向信号离场 · 往返成本 0.2% · R = 初始止损距离</p>
-<nav><a href="#sum">总览</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#pattern">规律审计</a><a href="#exit">出场测试</a><a href="#recent">最近半年逐笔</a><a href="#limits">说明</a></nav>
+<nav><a href="#sum">总览</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#pattern">规律审计</a><a href="#exit">出场测试</a><a href="#recent">最近半年逐笔</a><a href="#limits">说明</a></nav>
 <div class="kpis">
 <div class="kpi"><span>普通信号（多空）</span><b>{k['ordinary_all']['closed']} 笔</b><span>胜率 {k['ordinary_all']['win_rate'] * 100:.1f}%</span></div>
 <div class="kpi"><span>普通 · 每笔 / 合计</span><b class="neg">{k['ordinary_all']['mean_net_r']:+.2f}R</b><span>合计 {k['ordinary_all']['sum_net_r']:+.1f}R</span></div>
 <div class="kpi"><span>最大回撤</span><b class="neg">{dd_all:.1f}R</b><span>2024-02-09 高点后一直没回去</span></div>
 <div class="kpi"><span>最近半年 · 普通</span><b class="{cls(rec['sum'])}">{rec['sum']:+.1f}R</b><span>{rec['n']} 笔 · 每笔 {rec['mean']:+.2f}R</span></div>
-<div class="kpi"><span>最亏的一段</span><b class="neg">{leg_rows[0][3][0]}R</b><span>{leg_rows[0][1]}</span></div>
+<div class="kpi"><span>最亏的星期</span><b class="neg">{worst_day[0]} {worst_day[5][0]}R</b><span>{worst_day[1]} 笔 · 每笔 {worst_day[4][0]}R</span></div>
 </div>
 <div class="note">结论：扣 0.2% 成本后整体亏损。多头平均不比随机入场强；空头在 OKX 上好于随机，但在币安 2021–24 年没有复现。亏损是持续地慢慢亏，赚钱只集中在几次短暂爆发；少数大单（2026-08-19 做多 +29.5R、2026-01-31 做空 +18.2R 等）决定了大部分盈利。本页只看普通信号（多空），已去掉突破+spike。</div>
 
@@ -537,7 +589,20 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 <h3>分时间窗</h3>
 {table(["区间", "分组", "笔数", "胜率", "每笔 R", "合计 R", "随机入场/笔 R", "比随机多 bp/笔", "p（单边）"], windows, 2)}
 
-<h2 id="worst">哪个时间段亏损最多</h2>
+<h2 id="week">按星期（北京时间，按信号出现的那天）</h2>
+{table(["星期", "笔数", "胜率", "扣费前/笔", "扣费后/笔", "合计 R", "其中多单 R", "其中空单 R", "随机入场/笔"], week_rows)}
+<p class="sub">周日只有 00–08 点有信号：V9 规则本身不在 UTC 周日开新单（北京周日 08:00 到周一 08:00），所以周一也只有 08 点以后的信号。</p>
+<h3>三段数据分开看（每笔 R，括号里是笔数）</h3>
+{table(["星期", "OKX 2024-02 → 2025-10", "OKX 近 12 个月", "币安 2021-09 → 2024-01"], week_cross)}
+<h3>周末（北京周六、周日）对比工作日</h3>
+{table(["样本", "周末笔数", "周末每笔", "周末合计", "工作日笔数", "工作日每笔", "工作日合计", "差", "t"], weekend_rows)}
+<h3>星期 × 时段（合计 R，括号里是笔数）</h3>
+{table(["星期", "00–06 点", "06–12 点", "12–18 点", "18–24 点"], heat_rows)}
+<h3>为什么周末信号多、又亏</h3>
+{table(["星期", "被 BB 规则算作压缩的 5m K 线占比", "5m 成交量中位数", "5m 振幅中位数", "信号笔数"], bb_rows)}
+<p class="sub">BB 压缩条件拿当前带宽和「此前 500 根 5m（约 42 小时）」比较。到了周末，这 42 小时里大多是工作日的活跃行情，周末本身清淡（成交量约少 40%、振幅小约 30%），于是大量周末 K 线被判为「压缩」，信号就多；但清淡时段的突破大多走不远。这是事后发现的规律，三段数据方向一致，但每段单独的统计强度都不算强（|t| 0.9–1.9）。</p>
+
+<h2 id="worst">按日期：哪段时间亏损最多</h2>
 <img class="wide" src="worst.png" alt="最亏时段">
 <p class="sub">黑线 = 普通信号累计 R（按离场时间）；紫线 = ETH 价格（右轴）；红色阴影 = 亏得最多的三段下跌（编号同下表）。下跌段按资金曲线回撤 15R 以上切分。</p>
 <h3>资金曲线的下跌段（从局部高点到局部低点）</h3>
