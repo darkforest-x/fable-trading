@@ -128,8 +128,9 @@ def equity(cells: list[tuple[str, pd.DataFrame]], path: Path) -> None:
     fig, ax = plt.subplots(figsize=(11, 4.6), dpi=110)
     colors = ["#1f2937", "#6b7280", DOWN, "#4679C9", "#AD7B29", UP]
     for (name, t), color in zip(cells, colors):
-        x = pd.DatetimeIndex(t.exit).tz_convert(BJ).tz_localize(None)
-        ax.plot(x, t.sort_values("exit").net_r.cumsum().to_numpy(), color=color, lw=1.4, label=name)
+        g = t.sort_values("exit")
+        x = pd.DatetimeIndex(g.exit).tz_convert(BJ).tz_localize(None)
+        ax.plot(x, g.net_r.cumsum().to_numpy(), color=color, lw=1.4, label=name)
     ax.axvline(SPLIT.tz_convert(BJ).tz_localize(None), color="#9ca3af", ls="--", lw=1)
     ax.text(SPLIT.tz_convert(BJ).tz_localize(None), ax.get_ylim()[1], " 第二年", va="top", fontsize=9, color="#6b7280")
     ax.axhline(0, color="#9ca3af", lw=.8)
