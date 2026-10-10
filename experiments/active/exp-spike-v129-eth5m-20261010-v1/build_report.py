@@ -18,7 +18,9 @@ section: equity down-legs (15R zigzag), worst rolling 30/90/180 days and months,
 the OKX ETH hourly close for market context. Clarified "我说的是星期": the weekday
 section groups trades by the Beijing weekday of the signal close (OKX both periods
 and Binance 2021-09..2024-01) and shows the share of 5m bars the BB200 rule counts
-as compressed per weekday (its 500-bar window spans about 42 hours).
+as compressed per weekday (its 500-bar window spans about 42 hours). "最近两个月我看看每一笔交易" adds a
+last-61-day section that reuses the same per-trade charts (numbering kept from the
+six-month list).
 
 Run: PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v129-eth5m-20261010-v1/build_report.py
 Output (local, untracked): experiments/active/exp-spike-v129-eth5m-20261010-v1/report_v1/
@@ -391,7 +393,7 @@ def build() -> Path:
     equity_chart(recent, recent_start, OUT / "equity_recent.png")
 
     unique = recent.sort_values("entry_time")
-    cards, rows = [], []
+    cards, rows, templates, signal_at = [], [], {}, {}
     for n, row in enumerate(unique.itertuples(), 1):
         name = f"t{n:03d}.jpg"
         trade_chart(row, frame, tick, "", n, CHARTS / name)
@@ -403,11 +405,21 @@ def build() -> Path:
                      f"{row.initial_stop:.2f}", f"{row.initial_risk_frac * 100:.2f}%", _bj([row.exit_time])[0].strftime("%m-%d %H:%M"),
                      f"{row.exit_price:.2f}", REASON.get(row.exit_reason, row.exit_reason), f"{row.hold_h:.1f}h",
                      (fmt(row.net_r), cls(row.net_r)), fmt(row.mfe_known_r, 1, False), fmt(row.control_net_r)])
-        cards.append(f'<figure class="card {tags}" id="t{n}"><img loading="lazy" src="charts/{name}" alt="#{n}">'
+        templates[n] = (f'<figure class="card {tags}" id="__ID__"><img loading="lazy" src="charts/{name}" alt="#{n}">'
                      f'<figcaption>#{n} · {when} 做{side} · 进场 {row.entry_price:.2f} · '
                      f'止损 {row.initial_stop:.2f}（{row.initial_risk_frac * 100:.2f}%） · {REASON.get(row.exit_reason, row.exit_reason)} '
                      f'{row.exit_price:.2f} · 持仓 {row.hold_h:.1f}h · <b class="{cls(row.net_r)}">净 {row.net_r:+.2f}R</b>'
                      f' · 峰值 {row.mfe_known_r:.1f}R</figcaption></figure>')
+        cards.append(templates[n].replace("__ID__", f"t{n}"))
+        signal_at[n] = row.signal_close
+
+    two_start = end - pd.Timedelta(days=61)
+    two_ns = [n for n, when_ in signal_at.items() if when_ >= two_start]
+    two = recent.loc[recent.signal_close >= two_start]
+    equity_chart(two, two_start, OUT / "equity_2m.png")
+    two_rows = [[f'<a href="#m{n}">#{n}</a>', *rows[n - 1][1:]] for n in two_ns]
+    two_cards = [templates[n].replace("__ID__", f"m{n}") for n in two_ns]
+    two_stats = stats(two)
 
     rc = d["receipt"]["summary"]
     windows = []
@@ -574,7 +586,7 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 <main>
 <h1>SPIKE V12.9 · OKX ETHUSDT.P 5m 回测</h1>
 <p class="sub">回测区间 2024-02-01 至 2026-10-10 18:00（北京时间）· 下一根 5m 开盘价进场 · 止损 = 前 5 根极值外 0.2ATR（至少 2ATR）· 收盘浮盈到 2R 后启动 4ATR 跟踪止损 · 反向信号离场 · 往返成本 0.2% · R = 初始止损距离</p>
-<nav><a href="#sum">总览</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#pattern">规律审计</a><a href="#exit">出场测试</a><a href="#recent">最近半年逐笔</a><a href="#limits">说明</a></nav>
+<nav><a href="#sum">总览</a><a href="#two">最近两个月</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#pattern">规律审计</a><a href="#exit">出场测试</a><a href="#recent">最近半年逐笔</a><a href="#limits">说明</a></nav>
 <div class="kpis">
 <div class="kpi"><span>普通信号（多空）</span><b>{k['ordinary_all']['closed']} 笔</b><span>胜率 {k['ordinary_all']['win_rate'] * 100:.1f}%</span></div>
 <div class="kpi"><span>普通 · 每笔 / 合计</span><b class="neg">{k['ordinary_all']['mean_net_r']:+.2f}R</b><span>合计 {k['ordinary_all']['sum_net_r']:+.1f}R</span></div>
@@ -588,6 +600,14 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 {table(STAT_HEAD, stat_rows(trades))}
 <h3>分时间窗</h3>
 {table(["区间", "分组", "笔数", "胜率", "每笔 R", "合计 R", "随机入场/笔 R", "比随机多 bp/笔", "p（单边）"], windows, 2)}
+
+<h2 id="two">最近两个月逐笔（{_bj([two_start])[0]:%Y-%m-%d} 起，{len(two_ns)} 笔）</h2>
+{table(STAT_HEAD, stat_rows(two))}
+<img class="wide" src="equity_2m.png" alt="最近两个月资金曲线">
+<h3>交易列表（编号与「最近半年逐笔」一致，点编号跳到图）</h3>
+{table(["#", "信号（北京）", "方向", "进场", "止损", "止损宽度", "离场（北京）", "离场价", "离场方式", "持仓", "净 R", "峰值 R", "随机对照 R"], two_rows)}
+<p class="sub">这两个月：{two_stats['n']} 笔，胜率 {two_stats['win'] * 100:.0f}%，合计 {two_stats['sum']:+.1f}R，最长连亏 {two_stats['streak']} 笔。图例同下文：红框 = 进场到初始止损，绿框 = 进场到峰值，虚线 = 离场价，深绿阶梯线 = 跟踪止损，紫线 = 已收盘 15m EMA120。</p>
+{''.join(two_cards)}
 
 <h2 id="week">按星期（北京时间，按信号出现的那天）</h2>
 {table(["星期", "笔数", "胜率", "扣费前/笔", "扣费后/笔", "合计 R", "其中多单 R", "其中空单 R", "随机入场/笔"], week_rows)}
