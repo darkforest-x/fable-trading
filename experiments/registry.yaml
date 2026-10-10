@@ -11130,3 +11130,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 v12.9 15min ethusdt.p详细回测呢. Ordinary signals only (owner dropped 突破+spike from the 5m view). Engine parity required against exp-spike-manual-system-20260925-v1 ETHUSDT_15m on Binance data. HTML view build_report.py (report_v1, local only, all 164 trades charted). Ledgers local only, hashes in run_v1/receipt.json.
+  - experiment_id: exp-spike-v129-eth15m-weekend-20261010-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: With no new SPIKE V12.9 15m ordinary entries on Beijing Saturday/Sunday signals, how do OKX ETH 15m (2024-02..2026-10) and Binance ETH 15m (2021-09..2026-09) change against the unchanged baseline, after 0.2% cost and against weekday-only matched random entries?
+    single_variable: Entry admission only (Beijing-weekend signals dropped; open positions keep exits; occupancy re-replayed).
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-10 15m去掉周末再回测一下. Post-hoc hypothesis seen in these same ledgers, so both samples are in-sample; only forward data can validate. No Pine, monitor or account change.
