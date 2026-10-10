@@ -199,8 +199,8 @@ def build() -> Path:
     head = ("<tr><th>#</th><th>进场（北京）</th><th>高周期线</th><th>进场价</th><th>止损价</th><th>离场方式</th><th>离场时间</th>"
             "<th>离场价</th><th>R</th><th>之前连亏</th><th>倍数</th><th>这笔风险 U</th><th>仓位 U</th><th>盈亏 U</th><th>账户 U</th></tr>")
     tab = lambda rows: f'<div class="tw"><table><thead>{head}</thead><tbody>{"".join(rows)}</tbody></table></div>'
-    a_y2 = a.loc[t.loc[a.k, "entry"].to_numpy() >= START_B.to_datetime64()]
-    eq_at_b = a.loc[t.loc[a.k, "entry"].to_numpy() < START_B.to_datetime64()].equity_after.iloc[-1]
+    a_y2 = a.loc[(t.loc[a.k, "entry"] >= START_B).to_numpy()]
+    eq_at_b = a.loc[(t.loc[a.k, "entry"] < START_B).to_numpy()].equity_after.iloc[-1]
     css = """
 :root{--bg:#f7f7f5;--card:#fff;--ink:#1f2937;--mute:#6b7280;--line:#e5e7eb;--pos:#089981;--neg:#e11d48}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif}
