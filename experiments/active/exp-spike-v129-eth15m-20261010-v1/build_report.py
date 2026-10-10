@@ -380,6 +380,8 @@ def binance_trades() -> pd.DataFrame:
     return pd.read_csv(BINANCE_TRADES).assign(policy="baseline")
 LABEL = {"okx": "OKX ETH 15m（2024-02 → 2026-10）", "binance": "币安 ETH 15m（2021-09 → 2026-09）"}
 WINDOW = {"full": "全区间", "before_split": "前段", "after_split": "后段"}
+ARM_LABEL = {"baseline": "原规则", "no_weekend": "去掉周末", "no_weekend_1216": "去掉周末 + 12–16 点"}
+RULE_TEXT = "规则：北京时间周六、周日出现的信号不开新仓；已有持仓照常离场；单子重新按顺序回放（原来被周末单挡住的工作日信号会放出来）。随机对照只从工作日抽。"
 
 
 def compare_section() -> str:
@@ -389,17 +391,17 @@ def compare_section() -> str:
     rows = []
     for (venue, window), g in c.groupby(["venue", "window"], sort=False):
         for r in g.itertuples():
-            rows.append([LABEL[venue], WINDOW[window], "原规则" if r.arm == "baseline" else "<b>去掉周末</b>", r.closed,
+            last = r.arm == g.arm.iloc[-1]
+            rows.append([LABEL[venue], WINDOW[window], f"<b>{ARM_LABEL[r.arm]}</b>" if last else ARM_LABEL[r.arm], r.closed,
                          fmt(r.win_rate, pct=True), (fmt(r.mean_net_r), cls(r.mean_net_r)), (fmt(r.sum_net_r, 1), cls(r.sum_net_r)),
                          (fmt(r.sum_without_top5, 1), cls(r.sum_without_top5)), fmt(r.pf, 2, False), f"{r.max_drawdown_r:.1f}R",
                          r.max_losses_in_row, r.max_stops_in_row, fmt(r.long_sum_r, 1), fmt(r.short_sum_r, 1),
                          f"{fmt(r.excess_bp, 1)}（p={r.excess_p:.2f}）"])
-    return ('<h2 id="cmp">去掉周末前后对比</h2>'
-            '<p class="sub">规则：北京时间周六、周日出现的信号不开新仓；已有持仓照常离场；单子重新按顺序回放（原来被周末单挡住的工作日信号会放出来）。'
-            '随机对照只从工作日抽。OKX 前段 = 2025-10-10 以前，后段 = 之后；币安前段 = 2024-02-01 以前。</p>'
+    return ('<h2 id="cmp">过滤前后对比</h2>'
+            f'<p class="sub">{RULE_TEXT}OKX 前段 = 2025-10-10 以前，后段 = 之后；币安前段 = 2024-02-01 以前。</p>'
             + table(["数据", "区间", "版本", "笔数", "胜率", "每笔 R", "合计 R", "去掉最好5笔", "盈亏比", "最大回撤", "最长连亏",
                      "最长连续止损", "多单 R", "空单 R", "比随机多 bp/笔"], rows, 3)
-            + '<div class="note">注意：「周末更差」是在这几份数据里事后看出来的，所以这里的改善都在样本内，不能当成已经验证的规则；'
+            + '<div class="note">注意：这些过滤条件都是在这几份数据里事后看出来的，所以这里的改善都在样本内，不能当成已经验证的规则；OKX 和币安后段是同一段行情；'
               '真正的检验只能看以后的新数据。</div>')
 
 
@@ -622,7 +624,7 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 <main>
 <h1>SPIKE V12.9 · OKX ETHUSDT.P 15m 回测{SUFFIX}</h1>
 <p class="sub">回测区间 2024-02-01 至 2026-10-10 18:00（北京时间）· 只做普通信号（多空）· 方向过滤：收盘在上一根已收盘 1h SMA60 上方才做多、下方才做空 · 下一根 15m 开盘价进场 · 止损 = 前 5 根极值外 0.2ATR（至少 2ATR）· 收盘浮盈到 2R 后启动 4ATR 跟踪止损 · 反向信号离场 · 往返成本 0.2% · R = 初始止损距离</p>
-<nav>{'<a href="#cmp">去掉周末对比</a>' if COMPARE else ''}<a href="#sum">总览</a><a href="#two">最近两个月</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#recent">全部逐笔</a><a href="#limits">说明</a></nav>
+<nav>{'<a href="#cmp">过滤前后对比</a>' if COMPARE else ''}<a href="#sum">总览</a><a href="#two">最近两个月</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#recent">全部逐笔</a><a href="#limits">说明</a></nav>
 <div class="kpis">
 <div class="kpi"><span>普通信号（多空）</span><b>{k['ordinary_all']['closed']} 笔</b><span>胜率 {k['ordinary_all']['win_rate'] * 100:.1f}%</span></div>
 <div class="kpi"><span>每笔 / 合计</span><b class="{cls(k['ordinary_all']['mean_net_r'])}">{k['ordinary_all']['mean_net_r']:+.2f}R</b><span>合计 {k['ordinary_all']['sum_net_r']:+.1f}R · 去掉最好 5 笔 {k['ordinary_all']['sum_net_r_without_top5']:+.1f}R</span></div>
@@ -729,7 +731,10 @@ if __name__ == "__main__":
     parser.add_argument("--suffix", default="")
     parser.add_argument("--compare", type=Path, default=None)
     parser.add_argument("--binance-trades", type=Path, default=None)
+    parser.add_argument("--rule-text", default=None)
     args = parser.parse_args()
+    if args.rule_text:
+        RULE_TEXT = args.rule_text
     RUN, OUT, CHARTS, SUFFIX, COMPARE = args.run, args.out, args.out / "charts", args.suffix, args.compare
     BINANCE_TRADES = args.binance_trades
     print(build().resolve())

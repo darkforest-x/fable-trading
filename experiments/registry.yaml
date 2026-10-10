@@ -11142,3 +11142,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 15m去掉周末再回测一下. Post-hoc hypothesis seen in these same ledgers, so both samples are in-sample; only forward data can validate. No Pine, monitor or account change. HTML view via the 15m builder (--run run_v1/okx_no_weekend --compare run_v1/comparison.csv), output report_v1 local only.
+  - experiment_id: exp-spike-v129-eth15m-hours-20261010-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: On top of the no-weekend 15m rule, does also dropping SPIKE V12.9 ordinary signals with a Beijing 12:00-16:00 close change OKX ETH 15m (2024-02..2026-10) and Binance ETH 15m (2021-09..2026-09) results, after 0.2% cost and against matched random entries from the same allowed hours?
+    single_variable: Entry admission only, relative to the no-weekend arm - Beijing close hours 12-15 dropped; occupancy re-replayed; baseline and no-weekend arms recomputed side by side.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change.

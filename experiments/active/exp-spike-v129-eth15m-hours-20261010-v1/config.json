@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-spike-v129-eth15m-hours-20261010-v1",
+  "question": "On top of the no-weekend 15m rule, does also dropping SPIKE V12.9 ordinary signals whose close falls in Beijing 12:00-16:00 change OKX ETH 15m (2024-02..2026-10) and Binance ETH 15m (2021-09..2026-09) results, after 0.2% cost and against matched random entries from the same allowed hours?",
+  "single_variable": "Entry admission only, relative to the no-weekend arm: additionally drop signals with Beijing close hour 12-15 (12:00 inclusive, 16:00 exclusive). Open positions keep their exits; occupancy is re-replayed. Baseline and no-weekend arms are recomputed for the side-by-side table.",
+  "owner_request": "2026-10-10 15m去掉周末和12-16点再回测一下 (after the hour-of-day table of the no-weekend ledgers).",
+  "hypothesis_origin": "Post-hoc: the 12-16 weakness was seen in these same no-weekend ledgers (hour_patterns.py); OKX and Binance 2024-26 cover the same market period, so effectively two periods. In-sample only; forward data is the only validation.",
+  "okx_start": "2024-02-01T00:00:00+00:00",
+  "okx_split": "2025-10-10T00:00:00+00:00",
+  "okx_end": "2026-10-10T10:00:00+00:00",
+  "binance_start": "2021-09-25T00:00:00+00:00",
+  "binance_split": "2024-02-01T00:00:00+00:00",
+  "binance_end": "2026-09-25T00:00:00+00:00",
+  "blocked_hours_beijing": [12, 13, 14, 15],
+  "round_trip_cost": 0.002,
+  "control_seed": 1010171,
+  "stat_seed": 1010172,
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032],
+  "training_eligible": false,
+  "production_eligible": false
+}
