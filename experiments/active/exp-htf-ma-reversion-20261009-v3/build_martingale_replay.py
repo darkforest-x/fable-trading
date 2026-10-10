@@ -102,7 +102,7 @@ def chart(row, k: int, frames: dict, ledger_row: dict | None, path: Path) -> Non
         ax.bar(xs[mk], (c15.close - c15.open).abs()[mk].clip(lower=.01), w, bottom=c15[["open", "close"]].min(axis=1)[mk],
                color=color, lw=0)
     ax.step(mdates_num(x(line.index)), line, where="post", color="#C18CFA", lw=2, label="15m EMA120（高周期线）")
-    ax.step(mdates_num(x(trig.index)), trig, where="post", color="#f59e0b", lw=1.1, ls="--", label="触发线 = 线 − 4×ATR")
+    ax.step(mdates_num(x(trig.index)), trig, where="post", color="#f59e0b", lw=1.1, ls="--", label="触发线 = 线 - 4×ATR")
     e0, e1 = mdates_num(x([row.entry]))[0], mdates_num(x([row.exit]))[0]
     ax.hlines(row.stop_price, e0, e1, color=DOWN, lw=1.2)
     ax.text(e1, row.stop_price, f" 止损 {row.stop_price:.2f}", color=DOWN, fontsize=8, va="center")
