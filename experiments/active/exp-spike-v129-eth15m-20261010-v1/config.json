@@ -1,0 +1,29 @@
+{
+  "experiment_id": "exp-spike-v129-eth15m-20261010-v1",
+  "question": "How did unchanged SPIKE V12.9 ordinary signals perform on OKX ETHUSDT.P 15m from 2024-02-01 to 2026-10-10 after 0.2% round-trip cost and against matched random entries?",
+  "single_variable": "None; frozen-rule descriptive replay. On 15m V12.9 equals V12.8/V12.6 with the completed 1h SMA60 direction gate and the 4ATR close trail (only 1h uses 2ATR).",
+  "symbol": "ETH_USDT_SWAP",
+  "venue": "okx",
+  "asset": "ETH",
+  "tick": 0.01,
+  "timeframe_min": 15,
+  "data_receipt": "data/research/spike_v129_eth5m_20261010/receipt.json",
+  "start": "2024-02-01T00:00:00+00:00",
+  "split": "2025-10-10T00:00:00+00:00",
+  "end": "2026-10-10T10:00:00+00:00",
+  "binance_data": "data/research/spike_manual_system_20260925/ETHUSDT.csv.gz",
+  "binance_data_sha256": "1bd4c4ef5d934f22f5c42eeba7c5dcb6446db2ff3bec02adf115bf3a56996393",
+  "parent_trades": "experiments/active/exp-spike-manual-system-20260925-v1/run_v1/streams/ETHUSDT_15m/trades.csv.gz",
+  "round_trip_cost": 0.002,
+  "control_seed": 1010151,
+  "stat_seed": 1010152,
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032],
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": [
+    "Owner request 2026-10-10: v12.9 15min ethusdt.p 详细回测. Ordinary both-side signals only (the owner dropped 突破+spike from the 5m view the same day).",
+    "OKX 1m archive + API inputs are the 5m experiment's registered data receipt, aggregated to complete 5m then 15m buckets (the 5m buckets feed the completed 1h SMA60).",
+    "Engine parity: the same code path on the Binance ETH 5m series must reproduce every closed ordinary baseline trade of exp-spike-manual-system-20260925-v1 ETHUSDT_15m.",
+    "Next-open fills; add hints not executed. No report requested beyond the owner's HTML view."
+  ]
+}

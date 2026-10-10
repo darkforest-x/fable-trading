@@ -11118,3 +11118,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 chose option 3 (5m 出场单变量测试) after the pattern audit. Selection and pass rule fixed in config.json before results. No Pine, monitor, preset or account change. results_v1/trades.csv.gz local only (hash in results_v1/receipt.json). No report requested.
+  - experiment_id: exp-spike-v129-eth15m-20261010-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: How did unchanged SPIKE V12.9 ordinary signals perform on OKX ETHUSDT.P 15m from 2024-02-01 to 2026-10-10 after 0.2% round-trip cost and against matched random entries?
+    single_variable: None - frozen-rule descriptive replay; on 15m V12.9 = V12.8/V12.6 with the completed 1h SMA60 gate and 4ATR trail. Same OKX inputs as exp-spike-v129-eth5m-20261010-v1.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-10 v12.9 15min ethusdt.p详细回测呢. Ordinary signals only (owner dropped 突破+spike from the 5m view). Engine parity required against exp-spike-manual-system-20260925-v1 ETHUSDT_15m on Binance data. No report requested beyond the owner's HTML view.
