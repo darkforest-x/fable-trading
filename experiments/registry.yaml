@@ -11094,3 +11094,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-10 嗯 to recommendation A. v4 scan unchanged without a trend block (ETH v4 trades regenerated exactly). Read fixed in analyze.py before results (arms.csv, with_selection.csv, eth_best.json). trades.csv.gz local only - results_market sha256 5fb7648ad027b5d318aafc63f5b37c9576ee98e125c1826dc23b540fb1054649, results_eth sha256 35f20a5a55aab266c7e22e25b0fe622cda77393970efe12f590e676880183587. No report requested.
+  - experiment_id: exp-spike-v129-eth5m-20261010-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    result: Pending.
+    question: How did unchanged SPIKE V12.9 signals perform on OKX ETHUSDT.P 5m from 2024-02-01 to 2026-10-10 (ordinary both-side and long-only joint) after 0.2% round-trip cost and against matched random entries?
+    single_variable: None - frozen-rule descriptive replay. On 5m V12.9 equals V12.8/V12.6 (4ATR trail, completed 15m EMA120 gate); only the data end moves to 2026-10-10 and the ordinary arm and controls are added to the 2026-09-22 OKX low-timeframe run.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-10 Notion #46 回测 ethusdt.p 5min级别的 给出详细回测数据. Owner's chart is OKX ETHUSDT.P. Builder yoyo/evaluation/spike_v129_eth5m.py must reproduce every closed joint trade of exp-spike-lowtf-v1-v126-20260922-v1 (ETH 5m v126 arm) exactly. Next-open fills; add hints not executed; pivot-tie native parity unverified. No report requested.
