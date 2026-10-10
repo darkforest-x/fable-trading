@@ -9,7 +9,11 @@ owner dropped 突破+spike). Differences: 15m bars, the purple line is the compl
 5m-only pattern audit / exit test sections are absent. Binance context is the
 manual-system ETHUSDT_15m baseline ledger 2021-09..2024-01. No rule is changed.
 
+Owner follow-up "15m去掉周末再回测一下": --run/--out/--suffix/--compare render the same page for the
+no-weekend ledger of exp-spike-v129-eth15m-weekend-20261010-v1 with a before/after table on top.
+
 Run: PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v129-eth15m-20261010-v1/build_report.py
+     [--run DIR --out DIR --suffix TEXT --compare comparison.csv]
 Output (local, untracked): experiments/active/exp-spike-v129-eth15m-20261010-v1/report_v1/
 """
 from __future__ import annotations
@@ -364,6 +368,41 @@ STAT_HEAD = ["分组", "笔数", "胜率", "扣费前/笔", "手续费/笔", "�
              "最长连亏", "≥5R 拿住/到过", "随机入场/笔", "去掉最好5笔"]
 
 
+SUFFIX = ""
+COMPARE: Path | None = None
+BINANCE_TRADES: Path | None = None
+
+
+def binance_trades() -> pd.DataFrame:
+    """Binance ETH 15m context ledger: the manual-system baseline, or the variant's own ledger."""
+    if BINANCE_TRADES is None:
+        return pd.read_csv(BINANCE_LEDGER / "trades.csv.gz")
+    return pd.read_csv(BINANCE_TRADES).assign(policy="baseline")
+LABEL = {"okx": "OKX ETH 15m（2024-02 → 2026-10）", "binance": "币安 ETH 15m（2021-09 → 2026-09）"}
+WINDOW = {"full": "全区间", "before_split": "前段", "after_split": "后段"}
+
+
+def compare_section() -> str:
+    if COMPARE is None:
+        return ""
+    c = pd.read_csv(COMPARE)
+    rows = []
+    for (venue, window), g in c.groupby(["venue", "window"], sort=False):
+        for r in g.itertuples():
+            rows.append([LABEL[venue], WINDOW[window], "原规则" if r.arm == "baseline" else "<b>去掉周末</b>", r.closed,
+                         fmt(r.win_rate, pct=True), (fmt(r.mean_net_r), cls(r.mean_net_r)), (fmt(r.sum_net_r, 1), cls(r.sum_net_r)),
+                         (fmt(r.sum_without_top5, 1), cls(r.sum_without_top5)), fmt(r.pf, 2, False), f"{r.max_drawdown_r:.1f}R",
+                         r.max_losses_in_row, r.max_stops_in_row, fmt(r.long_sum_r, 1), fmt(r.short_sum_r, 1),
+                         f"{fmt(r.excess_bp, 1)}（p={r.excess_p:.2f}）"])
+    return ('<h2 id="cmp">去掉周末前后对比</h2>'
+            '<p class="sub">规则：北京时间周六、周日出现的信号不开新仓；已有持仓照常离场；单子重新按顺序回放（原来被周末单挡住的工作日信号会放出来）。'
+            '随机对照只从工作日抽。OKX 前段 = 2025-10-10 以前，后段 = 之后；币安前段 = 2024-02-01 以前。</p>'
+            + table(["数据", "区间", "版本", "笔数", "胜率", "每笔 R", "合计 R", "去掉最好5笔", "盈亏比", "最大回撤", "最长连亏",
+                     "最长连续止损", "多单 R", "空单 R", "比随机多 bp/笔"], rows, 3)
+            + '<div class="note">注意：「周末更差」是在这几份数据里事后看出来的，所以这里的改善都在样本内，不能当成已经验证的规则；'
+              '真正的检验只能看以后的新数据。</div>')
+
+
 def build() -> Path:
     d = load()
     frame, trades, tick, cfg = d["frame"], d["trades"], d["tick"], d["cfg"]
@@ -435,7 +474,7 @@ def build() -> Path:
     dist = [[lab, int(((o.net_r >= lo) & (o.net_r < hi)).sum()), f"{((o.net_r >= lo) & (o.net_r < hi)).mean() * 100:.1f}%"]
             for lo, hi, lab in bins]
     reasons = [[REASON.get(k, k), v, f"{v / len(o) * 100:.0f}%"] for k, v in o.exit_reason.value_counts().items()]
-    bn = pd.read_csv(BINANCE_LEDGER / "trades.csv.gz")
+    bn = binance_trades()
     bn = bn.loc[(bn.policy == "baseline") & ~bn.censored.astype(bool) & (pd.to_datetime(bn.signal_close, utc=True) < "2024-02-01")]
     cost_rows = []
     for label, g in (("OKX 2024-02 → 2025-10", o.loc[o.signal_close < pd.Timestamp(cfg["split"])]),
@@ -520,7 +559,7 @@ def build() -> Path:
                           (fmt(g.loc[g.side == 1].net_r.sum(), 1), cls(g.loc[g.side == 1].net_r.sum())),
                           (fmt(g.loc[g.side == -1].net_r.sum(), 1), cls(g.loc[g.side == -1].net_r.sum())),
                           fmt(g.loc[g.matched].control_net_r.mean())])
-    bn_all = pd.read_csv(BINANCE_LEDGER / "trades.csv.gz")
+    bn_all = binance_trades()
     bn_all = bn_all.loc[(bn_all.policy == "baseline") & (bn_all.arm == "ordinary") & ~bn_all.censored.astype(bool)].copy()
     bn_all["signal_close"] = pd.to_datetime(bn_all.signal_close, utc=True)
     bn_all = bn_all.loc[bn_all.signal_close < pd.Timestamp("2024-02-01T00:00:00Z")]
@@ -580,9 +619,9 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
     k = rc["full"]
     body = f"""
 <main>
-<h1>SPIKE V12.9 · OKX ETHUSDT.P 15m 回测</h1>
+<h1>SPIKE V12.9 · OKX ETHUSDT.P 15m 回测{SUFFIX}</h1>
 <p class="sub">回测区间 2024-02-01 至 2026-10-10 18:00（北京时间）· 只做普通信号（多空）· 方向过滤：收盘在上一根已收盘 1h SMA60 上方才做多、下方才做空 · 下一根 15m 开盘价进场 · 止损 = 前 5 根极值外 0.2ATR（至少 2ATR）· 收盘浮盈到 2R 后启动 4ATR 跟踪止损 · 反向信号离场 · 往返成本 0.2% · R = 初始止损距离</p>
-<nav><a href="#sum">总览</a><a href="#two">最近两个月</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#recent">全部逐笔</a><a href="#limits">说明</a></nav>
+<nav>{'<a href="#cmp">去掉周末对比</a>' if COMPARE else ''}<a href="#sum">总览</a><a href="#two">最近两个月</a><a href="#week">按星期</a><a href="#worst">最亏时段</a><a href="#curve">资金曲线</a><a href="#time">按时间</a><a href="#dist">盈亏分布</a><a href="#cost">成本</a><a href="#streak">连亏</a><a href="#recent">全部逐笔</a><a href="#limits">说明</a></nav>
 <div class="kpis">
 <div class="kpi"><span>普通信号（多空）</span><b>{k['ordinary_all']['closed']} 笔</b><span>胜率 {k['ordinary_all']['win_rate'] * 100:.1f}%</span></div>
 <div class="kpi"><span>每笔 / 合计</span><b class="{cls(k['ordinary_all']['mean_net_r'])}">{k['ordinary_all']['mean_net_r']:+.2f}R</b><span>合计 {k['ordinary_all']['sum_net_r']:+.1f}R · 去掉最好 5 笔 {k['ordinary_all']['sum_net_r_without_top5']:+.1f}R</span></div>
@@ -592,6 +631,7 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 </div>
 <div class="note">结论：扣 0.2% 成本后 {k['ordinary_all']['closed']} 笔合计 {k['ordinary_all']['sum_net_r']:+.1f}R（每笔 {k['ordinary_all']['mean_net_r']:+.2f}R），但去掉最好的 5 笔是 {k['ordinary_all']['sum_net_r_without_top5']:+.1f}R；比同周、同波动的随机入场每笔多 {k['ordinary_all']['random_excess']['mean_excess_bp']:.1f}bp，统计上不显著（p={k['ordinary_all']['random_excess']['p_one_sided']:.2f}）。前段（2024-02 → 2025-10）{rc['earlier']['ordinary_all']['sum_net_r']:+.1f}R，近 12 个月 {rc['last_12m']['ordinary_all']['sum_net_r']:+.1f}R，后者主要来自做空（{rc['last_12m']['ordinary_short']['sum_net_r']:+.1f}R），同期随机做空每笔也有 {rc['last_12m']['ordinary_short']['control_mean_net_r']:+.2f}R（ETH 在跌）。多单全区间 {k['ordinary_long']['sum_net_r']:+.1f}R。15m 止损比 5m 宽（中位 {k['ordinary_all']['median_risk_bp'] / 100:.2f}%），手续费每笔只吃 {k['ordinary_all']['mean_fee_r']:.2f}R，这是它比 5m 好的主要原因。</div>
 
+{compare_section()}
 <h2 id="sum">总览（全区间）</h2>
 {table(STAT_HEAD, stat_rows(trades))}
 <h3>分时间窗</h3>
@@ -673,11 +713,22 @@ document.querySelectorAll('.filters button').forEach(b=>b.onclick=()=>{
 </ul>
 </main>"""
     page = f"""<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SPIKE V12.9 ETH 15m 回测</title><style>{css}</style></head><body>{body}<script>{js}</script></body></html>"""
+<title>SPIKE V12.9 ETH 15m 回测{SUFFIX}</title><style>{css}</style></head><body>{body}<script>{js}</script></body></html>"""
     path = OUT / "index.html"
     path.write_text(page)
     return path
 
 
 if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="SPIKE V12.9 OKX ETH 15m HTML view")
+    parser.add_argument("--run", type=Path, default=RUN)
+    parser.add_argument("--out", type=Path, default=OUT)
+    parser.add_argument("--suffix", default="")
+    parser.add_argument("--compare", type=Path, default=None)
+    parser.add_argument("--binance-trades", type=Path, default=None)
+    args = parser.parse_args()
+    RUN, OUT, CHARTS, SUFFIX, COMPARE = args.run, args.out, args.out / "charts", args.suffix, args.compare
+    BINANCE_TRADES = args.binance_trades
     print(build().resolve())
