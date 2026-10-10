@@ -11156,9 +11156,9 @@ experiments:
     notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change. HTML via the 15m builder (--run run_v1/okx_variant), report_v1 local only. Doubling-stake overlay (martingale_variant.py, schemes and monthly restarts as the weekend experiment; run_v1/martingale_variant.json): OKX fixed 10/20/50U end 1440/1881/3202U (50U: DD 73%, 27% of 30 start months ruined; 10/20U never ruined); every doubling scheme is ruined from 2024-02 and in 47-90% of start months. Binance fixed 10/20/50U 1349/1698/2746U; 10U cap-3 doubling survives from 2021-09 (1825U, DD 78%) but is ruined in 64% of start months (median 61U); all other doubling schemes ruined.
   - experiment_id: exp-spike-v129-eth15m-paramopt-20261011-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
-    result: Pending.
+    source_commit: 647335df4c
+    status: rejected
+    result: Not passed. Default reproduced V12.9 signals exactly on OKX and Binance. Selection period (Binance ETH 15m 2020-07..2024-01) - 1 of 119 eligible cells has positive mean net R (raw best +0.002R); default -0.080R. Smoothed pick W5.0/A1.25/V1.25 (selection -0.005R) validates at OKX +0.068R (default +0.089R, worse) and Binance 2024-26 +0.006R (default -0.005R), OKX excess +22.8bp p0.17. Raw best W2.5/A1.5/V1.0 - OKX +0.111R but Binance 2024-26 -0.092R. Spearman of selection vs validation mean R across cells -0.28 (OKX) and +0.03 (Binance); 102 of 125 cells are positive on OKX 2024-26 (the period, mostly shorts in a falling ETH) but only 14 on Binance 2024-26, and no cell is positive in selection and both validations. The three thresholds have no reliably better setting on ETH 15m; the default is not beaten.
     question: Over a pre-registered 5x5x5 grid of SPIKE V12.9 density width, three-bar advance and volume-ratio thresholds, does the cell selected on Binance ETH 15m 2020-07..2024-01 beat the default and stay net positive on OKX ETH 15m and Binance ETH 15m 2024-02..2026-10?
     single_variable: Signal-threshold triple only (both literal sites); every other V12.9 rule, exit and cost fixed; ordinary signals.
     training_eligible: false
