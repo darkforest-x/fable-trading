@@ -1,0 +1,50 @@
+{
+ "experiment_id": "exp-ma6-knot-breakout-20261011-v1",
+ "owner_request": "2026-10-11: after the bar-by-bar read of ETHUSDT.P 1m 2026-10-08 23:01-23:09 Beijing (six SPIKE V13.1 MAs SMA/EMA 20/60/120), 「把上面几条特征写成规则去扫历史数据」",
+ "question": "Do the features of the owner's ETH 1m example (a tight, tangled six-MA knot, the first close beyond all six MAs, and the extra features of that read) pick entries that beat matched random entries with the same stop distance and 3R/5R targets after 0.2% cost, in both periods, on 1m majors and on 5m/15m/30m/1H?",
+ "prior_evidence": "exp-owner-squeeze-breakout-20261008-v1 (SPIKE dense rope <= 3 ATR / >= 2 flips + BB + engulfing breakout + volume, same exits): no timeframe passed; 5m about -0.2R net per trade from cost alone. New here: a far tighter knot (0.7 ATR, 10 flips) taken from the example, the first close beyond all six MAs as the trigger, 1m data, and single added conditions read one at a time.",
+ "rule": {
+  "knot": "mean (max MA - min MA) / ATR14 over the 12 bars before <= 0.7 and >= 10 pairwise MA order flips over those 12 bars",
+  "break": "close beyond all six MAs in the trade direction, previous close not beyond them",
+  "close": "close in the outer 20% of the bar range",
+  "volume": "volume / median of the 20 bars before >= 1.5",
+  "fakeout": "one of the 12 bars before closed beyond all six MAs on the other side with volume ratio >= 3",
+  "htf": "last closed higher-timeframe bar fully stacked in the trade direction (both 20s beyond both 60s beyond both 120s); 1m->5m, 5m->15m, 15m->1H, 30m->2H, 1H->4H",
+  "lower_highs": "this bar and the two before each made a lower high (higher low for longs)",
+  "confirm": "decision at the first bar from the break up to 4 bars after it where EMA20 is the outermost MA, every close since the break beyond all six MAs",
+  "threshold_source": "single owner example (2026-10-08 23:02 break: 0.67 ATR, 10 flips, close position 0.00, rv 1.57, fake-out rv 5.0/12.3, 5m stack, 3 lower highs); nothing tuned on the scanned data, which ends before the example"
+ },
+ "variants": ["primary", "knot_v131", "knot_loose", "plus_close", "plus_volume", "plus_fakeout", "plus_htf", "plus_lower_highs", "confirm", "replica"],
+ "variant_notes": "primary = knot + break. knot_v131 swaps the knot for SPIKE V13.1 dense (3.0 ATR, 2 flips), knot_loose for 1.0 ATR / 6 flips; plus_* add one condition; confirm moves the decision; replica stacks every condition and is descriptive only",
+ "cooldown_bars": 12,
+ "ready_bars": 700,
+ "entry": "next bar open",
+ "stop": "long: min(six MAs at the decision bar) - 0.2 ATR14; short: max(six MAs) + 0.2 ATR14; skip when the entry is not beyond the stop",
+ "targets_r": [3, 5],
+ "exit_path": "as exp-owner-squeeze-breakout-20261008-v1: bar high/low from the entry bar, gaps fill at the open, stop first when both print in one bar, exit at the close after max_hold_bars, a missing bar before the exit drops the trade",
+ "max_hold_bars": 192,
+ "round_trip_cost": 0.002,
+ "controls": {
+  "n": 20,
+  "n_variants": 5,
+  "pool": "same symbol, timeframe and calendar month, ready bars, not the event bar, ATR/price within 0.5-2x the event's",
+  "stop": "same stop distance in ATR units as the event",
+  "seed": 1011601
+ },
+ "data": {
+  "1m": "Binance USD-M monthly 1m archives (checksum verified, yoyo.data.binance_um_archives.fetch_symbol) for BTC/ETH/SOL/XRP/DOGE/BNB USDT, 2022-11 to 2026-09, at data/research/ma6_knot_1m_20261011",
+  "5m_source": "frozen Binance USD-M 5m series data/research/spike_v128_entry_clock_long_20260923/series, complete-bucket resampling; per month the top 100 alts by previous-month median daily quote volume (stables excluded) plus BTC/ETH",
+  "example_check": "OKX ETH-USDT-SWAP 1m data/research/spike_v129_eth5m_20261010 (2026-09-22 to 2026-10-10): which variants fire at the example break"
+ },
+ "timeframes_5m_source": [5, 15, 30, 60],
+ "start": "2023-01-01T00:00:00Z",
+ "select_before": "2025-01-01T00:00:00Z",
+ "end": "2026-10-01T00:00:00Z",
+ "end_5m_source": "2026-09-23T00:00:00Z",
+ "warmup_start": "2022-11-01T00:00:00Z",
+ "stat_seed": 1011602,
+ "flips": 10000,
+ "primary": "per timeframe, side and target, variant primary: mean net R and excess over matched controls in each period; a timeframe qualifies only if both periods are net positive after cost and excess is positive with month-block sign-flip p < 0.05 in at least one. Variants are single changes read against primary; with 10 variants x 5 timeframes x 2 sides x 2 targets, an isolated p < 0.05 cell is expected by chance",
+ "training_eligible": false,
+ "production_eligible": false
+}

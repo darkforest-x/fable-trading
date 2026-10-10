@@ -11166,3 +11166,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-11 做参数优化，先用15m ETH试 (threshold changes are the owner's decision). Selection rule (neighbourhood-smoothed mean R, >= 60 trades) and pass rule fixed in config.json before running; default must reproduce V12.9 signals exactly on both datasets. No Pine, monitor or account change.
+  - experiment_id: exp-ma6-knot-breakout-20261011-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: planned
+    result: pending
+    question: Do the features of the owner's ETH 1m example (2026-10-08 23:01-23:09 Beijing - a tight, tangled six-MA knot, the first close beyond all six MAs, plus close position, volume, opposite fake-out, higher-timeframe stack, lower highs, EMA20-outermost confirmation) beat matched random entries with the same stop distance and 3R/5R targets after 0.2% cost, in both periods, on 1m majors and 5m/15m/30m/1H?
+    single_variable: New rule family, pre-registered in config.json - primary knot (<= 0.7 ATR mean six-MA width, >= 10 order flips over the 12 bars before) + break; variants change one thing each (knot thresholds, one added condition, or confirm timing); replica stacks all and is descriptive. Exits, cost and controls as exp-owner-squeeze-breakout-20261008-v1.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-11 把上面几条特征写成规则去扫历史数据 (after the chat read of ETH 1m 2026-10-08 23:01-23:09). Thresholds from that single example; the scanned data ends 2026-09-30, before it. The example check (OKX ETH 1m) fires every variant at the 23:02 break and confirm at 23:05. No Pine, monitor or account change.
