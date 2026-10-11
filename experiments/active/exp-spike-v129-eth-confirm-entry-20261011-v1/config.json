@@ -1,0 +1,22 @@
+{
+ "experiment_id": "exp-spike-v129-eth-confirm-entry-20261011-v1",
+ "owner_request": "2026-10-11 「从这些亏损 盈利单子的特点 有没有什么可以当作二次确认的点 比如 5min级别出信号了 我先不开仓 等那个点确认了我再开」",
+ "question": "On SPIKE V12.9 ETH 5m and 15m ordinary trades, does waiting for the trade to first close in profit (by m R within K bars of the original entry) and entering at the next open, with the original absolute stop and the original exit, raise mean net R after 0.2% cost over immediate entry, in the selection sample and in both check samples?",
+ "prior_evidence": "exp-spike-v128-retest-entry-20260923-v1 (breakout-retest-rebreak confirmation, the V13 retest): win rate rose but all later net R negative, >=5R density fell, same-confirmation random excess negative. Winner anatomy 2026-10-11: on OKX 15m a close in profit 6 bars after entry splits trades into win 54% / +1.14R versus 11% / -0.54R, partly mechanical because it ignores the worse entry price.",
+ "candidates": {"K_bars": [3, 6, 12], "m_r": [0.0, 0.5, 1.0]},
+ "rule": "bars counted from the original entry bar (k = 1 is the entry bar). At each bar close k <= K: if the original stop was touched in that bar or the original trade already exited, the signal is skipped; if side * (close - original entry) >= m * original risk the signal is confirmed and entered at the next bar open. Not confirmed within K bars -> skipped. The entry must still be beyond the original stop.",
+ "exit": "the original trade's recorded exit (time and price) is kept: same absolute stop, same 2R-armed trail anchored to the original entry, same opposite-signal exit. If the original exit is at or before the confirmation entry open, the signal is skipped.",
+ "risk": "new risk = side * (confirmation entry - original stop); net R = (side * (exit / entry - 1) - 0.002) / (new risk / entry)",
+ "occupancy": "the original serial trade list is kept; signals skipped while in position stay skipped (conservative: a skipped confirmation does not free the slot for another signal)",
+ "samples": {
+  "selection": "OKX ETHUSDT.P ordinary trades signalled before 2025-10-10 (exp-spike-v129-eth5m/15m-20261010-v1 run_v1)",
+  "check_okx": "OKX ordinary trades signalled from 2025-10-10",
+  "check_binance": "Binance ETHUSDT ordinary baseline trades signalled before 2024-02-01 (exp-spike-manual-system-20260925-v1 ETHUSDT_5m / ETHUSDT_15m)"
+ },
+ "selection_rule": "per timeframe, the candidate with the highest mean net R on the selection sample among candidates with >= 30 entries there",
+ "pass_rule": "the selected candidate's mean net R is above immediate entry's and above zero in both check samples",
+ "round_trip_cost": 0.002,
+ "limits": "no matched random control in this version (exits are the original trades', which random entries do not have); totals fall with fewer entries, so total net R is reported next to mean net R",
+ "training_eligible": false,
+ "production_eligible": false
+}

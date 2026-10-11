@@ -11178,3 +11178,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-11 把上面几条特征写成规则去扫历史数据 (after the chat read of ETH 1m 2026-10-08 23:01-23:09). Thresholds from that single example; the scanned data ends 2026-09-30, before it. The example check (OKX ETH 1m) fires every variant at the 23:02 break and confirm at 23:05. No Pine, monitor or account change.
+  - experiment_id: exp-spike-v129-eth-confirm-entry-20261011-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: planned
+    result: pending
+    question: On SPIKE V12.9 ETH 5m and 15m ordinary trades, does waiting for the trade to first close in profit (m R within K bars of the original entry) and entering at the next open, with the original absolute stop and recorded exit, raise mean net R after 0.2 percent cost over immediate entry in the selection sample and both check samples?
+    single_variable: Entry timing only - K in 3/6/12 bars x m in 0/0.5/1 R; original stop, trail, opposite exit and occupancy kept; selection OKX before 2025-10-10, checks OKX after and Binance ETHUSDT before 2024-02-01.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-11 等确认点再开仓 (after the winner/loser anatomy). Prior - exp-spike-v128-retest-entry-20260923-v1 rejected the retest confirmation. No matched random control in this version. No Pine, monitor or account change.
