@@ -1,0 +1,52 @@
+{
+  "experiment_id": "exp-bitlanglang-mainwave-20261011-v1",
+  "owner_request": "2026-10-11 owner sent YouTube 0HmddXBIZU0 (Speculation Lab on Bit浪浪's main-wave system) with 「详细分析 并总结成小册」, then 「要」 to the handbook's chapter-12 proposal: backtest H1 (position ① beginner standard), H2 (+ leader filter), H3 (+ BTC season veto) with matched random controls.",
+  "question": "Does the video's position-① beginner standard (14-day daily box breakout on 3x volume, pullback to within 3% of the box top, 5m turn entry, stop 0.75% under the turn low, two pivot targets with plan >= 3R, half off at TP1 then break-even) earn positive net R after 0.2% cost in both periods and beat both matched random entries and the same 5m confirmation fired at random; and does adding the leader filter (H2) and then the BTC season veto (H3) add to it?",
+  "prior_evidence": "exp-owner-squeeze-breakout-20261008-v1: compression + volume breakout did not beat matched random entries on 550 symbols (5m about -0.2R net). exp-spike-v129-alts-confirm-20261011-v1: confirmation rules must be compared with the same confirmation fired at random. Handbook (local only) verified the video's three cases on Binance data; the mechanical 5m turn rule took 5 and 3 stops before the winning entry in the PEOPLE and SOL cases.",
+  "data": "frozen Binance USD-M 5m series (data/research/spike_v128_entry_clock_long_20260923/series); daily bars are complete UTC days resampled from it",
+  "universe": "per month, top 100 alts by previous-month median daily quote volume (stables and BTC/ETH excluded), same rule as market_sync_shock.monthly_universe; a setup counts only if its breakout day's month is in that symbol's universe",
+  "start": "2023-01-01T00:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T00:00:00Z",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "universe_size": 100,
+  "rule": {
+    "box": "the 14 complete UTC days before breakout day d: top = max high, bottom = min low; height <= 4.0 daily Wilder ATR14 as of d-1 (calibrated on the video's PEOPLE 2024-05-09 and INJ 2023-10-19 breakouts: 2.75 and 3.23 ATR); at most 10% frozen 5m bars (high == low or zero volume) in those days",
+    "breakout": "close(d) > top and volume(d) >= 3.0x the mean volume of d-7..d-1 (video: 突破那天的成交量是前7天平均的3倍以上)",
+    "pullback": "within the 10 days after d a 5m low <= top x 1.03 (video: 回落到离箱顶3%以内 或者跌回箱体里); the setup ends at the first 5m close below the box bottom",
+    "turn": "5m low L = lowest of the 48 bars before it; the next 3 bars have low >= L; the first later bar with close > open and close > previous high triggers (within 48 bars of L and before any lower low); L <= top x 1.03 and L at or after the first touch; entry at the next 5m open",
+    "stop": "L x (1 - 0.0075) (middle of the video's 0.5-1%)",
+    "targets": "daily pivot highs (high equals the max of 5 days each side, pivot + 5 days <= d) within 365 days and above entry x 1.005, nearest first; TP2 = next level >= TP1 x 1.01; missing levels filled with round numbers (integer multiples of 10^floor(log10(entry))); skip the trigger when mean((TP1-E),(TP2-E)) < 3 x (E - stop)",
+    "exits": "half at TP1 (fill max(open, TP1)); the rest's stop moves to the entry from the next bar; the rest exits at TP2, at the entry, or at the close after 30 days (8640 5m bars); stop first when stop and TP1 print in the same bar; gaps fill at the open; trades open at the data end close at the last close and are flagged",
+    "attempts": "up to 3 executed trades per setup; one open position per symbol at a time",
+    "round_trip_cost": 0.002
+  },
+  "leader_filter_h2": {
+    "new_face": "top 10 alts (stables, BTC, ETH excluded) by quote volume on day d, and not top 10 on any of d-7..d-1 (video: 热度排行榜前十 新上榜的币)",
+    "followed_first_wave": "BTC low over d-60..d-1 at t0, BTC high after it up to d-1 at t1; BTC leg >= 5% and the coin's close return t0->t1 >= BTC's (video: 大饼第一波上涨的时候它就跟着涨过)",
+    "resilient": "on days in d-30..d-1 when BTC fell <= 2%, the coin's mean daily return minus BTC's >= 0; passes when there were no such days (video: 大饼调整的时候它不怎么跌)",
+    "leader": "all three"
+  },
+  "season_veto_h3": "BTC close(d) > SMA50(d) and SMA50(d) > SMA50(d-5) (proxy for the video's 春夏); H3 = H2 + this; H1 + this alone is reported as H1_season (descriptive)",
+  "controls": {
+    "matched_random": "20 per trade: random 5m bars of the same symbol and calendar month with 5m ATR14/price within 0.5-2x the trigger bar's; entry next open; stop distance = the trade's stop in 5m ATR units; TP1/TP2 at the trade's R multiples; same exits and cost",
+    "same_confirmation": "20 per trade: random 5m turn triggers (same turn rule, any context) of the same symbol and month in the same ATR band; their own stop L x (1 - 0.0075); TP1/TP2 at the trade's R multiples; same exits and cost",
+    "seed": 1011701
+  },
+  "stat_seed": 1011702,
+  "flips": 10000,
+  "primary": "per hypothesis H1, H2, H3: pass only if before and from 2025 both have mean net R > 0, excess over matched random > 0 and excess over same-confirmation random > 0, and the pooled month-block sign-flip p < 0.01 for both excesses",
+  "descriptive": [
+    "H1_season (H1 + season veto without the leader filter)",
+    "per-setup summed net R and share of setups with a positive sum (the video's 错一次两次三次 总有一次会起来)",
+    "skipped triggers for plan R < 3"
+  ],
+  "limitations": [
+    "the hot-list proxy is quote-volume rank on Binance USD-M only; the video used unnamed watch-list software",
+    "pivot resistance looks back at most to 2022-11 (data start), so early-2023 setups lean on round-number targets",
+    "positions ② and ④ and the pin-catch method are not tested in this version",
+    "the video's thresholds are a second-hand codification by the video's author, not the trader's own words"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -11202,3 +11202,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-11 5min优化不了吗 还有同时测试一起其他优质山寨币. Universe fixed by a pre-window volume rank (no survivorship pick). ETHUSDT reported as a reference outside the pooled verdict. No Pine, monitor or account change. Descriptive 5m follow-up (owner 只关心5min) from signals.csv.gz - equal-risk break-even round-trip cost is above 7bp only for SOL 18.2bp, OKX ETH 2024-02..2026-10 10.9bp and BNB 10.5bp; Binance ETH 2023-01..2026-09 3.2bp; 13 of 20 alts below 4bp and 6 have negative gross; pooled alts net per trade at 20/10/7/4bp -0.254/-0.116/-0.075/-0.033R. Stop-width terciles are not consistent (OKX ETH mid +0.09R at 20bp, Binance ETH mid -0.37R).
+  - experiment_id: exp-bitlanglang-mainwave-20261011-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    result: pending
+    question: Does the Bit浪浪 video's position-1 beginner standard (14-day daily box breakout on 3x volume, pullback to within 3 percent of the box top, 5m turn entry, stop 0.75 percent under the turn low, two pivot targets with plan >= 3R, half off at TP1 then break-even) earn positive net R after 0.2 percent cost in both periods and beat matched random entries and the same 5m confirmation fired at random (H1); and do the leader filter (H2) and the BTC season veto (H3) add to it?
+    single_variable: New system, pre-registered in config.json from the video's beginner numbers (box height cap 4 ATR calibrated on the video's PEOPLE and INJ breakouts); H2 adds only the leader filter to H1, H3 adds only the season veto to H2; H1_season is descriptive.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-11 「详细分析 并总结成小册」 for YouTube 0HmddXBIZU0 (Speculation Lab), then 「要」 to the handbook's chapter-12 backtest proposal. Handbook stays local (public repo). Positions 2 and 4 and the pin-catch method are not tested here. No Pine, monitor or account change.
