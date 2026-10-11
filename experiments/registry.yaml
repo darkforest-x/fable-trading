@@ -11180,9 +11180,9 @@ experiments:
     notes: Owner 2026-10-11 把上面几条特征写成规则去扫历史数据 (after the chat read of ETH 1m 2026-10-08 23:01-23:09). Thresholds from that single example; the scanned data ends 2026-09-30, before it. The example check (OKX ETH 1m) fires every variant at the 23:02 break and confirm at 23:05. No Pine, monitor or account change.
   - experiment_id: exp-spike-v129-eth-confirm-entry-20261011-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: planned
-    result: pending
+    source_commit: d2f0de9542
+    status: inconclusive
+    result: 15m passes the pre-registered rule, 5m does not; the 15m pass is small and lacks a random control. 15m selected K12_m0.5 (enter at the next open after the first close >= +0.5R from the original entry within 12 bars, original stop and exit) - mean net R selection +0.105 (34 of 96 signals, immediate -0.132), OKX last 12 months +0.696 (24 of 68, immediate +0.402), Binance 2021-09..2024-01 +0.071 (41 of 113, immediate -0.175); bootstrap 95 percent intervals all include 0 (-0.45..+0.93, -0.02..+1.63, -0.31..+0.49); total R falls in the OKX check (+16.7 vs +27.3R) and rises elsewhere (+3.6 vs -12.7, +2.9 vs -19.8). Neighbouring m 0.5 cells (K3, K6) also beat immediate in all three samples. The filter selects well - confirmed signals averaged +0.93/+2.04/+0.87R when entered immediately versus -0.72/-0.49/-0.77R for skipped ones - but the later price and wider risk give back most of it (hand-checked 2025-10-15 short - immediate +1.87R, confirmed +0.70R). 5m selected K3_m0.5 is worse on Binance (-0.633 vs -0.510R); no 5m candidate improves all three samples.
     question: On SPIKE V12.9 ETH 5m and 15m ordinary trades, does waiting for the trade to first close in profit (m R within K bars of the original entry) and entering at the next open, with the original absolute stop and recorded exit, raise mean net R after 0.2 percent cost over immediate entry in the selection sample and both check samples?
     single_variable: Entry timing only - K in 3/6/12 bars x m in 0/0.5/1 R; original stop, trail, opposite exit and occupancy kept; selection OKX before 2025-10-10, checks OKX after and Binance ETHUSDT before 2024-02-01.
     training_eligible: false
