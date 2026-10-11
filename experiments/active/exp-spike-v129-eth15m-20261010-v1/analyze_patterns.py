@@ -16,7 +16,7 @@ rules fixed before any bucketed result was looked at:
   mean net R has the same sign with Welch |t| >= 1 in all three samples.
 * Loss streaks are compared with 20000 random orderings of the same outcomes.
 
-Run: .venv/bin/python experiments/active/exp-spike-v129-eth15m-20261010-v1/analyze_patterns.py
+Run: PYTHONPATH=. .venv/bin/python experiments/active/exp-spike-v129-eth15m-20261010-v1/analyze_patterns.py
 Outputs: run_v1/patterns_v1/{factors.csv, stability.csv, streaks.json, anatomy.json, receipt.json}
 """
 from __future__ import annotations
@@ -31,6 +31,7 @@ import pandas as pd
 
 from yoyo.evaluation import spike_v128_recent as p
 from yoyo.evaluation import spike_v129_eth15m as s
+from yoyo.evaluation import spike_v129_eth5m as s5
 
 FIVE = Path("experiments/active/exp-spike-v129-eth5m-20261010-v1/analyze_patterns.py")
 _spec = importlib.util.spec_from_file_location("five_audit", FIVE)
@@ -132,8 +133,8 @@ def main() -> None:
     for name, g in (("okx_ordinary", okx.loc[okx.arm == "ordinary"]), ("binance_ordinary_2021_2024", binance)):
         g = g.assign(_t=pd.to_datetime(g.entry_time, utc=True)).sort_values("_t")
         streak[name] = five.streaks(g.net_r.to_numpy(float), rng)
-    p.dump(OUT / "streaks.json", s._clean(streak))
-    p.dump(OUT / "anatomy.json", s._clean(five.anatomy(okx)))
+    p.dump(OUT / "streaks.json", s5._clean(streak))
+    p.dump(OUT / "anatomy.json", s5._clean(five.anatomy(okx)))
     p.dump(OUT / "receipt.json", {"cuts": cuts, "script_sha256": p.digest(Path(__file__)),
                                   "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                                   "samples": {k: int(v) for k, v in data.loc[data.arm == "ordinary"]["sample"].value_counts().items()},
