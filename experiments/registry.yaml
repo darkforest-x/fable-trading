@@ -11189,12 +11189,12 @@ experiments:
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: false
-    notes: Owner 2026-10-11 等确认点再开仓 (after the winner/loser anatomy). Prior - exp-spike-v128-retest-entry-20260923-v1 rejected the retest confirmation. No matched random control in this version. No Pine, monitor or account change.
+    notes: Owner 2026-10-11 等确认点再开仓 (after the winner/loser anatomy). Prior - exp-spike-v128-retest-entry-20260923-v1 rejected the retest confirmation. No matched random control in this version; follow-up exp-spike-v129-alts-confirm-20261011-v1 applied both selected rules unchanged to 20 alts with same-confirmation random controls and rejected them (gain matches random after 2025). No Pine, monitor or account change.
   - experiment_id: exp-spike-v129-alts-confirm-20261011-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: planned
-    result: pending
+    source_commit: a4765d7a1e
+    status: rejected
+    result: Neither ETH-selected confirmation passes on the 20 alts. Baseline V12.9 ordinary 2023-01..2026-09-23 - 5m 13528 trades, mean net -0.254R (gross +0.022R, cost 0.276R, matched random -0.315R), 0 of 20 coins net positive; 15m 4309 trades, -0.082R (gross +0.063R, cost 0.145R, random -0.126R), 4 of 20 positive (1000SHIB +32.9R, SOL +8.6R, DYDX +6.2R, MASK +3.7R), only 1000SHIB positive in both periods. Confirmation per signal (skips as 0) - 15m K12_m0.5 -0.002/-0.003R versus immediate -0.045/-0.123R, per entered trade -0.004/-0.007R, versus the same confirmation on matched random entries +0.059R (p0.13) then -0.002R (p0.96); 5m K3_m0.5 -0.029/-0.035R per signal, per entry -0.177/-0.221R, versus random +0.019R (p0.050) then +0.007R (p0.62). Waiting mostly cuts losses by not trading, and random entries gain the same from 2025, so the ETH 15m pass of exp-spike-v129-eth-confirm-entry-20261011-v1 does not generalize. Best grid cell 15m K3_m0.5 is +0.104 then +0.003R per entry (p vs random 0.000 then 0.40), not stable.
     question: Do the ETH-selected V12.9 confirmation entries (15m K12_m0.5, 5m K3_m0.5) earn more per signal than immediate entry and than the same confirmation applied to matched random entries, on 20 liquid alts (top Binance USD-M quote volume 2022-11/12), 2023-01 to 2026-09-23, before and from 2025?
     single_variable: Entry timing only, rules frozen from exp-spike-v129-eth-confirm-entry-20261011-v1; V12.9 ordinary ledgers via the ETH code path (ETH 5m/15m reproduce the manual-system Binance ledgers exactly over 2023-03..2024-01); one matched random control per trade with the same confirmation.
     training_eligible: false
