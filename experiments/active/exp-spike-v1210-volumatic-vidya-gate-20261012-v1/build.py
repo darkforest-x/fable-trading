@@ -253,7 +253,11 @@ def _baseline_controls(prepared, trades: list[dict], cfg: dict) -> pd.DataFrame:
 def _case(base: pd.DataFrame, *, symbol: str, venue: str, asset: str, tick: float, minutes: int,
           start: pd.Timestamp, split: pd.Timestamp, end: pd.Timestamp, cfg: dict,
           source_path: Path | None = None) -> tuple[dict, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    bars, partial = low.complete_bars(base, minutes)
+    if venue == "okx" and minutes == 5:
+        # This one source is raw 1m OKX data; every other case starts at 5m.
+        bars, partial = low.complete_bars(base, minutes)
+    else:
+        bars, partial = replay.complete_bars(base, minutes)
     if partial:
         raise ValueError(f"partial {minutes}m bars for {symbol}: {partial}")
     if venue == "okx" and minutes == 5:
