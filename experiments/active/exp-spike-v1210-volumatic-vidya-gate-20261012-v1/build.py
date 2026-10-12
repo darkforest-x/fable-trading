@@ -446,8 +446,9 @@ def _add_summaries(case_rows, baseline_all, gated_all, baseline_controls_all, ga
             # Per-trade pooled R is descriptive. With overlapping symbols and no
             # common capital allocation, a stitched multi-coin path has no valid
             # portfolio drawdown or consecutive-loss interpretation.
-            summary.pop("max_drawdown_r", None)
-            summary.pop("max_consecutive_losses", None)
+            for period_summary in summary.get("periods", {}).values():
+                period_summary.pop("max_drawdown_r", None)
+                period_summary.pop("max_consecutive_losses", None)
             summary["aggregation_note"] = (
                 "Trade-weighted pool across symbols; no portfolio drawdown or loss streak is reported "
                 "because positions overlap across coins without a frozen capital allocation."
