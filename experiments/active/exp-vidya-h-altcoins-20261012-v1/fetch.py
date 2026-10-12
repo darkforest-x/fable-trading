@@ -23,7 +23,7 @@ import time
 
 import pandas as pd
 
-from yoyo.data.binance_um_archives import (_download_month, _request_bytes, archive_months, parse_checksum,
+from yoyo.data.binance_um_archives import (BinanceArchiveError, _download_month, _request_bytes, archive_months, parse_checksum,
                                            parse_month_zip, sha256_bytes)
 
 HERE = Path(__file__).resolve().parent
@@ -42,8 +42,9 @@ def retry(fn, *args, tries=6, **kwargs):
     for attempt in range(tries):
         try:
             return fn(*args, **kwargs)
-        except (socket.timeout, ConnectionError) as exc:
-            if attempt + 1 == tries:
+        except (socket.timeout, ConnectionError, BinanceArchiveError) as exc:
+            transport = not isinstance(exc, BinanceArchiveError) or str(exc).startswith(("request failed", "HTTP"))
+            if attempt + 1 == tries or not transport:  # checksum or parsing errors are never retried
                 raise
             print("retry", args or kwargs.get("symbol"), kwargs.get("month", ""), type(exc).__name__, flush=True)
             time.sleep(2 ** attempt)
@@ -96,7 +97,7 @@ def main():
         if expected != UNIVERSE:
             raise SystemExit("universe differs from exp-spike-v129-alts-confirm-20261011-v1")
     OUT.mkdir(parents=True, exist_ok=True)
-    with ThreadPoolExecutor(max_workers=10) as pool:
+    with ThreadPoolExecutor(max_workers=5) as pool:
         for r in pool.map(fetch, UNIVERSE):
             pre = [m for m in r["missing"] if m < r["first"][:7]]
             print(r["symbol"], r["rows"], r["first"][:10], r["last"][:16], "gaps", r["gaps"],
