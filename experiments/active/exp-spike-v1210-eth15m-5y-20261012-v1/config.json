@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp-spike-v1210-eth15m-5y-20261012-v1",
+  "owner_request": "2026-10-12 「详细回测ethusdt.p 15min spike v12.10 近5年」",
+  "question": "How did frozen SPIKE V12.10 (V12.9 ordinary signals plus the same-timeframe Volumatic VIDYA direction gate) perform on OKX ETHUSDT.P 15m over the last five years after 0.2% round-trip cost, against trend-state-matched random entries, and compared with ungated V12.9 on the same data?",
+  "single_variable": "None; frozen-rule descriptive replay over a longer window. Signals, gate, exits, fills and costs are those of exp-spike-v1210-volumatic-vidya-gate-20261012-v1, imported from its committed builder.",
+  "symbol": "ETH_USDT_SWAP",
+  "venue": "okx",
+  "asset": "ETH",
+  "tick": 0.01,
+  "timeframe_min": 15,
+  "archive_months": ["2021-09", "2026-09"],
+  "archive_max_exclusive": "2026-09-30T16:00:00+00:00",
+  "start": "2021-10-12T00:00:00+00:00",
+  "split": "2024-02-01T00:00:00+00:00",
+  "end": "2026-10-12T00:00:00+00:00",
+  "data_dir": "data/research/spike_v1210_eth15m_5y_20261012",
+  "parent_study": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1",
+  "parent_trades": {
+    "vidya_gate": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/vidya_gate_trades.csv.gz",
+    "baseline": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/baseline_trades.csv.gz"
+  },
+  "parity_window": ["2024-03-01T00:00:00+00:00", "2026-10-10T10:00:00+00:00"],
+  "binance_crosscheck": {
+    "series": "data/research/spike_manual_system_20260925/ETHUSDT.csv.gz",
+    "symbol": "ETHUSDT",
+    "note": "Binance USD-M ETHUSDT 5m, same rules and window up to the series end; descriptive cross-venue check only."
+  },
+  "round_trip_cost": 0.002,
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032],
+  "control_seed": 10121210,
+  "stat_seed": 10121211,
+  "equity_risk_per_trade": 0.01,
+  "split_meaning": "2021-10-12..2024-01-31 was never used by any V12.10 ETH study; 2024-02-01 onward is the window already reported by the parent study. The split also defines the control fold.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": [
+    "Owner's TradingView chart is OKX ETHUSDT.P (HANDOFF); OKX official monthly 1m archives start at 2021-09 for ETH-USDT-SWAP, so warmup is 2021-08-31 16:00 UTC to 2021-10-12.",
+    "Incomplete 1m buckets are left as timestamp gaps (the engine censors positions across gaps) and are counted in the receipt instead of aborting.",
+    "Parity: closed trades with signal close inside parity_window must equal the parent study's saved OKX 15m ledgers (trade key, side, entry/exit time and price, exit reason, net R).",
+    "No monitor, Pine, threshold preset, account or live behaviour changes. Report requested by the owner (detailed backtest)."
+  ]
+}
