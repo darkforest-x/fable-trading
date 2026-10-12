@@ -1,0 +1,35 @@
+{
+  "experiment_id": "exp-spike-v1210-filters-20261012-v1",
+  "owner_request": "2026-10-12 「都试试」 after the V12.10 ETH 15m losing-run diagnostics proposed four filter ideas",
+  "question": "Does each candidate entry filter, added alone to frozen SPIKE V12.10 15m, raise net R per trade out of sample (20 liquid alts) in both periods, and do the filtered entries beat random entries drawn under the same VIDYA state and the same filter condition?",
+  "single_variable": "One admission filter per variant on top of V12.10; signals, VIDYA gate, exits, fills (next open) and 0.2% round-trip cost unchanged; rejected signals release occupancy (serial ledger rerun).",
+  "filters": {
+    "F1_trend8d": {"label": "大趋势同向", "rule": "side * (close - SMA(close, 800)) > 0 at the signal bar"},
+    "F2_vidya_fresh": {"label": "VIDYA 新鲜", "rule": "bars since the VIDYA trend state last flipped <= 4 at the signal bar"},
+    "F3_not_chop": {"label": "不做震荡", "rule": "efficiency ratio over the prior 96 bars (|close - close[96]| / sum |delta close|) >= 0.05"},
+    "F4a_near_vidya": {"label": "不追远", "rule": "side * (close - VIDYA trend line) / ATR14 <= 4.5 (line = lower band in up state, upper band in down state)"},
+    "F4b_no_big_bar": {"label": "不追大K线", "rule": "(high - low) / ATR14 <= 1.75 on the signal bar"}
+  },
+  "atr": "ATR14 = Wilder RMA of true range on the 15m chart, as in analyze_streaks.py of the five-year study",
+  "provenance": "All five thresholds come from the in-sample terciles of exp-spike-v1210-eth15m-5y-20261012-v1/analyze_streaks.py on OKX ETH 15m (rounded where noted); they are fixed here before any filtered result is computed. ETH results are therefore in-sample and descriptive.",
+  "cases": {
+    "eth_okx": {"window": ["2021-10-12T00:00:00+00:00", "2026-10-12T00:00:00+00:00"], "split": "2024-02-01T00:00:00+00:00",
+                "source": "experiments/active/exp-spike-v1210-eth15m-5y-20261012-v1 (okx_base5m, receipts checked)",
+                "parity": "V12.10 closed trades must equal that experiment's results_v1/okx_vidya_gate_trades.csv.gz"},
+    "eth_binance": {"window": ["2021-10-12T00:00:00+00:00", "2026-09-25T00:00:00+00:00"], "split": "2024-02-01T00:00:00+00:00",
+                    "source": "data/research/spike_manual_system_20260925/ETHUSDT.csv.gz", "note": "near-duplicate of OKX ETH; descriptive"},
+    "alts": {"window": ["2023-01-01T00:00:00+00:00", "2026-09-23T00:00:00+00:00"], "split": "2025-01-01T00:00:00+00:00",
+             "symbols": ["DOGEUSDT", "BNBUSDT", "XRPUSDT", "LTCUSDT", "SOLUSDT", "MASKUSDT", "CHZUSDT", "LINKUSDT", "APEUSDT", "ETCUSDT", "DYDXUSDT", "ADAUSDT", "APTUSDT", "NEARUSDT", "DOTUSDT", "AXSUSDT", "AVAXUSDT", "CRVUSDT", "GMTUSDT", "1000SHIBUSDT"],
+             "source": "spike_v129_alts_confirm.base5m (frozen Binance USD-M 5m series, warmup from 2022-11-01)",
+             "parity": "V12.10 closed trades must equal exp-spike-v1210-volumatic-vidya-gate-20261012-v1 results_v1/vidya_gate_trades.csv.gz (binance, 15m)"}
+  },
+  "primary": "Out of sample = pooled 20 alts. A filter IMPROVES V12.10 if pooled mean net R per trade is higher than V12.10's in both alt periods. It PASSES if in addition its trades beat the state-and-filter-matched random control with positive excess and month-block sign-flip p < 0.01 in both alt periods. ETH rows are in-sample and descriptive.",
+  "control": "One deterministic random entry per trade: same symbol, side, UTC week, fold, ATR/close bin, same VIDYA state and the same filter condition true at the random bar; same exit engine and cost.",
+  "vol_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032],
+  "control_seed": 10121220,
+  "stat_seed": 10121221,
+  "round_trip_cost": 0.002,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": ["Combinations of filters are not tested (multi-variable; owner approval needed).", "No Pine, monitor, preset or account change."]
+}
