@@ -105,7 +105,7 @@ button:hover{border-color:var(--axis)} button.on{background:var(--text);color:va
 button:focus-visible,.thumb:focus-visible,tr[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .thumb{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;text-align:left;min-height:168px}
-.thumb.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.thumb.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);background:var(--surface);color:var(--text)}
 .thumb .t{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;gap:6px}
 .thumb .t span{color:var(--muted)}
 .thumb .chart{height:110px}
@@ -174,10 +174,8 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
 
 <section id="time">
   <h2><span class="no">05</span>按时间看</h2>
-  <div class="grid2">
-    <div class="card"><h3 style="margin-top:0">每年合计 R</h3><div class="legend"><span><i class="k-blue"></i>V12.10</span><span><i class="k-orange"></i>V12.9</span></div><div class="chart" id="yr"></div></div>
-    <div class="card"><h3 style="margin-top:0">新数据和已研究过的数据</h3><p class="sub" style="margin-bottom:8px">2024-02 以前的两年多，任何 V12.10 ETH 研究都没用过；2024-02 以后是 V12.10 研究已经看过的区间。</p><div class="tw" id="split-table"></div></div>
-  </div>
+  <div class="card"><h3 style="margin-top:0">新数据和已研究过的数据</h3><p class="sub" style="margin-bottom:8px">2024-02 以前的两年多，任何 V12.10 ETH 研究都没用过；2024-02 以后是 V12.10 研究已经看过的区间。</p><div class="tw" id="split-table"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">每年合计 R</h3><div class="legend"><span><i class="k-blue"></i>V12.10</span><span><i class="k-orange"></i>V12.9</span></div><div class="chart" id="yr"></div></div>
   <div class="card" style="margin-top:16px"><h3 style="margin-top:0">逐年明细（V12.10）</h3><div class="tw" id="yr-table"></div></div>
   <div class="card" style="margin-top:16px"><h3 style="margin-top:0">每月合计 R（V12.10）</h3><div class="chart" id="mo"></div></div>
 </section>
@@ -185,10 +183,8 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
 <section id="gate">
   <h2><span class="no">06</span>VIDYA 方向门起了什么作用</h2>
   <p class="sub">同一份数据、同样的 V12.9 信号和出场，只差"VIDYA 方向不一致就不做"这一条。</p>
-  <div class="grid2">
-    <div class="card"><h3 style="margin-top:0">V12.10 和 V12.9 对比</h3><div class="tw" id="cmp-table"></div></div>
-    <div class="card"><h3 style="margin-top:0">被方向门拦下的信号</h3><p class="sub" style="margin-bottom:8px" id="removed-sub"></p><div class="tw" id="removed-table"></div></div>
-  </div>
+  <div class="card"><h3 style="margin-top:0">V12.10 和 V12.9 对比</h3><div class="tw" id="cmp-table"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">被方向门拦下的信号</h3><p class="sub" style="margin-bottom:8px" id="removed-sub"></p><div class="tw" id="removed-table"></div></div>
 </section>
 
 <section id="traits">
@@ -198,11 +194,11 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
     <div class="card"><h3 style="margin-top:0">每笔结果分布</h3><p class="sub" style="margin-bottom:6px">柱子是笔数，鼠标看这一档合计多少 R。</p><div class="chart" id="dist"></div></div>
     <div class="card"><h3 style="margin-top:0">靠大单吃饭</h3><div class="tiles" id="dep" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0"></div></div>
   </div>
-  <div class="grid3" style="margin-top:16px">
+  <div class="grid2" style="margin-top:16px">
     <div class="card"><h3 style="margin-top:0">做多和做空</h3><div class="tw" id="side-table"></div></div>
     <div class="card"><h3 style="margin-top:0">出场方式</h3><div class="tw" id="reason-table"></div></div>
-    <div class="card"><h3 style="margin-top:0">持仓时长</h3><div class="tw" id="hold-table"></div></div>
   </div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">持仓时长</h3><div class="tw" id="hold-table"></div></div>
 </section>
 
 <section id="control">
@@ -250,7 +246,7 @@ const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? "—").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
 const fin = (v) => typeof v === "number" && Number.isFinite(v);
 const sg = (v, d = 2) => fin(v) ? (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) : "—";
-const n2 = (v, d = 2) => fin(v) ? v.toLocaleString("zh-CN", {maximumFractionDigits: d, minimumFractionDigits: 0}) : "—";
+const n2 = (v, d = 2) => fin(v) ? v.toLocaleString("zh-CN", {maximumFractionDigits: d, minimumFractionDigits: 0}).replace(/^-/, "−") : "—";
 const pct = (v, d = 1) => fin(v) ? n2(v, d) + "%" : "—";
 const cls = (v) => fin(v) ? (v > 0 ? "pos" : v < 0 ? "neg" : "") : "";
 const tf = (ms, o) => new Intl.DateTimeFormat("zh-CN", {timeZone: "Asia/Shanghai", hour12: false, ...o}).format(new Date(ms));
@@ -324,7 +320,7 @@ function tradeChart(el, t, opt = {}) {
       p.push(`<text class="tick" x="${X(i)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === ticks ? "end" : "middle"}">${esc(tf(rows[i][0], {month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"}))}</text>`); }
   }
   if (opt.annotate) {
-    const lab = (x, y, text, anchor = "start") => { const w = [...text].reduce((s, ch) => s + (ch.charCodeAt(0) > 255 ? 11 : 6.4), 10), x0 = anchor === "end" ? x - w : x;
+    const lab = (x, y, text, anchor = "start") => { const w = [...text].reduce((s, ch) => s + (ch.charCodeAt(0) > 255 ? 11 : 6.4), 10), x0 = Math.max(L, Math.min(W - R - w, anchor === "end" ? x - w : x));
       p.push(`<rect class="ann-bg" x="${x0}" y="${y - 13}" width="${w}" height="18" rx="4"/><text class="ann" x="${x0 + 5}" y="${y}">${esc(text)}</text>`); };
     lab(sx - 6, Y(t.entry) - dir * 30, "① 信号 K 线收盘", "end");
     lab(xa + 10, Y(t.entry) + dir * 22, "② 下一根开盘入场");
