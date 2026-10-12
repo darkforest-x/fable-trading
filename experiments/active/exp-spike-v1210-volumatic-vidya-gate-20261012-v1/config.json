@@ -1,0 +1,65 @@
+{
+  "experiment_id": "exp-spike-v1210-volumatic-vidya-gate-20261012-v1",
+  "question": "Does a same-timeframe BigBeluga Volumatic VIDYA trend-direction entry gate improve frozen SPIKE V12.9 ordinary entries on OKX ETHUSDT.P 5m/15m and a pre-ranked 20-alt Binance USD-M sample after 0.2% round-trip cost, and does the admitted signal beat a trend-matched random entry?",
+  "single_variable": "Entry admission only: keep a V12.9 ordinary signal iff the confirmed signal-bar close has the same Volumatic VIDYA trend direction as the signal. Re-run the non-overlapping serial ledger so rejected entries do not occupy positions. All exits, stops, fills, prior BB/overheat/HTF gates, costs and raw signal rules are frozen.",
+  "vidya": {
+    "source_name": "Volumatic Variable Index Dynamic Average [BigBeluga]",
+    "source_url": "https://www.tradingview.com/script/llhVjhA5-Volumatic-Variable-Index-Dynamic-Average-BigBeluga/",
+    "source_script_id": "llhVjhA5",
+    "length": 10,
+    "momentum_length": 20,
+    "smoothing_sma": 15,
+    "atr_length": 200,
+    "band_distance_atr": 2.0,
+    "trend_rule": "Up state turns on when confirmed close crosses above the upper band; down state turns on when confirmed close crosses below the lower band; otherwise retain the prior state.",
+    "used_for_admission": "Current chart-timeframe trend state only. The Volumatic volume-delta readout and pivot annotations do not add entry conditions."
+  },
+  "eth_okx": {
+    "symbol": "ETH_USDT_SWAP",
+    "asset": "ETH",
+    "venue": "okx",
+    "tick": 0.01,
+    "timeframes": [5, 15],
+    "start": "2024-02-01T00:00:00Z",
+    "split": "2025-10-10T00:00:00Z",
+    "end": "2026-10-10T10:00:00Z",
+    "input_receipt": "data/research/spike_v129_eth5m_20261010/receipt.json",
+    "baseline_experiments": {
+      "5": "experiments/active/exp-spike-v129-eth5m-20261010-v1/run_v1/trades.csv.gz",
+      "15": "experiments/active/exp-spike-v129-eth15m-20261010-v1/run_v1/trades.csv.gz"
+    }
+  },
+  "altcoins_binance": {
+    "venue": "binance",
+    "timeframes": [5, 15],
+    "rank_start": "2022-11-01T00:00:00Z",
+    "rank_end": "2023-01-01T00:00:00Z",
+    "universe_rule": "Reuse the 20 Binance USD-M alts selected by median daily quote volume before the study window in exp-spike-v129-alts-confirm-20261011-v1; BTC, ETH and stablecoins remain excluded.",
+    "symbols": ["DOGEUSDT", "BNBUSDT", "XRPUSDT", "LTCUSDT", "SOLUSDT", "MASKUSDT", "CHZUSDT", "LINKUSDT", "APEUSDT", "ETCUSDT", "DYDXUSDT", "ADAUSDT", "APTUSDT", "NEARUSDT", "DOTUSDT", "AXSUSDT", "AVAXUSDT", "CRVUSDT", "GMTUSDT", "1000SHIBUSDT"],
+    "warmup_start": "2022-11-01T00:00:00Z",
+    "start": "2023-01-01T00:00:00Z",
+    "split": "2025-01-01T00:00:00Z",
+    "end": "2026-09-23T00:00:00Z",
+    "input_series_dir": "data/research/spike_v128_entry_clock_long_20260923/series",
+    "baseline_experiment": "experiments/active/exp-spike-v129-alts-confirm-20261011-v1/results_v1/trades.csv.gz"
+  },
+  "execution": {
+    "fill": "next bar open",
+    "exit_engine": "V12.9 ordinary serial ledger: 5-bar extreme plus 0.2 ATR stop, minimum 2 ATR initial risk, close-2R-armed 4 ATR trail, raw opposite exit",
+    "round_trip_cost": 0.002,
+    "position_policy": "one position at a time per symbol and timeframe; all archive events warm occupancy before the result window",
+    "matched_control": "One deterministic random entry per admitted trade, matched on same symbol, signal side, UTC week, study fold, causal ATR/close bin, and the same VIDYA trend state; same entry/exit engine and 0.2% cost.",
+    "control_seed": 10101210,
+    "stat_seed": 10101211,
+    "volatility_bins": [0.0005, 0.001, 0.002, 0.004, 0.008, 0.016, 0.032]
+  },
+  "primary": "For each timeframe in the pooled 20-alt set, the admitted trades must have positive mean net R in both periods and positive excess over the trend-state-matched random control with a calendar-month block sign-flip p < 0.01 in both periods. ETH is a separately reported reference. Every result remains research-only.",
+  "pine_source": "yoyo/evaluation/pine/spike_burst_v12_10.pine",
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": [
+    "This is a single admission-gate study. It does not tune VIDYA parameters and does not claim TradingView-native backtest parity.",
+    "Baseline ledgers must reproduce the saved V12.9 ordinary trades before the gated run is accepted.",
+    "No monitor, forward producer, active bundle, threshold preset, account, or live execution behavior is changed."
+  ]
+}
