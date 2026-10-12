@@ -11227,3 +11227,25 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-12 Notion task #47. VIDYA defaults frozen at length 10, momentum 20, SMA 15, ATR 200, band distance 2; same-state controls match symbol/side/UTC week/fold/ATR-close bin. ETH window 2024-02-01..2026-10-10 10:00 UTC; 20 alts 2023-01-01..2026-09-23, split at 2025-01-01. Require exact saved V12.9 baseline ledger parity before accepting results; research only, no training, promotion, monitor or live behavior change.
+  - experiment_id: exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c71f5d1a9f
+    status: inconclusive
+    result: >-
+      Adding a confirmed 15m VIDYA flip exit at the next open to the same V12.10 gate yielded 144 closed trades, +0.142R
+      mean, +20.41R sum, PF 1.210, and -30.80R R-unit max drawdown; incumbent gate was 142, +0.195R, +27.76R, PF
+      1.276, and -33.67R. Longest losing streak worsened from 17 to 18. In the fixed-entry comparison, 34/142 entries
+      exited on the flip, 19 losses were reduced, 3 losses became nonlosses, and 8 baseline winners were harmed; mean
+      paired delta -0.0386R (95% month-block CI -0.1510 to +0.0485, two-sided p=0.4639). Same-state-control excess
+      remained +0.695R (p=0.0072), below the incumbent +0.753R (p=0.0058). Small drawdown reduction did not offset lower
+      net R and no shorter full-sample loss streak; evidence does not establish an improved exit policy.
+    question: On frozen ETH 15m V12.10 VIDYA-gated serial entries, does exiting at the next 15m open after a confirmed VIDYA state flip reduce loss streak and drawdown without sacrificing net R versus the unchanged V12.10 exit?
+    single_variable: Exit rule only. V12.10 admission, entries, next-open fills, original stop/trail/opposite-signal exits, serial occupancy, and 0.2% round-trip cost are frozen; a confirmed opposing VIDYA state schedules an exit at the following 15m open, with an active stop gap retaining priority.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+      - experiments/active/exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1/config.json
+      - experiments/active/exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1/results_v1/receipt.json
+    reuse_allowed: false
+    notes: Owner said “试试看” on 2026-10-12. 2024-02-01..2026-10-10 10:00 UTC, split 2025-10-10. V12.9 baseline and parent V12.10 gate both reproduced exactly; 1m inputs hash-verified, with zero duplicate rows collapsed, zero partial buckets, and zero 15m data-gap bars. Research only; no Pine, monitor, threshold preset, account, or live behavior change.
