@@ -84,15 +84,15 @@ def early_attempt(prepared, i: int, side: int, trend: dict[str, np.ndarray]) -> 
 
     frame, gap, raw_side, spec = prepared.frame, prepared.gap, prepared.raw_side, prepared.spec
     oa, ha, la, ca, aa = prepared.open, prepared.high, prepared.low, prepared.close, prepared.atr
-    start = int(frame.index.get_loc(pd.Timestamp(row.entry_time)))
+    start = int(frame.index.get_loc(pd.Timestamp(row["entry_time"])))
     pos = {key: row[key] for key in (
         "signal_i", "signal_bar_open", "entry_i", "entry_time", "side", "entry_price",
         "initial_stop", "initial_risk", "initial_risk_frac",
     )}
-    pos["frozen_index_offset"] = int(row.entry_i) - start
+    pos["frozen_index_offset"] = int(row["entry_i"]) - start
     pos = fixed.base._new_trade(pos, trade_id=f"{prepared.context.key}:vidya-flip:{i}",
                                 cohort=prepared.cohort, policy="vidya_flip_exit", context=prepared.context)
-    pos.update(protection=float(row.initial_stop), mfe_r=0.0, trail_armed=False,
+    pos.update(protection=float(row["initial_stop"]), mfe_r=0.0, trail_armed=False,
                be_armed=False, be_trigger_count=0)
     pending_reverse = False
     pending_vidya_flip = False
