@@ -32368,3 +32368,18 @@ artifacts:
     notes: Reshaped 30m/1H events of exp-market-sync-shock-20261008-v2 (8840 events, 32 timeframe/kind/config groups),
       net bp per exit and instrument plus paired control, no recomputation. Read by the workbench 全市场异动 menu.
       1H sync z3/v3/b0.75 up events 126, ETH 12h mean +53.8bp, matching the v2 summary.
+
+  - artifact_id: spike-v1210-eth15m-vidya-flip-exit-20261012-results
+    artifact_type: manifest
+    role: eth15m_vidya_flip_exit_replay_receipt_and_trade_ledgers
+    source_repo: darkforest-x/fable-trading
+    source_commit: c71f5d1a9f8f6764294226bdbb8771dc48262926
+    source_path: experiments/active/exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1/results_v1/receipt.json
+    sha256: dd038f5819a672ee81eb3098b5f4b9e93b7f9dc255f58f1a7879e1852d1b5816
+    size_bytes: 2367
+    storage_uri: repo://experiments/active/exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1/results_v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Pins the config, input, source, summary and compressed trade-ledger hashes for the ETH 15m early-exit study.
+      Research only; receipt records exact data window and replay validation.

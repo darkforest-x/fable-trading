@@ -1,0 +1,241 @@
+{
+  "baseline_variant": "same V12.10 VIDYA entry gate + original V12.9 exit engine",
+  "data_quality": {
+    "15m_data_gap_bars": 0,
+    "bars_15m": 97320,
+    "bars_5m": 291960,
+    "data_receipt": "data/research/spike_v129_eth5m_20261010/receipt.json",
+    "first_15m_close": "2023-12-31 16:15:00+00:00",
+    "first_15m_open": "2023-12-31 16:00:00+00:00",
+    "identical_boundary_or_file_overlap_rows_collapsed": 0,
+    "last_15m_close": "2026-10-10 10:00:00+00:00",
+    "last_15m_open": "2026-10-10 09:45:00+00:00",
+    "merged_1m_rows": 1459800,
+    "partial_15m_buckets": 0,
+    "partial_5m_buckets": 0,
+    "raw_1m_rows": 1459800,
+    "raw_1m_rows_before_identical_duplicate_collapse": 1459800,
+    "raw_1m_source_first": "2023-12-31 16:00:00+00:00",
+    "raw_1m_source_last": "2026-10-10 09:59:00+00:00"
+  },
+  "early_exit_reason_counts": {
+    "initial_stop": 70,
+    "opposite_v6_next_open": 6,
+    "trailing_stop": 33,
+    "vidya_flip_next_open": 35
+  },
+  "early_exit_trade_flow": {
+    "censored": 0,
+    "closed": 144,
+    "matched_controls": 144,
+    "opened_in_window": 144,
+    "skipped_in_position": 23
+  },
+  "exit_rule": "Exit rule only. Keep the V12.10 admission gate, entry signal, next-open fill, initial stop, trailing stop, raw opposite-signal exit, serial occupancy, and 0.2% round-trip cost frozen. If a completed 15m bar shows the latched VIDYA state opposite to the open position, schedule an exit at the following 15m open. An active stop gap at that open retains priority; stop touches during the completed bar are processed before the close-confirmed VIDYA flip.",
+  "experiment_id": "exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1",
+  "limitations": [
+    "The direction-flip exit is confirmed at a 15m close and filled at the next bar open; it does not act within the flip bar.",
+    "An opening gap through the already-active initial/trailing stop keeps stop-gap priority.",
+    "The fixed-entry paired comparison isolates the per-trade exit effect but does not include trades admitted later by freed serial occupancy; the full serial ledger includes those entries.",
+    "Costs remain the frozen 0.2% round-trip assumption; dynamic spread, funding, and slippage are not modeled.",
+    "Research only; not a promotion or live-execution result."
+  ],
+  "original_gate_metrics": {
+    "closed": 142,
+    "periods": {
+      "before_split": {
+        "closed": 82,
+        "control_mean_net_r": -0.619485949778946,
+        "excess_mean_r": 0.5984814927307746,
+        "excess_month_block_ci95": [
+          -0.11083098114472306,
+          1.3517427337935817
+        ],
+        "excess_month_block_p": 0.1365,
+        "matched_controls": 82,
+        "max_consecutive_losses": 17,
+        "max_drawdown_r": -33.667054072594155,
+        "mean_cost_r": 0.16494327065813283,
+        "mean_gross_r": 0.14393881360996172,
+        "mean_net_bp": -10.485683600588773,
+        "mean_net_r": -0.021004457048171152,
+        "median_risk_pct": 1.2932764939292365,
+        "profit_factor_r": 0.9731760627378028,
+        "sum_net_r": -1.7223654779500346,
+        "win_rate": 0.25609756097560976,
+        "wins": 21
+      },
+      "from_split": {
+        "closed": 60,
+        "control_mean_net_r": -0.4729136861690974,
+        "excess_mean_r": 0.9642631342592328,
+        "excess_month_block_ci95": [
+          0.2837783095285027,
+          1.9532148855461813
+        ],
+        "excess_month_block_p": 0.0163,
+        "matched_controls": 60,
+        "max_consecutive_losses": 7,
+        "max_drawdown_r": -9.202289198485449,
+        "mean_cost_r": 0.20493454524771104,
+        "mean_gross_r": 0.6962839933378466,
+        "mean_net_bp": 74.68733531336089,
+        "mean_net_r": 0.49134944809013575,
+        "median_risk_pct": 1.218637643361089,
+        "profit_factor_r": 1.8097587685538872,
+        "sum_net_r": 29.480966885408144,
+        "win_rate": 0.38333333333333336,
+        "wins": 23
+      },
+      "full": {
+        "closed": 142,
+        "control_mean_net_r": -0.5575540074085873,
+        "excess_mean_r": 0.7530371159118134,
+        "excess_month_block_ci95": [
+          0.2625059341662453,
+          1.3271209232456922
+        ],
+        "excess_month_block_p": 0.0058,
+        "matched_controls": 142,
+        "max_consecutive_losses": 17,
+        "max_drawdown_r": -33.667054072594155,
+        "mean_cost_r": 0.18184099231570108,
+        "mean_gross_r": 0.37732410081892714,
+        "mean_net_bp": 25.502915940516722,
+        "mean_net_r": 0.19548310850322606,
+        "median_risk_pct": 1.2653825471665572,
+        "profit_factor_r": 1.2758834944405237,
+        "sum_net_r": 27.7586014074581,
+        "win_rate": 0.30985915492957744,
+        "wins": 44
+      }
+    }
+  },
+  "parent_experiment_id": "exp-spike-v1210-volumatic-vidya-gate-20261012-v1",
+  "production_eligible": false,
+  "replay_validation": {
+    "cost_contract": "closed trades are checked at exactly 0.2% round trip",
+    "gate_candidates": {
+      "admitted_candidates": 167,
+      "admitted_long": 86,
+      "admitted_short": 81,
+      "raw_candidates": 197,
+      "raw_long": 103,
+      "raw_short": 94,
+      "rejected_opposite": 30,
+      "rejected_unready": 0
+    },
+    "parent_v1210_gate_parity": {
+      "closed_gate_trades_checked": 142,
+      "exact": true
+    },
+    "v129_saved_baseline_parity": {
+      "closed_trades_checked": 164,
+      "exact": true,
+      "label": "OKX ETH 15m"
+    }
+  },
+  "same_entry_isolated_exit_effect": {
+    "baseline_winners_harmed": 8,
+    "flip_exit_count": 34,
+    "losses_reduced": 19,
+    "losses_to_nonloss": 3,
+    "mean_delta_net_r": -0.03864587258903625,
+    "median_delta_net_r": 0.0,
+    "month_block_bootstrap_ci95": [
+      -0.15099539953515714,
+      0.048484065115921786
+    ],
+    "month_block_sign_flip_p_two_sided": 0.4639,
+    "month_blocks": 32,
+    "n": 142,
+    "negative_delta_count": 11,
+    "positive_delta_count": 23,
+    "sum_delta_net_r": -5.487713907643148,
+    "zero_delta_count": 108
+  },
+  "scope": {
+    "end": "2026-10-10T10:00:00Z",
+    "parent_config": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/config.json",
+    "parent_control_ledger": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/vidya_gate_controls.csv.gz",
+    "parent_gate_ledger": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/vidya_gate_trades.csv.gz",
+    "split": "2025-10-10T00:00:00Z",
+    "start": "2024-02-01T00:00:00Z",
+    "symbol": "ETH_USDT_SWAP",
+    "timeframe_min": 15,
+    "venue": "OKX"
+  },
+  "training_eligible": false,
+  "variant": "V12.10 VIDYA entry gate + confirmed VIDYA direction-flip exit at next 15m open",
+  "vidya_flip_exit_metrics": {
+    "closed": 144,
+    "periods": {
+      "before_split": {
+        "closed": 84,
+        "control_mean_net_r": -0.6338467786364087,
+        "excess_mean_r": 0.5927799847004765,
+        "excess_month_block_ci95": [
+          -0.0530228826543133,
+          1.2517379959693602
+        ],
+        "excess_month_block_p": 0.1002,
+        "matched_controls": 84,
+        "max_consecutive_losses": 18,
+        "max_drawdown_r": -30.79508217163204,
+        "mean_cost_r": 0.16520100710138128,
+        "mean_gross_r": 0.12413421316544906,
+        "mean_net_bp": -15.060216554978375,
+        "mean_net_r": -0.041066793935932225,
+        "median_risk_pct": 1.2864621524894915,
+        "profit_factor_r": 0.9444239566150678,
+        "sum_net_r": -3.449610690618307,
+        "win_rate": 0.23809523809523808,
+        "wins": 20
+      },
+      "from_split": {
+        "closed": 60,
+        "control_mean_net_r": -0.44094518964237533,
+        "excess_mean_r": 0.8386231672316086,
+        "excess_month_block_ci95": [
+          0.1697862004870906,
+          1.8048854210247307
+        ],
+        "excess_month_block_p": 0.0358,
+        "matched_controls": 60,
+        "max_consecutive_losses": 6,
+        "max_drawdown_r": -13.051255520908395,
+        "mean_cost_r": 0.2049345452477111,
+        "mean_gross_r": 0.6026125228369444,
+        "mean_net_bp": 58.5044338371048,
+        "mean_net_r": 0.3976779775892334,
+        "median_risk_pct": 1.218637643361089,
+        "profit_factor_r": 1.6755426222264025,
+        "sum_net_r": 23.860678655354004,
+        "win_rate": 0.36666666666666664,
+        "wins": 22
+      },
+      "full": {
+        "closed": 144,
+        "control_mean_net_r": -0.5534711165555615,
+        "excess_mean_r": 0.6952146440884482,
+        "excess_month_block_ci95": [
+          0.22802810682660893,
+          1.2213807194532433
+        ],
+        "excess_month_block_p": 0.0072,
+        "matched_controls": 144,
+        "max_consecutive_losses": 18,
+        "max_drawdown_r": -30.79508217163204,
+        "mean_cost_r": 0.18175664799568533,
+        "mean_gross_r": 0.32350017552857213,
+        "mean_net_bp": 15.591721108389615,
+        "mean_net_r": 0.1417435275328868,
+        "median_risk_pct": 1.2598084491149744,
+        "profit_factor_r": 1.2095788821024631,
+        "sum_net_r": 20.4110679647357,
+        "win_rate": 0.2916666666666667,
+        "wins": 42
+      }
+    }
+  }
+}
