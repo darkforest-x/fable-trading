@@ -1,0 +1,36 @@
+{
+  "experiment_id": "exp-spike-v1210-eth15m-vidya-flip-exit-20261012-v1",
+  "parent_experiment_id": "exp-spike-v1210-volumatic-vidya-gate-20261012-v1",
+  "question": "On the frozen ETH 15m V12.10 VIDYA-gated serial entries, does exiting at the next 15m open after a confirmed VIDYA state flip reduce loss streak and drawdown without sacrificing net R versus the unchanged V12.10 exit?",
+  "single_variable": "Exit rule only. Keep the V12.10 admission gate, entry signal, next-open fill, initial stop, trailing stop, raw opposite-signal exit, serial occupancy, and 0.2% round-trip cost frozen. If a completed 15m bar shows the latched VIDYA state opposite to the open position, schedule an exit at the following 15m open. An active stop gap at that open retains priority; stop touches during the completed bar are processed before the close-confirmed VIDYA flip.",
+  "scope": {
+    "venue": "OKX",
+    "symbol": "ETH_USDT_SWAP",
+    "timeframe_min": 15,
+    "start": "2024-02-01T00:00:00Z",
+    "split": "2025-10-10T00:00:00Z",
+    "end": "2026-10-10T10:00:00Z",
+    "parent_config": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/config.json",
+    "parent_gate_ledger": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/vidya_gate_trades.csv.gz",
+    "parent_control_ledger": "experiments/active/exp-spike-v1210-volumatic-vidya-gate-20261012-v1/results_v1/vidya_gate_controls.csv.gz"
+  },
+  "execution": {
+    "fill": "next bar open",
+    "round_trip_cost": 0.002,
+    "initial_stop_and_trailing_stop": "unchanged V12.9/V12.10 serial exit engine",
+    "control": "one deterministic same-state random entry per admitted trade, matched on side, UTC week, fold, and causal ATR/close bin; apply the same exit policy and costs"
+  },
+  "vidya": {
+    "source": "parent V12.10 Volumatic VIDYA implementation",
+    "parameters": "length 10, momentum 20, SMA 15, ATR 200, band distance 2.0",
+    "exit_trigger": "confirmed latched direction state is opposite to position side at the 15m close"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "holdout_consumed": false,
+  "notes": [
+    "Research-only exit overlay requested by owner on 2026-10-12.",
+    "The primary comparison is the same V12.10 admission strategy with the original exit versus this single added VIDYA-flip exit.",
+    "No thresholds are tuned; no Pine, monitor, preset, active bundle, account, or live execution behavior is changed."
+  ]
+}
