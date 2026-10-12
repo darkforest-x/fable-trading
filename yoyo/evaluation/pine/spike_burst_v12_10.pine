@@ -568,7 +568,7 @@ if barstate.isconfirmed
 // Volume-delta and pivot annotations are intentionally not extra entry conditions.
 string gVolumatic = "03 · Volumatic VIDYA方向过滤"
 bool useVolumaticVidyaGate = input.bool(true, "只顺VIDYA趋势开仓", group=gVolumatic, tooltip="多头确认收盘时VIDYA须为上升趋势，空头确认收盘时须为下降趋势。仅过滤新开仓；原始反向确认仍管理/结束已有风险参考。默认复现BigBeluga Volumatic VIDYA：长度10、动量20、ATR200带宽2。", display=display.none)
-bool showVolumaticVidya = input.bool(true, "显示VIDYA趋势线", group=gVolumatic, display=display.none) and not v126Minimal
+bool showVolumaticVidya = input.bool(true, "显示VIDYA趋势线", group=gVolumatic, tooltip="灰色线显示VIDYA上下趋势带；趋势方向仍按收盘穿越带宽判定。关闭只隐藏曲线，不改变入场过滤。", display=display.none) and not v126Minimal
 
 f_volumatic_vidya(float src, int length, int momentumLength) =>
     float momentum = ta.change(src)
@@ -2927,8 +2927,7 @@ plot(barstate.isconfirmed ? advance3 : na, "三根净进展 ATR", display=displa
 plot(barstate.isconfirmed ? volumeRatio3 : na, "三根量比", display=display.data_window)
 plot(barstate.isconfirmed ? ropeDistanceAtr : na, "V9 离六线距离 ATR", display=display.data_window)
 // BEGIN CONFIRMED H1 SMA60 DATA
-plot(showVolumaticVidya ? (volumaticReady and not volumaticTrendFlip ? volumaticTrendLine : na) : na, "Volumatic VIDYA趋势线", color=volumaticTrendUp ? bull : bear, linewidth=2, style=plot.style_linebr, force_overlay=true, display=showVolumaticVidya ? display.pane + display.data_window : display.data_window)
-plot(barstate.isconfirmed and volumaticReady ? (volumaticTrendUp ? 1 : -1) : na, "Volumatic VIDYA方向（+1多/-1空）", display=display.data_window)
+plot(showVolumaticVidya ? (volumaticReady and not volumaticTrendFlip ? volumaticTrendLine : na) : na, "Volumatic VIDYA趋势线", color=#7D8490, linewidth=2, style=plot.style_linebr, force_overlay=true, display=showVolumaticVidya ? display.pane + display.data_window : display.data_window)
 plot(h1SmaApplies ? h1Sma60 : na, "15m过滤 · 已确认1h SMA60", color=#C18CFA, linewidth=2, style=plot.style_stepline, force_overlay=true, display=showH1Sma60 ? display.pane + display.data_window : display.data_window)
 // END CONFIRMED H1 SMA60 DATA
 // BEGIN CONFIRMED M15 EMA120 DATA
