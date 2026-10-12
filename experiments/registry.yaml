@@ -11214,3 +11214,15 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-11 「详细分析 并总结成小册」 for YouTube 0HmddXBIZU0 (Speculation Lab), then 「要」 to the handbook's chapter-12 backtest proposal. Handbook stays local (public repo). Positions 2 and 4 and the pin-catch method are not tested here. No Pine, monitor or account change.
+  - experiment_id: exp-spike-v1210-volumatic-vidya-gate-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9f57c4ef19
+    status: planned
+    result: Pending frozen replay; no results generated at preregistration.
+    question: Does a same-timeframe BigBeluga Volumatic VIDYA trend-direction entry gate improve frozen SPIKE V12.9 ordinary entries on OKX ETHUSDT.P 5m/15m and a pre-ranked 20-alt Binance USD-M sample after 0.2% round-trip cost, and does the admitted signal beat a trend-matched random entry?
+    single_variable: Entry admission only - keep a V12.9 ordinary signal iff the confirmed signal-bar close has the same Volumatic VIDYA trend direction as the signal; rerun serial occupancy so rejected entries release positions. All exits, stops, fills, existing gates, costs and raw signal rules stay frozen.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-12 Notion task #47. VIDYA defaults frozen at length 10, momentum 20, SMA 15, ATR 200, band distance 2; same-state controls match symbol/side/UTC week/fold/ATR-close bin. ETH window 2024-02-01..2026-10-10 10:00 UTC; 20 alts 2023-01-01..2026-09-23, split at 2025-01-01. Require exact saved V12.9 baseline ledger parity before accepting results; research only, no training, promotion, monitor or live behavior change.
