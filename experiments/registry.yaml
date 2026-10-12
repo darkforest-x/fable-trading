@@ -11216,9 +11216,10 @@ experiments:
     notes: Owner 2026-10-11 「详细分析 并总结成小册」 for YouTube 0HmddXBIZU0 (Speculation Lab), then 「要」 to the handbook's chapter-12 backtest proposal. Handbook stays local (public repo). Positions 2 and 4 and the pin-catch method are not tested here. No Pine, monitor or account change.
   - experiment_id: exp-spike-v1210-volumatic-vidya-gate-20261012-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: d9fe2de521
-    status: planned
-    result: Pending frozen replay; no results generated at preregistration.
+    source_commit: bb2615077b
+    status: rejected
+    result: >-
+      Frozen replay produced 42 cases and 18,573 baseline rows; V12.9 parity was exact for ETH 5m/15m (559/164 trades) and all 40 alt ledgers (17,837 trades). The 20-alt VIDYA 5m pool had 11,840 trades at -0.247R versus -0.349R for same-state random controls (excess +0.102R, p=0.0027); before/after split means were -0.230/-0.267R, excess +0.132/+0.067R, p=0.0088/0.1532, with 0/20 coins positive overall. The 15m pool had 3,738 trades at -0.069R versus -0.210R controls (excess +0.140R, p=0.0038); before/after means were -0.031/-0.111R, excess +0.189/+0.087R, p=0.0204/0.0809, with 3/20 coins positive overall. Both timeframes fail the preregistered requirement for positive net mean and p<0.01 in both folds. ETH is reference only: 5m 478 trades -0.068R full; 15m 142 trades +0.195R full but -0.021R before and +0.491R after, too small and heterogeneous to establish stability.
     question: Does a same-timeframe BigBeluga Volumatic VIDYA trend-direction entry gate improve frozen SPIKE V12.9 ordinary entries on OKX ETHUSDT.P 5m/15m and a pre-ranked 20-alt Binance USD-M sample after 0.2% round-trip cost, and does the admitted signal beat a trend-matched random entry?
     single_variable: Entry admission only - keep a V12.9 ordinary signal iff the confirmed signal-bar close has the same Volumatic VIDYA trend direction as the signal; rerun serial occupancy so rejected entries release positions. All exits, stops, fills, existing gates, costs and raw signal rules stay frozen.
     training_eligible: false
