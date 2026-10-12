@@ -18,6 +18,8 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 import json
 from pathlib import Path
+import socket
+import time
 
 import pandas as pd
 
@@ -33,6 +35,18 @@ SOURCE_CONFIG = HERE.parent / "exp-spike-v129-alts-confirm-20261011-v1/config.js
 MONTHS = archive_months("2022-01-01", "2026-09-30")
 DAYS = [f"2026-10-{d:02d}" for d in range(1, 11)]
 DAILY_BASE = "https://data.binance.vision/data/futures/um/daily/klines"
+
+
+def retry(fn, *args, tries=6, **kwargs):
+    """Python 3.9's socket.timeout during a read escapes the helper's retry; retry it here (cached ZIPs are reused)."""
+    for attempt in range(tries):
+        try:
+            return fn(*args, **kwargs)
+        except (socket.timeout, ConnectionError) as exc:
+            if attempt + 1 == tries:
+                raise
+            print("retry", args or kwargs.get("symbol"), kwargs.get("month", ""), type(exc).__name__, flush=True)
+            time.sleep(2 ** attempt)
 
 
 def download_day(symbol: str, day: str):
@@ -59,10 +73,10 @@ def download_day(symbol: str, day: str):
 def fetch(symbol: str) -> dict:
     frames, missing = [], []
     for month in MONTHS:
-        frame, _ = _download_month(symbol=symbol, month=month, download_dir=DOWNLOADS, interval="15m")
+        frame, _ = retry(_download_month, symbol=symbol, month=month, download_dir=DOWNLOADS, interval="15m")
         (frames.append(frame) if frame is not None else missing.append(month))
     for day in DAYS:
-        frame = download_day(symbol, day)
+        frame = retry(download_day, symbol, day)
         (frames.append(frame) if frame is not None else missing.append(day))
     df = (pd.concat(frames, ignore_index=True).sort_values("ts").drop_duplicates("ts").reset_index(drop=True))
     out = pd.DataFrame({"open_time": df["ts"], "open": df["open"], "high": df["high"], "low": df["low"],
