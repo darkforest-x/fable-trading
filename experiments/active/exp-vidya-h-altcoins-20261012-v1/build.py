@@ -34,6 +34,7 @@ from datetime import datetime, timezone
 import importlib.util
 import json
 from pathlib import Path
+import sys
 
 import numpy as np
 import pandas as pd
@@ -45,6 +46,7 @@ DATA = HERE.parents[2] / "data/vidya_retest"
 _spec = importlib.util.spec_from_file_location("h_stop_study", HERE.parent / "exp-vidya-h-stop-breakeven-20261012-v1/build.py")
 assert _spec is not None and _spec.loader is not None
 stop = importlib.util.module_from_spec(_spec)
+sys.modules[_spec.name] = stop  # dataclasses on Python 3.9 look the module up while building Exit
 _spec.loader.exec_module(stop)
 
 H, BASES, EXITS = stop.H, stop.BASES, {e.key: e for e in stop.EXITS}
