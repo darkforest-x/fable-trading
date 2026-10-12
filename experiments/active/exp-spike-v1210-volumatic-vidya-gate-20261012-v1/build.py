@@ -520,11 +520,17 @@ def _scan_alt(job) -> list:
 
 
 def _run_eth(cfg: dict) -> tuple[list, dict]:
-    base, data_info = _eth_base(cfg)
+    base1m, data_info = _eth_base(cfg)
+    base5m, partial = low.complete_bars(base1m, 5)
+    if partial:
+        raise ValueError(f"partial 5m OKX ETH bars: {partial}")
     ecfg = cfg["eth_okx"]
     meta = replay.source.symbol_meta()["ETHUSDT"]
     cases = []
     for minutes in ecfg["timeframes"]:
+        # The 15m V12.9 fact path derives completed higher-timeframe values from
+        # aligned 5m bars; the 5m Pine-facts path consumes the verified 1m feed.
+        base = base1m if int(minutes) == 5 else base5m
         row, baseline, gated, bcontrol, gcontrol = _case(
             base, symbol=ecfg["symbol"], venue="okx", asset=ecfg["asset"], tick=float(ecfg["tick"]),
             minutes=int(minutes), start=pd.Timestamp(ecfg["start"]), split=pd.Timestamp(ecfg["split"]),
