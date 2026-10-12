@@ -286,6 +286,7 @@ def _case(base: pd.DataFrame, *, symbol: str, venue: str, asset: str, tick: floa
             t["vidya_up_at_signal"] = bool(trend["up"][int(t["signal_i"])])
             t["vidya_ready_at_signal"] = bool(trend["ready"][int(t["signal_i"])])
     baseline_controls = _baseline_controls(prepared, baseline_trades, cfg)
+    baseline_controls["venue"] = venue
     baseline_controls["variant"] = "baseline"
     gated_controls = _same_regime_controls(prepared, gated_trades, cfg, trend)
     gated_controls["variant"] = "vidya_gate"
@@ -567,16 +568,26 @@ def _write(cfg: dict, eth_cases: list, alt_cases: list, data_info: dict, source_
            alt_parity: list[dict], elapsed: float) -> None:
     cases = eth_cases + alt_cases
     rows = [x["row"] for x in cases]
-    baseline = pd.concat([x["baseline"] for x in cases if not x["baseline"].empty], ignore_index=True)
-    gated = pd.concat([x["gated"] for x in cases if not x["gated"].empty], ignore_index=True)
-    base_controls = pd.concat([x["baseline_controls"] for x in cases if not x["baseline_controls"].empty], ignore_index=True)
-    gate_controls = pd.concat([x["gated_controls"] for x in cases if not x["gated_controls"].empty], ignore_index=True)
+
+    def combine(key: str, empty_columns: list[str]) -> pd.DataFrame:
+        frames = [case[key] for case in cases if not case[key].empty]
+        return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=empty_columns)
+
+    trade_columns = ["venue", "symbol", "timeframe_min", "trade_key", "signal_i", "signal_close",
+                     "censored", "net_r", "gross_r", "net_return", "initial_risk_frac", "exit_time"]
+    control_columns = ["venue", "symbol", "timeframe_min", "trade_key", "control_net_r"]
+    baseline = combine("baseline", trade_columns)
+    gated = combine("gated", trade_columns)
+    base_controls = combine("baseline_controls", control_columns)
+    gate_controls = combine("gated_controls", control_columns)
+    summary, per_coin = _add_summaries(rows, baseline, gated, base_controls, gate_controls, cfg)
+
+    # Only publish a run directory after parity and all summaries have succeeded.
     OUT.mkdir(parents=True, exist_ok=True)
     for name, frame in (("baseline_trades.csv.gz", baseline), ("vidya_gate_trades.csv.gz", gated),
                         ("baseline_controls.csv.gz", base_controls), ("vidya_gate_controls.csv.gz", gate_controls)):
         frame.to_csv(OUT / name, index=False, compression={"method": "gzip", "mtime": 0})
     pd.DataFrame(rows).to_csv(OUT / "candidate_diagnostics.csv", index=False)
-    summary, per_coin = _add_summaries(rows, baseline, gated, base_controls, gate_controls, cfg)
     per_coin.to_csv(OUT / "per_coin.csv", index=False)
     _dump(OUT / "summary.json", summary)
     artifacts = ["baseline_trades.csv.gz", "vidya_gate_trades.csv.gz", "baseline_controls.csv.gz",
