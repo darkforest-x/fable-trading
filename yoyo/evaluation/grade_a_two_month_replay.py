@@ -37,7 +37,7 @@ from yoyo.evaluation.grade_a_full40_training_input_renderer.data import ALL_MA_C
 from yoyo.evaluation.grade_a_full40_training_input_renderer.render import IMG_HEIGHT, IMG_WIDTH, ChartTransform, render_chart
 
 
-EXPERIMENT_ID = "exp-15m-grade-a-full40-two-month-okx-20261013-v1"
+EXPERIMENT_ID = "exp-15m-grade-a-full40-two-month-okx-20261013-v2"
 MODEL_REL = Path(
     "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/"
     "ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt"
@@ -62,7 +62,10 @@ ALLOWED_CORE_LENGTHS = (4, 5)
 ALLOWED_CONFIRMATIONS = tuple(range(2, 10))
 EVENT_GAP_BARS = 5
 CLASS_NAMES = {0: "dense_long", 1: "dense_short"}
-DEFAULT_OUT = ROOT / "analysis" / "output" / "grade_a_two_month_okx_20261013_v1"
+DEFAULT_OUT = ROOT / "analysis" / "output" / "grade_a_two_month_okx_20261013_v2"
+# The September archive follows OKX's UTC+8 archive calendar and ends at
+# 2026-09-30 15:45Z; begin the live 15m API tail on the next UTC bar.
+OCTOBER_ARCHIVE_API_START = pd.Timestamp("2026-09-30T16:00:00Z")
 
 
 class ReplayError(RuntimeError):
@@ -119,6 +122,9 @@ def verify_committed_sources() -> str:
     paths = [
         Path(__file__).resolve().relative_to(ROOT.resolve()),
         Path("experiments/active") / EXPERIMENT_ID / "preregistration.json",
+        Path("scripts/scan_15m_ma_launch_t3_daily_movers.py"),
+        Path("src/data/fetch_okx.py"),
+        Path("yoyo/data/okx_archive_bars.py"),
         TRAINING_RENDERER_REL,
         TRAINING_DATA_REL,
         Path("yoyo/evaluation/grade_a_full40_training_input_renderer/__init__.py"),
@@ -185,6 +191,8 @@ def verify_sources(require_training_assets: bool = True) -> Dict[str, Any]:
 def fetch_phase(out: Path, workers: int) -> Dict[str, Any]:
     """Freeze all eligible live OKX USDT-swap 15m candles over the fixed interval."""
 
+    if EXPERIMENT_ID.endswith("-v2"):
+        raise ReplayError("v2 is preregistered for official archive + October API collection; use --fetch-archive-hybrid")
     if out.exists():
         raise FileExistsError("refusing to overwrite replay output: %s" % out)
     immutable = verify_sources(require_training_assets=True)
@@ -290,9 +298,208 @@ def fetch_phase(out: Path, workers: int) -> Dict[str, Any]:
     return payload
 
 
+def fetch_archive_hybrid_phase(out: Path, workers: int, october_attempts: int) -> Dict[str, Any]:
+    """Collect August/September official 1m archives plus confirmed October 15m API bars."""
+
+    if out.exists():
+        raise FileExistsError("refusing to overwrite replay output: %s" % out)
+    immutable = verify_sources(require_training_assets=True)
+    committed_source = verify_committed_sources()
+    from scripts import scan_15m_ma_launch_t3_daily_movers as common
+    from src.data.fetch_okx import _request_archive, aggregate_archive_bytes, archive_url
+
+    started = time.perf_counter()
+    snapshot_dir = out / "kline_snapshot"
+    snapshot_dir.mkdir(parents=True)
+    ticker_payload = common._request(common.TICKERS_URL)  # noqa: SLF001 - repository reader
+    instruments_payload = common._request(common.INSTRUMENTS_URL)  # noqa: SLF001
+    instruments = common.eligible_instruments(
+        list(ticker_payload.get("data") or []),
+        list(instruments_payload.get("data") or []),
+    )
+    if not instruments:
+        raise ReplayError("OKX returned an empty eligible live USDT-swap universe")
+
+    archive_months = [pd.Timestamp(value) for value in ("2026-08-01T00:00:00Z", "2026-09-01T00:00:00Z")]
+    fetch_start = START_UTC - WARMUP_FETCH_BARS * BAR_DELTA
+    rows: List[Dict[str, Any]] = []
+    snapshots: List[Dict[str, Any]] = []
+    failures: List[Dict[str, str]] = []
+    partial: List[Dict[str, Any]] = []
+    print("eligible live OKX USDT swaps: %d" % len(instruments), flush=True)
+
+    def fetch_one(inst_id: str) -> Dict[str, Any]:
+        audit: Dict[str, Any] = {"inst_id": inst_id, "monthly_archives": [], "october_attempts": []}
+        frames: List[pd.DataFrame] = []
+        archive_symbol = inst_id.replace("-", "_")
+        for month in archive_months:
+            url = archive_url(archive_symbol, month)
+            try:
+                payload = _request_archive(url)
+                if payload is None:
+                    audit["monthly_archives"].append({"month": month.strftime("%Y-%m"), "status": "missing_404", "url": url})
+                    continue
+                frame, month_audit = aggregate_archive_bytes(payload, symbol=archive_symbol, month=month, bar="15m")
+                if month_audit.get("confirm_values") != ["1"]:
+                    raise ReplayError("archive contains non-final 1m rows: %s %s" % (inst_id, month.strftime("%Y-%m")))
+                audit["monthly_archives"].append({"status": "complete", "url": url, **month_audit})
+                frames.append(frame)
+            except Exception as exc:  # noqa: BLE001 - preserve per-source failures
+                audit["monthly_archives"].append({"month": month.strftime("%Y-%m"), "status": "error", "url": url, "error": "%s:%s" % (type(exc).__name__, exc)})
+
+        october_frame: Optional[pd.DataFrame] = None
+        october_error: Optional[str] = None
+        for attempt in range(1, october_attempts + 1):
+            returned, frame, api_rows, error = common.fetch_15m_frame(
+                inst_id, start=OCTOBER_ARCHIVE_API_START, end=END_UTC
+            )
+            if returned != inst_id:
+                error = "instrument_identity_mismatch"
+            audit["october_attempts"].append({
+                "attempt": attempt,
+                "api_rows_received": int(api_rows),
+                "error": error,
+                "confirmed_rows": int(len(frame)) if not error else 0,
+            })
+            if not error:
+                october_frame = frame
+                october_error = None
+                break
+            october_error = str(error)
+            if attempt < october_attempts:
+                time.sleep(2 ** attempt)
+        if october_frame is not None and not october_frame.empty:
+            frames.append(october_frame)
+        if not frames:
+            audit["final_error"] = october_error or "no_archive_or_api_rows"
+            return audit
+
+        frame = pd.concat(frames, ignore_index=True)
+        frame["open_time"] = pd.to_datetime(frame["open_time"], utc=True)
+        frame = frame.sort_values("open_time", kind="mergesort").drop_duplicates("open_time", keep="first")
+        frame = frame[(frame["open_time"] >= fetch_start) & (frame["open_time"] < END_UTC)].reset_index(drop=True)
+        if frame.empty:
+            audit["final_error"] = "merged_sources_have_no_requested_rows"
+            return audit
+        frame["ts"] = (frame["open_time"].astype("int64") // 1_000_000).astype("int64")
+        frame = frame[["ts", "open", "high", "low", "close", "volume", "open_time"]]
+        filename = inst_id.replace("-", "_") + ".csv"
+        path = snapshot_dir / filename
+        frame.to_csv(path, index=False)
+        times = frame["open_time"]
+        in_window = int(((times >= START_UTC) & (times < END_UTC)).sum())
+        archive_ok = [item["month"] for item in audit["monthly_archives"] if item.get("status") == "complete"]
+        archive_missing_or_error = [item for item in audit["monthly_archives"] if item.get("status") != "complete"]
+        snapshot = {
+            "inst_id": inst_id,
+            "symbol": archive_symbol,
+            "filename": filename,
+            "sha256": sha256_file(path),
+            "rows_including_warmup": int(len(frame)),
+            "in_window_bars": in_window,
+            "first_open_time": times.iloc[0].isoformat(),
+            "last_open_time": times.iloc[-1].isoformat(),
+            "gap_count_including_warmup": common.frame_gap_count(frame),
+            "monthly_archive_months": archive_ok,
+            "missing_or_failed_archive_months": archive_missing_or_error,
+            "october_api_bars": int(((times >= OCTOBER_ARCHIVE_API_START) & (times < END_UTC)).sum()),
+            "october_api_error": october_error,
+            "source_audit": audit,
+        }
+        audit["snapshot"] = snapshot
+        return audit
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {pool.submit(fetch_one, inst_id): inst_id for inst_id in instruments}
+        for completed, future in enumerate(as_completed(futures), 1):
+            inst_id = futures[future]
+            try:
+                result = future.result()
+            except Exception as exc:  # noqa: BLE001 - preserve per-instrument errors
+                result = {"inst_id": inst_id, "final_error": "%s:%s" % (type(exc).__name__, exc)}
+            snapshot = result.get("snapshot")
+            if snapshot:
+                snapshots.append(snapshot)
+                rows.append({key: value for key, value in snapshot.items() if key not in ("sha256", "source_audit", "missing_or_failed_archive_months")})
+                if snapshot["in_window_bars"] < 5856 or snapshot["october_api_error"] or snapshot["missing_or_failed_archive_months"]:
+                    partial.append({
+                        "inst_id": inst_id,
+                        "in_window_bars": snapshot["in_window_bars"],
+                        "expected_full_interval_bars": 5856,
+                        "first_open_time": snapshot["first_open_time"],
+                        "last_open_time": snapshot["last_open_time"],
+                        "monthly_archive_months": snapshot["monthly_archive_months"],
+                        "missing_or_failed_archive_months": snapshot["missing_or_failed_archive_months"],
+                        "october_api_error": snapshot["october_api_error"],
+                    })
+            else:
+                failures.append({"inst_id": inst_id, "error": str(result.get("final_error", "unknown_fetch_error")), "source_audit": result})
+            if completed % 10 == 0 or completed == len(instruments):
+                print("hybrid fetch [%d/%d] usable=%d partial=%d failed=%d" % (
+                    completed, len(instruments), len(snapshots), len(partial), len(failures)), flush=True)
+
+    universe_payload = {
+        "captured_at_utc": datetime.now(timezone.utc).isoformat(),
+        "eligible_instruments": instruments,
+        "ticker_payload": ticker_payload,
+        "instrument_payload": instruments_payload,
+    }
+    write_json(out / "exchange_universe.json", universe_payload)
+    write_csv(
+        out / "fetch_symbols.csv",
+        rows,
+        ("inst_id", "symbol", "filename", "rows_including_warmup", "in_window_bars", "first_open_time", "last_open_time", "gap_count_including_warmup", "monthly_archive_months", "october_api_bars", "october_api_error"),
+    )
+    fetch_module = Path("src/data/fetch_okx.py")
+    archive_module = Path("yoyo/data/okx_archive_bars.py")
+    helper_module = Path("scripts/scan_15m_ma_launch_t3_daily_movers.py")
+    receipt = {
+        "experiment_id": EXPERIMENT_ID,
+        "source_commit": committed_source,
+        "model_identity": immutable,
+        "exchange": "OKX",
+        "instrument_scope": "all currently live eligible crypto USDT swaps with positive current tickers; repository BLOCKED/STOCKISH exclusions",
+        "bar": "15m",
+        "interval_start_inclusive": START_UTC.isoformat(),
+        "interval_end_exclusive": END_UTC.isoformat(),
+        "warmup_start_inclusive": fetch_start.isoformat(),
+        "warmup_bars_requested": WARMUP_FETCH_BARS,
+        "expected_in_window_bars_per_full_history_instrument": 5856,
+        "eligible_instruments": len(instruments),
+        "usable_instruments": len(snapshots),
+        "failed_instruments": failures,
+        "partial_coverage_instruments": partial,
+        "snapshot_files": snapshots,
+        "collection_method": {
+            "august_and_september": "official OKX monthly 1m ZIP archives, only confirm=1 rows, aggregated into complete UTC-aligned 15m OHLCV with repository aggregate_complete_ohlcv",
+            "october_partial": "OKX public confirmed 15m candles via repository fetch_15m_frame; October-only interval; at most %d whole-range attempts" % october_attempts,
+            "source_code_sha256": {
+                str(fetch_module): sha256_file(ROOT / fetch_module),
+                str(archive_module): sha256_file(ROOT / archive_module),
+                str(helper_module): sha256_file(ROOT / helper_module),
+            },
+        },
+        "universe_file": "exchange_universe.json",
+        "universe_sha256": sha256_file(out / "exchange_universe.json"),
+        "symbols_file": "fetch_symbols.csv",
+        "symbols_sha256": sha256_file(out / "fetch_symbols.csv"),
+        "fetch_wall_seconds": round(time.perf_counter() - started, 3),
+        "canonical_data_written": False,
+        "training_or_tuning": False,
+        "promotion_or_deployment": False,
+        "orders_placed": False,
+    }
+    write_json(out / "fetch_receipt.json", receipt)
+    print("hybrid fetch complete: %d/%d instruments, partial=%d, %.1fs" % (
+        len(snapshots), len(instruments), len(partial), receipt["fetch_wall_seconds"]), flush=True)
+    return receipt
+
+
 def retry_failed_phase(out: Path, workers: int, max_attempts: int) -> Dict[str, Any]:
     """Retry only instrument fetches that failed the first full-universe pass."""
 
+    if EXPERIMENT_ID.endswith("-v2"):
+        raise ReplayError("v2 retries its October-only API tail inside --fetch-archive-hybrid; do not replace archived months")
     immutable = verify_sources(require_training_assets=True)
     retry_commit = verify_committed_sources()
     receipt_path = out / "fetch_receipt.json"
@@ -647,6 +854,7 @@ def scan_phase(snapshot_dir: Path, out: Path, weights: Path, device: str, batch_
         "eligible_instruments": int(fetch_receipt["eligible_instruments"]),
         "usable_instruments": int(fetch_receipt["usable_instruments"]),
         "unusable_instruments": fetch_receipt["failed_instruments"],
+        "partial_coverage_instruments": fetch_receipt.get("partial_coverage_instruments", []),
         "detector_contract": {
             "class_names": CLASS_NAMES,
             "window_lengths": list(WINDOW_LENGTHS),
@@ -798,6 +1006,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--fetch", action="store_true")
+    modes.add_argument("--fetch-archive-hybrid", action="store_true")
     modes.add_argument("--retry-failures", action="store_true")
     modes.add_argument("--bundle", action="store_true")
     modes.add_argument("--scan", action="store_true")
@@ -808,11 +1017,14 @@ def main() -> int:
     parser.add_argument("--device", default="0")
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--retry-attempts", type=int, default=2)
+    parser.add_argument("--october-attempts", type=int, default=3)
     args = parser.parse_args()
-    if args.workers < 1 or args.batch_size < 1 or args.retry_attempts < 1:
+    if args.workers < 1 or args.batch_size < 1 or args.retry_attempts < 1 or args.october_attempts < 1:
         parser.error("workers, batch size, and retry attempts must be positive")
     if args.fetch:
         fetch_phase(args.out.resolve(), args.workers)
+    elif args.fetch_archive_hybrid:
+        fetch_archive_hybrid_phase(args.out.resolve(), args.workers, args.october_attempts)
     elif args.retry_failures:
         retry_failed_phase(args.out.resolve(), args.workers, args.retry_attempts)
     elif args.bundle:

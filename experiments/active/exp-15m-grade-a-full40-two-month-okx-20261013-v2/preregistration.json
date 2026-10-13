@@ -1,0 +1,119 @@
+{
+  "calendar": {
+    "bar_open_time_interval": "15m",
+    "interval_end_exclusive": "2026-10-13T11:00:00Z",
+    "interval_start_inclusive": "2026-08-13T11:00:00Z",
+    "last_completed_bar_open_at_request": "2026-10-13T10:45:00Z",
+    "timezone": "UTC",
+    "warmup_bars_before_interval": 300
+  },
+  "created_at": "2026-10-13T11:54:47Z",
+  "detector": {
+    "confidence": 0.25,
+    "future_bars_rendered_into_each_input": 0,
+    "imgsz": 1280,
+    "input_png_dimensions": [
+      1280,
+      742
+    ],
+    "mapped_confirmation_bars": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ],
+    "mapped_core_lengths": [
+      4,
+      5
+    ],
+    "nms_iou": 0.7,
+    "same_symbol_event_gap_bars": 5,
+    "threshold_or_window_retuning": false,
+    "window_lengths": [
+      18,
+      19
+    ]
+  },
+  "experiment_id": "exp-15m-grade-a-full40-two-month-okx-20261013-v2",
+  "interpretation": {
+    "holdout_policy": "The repository owner canceled the holdout-consumption restriction on 2026-09-19; this replay records the historical interval but does not apply a holdout veto.",
+    "invalid_claims": [
+      "precision",
+      "recall",
+      "Gold accuracy",
+      "causal tip freshness",
+      "trade quality",
+      "profitability"
+    ],
+    "labels_available_for_scanned_windows": false,
+    "valid_claims": [
+      "number of downloaded bars and coverage gaps",
+      "number of scored input windows",
+      "raw detector boxes",
+      "structurally mapped completed-shape proposals",
+      "deduplicated proposal count"
+    ]
+  },
+  "market_data": {
+    "acquisition_validation": "Before v2 preregistration, a BTC overlap check compared API 15m bars against the repository aggregation of OKX 1m monthly archives across the applicable August/September range: OHLC matched exactly; volume differed only by floating-point summation up to 1.1641532182693481e-10. The September archive contained confirm=1 only. October current-month archive returned 404, so the preregistered API tail begins at 2026-09-30T16:00:00Z.",
+    "canonical_data_write": false,
+    "coverage_caveat": "The current-live instrument endpoint excludes contracts that are no longer live; newly listed contracts contribute only available archive/API history. The initial v1 history-API-only acquisition was halted before inference at displayed 140/285 instruments (79 usable, 61 failed at that progress line; 80 per-symbol CSVs had persisted by process termination). That partial directory is diagnostic only and is not reused in v2.",
+    "exchange": "OKX",
+    "fetch_retry_policy": "Download each available August/September official monthly archive with the repository archive retry helper. Fetch only the final UTC tail, starting at the first bar after the September UTC+8 monthly archive boundary, via confirmed 15m history API, at most three whole-tail attempts per instrument. Record source hashes, every month availability/error, each tail attempt, per-instrument gaps, and missing coverage. Do not silently switch exchange or data source.",
+    "gap_policy": "Record all timestamp gaps; compute moving averages separately inside each contiguous 15m segment; skip input windows crossing a gap and windows whose six 20/60/120 SMA/EMA values contain warmup NaNs.",
+    "selection": "No return, volume, mover, or model-score ranking; each selected instrument is fetched independently.",
+    "source": "Official OKX monthly 1m candlestick ZIP archives for August and September (confirm=1 only, aggregated to complete UTC-aligned 15m OHLCV with the repository helper), plus confirmed OKX public 15m history candles from 2026-09-30T16:00:00Z through 2026-10-13T11:00:00Z exclusive.",
+    "universe": "All currently live instCategory=1 crypto instruments ending -USDT-SWAP, with a positive current ticker, after the repository's BLOCKED_BASES and STOCKISH_BASES exclusions."
+  },
+  "method_amendment": {
+    "model_inference_started_before_amendment": false,
+    "prior_partial_snapshot_reused": false,
+    "reason": "The initial all-history endpoint stalled under repeated timeouts and could not support complete universe coverage. The collection attempt stopped before any model inference. This v2 keeps the same question, checkpoint, interval, detector contract, exchange, and live-universe rule; only the OKX collection method changes to use bulk historical archives where available.",
+    "supersedes_experiment_id": "exp-15m-grade-a-full40-two-month-okx-20261013-v1"
+  },
+  "model": {
+    "bar": "15m",
+    "checkpoint": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "checkpoint_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "classes": {
+      "0": "dense_long",
+      "1": "dense_short"
+    },
+    "training_experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+    "training_ma_module": "yoyo/evaluation/grade_a_full40_training_input_renderer/data.py",
+    "training_ma_module_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "training_renderer": "yoyo/evaluation/grade_a_full40_training_input_renderer/render.py",
+    "training_renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "training_source_commit": "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6"
+  },
+  "outputs": {
+    "deduplicated_events": "analysis/output/grade_a_two_month_okx_20261013_v2/grade_a_full40_1280/five_bar_events.csv",
+    "frozen_market_snapshot": "analysis/output/grade_a_two_month_okx_20261013_v2/kline_snapshot",
+    "raw_boxes": "analysis/output/grade_a_two_month_okx_20261013_v2/grade_a_full40_1280/raw_boxes.csv",
+    "scan_receipt": "analysis/output/grade_a_two_month_okx_20261013_v2/scan_receipt.json",
+    "structural_candidates": "analysis/output/grade_a_two_month_okx_20261013_v2/grade_a_full40_1280/structural_candidates.csv"
+  },
+  "question": "What completed-shape proposals does the frozen Grade-A YOLO11s full40 native-1280 checkpoint emit over every eligible OKX USDT swap with available confirmed 15m candles in the exact two-month interval?",
+  "request": "Owner asked how Grade-A was trained and asked to run that model over all recent two-month data.",
+  "safety": {
+    "active_or_frozen_change": false,
+    "deployment": false,
+    "forward_state_change": false,
+    "orders_placed": false,
+    "production_eligible": false,
+    "promotion": false,
+    "telegram_sent": false,
+    "threshold_or_weight_change": false,
+    "training": false,
+    "training_eligible": false
+  },
+  "schema_version": 1,
+  "single_variable": "No model or detector variable changes. One frozen checkpoint, one frozen training renderer, one fixed OKX universe rule, one fixed interval, and the checkpoint's documented W18/W19 detector contract. Data acquisition uses complete OKX monthly 1m archives aggregated to 15m for August/September and the same exchange's confirmed 15m history API from the next UTC bar through the interval end.",
+  "stage": "owner_requested_completed_history_replay_source_recovery"
+}
