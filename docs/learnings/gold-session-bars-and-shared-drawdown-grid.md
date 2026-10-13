@@ -16,3 +16,5 @@
 旧代码 `yoyo/evaluation/imacd_indicator_audit.py::aggregate` 和 `yoyo/evaluation/imacd_profit_mechanism.py::single_position` 保留历史语义，不为这次研究修改。新 XAUUSD 研究使用独立适配器；没有改变生产或 Pine 样式。
 
 HistData 的小型实际下载又显示 HTTP200 ZIP 可含冲突分钟，故下载成功不代表数据通过审计；严格拒绝冲突，只能显式去除完全相同的重复。档案按固定 EST 年月组织，目标窗口按 UTC 截取，两者边界不得混用。
+
+**2026-10-13 更正**：XAUUSD M1 的时间戳实测是纽约本地挂钟时间（含夏令时），不是固定 EST；见 [vendor-documented-timezone-must-be-fingerprinted-per-dst-season](vendor-documented-timezone-must-be-fingerprinted-per-dst-season.md)。
