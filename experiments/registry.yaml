@@ -17,7 +17,7 @@ experiments:
   - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2a4451810a308a81d251f7241d0329a45c2c1c05
-    status: active
+    status: inconclusive
     question: >-
       Which completed-shape proposals does the frozen Grade-A YOLO11s full40
       native-1280 checkpoint emit over every eligible OKX USDT swap with
@@ -28,7 +28,7 @@ experiments:
       training renderer, one current-live OKX universe snapshot, and the
       checkpoint's frozen W18/W19 completed-shape contract.
     result: >-
-      Preregistered before the candle fetch. No scan result has been read yet.
+      Initial OKX 15m history-only collection was interrupted before model inference after repeated per-page timeouts; the last progress line was 140/285 instruments (79 usable, 61 failed), and 80 partial symbol CSVs had persisted at termination. No frozen fetch receipt or detector result was produced. Superseded by the preregistered archive/API v2 acquisition.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -39,10 +39,42 @@ experiments:
       data. This interval is after the historical holdout date, whose veto
       rule the owner canceled on 2026-09-19. Coverage is limited to contracts
       currently live at universe capture; per-symbol rows and gaps are kept.
-      Request-error contracts receive at most two whole-instrument retries
-      over the unchanged interval after the first pass.
+      The history-only acquisition was halted before inference due repeated timeouts; no partial v1 snapshot is reused.
       The model emits delayed completed-shape proposals, not fresh tip signals.
       No labels are available, so this scan cannot estimate accuracy or value.
+  - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 207abe3625f73e0d7cf68252f7921406edbb45d6
+    status: active
+    question: >-
+      Which completed-shape proposals does the frozen Grade-A YOLO11s full40
+      native-1280 checkpoint emit over every eligible OKX USDT swap with
+      available confirmed 15m candles from 2026-08-13 11:00 UTC through
+      2026-10-13 10:45 UTC?
+    single_variable: >-
+      No model or detector variable changes. One frozen checkpoint, the exact
+      training renderer, one current-live OKX universe snapshot, and the frozen
+      W18/W19 contract. August/September OHLCV comes from official OKX monthly
+      1m archives aggregated to complete 15m bars; the final UTC tail comes
+      from confirmed OKX 15m history candles.
+    result: >-
+      Preregistered before v2 data acquisition. No detector inference or scan
+      result has been read yet.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: >-
+      Owner requested a retrospective replay of all recent two-month OKX 15m
+      data. The initial v1 API-only acquisition timed out before inference and
+      none of its partial snapshots are reused. v2 retains the same checkpoint,
+      interval, exchange, universe, renderer, and inference contract; only
+      historical OHLCV collection uses monthly archives plus the confirmed API
+      tail. Contracts are limited to those currently live at universe capture;
+      per-symbol source hashes, bars, and gaps are retained. This delayed
+      completed-shape detector is not a fresh tip signal. No labels are
+      available, so the scan cannot estimate accuracy or value.
   - experiment_id: exp-spike-market-two-months-20260925-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bf4d1021e3959057dd7a48b84df18fe49703379f
