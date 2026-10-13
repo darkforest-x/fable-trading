@@ -609,6 +609,180 @@ def retry_failed_phase(out: Path, workers: int, max_attempts: int) -> Dict[str, 
     return receipt
 
 
+def recover_transient_phase(out: Path, attempts: int) -> Dict[str, Any]:
+    """Retry only archive/API sources that failed transiently in a completed hybrid fetch."""
+
+    if attempts < 1:
+        raise ReplayError("recovery attempts must be positive")
+    immutable = verify_sources(require_training_assets=True)
+    recovery_commit = verify_committed_sources()
+    receipt_path = out / "fetch_receipt.json"
+    if not receipt_path.is_file():
+        raise ReplayError("transient recovery requires a completed hybrid fetch receipt")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("experiment_id") != EXPERIMENT_ID or receipt.get("model_identity") != immutable:
+        raise ReplayError("recovery snapshot identity mismatch")
+    if "collection_method" not in receipt:
+        raise ReplayError("transient recovery is restricted to the archive/API hybrid snapshot")
+
+    from scripts import scan_15m_ma_launch_t3_daily_movers as common
+    from src.data.fetch_okx import _request_archive, aggregate_archive_bytes
+    import copy
+
+    previous_receipt_sha256 = sha256_file(receipt_path)
+    by_symbol = {str(item["inst_id"]): copy.deepcopy(item) for item in receipt["snapshot_files"]}
+    recovery_rows: List[Dict[str, Any]] = []
+    targeted_archive = sum(
+        1
+        for item in by_symbol.values()
+        for month in item.get("source_audit", {}).get("monthly_archives", [])
+        if month.get("status") == "error"
+    )
+    targeted_api = sum(bool(item.get("october_api_error")) for item in by_symbol.values())
+    print("transient recovery targets: %d archive months, %d API tails" % (targeted_archive, targeted_api), flush=True)
+
+    for index, (inst_id, item) in enumerate(sorted(by_symbol.items()), 1):
+        audit = item.setdefault("source_audit", {})
+        archive_audits = list(audit.get("monthly_archives", []))
+        new_frames: List[pd.DataFrame] = []
+        for month_record in archive_audits:
+            if month_record.get("status") != "error":
+                continue
+            old_error = str(month_record.get("error", "unknown_archive_error"))
+            symbol = str(item["symbol"])
+            month = pd.Timestamp(str(month_record["month"]) + "-01T00:00:00Z")
+            url = str(month_record["url"])
+            history: List[Dict[str, Any]] = []
+            recovered_audit: Optional[Dict[str, Any]] = None
+            recovered_frame: Optional[pd.DataFrame] = None
+            for attempt in range(1, attempts + 1):
+                try:
+                    payload = _request_archive(url)
+                    if payload is None:
+                        history.append({"attempt": attempt, "error": "HTTP_404"})
+                        break
+                    frame, month_audit = aggregate_archive_bytes(payload, symbol=symbol, month=month, bar="15m")
+                    if month_audit.get("confirm_values") != ["1"]:
+                        raise ReplayError("archive contains non-final 1m rows")
+                    month_audit["url"] = url
+                    recovered_audit, recovered_frame = month_audit, frame
+                    history.append({"attempt": attempt, "error": None, "zip_sha256": month_audit["zip_sha256"], "rows": len(frame)})
+                    break
+                except Exception as exc:  # noqa: BLE001 - retain every recovery failure
+                    history.append({"attempt": attempt, "error": "%s:%s" % (type(exc).__name__, exc)})
+                if attempt < attempts:
+                    time.sleep(2 ** attempt)
+            if recovered_audit is not None and recovered_frame is not None:
+                month_record.clear()
+                month_record.update({
+                    "status": "complete",
+                    "recovered_from_error": old_error,
+                    "recovery_attempts": history,
+                    **recovered_audit,
+                })
+                new_frames.append(recovered_frame)
+            else:
+                month_record["recovery_attempts"] = history
+            recovery_rows.append({"inst_id": inst_id, "source": "archive", "month": str(month_record["month"]), "attempts": history, "recovered": recovered_audit is not None})
+
+        october_recovery: List[Dict[str, Any]] = []
+        october_error = item.get("october_api_error")
+        if october_error:
+            recovered_october: Optional[pd.DataFrame] = None
+            for attempt in range(1, attempts + 1):
+                returned, frame, api_rows, error = common.fetch_15m_frame(
+                    inst_id, start=OCTOBER_ARCHIVE_API_START, end=END_UTC
+                )
+                if returned != inst_id:
+                    error = "instrument_identity_mismatch"
+                october_recovery.append({
+                    "attempt": attempt,
+                    "api_rows_received": int(api_rows),
+                    "error": error,
+                    "confirmed_rows": int(len(frame)) if not error else 0,
+                })
+                if not error:
+                    recovered_october = frame
+                    item["october_api_error"] = None
+                    item["october_api_bars"] = int(len(frame))
+                    break
+                if attempt < attempts:
+                    time.sleep(2 ** attempt)
+            if recovered_october is not None and not recovered_october.empty:
+                new_frames.append(recovered_october)
+            audit["october_recovery_attempts"] = october_recovery
+            recovery_rows.append({"inst_id": inst_id, "source": "october_api", "attempts": october_recovery, "recovered": recovered_october is not None})
+
+        if new_frames:
+            path = out / "kline_snapshot" / str(item["filename"])
+            prior = pd.read_csv(path)
+            prior["open_time"] = pd.to_datetime(prior["open_time"], utc=True)
+            combined = pd.concat([prior] + new_frames, ignore_index=True)
+            combined["open_time"] = pd.to_datetime(combined["open_time"], utc=True)
+            combined = combined.sort_values("open_time", kind="mergesort").drop_duplicates("open_time", keep="first")
+            fetch_start = START_UTC - WARMUP_FETCH_BARS * BAR_DELTA
+            combined = combined[(combined["open_time"] >= fetch_start) & (combined["open_time"] < END_UTC)].reset_index(drop=True)
+            combined["ts"] = (combined["open_time"].astype("int64") // 1_000_000).astype("int64")
+            combined = combined[["ts", "open", "high", "low", "close", "volume", "open_time"]]
+            temporary = path.with_suffix(".csv.part")
+            combined.to_csv(temporary, index=False)
+            os.replace(str(temporary), str(path))
+            times = combined["open_time"]
+            item.update({
+                "sha256": sha256_file(path),
+                "rows_including_warmup": int(len(combined)),
+                "in_window_bars": int(((times >= START_UTC) & (times < END_UTC)).sum()),
+                "first_open_time": times.iloc[0].isoformat(),
+                "last_open_time": times.iloc[-1].isoformat(),
+                "gap_count_including_warmup": common.frame_gap_count(combined),
+                "october_api_bars": int(((times >= OCTOBER_ARCHIVE_API_START) & (times < END_UTC)).sum()),
+            })
+        audit["monthly_archives"] = archive_audits
+        item["monthly_archive_months"] = [str(row["month"]) for row in archive_audits if row.get("status") == "complete"]
+        item["missing_or_failed_archive_months"] = [row for row in archive_audits if row.get("status") != "complete"]
+        item["source_audit"] = audit
+        by_symbol[inst_id] = item
+        if index % 10 == 0 or index == len(by_symbol):
+            print("recovery [%d/%d]" % (index, len(by_symbol)), flush=True)
+
+    snapshots = [by_symbol[key] for key in sorted(by_symbol)]
+    partial: List[Dict[str, Any]] = []
+    for item in snapshots:
+        if item["in_window_bars"] < 5856 or item.get("october_api_error") or item.get("missing_or_failed_archive_months"):
+            partial.append({
+                "inst_id": item["inst_id"],
+                "in_window_bars": item["in_window_bars"],
+                "expected_full_interval_bars": 5856,
+                "first_open_time": item["first_open_time"],
+                "last_open_time": item["last_open_time"],
+                "monthly_archive_months": item["monthly_archive_months"],
+                "missing_or_failed_archive_months": item["missing_or_failed_archive_months"],
+                "october_api_error": item["october_api_error"],
+            })
+    receipt["snapshot_files"] = snapshots
+    receipt["usable_instruments"] = len(snapshots)
+    receipt["partial_coverage_instruments"] = partial
+    receipt["repair"] = {
+        "completed_at_utc": datetime.now(timezone.utc).isoformat(),
+        "repair_source_commit": recovery_commit,
+        "prior_fetch_receipt_sha256": previous_receipt_sha256,
+        "archive_error_months_targeted": targeted_archive,
+        "api_tail_errors_targeted": targeted_api,
+        "attempts_per_target": attempts,
+        "attempt_log": recovery_rows,
+    }
+    rows = [{key: value for key, value in item.items() if key not in ("sha256", "source_audit", "missing_or_failed_archive_months")} for item in snapshots]
+    write_csv(
+        out / "fetch_symbols.csv",
+        rows,
+        ("inst_id", "symbol", "filename", "rows_including_warmup", "in_window_bars", "first_open_time", "last_open_time", "gap_count_including_warmup", "monthly_archive_months", "october_api_bars", "october_api_error"),
+    )
+    receipt["symbols_sha256"] = sha256_file(out / "fetch_symbols.csv")
+    write_json(receipt_path, receipt)
+    print("recovery complete: %d partial instruments remain" % len(partial), flush=True)
+    return receipt
+
+
 def load_snapshot(snapshot_dir: Path) -> Tuple[Dict[str, pd.DataFrame], Dict[str, Any]]:
     """Load and hash-check the frozen per-instrument candle snapshot."""
 
@@ -1014,6 +1188,7 @@ def main() -> int:
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--fetch", action="store_true")
     modes.add_argument("--fetch-archive-hybrid", action="store_true")
+    modes.add_argument("--recover-transient", action="store_true")
     modes.add_argument("--retry-failures", action="store_true")
     modes.add_argument("--bundle", action="store_true")
     modes.add_argument("--scan", action="store_true")
@@ -1025,13 +1200,16 @@ def main() -> int:
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--retry-attempts", type=int, default=2)
     parser.add_argument("--october-attempts", type=int, default=3)
+    parser.add_argument("--recovery-attempts", type=int, default=2)
     args = parser.parse_args()
-    if args.workers < 1 or args.batch_size < 1 or args.retry_attempts < 1 or args.october_attempts < 1:
+    if args.workers < 1 or args.batch_size < 1 or args.retry_attempts < 1 or args.october_attempts < 1 or args.recovery_attempts < 1:
         parser.error("workers, batch size, and retry attempts must be positive")
     if args.fetch:
         fetch_phase(args.out.resolve(), args.workers)
     elif args.fetch_archive_hybrid:
         fetch_archive_hybrid_phase(args.out.resolve(), args.workers, args.october_attempts)
+    elif args.recover_transient:
+        recover_transient_phase(args.out.resolve(), args.recovery_attempts)
     elif args.retry_failures:
         retry_failed_phase(args.out.resolve(), args.workers, args.retry_attempts)
     elif args.bundle:

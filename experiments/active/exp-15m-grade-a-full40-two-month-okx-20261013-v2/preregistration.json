@@ -63,7 +63,7 @@
     "canonical_data_write": false,
     "coverage_caveat": "The current-live instrument endpoint excludes contracts that are no longer live; newly listed contracts contribute only available archive/API history. The initial v1 history-API-only acquisition was halted before inference at displayed 140/285 instruments (79 usable, 61 failed at that progress line; 80 per-symbol CSVs had persisted by process termination). That partial directory is diagnostic only and is not reused in v2.",
     "exchange": "OKX",
-    "fetch_retry_policy": "Download each available August/September official monthly archive with the repository archive retry helper. Fetch only the final UTC tail, starting at the first bar after the September UTC+8 monthly archive boundary, via confirmed 15m history API, at most three whole-tail attempts per instrument. Record source hashes, every month availability/error, each tail attempt, per-instrument gaps, and missing coverage. Do not silently switch exchange or data source.",
+    "fetch_retry_policy": "Initial collection attempts each official monthly archive through the repository archive helper and the confirmed 15m tail up to three whole-range attempts. Before model inference, allow at most two additional attempts only for the 11 recorded transient archive read errors and the one recorded October-tail timeout. Preserve both original and recovery attempts. Do not retry explicit monthly 404s and do not change source, interval, universe, or model based on detector outputs.",
     "gap_policy": "Record all timestamp gaps; compute moving averages separately inside each contiguous 15m segment; skip input windows crossing a gap and windows whose six 20/60/120 SMA/EMA values contain warmup NaNs.",
     "selection": "No return, volume, mover, or model-score ranking; each selected instrument is fetched independently.",
     "source": "Official OKX monthly 1m candlestick ZIP archives for August and September (confirm=1 only, aggregated to complete UTC-aligned 15m OHLCV with the repository helper), plus confirmed OKX public 15m history candles from 2026-09-30T16:00:00Z through 2026-10-13T11:00:00Z exclusive.",
@@ -98,6 +98,14 @@
     "raw_boxes": "analysis/output/grade_a_two_month_okx_20261013_v2/grade_a_full40_1280/raw_boxes.csv",
     "scan_receipt": "analysis/output/grade_a_two_month_okx_20261013_v2/scan_receipt.json",
     "structural_candidates": "analysis/output/grade_a_two_month_okx_20261013_v2/grade_a_full40_1280/structural_candidates.csv"
+  },
+  "pre_inference_recovery_amendment": {
+    "amended_at": "2026-10-13T12:38:52Z",
+    "model_inference_started": false,
+    "non_retryable": "Monthly archive HTTP 404 remains a documented history-availability boundary; no missing bars will be imputed.",
+    "observed_fetch_receipt_sha256": "5e2d5d848813725409afb24d8a0047f62c111ababd59ad697688bb53b5c5707c",
+    "reason": "Before detector inference, the final fetch receipt showed 11 transient monthly archive read errors (10 IncompleteRead, 1 timeout) and one transient October 15m API tail timeout. All 285 instruments have at least one saved usable snapshot; retry only these explicit transient failures to improve coverage.",
+    "retry_limit": "At most two whole-range attempts per affected archive month or October API tail, retaining all initial and recovery errors."
   },
   "question": "What completed-shape proposals does the frozen Grade-A YOLO11s full40 native-1280 checkpoint emit over every eligible OKX USDT swap with available confirmed 15m candles in the exact two-month interval?",
   "request": "Owner asked how Grade-A was trained and asked to run that model over all recent two-month data.",
