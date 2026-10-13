@@ -11250,9 +11250,10 @@ experiments:
     notes: Owner said “试试看” on 2026-10-12. 2024-02-01..2026-10-10 10:00 UTC, split 2025-10-10. V12.9 baseline and parent V12.10 gate both reproduced exactly; 1m inputs hash-verified, with zero duplicate rows collapsed, zero partial buckets, and zero 15m data-gap bars. Research only; no Pine, monitor, threshold preset, account, or live behavior change.
   - experiment_id: exp-ma6-fold-fan-1h-20261013-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: running
-    result: pending
+    source_commit: e41c9712ea
+    status: rejected
+    result: >-
+      No angle group passes (net positive in both periods and excess over matched random with p < 0.05). 441 symbols (monthly top-100 alts plus BTC/ETH, 1H, 2024-10..2026-09-23). Primary is too rare to carry a claim - 40 events in two years (obtuse 32, acute 6, mixed 2), median K3 close change 5.6 ATR and stop 5.0 ATR / about 8-10 percent of price; obtuse short 5R net +0.57R (4) then -0.14R (15), excess p 0.75/0.33; obtuse long had no select-period event and +1.96R on 13 in check (p 0.25); acute 6 events, 5 losers. Acute folds are structurally rare with the fan condition because a reversal must carry EMA20 through the ordered bundle before the width can grow (no_fan: 14 acute). The largest variant, turn_1_5 (392 events), is net positive for obtuse shorts in both periods (5R +0.30/+0.26R) but matched random shorts earn most of it (excess +0.25/+0.10R, p 0.50/0.71); obtuse longs about 0 excess. turn_2 (146) about 0 everywhere. The owner's example (after the data) hit 3R in 38 bars; 5R still open.
     question: On 1H, does a three-bar six-MA fold (SMA/EMA 20/60/120 converged near one point at K2, every line turning hard in the same direction at K3, then fanning out with EMA20 in front) pick entries in the fold direction that beat matched random entries with the same stop distance and 3R/5R targets after 0.2% cost, in both periods, separately for obtuse and acute folds?
     single_variable: New rule family, pre-registered in config.json - primary = converge (<= 1.0 ATR) + turn (all six slopes in the fold direction, each >= 3x its K2 slope) + fan (width >= 1.3x, EMA20 outermost); variants change one thing (turn ratio 2 / 1.5, no fan, converge 2.0). Exits, cost and controls as exp-ma6-knot-breakout-20261011-v1.
     training_eligible: false
