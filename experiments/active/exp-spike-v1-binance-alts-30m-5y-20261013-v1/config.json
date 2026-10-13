@@ -1,0 +1,38 @@
+{
+  "experiment_id": "exp-spike-v1-binance-alts-30m-5y-20261013-v1",
+  "owner_request": "2026-10-13 「多测试一些山寨币呢」, right after 「spike强劲爆发v1 ethusdt.p btcusdt.p 30min级别 5年详细的回测数据跑一下」",
+  "question": "How did frozen SPIKE 强劲爆发 V1 (default long-only) perform on 30 liquid alts, Binance USD-M perpetuals 30m, from 2021-10-13 to 2026-10-01 after 0.2 percent round-trip cost, against matched random long entries with the same initial stop distance and trailing exit, pooled and per coin, in both periods?",
+  "single_variable": "None; the same frozen rule, ledger engine, controls and statistics as exp-spike-v1-okx-30m-5y-20261013-v1 (its build.py helpers are imported), applied to a wider, pre-registered alt universe on Binance archives.",
+  "universe_rule": "every USDT-quoted symbol in the data.binance.vision futures/um monthly klines listing (delisted symbols included), minus BTCUSDT, ETHUSDT, quarterly contracts (names with '_'), stable or pegged assets and index contracts (config exclude); ranked by median daily quote volume (sum of close x volume per UTC day) in rank_month from that month's 30m archive (checksum verified); the top universe_size",
+  "exclude": ["BTCUSDT", "ETHUSDT", "USDCUSDT", "BUSDUSDT", "TUSDUSDT", "FDUSDUSDT", "USDPUSDT", "DAIUSDT", "EURUSDT", "AEURUSDT", "USDEUSDT", "XUSDUSDT", "BFUSDUSDT", "USD1USDT", "RLUSDUSDT", "PAXGUSDT", "XAUTUSDT", "BTCDOMUSDT", "DEFIUSDT", "BLUEBIRDUSDT", "FOOTBALLUSDT"],
+  "rank_month": "2021-09",
+  "universe_size": 30,
+  "interval": "30m",
+  "archive_start": "2021-08-01",
+  "archive_end_inclusive": "2026-09-01",
+  "archive_max_exclusive": "2026-10-01T00:00:00+00:00",
+  "start": "2021-10-13T00:00:00+00:00",
+  "split": "2024-09-10T00:00:00+00:00",
+  "end": "2026-10-01T00:00:00+00:00",
+  "data_dir": "data/research/spike_v1_binance_alts_30m_5y_20261013",
+  "ticks": "PRICE_FILTER tickSize from data/kline_preholdout_binance_um5m/exchange_info.json (2026-08 snapshot) where the symbol is listed; otherwise the smallest positive gap between distinct prices in the symbol's archive, recorded as inferred. The tick only floors V1's initial stop.",
+  "round_trip_cost": 0.002,
+  "controls": {
+    "n": 20,
+    "pool": "same symbol and calendar month, bars with finite ATR, not the signal bar, ATR/close within 0.5-2x the signal bar's",
+    "stop": "entry minus the event's initial stop distance in signal-bar ATR units",
+    "exit": "trail_exit of exp-spike-v1-okx-30m-5y-20261013-v1/build.py for events and controls alike",
+    "seed": 1013801
+  },
+  "stat_seed": 1013802,
+  "flips": 10000,
+  "equity_risk_per_trade": 0.01,
+  "primary": "pooled 30 alts: net mean R positive in both periods and excess over matched random positive with month-block sign-flip p < 0.01 in both (the repo bar); per-coin rows and years are descriptive",
+  "notes": [
+    "Binance, not OKX: OKX official 1m archives for 30 alts over five years are about 6 GB; Binance prices track OKX closely but signals can differ bar by bar. The OKX ETH/BTC study is the venue the owner charts.",
+    "The universe is ranked in 2021-09, before the window, so later winners are not picked with hindsight; symbols listed after 2021-09 are out by construction.",
+    "Funding, spread, impact and fee tiers are not modelled. No Pine, monitor, threshold preset, account or live behaviour change."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
