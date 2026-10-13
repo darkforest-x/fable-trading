@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SPIKE V12.12 五年回测</title>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f6f3; --surface:#ffffff; --surface-2:#f0efeb; --line:#e3e2dc; --grid:#ecebe6; --axis:#b9b8b1;
+  --text:#151514; --text-2:#52514e; --muted:#7c7b75;
+  --up:#1baf7a; --down:#e34948; --blue:#2a78d6; --blue-soft:#e3eefb; --orange:#eb6834; --amber:#b77800; --amber-soft:#fbf1dc; --rope:#8f8e86;
+  --serif:"Songti SC","Noto Serif SC","Source Han Serif SC",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  color-scheme:dark; --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#30302d; --grid:#272725; --axis:#55544f;
+  --text:#f3f3f0; --text-2:#c3c2b7; --muted:#8f8e86; --up:#199e70; --down:#e66767; --blue:#3987e5; --blue-soft:#1b2a3d; --orange:#f07a4a;
+  --amber:#e0a43a; --amber-soft:#33291a; --rope:#6f6e68;}}
+:root[data-theme="dark"]{color-scheme:dark; --bg:#121211; --surface:#1a1a19; --surface-2:#232321; --line:#30302d; --grid:#272725; --axis:#55544f;
+  --text:#f3f3f0; --text-2:#c3c2b7; --muted:#8f8e86; --up:#199e70; --down:#e66767; --blue:#3987e5; --blue-soft:#1b2a3d; --orange:#f07a4a;
+  --amber:#e0a43a; --amber-soft:#33291a; --rope:#6f6e68;}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.7 var(--sans);font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:clamp(16px,4vw,32px);padding-block:40px 80px}
+header{padding-bottom:28px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font-size:12px;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,5vw,44px);line-height:1.2;margin:10px 0 14px;text-wrap:balance}
+.lead{font-size:17px;line-height:1.8;max-width:70ch;color:var(--text-2);margin:0}
+.lead b{color:var(--text)}
+section{padding-top:44px}
+h2{font-family:var(--serif);font-weight:600;font-size:24px;margin:0 0 6px;text-wrap:balance}
+h2 .no{font-family:var(--sans);font-size:13px;color:var(--muted);font-weight:500;margin-right:10px;letter-spacing:.06em}
+h3{font-size:15px;margin:22px 0 8px}
+p{margin:8px 0;max-width:72ch}
+.sub{color:var(--muted);font-size:13px;margin:0 0 16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;min-width:0}
+.tile span{display:block;font-size:12px;color:var(--muted)}
+.tile strong{display:block;font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.3;margin-top:4px}
+.tile small{display:block;font-size:12px;color:var(--muted)}
+.pos{color:var(--up)} .neg{color:var(--down)}
+.rules{counter-reset:r;list-style:none;padding:0;margin:12px 0;display:grid;gap:10px}
+.rules li{counter-increment:r;position:relative;padding:12px 14px 12px 48px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.rules li::before{content:counter(r);position:absolute;left:14px;top:12px;width:22px;height:22px;border-radius:50%;background:var(--blue-soft);color:var(--blue);font-size:12px;font-weight:600;display:grid;place-items:center}
+.rules li.new::before{background:var(--amber-soft);color:var(--amber)}
+.rules li b{display:block;margin-bottom:2px}
+.rules li span{color:var(--text-2);font-size:14px}
+.note{background:var(--amber-soft);border-radius:10px;padding:12px 14px;color:var(--text);font-size:14px;line-height:1.75;margin:14px 0}
+.tw{overflow-x:auto;min-width:0}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{color:var(--muted);font-weight:500;background:var(--surface)}
+th:first-child,td:first-child{text-align:left}
+tr.cur td{background:var(--blue-soft)}
+td small{display:block;color:var(--muted);font-size:11px}
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tick{fill:var(--muted);font-size:11px}
+.gridl{stroke:var(--grid);stroke-width:1}
+.axisl{stroke:var(--axis);stroke-width:1}
+.wick.up{stroke:var(--up)} .wick.down{stroke:var(--down)}
+.body.up{fill:var(--up)} .body.down{fill:var(--down)}
+.trend{fill:none;stroke-width:2.2;stroke-linejoin:round;stroke-opacity:.6}
+.trend.up{stroke:var(--up)} .trend.down{stroke:var(--down)}
+.rope{fill:var(--rope);fill-opacity:.14;stroke:none}
+.sigband{fill:var(--blue);fill-opacity:.10}
+.stopl{stroke:var(--down);stroke-dasharray:4 3;stroke-width:1.2}
+.arml{stroke:var(--amber);stroke-dasharray:4 3;stroke-width:1.2}
+.conn{stroke-dasharray:6 3;stroke-width:1.5;fill:none}
+.conn.win{stroke:var(--up)} .conn.loss{stroke:var(--down)}
+.entry{fill:var(--text);stroke:var(--surface);stroke-width:1.5}
+.exitm{fill:var(--surface);stroke-width:2}
+.exitm.win{stroke:var(--up)} .exitm.loss{stroke:var(--down)}
+.ann{font-size:11px;fill:var(--text);font-weight:600}
+.ann-bg{fill:var(--surface);fill-opacity:.88}
+.tag.ent{fill:var(--text)} .tag.stp{fill:var(--down)} .tag.arm{fill:var(--amber)}
+.tagt{font-size:10.5px;fill:var(--surface);font-weight:600}
+.lineS{fill:none;stroke:var(--blue);stroke-width:2;stroke-linejoin:round}
+.lineB{fill:none;stroke:var(--orange);stroke-width:1.5;stroke-linejoin:round;stroke-opacity:.85}
+.dd{fill:var(--down);fill-opacity:.18;stroke:var(--down);stroke-width:1}
+.bar.pos{fill:var(--up)} .bar.neg{fill:var(--down)} .bar.blue{fill:var(--blue)} .bar.orange{fill:var(--orange)} .bar.cur{stroke:var(--text);stroke-width:1.5}
+.cross{stroke:var(--muted);stroke-dasharray:2 3;pointer-events:none}
+.dot{fill:var(--blue);stroke:var(--surface);stroke-width:2}
+.mk.win{fill:var(--up)} .mk.loss{fill:var(--down)}
+.split-l{stroke:var(--amber);stroke-dasharray:3 3;stroke-width:1}
+#tip{position:fixed;z-index:20;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,.14);white-space:nowrap;max-width:min(380px,92vw)}
+#tip .h{color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin:2px 0 10px}
+.legend i{display:inline-block;width:12px;height:10px;margin-right:6px;vertical-align:-1px}
+.k-up{background:var(--up)} .k-down{background:var(--down)} .k-blue{background:var(--blue)} .k-orange{background:var(--orange)} .k-rope{background:var(--rope);opacity:.4}
+.k-entry{background:var(--text);clip-path:polygon(50% 0,0 100%,100% 100%)}
+.k-dash-r{height:0!important;border-top:2px dashed var(--down)} .k-dash-a{height:0!important;border-top:2px dashed var(--amber)}
+.viewer{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px;margin:0}
+.facts dt{color:var(--muted);white-space:nowrap} .facts dd{margin:0;text-align:right;white-space:nowrap}
+.btns{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;align-items:center}
+button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:8px;padding:5px 12px;cursor:pointer}
+button:hover{border-color:var(--axis)} button.on{background:var(--text);color:var(--surface);border-color:var(--text)}
+button:focus-visible,.thumb:focus-visible,tr[tabindex]:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.thumb{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px;cursor:pointer;text-align:left;min-height:168px}
+.thumb.on{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue);background:var(--surface);color:var(--text)}
+.thumb .t{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;gap:6px}
+.thumb .t span{color:var(--muted)}
+.thumb .chart{height:110px}
+.strip{display:grid;grid-template-columns:repeat(auto-fill,minmax(10px,1fr));gap:2px}
+.cell{all:unset;box-sizing:border-box;aspect-ratio:1;border-radius:2px;cursor:pointer}
+.cell.win{background:var(--up)} .cell.loss{background:var(--down)} .cell.big{outline:2px solid var(--amber);outline-offset:-2px}
+.cell:hover{outline:2px solid var(--text);outline-offset:1px}
+tr[tabindex]{cursor:pointer}
+tr[tabindex]:hover td{background:var(--surface-2)}
+.more{display:block;margin:12px auto 0}
+.foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:5px}
+@media (max-width:860px){.grid2,.grid3,.viewer{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.tiles{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">SPIKE V12.12 · OKX ETHUSDT.P 永续 · 15 分钟 · 近 5 年</div>
+  <h1>SPIKE V12.12 · ETH 15 分钟五年回测</h1>
+  <p class="lead" id="lead"></p>
+</header>
+
+<section id="logic">
+  <h2><span class="no">01</span>V12.12 的交易逻辑</h2>
+  <p class="sub">V12.12 = V12.10 + 新增一道"顺 8 天均线"方向过滤（只在 15 分钟生效）。V12.10 = V12.9 普通信号 + Volumatic VIDYA 方向门。止损、出场、成交和成本都没变。</p>
+  <h3>信号：均线收拢后放量启动</h3>
+  <ol class="rules">
+    <li><b>六条均线收拢</b><span>SMA 和 EMA 各取 20、60、120 共六条，组成"均线带"。过去 12 根 K 线里，均线带平均宽度不超过 3 ATR、并且至少交叉 2 次，算作均线密集。</span></li>
+    <li><b>放量启动并确认</b><span>密集之后出现启动 K 线：3 根累计涨幅 ≥ 1.5 ATR、3 根成交量 ≥ 1.5 倍中位数、实体饱满、收在 K 线上端；3 根之内收盘突破启动 K 线的高点、实体站上均线带，才算确认。做空完全镜像。同方向 12 根内只算一次。</span></li>
+    <li><b>原有过滤</b><span>收盘离均线带不超过 3 ATR（不追太远）；布林带准入；成交量倍数不超过 50；UTC 周日不开仓；15 分钟收盘价在上一根已收盘的 1 小时 SMA60 上方才做多、下方才做空。</span></li>
+    <li><b>VIDYA 方向门（V12.10 加入）</b><span>信号 K 线收盘时，同周期 Volumatic VIDYA（Length 10）趋势为多头才做多、为空头才做空，方向不一致的信号直接跳过、不占仓位。</span></li>
+    <li class="new"><b>V12.12 新增：顺 8 天均线</b><span>15 分钟图上，信号 K 线收盘价在最近 800 根 K 线收盘均线（约 8.3 天）上方才做多、下方才做空；均线未就绪或正好相等不做。被拦下的信号不占仓位，已有仓位照旧管理。</span></li>
+  </ol>
+  <h3>入场与出场</h3>
+  <ol class="rules">
+    <li><b>入场</b><span>信号 K 线收盘后，下一根 15 分钟 K 线开盘价成交。同一时间只持有一笔。</span></li>
+    <li><b>初始止损</b><span>前 5 根 K 线的极值外 0.2 ATR，并且离入场价至少 2 ATR。入场价到止损的距离记为 1R。</span></li>
+    <li><b>跟踪止损</b><span>不设固定止盈。收盘浮盈达到 2R 后，启动 4 ATR 的收盘跟踪止损，让大行情尽量拿住。</span></li>
+    <li><b>反向离场与成本</b><span>出现反方向原始信号时，下一根开盘离场。每笔扣 0.2% 往返成本（手续费加滑点）。</span></li>
+  </ol>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0" id="ex1-title"></h3><div class="chart" id="ex1"></div></div>
+    <div class="card"><h3 style="margin-top:0" id="ex2-title"></h3><div class="chart" id="ex2"></div></div>
+  </div>
+  <div class="legend" style="margin-top:10px"><span><i class="k-up"></i>阳线 / VIDYA 多头线</span><span><i class="k-down"></i>阴线 / VIDYA 空头线</span><span><i class="k-rope"></i>六均线带</span><span><i class="k-entry"></i>入场</span><span><i class="k-dash-r"></i>初始止损</span><span><i class="k-dash-a"></i>2R（到这里启动跟踪止损）</span><span>浅蓝竖带 = 信号 K 线</span></div>
+</section>
+
+<section id="numbers">
+  <h2><span class="no">02</span>核心结果</h2>
+  <p class="sub" id="numbers-sub"></p>
+  <div class="tiles" id="tiles"></div>
+</section>
+
+<section id="overview">
+  <h2><span class="no">03</span>每笔交易在五年行情里的位置</h2>
+  <p class="sub">ETH 日线。▲ 做多、▼ 做空，绿色赚钱、红色亏钱；虚线是 2024-02-01 分界。鼠标停在三角上看这笔，点一下跳到它的 K 线图。</p>
+  <div class="card"><div class="chart" id="ovw"></div></div>
+</section>
+
+<section id="equity">
+  <h2><span class="no">04</span>累计 R 与回撤</h2>
+  <p class="sub">每笔按 R 计（1R = 初始止损距离），横轴是平仓时间。橙线是不加 8 天均线过滤的 V12.10，同样数据、同样出场。</p>
+  <div class="card"><div class="legend"><span><i class="k-blue"></i>V12.12</span><span><i class="k-orange"></i>V12.10（不加 8 天均线过滤）</span></div><div class="chart" id="eq"></div><div class="chart" id="ddc" style="margin-top:6px"></div></div>
+</section>
+
+<section id="time">
+  <h2><span class="no">05</span>按时间看</h2>
+  <div class="card"><h3 style="margin-top:0">前后两段</h3><p class="sub" style="margin-bottom:8px">注意："8 天均线"这条过滤就是在这 5 年 ETH 数据上发现的，所以两段对 V12.12 来说都是样本内，数字会偏好看。真正没参与发现的检验在第 09 节（20 个山寨币）。</p><div class="tw" id="split-table"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">每年合计 R</h3><div class="legend"><span><i class="k-blue"></i>V12.12</span><span><i class="k-orange"></i>V12.10</span></div><div class="chart" id="yr"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">逐年明细（V12.12）</h3><div class="tw" id="yr-table"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">每月合计 R（V12.12）</h3><div class="chart" id="mo"></div></div>
+</section>
+
+<section id="gate">
+  <h2><span class="no">06</span>8 天均线过滤起了什么作用</h2>
+  <p class="sub">同一份数据、同样的 V12.10 信号和出场，只差"逆着 8 天均线就不做"这一条。</p>
+  <div class="card"><h3 style="margin-top:0">V12.12 和 V12.10 对比</h3><div class="tw" id="cmp-table"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">被 8 天均线过滤拦下的信号</h3><p class="sub" style="margin-bottom:8px" id="removed-sub"></p><div class="tw" id="removed-table"></div></div>
+</section>
+
+<section id="traits">
+  <h2><span class="no">07</span>交易的特征</h2>
+  <div class="card"><h3 style="margin-top:0">逐笔结果（按时间）</h3><p class="sub" style="margin-bottom:10px" id="strip-sub"></p><div class="strip" id="strip"></div><div class="legend" style="margin-top:8px"><span><i class="k-up"></i>赚钱</span><span><i class="k-down"></i>亏钱</span><span>金色描边 = 单笔 ≥ 5R</span></div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3 style="margin-top:0">每笔结果分布</h3><p class="sub" style="margin-bottom:6px">柱子是笔数，鼠标看这一档合计多少 R。</p><div class="chart" id="dist"></div></div>
+    <div class="card"><h3 style="margin-top:0">靠大单吃饭</h3><div class="tiles" id="dep" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0"></div></div>
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3 style="margin-top:0">做多和做空</h3><div class="tw" id="side-table"></div></div>
+    <div class="card"><h3 style="margin-top:0">出场方式</h3><div class="tw" id="reason-table"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">持仓时长</h3><div class="tw" id="hold-table"></div></div>
+</section>
+
+<section id="control">
+  <h2><span class="no">08</span>跟随机入场比</h2>
+  <p class="sub">每笔真实交易配一笔随机入场：同一周、同方向、同一时段、同一波动档，而且同样处在 VIDYA 同向趋势里、同样在 8 天均线同一侧；出场规则和成本完全一样。看 V12.12 选的位置是否比随便进场更好。</p>
+  <div class="tiles" id="ctl" style="grid-template-columns:repeat(3,minmax(0,1fr))"></div>
+  <div class="card" style="margin-top:12px"><div class="tw" id="ctl-table"></div></div>
+  <p id="ctl-note" style="font-size:14px;color:var(--text-2)"></p>
+</section>
+
+<section id="binance">
+  <h2><span class="no">09</span>样本外检验：20 个山寨币，以及币安 ETH</h2>
+  <p class="sub">20 个流动性最好的山寨币（2023-01 至 2026-09，按 2025-01-01 分前后两段）完全没参与"8 天均线"规律的发现，是这条过滤真正的检验。</p>
+  <div class="card"><div class="tw" id="alt-table"></div><p class="sub" id="alt-note" style="margin:10px 0 0"></p></div>
+  <p class="sub" id="bn-sub" style="margin-top:16px"></p>
+  <div class="card"><div class="tw" id="bn-table"></div></div>
+</section>
+
+<section id="trades">
+  <h2><span class="no">10</span>每一笔交易的 K 线图</h2>
+  <p class="sub">上面是选中交易的大图，下面是缩略图（点任意一张切换）。持仓很长的交易会把几根 K 线合并成一根显示。时间为北京时间。</p>
+  <div class="viewer">
+    <div class="card"><div class="btns"><button type="button" id="prev">‹ 上一笔</button><button type="button" id="next">下一笔 ›</button><span id="vtitle" style="font-size:13px;color:var(--muted)"></span></div><div class="chart" id="big"></div></div>
+    <div class="card"><dl class="facts" id="facts"></dl></div>
+  </div>
+  <div class="btns" style="margin-top:16px" id="filters"></div>
+  <div class="thumbs" id="thumbs"></div>
+  <button type="button" class="more" id="more">显示更多</button>
+  <h3>交易明细</h3>
+  <div class="card tw"><table id="trade-table"></table></div>
+</section>
+
+<section id="verdict">
+  <h2><span class="no">11</span>结论与风险</h2>
+  <div id="verdict-body"></div>
+</section>
+
+<div class="foot" id="foot"></div>
+</div>
+<div id="tip" hidden></div>
+<script type="application/json" id="data">__DATA__</script>
+<script>
+(() => {
+"use strict";
+const D = JSON.parse(document.getElementById("data").textContent);
+const $ = (id) => document.getElementById(id);
+const esc = (v) => String(v ?? "—").replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+const fin = (v) => typeof v === "number" && Number.isFinite(v);
+const sg = (v, d = 2) => fin(v) ? (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) : "—";
+const n2 = (v, d = 2) => fin(v) ? v.toLocaleString("zh-CN", {maximumFractionDigits: d, minimumFractionDigits: 0}).replace(/^-/, "−") : "—";
+const pct = (v, d = 1) => fin(v) ? n2(v, d) + "%" : "—";
+const cls = (v) => fin(v) ? (v > 0 ? "pos" : v < 0 ? "neg" : "") : "";
+const tf = (ms, o) => new Intl.DateTimeFormat("zh-CN", {timeZone: "Asia/Shanghai", hour12: false, ...o}).format(new Date(ms));
+const dt = (ms) => tf(ms, {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"});
+const day = (ms) => tf(ms, {year: "numeric", month: "2-digit", day: "2-digit"});
+const BAR = 900000;
+const T = D.trades, M = D.metric.okx, G = M.vidya_gate.periods, B = M.baseline.periods, P = D.periods;
+const sideName = (s) => s === 1 ? "做多" : "做空";
+const SPLIT_MS = Date.parse(D.meta.split), START_MS = Date.parse(D.meta.start), END_MS = Date.parse(D.meta.end);
+
+/* tooltip */
+const tip = $("tip");
+function showTip(ev, lines) {
+  tip.innerHTML = lines.filter(Boolean).map((l, i) => `<div${i === 0 ? ' class="h"' : ""}>${esc(l)}</div>`).join("");
+  tip.hidden = false;
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + 14, y = ev.clientY - h - 12;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - 14;
+  if (y < 8) y = ev.clientY + 16;
+  tip.style.left = Math.max(8, x) + "px"; tip.style.top = y + "px";
+}
+const hideTip = () => { tip.hidden = true; };
+function niceTicks(lo, hi, n) {
+  const span = hi - lo || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => s >= raw) || raw, out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(10));
+  return out;
+}
+const width = (el, min = 300) => Math.max(min, el.clientWidth || 600);
+
+/* candle chart for one trade */
+function tradeChart(el, t, opt = {}) {
+  const rows = t.candles, n = rows.length, W = width(el, 180), H = opt.h || (opt.compact ? 110 : W < 560 ? 300 : 380);
+  const L = 4, R = opt.compact ? 4 : 74, Tp = opt.compact ? 4 : 12, Bt = opt.compact ? 4 : 24, pw = W - L - R, ph = H - Tp - Bt;
+  const span = BAR * t.k, dir = t.side, risk = Math.abs(t.entry - t.stop), arm = t.entry + dir * 2 * risk;
+  let lo = Infinity, hi = -Infinity;
+  rows.forEach(r => { lo = Math.min(lo, r[3]); hi = Math.max(hi, r[2]); });
+  [t.stop, t.entry, t.exit].forEach(v => { lo = Math.min(lo, v); hi = Math.max(hi, v); });
+  if (!opt.compact) { lo = Math.min(lo, arm); hi = Math.max(hi, arm); }
+  const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+  const slot = pw / n, X = (i) => L + (i + 0.5) * slot, Y = (v) => Tp + (hi - v) / (hi - lo) * ph, cw = Math.max(1, slot * 0.66);
+  const xAt = (ms) => { let j = 0; for (let i = 0; i < n; i++) if (rows[i][0] <= ms) j = i; else break; return L + (j + Math.min(1, (ms - rows[j][0]) / span)) * slot; };
+  const p = [];
+  if (!opt.compact) niceTicks(lo, hi, 5).forEach(v => p.push(`<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tick" x="${W - R + 6}" y="${Y(v) + 4}">${n2(v, v >= 1000 ? 0 : 1)}</text>`));
+  // six-MA rope band
+  let seg = [];
+  const flushRope = () => { if (seg.length > 1) p.push(`<path class="rope" d="M${seg.map(s => `${s[0]},${s[1]}`).join("L")}L${seg.slice().reverse().map(s => `${s[0]},${s[2]}`).join("L")}Z"/>`); seg = []; };
+  rows.forEach((r, i) => { if (!fin(r[7]) || !fin(r[8])) { flushRope(); return; } seg.push([X(i).toFixed(1), Y(r[7]).toFixed(1), Y(r[8]).toFixed(1)]); });
+  flushRope();
+  const sx = xAt(t.signal_ms - BAR);
+  p.push(`<rect class="sigband" x="${sx}" y="${Tp}" width="${Math.max(2, slot / t.k)}" height="${ph}"/>`);
+  rows.forEach((r, i) => { const c = r[4] >= r[1] ? "up" : "down";
+    p.push(`<line class="wick ${c}" x1="${X(i)}" x2="${X(i)}" y1="${Y(r[2])}" y2="${Y(r[3])}"/><rect class="body ${c}" x="${X(i) - cw / 2}" y="${Y(Math.max(r[1], r[4]))}" width="${cw}" height="${Math.max(1, Math.abs(Y(r[1]) - Y(r[4])))}"/>`); });
+  let line = [], su = null;
+  const flush = () => { if (line.length > 1) p.push(`<polyline class="trend ${su ? "up" : "down"}" points="${line.join(" ")}"/>`); line = []; };
+  rows.forEach((r, i) => { if (!fin(r[5])) { flush(); su = null; return; } if (su !== null && r[6] !== su) flush(); su = r[6]; line.push(`${X(i).toFixed(1)},${Y(r[5]).toFixed(1)}`); });
+  flush();
+  const xa = xAt(t.entry_ms), stopLike = t.reason_key !== "opposite_v6_next_open", xb = Math.min(W - R, xAt(t.exit_ms) + (stopLike ? slot / t.k / 2 : 0));
+  const win = t.r > 0, z = opt.compact ? 5 : 7;
+  p.push(`<line class="stopl" x1="${xa}" x2="${xb}" y1="${Y(t.stop)}" y2="${Y(t.stop)}"/>`);
+  if (!opt.compact) p.push(`<line class="arml" x1="${xa}" x2="${xb}" y1="${Y(arm)}" y2="${Y(arm)}"/>`);
+  p.push(`<line class="conn ${win ? "win" : "loss"}" x1="${xa}" x2="${xb}" y1="${Y(t.entry)}" y2="${Y(t.exit)}"/>`);
+  p.push(`<path class="entry" d="M${xa},${Y(t.entry)}L${xa - z * .75},${Y(t.entry) + dir * z * 1.4}L${xa + z * .75},${Y(t.entry) + dir * z * 1.4}Z"/>`);
+  p.push(`<circle class="exitm ${win ? "win" : "loss"}" cx="${xb}" cy="${Y(t.exit)}" r="${opt.compact ? 3.5 : 5}"/>`);
+  if (!opt.compact) {
+    const tags = [{v: arm, k: "arm", s: "2R"}, {v: t.entry, k: "ent", s: "入场"}, {v: t.stop, k: "stp", s: "止损"}].map(g => ({...g, y: Y(g.v)})).sort((a, b) => a.y - b.y);
+    for (let i = 1; i < tags.length; i++) tags[i].y = Math.max(tags[i].y, tags[i - 1].y + 17);
+    tags.forEach(g => p.push(`<rect class="tag ${g.k}" x="${W - R + 2}" y="${g.y - 8}" width="${R - 2}" height="16" rx="3"/><text class="tagt" x="${W - R + 5}" y="${g.y + 4}">${g.s} ${n2(g.v, g.v >= 1000 ? 0 : 2)}</text>`));
+    const ticks = Math.max(2, Math.floor(pw / 150));
+    for (let k = 0; k <= ticks; k++) { const i = Math.round(k / ticks * (n - 1));
+      p.push(`<text class="tick" x="${X(i)}" y="${H - 6}" text-anchor="${k === 0 ? "start" : k === ticks ? "end" : "middle"}">${esc(tf(rows[i][0], {month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"}))}</text>`); }
+  }
+  if (opt.annotate) {
+    const lab = (x, y, text, anchor = "start") => { const w = [...text].reduce((s, ch) => s + (ch.charCodeAt(0) > 255 ? 11 : 6.4), 10), x0 = Math.max(L, Math.min(W - R - w, anchor === "end" ? x - w : x));
+      p.push(`<rect class="ann-bg" x="${x0}" y="${y - 13}" width="${w}" height="18" rx="4"/><text class="ann" x="${x0 + 5}" y="${y}">${esc(text)}</text>`); };
+    lab(sx - 6, Y(t.entry) - dir * 30, "① 信号 K 线收盘", "end");
+    lab(xa + 10, Y(t.entry) + dir * 22, "② 下一根开盘入场");
+    lab(Math.min(xb, W - R) - 6, Y(t.exit) + (win ? -dir * 14 : dir * 24), `出场 ${sg(t.r)}R · ${t.reason}`, "end");
+  }
+  p.push(`<line class="cross" x1="0" x2="0" y1="${Tp}" y2="${Tp + ph}" style="display:none"/><rect x="${L}" y="${Tp}" width="${pw}" height="${ph}" fill="transparent" class="hit"/>`);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="第 ${t.n} 笔交易的 K 线图">${p.join("")}</svg>`;
+  if (opt.compact) return;
+  const svg = el.querySelector("svg"), cross = svg.querySelector(".cross");
+  svg.querySelector(".hit").addEventListener("mousemove", (ev) => {
+    const b = svg.getBoundingClientRect(), x = (ev.clientX - b.left) * W / b.width, i = Math.max(0, Math.min(n - 1, Math.floor((x - L) / slot))), r = rows[i];
+    cross.setAttribute("x1", X(i)); cross.setAttribute("x2", X(i)); cross.style.display = "";
+    showTip(ev, [dt(r[0]) + (t.k > 1 ? ` 起 ${t.k} 根合并` : " 开盘"), `开 ${n2(r[1])} · 高 ${n2(r[2])} · 低 ${n2(r[3])} · 收 ${n2(r[4])}`,
+      fin(r[5]) ? `VIDYA ${r[6] ? "多头" : "空头"} · 线 ${n2(r[5])}` : "VIDYA 趋势变色", fin(r[7]) ? `均线带 ${n2(r[8])} ~ ${n2(r[7])}` : ""]);
+  });
+  svg.querySelector(".hit").addEventListener("mouseleave", () => { cross.style.display = "none"; hideTip(); });
+}
+
+/* daily overview */
+function overview(el) {
+  const rows = D.overview, n = rows.length, W = width(el), H = W < 560 ? 280 : 380, L = 4, R = 60, Tp = 10, Bt = 24, pw = W - L - R, ph = H - Tp - Bt;
+  let lo = Infinity, hi = -Infinity; rows.forEach(r => { lo = Math.min(lo, r[3]); hi = Math.max(hi, r[2]); });
+  const pad = (hi - lo) * .05; lo -= pad; hi += pad;
+  const t0 = rows[0][0], t1 = rows[n - 1][0] + 864e5, X = (ms) => L + (ms - t0) / (t1 - t0) * pw, Y = (v) => Tp + (hi - v) / (hi - lo) * ph, cw = Math.max(1, pw / n * .7);
+  const p = [];
+  niceTicks(lo, hi, 5).forEach(v => p.push(`<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tick" x="${W - R + 6}" y="${Y(v) + 4}">${n2(v, 0)}</text>`));
+  for (let y = 2022; y <= 2026; y++) { const ms = Date.UTC(y, 0, 1); p.push(`<text class="tick" x="${X(ms) + 3}" y="${H - 6}">${y}</text><line class="gridl" x1="${X(ms)}" x2="${X(ms)}" y1="${Tp}" y2="${Tp + ph}"/>`); }
+  p.push(`<line class="split-l" x1="${X(SPLIT_MS)}" x2="${X(SPLIT_MS)}" y1="${Tp}" y2="${Tp + ph}"/>`);
+  rows.forEach(r => { const c = r[4] >= r[1] ? "up" : "down", x = X(r[0] + 432e5);
+    p.push(`<line class="wick ${c}" x1="${x}" x2="${x}" y1="${Y(r[2])}" y2="${Y(r[3])}" stroke-opacity=".5"/><rect class="body ${c}" fill-opacity=".5" x="${x - cw / 2}" y="${Y(Math.max(r[1], r[4]))}" width="${cw}" height="${Math.max(1, Math.abs(Y(r[1]) - Y(r[4])))}"/>`); });
+  T.forEach(t => { const x = X(t.entry_ms), y = Y(t.entry), d = t.side, z = 5;
+    p.push(`<path class="mk ${t.r > 0 ? "win" : "loss"}" data-n="${t.n}" stroke="var(--surface)" stroke-width="1" d="M${x},${y + d * 4}L${x - z},${y + d * (4 + z * 1.6)}L${x + z},${y + d * (4 + z * 1.6)}Z" style="cursor:pointer"/>`); });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ETH 日线与每笔交易">${p.join("")}</svg>`;
+  el.querySelectorAll("[data-n]").forEach(m => { const t = T[+m.dataset.n - 1];
+    m.addEventListener("mousemove", ev => showTip(ev, [`第 ${t.n} 笔 · ${sideName(t.side)}`, `入场 ${dt(t.entry_ms)} @ ${n2(t.entry)}`, `${t.reason} ${dt(t.exit_ms)} @ ${n2(t.exit)}`, `结果 ${sg(t.r)}R`]));
+    m.addEventListener("mouseleave", hideTip);
+    m.addEventListener("click", () => { select(t.n); $("trades").scrollIntoView({behavior: "smooth"}); }); });
+}
+
+/* cumulative R + drawdown */
+function equity() {
+  const el = $("eq"), W = width(el), H = W < 560 ? 230 : 280, L = 48, R = 16, Tp = 12, Bt = 24, pw = W - L - R, ph = H - Tp - Bt;
+  const pts = [{t: START_MS, v: 0, dd: 0, n: 0}]; let peak = 0;
+  T.forEach(t => { peak = Math.max(peak, t.cum_r); pts.push({t: t.exit_ms, v: t.cum_r, dd: t.cum_r - peak, n: t.n, r: t.r}); });
+  const bc = [[START_MS, 0], ...D.base_curve];
+  const X = (ms) => L + (ms - START_MS) / (END_MS - START_MS) * pw;
+  const all = [...pts.map(q => q.v), ...bc.map(q => q[1])], lo = Math.min(0, ...all) - 3, hi = Math.max(...all) + 3, Y = (v) => Tp + (hi - v) / (hi - lo) * ph;
+  const p = [];
+  niceTicks(lo, hi, 5).forEach(v => p.push(`<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tick" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${n2(v, 0)}R</text>`));
+  for (let y = 2022; y <= 2026; y++) p.push(`<text class="tick" x="${X(Date.UTC(y, 0, 1)) + 3}" y="${H - 6}">${y}</text>`);
+  p.push(`<line class="axisl" x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}"/><line class="split-l" x1="${X(SPLIT_MS)}" x2="${X(SPLIT_MS)}" y1="${Tp}" y2="${Tp + ph}"/>`);
+  p.push(`<path class="lineB" d="${bc.map((q, i) => i === 0 ? `M${X(q[0])},${Y(q[1])}` : `H${X(q[0])}V${Y(q[1])}`).join("")}H${X(END_MS)}"/>`);
+  p.push(`<path class="lineS" d="${pts.map((q, i) => i === 0 ? `M${X(q.t)},${Y(q.v)}` : `H${X(q.t)}V${Y(q.v)}`).join("")}H${X(END_MS)}"/>`);
+  const last = pts[pts.length - 1], lastB = bc[bc.length - 1];
+  p.push(`<text class="tick" x="${W - R}" y="${Y(last.v) - 8}" text-anchor="end" style="fill:var(--text);font-weight:600">${sg(last.v, 1)}R</text>`);
+  p.push(`<text class="tick" x="${W - R}" y="${Y(lastB[1]) + (Math.abs(Y(lastB[1]) - Y(last.v)) < 16 ? 16 : -8)}" text-anchor="end">${sg(lastB[1], 1)}R</text>`);
+  p.push(`<circle class="dot" r="4" cx="-20" cy="-20"/><line class="cross" x1="0" x2="0" y1="${Tp}" y2="${Tp + ph}" style="display:none"/><rect class="hit" x="${L}" y="${Tp}" width="${pw}" height="${ph}" fill="transparent"/>`);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="累计 R">${p.join("")}</svg>`;
+  const svg = el.querySelector("svg"), dot = svg.querySelector(".dot"), cross = svg.querySelector(".cross");
+  svg.querySelector(".hit").addEventListener("mousemove", e => {
+    const b = svg.getBoundingClientRect(), ms = START_MS + ((e.clientX - b.left) * W / b.width - L) / pw * (END_MS - START_MS);
+    let q = pts[0]; pts.forEach(z => { if (z.t <= ms) q = z; });
+    let qb = bc[0]; bc.forEach(z => { if (z[0] <= ms) qb = z; });
+    dot.setAttribute("cx", X(q.t)); dot.setAttribute("cy", Y(q.v)); cross.setAttribute("x1", X(q.t)); cross.setAttribute("x2", X(q.t)); cross.style.display = "";
+    showTip(e, [q.n ? `第 ${q.n} 笔平仓 · ${day(q.t)}` : "开始", q.n ? `这笔 ${sg(q.r)}R` : "", `V12.12 累计 ${sg(q.v, 1)}R（回撤 ${n2(q.dd, 1)}R）`, `V12.10 同时累计 ${sg(qb[1], 1)}R`]);
+  });
+  svg.querySelector(".hit").addEventListener("mouseleave", () => { hideTip(); cross.style.display = "none"; dot.setAttribute("cx", -20); });
+  const el2 = $("ddc"), H2 = 110, ph2 = H2 - Tp - 18, dmin = Math.min(...pts.map(q => q.dd), -1), Y2 = (v) => Tp + (0 - v) / (0 - dmin) * ph2;
+  const area = pts.map((q, i) => i === 0 ? `M${X(q.t)},${Y2(0)}L${X(q.t)},${Y2(q.dd)}` : `H${X(q.t)}V${Y2(q.dd)}`).join("") + `H${X(END_MS)}V${Y2(0)}Z`;
+  const q2 = [`<line class="axisl" x1="${L}" x2="${W - R}" y1="${Y2(0)}" y2="${Y2(0)}"/>`, `<path class="dd" d="${area}"/>`];
+  niceTicks(dmin, 0, 2).forEach(v => q2.push(`<text class="tick" x="${L - 6}" y="${Y2(v) + 4}" text-anchor="end">${n2(v, 0)}R</text>`));
+  q2.push(`<text class="tick" x="${L + 4}" y="${Y2(dmin) + 14}">V12.12 回撤（从累计最高点回落多少 R）</text>`);
+  el2.innerHTML = `<svg viewBox="0 0 ${W} ${H2}" role="img" aria-label="回撤">${q2.join("")}</svg>`;
+}
+
+/* bars (single or grouped) */
+function bars(el, items, opt = {}) {
+  const W = width(el, 260), H = opt.h || 210, L = 8, R = 8, Tp = 18, Bt = opt.sub ? 34 : 22, pw = W - L - R, ph = H - Tp - Bt;
+  const keys = opt.series || ["v"], vals = items.flatMap(d => keys.map(k => d[k])).filter(fin);
+  const lo = Math.min(0, ...vals), hi = Math.max(0, ...vals), pad = (hi - lo) * .12 || 1;
+  const y0 = lo < 0 ? lo - pad : 0, y1 = hi > 0 ? hi + pad : 0, Y = (v) => Tp + (y1 - v) / (y1 - y0) * ph, bw = pw / items.length;
+  const gw = Math.min(bw * .7, keys.length * 34), w = gw / keys.length - (keys.length > 1 ? 2 : 0);
+  const p = [`<line class="axisl" x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}"/>`];
+  items.forEach((d, i) => { const cx = L + bw * (i + .5);
+    keys.forEach((k, j) => { const v = d[k]; if (!fin(v)) return;
+      const x = cx - gw / 2 + j * (w + (keys.length > 1 ? 2 : 0)), c = opt.colors ? opt.colors[j] : (v >= 0 ? "pos" : "neg");
+      p.push(`<rect class="bar ${c}" x="${x}" y="${Math.min(Y(0), Y(v))}" width="${w}" height="${Math.max(1, Math.abs(Y(v) - Y(0)))}" rx="3"/>`);
+      if (opt.labels !== false) p.push(`<text class="tick" x="${x + w / 2}" y="${v >= 0 ? Y(v) - 5 : Y(v) + 13}" text-anchor="middle" style="fill:var(--text)">${esc(opt.fmt ? opt.fmt(v) : sg(v, 1))}</text>`); });
+    if (opt.xlabels !== false && (!opt.every || i % opt.every === 0)) p.push(`<text class="tick" x="${cx}" y="${H - (opt.sub ? 18 : 6)}" text-anchor="middle">${esc(d.k)}</text>`);
+    if (opt.sub) p.push(`<text class="tick" x="${cx}" y="${H - 4}" text-anchor="middle">${esc(d.sub)}</text>`);
+    p.push(`<rect data-i="${i}" class="hitb" x="${cx - bw / 2}" y="${Tp}" width="${bw}" height="${ph}" fill="transparent"/>`); });
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label || "柱状图")}">${p.join("")}</svg>`;
+  el.querySelectorAll(".hitb").forEach(r => { const d = items[+r.dataset.i];
+    r.addEventListener("mousemove", ev => showTip(ev, d.tip)); r.addEventListener("mouseleave", hideTip); });
+}
+
+/* tables */
+const table = (head, rows) => `<table><thead><tr>${head.map(h => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table>`;
+const sRow = (label, s, extra = "") => s && s.trades ? `<tr><td>${label}</td><td>${s.trades}</td><td>${pct(s.win_rate)}</td><td class="${cls(s.avg_r)}">${sg(s.avg_r, 2)}R</td><td class="${cls(s.sum_r)}">${sg(s.sum_r, 1)}R</td>${extra}</tr>` : `<tr><td>${label}</td><td>0</td><td>—</td><td>—</td><td>—</td>${extra ? extra.replace(/<td[^>]*>[^<]*<\/td>/g, "<td>—</td>") : ""}</tr>`;
+const S_HEAD = ["", "笔数", "胜率", "每笔", "合计"];
+const tile = (k, v, s, c = "") => `<div class="tile"><span>${k}</span><strong class="${c}">${v}</strong><small>${s}</small></div>`;
+
+/* ---------- render ---------- */
+const full = G.full, before = G.before_split, after = G.from_split, bfull = B.full, gf = P.gate.full, dep = D.dependence;
+$("lead").innerHTML = `${day(START_MS)} 至 ${day(END_MS - 1)}，V12.12 在 OKX ETH 15 分钟上一共平仓 <b>${full.closed} 笔</b>，胜率 <b>${pct(full.win_rate * 100)}</b>，扣 0.2% 成本后每笔 <b class="${cls(full.mean_net_r)}">${sg(full.mean_net_r)}R</b>、合计 <b class="${cls(full.sum_net_r)}">${sg(full.sum_net_r, 1)}R</b>，最大回撤 <b>${n2(Math.abs(full.max_drawdown_r), 1)}R</b>。`
+  + `2024-02 以前每笔 <b class="${cls(before.mean_net_r)}">${sg(before.mean_net_r)}R</b>，之后 <b class="${cls(after.mean_net_r)}">${sg(after.mean_net_r)}R</b>。同样数据上 V12.10 每笔 ${sg(bfull.mean_net_r)}R、最大回撤 ${n2(Math.abs(bfull.max_drawdown_r), 1)}R。8 天均线过滤是在这份 ETH 数据上发现的，ETH 结果属于样本内；样本外的 20 个山寨币见第 09 节。`;
+$("numbers-sub").textContent = `R = 初始止损距离；每笔已扣 0.2% 往返成本；下一根开盘成交。数据 OKX 官方 1 分钟归档合成 15 分钟，${n2(D.meta.okx.data_gap_bars, 0)} 根缺口 K 线（交易所停机）按缺口处理。`;
+$("tiles").innerHTML = [
+  tile("平仓笔数", full.closed, `做多 ${D.groups.side[0].trades} · 做空 ${D.groups.side[1].trades}${D.meta.open_at_end.length ? ` · 另有 ${D.meta.open_at_end.length} 笔仍持仓` : ""}`),
+  tile("胜率", pct(full.win_rate * 100), `赚钱平均 ${sg(gf.all.avg_win)}R，亏钱平均 ${sg(gf.all.avg_loss)}R`),
+  tile("每笔平均", sg(full.mean_net_r) + "R", `扣费前 ${sg(full.mean_gross_r)}R · 成本每笔 ${n2(full.mean_cost_r, 2)}R`, cls(full.mean_net_r)),
+  tile("合计", sg(full.sum_net_r, 1) + "R", `盈亏因子 ${n2(full.profit_factor_r, 2)}`, cls(full.sum_net_r)),
+  tile("最大回撤", n2(Math.abs(full.max_drawdown_r), 1) + "R", `最长连亏 ${full.max_consecutive_losses} 笔`),
+  tile("每笔冒 1% 风险复利", sg(gf.ret_pct, 1) + "%", `期间最大回撤 ${pct(gf.max_dd_pct)}`, cls(gf.ret_pct)),
+  tile("比随机入场多", sg(full.excess_mean_r) + "R", `p = ${n2(full.excess_month_block_p, 3)}（月块检验）`, cls(full.excess_mean_r)),
+  tile("中位止损距离", pct(full.median_risk_pct, 2), `持仓中位 ${n2(dep.median_hold_h, 1)} 小时`),
+].join("");
+
+// examples: the biggest trailing-stop winner and a typical initial-stop loss
+const ex1 = T.filter(t => t.reason_key === "trailing_stop").sort((a, b) => b.r - a.r)[0] || T[0];
+const ex2 = T.filter(t => t.reason_key === "initial_stop" && t.hold_h < 24).sort((a, b) => b.n - a.n)[0] || T[1];
+$("ex1-title").textContent = `例子：第 ${ex1.n} 笔 · ${sideName(ex1.side)} · ${ex1.reason} ${sg(ex1.r)}R · ${dt(ex1.entry_ms)}`;
+$("ex2-title").textContent = `例子：第 ${ex2.n} 笔 · ${sideName(ex2.side)} · ${ex2.reason} ${sg(ex2.r)}R · ${dt(ex2.entry_ms)}`;
+
+overview($("ovw"));
+equity();
+bars($("yr"), D.yearly.map(y => ({k: y.year, a: y.gate.all.sum_r, b: y.base.all.sum_r,
+  tip: [`${y.year} 年`, `V12.12：${y.gate.all.trades || 0} 笔 · 合计 ${sg(y.gate.all.sum_r, 1)}R · 每笔 ${sg(y.gate.all.avg_r)}R`, `V12.10：${y.base.all.trades || 0} 笔 · 合计 ${sg(y.base.all.sum_r, 1)}R`]})),
+  {series: ["a", "b"], colors: ["blue", "orange"], label: "每年合计 R"});
+const per = (lbl, g, s) => sRow(lbl, g.all, `<td class="${cls(g.excess_r)}">${sg(g.excess_r)}R</td><td>${n2(Math.abs(s.max_drawdown_r ?? NaN), 1)}R</td>`);
+$("split-table").innerHTML = table([...S_HEAD, "比随机多", "最大回撤"], [per("2021-10 至 2024-01<small>前段</small>", P.gate.before, before), per("2024-02 以后<small>后段</small>", P.gate.after, after), per("合计", P.gate.full, full)]);
+$("yr-table").innerHTML = table(["年份", "笔数", "胜率", "每笔", "合计", "最大回撤", "1% 复利", "比随机多"], D.yearly.map(y => { const s = y.gate.all;
+  return s.trades ? `<tr><td>${y.year}</td><td>${s.trades}</td><td>${pct(s.win_rate)}</td><td class="${cls(s.avg_r)}">${sg(s.avg_r)}R</td><td class="${cls(s.sum_r)}">${sg(s.sum_r, 1)}R</td><td>${n2(Math.abs(s.max_dd_r), 1)}R</td><td class="${cls(y.gate.ret_pct)}">${sg(y.gate.ret_pct, 1)}%</td><td class="${cls(y.gate.excess_r)}">${sg(y.gate.excess_r)}R</td></tr>` : `<tr><td>${y.year}</td><td colspan="7">没有交易</td></tr>`; }));
+bars($("mo"), D.monthly.map(m => ({k: m.m.slice(2), v: m.n ? m.sum_r : null, tip: [m.m, m.n ? `${m.n} 笔 · 合计 ${sg(m.sum_r, 2)}R` : "没有交易"]})), {labels: false, every: 6, h: 180, label: "每月合计 R"});
+
+const cmpRow = (lbl, g, b) => `<tr><td>${lbl}</td><td>${g.closed}</td><td>${b.closed}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r)}R</td><td class="${cls(b.mean_net_r)}">${sg(b.mean_net_r)}R</td><td class="${cls(g.sum_net_r)}">${sg(g.sum_net_r, 1)}R</td><td class="${cls(b.sum_net_r)}">${sg(b.sum_net_r, 1)}R</td><td>${n2(Math.abs(g.max_drawdown_r), 1)}R</td><td>${n2(Math.abs(b.max_drawdown_r), 1)}R</td></tr>`;
+$("cmp-table").innerHTML = `<table><thead><tr><th></th><th>笔数<small>V12.12</small></th><th>笔数<small>V12.10</small></th><th>每笔<small>V12.12</small></th><th>每笔<small>V12.10</small></th><th>合计<small>V12.12</small></th><th>合计<small>V12.10</small></th><th>回撤<small>V12.12</small></th><th>回撤<small>V12.10</small></th></tr></thead><tbody>${
+  cmpRow("2021-10 至 2024-01", before, B.before_split) + cmpRow("2024-02 以后", after, B.from_split) + cmpRow("五年合计", full, bfull)}</tbody></table>`;
+const ge = D.gate_effect, gc = D.meta.okx.gate_counts;
+$("removed-sub").textContent = `五年里 V12.10 一共放行 ${gc.raw_candidates} 个信号，8 天均线过滤又放行 ${gc.admitted_candidates} 个、拦下 ${gc.rejected_opposite + gc.rejected_unready} 个。下表是 V12.10 实际做了、V12.12 没做的那些交易的结果（拦下以后腾出的仓位也可能让 V12.12 多做几笔：${ge.new_only.trades || 0} 笔）。`;
+$("removed-table").innerHTML = table(S_HEAD, [sRow("被拦下的全部", ge.removed), sRow("其中做多", ge.removed_long), sRow("其中做空", ge.removed_short), sRow("V12.12 新增的", ge.new_only)]);
+
+const big = (t) => t.r >= 5;
+$("strip-sub").textContent = `${full.closed} 笔从左到右按平仓时间排列，点格子看这笔交易。`;
+$("strip").innerHTML = T.map(t => `<button type="button" class="cell ${t.r > 0 ? "win" : "loss"}${big(t) ? " big" : ""}" data-n="${t.n}" aria-label="第 ${t.n} 笔 ${sg(t.r)}R"></button>`).join("");
+$("strip").querySelectorAll(".cell").forEach(b => { const t = T[+b.dataset.n - 1];
+  b.addEventListener("mousemove", ev => showTip(ev, [`第 ${t.n} 笔 · ${day(t.entry_ms)}`, `${sideName(t.side)} · ${t.reason} · ${sg(t.r)}R`]));
+  b.addEventListener("mouseleave", hideTip); b.addEventListener("click", () => { select(t.n); $("trades").scrollIntoView({behavior: "smooth"}); }); });
+bars($("dist"), D.groups.buckets.map(b => ({k: b.label, v: b.n, tip: [`结果 ${b.label}`, `${b.n} 笔`, `合计 ${sg(b.sum_r, 1)}R`]})), {colors: ["blue"], fmt: v => String(v), h: 210, label: "每笔结果分布"});
+$("dep").innerHTML = [tile("最好 5 笔合计", sg(dep.best5_sum, 1) + "R", `单笔最大 ${sg(dep.max_r)}R`, "pos"),
+  tile("去掉最好 5 笔", sg(dep.without_best5, 1) + "R", `去掉最好 10 笔 ${sg(dep.without_best10, 1)}R`, cls(dep.without_best5)),
+  tile("≥ 5R 的单", dep.ge5r + " 笔", `其中 ≥ 10R ${dep.ge10r} 笔`), tile("每笔成本", n2(dep.cost_r, 2) + "R", `扣费前每笔 ${sg(dep.gross_avg_r)}R`)].join("");
+$("side-table").innerHTML = table(S_HEAD, D.groups.side.map(s => sRow(s.label, s)));
+$("reason-table").innerHTML = table(S_HEAD, D.groups.reason.map(s => sRow(s.label, s)));
+$("hold-table").innerHTML = table(S_HEAD, D.groups.hold.map(s => sRow(s.label, s)));
+
+const ctlTile = (k, v, s, c) => tile(k, v, s, c);
+$("ctl").innerHTML = [ctlTile("V12.12 每笔", sg(full.mean_net_r) + "R", `${full.matched_controls} 笔配到随机对照`, cls(full.mean_net_r)),
+  ctlTile("随机入场每笔", sg(full.control_mean_net_r) + "R", "同周、同方向、同波动、同 VIDYA 趋势、同在 8 天均线同侧", cls(full.control_mean_net_r)),
+  ctlTile("V12.12 多出", sg(full.excess_mean_r) + "R", `95% 区间 ${sg(full.excess_month_block_ci95?.[0])} ~ ${sg(full.excess_month_block_ci95?.[1])}R`, cls(full.excess_mean_r))].join("");
+const cRow = (lbl, g) => `<tr><td>${lbl}</td><td>${g.matched_controls}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r)}R</td><td class="${cls(g.control_mean_net_r)}">${sg(g.control_mean_net_r)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${n2(g.excess_month_block_p, 3)}</td></tr>`;
+$("ctl-table").innerHTML = `<table><thead><tr><th></th><th>配对笔数</th><th>V12.12 每笔</th><th>随机每笔</th><th>多出</th><th>p（月块）</th></tr></thead><tbody>${cRow("2021-10 至 2024-01", before)}${cRow("2024-02 以后", after)}${cRow("五年合计", full)}${cRow("V12.10（不加 8 天均线过滤，对照不限均线位置）", bfull)}</tbody></table>`;
+$("ctl-note").textContent = `p 是"把每个月的差值随机翻正负号后，平均差值不小于实际值"的比例；本仓验收要求两个时段都 p < 0.01。随机对照只配一笔，数字会有抖动，适合看方向和量级。`;
+
+const BN = D.metric.binance, bg = BN.vidya_gate.periods, bb = BN.baseline.periods;
+const AL = D.alts, aRow = (lbl, g, b) => `<tr><td>${lbl}</td><td>${g.closed}</td><td>${b.closed}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r, 3)}R</td><td class="${cls(b.mean_net_r)}">${sg(b.mean_net_r, 3)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${n2(g.excess_month_block_p, 3)}</td></tr>`;
+$("alt-table").innerHTML = `<table><thead><tr><th>20 个山寨币合计</th><th>笔数<small>V12.12</small></th><th>笔数<small>V12.10</small></th><th>每笔<small>V12.12</small></th><th>每笔<small>V12.10</small></th><th>V12.12 比同条件随机多</th><th>p（月块）</th></tr></thead><tbody>${
+  aRow("2023-01 至 2024-12", AL["F1_trend8d"].before_split, AL["V12.10"].before_split) + aRow("2025-01 以后", AL["F1_trend8d"].from_split, AL["V12.10"].from_split) + aRow("合计", AL["F1_trend8d"].full, AL["V12.10"].full)}</tbody></table>`;
+$("alt-note").textContent = `两段都比 V12.10 好，而且比同样顺 8 天均线、同 VIDYA 状态的随机入场每笔多出 ${sg(AL["F1_trend8d"].before_split.excess_mean_r)}R / ${sg(AL["F1_trend8d"].from_split.excess_mean_r)}R；但前段 p = ${n2(AL["F1_trend8d"].before_split.excess_month_block_p, 3)}，没有达到"两段都 p < 0.01"，而且山寨币整体仍略亏。`;
+$("bn-sub").textContent = `币安 USD-M ETHUSDT 5 分钟数据合成 15 分钟，规则、参数、成本完全不变，区间到 ${day(Date.parse(BN.end) - 1)}（币安数据截止）。两家交易所价格几乎一样，但 K 线细节不同，信号会有出入，用来看结果是否只属于某一家的数据。`;
+const bRow = (lbl, g) => g && g.closed ? `<tr><td>${lbl}</td><td>${g.closed}</td><td>${pct(g.win_rate * 100)}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r)}R</td><td class="${cls(g.sum_net_r)}">${sg(g.sum_net_r, 1)}R</td><td>${n2(Math.abs(g.max_drawdown_r), 1)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td></tr>` : `<tr><td>${lbl}</td><td colspan="6">—</td></tr>`;
+$("bn-table").innerHTML = table(["", "笔数", "胜率", "每笔", "合计", "最大回撤", "比随机多"], [bRow("OKX · V12.12 五年", full), bRow("OKX · V12.10 五年", bfull), bRow("币安 · V12.12 五年", bg.full), bRow("币安 · V12.12 2021-10 至 2024-01", bg.before_split), bRow("币安 · V12.12 2024-02 以后", bg.from_split), bRow("币安 · V12.10 五年", bb.full)]);
+
+/* trade viewer */
+let current = T[T.length - 1].n, filter = "all", shown = 48;
+const FILTERS = [["all", "全部"], ["win", "赚钱"], ["loss", "亏钱"], ["big", "≥ 5R"], ["long", "做多"], ["short", "做空"], ["before", "2024-02 以前"], ["after", "2024-02 以后"]];
+const visible = () => T.filter(t => filter === "all" || (filter === "win" ? t.r > 0 : filter === "loss" ? t.r <= 0 : filter === "big" ? t.r >= 5 : filter === "long" ? t.side === 1 : filter === "short" ? t.side === -1 : t.period === filter)).slice().reverse();
+function select(n) {
+  current = n; const t = T[n - 1];
+  tradeChart($("big"), t, {annotate: true});
+  $("vtitle").textContent = `第 ${t.n} / ${T.length} 笔 · ${sideName(t.side)} · ${t.reason} · ${sg(t.r)}R`;
+  $("facts").innerHTML = [["方向", sideName(t.side)], ["信号确认", dt(t.signal_ms)], ["入场", dt(t.entry_ms)], ["入场价", n2(t.entry)], ["初始止损", n2(t.stop)],
+    ["止损距离（1R）", pct(t.risk_pct, 2)], ["2R（启动跟踪）", n2(t.entry + t.side * 2 * Math.abs(t.entry - t.stop))], ["最高浮盈", fin(t.mfe) ? sg(t.mfe) + "R" : "—"],
+    ["收盘最高浮盈", sg(t.peak) + "R"], ["出场原因", t.reason], ["出场时间", dt(t.exit_ms)], ["出场价", n2(t.exit)], ["持仓", n2(t.hold_h, 1) + " 小时"],
+    ["结果", `<span class="${cls(t.r)}">${sg(t.r)}R</span>`], ["扣费前", sg(t.r_gross) + "R"], ["随机对照", fin(t.control_r) ? sg(t.control_r) + "R" : "—"], ["累计", sg(t.cum_r, 1) + "R"]]
+    .map(([k, v]) => `<dt>${k}</dt><dd>${k === "结果" ? v : esc(v)}</dd>`).join("");
+  document.querySelectorAll(".thumb").forEach(b => b.classList.toggle("on", +b.dataset.n === n));
+  document.querySelectorAll("#trade-table tr[data-n]").forEach(r => r.classList.toggle("cur", +r.dataset.n === n));
+}
+const io = "IntersectionObserver" in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { const c = e.target; io.unobserve(c); tradeChart(c, T[+c.dataset.c - 1], {compact: true, h: 110}); } }), {rootMargin: "300px"}) : null;
+function thumbs() {
+  const v = visible();
+  $("thumbs").innerHTML = v.slice(0, shown).map(t => `<button type="button" class="thumb${t.n === current ? " on" : ""}" data-n="${t.n}" aria-label="第 ${t.n} 笔"><div class="t"><b>#${t.n} ${sideName(t.side)}</b><b class="${cls(t.r)}">${sg(t.r)}R</b></div><div class="chart" data-c="${t.n}"></div><div class="t"><span>${day(t.entry_ms)}</span><span>${t.reason}</span></div></button>`).join("");
+  $("thumbs").querySelectorAll("[data-c]").forEach(c => io ? io.observe(c) : tradeChart(c, T[+c.dataset.c - 1], {compact: true, h: 110}));
+  $("thumbs").querySelectorAll(".thumb").forEach(b => b.addEventListener("click", () => { select(+b.dataset.n); $("trades").scrollIntoView({behavior: "smooth"}); }));
+  $("more").hidden = v.length <= shown;
+  $("more").textContent = `显示更多（还有 ${Math.max(0, v.length - shown)} 笔）`;
+}
+$("filters").innerHTML = FILTERS.map(([k, l]) => `<button type="button" data-f="${k}" class="${k === filter ? "on" : ""}">${l}</button>`).join("");
+$("filters").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { filter = b.dataset.f; shown = 48; $("filters").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); thumbs(); }));
+$("more").addEventListener("click", () => { shown += 48; thumbs(); });
+$("prev").addEventListener("click", () => select(current > 1 ? current - 1 : T.length));
+$("next").addEventListener("click", () => select(current < T.length ? current + 1 : 1));
+$("trade-table").innerHTML = `<thead><tr><th>#</th><th>方向</th><th>入场</th><th>入场价</th><th>止损</th><th>出场</th><th>出场价</th><th>原因</th><th>持仓</th><th>最高浮盈</th><th>结果</th><th>累计</th></tr></thead><tbody>${
+  T.slice().reverse().map(t => `<tr data-n="${t.n}" tabindex="0"><td>${t.n}</td><td>${sideName(t.side)}</td><td>${esc(dt(t.entry_ms))}</td><td>${n2(t.entry)}</td><td>${n2(t.stop)}<small>${pct(t.risk_pct, 2)}</small></td><td>${esc(dt(t.exit_ms))}</td><td>${n2(t.exit)}</td><td>${t.reason}</td><td>${n2(t.hold_h, 1)} 小时</td><td>${fin(t.mfe) ? sg(t.mfe) + "R" : "—"}</td><td class="${cls(t.r)}">${sg(t.r)}R</td><td class="${cls(t.cum_r)}">${sg(t.cum_r, 1)}R</td></tr>`).join("")}</tbody>`;
+$("trade-table").querySelectorAll("tr[data-n]").forEach(r => { const go = () => { select(+r.dataset.n); $("trades").scrollIntoView({behavior: "smooth"}); };
+  r.addEventListener("click", go); r.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+
+/* verdict */
+const pass = before.mean_net_r > 0 && after.mean_net_r > 0 && before.excess_month_block_p < 0.01 && after.excess_month_block_p < 0.01;
+$("verdict-body").innerHTML = `<ol class="rules">
+  <li><b>五年合计 ${sg(full.sum_net_r, 1)}R，每笔 ${sg(full.mean_net_r)}R</b><span>${full.closed} 笔，胜率 ${pct(full.win_rate * 100)}，最大回撤 ${n2(Math.abs(full.max_drawdown_r), 1)}R、最长连亏 ${full.max_consecutive_losses} 笔。每笔冒账户 1% 风险的话，复利 ${sg(gf.ret_pct, 1)}%，期间最大回撤 ${pct(gf.max_dd_pct)}。</span></li>
+  <li><b>前段 ${sg(before.mean_net_r)}R / 后段 ${sg(after.mean_net_r)}R</b><span>2024-02 以前 ${before.closed} 笔合计 ${sg(before.sum_net_r, 1)}R；2024-02 以后 ${after.closed} 笔合计 ${sg(after.sum_net_r, 1)}R。两段都比 V12.10 好（V12.10 为 ${sg(B.before_split.mean_net_r)}R / ${sg(B.from_split.mean_net_r)}R），但这份 ETH 数据正是发现这条过滤的数据。</span></li>
+  <li><b>8 天均线过滤的作用：每笔 ${sg(bfull.mean_net_r)}R → ${sg(full.mean_net_r)}R，回撤 ${n2(Math.abs(bfull.max_drawdown_r), 1)}R → ${n2(Math.abs(full.max_drawdown_r), 1)}R，最长连亏 ${bfull.max_consecutive_losses} → ${full.max_consecutive_losses} 笔</b><span>被拦下的 ${ge.removed.trades || 0} 笔在 V12.10 里每笔 ${sg(ge.removed.avg_r)}R、合计 ${sg(ge.removed.sum_r, 1)}R。交易少了约 ${n2((1 - full.closed / bfull.closed) * 100, 0)}%。</span></li>
+  <li><b>样本外：20 个山寨币每笔 ${sg(AL["V12.10"].full.mean_net_r, 3)}R → ${sg(AL["F1_trend8d"].full.mean_net_r, 3)}R</b><span>两段都改善，并跑赢同条件随机入场（前段 p = ${n2(AL["F1_trend8d"].before_split.excess_month_block_p, 3)}、后段 p = ${n2(AL["F1_trend8d"].from_split.excess_month_block_p, 3)}）；但还没达到两段都 p < 0.01，山寨币整体也还略亏。这是选择 V12.12 的主要依据。</span></li>
+  <li><b>收益集中在少数大单</b><span>胜率只有 ${pct(full.win_rate * 100)}，最好 5 笔贡献 ${sg(dep.best5_sum, 1)}R，去掉它们是 ${sg(dep.without_best5, 1)}R。这是跟踪止损策略的正常形态，但意味着少拿一两笔大单，结果会差很多。</span></li>
+  <li><b>和随机入场比 ${sg(full.excess_mean_r)}R（p = ${n2(full.excess_month_block_p, 3)}）</b><span>两个时段分别 ${sg(before.excess_mean_r)}R（p = ${n2(before.excess_month_block_p, 3)}）和 ${sg(after.excess_mean_r)}R（p = ${n2(after.excess_month_block_p, 3)}）。按本仓"两段都 p < 0.01"的标准，${pass ? "通过" : "还没有通过"}。</span></li>
+</ol>
+<div class="note">这是历史回测，不是收益承诺。成交按下一根开盘、0.2% 往返成本估算；TradingView 上的信号以 K 线收盘确认为准。V12.12 建议先在模拟盘前向检验，是否用于实盘由你决定。</div>`;
+$("foot").innerHTML = `生成：fable-trading <code>experiments/active/exp-spike-v1210-filters-20261012-v1</code>（build.py → build_v1212_report.py，F1 = V12.12）· Pine <code>yoyo/evaluation/pine/spike_burst_v12_12.pine</code> · V12.10 部分与已保存账本逐笔一致（${D.meta.parity.map(x => `${x.label} ${x.closed_trades} 笔`).join("，")}）· 数据 OKX 官方 1 分钟归档 · 北京时间 · 代码版本 ${esc(String(D.meta.git_head).slice(0, 10))}`;
+
+select(current);
+thumbs();
+tradeChart($("ex1"), ex1, {annotate: true, h: 340});
+tradeChart($("ex2"), ex2, {annotate: true, h: 340});
+let rt = null;
+addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { overview($("ovw")); equity(); select(current);
+  tradeChart($("ex1"), ex1, {annotate: true, h: 340}); tradeChart($("ex2"), ex2, {annotate: true, h: 340}); }, 200); });
+})();
+</script>
+</body>
+</html>
