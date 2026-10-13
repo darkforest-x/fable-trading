@@ -23,6 +23,12 @@ Rule (one variable: who chose the coin):
             also averaged first (picks within a session share the same week) as a second view.
 Picks missing from the frozen series (not listed on Binance USD-M then) are reported, not scored.
 Summaries are repeated for focus picks only and for picks whose coin name is not inferred (uncertain=false).
+
+Momentum control (added after the first run, v1b; `--momentum`): his picks were mostly coins that had
+already run. For each session, rank universe members by their trailing 30-day return up to the entry
+time; report where the picks sit in that ranking, the forward excess of the session's top-k trailing
+movers (k = number of scored picks), and a p-value for the picks against random draws from the
+session's top trailing-return quintile (same k).
 """
 from __future__ import annotations
 
@@ -139,12 +145,76 @@ def score(cfg: dict) -> dict:
     return {"summary": summary, "picks": rows, "missing": missing}
 
 
+def trailing_return(symbol: str, entry: pd.Timestamp, days: int = 30) -> float | None:
+    raw = read_5m(symbol, entry - pd.Timedelta(days=days + 1), entry)
+    if raw.empty:
+        return None
+    start = raw.loc[raw.ts >= (entry - pd.Timedelta(days=days)).value // 10**6]
+    if start.empty or start.ts.iloc[0] - (entry - pd.Timedelta(days=days)).value // 10**6 > 3_600_000:
+        return None
+    return float(raw.close.iloc[-1] / start.open.iloc[0] - 1)
+
+
+def momentum(cfg: dict, picks: pd.DataFrame) -> dict:
+    """Post-hoc momentum control: do the session's strongest trailing movers do as well as his picks?"""
+    horizons = cfg["horizons_days"]
+    symbols = sorted(p.name.removesuffix(".csv.gz") for p in SERIES.glob("*.csv.gz"))
+    dates = sorted({s["date"] for s in cfg["sessions"]})
+    universe = monthly_universe(symbols, pd.Timestamp(dates[0], tz="UTC") - pd.DateOffset(months=1),
+                                pd.Timestamp(dates[-1], tz="UTC") + pd.Timedelta(days=max(horizons) + 2), cfg["universe_size"])
+    rng = np.random.default_rng(cfg["seed"] + 11)
+    rows, pick_ranks = [], []
+    for s in cfg["sessions"]:
+        entry = pd.Timestamp(s["date"], tz="UTC") + pd.Timedelta(hours=cfg["entry_utc_hour"])
+        members = [m for m in universe.get(entry.strftime("%Y-%m"), []) if m not in LEADERS and m not in STABLE]
+        recs = []
+        for m in members:
+            fwd = price_path(m, entry, horizons)
+            tr = trailing_return(m, entry)
+            if fwd is not None and tr is not None:
+                recs.append({"symbol": m, "trail": tr, **{f"ret_{h}d": fwd[f"ret_{h}d"] for h in horizons}})
+        u = pd.DataFrame(recs)
+        mine = picks.loc[picks.session == s["id"]]
+        for _, p in mine.iterrows():
+            tr = trailing_return(p.symbol, entry)
+            pick_ranks.append({"session": s["id"], "symbol": p.symbol, "trail": tr,
+                               "trail_pct": float((u.trail < tr).mean()) if tr is not None else None})
+        k = len(mine)
+        top = u.sort_values("trail", ascending=False).head(k)
+        quint = u.loc[u.trail >= u.trail.quantile(0.8)]
+        row = {"session": s["id"], "k": k}
+        for h in horizons:
+            med = float(u[f"ret_{h}d"].median())
+            row[f"top_excess_{h}d"] = float(top[f"ret_{h}d"].mean() - med)
+            row[f"pick_excess_{h}d"] = float(mine[f"excess_{h}d"].mean())
+            row[f"quint_pool_{h}d"] = (quint[f"ret_{h}d"].dropna().to_numpy() - med).tolist()
+        rows.append(row)
+    out = {"pick_trailing_pct_mean": float(np.nanmean([r["trail_pct"] for r in pick_ranks if r["trail_pct"] is not None])),
+           "pick_trailing_pct_median": float(np.nanmedian([r["trail_pct"] for r in pick_ranks if r["trail_pct"] is not None])),
+           "pick_ranks": pick_ranks}
+    for h in horizons:
+        n = sum(r["k"] for r in rows)
+        top_mean = sum(r[f"top_excess_{h}d"] * r["k"] for r in rows) / n
+        pick_mean = sum(r[f"pick_excess_{h}d"] * r["k"] for r in rows) / n
+        draws = np.array([np.concatenate([rng.choice(r[f"quint_pool_{h}d"], size=r["k"], replace=len(r[f"quint_pool_{h}d"]) < r["k"])
+                                          for r in rows]).mean() for _ in range(cfg["draws"])])
+        out[f"{h}d"] = {"picks_mean_excess": pick_mean, "top_trailing_k_mean_excess": top_mean,
+                        "top_quintile_random_mean_excess": float(draws.mean()), "p_picks_vs_top_quintile": float((draws >= pick_mean).mean())}
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--config", required=True)
     ap.add_argument("--out", required=True)
+    ap.add_argument("--momentum", action="store_true", help="post-hoc v1b control; reads picks.csv from --out")
     a = ap.parse_args()
     cfg = json.loads(Path(a.config).read_text(encoding="utf-8"))
+    if a.momentum:
+        mom = momentum(cfg, pd.read_csv(Path(a.out) / "picks.csv"))
+        (Path(a.out) / "momentum_v1b.json").write_text(json.dumps(mom, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(json.dumps({k: v for k, v in mom.items() if k != "pick_ranks"}, indent=2))
+        return
     res = score(cfg)
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
