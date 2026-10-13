@@ -11261,3 +11261,29 @@ experiments:
     holdout_consumed: false
     reuse_allowed: false
     notes: Owner 2026-10-13 ETH 1H chart read (2026-10-07 07:00-09:00 Beijing, 双均线 V1.1) - 「只需要检测3根k」, kept only 「六条线从同一点散开」 of the extra features, then 「扫吧，多币种 1H 两年，钝角锐角分开」. Thresholds from that single example (width 0.64 ATR, weakest turn 5.35x, fan 1.50x, dC -3.8 ATR); scanned data 2024-10-01..2026-09-23 ends before it. Turn variants added after a count-only check found ratio 3 on six majors 4 times in two years. No Pine, monitor or account change.
+  - experiment_id: exp-spike-v1-okx-30m-5y-20261013-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2e7515294b
+    status: inconclusive
+    question: How did frozen SPIKE 强劲爆发 V1 (default long-only) perform on OKX ETHUSDT.P and BTCUSDT.P 30m from 2021-10-13 to 2026-10-13 after 0.2 percent round-trip cost, against matched random long entries with the same initial stop distance and trailing exit?
+    single_variable: None; frozen-rule descriptive replay over a longer window with the two-year all-market study's ledger engine (_trade_rows) and a shared trail_exit simulator for events and 20 matched controls each.
+    result: >-
+      Parity exact with the two-year all-market ledger in 2024-09-10..2026-09-10 (ETH 11/11, BTC 5/5 trades). ETH 27 trades, win 44.4 percent, +1.07R per trade, +29.0R, PF 2.77, max drawdown 8.8R; BTC 27 trades +0.09R, +2.5R. Matched random excess ETH +0.77R (p 0.28), BTC -0.07R (p 0.87). Both coins together 2021-10..2024-09 (data no V1 study had used) 38 trades -0.02R (excess -0.15R), from 2024-09 16 trades +2.02R (excess +1.54R, p 0.10). One ETH trade (2026-08-18) is +19.8R; without the best 3 trades the two coins sum to 0.0R. Fails the repo bar; too few signals (about 11 a year for both) to separate skill from luck.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Owner 2026-10-13 「spike强劲爆发v1 ethusdt.p btcusdt.p 30min级别 5年详细的回测数据跑一下」. OKX official 1m archives (ETH reused by SHA from exp-spike-v1210-eth15m-5y-20261012-v1, BTC fetched) plus confirmed API tail to 2026-10-13; complete 30m buckets only (6 incomplete dropped each), V1 run over the bars present. Detailed HTML report (owner request, V12.10 five-year precedent) at report_v1/index.html, local with the bar files. No Pine, monitor, preset or account change.
+  - experiment_id: exp-spike-v1-binance-alts-30m-5y-20261013-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2e7515294b
+    status: rejected
+    question: How did frozen SPIKE 强劲爆发 V1 (default long-only) perform on 30 liquid alts, Binance USD-M 30m, 2021-10-13..2026-10-01, after 0.2 percent cost, against matched random long entries, pooled and per coin, in both periods?
+    single_variable: None; the OKX ETH/BTC study's evaluate_bars and block applied unchanged to a universe ranked before the window.
+    result: >-
+      Universe = top 30 USDT perpetuals by 2021-09 median daily quote volume from the full data.binance.vision listing (delisted included - LUNA, SRM, EOS, MATIC end early). 352 trades, win 32.1 percent, +0.05R per trade, +17.6R, max drawdown 42.8R, longest losing run 21; matched random +0.06R, excess -0.01R (p 0.96). 2021-10..2024-09 223 trades -0.03R (excess -0.10R, p 0.47); from 2024-09 129 trades +0.18R (excess +0.14R, p 0.93). 2026-08 alone (12 trades, one market-wide rally) +54.1R; without that month the five years sum to -36.5R. No edge over random entry on alts.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Owner 2026-10-13 「多测试一些山寨币呢」. Binance rather than OKX for size (30 x five years of OKX 1m is about 6 GB); ticks from the 2026-08 exchange_info snapshot, inferred from price gaps for delisted symbols. Results feed section 08 of the OKX study's report. No Pine, monitor, preset or account change.

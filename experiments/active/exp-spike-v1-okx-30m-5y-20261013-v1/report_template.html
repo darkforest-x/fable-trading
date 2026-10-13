@@ -118,8 +118,9 @@ tr[tabindex]:hover td{background:var(--surface-2)}
 .more{display:block;margin:12px auto 0}
 .foot{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
 code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:1px 5px;border-radius:5px}
-@media (max-width:860px){.grid2,.grid3,.viewer{grid-template-columns:1fr}.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:420px){.tiles{grid-template-columns:1fr}}
+.tiles.five{grid-template-columns:repeat(5,minmax(0,1fr))}
+@media (max-width:860px){.grid2,.grid3,.viewer{grid-template-columns:1fr}.tiles,.tiles.five{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:420px){.tiles,.tiles.five{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -196,7 +197,7 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
 <section id="alts">
   <h2><span class="no">08</span>换成 30 个山寨币</h2>
   <p class="sub" id="alt-sub"></p>
-  <div class="tiles" id="alt-tiles"></div>
+  <div class="tiles five" id="alt-tiles"></div>
   <div class="card" style="margin-top:16px"><h3 style="margin-top:0">30 个币合起来：新数据和重叠区间</h3><div class="tw" id="alt-split"></div></div>
   <div class="card" style="margin-top:16px"><h3 style="margin-top:0">30 个币合起来的累计 R</h3><div class="chart" id="alt-eq"></div></div>
   <div class="grid2" style="margin-top:16px">
@@ -491,6 +492,7 @@ if (!AL) { $("alts").hidden = true; } else {
     tile("平仓笔数", F.trades, `${nc} 个币 · 平均每币每年 ${n2(F.trades / nc / 5, 1)} 笔`),
     tile("每笔平均", sg(F.avg_r) + "R", `合计 ${sg(F.sum_r, 1)}R · 胜率 ${pct(F.win_rate)}`, cls(F.avg_r)),
     tile("比随机多", sg(F.excess_r) + "R", `p = ${n2(F.p_excess, 3)}（月块检验）`, cls(F.excess_r)),
+    tile("去掉最好的一个月", sg(AL.best_month.without, 1) + "R", `${AL.best_month.month} 一个月 ${AL.best_month.n} 笔合计 ${sg(AL.best_month.sum_r, 1)}R`, cls(AL.best_month.without)),
     tile("最大回撤", n2(Math.abs(F.max_dd_r), 1) + "R", `最长连亏 ${F.max_losing_streak} 笔 · 1% 复利 ${sg(F.equity_1pct_ret, 1)}%`),
   ].join("");
   const aRow = (lbl, s) => s && s.trades ? `<tr><td>${lbl}</td><td>${s.trades}</td><td>${pct(s.win_rate)}</td><td class="${cls(s.avg_r)}">${sg(s.avg_r)}R</td><td class="${cls(s.sum_r)}">${sg(s.sum_r, 1)}R</td><td>${n2(Math.abs(s.max_dd_r), 1)}R</td><td class="${cls(s.control_avg_r)}">${sg(s.control_avg_r)}R</td><td class="${cls(s.excess_r)}">${sg(s.excess_r)}R</td><td>${n2(s.p_excess, 3)}</td></tr>` : `<tr><td>${lbl}</td><td colspan="8">没有交易</td></tr>`;
@@ -552,7 +554,7 @@ $("verdict-body").innerHTML = `<ol class="rules">
   <li><b>信号太少</b><span>30 分钟上五年只有 ${A.trades} 笔，平均每年不到 ${Math.ceil(A.trades / 5)} 笔。这么少的样本，一两笔大单就能决定结果，统计上很难区分真本事和运气。</span></li>
   <li><b>收益集中在少数大单</b><span>两个合计最好的一笔 ${sg(dA.max_r)}R，去掉它只剩 ${sg(dA.without_best1, 1)}R，去掉最好 3 笔是 ${sg(dA.without_best3, 1)}R。</span></li>
   <li><b>和随机做多比：ETH ${sg(E.excess_r)}R（p = ${n2(E.p_excess, 3)}），BTC ${sg(B.excess_r)}R（p = ${n2(B.p_excess, 3)}）</b><span>按本仓"两个时段都净收益为正、且 p < 0.01"的标准，ETH ${pass("ETH") ? "通过" : "没有通过"}，BTC ${pass("BTC") ? "通过" : "没有通过"}。</span></li>
-  ${AL ? `<li><b>30 个山寨币合计每笔 ${sg(AL.pooled.full.avg_r)}R，比随机多 ${sg(AL.pooled.full.excess_r)}R（p = ${n2(AL.pooled.full.p_excess, 3)}）</b><span>${AL.pooled.full.trades} 笔。新数据（2021-10 至 2024-09）每笔 ${sg(AL.pooled.before.avg_r)}R、比随机多 ${sg(AL.pooled.before.excess_r)}R（p = ${n2(AL.pooled.before.p_excess, 3)}）；重叠区间每笔 ${sg(AL.pooled.after.avg_r)}R、比随机多 ${sg(AL.pooled.after.excess_r)}R（p = ${n2(AL.pooled.after.p_excess, 3)}）。按同一标准，${AL.pooled.before.avg_r > 0 && AL.pooled.after.avg_r > 0 && AL.pooled.before.p_excess < 0.01 && AL.pooled.after.p_excess < 0.01 ? "通过" : "没有通过"}。最好 5 笔合计 ${sg(AL.dependence.best5, 1)}R，去掉它们是 ${sg(AL.dependence.without_best5, 1)}R。</span></li>` : ""}
+  ${AL ? `<li><b>30 个山寨币合计每笔 ${sg(AL.pooled.full.avg_r)}R，比随机多 ${sg(AL.pooled.full.excess_r)}R（p = ${n2(AL.pooled.full.p_excess, 3)}）</b><span>${AL.pooled.full.trades} 笔。新数据（2021-10 至 2024-09）每笔 ${sg(AL.pooled.before.avg_r)}R、比随机多 ${sg(AL.pooled.before.excess_r)}R（p = ${n2(AL.pooled.before.p_excess, 3)}）；重叠区间每笔 ${sg(AL.pooled.after.avg_r)}R、比随机多 ${sg(AL.pooled.after.excess_r)}R（p = ${n2(AL.pooled.after.p_excess, 3)}）。按同一标准，${AL.pooled.before.avg_r > 0 && AL.pooled.after.avg_r > 0 && AL.pooled.before.p_excess < 0.01 && AL.pooled.after.p_excess < 0.01 ? "通过" : "没有通过"}。最好 5 笔合计 ${sg(AL.dependence.best5, 1)}R，去掉它们是 ${sg(AL.dependence.without_best5, 1)}R；单月最好的 ${AL.best_month.month}（${AL.best_month.n} 笔，同一波全市场上涨）合计 ${sg(AL.best_month.sum_r, 1)}R，去掉这一个月，五年合计是 ${sg(AL.best_month.without, 1)}R。</span></li>` : ""}
   <li><b>和之前两年全市场回测对得上</b><span>2024-09-10 到 2026-09-10 这段和 9 月那次回测逐笔比对：${parText}。${openEnd.length ? `另有 ${openEnd.length} 笔在数据结束时还在持仓，没算进结果。` : ""}</span></li>
 </ol>
 <div class="note">这是历史回测，不是收益承诺。成交按下一根开盘、0.2% 往返成本估算，资金费没算；TradingView 上的信号以 K 线收盘确认为准。V1 默认只做多，这里没测做空。是否用于实盘由你决定。</div>`;

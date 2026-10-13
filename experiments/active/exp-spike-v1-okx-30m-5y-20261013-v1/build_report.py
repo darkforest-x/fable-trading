@@ -104,6 +104,10 @@ def alt_payload(stats_fn) -> dict:
         ok = np.isfinite(g.excess_r)
         years.append({"year": int(y), **stats_fn(g.net_r.to_numpy()), "excess_r": fnum(g.excess_r[ok].mean(), 3) if ok.any() else None})
     r = np.sort(t.net_r.to_numpy(float))[::-1]
+    month = t.signal_close_time.dt.tz_convert(BJ).dt.strftime("%Y-%m")
+    by_month = t.net_r.groupby(month).agg(["size", "sum"]).sort_values("sum")
+    best_month = {"month": by_month.index[-1], "n": int(by_month["size"].iloc[-1]), "sum_r": fnum(by_month["sum"].iloc[-1], 1),
+                  "without": fnum(t.net_r.sum() - by_month["sum"].iloc[-1], 1)}
     coins = []
     for sym, v in summ["per_coin"].items():
         coins.append({"sym": sym.removesuffix("USDT"), "full": v["full"], "before": v["before"], "after": v["after"],
@@ -116,7 +120,7 @@ def alt_payload(stats_fn) -> dict:
             "ranking": summ["ranking"], "exit_kinds": summ["exit_kinds"], "sim_diff": summ["sim_vs_ledger_max_abs_diff_r"],
             "dependence": {"max_r": fnum(r[0], 2), "best5": fnum(r[:5].sum(), 1), "without_best5": fnum(r[5:].sum(), 1),
                            "without_best10": fnum(r[10:].sum(), 1), "ge5r": int((r >= 5).sum()), "ge10r": int((r >= 10).sum())},
-            "end": summ["config"]["end"], "git_head": summ["git_head"]}
+            "best_month": best_month, "end": summ["config"]["end"], "git_head": summ["git_head"]}
 
 
 def main():
