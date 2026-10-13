@@ -11364,11 +11364,11 @@ experiments:
     notes: Owner 2026-10-13 asked what the strategy's logic is and to backtest it. Pine source read from TradingView pine-facade (PUB;42b9e30300f840c7af2787b46c8617cd). Data HistData.com XAUUSD M1 2011-01-02..2026-10-09 (data/histdata/XAUUSD, not in git); its stamps are New York wall-clock time despite the site saying EST without DST - verified by the NFP spike at 08:30 local in both seasons and by return correlation with OKX XAU-USDT-SWAP 15m in summer 2025 (0.86 vs 0.12 under fixed UTC-5). Dukascopy was throttled to about 15s per file through the proxy. No Pine, monitor, preset or account change.
   - experiment_id: exp-bitlanglang-picks-20261013-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending
-    status: active
+    source_commit: c67a6edc8d
+    status: inconclusive
     question: Did the alts Bit浪浪 named in real time at the end of his weekly group livestreams (2023-10-28..2024-06-01, 42 picks in 13 sessions) beat the same month's top-100 alt universe over the next 7/14/30/60 days from the first 5m open after the stream?
     single_variable: Who chose the coin - his live picks versus random members of the same session's top-100 universe (same entry time and horizon); no stop, no cost, no trade simulation.
-    result: Preregistered before scoring; picks copied from local transcripts with video id and second.
+    result: Picks beat the same-session universe median, but much of it is momentum and four new listings. v1 (preregistered) - 42 picks of 22 coins in 13 sessions, mean excess over the universe median 7d +14.1pp (p 0.013), 14d +20.7pp (p 0.018), 30d +38.5pp (median +19.8pp, 69 percent beat, p 0.0045, session-level p 0.0012), 60d +48.7pp (p 0.0009); certain coin names only 30d +45.0pp (p 0.0023); 2023 29 picks +42pp, 2024 13 picks +30pp at 30d. Post-hoc after reading v1 - picks sat at the 94th percentile (median) of trailing 30-day return. v1b mixed new listings into the momentum test and is kept only as a record. v1c splits it - 34 seasoned picks 30d +22.8pp versus the session's top-k trailing movers +10.0pp and random top-quintile draws +10.4pp (p 0.027; 7d +12.6 vs +3.3pp p 0.0014, 14d +16.2 vs +5.2pp p 0.0099, 60d +23.9 vs +9.9pp p 0.033); 8 new-listing picks (ORDI x4, TIA x2, BIGTIME, BB) 30d +105pp versus +17.7pp mean (median -5.9pp) for 47 other new listings, too few coins to test. Dropping ORDI alone takes the 30d mean from +38.5pp to +26.3pp. Not a trading result - no cost, no stop, one bull regime, picks transcribed by us after the fact. Selection edge beyond momentum is suggestive, below the p<0.01 bar and post-hoc.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
