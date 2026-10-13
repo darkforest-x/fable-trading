@@ -11349,3 +11349,16 @@ experiments:
     production_eligible: false
     reuse_allowed: false
     notes: Owner 2026-10-13 「多测试一些山寨币呢」. Binance rather than OKX for size (30 x five years of OKX 1m is about 6 GB); ticks from the 2026-08 exchange_info snapshot, inferred from price gaps for delisted symbols. Results feed section 08 of the OKX study's report. No Pine, monitor, preset or account change.
+  - experiment_id: exp-gold-breakout-15m-willy-20261013-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7894cc7446
+    status: rejected
+    question: Does the public TradingView strategy "Gold Breakout 15M Strategy [WillyAlgoTrader]" v1.0.0 (defaults - GMT+3 00:00-07:00 range, OCA buy/sell stops at its edges, one trade a day, 1% stop re-anchored to the fill, no target, market exit at 20:00) earn on XAUUSD 15m 2011-01..2026-10 after realistic costs, and does its breakout direction beat matched random entries?
+    single_variable: None; replication of a third-party rule with defaults, TradingView broker-emulator fills (stop at level or gap open, O-H-L-C / O-L-H-C path), plus controls on the same days with the same stop and exit - fade, same trigger moment with coin-flip side, and random bar-open time with coin-flip side (2000 seeds each).
+    result: >-
+      Replication matches the author's TradingView numbers - 3997 trades, gross +853 percent, PF 1.24, max drawdown 16 percent (author about 4000 trades, +800 percent, PF 1.27, 14 percent). Gross +0.059R (5.9bp) per trade, t 5.2; long +0.053R and short +0.066R, 2011-2018 +0.056R and 2019-2026 +0.062R, 14 of 16 years positive. Direction is real but tiny - fade -0.052R, same-moment random +0.003R and random-time +0.006R, both p 0.0005 (2000 of 2000 below). Breakeven round-trip cost 5.9bp. Net +0.019R with a 4bp CFD spread (+93 percent over 15.8 years, drawdown 22 percent), -0.041R at OKX taker 10bp, -0.141R at the repo 0.2 percent standard. The edge is the size of gold's spread plus stop slippage, which the author's run (bid data, zero slippage, $0.4 per order) does not charge.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Owner 2026-10-13 asked what the strategy's logic is and to backtest it. Pine source read from TradingView pine-facade (PUB;42b9e30300f840c7af2787b46c8617cd). Data HistData.com XAUUSD M1 2011-01-02..2026-10-09 (data/histdata/XAUUSD, not in git); its stamps are New York wall-clock time despite the site saying EST without DST - verified by the NFP spike at 08:30 local in both seasons and by return correlation with OKX XAU-USDT-SWAP 15m in summer 2025 (0.86 vs 0.12 under fixed UTC-5). Dukascopy was throttled to about 15s per file through the proxy. No Pine, monitor, preset or account change.

@@ -259,7 +259,6 @@ def main() -> None:
     flips = rng.integers(0, 2, size=(args.seeds, len(bo)))
     smr = both[flips, np.arange(len(bo))].mean(axis=1)
     tab = random_time_table(df, bo["day"].unique())
-    tab.to_parquet(OUT / "random_time_table.parquet")
     groups = tab.groupby("day").indices
     keys = list(groups)
     rt = []
