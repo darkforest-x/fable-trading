@@ -21,6 +21,7 @@
     "source": "OKX public confirmed 15m candles, via the repository's throttled fetch_okx request helper.",
     "canonical_data_write": false,
     "gap_policy": "Record all timestamp gaps; compute moving averages separately inside each contiguous 15m segment; skip input windows crossing a gap and windows whose six 20/60/120 SMA/EMA values contain warmup NaNs.",
+    "fetch_retry_policy": "After the first all-instrument pass, retry only instruments with request errors, at most two whole-instrument attempts with the identical endpoints and source. Preserve each attempt and the final per-instrument error; do not refetch successful instruments.",
     "coverage_caveat": "The current-live instrument endpoint excludes contracts that are no longer live; newly listed contracts contribute only candles available during the frozen interval. Per-instrument coverage and fetch failures are retained."
   },
   "model": {

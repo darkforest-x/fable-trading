@@ -290,6 +290,115 @@ def fetch_phase(out: Path, workers: int) -> Dict[str, Any]:
     return payload
 
 
+def retry_failed_phase(out: Path, workers: int, max_attempts: int) -> Dict[str, Any]:
+    """Retry only instrument fetches that failed the first full-universe pass."""
+
+    immutable = verify_sources(require_training_assets=True)
+    retry_commit = verify_committed_sources()
+    receipt_path = out / "fetch_receipt.json"
+    if not receipt_path.is_file():
+        raise ReplayError("retry requires a completed initial fetch receipt")
+    receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+    if receipt.get("experiment_id") != EXPERIMENT_ID or receipt.get("model_identity") != immutable:
+        raise ReplayError("retry snapshot identity mismatch")
+    failed = list(receipt.get("failed_instruments") or [])
+    if not failed:
+        receipt["initial_failed_instruments"] = []
+        receipt["retry_source_commit"] = retry_commit
+        receipt["retry_attempts"] = []
+        write_json(receipt_path, receipt)
+        print("retry complete: no failed instruments", flush=True)
+        return receipt
+
+    from scripts import scan_15m_ma_launch_t3_daily_movers as common
+
+    fetch_start = START_UTC - WARMUP_FETCH_BARS * BAR_DELTA
+    attempts: List[Dict[str, Any]] = []
+    succeeded: Dict[str, Dict[str, Any]] = {}
+    failures_by_symbol: Dict[str, str] = {}
+
+    def retry_one(inst_id: str) -> Tuple[str, Optional[pd.DataFrame], int, Optional[str], List[Dict[str, Any]]]:
+        history: List[Dict[str, Any]] = []
+        for attempt in range(1, max_attempts + 1):
+            returned_id, frame, api_rows, error = common.fetch_15m_frame(
+                inst_id, start=fetch_start, end=END_UTC
+            )
+            if returned_id != inst_id:
+                error = "instrument_identity_mismatch"
+            history.append({
+                "attempt": attempt,
+                "api_rows": int(api_rows),
+                "error": error,
+                "rows": int(len(frame)) if not error else 0,
+            })
+            if not error:
+                return inst_id, frame, api_rows, None, history
+            if attempt < max_attempts:
+                time.sleep(2 ** attempt)
+        return inst_id, None, history[-1]["api_rows"], history[-1]["error"], history
+
+    print("retrying %d failed instruments (max attempts=%d)" % (len(failed), max_attempts), flush=True)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = {
+            pool.submit(retry_one, str(item["inst_id"])): str(item["inst_id"])
+            for item in failed
+        }
+        for completed, future in enumerate(as_completed(futures), 1):
+            inst_id, frame, api_rows, error, history = future.result()
+            for record in history:
+                attempts.append({"inst_id": inst_id, **record})
+            if error or frame is None:
+                failures_by_symbol[inst_id] = str(error)
+                print("retry still failed %s: %s" % (inst_id, error), flush=True)
+            else:
+                frame = frame.sort_values("open_time").drop_duplicates("open_time").reset_index(drop=True)
+                filename = inst_id.replace("-", "_") + ".csv"
+                path = out / "kline_snapshot" / filename
+                frame.to_csv(path, index=False)
+                times = pd.to_datetime(frame["open_time"], utc=True) if len(frame) else pd.Series([], dtype="datetime64[ns, UTC]")
+                succeeded[inst_id] = {
+                    "inst_id": inst_id,
+                    "symbol": inst_id.replace("-", "_"),
+                    "filename": filename,
+                    "sha256": sha256_file(path),
+                    "rows_including_warmup": int(len(frame)),
+                    "in_window_bars": int(((times >= START_UTC) & (times < END_UTC)).sum()) if len(times) else 0,
+                    "first_open_time": times.iloc[0].isoformat() if len(times) else None,
+                    "last_open_time": times.iloc[-1].isoformat() if len(times) else None,
+                    "gap_count_including_warmup": common.frame_gap_count(frame),
+                    "api_rows_received": int(api_rows),
+                }
+                print("retry recovered %s (%d bars)" % (inst_id, len(frame)), flush=True)
+            if completed % 10 == 0 or completed == len(failed):
+                print("retry [%d/%d] recovered=%d still_failed=%d" % (
+                    completed, len(failed), len(succeeded), len(failures_by_symbol)), flush=True)
+
+    merged = {str(item["inst_id"]): dict(item) for item in receipt["snapshot_files"]}
+    merged.update(succeeded)
+    receipt["initial_failed_instruments"] = failed
+    receipt["snapshot_files"] = [merged[key] for key in sorted(merged)]
+    receipt["usable_instruments"] = len(merged)
+    receipt["failed_instruments"] = [
+        {"inst_id": key, "error": value, "retry_attempts": max_attempts}
+        for key, value in sorted(failures_by_symbol.items())
+    ]
+    receipt["retry_source_commit"] = retry_commit
+    receipt["retry_attempts"] = attempts
+    symbol_rows = [
+        {key: value for key, value in item.items() if key != "sha256"}
+        for item in receipt["snapshot_files"]
+    ]
+    write_csv(
+        out / "fetch_symbols.csv",
+        symbol_rows,
+        ("inst_id", "symbol", "filename", "rows_including_warmup", "in_window_bars", "first_open_time", "last_open_time", "gap_count_including_warmup", "api_rows_received"),
+    )
+    receipt["symbols_sha256"] = sha256_file(out / "fetch_symbols.csv")
+    write_json(receipt_path, receipt)
+    print("retry complete: recovered=%d still_failed=%d" % (len(succeeded), len(failures_by_symbol)), flush=True)
+    return receipt
+
+
 def load_snapshot(snapshot_dir: Path) -> Tuple[Dict[str, pd.DataFrame], Dict[str, Any]]:
     """Load and hash-check the frozen per-instrument candle snapshot."""
 
@@ -304,7 +413,7 @@ def load_snapshot(snapshot_dir: Path) -> Tuple[Dict[str, pd.DataFrame], Dict[str
     bundle_manifest = snapshot_dir.parent / "bundle_manifest.json"
     if bundle_manifest.is_file():
         bundle = json.loads(bundle_manifest.read_text(encoding="utf-8"))
-        if bundle.get("experiment_id") != EXPERIMENT_ID or bundle.get("source_commit") != receipt.get("source_commit"):
+        if bundle.get("experiment_id") != EXPERIMENT_ID or bundle.get("fetch_source_commit") != receipt.get("source_commit"):
             raise ReplayError("worker bundle source identity differs from fetch receipt")
         if bundle.get("fetch_receipt_sha256") != sha256_file(receipt_path):
             raise ReplayError("worker bundle fetch-receipt checksum mismatch")
@@ -495,6 +604,7 @@ def scan_phase(snapshot_dir: Path, out: Path, weights: Path, device: str, batch_
         "experiment_id": EXPERIMENT_ID,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "source_commit": fetch_receipt["source_commit"],
+        "scan_source_commit": source_commit() if (ROOT / ".git").exists() else json.loads((ROOT / "bundle_manifest.json").read_text(encoding="utf-8"))["source_commit"],
         "fetch_receipt_sha256": sha256_file(snapshot_dir / "fetch_receipt.json"),
         "runner_sha256": sha256_file(Path(__file__).resolve()),
         "model_identity": immutable,
@@ -639,6 +749,7 @@ def bundle_phase(out: Path, snapshot_dir: Path) -> None:
     manifest = {
         "experiment_id": EXPERIMENT_ID,
         "source_commit": bundle_commit,
+        "fetch_source_commit": json.loads(receipt.read_text(encoding="utf-8"))["source_commit"],
         "runner_sha256": sha256_file(Path(__file__).resolve()),
         "fetch_receipt_sha256": sha256_file(receipt),
     }
@@ -660,6 +771,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     modes = parser.add_mutually_exclusive_group(required=True)
     modes.add_argument("--fetch", action="store_true")
+    modes.add_argument("--retry-failures", action="store_true")
     modes.add_argument("--bundle", action="store_true")
     modes.add_argument("--scan", action="store_true")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -668,11 +780,14 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=8)
     parser.add_argument("--device", default="0")
     parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--retry-attempts", type=int, default=2)
     args = parser.parse_args()
-    if args.workers < 1 or args.batch_size < 1:
-        parser.error("--workers and --batch-size must be positive")
+    if args.workers < 1 or args.batch_size < 1 or args.retry_attempts < 1:
+        parser.error("workers, batch size, and retry attempts must be positive")
     if args.fetch:
         fetch_phase(args.out.resolve(), args.workers)
+    elif args.retry_failures:
+        retry_failed_phase(args.out.resolve(), args.workers, args.retry_attempts)
     elif args.bundle:
         if args.snapshot_dir is None:
             parser.error("--bundle requires --snapshot-dir")

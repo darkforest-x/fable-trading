@@ -39,6 +39,8 @@ experiments:
       data. This interval is after the historical holdout date, whose veto
       rule the owner canceled on 2026-09-19. Coverage is limited to contracts
       currently live at universe capture; per-symbol rows and gaps are kept.
+      Request-error contracts receive at most two whole-instrument retries
+      over the unchanged interval after the first pass.
       The model emits delayed completed-shape proposals, not fresh tip signals.
       No labels are available, so this scan cannot estimate accuracy or value.
   - experiment_id: exp-spike-market-two-months-20260925-v1
