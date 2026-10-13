@@ -1146,6 +1146,10 @@ def run_batch(model: Any, batch: Sequence[Tuple[np.ndarray, ChartTransform, Dict
 def bundle_phase(out: Path, snapshot_dir: Path) -> None:
     """Package the committed scan source and frozen candles for the 3060 worker."""
 
+    snapshot_root = snapshot_dir.resolve()
+    bundle_path = out.resolve()
+    if os.path.commonpath([str(bundle_path), str(snapshot_root)]) == str(snapshot_root):
+        raise ReplayError("worker bundle output must be outside the snapshot directory")
     if out.exists():
         raise FileExistsError("refusing to overwrite worker bundle: %s" % out)
     receipt = snapshot_dir / "fetch_receipt.json"
