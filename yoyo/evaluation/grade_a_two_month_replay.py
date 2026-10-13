@@ -907,6 +907,7 @@ def run_batch(model: Any, batch: Sequence[Tuple[np.ndarray, ChartTransform, Dict
               device: str) -> None:
     """Infer one memory-bounded image batch and preserve all returned boxes."""
 
+    windows_before = int(counters["windows_scored"])
     predictions = model.predict(
         source=[item[0] for item in batch], imgsz=IMGSZ, conf=CONFIDENCE, iou=NMS_IOU,
         batch=len(batch), device=device, verbose=False,
@@ -960,6 +961,9 @@ def run_batch(model: Any, batch: Sequence[Tuple[np.ndarray, ChartTransform, Dict
             }
             candidates.append(candidate)
             counters["structural_candidates"] += 1
+    windows_after = int(counters["windows_scored"])
+    if windows_after // 2048 > windows_before // 2048:
+        print("scan progress %s: %d windows scored" % (batch[-1][2]["symbol"], windows_after), flush=True)
 
 
 def bundle_phase(out: Path, snapshot_dir: Path) -> None:
