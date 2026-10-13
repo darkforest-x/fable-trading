@@ -13,8 +13,10 @@ Usage:
 """
 from __future__ import annotations
 
+import http.client
 import json
 import re
+import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -42,6 +44,19 @@ def list_symbols() -> list[str]:
     return sorted(set(names))
 
 
+def retried(fn, *args, attempts: int = 6):
+    """bua._request_bytes misses Python 3.9's socket.timeout and IncompleteRead; retry the whole call here.
+    Downloads are cached by checksum, so a retry only refetches what failed."""
+    for k in range(attempts):
+        try:
+            return fn(*args)
+        except (OSError, http.client.HTTPException, bua.BinanceArchiveError) as exc:
+            if k + 1 == attempts:
+                raise
+            print("retry", args[0] if args else "", type(exc).__name__, flush=True)
+            time.sleep(min(60, 2 ** k))
+
+
 def rank_one(symbol: str) -> dict:
     frame, audit = bua._download_month(symbol=symbol, month=CFG["rank_month"], download_dir=OUT / "rank_downloads",
                                        interval=CFG["interval"])
@@ -58,8 +73,8 @@ def main():
     exclude = set(CFG["exclude"])
     candidates = [s for s in listed if s.endswith("USDT") and "_" not in s and s not in exclude]
     print("listed", len(listed), "candidates", len(candidates), flush=True)
-    with ThreadPoolExecutor(max_workers=12) as pool:
-        ranked = list(pool.map(rank_one, candidates))
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        ranked = list(pool.map(lambda s: retried(rank_one, s), candidates))
     table = pd.DataFrame(ranked)
     have = table.loc[table.status.eq("complete")].sort_values("median_daily_quote_volume", ascending=False)
     universe = have.symbol.head(CFG["universe_size"]).tolist()
@@ -75,7 +90,7 @@ def main():
                                 archive_max_exclusive=CFG["archive_max_exclusive"], interval=CFG["interval"])
 
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for got in pool.map(fetch, rows):
+        for got in pool.map(lambda r: retried(fetch, r), rows):
             print(got["symbol"], got["status"], got.get("rows"), got.get("first_time"), got.get("last_time"),
                   "missing", len(got["months_missing"]), flush=True)
 

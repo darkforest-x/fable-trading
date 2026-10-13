@@ -193,8 +193,21 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
   <p id="ctl-note" style="font-size:14px;color:var(--text-2)"></p>
 </section>
 
+<section id="alts">
+  <h2><span class="no">08</span>换成 30 个山寨币</h2>
+  <p class="sub" id="alt-sub"></p>
+  <div class="tiles" id="alt-tiles"></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">30 个币合起来：新数据和重叠区间</h3><div class="tw" id="alt-split"></div></div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">30 个币合起来的累计 R</h3><div class="chart" id="alt-eq"></div></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card"><h3 style="margin-top:0">逐年</h3><div class="tw" id="alt-yr"></div></div>
+    <div class="card"><h3 style="margin-top:0">每笔结果分布</h3><p class="sub" style="margin-bottom:6px">柱子是笔数，鼠标看这一档合计多少 R。</p><div class="chart" id="alt-dist"></div></div>
+  </div>
+  <div class="card" style="margin-top:16px"><h3 style="margin-top:0">逐个币</h3><p class="sub" style="margin-bottom:8px">按五年合计 R 从高到低。单个币一般只有十几笔，单币的数字主要看个大概，不要拿来挑币。</p><div class="tw" id="alt-coins"></div></div>
+</section>
+
 <section id="trades">
-  <h2><span class="no">08</span>每一笔交易的 K 线图</h2>
+  <h2><span class="no">09</span>每一笔交易的 K 线图（ETH / BTC）</h2>
   <p class="sub">上面是选中交易的大图，下面是缩略图（点任意一张切换）。持仓很长的交易会把几根 K 线合并成一根显示。时间为北京时间。</p>
   <div class="viewer">
     <div class="card"><div class="btns"><button type="button" id="prev">‹ 上一笔</button><button type="button" id="next">下一笔 ›</button><span id="vtitle" style="font-size:13px;color:var(--muted)"></span></div><div class="chart" id="big"></div></div>
@@ -208,7 +221,7 @@ code{font-family:var(--mono);font-size:12px;background:var(--surface-2);padding:
 </section>
 
 <section id="verdict">
-  <h2><span class="no">09</span>结论与风险</h2>
+  <h2><span class="no">10</span>结论与风险</h2>
   <div id="verdict-body"></div>
 </section>
 
@@ -408,7 +421,7 @@ const sRow = (label, s) => s && s.trades ? `<tr><td>${label}</td><td>${s.trades}
 /* ---------- render ---------- */
 const A = C.ALL.full, E = C.ETH.full, B = C.BTC.full;
 $("lead").innerHTML = `${day(START_MS)} 至 ${day(END_MS - 1)}，V1 在 OKX ETH 30 分钟上平仓 <b>${E.trades} 笔</b>，扣 0.2% 成本后每笔 <b class="${cls(E.avg_r)}">${sg(E.avg_r)}R</b>、合计 <b class="${cls(E.sum_r)}">${sg(E.sum_r, 1)}R</b>；BTC 平仓 <b>${B.trades} 笔</b>，每笔 <b class="${cls(B.avg_r)}">${sg(B.avg_r)}R</b>、合计 <b class="${cls(B.sum_r)}">${sg(B.sum_r, 1)}R</b>。`
-  + `五年一共只有 ${A.trades} 笔，平均每年 ${n2(A.trades / 5, 1)} 笔，结论的统计把握很弱。`;
+  + `两个币五年一共只有 ${A.trades} 笔，统计把握很弱` + (D.alts ? `；所以又在 30 个山寨币上跑了同样的规则，合计 <b>${D.alts.pooled.full.trades} 笔</b>、每笔 <b class="${cls(D.alts.pooled.full.avg_r)}">${sg(D.alts.pooled.full.avg_r)}R</b>（见第 08 节）。` : "。");
 const rc = D.meta.receipts;
 $("numbers-sub").textContent = `R = 入场价到初始止损的距离；每笔已扣 0.2% 往返成本；下一根开盘成交；资金费没算。数据：OKX 官方 1 分钟归档加 API 尾段，合成 30 分钟（ETH 去掉 ${rc.ETH.incomplete_buckets_dropped} 根、BTC 去掉 ${rc.BTC.incomplete_buckets_dropped} 根不完整的 K 线）。`;
 const mainRow = (k) => { const s = C[k].full; return `<tr><td>${NAME[k]}</td><td>${s.trades}</td><td>${pct(s.win_rate)}</td><td class="${cls(s.avg_r)}">${sg(s.avg_r)}R</td><td class="${cls(s.sum_r)}">${sg(s.sum_r, 1)}R</td><td>${n2(s.pf, 2)}</td><td>${n2(Math.abs(s.max_dd_r), 1)}R</td><td>${s.max_losing_streak}</td><td class="${cls(s.equity_1pct_ret)}">${sg(s.equity_1pct_ret, 1)}%<small>回撤 ${pct(Math.abs(s.equity_1pct_max_dd))}</small></td><td class="${cls(s.excess_r)}">${sg(s.excess_r)}R<small>p = ${n2(s.p_excess, 3)}</small></td></tr>`; };
@@ -456,6 +469,44 @@ $("ctl-table").innerHTML = table(["", "笔数", "V1 每笔", "随机每笔", "V1
   cRow(`${NAME[k]} · 2021-10 至 2024-09`, C[k].before), cRow(`${NAME[k]} · 2024-09 以后`, C[k].after), cRow(`<b>${NAME[k]} · 五年</b>`, C[k].full)]));
 $("ctl-note").textContent = `p 是"把每个月的差值随机翻正负号后，平均差值不小于实际值"的比例；本仓验收要求两个时段都 p < 0.01。这里的"V1 每笔"用和随机单同一个出场模拟器重算（2R 按实际成交价计），和上面账本里的结果最多差 ${n2(Math.max(D.meta.sim_diff.ETH, D.meta.sim_diff.BTC), 3)}R。`;
 
+/* alts */
+function curveChart(el, pts) {
+  const W = width(el), H = W < 560 ? 220 : 260, L = 48, R = 16, Tp = 12, Bt = 24, pw = W - L - R, ph = H - Tp - Bt;
+  const AEND = Date.parse(D.alts.end), X = (ms) => L + (ms - START_MS) / (AEND - START_MS) * pw;
+  const all = [0, ...pts.map(q => q[1])], lo = Math.min(...all) - 3, hi = Math.max(...all) + 3, Y = (v) => Tp + (hi - v) / (hi - lo) * ph;
+  const p = [];
+  niceTicks(lo, hi, 5).forEach(v => p.push(`<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="tick" x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${n2(v, 0)}R</text>`));
+  for (let y = 2022; y <= 2026; y++) p.push(`<text class="tick" x="${X(Date.UTC(y, 0, 1)) + 3}" y="${H - 6}">${y}</text>`);
+  p.push(`<line class="axisl" x1="${L}" x2="${W - R}" y1="${Y(0)}" y2="${Y(0)}"/><line class="split-l" x1="${X(SPLIT_MS)}" x2="${X(SPLIT_MS)}" y1="${Tp}" y2="${Tp + ph}"/>`);
+  p.push(`<path class="lineS" d="M${X(START_MS)},${Y(0)}${pts.map(q => `H${X(q[0])}V${Y(q[1])}`).join("")}H${X(AEND)}"/>`);
+  const last = pts.length ? pts[pts.length - 1][1] : 0;
+  p.push(`<text class="tick" x="${W - R}" y="${Y(last) - 8}" text-anchor="end" style="fill:var(--text);font-weight:600">${sg(last, 1)}R</text>`);
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="山寨币累计 R">${p.join("")}</svg>`;
+}
+const AL = D.alts;
+if (!AL) { $("alts").hidden = true; } else {
+  const P = AL.pooled, F = P.full, dep2 = AL.dependence, nc = AL.coins.length;
+  $("alt-sub").textContent = `选币：币安 USDT 永续（含已退市的），按 2021 年 9 月（回测开始前）的日均成交额排前 ${nc} 个，BTC、ETH、稳定币和指数合约除外。数据：币安官方 30 分钟归档，${day(START_MS)} 至 ${day(Date.parse(AL.end) - 1)}。规则、出场、成本、随机对照和上面完全一样。`;
+  $("alt-tiles").innerHTML = [
+    tile("平仓笔数", F.trades, `${nc} 个币 · 平均每币每年 ${n2(F.trades / nc / 5, 1)} 笔`),
+    tile("每笔平均", sg(F.avg_r) + "R", `合计 ${sg(F.sum_r, 1)}R · 胜率 ${pct(F.win_rate)}`, cls(F.avg_r)),
+    tile("比随机多", sg(F.excess_r) + "R", `p = ${n2(F.p_excess, 3)}（月块检验）`, cls(F.excess_r)),
+    tile("最大回撤", n2(Math.abs(F.max_dd_r), 1) + "R", `最长连亏 ${F.max_losing_streak} 笔 · 1% 复利 ${sg(F.equity_1pct_ret, 1)}%`),
+  ].join("");
+  const aRow = (lbl, s) => s && s.trades ? `<tr><td>${lbl}</td><td>${s.trades}</td><td>${pct(s.win_rate)}</td><td class="${cls(s.avg_r)}">${sg(s.avg_r)}R</td><td class="${cls(s.sum_r)}">${sg(s.sum_r, 1)}R</td><td>${n2(Math.abs(s.max_dd_r), 1)}R</td><td class="${cls(s.control_avg_r)}">${sg(s.control_avg_r)}R</td><td class="${cls(s.excess_r)}">${sg(s.excess_r)}R</td><td>${n2(s.p_excess, 3)}</td></tr>` : `<tr><td>${lbl}</td><td colspan="8">没有交易</td></tr>`;
+  $("alt-split").innerHTML = table(["", "笔数", "胜率", "每笔", "合计", "最大回撤", "随机每笔", "比随机多", "p（月块）"],
+    [aRow("2021-10 至 2024-09<small>新数据</small>", P.before), aRow("2024-09 以后<small>和两年回测重叠</small>", P.after), aRow("<b>五年</b>", F)]);
+  curveChart($("alt-eq"), AL.curve);
+  $("alt-yr").innerHTML = table(["年份", "笔数", "胜率", "每笔", "合计", "比随机多"], AL.years.map(y => `<tr><td>${y.year}</td><td>${y.trades}</td><td>${pct(y.win_rate)}</td><td class="${cls(y.avg_r)}">${sg(y.avg_r)}R</td><td class="${cls(y.sum_r)}">${sg(y.sum_r, 1)}R</td><td class="${cls(y.excess_r)}">${sg(y.excess_r)}R</td></tr>`));
+  bars($("alt-dist"), AL.buckets.map(b => ({k: b.label, v: b.n, tip: [`结果 ${b.label}`, `${b.n} 笔`, `合计 ${sg(b.sum_r, 1)}R`]})), {colors: ["blue"], fmt: v => String(v), h: 210, label: "山寨币每笔结果分布"});
+  const AEND = Date.parse(AL.end);
+  $("alt-coins").innerHTML = table(["币种", "笔数", "胜率", "每笔", "合计", "最大回撤", "新数据每笔", "重叠区间每笔", "比随机多"],
+    AL.coins.slice().sort((a, b) => (b.full.sum_r ?? -1e9) - (a.full.sum_r ?? -1e9)).map(c => { const f = c.full, last = Date.parse(c.last_bar || AL.end);
+      const note = last < AEND - 30 * 864e5 ? `<small>数据止于 ${day(last).slice(0, 7)}（退市）</small>` : "";
+      return f.trades ? `<tr><td>${c.sym}${note}</td><td>${f.trades}</td><td>${pct(f.win_rate)}</td><td class="${cls(f.avg_r)}">${sg(f.avg_r)}R</td><td class="${cls(f.sum_r)}">${sg(f.sum_r, 1)}R</td><td>${n2(Math.abs(f.max_dd_r), 1)}R</td><td class="${cls(c.before.avg_r)}">${c.before.trades ? sg(c.before.avg_r) + "R" : "—"}</td><td class="${cls(c.after.avg_r)}">${c.after.trades ? sg(c.after.avg_r) + "R" : "—"}</td><td class="${cls(f.excess_r)}">${sg(f.excess_r)}R</td></tr>`
+        : `<tr><td>${c.sym}${note}</td><td colspan="8">没有交易</td></tr>`; }));
+}
+
 /* trade viewer */
 let current = T.slice().sort((a, b) => b.r - a.r)[0].n, filter = "all", shown = 48;
 const FILTERS = [["all", "全部"], ["ETH", "ETH"], ["BTC", "BTC"], ["win", "赚钱"], ["loss", "亏钱"], ["big", "≥ 5R"], ["before", "2024-09 以前"], ["after", "2024-09 以后"]];
@@ -501,6 +552,7 @@ $("verdict-body").innerHTML = `<ol class="rules">
   <li><b>信号太少</b><span>30 分钟上五年只有 ${A.trades} 笔，平均每年不到 ${Math.ceil(A.trades / 5)} 笔。这么少的样本，一两笔大单就能决定结果，统计上很难区分真本事和运气。</span></li>
   <li><b>收益集中在少数大单</b><span>两个合计最好的一笔 ${sg(dA.max_r)}R，去掉它只剩 ${sg(dA.without_best1, 1)}R，去掉最好 3 笔是 ${sg(dA.without_best3, 1)}R。</span></li>
   <li><b>和随机做多比：ETH ${sg(E.excess_r)}R（p = ${n2(E.p_excess, 3)}），BTC ${sg(B.excess_r)}R（p = ${n2(B.p_excess, 3)}）</b><span>按本仓"两个时段都净收益为正、且 p < 0.01"的标准，ETH ${pass("ETH") ? "通过" : "没有通过"}，BTC ${pass("BTC") ? "通过" : "没有通过"}。</span></li>
+  ${AL ? `<li><b>30 个山寨币合计每笔 ${sg(AL.pooled.full.avg_r)}R，比随机多 ${sg(AL.pooled.full.excess_r)}R（p = ${n2(AL.pooled.full.p_excess, 3)}）</b><span>${AL.pooled.full.trades} 笔。新数据（2021-10 至 2024-09）每笔 ${sg(AL.pooled.before.avg_r)}R、比随机多 ${sg(AL.pooled.before.excess_r)}R（p = ${n2(AL.pooled.before.p_excess, 3)}）；重叠区间每笔 ${sg(AL.pooled.after.avg_r)}R、比随机多 ${sg(AL.pooled.after.excess_r)}R（p = ${n2(AL.pooled.after.p_excess, 3)}）。按同一标准，${AL.pooled.before.avg_r > 0 && AL.pooled.after.avg_r > 0 && AL.pooled.before.p_excess < 0.01 && AL.pooled.after.p_excess < 0.01 ? "通过" : "没有通过"}。最好 5 笔合计 ${sg(AL.dependence.best5, 1)}R，去掉它们是 ${sg(AL.dependence.without_best5, 1)}R。</span></li>` : ""}
   <li><b>和之前两年全市场回测对得上</b><span>2024-09-10 到 2026-09-10 这段和 9 月那次回测逐笔比对：${parText}。${openEnd.length ? `另有 ${openEnd.length} 笔在数据结束时还在持仓，没算进结果。` : ""}</span></li>
 </ol>
 <div class="note">这是历史回测，不是收益承诺。成交按下一根开盘、0.2% 往返成本估算，资金费没算；TradingView 上的信号以 K 线收盘确认为准。V1 默认只做多，这里没测做空。是否用于实盘由你决定。</div>`;

@@ -115,16 +115,18 @@ def trail_exit(o, h, l, c, atr, entry_i: int, stop0: float, cost: float) -> dict
     return {"sim_net_r": np.nan, "sim_exit_i": -1, "sim_reason": "censored"}
 
 
-def run_symbol(symbol: str) -> dict:
-    meta = CFG["symbols"][symbol]
-    raw, data_receipt = load_1m(symbol)
-    bars, bar_receipt = bars_30m(raw)
-    start, end = pd.Timestamp(CFG["start"]), pd.Timestamp(CFG["end"])
-    item = {"venue": CFG["venue"], "symbol": symbol.replace("_", "-"), "asset": meta["asset"], "tick": meta["tick"]}
+def evaluate_bars(name: str, bars: pd.DataFrame, item: dict, cfg: dict) -> dict:
+    """Ledger, simulated event and matched controls for one bar series; shared with the alt study."""
+    start, end = pd.Timestamp(cfg["start"]), pd.Timestamp(cfg["end"])
     with entry_window(start, end):
         ledger = pd.DataFrame(tw._trade_rows(item, bars, MIN))
     f = features(bars)
-    rp = replay(f, meta["tick"])
+    rp = replay(f, float(item["tick"]))
+    ap = rp.active_protection.to_numpy(float)
+    signals = {"signals_total": int(rp.burst.sum()), "signals_in_window": int(rp.burst[(rp.index >= start) & (rp.index < end)].sum())}
+    bars = bars.assign(rope_high=f.ropeHigh.to_numpy(float), rope_low=f.ropeLow.to_numpy(float), protection=ap)
+    if ledger.empty:
+        return {"ledger": ledger, "controls": pd.DataFrame(), "bars": bars, "signals": signals}
     o, h, l, c = (bars[k].to_numpy(float) for k in ("open", "high", "low", "close"))
     atr = f.atr.to_numpy(float)
     atr_pct = atr / c
@@ -140,8 +142,8 @@ def run_symbol(symbol: str) -> dict:
     in_window = (bars.index >= start) & (bars.index < end)
     ready = np.isfinite(atr) & in_window
     ready[len(bars) - 1:] = False
-    rng = np.random.default_rng(CFG["controls"]["seed"] + zlib.crc32(symbol.encode()))
-    n_ctrl, cost = CFG["controls"]["n"], CFG["round_trip_cost"]
+    rng = np.random.default_rng(cfg["controls"]["seed"] + zlib.crc32(name.encode()))
+    n_ctrl, cost = cfg["controls"]["n"], cfg["round_trip_cost"]
     sims, ctrl_rows = [], []
     for k, p in enumerate(pos):
         ev = trail_exit(o, h, l, c, atr, p + 1, float(ledger.initial_stop.iloc[k]), cost)
@@ -163,15 +165,21 @@ def run_symbol(symbol: str) -> dict:
     ledger["excess_r"] = ledger.sim_net_r - ledger.control_net_r
     ledger["mfe_r"] = ledger.mfe_return / ledger.risk_fraction_at_entry
     # protective stops split by whether the Pine protection had been raised above the initial stop
-    ap = rp.active_protection.to_numpy(float)
     exit_pos = bars.index.get_indexer(pd.to_datetime(ledger.exit_time, utc=True) - pd.Timedelta(minutes=MIN))
     raised = [j >= 0 and np.isfinite(ap[j]) and ap[j] > s + 1e-12 for j, s in zip(exit_pos, ledger.initial_stop)]
     ledger["exit_kind"] = np.where(ledger.exit_reason.eq("protective_stop"),
                                    np.where(raised, "trailing_stop", "initial_stop"), ledger.exit_reason)
-    bars = bars.assign(rope_high=f.ropeHigh.to_numpy(float), rope_low=f.ropeLow.to_numpy(float), protection=ap)
-    return {"symbol": symbol, "ledger": ledger, "controls": pd.DataFrame(ctrl_rows), "bars": bars,
-            "receipt": {**data_receipt, **bar_receipt, "signals_total": int(rp.burst.sum()),
-                        "signals_in_window": int(rp.burst[(rp.index >= start) & (rp.index < end)].sum())}}
+    return {"ledger": ledger, "controls": pd.DataFrame(ctrl_rows), "bars": bars, "signals": signals}
+
+
+def run_symbol(symbol: str) -> dict:
+    meta = CFG["symbols"][symbol]
+    raw, data_receipt = load_1m(symbol)
+    bars, bar_receipt = bars_30m(raw)
+    item = {"venue": CFG["venue"], "symbol": symbol.replace("_", "-"), "asset": meta["asset"], "tick": meta["tick"]}
+    got = evaluate_bars(symbol, bars, item, CFG)
+    return {"symbol": symbol, "ledger": got["ledger"], "controls": got["controls"], "bars": got["bars"],
+            "receipt": {**data_receipt, **bar_receipt, **got["signals"]}}
 
 
 def parity(ledgers: dict[str, pd.DataFrame]) -> dict:
@@ -205,7 +213,7 @@ def parity(ledgers: dict[str, pd.DataFrame]) -> dict:
     return out
 
 
-def stats(r: np.ndarray) -> dict:
+def stats(r: np.ndarray, risk: float = 0.01) -> dict:
     r = np.asarray(r, float)
     r = r[np.isfinite(r)]
     if not len(r):
@@ -217,7 +225,7 @@ def stats(r: np.ndarray) -> dict:
     for v in r:
         streak = streak + 1 if v < 0 else 0
         best = max(best, streak)
-    eq = np.cumprod(1 + CFG["equity_risk_per_trade"] * r)
+    eq = np.cumprod(1 + risk * r)
     epk = np.maximum.accumulate(np.concatenate([[1.0], eq]))[1:]
     return {"trades": int(len(r)), "win_rate": round(float((r > 0).mean() * 100), 1), "avg_r": round(float(r.mean()), 3),
             "sum_r": round(float(r.sum()), 2), "pf": round(float(pos / neg), 2) if neg > 0 else None,
@@ -227,16 +235,17 @@ def stats(r: np.ndarray) -> dict:
             "equity_1pct_ret": round(float((eq[-1] - 1) * 100), 1), "equity_1pct_max_dd": round(float((eq / epk - 1).min() * 100), 1)}
 
 
-def block(df: pd.DataFrame) -> dict:
+def block(df: pd.DataFrame, cfg: dict | None = None) -> dict:
+    cfg = cfg or CFG
     df = df.loc[~df.censored.astype(bool)].sort_values(["exit_time", "entry_time"])
-    out = stats(df.net_r.to_numpy())
+    out = stats(df.net_r.to_numpy(), cfg["equity_risk_per_trade"])
     ok = np.isfinite(df.excess_r.to_numpy(float))
     x = df.excess_r.to_numpy(float)[ok]
     out.update({"sim_avg_r": round(float(np.nanmean(df.sim_net_r)), 3) if len(df) else None,
                 "control_avg_r": round(float(df.control_net_r[ok].mean()), 3) if ok.any() else None,
                 "excess_r": round(float(x.mean()), 3) if ok.any() else None,
                 "p_excess": v1.month_block_sign_flip(x, pd.to_datetime(df.signal_bar_open, utc=True).dt.strftime("%Y-%m").to_numpy()[ok],
-                                                     CFG["stat_seed"], CFG["flips"]) if ok.any() else None,
+                                                     cfg["stat_seed"], cfg["flips"]) if ok.any() else None,
                 "cost_r": round(float((df.gross_r - df.net_r).mean()), 3) if len(df) else None,
                 "median_risk_pct": round(float(df.risk_fraction_at_entry.median() * 100), 2) if len(df) else None,
                 "median_hold_h": round(float(df.holding_minutes.median() / 60), 1) if len(df) else None})

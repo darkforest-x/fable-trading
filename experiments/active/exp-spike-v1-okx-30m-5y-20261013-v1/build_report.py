@@ -20,6 +20,7 @@ import pandas as pd
 
 HERE = Path(__file__).resolve().parent
 RES = HERE / "results_v1"
+ALT_RES = HERE.parent / "exp-spike-v1-binance-alts-30m-5y-20261013-v1" / "results_v1"
 OUTDIR = HERE / "report_v1"
 BJ = "Asia/Shanghai"
 PRE, POST, MAX_CANDLES = 60, 16, 260
@@ -87,6 +88,35 @@ def window(bars: pd.DataFrame, t) -> tuple[list, int]:
                      round(float(g.low.min()), d + 1), round(float(last.close), d + 1), fnum(last.protection, d + 1),
                      fnum(last.rope_high, d + 1), fnum(last.rope_low, d + 1)])
     return rows, k
+
+
+def alt_payload(stats_fn) -> dict:
+    """Pooled and per-coin tables of the Binance alt study (no candle windows: too many trades to embed)."""
+    summ = json.loads((ALT_RES / "summary.json").read_text())
+    t = pd.read_csv(ALT_RES / "alt_trades.csv.gz")
+    for col in ("signal_close_time", "entry_time", "exit_time"):
+        t[col] = pd.to_datetime(t[col], utc=True)
+    t = t.loc[~t.censored.astype(bool)].sort_values(["exit_time", "entry_time"]).reset_index(drop=True)
+    t["year"] = t.signal_close_time.dt.tz_convert(BJ).dt.year
+    years = []
+    for y in sorted(t.year.unique()):
+        g = t[t.year == y]
+        ok = np.isfinite(g.excess_r)
+        years.append({"year": int(y), **stats_fn(g.net_r.to_numpy()), "excess_r": fnum(g.excess_r[ok].mean(), 3) if ok.any() else None})
+    r = np.sort(t.net_r.to_numpy(float))[::-1]
+    coins = []
+    for sym, v in summ["per_coin"].items():
+        coins.append({"sym": sym.removesuffix("USDT"), "full": v["full"], "before": v["before"], "after": v["after"],
+                      "first_bar": v["receipt"].get("first_bar"), "last_bar": v["receipt"].get("last_bar"),
+                      "tick_source": v["receipt"].get("tick_source"), "open": v["censored_open"]})
+    curve = [[int(x.exit_time.value // 1_000_000), fnum(c, 2)] for x, c in zip(t.itertuples(), np.cumsum(t.net_r.to_numpy(float)))]
+    buckets = [{"label": lbl, "n": int(((t.net_r >= lo) & (t.net_r < hi)).sum()), "sum_r": fnum(t.net_r[(t.net_r >= lo) & (t.net_r < hi)].sum(), 1)}
+               for lo, hi, lbl in R_BUCKETS]
+    return {"pooled": summ["pooled"], "coins": coins, "years": years, "curve": curve, "buckets": buckets,
+            "ranking": summ["ranking"], "exit_kinds": summ["exit_kinds"], "sim_diff": summ["sim_vs_ledger_max_abs_diff_r"],
+            "dependence": {"max_r": fnum(r[0], 2), "best5": fnum(r[:5].sum(), 1), "without_best5": fnum(r[5:].sum(), 1),
+                           "without_best10": fnum(r[10:].sum(), 1), "ge5r": int((r >= 5).sum()), "ge10r": int((r >= 10).sum())},
+            "end": summ["config"]["end"], "git_head": summ["git_head"]}
 
 
 def main():
@@ -163,6 +193,7 @@ def main():
                "cases": {SYMS[s]: {p: c[s][p] for p in ("full", "before", "after")} for s in SYMS} | {"ALL": summary["combined"]},
                "yearly": yearly, "groups": groups, "dependence": {s: dependence(df) for s, df in scopes.items()},
                "overview": overview, "trades": rows}
+    payload["alts"] = alt_payload(stats) if (ALT_RES / "summary.json").exists() else None
     blob = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     OUTDIR.mkdir(exist_ok=True)
     html = (HERE / "report_template.html").read_text().replace("__DATA__", blob)
