@@ -44,7 +44,7 @@ experiments:
       No labels are available, so this scan cannot estimate accuracy or value.
   - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: 207abe3625f73e0d7cf68252f7921406edbb45d6
+    source_commit: cc84939166e3f04534099d99f7a4520cafea40ff
     status: active
     question: >-
       Which completed-shape proposals does the frozen Grade-A YOLO11s full40
@@ -72,7 +72,8 @@ experiments:
       interval, exchange, universe, renderer, and inference contract; only
       historical OHLCV collection uses monthly archives plus the confirmed API
       tail. Contracts are limited to those currently live at universe capture;
-      per-symbol source hashes, bars, and gaps are retained. This delayed
+      per-symbol source hashes, bars, gaps, and the bounded pre-inference
+      recovery attempts are retained. This delayed
       completed-shape detector is not a fresh tip signal. No labels are
       available, so the scan cannot estimate accuracy or value.
   - experiment_id: exp-spike-market-two-months-20260925-v1
