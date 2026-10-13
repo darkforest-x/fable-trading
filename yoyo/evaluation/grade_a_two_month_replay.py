@@ -491,7 +491,32 @@ def scan_phase(snapshot_dir: Path, out: Path, weights: Path, device: str, batch_
     frames, fetch_receipt = load_snapshot(snapshot_dir)
     if fetch_receipt.get("model_identity") != immutable:
         raise ReplayError("worker renderer/data source differs from the frozen fetch identity")
+    import torch
+    import torchvision
+    import ultralytics
     from ultralytics import YOLO
+
+    runtime_versions = {
+        "python": sys.version.split()[0],
+        "torch": torch.__version__,
+        "torchvision": torchvision.__version__,
+        "ultralytics": ultralytics.__version__,
+        "numpy": np.__version__,
+        "pandas": pd.__version__,
+        "opencv": cv2.__version__,
+    }
+    required_runtime = {
+        "torch": "2.8.0",
+        "torchvision": "0.23.0",
+        "ultralytics": "8.4.89",
+        "numpy": "2.0.2",
+    }
+    for package, version in required_runtime.items():
+        if runtime_versions[package].split("+", 1)[0] != version:
+            raise ReplayError("inference runtime %s mismatch: %s != %s" % (
+                package, runtime_versions[package], version))
+    if not torch.cuda.is_available():
+        raise ReplayError("the frozen native-1280 replay requires the RTX 3060 CUDA runtime")
 
     model = YOLO(str(weights))
     out.mkdir(parents=True)
@@ -608,6 +633,8 @@ def scan_phase(snapshot_dir: Path, out: Path, weights: Path, device: str, batch_
         "fetch_receipt_sha256": sha256_file(snapshot_dir / "fetch_receipt.json"),
         "runner_sha256": sha256_file(Path(__file__).resolve()),
         "model_identity": immutable,
+        "runtime_versions": runtime_versions,
+        "gpu": torch.cuda.get_device_name(0),
         "weights_path_on_worker": str(weights),
         "weights_sha256": MODEL_SHA256,
         "device": device,
