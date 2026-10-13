@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "experiment_id": "exp-15m-grade-a-full40-two-month-okx-20261013-v1",
+  "created_at": "2026-10-13T11:00:00Z",
+  "stage": "owner_requested_completed_history_replay",
+  "question": "What completed-shape proposals does the frozen Grade-A YOLO11s full40 native-1280 checkpoint emit over every eligible OKX USDT swap with available confirmed 15m candles in the exact two-month interval?",
+  "request": "Owner asked how Grade-A was trained and asked to run that model over all recent two-month data.",
+  "single_variable": "No model or detector variable changes. One frozen checkpoint, one frozen training renderer, one fixed OKX universe rule, one fixed interval, and the checkpoint's documented W18/W19 detector contract.",
+  "calendar": {
+    "timezone": "UTC",
+    "interval_start_inclusive": "2026-08-13T11:00:00Z",
+    "interval_end_exclusive": "2026-10-13T11:00:00Z",
+    "bar_open_time_interval": "15m",
+    "last_completed_bar_open_at_request": "2026-10-13T10:45:00Z",
+    "warmup_bars_before_interval": 300
+  },
+  "market_data": {
+    "exchange": "OKX",
+    "universe": "All currently live instCategory=1 crypto instruments ending -USDT-SWAP, with a positive current ticker, after the repository's BLOCKED_BASES and STOCKISH_BASES exclusions.",
+    "selection": "No return, volume, mover, or model-score ranking; each selected instrument is fetched independently.",
+    "source": "OKX public confirmed 15m candles, via the repository's throttled fetch_okx request helper.",
+    "canonical_data_write": false,
+    "gap_policy": "Record all timestamp gaps; compute moving averages separately inside each contiguous 15m segment; skip input windows crossing a gap and windows whose six 20/60/120 SMA/EMA values contain warmup NaNs.",
+    "coverage_caveat": "The current-live instrument endpoint excludes contracts that are no longer live; newly listed contracts contribute only candles available during the frozen interval. Per-instrument coverage and fetch failures are retained."
+  },
+  "model": {
+    "training_experiment_id": "exp-15m-ma-launch-owner-grade-a8000-neg24000-train1280-full40-v1",
+    "checkpoint": "analysis/output/ma_launch_owner_grade_a8000_neg24000_v1/ma_launch_owner_grade_a8000_neg24000_v1_y11s_ft1280_full40/weights/best.pt",
+    "checkpoint_sha256": "862705b999594355c1133640acc540f4de19b561889e89d9e050ddad5c6db838",
+    "training_manifest": "datasets/ma_launch_owner_grade_a8000_yolo_neg24000_v1/manifest.jsonl",
+    "training_manifest_sha256": "22e95465b072fdfc4b0284f439c73a7f1cc9be9ab998ea768b2857a7cec798e2",
+    "training_source_commit": "ba1c321adcdbac59a24df414eaf5ff2c5ccc84f6",
+    "training_renderer": "yoyo/evaluation/grade_a_full40_training_input_renderer/render.py",
+    "training_renderer_sha256": "0962812feea57e0a666c4da62acea830cbbf53a3d66f6dbd722ae3e580ead3e7",
+    "training_ma_module": "yoyo/evaluation/grade_a_full40_training_input_renderer/data.py",
+    "training_ma_module_sha256": "bce9af28b00d1deb8346cafb19654e18d4987d42b3849b420a9739b5e9aeb265",
+    "classes": {"0": "dense_long", "1": "dense_short"},
+    "bar": "15m"
+  },
+  "detector": {
+    "window_lengths": [18, 19],
+    "confidence": 0.25,
+    "nms_iou": 0.7,
+    "imgsz": 1280,
+    "input_png_dimensions": [1280, 742],
+    "mapped_core_lengths": [4, 5],
+    "mapped_confirmation_bars": [2, 3, 4, 5, 6, 7, 8, 9],
+    "same_symbol_event_gap_bars": 5,
+    "future_bars_rendered_into_each_input": 0,
+    "threshold_or_window_retuning": false
+  },
+  "outputs": {
+    "frozen_market_snapshot": "analysis/output/grade_a_two_month_okx_20261013_v1/kline_snapshot",
+    "raw_boxes": "analysis/output/grade_a_two_month_okx_20261013_v1/grade_a_full40_1280/raw_boxes.csv",
+    "structural_candidates": "analysis/output/grade_a_two_month_okx_20261013_v1/grade_a_full40_1280/structural_candidates.csv",
+    "deduplicated_events": "analysis/output/grade_a_two_month_okx_20261013_v1/grade_a_full40_1280/five_bar_events.csv",
+    "scan_receipt": "analysis/output/grade_a_two_month_okx_20261013_v1/scan_receipt.json"
+  },
+  "interpretation": {
+    "labels_available_for_scanned_windows": false,
+    "valid_claims": ["number of downloaded bars and coverage gaps", "number of scored input windows", "raw detector boxes", "structurally mapped completed-shape proposals", "deduplicated proposal count"],
+    "invalid_claims": ["precision", "recall", "Gold accuracy", "causal tip freshness", "trade quality", "profitability"],
+    "holdout_policy": "The repository owner canceled the holdout-consumption restriction on 2026-09-19; this replay records the historical interval but does not apply a holdout veto."
+  },
+  "safety": {
+    "training": false,
+    "threshold_or_weight_change": false,
+    "promotion": false,
+    "deployment": false,
+    "active_or_frozen_change": false,
+    "forward_state_change": false,
+    "telegram_sent": false,
+    "orders_placed": false,
+    "production_eligible": false,
+    "training_eligible": false
+  }
+}
