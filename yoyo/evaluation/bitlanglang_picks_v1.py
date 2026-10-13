@@ -29,6 +29,13 @@ already run. For each session, rank universe members by their trailing 30-day re
 time; report where the picks sit in that ranking, the forward excess of the session's top-k trailing
 movers (k = number of scored picks), and a p-value for the picks against random draws from the
 session's top trailing-return quintile (same k).
+
+v1c (after reading v1b): 8 of the 42 picks (ORDI x4, TIA x2, BIGTIME, BB) were listed less than 30
+days before the session, so they have no trailing return and v1b's quintile pool could never contain
+them, while v1b's median also left new listings out. v1c splits the comparison: seasoned picks
+against the top trailing quintile (k = seasoned picks), and new-listing picks against the session's
+other new listings. The median is taken over every member with forward prices, as in the main score.
+Output goes to momentum_v1c.json; momentum_v1b.json is kept as the first post-hoc result.
 """
 from __future__ import annotations
 
@@ -156,7 +163,7 @@ def trailing_return(symbol: str, entry: pd.Timestamp, days: int = 30) -> float |
 
 
 def momentum(cfg: dict, picks: pd.DataFrame) -> dict:
-    """Post-hoc momentum control: do the session's strongest trailing movers do as well as his picks?"""
+    """Post-hoc momentum control (v1c): seasoned picks vs the top trailing quintile, new listings vs new listings."""
     horizons = cfg["horizons_days"]
     symbols = sorted(p.name.removesuffix(".csv.gz") for p in SERIES.glob("*.csv.gz"))
     dates = sorted({s["date"] for s in cfg["sessions"]})
@@ -170,36 +177,51 @@ def momentum(cfg: dict, picks: pd.DataFrame) -> dict:
         recs = []
         for m in members:
             fwd = price_path(m, entry, horizons)
-            tr = trailing_return(m, entry)
-            if fwd is not None and tr is not None:
-                recs.append({"symbol": m, "trail": tr, **{f"ret_{h}d": fwd[f"ret_{h}d"] for h in horizons}})
-        u = pd.DataFrame(recs)
-        mine = picks.loc[picks.session == s["id"]]
+            if fwd is not None:
+                recs.append({"symbol": m, "trail": trailing_return(m, entry), **{f"ret_{h}d": fwd[f"ret_{h}d"] for h in horizons}})
+        u_all = pd.DataFrame(recs)
+        u = u_all.loc[u_all.trail.notna()]
+        newl = u_all.loc[u_all.trail.isna()]
+        mine = picks.loc[picks.session == s["id"]].copy()
+        mine["trail"] = [trailing_return(sym, entry) for sym in mine.symbol]
         for _, p in mine.iterrows():
-            tr = trailing_return(p.symbol, entry)
-            pick_ranks.append({"session": s["id"], "symbol": p.symbol, "trail": tr,
-                               "trail_pct": float((u.trail < tr).mean()) if tr is not None else None})
-        k = len(mine)
+            tr = p.trail
+            pick_ranks.append({"session": s["id"], "symbol": p.symbol, "trail": None if pd.isna(tr) else float(tr),
+                               "trail_pct": None if pd.isna(tr) else float((u.trail < tr).mean())})
+        seasoned, fresh = mine.loc[mine.trail.notna()], mine.loc[mine.trail.isna()]
+        k = len(seasoned)
         top = u.sort_values("trail", ascending=False).head(k)
         quint = u.loc[u.trail >= u.trail.quantile(0.8)]
-        row = {"session": s["id"], "k": k}
+        row = {"session": s["id"], "k": k, "k_new": len(fresh), "n_new_universe": len(newl)}
         for h in horizons:
-            med = float(u[f"ret_{h}d"].median())
-            row[f"top_excess_{h}d"] = float(top[f"ret_{h}d"].mean() - med)
-            row[f"pick_excess_{h}d"] = float(mine[f"excess_{h}d"].mean())
+            med = float(u_all[f"ret_{h}d"].median())
+            row[f"top_excess_{h}d"] = float(top[f"ret_{h}d"].mean() - med) if k else 0.0
+            row[f"pick_excess_{h}d"] = float((seasoned[f"ret_{h}d"] - med).mean()) if k else 0.0
             row[f"quint_pool_{h}d"] = (quint[f"ret_{h}d"].dropna().to_numpy() - med).tolist()
+            row[f"new_pick_excess_{h}d"] = (fresh[f"ret_{h}d"].dropna() - med).tolist()
+            row[f"new_univ_excess_{h}d"] = (newl.loc[~newl.symbol.isin(fresh.symbol), f"ret_{h}d"].dropna() - med).tolist()
         rows.append(row)
     out = {"pick_trailing_pct_mean": float(np.nanmean([r["trail_pct"] for r in pick_ranks if r["trail_pct"] is not None])),
            "pick_trailing_pct_median": float(np.nanmedian([r["trail_pct"] for r in pick_ranks if r["trail_pct"] is not None])),
-           "pick_ranks": pick_ranks}
+           "n_seasoned_picks": sum(r["k"] for r in rows), "n_new_listing_picks": sum(r["k_new"] for r in rows),
+           "pick_ranks": pick_ranks, "sessions": [{k: v for k, v in r.items() if "pool" not in k} for r in rows]}
     for h in horizons:
-        n = sum(r["k"] for r in rows)
-        top_mean = sum(r[f"top_excess_{h}d"] * r["k"] for r in rows) / n
-        pick_mean = sum(r[f"pick_excess_{h}d"] * r["k"] for r in rows) / n
+        live = [r for r in rows if r["k"]]
+        n = sum(r["k"] for r in live)
+        top_mean = sum(r[f"top_excess_{h}d"] * r["k"] for r in live) / n
+        pick_mean = sum(r[f"pick_excess_{h}d"] * r["k"] for r in live) / n
         draws = np.array([np.concatenate([rng.choice(r[f"quint_pool_{h}d"], size=r["k"], replace=len(r[f"quint_pool_{h}d"]) < r["k"])
-                                          for r in rows]).mean() for _ in range(cfg["draws"])])
-        out[f"{h}d"] = {"picks_mean_excess": pick_mean, "top_trailing_k_mean_excess": top_mean,
-                        "top_quintile_random_mean_excess": float(draws.mean()), "p_picks_vs_top_quintile": float((draws >= pick_mean).mean())}
+                                          for r in live]).mean() for _ in range(cfg["draws"])])
+        new_picks = [x for r in rows for x in r[f"new_pick_excess_{h}d"]]
+        new_univ = [x for r in rows for x in r[f"new_univ_excess_{h}d"]]
+        out[f"{h}d"] = {"seasoned_picks_mean_excess": pick_mean, "top_trailing_k_mean_excess": top_mean,
+                        "top_quintile_random_mean_excess": float(draws.mean()),
+                        "p_seasoned_picks_vs_top_quintile": float((draws >= pick_mean).mean()),
+                        "new_listing_picks_mean_excess": float(np.mean(new_picks)) if new_picks else None,
+                        "new_listing_picks_n": len(new_picks),
+                        "other_new_listings_mean_excess": float(np.mean(new_univ)) if new_univ else None,
+                        "other_new_listings_median_excess": float(np.median(new_univ)) if new_univ else None,
+                        "other_new_listings_n": len(new_univ)}
     return out
 
 
@@ -212,7 +234,7 @@ def main() -> None:
     cfg = json.loads(Path(a.config).read_text(encoding="utf-8"))
     if a.momentum:
         mom = momentum(cfg, pd.read_csv(Path(a.out) / "picks.csv"))
-        (Path(a.out) / "momentum_v1b.json").write_text(json.dumps(mom, ensure_ascii=False, indent=2), encoding="utf-8")
+        (Path(a.out) / "momentum_v1c.json").write_text(json.dumps(mom, ensure_ascii=False, indent=2), encoding="utf-8")
         print(json.dumps({k: v for k, v in mom.items() if k != "pick_ranks"}, indent=2))
         return
     res = score(cfg)
