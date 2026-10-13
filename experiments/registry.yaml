@@ -11248,3 +11248,15 @@ experiments:
       - spike-v1210-eth15m-vidya-flip-exit-20261012-results
     reuse_allowed: false
     notes: Owner said “试试看” on 2026-10-12. 2024-02-01..2026-10-10 10:00 UTC, split 2025-10-10. V12.9 baseline and parent V12.10 gate both reproduced exactly; 1m inputs hash-verified, with zero duplicate rows collapsed, zero partial buckets, and zero 15m data-gap bars. Research only; no Pine, monitor, threshold preset, account, or live behavior change.
+  - experiment_id: exp-ma6-fold-fan-1h-20261013-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: running
+    result: pending
+    question: On 1H, does a three-bar six-MA fold (SMA/EMA 20/60/120 converged near one point at K2, every line turning hard in the same direction at K3, then fanning out with EMA20 in front) pick entries in the fold direction that beat matched random entries with the same stop distance and 3R/5R targets after 0.2% cost, in both periods, separately for obtuse and acute folds?
+    single_variable: New rule family, pre-registered in config.json - primary = converge (<= 1.0 ATR) + turn (all six slopes in the fold direction, each >= 3x its K2 slope) + fan (width >= 1.3x, EMA20 outermost); variants change one thing (turn ratio 2 / 1.5, no fan, converge 2.0). Exits, cost and controls as exp-ma6-knot-breakout-20261011-v1.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Owner 2026-10-13 ETH 1H chart read (2026-10-07 07:00-09:00 Beijing, 双均线 V1.1) - 「只需要检测3根k」, kept only 「六条线从同一点散开」 of the extra features, then 「扫吧，多币种 1H 两年，钝角锐角分开」. Thresholds from that single example (width 0.64 ATR, weakest turn 5.35x, fan 1.50x, dC -3.8 ATR); scanned data 2024-10-01..2026-09-23 ends before it. Turn variants added after a count-only check found ratio 3 on six majors 4 times in two years. No Pine, monitor or account change.
