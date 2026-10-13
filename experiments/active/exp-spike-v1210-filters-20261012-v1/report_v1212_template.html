@@ -251,6 +251,7 @@ const fin = (v) => typeof v === "number" && Number.isFinite(v);
 const sg = (v, d = 2) => fin(v) ? (v > 0 ? "+" : v < 0 ? "−" : "") + Math.abs(v).toFixed(d) : "—";
 const n2 = (v, d = 2) => fin(v) ? v.toLocaleString("zh-CN", {maximumFractionDigits: d, minimumFractionDigits: 0}).replace(/^-/, "−") : "—";
 const pct = (v, d = 1) => fin(v) ? n2(v, d) + "%" : "—";
+const pv = (v) => fin(v) ? (v < 0.001 ? "< 0.001" : n2(v, 3)) : "—";
 const cls = (v) => fin(v) ? (v > 0 ? "pos" : v < 0 ? "neg" : "") : "";
 const tf = (ms, o) => new Intl.DateTimeFormat("zh-CN", {timeZone: "Asia/Shanghai", hour12: false, ...o}).format(new Date(ms));
 const dt = (ms) => tf(ms, {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"});
@@ -438,7 +439,7 @@ $("tiles").innerHTML = [
   tile("合计", sg(full.sum_net_r, 1) + "R", `盈亏因子 ${n2(full.profit_factor_r, 2)}`, cls(full.sum_net_r)),
   tile("最大回撤", n2(Math.abs(full.max_drawdown_r), 1) + "R", `最长连亏 ${full.max_consecutive_losses} 笔`),
   tile("每笔冒 1% 风险复利", sg(gf.ret_pct, 1) + "%", `期间最大回撤 ${pct(gf.max_dd_pct)}`, cls(gf.ret_pct)),
-  tile("比随机入场多", sg(full.excess_mean_r) + "R", `p = ${n2(full.excess_month_block_p, 3)}（月块检验）`, cls(full.excess_mean_r)),
+  tile("比随机入场多", sg(full.excess_mean_r) + "R", `p = ${pv(full.excess_month_block_p)}（月块检验）`, cls(full.excess_mean_r)),
   tile("中位止损距离", pct(full.median_risk_pct, 2), `持仓中位 ${n2(dep.median_hold_h, 1)} 小时`),
 ].join("");
 
@@ -484,12 +485,12 @@ const ctlTile = (k, v, s, c) => tile(k, v, s, c);
 $("ctl").innerHTML = [ctlTile("V12.12 每笔", sg(full.mean_net_r) + "R", `${full.matched_controls} 笔配到随机对照`, cls(full.mean_net_r)),
   ctlTile("随机入场每笔", sg(full.control_mean_net_r) + "R", "同周、同方向、同波动、同 VIDYA 趋势、同在 8 天均线同侧", cls(full.control_mean_net_r)),
   ctlTile("V12.12 多出", sg(full.excess_mean_r) + "R", `95% 区间 ${sg(full.excess_month_block_ci95?.[0])} ~ ${sg(full.excess_month_block_ci95?.[1])}R`, cls(full.excess_mean_r))].join("");
-const cRow = (lbl, g) => `<tr><td>${lbl}</td><td>${g.matched_controls}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r)}R</td><td class="${cls(g.control_mean_net_r)}">${sg(g.control_mean_net_r)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${n2(g.excess_month_block_p, 3)}</td></tr>`;
+const cRow = (lbl, g) => `<tr><td>${lbl}</td><td>${g.matched_controls}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r)}R</td><td class="${cls(g.control_mean_net_r)}">${sg(g.control_mean_net_r)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${pv(g.excess_month_block_p)}</td></tr>`;
 $("ctl-table").innerHTML = `<table><thead><tr><th></th><th>配对笔数</th><th>V12.12 每笔</th><th>随机每笔</th><th>多出</th><th>p（月块）</th></tr></thead><tbody>${cRow("2021-10 至 2024-01", before)}${cRow("2024-02 以后", after)}${cRow("五年合计", full)}${cRow("V12.10（不加 8 天均线过滤，对照不限均线位置）", bfull)}</tbody></table>`;
 $("ctl-note").textContent = `p 是"把每个月的差值随机翻正负号后，平均差值不小于实际值"的比例；本仓验收要求两个时段都 p < 0.01。随机对照只配一笔，数字会有抖动，适合看方向和量级。`;
 
 const BN = D.metric.binance, bg = BN.vidya_gate.periods, bb = BN.baseline.periods;
-const AL = D.alts, aRow = (lbl, g, b) => `<tr><td>${lbl}</td><td>${g.closed}</td><td>${b.closed}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r, 3)}R</td><td class="${cls(b.mean_net_r)}">${sg(b.mean_net_r, 3)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${n2(g.excess_month_block_p, 3)}</td></tr>`;
+const AL = D.alts, aRow = (lbl, g, b) => `<tr><td>${lbl}</td><td>${g.closed}</td><td>${b.closed}</td><td class="${cls(g.mean_net_r)}">${sg(g.mean_net_r, 3)}R</td><td class="${cls(b.mean_net_r)}">${sg(b.mean_net_r, 3)}R</td><td class="${cls(g.excess_mean_r)}">${sg(g.excess_mean_r)}R</td><td>${pv(g.excess_month_block_p)}</td></tr>`;
 $("alt-table").innerHTML = `<table><thead><tr><th>20 个山寨币合计</th><th>笔数<small>V12.12</small></th><th>笔数<small>V12.10</small></th><th>每笔<small>V12.12</small></th><th>每笔<small>V12.10</small></th><th>V12.12 比同条件随机多</th><th>p（月块）</th></tr></thead><tbody>${
   aRow("2023-01 至 2024-12", AL["F1_trend8d"].before_split, AL["V12.10"].before_split) + aRow("2025-01 以后", AL["F1_trend8d"].from_split, AL["V12.10"].from_split) + aRow("合计", AL["F1_trend8d"].full, AL["V12.10"].full)}</tbody></table>`;
 $("alt-note").textContent = `两段都比 V12.10 好，而且比同样顺 8 天均线、同 VIDYA 状态的随机入场每笔多出 ${sg(AL["F1_trend8d"].before_split.excess_mean_r)}R / ${sg(AL["F1_trend8d"].from_split.excess_mean_r)}R；但前段 p = ${n2(AL["F1_trend8d"].before_split.excess_month_block_p, 3)}，没有达到"两段都 p < 0.01"，而且山寨币整体仍略亏。`;
@@ -540,7 +541,7 @@ $("verdict-body").innerHTML = `<ol class="rules">
   <li><b>8 天均线过滤的作用：每笔 ${sg(bfull.mean_net_r)}R → ${sg(full.mean_net_r)}R，回撤 ${n2(Math.abs(bfull.max_drawdown_r), 1)}R → ${n2(Math.abs(full.max_drawdown_r), 1)}R，最长连亏 ${bfull.max_consecutive_losses} → ${full.max_consecutive_losses} 笔</b><span>被拦下的 ${ge.removed.trades || 0} 笔在 V12.10 里每笔 ${sg(ge.removed.avg_r)}R、合计 ${sg(ge.removed.sum_r, 1)}R。交易少了约 ${n2((1 - full.closed / bfull.closed) * 100, 0)}%。</span></li>
   <li><b>样本外：20 个山寨币每笔 ${sg(AL["V12.10"].full.mean_net_r, 3)}R → ${sg(AL["F1_trend8d"].full.mean_net_r, 3)}R</b><span>两段都改善，并跑赢同条件随机入场（前段 p = ${n2(AL["F1_trend8d"].before_split.excess_month_block_p, 3)}、后段 p = ${n2(AL["F1_trend8d"].from_split.excess_month_block_p, 3)}）；但还没达到两段都 p < 0.01，山寨币整体也还略亏。这是选择 V12.12 的主要依据。</span></li>
   <li><b>收益集中在少数大单</b><span>胜率只有 ${pct(full.win_rate * 100)}，最好 5 笔贡献 ${sg(dep.best5_sum, 1)}R，去掉它们是 ${sg(dep.without_best5, 1)}R。这是跟踪止损策略的正常形态，但意味着少拿一两笔大单，结果会差很多。</span></li>
-  <li><b>和随机入场比 ${sg(full.excess_mean_r)}R（p = ${n2(full.excess_month_block_p, 3)}）</b><span>两个时段分别 ${sg(before.excess_mean_r)}R（p = ${n2(before.excess_month_block_p, 3)}）和 ${sg(after.excess_mean_r)}R（p = ${n2(after.excess_month_block_p, 3)}）。按本仓"两段都 p < 0.01"的标准，${pass ? "通过" : "还没有通过"}。</span></li>
+  <li><b>和随机入场比 ${sg(full.excess_mean_r)}R（p = ${pv(full.excess_month_block_p)}）</b><span>两个时段分别 ${sg(before.excess_mean_r)}R（p = ${n2(before.excess_month_block_p, 3)}）和 ${sg(after.excess_mean_r)}R（p = ${n2(after.excess_month_block_p, 3)}）。按本仓"两段都 p < 0.01"的标准，${pass ? "通过" : "还没有通过"}。</span></li>
 </ol>
 <div class="note">这是历史回测，不是收益承诺。成交按下一根开盘、0.2% 往返成本估算；TradingView 上的信号以 K 线收盘确认为准。V12.12 建议先在模拟盘前向检验，是否用于实盘由你决定。</div>`;
 $("foot").innerHTML = `生成：fable-trading <code>experiments/active/exp-spike-v1210-filters-20261012-v1</code>（build.py → build_v1212_report.py，F1 = V12.12）· Pine <code>yoyo/evaluation/pine/spike_burst_v12_12.pine</code> · V12.10 部分与已保存账本逐笔一致（${D.meta.parity.map(x => `${x.label} ${x.closed_trades} 笔`).join("，")}）· 数据 OKX 官方 1 分钟归档 · 北京时间 · 代码版本 ${esc(String(D.meta.git_head).slice(0, 10))}`;
