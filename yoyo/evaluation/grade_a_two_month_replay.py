@@ -404,7 +404,10 @@ def fetch_archive_hybrid_phase(out: Path, workers: int, october_attempts: int) -
             "missing_or_failed_archive_months": archive_missing_or_error,
             "october_api_bars": int(((times >= OCTOBER_ARCHIVE_API_START) & (times < END_UTC)).sum()),
             "october_api_error": october_error,
-            "source_audit": audit,
+            "source_audit": {
+                "monthly_archives": audit["monthly_archives"],
+                "october_attempts": audit["october_attempts"],
+            },
         }
         audit["snapshot"] = snapshot
         return audit
