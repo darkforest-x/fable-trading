@@ -1,0 +1,46 @@
+{
+  "experiment_id": "exp-spike-v1-okx-30m-5y-20261013-v1",
+  "owner_request": "2026-10-13 「spike强劲爆发v1 ethusdt.p btcusdt.p 30min级别 5年详细的回测数据跑一下」",
+  "question": "How did frozen SPIKE 强劲爆发 V1 (default long-only Pine, engineering defaults) perform on OKX ETHUSDT.P and BTCUSDT.P 30m from 2021-10-13 to 2026-10-13 after 0.2 percent round-trip cost, against matched random long entries with the same initial stop distance and the same trailing exit?",
+  "single_variable": "None; frozen-rule descriptive replay over a longer window. Signals come from yoyo.evaluation.spike_burst_replay (Pine SHA pinned); fills, stops and costs are the executable ledger of exp-spike-v1-twoyear-allmarkets-20260911-v1 (_trade_rows: next-open entry, Pine protection line, stop fill at min(open, stop), 0.2 percent round trip, no fixed target).",
+  "pine_sha256": "18bbb6955fdf12e124688003799c44fc2a641f11a342edcf478157b1c9641fe2",
+  "venue": "okx",
+  "symbols": {
+    "ETH_USDT_SWAP": {"asset": "ETH", "tick": 0.01},
+    "BTC_USDT_SWAP": {"asset": "BTC", "tick": 0.1}
+  },
+  "timeframe_min": 30,
+  "archive_months": ["2021-09", "2026-09"],
+  "archive_max_exclusive": "2026-09-30T16:00:00+00:00",
+  "eth_archive": "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+  "eth_archive_sha256": "cc91aab4e372ca893a20ff21f7dfdfffaea2fc750e3038ff997475395a49931f",
+  "start": "2021-10-13T00:00:00+00:00",
+  "split": "2024-09-10T00:00:00+00:00",
+  "end": "2026-10-13T00:00:00+00:00",
+  "data_dir": "data/research/spike_v1_okx_30m_5y_20261013",
+  "parity": {
+    "ledger": "experiments/active/exp-spike-v1-twoyear-allmarkets-20260911-v1/results/covered_trade_ledger.csv.gz",
+    "window": ["2024-09-10T00:00:00+00:00", "2026-09-10T00:00:00+00:00"],
+    "note": "OKX ETH-USDT-SWAP / BTC-USDT-SWAP 30m rows of the two-year ledger (11 / 5 trades) against this run's trades with entry in the window; that ledger split sources at gaps and used its own OKX source, so differences near gaps are reported, not forced."
+  },
+  "round_trip_cost": 0.002,
+  "controls": {
+    "n": 20,
+    "pool": "same symbol and calendar month, bars with finite ATR, not the signal bar, ATR/close within 0.5-2x the signal bar's",
+    "stop": "entry minus the event's initial stop distance in signal-bar ATR units (measured from the actual next-open entry)",
+    "exit": "same trailing rule for events and controls in one simulator: protective stop checked on bar lows (fill min(open, stop)); once a close reaches 2R from the actual fill, protection rises to close minus 4 current ATR, effective from the next bar, never lowered; no fixed target; open at the data end = censored, excluded",
+    "seed": 1013701
+  },
+  "stat_seed": 1013702,
+  "flips": 10000,
+  "gaps": "30m bars are built from complete 1m buckets only; incomplete buckets are dropped and V1 runs over the remaining bar sequence (as TradingView skips bars the exchange did not print); the number of dropped buckets is in the receipt",
+  "split_meaning": "2021-10-13..2024-09-09 was never used by any V1 study; 2024-09-10 onward overlaps the two-year all-market V1 study.",
+  "equity_risk_per_trade": 0.01,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": [
+    "Owner's TradingView charts are OKX ETHUSDT.P / BTCUSDT.P; V1's direction input defaults to 多头 (long only), which is what is replayed.",
+    "Funding, spread, impact and fee tiers are not modelled; 0.2 percent round trip is the project cost.",
+    "No Pine, monitor, threshold preset, account or live behaviour change."
+  ]
+}
