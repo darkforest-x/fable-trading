@@ -1,0 +1,407 @@
+{
+  "experiment_id": "exp-bitlanglang-picks-20261013-v1",
+  "owner_request": "2026-10-13 owner: 「之前整理的bit浪浪的交易系统 再收集一些资料 整理成小册 做到前端体系」. While collecting his livestreams for handbook v2, his own real-time 'watch next week' lists became available; this checks the system's claimed edge (selecting the leader) without hindsight in the selection.",
+  "question": "Did the alts he named in real time at the end of his weekly livestreams (2023-10-28..2024-06-01) beat the same month's top-100 alt universe over the next 7/14/30/60 days, measured from the first 5m open after the stream?",
+  "prior_evidence": "exp-bitlanglang-mainwave-20261011-v1 rejected the video's position-1 beginner standard (H1) and could test the leader filter (H2) only through volume-rank proxies (16 setups).",
+  "data": "frozen Binance USD-M 5m series (data/research/spike_v128_entry_clock_long_20260923/series)",
+  "source": "YouTube re-uploads of his group livestreams, transcribed locally with mlx-whisper large-v3-turbo; transcripts and per-session notes live outside this public repo (~/Documents/Codex/2026-10-11/bitlanglang/work/src). Each pick keeps the video id and the transcript second where he names it; 'asr' is the raw recognised text.",
+  "pick_rule": "coins he explicitly names as next-week / upcoming opportunities in the forward-looking part of a session (下周关注 / 财富密码 / 后面的机会). focus = named as main or first choice; backup = named as also worth watching. Coins he names only while reviewing past trades, or tells people to avoid, are excluded. uncertain = the coin name or the referent is inferred from ASR context.",
+  "entry_utc_hour": 16,
+  "horizons_days": [
+    7,
+    14,
+    30,
+    60
+  ],
+  "universe_size": 100,
+  "draws": 10000,
+  "seed": 1013101,
+  "primary": "descriptive: mean excess over the universe median at 30 days, with the p-value of the same-session random-draw null; reported for all picks, focus only and excluding uncertain picks. Not a trading rule: entries are on stream nights, no stop, no cost.",
+  "sessions": [
+    {
+      "id": "s20231028",
+      "date": "2023-10-28",
+      "video": "83-jhmek0iQ",
+      "picks": [
+        {
+          "symbol": "SOLUSDT",
+          "t": 4917,
+          "rank": "focus",
+          "asr": "SOL",
+          "uncertain": false
+        },
+        {
+          "symbol": "LINKUSDT",
+          "t": 4937,
+          "rank": "focus",
+          "asr": "第二只Link",
+          "uncertain": false
+        },
+        {
+          "symbol": "1000PEPEUSDT",
+          "t": 4993,
+          "rank": "backup",
+          "asr": "拍拍",
+          "uncertain": true
+        },
+        {
+          "symbol": "BIGTIMEUSDT",
+          "t": 5013,
+          "rank": "backup",
+          "asr": "Big Time也是有机会的",
+          "uncertain": false
+        },
+        {
+          "symbol": "AXSUSDT",
+          "t": 5029,
+          "rank": "backup",
+          "asr": "AXS",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20231104",
+      "date": "2023-11-04",
+      "video": "yzui2wDt2V4",
+      "picks": [
+        {
+          "symbol": "SOLUSDT",
+          "t": 4041,
+          "rank": "focus",
+          "asr": "就是SOL",
+          "uncertain": false
+        },
+        {
+          "symbol": "LINKUSDT",
+          "t": 4114,
+          "rank": "backup",
+          "asr": "其次还是link",
+          "uncertain": false
+        },
+        {
+          "symbol": "TRBUSDT",
+          "t": 4149,
+          "rank": "backup",
+          "asr": "然后就是TRB",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20231111",
+      "date": "2023-11-11",
+      "video": "x9LO8XJtB_U",
+      "picks": [
+        {
+          "symbol": "ORDIUSDT",
+          "t": 3615,
+          "rank": "focus",
+          "asr": "我宁愿去做奥迪",
+          "uncertain": false
+        },
+        {
+          "symbol": "BIGTIMEUSDT",
+          "t": 3546,
+          "rank": "backup",
+          "asr": "big time 对吧 不用说了",
+          "uncertain": false
+        },
+        {
+          "symbol": "ETCUSDT",
+          "t": 3479,
+          "rank": "backup",
+          "asr": "主流币像什么辣条对吧像什么反正etc啊",
+          "uncertain": true
+        },
+        {
+          "symbol": "XRPUSDT",
+          "t": 3483,
+          "rank": "backup",
+          "asr": "那个srp啊",
+          "uncertain": true
+        }
+      ]
+    },
+    {
+      "id": "s20231118",
+      "date": "2023-11-18",
+      "video": "cjZlnwfqMio",
+      "picks": [
+        {
+          "symbol": "ORDIUSDT",
+          "t": 5300,
+          "rank": "focus",
+          "asr": "奥迪",
+          "uncertain": false
+        },
+        {
+          "symbol": "TIAUSDT",
+          "t": 5337,
+          "rank": "focus",
+          "asr": "TIA和奥迪一样",
+          "uncertain": false
+        },
+        {
+          "symbol": "ARKUSDT",
+          "t": 5657,
+          "rank": "backup",
+          "asr": "ARK也高",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20231125",
+      "date": "2023-11-25",
+      "video": "4R0rkCp8Lus",
+      "picks": [
+        {
+          "symbol": "ORDIUSDT",
+          "t": 2634,
+          "rank": "focus",
+          "asr": "首先第一个就是奥迪",
+          "uncertain": false
+        },
+        {
+          "symbol": "SOLUSDT",
+          "t": 3038,
+          "rank": "focus",
+          "asr": "sol要重点说",
+          "uncertain": false
+        },
+        {
+          "symbol": "BLURUSDT",
+          "t": 3326,
+          "rank": "focus",
+          "asr": "所以不乐这个位置调整",
+          "uncertain": false
+        },
+        {
+          "symbol": "WLDUSDT",
+          "t": 2845,
+          "rank": "focus",
+          "asr": "WLD 你就把这个人挡上",
+          "uncertain": false
+        },
+        {
+          "symbol": "APEUSDT",
+          "t": 3087,
+          "rank": "focus",
+          "asr": "我操APE又起来了",
+          "uncertain": false
+        },
+        {
+          "symbol": "ARKUSDT",
+          "t": 2692,
+          "rank": "backup",
+          "asr": "ARK",
+          "uncertain": false
+        },
+        {
+          "symbol": "TIAUSDT",
+          "t": 2779,
+          "rank": "backup",
+          "asr": "TIA",
+          "uncertain": false
+        },
+        {
+          "symbol": "EGLDUSDT",
+          "t": 3154,
+          "rank": "backup",
+          "asr": "一切奥地",
+          "uncertain": false
+        },
+        {
+          "symbol": "LINKUSDT",
+          "t": 3199,
+          "rank": "backup",
+          "asr": "link我看了一下就是他跟sol差不多",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20231202",
+      "date": "2023-12-02",
+      "video": "jdzHpVy4W5w",
+      "picks": [
+        {
+          "symbol": "SOLUSDT",
+          "t": 790,
+          "rank": "focus",
+          "asr": "一个SOL",
+          "uncertain": false
+        },
+        {
+          "symbol": "LINKUSDT",
+          "t": 803,
+          "rank": "backup",
+          "asr": "一个link也还可以",
+          "uncertain": false
+        },
+        {
+          "symbol": "BIGTIMEUSDT",
+          "t": 814,
+          "rank": "backup",
+          "asr": "bing time就不说了吧",
+          "uncertain": false
+        },
+        {
+          "symbol": "ORDIUSDT",
+          "t": 838,
+          "rank": "backup",
+          "asr": "像奥迪的话",
+          "uncertain": false
+        },
+        {
+          "symbol": "TIAUSDT",
+          "t": 865,
+          "rank": "backup",
+          "asr": "TIA的话也是对吧",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20240225",
+      "date": "2024-02-25",
+      "video": "_T9r-v3pDjE",
+      "picks": [
+        {
+          "symbol": "CELOUSDT",
+          "t": 216,
+          "rank": "focus",
+          "asr": "CEL我跟你们说",
+          "uncertain": false
+        },
+        {
+          "symbol": "DOGEUSDT",
+          "t": 1664,
+          "rank": "backup",
+          "asr": "什么狗狗币",
+          "uncertain": false
+        },
+        {
+          "symbol": "FILUSDT",
+          "t": 1666,
+          "rank": "backup",
+          "asr": "什么feel",
+          "uncertain": false
+        },
+        {
+          "symbol": "LTCUSDT",
+          "t": 1667,
+          "rank": "backup",
+          "asr": "什么辣条呀",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20240302",
+      "date": "2024-03-02",
+      "video": "Gd8jEknDfgA",
+      "picks": [
+        {
+          "symbol": "1000PEPEUSDT",
+          "t": 1548,
+          "rank": "focus",
+          "asr": "第一个就是派派",
+          "uncertain": false
+        },
+        {
+          "symbol": "WLDUSDT",
+          "t": 1587,
+          "rank": "focus",
+          "asr": "就是WLD",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20240330",
+      "date": "2024-03-30",
+      "video": "LM9vYx6FWV8",
+      "picks": [
+        {
+          "symbol": "1000PEPEUSDT",
+          "t": 1105,
+          "rank": "focus",
+          "asr": "然后聊一下派派我怎么做的",
+          "uncertain": true
+        }
+      ]
+    },
+    {
+      "id": "s20240421",
+      "date": "2024-04-21",
+      "video": "pZCiEM0CYcY",
+      "picks": [
+        {
+          "symbol": "ONTUSDT",
+          "t": 2932,
+          "rank": "backup",
+          "asr": "前段ONT这边他拉过",
+          "uncertain": true
+        }
+      ]
+    },
+    {
+      "id": "s20240518",
+      "date": "2024-05-18",
+      "video": "E8_jRSuspvQ",
+      "picks": [
+        {
+          "symbol": "PEOPLEUSDT",
+          "t": 1704,
+          "rank": "backup",
+          "asr": "people这个东西我也在盯",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20240525",
+      "date": "2024-05-25",
+      "video": "AGw_TjQWwas",
+      "picks": [
+        {
+          "symbol": "PEOPLEUSDT",
+          "t": 971,
+          "rank": "focus",
+          "asr": "做people没做到",
+          "uncertain": false
+        },
+        {
+          "symbol": "1000PEPEUSDT",
+          "t": 969,
+          "rank": "focus",
+          "asr": "你看你龙头做派派",
+          "uncertain": false
+        }
+      ]
+    },
+    {
+      "id": "s20240601",
+      "date": "2024-06-01",
+      "video": "NbRTpKBwyUI",
+      "picks": [
+        {
+          "symbol": "PEOPLEUSDT",
+          "t": 350,
+          "rank": "focus",
+          "asr": "people这位置是不是起二波了",
+          "uncertain": false
+        },
+        {
+          "symbol": "BBUSDT",
+          "t": 295,
+          "rank": "focus",
+          "asr": "对于BBCB呢",
+          "uncertain": false
+        }
+      ]
+    }
+  ]
+}

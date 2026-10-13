@@ -11362,3 +11362,15 @@ experiments:
     production_eligible: false
     reuse_allowed: false
     notes: Owner 2026-10-13 asked what the strategy's logic is and to backtest it. Pine source read from TradingView pine-facade (PUB;42b9e30300f840c7af2787b46c8617cd). Data HistData.com XAUUSD M1 2011-01-02..2026-10-09 (data/histdata/XAUUSD, not in git); its stamps are New York wall-clock time despite the site saying EST without DST - verified by the NFP spike at 08:30 local in both seasons and by return correlation with OKX XAU-USDT-SWAP 15m in summer 2025 (0.86 vs 0.12 under fixed UTC-5). Dukascopy was throttled to about 15s per file through the proxy. No Pine, monitor, preset or account change.
+  - experiment_id: exp-bitlanglang-picks-20261013-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending
+    status: active
+    question: Did the alts Bit浪浪 named in real time at the end of his weekly group livestreams (2023-10-28..2024-06-01, 42 picks in 13 sessions) beat the same month's top-100 alt universe over the next 7/14/30/60 days from the first 5m open after the stream?
+    single_variable: Who chose the coin - his live picks versus random members of the same session's top-100 universe (same entry time and horizon); no stop, no cost, no trade simulation.
+    result: Preregistered before scoring; picks copied from local transcripts with video id and second.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Owner 2026-10-13 「之前整理的bit浪浪的交易系统 再收集一些资料 整理成小册 做到前端体系」. Transcripts and notes stay outside the public repo (YouTube re-uploads of his paid-access group streams). Descriptive check of the system's selection claim, not a trading rule. No Pine, monitor, preset or account change.
