@@ -1,0 +1,38 @@
+{
+ "experiment_id": "exp-monday-range-deviation-20261014-v1",
+ "owner_request": "2026-10-14: Notion task 建立一周区间交易系统 (indicator 周一高低点区间 v1.8) - 「详细分析我这个任务 有什么建议？」. The task lists 「做一些手动回测 todo」; this is the mechanical first pass of the rules as written.",
+ "question": "Does the owner's weekly Monday-range rule set as written (Tuesday-Friday break of the Monday low/high, 5m close back inside, stop at the deviation extreme, 80% at the far 0.618 and 20% at the opposite 1.13 extension) earn positive net R after 0.2% round-trip cost and beat matched random entries in the same week with the same stop and target distances, in both periods?",
+ "prior_evidence": "None in this repo for Monday ranges. The same week profile idea (ICT weekly profile, RektProof range deviation) is described in owner-provided material but untested.",
+ "rule": {
+  "timezone": "America/New_York (indicator default)",
+  "monday_range": "high H and low L of the complete 5m bars dated Monday NY; at least 276 of 288 bars present; R = H - L > 0",
+  "window": "Tuesday 00:00 to Saturday 00:00 NY; positions still open are closed at the close of the last Friday 1m bar",
+  "long": "arm on the first window 5m bar whose low < L; signal on the first 5m close > L at or after the arming bar; entry at the next 5m open; stop = lowest low from arming through the signal bar; TP1 = L + 0.618 R for 80%, TP2 = H + 0.13 R for 20%",
+  "short": "mirror: arm on high > H, signal on close < H, stop = highest high since arming, TP1 = H - 0.618 R (80%), TP2 = L - 0.13 R (20%)",
+  "per_week": "first signal per side per week only; skipped when the entry is not between stop and TP1",
+  "fills": "1m path from the entry minute: stop first when stop and target print in the same minute; an open beyond the stop fills at the open; targets fill at the target price",
+  "threshold_source": "owner Notion text and indicator v1.8 levels; nothing tuned"
+ },
+ "variants": {
+  "primary": "rules as above, the remaining 20% keeps the original stop after TP1",
+  "fib_113": "the deviation must reach the 1.13 extension (low <= L - 0.13 R, high >= H + 0.13 R) before a close back inside counts (只在关键斐波那契点位开仓)",
+  "be_after_tp1": "after TP1 the remaining 20% stop moves to the entry price",
+  "tp1_only": "100% at TP1, no TP2"
+ },
+ "round_trip_cost": 0.002,
+ "controls": {
+  "n": 20,
+  "pool": "same symbol, same week, same side, entry at a random window 5m open from Tuesday 00:00 NY to Friday 20:00 NY",
+  "levels": "stop, TP1 and TP2 at the event's distances in percent of entry",
+  "seed": 1014601
+ },
+ "data": "Binance USD-M monthly 1m archives for BTC/ETH/SOL/XRP/DOGE/BNB USDT at data/research/ma6_knot_1m_20261011 (exp-ma6-knot-breakout-20261011-v1), complete-bucket 5m",
+ "start": "2023-01-02T05:00:00Z",
+ "select_before": "2025-01-01T00:00:00Z",
+ "end": "2026-09-26T04:00:00Z",
+ "stat_seed": 1014602,
+ "flips": 10000,
+ "primary": "per side, variant primary: mean net R, win rate, mean excess over matched controls and month-block sign-flip p, in 2023-2024 and 2025-2026. Pass = net mean > 0 in both periods and excess > 0 with p < 0.05 in at least one. Variants are single changes read against primary.",
+ "training_eligible": false,
+ "production_eligible": false
+}
