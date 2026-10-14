@@ -17,7 +17,9 @@ Rules (config.json, America/New_York like the indicator):
 
 Variants change one thing: fib_113 needs the deviation to reach the 1.13 extension first
 (只在关键斐波那契点位开仓), be_after_tp1 moves the last 20% to break-even after TP1, tp1_only
-exits everything at TP1.
+exits everything at TP1, tp1_near puts TP1 at the near 0.618 (H - 0.618 R for a long, because
+"止盈在0.618" can mean either line; added after v1 results, flagged post-hoc). fib_113_tp1_near
+combines the two and is read against fib_113.
 
 Exits run on the 1m path from the entry minute: stop first when stop and target print in the same
 minute, an open beyond the stop fills at the open, targets fill at their price. Cost is 0.2% of
@@ -48,7 +50,7 @@ EXP = Path("experiments/active/exp-monday-range-deviation-20261014-v1")
 CONFIG = EXP / "config.json"
 SYMBOLS = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "DOGEUSDT", "BNBUSDT")
 NY = "America/New_York"
-VARIANTS = ("primary", "fib_113", "be_after_tp1", "tp1_only")
+VARIANTS = ("primary", "fib_113", "be_after_tp1", "tp1_only", "tp1_near", "fib_113_tp1_near")
 MIN_MONDAY_BARS = 276
 MS_5M = 300_000
 
@@ -148,10 +150,13 @@ def scan_symbol(args: tuple) -> tuple[pd.DataFrame, pd.DataFrame]:
                       "high_dow": int(wk.dow.loc[wd.high.idxmax()]), "low_dow": int(wk.dow.loc[wd.low.idxmin()])})
         for side in (1, -1):
             level = lo_m if side == 1 else hi_m
-            tp1 = lo_m + 0.618 * rng_m if side == 1 else hi_m - 0.618 * rng_m
             tp2 = hi_m + 0.13 * rng_m if side == 1 else lo_m - 0.13 * rng_m
             for variant in VARIANTS:
-                depth = 0.13 * rng_m if variant == "fib_113" else 0.0
+                # "止盈在0.618" is ambiguous: the far 0.618 (L + 0.618 R for a long) or the near one
+                # drawn from the other end (H - 0.618 R = L + 0.382 R); tp1_near tests the latter.
+                r1 = 0.382 if variant.endswith("tp1_near") else 0.618
+                tp1 = lo_m + r1 * rng_m if side == 1 else hi_m - r1 * rng_m
+                depth = 0.13 * rng_m if variant.startswith("fib_113") else 0.0
                 found = signal(lo, hi, cl, level, depth, side)
                 if found is None:
                     continue

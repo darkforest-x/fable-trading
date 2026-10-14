@@ -17,7 +17,9 @@
   "primary": "rules as above, the remaining 20% keeps the original stop after TP1",
   "fib_113": "the deviation must reach the 1.13 extension (low <= L - 0.13 R, high >= H + 0.13 R) before a close back inside counts (只在关键斐波那契点位开仓)",
   "be_after_tp1": "after TP1 the remaining 20% stop moves to the entry price",
-  "tp1_only": "100% at TP1, no TP2"
+  "tp1_only": "100% at TP1, no TP2",
+  "tp1_near": "TP1 at the near 0.618 drawn from the other end (H - 0.618 R = L + 0.382 R for a long; L + 0.618 R for a short) - the task text 止盈在0.618 can mean either line. Added 2026-10-14 after the first results (post-hoc, ambiguity found while writing the read-out)",
+  "fib_113_tp1_near": "fib_113 plus tp1_near; read against fib_113 (one change)"
  },
  "round_trip_cost": 0.002,
  "controls": {
