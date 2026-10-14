@@ -17,7 +17,7 @@ experiments:
   - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2a4451810a308a81d251f7241d0329a45c2c1c05
-    status: inconclusive
+    status: active
     question: >-
       Which completed-shape proposals does the frozen Grade-A YOLO11s full40
       native-1280 checkpoint emit over every eligible OKX USDT swap with
@@ -28,7 +28,7 @@ experiments:
       training renderer, one current-live OKX universe snapshot, and the
       checkpoint's frozen W18/W19 completed-shape contract.
     result: >-
-      Initial OKX 15m history-only collection was interrupted before model inference after repeated per-page timeouts; the last progress line was 140/285 instruments (79 usable, 61 failed), and 80 partial symbol CSVs had persisted at termination. No frozen fetch receipt or detector result was produced. Superseded by the preregistered archive/API v2 acquisition.
+      Preregistered before the candle fetch. No scan result has been read yet.
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
@@ -39,43 +39,147 @@ experiments:
       data. This interval is after the historical holdout date, whose veto
       rule the owner canceled on 2026-09-19. Coverage is limited to contracts
       currently live at universe capture; per-symbol rows and gaps are kept.
-      The history-only acquisition was halted before inference due repeated timeouts; no partial v1 snapshot is reused.
+      Request-error contracts receive at most two whole-instrument retries
+      over the unchanged interval after the first pass.
       The model emits delayed completed-shape proposals, not fresh tip signals.
       No labels are available, so this scan cannot estimate accuracy or value.
-  - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v2
+  - experiment_id: exp-spike-v1210-filters-20261012-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: cc84939166e3f04534099d99f7a4520cafea40ff
-    status: active
-    question: >-
-      Which completed-shape proposals does the frozen Grade-A YOLO11s full40
-      native-1280 checkpoint emit over every eligible OKX USDT swap with
-      available confirmed 15m candles from 2026-08-13 11:00 UTC through
-      2026-10-13 10:45 UTC?
-    single_variable: >-
-      No model or detector variable changes. One frozen checkpoint, the exact
-      training renderer, one current-live OKX universe snapshot, and the frozen
-      W18/W19 contract. August/September OHLCV comes from official OKX monthly
-      1m archives aggregated to complete 15m bars; the final UTC tail comes
-      from confirmed OKX 15m history candles.
-    result: >-
-      Preregistered before v2 data acquisition. No detector inference or scan
-      result has been read yet.
+    source_commit: 98dc2763f7
+    status: inconclusive
+    question: Does each of five admission filters (8-day trend side, VIDYA freshness, chop, distance to the VIDYA line,
+      signal bar range), added alone to frozen SPIKE V12.10 15m, raise net R out of sample on 20 alts in both periods
+      and beat random entries drawn under the same VIDYA state and filter condition?
+    single_variable: One filter per variant, thresholds frozen from in-sample ETH terciles before results; ETH OKX and
+      Binance five years (in-sample, descriptive) and 20 Binance alts 2023-01 to 2026-09 split 2025-01 (out of sample).
+    result: Parity exact (ETH 227, alts 3738 V12.10 trades). Alts pooled per trade V12.10 -0.069R; F1 trend8d -0.026R
+      (better in both periods, excess over filter-matched random +0.24 and +0.22R, p 0.030 and 0.006, 9 of 20 coins
+      positive); F2 VIDYA fresh -0.008R (better in both periods but excess -0.03 and -0.06R, random entries at fresh flips
+      earn +0.04R); F3 chop -0.110R, F4a distance -0.073R, F4b bar range -0.050R (not better in both periods). No filter
+      passes the p < 0.01 both-period bar and none makes the alts profitable. On ETH every filter looks better in-sample;
+      F1 cuts the longest losing run 17 to 10 and drawdown 39.9R to 27.9R (Binance ETH +0.004R to +0.121R).
     holdout_consumed: false
     training_eligible: false
     production_eligible: false
     artifacts: []
     reuse_allowed: false
-    notes: >-
-      Owner requested a retrospective replay of all recent two-month OKX 15m
-      data. The initial v1 API-only acquisition timed out before inference and
-      none of its partial snapshots are reused. v2 retains the same checkpoint,
-      interval, exchange, universe, renderer, and inference contract; only
-      historical OHLCV collection uses monthly archives plus the confirmed API
-      tail. Contracts are limited to those currently live at universe capture;
-      per-symbol source hashes, bars, gaps, and the bounded pre-inference
-      recovery attempts are retained. This delayed
-      completed-shape detector is not a fresh tip signal. No labels are
-      available, so the scan cannot estimate accuracy or value.
+    notes: Owner request 2026-10-12 to try all ideas from the losing-run diagnostics. F1 is the only filter consistent with
+      better signal selection out of sample; F2 selects a market moment rather than better SPIKE signals. Combinations
+      untested (multi-variable). Single-draw random controls carry noise (ETH V12.10 excess p 0.07 here vs 0.17 with the
+      five-year study's seed). Owner then asked for F1 as Pine V12.12 (yoyo/evaluation/pine/spike_burst_v12_12.pine,
+      built from V12.10 by owner choice; V12.11 display cleanup kept separate). No monitor, preset or account change.
+  - experiment_id: exp-spike-v1210-eth15m-5y-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5a475a9c93
+    status: inconclusive
+    question: How did frozen SPIKE V12.10 (V12.9 ordinary signals plus the same-timeframe Volumatic VIDYA direction gate)
+      perform on OKX ETHUSDT.P 15m from 2021-10-12 to 2026-10-12 after 0.2 percent round-trip cost, against
+      trend-state-matched random entries, and versus ungated V12.9 on the same data?
+    single_variable: None; descriptive replay over a longer window with the parent study's imported rules
+      (exp-spike-v1210-volumatic-vidya-gate-20261012-v1). OKX official 1m archives 2021-09..2026-09 plus confirmed API tail.
+    result: Parity exact with the parent's saved OKX 15m ledgers from 2024-03 (140 gated, 161 ungated closed trades).
+      V12.10 227 closed trades, win rate 29.5 percent, +0.073R per trade, +16.6R total, max drawdown 39.9R, longest
+      losing run 17; 2021-10..2024-01 (data no V12.10 ETH study had used) 85 trades -0.13R (-11.2R), from 2024-02 142
+      trades +0.20R (+27.8R). Ungated V12.9 266 trades -0.03R (-6.7R); the 47 trades the gate removed averaged -0.41R
+      (longs -0.93R). Matched random excess +0.33R (month-block p 0.17; -0.04R p 0.93 before, +0.56R p 0.051 after).
+      Best 5 trades +52.8R, without them -36.2R. Binance ETHUSDT same rules 219 trades +0.004R (-0.13R / +0.09R).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner request 2026-10-12 detailed backtest, HTML report in report_v1 (build_report.py). Fails the repo bar of
+      positive net and p < 0.01 in both periods. Results stay local (parent precedent); 7 incomplete 5m buckets and 5
+      gap bars from OKX outages are treated as gaps. No Pine, monitor, preset or account change. Losing-run diagnostics
+      (analyze_streaks.py) show the longest run 17 has p 0.16 under independent trades at the 70.5 percent loss rate (10+ runs
+      p 0.88), clustering p 0.18; runs of 6+ sat in low 24h-efficiency chop. Factors consistent in both periods (not
+      validated filters) are against the ~8-day trend -0.33R vs with it +0.44R; signals within 4 bars of a VIDYA flip
+      +0.63R vs 4-53 bars -0.37R; far from the VIDYA line -0.22R. 71 of 122 initial stops never reached +0.5R.
+  - experiment_id: exp-vidya-h-altcoins-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 09a3e73a72
+    status: rejected
+    question: Does VIDYA trend-line retest configuration H (selected on ETHUSDT 15m; Length 10, delta 50, stop 1 ATR,
+      2R), unchanged, make money after costs on 20 liquid alts and beat matched random entries there?
+    single_variable: Market only. Universe = the 20 alts of exp-spike-v129-alts-confirm-20261011-v1 (ranked on 2022-11..12
+      volume), trades counted 2023-01-01 to 2026-10-10, Binance USD-M 15m archives; ETH on the same window as reference.
+    result: Pre-declared criterion (pooled alts, 20bp next-open basis, net R > 0 in both periods and month-block excess
+      p < 0.01) failed. 490 alt trades, win rate 31.6 percent, -0.209R per trade (report basis -0.141R, CI -0.27 to
+      -0.004), negative before and after 2024-10; matched random -0.118R, excess -0.091R (CI -0.21 to +0.04, p 0.92).
+      7 of 20 coins positive on the report basis, 5 on the standard basis. ETH reference same window 46 trades +0.312R,
+      excess +0.40R. Exit variants on alts, stop 0.75 ATR +0.02 to +0.03R, breakeven at 1.25R -0.05R, lock at 1.5R
+      +0.01R, 24h time stop -0.04R (all intervals cross zero).
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner-requested. H's edge is specific to ETH, where its parameters were chosen; picking the positive alts
+      afterwards would be selection on the same data. Data from fetch.py (checksum-verified; some coins carry 2 archive
+      gaps in 2022, warmup only). Results in this folder's results.json.
+  - experiment_id: exp-vidya-h-stop-breakeven-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ab1dfec0c3
+    status: inconclusive
+    question: On VIDYA trend-line retest configuration H's own entries (ETHUSDT perpetual 15m, 2022-01 to 2026-10), does
+      a different stop placement, a breakeven or profit-lock stop, a trend-line trailing stop or a time stop improve the
+      result after costs, in both periods, on BTC/SOL and against matched random entries using the same exit?
+    single_variable: Exit rule only (22 variants, each one change from H); H's 53 entries held fixed and compared trade by
+      trade, plus an engine-equivalent sequential re-run. Report basis (close fill, 12bp) and repo standard (next open, 20bp).
+    result: No variant beats H with a paired 95 percent interval above zero. Breakeven at +0.5R is worse (-0.34R per trade,
+      CI -0.66 to -0.04; 16 winners stopped at entry); breakeven at +1R -0.08R (drawdown -6.6 to -4.7 percent); at +1.25R,
+      +1.5R or on a close beyond +1R about +0.02R. Stop 0.75 ATR +0.045R report / +0.147R standard (no winner lost, BTC and
+      SOL slightly better, CI crosses zero); 0.3 ATR and trend-line stops worse; trend-line trailing -0.18R; lock +0.5R at
+      +1.5R +0.03R; 24h time stop +0.07R (both periods positive, BTC -0.03R). Baseline random excess +0.42R, p 0.0115.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner-requested. 22 variants on 53 trades, so the best of them is selection-biased; only the early-breakeven
+      harm is outside the noise. Bar-data conventions (stop first, moved stops live from the next bar, gap fills at the
+      open) are in build.py. Results in this folder's results.json. Monitor strategies unchanged pending owner decision.
+  - experiment_id: exp-vidya-report-nine-configs-20261011-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 00ece61f6ac3031f86d1ae85cfc4aa66dbea7b8e
+    status: inconclusive
+    question: How do the PineTrades video rule (pivot-line retest of BigBeluga Volumatic VIDYA, delta 30 percent, 2R) and
+      eight variants perform on ETHUSDT perpetual 15m/1h from 2022-01 to 2026-10?
+    single_variable: Report of nine configurations, each one change from its parent (Length 14/10, stop 0.3 to 1.5 ATR with
+      trend-flip exit, no delta filter, 1h bars, trend-line instead of pivot-line entry). Report basis, confirming-close fill.
+    result: Confirming-close fill, 0.05 percent per side plus 0.01 percent slippage. A video rule L14 653 trades -0.36R
+      (negative every year), B -0.33R, C -0.04R, D +0.03R, E no delta -0.09R, F 1h +0.04R, G 1h trend exit +0.17R,
+      H trend-line 2R +0.38R, I trend-line trend exit +0.62R. No matched random control for A-G; H/I controls and the
+      20bp next-open basis are in exp-vidya-trendline-retest-20261012-v1.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner-requested report rebuilt in-repo so the monitor shows the report's own numbers; build.py aborts unless
+      every config matches the published trade count and mean R. C-I variants were chosen after looking at the data.
+      Candle cache for the monitor chart is written to data/vidya_retest (not in git). Video rule A is a negative result.
+  - experiment_id: exp-vidya-trendline-retest-20261012-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 00ece61f6ac3031f86d1ae85cfc4aa66dbea7b8e
+    status: inconclusive
+    question: Does trading only the retest of the BigBeluga Volumatic VIDYA trend line (Length 10) with per-trend volume
+      delta at least +-50 percent make money on 15m perpetuals after costs and beat matched random entries?
+    single_variable: Entry location moved from the script's pivot short lines (video rule) to the plotted trend line itself;
+      Length 10 and delta 50 chosen after an exploratory grid on ETH, stop 1 ATR(14), exit 2R (tl-2r) or trend flip (tl-trend).
+    result: Next-open fill, 20bp. ETH 2022-01 to 2026-10 tl-2r 53 trades +0.296R (matched random -0.107R, excess +0.40R,
+      p 0.0105), tl-trend 66 trades +0.559R (excess +0.56R, p 0.05); both positive before and after 2024-10, Length 8-12
+      positive, 13-14 negative. BTC tl-2r -0.21R, tl-trend -0.49R (below random); SOL -0.05R / +0.24R (p 0.12). Not
+      significant at p<0.01 and not transferable across coins; live paper forward started.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts: []
+    reuse_allowed: false
+    notes: Owner-requested. Parameters selected on ETH after exploratory scans (several dozen variants), so ETH figures carry
+      selection bias. Engine yoyo/monitor/vidya_retest.py reproduces the exploratory numbers exactly (53 trades +0.381R at
+      close fill and 12bp). Live paper on all OKX USDT perpetuals runs in the monitor (menu VIDYA 回踩, vidya_retest.sqlite3);
+      paper only, no orders or notifications. Results in this folder's results.json; Pine strategy in pine/.
   - experiment_id: exp-spike-market-two-months-20260925-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bf4d1021e3959057dd7a48b84df18fe49703379f
@@ -11374,3 +11478,16 @@ experiments:
     production_eligible: false
     reuse_allowed: false
     notes: Owner 2026-10-13 「之前整理的bit浪浪的交易系统 再收集一些资料 整理成小册 做到前端体系」. Transcripts and notes stay outside the public repo (YouTube re-uploads of his paid-access group streams). Descriptive check of the system's selection claim, not a trading rule. No Pine, monitor, preset or account change.
+  - experiment_id: exp-monday-range-deviation-20261014-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3d44b2c68d
+    status: rejected
+    question: Does the owner's weekly Monday-range system as written in Notion (建立一周区间交易系统 - NY Monday high/low, Tuesday-Friday break and 5m close back inside, stop at the deviation extreme, 80 percent at the far 0.618 and 20 percent at the opposite 1.13 extension) earn positive net R after 0.2 percent round-trip cost and beat same-week matched random entries, on six Binance majors 2023-01..2026-09?
+    single_variable: New rule family taken literally from the task text; variants change one thing - fib_113 (deviation must reach the 1.13 extension first), be_after_tp1, tp1_only. 20 same-symbol, same-week, same-side random entries per event with the event's stop and target distances in percent.
+    result: >-
+      Rules as written lose to cost. Primary 1,469 trades - long net -0.52R (2023-24) / -0.85R (2025-26), short -0.47 / -0.60R; gross -0.06 / -0.09R and +0.14 / +0.15R. The 5m deviation stop is tight (median 0.5-0.6 percent of price), so 0.2 percent cost is 0.47-0.76R a trade, and TP1 sits a median 4.7R away - 76 percent of trades stop out, win rate 16-25 percent. Excess over random +0.09 to +0.29R, p 0.22-0.50. be_after_tp1 and tp1_only change little (TP1 is reached in 15-23 percent). fib_113 (deeper deviation) widens the stop to about 1.5 percent (cost 0.15-0.19R, TP1 about 1.85R) and shows a location edge - excess +0.22R (p 0.007) and +0.06R (p 0.55) long, +0.25R (p 0.005) and +0.16R (p 0.044) short - but net is still -0.12 / -0.34R long and -0.07 / -0.14R short because random entries with the same levels lose -0.30 to -0.40R; at 0.1 percent cost fib_113 short is about -0.02R. Descriptive - the Monday low is broken Tuesday-Friday in 66 percent of 1,170 symbol-weeks and the high in 65 percent; the Monday-Friday high prints on Monday in 35 percent of weeks and Friday 24 percent (low 34 / 21 percent), the end-heavy pattern a random walk also gives.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    notes: Owner 2026-10-14 asked for a detailed read of the Notion task and suggestions; the task itself lists manual backtests as todo. Discretion in the text (当然这个不是固定的, 企稳, structure of the week) is not modelled; this is the fixed-rule baseline. Six majors only. No Pine, monitor, preset or account change.
