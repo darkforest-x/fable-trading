@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: exp-spike-v131-observed-paper-20261016-v1-registration
+    artifact_type: manifest
+    role: immutable-forward-paper-registration
+    source_repo: darkforest-x/fable-trading
+    source_commit: 07bc93ab67043604633aad58ff63588a97478cc6
+    source_path: experiments/active/exp-spike-v131-observed-paper-20261016-v1/run-registration.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    sha256: 18e7438ad0197b3749835b05bcd9a6504ba80bda0b70e97e8c8c11d5c931c381
+    size_bytes: 53317
+    notes: Registration snapshot only; live outcomes remain in paper.sqlite3. Run dc0c7e42add44beb902cafb33ea48424
+      began 2026-10-16 01:36:14 Asia/Shanghai with zero decisions. Full source bundle archived by the local service.
   - artifact_id: exp-spike-v131-observed-paper-20261016-v1-config
     artifact_type: config
     role: observed-entry-forward-paper-contract

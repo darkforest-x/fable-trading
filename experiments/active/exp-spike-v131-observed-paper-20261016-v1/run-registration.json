@@ -1,0 +1,2015 @@
+{
+  "id": "dc0c7e42add44beb902cafb33ea48424",
+  "strategy_id": "spike-v131-retest",
+  "strategy_name": "SPIKE V13.1 · 15m 到达后模拟",
+  "strategy_version": "spike-v13.1-retest-monitor-20261007-v1",
+  "status": "running",
+  "created_ms": 1792085774190,
+  "admit_after_ms": 1792085774190,
+  "heartbeat_ms": null,
+  "error": null,
+  "spec": {
+    "cost_bp": 20,
+    "data_source": {
+      "kind": "existing_monitor_closed_checkpoints",
+      "venue": "okx"
+    },
+    "entry_rule": "实际观察后，预定下一根尚未开盘的 15m K 线开盘模拟入场；不回填历史信号。",
+    "exit_fill_policy": "precommitted-closed-bar-rules-event-time-v1",
+    "exit_rule": "保留原信号止损，以模拟入场价重算风险；收盘达到 2R 后启用 4ATR 跟踪，下一根生效；原始反向信号次开盘退出；往返成本 20bp。",
+    "experiment_ids": [
+      "exp-spike-v131-observed-paper-20261016-v1"
+    ],
+    "factor_ids": [],
+    "fill_policy": "observed-then-next-future-bar-open-v1",
+    "funding_included": false,
+    "instrument_snapshot": {
+      "instruments": {
+        "0G-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "1INCH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "2Z-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "A-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AAOI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AAPL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AAVE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ACH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ACN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ACT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ACU-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ADA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ADBE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AEHR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AEON-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AERO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AEVO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AGLD-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AIXBT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AKE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ALAB-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ALGO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ALLO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AMAT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AMC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AMD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AMZN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ANIME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ANTHROPIC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "APE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "API3-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "APLD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "APP-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "APR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "APT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ARB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ARKM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ARM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ARX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ASML-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ASTER-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ASTS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ATH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ATOM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AUCTION-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AVAX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AVGO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AVNT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AXS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "AXTI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "AZTEC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BABY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BAND-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BARD-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BASED-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BAT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BB-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BCH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BEAT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BERA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BICO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BIGTIME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BILL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BIO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BLEND-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BLUR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BMNR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BNB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BOME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BONK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BOT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BRETT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BREV-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BRKB-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BSB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BSP-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BTC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "BWET-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "BZ-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "CAP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CASHCAT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CBRS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CELO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CFX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CGNX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CHIP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CHZ-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CIEN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CL-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "CNPY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "COAI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "COHR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "COIN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "COMP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CORE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "COST-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CRCL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CRDO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CRM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CRO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CRV-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CRWD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CRWV-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CSCO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CSOPSAMSUNG2L-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CSOPSKHYNIX2L-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CVX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "CXMT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "CYPH-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "DASH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DATA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DDOG-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "DELL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "DGAI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DKNG-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "DOGE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DOOD-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DOS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DOT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "DRAM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "DYDX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "EDEN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "EDGE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "EGLD-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "EIGEN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ENA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ENJ-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ENS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ENSO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ESP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ETC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ETH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ETHFI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ETHW-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "EWJ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "EWT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "EWY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "EWZ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "F-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FARTCOIN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FET-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FIL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FLNC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "FLOCK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FLOKI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FLOW-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FLY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "FOGO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "FWDI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GALA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GAS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GEV-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GIGGLE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GLM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GLW-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GME-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GMT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GMX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GOOGL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GPRO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "GPS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GRAM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GRASS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GRT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GRVT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "GTLB-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "H-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "H100-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "HANMI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "HBAR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "HIMS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "HMSTR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "HOME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "HOOD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "HPE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "HUMA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "HUT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "HYPE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "HYUNDAI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "IBM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ICP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "IMX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "INFQ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "INIT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "INJ-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "INTC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "INTW-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "IONQ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "IOST-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "IOTA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "IREN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "IRYS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ISRG-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "IWM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "JELLYJELLY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "JNJ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "JP225-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "JTO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "JUP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KAITO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KAT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KGEN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KII-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KIOXIA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "KITE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KLAC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "KMNO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "KORU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "KR200-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "KSM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "KSTR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LAB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LAYER-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LDO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LGELECTRONICS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LIGHT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LINEA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LINK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LIT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LITE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LLY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LPT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LQTY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LRCX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LTC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LUNA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "LUNR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "LYTE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MAGIC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MANA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MARA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MASK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MEGA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MEME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MERL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MET-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "META-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "METIS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MEW-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MINA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MINIMAX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MMT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MON-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MOODENG-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MOONSHOT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MORPHO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MOVE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MRK-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MRNA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MRVL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MSFT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MSTR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MSTU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MUBARAK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "MUU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "MVLL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NAVER-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NBIS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NEAR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NEIRO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NEO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NES-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NET-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NFLX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NG-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "NIGHT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NKE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NMR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NOK-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NOT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "NOW-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NVDA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "NVDL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "O-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OFC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OKB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OKLO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "OKTA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "OL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ON-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ONDO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ONDS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ONE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ONT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OPENAI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "OPG-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OPN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ORCL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ORDER-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ORDI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "OSCR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "OURA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "OUST-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PARTI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PENDLE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PENG-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PENGU-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PEOPLE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PEPE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PIEVERSE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PIPPIN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PLTR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PLUME-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PNUT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "POET-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "POL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PONS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "POPCAT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "POPMART-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PROS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PROVE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PUMP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "PURR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PYPL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "PYTH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "QCOM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "QNT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "QQQ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "QTUM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "QUANT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RAM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RAVE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RAY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RDDT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RDW-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RECALL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RENDER-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RESOLV-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RIOT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RIVER-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RIVN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RKLB-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RLS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ROBO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ROK-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "RSR-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "RVN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "S-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SAHARA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SAMSUNG-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SAND-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SAPIEN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SATS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SECZ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SEI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SENT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SHAZ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SHEIN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SHELL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SHIB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SHLD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SHOP-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SIGN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SIMO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SKDD-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SKHY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SKHYNIX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SKUU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SKY-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SLX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SMCI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SMH-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SNDK-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SNOW-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SNX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SNXX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SOFI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SOFTBANK-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SOL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SONY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SOON-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SOPH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SOXL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SOXS-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SPACE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SPCH-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SPCX-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SPK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SPX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SPY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SQQQ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "SSV-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "STABLE-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "STRC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "STRK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "STX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SUI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SUSHI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "SYRUP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TAO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TEAM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TEM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TER-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "THETA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TIA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TLT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TMF-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TQQQ-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TRB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TRIA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TRUMP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TRUST-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TRUTH-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TRX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TSEM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TSLA-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TSLL-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TSM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TTMI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TTWO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TURBO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "TWLO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "TXN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "UB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "UMA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "UNH-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "UNI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "UNITREE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "UP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "URNM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "US100-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "US500-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "USAR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "USDC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "USELESS-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "USO-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "UVXY-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "VANA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "VICR-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "VIRTUAL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "VRT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "VVV-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "W-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WAL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WCT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WDC-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "WEN-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "WET-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WIF-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WLD-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WLFI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "WMT-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "WOO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "XAG-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "XAU-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "XBI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "XCU-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "XDP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "XIAOMI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "XLE-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "XLM-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "XOM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "XPD-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "XPL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "XPT-USDT-SWAP": {
+          "asset_class": "commodities",
+          "inst_category": "4"
+        },
+        "XRP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "XTZ-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "YB-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "YFI-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "YGG-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZAMA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZBT-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZEC-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZEN-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZETA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZHIPU-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ZHONGJI-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ZIL-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZK-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZKP-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZM-USDT-SWAP": {
+          "asset_class": "stocks",
+          "inst_category": "3"
+        },
+        "ZORA-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZRO-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        },
+        "ZRX-USDT-SWAP": {
+          "asset_class": "crypto",
+          "inst_category": "1"
+        }
+      },
+      "observed_ms": 1792085774190,
+      "policy": "registration_snapshot_new_listings_unknown",
+      "source": "https://www.okx.com/api/v5/public/instruments?instType=SWAP"
+    },
+    "orderbook_slippage_included": false,
+    "position_policy": "one_position_per_symbol_timeframe_independent_unit_notional",
+    "production_eligible": false,
+    "source_hash": "10e9cae6d4e207ff288a02420b66cdae3fda2e7c2c4ff7277d47ce6adbbeadf6",
+    "symbol_scope": "okx_all_usdt",
+    "symbols": null,
+    "timeframes": [
+      "15m"
+    ],
+    "universe_policy": "dynamic_monitor_usdt_perpetuals"
+  },
+  "revision": 1,
+  "metrics": {
+    "accepted": 0,
+    "closed": 0,
+    "open": 0,
+    "pending": 0,
+    "skipped": 0,
+    "censored": 0,
+    "net_r": null,
+    "win_rate": null,
+    "by_side": {},
+    "by_asset_class": {},
+    "entry_comparisons": 0,
+    "mean_entry_adverse_bp": null
+  }
+}
