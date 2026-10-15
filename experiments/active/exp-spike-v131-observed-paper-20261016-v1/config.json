@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-spike-v131-observed-paper-20261016-v1",
+  "question": "15m 回踩确认在实际观察后预定下一未来开盘，其表现与入场价差如何？",
+  "strategy_id": "spike-v131-retest",
+  "single_variable": "Entry timing after actual worker observation; original stop, 2R/4ATR trail, raw opposite next-open exit and 20bp costs unchanged.",
+  "symbol_scope": "okx_all_usdt",
+  "symbols": null,
+  "timeframes": ["15m"],
+  "request_id": "v131-forward-observed-20261016-v1",
+  "start_policy": "new_signals_after_run_creation_no_backfill",
+  "asset_class_policy": "public_OKX_instCategory_snapshot_at_registration_new_listings_unknown",
+  "cost_bp": 20,
+  "funding_included": false,
+  "orderbook_slippage_included": false,
+  "live_orders": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "evidence_boundary": "Descriptive forward paper observation; no matched control or account portfolio simulation. No profitability claim from kernel parity. Requires later review; no automatic promotion."
+}

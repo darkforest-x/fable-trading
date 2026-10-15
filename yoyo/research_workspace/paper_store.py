@@ -105,10 +105,16 @@ class PaperStore:
                 self._event(db, run_id, at, "created", {"spec": spec})
         return self.run(run_id)
 
+    def by_request(self, request_id):
+        """Recover frozen registration metadata on an idempotent API retry."""
+        with self.connect() as db:
+            row = db.execute("SELECT * FROM runs WHERE request_id=?", (request_id,)).fetchone()
+        return self._run(row) if row else None
+
     def run(self, run_id):
         with self.connect() as db:
             result = self._run(db.execute("SELECT * FROM runs WHERE id=?", (run_id,)).fetchone())
-            rows = db.execute("SELECT status,trade FROM decisions WHERE run_id=?", (run_id,)).fetchall()
+            rows = db.execute("SELECT status,side,payload,trade FROM decisions WHERE run_id=?", (run_id,)).fetchall()
         trades = [json.loads(r["trade"]) for r in rows if r["status"] == "closed"]
         net = [float(t["net_r"]) for t in trades if t.get("net_r") is not None]
         result["metrics"] = {"accepted": sum(r["status"] in {"pending", "open", "closed", "censored", "stopped"} for r in rows),
@@ -118,6 +124,24 @@ class PaperStore:
                              "censored": sum(r["status"] in {"censored", "stopped"} for r in rows),
                              "net_r": sum(net) if net else None,
                              "win_rate": sum(x > 0 for x in net) / len(net) if net else None}
+        if result["strategy_id"] == "spike-v131-retest":
+            groups = {"by_side": {}, "by_asset_class": {}}
+            gaps = []
+            for row in rows:
+                trade, payload = json.loads(row["trade"]), json.loads(row["payload"])
+                if trade.get("entry_adverse_bp") is not None:
+                    gaps.append(float(trade["entry_adverse_bp"]))
+                for group, key in (("by_side", row["side"]),
+                                   ("by_asset_class", payload.get("asset_class", "unknown"))):
+                    bucket = groups[group].setdefault(key, {"closed": 0, "net_r": None, "win_rate": None, "wins": 0})
+                    if row["status"] == "closed" and trade.get("net_r") is not None:
+                        value = float(trade["net_r"])
+                        bucket["closed"] += 1
+                        bucket["wins"] += value > 0
+                        bucket["net_r"] = (bucket["net_r"] or 0) + value
+                        bucket["win_rate"] = bucket["wins"] / bucket["closed"]
+            result["metrics"].update(groups, entry_comparisons=len(gaps),
+                                      mean_entry_adverse_bp=sum(gaps) / len(gaps) if gaps else None)
         return result
 
     def runs(self, active_only=False):
@@ -181,6 +205,10 @@ class PaperStore:
             step = STEP_MS[event["timeframe"]]
             scheduled = (observed_ms // step + 1) * step
             status = "skipped" if reason else "pending"
+            if "instrument_snapshot" in run["spec"]:
+                instrument = run["spec"]["instrument_snapshot"]["instruments"].get(event["symbol"], {})
+                event = dict(event, asset_class=instrument.get("asset_class", "unknown"),
+                             inst_category=instrument.get("inst_category", ""))
             db.execute("INSERT INTO decisions(run_id,event_id,symbol,timeframe,side,signal_close_ms,observed_ms,scheduled_entry_ms,status,reason,initial_stop,payload) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
                        (run_id, event["id"], event["symbol"], event["timeframe"], event["side"], close, observed_ms,
                         scheduled, status, reason, event.get("initial_stop"), encode(event)))

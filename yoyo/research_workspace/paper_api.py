@@ -195,6 +195,12 @@ def install(api, app, root, monitor_runtime, workspace_store, all_factors, all_e
                     "production_eligible": False}
             if pipeline:
                 spec["pipeline"] = pipeline
+            if payload.strategy_id == "spike-v131-retest":
+                from .paper_v131 import instrument_snapshot
+
+                old = store.by_request(payload.request_id)
+                spec["instrument_snapshot"] = (old["spec"]["instrument_snapshot"] if old
+                                                and "instrument_snapshot" in old["spec"] else instrument_snapshot())
             run = store.create(strategy, spec, payload.request_id, at=clock_ms())
         except (ValueError, OSError, KeyError) as exc:
             raise HTTPException(409, str(exc))

@@ -31,6 +31,9 @@ _MAX_CHECKPOINT_BYTES = 32 * 1024 * 1024
 _MANIFEST_REQUIRED = (
     "yoyo/research_workspace/strategies.py",
     "yoyo/research_workspace/paper_source.py",
+    "yoyo/research_workspace/paper_v131.py",
+    "yoyo/monitor/v130_policy.py",
+    "yoyo/monitor/v130_signals.py",
     "yoyo/evaluation/spike_v1_v8_be05.py",
     "yoyo/evaluation/spike_exit_policy_study.py",
     "yoyo/evaluation/spike_v6_wvf_study.py",
@@ -255,10 +258,11 @@ class MonitorSource:
             values.append(json.dumps(selected))
         else:
             where.append("symbol LIKE '%-USDT-SWAP'")
-        if plugin.id == "spike-v128":
+        if plugin.id in {"spike-v128", "spike-v131-retest"}:
             where.extend(("json_extract(payload,'$.source')='live'",
-                          "json_extract(payload,'$.confirmation')='raw'",
+                          "json_extract(payload,'$.confirmation')=?",
                           "json_extract(payload,'$.is_closed')=1"))
+            values.append("retest" if plugin.id == "spike-v131-retest" else "raw")
         elif is_joint:
             pass
         else:
@@ -276,7 +280,7 @@ class MonitorSource:
                      + f" ORDER BY {detected_column} ASC,id ASC LIMIT ?")
             rows = db.execute(query, [*values, _MAX_EVENTS]).fetchall()
             market_ticks = {}
-            if plugin.id == "spike-v128":
+            if not is_joint:
                 for row in rows:
                     key = (row["symbol"], row["timeframe"])
                     if key in market_ticks:

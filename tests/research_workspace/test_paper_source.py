@@ -44,7 +44,7 @@ def _raw_payload(event_id: str, *, protocol="spike-burst-v128-monitor-v1", sourc
 def test_catalog_is_static_lightweight_and_fails_closed_for_unsupported_plugins(tmp_path):
     items = catalog(tmp_path)
     assert [item["id"] for item in items] == [
-        "spike-v128", "spike-v128-joint", "trendline-breakout", "yolo-confirmed"
+        "spike-v131-retest", "spike-v128", "spike-v128-joint", "trendline-breakout", "yolo-confirmed"
     ]
     assert all(item["production_eligible"] is False for item in items)
     assert all(isinstance(item["notes"], str) for item in items)

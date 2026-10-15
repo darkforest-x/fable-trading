@@ -2,8 +2,8 @@
 
 The catalog describes which existing signal streams have a bounded paper
 entry/exit contract. It does not enable orders or imply economic acceptance.
-Only the raw SPIKE V12.8 stream and the V12.8 long-joint stream currently have
-the frozen 20bp / 2R / 4ATR / raw-opposite exit adapter.
+V13.1 retest is enabled only for 15m, whose 20bp / 2R / 4ATR / raw-opposite
+exit contract matches the frozen kernel. Its observation-time entry is separate.
 """
 from __future__ import annotations
 
@@ -51,10 +51,18 @@ class Plugin:
             from yoyo.monitor.joint_notifications import is_joint_event
 
             return is_joint_event(event)
+        if self.id == "spike-v131-retest":
+            from yoyo.monitor.v130_policy import is_v130_signal
+
+            return is_v130_signal(event)
         return False
 
     def evaluate_trade(self, candles, timeframe, symbol, tick, decision, now_ms):
         """Dispatch through a fixed adapter identifier, never a dynamic import."""
+        if self.paper_supported and self.exit_adapter == "spike-v131-15m-observed-v1":
+            from yoyo.research_workspace.paper_v131 import evaluate_trade
+
+            return evaluate_trade(candles, timeframe, symbol, tick, decision, now_ms)
         if not self.paper_supported or self.exit_adapter != "spike-v128-frozen":
             raise ValueError("strategy has no frozen paper exit adapter")
         from yoyo.research_workspace.paper_source import evaluate_trade
@@ -63,6 +71,12 @@ class Plugin:
 
 
 _PLUGINS = {
+    "spike-v131-retest": Plugin(
+        id="spike-v131-retest", source_database="monitor.sqlite3",
+        protocol="spike-burst-v130-retest-monitor-v1", kind="spike_burst_v130_retest",
+        timeframes=("15m",), side="both", paper_supported=True,
+        exit_adapter="spike-v131-15m-observed-v1",
+    ),
     "spike-v128": Plugin(
         id="spike-v128", source_database="monitor.sqlite3",
         protocol="spike-burst-v128-monitor-v1", kind="spike_burst_v128",
@@ -89,6 +103,22 @@ _PLUGINS = {
 
 
 _CATALOG = [
+    {
+        "id": "spike-v131-retest",
+        "name": "SPIKE V13.1 · 15m 到达后模拟",
+        "version": "spike-v13.1-retest-monitor-20261007-v1",
+        "description": "观察新回踩确认信号，核对发现延迟后的模拟表现。",
+        "kind": "spike_burst_v130_retest", "status": "research", "side": "both",
+        "timeframes": ["15m"],
+        "entry_rule": "实际观察后，预定下一根尚未开盘的 15m K 线开盘模拟入场；不回填历史信号。",
+        "exit_rule": "保留原信号止损，以模拟入场价重算风险；收盘达到 2R 后启用 4ATR 跟踪，下一根生效；原始反向信号次开盘退出；往返成本 20bp。",
+        "cost_bp": 20, "factor_ids": [],
+        "experiment_ids": ["exp-spike-v131-observed-paper-20261016-v1"],
+        "notes": "与信号中心参考收益分开。K 线模拟未计资金费、盘口滑点及退出指令延迟；按方向和登记时资产类别分组，累计 R 不是账户收益率。",
+        "revision": 0, "production_eligible": False, "paper_supported": True,
+        "exit_adapter": "spike-v131-15m-observed-v1", "source_database": "monitor.sqlite3",
+        "protocol": "spike-burst-v130-retest-monitor-v1",
+    },
     {
         "id": "spike-v128",
         "name": "SPIKE V12.8 原始信号",

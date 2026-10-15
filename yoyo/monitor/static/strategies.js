@@ -22,7 +22,8 @@
 
   const strategyLabel = (value) => ({ research: "研究中", rejected: "已否定", archived: "已归档", active: "已登记", implemented: "已实现", draft: "草稿", paper_supported: "支持模拟（未验证）", unsupported_exit_contract: "模拟退出规则未就绪" }[value] || String(value || "未记录"));
   const sideLabel = (value) => ({ both: "多空", long: "多头", short: "空头" }[value] || String(value || "未记录"));
-  const kindLabel = (value) => ({ signal: "信号策略", entry: "入场规则", exit: "退出规则", composite: "组合策略", spike_burst_v128: "启动信号", joint: "联合信号", trendline_breakout: "趋势线突破", yolo_confirmed: "模型确认" }[value] || String(value || "策略"));
+  const kindLabel = (value) => ({ signal: "信号策略", entry: "入场规则", exit: "退出规则", composite: "组合策略", spike_burst_v128: "启动信号", spike_burst_v130_retest: "回踩确认", joint: "联合信号", trendline_breakout: "趋势线突破", yolo_confirmed: "模型确认" }[value] || String(value || "策略"));
+  const assetLabel = (value) => ({ crypto: "加密", stocks: "股票类", commodities: "商品类", forex: "外汇类", bonds: "债券类", unknown: "未分类" }[value] || "未分类");
   const runStateLabel = (value) => ({ running: "运行中", paused: "已暂停", stopped: "已停止", error: "运行异常" }[value] || String(value || "未知状态"));
   const decisionStateLabel = (value) => ({ pending: "等待未来开盘", accepted: "已模拟入场", open: "持仓观察中", closed: "已退出", skipped: "未入场", rejected: "未接受", error: "处理异常", censored: "截尾（无模拟平仓）", stopped: "截尾（无模拟平仓）" }[value] || String(value || "未记录"));
   const stageOptions = (value) => ["research", "rejected", "archived"].map((stage) => `<option value="${stage}"${value === stage ? " selected" : ""}>${strategyLabel(stage)}</option>`).join("");
@@ -144,13 +145,22 @@
 
   const supportedStrategies = () => strategyState.items.filter((item) => item.paper_supported === true && item.production_eligible !== true);
   const selectedStrategy = () => strategyState.items.find((item) => item.id === paperState.selectedStrategyId);
+  function groupedMetrics(values) {
+    if (!values.by_side) return "";
+    const group = (items, label) => Object.entries(items || {}).map(([key, value]) =>
+      '<span>' + escapeHTML(label(key)) + '：' + number(value.closed) + ' 笔结束 · ' +
+      (finite(value.net_r) ? Number(value.net_r).toFixed(2) + 'R' : '收益待积累') + '</span>').join("");
+    return '<div class="paper-run-metrics">' + group(values.by_side, sideLabel) + group(values.by_asset_class, assetLabel) +
+      '<span>平均入场价差 ' + (finite(values.mean_entry_adverse_bp) ? Number(values.mean_entry_adverse_bp).toFixed(1) + ' bp' : '—') +
+      '（' + number(values.entry_comparisons) + ' 笔；正值较差）</span></div>';
+  }
   function runMetrics(metrics) {
     const values = metrics || {};
     return '<div class="paper-run-metrics"><span>接受 ' + number(values.accepted) + '</span><span>已结束 ' + number(values.closed) +
       '</span><span>观察中 ' + number(values.open) + '</span><span>待处理 ' + number(values.pending) + '</span><span>跳过 ' +
       number(values.skipped) + '</span><span>截尾 ' + number(values.censored) + '</span><span>合计 R ' +
       (finite(values.net_r) ? Number(values.net_r).toFixed(2) : "—") + '</span><span>胜率 ' +
-      (finite(values.win_rate) ? (Number(values.win_rate) * 100).toFixed(1) + "%" : "—") + '</span></div>';
+      (finite(values.win_rate) ? (Number(values.win_rate) * 100).toFixed(1) + "%" : "—") + '</span></div>' + groupedMetrics(values);
   }
   function runCard(run) {
     const selected = run.id === paperState.selectedRunId;
@@ -200,6 +210,14 @@
   }
   function decisionRow(item) {
     const trade = item.trade || {};
+    const comparison = trade.comparison_policy ?
+      '<dt>原参考开盘</dt><dd>' + (finite(trade.reference_entry_price) ? escapeHTML(trade.reference_entry_price) : '缺少对应 K 线') +
+      ' · ' + escapeHTML(dateTime(trade.reference_entry_ms)) + '</dd><dt>入场价差</dt><dd>' +
+      (finite(trade.entry_adverse_bp) ? Number(trade.entry_adverse_bp).toFixed(2) + ' bp（正值较差）' : '—') +
+      '</dd><dt>观察 / 入场延迟</dt><dd>' + (finite(trade.observation_delay_ms) ? (Number(trade.observation_delay_ms) / 60000).toFixed(1) : '—') +
+      ' / ' + (finite(trade.entry_delay_ms) ? (Number(trade.entry_delay_ms) / 60000).toFixed(1) : '—') +
+      ' 分钟</dd><dt>资产类别 / 固定成本</dt><dd>' + escapeHTML(assetLabel(trade.asset_class)) + ' / ' +
+      (finite(trade.cost_r) ? Number(trade.cost_r).toFixed(3) + 'R（20bp）' : '—') + '</dd>' : '';
     const stopped = ["stopped", "censored"].includes(item.status) || ["stopped", "censored"].includes(trade.status);
     const exitLabel = stopped ? "截尾状态" : "退出时间精度";
     const exitValue = stopped && !finite(trade.exit_price)
@@ -218,7 +236,7 @@
       escapeHTML(exitValue) + '</dd>' +
       '<dt>初始止损</dt><dd>' + (finite(trade.initial_stop) ? escapeHTML(trade.initial_stop) : "—") + '</dd>' +
       '<dt>' + rLabel + '</dt><dd>' + (finite(trade.net_r) ? Number(trade.net_r).toFixed(3) : "—") + '</dd>' +
-      '<dt>浮动 R</dt><dd>' + (finite(trade.unrealized_r) ? Number(trade.unrealized_r).toFixed(3) : "—") + '</dd></dl>' +
+      '<dt>浮动 R</dt><dd>' + (finite(trade.unrealized_r) ? Number(trade.unrealized_r).toFixed(3) : "—") + '</dd>' + comparison + '</dl>' +
       (item.reason ? '<p class="paper-decision-reason">' + escapeHTML(item.reason) + '</p>' : "") +
       '<small class="research-mono">事件 ' + escapeHTML(item.event_id || "未记录") + '</small></article>';
   }
@@ -233,7 +251,8 @@
     const download = `/api/research/paper/runs/${encodeURIComponent(String(detail.id || paperState.selectedRunId))}/export`;
     const decisions = Array.isArray(detail.decisions) ? detail.decisions : [];
     const fillPolicy = detail.spec?.exit_fill_policy || detail.spec?.fill_policy || "未记录";
-    return `<details class="paper-fill-assumptions"><summary>模拟成交假设</summary><p>成交策略标识：<code>${escapeHTML(fillPolicy)}</code></p><p>入场按实际观察后下一根尚未开始的 K 线开盘，使用该 K 线开盘价模拟；退出按预先冻结的 K 线规则模拟。未建模逐次退出下单延迟，闭合 OHLC 计算结果不等同真实报价或盘口成交。</p></details><div class="paper-detail-heading"><div><h3>观察记录</h3><p>决策在信号收盘后实际观察时记录；模拟入场安排在之后的未来开盘。</p></div><a class="research-button" href="${escapeHTML(download)}" download>导出 JSON</a><a class="research-button" href="${escapeHTML(download.replace("/export", "/sources"))}" download>下载源码快照</a></div><div class="paper-rules"><div><strong>入场规则</strong><p>${escapeHTML(detail.spec?.entry_rule || "未记录")}</p></div><div><strong>退出规则</strong><p>${escapeHTML(detail.spec?.exit_rule || "未记录")}</p></div><div><strong>源码摘要</strong><p class="research-mono">${escapeHTML(detail.spec?.source_hash || "未记录")}</p></div></div>${paperState.detailError ? `<div class="research-error" role="alert">${escapeHTML(paperState.detailError)}</div>` : ""}${decisions.length ? `<div class="paper-decisions">${decisions.map(decisionRow).join("")}</div>` : `<p class="research-empty">这个模拟任务目前没有可显示的决策记录。</p>`}<div class="paper-pagination"><button class="research-button" type="button" data-decision-page="prev"${offset <= 0 || paperState.detailLoading ? " disabled" : ""}>上一页</button><span>第 ${number(currentPage)} / ${number(pages)} 页 · 共 ${number(total)} 条</span><button class="research-button" type="button" data-decision-page="next"${offset + limit >= total || paperState.detailLoading ? " disabled" : ""}>下一页</button></div>`;
+    const observedNotice = detail.strategy_id === "spike-v131-retest" ? '<p class="research-caption">本页为到达后模拟，独立于信号中心原参考收益。固定往返成本 20bp；未计资金费和盘口滑点。类别取登记时 OKX 快照，新上市未收录则显示未分类。累计 R 不等于账户收益率。</p>' : '';
+    return `${observedNotice}<details class="paper-fill-assumptions"><summary>模拟成交假设</summary><p>成交策略标识：<code>${escapeHTML(fillPolicy)}</code></p><p>入场按实际观察后下一根尚未开始的 K 线开盘，使用该 K 线开盘价模拟；退出按预先冻结的 K 线规则模拟。未建模逐次退出下单延迟，闭合 OHLC 计算结果不等同真实报价或盘口成交。</p></details><div class="paper-detail-heading"><div><h3>观察记录</h3><p>决策在信号收盘后实际观察时记录；模拟入场安排在之后的未来开盘。</p></div><a class="research-button" href="${escapeHTML(download)}" download>导出 JSON</a><a class="research-button" href="${escapeHTML(download.replace("/export", "/sources"))}" download>下载源码快照</a></div><div class="paper-rules"><div><strong>入场规则</strong><p>${escapeHTML(detail.spec?.entry_rule || "未记录")}</p></div><div><strong>退出规则</strong><p>${escapeHTML(detail.spec?.exit_rule || "未记录")}</p></div><div><strong>源码摘要</strong><p class="research-mono">${escapeHTML(detail.spec?.source_hash || "未记录")}</p></div></div>${paperState.detailError ? `<div class="research-error" role="alert">${escapeHTML(paperState.detailError)}</div>` : ""}${decisions.length ? `<div class="paper-decisions">${decisions.map(decisionRow).join("")}</div>` : `<p class="research-empty">这个模拟任务目前没有可显示的决策记录。</p>`}<div class="paper-pagination"><button class="research-button" type="button" data-decision-page="prev"${offset <= 0 || paperState.detailLoading ? " disabled" : ""}>上一页</button><span>第 ${number(currentPage)} / ${number(pages)} 页 · 共 ${number(total)} 条</span><button class="research-button" type="button" data-decision-page="next"${offset + limit >= total || paperState.detailLoading ? " disabled" : ""}>下一页</button></div>`;
   }
   function paperResultsContentHTML() {
     const error = paperState.error ? `<div class="research-error" role="alert">${escapeHTML(paperState.error)} <button type="button" class="research-button" data-paper-refresh>重试</button></div>` : "";
@@ -251,12 +270,15 @@
     const choices = supportedStrategies();
     const choicesMarkup = strategyChoices();
     const selected = selectedStrategy();
+    const allowedTimeframes = tokens(selected?.timeframes);
+    paperState.timeframes = paperState.timeframes.filter((value) => allowedTimeframes.includes(value));
+    if (!paperState.timeframes.length && allowedTimeframes.length) paperState.timeframes = [allowedTimeframes[0]];
     const details = selected ? `<div class="paper-selected-rule"><strong>所选策略</strong><span>${escapeHTML(selected.name || selected.id)} · ${escapeHTML(selected.version || "")}</span><small>入场：${escapeHTML(selected.entry_rule || "未记录")} · 退出：${escapeHTML(selected.exit_rule || "未记录")}</small></div>` : "";
     const allMarket = paperState.symbolScope === "okx_all_usdt";
     const customSymbols = allMarket ? "" : `<label>合约 <small>逗号分隔，最多 2000 个，例如 BTC-USDT-SWAP</small><input name="symbols" value="${escapeHTML(paperState.symbols)}" autocomplete="off" required></label>`;
     root.innerHTML = `<div class="paper-intro research-callout"><strong>前向模拟，不向交易所下单</strong><p>服务实际观察信号后，才按下一次未来开盘记录模拟入场，再按策略原退出规则跟踪。统计使用 R，不代表账户收益；模拟不计资金费和盘口滑点。暂停只停止新的入场，已有模拟仓位继续跟踪；停止时未平仓记录会保留为截尾，不会补造平仓。登记、暂停和停止不会训练或提升策略。</p><p><a href="#shadow">查看保留的 V7 / V8 前向影子旧视图 ↗</a></p></div>
       <div class="research-toolbar paper-toolbar"><div><h2>新建模拟运行</h2><span class="research-caption">默认观察 OKX 全部 USDT 永续 · 固定往返成本 20 bp</span></div><button type="button" class="research-button" data-paper-refresh${paperState.loading ? " disabled" : ""}>${paperState.loading ? "正在刷新…" : "刷新任务"}</button></div>
-      <form class="paper-create-form" data-paper-create><label>策略<select name="strategy_id" required${choices.length ? "" : " disabled"}>${choicesMarkup || `<option value="">没有登记为可模拟的策略</option>`}</select></label><label>观察范围<select name="symbol_scope"><option value="okx_all_usdt"${allMarket ? " selected" : ""}>OKX 全部 USDT 永续（默认）</option><option value="custom"${allMarket ? "" : " selected"}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label>${customSymbols}<fieldset class="paper-timeframes"><legend>观察周期</legend>${["15m", "30m", "1H", "4H"].map((timeframe) => `<label><input type="checkbox" name="timeframes" value="${timeframe}"${paperState.timeframes.includes(timeframe) ? " checked" : ""}> ${timeframe === "1Dutc" ? "日线" : timeframe}</label>`).join("")}</fieldset><button class="research-button primary" type="submit"${!choices.length || paperState.creating ? " disabled" : ""}>${paperState.creating ? "正在启动…" : "启动模拟"}</button><span class="research-caption">没有历史回填；只有任务创建后的新观察会进入记录。</span></form>
+      <form class="paper-create-form" data-paper-create><label>策略<select name="strategy_id" required${choices.length ? "" : " disabled"}>${choicesMarkup || `<option value="">没有登记为可模拟的策略</option>`}</select></label><label>观察范围<select name="symbol_scope"><option value="okx_all_usdt"${allMarket ? " selected" : ""}>OKX 全部 USDT 永续（默认）</option><option value="custom"${allMarket ? "" : " selected"}>自选合约</option></select><small>跟随现有监控发现的新合约，只读取触发信号的合约，不会额外下载行情。</small></label>${customSymbols}<fieldset class="paper-timeframes"><legend>观察周期</legend>${allowedTimeframes.map((timeframe) => `<label><input type="checkbox" name="timeframes" value="${timeframe}"${paperState.timeframes.includes(timeframe) ? " checked" : ""}> ${timeframe === "1Dutc" ? "日线" : timeframe}</label>`).join("")}</fieldset><button class="research-button primary" type="submit"${!choices.length || paperState.creating ? " disabled" : ""}>${paperState.creating ? "正在启动…" : "启动模拟"}</button><span class="research-caption">没有历史回填；只有任务创建后的新观察会进入记录。</span></form>
       ${details}${paperResultsHTML()}
       <section class="paper-detail-section" aria-label="模拟决策记录">${renderPaperDetail()}</section>`;
     bindPaperEvents(root);
