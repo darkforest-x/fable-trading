@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: exp-spike-v131-observed-paper-20261016-v1-config
+    artifact_type: config
+    role: observed-entry-forward-paper-contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: 07bc93ab67043604633aad58ff63588a97478cc6
+    source_path: experiments/active/exp-spike-v131-observed-paper-20261016-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    sha256: c62d9a5ffdd63951d7394c541f2feff621e1f31f492e8d9888c052004657e4b0
+    size_bytes: 1042
+    notes: Forward-only execution observation configuration; no profitability claim.
   - artifact_id: spike-v128-retest-symbol-detail-20260925-v2
     artifact_type: manifest
     role: per_symbol_baseline_retest_comparison_and_trade_ledger

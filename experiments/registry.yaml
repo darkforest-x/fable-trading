@@ -14,6 +14,23 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-observed-paper-20261016-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 07bc93ab67043604633aad58ff63588a97478cc6
+    status: active
+    question: 15m 回踩信号实际到达后才入场，多空表现和相对原参考价的价差如何？
+    single_variable: Entry timing after actual observation only; original stop, 2R/4ATR, raw opposite exits and 20bp
+      unchanged.
+    result: 前向观察待积累；退出适配核对通过，不构成盈利验证。
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+    - exp-spike-v131-observed-paper-20261016-v1-config
+    reuse_allowed: false
+    notes: Both directions; OKX all USDT perpetuals. Asset category snapshot at registration; later listings unknown.
+      No history backfill, no matched control, no funding/orderbook slippage/account portfolio simulation. Run evidence
+      stored in the local paper journal; no automatic promote.
   - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2a4451810a308a81d251f7241d0329a45c2c1c05
