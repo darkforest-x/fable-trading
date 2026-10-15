@@ -1,0 +1,24 @@
+{
+  "experiment_id": "exp-spike-v13-15m-direction-20261016-v1",
+  "source_run": "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/retest_v1",
+  "source_manifest_sha256": "5fcc6c5d834490568f1b7078112a9b31d2c8200e9e844c118401afadfd9fcbac",
+  "source_summary": "experiments/active/exp-spike-v128-entry-clock-long-20260923-v1/summary_v1/buckets.csv",
+  "source_summary_sha256": "a201de0500a1ca152130ec9600df2202ae64558aaca8238ea9d4f69bf65a6d95",
+  "analysis_start": "2023-01-01T00:00:00Z",
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "timezone": "Asia/Shanghai",
+  "round_trip_cost": 0.002,
+  "bootstrap": 2000,
+  "statistics_seed": 10161301,
+  "single_variable": "entry direction only: both, long-only, short-only; retain raw opposite exits and all original price paths",
+  "primary_tests": "long-only and short-only vs same-direction matched random, each in earlier/later; Holm four tests; yearly rows descriptive",
+  "limitations": [
+    "Already observed historical data; the short-side hypothesis was prompted by a later October forward snapshot.",
+    "Frozen 638-symbol Binance archive and tick sizes are not point-in-time metadata; not current OKX executions.",
+    "Replaying candidate admission reuses original per-candidate exits exactly; no capital or leverage portfolio model.",
+    "Control eligibility matches original summary, including exclusion of Sunday anchors; low matched coverage must be reported."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
