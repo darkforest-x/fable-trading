@@ -96,3 +96,29 @@ test('closing the draft while symbol validation is pending does not submit later
  const h=validationHarness('ETH'),result=h.validate('yd');h.element('yd-scan-dialog').open=false;
  h.resolve([{symbol:'ETH-USDT-SWAP'}]);assert.equal(await result,false);
 });
+
+function feedHarness(){
+ const pending=[],messages=[],nodes=new Map();let draws=0;
+ const state={active:true,tab:'schedules',feed:null,feedDays:7,feedQuery:'',feedPeriod:'',feedSide:'',feedLimit:30};
+ const context={state,URLSearchParams,api:path=>new Promise((resolve,reject)=>pending.push({path,resolve,reject})),
+  error:message=>messages.push(message),$:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id);},drawFeed:()=>draws++};
+ const fn=vm.runInNewContext('let feedVersion=0;'+source.slice(source.indexOf('  async function refreshFeed(){'),source.indexOf('  function drawFeed(){'))+';refreshFeed',context);
+ return {state,pending,messages,nodes,fn,draws:()=>draws};
+}
+test('patrol filter replies cannot overwrite a newer selection',async()=>{
+ const h=feedHarness();const old=h.fn();h.state.feedQuery='ETH';const latest=h.fn();
+ assert.match(h.pending[1].path,/q=ETH/);
+ h.pending[1].resolve({items:['ETH']});await latest;
+ h.pending[0].resolve({items:['BTC']});await old;
+ assert.deepEqual(h.state.feed.items,['ETH']);assert.equal(h.draws(),1);
+});
+test('feed failure preserves the last successful discovery list and marks it stale',async()=>{
+ const h=feedHarness();h.state.feed={items:['kept']};const request=h.fn();
+ h.pending[0].reject(Error('offline'));await request;
+ assert.deepEqual(h.state.feed.items,['kept']);assert.match(h.messages.at(-1),/更新失败/);
+ assert.match(h.nodes.get('yd-feed-updated').textContent,/更新中断/);
+});
+test('leaving the workspace discards an outstanding discovery response',async()=>{
+ const h=feedHarness(),request=h.fn();h.state.active=false;
+ h.pending[0].resolve({items:['old']});await request;assert.equal(h.state.feed,null);
+});
