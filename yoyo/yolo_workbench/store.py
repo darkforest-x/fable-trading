@@ -109,6 +109,7 @@ class Book:
         import zlib
         with closing(self.connect()) as db,db:
             if rows is not None:
+                db.execute('BEGIN IMMEDIATE')
                 # A bounded prewarmer must not replace a newer live prefix.
                 current=db.execute('SELECT payload FROM input_cache WHERE symbol=? AND timeframe=?',(symbol,timeframe)).fetchone()
                 if current:

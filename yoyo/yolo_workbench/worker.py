@@ -1,8 +1,8 @@
 """Single-process background queue: no imports of execution/notification code.
 
-A process lock permits only one worker per workbench book. Scheduled runs skip
-missed occurrences and never overlap. A crash preserves partial results and
-marks the old job interrupted; the UI never presents it as complete.
+A process lock permits only one worker per workbench book. Incremental patrols
+resume every uncommitted endpoint without overlapping model work. A crash
+preserves results; only legacy manual jobs are marked interrupted.
 """
 from __future__ import annotations
 import argparse
@@ -113,7 +113,11 @@ def run(runtime):
             if job:
                 def yield_work():
                     due_schedules(book,now())
-                    if not governor.pause_reason():patrol.tick()
+                    reason=governor.pause_reason()
+                    while reason and not book.cancelled(job['id']):
+                        book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=now(),state='cooling',reason=reason))
+                        time.sleep(5);reason=governor.pause_reason()
+                    if not book.cancelled(job['id']):patrol.tick()
                 execute(book,job,market,engine,one_symbol=True,yield_work=yield_work);last_work=now();time.sleep(.08);continue
             if stamp-last_work>600000 and not any(s['enabled'] for s in book.schedules()):break
             time.sleep(2)

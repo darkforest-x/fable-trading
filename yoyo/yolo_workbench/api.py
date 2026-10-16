@@ -117,7 +117,7 @@ def install(app,runtime,launch_worker=True):
         items=[]
         for s in book.schedules():
             j=book.get(s['last_job_id']) if s.get('last_job_id') else None
-            items.append(dict(s,last_run={k:j[k] for k in ('id','status','progress','updated_ms','error')} if j else None))
+            items.append(dict(s,last_run=dict({k:j[k] for k in ('id','status','progress','updated_ms','error')},cutoff_ms=j['spec'].get('end_ms')) if j else None))
         items.sort(key=lambda s:(not s.get('incremental',False),TIMEFRAMES[s['spec']['timeframe']]))
         return dict(items=items,worker=book.meta('worker'))
     @router.get('/discoveries')
