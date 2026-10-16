@@ -1,0 +1,7 @@
+# A saved input prefix must not hide an already available confirmed tail
+
+- **Problem**: The first incremental full-market run still waited for a public request per coin and period. Sporadic slow responses serialized the entire patrol despite smaller inference batches.
+- **Dead end**: Reusing the patrol's own prefix avoided downloading old history, but checking the existing market writer only when that prefix was absent caused duplicate tail requests. More GPU concurrency would not fix network waiting and would consume desktop resources.
+- **Effective path**: Merge the existing writer's confirmed tail before considering a public request, reject conflicting closed bars, then retain exactly the original warmup boundary. Two background IO readers share the public client's rate limit and prepare at most four inputs ahead of the single model owner. Input preparation never advances coverage; normal result transactions and retries still own that decision.
+- **General rule**: Measure steady increments separately from initial preparation. A local cache hit does not mean the freshest reusable data was selected. Overlap bounded IO with compute before increasing model concurrency, and retain the failed capacity measurement when retesting.
+- **Affected**: `yoyo/yolo_workbench/market.py`, `prefetch.py`, `patrol.py`, `calibrate.py`; regression checks cover newer-tail reuse, conflict rejection, two-reader overlap and unchanged endpoint coverage. Activation still requires full-market measured acceptance.

@@ -11,9 +11,9 @@ import time
 from .store import encode, now
 from .models import TIMEFRAMES
 from .storage import pack
+from .prefetch import Prefetch,bounds,MAX_ENDPOINTS
 
 GRACE_MS=60000
-MAX_ENDPOINTS=12
 
 
 def next_due(stamp,interval_minutes):
@@ -42,8 +42,12 @@ def enqueue_due(book,stamp):
 
 
 class Patrol:
-    def __init__(self,book,market,engine):
+    def __init__(self,book,market,engine,prefetch=False):
         self.book=book;self.market=market;self.engine=engine
+        self.prefetch=Prefetch(book,market) if prefetch else None
+
+    def close(self):
+        if self.prefetch:self.prefetch.close()
 
     def choose(self):
         with closing(self.book.connect()) as db:
@@ -118,16 +122,12 @@ class Patrol:
                 self.progress(job);return True
             symbol=unit['symbol']
             cursor=db.execute('SELECT through_ms FROM patrol_cursors WHERE schedule_id=? AND symbol=?',(spec['cursor_key'],symbol)).fetchone()
-        start=time.monotonic();after=cursor[0] if cursor else spec['baseline_after_ms']
+        start=time.monotonic();after,end,eligible=bounds(spec,symbol,cursor[0] if cursor else None)
         # A coin cannot have valid inputs before its listing plus the frozen warmup.
-        listed=spec.get('listed_ms',{}).get(symbol,0)
-        eligible=((listed+step-1)//step+1240)*step if listed else 0
         if eligible>spec['end_ms']:
             self.commit(job,symbol,dict(symbol=symbol,timeframe=spec['timeframe'],observed_ms=now(),
                 error='上市历史不足 1,240 根，尚不能按原模型输入检测',availability='insufficient_history',eligible_from_ms=eligible))
         else:
-            if not cursor:after=max(after,eligible-step)
-            end=min(spec['end_ms'],after+MAX_ENDPOINTS*step)
             if end<=after:
                 with closing(self.book.connect()) as db,db:db.execute("UPDATE patrol_units SET status='done' WHERE job_id=? AND symbol=?",(identity,symbol))
             else:
@@ -138,9 +138,12 @@ class Patrol:
                     # Small batches leave room for interactive work on the shared GPU.
                     time.sleep(.02)
                 try:
-                    rows=self.market.candles(symbol,spec['timeframe'],end,sub['start_ms'],cancel)
+                    if self.prefetch:rows,source=self.prefetch.candles(job,symbol,after,end)
+                    else:
+                        rows=self.market.candles(symbol,spec['timeframe'],end,sub['start_ms'],cancel)
+                        source=self.market.sources.get((symbol,spec['timeframe']),'OKX public candles')
                     result=self.engine.scan(rows,sub,symbol,pulse,cancel)
-                    result.update(observed_ms=now(),source=self.market.sources.get((symbol,spec['timeframe']),'OKX public candles'),
+                    result.update(observed_ms=now(),source=source,
                         incremental=True,coverage_after_ms=after,coverage_through_ms=end,remaining_endpoints=(spec['end_ms']-end)//step,
                         universe_observed_ms=spec['universe_observed_ms'])
                     self.commit(job,symbol,result,end)

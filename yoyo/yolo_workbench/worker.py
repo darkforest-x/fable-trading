@@ -96,7 +96,7 @@ def run(runtime):
         from .patrol import Patrol
         from .resources import Governor
         os.nice(10)
-        market=Market(runtime=runtime,book=book);engine=Engine();patrol=Patrol(book,market,engine);governor=Governor();last_work=now()
+        market=Market(runtime=runtime,book=book);engine=Engine();patrol=Patrol(book,market,engine,prefetch=True);governor=Governor();last_work=now()
         while True:
             control=book.meta('control') or {}
             if control.get('stop_worker'):break
@@ -121,7 +121,7 @@ def run(runtime):
                 execute(book,job,market,engine,one_symbol=True,yield_work=yield_work);last_work=now();time.sleep(.08);continue
             if stamp-last_work>600000 and not any(s['enabled'] for s in book.schedules()):break
             time.sleep(2)
-        book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=now(),state='stopped'))
+        patrol.close();book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=now(),state='stopped'))
 
 
 if __name__=='__main__':

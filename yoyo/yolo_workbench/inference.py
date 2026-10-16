@@ -81,7 +81,7 @@ def episodes(detections):
 class Engine:
     def __init__(self):
         self.models={}
-        self.implementation_sources={name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('models.py','market.py','inference.py','worker.py','patrol.py','storage.py')}
+        self.implementation_sources={name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('models.py','market.py','inference.py','worker.py','patrol.py','prefetch.py','storage.py')}
         import subprocess
         self.source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
 

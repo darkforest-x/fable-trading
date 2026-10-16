@@ -150,3 +150,40 @@ def test_saved_research_prefix_is_reused_after_market_restart(tmp_path):
     assert len(restarted.cache)==32
     book.input_cache('A','5m',rows[:1240])
     assert book.input_cache('A','5m')[-1]['t']==1240*step
+
+
+def test_newer_monitor_tail_avoids_duplicate_download_but_rejects_conflicts(tmp_path):
+    book=Book(tmp_path);step=900000
+    rows=[dict(t=i*step,o=100.,h=101.,l=99.,c=100.,v=10.) for i in range(1241)]
+    book.input_cache('A','15m',rows[:1240])
+    class Client:
+        def get(self,*args):raise AssertionError('confirmed tail must not be downloaded again')
+    market=Market(Client(),runtime=tmp_path,book=book);market.checkpoint=lambda *_:rows
+    result=market.candles('A','15m',1241*step,1001*step)
+    assert result==rows[1:] and market.sources[('A','15m')]=='existing_okx_confirmed_checkpoint'
+    changed=deepcopy(rows);changed[100]['c']=100.5;market.checkpoint=lambda *_:changed
+    with pytest.raises(ValueError,match='未静默覆盖'):market.candles('A','15m',1241*step,1001*step)
+
+
+def test_bounded_prefetch_overlaps_only_io_and_preserves_endpoint_coverage(tmp_path,monkeypatch):
+    import threading,time
+    import yoyo.yolo_workbench.prefetch as prefetch
+    book=Book(tmp_path);plan(book,'a','5m',15);plan(book,'b','15m',15);enqueue_due(book,END+GRACE_MS)
+    active=0;peak=0;lock=threading.Lock()
+    class Reader:
+        sources={}
+        def __init__(self,*args,**kwargs):pass
+        def candles(self,*args):
+            nonlocal active,peak
+            with lock:active+=1;peak=max(peak,active)
+            try:time.sleep(.04);return []
+            finally:
+                with lock:active-=1
+    monkeypatch.setattr(prefetch,'Market',Reader)
+    market=MarketStub();market.runtime=tmp_path;engine=Detector();patrol=Patrol(book,market,engine,prefetch=True)
+    try:
+        finish(patrol)
+        assert peak==2 and not patrol.prefetch.pending
+        assert len(engine.calls)==6 and all(j['status']=='completed' for j in book.jobs())
+        assert all(len(ts)==3 for _,_,ts in engine.calls)
+    finally:patrol.close()

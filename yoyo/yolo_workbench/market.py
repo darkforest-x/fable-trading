@@ -96,11 +96,19 @@ class Market:
         if not cached and self.book:
             cached=self.book.input_cache(*key)
             if cached:self.sources[key]='saved_research_input_checkpoint'
-        if not cached and self.runtime:
-            cached=self.checkpoint(symbol,timeframe)
-            if cached:self.sources[key]='existing_okx_confirmed_checkpoint'
         cached=parse([[r[k] for k in ('t','o','h','l','c','v')]+[0,0,str(r.get('confirm',1))] for r in cached],timeframe,cutoff)
         collected={r['t']:r for r in cached if first_open<=r['t']<=last_open}
+        # The existing market writer may already have the new closed bars.
+        # Merge its confirmed tail even when our saved prefix is present.
+        if self.runtime:
+            checkpoint=parse([[r[k] for k in ('t','o','h','l','c','v')]+[0,0,str(r.get('confirm',1))]
+                              for r in self.checkpoint(symbol,timeframe)],timeframe,cutoff)
+            for row in checkpoint:
+                if not first_open<=row['t']<=last_open:continue
+                old=collected.get(row['t'])
+                if old is not None and old!=row:raise ValueError('已确认行情与检测缓存不一致，未静默覆盖')
+                if old is None:self.sources[key]='existing_okx_confirmed_checkpoint'
+                collected[row['t']]=row
         # Only use a contiguous cache that reaches the required warmup origin.
         if not collected or min(collected)!=first_open or any(b-a!=step for a,b in zip(sorted(collected),sorted(collected)[1:])):
             collected={}
