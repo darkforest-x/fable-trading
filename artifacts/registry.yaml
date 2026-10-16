@@ -32408,3 +32408,46 @@ artifacts:
     production_eligible: false
     notes: Pins the config, input, source, summary and compressed trade-ledger hashes for the ETH 15m early-exit study.
       Research only; receipt records exact data window and replay validation.
+
+  - artifact_id: btc-key-level-reactions-20261016-receipt
+    artifact_type: manifest
+    role: btc_key_level_first_touch_response_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: a6f99cecb07ffd50898984330786de633c548fcb
+    source_path: experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/receipt.json
+    sha256: eebdfa9dd270ffe1ce985a94ac553cefebd6270cbd98df03eeac3bed11daa0df
+    size_bytes: 2869
+    storage_uri: repo://experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Raw level, event, response and matched-control ledgers are retained beside the receipt; descriptive study,
+      not live execution validation.
+  - artifact_id: btc-key-level-reactions-20261016-summary
+    artifact_type: dataset
+    role: btc_key_level_first_touch_response_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: a6f99cecb07ffd50898984330786de633c548fcb
+    source_path: experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/summary.csv
+    sha256: 8c8fd22e4eed5ae6a26a8528609245e7a07c80fab4efcd440b9773212ea57dd4
+    size_bytes: 143160
+    storage_uri: repo://experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Raw level, event, response and matched-control ledgers are retained beside the receipt; descriptive study,
+      not live execution validation.
+  - artifact_id: btc-key-level-reactions-20261016-verification
+    artifact_type: manifest
+    role: btc_key_level_first_touch_response_evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 665f1ff105de7d2cc9d949f864947904af600cc8
+    source_path: experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/verification.json
+    sha256: 0af4b3ff673d2c0bcc5a65ad178e8e6d55d49c1b8262680f89fc570431e726c7
+    size_bytes: 1219
+    storage_uri: repo://experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/verification.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Raw level, event, response and matched-control ledgers are retained beside the receipt; descriptive study,
+      not live execution validation.

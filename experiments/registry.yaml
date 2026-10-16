@@ -11509,3 +11509,32 @@ experiments:
     production_eligible: false
     reuse_allowed: false
     notes: Owner 2026-10-14 asked for a detailed read of the Notion task and suggestions; the task itself lists manual backtests as todo. Discretion in the text (当然这个不是固定的, 企稳, structure of the week) is not modelled; this is the fixed-rule baseline. Six majors only. No Pine, monitor, preset or account change.
+
+  - experiment_id: exp-btc-key-level-reactions-20261016-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a6f99cecb07ffd50898984330786de633c548fcb
+    status: inconclusive
+    question: Do first touches of the BTC frontend key levels offer short reactions that clear 0.2 percent cost and
+      beat matched random entries?
+    single_variable: Existing level family; fixed chronological split, approach direction strata and 15/60/240-minute
+      response windows; primary 60 minutes.
+    result: 'OKX BTC 2021-10-13..2026-10-13: 5945 events, 5610 unique touch minutes; 5824 matched (97.96 percent),
+      116058 control pairs. Gross/net means 15m +2.159/-17.841bp, 60m +0.050/-19.950bp, 240m -1.238/-21.238bp; matched
+      excess +1.602/-1.695/-5.419bp (week-cluster p .0970/.2584/.0542). 60m pre/post net -18.819/-21.699bp. Monday
+      low 174 events net -3.877bp, excess +17.466bp, p .0332, q .4648; pre net +8.187bp becomes post -22.683bp. All
+      15 categories have negative full-period 60m net; no family passes both periods. 60m MFE/MAE medians 29.377/30.071bp
+      are path extrema, not realized PnL.'
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts:
+    - btc-key-level-reactions-20261016-receipt
+    - btc-key-level-reactions-20261016-summary
+    - btc-key-level-reactions-20261016-verification
+    notes: Builder/config committed before generation. Inputs are existing frozen OKX 1m archives; no download or
+      venue change. Complete 15m sessions reconstruct NY UI levels; 1m first touch, next-minute-open measurements;
+      same-origin POC/nPOC deduplicated. Same BTC/week/6h-daypart/causal-vol-tertile/prior-15m-momentum controls,
+      week clustering, BH correction. No stops, target selection, actual limit fills, funding or portfolio claims.
+      81 tests and full independent arithmetic/UI-formula audit pass. Reproduce command in config.json. No report
+      requested. Notion https://app.notion.com/p/3fb8856479af81cdb42fd6610c0aab54 .

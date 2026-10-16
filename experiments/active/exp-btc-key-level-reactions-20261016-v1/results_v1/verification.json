@@ -1,0 +1,29 @@
+{
+  "verified": true,
+  "events": 5945,
+  "measurements": 17835,
+  "control_pairs": 116058,
+  "levels": 8517,
+  "maximum_absolute_errors": {
+    "gross": 1.1368683772161603e-12,
+    "net": 1.1368683772161603e-12,
+    "mfe": 1.1226575225009583e-12,
+    "mae": 1.1368683772161603e-12,
+    "ideal": 2.8705926524708048e-12,
+    "matched_control": 4.902744876744691e-13,
+    "frontend_level": 1.4551915228366852e-11
+  },
+  "generated_at": "2026-10-16T07:49:37.568470+00:00",
+  "verifier_commit": "665f1ff105de7d2cc9d949f864947904af600cc8",
+  "ui_reference_sha256": "040a43a4b419a8facb19915d5f7fd8065942ba62ceeb89d0b359eceaa6f39b0a",
+  "checks": [
+    "dated levels match frontend profile / independent range formulas",
+    "first contact only / approach direction / continuous prior path",
+    "entry is next minute / no touch-minute extremes",
+    "every response recomputed from raw OHLC",
+    "every control gross and cost recomputed",
+    "same week/daypart/side/split; no within-event control duplicates",
+    "no label crosses split"
+  ],
+  "limitation": "Control volatility/momentum construction has causal unit tests, but is not independently reimplemented here. No execution or profitability validation implied."
+}

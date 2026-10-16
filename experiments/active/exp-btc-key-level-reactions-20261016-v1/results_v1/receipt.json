@@ -1,0 +1,84 @@
+{
+  "experiment_id": "exp-btc-key-level-reactions-20261016-v1",
+  "generated_at": "2026-10-16T07:46:58.580389+00:00",
+  "git_head": "a6f99cecb07ffd50898984330786de633c548fcb",
+  "builders": {
+    "yoyo/evaluation/key_level_reactions.py": "8a8d41448e8eab84e22d422b86bf5d4719ae65e5a3ed3035799aa8d70957ad45",
+    "experiments/active/exp-btc-key-level-reactions-20261016-v1/config.json": "48c2b38925abd683433075224925fb0d53c6365cac9331ee5731071499e070d5"
+  },
+  "inputs": [
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+      "sha256": "ed20cecba7715a8d1e3675ff46bae7cafb9edcd1941103d74f2bdef9d31bea63",
+      "rows": 2672637,
+      "first_ms": 1630425600000,
+      "last_ms": 1790783940000
+    },
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+      "sha256": "3d63220a62dab2cc332895dfe71b4c96761718f7c70c1014506b0675423d04f7",
+      "rows": 17760,
+      "first_ms": 1790784000000,
+      "last_ms": 1791849540000
+    }
+  ],
+  "source_rows": 2690397,
+  "source_gap_intervals": 2,
+  "source_missing_minutes": 3,
+  "complete_15m_bars": 179358,
+  "incomplete_15m_buckets": 2,
+  "formation": {
+    "incomplete_sessions": 4,
+    "incomplete_weeks": 2,
+    "complete_sessions": 1865
+  },
+  "level_status": {
+    "contact": 5946,
+    "no_touch": 2429,
+    "touch_outside_study": 127,
+    "missing_no_touch_path": 14,
+    "approach_equal": 1
+  },
+  "matching": {
+    "matched": 5824,
+    "unmatched": 121,
+    "excluded_missing_path_features_or_split": 1
+  },
+  "control_rows": 116058,
+  "unique_control_minutes": 110527,
+  "measured_events": 5945,
+  "unique_touch_minutes": 5610,
+  "versions": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3"
+  },
+  "artifacts": {
+    "summary.csv": {
+      "sha256": "8c8fd22e4eed5ae6a26a8528609245e7a07c80fab4efcd440b9773212ea57dd4",
+      "size_bytes": 143160
+    },
+    "levels.csv.gz": {
+      "sha256": "aad787ec25a98e5bd7be91f0e957825f6f9d27bde40a7dacf6adfd5f3666776d",
+      "size_bytes": 127840
+    },
+    "level_status.csv.gz": {
+      "sha256": "7190a05c0350513d31a087808669b2b8a96a678118f455ca0b93f5ead1124d36",
+      "size_bytes": 60029
+    },
+    "measurements.csv.gz": {
+      "sha256": "0a252c2643341112888d5e409aec6153f7bf6ab8dae7c48eea8209c6d67eb67f",
+      "size_bytes": 2148585
+    },
+    "controls.csv.gz": {
+      "sha256": "f9eb9a2600bcb9834db9909fbb90efb44d17e9bd939a9817ae70810aca04f6d8",
+      "size_bytes": 552716
+    },
+    "events.csv.gz": {
+      "sha256": "698592d6e755d03463393de689a8f571cfe350001f464b76e6e210f85d5ffa83",
+      "size_bytes": 186705
+    }
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "interpretation": "Descriptive next-minute reaction measurements; neither hypothetical level prices nor maximum excursions are fills or an executable strategy."
+}
