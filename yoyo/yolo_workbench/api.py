@@ -77,8 +77,8 @@ def install(app,runtime,launch_worker=True):
             items=Market().universe();return dict(items=items,observed_ms=now())
         except Exception as exc:raise HTTPException(503,'OKX 币种列表不可用：'+str(exc)[:180]) from exc
     @router.get('/jobs')
-    def jobs(limit:int=Query(30,ge=1,le=100)):
-        return dict(items=book.jobs(limit),worker=book.meta('worker'),now_ms=now())
+    def jobs(limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0)):
+        return dict(items=book.jobs(limit,offset),total=book.job_count(),worker=book.meta('worker'),now_ms=now())
     @router.post('/jobs',status_code=202)
     def submit(body:Submission):
         spec=freeze_spec(body.model_dump(exclude={'request_id'}))

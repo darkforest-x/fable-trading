@@ -56,8 +56,11 @@ class Book:
     def get(self,identity):
         with closing(self.connect()) as db:return self.job(db.execute('SELECT * FROM jobs WHERE id=?',(identity,)).fetchone())
 
-    def jobs(self,limit=30):
-        with closing(self.connect()) as db:return [self.job(r) for r in db.execute('SELECT * FROM jobs ORDER BY created_ms DESC LIMIT ?',(limit,))]
+    def jobs(self,limit=30,offset=0):
+        with closing(self.connect()) as db:return [self.job(r) for r in db.execute('SELECT * FROM jobs ORDER BY created_ms DESC LIMIT ? OFFSET ?',(limit,offset))]
+
+    def job_count(self):
+        with closing(self.connect()) as db:return db.execute('SELECT count(*) FROM jobs').fetchone()[0]
 
     def claim(self):
         with closing(self.connect()) as db,db:
