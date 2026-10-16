@@ -119,10 +119,33 @@ def test_lossless_chart_storage_shares_ohlc_without_reusing_different_mas(tmp_pa
 
 
 def test_incremental_endpoint_pixels_match_the_original_snapshot(tmp_path):
+    import hashlib
+    seen=[]
     class Model:
-        def predict(self,source,**kwargs):return [SimpleNamespace(boxes=None) for _ in source]
+        def predict(self,source,**kwargs):
+            seen.extend(hashlib.sha256(np.ascontiguousarray(image).tobytes()).hexdigest() for image in source)
+            return [SimpleNamespace(boxes=None) for _ in source]
     engine=Engine();engine.models[DEFAULT_MODEL]=(Model(),'cpu')
     rows=[dict(t=i*300000,o=100+i*.01,h=101+i*.01,l=99+i*.01,c=100+i*.01,v=10) for i in range(1240)]
     spec=dict(model_id=DEFAULT_MODEL,timeframe='5m',mode='latest',start_ms=1000*300000,end_ms=1240*300000)
     old=engine.scan(rows,spec,'A');new=engine.scan(rows,dict(spec,incremental=True,scan_after_ms=1239*300000),'A')
     assert old['candles']==new['candles'] and new['endpoints_scored']==1 and new['windows_scored']==2
+    assert seen[4:6]==seen[6:8]
+
+
+def test_saved_research_prefix_is_reused_after_market_restart(tmp_path):
+    book=Book(tmp_path);step=300000
+    rows=[dict(t=i*step,o=100,h=101,l=99,c=100,v=10) for i in range(1241)]
+    calls=[]
+    class Client:
+        def clock(self):return 1241*step
+        def get(self,path,p):
+            calls.append(path);selected=[r for r in rows if r['t']<int(p['after'])][-int(p['limit']):]
+            return [[r[k] for k in ('t','o','h','l','c','v')]+[0,0,'1'] for r in reversed(selected)]
+    first=Market(Client(),book=book);first.candles('A','5m',1240*step,1000*step);n=len(calls)
+    restarted=Market(Client(),book=book);result=restarted.candles('A','5m',1241*step,1001*step)
+    assert len(calls)==n+1 and result[0]['t']==step
+    for i in range(40):restarted.remember((str(i),'5m'),rows)
+    assert len(restarted.cache)==32
+    book.input_cache('A','5m',rows[:1240])
+    assert book.input_cache('A','5m')[-1]['t']==1240*step

@@ -109,6 +109,11 @@ class Book:
         import zlib
         with closing(self.connect()) as db,db:
             if rows is not None:
+                # A bounded prewarmer must not replace a newer live prefix.
+                current=db.execute('SELECT payload FROM input_cache WHERE symbol=? AND timeframe=?',(symbol,timeframe)).fetchone()
+                if current:
+                    old=json.loads(zlib.decompress(current[0]))
+                    if old and rows and old[-1]['t']>rows[-1]['t']:return rows
                 db.execute('INSERT OR REPLACE INTO input_cache VALUES (?,?,?)',
                            (symbol,timeframe,zlib.compress(encode(rows[-2000:]).encode(),3)))
                 return rows
