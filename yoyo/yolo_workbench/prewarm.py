@@ -20,8 +20,11 @@ def prewarm(runtime,identity):
     spec=job['spec'];client=OKX(rate=3);client.synchronize();local=threading.local()
     def read(symbol):
         try:
-            cached=book.input_cache(symbol,spec['timeframe'])
             step=__import__('yoyo.yolo_workbench.models',fromlist=['TIMEFRAMES']).TIMEFRAMES[spec['timeframe']]
+            listed=spec.get('listed_ms',{}).get(symbol,0)
+            if listed and ((listed+step-1)//step+1240)*step>spec['end_ms']:
+                return symbol,'insufficient_history'
+            cached=book.input_cache(symbol,spec['timeframe'])
             if cached and cached[-1]['t']+step>=spec['end_ms']:return symbol,'cached'
             if not hasattr(local,'market'):local.market=Market(client,runtime=runtime,book=book)
             local.market.candles(symbol,spec['timeframe'],spec['end_ms'],spec['start_ms'])

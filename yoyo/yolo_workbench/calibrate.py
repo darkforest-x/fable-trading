@@ -93,7 +93,9 @@ def main(runtime,output,enable=False):
             if accepted and enable:
                 for s in plans:
                     # Cursor timestamps, not activation time, define next pending work.
-                    book.schedule(dict(s,enabled=True,validation=False,next_due_ms=next_due(now(),s['interval_minutes'])))
+                    last=book.get(s['last_job_id']) if s.get('last_job_id') else None
+                    pending=last and last['progress'].get('remaining_endpoints',0)
+                    book.schedule(dict(s,enabled=True,validation=False,next_due_ms=now() if pending else next_due(now(),s['interval_minutes'])))
                 for s in prior:
                     if s['enabled'] and s['spec']['timeframe']=='15m' and s['spec']['scope']=='all' and s['interval_minutes']==60:book.remove_schedule(s['id'])
                     else:book.schedule(s)
