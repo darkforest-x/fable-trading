@@ -125,6 +125,7 @@ class Book:
         with closing(self.connect()) as db:
             # JSON projection avoids loading every full chart into a page response.
             rows=db.execute("""SELECT symbol,json_extract(payload,'$.error') AS error,
+                json_extract(payload,'$.availability') AS availability,
                 json_array_length(payload,'$.episodes') AS count,
                 json_array_length(payload,'$.raw_detections') AS raw_count,
                 json_extract(payload,'$.cutoff_ms') AS cutoff_ms,

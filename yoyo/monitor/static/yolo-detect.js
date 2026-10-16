@@ -54,7 +54,7 @@
   const terminal=new Set(['completed','partial','failed','cancelled','interrupted']);
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const fmt=(ms,full=false)=>ms?new Intl.DateTimeFormat('zh-CN',{timeZone:'Asia/Shanghai',...(full?{year:'numeric'}:{}),month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date(ms)):'—';
-  const names={queued:'排队中',running:'检测中',completed:'已完成',partial:'部分失败',failed:'失败',cancelled:'已取消',interrupted:'已中断'};
+  const names={queued:'排队中',running:'检测中',completed:'已完成',partial:'部分可用',failed:'失败',cancelled:'已取消',interrupted:'已中断'};
   const periods={'5m':'5 分钟','15m':'15 分钟','30m':'30 分钟','1H':'1 小时','4H':'4 小时','1Dutc':'日线 · UTC'};
   const colors={sma20:'#4389c7',sma60:'#71aaa6',sma120:'#7c7f9e',ema20:'#e57950',ema60:'#d4a74e',ema120:'#af7db6'};
   const state={active:false,loaded:false,catalog:null,jobs:[],schedules:[],job:null,result:null,symbol:'',selected:null,
@@ -284,23 +284,23 @@
   function scopeName(spec){return spec.scope==='all'?'全市场':spec.symbols.map(short).join(' / ');}
   function summary(){
     const j=state.job;if(!j){html('yd-summary',state.loadingJob?'<strong>正在打开检测记录…</strong>':'<div><strong>从一次检测开始</strong><p>选择币种或扫描全市场，结果直接显示在下方。</p></div><button class="yd-primary" data-yd-new>新建检测</button>');return;}
-    const rows=j.results||[],hits=rows.filter(r=>r.count>0).length,failed=rows.filter(r=>r.error).length;
+    const rows=j.results||[],hits=rows.filter(r=>r.count>0).length,unavailable=rows.filter(r=>r.availability==='insufficient_history').length,failed=rows.filter(r=>r.error&&r.availability!=='insufficient_history').length;
     const latest=state.jobs.find(n=>n.id!==j.id&&n.created_ms>j.created_ms&&terminal.has(n.status)&&n.status!=='failed'&&sameScan(n.spec,j.spec));
     const age=j.spec.end_ms?Date.now()-j.spec.end_ms:0,isOld=j.spec.mode==='latest'&&age>steps[j.spec.timeframe];
-    html('yd-summary',`<div><strong>${scopeName(j.spec)} · ${periods[j.spec.timeframe]} <span class="yd-status ${j.status}">${names[j.status]}</span></strong><p>${j.spec.mode==='history'?'历史识别':'形态识别'} · ${fmt(j.spec.end_ms||j.created_ms)} 北京${isOld?' · <span class="yd-stale">旧识别记录</span>':''} · 已检测 ${rows.length}/${j.progress.total||'—'} 币 · <b>${hits} 币有形态</b>${failed?' · '+failed+' 币失败':''}</p>${j.error?`<p class="yd-error-text">${esc(j.error)}</p>`:''}</div><div class="yd-summary-actions">${latest?`<button data-yd-job="${latest.id}">查看较新结果</button>`:''}<button data-yd-rerun ${!terminal.has(j.status)||submitting?'disabled':''}>${j.spec.mode==='latest'?'重新扫描':'重新检测'}</button></div>`);
+    html('yd-summary',`<div><strong>${scopeName(j.spec)} · ${periods[j.spec.timeframe]} <span class="yd-status ${j.status}">${names[j.status]}</span></strong><p>${j.spec.mode==='history'?'历史识别':'形态识别'} · ${fmt(j.spec.end_ms||j.created_ms)} 北京${isOld?' · <span class="yd-stale">旧识别记录</span>':''} · 已处理 ${rows.length}/${j.progress.total||'—'} 币 · <b>${hits} 币有形态</b>${unavailable?' · '+unavailable+' 币历史不足':''}${failed?' · '+failed+' 币失败':''}</p>${j.error?`<p class="yd-error-text">${esc(j.error)}</p>`:''}</div><div class="yd-summary-actions">${latest?`<button data-yd-job="${latest.id}">查看较新结果</button>`:''}<button data-yd-rerun ${!terminal.has(j.status)||submitting?'disabled':''}>${j.spec.mode==='latest'?'重新扫描':'重新检测'}</button></div>`);
     const p=$('yd-run-progress');p.hidden=terminal.has(j.status);
     html('yd-run-progress',`<span>${names[j.status]} · ${j.progress.completed||0}/${j.progress.total||'—'} 币${j.progress.symbol?' · '+esc(short(j.progress.symbol)):''}${j.progress.windows_total?' · '+j.progress.windows_done+'/'+j.progress.windows_total+' 窗口':''}</span><progress aria-label="本次检测进度" max="${j.progress.total||1}" value="${j.progress.completed||0}"></progress><button data-yd-cancel="${j.id}" ${j.cancel?'disabled':''}>${j.cancel?'正在取消…':'取消检测'}</button>`);
   }
   function symbolRows(){return filteredSymbols(state.job?.results||[],state.symbolSearch,state.resultFilter,favorites,state.symbolOrder);}
   function drawSymbols(){
     const all=state.job?.results||[],rows=symbolRows(),hit=all.filter(r=>r.count>0).length,failed=all.filter(r=>r.error).length;
-    $('yd-symbol-total').textContent=all.length+' 币';$('yd-hit-count').textContent=hit;$('yd-failed-filter').textContent='失败 '+failed;$('yd-failed-filter').hidden=!failed;
+    $('yd-symbol-total').textContent=all.length+' 币';$('yd-hit-count').textContent=hit;$('yd-failed-filter').textContent='未能检测 '+failed;$('yd-failed-filter').hidden=!failed;
     $('yd-favorite-count').textContent=all.filter(r=>favorites.includes(r.symbol)).length;
     const favorite=favorites.includes(state.symbol);$('yd-favorite').disabled=!state.symbol;$('yd-favorite').textContent=favorite?'★ 已关注':'☆ 关注';$('yd-favorite').setAttribute('aria-pressed',String(favorite));
     $('yd-scan-symbol').disabled=$('yd-change-period').disabled=!state.symbol;
     root.querySelectorAll('[data-yd-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ydFilter===state.resultFilter)));
     const focus=root.contains(document.activeElement)&&document.activeElement?.matches('[data-yd-symbol]');
-    html('yd-symbol-list',rows.length?rows.map(r=>`<button data-yd-symbol="${esc(r.symbol)}" class="yd-symbol ${r.symbol===state.symbol?'selected':''}" aria-pressed="${r.symbol===state.symbol}"><strong>${favorites.includes(r.symbol)?'★ ':''}${esc(short(r.symbol))}</strong><span>${r.error?'读取失败':r.count?`${r.count} 个形态`:'未检出'}${!r.error&&!r.count&&r.raw_count?' · 有原始框':''}${r.count?'<small>'+(state.symbolOrder==='score'?'模型 '+((r.max_confidence||0)*100).toFixed(1)+'%':'确认 '+fmt(r.latest_detection_ms))+'</small>':''}</span></button>`).join(''):`<div class="yd-empty"><p>${state.loadingJob?'正在读取…':state.resultFilter==='favorites'?'本次结果中还没有符合搜索的关注币种。点图表标题旁的“关注”，以后就更好找。':all.length?'没有符合条件的币种':terminal.has(state.job?.status)?'本次没有可浏览的币种':'结果会在检测完成后出现'}</p>${all.length?`<button data-yd-clear-search>${state.resultFilter==='all'?'清空搜索':state.symbolSearch?'在全部币种中搜索':'查看全部币种'}</button>`:''}</div>`);
+    html('yd-symbol-list',rows.length?rows.map(r=>`<button data-yd-symbol="${esc(r.symbol)}" class="yd-symbol ${r.symbol===state.symbol?'selected':''}" aria-pressed="${r.symbol===state.symbol}"><strong>${favorites.includes(r.symbol)?'★ ':''}${esc(short(r.symbol))}</strong><span>${r.availability==='insufficient_history'?'历史不足':r.error?'读取失败':r.count?`${r.count} 个形态`:'未检出'}${!r.error&&!r.count&&r.raw_count?' · 有原始框':''}${r.count?'<small>'+(state.symbolOrder==='score'?'模型 '+((r.max_confidence||0)*100).toFixed(1)+'%':'确认 '+fmt(r.latest_detection_ms))+'</small>':''}</span></button>`).join(''):`<div class="yd-empty"><p>${state.loadingJob?'正在读取…':state.resultFilter==='favorites'?'本次结果中还没有符合搜索的关注币种。点图表标题旁的“关注”，以后就更好找。':all.length?'没有符合条件的币种':terminal.has(state.job?.status)?'本次没有可浏览的币种':'结果会在检测完成后出现'}</p>${all.length?`<button data-yd-clear-search>${state.resultFilter==='all'?'清空搜索':state.symbolSearch?'在全部币种中搜索':'查看全部币种'}</button>`:''}</div>`);
     if(focus)root.querySelector(`[data-yd-symbol="${CSS.escape(state.symbol)}"]`)?.focus({preventScroll:true});
     html('yd-quick-symbol',(!rows.some(r=>r.symbol===state.symbol)&&state.symbol?`<option value="${esc(state.symbol)}">${esc(short(state.symbol))} · 当前查看</option>`:'')+rows.map(r=>`<option value="${esc(r.symbol)}">${esc(short(r.symbol))}${r.count?' · '+r.count+' 形态':''}</option>`).join(''));$('yd-quick-symbol').value=state.symbol;
     const index=rows.findIndex(r=>r.symbol===state.symbol);$('yd-symbol-index').textContent=index<0?'':`${index+1} / ${rows.length}`;
@@ -356,7 +356,7 @@
     try{
       const key=id+':'+symbol;let result=resultCache.get(key);if(!result){result=await api(`/jobs/${id}/results/${encodeURIComponent(symbol)}`);resultCache.set(key,result);if(resultCache.size>32)resultCache.delete(resultCache.keys().next().value);}
       if(version!==requestVersion||!state.active)return;
-      if(result.error){$('yd-chart-sub').textContent='该币种检测失败';emptyChart('该币种检测失败：'+result.error);return;}
+      if(result.error){const unavailable=result.availability==='insufficient_history';$('yd-chart-sub').textContent=unavailable?'上市历史不足，暂不能检测':'该币种检测失败';emptyChart(result.error+(unavailable?'。达到所需历史后，将在后续巡检自动检测。':''));return;}
       state.result=result;tailStatus();if(focusBox&&!result.episodes.some(b=>b.id===focusBox)&&result.raw_detections.some(b=>b.id===focusBox)){state.boxes='raw';$('yd-boxes').value='raw';}await renderChart();if(version!==requestVersion)return;if(focusBox&&!boxes().some(b=>b.id===focusBox))error('这处形态已无法定位，当前展示该币种的其他结果。');drawBoxes();syncRoute();refreshTail();
     }catch(e){if(version===requestVersion){$('yd-chart-sub').textContent='图表未能加载，请重新选择币种重试';emptyChart('图表加载失败：'+e.message);error(e.message);}}
     finally{if(version===requestVersion){state.loadingResult=false;drawSymbols();}}

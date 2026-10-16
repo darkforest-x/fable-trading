@@ -100,6 +100,7 @@ def test_insufficient_listing_is_explicit_and_does_not_fetch_or_claim_coverage(t
     market=MarketStub();market.universe=lambda:[dict(symbol='NEW',listed_ms=END-10*86400000)]
     p=Patrol(book,market,Detector());finish(p)
     j=book.jobs()[0];assert j['progress']['unavailable']==1 and j['progress']['failed']==0
+    assert book.summaries(j['id'])[0]['availability']=='insufficient_history'
     assert market.visits==[]
     with closing(book.connect()) as db:assert db.execute('SELECT count(*) FROM patrol_cursors').fetchone()[0]==0
 
