@@ -11538,3 +11538,30 @@ experiments:
       week clustering, BH correction. No stops, target selection, actual limit fills, funding or portfolio claims.
       81 tests and full independent arithmetic/UI-formula audit pass. Reproduce command in config.json. No report
       requested. Notion https://app.notion.com/p/3fb8856479af81cdb42fd6610c0aab54 .
+
+  - experiment_id: exp-btc-key-level-wick-reclaim-20261016-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: eec12c25234d127ffa80c748967da49afcd5dbe8
+    status: rejected
+    question: Does first-touch same-5m wick-through-and-reclaim at existing BTC frontend key levels earn positive
+      net after 0.2 percent cost and beat matched random entries?
+    single_variable: Add strict 5m wick/reclaim filter. All-contact comparator waits to same next-5m-open clock; same
+      v1 levels, first-touch identities, temporal split, cost, horizons and seeds.
+    result: 3163 reclaim events (3012 unique 5m signal times), 3066 matched; pre/post 2025/1138. 15/60/240m gross
+      +1.153/-1.027/-2.428bp, net -18.847/-21.027/-22.428bp; matched control net -19.322/-18.447/-15.762bp; paired
+      excess +0.326/-2.692/-6.141bp, week p .7140/.0810/.0314. Primary 60m q .4359, excess CI [-5.600,+0.357]bp. Same-clock
+      unfiltered 60m net -20.649bp, compared with v1 original next-minute net -19.950bp. Reclaim pre/post 60m net
+      -20.747/-21.524bp; all 15 full-period families net negative, none passes both periods. Reject this frozen rule
+      as evidence for profitable entry; other retests or exits are untested.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: false
+    artifacts:
+    - btc-key-level-wick-reclaim-20261016-v2-receipt
+    - btc-key-level-wick-reclaim-20261016-v2-summary
+    - btc-key-level-wick-reclaim-20261016-v2-verification
+    notes: No wick/body threshold, TP/SL fit, funding, fills or account changes. Full 5m signal must close before
+      entry; only first touches. 91 tests and independent raw-slice replay of 5946 signals, 17835 outcomes, 112782
+      control pairs pass; max error 1.14e-12bp. No model/ranking, so AUC/class/top-decile metrics not applicable.
+      Reproduction command in config.json. Notion https://app.notion.com/p/3fb8856479af819b9facfcb02b6db533 .

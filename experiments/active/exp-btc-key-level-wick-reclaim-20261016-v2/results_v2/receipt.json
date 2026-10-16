@@ -1,0 +1,86 @@
+{
+  "experiment_id": "exp-btc-key-level-wick-reclaim-20261016-v2",
+  "generated_at": "2026-10-16T08:09:06.467584+00:00",
+  "git_head": "eec12c25234d127ffa80c748967da49afcd5dbe8",
+  "builders": {
+    "yoyo/evaluation/key_level_wick_reclaim.py": "47e9b24b10e7ed0ba7e974fee70ae1e4d20309d26aef2b7eb9d92cc899369f03",
+    "yoyo/evaluation/key_level_reactions.py": "8a8d41448e8eab84e22d422b86bf5d4719ae65e5a3ed3035799aa8d70957ad45",
+    "experiments/active/exp-btc-key-level-wick-reclaim-20261016-v2/config.json": "dc9ebff814523a2018af0803bf68007cf94fe75efacd98792d8062a7bbcb1df9"
+  },
+  "inputs": [
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+      "sha256": "ed20cecba7715a8d1e3675ff46bae7cafb9edcd1941103d74f2bdef9d31bea63"
+    },
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+      "sha256": "3d63220a62dab2cc332895dfe71b4c96761718f7c70c1014506b0675423d04f7"
+    }
+  ],
+  "baseline_artifacts": [
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/config.json",
+      "sha256": "48c2b38925abd683433075224925fb0d53c6365cac9331ee5731071499e070d5"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/events.csv.gz",
+      "sha256": "698592d6e755d03463393de689a8f571cfe350001f464b76e6e210f85d5ffa83"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/levels.csv.gz",
+      "sha256": "aad787ec25a98e5bd7be91f0e957825f6f9d27bde40a7dacf6adfd5f3666776d"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/summary.csv",
+      "sha256": "8c8fd22e4eed5ae6a26a8528609245e7a07c80fab4efcd440b9773212ea57dd4"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/verification.json",
+      "sha256": "0af4b3ff673d2c0bcc5a65ad178e8e6d55d49c1b8262680f89fc570431e726c7"
+    }
+  ],
+  "source_rows": 2690397,
+  "signal_audit": {
+    "not_reclaim": 2782,
+    "wick_reclaim": 3164
+  },
+  "matching": {
+    "matched": 5748,
+    "unmatched": 197,
+    "excluded_path_features_or_split": 1
+  },
+  "measured_events": 5945,
+  "reclaim_events": 3163,
+  "unique_reclaim_candles": 3012,
+  "controls": 112782,
+  "unique_control_minutes": 91717,
+  "versions": {
+    "numpy": "2.0.2",
+    "pandas": "2.3.3"
+  },
+  "artifacts": {
+    "summary.csv": {
+      "sha256": "79e6d588e4cc1af174a6b8a2afa2f09cdf5c4e472e96252bc9d10f3f4b9e24f4",
+      "size_bytes": 422934
+    },
+    "verification.json": {
+      "sha256": "957b366e00413f169be5549263e9eee67de9a6b8cbf30065a5e0f169cda01acc",
+      "size_bytes": 810
+    },
+    "measurements.csv.gz": {
+      "sha256": "62e2ac549e5c049b163b55561793f27c39091cf35a65614e481b284dd50de805",
+      "size_bytes": 1752738
+    },
+    "controls.csv.gz": {
+      "sha256": "91256df8e29ca622d596b303695ce42e32ca4743dddbe7cfc78fc23956226627",
+      "size_bytes": 479767
+    },
+    "events.csv.gz": {
+      "sha256": "a31b10634555050b6beb003aedf1f166b740e56b3fa73c1ebcc04679493e329e",
+      "size_bytes": 309054
+    }
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "interpretation": "First-touch 5m wick-reclaim filter with confirmation-close timing. Fixed-horizon responses, not a fitted TP/SL strategy or real fills. Later retests are outside this experiment."
+}

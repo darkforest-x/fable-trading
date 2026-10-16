@@ -1,0 +1,21 @@
+{
+  "verified": true,
+  "signals": 5946,
+  "measurements": 17835,
+  "control_pairs": 112782,
+  "maximum_absolute_errors": {
+    "gross": 1.1368683772161603e-12,
+    "net": 1.1368683772161603e-12,
+    "mfe": 1.1368683772161603e-12,
+    "mae": 1.1368683772161603e-12,
+    "control": 7.034373084024992e-13
+  },
+  "checks": [
+    "all 5m wick predicates recomputed from raw slices",
+    "entry after confirmation at next 5m open",
+    "no signal-candle extremes in outcomes",
+    "every return and control return independently recomputed",
+    "same week/daypart/side/split and no repeated control within event"
+  ],
+  "limitation": "Frozen v1 provides audited level formation/first contacts. Matching feature arithmetic has causal unit tests, not an independent second implementation. No execution validation."
+}
