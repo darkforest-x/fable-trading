@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-btc-key-level-reactions-20261016-v1",
+  "owner_request": "Test the existing market-observer BTC key levels as locations for short reactions.",
+  "design": "Preregistered descriptive first-touch event study; no parameter optimization or order simulator.",
+  "single_variable": "Location family, using the existing UI formulas; direction and observation horizons are declared strata, not fitted rules.",
+  "symbol": "BTC-USDT-SWAP",
+  "venue": "OKX",
+  "timezone": "America/New_York",
+  "start": "2021-10-13T00:00:00Z",
+  "split": "2024-10-13T00:00:00Z",
+  "end": "2026-10-13T00:00:00Z",
+  "inputs": [
+    {"path": "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv", "sha256": "ed20cecba7715a8d1e3675ff46bae7cafb9edcd1941103d74f2bdef9d31bea63"},
+    {"path": "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv", "sha256": "3d63220a62dab2cc332895dfe71b4c96761718f7c70c1014506b0675423d04f7"}
+  ],
+  "round_trip_cost": 0.002,
+  "profile_volume": "Archive volume is contracts; multiply by 0.01 for BTC base-volume units. A constant multiplier cancels analytically; compare both units for floating-point boundary differences and retain the count. No volume-based signal is fitted.",
+  "horizons_minutes": [15, 60, 240],
+  "primary_horizon_minutes": 60,
+  "entry": "First 1m candle containing a level after its activation; approach side uses the preceding minute close. Primary measurement starts at the NEXT minute open, with no confirmation filter. Ideal level-price reference is reported separately, not called a fill.",
+  "lifetime": "Frozen Monday levels: Tuesday to next Monday; previous-week extremes: current calendar week; yesterday VAH/VAL: one day. Each session POC: first touch within next 14 calendar days; classify as yesterday_poc on day 1, otherwise npoc. This prevents duplicate yesterday POC / nPOC events.",
+  "missing": "Only complete 15m buckets, complete formation sessions, continuous activation-to-touch paths and continuous 4h outcome paths. No interpolation. Crossing the chronological split is excluded.",
+  "controls": {"count": 20, "minimum": 5, "seed": 2026101601, "match": "Same BTC venue, NY calendar week, six-hour local daypart, causal volatility tertile and preceding completed 15m return sign; same side, horizons, next-minute-open measurement and cost. Exclude controls within 4h of the paired touch. No replacement within an event; reuse across events is recorded.", "volatility": "Std of 96 complete consecutive 15m log returns; tertile cutoffs from the preceding 30 days of that series, at least 7 days. All inputs completed before the touch minute."},
+  "statistics": {"seed": 2026101602, "resamples": 4999, "cluster": "NY week", "test": "Two-sided week-cluster sign flips of paired event minus mean-control returns; week bootstrap confidence interval; BH q across all 60m tests within each time period (all groupings included).", "success": "No live promotion. A promising family must have positive 60m net and positive excess in both chronological periods, with p<0.01 and q<0.01 in each; no selecting a different horizon after results."},
+  "not_applicable": "No fitted model or ranking: AUC, positive-class prevalence and top-decile performance are not applicable. Random matched entries provide the baseline. MFE/MAE are descriptive extremes, not attainable profit or a stop/target policy.",
+  "limitations": "No queue, actual maker fills, spread-specific executions, funding, stops, position sizing or portfolio equity. Cost is the unchanged project reporting assumption. Levels sharing one range are dependent; week clustering and unique-touch counts are retained. Pre/post are chronological replication, not untouched holdouts.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.key_level_reactions --config experiments/active/exp-btc-key-level-reactions-20261016-v1/config.json"
+}
