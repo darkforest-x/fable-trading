@@ -1,0 +1,75 @@
+{
+  "experiment_id": "exp-btc-key-level-wick-reclaim-20261016-v2",
+  "owner_request": "看 5min 级别的，到关键点位，只做插针收回的",
+  "design": "Preregistered single 5m wick-reclaim filter on the frozen first-contact cohort; primary pooled reclaim 60m, family/side strata with BH correction.",
+  "single_variable": "Add strict same-5m wick-through-and-reclaim confirmation. To isolate selection from entry delay, recompute ALL first contacts at the same next-5m-open clock as the filter. Preserve v1 first-contact scope, level definitions, date split, cost, horizons and random seeds.",
+  "symbol": "BTC-USDT-SWAP",
+  "venue": "OKX",
+  "timezone": "America/New_York",
+  "start": "2021-10-13T00:00:00Z",
+  "split": "2024-10-13T00:00:00Z",
+  "end": "2026-10-13T00:00:00Z",
+  "inputs": [
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+      "sha256": "ed20cecba7715a8d1e3675ff46bae7cafb9edcd1941103d74f2bdef9d31bea63"
+    },
+    {
+      "path": "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+      "sha256": "3d63220a62dab2cc332895dfe71b4c96761718f7c70c1014506b0675423d04f7"
+    }
+  ],
+  "round_trip_cost": 0.002,
+  "profile_volume": "Archive volume is contracts; multiply by 0.01 for BTC base-volume units. A constant multiplier cancels analytically; compare both units for floating-point boundary differences and retain the count. No volume-based signal is fitted.",
+  "horizons_minutes": [
+    15,
+    60,
+    240
+  ],
+  "primary_horizon_minutes": 60,
+  "entry": "Long: the first-touch complete 5m candle opens strictly above the level, trades strictly below, and closes strictly above. Short is symmetric. Confirm at 5m close, measure from following 5m open. No wick/body or penetration threshold. No repeated later retests.",
+  "lifetime": "Frozen Monday levels: Tuesday to next Monday; previous-week extremes: current calendar week; yesterday VAH/VAL: one day. Each session POC: first touch within next 14 calendar days; classify as yesterday_poc on day 1, otherwise npoc. This prevents duplicate yesterday POC / nPOC events.",
+  "missing": "Inherit audited continuous first-contact paths; require complete 5m signal candle and next open plus continuous 4h outcome. No interpolation and no split-crossing labels.",
+  "controls": {
+    "count": 20,
+    "minimum": 5,
+    "seed": 2026101601,
+    "match": "Same BTC/NY week/6h local daypart/causal vol tertile/last completed 15m momentum sign/side/split. Random entries only at 5m opens with a complete preceding 5m candle. Features known before that candle opens. Same horizons and 0.2% cost. Exclude +/-4h from event; sample without replacement per event; reuse across events allowed and retained.",
+    "volatility": "Unchanged 96-return 15m std and preceding 30-day tertile thresholds, minimum 7 days, all known BEFORE the signal 5m candle opens."
+  },
+  "statistics": {
+    "seed": 2026101602,
+    "resamples": 4999,
+    "cluster": "NY week",
+    "test": "Unchanged week-cluster sign flip and bootstrap of event-minus-control means. BH q over all primary-60m family/side groups within period AND cohort. Only wick_reclaim is the primary hypothesis cohort; all_contacts_5m_clock and not_reclaim are descriptive comparators. No direct causal claim from the filtered-minus-unfiltered mean.",
+    "success": "No live promotion. A promising family must have positive 60m net and positive excess in both chronological periods, with p<0.01 and q<0.01 in each; no selecting a different horizon after results."
+  },
+  "not_applicable": "No learned model or ranking: AUC, class prevalence and top-decile metrics are not applicable. Fixed-horizon returns and matched random controls are measured. MFE/MAE are descriptive extrema, not realized exit profits.",
+  "limitations": "First-touch events only; does not test every subsequent retest, multi-candle reclaim, a wick/body-ratio rule, resting limit fills or a TP/SL strategy. Same-bar reclaim is known only at its close. No queue, orderbook, funding, position sizing or portfolio equity. Overlapping levels are clustered by week. Pre/post are chronological replication, not untouched holdouts.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.key_level_wick_reclaim --config experiments/active/exp-btc-key-level-wick-reclaim-20261016-v2/config.json",
+  "contacts_path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/events.csv.gz",
+  "baseline_artifacts": [
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/config.json",
+      "sha256": "48c2b38925abd683433075224925fb0d53c6365cac9331ee5731071499e070d5"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/events.csv.gz",
+      "sha256": "698592d6e755d03463393de689a8f571cfe350001f464b76e6e210f85d5ffa83"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/levels.csv.gz",
+      "sha256": "aad787ec25a98e5bd7be91f0e957825f6f9d27bde40a7dacf6adfd5f3666776d"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/summary.csv",
+      "sha256": "8c8fd22e4eed5ae6a26a8528609245e7a07c80fab4efcd440b9773212ea57dd4"
+    },
+    {
+      "path": "experiments/active/exp-btc-key-level-reactions-20261016-v1/results_v1/verification.json",
+      "sha256": "0af4b3ff673d2c0bcc5a65ad178e8e6d55d49c1b8262680f89fc570431e726c7"
+    }
+  ]
+}
