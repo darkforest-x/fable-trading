@@ -1,0 +1,7 @@
+# A live chart must keep the detection snapshot immutable
+
+- **Problem**: A saved pattern still needs current price context, but its chart stopped at the original detection cutoff. Reopening the record did not show subsequent closed candles.
+- **Dead end**: Refreshing the saved result only reloads the same snapshot. Replacing its candles with a fresh rolling window would also shift indexed boxes and reseed EMA values, undermining the provenance of the original detection.
+- **Effective path**: Append a separate, display-only series after the frozen cutoff. Continue SMA from trailing source prices and EMA from saved state, for both close and HL2. Require contiguous confirmed candles from the same OKX source; retain the last successful view on failure. Label the original detection cutoff separately from the latest chart close. Discard responses for abandoned coins or disabled follow mode, and preserve user-adjusted chart ranges.
+- **General rule**: Treat model evidence and subsequent market context as separate data products. Verify prefix immutability and full-series MA parity before displaying their concatenation.
+- **Affected**: `yoyo/yolo_workbench/chart_tail.py`, its read-only chart API, and `yoyo/monitor/static/yolo-detect.js`. No inference job, persisted result, execution path, or model qualification changes. Tests cover causal MA parity, missing/unconfirmed candles, cached recovery, API immutability and late-response races; ALGO 15m extended from 17:45 to 21:00 using 13 existing confirmed candles.

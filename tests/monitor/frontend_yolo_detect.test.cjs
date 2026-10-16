@@ -122,3 +122,43 @@ test('leaving the workspace discards an outstanding discovery response',async()=
  const h=feedHarness(),request=h.fn();h.state.active=false;
  h.pending[0].resolve({items:['old']});await request;assert.equal(h.state.feed,null);
 });
+
+test('coin ordering supports recent shapes, score, alphabet and favorites without mutating rows',()=>{
+ const rows=[{symbol:'Z-USDT-SWAP',count:1,latest_detection_ms:200,max_confidence:.5},{symbol:'A-USDT-SWAP',count:2,latest_detection_ms:100,max_confidence:.9},{symbol:'B-USDT-SWAP',count:0}];
+ const order=(mode,favorites=[])=>filteredSymbols(rows,'','all',favorites,mode).map(r=>r.symbol[0]).join('');
+ assert.equal(order('latest'),'ZAB');assert.equal(order('score'),'AZB');assert.equal(order('name'),'ABZ');assert.equal(order('name-desc'),'ZBA');assert.equal(order('favorites',['B-USDT-SWAP']),'BZA');assert.equal(rows[0].symbol,'Z-USDT-SWAP');
+});
+test('chart continuation never mutates the detection prefix or mixes coins and periods',()=>{
+ const {chartRows}=require('../../yoyo/monitor/static/yolo-detect.js');
+ const result={symbol:'ETH',timeframe:'5m',candles:[{t:0},{t:300000}]};
+ const tail={symbol:'ETH',timeframe:'5m',detection_cutoff_ms:600000,candles:[{t:600000}]};
+ assert.deepEqual(chartRows(result,tail).map(r=>r.t),[0,300000,600000]);assert.equal(result.candles.length,2);
+ assert.equal(chartRows(result,{...tail,symbol:'BTC'}).length,2);
+ assert.equal(chartRows(result,{...tail,timeframe:'15m'}).length,2);
+ assert.equal(chartRows(result,{...tail,detection_cutoff_ms:900000}).length,2);
+});
+
+function tailHarness(){
+ const pending=[];let draws=0,focuses=0;
+ const state={active:true,tab:'results',result:{symbol:'ETH'},job:{id:'job'},follow:true,tailLoading:false,tailChecked:0,tail:null,viewTouched:false};
+ const context={state,Date,encodeURIComponent,api:path=>new Promise((resolve,reject)=>pending.push({path,resolve,reject})),tailStatus(){},updateChartData(){draws++;},followupRange(){focuses++;}};
+ const fn=vm.runInNewContext('let tailVersion=0;'+source.slice(source.indexOf('  async function refreshTail('),source.indexOf('  function emptyChart('))+';refreshTail',context);
+ return {state,pending,fn,draws:()=>draws,focuses:()=>focuses};
+}
+test('pending chart continuation cannot replace a different coin or a disabled follow view',async()=>{
+ for(const change of [s=>s.result={symbol:'BTC'},s=>s.follow=false,s=>s.active=false]){
+  const h=tailHarness(),request=h.fn();change(h.state);h.pending[0].resolve({candles:[{t:1}]});await request;
+  assert.equal(h.state.tail,null);assert.equal(h.draws(),0);
+ }
+});
+test('chart updates preserve a user-adjusted view and avoid duplicate network requests',async()=>{
+ const h=tailHarness(),request=h.fn();await h.fn(true);assert.equal(h.pending.length,1);
+ h.state.viewTouched=true;h.pending[0].resolve({candles:[{t:1}]});await request;
+ assert.equal(h.draws(),1);assert.equal(h.focuses(),0);await h.fn();assert.equal(h.pending.length,1);
+ const fresh=tailHarness(),first=fresh.fn();fresh.pending[0].resolve({candles:[{t:1}]});await first;assert.equal(fresh.focuses(),1);
+});
+test('chart update failure retains the last successful candles and exposes the failure',async()=>{
+ const h=tailHarness(),saved={candles:[{t:1}]};h.state.tail=saved;const request=h.fn();
+ h.pending[0].reject(Error('offline'));await request;
+ assert.equal(h.state.tail,saved);assert.match(h.state.tailError,/保留当前图表.*offline/);assert.equal(h.state.tailLoading,false);
+});

@@ -58,6 +58,8 @@ def install(app,runtime,launch_worker=True):
     book=Book(runtime);app.state.yolo_workbench=book
     from .discoveries import Feed
     feed=Feed(book)
+    from .chart_tail import ChartTail
+    charts=ChartTail(runtime)
     router=APIRouter(prefix='/api/yolo-detect',dependencies=[Depends(same_origin)])
     def launch():
         if launch_worker:
@@ -104,13 +106,19 @@ def install(app,runtime,launch_worker=True):
         try:return Response(input_png(value,detection,annotated),media_type='image/png')
         except KeyError:raise HTTPException(404,'检测框不存在') from None
         except ValueError as exc:raise HTTPException(409,str(exc)) from exc
+    @router.get('/jobs/{identity}/results/{symbol}/chart')
+    def chart(identity:str,symbol:str):
+        value=result(identity,symbol)
+        if value.get('error') or not value.get('candles'):raise HTTPException(409,'该币种没有可续接的K线')
+        try:return charts.read(identity,value)
+        except Exception as exc:raise HTTPException(503,'行情更新失败：'+str(exc)[:180]) from exc
     @router.get('/schedules')
     def schedules():return dict(items=book.schedules())
     @router.get('/discoveries')
     def discoveries(days:int=Query(7,ge=0,le=30),q:str=Query('',max_length=80),
                     timeframe:Literal['','5m','15m','30m','1H','4H','1Dutc']='',
-                    side:Literal['','long','short']='',limit:int=Query(30,ge=1,le=500)):
-        return feed.read(days=days,query=q,timeframe=timeframe,side=side,limit=limit)
+                    side:Literal['','long','short']='',limit:int=Query(30,ge=1,le=500),sort:Literal['newest','score','symbol']='newest'):
+        return feed.read(days=days,query=q,timeframe=timeframe,side=side,limit=limit,sort=sort)
     @router.post('/schedules',status_code=201)
     def schedule(body:Schedule):
         if len(book.schedules())>=12:raise HTTPException(409,'已有 12 个计划，请先删除不需要的计划')

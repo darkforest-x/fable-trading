@@ -101,6 +101,8 @@ class Book:
                 json_array_length(payload,'$.episodes') AS count,
                 json_array_length(payload,'$.raw_detections') AS raw_count,
                 json_extract(payload,'$.cutoff_ms') AS cutoff_ms,
+                (SELECT MAX(json_extract(value,'$.detected_at_ms')) FROM json_each(payload,'$.episodes')) AS latest_detection_ms,
+                (SELECT MAX(json_extract(value,'$.confidence')) FROM json_each(payload,'$.episodes')) AS max_confidence,
                 json_extract(payload,'$.windows_scored') AS windows_scored FROM results WHERE job_id=? ORDER BY symbol""",(identity,))
             return [dict(r) for r in rows]
 

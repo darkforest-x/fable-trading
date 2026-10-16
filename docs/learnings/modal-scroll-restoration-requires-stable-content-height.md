@@ -1,0 +1,7 @@
+# Restore modal content before restoring page scroll
+
+- **Problem**: Mobile form actions fell below the visible screen, coin filters opened behind the enlarged chart, and closing a large chart could return the page to the top.
+- **Dead end**: Scrolling an entire dialog leaves its submit button off-screen. Increasing z-index cannot place an ordinary sidebar above a native modal. Saving scroll after moving the chart is too late: removing the chart already collapses the page and clamps its scroll position.
+- **Effective path**: Use a native nested coin-picker dialog; keep modal headers and action footers fixed with only the body scrolling. Size to the visual viewport and safe area. Lock and capture page position before moving content into the dialog; restore the content before releasing the final nested-dialog lock. Use the same restoration path for explicit close, native close and workspace deactivation.
+- **General rule**: Scroll restoration depends on both ordering and geometry. Test at a nonzero page offset, close nested overlays independently, and verify actions inside short visible viewports rather than checking only CSS breakpoints.
+- **Affected**: `yoyo/monitor/static/yolo-detect.js` and `.css`. Browser checks cover 320×568, 390×700 and 390×400 viewports, nested coin selection and return to the actual saved 566.5px page offset. Real-device keyboard behavior remains a separate verification from browser viewport emulation.

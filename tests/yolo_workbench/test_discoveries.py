@@ -8,11 +8,12 @@ from yoyo.yolo_workbench.store import Book, now
 
 
 def add(book, key, *, schedule='plan', observed=100, start=10, end=20, side='long',
-        symbol='ETH-USDT-SWAP', timeframe='15m', mode='latest', model='model-a', error=None):
+        symbol='ETH-USDT-SWAP', timeframe='15m', mode='latest', model='model-a', error=None,
+        confidence=.8):
     spec=dict(model_id=model,model_sha256=model,renderer_sha256='renderer',parameters={'conf':.25},
               adapter_version='v1',timeframe=timeframe,mode=mode,scope='selected',symbols=[symbol])
     job=book.submit(spec,key,schedule_id=schedule)
-    box=dict(id=key,side=side,confidence=.8,core_start_ms=start,core_end_ms=end,
+    box=dict(id=key,side=side,confidence=confidence,core_start_ms=start,core_end_ms=end,
              core_bars=4,post_bars=3,detected_at_ms=end+30,first_detected_at_ms=end+20)
     book.result(job['id'],symbol,dict(observed_ms=observed,episodes=[box],candles=['not sent'],error=error))
     book.update(job['id'],status='partial' if error else 'completed')
@@ -78,3 +79,16 @@ def test_api_reads_do_not_submit_jobs_and_warm_cache_observes_external_writes(tm
     assert client.get(url).json()['total']==1 and book.job_count()==1
     assert client.get('/api/yolo-detect/discoveries?days=7&side=long').status_code==200
     assert client.get('/api/yolo-detect/discoveries?limit=501').status_code==422
+
+
+def test_sorting_applies_before_pagination_and_preserves_discovery_times(tmp_path):
+    app=FastAPI();install(app,tmp_path,launch_worker=False);client=TestClient(app)
+    book=Book(tmp_path)
+    add(book,'newest',symbol='Z-USDT-SWAP',observed=300,confidence=.4)
+    add(book,'highest',symbol='B-USDT-SWAP',observed=100,confidence=.9)
+    add(book,'alphabetic',symbol='A-USDT-SWAP',observed=200,confidence=.5)
+    for sort,expected,observed in [('newest','newest',300),('score','highest',100),('symbol','alphabetic',200)]:
+        out=client.get(f'/api/yolo-detect/discoveries?days=0&limit=1&sort={sort}').json()
+        assert out['total']==3 and out['items'][0]['detection_id']==expected
+        assert out['items'][0]['first_observed_ms']==observed
+    assert client.get('/api/yolo-detect/discoveries?sort=unknown').status_code==422

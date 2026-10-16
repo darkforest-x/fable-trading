@@ -51,7 +51,7 @@ class Feed:
         self.items = []
         self.lock = Lock()
 
-    def read(self, *, days=7, query='', timeframe='', side='', limit=30):
+    def read(self, *, days=7, query='', timeframe='', side='', limit=30, sort='newest'):
         with self.lock, closing(self.book.connect()) as db:
             # A snapshot prevents the high-water mark from skipping a concurrent insert.
             db.execute('BEGIN')
@@ -81,6 +81,10 @@ class Feed:
                        and query.strip().upper() in r['symbol']
                        and (not timeframe or r['timeframe'] == timeframe)
                        and (not side or r['side'] == side)]
+            if sort == 'score':
+                matched.sort(key=lambda r: (-r['confidence'], -r['first_observed_ms'], r['symbol']))
+            elif sort == 'symbol':
+                matched.sort(key=lambda r: (r['symbol'], -r['first_observed_ms']))
             latest = db.execute("""SELECT * FROM jobs WHERE schedule_id IS NOT NULL
                 AND json_extract(spec,'$.mode')='latest' ORDER BY created_ms DESC,id DESC LIMIT 1""").fetchone()
             job = self.book.job(latest)
