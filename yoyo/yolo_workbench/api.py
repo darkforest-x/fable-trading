@@ -61,7 +61,9 @@ def install(app,runtime,launch_worker=True):
         if launch_worker:
             from .worker import start
             start(runtime)
-    app.state.start_yolo_workbench=launch
+    from .supervisor import Supervisor
+    app.state.yolo_workbench_supervisor=Supervisor(runtime)
+    app.state.start_yolo_workbench=app.state.yolo_workbench_supervisor.start if launch_worker else lambda:None
     def job(identity):
         value=book.get(identity)
         if value is None:raise HTTPException(404,'检测任务不存在')

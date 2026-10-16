@@ -81,6 +81,9 @@ def episodes(detections):
 class Engine:
     def __init__(self):
         self.models={}
+        self.implementation_sources={name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('models.py','market.py','inference.py','worker.py')}
+        import subprocess
+        self.source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
 
     def load(self, profile):
         if profile['id'] in self.models:return self.models[profile['id']]
@@ -101,6 +104,7 @@ class Engine:
         profile=MODELS[spec['model_id']]
         if spec.get('model_sha256') and spec['model_sha256']!=profile['sha256']:raise ValueError('排队后模型版本发生变化，请重新提交')
         if spec.get('renderer_sha256') and spec['renderer_sha256']!=hashlib.sha256((ROOT/'yoyo/layers/l1_detection/render.py').read_bytes()).hexdigest():raise ValueError('排队后渲染器变化，请重新提交')
+        if spec.get('parameters') and spec['parameters']!=PARAMETERS:raise ValueError('排队后推理参数变化，请重新提交')
         model,device=self.load(profile)
         step=TIMEFRAMES[spec['timeframe']]
         rows=[r for r in rows if r['t']+step<=spec['end_ms']]
@@ -138,6 +142,7 @@ class Engine:
                     parameters=PARAMETERS,production_eligible=False,
                     data_sha256=hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest(),
                     runtime_versions={k:importlib.metadata.version(k) for k in ('torch','ultralytics','numpy','pandas')},
+                    implementation_sources=self.implementation_sources,source_commit=self.source_commit,
                     renderer_sha256=hashlib.sha256((ROOT/'yoyo/layers/l1_detection/render.py').read_bytes()).hexdigest())
         return result
 

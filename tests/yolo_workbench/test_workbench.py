@@ -44,6 +44,7 @@ def test_market_requires_complete_warmup_and_no_gaps():
     out=market.candles('ETH-USDT-SWAP','5m',1300*300000,1100*300000)
     assert out[0]['t']==100*300000 and out[-1]['t']==1299*300000
     data.pop(150)
+    market=Market(Client())
     with pytest.raises(ValueError,match='缺口'):market.candles('ETH-USDT-SWAP','5m',1300*300000,1100*300000)
     with pytest.raises(Cancelled):market.candles('ETH-USDT-SWAP','5m',1300*300000,1100*300000,lambda:True)
 
@@ -154,3 +155,32 @@ def test_api_rejects_cross_origin_and_never_launches_on_reads(tmp_path,monkeypat
     assert client.get('/api/yolo-detect/jobs/'+j['id']).json()['results']==[]
     assert client.post('/api/yolo-detect/jobs/'+j['id']+'/cancel',headers={'Origin':'http://testserver'}).json()['status']=='cancelled'
     assert client.get('/api/yolo-detect/jobs/nope').status_code==404
+
+
+def test_supervisor_restarts_only_when_work_has_no_lock_owner(tmp_path,monkeypatch):
+    import fcntl
+    from yoyo.yolo_workbench import supervisor
+    launched=[];monkeypatch.setattr(supervisor,'start',lambda r:launched.append(r))
+    watcher=supervisor.Supervisor(tmp_path)
+    assert watcher.ensure() is False
+    watcher.book.submit(spec(),'pending')
+    with (watcher.book.runtime/'worker.lock').open('a+') as lock:
+        fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+        assert watcher.ensure() is False
+    assert watcher.ensure() is True and launched==[tmp_path]
+
+
+def test_cached_closed_prefix_needs_only_a_new_tail_page():
+    data=rows(1301);calls=[]
+    class Client:
+        def clock(self):return 1301*300000
+        def get(self,path,p):
+            calls.append(path)
+            values=[r for r in data if r['t']<int(p['after'])][-int(p['limit']):]
+            return [[r[k] for k in ('t','o','h','l','c','v')]+[0,0,'1'] for r in reversed(values)]
+    market=Market(Client())
+    market.candles('ETH-USDT-SWAP','5m',1300*300000,1100*300000)
+    first=len(calls)
+    out=market.candles('ETH-USDT-SWAP','5m',1301*300000,1101*300000)
+    assert len(calls)==first+1 and out[0]['t']==101*300000 and out[-1]['t']==1300*300000
+    assert set(calls)=={'/api/v5/market/candles'}

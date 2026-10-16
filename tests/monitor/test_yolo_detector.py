@@ -22,7 +22,7 @@ def chart_rows(count=400, duration=3_600_000):
         candles.append(dict(t=i * duration, o=close - .1, h=close + 1,
                             l=close - 1, c=close, v=10))
     timeframe = next(k for k, v in detector.TIMEFRAME_MS.items() if v == duration)
-    return signals.analyze(candles, [], timeframe)["chart"]
+    return signals.analyze(candles, [], timeframe, tick=.01)["chart"]
 
 
 def normalized_box(window, a, b):

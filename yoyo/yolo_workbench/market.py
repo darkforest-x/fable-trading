@@ -8,6 +8,11 @@ snapshots belong only to the independent workbench's reproducible observations.
 from __future__ import annotations
 
 import math
+from pathlib import Path
+import gzip
+import json
+import sqlite3
+from contextlib import closing
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.altcoin_leaders import crypto_instrument
 from .models import TIMEFRAMES
@@ -43,8 +48,24 @@ def parse(rows, timeframe, cutoff):
 
 
 class Market:
-    def __init__(self, client=None):
+    def __init__(self, client=None, runtime=None):
         self.client = client or OKX(rate=3)
+        self.runtime = Path(runtime) if runtime else None
+        self.cache = {}
+        self.sources = {}
+
+    def checkpoint(self, symbol, timeframe):
+        """Reuse the existing writer's confirmed OHLC, never its MA state."""
+        path = self.runtime/'monitor.sqlite3' if self.runtime else None
+        if path is None or not path.is_file():return []
+        with closing(sqlite3.connect(path.resolve().as_uri()+'?mode=ro',uri=True,timeout=2)) as db:
+            row=db.execute('SELECT payload FROM candle_checkpoints WHERE symbol=? AND timeframe=?',(symbol,timeframe)).fetchone()
+        if not row:return []
+        import io
+        with gzip.GzipFile(fileobj=io.BytesIO(row[0])) as stream:raw=stream.read(32*1024*1024+1)
+        if len(raw)>32*1024*1024:raise ValueError('行情 checkpoint 超过读取上限')
+        return json.loads(raw)
+
 
     def universe(self):
         self.client.synchronize()
@@ -63,14 +84,32 @@ class Market:
         last_open = cutoff // step * step - step
         first_open = visible_start - WARMUP * step
         after = last_open + 1
-        collected = {}
+        key=(symbol,timeframe)
+        cached=self.cache.get(key,[])
+        if not cached and self.runtime:
+            cached=self.checkpoint(symbol,timeframe)
+            if cached:self.sources[key]='existing_okx_confirmed_checkpoint'
+        cached=parse([[r[k] for k in ('t','o','h','l','c','v')]+[0,0,str(r.get('confirm',1))] for r in cached],timeframe,cutoff)
+        collected={r['t']:r for r in cached if first_open<=r['t']<=last_open}
+        # Only use a contiguous cache that reaches the required warmup origin.
+        if not collected or min(collected)!=first_open or any(b-a!=step for a,b in zip(sorted(collected),sorted(collected)[1:])):
+            collected={}
+        cached_end=max(collected) if collected else None
+        if cached_end==last_open:
+            self.cache[key]=[collected[t] for t in sorted(collected)]
+            self.sources.setdefault(key,'prior_okx_observation_in_memory')
+            return self.cache[key]
+        recent=hasattr(self.client,'clock') and last_open>=self.client.clock()//step*step-1200*step and last_open-first_open<1400*step
+        page_size=300 if recent else 100
+        path='/api/v5/market/candles' if recent else '/api/v5/market/history-candles'
+        self.sources[key]='okx_public_candles_with_cached_prefix' if collected else 'okx_public_candles' if recent else 'okx_public_history_candles'
         # The API request limit is a page size, not a truncation of the job.
-        pages = (last_open-first_open)//step//100 + 4
+        pages = (last_open-first_open)//step//page_size + 4
         for _ in range(pages):
             if cancelled():
                 raise Cancelled()
-            raw = self.client.get('/api/v5/market/history-candles',
-                                  {'instId':symbol,'bar':timeframe,'limit':'100','after':str(after)})
+            raw = self.client.get(path,
+                                  {'instId':symbol,'bar':timeframe,'limit':str(page_size),'after':str(after)})
             if not raw:
                 break
             batch = parse(raw,timeframe,cutoff)
@@ -82,7 +121,7 @@ class Market:
             if oldest >= after:
                 raise ValueError('OKX 分页未向前推进')
             after = oldest
-            if oldest <= first_open:
+            if oldest <= (cached_end if cached_end is not None else first_open):
                 break
         rows = [collected[t] for t in sorted(collected) if first_open <= t <= last_open]
         if not rows or rows[-1]['t'] != last_open:
@@ -91,4 +130,5 @@ class Market:
             raise ValueError('上市时间或历史覆盖不足：需要额外 1,000 根均线预热')
         if any(b['t']-a['t'] != step for a,b in zip(rows,rows[1:])):
             raise ValueError('所选行情区间存在缺口，未补造K线')
+        self.cache[key]=rows[-2000:]
         return rows

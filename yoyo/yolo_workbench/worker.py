@@ -64,7 +64,7 @@ def execute(book,job,market,engine):
             try:
                 rows=market.candles(symbol,spec['timeframe'],spec['end_ms'],spec['start_ms'],cancel)
                 result=engine.scan(rows,spec,symbol,lambda done,n:progress(symbol,done,n),cancel)
-                result.update(observed_ms=now(),source='OKX public history-candles',universe_observed_ms=stamp)
+                result.update(observed_ms=now(),source=getattr(market,'sources',{}).get((symbol,spec['timeframe']),'OKX public candles'),universe_observed_ms=stamp)
             except Cancelled:raise
             except Exception as exc:
                 failed+=1;result=dict(symbol=symbol,error=str(exc)[:500],observed_ms=now())
@@ -83,7 +83,7 @@ def run(runtime):
         book.recover()
         from .market import Market
         from .inference import Engine
-        market=Market();engine=Engine();last_work=now()
+        market=Market(runtime=runtime);engine=Engine();last_work=now()
         while True:
             stamp=now();book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=stamp,state='idle'))
             due_schedules(book,stamp)
