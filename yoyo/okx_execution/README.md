@@ -26,8 +26,9 @@ Owner's 2026-10-16 settings:
 ## Local setup
 
 Run from the repository with its existing `.venv`; no new dependency is needed.
-The live configuration was initialized locally for this task, without keys or
-an executing worker. For a new installation:
+The live configuration was initialized locally for this task. Credentials were
+subsequently saved privately; the execution worker has not been started. For a
+new installation:
 
 ```sh
 .venv/bin/python -m yoyo.okx_execution init
@@ -55,9 +56,10 @@ the official global/US/EU endpoints. Live and demo credentials cannot be mixed.
 
 ## Explicit execution
 
-Private account eligibility, attached-stop creation/update and actual exchange
-round trips have **not** been tested yet: credentials are absent. Offline tests
-are not exchange acceptance. The following command is an execution action by
+Private authentication and read-only account checks passed on 2026-10-16. The
+account is currently in net position mode; the required long/short mode has not
+been configured. Attached-stop creation/update and actual trading round trips
+have **not** been tested. Offline tests are not exchange acceptance. The following command is an execution action by
 the owner after account integration has been checked; it is not a status check:
 
 ```sh
