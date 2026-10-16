@@ -1,6 +1,7 @@
 """Owner's Task 59 settings; no extra coin, timeframe or concurrency filter.
 
-2026-10-16: 50 USDT sleeve, 2% initial-stop sizing, venue maximum leverage.
+2026-10-16: owner increased the allocation to 125 USDT; 2% initial-stop sizing,
+venue maximum leverage.
 Three-position / six-percent aggregate caps were explicitly rejected.
 Credentials are local files outside the repository, never API/UI parameters.
 """
@@ -13,11 +14,13 @@ from pathlib import Path
 
 DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/OKXExecution"
 DEFAULT_SOURCE = Path.home() / "Library/Application Support/Fable/ImpulseMonitor"
+CAPITAL_USDT = "125"
+LIVE_ACK = f"EXECUTE-{CAPITAL_USDT}-USDT-LIVE"
 
 
 @dataclass(frozen=True)
 class Config:
-    capital_usdt: str = "50"
+    capital_usdt: str = CAPITAL_USDT
     risk_fraction: str = "0.02"
     leverage_policy: str = "venue_maximum"
     margin_mode: str = "isolated"
@@ -32,7 +35,7 @@ class Config:
         # Hosts are not arbitrary credential destinations.
         if self.host not in {"https://www.okx.com", "https://us.okx.com", "https://eea.okx.com"}:
             raise ValueError("unsupported OKX API host")
-        if (self.capital_usdt != "50" or self.risk_fraction != "0.02"
+        if (self.capital_usdt != CAPITAL_USDT or self.risk_fraction != "0.02"
                 or self.leverage_policy != "venue_maximum" or self.margin_mode != "isolated"
                 or self.position_mode != "long_short_mode" or self.max_positions is not None
                 or self.aggregate_risk_limit is not None or type(self.demo) is not bool):

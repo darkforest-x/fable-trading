@@ -15,7 +15,7 @@ import sys
 import time
 
 from .client import Client, APIError, TransportError
-from .config import Config, DEFAULT_RUNTIME, private_directory, read_private, write_private
+from .config import Config, DEFAULT_RUNTIME, LIVE_ACK, private_directory, read_private, write_private
 from .engine import Engine, TERMINAL
 from .source import Source
 from .store import Store
@@ -38,7 +38,7 @@ def main(argv=None):
     preview = sub.add_parser("preview", help="read-only fresh signal order plans; no persistent decisions")
     preview.add_argument("--lookback-minutes", type=int, default=30)
     run = sub.add_parser("run", help="continuous worker; requires an explicit execution acknowledgement")
-    run.add_argument("--ack", required=True, choices=["EXECUTE-50-USDT-LIVE", "EXECUTE-DEMO"])
+    run.add_argument("--ack", required=True, choices=[LIVE_ACK, "EXECUTE-DEMO"])
     run.add_argument("--manage-only", action="store_true", help="manage owned positions without new entries")
     args = parser.parse_args(argv)
     os.umask(0o077)
@@ -76,7 +76,7 @@ def main(argv=None):
         return
     credentials = read_private(runtime / "credentials.json")
     execute = args.command == "run"
-    if execute and args.ack != ("EXECUTE-DEMO" if config.demo else "EXECUTE-50-USDT-LIVE"):
+    if execute and args.ack != ("EXECUTE-DEMO" if config.demo else LIVE_ACK):
         raise ValueError("execution acknowledgement differs from credential environment")
     client = Client(config, credentials, writes=execute)
     engine = Engine(config, client, Source(Path(config.source)), store)

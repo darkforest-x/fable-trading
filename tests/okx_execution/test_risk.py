@@ -15,7 +15,7 @@ def inputs(side="long", timeframe="15m"):
 
 
 def make_plan(side="long", timeframe="15m", **kwargs):
-    options = dict(equity="50", available="50", allocated_margin="0", existing_size="0", config=Config())
+    options = dict(equity="125", available="125", allocated_margin="0", existing_size="0", config=Config())
     options.update(kwargs)
     return plan(*inputs(side, timeframe), **options)
 
@@ -24,9 +24,9 @@ def make_plan(side="long", timeframe="15m", **kwargs):
 @pytest.mark.parametrize("timeframe", ["15m", "30m", "1H", "4H"])
 def test_all_periods_directions_without_portfolio_caps(side, timeframe):
     result = make_plan(side, timeframe)
-    assert D(result["size"]) == 5
-    assert D(result["planned_risk"]) == 1
-    assert D(result["notional"]) == 50  # ctMult is not multiplied twice.
+    assert D(result["size"]) == D("12.5")
+    assert D(result["planned_risk"]) == D("2.5")
+    assert D(result["notional"]) == 125  # ctMult is not multiplied twice.
     assert D(result["leverage"]) == 75
     assert Config().max_positions is None and Config().aggregate_risk_limit is None
 
@@ -37,9 +37,11 @@ def test_aggregate_same_side_changes_venue_tier_not_signal_eligibility():
 
 def test_equity_loss_scales_risk_and_profit_does_not_expand_funding_allocation():
     assert D(make_plan(equity="25")["planned_risk"]) == D("0.5")
-    assert D(make_plan(equity="100")["planned_risk"]) == 1
+    assert D(make_plan(equity="50")["planned_risk"]) == 1
+    assert D(make_plan(equity="100")["planned_risk"]) == 2
+    assert D(make_plan(equity="200")["planned_risk"]) == D("2.5")
     with pytest.raises(ValueError, match="insufficient"):
-        make_plan(allocated_margin="49.9")
+        make_plan(allocated_margin="124.9")
 
 
 def test_below_minimum_is_not_rounded_up():

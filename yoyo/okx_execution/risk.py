@@ -1,10 +1,10 @@
 """Exact-decimal, linear-USDT contract sizing, without portfolio caps.
 
-Owner-selected 1R is 2% of min(50 USDT, current USDT equity), excluding costs.
+Owner-selected 1R is 2% of min(125 USDT, current USDT equity), excluding costs.
 OKX documents linear notional as sz * ctVal * price (not ctMult again):
 https://www.okx.com/docs-v5/#order-book-trading-trade-post-place-order
 Venue maximum leverage minimizes posted margin, not risk. Liquidation may
-precede the strategy stop; neither 1R nor 50 USDT is a guaranteed loss bound.
+precede the strategy stop; neither 1R nor 125 USDT is a guaranteed loss bound.
 """
 from __future__ import annotations
 

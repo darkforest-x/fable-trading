@@ -10,8 +10,9 @@ Owner's 2026-10-16 settings:
 - All signal-center symbols and 15m / 30m / 1H / 4H; both directions, including
   altcoins and any stock/commodity swaps already present in that source.
 - No symbol whitelist, maximum position count or aggregate risk percentage cap.
-- Allocation: 50 USDT. Each entry sizes initial-stop price risk at 2% of
-  `min(50, current USDT equity)`, rounded down to exchange contract increments.
+- Allocation: 125 USDT (owner increased it from 50 USDT). Each entry sizes
+  initial-stop price risk at 2% of `min(125, current USDT equity)`, rounded down
+  to exchange contract increments. At 125 USDT equity, the target is 2.5 USDT.
   This excludes fees, funding and slippage. Insufficient margin/minimum-size
   failures are journaled, not rounded up or funded automatically.
 - Isolated hedge mode. Each signal owns a virtual lot and an exchange attached
@@ -63,7 +64,7 @@ have **not** been tested. Offline tests are not exchange acceptance. The followi
 the owner after account integration has been checked; it is not a status check:
 
 ```sh
-.venv/bin/python -m yoyo.okx_execution run --ack EXECUTE-50-USDT-LIVE
+.venv/bin/python -m yoyo.okx_execution run --ack EXECUTE-125-USDT-LIVE
 ```
 
 The first start freezes a cutoff at the current time. It does not replay old
@@ -75,7 +76,7 @@ pending state, so doing so can duplicate a filled entry.
 To stop new entries while continuing management:
 
 ```sh
-.venv/bin/python -m yoyo.okx_execution run --ack EXECUTE-50-USDT-LIVE --manage-only
+.venv/bin/python -m yoyo.okx_execution run --ack EXECUTE-125-USDT-LIVE --manage-only
 ```
 
 Stop the previous process before switching modes; an OS lock permits one worker.
