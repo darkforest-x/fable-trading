@@ -187,3 +187,15 @@ def test_bounded_prefetch_overlaps_only_io_and_preserves_endpoint_coverage(tmp_p
         assert len(engine.calls)==6 and all(j['status']=='completed' for j in book.jobs())
         assert all(len(ts)==3 for _,_,ts in engine.calls)
     finally:patrol.close()
+
+
+def test_plan_recovery_requires_durable_coverage_and_retains_original_failure(tmp_path):
+    book=Book(tmp_path);j=book.submit(dict(incremental=True,cursor_key='s',end_ms=100),'recover')
+    book.result(j['id'],'A',dict(symbol='A',error='network',retry_pending=True))
+    book.update(j['id'],status='partial',progress=dict(completed=1,total=1,failed=1))
+    with closing(book.connect()) as db,db:db.execute('INSERT INTO patrol_cursors VALUES (?,?,?)',('s','A',99))
+    assert book.current_progress(book.get(j['id']))['failed']==1
+    with closing(book.connect()) as db,db:db.execute('UPDATE patrol_cursors SET through_ms=100')
+    assert book.current_progress(book.get(j['id']))['recovered']==1
+    assert book.current_progress(book.get(j['id']))['failed']==0
+    assert book.get(j['id'])['progress']['failed']==1

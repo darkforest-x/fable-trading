@@ -142,6 +142,18 @@ class Book:
     def schedules(self):
         with closing(self.connect()) as db:return [json.loads(r[0]) for r in db.execute('SELECT payload FROM schedules ORDER BY id')]
 
+    def current_progress(self,job):
+        """Overlay durable recovery on a plan; retain the original job evidence."""
+        progress=dict(job['progress']);spec=job['spec']
+        if not spec.get('incremental') or not progress.get('failed'):return progress
+        with closing(self.connect()) as db:
+            recovered=db.execute("""SELECT count(*) FROM results r JOIN patrol_cursors c
+                ON c.schedule_id=? AND c.symbol=r.symbol WHERE r.job_id=?
+                AND json_extract(r.payload,'$.retry_pending')=1 AND c.through_ms>=?""",
+                (spec['cursor_key'],job['id'],spec['end_ms'])).fetchone()[0]
+        if recovered:progress.update(failed=max(0,progress['failed']-recovered),recovered=recovered)
+        return progress
+
     def schedule(self,payload):
         with closing(self.connect()) as db,db:db.execute('INSERT OR REPLACE INTO schedules VALUES (?,?)',(payload['id'],encode(payload)))
         return payload
