@@ -162,3 +162,9 @@ test('chart update failure retains the last successful candles and exposes the f
  h.pending[0].reject(Error('offline'));await request;
  assert.equal(h.state.tail,saved);assert.match(h.state.tailError,/保留当前图表.*offline/);assert.equal(h.state.tailLoading,false);
 });
+
+test('patrol progress distinguishes processed coins, unavailable history and pending coverage',()=>{
+ const {patrolProgress}=require('../../yoyo/monitor/static/yolo-detect.js');
+ const text=patrolProgress({last_run:{status:'partial',progress:{completed:286,total:286,unavailable:100,failed:1,remaining_endpoints:20,elapsed_seconds:180}}});
+ assert.match(text,/已处理 286\/286/);assert.match(text,/100 币历史不足/);assert.match(text,/1 币待重试/);assert.match(text,/20 个收盘位置待补扫/);assert.match(text,/3.0 分钟/);
+});

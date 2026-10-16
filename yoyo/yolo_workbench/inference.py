@@ -81,7 +81,7 @@ def episodes(detections):
 class Engine:
     def __init__(self):
         self.models={}
-        self.implementation_sources={name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('models.py','market.py','inference.py','worker.py')}
+        self.implementation_sources={name:hashlib.sha256((Path(__file__).parent/name).read_bytes()).hexdigest() for name in ('models.py','market.py','inference.py','worker.py','patrol.py','storage.py')}
         import subprocess
         self.source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip()
 
@@ -96,6 +96,7 @@ class Engine:
         model=YOLO(str(path))
         if model.names!={0:'dense_long',1:'dense_short'}:raise ValueError('模型类别契约不匹配')
         device='mps' if torch.backends.mps.is_available() else 'cpu'
+        if device=='mps':torch.mps.set_per_process_memory_fraction(.4)
         self.models[profile['id']]=(model,device)
         return model,device
 
@@ -109,17 +110,22 @@ class Engine:
         step=TIMEFRAMES[spec['timeframe']]
         rows=[r for r in rows if r['t']+step<=spec['end_ms']]
         frame=enrich(rows,profile['source'])
-        if spec['mode']=='latest':
+        if spec.get('incremental'):
+            # Every endpoint is a closed-bar timestamp. The caller persists
+            # the cursor only in the same transaction as this exact result.
+            endpoints=list(frame.index[(frame.t+step>spec['scan_after_ms']) & (frame.t+step<=spec['end_ms'])])
+        elif spec['mode']=='latest':
             endpoints=list(range(len(frame)-3,len(frame)))
         else:
             endpoints=list(frame.index[(frame.t>=spec['start_ms']) & (frame.t+step<=spec['end_ms'])])
         if not endpoints or min(endpoints)<137:raise ValueError('检测范围或均线预热不足')
         tasks=[(i,n) for i in endpoints for n in (18,19)]
         detections=[]
-        for offset in range(0,len(tasks),8):
+        batch_size=2 if spec.get('incremental') else 8
+        for offset in range(0,len(tasks),batch_size):
             if cancelled():raise Cancelled()
             batch=[]
-            for endpoint,length in tasks[offset:offset+8]:
+            for endpoint,length in tasks[offset:offset+batch_size]:
                 window=frame.iloc[endpoint-length+1:endpoint+1]
                 img,transform=render_chart(window,out_path=None)
                 sha=hashlib.sha256(np.ascontiguousarray(img).tobytes()).hexdigest()

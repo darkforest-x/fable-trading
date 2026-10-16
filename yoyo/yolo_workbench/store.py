@@ -26,6 +26,14 @@ class Book:
               PRIMARY KEY(job_id,symbol));
             CREATE TABLE IF NOT EXISTS schedules(id TEXT PRIMARY KEY,payload TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY,payload TEXT NOT NULL);
+            CREATE TABLE IF NOT EXISTS chart_blobs(id TEXT PRIMARY KEY,payload BLOB NOT NULL);
+            CREATE TABLE IF NOT EXISTS input_cache(symbol TEXT,timeframe TEXT,payload BLOB NOT NULL,
+              PRIMARY KEY(symbol,timeframe));
+            CREATE TABLE IF NOT EXISTS patrol_cursors(schedule_id TEXT,symbol TEXT,through_ms INTEGER NOT NULL,
+              PRIMARY KEY(schedule_id,symbol));
+            CREATE TABLE IF NOT EXISTS patrol_units(job_id TEXT,symbol TEXT,status TEXT NOT NULL,
+              attempts INTEGER NOT NULL DEFAULT 0,retry_ms INTEGER NOT NULL DEFAULT 0,
+              PRIMARY KEY(job_id,symbol));
             ''')
 
     def connect(self):
@@ -65,7 +73,7 @@ class Book:
     def claim(self):
         with closing(self.connect()) as db,db:
             db.execute('BEGIN IMMEDIATE')
-            row=db.execute("SELECT * FROM jobs WHERE status='queued' ORDER BY created_ms LIMIT 1").fetchone()
+            row=db.execute("SELECT * FROM jobs WHERE status='queued' AND COALESCE(json_extract(spec,'$.incremental'),0)=0 ORDER BY created_ms LIMIT 1").fetchone()
             if not row:return None
             db.execute("UPDATE jobs SET status='running',updated_ms=? WHERE id=?",(now(),row['id']))
             return self.job(db.execute('SELECT * FROM jobs WHERE id=?',(row['id'],)).fetchone())
@@ -90,9 +98,22 @@ class Book:
     def result(self,identity,symbol,payload=None):
         with closing(self.connect()) as db,db:
             if payload is not None:
-                db.execute('INSERT INTO results VALUES (?,?,?)',(identity,symbol,encode(payload)));return payload
+                from .storage import pack
+                db.execute('INSERT INTO results VALUES (?,?,?)',(identity,symbol,encode(pack(db,payload))));return payload
             row=db.execute('SELECT payload FROM results WHERE job_id=? AND symbol=?',(identity,symbol)).fetchone()
-            return json.loads(row[0]) if row else None
+            from .storage import unpack
+            return unpack(db,json.loads(row[0])) if row else None
+
+    def input_cache(self,symbol,timeframe,rows=None):
+        """Bounded research input checkpoint; independent of canonical OHLC."""
+        import zlib
+        with closing(self.connect()) as db,db:
+            if rows is not None:
+                db.execute('INSERT OR REPLACE INTO input_cache VALUES (?,?,?)',
+                           (symbol,timeframe,zlib.compress(encode(rows[-2000:]).encode(),3)))
+                return rows
+            row=db.execute('SELECT payload FROM input_cache WHERE symbol=? AND timeframe=?',(symbol,timeframe)).fetchone()
+            return json.loads(zlib.decompress(row[0])) if row else []
 
     def summaries(self,identity):
         with closing(self.connect()) as db:
@@ -123,4 +144,5 @@ class Book:
 
     def recover(self):
         with closing(self.connect()) as db,db:
-            db.execute("UPDATE jobs SET status='interrupted',error='独立检测进程中断；已完成结果保留，可重新提交',updated_ms=? WHERE status='running'",(now(),))
+            db.execute("UPDATE jobs SET status='interrupted',error='独立检测进程中断；已完成结果保留，可重新提交',updated_ms=? WHERE status='running' AND COALESCE(json_extract(spec,'$.incremental'),0)=0",(now(),))
+            db.execute("UPDATE jobs SET status='queued',updated_ms=? WHERE status='running' AND json_extract(spec,'$.incremental')=1",(now(),))

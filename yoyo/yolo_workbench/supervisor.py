@@ -9,6 +9,7 @@ import logging
 import threading
 from .store import Book
 from .worker import start
+from .store import now
 
 
 class Supervisor:
@@ -16,6 +17,8 @@ class Supervisor:
         self.runtime=runtime;self.book=Book(runtime);self.stop=threading.Event();self.thread=None
 
     def ensure(self):
+        control=self.book.meta('control') or {}
+        if control.get('stop_worker') or control.get('maintenance_until_ms',0)>now():return False
         needed=any(j['status'] in ('queued','running') for j in self.book.jobs(100)) or any(s['enabled'] for s in self.book.schedules())
         if not needed:return False
         with (self.book.runtime/'worker.lock').open('a+') as lock:

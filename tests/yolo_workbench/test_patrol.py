@@ -1,0 +1,128 @@
+"""Coverage, fair batching, resume and lossless chart-storage regressions."""
+from contextlib import closing
+from copy import deepcopy
+from types import SimpleNamespace
+import json
+import numpy as np
+import pytest
+from yoyo.yolo_workbench.store import Book
+from yoyo.yolo_workbench.patrol import Patrol,enqueue_due,next_due,GRACE_MS
+from yoyo.yolo_workbench.models import DEFAULT_MODEL,TIMEFRAMES
+from yoyo.yolo_workbench.inference import Engine,enrich,input_png
+from yoyo.yolo_workbench.market import Market
+
+END=1800000000000
+
+
+def plan(book,key='s',tf='15m',interval=15):
+    step=TIMEFRAMES[tf];end=END//step*step
+    s=dict(id=key,spec=dict(model_id=DEFAULT_MODEL,timeframe=tf,mode='latest',scope='all',symbols=[]),
+           enabled=True,incremental=True,interval_minutes=interval,next_due_ms=end+GRACE_MS,
+           baseline_after_ms=end-max(3,interval*60000//step)*step,last_job_id=None)
+    book.schedule(s);return s
+
+
+class MarketStub:
+    sources={}
+    client=SimpleNamespace(clock=lambda:END+GRACE_MS)
+    def __init__(self):self.fail=set();self.visits=[]
+    def universe(self):return [dict(symbol=s) for s in ['A','B','C']]
+    def candles(self,symbol,tf,end,start,*args):
+        self.visits.append((symbol,tf))
+        if symbol in self.fail:raise ValueError('missing closed candle')
+        return []
+
+
+class Detector:
+    def __init__(self):self.calls=[]
+    def scan(self,rows,spec,symbol,*args):
+        endpoints=list(range(spec['scan_after_ms']+TIMEFRAMES[spec['timeframe']],spec['end_ms']+1,TIMEFRAMES[spec['timeframe']]))
+        self.calls.append((symbol,spec['timeframe'],endpoints))
+        return dict(symbol=symbol,timeframe=spec['timeframe'],endpoints_scored=len(endpoints),episodes=[],raw_detections=[])
+
+
+def finish(patrol,limit=100):
+    for _ in range(limit):
+        if not patrol.tick():return
+    raise AssertionError('patrol did not settle')
+
+
+def test_grid_and_four_hour_cycle_covers_all_four_hourly_endpoints(tmp_path):
+    book=Book(tmp_path);s=plan(book,tf='1H',interval=240);end=s['next_due_ms']-GRACE_MS
+    enqueue_due(book,end+GRACE_MS+21000);engine=Detector();p=Patrol(book,MarketStub(),engine);finish(p)
+    assert len(engine.calls)==3 and all(len(c[2])==4 for c in engine.calls)
+    assert engine.calls[0][2][-1]==end
+    assert book.schedules()[0]['next_due_ms']==next_due(end+GRACE_MS+21000,240)
+    enqueue_due(book,end+4*3600000+GRACE_MS);finish(p)
+    assert engine.calls[3][2][0]==end+3600000
+    assert set(engine.calls[0][2]).isdisjoint(engine.calls[3][2])
+
+
+def test_failure_never_advances_cursor_and_retry_then_catchup_is_contiguous(tmp_path):
+    book=Book(tmp_path);plan(book);enqueue_due(book,END+GRACE_MS);market=MarketStub();market.fail={'A'};engine=Detector();p=Patrol(book,market,engine)
+    finish(p)
+    with closing(book.connect()) as db,db:
+        assert db.execute("SELECT through_ms FROM patrol_cursors WHERE symbol='A'").fetchone() is None
+        db.execute('UPDATE patrol_units SET retry_ms=0')
+    market.fail.clear();finish(p)
+    assert all(j['status']=='completed' for j in book.jobs())
+    enqueue_due(book,END+900000+GRACE_MS);finish(p)
+    assert all(len(c[2])==1 for c in engine.calls[-3:])
+
+
+def test_short_jobs_rotate_coins_before_long_job_and_recover_after_result_commit(tmp_path):
+    book=Book(tmp_path);plan(book,'long','1H',240);plan(book,'short','5m',15);plan(book,'short2','15m',15)
+    enqueue_due(book,END+GRACE_MS);engine=Detector();p=Patrol(book,MarketStub(),engine)
+    p.tick();p.tick();assert {c[1] for c in engine.calls}=={'5m','15m'}
+    book.recover();finish(p)
+    assert len(engine.calls)==9 and all(c[1]!='1H' for c in engine.calls[:6])
+    # Crash after the final atomic commit but before updating the job summary.
+    job=next(j for j in book.jobs() if j['spec']['timeframe']=='1H');book.update(job['id'],status='running')
+    book.recover();finish(p);assert book.get(job['id'])['status']=='completed' and len(engine.calls)==9
+
+
+def test_long_outage_is_bounded_but_never_skips_remaining_endpoints(tmp_path):
+    book=Book(tmp_path);s=plan(book,'s','5m',15);enqueue_due(book,END+GRACE_MS)
+    engine=Detector();p=Patrol(book,MarketStub(),engine);finish(p);initial=len(engine.calls)
+    stamp=END+20*300000+GRACE_MS
+    enqueue_due(book,stamp);finish(p)
+    assert all(len(c[2])==12 for c in engine.calls[initial:])
+    enqueue_due(book,stamp);finish(p)
+    assert all(len(c[2])==8 for c in engine.calls[-3:])
+    for symbol in ['A','B','C']:
+        endpoints=[t for sym,_,ts in engine.calls if sym==symbol for t in ts]
+        assert len(endpoints)==len(set(endpoints))==23
+        assert all(b-a==300000 for a,b in zip(endpoints,endpoints[1:]))
+
+
+def test_insufficient_listing_is_explicit_and_does_not_fetch_or_claim_coverage(tmp_path):
+    book=Book(tmp_path);plan(book,tf='1Dutc',interval=1440);enqueue_due(book,END+GRACE_MS)
+    market=MarketStub();market.universe=lambda:[dict(symbol='NEW',listed_ms=END-10*86400000)]
+    p=Patrol(book,market,Detector());finish(p)
+    j=book.jobs()[0];assert j['progress']['unavailable']==1 and j['progress']['failed']==0
+    assert market.visits==[]
+    with closing(book.connect()) as db:assert db.execute('SELECT count(*) FROM patrol_cursors').fetchone()[0]==0
+
+
+def test_lossless_chart_storage_shares_ohlc_without_reusing_different_mas(tmp_path):
+    book=Book(tmp_path)
+    rows=[dict(t=i*900000,open=100+i*.01,high=101+i*.01,low=99+i*.01,close=100+i*.01,volume=10,sma20=99.999999999+i*.01) for i in range(240)]
+    original=dict(symbol='A',timeframe='15m',candles=rows,episodes=[])
+    j=book.submit({},'one');book.result(j['id'],'A',original)
+    changed=deepcopy(original)
+    for r in changed['candles']:r['sma20']+=1e-10
+    second=book.submit({},'two');book.result(second['id'],'A',changed)
+    assert book.result(j['id'],'A')==original and book.result(second['id'],'A')==changed
+    with closing(book.connect()) as db:
+        assert db.execute('SELECT count(*) FROM chart_blobs').fetchone()[0]==10 # 8 shared OHLC blocks + 2 exact MA versions
+        assert db.execute('SELECT sum(length(payload)) FROM chart_blobs').fetchone()[0]<len(json.dumps(original))
+
+
+def test_incremental_endpoint_pixels_match_the_original_snapshot(tmp_path):
+    class Model:
+        def predict(self,source,**kwargs):return [SimpleNamespace(boxes=None) for _ in source]
+    engine=Engine();engine.models[DEFAULT_MODEL]=(Model(),'cpu')
+    rows=[dict(t=i*300000,o=100+i*.01,h=101+i*.01,l=99+i*.01,c=100+i*.01,v=10) for i in range(1240)]
+    spec=dict(model_id=DEFAULT_MODEL,timeframe='5m',mode='latest',start_ms=1000*300000,end_ms=1240*300000)
+    old=engine.scan(rows,spec,'A');new=engine.scan(rows,dict(spec,incremental=True,scan_after_ms=1239*300000),'A')
+    assert old['candles']==new['candles'] and new['endpoints_scored']==1 and new['windows_scored']==2

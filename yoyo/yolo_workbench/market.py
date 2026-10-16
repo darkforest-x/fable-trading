@@ -13,6 +13,7 @@ import gzip
 import json
 import sqlite3
 from contextlib import closing
+from collections import OrderedDict
 from yoyo.monitor.okx import OKX
 from yoyo.monitor.altcoin_leaders import crypto_instrument
 from .models import TIMEFRAMES
@@ -48,10 +49,11 @@ def parse(rows, timeframe, cutoff):
 
 
 class Market:
-    def __init__(self, client=None, runtime=None):
+    def __init__(self, client=None, runtime=None, book=None):
         self.client = client or OKX(rate=3)
         self.runtime = Path(runtime) if runtime else None
-        self.cache = {}
+        self.cache = OrderedDict()
+        self.book = book
         self.sources = {}
 
     def checkpoint(self, symbol, timeframe):
@@ -72,7 +74,12 @@ class Market:
         rows = [r for r in self.client.instruments() if crypto_instrument(r)]
         if not rows:
             raise ValueError('OKX 加密永续合约分类不可用')
-        return [dict(symbol=r['instId'], name=r['instId'].split('-')[0]) for r in rows]
+        return [dict(symbol=r['instId'], name=r['instId'].split('-')[0],listed_ms=int(r.get('listTime') or 0)) for r in rows]
+
+    def remember(self,key,rows):
+        self.cache[key]=rows[-2000:];self.cache.move_to_end(key)
+        while len(self.cache)>32:self.cache.popitem(last=False)
+        if self.book:self.book.input_cache(*key,rows)
 
     def candles(self, symbol, timeframe, cutoff, visible_start, cancelled=lambda: False):
         """Read o/h/l/c/v through cutoff; need 1,000 preceding bars for MAs.
@@ -86,6 +93,9 @@ class Market:
         after = last_open + 1
         key=(symbol,timeframe)
         cached=self.cache.get(key,[])
+        if not cached and self.book:
+            cached=self.book.input_cache(*key)
+            if cached:self.sources[key]='saved_research_input_checkpoint'
         if not cached and self.runtime:
             cached=self.checkpoint(symbol,timeframe)
             if cached:self.sources[key]='existing_okx_confirmed_checkpoint'
@@ -96,7 +106,7 @@ class Market:
             collected={}
         cached_end=max(collected) if collected else None
         if cached_end==last_open:
-            self.cache[key]=[collected[t] for t in sorted(collected)]
+            self.remember(key,[collected[t] for t in sorted(collected)])
             self.sources.setdefault(key,'prior_okx_observation_in_memory')
             return self.cache[key]
         recent=hasattr(self.client,'clock') and last_open>=self.client.clock()//step*step-1200*step and last_open-first_open<1400*step
@@ -130,5 +140,5 @@ class Market:
             raise ValueError('上市时间或历史覆盖不足：需要额外 1,000 根均线预热')
         if any(b['t']-a['t'] != step for a,b in zip(rows,rows[1:])):
             raise ValueError('所选行情区间存在缺口，未补造K线')
-        self.cache[key]=rows[-2000:]
+        self.remember(key,rows)
         return rows

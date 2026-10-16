@@ -113,7 +113,12 @@ def install(app,runtime,launch_worker=True):
         try:return charts.read(identity,value)
         except Exception as exc:raise HTTPException(503,'行情更新失败：'+str(exc)[:180]) from exc
     @router.get('/schedules')
-    def schedules():return dict(items=book.schedules())
+    def schedules():
+        items=[]
+        for s in book.schedules():
+            j=book.get(s['last_job_id']) if s.get('last_job_id') else None
+            items.append(dict(s,last_run={k:j[k] for k in ('id','status','progress','updated_ms','error')} if j else None))
+        return dict(items=items,worker=book.meta('worker'))
     @router.get('/discoveries')
     def discoveries(days:int=Query(7,ge=0,le=30),q:str=Query('',max_length=80),
                     timeframe:Literal['','5m','15m','30m','1H','4H','1Dutc']='',
@@ -122,8 +127,11 @@ def install(app,runtime,launch_worker=True):
     @router.post('/schedules',status_code=201)
     def schedule(body:Schedule):
         if len(book.schedules())>=12:raise HTTPException(409,'已有 12 个计划，请先删除不需要的计划')
-        value=book.schedule(dict(id=uuid.uuid4().hex,spec=freeze_spec(body.spec.model_dump()),enabled=True,
-                    interval_minutes=body.interval_minutes,next_due_ms=now(),created_ms=now(),last_job_id=None))
+        from .patrol import next_due
+        stamp=now();step=TIMEFRAMES[body.spec.timeframe]
+        value=book.schedule(dict(id=uuid.uuid4().hex,spec=freeze_spec(body.spec.model_dump()),enabled=True,incremental=True,
+                    baseline_after_ms=stamp//step*step-max(3,body.interval_minutes*60000//step)*step,
+                    interval_minutes=body.interval_minutes,next_due_ms=next_due(stamp,body.interval_minutes),created_ms=stamp,last_job_id=None))
         launch();return value
     @router.delete('/schedules/{identity}')
     def delete_schedule(identity:str):book.remove_schedule(identity);return dict(deleted=True)

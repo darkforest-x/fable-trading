@@ -25,7 +25,10 @@ def start(runtime):
 
 
 def due_schedules(book,stamp):
+    from .patrol import enqueue_due
+    enqueue_due(book,stamp)
     for schedule in book.schedules():
+        if schedule.get('incremental'):continue
         if not schedule['enabled'] or schedule['next_due_ms']>stamp:continue
         old=book.get(schedule['last_job_id']) if schedule.get('last_job_id') else None
         if old and old['status'] in ('queued','running'):
@@ -42,7 +45,7 @@ def due_schedules(book,stamp):
             db.execute('UPDATE schedules SET payload=? WHERE id=?',(encode(schedule),schedule['id']))
 
 
-def execute(book,job,market,engine):
+def execute(book,job,market,engine,one_symbol=False,yield_work=lambda:None):
     from .market import Cancelled
     identity=job['id'];spec=dict(job['spec']);completed=0;failed=0;total=0
     cancel=lambda:book.cancelled(identity)
@@ -50,15 +53,20 @@ def execute(book,job,market,engine):
         book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=now(),state='running',job_id=identity))
         book.update(identity,progress=dict(completed=completed,total=total,failed=failed,symbol=symbol,
                                           windows_done=done,windows_total=windows))
+        if windows:yield_work()
     try:
-        universe=market.universe();known={r['symbol'] for r in universe}
-        symbols=[r['symbol'] for r in universe] if spec['scope']=='all' else spec['symbols']
-        if not set(symbols)<=known:raise ValueError('所选币种不在当前 OKX 加密永续池中')
-        stamp=market.client.clock();step=TIMEFRAMES[spec['timeframe']]
-        if spec['mode']=='latest':spec.update(end_ms=stamp//step*step,start_ms=stamp//step*step-240*step)
-        spec.update(universe=symbols,universe_observed_ms=stamp)
+        if 'universe' not in spec:
+            universe=market.universe();known={r['symbol'] for r in universe}
+            symbols=[r['symbol'] for r in universe] if spec['scope']=='all' else spec['symbols']
+            if not set(symbols)<=known:raise ValueError('所选币种不在当前 OKX 加密永续池中')
+            stamp=market.client.clock();step=TIMEFRAMES[spec['timeframe']]
+            if spec['mode']=='latest':spec.update(end_ms=stamp//step*step,start_ms=stamp//step*step-240*step)
+            spec.update(universe=symbols,universe_observed_ms=stamp)
+        symbols=spec['universe'];stamp=spec['universe_observed_ms']
+        saved={r['symbol']:r for r in book.summaries(identity)};completed=len(saved);failed=sum(bool(r['error']) for r in saved.values())
         book.update(identity,spec=spec);total=len(symbols)
         for symbol in symbols:
+            if symbol in saved:continue
             if cancel():raise Cancelled()
             progress(symbol,0,0)
             try:
@@ -69,6 +77,8 @@ def execute(book,job,market,engine):
             except Exception as exc:
                 failed+=1;result=dict(symbol=symbol,error=str(exc)[:500],observed_ms=now())
             book.result(identity,symbol,result);completed+=1;progress(symbol,0,0)
+            if one_symbol and completed<total and not cancel():
+                book.update(identity,status='queued');return
         status='failed' if failed==total else 'partial' if failed else 'completed'
         book.update(identity,status='cancelled' if cancel() else status)
     except Cancelled:book.update(identity,status='cancelled')
@@ -83,12 +93,28 @@ def run(runtime):
         book.recover()
         from .market import Market
         from .inference import Engine
-        market=Market(runtime=runtime);engine=Engine();last_work=now()
+        from .patrol import Patrol
+        from .resources import Governor
+        os.nice(10)
+        market=Market(runtime=runtime,book=book);engine=Engine();patrol=Patrol(book,market,engine);governor=Governor();last_work=now()
         while True:
+            control=book.meta('control') or {}
+            if control.get('stop_worker'):break
             stamp=now();book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=stamp,state='idle'))
+            if control.get('maintenance_until_ms',0)>stamp:
+                time.sleep(2);continue
             due_schedules(book,stamp)
+            reason=governor.pause_reason()
+            if reason:
+                book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=stamp,state='cooling',reason=reason));time.sleep(5);continue
+            if patrol.tick():
+                last_work=now();time.sleep(.08);continue
             job=book.claim()
-            if job:execute(book,job,market,engine);last_work=now();continue
+            if job:
+                def yield_work():
+                    due_schedules(book,now())
+                    if not governor.pause_reason():patrol.tick()
+                execute(book,job,market,engine,one_symbol=True,yield_work=yield_work);last_work=now();time.sleep(.08);continue
             if stamp-last_work>600000 and not any(s['enabled'] for s in book.schedules()):break
             time.sleep(2)
         book.meta('worker',dict(pid=os.getpid(),heartbeat_ms=now(),state='stopped'))
