@@ -58,7 +58,8 @@ def assert_ledger(frame: pd.DataFrame, cfg: dict) -> None:
     np.testing.assert_allclose(frame.gross_return - frame.net_return,
                                cfg["round_trip_cost"], atol=1e-12, rtol=0)
     entry = pd.to_datetime(frame.entry_time, utc=True)
-    if not ((entry >= pd.Timestamp(cfg["start"])) & (entry < pd.Timestamp(cfg["end"]))).all():
+    lower = pd.to_datetime(frame.timeframe_min.map({15: cfg["start"], 60: cfg["source_1h_earliest_entry"]}), utc=True)
+    if not ((entry >= lower) & (entry < pd.Timestamp(cfg["end"]))).all():
         raise ValueError("entry outside source analysis window")
 
 
@@ -113,9 +114,12 @@ def load(cfg: dict) -> tuple[pd.DataFrame, pd.DataFrame, dict, list[Path]]:
     for part in [t15, t60]:
         assert_ledger(part, cfg)
     pair60 = match(t60, c60)
+    before_start = t60[pd.to_datetime(t60.entry_time, utc=True) < pd.Timestamp(cfg["start"])]
     audits = {"source_summary_reconciliations": "passed", "unique_closed_trade_keys": "passed",
               "cost_20bp": "passed", "15m_excluded_censored": len(selected15) - len(t15),
               "15m_other_admissions_excluded": len(raw15) - len(selected15),
+              "1h_preserved_source_entries_before_2023": len(before_start),
+              "1h_preserved_source_entries_before_2023_net_r": math.fsum(before_start.net_r),
               "1h_frozen_entry_exit_replay": True}
     files = [p15 / n for n in ["trades.csv.gz", "matched_controls.csv.gz", "summary.csv"]]
     files += [p60 / n for n in ["trades.csv.gz", "summary.csv"]]
@@ -136,7 +140,9 @@ def run(config: Path, output: Path | None = None) -> None:
         selected_pairs = pairs[pairs.timeframe_min.eq(minutes) & pairs.side.eq(side)]
         label = {"timeframe_min": int(minutes), "timeframe": "15m" if minutes == 15 else "1H",
                  "side": int(side), "direction": "多头" if side == 1 else "空头"}
-        totals.append(label | {"symbols": int(part.symbol.nunique())} | metrics(part) |
+        totals.append(label | {"symbols": int(part.symbol.nunique()),
+                               "first_entry": str(pd.to_datetime(part.entry_time, utc=True).min()),
+                               "last_entry": str(pd.to_datetime(part.entry_time, utc=True).max())} | metrics(part) |
                       paired_metrics(selected_pairs, len(part)))
         group = []
         for symbol, subset in part.groupby("symbol"):
@@ -161,6 +167,7 @@ def run(config: Path, output: Path | None = None) -> None:
                 "audit": audit, "totals": totals, "rows": rows,
                 "limitations": ["Descriptive full-history ranking, not a causal symbol-selection rule.",
                   "1H replays frozen entries under trail2; no admission replay after earlier exits.",
+                  "1H preserves 19 source trades entered in December 2022; 15m starts in January 2023.",
                   "Cumulative R is arithmetic trade risk units, not account return.",
                   "Controls reuse separate source eligibility; unmatched groups have no comparator.",
                   "No minimum sample cutoff; infinite PF means no losing trade in the observed sample.",
