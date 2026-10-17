@@ -33,6 +33,10 @@ experiments:
       admission; preserves 19 December-2022 entries (-3.986849R) in the original 3357 trades. Matched controls retained
       with separate source eligibility; group coverage sparse. Cumulative R is not account return. No new content hashes.
       Builder committed before aggregation; results_v1 contains CSV, XLSX, provenance and independent verification.
+      Follow-up ranking_diagnostics_20261017.json finds weak earlier/later mean-R rank correlations
+      (+0.051/-0.014 for 15m long/short; +0.120/-0.146 for 1H). Earlier top-ten symbols have later net R
+      -10.070769/+12.785551 and -6.775723/+0.108347, respectively; sparse matched pairs and reused history
+      do not validate symbol selection. 15m longs turn from +16.706171R to -37.213773R without the best trade.
   - experiment_id: exp-spike-v131-observed-paper-20261016-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 07bc93ab67043604633aad58ff63588a97478cc6
