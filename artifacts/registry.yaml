@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-30m4h-bottom20-20261017-v1
+    artifact_type: config
+    role: frozen-retest-30m4h-bottom20-study
+    source_repo: darkforest-x/fable-trading
+    source_commit: 31ad5771667014c78e7714c28654ff3c65a3eb5a
+    source_path: experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json
+    storage_uri: repo://experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Pre-registered source, grid, cost, selection and chronological split; raw outputs will be kept in this experiment's local results directory.
   - artifact_id: spike-v131-symbol-summary-20261017-v1
     artifact_type: manifest
     role: Descriptive per-symbol direction ranking with source reconciliation and matched random controls

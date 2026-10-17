@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-30m4h-bottom20-20261017-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 31ad5771667014c78e7714c28654ff3c65a3eb5a
+    status: active
+    question: What are 30m and 4H V13.1 ordinary-retest results before and after removing each side's worst twenty symbols by total net R?
+    single_variable: Extend the chart grids to 30m and 4H with frozen retest and 2R/4ATR/20bp rules; outcome grouping is descriptive.
+    result: Registered before new replay; existing 638-symbol Binance 5m archive reused without download or content hashing.
+    artifacts: [spike-v131-30m4h-bottom20-20261017-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Jan2023 to Sep23 2026 with Nov2022 warmup. Separate full-history exclusion and pre2025 ranking/post2025 evaluation. No live gate changes. Source universe and ticks not point-in-time; cumulative R is not account return.
   - experiment_id: exp-spike-v131-symbol-summary-20261017-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1c76f9da4ace56aef1149d7a659281dfb557a00f
