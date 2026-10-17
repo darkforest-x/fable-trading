@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-spike-v131-30m4h-bottom20-20261017-v1",
+  "input_manifest": "data/research/spike_v128_entry_clock_long_20260923/manifest.json",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "start": "2022-11-01T00:00:00Z",
+  "analysis_start": "2023-01-01T00:00:00Z",
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "timeframes": [30, 240],
+  "round_trip_cost": 0.002,
+  "control_seed": 923128,
+  "vol_bins": [0.005, 0.01, 0.02, 0.05, 0.1],
+  "max_wait_bars": 24,
+  "selection_count": 20,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": [
+    "Only the chart grids change versus the archived ordinary-retest 15m pipeline; no 15m-only HTF gate on 30m/4H.",
+    "Both-side serial occupancy warmed before cropping entries; closed trades only in R metrics.",
+    "Full-history per-side bottom20 removal is descriptive; pre2025 lists evaluated on post2025 entries separately.",
+    "No signal-center exclusion changes requested; no new content hashes or downloads."
+  ]
+}
