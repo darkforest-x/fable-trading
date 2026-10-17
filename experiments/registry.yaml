@@ -14,6 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-symbol-summary-20261017-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1c76f9da4ace56aef1149d7a659281dfb557a00f
+    status: inconclusive
+    question: What are the archived V13.1-compatible 15m and 1H per-symbol long/short results ranked by cumulative net R?
+    single_variable: Descriptive grouping only; preserve the original trade sets, exits and 20bp costs.
+    result: 2307 symbol-side rows from 14502 closed trades. 15m long 5372 / 16.706171R / PF1.005037;
+      short 5773 / 471.305497R / PF1.141546. 1H long 1765 / 111.077235R / PF1.105146;
+      short 1592 / 198.932209R / PF1.237855. Source summaries and independent standard-library recomputation agree.
+    artifacts: [spike-v131-symbol-summary-20261017-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Full-history descriptive ranking, no minimum count or current-listing filter; not an ex-ante symbol policy.
+      15m uses both/closed only and excludes 20 censored trades. 1H is fixed-entry trail2 exit replay, not new serial
+      admission; preserves 19 December-2022 entries (-3.986849R) in the original 3357 trades. Matched controls retained
+      with separate source eligibility; group coverage sparse. Cumulative R is not account return. No new content hashes.
+      Builder committed before aggregation; results_v1 contains CSV, XLSX, provenance and independent verification.
   - experiment_id: exp-spike-v131-observed-paper-20261016-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 07bc93ab67043604633aad58ff63588a97478cc6

@@ -27,11 +27,12 @@ sh.getRange('A9:M9').values = [['周期', '方向', '币种数', '范围', '交�
 const headers = ['周期','方向','组内排名','币种','交易次数','胜率','累计净R','平均净R','PF','匹配数','对照均净R','匹配超额R','匹配覆盖'];
 sh.getRange('A14:M14').values = [headers];
 sh.getRange('O14:S14').values = [['盈利笔数','盈利净R总和','亏损净R绝对值','匹配信号净R总和','匹配随机净R总和']];
+sh.getRange('N14').values = [['说明']];
 sh.getRange('O9:S9').values = [['盈利笔数','盈利净R总和','亏损净R绝对值','匹配信号净R总和','匹配随机净R总和']];
 
 function values(r, total = false) {
   return [r.timeframe,r.direction,total ? r.symbols : r.rank,total ? '全部币种' : r.symbol,
-    r.trades,null,null,null,null,r.matched,null,null,null,null,
+    r.trades,null,null,null,null,r.matched,null,null,null,r.pf_r==='inf' ? '无亏损交易' : (r.matched===0 ? '无匹配对照' : ''),
     r.wins,r.positive_net_r,r.negative_net_r_abs,r.matched_target_sum_net_r,r.matched_random_sum_net_r];
 }
 sh.getRange(`A${start}:S${last}`).values = result.rows.map(r => values(r));
@@ -57,7 +58,8 @@ for (let i = 0; i < result.totals.length; i++) {
   }
   assert(result.rows.filter(r => r.timeframe === t.timeframe && r.side === t.side).length === t.symbols);
 }
-const table = sh.tables.add(`A14:M${last}`, true, 'SymbolRankings');
+// Include every row component in the table so an Excel sort cannot detach helpers.
+const table = sh.tables.add(`A14:S${last}`, true, 'SymbolRankings');
 table.showFilterButton = true;
 table.style = 'TableStyleMedium2';
 for (const range of ['A9:M9','A14:M14','O9:S9','O14:S14']) {
@@ -68,7 +70,7 @@ for (const range of ['A9:M9','A14:M14','O9:S9','O14:S14']) {
 }
 sh.getRange('A10:M13').format.fill = '#EDF2F7';
 sh.getRange('A10:M13').format.font.bold = true;
-for (const [col,width] of [['A',9],['B',9],['C',10],['D',23],['E',12],['F',12],['G',15],['H',14],['I',11],['J',11],['K',15],['L',15],['M',13],['N',3],['O',12],['P',20],['Q',20],['R',23],['S',23]]) {
+for (const [col,width] of [['A',9],['B',9],['C',10],['D',23],['E',12],['F',12],['G',15],['H',14],['I',11],['J',11],['K',15],['L',15],['M',13],['N',18],['O',12],['P',20],['Q',20],['R',23],['S',23]]) {
   sh.getRange(`${col}1:${col}${last}`).format.columnWidth = width;
 }
 sh.getRange(`E10:S${last}`).format.horizontalAlignment = 'right';
@@ -84,12 +86,15 @@ for (const col of ['G','H','L']) {
 }
 sh.freezePanes.freezeRows(14);
 sh.freezePanes.freezeColumns(4);
-sh.getRange('O2').values = [['统计底数（由归档逐笔聚合，供公式复核）']];
-sh.getRange('O3').values = [[`15m: ${result.config.source_15m}/trades.csv.gz`]];
-sh.getRange('O4').values = [[`15m 对照: ${result.config.source_15m}/matched_controls.csv.gz`]];
-sh.getRange('O5').values = [[`1H 及对照: ${result.config.source_1h}/trades.csv.gz`]];
-sh.getRange('O6').values = [['只取 both/closed 与 retest/trail2/incumbent parity 合格样本。']];
-sh.getRange('O7').values = [['历史快照；数值排序在导出时固定，筛选或重新排序不改变分组口径。']];
+const provenance = [
+  'N:S 为逐笔聚合底数，与主表同行排序，供公式复核。',
+  `15m: ${result.config.source_15m}/trades.csv.gz`,
+  `15m 对照: ${result.config.source_15m}/matched_controls.csv.gz`,
+  `1H 及对照: ${result.config.source_1h}/trades.csv.gz`,
+  '只取 both/closed 与 retest/trail2/incumbent parity 合格样本。',
+  '历史快照；组内排名在导出时固定，筛选或重新排序不改变统计口径。'
+];
+sh.getRange(`A${last+3}:A${last+8}`).values = provenance.map(x=>[x]);
 wb.recalculate();
 
 const all = [...result.totals.map((r,i)=>[r,10+i]), ...result.rows.map((r,i)=>[r,start+i])];

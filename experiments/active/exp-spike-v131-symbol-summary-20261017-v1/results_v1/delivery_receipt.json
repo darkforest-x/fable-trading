@@ -1,0 +1,42 @@
+{
+  "experiment_id": "exp-spike-v131-symbol-summary-20261017-v1",
+  "generated_at": "2026-10-17T10:48:45.097843+00:00",
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/SPIKE_V13.1_币种多空排名.xlsx",
+      "bytes": 473596
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/symbol_rankings.csv",
+      "bytes": 453685
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/totals.csv",
+      "bytes": 1563
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/result.json",
+      "bytes": 1638519
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/independent_verification.json",
+      "bytes": 247
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/top_tail_arithmetic_checks.json",
+      "bytes": 195
+    }
+  ],
+  "groups": 2307,
+  "closed_trades": 14502,
+  "source_and_independent_checks": "passed",
+  "xlsx_formula_rows_checked": 2311,
+  "xlsx_error_cells": 0,
+  "xlsx_table_ref": "A14:S2321",
+  "visual_check": "preview inspected; labels, dates, values visible",
+  "notion": "https://app.notion.com/p/3fa8856479af8152ae1bca1fb534c805",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduce_aggregation": "python3 -m yoyo.evaluation.spike_v131_symbol_summary --output experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_reproduce",
+  "reproduce_workbook": "Use bundled Node.js with bundled node_modules linked beside build_workbook.mjs, then run that script; it reads results_v1/result.json."
+}

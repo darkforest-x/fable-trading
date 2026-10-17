@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-symbol-summary-20261017-v1
+    artifact_type: manifest
+    role: Descriptive per-symbol direction ranking with source reconciliation and matched random controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1c76f9da4ace56aef1149d7a659281dfb557a00f
+    source_path: experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: 2307 symbol-side summaries, 14502 closed trades, four timeframe/direction groups. Original history remains
+      unchanged. CSV and sortable Excel include count, win rate, cumulative/mean net R, R-PF and matched comparison.
+      All arithmetic independently checked. 1H preserves 19 pre-2023 entries and remains a frozen-entry exit replay.
+      No content hashes computed; registered source paths, sizes, mtimes and actual reads retained.
   - artifact_id: exp-spike-v131-observed-paper-20261016-v1-registration
     artifact_type: manifest
     role: immutable-forward-paper-registration
