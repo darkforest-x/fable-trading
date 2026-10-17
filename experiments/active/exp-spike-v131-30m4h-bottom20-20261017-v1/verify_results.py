@@ -16,6 +16,10 @@ from pathlib import Path
 ROOT = Path(__file__).parent / 'results_v1'
 
 
+def stamp(value):
+    return datetime.fromisoformat(value.replace("Z", "+00:00"))
+
+
 def read(path):
     opener = gzip.open if path.suffix == '.gz' else open
     with opener(path, 'rt', encoding='utf-8-sig', newline='') as f:
@@ -59,20 +63,20 @@ def main():
             keys.add(r['trade_key'])
             if r['status'] != 'closed':
                 continue
-            r['entry'] = datetime.fromisoformat(r['entry_time'])
-            r['exit'] = datetime.fromisoformat(r['exit_time'])
-            assert datetime.fromisoformat(result['config']['analysis_start']) <= r['entry'] < datetime.fromisoformat(result['config']['end'])
+            r['entry'] = stamp(r['entry_time'])
+            r['exit'] = stamp(r['exit_time'])
+            assert stamp(result['config']['analysis_start']) <= r['entry'] < stamp(result['config']['end'])
             assert r['entry'] <= r['exit']
             assert math.isclose(float(r['gross_return'])-float(r['net_return']), .002, abs_tol=1e-12)
             assert math.isclose(float(r['net_r']),float(r['net_return'])*float(r['entry_price'])/float(r['initial_risk']),abs_tol=1e-10)
             rows.append(r)
         for c in read(folder/'controls.csv.gz'):
-            eligible = c['control_status']=='closed' and datetime.fromisoformat(c['control_anchor_close']).weekday()!=6
+            eligible = c['control_status']=='closed' and stamp(c['control_anchor_close']).weekday()!=6
             assert eligible == (c['eligible']=='True')
             if not eligible:
                 continue
             assert c['trade_key'] not in controls
-            c['entry'] = datetime.fromisoformat(c['control_entry_time'])
+            c['entry'] = stamp(c['control_entry_time'])
             controls[c['trade_key']] = c
     assert len(keys)-len(rows) == result['censored']
     checks = 0
@@ -84,7 +88,7 @@ def main():
             else:
                 assert actual[key] == value
             checks += 1
-    cut = datetime.fromisoformat(result['config']['split'])
+    cut = stamp(result['config']['split'])
     for g in result['groups']:
         part = [r for r in rows if int(r['timeframe_min'])==g['timeframe_min'] and int(r['side'])==g['side']]
         early = [r for r in part if r['entry']<cut and r['exit']<cut]
@@ -125,7 +129,7 @@ def main():
             if r['symbol'] in lists[int(r['timeframe_min']),int(r['side'])] or int(r['signal_i'])<flat:
                 continue
             flat = math.inf if r['status']=='censored_boundary' else int(float(r['exit_i']))
-            if r['status']=='closed' and datetime.fromisoformat(r['entry_time'])>=datetime.fromisoformat(result['config']['analysis_start']):
+            if r['status']=='closed' and stamp(r['entry_time'])>=stamp(result['config']['analysis_start']):
                 serial_rows.append(r)
     filtered = [r for r in rows if r['symbol'] not in lists[int(r['timeframe_min']),int(r['side'])]]
     old_keys, new_keys = {r['trade_key'] for r in filtered}, {r['trade_key'] for r in serial_rows}
