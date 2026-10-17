@@ -19,16 +19,16 @@ schema_version: 1
 
 artifacts:
   - artifact_id: spike-v131-30m4h-bottom20-20261017-v1
-    artifact_type: config
+    artifact_type: manifest
     role: frozen-retest-30m4h-bottom20-study
     source_repo: darkforest-x/fable-trading
     source_commit: 31ad5771667014c78e7714c28654ff3c65a3eb5a
-    source_path: experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json
-    storage_uri: repo://experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json
+    source_path: experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Pre-registered source, grid, cost, selection and chronological split; raw outputs will be kept in this experiment's local results directory.
+    notes: Completed raw trade/control ledgers, 1699 symbol rankings, eight exclusion lists, full-history and chronological comparisons. Independent stream-level recomputation and serial-admission sensitivity passed. Full-history selection is descriptive; no 30m/4H live gate changes. No content hashes.
   - artifact_id: spike-v131-symbol-summary-20261017-v1
     artifact_type: manifest
     role: Descriptive per-symbol direction ranking with source reconciliation and matched random controls

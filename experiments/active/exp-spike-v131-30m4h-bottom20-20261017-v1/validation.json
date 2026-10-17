@@ -1,0 +1,55 @@
+{
+  "source_builder_commit": "80c73d54fc3eb8fe660c80a3ffbdada58ca81d28",
+  "unit_tests": {
+    "status": "passed",
+    "count": 28,
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_spike_v128_retest_entry.py tests/evaluation/test_spike_v128_retest_state.py tests/evaluation/test_spike_v128_long_replay.py"
+  },
+  "original_15m_ledger_parity": [
+    {
+      "symbol": "BTCUSDT",
+      "trades": 35,
+      "closed": 35,
+      "matched": 4,
+      "status": "exact_to_1e-10"
+    },
+    {
+      "symbol": "ETHUSDT",
+      "trades": 24,
+      "closed": 24,
+      "matched": 2,
+      "status": "exact_to_1e-10"
+    }
+  ],
+  "monitor_30m4h_lifecycle_parity": [
+    {
+      "symbol": "BTCUSDT",
+      "timeframe": "30m",
+      "closed": 21,
+      "max_net_r_error": 1.7763568394002505e-15
+    },
+    {
+      "symbol": "BTCUSDT",
+      "timeframe": "4H",
+      "closed": 2,
+      "max_net_r_error": 8.881784197001252e-16
+    },
+    {
+      "symbol": "ETHUSDT",
+      "timeframe": "30m",
+      "closed": 16,
+      "max_net_r_error": 4.440892098500626e-16
+    },
+    {
+      "symbol": "ETHUSDT",
+      "timeframe": "4H",
+      "closed": 2,
+      "max_net_r_error": 0.0
+    }
+  ],
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.spike_v131_extra_timeframes --workers 4 --output experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_reproduce",
+  "limitations": [
+    "Sample lifecycle checks do not prove full native TradingView parity.",
+    "No source content hashes checked."
+  ]
+}

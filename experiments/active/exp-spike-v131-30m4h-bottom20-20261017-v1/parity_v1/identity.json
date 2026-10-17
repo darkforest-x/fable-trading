@@ -1,0 +1,299 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-v131-30m4h-bottom20-20261017-v1",
+    "input_manifest": "data/research/spike_v128_entry_clock_long_20260923/manifest.json",
+    "warmup_start": "2022-11-01T00:00:00Z",
+    "start": "2022-11-01T00:00:00Z",
+    "analysis_start": "2023-01-01T00:00:00Z",
+    "split": "2025-01-01T00:00:00Z",
+    "end": "2026-09-23T04:00:00Z",
+    "timeframes": [
+      30,
+      240
+    ],
+    "round_trip_cost": 0.002,
+    "control_seed": 923128,
+    "vol_bins": [
+      0.005,
+      0.01,
+      0.02,
+      0.05,
+      0.1
+    ],
+    "max_wait_bars": 24,
+    "selection_count": 20,
+    "training_eligible": false,
+    "production_eligible": false,
+    "notes": [
+      "Only the chart grids change versus the archived ordinary-retest 15m pipeline; no 15m-only HTF gate on 30m/4H.",
+      "Both-side serial occupancy warmed before cropping entries; closed trades only in R metrics.",
+      "Full-history per-side bottom20 removal is descriptive; pre2025 lists evaluated on post2025 entries separately.",
+      "No signal-center exclusion changes requested; no new content hashes or downloads."
+    ]
+  },
+  "subset": true,
+  "timeframes": [
+    15,
+    30,
+    240
+  ],
+  "builder_commit": "80c73d54fc3eb8fe660c80a3ffbdada58ca81d28",
+  "code": [
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/data/__init__.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/data/__init__.py",
+      "bytes": 0,
+      "mtime_ns": 1787222092900386491
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/data/binance_um_archives.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/data/binance_um_archives.py",
+      "bytes": 19315,
+      "mtime_ns": 1788063931793616672
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/__init__.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/__init__.py",
+      "bytes": 705,
+      "mtime_ns": 1787222092917927469
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_progressive.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_progressive.py",
+      "bytes": 14309,
+      "mtime_ns": 1789022487747375702
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_replay.py",
+      "bytes": 21772,
+      "mtime_ns": 1789305231878076227
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v6_structure.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_burst_v6_structure.py",
+      "bytes": 8603,
+      "mtime_ns": 1789061137470564233
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_accounts.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_accounts.py",
+      "bytes": 14298,
+      "mtime_ns": 1789194902657547243
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_policy_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_exit_policy_study.py",
+      "bytes": 34405,
+      "mtime_ns": 1789194703194497985
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v104_forward.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v104_forward.py",
+      "bytes": 28575,
+      "mtime_ns": 1790091669678707851
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4.py",
+      "bytes": 42297,
+      "mtime_ns": 1789747060948567985
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_increment.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_increment.py",
+      "bytes": 20759,
+      "mtime_ns": 1789735317039337394
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v10_4_study.py",
+      "bytes": 24837,
+      "mtime_ns": 1789728313494484232
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_support_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v112_support_study.py",
+      "bytes": 20956,
+      "mtime_ns": 1789817268540868369
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_box_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_box_study.py",
+      "bytes": 12481,
+      "mtime_ns": 1789747106557790772
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v11_study.py",
+      "bytes": 16240,
+      "mtime_ns": 1789746397673615613
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_engine.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_engine.py",
+      "bytes": 19767,
+      "mtime_ns": 1790083285127580113
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_recheck.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v126_htf_recheck.py",
+      "bytes": 25979,
+      "mtime_ns": 1790084573236967464
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_entry.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_expansion_entry.py",
+      "bytes": 18999,
+      "mtime_ns": 1790148118775667274
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_hint_replay.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_hint_replay.py",
+      "bytes": 16811,
+      "mtime_ns": 1790139160622369175
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent.py",
+      "bytes": 29473,
+      "mtime_ns": 1790139762458202566
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent_report.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_recent_report.py",
+      "bytes": 20030,
+      "mtime_ns": 1790140014850617039
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_entry.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_entry.py",
+      "bytes": 19101,
+      "mtime_ns": 1790151148422493077
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_state.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v128_retest_state.py",
+      "bytes": 8505,
+      "mtime_ns": 1790150525637424206
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v12_local_touch.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v12_local_touch.py",
+      "bytes": 21669,
+      "mtime_ns": 1789846030234898967
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_bottom20.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_bottom20.py",
+      "bytes": 7385,
+      "mtime_ns": 1792236764401839847
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_extra_timeframes.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_extra_timeframes.py",
+      "bytes": 14788,
+      "mtime_ns": 1792239497714415121
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_symbol_summary.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_symbol_summary.py",
+      "bytes": 11030,
+      "mtime_ns": 1792233882214058559
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v1_v8_be05.py",
+      "bytes": 37604,
+      "mtime_ns": 1790037597432291979
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py",
+      "bytes": 5224,
+      "mtime_ns": 1789154154951106152
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study.py",
+      "bytes": 33100,
+      "mtime_ns": 1789152040091596889
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study_post.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_wvf_study_post.py",
+      "bytes": 13270,
+      "mtime_ns": 1789153273134726293
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_episode_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_episode_study.py",
+      "bytes": 14686,
+      "mtime_ns": 1789211781319811578
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v7_fast.py",
+      "bytes": 27009,
+      "mtime_ns": 1789184251052494835
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_lowtf_study.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_lowtf_study.py",
+      "bytes": 32284,
+      "mtime_ns": 1789297563955497363
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_replay.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_replay.py",
+      "bytes": 9397,
+      "mtime_ns": 1789239007893153290
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_six_filters.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v8_six_filters.py",
+      "bytes": 28664,
+      "mtime_ns": 1789374392688706726
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9.py",
+      "bytes": 6837,
+      "mtime_ns": 1789410967768395939
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v9_htf_sma.py",
+      "bytes": 3568,
+      "mtime_ns": 1789851752923444030
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/trendline_break.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/trendline_break.py",
+      "bytes": 11292,
+      "mtime_ns": 1789668149432049960
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json",
+      "realpath": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/config.json",
+      "bytes": 1021,
+      "mtime_ns": 1792239497716227747
+    }
+  ],
+  "manifest": {
+    "path": "data/research/spike_v128_entry_clock_long_20260923/manifest.json",
+    "realpath": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_entry_clock_long_20260923/manifest.json",
+    "bytes": 606147,
+    "mtime_ns": 1790155326000000000
+  },
+  "metadata": {
+    "path": "/Users/zhangzc/fable-trading/data/kline_preholdout_binance_um5m/exchange_info.json",
+    "realpath": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_preholdout_binance_um5m/exchange_info.json",
+    "bytes": 1090684,
+    "mtime_ns": 1788063973000000000
+  },
+  "source_symbols": [
+    "BTCUSDT",
+    "ETHUSDT"
+  ]
+}

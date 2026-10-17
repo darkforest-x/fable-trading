@@ -17,16 +17,16 @@ experiments:
   - experiment_id: exp-spike-v131-30m4h-bottom20-20261017-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 31ad5771667014c78e7714c28654ff3c65a3eb5a
-    status: active
+    status: inconclusive
     question: What are 30m and 4H V13.1 ordinary-retest results before and after removing each side's worst twenty symbols by total net R?
     single_variable: Extend the chart grids to 30m and 4H with frozen retest and 2R/4ATR/20bp rules; outcome grouping is descriptive.
-    result: Registered before new replay; existing 638-symbol Binance 5m archive reused without download or content hashing.
+    result: Complete 638 symbols and 1276 streams; 7045 closed, 27 censored. Full-history per-side removal gives 30m long/short 496.184927/182.025298R and 4H 107.222011/22.974670R. Pre2025 lists applied later yield 261.217051/-85.186731R and -48.479651/-34.071175R; no stable exclusion benefit established.
     artifacts: [spike-v131-30m4h-bottom20-20261017-v1]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    notes: Jan2023 to Sep23 2026 with Nov2022 warmup. Separate full-history exclusion and pre2025 ranking/post2025 evaluation. No live gate changes. Source universe and ticks not point-in-time; cumulative R is not account return.
+    reuse_allowed: true
+    notes: Jan2023 to Sep23 2026 with Nov2022 warmup. Separate full-history exclusion and pre2025 ranking/post2025 evaluation. No live gate changes. Source universe and ticks not point-in-time; cumulative R is not account return. 1699 symbol-side rows; 13952 independent scalar checks passed. BTC/ETH original15m parity59 trades and monitor30m/4H lifecycle41 trades pass. Filtered serial replay adds/displaces zero trades. Post-exclusion paired excess remains negative in all four groups. 4H median one trade per symbol. Builder31ad577166 committed before replay; original migrated inputs read without content hashes.
   - experiment_id: exp-spike-v131-symbol-summary-20261017-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1c76f9da4ace56aef1149d7a659281dfb557a00f

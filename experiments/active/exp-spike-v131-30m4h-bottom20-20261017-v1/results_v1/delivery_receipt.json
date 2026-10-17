@@ -1,0 +1,94 @@
+{
+  "experiment_id": "exp-spike-v131-30m4h-bottom20-20261017-v1",
+  "status": "complete",
+  "research_conclusion": "inconclusive",
+  "training_eligible": false,
+  "production_eligible": false,
+  "builder_commit": "80c73d54fc3eb8fe660c80a3ffbdada58ca81d28",
+  "completed_streams": 1276,
+  "symbols": 638,
+  "closed": 7045,
+  "censored_excluded": 27,
+  "verification": {
+    "status": "passed",
+    "streams": 1276,
+    "closed": 7045,
+    "symbol_side_rows": 1699,
+    "bottom20_lists": 8,
+    "comparison_sets": 24,
+    "scalar_checks": 13952,
+    "full_history_serial_sensitivity": {
+      "filtered_original_closed": 6575,
+      "replayed_closed": 6575,
+      "added_keys": [],
+      "displaced_keys": [],
+      "replayed_sum_net_r": 808.4069057182278,
+      "filtered_sum_net_r": 808.4069057182278
+    },
+    "methods": "stdlib csv/gzip/math from per-stream ledgers; no analysis module imports"
+  },
+  "raw_ledgers": {
+    "directory": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/streams",
+    "storage": "local; combined closed/censored trade and control ledgers also retained"
+  },
+  "files": [
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/result.json",
+      "bytes": 81332,
+      "mtime_ns": 1792239989484440465
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/symbol_rankings.csv",
+      "bytes": 209451,
+      "mtime_ns": 1792239989478318421
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/剔除名单_30m与4H_多空各20币.csv",
+      "bytes": 6477,
+      "mtime_ns": 1792240285327745788
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/identity.json",
+      "bytes": 22006,
+      "mtime_ns": 1792239613077685653
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/comparisons.csv",
+      "bytes": 7288,
+      "mtime_ns": 1792239989479352629
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/bottom20_symbols.csv",
+      "bytes": 22825,
+      "mtime_ns": 1792239989481451464
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/controls.csv.gz",
+      "bytes": 161127,
+      "mtime_ns": 1792239989241993331
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/independent_verification.json",
+      "bytes": 500,
+      "mtime_ns": 1792240036896595435
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/trades.csv.gz",
+      "bytes": 502411,
+      "mtime_ns": 1792239989165021677
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_v1/receipt.json",
+      "bytes": 992802,
+      "mtime_ns": 1792239986214828142
+    }
+  ],
+  "method_notes": [
+    "Exactly20 symbols per timeframe and side, sorted total netR ascending, symbol tie break; no minimum count or current listing filter.",
+    "All four retrospective filtered serial ledgers have zero added/displaced trades.",
+    "Early-selected diagnostic is reused historical evaluation, not new blind or forward evidence.",
+    "No model: AUC/top-decile not applicable; no new significance test or profitability validation claim.",
+    "No new 30m/4H live exclusions."
+  ],
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.spike_v131_extra_timeframes --workers 4 --output experiments/active/exp-spike-v131-30m4h-bottom20-20261017-v1/results_reproduce"
+}
