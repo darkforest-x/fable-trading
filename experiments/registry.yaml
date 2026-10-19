@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-entry-stages-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 17ca60d913
+    status: active
+    question: Which closed-bar entry stage improves frozen Spike net returns after fresh serial occupancy and matched random controls?
+    single_variable: Entry stage only; immediate, first breakout, first valid pullback, existing rebreak. Original absolute stop, actual-entry R, timeframe trail and 20bp cost remain fixed.
+    artifacts: [spike-v131-entry-stages-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: Preregistered four-stage comparison running on638 registered symbols and15m/30m/1H/4H. Three-symbol smoke and98 focused/boundary tests pass; full results pending.
+    notes: Independent policy-specific occupancy includes newly freed entries. Paired queues share original seeded symbol/side/week/fold/volatility draws and nonSunday guard without redraw. Known no-fill retained as zero; actual censored outcomes remain unknown. Full-history ranking and early-selected later comparison kept separate. Smoke_v1 joint-control lineage scope error preserved; fixed before smoke_v2/full replay. No report or production change.
   - experiment_id: exp-spike-v131-confirmation-cost-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c304b78ad0
