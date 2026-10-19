@@ -32,6 +32,8 @@ def test_omitting_a_candidate_changes_fresh_occupancy():
     f=rows()
     assert serial_flags(f,np.array([True,True,True])).tolist()==[True,False,True]
     assert serial_flags(f,np.array([False,True,True])).tolist()==[False,True,False]
+    order=f.sort_values(['decision_i','anchor_i','trade_key']).index.to_numpy()
+    assert serial_flags(f,np.array([False,True,True]),order).tolist()==[False,True,False]
 
 
 def test_required_censored_is_unknown_but_blocked_hypothetical_is_zero():

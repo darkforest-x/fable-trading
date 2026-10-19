@@ -75,9 +75,9 @@ def eligibility(f,thresholds):
     return result
 
 
-def serial_flags(f,eligible):
+def serial_flags(f,eligible,order=None):
     """Order by closed decision, original anchor, stable ID; exit close frees slot."""
-    order=f.sort_values(['decision_i','anchor_i','trade_key']).index.to_numpy()
+    if order is None:order=f.sort_values(['decision_i','anchor_i','trade_key']).index.to_numpy()
     take=np.zeros(len(f),bool);flat=-1
     fill=f.filled.to_numpy(bool);di=f.decision_i.to_numpy(int)
     xi=f.exit_i.fillna(-1).to_numpy(int);status=f.status.to_numpy()
@@ -179,11 +179,12 @@ def run(root,name='analysis_v1'):
             net_all=f.net_r.to_numpy(float);gross_all=f.gross_r.to_numpy(float);cost_all=f.cost_r.to_numpy(float)
             exits_all=f.exit_time.to_numpy();ids_all=f.trade_key.to_numpy();closed_all=f.status.eq('closed').to_numpy()
             flags={};flagframe=f[['trade_key','cohort']].copy()
+            queue_order=f.sort_values(['decision_i','anchor_i','trade_key']).index.to_numpy()
             for field in ['eligible_bits','full_bits','pair_bits']:flagframe[field]=np.zeros(len(f),np.int64)
             for ai,policy in enumerate(POLICIES):
                 e=allowed[policy]
-                all_taken=serial_flags(f,e & target)
-                pair_taken=serial_flags(f,e & target & pair)|serial_flags(f,e & ~target & pair)
+                all_taken=serial_flags(f,e & target,queue_order)
+                pair_taken=serial_flags(f,e & target & pair,queue_order)|serial_flags(f,e & ~target & pair,queue_order)
                 flags[policy]=(all_taken,pair_taken)
                 flagframe['eligible_bits']+=e.astype(np.int64)*(1<<ai)
                 flagframe['full_bits']+=all_taken.astype(np.int64)*(1<<ai)
