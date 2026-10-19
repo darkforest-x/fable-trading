@@ -116,6 +116,53 @@ def groups(facts, pop):
     return rows
 
 
+def accounting(out):
+    """Posthoc path patterns and exact all-trade loss accounting, not filters."""
+    out=Path(out);facts=pd.read_csv(out/'all_signals.csv')
+    old=pd.read_csv(out/'all_policy_trades.csv.gz');ct=pd.read_csv(PARENT/'results_v1/controls.csv.gz')
+    distributions=[];retention=[]
+    for name in ('opposite_arrow','be_price_1r','be_price_2r'):
+        rows=old[old.policy.eq(name)];random=ct[ct.policy.eq(name)]
+        for population,z,control in [('independent',rows,random),('single_position',rows[rows.single_position_taken],serial(random))]:
+            for seg in ('all','development','validation','examples'):
+                q=z if seg=='all' else z[z.segment.eq(seg)];c=control if seg=='all' else control[control.segment.eq(seg)]
+                g=q.gross_r
+                masks={'gross_loss':g.lt(-1e-8),'gross_zero':g.abs().le(1e-8),'positive_under_3r':g.gt(1e-8)&g.lt(3),
+                    '3_to_10r':g.ge(3)&g.lt(10-1e-8),'10_to_20r':g.ge(10-1e-8)&g.lt(20-1e-8),'at_least_20r':g.ge(20-1e-8)}
+                assert sum(int(m.sum()) for m in masks.values())==len(q)
+                distributions.append(dict(policy=name,population=population,segment=seg,**tail_metrics(q),
+                    buckets={key:dict(n=int(mask.sum()),gross_points=float(q.loc[mask,'gross_points'].sum()),net_points=float(q.loc[mask,'net_points'].sum())) for key,mask in masks.items()},
+                    random_closed=int(c.closed.sum()),random_net_points=float(c.loc[c.closed,'net_points'].sum())))
+        for level in (10,20):
+            z=facts[facts[f'hit_{level}r']];exitcol=name+'__exit_i';reasoncol=name+'__reason';grosscol=name+'__gross_r'
+            later=z[f'first_{level}r_i']>z[exitcol]
+            # Same-minute opening exits happen before a later high/low unless target was met at open.
+            retention.append(dict(policy=name,level=level,static_hit=len(z),realized=int(z[grosscol].ge(level-1e-8).sum()),
+                gross_loss=int(z[grosscol].lt(-1e-8).sum()),gross_zero=int(z[grosscol].abs().le(1e-8).sum()),
+                exit_before_target_minute=int(later.sum()),exit_same_target_minute=int(z[f'first_{level}r_i'].eq(z[exitcol]).sum()),
+                before_target_by_reason=z.loc[later,reasoncol].value_counts().to_dict(),
+                serial_omitted=int((~z[name+'__single_position_taken']).sum())))
+    patterns={}
+    for level in (10,20):
+        z=facts[facts[f'hit_{level}r']]
+        # Connected same-side temporal windows are a descriptive overlap count, not an independent-event claim.
+        clusters=0
+        for _,q in z.groupby(['segment','side']):
+            right=-1
+            for r in q.sort_values('entry_i').itertuples(index=False):
+                if r.entry_i>right:clusters+=1
+                right=max(right,getattr(r,f'first_{level}r_i'))
+        patterns[str(level)]=dict(n=len(z),overlap_components=clusters,
+            minutes_quantiles=z[f'minutes_to_{level}r'].quantile([.1,.5,.9]).to_dict(),
+            risk_quantiles=z.risk.quantile([.1,.5,.9]).to_dict(),fee_r_quantiles=z.cost_r.quantile([.1,.5,.9]).to_dict(),
+            mae_lower_quantiles=z[f'mae_before_{level}r_lower'].quantile([.1,.5,.9]).to_dict(),
+            ambiguous_stop_minute=int(facts[f'ambiguous_{level}r'].sum()))
+    findings=dict(distributions=distributions,retention=retention,tail_patterns=patterns,
+        qualifier='Descriptive reused-history patterns. First-passage duration and MFE are outcomes, not entry-time predictors.')
+    (out/'accounting.json').write_text(json.dumps(findings,indent=2)+'\n')
+    return findings
+
+
 def main():
     cfg=json.loads((PARENT/'config.json').read_text());v2=json.loads((EXP/'config.json').read_text())
     out=EXP/'results';out.mkdir(exist_ok=False)
@@ -220,6 +267,7 @@ def main():
         static_mfe_warning='Maximum future excursion before original stop is not an executable exit or additive profit; terminal-minute lower/upper bounds retained.',
         unchanged_cost=.002,posthoc=True,training_eligible=False,production_eligible=False)
     (out/'receipt.json').write_text(json.dumps(output,indent=2)+'\n')
+    accounting(out)
     print(json.dumps({k:v for k,v in output.items() if k in ('old_paths','signal_opportunities','bracket_oracle_checks','passage_totals')}))
 
 
