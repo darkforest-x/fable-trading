@@ -1,0 +1,32 @@
+{
+  "experiment_id": "exp-eth5m-stoch-target-be-20261019-v3",
+  "source_experiments": [
+    "exp-eth5m-stoch-confirm-exits-20261019-v1",
+    "exp-eth5m-stoch-tail-forensics-20261019-v2"
+  ],
+  "owner_authorization": "Remove opposite-arrow exit; independent per-signal backtest; test 10R/20R targets crossed with BE timing; preserve large winners and compare net profits.",
+  "targets_r": [
+    10,
+    20
+  ],
+  "be_triggers_r": [
+    0.5,
+    1,
+    1.5,
+    2,
+    3,
+    5
+  ],
+  "be_destinations": [
+    "entry_price",
+    "fee_covering_price"
+  ],
+  "include_no_be": true,
+  "round_trip_cost": 0.002,
+  "selection": "2024 development total closed net points per fixed1ETH; tie by policy name. Separately rank sum netR (equal initial-risk units), and mark all-history winners hindsight.",
+  "execution": "Use frozen V1 minute-close BE with next-minute activation; fee BE cannot activate below fee-covering price. Stop first for ambiguous minute; gaps fill at open; targets and stops tick0.01. No opposite exits; no serial occupancy.",
+  "boundaries": "Frozen V1 partitions; open boundary trades censored. Report closed sum and censored mark-to-boundary sensitivity separately. All is segmented sum, not continuous account equity.",
+  "random_controls": "Reuse V1 exact2804 matched draws; same ETH/side/week/causal volatility bucket/segment. Weekly block signflip9999 and bootstrap9999; Holm across26arms per segment.",
+  "training_eligible": false,
+  "production_eligible": false
+}
