@@ -16,17 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v131-rule-state-20261019-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 448ec8998e
-    status: active
+    source_commit: c51dd65279
+    status: inconclusive
     question: Which V13.1 entry rules add independent value, and do causal compression duration, prior advance or relative BTC strength distinguish startup from overextension?
-    single_variable: One entry rule removed per arm, or one baseline-anchor state feature retained per arm; simple-breakout anchor is a separately labelled minimal benchmark. Original rebreak wrapper, exits, raw opposites and20bp remain fixed.
+    single_variable: One complete entry rule group removed per arm or one baseline-anchor state feature retained; simple12-bar anchor is a separately labelled combined benchmark. Original rebreak wrapper, exits, raw opposites and20bp fixed.
     artifacts: [spike-v131-rule-state-20261019-v1]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    result: Four-symbol smoke passed baseline and draw identity plus prefix audits; full638 historical run and independent summary verification pending.
-    notes: Owner authorized first two optimization routes20261019. Same archived Binance USDT perpetual universe, four timeframes and2025 time cut. Quantile edges use only pre2025 baseline anchors. No model, production, Pine, download or content-hash change. Builder precedes generation. Paths/config/PROJECT_PLAN inside experiment directory.
+    reuse_allowed: true
+    result: All638 archived symbols and2552 timeframe streams complete; baseline21534 trades1259.713421R and later579.061938R reproduced. Highest uniform fullR is no_advance1592.46R but trades+31.5pct,meanR-3.9pct,closedR drawdown+37.1pct; matched signal1547.45R versus random2203.57R. NoBB1006.11R,mean0.01375R; simple anchor -7751.12R. No corrected positive rule increment. State mid groups descriptive only; same-state later36 comparisons have no corrected positive excess. No upgrade accepted.
+    notes: Primary177383 baseline and4489577 union anchors,8978456 rows; all masks/features regenerated,50 exact cached-censor failures repaired and composed with588 complete streams. Raw parity,1398730 baseline scalar,177348 draw and1728 prefix checks pass; independent6539303 scalar,215482944 eligibility,323232792 queue decisions and74 extreme paths pass. 39 targeted tests;7 proven preexisting repository failures retained. State sensitivity specified before first full-return inspection after result generation;816454 membership/queue and2619 reconciliation checks pass. Primary later1H mid advance increment Holm0.0288 has no significant absolute excess and signal delta -3.07R. Output paths_final/analysis_v3,delivery_receipt.json,findings.json; Notion3fe8856479af81a2b965d252bcb1d5c9 synced/readback. No report,download,content hash,training,production,Pine,service or order mutation. Other four optimization routes not evaluated here.
   - experiment_id: exp-spike-v131-entry-stages-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 17ca60d913

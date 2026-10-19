@@ -20,15 +20,16 @@ schema_version: 1
 artifacts:
   - artifact_id: spike-v131-rule-state-20261019-v1
     artifact_type: manifest
-    role: V13.1 entry-rule ablations and causal startup-overextension state experiment
+    role: Completed V13.1 entry-rule ablations and causal state diagnostics with original and same-state random controls
     source_repo: darkforest-x/fable-trading
-    source_commit: 448ec8998e
-    source_path: experiments/active/exp-spike-v131-rule-state-20261019-v1/config.json
-    storage_uri: repo://experiments/active/exp-spike-v131-rule-state-20261019-v1/config.json
+    source_commit: c51dd65279
+    generator_commit: 62dce87e7a
+    source_path: experiments/active/exp-spike-v131-rule-state-20261019-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-spike-v131-rule-state-20261019-v1/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Active research; frozen recipe and design committed before generation. Smoke preserved. Local compressed paths and per-stream metadata; final results and independent verification pending. No content hashing or production authorization.
+    notes: Full638 completed and independently verified. Compact primary results,thresholds,checks,extreme paths,state-matched diagnostic and findings retained; local compressed paths/queues and weekly blocks ignored. Raw builders724682b4f8 and a31c139df2; summary62dce87e7a,verifierc79d9724f5,state-matchc51dd65279. Failed semantic/serialization runs and performance restarts preserved. Source path/size/mtime and reads checked, no content hashes or downloads. Non-PIT universe/ticks,historical reuse,no shared capital/funding/dynamic execution model; no production upgrade.
   - artifact_id: spike-v131-entry-stages-20261019-v1
     artifact_type: manifest
     role: Four causal entry stages with fresh serial occupancy and original matched random draws

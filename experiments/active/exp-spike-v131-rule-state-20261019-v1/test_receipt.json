@@ -1,0 +1,34 @@
+{
+  "focused_tests": {
+    "passed": 39,
+    "failed": 0,
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_spike_v131_rule_facts.py tests/evaluation/test_spike_v131_rule_summary.py tests/evaluation/test_spike_v131_rule_recover.py tests/evaluation/test_spike_v131_state_matched.py tests/evaluation/test_spike_v131_entry_stages.py -q",
+    "builder_commit": "c51dd65279"
+  },
+  "initial_combined_suite": {
+    "passed": 192,
+    "failed": 8,
+    "own_timezone_failure": "fixed and focused rerun passed"
+  },
+  "preexisting_failures": {
+    "base_commit": "157c61f4c9923c39cf6f978d7d7f17605f24ff60",
+    "count": 7,
+    "causes": [
+      "Charter URL /api/research/manual is interpreted by existing test as filesystem path",
+      "Existing ma_morphology_reuse_recover.py names archive/consolidated/yoyo-trading",
+      "Existing spike-v8-total2-1h-native-20260914-delivery artifact lacks source_commit, causing five teacher tests to fail"
+    ]
+  },
+  "new_registry_records": "both independently schema validated",
+  "launcher_note": "Direct .venv/bin/pytest entrypoint could not import local yoyo.evaluation; invoking .venv/bin/python -m pytest resolves repository imports and all 33 tests pass.",
+  "precision_regressions": [
+    "ENSOUSDT30m and EULUSDT60m retain original division-order shape predicate",
+    "Observed quantile sample CSV decimal retained with round_trip parsing",
+    "Filled censored cache retains numeric NaN; unfilled unknown remains None"
+  ],
+  "performance_parity": {
+    "queue_decisions": 1912320,
+    "effective_values": 2868480,
+    "all_equal": true
+  }
+}

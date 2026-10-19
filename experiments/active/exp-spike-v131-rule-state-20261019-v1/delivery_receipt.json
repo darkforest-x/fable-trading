@@ -1,0 +1,127 @@
+{
+  "experiment_id": "exp-spike-v131-rule-state-20261019-v1",
+  "status": "completed_no_upgrade_accepted",
+  "generated_at": "2026-10-19T11:43:56.229701+00:00",
+  "source_commit": "c51dd6527967867f312fe8f01dfb14f0559a98c4",
+  "primary_path_builder": "724682b4f8",
+  "repair_builder": "a31c139df2",
+  "summary_builder": "62dce87e7a85bbcc101890411a73a19b20cc2b0e",
+  "verification_source_commit": "c79d9724f5",
+  "state_match_builder": "c51dd6527967867f312fe8f01dfb14f0559a98c4",
+  "output": "experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_final/analysis_v3",
+  "symbols": 638,
+  "timeframes": [
+    15,
+    30,
+    60,
+    240
+  ],
+  "rules": 12,
+  "policies": 24,
+  "raw_counts": {
+    "union_anchors": 4489577,
+    "baseline_anchors": 177383,
+    "rows": 8978456
+  },
+  "path_audits": {
+    "baseline_scalar_checks": 1398730,
+    "draw_identity_checks": 177348,
+    "prefix_checks": 1728
+  },
+  "baseline_serial_identity_checks": 21818,
+  "full_baseline": {
+    "n": 21534,
+    "net_r": 1259.7134210042966,
+    "later_net_r": 579.0619381136803
+  },
+  "tests": {
+    "focused_tests": {
+      "passed": 39,
+      "failed": 0,
+      "command": ".venv/bin/python -m pytest tests/evaluation/test_spike_v131_rule_facts.py tests/evaluation/test_spike_v131_rule_summary.py tests/evaluation/test_spike_v131_rule_recover.py tests/evaluation/test_spike_v131_state_matched.py tests/evaluation/test_spike_v131_entry_stages.py -q",
+      "builder_commit": "c51dd65279"
+    },
+    "initial_combined_suite": {
+      "passed": 192,
+      "failed": 8,
+      "own_timezone_failure": "fixed and focused rerun passed"
+    },
+    "preexisting_failures": {
+      "base_commit": "157c61f4c9923c39cf6f978d7d7f17605f24ff60",
+      "count": 7,
+      "causes": [
+        "Charter URL /api/research/manual is interpreted by existing test as filesystem path",
+        "Existing ma_morphology_reuse_recover.py names archive/consolidated/yoyo-trading",
+        "Existing spike-v8-total2-1h-native-20260914-delivery artifact lacks source_commit, causing five teacher tests to fail"
+      ]
+    },
+    "new_registry_records": "both independently schema validated",
+    "launcher_note": "Direct .venv/bin/pytest entrypoint could not import local yoyo.evaluation; invoking .venv/bin/python -m pytest resolves repository imports and all 33 tests pass.",
+    "precision_regressions": [
+      "ENSOUSDT30m and EULUSDT60m retain original division-order shape predicate",
+      "Observed quantile sample CSV decimal retained with round_trip parsing",
+      "Filled censored cache retains numeric NaN; unfilled unknown remains None"
+    ],
+    "performance_parity": {
+      "queue_decisions": 1912320,
+      "effective_values": 2868480,
+      "all_equal": true
+    }
+  },
+  "verification": {
+    "status": "passed",
+    "scalar_checks": 6539303,
+    "eligibility_checks": 215482944,
+    "serial_decisions": 323232792,
+    "limitations": "Independent accounting/queue/pair audit; whole-frame signal parity and selected prefix checks are separately recorded by the path builder."
+  },
+  "extrema": {
+    "status": "passed",
+    "selections": 192,
+    "unique_trades": 74
+  },
+  "state_match_verification": {
+    "status": "passed",
+    "reconciliation_checks": 2619,
+    "known_state_primary_identity": true,
+    "membership_and_independent_serial_checks": 816454,
+    "limitations": "Aggregate/coverage/Holm reconciliation and known-state primary identity; raw price accounting independently audited in primary verification. Same-state scope still has unequal actual exposure."
+  },
+  "findings": "findings.json",
+  "reproduction": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_rule_study --workers 4 --output experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_rule_summary experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_rule_verify experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_rule_extremes experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_state_matched experiments/active/exp-spike-v131-rule-state-20261019-v1/paths_reproduce --name analysis_v1"
+  ],
+  "failures_preserved": [
+    "paths_v1/interruption.json: END anchor exclusion",
+    "paths_v2/interruption.json and parity_diagnostic.json: original division-order threshold ties",
+    "paths_v3/receipt.json and cache_repair_prediction.json: exactly50 cached censored numeric-unknown failures; repair_v4 all passed, composed exact failed subset",
+    "smoke_v3/analysis_v1/verification_failure.json: default CSV parser moved quantile boundary; round_trip decoding fixed",
+    "paths_final/analysis_v1/interruption.json and analysis_v2/interruption.json: performance-only restarts after exact vector parity"
+  ],
+  "limitations": [
+    "638 archived Binance identities and ticks are not point-in-time.",
+    "No funding, additional slippage, queue or shared-capital model.",
+    "Stateful removals can replace anchors; this is an entry-only ablation, not a complete changed exit detector.",
+    "Known/mature pair coverage differs across comparisons; never compare a full signal sum with its paired random sum.",
+    "History reused; pre2025 selection/post2025 evaluation is chronological diagnosis, not unseen validation.",
+    "Sparse shared-state pairs may leave very few actual fills.",
+    "Fills and holding time may still differ; this does not enforce identical market exposure.",
+    "History reused and non-PIT universe; no production qualification."
+  ],
+  "notes": [
+    "Baseline matched153288 opportunity population differs from prior all-four-entry-stage common153077; full baseline exactly retained.",
+    "Supplementary same-state diagnostic specified before first complete return inspection, after main result file generation; timing explicitly retained.",
+    "Other four proposed optimization routes are not evaluated in this experiment.",
+    "No downloads, content hashes, model training, production/Pine/service/order changes or standalone report.",
+    "Actual subagent model/effort was not verifiable from runtime; interrupted before research and parent completed work."
+  ],
+  "notion_page": "https://app.notion.com/p/3fe8856479af81a2b965d252bcb1d5c9",
+  "notion_status": "synced_and_readback_verified",
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_verified_at": "2026-10-19T11:47:43.567033+00:00"
+}
