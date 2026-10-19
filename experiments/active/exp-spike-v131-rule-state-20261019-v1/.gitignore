@@ -1,0 +1,5 @@
+# Local reproducible raw ledgers and per-stream metadata. Compact root receipts
+# and summaries remain versionable; no directory negation exceptions are used.
+*.csv.gz
+**/streams/**/receipt.json
+**/weekly_blocks.json

@@ -73,3 +73,15 @@ def test_reuse_rejects_end_anchor_and_partial_streams(tmp_path):
     assert reuse_complete(prior,tmp_path/'next',dict(symbol='X',path=str(source)),cfg) is not None
     cfg['timeframes']=[15,60]
     assert reuse_complete(prior,tmp_path/'partial',dict(symbol='X',path=str(source)),cfg) is None
+
+
+def test_independent_exit_interpreter_uses_old_stop_before_new_close_trail():
+    from yoyo.evaluation.spike_v131_rule_extremes import exit_trace
+    o=np.array([100.,104.,103.]);h=np.array([105.,105.,104.]);l=np.array([99.,100.,100.])
+    c=np.array([104.,104.,101.]);a=np.ones(3);g=np.zeros(3,bool);raw=np.zeros(3,int)
+    # Bar0 low99 does not touch original98; its close104 only activates stop102 for bar1.
+    assert exit_trace(o,h,l,c,a,g,raw,1,100.,98.,0,.1,2)==(1,102.)
+    raw[0]=-1
+    assert exit_trace(o,h,l,c,a,g,raw,1,100.,98.,0,.1,2)==(1,104.)
+    o[1]=97.
+    assert exit_trace(o,h,l,c,a,g,raw,1,100.,98.,0,.1,2)==(1,97.)
