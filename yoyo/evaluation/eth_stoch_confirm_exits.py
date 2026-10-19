@@ -253,6 +253,46 @@ def weekly_test(values,seed=621019,reps=9999):
         ci95=list(map(float,np.quantile(boot,[.025,.975]))))
 
 
+def diagnostics(out):
+    """Descriptive evidence only; never choose another arm or change admission."""
+    out=Path(out)
+    candidates=pd.read_csv(out/'signal_candidates.csv')
+    entries=pd.read_csv(out/'entries.csv')
+    summary=pd.read_csv(out/'summary.csv')
+    selected=json.loads((out/'selection.json').read_text())['selected_on_development']
+    trades=pd.read_csv(out/'serial_trades.csv.gz')
+    drawings=[]
+    observed=json.loads((EXP/'chart_observations.json').read_text())
+    for drawing in observed['all_positions_read']:
+        stamp=pd.Timestamp(drawing['matching_confirmation_close'][0]['signal_local']).tz_convert('UTC')
+        r=candidates[pd.to_datetime(candidates.signal_time).eq(stamp)].iloc[0]
+        drawings.append(dict(ordinal=drawing['ordinal'],signal_local=str(stamp.tz_convert('Asia/Shanghai')),
+            side=int(r.raw_side),entry=float(r.entry),causal_stop=float(r.stop),risk=float(r.risk),
+            passes_risk_gate=bool(r.eligible),confirmation_pass=bool(r.confirmation_pass),
+            drawn_stop=drawing['stop_drawn'],drawn_entry=drawing['entry_drawn']))
+    periods=[]
+    selected_trades=trades[trades.policy.eq(selected)]
+    years=pd.to_datetime(selected_trades.entry_time).dt.year
+    for year,z in selected_trades.groupby(years):
+        periods.append(dict(year=int(year),**metrics(z)))
+    serial_break_evens={}
+    for name,z in trades[trades.policy.str.startswith('be_')].groupby('policy'):
+        serial_break_evens[name]=dict(activated=int(z.be_activated.sum()),
+            mathematical_zero=int(z.net_points.abs().lt(1e-8).sum()),
+            net_wins=int(z.net_points.gt(1e-8).sum()))
+    data=dict(selected_on_development=selected,units='USDT points per fixed1ETH; not account returns',
+        qualified_signals_by_segment=entries.segment.value_counts().to_dict(),
+        drawings=drawings,drawings_qualified=sum(x['passes_risk_gate'] for x in drawings),
+        risk_points_quantiles=entries.risk.quantile([.1,.5,.9]).to_dict(),
+        cost_r_quantiles=(.002*entries.entry/entries.risk).quantile([.1,.5,.9]).to_dict(),
+        selected_years=periods,break_even_counts=serial_break_evens,
+        profitable_policy_count_by_segment=summary.groupby('segment').net_points.apply(lambda x:int(x.gt(0).sum())).to_dict(),
+        all_history_descriptive_best=summary[summary.segment.eq('all')].sort_values('net_points',ascending=False).iloc[0].to_dict(),
+        selection_caveat='All-history best is hindsight; development choice remains frozen; no profitable arm found.')
+    (out/'diagnostics.json').write_text(json.dumps(data,indent=2,allow_nan=False)+'\n')
+    return data
+
+
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--out',default='results_v1');ap.add_argument('--smoke',action='store_true');args=ap.parse_args()
     cfg=json.loads((EXP/'config.json').read_text());out=EXP/args.out
@@ -293,6 +333,7 @@ def main():
     # Raw recent signal inputs permit independent chart parity without return selection.
     recent=ctx['frame'].join(ctx['signals'][['k','d','arrow_long','arrow_short']]).loc['2026-10-16':]
     recent.to_csv(out/'recent_chart_parity.csv')
+    diagnostics(out)
     print(json.dumps(dict(output=str(out),eligible=len(signals),selected=chosen)))
 
 
