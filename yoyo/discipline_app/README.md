@@ -1,4 +1,10 @@
-# SPIKE 纪律交易 0.8.12
+# SPIKE 纪律交易 0.8.13
+
+0.8.13（22）：价格下方加入默认收起的实时 K 线，支持 1分 / 5分 / 15分 / 1时 / 4时 / 日、成交量、十字线、历史拖动、回到最新与全屏。保持圆角卡片，图表手势不触发底部菜单切换。Stitch 先行来源 `design/flow-0.8.13/source.json`，模型 `GEMINI_3_8_FLASH`。图表为只读公共行情，不进入下单价格或风险计算。
+
+使用 Lightweight Charts 5.2.1，图表代码独立懒加载；展开才请求 300 根，实时只更新变化的柱。当前币种/周期独占 WebSocket，收起、离开页面或后台时停止连接；重连用 REST 补齐。按币种/周期缓存最多 600 根、12 组、7 天，内存历史最多 2000 根，过期状态明确提示。Canvas 绘图和十字线更新与开仓表单隔离。OKX 公共 REST / WebSocket 实际读取通过，33 项前端测试通过；320px / 390px 浏览器验证展开、周期切换、全屏、历史加载、断网缓存与恢复、收起释放连接。iOS / Android 编译及签名通过，CoreDevice 确认 iPhone 覆盖安装成功；未测真机帧率、耗电或 Android 真机运行。服务端保持 0.8.9，网页已更新。
+
+复现：`node --test tests/discipline_app/*.test.ts`；移动端目录 `npm run build`。合成图表验收入口 `tests/discipline_app/serve_candle_ui_fixture.py`（文件顶部列出隔离构建变量），无账户或交易接口。图表保留 TradingView attribution 与版权信息。新增依赖未引入 npm audit 条目，现有 Capacitor CLI / uuid / xcode 的 3 项 moderate 问题未在此任务升级。
 
 0.8.12（21）：按 Owner 反馈重排开仓表单，保留柔和圆角。方向选择与主按钮使用胶囊形，主卡片 28px、输入框 18px 圆角；止损价格单独成行，1R 与手动操作移到标签旁，市价/限价改为文字标签，金额预估平铺。字号、44px 操作区、风险含义和执行流程保持，生成稿中的示例账户数字与保护承诺不进入产品。Stitch 来源 `design/flow-0.8.12/source.json`，模型 `GEMINI_3_8_FLASH`。
 

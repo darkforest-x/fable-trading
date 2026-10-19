@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE - 纪律合约交易</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface": "#f9faf8",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "background": "#f9faf8",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-primary-fixed-variant": "#005142",
+            "surface-container": "#edeeec",
+            "tertiary-container": "#677370",
+            "secondary-fixed": "#ffd9dc",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#087f69",
+            "tertiary-fixed": "#d8e5e1",
+            "on-surface": "#191c1b",
+            "surface-container-highest": "#e2e3e1",
+            "on-tertiary-fixed": "#121e1c",
+            "outline-variant": "#bdc9c4",
+            "secondary": "#a5374d",
+            "on-error-container": "#93000a",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#78d8be",
+            "primary": "#006452",
+            "primary-fixed": "#94f4d9",
+            "on-secondary-container": "#730f2a",
+            "inverse-surface": "#2e3130",
+            "surface-container-high": "#e7e8e6",
+            "outline": "#6e7a75",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-secondary-fixed": "#400011",
+            "surface-variant": "#e2e3e1",
+            "surface-bright": "#f9faf8",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "inverse-on-surface": "#f0f1ef",
+            "on-primary-fixed": "#002019",
+            "surface-container-low": "#f3f4f2",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "tertiary": "#4e5b58",
+            "on-tertiary-container": "#ecf9f5",
+            "on-background": "#191c1b",
+            "surface-dim": "#d9dad8",
+            "secondary-container": "#fc7a8f",
+            "on-surface-variant": "#3e4945",
+            "primary-fixed-dim": "#78d8be",
+            "surface-tint": "#006b58",
+            "on-primary-container": "#d3fff0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "gutter-tablet": "1.5rem",
+            "margin-desktop": "3rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.25rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "label-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "label-sm": ["Inter"],
+            "display-lg": ["Inter"],
+            "numeric-hero-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #087f69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(8, 127, 105, 0.35);
+      border: 2.5px solid #ffffff;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #087f69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(8, 127, 105, 0.35);
+      border: 2.5px solid #ffffff;
+    }
+    /* Tabular numbers for price accuracy */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-primary-fixed selection:text-on-primary-fixed font-body-md text-body-md" style="background-color: #f6f8f5;">
+<!-- Top App Bar (Shared Components standard anchor) -->
+<!-- Mobile Screen Container (390px default canvas, fluid to 320px) -->
+<main class="w-full max-w-[420px] mx-auto px-3.5 pb-24 space-y-3"><!-- Header: BTC/USDT 永续 & Settings Gear -->
+<header class="pt-2 pb-1">
+<div class="flex items-center justify-between">
+<button class="flex items-center space-x-1.5 text-on-surface font-semibold text-lg hover:text-primary transition-colors active:scale-95" type="button">
+<span class="tracking-tight font-bold text-[18px]">BTC/USDT 永续</span>
+<span class="material-symbols-outlined text-tertiary text-lg" data-icon="expand_more">expand_more</span>
+</button>
+<button aria-label="交易偏好设置" class="w-11 h-11 flex items-center justify-center text-tertiary hover:text-on-surface rounded-full transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+</div>
+<!-- Price Headline & Badge -->
+<div class="mt-1 flex items-baseline justify-between">
+<div class="flex items-baseline space-x-2">
+<span class="text-[30px] font-bold tracking-tight text-on-surface tabular-nums">68,100.00</span>
+<span class="text-[11px] text-tertiary font-medium tracking-wide uppercase">USDT</span>
+</div>
+<div class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-[#E8F5F1] text-primary">
+<span class="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-xs font-semibold tabular-nums">+2.40%</span>
+</div>
+</div>
+<!-- Quiet Discipline Strip (3 columns with clean hairline dividers) -->
+<!-- Interactive K-Line Chart Module with 3 States (Collapsed / Expanded / Fullscreen) -->
+<div class="mt-2.5 select-none" id="kline-module-root">
+<!-- State 1: Collapsed Pill (Slim 44px soft rounded bar with sparkline & status) -->
+<div class="flex items-center justify-between h-11 px-3.5 rounded-full bg-white/90 border border-neutral-200/60 shadow-[0_2px_8px_rgba(0,0,0,0.02)] transition-all cursor-pointer active:scale-[0.99]" id="kline-state-collapsed" onclick="toggleKLineState('expanded')">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[#087f69] text-[18px]">candlestick_chart</span>
+<span class="text-xs font-semibold text-[#1a1f1d]">K线</span>
+<span class="px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-[11px] font-semibold text-[#087f69] tabular-nums">15分</span>
+<span class="flex items-center space-x-1 text-[11px] text-[#718096] pl-1">
+<span class="h-1.5 w-1.5 rounded-full bg-[#087f69] animate-pulse"></span>
+<span>实时</span>
+</span>
+</div>
+<div class="flex items-center space-x-2">
+<!-- Mini quiet sparkline -->
+<svg class="w-16 h-5 overflow-visible" fill="none" viewbox="0 0 64 20">
+<path d="M2 14 L12 11 L22 13 L32 7 L42 10 L52 4 L62 8" stroke="#087f69" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+<button aria-label="展开K线" class="flex items-center text-xs text-[#087f69] font-medium h-11 px-1" type="button">
+<span>展开</span>
+<span class="material-symbols-outlined text-[16px] ml-0.5">expand_more</span>
+</button>
+</div>
+</div>
+<!-- State 2: Expanded Inline Chart Card (Height ~240px, period switcher, SVG candlesticks + volume) -->
+<div class="hidden rounded-[24px] bg-white border border-neutral-200/60 p-3 sm:p-3.5 shadow-[0_8px_24px_rgba(0,0,0,0.03)] space-y-2.5 transition-all" id="kline-state-expanded">
+<!-- Header toolbar with 44px tap targets -->
+<div class="flex items-center justify-between border-b border-neutral-100 pb-2">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[#087f69] text-[18px]">candlestick_chart</span>
+<span class="text-xs font-bold text-[#1a1f1d]">K线行情</span>
+<span class="flex items-center space-x-1 px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-[11px] font-semibold text-[#087f69]">
+<span class="h-1.5 w-1.5 rounded-full bg-[#087f69] animate-pulse"></span>
+<span id="active-period-label">15分 · 实时</span>
+</span>
+</div>
+<div class="flex items-center space-x-1">
+<button aria-label="全屏查看K线" class="h-11 px-2 flex items-center text-xs text-[#718096] hover:text-[#087f69] transition-colors active:scale-95" onclick="openKlineFullscreen()" type="button">
+<span class="material-symbols-outlined text-[18px] mr-0.5">open_in_full</span>
+<span class="text-[11px]">全屏</span>
+</button>
+<button aria-label="收起K线" class="h-11 px-2 flex items-center text-xs text-[#718096] hover:text-[#1a1f1d] transition-colors active:scale-95" onclick="toggleKLineState('collapsed')" type="button">
+<span class="text-[11px]">收起</span>
+<span class="material-symbols-outlined text-[16px] ml-0.5">expand_less</span>
+</button>
+</div>
+</div>
+<!-- Period Tabs (Pill group) -->
+<div class="flex items-center justify-between text-xs px-0.5" id="kline-period-tabs">
+<button class="period-tab h-7 px-2.5 rounded-full text-[#718096] font-medium text-[11px] hover:text-[#1a1f1d] transition-all" onclick="switchPeriod('1分')" type="button">1分</button>
+<button class="period-tab h-7 px-2.5 rounded-full text-[#718096] font-medium text-[11px] hover:text-[#1a1f1d] transition-all" onclick="switchPeriod('5分')" type="button">5分</button>
+<button class="period-tab h-7 px-2.5 rounded-full bg-[#087f69] text-white font-semibold text-[11px] shadow-sm transition-all" onclick="switchPeriod('15分')" type="button">15分</button>
+<button class="period-tab h-7 px-2.5 rounded-full text-[#718096] font-medium text-[11px] hover:text-[#1a1f1d] transition-all" onclick="switchPeriod('1时')" type="button">1时</button>
+<button class="period-tab h-7 px-2.5 rounded-full text-[#718096] font-medium text-[11px] hover:text-[#1a1f1d] transition-all" onclick="switchPeriod('4时')" type="button">4时</button>
+<button class="period-tab h-7 px-2.5 rounded-full text-[#718096] font-medium text-[11px] hover:text-[#1a1f1d] transition-all" onclick="switchPeriod('日')" type="button">日</button>
+</div>
+<!-- Mini Candlestick chart visualization area (~150px) -->
+<div class="relative w-full h-[145px] rounded-[18px] bg-[#f9faf8] border border-neutral-100 overflow-hidden flex flex-col justify-between p-2 pt-2.5">
+<!-- Live OHLC ribbon -->
+<div class="flex items-center justify-between text-[11px] text-[#718096] tabular-nums">
+<span>开: <b class="text-[#1a1f1d] font-semibold">67,820</b></span>
+<span>高: <b class="text-[#087f69] font-semibold">68,240</b></span>
+<span>低: <b class="text-[#d93848] font-semibold">67,610</b></span>
+<span>收: <b class="text-[#087f69] font-semibold">68,100</b></span>
+</div>
+<!-- Interactive SVG Candlestick & Volume Canvas -->
+<div class="relative flex-1 w-full my-1">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 340 90">
+<!-- Horizontal grid lines -->
+<line stroke="#eef3ee" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="18" y2="18"></line>
+<line stroke="#eef3ee" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="45" y2="45"></line>
+<line stroke="#eef3ee" stroke-dasharray="2 2" stroke-width="1" x1="0" x2="340" y1="68" y2="68"></line>
+<!-- Stop-loss reference line (dashed red/rose) -->
+<line opacity="0.5" stroke="#d93848" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="340" y1="76" y2="76"></line>
+<text fill="#d93848" font-size="8" font-weight="500" text-anchor="end" x="336" y="73">SL 67,419</text>
+<!-- Entry reference line (dashed jade) -->
+<line opacity="0.5" stroke="#087f69" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="340" y1="30" y2="30"></line>
+<text fill="#087f69" font-size="8" font-weight="500" text-anchor="end" x="336" y="27">挂单 68,100</text>
+<!-- Candlesticks (Green #087f69 / Red #d93848) -->
+<!-- Candle 1: Red -->
+<line stroke="#d93848" stroke-width="1" x1="20" x2="20" y1="32" y2="58"></line>
+<rect fill="#d93848" height="15" rx="1" width="6" x="17" y="38"></rect>
+<!-- Candle 2: Green -->
+<line stroke="#087f69" stroke-width="1" x1="45" x2="45" y1="35" y2="62"></line>
+<rect fill="#087f69" height="16" rx="1" width="6" x="42" y="40"></rect>
+<!-- Candle 3: Red -->
+<line stroke="#d93848" stroke-width="1" x1="70" x2="70" y1="38" y2="65"></line>
+<rect fill="#d93848" height="14" rx="1" width="6" x="67" y="44"></rect>
+<!-- Candle 4: Red (Dip) -->
+<line stroke="#d93848" stroke-width="1" x1="95" x2="95" y1="45" y2="75"></line>
+<rect fill="#d93848" height="16" rx="1" width="6" x="92" y="52"></rect>
+<!-- Candle 5: Hammer Green -->
+<line stroke="#087f69" stroke-width="1" x1="120" x2="120" y1="48" y2="77"></line>
+<rect fill="#087f69" height="12" rx="1" width="6" x="117" y="50"></rect>
+<!-- Candle 6: Green -->
+<line stroke="#087f69" stroke-width="1" x1="145" x2="145" y1="38" y2="58"></line>
+<rect fill="#087f69" height="12" rx="1" width="6" x="142" y="42"></rect>
+<!-- Candle 7: Green rally -->
+<line stroke="#087f69" stroke-width="1" x1="170" x2="170" y1="25" y2="50"></line>
+<rect fill="#087f69" height="16" rx="1" width="6" x="167" y="29"></rect>
+<!-- Candle 8: Consolidation Red -->
+<line stroke="#d93848" stroke-width="1" x1="195" x2="195" y1="26" y2="46"></line>
+<rect fill="#d93848" height="10" rx="1" width="6" x="192" y="30"></rect>
+<!-- Candle 9: Green -->
+<line stroke="#087f69" stroke-width="1" x1="220" x2="220" y1="20" y2="42"></line>
+<rect fill="#087f69" height="14" rx="1" width="6" x="217" y="24"></rect>
+<!-- Candle 10: Green breakout -->
+<line stroke="#087f69" stroke-width="1" x1="245" x2="245" y1="14" y2="36"></line>
+<rect fill="#087f69" height="15" rx="1" width="6" x="242" y="18"></rect>
+<!-- Candle 11: Doji Red -->
+<line stroke="#d93848" stroke-width="1" x1="270" x2="270" y1="12" y2="32"></line>
+<rect fill="#d93848" height="5" rx="1" width="6" x="267" y="19"></rect>
+<!-- Candle 12: Latest Active Green candle -->
+<line stroke="#087f69" stroke-width="1.2" x1="295" x2="295" y1="10" y2="30"></line>
+<rect fill="#087f69" height="14" rx="1" width="6" x="292" y="15"></rect>
+<!-- Current Price Pulse Beacon -->
+<circle class="animate-ping" cx="295" cy="15" fill="#087f69" opacity="0.6" r="2.5"></circle>
+<circle cx="295" cy="15" fill="#087f69" r="2"></circle>
+<!-- Volume histogram at bottom -->
+<rect fill="#d93848" height="9" opacity="0.2" rx="0.5" width="6" x="17" y="78"></rect>
+<rect fill="#087f69" height="11" opacity="0.2" rx="0.5" width="6" x="42" y="76"></rect>
+<rect fill="#d93848" height="8" opacity="0.2" rx="0.5" width="6" x="67" y="79"></rect>
+<rect fill="#d93848" height="13" opacity="0.25" rx="0.5" width="6" x="92" y="74"></rect>
+<rect fill="#087f69" height="10" opacity="0.2" rx="0.5" width="6" x="117" y="77"></rect>
+<rect fill="#087f69" height="7" opacity="0.2" rx="0.5" width="6" x="142" y="80"></rect>
+<rect fill="#087f69" height="15" opacity="0.3" rx="0.5" width="6" x="167" y="72"></rect>
+<rect fill="#d93848" height="6" opacity="0.2" rx="0.5" width="6" x="192" y="81"></rect>
+<rect fill="#087f69" height="12" opacity="0.25" rx="0.5" width="6" x="217" y="75"></rect>
+<rect fill="#087f69" height="16" opacity="0.35" rx="0.5" width="6" x="242" y="71"></rect>
+<rect fill="#d93848" height="7" opacity="0.2" rx="0.5" width="6" x="267" y="80"></rect>
+<rect fill="#087f69" height="17" opacity="0.4" rx="0.5" width="6" x="292" y="70"></rect>
+</svg>
+</div>
+<!-- Time / Attribution bar -->
+<div class="flex items-center justify-between text-[10px] text-[#718096] pt-0.5 border-t border-neutral-100/80 tabular-nums">
+<span>18:00</span>
+<span>19:30</span>
+<span>21:00</span>
+<span class="text-[#087f69] font-medium">现在</span>
+<span class="text-[9px] text-neutral-400 font-normal scale-90 origin-right">Powered by TradingView Lightweight Charts</span>
+</div>
+</div>
+</div>
+<!-- State 3: Fullscreen Mobile Overlay (Fixed full viewport modal, isolated touch gesture area) -->
+<div class="fixed inset-0 z-50 bg-[#f6f8f5] flex-col p-4 hidden select-none" id="kline-state-fullscreen">
+<!-- Fullscreen Header -->
+<div class="flex items-center justify-between pb-3 border-b border-neutral-200/60">
+<div class="flex items-center space-x-2">
+<button aria-label="关闭全屏" class="w-11 h-11 flex items-center justify-center rounded-full bg-white text-on-surface shadow-sm active:scale-95 transition-all" onclick="closeKlineFullscreen()" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-bold text-base text-[#1a1f1d]">BTC/USDT 永续</span>
+<span class="text-xs font-semibold text-[#087f69] tabular-nums">+2.40%</span>
+</div>
+<span class="text-[11px] text-[#718096]">全景行情分析 · 实时连通 (18ms)</span>
+</div>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="h-2 w-2 rounded-full bg-[#087f69] animate-pulse"></span>
+<span class="text-xs font-bold text-[#1a1f1d] tabular-nums text-[16px]">68,100.00</span>
+</div>
+</div>
+<!-- Live OHLC ribbon -->
+<div class="flex items-center justify-between py-2.5 px-3 mt-2 rounded-[18px] bg-white border border-neutral-200/50 text-xs tabular-nums text-[#718096] shadow-sm">
+<span>开: <strong class="text-[#1a1f1d] font-semibold">67,820</strong></span>
+<span>高: <strong class="text-[#087f69] font-semibold">68,240</strong></span>
+<span>低: <strong class="text-[#d93848] font-semibold">67,610</strong></span>
+<span>收: <strong class="text-[#087f69] font-semibold">68,100</strong></span>
+<span>量: <strong class="text-[#1a1f1d] font-semibold">142.5K</strong></span>
+</div>
+<!-- Period switcher tabs in Fullscreen -->
+<div class="flex items-center justify-between mt-3 px-1 text-xs">
+<div class="flex items-center space-x-2">
+<button class="h-8 px-3 rounded-full bg-[#087f69] text-white font-semibold text-xs shadow-sm" type="button">15分</button>
+<button class="h-8 px-3 rounded-full bg-white text-[#718096] font-medium text-xs border border-neutral-200/60" type="button">1时</button>
+<button class="h-8 px-3 rounded-full bg-white text-[#718096] font-medium text-xs border border-neutral-200/60" type="button">4时</button>
+<button class="h-8 px-3 rounded-full bg-white text-[#718096] font-medium text-xs border border-neutral-200/60" type="button">日K</button>
+</div>
+<div class="flex items-center space-x-1 text-xs text-[#718096]">
+<span class="material-symbols-outlined text-sm">tune</span>
+<span class="text-[11px]">指标: MA / VOL</span>
+</div>
+</div>
+<!-- Fullscreen expansive chart area -->
+<div class="flex-1 my-3 rounded-[24px] bg-white border border-neutral-200/60 p-4 shadow-sm flex flex-col justify-between overflow-hidden relative">
+<div class="flex items-center justify-between text-xs text-[#718096]">
+<div class="space-x-3 text-[11px]">
+<span class="text-[#087f69] font-medium">MA7: 67,950</span>
+<span class="text-[#b74760] font-medium">MA25: 67,420</span>
+</div>
+<span class="text-[11px] text-neutral-400">只读沉浸视图</span>
+</div>
+<!-- Fullscreen SVG Candles -->
+<div class="flex-1 w-full my-2 relative">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 500 240">
+<!-- Horizontal Grid lines -->
+<line stroke="#f0f4f1" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="500" y1="40" y2="40"></line>
+<line stroke="#f0f4f1" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="500" y1="90" y2="90"></line>
+<line stroke="#f0f4f1" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="500" y1="140" y2="140"></line>
+<line stroke="#f0f4f1" stroke-dasharray="3 3" stroke-width="1" x1="0" x2="500" y1="190" y2="190"></line>
+<!-- MA lines -->
+<path d="M 10 180 Q 120 170 240 120 T 480 80" fill="none" opacity="0.7" stroke="#087f69" stroke-width="1.5"></path>
+<path d="M 10 200 Q 130 190 250 150 T 480 110" fill="none" opacity="0.6" stroke="#b74760" stroke-dasharray="4 2" stroke-width="1.5"></path>
+<!-- Stoploss marker -->
+<line stroke="#d93848" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="500" y1="205" y2="205"></line>
+<text fill="#d93848" font-size="10" font-weight="600" text-anchor="end" x="495" y="201">计划止损: 67,419.00</text>
+<!-- Extended candle sequence -->
+<!-- 1 -->
+<line stroke="#d93848" stroke-width="1.2" x1="30" x2="30" y1="140" y2="190"></line>
+<rect fill="#d93848" height="30" rx="1.5" width="10" x="25" y="150"></rect>
+<!-- 2 -->
+<line stroke="#087f69" stroke-width="1.2" x1="70" x2="70" y1="150" y2="195"></line>
+<rect fill="#087f69" height="28" rx="1.5" width="10" x="65" y="155"></rect>
+<!-- 3 -->
+<line stroke="#d93848" stroke-width="1.2" x1="110" x2="110" y1="160" y2="210"></line>
+<rect fill="#d93848" height="32" rx="1.5" width="10" x="105" y="170"></rect>
+<!-- 4 -->
+<line stroke="#087f69" stroke-width="1.2" x1="150" x2="150" y1="155" y2="200"></line>
+<rect fill="#087f69" height="25" rx="1.5" width="10" x="145" y="160"></rect>
+<!-- 5 -->
+<line stroke="#087f69" stroke-width="1.2" x1="190" x2="190" y1="130" y2="175"></line>
+<rect fill="#087f69" height="30" rx="1.5" width="10" x="185" y="135"></rect>
+<!-- 6 -->
+<line stroke="#087f69" stroke-width="1.2" x1="230" x2="230" y1="110" y2="160"></line>
+<rect fill="#087f69" height="35" rx="1.5" width="10" x="225" y="115"></rect>
+<!-- 7 -->
+<line stroke="#d93848" stroke-width="1.2" x1="270" x2="270" y1="115" y2="150"></line>
+<rect fill="#d93848" height="20" rx="1.5" width="10" x="265" y="120"></rect>
+<!-- 8 -->
+<line stroke="#087f69" stroke-width="1.2" x1="310" x2="310" y1="90" y2="140"></line>
+<rect fill="#087f69" height="32" rx="1.5" width="10" x="305" y="98"></rect>
+<!-- 9 -->
+<line stroke="#087f69" stroke-width="1.2" x1="350" x2="350" y1="75" y2="125"></line>
+<rect fill="#087f69" height="35" rx="1.5" width="10" x="345" y="80"></rect>
+<!-- 10 -->
+<line stroke="#d93848" stroke-width="1.2" x1="390" x2="390" y1="70" y2="110"></line>
+<rect fill="#d93848" height="16" rx="1.5" width="10" x="385" y="80"></rect>
+<!-- 11 -->
+<line stroke="#087f69" stroke-width="1.2" x1="430" x2="430" y1="55" y2="100"></line>
+<rect fill="#087f69" height="30" rx="1.5" width="10" x="425" y="62"></rect>
+<!-- 12 Live Candle -->
+<line stroke="#087f69" stroke-width="1.5" x1="470" x2="470" y1="45" y2="90"></line>
+<rect fill="#087f69" height="28" rx="1.5" width="10" x="465" y="50"></rect>
+<circle class="animate-ping" cx="470" cy="50" fill="#087f69" opacity="0.75" r="3"></circle>
+<circle cx="470" cy="50" fill="#087f69" r="2.5"></circle>
+<!-- Volume bars -->
+<rect fill="#d93848" height="18" opacity="0.2" rx="1" width="10" x="25" y="215"></rect>
+<rect fill="#087f69" height="23" opacity="0.2" rx="1" width="10" x="65" y="210"></rect>
+<rect fill="#d93848" height="28" opacity="0.25" rx="1" width="10" x="105" y="205"></rect>
+<rect fill="#087f69" height="21" opacity="0.2" rx="1" width="10" x="145" y="212"></rect>
+<rect fill="#087f69" height="33" opacity="0.25" rx="1" width="10" x="185" y="200"></rect>
+<rect fill="#087f69" height="38" opacity="0.35" rx="1" width="10" x="225" y="195"></rect>
+<rect fill="#d93848" height="17" opacity="0.2" rx="1" width="10" x="265" y="216"></rect>
+<rect fill="#087f69" height="31" opacity="0.3" rx="1" width="10" x="305" y="202"></rect>
+<rect fill="#087f69" height="41" opacity="0.4" rx="1" width="10" x="345" y="192"></rect>
+<rect fill="#d93848" height="19" opacity="0.2" rx="1" width="10" x="385" y="214"></rect>
+<rect fill="#087f69" height="35" opacity="0.35" rx="1" width="10" x="425" y="198"></rect>
+<rect fill="#087f69" height="43" opacity="0.5" rx="1" width="10" x="465" y="190"></rect>
+</svg>
+</div>
+<!-- Fullscreen footer scale -->
+<div class="flex items-center justify-between text-xs text-[#718096] pt-2 border-t border-neutral-100 tabular-nums">
+<span>12:00</span>
+<span>15:00</span>
+<span>18:00</span>
+<span>21:00</span>
+<span class="text-[#087f69] font-medium">最新</span>
+</div>
+</div>
+<!-- Safe read-only back bar -->
+<div class="pt-1 text-center">
+<button class="w-full h-12 rounded-full bg-white border border-neutral-200/80 text-[#1a1f1d] font-semibold text-sm shadow-sm active:scale-[0.98] transition-all flex items-center justify-center space-x-1.5" onclick="closeKlineFullscreen()" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+<span>返回交易下单</span>
+</button>
+</div>
+</div>
+</div><div class="mt-3 grid grid-cols-3 divide-x divide-neutral-200/60 rounded-[22px] border border-neutral-200/50 bg-white/90 backdrop-blur-sm px-2 py-2.5 text-center text-xs tabular-nums text-tertiary shadow-[0_2px_12px_rgba(0,0,0,0.02)]"><div class="px-1"><span class="text-[11px] block text-[#718096]">今日可开</span><span class="font-semibold text-[#1a1f1d] text-xs mt-0.5 block">2/3次</span></div><div class="px-1"><span class="text-[11px] block text-[#718096]">再连亏停手</span><span class="font-semibold text-[#d93848] text-xs mt-0.5 block">1次</span></div><div class="px-1"><span class="text-[11px] block text-[#718096]">日亏剩余</span><span class="font-semibold text-[#1a1f1d] text-xs mt-0.5 block">20.00 U</span></div></div>
+</header>
+<!-- Unified White Card Surface with 18px radius and hairline border -->
+<section class="rounded-[28px] bg-white border border-neutral-200/60 p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] space-y-4"><!-- 1. Direction segmented switch: fully rounded pill (rounded-full) with 44px tap targets --><div class="grid grid-cols-2 p-1 bg-[#eef3ee] rounded-full" id="direction-segmented-group"><button class="h-11 rounded-full bg-[#087f69] text-white font-semibold text-sm transition-all active:scale-[0.98] shadow-sm flex items-center justify-center" id="btn-long" onclick="setDirection('LONG')" type="button">做多</button><button class="h-11 rounded-full text-[#718096] font-medium text-sm transition-all hover:text-[#1a1f1d] active:scale-[0.98] flex items-center justify-center" id="btn-short" onclick="setDirection('SHORT')" type="button">做空</button></div><!-- 2. Order Type & Leverage row: Quiet text tabs with clean underline & 44px hit-target leverage link --><div class="flex items-center justify-between border-b border-neutral-100 pb-2"><div class="flex items-center space-x-6 text-sm"><button class="py-1 text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium border-b-2 border-transparent h-11 flex items-center" id="tab-market" onclick="setOrderType('market')" type="button">市价</button><button class="py-1 text-[#1a1f1d] font-semibold border-b-2 border-[#087f69] transition-colors h-11 flex items-center" id="tab-limit" onclick="setOrderType('limit')" type="button">限价</button></div><button class="h-11 px-2 flex items-center text-xs font-medium text-[#718096] hover:text-[#087f69] transition-colors active:scale-95" type="button"><span>全仓 100x</span><span class="material-symbols-outlined text-sm ml-0.5" data-icon="chevron_right">chevron_right</span></button></div><!-- 3. Limit Price Input row: Borderless light sage fill with 44px tap action --><div class="space-y-1.5" id="limit-price-row"><div class="flex items-center justify-between text-xs"><label class="text-[#718096] font-medium" for="input-limit-price">委托价</label><button class="text-[#087f69] font-medium hover:underline text-xs h-11 px-1 flex items-center active:scale-95" onclick="fillLatestPrice()" type="button">最新价</button></div><div class="relative flex items-center h-12 rounded-[18px] bg-[#f0f4f1] px-3.5 transition-all focus-within:ring-2 focus-within:ring-[#087f69]/20"><input class="w-full bg-transparent text-[18px] font-semibold text-[#1a1f1d] tabular-nums focus:outline-none" id="input-limit-price" placeholder="0.00" type="text" value="68,100.00"/><span class="text-xs text-[#718096] select-none font-medium ml-2">USDT</span></div></div><!-- 4. Initial Stop Loss row: Borderless light sage fill --><div class="space-y-1.5"><div class="flex items-center justify-between text-xs"><span class="text-[#718096] font-medium">初始止损</span><button class="flex items-center space-x-1 text-[#087f69] font-medium hover:underline text-xs h-11 px-1 active:scale-95" id="btn-quick-1r" type="button"><span class="h-1.5 w-1.5 rounded-full bg-[#087f69]"></span><span id="label-quick-1r">1R 自动计算</span></button></div><div class="relative flex items-center h-12 rounded-[18px] bg-[#f0f4f1] px-3.5 transition-all focus-within:ring-2 focus-within:ring-[#087f69]/20"><input class="w-full bg-transparent text-[18px] font-semibold text-[#1a1f1d] tabular-nums focus:outline-none" id="input-sl-price" placeholder="止损价" type="text" value="67,419.00"/><span class="text-xs text-[#d93848] font-medium tabular-nums select-none mr-2" id="sl-delta-percent">-1.00%</span><span class="text-xs text-[#718096] select-none font-medium">USDT</span></div></div><!-- 5. Allocation (仓位额度) Slider & Tick Targets --><div class="space-y-2 pt-1"><div class="flex items-baseline justify-between"><span class="text-xs text-[#718096] font-medium">仓位额度</span><div class="text-right"><span class="text-[20px] font-bold text-[#1a1f1d] tabular-nums" id="slider-val-label">100%</span><span class="block text-[11px] text-[#718096] font-normal">保证金占净值 2.0% (上限10%)</span></div></div><div class="h-11 flex items-center px-0.5"><input class="w-full h-1.5 bg-[#eef3ee] rounded-full appearance-none cursor-pointer" id="quota-slider" max="100" min="0" oninput="updateQuota(this.value)" step="5" type="range" value="100"/></div><!-- Subtle tick targets with 44px tap target height --><div class="grid grid-cols-4 text-center text-xs"><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-25" onclick="setSliderPercent(25)" type="button">25%</button><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-50" onclick="setSliderPercent(50)" type="button">50%</button><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-75" onclick="setSliderPercent(75)" type="button">75%</button><button class="h-11 flex items-center justify-center text-[#087f69] font-bold rounded-full bg-[#087f69]/10 transition-colors active:scale-95" id="chip-100" onclick="setSliderPercent(100)" type="button">100%</button></div></div><!-- 6. Compact Estimate Strip (3-column flat hairline layout) --><div class="border-t border-neutral-100 pt-3"><div class="grid grid-cols-3 divide-x divide-neutral-100 text-center text-xs tabular-nums"><div class="px-1"><span class="text-[11px] text-[#718096] block">持仓金额</span><span class="font-semibold text-[#1a1f1d] text-[15px] mt-0.5 block" id="val-pos-size">200.00 U</span></div><div class="px-1"><span class="text-[11px] text-[#718096] block">占用保证金</span><span class="font-semibold text-[#1a1f1d] text-[15px] mt-0.5 block" id="val-margin">20.00 U</span></div><div class="px-1"><span class="text-[11px] text-[#718096] block">预计止损</span><span class="font-semibold text-[#d93848] text-[15px] mt-0.5 block" id="val-loss">-20.00 U</span></div></div></div><!-- 7. Account Equity Line --><div class="flex items-center justify-between text-xs text-[#718096] px-0.5"><span>可用 <strong class="text-[#1a1f1d] font-medium tabular-nums">800.00 U</strong></span><span class="text-neutral-300">·</span><span>净值 <strong class="text-[#1a1f1d] font-medium tabular-nums">1,000.00 U</strong></span></div><!-- 8. Primary Action Button: 48px height, rounded-full pill in solid Jade --><button class="w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-[#087f69] text-white font-semibold text-sm tracking-wide active:scale-[0.98] transition-all shadow-[0_4px_16px_rgba(8,127,105,0.25)] hover:bg-[#076f5c]" id="btn-submit-action" onclick="simulatePlaceOrder()" type="button"><span class="material-symbols-outlined text-[18px]" data-icon="shield">shield</span><span id="btn-submit-text">买入开多 (受纪律保护)</span></button><!-- 9. Inline Order Feedback Slot --><div class="flex items-center justify-between text-xs text-[#718096] px-1 pt-0.5" id="order-status-card"><div class="flex items-center space-x-2 truncate mr-2"><span class="h-1.5 w-1.5 rounded-full bg-[#087f69] flex-shrink-0"></span><span class="truncate text-[11px]" id="status-card-title">BTC · 限价开多 / 已挂出，等待成交</span></div><a class="text-[#087f69] font-medium hover:underline text-[11px] flex-shrink-0 h-11 flex items-center" href="#">查看订单</a></div></section></main>
+<!-- Bottom Navigation Bar (Shared Components JSON Anchor) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]"><!-- Tab 1: 合约 (active jade) -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-primary transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-[11px] font-semibold mt-0.5">合约</span>
+</button>
+<!-- Tab 2: 纪律 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
+<span class="text-[11px] font-medium mt-0.5">纪律</span>
+</button>
+<!-- Tab 3: 持仓 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="text-[11px] font-medium mt-0.5">持仓</span>
+</button>
+<!-- Tab 4: 统计 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="bar_chart">bar_chart</span>
+<span class="text-[11px] font-medium mt-0.5">统计</span>
+</button></nav>
+<!-- Interactive Logic for Drafting Direction, Quota Calculation, and Non-blocking feedback -->
+<script>
+    let currentDirection = 'LONG';
+    let currentRatio = 100;
+    const baseAllowance = 200.00; // USDT
+    const currentPrice = 68100.00;
+
+    function setDirection(dir) {
+      currentDirection = dir;
+      const btnLong = document.getElementById('btn-long');
+      const btnShort = document.getElementById('btn-short');
+      const submitBtn = document.getElementById('btn-submit-action');
+      const submitText = document.getElementById('btn-submit-text');
+      const quick1rLabel = document.getElementById('label-quick-1r');
+      const quick1rBtn = document.getElementById('btn-quick-1r');
+      const slInput = document.getElementById('input-sl-price');
+      const slPercent = document.getElementById('sl-delta-percent');
+      const statusTitle = document.getElementById('status-card-title');
+
+      if (dir === 'LONG') {
+        // Long Active Style
+        btnLong.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-primary-container/10 border-2 border-primary-container text-primary font-headline-sm text-headline-sm font-bold transition-all active:scale-[0.98]';
+        btnLong.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-primary text-[20px]';
+
+        // Short Inactive Style
+        btnShort.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-surface-container text-tertiary border-2 border-transparent font-headline-sm text-headline-sm font-medium transition-all active:scale-[0.98]';
+        btnShort.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-tertiary text-[20px]';
+
+        // CTA Button in Emerald
+        submitBtn.className = 'w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-primary-container text-on-primary font-headline-sm text-headline-sm font-semibold tracking-wide shadow-md active:scale-[0.98] transition-transform';
+        submitText.innerText = '买入开多 (受纪律保护)';
+        quick1rLabel.innerText = '多单 1R 锁定';
+        quick1rBtn.className = 'col-span-5 sm:col-span-4 h-12 flex flex-col justify-center items-center rounded-xl bg-primary-container/10 border border-primary-container/30 text-primary active:scale-95 transition-transform';
+
+        slInput.value = '67,419.00';
+        slPercent.innerText = '-1.00%';
+        slPercent.className = 'pr-2.5 text-label-sm font-label-sm text-secondary font-medium select-none tabular-nums';
+        statusTitle.innerText = 'BTC · 限价开多 / 已挂出，等待成交';
+      } else {
+        // Short Active Style (Rose Muted)
+        btnShort.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-[#FDF0F2] border-2 border-[#e11d48] text-[#e11d48] font-headline-sm text-headline-sm font-bold transition-all active:scale-[0.98]';
+        btnShort.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-[#e11d48] text-[20px]';
+
+        // Long Inactive Style
+        btnLong.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-surface-container text-tertiary border-2 border-transparent font-headline-sm text-headline-sm font-medium transition-all active:scale-[0.98]';
+        btnLong.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-tertiary text-[20px]';
+
+        // CTA Button in Rose
+        submitBtn.className = 'w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-[#e11d48] text-white font-headline-sm text-headline-sm font-semibold tracking-wide shadow-md active:scale-[0.98] transition-transform';
+        submitText.innerText = '卖出开空 (受纪律保护)';
+        quick1rLabel.innerText = '空单 1R 锁定';
+        quick1rBtn.className = 'col-span-5 sm:col-span-4 h-12 flex flex-col justify-center items-center rounded-xl bg-[#FDF0F2] border border-[#e11d48]/30 text-[#e11d48] active:scale-95 transition-transform';
+
+        slInput.value = '68,781.00';
+        slPercent.innerText = '+1.00%';
+        slPercent.className = 'pr-2.5 text-label-sm font-label-sm text-secondary font-medium select-none tabular-nums';
+        statusTitle.innerText = 'BTC · 限价开空 / 已挂出，等待成交';
+      }
+    }
+
+    function updateQuota(val) {
+      currentRatio = parseInt(val, 10);
+      document.getElementById('slider-val-label').innerText = currentRatio + '% ' + (currentRatio === 100 ? '(满额风控)' : '(动态配额)');
+
+      const posSize = (baseAllowance * (currentRatio / 100)).toFixed(2);
+      const btcAmount = (posSize / currentPrice).toFixed(4);
+      const margin = (posSize / 10).toFixed(2);
+      const loss = (posSize * 0.1).toFixed(2);
+
+      document.getElementById('val-pos-size').innerText = posSize + ' USDT';
+      document.getElementById('val-margin').innerText = margin + ' USDT';
+      document.getElementById('val-loss').innerText = '-' + loss + ' U (' + (currentRatio / 100).toFixed(1) + 'R)';
+      document.getElementById('quota-detail-note').innerText = currentRatio + '% = 本规则允许上限 (' + posSize + ' USDT / ' + btcAmount + ' BTC)';
+
+      // Clear chip styles
+      [25, 50, 75, 100].forEach(p => {
+        const chip = document.getElementById('chip-' + p);
+        if (chip) {
+          if (p === currentRatio) {
+            chip.className = 'h-8 rounded-lg bg-primary-container text-on-primary text-label-sm font-label-sm font-semibold shadow-xs';
+          } else {
+            chip.className = 'h-8 rounded-lg bg-surface-container text-tertiary text-label-sm font-label-sm font-medium hover:bg-surface-container-high transition-colors';
+          }
+        }
+      });
+    }
+
+    function setSliderPercent(pct) {
+      const slider = document.getElementById('quota-slider');
+      slider.value = pct;
+      updateQuota(pct);
+    }
+
+    function fillLatestPrice() {
+      const input = document.getElementById('input-limit-price');
+      input.value = "68,100.00";
+      input.focus();
+    }
+
+    function simulatePlaceOrder() {
+      const btn = document.getElementById('btn-submit-action');
+      const originalText = document.getElementById('btn-submit-text').innerText;
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      document.getElementById('btn-submit-text').innerText = '纪律审查已核准，指令提交中...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        document.getElementById('btn-submit-text').innerText = originalText;
+        const statusTitle = document.getElementById('status-card-title');
+        statusTitle.innerText = 'BTC · 挂单已更新于本地撮合队列 (等待触发)';
+      }, 900);
+    }
+  </script>
+</body></html>

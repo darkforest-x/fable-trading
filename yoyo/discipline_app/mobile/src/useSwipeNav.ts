@@ -6,7 +6,7 @@ export function useSwipeNav(tab:string,disabled:boolean,navigate:(tab:typeof MAI
  const start=useRef<{x:number;y:number;at:number}|null>(null);
  return {onTouchStart(e:TouchEvent){
   start.current=null;
-  if(disabled||e.touches.length!==1||(e.target as Element).closest('button,input,textarea,select,a,summary,[role="slider"],[role="dialog"],[role="listbox"]'))return;
+  if(disabled||e.touches.length!==1||(e.target as Element).closest('button,input,textarea,select,a,summary,[role="slider"],[role="dialog"],[role="listbox"],[data-no-swipe]'))return;
   const t=e.touches[0];if(t.clientX<20||t.clientX>window.innerWidth-20)return;
   start.current={x:t.clientX,y:t.clientY,at:Date.now()};
  },onTouchEnd(e:TouchEvent){

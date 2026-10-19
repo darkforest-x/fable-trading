@@ -626,6 +626,14 @@ html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .external-history summary{padding:14px 0 4px;font-size:13px;color:var(--muted,#758780);cursor:pointer}
 .external-history summary span{margin-left:6px}
 
+/* Lightweight collapsed shell; the chart bundle is imported only on expansion. */
+.candle-module{margin:0 0 14px;min-width:0}
+.candle-toggle{width:100%;display:flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;border-radius:999px;background:var(--card);color:var(--green);box-shadow:var(--shadow)}
+.candle-toggle b{color:var(--ink);font-size:12px}.candle-toggle small{font-size:10px;color:var(--muted)}
+.candle-toggle span{margin-left:auto;font-size:11px}.candle-toggle>svg:last-child{transform:rotate(90deg)}
+.candle-loading,.candle-failure{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;min-height:60px;border-radius:24px;background:var(--card);font-size:12px;color:var(--muted)}
+.candle-loading button,.candle-failure button{color:var(--green);font-size:12px}
+
 /* Stitch c0b45b9cfa2641289e445a9e3b795ab3: soft geometry, one clear panel. */
 .entry-page{padding-left:16px;padding-right:16px}
 .entry-page .quote-hero{padding:2px 3px 10px}
