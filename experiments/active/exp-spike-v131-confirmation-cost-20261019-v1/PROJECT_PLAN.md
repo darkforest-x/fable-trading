@@ -40,3 +40,9 @@ frozen. No report requested.
   scalar accounting and aggregation checks, and a bounded causal-prefix audit
   precede conclusions. Store raw ledgers/config/receipts and update registries,
   Notion and the required learning note.
+
+Audit addendum, 2026-10-19: raw inherited random anchors include UTC Sundays;
+the later 15m summary excludes them, matching the signal's time guard. Preserve
+the first all-draw result and add a non-Sunday-anchor comparison for both 15m/1H.
+Do not redraw exclusions or condition on control confirmation success. Prefer
+this shared-time-guard comparison when discussing incremental signal evidence.
