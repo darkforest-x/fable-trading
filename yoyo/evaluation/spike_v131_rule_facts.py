@@ -19,6 +19,14 @@ ARMS = ('baseline', 'no_density', 'no_bb', 'no_launch_volume', 'no_imacd',
 FEATURES = ('compression_run60', 'advance20_atr', 'relative_btc20_atr')
 
 
+def candle_shape(o,h,l,c,side):
+    """Keep oracle division order: multiplication changes IEEE threshold ties."""
+    span=h-l
+    with np.errstate(divide='ignore',invalid='ignore'):
+        return ((side*(c-o)>0) & (span>0) & (np.abs(c-o)/span>=.55)
+                & ((c-l if side==1 else h-c)/span>=.75))
+
+
 def context(frame, gap):
     """Original 12-bar density/parent, 3-bar launch and segmented volume fields."""
     f = frame
@@ -75,8 +83,7 @@ def structural(d, side, omit='baseline'):
     rope = d['ropeHigh' if side==1 else 'ropeLow']
     valid = (~d['gap'] & d['ready'] & np.isfinite(md) & np.isfinite(sb)
              & np.isfinite(atr) & np.isfinite(rope) & (atr>0))
-    span=h-l
-    shape=(side*(c-o)>0) & (span>0) & (np.abs(c-o)>=.55*span) & ((c-l if side==1 else h-c)>=.75*span)
+    shape=candle_shape(o,h,l,c,side)
     if omit=='no_candle_shape': shape=np.ones(len(c),bool)
     envelope=np.isfinite(d['advance']) & np.isfinite(d['volume'])
     if omit!='no_advance': envelope &= side*d['advance']>=1.5

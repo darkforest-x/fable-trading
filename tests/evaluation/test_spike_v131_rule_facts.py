@@ -5,7 +5,26 @@ import pytest
 
 from yoyo.evaluation import spike_v128_recent as parent
 from yoyo.evaluation.spike_v126_htf_recheck import _legacy
-from yoyo.evaluation.spike_v131_rule_facts import context,legacy,structural,rules,state_features,bb_fields
+from yoyo.evaluation.spike_v131_rule_facts import context,legacy,structural,rules,state_features,bb_fields,candle_shape
+
+
+@pytest.mark.parametrize('ohlc,side', [([.861,.876,.856,.872],1),([1.522,1.536,1.496,1.5],-1)])
+def test_real_threshold_ties_preserve_original_division_order(ohlc,side):
+    from yoyo.evaluation.spike_v7_fast import _shape
+    o,h,l,c=map(lambda x:np.array([x]),ohlc)
+    assert candle_shape(o,h,l,c,side)[0]==_shape(o,h,l,c,0,side)
+    assert _shape(o,h,l,c,0,side)
+    assert not (np.abs(c-o)>=.55*(h-l))[0]
+
+
+def test_price_path_cache_discards_old_membership_and_nan_optional_fields(tmp_path):
+    from yoyo.evaluation.spike_v131_rule_study import attempt_cache
+    pd.DataFrame([dict(policy='rebreak',anchor_i=12,side=1,decision_i=17,status='expired',
+        filled=False,net_r=np.nan,entry_i=np.nan,exit_i=np.nan,members=123,
+        compression_run60=60,trade_key='old-id')]).to_csv(tmp_path/'15m.csv.gz',index=False)
+    cached=attempt_cache(tmp_path,15)[12,1]
+    assert cached['net_r'] is None and cached['decision_i']==17
+    assert not {'members','compression_run60','trade_key','entry_i','exit_i'} & cached.keys()
 
 
 def fixture():

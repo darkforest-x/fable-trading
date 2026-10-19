@@ -29,6 +29,30 @@ EXP=Path('experiments/active/exp-spike-v131-rule-state-20261019-v1')
 CONFIG=EXP/'config.json'
 BASE=Path('experiments/active/exp-spike-v131-entry-stages-20261019-v1/results_v1')
 BTC={}
+ATTEMPT_FIELDS=('policy','anchor_i','side','decision_i','status','filled','net_r',
+    'initial_stop','anchor_entry','anchor_risk','entry_i','exit_i','entry_price',
+    'initial_risk','exit_price','exit_reason','gross_return','net_return',
+    'gross_r','cost_r','delay_bars','chase_r')
+
+
+def attempt_cache(folder,minutes):
+    """Reuse only price paths, never detector membership, IDs or state features.
+
+    The run checks identical source metadata/config and a complete old receipt.
+    Both builders used original raw exit/cancellation flags and the unchanged
+    attempt function. Current raw flags are independently rechecked below.
+    """
+    if folder is None:return {}
+    old=read(Path(folder)/f'{minutes}m.csv.gz')
+    if not len(old):return {}
+    out={}
+    for r in old.drop_duplicates(['anchor_i','side']).to_dict('records'):
+        core={k:r[k] for k in ATTEMPT_FIELDS if k in r and pd.notna(r[k])}
+        core.setdefault('net_r',None)
+        for k in ('anchor_i','side','decision_i','entry_i','exit_i'):
+            if k in core:core[k]=int(core[k])
+        out[core['anchor_i'],core['side']]=core
+    return out
 
 
 def load_base(source,cfg):
@@ -49,7 +73,7 @@ def init_worker(btcsource,cfg):
 
 
 def worker(args):
-    source,meta,cfg,root=args;start=time.perf_counter();symbol=source['symbol']
+    source,meta,cfg,root,cached_folder=args;start=time.perf_counter();symbol=source['symbol']
     before=provenance(source['path']);base=load_base(source,cfg)
     folder=Path(root)/'streams'/symbol;folder.mkdir(parents=True,exist_ok=False)
     receipts=[]
@@ -86,13 +110,15 @@ def worker(args):
         baseline_keys={a['trade_key'] for a in anchors if a['members']&1}
         assert baseline_keys==set(oldsignal.trade_key if len(oldsignal) else [])
         oldmap={(r['trade_key'],r['cohort']):r for r in old.to_dict('records')}
-        rows=[];cache={};checks=0;drawchecks=0
+        rows=[];cache=attempt_cache(cached_folder,minutes);cached_keys=set(cache);used_cache=set();fresh_paths=0;checks=0;drawchecks=0
         for a in anchors:
             key=a['trade_key'];ci=chosen[key];pair=ci is not None and clock[ci].dayofweek!=6
             for cohort,i in [('signal',a['anchor_i']),('control',ci)]:
                 if i is None:continue
                 ck=(int(i),a['side'])
-                if ck not in cache:cache[ck]=attempt(p,int(i),a['side'],'rebreak')
+                if ck not in cache:
+                    cache[ck]=attempt(p,int(i),a['side'],'rebreak');fresh_paths+=1
+                elif ck in cached_keys:used_cache.add(ck)
                 r=dict(cache[ck]);d=int(r['decision_i']);x=int(r.get('exit_i',d))
                 r.update(trade_key=key,cohort=cohort,members=a['members'],pair_eligible=pair,
                     symbol=symbol,timeframe_min=minutes,anchor_time=clock[i].isoformat(),
@@ -128,9 +154,11 @@ def worker(args):
                 np.testing.assert_allclose(sf.to_numpy(),feat.iloc[:i+1].to_numpy(),equal_nan=True);prefix_checks+=3
         receipts.append(dict(timeframe_min=minutes,bars=len(frame),partial=partial,rows=len(rows),union_anchors=len(anchors),
             baseline_anchors=len(baseline_keys),anchor_counts={arm:int(sum(masks[arm,s].sum() for s in (1,-1))) for arm in ARMS},
-            baseline_scalar_checks=checks,draw_identity_checks=drawchecks,prefix_checks=prefix_checks))
+            baseline_scalar_checks=checks,draw_identity_checks=drawchecks,prefix_checks=prefix_checks,
+            reused_price_paths=len(used_cache),fresh_price_paths=fresh_paths))
     assert before==provenance(source['path'])
-    receipt=dict(symbol=symbol,seconds=time.perf_counter()-start,input=before,streams=receipts)
+    receipt=dict(symbol=symbol,seconds=time.perf_counter()-start,input=before,streams=receipts,
+                 price_path_cache=cached_folder,detectors_and_features_recomputed=True)
     dump(folder/'receipt.json',receipt);return receipt
 
 
@@ -171,20 +199,28 @@ def run(root,workers,symbols,reuse=None):
     dump(root/'identity.json',dict(generated_at=datetime.now(timezone.utc).isoformat(),config=cfg,subset=bool(symbols),
         symbols=[r['symbol'] for r in sources],builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         code=[provenance(p) for p in paths],manifest=provenance(cfg['input_manifest']),metadata=provenance(parent.source.EXCHANGE_INFO),btc=provenance(btc['path'])))
-    receipts=[];errors=[]
+    receipts=[];errors=[];caches={}
     if reuse:
-        oldid=json.loads((Path(reuse)/'identity.json').read_text())
-        assert oldid['builder_commit'].startswith('448ec8998e') and oldid['config']==cfg
-        pending=[]
-        for source in sources:
-            cached=reuse_complete(reuse,root,source,cfg)
-            if cached is None:pending.append(source)
-            else:receipts.append(cached)
-        sources=pending
-        dump(root/'reuse.json',dict(source=str(reuse),original_builder=oldid['builder_commit'],reused=[r['symbol'] for r in receipts],fresh=[r['symbol'] for r in sources]))
-        print(json.dumps(dict(reused=len(receipts),fresh=len(sources))),flush=True)
+        identities=[]
+        for prior in reuse:
+            oldid=json.loads((Path(prior)/'identity.json').read_text())
+            assert oldid['builder_commit'][:10] in ('448ec8998e','eb5f3ff092') and oldid['config']==cfg
+            assert oldid['metadata']==provenance(parent.source.EXCHANGE_INFO)
+            identities.append(dict(source=str(prior),builder=oldid['builder_commit']))
+            for source in sources:
+                if source['symbol'] in caches:continue
+                folder=Path(prior)/'streams'/source['symbol'];receipt=folder/'receipt.json'
+                if not receipt.exists():continue
+                old=json.loads(receipt.read_text())
+                if old['input']!=provenance(source['path']):continue
+                if sorted(s['timeframe_min'] for s in old['streams'])!=sorted(cfg['timeframes']):continue
+                if any(len(read(folder/f"{s['timeframe_min']}m.csv.gz",['cohort']))!=s['rows'] for s in old['streams']):continue
+                caches[source['symbol']]=str(folder)
+        dump(root/'reuse.json',dict(sources=identities,price_path_caches=caches,
+            semantics='All masks, features, memberships, random draws and queues regenerated. Only unchanged original-raw-flag price paths reused.'))
+        print(json.dumps(dict(cached_symbols=len(caches),total=len(sources))),flush=True)
     with ProcessPoolExecutor(max_workers=workers,initializer=init_worker,initargs=(btc,cfg)) as pool:
-        fs={pool.submit(worker,(r,meta[r['symbol']],cfg,str(root))):r['symbol'] for r in sources}
+        fs={pool.submit(worker,(r,meta[r['symbol']],cfg,str(root),caches.get(r['symbol']))):r['symbol'] for r in sources}
         for n,f in enumerate(as_completed(fs),1):
             try:receipts.append(f.result())
             except Exception as exc:errors.append(dict(symbol=fs[f],error=repr(exc)))
@@ -195,5 +231,5 @@ def run(root,workers,symbols,reuse=None):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=EXP/'paths_v1')
-    parser.add_argument('--workers',type=int,default=4);parser.add_argument('--symbols',nargs='+');parser.add_argument('--reuse',type=Path)
+    parser.add_argument('--workers',type=int,default=4);parser.add_argument('--symbols',nargs='+');parser.add_argument('--reuse',type=Path,nargs='+')
     a=parser.parse_args();run(a.output,a.workers,a.symbols,a.reuse)
