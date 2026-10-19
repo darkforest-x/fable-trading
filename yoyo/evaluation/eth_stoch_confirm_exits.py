@@ -206,12 +206,13 @@ def serial(rows):
 def metrics(rows):
     closed=rows[rows.closed];n=closed.net_points.to_numpy(float);r=closed.net_r.to_numpy(float)
     cum=np.r_[0.,np.cumsum(n)];curve=np.maximum.accumulate(cum)-cum
-    wins=n[n>0].sum();loss=-n[n<0].sum()
+    # Fee-covering tick stops can leave floating dust at mathematical zero.
+    wins=n[n>1e-8].sum();loss=-n[n<-1e-8].sum()
     return dict(orders=len(rows),closed=len(closed),censored=int((~rows.closed).sum()),
         gross_points=float(closed.gross_points.sum()),net_points=float(n.sum()),
         net_r=float(r.sum()),mean_r=float(r.mean()) if len(r) else None,
         mean_net_bp=float(closed.net_return.mean()*10000) if len(r) else None,
-        win_rate=float((n>0).mean()) if len(n) else None,pf=float(wins/loss) if loss else None,
+        win_rate=float((n>1e-8).mean()) if len(n) else None,pf=float(wins/loss) if loss else None,
         closed_points_drawdown=float(curve.max()),cost_points=float(closed.cost_points.sum()),
         minus_best_points=float(n.sum()-n.max()) if len(n) else None,
         ambiguous_minutes=int(closed.ambiguous_old_stop_target.sum()),

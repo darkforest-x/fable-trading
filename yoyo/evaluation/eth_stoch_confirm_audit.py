@@ -141,12 +141,16 @@ def main():
                     assert len(closed) == summ.closed
                     assert abs(closed.gross_points.sum() - summ.gross_points) < 1e-7
                     assert abs(closed.cost_points.sum() - summ.cost_points) < 1e-7
+                    assert abs((closed.net_points > 1e-8).mean() - summ.win_rate) < 1e-10
+                    profits = closed.loc[closed.net_points > 1e-8, 'net_points'].sum()
+                    losses = -closed.loc[closed.net_points < -1e-8, 'net_points'].sum()
+                    assert abs(profits / losses - summ.pf) < 1e-10
                     curve = np.r_[0., closed.net_points.cumsum()]
                     assert abs(np.max(np.maximum.accumulate(curve) - curve) - summ.closed_points_drawdown) < 1e-7
     receipt = dict(status='passed', verifier_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
         minute_rows=len(minute), raw_arrows=len(candidates), admission_rows=len(entries), matched_controls=len(controls),
         scalar_paths=checks, serial_policy_populations=44, summary_cells=176,
-        tiny_nonzero_below_1e8=tiny_zero, independence='OHLC reshape, separate Stoch, signed-price scalar paths, monetary identities and fresh serial occupancy',
+        tiny_nonzero_below_1e8=tiny_zero, zero_tolerance_points=1e-8, independence='OHLC reshape, separate Stoch, signed-price scalar paths, monetary identities and fresh serial occupancy',
         not_checked='No tick ordering or actual market execution/funding; fixed cost convention, not exchange-account-specific costs')
     (out / 'verification.json').write_text(json.dumps(receipt, indent=2) + '\n')
     print(json.dumps(receipt))

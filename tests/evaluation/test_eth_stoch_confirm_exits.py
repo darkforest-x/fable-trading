@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.eth_stoch_confirm_exits import Policy, trace, prepare, opportunities, serial, sample_controls
+from yoyo.evaluation.eth_stoch_confirm_exits import Policy, trace, prepare, opportunities, serial, sample_controls, metrics
 
 
 def ctx(bars):
@@ -86,3 +86,12 @@ def test_control_matching_does_not_cross_time_split_or_side():
                     dict(eligible=True,is_signal=False,raw_side=0,segment='development',week='W',bucket=0,side=-1)])
     s,c,missing=sample_controls(d,{'control_seed':1})
     assert missing==[0] and c.empty and len(s)==1
+
+
+def test_mathematical_break_even_is_not_a_floating_point_win():
+    rows = pd.DataFrame(dict(closed=[True]*4, net_points=[2., -2., 2e-13, -2e-13],
+        net_r=[1., -1., 1e-13, -1e-13], net_return=[.02, -.02, 1e-15, -1e-15],
+        gross_points=[2.2, -1.8, .2, .2], cost_points=[.2]*4,
+        ambiguous_old_stop_target=[0]*4, hold_minutes=[1]*4))
+    result = metrics(rows)
+    assert result['win_rate'] == .25 and result['pf'] == 1
