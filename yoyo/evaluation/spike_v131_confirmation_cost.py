@@ -287,8 +287,8 @@ def summarize(events,diagnostics,cfg):
                 t=z[z.cohort.eq('signal')];c=z[z.cohort.eq('control')]
                 coverage.append(dict(timeframe_min=minutes,side=side,period=period,n=len(t),
                     net=stats(t.net_r),gross=stats(t.gross_r),fees=stats(t.fee_fill_r),
-                    chase_quantiles={str(q):float(t.chase_fill_r.quantile(q)) for q in [.1,.25,.5,.75,.9]},
-                    delay_quantiles={str(q):float(t.delay_bars.quantile(q)) for q in [.25,.5,.75]},
+                    chase_quantiles={str(q):float(t.chase_fill_r.quantile(q)) if len(t) else None for q in [.1,.25,.5,.75,.9]},
+                    delay_quantiles={str(q):float(t.delay_bars.quantile(q)) if len(t) else None for q in [.25,.5,.75]},
                     gross_positive_net_negative=int(((t.gross_r>0)&(t.net_r<=0)).sum()),
                     matched=paired(t,c,cfg,['net_r'])))
                 for feature,edges in [('chase_decision_r',cfg['chase_edges']),('delay_bars',cfg['delay_edges']),('fee_decision_r',cfg['fee_edges'])]:
