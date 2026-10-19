@@ -18,3 +18,15 @@ Prespecified contrasts: standalone Stoch vs matched random; standalone combined 
 
 ## Verification and delivery
 Commit builders before data execution. Synthetic decision tests, signal formula existing tests, causal prefixes, full original baseline path parity, independent scalar/serial/membership audit and raw extrema. Validate sample counts and preserve failures. No standalone report: raw ledgers, compact JSON, registry/Notion updates and conversation conclusions. Production/training false. Subagent requested Luna max but runtime cannot confirm actual model, interrupted before research; parent executes.
+# Owner scope amendment (2026-10-19)
+
+Owner requested "460 is enough" after the 460/638 progress update. Stop the
+remaining path generation and use exactly the first 460 completed symbol
+receipts ordered by completion mtime, then symbol. Nine additional symbols
+finished before termination; exclude them without inspecting returns. Preserve
+the interrupted full directory and freeze a linked subset in `subset460_v1`.
+This is an operational completion subset, approximately dispatch order, not a
+random or representative universe. The six policies, costs, exits, chronological
+split and inferential family remain unchanged. No policy returns were inspected
+when the owner selected this sample size.
+
