@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-confirmation-cost-20261019-v1
+    artifact_type: manifest
+    role: Frozen confirmation selection and price-cost attribution with opportunity-level random controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: c304b78ad0
+    source_path: experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/delivery_receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: results_v1 retains events.csv.gz,diagnostics.csv.gz,result.json,identity.json,receipt.json,verification.json,lineage_verification.json,guard_sensitivity.json; compressed ledgers/per-stream receipts local, compact findings/source receipts tracked. Independent opportunity and archived serial populations explicitly separate. Same20bp and frozen barriers. No content hashes or downloads.
   - artifact_id: spike-v131-staged-entry-search-20261019-v1
     artifact_type: manifest
     role: Entry allocation search with original-risk ceiling and chronological comparisons

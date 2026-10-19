@@ -1,0 +1,93 @@
+{
+  "config": {
+    "experiment_id": "exp-spike-v131-confirmation-cost-20261019-v1",
+    "analysis_start": "2023-01-01T00:00:00Z",
+    "split": "2025-01-01T00:00:00Z",
+    "end": "2026-09-23T04:00:00Z",
+    "round_trip_cost": 0.002,
+    "attribution_timeframes": [
+      15,
+      60
+    ],
+    "diagnostic_timeframes": [
+      15,
+      30,
+      60,
+      240
+    ],
+    "bootstrap": 3000,
+    "seed": 20261019,
+    "chase_edges": [
+      0,
+      0.25,
+      0.5,
+      1,
+      2
+    ],
+    "delay_edges": [
+      3,
+      6,
+      12,
+      24
+    ],
+    "fee_edges": [
+      0.05,
+      0.1,
+      0.2,
+      0.4
+    ],
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "subset": true,
+  "symbols": [
+    "BTCUSDT",
+    "DOGEUSDT",
+    "ETHUSDT"
+  ],
+  "builder_commit": "cd0a96b57c11a20b8dbb95946d14b91db95c4cf6",
+  "sources": [
+    {
+      "path": "data/research/spike_v128_entry_clock_long_20260923/manifest.json",
+      "realpath": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/research-spike_v128_entry_clock_long_20260923/manifest.json",
+      "bytes": 606147,
+      "mtime_ns": 1790155326000000000
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/leg_paths.csv.gz",
+      "realpath": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/leg_paths.csv.gz",
+      "bytes": 10940708,
+      "mtime_ns": 1792393872847730180
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/trades.csv.gz",
+      "realpath": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/trades.csv.gz",
+      "bytes": 2519016,
+      "mtime_ns": 1792391945782174357
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_confirmation_cost.py",
+      "realpath": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v131_confirmation_cost.py",
+      "bytes": 23908,
+      "mtime_ns": 1792395763660137303
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/config.json",
+      "realpath": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/config.json",
+      "bytes": 507,
+      "mtime_ns": 1792395552372050378
+    },
+    {
+      "path": "experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/PROJECT_PLAN.md",
+      "realpath": "/Users/zhangzc/fable-trading/experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/PROJECT_PLAN.md",
+      "bytes": 2992,
+      "mtime_ns": 1792395552372726843
+    },
+    {
+      "path": "tests/evaluation/test_spike_v131_confirmation_cost.py",
+      "realpath": "/Users/zhangzc/fable-trading/tests/evaluation/test_spike_v131_confirmation_cost.py",
+      "bytes": 2908,
+      "mtime_ns": 1792395763660542765
+    }
+  ]
+}

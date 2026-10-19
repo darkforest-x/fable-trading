@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-spike-v131-confirmation-cost-20261019-v1",
+  "status": "completed_diagnostic_no_gate_accepted",
+  "builder_commit": "c304b78ad0",
+  "original_builder_commit": "cd0a96b57c",
+  "verification_commit": "19b4620a3d",
+  "lineage_commit": "1716cd8e2a",
+  "sources": "Registered 638-symbol Binance archive; no downloads/content hashes",
+  "signal_anchors": 116667,
+  "control_anchors": 116574,
+  "current_closed_trades": 21547,
+  "current_filled_controls": 3131,
+  "scalar_checks": 2197588,
+  "exit_archive_comparisons": 199659,
+  "prefix_cases": 12,
+  "focused_tests": 30,
+  "reproduction": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_confirmation_cost --workers 4 --output experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_confirmation_verify experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_confirmation_lineage experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_confirmation_guards experiments/active/exp-spike-v131-confirmation-cost-20261019-v1/results_reproduce"
+  ],
+  "notes": [
+    "Fresh output directory required; source ledgers remain local at registered paths.",
+    "Smoke aggregation initially rejected empty-group NaN; fixed to null before full run. Smoke raw rows reused for aggregation.",
+    "First full verifier call started before result.json was ready and failed; successful full audit ran after aggregation completed.",
+    "Original 1H 19 December2022 entries retained in 21547 diagnostics; attribution anchors start Jan2023.",
+    "No model, hence AUC/top-decile/permutation-ranking metrics not applicable. Weekly matched-return intervals are descriptive.",
+    "No new threshold, account, Pine, service or model changes.",
+    "Raw matching includes Sundays; retain it and prefer the separate shared non-Sunday-anchor sensitivity (no redraw, known no-fill remains zero). Full coverage15m/1H87.1%/88.8%, later matched excess0.004123/-0.021491R."
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "boundary_tests": 71,
+  "guard_audit_commit": "1fd80c0f34",
+  "notion_status": "create_outcome_unconfirmed_transport_error; lookup retries also failed; deduplicate before retry"
+}

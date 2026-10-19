@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-confirmation-cost-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c304b78ad0
+    status: inconclusive
+    question: Does the frozen confirmation selection benefit pay for entry-price, exit-path, fee and equal-risk sizing changes?
+    single_variable: Descriptive attribution of existing confirmation only; no new filter, stop, exit, cost or production policy.
+    artifacts: [spike-v131-confirmation-cost-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: 116667 mature independent signal anchors and 116574 original matched random anchors; 21547 current closed trades plus3131 filled controls. Confirmation average chase is0.69/0.71 anchorR for15m/1H. Later same-nonSunday-guard paired per-opportunity netR is0.00789/0.00586 versus random0.00376/0.02735; excess0.00412/-0.02149, weekly95pct intervals[-0.00669,0.01581]/[-0.03861,-0.00507]. No stable universal chase/delay/fee filter established.
+    notes: Exact five-part money bridge separates hindsight selection, entry/exit price, fee notional and risk sizing. Selected early-entry outcome is not executable. Known random no-fills remain zero without redraw; raw near99.9pct opportunity coverage differs from sparse both-filled controls; shared nonSunday sensitivity preferred at87.1/88.8pct coverage. Both retained. 1H actual2ATR exits restored, archived serial occupancy preserved. 2197588 scalar checks,199659 separate exit-archive comparisons,30 focused tests,71 layer-boundary tests and12 prefix cases pass. Four-timeframe fee/chase diagnostics preserve original closed cohort. Historical reuse, overlapping events, archived universe/ticks and no account/funding simulation limit conclusions. No report. Reproduction and preserved smoke issue in delivery_receipt.json.
   - experiment_id: exp-spike-v131-staged-entry-search-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: e9ae4f92fc
