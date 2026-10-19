@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-rule-state-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 448ec8998e
+    status: active
+    question: Which V13.1 entry rules add independent value, and do causal compression duration, prior advance or relative BTC strength distinguish startup from overextension?
+    single_variable: One entry rule removed per arm, or one baseline-anchor state feature retained per arm; simple-breakout anchor is a separately labelled minimal benchmark. Original rebreak wrapper, exits, raw opposites and20bp remain fixed.
+    artifacts: [spike-v131-rule-state-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    result: Four-symbol smoke passed baseline and draw identity plus prefix audits; full638 historical run and independent summary verification pending.
+    notes: Owner authorized first two optimization routes20261019. Same archived Binance USDT perpetual universe, four timeframes and2025 time cut. Quantile edges use only pre2025 baseline anchors. No model, production, Pine, download or content-hash change. Builder precedes generation. Paths/config/PROJECT_PLAN inside experiment directory.
   - experiment_id: exp-spike-v131-entry-stages-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 17ca60d913

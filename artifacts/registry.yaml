@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-rule-state-20261019-v1
+    artifact_type: manifest
+    role: V13.1 entry-rule ablations and causal startup-overextension state experiment
+    source_repo: darkforest-x/fable-trading
+    source_commit: 448ec8998e
+    source_path: experiments/active/exp-spike-v131-rule-state-20261019-v1/config.json
+    storage_uri: repo://experiments/active/exp-spike-v131-rule-state-20261019-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Active research; frozen recipe and design committed before generation. Smoke preserved. Local compressed paths and per-stream metadata; final results and independent verification pending. No content hashing or production authorization.
   - artifact_id: spike-v131-entry-stages-20261019-v1
     artifact_type: manifest
     role: Four causal entry stages with fresh serial occupancy and original matched random draws
