@@ -1,10 +1,10 @@
-/** Stitch ba69e302d34d4f3e86f6faaf1ca766c7; PnL/ROI use remaining size, before fees. */
+/** Stitch ec0bcd621792497ea79fb9f4610eb366; PnL/ROI use remaining size, before fees. */
 import type {Position,State} from './api';
 import {CoinLogo} from './CoinLogo';
 import {Icon} from './Icon';
 import {Spinner} from './Dialog';
 const fmt=(v:number|undefined,d=2)=>v===undefined?'—':v.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
-export function PositionCard({pos,state,online,busy,entryStopBusy=false,compact=false,onEntryStop,onClose}:{pos:Position;state:State;online:boolean;busy:boolean;entryStopBusy?:boolean;compact?:boolean;onEntryStop:(p:Position)=>void;onClose:(p:Position)=>void}){
+export function PositionCard({pos,state,online,busy,entryStopBusy=false,compact=false,onEntryStop,onClose,onSelectSymbol}:{pos:Position;state:State;online:boolean;busy:boolean;entryStopBusy?:boolean;compact?:boolean;onEntryStop:(p:Position)=>void;onClose:(p:Position)=>void;onSelectSymbol:(symbol:string)=>void}){
  const q=state.quotes[pos.symbol],entry=Number(pos.entry),remaining=Number(pos.remaining),direction=pos.side==='long'?1:-1;
  const fresh=online&&!!q&&state.server_time-q.time>=0&&state.server_time-q.time<=(state.policy?.quote_max_age_seconds??15);
  const pnl=q?(Number(q.last)-entry)*remaining*direction:undefined;
@@ -14,7 +14,7 @@ export function PositionCard({pos,state,online,busy,entryStopBusy=false,compact=
  const decimals=Math.min(12,Math.max(2,Math.ceil(-Math.log10(Number(state.instruments[pos.symbol]?.tick??.01)))));
  const coin=pos.symbol.replace('-USDT-SWAP','');
  return <article className={`position-lite ${compact?'compact':''}`}>
-  <div className="position-lite-head"><CoinLogo coin={coin}/><b>{coin}<small> / USDT</small></b><span className={direction===1?'long':'short'}>{direction===1?'多':'空'} · {pos.leverage}x</span></div>
+  <div className="position-lite-head"><button type="button" className="position-symbol" aria-label={`查看 ${coin}/USDT 合约`} onClick={()=>onSelectSymbol(pos.symbol)}><CoinLogo coin={coin}/><b>{coin}<small> / USDT</small></b><Icon name="chevron" size={13}/></button><span className={direction===1?'long':'short'}>{direction===1?'多':'空'} · {pos.leverage}x</span></div>
   <div className={`position-profit ${pnl!==undefined&&pnl<0?'short':'long'}`}><div><b>{pnl!==undefined&&pnl>0?'+':''}{fmt(pnl)}<small> USDT</small></b><span>浮动盈亏{!fresh?' · 待更新':''}</span></div><div><b>{roi!==undefined&&roi>0?'+':''}{fmt(roi)}<small>%</small></b><span>收益率</span></div></div>
   <dl className="position-lite-stats"><div><dt>持仓金额 · U</dt><dd>{fmt((q?Number(q.last):entry)*remaining)}</dd></div><div><dt>开仓均价</dt><dd>{fmt(entry,decimals)}</dd></div><div><dt>当前止损</dt><dd>{fmt(Number(pos.stop),decimals)}</dd></div></dl>
   <div className="position-lite-actions"><button disabled={busy||!allowed} aria-busy={entryStopBusy} onClick={()=>onEntryStop(pos)}>{entryStopBusy?<><Spinner/>设置中…</>:<><Icon name="shield" size={15}/>{protectedEntry?'已保护开仓价':'止损到开仓价'}</>}</button><button disabled={busy||!online} onClick={()=>onClose(pos)}>平仓</button></div>

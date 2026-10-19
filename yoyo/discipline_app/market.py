@@ -20,6 +20,20 @@ def today_change(row):
         return None
 
 
+def estimated_turnover(row):
+    """Estimate USDT turnover from OKX SWAP base volume, never contract lots.
+
+    OKX v5 Get tickers documents volCcy24h in base currency for derivatives;
+    multiplying by last is an estimate, not the sum of each trade's notional.
+    Source: https://www.okx.com/docs-v5/en/#order-book-trading-market-data-get-tickers
+    """
+    try:
+        volume = dec(row['volCcy24h'])
+        return str(volume * positive(row['last'])) if volume >= 0 else None
+    except (KeyError, ValueError, Rejected):
+        return None
+
+
 def parse_instruments(rows):
     instruments = {}
     for row in rows:
@@ -77,7 +91,8 @@ class PublicMarket:
                 if any(positive(row[k]) <= 0 for k in ('last', 'bidPx', 'askPx')) or dec(row['bidPx']) > dec(row['askPx']):
                     continue
                 quotes[row['instId']] = dict(last=row['last'], bid=row['bidPx'], ask=row['askPx'],
-                    time=int(row['ts']) / 1000, source='OKX public ticker', today_change=today_change(row))
+                    time=int(row['ts']) / 1000, source='OKX public ticker', today_change=today_change(row),
+                    volume24h_usdt=estimated_turnover(row))
             except (KeyError, ValueError, Rejected):
                 continue
         self.book.update_market(self.instruments, quotes)

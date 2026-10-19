@@ -71,7 +71,7 @@ def main():
         def update():
             while not stopped.is_set():
                 price = '101' if options.position else '100'
-                manager.update_market(instruments, {s:dict(last=price, bid=price, ask=price, time=time.time(), today_change={'BTC-USDT-SWAP':'2.5','ETH-USDT-SWAP':'-1.2','SOL-USDT-SWAP':'5.1'}.get(s,'0')) for s in instruments})
+                manager.update_market(instruments, {s:dict(last=price, bid=price, ask=price, time=time.time(), today_change={'BTC-USDT-SWAP':'2.5','ETH-USDT-SWAP':'-1.2','SOL-USDT-SWAP':'5.1'}.get(s,'0'), volume24h_usdt={'DOGE-USDT-SWAP':'100000000','SOL-USDT-SWAP':'90000000','ETH-USDT-SWAP':'30000000','BTC-USDT-SWAP':'20000000'}.get(s,'1000')) for s in instruments})
                 for book in list(manager.books.values()):
                     book.reconcile()
                 stopped.wait(2)

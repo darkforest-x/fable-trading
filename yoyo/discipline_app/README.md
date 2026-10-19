@@ -1,4 +1,8 @@
-# SPIKE 纪律交易 0.8.5
+# SPIKE 纪律交易 0.8.6
+
+0.8.6（15）：首页与持仓页的币种名称可直接跳到对应合约，点击当前币种保留输入；默认按 24h 估算 USDT 成交额降序排列，不再固定置顶 BTC、ETH、SOL。列表打开后锁定排名，点击“更新排名”重新取值，涨跌幅仍按北京时间当日计算。成交额使用 OKX 基准币成交量乘最新价，缺失值排末尾，不以合约张数替代。Stitch 设计与来源位于 `design/flow-0.8.6/`。
+
+0.8.6 已通过 152 项 Python 测试、20 项前端逻辑测试，以及 320px / 390px 浏览器交互验收；iOS 与 Android 已编译并验证签名。iPhone 调试连接不可用，本次覆盖安装未成功；Android 未做真机验收。
 
 0.8.5（14）已编译、签名并由 CoreDevice 确认安装成功；Android 已编译并验证签名，尚未做安卓真机验收。设计来源为 `design/flow-0.8.5/source.json`、`quota-source.json`，验收结果为 `releases/build-0.8.5.json`。
 
@@ -82,7 +86,7 @@ python3 yoyo/discipline_app/scripts/live_service.py install --enable-execution
 
 安装包、设备安装收据、账户运行数据和验收截图只保存在本机，不随公开仓库分发；仓库保留完整源码、依赖锁文件及构建脚本。
 
-- Android：`releases/spike-discipline-0.8.5.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
+- Android：`releases/spike-discipline-0.8.6.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
 - iPhone：`mobile/ios/App/App.xcodeproj`，Xcode 26.6，Personal Team 真机签名。普通 Apple ID 的安装有有效期，需要重新签名续期；不会自动升级成付费会员。
 - 原生 HTTPS 校验保持开启，不绕过证书校验；原生请求不跟随重定向。
 
