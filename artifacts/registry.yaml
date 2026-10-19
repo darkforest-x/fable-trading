@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-staged-entry-search-20261019-v1
+    artifact_type: config
+    role: Frozen entry allocation grid and chronological comparison contract
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-builder
+    source_path: experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config.json
+    storage_uri: repo://experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Registered before replay; result artifacts will preserve per-opportunity leg fills, full grid summaries, source receipts and independent verification. No content hashes.
   - artifact_id: spike-v131-excursions-20261019-v1
     artifact_type: manifest
     role: Descriptive original V13.1 trade excursions with actual exit reconciliation

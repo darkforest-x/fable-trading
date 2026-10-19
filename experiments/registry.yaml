@@ -14,6 +14,19 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-staged-entry-search-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: pending-builder
+    status: active
+    question: Which fixed entry fraction, retracement depth, add method and expiry maximize archived V13.1 net R?
+    single_variable: Entry allocation policy; owner explicitly authorized the joint parameter grid in PROJECT_PLAN.md on 2026-10-19. Original stops, exits, quantity cap, risk denominator and 20bp rate remain frozen.
+    artifacts: [spike-v131-staged-entry-search-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    result: Registered before market replay; no outcome yet.
+    notes: Reuse 21547 original closed opportunities and 3131 eligible matched controls. Full-history optimum is retrospective; pre2025 selection and later-entry diagnostics are separate. Conservative one-tick limit penetration, touch sensitivity, reclaim next-open fills and expiry. No report, downloads, hashes or production changes.
   - experiment_id: exp-spike-v131-excursions-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ae053685db
