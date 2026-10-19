@@ -22,13 +22,14 @@ artifacts:
     artifact_type: manifest
     role: Task62 all-signal tail forensics and opposite-exit ablation
     source_repo: darkforest-x/fable-trading
-    source_commit: ae8993216a
-    source_path: experiments/active/exp-eth5m-stoch-tail-forensics-20261019-v2/config.json
-    storage_uri: repo://experiments/active/exp-eth5m-stoch-tail-forensics-20261019-v2/config.json
+    source_commit: d2f3cd6988
+    generator_commit: 6d2febb2df
+    source_path: experiments/active/exp-eth5m-stoch-tail-forensics-20261019-v2/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-tail-forensics-20261019-v2/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Reuses V1 data and matched draws;no fetch or hashing. Independent and serial populations separate. V1 immutable;V2 diagnostic correction cannot establish production qualification.
+    notes: Complete per-signal and original-policy ledgers local;compact tail summaries,12drawings,matched inference,accounting and verification retained. Reuses V1 data and matched draws,no fetch/hashes. Independent/serial populations and staticMFE/realized returns separate. V1 raw results immutable;interpretation corrected. No production qualification.
   - artifact_id: eth5m-stoch-confirm-exits-20261019-v1
     artifact_type: manifest
     role: Completed owner task62 ETH5m Stoch exit study and independent audit

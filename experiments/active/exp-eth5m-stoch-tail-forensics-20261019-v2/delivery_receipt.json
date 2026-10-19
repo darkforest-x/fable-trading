@@ -1,0 +1,69 @@
+{
+  "experiment_id": "exp-eth5m-stoch-tail-forensics-20261019-v2",
+  "parent_experiment": "exp-eth5m-stoch-confirm-exits-20261019-v1",
+  "task_url": "https://app.notion.com/p/3fe8856479af8034b989fed2918245c2",
+  "notion_experiment_url": "https://app.notion.com/p/3fe8856479af815597fbd1ed55474fd4",
+  "notion_readback": {"task": "Done", "v2_experiment": "完成", "v1_scope_correction": true, "v2_tables": 2},
+  "status": "forensics_complete_no_production_or_exhaustive_optimal_exit_claim",
+  "path_builder_commit_at_launch": "d2f3cd6988",
+  "accounting_commit": "7c522d5079",
+  "extended_audit_commit": "6d2febb2df",
+  "provenance_note": "The first run receipt's git_commit7c522d5079 was observed at finish; Python loaded the path builder at launch d2f3cd6988 before the accounting commit. Paths were produced by d2f3cd6988, and accounting/independent excursion verification ran afterward. Builder now captures commit at startup for future replays.",
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.eth_stoch_tail_forensics --out results_reproduction",
+    ".venv/bin/python -m pytest -q tests/evaluation/test_eth_stoch_tail_forensics.py tests/evaluation/test_eth_stoch_confirm_exits.py tests/boundaries/test_layer_imports.py"
+  ],
+  "input_contract": "Exact frozen V1 minute paths/cutoff,2805 entries,2804 controls and original22-policy ledgers; Elements SE mounted. Do not fetch replacement history or hash inputs. Output must be a new directory.",
+  "evidence": {
+    "all_signals": "results/all_signals.csv",
+    "all_policy_trades": "results/all_policy_trades.csv.gz",
+    "confirmed_candidates_including_rejected": "results/all_confirmed_candidates.csv",
+    "drawings": "results/drawings.csv",
+    "original_tail_summary": "results/original_policy_tail_summary.csv",
+    "counterfactual_summary": "results/bracket_summary.csv",
+    "matched_inference": "results/matched_bracket_inference.csv",
+    "accounting": "results/accounting.json",
+    "verification": "results/verification.json"
+  },
+  "key_findings": {
+    "old_serial_gross10R": 33,
+    "old_serial_gross20R": 4,
+    "old_serial_max_grossR": 40.069529652352784,
+    "eligible_signals": 2805,
+    "before_initial_stop_10R": 274,
+    "before_initial_stop_20R": 152,
+    "opposite_exit_strictly_before_10R_minute": 212,
+    "opposite_exit_strictly_before_20R_minute": 141,
+    "be1R_stops_before_later20R": 36,
+    "be2R_stops_before_later20R": 15,
+    "pure20R_target_wins": 152,
+    "pure20R_original_stops": 2652,
+    "pure20R_censored": 1,
+    "pure20R_gross_sumR": 388,
+    "pure20R_net_sumR_at20bp": -2749.179402219105,
+    "pure20R_full_matched_excess_points": 666.4726,
+    "pure20R_full_matched_two_sided_p": 0.7166,
+    "pure20R_full_matched_holm_p": 1.0
+  },
+  "checks": {"focused_and_boundary_tests": 90, "final_focused_rerun": 19, "bracket_oracle_paths": 33654, "scalar_extreme_drawing_seeded_cases": 86, "legacy8R_parity": 2805, "first_passage_identities": 5610, "new_registry_contracts": "pass"},
+  "corrections": [
+    "V1 omitted existing10R/20R tail counts in its narrative; not a lack of those winners.",
+    "Opposite exit and single-position restrictions were research assumptions, not user instructions. V1 results remain valid only conditional on those assumptions.",
+    "Fixed V1 targets stopped at8R. V2 8/10/20R pairs isolate opposite exit; they do not represent the final timely-break-even strategy or exhaustive exit search.",
+    "New fixed targets tick-rounded; old8R exits match exactly, price difference only2.73e-12. Original archived ledgers unchanged.",
+    "Notion transfer initially rejected Python JSON NaN in orchestration before any write; bounded finite fields were then passed successfully. No duplicate V2 page.",
+    "Model runtime settings remain unverifiable for delegation; primary performed the work."
+  ],
+  "interpretation_limits": [
+    "Static MFE may span months and cannot be summed as executable returns. First-hit timestamps and24/48hour counts are retained.",
+    "Independent overlapping opportunities are not a shared-capital account; serial results provided separately.",
+    "V1 input window, risk gate and20bp cost frozen. Actual account fee rate was not read. No funding or extra slippage.",
+    "Drawn stop and target rectangles are illustrations, not verified executions. Some drawn stops were touched before later targets.",
+    "This is posthoc historical research, not new forward validation."
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "new_browser_sessions": [],
+  "production_actions": [],
+  "extra_report_created": false
+}

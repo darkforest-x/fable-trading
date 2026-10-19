@@ -6,6 +6,7 @@ on the terminal minute and is NOT realized profit. Fixed-target comparisons
 change only opposite-arrow exit within each target; no policy is promoted.
 """
 from pathlib import Path
+import argparse
 import json
 import subprocess
 
@@ -235,9 +236,12 @@ def verify_forensics(out):
 
 
 def main():
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--out',default='results')
+    args=parser.parse_args()
     start_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
     cfg=json.loads((PARENT/'config.json').read_text());v2=json.loads((EXP/'config.json').read_text())
-    out=EXP/'results';out.mkdir(exist_ok=False)
+    out=EXP/args.out;out.mkdir(exist_ok=False)
     minute,receipt=load_minutes(cfg);ctx=prepare(minute);quiet=dict(ctx,arrow=np.zeros_like(ctx['arrow']))
     entries=pd.read_csv(PARENT/'results_v1/entries.csv');controls=pd.read_csv(PARENT/'results_v1/control_entries.csv')
     original=pd.read_csv(PARENT/'results_v1/paths.csv.gz');old_serial=pd.read_csv(PARENT/'results_v1/serial_trades.csv.gz')

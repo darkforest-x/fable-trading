@@ -16,16 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth5m-stoch-tail-forensics-20261019-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: ae8993216a
-    status: active
+    source_commit: d2f3cd6988
+    status: inconclusive
     question: Where did the drawn10R/20R winners go,and what do every-signal paths show about original-stop survival,early exits,risk denominators and overlapping positions?
     single_variable: For each8/10/20R target toggle opposite-arrow exit only;entry,stop,risk gate,20bp cost,splits and original matched draws frozen. Other analysis is descriptive path accounting.
     artifacts: [eth5m-stoch-tail-forensics-20261019-v2]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    result: Registered before V2 replay. V1 already has33 serial gross10R winners including4 gross20R; earlier summary omitted them. Shared opposite exit and single-position restriction were research assumptions,not owner rules.
+    reuse_allowed: true
+    result: V1 already had33 serial gross10R winners including4 gross20R,max40.07R. Of2805 independent signals,274/152 reach10R/20R before initial stop; opposite exit cuts212/141 before target minute.1R/2R BE lose36/15 potential20R opportunities at BE. Pure20R without opposite exits has152 wins2652 stops1censor,gross388R/net-2749.18R after20bp; paired positive excess not significant. Large tails exist;no claim of exhaustive optimal-exit search.
+    notes: All2805 rows and61710 original policy paths enriched,12 drawings reconciled.33654 bracket oracle checks,86 independent scalar extremes/drawings/seeded paths,2805 legacy8R parity,5610 first-passage identities and90 tests pass. Study preserves original entries/risk gate/data/cost/controls;single-position and independent estimands separate. V1 scope corrected in Notion;V2 page3fe8856479af815597fbd1ed55474fd4. No report,fetch,hash,training,service or account change.
   - experiment_id: exp-eth5m-stoch-confirm-exits-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bb57287536b3cfb54a3211fa1d1f209603ef4396
@@ -38,7 +39,7 @@ experiments:
     holdout_consumed: false
     reuse_allowed: true
     result: All22 exits lose after20bp in each chronological segment.10907 arrows,5800 confirmed,2805 risk-qualified.2024 selects2R price-BE; later1734 trades -9241.85806points,PF0.27807 versus baseline -8929.3191. Matched1810 pairs excess -1489.06658points,Holm0.4872. All-history hindsight best1R price-BE still -13947.76684points. Fixed1ETH units,not account returns;no exit accepted.
-    notes: Twelve drawings read and mapped; six exceed8points after causal reconstruction.123398 independent scalar paths,44 serial queues,176 summary groups and98 tests pass. Floating-zero win classification fixed with original summary retained; totals unchanged. Original data reused and only recent gap fetched,no content hashes. Historical reuse,minute execution,no funding/extra slippage. Notion task62 Done and experiment3fe8856479af81fda7dcf91f09968c2a read back. No report,training,production,Pine,service or account change.
+    notes: Scope correction in exp-eth5m-stoch-tail-forensics-20261019-v2;V1 rejection applies only to its shared opposite-exit/single-position assumptions,not absence of10R/20R opportunities or all possible exits. Twelve drawings read and mapped;six exceed8points after causal reconstruction.123398 independent scalar paths,44 serial queues,176 summary groups and98 tests pass. Floating-zero classification fixed with original summary retained;totals unchanged. Existing history reused,only recent gap fetched,no hashes. Minute execution,no funding/extra slippage. Notion3fe8856479af81fda7dcf91f09968c2a preserved with V2 correction.
   - experiment_id: exp-spike-stoch-wvf-entry-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f1dea4146a154aaaab03c62fafd563f0777b3f8f
