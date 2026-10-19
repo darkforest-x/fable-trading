@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"inverse-surface":"#dfe2ef","tertiary-fixed":"#ffddb8","outline-variant":"#3b494c","surface-bright":"#353943","on-secondary":"#3c0091","primary-container":"#00e5ff","on-secondary-fixed":"#23005c","on-tertiary-fixed-variant":"#653e00","tertiary-container":"#ffc681","error":"#ffb4ab","surface-container-lowest":"#0a0e17","on-background":"#dfe2ef","on-primary-fixed-variant":"#004f58","background":"#0f131c","secondary-fixed":"#e9ddff","on-surface-variant":"#bac9cc","primary-fixed-dim":"#00daf3","on-tertiary":"#472a00","inverse-primary":"#006875","tertiary":"#ffe9d3","on-error":"#690005","on-primary":"#00363d","secondary-container":"#571bc1","surface-tint":"#00daf3","on-tertiary-container":"#7e4e00","on-tertiary-fixed":"#2a1700","surface-container":"#1c2029","on-surface":"#dfe2ef","on-primary-fixed":"#001f24","surface-container-highest":"#31353f","surface":"#0f131c","on-primary-container":"#00626e","primary-fixed":"#9cf0ff","secondary":"#d0bcff","tertiary-fixed-dim":"#ffb95f","surface-container-low":"#181b25","on-secondary-container":"#c4abff","surface-container-high":"#262a34","secondary-fixed-dim":"#d0bcff","inverse-on-surface":"#2c303a","error-container":"#93000a","surface-variant":"#31353f","primary":"#c3f5ff","surface-dim":"#0f131c","outline":"#849396","on-secondary-fixed-variant":"#5516be","on-error-container":"#ffdad6"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-md":"0.5rem","space-xl":"1rem","space-xs":"0.125rem","space-sm":"0.25rem",gutter:"0.5rem",margin:"0.75rem","space-lg":"0.75rem"},fontFamily:{"code-snippet":["JetBrains Mono"],"headline-md":["Inter"],"label-numeric-lg":["JetBrains Mono"],"label-numeric-sm":["JetBrains Mono"],"headline-xl":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-numeric-md":["JetBrains Mono"],"body-lg":["Inter"],"body-md":["Inter"]},fontSize:{"code-snippet":["0.75rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.015em",fontWeight:"600"}],"label-numeric-lg":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.01em",fontWeight:"600"}],"label-numeric-sm":["0.6875rem",{lineHeight:"0.875rem",letterSpacing:"0.02em",fontWeight:"400"}],"headline-xl":["2rem",{lineHeight:"2.5rem",letterSpacing:"-0.025em",fontWeight:"700"}],"body-sm":["0.75rem",{lineHeight:"1rem",letterSpacing:"0.01em",fontWeight:"400"}],"headline-lg":["1.5rem",{lineHeight:"2rem",letterSpacing:"-0.02em",fontWeight:"600"}],"label-numeric-md":["0.8125rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"500"}],"body-lg":["0.9375rem",{lineHeight:"1.375rem",letterSpacing:"-0.01em",fontWeight:"400"}],"body-md":["0.8125rem",{lineHeight:"1.25rem",letterSpacing:"0em",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-14 bg-surface-container-lowest z-50 flex flex-col items-center justify-between py-space-md shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="flex flex-col items-center gap-space-lg"><div class="w-9 h-9 rounded bg-surface-container-high flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">bolt</span></div><nav class="flex flex-col items-center gap-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded"><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#" title="市场观察"><span class="material-symbols-outlined text-[19px]">candlestick_chart</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#" title="均线密集检测"><span class="material-symbols-outlined text-[19px]">grain</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#" title="信号中心"><span class="material-symbols-outlined text-[19px]">sensors</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="trading-accounts" href="#" title="交易与账户"><span class="material-symbols-outlined text-[19px]">account_balance_wallet</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="research-workspace" href="#" title="研究工作区"><span class="material-symbols-outlined text-[19px]">terminal</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#" title="知识与复盘"><span class="material-symbols-outlined text-[19px]">history_edu</span></a><a aria-current="page" class="w-9 h-9 flex items-center justify-center transition-colors bg-primary-container text-on-primary-container font-bold rounded" data-path="system-telemetry" href="#" title="系统与运行"><span class="material-symbols-outlined text-[19px]">settings_input_component</span></a></nav></div><div class="flex flex-col items-center gap-space-sm"><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="API连接状态" type="button"><span class="material-symbols-outlined text-[19px]">lan</span></button><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="系统设置" type="button"><span class="material-symbols-outlined text-[19px]">tune</span></button></div></aside><div class="pl-14"><header class="fixed top-0 left-14 right-0 h-12 bg-surface-container-low/95 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-12 w-full px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-sm select-none"><span class="font-headline-md text-headline-md tracking-tight font-bold text-primary">SPIKE</span><span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-space-xs rounded bg-surface-container text-primary-container uppercase font-semibold">TERMINAL</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary-container font-semibold rounded"><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#">市场观察</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#">均线密集检测</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#">信号中心</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="trading-accounts" href="#">交易与账户</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="research-workspace" href="#">研究工作区</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#">知识与复盘</a><a aria-current="page" class="px-space-md py-space-sm transition-colors bg-surface-container-high text-primary-container font-semibold rounded" data-path="system-telemetry" href="#">系统与运行</a></nav></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-lowest"><span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase">HEARTBEAT</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">120ms</span></div><button class="flex items-center gap-space-xs h-7 px-space-md rounded bg-surface-container-high text-primary hover:bg-primary-container hover:text-on-primary-container transition-all" type="button"><span class="material-symbols-outlined text-[15px]">flash_on</span><span class="font-body-sm text-body-sm font-semibold">快捷开单</span></button><button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors relative" title="系统告警与消息" type="button"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary"></span></button><div class="flex items-center gap-space-sm pl-space-md py-space-xs rounded bg-surface-container"><div class="flex flex-col text-right"><span class="font-body-sm text-body-sm text-on-surface font-medium leading-none">Quant Trader #01</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary leading-none">ALPHA-PROP</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-12 bg-surface"><div class="flex flex-col w-full p-gutter gap-gutter">
+<!-- System Status Strip & Quick Action Header -->
+<section class="grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+<!-- Health Overview Gauge Card -->
+<div class="xl:col-span-8 bg-surface-container-low rounded-lg p-space-lg flex flex-col justify-between shadow-sm relative overflow-hidden">
+<div class="absolute -right-10 -bottom-10 w-64 h-64 bg-primary-container/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex flex-wrap items-center justify-between gap-space-md z-10">
+<div class="flex items-center gap-space-md">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-primary-container shadow-inner">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">集群主线拓扑与诊断总览</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-primary-container font-label-numeric-sm text-label-numeric-sm font-semibold tracking-wider">PROD-APAC-01</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-medium">全局服务状态: All Systems Operational (正常运行中)</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xl bg-surface-container px-space-lg py-space-sm rounded">
+<div class="flex flex-col text-right">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase">SLA HEALTH INDEX</span>
+<span class="font-label-numeric-lg text-label-numeric-lg font-bold text-primary">99.982%</span>
+</div>
+<div class="w-10 h-10 relative flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-primary-container" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="99.98, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<span class="absolute material-symbols-outlined text-primary-container text-[16px]">bolt</span>
+</div>
+</div>
+</div>
+<!-- Quick Metrics Strip -->
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-space-md mt-space-lg pt-space-md z-10 bg-surface-container-lowest/60 rounded p-space-sm">
+<div class="flex flex-col px-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-primary">swap_calls</span> 平均总吞吐量
+          </span>
+<span class="font-label-numeric-md text-label-numeric-md text-primary font-semibold mt-0.5">38,412 msg/s</span>
+</div>
+<div class="flex flex-col px-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-primary-fixed-dim">speed</span> DMA平均延迟
+          </span>
+<span class="font-label-numeric-md text-label-numeric-md text-on-surface font-semibold mt-0.5">15.4 ms</span>
+</div>
+<div class="flex flex-col px-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-tertiary-container">memory</span> GPU显存占用
+          </span>
+<span class="font-label-numeric-md text-label-numeric-md text-tertiary-fixed-dim font-semibold mt-0.5">5.2 / 24 GB</span>
+</div>
+<div class="flex flex-col px-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-secondary">shield</span> 熔断器降级状态
+          </span>
+<span class="font-label-numeric-md text-label-numeric-md text-secondary font-semibold mt-0.5">0 触发 (100% PASS)</span>
+</div>
+</div>
+</div>
+<!-- Cluster Operations Control Box -->
+<div class="xl:col-span-4 bg-surface-container-low rounded-lg p-space-lg flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-container text-[18px]">terminal</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">运维应急指令舱</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant px-space-xs py-0.5 bg-surface-container rounded">ROOT ACCESS</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-space-sm my-space-md">
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded bg-surface-container hover:bg-surface-container-high transition-all" id="btn-reconnect" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-container text-[18px] group-hover:rotate-180 transition-transform duration-500">sync</span>
+<div class="flex flex-col text-left">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">一键重建 WS 集群</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">重签全部 1,420 订阅通道</span>
+</div>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-primary">RECONNECT</span>
+</button>
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded bg-surface-container hover:bg-surface-container-high transition-all" id="btn-flush-cache" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px] group-hover:scale-110 transition-transform">layers_clear</span>
+<div class="flex flex-col text-left">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">刷新行情快照缓存</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">清空 Redis L2 脏深数据</span>
+</div>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-tertiary-fixed-dim">FLUSH L2</span>
+</button>
+<button class="group flex items-center justify-between px-space-md py-space-sm rounded bg-surface-container hover:bg-surface-container-high transition-all" id="btn-dump-logs" type="button">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-secondary text-[18px] group-hover:-translate-y-0.5 transition-transform">archive</span>
+<div class="flex flex-col text-left">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">导出系统诊断分析包</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">打包 Core-Dump &amp; 堆栈日志</span>
+</div>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-highest text-secondary">ZIP DUMP</span>
+</button>
+</div>
+<div class="flex items-center justify-between font-label-numeric-sm text-label-numeric-sm text-on-surface-variant pt-space-xs">
+<span>节点同步: OKX-AWS-HKG</span>
+<span class="text-primary font-semibold">自愈系统就绪 (Auto-Heal: ON)</span>
+</div>
+</div>
+</section>
+<!-- Service Fleet Telemetry Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-gutter">
+<!-- Node 1: Binance DMA -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">Binance VIP DMA</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-high text-primary font-medium">FIX 4.4</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mb-space-sm">极低时延直接内存接入专线</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">链路时延</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary">14.2 ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded overflow-hidden">
+<div class="bg-primary-container h-full rounded" style="width: 22%"></div>
+</div>
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm pt-space-xs">
+<span class="text-on-surface-variant">丢包: 0.000%</span>
+<span class="text-on-surface-variant">心跳: 120ms</span>
+</div>
+</div>
+</div>
+<!-- Node 2: OKX AWS HK -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">OKX AWS 香港</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-high text-primary font-medium">AWS Direct</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mb-space-sm">亚太核心对等互联集群</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">链路时延</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary">18.6 ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded overflow-hidden">
+<div class="bg-primary-container h-full rounded" style="width: 28%"></div>
+</div>
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm pt-space-xs">
+<span class="text-on-surface-variant">丢包: 0.002%</span>
+<span class="text-primary font-medium">长连接保持</span>
+</div>
+</div>
+</div>
+<!-- Node 3: 6EMA Scanner Engine -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">6EMA 均线密集引擎</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-high text-tertiary-fixed-dim font-medium">HEAVY WORKER</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mb-space-sm">全周期矩阵密集离散度巡检</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">扫描周期耗时</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">184 ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded overflow-hidden">
+<div class="bg-tertiary-fixed-dim h-full rounded" style="width: 48%"></div>
+</div>
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm pt-space-xs">
+<span class="text-on-surface-variant">币种数: 350+</span>
+<span class="text-primary font-medium">60s 轮巡</span>
+</div>
+</div>
+</div>
+<!-- Node 4: YOLOv8 Engine -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">YOLOv8 视觉推理</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-high text-secondary font-medium">TensorRT INT8</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mb-space-sm">K线形态与箱体边界检测模型</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">单帧推理</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-secondary">14.2 ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded overflow-hidden">
+<div class="bg-secondary h-full rounded" style="width: 35%"></div>
+</div>
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm pt-space-xs">
+<span class="text-on-surface-variant">吞吐: 142 img/s</span>
+<span class="text-on-surface-variant">Batch: 8</span>
+</div>
+</div>
+</div>
+<!-- Node 5: Market Dispatch WS -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex flex-col justify-between shadow-sm relative group hover:bg-surface-container transition-all">
+<div>
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-body-sm text-body-sm font-bold text-on-surface">行情分发 WS 集群</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container-high text-primary font-medium">EDGE MESH</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant block mb-space-sm">低抖动广播推送信道</span>
+</div>
+<div class="space-y-space-xs">
+<div class="flex justify-between items-baseline">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">分发延迟</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary">4 ms</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded overflow-hidden">
+<div class="bg-primary-container h-full rounded" style="width: 12%"></div>
+</div>
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm pt-space-xs">
+<span class="text-on-surface-variant">在线客户端</span>
+<span class="text-primary font-bold">1,420 节点</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Body: Diagnostics Trace & Alert Notification Hub Split -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- LEFT PANEL: Incident Trace & Deep Diagnosis (5 Cols) -->
+<div class="lg:col-span-5 flex flex-col gap-gutter">
+<!-- Trace Header & Health Score -->
+<div class="bg-surface-container-low rounded-lg p-space-md flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[20px]">troubleshoot</span>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">实时链路异常诊断与链路栈</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">最近阻断事件与自愈生命周期</span>
+</div>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-0.5 rounded bg-surface-container text-tertiary font-semibold uppercase">TRACE_ID: #INC-8921</span>
+</div>
+<!-- Incident Analysis Detail Card -->
+<div class="bg-surface-container-low rounded-lg p-space-lg shadow-sm flex flex-col gap-space-md relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex items-start gap-space-sm">
+<div class="w-8 h-8 rounded bg-error/20 text-error flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-md text-body-md font-bold text-on-surface">委托执行阻断异常 (HTTP 429 &amp; Depth Slippage Warning)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">触发于: 14:38:22.109 UTC+8 · 模块: ExecutionRouter.OrderPipeline</span>
+</div>
+</div>
+<span class="px-space-xs py-0.5 rounded bg-surface-container-high text-primary font-label-numeric-sm text-label-numeric-sm font-semibold">
+            已平滑自愈
+          </span>
+</div>
+<!-- Metrics Grid for this Incident -->
+<div class="grid grid-cols-3 gap-space-sm bg-surface-container p-space-sm rounded">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">发生代码</span>
+<span class="font-label-numeric-md text-label-numeric-md text-error font-bold">RATE_LIMIT_429</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">订单簿冲击深度</span>
+<span class="font-label-numeric-md text-label-numeric-md text-tertiary-fixed-dim font-bold">0.18% (&gt;0.05%)</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">重试策略耗时</span>
+<span class="font-label-numeric-md text-label-numeric-md text-primary font-bold">240ms (PASS)</span>
+</div>
+</div>
+<!-- Call Stack Sequence -->
+<div class="flex flex-col gap-space-xs bg-surface-container-lowest p-space-md rounded">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-highest">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant font-semibold">TRACE LOG CALL-STACK</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary">EXPONENTIAL-BACKOFF</span>
+</div>
+<div class="space-y-space-xs font-code-snippet text-code-snippet mt-space-xs">
+<div class="flex items-start gap-space-xs text-on-surface-variant">
+<span class="text-outline font-label-numeric-sm">14:38:22.091</span>
+<span class="text-on-surface">[ROUTER]</span>
+<span class="text-on-surface">Dispatching PostOnly limit_order #ORD_99182 to Binance VIP gateway...</span>
+</div>
+<div class="flex items-start gap-space-xs text-error">
+<span class="text-outline font-label-numeric-sm">14:38:22.109</span>
+<span class="font-semibold">[429 WARN]</span>
+<span>Weight 1200/1200 threshold tripped. Endpoint restricted for 200ms.</span>
+</div>
+<div class="flex items-start gap-space-xs text-tertiary-fixed-dim">
+<span class="text-outline font-label-numeric-sm">14:38:22.115</span>
+<span class="font-semibold">[SAFETY]</span>
+<span>L2 Orderbook asks collapsed; slippage estimator tripped flag SLIP_HIGH.</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary-container">
+<span class="text-outline font-label-numeric-sm">14:38:22.150</span>
+<span class="font-semibold">[AUTO-HEAL]</span>
+<span>Shifted to Secondary Sub-Account Endpoint #VIP-02. Micro-jitter: 85ms.</span>
+</div>
+<div class="flex items-start gap-space-xs text-primary">
+<span class="text-outline font-label-numeric-sm">14:38:22.349</span>
+<span class="font-semibold">[RESOLVED]</span>
+<span>Order #ORD_99182 filled successfully at $89,420.50 (Zero Slippage Leak).</span>
+</div>
+</div>
+</div>
+<!-- Circuit Breaker Health Gauge Bar -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center font-label-numeric-sm text-label-numeric-sm">
+<span class="text-on-surface-variant">当前链路熔断器健康分 (Health Credit)</span>
+<span class="text-primary font-bold">96 / 100 (Safe Zone)</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded overflow-hidden flex">
+<div class="bg-primary-container h-full rounded" style="width: 96%"></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-body-sm text-body-sm text-on-surface-variant">安全隔离级别: L1 无须人工干预</span>
+<button class="font-label-numeric-sm text-label-numeric-sm text-primary hover:underline flex items-center gap-1" type="button">
+            查看历史14次异常分析 <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Service Dependency Topology -->
+<div class="bg-surface-container-low rounded-lg p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">关键依赖服务响应矩阵</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">TICK RATE: 1000Hz</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm font-label-numeric-sm text-label-numeric-sm">
+<div class="p-space-sm bg-surface-container rounded flex items-center justify-between">
+<span class="text-on-surface-variant">Redis L2 Buffer</span>
+<span class="text-primary font-semibold">0.42 ms</span>
+</div>
+<div class="p-space-sm bg-surface-container rounded flex items-center justify-between">
+<span class="text-on-surface-variant">TimescaleDB Timeseries</span>
+<span class="text-primary font-semibold">1.88 ms</span>
+</div>
+<div class="p-space-sm bg-surface-container rounded flex items-center justify-between">
+<span class="text-on-surface-variant">Kafka Cluster Log Bus</span>
+<span class="text-primary font-semibold">2.10 ms</span>
+</div>
+<div class="p-space-sm bg-surface-container rounded flex items-center justify-between">
+<span class="text-on-surface-variant">Risk Gatekeeper (C++)</span>
+<span class="text-primary font-semibold">0.12 ms</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT PANEL: Alerts & Notifications Center (7 Cols) -->
+<div class="lg:col-span-7 flex flex-col gap-gutter">
+<!-- Notification Filter Tabs Bar -->
+<div class="bg-surface-container-low rounded-lg p-space-sm shadow-sm flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-xs" id="filter-container">
+<button class="filter-btn active font-body-sm text-body-sm px-space-md py-space-xs rounded bg-primary-container text-on-primary-container font-semibold transition-all" data-filter="all" type="button">
+            全部 (18)
+          </button>
+<button class="filter-btn font-body-sm text-body-sm px-space-md py-space-xs rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-filter="ma" type="button">
+            均线密集临界 (6)
+          </button>
+<button class="filter-btn font-body-sm text-body-sm px-space-md py-space-xs rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-filter="trade" type="button">
+            实盘执行状态 (5)
+          </button>
+<button class="filter-btn font-body-sm text-body-sm px-space-md py-space-xs rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-filter="risk" type="button">
+            风控警报 (2)
+          </button>
+<button class="filter-btn font-body-sm text-body-sm px-space-md py-space-xs rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" data-filter="research" type="button">
+            研究回测完成 (5)
+          </button>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" id="btn-mark-read" title="一键全部已读" type="button">
+<span class="material-symbols-outlined text-[16px]">done_all</span>
+</button>
+<button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-primary hover:bg-surface-container-high transition-colors" id="btn-sound-toggle" title="预警声效" type="button">
+<span class="material-symbols-outlined text-[16px]">volume_up</span>
+</button>
+</div>
+</div>
+<!-- Notification Card Feed -->
+<div class="flex flex-col gap-space-sm" id="alert-feed">
+<!-- CARD 1: Risk Alarm (High Priority) -->
+<article class="alert-item bg-surface-container-low rounded-lg p-space-md shadow-sm relative overflow-hidden group hover:bg-surface-container transition-all" data-category="risk">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-9 h-9 rounded bg-error/20 text-error flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">fmd_bad</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-error-container text-on-error-container font-label-numeric-sm text-label-numeric-sm font-bold uppercase tracking-wider">风控提醒 · 高优先级</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">BTC-USDT 瞬时订单簿滑点预警触发</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                  委托规模 $250,000 于买一至买五档出现深度空洞，瞬时滑点估算达到 0.18%。系统已自动启动保守防砸模式，已拆分为 8 笔微量 TWAP 策略重挂，避免击穿盘口。
+                </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">目标标的: BTC-USDT-SWAP</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">当前滑点: 0.18% (限额 0.05%)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary">已切入保护性撮合</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-space-sm shrink-0">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">14:38:22</span>
+<button class="px-space-sm py-1 rounded bg-surface-container text-error hover:bg-error hover:text-on-error transition-all font-body-sm text-body-sm font-semibold" type="button">
+                审查订单
+              </button>
+</div>
+</div>
+</article>
+<!-- CARD 2: MA Density S-Class Alert -->
+<article class="alert-item bg-surface-container-low rounded-lg p-space-md shadow-sm relative overflow-hidden group hover:bg-surface-container transition-all" data-category="ma">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-9 h-9 rounded bg-primary-container/20 text-primary-container flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">grain</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-primary-container text-on-primary-container font-label-numeric-sm text-label-numeric-sm font-bold uppercase tracking-wider">均线密集 · S级预警</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">APT/USDT 4H 周期 6EMA 离散度收敛至 0.42%</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                  MA7 / MA14 / MA25 / MA30 / MA60 / MA90 形成极度致密带宽。YOLOv8 视觉推理引擎检测到蓄势箱体突破三角形态，突破概率测算为 94/100，建议关注放量方向。
+                </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary">密集度: 0.42% (极度收敛)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-tertiary-fixed-dim">箱体上轨: $11.45</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">突破概率: 94%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-space-sm shrink-0">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">14:32:05</span>
+<button class="px-space-sm py-1 rounded bg-primary-container text-on-primary-container hover:opacity-90 transition-all font-body-sm text-body-sm font-semibold" type="button">
+                载入K线
+              </button>
+</div>
+</div>
+</article>
+<!-- CARD 3: Real Execution Success -->
+<article class="alert-item bg-surface-container-low rounded-lg p-space-md shadow-sm relative overflow-hidden group hover:bg-surface-container transition-all" data-category="trade">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-9 h-9 rounded bg-primary/20 text-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-surface-container-highest text-primary font-label-numeric-sm text-label-numeric-sm font-bold uppercase tracking-wider">实盘成交 · 止盈触发</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">SUI/USDT 达到第一止盈位 TP1 $3.62</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                  网格多头突破单已触达预设第一止盈目标位 $3.62，系统已自动按规则减仓 50%，锁定已实现净利润 +$2,103.75 USDT，剩余仓位平保移动止损已提至入场价 $3.28。
+                </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">实现盈亏: +$2,103.75 (+23.4%)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">减仓数量: 25,000 SUI</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">滑点: 0.008%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-space-sm shrink-0">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">14:15:40</span>
+<button class="px-space-sm py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-body-sm text-body-sm font-semibold" type="button">
+                账本流水
+              </button>
+</div>
+</div>
+</article>
+<!-- CARD 4: Quantitative Research Experiment Done -->
+<article class="alert-item bg-surface-container-low rounded-lg p-space-md shadow-sm relative overflow-hidden group hover:bg-surface-container transition-all" data-category="research">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-9 h-9 rounded bg-secondary/20 text-secondary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">science</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-numeric-sm text-label-numeric-sm font-bold uppercase tracking-wider">实验完成 · 模型更新</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">EXP-7029 增量训练与回测完成</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                  基于过去 180 天多因子特征库的增量自适应拟合回测完毕。测试集夏普比率 (Sharpe Ratio) 由 2.81 提升至 3.42，最大历史回撤缩减至 4.12%，权重已同步至热备模型池。
+                </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-secondary font-semibold">Sharpe: 3.42 (+0.61)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">Max DD: -4.12%</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">Calmar Ratio: 5.88</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-space-sm shrink-0">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">13:50:11</span>
+<button class="px-space-sm py-1 rounded bg-surface-container text-secondary hover:bg-surface-container-high transition-all font-body-sm text-body-sm font-semibold" type="button">
+                回测报告
+              </button>
+</div>
+</div>
+</article>
+<!-- CARD 5: MA Density Medium Alert -->
+<article class="alert-item bg-surface-container-low rounded-lg p-space-md shadow-sm relative overflow-hidden group hover:bg-surface-container transition-all" data-category="ma">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-start gap-space-md">
+<div class="w-9 h-9 rounded bg-tertiary-container/30 text-tertiary-fixed-dim flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">filter_center_focus</span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="px-space-xs py-0.5 rounded bg-surface-container text-tertiary font-label-numeric-sm text-label-numeric-sm font-bold uppercase tracking-wider">均线密集 · 监控提示</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">SOL/USDT 15M 级别 6EMA 快速粘合</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                  短期 7-30EMA 间隙收敛至 0.65%，多空订单簿挂单厚度对称比为 1.08:1，处于突破前夕平衡态。
+                </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-tertiary-fixed-dim">密集度: 0.65%</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">突破概率: 78%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-end gap-space-sm shrink-0">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">13:42:19</span>
+<button class="px-space-sm py-1 rounded bg-surface-container text-on-surface hover:bg-surface-container-high transition-all font-body-sm text-body-sm font-semibold" type="button">
+                查看
+              </button>
+</div>
+</div>
+</article>
+</div>
+</div>
+</section>
+<!-- System Log Streaming Terminal -->
+<section class="bg-surface-container-lowest rounded-lg p-space-md shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between pb-space-xs border-b border-surface-container-highest">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-container text-[16px]">data_object</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">实时集群日志遥测总线 (Live Telemetry Bus)</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+</div>
+<div class="flex items-center gap-space-md font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>LOG LEVEL: [INFO, WARN, METRIC]</span>
+<span class="text-primary">STREAMING ACTIVE</span>
+</div>
+</div>
+<div class="font-code-snippet text-code-snippet flex flex-col gap-0.5 text-on-surface-variant overflow-x-auto py-space-xs">
+<div class="flex items-center gap-space-md">
+<span class="text-outline font-label-numeric-sm">14:40:01.002</span>
+<span class="text-primary font-semibold">[TELEMETRY]</span>
+<span>Node-Binance-VIP: Heartbeat response pong in 14.18ms. Buffer 0/10000 ok.</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="text-outline font-label-numeric-sm">14:40:01.184</span>
+<span class="text-tertiary-fixed-dim font-semibold">[EMA-ENGINE]</span>
+<span>Batch scan cycle completed: 354 symbols evaluated across [15M, 1H, 4H, 1D] in 184.2ms.</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="text-outline font-label-numeric-sm">14:40:01.320</span>
+<span class="text-secondary font-semibold">[YOLO-VISION]</span>
+<span>GPU-0 Infer: Inference batch size 8 returned in 14.2ms. Detected Box [APT/USDT, Triangle, Conf:0.94].</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="text-outline font-label-numeric-sm">14:40:01.890</span>
+<span class="text-primary-container font-semibold">[WS-DISPATCH]</span>
+<span>Broadcast tick burst: 4,120 msgs dispatched to 1,420 client listeners (Avg pipe: 4ms).</span>
+</div>
+</div>
+</section>
+</div>
+<script>
+  // Filter Interactive Handler
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const alertItems = document.querySelectorAll('.alert-item');
+
+  filterButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Switch active class styles
+      filterButtons.forEach(b => {
+        b.classList.remove('bg-primary-container', 'text-on-primary-container', 'font-semibold');
+        b.classList.add('bg-surface-container', 'text-on-surface-variant');
+      });
+      btn.classList.add('bg-primary-container', 'text-on-primary-container', 'font-semibold');
+      btn.classList.remove('bg-surface-container', 'text-on-surface-variant');
+
+      const filter = btn.getAttribute('data-filter');
+
+      alertItems.forEach(item => {
+        const cat = item.getAttribute('data-category');
+        if (filter === 'all' || cat === filter) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // Action Buttons Feedback
+  const btnReconnect = document.getElementById('btn-reconnect');
+  const btnFlushCache = document.getElementById('btn-flush-cache');
+  const btnDumpLogs = document.getElementById('btn-dump-logs');
+  const btnMarkRead = document.getElementById('btn-mark-read');
+
+  if(btnReconnect) {
+    btnReconnect.addEventListener('click', () => {
+      const badge = btnReconnect.querySelector('.text-primary');
+      if (badge) {
+        badge.textContent = 'CONNECTING...';
+        setTimeout(() => {
+          badge.textContent = 'CONNECTED';
+          setTimeout(() => badge.textContent = 'RECONNECT', 2000);
+        }, 800);
+      }
+    });
+  }
+
+  if(btnFlushCache) {
+    btnFlushCache.addEventListener('click', () => {
+      const badge = btnFlushCache.querySelector('.text-tertiary-fixed-dim');
+      if (badge) {
+        badge.textContent = 'CLEARED 100%';
+        setTimeout(() => badge.textContent = 'FLUSH L2', 2000);
+      }
+    });
+  }
+
+  if(btnDumpLogs) {
+    btnDumpLogs.addEventListener('click', () => {
+      const badge = btnDumpLogs.querySelector('.text-secondary');
+      if (badge) {
+        badge.textContent = 'ARCHIVING...';
+        setTimeout(() => badge.textContent = 'DOWNLOADED', 1500);
+        setTimeout(() => badge.textContent = 'ZIP DUMP', 3500);
+      }
+    });
+  }
+
+  if(btnMarkRead) {
+    btnMarkRead.addEventListener('click', () => {
+      alertItems.forEach(card => {
+        card.style.opacity = '0.7';
+      });
+    });
+  }
+</script></main></div></body></html>

@@ -29,13 +29,14 @@
   const factorStatus = (factor) => factor.stage || factor.status || 'unrecorded';
   const factorStatusLabel = (status) => status === 'unrecorded' ? '未记录' : statusNames[status] || status;
   const badge = (s) => `<span class="research-badge status-${esc(s)}">${esc(statusNames[s] || s || '未记录')}</span>`;
-  const state = { view:null, factors:[], experiments:[], jobs:[], recipes:[], selected:new Set(), loaded:false, loading:false, revision:0, detail:null, job:null };
+  const state = { view:null, factors:[], experiments:[], jobs:[], recipes:[], selected:new Set(), loaded:false, loading:false, revision:0, detail:null, job:null, experimentPage:0, experimentFilterKey:"" };
   const date = (s) => s ? new Date(s).toLocaleString('zh-CN', {hour12:false,timeZone:'Asia/Shanghai'}) : '—';
-  const title = (e) => e.title || e.experiment_id || e.id;
+  const title = (e) => e.display_title || e.title || e.experiment_id || e.id;
   async function api(path, options={}) {
     const response = await fetch('/api/research'+path, { ...options, headers:{'Content-Type':'application/json', ...options.headers} });
     let body; try { body = await response.json(); } catch { throw new Error('服务未返回有效数据'); }
     if (!response.ok) throw new Error(typeof body.detail === 'string' ? body.detail : '保存失败，请检查必填字段和长度。');
+    if(options.method&&options.method!=='GET')fetchedAt.clear();
     return body;
   }
   const options = (items, selected='') => items.map(([value,label]) => `<option value="${esc(value)}" ${value===selected?'selected':''}>${esc(label)}</option>`).join('');
@@ -44,30 +45,67 @@
   function dialogError(error) { const el=$('research-dialog-error'); el.textContent=error.message || error; el.hidden=false; }
   function heading(name,subtitle='') { return `<div class="research-dialog-heading"><div><h2>${esc(name)}</h2><p>${esc(subtitle)}</p></div><button class="research-button" data-close-dialog aria-label="关闭详情">关闭 ×</button></div><p id="research-dialog-error" class="research-error" role="alert" hidden></p>`; }
   function stageSelect(value='hypothesis') { return `<label>研究处理状态<select name="stage">${options(stages.map(x=>[x,statusNames[x]]),value)}</select></label>`; }
-  async function refresh() {
-    if (state.loading) return;
-    state.loading=true; $('research-error').classList.add('hidden');
+  const refreshes=new Map(), requests=new Map(), fetchedAt=new Map(), loadedViews=new Set();
+  let loadError='';
+  const restoredFilters=new Map();
+  const researchViews=['research','factors','experiments','backtests'];
+  const resources={research:['overview','jobs'],factors:['factors','experiments'],experiments:['experiments'],backtests:['jobs','recipes']};
+  function readResource(name, force=false) {
+    if(requests.has(name))return requests.get(name);
+    if(!force&&Date.now()-(fetchedAt.get(name)||0)<60000)return Promise.resolve();
+    const pending=api('/'+name).then(data=>{state[name]=name==='overview'?data:data.items;fetchedAt.set(name,Date.now());}).finally(()=>requests.delete(name));
+    requests.set(name,pending);return pending;
+  }
+  function syncLoadState() {
+    const active=researchViews.includes(state.view);
+    const loading=$('research-loading');
+    if(loading){
+      // Background refresh must not insert a banner and shift the table being read.
+      loading.classList.toggle('hidden',!active||!state.loading||state.loaded);
+      loading.textContent='正在读取研究记录…';
+    }
+    if(active&&loadError)showError(loadError);
+    for(const [id,columns] of [['factor-rows',6],['experiment-rows',5],['job-rows',5]]){
+      if(!state.loaded)$(id).innerHTML=`<tr><td colspan="${columns}" class="research-empty">${loadError?'暂时无法读取，请点击顶部刷新重试。':'正在读取记录…'}</td></tr>`;
+    }
+    if(!state.loaded&&loadError)$('research-overview').innerHTML='<p class="research-empty">研究记录暂时不可用，请点击顶部刷新重试。</p>';
+  }
+  function refresh(trigger='manual') {
+    const view=state.view;
+    if(!resources[view])return Promise.resolve();
+    if(refreshes.has(view))return refreshes.get(view);
+    const pending=loadRecords(view,trigger).finally(()=>refreshes.delete(view));
+    refreshes.set(view,pending);return pending;
+  }
+  async function loadRecords(view, trigger) {
+    state.loading=true;loadError='';$('research-error').classList.add('hidden');syncLoadState();
     try {
-      const [overview,factors,experiments,jobs,recipes] = await Promise.all([api('/overview'),api('/factors'),api('/experiments'),api('/jobs'),api('/recipes')]);
-      state.overview=overview; state.factors=factors.items; state.experiments=experiments.items; state.jobs=jobs.items; state.recipes=recipes.items; state.loaded=true;
-      render();
-    } catch(error) { showError(error); }
-    finally { state.loading=false; }
+      await Promise.all(resources[view].map(name=>readResource(name,trigger==='manual')));
+      loadedViews.add(view);
+      if(state.view===view){state.loaded=true;render();}
+    } catch(error) { if(state.view===view)loadError=error.message||String(error); }
+    finally { if(state.view===view){state.loading=false;syncLoadState();} }
   }
   function render() {
     if (!state.loaded) return;
+    if(state.view==='research'){
     const o=state.overview;
     $('research-overview').innerHTML=`<div class="research-objective"><span class="research-kicker">研究目标</span><h2>${esc(o.objective)}</h2><p>均线密集 → 启动识别 → 因子筛选 → 回测对照 → 前向观察</p></div>
       <div class="research-metrics"><button data-research-nav="factors"><small>已整理因子</small><strong>${o.factor_count}</strong><span>代码特征与研究假设</span></button><button data-research-nav="experiments"><small>登记实验</small><strong>${o.experiment_count}</strong><span>原始结论与历史版本</span></button><button data-research-nav="experiments" data-filter-status="negative-results"><small>否定 / 证据不足</small><strong>${(o.statuses.rejected||0)+(o.statuses.inconclusive||0)+(o.statuses.negative||0)}</strong><span>保留失败证据，避免重复试错</span></button><button data-research-nav="backtests"><small>待完成任务</small><strong>${state.jobs.filter(j=>['queued','running'].includes(j.status)).length}</strong><span>独立离线队列</span></button></div>
-      <div class="research-flow">${[['01','定义因子','记录公式、窗口和可知时点','factors'],['02','登记实验','明确问题与唯一变化','experiments'],['03','运行回测','冻结成本、时间与原始数据','backtests'],['04','复核证据','核对前后段及随机对照','experiments'],['05','VLM验证','回放图表、参考图与人工判断','vision']].map(([n,t,d,v])=>`<button data-research-nav="${v}"><span>${n}</span><strong>${t}</strong><small>${d}</small><b>↗</b></button>`).join('')}</div>
-      <div class="research-section-heading"><h2>近期研究</h2><button class="research-button" data-research-nav="experiments">查看全部 →</button></div><div class="research-recent">${o.recent.map(e=>`<button data-experiment="${esc(e.experiment_id)}"><div>${badge(e.status)}<span class="research-mono">${esc(e.experiment_id)}</span></div><h3>${esc(title(e))}</h3><p>${esc(e.question || e.result || '尚未记录研究问题')}</p><span class="research-open">查看问题、单变量与证据 →</span></button>`).join('')}</div>
-      <div class="research-provenance"><span>工作流参考</span>${o.sources.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>`).join('')}<span>研究完成不等于通过验证；实盘资格独立审批。</span></div>`;
+      <div class="linear-research-body"><div class="research-flow">${[['01','定义因子','记录公式、窗口和可知时点','factors'],['02','登记实验','明确问题与唯一变化','experiments'],['03','运行回测','冻结成本、时间与原始数据','backtests'],['04','复核证据','核对前后段及随机对照','experiments'],['05','VLM验证','回放图表、参考图与人工判断','vision']].map(([n,t,d,v])=>`<button data-research-nav="${v}"><span>${n}</span><strong>${t}</strong><small>${d}</small><b>↗</b></button>`).join('')}</div>
+      <div class="research-recent-region"><div class="research-section-heading"><h2>近期研究</h2><button class="research-button" data-research-nav="experiments">查看全部 →</button></div><div class="research-recent">${o.recent.map(e=>`<button data-experiment="${esc(e.experiment_id)}"><div>${badge(e.status)}<span class="research-mono">${esc(e.experiment_id)}</span></div><h3>${esc(title(e))}</h3>${e.question && e.question !== title(e) ? `<p>${esc(e.question)}</p>` : e.result ? `<p>${esc(e.result)}</p>` : ""}<span class="research-open">查看问题、单变量与证据 →</span></button>`).join('')}</div>
+      </div></div><div class="research-provenance"><span>工作流参考</span>${o.sources.map(s=>`<a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} ↗</a>`).join('')}<span>研究完成不等于通过验证；实盘资格独立审批。</span></div>`;
+    }
+    if(state.view==='factors'){
     const categories=[...new Set(state.factors.map(f=>f.category||'未分类'))];
     const selected=$('factor-category').value;
     $('factor-category').innerHTML=options([['','全部类别'],...categories.map(x=>[x,categoryLabel(x)])],selected);
     ensureFactorSourceFilter();
     ensureFactorStatusFilter();
-    renderFactors(); renderExperiments(); renderJobs();
+    restoreFilters('factors');renderFactors();
+    }
+    if(state.view==='experiments'){restoreFilters('experiments');renderExperiments();}
+    if(state.view==='backtests')renderJobs();
   }
   function ensureFactorSourceFilter() {
     const category=$('factor-category');
@@ -100,27 +138,49 @@
     const statuses=[...counts.keys()].sort((a,b)=>(order.indexOf(a)<0?order.length:order.indexOf(a))-(order.indexOf(b)<0?order.length:order.indexOf(b))||a.localeCompare(b));
     filter.innerHTML=options([['','全部研究状态'],...statuses.map(status=>[status,`${factorStatusLabel(status)}（${counts.get(status)}）`])],selected);
   }
+  function rememberTableFocus(id) {
+    const root=$(id),focused=document.activeElement;
+    if(!focused||!root.contains(focused))return ()=>{};
+    const key=['compare','experiment','factor','job'].find(key=>focused.dataset?.[key]);
+    if(!key)return ()=>{};
+    const value=focused.dataset[key],tag=focused.tagName,style=focused.className;
+    return ()=>{
+      const replacement=Array.from(root.querySelectorAll('input,button')).find(node=>node.tagName===tag&&node.className===style&&node.dataset[key]===value);
+      replacement?.focus({preventScroll:true});
+    };
+  }
   function renderFactors() {
+    const restoreFocus=rememberTableFocus('factor-rows');
     const q=$('factor-search').value.trim().toLowerCase(),category=$('factor-category').value,source=$('factor-source')?.value||'',status=$('factor-status')?.value||'';
     const items=state.factors.filter(f=>(!category||f.category===category)&&(!source||upstreamProject(f)===source)&&(!status||factorStatus(f)===status)&&(!q||JSON.stringify(f).toLowerCase().includes(q)));
     $('factor-count').textContent=`${items.length} / ${state.factors.length} 个因子`;
     $('factor-rows').innerHTML=items.map(f=>`<tr><td><button class="research-text-button" data-factor="${esc(f.id)}">${esc(f.name||f.id)}</button><small class="research-mono">${esc(f.id)}</small>${hasUpstream(f)?`<small class="research-factor-project">来源：${esc(upstreamProject(f)||'未记录')}</small>`:''}</td><td>${esc(categoryLabel(f.category))}</td><td class="research-description">${esc(f.definition)}</td><td>${badge(f.stage||f.status)}${hasUpstream(f)?'<small class="research-factor-claim">已实现 · 收益待验证</small>':''}</td><td>${(f.experiment_ids||[]).length}</td><td><button class="research-button" data-factor="${esc(f.id)}">管理 →</button></td></tr>`).join('') || '<tr><td colspan="6" class="research-empty">没有匹配的因子，请调整筛选条件或搜索词。</td></tr>';
+    window.SpikeNavigation?.sync('factors',{q,category,source,status});
+    restoreFocus();
   }
   function renderExperiments() {
+    const restoreFocus=rememberTableFocus('experiment-rows');
     const q=$('experiment-search').value.trim().toLowerCase(),status=$('experiment-status').value;
     const items=state.experiments.filter(e=>(!status||(status==='negative-results'?['rejected','inconclusive','negative'].includes(e.status):e.status===status))&&(!q||JSON.stringify(e).toLowerCase().includes(q)));
     $('experiment-count').textContent=`${items.length} / ${state.experiments.length} 个实验`;
     $('compare-experiments').disabled=state.selected.size<2;
     $('compare-experiments').textContent=`对照查看${state.selected.size?` (${state.selected.size})`:''}`;
-    $('experiment-rows').innerHTML=items.slice(0,120).map(e=>`<tr><td><input type="checkbox" aria-label="对照 ${esc(title(e))}" data-compare="${esc(e.experiment_id)}" ${state.selected.has(e.experiment_id)?'checked':''}></td><td><button class="research-text-button" data-experiment="${esc(e.experiment_id)}">${esc(title(e))}</button><small class="research-mono">${esc(e.experiment_id)}</small><p>${esc(e.question||'未记录研究问题')}</p></td><td>${badge(e.status)}</td><td class="research-description">${esc(e.single_variable||'旧记录未注明')}</td><td>${e.artifacts?.length||0}</td><td><button class="research-button" data-experiment="${esc(e.experiment_id)}">证据 →</button></td></tr>`).join('')||'<tr><td colspan="6" class="research-empty">没有匹配的实验。</td></tr>';
-    $('experiment-limit').textContent=items.length>120?'当前显示前 120 条，请用关键词缩小范围。':'';
+    const key=q+'|'+status;
+    if(key!==state.experimentFilterKey){state.experimentPage=0;state.experimentFilterKey=key;}
+    const pages=Math.max(1,Math.ceil(items.length/30));state.experimentPage=Math.min(state.experimentPage,pages-1);
+    $('experiment-rows').innerHTML=items.slice(state.experimentPage*30,(state.experimentPage+1)*30).map(e=>`<tr><td><input type="checkbox" aria-label="对照 ${esc(title(e))}" data-compare="${esc(e.experiment_id)}" ${state.selected.has(e.experiment_id)?'checked':''}></td><td><button class="research-text-button" data-experiment="${esc(e.experiment_id)}">${esc(title(e))}</button></td><td>${badge(e.status)}</td><td class="experiment-evidence-count">${e.artifacts?.length||0} 项</td><td><button class="research-button" data-experiment="${esc(e.experiment_id)}">详情 →</button></td></tr>`).join('')||'<tr><td colspan="5" class="research-empty">没有匹配的研究问题。</td></tr>';
+    $('experiment-limit').innerHTML=`<span>第 ${state.experimentPage+1} / ${pages} 页 · 共 ${items.length} 项</span><div><button type="button" class="research-button" data-experiment-page="prev" ${state.experimentPage===0?'disabled':''}>上一页</button><button type="button" class="research-button" data-experiment-page="next" ${state.experimentPage>=pages-1?'disabled':''}>下一页</button></div>`;
+    window.SpikeNavigation?.sync('experiments',{q,status,page:state.experimentPage});
+    restoreFocus();
   }
   function renderJobs() {
+    const restoreFocus=rememberTableFocus('job-rows');
     $('job-rows').innerHTML=state.jobs.map(j=>`<tr><td><button class="research-text-button" data-job="${esc(j.id)}">${j.recipe==='spike-v128-frozen'?'V12.8 冻结规则重放':'现有证据核验'}</button><small class="research-mono">${esc(j.id.slice(0,12))}</small></td><td>${esc(j.experiment_id)}<small>${esc(j.recipe==='spike-v128-frozen'?j.spec.symbols.join('、'):'读取现有结果')}</small></td><td>${badge(j.status)}${j.cancel_requested&&j.status==='running'?'<small>正在取消…</small>':''}</td><td>${date(j.created_at)}</td><td><button class="research-button" data-job="${esc(j.id)}">日志与结果 →</button></td></tr>`).join('')||'<tr><td colspan="5" class="research-empty">尚无工作台任务。历史实验可在“实验登记”查看；新任务将独立保留参数、日志与结果。</td></tr>';
     const r=state.recipes.find(r=>r.id==='spike-v128-frozen');
     $('backtest-recipe-detail').textContent=r?.description||'';
     $('new-backtest').disabled=!r?.available;
     $('backtest-availability').textContent=r?.available?`冻结快照可用 · ${r.symbols.length} 个合约 · 2026-07-23 至 2026-09-23`:'冻结输入缺失，不能启动重放。';
+    restoreFocus();
   }
   function experimentOptions(selected) { return options(state.experiments.map(e=>[e.experiment_id,title(e)]),selected); }
   function upstreamDetails(f) {
@@ -184,7 +244,7 @@
     try {
       const data=await api('/experiments/'+encodeURIComponent(id));state.detail=data;
       const e=data.experiment,a=data.annotation||{};
-      dialog(heading(title(e),e.experiment_id)+`<div class="research-detail-status">${badge(e.status)}<span>历史研究结论 · 训练 / 实盘资格独立</span></div><dl class="research-facts"><dt>问题</dt><dd>${esc(e.question||'未记录')}</dd><dt>单变量</dt><dd>${esc(e.single_variable||'未记录')}</dd><dt>原始结论</dt><dd>${esc(e.result||'尚未记录结果')}</dd><dt>限制 / 来源</dt><dd>${esc(e.notes||'未记录')}</dd></dl>${yoloEvidence(data)}${Object.keys(data.config||{}).length?`<details class="research-json"><summary>冻结配置与时间范围</summary><pre>${esc(JSON.stringify(data.config,null,2))}</pre></details>`:''}${data.jobs?.length?`<div class="research-section-heading"><h3>本实验的工作台运行</h3></div><div class="research-links">${data.jobs.map(j=>`<button class="research-button" data-job="${esc(j.id)}">${esc(j.spec.symbols?.join('、')||j.recipe)} · ${esc(statusNames[j.status]||j.status)} · ${esc(date(j.created_at))} →</button>`).join('')}</div>`:''}${evidenceMarkup(data)}<details class="research-json"><summary>证据文件与身份</summary><div class="research-files">${(data.files||[]).filter(f=>f.downloadable!==false).map(f=>`<a href="/api/research/file?experiment_id=${encodeURIComponent(id)}&path=${encodeURIComponent(f.path)}" download>${esc(f.path)} ↓<small>${esc(f.sha256||'未记录哈希')}</small></a>`).join('')||'无可读文件'}</div></details><p class="research-caption">${(data.notes||[]).map(esc).join(' · ')}</p><form id="experiment-note-form" data-id="${esc(id)}" data-revision="${a.revision||0}"><h3>后续处理</h3>${stageSelect(a.stage)}<label>结论补充 / 下一步<textarea name="notes" rows="3" maxlength="12000">${esc(a.notes||'')}</textarea></label><div class="research-form-footer"><button class="research-button" type="button" data-verify="${esc(id)}">核验并保存证据快照</button><button class="research-button primary" type="submit">保存补充记录</button></div></form>${data.history?.length?`<details class="research-json"><summary>补充记录历史 (${data.history.length})</summary>${data.history.map(h=>`<p>${badge(h.stage)} v${h.revision} · ${date(h.created_at)}</p><p>${esc(h.notes)}</p>`).join('')}</details>`:''}`);
+      dialog(heading(title(e),e.experiment_id)+`<div class="research-detail-status">${badge(e.status)}<span>历史研究结论 · 训练 / 实盘资格独立</span></div><details class="research-json"><summary>原始研究问题、单变量与完整结论</summary><dl class="research-facts"><dt>问题</dt><dd>${esc(e.question||'未记录')}</dd><dt>单变量</dt><dd>${esc(e.single_variable||'未记录')}</dd><dt>原始结论</dt><dd>${esc(e.result||'尚未记录结果')}</dd><dt>限制 / 来源</dt><dd>${esc(e.notes||'未记录')}</dd></dl></details>${yoloEvidence(data)}${Object.keys(data.config||{}).length?`<details class="research-json"><summary>冻结配置与时间范围</summary><pre>${esc(JSON.stringify(data.config,null,2))}</pre></details>`:''}${data.jobs?.length?`<div class="research-section-heading"><h3>本实验的工作台运行</h3></div><div class="research-links">${data.jobs.map(j=>`<button class="research-button" data-job="${esc(j.id)}">${esc(j.spec.symbols?.join('、')||j.recipe)} · ${esc(statusNames[j.status]||j.status)} · ${esc(date(j.created_at))} →</button>`).join('')}</div>`:''}${evidenceMarkup(data)}<details class="research-json"><summary>证据文件与身份</summary><div class="research-files">${(data.files||[]).filter(f=>f.downloadable!==false).map(f=>`<a href="/api/research/file?experiment_id=${encodeURIComponent(id)}&path=${encodeURIComponent(f.path)}" download>${esc(f.path)} ↓<small>${esc(f.sha256||'未记录哈希')}</small></a>`).join('')||'无可读文件'}</div></details><p class="research-caption">${(data.notes||[]).map(esc).join(' · ')}</p><form id="experiment-note-form" data-id="${esc(id)}" data-revision="${a.revision||0}"><h3>后续处理</h3>${stageSelect(a.stage)}<label>结论补充 / 下一步<textarea name="notes" rows="3" maxlength="12000">${esc(a.notes||'')}</textarea></label><div class="research-form-footer"><button class="research-button" type="button" data-verify="${esc(id)}">核验并保存证据快照</button><button class="research-button primary" type="submit">保存补充记录</button></div></form>${data.history?.length?`<details class="research-json"><summary>补充记录历史 (${data.history.length})</summary>${data.history.map(h=>`<p>${badge(h.stage)} v${h.revision} · ${date(h.created_at)}</p><p>${esc(h.notes)}</p>`).join('')}</details>`:''}`);
     } catch(error) { dialogError(error); }
   }
   function newBacktest() {
@@ -229,6 +289,12 @@
       if(b.dataset.job)await jobDetail(b.dataset.job);
       if(b.dataset.cancelJob){await api('/jobs/'+b.dataset.cancelJob+'/cancel',{method:'POST',body:'{}'});await jobDetail(b.dataset.cancelJob);await refresh();}
       if(b.dataset.verify){b.disabled=true;const j=await api('/jobs',{method:'POST',body:JSON.stringify({recipe:'verify-evidence',experiment_id:b.dataset.verify})});await refresh();await jobDetail(j.id);}
+      if(b.dataset.experimentPage){
+        state.experimentPage+=b.dataset.experimentPage==='next'?1:-1;renderExperiments();
+        const first=$('experiment-rows').querySelector('button[data-experiment]');
+        first?.focus({preventScroll:true});
+        $('experiment-rows').closest('table')?.scrollIntoView({block:'start',behavior:'auto'});
+      }
       if(b.id==='new-factor')newFactor();
       if(b.id==='new-experiment')newExperiment();
       if(b.id==='new-backtest')newBacktest();
@@ -244,6 +310,20 @@
   $('factor-search').addEventListener('input',renderFactors);
   document.addEventListener('change',(event)=>{if(['factor-source','factor-status'].includes(event.target.id))renderFactors();});
   ['experiment-search','experiment-status'].forEach(id=>$(id).addEventListener('input',renderExperiments));
-  setInterval(async()=>{if(state.view==='backtests'&&!document.hidden){try{state.jobs=(await api('/jobs')).items;renderJobs();}catch(error){showError(error);}}},4000);
-  window.SpikeResearch={setView(view){state.view=view;if(['research','factors','experiments','backtests'].includes(view))refresh();},refresh,openExperiment:experimentDetail};
+  setInterval(async()=>{
+    if(state.view!=='backtests'||document.hidden)return;
+    const running=state.jobs.some(job=>['running','queued'].includes(job.status));
+    if(!running&&Date.now()-(fetchedAt.get('jobs')||0)<60000)return;
+    try{await readResource('jobs',true);if(state.view==='backtests')renderJobs();}
+    catch(error){if(state.view==='backtests')showError(error);}
+  },4000);
+  function restoreFilters(view){
+    const p=restoredFilters.get(view);if(!p)return;
+    const fields=view==='factors'?{q:'factor-search',category:'factor-category',source:'factor-source',status:'factor-status'}:{q:'experiment-search',status:'experiment-status'};
+    for(const [key,id] of Object.entries(fields))if($(id))$(id).value=(p[key]||'').slice(0,200);
+    if(view==='experiments'){state.experimentFilterKey=(p.q||'').trim().toLowerCase()+'|'+(p.status||'');state.experimentPage=Math.max(0,Math.min(100000,Number.parseInt(p.page,10)||0));}
+    restoredFilters.delete(view);
+  }
+  for(const view of ['factors','experiments'])window.SpikeNavigation?.register(view,p=>restoredFilters.set(view,p));
+  window.SpikeResearch={setView(view){state.view=view;state.loaded=loadedViews.has(view);state.loading=refreshes.has(view);syncLoadState();if(researchViews.includes(view))refresh('navigation');},refresh,openExperiment:experimentDetail};
 })();

@@ -1,0 +1,96 @@
+/* Detection and execution share a workspace, with an explicit confirmation step. */
+body[data-workspace=yolo-detect] .yd-results-layout {display:grid;grid-template-columns:minmax(0,1fr) 288px;gap:16px;align-items:start}
+.yd-results-layout>* {min-width:0}
+.yd-results-layout :is(.ma-desk,.yd-chart-stage) {scroll-margin-top:16px}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-browser {min-width:0;grid-template-columns:minmax(0,1fr);gap:12px}
+body[data-workspace=yolo-detect] .yd-results-layout #yd-symbol-home:not([hidden]) {max-height:320px;overflow:auto}
+body[data-workspace=yolo-detect] .yd-results-layout #yd-symbol-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-height:200px}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-head {gap:12px;padding:18px;flex-wrap:wrap}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-head h2 {font-size:23px}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-commandbar {flex-wrap:wrap;padding:10px 16px;gap:8px}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-context-actions {flex:1;min-width:0;gap:10px}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-readout {padding:10px 16px}
+body[data-workspace=yolo-detect] .yd-results-layout .chart-ma-legend {grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px}
+body[data-workspace=yolo-detect] .yd-results-layout #yd-chart-wrap {height:clamp(300px,44vh,470px)}
+body[data-workspace=yolo-detect] .yd-results-layout #yd-chart {height:100%}
+body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-foot {gap:6px;flex-wrap:wrap;padding:10px 16px}
+.ma-desk {padding:18px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:12px;color:var(--text);position:sticky;top:16px}
+.ma-desk button {font:inherit;cursor:pointer;border:0;background:none;color:var(--muted);border-radius:4px;min-height:32px}
+.ma-desk button:hover {color:var(--text);background:var(--surface-2)}
+.ma-desk :is(button,summary):focus-visible {outline:2px solid var(--mint);outline-offset:3px}
+.ma-desk-heading {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ma-desk-heading h2 {font-size:15px;font-weight:600;letter-spacing:-.3px;margin:0 0 4px}
+.ma-desk-heading div>span {font-size:10px;color:var(--muted)}
+.ma-desk-heading button {font-size:11px}
+.ma-desk-health {display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:11px;margin:12px 0 4px;gap:8px}
+.ma-desk-health [data-ma-state]:before {content:'';display:inline-block;width:5px;height:5px;margin-right:6px;border-radius:50%;background:currentColor}
+.ma-desk .is-good,.ma-desk .is-profit {color:var(--positive-text,var(--green))}
+.ma-desk .is-loss {color:var(--negative-text,var(--red))}
+.ma-desk-metrics {display:grid;grid-template-columns:1fr 1fr;gap:18px 12px;padding:12px 0 18px;font-variant-numeric:tabular-nums}
+.ma-desk-metrics span {display:block;color:var(--muted);font-size:11px;margin-bottom:5px}
+.ma-desk-metrics strong {font-size:20px;font-weight:550;letter-spacing:-.5px;overflow-wrap:anywhere}
+.ma-desk.is-stale .ma-desk-metrics,.ma-desk.is-stale .ma-desk-positions {opacity:.55}
+.ma-desk-statistics,.ma-desk-policy {font-size:10px;line-height:1.6;color:var(--muted);margin:0 0 5px}
+.ma-desk-policy {color:var(--dim)}
+.ma-desk section>h3 {display:flex;justify-content:space-between;font-size:12px;font-weight:550;margin:0 0 6px}
+.ma-desk h3>span {color:var(--muted);font-variant-numeric:tabular-nums}
+.ma-desk-positions,.ma-desk-recent {margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.ma-position {padding:10px 0 13px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ma-position:last-child {border-bottom:0;padding-bottom:0}
+.ma-position header {display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ma-position header>button {display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px;font-weight:550;padding:0 2px}
+.ma-position header>strong {font-size:14px;font-weight:550}
+.ma-side {font-size:10px;font-weight:400}
+.ma-position-prices {display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted);margin:4px 0 7px}
+.ma-position-prices b {font-weight:400;color:var(--text)}
+.ma-position footer {display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--muted)}
+.ma-position details {font-size:10px;color:var(--muted);margin-top:8px}
+.ma-position summary {cursor:pointer;min-height:26px;align-content:center}
+.ma-lot {display:flex;justify-content:space-between;gap:8px;line-height:1.8;padding:8px 0;border-top:1px solid var(--line)}
+.ma-lot button {font-size:10px}
+.ma-desk .ma-activity {display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:9px 0;font-size:11px;color:var(--text)}
+.ma-activity>span:last-child {text-align:right;font-size:10px;color:var(--muted)}
+.ma-activity small {display:block;font-size:10px;color:var(--muted);margin-top:4px;max-width:150px}
+.ma-desk-empty {font-size:11px;color:var(--muted);padding:12px 0;margin:0}
+.ma-desk-updated {font-size:10px;color:var(--dim);padding-top:16px}
+.ma-desk-blocker {padding:12px;margin:10px 0;border:1px solid var(--notice-border);border-radius:6px;color:var(--notice-text);background:var(--notice-bg);font-size:11px;line-height:1.65}
+.ma-desk-blocker p {margin:5px 0}.ma-desk-blocker button {color:inherit;font-size:11px;text-align:left;overflow-wrap:anywhere}
+.ml-blocking-orders {display:flex;gap:8px;flex-wrap:wrap}
+.ml-recovered {font-size:12px;color:var(--mint)}
+.ml-dialog .ml-error {margin-bottom:18px}
+.ml-dialog .ml-error p {line-height:1.6}
+.ml-dialog .ml-layout {grid-template-columns:minmax(210px,.6fr) minmax(0,1fr);gap:24px}
+.ml-dialog .ml-review {padding-left:24px}
+.ml-dialog .ml-chart-canvas {height:220px}
+.ml-dialog .ml-policy {background:transparent;border:1px solid var(--line);color:var(--text);padding:12px}
+.ml-dialog .ml-policy strong {font-size:22px}
+.ml-dialog .ml-settings>h3,.ml-dialog .ml-subtitle {display:none}
+.ml-dialog .ml-fieldset {margin-top:14px}
+.ml-dialog .ml-rr-options label>span {flex-direction:row;align-items:baseline;gap:8px;padding:10px 12px}
+.ml-dialog .ml-money {padding:14px 0 8px}
+.ml-dialog .ml-money strong {font-size:19px}
+.ml-dialog .ml-facts {gap:6px;margin:10px 0}
+.ml-dialog .ml-direction.long {color:var(--positive-text,var(--green));background:var(--green-soft)}
+.ml-dialog .ml-steps {background:transparent}
+.ml-dialog .ml-error button {padding:5px 12px;min-height:34px}
+.ml-dialog .ml-layout.is-submitted {grid-template-columns:1fr}
+.ml-dialog .ml-layout.is-submitted .ml-review {padding:0}
+@media(max-width:1199px){
+ body[data-workspace=yolo-detect] .yd-results-layout {grid-template-columns:minmax(0,1fr)}
+ .ma-desk {position:static;display:grid;grid-template-columns:1fr 1fr;gap:0 24px}
+ .ma-desk-heading,.ma-desk-health,.ma-desk-blocker,.ma-desk-metrics,.ma-desk-statistics,.ma-desk-policy,.ma-desk-updated {grid-column:1/-1}
+ .ma-desk-metrics {grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ .yd-results-layout :is(.ma-desk,.yd-chart-stage) {scroll-margin-top:64px}
+ body[data-workspace=yolo-detect] .yd-results-layout {gap:14px}
+ body[data-workspace=yolo-detect] .yd-results-layout .yd-chart-head {padding:14px}
+ body[data-workspace=yolo-detect] .yd-results-layout .chart-ma-legend {grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px}
+ .ma-desk {display:block;padding:16px}
+ .ma-desk-metrics {grid-template-columns:1fr 1fr}
+ .ma-desk button {min-height:40px}
+ .ml-dialog .ml-layout {grid-template-columns:1fr;gap:16px}
+ .ml-dialog .ml-review {padding:0;border:0;order:0}
+ .ml-dialog .ml-settings {border:0;padding-top:0}
+ .ml-dialog .ml-chart-canvas {height:200px}
+}

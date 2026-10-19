@@ -1,4 +1,8 @@
-"""Personal decision journal, separate from strategy evaluation and execution.
+"""Personal principles, preparation and journal, separate from execution.
+
+The owner's 2026-09-24 workflow is principles -> manual execution -> records.
+Principles are independent from detailed playbooks. Preparation freezes the
+active principle versions before linking to an exchange page; it is not a fill.
 
 The owner's 2026-09-16 manual-system v2 supplies candidate playbooks, not
 approved risk defaults or evidence of profitability. CME's trade-plan outline
@@ -12,11 +16,12 @@ never inferred from signal outcomes. This module has no exchange client.
 """
 from __future__ import annotations
 
+import json
+import uuid
 from copy import deepcopy
 from datetime import date, datetime, timezone
 from decimal import Decimal
 from typing import Literal, Optional
-import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -39,6 +44,32 @@ class Playbook(Record):
     management_rule: str = Field(default="", max_length=4000)
     status: Literal["draft", "ready", "archived"] = "draft"
     source_template: Optional[Literal["ma-launch", "bb-reversal"]] = None
+
+
+class Principle(Record):
+    title: str = Field(min_length=2, max_length=120)
+    body: str = Field(min_length=1, max_length=4000)
+    category: Literal["mindset", "context", "entry", "risk", "exit"]
+    status: Literal["draft", "active", "archived"] = "draft"
+    rationale: Optional[str] = Field(default=None, max_length=4000)
+    source: Optional[str] = Field(default=None, max_length=1000)
+
+
+class PrincipleSelection(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, allow_inf_nan=False)
+    id: str = Field(pattern=r"^manual-principle-[0-9a-f]{16}$")
+    revision: int = Field(ge=1)
+
+
+class PreparationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True, allow_inf_nan=False)
+    symbol: str = Field(pattern=r"^[A-Z0-9]{2,24}-USDT-SWAP$")
+    side: Literal["long", "short"]
+    timeframe: str = Field(min_length=1, max_length=20)
+    mode: Literal["practice", "real"]
+    notes: str = Field(default="", max_length=8000)
+    signal_ref: str = Field(default="", max_length=500)
+    principles: list[PrincipleSelection] = Field(min_length=1)
 
 
 class Session(Record):
@@ -70,6 +101,10 @@ class Ticket(Record):
     planned_entry: Optional[float] = Field(default=None, gt=0, le=1e12)
     planned_stop: Optional[float] = Field(default=None, gt=0, le=1e12)
     risk_budget_usdt: Optional[float] = Field(default=None, gt=0, le=1e12)
+
+
+class TicketUpdate(Ticket):
+    preparation: Optional[dict] = Field(default=None, exclude=True)
 
 
 class Event(Record):
@@ -115,6 +150,9 @@ TEMPLATES = [
          invalidation_rule="", exit_rule="", avoid_rule="", management_rule="",
          note="历史手册提案，不代表已证实盈利；需明确实际采用的指标版本与趋势排除条件。"),
 ]
+
+# Owner removed all supplied principle drafts on 2026-10-15.
+PRINCIPLE_TEMPLATES = []
 
 
 def _directional_stop(side, entry, stop):
@@ -165,6 +203,10 @@ class ManualWorkspace:
         key, value, _ = self._save("playbook", payload, key)
         return self._write("playbook", key, value, payload.expected_revision)
 
+    def save_principle(self, payload, key=None):
+        key, value, _ = self._save("principle", payload, key)
+        return self._write("principle", key, value, payload.expected_revision)
+
     def save_session(self, payload, key=None):
         key, value, _ = self._save("session", payload, key)
         return self._write("session", key, value, payload.expected_revision)
@@ -173,6 +215,11 @@ class ManualWorkspace:
         key, value, previous = self._save("ticket", payload, key)
         if previous and previous["status"] not in {"watching", "planned"}:
             raise ValueError("已成交或已放弃的计划已冻结，请通过事件追加复盘。")
+        if previous and previous.get("preparation"):
+            for field in ("symbol", "side", "timeframe", "mode"):
+                if payload.model_dump()[field] != previous[field]:
+                    raise ValueError("开单准备已绑定交易身份，无法直接更改；请为新交易重新准备。")
+            value["preparation"] = deepcopy(previous["preparation"])
         playbook = self.get("playbook", payload.playbook_id) if payload.playbook_id else None
         if bool(payload.playbook_id) != bool(payload.playbook_revision):
             raise ValueError("个人规则 ID 与版本需同时填写或同时留空。")
@@ -192,6 +239,60 @@ class ManualWorkspace:
         value["record_source"] = "owner_manual"
         value["evidence_status"] = "self_reported_unreconciled"
         return self._write("ticket", key, value, payload.expected_revision)
+
+    def save_preparation(self, payload):
+        """Freeze the current active-principle set and create its watching ticket atomically."""
+        ticket = Ticket(symbol=payload.symbol, side=payload.side, timeframe=payload.timeframe,
+                        mode=payload.mode, signal_ref=payload.signal_ref)
+        key = "manual-ticket-" + uuid.uuid4().hex[:16]
+        value = ticket.model_dump(mode="json", exclude={"expected_revision"})
+        value.update(playbook_snapshot=None, session_snapshot=None, record_source="owner_manual",
+                     evidence_status="self_reported_unreconciled")
+
+        selected = {}
+        for item in payload.principles:
+            if item.id in selected:
+                raise ValueError("同一条个人原则不能重复核对。")
+            selected[item.id] = item.revision
+
+        with self.store.connect() as db:
+            db.execute("BEGIN IMMEDIATE")
+            rows = db.execute(
+                "SELECT n.entity_id,n.revision,n.payload,n.created_at FROM notes n "
+                "JOIN (SELECT entity_id,MAX(revision) revision FROM notes "
+                "WHERE kind='manual_principle' GROUP BY entity_id) latest "
+                "ON n.entity_id=latest.entity_id AND n.revision=latest.revision "
+                "WHERE n.kind='manual_principle'"
+            ).fetchall()
+            active = {}
+            for row in rows:
+                principle = json.loads(row["payload"])
+                if principle["status"] == "active":
+                    active[row["entity_id"]] = (row, principle)
+            if not active:
+                raise ValueError("当前没有已启用的个人原则，无法完成开单核对。")
+            if set(selected) != set(active):
+                unavailable = set(selected) - set(active)
+                if unavailable:
+                    raise ValueError("所选个人原则不存在、已归档或未启用。")
+                raise ValueError("开单前必须逐条核对所有已启用的个人原则。")
+
+            snapshots = []
+            for selection in payload.principles:
+                row, principle = active[selection.id]
+                if selection.revision != row["revision"]:
+                    raise ValueError("个人原则已更新，请刷新后重新核对。")
+                snapshots.append(dict(principle, id=row["entity_id"], revision=row["revision"],
+                                      created_at=principle.get("created_at") or row["created_at"],
+                                      updated_at=row["created_at"]))
+
+            stamp = now()
+            value["created_at"] = stamp
+            value["preparation"] = dict(checked_at=stamp, notes=payload.notes, principles=snapshots)
+            db.execute("INSERT INTO notes(kind,entity_id,revision,payload,created_at) VALUES(?,?,?,?,?)",
+                       ("manual_ticket", key, 1, json.dumps(value, ensure_ascii=False), stamp))
+
+        return dict(value, id=key, revision=1, updated_at=stamp)
 
     def event(self, key, payload):
         previous = self.get("ticket", key)
@@ -272,7 +373,8 @@ class ManualWorkspace:
             summary[mode] = dict(results(rows), evidence_status="self_reported_unreconciled", cohorts={
                 "prospective": results([row for row in rows if not row["execution"]["backfilled"]]),
                 "retrospective": results([row for row in rows if row["execution"]["backfilled"]])})
-        return dict(playbooks=self.records("playbook"), sessions=self.records("session"), tickets=tickets,
+        return dict(principles=self.records("principle"), principle_templates=deepcopy(PRINCIPLE_TEMPLATES),
+                    playbooks=self.records("playbook"), sessions=self.records("session"), tickets=tickets,
                     templates=deepcopy(TEMPLATES), summary=summary, sources=SOURCES,
                     capabilities=dict(exchange_connected=False, order_execution=False, automatic_position_sync=False,
                                       instrument_scope="USDT linear perpetual; quantity in base coin", partial_fill_accounting=False))

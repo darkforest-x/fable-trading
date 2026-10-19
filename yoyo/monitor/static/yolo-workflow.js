@@ -11,7 +11,7 @@
     rejected:'已否定', inconclusive:'证据不足', accepted:'历史记录：通过',
     superseded:'已替代', archived:'已归档', hypothesis:'待验证',
   };
-  const PAGE_SIZE = 12;
+  const PAGE_SIZE = 20;
   const state = { active:false, loading:false, loaded:false, data:null, error:'', actionError:'', query:'', status:'', stage:'', page:1 };
 
   function textValue(value, fallback='') {
@@ -38,11 +38,6 @@
   function statusLabel(status) {
     return statusNames[status] || status || '未记录';
   }
-  function eligibilityLabel(value) {
-    if (value === true) return '登记为是（未复核）';
-    if (value === false) return '登记为否';
-    return '未记录';
-  }
   async function api(path, options={}) {
     const response=await fetch(`/api/research${path}`,{
       ...options,
@@ -66,35 +61,17 @@
     const stages=Array.isArray(state.data?.stages)?state.data.stages:[];
     if (!stages.length) return '<div class="yolo-stage-empty research-caption">尚未登记阶段分类。</div>';
     return stages.map((stage)=>`<button type="button" class="yolo-stage-filter ${state.stage===stage.id?'selected':''}" data-yolo-stage="${esc(stage.id)}" aria-pressed="${state.stage===stage.id}">
-      <span class="yolo-stage-count">${esc(count(stage.count))}</span><span class="yolo-stage-copy"><strong>${esc(stage.label||stage.id)}</strong><small>${esc(stage.description||'')}</small></span><span class="yolo-stage-arrow" aria-hidden="true">↗</span>
+      <span class="yolo-stage-count">${esc(count(stage.count))}</span><span class="yolo-stage-copy"><strong>${esc(stage.label||stage.id)}</strong></span><span class="yolo-stage-arrow" aria-hidden="true">↗</span>
     </button>`).join('');
-  }
-  function artifactLabel(artifact) {
-    if (typeof artifact==='string') return artifact;
-    return textValue(artifact,'未命名产物');
   }
   function itemCard(item) {
     const stages=Array.isArray(item.stages)?item.stages:[];
     const artifacts=Array.isArray(item.artifacts)?item.artifacts:[];
-    const notes=textValue(item.notes,'');
     const experimentId=item.experiment_id||item.id||'';
-    const classification=item.workflow_classification==='explicit'?'显式登记分类':item.workflow_classification==='inferred'?'按登记文本归类':'分类来源未记录';
-    const result=textValue(item.result,'尚未记录结果');
     const receipt=item.receipt_status&&typeof item.receipt_status==='object'?item.receipt_status:null;
-    return `<article class="yolo-record-card">
-      <div class="yolo-record-top"><span class="yolo-record-state"><small>登记状态</small><strong class="yolo-record-status">${esc(statusLabel(item.status))}</strong></span><span class="yolo-record-classification">${esc(classification)}</span></div>
-      <h3>${esc(item.title||experimentId||'未命名实验')}</h3>
-      <p class="yolo-record-id">${esc(experimentId||item.id||'')}</p>
-      <div class="yolo-receipt-state"><span>落盘回执</span><strong>${esc(receipt?statusLabel(receipt.status):'未记录')}</strong>${receipt?.path?`<code>${esc(receipt.path)}</code>`:''}</div>
-      <div class="yolo-record-stages">${stages.map((id)=>`<span class="yolo-stage-tag">${esc(stageLabel(id))}</span>`).join('')||'<span class="research-missing">未分配阶段分类</span>'}</div>
-      <section class="yolo-record-field"><h4>研究问题</h4><p>${esc(textValue(item.question,'尚未记录研究问题'))}</p></section>
-      <section class="yolo-record-field yolo-result-field"><h4>原始结果</h4><pre>${esc(result)}</pre></section>
-      ${notes?`<section class="yolo-record-field"><h4>研究备注</h4><pre>${esc(notes)}</pre></section>`:''}
-      <div class="yolo-record-footer"><span>${artifacts.length?`${count(artifacts.length)} 个登记产物`:'暂无登记产物'}</span><button type="button" class="research-button" data-yolo-experiment="${esc(experimentId)}" ${experimentId?'':'disabled'}>打开实验详情 →</button></div>
-      ${artifacts.length?`<details class="yolo-artifacts"><summary>登记产物</summary><ul>${artifacts.map((artifact)=>`<li><code>${esc(artifactLabel(artifact))}</code></li>`).join('')}</ul></details>`:''}
-      <p class="yolo-eligibility">训练资格：${eligibilityLabel(item.training_eligible)} · 生产资格：${eligibilityLabel(item.production_eligible)}</p>
-    </article>`;
+    return `<tr><td><button type="button" class="research-text-button" data-yolo-experiment="${esc(experimentId)}">${esc(item.display_title||item.title||'未命名实验')}</button><div class="yolo-row-stages">${stages.map(id=>esc(stageLabel(id))).join(' · ')}</div></td><td><span class="research-badge">${esc(statusLabel(item.status))}</span>${receipt?`<small class="yolo-row-receipt">回执：${esc(statusLabel(receipt.status))}</small>`:''}</td><td class="yolo-evidence-count">${count(artifacts.length,'0')} 项</td><td><button type="button" class="research-button" data-yolo-experiment="${esc(experimentId)}" ${experimentId?'':'disabled'}>详情 →</button></td></tr>`;
   }
+
   function renderItems() {
     if (!root||!state.data) return;
     const items=visibleItems(), list=root.querySelector('#yolo-records');
@@ -111,7 +88,7 @@
       if (pagination) pagination.innerHTML='';
       return;
     }
-    list.innerHTML=pageItems.map(itemCard).join('');
+    list.innerHTML=`<table class="research-table yolo-record-table"><thead><tr><th>研究问题 / 阶段</th><th>当前结论</th><th class="yolo-evidence-count">证据</th><th></th></tr></thead><tbody>${pageItems.map(itemCard).join('')}</tbody></table>`;
     if (pagination) pagination.innerHTML=`<span>第 ${count(state.page,'0')} / ${count(pageCount,'0')} 页 · 显示 ${count(start+1,'0')}–${count(Math.min(start+PAGE_SIZE,items.length),'0')} / ${count(items.length,'0')} 条</span><div><button type="button" class="research-button" data-yolo-page="prev" ${state.page<=1?'disabled':''} aria-label="上一页">上一页</button><button type="button" class="research-button" data-yolo-page="next" ${state.page>=pageCount?'disabled':''} aria-label="下一页">下一页</button></div>`;
   }
   function isServiceSnapshot(pointer) {
@@ -149,31 +126,29 @@
       root.innerHTML='<div class="yolo-empty"><strong>YOLO 工作流</strong><p>选择此菜单后读取本机研究记录。</p></div>';
       return;
     }
-    const data=state.data, items=Array.isArray(data.items)?data.items:[], stages=Array.isArray(data.stages)?data.stages:[];
+    const data=state.data, items=Array.isArray(data.items)?data.items:[];
     const statuses=[...new Set(items.map((item)=>item.status).filter(Boolean))].sort((a,b)=>statusLabel(a).localeCompare(statusLabel(b),'zh-CN'));
     const notes=Array.isArray(data.notes)?data.notes.map((note)=>textValue(note)).filter(Boolean):[];
     const pointers=Array.isArray(data.pointers)?data.pointers:[];
     const models=Array.isArray(data.models)?data.models:[];
-    const summary=data.summary||{};
-    root.innerHTML=`<div class="yolo-workflow">
+    root.innerHTML=`<div class="yolo-workflow work-split">
+      <div class="yolo-callout"><strong>想直接检测行情？</strong> <a href="#yolo-detect">打开均线密集检测 ↗</a> <span>选币与周期、全局 K 线框选、定时巡检，以及 Grade-A 训练来源。</span></div>
       <header class="yolo-hero">
-        <div><span class="yolo-kicker">研究工作流 / YOLO</span><h2>YOLO 实验工作台</h2><p>按数据、训练、识别和经济验证分类浏览实验。分类支持一项实验跨多个阶段检索，不表示阶段已经完成。</p><p class="yolo-generated">目录生成时间：${esc(date(data.generated_at))}</p></div>
+        <div><h2>YOLO 研究流程</h2><p>${count(items.length)} 项研究 · 从样本、标注到识别与交易验证。阶段分类不代表已经通过。</p></div>
         <div class="yolo-hero-actions"><button type="button" class="research-button primary" data-yolo-register>＋ 登记 YOLO 实验</button><a class="research-button" href="#vision">VLM 工作流 →</a><a class="research-button" href="#paper">模拟实盘 →</a></div>
       </header>
       ${state.actionError?`<p class="yolo-inline-error" role="alert">${esc(state.actionError)}</p>`:''}
-      <section class="yolo-summary" aria-label="YOLO 研究目录数量"><article><span>实验记录</span><strong>${esc(count(summary.experiments,items.length))}</strong></article><article><span>登记产物</span><strong>${esc(count(summary.artifacts))}</strong></article><article><span>工作流阶段</span><strong>${esc(count(stages.length,'0'))}</strong></article></section>
-      ${notes.length?`<section class="yolo-notes"><h2>目录说明</h2><ul>${notes.map((note)=>`<li>${esc(note)}</li>`).join('')}</ul></section>`:''}
-      <section class="yolo-stage-section"><div class="yolo-section-heading"><div><h2>阶段分类</h2><p>点击阶段卡片筛选；同一实验可以同时出现在多个阶段。</p></div><button type="button" class="research-button ${state.stage?'':'yolo-clear-active'}" data-yolo-stage="" aria-pressed="${!state.stage}">全部阶段</button></div>
-        <div class="yolo-stage-grid">${stageFilters()}</div><p class="yolo-classification-note">分类用于查找研究记录，不是完成度或训练进度。</p>
+      <aside class="work-inspector yolo-inspector"><section class="yolo-stage-section"><div class="yolo-section-heading"><div><h2>按阶段查找</h2></div><button type="button" class="research-button ${state.stage?'':'yolo-clear-active'}" data-yolo-stage="" aria-pressed="${!state.stage}">全部阶段</button></div>
+        <div class="yolo-stage-grid">${stageFilters()}</div>
       </section>
-      <section class="yolo-record-section"><div class="yolo-section-heading"><div><h2>YOLO 实验记录</h2><p id="yolo-result-count"></p></div><div class="yolo-filters"><label class="yolo-search-label"><span class="sr-only">搜索 YOLO 实验</span><input id="yolo-search" type="search" value="${esc(state.query)}" placeholder="搜索问题、结论、备注或编号…" autocomplete="off"></label><label><span class="sr-only">研究状态筛选</span><select id="yolo-status"><option value="">全部研究状态</option>${statuses.map((status)=>`<option value="${esc(status)}" ${state.status===status?'selected':''}>${esc(statusLabel(status))}</option>`).join('')}</select></label><button type="button" class="research-button" data-yolo-refresh>刷新目录</button></div></div>
-        <div id="yolo-records" class="yolo-record-grid"></div><nav id="yolo-pagination" class="yolo-pagination" aria-label="YOLO 实验记录分页"></nav>
+      </aside><section class="yolo-record-section"><div class="yolo-section-heading"><div><h2>YOLO 实验记录</h2><p id="yolo-result-count"></p></div><div class="yolo-filters"><label class="yolo-search-label"><span class="sr-only">搜索 YOLO 实验</span><input id="yolo-search" type="search" value="${esc(state.query)}" placeholder="搜索问题、结论、备注或编号…" autocomplete="off"></label><label><span class="sr-only">研究状态筛选</span><select id="yolo-status"><option value="">全部研究状态</option>${statuses.map((status)=>`<option value="${esc(status)}" ${state.status===status?'selected':''}>${esc(statusLabel(status))}</option>`).join('')}</select></label><button type="button" class="research-button" data-yolo-refresh>刷新目录</button></div></div>
+        <div id="yolo-records" class="yolo-record-list"></div><nav id="yolo-pagination" class="yolo-pagination" aria-label="YOLO 实验记录分页"></nav>
       </section>
-      <section class="yolo-pointer-section"><div class="yolo-section-heading"><div><h2>服务快照、模型登记与历史路径</h2><p>服务快照保留接口来源时间；历史文件路径说明记录时的路径状态。两者均不能等价为交易准入。</p></div></div>
+      <details class="yolo-pointer-section"><summary>运行快照、模型版本与目录说明</summary><p class="research-caption">目录生成于 ${esc(date(data.generated_at))}</p>${notes.length?`<ul>${notes.map(note=>`<li>${esc(note)}</li>`).join('')}</ul>`:''}<div class="yolo-section-heading"><div><h2>服务快照、模型登记与历史路径</h2><p>服务快照保留接口来源时间；历史文件路径说明记录时的路径状态。两者均不能等价为交易准入。</p></div></div>
         <div class="yolo-pointer-notice"><strong>快照、登记记录与运行时身份分开理解</strong><span>/api/status 是带来源时间的服务快照，不表示交易准入。模型版本来自登记信息或已记录的 summary/checkpoint 路径；页面不加载权重、不探测 GPU，实时训练进度未知。</span></div>
         ${models.length?`<details class="yolo-models"><summary>已记录模型版本（${count(models.length,'0')}）</summary><div class="yolo-model-grid">${models.map((model)=>`<article class="yolo-model-card"><div class="yolo-model-heading"><h3>${esc(model.name||'未命名模型')}</h3><span>${model.registered===true?'已登记':model.source_receipt?'回执有记录 · 待登记':'未登记'}</span></div><dl><dt>所属实验</dt><dd>${esc(model.experiment_id||'未记录')}</dd><dt>来源路径</dt><dd><code>${esc(model.source_path||'未记录')}</code></dd><dt>SHA-256</dt><dd><code>${esc(model.sha256||'未记录')}</code></dd><dt>本地文件</dt><dd>${model.local_exists===true?'存在':model.local_exists===false?'缺失':'未核对'}</dd>${model.source_receipt?`<dt>来源回执</dt><dd><code>${esc(model.source_receipt)}</code></dd>`:''}</dl></article>`).join('')}</div></details>`:'<p class="yolo-models-empty">暂无已记录模型版本。</p>'}
         ${pointers.length?`<div class="yolo-pointer-grid">${pointers.map((pointer)=>pointerCard(pointer,data.generated_at)).join('')}</div>`:'<div class="yolo-empty"><p>暂无模型登记或路径指针。</p></div>'}
-      </section>
+      </details>
       <p class="yolo-footer-note">登记实验只保存研究问题和单变量计划，不启动训练、不提升模型，也不改变生产资格。</p>
     </div>`;
     renderItems();

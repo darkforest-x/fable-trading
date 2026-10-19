@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"inverse-surface":"#dfe2ef","tertiary-fixed":"#ffddb8","outline-variant":"#3b494c","surface-bright":"#353943","on-secondary":"#3c0091","primary-container":"#00e5ff","on-secondary-fixed":"#23005c","on-tertiary-fixed-variant":"#653e00","tertiary-container":"#ffc681","error":"#ffb4ab","surface-container-lowest":"#0a0e17","on-background":"#dfe2ef","on-primary-fixed-variant":"#004f58","background":"#0f131c","secondary-fixed":"#e9ddff","on-surface-variant":"#bac9cc","primary-fixed-dim":"#00daf3","on-tertiary":"#472a00","inverse-primary":"#006875","tertiary":"#ffe9d3","on-error":"#690005","on-primary":"#00363d","secondary-container":"#571bc1","surface-tint":"#00daf3","on-tertiary-container":"#7e4e00","on-tertiary-fixed":"#2a1700","surface-container":"#1c2029","on-surface":"#dfe2ef","on-primary-fixed":"#001f24","surface-container-highest":"#31353f","surface":"#0f131c","on-primary-container":"#00626e","primary-fixed":"#9cf0ff","secondary":"#d0bcff","tertiary-fixed-dim":"#ffb95f","surface-container-low":"#181b25","on-secondary-container":"#c4abff","surface-container-high":"#262a34","secondary-fixed-dim":"#d0bcff","inverse-on-surface":"#2c303a","error-container":"#93000a","surface-variant":"#31353f","primary":"#c3f5ff","surface-dim":"#0f131c","outline":"#849396","on-secondary-fixed-variant":"#5516be","on-error-container":"#ffdad6"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-md":"0.5rem","space-xl":"1rem","space-xs":"0.125rem","space-sm":"0.25rem",gutter:"0.5rem",margin:"0.75rem","space-lg":"0.75rem"},fontFamily:{"code-snippet":["JetBrains Mono"],"headline-md":["Inter"],"label-numeric-lg":["JetBrains Mono"],"label-numeric-sm":["JetBrains Mono"],"headline-xl":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-numeric-md":["JetBrains Mono"],"body-lg":["Inter"],"body-md":["Inter"]},fontSize:{"code-snippet":["0.75rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.015em",fontWeight:"600"}],"label-numeric-lg":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.01em",fontWeight:"600"}],"label-numeric-sm":["0.6875rem",{lineHeight:"0.875rem",letterSpacing:"0.02em",fontWeight:"400"}],"headline-xl":["2rem",{lineHeight:"2.5rem",letterSpacing:"-0.025em",fontWeight:"700"}],"body-sm":["0.75rem",{lineHeight:"1rem",letterSpacing:"0.01em",fontWeight:"400"}],"headline-lg":["1.5rem",{lineHeight:"2rem",letterSpacing:"-0.02em",fontWeight:"600"}],"label-numeric-md":["0.8125rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"500"}],"body-lg":["0.9375rem",{lineHeight:"1.375rem",letterSpacing:"-0.01em",fontWeight:"400"}],"body-md":["0.8125rem",{lineHeight:"1.25rem",letterSpacing:"0em",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-14 bg-surface-container-lowest z-50 flex flex-col items-center justify-between py-space-md shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="flex flex-col items-center gap-space-lg"><div class="w-9 h-9 rounded bg-surface-container-high flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">bolt</span></div><nav class="flex flex-col items-center gap-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded"><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#" title="市场观察"><span class="material-symbols-outlined text-[19px]">candlestick_chart</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#" title="均线密集检测"><span class="material-symbols-outlined text-[19px]">grain</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#" title="信号中心"><span class="material-symbols-outlined text-[19px]">sensors</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="trading-accounts" href="#" title="交易与账户"><span class="material-symbols-outlined text-[19px]">account_balance_wallet</span></a><a aria-current="page" class="w-9 h-9 flex items-center justify-center transition-colors bg-primary-container text-on-primary-container font-bold rounded" data-path="research-workspace" href="#" title="研究工作区"><span class="material-symbols-outlined text-[19px]">terminal</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#" title="知识与复盘"><span class="material-symbols-outlined text-[19px]">history_edu</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="system-telemetry" href="#" title="系统与运行"><span class="material-symbols-outlined text-[19px]">settings_input_component</span></a></nav></div><div class="flex flex-col items-center gap-space-sm"><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="API连接状态" type="button"><span class="material-symbols-outlined text-[19px]">lan</span></button><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="系统设置" type="button"><span class="material-symbols-outlined text-[19px]">tune</span></button></div></aside><div class="pl-14"><header class="fixed top-0 left-14 right-0 h-12 bg-surface-container-low/95 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-12 w-full px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-sm select-none"><span class="font-headline-md text-headline-md tracking-tight font-bold text-primary">SPIKE</span><span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-space-xs rounded bg-surface-container text-primary-container uppercase font-semibold">TERMINAL</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary-container font-semibold rounded"><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#">市场观察</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#">均线密集检测</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#">信号中心</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="trading-accounts" href="#">交易与账户</a><a aria-current="page" class="px-space-md py-space-sm transition-colors bg-surface-container-high text-primary-container font-semibold rounded" data-path="research-workspace" href="#">研究工作区</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#">知识与复盘</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="system-telemetry" href="#">系统与运行</a></nav></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-lowest"><span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase">HEARTBEAT</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">120ms</span></div><button class="flex items-center gap-space-xs h-7 px-space-md rounded bg-surface-container-high text-primary hover:bg-primary-container hover:text-on-primary-container transition-all" type="button"><span class="material-symbols-outlined text-[15px]">flash_on</span><span class="font-body-sm text-body-sm font-semibold">快捷开单</span></button><button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors relative" title="系统告警与消息" type="button"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary"></span></button><div class="flex items-center gap-space-sm pl-space-md py-space-xs rounded bg-surface-container"><div class="flex flex-col text-right"><span class="font-body-sm text-body-sm text-on-surface font-medium leading-none">Quant Trader #01</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary leading-none">ALPHA-PROP</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-12 bg-surface"><div class="flex flex-col w-full">
+<div class="px-space-xl py-space-lg flex flex-col gap-space-lg">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-lg">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-primary-container shadow-sm">
+<span class="material-symbols-outlined text-[24px]">hub</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md font-bold text-on-surface">量化研究中台 · 因子与实验回测资产库</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-sm py-space-xs rounded bg-surface-container-high text-primary font-semibold uppercase">Workspace v4.8-Alpha</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">统一管理深度学习拓扑模型、Tick 级订单流因子、多周期图神经网络特征与超参调优管道</span>
+</div>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-md bg-surface-container-low px-space-md py-space-xs rounded shadow-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase">H100 Node Array</span>
+</div>
+<div class="h-3 w-px bg-surface-container-highest"></div>
+<span class="font-label-numeric-md text-label-numeric-md text-primary">8x SXM5 / 84% LOAD</span>
+<div class="h-3 w-px bg-surface-container-highest"></div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-tertiary-fixed-dim">2 任务排队中</span>
+</div>
+<button class="flex items-center gap-space-xs h-8 px-space-lg rounded bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary transition-all font-semibold shadow-sm" id="btn-new-exp" type="button">
+<span class="material-symbols-outlined text-[17px]">play_arrow</span>
+<span class="font-body-sm text-body-sm">发起新回测 / 调优</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm hover:bg-surface-container transition-all relative overflow-hidden group">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase font-medium">数据集资产 / Datasets</span>
+<span class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">database</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">120,000</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary">ANNOTATED</span>
+</div>
+<div class="flex items-center justify-between mt-space-sm pt-space-xs border-t border-surface-container-highest/40">
+<span class="font-body-sm text-body-sm text-on-surface-variant">存储规模 48.6 TB</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">5y Tick/L2 深度切片</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container opacity-40 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm hover:bg-surface-container transition-all relative overflow-hidden group">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase font-medium">核心量化因子 / Factors</span>
+<span class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[16px]">calculate</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">64</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-secondary">ACTIVE ALPHA</span>
+</div>
+<div class="flex items-center justify-between mt-space-sm pt-space-xs border-t border-surface-container-highest/40">
+<span class="font-body-sm text-body-sm text-on-surface-variant">OFI失衡 · 均线曲率</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-secondary">IC均值 0.084</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-secondary opacity-40 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm hover:bg-surface-container transition-all relative overflow-hidden group">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase font-medium">模型库 / Model Registry</span>
+<span class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center text-tertiary-fixed-dim">
+<span class="material-symbols-outlined text-[16px]">deployed_code</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">28</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-tertiary-fixed-dim">PROD READY</span>
+</div>
+<div class="flex items-center justify-between mt-space-sm pt-space-xs border-t border-surface-container-highest/40">
+<span class="font-body-sm text-body-sm text-on-surface-variant">YOLOv8-Q / GNN Topology</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-tertiary-fixed-dim">推理时延 &lt; 2.4ms</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-tertiary-fixed-dim opacity-40 group-hover:opacity-100 transition-opacity"></div>
+</div>
+<div class="flex flex-col p-space-md rounded bg-surface-container-low shadow-sm hover:bg-surface-container transition-all relative overflow-hidden group">
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase font-medium">实验与回测 / Experiments</span>
+<span class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[16px]">science</span>
+</span>
+</div>
+<div class="flex items-baseline gap-space-sm">
+<span class="font-headline-xl text-headline-xl font-bold text-on-surface tracking-tight">342</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary">RUNS</span>
+</div>
+<div class="flex items-center justify-between mt-space-sm pt-space-xs border-t border-surface-container-highest/40">
+<span class="font-body-sm text-body-sm text-on-surface-variant">最优: MA_Alpha_v6</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-container font-bold">Sharpe 3.42</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-container opacity-40 group-hover:opacity-100 transition-opacity"></div>
+</div>
+</div>
+<div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-space-md bg-surface-container-low p-space-xs rounded shadow-sm">
+<div class="flex items-center gap-space-xs overflow-x-auto" id="asset-tab-group">
+<button class="tab-btn px-space-md py-space-xs rounded bg-surface-container-high text-primary font-semibold text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="all" type="button">
+<span class="material-symbols-outlined text-[16px]">apps</span>
+<span>所有资产 (214)</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="datasets" type="button">
+<span class="material-symbols-outlined text-[16px]">dataset</span>
+<span>数据集 Datasets (18)</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="factors" type="button">
+<span class="material-symbols-outlined text-[16px]">function</span>
+<span>特征/因子 Factors (64)</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="models" type="button">
+<span class="material-symbols-outlined text-[16px]">view_in_ar</span>
+<span>模型注册表 Models (28)</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="experiments" type="button">
+<span class="material-symbols-outlined text-[16px]">experiment</span>
+<span>策略实验 Experiments (74)</span>
+</button>
+<button class="tab-btn px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container text-body-sm transition-colors flex items-center gap-space-xs whitespace-nowrap" data-tab="backtests" type="button">
+<span class="material-symbols-outlined text-[16px]">query_stats</span>
+<span>历史回测 Backtests (30)</span>
+</button>
+</div>
+<div class="flex items-center gap-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-space-xs rounded">
+<span class="material-symbols-outlined text-[15px] text-outline">search</span>
+<input class="bg-transparent font-body-sm text-body-sm text-on-surface outline-none w-48 placeholder:text-outline" placeholder="搜索特征、模型或回测ID..." type="text"/>
+</div>
+<button class="w-7 h-7 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-space-md">
+<div class="xl:col-span-8 flex flex-col gap-space-md">
+<div class="flex flex-col bg-surface-container-low rounded p-space-md shadow-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-sm mb-space-md border-b border-surface-container-highest/50 gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">实验核心对比区 (Duel Matrix)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-sm py-space-xs rounded bg-surface-container-highest text-primary">A/B BENCHMARK</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="font-code-snippet text-code-snippet text-on-surface-variant">Timeframe: 2023.01.01 - 2024.12.31 (Tick-Level)</span>
+<button class="font-body-sm text-body-sm text-primary hover:underline flex items-center gap-space-xs" type="button">
+<span>导出研报</span>
+<span class="material-symbols-outlined text-[14px]">file_download</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-md">
+<div class="flex flex-col p-space-md rounded bg-surface-container relative">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-space-xs rounded bg-primary text-on-primary font-bold font-code-snippet text-code-snippet">EXP-7029</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">MA-Topology-Dense</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary px-space-xs py-space-xs rounded bg-surface-container-highest">TOP PICK (ACTIVE)</span>
+</div>
+<span class="font-body-lg text-body-lg font-bold text-on-surface mb-space-xs">6EMA 均线密集与破位回归探测</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-space-md">基于 6 周期 EMA 距离矩阵、拓扑曲率与高斯曲面破位检测，集成 GNN 与 YOLO 边界框回归。</p>
+<div class="grid grid-cols-3 gap-space-xs p-space-xs rounded bg-surface-container-low mb-space-sm">
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">CAGR</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-primary font-bold">+164.2%</span>
+</div>
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">Max DD</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-primary font-bold">-5.8%</span>
+</div>
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">Sharpe</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-primary font-bold">3.42</span>
+</div>
+</div>
+<div class="flex items-center justify-between font-code-snippet text-code-snippet text-on-surface-variant">
+<span>Loss: 0.0124 (mAP 89.4%)</span>
+<span>Calmar: 28.3</span>
+<span>WinRate: 68.4%</span>
+</div>
+</div>
+<div class="flex flex-col p-space-md rounded bg-surface-container relative">
+<div class="flex items-center justify-between mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-space-xs rounded bg-secondary text-on-secondary font-bold font-code-snippet text-code-snippet">EXP-6980</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-secondary font-semibold">OFI-Micro-Div</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant px-space-xs py-space-xs rounded bg-surface-container-highest">BASELINE</span>
+</div>
+<span class="font-body-lg text-body-lg font-bold text-on-surface mb-space-xs">订单流微结构与量价背离分类器</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mb-space-md">基于毫秒级订单簿买卖累计失衡量 (OFI) 与成交量价背离特征，运行 ConvNet 时序池化分类。</p>
+<div class="grid grid-cols-3 gap-space-xs p-space-xs rounded bg-surface-container-low mb-space-sm">
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">CAGR</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-secondary font-bold">+112.5%</span>
+</div>
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">Max DD</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-error font-bold">-9.4%</span>
+</div>
+<div class="flex flex-col text-center">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">Sharpe</span>
+<span class="font-label-numeric-lg text-label-numeric-lg text-secondary font-bold">2.68</span>
+</div>
+</div>
+<div class="flex items-center justify-between font-code-snippet text-code-snippet text-on-surface-variant">
+<span>Loss: 0.0289 (mAP 76.1%)</span>
+<span>Calmar: 11.9</span>
+<span>WinRate: 59.1%</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs bg-surface-container-lowest p-space-md rounded">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-md">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold uppercase">Cumulative Return / Alpha Drift Trajectory</span>
+<div class="flex items-center gap-space-sm text-code-snippet">
+<span class="flex items-center gap-space-xs text-primary"><span class="w-3 h-0.5 bg-primary-container"></span> EXP-7029 (+164.2%)</span>
+<span class="flex items-center gap-space-xs text-secondary"><span class="w-3 h-0.5 bg-secondary"></span> EXP-6980 (+112.5%)</span>
+<span class="flex items-center gap-space-xs text-outline"><span class="w-3 h-0.5 bg-outline"></span> BTC Benchmark (+48.6%)</span>
+</div>
+</div>
+<span class="font-code-snippet text-code-snippet text-outline">24 Months Tick Walk-Forward</span>
+</div>
+<div class="h-44 w-full relative pt-space-xs">
+<svg class="w-full h-full overflow-visible" preserveaspectratio="none" viewbox="0 0 800 160">
+<defs>
+<lineargradient id="grad-exp7029" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#00daf3" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#00daf3" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="grad-exp6980" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d0bcff" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#d0bcff" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<line stroke="#31353f" stroke-dasharray="3,3" stroke-width="0.5" x1="0" x2="800" y1="40" y2="40"></line>
+<line stroke="#31353f" stroke-dasharray="3,3" stroke-width="0.5" x1="0" x2="800" y1="80" y2="80"></line>
+<line stroke="#31353f" stroke-dasharray="3,3" stroke-width="0.5" x1="0" x2="800" y1="120" y2="120"></line>
+<path d="M0,150 Q100,145 200,135 T400,110 T600,85 T800,60" fill="none" stroke="#849396" stroke-dasharray="2,2" stroke-width="1"></path>
+<path d="M0,150 Q100,140 180,128 T320,105 T480,90 T640,65 T800,45 L800,160 L0,160 Z" fill="url(#grad-exp6980)"></path>
+<path d="M0,150 Q100,140 180,128 T320,105 T480,90 T640,65 T800,45" fill="none" stroke="#d0bcff" stroke-width="1.75"></path>
+<path d="M0,150 Q80,132 160,118 T300,88 T460,58 T620,32 T800,14 L800,160 L0,160 Z" fill="url(#grad-exp7029)"></path>
+<path d="M0,150 Q80,132 160,118 T300,88 T460,58 T620,32 T800,14" fill="none" stroke="#00daf3" stroke-width="2.25"></path>
+<circle cx="800" cy="14" fill="#00daf3" r="3"></circle>
+<circle cx="800" cy="45" fill="#d0bcff" r="3"></circle>
+<circle cx="800" cy="60" fill="#849396" r="2.5"></circle>
+</svg>
+<div class="absolute bottom-1 left-2 font-code-snippet text-label-numeric-sm text-outline">2023-01</div>
+<div class="absolute bottom-1 left-1/4 font-code-snippet text-label-numeric-sm text-outline">2023-07</div>
+<div class="absolute bottom-1 left-2/4 font-code-snippet text-label-numeric-sm text-outline">2024-01</div>
+<div class="absolute bottom-1 left-3/4 font-code-snippet text-label-numeric-sm text-outline">2024-07</div>
+<div class="absolute bottom-1 right-2 font-code-snippet text-label-numeric-sm text-outline">2024-12</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-low rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-highest/50">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[18px]">table_rows</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">核心资产目录清单 (Active Repository)</span>
+</div>
+<div class="flex items-center gap-space-xs font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>显示 5 / 214 项</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead class="bg-surface-container-lowest text-on-surface-variant font-code-snippet text-label-numeric-sm uppercase">
+<tr>
+<th class="py-space-xs px-space-sm font-medium">标识符 / 名称</th>
+<th class="py-space-xs px-space-sm font-medium">类别</th>
+<th class="py-space-xs px-space-sm font-medium">状态 / 架构</th>
+<th class="py-space-xs px-space-sm font-medium">采样/容量</th>
+<th class="py-space-xs px-space-sm font-medium">关键指标 (IC/mAP)</th>
+<th class="py-space-xs px-space-sm font-medium text-right">操作</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-highest/40 font-code-snippet">
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-semibold text-primary">DS-TICK-L2-BTC</span>
+<span class="font-body-sm text-on-surface-variant truncate max-w-[130px]">比特币5年订单流切片</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-on-surface-variant text-label-numeric-sm">Dataset</span>
+</td>
+<td class="py-space-sm px-space-sm text-on-surface">Parquet + Arrow</td>
+<td class="py-space-sm px-space-sm text-on-surface">32.4 TB (94B Ticks)</td>
+<td class="py-space-sm px-space-sm text-primary">质量评分 99.8%</td>
+<td class="py-space-sm px-space-sm text-right">
+<button class="px-space-xs py-space-xs text-primary hover:bg-surface-container-high rounded">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-semibold text-secondary">FAC-OFI-MICRO-01</span>
+<span class="font-body-sm text-on-surface-variant truncate max-w-[130px]">订单流失衡度连续积分</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-secondary text-label-numeric-sm">Factor</span>
+</td>
+<td class="py-space-sm px-space-sm text-on-surface">C++20 SIMD Ext</td>
+<td class="py-space-sm px-space-sm text-on-surface">500ms 窗口</td>
+<td class="py-space-sm px-space-sm text-secondary">IC 0.091 / IR 2.14</td>
+<td class="py-space-sm px-space-sm text-right">
+<button class="px-space-xs py-space-xs text-primary hover:bg-surface-container-high rounded">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="font-semibold text-primary">FAC-MA-CURV-TOP</span>
+<span class="font-body-sm text-on-surface-variant truncate max-w-[130px]">6EMA曲率几何压缩算子</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-primary text-label-numeric-sm">Factor</span>
+</td>
+<td class="py-space-sm px-space-sm text-on-surface">PyTorch Tensor</td>
+<td class="py-space-sm px-space-sm text-on-surface">1m/5m/15m/1h</td>
+<td class="py-space-sm px-space-sm text-primary">IC 0.084 / IR 3.02</td>
+<td class="py-space-sm px-space-sm text-right">
+<button class="px-space-xs py-space-xs text-primary hover:bg-surface-container-high rounded">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-semibold text-tertiary-fixed-dim">MOD-YOLO8-Q-V4</span>
+<span class="font-body-sm text-on-surface-variant truncate max-w-[130px]">形态目标检测回归网络</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-tertiary-fixed-dim text-label-numeric-sm">Model</span>
+</td>
+<td class="py-space-sm px-space-sm text-on-surface">ONNX TensorRT</td>
+<td class="py-space-sm px-space-sm text-on-surface">FP16 / 42.1MB</td>
+<td class="py-space-sm px-space-sm text-tertiary-fixed-dim">mAP@50: 89.4%</td>
+<td class="py-space-sm px-space-sm text-right">
+<button class="px-space-xs py-space-xs text-primary hover:bg-surface-container-high rounded">详情</button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container transition-colors">
+<td class="py-space-sm px-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary-fixed"></span>
+<span class="font-semibold text-primary-fixed">EXP-7029-PROD</span>
+<span class="font-body-sm text-on-surface-variant truncate max-w-[130px]">MA密集突破高频执行</span>
+</div>
+</td>
+<td class="py-space-sm px-space-sm">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-primary-fixed text-label-numeric-sm">Experiment</span>
+</td>
+<td class="py-space-sm px-space-sm text-on-surface">Live-Shadow</td>
+<td class="py-space-sm px-space-sm text-on-surface">Full Universe</td>
+<td class="py-space-sm px-space-sm text-primary">Sharpe 3.42 / +164%</td>
+<td class="py-space-sm px-space-sm text-right">
+<button class="px-space-xs py-space-xs text-primary hover:bg-surface-container-high rounded">详情</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<div class="flex flex-col bg-surface-container-low rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-highest/50">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">insights</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">特征重要性 (Alpha Top 5)</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">SHAP / Gain</span>
+</div>
+<div class="flex flex-col gap-space-sm font-code-snippet">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-label-numeric-sm">
+<span class="text-on-surface font-medium">1. MA_Density_Entropy (均线密熵)</span>
+<span class="text-primary font-bold">28.4%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 88%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-label-numeric-sm">
+<span class="text-on-surface font-medium">2. OFI_Cumulative_1m (订单流失衡)</span>
+<span class="text-primary font-bold">21.2%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 72%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-label-numeric-sm">
+<span class="text-on-surface font-medium">3. Vol_Compress_Ratio (波动收敛比)</span>
+<span class="text-secondary font-bold">18.6%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 61%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-label-numeric-sm">
+<span class="text-on-surface font-medium">4. Whale_Tx_Delta (大单瞬时净流)</span>
+<span class="text-secondary font-bold">14.1%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-secondary-fixed-dim rounded-full" style="width: 46%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-label-numeric-sm">
+<span class="text-on-surface font-medium">5. Topology_Curvature (拓扑曲率)</span>
+<span class="text-tertiary-fixed-dim font-bold">11.7%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-tertiary-fixed-dim rounded-full" style="width: 38%;"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-low rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-highest/50">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary text-[18px]">grid_on</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">因子正交相关矩阵 (Orthogonality)</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">ρ &lt; 0.35 Passed</span>
+</div>
+<div class="flex flex-col gap-space-xs font-code-snippet text-label-numeric-sm">
+<div class="grid grid-cols-5 gap-1 text-center font-bold text-outline pb-1">
+<div>F1</div>
+<div>F2</div>
+<div>F3</div>
+<div>F4</div>
+<div>F5</div>
+</div>
+<div class="grid grid-cols-5 gap-1 text-center items-center">
+<div class="py-1 rounded bg-primary text-on-primary font-bold">1.00</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.14</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.08</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">-0.05</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.22</div>
+</div>
+<div class="grid grid-cols-5 gap-1 text-center items-center">
+<div class="py-1 rounded bg-surface-container text-on-surface">0.14</div>
+<div class="py-1 rounded bg-secondary text-on-secondary font-bold">1.00</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.27</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.11</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">-0.02</div>
+</div>
+<div class="grid grid-cols-5 gap-1 text-center items-center">
+<div class="py-1 rounded bg-surface-container text-on-surface">0.08</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.27</div>
+<div class="py-1 rounded bg-secondary text-on-secondary font-bold">1.00</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.18</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.31</div>
+</div>
+<div class="grid grid-cols-5 gap-1 text-center items-center">
+<div class="py-1 rounded bg-surface-container text-on-surface">-0.05</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.11</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.18</div>
+<div class="py-1 rounded bg-tertiary-fixed-dim text-on-tertiary-fixed font-bold">1.00</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.09</div>
+</div>
+<div class="grid grid-cols-5 gap-1 text-center items-center">
+<div class="py-1 rounded bg-surface-container text-on-surface">0.22</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">-0.02</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.31</div>
+<div class="py-1 rounded bg-surface-container text-on-surface">0.09</div>
+<div class="py-1 rounded bg-primary-fixed text-on-primary-fixed font-bold">1.00</div>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs border-t border-surface-container-highest/40 flex items-center justify-between text-code-snippet text-outline">
+<span>F1:密熵 F2:OFI F3:波动 F4:大单 F5:曲率</span>
+<span class="text-primary">正交化方式: Gram-Schmidt</span>
+</div>
+</div>
+<div class="flex flex-col bg-surface-container-low rounded p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-surface-container-highest/50">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[18px]">memory</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">计算集群与任务队列</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<div class="flex flex-col p-space-sm rounded bg-surface-container">
+<div class="flex items-center justify-between mb-space-xs font-code-snippet">
+<span class="text-on-surface font-semibold">JOB-8921 · GNN-HyperTune</span>
+<span class="text-primary font-bold">ETA 14m</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mb-space-xs">
+<div class="h-full bg-primary-container rounded-full" style="width: 68%;"></div>
+</div>
+<div class="flex items-center justify-between text-label-numeric-sm text-outline font-code-snippet">
+<span>GPU #0-3 (NVIDIA H100)</span>
+<span>Epoch 68/100 (Loss 0.019)</span>
+</div>
+</div>
+<div class="flex flex-col p-space-sm rounded bg-surface-container">
+<div class="flex items-center justify-between mb-space-xs font-code-snippet">
+<span class="text-on-surface font-semibold">JOB-8922 · 5y-Tick-Backtest</span>
+<span class="text-secondary font-bold">ETA 42m</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden mb-space-xs">
+<div class="h-full bg-secondary rounded-full" style="width: 24%;"></div>
+</div>
+<div class="flex items-center justify-between text-label-numeric-sm text-outline font-code-snippet">
+<span>GPU #4-7 (NVIDIA H100)</span>
+<span>Chunk 1,240 / 5,120</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container-lowest text-code-snippet text-outline">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim">schedule</span>
+<span>排队队列 (2 项等待中)</span>
+</div>
+<button class="text-primary hover:underline">查看全部</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-50 bg-surface-container-lowest/80 backdrop-blur-md hidden flex items-center justify-center p-space-md" id="modal-submit-backtest">
+<div class="bg-surface-container-high rounded p-space-xl max-w-xl w-full flex flex-col gap-space-md shadow-2xl">
+<div class="flex items-center justify-between border-b border-surface-container-highest/60 pb-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
+<span class="material-symbols-outlined text-[18px]">rocket_launch</span>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">提交新回测 / 分布式调优实验</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface" id="btn-close-modal" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-numeric-sm text-label-numeric-sm text-outline uppercase font-semibold">选择基础算法模型架构</label>
+<select class="bg-surface-container-lowest text-on-surface p-space-xs rounded text-body-sm outline-none">
+<option>YOLOv8-Quant v4.2 (形态检测与边界回归)</option>
+<option>MA-GNN-Topology v2.1 (6EMA 密集曲率图神经网络)</option>
+<option>OFI-ConvNet v3.0 (高频订单流失衡池化模型)</option>
+<option>LightGBM Breakout-Classifier (多因子梯度提升树)</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-numeric-sm text-label-numeric-sm text-outline uppercase font-semibold">回测数据周期</label>
+<select class="bg-surface-container-lowest text-on-surface p-space-xs rounded text-body-sm outline-none">
+<option>2023-01-01 至 2024-12-31 (完整2年)</option>
+<option>最近 6 个月高波动行情压力测试</option>
+<option>全量 5 年历史 Tick 级深度回测</option>
+</select>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-numeric-sm text-label-numeric-sm text-outline uppercase font-semibold">GPU 分配算力</label>
+<select class="bg-surface-container-lowest text-on-surface p-space-xs rounded text-body-sm outline-none">
+<option>4x NVIDIA H100 (默认优先级)</option>
+<option>8x NVIDIA H100 (分布式超参并行调优)</option>
+<option>2x NVIDIA H100 (节能队列)</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<label class="font-label-numeric-sm text-label-numeric-sm text-outline uppercase font-semibold">执行超参数 (JSON 配置)</label>
+<textarea class="h-24 bg-surface-container-lowest text-primary font-code-snippet text-code-snippet p-space-sm rounded outline-none resize-none">{
+  "learning_rate": 0.0003,
+  "batch_size": 2048,
+  "ema_periods": [5, 10, 20, 30, 60, 120],
+  "curvature_threshold": 0.042,
+  "slippage_bps": 1.5,
+  "maker_fee_bps": -0.5
+}</textarea>
+</div>
+</div>
+<div class="flex items-center justify-end gap-space-md pt-space-xs">
+<button class="px-space-md py-space-xs rounded text-on-surface-variant hover:text-on-surface text-body-sm" id="btn-cancel-modal" type="button">取消</button>
+<button class="px-space-lg py-space-xs rounded bg-primary-container text-on-primary-container font-semibold hover:bg-primary text-body-sm shadow-sm flex items-center gap-space-xs" id="btn-confirm-submit" type="button">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+<span>立即入列运行</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+    (function() {
+      const modal = document.getElementById('modal-submit-backtest');
+      const btnNew = document.getElementById('btn-new-exp');
+      const btnClose = document.getElementById('btn-close-modal');
+      const btnCancel = document.getElementById('btn-cancel-modal');
+      const btnConfirm = document.getElementById('btn-confirm-submit');
+
+      function openModal() {
+        if(modal) modal.classList.remove('hidden');
+      }
+      function closeModal() {
+        if(modal) modal.classList.add('hidden');
+      }
+
+      if(btnNew) btnNew.addEventListener('click', openModal);
+      if(btnClose) btnClose.addEventListener('click', closeModal);
+      if(btnCancel) btnCancel.addEventListener('click', closeModal);
+      if(btnConfirm) {
+        btnConfirm.addEventListener('click', function() {
+          btnConfirm.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>调度中...</span>';
+          setTimeout(() => {
+            btnConfirm.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span><span>已加入队列</span>';
+            setTimeout(() => {
+              closeModal();
+              btnConfirm.innerHTML = '<span class="material-symbols-outlined text-[16px]">bolt</span><span>立即入列运行</span>';
+            }, 800);
+          }, 700);
+        });
+      }
+
+      const tabButtons = document.querySelectorAll('#asset-tab-group .tab-btn');
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          tabButtons.forEach(b => {
+            b.classList.remove('bg-surface-container-high', 'text-primary', 'font-semibold');
+            b.classList.add('text-on-surface-variant');
+          });
+          btn.classList.add('bg-surface-container-high', 'text-primary', 'font-semibold');
+          btn.classList.remove('text-on-surface-variant');
+        });
+      });
+    })();
+  </script>
+</div></main></div></body></html>

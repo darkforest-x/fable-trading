@@ -170,8 +170,10 @@ class BarkWorker:
         return True
 
     def status(self):
+        from yoyo.monitor.notification_policy import bark_disabled
         result = self.store.notification_status("bark")
         result["sent"] = result.get("sent", 0)
         result["historical_sent"] = self.store.bark_status().get("sent", 0) - result["sent"]
-        return dict(result, configured=bool(self.creds), enabled=bool(self.creds),
+        return dict(result, configured=bool(self.creds), enabled=bool(self.creds) and channel_enabled(self.store, "bark"),
+                    disabled_by_owner=bark_disabled(self.store),
                     acceptance="bark_server_accepted_not_device_receipt")

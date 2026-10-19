@@ -335,6 +335,10 @@ def install(app, runtime, root=ROOT, launch_worker=True, vision_transport=None):
     install_platform(api, app, root, catalog, datasets, store, all_factors, recipes, create_job, paper)
     from .manual_api import install as install_manual
     install_manual(api, app, store)
+    from .paper_desk_api import install as install_paper_desk
+    install_paper_desk(api, app, store)
+    from .knowledge_api import install as install_knowledge
+    install_knowledge(api, app, store, catalog)
     app.include_router(api)
 
     @app.api_route("/api/vision/{path:path}", methods=["GET", "POST", "PUT"], dependencies=[Depends(same_origin)])

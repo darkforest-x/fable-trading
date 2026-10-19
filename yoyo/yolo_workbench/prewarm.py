@@ -17,7 +17,7 @@ from yoyo.monitor.okx import OKX
 def prewarm(runtime,identity):
     os.nice(15);book=Book(runtime);job=book.get(identity)
     if not job or not job['spec'].get('universe'):raise ValueError('需要已冻结币种池的任务')
-    spec=job['spec'];client=OKX(rate=3);client.synchronize();local=threading.local()
+    spec=job['spec'];client=OKX(rate=3, runtime=runtime);client.synchronize();local=threading.local()
     def read(symbol):
         try:
             step=__import__('yoyo.yolo_workbench.models',fromlist=['TIMEFRAMES']).TIMEFRAMES[spec['timeframe']]

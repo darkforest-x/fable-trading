@@ -76,3 +76,27 @@
 @media(max-width:650px){.yd-dialog,.yd-enlarge-dialog{position:fixed;top:var(--yd-dialog-top,12px);bottom:auto;left:0;right:0;margin:0 auto;width:calc(100vw - 24px)}.yd-form-body{padding:16px;gap:16px}.yd-dialog footer{padding:12px 16px max(12px,env(safe-area-inset-bottom));gap:6px}.yd-dialog footer>span{font-size:11px}.yd-dialog input,.yd-dialog select{font-size:16px}.yd-dialog>header button{min-height:42px;padding:10px 14px}.yd-dialog form footer>.yd-primary{min-height:44px}.yd-live-chart{padding:0 12px 12px}.yd-live-chart button,.yd-switcher button{min-height:40px}.yd-live-chart label{min-height:36px}.yd-enlarge-header{padding:10px 12px}.yd-enlarge-dialog .yd-chart-head{padding-top:10px}.yd-enlarge-dialog .yd-chart-tools{padding-bottom:8px}#yd-quick-symbol{height:40px}.yd-symbol-dialog .yd-symbol-filters button{min-height:40px}}
 
 .yd-symbol span small{display:block;margin-top:4px;font-size:10px;color:var(--muted)}.yd-symbol-dialog .yd-symbol span{text-align:right}.yd-symbol-dialog .yd-symbol strong{max-width:48%;overflow-wrap:anywhere;white-space:normal}
+
+/* Coin-first results and compact patrol cards share one reading rhythm. */
+.yd-periods{display:flex;gap:3px;flex-wrap:wrap;flex:1}.yd-periods button{position:relative;min-width:40px;border-color:transparent;background:transparent;color:var(--muted)}.yd-periods [aria-pressed=true]{background:color-mix(in srgb,var(--mint) 10%,var(--surface));border-color:color-mix(in srgb,var(--mint) 30%,var(--line));color:var(--mint)}.yd-periods i{display:inline-block;width:4px;height:4px;border-radius:50%;background:var(--mint);vertical-align:top;margin-left:3px}
+/* Sibling buttons keep each period independently focusable and touchable. */
+.yd-symbol-list .yd-symbol{display:block;padding:6px;border:1px solid transparent;border-radius:8px}
+.yd-symbol-list .yd-symbol.selected{border-color:color-mix(in srgb,var(--mint) 35%,transparent)}
+.yd-symbol .yd-symbol-main{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-height:44px;padding:6px 3px;border:0;background:transparent;text-align:left}
+.yd-symbol-main strong{min-width:0;overflow-wrap:anywhere}.yd-symbol-main>span{text-align:right;font-size:11px}
+.yd-period-badges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:5px}
+.yd-period-badges button{display:flex;align-items:center;justify-content:center;gap:7px;min-width:44px;min-height:44px;padding:6px 4px;font-size:11px;color:var(--muted);background:var(--bg);border-color:transparent;touch-action:manipulation}
+.yd-period-badges button b{font-size:10px;font-weight:500;min-width:15px;padding:2px 3px;border-radius:4px;background:color-mix(in srgb,currentColor 8%,transparent)}
+.yd-period-badges button.has-shape{color:var(--mint);font-weight:600;background:color-mix(in srgb,var(--mint) 12%,var(--surface))}
+.yd-period-badges button[aria-pressed=true]{border-color:var(--mint);box-shadow:inset 0 0 0 1px var(--mint)}
+.yd-period-badges button:focus-visible{outline-offset:1px}
+.yd-symbol-dialog .yd-period-badges{grid-template-columns:repeat(4,minmax(0,1fr));max-width:none}
+.yd-chart-stage{scroll-margin-top:85px}
+
+.yd-findings{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}.yd-findings .yd-finding{padding:12px;gap:8px;border-top-width:2px;border-radius:8px}.yd-finding-head strong{font-size:16px}.yd-finding-head small{display:none}.yd-finding-head>span{padding:3px 5px}.yd-finding-direction{font-size:12px}.yd-finding-time{font-size:11px}.yd-finding-details{display:flex;gap:8px;align-items:center;justify-content:space-between;line-height:1.5}.yd-finding-details b{color:var(--mint);font-size:16px}
+#yd-schedules{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}.yd-plan-card{padding:14px;gap:10px;flex-direction:column}.yd-plan-card h3{font-size:14px;margin-top:6px}.yd-plan-card p{margin-top:5px}.yd-plan-card>div:last-child{justify-content:flex-end}.yd-plan-card button{font-size:11px}
+@media(max-width:650px){.yd-findings{grid-template-columns:repeat(2,minmax(0,1fr))}.yd-findings .yd-finding{padding:10px;gap:7px}.yd-finding-head{gap:4px}.yd-finding-head strong{font-size:15px}.yd-finding-head>span{font-size:10px}.yd-finding-direction{flex-wrap:wrap;gap:3px}.yd-finding-direction small{font-size:10px}.yd-finding-time{font-size:10px}.yd-finding-time b{display:block;margin:3px 0 0}.yd-finding-details{font-size:10px}.yd-context-actions{gap:8px}.yd-periods{flex-basis:100%}.yd-periods button{flex:1;min-height:40px;padding:6px}}
+@media(max-width:360px){.yd-findings{grid-template-columns:1fr}}
+.yd-shell button.yd-icon,.yd-shell #yd-prev,.yd-shell #yd-next{min-width:36px;min-height:36px;padding:4px 8px;font-size:20px;line-height:1}.yd-shell #yd-prev,.yd-shell #yd-next{font-size:24px}.yd-dialog [data-yd-close]{font-size:22px;line-height:1;min-width:40px}.yd-title-line #yd-favorite{font-size:21px;min-width:36px;min-height:36px}
+@media(max-width:650px){.yd-shell button.yd-icon,.yd-shell #yd-prev,.yd-shell #yd-next,.yd-title-line #yd-favorite{min-width:40px;min-height:40px}}
+@media(max-width:650px){.yd-feed-filters{position:relative}.yd-feed-filters>[data-yd-feed-refresh]{position:absolute;right:4px;top:3px;width:36px;min-width:36px;min-height:36px}.yd-feed-filters>#yd-feed-search{padding-right:76px!important;background-position:right 48px center}}

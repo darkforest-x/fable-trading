@@ -1,7 +1,7 @@
 """Personal trade planning and append-only journal endpoints; never orders."""
 from fastapi import HTTPException
 
-from .manual import Event, ManualWorkspace, Playbook, Session, Ticket
+from .manual import Event, ManualWorkspace, Playbook, Principle, PreparationRequest, Session, Ticket, TicketUpdate
 
 
 def install(api, app, store):
@@ -28,6 +28,20 @@ def install(api, app, store):
     def edit_playbook(key: str, payload: Playbook):
         return invoke(workspace.save_playbook, payload, key)
 
+    @api.post("/manual/principles", status_code=201)
+    def create_principle(payload: Principle):
+        return invoke(workspace.save_principle, payload)
+
+    @api.put("/manual/principles/{key}")
+    def edit_principle(key: str, payload: Principle):
+        return invoke(workspace.save_principle, payload, key)
+
+    @api.get("/manual/principles/{key}")
+    def principle_detail(key: str):
+        result = invoke(workspace.get, "principle", key)
+        result["history"] = store.history("manual_principle", key)
+        return result
+
     @api.post("/manual/sessions", status_code=201)
     def create_session(payload: Session):
         return invoke(workspace.save_session, payload)
@@ -40,8 +54,12 @@ def install(api, app, store):
     def create_ticket(payload: Ticket):
         return invoke(workspace.save_ticket, payload)
 
+    @api.post("/manual/preparations", status_code=201)
+    def create_preparation(payload: PreparationRequest):
+        return invoke(workspace.save_preparation, payload)
+
     @api.put("/manual/tickets/{key}")
-    def edit_ticket(key: str, payload: Ticket):
+    def edit_ticket(key: str, payload: TicketUpdate):
         return invoke(workspace.save_ticket, payload, key)
 
     @api.get("/manual/tickets/{key}")

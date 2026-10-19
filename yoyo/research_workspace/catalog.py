@@ -255,6 +255,8 @@ class Catalog:
         raw = self._read_yaml(EXPERIMENT_REGISTRY, {"experiments": []})
         if not isinstance(raw, dict) or not isinstance(raw.get("experiments", []), list):
             raise ValueError("experiments/registry.yaml must contain an experiments list")
+        label_path = self.root / "yoyo/research_workspace/experiment_labels_zh.json"
+        labels = json.loads(label_path.read_text()) if label_path.is_file() else {}
         seen: set[str] = set()
         rows: list[dict[str, Any]] = []
         for source in raw.get("experiments", []):
@@ -269,6 +271,11 @@ class Catalog:
             row = copy.deepcopy(source)
             row["id"] = experiment_id
             row["title"] = row.get("title") or _LATEST_TITLES.get(experiment_id, str(row.get("question") or experiment_id))
+            # Display aliases never replace the original question or conclusion.
+            alias = labels.get(experiment_id, {})
+            digest = hashlib.sha256(str(row.get("question") or "").encode()).hexdigest()
+            if alias.get("question_sha256") == digest:
+                row["display_title"] = alias["title"]
             factor_ids = _EXPERIMENT_FACTOR_IDS.get(experiment_id)
             if factor_ids:
                 row["factor_ids"] = list(factor_ids)

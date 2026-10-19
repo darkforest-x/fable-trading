@@ -52,7 +52,8 @@ def test_content_script_has_recent_visible_message_fallback():
     assert "scanRecentVisibleMessages" in content
     assert "isRecentVisiblePayload" in content
     assert "visible_recent_scan" in content
-    assert "discord-web-visible_recovery" in background
+    assert '"discord-web-visible"' in background
+    assert "discord-web-visible_recovery" not in background
 
 
 def test_content_script_never_reads_direct_messages():

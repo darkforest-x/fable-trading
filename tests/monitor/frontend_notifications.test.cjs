@@ -76,7 +76,7 @@ function clickDelegated(listener, selector, dataset, checked = null) {
   listener({ target });
 }
 
-test("channel cards and history distinguish service acceptance and safely render API data", async () => {
+test("channel cards retain delivery counts without fetching a notification history", async () => {
   const calls = [];
   const p = harness(async (url, options = {}) => {
     calls.push({ url, options });
@@ -88,68 +88,23 @@ test("channel cards and history distinguish service acceptance and safely render
   const cards = p.element("notification-channel-cards").innerHTML;
   assert.match(cards, /累计服务已接受/);
   assert.match(cards, />91</);
-  assert.match(cards, /未配置/);
+  assert.doesNotMatch(cards, /Bark/);
+  assert.doesNotMatch(p.element("notification-route-matrix").innerHTML, /data-route-channel="bark"/);
   assert.match(p.element("notification-route-matrix").innerHTML, /SPIKE V12\.8 普通启动/);
-  const rows = p.element("notification-history-rows").innerHTML;
-  assert.match(rows, /服务已接受/);
-  assert.match(rows, /BTC-USDT-SWAP/);
-  assert.match(rows, /来源订阅已关闭/);
-  assert.match(rows, /&lt;img src=x onerror=alert\(1\)&gt;/);
-  assert.doesNotMatch(rows, /<img src=x onerror=alert\(1\)>/i);
-  assert.match(rows, /<td>—<\/td>/, "null price remains unavailable instead of becoming zero");
+  assert.ok(calls.every(({url}) => url === "/api/notifications"));
+  assert.equal(p.element("notification-history-rows").innerHTML, "");
   p.api.setActive(false);
 });
 
-test("filters use the API contract and pagination advances by 50 rows", async () => {
-  const paths = [];
-  const p = harness(async (url) => {
-    paths.push(url);
-    if (url === "/api/notifications") return response(snapshot());
-    return response({ items: Array.from({ length: 50 }, (_, index) => event({ id: `evt-${index}` })), total: 105, offset: Number(new URL(url, "https://local").searchParams.get("offset")) });
-  });
-  await activate(p);
-  p.element("notification-filter-channel").value = "telegram";
-  p.element("notification-filter-channel").fire("change");
-  p.element("notification-filter-topic").value = "spike_v128";
-  p.element("notification-filter-topic").fire("change");
-  p.element("notification-filter-status").value = "failed";
-  p.element("notification-filter-status").fire("change");
-  p.element("notification-filter-side").value = "short";
-  p.element("notification-filter-side").fire("change");
-  p.element("notification-filter-timeframe").value = "1H";
-  p.element("notification-filter-timeframe").fire("change");
-  p.element("notification-filter-search").value = "BTC <x>";
-  p.element("notification-filter-search").fire("input");
-  await new Promise((resolve) => setTimeout(resolve, 300));
-  const filtered = paths.filter((url) => url.startsWith("/api/notifications/events?")).at(-1);
-  const query = new URL(filtered, "https://local").searchParams;
-  for (const [key, value] of Object.entries({ channel: "telegram", topic: "spike_v128", status: "failed", side: "short", timeframe: "1H", search: "BTC <x>", offset: "0", limit: "50" })) {
-    assert.equal(query.get(key), value, `query field ${key}`);
-  }
-  clickDelegated(p.element("notification-history-pagination").listeners?.click, "[data-notification-page]", { notificationPage: "next" });
-  await flush();
-  const paged = paths.filter((url) => url.startsWith("/api/notifications/events?")).at(-1);
-  assert.equal(new URL(paged, "https://local").searchParams.get("offset"), "50");
-  p.api.setActive(false);
-});
-
-test("stale event responses are ignored when a newer filter result arrives", async () => {
-  const pending = [];
-  const p = harness((url) => {
-    if (url === "/api/notifications") return Promise.resolve(response(snapshot()));
-    return new Promise((resolve) => pending.push({ url, resolve }));
-  });
-  p.api.setActive(true);
-  p.element("notification-filter-topic").value = "spike_v128";
-  p.element("notification-filter-topic").fire("change");
-  assert.equal(pending.length, 2);
-  pending[1].resolve(response({ items: [event({ label: "新结果" })], total: 1, offset: 0 }));
-  await flush();
-  assert.match(p.element("notification-history-rows").innerHTML, /新结果/);
-  pending[0].resolve(response({ items: [event({ label: "旧结果" })], total: 1, offset: 0 }));
-  await flush();
-  assert.match(p.element("notification-history-rows").innerHTML, /新结果/);
-  assert.doesNotMatch(p.element("notification-history-rows").innerHTML, /旧结果/);
+test("a response from a departed notification view cannot replace its current snapshot", async () => {
+  const pending=[];
+  const p=harness(url=>new Promise(resolve=>pending.push({url,resolve})));
+  p.api.setActive(true);p.api.setActive(false);p.api.setActive(true);
+  assert.equal(pending.length,2);
+  pending[1].resolve(response(snapshot({as_of_ms:1700000010000,notice:'new snapshot'})));
+  await flush();assert.equal(p.element('notifications-notice').textContent,'new snapshot');
+  pending[0].resolve(response(snapshot({notice:'old snapshot'})));
+  await flush();assert.equal(p.element('notifications-notice').textContent,'new snapshot');
   p.api.setActive(false);
 });
 

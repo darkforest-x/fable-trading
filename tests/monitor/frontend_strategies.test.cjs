@@ -269,14 +269,14 @@ test("primary nav uses strategy and paper views while old watch, warmup, and sha
     assert.match(app, new RegExp(`${view}: \\["${label}"`));
   }
   assert.match(source, /href="#shadow">查看保留的 V7 \/ V8 前向影子旧视图/);
-  assert.match(page, /\/static\/strategies\.js/);
-  assert.match(page, /\/static\/strategies\.css/);
+  assert.match(fs.readFileSync(path.join(root, "yoyo/monitor/static/module-loader.js"), "utf8"), /strategies\.js/);
+  assert.match(fs.readFileSync(path.join(root, "yoyo/monitor/static/module-loader.js"), "utf8"), /strategies\.css/);
   const navStart = page.indexOf('<nav class="nav-list"');
   assert.ok(navStart >= 0);
   const nav = page.slice(navStart, page.indexOf("</nav>", navStart));
   assert.ok(nav.indexOf('data-view="strategies"') < nav.indexOf('data-view="experiments"'));
   assert.ok(nav.indexOf('data-view="experiments"') < nav.indexOf('data-view="backtests"'));
-  assert.ok(nav.indexOf('data-view="backtests"') < nav.indexOf('data-view="paper"'));
+  assert.ok(nav.indexOf('data-view="paper"') < nav.indexOf('data-view="backtests"'));
 });
 
 test("legacy shadow view renders when its removed navigation count node is absent", () => {

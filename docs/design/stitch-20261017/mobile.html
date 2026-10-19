@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "inverse-surface": "#dfe2ef", "tertiary-fixed": "#ffddb8", "outline-variant": "#3b494c", "surface-bright": "#353943", "on-secondary": "#3c0091", "primary-container": "#00e5ff", "on-secondary-fixed": "#23005c", "on-tertiary-fixed-variant": "#653e00", "tertiary-container": "#ffc681", "error": "#ffb4ab", "surface-container-lowest": "#0a0e17", "on-background": "#dfe2ef", "on-primary-fixed-variant": "#004f58", "background": "#0f131c", "secondary-fixed": "#e9ddff", "on-surface-variant": "#bac9cc", "primary-fixed-dim": "#00daf3", "on-tertiary": "#472a00", "inverse-primary": "#006875", "tertiary": "#ffe9d3", "on-error": "#690005", "on-primary": "#00363d", "secondary-container": "#571bc1", "surface-tint": "#00daf3", "on-tertiary-container": "#7e4e00", "on-tertiary-fixed": "#2a1700", "surface-container": "#1c2029", "on-surface": "#dfe2ef", "on-primary-fixed": "#001f24", "surface-container-highest": "#31353f", "surface": "#0f131c", "on-primary-container": "#00626e", "primary-fixed": "#9cf0ff", "secondary": "#d0bcff", "tertiary-fixed-dim": "#ffb95f", "surface-container-low": "#181b25", "on-secondary-container": "#c4abff", "surface-container-high": "#262a34", "secondary-fixed-dim": "#d0bcff", "inverse-on-surface": "#2c303a", "error-container": "#93000a", "surface-variant": "#31353f", "primary": "#c3f5ff", "surface-dim": "#0f131c", "outline": "#849396", "on-secondary-fixed-variant": "#5516be", "on-error-container": "#ffdad6" }, borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" }, spacing: { "space-md": "0.5rem", "space-xl": "1rem", "space-xs": "0.125rem", "space-sm": "0.25rem", gutter: "0.5rem", margin: "0.75rem", "space-lg": "0.75rem" }, fontFamily: { "code-snippet": ["JetBrains Mono"], "headline-md": ["Inter"], "label-numeric-lg": ["JetBrains Mono"], "label-numeric-sm": ["JetBrains Mono"], "headline-xl": ["Inter"], "body-sm": ["Inter"], "headline-lg": ["Inter"], "label-numeric-md": ["JetBrains Mono"], "body-lg": ["Inter"], "body-md": ["Inter"] }, fontSize: { "code-snippet": ["0.75rem", { lineHeight: "1.125rem", letterSpacing: "0em", fontWeight: "400" }], "headline-md": ["1.125rem", { lineHeight: "1.5rem", letterSpacing: "-0.015em", fontWeight: "600" }], "label-numeric-lg": ["1.125rem", { lineHeight: "1.5rem", letterSpacing: "-0.01em", fontWeight: "600" }], "label-numeric-sm": ["0.6875rem", { lineHeight: "0.875rem", letterSpacing: "0.02em", fontWeight: "400" }], "headline-xl": ["2rem", { lineHeight: "2.5rem", letterSpacing: "-0.025em", fontWeight: "700" }], "body-sm": ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.01em", fontWeight: "400" }], "headline-lg": ["1.5rem", { lineHeight: "2rem", letterSpacing: "-0.02em", fontWeight: "600" }], "label-numeric-md": ["0.8125rem", { lineHeight: "1.125rem", letterSpacing: "0em", fontWeight: "500" }], "body-lg": ["0.9375rem", { lineHeight: "1.375rem", letterSpacing: "-0.01em", fontWeight: "400" }], "body-md": ["0.8125rem", { lineHeight: "1.25rem", letterSpacing: "0em", fontWeight: "400" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#0f131c;color:#dfe2ef;}body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen selection:bg-primary-container selection:text-on-primary-container"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_4px_16px_rgba(0,0,0,0.45)]"><div class="h-14 px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-primary-container shadow-[0_0_8px_#00e5ff]"></span><span class="font-headline-md text-headline-md tracking-tight uppercase text-on-surface truncate">Positions Monitor</span></div></div><div class="flex items-center gap-space-sm"><div class="h-8 px-space-md rounded bg-surface-container-low flex items-center gap-space-xs"><span class="material-symbols-outlined text-primary-fixed-dim text-[16px]">account_balance_wallet</span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-medium">$124,580.00</span></div><button aria-label="Search Symbols" class="w-11 h-11 flex items-center justify-center rounded text-on-surface-variant hover:text-primary transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-14 pb-16 bg-surface"><div class="flex flex-col w-full pb-20 select-none">
+<!-- 挂单排队悬浮轻量通告条 -->
+<div class="px-margin pt-space-xs">
+<div class="flex items-center justify-between px-space-md py-space-xs rounded bg-surface-container-high text-on-surface shadow-sm">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-fixed truncate">SOL-USDT #ORD-9021-TX</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">队位 <span class="text-tertiary font-label-numeric-sm">#14</span></span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="font-body-sm text-body-sm scale-90">0.08s</span>
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+</div>
+</div>
+</div>
+<!-- 账户实时盈亏微型看板 -->
+<div class="px-margin mt-space-sm">
+<div class="p-space-md rounded bg-surface-container-low shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs text-on-surface-variant">
+<span class="font-body-sm text-body-sm tracking-tight">动态净值 (USD)</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">120ms</span>
+</div>
+<div class="flex items-baseline gap-space-sm mt-0.5">
+<span class="font-label-numeric-lg text-label-numeric-lg font-bold text-on-surface">$142,850.00</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-container font-semibold">+6.25%</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-body-sm text-body-sm text-on-surface-variant">今日浮盈</span>
+<div class="flex items-center gap-space-xs mt-0.5">
+<span class="material-symbols-outlined text-primary-container text-[14px]">trending_up</span>
+<span class="font-label-numeric-md text-label-numeric-md font-semibold text-primary-container">+$8,940.00</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 均线检测信号雷达 & 标的轮播 -->
+<div class="mt-space-sm">
+<div class="flex items-center justify-between px-margin mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[14px]">tune</span>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">均线密集收缩监控</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">36对标的扫描中</span>
+</div>
+<!-- 横向极速切换卡片组 -->
+<div class="flex gap-space-sm overflow-x-auto px-margin no-scrollbar pb-space-xs">
+<!-- 选中的 APT/USDT -->
+<div class="shrink-0 w-44 p-space-sm rounded bg-surface-container-highest cursor-pointer relative shadow-md">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-bold text-primary">APT/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-container font-bold">+6.80%</span>
+</div>
+<div class="flex items-baseline justify-between mt-space-xs">
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">$11.45</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-1 rounded bg-secondary-container text-on-secondary-container">临界0.42%</span>
+</div>
+<div class="mt-1 flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm scale-90 -ml-1 text-primary-fixed">突破置信度</span>
+<span class="font-label-numeric-sm text-label-numeric-sm font-bold text-primary-container">94分</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden mt-1">
+<div class="bg-primary-container h-full w-[94%]"></div>
+</div>
+</div>
+<!-- SUI -->
+<div class="shrink-0 w-36 p-space-sm rounded bg-surface-container-low cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-medium text-on-surface">SUI</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-container">+14.8%</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">$3.842</span>
+</div>
+<div class="mt-1">
+<span class="font-body-sm text-body-sm scale-90 px-1 py-0.5 rounded bg-surface-bright text-tertiary">多头真突破</span>
+</div>
+</div>
+<!-- TAO -->
+<div class="shrink-0 w-36 p-space-sm rounded bg-surface-container-low cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-medium text-on-surface">TAO</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-error">-1.20%</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">$488.1</span>
+</div>
+<div class="mt-1">
+<span class="font-body-sm text-body-sm scale-90 px-1 py-0.5 rounded bg-error-container text-on-error-container">空头跌破带</span>
+</div>
+</div>
+<!-- SOL -->
+<div class="shrink-0 w-36 p-space-sm rounded bg-surface-container-low cursor-pointer">
+<div class="flex items-center justify-between">
+<span class="font-body-md text-body-md font-medium text-on-surface">SOL</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary-container">+7.45%</span>
+</div>
+<div class="mt-space-xs">
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface font-semibold">$184.2</span>
+</div>
+<div class="mt-1">
+<span class="font-body-sm text-body-sm scale-90 px-1 py-0.5 rounded bg-surface-bright text-on-surface-variant">高位震荡</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 核心单币 K 线与 6 均线系统 -->
+<div class="px-margin mt-space-sm">
+<div class="rounded bg-surface-container-low p-space-sm shadow-md">
+<!-- 头部：周期与均线图例 -->
+<div class="flex items-center justify-between border-none pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-primary font-bold">APT/USDT</span>
+<span class="px-1.5 py-0.5 rounded bg-surface-container text-on-surface font-label-numeric-sm">15m</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary-container font-label-numeric-sm font-bold">极度收敛</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-ping"></span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">$11.45</span>
+</div>
+</div>
+<!-- 6 均线高密度指标参数条 -->
+<div class="grid grid-cols-3 gap-y-1 gap-x-2 py-1 px-1.5 rounded bg-surface-container-lowest font-label-numeric-sm">
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim"></span>
+<span class="text-on-surface-variant">SMA20:</span>
+<span class="text-on-surface">11.42</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">SMA60:</span>
+<span class="text-on-surface">11.39</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="text-on-surface-variant">SMA120:</span>
+<span class="text-on-surface">11.36</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="text-on-surface-variant">EMA20:</span>
+<span class="text-on-surface">11.44</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed"></span>
+<span class="text-on-surface-variant">EMA60:</span>
+<span class="text-on-surface">11.40</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+<span class="text-on-surface-variant">EMA120:</span>
+<span class="text-on-surface">11.38</span>
+</div>
+</div>
+<!-- K线与均线收缩带 Canvas 模拟 SVG 渲染 -->
+<div class="relative w-full h-44 mt-space-xs rounded bg-surface-container-lowest overflow-hidden">
+<!-- 阻力与支撑标签悬浮在图表内部 -->
+<div class="absolute top-1 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-label-numeric-sm">
+<span>阻力位 $11.80</span>
+</div>
+<div class="absolute bottom-6 right-2 flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-highest text-primary-fixed-dim font-label-numeric-sm">
+<span>支撑密集带 $10.82</span>
+</div>
+<!-- 均线收敛状态标签 -->
+<div class="absolute top-8 left-2 px-1.5 py-0.5 rounded bg-surface-bright/70 backdrop-blur-sm text-tertiary font-body-sm text-[10px]">
+          6条均线宽差 0.42% 蓄势待发
+        </div>
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 350 160">
+<defs>
+<!-- 均线密集区光晕 -->
+<lineargradient id="bandGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#00daf3" stop-opacity="0.05"></stop>
+<stop offset="60%" stop-color="#d0bcff" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#00e5ff" stop-opacity="0.35"></stop>
+</lineargradient>
+</defs>
+<!-- 支撑与阻力虚线 -->
+<line opacity="0.6" stroke="#ffb4ab" stroke-dasharray="3,3" stroke-width="0.8" x1="0" x2="350" y1="20" y2="20"></line>
+<line opacity="0.6" stroke="#00daf3" stroke-dasharray="3,3" stroke-width="0.8" x1="0" x2="350" y1="124" y2="124"></line>
+<!-- 均线收敛带宽（粘合过渡带） -->
+<path d="M0,88 C80,92 180,82 250,83 C280,83 310,81 350,75 L350,85 C310,87 280,87 250,87 C180,88 80,98 0,96 Z" fill="url(#bandGradient)"></path>
+<!-- SMA 20, 60, 120 曲线 -->
+<path d="M0,95 Q100,90 200,86 T350,78" fill="none" opacity="0.9" stroke="#00daf3" stroke-width="1.2"></path>
+<path d="M0,92 Q120,92 230,86 T350,82" fill="none" opacity="0.8" stroke="#d0bcff" stroke-width="1.1"></path>
+<path d="M0,90 Q140,94 250,87 T350,85" fill="none" opacity="0.7" stroke="#ffb95f" stroke-width="1"></path>
+<!-- EMA 20, 60, 120 曲线 (更敏感上翘) -->
+<path d="M0,98 Q90,88 190,84 T350,73" fill="none" stroke="#00e5ff" stroke-width="1.4"></path>
+<path d="M0,94 Q110,91 220,85 T350,80" fill="none" opacity="0.85" stroke="#e9ddff" stroke-width="1"></path>
+<path d="M0,89 Q130,92 240,86 T350,83" fill="none" opacity="0.75" stroke="#ffe9d3" stroke-width="0.9"></path>
+<!-- K线模拟数据列（近期进入紧密挤压向上试探） -->
+<!-- 柱子1 -->
+<line stroke="#bac9cc" stroke-width="0.8" x1="30" x2="30" y1="84" y2="102"></line>
+<rect fill="#31353f" height="10" rx="0.5" width="6" x="27" y="88"></rect>
+<!-- 柱子2 阴线 -->
+<line stroke="#ffb4ab" stroke-width="0.8" x1="60" x2="60" y1="86" y2="108"></line>
+<rect fill="#93000a" height="14" rx="0.5" width="6" x="57" y="90"></rect>
+<!-- 柱子3 阳线 -->
+<line stroke="#00e5ff" stroke-width="0.8" x1="90" x2="90" y1="78" y2="98"></line>
+<rect fill="#00626e" height="12" rx="0.5" width="6" x="87" y="82"></rect>
+<!-- 柱子4 阳线 -->
+<line stroke="#00e5ff" stroke-width="0.8" x1="120" x2="120" y1="80" y2="95"></line>
+<rect fill="#00626e" height="8" rx="0.5" width="6" x="117" y="82"></rect>
+<!-- 柱子5 均线密集区横盘小十字星 -->
+<line stroke="#dfe2ef" stroke-width="0.8" x1="150" x2="150" y1="81" y2="91"></line>
+<rect fill="#849396" height="3" rx="0.5" width="6" x="147" y="84"></rect>
+<!-- 柱子6 蓄势阳线 -->
+<line stroke="#00e5ff" stroke-width="0.8" x1="180" x2="180" y1="79" y2="90"></line>
+<rect fill="#00626e" height="6" rx="0.5" width="6" x="177" y="81"></rect>
+<!-- 柱子7 极度收窄十字线 -->
+<line stroke="#dfe2ef" stroke-width="0.8" x1="210" x2="210" y1="81" y2="88"></line>
+<rect fill="#849396" height="2" rx="0.5" width="6" x="207" y="83"></rect>
+<!-- 柱子8 极度收窄 -->
+<line stroke="#00e5ff" stroke-width="0.8" x1="240" x2="240" y1="80" y2="87"></line>
+<rect fill="#00626e" height="4" rx="0.5" width="6" x="237" y="82"></rect>
+<!-- 柱子9 放量微突破阳线 -->
+<line stroke="#00e5ff" stroke-width="0.8" x1="270" x2="270" y1="74" y2="85"></line>
+<rect fill="#00626e" height="8" rx="0.5" width="6" x="267" y="76"></rect>
+<!-- 柱子10 当前阳线穿过密集带 -->
+<line stroke="#00e5ff" stroke-width="1" x1="300" x2="300" y1="68" y2="82"></line>
+<rect fill="#00e5ff" height="10" rx="0.5" width="8" x="296" y="70"></rect>
+<!-- 现价水平脉冲光线 -->
+<line stroke="#00e5ff" stroke-dasharray="2,2" stroke-width="0.7" x1="0" x2="350" y1="70" y2="70"></line>
+<circle cx="300" cy="70" fill="#00e5ff" r="2.5"></circle>
+</svg>
+<!-- 底层成交量极简条 -->
+<div class="absolute bottom-1 left-2 right-2 flex items-end justify-between h-5 opacity-40">
+<div class="w-2 bg-surface-variant h-2"></div>
+<div class="w-2 bg-error h-3"></div>
+<div class="w-2 bg-primary-container h-4"></div>
+<div class="w-2 bg-primary-container h-2"></div>
+<div class="w-2 bg-surface-variant h-1"></div>
+<div class="w-2 bg-primary-container h-3"></div>
+<div class="w-2 bg-surface-variant h-1"></div>
+<div class="w-2 bg-primary-container h-2"></div>
+<div class="w-2 bg-primary-container h-4"></div>
+<div class="w-2 bg-primary-container h-5"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- APT 待触发条件联动单 (均线破位追多/防守) -->
+<div class="px-margin mt-space-sm">
+<div class="p-space-sm rounded bg-surface-container-high shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+<span class="font-body-md text-body-md font-semibold text-on-surface">APT 联动策略挂单</span>
+<span class="font-body-sm text-body-sm px-1 py-0.2 rounded bg-surface-container text-tertiary">EMA突破激活</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">条件单 (预设)</span>
+</div>
+<div class="grid grid-cols-3 gap-2 mt-space-xs pt-space-xs border-none">
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface-variant">触发追多</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary-container mt-0.5">&gt; $11.50</span>
+</div>
+<div class="flex flex-col">
+<span class="font-body-sm text-body-sm text-on-surface-variant">密集止损</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-error mt-0.5">$10.82</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-body-sm text-body-sm text-on-surface-variant">拟执行量</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface mt-0.5">3,000 APT</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 实盘持仓同屏快速监控卡片 -->
+<div class="px-margin mt-space-sm">
+<div class="flex items-center justify-between mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[15px]">stacked_line_chart</span>
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">活跃实盘持仓 (2)</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">点击切换主图</span>
+</div>
+<div class="flex flex-col gap-space-sm">
+<!-- SUI 持仓卡片 -->
+<div class="p-space-sm rounded bg-surface-container-low active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-body-md text-body-md font-bold text-on-surface">SUI/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-1 rounded bg-primary-container/20 text-primary-container font-semibold">10x 多</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary-container">+$4,207.50</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-1 py-0.5 rounded bg-primary-container/15 text-primary-container font-bold">+93.3%</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-space-xs text-on-surface-variant font-label-numeric-sm">
+<span>开仓: $1.987</span>
+<span>现价: $3.842</span>
+<span>数量: 22,500 SUI</span>
+</div>
+<div class="mt-1 flex items-center justify-between text-[11px] text-outline">
+<span>均线状态: 6均线全头发散加速中</span>
+<span class="text-primary hover:underline">调仓</span>
+</div>
+</div>
+<!-- SOL 持仓卡片 -->
+<div class="p-space-sm rounded bg-surface-container-low active:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-body-md text-body-md font-bold text-on-surface">SOL/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-1 rounded bg-primary-container/20 text-primary-container font-semibold">10x 多</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary-container">+$2,704.00</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-1 py-0.5 rounded bg-primary-container/15 text-primary-container font-bold">+19.7%</span>
+</div>
+</div>
+<div class="flex items-center justify-between mt-space-xs text-on-surface-variant font-label-numeric-sm">
+<span>开仓: $153.80</span>
+<span>现价: $184.20</span>
+<span>数量: 89 SOL</span>
+</div>
+<div class="mt-1 flex items-center justify-between text-[11px] text-outline">
+<span>均线状态: EMA20支撑有效 震荡整固</span>
+<span class="text-primary hover:underline">调仓</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 底部常驻极速操作大按钮 (买入多/卖出空与一键平仓) -->
+<div class="fixed bottom-16 left-0 right-0 z-40 px-margin py-space-xs bg-surface-container-lowest/95 backdrop-blur-md shadow-lg">
+<div class="flex items-center gap-space-sm w-full">
+<!-- 闪电平仓/撤单按钮 -->
+<button class="h-10 px-space-md rounded bg-surface-container text-on-surface font-body-sm font-semibold flex flex-col items-center justify-center shrink-0 active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[16px] text-error">close</span>
+<span class="text-[10px] leading-tight">闪平</span>
+</button>
+<!-- 快速做多买入 -->
+<button class="flex-1 h-10 rounded bg-primary-container text-on-primary-container font-body-md font-bold flex items-center justify-center gap-space-xs shadow-[0_0_12px_rgba(0,229,255,0.3)] active:scale-98 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_upward</span>
+<span>买入·做多 (市价)</span>
+</button>
+<!-- 快速做空卖出 -->
+<button class="flex-1 h-10 rounded bg-error text-on-error font-body-md font-bold flex items-center justify-center gap-space-xs active:scale-98 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+<span>卖出·做空 (市价)</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+  // 简易单手微交互：标的切换主图模拟效果
+  document.querySelectorAll('.no-scrollbar > div').forEach(item => {
+    item.addEventListener('click', function() {
+      document.querySelectorAll('.no-scrollbar > div').forEach(el => {
+        el.classList.remove('bg-surface-container-highest', 'shadow-md');
+        el.classList.add('bg-surface-container-low');
+      });
+      this.classList.remove('bg-surface-container-low');
+      this.classList.add('bg-surface-container-highest', 'shadow-md');
+    });
+  });
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-4px_20px_rgba(0,0,0,0.6)]" data-active-classes="text-primary-container font-semibold"><div class="h-16 px-gutter flex items-center justify-between"><a class="flex flex-col items-center justify-center min-w-[56px] h-11 text-on-surface-variant hover:text-on-surface transition-colors" data-path="market-leaders" href="#"><span class="material-symbols-outlined text-[22px]">candlestick_chart</span><span class="font-body-sm text-body-sm mt-0.5 tracking-tight scale-90">行情</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[56px] h-11 transition-colors text-primary-container font-semibold" data-path="positions-monitor" href="#"><span class="material-symbols-outlined text-[22px]">stacked_line_chart</span><span class="font-body-sm text-body-sm mt-0.5 tracking-tight scale-90">持仓</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-11 text-on-surface-variant hover:text-on-surface transition-colors relative" data-path="signals-radar" href="#"><span class="relative flex items-center justify-center"><span class="material-symbols-outlined text-[22px]">radar</span><span class="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full bg-secondary shadow-[0_0_6px_#d0bcff]"></span></span><span class="font-body-sm text-body-sm mt-0.5 tracking-tight scale-90">雷达</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-11 text-on-surface-variant hover:text-on-surface transition-colors" data-path="instant-terminal" href="#"><div class="w-9 h-7 rounded bg-primary-container/15 flex items-center justify-center text-primary-container shadow-[0_0_10px_rgba(0,229,255,0.25)]"><span class="material-symbols-outlined text-[20px]">bolt</span></div><span class="font-body-sm text-body-sm mt-0.5 tracking-tight scale-90">闪电单</span></a><a class="flex flex-col items-center justify-center min-w-[56px] h-11 text-on-surface-variant hover:text-on-surface transition-colors" data-path="portfolio-ops" href="#"><span class="material-symbols-outlined text-[22px]">tune</span><span class="font-body-sm text-body-sm mt-0.5 tracking-tight scale-90">管理</span></a></div></nav></body></html>

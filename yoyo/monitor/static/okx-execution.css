@@ -1,0 +1,40 @@
+.okx-live {border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:24px;margin-bottom:30px;min-width:0;color:var(--text)}
+.okx-live[hidden] {display:none}
+.okx-live [data-okx-part][hidden] {display:none!important}
+.okx-heading {display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+.okx-heading h2 {font-size:24px;line-height:1.3;letter-spacing:-.5px;margin:6px 0 0}
+.okx-eyebrow {color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1.6px;display:flex;align-items:center;gap:10px}
+.okx-eyebrow span {border:1px solid var(--line);border-radius:4px;font-size:10px;padding:2px 5px;letter-spacing:0}
+.okx-live button {background:var(--surface-2);border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 12px;cursor:pointer;font:inherit;font-size:12px;white-space:nowrap}
+.okx-live button:disabled {opacity:.55;cursor:wait}
+.okx-live button:focus-visible,.okx-table-scroll:focus-visible {outline:2px solid var(--mint);outline-offset:3px}
+.okx-status {display:flex;align-items:center;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-bottom:16px}
+.okx-status small {margin-left:auto;font-size:11px;color:var(--dim)}
+.okx-badge {display:inline-flex;align-items:center;gap:6px;border-radius:6px;padding:5px 8px;background:var(--surface-2);font-weight:600}
+.okx-badge:before {content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.okx-badge.good {color:var(--positive-text,var(--mint));background:var(--mint-soft)}
+.okx-badge.warn {color:var(--warning-text,var(--amber))}
+.okx-notice {border-left:2px solid var(--amber);border-radius:0 6px 6px 0;padding:10px 13px;background:var(--surface-2);font-size:12px;line-height:1.8;margin:0 0 16px;color:var(--text)}
+.okx-metrics {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.okx-metrics article {background:var(--surface-2);border:1px solid var(--line-soft);border-radius:10px;padding:15px 16px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.okx-metrics article>span {font-size:11px;color:var(--muted)}
+.okx-metrics strong {font-size:27px;font-weight:600;letter-spacing:-.6px;line-height:1.15;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.okx-metrics small {font-size:10px;color:var(--dim);line-height:1.6}
+.okx-metrics.is-stale strong {opacity:.65}
+.okx-positive {color:var(--positive-text,var(--mint))}
+.okx-negative {color:var(--negative-text,var(--red))}
+.okx-config {display:flex;flex-wrap:wrap;gap:9px 20px;padding:16px 0 0;font-size:11px;color:var(--muted);line-height:1.7}
+.okx-config b {color:var(--text);font-weight:600}
+.okx-footnote {font-size:10px;line-height:1.8;color:var(--dim);margin:9px 0 0}
+.okx-tabs {display:flex;gap:20px;border-bottom:1px solid var(--line);margin-top:20px}
+.okx-tabs button {border:0;border-radius:0;background:transparent;padding:10px 0;color:var(--muted);border-bottom:2px solid transparent}
+.okx-tabs button[aria-selected=true] {border-bottom-color:var(--mint);color:var(--text);font-weight:600}
+.okx-empty {padding:22px 0;margin:0;color:var(--dim);font-size:12px;line-height:1.8}
+.okx-table-scroll {overflow-x:auto;width:100%;margin-top:8px;overscroll-behavior-x:contain}
+.okx-live table {width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;text-align:left}
+.okx-live th {font-weight:500;color:var(--dim);font-size:10px;padding:10px 14px 10px 0;border-bottom:1px solid var(--line-soft)}
+.okx-live td {padding:12px 14px 12px 0;border-bottom:1px solid var(--line-soft);font-variant-numeric:tabular-nums}
+.okx-live td small {display:block;font-size:10px;color:var(--dim);margin-top:5px}
+.okx-separation {border-top:1px solid var(--line-soft);padding-top:12px;margin:0;color:var(--dim);font-size:10px;line-height:1.8}
+@media(max-width:1023px) {.okx-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}.okx-status small {width:100%;margin:0}}
+@media(max-width:650px) {.okx-live {padding:16px;margin-bottom:24px}.okx-heading h2 {font-size:22px}.okx-metrics {gap:8px}.okx-metrics article {padding:12px 10px}.okx-metrics strong {font-size:23px}.okx-config {gap:7px 14px}.okx-tabs {gap:17px}.okx-tabs button {font-size:11px}.okx-heading button {font-size:11px;padding:8px 10px}}

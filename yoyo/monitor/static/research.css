@@ -1,5 +1,7 @@
 /* Reuse the signal center's semantic palette across the research workflow. */
 .research-panel { min-width:0; }
+.research-table {scroll-margin-top:80px}
+.research-loading {margin-bottom:16px;padding:12px 16px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:13px;line-height:1.6}
 .research-objective { padding:24px 26px; border:1px solid var(--line); border-radius:12px; background:linear-gradient(120deg,var(--mint-soft),var(--surface)); }
 .research-kicker { color:var(--mint); font-size:12px; letter-spacing:.1em; }
 .research-objective h2 { margin:9px 0; font-size:24px; font-weight:600; }
@@ -28,3 +30,23 @@
 .research-factor-project,.research-factor-claim { display:block; margin-top:5px; font-size:11px; line-height:1.5; }.research-factor-project { color:var(--dim); }.research-factor-claim { color:var(--amber); white-space:normal; }
 .research-factor-claim-banner { display:grid; gap:5px; padding:13px 16px; border:1px solid var(--line); border-radius:8px; background:var(--warning-bg); color:var(--text); font-size:13px; line-height:1.7; }.research-factor-claim-banner strong { color:var(--amber); }.research-factor-claim-banner span { color:var(--muted); }
 .research-factor-section { padding:16px 0; border-bottom:1px solid var(--line-soft); }.research-factor-section:last-of-type { border-bottom:0; }.research-factor-section h3 { margin:0 0 10px; font-size:15px; }.research-factor-section p { margin:8px 0; color:var(--muted); font-size:13px; line-height:1.8; overflow-wrap:anywhere; }.research-factor-section .research-facts { margin:10px 0 0; }.research-factor-section a { color:var(--mint); }.research-factor-inputs { margin:0; padding-left:20px; }.research-factor-inputs li { margin:3px 0; }.research-factor-formula { margin:0; padding:14px 16px; border-radius:7px; background:var(--surface-2); color:var(--text); white-space:pre-wrap; overflow-wrap:anywhere; font:12px/1.7 ui-monospace,SFMono-Regular,monospace; }
+
+/* Questions lead; technical identifiers and prose remain in evidence details. */
+#experiments-view .experiment-table {min-width:0;table-layout:fixed;width:100%}
+#experiments-view .experiment-table th:first-child {width:44px}
+#experiments-view .experiment-table th:nth-child(3) {width:100px}
+#experiments-view .experiment-table th:nth-child(4) {width:65px}
+#experiments-view .experiment-table th:last-child {width:80px}
+#experiments-view .experiment-table td {padding:13px 12px;vertical-align:middle}
+#experiments-view .experiment-table .research-text-button {text-align:left;line-height:1.65;font-weight:550;overflow-wrap:anywhere}
+.experiment-pagination {display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--muted);padding:16px 0}
+.experiment-pagination>div {display:flex;gap:8px}
+@media(max-width:600px){
+  .research-toolbar>div {width:100%;min-width:0}
+  .research-toolbar input[type=search] {flex:1 1 100%;width:100%;min-width:0;font-size:16px}
+  .research-toolbar select {min-height:44px}
+  .research-toolbar .research-button {min-height:44px}
+  #research-dialog :is(input,select,textarea) {font-size:16px}
+  .experiment-pagination {flex-wrap:wrap}
+}
+@media(max-width:600px){#experiments-view .experiment-table th:first-child{width:28px}#experiments-view .experiment-table th:nth-child(3){width:94px}#experiments-view .experiment-table th:last-child,#experiments-view .experiment-table td:last-child{display:none}#experiments-view .experiment-table td{padding:11px 5px}#experiments-view .experiment-evidence-count{display:none}#experiments-view .experiment-table td:nth-child(4){display:none}#experiments-view .research-text-button{font-size:12px}#experiments-view .experiment-table .research-button{padding:5px;font-size:11px;min-width:0}.experiment-pagination{font-size:11px}.experiment-pagination .research-button{padding:6px 8px}#experiment-search{font-size:16px}}

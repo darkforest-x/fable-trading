@@ -137,9 +137,10 @@ def test_worker_rebuild_has_h1_input_and_no_historical_push(tmp_path, monkeypatc
     calls = []
 
     class Client:
+        def __init__(self, **kwargs): pass
         def synchronize(self): pass
         def clock(self): return clock[0]
-        def instruments(self): return [{"instId": "NEIRO-USDT-SWAP", "tickSz": ".00000001", "uly": "NEIRO-USDT"}]
+        def instruments(self): return [{"instId": "NEIRO-USDT-SWAP", "tickSz": ".00000001", "uly": "NEIRO-USDT", "instType": "SWAP", "state": "live", "ctType": "linear", "settleCcy": "USDT"}]
         def candles(self, symbol, timeframe, previous=None, limit=720):
             step = TIMEFRAMES[timeframe]
             end = clock[0] // step * step

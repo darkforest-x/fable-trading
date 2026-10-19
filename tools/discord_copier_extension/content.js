@@ -7,6 +7,31 @@ const VISIBLE_RECENT_SCAN_MS = 5000;
 const VISIBLE_RECENT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 const VISIBLE_RECENT_MAX_MESSAGES = 40;
 const seenIds = new Set();
+const inFlightIds = new Set();
+const FOCUS_GUILD = "1004707886657699901";
+const FOCUS_CHANNEL = "1131521990814089276";
+function captureKey(payload) {
+  return JSON.stringify([payload.external_id, payload.content, payload.attachments.map(a => a.url.split("?")[0]).sort()]);
+}
+async function submitPayload(payload) {
+  const key = captureKey(payload);
+  if (inFlightIds.has(key)) return;
+  inFlightIds.add(key);
+  try {
+    const response = await chrome.runtime.sendMessage({type:"DISCORD_OKX_MESSAGE", payload});
+    if (response?.ok) seenIds.add(key);
+    else seenIds.delete(key);
+  } catch { seenIds.delete(key); }
+  finally { inFlightIds.delete(key); }
+}
+async function sendHeartbeat() {
+  if (getGuildId() !== FOCUS_GUILD || getChannelId() !== FOCUS_CHANNEL) return;
+  const messages = findMessageElements(document);
+  const latest = messages.length ? getMessageId(messages[messages.length-1]) : "";
+  const older = /viewing older messages|正在查看较早|正在查看旧消息/i.test(document.body.innerText);
+  try { await chrome.runtime.sendMessage({type:"DISCORD_OKX_HEARTBEAT",payload:{guild_id:FOCUS_GUILD,
+    channel_id:FOCUS_CHANNEL,latest_message_id:latest,version:chrome.runtime.getManifest().version,at_latest:!older}}); } catch {}
+}
 
 let ready = false;
 let observer = null;
@@ -20,6 +45,8 @@ function init() {
     ready = true;
   }, 1200);
   setInterval(scanRecentVisibleMessages, VISIBLE_RECENT_SCAN_MS);
+  setInterval(sendHeartbeat, 30000);
+  setTimeout(sendHeartbeat, 5000);
 
   observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
@@ -59,70 +86,33 @@ function init() {
 }
 
 async function captureStartupBacklog() {
-  const payloads = findMessageElements(document)
-    .map(extractMessage)
-    .filter((payload) => payload?.content)
-    .slice(-RECOVERY_MAX_MESSAGES);
-
-  for (const payload of payloads) {
-    seenIds.add(payload.external_id);
-    await chrome.runtime.sendMessage({
-      type: "DISCORD_OKX_MESSAGE",
-      payload: { ...payload, recovery_capture: true },
-    });
-  }
+  const payloads = findMessageElements(document).map(extractMessage).filter(p=>p?.content).slice(-RECOVERY_MAX_MESSAGES);
+  for (const payload of payloads) await submitPayload({...payload,recovery_capture:true});
 }
-
 function markExistingMessages() {
   for (const element of findMessageElements(document)) {
-    const payload = extractMessage(element);
-    if (payload?.external_id) {
-      seenIds.add(payload.external_id);
-    }
+    const payload=extractMessage(element);
+    if(payload) seenIds.add(captureKey(payload));
   }
 }
-
-function scanNode(node) {
-  if (!(node instanceof Element)) return;
-  const candidates = findMessageElements(node);
-  if (isMessageElement(node)) {
-    candidates.unshift(node);
-  }
-
-  for (const element of candidates) {
-    const payload = extractMessage(element);
-    if (!payload || seenIds.has(payload.external_id)) continue;
-    seenIds.add(payload.external_id);
-
-    if (!ready) continue;
-    if (payload.created_at_ms && payload.created_at_ms < STARTED_AT - START_GRACE_MS) {
-      continue;
-    }
-
-    chrome.runtime.sendMessage(
-      { type: "DISCORD_OKX_MESSAGE", payload },
-      () => void chrome.runtime.lastError
-    );
+async function scanNode(node) {
+  if (!(node instanceof Element) || !ready) return;
+  const candidates=findMessageElements(node);
+  if(isMessageElement(node)) candidates.unshift(node);
+  for(const element of candidates){
+    const payload=extractMessage(element);
+    if(!payload || seenIds.has(captureKey(payload)))continue;
+    const recovery = !payload.created_at_ms || payload.created_at_ms < STARTED_AT-START_GRACE_MS;
+    await submitPayload({...payload,recovery_capture:recovery});
   }
 }
-
 async function scanRecentVisibleMessages() {
-  if (!ready) return;
-
-  const payloads = findMessageElements(document)
-    .map(extractMessage)
-    .filter((payload) => payload?.content)
-    .slice(-VISIBLE_RECENT_MAX_MESSAGES);
-
-  for (const payload of payloads) {
-    if (seenIds.has(payload.external_id)) continue;
-    if (!isRecentVisiblePayload(payload)) continue;
-
-    seenIds.add(payload.external_id);
-    await chrome.runtime.sendMessage(
-      { type: "DISCORD_OKX_MESSAGE", payload: { ...payload, visible_recent_scan: true } },
-      () => void chrome.runtime.lastError
-    );
+  if(!ready)return;
+  const payloads=findMessageElements(document).map(extractMessage).filter(p=>p?.content).slice(-VISIBLE_RECENT_MAX_MESSAGES);
+  for(const payload of payloads){
+    if(seenIds.has(captureKey(payload)) || !isRecentVisiblePayload(payload))continue;
+    // The server checks age again. Startup/manual recovery never executes.
+    await submitPayload({...payload,visible_recent_scan:true});
   }
 }
 
@@ -140,7 +130,7 @@ async function captureLatestVisibleSignal() {
       state: getPageState(),
     };
   }
-  seenIds.add(payload.external_id);
+  seenIds.add(captureKey(payload));
   return await chrome.runtime.sendMessage({
     type: "DISCORD_OKX_MESSAGE",
     payload: { ...payload, manual_capture: true },
@@ -159,7 +149,7 @@ async function captureVisibleSignals() {
 
   const results = [];
   for (const payload of payloads) {
-    seenIds.add(payload.external_id);
+    seenIds.add(captureKey(payload));
     const result = await chrome.runtime.sendMessage({
       type: "DISCORD_OKX_MESSAGE",
       payload: { ...payload, manual_capture: true },
@@ -319,6 +309,7 @@ function extractMessage(element) {
   // Only server channels. Direct messages (/channels/@me/...) are never read or sent.
   const guildId = getGuildId();
   if (!guildId) return null;
+  if (guildId !== FOCUS_GUILD || getChannelId() !== FOCUS_CHANNEL) return null;
   const messageId = getMessageId(element);
   if (!messageId) return null;
 
@@ -386,6 +377,9 @@ function getAuthor(element) {
 }
 
 function getMessageContent(element) {
+  const id = getMessageId(element);
+  const own = element.querySelector(`[id="message-content-${id}"]`);
+  if (own) return cleanText(own.textContent || "");
   const contentElements = Array.from(
     element.querySelectorAll(
       [

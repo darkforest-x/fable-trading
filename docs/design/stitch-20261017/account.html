@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"inverse-surface":"#dfe2ef","tertiary-fixed":"#ffddb8","outline-variant":"#3b494c","surface-bright":"#353943","on-secondary":"#3c0091","primary-container":"#00e5ff","on-secondary-fixed":"#23005c","on-tertiary-fixed-variant":"#653e00","tertiary-container":"#ffc681","error":"#ffb4ab","surface-container-lowest":"#0a0e17","on-background":"#dfe2ef","on-primary-fixed-variant":"#004f58","background":"#0f131c","secondary-fixed":"#e9ddff","on-surface-variant":"#bac9cc","primary-fixed-dim":"#00daf3","on-tertiary":"#472a00","inverse-primary":"#006875","tertiary":"#ffe9d3","on-error":"#690005","on-primary":"#00363d","secondary-container":"#571bc1","surface-tint":"#00daf3","on-tertiary-container":"#7e4e00","on-tertiary-fixed":"#2a1700","surface-container":"#1c2029","on-surface":"#dfe2ef","on-primary-fixed":"#001f24","surface-container-highest":"#31353f","surface":"#0f131c","on-primary-container":"#00626e","primary-fixed":"#9cf0ff","secondary":"#d0bcff","tertiary-fixed-dim":"#ffb95f","surface-container-low":"#181b25","on-secondary-container":"#c4abff","surface-container-high":"#262a34","secondary-fixed-dim":"#d0bcff","inverse-on-surface":"#2c303a","error-container":"#93000a","surface-variant":"#31353f","primary":"#c3f5ff","surface-dim":"#0f131c","outline":"#849396","on-secondary-fixed-variant":"#5516be","on-error-container":"#ffdad6"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"space-md":"0.5rem","space-xl":"1rem","space-xs":"0.125rem","space-sm":"0.25rem",gutter:"0.5rem",margin:"0.75rem","space-lg":"0.75rem"},fontFamily:{"code-snippet":["JetBrains Mono"],"headline-md":["Inter"],"label-numeric-lg":["JetBrains Mono"],"label-numeric-sm":["JetBrains Mono"],"headline-xl":["Inter"],"body-sm":["Inter"],"headline-lg":["Inter"],"label-numeric-md":["JetBrains Mono"],"body-lg":["Inter"],"body-md":["Inter"]},fontSize:{"code-snippet":["0.75rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.015em",fontWeight:"600"}],"label-numeric-lg":["1.125rem",{lineHeight:"1.5rem",letterSpacing:"-0.01em",fontWeight:"600"}],"label-numeric-sm":["0.6875rem",{lineHeight:"0.875rem",letterSpacing:"0.02em",fontWeight:"400"}],"headline-xl":["2rem",{lineHeight:"2.5rem",letterSpacing:"-0.025em",fontWeight:"700"}],"body-sm":["0.75rem",{lineHeight:"1rem",letterSpacing:"0.01em",fontWeight:"400"}],"headline-lg":["1.5rem",{lineHeight:"2rem",letterSpacing:"-0.02em",fontWeight:"600"}],"label-numeric-md":["0.8125rem",{lineHeight:"1.125rem",letterSpacing:"0em",fontWeight:"500"}],"body-lg":["0.9375rem",{lineHeight:"1.375rem",letterSpacing:"-0.01em",fontWeight:"400"}],"body-md":["0.8125rem",{lineHeight:"1.25rem",letterSpacing:"0em",fontWeight:"400"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-14 bg-surface-container-lowest z-50 flex flex-col items-center justify-between py-space-md shadow-[0_1px_8px_rgba(0,0,0,0.35)]"><div class="flex flex-col items-center gap-space-lg"><div class="w-9 h-9 rounded bg-surface-container-high flex items-center justify-center text-primary-container"><span class="material-symbols-outlined text-[20px]">bolt</span></div><nav class="flex flex-col items-center gap-space-sm" data-active-classes="bg-primary-container text-on-primary-container font-bold rounded"><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#" title="市场观察"><span class="material-symbols-outlined text-[19px]">candlestick_chart</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#" title="均线密集检测"><span class="material-symbols-outlined text-[19px]">grain</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#" title="信号中心"><span class="material-symbols-outlined text-[19px]">sensors</span></a><a aria-current="page" class="w-9 h-9 flex items-center justify-center transition-colors bg-primary-container text-on-primary-container font-bold rounded" data-path="trading-accounts" href="#" title="交易与账户"><span class="material-symbols-outlined text-[19px]">account_balance_wallet</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="research-workspace" href="#" title="研究工作区"><span class="material-symbols-outlined text-[19px]">terminal</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#" title="知识与复盘"><span class="material-symbols-outlined text-[19px]">history_edu</span></a><a class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="system-telemetry" href="#" title="系统与运行"><span class="material-symbols-outlined text-[19px]">settings_input_component</span></a></nav></div><div class="flex flex-col items-center gap-space-sm"><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="API连接状态" type="button"><span class="material-symbols-outlined text-[19px]">lan</span></button><button class="w-9 h-9 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" title="系统设置" type="button"><span class="material-symbols-outlined text-[19px]">tune</span></button></div></aside><div class="pl-14"><header class="fixed top-0 left-14 right-0 h-12 bg-surface-container-low/95 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.25)]"><div class="h-12 w-full px-space-xl flex items-center justify-between"><div class="flex items-center gap-space-xl"><div class="flex items-center gap-space-sm select-none"><span class="font-headline-md text-headline-md tracking-tight font-bold text-primary">SPIKE</span><span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-space-xs rounded bg-surface-container text-primary-container uppercase font-semibold">TERMINAL</span></div><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container-high text-primary-container font-semibold rounded"><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="market-watch" href="#">市场观察</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="ma-density-scanner" href="#">均线密集检测</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="signal-hub" href="#">信号中心</a><a aria-current="page" class="px-space-md py-space-sm transition-colors bg-surface-container-high text-primary-container font-semibold rounded" data-path="trading-accounts" href="#">交易与账户</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="research-workspace" href="#">研究工作区</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="knowledge-replay" href="#">知识与复盘</a><a class="font-body-sm text-body-sm px-space-md py-space-sm text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="system-telemetry" href="#">系统与运行</a></nav></div><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-lowest"><span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span><span class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant uppercase">HEARTBEAT</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary font-semibold">120ms</span></div><button class="flex items-center gap-space-xs h-7 px-space-md rounded bg-surface-container-high text-primary hover:bg-primary-container hover:text-on-primary-container transition-all" type="button"><span class="material-symbols-outlined text-[15px]">flash_on</span><span class="font-body-sm text-body-sm font-semibold">快捷开单</span></button><button class="w-8 h-8 rounded bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors relative" title="系统告警与消息" type="button"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-secondary"></span></button><div class="flex items-center gap-space-sm pl-space-md py-space-xs rounded bg-surface-container"><div class="flex flex-col text-right"><span class="font-body-sm text-body-sm text-on-surface font-medium leading-none">Quant Trader #01</span><span class="font-label-numeric-sm text-label-numeric-sm text-primary leading-none">ALPHA-PROP</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><main class="w-full pt-12 bg-surface"><div class="flex flex-col w-full text-on-surface">
+<!-- Top Environment Bar & Metric Overview -->
+<div class="px-space-xl py-space-md bg-surface-container-low flex flex-col gap-space-md">
+<!-- Sub-navigation & Account Status Switcher -->
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest p-space-xs rounded">
+<button class="flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-high text-primary font-body-sm font-semibold transition-all" id="tab-btn-live" onclick="switchEnv('live')">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-ping"></span>
+<span>实盘主账户 (Binance VIP 5 DMA)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container text-on-surface-variant font-normal">#8841-A</span>
+</button>
+<button class="flex items-center gap-space-sm px-space-md py-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-body-sm transition-all" id="tab-btn-sub" onclick="switchEnv('sub')">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span>子账户 (Sub-08 Algo)</span>
+</button>
+<button class="flex items-center gap-space-sm px-space-md py-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-body-sm transition-all" id="tab-btn-paper" onclick="switchEnv('paper')">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span>模拟沙盒 (Paper Sandbox)</span>
+</button>
+<button class="flex items-center gap-space-sm px-space-md py-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-body-sm transition-all" id="tab-btn-copy" onclick="switchEnv('copy')">
+<span class="material-symbols-outlined text-[15px] text-tertiary-fixed-dim">group</span>
+<span>跟单网络 (Master Engine)</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container text-tertiary-fixed font-semibold">28 FOLLOWERS</span>
+</button>
+</div>
+<!-- Quick Action Utility & Sandbox Reset -->
+<div class="flex items-center gap-space-sm">
+<div class="hidden items-center gap-space-xs px-space-md py-space-xs rounded bg-surface-container-highest text-secondary-fixed cursor-pointer hover:bg-surface-bright transition-all" id="paper-reset-btn" onclick="resetSandbox()">
+<span class="material-symbols-outlined text-[15px]">restart_alt</span>
+<span class="font-body-sm text-body-sm font-medium">重置 $100K 虚拟金</span>
+</div>
+<div class="flex items-center gap-space-xs px-space-md py-space-xs rounded bg-surface-container-lowest">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline uppercase">EXEC REST LINK</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-bold">1.4ms</span>
+</div>
+<button class="flex items-center gap-space-xs px-space-md py-space-xs rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-body-sm transition-all">
+<span class="material-symbols-outlined text-[16px]">file_download</span>
+<span>报表导出</span>
+</button>
+</div>
+</div>
+<!-- KPI Matrix Cards (High Density Telemetry) -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-gutter">
+<!-- 1. Total Net Equity -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">账户净值 (NAV)</span>
+<span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+</div>
+<div class="mt-space-sm">
+<div class="font-label-numeric-lg text-label-numeric-lg text-primary tracking-tight font-bold">$142,850.00</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>初始入金:</span>
+<span class="text-on-surface font-semibold">$100,000.00</span>
+</div>
+</div>
+</div>
+<!-- 2. Unrealized PnL -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">当前浮动盈亏</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container-lowest text-primary font-bold">+6.25%</span>
+</div>
+<div class="mt-space-sm">
+<div class="font-label-numeric-lg text-label-numeric-lg text-primary-container font-bold">+$8,940.00</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>4 持仓单全浮盈</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+</div>
+</div>
+</div>
+<!-- 3. Realized Today -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">今日已实现盈亏</span>
+<span class="material-symbols-outlined text-[16px] text-primary-fixed-dim">trending_up</span>
+</div>
+<div class="mt-space-sm">
+<div class="font-label-numeric-lg text-label-numeric-lg text-primary font-bold">+$3,420.50</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-label-numeric-sm text-label-numeric-sm text-outline">
+<span>胜率: 87.5% (7/8)</span>
+</div>
+</div>
+</div>
+<!-- 4. Margin Occupation Gauge -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">保证金占用比</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-bold">62.0%</span>
+</div>
+<div class="mt-space-sm">
+<div class="w-full bg-surface-container-lowest h-2 rounded-full overflow-hidden flex">
+<div class="bg-primary-container h-full transition-all" style="width: 62%;"></div>
+</div>
+<div class="flex justify-between items-center mt-space-xs font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>已占用: $88,567</span>
+<span>可用: $54,283</span>
+</div>
+</div>
+</div>
+<!-- 5. Risk Safety Score -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">风控安全评级</span>
+<span class="material-symbols-outlined text-[16px] text-primary">verified_user</span>
+</div>
+<div class="mt-space-sm">
+<div class="flex items-baseline gap-space-xs">
+<span class="font-label-numeric-lg text-label-numeric-lg text-primary font-bold">98.4</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">/ 100</span>
+</div>
+<div class="mt-space-xs font-label-numeric-sm text-label-numeric-sm text-primary-container">
+            状态正常 · 强平距离 &gt; 42%
+          </div>
+</div>
+</div>
+<!-- 6. Master Share Profit Pool -->
+<div class="bg-surface-container p-space-md rounded flex flex-col justify-between shadow-sm">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm uppercase font-medium">跟单带单收益</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed-dim">paid</span>
+</div>
+<div class="mt-space-sm">
+<div class="font-label-numeric-lg text-label-numeric-lg text-tertiary-fixed font-bold">$12,600.00</div>
+<div class="flex items-center gap-space-xs mt-space-xs font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">
+<span>本月分成 (15% 提纯)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Multi-Panel Workspace -->
+<div class="p-space-xl flex flex-col gap-space-lg">
+<!-- Active Positions Section -->
+<div class="bg-surface-container-low rounded p-space-md shadow-md">
+<div class="flex flex-wrap items-center justify-between pb-space-sm gap-space-md">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">view_agenda</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">实盘深度持仓看板</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-sm py-space-xs rounded bg-surface-container-high text-primary font-semibold">4 ACTIVE</span>
+</div>
+<div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>杠杆模式: 全仓跨币种保证金</span>
+<span class="w-1 h-1 rounded-full bg-outline"></span>
+<span>自动减仓队列等级: 0 (极低)</span>
+</div>
+</div>
+<!-- Position Bar Actions -->
+<div class="flex items-center gap-space-sm">
+<button class="h-7 px-space-md rounded bg-surface-container text-on-surface hover:bg-surface-container-high font-body-sm text-body-sm flex items-center gap-space-xs transition-colors">
+<span class="material-symbols-outlined text-[15px]">alarm</span>
+<span>批量移动止损</span>
+</button>
+<button class="h-7 px-space-md rounded bg-error-container text-error hover:bg-error hover:text-on-error font-body-sm text-body-sm font-semibold flex items-center gap-space-xs transition-all" onclick="alert('触发全平指令: 正在以市价 IOC 挂单平仓所有多空敞口')">
+<span class="material-symbols-outlined text-[15px]">cancel</span>
+<span>一键全平 (Panic Close)</span>
+</button>
+</div>
+</div>
+<!-- Positions Table -->
+<div class="overflow-x-auto mt-space-xs">
+<table class="w-full text-left font-body-sm">
+<thead class="bg-surface-container-lowest text-on-surface-variant font-label-numeric-sm text-label-numeric-sm uppercase">
+<tr>
+<th class="py-space-sm px-space-md">标的 / 方向 / 杠杆</th>
+<th class="py-space-sm px-space-md">持仓总量 (名义价值)</th>
+<th class="py-space-sm px-space-md">开仓均价</th>
+<th class="py-space-sm px-space-md">标记现价</th>
+<th class="py-space-sm px-space-md">预估强平价</th>
+<th class="py-space-sm px-space-md">未实现盈亏 (ROE)</th>
+<th class="py-space-sm px-space-md">止盈 (TP) / 硬止损 (SL)</th>
+<th class="py-space-sm px-space-md text-right">执行干预操作</th>
+</tr>
+</thead>
+<tbody class="divide-y-0">
+<!-- Row 1: SUI/USDT -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center font-bold text-primary font-label-numeric-sm">
+                    SUI
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs font-label-numeric-md font-bold text-on-surface">
+<span>SUI/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container-lowest text-primary font-bold">做多 10x</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">永续合约 · 跨仓</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-semibold text-on-surface">15,000 SUI</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">≈ $49,260.00</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-on-surface">$3.0035</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-primary font-semibold">$3.2840</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-outline">$1.9210</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-bold text-primary-container">+$4,207.50</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-primary">+93.38% (ROE)</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="text-outline">TP:</span>
+<span class="font-semibold">$3.6500</span>
+</div>
+<div class="flex items-center gap-space-xs text-error">
+<span class="text-outline">SL:</span>
+<span class="font-semibold">$3.1800 (保本损)</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-primary font-label-numeric-sm transition-colors" title="修改止盈止损">
+                    TP/SL
+                  </button>
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-secondary-fixed font-label-numeric-sm transition-colors" title="反向开仓">
+                    反手
+                  </button>
+<button class="px-space-md h-6 rounded bg-error text-on-error font-label-numeric-sm font-semibold hover:bg-opacity-90 transition-all" onclick="alert('已发送 SUI 闪电市价平仓委托')">
+                    闪电平仓
+                  </button>
+</div>
+</td>
+</tr>
+<!-- Row 2: SOL/USDT -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center font-bold text-secondary font-label-numeric-sm">
+                    SOL
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs font-label-numeric-md font-bold text-on-surface">
+<span>SOL/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container-lowest text-primary font-bold">做多 10x</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">永续合约 · 跨仓</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-semibold text-on-surface">800 SOL</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">≈ $139,664.00</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-on-surface">$171.20</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-primary font-semibold">$174.58</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-outline">$124.80</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-bold text-primary-container">+$2,704.00</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-primary">+19.74% (ROE)</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="text-outline">TP:</span>
+<span class="font-semibold">$188.00</span>
+</div>
+<div class="flex items-center gap-space-xs text-error">
+<span class="text-outline">SL:</span>
+<span class="font-semibold">$168.00</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-primary font-label-numeric-sm transition-colors">TP/SL</button>
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-secondary-fixed font-label-numeric-sm transition-colors">反手</button>
+<button class="px-space-md h-6 rounded bg-error text-on-error font-label-numeric-sm font-semibold hover:bg-opacity-90 transition-all" onclick="alert('已发送 SOL 闪电市价平仓委托')">闪电平仓</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: BTC/USDT -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center font-bold text-tertiary font-label-numeric-sm">
+                    BTC
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs font-label-numeric-md font-bold text-on-surface">
+<span>BTC/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container-lowest text-primary font-bold">做多 20x</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">永续合约 · 跨仓</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-semibold text-on-surface">2.50 BTC</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">≈ $223,550.00</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-on-surface">$88,610.00</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-primary font-semibold">$89,420.00</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-outline">$78,140.00</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-bold text-primary-container">+$2,025.00</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-primary">+18.28% (ROE)</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="text-outline">TP:</span>
+<span class="font-semibold">$94,500.00</span>
+</div>
+<div class="flex items-center gap-space-xs text-error">
+<span class="text-outline">SL:</span>
+<span class="font-semibold">$87,900.00</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-primary font-label-numeric-sm transition-colors">TP/SL</button>
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-secondary-fixed font-label-numeric-sm transition-colors">反手</button>
+<button class="px-space-md h-6 rounded bg-error text-on-error font-label-numeric-sm font-semibold hover:bg-opacity-90 transition-all" onclick="alert('已发送 BTC 闪电市价平仓委托')">闪电平仓</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: TAO/USDT (Short) -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-7 h-7 rounded bg-surface-container-highest flex items-center justify-center font-bold text-primary-container font-label-numeric-sm">
+                    TAO
+                  </div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs font-label-numeric-md font-bold text-on-surface">
+<span>TAO/USDT</span>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs rounded bg-surface-container-lowest text-secondary-fixed font-bold">做空 10x</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">永续合约 · 跨仓</span>
+</div>
+</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-semibold text-on-surface">60.00 TAO</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-on-surface-variant">≈ $30,732.00</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-on-surface">$545.20</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-primary font-semibold">$512.20</td>
+<td class="py-space-md px-space-md font-label-numeric-md text-outline">$620.00</td>
+<td class="py-space-md px-space-md font-label-numeric-md">
+<div class="font-bold text-primary-container">+$1,980.00</div>
+<div class="font-label-numeric-sm text-label-numeric-sm text-primary">+36.31% (ROE)</div>
+</td>
+<td class="py-space-md px-space-md font-label-numeric-sm">
+<div class="flex items-center gap-space-xs text-primary">
+<span class="text-outline">TP:</span>
+<span class="font-semibold">$480.00</span>
+</div>
+<div class="flex items-center gap-space-xs text-error">
+<span class="text-outline">SL:</span>
+<span class="font-semibold">$552.00</span>
+</div>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="flex items-center justify-end gap-space-xs">
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-primary font-label-numeric-sm transition-colors">TP/SL</button>
+<button class="px-space-sm h-6 rounded bg-surface-container-lowest text-on-surface hover:text-secondary-fixed font-label-numeric-sm transition-colors">反手</button>
+<button class="px-space-md h-6 rounded bg-error text-on-error font-label-numeric-sm font-semibold hover:bg-opacity-90 transition-all" onclick="alert('已发送 TAO 闪电市价平仓委托')">闪电平仓</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Dual Split View: Order History (Left 8-cols) & Copy Master Controls (Right 4-cols) -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+<!-- Order History & Fill Logs Module (8 Columns) -->
+<div class="xl:col-span-8 bg-surface-container-low rounded p-space-md shadow-md flex flex-col gap-space-md">
+<div class="flex flex-wrap items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[18px] text-primary">history</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">历史订单与撮合明细穿透</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">MATCHING &amp; SLIPPAGE AUDIT</span>
+</div>
+<!-- Multi-faceted Filter Bar -->
+<div class="flex flex-wrap items-center gap-space-xs">
+<!-- Symbol Filter -->
+<select class="h-7 px-space-sm bg-surface-container-lowest text-on-surface rounded font-label-numeric-sm text-label-numeric-sm outline-none">
+<option>全部交易对 (All Symbols)</option>
+<option>SUI/USDT</option>
+<option>SOL/USDT</option>
+<option>BTC/USDT</option>
+<option>TAO/USDT</option>
+</select>
+<!-- Order Type Filter -->
+<select class="h-7 px-space-sm bg-surface-container-lowest text-on-surface rounded font-label-numeric-sm text-label-numeric-sm outline-none">
+<option>全部类型 (All Types)</option>
+<option>限价委托 (Limit)</option>
+<option>市价委托 (Market)</option>
+<option>条件单 (Trigger)</option>
+<option>冰山委托 (Iceberg)</option>
+<option>TWAP 算法执行</option>
+</select>
+<!-- Status Filter -->
+<select class="h-7 px-space-sm bg-surface-container-lowest text-on-surface rounded font-label-numeric-sm text-label-numeric-sm outline-none">
+<option>执行状态: 全部</option>
+<option>全部成交 (Filled)</option>
+<option>部分成交 (Partial)</option>
+<option>已撤销 (Canceled)</option>
+<option>风控拦截 (Risk Rejected)</option>
+</select>
+<button class="h-7 px-space-sm bg-surface-container text-primary rounded font-label-numeric-sm flex items-center gap-space-xs hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[14px]">filter_alt</span>
+<span>重置</span>
+</button>
+</div>
+</div>
+<!-- Orders Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm">
+<thead class="bg-surface-container-lowest text-on-surface-variant font-label-numeric-sm text-label-numeric-sm uppercase">
+<tr>
+<th class="py-space-sm px-space-md">委托时间 / 订单ID</th>
+<th class="py-space-sm px-space-md">标的 &amp; 方向</th>
+<th class="py-space-sm px-space-md">类型</th>
+<th class="py-space-sm px-space-md">委托价 / 成交均价</th>
+<th class="py-space-sm px-space-md">成交量 / 状态</th>
+<th class="py-space-sm px-space-md">滑点 (Slippage)</th>
+<th class="py-space-sm px-space-md">手续费 / 返佣</th>
+<th class="py-space-sm px-space-md text-right">已实现盈亏</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 font-label-numeric-sm">
+<!-- Order 1: SUI TWAP buy -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">14:28:10.421</div>
+<div class="text-outline text-[10px]">#ORD-99824-A1</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="font-bold text-on-surface">SUI/USDT</span>
+<span class="px-space-xs rounded bg-surface-container-lowest text-primary font-bold">买入做多</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-on-surface">TWAP 算法</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface-variant">$3.0030</div>
+<div class="text-primary font-semibold">$3.0035</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">15,000 / 15,000</div>
+<span class="text-primary font-medium">全部成交</span>
+</td>
+<td class="py-space-sm px-space-md text-primary">
+                  +1.6 bp
+                </td>
+<td class="py-space-sm px-space-md">
+<div class="text-primary font-medium">-0.01% (返佣)</div>
+<div class="text-outline">+$4.50</div>
+</td>
+<td class="py-space-sm px-space-md text-right font-label-numeric-md text-outline">
+                  --
+                </td>
+</tr>
+<!-- Order 2: SOL Limit sell -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">13:45:02.109</div>
+<div class="text-outline text-[10px]">#ORD-99750-X2</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="font-bold text-on-surface">SOL/USDT</span>
+<span class="px-space-xs rounded bg-surface-container-lowest text-secondary-fixed font-bold">平多止盈</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-on-surface">限价委托 (Maker)</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface-variant">$176.00</div>
+<div class="text-on-surface font-semibold">$176.00</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">400 / 400</div>
+<span class="text-primary font-medium">全部成交</span>
+</td>
+<td class="py-space-sm px-space-md text-primary">
+                  0.0 bp (零滑点)
+                </td>
+<td class="py-space-sm px-space-md">
+<div class="text-primary font-medium">-0.01%</div>
+<div class="text-outline">+$7.04</div>
+</td>
+<td class="py-space-sm px-space-md text-right font-label-numeric-md text-primary font-bold">
+                  +$1,920.00
+                </td>
+</tr>
+<!-- Order 3: ETH Risk Interception -->
+<tr class="bg-surface-container hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">11:15:33.882</div>
+<div class="text-outline text-[10px]">#ORD-99511-RJ</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="font-bold text-on-surface">ETH/USDT</span>
+<span class="px-space-xs rounded bg-surface-container-lowest text-error font-bold">市价强开</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-on-surface">市价委托</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface-variant">$3,410.00</div>
+<div class="text-outline">未成交</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-outline">0 / 50.0</div>
+<span class="text-error font-semibold">风控拦截 (Risk Block)</span>
+</td>
+<td class="py-space-sm px-space-md text-outline">
+                  --
+                </td>
+<td class="py-space-sm px-space-md text-outline">
+                  $0.00
+                </td>
+<td class="py-space-sm px-space-md text-right font-label-numeric-md text-outline">
+                  $0.00
+                </td>
+</tr>
+<!-- Order 4: NEAR Iceberg executed -->
+<tr class="bg-surface-container-low hover:bg-surface-container-high transition-colors">
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">09:12:44.004</div>
+<div class="text-outline text-[10px]">#ORD-99201-IC</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="font-bold text-on-surface">NEAR/USDT</span>
+<span class="px-space-xs rounded bg-surface-container-lowest text-secondary-fixed font-bold">买入做多</span>
+</div>
+</td>
+<td class="py-space-sm px-space-md">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-highest text-on-surface">冰山委托 (Iceberg)</span>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface-variant">$5.820</div>
+<div class="text-on-surface font-semibold">$5.822</div>
+</td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface font-semibold">8,000 / 8,000</div>
+<span class="text-primary font-medium">全部成交</span>
+</td>
+<td class="py-space-sm px-space-md text-tertiary-fixed">
+                  +3.4 bp
+                </td>
+<td class="py-space-sm px-space-md">
+<div class="text-on-surface-variant">0.02% (Taker)</div>
+<div class="text-outline">-$9.31</div>
+</td>
+<td class="py-space-sm px-space-md text-right font-label-numeric-md text-primary font-bold">
+                  +$1,500.50
+                </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Copy Master Network & Isolation Engine (4 Columns) -->
+<div class="xl:col-span-4 flex flex-col gap-space-md">
+<!-- Master Strategy Panel -->
+<div class="bg-surface-container-low rounded p-space-md shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary-fixed-dim">verified</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">跟单大师管理看板</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm px-space-xs py-space-xs rounded bg-primary-container text-on-primary-container font-bold uppercase">MASTER ACTIVE</span>
+</div>
+<!-- Strategy Performance Strip -->
+<div class="p-space-md rounded bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">当前主理策略: MA密集收缩突破 Alpha-01</span>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-bold">分润: 15%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              针对跨周期均线聚合形态自动化入场，严控下行破位，专为高夏普比率跟单者设计。
+            </p>
+<div class="grid grid-cols-3 gap-gutter pt-space-xs mt-space-xs border-t border-outline-variant/30">
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">追随者</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-on-surface">28 位</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">总托管资金 (AUM)</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-primary">$840,000</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-numeric-sm text-label-numeric-sm text-outline">本月主理分润</span>
+<span class="font-label-numeric-md text-label-numeric-md font-bold text-tertiary-fixed">$12,600</span>
+</div>
+</div>
+</div>
+<!-- Followers Quick Audit -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between text-on-surface-variant font-label-numeric-sm text-label-numeric-sm uppercase">
+<span>重点追随账户 (Top Followers)</span>
+<span>跟单本金 / 30D收益</span>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container font-label-numeric-sm hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="text-on-surface font-semibold">User-7782 (Singapore)</span>
+</div>
+<div class="text-right">
+<span class="text-on-surface font-bold">$180,000</span>
+<span class="text-primary font-bold ml-space-sm">+$24,100</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container font-label-numeric-sm hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="text-on-surface font-semibold">User-9104 (Zurich)</span>
+</div>
+<div class="text-right">
+<span class="text-on-surface font-bold">$125,000</span>
+<span class="text-primary font-bold ml-space-sm">+$18,450</span>
+</div>
+</div>
+<div class="flex items-center justify-between p-space-xs rounded bg-surface-container font-label-numeric-sm hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-space-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="text-on-surface font-semibold">Algo-Pool-03 (Dubai)</span>
+</div>
+<div class="text-right">
+<span class="text-on-surface font-bold">$340,000</span>
+<span class="text-primary font-bold ml-space-sm">+$41,200</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Copy Risk Isolation Configuration (Hard Boundary) -->
+<div class="bg-surface-container-low rounded p-space-md shadow-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-error">shield_with_heart</span>
+<span class="font-headline-md text-headline-md font-bold text-on-surface">跟单风控硬隔离中枢</span>
+</div>
+<span class="font-label-numeric-sm text-label-numeric-sm text-primary font-bold">HARD-RULE 03</span>
+</div>
+<div class="flex flex-col gap-space-sm mt-space-xs font-body-sm text-body-sm">
+<!-- Parameter 1 -->
+<div class="p-space-sm rounded bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-semibold text-on-surface">单笔最大允许滑点 (Max Slippage)</span>
+<span class="font-label-numeric-sm font-bold text-primary">5.0 bp (0.05%)</span>
+</div>
+<p class="font-label-numeric-sm text-label-numeric-sm text-outline">超过该阈值自动切入限价被动撮合，保护跟单者不被深套。</p>
+</div>
+<!-- Parameter 2 -->
+<div class="p-space-sm rounded bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-semibold text-on-surface">单日最大回撤强平熔断 (Daily Max DD)</span>
+<span class="font-label-numeric-sm font-bold text-error">2.00% 净值熔断</span>
+</div>
+<p class="font-label-numeric-sm text-label-numeric-sm text-outline">日内浮亏达到该阈值，系统自动对所有追随者执行全平并冻结策略24小时。</p>
+</div>
+<!-- Parameter 3 -->
+<div class="p-space-sm rounded bg-surface-container flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-semibold text-on-surface">黑名单与流动性过滤 (Asset Filters)</span>
+<span class="font-label-numeric-sm font-bold text-on-surface">3 币种已禁用</span>
+</div>
+<div class="flex flex-wrap gap-space-xs mt-space-xs">
+<span class="px-space-xs py-space-xs rounded bg-surface-container-lowest text-error font-label-numeric-sm font-semibold">LDO (深度不足)</span>
+<span class="px-space-xs py-space-xs rounded bg-surface-container-lowest text-error font-label-numeric-sm font-semibold">FTM (费率过高)</span>
+<span class="px-space-xs py-space-xs rounded bg-surface-container-lowest text-error font-label-numeric-sm font-semibold">1000PEPE (波动溢出)</span>
+</div>
+</div>
+</div>
+<button class="mt-space-xs w-full h-8 rounded bg-surface-container-high hover:bg-surface-bright text-primary font-body-sm text-body-sm font-semibold flex items-center justify-center gap-space-xs transition-colors">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>更新带单风控协议 (Sign Payload)</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  function switchEnv(env) {
+    const btnLive = document.getElementById('tab-btn-live');
+    const btnSub = document.getElementById('tab-btn-sub');
+    const btnPaper = document.getElementById('tab-btn-paper');
+    const btnCopy = document.getElementById('tab-btn-copy');
+    const paperReset = document.getElementById('paper-reset-btn');
+
+    // reset all buttons
+    [btnLive, btnSub, btnPaper, btnCopy].forEach(b => {
+      b.className = "flex items-center gap-space-sm px-space-md py-space-xs rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-body-sm transition-all";
+    });
+
+    if (env === 'live') {
+      btnLive.className = "flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-high text-primary font-body-sm font-semibold transition-all";
+      paperReset.classList.add('hidden');
+      paperReset.classList.remove('flex');
+    } else if (env === 'sub') {
+      btnSub.className = "flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-high text-primary font-body-sm font-semibold transition-all";
+      paperReset.classList.add('hidden');
+      paperReset.classList.remove('flex');
+    } else if (env === 'paper') {
+      btnPaper.className = "flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-high text-secondary-fixed font-body-sm font-semibold transition-all";
+      paperReset.classList.remove('hidden');
+      paperReset.classList.add('flex');
+    } else if (env === 'copy') {
+      btnCopy.className = "flex items-center gap-space-sm px-space-md py-space-xs rounded bg-surface-container-high text-tertiary-fixed font-body-sm font-semibold transition-all";
+      paperReset.classList.add('hidden');
+      paperReset.classList.remove('flex');
+    }
+  }
+
+  function resetSandbox() {
+    if (confirm('确认重置模拟交易沙盒？账户资金将被复位至 $100,000.00，所有虚拟持仓与历史订单将被清空。')) {
+      alert('沙盒已重置: 当前可用虚拟 USDT = $100,000.00');
+    }
+  }
+</script></main></div></body></html>

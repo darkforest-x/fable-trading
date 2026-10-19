@@ -1,225 +1,197 @@
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+
+<html data-design="stitch-obsidian" lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a1016">
-  <title>spike · 信号中心</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e191e'/%3E%3Cpath d='M8 23V10h5v9h5V7h6v16' fill='none' stroke='%2370e2bc' stroke-width='3'/%3E%3C/svg%3E">
-  <script src="/static/theme.js"></script>
-  <link rel="stylesheet" href="/static/styles.css">
-  <link rel="stylesheet" href="/static/research.css">
-  <link rel="stylesheet" href="/static/platform.css">
-  <link rel="stylesheet" href="/static/datasets.css">
-  <script src="/static/research.js" defer></script>
-  <script src="/static/datasets.js" defer></script>
-  <script src="/static/vision-module.js" defer></script>
-  <link rel="stylesheet" href="/static/yolo-workflow.css">
-  <script src="/static/yolo-workflow.js" defer></script>
-  <link rel="stylesheet" href="/static/strategies.css">
-  <script src="/static/strategies.js" defer></script>
-  <script src="/static/platform.js" defer></script>
-  <link rel="stylesheet" href="/static/manual.css">
-  <script src="/static/manual.js" defer></script>
-  <link rel="stylesheet" href="/static/notifications.css">
-  <script src="/static/notifications.js" defer></script>
-  <link rel="stylesheet" href="/static/knowledge.css">
-  <script src="/static/knowledge.js" defer></script>
-  <link rel="stylesheet" href="/static/v130.css">
-  <script src="/static/v130.js" defer></script>
-  <link rel="stylesheet" href="/static/copier.css">
-  <link rel="stylesheet" href="/static/market-sync.css">
-  <script src="/static/market-sync.js" defer></script>
-  <script src="/static/copier.js" defer></script>
-  <script src="/static/app.js" defer></script>
-</head>
-<body>
-  <a href="#main" class="skip-link">跳到主要内容</a>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="主导航">
-      <a class="brand" href="#signals" aria-label="spike 信号中心">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 28 28"><path d="M4 22V9h6v9h6V5h8v17"/></svg></span>
-        <span class="brand-word">spike<span>RESEARCH WORKSPACE</span></span>
-      </a>
-      <nav class="nav-list" aria-label="工作空间导航">
-        <div class="sidebar-label nav-group-label" aria-hidden="true">个人交易</div>
-        <button class="nav-item" data-view="manual" aria-label="个人交易系统"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="5" r="3"/><path d="M3 18v-3a7 7 0 0 1 14 0v3M6 15h8"/></svg><span>个人交易系统</span></button>
-        <button class="nav-item" data-view="copier" aria-label="Discord 跟单"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5h12v8H9l-4 3v-3H4Z"/><path d="M7.5 9h5M10 6.5v5"/></svg><span>Discord 跟单</span></button>
-        <div class="sidebar-label nav-group-label" aria-hidden="true">学习与输出</div>
-        <button class="nav-item" data-view="learning" aria-label="学习中心"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m2 7 8-4 8 4-8 4-8-4ZM5 9v5c3 2 7 2 10 0V9M18 7v7"/></svg><span>学习中心</span></button>
-        <button class="nav-item" data-view="knowledge" aria-label="知识库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 5C8 3 5 3 2 4v12c3-1 6-1 8 1 2-2 5-2 8-1V4c-3-1-6-1-8 1Zm0 0v12"/></svg><span>知识库</span></button>
-        <button class="nav-item" data-view="content" aria-label="内容工作室"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 3H3v14h14V9M8 12l1-4 6-6 3 3-6 6-4 1Z"/></svg><span>内容工作室</span></button>
-        <div class="sidebar-label nav-group-label" aria-hidden="true">基础能力</div>
-        <button class="nav-item" data-view="platform" aria-label="体系总览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 4h5v5H2zM13 4h5v5h-5zM7 13h6v5H7zM4.5 9v2h11V9M10 11v2"/></svg><span>体系总览</span></button>
-        <button class="nav-item" data-view="datasets" aria-label="数据集"><svg viewBox="0 0 20 20" aria-hidden="true"><ellipse cx="10" cy="4" rx="6.5" ry="2.5"/><path d="M3.5 4v5c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V4M3.5 9v5c0 1.4 2.9 2.5 6.5 2.5 1.1 0 2.1-.1 3-.3"/><path d="M13 15.5h5m-2.5-2.5v5"/></svg><span>数据集</span></button>
-        <button class="nav-item" data-view="factors" aria-label="因子库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h12M4 10h12M4 16h12M7 2v4M13 8v4M8 14v4"/></svg><span>因子库</span></button>
-        <button class="nav-item" data-view="models" aria-label="模型中心"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="4" width="12" height="12" rx="2"/><path d="M7 8h6M7 11h6M7 14h3M2 7h2M2 10h2M2 13h2M16 7h2M16 10h2M16 13h2"/></svg><span>模型中心</span></button>
-        <div class="sidebar-label nav-group-label" aria-hidden="true">研究开发</div>
-        <button class="nav-item" data-view="research" aria-label="研究总览"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 3h5v5H3ZM12 3h5v5h-5ZM3 12h5v5H3ZM12 12h5v5h-5Z"/></svg><span>研究总览</span></button>
-        <button class="nav-item" data-view="yolo" aria-label="YOLO 工作流"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><rect x="6" y="6" width="8" height="8" rx="1"/></svg><span>YOLO 工作流</span></button>
-        <button class="nav-item" data-view="vision" aria-label="VLM 工作流"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5h16v12H2ZM5 14l4-5 3 3 3-5"/></svg><span>VLM 工作流</span></button>
-        <button class="nav-item" data-view="strategies" aria-label="策略库"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 16V5h14v11M6 12l2-3 2 2 4-5"/><path d="M5 18h10"/></svg><span>策略库</span></button>
-        <button class="nav-item" data-view="experiments" aria-label="实验登记"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"/></svg><span>实验登记</span></button>
-        <div class="sidebar-label nav-group-label" aria-hidden="true">验证与运行</div>
-        <button class="nav-item" data-view="backtests" aria-label="回测任务"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"/></svg><span>回测任务</span></button>
-        <button class="nav-item" data-view="paper" aria-label="模拟实盘"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 13l3-3 2 2 3-5"/><path d="M6 6h.1M10 6h.1M14 6h.1"/></svg><span>模拟实盘</span></button>
-        <button class="nav-item active" data-view="signals" aria-label="信号中心" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 11h4l3-7 3 12 3-6h3"/></svg><span>信号中心</span><span class="nav-count" title="24 小时指标启动数" id="nav-signal-count">—</span></button>
-        <button class="nav-item" data-view="joints" aria-label="突破+spike"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5l7 4 9-3"/><path d="M4 17l4-6 3 3 6-9"/></svg><span>突破+spike</span><span class="nav-count" title="24 小时突破+spike 数" id="nav-joints-count">—</span></button>
-        <button class="nav-item" data-view="market" aria-label="全市场异动"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 14l4-4 3 2 4-6 5 3"/><path d="M2 18h16M6 10v8M13 6v12"/></svg><span>全市场异动</span></button>
-        <button class="nav-item" data-view="breaks" aria-label="趋势线突破"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M2 4l16 7"/><path d="M5 17l4-5 3 2 5-8"/></svg><span>趋势线突破</span><span class="nav-count" title="24 小时趋势线突破数" id="nav-breaks-count">—</span></button>
-        <div class="sidebar-label nav-group-label" aria-hidden="true">运维</div>
-        <button class="nav-item" data-view="notifications" aria-label="通知中心"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 14.5h12l-1.4-1.8V8a4.6 4.6 0 0 0-9.2 0v4.7L4 14.5Z"/><path d="M8 17h4"/></svg><span>通知中心</span></button>
-        <button class="nav-item" data-view="system" aria-label="运行状态"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="3" width="14" height="5" rx="1.5"/><rect x="3" y="12" width="14" height="5" rx="1.5"/><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"/></svg><span>运行状态</span></button>
-      </nav>
-      <div class="sidebar-strategy"><span class="strategy-orbit" aria-hidden="true"></span><div><span id="strategy-version">SPIKE · 连接中</span><small>V13.1 回踩确认 · 15m/30m/1H/4H</small></div></div>
-      <div class="sidebar-bottom"><span class="local-light" id="local-light"></span><div>Mac 监控<small id="sidebar-runtime">正在连接服务</small></div><span class="tiny-tag">MAC</span></div>
-    </aside>
-
-    <div class="workspace">
-      <header class="topbar">
-        <div class="breadcrumb"><span>工作空间</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">信号中心</strong></div>
-        <div class="topbar-meta"><span class="exchange-mark" id="exchange-mark">OKX</span><span class="market-scope" id="market-scope">全市场永续</span><span class="topbar-divider"></span><span class="live-indicator" id="connection-label"><i></i>连接中</span><span class="notification-header" id="bark-header">Bark · —</span><span class="notification-header" id="telegram-header">TG · —</span><time id="local-clock">—</time><label class="theme-picker"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="M10 3.5v13M10 3.5a6.5 6.5 0 0 1 0 13Z" fill="currentColor" stroke="none"/></svg><select id="theme-select" aria-label="外观主题"><option value="system">跟随系统</option><option value="dark">深色</option><option value="light">浅色</option></select></label></div>
-      </header>
-
-      <main id="main" tabindex="-1">
-        <div class="page-heading"><div><div class="eyebrow">SPIKE V13.1 / SIGNAL LEDGER</div><h1 id="page-title">信号中心</h1><p id="page-description">15 分钟、30 分钟、1 小时与 4 小时；V13.1 多空回踩再突破确认。只记录本次切换后的新信号。</p></div><button class="refresh-button" id="refresh-button" aria-label="立即刷新监控数据"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 7a6.5 6.5 0 1 0 .5 5M16 3v4h-4"/></svg><span>刷新</span></button></div>
-        <div class="notice hidden" id="error-notice" role="status"></div>
-        <div class="notice hidden" id="model-gate-notice" role="status"></div>
-
-        <section class="metrics" id="primary-metrics" aria-label="监控概览">
-          <article class="metric-card"><div class="metric-top"><span>24 小时 V13.1 确认</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="m11 2-7 10h6l-1 6 7-10h-6l1-6Z"/></svg></div><div class="metric-value" id="metric-signals">—</div><div class="metric-bottom"><span class="mint-dot"></span><span id="metric-signals-detail">回踩再突破 · 已收盘确认</span></div></article>
-          <article class="metric-card"><div class="metric-top"><span>正在蓄势</span><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14M7 3v14M13 3v14"/></svg></div><div class="metric-value"><span id="metric-building">—</span><span class="metric-unit">个观察窗口</span></div><div class="metric-bottom"><span class="amber-dot"></span><span id="metric-building-detail">零轴横盘与均线密集</span></div></article>
-          <article class="metric-card"><div class="metric-top"><span>全市场覆盖</span><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7"/><ellipse cx="10" cy="10" rx="3" ry="7"/><path d="M3 10h14"/></svg></div><div class="metric-value"><span id="metric-universe">—</span><span class="metric-unit">个合约</span></div><div class="metric-bottom"><span class="period-dot"></span><span id="metric-timeframes">读取周期</span><span class="metric-separator">/</span><span id="metric-scan-detail">等待扫描</span></div></article>
-        </section>
-
-        <section id="retest-view" class="view-panel hidden"><div id="v130-workspace"><p class="research-empty">正在读取 V13 回踩监控…</p></div></section>
-        <section id="signals-view" class="view-panel">
-          <div class="ledger-heading"><h2>信号统计</h2><div class="segmented" role="group" aria-label="统计时间范围"><button data-ledger-period="today" aria-pressed="false">今天</button><button data-ledger-period="week" aria-pressed="false">本周</button><button data-ledger-period="all" class="selected" aria-pressed="true">全部</button></div></div>
-          <div class="notice hidden" id="stats-availability" role="status"></div>
-          <div class="ledger-metrics" aria-label="全量信号 R 统计">
-            <article><span>已结束 · 合计 R</span><strong id="stats-realized">—</strong><small id="stats-closed-note">等待统计</small></article>
-            <article><span>运行中 · 浮动 R</span><strong id="stats-floating">—</strong><small id="stats-active-note">等待统计</small></article>
-            <article><span>已结束胜率</span><strong id="stats-winrate">—</strong><small id="stats-win-note">只统计有退出 R 的信号</small></article>
-            <article><span>信号总数</span><strong id="stats-total">—</strong><small id="stats-side-note">每次确认计一条</small></article>
-          </div>
-          <details class="ledger-breakdown" open><summary>分周期统计<span>状态未知单列 · 信号参考 R</span></summary><div class="ledger-table-wrap"><table><thead><tr><th>周期</th><th>信号</th><th>运行中</th><th>已结束</th><th>状态未知</th><th>结束 R</th><th>浮动 R</th><th>胜率</th></tr></thead><tbody id="stats-timeframes"></tbody></table></div></details>
-          <p class="ledger-basis" id="stats-basis">按原始信号收盘日归属 · 北京时间 · 周一开始</p>
-          <div class="section-toolbar"><div class="section-title"><h2 id="signal-section-title">V13.1 回踩确认 · 多空</h2><span class="subtle-count" id="filtered-count">—</span></div><span class="quiet-text" id="signal-window-note">最近 2,000 条 · 每 15 秒同步</span></div>
-          <div class="signal-mode-bar"><div class="segmented signal-scope" role="group" aria-label="信号确认阶段"><button type="button" data-signal-scope="retest" class="selected" aria-pressed="true">V13.1 回踩确认</button></div><div class="segmented source-scope hidden" id="signal-source-scope" role="group" aria-label="信号来源"><button type="button" data-signal-source="live" class="selected" aria-pressed="true">实时</button><button type="button" data-signal-source="replay" aria-pressed="false">历史回放</button><button type="button" data-signal-source="legacy" aria-pressed="false">V9 旧版记录</button></div><span class="quiet-text" id="signal-scope-note">突破 → 回踩守住 → 再突破收盘确认；次开盘参考，不是成交。</span></div>
-          <div class="signal-related-links"><span>旧视图：</span><a href="#watch">蓄势观察</a><a href="#warmup">预热历史</a></div>
-          <div id="warmup-notice" class="warmup-notice hidden" role="status">保留的服务回执仅作历史事实显示；这里不推断、补发或触发通知。</div>
-          <div class="filters"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="symbol-search" type="search" placeholder="搜索合约，例如 BTC" aria-label="搜索合约" autocomplete="off" spellcheck="false"><kbd>/</kbd></label><div class="segmented" aria-label="信号周期"><button data-timeframe="all" class="selected" aria-pressed="true">全部</button><button data-timeframe="15" aria-pressed="false">15m</button><button data-timeframe="30" aria-pressed="false">30m</button><button data-timeframe="60" aria-pressed="false">1H</button><button data-timeframe="240" aria-pressed="false">4H</button></div><label class="ledger-select"><span>方向</span><select id="side-filter" aria-label="信号方向"><option value="all">全部方向</option><option value="long">多头 ↑</option><option value="short">空头 ↓</option></select></label></div>
-          <div class="ledger-filter-row"><label class="ledger-select"><span>状态</span><select id="outcome-filter" aria-label="信号状态"><option value="all">全部状态</option><option value="active">运行中</option><option value="profit">已止盈 / 保护退出</option><option value="loss">已止损</option><option value="breakeven">保本退出</option><option value="unknown">状态未知 / 未跟踪</option></select></label><label class="ledger-select"><span>排序</span><select id="sort-filter" aria-label="信号排序"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="quiet-text">R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。</span></div>
-          <section class="feed-panel" aria-label="信号卡片"><div class="signal-feed"><div id="signal-rows"></div><div id="signal-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 23h17l6-10 8 18 7-8h22"/></svg></div><h3 id="signal-empty-title">正在连接行情服务</h3><p id="signal-empty-description">真实信号会在这里出现。</p></div></div><div class="panel-foot"><span><i class="tiny-live-dot"></i><span id="signal-footer-note">已收盘确认 · 北京时间</span></span><button id="load-more-signals" class="load-more hidden" type="button">显示更多</button><button id="load-earlier-signals" class="load-more hidden" type="button">加载更早记录</button><span id="last-sync">尚未同步</span></div></section>
-        </section>
-
-        <section id="watch-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2 id="watch-section-title">蓄势中的合约</h2><span class="subtle-count" id="watch-count">—</span></div><span class="quiet-text">均线与高周期仅供背景参考</span></div><div class="watch-filter"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input type="search" id="watch-search" placeholder="搜索合约，例如 BTC" aria-label="搜索观察合约" autocomplete="off"></label><div class="segmented watch-timeframe" role="group" aria-label="观察周期"><button type="button" data-watch-timeframe="all" class="selected" aria-pressed="true">全部</button><button type="button" data-watch-timeframe="5m" aria-pressed="false">5m</button><button type="button" data-watch-timeframe="15m" aria-pressed="false">15m</button><button type="button" data-watch-timeframe="30m" aria-pressed="false">30m</button><button type="button" data-watch-timeframe="1H" aria-pressed="false">1H</button><button type="button" data-watch-timeframe="4H" aria-pressed="false">4H</button><button type="button" data-watch-timeframe="1Dutc" aria-pressed="false" title="北京时间每日 08:00 收盘">日线</button></div><div class="segmented watch-scope" aria-label="观察范围"><button data-watch-scope="building" class="selected" aria-pressed="true">蓄势中</button><button data-watch-scope="all" aria-pressed="false">全部合约</button></div><span class="watch-explanation" id="watch-explanation">跟踪近零蓄势，等待主图可见的释放标记。</span></div><div class="watch-feed"><div id="watch-rows" class="watch-card-grid"></div><div id="watch-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 20h60"/></svg></div><h3>等待蓄势结构出现</h3><p>扫描完成后，符合条件的观察窗口会列在这里。</p></div><div class="panel-foot"><span>观察状态 · 尚非启动信号</span><button id="load-more-watch" class="load-more hidden" type="button">显示更多</button><span id="watch-timeframes">读取周期</span></div></div></section>
-
-        <section id="lines-view" class="view-panel hidden">
-          <div class="shadow-policy"><span class="shadow-policy-dot"></span><strong id="lines-policy-title">SPIKE V11.2 · 突破+spike</strong><span id="lines-policy-text">已收盘 K 线 · 通知状态同步中 · 不下单</span></div>
-          <div class="shadow-summary" aria-label="趋势线监控概览">
-            <article class="shadow-summary-card"><span id="lines-count-label">24 小时</span><strong id="lines-day-count">—</strong><small id="lines-day-detail">按收盘时间统计</small></article>
-            <article class="shadow-summary-card"><span>实时发现</span><strong id="lines-live-count">—</strong><small id="lines-live-detail">启用后、收盘一根内发现</small></article>
-            <article class="shadow-summary-card"><span>扫描</span><strong id="lines-scan-state">—</strong><small id="lines-scan-detail">等待扫描</small></article>
-          </div>
-          <div id="lines-stats" class="hidden">
-            <div class="ledger-heading"><h2>模拟持仓统计</h2><div class="segmented" role="group" aria-label="统计时间范围"><button type="button" data-lines-period="today" aria-pressed="false">今天</button><button type="button" data-lines-period="week" aria-pressed="false">本周</button><button type="button" data-lines-period="all" class="selected" aria-pressed="true">全部</button></div></div>
-            <div class="notice hidden" id="lines-stats-notice" role="status"></div>
-            <div class="ledger-metrics" aria-label="突破+spike 模拟持仓 R 统计">
-              <article><span>已结束 · 合计 R</span><strong id="lines-stats-realized">—</strong><small id="lines-stats-closed-note">等待统计</small></article>
-              <article><span>运行中 · 浮动 R</span><strong id="lines-stats-floating">—</strong><small id="lines-stats-active-note">等待统计</small></article>
-              <article><span>已结束胜率</span><strong id="lines-stats-winrate">—</strong><small id="lines-stats-win-note">只统计有退出 R 的信号</small></article>
-              <article><span>信号总数</span><strong id="lines-stats-total">—</strong><small id="lines-stats-side-note">每个 V9 框只算一次</small></article>
-            </div>
-            <details class="ledger-breakdown" open><summary>分周期统计<span>次根开盘入场 · 扣 0.2% 往返 · 同周期同币一次一笔</span></summary><div class="ledger-table-wrap"><table><thead><tr><th>周期</th><th>信号</th><th>运行中</th><th>已结束</th><th>状态未知</th><th>结束 R</th><th>浮动 R</th><th>胜率</th></tr></thead><tbody id="lines-stats-timeframes"></tbody></table></div></details>
-            <p class="ledger-basis" id="lines-stats-basis">按信号收盘日归属 · 北京时间 · 周一开始</p>
-          </div>
-          <div class="section-toolbar"><div class="section-title"><h2 id="lines-section-title">最新信号</h2><span class="subtle-count" id="lines-filtered-count">—</span></div><div class="segmented" id="lines-timeframes" role="group" aria-label="周期"></div></div>
-          <div class="filters"><label class="search-field"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg><input id="lines-search" type="search" placeholder="搜索合约，例如 SOL" aria-label="搜索合约" autocomplete="off" spellcheck="false"></label><div class="segmented" role="group" aria-label="显示范围"><button type="button" data-lines-state="all" class="selected" aria-pressed="true">全部</button><button type="button" data-lines-state="live" aria-pressed="false">只看实时</button></div><span class="quiet-text" id="lines-rule-note"></span></div>
-          <div class="ledger-filter-row hidden" id="lines-ledger-filters"><label class="ledger-select"><span>逻辑版本</span><select id="lines-performance-version" aria-label="逻辑版本"><option value="current">当前退出规则</option></select></label><label class="ledger-select"><span>状态</span><select id="lines-outcome" aria-label="持仓状态"><option value="all">全部状态</option><option value="active">运行中</option><option value="profit">已止盈 / 保护退出</option><option value="loss">亏损退出</option><option value="breakeven">保本退出</option><option value="unknown">未开仓 / 状态未知</option></select></label><label class="ledger-select"><span>排序</span><select id="lines-sort" aria-label="排序"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="quiet-text">R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。</span></div>
-          <p class="ledger-basis hidden" id="lines-exit-rule"></p>
-          <div id="lines-rows" class="shadow-event-grid"></div>
-          <div id="lines-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 8l30 14 30-4"/></svg></div><h3 id="lines-empty-title">等待第一次扫描</h3><p id="lines-empty-text">工作进程启动后约几分钟出现结果。</p></div>
-          <div class="panel-foot"><span id="lines-activation">尚未启用</span><button id="load-more-lines" class="load-more hidden" type="button">显示更多</button><span id="lines-last-sync">尚未同步</span></div>
-        </section>
-
-        <section id="shadow-view" class="view-panel hidden">
-          <div class="shadow-policy"><span class="shadow-policy-dot"></span><strong>前向研究账本</strong><span>V7 与 V8 同源对照 · 仅使用启用后的已收盘 K 线 · 不推送 · 不下单</span></div>
-          <div class="shadow-summary" aria-label="前向影子概览">
-            <article class="shadow-summary-card"><span>V7 新事件</span><strong id="shadow-event-count">—</strong><small id="shadow-event-detail">等待启用</small></article>
-            <article class="shadow-summary-card"><span>V8 保留</span><strong id="shadow-v8-count">—</strong><small id="shadow-v8-detail">单变量：距六线边缘不超过 3 ATR</small></article>
-            <article class="shadow-summary-card"><span>观察单元</span><strong id="shadow-cell-count">—</strong><small id="shadow-cell-detail">30m / 1H / 4H</small></article>
-          </div>
-          <div class="section-toolbar shadow-market-heading"><div class="section-title"><h2>市场状态</h2><span class="subtle-count">描述标签</span></div><span class="quiet-text">用于分层复盘，当前不拦截信号</span></div>
-          <div id="shadow-market-grid" class="shadow-market-grid"></div>
-          <div class="section-toolbar shadow-event-heading"><div class="section-title"><h2>V7 / V8 新盲样本</h2><span class="subtle-count" id="shadow-filtered-count">—</span></div><div class="segmented shadow-timeframe" role="group" aria-label="前向影子周期"><button type="button" data-shadow-timeframe="all" class="selected" aria-pressed="true">全部</button><button type="button" data-shadow-timeframe="30m" aria-pressed="false">30m</button><button type="button" data-shadow-timeframe="1H" aria-pressed="false">1H</button><button type="button" data-shadow-timeframe="4H" aria-pressed="false">4H</button></div></div>
-          <div id="shadow-rows" class="shadow-event-grid"></div>
-          <div id="shadow-empty" class="empty-state"><div class="empty-signal" aria-hidden="true"><svg viewBox="0 0 60 40"><path d="M0 24h13l6-5 7 7 8-16 7 12h19"/></svg></div><h3>等待启用后的新收盘信号</h3><p>这里不会回填已经研究过的历史事件。</p></div>
-          <div class="panel-foot"><span id="shadow-activation">尚未启用前向账本</span><span id="shadow-last-scan">等待扫描</span></div>
-        </section>
-
-        <section id="system-view" class="view-panel hidden"><div class="section-toolbar"><div class="section-title"><h2>运行状态</h2></div><span class="quiet-text">Mac 扫描 · 公开行情 · TG / Bark 通知渠道</span></div><div class="system-grid"><article class="panel system-card scan-card"><div class="system-card-heading"><h3>行情扫描</h3><span id="scan-state-badge" class="neutral-badge">等待连接</span></div><div class="scan-progress"><div id="scan-progress-fill"></div></div><dl class="system-facts" id="scan-facts"></dl></article><article class="panel system-card"><div class="system-card-heading"><h3>Bark 推送</h3><span id="bark-state-badge" class="neutral-badge">等待连接</span></div><p class="system-card-description" id="bark-description">读取 Bark 渠道状态…</p><dl class="system-facts" id="bark-facts"></dl><p class="system-card-description" id="joint-notification-facts">突破+spike 通知状态同步中…</p></article><article class="panel system-card runtime-card"><div class="system-card-heading"><h3>Mac 监控服务</h3><span class="neutral-badge" id="service-version">—</span></div><dl class="system-facts" id="runtime-facts"></dl><p class="system-footnote">本页面展示指标事件与运行状态，不执行交易。监控需要 Mac 保持开机并联网。</p></article></div><details class="health-details panel"><summary>查看诊断信息<span>仅运行数据</span></summary><pre id="health-json">尚未读取诊断信息。</pre></details></section>
-
-        <section id="notifications-view" class="view-panel hidden" aria-label="通知中心">
-          <div class="notifications-view-heading"><div><h2>通知渠道与订阅</h2><p>V13.1 回踩确认覆盖 15m/30m/1H/4H、支持多空。旧版启动、YOLO 与联合信号保留独立订阅。</p></div><span id="notifications-updated" class="quiet-text">状态更新时间待同步</span></div>
-          <div id="notifications-notice" class="notification-notice hidden" role="status" aria-live="polite"></div>
-          <div id="notification-channel-cards" class="notification-channel-grid" aria-label="通知渠道状态"></div>
-          <section class="notification-routes-section" aria-labelledby="notification-routes-title">
-            <div class="notification-section-heading"><div><h3 id="notification-routes-title">来源订阅</h3><p>订阅开关分别控制各来源的 TG 与 Bark 投递，开启不代表渠道已经就绪。</p></div></div>
-            <div id="notification-route-matrix"></div>
-          </section>
-          <section class="notification-history-section" aria-labelledby="notification-history-title">
-            <div class="notification-section-heading"><div><h3 id="notification-history-title">通知历史</h3><p>“服务已接受”只表示推送服务接受请求，不代表手机收到或已读。</p></div></div>
-            <div class="notification-filters" aria-label="通知历史筛选">
-              <label>搜索<input id="notification-filter-search" type="search" maxlength="48" placeholder="搜索币种或合约…" aria-label="搜索通知历史" autocomplete="off"></label>
-              <label>渠道<select id="notification-filter-channel" aria-label="按渠道筛选"><option value="">全部渠道</option><option value="telegram">Telegram（TG）</option><option value="bark">Bark</option></select></label>
-              <label>来源<select id="notification-filter-topic" aria-label="按通知来源筛选"><option value="">全部来源</option><option value="spike_v130">SPIKE V13.1 回踩确认</option><option value="spike_v128">SPIKE V12.8 普通启动</option><option value="yolo_confirmation">YOLO 补充确认</option><option value="joint">突破 + spike 联合信号</option><option value="legacy">旧版 SPIKE 历史</option></select></label>
-              <label>状态<select id="notification-filter-status" aria-label="按通知状态筛选"><option value="">全部状态</option><option value="sent">服务已接受</option><option value="pending">待发送</option><option value="sending">发送中</option><option value="failed">发送失败</option><option value="unknown">结果未知</option><option value="skipped">已跳过</option></select></label>
-              <label>方向<select id="notification-filter-side" aria-label="按方向筛选"><option value="">全部方向</option><option value="long">多头</option><option value="short">空头</option></select></label>
-              <label>周期<select id="notification-filter-timeframe" aria-label="按周期筛选"><option value="">全部周期</option><option value="15m">15m</option><option value="30m">30m</option><option value="1H">1H</option><option value="4H">4H</option></select></label>
-            </div>
-            <div class="notification-history-wrap"><table class="notification-history-table"><thead><tr><th scope="col">渠道 / 来源</th><th scope="col">合约 / 类型</th><th scope="col">周期 / 方向</th><th scope="col">状态 / 尝试</th><th scope="col">价格</th><th scope="col">时间（北京时间）</th></tr></thead><tbody id="notification-history-rows"></tbody></table></div>
-            <p id="notification-history-empty" class="notification-empty">正在读取通知历史…</p>
-            <div id="notification-history-pagination" class="notification-pagination"></div>
-          </section>
-          <p class="notification-safety-note">页面不会显示凭据或提供测试发送。打开页面、缺少历史记录或收到未知结果，都不会触发通知重发。</p>
-        </section>
-
-        <div id="research-error" class="research-error hidden" role="alert"></div>
-        <section id="platform-view" class="view-panel research-panel hidden"><div id="platform-workspace"><p class="research-empty">正在读取体系登记…</p></div></section>
-        <section id="learning-view" class="view-panel research-panel hidden"><div id="learning-workspace"><p class="research-empty">正在读取学习计划…</p></div></section>
-        <section id="knowledge-view" class="view-panel research-panel hidden"><div id="knowledge-workspace"><p class="research-empty">正在读取知识条目…</p></div></section>
-        <section id="content-view" class="view-panel research-panel hidden"><div id="content-workspace"><p class="research-empty">正在读取内容草稿…</p></div></section>
-        <section id="market-view" class="view-panel research-panel hidden"><div id="market-sync-workspace"><p class="research-empty">正在读取全市场异动…</p></div></section>
-        <section id="copier-view" class="view-panel research-panel hidden"><div id="copier-workspace"><p class="research-empty">正在读取跟单服务…</p></div></section>
-        <section id="manual-view" class="view-panel research-panel hidden"><div id="manual-workspace"><p class="research-empty">正在读取交易原则与个人工作区…</p></div></section>
-        <section id="models-view" class="view-panel research-panel hidden"><div id="models-workspace"><p class="research-empty">正在读取模型登记…</p></div></section>
-        <section id="research-view" class="view-panel research-panel hidden"><div id="research-overview"><p class="research-empty">正在读取实验注册表…</p></div></section>
-        <section id="strategies-view" class="view-panel research-panel hidden"><div id="strategies-workspace"><p class="research-empty">正在读取策略登记…</p></div></section>
-        <section id="paper-view" class="view-panel research-panel hidden"><div id="paper-workspace"><p class="research-empty">正在读取模拟任务…</p></div></section>
-        <section id="datasets-view" class="view-panel research-panel hidden"><div id="datasets-workspace"><p class="research-empty">正在读取数据集目录…</p></div></section>
-        <section id="factors-view" class="view-panel research-panel hidden">
-          <div class="research-toolbar"><div><input id="factor-search" type="search" aria-label="搜索因子" placeholder="搜索因子、公式或来源…"><select id="factor-category" aria-label="因子类别"><option value="">全部类别</option></select><span id="factor-count" class="research-caption"></span></div><button id="new-factor" class="research-button primary">＋ 登记因子</button></div>
-          <div class="research-table-wrap"><table class="research-table"><thead><tr><th>因子</th><th>类别</th><th>定义</th><th>研究状态</th><th>关联实验</th><th></th></tr></thead><tbody id="factor-rows"></tbody></table></div>
-          <p class="research-caption">代码特征代表已实现，不代表已经证明盈利。研究状态与训练、实盘资格分别记录。</p>
-        </section>
-        <section id="experiments-view" class="view-panel research-panel hidden">
-          <div class="research-toolbar"><div><input id="experiment-search" type="search" aria-label="搜索实验" placeholder="搜索问题、因子、结论或实验编号…"><select id="experiment-status" aria-label="实验结论"><option value="">全部结论</option><option value="negative-results">否定 / 证据不足</option><option value="negative">负面结论</option><option value="active">研究中</option><option value="rejected">已否定</option><option value="inconclusive">证据不足</option><option value="completed">已完成</option><option value="accepted">历史记录：通过</option><option value="superseded">已替代</option></select><span id="experiment-count" class="research-caption"></span></div><div><button id="compare-experiments" class="research-button" disabled>对照查看</button><button id="new-experiment" class="research-button primary">＋ 登记实验</button></div></div>
-          <div class="research-table-wrap"><table class="research-table experiment-table"><thead><tr><th>对照</th><th>实验 / 研究问题</th><th>原始结论</th><th>唯一变化</th><th>登记产物</th><th></th></tr></thead><tbody id="experiment-rows"></tbody></table></div><p id="experiment-limit" class="research-caption"></p>
-        </section>
-        <section id="backtests-view" class="view-panel research-panel hidden">
-          <div class="research-toolbar"><div><h2>离线回测队列</h2><span class="research-caption">排队 → 运行 → 结果复核</span></div><button id="new-backtest" class="research-button primary" disabled>＋ 新建回测</button></div>
-          <div class="research-callout"><strong>SPIKE V12.8 冻结规则重放</strong><p id="backtest-recipe-detail"></p><span id="backtest-availability"></span></div>
-          <p class="research-caption">任务独立于行情扫描运行。历史研究已在实验登记中保留；运行成功与策略结论分别记录。</p>
-          <div class="research-table-wrap"><table class="research-table"><thead><tr><th>任务</th><th>实验 / 范围</th><th>运行状态</th><th>创建时间</th><th></th></tr></thead><tbody id="job-rows"></tbody></table></div>
-        </section>
-        <section id="yolo-view" class="view-panel research-panel hidden"><div id="yolo-workspace"><p class="research-empty">正在读取 YOLO 工作流…</p></div></section>
-        <section id="vision-view" class="view-panel hidden"><p id="vision-module-error" role="alert"></p><div id="vision-module"></div></section>
-        <footer class="page-footer"><span>SPIKE <span class="footer-separator">/</span> 让趋势自己走出来。</span><span>V13.1 回踩确认 · 次开盘参考 · 信号价格不等于成交价格</span></footer>
-      </main>
-    </div>
-  </div>
-  <dialog id="research-dialog" aria-label="研究记录详情"><div id="research-dialog-content"></div></dialog>
-  <div id="tradingview-status" class="action-status hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#0b0e14" name="theme-color"/>
+<title>spike · 市场共振观察</title>
+<link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230e191e'/%3E%3Cpath d='M8 23V10h5v9h5V7h6v16' fill='none' stroke='%2370e2bc' stroke-width='3'/%3E%3C/svg%3E" rel="icon"/>
+<!-- asset-versions -->
+<script src="/static/theme.js"></script>
+<link href="/static/styles.css" rel="stylesheet"/>
+<link href="/static/workspace-display.css" rel="stylesheet"/>
+<script defer="" src="/static/workspace-navigation.js"></script>
+<script defer="" src="/static/workspace-runtime.js"></script>
+<script defer="" src="/static/workspace-motion.js"></script>
+<link href="/static/symbol-picker.css" rel="stylesheet"/>
+<script defer="" src="/static/symbol-picker.js"></script>
+<link href="/vision-assets/chart-tools.css" rel="stylesheet"/>
+<script defer="" src="/vision-assets/chart-tools.js"></script>
+<script defer="" src="/static/chart-style.js"></script>
+<script defer="" src="/static/module-loader.js"></script>
+<script defer="" src="/static/app.js"></script>
+<script defer="" src="/static/workspace-display.js"></script>
+<link href="/static/candle-status.css" rel="stylesheet"/>
+<script defer="" src="/static/candle-status.js"></script>
+<link href="/static/design-tokens.css" rel="stylesheet"/>
+<meta id="workspace-page-style"/>
+<link href="/static/workspace-motion.css" rel="stylesheet"/>
+<link href="/static/manual-workspace.css" rel="stylesheet"/>
+<script defer="" src="/static/workspace-command.js"></script>
+<script defer="" src="/static/workspace-layouts.js"></script>
+<script defer="" src="/static/workspace-panels.js"></script><script defer="" src="/static/stitch-workspace.js"></script>
+<meta id="workspace-polish"/><link href="/static/stitch-system.css" rel="stylesheet"/><link href="/static/stitch-pages.css" rel="stylesheet"/><link href="/static/market-workstation.css" rel="stylesheet"/><link href="/static/scan-cards.css" rel="stylesheet"/><link href="/static/compact-workspaces.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/static/mobile-chart-workspaces.css?v=20261018-1"></head>
+<body data-design="stitch-obsidian">
+<a class="skip-link" href="#main">跳到主要内容</a>
+<div class="app-shell">
+<aside aria-label="主导航" class="sidebar" id="main-sidebar">
+<button aria-label="关闭导航菜单" class="nav-close" id="nav-close" type="button">关闭</button>
+<div class="workspace-rail"><nav aria-label="功能工作区"><button aria-label="市场工作区" aria-pressed="false" class="rail-button" data-workspace-group="market" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/chart-candle.svg)"></span><span>市场</span></button><button aria-label="信号工作区" aria-pressed="false" class="rail-button" data-workspace-group="signals" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/activity.svg)"></span><span>信号</span></button><button aria-label="账户工作区" aria-pressed="false" class="rail-button" data-workspace-group="accounts" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/wallet.svg)"></span><span>账户</span></button><button aria-label="模拟交易工作区" aria-pressed="false" class="rail-button" data-workspace-group="simulation" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/wallet.svg)"></span><span>模拟</span></button><button aria-label="研究工作区" aria-pressed="false" class="rail-button" data-workspace-group="research" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/flask.svg)"></span><span>研究</span></button><button aria-label="学习工作区" aria-pressed="false" class="rail-button" data-workspace-group="learn" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/book.svg)"></span><span>学习</span></button><button aria-label="运行工作区" aria-pressed="false" class="rail-button" data-workspace-group="manage" type="button"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/settings.svg)"></span><span>运行</span></button></nav></div><div class="workspace-context"><header class="context-heading"><span>WORKSPACE</span><h2 id="workspace-group-title">市场观察</h2></header><label class="context-search"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/search.svg)"></span><input aria-label="筛选工作区菜单" autocomplete="off" id="workspace-nav-filter" placeholder="筛选菜单…" type="search"/></label><p class="nav-order-status" id="nav-order-status" role="status"></p><nav class="nav-list" aria-label="工作空间导航"><div class="nav-group" data-nav-group="market"><div class="sidebar-label nav-group-label">市场</div><button aria-current="page" aria-label="行情与共振" class="nav-item active" data-view="market"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 14l4-4 3 2 4-6 5 3"></path><path d="M2 18h16M6 10v8M13 6v12"></path></svg><span>行情与共振</span></button><button aria-label="强势标的发现" class="nav-item" data-view="auto-leaders"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4M5 12l4-4 3 3 3-5"></path></svg><span>强势标的发现</span></button></div><div class="nav-group" data-nav-group="signals"><div class="sidebar-label nav-group-label">信号</div><button aria-label="确认信号与表现" class="nav-item" data-view="signals"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 11h4l3-7 3 12 3-6h3"></path></svg><span>确认信号与表现</span><span class="nav-count" id="nav-signal-count" title="24 小时指标启动数">—</span></button><button aria-label="形态巡检池" class="nav-item" data-view="yolo-detect"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4M5 12l4-4 3 3 3-5"></path></svg><span>形态巡检池</span></button></div><div class="nav-group" data-nav-group="accounts"><div class="sidebar-label nav-group-label">账户</div><a class="nav-item" href="#yolo-detect?tab=account">均线专用账户</a><a class="nav-item" href="#signals?pane=account">自动执行账户</a><button aria-label="交易计划与复盘" class="nav-item" data-view="manual"><svg aria-hidden="true" viewbox="0 0 20 20"><circle cx="10" cy="5" r="3"></circle><path d="M3 18v-3a7 7 0 0 1 14 0v3M6 15h8"></path></svg><span>交易计划与复盘</span></button><button aria-label="外部信号跟踪" class="nav-item" data-view="copier"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M4 5h12v8H9l-4 3v-3H4Z"></path><path d="M7.5 9h5M10 6.5v5"></path></svg><span>外部信号跟踪</span></button></div><div class="nav-group" data-nav-group="simulation"><div class="nav-group-label">模拟交易</div><button aria-label="模拟开单" class="nav-item" data-view="paper-desk"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="14" rx="2" width="14" x="3" y="3"></rect><path d="M6 10h8M10 6v8"></path></svg><span>模拟开单</span></button><button aria-label="策略前向账本" class="nav-item" data-view="paper"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="14" rx="2" width="14" x="3" y="3"></rect><path d="M6 13l3-3 2 2 3-5"></path><path d="M6 6h.1M10 6h.1M14 6h.1"></path></svg><span>策略前向账本</span></button></div><div class="nav-group" data-nav-group="research"><div class="sidebar-label nav-group-label">研究</div><button aria-label="研究体系地图" class="nav-item" data-view="platform"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 4h5v5H2zM13 4h5v5h-5zM7 13h6v5H7zM4.5 9v2h11V9M10 11v2"></path></svg><span>研究体系地图</span></button><button aria-label="实验室总览" class="nav-item" data-view="research"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 3h5v5H3ZM12 3h5v5h-5ZM3 12h5v5H3ZM12 12h5v5h-5Z"></path></svg><span>实验室总览</span></button><button aria-label="数据与标注" class="nav-item" data-view="datasets"><svg aria-hidden="true" viewbox="0 0 20 20"><ellipse cx="10" cy="4" rx="6.5" ry="2.5"></ellipse><path d="M3.5 4v5c0 1.4 2.9 2.5 6.5 2.5s6.5-1.1 6.5-2.5V4M3.5 9v5c0 1.4 2.9 2.5 6.5 2.5 1.1 0 2.1-.1 3-.3"></path><path d="M13 15.5h5m-2.5-2.5v5"></path></svg><span>数据与标注</span></button><button aria-label="因子筛选" class="nav-item" data-view="factors"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M4 4h12M4 10h12M4 16h12M7 2v4M13 8v4M8 14v4"></path></svg><span>因子筛选</span></button><button aria-label="模型评估" class="nav-item" data-view="models"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="12" rx="2" width="12" x="4" y="4"></rect><path d="M7 8h6M7 11h6M7 14h3M2 7h2M2 10h2M2 13h2M16 7h2M16 10h2M16 13h2"></path></svg><span>模型评估</span></button><button aria-label="策略档案" class="nav-item" data-view="strategies"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 16V5h14v11M6 12l2-3 2 2 4-5"></path><path d="M5 18h10"></path></svg><span>策略档案</span></button><button aria-label="视觉模型工作流" class="nav-item" data-view="yolo"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"></path><rect height="8" rx="1" width="8" x="6" y="6"></rect></svg><span>视觉模型工作流</span></button><button aria-label="图像与视觉研究" class="nav-item" data-view="vision"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 5h16v12H2ZM5 14l4-5 3 3 3-5"></path></svg><span>图像与视觉研究</span></button><button aria-label="实验记录" class="nav-item" data-view="experiments"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M6 2h8M8 2v6l-5 8v2h14v-2l-5-8V2M6 12h8"></path></svg><span>实验记录</span></button><button aria-label="策略回测" class="nav-item" data-view="backtests"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 17V3M3 17h14M6 13l4-6 3 3 4-7"></path></svg><span>策略回测</span></button></div><div class="nav-group" data-nav-group="learn"><div class="sidebar-label nav-group-label">学习</div><button aria-label="学习工作台" class="nav-item" data-view="learning"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="m2 7 8-4 8 4-8 4-8-4ZM5 9v5c3 2 7 2 10 0V9M18 7v7"></path></svg><span>学习工作台</span></button><button aria-label="书架与研读" class="nav-item" data-view="trading-books"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M3 3h5v14H3zM10 3h3v14h-3zM14 4l3-1 3 13-3 1z"></path></svg><span>书架与研读</span></button><button aria-label="订单流研究" class="nav-item" data-view="orderflow"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M4 3h9l3 3v11H4Z"></path><path d="M7 14V9M10 14V7M13 14v-3"></path></svg><span>订单流研究</span></button><button aria-label="Bit浪浪研读" class="nav-item" data-view="langlang"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 15c2.5 0 3-4 5.5-4S10 14 12 9s3-6 6-6"></path><path d="M2 18h16"></path></svg><span>Bit浪浪研读</span></button><button aria-label="区间交易研读" class="nav-item" data-view="rektproof"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M2 6h16M2 14h16"></path><path d="M3 10l3-3 3 4 2-1 2 7 2-6 2 2"></path></svg><span>区间交易研读</span></button><button aria-label="研究知识库" class="nav-item" data-view="knowledge"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M10 5C8 3 5 3 2 4v12c3-1 6-1 8 1 2-2 5-2 8-1V4c-3-1-6-1-8 1Zm0 0v12"></path></svg><span>研究知识库</span></button><button aria-label="内容编辑" class="nav-item" data-view="content"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M11 3H3v14h14V9M8 12l1-4 6-6 3 3-6 6-4 1Z"></path></svg><span>内容编辑</span></button></div><div class="nav-group" data-nav-group="manage"><div class="sidebar-label nav-group-label">运行</div><button aria-label="通知与订阅" class="nav-item" data-view="notifications"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M4 14.5h12l-1.4-1.8V8a4.6 4.6 0 0 0-9.2 0v4.7L4 14.5Z"></path><path d="M8 17h4"></path></svg><span>通知与订阅</span></button><button aria-label="服务与数据节点" class="nav-item" data-view="system"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="5" rx="1.5" width="14" x="3" y="3"></rect><rect height="5" rx="1.5" width="14" x="3" y="12"></rect><path d="M6 5.5h.1M6 14.5h.1M10 5.5h4M10 14.5h4"></path></svg><span>服务与数据节点</span></button></div></nav><div class="context-empty" hidden="" id="workspace-nav-empty">没有匹配页面</div><nav aria-label="本页索引" class="workspace-outline" hidden="" id="workspace-outline"></nav></div> <div class="sidebar-bottom"><button aria-controls="main-sidebar" aria-label="收起左侧菜单" class="sidebar-fold" data-sidebar-fold="" title="收起左侧菜单" type="button"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="14" rx="2" width="16" x="2" y="3"></rect><path d="M7 3v14m6-10-3 3 3 3"></path></svg></button><span class="local-light" id="local-light"></span><div>Mac 监控<small id="sidebar-runtime">正在连接服务</small></div><span class="tiny-tag">MAC</span></div>
+</aside>
+<button aria-label="关闭导航菜单" class="nav-backdrop" hidden="" id="nav-backdrop"></button><div class="workspace">
+<header class="topbar"><a aria-label="Spike Terminal · 市场观察" class="stitch-brand" href="#market"><span aria-hidden="true" class="stitch-bolt">ϟ</span><span><strong>SPIKE</strong><small>QUANT DESK</small></span></a><nav aria-label="主要工作区" class="stitch-primary-nav"><a data-terminal-route="market" href="#market"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/chart-candle.svg)"></span>行情工作台</a><a data-terminal-route="signals" href="#signals"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/activity.svg)"></span>信号中心</a><a data-terminal-route="yolo-detect" href="#yolo-detect"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/chart-candle.svg)"></span>形态巡检</a><a data-terminal-route="yolo-detect?tab=account" href="#yolo-detect?tab=account"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/wallet.svg)"></span>实盘与风控</a><a data-terminal-route="paper-desk" href="#paper-desk"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/wallet.svg)"></span>模拟交易</a><a data-terminal-route="research" href="#research"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/flask.svg)"></span>研究实验室</a><a data-terminal-route="learning" href="#learning"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/book.svg)"></span>交易书架</a><a data-terminal-route="system" href="#system"><span aria-hidden="true" class="rail-icon" style="--icon:url(/static/icons/settings.svg)"></span>系统运行</a></nav><button aria-controls="main-sidebar" aria-expanded="true" aria-label="收起左侧菜单" class="nav-toggle" id="nav-toggle" title="收起左侧菜单"><svg aria-hidden="true" viewbox="0 0 20 20"><rect height="14" rx="2" width="16" x="2" y="3"></rect><path d="M7 3v14"></path><path class="nav-toggle-arrow" d="m13 7-3 3 3 3"></path></svg></button><button aria-haspopup="dialog" aria-label="搜索页面" class="workspace-search" id="workspace-search" type="button"><span aria-hidden="true" class="ui-search-icon"></span><span>搜索页面与功能</span><kbd>⌘ K</kbd></button><span class="live-indicator" id="connection-label"><i></i>连接中</span><time id="local-clock">—</time>
+<div class="breadcrumb visually-hidden"><span>工作空间</span><span class="crumb-slash">/</span><strong id="breadcrumb-current">市场共振观察</strong></div>
+<details class="quiet-menu workspace-preferences"><summary aria-label="界面与状态">设置</summary><div class="quiet-menu-panel"><button aria-pressed="true" class="workspace-density" id="workspace-density" title="切换列表行距" type="button">紧凑</button><div class="topbar-meta"><span class="exchange-mark" id="exchange-mark">OKX</span><span class="market-scope" id="market-scope">全市场永续</span><span class="topbar-divider"></span><span class="notification-header" id="telegram-header">TG · —</span><label class="theme-picker" title="Stitch · Obsidian Quant Terminal"><svg aria-hidden="true" viewbox="0 0 20 20"><circle cx="10" cy="10" r="6.5"></circle><path d="M10 3.5v13M10 3.5a6.5 6.5 0 0 1 0 13Z" fill="currentColor" stroke="none"></path></svg><select aria-label="外观主题" disabled="" id="theme-select"><option value="dark">Obsidian 深色</option></select></label></div></div></details>
+</header>
+<main id="main" tabindex="-1">
+<div class="page-heading"><div><div class="eyebrow">SPIKE V13.1 / SIGNAL LEDGER</div><h1 id="page-title">市场共振观察</h1><p id="page-description">BTC、ETH 同时放量，多数山寨也同方向涨跌，之后会怎样？</p></div><button aria-label="立即刷新监控数据" class="refresh-button" id="refresh-button" title="刷新当前页面"><svg aria-hidden="true" viewbox="0 0 20 20"><path d="M16 7a6.5 6.5 0 1 0 .5 5M16 3v4h-4"></path></svg><span>刷新</span></button></div>
+<div class="notice hidden" id="error-notice" role="status"></div>
+<div class="notice hidden" id="model-gate-notice" role="status"></div>
+<section aria-label="监控概览" class="metrics hidden" id="primary-metrics">
+<article class="metric-card"><div class="metric-top"><span>24 小时 V13.1 确认</span><svg aria-hidden="true" viewbox="0 0 20 20"><path d="m11 2-7 10h6l-1 6 7-10h-6l1-6Z"></path></svg></div><div class="metric-value" id="metric-signals">—</div><div class="metric-bottom"><span class="mint-dot"></span><span id="metric-signals-detail">回踩再突破 · 已收盘确认</span></div></article>
+<article class="metric-card"><div class="metric-top"><span>信号扫描池</span><svg aria-hidden="true" viewbox="0 0 20 20"><circle cx="10" cy="10" r="7"></circle><ellipse cx="10" cy="10" rx="3" ry="7"></ellipse><path d="M3 10h14"></path></svg></div><div class="metric-value"><span id="metric-universe">—</span><span class="metric-unit">个合约</span></div><div class="metric-bottom"><span class="period-dot"></span><span id="metric-timeframes">读取周期</span><span class="metric-separator">/</span><span id="metric-scan-detail">等待扫描</span></div></article>
+</section>
+<section class="view-panel hidden" data-stitch-screen="signals" id="retest-view"><div id="v130-workspace"><p class="research-empty">正在读取 V13 回踩监控…</p></div></section>
+<div hidden="" id="module-load-state" role="status"></div>
+<section class="view-panel hidden" data-stitch-screen="signals" id="signals-view">
+<nav aria-label="信号中心工作区" class="signal-workspace-nav"><div aria-label="工作区切换" class="nav nav-pills" role="group"><button aria-pressed="true" class="nav-link active selected" data-signal-pane="records" type="button">信号记录</button><button aria-pressed="false" class="nav-link" data-signal-pane="overview" type="button">表现分析</button><button aria-pressed="false" class="nav-link" data-signal-pane="account" type="button">实盘账户</button></div><span>V13.1 · 全市场 · 多空</span></nav>
+<section aria-label="OKX 实盘账户" class="okx-live" hidden="" id="okx-execution-panel"></section>
+<div class="signal-context"><div><h2 id="signal-pane-title">确认信号</h2><p id="signal-pane-description">查看已收盘确认信号、参考表现与形态说明。</p></div><button aria-label="信号参考，非账户成交" class="signal-reference-label spike-info" type="button">ⓘ<span class="spike-info-content">信号参考 · 非账户成交</span></button></div>
+<aside class="signal-query-inspector work-inspector"><h2>筛选信号</h2><div class="signal-controls">
+<div class="signal-filter-main"><div class="search-field"><input aria-label="搜索合约" autocomplete="off" class="form-control" id="symbol-search" placeholder="搜索合约，例如 BTC" spellcheck="false" type="search"/><kbd>/</kbd><button aria-label="清空合约搜索" hidden="" id="clear-signal-search" type="button">×</button></div><div class="ledger-heading"><h2 class="hidden" id="signal-statistics-title">历史开单统计</h2><div aria-label="统计时间范围" class="segmented" role="group"><button aria-pressed="false" data-ledger-period="today">今天</button><button aria-pressed="false" data-ledger-period="week">本周</button><button aria-pressed="true" class="selected" data-ledger-period="all">全部时间</button></div></div></div>
+<div class="filters"><div aria-label="信号周期" class="segmented"><button aria-pressed="true" class="selected" data-timeframe="all">全部周期</button><button aria-pressed="false" data-timeframe="15">15m</button><button aria-pressed="false" data-timeframe="30">30m</button><button aria-pressed="false" data-timeframe="60">1H</button><button aria-pressed="false" data-timeframe="240">4H</button></div><label class="ledger-select"><select aria-label="信号方向" class="form-select" id="side-filter"><option value="all">全部方向</option><option value="long">多头 ↑</option><option value="short">空头 ↓</option></select></label><label class="ledger-select hidden" id="signal-outcome-control"><select aria-label="信号状态" class="form-select" id="outcome-filter"><option value="all">全部状态</option><option value="active">参考运行中</option><option value="profit">盈利退出</option><option value="loss">亏损退出</option><option value="breakeven">保本退出</option><option value="unknown">等待 / 未知</option></select></label><button class="signal-reset btn btn-sm btn-outline-secondary" id="reset-signal-filters" type="button">重置</button></div>
+</div>
+<div class="signal-result-summary" id="signal-result-summary" role="status"></div>
+</aside>
+<div class="stitch-signal-board"><div class="signal-record-content">
+<div class="signal-record-toolbar"><div class="signal-history-toolbar"><div aria-label="信号显示方式" class="segmented" role="group"><button aria-pressed="true" class="selected" data-signal-layout="cards" type="button">信号卡片</button><button aria-pressed="false" data-signal-layout="history" type="button">已结束记录</button></div></div><label class="ledger-select"><select aria-label="信号排序" class="form-select" id="sort-filter"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="hidden" id="signal-sort-note"></span></div>
+<div class="section-toolbar"><div class="section-title"><h2 id="signal-section-title">V13.1 回踩确认 · 多空</h2><span class="subtle-count" id="filtered-count">—</span></div><span class="quiet-text" id="signal-window-note">最近 2,000 条 · 每 15 秒同步</span></div>
+<details class="signal-rules"><summary>查看信号规则</summary><p class="quiet-text" id="signal-universe-note"></p> <div class="signal-mode-bar"><div aria-label="信号确认阶段" class="segmented signal-scope" role="group"><button aria-pressed="true" class="selected" data-signal-scope="retest" type="button">V13.1 回踩确认</button></div><div aria-label="信号来源" class="segmented source-scope hidden" id="signal-source-scope" role="group"><button aria-pressed="true" class="selected" data-signal-source="live" type="button">实时</button><button aria-pressed="false" data-signal-source="replay" type="button">历史回放</button><button aria-pressed="false" data-signal-source="legacy" type="button">V9 旧版记录</button></div><span class="quiet-text" id="signal-scope-note">突破 → 回踩守住 → 再突破收盘确认；次开盘参考，不是成交。</span></div>
+</details>
+<div class="warmup-notice hidden" id="warmup-notice" role="status">保留的服务回执仅作历史事实显示；这里不推断、补发或触发通知。</div>
+<section aria-label="信号记录" class="feed-panel"><div class="signal-feed"><div id="signal-rows"></div><div class="empty-state" id="signal-empty"><div aria-hidden="true" class="empty-signal"><svg viewbox="0 0 60 40"><path d="M0 23h17l6-10 8 18 7-8h22"></path></svg></div><h3 id="signal-empty-title">正在连接行情服务</h3><p id="signal-empty-description">真实信号会在这里出现。</p></div></div><div class="panel-foot"><span><i class="tiny-live-dot"></i><span id="signal-footer-note">已收盘确认 · 北京时间</span></span><button class="load-more hidden" id="load-more-signals" type="button">显示更多</button><button class="load-more hidden" id="load-earlier-signals" type="button">加载更早记录</button><span id="last-sync">尚未同步</span></div></section>
+</div><div class="signal-analytics"><section aria-label="信号统计与账户入口" class="stitch-signal-context" id="stitch-signal-context"></section>
+<div aria-live="polite" id="history-statistics"></div>
+<div class="hidden" id="signal-overview">
+<div class="notice hidden" id="stats-availability" role="status"></div>
+<div aria-label="全量信号 R 统计" class="ledger-metrics">
+<article><span>已结束 · 合计 R</span><strong id="stats-realized">—</strong><small id="stats-closed-note">等待统计</small></article>
+<article><span>运行中 · 浮动 R</span><strong id="stats-floating">—</strong><small id="stats-active-note">等待统计</small></article>
+<article><span>已结束胜率</span><strong id="stats-winrate">—</strong><small id="stats-win-note">只统计有退出 R 的信号</small></article>
+<article><span>信号总数</span><strong id="stats-total">—</strong><small id="stats-side-note">每次确认计一条</small></article>
+</div>
+<details class="ledger-breakdown"><summary>分周期统计<span>状态未知单列 · 信号参考 R</span></summary><div class="ledger-table-wrap"><table><thead><tr><th>周期</th><th>信号</th><th>运行中</th><th>已结束</th><th>状态未知</th><th>结束 R</th><th>浮动 R</th><th>胜率</th></tr></thead><tbody id="stats-timeframes"></tbody></table></div></details>
+<p class="ledger-basis" id="stats-basis">按原始信号收盘日归属 · 北京时间 · 周一开始</p>
+</div>
+<section aria-label="信号参考表现图表" class="signal-visuals" id="signal-visuals">
+<article class="signal-chart-card"><div class="signal-chart-heading"><div><span class="signal-kicker">PERFORMANCE</span><h3>信号表现</h3></div><div aria-label="曲线指标" class="segmented" role="group"><button aria-pressed="true" class="selected" data-signal-chart="cumulative" type="button">累计 R</button><button aria-pressed="false" data-signal-chart="drawdown" type="button">回撤</button></div></div><div aria-label="信号累计净 R 曲线" class="signal-chart" id="signal-curve-chart" role="img"></div><p class="signal-chart-caption" id="signal-curve-caption">按退出记录时间累计 · 等风险参考</p></article>
+<article class="signal-chart-card"><div class="signal-chart-heading"><div><span class="signal-kicker">TIMEFRAMES</span><h3>周期贡献</h3></div><span class="signal-chart-unit">净 R</span></div><div aria-label="各周期已结束信号净 R" class="signal-chart" id="signal-timeframe-chart" role="img"></div><p class="signal-chart-caption">完整筛选结果 · 无样本周期保留为空</p></article>
+</section>
+</div></div></section>
+<section class="view-panel hidden" data-stitch-screen="signals" id="watch-view"><div class="section-toolbar"><div class="section-title"><h2 id="watch-section-title">蓄势中的合约</h2><span class="subtle-count" id="watch-count">—</span></div><span class="quiet-text">均线与高周期仅供背景参考</span></div><div class="watch-filter"><label class="search-field"><svg aria-hidden="true" viewbox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><input aria-label="搜索观察合约" autocomplete="off" id="watch-search" placeholder="搜索合约，例如 BTC" type="search"/></label><div aria-label="观察周期" class="segmented watch-timeframe" role="group"><button aria-pressed="true" class="selected" data-watch-timeframe="all" type="button">全部</button><button aria-pressed="false" data-watch-timeframe="5m" type="button">5m</button><button aria-pressed="false" data-watch-timeframe="15m" type="button">15m</button><button aria-pressed="false" data-watch-timeframe="30m" type="button">30m</button><button aria-pressed="false" data-watch-timeframe="1H" type="button">1H</button><button aria-pressed="false" data-watch-timeframe="4H" type="button">4H</button><button aria-pressed="false" data-watch-timeframe="1Dutc" title="北京时间每日 08:00 收盘" type="button">日线</button></div><div aria-label="观察范围" class="segmented watch-scope"><button aria-pressed="true" class="selected" data-watch-scope="building">蓄势中</button><button aria-pressed="false" data-watch-scope="all">全部合约</button></div><span class="watch-explanation" id="watch-explanation">跟踪近零蓄势，等待主图可见的释放标记。</span></div><div class="watch-feed"><div class="watch-card-grid" id="watch-rows"></div><div class="empty-state" id="watch-empty"><div aria-hidden="true" class="empty-signal"><svg viewbox="0 0 60 40"><path d="M0 20h60"></path></svg></div><h3>等待蓄势结构出现</h3><p>扫描完成后，符合条件的观察窗口会列在这里。</p></div><div class="panel-foot"><span>观察状态 · 尚非启动信号</span><button class="load-more hidden" id="load-more-watch" type="button">显示更多</button><span id="watch-timeframes">读取周期</span></div></div></section>
+<section class="view-panel hidden" data-stitch-screen="signals" id="lines-view">
+<div class="shadow-policy"><span class="shadow-policy-dot"></span><strong id="lines-policy-title">SPIKE V11.2 · 突破+spike</strong><span id="lines-policy-text">已收盘 K 线 · 通知状态同步中 · 不下单</span></div>
+<div aria-label="趋势线监控概览" class="shadow-summary">
+<article class="shadow-summary-card"><span id="lines-count-label">24 小时</span><strong id="lines-day-count">—</strong><small id="lines-day-detail">按收盘时间统计</small></article>
+<article class="shadow-summary-card"><span>实时发现</span><strong id="lines-live-count">—</strong><small id="lines-live-detail">启用后、收盘一根内发现</small></article>
+<article class="shadow-summary-card"><span>扫描</span><strong id="lines-scan-state">—</strong><small id="lines-scan-detail">等待扫描</small></article>
+</div>
+<div class="hidden" id="lines-stats">
+<div class="ledger-heading"><h2>模拟持仓统计</h2><div aria-label="统计时间范围" class="segmented" role="group"><button aria-pressed="false" data-lines-period="today" type="button">今天</button><button aria-pressed="false" data-lines-period="week" type="button">本周</button><button aria-pressed="true" class="selected" data-lines-period="all" type="button">全部</button></div></div>
+<div class="notice hidden" id="lines-stats-notice" role="status"></div>
+<div aria-label="突破+spike 模拟持仓 R 统计" class="ledger-metrics">
+<article><span>已结束 · 合计 R</span><strong id="lines-stats-realized">—</strong><small id="lines-stats-closed-note">等待统计</small></article>
+<article><span>运行中 · 浮动 R</span><strong id="lines-stats-floating">—</strong><small id="lines-stats-active-note">等待统计</small></article>
+<article><span>已结束胜率</span><strong id="lines-stats-winrate">—</strong><small id="lines-stats-win-note">只统计有退出 R 的信号</small></article>
+<article><span>信号总数</span><strong id="lines-stats-total">—</strong><small id="lines-stats-side-note">每个 V9 框只算一次</small></article>
+</div>
+<details class="ledger-breakdown"><summary>分周期统计<span>次根开盘入场 · 扣 0.2% 往返 · 同周期同币一次一笔</span></summary><div class="ledger-table-wrap"><table><thead><tr><th>周期</th><th>信号</th><th>运行中</th><th>已结束</th><th>状态未知</th><th>结束 R</th><th>浮动 R</th><th>胜率</th></tr></thead><tbody id="lines-stats-timeframes"></tbody></table></div></details>
+<p class="ledger-basis" id="lines-stats-basis">按信号收盘日归属 · 北京时间 · 周一开始</p>
+</div>
+<div class="section-toolbar"><div class="section-title"><h2 id="lines-section-title">最新信号</h2><span class="subtle-count" id="lines-filtered-count">—</span></div><div aria-label="周期" class="segmented" id="lines-timeframes" role="group"></div></div>
+<div class="filters"><label class="search-field"><svg aria-hidden="true" viewbox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5"></circle><path d="m13 13 4 4"></path></svg><input aria-label="搜索合约" autocomplete="off" id="lines-search" placeholder="搜索合约，例如 SOL" spellcheck="false" type="search"/></label><div aria-label="显示范围" class="segmented" role="group"><button aria-pressed="true" class="selected" data-lines-state="all" type="button">全部</button><button aria-pressed="false" data-lines-state="live" type="button">只看实时</button></div><span class="quiet-text" id="lines-rule-note"></span></div>
+<div class="ledger-filter-row hidden" id="lines-ledger-filters"><label class="ledger-select"><span>逻辑版本</span><select aria-label="逻辑版本" id="lines-performance-version"><option value="current">当前退出规则</option></select></label><label class="ledger-select"><span>状态</span><select aria-label="持仓状态" id="lines-outcome"><option value="all">全部状态</option><option value="active">运行中</option><option value="profit">已止盈 / 保护退出</option><option value="loss">亏损退出</option><option value="breakeven">保本退出</option><option value="unknown">未开仓 / 状态未知</option></select></label><label class="ledger-select"><span>排序</span><select aria-label="排序" id="lines-sort"><option value="newest">最新信号优先</option><option value="oldest">最早信号优先</option><option value="r_desc">R 从高到低</option><option value="r_asc">R 从低到高</option></select></label><span class="quiet-text">R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。</span></div>
+<p class="ledger-basis hidden" id="lines-exit-rule"></p>
+<div class="shadow-event-grid" id="lines-rows"></div>
+<div class="empty-state" id="lines-empty"><div aria-hidden="true" class="empty-signal"><svg viewbox="0 0 60 40"><path d="M0 8l30 14 30-4"></path></svg></div><h3 id="lines-empty-title">等待第一次扫描</h3><p id="lines-empty-text">工作进程启动后约几分钟出现结果。</p></div>
+<div class="panel-foot"><span id="lines-activation">尚未启用</span><button class="load-more hidden" id="load-more-lines" type="button">显示更多</button><span id="lines-last-sync">尚未同步</span></div>
+</section>
+<section class="view-panel hidden" data-stitch-screen="signals" id="shadow-view">
+<div class="shadow-policy"><span class="shadow-policy-dot"></span><strong>前向研究账本</strong><span>V7 与 V8 同源对照 · 仅使用启用后的已收盘 K 线 · 不推送 · 不下单</span></div>
+<div aria-label="前向影子概览" class="shadow-summary">
+<article class="shadow-summary-card"><span>V7 新事件</span><strong id="shadow-event-count">—</strong><small id="shadow-event-detail">等待启用</small></article>
+<article class="shadow-summary-card"><span>V8 保留</span><strong id="shadow-v8-count">—</strong><small id="shadow-v8-detail">单变量：距六线边缘不超过 3 ATR</small></article>
+<article class="shadow-summary-card"><span>观察单元</span><strong id="shadow-cell-count">—</strong><small id="shadow-cell-detail">30m / 1H / 4H</small></article>
+</div>
+<div class="section-toolbar shadow-market-heading"><div class="section-title"><h2>市场状态</h2><span class="subtle-count">描述标签</span></div><span class="quiet-text">用于分层复盘，当前不拦截信号</span></div>
+<div class="shadow-market-grid" id="shadow-market-grid"></div>
+<div class="section-toolbar shadow-event-heading"><div class="section-title"><h2>V7 / V8 新盲样本</h2><span class="subtle-count" id="shadow-filtered-count">—</span></div><div aria-label="前向影子周期" class="segmented shadow-timeframe" role="group"><button aria-pressed="true" class="selected" data-shadow-timeframe="all" type="button">全部</button><button aria-pressed="false" data-shadow-timeframe="30m" type="button">30m</button><button aria-pressed="false" data-shadow-timeframe="1H" type="button">1H</button><button aria-pressed="false" data-shadow-timeframe="4H" type="button">4H</button></div></div>
+<div class="shadow-event-grid" id="shadow-rows"></div>
+<div class="empty-state" id="shadow-empty"><div aria-hidden="true" class="empty-signal"><svg viewbox="0 0 60 40"><path d="M0 24h13l6-5 7 7 8-16 7 12h19"></path></svg></div><h3>等待启用后的新收盘信号</h3><p>这里不会回填已经研究过的历史事件。</p></div>
+<div class="panel-foot"><span id="shadow-activation">尚未启用前向账本</span><span id="shadow-last-scan">等待扫描</span></div>
+</section>
+<section class="view-panel hidden" data-stitch-screen="runtime" data-work-label="运行状态分区" data-work-tabs="system" id="system-view"><div data-work-panel="服务状态"><div class="section-toolbar"><div class="section-title"><h2>运行状态</h2></div><span class="quiet-text">Mac 扫描 · 公开行情 · TG 通知渠道</span></div><div class="system-grid"><article class="panel system-card scan-card"><div class="system-card-heading"><h3>行情扫描</h3><span class="neutral-badge" id="scan-state-badge">等待连接</span></div><div class="scan-progress"><div id="scan-progress-fill"></div></div><dl class="system-facts" id="scan-facts"></dl></article><article class="panel system-card"><div class="system-card-heading"><h3>Telegram 通知</h3><span class="neutral-badge" id="tg-state-badge">等待连接</span></div><p class="system-card-description" id="tg-description">读取通知渠道状态…</p><dl class="system-facts" id="tg-facts"></dl><a href="#notifications">查看通知订阅 →</a></article><article class="panel system-card runtime-card"><div class="system-card-heading"><h3>Mac 监控服务</h3><span class="neutral-badge" id="service-version">—</span></div><dl class="system-facts" id="runtime-facts"></dl><p class="system-footnote">本页面展示指标事件与运行状态，不执行交易。监控需要 Mac 保持开机并联网。</p></article></div></div><div data-work-panel="K 线共享"><article aria-label="全站 K 线共享状态" class="panel" id="candle-status"></article></div><div data-work-panel="诊断与历史"><details class="health-details panel"><summary>查看诊断信息<span>仅运行数据</span></summary><pre id="health-json">尚未读取诊断信息。</pre></details><details class="health-details panel"><summary>历史工作区<span>保留记录</span></summary><nav aria-label="历史工作区" class="legacy-workspaces"><a href="#watch">蓄势观察 →</a><a href="#warmup">预热历史 →</a><a href="#shadow">旧版影子记录 →</a></nav></details></div></section>
+<section aria-label="通知中心" class="view-panel hidden" data-stitch-screen="runtime" id="notifications-view">
+<div class="notifications-view-heading"><div><h2>通知渠道与订阅</h2><p>V13.1 回踩确认覆盖 15m/30m/1H/4H、支持多空。旧版启动、YOLO 与联合信号保留独立订阅。</p></div><span class="quiet-text" id="notifications-updated">状态更新时间待同步</span></div>
+<div aria-live="polite" class="notification-notice hidden" id="notifications-notice" role="status"></div>
+<nav aria-label="通知设置分页" class="linear-section-tabs"><button aria-pressed="true" data-notification-pane="channels" type="button">渠道状态</button><button aria-pressed="false" data-notification-pane="routes" type="button">来源订阅</button></nav><div aria-label="通知渠道状态" class="notification-channel-grid" id="notification-channel-cards"></div>
+<section aria-labelledby="notification-routes-title" class="notification-routes-section" id="notification-routes-section">
+<div class="notification-section-heading"><div><h3 id="notification-routes-title">来源订阅</h3><p>订阅开关控制各来源的 TG 投递，开启不代表渠道已经就绪。</p></div></div>
+<div id="notification-route-matrix"></div>
+</section>
+<p class="notification-safety-note">页面不会显示凭据或提供测试发送。打开页面、缺少历史记录或收到未知结果，都不会触发通知重发。</p>
+</section>
+<div aria-live="polite" class="research-loading hidden" id="research-loading" role="status"></div>
+<div class="research-error hidden" id="research-error" role="alert"></div>
+<section class="view-panel research-panel hidden" data-stitch-screen="research" id="platform-view"><div id="platform-workspace"><p class="research-empty">正在读取体系登记…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="trading-books-view"><div id="trading-books-workspace"><p class="research-empty">正在读取交易书架…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="learning-view"><div id="learning-workspace"><p class="research-empty">正在读取学习计划…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="orderflow-view"><div id="orderflow-workspace"><p class="research-empty">正在读取订单流小册…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="market" id="auto-leaders-view"><div id="auto-leaders-workspace"></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="account" id="yolo-detect-view"><div id="yolo-detect-workspace"></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="langlang-view"><div id="langlang-workspace"><p class="research-empty">正在读取 Bit浪浪小册…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="rektproof-view"><div id="rektproof-workspace"><p class="research-empty">正在读取 RektProof 小册…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="knowledge-view"><div id="knowledge-workspace"><p class="research-empty">正在读取知识条目…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="learning" id="content-view"><div id="content-workspace"><p class="research-empty">正在读取内容草稿…</p></div></section>
+<section class="view-panel research-panel" data-stitch-screen="market" id="market-view"><div id="market-sync-workspace"><p class="research-empty">正在读取全市场异动…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="account" id="copier-view"><div id="copier-workspace"><p class="research-empty">正在读取跟单服务…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="trading" id="manual-view"><div id="manual-workspace"><p class="research-empty">正在读取交易原则与个人工作区…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="research" id="models-view"><div id="models-workspace"><p class="research-empty">正在读取模型登记…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="research" id="research-view"><div id="research-overview"><p class="research-empty">正在读取实验注册表…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="research" id="strategies-view"><div id="strategies-workspace"><p class="research-empty">正在读取策略登记…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="trading" id="paper-desk-view"><div id="paper-desk-workspace"><p class="research-empty">正在读取模拟账户…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="trading" id="paper-view"><div id="paper-workspace"><p class="research-empty">正在读取模拟任务…</p></div></section>
+<section class="view-panel research-panel hidden" data-stitch-screen="research" id="datasets-view"><div id="datasets-workspace"><p class="research-empty">正在读取数据集目录…</p></div></section>
+<section class="view-panel research-panel hidden work-registry" data-stitch-screen="research" id="factors-view">
+<aside class="work-inspector"><h2>筛选因子</h2><div class="research-toolbar"><div><input aria-label="搜索因子" id="factor-search" placeholder="搜索因子、公式或来源…" type="search"/><select aria-label="因子类别" id="factor-category"><option value="">全部类别</option></select><span class="research-caption" id="factor-count"></span></div><button class="research-button primary" id="new-factor">＋ 登记因子</button></div>
+</aside><div class="research-table-wrap"><table class="research-table"><thead><tr><th>因子</th><th>类别</th><th>定义</th><th>研究状态</th><th>关联实验</th><th></th></tr></thead><tbody id="factor-rows"></tbody></table></div>
+<p class="research-caption">代码特征代表已实现，不代表已经证明盈利。研究状态与训练、实盘资格分别记录。</p>
+</section>
+<section class="view-panel research-panel hidden work-registry" data-stitch-screen="research" id="experiments-view">
+<aside class="work-inspector"><h2>筛选与对照</h2><div class="research-toolbar"><div><input aria-label="搜索实验" id="experiment-search" placeholder="搜索问题、因子、结论或实验编号…" type="search"/><select aria-label="实验结论" id="experiment-status"><option value="">全部结论</option><option value="negative-results">否定 / 证据不足</option><option value="negative">负面结论</option><option value="active">研究中</option><option value="rejected">已否定</option><option value="inconclusive">证据不足</option><option value="completed">已完成</option><option value="accepted">历史记录：通过</option><option value="superseded">已替代</option></select><span class="research-caption" id="experiment-count"></span></div><div><button class="research-button" disabled="" id="compare-experiments">对照查看</button><button class="research-button primary" id="new-experiment">＋ 登记实验</button></div></div>
+</aside><div class="research-table-wrap"><table class="research-table experiment-table"><thead><tr><th>对照</th><th>问题与假设</th><th>当前结论</th><th class="experiment-evidence-count">证据</th><th></th></tr></thead><tbody id="experiment-rows"></tbody></table></div><nav aria-label="研究问题分页" class="experiment-pagination" id="experiment-limit"></nav>
+</section>
+<section class="view-panel research-panel hidden work-registry" data-stitch-screen="research" id="backtests-view">
+<aside class="work-inspector"><div class="research-toolbar"><div><h2>离线回测队列</h2><span class="research-caption">排队 → 运行 → 结果复核</span></div><button class="research-button primary" disabled="" id="new-backtest">＋ 新建回测</button></div>
+<div class="research-callout"><strong>SPIKE V12.8 冻结规则重放</strong><p id="backtest-recipe-detail"></p><span id="backtest-availability"></span></div>
+<p class="research-caption">任务独立于行情扫描运行。历史研究已在实验登记中保留；运行成功与策略结论分别记录。</p>
+</aside><div class="research-table-wrap"><table class="research-table"><thead><tr><th>任务</th><th>实验 / 范围</th><th>运行状态</th><th>创建时间</th><th></th></tr></thead><tbody id="job-rows"></tbody></table></div>
+</section>
+<section class="view-panel research-panel hidden" data-stitch-screen="vision-research" id="yolo-view"><div id="yolo-workspace"><p class="research-empty">正在读取 YOLO 工作流…</p></div></section>
+<section class="view-panel hidden" data-stitch-screen="vision-research" id="vision-view"><p id="vision-module-error" role="alert"></p><div id="vision-module"></div></section>
+<footer class="page-footer"><span>SPIKE <span class="footer-separator">/</span> 让趋势自己走出来。</span></footer>
+</main>
+</div>
+</div>
+<dialog aria-label="研究记录详情" id="research-dialog"><div id="research-dialog-content"></div></dialog>
+<div aria-atomic="true" aria-live="polite" class="action-status hidden" id="tradingview-status" role="status"></div>
+<dialog aria-labelledby="workspace-command-title" class="workspace-command" id="workspace-command">
+<header><h2 id="workspace-command-title">前往工作空间</h2><button aria-label="关闭页面搜索" id="workspace-command-close" type="button">Esc</button></header>
+<input aria-label="搜索工作空间页面" autocomplete="off" id="workspace-command-input" placeholder="搜索页面，例如信号、均线、书架…" type="search"/>
+<div class="workspace-command-results" id="workspace-command-results"></div>
+<footer>↑ ↓ 选择页面 · Enter 打开 · Esc 关闭</footer>
+</dialog>
 </body>
 </html>

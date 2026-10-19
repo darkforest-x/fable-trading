@@ -31,7 +31,7 @@ function harness(fetchImpl = async () => response(status())) {
   const get = (id) => { if (!nodes.has(id)) nodes.set(id, element()); return nodes.get(id); };
   const nav = ["signals", "paper", "datasets", "manual", "vision"].map((view) => Object.assign(element(), { dataset: { view } }));
   const location = { hash: "#signals" };
-  const document = { hidden: false, getElementById: get, querySelectorAll: (selector) => selector === "[data-view]" ? nav : [] };
+  const document = { body: element(), hidden: false, getElementById: get, querySelectorAll: (selector) => selector === "[data-view]" ? nav : [] };
   const sandbox = { AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object,
     Math, RegExp, Error, TypeError, JSON, encodeURIComponent, location, document,
     history: { pushState: (_, __, hash) => { history.push(hash); location.hash = hash; } },
@@ -43,7 +43,7 @@ function harness(fetchImpl = async () => response(status())) {
     renderSignals = renderWatch = () => {};
     globalThis.client = { state, setView, refreshShellStatus, refresh, renderStatus };
   })();`, sandbox);
-  return { ...sandbox.client, get, calls, history, nav, document };
+  return { ...sandbox.client, get, calls, history, nav, document, window:sandbox.window };
 }
 
 test("direct workspace entry loads shared status without downloading a signal ledger", async () => {
@@ -55,7 +55,7 @@ test("direct workspace entry loads shared status without downloading a signal le
   assert.match(c.get("sidebar-runtime").textContent, /已运行/);
   assert.equal(c.get("connection-label").classList.contains("hidden"), true);
   assert.equal(c.get("model-gate-notice").classList.contains("hidden"), true);
-  assert.equal(c.get("refresh-button").attrs["aria-label"], "刷新模拟实盘");
+  assert.equal(c.get("refresh-button").attrs["aria-label"], "刷新策略前向账本");
 });
 
 test("direct notification entry and periodic refresh keep connection badges current", async () => {
@@ -118,4 +118,51 @@ test("hidden pages pause periodic fetching and VLM has no inert global refresh b
   assert.equal(c.calls.length, 1);
   c.setView("paper");
   assert.equal(c.get("refresh-button").classList.contains("hidden"), false);
+});
+
+test("refresh feedback belongs to the current page even when another request finishes late", async () => {
+  const c=harness();let finishPaper,finishModels;
+  c.window.SpikePaper.refresh=()=>new Promise(resolve=>{finishPaper=resolve;});
+  c.window.SpikeModels={setActive(){},refresh:()=>new Promise(resolve=>{finishModels=resolve;})};
+  c.setView('paper');const paper=c.refresh();
+  assert.equal(c.get('refresh-button').disabled,true);assert.equal(c.get('refresh-button').attrs['aria-busy'],'true');
+  c.setView('models');assert.equal(c.get('refresh-button').disabled,false);
+  const models=c.refresh();finishPaper();await paper;
+  assert.equal(c.get('refresh-button').disabled,true,'a late response must not enable another page’s busy refresh button');
+  finishModels();await models;
+  assert.equal(c.get('refresh-button').disabled,false);assert.equal(c.get('refresh-button').attrs['aria-busy'],'false');
+  c.window.SpikeModels.refresh=async()=>{throw new Error('offline');};
+  await assert.rejects(c.refresh(),/offline/);assert.equal(c.get('refresh-button').disabled,false);
+});
+
+test("selecting the current page from the drawer returns focus to content",()=>{
+  const c=harness();c.state.view='paper';c.document.body.classList.add('nav-open');
+  c.setView('paper',false);
+  assert.equal(c.get('main').focused,true);assert.equal(c.document.body.classList.contains('nav-open'),false);
+  assert.equal(c.history.length,0);
+});
+
+test('late module completion cannot reactivate an abandoned route', async () => {
+  const c=harness(), pending=new Map(), active=[];
+  c.window.SpikeModules={ensure:view=>new Promise(resolve=>pending.set(view,resolve))};
+  c.window.SpikeManual={setActive:value=>active.push(['manual',value])};
+  c.window.SpikePlatform={setActive:value=>active.push(['platform',value])};
+  c.setView('manual');c.setView('platform');
+  pending.get('platform')();await new Promise(setImmediate);
+  pending.get('manual')();await new Promise(setImmediate);
+  assert.equal(active.filter(([name,value])=>name==='manual'&&value).length,0);
+  assert.equal(active.filter(([name,value])=>name==='platform'&&value).length,1);
+  assert.equal(c.state.view,'platform');assert.equal(c.get('module-load-state').hidden,true);
+});
+
+test("daily detection and leader entries are independent workspaces", async () => {
+  const c=harness();
+  c.setView('auto-leaders',false);
+  assert.equal(c.get('page-title').textContent,'自动找龙头');
+  assert.equal(c.get('auto-leaders-view').classList.contains('hidden'),false);
+  assert.equal(c.get('langlang-view').classList.contains('hidden'),true);
+  c.setView('yolo-detect',false);
+  assert.equal(c.get('page-title').textContent,'均线密集检测');
+  assert.equal(c.get('yolo-detect-view').classList.contains('hidden'),false);
+  assert.equal(c.get('primary-metrics').classList.contains('hidden'),true);
 });

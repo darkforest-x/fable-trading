@@ -1,0 +1,26 @@
+/* SVG data geometry uses the colors, stroke weights and viewport of the export. */
+import {finite,num,time,$,$$,text} from './core.js';
+const NS='http://www.w3.org/2000/svg';
+export const series=[['sma20','#00daf3'],['sma60','#00e5ff'],['sma120','#e9ddff'],['ema20','#c3f5ff'],['ema60','#d0bcff'],['ema120','#ffe9d3']];
+export function normalize(rows){return rows.map(r=>({...r,t:Number(r.t??r.time_ms??r.timestamp),o:Number(r.o??r.open),h:Number(r.h??r.high),l:Number(r.l??r.low),c:Number(r.c??r.close),v:Number(r.v??r.volume??0)})).filter(r=>[r.t,r.o,r.h,r.l,r.c].every(Number.isFinite)).sort((a,b)=>a.t-b.t).filter((r,i,a)=>!i||r.t!==a[i-1].t);}
+function node(tag,attrs,parent){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);parent.append(el);return el;}
+export function chart(svg,{volume=null,axis=null,legend=null}={}){
+ let rows=[],count=60,offset=0,showMA=true,showVolume=true,visible=[],drag=null,scheduled=false;
+ const view=(svg.getAttribute('viewBox')||svg.getAttribute('viewbox')||'0 0 700 220').split(/\s+/).map(Number),width=view[2],height=view[3];
+ svg.setAttribute('viewBox',view.join(' '));svg.setAttribute('role','img');svg.setAttribute('aria-label','实时 K 线与六条均线');svg.style.touchAction='pan-y';
+ function draw(){scheduled=false;visible=rows.slice(Math.max(0,rows.length-offset-count),rows.length-offset);svg.replaceChildren();if(!visible.length){const n=node('text',{x:width/2,y:height/2,fill:'#bac9cc','text-anchor':'middle','font-size':12},svg);n.textContent='暂无 K 线数据';return;}
+  const all=visible.flatMap(r=>[r.l,r.h,...(showMA?series.map(([k])=>r[k]).filter(finite).map(Number):[])]);const low=Math.min(...all),high=Math.max(...all),range=(high-low)||Math.max(high*.01,.001),lo=low-range*.08,hi=high+range*.08,y=v=>height-10-(v-lo)/(hi-lo)*(height-20),step=width/(visible.length+2),x=i=>step*(i+1),bw=Math.max(1,step*.55);
+  visible.forEach((r,i)=>{const up=r.c>=r.o,col=up?'#00e5ff':'#ffb4ab';node('line',{x1:x(i),x2:x(i),y1:y(r.h),y2:y(r.l),stroke:col,'stroke-width':1},svg);node('rect',{x:x(i)-bw/2,y:Math.min(y(r.o),y(r.c)),width:bw,height:Math.max(1,Math.abs(y(r.o)-y(r.c))),fill:up?'#00daf3':'#93000a'},svg);});
+  if(showMA)series.forEach(([key,color])=>{let drawing=false,d='';visible.forEach((r,i)=>{if(finite(r[key])){d+=`${drawing?'L':'M'}${x(i).toFixed(2)} ${y(Number(r[key])).toFixed(2)} `;drawing=true;}else drawing=false;});node('path',{d,fill:'none',stroke:color,'stroke-width':key==='sma20'?2.5:1.5,opacity:.9,'data-series':key},svg);});
+  node('line',{x1:0,x2:width,y1:y(visible.at(-1).c),y2:y(visible.at(-1).c),stroke:'#00e5ff','stroke-dasharray':'3,3',opacity:.6},svg);
+  if(axis){[...axis.children].forEach((el,i,a)=>text(el,num(hi-(hi-lo)*i/Math.max(1,a.length-1),6)));}
+  if(volume){volume.replaceChildren();const max=Math.max(1,...visible.map(r=>r.v));visible.forEach(r=>{const b=document.createElement('div');b.className=r.c>=r.o?'bg-primary/40 w-full rounded-t-xs':'bg-error/40 w-full rounded-t-xs';b.style.height=`${showVolume?r.v/max*100:0}%`;b.title=time(r.t)+' · '+num(r.v);volume.append(b);});}
+  if(legend)legend(visible.at(-1));
+ }
+ function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(draw);}}
+ svg.addEventListener('wheel',e=>{e.preventDefault();count=Math.max(15,Math.min(rows.length||200,Math.round(count*(e.deltaY>0?1.15:.85))));schedule();},{passive:false});
+ svg.addEventListener('pointerdown',e=>{drag={x:e.clientX,offset};svg.setPointerCapture(e.pointerId);});
+ svg.addEventListener('pointermove',e=>{if(drag){offset=Math.max(0,Math.min(Math.max(0,rows.length-count),Math.round(drag.offset+(e.clientX-drag.x)/svg.getBoundingClientRect().width*count)));schedule();return;}const idx=Math.max(0,Math.min(visible.length-1,Math.floor((e.clientX-svg.getBoundingClientRect().left)/svg.getBoundingClientRect().width*visible.length)));const r=visible[idx];if(r){svg.setAttribute('aria-label',`${time(r.t)} 开${r.o} 高${r.h} 低${r.l} 收${r.c}`);if(legend)legend(r);}});
+ svg.addEventListener('pointerup',()=>drag=null);svg.addEventListener('pointercancel',()=>drag=null);svg.addEventListener('pointerleave',()=>{if(legend&&visible.length)legend(visible.at(-1));});svg.addEventListener('dblclick',()=>{count=60;offset=0;schedule();});
+ return {set(data){rows=normalize(data);offset=Math.min(offset,Math.max(0,rows.length-count));schedule();},ma(){showMA=!showMA;schedule();return showMA;},volume(){showVolume=!showVolume;schedule();return showVolume;},get rows(){return rows;}};
+}

@@ -44,6 +44,15 @@ def test_workflow_does_not_infer_completion_from_stage_membership():
                                     question="29 owner-selected symbols with box-any trades"))
 
 
+def test_gold_commodity_is_not_a_gold_label_workflow():
+    assert not workflow_stages(dict(experiment_id="exp-gold-breakout-15m-v1",
+                                    question="Does a Gold breakout strategy earn on XAUUSD?"))
+    assert "dataset" in workflow_stages(dict(experiment_id="exp-p1-gold-quality-v1",
+                                             question="Review the gold label errors"))
+    assert workflow_stages(dict(experiment_id="exp-w10-blind-audit-v1",
+                                 question="Can the Gold snapshot pass owner review?"))
+
+
 def test_overview_keeps_registry_and_receipt_status_separate(workspace):
     catalog, folder = workspace
     before = (catalog.root / "experiments/registry.yaml").read_bytes()

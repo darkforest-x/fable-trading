@@ -1,6 +1,8 @@
 """Same-origin workbench endpoints. Reads never start inference or training."""
 from __future__ import annotations
 import uuid
+import hashlib
+from .store import encode
 from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
@@ -58,6 +60,8 @@ def install(app,runtime,launch_worker=True):
     book=Book(runtime);app.state.yolo_workbench=book
     from .discoveries import Feed
     feed=Feed(book)
+    from .latest import Latest
+    latest=Latest(book)
     from .chart_tail import ChartTail
     charts=ChartTail(runtime)
     router=APIRouter(prefix='/api/yolo-detect',dependencies=[Depends(same_origin)])
@@ -74,15 +78,20 @@ def install(app,runtime,launch_worker=True):
         return value
     @router.get('/catalog')
     def get_catalog():return catalog()
+    @router.get('/latest')
+    def latest_results(if_revision:str=''):return latest.read(if_revision)
     @router.get('/symbols')
     def symbols():
         from .market import Market
         try:
             items=Market().universe();return dict(items=items,observed_ms=now())
         except Exception as exc:raise HTTPException(503,'OKX 币种列表不可用：'+str(exc)[:180]) from exc
+    def revision(value):return hashlib.sha256(encode(value).encode()).hexdigest()[:24]
     @router.get('/jobs')
-    def jobs(limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0)):
-        return dict(items=book.jobs(limit,offset),total=book.job_count(),worker=book.meta('worker'),now_ms=now())
+    def jobs(limit:int=Query(30,ge=1,le=100),offset:int=Query(0,ge=0),if_revision:str=''):
+        data=dict(items=book.job_summaries(limit,offset),total=book.job_count())
+        version=revision(data)
+        return dict({} if if_revision==version else data,revision=version,unchanged=if_revision==version,worker=book.meta('worker'),now_ms=now())
     @router.post('/jobs',status_code=202)
     def submit(body:Submission):
         spec=freeze_spec(body.model_dump(exclude={'request_id'}))
@@ -91,7 +100,13 @@ def install(app,runtime,launch_worker=True):
         except ValueError as exc:raise HTTPException(409,str(exc)) from exc
         launch();return value
     @router.get('/jobs/{identity}')
-    def detail(identity:str):return dict(job(identity),results=book.summaries(identity))
+    def detail(identity:str,if_revision:str='',view:Literal['full','progress']='full'):
+        value=job(identity)
+        # Summaries also cover a result committed before its progress update.
+        results=book.summaries(identity);version=revision([value['updated_ms'],value['status'],value['cancel'],value['progress'],results])
+        if if_revision==version:return dict(revision=version,unchanged=True)
+        if view=='progress':value={k:value[k] for k in ('id','status','updated_ms','progress','error','cancel')}
+        return dict(value,results=results,revision=version,unchanged=False)
     @router.post('/jobs/{identity}/cancel')
     def cancel(identity:str):job(identity);return book.cancel(identity)
     @router.get('/jobs/{identity}/results/{symbol}')
@@ -123,8 +138,9 @@ def install(app,runtime,launch_worker=True):
     @router.get('/discoveries')
     def discoveries(days:int=Query(7,ge=0,le=30),q:str=Query('',max_length=80),
                     timeframe:Literal['','5m','15m','30m','1H','4H','1Dutc']='',
-                    side:Literal['','long','short']='',limit:int=Query(30,ge=1,le=500),sort:Literal['newest','score','symbol']='newest'):
-        return feed.read(days=days,query=q,timeframe=timeframe,side=side,limit=limit,sort=sort)
+                    side:Literal['','long','short']='',limit:int=Query(30,ge=1,le=500),sort:Literal['newest','score','symbol']='newest',
+                    offset:int=Query(0,ge=0),before_ms:Optional[int]=Query(None,ge=0)):
+        return feed.read(days=days,query=q,timeframe=timeframe,side=side,limit=limit,sort=sort,offset=offset,before_ms=before_ms)
     @router.post('/schedules',status_code=201)
     def schedule(body:Schedule):
         if len(book.schedules())>=12:raise HTTPException(409,'已有 12 个计划，请先删除不需要的计划')

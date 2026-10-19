@@ -15,6 +15,14 @@ chrome.runtime.onInstalled.addListener(async () => {
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "DISCORD_OKX_HEARTBEAT") {
+    const p=message.payload;
+    if(p?.guild_id!=="1004707886657699901" || p?.channel_id!=="1131521990814089276") return false;
+    chrome.storage.local.get(["enabled"]).then(settings => settings.enabled === false ? {ok:false} :
+      fetch("http://127.0.0.1:8080/api/messages/heartbeat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)}))
+      .then(r=>sendResponse({ok:r.ok})).catch(()=>sendResponse({ok:false}));
+    return true;
+  }
   if (message?.type === "DISCORD_OKX_MESSAGE") {
     handleDiscordMessage(message.payload)
       .then((result) => sendResponse(result))
@@ -34,6 +42,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleDiscordMessage(payload) {
+  if(payload?.guild_id!=="1004707886657699901" || payload?.channel_id!=="1131521990814089276")
+    return {ok:true,skipped:true,reason:"outside_watchlist"};
   const settings = await chrome.storage.local.get(Object.keys(DEFAULTS));
   const merged = { ...DEFAULTS, ...settings };
 
@@ -47,10 +57,11 @@ async function handleDiscordMessage(payload) {
     return { ok: false, skipped: true, reason: "empty" };
   }
 
-  if (sentIds.has(externalId)) {
-    return { ok: false, skipped: true, reason: "duplicate" };
+  const versionKey = JSON.stringify([externalId,content,(payload.attachments||[]).map(a=>String(a.url||"").split("?")[0])]);
+  if (sentIds.has(versionKey)) {
+    return { ok: true, skipped: true, reason: "duplicate" };
   }
-  sentIds.add(externalId);
+  sentIds.add(versionKey);
 
   const body = {
     content,
@@ -63,7 +74,7 @@ async function handleDiscordMessage(payload) {
     source: payload.recovery_capture
       ? "discord-web_recovery"
       : payload.visible_recent_scan
-        ? "discord-web-visible_recovery"
+        ? "discord-web-visible"
       : payload.manual_capture
         ? "discord-web-manual"
         : "discord-web",
@@ -80,6 +91,10 @@ async function handleDiscordMessage(payload) {
       throw new Error(data.detail || response.statusText);
     }
 
+    if (data.skipped || data.message_id === null) {
+      sentIds.delete(versionKey);
+      return {ok:false,skipped:true,reason:data.reason||"not_ingested"};
+    }
     const duplicate = Boolean(data.duplicate);
     const submittedCount = duplicate
       ? Number(merged.submittedCount || 0)
@@ -92,7 +107,7 @@ async function handleDiscordMessage(payload) {
     });
     return { ok: true, data };
   } catch (error) {
-    sentIds.delete(externalId);
+    sentIds.delete(versionKey);
     await chrome.storage.local.set({
       lastStatus: "error",
       lastError: String(error?.message || error),

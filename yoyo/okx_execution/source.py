@@ -1,4 +1,4 @@
-"""Read-only all-market, all-period V13.1 signal-center input.
+"""Read-only owner-selected-universe, all-period V13.1 signal-center input.
 
 Only immutable confirmation fields create intents. Display performance is
 never consulted. Exit inputs reuse the exact closed OHLCV prefix, ATR and raw
@@ -15,6 +15,8 @@ from yoyo.monitor import FRESH_MS, TIMEFRAMES
 from yoyo.monitor.v130_policy import SIGNAL_KIND, is_v130_signal
 from yoyo.monitor.v130_signals import SOURCE_SHA256
 from yoyo.research_workspace.paper_source import MonitorSource
+from yoyo.contracts.signal_universe import exclusion_reason
+from .preparation import RetryableRead
 
 
 class Source:
@@ -43,19 +45,50 @@ class Source:
                     or event.get("id", identity) != identity):
                 raise ValueError("signal journal identity/strategy mismatch")
             # Keep only immutable fields; no display outcome can leak downstream.
+            if exclusion_reason(symbol, timeframe=timeframe, side=side) is not None:
+                continue
             events.append({k: v for k, v in dict(event, id=identity).items() if k != "performance"})
         return events
 
     def checkpoint(self, symbol, timeframe, now_ms):
         checkpoint = self.checkpoints.checkpoint(symbol, timeframe, now_ms)
-        if (not checkpoint or not checkpoint["candles"]
-                or not 0 <= now_ms - checkpoint["updated_ms"] <= FRESH_MS):
-            raise ValueError("monitor checkpoint unavailable or stale")
+        if not checkpoint or not checkpoint["candles"]:
+            raise RetryableRead("monitor checkpoint unavailable or stale", "checkpoint_unavailable")
         step = TIMEFRAMES[timeframe]
         last_close = checkpoint["candles"][-1]["t"] + step
+        observed_ms = self.checkpoint_observation(symbol, timeframe, checkpoint, last_close)
+        # The scanner rewrites a seed only when closed candles change. Its
+        # matching successful-read receipt ages independently; both retain the
+        # original 30-minute limit. Old writers fall back to seed-write time.
+        fresh_ms = checkpoint["updated_ms"] if observed_ms is None else observed_ms
+        if not 0 <= now_ms - fresh_ms <= FRESH_MS:
+            raise RetryableRead("monitor checkpoint unavailable or stale", "checkpoint_unavailable")
         if now_ms - last_close >= step + FRESH_MS:
-            raise ValueError("latest completed candle is unavailable")
+            raise RetryableRead("latest completed candle is unavailable", "checkpoint_unavailable")
         return checkpoint
+
+    def checkpoint_observation(self, symbol, timeframe, checkpoint, last_close):
+        """Read only a successful observation bound to this exact closed seed."""
+        path = self.runtime / "monitor.sqlite3"
+        if not path.is_file() or path.is_symlink():
+            return None
+        db = sqlite3.connect(path.resolve().as_uri() + "?mode=ro", uri=True)
+        try:
+            row = db.execute("SELECT payload FROM meta WHERE key=?",
+                             (f"candle_observation:{symbol}:{timeframe}",)).fetchone()
+        finally:
+            db.close()
+        if row is None:
+            return None
+        receipt = json.loads(row[0])
+        if (not isinstance(receipt, dict)
+                or any(type(receipt.get(k)) is not int
+                       for k in ("observed_ms", "checkpoint_updated_ms", "close_ms"))
+                or receipt["checkpoint_updated_ms"] != checkpoint["updated_ms"]
+                or receipt["close_ms"] != last_close
+                or receipt["observed_ms"] < checkpoint["updated_ms"]):
+            return None
+        return receipt["observed_ms"]
 
     def bars(self, symbol, timeframe, after_ms, now_ms):
         from yoyo.monitor.v9_signals import _validate_frame, _decision_frame

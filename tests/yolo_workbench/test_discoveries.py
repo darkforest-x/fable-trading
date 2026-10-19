@@ -92,3 +92,38 @@ def test_sorting_applies_before_pagination_and_preserves_discovery_times(tmp_pat
         assert out['total']==3 and out['items'][0]['detection_id']==expected
         assert out['items'][0]['first_observed_ms']==observed
     assert client.get('/api/yolo-detect/discoveries?sort=unknown').status_code==422
+
+
+def test_pages_are_bounded_filtered_and_keep_new_arrivals_out_of_older_pages(tmp_path):
+    app=FastAPI();install(app,tmp_path,launch_worker=False);client=TestClient(app)
+    book=Book(tmp_path)
+    for i in range(5):
+        add(book,str(i),symbol=f'COIN{i}-USDT-SWAP',observed=100+i)
+    first=client.get('/api/yolo-detect/discoveries?days=0&limit=2&before_ms=104').json()
+    add(book,'arrival',symbol='NEW-USDT-SWAP',observed=105)
+    second=client.get('/api/yolo-detect/discoveries?days=0&limit=2&offset=2&before_ms=104').json()
+    last=client.get('/api/yolo-detect/discoveries?days=0&limit=2&offset=4&before_ms=104').json()
+    ids=[r['detection_id'] for page in [first,second,last] for r in page['items']]
+    assert ids==['4','3','2','1','0']
+    assert second['total']==5 and second['offset']==2 and second['limit']==2
+    assert second['before_ms']==104 and book.job_count()==6
+    assert client.get('/api/yolo-detect/discoveries?days=0&offset=20').json()['items']==[]
+    assert client.get('/api/yolo-detect/discoveries?offset=-1').status_code==422
+    assert client.get('/api/yolo-detect/discoveries?before_ms=-1').status_code==422
+    filtered=client.get('/api/yolo-detect/discoveries?days=0&q=COIN1&limit=1').json()
+    assert filtered['total']==1 and filtered['items'][0]['detection_id']=='1'
+
+
+def test_page_cutoff_freezes_scores_and_cluster_merges_before_sorting(tmp_path):
+    book=Book(tmp_path);feed=Feed(book)
+    add(book,'a',observed=100,start=10,end=20,confidence=.9)
+    add(book,'b',observed=101,start=30,end=40,confidence=.7)
+    add(book,'c',observed=102,start=50,end=60,confidence=.5)
+    first=feed.read(days=0,limit=1,sort='score',before_ms=102)
+    add(book,'bridge',observed=103,start=19,end=31,confidence=.1)
+    add(book,'promoted',observed=104,start=50,end=60,confidence=.99)
+    second=feed.read(days=0,offset=1,limit=2,sort='score',before_ms=first['before_ms'])
+    assert [r['detection_id'] for r in first['items']+second['items']]==['a','b','c']
+    assert second['total']==3
+    assert feed.read(days=0,sort='score')['items'][0]['detection_id']=='promoted'
+    assert Feed(book).read(days=0,offset=1,limit=2,sort='score',before_ms=102)['items']==second['items']

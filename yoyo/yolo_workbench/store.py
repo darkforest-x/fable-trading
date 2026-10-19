@@ -67,6 +67,15 @@ class Book:
     def jobs(self,limit=30,offset=0):
         with closing(self.connect()) as db:return [self.job(r) for r in db.execute('SELECT * FROM jobs ORDER BY created_ms DESC LIMIT ? OFFSET ?',(limit,offset))]
 
+    def job_summaries(self,limit=30,offset=0):
+        """List projection excludes frozen model manifests and per-market inputs."""
+        keys=('model_id','timeframe','mode','scope','start_ms','end_ms')
+        projection=','.join("'%s',json_extract(spec,'$.%s')"%(k,k) for k in keys)
+        projection+=",'symbols',json(CASE WHEN json_extract(spec,'$.scope')='all' THEN '[]' ELSE COALESCE(json_extract(spec,'$.symbols'),'[]') END)"
+        with closing(self.connect()) as db:
+            rows=db.execute('SELECT id,status,created_ms,updated_ms,progress,error,cancel,schedule_id,json_object('+projection+') AS spec FROM jobs ORDER BY created_ms DESC LIMIT ? OFFSET ?',(limit,offset))
+            return [self.job(r) for r in rows]
+
     def job_count(self):
         with closing(self.connect()) as db:return db.execute('SELECT count(*) FROM jobs').fetchone()[0]
 

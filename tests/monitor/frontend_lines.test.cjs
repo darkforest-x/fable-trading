@@ -31,7 +31,7 @@ function harness(fetchImpl = async () => response({})) {
     }
     return elements.get(id);
   };
-  const sandbox = { AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object, Math,
+  const sandbox = { window: {}, AbortController, Date, Intl, Map, Set, Promise, Number, String, Boolean, Array, Object, Math,
     RegExp, Error, TypeError, JSON, encodeURIComponent, fetch: fetchImpl,
     setTimeout: (...args) => { const timer = setTimeout(...args); timer.unref(); return timer; }, clearTimeout,
     document: { getElementById: getElement, querySelectorAll: () => [] } };

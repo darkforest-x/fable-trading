@@ -1,0 +1,7 @@
+# Workspace redesigns must preserve state and verify route edges
+
+- **Problem**: A whole-site redesign must change where users work, while preserving filters, drafts, chart instances and the actual meaning of live status. Uniform colors alone left the original overloaded structure intact.
+- **Dead end**: Styling every route as generic cards kept long explanations ahead of records. Treating a route as verified as soon as its heading appeared also captured loading placeholders instead of its real layout. A valid research link fell back to the same page because the frontend route allowlist omitted `research`.
+- **Effective path**: Templates define primary records and an inspector. Local tabs and mobile disclosures keep the original controls mounted. Verify representative workflows in the browser, wait for actual records or chart canvases, then measure the final layout. Test entry links and historical route return paths as well as the default screen. Recheck long status labels after loading, not just the empty shell.
+- **General rule**: Map each route's primary task, state owner and navigation edges before changing its composition. Separate live backend failures from layout failures; preserve visible failure states instead of manufacturing a successful dashboard.
+- **Affected**: `workspace-terminal.css`, `workspace-panels.js`, page templates, `workspace-layouts.js`, platform route allowlist and corresponding frontend tests. UI validation must not submit trading actions or change workers, schedules or model gates.

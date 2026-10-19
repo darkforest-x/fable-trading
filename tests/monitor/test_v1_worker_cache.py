@@ -31,7 +31,7 @@ class Client:
 
 def test_persistent_worker_reuses_client_candles_and_skips_unchanged_replay(tmp_path, monkeypatch):
     client, calls = Client(), []
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     def analyze(candles, higher, timeframe, *, tick, chart_limit=None):
         assert chart_limit == 240
         calls.append((timeframe, tuple(row["t"] for row in candles)))
@@ -53,7 +53,7 @@ def test_persistent_worker_reuses_client_candles_and_skips_unchanged_replay(tmp_
 
 def test_scan_timing_separates_main_thread_cpu_and_preserves_fixed_outputs(tmp_path, monkeypatch):
     client = Client()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     cpu_ticks = iter(index / 1_000 for index in range(1, 100))
     monkeypatch.setattr(v1_worker.time, "thread_time", lambda: next(cpu_ticks))
 
@@ -114,7 +114,7 @@ def test_prefetches_up_to_eight_cells_but_replays_and_writes_in_cell_order(tmp_p
             return super().candles(symbol, timeframe, previous, limit)
 
     client, replays = PrefetchClient(), []
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     monkeypatch.setattr(v1_worker, "analyze", lambda candles, higher, timeframe, *, tick, chart_limit:
                         (replays.append(timeframe) or {"events": [], "chart": list(candles),
                                                         "state": {"phase": "ready", "ready": True}}))
@@ -147,7 +147,7 @@ def test_restart_hydrates_full_checkpoint_then_replays_exact_increment(tmp_path,
 
     database = tmp_path / "monitor.sqlite3"
     seed = SeedClient()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: seed)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: seed)
     first = v1_worker.V1Scanner(str(database))
     first.scan_once()
 
@@ -159,7 +159,7 @@ def test_restart_hydrates_full_checkpoint_then_replays_exact_increment(tmp_path,
             return previous + [{"t": previous[-1]["t"] + step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 100.}], 0
 
     increment = IncrementClient()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: increment)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: increment)
     second = v1_worker.V1Scanner(str(database))
     assert all(second.candles[("TEST-USDT-SWAP", timeframe)] == _complete_bars(timeframe)
                for timeframe in MONITORED_TIMEFRAMES)
@@ -185,7 +185,7 @@ def test_gap_checkpoint_is_not_restored_as_a_recurrence_seed(tmp_path, monkeypat
         {"t": 2 * step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.},
     ])
     client = Client()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     scanner = v1_worker.V1Scanner(str(database))
     assert ("TEST-USDT-SWAP", "1H") not in scanner.candles
 
@@ -197,7 +197,7 @@ def test_fractional_checkpoint_timestamp_is_not_restored(tmp_path, monkeypatch):
         {"t": 0.5, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.},
     ])
     client = Client()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     scanner = v1_worker.V1Scanner(str(database))
     assert ("TEST-USDT-SWAP", "1H") not in scanner.candles
 
@@ -212,7 +212,7 @@ def test_scanner_publishes_generation_before_synchronize(tmp_path, monkeypatch):
             return 0
 
     client = StartupClient()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     scanner = v1_worker.V1Scanner(str(database), generation="worker-generation-1")
     scanner.scan_once()
 
@@ -230,7 +230,7 @@ def test_performance_backfill_is_bounded_and_never_registers_old_candidates(tmp_
                     for i in range(v1_worker.PERFORMANCE_BACKFILL_PER_SCAN + 2)]
 
     client = ManyClient()
-    monkeypatch.setattr(v1_worker, "OKX", lambda: client)
+    monkeypatch.setattr(v1_worker, "OKX", lambda **kwargs: client)
     replays = []
 
     def replay(candles, higher, timeframe, *, tick, chart_limit):

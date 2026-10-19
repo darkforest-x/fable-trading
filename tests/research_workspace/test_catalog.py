@@ -175,3 +175,25 @@ def test_open_factors_keep_source_identity_and_separate_eligibility(tmp_path):
     target.write_text(json.dumps(manifest))
     with pytest.raises(ValueError, match="full commit"):
         Catalog(root).factors()
+
+
+def test_display_title_is_bound_to_original_question_and_never_rewrites_evidence(tmp_path):
+    import hashlib
+    root = _root(tmp_path, _experiment_yaml())
+    aliases = root / 'yoyo/research_workspace/experiment_labels_zh.json'
+    aliases.parent.mkdir(parents=True)
+    aliases.write_text(json.dumps({'exp-fixture-v1': {
+        'title': '这个研究问题是否有效？',
+        'question_sha256': hashlib.sha256(b'fixture question').hexdigest(),
+    }}))
+    catalog = Catalog(root)
+    row = catalog.experiments()[0]
+    assert row['display_title'] == '这个研究问题是否有效？'
+    assert row['question'] == 'fixture question'
+    assert row['status'] == 'rejected'
+    assert row['training_eligible'] is False
+    registry = root / 'experiments/registry.yaml'
+    registry.write_text(_experiment_yaml().replace('fixture question', 'changed question'))
+    row = catalog.experiments()[0]
+    assert 'display_title' not in row
+    assert row['question'] == 'changed question'

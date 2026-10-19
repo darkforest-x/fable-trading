@@ -1,0 +1,75 @@
+/* Shared motion language. No quote counters, chart drawing animations, blanket
+ * transition:all, persistent will-change, or polling-driven entry effects.
+ * Native dialog exit follows MDN's display/overlay discrete-transition pattern.
+ */
+html button, :host button, input, select, textarea, .signal-card {
+  transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,box-shadow var(--motion-fast) ease,translate var(--motion-fast) var(--motion-ease);
+}
+button:not(:disabled):not(.card-primary-action):active {translate:0 1px}
+@media(hover:hover) and (pointer:fine) {
+  .signal-card:hover {translate:0 -2px;box-shadow:0 5px 16px #0002}
+}
+/* Animate the selection accent independently of the tab's text/layout. */
+:is(.work-panel-tabs,.mt-watch-tabs,.primary-nav) > button {position:relative}
+:is(.work-panel-tabs,.mt-watch-tabs,.primary-nav) > button::after {
+  content:"";position:absolute;bottom:0;left:12px;right:12px;height:2px;
+  background:var(--mint);scale:0 1;opacity:0;transform-origin:center;
+  transition:scale var(--motion-panel) var(--motion-ease),opacity var(--motion-fast) ease;
+}
+:is(.work-panel-tabs,.mt-watch-tabs,.primary-nav) > button:is([aria-selected=true],[aria-pressed=true],.active)::after {scale:1 1;opacity:1}
+
+/* Native semantics/focus/closing remain immediate. Older browsers get entry. */
+@keyframes spike-surface-in {from {opacity:0;translate:0 10px}to {opacity:1;translate:0 0}}
+@keyframes spike-drawer-in {from {opacity:.4;translate:24px 0}to {opacity:1;translate:0 0}}
+@keyframes spike-fade-in {from {opacity:0}to {opacity:1}}
+dialog[open] {animation:spike-surface-in var(--motion-enter) var(--motion-ease)}
+dialog[open]::backdrop {animation:spike-fade-in var(--motion-panel) ease}
+:is(#research-dialog,#dataset-dialog,#model-dialog,#strategy-dialog,#paper-dialog)[open] {animation-name:spike-drawer-in}
+@supports (transition-behavior:allow-discrete) and (overlay:auto) {
+  dialog, .spike-symbol-options[popover] {
+    opacity:0;translate:0 10px;
+    transition:opacity var(--motion-panel) ease,translate var(--motion-enter) var(--motion-ease),
+      display var(--motion-enter) allow-discrete,overlay var(--motion-enter) allow-discrete;
+  }
+  dialog[open], .spike-symbol-options:popover-open {opacity:1;translate:0 0;animation:none}
+  dialog:not([open]), .spike-symbol-options:not(:popover-open) {pointer-events:none}
+  dialog:not([open])::backdrop {pointer-events:none}
+  :is(#research-dialog,#dataset-dialog,#model-dialog,#strategy-dialog,#paper-dialog) {translate:24px 0}
+  :is(#research-dialog,#dataset-dialog,#model-dialog,#strategy-dialog,#paper-dialog)[open] {translate:0 0}
+  dialog::backdrop {
+    opacity:0;transition:opacity var(--motion-panel) ease,
+      display var(--motion-enter) allow-discrete,overlay var(--motion-enter) allow-discrete;
+  }
+  dialog[open]::backdrop {opacity:1;animation:none}
+  @starting-style {
+    dialog[open], .spike-symbol-options:popover-open {opacity:0;translate:0 10px}
+    :is(#research-dialog,#dataset-dialog,#model-dialog,#strategy-dialog,#paper-dialog)[open] {translate:24px 0}
+    dialog[open]::backdrop {opacity:0}
+  }
+}
+.dropdown-menu.show, .spike-info-content {animation:spike-surface-in var(--motion-panel) var(--motion-ease)}
+/* Native details expands smoothly where intrinsic-size interpolation exists. */
+@supports (interpolate-size:allow-keywords) {
+  details:not(.nav-group)::details-content {
+    interpolate-size:allow-keywords;block-size:0;overflow:clip;
+    transition:block-size var(--motion-panel) var(--motion-ease),content-visibility var(--motion-panel) allow-discrete;
+  }
+  details:not(.nav-group)[open]::details-content {block-size:auto}
+}
+.sidebar {transition:transform var(--motion-enter) var(--motion-ease),visibility var(--motion-enter) allow-discrete}
+@media(max-width:1023px) {
+  .nav-backdrop:not([hidden]) {animation:spike-fade-in var(--motion-panel) ease}
+}
+/* Loading communicates pending work only; it never simulates completion. */
+@keyframes spike-loading {from {translate:-110% 0}to {translate:300% 0}}
+#module-load-state[data-loading=true] {position:relative;overflow:hidden}
+#module-load-state[data-loading=true]::after {
+  content:"";position:absolute;bottom:0;left:0;width:34%;height:2px;background:var(--mint);
+  animation:spike-loading 1.2s ease-in-out infinite;
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after,dialog::backdrop {animation:none!important;transition:none!important;scroll-behavior:auto!important}
+  details::details-content {transition:none!important}
+  .signal-card:hover,button:not(:disabled):active {translate:none}
+}

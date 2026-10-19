@@ -181,7 +181,9 @@ class ResearchPlatform:
         ]
         business_lines = [
             dict(id="personal", name="个人交易系统", view="manual",
-                 description="本人判断与执行；个人规则 → 盘前计划 → 机会筛选 → 实际成交登记 → 复盘。独立积累人工交易证据。"),
+                 description="沉淀原则 → 开单前核对并由本人执行 → 记录与复盘；值得保留的经验回到原则。"),
+            dict(id="learning", name="学习与内容输出", view="learning",
+                 description="问题与资料 → 学习复述 → 知识与研究证据 → 内容母稿 → 平台版本与发布记录。正式知识沿用 Notion 中枢。"),
             dict(id="research", name="策略研究", view="research",
                  description="外部思路与市场观察进入假设、因子、模型和实验，保留失败结论。"),
             dict(id="systematic", name="自动策略验证", view="paper",

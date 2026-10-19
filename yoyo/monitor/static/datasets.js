@@ -64,7 +64,7 @@
     if (grid) grid.innerHTML=categoryFiltersHTML();
   }
   function storageName(storage) {
-    return ({managed:'集中管理',in_place:'原位保留',external:'外部引用'})[storage] || '未登记';
+    return ({managed:'集中管理',in_place:'原位保留',external:'外部引用',external_managed:'外接硬盘',partially_external_managed:'部分外接硬盘'})[storage] || '未登记';
   }
   function listText(values, fallback='未知') {
     return arr(values).map((value)=>text(value,'')).filter(Boolean).join('、') || fallback;
@@ -123,16 +123,16 @@
         <button type="button" class="research-button" data-dataset-page="next" data-dataset-id="${esc(item.id)}" ${offset+limit>=total?'disabled':''}>下一页</button>
       </div></div></section>`;
   }
-  function itemCard(item) {
+  function itemCard(item, expanded=false) {
     const selected=state.detail?.id===item.id;
     const category=item.category_label||categoryName(item.category);
     const coverage=`开始 ${date(item.start)} · 结束 ${date(item.end)}`;
     const ready=item.backtest_ready===true;
     const example=ready?sampleCode(item):'';
     const missing=itemMissingCount(item), hasMissing=missing!==null&&missing>0;
-    return `<article class="dataset-card${hasMissing?' has-missing-files':''}">
-      <div class="dataset-card-top"><span class="dataset-category-tag">${esc(category)}</span><span class="dataset-storage-tag">${esc(storageName(item.storage))}</span>${hasMissing?`<span class="dataset-missing-tag">${esc(number(missing,'0'))} 个缺失文件</span>`:''}</div>
-      <h3>${esc(item.name||item.id||'未命名数据集')}</h3><p class="dataset-id">${esc(item.id||'')}</p>
+    return `<details data-dataset-record="${esc(item.id)}" ${selected||expanded?'open':''} class="dataset-card${hasMissing?' has-missing-files':''}">
+      <summary class="dataset-record-summary"><div class="dataset-record-name"><div class="dataset-card-top"><span class="dataset-category-tag">${esc(category)}</span><span class="dataset-storage-tag">${esc(storageName(item.storage))}</span>${hasMissing?`<span class="dataset-missing-tag">${esc(number(missing,'0'))} 个缺失文件</span>`:''}</div>
+      <h3>${esc(item.name||item.id||'未命名数据集')}</h3><p class="dataset-id">${esc(item.id||'')}</p></div><div class="dataset-record-meta"><span>${esc(number(item.file_count))} 文件</span><span>${esc(bytes(item.total_bytes))}</span><span>${esc(listText(item.formats))}</span></div><span class="dataset-record-expand">详情 ⌄</span></summary><div class="dataset-record-body">
       <p class="dataset-path"><span>目录位置</span><code>${esc(item.path||'未知')}</code></p>
       <div class="dataset-metrics"><span>文件 <strong>${esc(number(item.file_count))}</strong></span><span>逻辑大小 <strong>${esc(bytes(item.total_bytes))}</strong></span><span>格式 <strong>${esc(listText(item.formats))}</strong></span></div>
       <dl class="dataset-facts"><dt>市场</dt><dd>${esc(listText(item.exchanges))}</dd><dt>周期</dt><dd>${esc(listText(item.timeframes))}</dd><dt>币种数</dt><dd>${esc(number(item.symbols_count))}</dd><dt>覆盖时间</dt><dd>${esc(coverage)}</dd></dl>
@@ -141,7 +141,7 @@
       ${ready?`<div class="dataset-example"><div><strong>读取示例</strong><button type="button" class="research-button" data-dataset-copy="${esc(item.id)}">复制代码</button></div><pre><code>${esc(example)}</code></pre><p>${state.copyFor===item.id?esc(state.copyMessage):''}</p></div>`:''}
       <div class="dataset-card-footer"><span>索引记录 ${esc(number(item.file_count))} 个文件 · 逻辑大小 ${esc(bytes(item.total_bytes))}</span><button type="button" class="research-button" data-dataset-details="${esc(item.id)}">${selected?'收起文件明细':'查看文件明细'} →</button></div>
       ${selected?fileDetails(item):''}
-    </article>`;
+    </div></details>`;
   }
   function renderItems() {
     if (!root||!state.data) return;
@@ -163,7 +163,8 @@
       list.innerHTML=`<div class="dataset-empty"><strong>${esc(!state.data.indexed?'等待数据目录索引':hasItems?'没有匹配的数据集':'目录索引为空')}</strong><p>${esc(copy)}</p>${hasItems&&hasFilters?'<button type="button" class="research-button" data-dataset-reset>清除筛选，显示全部数据集</button>':''}</div>`;
       return;
     }
-    list.innerHTML=visiblePage.map(itemCard).join('');
+    const expanded=new Set(Array.from(list.querySelectorAll?.('[data-dataset-record][open]')||[],el=>el.dataset.datasetRecord));
+    list.innerHTML=visiblePage.map(item=>itemCard(item,expanded.has(item.id))).join('');
   }
   function render() {
     if (!root) return;
@@ -181,18 +182,18 @@
     const missingMismatch=missingAvailable&&Number.isFinite(missingTotal)&&affectedDatasets().reduce((sum,item)=>sum+itemMissingCount(item),0)!==missingTotal;
     const missingAction=missingAvailable&&affectedCount>0?`<button type="button" class="research-button" data-dataset-missing-filter aria-pressed="${state.missingOnly?'true':'false'}">${state.missingOnly?'取消缺失筛选':`查看受影响数据集（${esc(number(affectedCount,'0'))}）`}</button>`:'';
     const missingNote=missingTotal>0&&!missingAvailable?'<small>当前目录没有逐数据集缺失数，无法定位受影响条目。</small>':missingMismatch?'<small>汇总与逐数据集缺失数不一致，请刷新目录或重新索引核对。</small>':'';
-    root.innerHTML=`<div class="datasets-workspace">
+    root.innerHTML=`<div class="datasets-workspace work-split">
       <header class="datasets-hero"><div><span class="datasets-kicker">研究基础设施 / 数据目录</span><h2>币圈数据集</h2><p>统一查看已整理、原位保留与外部引用的数据目录，核对文件清单、覆盖范围和回测读取入口。</p><p class="datasets-generated">目录状态：<strong>${esc(status)}</strong> · 生成时间：${esc(date(data.generated_at))}</p></div><div class="datasets-actions"><button type="button" class="research-button" data-dataset-refresh ${state.loading?'disabled':''}>刷新目录</button><button type="button" class="research-button primary" data-dataset-reindex ${state.reindexing||maintenance.status==='running'?'disabled':''}>${state.reindexing?'正在提交…':'重新索引'}</button></div></header>
       ${state.error?`<p class="dataset-inline-error" role="alert">目录刷新失败：${esc(state.error)}</p>`:''}
       ${maintenance.status==='running'?'<p class="dataset-indexing" role="status">索引任务正在运行；点击“刷新目录”查看最新状态。</p>':''}
       ${maintenance.status==='failed'?`<p class="dataset-inline-error" role="alert">索引任务失败：${esc(text(maintenance.error,'未返回错误详情'))}</p>`:''}
       ${state.notice?`<p class="dataset-notice" role="status">${esc(state.notice)}</p>`:''}
-      <section class="dataset-summary" aria-label="数据集目录统计"><article><span>数据集</span><strong>${esc(number(summary.dataset_count))}</strong></article><article><span>索引文件</span><strong>${esc(number(summary.file_count))}</strong></article><article><span>文件逻辑大小</span><strong>${esc(bytes(summary.total_bytes))}</strong></article><article><span>集中行情大小</span><strong>${esc(bytes(summary.managed_bytes))}</strong></article><article><span>已处理重复块</span><strong>${esc(bytes(summary.duplicate_bytes))}</strong></article><article class="dataset-summary-missing"><div><span>缺失文件</span><strong>${esc(number(summary.missing_count))}</strong></div>${missingAction}${missingNote}</article></section>
+      <aside class="work-inspector dataset-inspector"><h2>目录概况</h2><section class="dataset-summary" aria-label="数据集目录统计"><article><span>数据集</span><strong>${esc(number(summary.dataset_count))}</strong></article><article><span>索引文件</span><strong>${esc(number(summary.file_count))}</strong></article><article><span>文件逻辑大小</span><strong>${esc(bytes(summary.total_bytes))}</strong></article><article><span>集中行情大小</span><strong>${esc(bytes(summary.managed_bytes))}</strong></article><article><span>已处理重复块</span><strong>${esc(bytes(summary.duplicate_bytes))}</strong></article><article class="dataset-summary-missing"><div><span>缺失文件</span><strong>${esc(number(summary.missing_count))}</strong></div>${missingAction}${missingNote}</article></section>
       <p class="dataset-storage-note">文件逻辑大小按目录文件统计；APFS 的 COW 共享会使物理占用不同。集中行情大小是集中管理目录的逻辑统计。已处理重复块表示已完成 COW 去重的字节数，反映整理状态。</p>
       <section class="dataset-category-section"><div class="dataset-section-heading"><div><h2>数据分类</h2><p>按索引登记的分类浏览；没有分类的条目仍可通过“全部”查看。</p></div></div>
         <div class="dataset-category-grid">${categoryFiltersHTML()}</div>
       </section>
-      <section class="dataset-list-section"><div class="dataset-section-heading"><div><h2>数据集目录</h2><p id="dataset-result-count"></p></div><div class="dataset-filters"><label><span class="sr-only">搜索数据集</span><input id="dataset-search" type="search" value="${esc(state.query)}" placeholder="搜索名称、币种、路径或备注…" autocomplete="off"></label><label><span class="sr-only">筛选分类</span><select id="dataset-category"><option value="">全部分类</option>${categories.map((category)=>`<option value="${esc(category.id)}" ${state.category===category.id?'selected':''}>${esc(category.label||category.id)}</option>`).join('')}</select></label></div></div><div id="dataset-records" class="dataset-record-grid"></div><div id="dataset-list-pagination" class="dataset-list-pagination" aria-label="数据集目录分页"></div></section>
+      </aside><section class="dataset-list-section"><div class="dataset-section-heading"><div><h2>数据集目录</h2><p id="dataset-result-count"></p></div><div class="dataset-filters"><label><span class="sr-only">搜索数据集</span><input id="dataset-search" type="search" value="${esc(state.query)}" placeholder="搜索名称、币种、路径或备注…" autocomplete="off"></label><label><span class="sr-only">筛选分类</span><select id="dataset-category"><option value="">全部分类</option>${categories.map((category)=>`<option value="${esc(category.id)}" ${state.category===category.id?'selected':''}>${esc(category.label||category.id)}</option>`).join('')}</select></label></div></div><div id="dataset-records" class="dataset-record-grid"></div><div id="dataset-list-pagination" class="dataset-list-pagination" aria-label="数据集目录分页"></div></section>
       <p class="dataset-footer-note">数据集目录为只读浏览；回测读取入口按目录登记状态展示。整理、去重与保留情况以索引事实为准。</p>
     </div>`;
     renderItems();

@@ -1,9 +1,9 @@
-/* Read-only notification history and explicit route controls for the local monitor. */
+/* Channel health and explicit subscription controls for the local monitor. */
 (() => {
   "use strict";
 
   const $ = (id) => document.getElementById(id);
-  const CHANNELS = ["telegram", "bark"];
+  const CHANNELS = ["telegram"];
   const CHANNEL_NAMES = { telegram: "Telegram（TG）", bark: "Bark" };
   const TOPICS = ["spike_v130", "spike_v128", "yolo_confirmation", "joint"];
   const TOPIC_NAMES = {
@@ -15,45 +15,11 @@
     spike_v9: "旧版 SPIKE 历史",
     v9: "旧版 SPIKE 历史",
   };
-  const STATUS_NAMES = {
-    sent: "服务已接受", pending: "待发送", sending: "发送中",
-    failed: "发送失败", unknown: "结果未知", skipped: "已跳过",
-  };
-  const DELIVERY_REASONS = {
-    notification_policy_replaced: "通知规则更新后停止旧任务",
-    timeframe_disabled_by_owner: "该周期已关闭",
-    bark_timeframe_muted_by_owner: "Bark 未订阅此周期",
-    telegram_disabled_by_owner: "TG 已关闭",
-    short_display_only: "该空头信号不属于联合信号范围",
-    not_model_confirmed_signal: "未达到模型确认条件",
-    before_bark_activation: "信号早于 Bark 接收时间",
-    before_notification_policy_activation: "信号早于通道接收时间",
-    before_timeframe_activation: "信号早于周期接收时间",
-    before_subscription_activation: "信号早于来源订阅时间",
-    signal_expired: "信号已超过可发送时限",
-    subscription_disabled: "来源订阅已关闭",
-    subscription_unavailable: "来源订阅状态暂不可用",
-    process_interrupted_during_delivery: "发送期间服务中断，结果无法确认",
-    bark_rate_limited: "Bark 请求触发频率限制，等待后重试",
-    bark_rate_limit_exhausted: "Bark 频率限制重试已耗尽",
-    bark_delivery_uncertain_no_automatic_resend: "结果未知，为避免重复不会自动重发",
-    delivery_uncertain_no_automatic_resend: "结果未知，为避免重复不会自动重发",
-    telegram_server_delivery_uncertain: "Telegram 返回结果不确定，不会自动重发",
-    details_redacted: "详细原因已隐藏",
-  };
-  const KIND_NAMES = {
-    spike_burst_v130_retest: "V13.1 回踩再突破",
-    spike_burst_v128: "V12.8 普通启动", tv_start: "普通启动",
-    yolo_confirmed: "YOLO 补充确认", yolo_confirmation: "YOLO 补充确认",
-    joint: "突破 + spike 联合信号", spike_burst_v9: "旧版 SPIKE 信号",
-  };
   const TIMEFRAME_NAMES = { "15m": "15m", "30m": "30m", "1H": "1H", "4H": "4H", "1D": "日线", "1Dutc": "日线" };
-  const PAGE_SIZE = 50;
   const state = {
-    active: false, snapshot: null, items: [], total: 0, offset: 0,
-    filters: { channel: "", topic: "", status: "", side: "", timeframe: "", search: "" },
-    snapshotError: "", eventsError: "", saveError: "", snapshotLoading: false,
-    eventsLoading: false, saving: false, snapshotRevision: 0, eventsRevision: 0, eventsQuery: "",
+    active: false, snapshot: null,
+    snapshotError: "", saveError: "", snapshotLoading: false,
+    saving: false, snapshotRevision: 0,
     activeGeneration: 0, timer: null,
   };
 
@@ -66,16 +32,6 @@
     ? topicName(topic || label) : String(label);
   const timeframeName = (timeframe) => TIMEFRAME_NAMES[timeframe] || "其他周期";
   const sideName = (side) => side === "long" ? "多头" : side === "short" ? "空头" : "未标注方向";
-  const statusName = (status) => STATUS_NAMES[status] || "状态待同步";
-  function deliveryReason(value) {
-    if (!value) return "";
-    const raw = String(value);
-    const code = /^[a-z0-9_:.-]{1,160}$/i.test(raw) ? raw : "details_redacted";
-    if (DELIVERY_REASONS[code]) return DELIVERY_REASONS[code];
-    const rejected = /^(telegram|bark)_rejected_(\d{3})$/.exec(code);
-    if (rejected) return `${rejected[1] === "telegram" ? "Telegram" : "Bark"} 服务拒绝请求（HTTP ${rejected[2]}）`;
-    return `其他原因（${code}）`;
-  }
   const dateTime = (value) => {
     const timestamp = typeof value === "string" ? Date.parse(value) : Number(value);
     if (!Number.isFinite(timestamp) || timestamp <= 0) return "—";
@@ -92,7 +48,6 @@
     if (!notice) return;
     const messages = [];
     if (state.snapshotError) messages.push(`通知配置读取失败：${state.snapshotError}`);
-    if (state.eventsError) messages.push(`历史记录读取失败：${state.eventsError}`);
     if (state.saveError) messages.push(state.saveError);
     if (!state.snapshot && !state.snapshotError) messages.push("正在读取通知通道和路由状态…");
     notice.textContent = messages.join("；") || (state.snapshot?.notice ? String(state.snapshot.notice) :
@@ -164,7 +119,7 @@
     }
     const known = TOPICS.map((topic) => routes.find((route) => route?.topic === topic));
     root.innerHTML = `<div class="notification-matrix-wrap"><table class="notification-matrix">
-      <thead><tr><th scope="col">通知来源</th><th scope="col">Telegram（TG）</th><th scope="col">Bark</th></tr></thead>
+      <thead><tr><th scope="col">通知来源</th><th scope="col">Telegram（TG）</th></tr></thead>
       <tbody>${TOPICS.map((topic, index) => {
         const route = known[index];
         const label = displayTopicLabel(route?.label, topic);
@@ -174,65 +129,8 @@
       }).join("")}</tbody></table></div>`;
   }
 
-  function renderFilters() {
-    for (const key of ["channel", "topic", "status", "side", "timeframe", "search"]) {
-      const element = $(`notification-filter-${key}`);
-      if (element && element.value !== state.filters[key]) element.value = state.filters[key];
-    }
-  }
-
-  function renderEvents() {
-    const root = $("notification-history-rows");
-    const empty = $("notification-history-empty");
-    if (!root || !empty) return;
-    if (state.eventsError && !state.items.length) {
-      root.innerHTML = "";
-      empty.textContent = "通知历史暂时不可用，请稍后刷新。";
-      empty.classList.remove("hidden");
-      return;
-    }
-    if (!state.items.length) {
-      root.innerHTML = "";
-      empty.textContent = state.eventsLoading ? "正在读取通知历史…" : "当前筛选条件下没有通知记录。历史数据缺失不会触发补发。";
-      empty.classList.remove("hidden");
-      return;
-    }
-    empty.classList.add("hidden");
-    root.innerHTML = state.items.map((item) => {
-      const status = STATUS_NAMES[item.status] || "状态待同步";
-      const topic = displayTopicLabel(item.label, item.topic);
-      const kind = KIND_NAMES[item.kind] || "其他通知事件";
-      const symbol = String(item.symbol || "—");
-      const time = item.updated_ms ?? item.bar_close_ms;
-      const priceValue = item.price;
-      const price = priceValue !== null && priceValue !== undefined && priceValue !== "" && Number.isFinite(Number(priceValue))
-        ? Number(priceValue).toLocaleString("en-US", { maximumFractionDigits: 10 }) : "—";
-      const reason = deliveryReason(item.error);
-      return `<tr>
-        <td><span class="notification-table-channel">${escapeHTML(channelName(item.channel))}</span><small>${escapeHTML(topic)}</small></td>
-        <td><strong>${escapeHTML(symbol)}</strong><small>${escapeHTML(kind)}</small></td>
-        <td>${escapeHTML(timeframeName(item.timeframe))}<small>${escapeHTML(sideName(item.side))}</small></td>
-        <td><span class="notification-delivery-status ${escapeHTML(item.status || "unknown")}">${escapeHTML(status)}</span><small>尝试 ${number(item.attempts)}</small>${reason ? `<small class="notification-error-code">${escapeHTML(reason)}</small>` : ""}</td>
-        <td>${escapeHTML(price)}</td>
-        <td><time>${escapeHTML(dateTime(time))}</time></td>
-      </tr>`;
-    }).join("");
-  }
-
-  function renderPagination() {
-    const root = $("notification-history-pagination");
-    if (!root) return;
-    const pageCount = Math.max(1, Math.ceil(state.total / PAGE_SIZE));
-    const page = Math.min(pageCount, Math.floor(state.offset / PAGE_SIZE) + 1);
-    const start = state.total ? state.offset + 1 : 0;
-    const end = Math.min(state.total, state.offset + state.items.length);
-    root.innerHTML = `<span>显示 ${number(start)}–${number(end)} 条，共 ${number(state.total)} 条 · 第 ${number(page)} / ${number(pageCount)} 页</span>
-      <div><button type="button" class="research-button" data-notification-page="previous"${page <= 1 || state.eventsLoading ? " disabled" : ""}>上一页</button>
-      <button type="button" class="research-button" data-notification-page="next"${page >= pageCount || state.eventsLoading ? " disabled" : ""}>下一页</button></div>`;
-  }
-
   function render() {
-    renderNotice(); renderChannels(); renderRoutes(); renderFilters(); renderEvents(); renderPagination();
+    renderNotice(); renderChannels(); renderRoutes();
     const updated = $("notifications-updated");
     if (updated) updated.textContent = state.snapshot?.as_of_ms ? `状态更新于 ${dateTime(state.snapshot.as_of_ms)}` : "状态更新时间待同步";
   }
@@ -272,52 +170,9 @@
     }
   }
 
-  function eventsPath() {
-    const query = new URLSearchParams();
-    for (const key of ["channel", "topic", "status", "side", "timeframe", "search"]) {
-      const value = state.filters[key];
-      if (value) query.set(key, value);
-    }
-    query.set("offset", String(state.offset));
-    query.set("limit", String(PAGE_SIZE));
-    return `/api/notifications/events?${query.toString()}`;
-  }
-
-  async function loadEvents() {
-    if (!state.active) return;
-    const path = eventsPath();
-    if (path !== state.eventsQuery) {
-      state.eventsQuery = path;
-      state.items = [];
-      state.total = 0;
-    }
-    const revision = ++state.eventsRevision;
-    const generation = state.activeGeneration;
-    state.eventsLoading = true;
-    renderEvents(); renderPagination();
-    try {
-      const data = await requestJSON(path);
-      if (!state.active || generation !== state.activeGeneration || revision !== state.eventsRevision) return;
-      if (!Array.isArray(data.items) || !Number.isFinite(Number(data.total))) throw new Error("服务返回的通知历史格式有误");
-      state.items = data.items.filter((item) => item && typeof item === "object");
-      state.total = Math.max(0, Number(data.total));
-      state.offset = Math.max(0, Number(data.offset) || 0);
-      state.eventsError = "";
-    } catch (error) {
-      if (state.active && generation === state.activeGeneration && revision === state.eventsRevision) {
-        state.eventsError = error.message || "请求失败";
-      }
-    } finally {
-      if (state.active && generation === state.activeGeneration && revision === state.eventsRevision) {
-        state.eventsLoading = false;
-        render();
-      }
-    }
-  }
-
   async function refresh() {
     if (!state.active) return;
-    await Promise.allSettled([loadSnapshot(), loadEvents()]);
+    await loadSnapshot();
   }
 
   async function saveRoute(topic, channel, enabled) {
@@ -346,40 +201,11 @@
     if (state.saveError) await loadSnapshot();
   }
 
-  function updateFilter(key, value) {
-    if (!Object.hasOwn(state.filters, key)) return;
-    state.filters[key] = String(value || "");
-    state.offset = 0;
-    state.eventsError = "";
-    renderFilters();
-    void loadEvents();
-  }
-
   const routeRoot = $("notification-route-matrix");
   if (routeRoot) routeRoot.addEventListener("click", (event) => {
     const button = event.target.closest?.("[data-route-topic][data-route-channel]");
     if (!button || button.disabled) return;
     void saveRoute(button.dataset.routeTopic, button.dataset.routeChannel, button.getAttribute("aria-checked") !== "true");
-  });
-
-  for (const key of ["channel", "topic", "status", "side", "timeframe"]) {
-    const control = $(`notification-filter-${key}`);
-    if (control) control.addEventListener("change", () => updateFilter(key, control.value));
-  }
-  const search = $("notification-filter-search");
-  let searchTimer = null;
-  if (search) search.addEventListener("input", () => {
-    state.filters.search = search.value;
-    state.offset = 0;
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => { if (state.active) void loadEvents(); }, 250);
-  });
-  const pagination = $("notification-history-pagination");
-  if (pagination) pagination.addEventListener("click", (event) => {
-    const button = event.target.closest?.("[data-notification-page]");
-    if (!button || button.disabled) return;
-    state.offset = Math.max(0, state.offset + (button.dataset.notificationPage === "next" ? PAGE_SIZE : -PAGE_SIZE));
-    void loadEvents();
   });
 
   function setActive(active) {
@@ -388,7 +214,6 @@
     state.active = next;
     state.activeGeneration += 1;
     state.snapshotRevision += 1;
-    state.eventsRevision += 1;
     if (state.timer !== null) clearInterval(state.timer);
     state.timer = null;
     if (next) {

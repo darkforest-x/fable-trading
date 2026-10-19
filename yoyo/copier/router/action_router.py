@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 
 from yoyo.copier.ai.deepseek_client import DeepseekClient
 from yoyo.copier.ai.schema import IntentResult
@@ -229,7 +230,15 @@ class ActionRouter:
     def _recent_channel_context(self, message_id: int, channel_id: str) -> str:
         if not channel_id:
             return ""
-        rows, _ = self.db.list_messages(page=1, per_page=8, channel_id=channel_id)
+        current = self.db.get_message(message_id) or {}
+        def source_id(row):
+            ids = re.findall(r"\d{15,25}", row.get("discord_message_id") or "")
+            return int(ids[-1]) if ids else None
+        before = source_id(current)
+        rows, _ = self.db.list_messages(page=1, per_page=100, channel_id=channel_id)
+        rows = [r for r in rows if r["id"] < message_id and
+                (before is None or (source_id(r) is not None and source_id(r) < before))]
+        rows.sort(key=lambda r: source_id(r) or r["id"], reverse=True)
         context = [
             own_text(str(row.get("content") or "")).strip()
             for row in rows

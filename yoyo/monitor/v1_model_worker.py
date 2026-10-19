@@ -17,7 +17,7 @@ def model_forever(database: str, interval_seconds: float = 3.0) -> None:
     reads those records, so expensive Torch initialization cannot delay the
     loopback health or status endpoints and replay rows remain excluded.
     """
-    store, client, stop = Store(Path(database)), OKX(), threading.Event()
+    store, client, stop = Store(Path(database)), OKX(runtime=Path(database).parent), threading.Event()
     try:
         client.synchronize()
     except Exception:

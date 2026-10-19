@@ -4,7 +4,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MODEL_KIND, MODEL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
+from yoyo.monitor import SIGNAL_KIND, SIGNAL_PROTOCOL, MODEL_KIND, MODEL_PROTOCOL, BARK_ARM_KEY
 from yoyo.monitor.signal_analytics import ledger, summarize, period_start
 from yoyo.monitor.store import Store
 
@@ -16,7 +16,7 @@ HOUR = 3_600_000
 def event(n, *, close=None, side='long', status='active', r=1.0, source='live', tf='1H'):
     close = NOW - HOUR if close is None else close
     p = dict(status=status, current_r=r, exit_r=None if status == 'active' else r, peak_r=99)
-    return dict(protocol=SHORT_SIGNAL_PROTOCOL if side == 'short' else SIGNAL_PROTOCOL,
+    return dict(protocol=SIGNAL_PROTOCOL,
                 kind=SIGNAL_KIND, confirmation='raw', source=source, side=side, direction=side,
                 symbol=f'C{n}-USDT-SWAP', timeframe=tf, timeframe_min={'1H':60,'15m':15,'30m':30,'4H':240}[tf],
                 bar_close_ms=close, bar_open_ms=close-HOUR, price=100, risk=10, initial_stop=90,
@@ -26,9 +26,7 @@ def event(n, *, close=None, side='long', status='active', r=1.0, source='live', 
 @pytest.fixture
 def store(tmp_path):
     s = Store(tmp_path / 'monitor.sqlite3')
-    s.set_meta('notification_policy:v1_bark_arm', {'activated_ms':NOW - 60*24*HOUR})
-    s.set_meta('display_policy:spike-v1:15m', {'activated_ms':NOW - 60*24*HOUR})
-    s.set_meta('display_policy:spike-v1-short', {'activated_ms':NOW - 60*24*HOUR})
+    s.set_meta(BARK_ARM_KEY, {'activated_ms':NOW - 60*24*HOUR})
     return s
 
 
@@ -96,12 +94,13 @@ def test_source_side_status_timeframe_search_and_missing_values(store):
     assert summarize([{'performance':{'status':'active','current_r':True}}])['floating_r'] is None
 
 
-def test_new_short_cutover_does_not_reclassify_as_fresh_live(store):
-    store.set_meta('display_policy:spike-v1-short',{'activated_ms':NOW-HOUR})
-    store.upsert_event(event(1,side='short',close=NOW-HOUR))
-    store.upsert_event(event(2,side='short',close=NOW-HOUR+1))
-    assert ledger(store,now=NOW,side='short')['total']==1
-    warm=ledger(store,now=NOW,side='short',source='warmup')
+@pytest.mark.parametrize('side', ['long', 'short'])
+def test_current_cutover_does_not_reclassify_warmup_as_fresh_live(store, side):
+    store.set_meta(BARK_ARM_KEY,{'activated_ms':NOW-HOUR})
+    store.upsert_event(event(1,side=side,close=NOW-HOUR))
+    store.upsert_event(event(2,side=side,close=NOW-HOUR+1))
+    assert ledger(store,now=NOW,side=side)['total']==1
+    warm=ledger(store,now=NOW,side=side,source='warmup')
     assert warm['total']==1 and warm['items'][0]['is_fresh'] is False
 
 

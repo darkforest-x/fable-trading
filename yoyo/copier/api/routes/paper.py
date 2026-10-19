@@ -35,10 +35,11 @@ R_BUCKETS = ((-math.inf, -1.0, "≤-1R"), (-1.0, 0.0, "-1~0R"), (0.0, 1.0, "0~1R
 
 
 def risk_usdt(p: dict[str, Any], qty: float | None = None) -> float | None:
-    """1R in USDT: distance from entry to the initial stop times the position size."""
+    """Committed initial risk, summed over entries and unchanged by partial exits."""
     if not p.get("initial_sl"):
         return None
-    return abs(p["entry_px"] - p["initial_sl"]) * (p["qty"] if qty is None else qty)
+    risk = p.get("initial_risk_usdt", abs(p["entry_px"] - p["initial_sl"]) * p["qty"])
+    return risk if qty is None or risk is None else risk * qty / p["qty"]
 
 
 def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float,
@@ -54,19 +55,26 @@ def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float,
     rs = [r for r in (book.r_multiple(p) for p in rows) if r is not None]
     fixed = [p for p in rows if sizing is None or sizing.get(p["message_id"]) == "fixed_risk"]
     risks = [x for x in (risk_usdt(p) for p in fixed) if x]
-    wins, losses = [r for r in rs if r > 0], [r for r in rs if r <= 0]
+    wins, losses = [r for r in rs if r > 0], [r for r in rs if r < 0]
+    nets = [p["realized_pnl"] - p["fees"] for p in rows]
     streak = worst_streak = 0
     for r in rs:
-        streak = streak + 1 if r <= 0 else 0
+        streak = streak + 1 if r < 0 else 0
         worst_streak = max(worst_streak, streak)
     curve, peak, max_dd = 0.0, 0.0, 0.0
     for r in rs:
         curve += r
         peak = max(peak, curve)
         max_dd = max(max_dd, peak - curve)
-    buckets = {label: sum(1 for r in rs if lo <= r < hi) for lo, hi, label in R_BUCKETS}
+    buckets = {label: sum(1 for r in rs if (r <= hi if lo == -math.inf else lo < r < hi if hi == 0 else lo <= r < hi))
+               for lo, hi, label in R_BUCKETS}
     return {
         "trades": len(rs), "win_rate": len(wins) / len(rs) if rs else None,
+        "wins": len(wins), "losses": len(losses), "breakeven": sum(r == 0 for r in rs),
+        "unknown_r": len(rows) - len(rs), "closed_total": len(rows),
+        "net_win_rate": sum(v > 0 for v in nets) / len(nets) if nets else None,
+        "net_wins": sum(v > 0 for v in nets), "net_losses": sum(v < 0 for v in nets),
+        "net_breakeven": sum(v == 0 for v in nets),
         "mean_r": statistics.fmean(rs) if rs else None, "median_r": statistics.median(rs) if rs else None,
         "sum_r": sum(rs) if rs else None, "best_r": max(rs) if rs else None, "worst_r": min(rs) if rs else None,
         "avg_win_r": statistics.fmean(wins) if wins else None, "avg_loss_r": statistics.fmean(losses) if losses else None,
@@ -79,14 +87,17 @@ def r_stats(book: PaperBook, closed: list[dict[str, Any]], equity: float,
 
 
 @router.get("/summary")
-def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
+def summary(db: Database = Depends(get_db), _: str = Depends(verify_token), channel_id: str | None = None):
     book = PaperBook(db)
     sizing = book.sizing_by_message()
     names = {**channel_names(db), **CHANNEL_NAMES}
     routed = [cid for cid, ex in get_channel_exchange_map(db).items() if ex == PAPER]
-    closed = book.closed_positions(limit=500)
+    if channel_id:
+        routed = [cid for cid in routed if cid == channel_id]
+    closed = book.closed_positions(limit=None, account=channel_id)
     accounts = []
-    for cid in sorted(set(routed) | set(book.accounts()), key=lambda c: names.get(c, c)):
+    account_ids = set(routed) | {cid for cid in book.accounts() if channel_id is None or cid == channel_id}
+    for cid in sorted(account_ids, key=lambda c: names.get(c, c)):
         bal = book.balance(cid)
         mine = [p for p in closed if p["account"] == cid]
         rs = [r for r in (book.r_multiple(p) for p in mine) if r is not None]
@@ -98,25 +109,28 @@ def summary(db: Database = Depends(get_db), _: str = Depends(verify_token)):
                          "closed_trades": len(mine), "wins": wins, "sum_r": sum(rs) if rs else None,
                          "net_pnl": sum(p["realized_pnl"] - p["fees"] for p in mine)})
     open_rows = []
-    for p in book.open_positions():
+    for p in book.open_positions(account=channel_id):
         mark = book.mark(p["inst_id"])
         upl = book.unrealized(p)
-        one_r = risk_usdt(p, p["open_qty"])
+        one_r = risk_usdt(p)
         equity = book.balance(p["account"])["equity"]
         open_rows.append({**_trade(book, p, names, sizing), "mark": mark, "unrealized_pnl": upl,
                           "open_qty": p["open_qty"], "liquidation_px": book.liquidation_px(p),
                           "risk_usdt": one_r, "risk_pct_of_equity": (one_r / equity) if one_r and equity > 0 else None,
-                          "current_r": (upl / one_r) if one_r else None,
+                          "current_r": ((p["realized_pnl"] + upl - p["fees"]) / one_r) if one_r else None,
                           "stop_distance_pct": abs(p["entry_px"] - p["initial_sl"]) / p["entry_px"] if p["initial_sl"] else None})
     pending = [{"id": o["id"], "channel_id": o["account"], "trader": names.get(o["account"], o["account"]),
                 "inst_id": o["inst_id"], "side": o["side"], "px": o["px"], "notional_usdt": o["qty"] * o["px"],
                 "mark": book.mark(o["inst_id"]), "sl": o["sl"], "tp": o["tp"], "created_at": o["created_at"]}
-               for o in book.pending_orders()]
+               for o in book.pending_orders(account=channel_id)]
+    with db._connect() as conn:
+        canceled = [dict(r) for r in conn.execute("SELECT * FROM paper_orders WHERE status='canceled' "
+                    + ("AND account=? " if channel_id else "") + "ORDER BY id DESC LIMIT 100", [channel_id] if channel_id else [])]
     return {"starting_equity": book.starting_equity(), "fee_rate_per_side": FEE_RATE, "poll_seconds": POLL_SECONDS,
             "r_stats_all": r_stats(book, closed, book.starting_equity(), sizing),
             "risk_pct": paper_risk_pct(db),
             "sizing_note": (f"按固定风险开仓：每笔 1R = 该频道账户已实现权益的 {paper_risk_pct(db):.0%}，仓位 = 1R ÷ 入场到止损的距离。"
                             "仓位超过该频道杠杆允许的上限时按上限开仓，这笔实际风险会小于设定值并标为“已封顶”；没有止损的信号不开仓。"
                             "10 月 7 日改口径之前开出的仓位标“旧口径”：R 照常计入统计，平均 1R 金额只算固定风险的交易。"),
-            "accounts": accounts, "open": open_rows, "pending": pending,
+            "accounts": accounts, "open": open_rows, "pending": pending, "canceled": canceled,
             "closed": [_trade(book, p, names, sizing) for p in closed[:100]]}

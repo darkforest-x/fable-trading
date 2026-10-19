@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="web_dashboard" name="shell-type"/>
+<title>SPIKE QUANT // Obsidian Trading Terminal Extreme Density</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    @layer base {
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+        background-color: #080a0f;
+        color: #d1d5db;
+        font-family: 'Inter', sans-serif;
+        user-select: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: 'tnum' on, 'lnum' on, 'zero' on;
+    }
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0b0e14;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1f2633;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2e384d;
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            terminal: {
+              bg: '#080a0f',
+              panel: '#0d1118',
+              card: '#111622',
+              hover: '#161d2d',
+              border: '#1b2232',
+              'border-subtle': '#141a26',
+              text: '#e2e8f0',
+              muted: '#7e8b9f',
+              dim: '#475569'
+            },
+            bull: {
+              DEFAULT: '#00e599',
+              dim: '#00b377',
+              bg: 'rgba(0, 229, 153, 0.12)',
+              bar: 'rgba(0, 229, 153, 0.18)'
+            },
+            bear: {
+              DEFAULT: '#ff3366',
+              dim: '#d92653',
+              bg: 'rgba(255, 51, 102, 0.12)',
+              bar: 'rgba(255, 51, 102, 0.18)'
+            },
+            accent: {
+              DEFAULT: '#4f8cff',
+              cyan: '#00d0ff',
+              gold: '#f59e0b',
+              purple: '#9d7cff'
+            }
+          },
+          fontSize: {
+            '2xs': ['10px', '12px'],
+            '3xs': ['9px', '11px']
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden bg-[#080a0f] text-slate-200 antialiased selection:bg-accent/30 selection:text-white">
+<!-- ================= TOP APP BAR / BRAND & GLOBAL SWITCHER ================= -->
+<header class="h-8 bg-[#0b0e14] border-b border-[#1b2232] flex items-center justify-between px-2 shrink-0 z-50 text-xs">
+<div class="flex items-center gap-3">
+<!-- Terminal Logo -->
+<div class="flex items-center gap-1.5 font-bold tracking-wider text-slate-100">
+<span class="w-4 h-4 bg-accent flex items-center justify-center rounded-sm text-black font-extrabold text-[10px]">⚡</span>
+<span class="font-mono-num font-extrabold text-sm tracking-tight text-white">SPIKE<span class="text-accent ml-0.5 font-normal text-xs">QUANT</span></span>
+<span class="text-[9px] px-1 py-0.2 rounded bg-[#172033] text-accent border border-accent/30 font-mono-num uppercase">OBSIDIAN v3.4</span>
+</div>
+<div class="h-3.5 w-px bg-[#1f2633]"></div>
+<!-- Module Quick Navigation Tabs -->
+<nav class="flex items-center gap-1">
+<a class="px-2 py-0.5 rounded bg-[#162032] text-accent font-semibold border-b border-accent flex items-center gap-1 text-[11px]" href="#">
+<span class="material-symbols-outlined text-[13px]">query_stats</span>行情总览
+        </a>
+<a class="px-2 py-0.5 rounded hover:bg-[#121620] text-terminal-muted hover:text-slate-200 flex items-center gap-1 text-[11px] transition-colors" href="#">
+<span class="material-symbols-outlined text-[13px]">stacked_line_chart</span>均线密集度
+        </a>
+<a class="px-2 py-0.5 rounded hover:bg-[#121620] text-terminal-muted hover:text-slate-200 flex items-center gap-1 text-[11px] transition-colors" href="#">
+<span class="material-symbols-outlined text-[13px]">radar</span>共振雷达
+          <span class="px-1 py-0.2 rounded-full bg-bear/20 text-bear text-[9px] font-mono-num">14</span>
+</a>
+<a class="px-2 py-0.5 rounded hover:bg-[#121620] text-terminal-muted hover:text-slate-200 flex items-center gap-1 text-[11px] transition-colors" href="#">
+<span class="material-symbols-outlined text-[13px]">waterfall_chart</span>清算热力图
+        </a>
+<a class="px-2 py-0.5 rounded hover:bg-[#121620] text-terminal-muted hover:text-slate-200 flex items-center gap-1 text-[11px] transition-colors" href="#">
+<span class="material-symbols-outlined text-[13px]">account_tree</span>量化回测
+        </a>
+</nav>
+</div>
+<!-- Right Global Telemetry Status & Utility Buttons -->
+<div class="flex items-center gap-2.5 font-mono-num text-[11px]">
+<div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-[#111622] border border-[#1b2232]">
+<span class="w-1.5 h-1.5 rounded-full bg-bull animate-pulse"></span>
+<span class="text-terminal-muted text-[10px]">WS FIX-4.4</span>
+<span class="text-bull font-bold text-[10px]">11ms</span>
+</div>
+<div class="flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-[#111622] border border-[#1b2232]">
+<span class="text-terminal-muted text-[10px]">TG BOT</span>
+<span class="text-bull text-[10px] font-bold">ONLINE</span>
+</div>
+<div class="flex items-center gap-1 text-terminal-muted">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+<span class="text-slate-300 font-medium" id="terminal-clock">18:42:09 UTC</span>
+</div>
+<button class="h-5 px-1.5 rounded bg-bear/20 hover:bg-bear/30 border border-bear/40 text-bear flex items-center gap-1 text-[10px] transition-colors" title="急停所有算法交易">
+<span class="material-symbols-outlined text-[12px]">pause_circle</span>
+<span>KILL-SWITCH</span>
+</button>
+<div class="flex items-center gap-1">
+<button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#172033] text-terminal-muted hover:text-white" title="声音预警已开启">
+<span class="material-symbols-outlined text-[14px]">volume_up</span>
+</button>
+<button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#172033] text-terminal-muted hover:text-white" title="终端全局设置">
+<span class="material-symbols-outlined text-[14px]">settings</span>
+</button>
+<div class="w-5 h-5 rounded bg-accent/20 border border-accent/40 flex items-center justify-center text-accent font-bold text-[10px]">
+          QD
+        </div>
+</div>
+</div>
+</header>
+<!-- ================= TOP TICKER STRIP & QUANT STATS (BLOOMBERG DENSITY) ================= -->
+<section class="bg-[#0e121a] border-b border-[#1b2232] px-2.5 py-1.5 flex flex-wrap items-center justify-between gap-y-1.5 shrink-0 text-xs">
+<!-- Left: Asset Selector & Core Ticker Info -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 bg-[#141a26] px-2 py-1 rounded border border-[#232c3f]">
+<span class="w-4 h-4 rounded-full bg-[#f7931a] flex items-center justify-center text-black font-extrabold text-[10px]">₿</span>
+<span class="font-mono-num font-bold text-sm text-white tracking-tight">BTC/USDT</span>
+<span class="text-[9px] px-1 bg-[#1e2738] rounded text-accent font-mono-num uppercase">永续 SWAP</span>
+<span class="material-symbols-outlined text-terminal-muted text-[14px] cursor-pointer hover:text-white">expand_more</span>
+</div>
+<!-- Live Price & 24h Delta -->
+<div class="flex items-baseline gap-1.5 font-mono-num">
+<span class="text-xl font-black text-bear tracking-tight" id="hero-live-price">81,540.8</span>
+<span class="text-[10px] text-terminal-muted">USDT</span>
+<span class="text-bear font-bold text-xs flex items-center ml-0.5">
+<span class="material-symbols-outlined text-[13px]">arrow_drop_down</span>-0.51%
+        </span>
+</div>
+<!-- Aggregated Exchanges Quick Badge -->
+<div class="hidden xl:flex items-center gap-1 text-[10px] font-mono-num bg-[#111622] px-1.5 py-0.5 rounded border border-[#1a2333] text-terminal-muted">
+<span>聚合:</span>
+<span class="text-slate-300">OKX <b class="text-bear font-normal">81,540.8</b></span>
+<span class="text-terminal-dim">|</span>
+<span class="text-slate-300">BN <b class="text-bear font-normal">81,541.2</b></span>
+<span class="text-terminal-dim">|</span>
+<span class="text-slate-300">BYB <b class="text-bear font-normal">81,540.5</b></span>
+</div>
+<!-- Quick Resolution Switcher -->
+<div class="flex items-center bg-[#111622] p-0.5 rounded border border-[#1b2232] font-mono-num text-[10px]">
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">1s</button>
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">1m</button>
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">5m</button>
+<button class="px-1.5 py-0.5 rounded bg-accent text-white font-bold">15m</button>
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">1h</button>
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">4h</button>
+<button class="px-1.5 py-0.5 rounded text-terminal-muted hover:text-white">1D</button>
+</div>
+</div>
+<!-- Right: High-Density Quantitative Metrics Strip -->
+<div class="flex items-center gap-3 font-mono-num text-[11px]">
+<!-- Index & Mark Price -->
+<div class="flex flex-col text-right">
+<span class="text-[9px] text-terminal-muted uppercase leading-none">标记 / 指数价</span>
+<span class="text-slate-200 text-xs font-semibold mt-0.5">81,538.2 / 81,542.0</span>
+</div>
+<div class="h-6 w-px bg-[#1f2633]"></div>
+<!-- Funding Rate with Countdown -->
+<div class="flex flex-col text-right">
+<div class="flex items-center gap-1 justify-end">
+<span class="text-[9px] text-terminal-muted uppercase leading-none">资金费率 (8H)</span>
+<span class="text-[9px] text-terminal-dim">03:17:51</span>
+</div>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="text-bull font-bold text-xs">+0.0102%</span>
+<span class="text-[9px] text-terminal-muted">(多付空)</span>
+</div>
+</div>
+<div class="h-6 w-px bg-[#1f2633]"></div>
+<!-- Open Interest (OI) & 1H Delta -->
+<div class="flex flex-col text-right">
+<span class="text-[9px] text-terminal-muted uppercase leading-none">持仓量 OI (聚合)</span>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="text-slate-100 font-bold text-xs">$4.82B</span>
+<span class="text-bull text-[10px] font-semibold">+3.2%(1h)</span>
+</div>
+</div>
+<div class="h-6 w-px bg-[#1f2633]"></div>
+<!-- 24H Volume -->
+<div class="flex flex-col text-right">
+<span class="text-[9px] text-terminal-muted uppercase leading-none">24H 额度 / 量能比</span>
+<span class="text-slate-100 font-semibold text-xs mt-0.5">$34.12B <span class="text-accent text-[10px]">1.42x</span></span>
+</div>
+<div class="h-6 w-px bg-[#1f2633]"></div>
+<!-- 1H Liquidations Monitor -->
+<div class="flex flex-col text-right">
+<span class="text-[9px] text-terminal-muted uppercase leading-none">1H 爆仓监控</span>
+<div class="flex items-center gap-1 mt-0.5">
+<span class="text-bear font-bold text-xs">多 $12.4M</span>
+<span class="text-terminal-dim">/</span>
+<span class="text-bull font-bold text-xs">空 $1.8M</span>
+</div>
+</div>
+<div class="h-6 w-px bg-[#1f2633]"></div>
+<!-- Resonance Alarm Indicator Box -->
+<div class="flex items-center gap-2 bg-[#121927] border border-accent/30 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-accent text-[15px] animate-pulse">crisis_alert</span>
+<div class="flex flex-col text-left">
+<div class="flex items-center gap-1">
+<span class="text-[10px] font-bold text-white uppercase">共振异动状态:</span>
+<span class="text-[10px] text-bull font-bold">蓄势整理 (18%)</span>
+</div>
+<span class="text-[9px] text-terminal-muted leading-tight">6均线收敛至 0.42% 带宽</span>
+</div>
+</div>
+</div>
+</section>
+<!-- ================= MAIN PANE: 3-COLUMN WORKSTATION (WATCHLIST | CHART | ORDERBOOK) ================= -->
+<div class="flex-1 flex overflow-hidden p-1 gap-1">
+<!-- ================= LEFT COLUMN: MARKET WATCHLIST & SCREENER (W-72 / ~290px) ================= -->
+<div class="w-72 shrink-0 bg-[#0d1118] border border-[#1b2232] rounded flex flex-col overflow-hidden text-xs">
+<!-- Watchlist Header & Filter Tabs -->
+<div class="p-1.5 bg-[#0b0e14] border-b border-[#1b2232] flex flex-col gap-1.5">
+<!-- Search Input -->
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-2 top-1.5 text-[14px] text-terminal-muted">search</span>
+<input class="w-full bg-[#121722] text-slate-100 text-[11px] font-mono-num pl-7 pr-7 py-1 rounded border border-[#1f283b] focus:border-accent focus:outline-none placeholder:text-terminal-dim" placeholder="快速定位品种 (Ctrl+K)" type="text"/>
+<kbd class="absolute right-1.5 top-1.5 text-[9px] bg-[#1a2333] text-terminal-muted px-1 rounded font-mono-num">⌘K</kbd>
+</div>
+<!-- 4 Screener Tabs -->
+<div class="grid grid-cols-4 gap-0.5 bg-[#121722] p-0.5 rounded font-mono-num text-[10px] text-center">
+<button class="py-0.5 rounded bg-[#1a2436] text-accent font-bold">自选 (6)</button>
+<button class="py-0.5 rounded text-terminal-muted hover:text-white">主流 (18)</button>
+<button class="py-0.5 rounded text-terminal-muted hover:text-white">异动榜</button>
+<button class="py-0.5 rounded text-terminal-muted hover:text-white">净流入</button>
+</div>
+<!-- Metric Sort Bar -->
+<div class="flex items-center justify-between text-[10px] text-terminal-muted px-1 font-mono-num">
+<span class="cursor-pointer hover:text-white">代码 / 额度</span>
+<div class="flex items-center gap-2">
+<span class="cursor-pointer text-accent">涨跌▼</span>
+<span class="cursor-pointer hover:text-white">费率/共振</span>
+</div>
+</div>
+</div>
+<!-- Ticker Row List (Extreme Density) -->
+<div class="flex-1 overflow-y-auto divide-y divide-[#151c2a] font-mono-num">
+<!-- Row 1: BTC (Active) -->
+<div class="bg-[#151d2c] border-l-2 border-accent p-1.5 flex items-center justify-between hover:bg-[#1a2436] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-white text-[11px]">BTC</span>
+<span class="text-[9px] px-1 rounded bg-[#1f2b42] text-accent">USDT</span>
+<span class="material-symbols-outlined text-[11px] text-yellow-400" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$1.82B</span>
+<span class="text-[8px] px-1 rounded bg-accent/20 text-accent font-semibold">SQZ 94%</span>
+</div>
+</div>
+<!-- Sparkline -->
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 4 L10 6 L20 3 L30 12 L40 9 L50 16 L59 15" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-white text-[11px]">81,540.8</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-0.51%</span>
+</div>
+</div>
+<!-- Row 2: ETH -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">ETH</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$890M</span>
+<span class="text-bull text-[9px]">+0.008%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 3 L12 8 L24 6 L36 15 L48 11 L59 18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">2,427.9</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-1.22%</span>
+</div>
+</div>
+<!-- Row 3: SOL -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">SOL</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$412M</span>
+<span class="text-bear text-[9px]">-0.004%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 2 L14 11 L28 8 L40 16 L50 13 L59 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">104.05</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-1.26%</span>
+</div>
+</div>
+<!-- Row 4: SUI (Bullish Spike) -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors bg-bull/5">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-100 text-[11px]">SUI</span>
+<span class="text-[9px] px-1 rounded bg-bull/20 text-bull font-semibold">多头突破</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$195M</span>
+<span class="text-[8px] px-1 rounded bg-bull/20 text-bull font-bold">MA发散</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bull" fill="none" viewbox="0 0 60 20">
+<path d="M1 18 L15 13 L26 15 L38 7 L48 9 L59 2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-100 text-[11px]">2.1842</span>
+<span class="text-[9px] px-1 rounded bg-bull/20 text-bull font-bold">+4.35%</span>
+</div>
+</div>
+<!-- Row 5: DOGE -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">DOGE</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$268M</span>
+<span class="text-bull text-[9px]">+0.012%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 5 L14 7 L26 4 L38 13 L49 10 L59 16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">0.1284</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-0.82%</span>
+</div>
+</div>
+<!-- Row 6: BNB -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">BNB</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$142M</span>
+<span class="text-terminal-muted text-[9px]">+0.005%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 6 L12 8 L25 5 L36 12 L47 11 L59 14" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">719.90</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-1.00%</span>
+</div>
+</div>
+<!-- Row 7: AVAX -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">AVAX</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$115M</span>
+<span class="text-bear text-[9px]">-0.001%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bear" fill="none" viewbox="0 0 60 20">
+<path d="M1 4 L14 9 L28 7 L40 17 L50 14 L59 19" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">27.42</span>
+<span class="text-[9px] px-1 rounded bg-bear/20 text-bear font-bold">-2.15%</span>
+</div>
+</div>
+<!-- Row 8: LINK -->
+<div class="p-1.5 flex items-center justify-between hover:bg-[#131a26] cursor-pointer transition-colors">
+<div class="flex flex-col">
+<div class="flex items-center gap-1">
+<span class="font-bold text-slate-200 text-[11px]">LINK</span>
+<span class="text-[9px] px-1 rounded bg-[#151c2a] text-terminal-muted">USDT</span>
+</div>
+<div class="flex items-center gap-1 text-[9px] text-terminal-muted mt-0.5">
+<span>$98M</span>
+<span class="text-bull text-[9px]">+0.010%</span>
+</div>
+</div>
+<svg class="w-14 h-5 text-bull" fill="none" viewbox="0 0 60 20">
+<path d="M1 16 L14 12 L26 14 L38 8 L48 10 L59 4" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"></path>
+</svg>
+<div class="flex flex-col items-end">
+<span class="font-bold text-slate-200 text-[11px]">14.86</span>
+<span class="text-[9px] px-1 rounded bg-bull/20 text-bull font-bold">+1.04%</span>
+</div>
+</div>
+</div>
+<!-- Left Bottom Pro Desk Diagnostic & Shortcuts -->
+<div class="p-1.5 bg-[#0a0d13] border-t border-[#1b2232] font-mono-num text-[10px] text-terminal-muted flex flex-col gap-1">
+<div class="flex items-center justify-between">
+<span>共振灵敏度 (σ)</span>
+<span class="text-bull font-bold">0.85 (密集阈值)</span>
+</div>
+<div class="flex items-center justify-between">
+<span>全市场多空散布</span>
+<span class="text-bear font-bold">98% 偏空 (49/50)</span>
+</div>
+<div class="pt-1 border-t border-[#151b26] flex items-center justify-between text-[9px] text-terminal-dim">
+<span>快捷键: [↑↓] 选择 [Enter] 载入 [Space] 加星</span>
+</div>
+</div>
+</div>
+<!-- ================= CENTER COLUMN: PRO QUANT CANDLESTICK & VPVR WORKBENCH ================= -->
+<div class="flex-1 bg-[#0d1118] border border-[#1b2232] rounded flex flex-col overflow-hidden min-w-0">
+<!-- Chart Control & Indicator Ribbon -->
+<div class="h-8 bg-[#0b0e14] border-b border-[#1b2232] px-2 flex items-center justify-between shrink-0 text-xs font-mono-num">
+<!-- 6 MA Indicator Toggles & Status -->
+<div class="flex items-center gap-2 overflow-x-auto py-1">
+<span class="text-[10px] text-terminal-muted font-bold uppercase tracking-wider flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-accent"></span>6均线矩阵:
+          </span>
+<div class="flex items-center gap-1.5 text-[10px]">
+<span class="px-1 rounded bg-[#172238] text-[#c0c1ff] font-semibold border border-[#c0c1ff]/30">SMA20: 81,573</span>
+<span class="px-1 rounded bg-[#132c25] text-bull font-semibold border border-bull/30">SMA60: 81,973</span>
+<span class="px-1 rounded bg-[#1b202a] text-slate-300 font-semibold border border-slate-600/30">SMA120: 82,006</span>
+<span class="px-1 rounded bg-[#2b1f3d] text-accent-purple font-semibold border border-accent-purple/30">EMA20: 81,512</span>
+<span class="px-1 rounded bg-[#3b271d] text-accent-gold font-semibold border border-accent-gold/30">EMA60: 81,837</span>
+<span class="px-1 rounded bg-[#381622] text-bear font-semibold border border-bear/30">EMA120: 81,923</span>
+</div>
+<span class="text-[9px] px-1 rounded bg-bear/25 text-bear font-bold uppercase ml-1">死叉收敛 [Squeeze]</span>
+</div>
+<!-- Chart Mode Tools -->
+<div class="flex items-center gap-1">
+<button class="px-1.5 py-0.5 rounded bg-[#162032] text-accent text-[10px] font-bold">VPVR筹码</button>
+<button class="px-1.5 py-0.5 rounded bg-[#111622] text-terminal-muted hover:text-white text-[10px]">POC锚点</button>
+<button class="px-1.5 py-0.5 rounded bg-[#111622] text-terminal-muted hover:text-white text-[10px]">OB流向</button>
+<div class="h-3 w-px bg-[#1f2633] mx-1"></div>
+<button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#1b2232] text-terminal-muted hover:text-white" title="重置图表">
+<span class="material-symbols-outlined text-[13px]">refresh</span>
+</button>
+<button class="w-5 h-5 flex items-center justify-center rounded hover:bg-[#1b2232] text-terminal-muted hover:text-white" title="全屏视窗">
+<span class="material-symbols-outlined text-[13px]">fullscreen</span>
+</button>
+</div>
+</div>
+<!-- Realtime Candlestick OHLC Bar Strip -->
+<div class="bg-[#0e131d] px-2.5 py-1 border-b border-[#182030] flex flex-wrap items-center justify-between text-[11px] font-mono-num text-terminal-muted shrink-0">
+<div class="flex items-center gap-3">
+<span class="text-white font-bold">BTCUSDT.P 15m</span>
+<span>开 <b class="text-slate-200 font-normal">81,376.7</b></span>
+<span>高 <b class="text-bull font-normal">81,450.6</b></span>
+<span>低 <b class="text-bear font-normal">80,954.5</b></span>
+<span>收 <b class="text-bear font-normal">81,081.4</b></span>
+<span>涨跌额 <b class="text-bear font-normal">-295.3 (-0.36%)</b></span>
+</div>
+<div class="flex items-center gap-3 text-[10px]">
+<span>振幅: <b class="text-slate-300 font-normal">0.61%</b></span>
+<span>成交量: <b class="text-slate-300 font-normal">14.28K BTC</b></span>
+<span>成交额: <b class="text-slate-300 font-normal">$1.16B</b></span>
+</div>
+</div>
+<!-- SVG Candlestick + VPVR + Confluence Overlay Chart Stage -->
+<div class="flex-1 relative bg-[#090c12] overflow-hidden flex select-none">
+<!-- VPVR (Volume Profile Visible Range) Overlay on Left Side of Chart -->
+<div class="absolute left-0 top-0 bottom-6 w-24 z-10 pointer-events-none opacity-40 flex flex-col justify-between py-4">
+<div class="w-12 h-1.5 bg-bear/40"></div>
+<div class="w-16 h-1.5 bg-bear/50"></div>
+<div class="w-20 h-1.5 bg-bear/60"></div>
+<div class="w-14 h-1.5 bg-bear/50"></div>
+<!-- POC High Volume Node -->
+<div class="w-24 h-2 bg-yellow-400/80 shadow-[0_0_8px_rgba(250,204,21,0.5)]"></div>
+<div class="w-18 h-1.5 bg-bull/60"></div>
+<div class="w-15 h-1.5 bg-bull/50"></div>
+<div class="w-10 h-1.5 bg-bull/40"></div>
+<div class="w-8 h-1.5 bg-bull/30"></div>
+</div>
+<!-- POC & Key Level Tag Overlay Lines -->
+<div class="absolute left-0 right-16 top-[32%] border-b border-dashed border-yellow-400/70 z-10 pointer-events-none flex items-center justify-between px-2">
+<span class="text-[9px] font-mono-num px-1 py-0.2 rounded bg-yellow-950/80 text-yellow-300 border border-yellow-400/50">昨日 POC 锚点: 81,555.14</span>
+<span class="text-[9px] font-mono-num text-yellow-300/80">VAH 82,340</span>
+</div>
+<div class="absolute left-0 right-16 top-[15%] border-b border-dashed border-bear/60 z-10 pointer-events-none flex items-center justify-between px-2">
+<span class="text-[9px] font-mono-num px-1 py-0.2 rounded bg-red-950/80 text-bear border border-bear/40">周一高点 (Monday High): 84,348.2</span>
+</div>
+<div class="absolute left-0 right-16 top-[78%] border-b border-dashed border-bull/60 z-10 pointer-events-none flex items-center justify-between px-2">
+<span class="text-[9px] font-mono-num px-1 py-0.2 rounded bg-emerald-950/80 text-bull border border-bull/40">周内关键支撑 (Weekly Low): 79,210.0</span>
+<span class="text-[9px] font-mono-num text-bull/80">VAL 79,880</span>
+</div>
+<!-- Resonance State Radar Badge inside Chart (Top-Right Floating HUD) -->
+<div class="absolute top-2 right-18 z-20 bg-[#0d121c]/90 border border-[#222c3f] p-1.5 rounded backdrop-blur font-mono-num text-[10px] flex flex-col gap-1 shadow-lg pointer-events-none">
+<div class="flex items-center gap-1.5 text-accent font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-accent animate-ping"></span>
+<span>多周期共振态势雷达</span>
+</div>
+<div class="grid grid-cols-4 gap-1 text-[9px] text-center">
+<div class="bg-[#141b27] p-0.5 rounded border border-[#1f293d]">
+<div class="text-terminal-muted">15m</div>
+<div class="text-bear font-bold">空头发散</div>
+</div>
+<div class="bg-[#141b27] p-0.5 rounded border border-[#1f293d]">
+<div class="text-terminal-muted">1H</div>
+<div class="text-bear font-bold">均线粘合</div>
+</div>
+<div class="bg-[#141b27] p-0.5 rounded border border-[#1f293d]">
+<div class="text-terminal-muted">4H</div>
+<div class="text-yellow-400 font-bold">震荡整理</div>
+</div>
+<div class="bg-[#141b27] p-0.5 rounded border border-[#1f293d]">
+<div class="text-terminal-muted">1D</div>
+<div class="text-bull font-bold">多头结构</div>
+</div>
+</div>
+</div>
+<!-- Vector Graphics Canvas (Candles, Volume & MA Curves) -->
+<svg class="w-full h-full pr-16 pb-5" preserveaspectratio="none" viewbox="0 0 760 380">
+<defs>
+<lineargradient id="volBullGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#00e599" stop-opacity="0.5"></stop>
+<stop offset="100%" stop-color="#00e599" stop-opacity="0.05"></stop>
+</lineargradient>
+<lineargradient id="volBearGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#ff3366" stop-opacity="0.5"></stop>
+<stop offset="100%" stop-color="#ff3366" stop-opacity="0.05"></stop>
+</lineargradient>
+</defs>
+<!-- Horizontal Grid Lines -->
+<line stroke="#141a26" stroke-width="1" x1="0" x2="760" y1="50" y2="50"></line>
+<line stroke="#141a26" stroke-width="1" x1="0" x2="760" y1="100" y2="100"></line>
+<line stroke="#141a26" stroke-width="1" x1="0" x2="760" y1="150" y2="150"></line>
+<line stroke="#141a26" stroke-width="1" x1="0" x2="760" y1="200" y2="200"></line>
+<line stroke="#141a26" stroke-width="1" x1="0" x2="760" y1="250" y2="250"></line>
+<line stroke="#172033" stroke-width="1" x1="0" x2="760" y1="300" y2="300"></line> <!-- Vol separator -->
+<!-- 6 Moving Averages Overlaid -->
+<!-- SMA 20 (Cyan/Blue) -->
+<path d="M 10 110 Q 140 140 260 190 T 450 205 T 620 208 T 750 210" fill="none" stroke="#c0c1ff" stroke-width="1.5"></path>
+<!-- EMA 20 (Purple) -->
+<path d="M 10 120 Q 150 150 270 195 T 460 202 T 630 205 T 750 208" fill="none" stroke="#9d7cff" stroke-width="1.5"></path>
+<!-- SMA 60 (Neon Bull Green) -->
+<path d="M 10 130 Q 160 160 290 190 T 480 198 T 640 202 T 750 205" fill="none" stroke="#00e599" stroke-width="1.3"></path>
+<!-- EMA 60 (Gold) -->
+<path d="M 10 140 Q 170 170 310 195 T 500 200 T 650 204 T 750 206" fill="none" stroke="#f59e0b" stroke-width="1.3"></path>
+<!-- SMA 120 (Slate) -->
+<path d="M 10 150 Q 180 175 330 193 T 520 197 T 660 200 T 750 203" fill="none" stroke="#64748b" stroke-width="1.2"></path>
+<!-- EMA 120 (Crimson/Bear) -->
+<path d="M 10 160 Q 190 180 350 195 T 540 199 T 670 201 T 750 204" fill="none" stroke="#ff3366" stroke-width="1.2"></path>
+<!-- High-Density Candlestick Bars Sequence -->
+<!-- Candles Group 1 (Volatile Drop & Recovery) -->
+<line stroke="#00e599" stroke-width="1" x1="25" x2="25" y1="70" y2="130"></line>
+<rect fill="#00e599" height="35" width="8" x="21" y="80"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="48" x2="48" y1="85" y2="185"></line>
+<rect fill="#ff3366" height="70" width="8" x="44" y="95"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="71" x2="71" y1="140" y2="225"></line>
+<rect fill="#ff3366" height="55" width="8" x="67" y="155"></rect>
+<line stroke="#00e599" stroke-width="1" x1="94" x2="94" y1="180" y2="245"></line>
+<rect fill="#00e599" height="28" width="8" x="90" y="185"></rect>
+<line stroke="#00e599" stroke-width="1" x1="117" x2="117" y1="170" y2="230"></line>
+<rect fill="#00e599" height="35" width="8" x="113" y="175"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="140" x2="140" y1="165" y2="250"></line>
+<rect fill="#ff3366" height="52" width="8" x="136" y="180"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="163" x2="163" y1="190" y2="265"></line>
+<rect fill="#ff3366" height="50" width="8" x="159" y="200"></rect>
+<line stroke="#00e599" stroke-width="1" x1="186" x2="186" y1="185" y2="258"></line>
+<rect fill="#00e599" height="42" width="8" x="182" y="190"></rect>
+<line stroke="#00e599" stroke-width="1" x1="209" x2="209" y1="168" y2="222"></line>
+<rect fill="#00e599" height="38" width="8" x="205" y="172"></rect>
+<line stroke="#00e599" stroke-width="1" x1="232" x2="232" y1="155" y2="210"></line>
+<rect fill="#00e599" height="32" width="8" x="228" y="162"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="255" x2="255" y1="165" y2="215"></line>
+<rect fill="#ff3366" height="26" width="8" x="251" y="172"></rect>
+<line stroke="#00e599" stroke-width="1" x1="278" x2="278" y1="168" y2="202"></line>
+<rect fill="#00e599" height="20" width="8" x="274" y="172"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="301" x2="301" y1="175" y2="225"></line>
+<rect fill="#ff3366" height="30" width="8" x="297" y="180"></rect>
+<!-- Compression Squeeze Candles (Extreme Congestion towards MA confluence) -->
+<line stroke="#00e599" stroke-width="1" x1="324" x2="324" y1="178" y2="210"></line>
+<rect fill="#00e599" height="15" width="8" x="320" y="182"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="347" x2="347" y1="180" y2="212"></line>
+<rect fill="#ff3366" height="16" width="8" x="343" y="184"></rect>
+<line stroke="#00e599" stroke-width="1" x1="370" x2="370" y1="182" y2="214"></line>
+<rect fill="#00e599" height="14" width="8" x="366" y="185"></rect>
+<line stroke="#00e599" stroke-width="1" x1="393" x2="393" y1="184" y2="215"></line>
+<rect fill="#00e599" height="12" width="8" x="389" y="187"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="416" x2="416" y1="186" y2="218"></line>
+<rect fill="#ff3366" height="18" width="8" x="412" y="188"></rect>
+<line stroke="#00e599" stroke-width="1" x1="439" x2="439" y1="187" y2="216"></line>
+<rect fill="#00e599" height="13" width="8" x="435" y="189"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="462" x2="462" y1="189" y2="218"></line>
+<rect fill="#ff3366" height="14" width="8" x="458" y="190"></rect>
+<line stroke="#00e599" stroke-width="1" x1="485" x2="485" y1="190" y2="219"></line>
+<rect fill="#00e599" height="11" width="8" x="481" y="192"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="508" x2="508" y1="192" y2="220"></line>
+<rect fill="#ff3366" height="12" width="8" x="504" y="193"></rect>
+<line stroke="#00e599" stroke-width="1" x1="531" x2="531" y1="193" y2="221"></line>
+<rect fill="#00e599" height="10" width="8" x="527" y="195"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="554" x2="554" y1="194" y2="222"></line>
+<rect fill="#ff3366" height="11" width="8" x="550" y="196"></rect>
+<line stroke="#00e599" stroke-width="1" x1="577" x2="577" y1="195" y2="223"></line>
+<rect fill="#00e599" height="9" width="8" x="573" y="197"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="600" x2="600" y1="196" y2="224"></line>
+<rect fill="#ff3366" height="11" width="8" x="596" y="198"></rect>
+<line stroke="#00e599" stroke-width="1" x1="623" x2="623" y1="197" y2="225"></line>
+<rect fill="#00e599" height="10" width="8" x="619" y="199"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="646" x2="646" y1="198" y2="226"></line>
+<rect fill="#ff3366" height="12" width="8" x="642" y="200"></rect>
+<line stroke="#00e599" stroke-width="1" x1="669" x2="669" y1="199" y2="227"></line>
+<rect fill="#00e599" height="9" width="8" x="665" y="201"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="692" x2="692" y1="200" y2="228"></line>
+<rect fill="#ff3366" height="13" width="8" x="688" y="202"></rect>
+<line stroke="#00e599" stroke-width="1" x1="715" x2="715" y1="201" y2="229"></line>
+<rect fill="#00e599" height="10" width="8" x="711" y="203"></rect>
+<line stroke="#ff3366" stroke-width="1" x1="738" x2="738" y1="202" y2="230"></line>
+<rect fill="#ff3366" height="14" width="8" x="734" y="204"></rect>
+<!-- Volume Sub-Bars (Y: 300 to 370) -->
+<rect fill="url(#volBullGrad)" height="30" width="8" x="21" y="340"></rect>
+<rect fill="url(#volBearGrad)" height="55" width="8" x="44" y="315"></rect>
+<rect fill="url(#volBearGrad)" height="65" width="8" x="67" y="305"></rect>
+<rect fill="url(#volBullGrad)" height="40" width="8" x="90" y="330"></rect>
+<rect fill="url(#volBullGrad)" height="35" width="8" x="113" y="335"></rect>
+<rect fill="url(#volBearGrad)" height="55" width="8" x="136" y="315"></rect>
+<rect fill="url(#volBearGrad)" height="60" width="8" x="159" y="310"></rect>
+<rect fill="url(#volBullGrad)" height="35" width="8" x="182" y="335"></rect>
+<rect fill="url(#volBullGrad)" height="30" width="8" x="205" y="340"></rect>
+<rect fill="url(#volBullGrad)" height="25" width="8" x="228" y="345"></rect>
+<rect fill="url(#volBearGrad)" height="18" width="8" x="251" y="352"></rect>
+<rect fill="url(#volBullGrad)" height="15" width="8" x="274" y="355"></rect>
+<rect fill="url(#volBearGrad)" height="20" width="8" x="297" y="350"></rect>
+<rect fill="url(#volBullGrad)" height="12" width="8" x="320" y="358"></rect>
+<rect fill="url(#volBearGrad)" height="10" width="8" x="343" y="360"></rect>
+<rect fill="url(#volBullGrad)" height="11" width="8" x="366" y="359"></rect>
+<rect fill="url(#volBullGrad)" height="9" width="8" x="389" y="361"></rect>
+<rect fill="url(#volBearGrad)" height="13" width="8" x="412" y="357"></rect>
+<rect fill="url(#volBullGrad)" height="8" width="8" x="435" y="362"></rect>
+<rect fill="url(#volBearGrad)" height="10" width="8" x="458" y="360"></rect>
+<rect fill="url(#volBullGrad)" height="7" width="8" x="481" y="363"></rect>
+<rect fill="url(#volBearGrad)" height="9" width="8" x="504" y="361"></rect>
+<rect fill="url(#volBullGrad)" height="6" width="8" x="527" y="364"></rect>
+<rect fill="url(#volBearGrad)" height="8" width="8" x="550" y="362"></rect>
+<rect fill="url(#volBullGrad)" height="7" width="8" x="573" y="363"></rect>
+<rect fill="url(#volBearGrad)" height="9" width="8" x="596" y="361"></rect>
+<rect fill="url(#volBullGrad)" height="6" width="8" x="619" y="364"></rect>
+<rect fill="url(#volBearGrad)" height="10" width="8" x="642" y="360"></rect>
+<rect fill="url(#volBullGrad)" height="7" width="8" x="665" y="363"></rect>
+<rect fill="url(#volBearGrad)" height="11" width="8" x="688" y="359"></rect>
+<rect fill="url(#volBullGrad)" height="8" width="8" x="711" y="362"></rect>
+<rect fill="url(#volBearGrad)" height="13" width="8" x="734" y="357"></rect>
+</svg>
+<!-- Right Price Axis Ladder (Fixed Bloomberg Style) -->
+<div class="absolute right-0 top-0 bottom-6 w-16 bg-[#0a0e14] border-l border-[#1a2333] flex flex-col justify-between py-2 text-right pr-1.5 font-mono-num text-[10px] text-terminal-muted pointer-events-none z-20">
+<span>84,348.2</span>
+<span>83,600.0</span>
+<span>82,800.0</span>
+<span class="text-yellow-400 font-bold bg-yellow-950/60 px-0.5 rounded">81,555.1</span>
+<span class="bg-bear text-white font-bold px-1 rounded animate-pulse shadow-sm">81,540.8</span>
+<span>81,200.0</span>
+<span>80,600.0</span>
+<span class="text-bull font-bold bg-emerald-950/60 px-0.5 rounded">79,210.0</span>
+</div>
+<!-- Bottom Timeline Axis -->
+<div class="absolute left-0 right-16 bottom-0 h-5 bg-[#0b0f17] border-t border-[#1a2333] flex items-center justify-between px-2 text-[9px] font-mono-num text-terminal-muted">
+<span>10/17 00:00</span>
+<span>03:00</span>
+<span>06:00</span>
+<span>09:00</span>
+<span>12:00</span>
+<span>15:00</span>
+<span class="text-accent font-bold">18:00 (NOW)</span>
+<span>21:00</span>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT COLUMN: LEVEL 2 ORDER BOOK & RECENT TRADES (W-64 / ~260px) ================= -->
+<div class="w-64 shrink-0 bg-[#0d1118] border border-[#1b2232] rounded flex flex-col overflow-hidden text-xs"><!-- Top Half: Liquidation Heatmap & Micro-Liquidity Levels -->
+<div class="flex-1 flex flex-col min-h-0 border-b border-[#1b2232] overflow-hidden">
+<!-- Module Header -->
+<div class="h-7 bg-[#0b0e14] border-b border-[#1b2232] px-2 flex items-center justify-between shrink-0 font-mono-num text-[10px]">
+<span class="font-bold text-slate-200 uppercase tracking-tight flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-yellow-400 rounded-sm animate-pulse"></span>清算热图与流动性
+    </span>
+<div class="flex items-center gap-1 text-[9px]">
+<button class="px-1 py-0.2 rounded bg-[#162032] text-accent font-semibold border border-accent/40">$10M</button>
+<button class="px-1 py-0.2 rounded text-terminal-muted hover:text-white">$50M</button>
+<span class="w-1.5 h-1.5 rounded-full bg-bear ml-0.5" title="空头爆仓磁吸高危"></span>
+</div>
+</div>
+<!-- Subhead Metric Strip -->
+<div class="px-2 py-1 bg-[#0e131d] border-b border-[#182030] flex items-center justify-between text-[9px] font-mono-num text-terminal-muted">
+<span class="uppercase">磁吸区间 (Magnetic Zone)</span>
+<span>预估清算 / 距离</span>
+</div>
+<!-- Liquidation Levels List -->
+<div class="flex-1 overflow-y-auto divide-y divide-[#131924] font-mono-num text-[10px] p-1 space-y-1">
+<!-- Level 1: Upper Resistance (Short Liq) -->
+<div class="relative p-1 rounded bg-[#101520] border border-bear/30 overflow-hidden hover:bg-[#141b27] transition-colors">
+<div class="absolute right-0 top-0 bottom-0 bg-bear/15 pointer-events-none" style="width: 72%;"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-1">
+<span class="text-bear font-bold">83,100</span>
+<span class="text-[8px] px-1 rounded bg-bear/20 text-bear">+1.9%</span>
+</div>
+<span class="text-slate-100 font-bold text-[11px] text-right">$89.2M</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted mt-0.5 relative z-10">
+<span>强清算阻力区</span>
+<span class="text-terminal-dim">级联阈值 1.8x</span>
+</div>
+</div>
+<!-- Level 2: High Gravity Cluster (Short Squeeze Target) -->
+<div class="relative p-1 rounded bg-[#1a131a] border border-bear/60 overflow-hidden hover:bg-[#201520] transition-colors shadow-sm">
+<div class="absolute right-0 top-0 bottom-0 bg-bear/25 pointer-events-none" style="width: 92%;"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-1">
+<span class="text-bear font-black">82,450</span>
+<span class="text-[8px] px-1 rounded bg-bear/30 text-white font-bold">+1.1%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-[8px] px-1 rounded bg-yellow-950/80 text-yellow-300 border border-yellow-400/50">极高磁吸</span>
+<span class="text-bear font-black text-[11px]">$142.5M</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted mt-0.5 relative z-10">
+<span class="text-yellow-300/80">空头集中爆仓带 [High Gravity]</span>
+<span class="text-bear font-semibold">预计空挤压</span>
+</div>
+</div>
+<!-- Current Live Price Level Pin -->
+<div class="flex items-center justify-between px-1.5 py-0.5 bg-[#172033] rounded border border-accent/40 text-[9px]">
+<div class="flex items-center gap-1 text-accent font-semibold">
+<span class="w-1 h-1 rounded-full bg-accent animate-ping"></span>
+<span>现价: 81,540.8</span>
+</div>
+<span class="text-[8px] text-terminal-muted">基准锚点</span>
+</div>
+<!-- Level 3: Weak Long Liq -->
+<div class="relative p-1 rounded bg-[#101520] border border-[#1b2434] overflow-hidden hover:bg-[#141b27] transition-colors">
+<div class="absolute right-0 top-0 bottom-0 bg-bull/15 pointer-events-none" style="width: 35%;"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-1">
+<span class="text-bull font-bold">81,150</span>
+<span class="text-[8px] px-1 rounded bg-bull/20 text-bull">-0.48%</span>
+</div>
+<span class="text-slate-200 font-bold text-[10px]">$34.1M</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted mt-0.5 relative z-10">
+<span>多头弱清算带</span>
+<span class="text-terminal-dim">散户小多单</span>
+</div>
+</div>
+<!-- Level 4: Strong Floor Long Liq Cluster -->
+<div class="relative p-1 rounded bg-[#0d1c18] border border-bull/60 overflow-hidden hover:bg-[#12241e] transition-colors">
+<div class="absolute right-0 top-0 bottom-0 bg-bull/25 pointer-events-none" style="width: 98%;"></div>
+<div class="flex items-center justify-between relative z-10">
+<div class="flex items-center gap-1">
+<span class="text-bull font-black">80,400</span>
+<span class="text-[8px] px-1 rounded bg-bull/30 text-white font-bold">-1.4%</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-[8px] px-1 rounded bg-emerald-950/80 text-bull border border-bull/40">强清算底</span>
+<span class="text-bull font-black text-[11px]">$198.8M</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted mt-0.5 relative z-10">
+<span class="text-bull/80">核心支撑密集清算区 [Strong Floor]</span>
+<span class="text-bull font-semibold">巨鲸托底</span>
+</div>
+</div>
+</div>
+<!-- Bottom Liq Imbalance Bar -->
+<div class="p-1.5 bg-[#0a0d14] border-t border-[#1b2232] font-mono-num text-[9px] flex flex-col gap-1 shrink-0">
+<div class="flex items-center justify-between">
+<span class="text-terminal-muted">清算失衡度 (Liq Imbalance):</span>
+<span class="text-bear font-bold">空方暴露 68% vs 多方 32%</span>
+</div>
+<div class="w-full bg-[#1c2538] h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-bull h-full" style="width: 32%;"></div>
+<div class="bg-bear h-full" style="width: 68%;"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Half: Whale Flow & CVD Delta Monitor -->
+<div class="flex-1 flex flex-col min-h-0 bg-[#0a0d14] overflow-hidden">
+<!-- Header -->
+<div class="h-7 bg-[#0b0e14] border-b border-[#1b2232] px-2 flex items-center justify-between shrink-0 font-mono-num text-[10px]">
+<span class="font-bold text-slate-200 uppercase tracking-tight flex items-center gap-1">
+<span class="material-symbols-outlined text-accent text-[13px]">tsunami</span>主力资金 &amp; CVD
+    </span>
+<div class="flex items-center gap-1">
+<span class="text-[9px] px-1 rounded bg-[#162032] text-accent font-semibold">15m CVD</span>
+</div>
+</div>
+<!-- CVD Telemetry Strip -->
+<div class="px-2 py-1 bg-[#0e131d] border-b border-[#182030] flex items-center justify-between text-[9px] font-mono-num shrink-0">
+<div class="flex items-center gap-1">
+<span class="text-terminal-muted">CVD:</span>
+<span class="text-bear font-bold">-1,420 BTC</span>
+<span class="text-[8px] text-bear">(主动卖)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="text-terminal-muted">大单净流:</span>
+<span class="text-bear font-bold">-$38.6M</span>
+</div>
+</div>
+<!-- Whale Order Stream Table -->
+<div class="flex-1 overflow-y-auto divide-y divide-[#131924] font-mono-num text-[9px]">
+<!-- Whale Row 1 -->
+<div class="p-1.5 hover:bg-[#121723] transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="text-terminal-muted">18:42:08</span>
+<span class="px-1 rounded bg-[#162032] text-slate-300 font-semibold">币安合约</span>
+<span class="text-bear font-bold">主动砸盘</span>
+</div>
+<span class="text-bear font-bold">$4.85M</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted">
+<span>标的: 60 BTC</span>
+<span class="text-bear font-semibold">空头加仓</span>
+</div>
+</div>
+<!-- Whale Row 2 -->
+<div class="p-1.5 hover:bg-[#121723] transition-colors bg-yellow-950/20 border-l border-yellow-400 flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="text-slate-400">18:40:15</span>
+<span class="px-1 rounded bg-[#162032] text-slate-200 font-semibold">OKX 永续</span>
+<span class="text-yellow-300 font-bold">挂单吸收</span>
+</div>
+<span class="text-yellow-300 font-bold">$8.20M ★</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted">
+<span>标的: 101 BTC (Passive Buy)</span>
+<span class="text-yellow-300 font-semibold">冰山托盘</span>
+</div>
+</div>
+<!-- Whale Row 3 -->
+<div class="p-1.5 hover:bg-[#121723] transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="text-terminal-muted">18:36:22</span>
+<span class="px-1 rounded bg-[#162032] text-slate-300 font-semibold">Bybit 现货</span>
+<span class="text-bull font-bold">分批吸筹</span>
+</div>
+<span class="text-bull font-bold">$3.50M</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted">
+<span>标的: 43 BTC</span>
+<span class="text-bull font-semibold">现货流入</span>
+</div>
+</div>
+<!-- Whale Row 4 -->
+<div class="p-1.5 hover:bg-[#121723] transition-colors flex flex-col gap-0.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1">
+<span class="text-terminal-muted">18:31:04</span>
+<span class="px-1 rounded bg-[#162032] text-slate-300 font-semibold">Coinbase</span>
+<span class="text-bear font-bold">市价抛售</span>
+</div>
+<span class="text-bear font-bold">$6.12M</span>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-muted">
+<span>标的: 75 BTC</span>
+<span class="text-bear font-semibold">激进做空</span>
+</div>
+</div>
+</div>
+<!-- Top Trader Net Exposure Gauge -->
+<div class="p-1.5 bg-[#0b0e14] border-t border-[#1b2232] font-mono-num text-[9px] flex flex-col gap-1 shrink-0">
+<div class="flex items-center justify-between">
+<span class="text-terminal-muted">大户持仓意向诊断:</span>
+<div class="flex items-center gap-1">
+<span class="text-slate-300">多空比:</span>
+<span class="text-bull font-bold">1.34</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-[8px] text-terminal-dim">
+<span>净风险敞口: 偏向看涨期权对冲</span>
+<span class="text-accent font-semibold">Top Trader Bias</span>
+</div>
+</div>
+</div></div>
+</div>
+<!-- ================= BOTTOM PANEL: CONFLUENCE EVENTS & QUANT BREADTH RADAR ================= -->
+<footer class="h-44 bg-[#0c0f16] border-t border-[#1b2232] flex shrink-0 text-xs font-mono-num z-40">
+<!-- Left 65%: Realtime Confluence Event Stream (共振异动触发流水) -->
+<div class="flex-1 flex flex-col border-r border-[#1b2232] overflow-hidden">
+<!-- Stream Header -->
+<div class="h-7 bg-[#090c12] border-b border-[#1b2232] px-2.5 flex items-center justify-between shrink-0">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-accent animate-ping"></span>
+<span class="font-bold text-white text-[11px] uppercase tracking-wider">全市场量化共振实时异动流 (Confluence Signals)</span>
+<span class="px-1.5 py-0.2 rounded bg-accent/20 text-accent text-[9px] font-bold">14 触发中</span>
+</div>
+<div class="flex items-center gap-2 text-[10px] text-terminal-muted">
+<span>过滤条件: 密集度 ≥ 80%</span>
+<span class="text-terminal-dim">|</span>
+<button class="text-accent hover:underline flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">tune</span>规则策略
+          </button>
+</div>
+</div>
+<!-- Table Column Titles -->
+<div class="grid grid-cols-12 px-2.5 py-1 bg-[#0e131d] border-b border-[#182030] text-[9px] text-terminal-muted uppercase">
+<div class="col-span-2">触发时间 (UTC+8)</div>
+<div class="col-span-2">监控标的 / 周期</div>
+<div class="col-span-2">共振信号类型</div>
+<div class="col-span-2">同向扩散度 / 多空比</div>
+<div class="col-span-3">技术面量化依据</div>
+<div class="col-span-1 text-right">状态 / TG</div>
+</div>
+<!-- Signals Feed Rows -->
+<div class="flex-1 overflow-y-auto divide-y divide-[#141b27] text-[10px]">
+<!-- Signal 1 -->
+<div class="grid grid-cols-12 px-2.5 py-1.5 items-center hover:bg-[#121723] transition-colors">
+<div class="col-span-2 text-terminal-muted flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-bear"></span>
+<span>10/17 20:45:12</span>
+</div>
+<div class="col-span-2 flex items-center gap-1 font-bold text-white">
+<span>BTC / USDT</span>
+<span class="text-[9px] px-1 bg-[#1a2333] text-accent rounded font-normal">15m</span>
+</div>
+<div class="col-span-2">
+<span class="px-1.5 py-0.5 rounded bg-bear/20 text-bear font-bold text-[9px] inline-flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]">south_east</span>六均线死叉粘合扩散
+            </span>
+</div>
+<div class="col-span-2 flex items-center gap-1.5">
+<span class="font-bold text-bear">96.0%</span>
+<div class="w-16 bg-[#1a2233] h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-bear h-full" style="width: 96%"></div>
+</div>
+</div>
+<div class="col-span-3 text-slate-300 text-[10px] truncate">
+            突破昨日 POC (81,555)，破位下行，资金费率由正转负
+          </div>
+<div class="col-span-1 flex items-center justify-end gap-1">
+<span class="text-[9px] px-1 rounded bg-[#162032] text-accent font-semibold">已推TG</span>
+<span class="material-symbols-outlined text-[13px] text-terminal-muted cursor-pointer hover:text-white">chevron_right</span>
+</div>
+</div>
+<!-- Signal 2 -->
+<div class="grid grid-cols-12 px-2.5 py-1.5 items-center hover:bg-[#121723] transition-colors bg-bull/5">
+<div class="col-span-2 text-terminal-muted flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-bull"></span>
+<span>10/17 19:15:00</span>
+</div>
+<div class="col-span-2 flex items-center gap-1 font-bold text-white">
+<span>SUI / USDT</span>
+<span class="text-[9px] px-1 bg-[#1a2333] text-accent rounded font-normal">1H</span>
+</div>
+<div class="col-span-2">
+<span class="px-1.5 py-0.5 rounded bg-bull/20 text-bull font-bold text-[9px] inline-flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]">north_east</span>多头均线密集发散
+            </span>
+</div>
+<div class="col-span-2 flex items-center gap-1.5">
+<span class="font-bold text-bull">82.4%</span>
+<div class="w-16 bg-[#1a2233] h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-bull h-full" style="width: 82%"></div>
+</div>
+</div>
+<div class="col-span-3 text-slate-300 text-[10px] truncate">
+            突破 2.15 筹码真空带，OI单小时剧增 +14.2%，放量拉升
+          </div>
+<div class="col-span-1 flex items-center justify-end gap-1">
+<span class="text-[9px] px-1 rounded bg-bull/20 text-bull font-semibold">多头跟进</span>
+<span class="material-symbols-outlined text-[13px] text-terminal-muted cursor-pointer hover:text-white">chevron_right</span>
+</div>
+</div>
+<!-- Signal 3 -->
+<div class="grid grid-cols-12 px-2.5 py-1.5 items-center hover:bg-[#121723] transition-colors">
+<div class="col-span-2 text-terminal-muted flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-accent-purple"></span>
+<span>10/17 18:30:22</span>
+</div>
+<div class="col-span-2 flex items-center gap-1 font-bold text-white">
+<span>ETH / USDT</span>
+<span class="text-[9px] px-1 bg-[#1a2333] text-accent rounded font-normal">30m</span>
+</div>
+<div class="col-span-2">
+<span class="px-1.5 py-0.5 rounded bg-purple-950/60 text-purple-300 border border-purple-500/30 font-bold text-[9px] inline-flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[11px]">swap_horiz</span>量价顶背离警报
+            </span>
+</div>
+<div class="col-span-2 flex items-center gap-1.5">
+<span class="font-bold text-slate-200">64.0%</span>
+<div class="w-16 bg-[#1a2233] h-1.5 rounded-full overflow-hidden flex">
+<div class="bg-accent-purple h-full" style="width: 64%"></div>
+</div>
+</div>
+<div class="col-span-3 text-slate-300 text-[10px] truncate">
+            MACD 动能衰减，触碰 2,450 阻力区受阻，持仓量分流
+          </div>
+<div class="col-span-1 flex items-center justify-end gap-1">
+<span class="text-[9px] px-1 rounded bg-[#162032] text-terminal-muted">监控中</span>
+<span class="material-symbols-outlined text-[13px] text-terminal-muted cursor-pointer hover:text-white">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right 35%: Macro Quant Breadth Radar & Liquidation Map (宏观量化矩阵) -->
+<div class="w-[380px] shrink-0 flex flex-col bg-[#0b0e14] overflow-hidden">
+<!-- Radar Header -->
+<div class="h-7 bg-[#090c12] border-b border-[#1b2232] px-2 flex items-center justify-between shrink-0">
+<span class="font-bold text-slate-200 text-[11px] uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-accent">hub</span>
+          宏观量化数据矩阵 (Breadth Matrix)
+        </span>
+<span class="text-[9px] px-1 bg-bear/20 text-bear rounded font-bold">单边偏空扩散</span>
+</div>
+<!-- 4 Core Quantitative Telemetry Cards in 2x2 Grid -->
+<div class="p-2 grid grid-cols-2 gap-1.5 flex-1 overflow-y-auto">
+<!-- Card 1: Market Breadth -->
+<div class="bg-[#101520] p-1.5 rounded border border-[#1b2434] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-terminal-muted">市场广度 (Breadth)</span>
+<span class="text-xs font-black text-bear">-96</span>
+</div>
+<div class="w-full bg-[#1c2538] h-1.5 rounded-full overflow-hidden flex my-1">
+<div class="bg-bull h-full" style="width: 2%"></div>
+<div class="bg-bear h-full" style="width: 98%"></div>
+</div>
+<div class="flex items-center justify-between text-[9px] text-terminal-muted">
+<span>上涨: <b class="text-bull font-normal">1</b></span>
+<span>下跌: <b class="text-bear font-normal">49</b> (50标的)</span>
+</div>
+</div>
+<!-- Card 2: BTC / ETH Momentum Spread -->
+<div class="bg-[#101520] p-1.5 rounded border border-[#1b2434] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-terminal-muted">BTC/ETH 动量背离</span>
+<span class="text-xs font-black text-bear">-12 σ</span>
+</div>
+<div class="w-full bg-[#1c2538] h-1.5 rounded-full overflow-hidden flex my-1">
+<div class="bg-accent h-full" style="width: 35%"></div>
+<div class="bg-bear h-full" style="width: 65%"></div>
+</div>
+<div class="flex items-center justify-between text-[9px] text-terminal-muted">
+<span>ETH/BTC 汇率弱化</span>
+<span class="text-slate-200">0.0297 (-1.8%)</span>
+</div>
+</div>
+<!-- Card 3: Long/Short Ratio Gauge -->
+<div class="bg-[#101520] p-1.5 rounded border border-[#1b2434] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-terminal-muted">大户账户数多空比</span>
+<span class="text-xs font-black text-bull">0.82</span>
+</div>
+<div class="w-full bg-[#1c2538] h-1.5 rounded-full overflow-hidden flex my-1">
+<div class="bg-bull h-full" style="width: 45%"></div>
+<div class="bg-bear h-full" style="width: 55%"></div>
+</div>
+<div class="flex items-center justify-between text-[9px] text-terminal-muted">
+<span>多头 45.1%</span>
+<span>空头 54.9%</span>
+</div>
+</div>
+<!-- Card 4: Liquidation Heatmap Summary -->
+<div class="bg-[#101520] p-1.5 rounded border border-[#1b2434] flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="text-[10px] text-terminal-muted">清算密集带 (Heatmap)</span>
+<span class="text-xs font-black text-yellow-400">$82,600</span>
+</div>
+<div class="flex items-center gap-1 my-1">
+<span class="w-full h-1 bg-gradient-to-r from-bull via-yellow-400 to-bear rounded-full"></span>
+</div>
+<div class="flex items-center justify-between text-[9px] text-terminal-muted">
+<span>上方空头: $142M</span>
+<span>下方多头: $98M</span>
+</div>
+</div>
+</div>
+</div>
+</footer>
+<!-- Realtime Simulation & Clock Micro-Script -->
+<script>
+    (function() {
+      // 1. Live Terminal UTC Clock
+      const clockEl = document.getElementById('terminal-clock');
+      setInterval(() => {
+        const now = new Date();
+        const timeStr = now.toTimeString().split(' ')[0] + ' UTC';
+        if (clockEl) clockEl.textContent = timeStr;
+      }, 1000);
+
+      // 2. Realtime BTC price micro-fluctuation for quantitative terminal realism
+      const priceEl = document.getElementById('hero-live-price');
+      if (!priceEl) return;
+      let currentPrice = 81540.8;
+      
+      setInterval(() => {
+        const delta = (Math.random() - 0.52) * 1.8;
+        currentPrice += delta;
+        priceEl.textContent = currentPrice.toLocaleString('en-US', {
+          minimumFractionDigits: 1,
+          maximumFractionDigits: 1
+        });
+      }, 1200);
+    })();
+  </script>
+</body></html>

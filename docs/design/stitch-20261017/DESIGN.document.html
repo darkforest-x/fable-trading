@@ -1,0 +1,27 @@
+<h1>DESIGN.md — Spike Quant &amp; Visual AI Research Terminal</h1><h2>1. 品牌愿景与设计哲学 (Design Philosophy)</h2><p>Spike 是一款融合深度学习计算机视觉（YOLO K线形态回归识别）、高阶多周期量化（6均线密集收敛收缩算法、订单流微结构）与自动化实盘执行的专业级量化交易研投终端。</p><ul><li><p><strong>高信息密度而不杂乱 (High Density, High Clarity)</strong>：专为职业交易员与量化研究员打造，一屏兼顾研报、回测、特征与实盘深度。</p></li><li><p><strong>等宽数据对齐与视觉零抖动 (Monospace Decimal Lock)</strong>：全部数字、订单量、P&amp;L、Tick 延迟均采用等宽排版，数据跳动时界面绝不出现水平位移或布局漂移。</p></li><li><p><strong>极客暗黑与电光聚焦 (Obsidian Quantum Theme)</strong>：极深冷调灰底降低长达12小时盯盘的视网膜疲劳，辅以电光青蓝（Cyan）主品牌焦点及高对比翡翠绿/玫瑰红的多空语义。</p></li></ul><hr contenteditable="false"><h2>2. 色彩系统 (Color Tokens)</h2><pre><code class="language-css">:root {
+  /* Surface Layers (冷色黑曜石递进) */
+  --surface-base: #090B10;        /* 视窗最底背景 */
+  --surface-layer-1: #0E121B;     /* 主面板、容器底色 */
+  --surface-layer-2: #151A26;     /* 卡片、表格行、输入框底色 */
+  --surface-layer-3: #1E2536;     /* 悬停态、选中态高亮 */
+  --surface-border: #232D42;      /* 精细边框线 (1px) */
+  --surface-border-subtle: #182030;
+
+  /* Brand &amp; Focus Tokens */
+  --brand-cyan: #00E5FF;          /* Spike 核心品牌强调色 */
+  --brand-cyan-glow: rgba(0, 229, 255, 0.15);
+  --brand-purple: #8B5CF6;        /* 视觉模型、深度学习研究专用色 */
+  --brand-amber: #F59E0B;         /* 预警、密集临界、观察状态 */
+
+  /* Semantic Trading (多空与风控语义) */
+  --trade-long: #10B981;          /* 多头 / 涨 / 盈利 */
+  --trade-long-bg: rgba(16, 185, 129, 0.12);
+  --trade-short: #F43F5E;         /* 空头 / 跌 / 亏损 */
+  --trade-short-bg: rgba(244, 63, 94, 0.12);
+  --risk-critical: #EF4444;       /* 熔断、API断开、异常 */
+
+  /* Text &amp; Typography */
+  --text-primary: #F1F5F9;        /* 极高亮正文、核心报价 */
+  --text-secondary: #94A3B8;      /* 辅助标签、参数名称 */
+  --text-muted: #64748B;          /* 次要注释、失效状态 */
+}</code></pre><hr contenteditable="false"><h2>3. 字体与排版层级 (Typography System)</h2><ul><li><p><strong>UI 界面字体</strong>：<code>Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", sans-serif</code></p></li><li><p><strong>数值与代码字体</strong>：<code>"JetBrains Mono", "SF Mono", "Fira Code", monospace</code></p></li><li><p><strong>排版比例与层级</strong>：</p><ul><li><p><code>Hero KPI / Balance</code>: 24px - 32px / 700 Monospace</p></li><li><p><code>Section Title</code>: 14px - 16px / 600 Inter / 字母大写或带发光指示点</p></li><li><p><code>Body / Cell Text</code>: 12px - 13px / 400 Regular</p></li><li><p><code>Micro Tag / Metadata</code>: 10px - 11px / 500 Uppercase Tracking 0.05em</p></li></ul></li></ul><hr contenteditable="false"><h2>4. 关键组件与布局范式 (Component Architecture)</h2><ol><li><p><strong>常驻 App Shell 架构</strong>：</p><ul><li><p>顶部全能导航条：集成系统状态心跳（120ms WebSocket 轮询）、一键极速开单快捷键、风控等级安全评分与活动通知中心。</p></li><li><p>左侧全局收折抽屉式功能导航。</p></li></ul></li><li><p><strong>K线与形态检测标注容器</strong>：</p><ul><li><p>标准 6 均线系统标配：SMA 20/60/120 与 EMA 20/60/120，色阶分明，均线密集阈值带（<code>&lt; 0.8%</code>）自动着色高亮。</p></li><li><p>YOLO 目标检测 Bounding Box：带置信度与类别标签，附带推理延迟与 NMS IoU 指标。</p></li></ul></li><li><p><strong>交易指令流与双向反馈</strong>：</p><ul><li><p>挂单状态即时跟踪条（排队位次、前序未挂量、可恢复操作选项）。</p></li><li><p>实盘账户与图表实时穿透联动，点击任何资产即时切换行情面板。</p></li></ul></li></ol><hr contenteditable="false"><h2>5. 跨端适配规范 (Responsive &amp; Mobile Strategy)</h2><ul><li><p><strong>桌面端 (Desktop, &gt;= 1440px)</strong>：以三栏或四栏高密度看板为主，多屏联动，支持研报、回测因子矩阵与多深度报单同屏交互。</p></li><li><p><strong>移动端 (Mobile, ~390px)</strong>：</p><ul><li><p>单手拇指热区优化：核心指标悬浮卡置顶，图表与均线密集检测结合快速下单手势。</p></li><li><p>简化信息流：以折叠抽屉与滑动标签展示多周期信号与持仓浮盈，保留关键止盈止损调整与一键闪电平仓。</p></li></ul></li></ul>

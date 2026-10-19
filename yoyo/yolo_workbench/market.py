@@ -50,7 +50,7 @@ def parse(rows, timeframe, cutoff):
 
 class Market:
     def __init__(self, client=None, runtime=None, book=None):
-        self.client = client or OKX(rate=3)
+        self.client = client or OKX(rate=3, runtime=runtime)
         self.runtime = Path(runtime) if runtime else None
         self.cache = OrderedDict()
         self.book = book

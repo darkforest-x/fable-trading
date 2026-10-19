@@ -10,13 +10,16 @@ import time
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+from starlette.middleware.gzip import GZipMiddleware
+from yoyo.monitor.asset_delivery import cache_policy, render_index
 
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
 from yoyo.monitor import market_sync as market_sync_research
-from yoyo.monitor.market_sync import Observer as MarketSync
+from yoyo.monitor.market_sync_okx import Observer as MarketSync
+from yoyo.monitor.market_context import MarketContext, market_bias
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.shadow_api import (SHADOW_DATABASE, ShadowBookUnavailable, events as shadow_events,
                                      market_snapshots as shadow_market_snapshots,
@@ -73,6 +76,11 @@ def create_app(runtime=None, start_monitor=True):
     lines_book = lines_database(runtime)
     monitor = Monitor(store)
     market_sync = MarketSync(runtime)
+    market_context = MarketContext(runtime, market_sync.client)
+    from yoyo.monitor.altcoin_leader_service import LeaderService, install as install_leaders
+    altcoin_leaders = LeaderService(runtime)
+    from yoyo.monitor.vidya_retest_api import VidyaRetestService
+    vidya_retest = VidyaRetestService(runtime)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -82,20 +90,47 @@ def create_app(runtime=None, start_monitor=True):
             if start_monitor:
                 monitor.start()
                 market_sync.start()
+                market_context.start()
+                altcoin_leaders.start()
+                vidya_retest.start()
+            if start_monitor:
+                app.state.start_yolo_workbench()
+            app.state.paper_desk_market.start()
+            app.state.paper_desk_worker.start()
             yield
         finally:
+            app.state.market_workstation.close()
+            app.state.signal_read_cache.close()
+            app.state.okx_execution_dashboard.close()
+            app.state.yolo_workbench_supervisor.close()
+            app.state.paper_desk_worker.close()
+            app.state.paper_desk_market.close()
+            vidya_retest.close()
+            market_context.close()
             market_sync.close()
+            altcoin_leaders.close()
             monitor.close()
             lockfile.close()
 
     app = FastAPI(title="Fable Impulse Monitor", lifespan=lifespan, docs_url=None, redoc_url=None)
+    app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=6)
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=["127.0.0.1", "localhost", "testserver"])
     app.state.monitor = monitor
+    from yoyo.monitor.market_workstation import install as install_market_workstation
+    install_market_workstation(app)
+    from yoyo.monitor.signal_cache import SignalReadCache
+    app.state.signal_read_cache = SignalReadCache(store)
+    app.state.altcoin_leaders = altcoin_leaders
+    install_leaders(app, altcoin_leaders)
 
     from yoyo.monitor.notification_api import install as install_notifications
     install_notifications(app, runtime, monitor)
     from yoyo.monitor.copier_proxy import install as install_copier
     install_copier(app)
+    from yoyo.okx_execution.dashboard import install as install_okx_dashboard
+    install_okx_dashboard(app)
+    from yoyo.monitor.vidya_retest_api import install as install_vidya_retest
+    install_vidya_retest(app, runtime, vidya_retest)
 
     @app.middleware("http")
     async def headers(request, call_next):
@@ -106,21 +141,33 @@ def create_app(runtime=None, start_monitor=True):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        response.headers["Cache-Control"] = "no-store"
+        response.headers["Cache-Control"] = cache_policy(request.url.path, request.query_params.get("v"), STATIC, response.status_code)
         return response
 
     @app.get("/")
     def index():
-        return FileResponse(STATIC / "index.html")
+        return HTMLResponse(render_index(STATIC))
 
     @app.get("/api/status")
     def status():
         dispatch_trace("handler:/api/status")
         return monitor.status()
 
+    @app.get('/api/candles/status')
+    def candle_status(symbol: str = Query('', max_length=64), limit: int = Query(80, ge=1, le=200)):
+        return monitor.client.hub.snapshot(symbol=symbol, limit=limit)
+
     @app.get("/api/market-sync")
     def market_sync_snapshot():
         return market_sync.snapshot()
+
+    @app.get('/api/market-sync/context')
+    def market_context_snapshot(
+        zone: str = Query('America/New_York', pattern=r'^(America/New_York|UTC|Asia/Shanghai)$'),
+        symbol: str = Query('BTC-USDT-SWAP', pattern=r'^[A-Z0-9]{1,24}-USDT-SWAP$'),
+    ):
+        value = market_context.snapshot(zone, symbol)
+        return dict(value, bias=market_bias(value, market_sync.snapshot()) if symbol == 'BTC-USDT-SWAP' else None)
 
     @app.get("/api/market-sync/history")
     def market_sync_history(group: str = Query(None, max_length=64)):
@@ -137,6 +184,7 @@ def create_app(runtime=None, start_monitor=True):
 
     @app.get("/api/v13/signals")
     def v13_signals(limit: int = Query(100, ge=1, le=1000), symbol: str = None, timeframe: str = None):
+        from yoyo.contracts.signal_universe import exclusion_reason, public_policy
         from yoyo.monitor.v130_policy import TIMEFRAMES as periods
         from yoyo.monitor.v130_signals import SIGNAL_PROTOCOL as protocol, SIGNAL_KIND as kind
         if timeframe is not None and timeframe not in periods:
@@ -146,8 +194,11 @@ def create_app(runtime=None, start_monitor=True):
                                  protocol=protocol, source="live", confirmation="retest", summary=False)
         clock = monitor.client.clock()
         for row in rows:
-            row["is_fresh"] = 0 <= clock - row["bar_close_ms"] <= FRESH_MS
+            reason = exclusion_reason(row['symbol'], timeframe=row['timeframe'], side=row['side'])
+            row.update(entry_eligible=reason is None, entry_exclusion=reason,
+                       is_fresh=reason is None and 0 <= clock - row["bar_close_ms"] <= FRESH_MS)
         return {"items": rows, "protocol": protocol, "timeframes": list(periods),
+                "entry_universe": public_policy(),
                 "candidate_source": "ordinary_both", "activation": arm,
                 "signals_24h": store.count_since(clock - 86400000, kind=kind, protocol=protocol),
                 "last_observation": store.get_meta("v130:last_observation", {}),
@@ -164,7 +215,7 @@ def create_app(runtime=None, start_monitor=True):
                       sort: str = "newest", offset: int = Query(0, ge=0), limit: int = Query(24, ge=1, le=2000)):
         from yoyo.monitor.signal_analytics import ledger
         try:
-            return ledger(store, now=monitor.client.clock(), source=source, confirmation=confirmation,
+            return ledger(app.state.signal_read_cache, now=monitor.client.clock(), source=source, confirmation=confirmation,
                           period=period, timeframe=timeframe, side=side, search=search,
                           outcome=outcome, sort=sort, offset=offset, limit=limit)
         except ValueError as exc:
@@ -378,6 +429,13 @@ def create_app(runtime=None, start_monitor=True):
 
     from yoyo.research_workspace.api import install as install_research_workspace
     install_research_workspace(app, runtime)
+    from yoyo.yolo_workbench.api import install as install_yolo_workbench
+    install_yolo_workbench(app, runtime, launch_worker=start_monitor)
+    from yoyo.okx_execution.manual_api import install as install_manual_live
+    install_manual_live(app, app.state.yolo_workbench)
+
+    from yoyo.monitor.pro.delivery import install as install_pro
+    install_pro(app)
 
     app.mount("/static", StaticFiles(directory=str(STATIC), check_dir=False), name="static")
     return app

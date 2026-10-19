@@ -100,8 +100,8 @@ async function loadPageState() {
 
 async function getActiveDiscordTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.id || !tab.url?.startsWith("https://discord.com/channels/")) {
-    throw new Error("请先切到 Discord 频道页");
+  if (!tab?.id || !/^https:\/\/discord\.com\/channels\/1004707886657699901\/1131521990814089276(?:[/?#]|$)/.test(tab.url || "")) {
+    throw new Error("请先打开指定的 Arthur 行情分析频道");
   }
   return tab;
 }

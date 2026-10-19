@@ -12,6 +12,8 @@ from yoyo.monitor.notification_policy import (arm_v9_bark, arm_v9_telegram, deli
                                               model_candidate_error)
 from yoyo.monitor.v128_signals import analyze
 from yoyo.monitor.store import Store, now_ms
+from yoyo.contracts.signal_universe import instrument_exclusion
+from yoyo.monitor.signal_universe import plan_scan
 
 
 def instrument_base(instrument):
@@ -55,7 +57,7 @@ class V9Scanner:
         self.store = Store(Path(database))
         self.generation = generation
         self.worker_started_at_ms = now_ms()
-        self.client = OKX()
+        self.client = OKX(runtime=Path(database).parent, priority='monitor')
         self.instruments = []
         self.universe_at = 0
         # A restart only reuses exact raw sequences.  Do not seed recurrence
@@ -105,8 +107,7 @@ class V9Scanner:
         if not self.instruments or started - self.universe_at >= 3_600_000:
             self.instruments = client.instruments()
             self.universe_at = started
-            store.set_meta("universe", {"count": len(self.instruments), "scope": "OKX all live SWAP", "updated_at_ms": started})
-        instruments = self.instruments
+        instruments, eligible = plan_scan(store, self.instruments, started)
         scan.update(status="scanning", total=len(instruments) * len(MONITORED_TIMEFRAMES))
         store.set_meta("scan", scan)
         # H1 must finish before this symbol's 15m decision. A cold restart or
@@ -139,6 +140,7 @@ class V9Scanner:
                 submit_next()
             for instrument, timeframe in cells:
                 symbol = instrument["instId"]
+                entry_allowed = symbol in eligible
                 cell = (symbol, timeframe)
                 fetch_ms = analyze_ms = checkpoint_ms = 0.0
                 analyze_cpu_ms = checkpoint_cpu_ms = 0.0
@@ -164,13 +166,17 @@ class V9Scanner:
                     # restart may fetch only the exchange delta with this exact
                     # sequence, but no invalid payload is ever restored.  Do
                     # not rewrite an unchanged compressed seed every pass.
+                    checkpoint_started = time.monotonic()
+                    checkpoint_cpu_started = time.thread_time()
                     if not unchanged or cell not in self._checkpointed:
-                        checkpoint_started = time.monotonic()
-                        checkpoint_cpu_started = time.thread_time()
                         store.save_candle_checkpoint(symbol, timeframe, candles)
-                        checkpoint_ms = round((time.monotonic() - checkpoint_started) * 1000, 3)
-                        checkpoint_cpu_ms = round((time.thread_time() - checkpoint_cpu_started) * 1000, 3)
                         self._checkpointed.add(cell)
+                    # An unchanged prefix is still a successful observation.
+                    # Publish only after fetch/merge and checkpoint persistence;
+                    # failed reads must not refresh execution's freshness proof.
+                    store.observe_candle_checkpoint(symbol, timeframe, close)
+                    checkpoint_ms = round((time.monotonic() - checkpoint_started) * 1000, 3)
+                    checkpoint_cpu_ms = round((time.thread_time() - checkpoint_cpu_started) * 1000, 3)
                     if not unchanged:
                         analyze_started = time.monotonic()
                         analyze_cpu_started = time.thread_time()
@@ -180,23 +186,28 @@ class V9Scanner:
                                          _context=context)
                         from yoyo.monitor.v130_worker import observe
                         retest = observe(store, result, context, symbol=symbol, timeframe=timeframe,
-                                         tick=float(instrument["tickSz"]), clock=client.clock)
+                                         tick=float(instrument["tickSz"]), clock=client.clock,
+                                         allow_new=entry_allowed)
                         analyze_ms = round((time.monotonic() - analyze_started) * 1000, 3)
                         analyze_cpu_ms = round((time.thread_time() - analyze_cpu_started) * 1000, 3)
                         # Warmup may calculate old decisions, but they cannot
                         # return to either the event journal or chart markers.
                         events = [dict(event) for event in result["events"] if event["bar_close_ms"] > cutoff]
                         events.sort(key=lambda event: (event["bar_close_ms"], event["side"], event["kind"]))
+                        retained_events = []
                         for event in events:
                             event.update(symbol=symbol, venue="okx", detected_at_ms=now_ms())
+                            if not entry_allowed and not store.has_event(event):
+                                continue
+                            retained_events.append(event)
                             # Each raw channel has an independent policy and
                             # outbox. YOLO follows its own per-channel topic
                             # subscription, even when both raw routes are off.
                             delivery_now = client.clock()
-                            raw_telegram = delivery_error(store, event, delivery_now, "telegram") is None
-                            raw_bark = delivery_error(store, event, delivery_now, "bark") is None
-                            model_telegram = model_candidate_error(store, event, delivery_now, "telegram") is None
-                            model_bark = model_candidate_error(store, event, delivery_now, "bark") is None
+                            raw_telegram = entry_allowed and delivery_error(store, event, delivery_now, "telegram") is None
+                            raw_bark = entry_allowed and delivery_error(store, event, delivery_now, "bark") is None
+                            model_telegram = entry_allowed and model_candidate_error(store, event, delivery_now, "telegram") is None
+                            model_bark = entry_allowed and model_candidate_error(store, event, delivery_now, "bark") is None
                             inserted = store.upsert_event(event, notify=raw_telegram, bark_notify=raw_bark)
                             # YOLO is an independently subscribed extra stage
                             # for a fresh raw event at registration time. A
@@ -211,10 +222,11 @@ class V9Scanner:
                             if not inserted and isinstance(event.get("performance"), dict):
                                 store.update_event_payload(store.event_id(event),
                                                            {"performance": event["performance"]})
-                        state = dict(result["state"], symbol=symbol, venue="okx", active=True, stale=False,
+                        state = dict(result["state"], symbol=symbol, venue="okx", active=entry_allowed, stale=False,
+                                     entry_eligible=entry_allowed, entry_exclusion=instrument_exclusion(instrument),
                                      gap_count=gaps, available_bars=len(candles), tick_size=instrument["tickSz"],
                                      chart=[dict(row, burst=False, burst_up=False, burst_down=False) if row["t"] + TIMEFRAMES[timeframe] <= cutoff else row
-                                            for row in result["chart"]], events=events[-100:])
+                                            for row in result["chart"]], events=retained_events[-100:])
                         if retest is not None:
                             state["v130"] = retest["state"]
                             state["v130_events"] = retest["events"][-100:]

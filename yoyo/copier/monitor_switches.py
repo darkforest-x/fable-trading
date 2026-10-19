@@ -161,6 +161,10 @@ def feature_enabled(db: Database, key: str, default: bool = True) -> bool:
 
 
 def channel_enabled(db: Database, channel_id: str) -> bool:
+    from yoyo.copier.discord_channels import watchlist
+    selected = watchlist(db)
+    if "channel_ids" in selected and str(channel_id) not in selected["channel_ids"]:
+        return False
     raw = _load_raw(db)
     channels = raw.get("channels")
     if not channels:

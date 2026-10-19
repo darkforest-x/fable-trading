@@ -1938,9 +1938,9 @@ h2 {
 }
 
 .signal-card {
-  gap:6px;
-  min-height:278px;
-  padding:13px 14px 12px;
+  gap:4px;
+  min-height:230px;
+  padding:10px 12px;
 }
 
 .shadow-event-card::before {
@@ -2225,3 +2225,12 @@ h2 {
 .ledger-filter-row .quiet-text {font-size:12px;margin-left:auto}
 @media(max-width:1100px){.ledger-metrics article{padding:18px 16px}.ledger-metrics strong{font-size:25px}.ledger-filter-row .quiet-text{width:100%;margin:0}}
 @media(max-width:700px){.ledger-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ledger-metrics article:nth-child(3){border-left:0}.ledger-metrics article:nth-child(n+3){border-top:1px solid var(--line-soft)}.ledger-metrics strong{font-size:24px}.ledger-heading h2{font-size:18px}.ledger-breakdown{padding:0 10px}.ledger-breakdown summary span{font-size:11px}.ledger-select{flex:1;justify-content:space-between}.ledger-filter-row{gap:8px}}
+/* Denser signal tiles retain all execution and outcome facts. */
+.signal-card-grid .signal-card {min-height:0;gap:3px;padding:10px 12px}
+.signal-card-grid .card-symbol strong {font-size:18px}
+.signal-card-grid .card-price {font-size:20px;line-height:1.2}
+.signal-card-grid .card-performance {margin:1px 0 0;padding:0;gap:5px}
+.signal-card-grid .card-performance>div {padding:5px 6px}
+.signal-card-grid .performance-note {font-size:10px;line-height:1.4}
+.signal-card-grid .model-card-status {font-size:10px;gap:5px}
+.signal-card-grid .card-origin {font-size:10px}

@@ -161,6 +161,22 @@ class Store:
             db.execute("INSERT OR REPLACE INTO candle_checkpoints VALUES (?,?,?,?)",
                        (symbol, timeframe, payload, now_ms()))
 
+    def observe_candle_checkpoint(self, symbol, timeframe, close_ms):
+        """Record a successful scan without rewriting an unchanged candle seed.
+
+        Content revisions and observation time are distinct: a healthy 4H
+        prefix can stay unchanged for hours. Bind the receipt to the persisted
+        revision so a later replacement cannot borrow an earlier observation.
+        """
+        with self.connect() as db:
+            row = db.execute("SELECT updated_ms FROM candle_checkpoints WHERE symbol=? AND timeframe=?",
+                             (symbol, timeframe)).fetchone()
+            if row is None:
+                raise ValueError("cannot observe a missing candle checkpoint")
+            receipt = dict(observed_ms=now_ms(), checkpoint_updated_ms=row[0], close_ms=close_ms)
+            db.execute("INSERT OR REPLACE INTO meta VALUES (?,?)",
+                       (f"candle_observation:{symbol}:{timeframe}", encode(receipt)))
+
     def load_candle_checkpoints(self):
         """Return raw checkpoint payloads; malformed entries are explicit ``None``."""
         with self.connect() as db:
@@ -344,6 +360,21 @@ class Store:
         with self.connect() as db:
             return [json.loads(row[0]) for row in db.execute(
                 "SELECT payload FROM market_summaries ORDER BY symbol,timeframe")]
+
+    def sync_market_admission(self, eligible, excluded):
+        """Change only scope metadata, retaining chart bytes, events and outboxes."""
+        with self.connect() as db:
+            rows = db.execute("SELECT symbol,timeframe,COALESCE(json_extract(payload,'$.active'),1) "
+                              "FROM market_summaries").fetchall()
+            for symbol, timeframe, active in rows:
+                allowed = symbol in eligible
+                if bool(active) == allowed:
+                    continue
+                reason = None if allowed else excluded.get(symbol, "instrument_not_live")
+                for table in ("markets", "market_summaries"):
+                    db.execute("UPDATE " + table + " SET payload=json_set(payload, '$.active', json(?), "
+                               "'$.entry_eligible', json(?), '$.entry_exclusion', ?) WHERE symbol=? AND timeframe=?",
+                               (encode(allowed), encode(allowed), reason, symbol, timeframe))
 
     def get_market(self, symbol, timeframe):
         """Read one persisted chart for the separate causal YOLO worker."""
@@ -714,12 +745,21 @@ class Store:
                               args + [since]).fetchone()[0]
 
     def market_phase_counts(self, timeframes):
-        """Return the small status summary without deserializing saved charts."""
+        """Count compact state without SQLite parsing every full chart JSON.
+
+        ``upsert_market`` updates both records atomically. Legacy summaries are
+        backfilled by the scanner; a partial migration must stay explicitly
+        unavailable instead of reporting an incomplete market count.
+        """
         marks = ",".join("?" for _ in timeframes)
-        sql = ("SELECT COALESCE(json_extract(payload, '$.phase'), 'loading'), COUNT(*) FROM markets "
-               "WHERE COALESCE(json_extract(payload, '$.active'), 1)=1 "
-               "AND timeframe IN (" + marks + ") GROUP BY 1")
+        sql = ("SELECT COALESCE(json_extract(s.payload, '$.phase'), 'loading'), COUNT(*) FROM market_summaries s "
+               "JOIN markets m ON m.symbol=s.symbol AND m.timeframe=s.timeframe "
+               "WHERE COALESCE(json_extract(s.payload, '$.active'), 1)=1 "
+               "AND s.timeframe IN (" + marks + ") GROUP BY 1")
         with self.connect() as db:
+            if db.execute("SELECT 1 FROM markets m WHERE NOT EXISTS (SELECT 1 FROM market_summaries s "
+                          "WHERE s.symbol=m.symbol AND s.timeframe=m.timeframe) LIMIT 1").fetchone():
+                raise RuntimeError("market_summary_backfill_pending")
             return {row[0]: row[1] for row in db.execute(sql, list(timeframes))}
 
     def _notification_filter(self, channel):

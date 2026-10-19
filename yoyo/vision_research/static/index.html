@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/replay.css" />
     <script defer src="/vendor/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="/chart-tools.css" />
+    <script src="/chart-tools.js"></script>
     <script type="module" src="/app.js"></script>
   </head>
   <body>
@@ -66,6 +68,7 @@
                 <span>中断 <strong id="automatic-count-interrupted">—</strong></span>
               </div>
               <div id="automatic-error" class="inline-error automatic-error" role="alert" hidden></div>
+              <button id="automatic-settings-link" class="automatic-settings-link" type="button" data-tab="settings" hidden>前往模型设置补充 API Key</button>
               <div id="signal-source" class="source-caption">等待读取候选来源…</div>
               <label class="search-box" for="signal-search">
                 <span class="search-icon ui-icon icon-search" aria-hidden="true"></span>
@@ -248,7 +251,7 @@
                   <div class="chart-title"><h3 id="replay-chart-heading">选择或创建一个回放会话</h3><span id="replay-mode-badge" class="source-chip" hidden></span></div>
                   <span id="replay-cursor-label" class="replay-cursor-label">尚未载入历史图表</span>
                 </div>
-                <div class="replay-legend" aria-label="均线图例"><span class="ma-sma20">SMA 20</span><span class="ma-ema20">EMA 20</span><span class="ma-sma60">SMA 60</span><span class="ma-ema60">EMA 60</span><span class="ma-sma120">SMA 120</span><span class="ma-ema120">EMA 120</span></div>
+                <div id="replay-chart-tools" class="cv-inspector" hidden></div>
                 <div id="replay-chart-stage" class="replay-chart-stage">
                   <div id="replay-chart-empty" class="replay-chart-empty"><h3>历史行情只展示到当前游标</h3><p>向前或向后移动后，图表会按服务端返回的已披露前缀更新。</p></div>
                   <div id="replay-chart" class="replay-chart" role="img" aria-label="历史回放 K 线与均线图表" hidden></div>
@@ -400,6 +403,7 @@
                 </div>
                 <label class="field-label" for="model-input">模型 ID</label>
                 <select id="model-input" name="model" autocomplete="off" disabled></select>
+                <p id="model-quality-note" class="field-help" hidden></p>
                 <p id="config-selection-status" class="field-help" role="status" aria-live="polite">等待读取当前配置。</p>
                 <label class="field-label" for="api-key-input">API 密钥 <span class="optional-label">可选</span></label>
                 <input id="api-key-input" name="api_key" type="password" placeholder="粘贴后保存；保存后输入框会清空" autocomplete="new-password" spellcheck="false" />

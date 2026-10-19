@@ -1,0 +1,7 @@
+# Backtest audits need source identity and decision clocks
+
+- **问题**：An audit of a two-year, long-only event workbook was described as an audit of a three-year portfolio backtest. Its proposed break-even rule also treated eventual intrabar MFE as equivalent to the existing close-triggered arming event.
+- **死胡同**：Using the shared V1 product name to infer equal scope would transfer a missing-control finding to a different experiment that already has matched controls. Treating a post-hoc peak-return ratio as an exit mechanism would create an imaginary fixed-percentage trailing rule.
+- **有效路径**：Trace the workbook back to its frozen ledger, direction configuration, and source hash. Read the actual stop state transition separately from the net-R accounting formula: next-open risk normalization does not rebase a protection line inherited from a signal-close replay. Separate source facts, descriptive outcomes, and untested counterfactuals.
+- **通用规则**：Before accepting external strategy analysis, pin source interval, universe, direction, realized/censored denominator, and executable decision clock. A new display version does not amend an old backtest. An exit improvement requires bar-path replay of losers and winners, with new protection operative only after its trigger was observable.
+- **牵连**：`analysis/p1_spike_v1_twoyear_20260911.md`; `analysis/p1_spike_burst_three_year_20260910.md`; `yoyo/evaluation/spike_v1_twoyear_allmarkets.py::_trade_rows`; `yoyo/evaluation/pine/spike_burst_v1.pine::f_path`; proposed V1 Plus evidence audit.

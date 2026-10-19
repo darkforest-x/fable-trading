@@ -51,7 +51,8 @@ class Feed:
         self.items = []
         self.lock = Lock()
 
-    def read(self, *, days=7, query='', timeframe='', side='', limit=30, sort='newest'):
+    def read(self, *, days=7, query='', timeframe='', side='', limit=30, sort='newest', offset=0, before_ms=None):
+        """Page discoveries as observed at the cutoff, before merging or sorting."""
         with self.lock, closing(self.book.connect()) as db:
             # A snapshot prevents the high-water mark from skipping a concurrent insert.
             db.execute('BEGIN')
@@ -77,7 +78,12 @@ class Feed:
                 if added:
                     self.items = merge_findings(self.rows)
             stamp = now()
-            matched = [r for r in self.items if (not days or r['first_observed_ms'] >= stamp-days*86400000)
+            cutoff = min(stamp, before_ms) if before_ms is not None else stamp
+            # Repeat scans may change score or bridge clusters. Freeze raw observations
+            # before merging so later pages keep their original membership and order.
+            items = merge_findings([r for r in self.rows if r['observed_ms'] <= cutoff]) if before_ms is not None else self.items
+            matched = [r for r in items if (not days or r['first_observed_ms'] >= cutoff-days*86400000)
+                       and r['first_observed_ms'] <= cutoff
                        and query.strip().upper() in r['symbol']
                        and (not timeframe or r['timeframe'] == timeframe)
                        and (not side or r['side'] == side)]
@@ -88,5 +94,5 @@ class Feed:
             latest = db.execute("""SELECT * FROM jobs WHERE schedule_id IS NOT NULL
                 AND json_extract(spec,'$.mode')='latest' ORDER BY created_ms DESC,id DESC LIMIT 1""").fetchone()
             job = self.book.job(latest)
-            return dict(items=matched[:limit], total=len(matched), now_ms=stamp,
+            return dict(items=matched[offset:offset+limit], total=len(matched), now_ms=stamp, offset=offset, limit=limit, before_ms=cutoff,
                         latest_job={k: job[k] for k in ('id','status','created_ms','updated_ms','progress','error')} if job else None)

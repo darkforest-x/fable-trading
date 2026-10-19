@@ -123,8 +123,8 @@ function asText(value, fallback = '') {
 const FALLBACK_PROVIDER_SPECS = [
   { id: 'zhipu', name: '智谱', default_model: DEFAULT_MODEL, models: [DEFAULT_MODEL], default_region: 'default', regions: { default: '默认' }, endpoints: { default: '' } },
   {
-    id: 'qwen', name: '通义千问（Qwen）', default_model: 'qwen3-vl-plus',
-    models: ['qwen3-vl-plus', 'qwen-vl-max'], default_region: 'beijing',
+    id: 'qwen', name: '通义千问（Qwen）', default_model: 'qwen3.8-max',
+    models: ['qwen3.8-max', 'qwen3.8-max-0902', 'qwen3-vl-plus', 'qwen-vl-max'], default_region: 'beijing',
     regions: { beijing: '北京', singapore: '新加坡' },
     endpoints: {
       beijing: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
@@ -412,6 +412,14 @@ function formatDate(value) {
   return new Intl.DateTimeFormat('zh-CN', { dateStyle: 'medium', timeStyle: 'short' }).format(date);
 }
 
+function formatElapsed(milliseconds) {
+  const ms = Number(milliseconds);
+  if (!Number.isFinite(ms) || ms < 0) return '';
+  if (ms < 60_000) return `${(ms / 1000).toFixed(1).replace(/\.0$/, '')} 秒`;
+  const totalSeconds = Math.round(ms / 1000);
+  return `${Math.floor(totalSeconds / 60)} 分 ${String(totalSeconds % 60).padStart(2, '0')} 秒`;
+}
+
 function formatMarketTime(value, withSeconds = false) {
   const stamp = Number(value);
   if (!Number.isFinite(stamp) || stamp <= 0) return '时间未提供';
@@ -567,7 +575,13 @@ function getFilteredSignals() {
 function automaticJobTime(job) {
   let label = '';
   let value = null;
-  if (Number(job.observed_at_ms) > 0) {
+  if (['failed', 'interrupted'].includes(job.status) && Number(job.observed_at_ms) > 0) {
+    label = '观察于';
+    value = Number(job.observed_at_ms);
+  } else if (['failed', 'interrupted'].includes(job.status) && job.completed_at) {
+    label = '结束于';
+    value = job.completed_at;
+  } else if (Number(job.observed_at_ms) > 0) {
     label = '判断于';
     value = Number(job.observed_at_ms);
   } else if (job.status === 'queued') {
@@ -627,6 +641,15 @@ function runFailureReason(run) {
     || asText(run?.error_details?.detail, '') || asText(automaticError, '');
 }
 
+function runFailureStatusLabel(run) {
+  if (run?.status === 'interrupted') return '识别已中断';
+  const code = asText(run?.error_details?.code, '').toLowerCase();
+  const reason = runFailureReason(run);
+  const timeout = /timeout|timed[\s_-]*out|超时/i.test(code)
+    || /timeout|timed[\s_-]*out|超时|连续\s*\d+\s*秒.{0,24}未收到|未收到.{0,24}\d+\s*秒/i.test(reason);
+  return timeout ? '请求超时' : '识别未完成';
+}
+
 function automaticReviewMarkup(signalId) {
   const job = state.automaticBySignal.get(signalId);
   if (!job) return '';
@@ -651,21 +674,27 @@ function renderAutomaticControls() {
   const automatic = state.automatic;
   const toggle = byId('automatic-toggle');
   const hasKnownState = typeof automatic?.enabled === 'boolean';
+  const credentialMissing = state.status?.api_key_configured === false;
+  const enabledWithoutCredential = credentialMissing && automatic?.enabled === true;
   const stale = state.automaticStale || state.apiReachable === false;
   const pending = state.automaticLoading || state.automaticSaving || !hasKnownState;
   const error = state.automaticActionError || state.automaticError || asText(automatic?.error, '')
     || (stale ? '自动识别状态显示为上次读取结果；连接恢复后会同步。' : '');
   toggle.disabled = pending || stale;
-  toggle.classList.toggle('is-enabled', !stale && automatic?.enabled === true);
+  toggle.classList.toggle('is-enabled', !stale && automatic?.enabled === true && !enabledWithoutCredential);
+  toggle.classList.toggle('is-credential-missing', !stale && enabledWithoutCredential);
   toggle.classList.toggle('is-disabled', !stale && automatic?.enabled === false);
   toggle.setAttribute('aria-pressed', stale ? 'mixed' : String(automatic?.enabled === true));
   toggle.setAttribute('aria-label', stale ? '自动识别状态未同步，暂时无法切换'
+    : enabledWithoutCredential ? '自动识别已开启，但模型服务未配置 API Key；可暂停自动识别'
     : automatic?.enabled === true ? '暂停自动识别' : '开启自动识别');
   byId('automatic-toggle-state').textContent = state.automaticSaving ? '保存中…'
     : stale && hasKnownState ? `状态未同步 · 上次${automatic.enabled ? '已开启' : '已暂停'}`
+      : enabledWithoutCredential ? '等待配置 API Key'
       : automatic?.enabled === true ? '已开启'
         : automatic?.enabled === false ? '已暂停'
           : state.automaticLoading ? '读取中…' : '不可用';
+  setVisible(byId('automatic-settings-link'), !stale && enabledWithoutCredential);
   const hasPolicy = Number.isFinite(Number(automatic?.post_signal_bars))
     && Number.isFinite(Number(automatic?.poll_interval_seconds));
   byId('automatic-policy').textContent = hasPolicy
@@ -968,7 +997,7 @@ function renderRunStatus() {
     status.classList.add('is-failed');
   } else if (state.activeRun) {
     if (state.activeRun.status && state.activeRun.status !== 'completed') {
-      status.textContent = '识别未完成';
+      status.textContent = runFailureStatusLabel(state.activeRun);
       status.classList.add('is-failed');
     } else {
       status.textContent = '已返回结果';
@@ -1027,20 +1056,22 @@ function renderResult() {
   const completed = run.status === 'completed';
   const incomplete = run.status && run.status !== 'completed';
   const currentScope = run.analysis_scope === 'current_right_edge';
-  const headingLabel = incomplete ? '识别未完成' : `${currentScope ? '' : '旧版整图判断 · '}${verdictLabel(verdict)}`;
+  const headingLabel = incomplete ? runFailureStatusLabel(run) : `${currentScope ? '' : '旧版整图判断 · '}${verdictLabel(verdict)}`;
   const stateLabel = currentStateLabel(decision.current_state);
-  const sideText = stateLabel
+  const sideText = !incomplete && stateLabel
     ? `${stateLabel}${['long', 'short'].includes(decision.side) ? ` · ${sideLabel(decision.side)}` : ''}`
-    : sideLabel(decision.side);
+    : incomplete ? '' : sideLabel(decision.side);
   const evidence = safeList(decision.evidence);
   const risks = safeList(decision.risks);
   const human = run.review;
   const evidenceHtml = evidence.length ? `<ul class="result-list">${evidence.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未返回可观察证据。</span>';
   const risksHtml = risks.length ? `<ul class="result-list">${risks.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '<span class="list-blank">模型未列出风险说明。</span>';
-  const model = asText(run.model, state.status?.model || state.model);
+  const model = asText(run.model, '模型未记录');
   const providerName = providerNameForRecord(run);
   const created = formatDate(run.created_at);
   const latency = run.latency_ms != null && Number.isFinite(Number(run.latency_ms)) ? `${Math.round(Number(run.latency_ms))} ms` : '';
+  const elapsed = formatElapsed(run.latency_ms);
+  const runMeta = `<p class="result-run-meta"><strong>本次调用</strong><span>${escapeHtml(providerName)} · ${escapeHtml(model)}</span><span>${escapeHtml(created)}</span><span>${elapsed ? `耗时 ${escapeHtml(elapsed)}` : '耗时未记录'}</span></p>`;
   const usage = run.usage && typeof run.usage === 'object' ? Object.entries(run.usage).map(([key, value]) => `${key}: ${asText(value)}`).join(' · ') : '';
   const referenceNames = Array.isArray(run.references) ? run.references.map((reference) => asText(reference?.name, '参考图')).filter(Boolean) : [];
   const criteria = asText(run.criteria, '记录中没有保存形态规则。');
@@ -1069,10 +1100,13 @@ function renderResult() {
         <button type="button" data-review-verdict="uncertain" data-review-run="${escapeHtml(runId)}">不确定</button>
       </div>`;
   updateResultMarkup(`<article class="decision-card" data-result-run="${escapeHtml(runId)}">
-    <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span><span class="side-tag">${escapeHtml(sideText)}</span></div>
-    <p class="result-summary">${escapeHtml(asText(decision.summary, failureReason || '模型未返回摘要。'))}</p>
-    <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
-    <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>
+    <div class="decision-topline"><span class="decision-label"><span class="verdict-pill ${incomplete ? 'failed' : verdictClass}">${escapeHtml(headingLabel)}</span></span>${sideText ? `<span class="side-tag">${escapeHtml(sideText)}</span>` : ''}</div>
+    ${runMeta}
+    ${incomplete
+      ? `<p class="result-summary">${escapeHtml(failureReason || '本次请求未完成。')}<br><span class="result-unknown">本次没有收到可采纳的模型判断，结果未知；不能据此判为符合或不符合。</span></p>`
+      : `<p class="result-summary">${escapeHtml(asText(decision.summary, '模型未返回摘要。'))}</p>
+        <section class="result-section" aria-label="可观察证据"><h4>可观察证据</h4>${evidenceHtml}</section>
+        <section class="result-section risks" aria-label="不确定性与风险"><h4>不确定性与风险</h4>${risksHtml}</section>`}
     ${requestContext}
     <div class="exchange-result-action">${apiExchangeActionMarkup(run.api_exchange_id)}</div>
     <details class="human-review" aria-label="人工复核">
@@ -1385,6 +1419,12 @@ function renderSettings() {
   }
 
   const selectedEndpoint = providerEndpoint(selectedSpec, draft.region) || (draft.provider === savedConfig.provider && draft.region === savedConfig.region ? asText(state.status?.endpoint) : '');
+  const quality = selectedSpec.model_settings?.[draft.model];
+  const qualityNote = byId('model-quality-note');
+  qualityNote.textContent = quality?.summary
+    ? `${quality.summary}。这是调用上限，实际消耗按模型返回计；图像保留原有像素，不放大补细节。`
+    : '';
+  qualityNote.hidden = !quality?.summary;
   byId('recipient-provider-name').textContent = matchesSaved ? savedProviderName : `${selectedProviderName}（待保存）`;
   byId('recipient-endpoint').textContent = selectedEndpoint || (matchesSaved ? asText(state.status?.endpoint, '由本机服务配置') : '保存后由本机服务切换');
   byId('recipient-heading').textContent = matchesSaved ? '当前已保存接收方' : '保存后将使用的接收方';
@@ -1406,8 +1446,10 @@ function renderSettings() {
   const testLabel = byId('connection-test').querySelector('.button-label');
   testLabel.textContent = state.connectionTesting ? '正在测试…' : matchesSaved ? `测试${savedProviderName}连接` : '先保存所选设置后再测试';
   setVisible(byId('connection-test').querySelector('.button-spinner'), state.connectionTesting);
-  byId('connection-test').disabled = state.connectionTesting || state.configLoading || !matchesSaved;
-  byId('connection-test-help').textContent = matchesSaved
+  byId('connection-test').disabled = state.connectionTesting || state.configLoading || !matchesSaved || !state.status?.api_key_configured;
+  byId('connection-test-help').textContent = matchesSaved && !state.status?.api_key_configured
+    ? '当前地域尚未配置 API Key；保存密钥后可测试连接。'
+    : matchesSaved
     ? '连接测试会发送一条简短请求到当前已保存的服务，产生少量模型用量。'
     : '测试连接只针对已保存配置；请先保存当前选择。测试请求会产生少量模型用量。';
   syncProviderDisclosure();

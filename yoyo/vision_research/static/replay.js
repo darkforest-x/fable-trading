@@ -280,6 +280,9 @@ let replayAverages = [];
 let replayResizeObserver = null;
 let replayThemeObserver = null;
 let chartDataHash = '';
+const chartTools = typeof window !== 'undefined' ? window.SpikeChartTools : null;
+const syncChartSeries = chartTools?.syncer();
+let replayRows = [], replayChartSession = null, replayInspector = null;
 let coverageRequestToken = 0;
 let startTimeEdited = false;
 let caseFilterTimer = null;
@@ -1124,6 +1127,7 @@ function renderSession() {
   const chartElement = byId('replay-chart');
   const standardImageElement = byId('replay-standard-image');
   setHidden(chartElement, !hasSession || !replayActive);
+  setHidden(byId('replay-chart-tools'), !hasSession || !replayActive);
   const standardImage = byId('replay-standard-image-src');
   const observationImage = byId('replay-observation-image');
   setHidden(standardImageElement, true);
@@ -1234,10 +1238,10 @@ function updateReplaySeries(rows) {
   const priceFormat = replayPriceFormat(rows);
   replayCandles.applyOptions({ priceFormat });
   replayAverages.forEach((series) => series.applyOptions({ priceFormat }));
-  replayCandles.setData(rows.map((row) => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
+  syncChartSeries(replayCandles, rows.map((row) => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
   replayAverages.forEach((series, index) => {
     const field = MA_KEYS[index];
-    series.setData(rows.map((row) => Number.isFinite(row[field]) ? { time: row.t / 1000, value: row[field] } : { time: row.t / 1000 }));
+    syncChartSeries(series, rows.map((row) => Number.isFinite(row[field]) ? { time: row.t / 1000, value: row[field] } : { time: row.t / 1000 }));
   });
 }
 
@@ -1255,36 +1259,40 @@ function updateReplayChart(session) {
     const height = host.clientHeight || host.parentElement?.clientHeight || 0;
     if (!width || !height) return;
     replayChart = window.LightweightCharts.createChart(host, {
-      ...chartPalette(), width, height, localization: { locale: 'zh-CN' }, handleScroll: { vertTouchDrag: false },
+      ...chartPalette(), width, height, localization: { priceFormatter: chartTools.axisPrice, locale: 'zh-CN' }, ...chartTools.interaction,
     });
-    replayCandles = replayChart.addCandlestickSeries({ borderVisible: false, upColor: token('--chart-up'), downColor: token('--chart-down'), wickUpColor: token('--chart-up'), wickDownColor: token('--chart-down') });
-    replayAverages = MA_KEYS.map((key) => replayChart.addLineSeries({ color: token(`--ma-${key}`), lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false }));
-    replayResizeObserver = new ResizeObserver(() => {
-      if (!replayChart || !host.clientWidth || !host.clientHeight) return;
-      replayChart.resize(host.clientWidth, host.clientHeight);
-    });
-    replayResizeObserver.observe(host);
+    replayCandles = replayChart.addCandlestickSeries({ borderVisible: false, upColor: chartTools.colors.up, downColor: chartTools.colors.down, wickUpColor: chartTools.colors.up, wickDownColor: chartTools.colors.down });
+    replayAverages = MA_KEYS.map((key) => replayChart.addLineSeries({ color: chartTools.lines.find(line => line.key === key).color, lineWidth: 1, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false }));
+    replayResizeObserver = chartTools.resize(replayChart, host);
+    replayInspector = chartTools.inspector(byId('replay-chart-tools'), replayChart, replayCandles, { rows: () => replayRows, canvas: host, panel: host.closest('.replay-chart-panel') });
   }
-  if (session.chart?.chart_sha256 && session.chart.chart_sha256 === chartDataHash) {
+  if (session.id === replayChartSession && session.chart?.chart_sha256 && session.chart.chart_sha256 === chartDataHash) {
     replayCandles.setMarkers(replaySignalMarkers(session, token('--accent')));
     return;
   }
+  const saved = session.id === replayChartSession ? chartTools.anchor(replayChart.timeScale().getVisibleLogicalRange(), chartTools.times(replayRows)) : null;
   updateReplaySeries(rows);
+  replayRows = rows;
+  replayChartSession = session.id;
   replayCandles.setMarkers(replaySignalMarkers(session, token('--accent')));
   replayChart.applyOptions(chartPalette());
-  replayChart.timeScale().fitContent();
+  const retained = chartTools.restore(saved, chartTools.times(rows));
+  if (retained) replayChart.timeScale().setVisibleLogicalRange(retained);
+  else replayChart.timeScale().fitContent();
+  replayInspector?.update();
   chartDataHash = session.chart?.chart_sha256 || '';
 }
 
 function applyReplayTheme() {
   if (!replayChart) return;
   replayChart.applyOptions(chartPalette());
-  replayCandles?.applyOptions({ upColor: token('--chart-up'), downColor: token('--chart-down'), wickUpColor: token('--chart-up'), wickDownColor: token('--chart-down') });
-  replayAverages.forEach((series, index) => series.applyOptions({ color: token(`--ma-${MA_KEYS[index]}`) }));
+  replayCandles?.applyOptions({ upColor: chartTools.colors.up, downColor: chartTools.colors.down, wickUpColor: chartTools.colors.up, wickDownColor: chartTools.colors.down });
+  replayAverages.forEach((series, index) => series.applyOptions({ color: chartTools.lines.find(line => line.key === MA_KEYS[index]).color }));
   replayCandles?.setMarkers(replaySignalMarkers(state.session, token('--accent')));
 }
 
 function teardownReplayChart() {
+  replayInspector?.destroy(); replayInspector = null; replayRows = []; replayChartSession = null;
   replayResizeObserver?.disconnect();
   replayChart?.remove();
   replayChart = null;

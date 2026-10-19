@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-tertiary-fixed-variant":"#910030","on-primary":"#1000a9","on-tertiary-fixed":"#400011","error-container":"#93000a","surface-variant":"#32353c","surface-container-lowest":"#0b0e14","surface-dim":"#10131a","surface-bright":"#363940","on-secondary-fixed":"#002112","inverse-on-surface":"#2e3037","surface-container-low":"#191c22","on-error-container":"#ffdad6","secondary-fixed":"#4dffb2","on-primary-fixed":"#07006c","on-surface":"#e1e2eb","inverse-primary":"#494bd6","on-secondary-container":"#00613e","on-secondary-fixed-variant":"#005234","outline-variant":"#464554","primary-fixed":"#e1e0ff","background":"#10131a","tertiary":"#ffb2ba","on-primary-container":"#0d0096","on-surface-variant":"#c7c4d7","inverse-surface":"#e1e2eb","tertiary-fixed-dim":"#ffb2ba","tertiary-fixed":"#ffd9dc","tertiary-container":"#ff4f73","surface-container-high":"#272a31","on-secondary":"#003822","primary-container":"#8083ff","surface-tint":"#c0c1ff","primary":"#c0c1ff","outline":"#908fa0","on-error":"#690005","secondary-container":"#01e599","surface":"#10131a","on-tertiary":"#670020","primary-fixed-dim":"#c0c1ff","secondary":"#70ffba","secondary-fixed-dim":"#00e297","surface-container":"#1d2026","surface-container-highest":"#32353c","on-tertiary-container":"#5a001b","error":"#ffb4ab","on-background":"#e1e2eb","on-primary-fixed-variant":"#2f2ebe"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"space-md":"0.5rem","space-xl":"1rem","margin-panel":"1rem","gutter-loose":"0.75rem","space-xs":"0.25rem","space-sm":"0.375rem","gutter":"0.5rem","space-lg":"0.75rem","margin":"0.75rem"},"fontFamily":{"body-compact":["Inter"],"figure-sm":["Geist"],"label-mono":["Geist"],"figure-md":["Geist"],"headline-md":["Inter"],"ticker-lg":["Geist"],"headline-lg":["Inter"],"figure-xl":["Geist"],"display-hero":["Inter"],"label-micro":["Geist"],"body-default":["Inter"]},"fontSize":{"body-compact":["12px",{"lineHeight":"16px","fontWeight":"400"}],"figure-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],"label-mono":["11px",{"lineHeight":"14px","letterSpacing":"0.02em","fontWeight":"500"}],"figure-md":["14px",{"lineHeight":"18px","fontWeight":"600"}],"headline-md":["16px",{"lineHeight":"22px","fontWeight":"600"}],"ticker-lg":["20px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"700"}],"headline-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"figure-xl":["26px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"display-hero":["32px",{"lineHeight":"38px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-micro":["10px",{"lineHeight":"12px","letterSpacing":"0.04em","fontWeight":"600"}],"body-default":["13px",{"lineHeight":"18px","fontWeight":"400"}]}}}};</script></head><body class="bg-surface-container-lowest font-body-default text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container"><aside class="fixed left-0 top-0 h-full w-60 bg-surface-container-low z-50 flex flex-col justify-between select-none"><div class="flex flex-col"><div class="h-12 px-space-lg flex items-center justify-between bg-surface-container-lowest/60"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-secondary text-[20px]">terminal</span><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-md text-headline-md tracking-tight text-on-surface">SPIKE</span><span class="font-label-mono text-label-micro text-secondary px-space-xs rounded bg-surface-container-highest">v4.2 PRO</span></div></div></div><div class="flex items-center gap-1.5 px-space-xs py-0.5 rounded bg-surface-container"><span class="w-1.5 h-1.5 rounded-full bg-secondary-container animate-pulse"></span><span class="font-label-mono text-label-micro text-secondary">CORE</span></div></div><div class="px-space-md py-space-xs"><span class="font-label-mono text-label-micro text-outline uppercase tracking-wider px-space-sm">Desk Modules</span></div><nav class="flex flex-col px-space-sm gap-0.5" data-active-classes="bg-surface-container-high text-on-surface font-semibold shadow-inner"><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm rounded transition-colors bg-surface-container-high text-on-surface font-semibold shadow-inner" data-path="signal-center" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[18px]">radar</span><span class="font-body-compact text-body-compact">信号与巡检</span></div><span class="font-label-mono text-label-micro text-secondary bg-surface-container-highest px-1 rounded">AUTO</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="live-execution" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[18px]">candlestick_chart</span><span class="font-body-compact text-body-compact">实盘与风控执行</span></div><span class="font-label-mono text-label-micro text-on-surface-variant bg-surface-container-highest px-1 rounded">LIVE</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" data-path="order-confirmation" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[18px]">fact_check</span><span class="font-body-compact text-body-compact">1R决策决策台</span></div><span class="font-label-mono text-label-micro text-tertiary-container bg-surface-container-highest px-1 rounded">RISK</span></a></nav><div class="px-space-md py-space-xs mt-space-sm"><span class="font-label-mono text-label-micro text-outline uppercase tracking-wider px-space-sm">Terminal Suite</span></div><div class="flex flex-col px-space-sm gap-0.5"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span class="font-body-compact text-body-compact">市场深度观察</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">science</span><span class="font-body-compact text-body-compact">研究工作区 (Lab)</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">auto_stories</span><span class="font-body-compact text-body-compact">交易书架与复盘</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors" href="#"><span class="material-symbols-outlined text-[18px]">tune</span><span class="font-body-compact text-body-compact">系统运维与节点</span></a></div></div><div class="p-space-md bg-surface-container-lowest/80"><div class="p-space-sm rounded bg-surface-container flex flex-col gap-space-xs"><div class="flex items-center justify-between"><span class="font-label-mono text-label-micro text-outline">MAC DEPLOY</span><span class="font-label-mono text-label-micro text-secondary flex items-center gap-1"><span class="w-1 h-1 rounded-full bg-secondary"></span>UP 28m</span></div><div class="flex items-center justify-between"><span class="font-label-mono text-label-micro text-on-surface-variant">AUTH LEVEL</span><span class="font-label-mono text-label-micro text-primary-fixed">QUANT_SEAL_L3</span></div><div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden"><div class="bg-secondary-container h-full w-4/5"></div></div></div></div></aside><div class="pl-60"><header class="fixed top-0 left-60 right-0 h-12 bg-surface-container-low/95 backdrop-blur-md z-40 px-space-md flex items-center justify-between select-none"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1 rounded"><span class="font-label-mono text-label-micro text-outline">BN:</span><span class="font-label-mono text-label-micro text-secondary">12ms</span></div><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1 rounded"><span class="font-label-mono text-label-micro text-outline">OKX:</span><span class="font-label-mono text-label-micro text-secondary">15ms</span></div><div class="flex items-center gap-space-xs bg-surface-container px-space-sm py-1 rounded"><span class="font-label-mono text-label-micro text-outline">BYBIT:</span><span class="font-label-mono text-label-micro text-secondary">18ms</span></div><div class="h-4 w-px bg-surface-variant"></div><div class="flex items-center gap-1.5 px-space-sm py-1 rounded bg-surface-container"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span><span class="font-label-mono text-label-micro text-on-surface">TG BOT ACTIVE</span></div></div><div class="flex items-center gap-space-lg"><button class="flex items-center gap-1.5 px-space-md py-1 rounded bg-tertiary-container text-on-tertiary font-label-mono text-label-micro hover:opacity-95 transition-opacity" type="button"><span class="material-symbols-outlined text-[14px]">power_settings_new</span><span>KILL-SWITCH</span></button><div class="h-4 w-px bg-surface-variant"></div><div class="flex items-center gap-space-md font-label-mono text-figure-sm"><div class="flex items-center gap-1"><span class="text-outline text-label-micro">EQUITY</span><span class="text-on-surface font-semibold">121.41</span><span class="text-outline text-label-micro">USDT</span></div><div class="flex items-center gap-1"><span class="text-outline text-label-micro">1R</span><span class="text-secondary font-semibold">3.64</span><span class="text-outline text-label-micro">USDT (3%)</span></div></div><div class="h-4 w-px bg-surface-variant"></div><div class="flex items-center gap-1 font-label-mono text-label-micro text-on-surface-variant"><span class="material-symbols-outlined text-[16px]">schedule</span><span>14:26:08 UTC+8</span></div><div class="flex items-center gap-space-xs text-on-surface-variant"><button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container transition-colors" title="Toggle Fullscreen" type="button"><span class="material-symbols-outlined text-[16px]">fullscreen</span></button><button class="w-7 h-7 flex items-center justify-center rounded hover:bg-surface-container transition-colors" title="Preferences" type="button"><span class="material-symbols-outlined text-[16px]">settings</span></button></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shadow-inner"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-12 min-h-screen bg-surface-container-lowest text-on-surface"><div class="flex flex-col w-full">
+<!-- Top Secondary Sub-Navigation & Terminal Header Bar -->
+<div class="bg-surface-container-low px-space-xl py-space-sm flex flex-wrap items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-center gap-space-xl overflow-x-auto">
+<div class="flex items-center gap-space-xs font-headline-md text-headline-md text-on-surface">
+<span class="material-symbols-outlined text-secondary text-[22px]">radar</span>
+<span class="tracking-tight">信号与巡检中枢</span>
+<span class="font-label-mono text-label-micro text-outline-variant uppercase ml-space-xs">TERMINAL · V4.2</span>
+</div>
+<nav class="flex items-center gap-1 font-body-compact text-body-compact">
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container-high text-on-surface font-semibold shadow-inner" type="button">
+<span class="material-symbols-outlined text-[16px] text-secondary">grid_view</span>
+<span>形态巡检池</span>
+<span class="font-label-mono text-label-micro px-1 rounded bg-surface-container-highest text-secondary font-bold">604</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">monitoring</span>
+<span>表现分析</span>
+<span class="font-label-mono text-label-micro px-1 rounded bg-surface-container text-outline">83笔</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+<span>实盘账户关联</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">rule</span>
+<span>自动巡检配置</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+</button>
+<button class="flex items-center gap-1.5 px-space-md py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+<span>模型说明</span>
+</button>
+</nav>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="flex items-center gap-1 px-space-md py-1.5 rounded-lg bg-primary text-on-primary font-figure-sm text-figure-sm hover:opacity-90 transition-opacity" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span>新建检测计划</span>
+</button>
+<button class="flex items-center gap-1 px-space-md py-1.5 rounded-lg bg-surface-container-high text-on-surface font-figure-sm text-figure-sm hover:bg-surface-bright transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+<span>添加巡检</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-bright transition-all" id="refresh-pulse-btn" title="立即刷新数据池" type="button">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+</button>
+</div>
+</div>
+<!-- Main Terminal Canvas -->
+<div class="p-space-lg flex flex-col gap-space-lg w-full">
+<!-- Screener Engine Health Banner -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-wrap items-center justify-between gap-space-md shadow-sm">
+<div class="flex items-center gap-space-lg flex-wrap">
+<div class="flex items-center gap-2">
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-container animate-ping"></div>
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight">4 个巡检计划已启用</span>
+</div>
+<div class="flex items-center gap-space-md font-label-mono text-label-micro text-on-surface-variant flex-wrap">
+<div class="flex items-center gap-1.5 bg-surface-container px-space-sm py-1 rounded">
+<span class="text-outline">最近一轮:</span>
+<span class="text-on-surface">10/17 21:16:04</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container px-space-sm py-1 rounded">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-secondary font-semibold">状态: 全部正常</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container px-space-sm py-1 rounded">
+<span class="text-outline">扫描资产:</span>
+<span class="text-on-surface">286/286 币对</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container px-space-sm py-1 rounded">
+<span class="text-outline">异常抛出:</span>
+<span class="text-secondary">0 笔</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container px-space-sm py-1 rounded">
+<span class="text-outline">执行延时:</span>
+<span class="text-primary-fixed">1.42s</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm font-label-mono text-label-micro">
+<span class="text-outline">SYNC: AUTO 5s</span>
+<button class="px-space-md py-1 rounded bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+          查看本轮异常与日志
+        </button>
+</div>
+</div>
+<!-- Advanced Toolbar & Filter Row -->
+<div class="bg-surface-container-low rounded-xl p-space-sm flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm flex-wrap flex-1 min-w-[320px]">
+<!-- Search Input -->
+<div class="relative flex items-center min-w-[220px]">
+<span class="material-symbols-outlined text-[16px] text-outline absolute left-2.5">search</span>
+<input class="w-full bg-surface-container-lowest text-on-surface font-body-compact text-body-compact pl-8 pr-12 py-1.5 rounded-lg focus:outline-none focus:bg-surface-container transition-colors placeholder:text-outline-variant" placeholder="搜索合约，如 BTC / SOL / ETH" type="text"/>
+<span class="absolute right-2 font-label-mono text-label-micro text-outline px-1 rounded bg-surface-container">/</span>
+</div>
+<!-- Filter Pills -->
+<div class="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded-lg font-body-compact text-body-compact">
+<button class="px-space-md py-1 rounded bg-surface-container-high text-on-surface font-medium" type="button">最近 7 天</button>
+<button class="px-space-md py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">30 天</button>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded-lg font-body-compact text-body-compact">
+<button class="px-space-sm py-1 rounded bg-surface-container-high text-on-surface font-medium" type="button">全部周期</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">5m</button>
+<button class="px-space-sm py-1 rounded text-secondary hover:text-on-surface" type="button">15m</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">30m</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">1h</button>
+<button class="px-space-sm py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">4h</button>
+</div>
+<div class="flex items-center gap-1 bg-surface-container-lowest p-0.5 rounded-lg font-body-compact text-body-compact">
+<button class="px-space-md py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">多空方向: 全部</button>
+<button class="px-space-md py-1 rounded bg-surface-container-high text-tertiary font-medium flex items-center gap-1" type="button">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary-container"></span>
+<span>空头密集</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-space-sm font-label-mono text-label-micro">
+<span class="text-outline">排序:</span>
+<select class="bg-surface-container-lowest text-on-surface py-1.5 px-space-md rounded-lg focus:outline-none cursor-pointer">
+<option selected="">最新发现优先 (Recency)</option>
+<option>模型置信度降序 (Confidence)</option>
+<option>波动压缩度降序 (Squeeze)</option>
+<option>1R 期望回报比最高</option>
+</select>
+<div class="text-outline px-space-xs">
+<span>604 处形态</span>
+<span class="mx-1">·</span>
+<span>10/17 21:29 更新</span>
+</div>
+</div>
+</div>
+<!-- Section 1: Screener Matrix (4 columns x 3 rows = 12 High-Priority Signals) -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface">高优先级形态雷达</span>
+<span class="font-label-mono text-label-micro px-2 py-0.5 rounded-full bg-tertiary-container/20 text-tertiary font-bold">12 SQUEEZE DETECTED</span>
+</div>
+<div class="font-label-mono text-label-micro text-outline">
+          点击卡片任意区域可穿透呼出标的级深度 K 线与风控委托单
+        </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+<!-- Card 1: WAL -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">WAL</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-on-surface font-semibold">46.5%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 46.5%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:20</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 2: SYRUP -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">SYRUP</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-semibold">60.6%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 60.6%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:20</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 3: SPK -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">SPK</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-semibold">58.3%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 58.3%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:19</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 5根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 4: SPACE -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">SPACE</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-primary-container/20 text-primary-fixed">5分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-bold">92.1% (顶级)</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary shadow-sm rounded-full" style="width: 92.1%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:19</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 5根</span>
+<span class="material-symbols-outlined text-[14px] text-secondary group-hover:scale-110 transition-transform">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 5: RVN -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">RVN</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-primary-container/20 text-primary-fixed">5分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-bold">85.9%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 85.9%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:19</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 6: PENGU -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">PENGU</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-on-surface-variant font-semibold">25.9%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-outline rounded-full" style="width: 25.9%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:19</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 5根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 7: OP -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">OP</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-semibold">63.7%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 63.7%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:19</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 8: ESP -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">ESP</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-on-surface font-semibold">44.1%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-outline rounded-full" style="width: 44.1%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:17</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 9: DASH -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">DASH</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-semibold">65.6%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 65.6%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:17</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 10: CFX -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">CFX</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-bold">78.4%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 78.4%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:17</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 11: BAT -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">BAT</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-primary-container/20 text-primary-fixed">5分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-bold">89.7%</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 89.7%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:16</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:05 · 4根</span>
+<span class="material-symbols-outlined text-[14px] text-outline group-hover:text-primary transition-colors">north_east</span>
+</div>
+</div>
+</div>
+<!-- Card 12: AXS -->
+<div class="bg-surface-container-low rounded-xl p-space-md hover:bg-surface-container transition-all cursor-pointer flex flex-col justify-between gap-space-sm group shadow-sm">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-on-surface font-bold group-hover:text-primary transition-colors">AXS</span>
+<span class="font-label-mono text-label-micro px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant">15分钟</span>
+</div>
+<div class="flex items-center gap-1 font-label-mono text-label-micro text-tertiary bg-tertiary-container/15 px-1.5 py-0.5 rounded">
+<span class="material-symbols-outlined text-[13px]">south_east</span>
+<span>空头密集</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">模型置信度</span>
+<span class="text-secondary font-bold">91.4% (顶级)</span>
+</div>
+<div class="w-full h-1 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 91.4%;"></div>
+</div>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-1">
+<div>首次: <span class="text-on-surface-variant">10/17 21:16</span></div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span>确认 21:15 · 5根</span>
+<span class="material-symbols-outlined text-[14px] text-secondary group-hover:scale-110 transition-transform">north_east</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 2: Quant Performance & Backtest Insights Dashboard -->
+<div class="flex flex-col gap-space-sm mt-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface">实盘表现分析与回测穿透</span>
+<span class="font-label-mono text-label-micro text-outline">已归档样本 (全部退出按 1R 单元核算)</span>
+</div>
+<div class="flex items-center gap-space-md font-label-mono text-label-micro text-outline">
+<span>24小时 V13.1 确认: <strong class="text-on-surface">13</strong> 笔</span>
+<span>·</span>
+<span>信号扫描池: <strong class="text-on-surface">489</strong> 个合约</span>
+</div>
+</div>
+<!-- 4 Core Performance KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-sm">
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-xs shadow-sm">
+<div class="font-label-mono text-label-micro text-outline">已结束交易 (TRADES)</div>
+<div class="font-figure-xl text-figure-xl text-on-surface tracking-tight">83 <span class="text-headline-md font-normal text-on-surface-variant">笔</span></div>
+<div class="font-label-mono text-label-micro text-outline">胜 <span class="text-secondary font-bold">50</span> · 负 <span class="text-tertiary font-bold">33</span> · 保本 0</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-xs shadow-sm">
+<div class="font-label-mono text-label-micro text-outline">累计净收益 (NET R-RETURN)</div>
+<div class="font-figure-xl text-figure-xl text-secondary tracking-tight">+74.24 <span class="text-headline-md font-normal">R</span></div>
+<div class="font-label-mono text-label-micro text-outline">全部 83 笔均有完整退出点位</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-xs shadow-sm">
+<div class="font-label-mono text-label-micro text-outline">实盘胜率 (WIN RATE)</div>
+<div class="font-figure-xl text-figure-xl text-on-surface tracking-tight">60.2<span class="text-headline-md font-normal text-on-surface-variant">%</span></div>
+<div class="font-label-mono text-label-micro text-outline">盈亏比 1.84:1 (盈利笔数/亏损笔数)</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-xs shadow-sm">
+<div class="font-label-mono text-label-micro text-outline">最大累计 R 回撤 (MAX DD)</div>
+<div class="font-figure-xl text-figure-xl text-tertiary tracking-tight">15.31 <span class="text-headline-md font-normal">R</span></div>
+<div class="font-label-mono text-label-micro text-outline">按退出先后累计；同刻退出合并</div>
+</div>
+</div>
+<!-- Dual Charts: Equity Stepped Curve & Timeframe Contribution -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-sm">
+<!-- Left: Equity Curve (2 Cols) -->
+<div class="lg:col-span-2 bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">信号表现净值阶梯 (Equity Stepped)</span>
+<span class="font-label-mono text-label-micro text-secondary bg-surface-container px-1.5 py-0.5 rounded">+74.24 R ATH</span>
+</div>
+<div class="flex items-center gap-1 bg-surface-container p-0.5 rounded-lg font-body-compact text-body-compact">
+<button class="px-space-md py-1 rounded bg-surface-container-high text-on-surface font-medium" type="button">累计 R</button>
+<button class="px-space-md py-1 rounded text-on-surface-variant hover:text-on-surface" type="button">回撤视角</button>
+</div>
+</div>
+<!-- Stepped SVG Chart -->
+<div class="relative w-full h-56 flex items-end">
+<!-- Grid Lines and Y-Axis -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none font-label-mono text-label-micro text-outline-variant opacity-60">
+<div class="flex items-center justify-between border-b border-surface-variant/20 pb-0.5"><span>80R</span></div>
+<div class="flex items-center justify-between border-b border-surface-variant/20 pb-0.5"><span>60R</span></div>
+<div class="flex items-center justify-between border-b border-surface-variant/20 pb-0.5"><span>40R</span></div>
+<div class="flex items-center justify-between border-b border-surface-variant/20 pb-0.5"><span>20R</span></div>
+<div class="flex items-center justify-between pb-0.5"><span>0R</span></div>
+</div>
+<!-- Vector Stepped Line -->
+<svg class="w-full h-full overflow-visible z-10" preserveaspectratio="none" viewbox="0 0 600 200">
+<defs>
+<lineargradient id="equityGlow" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#01e599" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#01e599" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Fill under curve -->
+<path d="M 0,195 L 40,195 L 40,190 L 80,190 L 80,175 L 120,175 L 120,180 L 160,180 L 160,155 L 200,155 L 200,140 L 240,140 L 240,145 L 280,145 L 280,120 L 320,120 L 320,110 L 360,110 L 360,95 L 400,95 L 400,60 L 440,60 L 440,35 L 500,35 L 500,20 L 560,20 L 560,25 L 600,25 L 600,200 L 0,200 Z" fill="url(#equityGlow)"></path>
+<!-- Stepped stroke line -->
+<path d="M 0,195 L 40,195 L 40,190 L 80,190 L 80,175 L 120,175 L 120,180 L 160,180 L 160,155 L 200,155 L 200,140 L 240,140 L 240,145 L 280,145 L 280,120 L 320,120 L 320,110 L 360,110 L 360,95 L 400,95 L 400,60 L 440,60 L 440,35 L 500,35 L 500,20 L 560,20 L 560,25 L 600,25" fill="none" stroke="#70ffba" stroke-linecap="square" stroke-linejoin="miter" stroke-width="2.5"></path>
+<!-- Current Peak Pin -->
+<circle class="animate-pulse" cx="560" cy="20" fill="#01e599" r="4"></circle>
+</svg>
+</div>
+<div class="flex items-center justify-between font-label-mono text-label-micro text-outline pt-space-xs">
+<span>第 1 笔 (09/18)</span>
+<span>第 25 笔</span>
+<span>第 50 笔</span>
+<span>最新第 83 笔 (当前 +74.24R)</span>
+</div>
+</div>
+<!-- Right: Timeframe Contribution Bar Chart (1 Col) -->
+<div class="bg-surface-container-low rounded-xl p-space-md flex flex-col justify-between gap-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-md text-headline-md text-on-surface font-semibold">周期盈亏贡献</span>
+<span class="font-label-mono text-label-micro text-outline">(净 R)</span>
+</div>
+<span class="font-label-mono text-label-micro text-secondary font-bold">100% 正收益周期</span>
+</div>
+<!-- Vertical Bars for Timeframes -->
+<div class="flex items-end justify-between gap-space-md h-56 px-space-md pt-space-md">
+<!-- Bar 1: 15m (+37.85R) -->
+<div class="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+<span class="font-label-mono text-label-micro text-secondary font-bold">+37.85R</span>
+<div class="w-full bg-surface-container rounded-t-lg overflow-hidden flex items-end" style="height: 80%;">
+<div class="w-full h-full bg-secondary-container group-hover:bg-secondary transition-colors rounded-t-lg"></div>
+</div>
+<span class="font-label-mono text-label-micro text-on-surface font-semibold">15m 周期</span>
+</div>
+<!-- Bar 2: 30m (+28.28R) -->
+<div class="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+<span class="font-label-mono text-label-micro text-secondary font-bold">+28.28R</span>
+<div class="w-full bg-surface-container rounded-t-lg overflow-hidden flex items-end" style="height: 60%;">
+<div class="w-full h-full bg-secondary group-hover:opacity-90 transition-opacity rounded-t-lg"></div>
+</div>
+<span class="font-label-mono text-label-micro text-on-surface font-semibold">30m 周期</span>
+</div>
+<!-- Bar 3: 5m (+8.06R) -->
+<div class="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+<span class="font-label-mono text-label-micro text-on-surface-variant font-medium">+8.06R</span>
+<div class="w-full bg-surface-container rounded-t-lg overflow-hidden flex items-end" style="height: 22%;">
+<div class="w-full h-full bg-surface-bright group-hover:bg-primary-container transition-colors rounded-t-lg"></div>
+</div>
+<span class="font-label-mono text-label-micro text-on-surface-variant">5m 周期</span>
+</div>
+<!-- Bar 4: 1h (+0.05R) -->
+<div class="flex flex-col items-center gap-2 flex-1 h-full justify-end group">
+<span class="font-label-mono text-label-micro text-outline">+0.05R</span>
+<div class="w-full bg-surface-container rounded-t-lg overflow-hidden flex items-end" style="height: 6%;">
+<div class="w-full h-full bg-surface-container-highest rounded-t-lg"></div>
+</div>
+<span class="font-label-mono text-label-micro text-outline">1h 周期</span>
+</div>
+</div>
+<div class="bg-surface-container rounded-lg p-space-sm flex items-center justify-between font-label-mono text-label-micro">
+<span class="text-outline">核心主力胜率策略:</span>
+<span class="text-secondary font-semibold">15m 均线密集破位 68.4%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple micro-interaction for refresh button animation
+  document.getElementById('refresh-pulse-btn')?.addEventListener('click', function() {
+    const icon = this.querySelector('.material-symbols-outlined');
+    if (icon) {
+      icon.classList.add('animate-spin');
+      setTimeout(() => {
+        icon.classList.remove('animate-spin');
+      }, 700);
+    }
+  });
+</script></main></div></body></html>

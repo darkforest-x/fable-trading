@@ -1,0 +1,125 @@
+/* Stitch 8978791379095391159 / 78daa93a8007492a9a254f3b8b705c4c.
+ * Source image and HTML: output/mobile-chart-layout-20261018/stitch/.
+ * Reuse live components and their controllers; mock data is never imported. */
+.market-account-disclosure,[data-market-funds-toggle]{display:none}
+.desk-funds{grid-area:funds;min-width:0}
+.desk-funds>[data-market-balances]{height:100%}
+.desk-range-panel{position:relative}
+.desk-range-settings{width:max-content;margin:4px 0 6px}
+.desk-range-settings summary{font-size:11px;padding:5px 9px}
+.desk-range-settings .quiet-menu-panel{left:0;right:auto;width:min(340px,calc(100vw - 16px));padding:10px;z-index:25}
+.desk-range-settings label{display:flex;gap:8px;align-items:center;font-size:11px}
+.desk-range-settings select{min-width:0;flex:1;font:inherit;color:var(--text);background:var(--surface-lowest);padding:6px;border:1px solid var(--line);border-radius:4px}
+.desk-range-settings .desk-range-controls{margin:8px 0 0;gap:6px}
+.cv-level-details>summary{font-size:10px;color:var(--muted);padding:6px;cursor:pointer}
+.cv-level-details>.cv-levels{padding:0 6px 6px}
+.mt-chart-settings .cv-tools{display:flex;flex-wrap:wrap;gap:4px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+@media(max-width:700px){
+ body[data-workspace=market] .workspace main,body[data-workspace=paper-desk] .workspace main{padding-left:4px;padding-right:4px}
+ body #market-sync-workspace,body #paper-desk-workspace{min-width:0;width:100%;gap:4px}
+ /* Two account rows by default; details retain the existing account selector. */
+ #market-account-overview .market-account-disclosure{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:26px;padding:3px 7px;background:none;border:0;color:var(--muted);font-size:10px;text-align:left}
+ #market-account-overview .market-account-disclosure span{color:var(--mint)}
+ #market-account-overview:not(.accounts-expanded) :is(.market-account-switch,.market-account-preview){display:none}
+ #market-account-overview:not(.accounts-expanded) .market-account{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 6px;padding:3px 7px;border-top:1px solid var(--line-soft)}
+ #market-account-overview:not(.accounts-expanded) .market-account>header{display:contents}
+ #market-account-overview:not(.accounts-expanded) .market-account-identity{grid-column:1;grid-row:1}
+ #market-account-overview:not(.accounts-expanded) .market-account h3{font-size:10px;line-height:20px;white-space:nowrap}
+ #market-account-overview:not(.accounts-expanded) .market-account-actions{display:none}
+ #market-account-overview:not(.accounts-expanded) .market-account .market-account-metrics{grid-column:2;grid-row:1;display:grid;grid-template-columns:1.1fr 1.2fr;gap:5px}
+ #market-account-overview:not(.accounts-expanded) .market-account-metrics>div{display:flex;align-items:baseline;gap:4px;white-space:nowrap}
+ #market-account-overview:not(.accounts-expanded) .market-account-metrics>div:is(:nth-child(2),:nth-child(4)){display:none}
+ #market-account-overview:not(.accounts-expanded) .market-account dt{font-size:8px}
+ #market-account-overview:not(.accounts-expanded) .market-account dd{font-size:11px!important;line-height:18px}
+ #market-account-overview:not(.accounts-expanded) .market-account-state{display:none;grid-column:1/-1}
+ #market-account-overview:not(.accounts-expanded) .market-account-state:has(.is-warning){display:flex}
+ #market-account-overview:not(.accounts-expanded) .market-account-state:has(.is-warning)>:not(.is-warning){display:none}
+ #market-account-overview:not(.accounts-expanded) .market-account-settlement-panel{display:none}
+ /* Quote and tools use compact rows; the canvas owns the remaining height. */
+ body #market-sync-workspace .mt-topline{padding:3px 5px;gap:2px 5px}
+ body #market-sync-workspace .mt-quotes strong{font-size:17px}
+ body #market-sync-workspace .mt-quotes{gap:5px}
+ body #market-sync-workspace .mt-pair{gap:3px}
+ body #market-sync-workspace .mt-star{font-size:15px;padding:0;min-width:20px}
+ body #market-sync-workspace .stitch-market-pulse{padding:0;gap:8px}
+ body #market-sync-workspace .stitch-market-pulse article{flex-direction:row;align-items:baseline;gap:4px}
+ body #market-sync-workspace .stitch-market-pulse span{font-size:8px}
+ body #market-sync-workspace .stitch-market-pulse strong{font-size:9px}
+ body #market-sync-workspace .mt-chart-panel{height:clamp(380px,54dvh,520px);min-height:380px;border-radius:3px}
+ body #market-sync-workspace .mt-chart-toolbar{padding:2px 4px;gap:2px}
+ body #market-sync-workspace .mt-chart-control-row{display:flex;align-items:center;justify-content:space-between;gap:4px}
+ body #market-sync-workspace .mt-periods{display:flex;min-width:0;padding:1px}
+ body #market-sync-workspace .mt-periods button{min-width:0;min-height:32px;padding:4px 7px;font-size:10px}
+ body #market-sync-workspace .mt-chart-actions{width:auto;gap:2px}
+ body #market-sync-workspace .mt-chart-actions :is(button,summary){min-height:32px;padding:4px 6px}
+ body #market-sync-workspace .mt-chart-actions [data-chart-expand]{width:32px}
+ body #market-sync-workspace .mt-chart-settings .quiet-menu-panel{right:0;width:236px;z-index:20}
+ body #market-sync-workspace .mt-ohlc,body #paper-desk-workspace .cv-readout{display:flex;flex-wrap:nowrap;white-space:nowrap;overflow-x:auto;scrollbar-width:none;min-height:20px;align-items:center;gap:6px;font-size:9px;line-height:20px}
+ body #market-sync-workspace .mt-ohlc>*,body #paper-desk-workspace .cv-readout>*{flex:0 0 auto}
+ body #market-sync-workspace .mt-chart-surface .mt-ma-legend{left:3px;right:57px;top:2px;gap:1px 7px!important;padding:2px 3px!important;line-height:12px!important}
+ body #market-sync-workspace .mt-chart-surface .chart-ma-value :is(span,b){font-size:8px!important}
+ body #market-sync-workspace .mt-chart-source{font-size:8px;min-width:0;overflow:hidden;white-space:nowrap}
+ body #market-sync-workspace .mt-chart-source a{display:none}
+ /* The simulated chart always comes first on phones, for every saved desktop layout. */
+ body #paper-desk-workspace .desk-market-layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"market" "ticket" "ledger";gap:6px}
+ body #paper-desk-workspace .desk-market{padding:0;border:0;border-radius:3px;overflow:visible}
+ body #paper-desk-workspace .desk-market-header{padding:4px 5px;grid-template-columns:minmax(100px,.9fr) minmax(0,1.4fr);grid-template-areas:"tools tools" "symbol quote" "stats stats" "funds funds";gap:3px 6px}
+ body #paper-desk-workspace .desk-market-header>[data-market-tools]{margin:0;padding:0 0 3px}
+ body #paper-desk-workspace .desk-market .desk-toolbar{padding:0;gap:4px;flex-wrap:nowrap}
+ body #paper-desk-workspace .desk-toolbar :is(select,.research-button){min-height:30px;padding:4px 6px;font-size:10px}
+ body #paper-desk-workspace .desk-toolbar-main{min-width:0}
+ body #paper-desk-workspace .desk-toolbar select{width:110px;max-width:100%;font-size:11px}
+ body #paper-desk-workspace .desk-toolbar-actions{gap:3px}
+ body #paper-desk-workspace .desk-symbol-trigger{min-height:34px;font-size:13px;gap:3px}
+ body #paper-desk-workspace .desk-market-last{display:flex;align-items:baseline;justify-content:flex-end;flex-wrap:wrap;gap:0 6px}
+ body #paper-desk-workspace .desk-market-last>strong{font-size:20px;letter-spacing:-.5px;line-height:25px}
+ body #paper-desk-workspace .desk-market-last>span{order:3;flex-basis:100%;text-align:right;font-size:8px;line-height:12px}
+ body #paper-desk-workspace .desk-market-last>div{margin:0;font-size:10px}
+ body #paper-desk-workspace .desk-market-last>div>small{display:none}
+ body #paper-desk-workspace .desk-market-stats{padding:2px 0;border:0;gap:4px}
+ body #paper-desk-workspace .desk-market-stats>div{display:flex;align-items:baseline;gap:3px;justify-content:space-between}
+ body #paper-desk-workspace .desk-market-stats dt{font-size:8px;margin:0}
+ body #paper-desk-workspace .desk-market-stats dd{font-size:9px}
+ body #paper-desk-workspace .desk-funds{position:relative;min-height:28px;border-top:1px solid var(--line-soft);padding-top:3px}
+ body #paper-desk-workspace [data-market-funds-toggle]{position:absolute;right:0;top:2px;display:block;min-height:26px;padding:2px 6px;font-size:10px;background:none;color:var(--mint);border:0;z-index:1}
+ body #paper-desk-workspace .desk-funds:not(.is-expanded) .desk-metrics{display:block;background:none;border:0;padding-right:80px}
+ body #paper-desk-workspace .desk-funds:not(.is-expanded) .desk-metrics article:first-child{display:flex;flex-direction:row;align-items:center;padding:2px 0;gap:8px;min-height:22px}
+ body #paper-desk-workspace .desk-funds:not(.is-expanded) .desk-metrics article:not(:first-child){display:none}
+ body #paper-desk-workspace .desk-funds .desk-metrics strong{font-size:13px!important}
+ body #paper-desk-workspace .desk-funds.is-expanded{padding-top:28px}
+ body #paper-desk-workspace .desk-funds.is-expanded .desk-metrics{height:auto;grid-template-columns:repeat(3,minmax(0,1fr))}
+ body #paper-desk-workspace .desk-chart-controls{padding:0 4px;gap:2px;min-height:32px;flex-wrap:nowrap}
+ body #paper-desk-workspace .desk-chart-controls>div{gap:4px}
+ body #paper-desk-workspace .desk-chart-controls button{min-height:32px;padding:4px;font-size:10px;white-space:nowrap}
+ body #paper-desk-workspace .desk-chart-help{font-size:9px;padding:4px;gap:4px}
+ body #paper-desk-workspace .desk-chart-help button{min-height:28px;font-size:9px;padding:3px}
+ body #paper-desk-workspace .desk-range-panel{padding:0;border:0}
+ body #paper-desk-workspace .desk-range-heading{display:none}
+ body #paper-desk-workspace .desk-range-settings{position:absolute;right:4px;top:2px;margin:0;z-index:5}
+ body #paper-desk-workspace .desk-range-settings summary{min-height:30px;font-size:10px;padding:5px 8px}
+ body #paper-desk-workspace .desk-range-settings .quiet-menu-panel{left:auto;right:0}
+ body #paper-desk-workspace .desk-range-controls button{min-height:32px;padding:6px 8px}
+ body #paper-desk-workspace .cv-range{padding:0;border:0;border-radius:0;background:var(--chart-bg)}
+ body #paper-desk-workspace .cv-range-header{min-height:34px;padding:2px 64px 2px 4px;flex-wrap:nowrap}
+ body #paper-desk-workspace .cv-range-header>strong,body #paper-desk-workspace .cv-range [data-cv=expand]{display:none}
+ body #paper-desk-workspace .cv-range .cv-tools{gap:4px;flex-wrap:nowrap}
+ body #paper-desk-workspace .cv-range .cv-tools button{min-height:30px;padding:4px 7px;font-size:10px;white-space:nowrap}
+ body #paper-desk-workspace .cv-range-status{padding:0 5px;margin:0;line-height:16px;font-size:8px;white-space:nowrap;overflow-x:auto}
+ body #paper-desk-workspace .cv-readout{padding:0 4px;margin:0}
+ body #paper-desk-workspace .cv-range .cv-canvas{width:100%;height:clamp(340px,50dvh,480px);min-height:340px}
+ body #paper-desk-workspace .desk-market-widget{height:clamp(380px,58dvh,560px);border-radius:0}
+ body #paper-desk-workspace .desk-range-note{margin:4px;padding:0;font-size:8px;line-height:12px}
+ body #paper-desk-workspace .desk-chart-credit{padding:3px 4px;font-size:8px;gap:3px}
+ body #paper-desk-workspace .desk-chart-focus.cv-expanded{padding:0!important}
+ body #paper-desk-workspace .desk-chart-focus.cv-expanded .cv-range .cv-canvas{height:calc(100dvh - 170px)!important;min-height:240px}
+ body #market-sync-workspace .mt-chart-panel.is-expanded{height:100%;min-height:0}
+}
+@media(max-width:700px){
+ body[data-workspace=paper-desk] .page-heading{display:none}
+ body #paper-desk-workspace .desk-market-stats>div{flex-wrap:wrap;gap:1px 4px}
+ body #paper-desk-workspace .desk-market-stats dt{white-space:nowrap}
+}
+/* Match the existing mint brand; direction colors remain trading semantics. */
+body #paper-desk-workspace{--desk-long:var(--positive-text);--desk-short:var(--negative-text)}
+body #paper-desk-workspace .desk-submit.desk-long{background:var(--signal-accent);color:var(--on-accent);border-radius:6px;box-shadow:none}
+body #paper-desk-workspace .desk-submit.desk-short{background:var(--negative-text);color:var(--on-accent);border-radius:6px;box-shadow:none}

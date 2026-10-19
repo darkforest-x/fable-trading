@@ -213,12 +213,11 @@
       <h3>${esc(item.title)}</h3><p class="manual-principle-body">${esc(item.body)}</p>
       ${item.rationale || item.source ? `<details class="manual-optional"><summary>依据与来源</summary><p>${esc(item.rationale || '')}</p><small>${esc(item.source || '')}</small></details>`:''}
       <div class="manual-form-footer"><small>v${esc(item.revision)}</small><button type="button" class="research-button" data-manual-edit-principle="${esc(item.id)}">编辑原则</button></div></article>`).join('');
-    const templates = arr(state.data?.principle_templates);
     return `<section class="manual-pane"><div class="manual-heading"><div><h2>我的交易原则</h2><p>把反复认可的判断留下来，让每一笔交易都有自己的依据。</p></div><button type="button" class="research-button primary" data-manual-new-principle>＋ 沉淀原则</button></div>
       <div class="manual-principle-toolbar"><label>查看 <select data-manual-principle-filter aria-label="筛选原则状态">${[['all','全部原则'],...Object.entries(labels.principleStatus)].map(([value,label])=>`<option value="${value}" ${state.principleFilter===value?'selected':''}>${label}</option>`).join('')}</select></label><span>${active.length} 条正在遵守</span><button type="button" class="research-button" data-manual-tab="prepare">按原则准备开单 →</button></div>
       ${state.principleEditing ? principleEditor() : ''}
       ${shown.length ? `<div class="manual-principle-grid">${cards}</div>` : `<div class="manual-principle-empty"><h3>${records.length?'这个分类暂时没有原则':'先写下你真正想遵守的原则'}</h3><p>不必一次写成完整的交易手册。从市场判断、入场选择、风险纪律或一次复盘心得开始。</p><button type="button" class="research-button" data-manual-new-principle>写下第一条</button></div>`}
-      ${templates.length ? `<details class="manual-card manual-optional"><summary>参考草稿 · 选择后修改成自己的原则</summary><div class="manual-principle-grid">${templates.map(item=>`<article class="manual-template"><strong>${esc(item.title)}</strong><p>${esc(item.body)}</p><button type="button" class="research-button" data-manual-principle-template="${esc(item.id)}">编辑这条草稿</button></article>`).join('')}</div></details>`:''}
+
       <div class="manual-support-row"><span>有需要时，再把原则展开成具体打法。</span><button type="button" class="research-button" data-manual-tab="playbooks">具体打法与历史模板</button></div></section>`;
   }
 
@@ -781,15 +780,15 @@
     else if (state.tab === "sessions") body = renderSessions();
     else if (state.tab === "tickets") body = renderTickets();
     else body = renderReview();
-    root.innerHTML = '<div class="manual-workspace">' +
-      '<header class="manual-hero"><div><p class="manual-kicker">我的交易系统</p><h2>先有原则，再做交易</h2>' +
+    root.innerHTML = '<div class="manual-workspace">' + renderTabs() +
+      '<details class="manual-hero" data-work-disclosure="manual-workflow"><summary>我的交易流程与参考</summary><div><h2>先有原则，再做交易</h2>' +
       '<p>沉淀自己的判断，开单前逐条核对；交易后的记录与复盘，让原则逐渐清晰。</p></div>' +
       '<button type="button" class="research-button" data-manual-refresh' + (state.loading ? " disabled" : "") + ">" +
-      (state.loading ? "读取中…" : "刷新记录") + "</button></header>" +
+      (state.loading ? "读取中…" : "刷新记录") + "</button>" +
+      '<nav class="pb-actions" aria-label="详细交易体系"><a class="research-button" href="#rektproof?tab=system" data-pb-open="weekly">周一区间 · 详细系统</a><a class="research-button" href="#langlang?tab=leaders" data-pb-open="leaders">ETH 启动 · 找龙头流程</a></nav></details>' +
       (state.actionError || state.actionMessage ? formMessage() : "") +
       (state.data && state.loadError ? '<div class="research-error manual-message" role="alert">' + esc(state.loadError) + "</div>" : "") +
-      signalPromptHTML() +
-      renderTabs() + body + sourceHTML() + "</div>";
+      signalPromptHTML() + body + sourceHTML() + "</div>";
   }
 
   async function refresh() {

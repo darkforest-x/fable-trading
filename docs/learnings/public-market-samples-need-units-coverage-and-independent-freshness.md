@@ -1,0 +1,7 @@
+# A live market widget needs units, coverage and freshness before decoration
+
+- **问题**：The selected workstation expects OI, funding, order flow and liquidation panels, while the existing UI only supplied quotes and confluence. A visually plausible total could silently overstate the source's coverage.
+- **死胡同**：Summing swap size as coins ignores contract face value; calling the latest 500 trades a complete 15-minute CVD is false. Retaining a successful projection after a refresh error also makes old data look current. Predicted liquidation bands cannot be inferred from reported liquidation events.
+- **有效路径**：Add a read-only, demand-driven public-data service with independent field caches, bounded workers/queue and retry backoff. Convert contracts using actual ctVal/ctMult/currency, deduplicate and time-bound samples, return their observed coverage, and suppress errored/expired projections. Render reported bankruptcy prices with explicit sample labels. Nonblocking/cache and unit/invalid-time tests cover these distinctions.
+- **通用规则**：Before drawing a metric, establish its unit, source universe, time coverage and unavailable-state semantics. Display polling must remain independent of execution workers and inspection cadence.
+- **牵连**：yoyo/monitor/market_workstation.py; market-intelligence.js and market-terminal.js; tests/monitor/test_market_workstation.py and frontend_market_intelligence.test.cjs. No exchange mutations, freshness-gate changes or model promotion.

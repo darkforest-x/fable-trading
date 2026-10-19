@@ -1,0 +1,7 @@
+# Tunnel process status is not public reachability
+
+- **Problem**: The public workspace manager reported installed services and a healthy local gateway, while the previous Quick Tunnel was no longer registered with its provider.
+- **Dead end**: A true launchd-service flag and a successful loopback gateway probe did not prove external access. The status URL came from historical logs, so it continued to look usable while cloudflared repeatedly reported `Unauthorized: Tunnel not found`.
+- **Effective path**: Check the public HTTPS endpoint and recent connection logs separately. Restarting only the existing tunnel process obtained a fresh hostname; then the page, paper-account API, and current JavaScript all returned 200. A real browser at 390px loaded the same account without horizontal overflow. Update the local access note after verifying the new URL.
+- **General rule**: Distinguish process existence, local upstream health, provider registration, and end-to-end HTTPS reachability. A cached public URL is evidence of an earlier registration, not current availability. Do not restart the application or change its access policy to repair a failed connector.
+- **Related**: `yoyo/monitor/public_tunnel.py`, local `PublicTunnel/access.txt`, and `output/playwright/task54/public-verification.json`. Existing login-free whole-workspace policy was preserved; no simulation orders or trading settings were changed.

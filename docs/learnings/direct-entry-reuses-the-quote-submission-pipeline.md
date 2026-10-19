@@ -1,0 +1,7 @@
+# Direct entry reuses the quote submission pipeline
+
+- **Problem**: Owner requested optional one-click paper entry while retaining the confirmation dialog as a preference. Skipping the dialog must not skip current sizing, quote expiry, or idempotency.
+- **Dead end**: No failed implementation was deployed. A separate direct-order path would duplicate payload construction and could drift from the reviewed quote's quantity, leverage, and protection prices, so that design was rejected before implementation.
+- **Effective path**: Fetch and freeze the same quote, then call one submission function from either the dialog or direct entry. Persist the entry-only preference separately from pending requests. Hold the busy guard through quote retrieval and submission; retain the original request after uncertain responses. Track page activation so leaving and returning during a quote request cannot silently place a delayed direct order.
+- **General rule**: Removing a confirmation is a presentation choice, not a second execution protocol. Test the absence of a modal together with exactly one order, stale-quote rejection, route cancellation, and unchanged retry identity.
+- **Related**: `yoyo/monitor/static/paper-desk.js`, `paper-desk.css`, `tests/monitor/frontend_paper_desk.test.cjs`; browser preference `spike-paper-desk-confirm-entry-v1`. Closing positions still requires confirmation. Backend pricing and cost policy are unchanged.

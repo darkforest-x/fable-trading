@@ -3,12 +3,14 @@
   "use strict";
 
   const $ = (id) => document.getElementById(id);
+  const DEFAULT_VIEW = "market";
   const state = {
-    view: "signals", signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
+    view: DEFAULT_VIEW, signals: [], directSignals: [], performanceSignals: [], rawYoloSignals: [], candidates: [], signalScope: "retest", markets: [], status: null, health: null,
     signalsLoaded: false, directSignalsLoaded: false, directSignalTotal: 0, candidatesLoaded: false, candidateTotal: 0, candidateCounts: null, marketsLoaded: false, marketsLoading: false, marketsRetryTimer: null, signalTotal: 0, rowLimit: 24, watchLimit: 24, search: "", watchSearch: "", watchScope: "building",
     shadowStatus: null, shadowEvents: [], shadowMarket: [], shadowLoaded: false, shadowLoading: false, shadowTimeframe: "all",
     rawNextCursor: null, rawHasMore: false, rawPaged: false, rawLoadingMore: false,
     ledger: null, period: "all", outcome: "all", sort: "newest", page: 0,
+    signalLayout: "cards", signalPane: "records", recordLayout: "cards", signalDetailId: null, historyStatsOpen: { groups: false },
     timeframe: "all", watchTimeframe: "all", side: "all", signalSource: "live",
     syncing: false, refreshQueued: null, signalQueryRevision: 0, lastSync: null, statusReceivedAt: null, errors: {},
     tradingViewPending: false,
@@ -17,32 +19,37 @@
   };
   const titles = {
     platform: ["体系总览", "个人交易、学习输出、策略研究与自动策略验证，共用知识、数据与模型。"],
+    "trading-books": ["交易书架", "从原文到小册：选书、逐章研读、自己的笔记与复习。"],
     learning: ["学习中心", "围绕问题安排学习、复述与复习，把答案沉淀为自己的知识。"],
+    orderflow: ["订单流框架", "订单流与机构框架学习小册：逐章阅读、笔记、间隔复习与练习清单。小册内容只在本机。"],
+    "auto-leaders": ["自动找龙头", "筛选山寨币观察候选，追踪相对强度、回吐与恢复进度。"],
+    "yolo-detect": ["均线密集检测", "选择币种与周期，用 YOLO 在全局 K 线上定位均线密集形态。"],
+    langlang: ["Bit浪浪体系", "主升浪交易法：体系图、逐章阅读、直播原话检索、案例盲测与开单检查。资料只在本机。"],
+    rektproof: ["RektProof 区间", "RektProof（Arthur）学习体系：逐章精读、作者原图、交易案例、回放练习与周计划。资料只在本机。"],
     knowledge: ["知识库", "按领域组织概念、原则、假设与经验，保留来源、证据和适用边界。"],
     content: ["内容工作室", "知识形成母稿，按平台编写文章、短帖与视频脚本，导出并登记发布记录。"],
+    "paper-desk": ["模拟开单", "手动模拟开仓、平仓，跟踪账户权益与逐笔盈亏。"],
     manual: ["个人交易系统", "沉淀交易原则 → 核对后开单 → 记录与复盘。"],
-    market: ["全市场异动", "BTC/ETH 带动的全市场同步冲击：实时状态、前向记录与研究历史。只记录，不下单、不推送。"],
-    copier: ["Discord 跟单", "Discord 频道信号 → DeepSeek 解析 → 风控 → OKX / Gate 下单。切到实盘只能在本机由你确认。"],
+    market: ["市场共振观察", "BTC、ETH 同时放量，多数山寨也同方向涨跌，之后会怎样？"],
+    copier: ["Arthur 监控", "一个频道，一套可核对的模拟账本。发布、采集、处理与成交分别记录。"],
     models: ["模型中心", "查看登记制品、来源、特征语义和身份校验；身份校验不代表模型效果或生产准入。"],
     signals: ["信号中心", "SPIKE V13.1 多空回踩再突破确认 · 15m/30m/1H/4H；通知按通知中心订阅。"],
     warmup: ["预热历史", "V12.8 启用前按当前规则重算的信号，仅供复盘，不补发通知。"],
     watch: ["蓄势观察", "还在横盘的，单独观察。这里的结构尚不是启动信号。"],
-    joints: ["突破+spike", "V12.8：有效多头参考框与本周期或上级趋势线配对，支持先启动后突破、先突破后启动。"],
-    breaks: ["趋势线突破", "15m、1H、4H、日线自己的三点下降线被收盘突破：连续 2 根收在线上 0.2 ATR。"],
     shadow: ["旧版影子记录", "已退役的 V7 / V8 独立观察记录，仅供历史对照；新运行统一进入模拟实盘。"],
     research: ["研究总览", "围绕均线密集系统，跟踪因子、实验、回测与视觉判断。"],
     datasets: ["数据集", "统一管理币圈数据目录，核对覆盖、整理状态与回测读取入口。"],
     factors: ["因子库", "定义、可知时点、实现来源与研究结论，一处追踪。"],
     strategies: ["策略库", "登记策略规则、研究状态与关联，为后续模拟观察保留版本记录。"],
-    paper: ["模拟实盘", "只观察创建任务之后的新信号，按未来开盘模拟，不向交易所下单。"],
+    paper: ["策略前向账本", "只观察创建任务之后的新信号，按未来开盘模拟，不向交易所下单。"],
     experiments: ["实验登记", "保留每次问题、唯一变化、原始结果与失败证据。"],
     backtests: ["回测任务", "冻结参数与数据，独立运行，留存逐笔与随机对照。"],
     yolo: ["YOLO 工作流", "样本、标注、数据集、训练与评估，沿同一条研究流程追踪。"],
     vision: ["VLM 工作流", "视觉语言模型的参考图、形态判断、人工复核与历史回放，与 YOLO 并行研究。"],
-    notifications: ["通知中心", "分别查看 TG 与 Bark 渠道状态、来源订阅和历史回执。"],
+    notifications: ["通知中心", "管理通知渠道状态与来源订阅。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const workspaceView = (view = state.view) => ["learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
+  const workspaceView = (view = state.view) => ["learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
   const eventNames = { tv_start: "V12.8 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -103,7 +110,7 @@
   const notificationChannels = () => {
     const configured = state.status?.runtime?.notification_channels;
     const channels = Array.isArray(configured) ? configured : [];
-    return ["telegram", "bark"].filter((channel) => channels.includes(channel) && (channel !== "telegram" || state.status?.telegram?.disabled_by_owner !== true));
+    return ["telegram"].filter((channel) => channels.includes(channel) && (channel !== "telegram" || state.status?.telegram?.disabled_by_owner !== true));
   };
   // Only the policy-filtered direct endpoint supplies first-stage receipts.
   // Candidate history is deliberately not a receipt source.
@@ -125,7 +132,7 @@
   const isDisplayOnly = (item) => !notificationChannels().includes("telegram") && (item?.display_only === true || displayOnlyTimeframes().includes(item?.timeframe));
   const notificationPolicy = () => {
     const channels = notificationChannels().map((channel) => channel === "telegram" ? "TG" : "Bark");
-    const delivery = channels.length ? `通知渠道：${channels.join(" + ")}；按通知中心来源订阅。` : "通知渠道状态待同步；以通知中心订阅和历史回执为准。";
+    const delivery = channels.length ? `通知渠道：${channels.join(" + ")}；按通知中心来源订阅。` : "通知渠道状态待同步；请查看通知中心。";
     return `${delivery} V13.1 多空回踩再突破，15m/30m/1H/4H；15m 候选须符合已完成 H1 SMA60 方向；1H 收盘 2R 后按 2ATR 追踪，其他周期 4ATR。历史记录不补发。`;
   };
   function candidateNotificationNote(item) {
@@ -276,27 +283,44 @@
       renderTradingViewButtons();
     }
   }
+  function toggleNavigation(open) {
+    if(window.SpikeWorkspaceDisplay){window.SpikeWorkspaceDisplay.setMobileNavigation(open);return;}
+    document.body.classList.toggle("nav-open", open);
+    $("nav-toggle")?.setAttribute("aria-expanded", String(open));
+    if ($("nav-backdrop")) $("nav-backdrop").hidden = !open;
+  }
   function setView(view, updateHash = true) {
+    if (view.startsWith("langlang?") && new URLSearchParams(view.split("?")[1]).get("tab") === "auto-leaders") {view="auto-leaders";history.replaceState(null,"","#auto-leaders");}
+    view = view.split("?")[0];
     // The accessibility skip target is an anchor, not another application view.
     if (view === "main") { $("main").focus?.({ preventScroll: true }); return; }
+    if (["joints", "breaks", "vidya"].includes(view)) {view = "signals"; history.replaceState(null, "", "#signals");}
+    if (!titles[view]) {view = DEFAULT_VIEW; history.replaceState(null, "", `#${view}`);}
+    const navigationWasOpen = document.body.classList.contains("nav-open");
+    window.SpikeWorkspaceDisplay?.setMobileNavigation(false, { restoreFocus: false });
+    document.body.classList.remove("nav-open");
+    $("nav-toggle")?.setAttribute("aria-expanded", "false");
+    if ($("nav-backdrop")) $("nav-backdrop").hidden = true;
+    window.SpikeWorkspaceDisplay?.syncNavigation();
     const previousView = state.view;
-    const nextView = titles[view] ? view : "signals";
+    const nextView = view;
+    window.SpikeNavigation?.begin(nextView, updateHash);
     state.view = nextView;
+    syncRefreshButton();
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "knowledge", "content", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
       if (active) button.setAttribute("aria-current", "page"); else button.removeAttribute("aria-current");
       button.title = titles[button.dataset.view]?.[0] || "";
-      if (active) button.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+      if (active) { const group = button.closest?.("details"); if (group) group.open = true; button.scrollIntoView?.({ block: "nearest", inline: "nearest" }); }
     });
     const researchView = workspaceView();
     $("exchange-mark").textContent = state.view === "manual" ? "个人" : state.view === "copier" ? "跟单" : researchView ? "研究" : "OKX";
     $("market-scope").textContent = researchView ? "本机工作台" : "全市场永续";
     $("connection-label").classList.toggle("hidden", researchView);
-    $("bark-header").classList.toggle("hidden", researchView);
     $("telegram-header")?.classList.toggle("hidden", researchView);
     $("model-gate-notice").classList.toggle("hidden", researchView || state.view === "retest" || state.signalScope === "retest" || !$("model-gate-notice").textContent);
     // The embedded VLM owns its chart, references and history refresh actions.
@@ -304,38 +328,44 @@
     $("refresh-button").setAttribute("aria-label", researchView ? `刷新${titles[state.view][0]}` : "立即刷新监控数据");
     $("page-title").textContent = titles[state.view][0];
     $("breadcrumb-current").textContent = titles[state.view][0];
-    $("page-description").textContent = state.view === "signals" && state.status ? notificationPolicy() : titles[state.view][1];
+    $("page-description").textContent = state.view === "signals" ? "追踪全市场确认信号，查看参考表现与 OKX 账户。" : titles[state.view][1];
     $("signal-source-scope").classList.toggle("hidden", state.view === "warmup" || state.signalScope === "retest");
     $("signal-scope-note").classList.toggle("hidden", state.view === "warmup");
     $("warmup-notice").classList.toggle("hidden", state.view !== "warmup");
     document.title = `spike · ${titles[state.view][0]}`;
-    if (updateHash && location.hash !== `#${state.view}`) history.pushState(null, "", `#${state.view}`);
-    if (previousView !== state.view) {
+    window.SpikeWorkbench?.navigate(state.view);
+    if(state.status)renderStatus();
+    if (!window.SpikeNavigation && updateHash && location.hash !== `#${state.view}`) history.pushState(null, "", `#${state.view}`);
+    if (!window.SpikeNavigation && previousView !== state.view) {
       window.scrollTo?.({ top: 0, behavior: "auto" });
-      $("main").focus?.({ preventScroll: true });
     }
+    if (previousView !== state.view || navigationWasOpen) $("main").focus?.({ preventScroll: true });
     if (researchView || state.view === "shadow" || state.view === "notifications") refreshShellStatus();
     const changesWarmupScope = previousView === "warmup" || state.view === "warmup";
     const entersSignalView = !signalView(previousView) && signalView(state.view);
-    if (changesWarmupScope || entersSignalView) {
+    if (changesWarmupScope) {
       state.rowLimit = 24; state.page = 0;
       invalidateSignalQuery();
       if (signalView(state.view)) refresh();
     }
-    window.SpikeResearch?.setView(state.view);
-    window.SpikePlatform?.setActive(state.view === "platform");
-    window.SpikeManual?.setActive(state.view === "manual");
-    window.SpikeCopier?.setActive(state.view === "copier");
-    window.SpikeMarketSync?.setActive(state.view === "market");
-    window.SpikeKnowledge?.setView(state.view);
-    window.SpikeModels?.setActive(state.view === "models");
-    window.SpikeDatasets?.setActive(state.view === "datasets");
-    window.SpikeStrategies?.setActive(state.view === "strategies");
-    window.SpikePaper?.setActive(state.view === "paper");
-    window.SpikeYolo?.setActive(state.view === "yolo");
-    window.SpikeVisionModule?.setActive(state.view === "vision").catch(() => {});
-    window.SpikeNotifications?.setActive(state.view === "notifications");
-    window.SpikeV130?.setActive(state.view === "retest");
+    if (window.SpikeModules) {
+      if (previousView !== state.view) activateModules(null);
+      const requestedView=state.view, generation=++viewGeneration;
+      const message=$('module-load-state');
+      if(message){message.hidden=false;message.dataset.loading='true';message.textContent='正在载入页面…';}
+      viewLoad=window.SpikeModules.ensure(requestedView).then(()=>{
+        if(generation!==viewGeneration)return;
+        if(message){message.hidden=true;delete message.dataset.loading;}
+        window.SpikeNavigation?.restore(requestedView);
+        activateModules(requestedView);
+        window.SpikeMotion?.route(requestedView, $(`${section}-view`));
+        if(requestedView==='signals')window.SpikeMotion?.cards('signals',document.querySelectorAll('#signal-rows .signal-card'));
+        if(signalView(requestedView))refresh("navigation");
+        window.SpikeNavigation?.settled();
+      }).catch(error=>{
+        if(generation===viewGeneration&&message){message.hidden=false;delete message.dataset.loading;message.textContent=error.message;}
+      });
+    } else {activateModules(state.view);window.SpikeMotion?.route(state.view, $(`${section}-view`));}
     $("research-error").classList.add("hidden");
     if (state.view === "system") loadHealth();
     // Signals never load the expensive market overview.  Watch opts in once.
@@ -347,6 +377,32 @@
       renderLines();
       loadLines();
     }
+  }
+  let viewLoad=Promise.resolve(), viewGeneration=0;
+  function activateModules(activeView) {
+    window.SpikeOKXExecution?.setActive(activeView === "signals" && state.signalPane === "account");
+    window.SpikeSignalWorkspace?.setActive(activeView === "signals");
+    window.SpikeResearch?.setView(activeView);
+    window.SpikePlatform?.setActive(activeView === "platform");
+    window.SpikeManual?.setActive(activeView === "manual");
+    window.SpikePaperDesk?.setActive(activeView === "paper-desk");
+    window.SpikeCopier?.setActive(activeView === "copier");
+    window.SpikeMarketSync?.setActive(activeView === "market");
+    window.SpikeTradingBooks?.setActive(activeView === "trading-books");
+    window.SpikeOrderflow?.setActive(activeView === "orderflow");
+    window.SpikeLanglang?.setActive(activeView === "langlang");
+    window.SpikeLeaderPage?.setActive(activeView === "auto-leaders");
+    window.SpikeYoloDetect?.setActive(activeView === "yolo-detect");
+    window.SpikeRektproof?.setActive(activeView === "rektproof");
+    window.SpikeKnowledge?.setView(activeView);
+    window.SpikeModels?.setActive(activeView === "models");
+    window.SpikeDatasets?.setActive(activeView === "datasets");
+    window.SpikeStrategies?.setActive(activeView === "strategies");
+    window.SpikePaper?.setActive(activeView === "paper");
+    window.SpikeYolo?.setActive(activeView === "yolo");
+    window.SpikeVisionModule?.setActive(activeView === "vision").catch(() => {});
+    window.SpikeNotifications?.setActive(activeView === "notifications");
+    window.SpikeV130?.setActive(activeView === "retest");
   }
   const LINE_TIMEFRAMES = { joint: ["15m", "30m", "1H", "4H"], break: ["15m", "1H", "4H", "1Dutc"] };
   const LINE_STATES = { live: ["实时", "admitted"], late: ["补录", "filtered"], history: ["启用前", "filtered"] };
@@ -478,6 +534,12 @@
       && (!q || String(item.symbol).toUpperCase().includes(q)) && (!lines.liveOnly || item.display_state === "live"));
     $("lines-day-count").textContent = lines.items.length || configured ? number(lines.items.filter((item) => item.bar_close_ms >= day).length) : "—";
     $("lines-live-count").textContent = lines.items.length || configured ? number(lines.items.filter((item) => item.display_state === "live").length) : "—";
+    if(workspaceView()){
+      const count=status.runtime?.v130?.signals_24h;
+      $('nav-signal-count').textContent=finite(count)?number(count):'—';
+      $('sidebar-runtime').textContent=online?status.started_at_ms?`已运行 ${duration(Date.now()-Number(status.started_at_ms))}`:'服务运行中':'连接中断 · 自动重连';
+      return;
+    }
     const scan = status.scan || {};
     $("lines-scan-state").textContent = !configured ? "未启动" : scan.status === "idle" ? "正常" : scan.status === "scanning" ? "扫描中" : scan.status === "degraded" ? "部分异常" : scan.status === "error" ? "失败" : "—";
     $("lines-scan-detail").textContent = !configured ? "工作进程随监控服务启动" : scan.finished_ms
@@ -541,8 +603,6 @@
       const status = await api("/api/lines/status");
       state.lines.status = status;
       const recent = status.recent_24h || {};
-      $("nav-joints-count").textContent = status.configured ? number(recent.joint || 0) : "—";
-      $("nav-breaks-count").textContent = status.configured ? number(recent.break || 0) : "—";
     } catch (error) { /* the page view reports load errors */ }
   }
   async function loadLines() {
@@ -631,9 +691,9 @@
   function performanceView(item) {
     const performance = signalPerformance(item);
     if (!performance || !["active", "profit", "loss", "breakeven"].includes(performance.status)) return {
-      className: "outcome-unknown", badge: "仅入场参考", value: "—", valueLabel: "当前 R",
+      className: "outcome-unknown", badge: performance?.reason === "awaiting_next_closed_bar" ? "等待入场参考" : "仅入场参考", value: "—", valueLabel: "当前 R",
       peak: "—", stop: finite(originalSignal(item)?.initial_stop) ? price(originalSignal(item).initial_stop) : "—",
-      stopLabel: "初始 SL", note: "持仓路径暂不可用",
+      stopLabel: "初始 SL", note: ({awaiting_next_closed_bar:"等待下一根已收盘 K 线同步",next_bar_is_gap:"入场行情缺口，参考状态不可用",data_gap_censored:"行情缺口，参考跟踪中断",delayed_risk_invalid:"入场参考风险无效"})[performance?.reason] || "持仓路径暂不可用",
     };
     const status = String(performance.status || "active");
     const outcomeR = status === "active" ? performance.current_r : performance.exit_r;
@@ -648,8 +708,19 @@
       stopLabel: performance.trailing_active ? "跟随保护" : "SL", note: status === "active" ? `${number(performance.bars_held)} 根已收盘 K 线 · 保护线下一根生效` : `已持有 ${number(performance.bars_held)} 根 K 线`,
     };
   }
+  let signalRowsSignature = null;
   function renderSignals() {
     const items = sourceItems(), data = state.ledger;
+    const history = state.signalLayout === "history";
+    $("signal-outcome-control").classList.toggle("hidden", history);
+    $("signal-overview").classList.toggle("hidden", history);
+    $("history-statistics").classList.toggle("hidden", !history);
+    $("signal-statistics-title").textContent = history ? "历史开单统计" : "信号统计";
+    $("signal-sort-note").textContent = history ? "仅已结束记录 · 按退出记录时间排序 · 净 R 缺值排最后。" : "R 排序：运行中用浮动 R，已结束用退出 R；缺值排最后。";
+    $("sort-filter").querySelectorAll("option").forEach((option) => {
+      if (option.value === "newest") option.textContent = history ? "最近结束优先" : "最新信号优先";
+      if (option.value === "oldest") option.textContent = history ? "最早结束优先" : "最早信号优先";
+    });
     const loaded = Boolean(data), total = data?.total || 0;
     const confirmed = state.signalScope === "confirmed", warmup = state.view === "warmup";
     $("filtered-count").textContent = loaded ? `${number(total)} 条` : "—";
@@ -659,7 +730,7 @@
       ? "突破 → 回踩守住 → 再突破收盘确认；次开盘参考、原止损，最多等待 24 根。价格与 R 为信号参考。"
       : confirmed ? "YOLO 追加确认关联原始 SPIKE 启动，不重复计数。"
       : signalQuerySource() === "legacy" ? "升级前的 V9 记录，结果停止更新，保留通知回执，不作为 V12.8 信号。" : "V12.8 默认规则；15m 收盘须符合已完成 H1 SMA60 方向。价格与 R 为信号参考。";
-    $("signal-window-note").textContent = loaded ? `全量 ${number(total)} 条 · 第 ${state.page + 1} 页` : "正在读取全量统计";
+    $("signal-window-note").textContent = loaded ? `共 ${number(total)} 条 · 第 ${state.page + 1} / ${Math.max(1, Math.ceil(total / SIGNAL_PAGE_SIZE))} 页` : "正在读取全量统计";
     $("load-more-signals").classList.toggle("hidden", !data?.has_more);
     $("load-more-signals").disabled = state.syncing;
     $("load-more-signals").textContent = "下一页 →";
@@ -668,15 +739,129 @@
     $("load-earlier-signals").textContent = "← 上一页";
     $("signal-empty").classList.toggle("hidden", items.length > 0);
     if (!items.length) {
-      $("signal-empty-title").textContent = state.errors[sourceKey()] ? "信号数据暂时不可用" : loaded ? "没有符合筛选的信号" : "正在读取信号";
-      $("signal-empty-description").textContent = loaded ? "可调整时间范围、方向、周期或状态。" : "正在同步已收盘行情与统计。";
+      $("signal-empty-title").textContent = state.errors[sourceKey()] ? "信号数据暂时不可用" : loaded ? history ? "没有已结束的开单" : "没有符合筛选的信号" : "正在读取信号";
+      $("signal-empty-description").textContent = loaded ? history ? "可调整时间范围、合约、方向或周期；运行中的记录在信号卡片查看。" : "可调整时间范围、方向、周期或状态。" : "正在同步已收盘行情与统计。";
     }
     const focused = document.activeElement?.dataset;
-    $("signal-rows").innerHTML = `<div class="signal-card-grid">${items.map((item) => signalCardHTML(item)).join("")}</div>`;
+    const focusedSummary = document.activeElement?.matches?.(".signal-row-details > summary")
+      ? document.activeElement.parentElement.dataset.signalRow : null;
+    const openRows = new Set(Array.from($("signal-rows").querySelectorAll(".signal-row-details[open]"), el => el.dataset.signalRow));
+    const openChecks = new Set(Array.from($("signal-rows").querySelectorAll(".pb-tv-check[open]"), (el) => el.dataset.signalCheck));
+    const rowsSignature = JSON.stringify([state.signalLayout, state.signalDetailId, items,
+      state.signalLayout === 'cards' ? Math.floor(signalClock()/60000) : null]);
+    if (signalRowsSignature !== rowsSignature) {
+      $("signal-rows").innerHTML = state.signalLayout === "history" ? signalHistoryHTML(items)
+        : `<div class="signal-card-grid">${items.map((item) => signalCardHTML(item)).join("")}</div>`;
+      $("signal-rows").querySelectorAll(".signal-row-details").forEach(el => { el.open = openRows.has(el.dataset.signalRow); });
+      signalRowsSignature = rowsSignature;
+    }
+    document.querySelectorAll("[data-signal-layout]").forEach((button) => {
+      const selected = button.dataset.signalLayout === state.signalLayout;
+      button.classList.toggle("selected", selected); button.setAttribute("aria-pressed", String(selected));
+    });
+    $("signal-rows").querySelectorAll(".pb-tv-check").forEach((el) => { el.open = openChecks.has(el.dataset.signalCheck); });
     $("signal-footer-note").textContent = warmup ? "预热回算 · 不触发通知 · 北京时间" : "已收盘确认 · 北京时间";
     renderLedgerStats();
+    if (history) renderHistoryStatistics();
+    window.SpikeSignalWorkspace?.render(state.ledger, state.signalLayout, state.signalPane);
     renderTradingViewButtons();
+    window.SpikeMotion?.cards('signals',$("signal-rows").querySelectorAll('.signal-card'));
+    if (focusedSummary) Array.from($("signal-rows").querySelectorAll(".signal-row-details")).find(el => el.dataset.signalRow === focusedSummary)?.querySelector("summary")?.focus({ preventScroll: true });
     if (focused?.signalId) Array.from($("signal-rows").querySelectorAll("[data-signal-id]")).find((card) => card.dataset.signalId === focused.signalId)?.focus({ preventScroll: true });
+    if (focused?.signalDetail) Array.from($("signal-rows").querySelectorAll("[data-signal-detail]")).find((button) => button.dataset.signalDetail === focused.signalDetail)?.focus({ preventScroll: true });
+  }
+  function changeSignalPane(pane) {
+    if (!['records','overview','account'].includes(pane) || pane === state.signalPane) return;
+    if (state.signalPane === 'records') state.recordLayout = state.signalLayout;
+    state.signalPane = pane;
+    if (pane !== 'account') state.signalLayout = pane === 'overview' ? 'history' : state.recordLayout;
+    state.page = 0;
+    invalidateSignalQuery();
+    window.SpikeSignalWorkspace?.render(null, state.signalLayout, pane);
+    window.SpikeOKXExecution?.setActive(state.view === 'signals' && pane === 'account');
+    refresh('navigation');
+  }
+  window.SpikeSignals = {selectPane:changeSignalPane};
+  function changeSignalLayout(layout) {
+    if (!["history", "cards"].includes(layout) || state.signalLayout === layout) return;
+    state.signalLayout = layout;
+    state.recordLayout = layout;
+    applySignalFilters();
+  }
+  function renderHistoryStatistics() {
+    const target = $("history-statistics"), stats = state.ledger?.closed_statistics;
+    target.querySelectorAll("details").forEach((el) => { state.historyStatsOpen[el.dataset.historyBreakdown] = el.open; });
+    if (!stats) { target.innerHTML = `<p class="ledger-basis">${state.errors[sourceKey()] ? "历史统计暂时不可用，请刷新重试。" : "正在读取全部已结束记录…"}</p>`; return; }
+    const ratio = (v) => finite(v) ? Number(v).toFixed(2) : "—";
+    const percent = (v) => finite(v) ? `${(Number(v) * 100).toFixed(1)}%` : "—";
+    const metric = (label, value, note, r = null) => `<article><span>${label}</span><strong class="${finite(r) && r > 0 ? "r-positive" : finite(r) && r < 0 ? "r-negative" : ""}">${escapeHTML(value)}</strong><small>${escapeHTML(note)}</small></article>`;
+    const breakdown = (rows) => `<div class="ledger-table-wrap"><table><thead><tr><th>分组</th><th>结束笔数</th><th>胜 / 负 / 平</th><th>胜率</th><th>净 R</th><th>平均 R</th><th>盈利因子</th></tr></thead><tbody>${(rows || []).map((row) => `<tr><th scope="row">${escapeHTML(row.label)}</th><td>${number(row.total)}</td><td>${number(row.wins)} / ${number(row.losses)} / ${number(row.breakeven)}</td><td>${percent(row.win_rate)}</td><td>${signedR(row.net_r)}</td><td>${signedR(row.average_r)}</td><td>${ratio(row.profit_factor)}</td></tr>`).join("")}</tbody></table></div>`;
+    target.innerHTML = `<div class="history-stat-grid">
+      ${metric("已结束", number(stats.total) + " 笔", `胜 ${number(stats.wins)} · 负 ${number(stats.losses)} · 平 ${number(stats.breakeven)}`)}
+      ${metric("累计净 R", signedR(stats.net_r), `全部 ${number(stats.measured)} 笔有退出 R`, stats.net_r)}
+      ${metric("胜率", percent(stats.win_rate), "盈利笔数 / 有退出 R 的结束笔数")}
+      ${metric("最大累计 R 回撤", finite(stats.max_drawdown_r) ? `${ratio(stats.max_drawdown_r)}R` : "—", "按退出先后累计；同刻退出合并")}
+    </div>
+    <div class="history-stat-extras"><details class="history-stat-details" data-history-breakdown="metrics"><summary>更多统计与盈亏明细</summary><div class="history-stat-grid secondary">
+      ${metric("平均净 R", signedR(stats.average_r), "每笔已结束记录的平均结果", stats.average_r)}
+      ${metric("盈利因子", ratio(stats.profit_factor), "盈利 R 合计 / 亏损 R 绝对值")}
+      ${metric("平均盈亏比", ratio(stats.payoff_ratio), "平均盈利 R / 平均亏损 R 绝对值")}
+      ${metric("平均持有时长", duration(stats.average_holding_ms), `${number(stats.measured_holding)} 笔时间完整的结束记录`)}
+
+      ${metric("平均盈利", signedR(stats.average_win_r), `${number(stats.wins)} 笔盈利`, stats.average_win_r)}
+      ${metric("平均亏损", signedR(stats.average_loss_r), `${number(stats.losses)} 笔亏损`, stats.average_loss_r)}
+      ${metric("最佳单笔", signedR(stats.best_r), "已结束净 R 最高值", stats.best_r)}
+      ${metric("最差单笔", signedR(stats.worst_r), "已结束净 R 最低值", stats.worst_r)}
+      ${metric("中位数净 R", signedR(stats.median_r), "已结束记录的中间水平", stats.median_r)}
+      ${metric("最长连续盈利", finite(stats.max_consecutive_wins) ? `${stats.max_consecutive_wins} 笔` : "—", "保本打断；顺序不明时不计算")}
+      ${metric("最长连续亏损", finite(stats.max_consecutive_losses) ? `${stats.max_consecutive_losses} 笔` : "—", "保本打断；顺序不明时不计算")}
+      ${metric("缺失退出 R", `${number(stats.missing_r)} 笔`, "保留在历史列表，不补零")}
+    </div></details>
+    <details class="ledger-breakdown" data-history-breakdown="groups"><summary>按周期与方向统计<span>全部已结束记录</span></summary>${breakdown([...(stats.by_timeframe || []), ...(stats.by_side || [])])}</details>
+    <details class="ledger-breakdown" data-history-breakdown="reasons"><summary>按退出原因统计</summary>${breakdown(stats.by_exit_reason)}</details>
+    <p class="ledger-basis">按退出记录日归属 · 北京时间 · 全部筛选结果，翻页与排序不影响统计。净 R 沿用记录中的成本，不重复扣费；累计 R 是等风险参考，非账户收益率。无亏损或无可用样本的比值显示“—”。</p>
+    ${stats.missing_r || stats.missing_exit_time || stats.ambiguous_exit_order ? `<p class="ledger-basis">${stats.missing_r || stats.missing_exit_time ? `缺失退出 R ${number(stats.missing_r)} 笔、退出时间 ${number(stats.missing_exit_time)} 笔；缺失 R 不进入收益及胜率，记录不完整时不计算回撤与连续结果。` : ""}${stats.ambiguous_exit_order ? "同刻退出包含不同结果，连胜连亏顺序无法确认。" : ""}</p>` : ""}
+    <p class="ledger-basis">${state.errors[sourceKey()] ? "同步失败，保留上次统计快照" : `更新 ${clockTime(state.ledger.as_of_ms)}`}</p></div>`;
+    target.querySelectorAll("details").forEach((el) => { el.open = Boolean(state.historyStatsOpen[el.dataset.historyBreakdown]); });
+  }
+  // History is another view of the server-paginated ledger. Entry/exit facts
+  // come only from its projection, never from signal-close prices or peak R.
+  function signalHistoryHTML(items) {
+    if (!items.length) return "";
+    const reasons = { initial_stop: "初始止损", trailing_stop: "跟随保护", raw_opposite_next_open: "反向信号退出",
+      awaiting_next_closed_bar: "等待入场参考", next_bar_is_gap: "入场行情缺口", data_gap_censored: "行情缺口，跟踪中断", delayed_risk_invalid: "入场风险无效" };
+    const time = (value) => `<time title="${escapeHTML(fullDate(value))} 北京时间">${escapeHTML(shortDate(value))}</time>`;
+    const rows = items.map((item, index) => {
+      const p = signalPerformance(item) || {}, status = p.status;
+      const active = status === "active", closed = ["profit", "loss", "breakeven"].includes(status);
+      const label = active ? "运行中" : closed ? { profit: "盈利退出", loss: "亏损退出", breakeven: "保本退出" }[status] : "状态未知";
+      const r = active ? p.current_r : closed ? p.exit_r : null;
+      const rClass = finite(r) && Number(r) > 0 ? "r-positive" : finite(r) && Number(r) < 0 ? "r-negative" : "";
+      const reason = reasons[p.exit_reason || p.reason] || (closed ? "已结束" : active ? "已收盘 K 线跟踪" : "未跟踪或记录缺失");
+      const expanded = state.signalDetailId === String(item.id), detailId = `signal-history-detail-${index}`;
+      const side = item.side === "long" ? "long" : item.side === "short" ? "short" : "neutral";
+      const fact = (title, value) => `<div><dt>${escapeHTML(title)}</dt><dd>${escapeHTML(value)}</dd></div>`;
+      return `<tr class="signal-history-row">
+        <th scope="row"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small><span class="history-side ${side}">${escapeHTML(sideName(item.side))}</span> · ${escapeHTML(timeframeLabel(item.timeframe))}</small></th>
+        <td><span>${escapeHTML(price(p.entry_price))}</span><small>${time(p.entry_time_ms)}</small></td>
+        <td class="history-secondary">${escapeHTML(price(p.initial_stop ?? originalSignal(item)?.initial_stop))}</td>
+        <td class="history-secondary">${escapeHTML(price(closed ? p.exit_price : null))}<small>${closed ? time(p.exit_time_ms) : "—"}</small></td>
+        <td><strong class="${rClass}">${escapeHTML(signedR(r))}</strong><small>${label}${active ? " · 浮动" : ""}</small></td>
+        <td class="history-secondary">${finite(p.bars_held) ? `${escapeHTML(number(p.bars_held))} 根` : "—"}</td>
+        <td class="history-actions"><button type="button" data-signal-detail="${escapeHTML(item.id)}" aria-expanded="${expanded}" aria-controls="${detailId}" aria-label="${escapeHTML(shortSymbol(item.symbol))} 开单详情">${expanded ? "收起" : "详情"}</button></td>
+      </tr><tr id="${detailId}" class="signal-history-detail"${expanded ? "" : " hidden"}><td colspan="7">
+        <div class="history-detail-heading"><strong>${escapeHTML(item.symbol)} · ${escapeHTML(timeframeLabel(item.timeframe))} · ${escapeHTML(sideName(item.side))}</strong><span>${escapeHTML(reason)}</span></div>
+        <dl>${fact("信号确认 · 北京时间", fullDate(item.bar_close_ms))}${fact("参考入场 · 北京时间", fullDate(p.entry_time_ms))}
+          ${fact("参考入场价", price(p.entry_price))}${fact("初始止损", price(p.initial_stop ?? originalSignal(item)?.initial_stop))}
+          ${fact("当前保护价", price(p.stop_price))}${fact("退出价", price(closed ? p.exit_price : null))}
+          ${fact("退出记录 · 北京时间", fullDate(closed ? p.exit_time_ms : null))}${fact("持仓 K 线", finite(p.bars_held) ? `${number(p.bars_held)} 根` : "—")}
+          ${fact(active ? "浮动净 R" : "退出净 R", signedR(r))}${fact("峰值 R", signedR(p.peak_r))}
+          ${fact("往返成本", finite(p.round_trip_cost) ? `${(Number(p.round_trip_cost) * 100).toFixed(2)}%` : "—")}${fact("跟踪更新 · 北京时间", fullDate(p.updated_at_ms))}</dl>
+        <p class="history-record-id">记录 ID · ${escapeHTML(item.id)}</p>
+        <div class="history-detail-actions">${manualObservationButton(item)}</div>
+      </td></tr>`;
+    }).join("");
+    return `<div class="signal-history-wrap"><table class="signal-history-table" aria-label="历史开单列表"><thead><tr><th scope="col">合约 / 方向</th><th scope="col">参考入场</th><th scope="col" class="history-secondary">初始止损</th><th scope="col" class="history-secondary">退出价</th><th scope="col">净 R / 状态</th><th scope="col" class="history-secondary">持仓</th><th scope="col">操作</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
   function renderLedgerStats() {
     const data = state.ledger, stats = data?.stats;
@@ -723,27 +908,31 @@
     const retest = isRetest(item);
     const status = retest ? "V13.1 回踩确认" : confirmed ? "YOLO 补充确认" : `${signalVersion(item)} 启动`, caption = retest ? "确认收盘价" : "信号收盘价";
     const outcome = performanceView(item);
-    return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}"><button type="button" class="card-primary-action" data-signal-id="${escapeHTML(item.id)}" data-signal-kind="${escapeHTML(item.kind)}" data-tradingview-action="signal" data-tv-symbol="${escapeHTML(item.symbol)}" data-tv-timeframe="${escapeHTML(item.timeframe)}" title="点击整张卡片，在${tradingViewTargetLabel()} 打开" aria-label="${escapeHTML(`${venue} ${shortSymbol(item.symbol)} ${quoteSymbol(item.symbol)} ${timeframeLabel(item.timeframe)} ${sideName(item.side)}，${status}，${caption} ${price(item.price)}，${outcome.badge}，${shortDate(item.bar_close_ms)}，在${tradingViewTargetLabel()} 打开`)}"></button>
+    return `<article class="signal-card ${side} ${outcome.className}${confirmed || direct ? "" : " candidate-card"}${fresh ? " is-fresh" : ""}">
       <span class="signal-card-top"><span class="card-symbol"><strong>${escapeHTML(shortSymbol(item.symbol))}</strong><small>${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续</small></span><span class="card-timeframe">${escapeHTML(timeframeLabel(item.timeframe))}</span></span>
-      <span class="signal-card-direction"><span class="card-direction-group"><span class="card-direction"><span class="direction-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${side === "short" ? "m3 6 6 6 4-4 8 10M15 18h6v-6" : side === "long" ? "m3 18 6-6 4 4 8-10M15 6h6v6" : "M5 12h14"}"/></svg></span><span class="direction-name">${sideName(item.side)}</span></span><span class="direction-stage">${confirmed || retest ? "确认" : "启动"}</span></span><span class="card-recency">${displayScope(item) === "legacy" ? "V9 旧版记录" : isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span></span>
-      <span class="model-card-status"><span class="model-badge ${confirmed || retest ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${retest ? `等待 ${escapeHTML(number(item.wait_bars))} 根 · ${finite(item.trail_atr) ? `${escapeHTML(item.trail_atr)}ATR 追踪` : "已收盘"}` : displayScope(item) === "legacy" ? "旧版归档 · 不补发" : isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
-      <span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span>
-      ${retest && finite(item.anchor_close_ms) ? `<span class="card-origin">原启动 ${escapeHTML(shortDate(item.anchor_close_ms))} · 回踩 ${escapeHTML(shortDate(item.retest_close_ms))}</span>` : ""}
-      ${confirmed && item.indicator ? `<span class="card-origin">${signalVersion(original)} ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
+      <span class="signal-card-direction"><span class="card-direction-group"><span class="card-direction"><span class="direction-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${side === "short" ? "m3 6 6 6 4-4 8 10M15 18h6v-6" : side === "long" ? "m3 18 6-6 4 4 8-10M15 6h6v6" : "M5 12h14"}"/></svg></span><span class="direction-name">${sideName(item.side)}</span></span><span class="direction-stage">${confirmed || retest ? "确认" : "启动"}</span></span></span>
+      <span class="signal-card-price"><span class="card-price-label">${caption}</span><span class="card-price">${escapeHTML(price(item.price))}</span></span>
       <span class="performance-badge">${escapeHTML(outcome.badge)}</span>
       <dl class="card-performance"><div><dt>${escapeHTML(outcome.valueLabel)}</dt><dd>${escapeHTML(outcome.value)}</dd></div><div><dt>最高 R</dt><dd>${escapeHTML(outcome.peak)}</dd></div><div><dt>${escapeHTML(outcome.stopLabel)}</dt><dd>${escapeHTML(outcome.stop)}</dd></div></dl>
+      <details class="signal-row-details" data-signal-row="${escapeHTML(item.id)}"><summary>形态详情<span class="signal-confirmed-time">${escapeHTML(shortDate(item.bar_close_ms))} 收盘</span></summary>
+      <span class="card-recency">${escapeHTML(venue)} · ${escapeHTML(quoteSymbol(item.symbol))} 永续 · ${displayScope(item) === "legacy" ? "V9 旧版记录" : isWarmupRecord(item) ? "预热历史" : item.source === "replay" ? "历史回放" : fresh ? "新 · " + ageLabel(item.bar_close_ms) : ageLabel(item.bar_close_ms)}</span>
+      <span class="model-card-status"><span class="model-badge ${confirmed || retest ? "confirmed" : "pending"}">${escapeHTML(status)}</span><span>${retest ? `等待 ${escapeHTML(number(item.wait_bars))} 根 · ${finite(item.trail_atr) ? `${escapeHTML(item.trail_atr)}ATR 追踪` : "已收盘"}` : displayScope(item) === "legacy" ? "旧版归档 · 不补发" : isWarmupRecord(item) ? "预热回算 · 不通知" : item.source === "replay" ? "回放记录 · 不通知" : confirmed ? "补充确认 · 非启动门" : "第一阶段 · 已收盘"}</span></span>
+      ${retest && finite(item.anchor_close_ms) ? `<span class="card-origin">原启动 ${escapeHTML(shortDate(item.anchor_close_ms))} · 回踩 ${escapeHTML(shortDate(item.retest_close_ms))}</span>` : ""}
+      ${confirmed && item.indicator ? `<span class="card-origin">${signalVersion(original)} ${escapeHTML(price(original.price))} · ${escapeHTML(shortDate(original.bar_close_ms))}</span>` : ""}
       <span class="performance-note">${escapeHTML(outcome.note)} · 信号收盘参考，并非账户实际成交</span>
-      <span class="card-context"><span>${"信号 K 线"}</span><strong>${item.is_closed ? `${signalVersion(item)} 已确认` : "待确认"}</strong></span>
-      <span class="card-confirmed"><span>${isWarmupRecord(item) ? "回算信号 · 仅供复盘" : item.executable_entry_time ? item.source === "replay" ? `回放执行时钟 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : `实际进场 ${escapeHTML(shortDate(milliseconds(item.executable_entry_time)))}` : item.entry_reference === "next_open" ? "次开盘参考 · 等待实际成交" : item.entry_reference === "next_open_reference_not_fill" ? "次开盘参考 · 非实际成交" : "仅信号收盘参考"}</span><time title="${escapeHTML(fullDate(item.bar_close_ms))} 北京时间">${escapeHTML(shortDate(item.bar_close_ms))}</time></span>
-      <span class="card-footer"><span class="notification-stack">${item.source === "replay" ? `<span class="candidate-notice">历史回放不通知</span>` : notificationHTML(item)}</span><span class="card-open" data-tradingview-label="整卡打开 TradingView ↗" aria-hidden="true">整卡打开 TradingView ↗</span></span>
-      ${manualObservationButton(item)}
+      </details>
     </article>`;
   }
   function applySignalFilters() {
     state.page = 0; invalidateSignalQuery(); refresh();
   }
+  function syncSignalLocation(){
+    if(signalView())window.SpikeNavigation?.sync(state.view,{pane:state.signalPane,layout:state.signalLayout,q:state.search,timeframe:state.timeframe,side:state.side,period:state.period,outcome:state.outcome,sort:state.sort,scope:state.signalScope,source:state.signalSource,page:state.page});
+  }
   function invalidateSignalQuery() {
+    syncSignalLocation();
     state.signalQueryRevision++;
+    state.signalDetailId = null;
     state.ledger = null;
     state.signals = [];
     state.directSignals = [];
@@ -785,6 +974,8 @@
       emptyDescription.textContent = hasFilters ? "试试其他合约、周期，或切换全部合约。" : state.watchScope === "all" ? "全市场合约会在扫描后列出，当前状态不等于入场信号。" : "可切换全部合约查看其他交易对；蓄势状态不代表已经启动。";
     }
     const focused = document.activeElement?.dataset;
+    const focusedSummary = document.activeElement?.matches?.(".signal-row-details > summary")
+      ? document.activeElement.parentElement.dataset.signalRow : null;
     const focusedSymbol = focused?.tvSymbol, focusedTimeframe = focused?.tvTimeframe;
     $("load-more-watch").classList.toggle("hidden", items.length <= state.watchLimit);
     $("load-more-watch").textContent = `显示更多（${Math.min(state.watchLimit, items.length)} / ${items.length}）`;
@@ -887,6 +1078,12 @@
     if (!status) $("sidebar-runtime").textContent = state.errors.status ? "连接中断 · 自动重连" : "正在连接服务";
     if (!status) return;
     if ($("strategy-version")) $("strategy-version").textContent = status.runtime?.v130 ? "SPIKE V13.1" : status.protocol?.includes("v128") ? "SPIKE V12.8" : "SPIKE V9 · 等待升级";
+    if(workspaceView()){
+      const count=status.runtime?.v130?.signals_24h;
+      $('nav-signal-count').textContent=finite(count)?number(count):'—';
+      $('sidebar-runtime').textContent=online?status.started_at_ms?`已运行 ${duration(Date.now()-Number(status.started_at_ms))}`:'服务运行中':'连接中断 · 自动重连';
+      return;
+    }
     const scan = status.scan || {};
     const counts = status.counts || {};
     const jointBark = status.joint_notifications?.bark;
@@ -899,7 +1096,7 @@
     } : jointBark;
     const runtime = status.runtime || {};
     const timeframes = Array.isArray(runtime.timeframes) ? runtime.timeframes : [];
-    if (state.view === "signals") $("page-description").textContent = notificationPolicy();
+    if (state.view === "signals") $("page-description").textContent = "追踪全市场确认信号，查看参考表现与 OKX 账户。";
     $("metric-timeframes").textContent = timeframes.length ? timeframes.map(timeframeLabel).join(" + ") : "—";
     $("watch-timeframes").textContent = timeframes.length ? timeframes.map(timeframeLabel).join(" / ") : "—";
     const directTimeframes = runtimeTimeframes("direct_timeframes");
@@ -908,7 +1105,6 @@
     const retestCount = runtime.v130?.signals_24h;
     $("metric-signals").textContent = finite(retestCount) ? number(retestCount) : "—";
     $("nav-signal-count").textContent = finite(retestCount) ? number(retestCount) : "—";
-    $("metric-building").textContent = number(counts.building ?? 0);
     $("metric-universe").textContent = number(status.universe?.count);
     const scanning = ["running", "scanning", "in_progress", "starting", "bootstrap"].includes(scan.status);
     const scanErrorCount = Array.isArray(scan.errors) ? scan.errors.length : numeric(scan.errors);
@@ -916,11 +1112,6 @@
     const total = numeric(scan.total);
     // `counts.ready` describes persisted feature phase and may belong to a
     // prior pass.  It cannot prove every cell has caught the current close.
-    $("metric-building-detail").textContent = scanning
-      ? `已扫描 ${number(complete)} / ${number(total)} · 预热/追平中`
-      : total > 0 && complete >= total
-        ? `已扫描 ${number(complete)} / ${number(total)} · 已覆盖，按收盘刷新`
-        : "扫描状态待同步";
     $("metric-signals-detail").textContent = "回踩再突破 · 已收盘确认";
     $("metric-scan-detail").textContent = scanning ? `扫描 ${number(complete)} / ${number(total)}` : scan.finished_at_ms ? `${ageLabel(scan.finished_at_ms)}更新` : "等待扫描";
     $("sidebar-runtime").textContent = online ? status.started_at_ms ? `已运行 ${duration(Date.now() - Number(status.started_at_ms))}` : "服务运行中" : "连接中断 · 自动重连";
@@ -935,16 +1126,13 @@
     ]);
     const barkReady = Boolean(bark?.configured && bark?.enabled);
     const barkProblem = numeric(bark?.failed) > 0 || numeric(bark?.unknown) > 0;
-    $("bark-header").textContent = !bark ? "Bark · 待接入" : barkReady ? barkProblem ? `Bark · ${number(numeric(bark.failed) + numeric(bark.unknown))} 条待核实` : "Bark · 已启用" : "Bark · 未启用";
-    $("bark-header").classList.toggle("good", barkReady && !barkProblem);
     const telegramAvailable = notificationChannels().includes("telegram");
     $("telegram-header").textContent = telegramAvailable ? "TG · 来源订阅已接入" : status.telegram?.configured ? "TG · 待启用" : "TG · 状态待同步";
     $("telegram-header").classList.toggle("good", telegramAvailable);
-    $("joint-notification-facts").textContent = jointNotificationText(status.joint_notifications);
-    $("bark-state-badge").textContent = !bark ? "状态待接入" : barkReady ? barkProblem ? "需检查发送结果" : "通知已启用" : bark.configured ? "通知已关闭" : "尚未配置";
-    $("bark-state-badge").className = `neutral-badge ${barkReady && !barkProblem ? "good" : "warn"}`;
-    $("bark-description").textContent = !bark ? "服务尚未提供 Bark 通道状态，等待下一次同步。" : barkReady ? `${notificationPolicy()}${numeric(bark.unknown) > 0 ? "部分发送结果未知，为避免重复通知不自动重发。" : ""}服务已接受不代表手机已收到或已读。` : bark.configured ? "Bark 已配置，当前发送开关关闭；前端继续记录信号。" : "Bark 尚未配置；前端继续记录信号。";
-    $("bark-facts").innerHTML = factsHTML([["本次服务接受", number(bark?.sent)], ["最近服务接受", fullDate(bark?.last_success_ms)], ["待发送", number(bark?.pending)], ["发送失败", number(bark?.failed)], ["发送结果未知", number(bark?.unknown)], ["历史服务接受", number(bark?.historical_sent)], ["配置状态", !bark ? "等待状态" : bark.configured ? "已配置（敏感信息不展示）" : "未配置"]]);
+    const tg = status.telegram || {};
+    $("tg-state-badge").textContent = tg.configured ? "已配置" : "尚未配置";
+    $("tg-description").textContent = "按通知中心的来源订阅发送；服务接受不代表设备已读。";
+    $("tg-facts").innerHTML = factsHTML([["服务已接受", number(tg.sent)], ["待发送", number(tg.pending)], ["发送失败", number(tg.failed)], ["最近接受", fullDate(tg.last_success_ms)]]);
     $("service-version").textContent = status.version ? `v${String(status.version).replace(/^v/, "")}` : "本机服务";
     const runtimeFacts = [["监控台", "spike"], ["启动时间", fullDate(status.started_at_ms)], ["服务时间", fullDate(status.now_ms)], ["运行时长", duration(Date.now() - numeric(status.started_at_ms, Date.now()))]];
     if (timeframes.length) runtimeFacts.push(["监控周期", timeframes.map(timeframeLabel).join(" / ")]);
@@ -1009,16 +1197,52 @@
   function ledgerPath() {
     const retest = state.signalScope === "retest" && state.view === "signals";
     const pairs = { source: retest ? "live" : signalQuerySource(), confirmation: retest ? "retest" : state.signalScope === "confirmed" ? "yolo" : "raw",
-      period: state.period, outcome: state.outcome, sort: state.sort,
+      period: state.period, outcome: state.signalLayout === "history" ? "closed" : state.outcome, sort: state.sort,
       offset: state.page * SIGNAL_PAGE_SIZE, limit: SIGNAL_PAGE_SIZE, search: state.search };
     if (state.timeframe !== "all") pairs.timeframe = apiTimeframe(state.timeframe);
     if (state.side !== "all") pairs.side = state.side;
     return "/api/signals?view=ledger&" + Object.entries(pairs).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&");
   }
+  const pendingRefreshes = new Map();
+  function syncRefreshButton() {
+    const busy = (pendingRefreshes.get(state.view) || 0) > 0;
+    const button = $("refresh-button");
+    button.disabled = busy;
+    button.classList.toggle("loading", busy);
+    button.setAttribute("aria-busy", String(busy));
+    const label = button.querySelector?.("span");
+    if (label) label.textContent = busy ? "刷新中" : "刷新";
+  }
   async function refresh(trigger = "manual") {
+    if (document.hidden && trigger === "periodic") return;
+    const view = state.view;
+    pendingRefreshes.set(view, (pendingRefreshes.get(view) || 0) + 1);
+    syncRefreshButton();
+    try { await refreshView(trigger); }
+    finally {
+      const remaining = (pendingRefreshes.get(view) || 1) - 1;
+      if (remaining) pendingRefreshes.set(view, remaining); else pendingRefreshes.delete(view);
+      syncRefreshButton();
+    }
+  }
+  async function refreshView(trigger = "manual") {
+    if(window.SpikeModules){
+      const requestedView=state.view;
+      await viewLoad;
+      if(requestedView!==state.view)return;
+      try {await window.SpikeModules.ensure(requestedView);} catch(error){
+        const message=$('module-load-state');if(message){message.hidden=false;message.textContent=error.message;}return;
+      }
+      if(requestedView!==state.view)return;
+      const message=$('module-load-state');if(message&&!message.hidden){message.hidden=true;activateModules(requestedView);}
+    }
     if (document.hidden && trigger === "periodic") return;
     if (state.view === "retest") {
       await Promise.allSettled([refreshShellStatus(trigger === "manual"), window.SpikeV130?.refresh()]);
+      return;
+    }
+    if (state.view === "signals" && state.signalPane === "account") {
+      await Promise.allSettled([refreshShellStatus(trigger === "manual"), trigger === "manual" ? window.SpikeOKXExecution?.refresh() : null]);
       return;
     }
     if (state.view === "notifications") {
@@ -1031,12 +1255,19 @@
     if (workspaceView() || state.view === "shadow") refreshShellStatus(trigger === "manual");
     if (["learning", "knowledge", "content"].includes(state.view)) { if (trigger !== "periodic") await window.SpikeKnowledge?.refresh(); return; }
     if (state.view === "platform") { if (trigger !== "periodic") await window.SpikePlatform?.refresh(); return; }
+    if (state.view === "paper-desk") { if (trigger !== "periodic") await window.SpikePaperDesk?.refresh(); return; }
     if (state.view === "manual") { if (trigger !== "periodic") await window.SpikeManual?.refresh(); return; }
     if (state.view === "copier") { if (trigger !== "periodic") await window.SpikeCopier?.refresh(); return; }
     if (state.view === "market") { await window.SpikeMarketSync?.refresh(); return; }
+    if (state.view === "trading-books") { if (trigger !== "periodic") await window.SpikeTradingBooks?.refresh(); return; }
+    if (state.view === "orderflow") { if (trigger !== "periodic") await window.SpikeOrderflow?.refresh(); return; }
+    if (state.view === "auto-leaders") { if (trigger !== "periodic") await window.SpikeLeaderPage?.refresh(); return; }
+    if (state.view === "yolo-detect") { if (trigger !== "periodic") await window.SpikeYoloDetect?.refresh(); return; }
+    if (state.view === "langlang") { if (trigger !== "periodic") await window.SpikeLanglang?.refresh(); return; }
+    if (state.view === "rektproof") { if (trigger !== "periodic") await window.SpikeRektproof?.refresh(); return; }
     if (state.view === "models") { if (trigger !== "periodic") await window.SpikeModels?.refresh(); return; }
     if (state.view === "datasets") { if (trigger !== "periodic") await window.SpikeDatasets?.refresh(); return; }
-    if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(); return; }
+    if (["research", "factors", "experiments", "backtests"].includes(state.view)) { await window.SpikeResearch.refresh(trigger); return; }
     if (state.view === "strategies") { if (trigger !== "periodic") await window.SpikeStrategies?.refresh(); return; }
     if (state.view === "paper") { await window.SpikePaper?.refresh(trigger); return; }
     if (state.view === "yolo") { if (trigger !== "periodic") await window.SpikeYolo?.refresh(); return; }
@@ -1045,8 +1276,6 @@
     if (state.syncing) { queueRefresh(trigger); return; }
     const revision = state.signalQueryRevision, view = state.view, source = signalQuerySource(), key = sourceKey();
     state.syncing = true;
-    $("refresh-button").disabled = true;
-    $("refresh-button").classList.add("loading");
     try {
       const requests = [{ key: "status", path: "/api/status" }];
       if (signalView()) requests.push({ key, path: ledgerPath() });
@@ -1058,7 +1287,8 @@
         const data = result.value;
         if (current === "status") { state.status = data; state.statusReceivedAt = Date.now(); }
         else {
-          if (!Array.isArray(data.items) || !data.stats || !Array.isArray(data.by_timeframe)) {
+          if (!Array.isArray(data.items) || !data.stats || !Array.isArray(data.by_timeframe) ||
+              (state.signalLayout === "history" && (!data.closed_statistics || data.items.some((item) => !["profit", "loss", "breakeven"].includes(item.performance?.status))))) {
             state.errors[current] = "统计数据格式有误"; return;
           }
           state.ledger = data;
@@ -1077,8 +1307,6 @@
       if (state.view === "system" && $("health-json").closest("details").open) loadHealth();
     } finally {
       state.syncing = false;
-      $("refresh-button").disabled = false;
-      $("refresh-button").classList.remove("loading");
       $("load-more-signals").disabled = false;
       $("load-earlier-signals").disabled = false;
       if (state.refreshQueued) {
@@ -1124,6 +1352,14 @@
     if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, /token|secret|password|api.?key|chat.?id|authorization|device.?key|(?:bark|push|server).?(?:url|address)|endpoint|^url$/i.test(key) ? "[已隐藏]" : redact(item)]));
     return value;
   }
+  document.addEventListener("click", event => {
+    if (event.target.closest?.("#nav-toggle")) {
+      if(window.SpikeWorkspaceDisplay)window.SpikeWorkspaceDisplay.toggleNavigation();
+      else toggleNavigation(!document.body.classList.contains("nav-open"));
+    }
+    if (event.target.closest?.("#nav-backdrop")) toggleNavigation(false);
+  });
+  document.addEventListener("keydown", event => { if (event.key === "Escape") toggleNavigation(false); });
   async function loadHealth() {
     try { state.health = await api("/api/health"); $("health-json").textContent = JSON.stringify(redact(state.health), null, 2); }
     catch (error) { $("health-json").textContent = `诊断信息暂时不可用：${error.message}`; }
@@ -1141,17 +1377,41 @@
     document.querySelectorAll("[data-signal-scope]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     invalidateSignalQuery(); refresh();
   }));
+  document.querySelectorAll("[data-signal-layout]").forEach((button) => button.addEventListener("click", () => {
+    changeSignalLayout(button.dataset.signalLayout);
+  }));
+  $("signal-rows").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-signal-detail]");
+    if (!button) return;
+    state.signalDetailId = state.signalDetailId === button.dataset.signalDetail ? null : button.dataset.signalDetail;
+    renderSignals();
+  });
   let searchTimer;
   $("symbol-search").addEventListener("input", (event) => {
     state.search = event.target.value; state.page = 0;
     invalidateSignalQuery(); clearTimeout(searchTimer);
     searchTimer = setTimeout(() => refresh(), 250);
   });
+  $("clear-signal-search")?.addEventListener("click", () => {
+    clearTimeout(searchTimer);state.search="";$("symbol-search").value="";
+    window.SpikeSymbols?.close();applySignalFilters();$("symbol-search").focus();window.SpikeSymbols?.close();
+  });
   document.querySelectorAll("[data-ledger-period]").forEach((button) => button.addEventListener("click", () => {
     state.period = button.dataset.ledgerPeriod;
     document.querySelectorAll("[data-ledger-period]").forEach((other) => { const selected = other === button; other.classList.toggle("selected", selected); other.setAttribute("aria-pressed", String(selected)); });
     applySignalFilters();
   }));
+  $("reset-signal-filters")?.addEventListener("click", () => {
+    clearTimeout(searchTimer);
+    Object.assign(state, {search:"", timeframe:"all", side:"all", period:"all", outcome:"all", sort:"newest"});
+    $("symbol-search").value=""; $("side-filter").value="all";
+    $("outcome-filter").value="all"; $("sort-filter").value="newest";
+    document.querySelectorAll("[data-timeframe], [data-ledger-period]").forEach(button => {
+      const selected=(button.dataset.timeframe || button.dataset.ledgerPeriod)==="all";
+      button.classList.toggle("selected",selected);button.setAttribute("aria-pressed",String(selected));
+    });
+    applySignalFilters();
+  });
   $("outcome-filter").addEventListener("change", (event) => { state.outcome = event.target.value; applySignalFilters(); });
   $("sort-filter").addEventListener("change", (event) => { state.sort = event.target.value; applySignalFilters(); });
   $("watch-search").addEventListener("input", (event) => { state.watchSearch = event.target.value; state.watchLimit = 24; renderWatch(); });
@@ -1224,6 +1484,7 @@
       setView("manual");
       return;
     }
+    if (type === "signal") return;
     const cardClass = type === "signal" ? ".signal-card" : type === "shadow" || type === "lines" ? ".shadow-event-card" : ".watch-card";
     const row = event.target.closest("[data-tradingview-action]") || event.target.closest(cardClass)?.querySelector("[data-tradingview-action]");
     if (!row) return;
@@ -1252,24 +1513,33 @@
   });
   $("load-more-watch").addEventListener("click", () => { state.watchLimit += 24; renderWatch(); });
   $("health-json").closest("details").addEventListener("toggle", (event) => { if (event.target.open) loadHealth(); });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !["INPUT", "TEXTAREA", "SELECT"].includes((event.composedPath?.()[0] || document.activeElement)?.tagName)) {
-      event.preventDefault();
-      if (["learning", "knowledge", "content"].includes(state.view)) {
-        $(`${state.view}-workspace`)?.querySelector('input[type="search"]')?.focus();
-        return;
-      }
-      if (["system", "shadow", "notifications", "manual", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view)) setView("signals");
-      (state.view === "watch" ? $("watch-search") : linesView() ? $("lines-search") : $("symbol-search")).focus();
-    }
-  });
   window.addEventListener("hashchange", () => setView(location.hash.slice(1), false));
   document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh("periodic"); });
-  setView(location.hash.slice(1) || "signals", false);
+  function restoreSignalRoute(p) {
+    const previous=JSON.stringify([state.search,state.page,state.timeframe,state.side,state.period,state.outcome,state.sort,state.signalScope,state.signalSource,state.signalLayout,state.signalPane]);
+    state.signalLayout=['history','cards'].includes(p.layout)?p.layout:'cards';
+    state.signalPane=['records','overview','account'].includes(p.pane)?p.pane:'records';
+    if(state.signalPane==='overview')state.signalLayout='history';
+    else if(state.signalPane==='records')state.recordLayout=state.signalLayout;
+    state.search=(p.q||'').slice(0,100);$('symbol-search').value=state.search;
+    state.page=Math.max(0,Math.min(100000,Number.parseInt(p.page,10)||0));
+    for(const [param,field,id] of [['side','side','side-filter'],['outcome','outcome','outcome-filter'],['sort','sort','sort-filter']]){
+      const control=$(id);state[field]=p[param]&&Array.from(control.options).some(x=>x.value===p[param])?p[param]:field==='sort'?'newest':'all';control.value=state[field];
+    }
+    for(const [param,field,attribute] of [['timeframe','timeframe','timeframe'],['period','period','ledger-period'],['scope','signalScope','signal-scope'],['source','signalSource','signal-source']]){
+      const buttons=Array.from(document.querySelectorAll(`[data-${attribute}]`));
+      state[field]=p[param]&&buttons.some(b=>b.getAttribute(`data-${attribute}`)===p[param])?p[param]:({scope:'retest',source:'live'}[param]||'all');
+      buttons.forEach(b=>{const selected=b.getAttribute(`data-${attribute}`)===state[field];b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected));});
+    }
+    const next=JSON.stringify([state.search,state.page,state.timeframe,state.side,state.period,state.outcome,state.sort,state.signalScope,state.signalSource,state.signalLayout,state.signalPane]);
+    if(next!==previous)invalidateSignalQuery();
+    renderSignals();
+  }
+  for(const view of ['signals','warmup'])window.SpikeNavigation?.register(view,restoreSignalRoute);
+  setView(location.hash.slice(1), false);
   setInterval(() => { $("local-clock").textContent = clockTime(Date.now()); }, 1000);
   $("local-clock").textContent = clockTime(Date.now());
-  if (state.view !== "warmup" && state.view !== "notifications") refresh();
+  if (!window.SpikeModules && state.view !== "warmup" && state.view !== "notifications") refresh();
   setInterval(() => refresh("periodic"), 15000);
-  loadLinesStatus();
-  setInterval(() => { if (linesView()) loadLines(); else loadLinesStatus(); }, 15000);
+  // Retired joint/break views no longer poll their status in the background.
 })();

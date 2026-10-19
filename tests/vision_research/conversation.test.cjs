@@ -27,13 +27,15 @@ function validCurrentDecision(overrides = {}) {
 }
 
 function detail({ kind = 'recognition', status = 'completed', prompt = '', response,
-  error = null, httpStatus = 200, requestBody } = {}) {
+  error = null, httpStatus = 200, requestBody, provider, model } = {}) {
   const body = requestBody || { model: 'glm-5.3-flash', reasoning_effort: 'max', messages: [
     { role: 'user', content: [{ type: 'text', text: prompt }] },
   ] };
   return {
     kind,
     status,
+    ...(provider ? { provider } : {}),
+    ...(model ? { model } : {}),
     error,
     http_status: httpStatus,
     request: { body_text: JSON.stringify(body) },
@@ -50,6 +52,41 @@ function zhipuResponse(content, extra = {}) {
     } }],
     usage: { prompt_tokens: 100, completion_tokens: 12, total_tokens: 112 },
   };
+}
+
+function qwenSse(chunks) {
+  return chunks.map((chunk) => `data: ${chunk === '[DONE]' ? chunk : JSON.stringify(chunk)}\r\n\r\n`).join('');
+}
+
+function qwenStreamDetail(response, overrides = {}) {
+  return detail({
+    provider: 'qwen', model: 'qwen3.8-max-0902',
+    requestBody: { model: 'qwen3.8-max-0902', stream: true, messages: [
+      { role: 'user', content: '请输出 JSON。' },
+    ] },
+    response,
+    ...overrides,
+  });
+}
+
+function qwenStreamChunks(content, { finishReason = 'stop', usage = true } = {}) {
+  const splitAt = Math.floor(content.length / 2);
+  const chunks = [
+    { id: 'qwen-sse-response', model: 'qwen3.8-max-0902', choices: [
+      { index: 0, delta: { reasoning_content: '先检查当前边界。' }, finish_reason: null },
+    ] },
+    { choices: [{ index: 0, delta: { content: content.slice(0, splitAt) }, finish_reason: null }] },
+    { choices: [{ index: 0, delta: { content: content.slice(splitAt) }, finish_reason: null }] },
+    { choices: [{ index: 0, delta: {}, finish_reason: finishReason }] },
+  ];
+  if (usage) {
+    chunks.push({ choices: [], usage: {
+      prompt_tokens: 120, completion_tokens: 40, total_tokens: 160,
+      completion_tokens_details: { reasoning_tokens: 12 },
+    } });
+  }
+  chunks.push('[DONE]');
+  return chunks;
 }
 
 test('recognition extracts quoted Zhipu criteria verbatim and accepts a full JSON fence', () => {
@@ -188,4 +225,80 @@ test('Zhipu usage explains thinking consumption even when no final JSON was gene
   const result = exchangeConversation(detail({ status: 'failed', response, error: '输出达到长度上限。' }));
   assert.equal(result.decision, null);
   assert.equal(result.usageText, '输入 10195 · 输出 8192 · 合计 18387 · 思考 8190 tokens');
+});
+
+test('Qwen SSE joins visible and reasoning deltas and keeps final usage-only chunk', () => {
+  const rawBody = qwenSse(qwenStreamChunks(JSON.stringify(validCurrentDecision())));
+  const exchange = qwenStreamDetail(rawBody);
+  const result = exchangeConversation(exchange);
+
+  assert.equal(result.state, 'completed');
+  assert.equal(result.responseText, '右端出现启动。');
+  assert.equal(result.decision.summary, '右端出现启动。');
+  assert.equal(result.reasoningText, '先检查当前边界。');
+  assert.equal(result.usageText, '输入 120 · 输出 40 · 合计 160 · 思考 12 tokens');
+  assert.equal(exchange.response.body_text, rawBody);
+});
+
+test('Qwen failed SSE exchange cannot become a successful decision', () => {
+  const rawBody = qwenSse(qwenStreamChunks(JSON.stringify(validCurrentDecision())));
+  const result = exchangeConversation(qwenStreamDetail(rawBody, {
+    status: 'failed', error: '千问流式响应处理失败。',
+  }));
+
+  assert.equal(result.decision, null);
+  assert.equal(result.responseText, '');
+  assert.equal(result.errorText, '千问流式响应处理失败。');
+});
+
+test('Qwen SSE without the terminal marker is undecided even if its JSON parses', () => {
+  const chunks = qwenStreamChunks(JSON.stringify(validCurrentDecision()));
+  chunks.pop();
+  const result = exchangeConversation(qwenStreamDetail(qwenSse(chunks)));
+
+  assert.equal(result.state, 'failed');
+  assert.equal(result.decision, null);
+  assert.equal(result.responseText, '');
+  assert.match(result.errorText, /缺少 \[DONE\]/);
+});
+
+test('Qwen length finish reason and in-stream error cannot produce a decision', () => {
+  const truncated = exchangeConversation(qwenStreamDetail(qwenSse(
+    qwenStreamChunks(JSON.stringify(validCurrentDecision()), { finishReason: 'length' }),
+  )));
+  assert.equal(truncated.decision, null);
+  assert.equal(truncated.responseText, '');
+  assert.match(truncated.errorText, /长度上限/);
+
+  const errored = exchangeConversation(qwenStreamDetail(qwenSse([
+    { error: { message: 'provider details stay raw' } }, '[DONE]',
+  ])));
+  assert.equal(errored.decision, null);
+  assert.equal(errored.responseText, '');
+  assert.match(errored.errorText, /返回错误/);
+});
+
+test('legacy Qwen JSON response still uses the existing envelope parser', () => {
+  const result = exchangeConversation(detail({
+    provider: 'qwen', model: 'qwen3-vl-plus',
+    requestBody: { model: 'qwen3-vl-plus', stream: false, messages: [] },
+    response: {
+      choices: [{ finish_reason: 'stop', message: { role: 'assistant', content: JSON.stringify(validCurrentDecision()) } }],
+      usage: { prompt_tokens: 20, completion_tokens: 8, total_tokens: 28 },
+    },
+  }));
+
+  assert.equal(result.decision.summary, '右端出现启动。');
+  assert.equal(result.responseText, '右端出现启动。');
+  assert.equal(result.usageText, '输入 20 · 输出 8 · 合计 28 tokens');
+});
+
+test('a Qwen JSON completion is readable even when streaming was requested', () => {
+  const result = exchangeConversation(qwenStreamDetail({
+    choices: [{ finish_reason: 'stop', message: {
+      role: 'assistant', content: JSON.stringify(validCurrentDecision()),
+    } }],
+  }));
+  assert.equal(result.state, 'completed');
+  assert.equal(result.decision.summary, '右端出现启动。');
 });

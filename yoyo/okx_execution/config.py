@@ -1,8 +1,9 @@
-"""Owner's Task 59 settings; no extra coin, timeframe or concurrency filter.
+"""Owner's Task 59 settings; no extra timeframe or concurrency filter.
 
 2026-10-16: owner increased the allocation to 125 USDT; 2% initial-stop sizing,
-venue maximum leverage.
+venue maximum leverage. Owner changed margin mode to cross on 2026-10-16.
 Three-position / six-percent aggregate caps were explicitly rejected.
+The later owner-selected asset exclusions live in contracts.signal_universe.
 Credentials are local files outside the repository, never API/UI parameters.
 """
 from __future__ import annotations
@@ -13,6 +14,7 @@ import os
 from pathlib import Path
 
 DEFAULT_RUNTIME = Path.home() / "Library/Application Support/Fable/OKXExecution"
+DEFAULT_MANUAL_RUNTIME = Path.home() / "Library/Application Support/Fable/OKXManualExecution"
 DEFAULT_SOURCE = Path.home() / "Library/Application Support/Fable/ImpulseMonitor"
 CAPITAL_USDT = "125"
 LIVE_ACK = f"EXECUTE-{CAPITAL_USDT}-USDT-LIVE"
@@ -23,7 +25,7 @@ class Config:
     capital_usdt: str = CAPITAL_USDT
     risk_fraction: str = "0.02"
     leverage_policy: str = "venue_maximum"
-    margin_mode: str = "isolated"
+    margin_mode: str = "cross"
     position_mode: str = "long_short_mode"
     max_positions: None = None
     aggregate_risk_limit: None = None
@@ -36,7 +38,7 @@ class Config:
         if self.host not in {"https://www.okx.com", "https://us.okx.com", "https://eea.okx.com"}:
             raise ValueError("unsupported OKX API host")
         if (self.capital_usdt != CAPITAL_USDT or self.risk_fraction != "0.02"
-                or self.leverage_policy != "venue_maximum" or self.margin_mode != "isolated"
+                or self.leverage_policy != "venue_maximum" or self.margin_mode != "cross"
                 or self.position_mode != "long_short_mode" or self.max_positions is not None
                 or self.aggregate_risk_limit is not None or type(self.demo) is not bool):
             raise ValueError("configuration differs from the reviewed Task 59 contract")

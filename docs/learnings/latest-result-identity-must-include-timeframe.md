@@ -1,0 +1,7 @@
+# Latest results must be keyed by symbol and timeframe
+
+- **问题**：The detection workspace opened the newest job globally. A newer 5m patrol hid the still-current 15m, hourly and daily observations, and remembered navigation reopened an obsolete job.
+- **死胡同**：Keeping a larger recent-job list still lets frequent short-period jobs evict daily coverage; concatenating boxes mixes different candle clocks and frozen inputs. Automatically resubmitting scans on period selection would also add unnecessary work.
+- **有效路径**：Project immutable observations into one latest row per symbol and period, ranked by detection cutoff before completion order. Read only rows after the SQLite high-water mark within one snapshot, return delta summaries, and fetch the chosen row's exact job/symbol chart. Menu entry opens the combined latest view; explicit historical links retain their source job. Periods without detection reuse available monitor candle charts as explicitly unscanned previews, never borrowing another period's boxes or claiming a negative detection.
+- **通用规则**：Define what “latest” is keyed by before choosing a global timestamp. Navigation convenience and evidence provenance need separate state; a view change is not permission to compute new observations.
+- **牵连**：`yoyo/yolo_workbench/latest.py`, `yoyo/monitor/static/yolo-detect.js`, `workspace-navigation.js`. No model, scheduler cadence, execution gate or canonical candle writer changes.

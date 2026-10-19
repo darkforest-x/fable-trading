@@ -8,7 +8,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const source = fs.readFileSync(path.join(__dirname, "../../yoyo/monitor/static/theme.js"), "utf8");
 
-function page({ stored = null, dark = true, blocked = false } = {}) {
+function page({ stored = null, dark = true, blocked = false, design = undefined } = {}) {
   const attributes = {}, meta = {}, documentEvents = {}, windowEvents = {};
   let ready = false;
   const select = { value: "system", addEventListener: (_, listener) => { select.change = listener; } };
@@ -19,7 +19,7 @@ function page({ stored = null, dark = true, blocked = false } = {}) {
   };
   vm.runInNewContext(source, {
     document: {
-      documentElement: { setAttribute: (key, value) => { attributes[key] = value; } },
+      documentElement: { dataset:{design}, setAttribute: (key, value) => { attributes[key] = value; } },
       querySelector: () => ({ setAttribute: (key, value) => { meta[key] = value; } }),
       getElementById: () => ready ? select : null,
       addEventListener: (key, listener) => { documentEvents[key] = listener; },
@@ -41,7 +41,7 @@ function page({ stored = null, dark = true, blocked = false } = {}) {
 test("saved light appearance applies before DOM readiness and survives reload", () => {
   const p = page({ stored: "light", dark: true });
   assert.equal(p.attributes["data-theme"], "light");
-  assert.equal(p.meta.content, "#f4f7f9");
+  assert.equal(p.meta.content, "#f5f5f7");
   p.ready();
   assert.equal(p.select.value, "light");
   p.choose("dark");
@@ -50,7 +50,7 @@ test("saved light appearance applies before DOM readiness and survives reload", 
 });
 
 test("system changes update automatic appearance but preserve an explicit choice", () => {
-  const p = page({ dark: false });
+  const p = page({ stored: "system", dark: false });
   assert.equal(p.attributes["data-theme"], "light");
   p.ready();
   assert.equal(p.select.value, "system");
@@ -73,14 +73,28 @@ test("restricted storage and corrupt preferences cannot break startup or manual 
   assert.equal(page({ stored: "invalid", dark: false }).attributes["data-theme"], "light");
 });
 
-test("other tabs update the preference and clearing storage restores system following", () => {
+test("other tabs update the preference and clearing storage restores the approved dark default", () => {
   const p = page({ stored: "dark", dark: false });
   p.ready();
   p.otherTab("light");
   assert.equal(p.select.value, "light");
   assert.equal(p.attributes["data-theme"], "light");
   p.otherTab(null, null);
-  assert.equal(p.select.value, "system");
+  assert.equal(p.select.value, "dark");
   p.os(true);
   assert.equal(p.attributes["data-theme"], "dark");
+});
+
+test("first visit uses the selected dark workspace even on a light operating system", () => {
+  const p = page({ dark: false });
+  p.ready();
+  assert.equal(p.select.value, "dark");
+  assert.equal(p.attributes["data-theme"], "dark");
+  assert.equal(p.meta.content, "#101114");
+});
+
+test('approved Stitch appearance is stable across old preferences without overwriting them',()=>{
+ const p=page({stored:'light',dark:false,design:'stitch-obsidian'});p.ready();
+ assert.equal(p.attributes['data-theme'],'dark');assert.equal(p.select.value,'dark');assert.equal(p.meta.content,'#0b0e14');assert.equal(p.stored(),'light');
+ p.os(false);p.otherTab('system');assert.equal(p.attributes['data-theme'],'dark');assert.equal(p.select.value,'dark');
 });

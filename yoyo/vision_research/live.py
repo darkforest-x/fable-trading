@@ -1,4 +1,4 @@
-"""Read public OKX candles without writing scanner state or market caches.
+"""Read shared public OKX candles without writing scanner or execution state.
 
 Source: https://www.okx.com/docs-v5/en/#order-book-trading-market-data-get-candlesticks
 The newest row may be unconfirmed. SMA uses the trailing 20/60/120 closes;
@@ -9,10 +9,17 @@ previous provisional EMA. Observations are not original signal-time evidence.
 from __future__ import annotations
 
 import httpx
+from functools import lru_cache
 
 from .source import SourceError, causal_candles, finite
 
 MARKET_URL = "https://www.okx.com/api/v5/market/candles"
+
+
+@lru_cache(maxsize=1)
+def shared_client():
+    from yoyo.monitor.okx import OKX
+    return OKX(rate=3, include_open=True)
 
 
 class LiveMarket:
@@ -21,6 +28,13 @@ class LiveMarket:
 
     def candles(self, signal):
         try:
+            if self.transport is None:
+                from yoyo.monitor.okx import MarketError
+                try:
+                    return shared_client().get('/api/v5/market/candles', {
+                        'instId': signal['symbol'], 'bar': signal['timeframe'], 'limit': '300'})
+                except MarketError as error:
+                    raise ValueError(str(error)) from error
             with httpx.Client(timeout=8, follow_redirects=False, transport=self.transport) as client:
                 response = client.get(MARKET_URL, params={"instId": signal["symbol"],
                                       "bar": signal["timeframe"], "limit": "300"})

@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import re
 import time
+import json
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from yoyo.copier.api.auth import verify_token
 from yoyo.copier.api.deps import get_db
-from yoyo.copier.discord_channels import register_web_channel
+from yoyo.copier.discord_channels import accepts_web_channel, register_web_channel
+from yoyo.copier.ai.text import own_text
 from yoyo.copier.ingest import ingest_message
 from yoyo.copier.router.action_router import ActionRouter
 from yoyo.copier.store.sqlite import Database
@@ -53,7 +56,19 @@ class IngestBody(BaseModel):
 
 @router.post("/ingest")
 def ingest(body: IngestBody, db: Database = Depends(get_db)):
+    if body.source.startswith("discord-web") and not accepts_web_channel(db, body.channel_id, body.guild_id):
+        return {"ok": True, "skipped": True, "reason": "outside_watchlist", "message_id": None}
     if db.message_exists(body.external_id):
+        with db._connect() as conn:
+            original = conn.execute("SELECT id,content FROM messages WHERE discord_message_id=?", (body.external_id,)).fetchone()
+        if " ".join(own_text(original["content"]).split()) != " ".join(own_text(body.content).split()):
+            payload = {"content": body.content, "attachments": body.attachments, "requires_review": True}
+            raw = json.dumps(payload, ensure_ascii=False)
+            with db._connect() as conn:
+                previous = conn.execute("SELECT payload_json FROM audit_logs WHERE message_id=? AND event='message_revision' ORDER BY id DESC LIMIT 1", (original["id"],)).fetchone()
+            if not previous or previous[0] != raw:
+                db.audit("message_revision", "Source text changed; never execute an edit as a second entry", message_id=original["id"], payload=payload)
+            return {"ok": True, "duplicate": True, "revision": True, "requires_review": True}
         return {"ok": True, "duplicate": True}
     registered = False
     source = body.source
@@ -74,6 +89,9 @@ def ingest(body: IngestBody, db: Database = Depends(get_db)):
         attachments=body.attachments,
         source=source,
     )
+    if message_id:
+        db.audit("message_received", source, message_id=message_id, payload={"source": source, "age_min": age,
+                 "guild_id": body.guild_id, "attachment_count": len(body.attachments)})
     return {"ok": True, "duplicate": False, "message_id": message_id, "channel_registered": registered,
             "late": source == "discord-web-late_recovery", "age_min": None if age is None else round(age, 1)}
 
@@ -92,7 +110,29 @@ def list_messages(
     rows, total = db.list_messages(
         page=page, per_page=per_page, status=status, intent=intent, channel_id=channel_id
     )
+    for row in rows:
+        age = discord_message_age_min(row["discord_message_id"], now_ms=0)
+        row["sent_at"] = datetime.fromtimestamp(-age * 60, timezone.utc).isoformat() if age is not None else None
+        row["source_url"] = "https://discord.com/channels/1004707886657699901/" + row["channel_id"] + "/" + row["discord_message_id"].split("_")[-1]
+        with db._connect() as conn:
+            row["audit"] = [dict(r) for r in conn.execute("SELECT event,detail,created_at,payload_json FROM audit_logs WHERE message_id=? ORDER BY id", (row["id"],))]
     return {"items": rows, "total": total, "page": page, "per_page": per_page}
+
+
+class HeartbeatBody(BaseModel):
+    guild_id: str
+    channel_id: str
+    latest_message_id: str = ""
+    version: str = ""
+    at_latest: bool = False
+
+
+@router.post("/heartbeat")
+def heartbeat(body: HeartbeatBody, db: Database = Depends(get_db)):
+    if not accepts_web_channel(db, body.channel_id, body.guild_id):
+        return {"ok": True, "skipped": True}
+    db.set_setting("discord_heartbeat:" + body.channel_id, json.dumps({**body.model_dump(), "received_ms": int(time.time() * 1000)}))
+    return {"ok": True}
 
 
 @router.get("/{message_id}")

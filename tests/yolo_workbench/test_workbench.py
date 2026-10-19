@@ -184,3 +184,23 @@ def test_cached_closed_prefix_needs_only_a_new_tail_page():
     out=market.candles('ETH-USDT-SWAP','5m',1301*300000,1101*300000)
     assert len(calls)==first+1 and out[0]['t']==101*300000 and out[-1]['t']==1300*300000
     assert set(calls)=={'/api/v5/market/candles'}
+
+
+def test_list_projection_and_conditional_progress_preserve_frozen_job(tmp_path):
+    app=FastAPI();install(app,tmp_path,launch_worker=False);client=TestClient(app)
+    book=app.state.yolo_workbench
+    frozen=dict(spec(),scope='all',symbols=['ETH-USDT-SWAP'],manifest={'large':'x'*10000},listed_ms={'ETH':123})
+    j=book.submit(frozen,'projection-request')
+    base='/api/yolo-detect'
+    data=client.get(base+'/jobs').json()
+    assert data['items'][0]['spec']['symbols']==[]
+    assert 'manifest' not in data['items'][0]['spec'] and 'listed_ms' not in data['items'][0]['spec']
+    unchanged=client.get(base+'/jobs',params={'if_revision':data['revision']}).json()
+    assert unchanged['unchanged'] and 'items' not in unchanged
+    detail=client.get(base+'/jobs/'+j['id']).json()
+    assert detail['spec']==frozen
+    assert client.get(base+'/jobs/'+j['id'],params={'if_revision':detail['revision']}).json()['unchanged']
+    book.update(j['id'],status='running',progress={'completed':1,'total':2})
+    changed=client.get(base+'/jobs/'+j['id'],params={'view':'progress','if_revision':detail['revision']}).json()
+    assert changed['status']=='running' and changed['progress']['completed']==1 and 'spec' not in changed
+    assert book.get(j['id'])['spec']==frozen

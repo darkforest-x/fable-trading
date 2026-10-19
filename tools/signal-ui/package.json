@@ -1,0 +1,8 @@
+{
+  "name": "spike-signal-ui",
+  "private": true,
+  "scripts": {
+    "build": "sass --quiet-deps --silence-deprecation=import,global-builtin,color-functions --style=compressed --no-source-map --load-path=node_modules signal-components.scss ../../yoyo/monitor/static/signal-components.css"
+  },
+  "devDependencies": {"bootstrap": "5.3.8", "sass": "1.105.2"}
+}

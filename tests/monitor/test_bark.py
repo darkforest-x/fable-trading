@@ -146,6 +146,16 @@ def test_no_channel_activation_leaves_queue_unclaimed(tmp_path):
     assert store.bark_status()["pending"] == 1
 
 
+def test_owner_pause_blocks_already_queued_bark_delivery(tmp_path):
+    store = queued(tmp_path)
+    (tmp_path / "bark-disabled.json").write_text('{"disabled":true}')
+    worker = BarkWorker(store, "fake-private-device", lambda *a, **k: pytest.fail("paused Bark sent"))
+    assert worker.status()["enabled"] is False
+    assert worker.status()["disabled_by_owner"] is True
+    worker.deliver_once(CONFIRM + 2000)
+    assert store.bark_status().get("sent", 0) == 0
+
+
 def test_private_configuration_roundtrip_and_disable(tmp_path):
     save_configuration("https://api.day.app/fake-private-device/", tmp_path)
     p = tmp_path / "bark.json"

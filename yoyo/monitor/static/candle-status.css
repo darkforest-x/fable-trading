@@ -1,0 +1,16 @@
+#candle-status{margin:18px 0;padding:20px;min-width:0}
+.candle-heading{display:flex;justify-content:space-between;gap:16px;align-items:start}
+.candle-heading h3{margin:0 0 8px}.candle-heading p,.candle-footnote{font-size:12px;line-height:1.7;opacity:.75;margin:0}
+#candle-status button,#candle-status input{font:inherit;color:inherit;background:transparent;border:1px solid var(--line,#33434b);border-radius:8px;padding:9px 12px;min-height:40px}
+#candle-status button{white-space:nowrap;cursor:pointer}#candle-status button:focus-visible,#candle-status input:focus-visible{outline:2px solid #52b597;outline-offset:2px}
+#candle-status-summary{display:flex;gap:14px 24px;flex-wrap:wrap;margin:20px 0;font-size:12px}#candle-status-summary b{font-size:18px;margin-right:4px}
+.candle-filter{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:14px 0;font-size:12px}.candle-filter input{width:180px;max-width:100%}#candle-status-count{opacity:.7}
+.candle-table-wrap{max-width:100%;max-height:440px;overflow:auto;-webkit-overflow-scrolling:touch}#candle-status table{width:100%;border-collapse:collapse;text-align:left;font-size:12px;min-width:650px}
+#candle-status th,#candle-status td{padding:12px 10px;border-bottom:1px solid var(--line,#33434b);vertical-align:top}#candle-status th{font-weight:500;opacity:.65}#candle-status small{display:block;font-size:11px;opacity:.7;margin-top:5px;max-width:260px;overflow-wrap:anywhere}
+.candle-state{display:inline-block;border-radius:5px;padding:3px 6px;background:#859ba51a}.candle-ready{color:var(--mint)}.candle-syncing{color:var(--blue)}.candle-error{color:var(--red)}.candle-footnote{margin-top:15px}
+@media(max-width:600px){#candle-status{padding:14px}.candle-heading{flex-wrap:wrap}#candle-status-summary{gap:12px}.candle-filter{gap:8px}.candle-filter input{flex:1;min-width:0}#candle-status-count{width:100%}}
+
+#candle-status th{position:sticky;top:0;z-index:1;background:var(--surface);opacity:1;color:var(--muted)}
+.candle-table-wrap:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+
+@media(max-width:600px){.candle-filter::after{content:"左右滑动表格，可查看完整时间与同步记录";width:100%;font-size:11px;color:var(--muted)}}

@@ -57,7 +57,8 @@ def test_keys_are_isolated_by_provider_and_region_and_survive_restart(app, tmp_p
     with TestClient(app, base_url="http://127.0.0.1") as c:
         save(c, api_key=ZKEY)
         state = save(c, provider="qwen")
-        assert state["model"] == "qwen3-vl-plus"
+        assert state["model"] == "qwen3.8-max"
+        assert state["providers"][0]["model_settings"][state["model"]]["reasoning_effort"] == "xhigh"
         assert state["api_key_configured"] is False
         assert c.post("/api/connection-test", json={}).status_code == 503
         assert not Client.instances

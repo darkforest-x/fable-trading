@@ -38,6 +38,7 @@ Binance USDT-M market data: https://developers.binance.com/docs/derivatives/usds
 from __future__ import annotations
 
 import calendar
+import csv
 import gzip
 import json
 import logging
@@ -55,6 +56,8 @@ import requests
 LOG = logging.getLogger("fable.monitor.market_sync")
 ROOT = Path(__file__).resolve().parents[2]
 HISTORY = ROOT / "experiments/active/exp-market-sync-shock-20261008-v2/results_v2/menu_history.json.gz"
+EXIT_STUDY = ROOT / "experiments/active/exp-market-sync-shock-20261008-v5"
+STRICT_EXIT_STUDY = ROOT / "experiments/active/exp-market-sync-shock-20261015-v6"
 REGISTRY = ROOT / "experiments/registry.yaml"
 PROGRAM_PREFIX = "exp-market-sync-shock-"
 BINANCE = "https://fapi.binance.com"
@@ -220,7 +223,9 @@ def outcome(series: dict, members: list[str], i: int, side: int, bars: int) -> d
         out[name] = round((side * g - COST) * 1e4, 1) if finite(g) else None
     legs = [leg(series[s], a, end) for s in members if s in series]
     legs = [g for g in legs if finite(g)]
-    out["alts"] = round((side * sum(legs) / len(legs) - COST) * 1e4, 1) if legs else None
+    out["alts_n"] = len(legs)
+    out["alts_expected"] = len(members)
+    out["alts"] = round((side * sum(legs) / len(legs) - COST) * 1e4, 1) if legs and len(legs) == len(members) else None
     return out
 
 
@@ -261,10 +266,18 @@ def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[
     alt_rows = {s: rows for s, rows in series.items() if s not in LEADERS}
     up, down, count = breadth(index, alt_rows, universe)
     events = []
+    decisions = [{} for _ in index]
     for cfg in GRID:
         hits = sync_hits(btc, eth, up, down, **cfg)
         for kind in KINDS:
-            for i, side in events_from_hits(hits, kind, COOLDOWN_HOURS * per_hour):
+            selected_events = events_from_hits(hits, kind, COOLDOWN_HOURS * per_hour)
+            emitted = {i for i, _ in selected_events}
+            for i, hit in enumerate(hits):
+                clustered = hit and any(i >= n and hits[i-n] == hit for n in (1, 2))
+                decisions[i][kind + "|" + config_key(cfg)] = ("event" if i in emitted else
+                    "cooldown" if hit and (kind == "sync" or clustered) else
+                    "waiting_cluster" if hit else "no_hit")
+            for i, side in selected_events:
                 if index[i] < observe_start_ms:
                     continue
                 members = universe.get(month_of(index[i]), [])
@@ -274,7 +287,8 @@ def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[
                     "close_ms": index[i] + minutes * 60_000, "side": side,
                     "btc_ret": btc[i]["ret"], "eth_ret": eth[i]["ret"], "btc_z": btc[i]["z"], "eth_z": eth[i]["z"],
                     "btc_vr": btc[i]["vr"], "eth_vr": eth[i]["vr"], "breadth": up[i] if side > 0 else down[i],
-                    "n_alts": count[i], "out_of_sample": index[i] >= RESEARCH_END_MS,
+                    "n_alts": count[i], "after_research_end": index[i] >= RESEARCH_END_MS,
+                    "out_of_sample": False,
                     "outcomes": {f"{h}h": outcome(series, members, i, side, h * per_hour) for h in HOLD_HOURS},
                     "env": env, "vetoes": vetoes(minutes, side, env),
                 })
@@ -283,7 +297,8 @@ def analyse(index: list[int], series: dict[str, list], universe: dict[str, list[
         latest.append({"open_ms": index[t], "close_ms": index[t] + minutes * 60_000,
                        "btc_ret": btc[t]["ret"], "btc_z": btc[t]["z"], "btc_vr": btc[t]["vr"],
                        "eth_ret": eth[t]["ret"], "eth_z": eth[t]["z"], "eth_vr": eth[t]["vr"],
-                       "breadth_up": up[t], "breadth_down": down[t], "n_alts": count[t]})
+                       "breadth_up": up[t], "breadth_down": down[t], "n_alts": count[t],
+                       "expected_alts": len(universe.get(month_of(index[t]), [])), "decisions": decisions[t]})
     return {"events": events, "latest": latest, "bars": len(index)}
 
 
@@ -368,6 +383,7 @@ class Book:
                 CREATE TABLE IF NOT EXISTS universe(month TEXT PRIMARY KEY, symbols TEXT NOT NULL,
                   ranked_from TEXT NOT NULL, candidates INTEGER NOT NULL, computed_ms INTEGER NOT NULL);
                 CREATE TABLE IF NOT EXISTS meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS first_observed(event_key TEXT PRIMARY KEY, observed_ms INTEGER NOT NULL);
             """)
 
     def connect(self):
@@ -436,15 +452,23 @@ def rank_month(daily: dict[str, list[list]], month: str, size: int = UNIVERSE_SI
 class Observer:
     """Background thread: refresh universes and bars after each 30m close, then analyse."""
 
-    def __init__(self, runtime: Path, client: Binance | None = None):
-        self.book = Book(Path(runtime) / DATABASE)
+    def __init__(self, runtime: Path, client: Binance | None = None, *, database=DATABASE, backfill_start=BACKFILL_START_MS):
+        self.book = Book(Path(runtime) / database)
+        self.backfill_start = self.book.get_meta("backfill_start_ms") or backfill_start
+        self.book.put_meta("backfill_start_ms", self.backfill_start)
+        self.env_start = self.backfill_start - 31*24*HOUR_MS
         self.client = client or Binance()
         self._stop = threading.Event()
         self._thread: threading.Thread | None = None
         self._lock = threading.Lock()
         self._snapshot = self.book.get_meta("snapshot")
-        self.state = {"state": "starting", "error": None, "updated_ms": None, "next_ms": None}
+        self.state = {"state": "starting", "error": None,
+                      "updated_ms": (self._snapshot or {}).get("generated_ms"), "next_ms": None}
         self.skipped: dict[str, str] = {}
+        self.protocol_started_ms = self.book.get_meta("verified_observer_v2_started_ms")
+        if self.protocol_started_ms is None:
+            self.protocol_started_ms = int(time.time() * 1000)
+            self.book.put_meta("verified_observer_v2_started_ms", self.protocol_started_ms)
 
     # -- lifecycle
     def start(self) -> None:
@@ -467,7 +491,9 @@ class Observer:
             except Exception as error:  # keep observing; surface the error on the page
                 LOG.warning("market sync cycle failed: %s", error)
                 self.state.update(state="error", error=str(error)[:200])
-                delay = 120
+                # A region restriction is not a transient network failure. Keep the
+                # original source and retry on the normal observation cadence.
+                delay = 1800 if str(error) == "binance_http_451" else 120
             self.state["next_ms"] = int((time.time() + delay) * 1000)
             self._stop.wait(delay)
 
@@ -484,14 +510,14 @@ class Observer:
         universes = self.ensure_universes(server)
         symbols = set(LEADERS)
         for month, entry in universes.items():
-            if month_bounds(month)[1] > BACKFILL_START_MS:
+            if month_bounds(month)[1] > self.backfill_start:
                 symbols.update(entry["symbols"])
         jobs = [(s, m, i) for m, i in INTERVALS.items() for s in sorted(symbols)]
         with ThreadPoolExecutor(WORKERS) as pool:
             list(pool.map(lambda job: self.fetch_bars(*job, server), jobs))
         first = self.book.first_open(60, "BTCUSDT")
-        if first is not None and first > ENV_START_MS:  # one-off: 30 days of BTC 1h before the backfill
-            self.fetch_bars("BTCUSDT", 60, "1h", first, start=ENV_START_MS)
+        if first is not None and first > self.env_start:  # one-off: 30 days of BTC 1h before the backfill
+            self.fetch_bars("BTCUSDT", 60, "1h", first, start=self.env_start)
         snapshot = self.build({m: e["symbols"] for m, e in universes.items()}, universes)
         snapshot["requests"] = self.client.requests
         snapshot["skipped"] = dict(sorted(self.skipped.items())[:20])
@@ -503,7 +529,7 @@ class Observer:
 
     def ensure_universes(self, server_ms: int) -> dict[str, dict]:
         have = self.book.universes()
-        months, ms = [], month_bounds(month_of(BACKFILL_START_MS))[0]
+        months, ms = [], month_bounds(month_of(self.backfill_start))[0]
         while ms <= server_ms:
             months.append(month_of(ms))
             ms = month_bounds(month_of(ms))[1]
@@ -533,9 +559,9 @@ class Observer:
         step = minutes * 60_000
         if start is None:
             last = self.book.last_open(minutes, symbol)
-            start = BACKFILL_START_MS if last is None else last + step
+            start = self.backfill_start if last is None else last + step
         added = 0
-        while start + step <= server_ms:
+        while start + step <= server_ms and not self._stop.is_set():
             try:
                 rows = self.client.klines(symbol, interval, start, server_ms, limit=PAGE)
             except MarketSyncError as error:  # keep the other contracts current
@@ -552,22 +578,36 @@ class Observer:
         return added
 
     def build(self, universe: dict[str, list[str]], universes: dict[str, dict]):
-        btc_1h = self.book.bars(60, ENV_START_MS).get("BTCUSDT", {})
+        btc_1h = self.book.bars(60, self.env_start).get("BTCUSDT", {})
         btc_closes = {ms + HOUR_MS: row[1] for ms, row in btc_1h.items() if row and row[1] and row[1] > 0}
         frames = {}
         for minutes in INTERVALS:
-            raw = self.book.bars(minutes, BACKFILL_START_MS)
-            index = sorted(raw.get("BTCUSDT", {}))
+            raw = self.book.bars(minutes, self.backfill_start)
+            btc_index = sorted(raw.get("BTCUSDT", {}))
+            # Keep missing clock slots: compressing a gap changes 96-bar windows,
+            # two-bar clusters, cooldown length and fixed-hour exit timestamps.
+            step = minutes * 60000
+            index = list(range(btc_index[0], btc_index[-1] + step, step)) if btc_index else []
             series = {s: [rows.get(ms) for ms in index] for s, rows in raw.items()}
             if not index or "ETHUSDT" not in series:
                 continue
             frames[str(minutes)] = analyse(index, series, universe, minutes, btc_closes=btc_closes)
         env_now = environment(btc_closes, max(btc_closes)) if btc_closes else {}
         events = [e for f in frames.values() for e in f["events"]]
+        now = int(time.time() * 1000)
+        with self.book.connect() as db:
+            for e in events:
+                key = f"{e['minutes']}|{e['kind']}|{e['config']}|{e['open_ms']}|{e['side']}"
+                db.execute("INSERT OR IGNORE INTO first_observed VALUES (?,?)", (key, now))
+                first = db.execute("SELECT observed_ms FROM first_observed WHERE event_key=?", (key,)).fetchone()[0]
+                e["first_observed_ms"] = first
+                e["out_of_sample"] = (e["close_ms"] >= self.protocol_started_ms and
+                                       e["close_ms"] <= first <= e["close_ms"] + 35 * 60000)
         return clean({
             "generated_ms": int(time.time() * 1000),
-            "observe_start_ms": OBSERVE_START_MS,
+            "observe_start_ms": max(OBSERVE_START_MS, self.backfill_start),
             "research_end_ms": RESEARCH_END_MS,
+            "forward_started_ms": self.protocol_started_ms,
             "primary": PRIMARY,
             "grid": [config_key(c) for c in GRID],
             "kinds": list(KINDS),
@@ -586,7 +626,33 @@ class Observer:
     def snapshot(self) -> dict:
         with self._lock:
             snap = self._snapshot
-        return {"status": dict(self.state), "snapshot": snap}
+        now = int(time.time() * 1000)
+        freshness = {}
+        for minutes in INTERVALS:
+            tf = str(minutes)
+            rows = (snap or {}).get("latest", {}).get(tf, [])
+            close = rows[-1]["close_ms"] if rows else None
+            age = now - close if close is not None else None
+            last = rows[-1] if rows else {}
+            # A current BTC timestamp alone does not establish that ETH, the
+            # causal feature windows and the alt breadth are usable.
+            leaders_ready = all(finite(last.get(f"{s}_{key}"))
+                                for s in ("btc", "eth") for key in ("ret", "z", "vr"))
+            breadth_ready = (last.get("n_alts", 0) >= MIN_ALTS and
+                             finite(last.get("breadth_up")) and finite(last.get("breadth_down")))
+            stale = age is None or age < 0 or age > minutes * 60000 + 120000
+            month = month_of(last.get("open_ms", close - minutes * 60000)) if close else None
+            expected = last.get("expected_alts")
+            if expected is None:
+                expected = (snap or {}).get("universe", {}).get(month, {}).get("size", 0)
+            freshness[tf] = {"last_close_ms": close, "age_ms": age,
+                             "stale": stale, "leaders_ready": leaders_ready,
+                             "breadth_ready": breadth_ready,
+                             "ready": not stale and leaders_ready and breadth_ready,
+                             "valid_alts": last.get("n_alts", 0),
+                             "expected_alts": expected}
+        return {"status": dict(self.state), "snapshot": snap, "freshness": freshness, "read_ms": now,
+                "source": getattr(self.client, "source", {"id": "binance-usdt-m", "label": "币安 USDT 永续"})}
 
 
 # --------------------------------------------------------------------------- research side
@@ -617,7 +683,40 @@ def history(group: str | None = None, path: Path = HISTORY) -> dict:
         return meta
     if group not in payload["groups"]:
         raise KeyError(group)
-    return {**meta, "group": group, "rows": payload["groups"][group]}
+    study_path = STRICT_EXIT_STUDY if group in {
+        "30|sync|z3.0_v3.0_b0.75", "60|sync|z3.0_v3.0_b0.75"} else EXIT_STUDY
+    return {**meta, "group": group, "rows": payload["groups"][group], "exit_study": exit_study(study_path)}
+
+
+def exit_study(path: Path = EXIT_STUDY) -> dict:
+    """Read the registered exit comparison with its actual event-set scope.
+
+    This is presentation of existing results, never a new backtest or a claim
+    that the default stricter observer was used by v5.
+    """
+    try:
+        cfg = _cached(path / "config.json", lambda p: json.loads(p.read_text()))
+        receipt = _cached(path / "results_v5/receipt.json", lambda p: json.loads(p.read_text()))
+        def load_rows(p):
+            with p.open(newline="") as f:
+                return list(csv.DictReader(f))
+        raw = _cached(path / "results_v5/summary.csv", load_rows)
+        rows = []
+        for row in raw:
+            item = {k: row[k] for k in ("period", "instrument", "exit")}
+            item.update({k: int(row[k]) for k in ("minutes", "side", "events")})
+            item.update({k: float(row[k]) if row[k] else None for k in
+                         ("mean_net_bp", "control_net_bp", "excess_bp", "p_excess", "vs_base_bp", "p_vs_base")})
+            rows.append(item)
+        return clean({"available": True, "experiment_id": cfg["experiment_id"],
+                      "source_commit": receipt["source_commit"], "event_set": cfg["event_set"],
+                      "baseline": cfg["baseline"], "cost_bp": cfg["round_trip_cost"] * 1e4,
+                      "control_seed": cfg["control_seed"],
+                      "select_before": cfg["select_before"], "end": cfg["end"],
+                      "exits": list(cfg["exits"]), "rows": rows})
+    except (OSError, ValueError, KeyError, TypeError):
+        # Optional study failure must not hide the original history.
+        return {"available": False}
 
 
 def iterations(path: Path = REGISTRY) -> list[dict]:

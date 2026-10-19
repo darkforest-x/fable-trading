@@ -1,0 +1,438 @@
+/* Linear Precision: app frame, shared components and structural page families.
+ * References and owner-selected target are documented in /DESIGN.md.
+ */
+body {font-family:var(--font-ui);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;--row-pad:12px}
+body[data-density="comfortable"] {--row-pad:20px}
+[hidden] {display:none!important}
+button,a,input,select,textarea,summary {touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:is(button,a,input,select,textarea,summary):focus-visible {outline:2px solid var(--mint);outline-offset:3px}
+button {transition:background-color .12s,color .12s,border-color .12s}
+button:disabled {cursor:not-allowed;opacity:.5}
+input[type=checkbox],input[type=radio] {accent-color:var(--brand-primary)}
+button,input,select,textarea {font-family:inherit}
+.rail-icon,.ui-search-icon {display:inline-block;flex:none;width:20px;height:20px;background:currentColor;mask:var(--icon) center/contain no-repeat;-webkit-mask:var(--icon) center/contain no-repeat}
+.ui-search-icon {--icon:url('/static/icons/search.svg');width:16px;height:16px}
+/* The app frame replaces a long sidebar with a rail and contextual navigation. */
+.sidebar {position:fixed;inset:0 auto 0 0;width:280px;height:100dvh;padding:0;display:grid;grid-template-columns:64px 216px;grid-template-rows:minmax(0,1fr) auto;background:var(--sidebar);border-right:1px solid var(--line);overflow:hidden}
+.workspace-rail {grid-column:1;grid-row:1/3;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--bg);padding:18px 6px 12px;gap:24px}
+.sidebar .brand {margin:0;display:flex;flex-direction:column;gap:3px;align-items:center;justify-content:center;font-size:14px;letter-spacing:-.5px;line-height:1.2}
+.sidebar .brand img {width:24px;height:24px;padding:3px;border-radius:8px;background:#5e6ad2;filter:none}
+.sidebar .brand strong {color:var(--text)}
+.workspace-rail nav {display:flex;flex-direction:column;gap:9px}
+.rail-button {position:relative;width:52px;min-height:58px;border:0;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:7px 4px;color:var(--muted);background:none;font-size:11px}
+.rail-button:hover {background:var(--nav-hover);color:var(--text)}
+.rail-button[aria-pressed=true] {color:var(--mint);background:var(--nav-active)}
+.rail-button[aria-pressed=true]::before {content:'';position:absolute;left:-6px;top:12px;bottom:12px;width:3px;background:var(--mint);border-radius:0 3px 3px 0}
+.workspace-context {grid-column:2;grid-row:1;min-height:0;overflow:auto;padding:24px 12px 12px;scrollbar-width:thin}
+.context-heading {padding:0 10px 21px}
+.context-heading>span,.context-section-label {color:var(--dim);font-size:10px;letter-spacing:.08em}
+.context-heading h2 {font-size:19px;font-weight:600;margin:8px 0 0;line-height:1.4}
+.context-search {height:34px;display:flex;align-items:center;gap:8px;padding:0 9px;border:1px solid var(--line);border-radius:6px;margin:0 4px 18px;color:var(--muted);background:var(--bg)}
+.context-search .rail-icon {width:15px;height:15px}
+.context-search input {width:100%;min-width:0;border:0;background:none;color:var(--text);font-size:12px;padding:0;outline-offset:6px}
+.sidebar .nav-list {display:block;flex:initial;overflow:visible;padding:0;gap:0}
+.sidebar .nav-item {font-size:13px;min-height:38px;width:100%;border-radius:6px;padding:9px 10px;gap:9px;color:var(--muted);line-height:1.4}
+.sidebar .nav-item svg {width:16px;height:16px;stroke-width:1.5}
+.sidebar .nav-item:hover {background:var(--nav-hover);color:var(--text)}
+.sidebar .nav-item.active {background:var(--nav-active);color:var(--text);box-shadow:none;font-weight:500}
+.sidebar .nav-item.active::before {display:none}
+.sidebar .nav-group-label {height:0;overflow:hidden;padding:0!important;margin:0!important;font-size:0;position:absolute}
+.sidebar .nav-order-row {margin:2px 0}
+.nav-drag-grip {opacity:0}
+.nav-order-row:hover .nav-drag-grip {opacity:.45}
+.nav-count {border-radius:4px;font-size:10px;background:var(--nav-count);color:var(--text-secondary)}
+.context-empty {font-size:12px;color:var(--muted);padding:12px}
+.workspace-outline {margin:24px 4px 0;padding-top:20px;border-top:1px solid var(--line);display:grid;gap:3px}
+.workspace-outline .context-section-label {margin:0 6px 7px}
+.workspace-outline button {background:transparent;border:0;padding:8px 6px;font-size:11px;text-align:left;line-height:1.5;color:var(--muted);border-radius:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.workspace-outline button:hover {background:var(--nav-hover);color:var(--text)}
+.sidebar .sidebar-bottom {grid-column:2;grid-row:2;margin:0;padding:12px 14px;border-top:1px solid var(--line);font-size:11px;gap:8px;background:var(--sidebar)}
+.sidebar-bottom small {font-size:10px;line-height:1.4}
+.sidebar-bottom .sidebar-fold {width:28px;height:28px;padding:5px;border:0;background:none}
+.sidebar-bottom .tiny-tag {display:none}
+.workspace {width:calc(100% - 280px);margin-left:280px;min-width:0}
+.workspace .topbar {min-height:48px;height:48px;padding:0 24px;gap:16px;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:60}
+.breadcrumb {font-size:12px;min-width:0;flex:1}
+.breadcrumb strong {font-weight:500}
+.workspace-search {display:flex;align-items:center;gap:8px;min-height:29px;min-width:180px;padding:4px 9px;background:var(--surface);border:1px solid var(--line);border-radius:6px;color:var(--muted);font-size:11px}
+.workspace-search kbd {margin-left:auto;font:10px var(--font-ui);border:1px solid var(--line);padding:1px 3px;border-radius:3px}
+.workspace-density {font-size:11px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:5px;padding:5px 8px;white-space:nowrap}
+.topbar-meta {gap:10px;font-size:10px}
+.topbar .theme-picker {border:0;background:none;padding:0}
+.topbar .theme-picker select {font-size:11px;width:70px;padding:4px}
+.topbar-meta .exchange-mark,.topbar-meta .market-scope,.topbar-meta .topbar-divider {display:none}
+.workspace main {max-width:none;padding:20px 24px 32px;min-width:0}
+.workspace .page-heading {display:flex;gap:20px;align-items:center;margin:0 0 18px}
+.workspace .page-heading>div {display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 18px;min-width:0}
+.workspace .page-heading h1 {font-size:22px;font-weight:600;line-height:1.4;letter-spacing:-.5px}
+.workspace .page-heading p {font-size:12px;line-height:1.6;margin:0;color:var(--muted);max-width:760px}
+.page-heading .refresh-button {min-width:30px;min-height:30px;border:1px solid var(--line);border-radius:6px;padding:6px;background:var(--surface)}
+.workspace-footer {font-size:10px;color:var(--dim);border-top:1px solid var(--line-soft);margin-top:24px;padding:14px 0}
+h2,summary {scroll-margin-top:84px}
+/* Shared controls, flat surfaces and tables. */
+html :is(.panel,.system-card,.research-objective,.research-table-wrap,.research-flow,.knowledge-card,.strategy-card,.dataset-card,.copier-panel,.copier-message,.signal-chart-card,.okx-live,.yd-card,.yd-chart-stage,.yd-symbol-panel,.ms-context,.ms-bias) {border-color:var(--line);border-radius:var(--radius-panel);box-shadow:none;background:var(--surface)}
+html :is(.research-button,.load-more,.refresh-button,.copier-button,.copier-pagination button,.okx-live button,.bk-button,.of-button,.ll-button,.rp-btn,.yd-shell button) {border-radius:var(--radius-control);font-size:12px;min-height:32px}
+html :is(.research-button.primary,.ml-primary,.yd-primary) {background:var(--brand-primary);color:#fff;border-color:var(--brand-primary)}
+html :is(input:not([type=checkbox]):not([type=radio]),select,textarea) {border-color:var(--control-border);border-radius:var(--radius-control);color:var(--text)}
+html :is(.research-toolbar,.signal-controls) {gap:10px}
+html :is(.research-toolbar input,.research-toolbar select,.research-toolbar textarea,.signal-controls input,.signal-controls select) {background:var(--control-bg);border-radius:6px;font-size:13px}
+html :is(.research-table,.okx-live table,.v130-table,.ledger-table-wrap table,.notification-matrix) {font-variant-numeric:tabular-nums;border-collapse:collapse}
+html :is(.research-table,.okx-live table,.v130-table,.notification-matrix) th {background:var(--surface-2);color:var(--muted);font-weight:500;font-size:11px;white-space:nowrap}
+html :is(.research-table,.okx-live table,.v130-table,.notification-matrix) td {padding-top:var(--row-pad);padding-bottom:var(--row-pad);font-size:12px;border-color:var(--line-soft)}
+html :is(.research-table,.okx-live table,.v130-table,.notification-matrix) tbody tr:hover {background:var(--card-hover-bg)}
+html :is(.research-table-wrap,.ledger-table-wrap,.notification-matrix-wrap) {overflow:auto;max-width:100%;scrollbar-width:thin}
+html :is(.research-badge,.ms-badge,.okx-badge) {border-radius:4px;font-size:10px}
+html :is(.research-empty,.empty-state,.okx-empty,.knowledge-empty) {color:var(--muted);padding:36px 24px;line-height:1.8;background:var(--surface)}
+html :is(.research-section-heading,.copier-panel,.ms-heading) h2 {font-size:16px;font-weight:550}
+html :is(.research-toolbar,.model-toolbar,.dataset-toolbar,.notification-tabs,.manual-tabs,.bk-tabs,.of-tabs,.ll-tabs,.rp-tabs,.copier-tabs,.yd-toolbar,.signal-workspace-nav) {border-bottom:1px solid var(--line);border-radius:0;padding:10px 0;gap:8px;background:transparent}
+html :is(.manual-tabs,.bk-tabs,.of-tabs,.ll-tabs,.rp-tabs,.copier-tabs,.yd-view-tabs,.signal-workspace-nav) button {border-radius:4px;font-size:12px;min-height:34px}
+html :is(.manual-tabs,.bk-tabs,.of-tabs,.ll-tabs,.rp-tabs,.copier-tabs,.yd-view-tabs,.signal-workspace-nav) :is(.selected,.active,[aria-selected=true],[aria-pressed=true]) {background:var(--nav-active);color:var(--text);border-color:transparent}
+/* Dialogs are consistent inspector drawers; trading/chart dialogs keep their geometry. */
+html :is(#research-dialog,#dataset-dialog,#model-dialog,#strategy-dialog,#paper-dialog) {position:fixed;inset:0 0 0 auto;width:min(680px,92vw);max-width:92vw;height:100dvh;max-height:100dvh;margin:0;border:0;border-left:1px solid var(--line);border-radius:0;padding:24px;background:var(--surface);color:var(--text);box-shadow:var(--elevated-shadow)}
+dialog::backdrop {background:var(--dialog-backdrop)}
+.research-dialog-heading {position:sticky;top:-24px;padding:18px 0;background:var(--surface);z-index:3;border-bottom:1px solid var(--line);margin-bottom:20px}
+.research-dialog-heading h2 {font-size:20px}
+.research-dialog-heading p {font-size:12px}
+.workspace-command {width:min(580px,calc(100vw - 32px));max-height:70dvh;margin:12vh auto auto;padding:0;border:1px solid var(--control-border);border-radius:12px;background:var(--surface);color:var(--text);box-shadow:var(--elevated-shadow)}
+.workspace-command header {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px;border-bottom:1px solid var(--line)}
+.workspace-command input {flex:1;min-width:0;background:transparent;border:0;outline:none;color:var(--text);font-size:15px}
+.workspace-command>input {display:block;box-sizing:border-box;width:calc(100% - 24px);min-height:42px;margin:12px;padding:10px 12px;border:1px solid var(--control-border);border-radius:var(--radius-control);background:var(--control-bg)}
+.workspace-command>input:focus {border-color:var(--focus-border);box-shadow:0 0 0 3px var(--focus-glow)}
+.workspace-command header button {background:var(--surface-2);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:4px 7px}
+.workspace-command-results {padding:8px;max-height:50vh;overflow:auto}
+.workspace-command-results button {display:flex;align-items:center;width:100%;gap:12px;border:0;background:none;color:var(--text);padding:12px;border-radius:6px;text-align:left}
+.workspace-command-results button:is(:hover,[aria-selected=true]) {background:var(--nav-active)}
+.workspace-command-results small {margin-left:auto;color:var(--muted)}
+.workspace-command footer {padding:10px 16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted)}
+/* Market terminal: chart and evidence share the first screen; detail tabs below. */
+#market-sync-workspace {display:grid;grid-template-columns:minmax(0,1fr) 254px;gap:12px;align-items:start}
+#market-sync-workspace>* {min-width:0;margin:0;grid-column:1/-1}
+#market-sync-workspace>.ms-alert {grid-column:1;grid-row:1;padding:12px 16px;display:flex;flex-wrap:nowrap;align-items:center;gap:12px;min-height:80px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.ms-alert .ms-alert-icon {display:none}
+#market-sync-workspace .ms-alert h2 {font-size:16px;line-height:1.5}
+#market-sync-workspace .ms-alert p {font-size:11px;color:var(--muted);line-height:1.5;margin-top:5px}
+.ms-alert button {margin-left:auto!important;white-space:nowrap;flex-shrink:0}
+#market-sync-workspace>.ms-alert-event {border-left:3px solid var(--amber)}
+#market-sync-workspace>.ms-alert-unavailable {border-left:3px solid var(--red)}
+#market-sync-workspace>.ms-quick-guide {display:none}
+#market-sync-workspace>.ms-feed {grid-column:2;grid-row:1;min-height:80px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px;font-size:10px;line-height:1.5;display:block}
+.ms-feed strong {font-size:11px}.ms-feed>span {display:block;margin-top:5px}.ms-feed>small {color:var(--muted)}
+#market-sync-workspace>.ms-context {grid-column:1;grid-row:2;padding:16px;min-width:0}
+.ms-context .ms-heading {align-items:center;gap:12px;margin-bottom:12px}
+.ms-context .ms-heading h2 {font-size:18px;letter-spacing:-.4px}
+.ms-chart-controls {gap:5px;margin:0 0 10px;flex-wrap:wrap}
+.ms-chart-controls button {padding:6px 8px;font-size:10px;min-height:28px;border-radius:5px;background:var(--surface-2);border-color:var(--line)}
+.ms-zone {font-size:10px}.ms-zone select {font-size:11px;max-width:112px}
+.ms-chart-scroll {min-width:0;overflow:auto}.ms-chart-scroll svg.ms-candle-chart {min-width:560px;width:100%;height:auto}
+.ms-chart-caption,.ms-profile-note {font-size:10px;line-height:1.6;margin:8px 0 0;color:var(--muted)}
+#market-sync-workspace>.ms-bias {grid-column:2;grid-row:2;padding:18px 16px;min-height:100%;background:var(--surface);display:block}
+.ms-bias .ms-heading {display:block;margin:0}.ms-bias .ms-eyebrow {font-size:10px;line-height:1.6}
+.ms-bias .ms-heading h2 {margin-top:6px;font-size:15px}
+.ms-bias-value {display:block;margin-top:18px;font-size:32px;font-weight:500;letter-spacing:-1px}
+.ms-bias-value small {font-size:11px;margin-left:8px;letter-spacing:0;color:var(--muted)}
+.ms-bias-track {height:5px;margin-top:18px;background:var(--surface-2)}
+.ms-bias-scale {font-size:9px;gap:3px;margin-top:8px}
+.ms-bias-components {display:flex;flex-direction:column;gap:0;margin-top:24px}
+.ms-bias-components>span {padding:13px 0;display:flex;justify-content:space-between;border-top:1px solid var(--line);font-size:12px;line-height:1.5}
+.ms-bias>.quiet-text {font-size:10px;margin-top:18px;line-height:1.8}
+.ms-terminal-levels {margin-top:24px;border-top:1px solid var(--line);padding-top:16px}
+.ms-terminal-levels h3 {font-size:13px;margin:0 0 12px}
+.ms-terminal-levels>div {display:flex;justify-content:space-between;gap:8px;padding:8px 0;font-size:11px;color:var(--muted)}
+.ms-terminal-levels b {color:var(--text);font:11px var(--mono)}
+.ms-terminal-tabs {display:flex;gap:8px;padding:8px 0 0;border-bottom:1px solid var(--line);overflow:auto}
+.ms-terminal-tabs button {padding:10px 14px;background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-size:12px;white-space:nowrap;border-radius:0}
+.ms-terminal-tabs button[aria-pressed=true] {color:var(--text);border-color:var(--mint)}
+#market-sync-workspace>.ms-section {padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+#market-sync-workspace>.ms-section h2 {font-size:15px}
+#market-sync-workspace>.ms-section summary {font-size:12px}
+/* Detection workbench: independent scrolling symbol pane and chart inspector. */
+.yd-shell {display:block;min-width:0}
+.yd-shell .yd-toolbar {padding:0 0 10px;margin-bottom:10px}
+.yd-shell .ml-account-bar {border-radius:4px;background:var(--surface);padding:7px 10px;margin:0 0 10px;font-size:11px}
+.yd-shell .yd-summary {padding:4px 0 10px;gap:12px;font-size:11px;min-height:0}
+.yd-shell .yd-browser {grid-template-columns:220px minmax(0,1fr);gap:10px}
+.yd-shell .yd-symbol-panel {border-radius:8px;padding:12px 8px;position:sticky;top:64px;max-height:calc(100dvh - 90px);overflow:auto;scrollbar-width:thin}
+.yd-shell .yd-symbol-list {max-height:calc(100dvh - 280px);overflow:auto;scrollbar-width:thin}
+.yd-symbol-row {border-radius:4px!important;border-color:transparent!important;border-bottom-color:var(--line-soft)!important}
+.yd-shell .yd-chart-stage {padding:0;overflow:hidden;border-radius:8px}
+.yd-shell .yd-chart-head {padding:12px 14px;border-bottom:1px solid var(--line);margin:0;gap:10px}
+.yd-shell .yd-chart-head h2 {font-size:18px}.yd-chart-head p {font-size:10px}
+.yd-shell .yd-context-actions,.yd-shell .yd-chart-tools {padding:8px 12px;margin:0;gap:8px;border-bottom:1px solid var(--line-soft)}
+.yd-shell .yd-insight {padding:6px 12px;font-size:10px;margin:0;border:0;border-radius:0;background:var(--surface-2)}
+.yd-shell #yd-chart-wrap,.yd-shell #yd-chart {height:clamp(330px,51vh,680px)}
+.yd-shell .yd-chart-foot {padding:8px 12px;font-size:10px}
+.yd-shell .yd-detections {margin:0;padding:12px 14px;border-top:1px solid var(--line)}
+.yd-shell .yd-box-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.yd-shell .yd-view-tabs .nav-link {font-size:12px;white-space:nowrap;padding:7px 10px}
+.yd-shell .yd-history-row,.yd-shell .yd-job {border-radius:0;border-width:0 0 1px;padding:var(--row-pad) 12px}
+/* Signal cards: scan the decision context, expand supporting explanation. */
+.signal-workspace .signal-context {margin:12px 0}.signal-context h2 {font-size:16px}.signal-context p {font-size:11px}
+.signal-workspace .signal-controls {padding:12px 0;border:0;border-bottom:1px solid var(--line);border-radius:0;background:none}
+.signal-workspace .signal-card-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));align-items:start;gap:16px;border:0;border-radius:0;overflow:visible}
+.signal-workspace .signal-card {display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 16px;min-height:0;padding:20px;border:1px solid var(--line);border-radius:10px;background:var(--surface);box-shadow:none;transition:border-color .16s}
+.signal-workspace .signal-card:hover {border-color:var(--card-hover-border);transform:none;box-shadow:none}
+.signal-workspace .signal-card:focus-within {border-color:var(--mint)}
+.signal-card .signal-card-top {grid-column:1/-1;grid-row:1;display:flex;align-items:center;justify-content:space-between}
+.signal-card .card-symbol {display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+.signal-card .card-symbol strong {font-size:20px;letter-spacing:-.3px}.signal-card .card-symbol small {font-size:12px}
+.signal-card .card-timeframe {font-size:12px;padding:5px 8px;background:var(--surface-2);border:1px solid var(--line);border-radius:5px}
+.signal-card .signal-card-direction {grid-column:1/-1;grid-row:2;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.signal-card .card-recency {font-size:12px}.signal-card .direction-stage {font-size:12px}
+.signal-card .card-price-label {grid-column:1;grid-row:3;align-self:auto;font-size:12px;margin:0}
+.signal-card .card-price {grid-column:1;grid-row:4;align-self:center;font-size:27px;line-height:1.2;letter-spacing:-.5px;margin:-6px 0 0}
+.signal-card .performance-badge {grid-column:2;grid-row:4;align-self:center;justify-self:end;margin:-6px 0 0;padding:5px 8px;font-size:11px}
+.signal-card .card-performance {grid-column:1/-1;grid-row:5;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:4px 0 0;padding:14px 0 2px;border-top:1px solid var(--line-soft)}
+.signal-card .card-performance>div {min-width:0;padding:0;border:0;border-radius:0;background:none}
+.signal-card .card-performance dt {font-size:12px;color:var(--muted);font-weight:400}
+.signal-card .card-performance dd {font-size:15px;margin:6px 0 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.signal-card .signal-row-details {grid-column:1/-1;grid-row:6;border-top:1px solid var(--line-soft);padding-top:4px;font-size:11px}
+.signal-row-details summary {color:var(--muted);cursor:pointer;font-size:12px;min-height:38px;padding:10px 0 4px}
+.signal-confirmed-time {float:right;font-size:12px;font-weight:400;color:var(--dim)}
+.signal-row-details summary:hover {color:var(--text)}
+.signal-row-details summary:focus-visible {outline:2px solid var(--mint);outline-offset:4px;border-radius:2px}
+.signal-card .signal-row-details .performance-note {display:block;font-size:11px;line-height:1.8;margin:12px 0 0;color:var(--muted)}
+.signal-card .signal-row-details .model-card-status {margin:12px 0 0;display:flex;justify-content:flex-start;flex-wrap:wrap;gap:8px 12px;font-size:11px;line-height:1.7}
+.signal-row-details .card-origin {display:block;margin:10px 0;color:var(--muted)}
+html .signal-visual-grid {gap:12px}.signal-chart-card {padding:16px}
+html .ledger-metrics {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .ledger-metrics>article {padding:14px 18px;border:0;border-right:1px solid var(--line);border-radius:0;background:var(--surface)}
+/* Registry components: metrics form a strip; workflow lives beside recent records. */
+html :is(.research-objective,.platform-hero,.knowledge-hero,.manual-hero,.copier-focus-hero) {padding:14px 0;border:0;border-radius:0;background:none;margin:0 0 14px;box-shadow:none}
+html :is(.research-objective,.platform-hero,.knowledge-hero,.manual-hero,.copier-focus-hero) h2 {font-size:19px;line-height:1.5;max-width:100%;letter-spacing:-.3px}
+html :is(.research-objective,.platform-hero,.knowledge-hero,.manual-hero,.copier-focus-hero) p {font-size:12px;line-height:1.8;max-width:960px;color:var(--muted)}
+html :is(.research-metrics,.copier-kpis,.okx-metrics,.ms-stats,.ms-overview) {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+html :is(.research-metrics button,.metric-card,.copier-kpis>article,.okx-metrics article,.ms-stats article,.ms-overview article) {border:0;border-right:1px solid var(--line);border-radius:0;padding:14px 16px;background:transparent}
+html .research-metrics strong {font-size:26px;font-weight:500}.research-metrics small {font-size:11px}
+.linear-research-body {display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:20px;margin-top:20px;align-items:start}
+.linear-research-body .research-flow {grid-column:2;grid-row:1;display:flex;flex-direction:column;padding:8px;margin:0;position:sticky;top:68px;gap:0}
+.linear-research-body .research-flow button {padding:14px 10px;border:0;border-bottom:1px solid var(--line-soft);border-radius:0;background:transparent;text-align:left}
+.linear-research-body .research-recent-region {grid-column:1;grid-row:1;min-width:0}
+html .research-recent {display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .research-recent>button {padding:var(--row-pad) 16px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--surface);text-align:left}
+html .research-recent h3 {font-size:14px}.research-recent p {font-size:12px;line-height:1.6}
+html :is(.strategy-grid,.dataset-grid,.model-grid) {display:grid;grid-template-columns:minmax(0,1fr);gap:0}
+html :is(.strategy-card,.dataset-card) {padding:var(--row-pad) 18px;border-radius:0;border-width:0 0 1px;margin:0}
+html .strategy-card h3 {font-size:15px}.strategy-card p {font-size:12px}
+html .platform-layer {border-radius:8px;border-color:var(--line)}
+html .platform-summary {gap:12px}.platform-layer h3 {font-size:15px}
+/* Collection editors are true split panes, retaining the same form nodes/state. */
+.linear-collection {display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+.linear-collection:has(.knowledge-editor) {grid-template-columns:minmax(280px,1fr) minmax(360px,1.1fr)}
+.linear-collection>.knowledge-editor {grid-column:2;grid-row:1;position:sticky;top:64px;max-height:calc(100dvh - 88px);overflow:auto;padding:20px;border:1px solid var(--line);border-radius:8px;background:var(--surface);scrollbar-width:thin}
+.linear-collection>.linear-collection-records {grid-column:1;grid-row:1;min-width:0}
+html .knowledge-card-grid {display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .knowledge-card {padding:var(--row-pad) 18px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:var(--surface)}
+.knowledge-card h3 {font-size:15px!important;margin:10px 0 6px}.knowledge-card p {font-size:12px!important;line-height:1.7}
+html .knowledge-topic-grid {display:flex;gap:6px;overflow:auto;margin:12px 0;flex-wrap:wrap}
+html .knowledge-topic {display:flex;align-items:center;gap:10px;min-width:0;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.knowledge-topic strong {font-size:12px!important}.knowledge-topic span {display:none}.knowledge-topic small {font-size:10px!important;color:var(--muted)}
+html .knowledge-topic.selected {background:var(--nav-active);border-color:var(--brand-primary)}
+.knowledge-step-links {padding:0!important;gap:16px!important;border:0!important}.knowledge-step-links a {font-size:11px!important}
+.knowledge-actions button {font-size:11px!important;padding:6px 9px!important}
+/* Reading spaces use the same pane language, with deliberate long-form leading. */
+html :is(.bk-hero,.of-hero,.ll-hero,.rp-hero) {padding:16px 0;margin-bottom:16px;border:0;background:transparent;border-radius:0;box-shadow:none}
+html :is(.bk-hero,.of-hero,.ll-hero,.rp-hero) h2 {font-size:23px;line-height:1.45}
+html :is(.bk-hero,.of-hero,.ll-hero,.rp-hero) p {font-size:12px;line-height:1.8}
+html :is(.bk-grid,.of-grid,.ll-grid,.rp-grid) {gap:12px}
+html .bk-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+html .bk-card {border-radius:8px;background:var(--surface);border-color:var(--line);box-shadow:none}
+html .bk-card h3 {font-size:18px}.bk-card-main {padding:20px}.bk-spine {width:34px}
+html .bk-reading {grid-template-columns:180px minmax(0,1fr);gap:16px}
+html :is(.bk-toc,.of-toc,.ll-toc,.rp-toc) {background:var(--sidebar);padding:10px;border-radius:8px;border:1px solid var(--line);top:64px;max-height:calc(100dvh - 85px);overflow:auto;scrollbar-width:thin}
+html :is(.bk-reader,.of-reader,.ll-reader,.rp-reader) {padding:28px 32px;border-radius:8px;border-color:var(--line);background:var(--surface)}
+html :is(.bk-reader,.of-reader,.ll-reader,.rp-reader) p {font-size:14px;line-height:1.95}
+/* Accounts, simulations and operations retain explicit action boundaries. */
+html :is(.okx-live,.manual-section,.notification-card,.system-card) {padding:18px;border-color:var(--line);border-radius:8px;background:var(--surface)}
+html .okx-live {margin:12px 0}.okx-live h2 {font-size:17px}
+html .manual-workspace {gap:14px}.manual-hero .manual-kicker {display:none}
+html .manual-layout {grid-template-columns:minmax(0,1fr) 280px;gap:16px}
+html .copier-focus-hero {display:flex;justify-content:space-between;align-items:center}
+html .copier-message {border-radius:0;border-width:0 0 1px;padding:var(--row-pad) 16px}
+html .copier-focus-status {padding:10px 0;margin:0;border:0;background:none;font-size:12px}
+html .copier-kpis strong {font-size:26px}
+html .desk-shell {gap:12px}.desk-market-widget {border-radius:6px;overflow:hidden}
+html .notification-channels {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+html .notification-card h2,html .system-card h2 {font-size:16px}
+html .metrics {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:16px}
+html .metric-value {font-size:26px}
+/* VLM consumes tokens inside Shadow DOM; host is a first-class workspace. */
+#vision-module {min-width:0;display:block}
+@media(min-width:1024px) {
+  body.sidebar-collapsed .sidebar {transform:translateX(-100%);visibility:hidden}
+  body.sidebar-collapsed .workspace {margin-left:0;width:100%}
+  .workspace:has(#yolo-detect-view:not(.hidden)) .page-heading p {display:none}
+}
+@media(max-width:1250px) and (min-width:1024px) {
+ .sidebar {width:244px;grid-template-columns:60px 184px}.workspace {margin-left:244px;width:calc(100% - 244px)}
+ .workspace-rail {padding-left:4px;padding-right:4px}.workspace main {padding-left:18px;padding-right:18px}
+ .topbar-meta time {display:none}.workspace-search {min-width:140px}
+ #market-sync-workspace {grid-template-columns:minmax(0,1fr) 220px}.yd-shell .yd-browser {grid-template-columns:190px minmax(0,1fr)}
+}
+@media(max-width:1023px) {
+ .sidebar {width:320px;max-width:92vw;grid-template-columns:64px minmax(0,1fr);z-index:200;transform:translateX(-100%);visibility:hidden}
+ .nav-open .sidebar {transform:translateX(0);visibility:visible;display:grid}
+ .sidebar .nav-close {top:12px;right:12px;width:34px;min-height:34px;font-size:11px}
+ .context-heading {padding-right:46px}.context-heading h2 {font-size:17px}
+ .sidebar .brand {margin:0}.workspace,.sidebar-collapsed .workspace {margin-left:0;width:100%}
+ .workspace .topbar {padding:0 16px;height:52px}.workspace main {padding:16px 18px 24px}
+ .workspace .topbar .nav-toggle {display:flex;width:32px;height:32px}
+ .nav-backdrop {z-index:190}.workspace-search {min-width:0}.workspace-search>span:not(.ui-search-icon),.workspace-search kbd {display:none}
+ .linear-collection:has(.knowledge-editor) {grid-template-columns:1fr}
+ .linear-collection>.knowledge-editor {grid-column:1;grid-row:1;position:static;max-height:none}
+ .linear-collection>.linear-collection-records {grid-row:2}
+}
+@media(max-width:760px) {
+ .workspace main {padding:14px 12px 24px}.workspace .topbar {gap:10px;padding:0 12px}
+ .workspace .page-heading {margin-bottom:12px}.workspace .page-heading h1 {font-size:20px}.workspace .page-heading p {font-size:11px}
+ .breadcrumb>span,.topbar-meta>:not(.theme-picker),.workspace-density {display:none}
+ .topbar .theme-picker select {width:64px;font-size:12px;min-height:36px}.topbar .theme-picker svg {display:none}
+ .workspace-search {width:32px;min-height:32px;padding:7px}.context-search input {font-size:16px}
+ #market-sync-workspace {grid-template-columns:minmax(0,1fr)}
+ #market-sync-workspace>.ms-alert {grid-column:1;grid-row:1;flex-wrap:wrap;padding:12px;min-height:0}
+ #market-sync-workspace>.ms-feed {grid-column:1;grid-row:2;min-height:0;padding:10px 12px}
+ #market-sync-workspace>.ms-context {grid-column:1;grid-row:3;padding:12px}
+ #market-sync-workspace>.ms-bias {grid-column:1;grid-row:4;min-height:0;padding:16px}
+ .ms-bias .ms-heading {display:flex;justify-content:space-between;align-items:center}.ms-bias-value {margin:0;font-size:26px}
+ .ms-bias-components {margin-top:16px}.ms-terminal-levels {margin-top:12px}.ms-chart-caption {display:block}
+ .ms-chart-scroll svg.ms-candle-chart {min-width:620px}.ms-alert button {min-height:34px}
+ .linear-research-body {grid-template-columns:1fr}.linear-research-body .research-flow {grid-column:1;grid-row:2;position:static}
+ .linear-research-body .research-recent-region {grid-column:1;grid-row:1}
+ html .bk-grid,html .bk-reading {grid-template-columns:1fr}html .bk-toc {max-height:240px;position:static}
+ html :is(.bk-reader,.of-reader,.ll-reader,.rp-reader) {padding:20px 16px}
+ html .notification-channels {grid-template-columns:1fr}
+ .signal-workspace .signal-card {padding:18px}
+ .signal-workspace .signal-card-grid {grid-template-columns:minmax(0,1fr);gap:14px}
+ .yd-shell .yd-browser {display:block}.yd-shell .yd-symbol-panel {position:static;max-height:none}.yd-shell .yd-symbol-list {max-height:55vh}
+ .yd-shell .yd-chart-head {flex-wrap:wrap}.yd-shell .yd-switcher {flex-wrap:wrap;min-width:0}
+ .yd-shell .yd-view-tabs {gap:3px;flex-wrap:nowrap;overflow:auto}.yd-shell .yd-view-tabs .nav-link {font-size:11px;padding:8px 6px}
+ .yd-shell .yd-box-list {grid-template-columns:1fr}.yd-shell .yd-chart-tools {flex-wrap:wrap}
+ .yd-shell #yd-chart-wrap,.yd-shell #yd-chart {height:350px}
+ html :is(input[type=search],textarea) {font-size:16px!important}
+ .workspace-command input {font-size:16px}.workspace-command {margin-top:6vh}
+ html .manual-layout {grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce) {*,*::before,*::after {scroll-behavior:auto!important;transition:none!important}}
+/* Final component dimensions are shared with the chosen terminal reference. */
+.ms-bias-components>span {padding:10px 0}
+.ms-bias .ms-eyebrow {display:none}
+.ms-bias-value {margin-top:14px}
+.ms-terminal-levels {margin-top:16px;padding-top:14px}
+.ms-terminal-levels>div {padding:6px 0}
+.ms-bias>.quiet-text {margin-top:14px}
+#signals-view.signal-workspace .signal-workspace-nav .nav {border:0;background:transparent;padding:0;gap:3px;border-radius:0}
+#signals-view.signal-workspace .signal-workspace-nav .nav-link {border-radius:4px;padding:8px 16px;font-size:12px}
+#signals-view.signal-workspace .signal-workspace-nav .nav-link.active {background:var(--nav-active);box-shadow:none}
+.signal-card .card-recency {display:block;margin-top:0;font-size:12px}
+.linear-section-tabs {display:flex;gap:8px;border-bottom:1px solid var(--line);padding:0;margin:16px 0;overflow:auto}
+.linear-section-tabs button {background:none;border:0;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;padding:12px 16px;border-radius:0;white-space:nowrap}
+.linear-section-tabs button[aria-pressed=true] {border-bottom-color:var(--mint);color:var(--text)}
+html .notification-channel-grid {grid-template-columns:minmax(0,1fr);gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .notification-channel-card {display:grid;grid-template-columns:minmax(180px,1fr) 2fr;gap:12px 28px;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:20px;background:var(--surface)}
+.notification-card-heading {align-items:center}.notification-channel-counts {margin:0}.notification-card-note {grid-column:1/-1;margin:0}
+html .system-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html .system-grid .scan-card {grid-column:1/-1}
+html .system-grid .system-card {border-radius:8px}
+html .system-facts {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px}
+body[data-workspace-family=registry] .research-toolbar {position:sticky;top:48px;z-index:10;background:var(--bg);padding:12px 0;margin:0 0 12px}
+@media(max-width:760px){html .notification-channel-card,html .system-grid {grid-template-columns:minmax(0,1fr)}html .system-facts {grid-template-columns:1fr}.notification-card-note {grid-column:1}}
+/* A chart workspace owns its heading; the shell title remains accessible. */
+body[data-workspace="yolo-detect"] .page-heading {position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.yd-shell .yd-symbol-panel .yd-summary {display:flex;flex-wrap:wrap;font-size:10px;padding:8px 4px;margin:0;gap:5px;border-bottom:1px solid var(--line)}
+.yd-account-summary {border-top:1px solid var(--line);margin-top:10px;padding:10px 4px;font-size:11px}
+.yd-account-summary>summary {cursor:pointer;color:var(--text-secondary)}
+.yd-account-summary .ml-account-bar {display:flex;flex-direction:column;align-items:flex-start;gap:8px;font-size:10px;margin:10px 0 0;padding:8px}
+.yd-shell .yd-chart-head {padding:10px 12px}.yd-shell .yd-chart-head p {margin:4px 0 0}
+.yd-shell .yd-chart-tools {padding:7px 10px}.yd-shell .yd-context-actions {padding:7px 10px}
+.yd-shell #yd-chart-wrap,.yd-shell #yd-chart {height:clamp(330px,50vh,620px)}
+/* Collection guidance leaves records in the first fold. */
+html .knowledge-hero {align-items:center;padding:4px 0 12px;margin:0}
+html .knowledge-hero h2 {font-size:16px;margin:0 0 4px}
+html .knowledge-hero p {font-size:11px}
+html .knowledge-hub-links {gap:6px}
+html .knowledge-step-links {gap:0!important;border-bottom:1px solid var(--line)!important;margin:12px 0}
+html .knowledge-step-links a {border:0;border-radius:0;background:none;padding:10px 16px;color:var(--muted)}
+body[data-workspace="learning"] .knowledge-step-links a[href="#learning"],
+body[data-workspace="knowledge"] .knowledge-step-links a[href="#knowledge"],
+body[data-workspace="content"] .knowledge-step-links a[href="#content"] {color:var(--text);box-shadow:inset 0 -2px var(--brand-primary)}
+.knowledge-guidance {margin:8px 0;font-size:11px;color:var(--muted)}
+.knowledge-guidance summary {cursor:pointer;padding:4px 0}
+.knowledge-guidance .research-caption {font-size:11px;line-height:1.7}
+/* Scan boards share the compact registry rhythm without hiding freshness. */
+.al-board .al-header {margin:4px 0 16px;gap:16px}.al-board .al-header h2 {font-size:18px;margin:0 0 5px}
+.al-board .al-header p {font-size:12px;margin:0}.al-board .al-eyebrow {font-size:10px}
+.al-board .al-stats {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.al-board .al-stats>div {border:0;border-right:1px solid var(--line);border-radius:0;padding:16px}
+.al-board .al-rules {padding:12px 16px;margin:12px 0;border-radius:6px;font-size:12px}
+.al-board .al-toolbar {margin:16px 0 12px}.al-board .al-table {border-radius:8px}
+.al-board .al-table td {padding:var(--row-pad) 12px}.al-board .al-alert {font-size:12px;border-radius:4px}
+#paper-desk-workspace {--desk-radius:8px;--desk-gap:12px;--desk-long:var(--positive-text)}
+#paper-desk-workspace .desk-market-layout {gap:12px}
+#paper-desk-workspace .desk-ticket {padding:16px;position:sticky;top:64px}
+#paper-desk-workspace .desk-ticket :is(input,select) {font-size:12px;height:36px;padding:8px}
+#paper-desk-workspace .desk-submit {border-radius:6px;font-size:13px;min-height:38px}
+#paper-desk-workspace .desk-submit.desk-long {background:var(--positive-dot);color:var(--bg)}
+#paper-desk-workspace .desk-submit.desk-short {background:var(--red);color:var(--bg)}
+#paper-desk-workspace .desk-market-header {gap:10px;padding:14px}
+#paper-desk-workspace .desk-metrics strong {font-size:20px}
+#paper-desk-workspace .desk-metrics article {padding:10px}
+@media(max-width:760px) {#paper-desk-workspace .desk-ticket {position:static}#paper-desk-workspace .desk-ticket :is(input,select) {font-size:16px}}
+/* Readers share a chapter pane and a restrained content toolbar. */
+body[data-workspace-family=reader] :is(.of-layout,.ll-layout,.rp-layout) {grid-template-columns:208px minmax(0,1fr);gap:16px}
+body[data-workspace-family=reader] :is(.of-nav,.ll-nav,.rp-nav) {border-radius:6px;background:var(--sidebar);border-color:var(--line);top:64px;max-height:calc(100dvh - 100px);scrollbar-width:thin}
+body[data-workspace-family=reader] .ms-controls {background:none;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0;margin:10px 0 18px;min-height:42px}
+body[data-workspace-family=reader] .ms-controls .segmented {border:0;background:none;border-radius:0;padding:0;gap:0;flex-wrap:wrap}
+body[data-workspace-family=reader] .ms-controls .segmented button {font-size:12px;min-height:40px;padding:9px 14px;border-radius:0;border:0;border-bottom:2px solid transparent;box-shadow:none;background:none}
+body[data-workspace-family=reader] .ms-controls .segmented button.active {border-bottom-color:var(--mint);color:var(--text)}
+body[data-workspace-family=reader] .reader-save {margin:0 0 8px;font-size:11px}
+body[data-workspace-family=reader] .reader-disclosure>summary {font-size:11px;color:var(--muted)}
+body[data-workspace-family=reader] :is(.rp-reader,.ll-reader,.of-reader) {padding:24px 28px}
+body[data-workspace-family=reader] :is(.rp-reader,.ll-reader,.of-reader) h2 {font-size:21px}
+body[data-workspace-family=reader] :is(.rp-reader,.ll-reader,.of-reader) p {font-size:14px;line-height:1.9}
+@media(max-width:760px){body[data-workspace-family=reader] :is(.of-layout,.ll-layout,.rp-layout,.bk-reading) {grid-template-columns:minmax(0,1fr)}body[data-workspace-family=reader] :is(.rp-reader,.ll-reader,.of-reader) {padding:20px 16px}body[data-workspace-family=reader] .ms-controls .segmented button {padding:10px;font-size:12px}}
+html .platform-business-lines {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html .platform-business-lines .platform-pipeline {padding:16px;background:var(--surface);border-radius:8px}
+html .platform-business-lines h3 {font-size:14px;margin:0 0 8px}.platform-business-lines p {font-size:12px;line-height:1.7;margin-bottom:12px}
+html .platform-summary {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .platform-summary article {border:0;border-right:1px solid var(--line);border-radius:0}
+html .system-grid .runtime-card {grid-column:auto}
+html #primary-metrics {grid-template-columns:repeat(2,minmax(0,1fr))}
+html .system-facts {grid-template-columns:minmax(90px,.8fr) minmax(0,1.8fr);gap:9px 18px}
+@media(max-width:760px){html .platform-business-lines {grid-template-columns:minmax(0,1fr)}html .system-grid .runtime-card {grid-column:1/-1}html #primary-metrics .metric-card {padding:14px}}
+/* Dataset metadata is a catalogue of expandable records, not a wall of cards. */
+html .datasets-hero {padding:8px 0 14px;border:0;border-radius:0;background:none;align-items:center}
+html .datasets-hero h2 {font-size:18px;margin:0 0 6px}html .datasets-hero p {font-size:12px;margin:4px 0}.datasets-kicker {display:none}
+html .dataset-summary {gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:8px 0}
+html .dataset-summary article {border:0;border-right:1px solid var(--line);border-bottom:1px solid var(--line);border-radius:0;padding:12px 16px}
+html .dataset-category-section {margin:16px 0}.dataset-category-section .dataset-section-heading {display:none}
+html .dataset-category-grid {display:flex;gap:6px;flex-wrap:wrap}html .dataset-category-filter {min-height:34px;padding:7px 12px;font-size:12px;gap:12px;border-radius:6px}
+html .dataset-category-filter strong {font-size:12px}.dataset-storage-note {margin-bottom:12px}
+html .dataset-record-grid {display:flex;flex-direction:column;align-items:stretch;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+html .dataset-record-grid .dataset-card {display:block;border:0;border-bottom:1px solid var(--line);padding:0;background:var(--surface);border-radius:0}
+.dataset-record-summary {display:grid;grid-template-columns:minmax(0,1fr) minmax(180px,.6fr) 50px;align-items:center;gap:18px;padding:var(--row-pad) 16px;list-style:none;cursor:pointer}
+.dataset-record-summary::-webkit-details-marker {display:none}.dataset-record-summary:hover {background:var(--surface-2)}
+.dataset-record-summary h3 {font-size:13px!important;margin:6px 0 2px!important}.dataset-record-summary .dataset-id {font-size:10px;margin:0;color:var(--dim)}
+.dataset-record-meta {display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:12px;font-size:11px;color:var(--muted);overflow-wrap:anywhere}.dataset-record-expand {font-size:11px;color:var(--muted);white-space:nowrap}
+.dataset-record-body {padding:18px 20px;border-top:1px solid var(--line);background:var(--surface-2)}
+@media(max-width:760px){.dataset-record-summary {grid-template-columns:minmax(0,1fr) 40px;gap:8px}.dataset-record-meta {grid-column:1/-1;grid-row:2}.dataset-record-expand{grid-column:2;grid-row:1}.dataset-record-body{padding:14px}.datasets-hero {flex-direction:column;align-items:flex-start!important}.dataset-summary article {padding:12px!important}}
+
+/* External charts keep a recovery path even if the third-party frame is blank. */
+.desk-chart-help {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 16px;border-bottom:1px solid var(--line-soft);font-size:11px;color:var(--muted)}
+.desk-chart-help[hidden] {display:none}
+.desk-chart-help button {flex-shrink:0;font-size:11px;padding:5px 8px}
+@media(max-width:600px){.desk-chart-help {align-items:flex-start;padding:8px 12px}}
+
+/* Quiet native scrollbars retain keyboard, touch and drag scrolling. */
+html,body * {scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--muted) 28%,transparent) transparent}
+body *:hover {scrollbar-color:color-mix(in srgb,var(--muted) 45%,transparent) transparent}
+::-webkit-scrollbar {width:6px;height:6px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner {background:transparent}
+::-webkit-scrollbar-thumb {background:color-mix(in srgb,var(--muted) 28%,transparent);border-radius:8px}
+::-webkit-scrollbar-thumb:hover {background:color-mix(in srgb,var(--muted) 50%,transparent)}
+::-webkit-scrollbar-button {display:none;width:0;height:0}
+.chart-ma-legend {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 18px;font-size:var(--text-caption);font-variant-numeric:tabular-nums}
+.chart-ma-value {display:flex;align-items:center;gap:6px;min-width:0;color:var(--muted)}
+.chart-ma-value i {flex:none;width:10px;height:2px;border-radius:2px;background:var(--ma-color)}
+.chart-ma-value>span {white-space:nowrap}
+.chart-ma-value b {font-weight:450;color:var(--ma-color);margin-left:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:700px){.chart-ma-legend {font-size:11px;gap:8px 10px}.chart-ma-value {gap:4px}.chart-ma-value i {width:6px}}
+@media(max-width:700px){.chart-ma-value {display:grid;grid-template-columns:6px minmax(0,1fr);gap:4px}.chart-ma-value b {grid-column:1/-1;margin:0;font-size:12px;overflow:visible;text-overflow:clip}.chart-ma-value i {align-self:center}.chart-ma-legend {gap:9px 12px}}

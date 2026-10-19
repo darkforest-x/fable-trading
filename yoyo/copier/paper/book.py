@@ -8,6 +8,7 @@ reserve margin (notional / leverage).
 from __future__ import annotations
 
 import json
+import math
 import sqlite3
 from typing import Any, Optional
 
@@ -69,6 +70,14 @@ class PaperBook:
         self.db = db
         with self._connect() as conn:
             conn.executescript(SCHEMA)
+            columns = {r[1] for r in conn.execute("PRAGMA table_info(paper_positions)")}
+            if "initial_risk_usdt" not in columns:
+                conn.execute("ALTER TABLE paper_positions ADD COLUMN initial_risk_usdt REAL")
+                # A scaled legacy position cannot recover its original risk from
+                # the current weighted entry. Keep its R unknown.
+                conn.execute("UPDATE paper_positions SET initial_risk_usdt=ABS(entry_px-initial_sl)*qty "
+                             "WHERE initial_sl IS NOT NULL AND (SELECT COUNT(*) FROM paper_fills f "
+                             "WHERE f.position_id=paper_positions.id AND f.kind='open')<=1")
 
     def _connect(self) -> sqlite3.Connection:
         return self.db._connect()
@@ -108,11 +117,18 @@ class PaperBook:
         with self._connect() as conn:
             return self._rows(conn.execute(sql + " ORDER BY id", args).fetchall())
 
-    def closed_positions(self, limit: int = 200) -> list[dict[str, Any]]:
+    def closed_positions(self, limit: int | None = 200, account: str | None = None) -> list[dict[str, Any]]:
+        sql = "SELECT * FROM paper_positions WHERE status='closed'"
+        args = []
+        if account is not None:
+            sql += " AND account=?"
+            args.append(account)
+        sql += " ORDER BY closed_at DESC, id DESC"
+        if limit is not None:
+            sql += " LIMIT ?"
+            args.append(limit)
         with self._connect() as conn:
-            return self._rows(conn.execute(
-                "SELECT * FROM paper_positions WHERE status='closed' ORDER BY closed_at DESC, id DESC LIMIT ?",
-                (limit,)).fetchall())
+            return self._rows(conn.execute(sql, args).fetchall())
 
     def accounts(self) -> list[str]:
         with self._connect() as conn:
@@ -120,11 +136,14 @@ class PaperBook:
                                 "SELECT DISTINCT account FROM paper_orders").fetchall()
         return sorted(str(r[0]) for r in rows)
 
+    def matching_enabled(self, account: str) -> bool:
+        from yoyo.copier.discord_channels import watchlist
+        selected = watchlist(self.db)
+        return "channel_ids" not in selected or account in selected["channel_ids"]
+
     def active_inst_ids(self) -> list[str]:
-        with self._connect() as conn:
-            rows = conn.execute("SELECT inst_id FROM paper_positions WHERE status='open' UNION "
-                                "SELECT inst_id FROM paper_orders WHERE status='pending'").fetchall()
-        return sorted(str(r[0]) for r in rows)
+        return sorted({r["inst_id"] for r in self.open_positions() + self.pending_orders()
+                       if self.matching_enabled(r["account"])})
 
     def unrealized(self, position: dict[str, Any]) -> float:
         px = self.mark(position["inst_id"])
@@ -207,16 +226,17 @@ class PaperBook:
                          (json.dumps(payload, ensure_ascii=False), "canceled" if status == "canceled" else "live",
                           order["order_row_id"]))
 
-    def fill(self, order_id: int, px: float) -> dict[str, Any]:
+    def fill(self, order_id: int, px: float, *, at: str | None = None) -> dict[str, Any]:
         order = self.order(order_id)
         if order["status"] != "pending":
             return order
-        stamp = now_iso()
+        stamp = at or now_iso()
         for existing in self.open_positions(order["account"], order["inst_id"]):
             if existing["side"] != order["side"]:
-                self.close(existing["id"], 100.0, px, "reversed")
+                self.close(existing["id"], 100.0, px, "reversed", at=stamp)
         same = self.open_positions(order["account"], order["inst_id"])
         fee = px * order["qty"] * FEE_RATE
+        risk = abs(px - order["sl"]) * order["qty"] if order["sl"] is not None else None
         with self._connect() as conn:
             if same:
                 pos = same[0]
@@ -226,6 +246,8 @@ class PaperBook:
                              "sl=COALESCE(?,sl), tp=COALESCE(?,tp) WHERE id=?",
                              (order["qty"], new_qty, entry, fee, order["sl"], order["tp"], pos["id"]))
                 position_id = pos["id"]
+                conn.execute("UPDATE paper_positions SET initial_risk_usdt=initial_risk_usdt+? WHERE id=?",
+                             (risk, position_id))
             else:
                 cur = conn.execute(
                     "INSERT INTO paper_positions(account,inst_id,side,qty,open_qty,entry_px,leverage,initial_sl,sl,tp,"
@@ -233,6 +255,7 @@ class PaperBook:
                     (order["account"], order["inst_id"], order["side"], order["qty"], order["qty"], px,
                      order["leverage"], order["sl"], order["sl"], order["tp"], fee, order["message_id"], stamp))
                 position_id = int(cur.lastrowid)
+                conn.execute("UPDATE paper_positions SET initial_risk_usdt=? WHERE id=?", (risk, position_id))
             conn.execute("INSERT INTO paper_fills(position_id,kind,qty,px,fee,pnl,at) VALUES(?,?,?,?,?,0,?)",
                          (position_id, "open", order["qty"], px, fee, stamp))
             conn.execute("UPDATE paper_orders SET status='filled', px=?, updated_at=? WHERE id=?", (px, stamp, order_id))
@@ -247,7 +270,7 @@ class PaperBook:
             conn.execute("UPDATE paper_orders SET status='canceled', updated_at=? WHERE id=?", (now_iso(), order_id))
         self._sync_order_row(order, "canceled")
 
-    def close(self, position_id: int, pct: float, px: float, reason: str) -> dict[str, Any]:
+    def close(self, position_id: int, pct: float, px: float, reason: str, *, at: str | None = None) -> dict[str, Any]:
         with self._connect() as conn:
             pos = dict(conn.execute("SELECT * FROM paper_positions WHERE id=?", (position_id,)).fetchone())
         if pos["status"] != "open":
@@ -260,7 +283,7 @@ class PaperBook:
         fee = px * qty * FEE_RATE
         remaining = pos["open_qty"] - qty
         done = remaining <= pos["qty"] * 1e-9
-        stamp = now_iso()
+        stamp = at or now_iso()
         closed_before = pos["qty"] - pos["open_qty"]
         exit_px = ((pos["exit_px"] or 0) * closed_before + px * qty) / max(closed_before + qty, EPSILON)
         with self._connect() as conn:
@@ -291,11 +314,15 @@ class PaperBook:
         self.set_mark(inst_id, px, venue)
         events = []
         for order in self.pending_orders(inst_id=inst_id):
+            if not self.matching_enabled(order["account"]):
+                continue
             crossed = px <= order["px"] if order["side"] == "long" else px >= order["px"]
             if crossed:
                 self.fill(order["id"], order["px"])
                 events.append({"kind": "fill", "order_id": order["id"], "px": order["px"]})
         for pos in self.open_positions(inst_id=inst_id):
+            if not self.matching_enabled(pos["account"]):
+                continue
             d = direction(pos["side"])
             liq = self.liquidation_px(pos)
             # The level nearer to entry is reached first on the way down (long) / up (short).
@@ -324,8 +351,16 @@ class PaperBook:
     def process_bar(self, inst_id: str, start_ms: int, o: float, h: float, l: float, c: float) -> list[dict[str, Any]]:
         """Apply one closed 1m bar. Within a bar the order of high and low is unknown, so
         a stop and a target touched in the same bar resolve as the stop (conservative)."""
-        events = []
+        from datetime import datetime, timezone
+        if start_ms <= self.bar_cursor(inst_id):
+            return []
+        if not all(math.isfinite(x) and x > 0 for x in (o, h, l, c)) or not l <= min(o, c) <= max(o, c) <= h:
+            raise ValueError("invalid paper candle")
+        stamp = datetime.fromtimestamp((start_ms + MINUTE_MS - 1) / 1000, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        events, filled_accounts = [], {}
         for order in self.pending_orders(inst_id=inst_id):
+            if not self.matching_enabled(order["account"]):
+                continue
             if start_ms < first_full_bar_ms(order["created_at"]):
                 continue
             px = order["px"]
@@ -335,10 +370,14 @@ class PaperBook:
                 fill = max(px, o)
             else:
                 continue
-            self.fill(order["id"], fill)
+            self.fill(order["id"], fill, at=stamp)
+            filled_accounts[order["account"]] = (o <= px if order["side"] == "long" else o >= px)
             events.append({"kind": "fill", "order_id": order["id"], "px": fill, "bar_ms": start_ms})
         for pos in self.open_positions(inst_id=inst_id):
-            if start_ms < first_full_bar_ms(pos["opened_at"]):
+            if not self.matching_enabled(pos["account"]):
+                continue
+            filled_here = pos["account"] in filled_accounts
+            if not filled_here and start_ms < first_full_bar_ms(pos["opened_at"]):
                 continue
             d = direction(pos["side"])
             liq = self.liquidation_px(pos)
@@ -352,11 +391,16 @@ class PaperBook:
                     fill = max(fill, liq) if d > 0 else min(fill, liq)
                 else:
                     fill = liq
-                self.close(pos["id"], 100.0, fill, stop[1])
+                self.close(pos["id"], 100.0, fill, stop[1], at=stamp)
                 events.append({"kind": stop[1], "position_id": pos["id"], "px": fill, "bar_ms": start_ms})
             elif pos["tp"] and (favourable - pos["tp"]) * d >= 0:
+                # Intrabar high may precede a limit buy (low precede a sell).
+                # A favourable close proves the target occurred after entry;
+                # an entry marketable at the open also has known ordering.
+                if filled_here and not filled_accounts[pos["account"]] and (c - pos["tp"]) * d < 0:
+                    continue
                 fill = max(pos["tp"], o) if d > 0 else min(pos["tp"], o)
-                self.close(pos["id"], 100.0, fill, "take_profit")
+                self.close(pos["id"], 100.0, fill, "take_profit", at=stamp)
                 events.append({"kind": "take_profit", "position_id": pos["id"], "px": fill, "bar_ms": start_ms})
         with self._connect() as conn:
             conn.execute("INSERT INTO paper_bar_cursor(inst_id,last_bar_ms) VALUES(?,?) ON CONFLICT(inst_id) "
@@ -369,7 +413,7 @@ class PaperBook:
     def r_multiple(position: dict[str, Any]) -> Optional[float]:
         if not position.get("initial_sl"):
             return None
-        risk = abs(position["entry_px"] - position["initial_sl"]) * position["qty"]
-        if risk <= EPSILON:
+        risk = position.get("initial_risk_usdt", abs(position["entry_px"] - position["initial_sl"]) * position["qty"])
+        if risk is None or not math.isfinite(risk) or risk <= EPSILON:
             return None
         return (position["realized_pnl"] - position["fees"]) / risk

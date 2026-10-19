@@ -1,0 +1,36 @@
+// Bootstrap 5.3.8: scoped controls only, no reset, layout utilities or JS bundle.
+@import "bootstrap/scss/functions";
+$primary: #34735e;
+$enable-shadows: false;
+$enable-gradients: false;
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+$theme-colors: ("primary": $primary, "secondary": $secondary);
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+#signals-view.signal-workspace {
+  --bs-body-color: var(--text);
+  --bs-body-bg: var(--surface);
+  --bs-border-color: var(--line);
+  --bs-border-width: 1px;
+  --bs-border-radius: .5rem;
+  --bs-border-radius-sm: .375rem;
+  --bs-secondary-color: var(--muted);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-link-color: var(--text);
+  --bs-link-hover-color: var(--positive-text, var(--mint));
+  --bs-emphasis-color: var(--text);
+  --bs-focus-ring-width: .2rem;
+  --bs-focus-ring-opacity: .25;
+  --bs-focus-ring-color: var(--mint-soft);
+  @import "bootstrap/scss/forms/form-control";
+  @import "bootstrap/scss/forms/form-select";
+  @import "bootstrap/scss/buttons";
+  @import "bootstrap/scss/button-group";
+  @import "bootstrap/scss/nav";
+  // Reuse Bootstrap's own dark indicator with the application's theme switch.
+  [data-theme="dark"] & .form-select {
+    --bs-form-select-bg-img: #{escape-svg($form-select-indicator-dark)};
+  }
+}

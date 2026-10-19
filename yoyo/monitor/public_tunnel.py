@@ -1,14 +1,17 @@
-"""Owner-authorized, login-free Cloudflare Quick Tunnel for the workspace.
+"""Owner-authorized, login-free public tunnels for the workspace.
 
 The monitor and VLM stay on loopback. On 2026-09-24 the owner explicitly removed
 the public login. Mutation origins are still checked against the public host
 BEFORE adapting headers for the existing loopback-only services. Quick Tunnel
-URLs are temporary and have no uptime SLA.
+URLs are temporary; named Cloudflare tunnels retain an owner-controlled hostname.
+The legacy ngrok dev domain is also fixed, but remains subject to account quotas.
 
 Sources:
 https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#headers
 https://caddyserver.com/docs/caddyfile/matchers#expression
 https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/
+https://ngrok.com/docs/gateway/domains#dev-domains
+https://ngrok.com/docs/pricing-limits/free-plan-limits
 """
 from __future__ import annotations
 
@@ -26,12 +29,39 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[2]
 RUNTIME = Path.home() / "Library/Application Support/Fable/PublicTunnel"
 LABELS = ("com.spike.public-gateway", "com.spike.public-tunnel")
+FIXED_LABEL = "com.spike.public-ngrok"
+NAMED_LABEL = "com.spike.public-cloudflare"
 PORT = 8780
 
 
-def caddy_config(port=PORT, upstream_port=8766) -> str:
+def fixed_host(url):
+    # An exact HTTPS hostname only: never interpolate Caddy syntax or credentials.
+    if not isinstance(url, str) or not re.fullmatch(
+        r"https://(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}", url
+    ):
+        raise ValueError("Use an HTTPS origin without a path, port, or credentials")
+    return url.removeprefix("https://")
+
+
+def saved_fixed_url():
+    path = RUNTIME / "fixed-endpoint.json"
+    if not path.exists():
+        return None
+    url = json.loads(path.read_text())["url"]
+    fixed_host(url)
+    return url
+
+
+def caddy_config(port=PORT, upstream_port=8766, public_url=None, additional_public_urls=()) -> str:
     if not all(isinstance(value, int) and 1024 <= value <= 65535 for value in (port, upstream_port)):
         raise ValueError("Invalid loopback port")
+    hosts = "*.trycloudflare.com"
+    if public_url:
+        hosts += " " + fixed_host(public_url)
+    for url in additional_public_urls:
+        host = fixed_host(url)
+        if host not in hosts.split():
+            hosts += " " + host
     return r'''{
     admin off
     auto_https off
@@ -39,7 +69,7 @@ def caddy_config(port=PORT, upstream_port=8766) -> str:
 }
 http://:GATEWAY_PORT {
     bind 127.0.0.1
-    @invalid_host not host *.trycloudflare.com
+    @invalid_host not host PUBLIC_HOSTS
     @insecure not header X-Forwarded-Proto https
     @bad_origin {
         not method GET HEAD OPTIONS
@@ -49,7 +79,6 @@ http://:GATEWAY_PORT {
     route {
         header {
             X-Robots-Tag "noindex, nofollow, noarchive"
-            Cache-Control "no-store"
             Referrer-Policy "no-referrer"
             X-Content-Type-Options "nosniff"
         }
@@ -72,7 +101,7 @@ http://:GATEWAY_PORT {
         }
     }
 }
-'''.replace("GATEWAY_PORT", str(port)).replace("UPSTREAM_PORT", str(upstream_port))
+'''.replace("GATEWAY_PORT", str(port)).replace("UPSTREAM_PORT", str(upstream_port)).replace("PUBLIC_HOSTS", hosts)
 
 
 def binary(name):
@@ -127,12 +156,12 @@ def gateway_ready():
         return False
 
 
-def start():
-    caddy, cloudflared = binary("caddy"), binary("cloudflared")
+def start_gateway(public_url=None, additional_public_urls=()):
+    caddy = binary("caddy")
     RUNTIME.mkdir(parents=True, exist_ok=True, mode=0o700)
     RUNTIME.chmod(0o700)
     config = RUNTIME / "Caddyfile"
-    expected = caddy_config()
+    expected = caddy_config(public_url=public_url, additional_public_urls=additional_public_urls)
     changed = not config.exists() or config.read_text() != expected
     # Validate before replacing the active file. Restart only the gateway so
     # cloudflared keeps its existing public URL during the login removal.
@@ -157,6 +186,16 @@ def start():
         time.sleep(0.25)
     else:
         raise RuntimeError("Login-free gateway did not become ready; tunnel not started")
+
+
+def start():
+    if (RUNTIME / "named-endpoint.json").exists():
+        from . import named_tunnel
+        return named_tunnel.start_saved()
+    if url := saved_fixed_url():
+        return start_fixed(url)
+    cloudflared = binary("cloudflared")
+    start_gateway()
     if not installed(LABELS[1]):
         private_write(RUNTIME / (LABELS[1] + ".log"), "")
     start_job(LABELS[1], [cloudflared, "tunnel", "--config", "/dev/null", "--no-autoupdate",
@@ -176,8 +215,64 @@ def start():
     return result
 
 
+def public_ready(url):
+    request = urllib.request.Request(url + "/api/status", headers={
+        "User-Agent": "SPIKE-Public-Health/1.0", "ngrok-skip-browser-warning": "1"})
+    try:
+        with urllib.request.urlopen(request, timeout=5) as response:
+            return response.status == 200 and json.load(response).get("service") == "spike Impulse Monitor"
+    except (OSError, ValueError, AttributeError):
+        return False
+
+
+def remove_job(label):
+    if installed(label):
+        subprocess.run(["launchctl", "bootout", target(label)], check=True, timeout=15)
+    (Path.home() / "Library/LaunchAgents" / (label + ".plist")).unlink(missing_ok=True)
+
+
+def start_fixed(url):
+    fixed_host(url)
+    ngrok = binary("ngrok")
+    start_gateway(public_url=url)
+    # ngrok reads the owner's existing private credential file. No secret is
+    # copied into repository files, LaunchAgent arguments, or the access note.
+    log = RUNTIME / (FIXED_LABEL + ".log")
+    if not log.exists():
+        private_write(log, "")
+    start_job(FIXED_LABEL, [ngrok, "http", f"http://127.0.0.1:{PORT}", "--url", url,
+                           "--inspect=false", "--log=stdout", "--log-format=json"])
+    for _ in range(6):
+        if public_ready(url):
+            break
+        time.sleep(1)
+    else:
+        raise RuntimeError("Fixed public endpoint did not become reachable; previous tunnel retained")
+    private_write(RUNTIME / "fixed-endpoint.json", json.dumps({"provider": "ngrok", "url": url}) + "\n")
+    # Retire the temporary endpoint only after the new HTTPS route reaches the app.
+    remove_job(LABELS[1])
+    private_write(RUNTIME / "access.txt", "SPIKE 固定公网入口（免登录）\n地址：" + url + "/#paper-desk\n"
+                  "无需账号或密码；持有链接即可访问完整工作台。\n"
+                  "固定域名绑定现有 ngrok 账号；重启后仍使用同一地址。\n"
+                  "Mac 登录后自动启动，Mac 和工作台必须保持在线。\n"
+                  "免费版首次访问需点 Visit Site，有月度流量与请求配额。\n\n"
+                  "查看状态：.venv/bin/python -m yoyo.monitor.public_tunnel status\n"
+                  "启动入口：.venv/bin/python -m yoyo.monitor.public_tunnel start\n"
+                  "停止入口：.venv/bin/python -m yoyo.monitor.public_tunnel stop\n")
+    return status()
+
+
 def status():
-    services = {label: installed(label) for label in LABELS}
+    services = {label: installed(label) for label in (*LABELS, FIXED_LABEL, NAMED_LABEL)}
+    if (RUNTIME / "named-endpoint.json").exists():
+        from . import named_tunnel
+        return named_tunnel.status(services)
+    if url := saved_fixed_url():
+        return dict(services=services, gateway_ready=gateway_ready() if services[LABELS[0]] else False,
+                    access_mode="no_login", provider="ngrok", url=url,
+                    public_ready=public_ready(url) if services[FIXED_LABEL] else False,
+                    access_file=str(RUNTIME / "access.txt"),
+                    note="Fixed account dev domain; provider quotas apply; Mac must remain online")
     log = RUNTIME / (LABELS[1] + ".log")
     urls = re.findall(r"https://[a-z0-9]+(?:-[a-z0-9]+)*[.]trycloudflare[.]com", log.read_text(errors="replace") if log.exists() else "")
     return dict(services=services, gateway_ready=gateway_ready() if services[LABELS[0]] else False,
@@ -188,19 +283,29 @@ def status():
 
 
 def stop():
-    for label in reversed(LABELS):
-        if installed(label):
-            subprocess.run(["launchctl", "bootout", target(label)], check=True, timeout=15)
-        path = Path.home() / "Library/LaunchAgents" / (label + ".plist")
-        path.unlink(missing_ok=True)
+    for label in reversed((*LABELS, FIXED_LABEL, NAMED_LABEL)):
+        remove_job(label)
     return dict(stopped=True, local_workspace="http://127.0.0.1:8766")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["start", "status", "stop"])
+    parser.add_argument("action", choices=["start", "start-fixed", "start-cloudflare", "status", "stop"])
+    parser.add_argument("--url", help="Account-owned HTTPS origin for start-fixed or start-cloudflare")
+    parser.add_argument("--tunnel-id", help="Existing locally managed Cloudflare tunnel UUID")
+    parser.add_argument("--credentials-file", help="Private cloudflared tunnel JSON outside the repository")
     args = parser.parse_args()
-    print(json.dumps({"start": start, "status": status, "stop": stop}[args.action](), ensure_ascii=False, indent=2))
+    if args.action == "start-fixed" and not args.url:
+        parser.error("start-fixed requires --url")
+    if args.action == "start-cloudflare":
+        if not all((args.url, args.tunnel_id, args.credentials_file)):
+            parser.error("start-cloudflare requires --url, --tunnel-id and --credentials-file")
+        from . import named_tunnel
+        print(json.dumps(named_tunnel.start(args.url, args.tunnel_id, args.credentials_file),
+                         ensure_ascii=False, indent=2))
+        return
+    print(json.dumps({"start": start, "start-fixed": lambda: start_fixed(args.url),
+                      "status": status, "stop": stop}[args.action](), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

@@ -49,6 +49,31 @@ def test_cold_start_never_backfills_recent_confirmation(tmp_path):
     assert store.event_count() == 0
 
 
+def test_excluded_asset_cannot_seed_new_signal_but_old_reference_can_exit(tmp_path, monkeypatch):
+    from yoyo.monitor import v130_worker
+    parent, context = inputs()
+    final = int(context['built'].index[-1].value // 1_000_000) + 900_000
+    store = Store(tmp_path / 'monitor.sqlite3')
+    NotificationCenter(tmp_path)
+    arm_v130(store, final - 1)
+    observe(store, parent, context, symbol='GMT-USDT-SWAP', tick=.1, clock=lambda: final + 1)
+    assert store.event_count() == 0 and store.notification_status('bark')['pending'] == 0
+    # Reproduce a reference that predates the owner exclusion.
+    with monkeypatch.context() as patch:
+        patch.setattr(v130_worker, 'exclusion_reason', lambda _, **kw: None)
+        patch.setattr('yoyo.monitor.notification_policy.exclusion_reason', lambda _, **kw: None)
+        observe(store, parent, context, symbol='GMT-USDT-SWAP', tick=.1, clock=lambda: final + 1)
+    before = store.list_events(summary=False)[0]
+    parent, context = inputs([(11.2, 11.4, 7.9, 9.)])
+    observe(store, parent, context, symbol='GMT-USDT-SWAP', tick=.1, clock=lambda: final + 900_001,
+            allow_new=False)
+    after = store.list_events(summary=False)[0]
+    assert store.event_count() == 1 and after['id'] == before['id']
+    assert after['detected_at_ms'] == before['detected_at_ms']
+    assert after['performance']['status'] == 'loss'
+    assert store.notification_status('bark')['pending'] == 1
+
+
 def test_api_exposes_v13_periods_and_same_receipts(tmp_path, monkeypatch):
     monkeypatch.setattr('yoyo.monitor.telegram.credentials', lambda: None)
     monkeypatch.setattr('yoyo.monitor.bark.credentials', lambda *a: None)

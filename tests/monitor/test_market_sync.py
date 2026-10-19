@@ -179,3 +179,123 @@ def test_environment_matches_the_v4_study_and_vetoes_use_frozen_edges():
     assert live.vetoes(60, 1, {"trend30": 0.10, "vol30": 0.009}) == []
     assert live.vetoes(30, -1, {"trend30": 0.30, "vol30": 0.0055}) == ["high_vol"]
     assert live.vetoes(60, -1, {"trend30": math.nan, "vol30": math.nan}) == []
+
+
+def test_missing_alt_exit_does_not_silently_change_the_basket():
+    _, series, universe = synthetic()
+    members = universe["2026-08"]
+    series[members[0]][151] = None
+    got = live.outcome(series, members, 150, 1, 1)
+    assert got["alts"] is None
+    assert got["alts_n"] == len(members) - 1
+    assert got["alts_expected"] == len(members)
+    assert got["btc"] is not None
+
+
+def test_missing_btc_clock_slot_stays_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(live, "BACKFILL_START_MS", START)
+    observer = live.Observer(tmp_path)
+    rows = [(START + i * HOUR, 100., 102., 99., 101., 1.) for i in (0, 1, 3)]
+    for symbol in live.LEADERS:
+        observer.book.put_bars(60, symbol, rows)
+    got = observer.build({}, {})
+    assert got["bars"]["60"] == 4
+    assert got["latest"]["60"][2]["open_ms"] == START + 2 * HOUR
+    assert got["latest"]["60"][2]["btc_ret"] is None
+
+
+def test_first_observation_controls_forward_status_and_snapshot_age(tmp_path, monkeypatch):
+    clock = [START + HOUR + 60000]
+    monkeypatch.setattr(live.time, "time", lambda: clock[0] / 1000)
+    monkeypatch.setattr(live, "BACKFILL_START_MS", START)
+    observer = live.Observer(tmp_path)
+    observer.protocol_started_ms = START
+    for symbol in live.LEADERS:
+        observer.book.put_bars(60, symbol, [(START, 100., 102., 99., 101., 1.)])
+    event = {"minutes": 60, "kind": "sync", "config": "test", "open_ms": START,
+             "close_ms": START + HOUR, "side": 1}
+    monkeypatch.setattr(live, "analyse", lambda *args, **kwargs: {
+        "events": [dict(event)], "latest": [{"close_ms": START + HOUR}], "bars": 1})
+    first = observer.build({}, {})
+    assert first["events"][0]["out_of_sample"] is True
+    clock[0] += 10 * HOUR
+    observer._snapshot = observer.build({}, {})
+    assert observer._snapshot["events"][0]["first_observed_ms"] == first["events"][0]["first_observed_ms"]
+    assert observer.snapshot()["freshness"]["60"]["stale"] is True
+    event["config"] = "late-backfill"
+    assert observer.build({}, {})["events"][0]["out_of_sample"] is False
+
+
+def test_latest_decision_uses_emission_and_cooldown(monkeypatch):
+    index, series, universe = synthetic()
+    hits = [0] * len(index)
+    hits[-3:] = [1, 0, 1]
+    monkeypatch.setattr(live, "sync_hits", lambda *args, **kwargs: hits)
+    got = live.analyse(index, series, universe, 60, observe_start_ms=START)
+    key = live.config_key(live.GRID[0])
+    assert got["latest"][-3]["decisions"]["cluster|" + key] == "waiting_cluster"
+    assert got["latest"][-1]["decisions"]["cluster|" + key] == "event"
+    assert got["latest"][-1]["decisions"]["sync|" + key] == "cooldown"
+
+
+def test_fresh_btc_alone_does_not_make_market_feed_ready(tmp_path, monkeypatch):
+    monkeypatch.setattr(live.time, "time", lambda: (START + HOUR + 60_000) / 1000)
+    observer = live.Observer(tmp_path)
+    last = {"close_ms": START + HOUR, "btc_ret": .02, "btc_z": 3., "btc_vr": 4.,
+            "eth_ret": .03, "eth_z": None, "eth_vr": 4.,
+            "n_alts": 50, "expected_alts": 50, "breadth_up": .9, "breadth_down": .1}
+    observer._snapshot = {"latest": {"60": [last]}}
+    health = observer.snapshot()["freshness"]["60"]
+    assert not health["stale"]
+    assert not health["leaders_ready"] and not health["ready"]
+    last["eth_z"] = 3.
+    assert observer.snapshot()["freshness"]["60"]["ready"]
+    last["n_alts"] = live.MIN_ALTS - 1
+    assert not observer.snapshot()["freshness"]["60"]["ready"]
+    # Preserve the registered >=10 breadth rule, while exposing partial coverage.
+    last["n_alts"] = live.MIN_ALTS
+    health = observer.snapshot()["freshness"]["60"]
+    assert health["ready"] and health["valid_alts"] == live.MIN_ALTS
+    assert health["expected_alts"] == 50
+
+
+def test_empty_and_future_timestamp_are_not_fresh(tmp_path, monkeypatch):
+    monkeypatch.setattr(live.time, "time", lambda: START / 1000)
+    observer = live.Observer(tmp_path)
+    assert all(not h["ready"] for h in observer.snapshot()["freshness"].values())
+    observer._snapshot = {"latest": {"60": [{"close_ms": START + HOUR}]}}
+    assert observer.snapshot()["freshness"]["60"]["stale"]
+
+
+def test_exit_study_exposes_actual_scope_and_control_evidence():
+    study = live.exit_study()
+    assert study["available"]
+    assert live.config_key(study["event_set"]) == "z2.0_v2.0_b0.6"
+    assert study["cost_bp"] == 20
+    rows = [r for r in study["rows"] if r["minutes"] == 60 and r["side"] == 1
+            and r["instrument"] == "eth" and r["exit"] == "trail3_48h"]
+    by_period = {r["period"]: r for r in rows}
+    assert by_period["select"]["events"] == 132
+    assert by_period["check"]["events"] == 107
+    assert by_period["select"]["vs_base_bp"] == pytest.approx(18.005897, abs=1e-6)
+    assert by_period["check"]["p_vs_base"] == pytest.approx(.3136)
+    assert by_period["check"]["control_net_bp"] == pytest.approx(13.487150, abs=1e-6)
+
+
+def test_missing_optional_exit_study_is_explicitly_unavailable(tmp_path):
+    assert live.exit_study(tmp_path) == {"available": False}
+
+
+def test_default_history_uses_strict_exit_audit_not_the_loose_cohort():
+    study = live.history("60|sync|z3.0_v3.0_b0.75")["exit_study"]
+    assert study["available"]
+    assert study["experiment_id"] == "exp-market-sync-shock-20261015-v6"
+    assert live.config_key(study["event_set"]) == live.PRIMARY["config"]
+    rows = [r for r in study["rows"] if r["minutes"] == 60 and r["side"] == 1 and r["instrument"] == "eth"]
+    baseline = {r["period"]: r for r in rows if r["exit"] == "hold_12h"}
+    assert baseline["select"]["events"] == 72
+    assert baseline["check"]["events"] == 54
+    assert baseline["check"]["p_excess"] == .0735
+    assert all(r["vs_base_bp"] < 0 for r in rows if r["period"] == "select" and r["exit"] != "hold_12h")
+    loose = live.history("60|sync|z2.0_v2.0_b0.6")["exit_study"]
+    assert loose["experiment_id"] == "exp-market-sync-shock-20261008-v5"

@@ -41,3 +41,21 @@
 .yolo-pagination { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:14px; color:var(--dim); font-size:11px; }.yolo-pagination > div { display:flex; gap:8px; }.yolo-pagination .research-button { min-height:34px; padding:6px 11px; }
 .yolo-snapshot-caveat { margin:12px 0 0; padding:9px 11px; border-radius:6px; background:var(--surface-2); color:var(--muted); font-size:10px; line-height:1.7; }
 @media(max-width:680px) { .yolo-pagination { align-items:flex-start; flex-direction:column; }.yolo-pagination > div { width:100%; }.yolo-pagination button { flex:1; } }
+
+/* Workflow navigation above a compact research ledger. */
+.yolo-workflow .yolo-hero {padding:0 0 16px;border:0;border-radius:0;background:none;box-shadow:none;gap:12px}
+.yolo-workflow .yolo-hero h2 {font-size:20px}.yolo-workflow .yolo-hero p {max-width:none;margin:6px 0 0;font-size:12px}
+.yolo-workflow .yolo-stage-section {padding:12px 0;border:0;border-block:1px solid var(--line-soft);border-radius:0;background:none}
+.yolo-workflow .yolo-stage-grid {display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.yolo-workflow .yolo-stage-filter {display:flex;align-items:center;gap:7px;padding:8px 11px;min-height:0;border-radius:6px;flex:0 1 auto}
+.yolo-workflow .yolo-stage-count {font-size:12px;order:2}.yolo-workflow .yolo-stage-copy strong {font-size:12px}.yolo-workflow .yolo-stage-arrow {display:none}
+.yolo-workflow .yolo-section-heading h2 {font-size:14px}.yolo-workflow .yolo-record-section {padding:0;border:0;background:none}
+.yolo-record-list {border-block:1px solid var(--line);background:var(--surface);min-width:0}
+.yolo-record-table {width:100%;min-width:0;table-layout:fixed}.yolo-record-table th:nth-child(2){width:110px}.yolo-record-table th:nth-child(3){width:60px}.yolo-record-table th:last-child{width:82px}
+.yolo-record-table td {vertical-align:middle;padding:13px 12px}.yolo-record-table .research-text-button {text-align:left;font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+.yolo-row-stages {font-size:11px;color:var(--dim);margin-top:5px;line-height:1.6}.yolo-row-receipt {display:block;font-size:10px;color:var(--dim);margin-top:5px}
+.yolo-pointer-section>summary {cursor:pointer;font-size:13px;color:var(--muted)}.yolo-pointer-section:not([open]) {padding:13px 0;border:0;border-top:1px solid var(--line-soft);border-radius:0;background:none}
+.yolo-workflow .yolo-pointer-section>ul {color:var(--muted);font-size:12px;line-height:1.7}
+@media(max-width:600px){.yolo-workflow .yolo-hero-actions{flex-wrap:wrap}.yolo-workflow .yolo-stage-filter{padding:7px 9px}.yolo-record-table th:nth-child(2){width:94px}.yolo-record-table th:last-child,.yolo-record-table td:last-child{display:none}.yolo-record-table td{padding:11px 5px}.yolo-evidence-count{display:none}.yolo-record-table .research-text-button{font-size:12px}.yolo-record-table .research-button{padding:5px;min-width:0;font-size:11px}.yolo-workflow .yolo-filters{width:100%;flex-wrap:wrap}.yolo-search-label{min-width:0;flex:1}.yolo-workflow #yolo-search{min-width:0;width:100%;font-size:16px}}
+
+@media(max-width:600px){.yolo-workflow .yolo-hero h2{display:none}.yolo-workflow .yolo-hero{padding-bottom:0;gap:10px}.yolo-workflow .yolo-stage-section,.yolo-workflow .yolo-record-section{margin:14px 0}.yolo-workflow .yolo-section-heading{margin-bottom:8px}.yolo-workflow .yolo-hero-actions a{padding:7px;font-size:11px}.yolo-workflow .yolo-record-section>.yolo-section-heading h2{display:none}}

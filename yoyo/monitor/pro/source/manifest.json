@@ -1,0 +1,73 @@
+{
+  "project": "https://stitch.withgoogle.com/projects/8978791379095391159",
+  "title": "Spike Trading Research Platform",
+  "exported_at": "2026-10-17",
+  "method": "Stitch View Code / Copy code; DESIGN document editor HTML converted to Markdown",
+  "screens": {
+    "market": "8ad0e81b9081476d8a76f7da5e28d007",
+    "ma-detection": "5a505e702ea14ff8843dd8c352a6232b",
+    "trading": "9cb889bbf28b4773af9f9fe450e5cfac",
+    "signals": "13519b4b98084997b87f9f1a18952968",
+    "vision-research": "ad62242a7e73494aa4d795f746b8a4dc",
+    "learning": "d737f8dda5b548d98f584e00307dd3a2",
+    "research": "369dabf4230c47118b7842c2f5918c54",
+    "account": "bae81c02612a400eaae7dc572e32709c",
+    "mobile": "6c4800dcb7e14ea391e595fdedcf1b9c",
+    "runtime": "712049a20b504d2898b30985a715ef65"
+  },
+  "routes": {
+    "market": [
+      "market",
+      "auto-leaders"
+    ],
+    "ma-detection": [
+      "yolo-detect"
+    ],
+    "signals": [
+      "signals",
+      "watch",
+      "warmup",
+      "lines",
+      "retest",
+      "shadow"
+    ],
+    "account": [
+      "signals?pane=account",
+      "yolo-detect?tab=account",
+      "copier"
+    ],
+    "trading": [
+      "manual",
+      "paper-desk",
+      "paper"
+    ],
+    "research": [
+      "platform",
+      "research",
+      "datasets",
+      "factors",
+      "models",
+      "strategies",
+      "experiments",
+      "backtests"
+    ],
+    "vision-research": [
+      "yolo",
+      "vision"
+    ],
+    "learning": [
+      "learning",
+      "trading-books",
+      "orderflow",
+      "langlang",
+      "rektproof",
+      "knowledge",
+      "content"
+    ],
+    "runtime": [
+      "system",
+      "notifications"
+    ]
+  },
+  "data_contract": "Source example data are design examples only. Application uses existing backend data, safety gates and polling cadence."
+}

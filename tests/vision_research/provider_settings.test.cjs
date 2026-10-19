@@ -37,8 +37,8 @@ function loadProviderHelpers() {
 test('provider selectors expose the documented Qwen model IDs and regional endpoints', () => {
   const api = loadProviderHelpers();
   const qwen = api.providerSpec('qwen');
-  assert.equal(qwen.default_model, 'qwen3-vl-plus');
-  assert.deepEqual([...api.providerModels(qwen)], ['qwen3-vl-plus', 'qwen-vl-max']);
+  assert.equal(qwen.default_model, 'qwen3.8-max');
+  assert.deepEqual([...api.providerModels(qwen)], ['qwen3.8-max', 'qwen3.8-max-0902', 'qwen3-vl-plus', 'qwen-vl-max']);
   assert.deepEqual(JSON.parse(JSON.stringify(api.providerRegions(qwen))), [['beijing', '北京'], ['singapore', '新加坡']]);
   assert.equal(api.providerEndpoint(qwen, 'beijing'), 'https://dashscope.aliyuncs.com/compatible-mode/v1');
   assert.equal(api.providerEndpoint(qwen, 'singapore'), 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1');

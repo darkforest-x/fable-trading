@@ -70,6 +70,7 @@ const overview = (extra = {}) => ({
   generated_at: "2026-09-24T01:02:03Z",
   layers: [{ id: "data", name: "数据层", description: "真实登记", inputs: ["行情"], outputs: ["数据集"], count: 197,
     components: [{ id: "catalog", name: "目录 <script>", kind: "registry", view: "datasets", status: "available", description: "有界说明", source_path: "yoyo/data/catalog.py" }] }],
+  business_lines: [{ name: "策略研究", description: "研究入口", view: "research" }],
   cross_cutting: ["实验登记与失败记录"],
   summary: { datasets: 197, factors: 52, models: 35, strategies: 4, experiments: 12, backtest_runs: 3, paper_runs: 2 },
   sources: [{ name: "可信来源", url: "https://example.com/docs" }, { name: "危险来源", url: "javascript:alert(1)" }],
@@ -116,13 +117,14 @@ test("platform overview loads once, renders reported asset counts, and safely li
   assert.match(html, /目录 &lt;script&gt;/);
   assert.doesNotMatch(html, /<script>alert/);
   assert.match(html, /href="#datasets"/);
+  assert.match(html, /href="#research">进入策略研究/);
   assert.match(html, /可信来源/);
   assert.match(html, /https:\/\/example\.com\/docs/);
   assert.match(html, /危险来源/);
   assert.doesNotMatch(html, /href="javascript:/);
   assert.match(html, /实验登记与失败记录/);
   assert.match(html, /内置研究路线/);
-  assert.match(html, /可在下方版本化流程中使用模板/);
+  assert.match(html, /可在「版本化流程」分区使用模板/);
   assert.doesNotMatch(html, /仅展示已登记流程，不在此页运行任务/);
   assert.match(html, /登记目录/);
   assert.match(html, /可用/);
@@ -164,7 +166,9 @@ test("models search and family filters use catalog values; audit and notes use e
   let html = p.element("models-workspace").innerHTML;
   assert.match(html, /VLM &lt;img src=x onerror=alert\(1\)&gt;/);
   assert.doesNotMatch(html, /<img src=x/);
-  assert.match(html, /工程身份检查/);
+  assert.match(html, /模型目录/);
+  assert.match(html, /class="model-list"/);
+  assert.doesNotMatch(html, /class="model-card"/);
   assert.match(html, /登记为否/);
   assert.match(html, /原始来源备注/);
   assert.match(html, /旧人工笔记/);
@@ -504,17 +508,19 @@ test("pipeline plan edits survive registry loading/errors, refresh revisions, an
 test("navigation groups and hooks include platform/model views while preserving VLM research wording", () => {
   const nav = page.match(/<nav class="nav-list"[\s\S]*?<\/nav>/)?.[0] || "";
   const labels = [...nav.matchAll(/class="sidebar-label nav-group-label"[^>]*>([^<]+)/g)].map((match) => match[1]);
-  assert.deepEqual(labels, ["个人交易", "学习与输出", "基础能力", "研究开发", "验证与运行", "运维"]);
+  assert.deepEqual(labels, ["市场", "信号", "账户", "研究", "学习", "运行"]);
+  assert.match(nav, /data-nav-group="research"/);
   assert.ok(nav.indexOf('data-view="platform"') < nav.indexOf('data-view="datasets"'));
-  assert.ok(nav.indexOf('data-view="models"') < nav.indexOf('data-view="research"'));
-  assert.ok(nav.indexOf('data-view="backtests"') < nav.indexOf('data-view="paper"'));
+  assert.ok(nav.indexOf('data-view="research"') < nav.indexOf('data-view="models"'));
+  assert.ok(nav.indexOf('data-view="paper"') < nav.indexOf('data-view="backtests"'));
+  for (const removed of ["joints", "breaks", "vidya"]) assert.ok(!nav.includes(`data-view="${removed}"`));
   assert.match(page, /href="#platform"|data-view="platform"/);
   assert.match(page, /id="platform-view"/);
   assert.match(page, /id="models-view"/);
-  assert.match(page, /\/static\/platform\.css/);
-  assert.match(page, /\/static\/platform\.js/);
-  assert.match(app, /window\.SpikePlatform\?\.setActive\(state\.view === "platform"\)/);
-  assert.match(app, /window\.SpikeModels\?\.setActive\(state\.view === "models"\)/);
+  assert.match(fs.readFileSync(path.join(root, "yoyo/monitor/static/module-loader.js"), "utf8"), /platform\.css/);
+  assert.match(fs.readFileSync(path.join(root, "yoyo/monitor/static/module-loader.js"), "utf8"), /platform\.js/);
+  assert.match(app, /window\.SpikePlatform\?\.setActive\(activeView === "platform"\)/);
+  assert.match(app, /window\.SpikeModels\?\.setActive\(activeView === "models"\)/);
   assert.match(app, /if \(state\.view === "platform"\)/);
   assert.match(app, /if \(state\.view === "models"\)/);
   assert.match(research, /VLM验证/);

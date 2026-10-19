@@ -1,0 +1,42 @@
+// Official Bootstrap components, scoped to the opt-in workbench.
+// No reboot, global root, layout grid or modal controller is imported.
+@import 'bootstrap/scss/functions';
+$font-size-base: .8125rem;
+$font-size-sm: .75rem;
+$border-radius: .375rem;
+$border-radius-sm: .25rem;
+$input-btn-padding-y: .375rem;
+$input-btn-padding-x: .625rem;
+$input-btn-padding-y-sm: .25rem;
+$input-btn-padding-x-sm: .5rem;
+$enable-shadows: false;
+$enable-dark-mode: false;
+$primary: #1d8068;
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+.spike-ui {
+  --bs-body-color: var(--text);
+  --bs-body-bg: var(--surface);
+  --bs-secondary-color: var(--muted);
+  --bs-secondary-bg: var(--surface-2);
+  --bs-tertiary-bg: var(--surface-2);
+  --bs-border-color: var(--line);
+  --bs-border-width: 1px;
+  --bs-border-radius: .375rem;
+  --bs-border-radius-sm: .25rem;
+  --bs-emphasis-color: var(--text);
+  --bs-emphasis-color-rgb: 120,140,150;
+  --bs-link-color: var(--mint);
+  --bs-link-hover-color: var(--text);
+  --bs-highlight-bg: var(--mint-soft);
+  @import 'bootstrap/scss/buttons';
+  @import 'bootstrap/scss/button-group';
+  @import 'bootstrap/scss/dropdown';
+  @import 'bootstrap/scss/nav';
+  @import 'bootstrap/scss/forms/form-control';
+  @import 'bootstrap/scss/forms/form-select';
+  @import 'bootstrap/scss/forms/form-check';
+  @import 'bootstrap/scss/helpers/visually-hidden';
+}

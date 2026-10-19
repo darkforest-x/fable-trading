@@ -130,7 +130,7 @@ class LeaderService:
     def __init__(self, runtime, client=None, interval=60):
         self.runtime = Path(runtime)
         self.book = LeaderBook(self.runtime / DATABASE)
-        self.client = client or OKX(rate=1)
+        self.client = client or OKX(rate=1, runtime=runtime)
         self.interval = interval
         self.stop = threading.Event()
         self.lock = threading.Lock()

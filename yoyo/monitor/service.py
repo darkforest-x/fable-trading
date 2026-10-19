@@ -43,7 +43,7 @@ STATUS_REFRESH_SECONDS = 30
 class Monitor:
     def __init__(self, store, interval=120, client=None):
         self.store = store
-        self.client = client or OKX()
+        self.client = client or OKX(runtime=store.path.parent, priority='monitor')
         self.interval = interval
         self.started = now_ms()
         self.notification_since = store.get_meta("notification_policy:" + PROTOCOL, {}).get("activated_ms", self.started)
@@ -450,7 +450,7 @@ class Monitor:
                     joint_notifications=self.joint_notification_status(), runtime={"host": "This Mac", "notification_only": True,
                     "fresh_minutes": FRESH_MS // 60000, "interval_seconds": self.interval, "timeframes": list(MONITORED_TIMEFRAMES),
                     "clock_offset_ms": self.client.offset_ms, "public_requests": self.client.requests,
-                    "candle_storage": "memory_only", "history_days": 7,
+                    "candle_storage": "shared_public_read_cache", "candle_status_url": "/api/candles/status", "history_days": 7,
                     "signal_mode": "V13.1 普通多空回踩 15m/30m/1H/4H（1H 2ATR 追踪）；独立YOLO订阅保留", "signal_kind": MODEL_KIND,
                     "v130": {"protocol": "spike-burst-v130-retest-monitor-v1", "strategy_version": V130_VERSION,
                              "timeframes": list(V130_TIMEFRAMES), "trail_atr": {tf: v130_trail(tf) for tf in V130_TIMEFRAMES},

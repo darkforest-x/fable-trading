@@ -16,6 +16,8 @@ from yoyo.vision_research.qwen import (
     CONNECTION_TEST_MAX_TOKENS,
     DEFAULT_QWEN_MODEL,
     MAX_OUTPUT_TOKENS,
+    MAX_IMAGE_PIXELS,
+    FLAGSHIP_MODELS,
     PROMPT_VERSION,
     QWEN_MODELS,
     QwenClient,
@@ -143,9 +145,13 @@ def test_analyze_sends_bounded_json_mode_and_png_data_urls_to_region_endpoint(re
     assert str(request.url) == REGION_ENDPOINTS[region]
     assert request.headers["authorization"] == "Bearer test-api-key"
     assert body["model"] == DEFAULT_QWEN_MODEL
-    assert body["stream"] is False
-    assert body["max_tokens"] == MAX_OUTPUT_TOKENS == 4096
-    assert body["enable_thinking"] is False
+    assert body["stream"] is True
+    assert body["stream_options"] == {"include_usage": True}
+    assert body["max_completion_tokens"] == MAX_OUTPUT_TOKENS == 131072
+    assert "max_tokens" not in body
+    assert body["enable_thinking"] is True
+    assert body["reasoning_effort"] == "xhigh"
+    assert "thinking_budget" not in body
     assert body["response_format"] == {"type": "json_object"}
     assert "tools" not in body
 
@@ -156,6 +162,7 @@ def test_analyze_sends_bounded_json_mode_and_png_data_urls_to_region_endpoint(re
     assert "不能把右端变化排除为“事后走势”" in parts[0]["text"]
     image_parts = [part for part in parts if part["type"] == "image_url"]
     assert len(image_parts) == 3
+    assert all(part["max_pixels"] == MAX_IMAGE_PIXELS == 16777216 for part in image_parts)
     assert [part["image_url"]["url"] for part in image_parts] == [
         "data:image/png;base64," + base64.b64encode(value.data).decode("ascii")
         for value in [candidate, *references]
@@ -206,7 +213,8 @@ def test_comparison_reuses_frozen_input_validation_and_emits_schema_json_mode() 
     request, body = captured[0]
     assert str(request.url) == REGION_ENDPOINTS["singapore"]
     assert body["response_format"] == {"type": "json_object"}
-    assert body["enable_thinking"] is False
+    assert body["enable_thinking"] is True
+    assert body["reasoning_effort"] == "xhigh"
     parts = body["messages"][0]["content"]
     assert "冻结行情数值" in parts[-1]["text"]
     assert any(part["type"] == "image_url" for part in parts)
@@ -228,7 +236,10 @@ def test_connection_check_uses_region_host_small_budget_and_no_json_mode(region:
 
     request, body = captured[0]
     assert str(request.url) == REGION_ENDPOINTS[region]
-    assert body["max_tokens"] == CONNECTION_TEST_MAX_TOKENS == 128
+    assert body["max_completion_tokens"] == CONNECTION_TEST_MAX_TOKENS == 128
+    assert "max_tokens" not in body
+    assert "reasoning_effort" not in body
+    assert body["stream"] is False
     assert body["enable_thinking"] is False
     assert "response_format" not in body
     assert "百炼 API Key" in result["message"]
@@ -351,4 +362,117 @@ def test_invalid_region_or_model_fails_before_transport() -> None:
         QwenClient("test-api-key", model="qwen3-vl-max")
     assert bad_region.value.code == "invalid_region"
     assert bad_model.value.code == "invalid_model"
-    assert QWEN_MODELS == {"qwen3-vl-plus", "qwen-vl-max"}
+    assert QWEN_MODELS == FLAGSHIP_MODELS | {"qwen3-vl-plus", "qwen-vl-max"}
+
+
+def sse_chunks(*, finish_reason="stop", done=True, final_text=None):
+    text = decision_text() if final_text is None else final_text
+    chunks = [
+        {"id": "sse-test-1", "model": "qwen3.8-max-0902", "choices": [
+            {"index": 0, "delta": {"role": "assistant", "reasoning_content": "reasoning-only test-api-key"}, "finish_reason": None}]},
+        {"choices": [{"index": 0, "delta": {"content": text[:30]}, "finish_reason": None}]},
+        {"choices": [{"index": 0, "delta": {"content": text[30:]}, "finish_reason": None}]},
+        {"choices": [{"index": 0, "delta": {}, "finish_reason": finish_reason}]},
+        {"choices": [], "usage": {"completion_tokens": 600, "completion_tokens_details": {"reasoning_tokens": 530}}},
+    ]
+    return "".join("data: " + json.dumps(chunk, ensure_ascii=False) + "\r\n\r\n" for chunk in chunks) + (
+        "data: [DONE]\r\n\r\n" if done else "")
+
+
+@pytest.mark.parametrize("model", sorted(FLAGSHIP_MODELS))
+def test_flagship_sse_preserves_raw_trace_usage_model_and_final_json(model):
+    calls = []
+    raw = sse_chunks()
+
+    def respond(request):
+        calls.append(json.loads(request.content))
+        return httpx.Response(200, text=raw, headers={"content-type": "text/event-stream"})
+
+    with make_client(respond, model=model) as adapter:
+        result = adapter.analyze(image("candidate.png", b"candidate"), [], "只看右端。")
+        trace = adapter.last_exchange
+    assert len(calls) == 1
+    assert result["model"] == "qwen3.8-max-0902"
+    assert result["response_id"] == "sse-test-1"
+    assert result["decision"]["summary"] == json.loads(decision_text())["summary"]
+    assert "reasoning-only" not in json.dumps(result["decision"])
+    assert result["usage"]["reasoning_tokens"] == 530
+    assert trace["response"]["body_text"] == raw.replace("test-api-key", "[API_KEY_REDACTED]")
+    assert trace["redacted"] is True
+    assert json.loads(trace["request"]["body_text"])["max_completion_tokens"] == 131072
+
+
+@pytest.mark.parametrize("raw,code", [
+    (sse_chunks(finish_reason="length"), "truncated_response"),
+    (sse_chunks(done=False), "incomplete_response"),
+    (sse_chunks(finish_reason=None), "incomplete_response"),
+    ('data: {"error":{"code":"private-test-api-key"}}\n\ndata: [DONE]\n\n', "provider_error"),
+    ('data: {bad\n\ndata: [DONE]\n\n', "invalid_response"),
+    ('data: {"choices":[{"delta":{"tool_calls":[{}]}}]}\n\ndata: [DONE]\n\n', "unexpected_tool_call"),
+    (sse_chunks(final_text=""), "no_result"),
+])
+def test_flagship_bad_stream_never_becomes_decision_or_retries(raw, code):
+    calls = []
+
+    def respond(request):
+        calls.append(request)
+        return httpx.Response(200, text=raw, headers={"content-type": "text/event-stream"})
+
+    with make_client(respond) as adapter:
+        with pytest.raises(QwenError) as caught:
+            adapter.analyze(image("candidate.png", b"candidate"), [], "只看右端。")
+    assert caught.value.code == code
+    assert len(calls) == 1
+    assert "test-api-key" not in str(caught.value)
+
+
+def test_legacy_plus_keeps_original_non_thinking_contract():
+    bodies = []
+    def respond(request):
+        bodies.append(json.loads(request.content))
+        return httpx.Response(200, json=completion())
+    with make_client(respond, model="qwen3-vl-plus") as adapter:
+        adapter.analyze(image("candidate.png", b"candidate"), [], "只看右端。")
+    body = bodies[0]
+    assert body["enable_thinking"] is False
+    assert body["max_tokens"] == 4096
+    assert body["stream"] is False
+    assert "max_completion_tokens" not in body
+    assert "max_pixels" not in body["messages"][0]["content"][1]
+
+
+@pytest.mark.parametrize("finish,status", [("stop", "completed"), ("length", "failed")])
+def test_sse_api_run_persists_original_exchange_and_never_accepts_truncation(tmp_path, finish, status):
+    from fastapi.testclient import TestClient
+    from yoyo.vision_research.server import create_app
+    from test_app import EmptySource, image_url
+
+    raw = sse_chunks(finish_reason=finish)
+    calls = []
+
+    class Stream(httpx.SyncByteStream):
+        def __iter__(self):
+            encoded = raw.encode("utf-8")
+            for start in range(0, len(encoded), 13):
+                yield encoded[start:start + 13]
+
+    def respond(request):
+        calls.append(json.loads(request.content))
+        return httpx.Response(200, stream=Stream(), headers={"content-type": "text/event-stream; charset=utf-8"})
+
+    app = create_app(tmp_path, source=EmptySource(), qwen_factory=lambda **kwargs: QwenClient(
+        **kwargs, transport=httpx.MockTransport(respond)))
+    with TestClient(app, base_url="http://127.0.0.1") as client:
+        assert client.post("/api/config", json={"provider": "qwen", "api_key": "offline-only-api-key-0001"}).status_code == 200
+        run = client.post("/api/analyze", json={"image_data_url": image_url()}).json()
+        assert run["status"] == status
+        assert run["provider"] == "qwen"
+        exchange = client.get(f'/api/exchanges/{run["api_exchange_id"]}').json()
+        assert exchange["status"] == status
+        assert exchange["response"]["body_text"] == raw
+        assert len(calls) == 1 and calls[0]["stream"] is True
+        if status == "completed":
+            assert run["usage"]["reasoning_tokens"] == 530
+        else:
+            assert run["error_details"]["code"] == "truncated_response"
+            assert not run.get("decision")

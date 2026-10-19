@@ -1,0 +1,57 @@
+/* The history table shares the ledger's semantic palette and query controls. */
+.signal-history-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin:16px 0 12px; }
+#signals-view .ledger-select > span { white-space:nowrap; flex-shrink:0; }
+.signal-history-wrap { max-width:100%; overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.signal-history-table { width:100%; border-collapse:collapse; text-align:left; font-size:12px; font-variant-numeric:tabular-nums; }
+.signal-history-table th, .signal-history-table td { padding:12px 14px; border-bottom:1px solid var(--line-soft); vertical-align:middle; white-space:nowrap; }
+.signal-history-table thead th { background:var(--surface-2); color:var(--muted); font-size:11px; font-weight:500; }
+.signal-history-row th { font-weight:500; }
+.signal-history-row strong { font-weight:600; }
+.signal-history-row small { display:block; margin-top:5px; font-size:11px; color:var(--muted); font-weight:400; }
+.signal-history-row:hover { background:var(--card-hover-bg); }
+.history-side.long { color:var(--direction-long); }
+.history-side.short { color:var(--direction-short); }
+.history-actions button { border:1px solid var(--line); border-radius:5px; padding:5px 8px; background:var(--control-bg); color:var(--text-secondary); cursor:pointer; font:inherit; min-height:32px; }
+.history-actions button:hover, .history-actions button[aria-expanded="true"] { background:var(--segment-active-bg); color:var(--segment-active-text); }
+.history-actions button:focus-visible { outline:2px solid var(--mint); outline-offset:3px; }
+.signal-history-detail[hidden] { display:none; }
+.signal-history-table .signal-history-detail > td { padding:18px; white-space:normal; background:var(--surface-2); }
+.history-detail-heading { display:flex; flex-wrap:wrap; gap:8px 18px; align-items:center; margin-bottom:14px; }
+.history-detail-heading span { color:var(--muted); }
+.signal-history-detail dl { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin:0; }
+.signal-history-detail dt { color:var(--muted); font-size:11px; margin-bottom:5px; }
+.signal-history-detail dd { margin:0; overflow-wrap:anywhere; }
+.history-record-id { color:var(--dim); font-size:11px; overflow-wrap:anywhere; margin:16px 0 10px; }
+.history-detail-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.signal-history-detail .pb-tv-check { margin-top:14px; }
+.history-stat-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface); margin-bottom:14px; }
+.history-stat-grid article { display:flex; flex-direction:column; gap:8px; padding:16px; border-bottom:1px solid var(--line-soft); min-width:0; }
+.history-stat-grid article > span { font-size:12px; color:var(--muted); }
+.history-stat-grid strong { font-size:24px; font-weight:600; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.history-stat-grid small { font-size:11px; color:var(--muted); line-height:1.5; }
+.history-stat-grid.secondary { margin-top:12px; }
+.history-stat-grid.secondary strong { font-size:20px; }
+.history-stat-details { margin:10px 0 16px; }
+.history-stat-details summary { font-size:13px; color:var(--text-secondary); cursor:pointer; padding:8px 0; }
+@media (max-width:1100px) {
+  .signal-history-table th, .signal-history-table td { padding:10px 8px; }
+}
+@media (max-width:700px) {
+  .history-stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .history-stat-grid article { padding:12px 10px; }
+  .history-stat-grid strong { font-size:20px; }
+  .signal-history-table { table-layout:fixed; font-size:12px; }
+  .signal-history-table .history-secondary { display:none; }
+  .signal-history-table th, .signal-history-table td { padding:10px 6px; }
+  .signal-history-table th:first-child { width:24%; white-space:normal; overflow-wrap:anywhere; }
+  .signal-history-table th:nth-child(2) { width:30%; }
+  .signal-history-table th:nth-child(5) { width:30%; }
+  .signal-history-table th:last-child { width:16%; }
+  .signal-history-row small { font-size:10px; }
+  .signal-history-row td > span { overflow-wrap:anywhere; white-space:normal; }
+  .history-actions button { padding:4px; min-height:36px; }
+  .signal-history-table .signal-history-detail > td { padding:14px 10px; }
+  .signal-history-detail dl { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .signal-history-toolbar { align-items:flex-start; }
+  .signal-history-toolbar > .quiet-text { font-size:11px; }
+}

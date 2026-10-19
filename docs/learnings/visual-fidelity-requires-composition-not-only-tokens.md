@@ -1,0 +1,7 @@
+# Visual fidelity requires matching composition, not only tokens
+
+- **Problem**: The owner selected a market-terminal concept, but a broad Linear-style UI rebuild retained a different information hierarchy. It passed navigation and responsive checks while still looking unlike the selected image.
+- **Dead end**: Treating a DESIGN.md color, typography and component vocabulary as sufficient acceptance. A generic contextual menu, summary panels and a smaller chart can all use correct tokens while presenting the wrong product.
+- **Effective path**: Use the exact owner-reattached screenshot as the composition contract. Compare source and actual render together at 1487 × 1058; measure navigation, quote header, primary chart, inspector and records. Replace the market context menu with a functional watchlist and mount the chart in a stable lifecycle-owned region. Verify real interactions separately from visual geometry.
+- **General rule**: Before claiming fidelity, match region order, relative area, density and control placement at the same viewport. Automated tests verify behavior; they cannot substitute for the visual comparison. Preserve real data and honest loading/stale states instead of copying attractive example values.
+- **Affected**: `DESIGN.md`, `yoyo/monitor/static/market-terminal.{js,css}`, `market-sync.js`, and `docs/design/references/linear-owner-target.jpg`. Read-only display APIs and existing trading/worker boundaries remain unchanged. Actual screenshots and test outputs are in `output/linear-fidelity-20261017/`.

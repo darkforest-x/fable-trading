@@ -1,0 +1,179 @@
+/* Compact trading desk. Bootstrap components opt in through .spike-ui;
+   trading colors, data, chart semantics and account ownership remain local. */
+main:has(#yolo-detect-view:not(.hidden)) .page-heading { margin-bottom:14px; }
+.yd-shell.spike-ui { --yd-radius:6px; gap:10px; font-size:13px; }
+.spike-ui .btn { --bs-btn-color:var(--text); --bs-btn-border-color:var(--line); --bs-btn-hover-color:var(--text); --bs-btn-hover-bg:var(--surface-2); --bs-btn-hover-border-color:var(--muted); --bs-btn-active-bg:var(--surface-2); --bs-btn-active-color:var(--text); --bs-btn-focus-shadow-rgb:80,140,130; font-weight:500; box-shadow:none; }
+.spike-ui .btn-primary { --bs-btn-bg:var(--mint); --bs-btn-color:var(--on-accent); --bs-btn-border-color:var(--mint); --bs-btn-hover-bg:var(--mint); --bs-btn-hover-color:var(--on-accent); }
+.spike-ui .form-control,.spike-ui .form-select { color:var(--text); background-color:var(--surface); border-color:var(--line); font-size:12px; }
+.spike-ui .form-control:focus,.spike-ui .form-select:focus { border-color:var(--mint); box-shadow:0 0 0 2px var(--mint-soft); }
+.spike-ui .form-control::placeholder { color:var(--muted); }
+.spike-ui .form-check-input:checked { background-color:var(--mint); border-color:var(--mint); }
+.ui-icon { display:inline-block; width:16px; height:16px; flex:none; background:currentColor; mask:var(--ui-icon) center/contain no-repeat; vertical-align:middle; pointer-events:none; }
+.ui-chevron-left { --ui-icon:url('/static/icons/chevron-left.svg'); }
+.ui-chevron-right { --ui-icon:url('/static/icons/chevron-right.svg'); }
+.ui-refresh { --ui-icon:url('/static/icons/refresh.svg'); }
+.ui-maximize { --ui-icon:url('/static/icons/maximize.svg'); }
+.ui-minimize { --ui-icon:url('/static/icons/minimize.svg'); }
+.ui-adjustments { --ui-icon:url('/static/icons/adjustments-horizontal.svg'); }
+.ui-star { --ui-icon:url('/static/icons/star.svg'); }
+.ui-star-filled { --ui-icon:url('/static/icons/star-filled.svg'); }
+.ui-close { --ui-icon:url('/static/icons/x.svg'); }
+.yd-shell .yd-toolbar { padding:0; border-bottom:1px solid var(--line); gap:12px; }
+.yd-shell .yd-view-tabs { gap:20px; padding:0; border:0; border-radius:0; background:transparent; }
+.yd-shell .yd-view-tabs .nav-link { border:0; border-bottom:2px solid transparent; border-radius:0; background:transparent; padding:10px 0; font-size:12px; color:var(--muted); white-space:nowrap; }
+.yd-shell .yd-view-tabs [aria-selected=true] { border-bottom-color:var(--mint); color:var(--text); font-weight:600; box-shadow:none; }
+.yd-shell .yd-toolbar>.btn { min-height:30px; padding:5px 10px; margin-bottom:5px; font-size:12px; }
+.yd-shell .ml-account-bar { padding:2px 0 6px; border:0; border-radius:0; background:transparent; gap:8px; font-size:11px; }
+.yd-shell .ml-account-bar strong { font-size:11px; font-weight:500; }
+.yd-shell .ml-account-bar button { min-height:28px; padding:2px 0; }
+.yd-shell .ml-account-state { padding:1px 5px; border-radius:3px; background:transparent; }
+.yd-shell .yd-summary { margin:0 0 10px; padding:0; min-height:24px; border:0; background:transparent; gap:8px; }
+.yd-summary-inline { display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; font-size:11px; color:var(--muted); }
+.yd-summary-inline strong { font-size:12px; font-weight:550; color:var(--text); }
+.yd-shell .yd-browser { grid-template-columns:236px minmax(0,1fr); gap:12px; }
+.yd-shell .yd-symbol-panel,.yd-shell .yd-chart-stage,.yd-shell .yd-card { border-radius:var(--yd-radius); }
+.yd-shell .yd-symbol-panel { padding:10px 8px 0; top:75px; }
+.yd-symbol-panel header { margin-bottom:8px; padding:0 4px; }
+.yd-symbol-panel header h2 { font-size:12px; }
+.yd-symbol-panel #yd-result-search { height:32px; padding:6px 30px 6px 9px; }
+.yd-symbol-panel .yd-symbol-filters { margin:6px 0; gap:2px; flex-wrap:wrap; }
+.yd-symbol-panel .yd-symbol-filters button { min-height:26px; padding:4px 6px; border-radius:4px; font-size:11px; }
+.yd-symbol-panel .yd-symbol-sort { margin:0 0 8px; display:block; }
+.yd-symbol-panel .yd-symbol-sort select { height:28px; padding:3px 28px 3px 7px; font-size:11px; border-color:transparent; background-color:var(--surface-2); }
+.yd-shell .yd-symbol-list { display:block; max-height:calc(100dvh - 345px); min-height:220px; padding-bottom:8px; }
+.yd-shell .yd-symbol-list .yd-symbol { display:block; padding:4px 6px 6px; margin:0; border:0; border-bottom:1px solid var(--line-soft); border-radius:0; background:transparent; }
+.yd-shell .yd-symbol-list .yd-symbol.selected { background:var(--mint-soft); box-shadow:inset 2px 0 var(--mint); }
+.yd-shell .yd-symbol-list .yd-symbol:hover { background:var(--surface-2); }
+.yd-shell .yd-symbol-list .yd-symbol.selected:hover { background:var(--mint-soft); }
+.yd-shell .yd-symbol .yd-symbol-main { min-height:25px; padding:2px 1px 3px; gap:6px; line-height:1.4; border-radius:2px; }
+.yd-symbol-main strong { font-size:12px; font-weight:600; }
+.yd-symbol-main .yd-symbol-meta { font-size:10px; color:var(--muted); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.yd-shell .yd-period-badges { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); grid-template-columns:none; gap:3px; margin-top:0; }
+.yd-shell .yd-period-badges button { min-width:0; min-height:27px; padding:3px 2px; gap:3px; border-radius:4px; white-space:nowrap; font-size:10px; background:transparent; }
+.yd-shell .yd-period-badges button b { padding:0 2px; min-width:0; font-size:9px; background:transparent; }
+.yd-shell .yd-period-badges button.has-shape { background:color-mix(in srgb,var(--mint) 9%,var(--surface)); color:var(--mint); }
+.yd-shell .yd-period-badges button[aria-pressed=true] { border-color:var(--mint); box-shadow:none; }
+.yd-shell .yd-chart-head { padding:12px 14px 8px; gap:8px; }
+.yd-shell .yd-chart-head h2 { font-size:17px; letter-spacing:-.015em; }
+.yd-shell .yd-chart-head p { margin-top:3px; font-size:10px; line-height:1.5; }
+.yd-shell .yd-title-line { gap:8px; }
+.yd-shell .yd-title-line #yd-favorite { min-width:28px; min-height:28px; padding:3px; display:inline-flex; align-items:center; justify-content:center; border:0; background:transparent; }
+.yd-shell .yd-switcher { gap:3px; }
+.yd-shell .yd-switcher>span { font-size:10px; min-width:34px; }
+.yd-shell #yd-prev,.yd-shell #yd-next,.yd-shell button.yd-icon { min-width:30px; min-height:30px; padding:5px; display:inline-flex; align-items:center; justify-content:center; font-size:14px; }
+.yd-shell .yd-context-actions { margin:0; padding:0 14px 8px; gap:8px; align-items:center; flex-wrap:wrap; }
+.yd-shell .yd-periods { flex:1; flex-wrap:nowrap; gap:2px; }
+.yd-shell .yd-periods button { min-width:32px; min-height:29px; padding:5px 7px; font-size:11px; border-radius:4px; }
+.yd-shell #yd-scan-symbol { min-height:29px; padding:5px 8px; font-size:11px; white-space:nowrap; }
+.yd-shell .yd-trade-action { margin:0; padding:0; border:0; border-radius:0; background:transparent; }
+.yd-shell .yd-trade-action button { min-height:30px; padding:5px 11px; border-radius:4px; font-size:12px; }
+.yd-shell .yd-chart-tools { padding:0 14px 8px; gap:8px; border-bottom:1px solid var(--line-soft); }
+.yd-shell .yd-chart-tools .yd-view-modes { gap:0; flex-wrap:nowrap; }
+.yd-shell .yd-chart-tools .yd-view-modes .btn { min-height:28px; padding:4px 9px; font-size:11px; background:transparent; border-color:var(--line); }
+.yd-shell .yd-display-tools { display:flex; align-items:center; gap:5px; flex-wrap:nowrap; }
+.yd-shell .yd-live-chart { margin:0; padding:0; display:flex; flex-wrap:nowrap; gap:5px; }
+.yd-shell .yd-live-chart label { font-size:11px; margin:0; white-space:nowrap; min-height:28px; }
+.yd-shell .yd-options-button { display:flex; gap:5px; align-items:center; min-height:30px; font-size:11px; padding:5px 7px; }
+.yd-shell .dropdown { position:relative; }
+.yd-shell .yd-chart-options { --bs-dropdown-bg:var(--surface); --bs-dropdown-color:var(--text); --bs-dropdown-border-color:var(--line); --bs-dropdown-link-color:var(--text); --bs-dropdown-link-hover-color:var(--text); --bs-dropdown-link-hover-bg:var(--surface-2); --bs-dropdown-divider-bg:var(--line); padding:8px; margin:0; width:230px; font-size:12px; border-radius:6px; box-shadow:0 6px 22px #0002; z-index:8; }
+.yd-shell .yd-chart-options:not(.show) { display:none; }
+.yd-shell .yd-chart-options.show { display:block; }
+.yd-shell .yd-chart-options .yd-options-checks { display:block; padding:0 7px; }
+.yd-shell .yd-chart-options label { display:flex; align-items:center; gap:8px; min-height:32px; padding:0; margin:0; font-size:12px; }
+.yd-shell .yd-chart-options input { float:none; margin:0; width:14px; height:14px; }
+.yd-shell .yd-chart-options .dropdown-item { display:block; text-align:left; width:100%; border:0; border-radius:3px; padding:7px; font-size:12px; min-height:32px; }
+.yd-shell .yd-chart-options .yd-ma-legend { padding:4px 7px; display:grid; grid-template-columns:repeat(3,1fr); gap:5px; font-size:9px; }
+.yd-shell .yd-chart-options .dropdown-divider { display:block; margin:6px 0; }
+.yd-shell .yd-insight { margin:8px 14px; padding:6px 8px; background:transparent; border:0; font-size:11px; }
+.yd-shell .yd-insight p:empty { display:none; }
+.yd-shell #yd-chart-wrap { height:clamp(320px,52vh,620px); }
+.yd-shell .yd-chart-foot { padding:6px 14px; font-size:10px; gap:5px 12px; }
+.yd-shell #yd-tail-status { font-size:10px; color:var(--muted); margin-left:auto; }
+.yd-shell .yd-chart-foot>a { display:none; } /* TradingView's in-chart attribution remains. */
+.yd-shell .yd-detections>header { padding:10px 14px 5px; }
+.yd-shell .yd-detections h3 { font-size:12px; }
+.yd-shell .yd-detections select { min-height:28px; height:28px; font-size:10px; padding:3px 5px; }
+.yd-shell .yd-detection { border:0; border-bottom:1px solid var(--line-soft); border-radius:0; margin:0; }
+.yd-shell .yd-detection .yd-box-focus { padding:9px 2px; gap:10px; }
+.yd-shell .yd-detection .yd-live-link { min-height:30px; padding:5px 9px; margin:3px 0 3px 8px; }
+.yd-shell .yd-detection>small { padding:0 2px 7px; }
+.yd-shell .yd-reading-guide { margin-top:9px!important; font-size:10px; }
+.yd-reading-guide summary { cursor:pointer; width:fit-content; }
+.yd-reading-guide p { margin-top:5px; }
+/* Keep the ticket useful at laptop height; prices and settings are less padded. */
+.ml-dialog { --ml-space:18px; --ml-radius:6px; border-radius:10px; }
+.ml-dialog::backdrop { backdrop-filter:blur(2px); }
+.ml-header { padding-top:16px; padding-bottom:12px; }
+.ml-dialog #ml-close { width:32px; height:32px; border-radius:5px; font-size:22px; }
+.ml-dialog h2 { font-size:21px; margin:4px 0; letter-spacing:-.02em; }
+.ml-steps { padding-top:8px; padding-bottom:8px; background:transparent; }
+.ml-layout { grid-template-columns:minmax(210px,.55fr) minmax(0,1.45fr); gap:20px; }
+.ml-review { padding-left:20px; }
+.ml-subtitle { display:none; }
+.ml-settings>h3 { margin-bottom:12px; }
+.ml-policy { padding:10px 12px; border:1px solid var(--line); background:var(--surface-2); color:var(--text); border-radius:6px; }
+.ml-policy>strong { font-size:22px; }.ml-policy p { color:var(--muted); }
+.ml-fieldset { margin-top:16px; }
+.ml-segments { padding:2px; border-radius:5px; }.ml-segments label>span { min-height:33px; border-radius:3px; font-size:11px; }
+.ml-rr-options label>span { flex-direction:row; align-items:baseline; gap:6px; padding:9px 12px; border-radius:5px; }
+.ml-rr-options strong { font-size:16px; }.ml-rr-options small { font-size:10px; }
+.ml-money { padding:12px 0; }.ml-money strong { font-size:19px; }
+.ml-prices { padding:10px 8px; }.ml-facts { margin:12px 0; gap:6px; }
+.ml-position-chart { border-radius:6px; padding:9px 8px 5px; margin-top:10px; }
+.ml-chart-canvas { height:220px; }
+#ml-footer { padding-top:12px; padding-bottom:max(12px,env(safe-area-inset-bottom)); }
+.ml-dialog .ml-primary { min-height:38px; padding:9px 16px; border-radius:5px; }
+.yd-shell .ma-account { margin-top:4px; }
+.yd-shell .ma-account .okx-hero { padding:16px; border-radius:6px; }
+.yd-shell .ma-account .okx-account-grid>article { border-radius:5px; }
+@media(max-width:1150px) and (min-width:1001px) {
+  .yd-shell .yd-browser { grid-template-columns:210px minmax(0,1fr); }
+  .yd-shell .yd-display-tools .yd-options-button>span:last-child { display:none; }
+}
+@media(max-width:1000px) {
+  .yd-shell .yd-browser { grid-template-columns:1fr; }
+  .yd-shell .yd-symbol-dialog .yd-symbol-panel { padding:12px; }
+  .yd-shell .yd-symbol-dialog .yd-symbol-list { max-height:none; min-height:0; }
+  .yd-shell .yd-symbol-dialog .yd-symbol-main { min-height:32px; }
+  .yd-shell .yd-symbol-dialog #yd-result-search,
+  .yd-shell .yd-symbol-dialog #yd-symbol-sort { font-size:16px; min-height:38px; height:38px; }
+  .yd-shell .yd-symbol-dialog .yd-period-badges button { min-height:38px; font-size:12px; }
+}
+@media(max-width:650px) {
+  .yd-shell .yd-toolbar { gap:8px; flex-wrap:wrap; }
+  .yd-shell .yd-view-tabs { gap:16px; width:100%; overflow-x:auto; flex-wrap:nowrap; }
+  .yd-shell .yd-view-tabs .nav-link { min-height:42px; }
+  .yd-shell .yd-toolbar>.btn { margin-left:auto; min-height:36px; }
+  .yd-shell .ml-account-bar { padding:0; gap:0; }
+  .yd-shell .ml-account-bar button { min-height:36px; }
+  .yd-shell .yd-summary { margin-bottom:7px; }
+  .yd-shell .yd-summary-inline { gap:4px 10px; }
+  .yd-shell .yd-chart-head { padding:10px 10px 6px; flex-wrap:wrap; }
+  .yd-shell .yd-chart-head h2 { font-size:16px; }
+  .yd-shell .yd-chart-head p { max-width:100%; }
+  .yd-shell .yd-switcher { width:100%; justify-content:flex-end; }
+  .yd-shell #yd-quick-symbol { margin-right:auto; height:36px; font-size:14px; }
+  .yd-shell .yd-context-actions { padding:0 10px 7px; gap:7px; }
+  .yd-shell .yd-periods { flex-basis:100%; }
+  .yd-shell .yd-periods button { flex:1; min-width:0; min-height:36px; padding:5px; }
+  .yd-shell .yd-trade-action { flex:1; }.yd-shell .yd-trade-action button { width:100%; min-height:38px; }
+  .yd-shell #yd-scan-symbol { min-height:38px; }
+  .yd-shell .yd-chart-tools { padding:0 10px 7px; flex-wrap:wrap; }
+  .yd-shell .yd-chart-tools .yd-view-modes { width:100%; }
+  .yd-shell .yd-chart-tools .yd-view-modes .btn { flex:1; min-height:36px; }
+  .yd-shell .yd-display-tools { justify-content:flex-end; width:100%; }
+  .yd-shell .yd-display-tools .yd-live-chart { margin-right:auto; }
+  .yd-shell #yd-prev,.yd-shell #yd-next,.yd-shell button.yd-icon { min-width:36px; min-height:36px; }
+  .yd-shell .yd-options-button { min-height:36px; }
+  .yd-shell .yd-insight { margin:5px 10px; }
+  .yd-shell #yd-tail-status { margin-left:0; }
+  .yd-shell .yd-chart-options .dropdown-item { min-height:40px; }
+  .ml-layout { grid-template-columns:1fr; gap:16px; }.ml-review { padding-left:0; }
+  .ml-settings>h3 { display:none; }.ml-segments label>span { min-height:40px; }
+  .ml-dialog .ml-primary { min-height:44px; }.ml-chart-canvas { height:240px; }
+  .ml-dialog #ml-close { width:40px; height:40px; }
+}
+@media(pointer:coarse) {
+  .yd-shell .yd-period-badges button { min-height:40px; }
+  .yd-shell .yd-symbol .yd-symbol-main { min-height:36px; }
+}

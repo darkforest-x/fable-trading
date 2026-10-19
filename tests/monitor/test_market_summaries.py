@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from yoyo.monitor.server import create_app
 from yoyo.monitor.service import Monitor
 from yoyo.monitor.store import Store
+from yoyo.monitor import SIGNAL_PROTOCOL
 
 
 class FixedClock:
@@ -16,7 +17,7 @@ class FixedClock:
 
 def market_row():
     return {
-        "symbol": "PEPE-USDT-SWAP", "timeframe": "1H", "active": True,
+        "symbol": "PEPE-USDT-SWAP", "timeframe": "1H", "active": True, "protocol": SIGNAL_PROTOCOL,
         "phase": "ready", "bar_close_ms": 1_800_000,
         "chart": [{"t": 0, "o": 1, "h": 2, "l": 0, "c": 1, "v": 4}] * 800,
         "events": [{"id": "archived-event"}] * 200,
@@ -39,6 +40,23 @@ def test_market_overview_excludes_persisted_chart_and_events(tmp_path):
     selected = monitor.chart(row["symbol"], row["timeframe"])
     assert selected["candles"] == row["chart"]
     assert selected["events"] == row["events"]
+
+
+def test_phase_counts_never_parse_chart_payload_and_respect_active_period(tmp_path):
+    store = Store(tmp_path / 'monitor.sqlite')
+    row = market_row()
+    store.upsert_market(row)
+    store.upsert_market(dict(row, symbol='INACTIVE', active=False))
+    store.upsert_market(dict(row, symbol='OTHER', timeframe='4H', phase='loading'))
+    # Full chart JSON can be unavailable; count the separately committed summary.
+    with store.connect() as db:
+        db.execute("UPDATE markets SET payload='not JSON'")
+    assert store.market_phase_counts(['1H']) == {'ready': 1}
+    assert store.market_phase_counts(['1H', '4H']) == {'ready': 1, 'loading': 1}
+    with store.connect() as db:
+        db.execute("DELETE FROM market_summaries WHERE symbol=?", (row['symbol'],))
+    with pytest.raises(RuntimeError, match='market_summary_backfill_pending'):
+        store.market_phase_counts(['1H'])
 
 
 def test_summary_backfill_never_requires_http_to_parse_legacy_chart_payload(tmp_path):

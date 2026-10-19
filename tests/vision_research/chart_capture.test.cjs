@@ -62,12 +62,14 @@ function createHarness() {
     document: {
       body: {},
       documentElement: {},
-      getElementById: () => container,
+      getElementById: (id) => id === 'tradingview-chart' ? container : null,
     },
     getComputedStyle: () => ({
       fontFamily: 'sans-serif',
       getPropertyValue: () => '#ffffff',
     }),
+    requestAnimationFrame: () => 1,
+    cancelAnimationFrame: () => {},
     MutationObserver: class { observe() {} },
     ResizeObserver: class { observe() {} disconnect() {} },
     window: {
@@ -76,6 +78,7 @@ function createHarness() {
       },
     },
   });
+  vm.runInContext(fs.readFileSync(path.join(__dirname, '../../yoyo/vision_research/static/chart-tools.js'), 'utf8'), context);
   vm.runInContext(chartSource, context, { filename: chartPath });
   return {
     api: context.__chartApi,
@@ -92,6 +95,21 @@ function createHarness() {
 function openChart(harness) {
   harness.api.showChart({ candles: candleRows, chart_sha256: 'a'.repeat(64) }, 'signal-1');
 }
+
+test('capture uses the actual final candle timestamp across a missing interval', () => {
+  const harness = createHarness();
+  const rows = candleRows.filter((_, index) => index !== 50);
+  harness.api.showChart({ candles: rows }, 'gapped');
+  assert.equal(harness.api.captureChart().viewport.last_bar_open_ms, rows.at(-1).t);
+});
+
+test('returning to a research source restores its own timestamp-anchored view', () => {
+  const harness = createHarness();
+  openChart(harness); harness.setRange({ from: 20, to: 60 });
+  harness.api.showChart({ candles: candleRows }, 'second');
+  harness.api.showChart({ candles: candleRows.slice(5), chart_sha256: 'new' }, 'signal-1');
+  assert.deepEqual(harness.getRange(), { from: 15, to: 55 });
+});
 
 test('initial fit captures the latest full bar with matching viewport metadata', () => {
   const harness = createHarness();

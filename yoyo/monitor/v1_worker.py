@@ -48,7 +48,7 @@ class V1Scanner:
         self.store = Store(Path(database))
         self.generation = generation
         self.worker_started_at_ms = now_ms()
-        self.client = OKX()
+        self.client = OKX(runtime=Path(database).parent, priority='monitor')
         self.instruments = []
         self.universe_at = 0
         # A restart only reuses exact raw sequences.  Do not seed recurrence

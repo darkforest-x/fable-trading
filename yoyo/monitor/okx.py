@@ -1,8 +1,8 @@
 """Public OKX SWAP universe and confirmed in-memory candles.
 
 API contract: https://www.okx.com/docs-v5/en/#order-book-trading-market-data
-Only public GETs are used, at <=8 requests/sec across scanner threads. The
-monitor deliberately does not write to the VPS-owned OHLCV cache/forward log.
+Only public GETs are used. Candle requests share a cross-process <=8/s budget;
+background consumers share <=3/s. The monitor never writes VPS-owned OHLCV.
 15m/30m/1H/4H/1Dutc bars use exchange boundaries. Daily monitoring uses
 the already fetched UTC daily series; its background is Monday-open 1Wutc.
 """
@@ -12,6 +12,7 @@ import math
 import threading
 import time
 import requests
+from yoyo.data.candle_hub import CandleHub, CandleError, PATHS
 
 from yoyo.monitor import TIMEFRAMES, candle_open_ms
 
@@ -69,18 +70,40 @@ def merge_rows(previous, new, timeframe):
 
 
 class OKX:
-    def __init__(self, rate=8.0):
+    def __init__(self, rate=8.0, *, runtime=None, priority='background', include_open=False,
+                 base_url='https://www.okx.com', timeout=(5, 12)):
         self._lock = threading.Lock()
         self._next = 0.0
         self.rate = rate
         self.local = threading.local()
         self.offset_ms = 0
         self.requests = 0
+        self.runtime = runtime
+        self.priority = priority
+        self.include_open = include_open
+        self.base_url = base_url.rstrip('/')
+        self._hub = None
+        self.timeout = timeout
+
+    @property
+    def hub(self):
+        with self._lock:
+            if self._hub is None:
+                self._hub = CandleHub(self.runtime, self.base_url)
+        return self._hub
 
     def clock(self):
         return int(time.time() * 1000) + self.offset_ms
 
     def get(self, path, params=None):
+        if path in PATHS:
+            try:
+                return self.hub.fetch(path, params, self._get, now_ms=self.clock(), include_open=self.include_open)
+            except CandleError as error:
+                raise MarketError(str(error)) from error
+        return self._get(path, params)
+
+    def _get(self, path, params=None):
         if not path.startswith(("/api/v5/public/", "/api/v5/market/")):
             raise MarketError("non_public_endpoint_forbidden")
         if not hasattr(self.local, "session"):
@@ -93,10 +116,14 @@ class OKX:
                 self.requests += 1
             if wait:
                 time.sleep(wait)
+            if path in PATHS:
+                self.hub.acquire(self.priority)
             try:
-                response = self.local.session.get("https://www.okx.com" + path, params=params, timeout=(5, 12))
+                response = self.local.session.get(self.base_url + path, params=params, timeout=self.timeout)
                 payload = response.json()
                 if response.status_code == 429 or payload.get("code") == "50011":
+                    if path in PATHS:
+                        self.hub.cooldown(2 * (attempt + 1))
                     time.sleep(2 * (attempt + 1))
                     continue
                 if response.status_code != 200 or str(payload.get("code")) != "0":

@@ -8,11 +8,13 @@ https://help.aliyun.com/zh/model-studio/get-api-key
 from __future__ import annotations
 
 from .schemas import DEFAULT_MODEL, VISION_MODELS
+from .qwen import DEFAULT_QWEN_MODEL, FLAGSHIP_MODELS, model_settings
 
 PROVIDERS = {
     "qwen": {
-        "name": "千问", "default_model": "qwen3-vl-plus",
-        "models": ["qwen3-vl-plus", "qwen-vl-max"], "default_region": "beijing",
+        "name": "千问", "default_model": DEFAULT_QWEN_MODEL,
+        "models": [DEFAULT_QWEN_MODEL, "qwen3.8-max-0902", "qwen3-vl-plus", "qwen-vl-max"], "default_region": "beijing",
+        "model_settings": {model: model_settings(model) for model in [*FLAGSHIP_MODELS, "qwen3-vl-plus", "qwen-vl-max"]},
         "regions": {"beijing": "中国内地（北京）", "singapore": "国际（新加坡）"},
         "endpoints": {
             "beijing": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
@@ -34,7 +36,7 @@ def provider_for_model(model: str) -> str:
     for name, spec in PROVIDERS.items():
         if model in spec["models"]:
             return name
-    raise ValueError("请选择支持的视觉模型，例如 qwen3-vl-plus 或 glm-5.3-flash")
+    raise ValueError("请选择支持的视觉模型，例如 qwen3.8-max 或 glm-5.3-flash")
 
 
 def region_for(provider: str, region: str | None = None) -> str:

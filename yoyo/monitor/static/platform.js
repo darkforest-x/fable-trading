@@ -24,14 +24,14 @@
       return url.protocol === "https:" && !url.username && !url.password ? url.href : "";
     } catch { return ""; }
   };
-  const routeViews = new Set(["learning", "knowledge", "content", "manual", "platform", "models", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision", "signals", "joints", "breaks", "system"]);
+  const routeViews = new Set(["research", "learning", "knowledge", "content", "manual", "platform", "models", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision", "signals", "joints", "breaks", "system"]);
   const routeNames = { platform: "体系总览", models: "模型中心", datasets: "数据集", factors: "因子库", strategies: "策略库", paper: "模拟实盘", experiments: "实验登记", backtests: "回测任务", yolo: "YOLO 工作流", vision: "VLM 工作流", signals: "信号中心", joints: "突破+spike", breaks: "趋势线突破", system: "运行状态" };
   const summaryNames = { datasets: "数据集", factors: "因子", models: "模型", strategies: "策略", experiments: "实验", backtest_runs: "回测运行", paper_runs: "模拟运行" };
   const statusNames = { available: "可用", research: "研究中", hypothesis: "待验证", implemented: "已实现", active: "登记中", ready: "已登记", review: "待复核", rejected: "已否定", archived: "已归档", missing: "缺失", verified: "身份校验通过", inspected: "已检查", review_required: "需要复核", incomplete: "信息不完整", stale: "校验记录过期", pass: "通过", mismatch: "不匹配", unknown: "未知", not_rehashed: "未重新计算哈希", declared_only: "仅登记声明", computed: "本次计算", disabled: "未执行", failed: "校验失败" };
   const componentKinds = { registry: "登记目录", transform: "数据转换" };
   const stageNames = { research: "研究中", rejected: "已否定", archived: "已归档" };
   const platformState = { active: false, loaded: false, loading: false, error: "", data: null };
-  const modelState = { active: false, loaded: false, loading: false, error: "", items: [], families: [], gates: {}, family: "all", query: "", saving: new Set(), auditing: new Set(), auditErrors: {} };
+  const modelState = { active: false, loaded: false, loading: false, error: "", items: [], families: [], gates: {}, family: "all", query: "", saving: new Set(), auditing: new Set(), auditErrors: {}, expanded: new Set() };
   const pipelineState = { loaded: false, loading: false, saving: false, running: false, runError: "", runMode: "", runTimeframes: ["15m"], runSymbols: "BTCUSDT", paperSymbolScope: "okx_all_usdt", paperSymbols: "", error: "", items: [], templates: [], options: {}, selectedId: "", draft: null };
 
   async function api(path, options = {}) {
@@ -63,7 +63,7 @@
     const components = arr(layer.components);
     const reportedCount = finite(layer.count) ? layer.count : components.length;
     const countUnit = layerCountUnits[String(layer.id || "").toLowerCase()] || "条登记";
-    return `<article class="platform-layer"><div class="platform-layer-top"><span class="platform-layer-index">${String(index + 1).padStart(2, "0")}</span><span class="research-badge">${esc(layer.id || "layer")}</span><span class="platform-layer-count">${count(reportedCount)} ${countUnit}</span></div><h3>${esc(layer.name || "未命名层")}</h3><p>${esc(display(layer.description))}</p><div class="platform-io"><div><strong>输入</strong>${textBlock(layer.inputs)}</div><div><strong>输出</strong>${textBlock(layer.outputs)}</div></div><div class="platform-components">${components.length ? components.map(componentMarkup).join("") : `<p class="platform-muted">此层尚未登记组件明细。</p>`}</div></article>`;
+    return `<details class="platform-layer"><summary><div class="platform-layer-top"><span class="platform-layer-index">${String(index + 1).padStart(2, "0")}</span><span class="research-badge">${esc(layer.id || "layer")}</span><span class="platform-layer-count">${count(reportedCount)} ${countUnit}</span></div><h3>${esc(layer.name || "未命名层")}</h3><p>${esc(display(layer.description))}</p></summary><div class="platform-io"><div><strong>输入</strong>${textBlock(layer.inputs)}</div><div><strong>输出</strong>${textBlock(layer.outputs)}</div></div><div class="platform-components">${components.length ? components.map(componentMarkup).join("") : `<p class="platform-muted">此层尚未登记组件明细。</p>`}</div></details>`;
   }
   function summaryMarkup(summary) {
     return Object.entries(summaryNames).map(([key, label]) => `<article><span>${label}</span><strong>${count(summary?.[key])}</strong></article>`).join("");
@@ -95,16 +95,16 @@
     }).join("");
     const crossCutting = arr(data.cross_cutting);
     const pipelines = arr(data.pipelines);
-    root.innerHTML = `<div class="platform-hero research-objective"><span class="research-kicker">SPIKE · 交易与研究</span><h2>个人交易、学习输出、策略研究和自动策略验证，共用一套基础能力</h2><p>个人原则指导开单，交易后记录与复盘；学习沉淀知识，研究形成证据，再整理为各平台内容。自动策略独立验证。各条业务线保留自己的证据与结果；架构关系不代表模型已经准确或策略已经通过。</p></div>
+    root.innerHTML = `<div data-work-tabs="platform" data-work-label="体系总览分区"><section data-work-panel="业务总览"><div class="platform-hero research-objective"><span class="research-kicker">SPIKE · 交易与研究</span><h2>个人交易、学习输出、策略研究和自动策略验证，共用一套基础能力</h2><p>个人原则指导开单，交易后记录与复盘；学习沉淀知识，研究形成证据，再整理为各平台内容。自动策略独立验证。各条业务线保留自己的证据与结果；架构关系不代表模型已经准确或策略已经通过。</p></div>
       <div class="platform-section-heading"><div><h2>四条业务线</h2><p>个人交易系统持续建设，与自动策略是否通过独立管理。</p></div></div>
-      <div class="platform-pipeline-list">${arr(data.business_lines).map((line) => `<article class="platform-pipeline"><h3>${esc(line.name)}</h3><p>${esc(line.description)}</p><a class="research-button" href="#${routeViews.has(line.view) ? esc(line.view) : "platform"}">进入${esc(line.name)} ↗</a></article>`).join("")}</div>
+      <div class="platform-pipeline-list platform-business-lines">${arr(data.business_lines).map((line) => `<article class="platform-pipeline"><h3>${esc(line.name)}</h3><p>${esc(line.description)}</p><a class="research-button" href="#${routeViews.has(line.view) ? esc(line.view) : "platform"}">进入${esc(line.name)} ↗</a></article>`).join("")}</div>
       <div class="platform-summary">${summaryMarkup(data.summary || {})}</div>
-      <div class="platform-section-heading"><div><h2>研究与运行链路</h2><p>数据 → 特征 / 标签 → 模型 → 策略 → 评估 / 回测 → 前向运行</p></div><button type="button" class="research-button" data-platform-refresh${platformState.loading ? " disabled" : ""}>${platformState.loading ? "正在刷新…" : "刷新体系"}</button></div>
+      </section><section data-work-panel="架构与约束"><div class="platform-section-heading"><div><h2>研究与运行链路</h2><p>数据 → 特征 / 标签 → 模型 → 策略 → 评估 / 回测 → 前向运行</p></div><button type="button" class="research-button" data-platform-refresh${platformState.loading ? " disabled" : ""}>${platformState.loading ? "正在刷新…" : "刷新体系"}</button></div>
       ${layers.length ? `<div class="platform-layer-grid">${layers.map(layerMarkup).join("")}</div>` : `<p class="research-empty">体系接口尚未登记架构层。</p>`}
       <div class="platform-lower-grid"><section class="platform-support"><div class="platform-section-heading"><div><h2>跨层约束</h2><p>贯穿各层的共同约束。</p></div></div>${crossCutting.length ? `<ul>${crossCutting.map((item) => `<li>${esc(display(item))}</li>`).join("")}</ul>` : `<p class="platform-muted">暂无跨层约束登记。</p>`}</section>
-      <section class="platform-support"><div class="platform-section-heading"><div><h2>内置研究路线</h2><p>展示路线说明；可在下方版本化流程中使用模板、关联登记项并按验证门启动任务。</p></div></div>${pipelines.length ? `<div class="platform-pipeline-list">${pipelines.map(pipelineMarkup).join("")}</div>` : `<p class="platform-muted">路线信息尚未提供。</p>`}</section></div>
+      <section class="platform-support"><div class="platform-section-heading"><div><h2>内置研究路线</h2><p>展示路线说明；可在「版本化流程」分区使用模板、关联登记项并按验证门启动任务。</p></div></div>${pipelines.length ? `<div class="platform-pipeline-list">${pipelines.map(pipelineMarkup).join("")}</div>` : `<p class="platform-muted">路线信息尚未提供。</p>`}</section></div>
       <div class="platform-provenance"><strong>体系来源</strong>${sources ? `<ul>${sources}</ul>` : `<span class="platform-muted">未登记外部来源。</span>`}</div>
-      <section id="platform-pipelines" class="platform-pipeline-registry">${pipelineRegistryHTML()}</section>`;
+      </section><section id="platform-pipelines" class="platform-pipeline-registry" data-work-panel="版本化流程">${pipelineRegistryHTML()}</section></div>`;
     bindPlatformEvents(root);
   }
   async function refreshPlatform() {
@@ -410,6 +410,18 @@
     const checks = arr(audit.checks);
     return `<div class="platform-audit-summary"><span class="research-badge status-${esc(audit.status || "unknown")}">${esc(modelStatus(audit.status))}</span>${checked}</div>${checks.length ? `<ul class="platform-audit-checks">${checks.map((check) => `<li><strong>${esc(check.name || "检查项")}</strong><span class="research-badge">${esc(modelStatus(check.status))}</span><p>${esc(display(check.detail))}</p></li>`).join("")}</ul>` : `<p class="platform-muted">接口未返回检查明细。</p>`}`;
   }
+  const modelAliases = {
+    'ma-profit3r-owner1500-v4-arm-a-best':'3R 形态 · 1500 样本 · A 组',
+    'ma-profit3r-owner1500-v4-arm-b-best':'3R 形态 · 1500 样本 · B 组',
+    'owner-v10-chain':'原始标注 · V10 链式检测', 'owner-short-star-v10':'空头参考 · V10',
+    'owner-v16-tipuni-cold':'窗口末端检测 · V16', 'yolo-xx-detector-weights-3060':'历史 YOLO 检测器 · 3060',
+    '15m-ma-launch-t3-yolo10000-v1-best-weights':'15m 启动 · t−3 · 一万样本',
+    '15m-ma-launch-t3-yolo10000-imgsz1280-v1-best-weights':'15m 启动 · t−3 · 1280',
+    '15m-ma-launch-owner-yolo-neg30000-train960-v1-best-weights':'15m 启动 · 一万正例 / 三万反例 · 960',
+    '15m-ma-launch-owner-grade-a8000-neg24000-train960-v1-best-weights':'Grade-A · 八千正例 · 960',
+    '15m-ma-launch-owner-grade-a8000-neg24000-hl2-train1280-full40-v1-best-weight':'Grade-A · HL2 · 1280 · 40 轮',
+  };
+  const modelName = item => modelAliases[item.id] || String(item.name || item.id || '未命名模型').replace(/LONG/g,'多头').replace(/SHORT/g,'空头');
   function modelCard(item) {
     const id = String(item.id ?? "");
     const family = familyFor(item);
@@ -421,17 +433,18 @@
     const viewLink = family ? safeViewLink(family.view) : "";
     const auditError = modelState.auditErrors[id] ? `<p class="research-error" role="alert">${esc(modelState.auditErrors[id])}</p>` : "";
     const stage = ["research", "rejected", "archived"].includes(item.stage) ? item.stage : ["research", "rejected", "archived"].includes(item.status) ? item.status : "research";
-    return `<article class="model-card"><div class="model-card-top"><div><span class="research-badge">${esc(family?.name || item.family || "未分类")}</span><span class="research-badge">${esc(item.kind || "模型")}</span></div><span class="research-badge status-${esc(item.status || "unknown")}">${esc(modelStatus(item.status))}</span></div>
+    return `<details class="model-record" data-model-record="${esc(id)}" ${modelState.expanded.has(id)?'open':''}><summary class="model-row"><span class="model-name"><strong>${esc(modelName(item))}</strong><small>${esc(family?.name || item.family || '未分类')}</small></span><span class="research-badge status-${esc(item.status || 'unknown')}">${esc(modelStatus(item.status))}</span><span class="model-file ${item.local_exists===false?'is-missing':''}">${item.local_exists===true?'文件在本机':item.local_exists===false?'文件缺失':'文件待核对'}</span><span class="model-feature-count">${item.feature_count == null?'—':count(item.feature_count)+' 项特征'}</span><span class="model-expand">详情 <b aria-hidden="true">⌄</b></span></summary><div class="model-record-detail">
+      <code class="research-mono">${esc(id)}</code>
       <h3>${esc(item.name || id || "未命名模型")}</h3><p class="model-description">${esc(item.notes ? Array.isArray(item.notes) ? item.notes.join(" · ") : item.notes : item.objective || "模型说明尚未登记。")}</p>
       <dl class="model-facts"><dt>本机文件</dt><dd>${item.local_exists === true ? "登记位置存在" : item.local_exists === false ? "登记位置缺失" : "未知"}</dd><dt>特征数量</dt><dd>${count(item.feature_count)}</dd><dt>训练资格</dt><dd>${eligibility(item.training_eligible)}</dd><dt>生产资格</dt><dd>${eligibility(item.production_eligible)}</dd><dt>关联实验</dt><dd>${experiments.length ? experiments.map((experimentId) => `<button type="button" class="platform-link-button" data-experiment="${esc(experimentId)}">${esc(experimentId)} ↗</button>`).join(" ") : "未关联"}</dd><dt>登记制品</dt><dd>${artifacts.length ? artifacts.map((artifactId) => `<span class="research-mono">${esc(artifactId)}</span>`).join(" · ") : "未关联登记制品"}</dd></dl>
       <div class="model-card-actions"><button type="button" class="research-button" data-model-audit="${esc(id)}"${auditing || saving ? " disabled" : ""}>${auditing ? "正在校验…" : "校验制品身份"}</button>${viewLink}</div>
       ${auditError}<details class="model-evidence"><summary>来源、特征语义与校验结果</summary><dl class="model-facts model-source-facts"><dt>源码位置</dt><dd><code>${esc(display(item.source_path))}</code></dd><dt>元数据位置</dt><dd><code>${esc(display(item.metadata_path))}</code></dd><dt>特征语义</dt><dd>${textBlock(item.feature_semantics)}</dd><dt>研究目标</dt><dd>${textBlock(item.objective)}</dd><dt>身份校验</dt><dd>${auditMarkup(item.audit)}</dd></dl></details>
       <details class="model-edit"><summary>研究备注</summary><form data-model-edit="${esc(id)}" data-revision="${esc(item.revision ?? "")}" class="model-edit-form"><label>研究阶段<select name="stage">${stageOptions(stage)}</select></label><label>备注<textarea name="notes" rows="3" maxlength="12000">${esc(notes)}</textarea></label><button class="research-button primary" type="submit"${saving || auditing ? " disabled" : ""}>${saving ? "正在保存…" : "保存备注"}</button><span class="research-caption">保存研究状态与备注，不会运行训练或提升资格。</span></form></details>
-      <span class="research-caption">身份校验只核对登记源文件，不代表准确率、研究结论或生产准入。</span></article>`;
+      <span class="research-caption">身份校验只核对登记源文件，不代表准确率、研究结论或生产准入。</span></div></details>`;
   }
   function modelSearchText(item) {
     const family = familyFor(item);
-    return [item.id, item.name, item.family, family?.name, item.kind, item.status, item.source_path, item.metadata_path, item.feature_semantics, item.objective, item.notes, ...arr(item.experiment_ids), ...arr(item.artifact_ids)].map(display).join(" ").toLocaleLowerCase();
+    return [modelName(item), item.id, item.name, item.family, family?.name, item.kind, item.status, item.source_path, item.metadata_path, item.feature_semantics, item.objective, item.notes, ...arr(item.experiment_ids), ...arr(item.artifact_ids)].map(display).join(" ").toLocaleLowerCase();
   }
   function filteredModels() {
     const query = modelState.query.trim().toLocaleLowerCase();
@@ -447,7 +460,7 @@
     const items = filteredModels();
     const error = modelState.error ? `<div class="research-error" role="alert">${esc(modelState.error)} <button type="button" class="research-button" data-model-refresh>重试</button></div>` : "";
     const empty = modelState.items.length === 0 ? `<p class="research-empty">模型接口没有登记制品。</p>` : items.length === 0 ? `<p class="research-empty">没有匹配的模型。</p>` : "";
-    return `${error}${empty || `<div class="model-grid">${items.map(modelCard).join("")}</div>`}`;
+    return `${error}${empty || `<div class="model-list"><div class="model-list-heading"><span>模型 / 用途</span><span>研究状态</span><span>本机文件</span><span>特征</span><span></span></div>${items.map(modelCard).join("")}</div>`}`;
   }
   function renderModelResults() {
     const results = $("model-results");
@@ -461,10 +474,10 @@
     const root = $("models-workspace");
     if (!root) return;
     const familyOptions = modelState.families.map((family) => `<option value="${esc(family.id)}"${family.id === modelState.family ? " selected" : ""}>${esc(family.name || family.id)} · ${count(family.count)}</option>`).join("");
-    root.innerHTML = `<div class="platform-hero research-callout"><strong>模型登记与工程身份检查</strong><p>模型制品、来源、特征语义和研究关联来自现有登记。身份检查不运行推理或训练，也不代表模型准确率或生产准入。此页不提供训练或 promote 操作。</p><div class="model-research-links"><a class="research-button" href="#yolo">YOLO 工作流 ↗</a><a class="research-button" href="#vision">VLM 工作流 ↗</a><a class="research-button" href="#factors">因子库 ↗</a></div></div>
-      <div class="model-gates">${gateCard("训练门", modelState.gates.training)}${gateCard("生产门", modelState.gates.production)}</div>
+    root.innerHTML = `<div class="model-board work-split"><div class="model-intro"><div><h2>模型目录</h2><p>查找形态检测、收益排序与研究能力，展开一行查看来源和证据。</p></div><nav><a href="#yolo">YOLO 工作流 →</a><a href="#vision">VLM 工作流 →</a></nav></div>
+      <aside class="work-inspector model-inspector"><h2>系列与准入</h2><details class="model-access" open><summary>训练：${modelState.gates.training?.allowed===true?'开放':modelState.gates.training?.allowed===false?'未开放':'未知'} · 生产：${modelState.gates.production?.allowed===true?'开放':modelState.gates.production?.allowed===false?'未开放':'未知'}<span>查看准入说明</span></summary><div class="model-gates">${gateCard("训练门", modelState.gates.training)}${gateCard("生产门", modelState.gates.production)}</div><p>身份检查不运行推理或训练，也不代表模型准确率或生产准入。</p></details>
       <div class="research-toolbar model-toolbar"><div><input id="model-search" type="search" value="${esc(modelState.query)}" aria-label="搜索模型" placeholder="搜索模型、路径、特征或关联实验…"><select id="model-family" aria-label="模型系列"><option value="all">全部系列 · ${count(modelState.items.length)}</option>${familyOptions}</select><span id="model-result-count" class="research-caption">显示 ${count(filteredModels().length)} / ${count(modelState.items.length)} 项</span></div><button type="button" class="research-button" data-model-refresh${modelState.loading ? " disabled" : ""}>${modelState.loading ? "正在刷新…" : "刷新登记"}</button></div>
-      <div id="model-results" aria-live="polite">${modelResultsMarkup()}</div>`;
+      </aside><div id="model-results" aria-live="polite">${modelResultsMarkup()}</div></div>`;
     bindModelEvents(root);
   }
   async function refreshModels() {
@@ -526,6 +539,10 @@
   function bindModelEvents(root) {
     if (root.dataset.bound) return;
     root.dataset.bound = "true";
+    root.addEventListener("toggle", event => {
+      const id=event.target.dataset?.modelRecord;
+      if(id) { if(event.target.open) modelState.expanded.add(id); else modelState.expanded.delete(id); }
+    }, true);
     root.addEventListener("input", (event) => {
       if (event.target.id === "model-search") {
         modelState.query = event.target.value;

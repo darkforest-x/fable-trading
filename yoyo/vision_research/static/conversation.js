@@ -259,6 +259,103 @@ function requestEffort(requestBodyText) {
   return typeof effort === 'string' || typeof effort === 'number' ? String(effort) : '';
 }
 
+function parseQwenSse(bodyText) {
+  const payload = {};
+  const message = { role: 'assistant', content: '', reasoning_content: '' };
+  let finishReason = null;
+  let sawChoice = false;
+  let done = false;
+  let errorText = '';
+  let dataLines = [];
+
+  const fail = (text) => { if (!errorText) errorText = text; };
+  const consume = () => {
+    if (!dataLines.length) return;
+    const data = dataLines.join('\n');
+    dataLines = [];
+    if (data.trim() === '[DONE]') {
+      if (done) fail('千问流式响应包含重复结束标记；本次未采纳。');
+      done = true;
+      return;
+    }
+    if (done) {
+      fail('千问流式响应在结束标记后仍包含数据；本次未采纳。');
+      return;
+    }
+
+    let chunk;
+    try { chunk = JSON.parse(data); } catch {
+      fail('千问流式响应格式无效或未完整传输；本次未采纳。');
+      return;
+    }
+    if (!isRecord(chunk)) {
+      fail('千问流式响应格式无效；本次未采纳。');
+      return;
+    }
+    if (isRecord(chunk.error) || chunk.error) {
+      fail('千问流式响应返回错误；本次未采纳。');
+      return;
+    }
+    for (const key of ['id', 'model', 'usage']) {
+      if (chunk[key] !== undefined) payload[key] = chunk[key];
+    }
+
+    const choices = chunk.choices === undefined ? [] : chunk.choices;
+    if (!Array.isArray(choices) || choices.length > 1) {
+      fail('千问流式响应候选格式无效；本次未采纳。');
+      return;
+    }
+    for (const choice of choices) {
+      if (!isRecord(choice) || (choice.index !== undefined && choice.index !== 0)) {
+        fail('千问流式响应候选索引无效；本次未采纳。');
+        return;
+      }
+      if (finishReason !== null) {
+        fail('千问流式响应在完成状态后仍返回候选；本次未采纳。');
+        return;
+      }
+      const delta = choice.delta === undefined ? {} : choice.delta;
+      if (!isRecord(delta) || (delta.tool_calls && (!Array.isArray(delta.tool_calls) || delta.tool_calls.length)) || delta.refusal) {
+        fail('千问流式响应包含不支持的候选内容；本次未采纳。');
+        return;
+      }
+      sawChoice = true;
+      for (const key of ['content', 'reasoning_content']) {
+        if (delta[key] === undefined || delta[key] === null) continue;
+        if (typeof delta[key] !== 'string') {
+          fail('千问流式响应文本格式无效；本次未采纳。');
+          return;
+        }
+        message[key] += delta[key];
+      }
+      if (choice.finish_reason !== undefined && choice.finish_reason !== null) {
+        finishReason = choice.finish_reason;
+      }
+    }
+  };
+
+  for (const line of bodyText.split(/\r\n|\r|\n/)) {
+    if (!line) {
+      consume();
+    } else if (line.startsWith('data:')) {
+      dataLines.push(line.slice(5).replace(/^ /, ''));
+    }
+  }
+  consume();
+
+  if (!done) fail('千问流式响应未完整结束（缺少 [DONE]）；本次未采纳。');
+  if (finishReason !== 'stop') {
+    fail(finishReason === 'length'
+      ? '千问流式输出达到长度上限；本次未采纳。'
+      : '千问流式响应没有正常完成；本次未采纳。');
+  }
+
+  payload.choices = sawChoice
+    ? [{ index: 0, finish_reason: finishReason, message }]
+    : [];
+  return { payload, errorText };
+}
+
 export function exchangeConversation(detail) {
   const result = { ...EMPTY_CONVERSATION };
   if (!isRecord(detail)) return result;
@@ -273,10 +370,23 @@ export function exchangeConversation(detail) {
   result.effort = requestEffort(requestBodyText);
 
   const responseBodyText = safeString(detail.response?.body_text);
-  const payload = parseJson(responseBodyText);
+  const requestBody = parseJson(requestBodyText);
+  const isQwen = detail.provider === 'qwen' || safeString(detail.model).startsWith('qwen')
+    || safeString(requestBody?.model).startsWith('qwen');
+  const expectsQwenSse = isQwen && requestBody?.stream === true;
+  const jsonPayload = parseJson(responseBodyText);
+  const streamResponse = isQwen && ((expectsQwenSse && jsonPayload === null) || /^\s*data:/m.test(responseBodyText))
+    && !(isRecord(jsonPayload) && jsonPayload.error)
+    ? parseQwenSse(responseBodyText)
+    : null;
+  const payload = streamResponse ? streamResponse.payload : jsonPayload;
+  if (streamResponse?.errorText) {
+    if (!['failed', 'interrupted'].includes(result.state)) result.state = 'failed';
+    if (!result.errorText) result.errorText = streamResponse.errorText;
+  }
   const envelope = readProviderEnvelope(payload);
   const apiErrorPayload = isRecord(payload) && isRecord(payload.error);
-  const directDecisionPayload = isRecord(payload) && !envelope.visibleText && !envelope.reasoningText
+  const directDecisionPayload = !streamResponse && isRecord(payload) && !envelope.visibleText && !envelope.reasoningText
     ? payload
     : null;
   let responseText = envelope.visibleText;

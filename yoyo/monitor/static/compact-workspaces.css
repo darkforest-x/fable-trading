@@ -1,0 +1,279 @@
+/* Stitch project 8978791379095391159 / screen 220137da7e664be890dcdb5d060b8db2.
+ * Source image and HTML: output/compact-workspaces-20261018/stitch-source.json.
+ * Compose existing data/control components; no design mock values or trade actions. */
+:root{--desk-gap:4px;--desk-pad:8px;--desk-control:28px}
+/* Stitch 8978791379095391159 / 66017cd619d74ab5bda6597d23f51d2b.
+ * Emphasize live bias within the existing summary height. Data colors are
+ * independent of the mint navigation accent; never derive values in CSS. */
+body .r-positive{color:var(--positive-text)!important}
+body .r-negative{color:var(--negative-text)!important}
+body #market-resonance-overview{display:grid;grid-template-columns:136px minmax(0,1fr);grid-template-rows:20px auto 16px 16px;column-gap:10px;row-gap:0}
+body #market-resonance-overview>header{grid-column:1/-1}
+body #market-resonance-overview>table{grid-column:2;grid-row:2}
+body #market-resonance-overview>.market-resonance-breadth{grid-column:2;grid-row:3}
+body #market-resonance-overview>footer{grid-column:1/-1;grid-row:4}
+.market-resonance-bias{grid-column:1;grid-row:2/4;display:flex;flex-direction:column;justify-content:center;gap:3px;border-right:1px solid var(--line);padding-right:10px;color:var(--dim);min-width:0}
+.market-resonance-bias>span{font-size:11px;font-weight:600;color:var(--text)}
+.market-resonance-bias>div{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.market-resonance-bias strong{font:700 28px/30px var(--mono);letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.market-resonance-bias [data-resonance-label]{font-size:11px;line-height:16px;font-weight:600;padding:0 5px;border-radius:3px;background:color-mix(in srgb,currentColor 12%,transparent);white-space:nowrap}
+@media(max-width:700px){
+ body #market-resonance-overview{grid-template-columns:94px minmax(0,1fr);column-gap:8px;grid-template-rows:20px auto 16px 16px}
+ .market-resonance-bias{padding-right:7px;gap:2px}
+ .market-resonance-bias>div{gap:2px 5px}
+ .market-resonance-bias strong{font-size:26px;line-height:28px}
+ .market-resonance-bias [data-resonance-label]{font-size:10px;padding:0 4px;line-height:14px}
+ body #market-resonance-overview thead th{font-size:8px}
+}
+/* These global signal totals duplicated local content, including on unrelated pages. */
+body #primary-metrics{display:none!important}
+body .workspace-context{left:0;right:0;width:auto;justify-content:flex-start;padding-left:12px}
+body .workspace-context .nav-list,body .workspace-context .nav-group{justify-content:flex-start;margin-left:0}
+body[data-workspace=signals] .page-heading>div,body[data-workspace=signals] #primary-metrics{display:none!important}
+body[data-workspace=signals] .page-heading{position:absolute;top:48px;right:12px;margin:0;padding:0;min-height:0;z-index:2;background:none;border:0}
+body[data-workspace=signals] .page-heading .refresh-button{width:28px;height:28px;min-height:28px;padding:5px}
+body[data-workspace=signals] .page-heading .refresh-button span{display:none}
+body #signals-view.signal-workspace{gap:4px}
+body #signals-view.signal-workspace .signal-workspace-nav{min-height:32px;padding:0 42px 0 0;background:none;border:0;border-bottom:1px solid var(--line)}
+body #signals-view.signal-workspace .signal-workspace-nav .nav-link{min-height:30px;padding:5px 10px!important}
+body #signals-view.signal-workspace .signal-query-inspector{padding:4px 6px;gap:3px 6px;border-radius:4px}
+body #signals-view.signal-workspace .signal-result-summary{padding:0;line-height:16px}
+body #signals-view.signal-workspace .signal-record-toolbar{min-height:30px;padding:2px 6px;margin:0 0 4px;background:none;border-radius:0}
+body #signals-view.signal-workspace .signal-record-toolbar .segmented{padding:0}
+body #signals-view.signal-workspace .signal-record-toolbar button,body #signals-view.signal-workspace #sort-filter{min-height:26px;height:26px;font-size:11px;padding:3px 8px}
+body #signals-view.signal-workspace .signal-record-toolbar select{padding-right:28px!important}
+body #signals-view.signal-workspace .signal-card-grid{gap:8px}
+/* Patrol keeps useful health/errors in a thin line above its cards. */
+body[data-workspace=yolo-detect] .workspace{padding-top:44px}
+body #yolo-detect-workspace .yd-toolbar{min-height:34px;padding:2px 6px;margin-bottom:4px;background:none;border-bottom:1px solid var(--line);border-radius:0}
+body #yolo-detect-workspace .yd-toolbar .nav-link{padding:5px 8px!important;min-height:28px;font-size:12px}
+body #yolo-detect-workspace .yd-toolbar .yd-workspace-title{display:none}
+body #yolo-detect-workspace .yd-toolbar .yd-view-tabs{margin-right:auto}
+body .yd-primary.btn-primary{background:var(--signal-accent);border-color:var(--signal-accent);color:#0b0e14;min-height:28px;padding:4px 10px;font-size:12px;box-shadow:none}
+body #yolo-detect-workspace .yd-overview-actions{margin:0 0 4px;font-size:11px;gap:8px}
+body #yolo-detect-workspace .yd-overview-actions button{padding:3px 8px;min-height:26px}
+body #yolo-detect-workspace .yd-patrol-status{padding:5px 8px;margin-bottom:4px;gap:8px;border-radius:4px;min-height:28px}
+body #yolo-detect-workspace .yd-patrol-status strong{font-size:12px}
+body #yolo-detect-workspace .yd-feed-filters{padding:4px 6px;margin-bottom:4px;gap:6px;border-radius:4px}
+body #yolo-detect-workspace .yd-feed-filters :is(input,select,button){min-height:28px;height:28px;padding-top:3px;padding-bottom:3px}
+body #yolo-detect-workspace .yd-feed-meta{margin:0 0 4px;line-height:18px}
+body .yd-radar-heading{display:none}
+body #yd-feed-more{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:8px 0;margin:0}
+#yd-feed-more nav{display:flex;gap:4px;align-items:center}
+#yd-feed-more :is(button,select){min-height:28px;padding:4px 8px;font-size:11px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--text)}
+#yd-feed-more button[aria-current=page]{background:var(--segment-active-bg);border-color:var(--signal-accent);color:var(--signal-accent)}
+#yd-feed-more button:disabled{opacity:.4;cursor:default}
+#yd-feed-more>span{margin-left:auto;font:11px var(--mono);color:var(--muted)}
+#yd-feed-more label{font-size:11px;color:var(--muted)}
+body[data-account-route=true] .page-heading,body[data-account-route=true] #yolo-detect-workspace .yd-toolbar,body[data-account-route=true] .signal-workspace-nav{display:none!important}
+body[data-account-route=true] .workspace{padding-top:78px}
+body[data-account-route=true] #yd-panel-account{padding:0;border:0;background:none}
+body[data-account-route=true] #yd-account-detail{padding:0}
+body[data-account-route=true] .ma-account-page{padding:12px}
+/* Quote metrics share the symbol strip instead of claiming a separate grid row. */
+#market-sync-workspace #ms-terminal-top{grid-template-rows:46px clamp(430px,calc(100dvh - 205px),1000px) auto}
+#market-sync-workspace #market-watch-sidebar,#market-sync-workspace .mt-chart-panel,#market-sync-workspace .mt-intelligence{grid-row:2}
+#market-sync-workspace .mt-evidence{grid-row:3}
+#market-sync-workspace .mt-topline{gap:12px}
+#market-sync-workspace .mt-quotes{flex:none;gap:10px}
+#market-sync-workspace .mt-quotes strong{font-size:19px}
+#market-sync-workspace .mt-quotes>div:nth-child(2){gap:3px;flex-direction:column;align-items:flex-start}
+#market-sync-workspace .mt-pair>span{display:none}
+#market-sync-workspace [data-pair-switch]{font:600 15px var(--mono);color:var(--text);background:none;border:0;padding:5px 0;white-space:nowrap;cursor:pointer}
+#market-sync-workspace [data-pair-switch]:after{content:'⌄';font-size:12px;color:var(--muted);margin-left:6px}
+#market-sync-workspace .stitch-market-pulse{display:flex;flex:1;min-width:0;gap:14px;border:0;background:none;overflow:visible;justify-content:flex-end}
+#market-sync-workspace .stitch-market-pulse article{display:flex;position:relative;min-width:0;flex-direction:column;gap:2px;border:0;padding:0;outline-offset:3px}
+#market-sync-workspace .stitch-market-pulse span{font-size:10px;white-space:nowrap}
+#market-sync-workspace .stitch-market-pulse strong{font:500 11px var(--mono);overflow:visible}
+#market-sync-workspace .stitch-market-pulse small{display:none;position:absolute;right:0;top:100%;z-index:15;padding:8px;background:var(--surface-high);border:1px solid var(--line);border-radius:4px;max-width:340px;font-size:11px}
+#market-sync-workspace .stitch-market-pulse article:is(:hover,:focus) small{display:block}
+#market-sync-workspace .mt-chart-panel{grid-template-rows:auto minmax(0,1fr) 20px}
+.mt-chart-surface{position:relative;min-height:0;overflow:hidden}
+#market-sync-workspace .mt-chart-surface .mt-chart{width:100%;height:100%;min-height:0}
+#market-sync-workspace .mt-chart-surface .mt-ma-legend{position:absolute;top:4px;left:8px;right:70px;z-index:2;display:flex!important;flex-wrap:wrap;gap:3px 12px!important;margin:0!important;padding:3px 5px!important;background:color-mix(in srgb,var(--chart-bg) 82%,transparent);border:0!important;pointer-events:none;line-height:14px!important}
+#market-sync-workspace .mt-chart-surface .mt-ma-legend[hidden]{display:none!important}
+#market-sync-workspace .mt-chart-surface .chart-ma-value{display:flex!important;gap:4px;padding:0!important;background:none!important;font-size:10px}
+#market-sync-workspace .mt-chart-surface .chart-ma-value :is(span,b){font-size:10px!important}
+.mt-symbol-dialog{width:min(440px,calc(100vw - 20px));max-height:75dvh;border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--surface);color:var(--text)}
+.mt-symbol-dialog::backdrop{background:#0008}
+.mt-symbol-dialog header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mt-symbol-dialog header button{border:0;background:none;color:var(--muted);font-size:22px;padding:0 6px}
+.mt-symbol-dialog input{width:100%;height:36px;padding:6px 10px;color:var(--text);background:var(--surface-lowest);border:1px solid var(--line);border-radius:4px}
+.mt-symbol-dialog [data-symbol-results]{max-height:52dvh;overflow:auto;margin-top:6px}
+.mt-symbol-dialog [data-pick-symbol]{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:38px;padding:8px;border:0;border-bottom:1px solid var(--line-soft);background:none;color:var(--text);text-align:left}
+.mt-symbol-dialog [data-pick-symbol]:is(:hover,[aria-pressed=true]){background:var(--surface-high);color:var(--signal-accent)}
+.mt-symbol-dialog small{color:var(--dim);font-size:10px;font-weight:400}
+/* Wide submitted ticket: plot and details share the available width. */
+body .ml-dialog{width:min(1320px,96vw);max-width:none;max-height:94dvh;--ml-space:12px;border-radius:8px}
+body .ml-dialog .ml-header{padding:10px 12px}
+body .ml-dialog .ml-header>div{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+body .ml-dialog .ml-eyebrow{font-size:10px;margin:0}
+body .ml-dialog .ml-eyebrow span{display:block;border:0;padding:0;font-size:10px}
+body .ml-dialog h2{font-size:20px;margin:0}
+body .ml-dialog #ml-context{margin:0;font-size:12px}
+body .ml-dialog #ml-close{width:30px;height:30px;min-height:30px}
+body .ml-dialog .ml-steps{min-height:28px;padding:5px 12px;margin:0;font-size:11px;gap:24px}
+body .ml-dialog #ml-body{padding:8px 12px}
+body .ml-dialog .ml-status-review,body .ml-dialog .ml-layout.is-submitted .ml-review{max-width:none;width:100%;margin:0;padding:0;border:0}
+body .ml-dialog .ml-review-heading{min-height:28px;margin-bottom:6px}
+body .ml-dialog .ml-review-heading h3{font-size:13px;margin:0}
+.ml-ticket-workspace{display:grid;grid-template-columns:minmax(0,7fr) minmax(270px,3fr);gap:12px;align-items:start}
+.ml-ticket-details{min-width:0;border-left:1px solid var(--line);padding-left:12px}
+body .ml-dialog .ml-ticket-workspace .ml-position-chart{margin:0;border:0;padding:0;border-radius:0;min-width:0}
+body .ml-dialog[data-stage=status] .ml-chart-canvas{height:clamp(330px,calc(100dvh - 280px),650px)}
+body .ml-dialog .ml-chart-actions{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+body .ml-dialog .ml-chart-actions button{min-height:26px;padding:3px 6px;font-size:10px}
+body .ml-dialog .ml-prices{margin:0;padding:8px 0;gap:6px}
+body .ml-dialog .ml-prices strong{font-size:15px}
+body .ml-dialog .ml-money{padding:10px 0;gap:8px}
+body .ml-dialog .ml-money strong{font-size:19px}
+body .ml-dialog .ml-facts>div{padding:6px 0}
+body .ml-dialog .ml-protection{padding:9px;margin:8px 0;border-radius:4px}
+body .ml-dialog .ml-risk-note{margin:8px 0 0;font-size:10px}
+body .ml-dialog #ml-footer{padding:8px 12px;gap:10px}
+body .ml-dialog .ml-primary{min-height:34px;padding:7px 16px;font-size:12px}
+@media(min-width:1000px){
+ #market-overview-strip{gap:6px;margin-bottom:4px}
+ #market-resonance-overview{min-height:96px;padding:2px 10px;gap:0}
+ #market-resonance-overview>header{min-height:18px}
+ #market-resonance-overview table{line-height:16px}
+ #market-resonance-overview thead th{line-height:13px;font-size:9px}
+ #market-resonance-overview>footer{padding-top:0;line-height:13px}
+ #market-resonance-overview .market-resonance-breadth{font-size:10px;line-height:16px;gap:6px}
+ #market-account-overview .market-account-grid{gap:4px}
+ #market-account-overview .market-account{display:grid;grid-template-columns:108px minmax(0,1fr);grid-template-rows:22px 18px;gap:0 6px;padding:2px 6px;min-height:46px}
+ #market-account-overview .market-account>header{display:contents}
+ #market-account-overview .market-account-identity{grid-row:1;grid-column:1;display:block;align-self:center}
+ #market-account-overview .market-account h3{font-size:11px;white-space:nowrap;line-height:18px}
+ #market-account-overview .market-account-scope{display:none}
+ #market-account-overview .market-account-metrics{grid-column:2;grid-row:1;grid-template-columns:1.25fr 1fr 1fr .65fr;gap:4px}
+ #market-account-overview .market-account-metrics>div{display:flex;gap:4px;padding:0;border:0;white-space:nowrap}
+ #market-account-overview .market-account dt{font-size:10px;line-height:16px}
+ #market-account-overview .market-account dd{font-size:12px;line-height:18px}
+ #market-account-overview .market-account dd small{display:none}
+ #market-account-overview .market-account-state{grid-column:1/-1;grid-row:2;padding-right:132px;gap:0 7px;flex-wrap:nowrap;font-size:10px}
+ #market-account-overview .market-account-state time{font-size:9px;white-space:nowrap}
+ #market-account-overview .market-account-actions{grid-column:2;grid-row:2;justify-self:end;z-index:1;gap:5px}
+ #market-account-overview .market-account-actions :is(a,button){min-height:16px;line-height:16px;padding:0 3px;font-size:10px;border:0;background:none}
+ #market-account-overview .market-account-settlement-panel{grid-column:1/-1;grid-row:3}
+}
+@media(max-width:1200px) and (min-width:701px){
+ #market-sync-workspace .stitch-market-pulse{gap:10px}
+ #market-sync-workspace .stitch-market-pulse article:first-child{display:none}
+ #market-sync-workspace .mt-quotes{gap:5px}
+ #market-sync-workspace .mt-topline{gap:8px}
+ #market-account-overview .market-account-state time{display:none}
+}
+@media(max-width:700px){
+ body:is([data-workspace-group=accounts],[data-workspace-group=simulation],[data-workspace-group=research],[data-workspace-group=learn],[data-workspace-group=manage]):not(.nav-open) .sidebar:has(.workspace-context){width:0;height:0;transform:none;background:none;overflow:visible;pointer-events:none}
+ body:is([data-workspace-group=accounts],[data-workspace-group=simulation],[data-workspace-group=research],[data-workspace-group=learn],[data-workspace-group=manage]):not(.nav-open) .workspace-context{display:flex;left:0;top:44px;width:100vw;height:36px;padding:0 6px;overflow-x:auto;pointer-events:auto}
+ body:is([data-workspace-group=accounts],[data-workspace-group=simulation],[data-workspace-group=research],[data-workspace-group=learn],[data-workspace-group=manage]) .workspace{padding-top:80px}
+ body[data-workspace=signals] .page-heading{top:51px;right:7px}
+ body #signals-view.signal-workspace .signal-workspace-nav>span{display:none}
+ body #signals-view.signal-workspace .signal-query-inspector{display:block}
+ body #signals-view.signal-workspace .signal-result-summary{padding-top:3px}
+ body #yolo-detect-workspace .yd-toolbar{display:flex!important;flex-wrap:nowrap;overflow:visible;gap:4px}
+ body #yolo-detect-workspace .yd-toolbar .yd-view-tabs{flex:1;min-width:0;width:auto;flex-wrap:nowrap;overflow-x:auto}
+ body #yolo-detect-workspace .yd-toolbar .nav-link{white-space:nowrap;padding:5px 6px!important;font-size:11px}
+ body #yolo-detect-workspace .yd-toolbar .yd-primary{white-space:nowrap}
+ body #yolo-detect-workspace .yd-feed-filters input{max-width:none;flex-basis:100%}
+ body #yolo-detect-workspace .yd-patrol-status{align-items:flex-start}
+ body #yolo-detect-workspace .yd-patrol-status>div{display:flex;gap:3px;flex-wrap:wrap}
+ body #yolo-detect-workspace .yd-patrol-status strong{margin:0}
+ body #yolo-detect-workspace .yd-feed-meta{align-items:flex-start;gap:6px}
+ #yd-feed-more{gap:6px!important}
+ #yd-feed-more nav{width:100%;justify-content:center}
+ #yd-feed-more nav button{min-height:34px;padding:5px 9px}
+ body[data-account-route=true] .workspace-context{display:flex!important;left:0;top:44px;width:100vw;height:34px;padding:0 6px;overflow-x:auto}
+ body[data-account-route=true] .workspace-context .nav-list{display:flex}
+ body[data-account-route=true] .workspace{padding-top:80px}
+ #market-overview-strip{gap:4px;margin-bottom:4px}
+ #market-resonance-overview{padding:3px 8px;min-height:0;gap:0}
+ #market-resonance-overview table{line-height:16px;font-size:11px}
+ #market-resonance-overview thead th{font-size:9px;line-height:14px}
+ .market-resonance-breadth{font-size:9px;gap:5px}
+ .market-resonance-breadth [data-resonance-coverage]{display:none}
+ #market-account-overview .market-account-switch{padding:1px 4px}
+ #market-account-overview .market-account-switch button{min-height:26px;font-size:11px}
+ #market-account-overview .market-account{padding:3px 8px;gap:2px}
+ #market-account-overview .market-account>header{min-height:18px}
+ #market-account-overview .market-account h3{font-size:11px}
+ #market-account-overview .market-account .market-account-metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+ #market-account-overview .market-account-metrics>div{padding:0;border:0;background:none}
+ #market-account-overview .market-account dt{font-size:9px;line-height:14px}
+ #market-account-overview .market-account dd,#market-account-overview .market-account .market-account-equity dd{font-size:14px;line-height:18px}
+ #market-account-overview .market-account dd small{display:none}
+ #market-account-overview .market-account-state{font-size:9px;line-height:14px;gap:0 6px}
+ #market-account-overview .market-account-state time{flex-basis:auto;margin-left:auto;font-size:8px}
+ #market-account-overview .market-account-preview{min-height:24px;padding:2px 8px;font-size:10px}
+ #market-sync-workspace .mt-topline{flex-wrap:wrap;gap:2px 8px;padding:4px 6px}
+ #market-sync-workspace .mt-quotes{margin-left:auto;gap:8px}
+ #market-sync-workspace [data-pair-switch]{font-size:12px}
+ #market-sync-workspace .mt-quotes>div:nth-child(2){flex-direction:row}
+ #market-sync-workspace .stitch-market-pulse{flex-basis:100%;display:flex;justify-content:space-between;gap:8px;overflow-x:auto;padding:2px 0}
+ #market-sync-workspace .stitch-market-pulse article{min-height:0;padding:0;gap:2px}
+ #market-sync-workspace .stitch-market-pulse article:first-child{display:none}
+ #market-sync-workspace .stitch-market-pulse span{font-size:9px}
+ #market-sync-workspace .stitch-market-pulse strong{font-size:10px}
+ #market-sync-workspace .mt-chart-panel{height:440px;min-height:440px}
+ #market-sync-workspace .mt-chart-surface .mt-ma-legend{right:60px;gap:2px 8px!important}
+ #market-sync-workspace .mt-chart-surface .chart-ma-value :is(span,b){font-size:9px!important}
+ #market-sync-workspace .mt-chart-control-row{display:grid;grid-template-columns:minmax(0,1fr);gap:3px}
+ #market-sync-workspace .mt-periods{width:max-content}
+ #market-sync-workspace .mt-chart-actions{width:100%;flex-wrap:nowrap;justify-content:space-between;gap:3px}
+ #market-sync-workspace .mt-chart-actions :is(button,summary){min-height:26px;padding:3px 5px;font-size:10px;white-space:nowrap}
+ #market-sync-workspace .mt-ohlc{gap:2px 6px;font-size:9px;line-height:14px}
+ body .ml-dialog{width:calc(100vw - 12px);max-height:96dvh;--ml-space:8px;border-radius:6px}
+ body .ml-dialog .ml-header{padding:7px 8px;align-items:flex-start}
+ body .ml-dialog .ml-header>div{gap:4px 12px}
+ body .ml-dialog .ml-eyebrow{display:none}
+ body .ml-dialog h2{font-size:17px}
+ body .ml-dialog .ml-steps{padding:5px 8px;gap:10px;font-size:10px}
+ body .ml-dialog #ml-body{padding:6px 8px}
+ .ml-ticket-workspace{grid-template-columns:1fr;gap:8px}
+ .ml-ticket-details{padding:8px 0 0;border-left:0;border-top:1px solid var(--line)}
+ body .ml-dialog[data-stage=status] .ml-chart-canvas{height:330px}
+ body .ml-dialog .ml-chart-actions{gap:2px}
+ body .ml-dialog .ml-chart-actions button{padding:3px 4px}
+ body .ml-dialog #ml-footer{padding:7px 8px;gap:6px}
+ body .ml-dialog .ml-footer-note{flex-wrap:wrap;gap:3px}
+ body .ml-dialog .ml-primary{min-height:38px;font-size:12px}
+}
+/* Legacy sidebar used a column flex list: left alignment alone cannot move its child. */
+body .workspace-context .nav-list{flex-direction:row;align-items:center}
+/* One secondary-navigation contract across terminal, research, reading and settings. */
+body .workspace-context{height:36px;padding:0 12px;border-bottom:1px solid var(--line)}
+body .workspace-context .nav-list{padding:0;gap:0}
+body .workspace-context .nav-group{gap:4px}
+body .workspace-context .nav-item,
+body #signals-view.signal-workspace .signal-workspace-nav .nav-link,
+body #yolo-detect-workspace .yd-view-tabs .nav-link{
+ min-height:32px;padding:6px 10px!important;border:0!important;border-bottom:2px solid transparent!important;
+ border-radius:0!important;background:transparent!important;color:var(--muted)!important;font-size:12px;font-weight:500;box-shadow:none
+}
+body .workspace-context .nav-item:is(.active,[aria-current=page]),
+body #signals-view.signal-workspace .signal-workspace-nav .nav-link:is(.active,[aria-selected=true]),
+body #yolo-detect-workspace .yd-view-tabs .nav-link:is(.active,[aria-selected=true]){
+ color:var(--mint)!important;border-bottom-color:var(--mint)!important;background:var(--mint-soft)!important
+}
+body .workspace-context .nav-item:hover{color:var(--mint)!important;background:var(--surface-high)!important}
+body :is(.segmented,.yd-periods,.mt-periods,.mt-watch-tabs) button:is(.selected,[aria-pressed=true]){color:var(--mint)!important}
+@media(min-width:701px){
+ body #signals-view.signal-workspace .work-inspector-content[hidden]{display:block!important}
+}
+body #signals-view.signal-workspace .signal-workspace-nav>span{display:none}
+body #yd-feed-more label{display:flex;align-items:center;gap:6px;margin:0}
+body #yd-feed-more select{width:58px;height:28px;min-height:28px;margin:0;padding:3px 6px}
+body[data-account-route=true] #yd-account-detail.okx-live{padding:10px 12px}
+body[data-account-route=true] .okx-heading{padding:0 0 8px;margin-bottom:8px}
+body[data-account-route=true] .okx-heading h2{font-size:16px;margin:3px 0}
+body[data-account-route=true] .okx-connection{padding:6px 0;margin:0}
+body .ml-dialog[data-stage=status] .ml-chart-canvas{height:clamp(300px,calc(100dvh - 340px),650px)}
+@media(max-width:700px){
+ body[data-account-route=true]:not(.nav-open) .sidebar:has(.workspace-context){width:0;height:0;transform:none;background:none;overflow:visible;pointer-events:none}
+ body[data-account-route=true]:not(.nav-open) .sidebar .workspace-context{padding:0 6px;pointer-events:auto}
+ body[data-account-route=true] #yd-account-detail.okx-live{padding:8px}
+ body.nav-open .workspace-context .nav-list{flex-direction:column;align-items:stretch}
+ body.nav-open[data-account-route=true] .workspace-context{position:static;width:auto;height:auto;overflow:visible;display:block!important}
+ body .ml-dialog[data-stage=status] .ml-chart-canvas{height:330px}
+}

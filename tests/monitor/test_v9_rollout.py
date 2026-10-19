@@ -166,9 +166,10 @@ def test_scanner_restarts_never_restore_old_events_or_queue_twice(tmp_path, monk
     calls = []
 
     class Client:
+        def __init__(self, **kwargs): pass
         def synchronize(self): pass
         def clock(self): return NOW
-        def instruments(self): return [{"instId": "ETH-USDT-SWAP", "tickSz": ".01", "uly": "ETH-USDT"}]
+        def instruments(self): return [{"instId": "ETH-USDT-SWAP", "tickSz": ".01", "uly": "ETH-USDT", "instType": "SWAP", "state": "live", "ctType": "linear", "settleCcy": "USDT"}]
         def candles(self, symbol, timeframe, previous=None, limit=720):
             step = TIMEFRAMES[timeframe]
             return [{"t": NOW - step, "o": 100., "h": 101., "l": 99., "c": 100., "v": 1.}], 0

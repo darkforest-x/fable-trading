@@ -1,0 +1,61 @@
+/* Shared sidebar controls stay reachable in both desktop and drawer layouts. */
+.workspace .topbar {min-height:48px;padding:6px 24px}
+.sidebar .sidebar-bottom {flex-shrink:0;gap:10px;padding:10px 0 0;margin-top:10px}
+.sidebar-bottom .sidebar-fold {display:inline-flex;align-items:center;justify-content:center;flex:none;width:36px;height:36px;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--muted);cursor:pointer}
+.sidebar-fold svg {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.sidebar-fold:hover {border-color:var(--mint);color:var(--mint)}
+.topbar .nav-toggle {display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:7px;flex:none}
+.nav-toggle svg {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.topbar .breadcrumb {margin-right:auto}
+.nav-close {display:none}
+.sidebar .nav-list {overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--scrollbar) transparent}
+.workspace .view-panel {scroll-margin-top:84px}
+@media(max-width:1023px) {
+  body.nav-open {overflow:hidden}
+  .nav-open .sidebar {overscroll-behavior:contain}
+  .sidebar .brand {margin-right:52px}
+  .sidebar .nav-close {display:inline-flex;align-items:center;justify-content:center;position:absolute;top:26px;right:14px;min-width:44px;min-height:44px;padding:6px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted);font-size:12px;cursor:pointer}
+  .topbar .nav-toggle {width:44px;height:44px}
+  .workspace .topbar {min-height:52px;padding:4px 16px}
+  .sidebar-bottom .sidebar-fold {display:none}
+}
+@media(max-width:600px) {
+  .topbar {padding:10px 16px;gap:10px}
+  .topbar .breadcrumb {display:flex;flex:1;min-width:0;overflow:hidden;font-size:13px}
+  .topbar .breadcrumb strong {overflow:hidden;text-overflow:ellipsis;font-weight:600}
+  .topbar .topbar-meta {flex:none;margin-left:0}
+  .topbar .topbar-meta > :not(.theme-picker) {display:none}
+  .topbar .theme-picker {min-height:40px;padding:0 6px}
+  .topbar .theme-picker select {font-size:16px;min-height:38px;max-width:116px}
+  .page-heading .refresh-button {min-width:44px;min-height:44px}
+}
+@media(min-width:1024px) {
+  body:not(.sidebar-collapsed) .topbar .nav-toggle {display:none}
+  .topbar {gap:14px}
+  .sidebar-collapsed .sidebar {transform:translateX(-100%);visibility:hidden;pointer-events:none}
+  .sidebar-collapsed .workspace {margin-left:0;width:100%}
+  .sidebar-collapsed .nav-toggle .nav-toggle-arrow {transform:translateX(20px) scaleX(-1)}
+}
+body.workspace-fullscreen-open {overflow:hidden}
+#paper-desk-workspace.is-workspace-fullscreen {position:fixed;inset:0;z-index:1000;box-sizing:border-box;width:100%;height:100dvh;max-width:none;margin:0;padding:20px;overflow:auto;overscroll-behavior:contain;align-content:start;background:var(--bg)}
+#paper-desk-workspace.is-workspace-fullscreen .desk-market-widget {height:clamp(340px,calc(100dvh - 220px),720px)}
+.desk-fullscreen-button {display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap}
+.desk-fullscreen-button svg {width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.desk-fullscreen-button[aria-pressed=true] {color:var(--mint);border-color:var(--mint)!important}
+@media(max-width:900px) {
+  #paper-desk-workspace.is-workspace-fullscreen {padding:0 0 env(safe-area-inset-bottom)}
+  #paper-desk-workspace.is-workspace-fullscreen .desk-market-widget {height:280px}
+}
+
+/* Compact the common heading: modules keep their own explanatory introductions. */
+.workspace main {padding-top:16px}
+.workspace .page-heading {margin-bottom:12px;align-items:center;gap:12px}
+.workspace .page-heading>div {display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap}
+.workspace .page-heading h1 {font-size:21px;line-height:1.35}
+.workspace .page-heading p {font-size:12px;line-height:1.5;margin:0;max-width:760px}
+@media(max-width:700px){
+ .workspace main {padding-top:12px}
+ .workspace .page-heading>div {gap:4px}
+ .workspace .page-heading h1 {font-size:20px}
+ .workspace .page-heading p {flex-basis:100%;font-size:11px}
+}

@@ -36,6 +36,8 @@ def _positive(value) -> Optional[float]:
 class PublicMarket:
     def __init__(self, fetch: Optional[Callable[[str, dict], object]] = None, ttl: float = 2.0) -> None:
         self._fetch = fetch or self._http_get
+        self._custom_fetch = fetch is not None
+        self._candles = None
         self._ttl = ttl
         self._cache: dict[str, tuple[float, float, str]] = {}
 
@@ -80,7 +82,14 @@ class PublicMarket:
         if venue != "okx":
             return bars
         try:
-            body = self._fetch(OKX_CANDLES, {"instId": inst_id, "bar": "1m", "limit": str(limit)})
+            params = {"instId": inst_id, "bar": "1m", "limit": str(limit)}
+            if self._custom_fetch:
+                body = self._fetch(OKX_CANDLES, params)
+            else:
+                from yoyo.monitor.okx import OKX
+                if self._candles is None:
+                    self._candles = OKX(rate=3)
+                body = {'data': self._candles.get('/api/v5/market/candles', params)}
             for row in reversed((body or {}).get("data") or []):
                 bars.append((int(row[0]), float(row[1]), float(row[2]), float(row[3]), float(row[4])))
         except Exception as exc:

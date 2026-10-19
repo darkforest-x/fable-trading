@@ -50,7 +50,7 @@ def run(client, plan, **overrides):
 def test_six_layers_parallel_routes_and_registered_models(workspace):
     client, _, _ = workspace
     data = client.get("/api/research/platform").json()
-    assert [x["id"] for x in data["business_lines"]] == ["personal", "research", "systematic"]
+    assert [x["id"] for x in data["business_lines"]] == ["personal", "learning", "research", "systematic"]
     assert client.get("/api/research/manual").json()["capabilities"]["order_execution"] is False
     assert [x["id"] for x in data["layers"]] == ["data", "features", "models", "strategies", "evaluation", "forward"]
     assert {x["id"] for x in data["layers"][2]["components"]} == {"yolo", "vlm", "lightgbm"}

@@ -47,6 +47,18 @@ def test_db_payload_mismatch_fails_explicitly(tmp_path):
     with pytest.raises(ValueError, match="mismatch"): Source(tmp_path).events(0, 100_000_000)
 
 
+def test_exclusions_filter_admission_without_deleting_history_or_blocking_checkpoints(tmp_path, monkeypatch):
+    events = [event(tf, symbol) for tf, symbol in zip(TIMEFRAMES,
+        ['GMT-USDT-SWAP', 'ETH-USDT-SWAP', 'BTC-USD-SWAP', 'ICP-USDT-SWAP'])]
+    populate(tmp_path, events)
+    before = (tmp_path / 'monitor.sqlite3').read_bytes()
+    source = Source(tmp_path)
+    assert [e['symbol'] for e in source.events(0, 100_000_000)] == ['ETH-USDT-SWAP']
+    assert (tmp_path / 'monitor.sqlite3').read_bytes() == before
+    monkeypatch.setattr(source, 'checkpoint', lambda *args: dict(candles=[dict(t=0)]))
+    assert source.bars('ICP-USDT-SWAP', '15m', 900000, 1000000) == []
+
+
 def test_checkpoint_freshness_respects_long_timeframe(monkeypatch, tmp_path):
     source = Source(tmp_path)
     now = 50_000_000

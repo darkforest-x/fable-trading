@@ -34,7 +34,28 @@ def quantize(value, step, *, up=False):
     return (value / step).to_integral_value(rounding=ROUND_CEILING if up else ROUND_FLOOR) * step
 
 
-def plan(event, instrument, ticker, tiers, *, equity, available, allocated_margin, existing_size, config):
+class MarketOrderLimitError(ValueError):
+    """Expose the calculation behind a venue quantity rejection, not a new cap."""
+    def __init__(self, *, symbol, size, maximum, price, stop, ctval, target, distance):
+        super().__init__("risk-sized quantity exceeds exchange market-order limit")
+        self.details = dict(code="market_order_size_limit", symbol=symbol, quantity_unit="contracts",
+                            requested_size=amount(size), max_market_size=amount(maximum),
+                            price=amount(price), stop=amount(stop), contract_value=amount(ctval),
+                            target_risk=amount(target), stop_distance=amount(distance))
+
+
+class InsufficientMarginError(ValueError):
+    """Keep the allocation gate unchanged while exposing its exact arithmetic."""
+    def __init__(self, *, required, available, remaining, allocated, leverage, size, price, stop, target):
+        super().__init__("insufficient available allocation for this signal")
+        self.details = dict(code="insufficient_margin", required_margin=amount(required),
+                            available_margin=amount(available), usable_margin=amount(remaining),
+                            allocated_margin=amount(allocated), shortfall=amount(required-remaining),
+                            leverage=amount(leverage), requested_size=amount(size), price=amount(price),
+                            stop=amount(stop), target_risk=amount(target))
+
+
+def plan(event, instrument, ticker, tiers, *, equity, available, allocated_margin, existing_size, config, opposite_size="0", size_limit=None):
     """Use current quote and frozen signal stop; never reference performance."""
     if (instrument.get("instId") != event["symbol"] or instrument.get("instType") != "SWAP"
             or instrument.get("ctType") != "linear" or instrument.get("settleCcy") != "USDT"
@@ -52,14 +73,25 @@ def plan(event, instrument, ticker, tiers, *, equity, available, allocated_margi
     capital = max(D(0), min(D(config.capital_usdt), D(equity)))
     target = capital * D(config.risk_fraction)
     size = quantize(target / (distance * ctval), lot)
+    if size_limit is not None:
+        size = min(size, quantize(size_limit, lot))
     if size < minimum:
         raise ValueError("risk-sized quantity is below exchange minimum")
-    if size > D(instrument["maxMktSz"]):
-        raise ValueError("risk-sized quantity exceeds exchange market-order limit")
+    maximum = D(instrument["maxMktSz"])
+    if size > maximum:
+        raise MarketOrderLimitError(symbol=event["symbol"], size=size, maximum=maximum,
+                                    price=price, stop=stop, ctval=ctval, target=target, distance=distance)
     total = size + D(existing_size)
     matching = [r for r in tiers if D(r["minSz"]) <= total <= D(r["maxSz"])]
     if not matching:
         raise ValueError("exchange position tier is unavailable")
+    # Cross hedge mode shares leverage across both sides. Never choose a
+    # leverage allowed only by the incoming side while the other side is larger.
+    if D(opposite_size) > 0:
+        opposite = [r for r in tiers if D(r["minSz"]) <= D(opposite_size) <= D(r["maxSz"])]
+        if not opposite:
+            raise ValueError("opposite position tier is unavailable")
+        matching += opposite
     leverage = min(D(instrument["lever"]), *(D(r["maxLever"]) for r in matching))
     if leverage <= 0:
         raise ValueError("invalid exchange leverage")
@@ -67,13 +99,15 @@ def plan(event, instrument, ticker, tiers, *, equity, available, allocated_margi
     margin = notional / leverage
     remaining = max(D(0), min(D(available), capital - D(allocated_margin)))
     if margin > remaining:
-        raise ValueError("insufficient available allocation for this signal")
+        raise InsufficientMarginError(required=margin, available=available, remaining=remaining,
+                                      allocated=allocated_margin, leverage=leverage, size=size,
+                                      price=price, stop=stop, target=target)
     return dict(symbol=event["symbol"], timeframe=event["timeframe"], side=event["side"],
                 size=amount(size), price=amount(price), stop=amount(stop), ctval=amount(ctval),
                 tick=amount(tick), leverage=amount(leverage), margin=amount(margin),
                 planned_risk=amount(size * ctval * distance), target_risk=amount(target),
                 notional=amount(notional), risk_excludes_fees_slippage_and_funding=True,
-                liquidation_can_precede_stop=True)
+                liquidation_can_precede_stop=True, margin_mode=config.margin_mode)
 
 
 def advance(position, bar):

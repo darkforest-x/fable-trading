@@ -231,8 +231,8 @@ class LinesWorker:
         self.runtime = Path(runtime)
         self.book = LinesBook(self.runtime / DATABASE)
         self.primary = Primary(self.runtime / PRIMARY_DATABASE)
-        # The scanner already uses 8 req/s; OKX allows 20/s for candles per IP.
-        self.client = OKX(rate=3.0)
+        # All readers share a cross-process candle budget; background gets <=3/s.
+        self.client = OKX(rate=3.0, runtime=self.runtime)
         self.instruments: dict[str, dict] = {}
         self.universe_at = 0
         self.daily = self.book.load_daily()

@@ -47,6 +47,11 @@ class Client:
         self.opener = opener or build_opener(NoRedirect())
         self.last_request = 0.0
 
+    def pace(self, path):
+        # Conservative single-client pacing, not a signal/portfolio limit.
+        time.sleep(max(0, .21 - (time.monotonic() - self.last_request)))
+        self.last_request = time.monotonic()
+
     def request(self, method, path, *, query=None, body=None, private=True):
         if method not in {"GET", "POST"} or not path.startswith("/api/v5/"):
             raise ValueError("unsupported request")
@@ -54,6 +59,8 @@ class Client:
             raise PermissionError("read-only client")
         if private and not self.credentials:
             raise ValueError("local credentials are not configured")
+        self.pace(path)
+        candle_response = method == "GET" and path == "/api/v5/market/candles"
         path += "?" + urlencode(sorted(query.items())) if query else ""
         encoded = json.dumps(body, separators=(",", ":"), allow_nan=False) if body is not None else ""
         headers = {"Content-Type": "application/json", "User-Agent": "Fable-Task59/1"}
@@ -65,9 +72,6 @@ class Client:
                             "OK-ACCESS-PASSPHRASE": self.credentials["passphrase"],
                             "OK-ACCESS-TIMESTAMP": stamp,
                             "OK-ACCESS-SIGN": signature(self.credentials["secret"], stamp, method, path, encoded)})
-        # Conservative single-client pacing, not a signal/portfolio limit.
-        time.sleep(max(0, .21 - (time.monotonic() - self.last_request)))
-        self.last_request = time.monotonic()
         request = Request(self.config.host + path, data=encoded.encode() if encoded else None,
                           headers=headers, method=method)
         try:
@@ -79,10 +83,11 @@ class Client:
         if not isinstance(payload, dict) or str(payload.get("code")) != "0":
             raise APIError(payload.get("code", "malformed") if isinstance(payload, dict) else "malformed")
         rows = payload.get("data")
-        if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        row_type = list if candle_response else dict
+        if not isinstance(rows, list) or any(not isinstance(row, row_type) for row in rows):
             raise TransportError("invalid response shape")
         for row in rows:
-            if "sCode" in row and str(row["sCode"]) != "0":
+            if isinstance(row, dict) and "sCode" in row and str(row["sCode"]) != "0":
                 raise APIError(row["sCode"])
         return rows
 

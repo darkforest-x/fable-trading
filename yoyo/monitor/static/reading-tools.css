@@ -1,0 +1,19 @@
+/* Reading controls follow the existing theme tokens and reserve no fixed mobile width. */
+.reader-save{display:flex;align-items:center;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:12px;margin:0 0 12px}
+.reader-save span{flex:1;min-width:180px}.reader-save.save-failed{color:var(--red);padding:10px;border:1px solid currentColor;border-radius:8px}
+.reader-save button,.reader-chapter-bar button{font:inherit;border:1px solid var(--line);border-radius:7px;padding:6px 12px;color:var(--text);background:var(--surface);cursor:pointer}
+.reader-save button[hidden]{display:none}.reader-chapter-bar button:disabled{opacity:.4;cursor:default}
+.reader-disclosure{min-width:0;margin:0}.reader-disclosure>summary{cursor:pointer;padding:10px 0;color:var(--muted);font-size:13px}
+.reader-directory{position:sticky;top:80px;max-height:calc(100dvh - 96px);overflow:auto;align-self:start}
+.reader-directory .ll-nav,.reader-directory .of-nav,.reader-directory .rp-nav,.reader-directory .bk-toc{position:static;max-height:none}
+.reader-chapter-bar{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 0 14px;margin:0 0 20px;color:var(--muted);font-size:12px}
+.reader-chapter-bar>span{min-width:0}.reader-chapter-bar>div{display:flex;gap:6px;flex-shrink:0}
+.ll-reader,.of-reader,.rp-reader,.bk-reader{scroll-margin-top:84px!important}
+.ll-tabs,.of-tabs,.rp-tabs,.bk-toolbar .segmented{flex-wrap:wrap;height:auto}
+@media(max-width:760px){
+ .reader-directory{position:static;max-height:none}.reader-directory[open]{max-height:320px;overflow:auto}
+ .reader-chapter-bar{flex-wrap:wrap;gap:8px}.reader-chapter-bar>span{flex-basis:100%}
+ .reader-save button,.reader-chapter-bar button{min-height:44px}
+ .reader-save{font-size:12px}.reader-save>span{min-width:0}.reader-save.save-failed>span{flex-basis:100%}
+ .of-overview,.rp-overview{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}

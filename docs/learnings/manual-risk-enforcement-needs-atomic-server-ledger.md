@@ -1,0 +1,7 @@
+# Risk limits require one atomic server ledger
+
+- **Problem**: A manual trading client must enforce entry quotas, loss cooldowns and fixed-R exits across retries, concurrent phones and service restarts.
+- **Dead end**: Client-only disabled buttons and local counters cannot enforce limits. Checking risk once when accepting a pending order also leaves a stale budget when equity falls before its fill. These alternatives were rejected during design; no live trading experiment was run.
+- **Effective path**: The independent paper service serializes checks, reservations, fills, stage progression and idempotency receipts in one SQLite `BEGIN IMMEDIATE` transaction. Pending fills recheck current equity as well as their original budget. R and original quantity are immutable; whole-trade net PnL controls loss cooldowns. Separate day locks and timestamp cooldowns prevent midnight resets from reopening early or locking forever.
+- **General rule**: Locate the authoritative writer before building the trading UI. Test retries, concurrent reservations, cross-day fills and recovery with adversarial state transitions, then distinguish server paper receipts from exchange-confirmed live protection.
+- **Affected**: `yoyo/discipline_app/book.py`, `policy.py`, `api.py`, `tests/discipline_app/test_service.py`. Owner policy: 2% per entry, three entries/positions, three losses or 17% daily equity drawdown, 24-hour loss cooldown, 1R breakeven / 3R 60% original / 5R remainder. Existing execution modules remain outside this service; no live authorization is implied.

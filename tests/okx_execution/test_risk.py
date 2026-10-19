@@ -3,7 +3,7 @@ from dataclasses import replace
 import pytest
 
 from yoyo.okx_execution.config import Config
-from yoyo.okx_execution.risk import D, advance, plan
+from yoyo.okx_execution.risk import D, advance, plan, MarketOrderLimitError, InsufficientMarginError
 
 
 def inputs(side="long", timeframe="15m"):
@@ -51,6 +51,18 @@ def test_below_minimum_is_not_rounded_up():
         plan(event, instrument, quote, tiers, equity="50", available="50", allocated_margin="0", existing_size="0", config=Config())
 
 
+def test_margin_rejection_explains_actual_max_leverage_and_shortfall():
+    with pytest.raises(InsufficientMarginError, match='insufficient available allocation') as error:
+        make_plan(available='1')
+    d = error.value.details
+    assert d['leverage'] == '75' and d['requested_size'] == '12.5'
+    assert D(d['required_margin']) == D(125)/75
+    assert D(d['usable_margin']) == 1
+    assert D(d['shortfall']) == D(d['required_margin'])-1
+    # Available equity already accounts for used margin: do not subtract twice.
+    assert make_plan(available='2', allocated_margin='100')['size'] == '12.5'
+
+
 def test_no_artificial_leverage_safety_filter():
     result = make_plan()
     assert D(result["leverage"]) == 75  # Stop at -2% is beyond a 75x initial-margin fraction.
@@ -81,3 +93,39 @@ def test_two_r_closed_arm_and_monotone_trail(side, close, expected):
 def test_only_owner_contract_supported():
     with pytest.raises(ValueError):
         replace(Config(), max_positions=3).validate()
+
+
+def test_cross_leverage_is_shared_with_larger_opposite_position():
+    result = make_plan(opposite_size="110")
+    assert D(result["leverage"]) == 25
+    assert D(result["planned_risk"]) == D("2.5")
+    assert result["margin_mode"] == "cross"
+    with pytest.raises(ValueError, match="opposite position tier"):
+        make_plan(opposite_size="1001")
+
+
+def test_previous_isolated_contract_cannot_start_as_cross():
+    with pytest.raises(ValueError):
+        replace(Config(), margin_mode="isolated").validate()
+
+
+def test_beat_contract_limit_reports_risk_calculation_in_contracts():
+    from yoyo.okx_execution.manual import Sizing
+    event = dict(symbol='BEAT-USDT-SWAP', side='long', timeframe='5m', initial_stop='0.07691')
+    instrument = dict(instId=event['symbol'], instType='SWAP', ctType='linear', settleCcy='USDT', state='live',
+                      ctVal='10', ctMult='1', lotSz='0.1', minSz='0.1', maxMktSz='7000', tickSz='0.00001', lever='10')
+    with pytest.raises(MarketOrderLimitError) as error:
+        plan(event, instrument, dict(askPx='0.07697',bidPx='0.07696'), [], equity='157.4722',
+             available='157.4722', allocated_margin='0', existing_size='0', config=Sizing('157.4722'))
+    d = error.value.details
+    assert d['requested_size'] == '7873.6' and d['max_market_size'] == '7000'
+    assert d['target_risk'] == '4.724166' and d['stop_distance'] == '0.00006'
+    assert d['contract_value'] == '10' and d['quantity_unit'] == 'contracts'
+
+
+def test_exact_venue_maximum_is_allowed_without_unit_conversion():
+    event, instrument, quote, tiers = inputs()
+    instrument['maxMktSz'] = '12.5'
+    result = plan(event, instrument, quote, tiers, equity='125', available='125', allocated_margin='0',
+                  existing_size='0', config=Config())
+    assert result['size'] == '12.5'

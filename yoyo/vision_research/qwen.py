@@ -15,6 +15,8 @@ Official contracts:
 * https://help.aliyun.com/en/model-studio/qwen-structured-output
 * https://help.aliyun.com/en/model-studio/vision
 * https://help.aliyun.com/en/model-studio/error-code
+* https://help.aliyun.com/zh/model-studio/qwen3-8-max
+* https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions
 """
 from __future__ import annotations
 
@@ -36,15 +38,35 @@ from .zhipu import (
 
 
 PROVIDER = "qwen"
-DEFAULT_QWEN_MODEL = "qwen3-vl-plus"
-QWEN_MODELS = frozenset({"qwen3-vl-plus", "qwen-vl-max"})
+DEFAULT_QWEN_MODEL = "qwen3.8-max"
+FLAGSHIP_MODELS = frozenset({DEFAULT_QWEN_MODEL, "qwen3.8-max-0902"})
+QWEN_MODELS = FLAGSHIP_MODELS | {"qwen3-vl-plus", "qwen-vl-max"}
 REGION_ENDPOINTS = MappingProxyType({
     "beijing": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
     "singapore": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
 })
-PROMPT_VERSION = "spike-vision-qwen-v1-project-rules"
-MAX_OUTPUT_TOKENS = 4096
+PROMPT_VERSION = "spike-vision-qwen-v2-flagship-quality"
+MAX_OUTPUT_TOKENS = 131072
+MAX_IMAGE_PIXELS = 16777216
+LEGACY_OUTPUT_TOKENS = 4096
 CONNECTION_TEST_MAX_TOKENS = 128
+
+
+def model_settings(model: str) -> dict[str, Any]:
+    """Public description of the request policy, with no credentials.
+
+    Qwen3.8 xhigh maps to the largest reasoning budget. Do not also send
+    thinking_budget: the provider rejects that combination. The complete
+    output (reasoning plus answer) still shares the 131072-token API ceiling.
+    Sampling uses provider defaults; higher temperature is not higher quality.
+    """
+    if model in FLAGSHIP_MODELS:
+        return {"label": "旗舰最高质量", "reasoning_effort": "xhigh",
+                "max_completion_tokens": MAX_OUTPUT_TOKENS,
+                "max_image_pixels": MAX_IMAGE_PIXELS, "stream": True,
+                "summary": "旗舰最高质量 · xhigh 思考 · 完整输出上限 131,072 token（含思考） · 单图上限 16,777,216 像素 · 流式接收"}
+    return {"label": "兼容配置", "max_tokens": LEGACY_OUTPUT_TOKENS,
+            "summary": "兼容配置 · 非思考模式 · 输出上限 4,096 token"}
 
 
 class QwenError(ZhipuError):
@@ -137,7 +159,7 @@ class QwenClient(ZhipuClient):
         if not isinstance(api_key, str) or not api_key.strip():
             raise QwenError("missing_api_key", "请先配置有效的通义千问 API Key。")
         if type(model) is not str or model not in QWEN_MODELS:
-            raise QwenError("invalid_model", "通义千问视觉模型仅支持 qwen3-vl-plus 与 qwen-vl-max。")
+            raise QwenError("invalid_model", "请选择已支持的千问视觉模型，例如 qwen3.8-max。")
         if type(region) is not str or region not in REGION_ENDPOINTS:
             raise QwenError("invalid_region", "通义千问地域仅支持 beijing 或 singapore。")
 
@@ -168,13 +190,13 @@ class QwenClient(ZhipuClient):
         return _request_error(response)
 
     def _thinking_options(self) -> dict[str, Any]:
+        if self.model in FLAGSHIP_MODELS:
+            return {"enable_thinking": True, "reasoning_effort": "xhigh"}
         # qwen3-vl-plus is a hybrid model; the legacy qwen-vl-max is not.
         return {"enable_thinking": False} if self.model == "qwen3-vl-plus" else {}
 
     def _output_token_budget(self) -> int:
-        # 4K leaves ample room for the bounded decision while staying below
-        # both supported models' documented completion limits.
-        return MAX_OUTPUT_TOKENS
+        return MAX_OUTPUT_TOKENS if self.model in FLAGSHIP_MODELS else LEGACY_OUTPUT_TOKENS
 
     def _connection_token_budget(self) -> int:
         return CONNECTION_TEST_MAX_TOKENS
@@ -194,6 +216,30 @@ class QwenClient(ZhipuClient):
         )
 
     def _send(self, json_body: dict[str, Any]) -> httpx.Response:
+        # The shared prompt builder uses max_tokens; Qwen3.8 instead requires
+        # a ceiling for the whole completion. SSE is consumed by HTTPX while
+        # reading, so thinking tokens keep the read-inactivity timer alive.
+        if self.model in FLAGSHIP_MODELS:
+            json_body = dict(json_body)
+            budget = json_body.pop("max_tokens")
+            json_body["max_completion_tokens"] = budget
+            if budget == CONNECTION_TEST_MAX_TOKENS:
+                # Credential probing must not spend a full reasoning budget.
+                json_body.pop("reasoning_effort", None)
+                json_body["enable_thinking"] = False
+            else:
+                json_body["stream"] = True
+                json_body["stream_options"] = {"include_usage": True}
+                # Per-image max_pixels is documented for both flagship IDs.
+                # Do not upscale images or change their saved input bytes.
+                json_body["messages"] = [
+                    {**message, "content": [
+                        {**part, "max_pixels": MAX_IMAGE_PIXELS}
+                        if part.get("type") == "image_url" else part
+                        for part in message["content"]
+                    ]} if isinstance(message.get("content"), list) else message
+                    for message in json_body["messages"]
+                ]
         try:
             return super()._send(json_body)
         except ZhipuError as exc:
@@ -203,6 +249,82 @@ class QwenClient(ZhipuClient):
                 if self.trace_callback:
                     self.trace_callback(self.last_exchange)
             raise error from exc
+
+    @staticmethod
+    def _json_payload(response: httpx.Response, what: str) -> dict[str, Any]:
+        """Fold SSE chunks without treating reasoning or partial JSON as an answer.
+
+        The shared transport has already recorded the exact SSE response body.
+        Require the stream terminator as well as the normal finish_reason gate.
+        HTTP errors still go through the existing allowlisted diagnostics.
+        """
+        if "text/event-stream" not in response.headers.get("content-type", ""):
+            return ZhipuClient._json_payload(response, what)
+        payload: dict[str, Any] = {}
+        message: dict[str, Any] = {"role": "assistant", "content": "", "reasoning_content": ""}
+        fragments: dict[str, list[str]] = {"content": [], "reasoning_content": []}
+        finish_reason = None
+        done = False
+        event_lines: list[str] = []
+
+        def consume(lines: list[str]) -> None:
+            nonlocal done, finish_reason
+            if not lines:
+                return
+            data = "\n".join(lines)
+            if done:
+                raise QwenError("invalid_response", "千问流式响应在结束标记后仍包含数据。")
+            if data.strip() == "[DONE]":
+                done = True
+                return
+            try:
+                chunk = json.loads(data)
+            except ValueError as exc:
+                raise QwenError("invalid_response", "千问返回了无法读取的流式数据。") from exc
+            if not isinstance(chunk, dict):
+                raise QwenError("invalid_response", "千问流式数据格式无效。")
+            if chunk.get("error"):
+                raise QwenError("provider_error", "千问在流式响应中返回了错误；没有自动重试。")
+            for key in ("id", "model", "usage"):
+                if chunk.get(key) is not None:
+                    payload[key] = chunk[key]
+            choices = chunk.get("choices", [])
+            if not isinstance(choices, list) or len(choices) > 1:
+                raise QwenError("invalid_response", "千问返回了不符合请求的流式候选。")
+            for choice in choices:
+                if not isinstance(choice, dict) or choice.get("index", 0) != 0:
+                    raise QwenError("invalid_response", "千问流式候选索引无效。")
+                delta = choice.get("delta", {})
+                if not isinstance(delta, dict):
+                    raise QwenError("invalid_response", "千问流式内容格式无效。")
+                if finish_reason is not None:
+                    raise QwenError("invalid_response", "千问在完成状态之后仍返回了候选。")
+                if delta.get("tool_calls"):
+                    raise QwenError("unexpected_tool_call", "千问返回了未启用的工具调用，已拒绝该结果。")
+                if delta.get("refusal"):
+                    raise QwenError("safety_blocked", "千问拒绝了这次审阅。")
+                for key in ("content", "reasoning_content"):
+                    value = delta.get(key)
+                    if value is not None:
+                        if not isinstance(value, str):
+                            raise QwenError("invalid_response", "千问流式文本格式无效。")
+                        fragments[key].append(value)
+                if choice.get("finish_reason") is not None:
+                    finish_reason = choice["finish_reason"]
+
+        # SSE uses CR/LF, not Unicode separators that may be valid JSON text.
+        for line in response.text.replace("\r\n", "\n").replace("\r", "\n").split("\n"):
+            if not line:
+                consume(event_lines)
+                event_lines = []
+            elif line.startswith("data:"):
+                event_lines.append(line[5:].removeprefix(" "))
+        consume(event_lines)
+        if not done:
+            raise QwenError("incomplete_response", "千问流式响应未完整结束；本次结果未采纳，也未自动重试。")
+        message.update({key: "".join(parts) for key, parts in fragments.items()})
+        payload["choices"] = [{"index": 0, "finish_reason": finish_reason, "message": message}]
+        return payload
 
     def check_connection(self) -> dict[str, Any]:
         try:

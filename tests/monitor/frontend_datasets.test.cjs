@@ -59,7 +59,7 @@ test("catalog lazy-loads, explains logical storage, uses the single-stream examp
   assert.match(p.root.innerHTML, /已处理重复块/);
   assert.match(p.root.innerHTML, /APFS 的 COW 共享会使物理占用不同/);
   assert.doesNotMatch(p.root.innerHTML, /磁盘总占用|重复数据占用|backtest_ready|没有删除接口/);
-  const cards = p.element("#dataset-records").innerHTML.split('<article class="dataset-card">').slice(1);
+  const cards = p.element("#dataset-records").innerHTML.split(/<details data-dataset-record="[^"]*"[^>]*>/).slice(1);
   assert.equal(cards.length, 2);
   assert.match(cards[0], /read_market_data/);
   assert.match(cards[0], /symbol=&#39;ETH-USDT&#39;/);

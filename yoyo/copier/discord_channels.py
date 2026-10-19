@@ -112,6 +112,9 @@ def register_web_channel(db: Database, channel_id: str, guild_id: str, title: st
         return False
     names = channel_names(db)
     wl = watchlist(db)
+    if "channel_ids" in wl:
+        # An exact owner-selected channel must never expand by matching a title.
+        return False
     hit = watched_name(db, title, guild_id) if wl.get("names") else None
     display = hit or clean_title(title)
     if display and names.get(channel_id) != display:
@@ -181,3 +184,22 @@ def apply_watchlist(db: Database, guild_id: str, names: Iterable[str], known: di
               "switched_off": sorted(c for c, on in switches["channels"].items() if not on)}
     db.audit("watchlist_applied", f"{len(names)} names, route={route}", payload=result)
     return result
+
+
+def apply_exact_watchlist(db: Database, guild_id: str, channel_id: str, name: str) -> dict[str, Any]:
+    """Narrow monitoring to one immutable Discord id; keep historical books intact."""
+    if not all(SNOWFLAKE.fullmatch(str(v)) for v in (guild_id, channel_id)):
+        raise ValueError("invalid Discord guild/channel id")
+    result = apply_watchlist(db, guild_id, [name], {channel_id: name}, "paper")
+    _save(db, WATCHLIST_KEY, {"guild_id": guild_id, "channel_ids": [channel_id],
+                             "names": [name], "route": "paper"})
+    db.audit("exact_watchlist_applied", name, payload=result)
+    return result
+
+
+def accepts_web_channel(db: Database, channel_id: str, guild_id: str) -> bool:
+    """Apply exact guild + channel identity before ingestion or registration."""
+    wl = watchlist(db)
+    if "channel_ids" not in wl:
+        return True
+    return str(guild_id) == str(wl.get("guild_id")) and str(channel_id) in wl["channel_ids"]

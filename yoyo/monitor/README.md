@@ -1,5 +1,56 @@
 # Fable · Impulse Monitor
 
+## 信号中心分周期、多空排除名单（2026-10-17）
+
+Owner明确要求将V13.1全历史累计净R倒数20币用于信号中心。规则版本
+`signal-universe-20261017-bottom20-v1`：15m多/空、1H多/空分别使用各自20币名单，
+不是把80个币种/方向条目合并为全周期禁用。此前全周期10币排除及USDT线性永续要求继续有效。
+完整源名单、笔数和净R在
+`experiments/active/exp-spike-v131-symbol-summary-20261017-v1/results_v1/bottom20_20261017_symbols.csv`
+的`full_history_retrospective`、`side != 0`行。此为Owner选择的范围限制，不是新增盈利验证。
+
+`contracts/signal_universe.py`是单一判定来源。扫描观察入口拒绝新记录；Telegram/Bark在发送前再次
+检查已排队事件；自动执行在读取信号、准备、下单前和等待重试时分别检查。现有参考记录与自有仓位
+继续更新退出，不删除账本、不重置切点。旧记录仍可查询，但命中名单不显示为可用新鲜信号。
+只按合约调用的市场发现与独立均线手动账户保持原范围；自动执行器的共享父类入口为手动事件保留
+原判定，不能因同一引擎继承关系误套SPIKE分组名单。
+
+研究名称只做明确映射：LUNA2→LUNA、1000XEC→XEC、1000RATS→RATS；不自动剥除任意数字前缀，
+不将LUNA映射到LUNC。部署时公开OKX在交易永续快照中，四组分别有10/9/13/8个对应合约；
+未上市或已下架名称仍留在规则中，不重新抓取历史。原始部署核对与测试在`output/signal-bottom20-20261017/`。
+
+来源：[Binance LUNA2标的说明](https://www.binance.com/en/support/announcement/detail/3b7184c80d544586993045a0e6e36e57)、
+[OKX LUNA永续](https://www.okx.com/en-us/help/okx-to-list-usdt-margined-perpetual-for-luna)、
+[Binance 1000XEC合约](https://www.binance.com/ar-BH/support/announcement/detail/974acd319e2343a094a9485d99fd5049)、
+[Binance 1000RATS官方公告](https://www.binance.com/en/square/post/1407623093433)。
+
+## VIDYA 趋势线回踩模拟盘（2026-10-12）
+
+Owner 要求把 VIDYA 趋势线回踩做成独立菜单和模块，对所有币种跑实时模拟实盘。入口为侧栏
+“验证与运行 → VIDYA 回踩”（`/#vidya`）。只做模拟：不下单、不推送、不持有密钥；不改动现有
+信号、通知、账本和新鲜度门。
+
+- **规则**（`vidya_retest.py`，回测与实时共用同一份代码）：BigBeluga Volumatic VIDYA 逐行复现，
+  Length 10 / Momentum 20 / 通道 2 ATR(200)。多头时 K 线影线碰到趋势线且收盘守住、上一根未碰线；
+  碰线 K 线同向直接确认，反向等下一根同向收盘守住；确认时 Delta ≥ +50%（空头 ≤ −50%）；
+  止损在碰线/确认 K 线极值外 1 倍 ATR(14)。`tl-2r` 止盈 2R；`tl-trend` 趋势云变色收盘离场，碰线容差 0.2 ATR。
+- **成交与成本**：确认收盘后下一根开盘成交，20bp 往返（与其他模拟账本相同），按每笔 1% 风险复利统计。
+- **数据**：每小时刷新 OKX `live` 状态的加密币 `-USDT-SWAP`（`instCategory=1`、非盘前；代币化股票和大宗商品不在范围内，已混入的预热记录会被清除）；每根 15m 收盘后约 20 秒拉取已确认 K 线，
+  独立进程限速 4 次/秒（扫描器保持自己的 8 次/秒）。只取最近 1440 根；在 ETH/BTC/SOL 共 444 个截断点上，
+  最新一根的趋势、趋势线和 Delta 与全历史计算 100% 一致。
+- **来源**：首次见到某币时按同一规则回放约 10 天作为“预热回算”，只供对照，不计入实时统计；
+  实时从启用后第一根新 K 线开始。停机后补算缺失 K 线以继续管理持仓，但收盘超过 30 分钟的确认
+  不开新仓（记为“信号已过期”）；停机超过可取历史则从最新一根重新开始并记录缺口。
+- **文件**：`vidya_retest.py`（指标、规则、回测）、`vidya_retest_worker.py`（独立进程，唯一写者）、
+  `vidya_retest_api.py`（只读 API 与进程守护）、`static/vidya-retest.{js,css}`；运行库为运行目录下的
+  `vidya_retest.sqlite3`。API：`GET /api/vidya-retest/overview|trades|market|backtest`。
+- **历史回测页**（`static/vidya-history.js`）：页面顶部切到“历史回测”。九个方案 A–I 与 2026-10-11 回测报告同口径、同数字（`experiments/active/exp-vidya-report-nine-configs-20261011-v1/`，`build.py` 逐个核对报告的笔数与每笔平均 R，不一致就中止）：核心数字、K 线进出场图（趋势线、入场/出场、止损/止盈；1 天至 1 年，长范围在服务端合并 K 线；点交易跳转）、累计 R、分年与分段、多空/离场/Delta 分组、九方案对比、4009 笔交易明细。页面下方另列趋势线回踩三个币对照与 Length 敏感性（标准口径：次开成交、20bp，来自 `exp-vidya-trendline-retest-20261012-v1`）。K 线缓存在 `data/vidya_retest/candles_ETH_{15m,1h}.npz`（不入 git，由 build.py 生成）。接口：`GET /api/vidya-retest/history` 与 `/api/vidya-retest/history/candles`。
+- **证据**：`experiments/active/exp-vidya-trendline-retest-20261012-v1/`（`build.py`、`results.json`、
+  `pine/`）。ETH 2022-01～2026-10 次开成交 20bp：`tl-2r` 53 笔 +0.296R（匹配随机 −0.107R，p 0.0105），
+  `tl-trend` 66 笔 +0.559R（p 0.05）；BTC 两版均为负，SOL 不一致。参数在 ETH 上挑选，状态 inconclusive，
+  生产与训练资格均为 false；全币种表现以本模块前向记录为准。
+- **测试**：`tests/monitor/test_vidya_retest.py`（规则语义、实时与离线逐笔一致、API 合同）。
+
 ## 当前运行：SPIKE V12.8（2026-09-24，服务 1.19.0）
 
 Owner 要求信号中心使用最新 Pine 逻辑。普通信号生产者为 `v128_signals.py`：
@@ -14,7 +65,62 @@ V12.8 原价格退出；RSI 提前退出不属于该 Pine 版本。Python 趋势
 均支持 Bark + Telegram，多空独立；联合信号继续支持双渠道，其原策略仅产生多头。
 30 分钟新鲜度与固定成本未调整。此次没有更改 Pine 源文件。
 
-## 本人公网访问试用（2026-09-24）
+## 自有域名与正式 Cloudflare 隧道（2026-10-18，已接通）
+
+固定入口为 `https://spikeok.com/#market?tab=overview`。域名审核、Cloudflare DNS 激活和
+通用 TLS 证书均已完成；两个公网节点的首页、健康接口及 app.js 返回 200，Owner 已确认手机
+蜂窝网络可打开。正式隧道重启后同一地址恢复健康。当前状态以 `HANDOFF.md` 顶部为准。
+
+Mac 的 Shadowrocket 访问已恢复：该域名使用本地动态 DNS、真实 IP 应答、系统 HTTP 代理
+例外和精确 PROXY 规则，由 TUN 继续代理实际 IPv4；当前配置的 IPv6 支持关闭。
+正常域名的首页、脚本、健康和市场接口均200，Chrome已加载完整行情与图表；旧临时入口
+与ngrok连接器已退役。`status.public_ready` 是这台 Mac 网络路径的检查结果，不能单独
+代表其他网络是否可达。无需将Cloudflare网站IP写入hosts；完整排障边界见
+`docs/learnings/proxy-domain-success-needs-browser-and-address-family-checks.md`。
+域名留在阿里云续费，DNS 托管到 Cloudflare；使用账户内的正式命名隧道，路由到
+原 Caddy `127.0.0.1:8780`，由 Caddy 保留现有工作台访问规则。
+
+完成 Cloudflare 添加域名、DNS 委派和本机 `cloudflared tunnel login` 后，创建或复用
+本账户的命名隧道，将根域名 DNS 路由到其 UUID。凭据只保留在仓外私有目录。
+本机安装命令如下（UUID 和源凭据路径必须取自真实创建结果）：
+
+```bash
+.venv/bin/python -m yoyo.monitor.public_tunnel start-cloudflare \
+  --url https://spikeok.com --tunnel-id <TUNNEL_UUID> \
+  --credentials-file "$HOME/.cloudflared/<TUNNEL_UUID>.json"
+.venv/bin/python -m yoyo.monitor.public_tunnel status
+```
+
+`com.spike.public-cloudflare` 由 launchd 独立托管，Mac 登录后启动，使用持久 UUID
+与精确主机名 ingress；未匹配的域名返回 404。凭据复制到 `PublicTunnel/` 的 0600
+文件，服务参数不包含凭据内容。`named-endpoint.json` 保存当前配置，后续 `start`
+继续该提供商，`stop` 同时停止公网连接器与网关，不操作交易执行器。
+
+DNS/实名审核尚未就绪时返回 `pending_activation=true`，保留旧入口及其说明。
+域名能实际返回工作台 `/api/status` 后，再运行 `start` 完成激活，更新 `access.txt`
+并退役旧 Quick Tunnel 和 ngrok。固定名称不能保证源站永远在线；Mac 与网络仍需可用。
+来源：[Cloudflare 本机管理隧道](https://developers.cloudflare.com/tunnel/features/locally-managed-tunnels/create-local-tunnel/)。
+
+## 原 ngrok 固定公网访问（2026-10-15）
+
+当前使用现有 ngrok 账号的固定 Dev Domain → Caddy `127.0.0.1:8780` → 工作台 `127.0.0.1:8766`。
+入口保存在本机 `~/Library/Application Support/Fable/PublicTunnel/access.txt`，手机收藏其中的 `/#paper-desk` 地址即可。
+已验证隧道重启后域名不变；LaunchAgent 在 Mac 登录后启动并负责异常重连，Mac 与工作台仍需在线。
+首次设置用 `start-fixed --url https://<account-dev-domain>`；之后 `start/status/stop` 自动沿用保存的固定域名。
+ngrok 使用已有的本机私有配置，令牌不复制到仓库或启动参数；HTTP 检查器关闭。
+只有新入口实际返回工作台健康响应后，才移除旧 Quick Tunnel 服务。网关原有同源检查与桌面接口限制保留。
+
+```bash
+.venv/bin/python -m yoyo.monitor.public_tunnel status
+.venv/bin/python -m yoyo.monitor.public_tunnel start
+.venv/bin/python -m yoyo.monitor.public_tunnel stop
+```
+
+免费账号的固定域名不能自选名称；浏览器首次进入需点 Visit Site，此提示按官方说明由 Cookie 隐藏 7 天。
+免费额度为每月 20,000 HTTP 请求 / 1 GB 下行；工作台会轮询，勿将固定地址理解为无限使用或持续可用保证。
+来源：[固定域名](https://ngrok.com/docs/gateway/domains#dev-domains)、[免费版限制](https://ngrok.com/docs/pricing-limits/free-plan-limits)。
+
+### 原 Quick Tunnel 试用配置（2026-09-24）
 
 使用 Cloudflare Quick Tunnel → Caddy 免登录网关 `127.0.0.1:8780` → 原工作台 `127.0.0.1:8766`。
 8771 继续通过统一工作台内部代理访问，不单独公开；监控与视觉服务无需改监听地址。

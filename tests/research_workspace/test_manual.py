@@ -38,6 +38,13 @@ def playbook(client):
                 exit_rule="Recorded exit", avoid_rule="No chase", management_rule="Monitor protection"))
 
 
+def principle(client, **kwargs):
+    payload = dict(title="Define the risk", body="State the risk boundary before acting.",
+                   category="risk", status="active")
+    payload.update(kwargs)
+    return post(client, "/principles", payload)
+
+
 def ticket(client, **kwargs):
     payload = dict(symbol="BTC-USDT-SWAP", side="long", timeframe="1H", mode="real")
     payload.update(kwargs)
@@ -63,6 +70,8 @@ def test_empty_no_risk_defaults_no_execution(workspace):
     client, store = workspace
     data = client.get(BASE).json()
     assert data["tickets"] == []
+    assert data["principles"] == []
+    assert data["principle_templates"] == []
     assert all(x["status"] == "draft" for x in data["templates"])
     assert "0.25%" not in str(data)
     assert data["summary"]["real"]["net_pnl_usdt"] is None
@@ -78,6 +87,105 @@ def test_origin_validation_and_unknown_fields(workspace):
     assert post(client, "/tickets", dict(symbol="BTCUSD", side="long", timeframe="1H", mode="real"), 422)
     assert post(client, "/sessions", dict(date="2026-09-24", title="Today", risk_budget_usdt=0), 422)
     assert post(client, "/playbooks", dict(name="Draft", status="ready"), 409)
+
+
+def test_preparation_needs_an_active_principle_and_rejects_forged_snapshot(workspace):
+    client, _ = workspace
+    draft = principle(client, status="draft")
+    selection = [dict(id=draft["id"], revision=draft["revision"])]
+    preparation = dict(symbol="BTC-USDT-SWAP", side="long", timeframe="1H", mode="real",
+                       principles=selection)
+    assert post(client, "/preparations", preparation, 409)
+
+    forged = dict(symbol="BTC-USDT-SWAP", side="long", timeframe="1H", mode="real",
+                  preparation=dict(checked_at=past(), principles=selection))
+    assert post(client, "/tickets", forged, 422)
+
+
+def test_principles_are_versioned_and_history_is_readable(workspace):
+    client, _ = workspace
+    initial = client.get(BASE).json()
+    assert initial["principles"] == []
+    assert initial["principle_templates"] == []
+
+    record = principle(client, status="draft", rationale="Reason", source="Owner note")
+    assert record["revision"] == 1
+    assert record["status"] == "draft"
+    changes = {k: v for k, v in record.items() if k not in {"id", "revision", "created_at", "updated_at"}}
+    changes.update(expected_revision=1, body="Updated risk boundary.", status="active")
+    updated = client.put(BASE + "/principles/" + record["id"], json=changes, headers=HEADERS)
+    assert updated.status_code == 200, updated.text
+    assert updated.json()["revision"] == 2
+    stale = client.put(BASE + "/principles/" + record["id"], json=changes, headers=HEADERS)
+    assert stale.status_code == 409
+
+    detail = client.get(BASE + "/principles/" + record["id"]).json()
+    assert detail["body"] == "Updated risk boundary."
+    assert [item["revision"] for item in detail["history"]] == [2, 1]
+    assert detail["history"][1]["body"] == "State the risk boundary before acting."
+    assert post(client, "/principles", dict(title="Empty body", body="   ", category="risk"), 422)
+
+
+def test_preparation_requires_all_active_latest_principles_and_freezes_them(workspace):
+    client, _ = workspace
+    first = principle(client, title="Wait for the trigger", category="entry", body="Do not enter before the trigger.")
+    second = principle(client, title="Define invalidation", category="mindset", body="Write what invalidates the thesis.")
+    principle(client, status="draft", title="Draft only", body="Not active yet.")
+    archived = principle(client, status="archived", title="Old principle", body="No longer in use.")
+    request = dict(symbol="BTC-USDT-SWAP", side="long", timeframe="1H", mode="real", notes="Opening notes",
+                   signal_ref="signal-42", principles=[dict(id=first["id"], revision=first["revision"])])
+    assert post(client, "/preparations", request, 409)
+
+    both = [dict(id=first["id"], revision=first["revision"]),
+            dict(id=second["id"], revision=second["revision"])]
+    duplicate = dict(request, principles=[both[0], both[0]])
+    assert post(client, "/preparations", duplicate, 409)
+    inactive = dict(request, principles=both + [dict(id=archived["id"], revision=archived["revision"])])
+    assert post(client, "/preparations", inactive, 409)
+
+    updated_fields = {k: v for k, v in first.items() if k not in {"id", "revision", "created_at", "updated_at"}}
+    updated_fields.update(expected_revision=1, body="Updated before checking.")
+    response = client.put(BASE + "/principles/" + first["id"], json=updated_fields, headers=HEADERS)
+    assert response.status_code == 200, response.text
+    stale = dict(request, principles=[dict(id=first["id"], revision=1), both[1]])
+    assert post(client, "/preparations", stale, 409)
+
+    both[0]["revision"] = 2
+    preparation = post(client, "/preparations", dict(request, principles=both))
+    assert preparation["status"] == "watching"
+    assert preparation["preparation"]["notes"] == "Opening notes"
+    assert preparation["preparation"]["checked_at"]
+    assert preparation["signal_ref"] == "signal-42"
+    assert "execution" not in preparation
+    assert [item["id"] for item in preparation["preparation"]["principles"]] == [first["id"], second["id"]]
+    assert preparation["preparation"]["principles"][0]["body"] == "Updated before checking."
+    first_snapshot = preparation["preparation"]["principles"][0]
+    assert first_snapshot["created_at"] == first["created_at"]
+    assert first_snapshot["updated_at"] == response.json()["updated_at"]
+
+    # Revising a principle and editing other ticket text cannot rewrite the prepared snapshot.
+    updated_fields = {k: v for k, v in response.json().items()
+                      if k not in {"id", "revision", "created_at", "updated_at"}}
+    updated_fields.update(expected_revision=2, body="Changed after preparation.")
+    assert client.put(BASE + "/principles/" + first["id"], json=updated_fields, headers=HEADERS).status_code == 200
+    edit = dict(symbol=preparation["symbol"], side=preparation["side"], timeframe=preparation["timeframe"],
+                mode=preparation["mode"], expected_revision=preparation["revision"], thesis="Additional observation",
+                preparation=dict(preparation["preparation"], notes="Forged replacement"))
+    edited = client.put(BASE + "/tickets/" + preparation["id"], json=edit, headers=HEADERS)
+    assert edited.status_code == 200, edited.text
+    assert edited.json()["preparation"] == preparation["preparation"]
+    identity_change = dict(edit, expected_revision=edited.json()["revision"], side="short")
+    assert client.put(BASE + "/tickets/" + preparation["id"], json=identity_change, headers=HEADERS).status_code == 409
+
+    opened_record = event(client, edited.json(), "open", occurred_at=past(2), entry_price=100,
+                          initial_stop=90, quantity=1)
+    assert opened_record["execution"]["unplanned"] is True
+    assert opened_record["plan_snapshot"]["preparation"] == preparation["preparation"]
+    closed = event(client, opened_record, "close", occurred_at=past(), net_pnl_usdt=5)
+    history = client.get(BASE + "/tickets/" + preparation["id"]).json()["history"]
+    assert history[0]["status"] == "closed"
+    assert history[-1]["preparation"] == preparation["preparation"]
+    assert closed["plan_snapshot"]["preparation"]["principles"][0]["body"] == "Updated before checking."
 
 
 def test_frozen_plan_snapshots_and_revision_conflicts(workspace):

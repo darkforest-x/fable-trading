@@ -23,8 +23,10 @@ STAGES = (
     ("economic", "交易验证", "原成本、时间分段、匹配随机与失败结论"),
 )
 _YOLO = re.compile(
-    r"(?:^|[^a-z0-9])(?:yolo(?:v?\d+)?|ma[-_]morph(?:ology)?|ma3r|gold|onset|l1|l2)"
+    r"(?:^|[^a-z0-9])(?:yolo(?:v?\d+)?|ma[-_]morph(?:ology)?|ma3r|onset|l1|l2)"
     r"(?=$|[^a-z0-9])|(?:^|[^a-z0-9])owner[-_](?:grade|tip|box|train)(?=$|[^a-z0-9])", re.I)
+_GOLD = re.compile(r"(?:^|[^a-z0-9])gold(?=$|[^a-z0-9])|金标", re.I)
+_GOLD_CONTEXT = re.compile(r"label|annotat|review|train|dataset|标注|标签|金标", re.I)
 _STAGE_TERMS = {
     "dataset": r"dataset|label|annotation|gold|negative|curation|crop|标注|数据集|标签|样本",
     "training": r"train|finetun|epoch|训练",
@@ -61,7 +63,10 @@ def _small_receipt(catalog, folder, relative):
 def workflow_stages(record):
     """Classify legacy records for browsing; this does not validate any stage."""
     identity = " ".join(str(record.get(key) or "") for key in ("experiment_id", "title", "question"))
-    if record.get("workflow") != "yolo" and not _YOLO.search(identity):
+    # Gold means reviewed labels only with annotation context; the commodity
+    # (for example XAUUSD breakout research) is not a detection workflow.
+    gold_labels = _GOLD.search(identity) and _GOLD_CONTEXT.search(identity)
+    if record.get("workflow") != "yolo" and not (_YOLO.search(identity) or gold_labels):
         return []
     text = identity + " " + str(record.get("single_variable") or "")
     selected = [stage for stage, pattern in _STAGE_TERMS.items() if re.search(pattern, text, re.I)]

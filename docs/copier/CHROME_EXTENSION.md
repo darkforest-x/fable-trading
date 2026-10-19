@@ -1,60 +1,19 @@
-# Chrome 本地扩展监听 Discord 网页
+# Arthur 频道本地桥接
 
-这个方案不使用 Discord Bot，也不使用用户 Token。它在你本机 Chrome 里读取当前 Discord 网页上**新增出现的交易信号**，然后提交到本项目已有接口：
+当前版本：0.4.0（2026-10-15）。维护目录为 `/Users/zhangzc/fable-trading/tools/discord_copier_extension/`；旧 `~/discord-okx-copier/browser-extension` 的 0.1.0 已停用，保留可恢复状态。
 
-```text
-Discord 网页新信号 -> Chrome 扩展 -> /api/messages/ingest -> DeepSeek -> 风控 -> OKX/dry_run
-```
+## 启动与检查
 
-## 使用步骤
+1. 服务状态：在本仓运行 `.venv/bin/python -m yoyo.copier.manage status`。本地接收接口为 `127.0.0.1:8080`，工作台为 `http://127.0.0.1:8766/#copier`。
+2. Chrome 的 `chrome://extensions` 应显示当前目录加载的 **Discord OKX Copier Bridge 0.4.0** 为启用。代码更新后点“重新加载”。
+3. 登录 Discord，打开并保留唯一频道：`https://discord.com/channels/1004707886657699901/1131521990814089276`。扩展重载后刷新该标签页。
+4. 工作台查看心跳、原消息发布时间、入库时间和逐条处理原因。新消息有原文、附件链接与解析依据。心跳不代表完整采集；停在历史消息或未登录时不能宣称实时监控准确。
 
-1. 启动后端：
+## 数据与执行
 
-```bash
-cd /Users/zhangzc/discord-okx-copier
-PYTHONPATH=. .venv/bin/python -m src.main api-only
-```
-
-2. 打开 Chrome 扩展管理页：
-
-```text
-chrome://extensions
-```
-
-3. 打开右上角「开发者模式」。
-4. 点「加载已解压的扩展程序」。
-5. 选择目录：
-
-```text
-/Users/zhangzc/discord-okx-copier/browser-extension
-```
-
-6. 打开 Discord 网页版并进入要监听的频道：
-
-```text
-https://discord.com/channels/...
-```
-
-7. 点浏览器右上角扩展图标，确认「监听当前 Discord 网页」已开启。
-8. 弹窗会显示当前频道和「最新可见信号」。如果你已经打开频道，可以点「提交当前可见最新信号」手动测试。
-9. 让目标频道出现一条**新交易信号**，再打开管理台信号台查看：
-
-```text
-http://127.0.0.1:5173/messages
-```
-
-## 行为说明
-
-- 扩展默认跳过页面加载前的历史消息，避免一打开频道就批量提交旧消息。
-- 自动监听只提交看起来像交易信号的消息，例如包含「飞扬合约策略 / 进场点位 / 止损点位 / 止盈点位」等关键词。
-- 弹窗手动按钮会在当前可见区域内向上寻找最新交易信号；如果最新消息只是提醒/闲聊，不会误提交。
-- 扩展只处理网页 DOM 中能读到的文本；图片喊单目前只会提交简单的图片提示，不做 OCR。
-- 每条 Discord 消息会用原始消息 ID 作为 `external_id`，重复点击不会重复入库。
-- 如果后端没启动，扩展弹窗会显示提交错误。
-- 本方案不触碰 Discord API 和用户 Token，但仍依赖 Discord 网页结构。Discord 改版后，选择器可能需要调整。
-
-## 风险和建议
-
-- 这不是 Discord 官方集成，不能承诺零风险。
-- 风险低于用户 Token 轮询，因为它不伪装 API 客户端，也不高频请求 Discord。
-- 建议先保持 `dry_run=true`，确认消息能正确进入管理台并被 AI 解析后，再考虑交易执行。
+- 精确匹配服务器和频道 ID；其他频道不采集、不新增模拟交易，旧账本保留并冻结撮合。
+- 初始加载的历史消息只补录，绝不补开历史仓位。定期可见消息扫描接受新消息，但服务端仍执行现有 10 分钟新鲜度门。
+- 消息编辑保留审计版本，等待核对，不重复执行开仓。失败上传可以重试；成功后才去重。
+- 当前指定频道只进入本地 `paper` 账本。普通 `dry_run` 保持开启，未更改实盘模式、风险比例、杠杆或费用。
+- 弹窗手动提交同样受频道范围和新鲜度检查；核查阶段不要制造真实频道消息作测试。
+- 胜率与净 R 使用模拟已平仓记录；博主业绩必须另外核验完整成交过程。详见 `yoyo/copier/README.md`。

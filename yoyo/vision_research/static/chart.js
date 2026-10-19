@@ -2,6 +2,10 @@
 const document = typeof window !== "undefined" && window.SpikeVision ? window.SpikeVision.document : globalThis.document;
 // TradingView 4.2 uses a confirmed SPIKE seed plus a separate live observation.
 // API: https://tradingview.github.io/lightweight-charts/docs/4.2/api/interfaces/IChartApi
+const chartTools = window.SpikeChartTools;
+const chartViews = new chartTools.Views();
+const syncSeries = chartTools.syncer();
+let shownRows = [], inspector;
 let chart;
 let candles;
 let movingAverages = [];
@@ -34,9 +38,9 @@ function palette() {
 export function applyChartTheme() {
   if (!chart) return;
   chart.applyOptions(palette());
-  const up = token('--chart-up'), down = token('--chart-down');
+  const up = chartTools.colors.up, down = chartTools.colors.down;
   candles.applyOptions({ upColor: up, downColor: down, wickUpColor: up, wickDownColor: down });
-  movingAverages.forEach((series, index) => series.applyOptions({ color: token(`--ma-${keys[index]}`) }));
+  movingAverages.forEach((series, index) => series.applyOptions({ color: chartTools.lines.find(line => line.key === keys[index]).color }));
   updateSignalMarkers(markerData);
 }
 
@@ -77,13 +81,11 @@ export function showChart(data, key) {
       return;
     }
     const scale = chart.timeScale();
-    const logicalRange = scale.getVisibleLogicalRange();
-    const followedTail = !logicalRange || logicalRange.to >= candleCount - 1.5;
-    const oldCount = candleCount;
-    const oldFirst = firstCandleTimeMs;
-    const oldInterval = candleIntervalMs;
+    const saved = chartTools.anchor(scale.getVisibleLogicalRange(), chartTools.times(shownRows));
     updateSeries(data);
-    preserveLogicalRange(scale, logicalRange, oldCount, oldFirst, oldInterval, followedTail);
+    const range = chartTools.restore(saved, chartTools.times(shownRows));
+    if (range) scale.setVisibleLogicalRange(range);
+    inspector?.update();
     activeDataHash = data?.chart_sha256;
     return;
   }
@@ -92,8 +94,8 @@ export function showChart(data, key) {
   const container = host();
   chart = window.LightweightCharts.createChart(container, {
     ...palette(), width: container.clientWidth, height: container.clientHeight,
-    localization: { locale: 'zh-CN', timeFormatter: time => crosshairTime.format(new Date(time * 1000)) },
-    handleScroll: { vertTouchDrag: false },
+    localization: { priceFormatter: chartTools.axisPrice, locale: 'zh-CN', timeFormatter: time => crosshairTime.format(new Date(time * 1000)) },
+    ...chartTools.interaction,
   });
   const minimum = Math.min(...data.candles.map(row => row.l));
   const precision = Math.min(10, Math.max(2, 4 - Math.floor(Math.log10(minimum))));
@@ -103,14 +105,12 @@ export function showChart(data, key) {
   });
   updateSeries(data);
   applyChartTheme();
-  chart.timeScale().fitContent();
-  observer = new ResizeObserver(() => {
-    if (chart && container.clientWidth && container.clientHeight) {
-      chart.resize(container.clientWidth, container.clientHeight);
-      updateSignalMarkers(markerData);
-    }
-  });
-  observer.observe(container);
+  const retained = chartViews.get(key, chartTools.times(shownRows));
+  if (retained) chart.timeScale().setVisibleLogicalRange(retained);
+  else chart.timeScale().fitContent();
+  const controls = document.getElementById('chart-legend');
+  if (controls) inspector = chartTools.inspector(controls, chart, candles, { rows: () => shownRows, canvas: container, panel: container.closest('.image-panel') });
+  observer = chartTools.resize(chart, container);
   activeKey = key;
   activeDataHash = data?.chart_sha256;
 }
@@ -118,10 +118,13 @@ export function showChart(data, key) {
 function updateSeries(data) {
   const rows = Array.isArray(data?.candles) ? data.candles : [];
   if (!rows.length || !candles) return;
-  candles.setData(rows.map(row => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
+  shownRows = rows;
+  candles.applyOptions({ priceFormat: chartTools.priceFormat(rows) });
+  syncSeries(candles, rows.map(row => ({ time: row.t / 1000, open: row.o, high: row.h, low: row.l, close: row.c })));
   movingAverages.forEach((series, index) => {
     const field = keys[index];
-    series.setData(rows.map(row => Number.isFinite(row[field])
+    series.applyOptions({ priceFormat: chartTools.priceFormat(rows) });
+    syncSeries(series, rows.map(row => Number.isFinite(row[field])
       ? { time: row.t / 1000, value: row[field] }
       : { time: row.t / 1000 }));
   });
@@ -129,23 +132,6 @@ function updateSeries(data) {
   firstCandleTimeMs = Number(rows[0].t);
   candleIntervalMs = rows.length > 1 ? Number(rows[1].t) - Number(rows[0].t) : undefined;
   updateSignalMarkers(data);
-}
-
-function preserveLogicalRange(scale, range, oldLength, oldFirst, oldInterval, followedTail) {
-  const length = candleCount;
-  if (!range || !length) return;
-  const width = range.to - range.from;
-  if (followedTail) {
-    const rightOffset = range.to - (oldLength - 1);
-    const to = length - 1 + rightOffset;
-    try { scale.setVisibleLogicalRange({ from: to - width, to }); } catch { /* Keep the chart library's valid range. */ }
-    return;
-  }
-  const delta = oldInterval > 0 && Number.isFinite(oldFirst)
-    ? (firstCandleTimeMs - oldFirst) / oldInterval
-    : 0;
-  try { scale.setVisibleLogicalRange({ from: range.from - delta, to: range.to - delta }); }
-  catch { /* Keep the chart library's valid range. */ }
 }
 
 export function fitChart() { chart?.timeScale().fitContent(); }
@@ -164,9 +150,7 @@ export function captureChart() {
       || range.to < lastIndex + 0.5) {
     throw new Error('当前视图没有完整显示最新K线，请先点「回到盘口」后再识别。');
   }
-  const lastBarOpenMs = candleCount === 1
-    ? firstCandleTimeMs
-    : firstCandleTimeMs + lastIndex * candleIntervalMs;
+  const lastBarOpenMs = shownRows.at(-1)?.t;
   if (!Number.isFinite(lastBarOpenMs)) {
     throw new Error('当前视图没有完整显示最新K线，请先点「回到盘口」后再识别。');
   }
@@ -192,11 +176,13 @@ export function captureChart() {
 }
 
 export function destroyChart() {
+  if (chart) chartViews.save(activeKey, chart.timeScale().getVisibleLogicalRange(), chartTools.times(shownRows));
+  inspector?.destroy(); inspector = null;
   observer?.disconnect();
   chart?.remove();
   chart = null; candles = null; observer = null; activeKey = null; activeDataHash = null;
   candleCount = 0; firstCandleTimeMs = undefined; candleIntervalMs = undefined; movingAverages = [];
-  markerData = undefined; displayMarkers = [];
+  markerData = undefined; displayMarkers = []; shownRows = [];
 }
 
 new MutationObserver(applyChartTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });

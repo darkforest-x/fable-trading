@@ -8,6 +8,8 @@ own cutover; enabling a daily stream cannot inherit any earlier period’s cutov
 """
 import re
 
+from yoyo.contracts.signal_universe import exclusion_reason
+
 from yoyo.monitor import (DIRECT_POLICY, DIRECT_TIMEFRAMES, FRESH_MS, MODEL_KIND, MODEL_PROTOCOL,
                           MONITORED_TIMEFRAMES, TIMEFRAMES, BARK_TIMEFRAMES, BARK_ARM_KEY)
 from yoyo.monitor.joint_notifications import JOINT_POLICY, is_joint_event
@@ -87,8 +89,15 @@ def activation(store, channel, protocol):
 
 
 def channel_enabled(store, channel):
+    if channel == "bark" and bark_disabled(store):
+        return False
     return any(activation(store, channel, p) is not None
                for p in (MODEL_PROTOCOL, DIRECT_POLICY, JOINT_POLICY, V130_POLICY))
+
+
+def bark_disabled(store):
+    """Owner pause shared by ordinary and joint senders; credentials stay untouched."""
+    return (store.path.parent / "bark-disabled.json").exists()
 
 
 def is_direct_start(event):
@@ -137,6 +146,8 @@ def model_candidate_error(store, event, now, channel):
 
 def delivery_error(store, event, now, channel):
     """Return a stable rejection code, or None for a currently deliverable leg."""
+    if channel == "bark" and bark_disabled(store):
+        return "bark_disabled_by_owner"
     if is_joint_event(event):
         protocol = JOINT_POLICY
         closes = (event["bar_close_ms"],)
@@ -157,6 +168,9 @@ def delivery_error(store, event, now, channel):
             raise ValueError("unsupported notification channel")
         if not is_v130_signal(event):
             return "not_v130_retest_signal"
+        reason = exclusion_reason(event['symbol'], timeframe=event['timeframe'], side=event['side'])
+        if reason:
+            return reason
         close = event["bar_close_ms"]
         detected = event["detected_at_ms"]
         # Causality, freshness and channel cutovers are anchored only to the
