@@ -11,11 +11,25 @@ from .policy import Policy, Rejected, dec, positive, floor_step
 from .okx_execution import ExchangeRejected, ExchangeUncertain, protective_prices, stable_id
 
 
+_ENTRY_CANCEL_REASONS = frozenset({
+    'manual', 'stop_crossed', 'parent_closed', 'position_closed', 'protection_unverified',
+})
+
+
 class ManagedOrders:
-    def _cancel_entry(self, intent):
+    def _cancel_entry(self, intent, *, reason):
+        if reason not in _ENTRY_CANCEL_REASONS:
+            raise ValueError('Unknown entry cancellation reason')
         identity = stable_id(intent['id'], 'cancel-entry')
         payload = dict(instId=intent['request']['symbol'], clOrdId=intent['payload']['clOrdId'])
-        self.outbox.prepare(identity, '/api/v5/trade/cancel-order', payload)
+        with self.transaction() as (db, state):
+            prior = db.execute('SELECT id FROM exchange_commands WHERE id=?', (identity,)).fetchone()
+            self.outbox.prepare(identity, '/api/v5/trade/cancel-order', payload, db=db)
+            if not prior:
+                # Record the first cause atomically with its durable command.
+                # A retry must not rewrite history or invent a legacy cause.
+                state['intents'][intent['id']]['cancel_requested'] = dict(reason=reason, time=self.clock())
+                self.event(db, 'live_entry_cancel_requested', dict(id=intent['id'], symbol=payload['instId'], reason=reason))
         record = self.outbox.inspect(identity)
         if record['phase'] == 'attempted':
             rows = self.client.get('/api/v5/trade/order', **payload)
@@ -72,15 +86,21 @@ class ManagedOrders:
                         pending['plan']={**current['plan'],**{field:str(dec(current['plan'][field])*ratio) for field in ('quantity','notional','margin','risk','costs')}}
             # A parent that disappeared cannot silently become a new trade.
             parent = current.get('add_to')
-            cancel = not terminal and parent and not any(x['id'] == parent for x in state['positions'])
-            if not terminal:
+            cancel_reason = None
+            if not terminal and parent and not any(x['id'] == parent for x in state['positions']):
+                cancel_reason = 'parent_closed'
+            if not terminal and not cancel_reason:
                 try:
                     q = self.quote(state, order['instId'])
-                    cancel = cancel or (dec(q['last']) - dec(current['plan']['stop'])) * (1 if order['posSide'] == 'long' else -1) <= 0
                 except Rejected:
-                    cancel = True
-        if cancel:
-            self._cancel_entry(intent)
+                    # Missing market evidence blocks new entries; it does not
+                    # invalidate an already accepted GTC order at the exchange.
+                    pass
+                else:
+                    if (dec(q['last']) - dec(current['plan']['stop'])) * (1 if order['posSide'] == 'long' else -1) <= 0:
+                        cancel_reason = 'stop_crossed'
+        if cancel_reason:
+            self._cancel_entry(intent, reason=cancel_reason)
 
     def _merge_fill(self, intent, order):
         from .scaling import merged_position
@@ -161,7 +181,7 @@ class ManagedOrders:
         current_positions=self.client.get('/api/v5/account/positions')
         if not any(p['instId']==pos['symbol'] and p['posSide']==pos['side'] and dec(p['pos'])>0 for p in current_positions):
             if order['state'] not in ('filled','canceled'):
-                self._cancel_entry(current)
+                self._cancel_entry(current, reason='position_closed')
             self._commit_merge(key,root,merging)
             return
         # Place and read back the new stop first. A timeout never resends it.
@@ -213,7 +233,7 @@ class ManagedOrders:
         must match the owned lifecycle and cumulative entered contract count.
         """
         if order['state'] not in ('filled', 'canceled'):
-            self._cancel_entry(current)
+            self._cancel_entry(current, reason='position_closed')
             raise Rejected('仓位已归零，等待剩余开仓委托撤销核对')
         if current.get('add_to') and parent is None:
             raise Rejected('原持仓已结束，加仓成交需核对原仓位生命周期')
@@ -312,7 +332,7 @@ class ManagedOrders:
                 pending=[state['intents'][p['id']] for p in state['pending'] if p['symbol']==pos['symbol']]
             if pending:
                 for pending_intent in pending:
-                    self._cancel_entry(pending_intent)
+                    self._cancel_entry(pending_intent, reason='position_closed')
                 raise Rejected('仓位已归零，等待剩余开仓委托撤销')
             self._settle(protected,pos,algos)
             return

@@ -265,7 +265,7 @@ class LiveBook(ManagedOrders, Book):
                                     covered=False
                                 if not covered:
                                     try:
-                                        self._cancel_entry(intent)
+                                        self._cancel_entry(intent, reason='protection_unverified')
                                         self._emergency_close(dict(merging['position'],id=merging['generation']),instrument)
                                     except (Rejected,ExchangeUncertain):
                                         pass  # Durable requests are reconciled next pass.
@@ -660,7 +660,7 @@ class LiveBook(ManagedOrders, Book):
                 intent=copy.deepcopy(state['intents'].get(identity))
             if not intent or intent['request']['kind']!='limit' or intent.get('execution_version')!=2:
                 raise Rejected('可撤销挂单不存在')
-            self._cancel_entry(intent)
+            self._cancel_entry(intent, reason='manual')
             self.reconcile()
             with self.read_transaction() as (_,state):
                 result=state['intents'][identity]

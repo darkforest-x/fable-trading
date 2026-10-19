@@ -5,7 +5,7 @@ from decimal import Decimal as D
 import pytest
 from test_live_book import Exchange, quote, ticket, enter
 from yoyo.discipline_app.live_book import LiveBook
-from yoyo.discipline_app.okx_execution import ExchangeUncertain
+from yoyo.discipline_app.okx_execution import ExchangeUncertain, stable_id
 from yoyo.discipline_app.policy import Rejected
 
 
@@ -75,6 +75,123 @@ def test_gtc_waits_and_zero_fill_cancel_refunds_once(managed):
     book.cancel(uuid.uuid4().hex,key);book.reconcile()
     assert book.snapshot()['daily']['entries']==0
     assert len([x for x in ex.writes if x[0].endswith('cancel-order')])==1
+    events = [e for e in book.events() if e['kind'] == 'live_entry_cancel_requested']
+    assert len(events) == 1 and events[0]['body']['reason'] == 'manual'
+
+
+@pytest.mark.parametrize('failure', ['missing', 'stale', 'future', 'restart'])
+def test_resting_limit_survives_unavailable_quotes(managed, failure):
+    book, ex, now = managed
+    _, key, _ = enter(book, ticket(kind='limit', price='99'))
+    order = next(iter(ex.orders.values()))
+    before = len(ex.writes)
+    if failure == 'missing':
+        with book.transaction() as (_, state):
+            state['quotes'].clear()
+    elif failure == 'future':
+        with book.transaction() as (_, state):
+            state['quotes']['BTC-USDT-SWAP']['time'] = now[0] + 1
+    else:
+        now[0] += 16
+        book.market_failed('Synthetic unavailable public feed')
+        if failure == 'restart':
+            book = LiveBook(book.path, ex, lambda: now[0])
+    for _ in range(3):
+        assert book.reconcile(), book.snapshot()['private_error']
+    assert len(ex.writes) == before
+    assert order['state'] == 'live'
+    assert [p['id'] for p in book.snapshot()['pending']] == [key]
+    assert book.snapshot()['daily']['entries'] == 1
+    # A missing feed still prevents new entries without canceling accepted ones.
+    with pytest.raises(Rejected, match='行情'):
+        if failure == 'future':
+            book.quote(book.snapshot(), 'BTC-USDT-SWAP')
+        else:
+            book.preview(ticket(symbol='ETH-USDT-SWAP'))
+    quote(book)
+    assert book.reconcile()
+    assert order['state'] == 'live' and len(ex.writes) == before
+
+
+def test_partially_filled_limit_keeps_remainder_and_stop_when_quote_stales(managed):
+    book, ex, now = managed
+    _, key, _ = enter(book, ticket(kind='limit', price='100'))
+    order = next(iter(ex.orders.values()))
+    ex.fill(order['clOrdId'], '10')
+    assert book.reconcile()
+    before = len(ex.writes)
+    now[0] += 16
+    # Price-based breakeven management still waits for fresh market evidence.
+    assert not book.reconcile()
+    assert '行情' in book.snapshot()['private_error']
+    assert len(ex.writes) == before
+    assert order['state'] == 'partially_filled'
+    assert book.snapshot()['pending'][0]['id'] == key
+    assert all(a['state'] == 'live' for a in ex.algos.values())
+    quote(book)
+    assert book.reconcile()
+    assert book.snapshot()['positions'][0]['protection'] == 'exchange-verified'
+
+
+@pytest.mark.parametrize(('side', 'price', 'stop'), [('long', '99', '95'), ('short', '101', '105')])
+def test_only_fresh_stop_cross_cancels_and_final_receipt_refunds(managed, side, price, stop):
+    book, ex, now = managed
+    _, key, _ = enter(book, ticket(kind='limit', side=side, price=price, stop=stop))
+    order = next(iter(ex.orders.values()))
+    before = len(ex.writes)
+    # Even a crossed price cannot authorize cancellation when its timestamp is stale.
+    now[0] += 16
+    with book.transaction() as (_, state):
+        state['quotes']['BTC-USDT-SWAP']['last'] = stop
+    assert book.reconcile()
+    assert order['state'] == 'live' and len(ex.writes) == before
+    quote(book, stop)
+    assert book.reconcile()
+    assert order['state'] == 'canceled'
+    # The cancel acknowledgement is not yet a terminal execution receipt.
+    assert book.snapshot()['pending'][0]['id'] == key
+    assert book.snapshot()['daily']['entries'] == 1
+    reopened = LiveBook(book.path, ex, lambda: now[0])
+    assert reopened.reconcile()
+    assert not reopened.snapshot()['pending']
+    assert reopened.snapshot()['daily']['entries'] == 0
+    # A later manual retry must retain the original automatic cause.
+    reopened.cancel(uuid.uuid4().hex, key)
+    assert len(ex.writes) == before + 1
+    events = [e for e in reopened.events() if e['kind'] == 'live_entry_cancel_requested']
+    assert len(events) == 1 and events[0]['body']['reason'] == 'stop_crossed'
+    with reopened.read_transaction() as (_, state):
+        assert state['intents'][key]['cancel_requested']['reason'] == 'stop_crossed'
+
+
+def test_missing_parent_still_cancels_scale_in_without_quote(managed):
+    book, ex, _ = managed
+    _, root, _ = enter(book)
+    _, key, _ = enter(book, ticket(kind='limit', price='99'))
+    with book.transaction() as (_, state):
+        assert state['intents'][key]['add_to'] == root
+        state['positions'].clear()
+        state['quotes'].clear()
+        intent = copy.deepcopy(state['intents'][key])
+    book._managed_order(intent)
+    assert ex.orders[intent['payload']['clOrdId']]['state'] == 'canceled'
+    events = [e for e in book.events() if e['kind'] == 'live_entry_cancel_requested']
+    assert len(events) == 1 and events[0]['body']['reason'] == 'parent_closed'
+
+
+def test_legacy_cancel_retry_does_not_invent_a_reason(managed):
+    book, ex, _ = managed
+    _, key, _ = enter(book, ticket(kind='limit', price='99'))
+    with book.read_transaction() as (_, state):
+        intent = state['intents'][key]
+    command = stable_id(key, 'cancel-entry')
+    book.outbox.prepare(command, '/api/v5/trade/cancel-order',
+        dict(instId=intent['request']['symbol'], clOrdId=intent['payload']['clOrdId']))
+    book.outbox.dispatch(command, ex)
+    book.cancel(uuid.uuid4().hex, key)
+    with book.read_transaction() as (_, state):
+        assert 'cancel_requested' not in state['intents'][key]
+    assert not any(e['kind'] == 'live_entry_cancel_requested' for e in book.events())
 
 
 def test_partial_gtc_has_stop_then_final_fill_rebases_once(managed):
