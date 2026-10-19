@@ -1,9 +1,31 @@
 # SPIKE Vision Lab
 
-Independent local workbench for Zhipu visual judgments and owner review.
-The original experiment ID is retained; new requests use BigModel, while prior
-Gemini records retain their original model and results.
+Local VLM workbench for Qwen/Zhipu visual judgments and owner review, integrated
+into the shared SPIKE frontend at http://127.0.0.1:8766/#vision.
+The original experiment ID and historical provider records are retained.
 Application source and frontend: `yoyo/vision_research/`.
+
+Version 0.13.0 adds the Qwen flagship quality preset, selected by the owner on
+2026-09-24: `qwen3.8-max` (provider-maintained alias), with optional fixed
+`qwen3.8-max-0902` snapshot. Both use `reasoning_effort=xhigh`,
+`max_completion_tokens=131072` (reasoning plus final answer), per-image
+`max_pixels=16777216`, and SSE with usage reporting. The maximum image budget
+does not upscale local inputs. Sampling parameters use provider defaults.
+`thinking_budget` is omitted because the API rejects it alongside reasoning
+effort. JSON Object output is still checked against the local decision schema;
+reasoning, truncated streams and missing terminal markers are never accepted
+as decisions. The exact SSE body remains in the original exchange record.
+Connection tests use a small non-thinking text request, not the quality preset.
+Existing legacy model settings remain available for historical compatibility.
+
+Select Qwen and the API Key's region in Model Settings; saving without a key
+is supported. Add a regional DashScope API Key there later (or use
+`DASHSCOPE_API_KEY`, `DASHSCOPE_REGION`, `QWEN_MODEL`). A missing Qwen key never
+reuses Zhipu credentials or falls back to another model. No paid inference was
+used to validate this preset; provider access and chart quality await the key.
+Official contracts: [model](https://help.aliyun.com/zh/model-studio/qwen3-8-max),
+[parameters](https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions),
+[JSON output](https://help.aliyun.com/zh/model-studio/qwen-structured-output).
 
 Version 0.10.0 allows 300 seconds of response-read inactivity for Zhipu calls
 while retaining max reasoning. Connection, write and pool waits remain bounded

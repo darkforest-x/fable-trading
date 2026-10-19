@@ -1,14 +1,17 @@
 from pathlib import Path
 
 import pandas as pd
+import torch
 
 from scripts.backtest_owner_short_gold_center_recent import (
     EVENT_GAP_BARS,
     bar_from_x_normalized,
     deduplicate_detections,
     historical_target_index,
+    nms_execution_scope,
     paired_closed_metrics,
     parser,
+    resolve_holdout_use_number,
     shard_paths,
 )
 
@@ -126,3 +129,82 @@ def test_train_hardneg_scope_is_explicit_for_snapshot_and_scan() -> None:
 
     assert historical.evaluation_scope == "train_hardneg_mining"
     assert scan.evaluation_scope == "train_hardneg_mining"
+
+
+def test_scan_parser_records_per_weight_holdout_consumption() -> None:
+    scan = parser().parse_args(
+        [
+            "scan",
+            "--snapshot-dir",
+            "/tmp/example",
+            "--out-dir",
+            "/tmp/output",
+            "--evaluation-scope",
+            "holdout",
+            "--holdout-use-number",
+            "2",
+            "--nms-device",
+            "cpu",
+            "--nms-max-time-img",
+            "60",
+            "--nms-implementation",
+            "torchvision",
+        ]
+    )
+
+    assert scan.evaluation_scope == "holdout"
+    assert scan.holdout_use_number == 2
+    assert scan.nms_device == "cpu"
+    assert scan.nms_implementation == "torchvision"
+    assert scan.nms_max_time_img == 60.0
+
+
+def test_holdout_consumption_validation_fails_before_scan() -> None:
+    assert resolve_holdout_use_number("holdout", 2) == 2
+    assert resolve_holdout_use_number("preholdout_postval_canary", None) == 0
+
+    try:
+        resolve_holdout_use_number("holdout", 0)
+    except ValueError as exc:
+        assert "require" in str(exc)
+    else:
+        raise AssertionError("holdout ordinal zero must fail")
+
+    try:
+        resolve_holdout_use_number("train_hardneg_mining", 1)
+    except ValueError as exc:
+        assert "only valid" in str(exc)
+    else:
+        raise AssertionError("non-holdout scan must reject a holdout ordinal")
+
+
+def test_nms_execution_scope_rejects_invalid_budget() -> None:
+    try:
+        with nms_execution_scope("cpu", 0):
+            pass
+    except ValueError as exc:
+        assert "must be > 0" in str(exc)
+    else:
+        raise AssertionError("zero NMS time budget must fail")
+
+
+def test_nms_execution_scope_moves_predictions_and_overrides_timeout() -> None:
+    import ultralytics.utils.nms as ultralytics_nms
+
+    installed = ultralytics_nms.non_max_suppression
+    observed = {}
+
+    def fake_nms(prediction, *args, **kwargs):
+        observed["device"] = prediction.device.type
+        observed["max_time_img"] = kwargs["max_time_img"]
+        return []
+
+    ultralytics_nms.non_max_suppression = fake_nms
+    try:
+        with nms_execution_scope("cpu", 60.0):
+            ultralytics_nms.non_max_suppression(torch.zeros((1, 5, 1)))
+        assert ultralytics_nms.non_max_suppression is fake_nms
+    finally:
+        ultralytics_nms.non_max_suppression = installed
+
+    assert observed == {"device": "cpu", "max_time_img": 60.0}

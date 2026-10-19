@@ -1,0 +1,63 @@
+// Append to the delivered v1.11 source for native TradingView validation.
+// These call the actual profile/state-machine functions with synthetic bars.
+// This is a test fixture, never part of the delivered indicator.
+checkNative(bool passed, string message) =>
+    if not passed
+        runtime.error("NATIVE CHECK FAILED: " + message)
+
+if barstate.isfirst
+    [uP, uH, uL] = estimatedProfile(array.from(80.0), array.from(0.0), array.from(40.0), array.from(80.0))
+    checkNative(uP == 0.5 and uH == 56 and uL == 0, "uniform 80-bin / 70% area")
+    [pP, pH, pL] = estimatedProfile(array.from(80.0, 50.0), array.from(0.0, 50.0), array.from(40.0, 50.0), array.from(80.0, 100.0))
+    checkNative(pP == 50.5 and pH == 51 and pL == 25, "point volume and left-side tie")
+    [zP, zH, zL] = estimatedProfile(array.from(80.0), array.from(0.0), array.from(40.0), array.from(0.0))
+    checkNative(na(zP) and na(zH) and na(zL), "zero volume is unknown")
+    [fP, fH, fL] = estimatedProfile(array.from(5.0), array.from(5.0), array.from(5.0), array.from(10.0))
+    checkNative(na(fP) and na(fH) and na(fL), "flat range is unknown")
+
+    int start = timestamp(tz, 2026, 10, 12, 0, 0)
+    KeySnapshot weekCheck = na
+    for i = 0 to 7 * 96 - 1
+        int at = start + i * 900000
+        float lo = 100.0 * (int(i / 96) + 1)
+        weekCheck := keyEngine(at, at + 900000, lo + 80, lo, lo + 40, 80)
+        if i == 94
+            checkNative(na(weekCheck.poc), "partial day has no profile")
+        if i == 95
+            checkNative(weekCheck.poc == 100.5 and weekCheck.profileEnd == start + 86400000, "midnight freezes immediately")
+            checkNative(str.length(weekCheck.naked) > 0, "own day never touches its new POC")
+    checkNative(weekCheck.weekHigh == 780 and weekCheck.weekLow == 100, "full week includes Sunday")
+    checkNative(str.split(weekCheck.naked, ";").size() == 8, "all seven disjoint POCs survive")
+
+    KeySnapshot gapCheck = na
+    for i = 0 to 98
+        if i != 96
+            int at = start + i * 900000
+            float lo = i < 96 ? 100.0 : 1000.0
+            gapCheck := keyEngine(at, at + 900000, lo + 80, lo, lo + 40, 80)
+    checkNative(gapCheck.naked == "", "post-session gap invalidates untouched claims")
+
+    KeySnapshot touchCheck = na
+    for i = 0 to 97
+        int at = start + i * 900000
+        touchCheck := keyEngine(at, at + 900000, 180, 100, 140, 80)
+    checkNative(touchCheck.naked == "", "later candle removes touched POC")
+
+    KeySnapshot partialCheck = na
+    for i = 1 to 95
+        int at = start + i * 900000
+        partialCheck := keyEngine(at, at + 900000, 180, 100, 140, 80)
+    checkNative(na(partialCheck.poc), "missing first candle cannot form a profile")
+
+    // Calendar DST tests are meaningful under the delivered default NY zone.
+    if tz == "America/New_York"
+        int spring = timestamp(tz, 2026, 3, 8, 0, 0)
+        int autumn = timestamp(tz, 2026, 11, 1, 0, 0)
+        checkNative(dayStart(spring, 1) - spring == 23 * 3600000, "23-hour spring day")
+        checkNative(dayStart(autumn, 1) - autumn == 25 * 3600000, "25-hour autumn day")
+        KeySnapshot dstCheck = na
+        for i = 0 to 91
+            int at = spring + i * 900000
+            dstCheck := keyEngine(at, at + 900000, 180, 100, 140, 80)
+        checkNative(dstCheck.poc == 100.5 and dstCheck.profileEnd == dayStart(spring, 1), "92 bars form a complete spring day")
+    log.info("MONDAY_V111_NATIVE_CHECKS_PASS: profile, midnight, prior week, touch, gap, partial day, DST")

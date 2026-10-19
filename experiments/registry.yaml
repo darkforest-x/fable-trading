@@ -73,6 +73,31 @@ experiments:
     notes: Both directions; OKX all USDT perpetuals. Asset category snapshot at registration; later listings unknown.
       No history backfill, no matched control, no funding/orderbook slippage/account portfolio simulation. Run evidence
       stored in the local paper journal; no automatic promote.
+  - experiment_id: exp-spike-v13-15m-direction-20261016-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0569714f1b9d04683eb42ac4e6f0c9c84dd41a9c
+    status: inconclusive
+    question: Does short-only admission improve the frozen V13 ordinary-retest 15m history over long-only
+      and both directions?
+    single_variable: Entry direction only; preserve original opposite exits, stop/trail, execution chronology
+      and 20bp costs.
+    result: Long-only 5372 closed, +16.706171R, mean +0.003110R, PF 1.005037; short-only 5773 closed, +471.305497R,
+      mean +0.081640R, PF 1.141546. No new or displaced entries after direction-only replay. Short 2023
+      and 2026 negative; 787 matched shorts have -6.577831bp excess. Earlier/later raw p=.738826/.408959
+      and Holm p=1/1; no stable excess established.
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    artifacts:
+    - exp-spike-v13-15m-direction-20261016-v1-receipt
+    reuse_allowed: true
+    notes: 'Completed frozen historical analysis, not forward validation. 638 stream identities and ledger
+      hashes verified; both-direction parity matches 11145 closed and 488.011668R. Direction-mean difference
+      weekly-bootstrap CI [-.128944,.291021]R. Control coverage 13.6% for shorts, original Sunday anchor
+      exclusion retained. AUC/top-decile not applicable: no model/ranking. Arithmetic R sums are not account
+      returns. Notion: https://app.notion.com/p/3fa8856479af8152ae1bca1fb534c805 . Reproduce with .venv/bin/python
+      -m yoyo.evaluation.spike_v13_direction_split --output experiments/active/exp-spike-v13-15m-direction-20261016-v1/results_reproduce
+      (directory must not exist).'
   - experiment_id: exp-15m-grade-a-full40-two-month-okx-20261013-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2a4451810a308a81d251f7241d0329a45c2c1c05
@@ -11323,7 +11348,7 @@ experiments:
     source_repo: darkforest-x/fable-trading
     source_commit: 55a2dff008
     status: completed
-    result: OKX ETHUSDT.P 5m 2024-02-01..2026-10-10, 20bp, next-open fills; all 241 closed joint trades of the 2026-09-22 OKX run reproduced exactly. Ordinary both-side 559 closed (135 skipped in position) - win 27.2%, mean net -0.180R (gross +0.216R, cost 0.396R), total -100.6R, PF 0.80, max 16 losses in a row, R drawdown 118; mean net -6.2bp vs matched random -19.9bp, excess +13.7bp CI -3.4..+32.0 p0.06. Long 275 -0.267R (-73.5R, excess -9.3bp p0.76). Short 284 -0.095R (-27.1R, +3.0bp net, excess +36.1bp CI 13.9..61.5, both halves positive) but the same Binance short ledger 2021-09..2024-01 shows no excess (+0.3bp p0.48, -0.44R) so the short lead is not replicated. Joint long 249 - win 28.9%, -0.259R, -64.5R, PF 0.72, excess +2.9bp p0.42. 2026 YTD joint +7.3R rests on one +29.45R trade (2026-08-19 16:40 BJ); without it -22.1R. Last 12 months ordinary -8.7R, joint -8.0R; last 30 days ordinary -1.2R (19), joint -1.4R (8). Break-even round-trip cost about 0.11% ordinary, 0.08% joint. No profitable 5m rule established. Pattern audit (analyze_patterns.py, rules committed 896a139161 before bucketed results): none of 18 signal-time factors (hour block, Saturday, ATR%, stop width, rv, momentum, rope/EMA120 distance, 24h move, 7d efficiency, gap since prior signal, 1h/4h/daily trend, prior loss) is stable across OKX earlier, OKX last 12 months and Binance 2021-09..2024-01; tight stops (lowest tercile <0.51%) lose in all three (-0.44/-0.38/-0.96R) mostly from cost, Saturday (Beijing) is weaker in all three but |t|<1.7, daily-trend alignment flips sign. Loss streaks match random order (OKX ordinary 16 vs shuffled mean 17.1, p0.62, runs z0.18; Binance 20 vs 19.2) and next-trade win rate does not rise after losses. 26% of initial-stop losers first showed +1R; the 23 trades >=5R (16 short) look like ordinary trades at entry.
+    result: "OKX ETHUSDT.P 5m 2024-02-01..2026-10-10, 20bp, next-open fills; all 241 closed joint trades of the 2026-09-22 OKX run reproduced exactly. Ordinary both-side 559 closed (135 skipped in position) - win 27.2%, mean net -0.180R (gross +0.216R, cost 0.396R), total -100.6R, PF 0.80, max 16 losses in a row, R drawdown 118; mean net -6.2bp vs matched random -19.9bp, excess +13.7bp CI -3.4..+32.0 p0.06. Long 275 -0.267R (-73.5R, excess -9.3bp p0.76). Short 284 -0.095R (-27.1R, +3.0bp net, excess +36.1bp CI 13.9..61.5, both halves positive) but the same Binance short ledger 2021-09..2024-01 shows no excess (+0.3bp p0.48, -0.44R) so the short lead is not replicated. Joint long 249 - win 28.9%, -0.259R, -64.5R, PF 0.72, excess +2.9bp p0.42. 2026 YTD joint +7.3R rests on one +29.45R trade (2026-08-19 16:40 BJ); without it -22.1R. Last 12 months ordinary -8.7R, joint -8.0R; last 30 days ordinary -1.2R (19), joint -1.4R (8). Break-even round-trip cost about 0.11% ordinary, 0.08% joint. No profitable 5m rule established. Pattern audit (analyze_patterns.py, rules committed 896a139161 before bucketed results): none of 18 signal-time factors (hour block, Saturday, ATR%, stop width, rv, momentum, rope/EMA120 distance, 24h move, 7d efficiency, gap since prior signal, 1h/4h/daily trend, prior loss) is stable across OKX earlier, OKX last 12 months and Binance 2021-09..2024-01; tight stops (lowest tercile <0.51%) lose in all three (-0.44/-0.38/-0.96R) mostly from cost, Saturday (Beijing) is weaker in all three but |t|<1.7, daily-trend alignment flips sign. Loss streaks match random order (OKX ordinary 16 vs shuffled mean 17.1, p0.62, runs z0.18; Binance 20 vs 19.2) and next-trade win rate does not rise after losses. 26% of initial-stop losers first showed +1R; the 23 trades >=5R (16 short) look like ordinary trades at entry."
     question: How did unchanged SPIKE V12.9 signals perform on OKX ETHUSDT.P 5m from 2024-02-01 to 2026-10-10 (ordinary both-side and long-only joint) after 0.2% round-trip cost and against matched random entries?
     single_variable: None - frozen-rule descriptive replay. On 5m V12.9 equals V12.8/V12.6 (4ATR trail, completed 15m EMA120 gate); only the data end moves to 2026-10-10 and the ordinary arm and controls are added to the 2026-09-22 OKX low-timeframe run.
     training_eligible: false
@@ -11378,7 +11403,7 @@ experiments:
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: false
-    notes: Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change. HTML via the 15m builder (--run run_v1/okx_variant), report_v1 local only. Doubling-stake overlay (martingale_variant.py, schemes and monthly restarts as the weekend experiment; run_v1/martingale_variant.json): OKX fixed 10/20/50U end 1440/1881/3202U (50U: DD 73%, 27% of 30 start months ruined; 10/20U never ruined); every doubling scheme is ruined from 2024-02 and in 47-90% of start months. Binance fixed 10/20/50U 1349/1698/2746U; 10U cap-3 doubling survives from 2021-09 (1825U, DD 78%) but is ruined in 64% of start months (median 61U); all other doubling schemes ruined.
+    notes: "Owner 2026-10-10 15m去掉周末和12-16点再回测一下. Post-hoc filters from the same ledgers; OKX and Binance 2024-26 share a market period; in-sample only. No Pine, monitor or account change. HTML via the 15m builder (--run run_v1/okx_variant), report_v1 local only. Doubling-stake overlay (martingale_variant.py, schemes and monthly restarts as the weekend experiment; run_v1/martingale_variant.json): OKX fixed 10/20/50U end 1440/1881/3202U (50U: DD 73%, 27% of 30 start months ruined; 10/20U never ruined); every doubling scheme is ruined from 2024-02 and in 47-90% of start months. Binance fixed 10/20/50U 1349/1698/2746U; 10U cap-3 doubling survives from 2021-09 (1825U, DD 78%) but is ruined in 64% of start months (median 61U); all other doubling schemes ruined."
   - experiment_id: exp-spike-v129-eth15m-paramopt-20261011-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 647335df4c
@@ -11550,6 +11575,30 @@ experiments:
     production_eligible: false
     reuse_allowed: false
     notes: Owner 2026-10-14 asked for a detailed read of the Notion task and suggestions; the task itself lists manual backtests as todo. Discretion in the text (当然这个不是固定的, 企稳, structure of the week) is not modelled; this is the fixed-rule baseline. Six majors only. No Pine, monitor, preset or account change.
+
+  - experiment_id: exp-market-sync-shock-20261015-v6
+    source_repo: darkforest-x/fable-trading
+    source_commit: e54cffc97edc79fbb00c202e199560e40a68e907
+    status: inconclusive
+    question: For the market menu existing strict z3/v3/75% sync cohort, do the eight unchanged v5 exit rules improve on a fixed
+      12h hold?
+    single_variable: 'Evidence-cohort reconciliation only: use the menu pre-existing strict event set; v5 builder, eight exits,
+      next-open entry, 0.2% cost, 20 matched controls, seeds and chronological 2025 split unchanged. No new threshold or live
+      policy.'
+    result: '725 strict events (445 on 30m, 280 on 1H); 724 have complete 48h paths. Primary 1H up / ETH: 72 events before 2025
+      and 54 after. Hold12h net +50.475/+58.139bp, matched control -5.226/-3.613bp, excess p0.0015/0.0735. Every alternative
+      loses against hold12h before 2025 (-14.124 to -30.789bp); none improves both periods. Trail3_48h net +33.884/+117.194bp,
+      paired difference -16.592/+59.055bp, p0.5087/0.3648. Hold24h difference -15.706/+21.314bp. This corrects the applicability
+      gap in v5, not independent new evidence. No better entry rule tested.'
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: 'Owner 2026-10-15 那这个要做好啊. Configuration committed before generation; reuse yoyo.evaluation.market_sync_shock_v5
+      with CONFIG set to this experiment config. Reproduction command in config.json. Reconciliation: all 725 events equal v2
+      strict cohort; trend gross max difference 1e-16, fixed holds within 1.5e-7 float32 tolerance. Results in results_v5; same
+      period comparison, original failed alternatives retained. Control draws differ from v2 menu export because v5 fixed seed
+      is retained. No report requested; no trading changes.'
 
   - experiment_id: exp-btc-key-level-reactions-20261016-v1
     source_repo: darkforest-x/fable-trading

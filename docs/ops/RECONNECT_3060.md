@@ -1,172 +1,166 @@
 # 重装后把 3060 接回来
 
-> 2026-08-20。Owner 重装了 3060 的系统。本文是从零恢复到「Mac 能一条命令开训」的步骤。
-> **必须在那台 Windows 上操作**——目前 Mac 完全连不上它（所有端口关闭）。
+> 2026-08-20 现场恢复记录与下一次重装手册。当前只完成训练机环境恢复，
+> **没有启动训练、没有读取 holdout、没有 promote，也没有改 ACTIVE/frozen。**
 
-## 现状（实测，2026-08-20）
+## 当前真相（已实机验证）
 
-| 项 | 结果 |
-|---|---|
-| Mac 自己 | `192.168.1.2`（`en0`） |
-| 在线主机 | `.1` 路由 · `.2` Mac · **`.3` Intel 网卡** · `.4` 随机 MAC |
-| `192.168.1.5`（脚本默认） | **不在线** |
-| `192.168.1.3` 开放端口 | **22 / 445 / 3389 / 5985 / 135 全关** |
+| 项 | 当前值 | 验证结果 |
+|---|---|---|
+| 主机 / 用户 | `win-zzc` / `Administrator` | SSH 公钥免密登录成功 |
+| Windows | Windows 11 Pro x64，build `26200` | 正常 |
+| 局域网地址 | `192.168.1.3`（WLAN） | 当前可达；DHCP 仍可能漂移 |
+| GPU | NVIDIA GeForce RTX 3060，12 GB | CUDA 计算与 NMS 实测通过 |
+| NVIDIA 驱动 | `610.88` | `nvidia-smi` 正常 |
+| Python | `3.9.13`，`C:\Program Files\Python39\python.exe` | 正常 |
+| venv | `C:\fable\.venv` | `pip check` 无损坏依赖 |
+| torch | `2.8.0+cu126` | `torch.cuda.is_available() == True` |
+| torchvision | `0.23.0+cu126` | CUDA NMS 通过 |
+| ultralytics | `8.4.89` | 与 Mac 契约一致 |
+| numpy | `2.0.2` | 与 Mac 契约一致 |
+| OpenSSH | Win32-OpenSSH Server `9.8.3.0` Preview | `sshd` Running + Automatic |
+| 防火墙 | 入站 TCP 22，仅 `LocalSubnet` | IPv4/IPv6 均监听 |
+| 远端根目录 | `C:\fable` | venv / trainer / datasets / logs 已建 |
 
-`.3` 的 MAC OUI 是 **Intel Corporate**，几乎可以断定就是那台 Windows。
-端口全关与「刚重装 + 防火墙默认拦入站 + OpenSSH Server 未安装」完全吻合。
+Mac 侧完整验收命令：
 
-> ⚠️ **别用 ping 判断找没找对机器。** 排查时我 ping `192.168.1.2` 通了、22 拒绝，
-> 差点当成 3060 有问题——那是 Mac 在 ping 自己。
-> 见 `docs/learnings/`「3060 局域网 IP 会从 .5 漂走」，那条笔记专门警告过这个坑。
+```bash
+FABLE_3060_HOST=Administrator@192.168.1.3 \
+  bash scripts/train_on_3060.sh --check
+```
 
-## 好消息：权重一个都没丢
+通过只表示“机器与受控训练入口可用”。是否允许开训仍以 `HANDOFF.md` 和
+`ROADMAP.md` 的阶段门为准；当前 P0/P1 阶段禁止新训练。
 
-3060 上曾有的 20 个 run（`v7_chain` / `v8_chain` / `v8_coco` / `v8_star3` /
-`v9` 四版 / `v10_chain` / `v10_coco` / `v14_pad200` / `v15_tipval` /
-`v16_tipuni_cold` / `short_star v6–v10` / `side_short_tip v2·v3`）
-**在本机全部有权重**，2026-08-05 那次取回是完整的。
-逐项核对见 `analysis/p_model_inventory_20260820.md`。
+## 这次实际恢复了什么
 
-**重装没有造成模型损失。** 需要重建的只是训练环境。
+### 1. SSH 管理面
 
----
+- Mac 公钥写入 `C:\ProgramData\ssh\administrators_authorized_keys`。
+- 该文件关闭继承，只保留 `SYSTEM:F` 与 `BUILTIN\Administrators:F`。
+- `HKLM:\SOFTWARE\OpenSSH\DefaultShell` 指向 Windows PowerShell。
+- 防火墙只允许本地子网访问 22，不向公网放开。
+- Mac 已在 ToDesk 画面中核对新主机 ED25519 指纹：
+  `SHA256:fQTPIk3nUVNYmPuRzt7DhZfZaRjKukRP9fHJn19karY`。
+- 旧 `known_hosts` 已备份到
+  `~/.ssh/known_hosts.before-win3060-reinstall-20260820` 后再替换。
 
-## 最省事的做法：跑一个脚本
+Windows 内置 `Add-WindowsCapability` 在这台 build 26200 上长时间卡住，能力状态仍为
+`NotPresent`。现场改用微软签名的 Win32-OpenSSH Server-only MSI：
 
-`scripts/windows/setup_3060.ps1` 把下面所有步骤一次做完，**幂等**（跑坏了再跑一遍就行），
-每步自检，失败会明说哪一步、为什么。
+```text
+file    OpenSSH-Win64-v9.8.3.0.msi
+bytes   6103040
+sha256  c8a8c7e21136a099665c2fad9accb41152d129466b719ea71678bab665e03389
+signer  Microsoft Corporation (Authenticode Valid)
+```
 
-把它拷到 Windows（U 盘 / 微信 / OneDrive 都行），然后**以管理员身份**开 PowerShell：
+这是 Preview 构建，当前仅用于受 LAN 防火墙约束的训练箱。Windows servicing 恢复后，
+应评估迁回系统自带 OpenSSH；不要把这个回退解释成生产服务器基线。
+
+MSI 的 `sshd_config` 使用相对的 `sftp-server.exe`，因此还把
+`C:\Program Files\OpenSSH` 加入了 Machine PATH 并重启 `sshd`。否则命令行 SSH 会成功，
+但默认使用 SFTP 的现代 `scp` 会直接断开。
+
+### 2. Python / CUDA 契约
+
+旧脚本使用 `cu124` index，但该 index 没有 Windows/Python 3.9 的 `torch==2.8.0`
+wheel。PowerShell 5.1 又不会因为原生命令返回非零而自动服从
+`$ErrorActionPreference = "Stop"`，于是后续依赖安装可能从 PyPI 补进 CPU torch。
+
+本次实际使用 `cu126`，并把 torch 与 torchvision 一起锁定：
+
+```powershell
+$py = "C:\fable\.venv\Scripts\python.exe"
+
+& $py -m pip install --dry-run --report C:\fable\logs\pip-torch-dry-run.json `
+  torch==2.8.0 torchvision==0.23.0 `
+  --index-url https://download.pytorch.org/whl/cu126
+
+& $py -m pip install torch==2.8.0 torchvision==0.23.0 `
+  --index-url https://download.pytorch.org/whl/cu126
+
+& $py -m pip install --dry-run --report C:\fable\logs\pip-app-dry-run.json `
+  ultralytics==8.4.89 numpy==2.0.2
+& $py -m pip install ultralytics==8.4.89 numpy==2.0.2
+& $py -m pip check
+```
+
+离线 torch wheel 已保留在 Mac 与 Windows 的恢复目录，便于以后免去 2.9 GB 下载：
+
+```text
+file    torch-2.8.0+cu126-cp39-cp39-win_amd64.whl
+bytes   2915338284
+sha256  44d44adc578013fe60280abf84bef359c8f9e490d1d734e4d624a5c976a8f275
+```
+
+### 3. 训练入口不再只存在于一台机器
+
+从 Mac 备份恢复出的旧文件哈希是：
+
+```text
+795c5c8b3f8874afc383aaecaf24faec9f190f83d64164d0a457ba6f5f526180
+```
+
+审计时发现旧副本仍有 `hsv_s=0.05` / `hsv_v=0.05`，与当前“HSV 全关”的铁律冲突。
+因此没有把它继续当不可见的远端特例，而是建立了仓库受控入口：
+
+```text
+scripts/windows/train_dense.py
+sha256  92b58d629e78cae261b7ab5d5ad50db35f9c10535577f95642bc7c703e2204c6
+```
+
+受控版把 `hsv_h/s/v` 全设为 `0.0`、显式记录 seed，并继续强制 CUDA；本轮没有用它训练
+任何模型。`scripts/train_on_3060.sh` 在 `--check` 时比较两端哈希，真正运行时也会先同步并
+复核该文件，避免 Windows 再次成为不可追溯的代码源。
+
+## 下一次重装的最短恢复路径
+
+以管理员身份打开 Windows PowerShell，把仓库中的
+`scripts/windows/setup_3060.ps1` 和官方 Python 3.9 安装包放到 Windows：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup_3060.ps1
 ```
 
-跑完它会打印这台机器的 hostname / 用户名 / IPv4 / GPU 型号，把那几行发回来即可。
-
-下面是它逐步在做什么——手动执行或排查时看。
-
----
-
-## 第一步：Windows 上装 OpenSSH Server
-
-以**管理员** PowerShell 运行：
+如果 Windows capability 安装再次卡住，先取得微软签名的 Win32-OpenSSH MSI，再运行：
 
 ```powershell
-# 1. 安装（Win10 1809+ / Win11 自带这个可选功能）
-Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-
-# 2. 启动并设为开机自启
-Start-Service sshd
-Set-Service  -Name sshd -StartupType Automatic
-
-# 3. 防火墙放行 22
-New-NetFirewallRule -Name sshd -DisplayName "OpenSSH Server (sshd)" `
-  -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
-
-# 4. 默认 shell 设成 PowerShell —— 仓库所有脚本按 PowerShell 写的，cmd 会报 UNC 错
-New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell `
-  -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" `
-  -PropertyType String -Force
+powershell -ExecutionPolicy Bypass -File .\setup_3060.ps1 `
+  -OpenSshServerMsi C:\fable\OpenSSH-Win64-v9.8.3.0.msi
 ```
 
-## 第二步：装公钥（**管理员账户有个坑**）
+脚本现在会：
 
-Mac 的公钥：
+1. 已存在 `sshd` 时跳过 capability 安装，避免在当前 MSI 状态下再次卡住；
+2. 将 22 端口限制在 `LocalSubnet`；
+3. 用与系统语言无关的 SID 收紧管理员公钥 ACL；
+4. 对两轮 `pip install` 先执行 `--dry-run --report`；
+5. 检查每个原生命令的 exit code；
+6. 锁定 `torch 2.8.0 + torchvision 0.23.0` 的 cu126 wheel；
+7. 检查版本、CUDA、torchvision CUDA NMS、GPU 与 `pip check`，任一失败以 exit 1 结束。
 
-```
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAjtCeQsUhmpprxG8xmQ+dzCMsD95G9r+7yllPn39owl antigravity
-```
+## SCP/SFTP 的 Windows 路径规则
 
-如果 `zzc` 是**管理员账户**（多半是），Windows OpenSSH **不读** `~/.ssh/authorized_keys`，
-只读 `C:\ProgramData\ssh\administrators_authorized_keys`，而且**ACL 不对就静默拒绝**：
+PowerShell 远程命令使用：
 
-```powershell
-$k = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAjtCeQsUhmpprxG8xmQ+dzCMsD95G9r+7yllPn39owl antigravity"
-$f = "C:\ProgramData\ssh\administrators_authorized_keys"
-Add-Content -Path $f -Value $k -Encoding utf8
-
-# ACL：只留 Administrators 和 SYSTEM，否则 sshd 拒绝该文件且不报原因
-icacls $f /inheritance:r
-icacls $f /grant "Administrators:F" /grant "SYSTEM:F"
-Restart-Service sshd
+```text
+C:/fable/train_dense.py
 ```
 
-这一步失败的表现是**一直要密码**，不会告诉你是 ACL 的问题。
+现代 `scp` 的 SFTP 传输路径必须使用：
 
-## 第三步：从 Mac 验证
-
-```bash
-ssh -o ConnectTimeout=5 zzc@192.168.1.3 'hostname; nvidia-smi --query-gpu=name --format=csv,noheader'
+```text
+/C:/fable/train_dense.py
 ```
 
-看到 `NVIDIA GeForce RTX 3060` 才算找对机器（MAC 地址只能说明是 Intel 网卡）。
+因此主脚本把命令路径与传输路径分开保存。`scp host:C:/...` 在 legacy SCP 模式可能碰巧
+工作，但在现代默认 SFTP 下会把盘符解释错；不要用 `scp -O` 掩盖 SFTP 子系统问题。
 
-然后把 IP 固定下来，省得再漂：
+## 仍需 owner/运维决定的事项
 
-```bash
-echo 'export FABLE_3060_HOST=zzc@192.168.1.3' >> ~/.zshrc
-```
-
-**更好的做法是在路由器上按 MAC 做 DHCP 预留**（`e0:d4:e8:c7:fb:41` → 固定 IP），
-这样脚本默认值和现实不会再分叉。
-
-## 第四步：重建训练环境
-
-远端布局不是完整仓库，是个精简 GPU 箱：
-
-```
-C:\fable\
-├── .venv\Scripts\python.exe
-├── train_dense.py          ← 训练入口（不是 src.detection.train）
-└── datasets\               ← Mac 用 scp 推过来
-```
-
-```powershell
-mkdir C:\fable; cd C:\fable
-py -3.9 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install --upgrade pip
-.\.venv\Scripts\python.exe -m pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu124
-.\.venv\Scripts\python.exe -m pip install ultralytics==8.4.89 numpy==2.0.2
-```
-
-### ⚠️ 版本必须逐位对上
-
-`scripts/train_on_3060.sh` 会比对两端版本，不一致直接拒绝开训，理由是
-**「结果无法与历史曲线对照」**。Mac 侧当前：
-
-| 包 | 版本 |
-|---|---|
-| python | 3.9.6 |
-| torch | **2.8.0** |
-| ultralytics | **8.4.89** |
-| numpy | **2.0.2** |
-
-装完自检：
-
-```powershell
-.\.venv\Scripts\python.exe -c "import torch,ultralytics,numpy; print(torch.__version__, ultralytics.__version__, numpy.__version__, torch.cuda.is_available())"
-```
-
-`torch.cuda.is_available()` 必须是 `True`，否则装成了 CPU 版，训练会慢到没意义。
-
-`train_dense.py` 需要从旧机备份或重新生成——**本机没有它的副本**
-（它只在 3060 上，从来没进过仓库）。这是这次重装**唯一可能真丢的东西**，
-优先确认还有没有备份。
-
-## 第五步：确认整条链通
-
-```bash
-scripts/train_on_3060.sh --check-only
-```
-
-它会验 SSH、`C:/fable` 存在、版本一致。全绿之后才谈开训。
-
----
-
-## 这次暴露出来的两个问题
-
-1. **`train_dense.py` 只存在于 3060，从未入库。** 一台机器重装就可能永久丢失训练入口。
-   恢复后应当把它提进仓库（它是代码，不是产物）。
-2. **`FABLE_3060_HOST` 默认值 `.5` 已经和现实分叉过两次。**
-   DHCP 预留一次配好，比每次排查省事。
+- 在路由器上给 `win-zzc` 做 DHCP 预留；当前 `.3` 不是永久承诺。
+- Windows servicing 修复后，决定何时从 Preview MSI 迁回 inbox OpenSSH。
+- 等 P0/P1 阶段门通过后，再为第一轮 3060 实验注册 experiment_id 与单变量配置。
+- 每次训练结束只取回产物并评估；`owner_best`、ACTIVE、frozen 切换仍需 owner 明确批准，
+  脚本不再自动 promote。

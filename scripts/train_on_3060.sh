@@ -3,7 +3,8 @@
 #
 # Division of labour is deliberate and load-bearing:
 #   Mac  (here)  = single source of truth. golden_pool.json, dataset build,
-#                  frozen-eval, promote, deploy. Every decision happens here.
+#                  frozen-eval, owner-approved promote, deploy. Every decision
+#                  happens here.
 #   3060 (there) = a GPU that fits weights. Holds no pool, no git, no owner_best.
 #                  Wipe it any time; nothing is lost.
 #
@@ -20,9 +21,13 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-HOST="${FABLE_3060_HOST:-zzc@192.168.1.5}"
+HOST="${FABLE_3060_HOST:-Administrator@192.168.1.3}"
 REMOTE="C:/fable"
+# OpenSSH's modern scp transport is SFTP. Windows drive paths must be rooted as
+# /C:/... for SFTP even though PowerShell commands continue to use C:/....
+SCP_REMOTE="/C:/fable"
 RPY="$REMOTE/.venv/Scripts/python.exe"
+TRAINER="scripts/windows/train_dense.py"
 SSH="ssh -o BatchMode=yes -o ConnectTimeout=15"
 
 NAME="owner_v8_chain"
@@ -48,12 +53,13 @@ say() { echo -e "\n\033[1;36m=== $* ===\033[0m"; }
 die() { echo -e "\033[1;31m[X] $*\033[0m"; exit 1; }
 
 say "0) 连通性 + 版本对齐检查"
+[ -f "$TRAINER" ] || die "受控训练入口不存在: $TRAINER"
 $SSH "$HOST" "echo ok" >/dev/null 2>&1 || die "SSH 不通: $HOST"
 
 # A mismatched remote silently makes results incomparable, which is worse than
 # a crash: the number still looks plausible. Fail loudly instead.
-LOCAL_V=$(.venv/bin/python -c "import torch,ultralytics,numpy;print(f'{torch.__version__.split(\"+\")[0]}|{ultralytics.__version__}|{numpy.__version__}')" 2>/dev/null)
-REMOTE_V=$($SSH "$HOST" "$RPY -c \"import torch,ultralytics,numpy;print(f'{torch.__version__.split(chr(43))[0]}|{ultralytics.__version__}|{numpy.__version__}')\"" 2>/dev/null | tr -d '\r')
+LOCAL_V=$(.venv/bin/python -c "import torch,torchvision,ultralytics,numpy;print(f'{torch.__version__.split(\"+\")[0]}|{torchvision.__version__.split(\"+\")[0]}|{ultralytics.__version__}|{numpy.__version__}')" 2>/dev/null)
+REMOTE_V=$($SSH "$HOST" "$RPY -c \"import torch,torchvision,ultralytics,numpy;print(f'{torch.__version__.split(chr(43))[0]}|{torchvision.__version__.split(chr(43))[0]}|{ultralytics.__version__}|{numpy.__version__}')\"" 2>/dev/null | tr -d '\r')
 echo "  Mac : $LOCAL_V"
 echo "  3060: $REMOTE_V"
 [ "$LOCAL_V" = "$REMOTE_V" ] || die "版本不一致 -> 结果无法与历史曲线对照。先对齐再训。"
@@ -61,8 +67,18 @@ echo "  3060: $REMOTE_V"
 CUDA_OK=$($SSH "$HOST" "$RPY -c \"import torch;print(torch.cuda.is_available())\"" 2>/dev/null | tr -d '\r')
 [ "$CUDA_OK" = "True" ] || die "远端 CUDA 不可用 (torch.cuda.is_available()=$CUDA_OK)"
 $SSH "$HOST" "$RPY -c \"import torch;print('  GPU:',torch.cuda.get_device_name(0),f'{torch.cuda.get_device_properties(0).total_memory/1024**3:.0f}GB')\"" 2>/dev/null | tr -d '\r'
+NMS_OK=$($SSH "$HOST" "$RPY -c \"import torch,torchvision;b=torch.tensor([[0.,0.,10.,10.],[1.,1.,9.,9.]],device='cuda');s=torch.tensor([.9,.8],device='cuda');print(torchvision.ops.nms(b,s,.5).cpu().tolist()==[0])\"" 2>/dev/null | tr -d '\r')
+[ "$NMS_OK" = "True" ] || die "远端 torchvision CUDA NMS 失败"
+LOCAL_ENTRY_SHA=$(shasum -a 256 "$TRAINER" | awk '{print $1}')
+REMOTE_ENTRY_SHA=$($SSH "$HOST" "if (Test-Path $REMOTE/train_dense.py) { (Get-FileHash -Algorithm SHA256 $REMOTE/train_dense.py).Hash.ToLower() } else { 'missing' }" 2>/dev/null | tr -d '\r')
+echo "  trainer Mac : $LOCAL_ENTRY_SHA"
+echo "  trainer 3060: $REMOTE_ENTRY_SHA"
 
-if [ "$CHECK_ONLY" = "1" ]; then echo -e "\n✅ 检查通过,可以训练。"; exit 0; fi
+if [ "$CHECK_ONLY" = "1" ]; then
+  [ "$LOCAL_ENTRY_SHA" = "$REMOTE_ENTRY_SHA" ] || die "远端 train_dense.py 不是仓库受控版本"
+  echo -e "\n✅ 3060 环境检查通过；是否开训仍受 HANDOFF/ROADMAP 阶段门约束。"
+  exit 0
+fi
 
 [ -d "$DATASET" ] || die "数据集不存在: $DATASET"
 [ -f "$BASE" ]    || die "基础权重不存在: $BASE"
@@ -76,8 +92,11 @@ TAR=$(mktemp -t fable_ds).tar
 COPYFILE_DISABLE=1 tar cf "$TAR" --exclude='*.npy' --exclude='*.cache' --exclude='._*' \
   -C "$(dirname "$DATASET")" "$(basename "$DATASET")"
 echo "  包: $(du -h "$TAR" | cut -f1)"
-scp -o BatchMode=yes -q "$TAR" "$HOST:$REMOTE/ds.tar" || die "scp 数据集失败"
-scp -o BatchMode=yes -q "$BASE" "$HOST:$REMOTE/base.pt" || die "scp 基础权重失败"
+scp -o BatchMode=yes -q "$TRAINER" "$HOST:$SCP_REMOTE/train_dense.py" || die "scp 训练入口失败"
+scp -o BatchMode=yes -q "$TAR" "$HOST:$SCP_REMOTE/ds.tar" || die "scp 数据集失败"
+scp -o BatchMode=yes -q "$BASE" "$HOST:$SCP_REMOTE/base.pt" || die "scp 基础权重失败"
+COPIED_ENTRY_SHA=$($SSH "$HOST" "(Get-FileHash -Algorithm SHA256 $REMOTE/train_dense.py).Hash.ToLower()" 2>/dev/null | tr -d '\r')
+[ "$LOCAL_ENTRY_SHA" = "$COPIED_ENTRY_SHA" ] || die "train_dense.py 传输后哈希不一致"
 # The tar holds just "<basename>/..." (it was created with -C dirname), so it
 # MUST be extracted into datasets/, not into the repo root. Extracting with
 # "-C ." dropped the tree at C:/fable/<basename> while step 2 looks for it under
@@ -99,11 +118,12 @@ say "3) 取回权重 + 训练记录"
 # run's training set was eval-free by reading the dataset out of it, and a run
 # without one is rejected as unverifiable no matter how good its weights are.
 RUN_REMOTE="$REMOTE/runs/detect/runs/detect/$NAME"
+RUN_SCP="$SCP_REMOTE/runs/detect/runs/detect/$NAME"
 mkdir -p "runs/detect/runs/detect/$NAME/weights"
-scp -o BatchMode=yes -q "$HOST:$RUN_REMOTE/weights/best.pt" \
+scp -o BatchMode=yes -q "$HOST:$RUN_SCP/weights/best.pt" \
     "runs/detect/runs/detect/$NAME/weights/best.pt" || die "取回权重失败 —— 训练可能没成功"
 for f in args.yaml results.csv; do
-  scp -o BatchMode=yes -q "$HOST:$RUN_REMOTE/$f" "runs/detect/runs/detect/$NAME/$f" \
+  scp -o BatchMode=yes -q "$HOST:$RUN_SCP/$f" "runs/detect/runs/detect/$NAME/$f" \
     || echo "  ⚠️ 没取到 $f（promote 会因此拒绝这个 run）"
 done
 ls -lh "runs/detect/runs/detect/$NAME/weights/best.pt" | awk '{print "  ✅ "$5"  "$9}'
@@ -150,8 +170,6 @@ d["$NAME".replace("owner_", "")] = best
 p.write_text(json.dumps(d, indent=2), encoding="utf-8")
 PY
 
-say "5) promote (只有赢过当前最好才会替换)"
-PYTHONPATH=. .venv/bin/python scripts/promote_owner_best.py 2>&1 | tail -5
-
-echo -e "\n\033[1;32m✅ 完成。owner_best.json:\033[0m"
-python3 -c "import json;d=json.load(open('models/owner_best.json'));print(f\"  {d['source_run']}  frozen-F1 {d['frozen_eval_f1']}\")" 2>/dev/null
+say "5) 到此停止：不自动 promote"
+echo "  训练产物与 frozen-eval 已保存在 Mac。"
+echo "  owner_best / ACTIVE / frozen 的任何切换都必须由 owner 逐次明确批准。"

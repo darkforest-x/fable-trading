@@ -1,0 +1,200 @@
+{
+  "experiment_id": "exp-ethusdtp-multitimeframe-trend-confluence-preholdout-20260904-v1",
+  "purpose": "Build an ETHUSDT.P-specific causal launch system and compare common intraday timeframes without assuming SMA40, then test whether multifactor ranking can isolate trades that survive into a trend runner.",
+  "owner_authorization": {
+    "request": "Owner asked for a dedicated ETHUSDT.P version and explicitly requested that 15m and all practical timeframes be tried.",
+    "bundle_scope": "Approved exploratory bundle: timeframe, trigger MA, entry family, trend exit, and fixed multifactor variants. No live or production mutation is authorized.",
+    "screenshot_role": "The supplied 2026-08-30 ETHUSDT.P 15m screenshot motivates a dense-release family and visual recall audit only; its post-holdout prices are not read or scored in this experiment."
+  },
+  "sources": {
+    "eth": {
+      "symbol": "ETH_USDT_SWAP",
+      "directory": "data/kline_preholdout_okx_eth_mtf",
+      "audit": "data/kline_preholdout_okx_eth_mtf/archive_ETH_USDT_SWAP.json",
+      "glob": "data/kline_preholdout_okx_eth_mtf/okx_ETH_USDT_SWAP_5m_*.csv",
+      "archive_month_start": "2022-12",
+      "archive_month_end": "2026-02",
+      "native_bar": "5m"
+    },
+    "btc_resonance": {
+      "symbol": "BTC_USDT_SWAP",
+      "path": "data/kline_preholdout_okx_5m/okx_BTC_USDT_SWAP_5m_341567.csv",
+      "audit": "data/kline_preholdout_okx_5m/archive_BTC_USDT_SWAP.json",
+      "sha256": "767f67c2b0ae5a8c83369a7cb950334e61de09edbb82a0158122c41794eed5ac"
+    },
+    "contract": "Official OKX monthly 1m archives aggregated to complete UTC-aligned 5m candles; all higher bars are rebuilt from exactly complete contiguous 5m groups."
+  },
+  "time_contract": {
+    "physical_start_inclusive": "2022-11-30T16:00:00Z",
+    "discovery_start_inclusive": "2023-01-01T00:00:00Z",
+    "discovery_end_exclusive": "2024-01-01T00:00:00Z",
+    "discovery_folds": ["2023H1", "2023H2"],
+    "confirmation_start_inclusive": "2024-01-01T00:00:00Z",
+    "confirmation_end_exclusive": "2025-01-01T00:00:00Z",
+    "confirmation_folds": ["2024H1", "2024H2"],
+    "audit_start_inclusive": "2025-01-01T00:00:00Z",
+    "audit_end_exclusive": "2026-03-01T00:00:00Z",
+    "audit_slices": ["2025H1", "2025H2", "2026P1"],
+    "holdout_start": "2026-05-04T00:00:00Z",
+    "holdout_price_rows_allowed": 0,
+    "audit_status": "historical transport audit, not pristine OOS: the asset and portions of this era were inspected by earlier ETH research"
+  },
+  "timeframes": [
+    {"id": "5m", "minutes": 5, "minimum_total": 120, "minimum_per_fold": 35},
+    {"id": "15m", "minutes": 15, "minimum_total": 100, "minimum_per_fold": 25},
+    {"id": "30m", "minutes": 30, "minimum_total": 80, "minimum_per_fold": 18},
+    {"id": "1h", "minutes": 60, "minimum_total": 60, "minimum_per_fold": 12},
+    {"id": "2h", "minutes": 120, "minimum_total": 40, "minimum_per_fold": 8},
+    {"id": "4h", "minutes": 240, "minimum_total": 24, "minimum_per_fold": 5}
+  ],
+  "signal": {
+    "source": "HL2",
+    "atr_length": 14,
+    "lookback_bars": 8,
+    "slope_lag_bars": 4,
+    "cooldown_bars": 24,
+    "direct": {
+      "previous_signed_close_atr_max": 0.10,
+      "current_signed_close_atr_min": 0.10,
+      "signed_body_atr_min": 0.20,
+      "range_atr_min": 0.65,
+      "directional_close_location_min": 0.60,
+      "signed_ma_slope_atr_per_bar_min": -0.04
+    },
+    "rejection": {
+      "current_signed_close_atr_min": 0.05,
+      "signed_body_atr_min": 0.10,
+      "directional_close_location_min": 0.65,
+      "signed_ma_slope_atr_per_bar_min": -0.03,
+      "requires_physical_ma_touch": true
+    },
+    "coil": {
+      "current_signed_close_atr_min": 0.15,
+      "prior_breakout_atr_min": 0.05,
+      "signed_body_atr_min": 0.25,
+      "range_atr_min": 0.70,
+      "directional_close_location_min": 0.60,
+      "prior_near_ma_share_min": 0.50,
+      "prior_range_atr_max": 2.75,
+      "signed_ma_slope_atr_per_bar_min": -0.03
+    },
+    "k1k2": {
+      "gap_bars_min": 2,
+      "gap_bars_max": 8,
+      "k1_body_ratio_min": 0.40,
+      "k1_range_atr_min": 0.65,
+      "k1_directional_close_location_min": 0.60,
+      "k2_wick_share_min": 0.15,
+      "k2_body_ratio_max": 0.65,
+      "k2_directional_close_location_min": 0.60,
+      "path_correct_side_share_min": 1.0,
+      "body_must_remain_on_directional_side": true,
+      "physical_wick_touch_required": true
+    }
+  },
+  "coordinate_pass": {
+    "initial": {
+      "ma_reference": "SMA40",
+      "entry_family": "all_with_k1k2",
+      "exit_policy": "fixed_5atr_h24"
+    },
+    "ordered_factors": [
+      {
+        "factor": "ma_reference",
+        "values": ["SMA20", "EMA20", "SMA30", "EMA30", "SMA40", "EMA40", "SMA60", "EMA60", "SMA80", "EMA80", "SMA120", "EMA120"]
+      },
+      {
+        "factor": "entry_family",
+        "values": ["k1k2", "direct", "rejection", "coil", "direct_rejection", "all_state", "all_with_k1k2"]
+      },
+      {
+        "factor": "exit_policy",
+        "values": ["fixed_5atr_h24", "runner_sma60_b1_h24", "runner_sma60_b1_h96", "runner_ema60_b1_h96", "runner_sma120_b1_h96", "runner_sma60_b0_5_h96"]
+      }
+    ],
+    "minimum_robust_improvement_bp": 2.0,
+    "maximum_worst_fold_degradation_bp": 5.0,
+    "selection_metric": "median(half-year mean net bp) - 0.5 * population std(half-year mean net bp)",
+    "one_factor_at_a_time": true
+  },
+  "execution": {
+    "entry": "confirmed decision bar close; fill next bar open",
+    "round_trip_cost_fraction": 0.002,
+    "initial_disaster_stop_atr": 2.0,
+    "fixed_target_atr": 5.0,
+    "runner_activation": "first completed close at or beyond +2 signal ATR; trailing update becomes active on the next bar",
+    "runner_activation_atr": 2.0,
+    "same_bar_priority": "active stop first",
+    "gap_fill": "next bar open when it gaps beyond the active stop",
+    "horizons_hours": [24, 96]
+  },
+  "feature_screen": {
+    "target": "per-trade net return in basis points after fixed 20bp round-trip cost",
+    "secondary_target": "whether a completed close arms the +2ATR trend runner before exit",
+    "top_fraction": 0.10,
+    "feature_groups": ["geometry", "trend", "volatility", "participation", "structure", "sequence", "higher_timeframe", "btc_resonance"],
+    "variants": [
+      "rule_score",
+      "geometry",
+      "geometry_trend",
+      "geometry_volatility",
+      "geometry_participation",
+      "geometry_structure",
+      "geometry_sequence",
+      "geometry_higher_timeframe",
+      "geometry_btc_resonance",
+      "all_return",
+      "all_arm_probability",
+      "all_two_stage"
+    ],
+    "model": {
+      "library": "lightgbm",
+      "return_objective": "huber",
+      "n_estimators": 180,
+      "learning_rate": 0.025,
+      "num_leaves": 11,
+      "max_depth": 4,
+      "min_child_samples": 30,
+      "subsample": 0.80,
+      "colsample_bytree": 0.75,
+      "reg_alpha": 0.20,
+      "reg_lambda": 1.00,
+      "random_state": 20260904,
+      "n_jobs": 1,
+      "verbosity": -1
+    },
+    "selection": "Fit on 2023 only; derive the absolute top-decile threshold from 2023 fitted scores; nominate within each timeframe on 2024 by worst-half then overall net expectancy. Bonferroni correction covers all timeframe-by-variant comparisons.",
+    "audit_refit": "Refit the nominated fixed variant on 2023-2024, derive a new training-only absolute top-decile threshold, and replay once on 2025 through 2026-02."
+  },
+  "matched_control": {
+    "controls_per_event": 3,
+    "strata": ["calendar month", "UTC six-hour block", "same-timeframe monthly ATR quintile", "direction"],
+    "exclude_all_candidate_neighborhoods": true,
+    "seed": "eth-mtf-confluence-20260904",
+    "inference": "UTC-week block sign flip on candidate minus exact-control mean"
+  },
+  "gates": {
+    "confirmation": [
+      "selected 2024 mean net return > 0 after 20bp cost",
+      "both 2024 half-years with enough observations have mean net return > 0",
+      "Bonferroni familywise score p < 0.01",
+      "paired excess versus exact matched controls > 0 with block sign-flip p < 0.01"
+    ],
+    "audit": [
+      "2025 through 2026-02 mean net return > 0",
+      "every audit slice with enough observations has mean net return > 0",
+      "score and matched-control p < 0.01"
+    ],
+    "automatic_promote": false,
+    "production_eligible": false,
+    "tradingview_write_allowed": false,
+    "live_trading_allowed": false
+  },
+  "eligibility": {
+    "holdout_consumed": false,
+    "holdout_evaluation_consumed": false,
+    "training_eligible": false,
+    "production_eligible": false,
+    "forward_eligible": false
+  }
+}

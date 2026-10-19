@@ -1,0 +1,201 @@
+//@version=6
+// Monday high/low range display, v1.3 (ICT weekly-profile helper).
+//
+// v1.3 is built on v1, not on v1.1/v1.2: the owner chose v1's candle
+// behaviour (2026-10-14) and asked for weekly-candle high/low lines at 2px.
+//
+// Display only: no signals, alerts or orders. "Monday" and "weekend" are
+// evaluated in the selected timezone (default America/New_York, the ICT
+// convention). Daily bars use the exchange timezone instead, because a daily
+// bar's open time is a trading-day stamp, not a New York wall-clock instant.
+//
+// Pine cannot remove bars from the time axis. Weekend candles are drawn fully
+// transparent, so on 24/7 symbols their slots remain as blank space.
+//
+// Native candles are recoloured with barcolor(); a same-colour plotcandle is
+// also drawn in front (behind_chart=false) so native red/green bodies, wicks
+// or borders cannot leak through on weekdays (see
+// docs/learnings/pine-candle-style-parity-requires-foreground-z-order.md).
+//
+// Rays start at the bar that set the Monday high/low and update live while
+// Monday is in progress. The current week's rays extend right; older weeks are
+// cut at the last bar before the next Monday unless "extend history" is on.
+//
+// Weekly high/low follows the symbol's own weekly candle (timeframe.change("W"),
+// exchange timezone; OKX weeks start Monday 00:00 UTC), independent of the
+// Monday timezone input. Each week's lines keep running through the following
+// week, so last week's high/low stays visible next to the developing one.
+// The first, partial week of loaded history is skipped.
+
+indicator("周一高低点区间 · v1.3", shorttitle="Monday Range v1.3", overlay=true,
+     behind_chart=false, max_lines_count=500, max_labels_count=500)
+
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+bool hideWeekend = input.bool(true, "隐藏周六、周日K线", group=candleGroup)
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+// 2 Monday + 2 weekly lines per week must fit max_lines_count=500.
+int keepWeeks = input.int(12, "保留最近几周", minval=1, maxval=120, group=rayGroup)
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示价格标签", group=rayGroup)
+
+string weekGroup = "周K高低点"
+bool showWeek = input.bool(true, "显示周K高低点", group=weekGroup)
+color wkHighCol = input.color(#FF9800, "周高", group=weekGroup)
+color wkLowCol = input.color(#9C27B0, "周低", group=weekGroup)
+int wkWidth = input.int(2, "线宽", minval=1, maxval=4, group=weekGroup)
+
+if barstate.isfirst and (timeframe.isweekly or timeframe.ismonthly)
+    runtime.error("请在日线或更低周期使用：周线 / 月线没有单独的“周一”K线。")
+
+string tz = timeframe.isdaily or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+
+int dow = dayofweek(time, tz)
+bool isMonday = dow == dayofweek.monday
+bool isWeekend = dow == dayofweek.saturday or dow == dayofweek.sunday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+// The date key also catches back-to-back Mondays when a whole week is missing.
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// ---- Candles -------------------------------------------------------------
+color hiddenCol = color.new(color.white, 100)
+color candleCol = hideWeekend and isWeekend ? hiddenCol : isMonday ? mondayCol : baseCol
+barcolor(candleCol, title="K线着色")
+plotcandle(open, high, low, close, "K线", color=candleCol, wickcolor=candleCol,
+     bordercolor=candleCol, display=display.pane)
+
+// ---- Monday rays ---------------------------------------------------------
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var array<label> highLabels = array.new<label>()
+var array<label> lowLabels = array.new<label>()
+var float monHigh = na
+var float monLow = na
+
+labelText(string name, float price) =>
+    name + " " + str.tostring(price, format.mintick)
+
+newRayLabel(float price, string name, color col) =>
+    label.new(bar_index, price, labelText(name, price), style=label.style_label_left,
+         color=hiddenCol, textcolor=col, size=size.small)
+
+if newMonday
+    // Freeze the previous week at the last bar before this Monday.
+    if highLines.size() > 0 and not extendHistory
+        for l in array.from(highLines.last(), lowLines.last())
+            l.set_extend(extend.none)
+            l.set_x2(bar_index - 1)
+    monHigh := high
+    monLow := low
+    highLines.push(line.new(bar_index, high, bar_index + 1, high, extend=extend.right,
+         color=highCol, style=rayStyle, width=rayWidth))
+    lowLines.push(line.new(bar_index, low, bar_index + 1, low, extend=extend.right,
+         color=lowCol, style=rayStyle, width=rayWidth))
+    if showLabels
+        highLabels.push(newRayLabel(high, "周一高", highCol))
+        lowLabels.push(newRayLabel(low, "周一低", lowCol))
+    if highLines.size() > keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    if highLabels.size() > keepWeeks
+        highLabels.shift().delete()
+        lowLabels.shift().delete()
+else if isMonday and highLines.size() > 0
+    if high > monHigh
+        monHigh := high
+        highLines.last().set_xy1(bar_index, high)
+        highLines.last().set_xy2(bar_index + 1, high)
+    if low < monLow
+        monLow := low
+        lowLines.last().set_xy1(bar_index, low)
+        lowLines.last().set_xy2(bar_index + 1, low)
+
+// The current week's labels ride on the latest bar; once the next Monday
+// starts they stay at the old week's last bar (the blank weekend slot).
+if highLabels.size() > 0
+    highLabels.last().set_xy(bar_index, monHigh)
+    highLabels.last().set_text(labelText("周一高", monHigh))
+    lowLabels.last().set_xy(bar_index, monLow)
+    lowLabels.last().set_text(labelText("周一低", monLow))
+
+// ---- Weekly candle high/low ----------------------------------------------
+var array<line> wkHighLines = array.new<line>()
+var array<line> wkLowLines = array.new<line>()
+var array<label> wkHighLabels = array.new<label>()
+var array<label> wkLowLabels = array.new<label>()
+var float wkHigh = na
+var float wkLow = na
+var float prevWkHigh = na
+var float prevWkLow = na
+// Weekly labels sit further right so they do not cover the Monday labels.
+int wkLabelOffset = 15
+
+// Evaluated on every bar, outside the condition, so its history stays intact.
+bool weekChanged = timeframe.change("W")
+bool newWeek = showWeek and weekChanged and bar_index > 0
+
+if newWeek
+    // The week before last stops here; last week keeps running through this week.
+    int n = wkHighLines.size()
+    if n >= 2 and not extendHistory
+        for l in array.from(wkHighLines.get(n - 2), wkLowLines.get(n - 2))
+            l.set_extend(extend.none)
+            l.set_x2(bar_index - 1)
+    int nl = wkHighLabels.size()
+    if nl >= 2
+        // Park the week-before-last labels at its line end.
+        wkHighLabels.get(nl - 2).set_xy(bar_index - 1, prevWkHigh)
+        wkHighLabels.get(nl - 2).set_text(labelText("周高", prevWkHigh))
+        wkLowLabels.get(nl - 2).set_xy(bar_index - 1, prevWkLow)
+        wkLowLabels.get(nl - 2).set_text(labelText("周低", prevWkLow))
+    if nl >= 1
+        wkHighLabels.last().set_text(labelText("上周高", wkHigh))
+        wkLowLabels.last().set_text(labelText("上周低", wkLow))
+    prevWkHigh := wkHigh
+    prevWkLow := wkLow
+    wkHigh := high
+    wkLow := low
+    wkHighLines.push(line.new(bar_index, high, bar_index + 1, high, extend=extend.right,
+         color=wkHighCol, width=wkWidth))
+    wkLowLines.push(line.new(bar_index, low, bar_index + 1, low, extend=extend.right,
+         color=wkLowCol, width=wkWidth))
+    if showLabels
+        wkHighLabels.push(newRayLabel(high, "本周高", wkHighCol))
+        wkLowLabels.push(newRayLabel(low, "本周低", wkLowCol))
+    if wkHighLines.size() > keepWeeks
+        wkHighLines.shift().delete()
+        wkLowLines.shift().delete()
+    if wkHighLabels.size() > keepWeeks
+        wkHighLabels.shift().delete()
+        wkLowLabels.shift().delete()
+else if showWeek and wkHighLines.size() > 0
+    if high > wkHigh
+        wkHigh := high
+        wkHighLines.last().set_xy1(bar_index, high)
+        wkHighLines.last().set_xy2(bar_index + 1, high)
+    if low < wkLow
+        wkLow := low
+        wkLowLines.last().set_xy1(bar_index, low)
+        wkLowLines.last().set_xy2(bar_index + 1, low)
+
+// This week's and last week's labels ride on the latest bar.
+int nwl = wkHighLabels.size()
+if nwl > 0
+    wkHighLabels.last().set_xy(bar_index + wkLabelOffset, wkHigh)
+    wkHighLabels.last().set_text(labelText("本周高", wkHigh))
+    wkLowLabels.last().set_xy(bar_index + wkLabelOffset, wkLow)
+    wkLowLabels.last().set_text(labelText("本周低", wkLow))
+if nwl > 1
+    wkHighLabels.get(nwl - 2).set_xy(bar_index + wkLabelOffset, prevWkHigh)
+    wkLowLabels.get(nwl - 2).set_xy(bar_index + wkLabelOffset, prevWkLow)

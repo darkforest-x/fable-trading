@@ -32,12 +32,17 @@ def main():
     for j,m in enumerate([1,2]):
         values=[next(a for a in r['accounts'] if a['multiplier']==m and a['margin_leverage']==1)['net_profit'] for r in cases]
         bars=ax.bar(x+(j-.5)*width, values,width,label='Fixed 100 USDT' if m==1 else 'Double after net loss',color=['#517caa','#e68b46'][j])
-        ax.bar_label(bars,labels=[f'{v:+.2f}' for v in values],padding=4,fontsize=10)
+        labels=[]
+        for case,value in zip(cases,values):
+            account=next(a for a in case['accounts'] if a['multiplier']==m and a['margin_leverage']==1)
+            labels.append(f'{value:+.2f}'+(' *' if account['stopped_reason'] else ''))
+        ax.bar_label(bars,labels=labels,padding=4,fontsize=10)
     ax.set_xticks(x,[str(r['minutes'])+'m' for r in cases]);ax.axhline(0,color='#555',linewidth=.7)
     ax.set_ylabel('Net P&L (USDT), open position marked after cost')
     ax.set_title('OKX ETH | Jan 1 – May 1, 2026 UTC | 1x initial-margin budget')
     ax.legend(frameon=False);ax.grid(axis='y',alpha=.15);ax.set_axisbelow(True);ax.margins(y=.3)
-    fig.tight_layout();fig.savefig(OUT/'comparison.png',dpi=160,bbox_inches='tight');plt.close(fig)
+    fig.text(.5,0,'* Stopped early: insufficient initial margin for the next doubling level.',ha='center',fontsize=10)
+    fig.tight_layout(rect=[0,.04,1,1]);fig.savefig(OUT/'comparison.png',dpi=160,bbox_inches='tight');plt.close(fig)
 
     text=['# ChartArt BB＋RSI v1.1：原逻辑与亏损后翻倍\n',
           '本报告是固定规则的研究模拟，源策略与仓位层分别核查。未复现用户截图那段近期交易，未运行或部署实盘。\n',

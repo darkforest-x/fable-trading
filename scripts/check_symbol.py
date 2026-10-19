@@ -65,12 +65,12 @@ from src.execution.config import ExecutorConfig  # noqa: E402
 from src.judgment.candidates import WARMUP_BARS, add_indicators  # noqa: E402
 from src.judgment.features import FEATURE_COLUMNS, add_features, extract_feature_rows  # noqa: E402
 from src.judgment.labeling import ATR_PCT_MIN  # noqa: E402
-from src.judgment.yolo_candidates import (  # noqa: E402
+from yoyo.layers.l1_detection.candidates import (  # noqa: E402
     DEFAULT_CONF,
     STRIDE,
     WINDOW,
-    _resolve_predict_device,
     load_yolo_model,
+    resolve_predict_device,
     right_edge_to_bar,
 )
 
@@ -191,7 +191,7 @@ def harvest_confidences(frame: pd.DataFrame, model, mode: str, tmpdir: Path) -> 
         [str(p) for _, _, p in rendered],
         conf=DEFAULT_CONF,
         verbose=False,
-        device=_resolve_predict_device(),
+        device=resolve_predict_device(),
     )
     conf_by_bar: dict[int, float] = {}
     for (start, tf, _), res in zip(rendered, results):

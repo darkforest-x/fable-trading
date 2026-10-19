@@ -1,0 +1,1437 @@
+{
+ "meta": {
+  "experiment_id": "exp-vidya-report-nine-configs-20261011-v1",
+  "symbol": "ETHUSDT 永续（币安 USD-M 历史数据）",
+  "first": "2022-01-01 00:00:00+00:00",
+  "last": "2026-10-10 23:45:00+00:00",
+  "bars_15m": 167424,
+  "fee_per_side": 0.0005,
+  "slippage": 0.0001,
+  "risk_fraction": 0.01,
+  "fill": "confirming_close",
+  "split": "2024-10-01"
+ },
+ "configs": [
+  {
+   "config": "A",
+   "short": "A 原版 L14",
+   "name": "15分钟 · 原版规则 · Length 14",
+   "desc": "视频原版规则：回踩枢轴短线、Delta≥30% 入场，止损在入场K线外侧 0.3 倍 ATR，止盈 2 倍风险。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 14,
+   "rule": "pivot",
+   "trades": 653,
+   "wins": 194,
+   "win_rate": 29.7,
+   "avg_R": -0.36,
+   "avg_R_gross": -0.12,
+   "cost_R": 0.23,
+   "total_R": -233.8,
+   "pf": 0.59,
+   "ret_pct": -91.0,
+   "max_dd_pct": -91.4,
+   "final_equity": 9.0,
+   "avg_risk_pct": 0.62,
+   "avg_hold_h": 3.5,
+   "avg_win_R": 1.76,
+   "avg_loss_R": -1.25,
+   "best_R": 1.96,
+   "worst_R": -2.04,
+   "max_losing_streak": 15,
+   "long_n": 335,
+   "short_n": 318,
+   "breakeven_wr": 33.3,
+   "holdout_n": 389,
+   "holdout_avgR": -0.36,
+   "recent_n": 264,
+   "recent_avgR": -0.35,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 147,
+     "win_rate": 31.3,
+     "avg_R": -0.27,
+     "sum_R": -39.1,
+     "ret_pct": -33.3
+    },
+    {
+     "year": 2023,
+     "n": 141,
+     "win_rate": 24.1,
+     "avg_R": -0.62,
+     "sum_R": -87.2,
+     "ret_pct": -58.8
+    },
+    {
+     "year": 2024,
+     "n": 130,
+     "win_rate": 35.4,
+     "avg_R": -0.16,
+     "sum_R": -20.3,
+     "ret_pct": -19.5
+    },
+    {
+     "year": 2025,
+     "n": 135,
+     "win_rate": 23.7,
+     "avg_R": -0.5,
+     "sum_R": -67.7,
+     "ret_pct": -49.8
+    },
+    {
+     "year": 2026,
+     "n": 100,
+     "win_rate": 36.0,
+     "avg_R": -0.2,
+     "sum_R": -19.6,
+     "ret_pct": -18.7
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 335,
+     "win_rate": 30.1,
+     "avg_R": -0.33,
+     "avg_R_gross": -0.11,
+     "sum_R": -111.4
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 318,
+     "win_rate": 29.2,
+     "avg_R": -0.38,
+     "avg_R_gross": -0.14,
+     "sum_R": -122.4
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止盈",
+     "ord": 0,
+     "n": 194,
+     "win_rate": 100.0,
+     "avg_R": 1.76,
+     "avg_R_gross": 2.0,
+     "sum_R": 341.1
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 459,
+     "win_rate": 0.0,
+     "avg_R": -1.25,
+     "avg_R_gross": -1.02,
+     "sum_R": -574.9
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 451,
+     "win_rate": 28.2,
+     "avg_R": -0.4,
+     "avg_R_gross": -0.17,
+     "sum_R": -182.5
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 157,
+     "win_rate": 33.1,
+     "avg_R": -0.27,
+     "avg_R_gross": -0.02,
+     "sum_R": -42.1
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 38,
+     "win_rate": 28.9,
+     "avg_R": -0.33,
+     "avg_R_gross": -0.15,
+     "sum_R": -12.5
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 7,
+     "win_rate": 57.1,
+     "avg_R": 0.47,
+     "avg_R_gross": 0.71,
+     "sum_R": 3.3
+    }
+   ]
+  },
+  {
+   "config": "B",
+   "short": "B 原版 L10",
+   "name": "15分钟 · 原版规则 · Length 10",
+   "desc": "同 A，Length 换回默认的 10。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 10,
+   "rule": "pivot",
+   "trades": 650,
+   "wins": 202,
+   "win_rate": 31.1,
+   "avg_R": -0.33,
+   "avg_R_gross": -0.08,
+   "cost_R": 0.24,
+   "total_R": -211.4,
+   "pf": 0.63,
+   "ret_pct": -88.7,
+   "max_dd_pct": -89.1,
+   "final_equity": 11.3,
+   "avg_risk_pct": 0.61,
+   "avg_hold_h": 3.6,
+   "avg_win_R": 1.75,
+   "avg_loss_R": -1.26,
+   "best_R": 1.96,
+   "worst_R": -2.04,
+   "max_losing_streak": 13,
+   "long_n": 318,
+   "short_n": 332,
+   "breakeven_wr": 33.3,
+   "holdout_n": 393,
+   "holdout_avgR": -0.32,
+   "recent_n": 257,
+   "recent_avgR": -0.34,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 135,
+     "win_rate": 31.9,
+     "avg_R": -0.25,
+     "sum_R": -33.1,
+     "ret_pct": -29.2
+    },
+    {
+     "year": 2023,
+     "n": 157,
+     "win_rate": 26.8,
+     "avg_R": -0.55,
+     "sum_R": -86.3,
+     "ret_pct": -58.5
+    },
+    {
+     "year": 2024,
+     "n": 127,
+     "win_rate": 38.6,
+     "avg_R": -0.07,
+     "sum_R": -9.1,
+     "ret_pct": -10.0
+    },
+    {
+     "year": 2025,
+     "n": 133,
+     "win_rate": 24.1,
+     "avg_R": -0.49,
+     "sum_R": -64.7,
+     "ret_pct": -48.3
+    },
+    {
+     "year": 2026,
+     "n": 98,
+     "win_rate": 36.7,
+     "avg_R": -0.18,
+     "sum_R": -18.0,
+     "ret_pct": -17.4
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 318,
+     "win_rate": 30.8,
+     "avg_R": -0.32,
+     "avg_R_gross": -0.09,
+     "sum_R": -102.3
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 332,
+     "win_rate": 31.3,
+     "avg_R": -0.33,
+     "avg_R_gross": -0.08,
+     "sum_R": -109.0
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止盈",
+     "ord": 0,
+     "n": 202,
+     "win_rate": 100.0,
+     "avg_R": 1.75,
+     "avg_R_gross": 2.0,
+     "sum_R": 352.5
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 448,
+     "win_rate": 0.0,
+     "avg_R": -1.26,
+     "avg_R_gross": -1.02,
+     "sum_R": -563.9
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 435,
+     "win_rate": 29.7,
+     "avg_R": -0.37,
+     "avg_R_gross": -0.13,
+     "sum_R": -162.9
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 162,
+     "win_rate": 34.0,
+     "avg_R": -0.23,
+     "avg_R_gross": 0.0,
+     "sum_R": -37.7
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 44,
+     "win_rate": 31.8,
+     "avg_R": -0.27,
+     "avg_R_gross": -0.06,
+     "sum_R": -11.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 9,
+     "win_rate": 44.4,
+     "avg_R": 0.12,
+     "avg_R_gross": 0.33,
+     "sum_R": 1.1
+    }
+   ]
+  },
+  {
+   "config": "C",
+   "short": "C 趋势离场 L14",
+   "name": "15分钟 · 趋势变色离场 · Length 14",
+   "desc": "入场同 A；止损放宽到 1.5 倍 ATR；不设止盈，趋势云变色才离场。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 14,
+   "rule": "pivot",
+   "trades": 433,
+   "wins": 103,
+   "win_rate": 23.8,
+   "avg_R": -0.04,
+   "avg_R_gross": 0.07,
+   "cost_R": 0.11,
+   "total_R": -15.8,
+   "pf": 0.95,
+   "ret_pct": -24.9,
+   "max_dd_pct": -48.9,
+   "final_equity": 75.1,
+   "avg_risk_pct": 1.22,
+   "avg_hold_h": 16.2,
+   "avg_win_R": 3.16,
+   "avg_loss_R": -1.03,
+   "best_R": 21.45,
+   "worst_R": -1.46,
+   "max_losing_streak": 14,
+   "long_n": 226,
+   "short_n": 207,
+   "breakeven_wr": null,
+   "holdout_n": 256,
+   "holdout_avgR": -0.22,
+   "recent_n": 177,
+   "recent_avgR": 0.22,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 100,
+     "win_rate": 25.0,
+     "avg_R": -0.23,
+     "sum_R": -23.2,
+     "ret_pct": -22.0
+    },
+    {
+     "year": 2023,
+     "n": 92,
+     "win_rate": 21.7,
+     "avg_R": -0.25,
+     "sum_R": -23.4,
+     "ret_pct": -22.6
+    },
+    {
+     "year": 2024,
+     "n": 83,
+     "win_rate": 24.1,
+     "avg_R": 0.01,
+     "sum_R": 0.6,
+     "ret_pct": -1.4
+    },
+    {
+     "year": 2025,
+     "n": 92,
+     "win_rate": 21.7,
+     "avg_R": 0.32,
+     "sum_R": 29.1,
+     "ret_pct": 26.9
+    },
+    {
+     "year": 2026,
+     "n": 66,
+     "win_rate": 27.3,
+     "avg_R": 0.02,
+     "sum_R": 1.0,
+     "ret_pct": -0.5
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 226,
+     "win_rate": 23.9,
+     "avg_R": -0.19,
+     "avg_R_gross": -0.08,
+     "sum_R": -42.6
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 207,
+     "win_rate": 23.7,
+     "avg_R": 0.13,
+     "avg_R_gross": 0.24,
+     "sum_R": 26.8
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "趋势变色",
+     "ord": 1,
+     "n": 163,
+     "win_rate": 63.2,
+     "avg_R": 1.77,
+     "avg_R_gross": 1.86,
+     "sum_R": 288.5
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 270,
+     "win_rate": 0.0,
+     "avg_R": -1.13,
+     "avg_R_gross": -1.01,
+     "sum_R": -304.3
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 289,
+     "win_rate": 22.5,
+     "avg_R": -0.03,
+     "avg_R_gross": 0.08,
+     "sum_R": -7.6
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 109,
+     "win_rate": 24.8,
+     "avg_R": -0.14,
+     "avg_R_gross": -0.04,
+     "sum_R": -15.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 28,
+     "win_rate": 28.6,
+     "avg_R": 0.06,
+     "avg_R_gross": 0.14,
+     "sum_R": 1.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 7,
+     "win_rate": 42.9,
+     "avg_R": 0.84,
+     "avg_R_gross": 0.94,
+     "sum_R": 5.8
+    }
+   ]
+  },
+  {
+   "config": "D",
+   "short": "D 趋势离场 L10",
+   "name": "15分钟 · 趋势变色离场 · Length 10",
+   "desc": "同 C，Length 换成 10。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 10,
+   "rule": "pivot",
+   "trades": 450,
+   "wins": 110,
+   "win_rate": 24.4,
+   "avg_R": 0.03,
+   "avg_R_gross": 0.14,
+   "cost_R": 0.11,
+   "total_R": 12.6,
+   "pf": 1.04,
+   "ret_pct": -1.3,
+   "max_dd_pct": -38.5,
+   "final_equity": 98.7,
+   "avg_risk_pct": 1.19,
+   "avg_hold_h": 14.7,
+   "avg_win_R": 3.21,
+   "avg_loss_R": -1.0,
+   "best_R": 21.45,
+   "worst_R": -1.46,
+   "max_losing_streak": 16,
+   "long_n": 229,
+   "short_n": 221,
+   "breakeven_wr": null,
+   "holdout_n": 269,
+   "holdout_avgR": -0.12,
+   "recent_n": 181,
+   "recent_avgR": 0.25,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 96,
+     "win_rate": 26.0,
+     "avg_R": -0.12,
+     "sum_R": -11.3,
+     "ret_pct": -12.3
+    },
+    {
+     "year": 2023,
+     "n": 104,
+     "win_rate": 24.0,
+     "avg_R": -0.09,
+     "sum_R": -9.0,
+     "ret_pct": -10.9
+    },
+    {
+     "year": 2024,
+     "n": 85,
+     "win_rate": 27.1,
+     "avg_R": 0.02,
+     "sum_R": 1.7,
+     "ret_pct": -0.3
+    },
+    {
+     "year": 2025,
+     "n": 96,
+     "win_rate": 17.7,
+     "avg_R": 0.24,
+     "sum_R": 23.1,
+     "ret_pct": 19.0
+    },
+    {
+     "year": 2026,
+     "n": 69,
+     "win_rate": 29.0,
+     "avg_R": 0.12,
+     "sum_R": 8.0,
+     "ret_pct": 6.5
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 229,
+     "win_rate": 25.8,
+     "avg_R": -0.08,
+     "avg_R_gross": 0.02,
+     "sum_R": -19.1
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 221,
+     "win_rate": 23.1,
+     "avg_R": 0.14,
+     "avg_R_gross": 0.26,
+     "sum_R": 31.6
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "趋势变色",
+     "ord": 1,
+     "n": 192,
+     "win_rate": 57.3,
+     "avg_R": 1.59,
+     "avg_R_gross": 1.68,
+     "sum_R": 304.4
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 258,
+     "win_rate": 0.0,
+     "avg_R": -1.13,
+     "avg_R_gross": -1.01,
+     "sum_R": -291.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 291,
+     "win_rate": 21.3,
+     "avg_R": -0.09,
+     "avg_R_gross": 0.02,
+     "sum_R": -26.3
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 116,
+     "win_rate": 27.6,
+     "avg_R": 0.24,
+     "avg_R_gross": 0.34,
+     "sum_R": 27.5
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 34,
+     "win_rate": 35.3,
+     "avg_R": 0.18,
+     "avg_R_gross": 0.27,
+     "sum_R": 6.2
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 9,
+     "win_rate": 44.4,
+     "avg_R": 0.57,
+     "avg_R_gross": 0.66,
+     "sum_R": 5.2
+    }
+   ]
+  },
+  {
+   "config": "E",
+   "short": "E 无 Delta 过滤",
+   "name": "15分钟 · 趋势变色离场 · 不用 Delta",
+   "desc": "同 C，去掉 Delta≥30% 的条件。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 14,
+   "rule": "pivot",
+   "trades": 1397,
+   "wins": 296,
+   "win_rate": 21.2,
+   "avg_R": -0.09,
+   "avg_R_gross": 0.03,
+   "cost_R": 0.12,
+   "total_R": -125.8,
+   "pf": 0.89,
+   "ret_pct": -82.8,
+   "max_dd_pct": -86.6,
+   "final_equity": 17.2,
+   "avg_risk_pct": 1.09,
+   "avg_hold_h": 14.5,
+   "avg_win_R": 3.36,
+   "avg_loss_R": -1.02,
+   "best_R": 41.4,
+   "worst_R": -1.88,
+   "max_losing_streak": 21,
+   "long_n": 711,
+   "short_n": 686,
+   "breakeven_wr": null,
+   "holdout_n": 820,
+   "holdout_avgR": -0.08,
+   "recent_n": 577,
+   "recent_avgR": -0.11,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 270,
+     "win_rate": 24.8,
+     "avg_R": -0.16,
+     "sum_R": -42.3,
+     "ret_pct": -37.5
+    },
+    {
+     "year": 2023,
+     "n": 328,
+     "win_rate": 20.1,
+     "avg_R": -0.16,
+     "sum_R": -51.8,
+     "ret_pct": -47.2
+    },
+    {
+     "year": 2024,
+     "n": 291,
+     "win_rate": 22.3,
+     "avg_R": 0.11,
+     "sum_R": 31.8,
+     "ret_pct": 15.8
+    },
+    {
+     "year": 2025,
+     "n": 297,
+     "win_rate": 19.5,
+     "avg_R": -0.15,
+     "sum_R": -43.3,
+     "ret_pct": -40.7
+    },
+    {
+     "year": 2026,
+     "n": 211,
+     "win_rate": 19.0,
+     "avg_R": -0.1,
+     "sum_R": -20.2,
+     "ret_pct": -24.2
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 711,
+     "win_rate": 22.1,
+     "avg_R": -0.14,
+     "avg_R_gross": -0.01,
+     "sum_R": -97.7
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 686,
+     "win_rate": 20.3,
+     "avg_R": -0.04,
+     "avg_R_gross": 0.08,
+     "sum_R": -28.1
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "趋势变色",
+     "ord": 1,
+     "n": 555,
+     "win_rate": 53.3,
+     "avg_R": 1.51,
+     "avg_R_gross": 1.62,
+     "sum_R": 839.2
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 842,
+     "win_rate": 0.0,
+     "avg_R": -1.15,
+     "avg_R_gross": -1.01,
+     "sum_R": -965.0
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "低于 30%",
+     "ord": 0,
+     "n": 829,
+     "win_rate": 19.8,
+     "avg_R": -0.15,
+     "avg_R_gross": -0.02,
+     "sum_R": -121.0
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 323,
+     "win_rate": 22.9,
+     "avg_R": 0.07,
+     "avg_R_gross": 0.19,
+     "sum_R": 23.7
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 160,
+     "win_rate": 27.5,
+     "avg_R": -0.0,
+     "avg_R_gross": 0.11,
+     "sum_R": -0.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 71,
+     "win_rate": 15.5,
+     "avg_R": -0.38,
+     "avg_R_gross": -0.28,
+     "sum_R": -27.0
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 14,
+     "win_rate": 21.4,
+     "avg_R": -0.05,
+     "avg_R_gross": 0.05,
+     "sum_R": -0.7
+    }
+   ]
+  },
+  {
+   "config": "F",
+   "short": "F 1小时 原版",
+   "name": "1小时 · 原版规则 · Length 14",
+   "desc": "规则同 A，换成 1 小时图。",
+   "timeframe": "1小时",
+   "tf": "1h",
+   "length": 14,
+   "rule": "pivot",
+   "trades": 188,
+   "wins": 72,
+   "win_rate": 38.3,
+   "avg_R": 0.04,
+   "avg_R_gross": 0.14,
+   "cost_R": 0.1,
+   "total_R": 7.2,
+   "pf": 1.06,
+   "ret_pct": 5.3,
+   "max_dd_pct": -16.9,
+   "final_equity": 105.3,
+   "avg_risk_pct": 1.36,
+   "avg_hold_h": 12.7,
+   "avg_win_R": 1.9,
+   "avg_loss_R": -1.12,
+   "best_R": 1.98,
+   "worst_R": -1.48,
+   "max_losing_streak": 8,
+   "long_n": 84,
+   "short_n": 104,
+   "breakeven_wr": 33.3,
+   "holdout_n": 113,
+   "holdout_avgR": -0.05,
+   "recent_n": 75,
+   "recent_avgR": 0.18,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 39,
+     "win_rate": 28.2,
+     "avg_R": -0.24,
+     "sum_R": -9.2,
+     "ret_pct": -9.1
+    },
+    {
+     "year": 2023,
+     "n": 47,
+     "win_rate": 34.0,
+     "avg_R": -0.13,
+     "sum_R": -5.9,
+     "ret_pct": -6.2
+    },
+    {
+     "year": 2024,
+     "n": 34,
+     "win_rate": 47.1,
+     "avg_R": 0.31,
+     "sum_R": 10.5,
+     "ret_pct": 10.6
+    },
+    {
+     "year": 2025,
+     "n": 38,
+     "win_rate": 42.1,
+     "avg_R": 0.16,
+     "sum_R": 6.1,
+     "ret_pct": 5.8
+    },
+    {
+     "year": 2026,
+     "n": 30,
+     "win_rate": 43.3,
+     "avg_R": 0.19,
+     "sum_R": 5.7,
+     "ret_pct": 5.5
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 84,
+     "win_rate": 34.5,
+     "avg_R": -0.07,
+     "avg_R_gross": 0.03,
+     "sum_R": -5.6
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 104,
+     "win_rate": 41.3,
+     "avg_R": 0.12,
+     "avg_R_gross": 0.23,
+     "sum_R": 12.8
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止盈",
+     "ord": 0,
+     "n": 72,
+     "win_rate": 100.0,
+     "avg_R": 1.9,
+     "avg_R_gross": 2.0,
+     "sum_R": 136.6
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 116,
+     "win_rate": 0.0,
+     "avg_R": -1.12,
+     "avg_R_gross": -1.01,
+     "sum_R": -129.4
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 126,
+     "win_rate": 38.1,
+     "avg_R": 0.03,
+     "avg_R_gross": 0.14,
+     "sum_R": 3.6
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 40,
+     "win_rate": 42.5,
+     "avg_R": 0.17,
+     "avg_R_gross": 0.27,
+     "sum_R": 6.7
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 18,
+     "win_rate": 33.3,
+     "avg_R": -0.1,
+     "avg_R_gross": -0.01,
+     "sum_R": -1.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 4,
+     "win_rate": 25.0,
+     "avg_R": -0.31,
+     "avg_R_gross": -0.25,
+     "sum_R": -1.3
+    }
+   ]
+  },
+  {
+   "config": "G",
+   "short": "G 1小时 趋势离场",
+   "name": "1小时 · 趋势变色离场 · Length 14",
+   "desc": "规则同 C，换成 1 小时图。",
+   "timeframe": "1小时",
+   "tf": "1h",
+   "length": 14,
+   "rule": "pivot",
+   "trades": 119,
+   "wins": 32,
+   "win_rate": 26.9,
+   "avg_R": 0.17,
+   "avg_R_gross": 0.21,
+   "cost_R": 0.05,
+   "total_R": 20.0,
+   "pf": 1.24,
+   "ret_pct": 17.2,
+   "max_dd_pct": -19.0,
+   "final_equity": 117.2,
+   "avg_risk_pct": 2.72,
+   "avg_hold_h": 68.2,
+   "avg_win_R": 3.21,
+   "avg_loss_R": -0.95,
+   "best_R": 14.87,
+   "worst_R": -1.14,
+   "max_losing_streak": 13,
+   "long_n": 50,
+   "short_n": 69,
+   "breakeven_wr": null,
+   "holdout_n": 72,
+   "holdout_avgR": 0.13,
+   "recent_n": 47,
+   "recent_avgR": 0.23,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 28,
+     "win_rate": 21.4,
+     "avg_R": 0.13,
+     "sum_R": 3.8,
+     "ret_pct": 2.7
+    },
+    {
+     "year": 2023,
+     "n": 29,
+     "win_rate": 17.2,
+     "avg_R": -0.28,
+     "sum_R": -8.2,
+     "ret_pct": -8.5
+    },
+    {
+     "year": 2024,
+     "n": 20,
+     "win_rate": 35.0,
+     "avg_R": 0.78,
+     "sum_R": 15.7,
+     "ret_pct": 15.9
+    },
+    {
+     "year": 2025,
+     "n": 26,
+     "win_rate": 30.8,
+     "avg_R": 0.0,
+     "sum_R": 0.0,
+     "ret_pct": -0.5
+    },
+    {
+     "year": 2026,
+     "n": 16,
+     "win_rate": 37.5,
+     "avg_R": 0.55,
+     "sum_R": 8.8,
+     "ret_pct": 8.0
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 50,
+     "win_rate": 28.0,
+     "avg_R": 0.53,
+     "avg_R_gross": 0.57,
+     "sum_R": 26.3
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 69,
+     "win_rate": 26.1,
+     "avg_R": -0.09,
+     "avg_R_gross": -0.04,
+     "sum_R": -6.3
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "趋势变色",
+     "ord": 1,
+     "n": 54,
+     "win_rate": 59.3,
+     "avg_R": 1.64,
+     "avg_R_gross": 1.68,
+     "sum_R": 88.6
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 65,
+     "win_rate": 0.0,
+     "avg_R": -1.05,
+     "avg_R_gross": -1.0,
+     "sum_R": -68.6
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "30–50%",
+     "ord": 1,
+     "n": 72,
+     "win_rate": 26.4,
+     "avg_R": 0.32,
+     "avg_R_gross": 0.37,
+     "sum_R": 23.3
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 28,
+     "win_rate": 32.1,
+     "avg_R": -0.12,
+     "avg_R_gross": -0.08,
+     "sum_R": -3.5
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 16,
+     "win_rate": 25.0,
+     "avg_R": 0.18,
+     "avg_R_gross": 0.23,
+     "sum_R": 2.9
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 3,
+     "win_rate": 0.0,
+     "avg_R": -0.91,
+     "avg_R_gross": -0.89,
+     "sum_R": -2.7
+    }
+   ]
+  },
+  {
+   "config": "H",
+   "short": "H 趋势线回踩 2R",
+   "name": "15分钟 · 只做趋势线回踩 · Length 10 · 2R",
+   "desc": "只做价格回踩 VIDYA 趋势线本身，Delta≥50%，止损在两根 K 线极值外 1 倍 ATR，止盈 2 倍风险。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 10,
+   "rule": "trendline",
+   "trades": 53,
+   "wins": 26,
+   "win_rate": 49.1,
+   "avg_R": 0.38,
+   "avg_R_gross": 0.47,
+   "cost_R": 0.09,
+   "total_R": 20.2,
+   "pf": 1.69,
+   "ret_pct": 21.6,
+   "max_dd_pct": -6.6,
+   "final_equity": 121.6,
+   "avg_risk_pct": 1.64,
+   "avg_hold_h": 17.9,
+   "avg_win_R": 1.9,
+   "avg_loss_R": -1.09,
+   "best_R": 1.98,
+   "worst_R": -1.17,
+   "max_losing_streak": 6,
+   "long_n": 26,
+   "short_n": 27,
+   "breakeven_wr": 33.3,
+   "holdout_n": 20,
+   "holdout_avgR": 0.56,
+   "recent_n": 33,
+   "recent_avgR": 0.27,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 7,
+     "win_rate": 42.9,
+     "avg_R": 0.24,
+     "sum_R": 1.7,
+     "ret_pct": 1.6
+    },
+    {
+     "year": 2023,
+     "n": 8,
+     "win_rate": 50.0,
+     "avg_R": 0.37,
+     "sum_R": 3.0,
+     "ret_pct": 2.9
+    },
+    {
+     "year": 2024,
+     "n": 5,
+     "win_rate": 80.0,
+     "avg_R": 1.33,
+     "sum_R": 6.6,
+     "ret_pct": 6.8
+    },
+    {
+     "year": 2025,
+     "n": 18,
+     "win_rate": 50.0,
+     "avg_R": 0.42,
+     "sum_R": 7.6,
+     "ret_pct": 7.6
+    },
+    {
+     "year": 2026,
+     "n": 15,
+     "win_rate": 40.0,
+     "avg_R": 0.09,
+     "sum_R": 1.3,
+     "ret_pct": 1.1
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 26,
+     "win_rate": 42.3,
+     "avg_R": 0.19,
+     "avg_R_gross": 0.26,
+     "sum_R": 4.9
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 27,
+     "win_rate": 55.6,
+     "avg_R": 0.56,
+     "avg_R_gross": 0.66,
+     "sum_R": 15.2
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止盈",
+     "ord": 0,
+     "n": 26,
+     "win_rate": 100.0,
+     "avg_R": 1.9,
+     "avg_R_gross": 2.0,
+     "sum_R": 49.5
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 27,
+     "win_rate": 0.0,
+     "avg_R": -1.09,
+     "avg_R_gross": -1.01,
+     "sum_R": -29.4
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 38,
+     "win_rate": 52.6,
+     "avg_R": 0.48,
+     "avg_R_gross": 0.57,
+     "sum_R": 18.2
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 10,
+     "win_rate": 40.0,
+     "avg_R": 0.12,
+     "avg_R_gross": 0.2,
+     "sum_R": 1.2
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 5,
+     "win_rate": 40.0,
+     "avg_R": 0.15,
+     "avg_R_gross": 0.2,
+     "sum_R": 0.7
+    }
+   ]
+  },
+  {
+   "config": "I",
+   "short": "I 趋势线回踩 趋势离场",
+   "name": "15分钟 · 只做趋势线回踩 · Length 10 · 趋势离场",
+   "desc": "入场同 H（碰线容差 0.2 ATR），不设止盈，趋势云变色收盘离场。",
+   "timeframe": "15分钟",
+   "tf": "15m",
+   "length": 10,
+   "rule": "trendline",
+   "trades": 66,
+   "wins": 20,
+   "win_rate": 30.3,
+   "avg_R": 0.62,
+   "avg_R_gross": 0.71,
+   "cost_R": 0.09,
+   "total_R": 41.2,
+   "pf": 2.2,
+   "ret_pct": 46.4,
+   "max_dd_pct": -7.7,
+   "final_equity": 146.4,
+   "avg_risk_pct": 1.53,
+   "avg_hold_h": 16.5,
+   "avg_win_R": 3.78,
+   "avg_loss_R": -0.75,
+   "best_R": 15.93,
+   "worst_R": -1.25,
+   "max_losing_streak": 10,
+   "long_n": 33,
+   "short_n": 33,
+   "breakeven_wr": null,
+   "holdout_n": 27,
+   "holdout_avgR": 0.11,
+   "recent_n": 39,
+   "recent_avgR": 0.98,
+   "yearly": [
+    {
+     "year": 2022,
+     "n": 8,
+     "win_rate": 50.0,
+     "avg_R": 0.72,
+     "sum_R": 5.8,
+     "ret_pct": 5.8
+    },
+    {
+     "year": 2023,
+     "n": 12,
+     "win_rate": 25.0,
+     "avg_R": -0.49,
+     "sum_R": -5.9,
+     "ret_pct": -5.7
+    },
+    {
+     "year": 2024,
+     "n": 9,
+     "win_rate": 44.4,
+     "avg_R": 0.84,
+     "sum_R": 7.6,
+     "ret_pct": 7.6
+    },
+    {
+     "year": 2025,
+     "n": 22,
+     "win_rate": 13.6,
+     "avg_R": 0.56,
+     "sum_R": 12.2,
+     "ret_pct": 11.3
+    },
+    {
+     "year": 2026,
+     "n": 15,
+     "win_rate": 40.0,
+     "avg_R": 1.43,
+     "sum_R": 21.5,
+     "ret_pct": 22.5
+    }
+   ],
+   "breakdown": [
+    {
+     "dim": "方向",
+     "bucket": "做多",
+     "ord": 0,
+     "n": 33,
+     "win_rate": 33.3,
+     "avg_R": 0.31,
+     "avg_R_gross": 0.39,
+     "sum_R": 10.2
+    },
+    {
+     "dim": "方向",
+     "bucket": "做空",
+     "ord": 1,
+     "n": 33,
+     "win_rate": 27.3,
+     "avg_R": 0.94,
+     "avg_R_gross": 1.04,
+     "sum_R": 31.0
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "趋势变色",
+     "ord": 1,
+     "n": 50,
+     "win_rate": 40.0,
+     "avg_R": 1.18,
+     "avg_R_gross": 1.27,
+     "sum_R": 59.2
+    },
+    {
+     "dim": "出场原因",
+     "bucket": "止损",
+     "ord": 2,
+     "n": 16,
+     "win_rate": 0.0,
+     "avg_R": -1.13,
+     "avg_R_gross": -1.01,
+     "sum_R": -18.0
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "50–70%",
+     "ord": 2,
+     "n": 48,
+     "win_rate": 29.2,
+     "avg_R": 0.55,
+     "avg_R_gross": 0.65,
+     "sum_R": 26.6
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "70–100%",
+     "ord": 3,
+     "n": 12,
+     "win_rate": 33.3,
+     "avg_R": 1.15,
+     "avg_R_gross": 1.22,
+     "sum_R": 13.8
+    },
+    {
+     "dim": "入场 Delta",
+     "bucket": "100% 以上",
+     "ord": 4,
+     "n": 6,
+     "win_rate": 33.3,
+     "avg_R": 0.14,
+     "avg_R_gross": 0.19,
+     "sum_R": 0.9
+    }
+   ]
+  }
+ ]
+}

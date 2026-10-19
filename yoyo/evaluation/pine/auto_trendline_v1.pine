@@ -1,0 +1,195 @@
+//@version=6
+// Auto Trendline v1.1 — pivot-anchored trendlines with a validity scan and break detection.
+// 画法：右锚点固定为最新确认的枢轴；向左扫描候选枢轴，优先保留「两锚点之间没有被穿越」的连线，
+//      在合法连线里取当前值最贴近价格的那条（压力取最低、支撑取最高）。找不到合法线时可退回最近一对枢轴。
+// 因果性：枢轴需要 right=lb 根确认，所以线在枢轴之后 lb 根才出现；bar t 画出的线只用到 <= t 的数据。
+//      历史回看时视觉上像「早就画好了」，实盘会滞后 lb 根 —— 这是画法本身的延迟，不是前视。
+// v1.1 修复：首次建线的 `x1 != dnX1` 在 dnX1 为 na 时恒假，导致一条线都画不出来。
+// 本文件只是画图工具，不含任何收益主张，不进入 ACTIVE / forward / 部署。
+indicator("自动趋势线 Auto Trendline v1.1", shorttitle="AutoTL", overlay=true, max_lines_count=500, max_bars_back=3000)
+
+// ---------------- inputs ----------------
+string gP = "枢轴"
+int   lb      = input.int(8,  "枢轴左右宽度 (left=right)", minval=1, maxval=50, group=gP)
+int   maxCand = input.int(20, "保留候选枢轴数",           minval=2, maxval=50, group=gP)
+int   minGap  = input.int(5,  "两锚点最小间隔K线",         minval=1,            group=gP)
+
+string gV = "有效性"
+bool  useWick  = input.bool(true,  "穿越判定用影线（否则用收盘）", group=gV)
+float tolAtr   = input.float(0.10, "穿越容差 (ATR 倍数)", minval=0.0, step=0.05, group=gV)
+bool  fallback = input.bool(true,  "找不到合法线时退回最近一对枢轴", group=gV)
+
+string gS = "显示"
+bool  showDn     = input.bool(true, "下降压力线", group=gS)
+bool  showUp     = input.bool(true, "上升支撑线", group=gS)
+color cDn        = input.color(color.white, "压力线颜色", group=gS)
+color cUp        = input.color(color.aqua,  "支撑线颜色", group=gS)
+int   wid        = input.int(2, "线宽", minval=1, maxval=5, group=gS)
+bool  extR       = input.bool(true, "向右延伸", group=gS)
+bool  keepBroken = input.bool(true, "保留已突破的线（虚线）", group=gS)
+bool  showInfo   = input.bool(true, "右下角诊断表", group=gS)
+
+float tol = ta.atr(14) * tolAtr
+
+// ---------------- pivot store ----------------
+var array<float> phP = array.new<float>()
+var array<int>   phB = array.new<int>()
+var array<float> plP = array.new<float>()
+var array<int>   plB = array.new<int>()
+
+float ph = ta.pivothigh(high, lb, lb)
+float pl = ta.pivotlow(low,  lb, lb)
+
+if not na(ph)
+    phP.push(ph)
+    phB.push(bar_index - lb)
+    if phP.size() > maxCand
+        phP.shift()
+        phB.shift()
+
+if not na(pl)
+    plP.push(pl)
+    plB.push(bar_index - lb)
+    if plP.size() > maxCand
+        plP.shift()
+        plB.shift()
+
+// ---------------- helpers ----------------
+// 两锚点之间没有任何一根突破这条线 => 这条线在历史上真的被尊重过
+f_clean(int x1, float y1, int x2, float y2, bool isRes) =>
+    float slope = (y2 - y1) / (x2 - x1)
+    bool ok = true
+    int o1 = bar_index - x1
+    int o2 = bar_index - x2
+    for k = o2 to o1
+        float lv = y2 + slope * ((bar_index - k) - x2)
+        float px = isRes ? (useWick ? high[k] : close[k]) : (useWick ? low[k] : close[k])
+        if isRes and px > lv + tol
+            ok := false
+            break
+        if not isRes and px < lv - tol
+            ok := false
+            break
+    ok
+
+// 右锚点 = 最新枢轴；左锚点 = 合法候选里当前值最贴近价格的那个；无合法候选时退回最近一对
+f_pick(array<float> aP, array<int> aB, bool isRes) =>
+    int   n    = aP.size()
+    int   bx1  = na
+    float by1  = na
+    int   bx2  = na
+    float by2  = na
+    int   fbx1 = na
+    float fby1 = na
+    float best = na
+    if n >= 2
+        int   x2 = aB.get(n - 1)
+        float y2 = aP.get(n - 1)
+        bx2 := x2
+        by2 := y2
+        for k = 0 to n - 2
+            int   i  = n - 2 - k
+            int   x1 = aB.get(i)
+            float y1 = aP.get(i)
+            bool slopeOk = isRes ? y1 > y2 : y1 < y2
+            if slopeOk and (x2 - x1) >= minGap
+                if na(fbx1)
+                    fbx1 := x1
+                    fby1 := y1
+                if f_clean(x1, y1, x2, y2, isRes)
+                    float sl  = (y2 - y1) / (x2 - x1)
+                    float cur = y2 + sl * (bar_index - x2)
+                    if na(best) or (isRes ? cur < best : cur > best)
+                        best := cur
+                        bx1  := x1
+                        by1  := y1
+        if na(bx1) and fallback and not na(fbx1)
+            bx1 := fbx1
+            by1 := fby1
+    [bx1, by1, bx2, by2]
+
+// ---------------- line state ----------------
+var line  dnL  = na
+var int   dnX1 = na
+var float dnY1 = na
+var int   dnX2 = na
+var float dnY2 = na
+var bool  dnBrk = false
+
+var line  upL  = na
+var int   upX1 = na
+var float upY1 = na
+var int   upX2 = na
+var float upY2 = na
+var bool  upBrk = false
+
+if showDn and not na(ph)
+    [x1, y1, x2, y2] = f_pick(phP, phB, true)
+    if not na(x1) and (na(dnX1) or x1 != dnX1 or x2 != dnX2)
+        if not na(dnL) and (not dnBrk or not keepBroken)
+            line.delete(dnL)
+        dnL   := line.new(x1, y1, x2, y2, xloc=xloc.bar_index, extend=extR ? extend.right : extend.none, color=cDn, width=wid)
+        dnX1  := x1
+        dnY1  := y1
+        dnX2  := x2
+        dnY2  := y2
+        dnBrk := false
+
+if showUp and not na(pl)
+    [x1, y1, x2, y2] = f_pick(plP, plB, false)
+    if not na(x1) and (na(upX1) or x1 != upX1 or x2 != upX2)
+        if not na(upL) and (not upBrk or not keepBroken)
+            line.delete(upL)
+        upL   := line.new(x1, y1, x2, y2, xloc=xloc.bar_index, extend=extR ? extend.right : extend.none, color=cUp, width=wid)
+        upX1  := x1
+        upY1  := y1
+        upX2  := x2
+        upY2  := y2
+        upBrk := false
+
+// ---------------- break detection（收盘确认） ----------------
+float dnVal = na
+float upVal = na
+bool  dnBreak = false
+bool  upBreak = false
+
+if not na(dnL) and not dnBrk
+    float sl = (dnY2 - dnY1) / (dnX2 - dnX1)
+    dnVal := dnY2 + sl * (bar_index - dnX2)
+    if close > dnVal + tol
+        dnBrk   := true
+        dnBreak := true
+        line.set_extend(dnL, extend.none)
+        line.set_xy2(dnL, bar_index, dnVal)
+        line.set_style(dnL, line.style_dashed)
+
+if not na(upL) and not upBrk
+    float sl = (upY2 - upY1) / (upX2 - upX1)
+    upVal := upY2 + sl * (bar_index - upX2)
+    if close < upVal - tol
+        upBrk   := true
+        upBreak := true
+        line.set_extend(upL, extend.none)
+        line.set_xy2(upL, bar_index, upVal)
+        line.set_style(upL, line.style_dashed)
+
+plotshape(dnBreak, title="上破压力线", style=shape.triangleup,   location=location.belowbar, color=cDn, size=size.tiny)
+plotshape(upBreak, title="下破支撑线", style=shape.triangledown, location=location.abovebar, color=cUp, size=size.tiny)
+
+plot(dnVal, "压力线数值", color=cDn, display=display.data_window)
+plot(upVal, "支撑线数值", color=cUp, display=display.data_window)
+
+alertcondition(dnBreak, "上破下降压力线", "上破下降趋势线")
+alertcondition(upBreak, "下破上升支撑线", "下破上升趋势线")
+
+// ---------------- 诊断表：线没出来时先看这里 ----------------
+var table info = table.new(position.bottom_right, 2, 4, border_width=1)
+if showInfo and barstate.islast
+    table.cell(info, 0, 0, "高枢轴", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 0, str.tostring(phP.size()), text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 0, 1, "低枢轴", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 1, str.tostring(plP.size()), text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 0, 2, "压力线", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 2, na(dnL) ? "无" : (dnBrk ? "已破" : str.tostring(dnVal, format.mintick)), text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 0, 3, "支撑线", text_color=color.gray, text_size=size.tiny)
+    table.cell(info, 1, 3, na(upL) ? "无" : (upBrk ? "已破" : str.tostring(upVal, format.mintick)), text_color=color.gray, text_size=size.tiny)

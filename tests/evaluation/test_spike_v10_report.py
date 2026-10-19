@@ -12,7 +12,7 @@ from yoyo.evaluation.spike_v10_full_replay import CUT, replay_stream
 from yoyo.evaluation.spike_v9_full_replay import random_controls
 from yoyo.evaluation.spike_v9_full_report import event_keys
 
-from tests.evaluation.test_spike_v10_full_replay import trending_fixture
+from test_spike_v10_full_replay import trending_fixture
 
 
 def ledgers(seed=3):

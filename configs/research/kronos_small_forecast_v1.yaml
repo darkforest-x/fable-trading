@@ -1,0 +1,58 @@
+schema_version: 1
+role: offline_research_only
+
+source:
+  repository: https://github.com/shiyu-coder/Kronos.git
+  commit: 67b630e67f6a18c9e9be918d9b4337c960db1e9a
+  license: MIT
+  license_sha256: acb2d194d378204e5f2be4dcd24d39ecac437903620c790c3315a96dab388fdc
+
+model:
+  repo_id: NeoQuasar/Kronos-small
+  revision: 901c26c1332695a2a8f243eb2f37243a37bea320
+  config_sha256: 5e0f6a605d5f81b5c9b559fe5cf716a1acb041c744e6f41bd05b097b7a685396
+  weights_sha256: b082dfcbd8e8c142a725c8bbb99781802f38fec81210e13479effb32b3c3e020
+  weights_size_bytes: 98980656
+
+tokenizer:
+  repo_id: NeoQuasar/Kronos-Tokenizer-base
+  revision: 0e0117387f39004a9016484a186a908917e22426
+  config_sha256: 2366e7ccfec76cbc19cf3c4c1b9c5d901be336ca1e83f2d2292c9bff381b77a2
+  weights_sha256: 59d85f6af76a2c3b8240ea06cb21db4213b4eeca053f246b23e29cf832fc6bee
+  weights_size_bytes: 15842368
+
+inference:
+  max_context: 512
+  # Keep the old experiment's context and horizon fixed. A future experiment
+  # must change T, sample_count and lookback in separate, preregistered steps.
+  lookback: 400
+  pred_len: 12
+  temperature: 0.6
+  top_p: 0.9
+  sample_count: 10
+  torch_seed: 20260901
+  explicit_eval: true
+  timestamp_timezone: UTC
+  amount_policy: volume_times_mean_ohlc
+
+evaluation:
+  alpha: 0.01
+  n_permutations: 10000
+  matched_control_axes:
+    - symbol
+    - time_bucket
+    - volatility_bucket
+    - horizon
+    - cost
+  time_split: walk_forward
+  one_variable_at_a_time: true
+
+holdout:
+  read_allowed: false
+  start_exclusive: "2026-05-04T00:00:00+00:00"
+
+eligibility:
+  training: false
+  production: false
+  active_bundle: false
+

@@ -1,0 +1,101 @@
+{
+  "experiment_id": "exp-pine-allin-v7-preholdout-v1",
+  "status": "active",
+  "purpose": "Audit and pre-holdout replay of the user-supplied ALLIN-V7.2 Pine strategy.",
+  "source_attachment_sha256": "d721a4864a13cad1aae17ab634c87437a648897d1324d389e51ea591fb9aca8a",
+  "data_glob": "data/kline_deep/okx_*_USDT_SWAP_15m_*.csv",
+  "bar_minutes": 15,
+  "development_start": "2023-01-01T00:00:00Z",
+  "validation_start": "2025-01-01T00:00:00Z",
+  "safe_end_exclusive": "2026-03-01T00:00:00Z",
+  "holdout_start": "2026-05-04T00:00:00Z",
+  "round_trip_cost": 0.002,
+  "timezone": "Asia/Hong_Kong",
+  "signal_parameters": {
+    "fast_len": 10,
+    "slow_len": 60,
+    "regime_len": 100,
+    "atr_len": 14,
+    "atr_mult": 4.0,
+    "max_sl_percent": 3.0,
+    "osc_basis_len": 40,
+    "osc_percentile_len": 200,
+    "osc_percentile": 99.0,
+    "osc_change_lag": 10,
+    "osc_hma_len": 10,
+    "osc_threshold": 0.2,
+    "min_atr_percent": 0.1,
+    "max_atr_percent": 10.0,
+    "break_even_trigger_percent": 1.5,
+    "break_even_offset_percent": 0.1
+  },
+  "execution": {
+    "entry": "next_bar_open",
+    "opposite_signal": "reverse_once_without_duplicate_close",
+    "initial_stop": "active_from_entry_fill",
+    "break_even_update": "confirmed_bar_close_effective_next_bar",
+    "time_filter_mode": "block_window",
+    "blocked_hk_hours": [21, 23],
+    "trade_on_sunday": false
+  },
+  "arms": [
+    {
+      "name": "sma_cross_only",
+      "signal_kind": "sma_cross_only",
+      "sizing_kind": "fixed",
+      "base_leverage": 4.0,
+      "time_boosts": false,
+      "skip_logic": false
+    },
+    {
+      "name": "v7_fixed_boost",
+      "signal_kind": "v7",
+      "sizing_kind": "fixed",
+      "base_leverage": 4.0,
+      "time_boosts": true,
+      "skip_logic": true
+    },
+    {
+      "name": "v7_fixed_no_boost",
+      "signal_kind": "v7",
+      "sizing_kind": "fixed",
+      "base_leverage": 4.0,
+      "time_boosts": false,
+      "skip_logic": true
+    },
+    {
+      "name": "v7_risk_2pct",
+      "signal_kind": "v7",
+      "sizing_kind": "risk",
+      "risk_per_trade_percent": 2.0,
+      "max_leverage": 13.0,
+      "time_boosts": false,
+      "skip_logic": true
+    },
+    {
+      "name": "v7_risk_2pct_no_skip",
+      "signal_kind": "v7",
+      "sizing_kind": "risk",
+      "risk_per_trade_percent": 2.0,
+      "max_leverage": 13.0,
+      "time_boosts": false,
+      "skip_logic": false
+    }
+  ],
+  "matched_control": {
+    "n_per_trade": 3,
+    "month": true,
+    "hk_time_block_hours": 6,
+    "atr_buckets": 5,
+    "copy_direction": true,
+    "copy_holding_bars": true,
+    "same_stop_break_even_and_cost": true,
+    "exclude_signal_bars": true,
+    "seed": "pine-allin-v7-control-v1"
+  },
+  "eligibility": {
+    "training_eligible": false,
+    "production_eligible": false,
+    "holdout_consumed": false
+  }
+}

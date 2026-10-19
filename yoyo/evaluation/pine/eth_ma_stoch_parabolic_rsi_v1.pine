@@ -1,0 +1,91 @@
+//@version=6
+// This Pine Script code is subject to the Mozilla Public License 2.0 at
+// https://mozilla.org/MPL/2.0/
+// Indicator formulas adapted from MA Shift [ChartPrime] and
+// Parabolic RSI [ChartPrime], copyright ChartPrime. Stoch 5/3/3 extreme
+// crossings follow the owner's frozen Stochastic source.
+// Parabolic RSI source: https://www.tradingview.com/script/NI0Qhwy7/
+// Owner rule (2026-09-16): use the RSI LINE below 30 / above 70 as a gate.
+// No SAR reversal/diamond is required. This indicator marks eligible entries;
+// it does not know the user's position or send orders.
+indicator("ETH · 15m方向 × 5m Stoch × RSI", shorttitle="MA×Stoch×RSI", overlay=true)
+
+string groupMA = "01 · 15分钟方向"
+int maLength = input.int(40, "SMA 长度（HL2）", minval=1, group=groupMA)
+bool paintCandles = input.bool(true, "按15分钟方向给K线着色", group=groupMA)
+bool showMA = input.bool(false, "显示已确认的15分钟均线", group=groupMA)
+
+string groupRSI = "02 · Parabolic RSI 区域过滤（5分钟）"
+int rsiLength = input.int(14, "RSI 长度", minval=1, group=groupRSI)
+float oversold = input.float(30.0, "超卖：RSI 低于此值才允许多", minval=0, maxval=100, group=groupRSI)
+float overbought = input.float(70.0, "超买：RSI 高于此值才允许空", minval=0, maxval=100, group=groupRSI)
+
+string groupDisplay = "03 · 显示"
+bool showPanel = input.bool(true, "显示条件状态", group=groupDisplay)
+color longColor = input.color(#00A67D, "多头颜色", group=groupDisplay)
+color shortColor = input.color(#E05260, "空头颜色", group=groupDisplay)
+
+if barstate.isfirst
+    if not timeframe.isminutes or timeframe.multiplier != 5 or not chart.is_standard
+        runtime.error("请在5分钟标准K线图上使用本指标。")
+    if oversold >= overbought
+        runtime.error("超卖阈值必须小于超买阈值。")
+
+// Stable completed HTF values during the first two 5m closes in a 15m block.
+// The [1] offsets are INSIDE request.security's HTF context.
+[priorHL2, priorMA] = request.security(syminfo.tickerid, "15", [hl2[1], ta.sma(hl2, maLength)[1]], gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+// On the block's final confirmed 5m close the current 15m candle is complete.
+// Consume this unoffset request ONLY at that boundary, never while forming.
+[closingHL2, closingMA] = request.security(syminfo.tickerid, "15", [hl2, ta.sma(hl2, maLength)], gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_off)
+bool completed15Now = barstate.isconfirmed and time_close == time_close("15")
+float confirmedHL2 = completed15Now ? closingHL2 : priorHL2
+float confirmedMA = completed15Now ? closingMA : priorMA
+bool directionReady = not na(confirmedHL2) and not na(confirmedMA)
+bool allowLong = directionReady and confirmedHL2 >= confirmedMA
+bool allowShort = directionReady and confirmedHL2 < confirmedMA
+
+// Original Stoch arrows: extreme K/D cross on this same 5m bar.
+float k = ta.sma(ta.stoch(close, high, low, 5), 3)
+float d = ta.sma(k, 3)
+bool crossUp = ta.crossover(k, d)
+bool crossDown = ta.crossunder(k, d)
+bool stochLong = crossUp and k < 20 and d < 20
+bool stochShort = crossDown and k > 80 and d > 80
+
+// Exact RSI-line formula from Parabolic RSI [ChartPrime]. SAR only creates
+// that source's separate diamonds; it is not part of the selected zone rule.
+float rsi = ta.rsi(close, rsiLength)
+bool rsiLong = not na(rsi) and rsi < oversold
+bool rsiShort = not na(rsi) and rsi > overbought
+bool longSignal = barstate.isconfirmed and allowLong and stochLong and rsiLong
+bool shortSignal = barstate.isconfirmed and allowShort and stochShort and rsiShort
+
+color directionColor = allowLong ? longColor : allowShort ? shortColor : na
+barcolor(paintCandles ? directionColor : na, title="15分钟方向颜色")
+plot(showMA ? confirmedMA : na, title="已确认15m SMA", color=directionColor, linewidth=2, style=plot.style_stepline)
+plotshape(longSignal, title="过滤后做多箭头", style=shape.triangleup, location=location.belowbar, color=longColor, text="多", textcolor=longColor, size=size.small)
+plotshape(shortSignal, title="过滤后做空箭头", style=shape.triangledown, location=location.abovebar, color=shortColor, text="空", textcolor=shortColor, size=size.small)
+
+// Data Window diagnostics do not affect the chart's price scale.
+plot(rsi, "5m RSI", display=display.data_window)
+plot(k, "5m Stoch K", display=display.data_window)
+plot(d, "5m Stoch D", display=display.data_window)
+plot(allowLong ? 1 : allowShort ? -1 : 0, "15m方向（1多/-1空）", display=display.data_window)
+plot(longSignal ? 1 : shortSignal ? -1 : 0, "开仓信号（1多/-1空）", display=display.data_window)
+
+alertcondition(longSignal, title="做多信号", message="{{ticker}} 5m收盘做多信号：15m方向允许多 + Stoch多箭头 + RSI超卖。收盘价 {{close}}。")
+alertcondition(shortSignal, title="做空信号", message="{{ticker}} 5m收盘做空信号：15m方向允许空 + Stoch空箭头 + RSI超买。收盘价 {{close}}。")
+alertcondition(longSignal or shortSignal, title="多空任一信号", message="{{ticker}} 5m收盘出现MA×Stoch×RSI信号，请查看图上多/空箭头。收盘价 {{close}}。")
+
+var table panel = table.new(position.top_right, 2, 4, bgcolor=color.new(chart.bg_color, 12), frame_color=color.new(chart.fg_color, 75), frame_width=1)
+if barstate.islast and showPanel
+    float closedRSI = barstate.isconfirmed ? rsi : rsi[1]
+    string zone = na(closedRSI) ? "预热中" : closedRSI < oversold ? "超卖·允许多" : closedRSI > overbought ? "超买·允许空" : "中间区域·不开仓"
+    table.cell(panel, 0, 0, "15m方向", text_color=chart.fg_color)
+    table.cell(panel, 1, 0, allowLong ? "只做多" : allowShort ? "只做空" : "预热中", text_color=directionReady ? directionColor : chart.fg_color)
+    table.cell(panel, 0, 1, "5m已收盘RSI", text_color=chart.fg_color)
+    table.cell(panel, 1, 1, na(closedRSI) ? "—" : str.tostring(closedRSI, "#.00"), text_color=chart.fg_color)
+    table.cell(panel, 0, 2, "RSI过滤", text_color=chart.fg_color)
+    table.cell(panel, 1, 2, zone, text_color=chart.fg_color)
+    table.cell(panel, 0, 3, "触发条件", text_color=chart.fg_color)
+    table.cell(panel, 1, 3, "同根Stoch箭头·收盘确认", text_color=chart.fg_color)

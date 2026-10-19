@@ -1,0 +1,22 @@
+//@version=6
+indicator(title="双均线", shorttitle="双均线", overlay=true)
+
+// Original owner-supplied version, preserved before the V1.1 style update.
+group_len = "周期设置"
+len1 = input.int(20, title="周期 1", group=group_len)
+len2 = input.int(60, title="周期 2", group=group_len)
+len3 = input.int(120, title="周期 3", group=group_len)
+
+sma1 = ta.sma(close, len1)
+sma2 = ta.sma(close, len2)
+sma3 = ta.sma(close, len3)
+ema1 = ta.ema(close, len1)
+ema2 = ta.ema(close, len2)
+ema3 = ta.ema(close, len3)
+
+plot(sma1, color=color.black, title="SMA 1")
+plot(sma2, color=color.blue, title="SMA 2")
+plot(sma3, color=color.purple, title="SMA 3")
+plot(ema1, color=color.new(color.black, 50), title="EMA 1")
+plot(ema2, color=color.new(color.blue, 50), title="EMA 2")
+plot(ema3, color=color.new(color.purple, 50), title="EMA 3")

@@ -1,0 +1,159 @@
+//@version=6
+// Monday high/low range display, v1.4 (ICT weekly-profile helper).
+//
+// v1.4 is built on v1 (not v1.1-v1.3, owner 2026-10-14) and adds Fibonacci
+// levels on the latest week's Monday range, drawn from both ends.
+//
+// Display only: no signals, alerts or orders. "Monday" and "weekend" are
+// evaluated in the selected timezone (default America/New_York, the ICT
+// convention). Daily bars use the exchange timezone instead, because a daily
+// bar's open time is a trading-day stamp, not a New York wall-clock instant.
+//
+// Pine cannot remove bars from the time axis. Weekend candles are drawn fully
+// transparent, so on 24/7 symbols their slots remain as blank space.
+//
+// Native candles are recoloured with barcolor(); a same-colour plotcandle is
+// also drawn in front (behind_chart=false) so native red/green bodies, wicks
+// or borders cannot leak through on weekdays (see
+// docs/learnings/pine-candle-style-parity-requires-foreground-z-order.md).
+//
+// Rays start at the bar that set the Monday high/low and update live while
+// Monday is in progress. The current week's rays extend right; older weeks are
+// cut at the last bar before the next Monday unless "extend history" is on.
+//
+// Fibonacci: only the latest Monday range. Every ratio r is drawn from both
+// ends, low + r * range and high - r * range (0.5 coincides, drawn once), so
+// 1.13 / 1.27 / 1.618 project above the high and below the low. Lines start at
+// that Monday's first bar and extend right only, never left (owner
+// 2026-10-14). They are rebuilt on the last bar, so they follow the live
+// Monday range.
+
+indicator("周一高低点区间 · v1.4", shorttitle="Monday Range v1.4", overlay=true,
+     behind_chart=false, max_lines_count=500, max_labels_count=500)
+
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+bool hideWeekend = input.bool(true, "隐藏周六、周日K线", group=candleGroup)
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+int keepWeeks = input.int(12, "保留最近几周", minval=1, maxval=200, group=rayGroup)
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示价格标签", group=rayGroup)
+
+string fibGroup = "斐波那契（最新一周的周一区间）"
+bool showFib = input.bool(true, "显示斐波那契", group=fibGroup)
+string fibLevelsStr = input.string("0.5, 0.618, 0.705, 1.13, 1.27, 1.618",
+     "比例（逗号分隔，上下两个方向都画）", group=fibGroup)
+color fibCol = input.color(#787B8680, "线和文字颜色", group=fibGroup)
+
+if barstate.isfirst and (timeframe.isweekly or timeframe.ismonthly)
+    runtime.error("请在日线或更低周期使用：周线 / 月线没有单独的“周一”K线。")
+
+string tz = timeframe.isdaily or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+
+int dow = dayofweek(time, tz)
+bool isMonday = dow == dayofweek.monday
+bool isWeekend = dow == dayofweek.saturday or dow == dayofweek.sunday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+// The date key also catches back-to-back Mondays when a whole week is missing.
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// ---- Candles -------------------------------------------------------------
+color hiddenCol = color.new(color.white, 100)
+color candleCol = hideWeekend and isWeekend ? hiddenCol : isMonday ? mondayCol : baseCol
+barcolor(candleCol, title="K线着色")
+plotcandle(open, high, low, close, "K线", color=candleCol, wickcolor=candleCol,
+     bordercolor=candleCol, display=display.pane)
+
+// ---- Monday rays ---------------------------------------------------------
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var array<label> highLabels = array.new<label>()
+var array<label> lowLabels = array.new<label>()
+var float monHigh = na
+var float monLow = na
+var int monStartBar = na
+
+labelText(string name, float price) =>
+    name + " " + str.tostring(price, format.mintick)
+
+newRayLabel(float price, string name, color col) =>
+    label.new(bar_index, price, labelText(name, price), style=label.style_label_left,
+         color=hiddenCol, textcolor=col, size=size.small)
+
+if newMonday
+    // Freeze the previous week at the last bar before this Monday.
+    if highLines.size() > 0 and not extendHistory
+        for l in array.from(highLines.last(), lowLines.last())
+            l.set_extend(extend.none)
+            l.set_x2(bar_index - 1)
+    monHigh := high
+    monLow := low
+    monStartBar := bar_index
+    highLines.push(line.new(bar_index, high, bar_index + 1, high, extend=extend.right,
+         color=highCol, style=rayStyle, width=rayWidth))
+    lowLines.push(line.new(bar_index, low, bar_index + 1, low, extend=extend.right,
+         color=lowCol, style=rayStyle, width=rayWidth))
+    if showLabels
+        highLabels.push(newRayLabel(high, "周一高", highCol))
+        lowLabels.push(newRayLabel(low, "周一低", lowCol))
+    if highLines.size() > keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    if highLabels.size() > keepWeeks
+        highLabels.shift().delete()
+        lowLabels.shift().delete()
+else if isMonday and highLines.size() > 0
+    if high > monHigh
+        monHigh := high
+        highLines.last().set_xy1(bar_index, high)
+        highLines.last().set_xy2(bar_index + 1, high)
+    if low < monLow
+        monLow := low
+        lowLines.last().set_xy1(bar_index, low)
+        lowLines.last().set_xy2(bar_index + 1, low)
+
+// The current week's labels ride on the latest bar; once the next Monday
+// starts they stay at the old week's last bar (the blank weekend slot).
+if highLabels.size() > 0
+    highLabels.last().set_xy(bar_index, monHigh)
+    highLabels.last().set_text(labelText("周一高", monHigh))
+    lowLabels.last().set_xy(bar_index, monLow)
+    lowLabels.last().set_text(labelText("周一低", monLow))
+
+// ---- Fibonacci on the latest Monday range --------------------------------
+var array<line> fibLines = array.new<line>()
+var array<label> fibLabels = array.new<label>()
+// Fib labels sit right of the Monday labels so the two do not collide.
+int fibLabelOffset = 20
+
+if showFib and barstate.islast and not na(monStartBar)
+    for l in fibLines
+        l.delete()
+    for lb in fibLabels
+        lb.delete()
+    fibLines.clear()
+    fibLabels.clear()
+    float rng = monHigh - monLow
+    for item in str.split(str.replace_all(fibLevelsStr, " ", ""), ",")
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = monLow + r * rng
+            float dn = monHigh - r * rng
+            array<float> prices = math.abs(up - dn) < syminfo.mintick ? array.from(up) : array.from(up, dn)
+            for p in prices
+                fibLines.push(line.new(monStartBar, p, bar_index + 1, p, extend=extend.right,
+                     color=fibCol, width=1))
+                fibLabels.push(label.new(bar_index + fibLabelOffset, p,
+                     str.tostring(r) + " (" + str.tostring(p, format.mintick) + ")",
+                     style=label.style_label_left, color=hiddenCol, textcolor=fibCol, size=size.small))

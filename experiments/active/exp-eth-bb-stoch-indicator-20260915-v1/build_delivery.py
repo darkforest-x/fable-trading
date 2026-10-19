@@ -6,6 +6,7 @@ from pathlib import Path
 import hashlib
 import html
 import json
+import subprocess
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -25,4 +26,8 @@ if __name__ == '__main__':
     (ROOT / 'analysis/html/eth_bb_stoch_reversal_v1_code.html').write_text(copy_page(source, 'ETH 5m · BB × Stoch 指标源码'))
     receipt = {'source_path': str(SOURCE.relative_to(ROOT)), 'source_sha256': hashlib.sha256(source.encode()).hexdigest(), 'probe_sha256': hashlib.sha256(probe.encode()).hexdigest(), 'probe_difference': 'runSelfTest input default true only'}
     (HERE / 'source_receipt.json').write_text(json.dumps(receipt, indent=2) + '\n')
+    source_commit = subprocess.check_output(['git', 'log', '-1', '--format=%H', '--', str(SOURCE.relative_to(ROOT))], cwd=ROOT, text=True).strip()
+    paths = [SOURCE, HERE / 'PROJECT_PLAN.md', HERE / 'native_selftest.pine', HERE / 'native_selftest.html', HERE / 'source_receipt.json', HERE / 'native_validation.json', HERE / 'repository_gates.txt', ROOT / 'analysis/p1_eth_bb_stoch_indicator_20260915.md', ROOT / 'analysis/html/p1_eth_bb_stoch_indicator_20260915.html', ROOT / 'analysis/html/eth_bb_stoch_reversal_v1_code.html']
+    manifest = {'source_commit': source_commit, 'holdout_consumed': 0, 'backtest_performed': False, 'files': [{'path': str(p.relative_to(ROOT)), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest(), 'size_bytes': p.stat().st_size} for p in paths if p.exists()]}
+    (HERE / 'delivery_manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(json.dumps(receipt))

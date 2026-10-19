@@ -25,6 +25,8 @@ import subprocess
 import sys
 import uuid
 
+from .external_storage import registrations, registered_location, descendant_locations, expected_entry, verify_file, verify_access
+
 ROOT = Path(__file__).resolve().parents[2]
 CATEGORIES = {"market": "行情 K 线", "vision": "YOLO 图像与标注", "features": "因子与特征", "archives": "历史归档", "research": "研究输入"}
 EXCLUDED = {".git", "__pycache__", ".venv", "node_modules", ".DS_Store"}
@@ -47,6 +49,7 @@ def dataset_id(path):
 def sources(root=ROOT):
     """Discover dataset roots only, excluding credentials and execution journals."""
     root = Path(root)
+    external_locations = registrations(root)
     result = []
     def add(path, category):
         if not path.exists() and not path.is_symlink():
@@ -57,9 +60,14 @@ def sources(root=ROOT):
         resolved = path.resolve()
         storage = "external" if not resolved.is_relative_to(root) else "managed" if resolved.is_relative_to(root / "data/crypto") else "in_place"
         canonical = resolved.relative_to(root).as_posix() if storage != "external" else rel
+        external = registered_location(path, root, external_locations) if storage == "external" else None
+        if external:
+            storage, canonical = "external_managed", external["source"]
         view = root / "data/crypto" / category / dataset_id(rel)
-        if storage == "in_place" and view.is_symlink() and view.resolve() == resolved:
+        if storage in {"in_place", "external_managed"} and view.is_symlink() and view.resolve() == resolved:
             canonical = view.relative_to(root).as_posix()
+        if storage != "external_managed" and descendant_locations(path, root, external_locations):
+            storage = "partially_external_managed"
         display = path.parent.name + " / " + path.name if rel.startswith("experiments/") else path.name
         result.append(dict(id=dataset_id(rel), name=display, category=category,
                            category_label=CATEGORIES[category], path=canonical,
@@ -163,15 +171,30 @@ def market_metadata(path, identity_path):
     return info
 
 
-def _files(path):
+def _files(path, external_locations=(), root=ROOT, seen=None):
+    """Walk local directories and only explicitly registered external entries."""
     if path.is_file():
         yield path
         return
+    seen = set() if seen is None else seen
+    resolved_root = path.resolve()
+    if resolved_root in seen:
+        return
+    seen.add(resolved_root)
     for current, dirs, files in os.walk(path, followlinks=False):
+        external_dirs = []
+        for name in dirs:
+            child = Path(current) / name
+            if name not in EXCLUDED and child.is_symlink():
+                item = registered_location(child, root, external_locations)
+                if item and child.resolve() == item['target']:
+                    external_dirs.append(child)
         dirs[:] = sorted(d for d in dirs if d not in EXCLUDED and not (Path(current)/d).is_symlink())
         for name in sorted(files):
             if name not in EXCLUDED and not name.startswith("."):
                 yield Path(current) / name
+        for child in sorted(external_dirs):
+            yield from _files(child, external_locations, root, seen)
 
 
 def _receipts(directory):
@@ -210,6 +233,14 @@ def build_index(root=ROOT):
         status(dict(status="running", started_at=now(), pid=os.getpid(), error=None))
         temp = home / ("index-" + uuid.uuid4().hex + ".sqlite3")
         try:
+            # Discovery uses is_dir() for vision roots, so an offline symlink
+            # can disappear before reaching the per-dataset checks below.
+            # Validate every registration before publishing any replacement.
+            external_locations = registrations(root)
+            for external in external_locations:
+                if (root / external["source"]).resolve() != external["target"]:
+                    raise ValueError("外接数据入口与登记不一致，请先恢复迁移路径。")
+                verify_access(external)
             with closing(sqlite3.connect(temp)) as db:
                 db.executescript("""PRAGMA journal_mode=OFF; PRAGMA synchronous=OFF;
                 CREATE TABLE datasets(id TEXT PRIMARY KEY, metadata TEXT NOT NULL);
@@ -220,15 +251,20 @@ def build_index(root=ROOT):
                 CREATE TABLE info(key TEXT PRIMARY KEY,value TEXT);
                 """)
                 for item in sources(root):
+                    external = registered_location(root / item["path"], root) if item["storage"] == "external_managed" else None
+                    if external:
+                        verify_access(external)
                     receipts = _receipts(root / item["path"])
                     formats, exchanges, timeframes, symbols = set(), set(), set(), set()
                     count = size = missing = 0; starts=[]; ends=[]
                     if item["storage"] != "external":
-                        for path in _files(root / item["path"]):
+                        for path in _files(root / item["path"], external_locations, root):
                             rel = path.relative_to(root).as_posix()
                             resolved = path.resolve()
                             if not resolved.is_relative_to(root):
-                                missing += 1; continue
+                                file_external = external or registered_location(path, root, external_locations)
+                                if not (file_external and expected_entry(file_external, path)):
+                                    missing += 1; continue
                             try: st=path.stat()
                             except OSError: missing += 1; continue
                             suffix = ".csv.gz" if path.name.endswith(".csv.gz") else path.suffix.lower() or "[none]"
@@ -252,6 +288,8 @@ def build_index(root=ROOT):
                                 backtest_ready=bool(symbols and timeframes and exchanges),
                                 notes=["文件逻辑大小；不等于内存或 APFS 共享后的实际物理占用。", "版本与原始时间切分保留，索引不授予训练或生产资格。"])
                     if item["storage"] == "external": item["notes"].append("外部只读旧缓存，仅登记入口，不移动、不索引外部文件。")
+                    if item["storage"] == "external_managed": item["notes"].append("已登记的外接数据；读取时核验硬盘身份与登记的文件信息，硬盘离线时不可用。")
+                    if item["storage"] == "partially_external_managed": item["notes"].append("部分文件已迁至登记的外接硬盘；本机配置和标注保留，外盘文件读取时核验硬盘身份与登记信息。")
                     if starts: item["notes"].append("时间范围来自文件首尾或已有清单；具体回测读取时检查缺口和冲突。")
                     if missing: item["notes"].append(f"{missing} 个失效或越界链接未计入可用文件。")
                     db.execute("INSERT INTO datasets VALUES (?,?)",(item["id"],json.dumps(item,ensure_ascii=False)))
@@ -324,9 +362,16 @@ class DatasetCatalog:
         with closing(self._connect()) as db:
             row=db.execute("SELECT size_bytes,mtime_ns FROM files WHERE dataset_id=? AND path=?",(key,path)).fetchone()
         target=(self.root/path).resolve()
-        if row is None or not target.is_relative_to(self.root) or not target.is_file(): raise KeyError(path)
+        if row is None: raise KeyError(path)
+        external = registered_location(target, self.root) if not target.is_relative_to(self.root) else None
+        if not target.is_relative_to(self.root) and not external: raise KeyError(path)
+        if external: verify_file(external, target)
+        if not target.is_file(): raise KeyError(path)
         st=target.stat()
-        if (st.st_size,st.st_mtime_ns)!=tuple(row): raise ValueError("文件已变动，请重新索引后读取。")
+        # Registered external files have passed their declared verification mode.
+        # NTFS timestamps may lose nanoseconds; keep local checks unchanged.
+        if st.st_size != row[0] or (not external and st.st_mtime_ns != row[1]):
+            raise ValueError("文件已变动，请重新索引后读取。")
         return target
 
 

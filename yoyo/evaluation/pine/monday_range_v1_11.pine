@@ -1,0 +1,509 @@
+//@version=6
+// Monday high/low range display, v1.11, based on owner-selected v1.8.
+// Adds closed-15m estimated daily POC/VA, untouched POCs and prior-week H/L.
+// v1.9/v1.10 mini charts are deliberately not part of this v1.8-based version.
+// Sources: https://www.tradingview.com/pine-script-docs/concepts/other-timeframes-and-data/
+// https://www.tradingview.com/pine-script-docs/concepts/time/
+// https://www.tradingview.com/pine-script-docs/visuals/lines-and-boxes/
+// https://www.tradingview.com/pine-script-docs/writing/limitations/
+//
+// v1.4 is built on v1 (not v1.1-v1.3, owner 2026-10-14) and adds Fibonacci
+// levels on the latest week's Monday range, drawn from both ends.
+// v1.5: Fib labels one size larger and darker, matching the owner's manual
+// Fib tool (screenshot 2026-10-14); line and text colours split.
+// v1.6: weekend candles are painted a lighter opaque grey instead of the v1
+// "hidden" colour, which TradingView rendered as native red/green.
+// v1.7: every completed week's Monday range also gets a fainter Fib
+// (0.5 / 0.618 / 0.705, both ends) drawn only from that Monday's first bar to
+// its last weekday bar, so it never runs into the weekend.
+// v1.8: history Fib lines carry "ratio (price)" labels at their Friday end.
+//
+// Display only: no signals, alerts or orders. "Monday" and "weekend" are
+// evaluated in the selected timezone (default America/New_York, the ICT
+// convention). Daily bars use the exchange timezone instead, because a daily
+// bar's open time is a trading-day stamp, not a New York wall-clock instant.
+//
+// Weekend candles get their own lighter grey. It must stay opaque: a 100%-
+// transparent barcolor() falls back to the native red/green candles (see
+// docs/learnings/pine-transparent-barcolor-falls-back-to-native-candles.md).
+//
+// Native candles are recoloured with barcolor(); a same-colour plotcandle is
+// also drawn in front (behind_chart=false) so native red/green bodies, wicks
+// or borders cannot leak through on weekdays (see
+// docs/learnings/pine-candle-style-parity-requires-foreground-z-order.md).
+//
+// Rays start at the bar that set the Monday high/low and update live while
+// Monday is in progress. The current week's rays extend right; older weeks are
+// cut at the last bar before the next Monday unless "extend history" is on.
+//
+// Fibonacci: only the latest Monday range. Every ratio r is drawn from both
+// ends, low + r * range and high - r * range (0.5 coincides, drawn once), so
+// 1.13 / 1.27 / 1.618 project above the high and below the low. Lines start at
+// that Monday's first bar and extend right only, never left (owner
+// 2026-10-14). They are rebuilt on the last bar, so they follow the live
+// Monday range.
+
+indicator("周一高低点区间 · v1.11", shorttitle="Monday Range v1.11", overlay=true,
+     behind_chart=false, max_lines_count=500, max_labels_count=500)
+
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+color weekendCol = input.color(#B2B5BE, "周六、周日K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+// Reserve 24 latest Fib objects and 19 extra key levels. Trim oldest history
+// before creating new objects, so TradingView GC never removes current levels.
+int keepWeeks = input.int(12, "保留最近几周", minval=1, maxval=65, group=rayGroup)
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示价格标签", group=rayGroup)
+
+string fibGroup = "斐波那契（最新一周的周一区间）"
+bool showFib = input.bool(true, "显示斐波那契", group=fibGroup)
+string fibLevelsStr = input.string("0.5, 0.618, 0.705, 1.13, 1.27, 1.618",
+     "比例（逗号分隔，上下两个方向都画）", group=fibGroup)
+color fibCol = input.color(#787B86A6, "线颜色", group=fibGroup)
+color fibTextCol = input.color(#787B86, "文字颜色", group=fibGroup)
+string fibSizeOpt = input.string("中", "文字大小", options=["小", "中", "大"], group=fibGroup)
+
+string histFibGroup = "斐波那契（历史周，只画周一到周五）"
+bool showHistFib = input.bool(true, "显示历史周斐波那契", group=histFibGroup)
+string histFibLevelsStr = input.string("0.5, 0.618, 0.705",
+     "比例（逗号分隔，上下两个方向都画）", group=histFibGroup)
+color histFibCol = input.color(#787B8659, "线颜色", group=histFibGroup)
+color histFibTextCol = input.color(#787B86A6, "文字颜色", group=histFibGroup)
+
+string keyGroup = "关键价位（固定 15m 估算）"
+bool showPrevPOC = input.bool(true, "昨日 POC", inline="daily", group=keyGroup)
+bool showPrevVA = input.bool(true, "昨日 VAH / VAL", inline="daily", group=keyGroup)
+bool showNPOC = input.bool(true, "未触及 nPOC", inline="naked", group=keyGroup)
+int nakedDays = input.int(14, "回看日数", minval=1, maxval=14, inline="naked", group=keyGroup)
+bool showPrevWeek = input.bool(true, "上周高低点（完整周，含周末）", group=keyGroup)
+bool showKeyLabels = input.bool(true, "显示关键价位标签", group=keyGroup)
+bool showKeyInfo = input.bool(true, "显示计算状态", group=keyGroup)
+color pocColor = input.color(#D28D2F, "POC", inline="colors", group=keyGroup)
+color vaColor = input.color(#A99570, "VA", inline="colors", group=keyGroup)
+color npocColor = input.color(#AE6B9F, "nPOC", inline="colors", group=keyGroup)
+color priorColor = input.color(#63899B, "上周", inline="colors", group=keyGroup)
+int keyLabelOffset = input.int(8, "关键位标签右移（根）", minval=0, maxval=100, group=keyGroup)
+bool keyDebug = input.bool(false, "记录最后快照到 Pine 日志（核对用）", group=keyGroup, display=display.none)
+
+if barstate.isfirst and (not chart.is_standard or timeframe.in_seconds() > 86400)
+    runtime.error("请使用标准时间 K 线，周期不超过 1 日。")
+
+// main_period keeps the original v1.8 daily-timezone exception inside requests.
+string tz = timeframe.in_seconds(timeframe.main_period) >= 86400 or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+
+int dow = dayofweek(time, tz)
+bool isMonday = dow == dayofweek.monday
+bool isWeekend = dow == dayofweek.saturday or dow == dayofweek.sunday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+// The date key also catches back-to-back Mondays when a whole week is missing.
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// ---- Candles -------------------------------------------------------------
+color hiddenCol = color.new(color.white, 100)
+color candleCol = isWeekend ? weekendCol : isMonday ? mondayCol : baseCol
+barcolor(candleCol, title="K线着色")
+plotcandle(open, high, low, close, "K线", color=candleCol, wickcolor=candleCol,
+     bordercolor=candleCol, display=display.pane)
+
+// ---- Monday rays ---------------------------------------------------------
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var array<label> highLabels = array.new<label>()
+var array<label> lowLabels = array.new<label>()
+var float monHigh = na
+var float monLow = na
+var int monStartBar = na
+var int lastWeekdayBar = na
+var array<line> histFibLines = array.new<line>()
+var array<label> histFibLabels = array.new<label>()
+string fibSize = fibSizeOpt == "小" ? size.small : fibSizeOpt == "大" ? size.large : size.normal
+
+labelText(string name, float price) =>
+    name + " " + str.tostring(price, format.mintick)
+
+newRayLabel(float price, string name, color col) =>
+    label.new(time, price, labelText(name, price), xloc=xloc.bar_time, style=label.style_label_left,
+         color=hiddenCol, textcolor=col, size=size.small)
+
+// Both-end Fib prices of a range, with the ratio behind each price; a ratio
+// whose two prices coincide (0.5) is kept once.
+fibPrices(float hi, float lo, string levels) =>
+    array<float> prices = array.new<float>()
+    array<float> ratios = array.new<float>()
+    float rng = hi - lo
+    array<string> items = str.split(str.replace_all(levels, " ", ""), ",")
+    if items.size() > 12
+        runtime.error("每组 Fib 最多支持 12 个比例，请减少输入。")
+    for item in items
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = lo + r * rng
+            float dn = hi - r * rng
+            prices.push(up)
+            ratios.push(r)
+            if math.abs(up - dn) >= syminfo.mintick
+                prices.push(dn)
+                ratios.push(r)
+    [prices, ratios]
+
+fibText(float r, float price) =>
+    str.tostring(r) + " (" + str.tostring(price, format.mintick) + ")"
+
+if newMonday
+    // Freeze the previous week at the last bar before this Monday.
+    if highLines.size() > 0 and not extendHistory
+        for l in array.from(highLines.last(), lowLines.last())
+            l.set_extend(extend.none)
+            l.set_x2(time[1])
+    // The week that just ended gets its faint Fib, Monday through its last
+    // weekday bar. lastWeekdayBar has not seen this bar yet.
+    if showHistFib and not na(monStartBar) and not na(lastWeekdayBar) and lastWeekdayBar >= monStartBar
+        [hp, hr] = fibPrices(monHigh, monLow, histFibLevelsStr)
+        int historyBudget = math.min(keepWeeks * hp.size(), 500 - 2 * keepWeeks - 24 - 19 - 2)
+        while histFibLines.size() > 0 and histFibLines.size() + hp.size() > historyBudget
+            histFibLines.shift().delete()
+            histFibLabels.shift().delete()
+        for [i, p] in hp
+            histFibLines.push(line.new(monStartBar, p, lastWeekdayBar, p, xloc=xloc.bar_time, color=histFibCol, width=1))
+            histFibLabels.push(label.new(lastWeekdayBar, p, fibText(hr.get(i), p), xloc=xloc.bar_time,
+                 style=label.style_label_left, color=hiddenCol, textcolor=histFibTextCol, size=fibSize))
+    if highLines.size() >= keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    if highLabels.size() >= keepWeeks
+        highLabels.shift().delete()
+        lowLabels.shift().delete()
+    monHigh := high
+    monLow := low
+    monStartBar := time
+    highLines.push(line.new(time, high, time_close, high, xloc=xloc.bar_time, extend=extend.right,
+         color=highCol, style=rayStyle, width=rayWidth))
+    lowLines.push(line.new(time, low, time_close, low, xloc=xloc.bar_time, extend=extend.right,
+         color=lowCol, style=rayStyle, width=rayWidth))
+    if showLabels
+        highLabels.push(newRayLabel(high, "周一高", highCol))
+        lowLabels.push(newRayLabel(low, "周一低", lowCol))
+    if highLines.size() > keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    if highLabels.size() > keepWeeks
+        highLabels.shift().delete()
+        lowLabels.shift().delete()
+else if isMonday and highLines.size() > 0
+    if high > monHigh
+        monHigh := high
+        highLines.last().set_xy1(time, high)
+        highLines.last().set_xy2(time_close, high)
+    if low < monLow
+        monLow := low
+        lowLines.last().set_xy1(time, low)
+        lowLines.last().set_xy2(time_close, low)
+
+if not isWeekend
+    lastWeekdayBar := time
+
+// The current week's labels ride on the latest bar; once the next Monday
+// starts they stay at the old week's last bar (the weekend slot).
+if highLabels.size() > 0
+    highLabels.last().set_xy(time, monHigh)
+    highLabels.last().set_text(labelText("周一高", monHigh))
+    lowLabels.last().set_xy(time, monLow)
+    lowLabels.last().set_text(labelText("周一低", monLow))
+
+// ---- Fibonacci on the latest Monday range --------------------------------
+var array<line> fibLines = array.new<line>()
+var array<label> fibLabels = array.new<label>()
+// Fib labels sit right of the Monday labels so the two do not collide.
+int fibLabelOffset = 20
+
+if showFib and barstate.islast and not na(monStartBar)
+    for l in fibLines
+        l.delete()
+    for lb in fibLabels
+        lb.delete()
+    fibLines.clear()
+    fibLabels.clear()
+    float rng = monHigh - monLow
+    array<string> items = str.split(str.replace_all(fibLevelsStr, " ", ""), ",")
+    if items.size() > 12
+        runtime.error("每组 Fib 最多支持 12 个比例，请减少输入。")
+    for item in items
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = monLow + r * rng
+            float dn = monHigh - r * rng
+            array<float> prices = math.abs(up - dn) < syminfo.mintick ? array.from(up) : array.from(up, dn)
+            for p in prices
+                fibLines.push(line.new(monStartBar, p, time_close, p, xloc=xloc.bar_time, extend=extend.right,
+                     color=fibCol, width=1))
+                fibLabels.push(label.new(time + int(timeframe.in_seconds()) * 1000 * fibLabelOffset, p, xloc=xloc.bar_time,
+                     text=str.tostring(r) + " (" + str.tostring(p, format.mintick) + ")",
+                     style=label.style_label_left, color=hiddenCol, textcolor=fibTextCol, size=fibSize))
+
+// ---- Closed 15m key-level engine -----------------------------------------
+// Same numerical profile contract as yoyo/monitor/market_context.py:
+// uniform high-low volume allocation, 80 bins, contiguous >=70% VA; ties go
+// left and the first largest bin wins. This is NOT a native tick profile.
+// No arrays cross request contexts: the bounded nPOC list is serialized.
+type NakedPoint
+    int start
+    int finish
+    float price
+
+type KeySnapshot
+    int closeAt
+    int coverageAt
+    int profileStart
+    int profileEnd
+    float poc
+    float vah
+    float val
+    int weekStart
+    int weekEnd
+    float weekHigh
+    float weekLow
+    string naked
+
+dayStart(int stamp, int offset = 0) =>
+    timestamp(tz, year(stamp, tz), month(stamp, tz), dayofmonth(stamp, tz) + offset, 0, 0)
+
+weekStart(int stamp) =>
+    int weekdayOffset = (dayofweek(stamp, tz) + 5) % 7
+    dayStart(stamp, -weekdayOffset)
+
+estimatedProfile(array<float> highs, array<float> lows, array<float> closes, array<float> volumes) =>
+    float poc = na
+    float vah = na
+    float val = na
+    float hi = highs.max()
+    float lo = lows.min()
+    if highs.size() > 0 and hi > lo
+        float width = (hi - lo) / 80
+        array<float> bins = array.new<float>(80, 0)
+        for j = 0 to highs.size() - 1
+            float bh = highs.get(j)
+            float bl = lows.get(j)
+            float vol = volumes.get(j)
+            if bh == bl
+                int slot = math.min(79, math.max(0, int((closes.get(j) - lo) / width)))
+                bins.set(slot, bins.get(slot) + vol)
+            else
+                int first = math.max(0, int((bl - lo) / width))
+                int last = math.min(79, int((bh - lo) / width))
+                for i = first to last
+                    float overlap = math.max(0, math.min(bh, lo + (i + 1) * width) - math.max(bl, lo + i * width))
+                    bins.set(i, bins.get(i) + vol * overlap / (bh - bl))
+        float total = bins.sum()
+        if total > 0
+            int point = bins.indexof(bins.max())
+            int a = point
+            int b = point
+            float covered = bins.get(point)
+            while covered < total * 0.70 and (a > 0 or b < 79)
+                float left = a > 0 ? bins.get(a - 1) : -1
+                float right = b < 79 ? bins.get(b + 1) : -1
+                if right > left
+                    b += 1
+                    covered += bins.get(b)
+                else
+                    a -= 1
+                    covered += bins.get(a)
+            poc := lo + (point + 0.5) * width
+            vah := lo + (b + 1) * width
+            val := lo + a * width
+    [poc, vah, val]
+
+keyEngine(int sourceTime, int sourceEnd, float sourceHigh, float sourceLow, float sourceClose, float sourceVolume) =>
+    var array<float> dh = array.new<float>()
+    var array<float> dl = array.new<float>()
+    var array<float> dc = array.new<float>()
+    var array<float> dv = array.new<float>()
+    var array<NakedPoint> naked = array.new<NakedPoint>()
+    var int firstSeen = sourceTime
+    var int lastEnd = na
+    var int activeDay = na
+    var int activeWeek = na
+    var bool dayOK = false
+    var bool weekOK = false
+    var float wh = na
+    var float wl = na
+    var int profileStart = na
+    var int profileEnd = na
+    var float poc = na
+    var float vah = na
+    var float val = na
+    var int priorStart = na
+    var int priorEnd = na
+    var float priorHigh = na
+    var float priorLow = na
+    int ds = dayStart(sourceTime)
+    int de = dayStart(sourceTime, 1)
+    int ws = weekStart(sourceTime)
+    int we = dayStart(ws, 7)
+    bool continuous = not na(lastEnd) and sourceTime == lastEnd
+    bool validBar = sourceEnd - sourceTime == 900000 and not na(sourceHigh) and not na(sourceLow) and sourceHigh >= sourceLow
+    // A gap makes all earlier untouched claims unknown, even if price stayed away.
+    if not continuous or not validBar
+        naked.clear()
+        firstSeen := sourceTime
+    if na(activeDay) or ds != activeDay
+        activeDay := ds
+        dh.clear()
+        dl.clear()
+        dc.clear()
+        dv.clear()
+        dayOK := sourceTime == ds
+    else
+        dayOK := dayOK and continuous
+    if na(activeWeek) or ws != activeWeek
+        activeWeek := ws
+        wh := sourceHigh
+        wl := sourceLow
+        weekOK := sourceTime == ws
+    else
+        wh := math.max(wh, sourceHigh)
+        wl := math.min(wl, sourceLow)
+        weekOK := weekOK and continuous
+    dayOK := dayOK and validBar and not na(sourceVolume) and sourceVolume >= 0
+    weekOK := weekOK and validBar
+    // Existing POCs see this candle. A newly formed POC does not see its own day.
+    int cutoffDay = dayStart(sourceEnd, -nakedDays)
+    int k = naked.size() - 1
+    while k >= 0
+        NakedPoint point = naked.get(k)
+        if point.start < cutoffDay or (sourceLow <= point.price and sourceHigh >= point.price)
+            naked.remove(k)
+        k -= 1
+    dh.push(sourceHigh)
+    dl.push(sourceLow)
+    dc.push(sourceClose)
+    dv.push(sourceVolume)
+    // Freeze at the actual local midnight, including 23/25-hour DST days.
+    // No first-bar-of-tomorrow delay, and no partial-day replacement.
+    if sourceEnd == de and dayOK
+        [p, h, l] = estimatedProfile(dh, dl, dc, dv)
+        profileStart := ds
+        profileEnd := de
+        poc := p
+        vah := h
+        val := l
+        if not na(p)
+            naked.push(NakedPoint.new(ds, de, p))
+    if sourceEnd == we and weekOK
+        priorStart := ws
+        priorEnd := we
+        priorHigh := wh
+        priorLow := wl
+    lastEnd := sourceEnd
+    string packed = ""
+    for point in naked
+        packed += str.tostring(point.start) + "," + str.tostring(point.finish) + "," + str.tostring(point.price, "#.################") + ";"
+    KeySnapshot.new(sourceEnd, firstSeen, profileStart, profileEnd, poc, vah, val,
+         priorStart, priorEnd, priorHigh, priorLow, packed)
+
+// HTF-on-LTF: offset the whole snapshot before lookahead_on, per Pine docs.
+confirmedKeyEngine() =>
+    KeySnapshot value = keyEngine(time, time_close, high, low, close, volume)
+    value[1]
+
+// LTF-on-HTF: the function accumulates EVERY 15m bar within its own context;
+// request.security returns its final state, not raw sampled OHLC. A realtime
+// unfinished 15m snapshot is replaced by the preceding complete snapshot.
+keyEnginePair() =>
+    KeySnapshot value = keyEngine(time, time_close, high, low, close, volume)
+    [value, value[1]]
+
+KeySnapshot key = na
+int observedAt = barstate.isrealtime ? timenow : time_close
+if timeframe.in_seconds() < 900
+    key := request.security(syminfo.tickerid, "15", confirmedKeyEngine(), lookahead=barmerge.lookahead_on, calc_bars_count=3200)
+else
+    [latestKey, previousKey] = request.security(syminfo.tickerid, "15", keyEnginePair(), lookahead=barmerge.lookahead_off, calc_bars_count=3200)
+    key := not na(latestKey) and latestKey.closeAt <= observedAt ? latestKey : previousKey
+
+int todayStart = dayStart(observedAt)
+int thisWeekStart = weekStart(observedAt)
+bool hasYesterday = not na(key) and key.profileEnd == todayStart and not na(key.poc)
+bool hasPriorWeek = not na(key) and key.weekEnd == thisWeekStart and not na(key.weekHigh)
+bool keyFresh = not na(key) and observedAt >= key.closeAt and observedAt - key.closeAt <= 900000
+
+var array<line> keyLines = array.new<line>()
+var array<label> keyLabels = array.new<label>()
+var table keyInfo = table.new(position.bottom_left, 1, 3, border_width=0)
+
+drawKey(float price, int availableAt, string name, color col, string detail, int column = 0) =>
+    keyLines.push(line.new(availableAt, price, math.max(availableAt + 1, observedAt), price,
+         xloc=xloc.bar_time, extend=extend.right, color=col, style=line.style_dashed, width=1))
+    if showKeyLabels
+        int at = time + int(timeframe.in_seconds()) * 1000 * (keyLabelOffset + column)
+        keyLabels.push(label.new(at, price, labelText(name, price), xloc=xloc.bar_time,
+             style=label.style_label_left, color=hiddenCol, textcolor=col, size=size.small, tooltip=detail))
+
+if barstate.islast
+    for item in keyLines
+        item.delete()
+    for item in keyLabels
+        item.delete()
+    keyLines.clear()
+    keyLabels.clear()
+    bool yesterdayNaked = false
+    int nakedCount = 0
+    if not na(key) and keyFresh
+        int oldest = dayStart(observedAt, -nakedDays)
+        for row in str.split(key.naked, ";")
+            array<string> fields = str.split(row, ",")
+            if fields.size() == 3
+                int sourceStart = int(str.tonumber(fields.get(0)))
+                int sourceEnd = int(str.tonumber(fields.get(1)))
+                float price = str.tonumber(fields.get(2))
+                if sourceStart >= oldest
+                    nakedCount += 1
+                    bool isYesterday = sourceEnd == todayStart
+                    yesterdayNaked := yesterdayNaked or isYesterday
+                    if showNPOC and not (isYesterday and showPrevPOC and hasYesterday)
+                        string origin = str.format_time(sourceStart, "MM-dd", tz)
+                        drawKey(price, sourceEnd, "nPOC " + origin, npocColor,
+                             "来源日 " + str.format_time(sourceStart, "yyyy-MM-dd", tz) + " · " + tz +
+                             "\n此后完整15m K线未触及；最后检查 " + str.format_time(key.closeAt, "MM-dd HH:mm", tz), 12)
+    if hasYesterday
+        string dayName = str.format_time(key.profileStart, "yyyy-MM-dd", tz)
+        string profileTip = dayName + " · " + tz + "\n固定15m成交量均匀分配至80档，70%价值区；估算值。"
+        if showPrevPOC
+            drawKey(key.poc, key.profileEnd, "昨日 POC" + (showNPOC and yesterdayNaked ? " · nPOC" : ""), pocColor, profileTip)
+        if showPrevVA
+            drawKey(key.vah, key.profileEnd, "昨日 VAH", vaColor, profileTip)
+            drawKey(key.val, key.profileEnd, "昨日 VAL", vaColor, profileTip)
+    if hasPriorWeek and showPrevWeek
+        string weekTip = str.format_time(key.weekStart, "yyyy-MM-dd", tz) + " 至 " + str.format_time(key.weekEnd, "yyyy-MM-dd", tz) + "\n完整自然周（含周末） · " + tz
+        drawKey(key.weekHigh, key.weekEnd, "上周高", priorColor, weekTip, 24)
+        drawKey(key.weekLow, key.weekEnd, "上周低", priorColor, weekTip, 24)
+    if showKeyInfo
+        table.cell(keyInfo, 0, 0, "v1.11 · " + tz + " · 15m估算 / 80档 / VA70%", text_color=chart.fg_color, text_size=size.small, bgcolor=color.new(chart.bg_color, 12))
+        string status = (hasYesterday ? "昨日完整" : "昨日数据不足") + " · " + (hasPriorWeek ? "上周完整" : "上周数据不足")
+        string coverage = not na(key) and key.coverageAt > dayStart(observedAt, -nakedDays) ? "（覆盖不足" + str.tostring(nakedDays) + "日）" : ""
+        table.cell(keyInfo, 0, 1, status + " · nPOC " + (keyFresh ? str.tostring(nakedCount) + coverage : "待更新"), text_color=chart.fg_color, text_size=size.small, bgcolor=color.new(chart.bg_color, 12))
+        table.cell(keyInfo, 0, 2, na(key) ? "等待15m数据" : "检查至 " + str.format_time(key.closeAt, "MM-dd HH:mm", tz) + (keyFresh ? " · 收盘更新" : " · 行情未更新"), text_color=chart.fg_color, text_size=size.small, bgcolor=color.new(chart.bg_color, 12))
+    else
+        table.clear(keyInfo, 0, 0, 0, 2)
+
+// Data Window exposes source prices for cross-timeframe verification.
+plot(hasYesterday ? key.poc : na, "昨日 POC（15m估算）", display=display.data_window)
+plot(hasYesterday ? key.vah : na, "昨日 VAH（15m估算）", display=display.data_window)
+plot(hasYesterday ? key.val : na, "昨日 VAL（15m估算）", display=display.data_window)
+plot(hasPriorWeek ? key.weekHigh : na, "上周高（15m）", display=display.data_window)
+plot(hasPriorWeek ? key.weekLow : na, "上周低（15m）", display=display.data_window)
+plot(not na(key) ? key.closeAt : na, "关键位最后检查时间（Unix ms）", display=display.data_window)
+if keyDebug and barstate.islastconfirmedhistory and not na(key)
+    log.info("KEY15 close={0} day={1} poc={2} vah={3} val={4} prior={5}/{6} npoc={7}", key.closeAt, key.profileStart, key.poc, key.vah, key.val, key.weekHigh, key.weekLow, key.naked)

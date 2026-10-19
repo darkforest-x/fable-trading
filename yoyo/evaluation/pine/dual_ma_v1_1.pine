@@ -1,0 +1,35 @@
+//@version=6
+// Style source: SPIKE V12.5 main-chart moving averages.
+// Preserve the owner's black/blue/purple palette and close-based SMA/EMA values.
+indicator(title="双均线 V1.1 · SPIKE 样式", shorttitle="双均线 V1.1", overlay=true)
+
+// Lengths and pair visibility.
+group_len = "周期设置"
+len1 = input.int(20, title="周期 1", minval=1, group=group_len, inline="ma1", display=display.none)
+show1 = input.bool(true, title="显示黑色组", group=group_len, inline="ma1", display=display.none)
+len2 = input.int(60, title="周期 2", minval=1, group=group_len, inline="ma2", display=display.none)
+show2 = input.bool(true, title="显示蓝色组", group=group_len, inline="ma2", display=display.none)
+len3 = input.int(120, title="周期 3", minval=1, group=group_len, inline="ma3", display=display.none)
+show3 = input.bool(true, title="显示紫色组", group=group_len, inline="ma3", display=display.none)
+
+// Thin lines, with SMA slightly stronger than EMA, as in SPIKE.
+group_style = "样式设置"
+line_width = input.int(1, title="均线粗细", minval=1, maxval=4, group=group_style, display=display.none)
+
+// Always calculate all six averages, independently of display switches.
+sma1 = ta.sma(close, len1)
+sma2 = ta.sma(close, len2)
+sma3 = ta.sma(close, len3)
+ema1 = ta.ema(close, len1)
+ema2 = ta.ema(close, len2)
+ema3 = ta.ema(close, len3)
+
+// Keep values in the Data Window without cluttering the status line or price scale.
+plot(show1 ? sma1 : na, title="SMA 1", color=color.new(color.black, 38), linewidth=line_width, display=display.pane + display.data_window)
+plot(show1 ? ema1 : na, title="EMA 1", color=color.new(color.black, 58), linewidth=line_width, display=display.pane + display.data_window)
+
+plot(show2 ? sma2 : na, title="SMA 2", color=color.new(color.blue, 40), linewidth=line_width, display=display.pane + display.data_window)
+plot(show2 ? ema2 : na, title="EMA 2", color=color.new(color.blue, 60), linewidth=line_width, display=display.pane + display.data_window)
+
+plot(show3 ? sma3 : na, title="SMA 3", color=color.new(color.purple, 48), linewidth=line_width, display=display.pane + display.data_window)
+plot(show3 ? ema3 : na, title="EMA 3", color=color.new(color.purple, 66), linewidth=line_width, display=display.pane + display.data_window)

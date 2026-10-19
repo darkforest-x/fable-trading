@@ -1,0 +1,250 @@
+//@version=6
+// ALLIN-V8 Research — mechanically safer rewrite of the supplied V7.2 script.
+// Research only. It does NOT implement the project's SMA/EMA 20/60/120
+// Local Signal V2 detector and it is not production-eligible.
+strategy(
+     "ALLIN-V8 Research (confirmed-bar / cost-aware)",
+     overlay = true,
+     initial_capital = 500,
+     pyramiding = 0,
+     default_qty_type = strategy.fixed,
+     calc_on_every_tick = false,
+     calc_on_order_fills = false,
+     process_orders_on_close = false,
+     use_bar_magnifier = true,
+     commission_type = strategy.commission.percent,
+     commission_value = 0.10,
+     slippage = 0,
+     margin_long = 7.69,
+     margin_short = 7.69,
+     alert_message = "{{strategy.order.alert_message}}")
+
+// Commission is 0.10% per filled order = the repository's frozen 0.20%
+// round-trip reporting cost for a simple entry/exit. Slippage remains zero
+// because the owner has not approved a different cost assumption. Do not
+// change it for an official result; any slippage study needs its own approval
+// and must be reported separately rather than cherry-picked.
+
+string GROUP_SCOPE = "1 · Research scope"
+string GROUP_RISK = "2 · Position sizing"
+string GROUP_EXIT = "3 · Stops and exits"
+string GROUP_FILTER = "4 · Entry filters"
+string GROUP_DISPLAY = "5 · Display"
+
+// The default analysis end is 64 days before this repository's holdout.
+int researchStart = input.time(timestamp("2023-01-01T00:00:00+00:00"), "Start (UTC)", group = GROUP_SCOPE)
+int researchEnd = input.time(timestamp("2026-03-01T00:00:00+00:00"), "End, exclusive (UTC)", group = GROUP_SCOPE)
+string sideMode = input.string("Both", "Direction", options = ["Both", "Long only", "Short only"], group = GROUP_SCOPE)
+string reversalMode = input.string("Reverse", "Opposite signal", options = ["Reverse", "Close only"], group = GROUP_SCOPE)
+
+string sizingMode = input.string("Risk Based", "Sizing", options = ["Risk Based", "Fixed Leverage"], group = GROUP_RISK)
+float riskPerTradePct = input.float(2.0, "Equity risk per trade (%)", minval = 0.1, maxval = 10.0, step = 0.1, group = GROUP_RISK)
+float baseLeverage = input.float(4.0, "Fixed base leverage", minval = 0.1, maxval = 13.0, step = 0.1, group = GROUP_RISK)
+float maxLeverage = input.float(13.0, "Leverage cap", minval = 0.1, maxval = 13.0, step = 0.1, group = GROUP_RISK)
+bool enableTimeBoosts = input.bool(false, "Enable legacy 03:00 / Thursday boosts", group = GROUP_RISK, tooltip = "Disabled by default: calendar leverage multipliers need their own OOS evidence.")
+float maxStrategyDrawdownPct = input.float(100.0, "Hard strategy drawdown halt (%)", minval = 1.0, maxval = 100.0, step = 1.0, group = GROUP_RISK)
+
+// Owner-frozen barrier values from V7.2. They are constants, not optimizer knobs.
+float maxSlPercent = 3.0
+float atrMult = 4.0
+bool useBreakEven = input.bool(true, "Break-even stop", group = GROUP_EXIT)
+float breakEvenTriggerPct = input.float(1.5, "Break-even trigger (%)", minval = 0.1, step = 0.1, group = GROUP_EXIT)
+float breakEvenOffsetPct = input.float(0.1, "Break-even locked profit (%)", minval = 0.0, step = 0.1, group = GROUP_EXIT)
+bool useTrailingStop = input.bool(false, "Trailing stop", group = GROUP_EXIT)
+float trailingTriggerPct = input.float(2.5, "Trailing activation (%)", minval = 0.1, step = 0.1, group = GROUP_EXIT)
+float trailingDistancePct = input.float(1.0, "Trailing distance (%)", minval = 0.1, step = 0.1, group = GROUP_EXIT)
+
+bool useSkipLogic = input.bool(true, "Skip signals after profitable trades", group = GROUP_FILTER)
+float skipThresholdPct = input.float(2.0, "Skip trigger (%)", step = 0.1, group = GROUP_FILTER)
+int skipCount = input.int(1, "Signals skipped", minval = 0, group = GROUP_FILTER)
+float bigSkipThresholdPct = input.float(20.0, "Large-win skip trigger (%)", step = 0.5, group = GROUP_FILTER)
+int bigSkipCount = input.int(7, "Signals skipped after large win", minval = 0, group = GROUP_FILTER)
+bool tradeOnSunday = input.bool(false, "Allow Sunday entries (HK)", group = GROUP_FILTER)
+string timeFilterMode = input.string("Block window", "HK time window", options = ["Off", "Block window", "Allow window"], group = GROUP_FILTER)
+int startHour = input.int(21, "Window start hour (HK)", minval = 0, maxval = 23, group = GROUP_FILTER)
+int endHour = input.int(23, "Window end hour, exclusive (HK)", minval = 0, maxval = 23, group = GROUP_FILTER)
+bool filterVolatility = input.bool(true, "ATR% guard", group = GROUP_FILTER)
+float minAtrPct = input.float(0.1, "Minimum ATR (%)", minval = 0.0, step = 0.1, group = GROUP_FILTER)
+float maxAtrPct = input.float(10.0, "Maximum ATR (%)", minval = 0.1, step = 0.1, group = GROUP_FILTER)
+
+bool showSignals = input.bool(true, "Signal markers", group = GROUP_DISPLAY)
+bool showHud = input.bool(true, "Research HUD", group = GROUP_DISPLAY)
+
+strategy.risk.max_drawdown(maxStrategyDrawdownPct, strategy.percent_of_equity)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Frozen V7.2 signal. All inputs are current bar or earlier; orders wait for a
+// confirmed close and fill on the next bar's open.
+// ─────────────────────────────────────────────────────────────────────────────
+int fastLen = 10
+int slowLen = 60
+int regimeLen = 100
+int atrLen = 14
+float source = hl2
+float fastMa = ta.sma(source, fastLen)
+float slowMa = ta.sma(source, slowLen)
+float regimeMa = ta.ema(close, regimeLen)
+float atr = ta.atr(atrLen)
+
+float maBasis = ta.sma(source, 40)
+float difference = source - maBasis
+float percentile99 = ta.percentile_linear_interpolation(difference, 200, 99)
+float ratio = not na(percentile99) and percentile99 != 0.0 ? difference / percentile99 : 0.0
+float changeRatio = ratio - ratio[10]
+float oscillator = ta.hma(changeRatio, 10)
+
+bool crossUp = ta.crossover(fastMa, slowMa)
+bool crossDown = ta.crossunder(fastMa, slowMa)
+bool oscillatorRising = oscillator > 0.2 and oscillator > oscillator[1]
+bool oscillatorFalling = oscillator < -0.2 and oscillator < oscillator[1]
+bool rawLong = crossUp and close > slowMa and close > regimeMa and oscillatorRising
+bool rawShort = crossDown and close < slowMa and close < regimeMa and oscillatorFalling
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Calendar and volatility filters use one explicit timezone. The supplied V7.2
+// mixed the exchange timezone for entry filters with UTC+8 for leverage boosts.
+// startHour == endHour means no time restriction, not a full-day block.
+// ─────────────────────────────────────────────────────────────────────────────
+f_inWindow(int value, int startValue, int endValue) =>
+    startValue == endValue ? false :
+     startValue < endValue ? value >= startValue and value < endValue :
+     value >= startValue or value < endValue
+
+int hourHk = hour(time, "Asia/Hong_Kong")
+int weekdayHk = dayofweek(time, "Asia/Hong_Kong")
+bool insideWindow = f_inWindow(hourHk, startHour, endHour)
+bool timeAllowed = timeFilterMode == "Off" or startHour == endHour or (timeFilterMode == "Allow window" ? insideWindow : not insideWindow)
+bool dayAllowed = tradeOnSunday or weekdayHk != dayofweek.sunday
+float atrPct = atr / close * 100.0
+bool volatilityAllowed = not filterVolatility or atrPct >= minAtrPct and atrPct <= maxAtrPct
+bool dateAllowed = time >= researchStart and time < researchEnd
+bool longSideAllowed = sideMode != "Short only"
+bool shortSideAllowed = sideMode != "Long only"
+
+// Update cooldown from the newest closed trade BEFORE evaluating this bar's
+// signal. V7.2 computed is_cooling_down first, so a close and a new signal on
+// the same bar could bypass the newly-created cooldown.
+var int tradesToSkip = 0
+bool justClosed = strategy.closedtrades > nz(strategy.closedtrades[1])
+if justClosed and useSkipLogic
+    int tradeIndex = strategy.closedtrades - 1
+    float tradeProfit = strategy.closedtrades.profit(tradeIndex)
+    float tradeNotional = math.abs(strategy.closedtrades.entry_price(tradeIndex) * strategy.closedtrades.size(tradeIndex))
+    float tradeReturnPct = tradeNotional > 0.0 ? tradeProfit / tradeNotional * 100.0 : 0.0
+    if tradeReturnPct > bigSkipThresholdPct
+        tradesToSkip := bigSkipCount
+    else if tradeReturnPct > skipThresholdPct
+        tradesToSkip := skipCount
+else if not useSkipLogic
+    tradesToSkip := 0
+
+bool rawSignal = rawLong or rawShort
+bool skippedSignal = rawSignal and tradesToSkip > 0
+if skippedSignal
+    tradesToSkip -= 1
+
+bool commonAllowed = barstate.isconfirmed and dateAllowed and timeAllowed and dayAllowed and volatilityAllowed and not skippedSignal
+bool longSignal = rawLong and commonAllowed and longSideAllowed
+bool shortSignal = rawShort and commonAllowed and shortSideAllowed
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sizing and order management.
+// ─────────────────────────────────────────────────────────────────────────────
+float signalStopDistance = math.min(atr * atrMult, close * maxSlPercent / 100.0)
+int signalStopTicks = math.max(1, int(math.round(signalStopDistance / syminfo.mintick)))
+
+f_targetLeverage(float stopDistance) =>
+    float stopFraction = stopDistance / close
+    float leverage = sizingMode == "Risk Based" and stopFraction > 0.0 ? riskPerTradePct / 100.0 / stopFraction : baseLeverage
+    if sizingMode == "Fixed Leverage" and enableTimeBoosts and hourHk == 3
+        leverage *= 1.5
+    if sizingMode == "Fixed Leverage" and enableTimeBoosts and weekdayHk == dayofweek.thursday
+        leverage *= 2.0
+    math.min(leverage, maxLeverage)
+
+float targetLeverage = f_targetLeverage(signalStopDistance)
+float targetQuantity = strategy.equity > 0.0 and close > 0.0 ? strategy.equity * targetLeverage / close : 0.0
+
+string longEntryAlert = "策略: ALLIN-V8 Research\n品种: {{ticker}}\n动作: OPEN LONG\n订单价: {{strategy.order.price}}\n信号只在收盘确认"
+string shortEntryAlert = "策略: ALLIN-V8 Research\n品种: {{ticker}}\n动作: OPEN SHORT\n订单价: {{strategy.order.price}}\n信号只在收盘确认"
+string longExitAlert = "策略: ALLIN-V8 Research\n品种: {{ticker}}\n动作: CLOSE LONG\n订单价: {{strategy.order.price}}"
+string shortExitAlert = "策略: ALLIN-V8 Research\n品种: {{ticker}}\n动作: CLOSE SHORT\n订单价: {{strategy.order.price}}"
+
+var int pendingLongStopTicks = na
+var int pendingShortStopTicks = na
+
+if longSignal and strategy.position_size <= 0.0
+    if strategy.position_size < 0.0 and reversalMode == "Close only"
+        strategy.close("Short", comment = "Opposite signal", alert_message = shortExitAlert)
+    else if targetQuantity > 0.0
+        pendingLongStopTicks := signalStopTicks
+        strategy.entry("Long", strategy.long, qty = targetQuantity, comment = "Confirmed long", alert_message = longEntryAlert)
+        // Tick-based loss is relative to the actual fill and is active on the
+        // entry bar. V7.2 did not submit its stop until a later calculation.
+        strategy.exit("Exit Long", "Long", loss = signalStopTicks, comment = "Initial stop", alert_message = longExitAlert)
+
+if shortSignal and strategy.position_size >= 0.0
+    if strategy.position_size > 0.0 and reversalMode == "Close only"
+        strategy.close("Long", comment = "Opposite signal", alert_message = longExitAlert)
+    else if targetQuantity > 0.0
+        pendingShortStopTicks := signalStopTicks
+        strategy.entry("Short", strategy.short, qty = targetQuantity, comment = "Confirmed short", alert_message = shortEntryAlert)
+        strategy.exit("Exit Short", "Short", loss = signalStopTicks, comment = "Initial stop", alert_message = shortExitAlert)
+
+bool newLongPosition = strategy.position_size > 0.0 and nz(strategy.position_size[1]) <= 0.0
+bool newShortPosition = strategy.position_size < 0.0 and nz(strategy.position_size[1]) >= 0.0
+var float stopPrice = na
+if newLongPosition
+    stopPrice := strategy.position_avg_price - nz(pendingLongStopTicks, signalStopTicks) * syminfo.mintick
+if newShortPosition
+    stopPrice := strategy.position_avg_price + nz(pendingShortStopTicks, signalStopTicks) * syminfo.mintick
+if strategy.position_size == 0.0 and nz(strategy.position_size[1]) != 0.0
+    stopPrice := na
+
+if strategy.position_size > 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if useBreakEven and high >= entryPrice * (1.0 + breakEvenTriggerPct / 100.0)
+        stopPrice := math.max(stopPrice, entryPrice * (1.0 + breakEvenOffsetPct / 100.0))
+    if useTrailingStop and high >= entryPrice * (1.0 + trailingTriggerPct / 100.0)
+        stopPrice := math.max(stopPrice, high * (1.0 - trailingDistancePct / 100.0))
+    strategy.exit("Exit Long", "Long", stop = stopPrice, comment = "Managed stop", alert_message = longExitAlert)
+
+if strategy.position_size < 0.0 and not na(stopPrice)
+    float entryPrice = strategy.position_avg_price
+    if useBreakEven and low <= entryPrice * (1.0 - breakEvenTriggerPct / 100.0)
+        stopPrice := math.min(stopPrice, entryPrice * (1.0 - breakEvenOffsetPct / 100.0))
+    if useTrailingStop and low <= entryPrice * (1.0 - trailingTriggerPct / 100.0)
+        stopPrice := math.min(stopPrice, low * (1.0 + trailingDistancePct / 100.0))
+    strategy.exit("Exit Short", "Short", stop = stopPrice, comment = "Managed stop", alert_message = shortExitAlert)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Visual audit surface.
+// ─────────────────────────────────────────────────────────────────────────────
+color longColor = #2563EB
+color shortColor = #D97706
+color neutralColor = #64748B
+plot(regimeMa, "EMA100 regime", color = color.new(neutralColor, 35), linewidth = 1)
+fastPlot = plot(fastMa, "SMA10", color = color.new(longColor, 65), display = display.none)
+slowPlot = plot(slowMa, "SMA60", color = color.new(shortColor, 65), display = display.none)
+fill(fastPlot, slowPlot, color = color.new(fastMa >= slowMa ? longColor : shortColor, 88), title = "SMA cloud")
+plot(strategy.position_size != 0.0 ? strategy.position_avg_price : na, "Entry price", color = #334155, style = plot.style_linebr, linewidth = 2)
+plot(strategy.position_size != 0.0 ? stopPrice : na, "Managed stop", color = shortColor, style = plot.style_linebr, linewidth = 1)
+plotshape(showSignals and longSignal, "Confirmed long", shape.triangleup, location.belowbar, longColor, size = size.tiny, text = "L")
+plotshape(showSignals and shortSignal, "Confirmed short", shape.triangledown, location.abovebar, shortColor, size = size.tiny, text = "S")
+plotshape(showSignals and skippedSignal, "Skipped", shape.circle, location.abovebar, color = #C2417A, size = size.tiny, text = "跳")
+
+var table hud = table.new(position.bottom_right, 2, 6, bgcolor = color.new(#FFFFFF, 8), frame_color = #CBD5E1, frame_width = 1)
+if barstate.islast and showHud
+    string positionText = strategy.position_size > 0.0 ? "LONG" : strategy.position_size < 0.0 ? "SHORT" : "FLAT"
+    table.cell(hud, 0, 0, "Mode", text_color = neutralColor)
+    table.cell(hud, 1, 0, sizingMode, text_color = #0F172A)
+    table.cell(hud, 0, 1, "Position", text_color = neutralColor)
+    table.cell(hud, 1, 1, positionText, text_color = strategy.position_size > 0.0 ? longColor : strategy.position_size < 0.0 ? shortColor : neutralColor)
+    table.cell(hud, 0, 2, "Target lev", text_color = neutralColor)
+    table.cell(hud, 1, 2, str.tostring(targetLeverage, "#.##") + "x", text_color = #0F172A)
+    table.cell(hud, 0, 3, "Stop", text_color = neutralColor)
+    table.cell(hud, 1, 3, na(stopPrice) ? "—" : str.tostring(stopPrice, format.mintick), text_color = shortColor)
+    table.cell(hud, 0, 4, "Cooldown", text_color = neutralColor)
+    table.cell(hud, 1, 4, str.tostring(tradesToSkip), text_color = tradesToSkip > 0 ? #C2417A : neutralColor)
+    table.cell(hud, 0, 5, "Scope", text_color = neutralColor)
+    table.cell(hud, 1, 5, dateAllowed ? "PRE-HOLDOUT" : "OUTSIDE", text_color = dateAllowed ? #6B8E23 : #C2417A)

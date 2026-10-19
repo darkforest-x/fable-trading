@@ -1,0 +1,437 @@
+//@version=5
+indicator("Support and Resistance (High Volume Boxes) [ChartPrime]", shorttitle = "SR Breaks and Retests [ChartPrime]", overlay=true, max_boxes_count = 50)
+
+// === 输入参数 ===
+type_ma = input.string("SMA", "Type", options = ["SMA", "EMA", "SMMA (RMA)", "WMA", "VWMA"])
+length = input.int(100, "Length")
+source = input.source(hl2, "Source")
+
+// 信号设置
+signal_enabled = input.bool(true, "显示信号")
+osc_len = input.int(15, "信号计算周期")
+
+// K线显示设置
+use_custom_candle = input.bool(true, "使用自定义K线")
+
+// 颜色设置
+bull_color = input.color(#02f9e4, "多头颜色")
+bear_color = input.color(color.orange, "空头颜色")
+
+// === 均线函数 ===
+ma(source, length, MAtype) =>
+    switch MAtype
+        "SMA" => ta.sma(source, length)
+        "EMA" => ta.ema(source, length)
+        "SMMA (RMA)" => ta.rma(source, length)
+        "WMA" => ta.wma(source, length)
+        "VWMA" => ta.vwma(source, length)
+
+// === 主计算逻辑 ===
+MA = ma(source, length, type_ma)
+trend_color = source >= MA ? bull_color : bear_color
+
+diff = source - MA
+momentum = ta.change(diff, osc_len)
+
+// === 信号逻辑 ===
+bull_signal = signal_enabled and ta.crossover(source, MA) and momentum > 0
+bear_signal = signal_enabled and ta.crossunder(source, MA) and momentum < 0
+
+// === 绘图：均线与信号 ===
+plot(MA, "移动平均", color=trend_color, linewidth = 2)
+plot(MA, "MA背景", color=color.new(trend_color, 85), linewidth = 6)
+
+plotshape(bull_signal, "买入信号", shape.triangleup, location.belowbar, bull_color, size = size.small)
+plotshape(bear_signal, "卖出信号", shape.triangledown, location.abovebar, bear_color, size = size.small)
+
+ 
+ 
+
+
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙐𝙎𝙀𝙍 𝙄𝙉𝙋𝙐𝙏𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+int   lookbackPeriod = input.int(20, "Lookback Period", minval=1, group = "Settings")
+int   vol_len        = input.int(2, "Delta Volume Filter Length", tooltip = "Higher input, will filter low volume boxes"
+                                                                                                   , group = "Settings")
+float box_withd      = input.float(1, "Adjust Box Width", maxval = 1000, minval = 0, step = 0.1)
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙄𝙉𝘿𝙄𝘾𝘼𝙏𝙊𝙍 𝘾𝘼𝙇𝘾𝙐𝙇𝘼𝙏𝙄𝙊𝙉𝙎
+// ---------------------------------------------------------------------------------------------------------------------{
+// Delta Volume Function
+upAndDownVolume() =>
+    posVol = 0.0
+    negVol = 0.0
+    
+    var isBuyVolume = true    
+
+    switch
+        close > open   => isBuyVolume := true
+        close < open   => isBuyVolume := false
+
+    if isBuyVolume
+        posVol += volume
+    else
+        negVol -= volume
+
+    posVol + negVol
+
+
+// Function to identify support and resistance boxes
+calcSupportResistance(src, lookbackPeriod) =>
+    // Volume
+    Vol    = upAndDownVolume()
+    vol_hi = ta.highest(Vol/2.5, vol_len)
+    vol_lo = ta.lowest(Vol/2.5, vol_len)
+
+    var float supportLevel      = na
+    var float supportLevel_1    = na    
+    var float resistanceLevel   = na
+    var float resistanceLevel_1 = na    
+    var box   sup               = na
+    var box   res               = na
+    var color res_color         = na
+    var color sup_color         = na    
+    var float multi             = na
+
+    var bool  brekout_res       = na
+    var bool  brekout_sup       = na
+    var bool  res_holds         = na
+    var bool  sup_holds         = na
+
+    // Find pivot points
+    pivotHigh = ta.pivothigh(src, lookbackPeriod, lookbackPeriod)
+    pivotLow  = ta.pivotlow (src, lookbackPeriod, lookbackPeriod)
+    // Box width
+    atr       = ta.atr(200)
+    withd     = atr * box_withd
+
+    // Find support levels with Positive Volume
+    if (not na(pivotLow)) and Vol > vol_hi 
+
+        supportLevel   := pivotLow
+        supportLevel_1 := supportLevel-withd       
+
+        topLeft         = chart.point.from_index(bar_index-lookbackPeriod, supportLevel)
+        bottomRight     = chart.point.from_index(bar_index, supportLevel_1)
+
+        sup_color      := color.from_gradient(Vol, 0, ta.highest(Vol, 25), color(na), color.new(color.green, 30))
+
+        sup := box.new(
+                       top_left     = topLeft, 
+                       bottom_right = bottomRight, 
+                       border_color = color.green, 
+                       border_width = 1, 
+                       bgcolor      = sup_color, 
+                       text         = "Vol: "+str.tostring(math.round(Vol,2)), 
+                       text_color   = chart.fg_color, 
+                       text_size    = size.small
+                       ) 
+
+
+    // Find resistance levels with Negative Volume
+    if (not na(pivotHigh)) and Vol < vol_lo
+   
+        resistanceLevel   := pivotHigh
+        resistanceLevel_1 := resistanceLevel+withd
+
+        topLeft            = chart.point.from_index(bar_index-lookbackPeriod, resistanceLevel)
+        bottomRight        = chart.point.from_index(bar_index, resistanceLevel_1)
+
+        res_color         := color.from_gradient(Vol, ta.lowest(Vol, 25), 0, color.new(color.red, 30), color(na))
+
+        res := box.new(
+                       top_left     = topLeft, 
+                       bottom_right = bottomRight, 
+                       border_color = color.red, 
+                       border_width = 1, 
+                       bgcolor      = res_color, 
+                       text         = "Vol: "+str.tostring(math.round(Vol,2)), 
+                       text_color   = chart.fg_color, 
+                       text_size    = size.small
+                       ) 
+
+    // Adaptive Box Len
+    sup.set_right(bar_index+1)
+    res.set_right(bar_index+1)
+
+    // Break of support or resistance conditions
+    brekout_res := ta.crossover(low, resistanceLevel_1)
+    res_holds   := ta.crossunder(high, resistanceLevel)
+
+    sup_holds   := ta.crossover(low, supportLevel)
+    brekout_sup := ta.crossunder(high, supportLevel_1)
+
+    // Change Color of Support to red if it was break, change color of resistance to green if it was break
+    if brekout_sup
+        sup.set_bgcolor(color.new(color.red, 80))
+        sup.set_border_color(color.red)
+        sup.set_border_style(line.style_dashed)
+
+    if sup_holds
+        sup.set_bgcolor(sup_color)
+        sup.set_border_color(color.green)
+        sup.set_border_style(line.style_solid)
+
+    if brekout_res
+        res.set_bgcolor(color.new(color.green, 80))
+        res.set_border_color(color.new(color.green, 0))
+        res.set_border_style(line.style_dashed)
+
+    if res_holds
+        res.set_bgcolor(res_color)
+        res.set_border_color(color.new(color.red, 0))
+        res.set_border_style(line.style_solid)
+
+    [supportLevel, resistanceLevel, brekout_res, res_holds, sup_holds, brekout_sup]
+
+
+// Calculate support and resistance levels and their breakouts
+[supportLevel,
+         resistanceLevel, 
+             brekout_res, 
+                 res_holds, 
+                     sup_holds, 
+                         brekout_sup] = calcSupportResistance(close, lookbackPeriod)
+
+
+// Check if Resistance become Support or Support Become Resistance
+var bool res_is_sup = na
+var bool sup_is_res = na
+
+switch
+    brekout_res => res_is_sup := true
+    res_holds   => res_is_sup := false
+
+switch
+    brekout_sup => sup_is_res := true
+    sup_holds   => sup_is_res := false
+
+
+// ---------------------------------------------------------------------------------------------------------------------}
+// 𝙑𝙄𝙎𝙐𝘼𝙇𝙄𝙕𝘼𝙏𝙄𝙊𝙉
+// ---------------------------------------------------------------------------------------------------------------------{
+// Plot Res and Sup breakouts and holds 
+plotchar(res_holds, "Resistance Holds", "◆", 
+             color = #e92929,   size = size.tiny, location = location.abovebar, offset = -1)
+plotchar(sup_holds, "Support Holds",    "◆", 
+             color = #20ca26, size = size.tiny, location = location.belowbar, offset = -1)
+
+plotchar(brekout_res and res_is_sup[1], "Resistance as Support Holds", "◆", 
+             color = #20ca26, size = size.tiny, location = location.belowbar, offset = -1)
+plotchar(brekout_sup and sup_is_res[1], "Support as Resistance Holds", "◆", 
+             color = #e92929,   size = size.tiny, location = location.abovebar, offset = -1)
+
+// Break Out Labels
+// if brekout_sup and not sup_is_res[1]
+//     label.new(
+//               bar_index[1], supportLevel[1], 
+//               text       = "Break Sup", 
+//               style      = label.style_label_down, 
+//               color      = #7e1e1e, 
+//               textcolor  = chart.fg_color, 
+//               size       = size.small
+//               )
+
+// if brekout_res and not res_is_sup[1]
+//     label.new(
+//               bar_index[1], resistanceLevel[1], 
+//               text       = "Break Res", 
+//               style      = label.style_label_up, 
+//               color      = #2b6d2d, 
+//               textcolor  = chart.fg_color, 
+//               size       = size.small
+//               )
+ 
+
+// ===== 参数设置 =====
+moveBar = input.int(0, "偏移量调整")
+x20 = input.int(20, "20周期偏移") + moveBar
+x60 = input.int(60, "60周期偏移") + moveBar
+x120 = input.int(120, "120周期偏移") + moveBar
+
+maPeriod1 = input.int(20, "短期均线周期")
+maPeriod2 = input.int(60, "中期均线周期")
+maPeriod3 = input.int(120, "长期均线周期")
+densityWindow = input.int(5, "密集检测窗口")
+crossThreshold = input.int(3, "交叉阈值")
+bullRatio = input.float(60.0, "看多比例阈值(%)", step=0.1)
+adhesionThreshold = input.float(0.5, "均线粘合阈值", step=0.1)
+
+// 新增参数
+resonanceWindow = input.int(50, "共振窗口(K线数)", minval=1, group="共振设置")
+
+// ===== 均线计算 =====
+sma20 = ta.sma(close, maPeriod1)
+sma60 = ta.sma(close, maPeriod2)
+sma120 = ta.sma(close, maPeriod3)
+ema20 = ta.ema(close, 20)
+ema60 = ta.ema(close, 60)
+ema120 = ta.ema(close, 120)
+
+// ===== 交叉检测函数 =====
+detectCross(ma1, ma2) =>
+    crossUp = ta.crossover(ma1, ma2)
+    crossDown = ta.crossunder(ma1, ma2)
+    [crossUp, crossDown]
+
+// ===== 三组均线交叉检测 =====
+[crossUp1, crossDown1] = detectCross(sma20, sma60)
+[crossUp2, crossDown2] = detectCross(sma60, sma120)
+[crossUp3, crossDown3] = detectCross(sma20, sma120)
+
+// ===== 交叉事件统计 =====
+var int totalCross = 0
+var int bullishCross = 0
+var int bearishCross = 0
+
+totalCross := (crossUp1 or crossUp2 or crossUp3 or crossDown1 or crossDown2 or crossDown3) ? nz(totalCross[1]) + 1 : nz(totalCross[1])
+bullishCross := (crossUp1 or crossUp2 or crossUp3) ? nz(bullishCross[1]) + 1 : nz(bullishCross[1])
+bearishCross := (crossDown1 or crossDown2 or crossDown3) ? nz(bearishCross[1]) + 1 : nz(bearishCross[1])
+
+// ===== 密集区域检测 =====
+var int[] crossHistory = array.new_int(0)
+if barstate.isconfirmed
+    array.unshift(crossHistory, totalCross)
+    if array.size(crossHistory) > densityWindow
+        array.pop(crossHistory)
+    
+// 计算窗口内cross总和
+totalInWindow = 0
+for i = 0 to array.size(crossHistory) - 1
+    totalInWindow += array.get(crossHistory, i)
+    
+isDenseArea = totalInWindow >= crossThreshold
+
+// ===== 新增均线粘合检测 =====
+diff1 = math.abs(sma20 - sma60)
+diff2 = math.abs(sma60 - sma120)
+diff3 = math.abs(sma20 - sma120)
+maxDiff = math.max(diff1, math.max(diff2, diff3))
+
+isAdhesion = maxDiff <= adhesionThreshold
+
+// ===== 多空信号逻辑 =====
+bullRatioCalc = (bullishCross / (bullishCross + bearishCross + 0.0001)) * 100
+bearRatioCalc = (bearishCross / (bullishCross + bearishCross + 0.0001)) * 100
+
+bullishCondition = isDenseArea and (bullRatioCalc >= bullRatio) and close > sma20 and not isAdhesion
+bearishCondition = isDenseArea and (bearRatioCalc >= bullRatio) and close < sma20 and not isAdhesion
+
+// ===== 新增：趋势反转检测 =====
+// 检测K线和MA颜色变化（趋势反转）
+trendTurnBull = source >= MA and source[1] < MA[1]  // 从空头转为多头（颜色从青色变为橙色）
+trendTurnBear = source < MA and source[1] >= MA[1]  // 从多头转为空头（颜色从橙色变为青色）
+
+// 记录趋势反转的bar_index
+var int lastTrendTurnBullBar = -9999
+var int lastTrendTurnBearBar = -9999
+
+if trendTurnBull
+    lastTrendTurnBullBar := bar_index
+
+if trendTurnBear
+    lastTrendTurnBearBar := bar_index
+
+// 计算距离最近一次趋势反转的K线数
+barsSinceTrendTurnBull = bar_index - lastTrendTurnBullBar
+barsSinceTrendTurnBear = bar_index - lastTrendTurnBearBar
+
+// ===== 警报触发 =====
+alertcondition(bullishCondition, title="多头警报", message="均线密集金叉突破！")
+alertcondition(bearishCondition, title="空头警报", message="均线密集死叉破位！")
+
+// ===== 可视化增强 =====
+// EMA 绘制
+plot(ema20, color=color.new(color.black, 50), title="EMA20", linewidth=1)
+plot(ema60, color=color.new(color.blue, 50), title="EMA60", linewidth=1)
+plot(ema120, color=color.new(color.purple, 50), title="EMA120", linewidth=1)
+// // SMA 绘制
+plot(sma20, color=color.black, title="SMA20", linewidth=2)
+plot(sma60, color=color.blue, title="SMA60", linewidth=2)
+plot(sma120, color=color.purple, title="SMA120", linewidth=2)
+// 交叉标记
+plotshape(crossUp1, style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small, text="多")
+plotshape(crossDown1, style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small, text="空")
+
+alertcondition(crossUp1, title="绿色三角多", message="均线密集金叉突破！")
+alertcondition(crossDown1, title="红色三角空", message="均线密集死叉破位！")
+
+// ===== 原始标记系统 =====
+cond = barstate.islast
+bl = low
+// plot(cond ? bl[20] : na, color=#FFC40C, linewidth=5, offset=-x20, style=plot.style_circles, transp=0, title="20周期标记")
+// plot(cond ? bl[60] : na, color=#FFC40C, linewidth=5, offset=-x60, style=plot.style_circles, transp=0, title="60周期标记")
+// plot(cond ? bl[120] : na, color=#FFC40C, linewidth=5, offset=-x120, style=plot.style_circles, transp=0, title="120周期标记")
+
+// 记录 crossUp1 和 crossDown1 触发的 bar_index，初始化为 -9999（表示未触发）
+var int lastCrossUpBar = -9999
+var int lastCrossDownBar = -9999
+
+if crossUp1
+    lastCrossUpBar := bar_index
+
+if crossDown1
+    lastCrossDownBar := bar_index
+
+// 计算距离最近一次警报的K线数
+barsSinceCrossUp = bar_index - lastCrossUpBar
+barsSinceCrossDown = bar_index - lastCrossDownBar
+
+resonanceBars = input.int(15, title="Resonance Bars Window", minval=1)
+
+// 定义触发共振做多条件：在crossUp1后 resonanceBars 根K线内出现 brekout_res 信号
+resonanceLongCondition = (barsSinceCrossUp > 0 and barsSinceCrossUp <= resonanceBars) and (brekout_res and not res_is_sup[1])
+
+// 定义触发共振做空条件：在crossDown1后 resonanceBars 根K线内出现 brekout_sup 信号
+resonanceShortCondition = (barsSinceCrossDown > 0 and barsSinceCrossDown <= resonanceBars) and (brekout_sup and not sup_is_res[1])
+
+// 创建共振警报
+alertcondition(resonanceLongCondition, title="2层共振做多", message="2层共振做多")
+alertcondition(resonanceShortCondition, title="2层共振做空", message="2层共振做空")
+
+if resonanceLongCondition
+    label.new(bar_index, high, text="UP", color=color.new(#07f60f, 0), style=label.style_label_up, size=size.small)
+
+if resonanceShortCondition
+    label.new(bar_index, low, text="DOWN", color=color.new(#f80505, 0), style=label.style_label_down, size=size.small)
+
+// ===== 新增：3层共振信号 =====
+
+// 3层共振做多条件：
+// 1. 趋势反转为多（K线和SMA颜色变为橙色）
+// 2. 在反转后10个K线内出现均线密集做多信号
+// 3. 在反转后10个K线内出现做多突破确认信号
+threeLayerResonanceLong = (barsSinceTrendTurnBull > 0 and barsSinceTrendTurnBull <= resonanceWindow) and resonanceLongCondition
+
+// 3层共振做空条件：
+// 1. 趋势反转为空（K线和SMA颜色变为青色）
+// 2. 在反转后10个K线内出现均线密集做空信号
+// 3. 在反转后10个K线内出现做空突破确认信号
+threeLayerResonanceShort = (barsSinceTrendTurnBear > 0 and barsSinceTrendTurnBear <= resonanceWindow) and resonanceShortCondition
+
+// 创建3层共振警报
+alertcondition(threeLayerResonanceLong, title="3层共振做多", message="3层共振做多信号触发！趋势反转+均线密集+突破确认")
+alertcondition(threeLayerResonanceShort, title="3层共振做空", message="3层共振做空信号触发！趋势反转+均线密集+突破确认")
+
+// 也可以用label做辅助标记（可选）
+// if resonanceLongCondition
+//     label.new(bar_index, high, text="3层多", color=color.new(#07f60f, 0), style=label.style_label_up, size=size.small)
+
+// if resonanceShortCondition
+//     label.new(bar_index, low, text="3层空", color=color.new(#f80505, 0), style=label.style_label_down, size=size.small)
+
+// 3层共振标记
+if threeLayerResonanceLong
+    label.new(bar_index, high, text="3层多", color=color.new(#07f60f, 0), style=label.style_label_up, size=size.small)
+
+if threeLayerResonanceShort
+    label.new(bar_index, low, text="3层空", color=color.new(#f80505, 0), style=label.style_label_down, size=size.small)
+
+// 调试信息（可选，可以注释掉）
+// plotshape(trendTurnBull, style=shape.circle, location=location.belowbar, color=color.orange, size=size.tiny, title="趋势转多")
+// plotshape(trendTurnBear, style=shape.circle, location=location.abovebar, color=color.aqua, size=size.tiny, title="趋势转空")

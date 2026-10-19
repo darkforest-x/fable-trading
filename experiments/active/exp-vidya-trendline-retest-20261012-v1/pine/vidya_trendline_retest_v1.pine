@@ -1,0 +1,182 @@
+// VIDYA trend-line retest strategy v1 (fable-trading exp-vidya-trendline-retest-20261012-v1)
+// Indicator: Volumatic Variable Index Dynamic Average [BigBeluga], CC BY-NC-SA 4.0, replicated line by line.
+// Rules (same as yoyo/monitor/vidya_retest.py): trade only the retest of the plotted trend line.
+//   Long: uptrend, low reaches the line (within tolerance x ATR14) and the close holds on/above it,
+//   previous bar clear of the line; a green touch bar confirms, a red one waits for the next green
+//   close that holds; per-trend volume delta >= threshold at the confirming close. Short mirrors.
+//   Stop: beyond the touch/confirm extremes by k x ATR(14). Exit: rr target or close after trend flip.
+// Orders fill at the next bar's open. Commission 0.1%/side = 20bp round trip, as in the backtest.
+// Differences vs the Python engine: the first bar's target uses the signal close as the entry
+// estimate and is corrected to the real fill from the next bar; TradingView's intrabar order of
+// high/low may differ from the engine's stop-first rule. Expect small trade-level differences.
+//@version=6
+strategy("VIDYA Trendline Retest v1", overlay = true, initial_capital = 10000, pyramiding = 0,
+     commission_type = strategy.commission.percent, commission_value = 0.1, slippage = 0,
+     process_orders_on_close = false, max_lines_count = 500, max_labels_count = 500)
+
+// ---- inputs
+int   vidya_length   = input.int(10, "VIDYA Length", minval = 1)
+int   vidya_momentum = input.int(20, "VIDYA Momentum", minval = 1)
+float band_distance  = input.float(2.0, "Distance factor for upper/lower bands", step = 0.1)
+float source         = input.source(close, "Source")
+float delta_th       = input.float(50.0, "Delta threshold (%)", minval = 0)
+float k_atr          = input.float(1.0, "Stop buffer x ATR(14)", step = 0.1)
+string exit_mode     = input.string("2R", "Exit", options = ["2R", "Trend flip"])
+float rr             = input.float(2.0, "Reward : risk (2R mode)", step = 0.1)
+float tol_atr        = input.float(0.0, "Touch tolerance x ATR(14)", step = 0.05)
+float risk_pct       = input.float(1.0, "Risk per trade (% equity)", step = 0.1)
+color up_color       = input.color(#17dfad, "Up", group = "Colors")
+color dn_color       = input.color(#dd326b, "Down", group = "Colors")
+
+// ---- indicator (from the open-source script)
+vidya_calc(float src, int len, int mom) =>
+    float momentum = ta.change(src)
+    float sum_pos = math.sum(momentum >= 0 ? momentum : 0.0, mom)
+    float sum_neg = math.sum(momentum >= 0 ? 0.0 : -momentum, mom)
+    float abs_cmo = math.abs(100 * (sum_pos - sum_neg) / (sum_pos + sum_neg))
+    float alpha = 2.0 / (len + 1)
+    var float v = 0.0
+    v := alpha * abs_cmo / 100 * src + (1 - alpha * abs_cmo / 100) * nz(v[1])
+    ta.sma(v, 15)
+
+float atr200 = ta.atr(200)
+float vidya_value = vidya_calc(source, vidya_length, vidya_momentum)
+float upper_band = vidya_value + atr200 * band_distance
+float lower_band = vidya_value - atr200 * band_distance
+var bool is_trend_up = false
+if ta.crossover(source, upper_band)
+    is_trend_up := true
+if ta.crossunder(source, lower_band)
+    is_trend_up := false
+float trend_line = is_trend_up ? lower_band : upper_band
+if ta.change(is_trend_up)
+    trend_line := na
+
+bool trend_cross_up = not is_trend_up[1] and is_trend_up
+bool trend_cross_down = not is_trend_up and is_trend_up[1]
+var float up_volume = na
+var float down_volume = na
+if ta.change(trend_cross_up) or ta.change(trend_cross_down)
+    up_volume := 0
+    down_volume := 0
+else
+    up_volume := up_volume + (close > open ? volume : 0)
+    down_volume := down_volume + (close < open ? volume : 0)
+float avg_volume = (up_volume + down_volume) / 2
+float delta_pct = nz((up_volume - down_volume) / avg_volume * 100, 0)
+
+// ---- retest detection at the bar close
+float atr14 = ta.atr(14)
+var bool pend_long = false
+var float pend_low = na
+var bool pend_short = false
+var float pend_high = na
+bool long_signal = false
+bool short_signal = false
+float long_stop = na
+float short_stop = na
+
+if na(trend_line)
+    pend_long := false
+    pend_short := false
+else
+    float band = tol_atr * atr14
+    float prev_band = tol_atr * nz(atr14[1])
+    if is_trend_up
+        pend_short := false
+        bool touch_l = low <= trend_line + band and close >= trend_line
+        bool clear_l = na(trend_line[1]) or low[1] > trend_line[1] + prev_band
+        if pend_long
+            if close > open and close >= trend_line
+                long_signal := true
+                long_stop := math.min(low, pend_low) - k_atr * atr14
+            pend_long := false
+        else if touch_l and clear_l
+            if close > open
+                long_signal := true
+                long_stop := low - k_atr * atr14
+            else
+                pend_long := true
+                pend_low := low
+    else
+        pend_long := false
+        bool touch_s = high >= trend_line - band and close <= trend_line
+        bool clear_s = na(trend_line[1]) or high[1] < trend_line[1] - prev_band
+        if pend_short
+            if close < open and close <= trend_line
+                short_signal := true
+                short_stop := math.max(high, pend_high) + k_atr * atr14
+            pend_short := false
+        else if touch_s and clear_s
+            if close < open
+                short_signal := true
+                short_stop := high + k_atr * atr14
+            else
+                pend_short := true
+                pend_high := high
+
+bool long_ok = long_signal and delta_pct >= delta_th
+bool short_ok = short_signal and delta_pct <= -delta_th
+
+// ---- orders (decided at the close, filled at the next open)
+var float active_stop = na
+var bool target_fixed = false
+bool flat = strategy.position_size == 0
+
+// management first, so an exit and a new signal on the same bar behave like the engine
+if exit_mode == "Trend flip"
+    if strategy.position_size > 0 and not is_trend_up
+        strategy.close("L", comment = "trend flip", immediately = true)
+    if strategy.position_size < 0 and is_trend_up
+        strategy.close("S", comment = "trend flip", immediately = true)
+flat := strategy.position_size == 0 or (exit_mode == "Trend flip" and ((strategy.position_size > 0 and not is_trend_up) or (strategy.position_size < 0 and is_trend_up)))
+
+if flat and long_ok
+    float risk_est = close - long_stop
+    if risk_est > 0
+        float qty = strategy.equity * risk_pct / 100 / risk_est
+        strategy.entry("L", strategy.long, qty = qty)
+        active_stop := long_stop
+        target_fixed := false
+        if exit_mode == "2R"
+            strategy.exit("XL", "L", stop = long_stop, limit = close + rr * risk_est)
+        else
+            strategy.exit("XL", "L", stop = long_stop)
+else if flat and short_ok
+    float risk_est = short_stop - close
+    if risk_est > 0
+        float qty = strategy.equity * risk_pct / 100 / risk_est
+        strategy.entry("S", strategy.short, qty = qty)
+        active_stop := short_stop
+        target_fixed := false
+        if exit_mode == "2R"
+            strategy.exit("XS", "S", stop = short_stop, limit = close - rr * risk_est)
+        else
+            strategy.exit("XS", "S", stop = short_stop)
+
+// once filled, move the 2R target to the real fill price (entry + rr x (entry - stop))
+if exit_mode == "2R" and not target_fixed and strategy.position_size != 0 and not na(active_stop)
+    float fill = strategy.position_avg_price
+    if strategy.position_size > 0
+        strategy.exit("XL", "L", stop = active_stop, limit = fill + rr * (fill - active_stop))
+    else
+        strategy.exit("XS", "S", stop = active_stop, limit = fill - rr * (active_stop - fill))
+    target_fixed := true
+
+// ---- display
+plot(trend_line, "VIDYA trend line", color = is_trend_up ? up_color : dn_color, linewidth = 2, style = plot.style_linebr)
+plotshape(long_ok, "Long retest", shape.triangleup, location.belowbar, up_color, size = size.small)
+plotshape(short_ok, "Short retest", shape.triangledown, location.abovebar, dn_color, size = size.small)
+plotshape(long_signal and not long_ok, "Long retest, delta too low", shape.circle, location.belowbar, color.new(color.gray, 40), size = size.tiny)
+plotshape(short_signal and not short_ok, "Short retest, delta too low", shape.circle, location.abovebar, color.new(color.gray, 40), size = size.tiny)
+plot(strategy.position_size != 0 ? active_stop : na, "Stop", color = color.new(dn_color, 30), style = plot.style_linebr)
+
+var table info = table.new(position.top_right, 2, 2, bgcolor = color.new(color.black, 80))
+if barstate.islast
+    table.cell(info, 0, 0, "Delta", text_color = color.white)
+    table.cell(info, 1, 0, str.tostring(delta_pct, "#.#") + "%", text_color = delta_pct >= 0 ? up_color : dn_color)
+    table.cell(info, 0, 1, "Trend", text_color = color.white)
+    table.cell(info, 1, 1, is_trend_up ? "up" : "down", text_color = is_trend_up ? up_color : dn_color)
+
+alertcondition(long_ok, "VIDYA long retest", "{{ticker}} VIDYA trend-line long retest, delta >= threshold")
+alertcondition(short_ok, "VIDYA short retest", "{{ticker}} VIDYA trend-line short retest, delta <= -threshold")

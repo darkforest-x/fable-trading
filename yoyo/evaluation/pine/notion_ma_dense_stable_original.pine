@@ -1,0 +1,92 @@
+//@version=4
+study(title="增强版均线交叉警报系统 - 稳定版", shorttitle="MACD Pro", overlay=true)
+
+// ===== 参数设置 =====
+moveBar = input(0, "偏移量调整")
+x20 = input(20) + moveBar
+x60 = input(60) + moveBar
+x120 = input(120) + moveBar
+
+maPeriod1 = input(20, "短期均线周期")
+maPeriod2 = input(60, "中期均线周期")
+maPeriod3 = input(120, "长期均线周期")
+densityWindow = input(5, "密集检测窗口")
+crossThreshold = input(3, "交叉阈值")
+bullRatio = input(60.0, "看多比例阈值(%)", step=0.1)
+
+// ===== 均线计算 =====
+sma20 = sma(close, maPeriod1)
+sma60 = sma(close, maPeriod2)
+sma120 = sma(close, maPeriod3)
+
+ema20 = ema(close, 20)
+ema60 = ema(close, 60)
+ema120 = ema(close, 120)
+
+// ===== 交叉检测函数 =====
+detectCross(ma1, ma2) =>
+    crossUp = crossover(ma1, ma2)
+    crossDown = crossunder(ma1, ma2)
+    [crossUp, crossDown]
+
+// ===== 三组均线交叉检测 =====
+[crossUp1, crossDown1] = detectCross(sma20, sma60)
+[crossUp2, crossDown2] = detectCross(sma60, sma120)
+[crossUp3, crossDown3] = detectCross(sma20, sma120)
+
+isBullCross = crossUp1 or crossUp2 or crossUp3
+isBearCross = crossDown1 or crossDown2 or crossDown3
+isAnyCross = isBullCross or isBearCross
+
+// ===== 最近N根交叉记录统计（用 array）=====
+var int[] bullList = array.new_int()
+var int[] bearList = array.new_int()
+
+if barstate.isconfirmed
+    array.unshift(bullList, isBullCross ? 1 : 0)
+    array.unshift(bearList, isBearCross ? 1 : 0)
+    if array.size(bullList) > densityWindow
+        array.pop(bullList)
+        array.pop(bearList)
+
+bullCount = array.sum(bullList)
+bearCount = array.sum(bearList)
+totalCount = bullCount + bearCount
+
+bullishRatio = (bullCount / (totalCount + 0.0001)) * 100
+isDenseArea = totalCount >= crossThreshold
+
+// ===== 警报逻辑 =====
+bullishCondition = isDenseArea and bullishRatio >= bullRatio and close > sma20
+bearishCondition = isDenseArea and bullishRatio <= (100 - bullRatio) and close < sma20
+
+// ===== 警报触发 =====
+alertcondition(bullishCondition, "多头警报", "📈 均线密集金叉突破！")
+alertcondition(bearishCondition, "空头警报", "📉 均线密集死叉破位！")
+
+// ===== 可视化增强 =====
+plot(ema20, color=color.new(color.black, 50), title="EMA20", linewidth=1)
+plot(ema60, color=color.new(color.blue, 50), title="EMA60", linewidth=1)
+plot(ema120, color=color.new(color.purple, 50), title="EMA120", linewidth=1)
+
+plot(sma20, color=color.black, title="SMA20", linewidth=2)
+plot(sma60, color=color.blue, title="SMA60", linewidth=2)
+plot(sma120, color=color.purple, title="SMA120", linewidth=2)
+
+// 交叉标记
+plotshape(crossUp1, style=shape.triangleup, location=location.belowbar, color=color.green, size=size.small, text="多")
+plotshape(crossDown1, style=shape.triangledown, location=location.abovebar, color=color.red, size=size.small, text="空")
+
+// 多空触发信号标记
+plotshape(bullishCondition, title="多头信号", location=location.belowbar, color=color.lime, style=shape.labelup, text="📈")
+plotshape(bearishCondition, title="空头信号", location=location.abovebar, color=color.orange, style=shape.labeldown, text="📉")
+
+// 背景标记
+bgcolor(isDenseArea ? color.new(color.blue, 90) : na, title="密集区域")
+
+// 原始标记系统
+cond = barstate.islast
+bl = low
+plot(cond ? bl[20] : na, color=#FFC40C, linewidth=5, offset=-x20, style=plot.style_circles, transp=0, title="20周期标记")
+plot(cond ? bl[60] : na, color=#FFC40C, linewidth=5, offset=-x60, style=plot.style_circles, transp=0, title="60周期标记")
+plot(cond ? bl[120] : na, color=#FFC40C, linewidth=5, offset=-x120, style=plot.style_circles, transp=0, title="120周期标记")

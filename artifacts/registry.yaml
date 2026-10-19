@@ -74,6 +74,20 @@ artifacts:
     sha256: c62d9a5ffdd63951d7394c541f2feff621e1f31f492e8d9888c052004657e4b0
     size_bytes: 1042
     notes: Forward-only execution observation configuration; no profitability claim.
+  - artifact_id: exp-spike-v13-15m-direction-20261016-v1-receipt
+    artifact_type: manifest
+    role: Frozen 15m direction admission replay, matched controls and provenance
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0569714f1b9d04683eb42ac4e6f0c9c84dd41a9c
+    source_path: experiments/active/exp-spike-v13-15m-direction-20261016-v1/results_v1/receipt.json
+    sha256: 99afcc313b4f141aa0b83f49d43a7a5c3d782409f18aa1983fb08ce9ae2b2f50
+    size_bytes: 209334
+    storage_uri: repo://experiments/active/exp-spike-v13-15m-direction-20261016-v1/results_v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Complete historical diagnostic; parent parity and 638 stream hashes verified. Receipt contains
+      result file hashes. Historical-date veto canceled by owner; not a promotion artifact.
   - artifact_id: spike-v128-retest-symbol-detail-20260925-v2
     artifact_type: manifest
     role: per_symbol_baseline_retest_comparison_and_trade_ledger
@@ -32439,6 +32453,49 @@ artifacts:
     production_eligible: false
     notes: Pins the config, input, source, summary and compressed trade-ledger hashes for the ETH 15m early-exit study.
       Research only; receipt records exact data window and replay validation.
+
+  - artifact_id: market-sync-strict-exits-20261015-v6-receipt
+    artifact_type: manifest
+    role: strict_market_menu_cohort_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: e54cffc97edc79fbb00c202e199560e40a68e907
+    source_path: experiments/active/exp-market-sync-shock-20261015-v6/results_v5/receipt.json
+    sha256: be56a3301dec57febc4e34858e3b2b7feba37f4f0810c3f828ada35134d6a080
+    size_bytes: 638
+    storage_uri: repo://experiments/active/exp-market-sync-shock-20261015-v6/results_v5/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Post-hoc scope reconciliation using unchanged v5 exits, 0.2% cost and matched controls. Does not establish live eligibility.
+      The holdout restriction was canceled by owner; enum retained for schema only.
+  - artifact_id: market-sync-strict-exits-20261015-v6-summary
+    artifact_type: dataset
+    role: strict_market_menu_cohort_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: e54cffc97edc79fbb00c202e199560e40a68e907
+    source_path: experiments/active/exp-market-sync-shock-20261015-v6/results_v5/summary.csv
+    sha256: 3d0a931935ac79b4bb4ec97424a15933ad510bf1e3ccd2a9c58f558ae52c0bdc
+    size_bytes: 42240
+    storage_uri: repo://experiments/active/exp-market-sync-shock-20261015-v6/results_v5/summary.csv
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Post-hoc scope reconciliation using unchanged v5 exits, 0.2% cost and matched controls. Does not establish live eligibility.
+      The holdout restriction was canceled by owner; enum retained for schema only.
+  - artifact_id: market-sync-strict-exits-20261015-v6-trades
+    artifact_type: dataset
+    role: strict_market_menu_cohort_exit_comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: e54cffc97edc79fbb00c202e199560e40a68e907
+    source_path: experiments/active/exp-market-sync-shock-20261015-v6/results_v5/trades.csv.gz
+    sha256: 4210b8bde118b6677d7523c863d32785d42183635445496f4445e4cc515ede5a
+    size_bytes: 552559
+    storage_uri: local://experiments/active/exp-market-sync-shock-20261015-v6/results_v5/trades.csv.gz
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Post-hoc scope reconciliation using unchanged v5 exits, 0.2% cost and matched controls. Does not establish live eligibility.
+      The holdout restriction was canceled by owner; enum retained for schema only.
 
   - artifact_id: btc-key-level-reactions-20261016-receipt
     artifact_type: manifest

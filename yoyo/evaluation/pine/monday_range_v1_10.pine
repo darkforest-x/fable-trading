@@ -1,0 +1,503 @@
+//@version=6
+// Task 51, v1.10. Display only; no signals, alerts or orders.
+// MA identity: dual_ma_v1_1.pine, close-based SMA/EMA 20/60/120.
+// Historical MA cutoff is the visible right bar OPEN; live cutoff is now.
+// This excludes an unfinished replay bar without assuming its close is known.
+// Samples are
+// closed source bars only. LTF requests retain every returned intrabar.
+// Monday archive is calculated in an independent 1H context, using the same
+// IANA timezone at every chart resolution. Incomplete Mondays are not drawn.
+// NY is a local default, not a verified claim about RektProof's timezone.
+// Sources: TradingView Pine v6 Other timeframes and data / Lines and boxes.
+indicator("周一高低点区间 · v1.10", shorttitle="Monday Range v1.10", overlay=true,
+     behind_chart=false, max_lines_count=500, max_labels_count=500,
+     max_polylines_count=30, max_boxes_count=8, max_bars_back=500)
+
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+color weekendCol = input.color(#B2B5BE, "周六、周日K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+// Per kept week: 2 rays + up to 5 history Fib lines; plus 11 latest-Fib lines,
+// all inside max_lines_count=500 (labels follow the same count).
+int keepWeeks = input.int(104, "高低点保留周数", minval=1, maxval=240, group=rayGroup)
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示最新周价格标签", group=rayGroup)
+bool showHistoryLabels = input.bool(false, "显示历史周价格标签（密集视图建议关闭）", group=rayGroup)
+
+string fibGroup = "斐波那契（最新一周的周一区间）"
+bool showFib = input.bool(true, "显示斐波那契", group=fibGroup)
+string fibLevelsStr = input.string("0.5, 0.618, 0.705, 1.13, 1.27, 1.618",
+     "比例（逗号分隔，上下两个方向都画）", group=fibGroup)
+color fibCol = input.color(#787B86A6, "线颜色", group=fibGroup)
+color fibTextCol = input.color(#787B86, "文字颜色", group=fibGroup)
+string fibSizeOpt = input.string("中", "文字大小", options=["小", "中", "大"], group=fibGroup)
+
+string histFibGroup = "斐波那契（历史周，只画周一到周五）"
+int keepFibWeeks = input.int(12, "历史 Fib 保留周数（预算不足自动缩减）", minval=0, maxval=80, group=histFibGroup)
+bool showHistFib = input.bool(true, "显示历史周斐波那契", group=histFibGroup)
+string histFibLevelsStr = input.string("0.5, 0.618, 0.705",
+     "比例（逗号分隔，上下两个方向都画）", group=histFibGroup)
+color histFibCol = input.color(#787B8659, "线颜色", group=histFibGroup)
+color histFibTextCol = input.color(#787B86A6, "文字颜色", group=histFibGroup)
+
+string miniGroup = "连续均线小图"
+bool showMini = input.bool(true, "显示均线小图", group=miniGroup)
+bool mini5 = input.bool(true, "5m", inline="panels", group=miniGroup)
+bool mini15 = input.bool(true, "15m", inline="panels", group=miniGroup)
+bool mini60 = input.bool(true, "1H", inline="panels", group=miniGroup)
+bool mini240 = input.bool(true, "4H", inline="panels", group=miniGroup)
+int samples = input.int(40, "已收盘样本数", minval=20, maxval=120, group=miniGroup)
+string miniSize = input.string("中", "小图大小", options=["小", "中", "大"], group=miniGroup)
+float offsetX = input.float(0, "水平偏移（可见宽度 %，正数向左）", minval=-20, maxval=60, group=miniGroup)
+float offsetY = input.float(0, "垂直偏移（可见价格范围 %，正数向下）", minval=-20, maxval=60, group=miniGroup)
+bool showInfo = input.bool(true, "显示时区与历史覆盖", group=miniGroup)
+string diagGroup = "核对（默认关闭）"
+bool dumpSamples = input.bool(false, "输出样本到 Pine 日志", group=diagGroup, display=display.none)
+string inspectTF = input.string("图表", "数据窗口核对周期", options=["图表", "5", "15", "60", "240"], group=diagGroup, display=display.none)
+int inspectAgo = input.int(0, "样本向前偏移（0 为最后一根）", minval=0, maxval=119, group=diagGroup, display=display.none)
+
+if barstate.isfirst and (not chart.is_standard or timeframe.in_seconds() > 86400)
+    runtime.error("请使用标准时间 K 线，周期不超过 1 日。")
+string tz = tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+int hourMs = 3600000
+int mainMs = int(timeframe.in_seconds(timeframe.main_period) * 1000)
+// chart.* visible times refer to the main chart, including inside requests.
+bool liveView = chart.right_visible_bar_time <= timenow and chart.right_visible_bar_time + mainMs > timenow
+int cutoff = liveView ? timenow : chart.right_visible_bar_time
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+string fibSize = fibSizeOpt == "小" ? size.small : fibSizeOpt == "大" ? size.large : size.normal
+int dow = dayofweek(time, tz)
+color candleCol = dow == dayofweek.monday ? mondayCol : dow == dayofweek.saturday or dow == dayofweek.sunday ? weekendCol : baseCol
+barcolor(candleCol, title="K线着色（按开盘所属日期）")
+plotcandle(open, high, low, close, "K线", color=candleCol, wickcolor=candleCol, bordercolor=candleCol, display=display.pane)
+
+// A sample preserves its source close time. Equal prices are never deduplicated.
+type MASample
+    int stamp
+    float s20
+    float e20
+    float s60
+    float e60
+    float s120
+    float e120
+
+maValue() =>
+    MASample.new(time_close, ta.sma(close, 20), ta.ema(close, 20),
+         ta.sma(close, 60), ta.ema(close, 60), ta.sma(close, 120), ta.ema(close, 120))
+
+// Keep all source timestamps near the cutoff but do not transport thousands
+// of old UDTs that cannot enter a 120-sample panel. Extra slots expose gaps.
+maWindowValue() =>
+    MASample sample = maValue()
+    int horizon = int(timeframe.in_seconds() * 1000) * (samples + 120)
+    sample.stamp <= cutoff and sample.stamp >= cutoff - horizon ? sample : na
+
+method addClosed(array<MASample> buf, MASample sample) =>
+    if not na(sample) and sample.stamp <= cutoff and (buf.size() == 0 or sample.stamp > buf.last().stamp)
+        buf.push(sample)
+        if buf.size() > samples
+            buf.shift()
+    buf
+
+// Evaluate all source bars, return the collection only at the end. Panning
+// recalculates the context; accumulation stops at cutoff even on later bars.
+maHistory() =>
+    var array<MASample> buf = array.new<MASample>()
+    MASample sample = maValue()
+    buf.addClosed(sample)
+    bool atCutoff = time <= cutoff and time_close >= cutoff - int(timeframe.in_seconds() * 1000)
+    atCutoff or barstate.islast or barstate.islastconfirmedhistory ? buf : na
+
+collectMA(string tf) =>
+    var array<MASample> buf = array.new<MASample>()
+    float sourceSeconds = timeframe.in_seconds(tf)
+    if sourceSeconds < timeframe.in_seconds(timeframe.main_period)
+        array<MASample> intrabars = request.security_lower_tf(syminfo.tickerid, tf, maWindowValue(), calc_bars_count=100000)
+        for sample in intrabars
+            buf.addClosed(sample)
+    else if sourceSeconds == timeframe.in_seconds(timeframe.main_period)
+        buf.addClosed(maValue())
+    else
+        array<MASample> remote = request.security(syminfo.tickerid, tf, maHistory(), lookahead=barmerge.lookahead_off, calc_bars_count=50000)
+        if not na(remote)
+            buf := remote
+    buf
+
+array<MASample> ma5 = collectMA("5")
+array<MASample> ma15 = collectMA("15")
+array<MASample> ma60 = collectMA("60")
+array<MASample> ma240 = collectMA("240")
+
+// The archive does not depend on the main chart's loaded bar count.
+type MondayWeek
+    int start
+    int finish
+    float hi
+    float lo
+    int hiAt
+    int loAt
+    int hours
+    int lastEnd
+    bool contiguous
+
+// Return a bounded text snapshot across contexts. Returning arrays of UDTs
+// exhausted Pine memory on replay advances even with sparse emission.
+packWeeks(array<MondayWeek> weeks) =>
+    string packed = ""
+    for w in weeks
+        packed += str.tostring(w.start) + "," + str.tostring(w.finish) + "," + str.tostring(w.hi, format.mintick) + "," + str.tostring(w.lo, format.mintick) + "," + str.tostring(w.hiAt) + "," + str.tostring(w.loAt) + "," + str.tostring(w.lastEnd) + "," + (w.contiguous ? "1" : "0") + ";"
+    packed
+
+unpackWeeks(string packed) =>
+    array<MondayWeek> weeks = array.new<MondayWeek>()
+    if not na(packed)
+        for row in str.split(packed, ";")
+            array<string> cells = str.split(row, ",")
+            if cells.size() == 8
+                weeks.push(MondayWeek.new(int(str.tonumber(cells.get(0))), int(str.tonumber(cells.get(1))), str.tonumber(cells.get(2)), str.tonumber(cells.get(3)), int(str.tonumber(cells.get(4))), int(str.tonumber(cells.get(5))), 0, int(str.tonumber(cells.get(6))), cells.get(7) == "1"))
+    weeks
+
+hourlyArchive() =>
+    var array<MondayWeek> weeks = array.new<MondayWeek>()
+    // Exclude unfinished historical HTF bars: their final high/low would leak.
+    if time_close <= cutoff
+        if dayofweek(time, tz) == dayofweek.monday
+            int start = timestamp(tz, year(time, tz), month(time, tz), dayofmonth(time, tz), 0, 0)
+            int finish = timestamp(tz, year(time, tz), month(time, tz), dayofmonth(time, tz) + 1, 0, 0)
+            if weeks.size() == 0 or weeks.last().start != start
+                weeks.push(MondayWeek.new(start, finish, high, low, time, time, 0, start, time == start))
+                if weeks.size() > 241
+                    weeks.shift()
+            MondayWeek w = weeks.last()
+            w.contiguous := w.contiguous and time == w.lastEnd and time_close - time == hourMs
+            w.hours += 1
+            w.lastEnd := time_close
+            if high > w.hi
+                w.hi := high
+                w.hiAt := time
+            if low < w.lo
+                w.lo := low
+                w.loAt := time
+    string result = na
+    // Replay does not reliably flag the requested intrabar as islast.
+    // Emit near the explicit cutoff as well, rather than depending on flags.
+    if (time <= cutoff and time_close >= cutoff - hourMs) or barstate.islast or barstate.islastconfirmedhistory
+        array<MondayWeek> snapshot = weeks.copy()
+        // A live hourly high/low is observable now. Historical unclosed hours
+        // remain excluded, because their final prices are not observable yet.
+        if barstate.isrealtime and time < cutoff and time_close > cutoff and dayofweek(time, tz) == dayofweek.monday
+            int start = timestamp(tz, year(time, tz), month(time, tz), dayofmonth(time, tz), 0, 0)
+            int finish = timestamp(tz, year(time, tz), month(time, tz), dayofmonth(time, tz) + 1, 0, 0)
+            MondayWeek live = snapshot.size() > 0 and snapshot.last().start == start ? snapshot.pop().copy() : MondayWeek.new(start, finish, high, low, time, time, 0, start, time == start)
+            live.contiguous := live.contiguous and live.lastEnd == time
+            if high > live.hi
+                live.hi := high
+                live.hiAt := time
+            if low < live.lo
+                live.lo := low
+                live.loAt := time
+            live.lastEnd := cutoff
+            snapshot.push(live)
+        result := packWeeks(snapshot)
+    result
+
+string returnedArchive = request.security(syminfo.tickerid, "60", hourlyArchive(), lookahead=barmerge.lookahead_off, calc_bars_count=50000)
+var string archive = na
+if not na(returnedArchive)
+    archive := returnedArchive
+// LTF request.security returns the last hourly archive of a higher chart bar.
+// Its expression has already accumulated every hourly bar, including Mondays.
+
+// Current Monday partial hour, from main bars <= 1H only. This never repairs
+// missing complete hours, and is not used for the frozen historical archive.
+var float liveHi = na
+var float liveLo = na
+var int liveStart = na
+var int liveHighAt = na
+var int liveLowAt = na
+var int liveEnd = na
+if mainMs <= hourMs and dow == dayofweek.monday and time < cutoff
+    int start = timestamp(tz, year(time, tz), month(time, tz), dayofmonth(time, tz), 0, 0)
+    if na(liveStart) or liveStart != start
+        liveStart := start
+        liveHi := high
+        liveLo := low
+        liveHighAt := time
+        liveLowAt := time
+    if high > liveHi
+        liveHi := high
+        liveHighAt := time
+    if low < liveLo
+        liveLo := low
+        liveLowAt := time
+    liveEnd := math.min(time_close, cutoff)
+
+ratios(string valueText) =>
+    array<float> result = array.new<float>()
+    for token in str.split(str.replace_all(valueText, " ", ""), ",")
+        float r = str.tonumber(token)
+        if not na(r) and r >= 0 and not result.includes(r)
+            result.push(r)
+    result
+
+ratioCount(array<float> rs) =>
+    int count = 0
+    for r in rs
+        count += r == 0.5 ? 1 : 2
+    count
+
+array<float> latestRatios = ratios(fibLevelsStr)
+array<float> oldRatios = ratios(histFibLevelsStr)
+int latestCount = showFib ? ratioCount(latestRatios) : 0
+int oldCount = showHistFib ? ratioCount(oldRatios) : 0
+if barstate.isfirst and (latestCount > 40 or oldCount > 40)
+    runtime.error("每组比例最多生成 40 条线，请减少比例。")
+int rangeLimit = math.min(keepWeeks, int(math.floor((496 - latestCount) / 2)))
+int fibLimit = oldCount > 0 ? math.max(0, math.min(keepFibWeeks, math.min(rangeLimit - 1, int(math.floor((496 - latestCount - 2 * rangeLimit) / oldCount))))) : 0
+
+var array<line> rangeLines = array.new<line>()
+var array<label> labels = array.new<label>()
+var array<polyline> curves = array.new<polyline>()
+
+putLabel(int x, float y, string caption, color col, string labelSize) =>
+    labels.push(label.new(x, y, caption, xloc=xloc.bar_time, style=label.style_label_left,
+         color=color.new(color.white, 100), textcolor=col, size=labelSize))
+
+drawFib(MondayWeek w, int finish, array<float> rs, bool latest) =>
+    float width = w.hi - w.lo
+    for r in rs
+        for direction = 0 to (r == 0.5 ? 0 : 1)
+            float p = direction == 0 ? w.lo + r * width : w.hi - r * width
+            rangeLines.push(line.new(w.start, p, finish, p, xloc=xloc.bar_time,
+                 extend=latest ? extend.right : extend.none, color=latest ? fibCol : histFibCol))
+            if latest or showHistoryLabels
+                putLabel(latest ? finish + 20 * mainMs : finish, p,
+                     str.tostring(r) + " (" + str.tostring(p, format.mintick) + ")",
+                     latest ? fibTextCol : histFibTextCol, fibSize)
+
+var float windowHigh = na
+var float windowLow = na
+if time >= chart.left_visible_bar_time and time <= chart.right_visible_bar_time
+    windowHigh := na(windowHigh) ? high : math.max(windowHigh, high)
+    windowLow := na(windowLow) ? low : math.min(windowLow, low)
+
+maValues(MASample sample) =>
+    array.from(sample.s20, sample.e20, sample.s60, sample.e60, sample.s120, sample.e120)
+
+drawPanel(array<MASample> buf, string title, int slot, int count) =>
+    float scale = miniSize == "小" ? 0.80 : miniSize == "大" ? 1.20 : 1.0
+    int viewWidth = math.max(chart.right_visible_bar_time - chart.left_visible_bar_time, mainMs * 20)
+    int panelWidth = int(viewWidth * 0.18 * scale)
+    int gutter = int(viewWidth * 0.018)
+    int columns = math.min(count, 2)
+    int right = chart.right_visible_bar_time - int(viewWidth * (0.015 + offsetX / 100))
+    int column = slot % 2
+    int row = int(math.floor(slot / 2))
+    int x1 = right - (columns - column) * panelWidth - (columns - column - 1) * gutter
+    int x2 = x1 + panelWidth
+    float priceSpan = math.max(windowHigh - windowLow, syminfo.mintick * 100)
+    float panelHeight = priceSpan * 0.30 * scale
+    float top = windowHigh - priceSpan * (0.025 + offsetY / 100) - row * (panelHeight + priceSpan * 0.035)
+    float bottom = top - panelHeight
+    // Boxes have a higher z-index than polylines regardless of creation order.
+    // A filled polyline background shares the curves' drawing group instead.
+    array<chart.point> frame = array.from(chart.point.from_time(x1, top), chart.point.from_time(x2, top),
+         chart.point.from_time(x2, bottom), chart.point.from_time(x1, bottom))
+    curves.push(polyline.new(frame, closed=true, xloc=xloc.bar_time,
+         line_color=color.new(color.gray, 55), fill_color=color.new(color.white, 4)))
+    float lo = na
+    float hi = na
+    bool warming = false
+    bool gaps = false
+    int previous = na
+    int expected = title == "5m" ? 300000 : title == "15m" ? 900000 : title == "1H" ? hourMs : hourMs * 4
+    for sample in buf
+        for value in maValues(sample)
+            if na(value)
+                warming := true
+            else
+                lo := na(lo) ? value : math.min(lo, value)
+                hi := na(hi) ? value : math.max(hi, value)
+        gaps := gaps or (not na(previous) and sample.stamp - previous != expected)
+        previous := sample.stamp
+    string state = buf.size() == 0 ? "无数据" : warming ? "预热不足" : buf.size() < samples ? "样本不足" : gaps ? "行情有缺口" : "已收盘"
+    string stamp = buf.size() > 0 ? str.format_time(buf.last().stamp, "MM-dd HH:mm", tz) : "—"
+    putLabel(x1, top - panelHeight * 0.09, title + " · " + stamp + " · " + state, color.black, size.small)
+    if not na(lo) and buf.size() > 1
+        float spread = math.max(hi - lo, syminfo.mintick)
+        array<color> colors = array.from(color.new(color.black, 38), color.new(color.black, 58),
+             color.new(color.blue, 40), color.new(color.blue, 60), color.new(color.purple, 48), color.new(color.purple, 66))
+        for curve = 0 to 5
+            array<chart.point> points = array.new<chart.point>()
+            for i = 0 to buf.size() - 1
+                float value = maValues(buf.get(i)).get(curve)
+                if not na(value)
+                    int x = x1 + int(panelWidth * (0.04 + 0.92 * i / math.max(samples - 1, 1)))
+                    float y = bottom + panelHeight * (0.10 + 0.68 * (value - lo) / spread)
+                    points.push(chart.point.from_time(x, y))
+            if points.size() > 1
+                curves.push(polyline.new(points, curved=false, xloc=xloc.bar_time, line_color=colors.get(curve), line_width=1))
+
+var table info = table.new(position.bottom_right, 1, 2, bgcolor=color.new(chart.bg_color, 8))
+var int shownWeeks = 0
+var int incompleteWeeks = 0
+var int shownFib = 0
+var float lastMondayHigh = na
+var float lastMondayLow = na
+var int lastMondayStart = na
+var int lastMondayFinish = na
+if barstate.islast
+    for l in rangeLines
+        l.delete()
+    rangeLines.clear()
+    for lb in labels
+        lb.delete()
+    labels.clear()
+    for curve in curves
+        curve.delete()
+    curves.clear()
+    shownWeeks := 0
+    incompleteWeeks := 0
+    shownFib := 0
+    lastMondayHigh := na
+    lastMondayLow := na
+    lastMondayStart := na
+    lastMondayFinish := na
+    array<MondayWeek> valid = array.new<MondayWeek>()
+    if not na(archive)
+        int previousStart = na
+        for original in unpackWeeks(archive)
+            MondayWeek w = original.copy()
+            if not na(previousStart)
+                incompleteWeeks += math.max(0, int(math.round((w.start - previousStart) / (7.0 * 24 * hourMs))) - 1)
+            previousStart := w.start
+            bool forming = cutoff > w.start and cutoff < w.finish
+            bool complete = w.contiguous and w.lastEnd == w.finish
+            bool formingValid = forming and w.contiguous and w.lastEnd >= int(math.floor(cutoff / hourMs)) * hourMs
+            if formingValid and liveStart == w.start and not na(liveEnd) and liveEnd >= w.lastEnd
+                if liveHi > w.hi
+                    w.hi := liveHi
+                    w.hiAt := liveHighAt
+                if liveLo < w.lo
+                    w.lo := liveLo
+                    w.loAt := liveLowAt
+            if complete or formingValid
+                valid.push(w)
+            else
+                incompleteWeeks += 1
+        // Include an entirely absent trailing Monday, not only gaps between
+        // existing records. The calendar clock is not evidence of any prices.
+        int daysFromMonday = (dayofweek(cutoff - 1, tz) + 5) % 7
+        int expectedStart = timestamp(tz, year(cutoff - 1, tz), month(cutoff - 1, tz), dayofmonth(cutoff - 1, tz) - daysFromMonday, 0, 0)
+        if not na(previousStart) and expectedStart > previousStart
+            incompleteWeeks += math.max(0, int(math.round((expectedStart - previousStart) / (7.0 * 24 * hourMs))))
+        // A complete first hour is not available during Monday's first hour.
+        // The partial range is shown only when the chart includes midnight.
+        if mainMs <= hourMs and not na(liveStart) and cutoff > liveStart and cutoff < liveStart + hourMs and liveStart >= chart.left_visible_bar_time and (valid.size() == 0 or valid.last().start != liveStart)
+            valid.push(MondayWeek.new(liveStart, liveStart + 24 * hourMs, liveHi, liveLo, liveHighAt, liveLowAt, 0, liveEnd, true))
+    int first = math.max(0, valid.size() - rangeLimit)
+    if valid.size() > 0
+        for i = first to valid.size() - 1
+            MondayWeek w = valid.get(i)
+            bool latest = i == valid.size() - 1
+            // A missing current Monday must never turn an old week into "current".
+            int calendarEnd = timestamp(tz, year(w.start, tz), month(w.start, tz), dayofmonth(w.start, tz) + 7, 0, 0)
+            bool current = latest and cutoff <= calendarEnd
+            int finish = current ? cutoff : calendarEnd
+            bool extend = current or extendHistory
+            rangeLines.push(line.new(w.hiAt, w.hi, finish, w.hi, xloc=xloc.bar_time, extend=extend ? extend.right : extend.none, color=highCol, width=rayWidth, style=rayStyle))
+            rangeLines.push(line.new(w.loAt, w.lo, finish, w.lo, xloc=xloc.bar_time, extend=extend ? extend.right : extend.none, color=lowCol, width=rayWidth, style=rayStyle))
+            if showLabels and (current or showHistoryLabels)
+                putLabel(finish, w.hi, "周一高 " + str.tostring(w.hi, format.mintick), highCol, size.small)
+                putLabel(finish, w.lo, "周一低 " + str.tostring(w.lo, format.mintick), lowCol, size.small)
+            shownWeeks += 1
+            if current
+                lastMondayHigh := w.hi
+                lastMondayLow := w.lo
+                lastMondayStart := w.start
+                lastMondayFinish := w.finish
+                if showFib
+                    drawFib(w, cutoff, latestRatios, true)
+            else if showHistFib and i >= valid.size() - 1 - fibLimit and shownFib < fibLimit
+                int fridayEnd = timestamp(tz, year(w.start, tz), month(w.start, tz), dayofmonth(w.start, tz) + 5, 0, 0)
+                drawFib(w, fridayEnd, oldRatios, false)
+                shownFib += 1
+    int count = (mini5 ? 1 : 0) + (mini15 ? 1 : 0) + (mini60 ? 1 : 0) + (mini240 ? 1 : 0)
+    int slot = 0
+    if showMini and not na(windowHigh)
+        if mini5
+            drawPanel(ma5, "5m", slot, count)
+            slot += 1
+        if mini15
+            drawPanel(ma15, "15m", slot, count)
+            slot += 1
+        if mini60
+            drawPanel(ma60, "1H", slot, count)
+            slot += 1
+        if mini240
+            drawPanel(ma240, "4H", slot, count)
+    if showInfo
+        table.cell(info, 0, 0, tz + (liveView ? " · 截至当前 " : " · 截至最右K线开盘 ") + str.format_time(cutoff, "yyyy-MM-dd HH:mm", tz) +
+             (dayofweek(cutoff - 1, tz) == dayofweek.monday ? " · 周一形成中" : " · 周一已结束"), text_color=chart.fg_color, text_size=size.small)
+        table.cell(info, 0, 1, "H/L " + str.tostring(shownWeeks) + "/" + str.tostring(rangeLimit) + " 周 · 历史 Fib " + str.tostring(shownFib) +
+             " 周 · 不完整 " + str.tostring(incompleteWeeks) + " 周\n" + (na(archive) or str.length(archive) == 0 ? "1H 档案无可用数据" : "1H 档案受可用行情限制") + " · 小图同框共用比例", text_color=chart.fg_color, text_size=size.small)
+    else
+        table.clear(info, 0, 0, 0, 1)
+
+// Data Window values and optional logs expose the actual rendered samples.
+string inspectedPeriod = inspectTF == "图表" ? (timeframe.period == "5" or timeframe.period == "15" or timeframe.period == "60" or timeframe.period == "240" ? timeframe.period : "5") : inspectTF
+array<MASample> inspected = inspectedPeriod == "5" ? ma5 : inspectedPeriod == "15" ? ma15 : inspectedPeriod == "60" ? ma60 : ma240
+MASample inspectedSample = inspected.size() > inspectAgo ? inspected.get(inspected.size() - 1 - inspectAgo) : na
+plot(na(inspectedSample) ? na : inspectedSample.s20, "核对 SMA20", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.e20, "核对 EMA20", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.s60, "核对 SMA60", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.e60, "核对 EMA60", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.s120, "核对 SMA120", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.e120, "核对 EMA120", display=display.data_window)
+plot(na(inspectedSample) ? na : inspectedSample.stamp, "核对样本收盘时间 ms", display=display.data_window)
+plot(lastMondayHigh, "核对周一高", display=display.data_window)
+plot(lastMondayLow, "核对周一低", display=display.data_window)
+varip bool dumped = false
+if barstate.islast and dumpSamples and not dumped
+    for sample in inspected
+        log.info(str.tostring(sample.stamp) + "," + str.tostring(sample.s20, "#.########") + "," + str.tostring(sample.e20, "#.########") + "," +
+             str.tostring(sample.s60, "#.########") + "," + str.tostring(sample.e60, "#.########") + "," + str.tostring(sample.s120, "#.########") + "," + str.tostring(sample.e120, "#.########"))
+    dumped := true
+
+// Independent chart-series calculation copied from dual_ma_v1_1.pine.
+// Only compare when the inspected source equals the native chart timeframe.
+float referenceS20 = ta.sma(close, 20)
+float referenceE20 = ta.ema(close, 20)
+float referenceS60 = ta.sma(close, 60)
+float referenceE60 = ta.ema(close, 60)
+float referenceS120 = ta.sma(close, 120)
+float referenceE120 = ta.ema(close, 120)
+float closedS20 = ta.valuewhen(time_close <= cutoff, referenceS20, inspectAgo)
+float closedE20 = ta.valuewhen(time_close <= cutoff, referenceE20, inspectAgo)
+float closedS60 = ta.valuewhen(time_close <= cutoff, referenceS60, inspectAgo)
+float closedE60 = ta.valuewhen(time_close <= cutoff, referenceE60, inspectAgo)
+float closedS120 = ta.valuewhen(time_close <= cutoff, referenceS120, inspectAgo)
+float closedE120 = ta.valuewhen(time_close <= cutoff, referenceE120, inspectAgo)
+int referenceStamp = ta.valuewhen(time_close <= cutoff, time_close, inspectAgo)
+float referenceError = na
+if timeframe.period == inspectedPeriod and not na(inspectedSample) and inspectedSample.stamp == referenceStamp
+    referenceError := math.max(math.abs(inspectedSample.s20 - closedS20), math.abs(inspectedSample.e20 - closedE20), math.abs(inspectedSample.s60 - closedS60), math.abs(inspectedSample.e60 - closedE60), math.abs(inspectedSample.s120 - closedS120), math.abs(inspectedSample.e120 - closedE120))
+plot(referenceError, "双均线 V1.1 公式最大绝对差", display=display.data_window)
+plot(inspected.size(), "核对样本数", display=display.data_window)
+plot(inspected.size() > 0 ? inspected.first().stamp : na, "核对首样本收盘时间 ms", display=display.data_window)
+plot(array.size(polyline.all), "核对小图折线对象数", display=display.data_window)
+plot(array.size(line.all), "核对历史与Fib线对象数", display=display.data_window)
+plot(shownWeeks, "核对保留周数", display=display.data_window)
+plot(shownFib, "核对历史Fib周数", display=display.data_window)
+plot(lastMondayStart, "核对周一起点 ms", display=display.data_window)
+plot(lastMondayFinish, "核对周一终点 ms", display=display.data_window)

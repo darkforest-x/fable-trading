@@ -37,6 +37,7 @@ import sys
 import time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
@@ -454,9 +455,74 @@ def shard_paths(paths: list[Path], *, shard_index: int, shard_count: int) -> lis
     return paths[shard_index::shard_count]
 
 
+def resolve_holdout_use_number(
+    evaluation_scope: str,
+    requested: int | None,
+) -> int:
+    """Validate and resolve the per-weight holdout consumption ordinal."""
+    if evaluation_scope == "holdout":
+        value = HOLDOUT_USE_NUMBER if requested is None else int(requested)
+        if value < 1:
+            raise ValueError("holdout scans require --holdout-use-number >= 1")
+        return value
+    if requested not in (None, 0):
+        raise ValueError(
+            "--holdout-use-number is only valid for evaluation-scope=holdout"
+        )
+    return 0
+
+
+@contextmanager
+def nms_execution_scope(device: str, max_time_img: float, implementation: str = "auto"):
+    """Run Ultralytics NMS on the requested device without silent batch truncation.
+
+    Detection features and model inference remain on the configured inference
+    device.  Only the raw prediction tensor is copied to CPU when requested.
+    ``max_time_img`` replaces Ultralytics' default 0.05-second budget, whose
+    batch-level timeout otherwise breaks out early and drops later images.
+    """
+    if max_time_img <= 0:
+        raise ValueError("nms_max_time_img must be > 0")
+    if device not in {"native", "cpu"}:
+        raise ValueError(f"unsupported NMS device: {device}")
+    if implementation not in {"auto", "torchvision"}:
+        raise ValueError(f"unsupported NMS implementation: {implementation}")
+    if implementation == "torchvision":
+        import torchvision  # noqa: F401, PLC0415 -- selects compiled Ultralytics NMS
+    if (
+        device == "native"
+        and math.isclose(max_time_img, 0.05)
+        and implementation == "auto"
+    ):
+        yield
+        return
+
+    import ultralytics.utils.nms as ultralytics_nms  # noqa: PLC0415
+
+    original = ultralytics_nms.non_max_suppression
+
+    def configured_nms(prediction, *args, **kwargs):
+        if device == "cpu":
+            if isinstance(prediction, (list, tuple)):
+                prediction = prediction[0]
+            prediction = prediction.cpu()
+        kwargs["max_time_img"] = max_time_img
+        return original(prediction, *args, **kwargs)
+
+    ultralytics_nms.non_max_suppression = configured_nms
+    try:
+        yield
+    finally:
+        ultralytics_nms.non_max_suppression = original
+
+
 def scan_snapshot(args: argparse.Namespace) -> int:
     from ultralytics import YOLO  # noqa: PLC0415
 
+    holdout_use_number = resolve_holdout_use_number(
+        args.evaluation_scope,
+        args.holdout_use_number,
+    )
     snapshot_dir = Path(args.snapshot_dir)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -539,6 +605,9 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         "window_lengths": list(range(args.window_min, args.window_max + 1)),
         "confidence": args.conf,
         "nms_iou": args.iou,
+        "nms_device": args.nms_device,
+        "nms_implementation": args.nms_implementation,
+        "nms_max_time_img": args.nms_max_time_img,
         "event_gap_bars": EVENT_GAP_BARS,
         "bar_endpoints": sum(
             int(((pd.to_datetime(frame["open_time"], utc=True) > replay_start) & (pd.to_datetime(frame["open_time"], utc=True) <= latest)).sum())
@@ -549,7 +618,7 @@ def scan_snapshot(args: argparse.Namespace) -> int:
         "deduplicated_events": len(events),
         "wall_seconds": round(time.perf_counter() - started, 3),
         "evaluation_scope": args.evaluation_scope,
-        "holdout_use_number": HOLDOUT_USE_NUMBER if args.evaluation_scope == "holdout" else 0,
+        "holdout_use_number": holdout_use_number,
         "owner_authorized_in_conversation": args.evaluation_scope == "holdout",
         "promoted": False,
         "orders_placed": False,
@@ -632,17 +701,22 @@ def merge_scans(args: argparse.Namespace) -> int:
 
 def _predict_batch(model, jobs, frame: pd.DataFrame, symbol: str, args: argparse.Namespace) -> list[dict[str, Any]]:
     images = [job[2] for job in jobs]
-    results = model.predict(
-        images,
-        imgsz=args.imgsz,
-        conf=args.conf,
-        iou=args.iou,
-        device=args.device,
-        batch=args.batch,
-        verbose=False,
-        augment=False,
-        save=False,
-    )
+    with nms_execution_scope(
+        args.nms_device,
+        args.nms_max_time_img,
+        args.nms_implementation,
+    ):
+        results = model.predict(
+            images,
+            imgsz=args.imgsz,
+            conf=args.conf,
+            iou=args.iou,
+            device=args.device,
+            batch=args.batch,
+            verbose=False,
+            augment=False,
+            save=False,
+        )
     found: list[dict[str, Any]] = []
     for (decision_i, window_len, _image), result in zip(jobs, results):
         if result.boxes is None or len(result.boxes) == 0:
@@ -1304,6 +1378,24 @@ def parser() -> argparse.ArgumentParser:
     scan.add_argument("--imgsz", type=int, default=960)
     scan.add_argument("--device", default="mps")
     scan.add_argument("--batch", type=int, default=32)
+    scan.add_argument(
+        "--nms-device",
+        choices=("native", "cpu"),
+        default="native",
+        help="Post-process model predictions on the inference device or CPU.",
+    )
+    scan.add_argument(
+        "--nms-max-time-img",
+        type=float,
+        default=0.05,
+        help="Ultralytics NMS per-image time budget; increase to prevent batch truncation.",
+    )
+    scan.add_argument(
+        "--nms-implementation",
+        choices=("auto", "torchvision"),
+        default="auto",
+        help="Use Ultralytics' automatic NMS backend or preload compiled torchvision NMS.",
+    )
     scan.add_argument("--max-symbols", type=int, default=0)
     scan.add_argument("--shard-index", type=int, default=0)
     scan.add_argument("--shard-count", type=int, default=1)
@@ -1311,6 +1403,15 @@ def parser() -> argparse.ArgumentParser:
         "--evaluation-scope",
         choices=EVALUATION_SCOPES,
         default="holdout",
+    )
+    scan.add_argument(
+        "--holdout-use-number",
+        type=int,
+        default=None,
+        help=(
+            "Per-weight holdout consumption ordinal. Required explicitly for "
+            "new audited runs; the legacy default remains 1 for compatibility."
+        ),
     )
 
     merge = commands.add_parser("merge")

@@ -213,6 +213,16 @@ def _resolve_predict_device() -> str:
     return _predict_device
 
 
+def resolve_predict_device() -> str:
+    """Public serving hook for callers outside this module.
+
+    Legacy ``src.*`` forwarding modules use star imports, which intentionally
+    omit underscore-prefixed names. Keeping the public wrapper here prevents a
+    moved private helper from breaking subprocess probes after a restructure.
+    """
+    return _resolve_predict_device()
+
+
 def right_edge_to_bar(cx: float, w: float, tf, *, n_bars: int) -> int:
     """Normalized box right edge -> bar index within the window."""
     right_px = (cx + w / 2) * tf.width
