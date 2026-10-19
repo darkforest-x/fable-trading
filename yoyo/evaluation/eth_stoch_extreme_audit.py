@@ -17,6 +17,41 @@ from yoyo.evaluation.eth_stoch_extreme_stop import EXP,REASONS,stops
 from yoyo.evaluation.eth_stoch_extreme_analysis import entry_configs,indices,load_arrays,metrics,paired_metrics
 
 
+def stop_change_attribution(events, configs, paths, seed, policy_index):
+    """Decompose outcomes by signal identity, without selecting future winners.
+
+    Admission uses the stored causal K windows and original structure. Realized
+    returns are outcomes only. The five comparisons change one stop parameter
+    relative to the exact owner filter; their sum must equal the total change.
+    """
+    reference = configs['e1180']
+    original = indices(events, reference, seed)[0]
+    base = load_arrays(paths, reference['buffer'], events, .002)
+    rows = []
+    for cid in ('e0776', 'e0372', 'e0978', 'e1079', 'e0877'):
+        conf = configs[cid]
+        current = indices(events, conf, seed)[0]
+        a = load_arrays(paths, conf['buffer'], events, .002)
+        common = np.intersect1d(original, current)
+        added = np.setdiff1d(current, original)
+        dropped = np.setdiff1d(original, current)
+        j = policy_index
+        # These exact-owner comparisons have no segment-end censoring.
+        for arr, ids in ((base, original), (a, current)):
+            assert np.all(arr['closed'][ids, j])
+        common_change = float((a['net'][common, j] - base['net'][common, j]).sum())
+        added_net = float(a['net'][added, j].sum())
+        dropped_net = float(base['net'][dropped, j].sum())
+        total = float(a['net'][current, j].sum() - base['net'][original, j].sum())
+        assert abs(total - (common_change + added_net - dropped_net)) < 1e-7
+        rows.append(dict(config_id=cid, buffer=conf['buffer'], cap=conf['cap'],
+            common=len(common), added=len(added), dropped=len(dropped),
+            common_net_change=common_change, added_net=added_net, dropped_net=dropped_net,
+            total_change=total,
+            dropped_original_targets=int(base['target'][dropped, j].sum())))
+    return pd.DataFrame(rows)
+
+
 def main():
     ap=argparse.ArgumentParser();ap.add_argument('--paths',default='paths_v1');ap.add_argument('--analysis',default='analysis_v1');ap.add_argument('--out',default='audit_v1')
     args=ap.parse_args();out=EXP/args.out;out.mkdir(exist_ok=False)
@@ -66,6 +101,8 @@ def main():
     parts.to_csv(out/'sparse_positive_periods.csv',index=False)
     baseline=grid[(grid.config_id=='e1111')&(grid.segment=='all')].set_index('policy')
     owner=grid[(grid.config_id=='e1180')&(grid.segment=='all')].set_index('policy')
+    attribution=stop_change_attribution(events,configs,paths,cfg['control_seed'],pindex['tp20_price_5r'])
+    attribution.to_csv(out/'stop_change_attribution.csv',index=False)
     facts=dict(builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         direct_k_windows=len(events)*len(cfg['lookbacks']),direct_stop_geometries=len(events)*len(cfg['stop_buffers']),
         positive_full_history_arms=len(positive),positive_candidate_unique_paths=checks,
@@ -74,6 +111,7 @@ def main():
         primary_owner_target_hits=int(owner.loc['tp20_price_5r'].target_hits),
         primary_large_winner_retention=float(owner.loc['tp20_price_5r'].target_hits/baseline.loc['tp20_price_5r'].target_hits),
         primary_signal_retention=float(owner.loc['tp20_price_5r'].orders/baseline.loc['tp20_price_5r'].orders),
+        stop_attribution_identities=len(attribution),
         not_economic_acceptance=True,training_eligible=False,production_eligible=False)
     (out/'receipt.json').write_text(json.dumps(facts,indent=2)+'\n')
     print(json.dumps(facts),flush=True)
