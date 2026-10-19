@@ -143,6 +143,8 @@ def worker(args):
     assert len(raw)==source['rows'] and raw.ts.is_monotonic_increasing and not raw.ts.duplicated().any()
     assert int(raw.ts.iloc[0])==source['first_ms'] and int(raw.ts.iloc[-1])==source['last_ms']
     assert np.isfinite(raw.to_numpy(float)).all()
+    assert ((raw.low>0) & (raw.low<=raw[['open','close']].min(axis=1)) &
+            (raw.high>=raw[['open','close']].max(axis=1))).all()
     base=raw.drop(columns='ts').set_axis(pd.to_datetime(raw.ts.to_numpy(),unit='ms',utc=True))
     base=base[(base.index>=pd.Timestamp(cfg['warmup_start'])) & (base.index+pd.Timedelta(minutes=5)<=pd.Timestamp(cfg['end']))]
     receipts=[]
@@ -161,7 +163,8 @@ def worker(args):
                  for i in np.flatnonzero(facts['v9']) if clock[i]<pd.Timestamp(cfg['end'])]
         assert {a['trade_key'] for a in anchors} == set(old.trade_key), (symbol,minutes,'anchor lineage')
         chosen=draws(p,anchors,cfg); oldc=read(oldfolder/'controls.csv.gz'); inputs.append(provenance(oldfolder/'controls.csv.gz'))
-        if len(oldc) and 'control_pool' in oldc:oldc=oldc[oldc.control_pool.eq('baseline')]
+        if len(oldc) and 'control_pool' in oldc:
+            oldc=oldc[oldc.control_pool.eq('baseline') & oldc.arm.eq('v9_both')]
         draw_checks=0
         for c in oldc.to_dict('records'):
             prior=c['control_sig']; now=chosen[c['trade_key']]
@@ -260,7 +263,7 @@ def trade_metrics(f):
 
 
 def aggregate(root,cfg,receipts):
-    root=Path(root); main=[]; paired=[]; slices=[]; audit=[]
+    root=Path(root); main=[]; paired=[]; slices=[]; audit=[]; pair_audit=[]
     split=pd.Timestamp(cfg['split']); start=pd.Timestamp(cfg['analysis_start'])
     for minutes in cfg['timeframes']:
         frames=[read(root/'streams'/r['symbol']/f'{minutes}m.csv.gz') for r in receipts]
@@ -285,6 +288,11 @@ def aggregate(root,cfg,receipts):
             pairs=paired_frame(f,serial)
             pairs=pairs[pairs['first']>=start]
             pairs['period']=np.where(pairs['first']>=split,'later',np.where(pairs['last']<split,'early','crossing'))
+            original=f[f.cohort.eq('signal') & f.policy.eq('immediate') & (f.anchor_time>=start)]
+            pair_audit.append(dict(timeframe_min=minutes,mode='paired_serial' if serial else 'independent',
+                original_anchors=len(original),eligible_draws=int(original.pair_eligible.sum()),
+                common_mature_pairs=len(pairs),common_coverage=len(pairs)/len(original) if len(original) else None,
+                temporal_counts={str(k):int(v) for k,v in pairs.period.value_counts().items()}))
             pairs.to_csv(root/f'pairs_{minutes}m_{"serial" if serial else "independent"}.csv.gz')
             for side in (0,1,-1):
                 sp=pairs if side==0 else pairs[pairs.side.eq(side)]
@@ -310,7 +318,7 @@ def aggregate(root,cfg,receipts):
             later_selected_r=float(later[winner]),later_rebreak_r=float(later['rebreak']),
             full_history_best=full.idxmax(),full_history_r={k:float(v) for k,v in full.items()}))
     result=dict(generated_at=datetime.now(timezone.utc).isoformat(),config=cfg,serial=main,paired=paired,
-        yearly=slices,selection=choices,audit=audit,
+        yearly=slices,selection=choices,audit=audit,pair_audit=pair_audit,
         lineage={k:sum(s[k] for r in receipts for s in r['streams']) for k in
             ['rebreak_scalar_checks','serial_identity_checks','draw_identity_checks','prefix_checks']},
         definitions={'serial':'Actual per-symbol/timeframe both-side occupancy. Equal-risk trade R, not account performance.',
