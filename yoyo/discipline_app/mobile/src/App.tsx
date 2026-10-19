@@ -1,4 +1,5 @@
 import {useAutoStop} from './useAutoStop';
+import {priceAtTick,parseEntryIntent,entryResolved,entryPollDelay,type EntryIntent} from './entryFlow';
 import {entryAvailability} from './entryAvailability';
 import {TradeProgress,type EntryProgress} from './TradeProgress';
 import {useCloseRecovery} from './useCloseRecovery';
@@ -42,13 +43,15 @@ export default function App(){
  const [tab,setTab]=useState<Tab>('合约'),[connection,setConnection]=useState<Connection|null>(null),[state,setState]=useState<State|null>(null),[online,setOnline]=useState(false);
  const [token,setToken]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState<Notice|null>(null),[busy,setBusy]=useState(false);
  const [symbol,setSymbol]=useState('BTC-USDT-SWAP'),[kind,setKind]=useState<'market'|'limit'>('market'),[price,setPrice]=useState(''),[stop,setStop]=useState(''),[allocation,setAllocation]=useState(100),[leverage,setLeverage]=useState(100);
+ const [direction,setDirection]=useState<'long'|'short'>('long');
  const [preview,setPreview]=useState<Preview|null>(null),[closeTarget,setCloseTarget]=useState<Position|null>(null),[uncertain,setUncertain]=useState(false);
  const live=(state?.mode??connection?.mode)==='okx_live';
  const [restoring,setRestoring]=useState(nativeSession);
- const [pendingEntry,setPendingEntry]=useState<{id:string;symbol:string}|null>(null);
+ const [pendingEntry,setPendingEntry]=useState<EntryIntent|null>(null);
+ const pendingEntryRef=useRef<EntryIntent|null>(null);
  const pendingKey=(c:Connection)=>`spike-pending:${c.cacheScope}:${c.mode}:${c.accountId??'primary'}`;
  useEffect(()=>{let active=true;void restoreSession().then(async c=>{if(!c)return;c.cacheScope=await authorizationScope(c.url,c.token);if(active)setConnection(c)}).catch(()=>{if(active)notify('本机授权暂不可读，请在设置中重新连接')}).finally(()=>{if(active)setRestoring(false)});return()=>{active=false}},[]);
- useEffect(()=>{if(!connection){setPendingEntry(null);return}try{const raw=localStorage.getItem(pendingKey(connection));const value=raw?JSON.parse(raw):null;setPendingEntry(value&&typeof value.id==='string'&&typeof value.symbol==='string'?value:null)}catch{setPendingEntry(null)}},[connection]);
+ useEffect(()=>{let value:EntryIntent|null=null;try{if(connection)value=parseEntryIntent(localStorage.getItem(pendingKey(connection)))}catch{}pendingEntryRef.current=value;setPendingEntry(value)},[connection]);
  const [entryProgress,setEntryProgress]=useState<EntryProgress|null>(null);
  const [fieldError,setFieldError]=useState<FieldIssue|null>(null);
  const [clockTick,setClockTick]=useState(0);
@@ -90,7 +93,8 @@ export default function App(){
  const displayState=state?{...state,quotes:{...state.quotes,...stream},server_time:Math.max(state.server_time,...Object.values(stream).map(q=>q.time))}:null;
  const selectedQuote=stream[symbol]??state?.quotes[symbol];
  const existing=state?.positions.find(pos=>pos.symbol===symbol);
- useEffect(()=>{if(existing){setStop(existing.stop);setLeverage(existing.leverage)}},[existing?.id,existing?.stop,existing?.leverage]);
+ const selectedSide=existing?.side==='short'?'short':existing?.side==='long'?'long':direction;
+ useEffect(()=>{if(existing){setStop(existing.stop);setLeverage(existing.leverage);setDirection(existing.side==='short'?'short':'long')}},[existing?.id,existing?.stop,existing?.leverage]);
  const priceDecimals=(coin:string)=>Math.min(12,Math.max(2,Math.ceil(-Math.log10(Number(state?.instruments[coin]?.tick??.01)))));
  const priceFmt=(value:string|undefined,coin=symbol)=>fmt(value,priceDecimals(coin));
  const holdingAmount=(pos:Position)=>positionAmount(pos,state?.quotes[pos.symbol],online,state?.server_time??0,state?.policy?.quote_max_age_seconds??15);
@@ -105,13 +109,13 @@ export default function App(){
  useEffect(()=>{setLeverage(existing?.leverage??cap)},[cap,symbol,state?.policy_revision,existing?.leverage]);
  const room=marginRoom(state,symbol);
  const fraction=String(allocatedMargin(room,allocation));
- const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,kind,price,allocation,leverage,state?.policy_revision]);
+ const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,selectedSide,kind,price,allocation,leverage,state?.policy_revision]);
  const [stopFeedback,setStopFeedback]=useState<{side:'long'|'short';value:string;context:string}|null>(null);
  const automatic=useAutoStop({connection,key:stopContext,ticket:{symbol,side:'long',kind,price,stop:'',fraction,leverage,sizing_mode:'margin'},enabled:online&&fresh&&room>0&&!existing&&!pendingEntry&&!state?.blockers.length,
   onApply:(value,side)=>{setStop(value);setFieldError(null);setStopFeedback({side,value,context:stopContext})},onError:message=>setFieldError(issueForMessage(message)??{field:'stop',message})});
  const stopApplied=!!stopFeedback&&stopFeedback.context===stopContext&&stopFeedback.value===stop;
  const autoStopSide=automatic.working?automatic.mode:null;
- const inferredSide=automatic.mode??(existing?.side==='short'?'short':existing?.side==='long'?'long':Number(stop)>Number(kind==='limit'?price:selectedQuote?.last)?'short':'long');
+ const inferredSide=selectedSide;
  const estimate=automatic.ready?ticketEstimate(displayState,{symbol,side:inferredSide,kind,price,stop,fraction,leverage,sizing_mode:'margin'}):null;
  const availability=entryAvailability({state,symbol,connected:!!connection,online,fresh,restoring,pending:!!pendingEntry||!!closeRecovery.attempt,room,now:displayNow});
  const blocked=!!availability;
@@ -157,42 +161,50 @@ export default function App(){
   let missingReads=0;
   const poll=async()=>{
    if(!active||document.hidden){if(active)timer=setTimeout(poll,3000);return}
+   let delay=3000;
    try{const result=await api<{id:string;status:string;message?:string}>(c,`/v1/order-requests/${identity}`);
+    delay=entryPollDelay(result.status);
     if(result.status==='not_found'){
      missingReads++;
      if(active&&missingReads>=6)await api(c,`/v1/order-requests/${identity}/abandon-unreceived`,{});
     }else missingReads=0;
-    if(active&&result.id===identity&&['pending','partially_filled','filled','closed','rejected','cancelled','interrupted'].includes(result.status)){
-     terminalEntry.current=identity;localStorage.removeItem(key);setPendingEntry(null);setEntryProgress({id:identity,symbol:pendingEntry.symbol,status:result.status});
+    if(active&&result.id===identity&&entryResolved(result.status)){
+     terminalEntry.current=identity;localStorage.removeItem(key);pendingEntryRef.current=null;setPendingEntry(null);setEntryProgress({...pendingEntry,status:result.status});
      if(['pending','partially_filled','filled','closed'].includes(result.status)){notify(result.status==='pending'?'限价单已挂出，可在持仓页撤单':result.status==='partially_filled'?'部分成交，剩余委托继续等待':result.status==='filled'?'已成交，保护状态请查看持仓':'订单已完成','success');feedback('success')}else{const issue=issueForMessage(result.message??'');if(issue)inlineIssue(issue,true);else setError(result.message??'本次委托未成交');feedback('warning')}
      void refresh().catch(()=>setOnline(false));return;
     }
    }catch{/* Read-only reconciliation continues; never resend an order on timeout. */}
-   if(active)timer=setTimeout(poll,3000);
+   if(active)timer=setTimeout(poll,delay);
   };
   void poll();return()=>{active=false;clearTimeout(timer)};
  },[connection,pendingEntry?.id]);
  async function submitEntry(order:{ticket:Ticket;request_id:string;policy_revision:number;preview_id?:string}){
   const c=connection!;
   if(live){
-   const pending={id:order.request_id,symbol:order.ticket.symbol};
+   const pending:EntryIntent={id:order.request_id,symbol:order.ticket.symbol,side:order.ticket.side,kind:order.ticket.kind};
+   const generation=epoch.current;
    // Persist the identity before transmission, so app restarts never create a retry order.
-   localStorage.setItem(pendingKey(c),JSON.stringify(pending));setPendingEntry(pending);setEntryProgress({...pending,status:'processing'});setPreview(null);setUncertain(false);
-   try{await api(c,'/v1/order-requests',{request_id:order.request_id,policy_revision:order.policy_revision,ticket:order.ticket,preview_id:order.preview_id??null,confirmed_live:true});/* Inline card follows the durable request. */}
-   catch(e){if(terminalEntry.current===order.request_id)return;if(e instanceof ApiError&&e.status<500){localStorage.removeItem(pendingKey(c));setPendingEntry(null);setEntryProgress({...pending,status:'rejected'});const issue=issueForMessage(e.message);if(issue)inlineIssue(issue,true);else setError(e.message)}else setEntryProgress({...pending,status:'checking'})}
+   try{localStorage.setItem(pendingKey(c),JSON.stringify(pending))}catch{throw Error('本机无法保存恢复记录，本次开仓尚未发送')}
+   pendingEntryRef.current=pending;setPendingEntry(pending);setEntryProgress({...pending,status:'sending'});setPreview(null);setUncertain(false);
+   // The durable pending identity locks further entry while polling can finish
+   // before a delayed POST response. Late responses never overwrite a receipt.
+   const active=()=>generation===epoch.current&&pendingEntryRef.current?.id===pending.id&&terminalEntry.current!==pending.id;
+   void api<{status:string}>(c,'/v1/order-requests',{request_id:order.request_id,policy_revision:order.policy_revision,ticket:order.ticket,preview_id:order.preview_id??null,confirmed_live:true})
+    .then(result=>{if(active())setEntryProgress({...pending,status:result.status})})
+    .catch(e=>{if(!active())return;if(e instanceof ApiError&&e.status<500){localStorage.removeItem(pendingKey(c));pendingEntryRef.current=null;setPendingEntry(null);setEntryProgress({...pending,status:'rejected'});const issue=issueForMessage(e.message);if(issue)inlineIssue(issue,true);else setError(e.message)}else setEntryProgress({...pending,status:'checking'})});
    return;
   }
   try{await api(c,'/v1/orders',{request_id:order.request_id,policy_revision:order.policy_revision,ticket:order.ticket});setPreview(null);notify('模拟委托已受理','success');await refresh();feedback('success')}
   catch(e){setError((e as Error).message)}
  }
  async function review(side:'long'|'short'){
-  if(!connection||command.current||pendingEntry||!automatic.ready)return;setError('');setBusy(true);setReviewSide(side);command.current=true;feedback('light');
+  if(!connection||command.current||pendingEntryRef.current||blocked||side!==selectedSide||!automatic.ready)return;setError('');setBusy(true);setReviewSide(side);command.current=true;feedback('light');
   try{const ticket:Ticket={symbol,side,kind,price:price.trim(),stop:stop.trim(),fraction,leverage,sizing_mode:'margin'};const invalid=fieldIssue(ticket,displayState);if(invalid){inlineIssue(invalid,true);return}setFieldError(null);(document.activeElement as HTMLElement)?.blur();if(live&&!confirmTrades){await submitEntry({ticket,request_id:id(),policy_revision:state!.policy_revision});return}const result=await api<{plan:Plan;policy_revision:number;preview_id?:string}>(connection,'/v1/preview',ticket);const order={...result,ticket,request_id:id()};setUncertain(false);if(confirmTrades)setPreview(order);else await submitEntry(order)}
   catch(e){const text=(e as Error).message;const issue=issueForMessage(text);if(issue)inlineIssue(issue,true);else setError(text);feedback('warning')}finally{setBusy(false);setReviewSide(null);command.current=false}
  }
  async function confirm(){
   if(!connection||!preview||command.current||(confirmTrades&&live&&!liveConsent))return;command.current=true;setBusy(true);setError('');
-  try{await submitEntry(preview)}finally{command.current=false;setBusy(false)}
+  try{await submitEntry(preview)}catch(e){setError((e as Error).message);feedback('warning')}finally{command.current=false;setBusy(false)}
  }
  async function switchAccount(account:Account){
   if(!connection||command.current||pendingEntry)return;command.current=true;setBusy(true);setError('');epoch.current++;feedback('light');
@@ -227,6 +239,16 @@ export default function App(){
   const issue=fieldIssue({symbol,side,kind,price,stop:'',fraction,leverage,sizing_mode:'margin'},displayState,true);
   if(issue){inlineIssue(issue,true);return}setFieldError(null);automatic.select(side);
  }
+ function selectDirection(side:'long'|'short'){
+  if(existing||busy||pendingEntryRef.current||side===selectedSide)return;
+  const recalculate=!!automatic.mode;automatic.manual();setDirection(side);setStop('');setStopFeedback(null);setFieldError(null);
+  if(recalculate)automatic.select(side);else feedback('light');
+ }
+ function useLatestPrice(){
+  const value=priceAtTick(selectedQuote?.last,state?.instruments[symbol]?.tick);
+  if(!fresh||value===null)return;
+  setPrice(value);setFieldError(null);feedback('light');
+ }
  async function entryStop(pos:Position){
   if(!connection||command.current)return;command.current=true;setBusy(true);setAction({kind:'entry-stop',id:pos.id});feedback('light');
   try{await api(connection,`/v1/positions/${pos.id}/entry-stop`,{request_id:id(),confirmed_live:live});notify('止损保护已核对，开仓价不包含手续费','success');await refresh().catch(()=>setOnline(false));feedback('success')}
@@ -240,6 +262,8 @@ export default function App(){
  function dismissPreview(){setPreview(null);if(uncertain){setTab('持仓');void refresh().catch(()=>setOnline(false))}}
  function closeProgress(){return <section className="trade-progress close-recovery" aria-label="平仓请求进度"><div className="progress-heading"><Spinner/><b>{closeRecovery.attempt?.symbol.replace('-USDT-SWAP','')} · 平仓 {closeRecovery.attempt?.percent}%</b></div><p role="status">{closeRecovery.status==='ready'?'原请求尚未发送，可继续提交':'正在核对原平仓请求'}</p><div className="recovery-actions"><button disabled={busy} onClick={()=>{closeRecovery.check();feedback('light')}}>刷新核对</button>{closeRecovery.status==='ready'&&<button disabled={busy} onClick={()=>void close(null,true)}>以原请求重试</button>}</div></section>}
  const metrics=(plan:Plan)=><dl className="metrics">{[['初始止损价格',`${priceFmt(plan.stop)} USDT`],['入场价格边界',`${priceFmt(plan.entry)} USDT`],['名义仓位',`${fmt(plan.notional)} USDT`],['本单名义 / 净值',`${fmt(plan.notional_equity_multiple)} 倍`],['预计保证金',`${fmt(plan.margin)} USDT`],['价格止损风险',`${fmt(plan.price_risk)} USDT`],['成本预留',`${fmt(plan.costs)} USDT`],['初始计划风险 1R',`${fmt(plan.risk)} USDT`]].map(([k,v])=><div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>;
+ const activeEntry=pendingEntry?{...pendingEntry,status:entryProgress?.id===pendingEntry.id?entryProgress.status:'checking'}:entryProgress;
+ const ticketLocked=busy||!!pendingEntry;
 
 
  const riskPercent=Number(p?.risk_fraction??0.05)*100;
@@ -257,26 +281,30 @@ export default function App(){
   <main key={tab} className="page-transition" style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
-     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
+     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
      <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
     <DisciplineBudget state={state} online={online} onOpen={()=>nav('纪律')}/>
     {connection&&reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={18}/><span>{reason}</span><Icon name="chevron" size={16}/></button>}
-    <TradeProgress entry={pendingEntry?{...pendingEntry,status:'checking'}:entryProgress} state={state} onOpen={()=>nav('持仓')} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}
-    <section className="trade-card" aria-label="下单设置">
-     <div className="segment" aria-label="委托类型"><button aria-pressed={kind==='market'} className={kind==='market'?'active':''} onClick={()=>{if(kind!=='market')feedback('light');setKind('market')}}>市价</button><button aria-pressed={kind==='limit'} className={kind==='limit'?'active':''} onClick={()=>{if(kind!=='limit')feedback('light');setKind('limit')}}>限价</button></div>
-     <button className="leverage-field" data-field="leverage" disabled={!!existing} aria-label={`调整杠杆，当前 ${leverage} 倍`} aria-haspopup="dialog" onClick={()=>{setDraftLeverage(leverage);setSheet('leverage');feedback('light')}}><span>杠杆</span><b>{leverage}<small>x</small></b><span className="label-note">{existing?'沿用持仓':`最高 ${cap}x`}</span><Icon name="chevron" size={15}/></button>
+    {closeRecovery.attempt&&closeProgress()}
+    <section className={`trade-card entry-ticket entry-${selectedSide}`} aria-label="下单设置">
+     <div className="direction-picker" aria-label="开仓方向">{(['long','short'] as const).map(side=><button key={side} data-side={side} type="button" aria-pressed={selectedSide===side} className={selectedSide===side?'active':''} disabled={ticketLocked||!!existing} onClick={()=>selectDirection(side)}><Icon name="trend" size={16}/>{side==='long'?'做多':'做空'}<small>{side==='long'?'LONG':'SHORT'}</small></button>)}</div>
+     {existing&&<p className="scale-in-note">同向加仓 · 沿用当前止损和杠杆</p>}
+     <div className="order-options">
+     <div className="segment" aria-label="委托类型"><button aria-pressed={kind==='market'} className={kind==='market'?'active':''} disabled={ticketLocked} onClick={()=>{if(kind!=='market')feedback('light');setKind('market');setFieldError(null)}}>市价</button><button aria-pressed={kind==='limit'} className={kind==='limit'?'active':''} disabled={ticketLocked} onClick={()=>{if(kind!=='limit')feedback('light');setKind('limit');setFieldError(null)}}>限价</button></div>
+     <button className="leverage-field" data-field="leverage" disabled={ticketLocked||!!existing} aria-label={`调整杠杆，当前 ${leverage} 倍`} aria-haspopup="dialog" onClick={()=>{setDraftLeverage(leverage);setSheet('leverage');feedback('light')}}><span>杠杆</span><b>{leverage}<small>x</small></b><Icon name="chevron" size={15}/></button></div>
 
-     {kind==='limit'&&<label className="field"><span className="field-label">委托价格</span><span className="input-shell"><input data-field="price" aria-invalid={fieldError?.field==='price'} aria-describedby={fieldError?.field==='price'?'field-price-error':undefined} onBlur={()=>validateField('price')} aria-label="委托价格" inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={price} onChange={e=>{setPrice(e.target.value);setFieldError(null)}} placeholder="输入委托价格"/><span>USDT</span></span>{fieldError?.field==='price'&&<span id="field-price-error" className="field-error" role="status">{fieldError.message}</span>}</label>}
+     {kind==='limit'&&<label className="field"><span className="field-label">委托价格<button type="button" aria-label="使用最新价" className="latest-price" disabled={ticketLocked||!fresh} onClick={useLatestPrice}>最新价</button></span><span className="input-shell"><input disabled={ticketLocked} data-field="price" aria-invalid={fieldError?.field==='price'} aria-describedby={fieldError?.field==='price'?'field-price-error':undefined} onBlur={()=>validateField('price')} aria-label="委托价格" inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={price} onChange={e=>{setPrice(e.target.value);setFieldError(null)}} placeholder="输入委托价格"/><span>USDT</span></span>{fieldError?.field==='price'&&<span id="field-price-error" className="field-error" role="status">{fieldError.message}</span>}</label>}
      <div className={`field stop-field ${stopApplied?'stop-applied':''}`}>
-      <span className="field-label">{existing?'当前止损':'初始止损'} <em>{existing?'沿用':'必填'}</em>{!existing&&<small>{(['long','short'] as const).map(side=><button key={side} type="button" aria-label={side==='long'?'多单 1R':'空单 1R'} aria-busy={autoStopSide===side} aria-pressed={automatic.mode===side} className={autoStopSide===side?'calculating':automatic.mode===side?'applied':''} disabled={blocked||busy} onClick={()=>void autoStop(side)}>{autoStopSide===side?<><Spinner/>计算中</>:<>{stopApplied&&stopFeedback?.side===side&&<Icon name="check" size={12}/>} {side==='long'?'多单':'空单'} 1R</>}</button>)}</small>}</span>
-      <span className="input-shell"><input data-field="stop" aria-invalid={fieldError?.field==='stop'} onBlur={()=>validateField('stop')} aria-label="初始止损" aria-describedby={fieldError?.field==='stop'?'field-stop-error':stopApplied?'stop-applied-status':undefined} readOnly={!!existing} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={stop} onChange={e=>{automatic.manual();setStop(e.target.value);setStopFeedback(null);setFieldError(null)}} placeholder="输入止损价格"/>{stopApplied&&<span className="stop-applied-mark" aria-hidden="true"><Icon name="check" size={14}/></span>}<span>USDT</span></span>
-      {automatic.mode&&<span className="auto-mode-note">{automatic.mode==='long'?'多单':'空单'} 1R · {automatic.working?'重新计算中':automatic.ready?'自动更新':'等待有效参数'}<button onClick={()=>automatic.manual()}>转为手动</button></span>}{fieldError?.field==='stop'&&<span id="field-stop-error" className="field-error" role="status">{fieldError.message}</span>}<span id="stop-applied-status" className="sr-only" role="status" aria-live="polite">{stopApplied?`${stopFeedback?.side==='long'?'多单':'空单'} 1R 止损已填入，含成本预留`:''}</span>
+      <span className="field-label">{existing?'当前止损':'初始止损'} <em>{existing?'沿用':'必填'}</em>{!existing&&<small><button type="button" aria-label={selectedSide==='long'?'多单 1R':'空单 1R'} aria-busy={!!autoStopSide} aria-pressed={automatic.mode===selectedSide} className={autoStopSide?'calculating':automatic.mode===selectedSide?'applied':''} disabled={blocked||ticketLocked} onClick={()=>autoStop(selectedSide)}>{autoStopSide?<><Spinner/>计算中</>:<>{stopApplied&&<Icon name="check" size={12}/>} {selectedSide==='long'?'多单':'空单'} 1R</>}</button></small>}</span>
+      <span className="input-shell"><input disabled={ticketLocked} data-field="stop" aria-invalid={fieldError?.field==='stop'} onBlur={()=>validateField('stop')} aria-label="初始止损" aria-describedby={fieldError?.field==='stop'?'field-stop-error':stopApplied?'stop-applied-status':undefined} readOnly={!!existing} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={stop} onChange={e=>{automatic.manual();setStop(e.target.value);setStopFeedback(null);setFieldError(null)}} placeholder="输入止损价格"/>{stopApplied&&<span className="stop-applied-mark" aria-hidden="true"><Icon name="check" size={14}/></span>}<span>USDT</span></span>
+      {automatic.mode&&<span className="auto-mode-note">{automatic.mode==='long'?'多单':'空单'} 1R · {automatic.working?'重新计算中':automatic.ready?'自动更新':'等待有效参数'}<button disabled={ticketLocked} onClick={()=>{automatic.manual();feedback('light')}}>转为手动</button></span>}{fieldError?.field==='stop'&&<span id="field-stop-error" className="field-error" role="status">{fieldError.message}</span>}<span id="stop-applied-status" className="sr-only" role="status" aria-live="polite">{stopApplied?`${stopFeedback?.side==='long'?'多单':'空单'} 1R 止损已填入，含成本预留`:''}</span>
      </div>
-     <div className="budget"><div className="slider-heading"><label htmlFor="position-size">仓位额度 <small>当前可用</small></label><output htmlFor="position-size">{allocation}<small>%</small></output></div><input data-field="sizing" aria-describedby={fieldError?.field==='sizing'?'field-sizing-error':undefined} id="position-size" aria-label="仓位额度" aria-valuetext={`${allocation}% 可用额度，保证金占账户净值 ${fmt(Number(fraction)*100,2)}%`} type="range" min="0" max="100" step="1" disabled={!state||room<=0} value={allocation} onChange={e=>{setAllocation(Number(e.target.value));setFieldError(null);feedback('tick')}} style={{'--fill':`${allocation}%`} as CSSProperties}/><div className="slider-scale"><span>0%</span><span>保证金占净值 {state?fmt(Number(fraction)*100,2):'—'}%</span></div></div>
+     <div className="budget"><div className="slider-heading"><label htmlFor="position-size">仓位额度 <small>当前可用</small></label><output htmlFor="position-size">{allocation}<small>%</small></output></div><input data-field="sizing" aria-describedby={fieldError?.field==='sizing'?'field-sizing-error':undefined} id="position-size" aria-label="仓位额度" aria-valuetext={`${allocation}% 可用额度，保证金占账户净值 ${fmt(Number(fraction)*100,2)}%`} type="range" min="0" max="100" step="1" disabled={ticketLocked||!state||room<=0} value={allocation} onChange={e=>{setAllocation(Number(e.target.value));setFieldError(null);feedback('tick')}} style={{'--fill':`${allocation}%`} as CSSProperties}/><div className="allocation-presets" aria-label="仓位额度快捷选择">{[25,50,75,100].map(value=><button type="button" key={value} aria-pressed={allocation===value} disabled={ticketLocked||!state||room<=0} onClick={()=>{setAllocation(value);setFieldError(null);feedback('light')}}>{value}%</button>)}</div><div className="slider-scale"><span>保证金占净值 {state?fmt(Number(fraction)*100,2):'—'}%</span></div></div>
      {fieldError&&['sizing','leverage'].includes(fieldError.field)&&<p id="field-sizing-error" className="field-error" role="status">{fieldError.message}</p>}<div className="ticket-estimate" aria-live="polite">{[[existing?'本次持仓金额':'持仓金额',estimate?.notional],['预计保证金',estimate?.margin],[existing?'合并止损金额':'预计止损',estimate?.risk]].map(([label,value])=><div key={String(label)}><span>{String(label)}</span><b>{fmt(value as number|undefined)}<small> USDT</small></b></div>)}</div>
      <div className="equity"><span>{live?`${state?.account_name??'主账户'} · USDT 净值`:'模拟净值'}</span><b>{fmt(state?.equity)} <small>USDT</small></b></div>
-     <div className="order-actions"><button className="buy" disabled={blocked||busy||!automatic.ready||existing?.side==='short'||automatic.mode==='short'} onClick={()=>review('long')}>{reviewSide==='long'?<><Spinner/>正在校验…</>:existing?.side==='long'?'买入加仓':'买入开多'}</button><button className="sell" disabled={blocked||busy||!automatic.ready||existing?.side==='long'||automatic.mode==='long'} onClick={()=>review('short')}>{reviewSide==='short'?<><Spinner/>正在校验…</>:existing?.side==='short'?'卖出加仓':'卖出开空'}</button></div>
+     <div className="order-actions"><button className={selectedSide==='long'?'buy':'sell'} disabled={blocked||ticketLocked||!automatic.ready} onClick={()=>review(selectedSide)}>{pendingEntry?<><Spinner/>正在核对订单</>:reviewSide?<><Spinner/>正在校验…</>:automatic.working?<><Spinner/>计算止损中</>:selectedSide==='long'?(existing?'买入加仓':'买入开多'):(existing?'卖出加仓':'卖出开空')}</button></div>
+     <TradeProgress entry={activeEntry} state={state} onOpen={()=>nav('持仓')} onDismiss={()=>setEntryProgress(null)}/>
      {!connection?<button className="primary connect-action" onClick={()=>nav('设置')}><Icon name="link" size={17}/>连接纪律服务<Icon name="arrow" size={17}/></button>:null}
     </section>
     {!!state?.positions.length&&<section className="home-positions"><div className="section-heading"><h2>当前持仓 <span>{state.positions.length}</span></h2><button className="plain" onClick={()=>nav('持仓')}>全部持仓 ›</button></div>{state.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} compact onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}</section>}
@@ -286,7 +314,7 @@ export default function App(){
    </>}
    {tab==='持仓'&&<>
     <PageHeader title="持仓保护" subtitle={`${state?.account_name??'当前账户'} · 每笔交易都有退出计划。`} onSettings={()=>nav('设置')}/>
-    <TradeProgress entry={pendingEntry?{...pendingEntry,status:'checking'}:entryProgress} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有 App 持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
+    <TradeProgress entry={activeEntry} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有 App 持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
     {state?.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}
     {state&&<TradeActivity state={state} busy={busy} cancelling={action?.kind==='cancel'?action.id:undefined} onCancel={cancelOrder} price={priceFmt}/>}
     {state&&<ExternalActivity state={state} online={online}/>}

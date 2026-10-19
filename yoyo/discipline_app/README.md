@@ -1,4 +1,8 @@
-# SPIKE 纪律交易 0.8.9
+# SPIKE 纪律交易 0.8.10
+
+0.8.10（19）：开仓先选择多空方向，1R、预估和唯一提交按钮保持一致；限价支持填入最新价，仓位支持 25% / 50% / 75% / 100% 快捷选择。重复点击 1R 会重新计算，切换手动有独立入口；加仓沿用原方向、止损和杠杆。提交前持久化请求编号，核对中锁定重复提交，进度显示在按钮下方。已受理请求每秒核对；未送达的等待与阻断窗口不变。慢 POST 回执或迟到超时不能覆盖已查到的结果，不会自动重发订单。
+
+Stitch 来源为 `design/flow-0.8.10/source.json`，模型 `GEMINI_3_8_FLASH`。24 项前端逻辑测试与 17 项开仓/每日额度 Python 回归通过，320px / 390px 假交易所浏览器验收覆盖方向切换、重复 1R、手动输入、双击去重和 14 秒迟到回执。iOS / Android 编译和签名验证通过；CoreDevice 将 iPhone 标为 unavailable，本次覆盖安装未成功，Android 未做真机验收。网页已更新；服务端保持 0.8.9，风控与交易执行逻辑不变。
 
 0.8.9（18）：外部仓位、普通委托和策略委托单独持久化为只读观测，不占用 App 开仓次数、连亏、持仓或保证金额度，也不再全账户禁止开仓。日亏改为 App 管理交易的当日已实现与浮动盈亏，账户转入转出和外部交易盈亏不直接消耗该预算。真实可用保证金仍由交易所约束；同一合约存在外部交易时保留局部限制，避免合并仓位或修改共用杠杆。外部记录离开当前列表不代表已成交、撤销或完成结算。
 
@@ -96,7 +100,7 @@ python3 yoyo/discipline_app/scripts/live_service.py install --enable-execution
 
 安装包、设备安装收据、账户运行数据和验收截图只保存在本机，不随公开仓库分发；仓库保留完整源码、依赖锁文件及构建脚本。
 
-- Android：`releases/spike-discipline-0.8.9.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
+- Android：`releases/spike-discipline-0.8.10.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
 - iPhone：`mobile/ios/App/App.xcodeproj`，Xcode 26.6，Personal Team 真机签名。普通 Apple ID 的安装有有效期，需要重新签名续期；不会自动升级成付费会员。
 - 原生 HTTPS 校验保持开启，不绕过证书校验；原生请求不跟随重定向。
 

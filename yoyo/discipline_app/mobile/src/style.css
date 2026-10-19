@@ -625,3 +625,31 @@ html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .external-values dd{font-size:13px;font-weight:600;margin:0;overflow-wrap:anywhere}
 .external-history summary{padding:14px 0 4px;font-size:13px;color:var(--muted,#758780);cursor:pointer}
 .external-history summary span{margin-left:6px}
+
+/* Stitch 478cef9cdb2b480b8550632ec936c526: one direction, one execution action. */
+.entry-ticket{--entry-accent:var(--green);--entry-soft:var(--green-soft);gap:13px}
+.entry-ticket.entry-short{--entry-accent:var(--red);--entry-soft:var(--red-soft)}
+.direction-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.direction-picker button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border:1.5px solid transparent;border-radius:14px;background:var(--recessed);color:var(--muted);font-size:15px;font-weight:600}
+.direction-picker small{font-size:10px;letter-spacing:.03em;font-weight:500}
+.direction-picker button.active{border-color:var(--entry-accent);background:var(--entry-soft);color:var(--entry-accent)}
+.direction-picker button:disabled:not(.active){opacity:.5}
+.order-options{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center}
+.order-options .leverage-field{width:auto;min-height:48px;padding:0 12px;gap:6px}
+.order-options .leverage-field>span{font-size:11px}.order-options .leverage-field>b{font-size:15px}
+.latest-price{margin-left:auto;border-radius:16px;background:var(--green-soft);color:var(--green);font-size:11px;padding:0 12px}
+.latest-price:disabled{opacity:.5}
+.allocation-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.allocation-presets button{border-radius:12px;min-height:44px;background:var(--recessed);color:var(--muted);font-size:12px}
+.allocation-presets button[aria-pressed=true]{background:var(--entry-soft);color:var(--entry-accent);box-shadow:inset 0 0 0 1px var(--entry-accent)}
+.entry-ticket .slider-scale{justify-content:flex-end;margin-top:7px}
+.entry-ticket .slider-heading output{color:var(--entry-accent)}
+.entry-ticket .ticket-estimate{padding:12px 8px}
+.entry-ticket .trade-progress{margin:0;padding:10px 12px}
+.entry-ticket .order-actions>button{min-height:50px}
+.entry-ticket .equity{font-size:11px}
+.entry-ticket .scale-in-note{font-size:11px;color:var(--muted);margin:0}
+.entry-ticket .field:has(.latest-price) .field-label{margin-bottom:3px}
+@media(max-width:360px){.order-options{gap:6px}.order-options .leverage-field{padding:0 10px}.order-options .leverage-field>span{display:none}.direction-picker small{display:none}}
+
+.direction-picker button[data-side=short] svg{transform:rotate(180deg)}
