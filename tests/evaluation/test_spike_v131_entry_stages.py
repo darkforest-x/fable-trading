@@ -5,6 +5,7 @@ import pytest
 
 from yoyo.evaluation import spike_v128_recent as parent
 from yoyo.evaluation.spike_v131_entry_stages import decision, attempt, mark_serial, paired_frame
+from yoyo.evaluation.spike_v131_entry_stages_summary import signflip
 
 
 def path(side=1):
@@ -95,3 +96,15 @@ def test_pairs_keep_no_fill_zero_but_not_missing_and_use_skipped_decision_maturi
     assert independent.loc['ok','control_immediate']==0.
     assert serial.loc['unknown','signal_immediate']==0.
     assert serial.loc['unknown','last']==pd.Timestamp('2024-01-03',tz='UTC')
+
+
+def test_week_signflip_does_not_treat_same_week_duplicates_as_independent_evidence():
+    values=np.array([1.,2.,3.,4.,-1.]);weeks=np.arange(5)
+    p=signflip(values,weeks)
+    assert signflip(np.repeat(values,10),np.repeat(weeks,10))==p
+    assert signflip(-values,weeks)==p
+
+
+def test_zero_week_differences_cannot_claim_a_statistical_advantage():
+    assert signflip(np.zeros(10),np.arange(10))==1.
+    assert signflip([5.],['one_week']) is None
