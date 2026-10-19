@@ -15,3 +15,11 @@ Reproduce after builder commit:
 ` .venv/bin/python -m yoyo.evaluation.spike_v131_staged_entry --workers 4 --output experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_reproduce `
 
 Code and raw results are required experimental records; no separate report is requested.
+
+## Registered refinement after first-stage outcomes
+
+First stage, builder d8837010cd, searched 2,293 policies. Uniform best was zero initial quantity, -0.05R then reclaim, no expiry: 1,274.63R versus original 1,243.46R. Its original-stop risk-capped fixed-policy sensitivity fell to 1,175.02R. The boundary optimum warrants a bounded refinement, not a claim of an unseen optimum.
+
+`config_refine.json` preserves the original depths and adds 0 and 0.01R steps through 0.20R, plus expiry 2/4/8/24 bars. Zero depth means a favorable close without requiring an adverse excursion. Add `reclaim_capped`: reduce the remaining quantity by `min(1, original_R / distance(new_fill, original_absolute_stop))`; the original stop remains unchanged. This prevents later entries from increasing planned loss to the original stop. Fractions 0/0.5/1 suffice in this stage because the objective is affine; intermediate fractions cannot exceed both endpoints. No fees or barrier parameters change.
+
+This refinement is informed by full-history stage-one outcomes. Both stage results and negative findings remain; chronological diagnostics are exploratory, not untouched validation. Reproduce with the same command plus `--config experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config_refine.json` and a fresh output directory.

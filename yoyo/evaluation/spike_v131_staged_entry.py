@@ -184,12 +184,17 @@ def candidate_returns(frame, policy, touch=False):
     if policy['method']=='constant':
         return w*base, np.zeros(len(frame),bool)
     method = 'touch' if touch and policy['method']=='limit' else policy['method']
+    if method=='reclaim_capped':method='reclaim'
     prefix = f"{method}_{int(round(policy['depth']*100)):02d}"
     offset = frame[prefix+'_offset'].to_numpy(int)
     fill = offset>=0
     if policy['expiry']:
         fill &= offset<policy['expiry']
-    return w*base + (1-w)*np.where(fill,frame[prefix+'_r'].to_numpy(float),0.0),fill
+    leg=frame[prefix+'_r'].to_numpy(float)
+    if policy['method']=='reclaim_capped':
+        exposure=frame.side.to_numpy()*(frame[prefix+'_price'].to_numpy()-frame.initial_stop.to_numpy())/frame.initial_risk.to_numpy()
+        leg=leg/np.maximum(1.0,exposure)
+    return w*base + (1-w)*np.where(fill,leg,0.0),fill
 
 
 def stat(r):
@@ -290,12 +295,12 @@ def aggregate(frame,cfg,output):
         crossing_targets=int((~period_mask(targets,'early',cut)&~period_mask(targets,'later',cut)).sum()))
 
 
-def run(output,workers):
+def run(output,workers,config=CONFIG):
     assert not output.exists(),'refusing to overwrite results'
-    for path in [Path(__file__),CONFIG]:
+    for path in [Path(__file__),config]:
         subprocess.run(['git','ls-files','--error-unmatch',str(path)],check=True,stdout=subprocess.DEVNULL)
         subprocess.run(['git','diff','--exit-code','HEAD','--',str(path)],check=True)
-    cfg=json.loads(CONFIG.read_text())
+    cfg=json.loads(config.read_text())
     assert cfg['round_trip_cost']==.002
     targets=pd.read_csv(EXCURSIONS)
     _,pairs,audit,sources=load(json.loads(SUMMARY_CONFIG.read_text()))
@@ -337,5 +342,5 @@ def run(output,workers):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=EXP/'results_v1');parser.add_argument('--workers',type=int,default=4)
-    args=parser.parse_args();run(args.output,args.workers)
+    parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=EXP/'results_v1');parser.add_argument('--workers',type=int,default=4);parser.add_argument('--config',type=Path,default=CONFIG)
+    args=parser.parse_args();run(args.output,args.workers,args.config)

@@ -85,3 +85,21 @@ def test_chronological_split_excludes_crossing_trades():
     cut=pd.Timestamp('2025-01-01',tz='UTC')
     assert period_mask(frame,'early',cut).tolist()==[True,False,False]
     assert period_mask(frame,'later',cut).tolist()==[False,False,True]
+
+
+def test_reclaim_risk_cap_keeps_original_absolute_stop_budget():
+    r=run([[100,104,94,102],[103,105,100,104],[104,105,103,104]],opposite=True)
+    frame=pd.DataFrame([r|dict(side=1,initial_stop=90,initial_risk=10)])
+    p=dict(method='reclaim_capped',fraction=.5,depth=.5,expiry=0)
+    value,fill=candidate_returns(frame,p)
+    assert fill[0]
+    assert value[0]==pytest.approx(.5*r['net_r']+.5*r['reclaim_50_r']/1.3)
+    assert .5+.5/1.3*1.3==pytest.approx(1.)
+
+
+def test_zero_depth_is_favorable_close_confirmation():
+    r=leg_paths(side=1,entry=100,stop0=90,tick=.1,o=np.array([100,102,104]),
+        h=np.array([102,104,105]),l=np.array([100,101,103]),c=np.array([101,103,104]),
+        atr=np.ones(3),e=0,x=2,opposite=True,trail=4,depths=[0])
+    assert r['reclaim_00_offset']==1 and r['reclaim_00_price']==102
+    assert r['limit_00_offset']==-1 and r['touch_00_offset']==0

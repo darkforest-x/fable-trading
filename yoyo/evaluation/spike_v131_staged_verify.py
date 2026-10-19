@@ -7,6 +7,7 @@ reclaim fills may chase above entry even though total quantity is capped.
 from __future__ import annotations
 
 import csv
+import argparse
 from datetime import datetime
 import gzip
 import json
@@ -20,6 +21,7 @@ def policy_value(row,p,touch=False,cap=False):
     w=float(p['fraction']); base=float(row['net_r'])
     if p['method']=='constant':return w*base,w>0,w
     method='touch' if touch and p['method']=='limit' else p['method']
+    if method=='reclaim_capped':method='reclaim';cap=True
     prefix=f"{method}_{round(float(p['depth'])*100):02d}"
     offset=int(row[prefix+'_offset'])
     filled=offset>=0 and (not p['expiry'] or offset<int(p['expiry']))
@@ -41,7 +43,9 @@ def selected(row,name,period,cut):
     return period=='full' or (period=='early' and entry<cut and exit_time<cut) or (period=='later' and entry>=cut)
 
 
-def run():
+def run(root=ROOT):
+    global ROOT
+    ROOT=root
     result=json.loads((ROOT/'result.json').read_text());cut=datetime.fromisoformat(result['config']['split'].replace('Z','+00:00'))
     with gzip.open(ROOT/'leg_paths.csv.gz','rt') as f:rows=list(csv.DictReader(f))
     target=[r for r in rows if r['cohort']=='signal'];control=[r for r in rows if r['cohort']=='control']
@@ -63,7 +67,7 @@ def run():
                 else:
                     price=float(r[key+'_price'])
                     eq(r[key+'_r'],(side*(exit_price-price)-.002*price)/risk)
-                    assert offset>0 if method=='reclaim' else side*(entry-price)>0
+                    assert offset>0 if method=='reclaim' else side*(entry-price)>=-1e-10
     diagnostics=[]
     for group in result['selections']:
         candidates=[group[k] for k in ['full_best','early_best','best_half','best_positive_initial','early_selected_later','full_best_later']]
@@ -101,4 +105,6 @@ def run():
     print(json.dumps(dict(checks=checks,rows=len(rows),diagnostics=diagnostics[:3]),ensure_ascii=False))
 
 
-if __name__=='__main__':run()
+if __name__=='__main__':
+    parser=argparse.ArgumentParser();parser.add_argument('--root',type=Path,default=ROOT)
+    run(parser.parse_args().root)
