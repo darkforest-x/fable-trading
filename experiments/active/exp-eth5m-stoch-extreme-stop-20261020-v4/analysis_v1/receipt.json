@@ -1,0 +1,41 @@
+{
+  "owner_config": {
+    "config_id": "e1180",
+    "buffer": 1,
+    "cap": 8,
+    "upper": 96.19,
+    "lower": 4,
+    "lookback": 3
+  },
+  "baseline_config": {
+    "config_id": "e1111",
+    "buffer": 1,
+    "cap": 8,
+    "lower": 0.0,
+    "upper": 100.0,
+    "lookback": -1
+  },
+  "independent_scalar_summary_groups": 40,
+  "baseline_v3_summary_groups": 104,
+  "hypotheses": 30,
+  "selected_rows": 15015,
+  "analysis_commit": "901d636250c3b1f87d1245f3436b600d6fc20a64",
+  "entry_configs": 1212,
+  "exit_policies": 26,
+  "grid_arms": 31512,
+  "positive_arms_by_segment": {
+    "all": 235,
+    "development": 408,
+    "examples": 1583,
+    "validation": 504
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "caveats": [
+    "All data previously exposed; chronological selection is not forward validation.",
+    "Full-history leaders are descriptive and chosen among31512arms.",
+    "Equal-risk and fixed1ETH profits differ; tighter stops increase feeR and change the point value of10R20R.",
+    "Random draws share symbols,side,week,volatility and exact causal admission filters; replacement allowed.",
+    "No classifier:AUC/top-decile scores undefined. Economic null uses matched random,weekly blocks and selected-family Holm."
+  ]
+}

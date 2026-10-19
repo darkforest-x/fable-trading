@@ -17,7 +17,7 @@ experiments:
   - experiment_id: exp-eth5m-stoch-extreme-stop-20261020-v4
     source_repo: darkforest-x/fable-trading
     source_commit: bfd5b5cd97
-    status: active
+    status: inconclusive
     question: Can causal blue-K extremes and smaller structural stops improve independent10R20R outcomes at frozen20bp?
     single_variable: Owner-authorized finite threshold-lookback-cap-buffer grid with26frozen exits; original admission timing,structural window,cost and splits unchanged. PROJECT_PLAN authorization20261020.
     artifacts: [eth5m-stoch-extreme-stop-20261020-v4]
@@ -25,8 +25,8 @@ experiments:
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: true
-    result: Running;parameters frozen before results,2024selection and later-segment checks.
-    notes: BlueK only,current and preceding bars;caps skip instead of clipping,buffer changes reprice stops and targets. No future conditioning,production or report.
+    result: Completed31512arms;235full-history positives all have<=49closed trades. ExactOwner261trades13targets4.98percent vs original4.96percent;smaller buffers worsen shared-trade returns. Development>=100closed selects K96/4,lookback2,buffer1,cap8,tp20_net_5r;validation156trades net-771.66766points,139matched excess+17.71504,p0.9384. No supported profitable optimum.
+    notes: Inconclusive because sparse positive arms exist but no sufficiently sampled profitable upgrade;negative broad results preserved.96tests,145834V3paths,5824newscalarpaths,104V3groups,40summaries,746905Kwindows,448143stops and1279all-positive paths pass. Five stop-attribution identities reproduce. Notion3fe8856479af812abe33d80718028f1f;historical/noaccountcurve/nohash/no production.
   - experiment_id: exp-eth5m-stoch-target-be-20261019-v3
     source_repo: darkforest-x/fable-trading
     source_commit: 111e6b3a36
