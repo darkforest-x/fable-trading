@@ -1,4 +1,6 @@
-# SPIKE 纪律交易 0.8.6
+# SPIKE 纪律交易 0.8.7
+
+0.8.7（16）：App 图标改为参考图右侧的纯黑底、常规白色 S。字形转为固定矢量路径，按真实可见边界居中；iOS、Android 各密度、自适应前景与背景、网页 favicon 和主屏幕图标统一更新。设计来源为 `design/monogram-s-0.8.7/source.json`，先前细长收腰的稿件已弃用。网页构建、图标尺寸与不透明性检查、iOS/Android 编译及签名验证通过；CoreDevice 1011 仍无法定位 iPhone，本次覆盖安装未成功，Android 未做真机验收。服务端保持 0.8.6，本次不改变交易逻辑。
 
 0.8.6（15）：首页与持仓页的币种名称可直接跳到对应合约，点击当前币种保留输入；默认按 24h 估算 USDT 成交额降序排列，不再固定置顶 BTC、ETH、SOL。列表打开后锁定排名，点击“更新排名”重新取值，涨跌幅仍按北京时间当日计算。成交额使用 OKX 基准币成交量乘最新价，缺失值排末尾，不以合约张数替代。Stitch 设计与来源位于 `design/flow-0.8.6/`。
 
@@ -88,7 +90,7 @@ python3 yoyo/discipline_app/scripts/live_service.py install --enable-execution
 
 安装包、设备安装收据、账户运行数据和验收截图只保存在本机，不随公开仓库分发；仓库保留完整源码、依赖锁文件及构建脚本。
 
-- Android：`releases/spike-discipline-0.8.6.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
+- Android：`releases/spike-discipline-0.8.7.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
 - iPhone：`mobile/ios/App/App.xcodeproj`，Xcode 26.6，Personal Team 真机签名。普通 Apple ID 的安装有有效期，需要重新签名续期；不会自动升级成付费会员。
 - 原生 HTTPS 校验保持开启，不绕过证书校验；原生请求不跟随重定向。
 
