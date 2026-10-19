@@ -18,12 +18,21 @@ import pandas as pd
 
 from yoyo.evaluation.spike_v131_rule_facts import ARMS,FEATURES
 from yoyo.evaluation.spike_v131_rule_study import CONFIG,BASE
-from yoyo.evaluation.spike_v131_entry_stages import read,dump,known
+from yoyo.evaluation.spike_v131_entry_stages import dump,known
 from yoyo.evaluation.spike_v131_excursions import provenance
 from yoyo.evaluation.spike_v112_support_study import _local_transitive_python
 
 POLICIES=(*ARMS,*(f'{feature}_{band}' for feature in FEATURES for band in ('known','low','mid','high')))
 FIELDS=('target','random','baseline_target','baseline_random','delta','excess','incremental_excess')
+
+
+def read(path,columns=None):
+    """Round-trip stored feature decimals before fitting/testing exact edges."""
+    try:
+        return pd.read_csv(path,usecols=None if columns is None else lambda c:c in columns,
+                           low_memory=False,float_precision='round_trip')
+    except pd.errors.EmptyDataError:
+        return pd.DataFrame(columns=columns or [])
 
 
 def epoch(values):

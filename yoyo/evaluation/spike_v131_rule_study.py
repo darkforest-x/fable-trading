@@ -48,7 +48,8 @@ def attempt_cache(folder,minutes):
     out={}
     for r in old.drop_duplicates(['anchor_i','side']).to_dict('records'):
         core={k:r[k] for k in ATTEMPT_FIELDS if k in r and pd.notna(r[k])}
-        core.setdefault('net_r',None)
+        # Filled censored paths have a numeric NaN, unlike unfilled None.
+        core.setdefault('net_r',np.nan if core['filled'] else None)
         for k in ('anchor_i','side','decision_i','entry_i','exit_i'):
             if k in core:core[k]=int(core[k])
         out[core['anchor_i'],core['side']]=core

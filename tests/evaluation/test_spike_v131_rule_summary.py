@@ -3,7 +3,19 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_v131_rule_facts import FEATURES
-from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer,four_week_blocks
+from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer,four_week_blocks,read
+
+
+def test_feature_decimals_round_trip_at_observed_quantile_edge(tmp_path):
+    value=1.8396688922272746
+    f=pd.DataFrame(dict(cohort=['signal']*4,members=[1]*4,
+        anchor_time=['2024-01-01T00:00Z']*4))
+    for name in FEATURES:f[name]=[0.,value,3.,4.]
+    f.to_csv(tmp_path/'15m.csv.gz',index=False)
+    q=cutpoints([tmp_path],dict(timeframes=[15],analysis_start='2023-01-01',split='2025-01-01',feature_quantiles=[1/3,2/3]))
+    decoded=read(tmp_path/'15m.csv.gz')
+    assert decoded.advance20_atr.iloc[1]==value==q['15']['advance20_atr']['lower']
+    assert eligibility(decoded,q['15'])['advance20_atr_low'].tolist()==[True,True,False,False]
 
 
 def rows():

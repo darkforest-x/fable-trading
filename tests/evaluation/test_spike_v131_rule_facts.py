@@ -27,6 +27,15 @@ def test_price_path_cache_discards_old_membership_and_nan_optional_fields(tmp_pa
     assert not {'members','compression_run60','trade_key','entry_i','exit_i'} & cached.keys()
 
 
+def test_filled_censored_price_cache_keeps_numeric_unknown(tmp_path):
+    from yoyo.evaluation.spike_v131_rule_study import attempt_cache
+    pd.DataFrame([dict(policy='rebreak',anchor_i=12,side=1,decision_i=17,status='censored_boundary',
+        filled=True,net_r=np.nan,entry_i=18,exit_i=20)]).to_csv(tmp_path/'15m.csv.gz',index=False)
+    cached=attempt_cache(tmp_path,15)[12,1]
+    assert np.isclose(cached['net_r'],np.nan,equal_nan=True)
+    assert cached['entry_i']==18 and cached['exit_i']==20
+
+
 def fixture():
     n=30
     d={k:np.full(n,v,float) for k,v in dict(open=95,high=99,low=90,close=95,atr=1,md=2,sb=1,
