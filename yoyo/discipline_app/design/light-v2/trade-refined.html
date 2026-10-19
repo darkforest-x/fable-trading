@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 - 独立合约模拟终端</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#f8fafc',
+              card: '#ffffff',
+              subtle: '#f1f5f9',
+              border: '#e2e8f0',
+              text: '#0f172a',
+              muted: '#64748b',
+              faint: '#94a3b8',
+              teal: '#0d9488',
+              tealLight: '#f0fdfa',
+              tealBorder: '#99f6e4',
+              emerald: '#059669',
+              emeraldLight: '#ecfdf5',
+              rose: '#e11d48',
+              roseLight: '#fff1f2'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif']
+          },
+          borderRadius: {
+            'card': '14px',
+            'control': '10px'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f1f5f9;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      font-size: 19px;
+      line-height: 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="text-app-text min-h-screen flex justify-center items-start selection:bg-teal-100 selection:text-teal-900">
+<!-- Mobile Viewport Shell (Strict 390px iPhone form-factor) -->
+<main class="w-full max-w-[390px] min-h-screen bg-app-bg border-x border-app-border flex flex-col relative shadow-[0_0_50px_rgba(15,23,42,0.04)]"><!-- Top Brand & Connection Bar -->
+<header class="w-full px-5 pt-4 pb-3 flex items-center justify-between bg-white border-b border-slate-100">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+</svg>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-[16px] font-bold tracking-tight text-slate-900">SPIKE</span>
+<span class="text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80">模拟</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200/70 text-slate-500">
+<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+<span class="text-[12px] font-medium">行情待连接</span>
+</div>
+</header>
+<!-- Main Scrollable Canvas -->
+<div class="flex-1 px-5 pt-4 pb-24 space-y-4 overflow-y-auto bg-white">
+<!-- Symbol & Quote Hero -->
+<section class="space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h1 class="text-[22px] font-bold text-slate-900 tracking-tight">BTCUSDT</h1>
+<span class="text-[12px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">永续</span>
+</div>
+<span class="text-[12px] text-slate-400 font-medium">等待行情</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-mono text-[34px] font-bold text-slate-800 leading-none tracking-tight">—</span>
+<span class="text-[14px] font-semibold text-slate-400 font-mono">USDT</span>
+</div>
+<div class="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100 text-[12px] text-slate-500">
+<div class="flex items-center justify-between">
+<span>买一 (Bid)</span>
+<span class="font-mono font-medium text-slate-700">—</span>
+</div>
+<div class="flex items-center justify-between">
+<span>卖一 (Ask)</span>
+<span class="font-mono font-medium text-slate-700">—</span>
+</div>
+</div>
+</section>
+<!-- Compact Risk Ribbon -->
+<div class="w-full px-3.5 py-2.5 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-between text-[#0f766e]">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-teal-700">shield</span>
+<span class="text-[13px] font-medium tracking-tight">单笔风险 2%</span>
+</div>
+<span class="text-teal-300 text-[12px]">|</span>
+<div class="text-[13px] font-medium tracking-tight">每日上限 3 次</div>
+</div>
+<!-- Protection Milestones Timeline -->
+<section class="rounded-xl bg-slate-50 border border-slate-100 p-3.5 space-y-2.5">
+<div class="flex items-center justify-between text-[12px]">
+<span class="font-semibold text-slate-800">阶梯止盈保护</span>
+<span class="text-slate-400">按初始仓位比例执行</span>
+</div>
+<div class="relative flex items-center justify-between px-3 pt-1">
+<div class="absolute left-7 right-7 top-[15px] h-0.5 bg-slate-200 z-0"></div>
+<!-- Milestone 1 -->
+<div class="relative z-10 flex flex-col items-center gap-1">
+<div class="w-5 h-5 rounded-full bg-white border-2 border-teal-600 flex items-center justify-center shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+</div>
+<span class="text-[12px] font-bold text-slate-800">1R 保本</span>
+</div>
+<!-- Milestone 2 -->
+<div class="relative z-10 flex flex-col items-center gap-1">
+<div class="w-5 h-5 rounded-full bg-white border-2 border-teal-600 flex items-center justify-center shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+</div>
+<span class="text-[12px] font-bold text-slate-800">3R 平 60%</span>
+</div>
+<!-- Milestone 3 -->
+<div class="relative z-10 flex flex-col items-center gap-1">
+<div class="w-5 h-5 rounded-full bg-white border-2 border-teal-600 flex items-center justify-center shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
+</div>
+<span class="text-[12px] font-bold text-slate-800">5R 全平</span>
+</div>
+</div>
+</section>
+<!-- Order Form Card -->
+<section class="rounded-2xl bg-slate-50 border border-slate-100 p-4 space-y-3.5 shadow-xs">
+<!-- Segmented Order Mode Switcher (44px) -->
+<div class="w-full h-[44px] p-1 rounded-xl bg-slate-200/70 flex items-center gap-1">
+<button class="flex-1 h-full rounded-lg bg-white text-slate-900 font-bold text-[14px] shadow-sm flex items-center justify-center" type="button">
+        市价
+      </button>
+<button class="flex-1 h-full rounded-lg text-slate-600 font-medium text-[14px] flex items-center justify-center hover:text-slate-900 transition-colors" type="button">
+        限价
+      </button>
+</div>
+<!-- Stop Loss Field (48px input) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="text-[13px] font-semibold text-slate-800 flex items-center gap-1.5">
+<span>初始止损</span>
+<span class="text-[10px] font-semibold px-1 py-0.5 rounded bg-rose-50 text-rose-600 border border-rose-200">必填</span>
+</label>
+<span class="text-[12px] text-slate-400 font-mono">预估亏损: — USDT</span>
+</div>
+<div class="relative flex items-center h-[48px]">
+<input class="w-full h-full bg-white border border-slate-200 focus:border-teal-600 focus:ring-1 focus:ring-teal-600 rounded-xl pl-3.5 pr-14 text-[14px] font-mono text-slate-900 placeholder:text-slate-400 outline-none transition-all shadow-xs" placeholder="输入止损触发价" type="number"/>
+<span class="absolute right-3.5 font-mono text-[12px] font-semibold text-slate-400 pointer-events-none">USDT</span>
+</div>
+</div>
+<!-- Leverage Line -->
+<div class="flex items-center justify-between py-1">
+<div class="flex items-center gap-2">
+<span class="text-[13px] font-semibold text-slate-800">杠杆</span>
+<div class="flex items-center gap-1.5 bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-[13px] font-mono font-bold text-slate-800 shadow-xs">
+<span>1x</span>
+<span class="material-symbols-outlined text-[16px] text-slate-400">expand_more</span>
+</div>
+</div>
+<span class="text-[12px] text-slate-400">上限 100x</span>
+</div>
+<!-- Risk Allocation Segments (44px target) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between text-[13px]">
+<span class="font-semibold text-slate-800">风险预算</span>
+<span class="font-mono font-medium text-teal-700">已选 100%</span>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<button class="h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 font-mono font-medium text-[13px] hover:border-slate-300 transition-colors" type="button">
+          25%
+        </button>
+<button class="h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 font-mono font-medium text-[13px] hover:border-slate-300 transition-colors" type="button">
+          50%
+        </button>
+<button class="h-[44px] rounded-xl bg-white border border-slate-200 text-slate-700 font-mono font-medium text-[13px] hover:border-slate-300 transition-colors" type="button">
+          75%
+        </button>
+<button class="h-[44px] rounded-xl bg-teal-600 text-white font-mono font-bold text-[13px] shadow-sm" type="button">
+          100%
+        </button>
+</div>
+<p class="text-[12px] text-slate-500 leading-normal pt-0.5">
+        占本次风险预算，100% 对应净值 2%
+      </p>
+</div>
+<!-- Dual Action CTA (48px targets) -->
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<button class="h-[48px] rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800/60 font-bold text-[14px] flex items-center justify-center cursor-not-allowed select-none" disabled="" type="button">
+        买入开多
+      </button>
+<button class="h-[48px] rounded-xl bg-rose-50 border border-rose-200 text-rose-800/60 font-bold text-[14px] flex items-center justify-center cursor-not-allowed select-none" disabled="" type="button">
+        卖出开空
+      </button>
+</div>
+<!-- Primary Action Bar (40px) -->
+<button class="w-full h-[40px] rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px] text-slate-600">refresh</span>
+<span>连接模拟服务</span>
+</button>
+</section>
+<!-- Slim Telemetry Row -->
+<div class="flex items-center justify-around py-2.5 px-3 rounded-xl bg-slate-50 border border-slate-100 text-[12px] text-slate-600">
+<div>当前持仓 <span class="font-mono font-bold text-slate-900 ml-0.5">0</span></div>
+<span class="text-slate-300">·</span>
+<div>委托挂单 <span class="font-mono font-bold text-slate-900 ml-0.5">0</span></div>
+<span class="text-slate-300">·</span>
+<div>今日已用 <span class="font-mono font-bold text-slate-900 ml-0.5">0</span> / <span class="font-mono text-slate-400">3</span></div>
+</div>
+<!-- Footer Note -->
+<footer class="pt-1 pb-1 text-center">
+<p class="text-[12px] text-slate-400 font-medium">
+      模拟交易 · 未启用实盘
+    </p>
+</footer>
+</div>
+<!-- Bottom Fixed 4-Tab Navigation Bar (44px targets) -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 z-40 pb-[max(0.6rem,env(safe-area-inset-bottom))]">
+<div class="grid grid-cols-4 items-center">
+<!-- Tab 1: Contract (Active) -->
+<button class="h-[44px] flex flex-col items-center justify-center text-teal-700" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M3 3v18h18M9 9l4 4 6-6" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-bold mt-1">合约</span>
+<span class="w-1 h-1 rounded-full bg-teal-600 mt-0.5"></span>
+</button>
+<!-- Tab 2: Positions -->
+<button class="h-[44px] flex flex-col items-center justify-center text-slate-400 hover:text-slate-700 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">持仓</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+<!-- Tab 3: Discipline -->
+<button class="h-[44px] flex flex-col items-center justify-center text-slate-400 hover:text-slate-700 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">纪律</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+<!-- Tab 4: Connection -->
+<button class="h-[44px] flex flex-col items-center justify-center text-slate-400 hover:text-slate-700 transition-colors" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium mt-1">连接</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+</div>
+</nav></main>
+</body></html>

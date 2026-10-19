@@ -1,0 +1,388 @@
+{
+  "projectId": "8978791379095391159",
+  "sessionId": "8237878718089223853",
+  "modelId": "GEMINI_3_8_FLASH",
+  "screens": [
+    {
+      "screenshot": {
+        "name": "projects/8978791379095391159/files/07fc060efe054f57865aa151d9ff89eb",
+        "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1UhLd-47zyxStfjlmgkbLkGfw2bJR7zJNgjo16bsx6Me4iXolRoUemI3D1TxGLpfy_7tXzkeiVddXECiAthAce5nd1lBUTcHdBA9Zx_CkBzwcyp_23P3SPo8wYJUwCbbryL7F_btNM-vCZ6HsWq3OOvMIJELRYEbFeKlwqDxpOFJmAR2Dqn5irkrfz5TXJ0eF603QlQm4NLJPrIGiufYG99GXnKiwp-Xn2yB4pXw9_cr3-fhTXoquyyB8o"
+      },
+      "htmlCode": {
+        "name": "projects/8978791379095391159/files/cf86771a7f4c4ad39dc9a9460b6961e4",
+        "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2E3OTRlZTFkZTZjYjRiZjBiMmVlNTVjYjE1MzI0ZDQyEgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+        "mimeType": "text/html"
+      },
+      "id": "b3c855b13501431daa81a71aca93dd85",
+      "generatedBy": "HatterAgent",
+      "width": "780",
+      "height": "2386",
+      "title": "SPIKE 独立纪律交易 · 当前持仓 (委托持仓金额规范版)",
+      "prompt": "Make one precise correction to the pending-order card (待成交委托区) in this SPIKE discipline screen, retaining the exact porcelain & jade (白瓷与软玉) palette, card radiuses, two-column metric layout, typography, timestamps, 44px cancel button (撤单), and overall 390px mobile layout.\n\nSpecifically, in the '待成交委托 (1)' card:\n1. Replace the metric titled '待成交数量' and its base-coin quantity with:\n   - Metric title: '委托持仓金额'\n   - Value: '800.00 USDT' (highlighted or clear monospace font)\n   - Pair with the fixed order price: '委托价: 80,000.00 USDT' (or clear two-column/inline presentation: 委托价 80,000.00 USDT, 委托持仓金额 800.00 USDT, representing the remaining unfilled order quantity multiplied by the fixed order price, strictly NOT margin or live market price).\n2. For example, the pending item row should show:\n   - Header row: BTC/USDT 买入开多 限价 | 挂单中 (soft jade badge)\n   - Metric row: 委托价: 80,000.00 USDT (left) and 委托持仓金额: 800.00 USDT (right, or clear two-column metric layout)\n   - Footer row: 2026-10-18 14:10:05 (北京时间) and the 44px '撤单' button.\n3. Ensure the container renders as a clean, authentic 390px mobile viewport (device_type: mobile).\n4. Keep all other sections intact: single-row top bar with settings gear, persistent close request recovery card ('正在核对原平仓请求'), current active position card ('BTC/USDT 永续' with +12.30 USDT, 止损到开仓价 / 平仓 buttons), recent completed collapsed ledger ('最近完成'), and 4-tab bottom navigation ('合约', '纪律', '持仓' [active], '统计').\n5. All values must remain purely synthetic placeholder examples. No unrelated UI or redesigned themes.",
+      "name": "projects/8978791379095391159/screens/b3c855b13501431daa81a71aca93dd85",
+      "theme": {
+        "colorMode": "LIGHT",
+        "font": "INTER",
+        "roundness": "ROUND_EIGHT",
+        "customColor": "#087f69",
+        "headlineFont": "INTER",
+        "bodyFont": "INTER",
+        "labelFont": "INTER",
+        "namedColors": {
+          "surface_variant": "#e2e3e1",
+          "on_secondary": "#ffffff",
+          "on_secondary_fixed": "#400011",
+          "primary_container": "#087f69",
+          "surface_dim": "#d9dad8",
+          "surface_container_highest": "#e2e3e1",
+          "on_surface": "#191c1b",
+          "inverse_primary": "#78d8be",
+          "tertiary_fixed": "#d8e5e1",
+          "surface_container_high": "#e7e8e6",
+          "surface": "#f9faf8",
+          "inverse_on_surface": "#f0f1ef",
+          "outline_variant": "#bdc9c4",
+          "on_surface_variant": "#3e4945",
+          "on_primary_fixed": "#002019",
+          "outline": "#6e7a75",
+          "secondary_container": "#fc7a8f",
+          "on_error": "#ffffff",
+          "primary": "#006452",
+          "surface_tint": "#006b58",
+          "primary_fixed_dim": "#78d8be",
+          "surface_container_low": "#f3f4f2",
+          "tertiary_fixed_dim": "#bcc9c6",
+          "background": "#f9faf8",
+          "on_secondary_fixed_variant": "#851e36",
+          "on_tertiary_fixed_variant": "#3d4947",
+          "surface_container_lowest": "#ffffff",
+          "on_primary": "#ffffff",
+          "tertiary_container": "#677370",
+          "error": "#ba1a1a",
+          "on_primary_container": "#d3fff0",
+          "on_tertiary": "#ffffff",
+          "on_error_container": "#93000a",
+          "on_secondary_container": "#730f2a",
+          "on_tertiary_container": "#ecf9f5",
+          "on_primary_fixed_variant": "#005142",
+          "on_background": "#191c1b",
+          "on_tertiary_fixed": "#121e1c",
+          "error_container": "#ffdad6",
+          "inverse_surface": "#2e3130",
+          "tertiary": "#4e5b58",
+          "secondary_fixed": "#ffd9dc",
+          "secondary_fixed_dim": "#ffb2bb",
+          "surface_bright": "#f9faf8",
+          "surface_container": "#edeeec",
+          "secondary": "#a5374d",
+          "primary_fixed": "#94f4d9"
+        },
+        "colorVariant": "FIDELITY",
+        "overridePrimaryColor": "#087f69",
+        "overrideSecondaryColor": "#ca5368",
+        "overrideTertiaryColor": "#e8f5f1",
+        "overrideNeutralColor": "#f6f7f5",
+        "spacingScale": 2,
+        "typography": {
+          "headline-sm": {
+            "fontFamily": "Inter",
+            "fontSize": "18px",
+            "fontWeight": "600",
+            "lineHeight": "24px",
+            "letterSpacing": "-0.01em"
+          },
+          "body-md": {
+            "fontFamily": "Inter",
+            "fontSize": "14px",
+            "fontWeight": "400",
+            "lineHeight": "20px",
+            "letterSpacing": "0em"
+          },
+          "body-lg": {
+            "fontFamily": "Inter",
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "lineHeight": "24px",
+            "letterSpacing": "-0.005em"
+          },
+          "label-sm": {
+            "fontFamily": "Inter",
+            "fontSize": "11px",
+            "fontWeight": "600",
+            "lineHeight": "14px",
+            "letterSpacing": "0.03em"
+          },
+          "headline-md": {
+            "fontFamily": "Inter",
+            "fontSize": "22px",
+            "fontWeight": "600",
+            "lineHeight": "28px",
+            "letterSpacing": "-0.015em"
+          },
+          "numeric-hero": {
+            "fontFamily": "Inter",
+            "fontSize": "36px",
+            "fontWeight": "600",
+            "lineHeight": "44px",
+            "letterSpacing": "-0.03em"
+          },
+          "label-md": {
+            "fontFamily": "Inter",
+            "fontSize": "12px",
+            "fontWeight": "500",
+            "lineHeight": "16px",
+            "letterSpacing": "0.02em"
+          },
+          "headline-lg": {
+            "fontFamily": "Inter",
+            "fontSize": "28px",
+            "fontWeight": "600",
+            "lineHeight": "36px",
+            "letterSpacing": "-0.02em"
+          },
+          "display-lg-mobile": {
+            "fontFamily": "Inter",
+            "fontSize": "32px",
+            "fontWeight": "600",
+            "lineHeight": "40px",
+            "letterSpacing": "-0.025em"
+          },
+          "numeric-hero-mobile": {
+            "fontFamily": "Inter",
+            "fontSize": "30px",
+            "fontWeight": "600",
+            "lineHeight": "38px",
+            "letterSpacing": "-0.02em"
+          },
+          "label-lg": {
+            "fontFamily": "Inter",
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "lineHeight": "20px",
+            "letterSpacing": "0em"
+          },
+          "body-sm": {
+            "fontFamily": "Inter",
+            "fontSize": "12px",
+            "fontWeight": "400",
+            "lineHeight": "16px",
+            "letterSpacing": "0.01em"
+          },
+          "display-lg": {
+            "fontFamily": "Inter",
+            "fontSize": "40px",
+            "fontWeight": "600",
+            "lineHeight": "48px",
+            "letterSpacing": "-0.03em"
+          }
+        },
+        "spacing": {
+          "space-md": "1rem",
+          "space-sm": "0.5rem",
+          "gutter": "1rem",
+          "margin-tablet": "2rem",
+          "space-xl": "2rem",
+          "gutter-desktop": "2rem",
+          "space-lg": "1.5rem",
+          "margin-desktop": "3rem",
+          "margin": "1.25rem",
+          "space-2xl": "3rem",
+          "space-xs": "0.25rem",
+          "gutter-tablet": "1.5rem"
+        },
+        "headlineFontFamily": "Inter",
+        "bodyFontFamily": "Inter",
+        "labelFontFamily": "Inter"
+      },
+      "deviceType": "MOBILE",
+      "screenType": "DESIGN",
+      "screenMetadata": {
+        "agentType": "PRO_AGENT",
+        "status": "COMPLETE"
+      },
+      "designSystem": {
+        "name": "assets/745540078c274a9187890c5bd14db33a",
+        "designSystem": {
+          "displayName": "Porcelain & Jade",
+          "styleGuidelines": "## Brand & Style\n\nThis design system expresses quiet financial mastery through the material metaphor of fine porcelain and polished jade. It replaces the anxious, high-frequency kinetic energy of typical retail trading apps with an atmosphere of restorative calm, deliberate clarity, and sculptural permanence.\n\n### Personality & Values\n- **Serene & Unhurried:** Wealth management framed as sustainable cultivation rather than reactive speculation. Generous negative space and soft contrast calm user anxiety during volatile financial moments.\n- **Crafted & Tactile:** Surfaces evoke hand-carved jade vessels and pure white glazed porcelain—sculpted, pillowed, and reassuringly solid.\n- **Authoritative Restraint:** Minimal ornamentation, intentional editorial hierarchy, and absence of visual clutter signal institution-grade precision.\n\n### Target Audience & Emotional Impact\nDesigned for high-intent, discerning individual investors and wealth-builders who value mental clarity, private-banking aesthetic standards, and intuitive tactile interactions over raw terminal data density. The interface evokes a feeling of balanced equilibrium, discrete luxury, and grounded optimism.\n\n## Layout & Spacing\n\nThe layout philosophy centers on expansive breathing room, content grouping within island cards, and a clear horizontal safe area to support mobile thumb reaches.\n\n### Layout Model\n- **Grid Architecture:** 4-column fluid layout on mobile screens (`< 640px`), expanding to 8-column layout on tablets (`640px - 1024px`), and a centered 12-column max-width (`1180px`) container on desktop viewports.\n- **Vertical Flow:** Generous spacing between distinct thematic modules (`space-xl` to `space-2xl`). Nested items within cards maintain tight structural cohesion using `space-xs` and `space-sm`.\n- **Bottom Clearance:** A persistent bottom offset of `6rem` must be reserved across all mobile scroll views to prevent floating navigation bar occlusion.\n\n## Elevation & Depth\n\nVisual hierarchy is maintained through tactile layering and warm diffused ambient shadows rather than harsh strokes or layered border outlines.\n\n### Depth Hierarchy\n- **Level 0 (Canvas Base):** Flat `#F6F7F5`. Uninterrupted background providing environmental softness.\n- **Level 1 (Recessed/Input):** `#EEF1EE` with no border and no shadow. Elements appear softly pressed into the porcelain surface.\n- **Level 2 (Resting Card):** Pure `#FFFFFF` resting on `#F6F7F5`. Supported by an ultra-diffused jade-tinted shadow: `box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02)`.\n- **Level 3 (Interactive / Hover):** Dynamic translation (`-1px` vertical lift) paired with an extended shadow: `box-shadow: 0 12px 32px -4px rgba(23, 36, 34, 0.07), 0 2px 6px 0 rgba(8, 127, 105, 0.03)`.\n- **Level 4 (Floating Dock / Navigation Island):** Frosted porcelain backdrop blur (`backdrop-filter: blur(20px) saturate(180%)`), layered with `rgba(255, 255, 255, 0.88)` and a gentle omnidirectional shadow: `box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10)`.\n\n## Components\n\n### Buttons\n- **Primary Action:** Solid `#087F69` surface with `#FFFFFF` text. Minimum height of `52px` (mobile thumb priority) with pill curvature (`rounded-full`), `space-lg` horizontal padding, and active-state compression (`transform: scale(0.98)`).\n- **Secondary Action:** Pill-shaped `#E8F5F1` background with `#087F69` typography and subtle hover intensification.\n- **Tertiary / Ghost:** Borderless `#172422` label with transparent background, gaining `#EEF1EE` on press.\n\n### Inputs & Form Fields\n- Height of `48px` to `54px`.\n- Rendered in borderless recessed `#EEF1EE` with `#172422` text and `#8A9A96` placeholder tone.\n- Rounded radius of `16px` or `rounded-full` depending on modal density. Focused state manifests via a soft jade ring: `box-shadow: 0 0 0 2px #087F69`.\n\n### Asset & Transaction Lists\n- High-breathing horizontal rows inside cards.\n- Left-aligned circular asset icon (`44px` diameter with jade or warm stone background).\n- Title and subtitle pair stacked vertically with no harsh dividing lines. Rows are separated by pure whitespace or a faint translucent divider (`rgba(23, 36, 34, 0.04)`).\n- Right-aligned balance accompanied by a compact rounded pill chip indicating market delta (`#E8F5F1` with `#087F69` text for gains; `#FDF0F2` with `#CA5368` text for losses).\n\n### Cards & Modular Containers\n- Constructed in pure white `#FFFFFF` with `24px` to `28px` corner radius.\n- Padding: `space-lg` (24px) internally.\n- Structural borders are strictly omitted. Separation is achieved through background value shifts (`#F6F7F5` to `#FFFFFF`) and elevation shadows.\n\n### Floating Navigation Island\n- Positioned floating centered horizontally, `20px` above the bottom viewport edge.\n- Pill-shaped (`rounded-full`) enclosure with a height of `64px`, featuring translucent white backdrop blur (`rgba(255, 255, 255, 0.88)`).\n- Active navigation item rendered as a solid jade circular pill carrying white iconography, while inactive items use `#687975`.\n\n### Checkboxes & Segmented Controls\n- Segmented tab controls use a continuous pill-shaped recessed track (`#EEF1EE`) housing a sliding pure white `#FFFFFF` pill thumb with light resting shadow.\n- Selection toggles utilize smooth pill checkboxes with an animated jade fill and white checkmark icon.",
+          "theme": {
+            "colorMode": "LIGHT",
+            "font": "INTER",
+            "roundness": "ROUND_EIGHT",
+            "customColor": "#087f69",
+            "headlineFont": "INTER",
+            "bodyFont": "INTER",
+            "labelFont": "INTER",
+            "namedColors": {
+              "on_secondary_container": "#730f2a",
+              "on_error_container": "#93000a",
+              "primary": "#006452",
+              "background": "#f9faf8",
+              "error_container": "#ffdad6",
+              "outline": "#6e7a75",
+              "secondary": "#a5374d",
+              "on_tertiary": "#ffffff",
+              "tertiary": "#4e5b58",
+              "inverse_surface": "#2e3130",
+              "tertiary_container": "#677370",
+              "secondary_fixed": "#ffd9dc",
+              "on_surface": "#191c1b",
+              "tertiary_fixed": "#d8e5e1",
+              "surface": "#f9faf8",
+              "on_secondary_fixed_variant": "#851e36",
+              "on_primary_fixed": "#002019",
+              "surface_container": "#edeeec",
+              "secondary_fixed_dim": "#ffb2bb",
+              "error": "#ba1a1a",
+              "on_tertiary_fixed": "#121e1c",
+              "on_tertiary_container": "#ecf9f5",
+              "inverse_on_surface": "#f0f1ef",
+              "on_surface_variant": "#3e4945",
+              "on_secondary": "#ffffff",
+              "surface_container_high": "#e7e8e6",
+              "on_primary_fixed_variant": "#005142",
+              "on_error": "#ffffff",
+              "surface_container_low": "#f3f4f2",
+              "on_background": "#191c1b",
+              "surface_container_lowest": "#ffffff",
+              "surface_dim": "#d9dad8",
+              "primary_container": "#087f69",
+              "surface_container_highest": "#e2e3e1",
+              "on_secondary_fixed": "#400011",
+              "surface_bright": "#f9faf8",
+              "tertiary_fixed_dim": "#bcc9c6",
+              "primary_fixed_dim": "#78d8be",
+              "surface_tint": "#006b58",
+              "outline_variant": "#bdc9c4",
+              "on_primary": "#ffffff",
+              "on_tertiary_fixed_variant": "#3d4947",
+              "surface_variant": "#e2e3e1",
+              "primary_fixed": "#94f4d9",
+              "on_primary_container": "#d3fff0",
+              "secondary_container": "#fc7a8f",
+              "inverse_primary": "#78d8be"
+            },
+            "designMd": "---\nname: Porcelain & Jade\ncolors:\n  surface: '#f9faf8'\n  surface-dim: '#d9dad8'\n  surface-bright: '#f9faf8'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f3f4f2'\n  surface-container: '#edeeec'\n  surface-container-high: '#e7e8e6'\n  surface-container-highest: '#e2e3e1'\n  on-surface: '#191c1b'\n  on-surface-variant: '#3e4945'\n  inverse-surface: '#2e3130'\n  inverse-on-surface: '#f0f1ef'\n  outline: '#6e7a75'\n  outline-variant: '#bdc9c4'\n  surface-tint: '#006b58'\n  primary: '#006452'\n  on-primary: '#ffffff'\n  primary-container: '#087f69'\n  on-primary-container: '#d3fff0'\n  inverse-primary: '#78d8be'\n  secondary: '#a5374d'\n  on-secondary: '#ffffff'\n  secondary-container: '#fc7a8f'\n  on-secondary-container: '#730f2a'\n  tertiary: '#4e5b58'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#677370'\n  on-tertiary-container: '#ecf9f5'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#94f4d9'\n  primary-fixed-dim: '#78d8be'\n  on-primary-fixed: '#002019'\n  on-primary-fixed-variant: '#005142'\n  secondary-fixed: '#ffd9dc'\n  secondary-fixed-dim: '#ffb2bb'\n  on-secondary-fixed: '#400011'\n  on-secondary-fixed-variant: '#851e36'\n  tertiary-fixed: '#d8e5e1'\n  tertiary-fixed-dim: '#bcc9c6'\n  on-tertiary-fixed: '#121e1c'\n  on-tertiary-fixed-variant: '#3d4947'\n  background: '#f9faf8'\n  on-background: '#191c1b'\n  surface-variant: '#e2e3e1'\ntypography:\n  display-lg:\n    fontFamily: Inter\n    fontSize: 40px\n    fontWeight: '600'\n    lineHeight: 48px\n    letterSpacing: -0.03em\n  display-lg-mobile:\n    fontFamily: Inter\n    fontSize: 32px\n    fontWeight: '600'\n    lineHeight: 40px\n    letterSpacing: -0.025em\n  headline-lg:\n    fontFamily: Inter\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 36px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Inter\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 28px\n    letterSpacing: -0.015em\n  headline-sm:\n    fontFamily: Inter\n    fontSize: 18px\n    fontWeight: '600'\n    lineHeight: 24px\n    letterSpacing: -0.01em\n  body-lg:\n    fontFamily: Inter\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 24px\n    letterSpacing: -0.005em\n  body-md:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 20px\n    letterSpacing: 0em\n  body-sm:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 16px\n    letterSpacing: 0.01em\n  label-lg:\n    fontFamily: Inter\n    fontSize: 14px\n    fontWeight: '500'\n    lineHeight: 20px\n    letterSpacing: 0em\n  label-md:\n    fontFamily: Inter\n    fontSize: 12px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: 0.02em\n  label-sm:\n    fontFamily: Inter\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.03em\n  numeric-hero:\n    fontFamily: Inter\n    fontSize: 36px\n    fontWeight: '600'\n    lineHeight: 44px\n    letterSpacing: -0.03em\n  numeric-hero-mobile:\n    fontFamily: Inter\n    fontSize: 30px\n    fontWeight: '600'\n    lineHeight: 38px\n    letterSpacing: -0.02em\nrounded:\n  sm: 0.25rem\n  DEFAULT: 0.5rem\n  md: 0.75rem\n  lg: 1rem\n  xl: 1.5rem\n  full: 9999px\nspacing:\n  gutter: 1rem\n  gutter-tablet: 1.5rem\n  gutter-desktop: 2rem\n  margin: 1.25rem\n  margin-tablet: 2rem\n  margin-desktop: 3rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2rem\n  space-2xl: 3rem\n---\n\n## Brand & Style\n\nThis design system expresses quiet financial mastery through the material metaphor of fine porcelain and polished jade. It replaces the anxious, high-frequency kinetic energy of typical retail trading apps with an atmosphere of restorative calm, deliberate clarity, and sculptural permanence.\n\n### Personality & Values\n- **Serene & Unhurried:** Wealth management framed as sustainable cultivation rather than reactive speculation. Generous negative space and soft contrast calm user anxiety during volatile financial moments.\n- **Crafted & Tactile:** Surfaces evoke hand-carved jade vessels and pure white glazed porcelain—sculpted, pillowed, and reassuringly solid.\n- **Authoritative Restraint:** Minimal ornamentation, intentional editorial hierarchy, and absence of visual clutter signal institution-grade precision.\n\n### Target Audience & Emotional Impact\nDesigned for high-intent, discerning individual investors and wealth-builders who value mental clarity, private-banking aesthetic standards, and intuitive tactile interactions over raw terminal data density. The interface evokes a feeling of balanced equilibrium, discrete luxury, and grounded optimism.\n\n## Colors\n\nThe palette draws directly from geological mineral tones and ceramic glazes. Avoid saturated neon accents or cold corporate blues.\n\n### Color Roles & Ratios\n- **Canvas Base (`#F6F7F5`):** Warm off-white porcelain tone serving as the default foundation across views.\n- **Surface Elevation (`#FFFFFF`):** High-purity white used for sculpted primary cards and active interaction sheets.\n- **Primary / Jade (`#087F69`):** Deep lustrous jade utilized for primary brand actions, positive market movement, secure state indicators, and active selection pills.\n- **Jade Tint (`#E8F5F1`):** Subdued, breathable pale wash for positive delta badges, selected item containers, and progress track fills.\n- **Semantic Rose (`#CA5368`):** Restrained, earthen rose for downward deltas, alerts, and critical confirmations. Never uses alarmist red.\n- **Rose Tint (`#FDF0F2`):** Low-saturation background tint for negative trend indicators and warning banners.\n- **Charcoal Text Primary (`#172422`):** Mineral-infused charcoal for primary numerals, major headlines, and high-emphasis data.\n- **Muted Text Secondary (`#687975`):** Balanced lichen-grey for body descriptions, labels, and secondary indicators.\n- **Muted Text Tertiary (`#8A9A96`):** Soft stone-grey for inactive iconography, timestamp captions, and helper notes.\n- **Input / Recessed Field (`#EEF1EE`):** Warm soft stone for borderless inputs, segmented controls, and nested sub-cards.\n\n## Typography\n\nThe typography system relies on a calibrated neutral sans-serif (Inter with dynamic fallback to SF Pro and PingFang SC) configured with optical sizing, tightened tracking on numerical figures, and proportional tabular numerals (`tnum`) for monetary tallies.\n\n### Usage Rules\n- **Monetary & Balance Figures:** Always apply `font-feature-settings: \"tnum\" 1, \"cv05\" 1` to financial statistics, balance sheets, and delta listings to avoid jitter during real-time value updates.\n- **Editorial Headings:** Major overview balances and top-level portfolio categories use semi-bold weights with negative tracking to convey weight and authority.\n- **Hierarchy Separation:** Pair `display-lg` numbers directly with `label-md` or `body-sm` muted uppercase metadata. Never combine two large weights in direct vertical succession.\n\n## Layout & Spacing\n\nThe layout philosophy centers on expansive breathing room, content grouping within island cards, and a clear horizontal safe area to support mobile thumb reaches.\n\n### Layout Model\n- **Grid Architecture:** 4-column fluid layout on mobile screens (`< 640px`), expanding to 8-column layout on tablets (`640px - 1024px`), and a centered 12-column max-width (`1180px`) container on desktop viewports.\n- **Vertical Flow:** Generous spacing between distinct thematic modules (`space-xl` to `space-2xl`). Nested items within cards maintain tight structural cohesion using `space-xs` and `space-sm`.\n- **Bottom Clearance:** A persistent bottom offset of `6rem` must be reserved across all mobile scroll views to prevent floating navigation bar occlusion.\n\n## Elevation & Depth\n\nVisual hierarchy is maintained through tactile layering and warm diffused ambient shadows rather than harsh strokes or layered border outlines.\n\n### Depth Hierarchy\n- **Level 0 (Canvas Base):** Flat `#F6F7F5`. Uninterrupted background providing environmental softness.\n- **Level 1 (Recessed/Input):** `#EEF1EE` with no border and no shadow. Elements appear softly pressed into the porcelain surface.\n- **Level 2 (Resting Card):** Pure `#FFFFFF` resting on `#F6F7F5`. Supported by an ultra-diffused jade-tinted shadow: `box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02)`.\n- **Level 3 (Interactive / Hover):** Dynamic translation (`-1px` vertical lift) paired with an extended shadow: `box-shadow: 0 12px 32px -4px rgba(23, 36, 34, 0.07), 0 2px 6px 0 rgba(8, 127, 105, 0.03)`.\n- **Level 4 (Floating Dock / Navigation Island):** Frosted porcelain backdrop blur (`backdrop-filter: blur(20px) saturate(180%)`), layered with `rgba(255, 255, 255, 0.88)` and a gentle omnidirectional shadow: `box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10)`.\n\n## Shapes\n\nThe design language uses organic, softened geometry evocative of tumble-polished stones and curved porcelain tableware.\n\n### Curvature Guidelines\n- **Containers & Primary Cards:** Curvature scales between `24px` and `28px` (`rounded-2xl` to `rounded-3xl`), producing a pillowed, tablet-like profile.\n- **Inputs & Interactive Controls:** Strict pill shaping (`rounded-full`, 9999px) for search filters, key action buttons, and segmented pickers; `16px` (`rounded-xl`) for compact form fields.\n- **Pills & Status Chips:** Fully rounded circular ends to eliminate harsh terminal edges across numerical telemetry.\n\n## Components\n\n### Buttons\n- **Primary Action:** Solid `#087F69` surface with `#FFFFFF` text. Minimum height of `52px` (mobile thumb priority) with pill curvature (`rounded-full`), `space-lg` horizontal padding, and active-state compression (`transform: scale(0.98)`).\n- **Secondary Action:** Pill-shaped `#E8F5F1` background with `#087F69` typography and subtle hover intensification.\n- **Tertiary / Ghost:** Borderless `#172422` label with transparent background, gaining `#EEF1EE` on press.\n\n### Inputs & Form Fields\n- Height of `48px` to `54px`.\n- Rendered in borderless recessed `#EEF1EE` with `#172422` text and `#8A9A96` placeholder tone.\n- Rounded radius of `16px` or `rounded-full` depending on modal density. Focused state manifests via a soft jade ring: `box-shadow: 0 0 0 2px #087F69`.\n\n### Asset & Transaction Lists\n- High-breathing horizontal rows inside cards.\n- Left-aligned circular asset icon (`44px` diameter with jade or warm stone background).\n- Title and subtitle pair stacked vertically with no harsh dividing lines. Rows are separated by pure whitespace or a faint translucent divider (`rgba(23, 36, 34, 0.04)`).\n- Right-aligned balance accompanied by a compact rounded pill chip indicating market delta (`#E8F5F1` with `#087F69` text for gains; `#FDF0F2` with `#CA5368` text for losses).\n\n### Cards & Modular Containers\n- Constructed in pure white `#FFFFFF` with `24px` to `28px` corner radius.\n- Padding: `space-lg` (24px) internally.\n- Structural borders are strictly omitted. Separation is achieved through background value shifts (`#F6F7F5` to `#FFFFFF`) and elevation shadows.\n\n### Floating Navigation Island\n- Positioned floating centered horizontally, `20px` above the bottom viewport edge.\n- Pill-shaped (`rounded-full`) enclosure with a height of `64px`, featuring translucent white backdrop blur (`rgba(255, 255, 255, 0.88)`).\n- Active navigation item rendered as a solid jade circular pill carrying white iconography, while inactive items use `#687975`.\n\n### Checkboxes & Segmented Controls\n- Segmented tab controls use a continuous pill-shaped recessed track (`#EEF1EE`) housing a sliding pure white `#FFFFFF` pill thumb with light resting shadow.\n- Selection toggles utilize smooth pill checkboxes with an animated jade fill and white checkmark icon.",
+            "colorVariant": "FIDELITY",
+            "overridePrimaryColor": "#087f69",
+            "overrideSecondaryColor": "#ca5368",
+            "overrideTertiaryColor": "#e8f5f1",
+            "overrideNeutralColor": "#f6f7f5",
+            "spacingScale": 2,
+            "typography": {
+              "body-sm": {
+                "fontFamily": "Inter",
+                "fontSize": "12px",
+                "fontWeight": "400",
+                "lineHeight": "16px",
+                "letterSpacing": "0.01em"
+              },
+              "numeric-hero-mobile": {
+                "fontFamily": "Inter",
+                "fontSize": "30px",
+                "fontWeight": "600",
+                "lineHeight": "38px",
+                "letterSpacing": "-0.02em"
+              },
+              "headline-sm": {
+                "fontFamily": "Inter",
+                "fontSize": "18px",
+                "fontWeight": "600",
+                "lineHeight": "24px",
+                "letterSpacing": "-0.01em"
+              },
+              "label-md": {
+                "fontFamily": "Inter",
+                "fontSize": "12px",
+                "fontWeight": "500",
+                "lineHeight": "16px",
+                "letterSpacing": "0.02em"
+              },
+              "headline-lg": {
+                "fontFamily": "Inter",
+                "fontSize": "28px",
+                "fontWeight": "600",
+                "lineHeight": "36px",
+                "letterSpacing": "-0.02em"
+              },
+              "headline-md": {
+                "fontFamily": "Inter",
+                "fontSize": "22px",
+                "fontWeight": "600",
+                "lineHeight": "28px",
+                "letterSpacing": "-0.015em"
+              },
+              "display-lg-mobile": {
+                "fontFamily": "Inter",
+                "fontSize": "32px",
+                "fontWeight": "600",
+                "lineHeight": "40px",
+                "letterSpacing": "-0.025em"
+              },
+              "label-sm": {
+                "fontFamily": "Inter",
+                "fontSize": "11px",
+                "fontWeight": "600",
+                "lineHeight": "14px",
+                "letterSpacing": "0.03em"
+              },
+              "display-lg": {
+                "fontFamily": "Inter",
+                "fontSize": "40px",
+                "fontWeight": "600",
+                "lineHeight": "48px",
+                "letterSpacing": "-0.03em"
+              },
+              "label-lg": {
+                "fontFamily": "Inter",
+                "fontSize": "14px",
+                "fontWeight": "500",
+                "lineHeight": "20px",
+                "letterSpacing": "0em"
+              },
+              "numeric-hero": {
+                "fontFamily": "Inter",
+                "fontSize": "36px",
+                "fontWeight": "600",
+                "lineHeight": "44px",
+                "letterSpacing": "-0.03em"
+              },
+              "body-lg": {
+                "fontFamily": "Inter",
+                "fontSize": "16px",
+                "fontWeight": "400",
+                "lineHeight": "24px",
+                "letterSpacing": "-0.005em"
+              },
+              "body-md": {
+                "fontFamily": "Inter",
+                "fontSize": "14px",
+                "fontWeight": "400",
+                "lineHeight": "20px",
+                "letterSpacing": "0em"
+              }
+            },
+            "spacing": {
+              "space-xl": "2rem",
+              "gutter-desktop": "2rem",
+              "space-sm": "0.5rem",
+              "space-md": "1rem",
+              "margin-tablet": "2rem",
+              "space-2xl": "3rem",
+              "gutter": "1rem",
+              "space-xs": "0.25rem",
+              "space-lg": "1.5rem",
+              "gutter-tablet": "1.5rem",
+              "margin": "1.25rem",
+              "margin-desktop": "3rem"
+            },
+            "headlineFontFamily": "Inter",
+            "bodyFontFamily": "Inter",
+            "labelFontFamily": "Inter"
+          }
+        },
+        "version": "1"
+      }
+    }
+  ]
+}

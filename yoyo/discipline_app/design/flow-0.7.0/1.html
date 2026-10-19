@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE 纪律交易 - 设置与账户</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#edeeec",
+            "secondary-fixed-dim": "#ffb2bb",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#087f69",
+            "on-secondary-container": "#730f2a",
+            "on-tertiary-container": "#ecf9f5",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "primary-fixed-dim": "#78d8be",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-variant": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "tertiary-container": "#677370",
+            "surface": "#f9faf8",
+            "outline": "#6e7a75",
+            "surface-tint": "#006b58",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#2e3130",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-secondary": "#ffffff",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "surface-container-low": "#f3f4f2",
+            "error-container": "#ffdad6",
+            "on-primary-fixed-variant": "#005142",
+            "on-surface-variant": "#3e4945",
+            "surface-container-highest": "#e2e3e1",
+            "primary-fixed": "#94f4d9",
+            "on-secondary-fixed": "#400011",
+            "background": "#f9faf8",
+            "surface-bright": "#f9faf8",
+            "on-surface": "#191c1b",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#002019",
+            "inverse-primary": "#78d8be",
+            "error": "#ba1a1a",
+            "on-primary-container": "#d3fff0",
+            "tertiary-fixed": "#d8e5e1",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed": "#121e1c",
+            "on-error": "#ffffff",
+            "surface-container-high": "#e7e8e6",
+            "secondary": "#a5374d",
+            "tertiary": "#4e5b58",
+            "secondary-container": "#fc7a8f",
+            "primary": "#006452",
+            "outline-variant": "#bdc9c4",
+            "surface-dim": "#d9dad8",
+            "on-background": "#191c1b"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "gutter-tablet": "1.5rem",
+            "gutter": "1rem",
+            "space-xl": "2rem",
+            "space-md": "1rem",
+            "margin-tablet": "2rem",
+            "space-lg": "1.5rem",
+            "space-2xl": "3rem",
+            "margin": "1.25rem",
+            "gutter-desktop": "2rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "3rem"
+          },
+          "fontFamily": {
+            "numeric-hero-mobile": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "body-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-md": ["Inter"],
+            "label-lg": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-hero-mobile": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "numeric-hero": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}],
+            "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600"}],
+            "display-lg-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600"}],
+            "headline-lg": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+            "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400"}],
+            "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}],
+            "label-sm": ["11px", {"lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600"}],
+            "headline-md": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "label-lg": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500"}]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    body {
+      background-color: #f9faf8;
+      color: #191c1b;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .porcelain-card {
+      background-color: #ffffff;
+      border-radius: 26px;
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+    }
+    .jade-pulse {
+      animation: pulse-ring 2.8s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background min-h-screen text-on-surface antialiased flex flex-col items-center">
+<!-- Mobile Viewport Container: 390px Max Width Standard -->
+<div class="w-full max-w-[390px] min-h-screen flex flex-col relative pb-32">
+<!-- Top App Bar (Shared Components Anchor execution) -->
+<header class="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-margin h-14">
+<!-- Brand & Leading Item -->
+<div class="flex items-center space-x-2">
+<div class="w-7 h-7 rounded-full bg-surface-container-low flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+</div>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">SPIKE 纪律交易</span>
+</div>
+<!-- Connection Pill Trailing Status -->
+<div class="flex items-center space-x-1.5 px-3 py-1 bg-surface-container-lowest rounded-full shadow-[0_2px_8px_rgba(23,36,34,0.04)] border border-surface-container">
+<span class="relative flex h-2 w-2">
+<span class="jade-pulse absolute inline-flex h-full w-full rounded-full bg-primary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary-container"></span>
+</span>
+<span class="text-[10px] font-medium tracking-tight text-on-surface-variant font-label-sm">守护中 18ms</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="px-margin flex flex-col space-y-6 pt-2">
+<!-- Title & Architecture Subtitle -->
+<section class="space-y-1">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold tracking-tight text-on-surface">设置与账户</h1>
+<p class="font-body-sm text-body-sm text-outline flex items-center space-x-1">
+<span class="material-symbols-outlined text-[13px] text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<span>当前设备已安全信任 · 私有纪律引擎常态生效</span>
+</p>
+</section>
+<!-- Card 1: 信任设备与连接状态 -->
+<section class="porcelain-card p-5 space-y-4">
+<div class="flex items-center justify-between pb-1">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-primary-fixed/30 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">信任设备与连接</h2>
+</div>
+<span class="px-2.5 py-0.5 rounded-full text-primary-container bg-on-tertiary-container font-label-sm text-label-sm font-medium">
+            已安全绑定
+          </span>
+</div>
+<!-- Device Info Item -->
+<div class="bg-surface-container-low rounded-2xl p-3.5 space-y-2">
+<div class="flex justify-between items-center">
+<div class="space-y-0.5">
+<div class="text-on-surface font-label-lg text-label-lg font-semibold flex items-center space-x-1.5">
+<span>iPhone 15 Pro</span>
+<span class="font-label-sm text-[10px] text-tertiary bg-surface-container px-1.5 py-0.2 rounded font-normal">本机</span>
+</div>
+<p class="text-outline font-body-sm text-[11px]">Secure Enclave 硬件级密钥已签名绑定</p>
+</div>
+<span class="material-symbols-outlined text-primary text-[20px]" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="pt-2 border-t border-surface-container/60 flex items-center justify-between">
+<div class="flex items-center space-x-2 text-on-surface-variant font-body-sm text-[12px]">
+<span class="material-symbols-outlined text-[16px] text-primary">sensors</span>
+<span>WebSocket 专线正常 (18ms)</span>
+</div>
+<span class="font-label-sm text-[11px] text-primary font-medium">常驻高频守护</span>
+</div>
+</div>
+<!-- Reconnect Action Button -->
+<button class="w-full h-11 bg-surface-container-low hover:bg-surface-container active:scale-[0.98] transition-all duration-150 rounded-full flex items-center justify-center space-x-2 text-primary font-label-lg text-label-lg font-medium" type="button">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span>测试并重新连接 (Reconnect)</span>
+</button>
+<!-- Hidden Setup Discreet Trigger & Note -->
+<div class="pt-1">
+<details class="group cursor-pointer">
+<summary class="flex items-center justify-between font-label-sm text-label-sm text-outline hover:text-on-surface transition-colors duration-150 select-none list-none">
+<span>设备授权管理配置</span>
+<span class="material-symbols-outlined text-sm transition-transform duration-200 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pt-3 pb-1 space-y-2.5">
+<p class="font-body-sm text-[11px] text-outline leading-relaxed">
+                初次配对设置仅在新设备首发授权时展开；当前设备已固化私有密钥链凭证，免除了敏感网络服务端点暴露风险。
+              </p>
+<button class="w-full text-left font-body-sm text-[12px] text-secondary hover:text-on-secondary-container transition-colors py-1 flex items-center space-x-1" type="button">
+<span class="material-symbols-outlined text-[14px]">key_off</span>
+<span>吊销此设备临时授权...</span>
+</button>
+</div>
+</details>
+</div>
+</section>
+<!-- Card 2: 交易账户管理 -->
+<section class="porcelain-card p-5 space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">交易账户</h2>
+</div>
+<span class="text-label-sm font-label-sm text-primary font-medium">1 个账户已接管</span>
+</div>
+<!-- Account Item: OKX 实盘 #01 -->
+<div class="bg-surface-container-low/70 rounded-2xl p-4 flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-md bg-on-surface text-surface flex items-center justify-center font-bold text-[10px]">
+                OK
+              </div>
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface">OKX 实盘 #01</span>
+<span class="text-[10px] font-medium bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">主账户</span>
+</div>
+<span class="flex items-center space-x-1 text-primary text-[11px] font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>运行中</span>
+</span>
+</div>
+<div class="grid grid-cols-2 gap-2 pt-1 text-left">
+<div class="bg-surface-container-lowest/80 rounded-xl p-2.5">
+<p class="font-label-sm text-[10px] text-outline">账户净值</p>
+<p class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight mt-0.5">1,000.00 <span class="text-[10px] text-tertiary font-normal">USDT</span></p>
+</div>
+<div class="bg-surface-container-lowest/80 rounded-xl p-2.5">
+<p class="font-label-sm text-[10px] text-outline">可用保证金</p>
+<p class="font-headline-sm text-headline-sm font-semibold text-on-surface tracking-tight mt-0.5">800.00 <span class="text-[10px] text-tertiary font-normal">USDT</span></p>
+</div>
+</div>
+</div>
+<!-- Action Pill: Account Management -->
+<button class="w-full h-11 bg-surface-container-low hover:bg-surface-container active:scale-[0.98] transition-all rounded-full flex items-center justify-between px-5 text-on-surface font-label-lg text-label-lg font-medium" type="button">
+<span>管理交易账户及隔离密钥</span>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</button>
+<!-- Cloud Sync Placeholder: Strictly Offline-First -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low/40 border border-surface-container flex items-start space-x-3">
+<span class="material-symbols-outlined text-outline mt-0.5 text-[18px]">cloud_off</span>
+<div class="space-y-0.5">
+<div class="flex items-center space-x-2">
+<span class="font-label-md text-label-md text-on-surface font-medium">Spike 云同步账户</span>
+<span class="font-label-sm text-[10px] text-tertiary px-1.5 py-0.2 bg-surface-container rounded-full">即将推出</span>
+</div>
+<p class="font-body-sm text-[11px] text-outline leading-tight">
+              占位预留 · 坚持纯本地离线优先运行原则，绝不伪造网络认证与数据抓取。
+            </p>
+</div>
+</div>
+</section>
+<!-- Card 3: 交易安全与执行偏好 -->
+<section class="porcelain-card p-5 space-y-4">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container-low text-on-surface flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">tune</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-semibold">执行与安全偏好</h2>
+</div>
+<div class="space-y-4 pt-1">
+<!-- Toggle 1: 二次确认 (Off by default for speed) -->
+<div class="flex items-center justify-between">
+<div class="space-y-0.5 pr-4">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">开平仓二次确认</div>
+<div class="font-body-sm text-[11px] text-outline">关闭状态下执行极速交易，单击直达纪律通道</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+<input class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="h-px bg-surface-container/60 w-full"></div>
+<!-- Toggle 2: 触感反馈 (On by default) -->
+<div class="flex items-center justify-between">
+<div class="space-y-0.5 pr-4">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">触感反馈 (Haptics)</div>
+<div class="font-body-sm text-[11px] text-outline">关键状态变化与纪律触发提供高级微触震动</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container"></div>
+</label>
+</div>
+<div class="h-px bg-surface-container/60 w-full"></div>
+<!-- Item: 动效与减弱动效 -->
+<div class="flex items-center justify-between cursor-pointer py-0.5 hover:opacity-80 transition-opacity">
+<div class="space-y-0.5">
+<div class="font-label-lg text-label-lg text-on-surface font-medium">动效模式</div>
+<div class="font-body-sm text-[11px] text-outline">界面转场与微动效帧率呈现</div>
+</div>
+<div class="flex items-center space-x-1 text-on-surface-variant font-label-md text-label-md">
+<span>标准平滑</span>
+<span class="material-symbols-outlined text-outline text-[16px]">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Card 4: 危险与重置区 -->
+<section class="porcelain-card p-5 space-y-3">
+<div class="flex items-center space-x-2 text-secondary">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<h2 class="font-headline-sm text-headline-sm font-semibold">敏感权限操作</h2>
+</div>
+<p class="font-body-sm text-[12px] text-outline leading-relaxed">
+          清除受信任设备凭证后，需在私有部署控制台重新配对。现存订单不受影响，但本机将停止接收纪律引擎实时指令。
+        </p>
+<button class="w-full h-11 border border-secondary/20 hover:bg-secondary-fixed/30 active:scale-[0.98] transition-all rounded-full flex items-center justify-center space-x-1.5 text-secondary font-label-lg text-label-lg font-medium" type="button">
+<span class="material-symbols-outlined text-[17px]">delete_forever</span>
+<span>清除设备授权 (Clear Device Authorization)</span>
+</button>
+</section>
+<!-- Institutional Footer -->
+<footer class="pt-4 pb-8 text-center space-y-1 select-none">
+<p class="text-[10px] tracking-widest text-outline font-semibold uppercase">
+          SPIKE DISCIPLINE ENGINE · V2.4.2
+        </p>
+<p class="font-body-sm text-[11px] text-outline/80 flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-[12px] text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>本地守护进程加密签名 · 零外泄隔离验证</span>
+</p>
+</footer>
+</main>
+<!-- BottomNavBar (Shared Component Execution - Active on "设置/纪律" ecosystem) -->
+<!-- The prompt defines tabs: 合约, 持仓, 纪律, 设置 (active jade green on current page) -->
+<nav aria-label="Main Navigation" class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<!-- Nav Item 1: 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</a>
+<!-- Nav Item 2: 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</a>
+<!-- Nav Item 3: 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield_lock">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- Nav Item 4: 设置 (Active State applied matching style_active_navigation) -->
+<a aria-current="page" class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 shadow-sm" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="tune" style="font-variation-settings: 'FILL' 1;">tune</span>
+<span class="text-label-sm font-label-sm mt-0.5">设置</span>
+</a>
+</nav>
+</div>
+</body></html>

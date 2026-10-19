@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=390, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE Discipline Trading</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-error": "#ffffff",
+            "tertiary-container": "#677370",
+            "tertiary": "#4e5b58",
+            "surface": "#f9faf8",
+            "error-container": "#ffdad6",
+            "surface-variant": "#e2e3e1",
+            "secondary": "#a5374d",
+            "on-secondary-fixed": "#400011",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#d3fff0",
+            "secondary-fixed-dim": "#ffb2bb",
+            "primary-container": "#087f69",
+            "background": "#f9faf8",
+            "on-tertiary-container": "#ecf9f5",
+            "surface-dim": "#d9dad8",
+            "outline": "#6e7a75",
+            "surface-tint": "#006b58",
+            "primary-fixed-dim": "#78d8be",
+            "primary": "#006452",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed": "#121e1c",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-background": "#191c1b",
+            "on-surface-variant": "#3e4945",
+            "inverse-primary": "#78d8be",
+            "on-surface": "#191c1b",
+            "surface-container-highest": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "secondary-container": "#fc7a8f",
+            "surface-container": "#edeeec",
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#002019",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e7e8e6",
+            "outline-variant": "#bdc9c4",
+            "on-secondary-container": "#730f2a",
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#f9faf8",
+            "inverse-surface": "#2e3130",
+            "tertiary-fixed": "#d8e5e1",
+            "on-primary-fixed-variant": "#005142",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container-low": "#f3f4f2",
+            "primary-fixed": "#94f4d9",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "3xl": "1.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "margin": "1.25rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "3rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xl": "2rem",
+            "gutter-tablet": "1.5rem"
+          },
+          "fontFamily": {
+            "numeric-hero-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .porcelain-shadow {
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+    }
+    .dock-shadow {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10);
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #087f69;
+      box-shadow: 0 2px 6px rgba(0, 100, 82, 0.28);
+      cursor: pointer;
+      margin-top: -8px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 4px;
+      cursor: pointer;
+      background: #e2e3e1;
+      border-radius: 9999px;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background antialiased flex justify-center min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<main class="w-[390px] min-h-screen relative flex flex-col pb-28">
+<!-- TopAppBar -->
+<header class="docked full-width top-0 sticky z-40 bg-background/80 dark:bg-background/80 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-margin h-14 max-w-md mx-auto">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[22px]" data-icon="trending_up">trending_up</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+</div>
+<div class="flex items-center space-x-2">
+<div class="flex items-center space-x-1.5 bg-surface-container-low px-2.5 py-1 rounded-full">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">OKX 实盘</span>
+</div>
+<div class="flex items-center space-x-1 bg-surface-container-low px-2 py-1 rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-primary" data-icon="sensors">sensors</span>
+<span class="font-label-sm text-label-sm font-medium">18ms</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Area -->
+<section class="px-margin flex flex-col space-y-4 pt-1">
+<!-- Pair Header Card -->
+<div class="bg-surface-container-lowest rounded-3xl p- space-md porcelain-shadow flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<button class="flex items-center space-x-2.5 bg-surface-container-low hover:bg-surface-container px-3 py-1.5 rounded-full transition-colors active:scale-95 duration-150" id="pairSelectorBtn">
+<!-- Official Bitcoin Token Icon -->
+<div class="w-6 h-6 rounded-full bg-[#F7931A] flex items-center justify-center text-white font-bold text-xs shadow-sm">
+              ₿
+            </div>
+<div class="flex items-center space-x-1">
+<span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">BTC/USDT</span>
+<span class="font-label-sm text-label-sm text-outline font-medium">永续</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="expand_more">expand_more</span>
+</button>
+<div class="flex items-center space-x-1.5 bg-surface-container-low px-2.5 py-1 rounded-full text-outline">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="verified_user">verified_user</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">硬性纪律守护中</span>
+</div>
+</div>
+<div class="flex items-baseline justify-between pt-0.5 px-0.5">
+<div class="flex items-baseline space-x-1.5">
+<span class="font-numeric-hero-mobile text-numeric-hero-mobile text-on-surface tracking-tight">68,420.50</span>
+<span class="font-label-sm text-label-sm text-outline">USDT</span>
+</div>
+<div class="flex items-center space-x-1 bg-surface-container-low text-primary px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[14px]" data-icon="arrow_drop_up">arrow_drop_up</span>
+<span class="font-label-md text-label-md font-semibold">+2.38%</span>
+</div>
+</div>
+</div>
+<!-- Order Ticket Card -->
+<div class="bg-surface-container-lowest rounded-3xl p-space-lg porcelain-shadow flex flex-col space-y-4">
+<!-- Direction Segmented Tabs -->
+<div class="grid grid-cols-2 p-1 bg-surface-container rounded-full gap-1">
+<button class="py-2.5 rounded-full font-label-lg text-label-lg font-semibold transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center space-x-1" id="tabBuy" onclick="switchDirection('buy')">
+<span class="w-2 h-2 rounded-full bg-primary mr-1"></span>
+<span>买入开多</span>
+</button>
+<button class="py-2.5 rounded-full font-label-lg text-label-lg font-medium transition-all duration-200 text-tertiary flex items-center justify-center space-x-1" id="tabSell" onclick="switchDirection('sell')">
+<span>卖出开空</span>
+</button>
+</div>
+<!-- Order Type & Leverage Pill Bar -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center space-x-1.5 bg-surface-container-low px-3 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-[16px] text-outline" data-icon="bolt">bolt</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">市价委托 (Market)</span>
+</div>
+<!-- Compact Leverage Pill Button -->
+<button class="flex items-center space-x-1 bg-surface-container-low hover:bg-surface-container active:scale-95 transition-all px-3 py-1.5 rounded-full" onclick="openLeverageModal()">
+<span class="font-label-md text-label-md text-on-surface font-semibold" id="leverageLabel">杠杆 100x</span>
+<span class="material-symbols-outlined text-outline text-[16px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+<!-- 初始止损 (Mandatory Stop Loss) Input -->
+<div class="flex flex-col space-y-1.5 pt-1">
+<div class="flex justify-between items-center px-0.5">
+<label class="font-label-md text-label-md font-semibold text-on-surface flex items-center space-x-1">
+<span>初始止损 (Stop Loss)</span>
+<span class="text-secondary font-bold">*</span>
+</label>
+<span class="font-label-sm text-label-sm text-primary font-medium bg-on-tertiary-container px-2 py-0.5 rounded-full">硬性锁定 1R 风险预算</span>
+</div>
+<div class="relative flex items-center">
+<input class="w-full h-12 bg-surface-container-low text-on-surface placeholder:text-outline/70 px-4 rounded-2xl border-0 focus:ring-2 focus:ring-primary font-body-md text-body-md transition-all" id="slInput" inputmode="decimal" placeholder="输入必选止损价 (如 67200.0)" type="text" value="67400.0"/>
+<span class="absolute right-4 font-label-md text-label-md text-outline">USDT</span>
+</div>
+<div class="flex justify-between items-center px-1">
+<span class="font-label-sm text-label-sm text-outline">单笔最大亏损限制</span>
+<span class="font-label-sm text-label-sm text-on-surface font-medium">≈ 100.00 USDT (1.0% 总资)</span>
+</div>
+</div>
+<!-- 开仓预算 / 数量 -->
+<div class="flex flex-col space-y-2.5 pt-2 border-t border-surface-container/60">
+<div class="flex justify-between items-baseline px-0.5">
+<span class="font-label-md text-label-md font-semibold text-on-surface">拟开数量</span>
+<div class="flex items-center space-x-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold" id="btcAmountDisplay">0.010</span>
+<span class="font-label-md text-label-md text-outline">BTC</span>
+</div>
+</div>
+<!-- Position Slider -->
+<div class="pt-1 px-1">
+<input class="w-full bg-transparent accent-primary" id="posSlider" max="100" min="0" oninput="handleSliderChange(this.value)" step="5" type="range" value="25"/>
+<div class="flex justify-between items-center text-outline font-label-sm text-label-sm pt-1">
+<span>0%</span>
+<button class="hover:text-primary" onclick="setPercent(25)">25%</button>
+<button class="hover:text-primary" onclick="setPercent(50)">50%</button>
+<button class="hover:text-primary" onclick="setPercent(75)">75%</button>
+<span>100%</span>
+</div>
+</div>
+<!-- Metric Summary -->
+<div class="grid grid-cols-2 gap-2 pt-1 bg-surface-container-low/60 rounded-2xl p-2.5">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">占用保证金预估</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">6.84 USDT</span>
+</div>
+<div class="flex flex-col text-right">
+<span class="font-label-sm text-label-sm text-outline">可用余额 (OKX)</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">10,240.50 USDT</span>
+</div>
+</div>
+</div>
+<!-- Primary CTA Button -->
+<div class="pt-2">
+<button class="w-full h-13 py-3.5 bg-primary-container text-on-primary rounded-full font-label-lg text-label-lg font-semibold shadow-md active:scale-[0.98] transition-transform duration-150 flex items-center justify-center space-x-2" id="orderCtaBtn">
+<span class="material-symbols-outlined text-[20px]" data-icon="lock">lock</span>
+<span id="ctaText">买入开多 (受纪律保护)</span>
+</button>
+<p class="font-label-sm text-label-sm text-outline text-center pt-2">
+            已开启执行风控：严禁撤销首道止损
+          </p>
+</div>
+</div>
+<!-- Quick Discipline Telemetry Mini-Card -->
+<div class="bg-surface-container-lowest/70 backdrop-blur-md rounded-2xl p-3 porcelain-shadow flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified">verified</span>
+</div>
+<div>
+<div class="font-label-md text-label-md font-semibold text-on-surface">今日纪律评分: 98/100</div>
+<div class="font-label-sm text-label-sm text-outline">无情绪化开仓 · 严格遵循 1R 限制</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="chevron_right">chevron_right</span>
+</div>
+</section>
+<!-- BottomNavBar (Shared Component from JSON) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 bg-surface-container-lowest/90 dark:bg-inverse-surface/90 backdrop-blur-xl rounded-full shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<!-- 合约 (Active Match based on current trading screen) -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="font-label-sm text-label-sm">合约</span>
+</button>
+<!-- 持仓 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="font-label-sm text-label-sm">持仓</span>
+</button>
+<!-- 纪律 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield_lock">shield_lock</span>
+<span class="font-label-sm text-label-sm">纪律</span>
+</button>
+<!-- 连接 -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="link">link</span>
+<span class="font-label-sm text-label-sm">连接</span>
+</button>
+</nav>
+<!-- Coin Search Modal (Hidden by Default) -->
+<div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm hidden items-end justify-center transition-opacity" id="pairModal">
+<div class="bg-surface-container-lowest w-full max-w-md rounded-t-3xl p-5 flex flex-col space-y-4 max-h-[707px] shadow-2xl">
+<div class="flex items-center justify-between pb-2">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">选择合约标的</span>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-outline" onclick="closePairModal()">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-3 text-outline text-[18px]" data-icon="search">search</span>
+<input class="w-full bg-surface-container-low pl-10 pr-4 py-2.5 rounded-full text-body-md font-body-md border-0 focus:ring-2 focus:ring-primary" placeholder="搜索代币或代码 (如 ETH, SOL)" type="text"/>
+</div>
+<div class="flex flex-col space-y-1 overflow-y-auto divide-y divide-surface-container-low">
+<div class="flex items-center justify-between py-3 px-2 rounded-2xl hover:bg-surface-container-low cursor-pointer" onclick="selectPair('BTC/USDT 永续', '68,420.50', '₿', '#F7931A')">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-sm">₿</div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">BTC/USDT 永续</div>
+<div class="font-label-sm text-label-sm text-outline">比特币 · OKX 永续</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">68,420.50</div>
+<div class="font-label-sm text-label-sm text-primary">+2.38%</div>
+</div>
+</div>
+<div class="flex items-center justify-between py-3 px-2 rounded-2xl hover:bg-surface-container-low cursor-pointer" onclick="selectPair('ETH/USDT 永续', '3,540.20', 'Ξ', '#627EEA')">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-[#627EEA] text-white flex items-center justify-center font-bold text-sm">Ξ</div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">ETH/USDT 永续</div>
+<div class="font-label-sm text-label-sm text-outline">以太坊 · OKX 永续</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">3,540.20</div>
+<div class="font-label-sm text-label-sm text-primary">+1.15%</div>
+</div>
+</div>
+<div class="flex items-center justify-between py-3 px-2 rounded-2xl hover:bg-surface-container-low cursor-pointer" onclick="selectPair('SOL/USDT 永续', '182.40', 'S', '#14F195')">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-black text-[#14F195] flex items-center justify-center font-bold text-sm">S</div>
+<div>
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">SOL/USDT 永续</div>
+<div class="font-label-sm text-label-sm text-outline">索拉纳 · OKX 永续</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-lg text-label-lg font-semibold text-on-surface">182.40</div>
+<div class="font-label-sm text-label-sm text-secondary">-0.82%</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Leverage Sheet Modal -->
+<div class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm hidden items-end justify-center" id="leverageModal">
+<div class="bg-surface-container-lowest w-full max-w-md rounded-t-3xl p-5 flex flex-col space-y-4 shadow-2xl">
+<div class="flex items-center justify-between pb-1">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">选择交易所杠杆</span>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-outline" onclick="closeLeverageModal()">
+<span class="material-symbols-outlined text-[18px]" data-icon="close">close</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-outline">
+          SPIKE 核心原则：高杠杆仅用于减少名义占用资金，严禁扩大绝对亏损额度 (1R 刚性限制)。
+        </p>
+<div class="grid grid-cols-4 gap-2 py-2">
+<button class="py-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold" onclick="selectLeverage(10)">10x</button>
+<button class="py-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold" onclick="selectLeverage(25)">25x</button>
+<button class="py-2.5 rounded-2xl bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold" onclick="selectLeverage(50)">50x</button>
+<button class="py-2.5 rounded-2xl bg-primary-container text-on-primary font-label-md text-label-md font-semibold" onclick="selectLeverage(100)">100x</button>
+</div>
+<button class="w-full py-3 bg-primary text-on-primary rounded-full font-label-md text-label-md font-medium" onclick="closeLeverageModal()">确认调整</button>
+</div>
+</div>
+</main>
+<!-- Interactive Logic -->
+<script>
+    let currentDirection = 'buy';
+
+    function switchDirection(dir) {
+      currentDirection = dir;
+      const tabBuy = document.getElementById('tabBuy');
+      const tabSell = document.getElementById('tabSell');
+      const ctaBtn = document.getElementById('orderCtaBtn');
+      const ctaText = document.getElementById('ctaText');
+      const slInput = document.getElementById('slInput');
+
+      if (dir === 'buy') {
+        tabBuy.className = 'py-2.5 rounded-full font-label-lg text-label-lg font-semibold transition-all duration-200 bg-surface-container-lowest text-primary shadow-sm flex items-center justify-center space-x-1';
+        tabBuy.innerHTML = '<span class="w-2 h-2 rounded-full bg-primary mr-1"></span><span>买入开多</span>';
+        tabSell.className = 'py-2.5 rounded-full font-label-lg text-label-lg font-medium transition-all duration-200 text-tertiary flex items-center justify-center space-x-1';
+        tabSell.innerHTML = '<span>卖出开空</span>';
+        
+        ctaBtn.className = 'w-full h-13 py-3.5 bg-primary-container text-on-primary rounded-full font-label-lg text-label-lg font-semibold shadow-md active:scale-[0.98] transition-transform duration-150 flex items-center justify-center space-x-2';
+        ctaText.textContent = '买入开多 (受纪律保护)';
+        slInput.value = '67400.0';
+      } else {
+        tabSell.className = 'py-2.5 rounded-full font-label-lg text-label-lg font-semibold transition-all duration-200 bg-surface-container-lowest text-secondary shadow-sm flex items-center justify-center space-x-1';
+        tabSell.innerHTML = '<span class="w-2 h-2 rounded-full bg-secondary mr-1"></span><span>卖出开空</span>';
+        tabBuy.className = 'py-2.5 rounded-full font-label-lg text-label-lg font-medium transition-all duration-200 text-tertiary flex items-center justify-center space-x-1';
+        tabBuy.innerHTML = '<span>买入开多</span>';
+
+        ctaBtn.className = 'w-full h-13 py-3.5 bg-secondary text-on-secondary rounded-full font-label-lg text-label-lg font-semibold shadow-md active:scale-[0.98] transition-transform duration-150 flex items-center justify-center space-x-2';
+        ctaText.textContent = '卖出开空 (受纪律保护)';
+        slInput.value = '69200.0';
+      }
+    }
+
+    function handleSliderChange(val) {
+      const btcAmount = ((val / 100) * 0.04).toFixed(3);
+      document.getElementById('btcAmountDisplay').textContent = btcAmount;
+    }
+
+    function setPercent(val) {
+      const slider = document.getElementById('posSlider');
+      slider.value = val;
+      handleSliderChange(val);
+    }
+
+    const pairSelectorBtn = document.getElementById('pairSelectorBtn');
+    const pairModal = document.getElementById('pairModal');
+
+    pairSelectorBtn.addEventListener('click', () => {
+      pairModal.classList.remove('hidden');
+      pairModal.classList.add('flex');
+    });
+
+    function closePairModal() {
+      pairModal.classList.add('hidden');
+      pairModal.classList.remove('flex');
+    }
+
+    function selectPair(name) {
+      closePairModal();
+    }
+
+    const leverageModal = document.getElementById('leverageModal');
+
+    function openLeverageModal() {
+      leverageModal.classList.remove('hidden');
+      leverageModal.classList.add('flex');
+    }
+
+    function closeLeverageModal() {
+      leverageModal.classList.add('hidden');
+      leverageModal.classList.remove('flex');
+    }
+
+    function selectLeverage(lev) {
+      document.getElementById('leverageLabel').textContent = `杠杆 ${lev}x`;
+      closeLeverageModal();
+    }
+  </script>
+</body></html>

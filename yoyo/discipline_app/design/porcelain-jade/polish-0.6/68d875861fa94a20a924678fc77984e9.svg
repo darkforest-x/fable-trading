@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background porcelain subtlest luxury gradient -->
+    <linearGradient id="bgPorcelain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCFCFA"/>
+      <stop offset="45%" stop-color="#F5F6F3"/>
+      <stop offset="100%" stop-color="#E9ECE7"/>
+    </linearGradient>
+
+    <!-- Ambient porcelain rim light / inner glow -->
+    <linearGradient id="porcelainVignette" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#DDE2DC" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Primary Emerald Jade Curve Gradient -->
+    <linearGradient id="jadeAscent" x1="15%" y1="90%" x2="85%" y2="10%">
+      <stop offset="0%" stop-color="#044D3F"/>
+      <stop offset="35%" stop-color="#066F5B"/>
+      <stop offset="70%" stop-color="#087F69"/>
+      <stop offset="100%" stop-color="#14A88B"/>
+    </linearGradient>
+
+    <!-- Secondary Counter-Interlocking Jade Rib Gradient -->
+    <linearGradient id="jadeSupport" x1="85%" y1="15%" x2="15%" y2="85%">
+      <stop offset="0%" stop-color="#0B987C"/>
+      <stop offset="40%" stop-color="#087F69"/>
+      <stop offset="85%" stop-color="#055546"/>
+      <stop offset="100%" stop-color="#02332A"/>
+    </linearGradient>
+
+    <!-- Soft specular highlight for sculptural jade depth -->
+    <linearGradient id="jadeGleam" x1="30%" y1="10%" x2="70%" y2="90%">
+      <stop offset="0%" stop-color="#A5F3E2" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#34D399" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#044D3F" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Precision drop shadow for tactile lift on porcelain surface -->
+    <filter id="sculpturalShadow" x="-20%" y="-20%" width="150%" height="150%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#0A241F" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#087F69" flood-opacity="0.12"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#042B23" flood-opacity="0.10"/>
+    </filter>
+
+    <filter id="internalSoftCrease" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="-6" dy="-6" stdDeviation="10" flood-color="#02241D" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed 1024x1024 square background canvas (OS rounds corners smoothly) -->
+  <rect width="1024" height="1024" fill="url(#bgPorcelain)"/>
+
+  <!-- Subtle refined porcelain ceramic rim border -->
+  <rect x="2" y="2" width="1020" height="1020" fill="none" stroke="url(#porcelainVignette)" stroke-width="4"/>
+
+  <!-- Sculptural Jade Monogram Group: Geometric S-Spike Kinetic Curve -->
+  <g filter="url(#sculpturalShadow)">
+    <!-- Base Lower Foundation Curve (Discipline Anchor & Fluid Turn) -->
+    <path d="M 276 690 
+             C 276 776 346 846 432 846 
+             C 528 846 620 782 682 708 
+             C 730 650 754 582 754 512 
+             C 754 448 732 388 692 340 
+             L 576 438 
+             C 598 468 610 500 610 534 
+             C 610 578 584 624 550 660 
+             C 514 698 466 720 420 720 
+             C 388 720 364 698 364 670 
+             C 364 636 390 604 424 576 
+             L 516 502 
+             C 454 506 388 534 338 578 
+             C 298 612 276 652 276 690 Z" 
+          fill="url(#jadeSupport)"/>
+
+    <!-- Dominant Upper Piercing Spike / Ascending Fin Curve -->
+    <path d="M 748 334 
+             C 748 248 678 178 592 178 
+             C 496 178 404 242 342 316 
+             C 294 374 270 442 270 512 
+             C 270 576 292 636 332 684 
+             L 448 586 
+             C 426 556 414 524 414 490 
+             C 414 446 440 400 474 364 
+             C 510 326 558 304 604 304 
+             C 636 304 660 326 660 354 
+             C 660 388 634 420 600 448 
+             L 508 522 
+             C 570 518 636 490 686 446 
+             C 726 412 748 372 748 334 Z" 
+          fill="url(#jadeAscent)"/>
+
+    <!-- Central Interlocking Jade Core Diamond/Keystone Blade (Unified Equilibrium) -->
+    <path d="M 512 372 
+             C 552 420 580 474 580 528 
+             C 580 540 576 554 568 568 
+             L 456 456 
+             C 468 438 488 408 512 372 Z" 
+          fill="#14A88B" 
+          opacity="0.9" />
+
+    <!-- Pure Light Reflection Accent across the Jade Crest -->
+    <path d="M 592 196 
+             C 666 196 726 256 730 330 
+             C 700 376 654 418 604 454 
+             L 582 436 
+             C 624 398 644 366 644 346 
+             C 644 316 620 292 588 292 
+             C 542 292 494 320 456 360 
+             L 434 342 
+             C 478 296 534 262 588 200 
+             C 590 198 591 196 592 196 Z" 
+          fill="url(#jadeGleam)" 
+          opacity="0.85"/>
+  </g>
+</svg>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE 独立纪律交易 v0.8.4+ · 交互规范状态工程看板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            porcelain: '#F8FAF8',
+            'porcelain-dim': '#EFF2EE',
+            'porcelain-card': '#FFFFFF',
+            jade: '#087F69',
+            'jade-dark': '#066352',
+            'jade-light': '#E6F4F1',
+            'jade-border': '#A4D9CE',
+            'rose-trade': '#E11D48',
+            'rose-light': '#FFE4E6',
+            'amber-warn': '#D97706',
+            'amber-light': '#FEF3C7',
+            'text-primary': '#111827',
+            'text-secondary': '#4B5563',
+            'text-tertiary': '#9CA3AF',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+    .spec-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body class="bg-[#F2F5F2] text-text-primary font-sans antialiased p-6 md:p-10 min-h-screen">
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <header class="bg-porcelain-card rounded-2xl p-6 border border-black/5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="w-2.5 h-2.5 rounded-full bg-jade"></span>
+          <span class="text-xs font-mono font-semibold tracking-wider text-jade uppercase">PROPRIETARY DISCIPLINE SPEC v0.8.4+</span>
+          <span class="spec-badge bg-jade-light text-jade border border-jade/20">PRODUCTION READY</span>
+        </div>
+        <h1 class="text-2xl font-bold tracking-tight text-gray-900">SPIKE 状态交互工程规范与核心微状态看板</h1>
+        <p class="text-sm text-text-secondary mt-1">白瓷与软玉体系 · 覆盖非阻断进度卡、开仓阻断与路由、平仓对账恢复、1R自动反算与行内校验、自选星标及折叠账单</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="text-right text-xs text-text-tertiary">
+          <div class="font-mono text-gray-700">触控物理基准: ≥ 44×44px</div>
+          <div class="font-mono text-gray-700">动效节拍: 150ms ~ 220ms</div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-jade/10 flex items-center justify-center text-jade">
+          <span class="material-symbols-outlined">rule</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Grid of 6 Interaction Modules -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Module 1: Order Progress Card -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-jade"></span>
+            <h2 class="text-sm font-semibold text-gray-900">01. 行内订单进度卡片</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">INLINE PROGRESS</span>
+        </div>
+        <p class="text-xs text-text-secondary">报单提交中 → 挂单/部分成交/已完全成交 → 保护状态生效。常规成功为顶部非阻断 Toast，异常/未确定保留独立卡片。</p>
+
+        <!-- State A: Submitting -> Resting -->
+        <div class="rounded-xl border border-jade/25 bg-jade-light/30 p-3.5 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-jade flex items-center gap-1.5">
+              <svg class="animate-spin h-3.5 w-3.5 text-jade" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              正在提交买入委托 (BTC/USDT)
+            </span>
+            <span class="font-mono text-jade text-[11px]">84ms</span>
+          </div>
+          <div class="w-full bg-black/5 rounded-full h-1.5 overflow-hidden">
+            <div class="bg-jade h-1.5 rounded-full w-2/3 transition-all duration-200"></div>
+          </div>
+          <div class="flex justify-between text-[11px] text-text-secondary font-mono">
+            <span>限价 100.00 USDT · 0.020 BTC</span>
+            <span>等待交易所确认</span>
+          </div>
+        </div>
+
+        <!-- State B: Filled & Protection Verified -->
+        <div class="rounded-xl border border-jade/30 bg-jade-light/50 p-3.5 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-jade-dark flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-jade">verified</span>
+              已成交 · 1R 纪律保护就绪
+            </span>
+            <span class="spec-badge bg-jade text-white text-[10px]">VERIFIED</span>
+          </div>
+          <div class="text-[11px] text-text-secondary flex justify-between font-mono">
+            <span>成交均价: 100.00 USDT</span>
+            <span>止损价: 95.00 (-5.00%)</span>
+          </div>
+        </div>
+
+        <!-- State C: Explicit Uncertain State -->
+        <div class="rounded-xl border border-amber-warn/30 bg-amber-light/40 p-3.5 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-amber-900 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sm text-amber-warn">help_outline</span>
+              委托结果未确认 (超时等待对账)
+            </span>
+            <span class="spec-badge bg-amber-warn text-white text-[10px]">UNCERTAIN</span>
+          </div>
+          <p class="text-[11px] text-amber-900/80 leading-relaxed">交易所网关未返回明确状态。系统正在向 OKX 轮询核对，请勿重复下单。</p>
+          <div class="flex items-center justify-end gap-2 pt-1">
+            <button class="h-8 px-3 rounded-lg text-xs bg-white text-gray-800 border border-black/10 font-medium">查看持仓</button>
+            <button class="h-8 px-3 rounded-lg text-xs bg-amber-warn text-white font-medium">重试对账</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 2: Disabled Entry & Route Reasons -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-rose-trade"></span>
+            <h2 class="text-sm font-semibold text-gray-900">02. 开仓阻断原因与路由</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">ACTIONABLE GATES</span>
+        </div>
+        <p class="text-xs text-text-secondary">明确展示阻断类型（标的限额/并发占满/对账排队/冷却倒计时），提供直达路由按钮。</p>
+
+        <!-- Condition 1: Category Collateral Exhausted -->
+        <div class="rounded-xl border border-rose-trade/20 bg-rose-light/30 p-3.5 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-rose-trade flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">block</span>
+              主流币保证金配额已用尽 (10%)
+            </span>
+            <span class="text-[11px] font-mono text-rose-trade">0.00 / 100 U</span>
+          </div>
+          <p class="text-[11px] text-text-secondary">BTC/ETH 累计保证金已达净值上限，需待已有持仓平仓或释放限价挂单。</p>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] text-text-tertiary font-mono">规则: 净值 10% 封顶</span>
+            <button class="h-8 px-3 rounded-lg bg-white border border-rose-trade/30 text-rose-trade text-xs font-medium flex items-center gap-1 active:scale-95 transition-transform">
+              前往持仓释放
+              <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Condition 2: Cooldown Countdown -->
+        <div class="rounded-xl border border-gray-200 bg-gray-50 p-3.5 space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-gray-800 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm text-gray-500">timer</span>
+              止损冷静锁生效中
+            </span>
+            <span class="font-mono text-gray-900 font-semibold bg-gray-200/80 px-2 py-0.5 rounded text-[11px]">04:22:15</span>
+          </div>
+          <p class="text-[11px] text-text-secondary">触发单日连亏保护或全平止损。硬性锁定期内禁止任何主动开仓操作。</p>
+          <div class="flex items-center justify-between pt-1">
+            <span class="text-[11px] text-text-tertiary">日亏保护剩余 1 笔</span>
+            <button class="h-8 px-3 rounded-lg bg-white border border-gray-300 text-gray-700 text-xs font-medium flex items-center gap-1 active:scale-95 transition-transform">
+              查看纪律详情
+              <span class="material-symbols-outlined text-xs">arrow_forward</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 3: Close Recovery Card -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-amber-warn"></span>
+            <h2 class="text-sm font-semibold text-gray-900">03. 平仓对账与恢复卡片</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">RECOVERY CARD</span>
+        </div>
+        <p class="text-xs text-text-secondary">网络断流或服务端对账中时常驻持仓页。只读核对，严禁隐蔽自动二次报单，仅允许人工单次确认重试。</p>
+
+        <!-- Recovery Card UI -->
+        <div class="rounded-xl border-2 border-amber-warn/40 bg-amber-light/30 p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-900 flex items-center gap-1.5">
+              <svg class="animate-spin h-3.5 w-3.5 text-amber-warn" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              正在核对原平仓请求
+            </span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-warn/10 text-amber-900 font-medium">REQ #PL-8941</span>
+          </div>
+
+          <div class="text-xs text-amber-950/80 space-y-1 font-mono text-[11px] bg-white/60 p-2.5 rounded-lg border border-amber-warn/20">
+            <div class="flex justify-between">
+              <span>标的仓位:</span>
+              <span class="font-bold">BTC/USDT 50% (50.00 USDT)</span>
+            </div>
+            <div class="flex justify-between">
+              <span>原指令状态:</span>
+              <span class="text-amber-800">对账排队中 (OKX 待确认)</span>
+            </div>
+            <div class="flex justify-between">
+              <span>发起时间:</span>
+              <span>14:15:22 (48秒前)</span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-amber-900 leading-snug">
+            ⚠️ 严禁自动发起新报单。若交易所已在处理，盲目重试将导致双重平仓或反向开空。
+          </p>
+
+          <div class="flex items-center justify-between pt-1 gap-2">
+            <button class="h-9 flex-1 rounded-xl bg-white border border-amber-warn/40 text-amber-900 text-xs font-medium active:scale-95 transition-transform">
+              仅刷新对账状态
+            </button>
+            <button class="h-9 flex-1 rounded-xl bg-amber-warn text-white text-xs font-medium active:scale-95 transition-transform flex items-center justify-center gap-1 shadow-sm">
+              <span class="material-symbols-outlined text-xs">restart_alt</span>
+              确认重发原请求
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 4: 1R Auto Stop & Field Validation -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-jade"></span>
+            <h2 class="text-sm font-semibold text-gray-900">04. 1R 自动模式与行内校验</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">AUTO-1R & VALIDATION</span>
+        </div>
+        <p class="text-xs text-text-secondary">多/空 1R 常驻药丸，编辑保证金/杠杆/限价时自动反算。人工手改止损时退回「手动」，行内提示错误不弹窗。</p>
+
+        <!-- 1R Persistent Chips -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-gray-700">止损锁定模式</span>
+            <span class="text-[11px] text-jade font-medium flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-jade animate-pulse"></span>
+              自动反算已激活
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="flex-1 h-9 rounded-xl bg-jade text-white text-xs font-medium flex items-center justify-center gap-1.5 border border-jade shadow-sm">
+              <span class="material-symbols-outlined text-xs">check</span>
+              多单 1R (自动更新)
+            </button>
+            <button class="flex-1 h-9 rounded-xl bg-porcelain-dim text-text-secondary text-xs font-medium flex items-center justify-center gap-1 border border-black/5">
+              空单 1R
+            </button>
+          </div>
+        </div>
+
+        <!-- Stop Loss Input with Inline Error -->
+        <div class="space-y-1">
+          <label class="text-xs text-text-secondary flex justify-between">
+            <span>初始止损价 (Stop Loss)</span>
+            <span class="text-rose-trade font-mono text-[11px]">止损方向错误</span>
+          </label>
+          <div class="relative">
+            <input type="text" value="105.00" class="w-full h-11 px-3 rounded-xl border border-rose-trade bg-rose-light/10 font-mono text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-trade/20" />
+            <span class="absolute right-3 top-3 text-xs text-rose-trade font-mono">USDT</span>
+          </div>
+          <p class="text-[11px] text-rose-trade flex items-center gap-1 mt-1">
+            <span class="material-symbols-outlined text-xs">error</span>
+            做多止损价必须低于入场价 (当前 100.00 USDT)
+          </p>
+        </div>
+
+        <!-- Valid State -->
+        <div class="rounded-lg bg-jade-light/40 border border-jade/20 p-2.5 text-[11px] text-jade-dark flex items-center justify-between font-mono">
+          <span>✓ 1R 自动锚定单笔亏损: 10.00 U</span>
+          <span class="font-bold">95.00 USDT (-5%)</span>
+        </div>
+      </section>
+
+      <!-- Module 5: Coin Sheet Tabs & Star Button -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-jade"></span>
+            <h2 class="text-sm font-semibold text-gray-900">05. 标的自选/最近与稳定排序</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">SYMBOL SELECTOR</span>
+        </div>
+        <p class="text-xs text-text-secondary">「全部 / 自选 / 最近」三 Tab。星标独立 44px 热区，列表稳定不随价格每秒乱跳，提供明确「更新排名」按钮。</p>
+
+        <!-- Segmented Tabs -->
+        <div class="flex bg-porcelain-dim p-1 rounded-xl gap-1">
+          <button class="flex-1 py-1.5 rounded-lg text-xs font-medium text-text-secondary">全部</button>
+          <button class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-white text-gray-900 shadow-xs flex items-center justify-center gap-1">
+            <span class="material-symbols-outlined text-xs text-amber-500 fill-1">star</span>
+            自选 (3)
+          </button>
+          <button class="flex-1 py-1.5 rounded-lg text-xs font-medium text-text-secondary">最近</button>
+        </div>
+
+        <!-- Stable Header with Update Button -->
+        <div class="flex items-center justify-between text-[11px] text-text-tertiary px-1">
+          <span>排序: 按24h成交额 (锁定)</span>
+          <button class="text-jade font-medium flex items-center gap-0.5 hover:underline active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-xs">sync</span>
+            更新排名
+          </button>
+        </div>
+
+        <!-- Sample Coin Row with Independent Star -->
+        <div class="divide-y divide-black/5 rounded-xl border border-black/5 overflow-hidden">
+          <div class="flex items-center justify-between p-2.5 bg-white hover:bg-porcelain-dim transition-colors">
+            <!-- Independent 44px Star Button -->
+            <button class="w-11 h-11 -ml-1 flex items-center justify-center text-amber-500 active:scale-90 transition-transform">
+              <span class="material-symbols-outlined text-lg fill-1">star</span>
+            </button>
+            <div class="flex-1 ml-1">
+              <div class="flex items-center gap-1.5">
+                <span class="font-bold text-xs text-gray-900">BTC/USDT</span>
+                <span class="text-[10px] bg-gray-100 text-gray-600 px-1 rounded">100x</span>
+              </div>
+              <div class="text-[11px] text-text-tertiary font-mono">100.00 USDT</div>
+            </div>
+            <div class="text-right font-mono">
+              <div class="text-xs font-semibold text-jade">+2.40%</div>
+              <div class="text-[10px] text-text-tertiary">主流限额 10%</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Module 6: Recent Completed Collapsible Card -->
+      <section class="bg-porcelain-card rounded-2xl p-5 border border-black/5 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-black/5 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-jade"></span>
+            <h2 class="text-sm font-semibold text-gray-900">06. 最近完成折叠对账详情</h2>
+          </div>
+          <span class="spec-badge bg-gray-100 text-gray-600">COLLAPSIBLE LEDGER</span>
+        </div>
+        <p class="text-xs text-text-secondary">折叠态保留币种/方向/盈亏/平仓时间。展开后展示开平时间、进场/最后止损、手续费与平仓原因。</p>
+
+        <!-- Collapsible Component Mockup -->
+        <div class="rounded-xl border border-black/10 overflow-hidden divide-y divide-black/5 bg-white">
+          <!-- Summary Header (Clickable) -->
+          <div class="p-3 flex items-center justify-between cursor-pointer hover:bg-porcelain-dim transition-colors">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-jade/10 text-jade font-bold text-[10px] flex items-center justify-center">多</span>
+              <div>
+                <span class="text-xs font-bold text-gray-900">BTC/USDT 10x</span>
+                <div class="text-[10px] text-text-tertiary font-mono">平仓: 14:12:05 (北京时间)</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold font-mono text-jade">+12.30 USDT</span>
+              <span class="material-symbols-outlined text-sm text-text-tertiary rotate-180">expand_more</span>
+            </div>
+          </div>
+
+          <!-- Expanded Detail View -->
+          <div class="p-3 bg-porcelain text-[11px] font-mono space-y-1.5 text-text-secondary border-t border-black/5">
+            <div class="flex justify-between">
+              <span>开仓时间:</span>
+              <span class="text-gray-900">2026-10-18 10:30:12</span>
+            </div>
+            <div class="flex justify-between">
+              <span>平仓时间:</span>
+              <span class="text-gray-900">2026-10-18 14:12:05</span>
+            </div>
+            <div class="flex justify-between">
+              <span>开仓均价 / 最后止损:</span>
+              <span class="text-gray-900">100.00 / 98.50 USDT (已保本)</span>
+            </div>
+            <div class="flex justify-between">
+              <span>已结手续费:</span>
+              <span class="text-gray-900">0.08 USDT</span>
+            </div>
+            <div class="flex justify-between pt-1 border-t border-black/5">
+              <span>离场原因:</span>
+              <span class="text-jade font-sans font-medium">3R 主力分批止盈 (60%) 触发生效</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Motion & Accessibility Tokens Bar -->
+    <footer class="bg-porcelain-card rounded-2xl p-4 border border-black/5 text-xs text-text-secondary flex flex-wrap items-center justify-between gap-4 font-mono">
+      <div class="flex items-center gap-4">
+        <span>● CSS DURATIONS: 150ms ~ 220ms ease-out</span>
+        <span>● REDUCED MOTION: @media(prefers-reduced-motion) -> 0.01ms</span>
+        <span>● ZERO TICK DRIFT: tabular-nums strict alignment</span>
+      </div>
+      <div class="text-gray-500">SPIKE DISCIPLINE TERMINAL · INTERACTION SPEC SHEET</div>
+    </footer>
+
+  </div>
+</body>
+</html>

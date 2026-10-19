@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1200, initial-scale=1.0">
+  <title>SPIKE Brand Identity Concept A — SLASH / 断面</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 1200px;
+      height: 760px;
+      overflow: hidden;
+      background: #FFFFFF;
+      color: #000000;
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono-meta {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .wordmark {
+      letter-spacing: -0.035em;
+    }
+  </style>
+</head>
+<body class="flex flex-col justify-between p-16 select-none bg-[#FFFFFF]">
+
+  <!-- Top Metadata Header: strictly minimal, neutral index -->
+  <header class="flex items-center justify-between w-full border-b border-black/10 pb-5">
+    <div class="flex items-center space-x-3">
+      <span class="mono-meta text-xs uppercase tracking-widest font-semibold px-2 py-0.5 bg-black text-white rounded-[2px]">DIR · A</span>
+      <span class="mono-meta text-xs uppercase tracking-wider text-black/60">CONCEPT 01 // SLASH · 断面</span>
+    </div>
+    <div class="mono-meta text-xs text-black/40 tracking-wider uppercase">
+      SPIKE IDENTITY EXPLORATION · 1200 × 760
+    </div>
+  </header>
+
+  <!-- Center Primary Lockup: Massive Horizontal Symbol + SPIKE Wordmark on Pure White -->
+  <main class="flex items-center justify-center flex-1 py-10">
+    <div class="flex items-center space-x-12">
+      <!-- Direction A Symbol: SLASH / 断面 (Original 120x120 SVG)
+           Two heavyweight offset solid black slabs parted by one razor-sharp clean diagonal negative channel.
+           Brutally solid, decisive, balanced mass. No letters, no arrows, no thin lines. -->
+      <svg class="w-32 h-32 flex-shrink-0" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Upper-Left Heavy Block with clean 38-degree clean shear -->
+        <path d="M12 12 H76 L44 108 H12 V12Z" fill="#000000"/>
+        <!-- Lower-Right Heavy Block with parallel precision negative gap (gap width = 16px) -->
+        <path d="M108 108 H44 L76 12 H108 V108Z" fill="#000000"/>
+      </svg>
+
+      <!-- Precision Wordmark -->
+      <div class="text-[104px] leading-none font-bold tracking-tight wordmark text-black">
+        SPIKE
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Applications: Reversed Negative Lockup + 64px App Icon -->
+  <footer class="flex items-end justify-between w-full pt-8 border-t border-black/10">
+    <!-- Reversed 1:1 Black Field Variant -->
+    <div class="flex items-center space-x-6">
+      <div class="w-56 h-24 bg-black rounded-lg flex items-center justify-center px-6 space-x-4">
+        <svg class="w-10 h-10 flex-shrink-0" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 12 H76 L44 108 H12 V12Z" fill="#FFFFFF"/>
+          <path d="M108 108 H44 L76 12 H108 V108Z" fill="#FFFFFF"/>
+        </svg>
+        <span class="text-white text-3xl font-bold wordmark">SPIKE</span>
+      </div>
+      <span class="mono-meta text-[11px] uppercase tracking-wider text-black/40">Reversed Lockup</span>
+    </div>
+
+    <!-- 64px Mobile Launcher Icon Application -->
+    <div class="flex items-center space-x-4">
+      <div class="flex flex-col items-center space-y-1.5">
+        <div class="w-16 h-16 bg-black rounded-[15px] flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.12)]">
+          <svg class="w-8 h-8" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12 H76 L44 108 H12 V12Z" fill="#FFFFFF"/>
+            <path d="M108 108 H44 L76 12 H108 V108Z" fill="#FFFFFF"/>
+          </svg>
+        </div>
+        <span class="mono-meta text-[10px] uppercase text-black/50">64px App Icon</span>
+      </div>
+
+      <div class="flex flex-col items-center space-y-1.5 pl-3">
+        <div class="w-16 h-16 bg-white border border-black/15 rounded-[15px] flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.06)]">
+          <svg class="w-8 h-8" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 12 H76 L44 108 H12 V12Z" fill="#000000"/>
+            <path d="M108 108 H44 L76 12 H108 V108Z" fill="#000000"/>
+          </svg>
+        </div>
+        <span class="mono-meta text-[10px] uppercase text-black/50">Light Icon</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

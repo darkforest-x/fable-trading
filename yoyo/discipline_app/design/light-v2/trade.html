@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 纪律交易 - 独立合约模拟终端</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            app: {
+              bg: '#f8fafc',
+              card: '#ffffff',
+              subtle: '#f1f5f9',
+              border: '#e2e8f0',
+              text: '#0f172a',
+              muted: '#64748b',
+              faint: '#94a3b8',
+              teal: '#0d9488',
+              tealLight: '#f0fdfa',
+              tealBorder: '#99f6e4',
+              emerald: '#059669',
+              emeraldLight: '#ecfdf5',
+              rose: '#e11d48',
+              roseLight: '#fff1f2'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif']
+          },
+          borderRadius: {
+            'card': '14px',
+            'control': '10px'
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #f1f5f9;
+      font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 20;
+      font-size: 19px;
+      line-height: 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-app-text min-h-screen flex justify-center items-start selection:bg-teal-100 selection:text-teal-900">
+<!-- Mobile Viewport Shell (Strict 390px iPhone form-factor) -->
+<main class="w-full max-w-[390px] min-h-screen bg-app-bg border-x border-app-border flex flex-col relative shadow-[0_0_50px_rgba(15,23,42,0.04)]">
+<!-- Top System Header / Brand Status Strip -->
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-app-border px-3.5 pt-3 pb-2.5">
+<div class="flex items-center justify-between">
+<!-- Logo & Brand Pillar -->
+<div class="flex items-center gap-2">
+<div class="w-6 h-6 rounded-md bg-app-text flex items-center justify-center text-white">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
+</svg>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="text-[13px] font-bold tracking-tight text-app-text">SPIKE 纪律交易</span>
+<span class="text-[10px] font-mono tracking-wider px-1.5 py-0.5 rounded border border-app-border bg-app-subtle text-app-muted">模拟</span>
+</div>
+</div>
+<!-- Connection State (Disconnected per specification) -->
+<div class="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-100 border border-slate-200">
+<span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+<span class="text-[11px] font-medium text-app-muted">行情待连接</span>
+</div>
+</div>
+<!-- Primary Instrument Selector & Real-Quote Bar -->
+<div class="mt-3 bg-app-subtle border border-app-border rounded-control p-2.5 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1 bg-white border border-app-border px-2 py-1 rounded text-[13px] font-bold text-app-text" type="button">
+<span>BTCUSDT 永续</span>
+<span class="material-symbols-outlined text-[16px] text-app-muted">expand_more</span>
+</button>
+<span class="text-[11px] font-mono px-1.5 py-0.5 bg-white border border-app-border text-slate-700 rounded font-medium">逐仓 1.00x</span>
+</div>
+<div class="text-right">
+<div class="text-[10px] text-app-muted tracking-tight">最新成交价</div>
+<div class="font-mono text-[14px] font-semibold text-slate-500 tracking-tight">— — <span class="text-[10px] text-app-faint">USDT</span></div>
+</div>
+</div>
+<!-- Real-time Best Bid / Ask (Unconnected State) -->
+<div class="grid grid-cols-2 gap-1.5 mt-1.5">
+<div class="flex items-center justify-between px-2.5 py-1 rounded bg-white border border-app-border">
+<span class="text-[10px] font-medium text-app-muted">买一 (Bid)</span>
+<span class="font-mono text-[11px] text-slate-400 font-medium">—</span>
+</div>
+<div class="flex items-center justify-between px-2.5 py-1 rounded bg-white border border-app-border">
+<span class="text-[10px] font-medium text-app-muted">卖一 (Ask)</span>
+<span class="font-mono text-[11px] text-slate-400 font-medium">—</span>
+</div>
+</div>
+</header>
+<!-- Scrollable Workspace Canvas -->
+<div class="flex-1 px-3.5 pt-3 pb-24 space-y-3">
+<!-- Disciplined Risk & Protection Specs Card (Rules Governance) -->
+<section class="bg-white border border-app-border rounded-card p-3 shadow-none">
+<div class="flex items-center justify-between pb-2 border-b border-app-border">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-app-teal text-[16px]">verified_user</span>
+<span class="text-[12px] font-bold tracking-tight text-app-text">独立纪律风控体系</span>
+</div>
+<span class="text-[10px] font-mono font-medium text-app-teal bg-app-tealLight border border-app-tealBorder px-1.5 py-0.5 rounded">STRICT-R</span>
+</div>
+<!-- Risk Governance Badges -->
+<div class="grid grid-cols-2 gap-1.5 mt-2.5">
+<div class="bg-app-subtle border border-app-border px-2 py-1.5 rounded-control">
+<div class="text-[10px] text-app-muted">单笔现金风险上限</div>
+<div class="text-[13px] font-mono font-bold text-app-text mt-0.5">2.0% <span class="text-[10px] font-normal text-app-muted">Hard-Stop</span></div>
+</div>
+<div class="bg-app-subtle border border-app-border px-2 py-1.5 rounded-control">
+<div class="text-[10px] text-app-muted">日内最多开仓频次</div>
+<div class="text-[13px] font-mono font-bold text-app-text mt-0.5">3 <span class="text-[10px] font-normal text-app-muted">次 / 强制冷却</span></div>
+</div>
+</div>
+<!-- 3-Stage Discrete Protection Pipeline -->
+<div class="mt-2.5 pt-2 border-t border-slate-100">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-[11px] font-semibold text-app-text">阶梯止盈与保护管道 (3-Stage Pipeline)</span>
+<span class="text-[10px] text-app-muted font-mono">1R = 初始锁定风险</span>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between text-[11px] bg-slate-50 border border-slate-200/80 px-2 py-1 rounded">
+<span class="font-mono font-bold text-app-teal bg-white border border-app-tealBorder/60 px-1 rounded text-[10px]">1R</span>
+<span class="text-slate-700">触达移保本</span>
+<span class="text-app-muted text-[10px] font-mono">成本价保本 (Break-even)</span>
+</div>
+<div class="flex items-center justify-between text-[11px] bg-slate-50 border border-slate-200/80 px-2 py-1 rounded">
+<span class="font-mono font-bold text-emerald-700 bg-white border border-emerald-200 px-1 rounded text-[10px]">3R</span>
+<span class="text-slate-700">平原始仓位 60%</span>
+<span class="text-app-muted text-[10px] font-mono">保护主流确定性收益</span>
+</div>
+<div class="flex items-center justify-between text-[11px] bg-slate-50 border border-slate-200/80 px-2 py-1 rounded">
+<span class="font-mono font-bold text-slate-800 bg-white border border-slate-300 px-1 rounded text-[10px]">5R</span>
+<span class="text-slate-700">平全部余仓</span>
+<span class="text-app-muted text-[10px] font-mono">终极离场 (100% 结束)</span>
+</div>
+</div>
+<p class="text-[10px] text-app-faint mt-1.5 leading-tight">
+            * 纪律原则：R 为开仓强制锚定的现金亏损额度，开仓后严禁反向移动或扩大止损。
+          </p>
+</div>
+</section>
+<!-- Main Trading Form (Clean 44px ergonomic flow) -->
+<section class="bg-white border border-app-border rounded-card p-3.5 space-y-3">
+<!-- Order Type Switcher -->
+<div class="flex items-center justify-between">
+<div class="inline-flex p-0.5 rounded-control bg-app-subtle border border-app-border w-48">
+<button class="w-1/2 py-1 text-[12px] font-bold rounded-[8px] bg-white text-app-text shadow-sm border border-slate-200/60" type="button">
+              市价 (Market)
+            </button>
+<button class="w-1/2 py-1 text-[12px] font-medium text-app-muted hover:text-app-text transition-colors" type="button">
+              限价 (Limit)
+            </button>
+</div>
+<span class="text-[10px] text-app-muted font-mono">Slippage: Auto</span>
+</div>
+<!-- Stop Loss (Mandatory Discipline Field) -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="text-[11px] font-bold text-app-text flex items-center gap-1">
+<span>止损价 (Stop Loss)</span>
+<span class="text-rose-600 text-[10px] font-semibold bg-app-roseLight border border-rose-200 px-1 py-0.2 rounded">强制纪律</span>
+</label>
+<span class="text-[10px] text-rose-500 font-medium">不设不可开仓</span>
+</div>
+<div class="relative flex items-center h-[44px]">
+<input class="w-full h-full bg-slate-50 border border-slate-300 focus:border-app-teal focus:bg-white focus:ring-1 focus:ring-app-teal rounded-control pl-3 pr-16 text-[13px] font-mono text-app-text placeholder:text-slate-400 transition-all outline-none" placeholder="请输入必选止损触发价" type="number"/>
+<span class="absolute right-3 font-mono text-[11px] font-semibold text-app-muted pointer-events-none">USDT</span>
+</div>
+<div class="text-[10px] text-app-muted flex justify-between px-0.5 font-mono">
+<span>预估离场亏损: — USDT</span>
+<span>R基准值: 未计算</span>
+</div>
+</div>
+<!-- Leverage Selector (Default 1x, strict note) -->
+<div class="space-y-1 pt-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-app-text">杠杆倍率</span>
+<span class="text-[10px] text-app-muted font-mono">当前: <b class="text-app-text">1.00x</b></span>
+</div>
+<div class="flex items-center gap-1.5">
+<button class="flex-1 py-1.5 text-[11px] font-mono font-bold rounded-control bg-slate-900 text-white" type="button">1x</button>
+<button class="flex-1 py-1.5 text-[11px] font-mono rounded-control bg-app-subtle border border-app-border text-slate-700" type="button">2x</button>
+<button class="flex-1 py-1.5 text-[11px] font-mono rounded-control bg-app-subtle border border-app-border text-slate-700" type="button">3x</button>
+<button class="flex-1 py-1.5 text-[11px] font-mono rounded-control bg-app-subtle border border-app-border text-slate-700" type="button">5x</button>
+<button class="px-2 py-1.5 text-[11px] font-mono rounded-control bg-app-subtle border border-app-border text-slate-500" type="button">自定义</button>
+</div>
+<p class="text-[10px] text-slate-500 font-mono pt-0.5">
+            * 规则提示：<span class="text-slate-700">默认 1x</span> (硬上限 100x，高倍率极度放大滑点，非推荐)。
+          </p>
+</div>
+<!-- Risk Budget Selector (% of Risk Allocation, not balance) -->
+<div class="space-y-1.5 pt-1">
+<div class="flex items-center justify-between">
+<span class="text-[11px] font-bold text-app-text">风险预算分配</span>
+<span class="text-[10px] text-app-teal font-medium">防情绪化上头</span>
+</div>
+<div class="grid grid-cols-4 gap-1.5">
+<button class="py-2 text-[12px] font-mono font-semibold rounded-control bg-white border border-app-border text-slate-700 hover:border-slate-400" type="button">
+              25%
+            </button>
+<button class="py-2 text-[12px] font-mono font-semibold rounded-control bg-white border border-app-border text-slate-700 hover:border-slate-400" type="button">
+              50%
+            </button>
+<button class="py-2 text-[12px] font-mono font-bold rounded-control bg-teal-50 border border-app-teal text-app-teal" type="button">
+              75%
+            </button>
+<button class="py-2 text-[12px] font-mono font-semibold rounded-control bg-white border border-app-border text-slate-700 hover:border-slate-400" type="button">
+              100%
+            </button>
+</div>
+<div class="bg-slate-50 border border-slate-200/80 rounded p-1.5 text-[10px] text-app-muted leading-tight">
+<span class="font-semibold text-slate-700">定义确认：</span>仅占本次单笔风险上限预算 (2%现金)，并非账户全部本金或全部仓位占比。
+          </div>
+</div>
+<!-- Position Sizing Input (44px target) -->
+<div class="space-y-1 pt-1">
+<div class="flex items-center justify-between text-[11px]">
+<span class="font-bold text-app-text">开仓拟定数量</span>
+<span class="font-mono text-app-muted">可开: — BTC</span>
+</div>
+<div class="relative flex items-center h-[44px]">
+<input class="w-full h-full bg-slate-50 border border-slate-300 focus:border-app-teal focus:bg-white focus:ring-1 focus:ring-app-teal rounded-control pl-3 pr-14 text-[13px] font-mono text-app-text placeholder:text-slate-400 transition-all outline-none" placeholder="0.000" type="number"/>
+<span class="absolute right-3 font-mono text-[11px] font-semibold text-app-muted pointer-events-none">BTC</span>
+</div>
+</div>
+<!-- Dual Action Execution Buttons (Dormant / Disabled state prior to feed connection) -->
+<div class="pt-2 grid grid-cols-2 gap-2">
+<!-- Buy / Long Button (Dormant) -->
+<button class="h-[44px] rounded-control border border-emerald-300 bg-emerald-50/60 text-emerald-800/50 flex flex-col items-center justify-center cursor-not-allowed select-none" disabled="" type="button">
+<span class="text-[13px] font-bold tracking-tight">买入开多</span>
+<span class="text-[9px] font-mono opacity-80 leading-none">多头保护管道</span>
+</button>
+<!-- Sell / Short Button (Dormant) -->
+<button class="h-[44px] rounded-control border border-rose-300 bg-rose-50/60 text-rose-800/50 flex flex-col items-center justify-center cursor-not-allowed select-none" disabled="" type="button">
+<span class="text-[13px] font-bold tracking-tight">卖出开空</span>
+<span class="text-[9px] font-mono opacity-80 leading-none">空头保护管道</span>
+</button>
+</div>
+<!-- Connection CTA Bar (Primary Operational Gate) -->
+<div class="pt-1">
+<button class="w-full h-[42px] rounded-control bg-white border border-app-teal text-app-teal hover:bg-app-tealLight active:bg-teal-100 flex items-center justify-center gap-2 text-[12px] font-bold tracking-tight transition-all" type="button">
+<span class="material-symbols-outlined text-[17px] text-app-teal">sync</span>
+<span>连接模拟服务 · 激活实时行情</span>
+</button>
+</div>
+</section>
+<!-- Compact Telemetry & Real-Time Constraints Row -->
+<section class="bg-white border border-app-border rounded-card p-2.5">
+<div class="grid grid-cols-3 divide-x divide-app-border text-center">
+<div class="px-1">
+<div class="text-[10px] text-app-muted">当前持仓</div>
+<div class="font-mono text-[13px] font-bold text-app-text mt-0.5">0</div>
+</div>
+<div class="px-1">
+<div class="text-[10px] text-app-muted">委托挂单</div>
+<div class="font-mono text-[13px] font-bold text-app-text mt-0.5">0</div>
+</div>
+<div class="px-1">
+<div class="text-[10px] text-app-muted">今日申请</div>
+<div class="font-mono text-[13px] font-bold text-app-text mt-0.5">— / <span class="text-slate-400">3</span></div>
+</div>
+</div>
+</section>
+<!-- Compliance & Strict Paper Trading Disclaimer -->
+<footer class="pt-1 pb-2 text-center space-y-1">
+<div class="flex items-center justify-center gap-1.5 text-[11px] text-slate-500 font-medium">
+<span class="material-symbols-outlined text-[15px] text-slate-400">gavel</span>
+<span>服务端纪律仲裁</span>
+<span class="text-slate-300">·</span>
+<span>仅模拟交易</span>
+<span class="text-slate-300">·</span>
+<span>未启用实盘</span>
+</div>
+<p class="text-[10px] text-slate-400 font-mono">
+          ENGINE: SPIKE-CORE-V4.2 // PAPER PROTOCOL ACTIVE
+        </p>
+</footer>
+</div>
+<!-- Fixed Bottom 4-Tab Navigation Bar -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] bg-white border-t border-app-border px-3 py-1.5 z-40 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+<div class="grid grid-cols-4 items-center">
+<!-- Tab 1: Contract (Active) -->
+<button class="flex flex-col items-center justify-center py-1 text-app-teal" type="button">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">candlestick_chart</span>
+<span class="text-[10px] font-bold mt-0.5">合约</span>
+<span class="w-1 h-1 rounded-full bg-app-teal mt-0.5"></span>
+</button>
+<!-- Tab 2: Positions -->
+<button class="flex flex-col items-center justify-center py-1 text-app-muted hover:text-app-text transition-colors" type="button">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-medium mt-0.5">持仓</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+<!-- Tab 3: Discipline -->
+<button class="flex flex-col items-center justify-center py-1 text-app-muted hover:text-app-text transition-colors" type="button">
+<span class="material-symbols-outlined">security</span>
+<span class="text-[10px] font-medium mt-0.5">纪律</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+<!-- Tab 4: Connection -->
+<button class="flex flex-col items-center justify-center py-1 text-app-muted hover:text-app-text transition-colors" type="button">
+<span class="material-symbols-outlined">wifi_tethering</span>
+<span class="text-[10px] font-medium mt-0.5">连接</span>
+<span class="w-1 h-1 rounded-full bg-transparent mt-0.5"></span>
+</button>
+</div>
+</nav>
+</main>
+</body></html>

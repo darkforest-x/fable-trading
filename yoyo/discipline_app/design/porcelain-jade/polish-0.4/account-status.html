@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#F6F7F5]" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
+<title>SPIKE 独立纪律交易 - 连接与体验设置</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-fixed": "#400011",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-container": "#d3fff0",
+            "on-background": "#191c1b",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#ffd9dc",
+            "on-tertiary-container": "#ecf9f5",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f3f4f2",
+            "on-error": "#ffffff",
+            "on-primary-fixed": "#002019",
+            "secondary": "#a5374d",
+            "on-error-container": "#93000a",
+            "inverse-surface": "#2e3130",
+            "surface-tint": "#006b58",
+            "primary-fixed-dim": "#78d8be",
+            "on-tertiary-fixed": "#121e1c",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-primary": "#ffffff",
+            "on-primary-fixed-variant": "#005142",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-container": "#677370",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container-high": "#e7e8e6",
+            "surface-container": "#edeeec",
+            "on-secondary-container": "#730f2a",
+            "surface": "#f9faf8",
+            "surface-container-highest": "#e2e3e1",
+            "surface-bright": "#f9faf8",
+            "outline": "#6e7a75",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "tertiary": "#4e5b58",
+            "surface-variant": "#e2e3e1",
+            "on-surface-variant": "#3e4945",
+            "background": "#f9faf8",
+            "error": "#ba1a1a",
+            "on-surface": "#191c1b",
+            "surface-dim": "#d9dad8",
+            "tertiary-fixed": "#d8e5e1",
+            "secondary-container": "#fc7a8f",
+            "inverse-primary": "#78d8be",
+            "primary-container": "#087f69",
+            "outline-variant": "#bdc9c4",
+            "on-secondary-fixed-variant": "#851e36",
+            "error-container": "#ffdad6",
+            "primary": "#006452",
+            "primary-fixed": "#94f4d9"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1.25rem",
+            "3xl": "1.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2rem",
+            "space-2xl": "3rem",
+            "margin-desktop": "3rem",
+            "gutter": "1rem",
+            "gutter-tablet": "1.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "margin": "1.25rem",
+            "gutter-desktop": "2rem"
+          },
+          "fontFamily": {
+            "label-sm": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "numeric-hero-mobile": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "numeric-hero": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "display-lg": ["Inter", "sans-serif"],
+            "display-lg-mobile": ["Inter", "sans-serif"],
+            "label-lg": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    
+    /* Screen canvas styling */
+    body {
+      background-color: #F6F7F5;
+      color: #172422;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    /* Tactile Elevation Shadows */
+    .shadow-porcelain {
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+    }
+    
+    .shadow-island {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10);
+    }
+
+    .shadow-focus-jade:focus-within {
+      box-shadow: 0 0 0 2px #087F69;
+    }
+
+    /* Micro-interactions & animations */
+    @keyframes entryLift {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .page-entry {
+      animation: entryLift 180ms ease-out forwards;
+    }
+
+    /* Skeleton shimmer */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .skeleton-shimmer {
+      background: linear-gradient(90deg, #EEF1EE 25%, #E2E6E2 50%, #EEF1EE 75%);
+      background-size: 200% 100%;
+      animation: shimmer 2s infinite ease-in-out;
+    }
+
+    /* Interactive press */
+    .btn-press {
+      transition: transform 120ms ease-out, background-color 150ms ease;
+    }
+    .btn-press:active {
+      transform: scale(0.975);
+    }
+
+    /* Accessibility: Reduced Motion Override */
+    @media (prefers-reduced-motion: reduce) {
+      .page-entry,
+      .btn-press,
+      .skeleton-shimmer,
+      * {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        transform: none !important;
+      }
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="flex justify-center items-start min-h-screen py-0 sm:py-6 text-on-surface">
+<!-- Mobile Container (390px Canvas Anchor) -->
+<main class="w-full max-w-[390px] min-h-screen sm:min-h-[844px] bg-[#F6F7F5] relative flex flex-col overflow-x-hidden pb-28 select-none page-entry">
+<!-- TopAppBar Sticky Shell -->
+<header class="sticky top-0 z-40 w-full px-margin h-14 bg-background/80 backdrop-blur-md flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="trending_up">trending_up</span>
+<span>SPIKE</span>
+</span>
+<span class="text-[10px] font-label-sm font-semibold tracking-wider px-2 py-0.5 rounded-full bg-surface-container text-tertiary">
+          纪律交易
+        </span>
+</div>
+<!-- Live Connection State Pill & Leading Sensors Icon -->
+<div class="flex items-center space-x-2">
+<div class="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-surface-container-low text-tertiary">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+<span class="text-label-sm font-label-sm">未连接</span>
+</div>
+<button aria-label="网络传感器指标" class="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined text-[20px]" data-icon="sensors">sensors</span>
+</button>
+</div>
+</header>
+<!-- Main Content Flow -->
+<div class="flex-1 px-margin pt-2 space-y-4">
+<!-- Status Summary Card -->
+<section class="bg-surface-container-lowest rounded-3xl p-5 shadow-porcelain">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center space-x-2">
+<span class="text-label-md font-label-md text-tertiary">运行模式</span>
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-label-sm font-label-sm">模拟沙盒</span>
+</div>
+<span class="text-label-sm font-label-sm text-outline">本地隔离运行</span>
+</div>
+<div class="grid grid-cols-3 gap-2 pt-1 pb-1">
+<div class="bg-[#EEF1EE] rounded-2xl p-2.5 text-center">
+<span class="block text-[11px] font-label-sm text-tertiary mb-0.5">心跳延迟</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface">— ms</span>
+</div>
+<div class="bg-[#EEF1EE] rounded-2xl p-2.5 text-center">
+<span class="block text-[11px] font-label-sm text-tertiary mb-0.5">预警同步</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-on-surface">—</span>
+</div>
+<div class="bg-[#EEF1EE] rounded-2xl p-2.5 text-center">
+<span class="block text-[11px] font-label-sm text-tertiary mb-0.5">风控执行</span>
+<span class="text-headline-sm font-headline-sm font-semibold text-primary">严守</span>
+</div>
+</div>
+</section>
+<!-- Group 1: 节点连接配置 (Recessed & Tactile Inputs) -->
+<section class="bg-surface-container-lowest rounded-3xl p-5 shadow-porcelain space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="dns">dns</span>
+<span>节点连接配置</span>
+</h2>
+<span class="text-label-sm font-label-sm text-tertiary">本地回环</span>
+</div>
+<!-- Node Address Input -->
+<div class="space-y-1.5">
+<label class="block text-label-sm font-label-sm text-on-surface-variant font-medium" for="node-url">服务节点地址 (Endpoint URL)</label>
+<div class="relative flex items-center bg-[#EEF1EE] rounded-2xl transition-shadow shadow-focus-jade px-3.5 h-[50px]">
+<span class="material-symbols-outlined text-tertiary text-[18px] mr-2" data-icon="link">link</span>
+<input class="w-full bg-transparent border-0 p-0 text-body-md font-body-md text-on-surface focus:ring-0 focus:outline-none" id="node-url" placeholder="http://127.0.0.1:8765" type="text" value="http://127.0.0.1:8765"/>
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="lock_open">lock_open</span>
+</div>
+</div>
+<!-- Session Token Input -->
+<div class="space-y-1.5">
+<label class="block text-label-sm font-label-sm text-on-surface-variant font-medium" for="session-token">访问密钥凭证 (Session Token)</label>
+<div class="relative flex items-center bg-[#EEF1EE] rounded-2xl transition-shadow shadow-focus-jade px-3.5 h-[50px]">
+<span class="material-symbols-outlined text-tertiary text-[18px] mr-2" data-icon="key">key</span>
+<input class="w-full bg-transparent border-0 p-0 text-body-md font-body-md text-on-surface focus:ring-0 focus:outline-none" id="session-token" placeholder="请输入授权凭证" type="password" value="spk_live_demo_auth_offline_sandbox"/>
+<button aria-label="显示凭证" class="text-tertiary hover:text-on-surface focus:outline-none" type="button">
+<span class="material-symbols-outlined text-[18px]" data-icon="visibility_off">visibility_off</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Group 2: 体验设置 (Experience Settings) -->
+<section class="bg-surface-container-lowest rounded-3xl p-5 shadow-porcelain space-y-4">
+<div class="flex items-center justify-between">
+<h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="tune">tune</span>
+<span>体验设置</span>
+</h2>
+<span class="text-label-sm font-label-sm px-2 py-0.5 rounded-full bg-surface-container text-tertiary">人机交互</span>
+</div>
+<!-- Haptic Feedback Master Toggle -->
+<div class="p-4 rounded-2xl bg-[#F6F7F5] space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="vibration">vibration</span>
+</div>
+<div>
+<span class="block text-label-lg font-label-lg text-on-surface font-semibold">触感反馈</span>
+<span class="block text-[11px] font-label-sm text-tertiary">仅手机端，操作与确认轻触响应</span>
+</div>
+</div>
+<!-- Native iOS Style Switch Toggle -->
+<label class="relative inline-flex items-center cursor-pointer select-none">
+<input checked="" class="sr-only peer" id="haptic-toggle" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:duration-200 peer-checked:bg-primary-container shadow-inner"></div>
+</label>
+</div>
+<!-- Micro-haptics Security Spec Description -->
+<div class="text-[12px] leading-[18px] font-body-sm text-tertiary pt-1 border-t border-[#172422]/5">
+<p>
+              遵循安全原则：页面加载、行情跳动、轮询与被动预警绝不自动震动；仅用户主动点击标签、拖动滑块及重要指令确认时触发微触感。
+            </p>
+</div>
+</div>
+<!-- Motion & Dynamic Reduced Info Row -->
+<div class="flex items-center justify-between px-3 py-2 rounded-2xl bg-surface-container-low/60">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-outline text-[18px]" data-icon="motion_sensor_active">motion_sensor_active</span>
+<span class="text-body-sm font-body-sm text-on-surface-variant">动效与减弱动态</span>
+</div>
+<span class="text-label-sm font-label-sm text-tertiary bg-white px-2.5 py-1 rounded-full shadow-sm">
+            遵循系统偏好
+          </span>
+</div>
+</section>
+<!-- Group 3: 连通性测试与模拟状态说明 (Pure Offline / Sandbox Disclaimers) -->
+<section class="bg-surface-container-lowest rounded-3xl p-5 shadow-porcelain space-y-4"><div class="flex items-center justify-between"><h2 class="text-headline-sm font-headline-sm text-on-surface flex items-center space-x-2"><span class="material-symbols-outlined text-primary text-[20px]" data-icon="shield">shield</span><span>OKX 账户</span></h2><div class="flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-label-sm font-label-sm"><span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span><span>只读已连接</span></div></div><div class="p-3.5 rounded-2xl bg-[#F6F7F5] space-y-2.5"><div class="flex items-center justify-between pb-2 border-t border-0 border-[#172422]/5"><span class="text-label-md font-label-md text-tertiary">核验状态</span><span class="text-label-sm font-label-sm font-semibold text-primary flex items-center space-x-1"><span class="material-symbols-outlined text-[16px]" data-icon="check_circle">check_circle</span><span>实盘账户连接已核验</span></span></div><div class="flex items-center justify-between"><span class="text-label-md font-label-md text-tertiary">交易权限</span><span class="text-label-sm font-label-sm font-medium text-primary flex items-center space-x-1"><span class="material-symbols-outlined text-[14px]" data-icon="check">check</span><span>已具备</span></span></div><div class="flex items-center justify-between"><span class="text-label-md font-label-md text-tertiary">下单服务</span><span class="px-2 py-0.5 rounded-full bg-surface-container text-tertiary text-label-sm font-label-sm font-medium">尚未启用</span></div></div><div class="space-y-2 text-[12px] leading-[18px] font-body-sm text-tertiary"><p>Spike 内部纪律模拟沙盒与 OKX 账户保持逻辑隔离；当前仅建立只读核验通道，实盘自动报单引擎尚未启用。</p><p class="text-outline text-[11px]">API Key 与密钥仅在本地守护进程 (Mac/Linux) 内存中加密保管，此移动终端绝不传输或留存 API Secret。</p></div></section><section class="bg-surface-container-lowest rounded-3xl p-5 shadow-porcelain space-y-3">
+<div class="flex items-center space-x-2 text-primary">
+<span class="material-symbols-outlined text-[18px]" data-icon="verified_user">verified_user</span>
+<h3 class="text-label-lg font-label-lg font-semibold text-on-surface">连通性与安全性保障</h3>
+</div>
+<p class="text-body-sm font-body-sm text-tertiary leading-relaxed">
+          当前环境处于严格隔离的单机沙盒模式。客户端不持有、不请求亦不持久化任何真实资金私钥，全链路模拟撮合旨在强化交易纪律与知行合一。
+        </p>
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center space-x-1.5 text-label-sm font-label-sm text-outline">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="offline_bolt">offline_bolt</span>
+<span>离线引擎运行中</span>
+</div>
+<button class="text-primary text-label-sm font-label-sm font-semibold hover:underline flex items-center space-x-0.5" id="test-ping-btn">
+<span>测试网络回路</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</section>
+<!-- Action Button: 48px Jade Capsule Button with Async Spinner Option -->
+<div class="pt-2">
+<button class="btn-press w-full h-12 bg-primary-container text-on-primary rounded-full font-label-lg font-semibold flex items-center justify-center space-x-2 shadow-[0_4px_16px_rgba(8,127,105,0.25)] hover:bg-primary transition-all duration-150" id="connect-action-btn" type="button">
+<span class="hidden animate-spin material-symbols-outlined text-[18px]" data-icon="progress_activity" id="btn-spinner">progress_activity</span>
+<span id="btn-text">连接模拟服务</span>
+</button>
+</div>
+</div>
+<!-- 5-pill Floating Navigation Island at Bottom -->
+<!-- Content: [合约, 持仓, 统计, 纪律, 连接], Active: 连接 -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 bg-surface-container-lowest/90 backdrop-blur-xl rounded-full shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<!-- 1. 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#futures">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</a>
+<!-- 2. 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#positions">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</a>
+<!-- 3. 统计 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#stats">
+<span class="material-symbols-outlined text-[20px]" data-icon="query_stats">query_stats</span>
+<span class="text-label-sm font-label-sm mt-0.5">统计</span>
+</a>
+<!-- 4. 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200" href="#discipline">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield_lock">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- 5. 连接 (Active State - Solid Jade Pill) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 shadow-sm" href="#connection">
+<span class="material-symbols-outlined text-[20px]" data-icon="link" data-weight="fill" style="font-variation-settings: 'FILL' 1;">link</span>
+<span class="text-label-sm font-label-sm mt-0.5 font-medium">连接</span>
+</a>
+</nav>
+</main>
+<!-- Lightweight Inline Micro-Interactions Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const connectBtn = document.getElementById('connect-action-btn');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const btnText = document.getElementById('btn-text');
+      const testPingBtn = document.getElementById('test-ping-btn');
+      const hapticToggle = document.getElementById('haptic-toggle');
+
+      // Async Connect Button State Simulation
+      let isConnecting = false;
+      connectBtn.addEventListener('click', () => {
+        if (isConnecting) return;
+        isConnecting = true;
+        btnSpinner.classList.remove('hidden');
+        btnText.textContent = '正在握手...';
+        connectBtn.classList.add('opacity-90');
+
+        setTimeout(() => {
+          isConnecting = false;
+          btnSpinner.classList.add('hidden');
+          btnText.textContent = '已连接到沙盒';
+          connectBtn.classList.remove('opacity-90');
+          connectBtn.classList.replace('bg-primary-container', 'bg-primary');
+          
+          setTimeout(() => {
+            btnText.textContent = '重新连接服务';
+          }, 2400);
+        }, 1200);
+      });
+
+      // Quick Ping Action Demo
+      testPingBtn.addEventListener('click', () => {
+        testPingBtn.classList.add('opacity-50');
+        setTimeout(() => {
+          testPingBtn.classList.remove('opacity-50');
+        }, 300);
+      });
+
+      // Active toggle micro-haptic feedback emulation via navigator.vibrate if supported
+      hapticToggle.addEventListener('change', () => {
+        if ('vibrate' in navigator && hapticToggle.checked) {
+          navigator.vibrate(10); // subtle 10ms haptic tick
+        }
+      });
+    });
+  </script>
+</body></html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>选择合约交易对 - SPIKE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-error": "#ffffff",
+            "tertiary-container": "#677370",
+            "tertiary": "#4e5b58",
+            "surface": "#f9faf8",
+            "error-container": "#ffdad6",
+            "surface-variant": "#e2e3e1",
+            "secondary": "#a5374d",
+            "on-secondary-fixed": "#400011",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#d3fff0",
+            "secondary-fixed-dim": "#ffb2bb",
+            "primary-container": "#087f69",
+            "background": "#f9faf8",
+            "on-tertiary-container": "#ecf9f5",
+            "surface-dim": "#d9dad8",
+            "outline": "#6e7a75",
+            "surface-tint": "#006b58",
+            "primary-fixed-dim": "#78d8be",
+            "primary": "#006452",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed": "#121e1c",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-background": "#191c1b",
+            "on-surface-variant": "#3e4945",
+            "inverse-primary": "#78d8be",
+            "on-surface": "#191c1b",
+            "surface-container-highest": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "secondary-container": "#fc7a8f",
+            "surface-container": "#edeeec",
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#002019",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e7e8e6",
+            "outline-variant": "#bdc9c4",
+            "on-secondary-container": "#730f2a",
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#f9faf8",
+            "inverse-surface": "#2e3130",
+            "tertiary-fixed": "#d8e5e1",
+            "on-primary-fixed-variant": "#005142",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container-low": "#f3f4f2",
+            "primary-fixed": "#94f4d9",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "margin": "1.25rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "3rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xl": "2rem",
+            "gutter-tablet": "1.5rem"
+          },
+          "fontFamily": {
+            "numeric-hero-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-fixed min-h-screen flex justify-center">
+<!-- Mobile Viewport Wrapper (390px Portrait) -->
+<div class="relative w-full max-w-[390px] h-[844px] bg-background overflow-hidden flex flex-col shadow-2xl">
+<!-- TOP APP BAR (Shared Component Source) -->
+<header class="docked full-width top-0 sticky z-10 bg-background/80 backdrop-blur-md flex justify-between items-center w-full px-margin h-14 max-w-md mx-auto">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-xl" data-icon="trending_up">trending_up</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+</div>
+<div class="flex items-center space-x-2">
+<button aria-label="Sensors" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors duration-150 active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant text-xl" data-icon="sensors">sensors</span>
+</button>
+</div>
+</header>
+<!-- TRADING BACKGROUND SCREEN (Simulated Resting Screen behind Sheet) -->
+<main class="flex-1 px-4 pt-2 pb-24 overflow-hidden select-none opacity-40 filter blur-[1px]">
+<!-- Pair & Stats Card -->
+<div class="bg-surface-container-lowest rounded-[24px] p-4 shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04)] mb-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="font-headline-sm text-headline-sm font-bold">BTC/USDT</span>
+<span class="text-label-sm font-label-sm bg-surface-container px-2 py-0.5 rounded-full text-tertiary">永续 10x</span>
+</div>
+<span class="text-primary text-headline-sm font-headline-sm font-semibold">+2.40%</span>
+</div>
+<div class="mt-2 text-numeric-hero-mobile font-numeric-hero-mobile text-on-surface">68,420.50</div>
+</div>
+<!-- Chart Simulation -->
+<div class="bg-surface-container-lowest rounded-[24px] p-4 shadow-[0_4px_24px_-2px_rgba(23,36,34,0.04)] h-56 flex flex-col justify-between">
+<div class="flex justify-between text-body-sm font-body-sm text-outline">
+<span>15分</span>
+<span>1小时</span>
+<span class="text-primary font-semibold">4小时</span>
+<span>1日</span>
+</div>
+<div class="w-full h-32 flex items-end space-x-1.5 opacity-60">
+<div class="w-1/12 bg-primary/20 h-1/3 rounded-t"></div>
+<div class="w-1/12 bg-primary/30 h-1/2 rounded-t"></div>
+<div class="w-1/12 bg-primary/40 h-2/3 rounded-t"></div>
+<div class="w-1/12 bg-secondary/30 h-1/2 rounded-t"></div>
+<div class="w-1/12 bg-primary/50 h-3/4 rounded-t"></div>
+<div class="w-1/12 bg-primary-container h-full rounded-t"></div>
+<div class="w-1/12 bg-primary/80 h-4/5 rounded-t"></div>
+<div class="w-1/12 bg-secondary/40 h-2/5 rounded-t"></div>
+<div class="w-1/12 bg-primary/60 h-3/5 rounded-t"></div>
+<div class="w-1/12 bg-primary/90 h-5/6 rounded-t"></div>
+</div>
+</div>
+</main>
+<!-- SEMI-TRANSPARENT SOFT FROSTED OVERLAY -->
+<div class="absolute inset-0 bg-inverse-surface/35 backdrop-blur-[3px] z-20 transition-opacity"></div>
+<!-- PURE WHITE BOTTOM SHEET -->
+<section class="absolute bottom-0 inset-x-0 z-30 bg-surface-container-lowest rounded-t-[32px] pt-3 pb-24 shadow-[0_-8px_32px_rgba(23,36,34,0.12)] flex flex-col max-h-[82%] animate-[fadeInUp_0.25s_ease-out]">
+<!-- Grab Handle -->
+<div class="w-10 h-1 bg-surface-variant rounded-full mx-auto mb-3"></div>
+<!-- Header -->
+<div class="px-5 flex items-start justify-between">
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface tracking-tight">选择合约交易对</h2>
+<p class="text-label-sm font-label-sm text-outline mt-0.5">支持全部 USDT 永续合约</p>
+</div>
+<button aria-label="关闭" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors active:scale-95">
+<span class="text-body-lg font-bold leading-none">✕</span>
+</button>
+</div>
+<!-- Search Input Bar -->
+<div class="px-5 mt-4">
+<div class="relative flex items-center h-12 bg-surface-container-low rounded-2xl px-3.5 focus-within:ring-2 focus-within:ring-primary-container transition-all">
+<span class="material-symbols-outlined text-outline text-xl mr-2.5" data-icon="search">search</span>
+<input class="w-full bg-transparent border-0 p-0 text-on-surface placeholder:text-outline text-body-sm font-body-sm focus:ring-0 focus:outline-none" placeholder="搜索标的代码 (如 BTC, ETH, SOL, SUI, DOGE)" type="text"/>
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="px-5 mt-3 flex items-center space-x-2 overflow-x-auto no-scrollbar py-1">
+<!-- Chip 1: 全部 (Active jade pill) -->
+<button class="shrink-0 h-8 px-4 rounded-full bg-primary-container text-on-primary font-label-md text-label-md flex items-center justify-center shadow-[0_2px_8px_rgba(8,127,105,0.2)] active:scale-95 transition-transform">
+          全部
+        </button>
+<!-- Chip 2: 主流标的 -->
+<button class="shrink-0 h-8 px-3.5 rounded-full bg-surface-container-low text-tertiary hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors active:scale-95">
+          主流标的
+        </button>
+<!-- Chip 3: 高波动山寨 -->
+<button class="shrink-0 h-8 px-3.5 rounded-full bg-surface-container-low text-tertiary hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors active:scale-95">
+          高波动山寨
+        </button>
+<!-- Chip 4: 自选 -->
+<button class="shrink-0 h-8 px-3.5 rounded-full bg-surface-container-low text-tertiary hover:text-on-surface font-label-md text-label-md flex items-center justify-center transition-colors active:scale-95">
+          自选
+        </button>
+</div>
+<!-- Contract Pair List Rows (Scrollable Area) -->
+<div class="mt-2 flex-1 overflow-y-auto px-5 space-y-1"><div class="flex items-center justify-between py-3 px-3 rounded-2xl bg-surface-container-low/60 active:bg-surface-container-low transition-colors cursor-pointer"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-body-lg shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">₿</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">BTC/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span><span class="material-symbols-outlined text-primary-container text-base font-bold" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">主流 · 上限 10x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">68,420.50</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+2.4%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-[#627EEA] text-white flex items-center justify-center font-bold text-body-lg shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">Ξ</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">ETH/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">主流 · 上限 10x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">3,450.20</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+1.8%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-[#14151a] border border-outline-variant/40 text-[#14F195] flex items-center justify-center font-bold text-xs shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">SOL</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">SOL/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">高波动 · 上限 5x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">182.40</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+5.6%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-[#4DA2FF] text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">SUI</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">SUI/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">高波动 · 上限 5x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">2.15</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+8.4%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-[#C2A633] text-white flex items-center justify-center font-bold text-body-lg shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">Ð</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">DOGE/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">高波动 · 上限 5x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">0.165</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#FDF0F2] text-secondary font-label-sm text-label-sm mt-0.5">-1.2%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer opacity-80"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">AVAX</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">AVAX/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">主流 · 上限 10x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">26.40</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+3.1%</div></div></div><div class="flex items-center justify-between py-3 px-3 rounded-2xl hover:bg-surface-container-low/40 active:bg-surface-container-low transition-colors cursor-pointer opacity-60"><div class="flex items-center space-x-3"><div class="w-10 h-10 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0 select-none"><span class="relative z-10 leading-none">LINK</span></div><div><div class="flex items-center space-x-1.5"><span class="text-body-lg font-headline-sm font-semibold text-on-surface">LINK/USDT</span><span class="text-label-sm font-label-sm text-outline">永续</span></div><div class="mt-0.5"><span class="inline-block px-1.5 py-0.2 text-[10px] leading-4 font-label-sm bg-surface-container text-tertiary rounded-md">主流 · 上限 10x</span></div></div></div><div class="text-right"><div class="text-body-lg font-headline-sm font-semibold text-on-surface">14.28</div><div class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-[#E8F5F1] text-primary font-label-sm text-label-sm mt-0.5">+0.9%</div></div></div></div>
+<!-- Bottom Guidance Note -->
+<div class="px-5 pt-3 pb-1 flex items-center justify-center space-x-1.5 text-center text-outline"><div class="flex flex-col items-center justify-center space-y-1"><div class="flex items-center space-x-1.5 text-outline"><span class="material-symbols-outlined text-sm" data-icon="shield_lock">shield_lock</span><span class="text-label-sm font-label-sm">全标的共享纪律归一化名义总预算</span></div><div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-surface-container text-[10px] text-tertiary"><span class="material-symbols-outlined text-[11px] text-primary-container" data-icon="bolt">bolt</span><span>已挂载可视视口 · 支持全部 USDT 永续快速检索 · 内存极简</span></div></div></div>
+</section>
+<!-- FLOATING BOTTOM NAV (Shared Component Source) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<!-- Item 1: 合约 (Active Navigation Item based on intent) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg leading-none" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</a>
+<!-- Item 2: 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg leading-none" data-icon="pie_chart">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</a>
+<!-- Item 3: 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg leading-none" data-icon="shield_lock">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- Item 4: 连接 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 active:scale-95" href="#">
+<span class="material-symbols-outlined text-lg leading-none" data-icon="link">link</span>
+<span class="text-label-sm font-label-sm mt-0.5">连接</span>
+</a>
+</nav>
+</div>
+</body></html>

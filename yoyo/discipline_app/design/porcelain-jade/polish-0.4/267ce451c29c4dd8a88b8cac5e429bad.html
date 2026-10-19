@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>确认模拟订单 - SPIKE</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed": "#121e1c",
+            "on-background": "#191c1b",
+            "on-primary": "#ffffff",
+            "primary-container": "#087f69",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container-low": "#f3f4f2",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "surface-bright": "#f9faf8",
+            "on-error-container": "#93000a",
+            "on-error": "#ffffff",
+            "surface-dim": "#d9dad8",
+            "on-surface-variant": "#3e4945",
+            "on-surface": "#191c1b",
+            "tertiary": "#4e5b58",
+            "surface-container": "#edeeec",
+            "on-primary-container": "#d3fff0",
+            "secondary-container": "#fc7a8f",
+            "error-container": "#ffdad6",
+            "primary": "#006452",
+            "surface-container-highest": "#e2e3e1",
+            "surface-container-lowest": "#ffffff",
+            "error": "#ba1a1a",
+            "inverse-primary": "#78d8be",
+            "primary-fixed": "#94f4d9",
+            "on-primary-fixed": "#002019",
+            "on-tertiary": "#ffffff",
+            "tertiary-fixed": "#d8e5e1",
+            "secondary-fixed": "#ffd9dc",
+            "inverse-surface": "#2e3130",
+            "surface-tint": "#006b58",
+            "secondary-fixed-dim": "#ffb2bb",
+            "surface": "#f9faf8",
+            "on-primary-fixed-variant": "#005142",
+            "outline": "#6e7a75",
+            "on-tertiary-container": "#ecf9f5",
+            "tertiary-container": "#677370",
+            "outline-variant": "#bdc9c4",
+            "surface-container-high": "#e7e8e6",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-secondary-container": "#730f2a",
+            "on-secondary": "#ffffff",
+            "on-secondary-fixed": "#400011",
+            "background": "#f9faf8",
+            "primary-fixed-dim": "#78d8be",
+            "secondary": "#a5374d",
+            "surface-variant": "#e2e3e1"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-tablet": "1.5rem",
+            "space-xl": "2rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "margin-tablet": "2rem",
+            "margin-desktop": "3rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "margin": "1.25rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem"
+          },
+          "fontFamily": {
+            "label-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "headline-lg": ["Inter"],
+            "numeric-hero-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "display-lg-mobile": ["Inter"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    body {
+      background-color: #121615;
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    @keyframes dialogPopIn {
+      from {
+        opacity: 0;
+        transform: scale(0.94);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    .animate-dialog-in {
+      animation: dialogPopIn 180ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .animate-dialog-in {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+  </style></head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4 text-on-surface">
+<!-- Mobile Viewport Container (390px target) -->
+<div class="relative w-full max-w-[390px] h-[844px] overflow-hidden bg-background shadow-2xl flex flex-col justify-between sm:rounded-[40px]">
+<!-- BACKGROUND: Simulated Trading Canvas (Contract Trading screen) with soft frosted overlay -->
+<div class="absolute inset-0 z-0 flex flex-col pointer-events-none select-none overflow-hidden bg-background">
+<!-- Status Bar / Safe Area Top Backing -->
+<div class="h-11 w-full bg-surface-container-lowest flex items-center justify-between px-6 border-b border-surface-container-high/60">
+<span class="text-[14px] font-semibold tracking-tight text-on-surface">09:41</span>
+<div class="flex items-center gap-1.5 text-on-surface">
+<span class="material-symbols-outlined text-[16px]" data-icon="signal_cellular_alt">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[16px]" data-icon="wifi">wifi</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="battery_full">battery_full</span>
+</div>
+</div>
+<!-- Trading App Header -->
+<header class="flex justify-between items-center w-full px-5 h-12 bg-surface-container-lowest border-b border-surface-container-high/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded bg-primary-fixed text-primary font-medium ml-1">模拟交易</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-outline">服务端仲裁</span>
+<span class="material-symbols-outlined text-tertiary text-[18px]" data-icon="sensors">sensors</span>
+</div>
+</header>
+<!-- Contract Instrument & Price Header -->
+<div class="px-5 pt-2.5 pb-2 bg-surface-container-lowest">
+<div class="flex justify-between items-start">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">BTCUSDT</span>
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded bg-surface-container text-tertiary font-medium">永续</span>
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded-full bg-secondary-fixed/40 text-secondary font-semibold">逐仓 20x</span>
+</div>
+<div class="flex items-baseline gap-2 mt-0.5">
+<span class="font-numeric-hero-mobile text-numeric-hero-mobile text-primary font-bold tracking-tight">68,420.50</span>
+<span class="text-label-md font-label-md text-primary font-semibold">+2.84%</span>
+</div>
+</div>
+<div class="text-right text-label-sm font-label-sm text-outline space-y-0.5">
+<div>24h高 <span class="text-on-surface font-medium">69,120.0</span></div>
+<div>24h低 <span class="text-on-surface font-medium">67,800.0</span></div>
+</div>
+</div>
+</div>
+<!-- Order Entry Form Displaying Intact Input Values -->
+<div class="p-4 space-y-3 flex-1 bg-surface-container-low/50">
+<!-- Tab Selector -->
+<div class="flex bg-surface-container rounded-full p-1 text-label-md font-label-md">
+<div class="flex-1 py-1.5 bg-surface-container-lowest rounded-full font-semibold text-primary text-center shadow-xs">买入开多</div>
+<div class="flex-1 py-1.5 text-tertiary text-center">卖出开空</div>
+</div>
+<!-- Filled Input Rows -->
+<div class="space-y-2 bg-surface-container-lowest p-3 rounded-2xl border border-surface-container-high/60">
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-tertiary">委托类型</span>
+<span class="font-medium text-on-surface">市价委托</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-tertiary">计划仓位数量</span>
+<span class="font-semibold text-on-surface">0.45 BTC</span>
+</div>
+<div class="flex justify-between items-center text-body-sm font-body-sm">
+<span class="text-tertiary">名义价值</span>
+<span class="font-semibold text-on-surface">30,789.22 USDT</span>
+</div>
+<!-- Missing Stop Loss highlighted in form state -->
+<div class="flex justify-between items-center text-body-sm font-body-sm pt-1 border-t border-surface-container-high/60">
+<div class="flex items-center gap-1">
+<span class="text-secondary font-medium">初始止损价</span>
+<span class="text-label-sm font-label-sm text-secondary bg-secondary-fixed/40 px-1 py-0.2 rounded font-medium">未填写</span>
+</div>
+<span class="text-secondary font-semibold">—</span>
+</div>
+</div>
+<!-- Discipline Risk Budget Info Box -->
+<div class="p-3 rounded-xl bg-surface-container-high/40 text-label-sm font-label-sm space-y-1 text-tertiary">
+<div class="flex justify-between">
+<span>可用保证金</span>
+<span class="font-medium text-on-surface">12,480.00 USDT</span>
+</div>
+<div class="flex justify-between">
+<span>单笔 1R 风险上限预算</span>
+<span class="font-medium text-primary">249.60 USDT (2.0%)</span>
+</div>
+</div>
+</div>
+<!-- Floating 5-Pill Bottom Navigation Bar -->
+<nav class="w-full bg-surface-container-lowest border-t border-surface-container-high/60 px-3 py-2 flex items-center justify-around z-0">
+<div class="flex flex-col items-center gap-0.5 text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="dashboard">dashboard</span>
+<span class="text-[11px] font-medium">行情</span>
+</div>
+<div class="flex flex-col items-center gap-0.5 text-primary">
+<span class="material-symbols-outlined text-[20px]" data-icon="trending_up" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+<span class="text-[11px] font-semibold">模拟交易</span>
+</div>
+<div class="flex flex-col items-center gap-0.5 text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="assignment">assignment</span>
+<span class="text-[11px] font-medium">持仓</span>
+</div>
+<div class="flex flex-col items-center gap-0.5 text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="verified_user">verified_user</span>
+<span class="text-[11px] font-medium">纪律</span>
+</div>
+<div class="flex flex-col items-center gap-0.5 text-outline">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+<span class="text-[11px] font-medium">我的</span>
+</div>
+</nav>
+</div>
+<!-- Soft Darkened / Frosted Overlay Mask -->
+<div class="absolute inset-0 z-10 bg-on-tertiary-fixed/40 backdrop-blur-[4px] transition-opacity duration-300"></div>
+<!-- FOREGROUND: Porcelain & Jade Sculpted Bottom Sheet -->
+<div aria-label="错误提示层" class="relative z-20 m-auto w-full max-w-[390px] px-6 flex items-center justify-center" role="region">
+<!-- Pure White Sculpted Centered Modal Dialog (330px width) -->
+<div aria-describedby="alert-dialog-desc" aria-labelledby="alert-dialog-title" aria-modal="true" class="w-[330px] bg-surface-container-lowest rounded-[24px] p-6 shadow-[0_20px_48px_rgba(23,36,34,0.24)] border border-surface-container-high/60 flex flex-col items-center text-center animate-dialog-in focus:outline-none focus:ring-2 focus:ring-primary/40" role="alertdialog" tabindex="-1">
+<!-- Calm Rose (#B74760) Circular Icon Container -->
+<div aria-hidden="true" class="w-14 h-14 rounded-full bg-[#FCEDF0] flex items-center justify-center mb-4 shrink-0 shadow-xs border border-[#F8D2D9]">
+<span class="material-symbols-outlined text-[28px] text-[#B74760]" data-icon="shield_lock" style="font-variation-settings: 'FILL' 0, 'wght' 350;">shield_lock</span>
+</div>
+<!-- Short Crystal-Clear Chinese Title -->
+<h3 class="text-headline-sm font-headline-sm font-bold text-on-surface tracking-tight mb-2" id="alert-dialog-title">
+      请填写初始止损
+    </h3>
+<!-- Actionable Explanatory Text with Risk Context -->
+<p class="text-body-sm font-body-sm text-tertiary leading-relaxed text-center px-1 mb-6" id="alert-dialog-desc">
+      纪律引擎要求每笔开仓必须硬性设定止损触发价，以锁定单笔最大 1R 风险预算（当前为净值 2.0%）。未设止损无法计算可开仓位。
+    </p>
+<!-- Action Buttons Stack -->
+<div class="w-full space-y-2">
+<!-- Primary Action: Return to edit, 48px height pill, active:scale-95 -->
+<button autofocus="" class="w-full h-12 bg-primary-container hover:bg-primary active:scale-95 text-on-primary rounded-full font-label-lg text-label-lg font-semibold tracking-tight shadow-[0_4px_16px_rgba(8,127,105,0.20)] transition-all duration-150 flex items-center justify-center gap-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary" type="button">
+<span>返回修改</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Secondary Action: View Current Rules (Ghost/Subtle Muted Pill) -->
+<button class="w-full h-10 bg-transparent hover:bg-surface-container active:scale-95 text-outline hover:text-on-surface rounded-full font-label-md text-label-md font-medium transition-colors duration-150 flex items-center justify-center gap-1 focus:outline-none focus:ring-1 focus:ring-outline/40" type="button">
+<span class="material-symbols-outlined text-[16px]" data-icon="rule">rule</span>
+<span>查看纪律规则</span>
+</button>
+</div>
+<!-- Honest Paper Trading Subtitle Note -->
+<div class="mt-4 pt-3 border-t border-surface-container-high/60 w-full flex items-center justify-center gap-1 text-[11px] text-outline font-normal">
+<span class="material-symbols-outlined text-[13px]" data-icon="verified">verified</span>
+<span>模拟交易 · 服务端仲裁</span>
+</div>
+</div>
+</div>
+</div>
+</body></html>

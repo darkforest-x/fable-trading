@@ -1,0 +1,34 @@
+{
+  "projectId": "8978791379095391159",
+  "screen": {
+    "deviceType": "MOBILE",
+    "generatedBy": "HatterAgent",
+    "height": "3236",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzY5ZjhhMmRlYzFkNjQyMzViZTcxOGRmOWU4NDY2MDMyEgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+      "mimeType": "text/html",
+      "name": "projects/8978791379095391159/files/924a9cc06d7c4d4bac001aaf90a6ab80"
+    },
+    "id": "465ff97bb4764395974bdc63af3f94b6",
+    "name": "projects/8978791379095391159/screens/465ff97bb4764395974bdc63af3f94b6",
+    "prompt": "Create a single 390px wide portrait mobile screen (Device: mobile) for the SPIKE independent discipline contract app: \"持仓保护\" (Position Protection).\nMatch the clean white / light compact visual style of {{DATA:SCREEN:SCREEN_3}} and {{DATA:SCREEN:SCREEN_4}} (clean light gray/white background #f6f8fa, clean white cards #ffffff with subtle borders #e2e8f0, crisp green #00b074, soft amber/red highlights, clean compact sans-serif typography, mobile app UI without phone shell/bezel, full width 390px mobile view).\n\nCRITICAL REQUIREMENTS & TRUTHFUL COPY (Strict obedience):\n1. TOP STATUS & HEADER:\n- Top bar indicators: 演示数据 · 未连接实盘 (示例数据), 服务端保存 · 模拟服务 (green dot).\n- Title: \"持仓保护\", contract tag \"BTCUSDT 永续\", badge \"纪律管控中\".\n- Top warning banner: MUST replace previous guarantee claim with:\n  \"计划风险固定 · 实际损失可能超预算\" (amber warning callout box with alert icon, with subtitle or badge explaining: 超额风险委托由服务端拦截，但滑点与极端行情不可完全免疫).\n\n2. POSITION SNAPSHOT (Synthetic Mock clearly marked \"示例数据\"):\n- Tag: 多 LONG BTCUSDT 逐仓 3.00x, PnL: +14.28 USDT (+1.74%) [示例数据]\n- Metrics grid: 开仓均价 (成交锁定) 60,000.0 USDT | 当前标记价 60,348.5 USDT\n- 初始风控基准 (成交即冻结 · 不可篡改):\n  原始成交仓位 0.041 BTC (约 2,460 USDT) | 初始止损价 59,400.0 (-600.0 / -1.00%) | 原始现金风险 (1R) 24.60 USDT (含预估手续费成本，成交后不可变)\n- 当前剩余持仓: 0.041 BTC (100% 原始仓位) | 保证金: 820.00 USDT\n\n3. CLOSE BUTTON (Crucial Truthful Copy):\n- Big primary dark button: \"立即平仓 (平仓始终可用 · 需服务与行情可用)\"\n- Micro text underneath: \"市价闪电平仓最高优先级仲裁保护；平仓依赖服务端连线及交易所行情深度正常，网络/服务离线时无法下发\"\n\n4. EXACT 3-TIER EXECUTION PIPELINE (Owner's exact specified policy - NO runner/trailing):\n- Section title: \"保护执行阶梯与时间轴 (1R / 3R / 5R 阶梯流水线)\"\n- Subtext: \"追踪盈利触发阶梯，所有比例严格按原始成交位 0.041 BTC 基准计算\"\n- Row 1: 阶梯 1 · 自动保本 (Break-even) [已就绪/待触发]\n  - 触发阈值: 浮盈达到 +1.0R (目标价 60,000.0 + 手续费缓冲 ≈ 60,024.6 USDT)\n  - 执行动作: 将止损价上移至保本位 (开仓成本价 + 费率平价线)\n  - 状态: 监控中\n- Row 2: 阶梯 2 · 分批止盈 TP 1 [待触发]\n  - 触发阈值: 浮盈达到 +3.0R (目标价 61,800.0 USDT)\n  - 执行动作: 平原始仓位 60% (即 0.0246 BTC)，锁定确定性收益并维持保本底线\n  - 减仓比例: 60% 原始仓位\n- Row 3: 阶梯 3 · 终极止盈 TP 2 (全部平仓) [待触发]\n  - 触发阈值: 浮盈达到 +5.0R (目标价 63,000.0 USDT)\n  - 执行动作: 平掉全部余仓 (剩余 40% 仓位 / 0.0164 BTC)，单笔交易生命周期结束\n  - 严正注意: 绝无任何无脑 Runner / 动态 ATR 移动止损特性，严格遵照 1R/3R/5R 三阶梯。\n\n5. SPIKE 持仓保护纪律原则 & 交易系统规则 (Detailed Policy Card):\n- 标题: \"SPIKE 持仓保护与风控纪律准则 (服务端生效)\"\n- 详细条款列表 (排版紧凑清晰，真实严谨):\n  1. R 在成交时固定：1R 为包含预估手续费及滑点成本的初始现金风险 (本笔 24.60 USDT)，成交冻结后不可逆逆向扩大。\n  2. 计划风险 vs 实际风险：系统锁定计划最大单笔亏损在预设 R 范围内，但遇流动性枯竭或跳空可能穿透预算。\n  3. 仓位与杠杆硬约束：单笔风险预算法定上限 2%，BTC/ETH 最高允许杠杆 100x，其他主流标的上限 20x (此为上限封顶而非默认杠杆)。\n  4. 频次与持仓限制：全账户并发持仓及挂单总数 ≤ 3 个；每日开仓尝试上限 ≤ 3 次。\n  5. 熔断与冷却保护：连亏 3 笔或单日净值回撤达 17% 时，触发开仓熔断拦截；因止损完全离场触发 24h 开仓冷却锁。\n  6. 止损只收紧不放宽：只允许向盈利方向单向推进，任何反向调大亏损的请求将被服务端拒绝。\n  7. 架构说明：本功能为「模拟交易 / 服务端保存 / 实盘未启用」，不宣称本地原生机器码编译，不宣称交易所真实保密指令。\n\n6. BOTTOM TAB BAR:\n- Mobile bottom navigation: 行情 | 合约 | 持仓 (active tab highlighted with badge) | 纪律 | 我的.\n- Bottom footer note: \"服务状态: 服务端保存 / 实盘未启用 · 本地无私钥 · 纯自律风控引擎\"\n\nEnsure clean vertical mobile flow (single column 390px), exquisite details, crisp borders, high typography contrast, matching SPIKE design standard.",
+    "screenMetadata": {
+      "agentType": "PRO_AGENT",
+      "status": "COMPLETE"
+    },
+    "screenType": "DESIGN",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1WA3vVNlYgNR2ZrPbMT3EsSnKWSheDAS8wI1-7f34izM09rRIrxTQi6N-caY-iaMgVivZIm3F6f5Ss32kTY0jkrboA7MEvpVoFTj_fEm4lAVBRtmfpE4Lv6cFJjZN3MIXUPt3h0Tau-qp51M_p56w2v6rB-t23N1ii1pOcDCdvUMCjvvWvYmgcO-Vr8wjZylqoxoKyON7yXAoAKNnt82jxC_SD5Hp_HVGRKSAriRI2Oq2G0d-zBybHmlw",
+      "name": "projects/8978791379095391159/files/2553563819eb486b8be7c35ec2ec9e62"
+    },
+    "theme": {},
+    "title": "SPIKE 独立纪律交易 · 持仓保护 (390px 移动端)",
+    "width": "780"
+  },
+  "entryScreen": "41ab8c418c3043ca9a42076e44e66722",
+  "notes": [
+    "Stitch code and image are layout references, not financial calculations.",
+    "Generated example R target prices and guarantee-like phrases are not accepted; application uses server-computed values.",
+    "Owner policy confirmed in chat on 2026-10-18; paper-only authorization."
+  ]
+}

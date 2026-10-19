@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE 独立纪律交易 v0.8.4 · 微交互与状态规范画板</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline-variant": "#bdc9c4",
+            "on-tertiary": "#ffffff",
+            "surface-container-low": "#f3f4f2",
+            "on-secondary-fixed": "#400011",
+            "primary-fixed": "#94f4d9",
+            "on-primary-fixed-variant": "#005142",
+            "on-tertiary-container": "#ecf9f5",
+            "surface-container-lowest": "#ffffff",
+            "primary": "#006452",
+            "on-primary": "#ffffff",
+            "surface-bright": "#f9faf8",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-tertiary-fixed": "#121e1c",
+            "on-secondary-container": "#730f2a",
+            "on-secondary": "#ffffff",
+            "background": "#f9faf8",
+            "surface-tint": "#006b58",
+            "surface-dim": "#d9dad8",
+            "on-surface": "#191c1b",
+            "tertiary-fixed": "#d8e5e1",
+            "inverse-primary": "#78d8be",
+            "on-background": "#191c1b",
+            "inverse-surface": "#2e3130",
+            "secondary-container": "#fc7a8f",
+            "on-error": "#ffffff",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "inverse-on-surface": "#f0f1ef",
+            "on-primary-fixed": "#002019",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#677370",
+            "secondary": "#a5374d",
+            "surface-container-high": "#e7e8e6",
+            "surface": "#f9faf8",
+            "outline": "#6e7a75",
+            "on-error-container": "#93000a",
+            "primary-container": "#087f69",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-primary-container": "#d3fff0",
+            "error": "#ba1a1a",
+            "on-secondary-fixed-variant": "#851e36",
+            "surface-container": "#edeeec",
+            "surface-container-highest": "#e2e3e1",
+            "tertiary": "#4e5b58",
+            "primary-fixed-dim": "#78d8be",
+            "surface-variant": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "on-surface-variant": "#3e4945"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "gutter-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "margin-desktop": "3rem",
+            "gutter": "1rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin-tablet": "2rem",
+            "space-2xl": "3rem",
+            "gutter-tablet": "1.5rem",
+            "margin": "1.25rem"
+          },
+          "fontFamily": {
+            "numeric-hero-mobile": ["JetBrains Mono", "Inter", "sans-serif"],
+            "display-lg": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "numeric-hero": ["JetBrains Mono", "Inter", "sans-serif"],
+            "display-lg-mobile": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "label-lg": ["Inter", "sans-serif"],
+            "mono": ["JetBrains Mono", "monospace"]
+          },
+          "fontSize": {
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* 瓷面与软玉特定环境阴影系统 */
+    .porcelain-card {
+      background-color: #ffffff;
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+      border-radius: 20px;
+    }
+    .porcelain-card-lift {
+      transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms ease;
+    }
+    .porcelain-card-lift:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px -4px rgba(23, 36, 34, 0.07), 0 2px 6px 0 rgba(8, 127, 105, 0.03);
+    }
+    .recessed-surface {
+      background-color: #eef1ee;
+    }
+    /* 动效克制与安全节拍规范 */
+    .micro-press {
+      transition: transform 140ms cubic-bezier(0.2, 0, 0, 1), background-color 140ms ease;
+    }
+    .micro-press:active {
+      transform: scale(0.97);
+    }
+    .micro-expand {
+      transition: all 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* 自定义滑块轨道 */
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 9999px;
+      background: #087f69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 100, 82, 0.3);
+      margin-top: -8px;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      cursor: pointer;
+      background: #e2e3e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased font-body-md selection:bg-primary-fixed selection:text-on-primary-fixed min-h-screen pb-28">
+<!-- ========================================== -->
+<!-- 顶栏规范条 (Brand Anchor TopAppBar 映射与规范声明) -->
+<!-- ========================================== -->
+<header class="sticky top-0 z-40 bg-background/80 backdrop-blur-md">
+<div class="max-w-[1440px] mx-auto px-6 h-16 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-sm">
+<span class="material-symbols-outlined text-[20px]">trending_up</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+<span class="text-label-sm font-label-sm bg-surface-container px-2 py-0.5 rounded-full text-primary font-mono font-medium">v0.8.4</span>
+<span class="text-label-sm font-label-sm bg-primary-fixed/40 text-on-primary-fixed-variant px-2 py-0.5 rounded-full font-medium">规范画板</span>
+</div>
+<p class="text-body-sm font-body-sm text-tertiary">全套微交互与状态规范 · 白瓷与软玉工程手册</p>
+</div>
+</div>
+<!-- 快速规范校验参数标牌 -->
+<div class="hidden lg:flex items-center gap-5 text-label-sm font-label-sm font-mono text-tertiary">
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>触控热区: ≥ 44×44px</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>按压动效: 140ms</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>转场展开: 220ms</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>WCAG AAA 认证</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="系统传感器监控状态" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container transition-colors duration-150 active:scale-95" type="button">
+<span class="material-symbols-outlined text-[22px]">sensors</span>
+</button>
+</div>
+</div>
+</header>
+<!-- ========================================== -->
+<!-- 主画板布局 (1440px / 1280px 宽幅工作台) -->
+<!-- ========================================== -->
+<main class="max-w-[1440px] mx-auto px-6 pt-6">
+<!-- 画板综述 Header Banner -->
+<section class="porcelain-card p-6 md:p-8 mb-8 relative overflow-hidden">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+<div class="max-w-3xl">
+<div class="flex items-center gap-2 text-label-md font-label-md text-primary font-semibold mb-2">
+<span class="material-symbols-outlined text-base">verified</span>
+<span>PROPRIETARY DISCIPLINE TRADING UI SYSTEM</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg text-on-surface mb-3 tracking-tight">微交互节拍与异步状态工程画板</h1>
+<p class="text-body-md font-body-md text-tertiary leading-relaxed">
+            严守「白瓷与软玉」温润秩序。杜绝高频燥热与破坏性全屏弹窗。通过 44×44px 独立手势边界、140ms/220ms 神经反射物理反馈、内联防重提交门禁及非阻断顶部通知，构建高拟真、克制且具仪式感的独立纪律交易终端。
+          </p>
+</div>
+<div class="flex items-center gap-3 self-start lg:self-center">
+<div class="bg-surface-container px-4 py-3 rounded-2xl">
+<div class="text-label-sm font-label-sm text-tertiary font-mono">规范状态</div>
+<div class="text-body-md font-body-md font-semibold text-primary flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+              READY FOR PRODUCTION
+            </div>
+</div>
+<button class="h-[52px] px-6 rounded-full bg-primary-container text-on-primary font-label-lg font-medium shadow-sm hover:opacity-95 micro-press flex items-center gap-2" onclick="window.scrollTo({top: 800, behavior: 'smooth'})" type="button">
+<span>检视交互规范</span>
+<span class="material-symbols-outlined text-[18px]">arrow_downward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 规范网格栅格布局 (Bento Grid) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- ======================================================== -->
+<!-- 模块一【触控热区与动效规范 (44x44 Hit Targets & State Rhythm)】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">touch_app</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 01 · 触控热区与动效节拍</h2>
+<p class="text-body-sm font-body-sm text-tertiary">44×44px 物理防空触 · 140ms 按压回弹 · 内联微旋加载</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary bg-primary-fixed/30 px-2.5 py-1 rounded-full">SPEC M-01</span>
+</div>
+<!-- 44x44 触控标靶演示区 -->
+<div class="bg-surface-container-low rounded-2xl p-5 mb-6">
+<div class="text-label-sm font-label-sm font-mono text-tertiary mb-3 flex items-center justify-between">
+<span>状态演练矩阵 (1R 快捷开仓按键状态)</span>
+<span class="text-primary font-semibold">140ms Press Duration</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+<!-- 普通态 -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl">
+<div class="text-label-sm font-label-sm text-tertiary mb-1.5 flex justify-between">
+<span>01. 常规待命态</span>
+<span class="text-tertiary font-mono">Resting</span>
+</div>
+<button class="w-full h-[52px] rounded-full bg-primary-container text-on-primary font-label-lg font-medium flex items-center justify-center gap-2 micro-press shadow-sm" type="button">
+<span>做多 1R 仓位</span>
+<span class="text-label-sm font-mono opacity-80">(0.045 BTC)</span>
+</button>
+</div>
+<!-- 140ms 按压态 -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl">
+<div class="text-label-sm font-label-sm text-tertiary mb-1.5 flex justify-between">
+<span>02. 按压触感态</span>
+<span class="text-primary font-mono">active:scale-97</span>
+</div>
+<button class="w-full h-[52px] rounded-full bg-primary-container text-on-primary font-label-lg font-medium flex items-center justify-center gap-2 transform scale-[0.97] opacity-90 ring-4 ring-primary-container/20" type="button">
+<span>做多 1R 仓位</span>
+<span class="text-label-sm font-mono opacity-80">(0.045 BTC)</span>
+</button>
+</div>
+<!-- 内联加载中 (Tiny spinner) -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl">
+<div class="text-label-sm font-label-sm text-tertiary mb-1.5 flex justify-between">
+<span>03. 异步提交态 (防重击)</span>
+<span class="text-tertiary font-mono">disabled</span>
+</div>
+<button class="w-full h-[52px] rounded-full bg-primary-container/80 text-on-primary font-label-lg font-medium flex items-center justify-center gap-2.5 cursor-not-allowed" disabled="" type="button">
+<svg class="animate-spin h-4 w-4 text-on-primary" fill="none" viewbox="0 0 24 24">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+<span>计算风控排队中...</span>
+</button>
+</div>
+<!-- 成功内联徽标态 -->
+<div class="bg-surface-container-lowest p-3.5 rounded-xl">
+<div class="text-label-sm font-label-sm text-tertiary mb-1.5 flex justify-between">
+<span>04. 完成就绪态 (免弹窗)</span>
+<span class="text-primary font-mono">ring-2 jade</span>
+</div>
+<button class="w-full h-[52px] rounded-full bg-primary-fixed/40 text-on-primary-fixed-variant font-label-lg font-semibold flex items-center justify-center gap-2 ring-2 ring-primary-container/30" type="button">
+<span class="material-symbols-outlined text-[20px] text-primary">check_circle</span>
+<span>已填入 1R 保护标的</span>
+</button>
+</div>
+</div>
+<!-- 独立 44x44 关闭与步进器热区展示 -->
+<div class="mt-4 pt-4 border-t border-surface-container flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<span class="text-label-sm font-label-sm text-tertiary">44×44px 独立关闭键:</span>
+<div class="relative group">
+<div class="absolute -inset-1 border border-dashed border-primary/40 rounded-full pointer-events-none"></div>
+<button aria-label="关闭当前层级" class="w-11 h-11 rounded-full bg-surface-container-lowest text-on-surface-variant flex items-center justify-center hover:bg-surface-container micro-press" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary">热区标界有效</span>
+</div>
+<!-- 触控步进器 Stepper -->
+<div class="flex items-center gap-2">
+<span class="text-label-sm font-label-sm text-tertiary">44px 步进器:</span>
+<div class="flex items-center bg-surface-container-lowest rounded-full p-1 shadow-sm">
+<button aria-label="减少标的杠杆倍数" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container micro-press" type="button">
+<span class="material-symbols-outlined text-[18px]">remove</span>
+</button>
+<span class="w-12 text-center font-mono font-semibold text-body-md text-on-surface">10x</span>
+<button aria-label="增加标的杠杆倍数" class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container micro-press" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- 动效与无障碍 CSS 规范嵌入卡片 -->
+<div class="bg-inverse-surface rounded-2xl p-5 text-inverse-on-surface font-mono text-label-sm">
+<div class="flex items-center justify-between text-tertiary-fixed-dim mb-2 border-b border-white/10 pb-2">
+<span>CSS RHYTHM SPEC // tokens.css</span>
+<span class="text-inverse-primary">v0.8.4</span>
+</div>
+<pre class="overflow-x-auto text-body-sm leading-relaxed text-surface-container-highest"><span class="text-inverse-primary">:root</span> {
+  <span class="text-primary-fixed-dim">--micro-press-duration</span>: 140ms;
+  <span class="text-primary-fixed-dim">--sheet-expand-duration</span>: 220ms;
+  <span class="text-primary-fixed-dim">--ease-tactile</span>: cubic-bezier(0.16, 1, 0.3, 1);
+}
+<span class="text-secondary-fixed-dim">@media</span> (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { transition-duration: 0.01ms !important; }
+}</pre>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 模块二【合约搜索底抽屉与键盘输入交互 (Search Sheet & Clear Button)】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 02 · 合约搜索底抽屉与键盘交互</h2>
+<p class="text-body-sm font-body-sm text-tertiary">拉条手柄 · 44px 独立关闭 · 动态清除 X · 内联空状态</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary bg-primary-fixed/30 px-2.5 py-1 rounded-full">SPEC M-02</span>
+</div>
+<!-- 390px 真实移动端视窗模拟框架 -->
+<div class="max-w-[390px] mx-auto bg-surface-container-low rounded-3xl p-4 shadow-inner border border-surface-container">
+<div class="bg-surface-container-lowest rounded-2xl p-4 shadow-sm relative overflow-hidden">
+<!-- 手柄拉条 (Drag Handle) -->
+<div class="flex justify-center mb-3">
+<div class="w-10 h-1.5 bg-outline-variant/60 rounded-full"></div>
+</div>
+<!-- 抽屉头部与 44x44 关闭 X -->
+<div class="flex items-center justify-between mb-3">
+<div>
+<h3 class="font-headline-sm text-body-lg font-bold text-on-surface">切换合约标的</h3>
+<p class="text-label-sm text-tertiary">支持主流永续合约与模拟沙盒</p>
+</div>
+<button aria-label="关闭底抽屉" class="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container micro-press" type="button">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<!-- 搜索框带独立 44px 清除 X 交互演示 -->
+<div class="relative mb-4">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-tertiary">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full h-[50px] pl-10 pr-12 rounded-2xl bg-surface-container text-body-md text-on-surface font-mono placeholder:text-outline border-0 focus:ring-2 focus:ring-primary-container outline-none transition-shadow" id="demo-search-input" placeholder="搜索标的代码 (如 BTC, ETH, SOL)..." type="text" value="XYZ-PERP"/>
+<!-- 独立 44x44 清除按键 (仅当有文本时显示) -->
+<button aria-label="清除搜索输入内容" class="absolute inset-y-0 right-1 w-11 h-11 my-auto rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors micro-press" id="demo-search-clear" type="button">
+<span class="material-symbols-outlined text-[18px]">cancel</span>
+</button>
+</div>
+<!-- 搜索无结果内联空状态 (No-results inside sheet) -->
+<div class="py-8 px-4 text-center rounded-2xl bg-surface-container-low/70 border border-dashed border-outline-variant/40" id="demo-search-empty">
+<div class="w-12 h-12 rounded-full bg-surface-container mx-auto flex items-center justify-center text-tertiary mb-3">
+<span class="material-symbols-outlined text-[24px]">troubleshoot</span>
+</div>
+<div class="font-label-lg font-semibold text-on-surface mb-1">未找到包含 'XYZ' 的合约标的</div>
+<p class="text-body-sm font-body-sm text-tertiary max-w-[260px] mx-auto mb-4">
+                  系统支持全部 USDT 永续标的与现货指数。请检查拼写或切换至自选白名单。
+                </p>
+<button class="h-10 px-4 rounded-full bg-surface-container-lowest text-primary text-label-md font-medium shadow-sm hover:bg-surface-container micro-press" onclick="document.getElementById('demo-search-input').value='BTC-USDT'; document.getElementById('demo-search-empty').classList.add('hidden'); document.getElementById('demo-search-result').classList.remove('hidden');" type="button">
+                  推荐填入 BTC-USDT
+                </button>
+</div>
+<!-- 默认有效结果列表项 (切换展示) -->
+<div class="hidden space-y-2 mt-2" id="demo-search-result">
+<div class="flex items-center justify-between p-3 rounded-xl hover:bg-surface-container transition-colors cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-primary-fixed/50 flex items-center justify-center text-primary font-bold text-xs">BTC</div>
+<div>
+<div class="font-mono font-semibold text-body-md text-on-surface">BTC-USDT 永续</div>
+<div class="text-label-sm text-tertiary font-mono">OKX Web3 · 杠杆 1-100x</div>
+</div>
+</div>
+<span class="font-mono text-label-md text-primary font-semibold">$64,820.50</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-surface-container flex items-center justify-between text-body-sm text-tertiary">
+<span>防闪退逻辑：无结果状态永续停留在 Sheet 内部</span>
+<span class="text-primary font-mono font-medium">Sheet Height: Auto-clamp</span>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 模块三【底抽屉滑动与手势隔离规范 (Draggable Handle & Scroll Protection)】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">pan_tool</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 03 · 底抽屉手势隔离与滚动防护</h2>
+<p class="text-body-sm font-body-sm text-tertiary">拖拽手柄专区拦截 · 内容区域手势穿透隔离</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary bg-primary-fixed/30 px-2.5 py-1 rounded-full">SPEC M-03</span>
+</div>
+<!-- 手势隔离示意图解 -->
+<div class="bg-surface-container-low rounded-2xl p-5 mb-5 space-y-4">
+<!-- 手柄受控区 (Active drag zone) -->
+<div class="relative bg-emerald-50 rounded-2xl p-4 border-2 border-emerald-500/30">
+<div class="flex items-center justify-between text-label-sm font-mono text-primary font-semibold mb-2">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+                  唯一允许下滑关闭的受控手柄区 (TOUCH_DRAG_ALLOW)
+                </span>
+<span>touch-action: pan-y</span>
+</div>
+<div class="w-16 h-2 bg-primary-container/40 rounded-full mx-auto my-1"></div>
+<p class="text-label-sm text-tertiary text-center mt-2">
+                高度 48px 热区。仅在此区域内的向下滑动才会激活抽屉收起物理回弹。
+              </p>
+</div>
+<!-- 严格隔离的内容区 (Isolated content zone) -->
+<div class="relative bg-surface-container-lowest rounded-2xl p-4 border border-outline-variant/40">
+<div class="flex items-center justify-between text-label-sm font-mono text-secondary mb-2">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                  下层内容区：严格手势隔离 (STOP_PROPAGATION)
+                </span>
+<span>overscroll-behavior: contain</span>
+</div>
+<!-- 模拟 K线 / 滚动列表容器 -->
+<div class="h-28 rounded-xl bg-surface-container flex items-center justify-center flex-col gap-2 p-3 text-center">
+<div class="flex items-center gap-2 text-on-surface-variant font-mono text-body-sm">
+<span class="material-symbols-outlined text-[18px]">show_chart</span>
+<span>K 线交互图表 / 滚动成交深度列表</span>
+</div>
+<div class="text-label-sm text-tertiary">
+                  上下左右连续拖拽此区域绝不触发底抽屉关闭或页面意外跳出
+                </div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl p-4 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[22px]">accessibility_new</span>
+<div class="text-body-sm text-on-surface">
+<span class="font-semibold text-primary">无障碍 (A11y) 原生支持：</span>
+            键盘按下 <kbd class="px-2 py-0.5 bg-surface-container-lowest rounded border font-mono text-xs shadow-sm">ESC</kbd> 立即平滑收起抽屉，同时焦点自动归还至触发前的主动按键。
+          </div>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 模块四【部分平仓预设百分比胶囊条与单独确认 CTA (Close Preset Pills)】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">pie_chart</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 04 · 部分平仓预设百分比胶囊与确认</h2>
+<p class="text-body-sm font-body-sm text-tertiary">25%/50%/75%/100% 快捷药丸 · 联动滑块 · 严格单 CTA</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-secondary bg-secondary-fixed/40 px-2.5 py-1 rounded-full">SPEC M-04</span>
+</div>
+<!-- 平仓组件交互容器 -->
+<div class="bg-surface-container-low rounded-2xl p-5 mb-5">
+<div class="flex items-center justify-between mb-4">
+<div>
+<span class="text-label-sm text-tertiary font-mono">当前持仓标的</span>
+<div class="font-mono font-bold text-headline-sm text-on-surface">ETH-USDT 多单 (2.400 ETH)</div>
+</div>
+<div class="text-right">
+<span class="text-label-sm text-tertiary font-mono">未实现盈亏</span>
+<div class="font-mono font-bold text-body-lg text-primary">+ $348.60 (+14.2%)</div>
+</div>
+</div>
+<!-- 百分比药丸胶囊行 (Preset Pills) -->
+<div class="grid grid-cols-4 gap-2 mb-5">
+<button class="h-11 rounded-full bg-surface-container-lowest text-tertiary font-mono font-semibold text-body-sm border border-transparent hover:border-outline-variant micro-press transition-all" id="pill-25" onclick="setClosePreset(25)" type="button">
+                25%
+              </button>
+<button class="h-11 rounded-full bg-rose-50 text-secondary font-mono font-bold text-body-sm border-2 border-secondary micro-press transition-all shadow-sm" id="pill-50" onclick="setClosePreset(50)" type="button">
+                50%
+              </button>
+<button class="h-11 rounded-full bg-surface-container-lowest text-tertiary font-mono font-semibold text-body-sm border border-transparent hover:border-outline-variant micro-press transition-all" id="pill-75" onclick="setClosePreset(75)" type="button">
+                75%
+              </button>
+<button class="h-11 rounded-full bg-surface-container-lowest text-tertiary font-mono font-semibold text-body-sm border border-transparent hover:border-outline-variant micro-press transition-all" id="pill-100" onclick="setClosePreset(100)" type="button">
+                100%
+              </button>
+</div>
+<!-- 连续滑动微调滑块 -->
+<div class="mb-5 px-1">
+<div class="flex justify-between text-label-sm font-mono text-tertiary mb-1">
+<span>精细分批调节</span>
+<span class="text-secondary font-bold font-mono" id="slider-val-label">50% 平仓额度 (1.200 ETH)</span>
+</div>
+<input class="w-full" id="close-range-slider" max="100" min="1" oninput="onSliderInput(this.value)" type="range" value="50"/>
+</div>
+<!-- 严谨独立的执行 CTA 按钮 (根据百分比动态文案) -->
+<button class="w-full h-[52px] rounded-full bg-secondary text-on-secondary font-label-lg font-semibold flex items-center justify-center gap-2 micro-press shadow-sm" id="close-submit-btn" onclick="triggerCloseSubmit()" type="button">
+<span class="material-symbols-outlined text-[20px]">exit_to_app</span>
+<span id="close-submit-text">确认平仓 50% (1.200 ETH)</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between text-body-sm text-tertiary">
+<span>防误触机制：选中 100% 自动强化文案为「确认全部平仓」</span>
+<span class="text-secondary font-mono font-semibold">Single Final CTA</span>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 模块五【异步操作独立状态与防重触发门禁 (Async Spinner & Guard)】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 05 · 异步操作独立状态与防重门禁</h2>
+<p class="text-body-sm font-body-sm text-tertiary">撤单 · 切换账户 · 移动止损 · 即时锁定与微旋</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary bg-primary-fixed/30 px-2.5 py-1 rounded-full">SPEC M-05</span>
+</div>
+<!-- 异步演示三列交互项 -->
+<div class="space-y-4 mb-4">
+<!-- 异步项 1: 撤销挂单 (Cancel Order) -->
+<div class="bg-surface-container-low p-4 rounded-2xl flex items-center justify-between">
+<div>
+<div class="font-mono font-bold text-body-md text-on-surface">SOL 限价买单 #9482</div>
+<div class="text-label-sm text-tertiary font-mono">142.50 USDT · 25.0 SOL · 待撮合</div>
+</div>
+<button class="h-11 px-5 rounded-full bg-surface-container-lowest text-secondary font-label-md font-semibold border border-secondary/20 hover:bg-rose-50 micro-press flex items-center gap-2 transition-all" id="btn-async-cancel" onclick="triggerAsyncAction('btn-async-cancel', '撤单中...', '撤销挂单')" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+<span>撤销挂单</span>
+</button>
+</div>
+<!-- 异步项 2: 账户切换 (Switch Account) -->
+<div class="bg-surface-container-low p-4 rounded-2xl flex items-center justify-between">
+<div>
+<div class="font-mono font-bold text-body-md text-on-surface">切换至币安实盘子账户</div>
+<div class="text-label-sm text-tertiary font-mono">Sub-Account #02 (VIP 3)</div>
+</div>
+<button class="h-11 px-5 rounded-full bg-surface-container-lowest text-primary font-label-md font-semibold border border-primary/20 hover:bg-emerald-50 micro-press flex items-center gap-2 transition-all" id="btn-async-switch" onclick="triggerAsyncAction('btn-async-switch', '切换中...', '切换账户')" type="button">
+<span class="material-symbols-outlined text-[18px]">swap_horiz</span>
+<span>切换账户</span>
+</button>
+</div>
+<!-- 异步项 3: 止损更新 (Update Stop) -->
+<div class="bg-surface-container-low p-4 rounded-2xl flex items-center justify-between">
+<div>
+<div class="font-mono font-bold text-body-md text-on-surface">同步追踪止损至盈亏平衡</div>
+<div class="text-label-sm text-tertiary font-mono">Breakeven Guard @ $63,200</div>
+</div>
+<button class="h-11 px-5 rounded-full bg-primary-container text-on-primary font-label-md font-medium hover:opacity-95 micro-press flex items-center gap-2 transition-all" id="btn-async-stop" onclick="triggerAsyncAction('btn-async-stop', '提交中...', '更新止损')" type="button">
+<span class="material-symbols-outlined text-[18px]">security_update_good</span>
+<span>更新止损</span>
+</button>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-tertiary flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span>防重门禁原理：触发即刻 <code class="font-mono text-xs bg-surface-container px-1 py-0.5 rounded">pointer-events: none</code>，从源头杜绝并发重试。</span>
+</div>
+</section>
+<!-- ======================================================== -->
+<!-- 模块六【非阻断顶部轻量 Toast 与严肃交易弹窗分级】 -->
+<!-- ======================================================== -->
+<section class="lg:col-span-6 porcelain-card p-6 md:p-8 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+</span>
+<div>
+<h2 class="text-headline-sm font-headline-sm text-on-surface">模块 06 · 轻量通知 vs 严肃居中弹窗分级</h2>
+<p class="text-body-sm font-body-sm text-tertiary">非阻断盯盘 Toast · 严重风控二次确认模态窗</p>
+</div>
+</div>
+<span class="text-label-sm font-label-sm font-mono text-primary bg-primary-fixed/30 px-2.5 py-1 rounded-full">SPEC M-06</span>
+</div>
+<div class="space-y-4 mb-4">
+<!-- 常规非阻断 Toast 演示 -->
+<div class="bg-surface-container-low rounded-2xl p-4">
+<div class="text-label-sm font-label-sm text-tertiary mb-2">常规低危动作：顶部滑入轻量 Toast (不打断交易盯盘)</div>
+<!-- 模拟 Toast 视觉标本 -->
+<div class="bg-surface-container-lowest rounded-full px-4 py-2 shadow-[0_8px_24px_-4px_rgba(23,36,34,0.08)] flex items-center justify-between border border-surface-container">
+<div class="flex items-center gap-2.5">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container"></span>
+<span class="text-body-md font-medium text-on-surface">已连接至 OKX 实盘交易通道 #01</span>
+<span class="text-label-sm font-mono text-tertiary hidden sm:inline">ping: 28ms</span>
+</div>
+<button aria-label="关闭提示" class="w-11 h-11 -mr-2 rounded-full flex items-center justify-center text-tertiary hover:text-on-surface micro-press" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="mt-3 flex justify-end">
+<button class="h-9 px-4 rounded-full bg-surface-container text-primary font-label-md font-semibold hover:bg-surface-container-high micro-press flex items-center gap-1.5" onclick="triggerFloatingToast()" type="button">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+<span>模拟顶部滑入体验</span>
+</button>
+</div>
+</div>
+<!-- 严肃阻断模态窗示例 -->
+<div class="bg-surface-container-low rounded-2xl p-4">
+<div class="text-label-sm font-label-sm text-secondary font-medium mb-2">高危风控阻断：居中模态弹窗 (强制二次确认)</div>
+<div class="bg-surface-container-lowest rounded-2xl p-4 border border-rose-100 flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-rose-50 text-secondary flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</div>
+<div class="flex-grow">
+<div class="font-bold text-body-md text-on-surface">超出单日最大回撤警戒线 (2.5R)</div>
+<p class="text-body-sm text-tertiary mt-0.5">
+                    根据独立纪律守则，继续下单需进行冷静期确认，或强制锁定交易终端至次日 08:00。
+                  </p>
+<div class="flex items-center gap-3 mt-3">
+<button class="h-10 px-4 rounded-full bg-secondary text-on-secondary font-label-md font-semibold micro-press" onclick="alert('模态窗确认：纪律锁定触发')" type="button">
+                      强制锁定终端
+                    </button>
+<button class="h-10 px-4 rounded-full bg-surface-container text-tertiary font-label-md font-semibold hover:bg-surface-container-high micro-press" type="button">
+                      放弃本次下单
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="text-body-sm text-tertiary">
+          分级铁律：资金相关成功与就绪使用非侵入 Toast；阻断性纪律审查绝不降级为 Toast。
+        </div>
+</section>
+</div>
+</main>
+<!-- ======================================================== -->
+<!-- 动态顶部滑入浮动 Toast 实体 (JS 控制演示) -->
+<!-- ======================================================== -->
+<div class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform -translate-y-24 opacity-0 pointer-events-none transition-all duration-300 ease-out" id="runtime-toast">
+<div class="bg-surface-container-lowest/95 backdrop-blur-md rounded-full px-5 py-2.5 shadow-[0_16px_40px_-6px_rgba(23,36,34,0.12)] border border-surface-container flex items-center gap-3">
+<span class="w-2.5 h-2.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-body-md font-medium text-on-surface">实盘账户连接成功 · 通道延迟 18ms</span>
+<button aria-label="关闭通知" class="w-11 h-11 -mr-3 rounded-full flex items-center justify-center text-tertiary hover:text-on-surface micro-press" onclick="hideRuntimeToast()" type="button">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- ======================================================== -->
+<!-- 规范大板底部导航悬浮岛 (Brand Anchor BottomNavBar 完整落地) -->
+<!-- ======================================================== -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 bg-surface-container-lowest/90 backdrop-blur-xl rounded-full shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<!-- 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 micro-press" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</a>
+<!-- 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 micro-press" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</a>
+<!-- 纪律 (当前规范画板所处的核心语义) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 micro-press shadow-sm" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- 连接 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 micro-press" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">link</span>
+<span class="text-label-sm font-label-sm mt-0.5">连接</span>
+</a>
+</nav>
+<!-- ======================================================== -->
+<!-- 交互微逻辑脚本 (纯原生 JavaScript) -->
+<!-- ======================================================== -->
+<script>
+    // 1. 模块二：搜索输入框与清除 X 按键动态联动
+    const searchInput = document.getElementById('demo-search-input');
+    const searchClear = document.getElementById('demo-search-clear');
+    const searchEmpty = document.getElementById('demo-search-empty');
+    const searchResult = document.getElementById('demo-search-result');
+
+    if (searchInput && searchClear) {
+      searchInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        if (val.length > 0) {
+          searchClear.style.display = 'flex';
+        } else {
+          searchClear.style.display = 'none';
+        }
+
+        // 模拟搜索结果匹配
+        if (val.toUpperCase().includes('BTC')) {
+          searchEmpty.classList.add('hidden');
+          searchResult.classList.remove('hidden');
+        } else {
+          searchEmpty.classList.remove('hidden');
+          searchResult.classList.add('hidden');
+        }
+      });
+
+      searchClear.addEventListener('click', () => {
+        searchInput.value = '';
+        searchClear.style.display = 'none';
+        searchEmpty.classList.remove('hidden');
+        searchResult.classList.add('hidden');
+        searchInput.focus();
+      });
+    }
+
+    // 2. 模块四：平仓百分比胶囊条与滑块确认联动
+    const totalEth = 2.400;
+    const presets = [25, 50, 75, 100];
+
+    function setClosePreset(percent) {
+      presets.forEach(p => {
+        const pill = document.getElementById('pill-' + p);
+        if (p === percent) {
+          pill.className = 'h-11 rounded-full bg-rose-50 text-secondary font-mono font-bold text-body-sm border-2 border-secondary micro-press transition-all shadow-sm';
+        } else {
+          pill.className = 'h-11 rounded-full bg-surface-container-lowest text-tertiary font-mono font-semibold text-body-sm border border-transparent hover:border-outline-variant micro-press transition-all';
+        }
+      });
+
+      const slider = document.getElementById('close-range-slider');
+      if (slider) slider.value = percent;
+      updateCloseLabels(percent);
+    }
+
+    function onSliderInput(percent) {
+      const p = parseInt(percent, 10);
+      presets.forEach(preset => {
+        const pill = document.getElementById('pill-' + preset);
+        if (preset === p) {
+          pill.className = 'h-11 rounded-full bg-rose-50 text-secondary font-mono font-bold text-body-sm border-2 border-secondary micro-press transition-all shadow-sm';
+        } else {
+          pill.className = 'h-11 rounded-full bg-surface-container-lowest text-tertiary font-mono font-semibold text-body-sm border border-transparent hover:border-outline-variant micro-press transition-all';
+        }
+      });
+      updateCloseLabels(p);
+    }
+
+    function updateCloseLabels(percent) {
+      const ethAmount = ((totalEth * percent) / 100).toFixed(3);
+      const label = document.getElementById('slider-val-label');
+      const submitText = document.getElementById('close-submit-text');
+      const submitBtn = document.getElementById('close-submit-btn');
+
+      if (label) {
+        label.innerText = `${percent}% 平仓额度 (${ethAmount} ETH)`;
+      }
+
+      if (submitText) {
+        if (percent === 100) {
+          submitText.innerText = `确认全部平仓 (${ethAmount} ETH)`;
+          submitBtn.classList.add('ring-4', 'ring-secondary/20');
+        } else {
+          submitText.innerText = `确认平仓 ${percent}% (${ethAmount} ETH)`;
+          submitBtn.classList.remove('ring-4', 'ring-secondary/20');
+        }
+      }
+    }
+
+    function triggerCloseSubmit() {
+      const btn = document.getElementById('close-submit-btn');
+      const originalHtml = btn.innerHTML;
+      btn.style.pointerEvents = 'none';
+      btn.innerHTML = `
+        <svg class="animate-spin h-5 w-5 text-on-secondary" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>平仓指令排队中...</span>
+      `;
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">done_all</span><span>平仓指令已送达撮合所</span>`;
+        btn.classList.remove('bg-secondary');
+        btn.classList.add('bg-primary-container');
+        setTimeout(() => {
+          btn.innerHTML = originalHtml;
+          btn.classList.add('bg-secondary');
+          btn.classList.remove('bg-primary-container');
+          btn.style.pointerEvents = 'auto';
+        }, 1600);
+      }, 1000);
+    }
+
+    // 3. 模块五：通用异步按钮防重触发门禁
+    function triggerAsyncAction(btnId, loadingText, defaultText) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const originalContent = btn.innerHTML;
+      btn.style.pointerEvents = 'none';
+      btn.classList.add('opacity-70');
+      btn.innerHTML = `
+        <svg class="animate-spin h-4 w-4 text-current" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>${loadingText}</span>
+      `;
+      setTimeout(() => {
+        btn.innerHTML = `<span class="material-symbols-outlined text-[18px]">check</span><span>完成</span>`;
+        setTimeout(() => {
+          btn.innerHTML = originalContent;
+          btn.classList.remove('opacity-70');
+          btn.style.pointerEvents = 'auto';
+        }, 1200);
+      }, 900);
+    }
+
+    // 4. 模块六：顶部浮动 Toast 显示与收起
+    let toastTimer = null;
+    function triggerFloatingToast() {
+      const toast = document.getElementById('runtime-toast');
+      if (!toast) return;
+      clearTimeout(toastTimer);
+      toast.classList.remove('-translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      toastTimer = setTimeout(() => {
+        hideRuntimeToast();
+      }, 3500);
+    }
+
+    function hideRuntimeToast() {
+      const toast = document.getElementById('runtime-toast');
+      if (!toast) return;
+      toast.classList.add('-translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.remove('translate-y-0', 'opacity-100');
+    }
+  </script>
+</body></html>

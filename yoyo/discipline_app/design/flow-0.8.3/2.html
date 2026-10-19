@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-[#F6F7F5]" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE 独立纪律交易 · 当前持仓</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed-variant": "#005142",
+            "tertiary": "#4e5b58",
+            "on-surface-variant": "#3e4945",
+            "primary-fixed-dim": "#78d8be",
+            "inverse-primary": "#78d8be",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-tertiary-fixed": "#121e1c",
+            "inverse-surface": "#2e3130",
+            "secondary-container": "#fc7a8f",
+            "on-error": "#ffffff",
+            "on-background": "#191c1b",
+            "surface-container-low": "#f3f4f2",
+            "on-tertiary-container": "#ecf9f5",
+            "on-primary-fixed": "#002019",
+            "outline": "#6e7a75",
+            "tertiary-fixed": "#d8e5e1",
+            "outline-variant": "#bdc9c4",
+            "surface-container-highest": "#e2e3e1",
+            "on-secondary": "#ffffff",
+            "error": "#ba1a1a",
+            "surface-tint": "#006b58",
+            "on-error-container": "#93000a",
+            "surface-variant": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "surface-container-high": "#e7e8e6",
+            "on-secondary-fixed": "#400011",
+            "tertiary-container": "#677370",
+            "surface-bright": "#f9faf8",
+            "primary-container": "#087f69",
+            "on-surface": "#191c1b",
+            "surface-dim": "#d9dad8",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-primary": "#ffffff",
+            "secondary": "#a5374d",
+            "error-container": "#ffdad6",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-primary-container": "#d3fff0",
+            "on-secondary-container": "#730f2a",
+            "surface": "#f9faf8",
+            "primary-fixed": "#94f4d9",
+            "surface-container-lowest": "#ffffff",
+            "surface-container": "#edeeec",
+            "background": "#f6f7f5",
+            "on-tertiary": "#ffffff",
+            "inverse-on-surface": "#f0f1ef",
+            "primary": "#006452"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1.25rem",
+            "3xl": "1.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "1.25rem",
+            "space-md": "1rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "margin-desktop": "3rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "gutter-tablet": "1.5rem",
+            "space-xs": "0.25rem",
+            "space-sm": "0.5rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Inter", "sans-serif"],
+            "display-lg": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "label-lg": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "headline-sm-mobile": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "numeric-hero": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "numeric-hero-mobile": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-sm-mobile": ["16px", { "lineHeight": "22px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .jade-pill-shadow {
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.05), 0 1px 3px 0 rgba(8, 127, 105, 0.03);
+    }
+    .floating-nav-shadow {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.12);
+    }
+    /* Subtle touch highlight reset */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="h-full bg-background text-on-surface antialiased font-body-md select-none flex flex-col justify-between">
+<!-- Mobile Screen Container (390px Optimized Canvas) -->
+<div class="w-full max-w-[390px] mx-auto min-h-screen flex flex-col relative px-4 pb-28">
+<!-- 1. Top Bar: Pure Calm, No noisy headlines -->
+<header class="pt-4 pb-3 flex items-center justify-between z-10">
+<div class="flex items-center space-x-2">
+<span class="font-headline-sm-mobile text-headline-sm-mobile font-semibold text-on-surface tracking-tight">
+          当前持仓 <span class="text-tertiary font-normal">(1)</span>
+</span>
+</div>
+<div class="flex items-center space-x-2">
+<!-- 实时风控徽标 -->
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#E8F5F1] text-primary-container text-[11px] font-medium leading-none tracking-tight">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span>实时风控已接管</span>
+</div>
+<!-- 独立 44px 热区设置齿轮按钮 -->
+<button aria-label="设置" class="w-11 h-11 flex items-center justify-center rounded-full text-tertiary hover:text-on-surface hover:bg-[#EEF1EE] active:scale-95 transition-all duration-150">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+</header>
+<!-- 主体内容区域 -->
+<main class="flex-1 flex flex-col space-y-4 mt-1">
+<!-- 2. 主持仓卡片 (White Porcelain Level 2 Surface) -->
+<section class="bg-surface-container-lowest rounded-3xl p-5 jade-pill-shadow relative overflow-hidden transition-all duration-200">
+<!-- 顶部装饰浅光晕 -->
+<div class="absolute -top-12 -right-12 w-28 h-28 bg-primary-fixed/20 rounded-full blur-2xl pointer-events-none"></div>
+<!-- 标的行 -->
+<div class="flex items-center justify-between pb-4 border-b border-[#172422]/[0.04]">
+<div class="flex items-center space-x-2.5">
+<!-- 橙色圆形 BTC 币标 -->
+<div class="w-8 h-8 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-xs shadow-sm">
+              ₿
+            </div>
+<div class="flex items-baseline space-x-1.5">
+<span class="font-headline-sm-mobile text-headline-sm-mobile font-bold text-on-surface tracking-tight">BTC/USDT</span>
+<span class="text-[11px] font-medium text-tertiary">永续</span>
+</div>
+</div>
+<div class="flex items-center space-x-1.5">
+<span class="inline-flex items-center text-[11px] font-semibold text-primary-container bg-[#E8F5F1] px-2 py-0.5 rounded-full">
+              ↗ 多 LONG
+            </span>
+<span class="inline-flex items-center text-[11px] font-semibold text-on-surface bg-[#EEF1EE] px-2 py-0.5 rounded-full">
+              100x
+            </span>
+</div>
+</div>
+<!-- 主视觉核心两列大数字 (浮动盈亏 & 收益率) -->
+<div class="grid grid-cols-2 gap-4 py-4">
+<!-- 左列: 浮动盈亏 -->
+<div class="flex flex-col">
+<div class="text-[28px] font-bold tracking-tight text-primary-container leading-none font-numeric-hero-mobile">
+              +12.30
+              <span class="text-xs font-semibold text-tertiary ml-0.5">USDT</span>
+</div>
+<span class="text-[12px] text-tertiary mt-1.5 font-label-md">浮动盈亏</span>
+</div>
+<!-- 右列: 收益率 -->
+<div class="flex flex-col items-end">
+<div class="text-[28px] font-bold tracking-tight text-primary-container leading-none font-numeric-hero-mobile">
+              +8.20%
+            </div>
+<span class="text-[12px] text-tertiary mt-1.5 font-label-md">收益率</span>
+</div>
+</div>
+<!-- 核心小数值平铺区 (两行两组) -->
+<div class="bg-[#EEF1EE]/60 rounded-2xl p-3.5 space-y-2 text-[12px] leading-relaxed">
+<!-- 第一行 -->
+<div class="flex items-center justify-between text-tertiary font-body-sm">
+<div>持仓金额 <span class="font-medium text-on-surface ml-0.5">250.00 USDT</span></div>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<div>开仓均价 <span class="font-medium text-on-surface ml-0.5">68,100.00</span></div>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<div>当前止损 <span class="font-medium text-primary-container ml-0.5">67,650.00</span></div>
+</div>
+<!-- 第二行 -->
+<div class="flex items-center justify-between text-tertiary font-body-sm pt-0.5">
+<div>占用保证金 <span class="font-medium text-on-surface ml-0.5">2.50 USDT</span> <span class="text-[10px] text-tertiary">(全仓)</span></div>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<div>费率 <span class="font-medium text-on-surface ml-0.5">0.010%</span></div>
+<div class="w-1 h-1 rounded-full bg-outline-variant"></div>
+<div>时间 <span class="font-medium text-on-surface ml-0.5">14:12</span></div>
+</div>
+</div>
+<!-- 快捷操作按钮组 -->
+<div class="grid grid-cols-5 gap-2.5 pt-4">
+<!-- 重点按钮: 止损到开仓价 (占比 3.2 列) -->
+<button class="col-span-3 h-[46px] rounded-full bg-primary-container hover:bg-primary active:scale-[0.98] transition-all duration-150 text-white font-label-lg flex items-center justify-center space-x-1.5 px-3 shadow-sm" id="btn-breakeven" onclick="handleBreakeven()">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+<span class="font-semibold text-xs tracking-tight">止损到开仓价</span>
+<span class="material-symbols-outlined text-[15px] opacity-75 hover:opacity-100" title="若已有更优止损则锁定防回撤，不含预估手续费">help</span>
+</button>
+<!-- 次要按钮: 平仓 (浅粉底玫红字) -->
+<button class="col-span-2 h-[46px] rounded-full bg-[#FDF0F2] hover:bg-secondary-fixed active:scale-[0.98] transition-all duration-150 text-secondary font-label-lg font-semibold text-xs flex items-center justify-center space-x-1">
+<span class="material-symbols-outlined text-[16px]">close</span>
+<span>平仓</span>
+</button>
+</div>
+</section>
+<!-- 3. 折叠式自动保护流水线 (1R / 3R / 5R) -->
+<section class="bg-surface-container-lowest rounded-3xl p-4 jade-pill-shadow transition-all duration-200">
+<!-- 折叠 Header 触控栏 -->
+<div class="flex items-center justify-between cursor-pointer py-1 select-none" onclick="togglePipeline()">
+<div class="flex items-center space-x-2">
+<div class="w-6 h-6 rounded-full bg-[#E8F5F1] text-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-[15px]">alt_route</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-semibold text-on-surface">自动阶梯保护执行流水线</span>
+<span class="text-[10px] text-tertiary">已装载：1R保本 · 3R止盈 · 5R清仓</span>
+</div>
+</div>
+<div class="flex items-center space-x-1 text-tertiary">
+<span class="text-[11px] font-medium text-primary-container bg-[#E8F5F1] px-2 py-0.5 rounded-full">已就绪</span>
+<span class="material-symbols-outlined text-[18px] transition-transform duration-200" id="pipeline-chevron">expand_more</span>
+</div>
+</div>
+<!-- 流水线具体阶梯 (默认折叠展开两用设计，初次呈现柔和紧凑预览) -->
+<div class="mt-3 pt-3 border-t border-[#172422]/[0.04] space-y-2.5" id="pipeline-content">
+<!-- 阶梯 1 -->
+<div class="flex items-center justify-between bg-[#F6F7F5] rounded-2xl p-2.5 text-xs">
+<div class="flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-primary-container text-white text-[10px] font-bold flex items-center justify-center">1</span>
+<div>
+<div class="font-medium text-on-surface">+1.0R 自动保本锁定</div>
+<div class="text-[10px] text-tertiary">触发价: 68,550.00 USDT</div>
+</div>
+</div>
+<span class="text-[11px] font-semibold text-primary-container px-2 py-0.5 rounded-full bg-[#E8F5F1]">准备触发</span>
+</div>
+<!-- 阶梯 2 -->
+<div class="flex items-center justify-between bg-[#F6F7F5] rounded-2xl p-2.5 text-xs">
+<div class="flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-[#EEF1EE] text-on-surface text-[10px] font-bold flex items-center justify-center">2</span>
+<div>
+<div class="font-medium text-on-surface">+3.0R 分批止盈 60%</div>
+<div class="text-[10px] text-tertiary">触发价: 69,450.00 USDT</div>
+</div>
+</div>
+<span class="text-[11px] text-tertiary px-2 py-0.5 rounded-full bg-[#EEF1EE]">等待中</span>
+</div>
+<!-- 阶梯 3 -->
+<div class="flex items-center justify-between bg-[#F6F7F5] rounded-2xl p-2.5 text-xs">
+<div class="flex items-center space-x-2">
+<span class="w-5 h-5 rounded-full bg-[#EEF1EE] text-on-surface text-[10px] font-bold flex items-center justify-center">3</span>
+<div>
+<div class="font-medium text-on-surface">+5.0R 仓底彻底清算 40%</div>
+<div class="text-[10px] text-tertiary">触发价: 70,350.00 USDT</div>
+</div>
+</div>
+<span class="text-[11px] text-tertiary px-2 py-0.5 rounded-full bg-[#EEF1EE]">等待中</span>
+</div>
+</div>
+</section>
+<!-- 4. 无情绪交易协议提示底条 -->
+<!-- 4. 待成交委托 (Pending Orders) -->
+<section class="space-y-2.5">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center space-x-1.5">
+<span class="font-semibold text-xs text-on-surface">待成交委托</span>
+<span class="text-tertiary text-xs font-normal">(1)</span>
+</div>
+<span class="text-[11px] text-tertiary">限价单挂单托管</span>
+</div>
+<div class="bg-surface-container-lowest rounded-3xl p-4 jade-pill-shadow transition-all duration-200 border border-[#172422]/[0.03]">
+<div class="flex items-center justify-between pb-3 border-b border-[#172422]/[0.04]">
+<div class="flex items-center space-x-2">
+<span class="text-xs font-bold text-on-surface">BTC/USDT</span>
+<span class="inline-flex items-center text-[10px] font-semibold text-primary-container bg-[#E8F5F1] px-2 py-0.5 rounded-full">买入做多 限价</span>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-[#E8F5F1] text-primary-container text-[11px] font-medium leading-none">挂单中</span>
+</div>
+<div class="grid grid-cols-2 gap-2 py-3 text-xs">
+<div>
+<div class="text-[11px] text-tertiary">委托价</div>
+<div class="font-medium text-on-surface mt-0.5 text-xs">66,200.00 <span class="text-[10px] text-tertiary font-normal">USDT</span></div>
+</div>
+<div>
+<div class="text-[11px] text-tertiary">待成交数量</div>
+<div class="font-medium text-on-surface mt-0.5 text-xs">0.020 <span class="text-[10px] text-tertiary font-normal">BTC</span></div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2 border-t border-[#172422]/[0.04]">
+<div class="text-[10px] text-tertiary">
+<span>委托时间: </span>
+<span class="font-medium text-on-surface-variant">2026-03-30 14:28:10</span>
+</div>
+<button class="h-11 min-w-[64px] px-3.5 flex items-center justify-center rounded-xl border border-outline-variant/60 text-xs font-medium text-on-surface-variant hover:bg-[#EEF1EE] active:scale-95 transition-all duration-150" onclick="showToast('已撤销该挂单委托')">
+        撤单
+      </button>
+</div>
+</div>
+</section>
+<!-- 5. 最近完成 (Recent Completed) -->
+<section class="space-y-2.5">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center space-x-1.5">
+<span class="font-semibold text-xs text-on-surface">最近完成</span>
+<span class="text-tertiary text-xs font-normal">(1)</span>
+</div>
+<span class="text-[10px] text-tertiary">时间均为北京时间 (UTC+8)</span>
+</div>
+<div class="bg-surface-container-lowest rounded-3xl p-4 jade-pill-shadow transition-all duration-200 border border-[#172422]/[0.03]">
+<div class="flex items-center justify-between pb-3 border-b border-[#172422]/[0.04]">
+<div class="flex items-center space-x-2">
+<span class="text-xs font-bold text-on-surface">BTC/USDT</span>
+<span class="inline-flex items-center text-[10px] font-semibold text-primary-container bg-[#E8F5F1] px-2 py-0.5 rounded-full">做多</span>
+</div>
+<span class="inline-flex items-center text-[11px] font-bold text-primary-container bg-[#E8F5F1] px-2.5 py-0.5 rounded-full font-numeric-hero-mobile">+12.30 USDT (+8.20%)</span>
+</div>
+<div class="grid grid-cols-2 gap-2 py-3 text-xs border-b border-[#172422]/[0.04]">
+<div>
+<div class="text-[11px] text-tertiary">开仓价</div>
+<div class="font-medium text-on-surface mt-0.5 text-xs">50,000.00 <span class="text-[10px] text-tertiary font-normal">USDT</span></div>
+</div>
+<div>
+<div class="text-[11px] text-tertiary">最后止损</div>
+<div class="font-medium text-primary-container mt-0.5 text-xs">49,500.00 <span class="text-[10px] text-tertiary font-normal">USDT</span></div>
+</div>
+</div>
+<div class="pt-2.5 space-y-1 text-[11px] text-tertiary leading-relaxed">
+<div class="flex items-center justify-between">
+<span>开仓时间</span>
+<span class="font-medium text-on-surface-variant">2026-03-30 10:15:22</span>
+</div>
+<div class="flex items-center justify-between">
+<span>平仓时间</span>
+<span class="font-medium text-on-surface-variant">2026-03-30 13:42:08</span>
+</div>
+</div>
+</div>
+</section><section class="bg-surface-container-lowest/70 backdrop-blur-sm rounded-2xl p-3 border border-[#172422]/[0.03] flex items-center space-x-2.5">
+<div class="w-7 h-7 rounded-full bg-[#E8F5F1] text-primary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[17px]">shield</span>
+</div>
+<p class="text-[11px] text-tertiary leading-snug">
+<span class="font-semibold text-on-surface">无情绪交易协议：</span>严格遵循单笔 1R 风险上限，由智能算法托管止盈止损，禁止情绪化手动追单。
+        </p>
+</section>
+</main>
+<!-- 5. 底部主导航栏 (严格4项：合约、纪律、持仓、统计，当前在「持仓」项高亮，移除设置项) -->
+<nav class="fixed bottom-5 inset-x-4 max-w-[358px] mx-auto h-16 bg-surface-container-lowest/90 backdrop-blur-xl rounded-full floating-nav-shadow flex items-center justify-between px-3 z-50">
+<!-- 1. 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-1.5 transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="text-[11px] font-label-sm mt-0.5">合约</span>
+</a>
+<!-- 2. 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-1.5 transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="text-[11px] font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- 3. 持仓 (Active State 高亮玉绿胶囊) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-1.5 shadow-sm active:scale-95 transition-all duration-150" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">pie_chart</span>
+<span class="text-[11px] font-label-sm font-semibold mt-0.5">持仓</span>
+</a>
+<!-- 4. 统计 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-1.5 transition-colors duration-150 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span class="text-[11px] font-label-sm mt-0.5">统计</span>
+</a>
+</nav>
+<!-- Toast Notification for Actions -->
+<div class="fixed top-6 inset-x-6 max-w-[342px] mx-auto bg-inverse-surface text-inverse-on-surface px-4 py-2.5 rounded-full shadow-lg text-xs flex items-center justify-center space-x-2 opacity-0 pointer-events-none transition-all duration-300 z-50" id="toast">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">task_alt</span>
+<span id="toast-message">已将止损锁定至开仓价 68,100.00 USDT</span>
+</div>
+</div>
+<script>
+    // 阶梯折叠逻辑
+    let isPipelineExpanded = true;
+    function togglePipeline() {
+      const content = document.getElementById('pipeline-content');
+      const chevron = document.getElementById('pipeline-chevron');
+      isPipelineExpanded = !isPipelineExpanded;
+      if (isPipelineExpanded) {
+        content.classList.remove('hidden');
+        chevron.style.transform = 'rotate(0deg)';
+      } else {
+        content.classList.add('hidden');
+        chevron.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    // 快捷按钮互动提示
+    function handleBreakeven() {
+      showToast('已安全锁定至保本价 68,100.00 USDT (防回撤已生效)');
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-message');
+      msg.textContent = text;
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0', 'pointer-events-none');
+      }, 2600);
+    }
+  </script>
+</body></html>

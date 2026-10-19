@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE 独立纪律交易 · 持仓保护</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "secondary": "#a5374d",
+            "surface-container-highest": "#e2e3e1",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed-dim": "#ffb2bb",
+            "secondary-container": "#fc7a8f",
+            "on-tertiary-container": "#ecf9f5",
+            "error-container": "#ffdad6",
+            "primary-fixed": "#94f4d9",
+            "primary-fixed-dim": "#78d8be",
+            "secondary-fixed": "#ffd9dc",
+            "on-secondary-fixed-variant": "#851e36",
+            "surface-dim": "#d9dad8",
+            "tertiary-container": "#677370",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "on-primary-container": "#d3fff0",
+            "background": "#f9faf8",
+            "on-surface": "#191c1b",
+            "tertiary-fixed": "#d8e5e1",
+            "surface-bright": "#f9faf8",
+            "primary-container": "#087f69",
+            "surface-tint": "#006b58",
+            "on-primary-fixed-variant": "#005142",
+            "inverse-surface": "#2e3130",
+            "tertiary": "#4e5b58",
+            "surface-container-low": "#f3f4f2",
+            "surface-variant": "#e2e3e1",
+            "surface-container-high": "#e7e8e6",
+            "primary": "#006452",
+            "inverse-primary": "#78d8be",
+            "inverse-on-surface": "#f0f1ef",
+            "on-tertiary-fixed": "#121e1c",
+            "on-background": "#191c1b",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "surface-container": "#edeeec",
+            "on-secondary": "#ffffff",
+            "outline-variant": "#bdc9c4",
+            "on-secondary-container": "#730f2a",
+            "on-primary": "#ffffff",
+            "on-surface-variant": "#3e4945",
+            "on-primary-fixed": "#002019",
+            "outline": "#6e7a75",
+            "on-tertiary": "#ffffff",
+            "surface": "#f9faf8",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-secondary-fixed": "#400011"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xl": "2rem",
+            "margin-tablet": "2rem",
+            "gutter-tablet": "1.5rem",
+            "margin-desktop": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "space-lg": "1.5rem",
+            "gutter": "1rem",
+            "margin": "1.25rem",
+            "space-2xl": "3rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "label-sm": ["Inter", "sans-serif"],
+            "headline-lg": ["Inter", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "display-lg": ["Inter", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+            "headline-sm": ["Inter", "sans-serif"],
+            "label-lg": ["Inter", "sans-serif"],
+            "numeric-hero-mobile": ["Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "headline-md": ["Inter", "sans-serif"],
+            "numeric-hero": ["Inter", "sans-serif"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Custom Jade & Porcelain Shadows and Material Symbols setup */
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .porcelain-card {
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+      border-radius: 26px;
+    }
+    .porcelain-dock {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10);
+    }
+    /* Subtle touch active scaling */
+    .tap-scale {
+      transition: transform 0.15s ease;
+    }
+    .tap-scale:active {
+      transform: scale(0.97);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface antialiased font-body-md min-h-screen flex flex-col items-center justify-start p-0 selection:bg-primary-fixed">
+<!-- Mobile Screen Container (390px maximum width for true iOS feel) -->
+<div class="w-full max-w-[390px] min-h-screen bg-background relative flex flex-col pb-28">
+<!-- Top Status & Brand Header (Shared Component Anchored Logic) -->
+<header class="sticky top-0 z-40 w-full bg-background/80 backdrop-blur-md px-margin h-14 flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<div class="flex items-center space-x-1.5">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="trending_up">trending_up</span>
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+</div>
+<span class="text-tertiary font-label-sm text-label-sm tracking-wide">纪律交易</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm scale-90 origin-left">模拟</span>
+</div>
+<!-- Right Indicator: 纪律服务就绪 -->
+<div class="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-surface-container-low">
+<span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">服务就绪</span>
+<span class="material-symbols-outlined text-primary text-[16px]" data-icon="shield_lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+</div>
+</header>
+<!-- Subheader Title Ribbon -->
+<section class="px-margin pt-2 pb-3 flex items-center justify-between">
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-on-surface tracking-tight">持仓保护</h1>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">多重纪律防线 · 锁定下行风险</p>
+</div>
+<div class="flex items-center space-x-1 text-tertiary bg-surface-container-low px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-[15px]" data-icon="sensors">sensors</span>
+<span class="font-label-sm text-label-sm">实时风控</span>
+</div>
+</section>
+<!-- Main Content Area -->
+<main class="px-margin flex flex-col space-y-4">
+<!-- 2. Position Summary Hero Card -->
+<article class="bg-surface-container-lowest porcelain-card p-5 flex flex-col">
+<!-- Top Row -->
+<div class="flex items-center justify-between pb-3.5 border-b border-surface-container-high/40">
+<div class="flex items-center space-x-2">
+<span class="px-2.5 py-0.5 rounded-full bg-primary-fixed/40 text-primary font-label-sm text-label-sm font-semibold tracking-wide">多 LONG</span>
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">BTCUSDT</span>
+<span class="font-label-sm text-label-sm text-outline">永续</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-low text-tertiary font-label-sm text-label-sm">逐仓 3.00x</span>
+</div>
+<!-- Floating PnL placeholder -->
+<div class="text-right flex flex-col items-end">
+<div class="flex items-baseline space-x-1">
+<span class="font-body-md text-body-md text-outline font-semibold">— USDT</span>
+<span class="font-label-sm text-label-sm text-outline">(—%)</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline-variant leading-none">示例占位</span>
+</div>
+</div>
+<!-- Middle Metrics: Clean whitespace separated figures -->
+<div class="grid grid-cols-2 gap-y-3.5 gap-x-4 pt-4 pb-4">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">开仓均价</span>
+<span class="font-body-lg text-body-lg font-semibold text-on-surface mt-0.5">— USDT</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">标记价格</span>
+<span class="font-body-lg text-body-lg font-semibold text-on-surface mt-0.5">— USDT</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center space-x-1">
+<span class="font-label-sm text-label-sm text-outline">初始现金风险 (1R)</span>
+<span class="material-symbols-outlined text-[13px] text-primary" data-icon="lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+<div class="flex items-baseline space-x-1 mt-0.5">
+<span class="font-body-lg text-body-lg font-semibold text-on-surface">— USDT</span>
+<span class="font-label-sm text-[11px] text-primary font-medium">(已锁定)</span>
+</div>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-outline">剩余持仓</span>
+<div class="flex items-baseline space-x-1 mt-0.5">
+<span class="font-body-lg text-body-lg font-semibold text-on-surface">— BTC</span>
+<span class="font-label-sm text-[11px] text-outline">(100% 原始)</span>
+</div>
+</div>
+</div>
+<!-- Bottom Warning / Status Notice -->
+<div class="mt-1 pt-3 border-t border-surface-container-high/40 flex items-start space-x-2">
+<span class="material-symbols-outlined text-outline text-[16px] mt-0.5 shrink-0" data-icon="info">info</span>
+<p class="font-body-sm text-body-sm text-outline leading-tight">
+            计划风险固定 · 实际损失可能超预算 (滑点需自担)
+          </p>
+</div>
+</article>
+<!-- 3. Milestone Protection Pipeline (Vertical sculpted white card) -->
+<section class="bg-surface-container-lowest porcelain-card p-5 flex flex-col">
+<!-- Pipeline Header -->
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="schema">schema</span>
+<h2 class="font-headline-sm text-headline-sm font-semibold text-on-surface">纪律保护阶梯</h2>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm">R 为初始锁定风险</span>
+</div>
+<!-- Stepper Pipeline Rail -->
+<div class="relative pl-6 space-y-5 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-[2px] before:bg-surface-container-highest">
+<!-- Stage 1: Break-even -->
+<div class="relative flex flex-col group">
+<!-- Node Indicator -->
+<div class="absolute -left-6 top-0.5 w-[24px] h-[24px] rounded-full bg-surface-container-lowest flex items-center justify-center ring-4 ring-background">
+<span class="w-3.5 h-3.5 rounded-full bg-primary-container flex items-center justify-center text-white text-[9px] font-bold">1</span>
+</div>
+<!-- Stage Content -->
+<div class="bg-surface-container-low/70 rounded-2xl p-3.5 tap-scale">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">阶段 1 · 自动保本 (Break-even)</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm">待触发</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                浮盈达到 <strong class="text-primary font-semibold">+1.0R</strong> 时自动移止损至成本价与手续费缓冲线。
+              </p>
+<div class="flex items-center justify-between mt-2.5 pt-2 border-t border-surface-container-high/30">
+<span class="font-label-sm text-label-sm text-outline">触发阈值</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">— USDT</span>
+</div>
+</div>
+</div>
+<!-- Stage 2: Take Profit 1 -->
+<div class="relative flex flex-col group">
+<!-- Node Indicator -->
+<div class="absolute -left-6 top-0.5 w-[24px] h-[24px] rounded-full bg-surface-container-lowest flex items-center justify-center ring-4 ring-background">
+<span class="w-3.5 h-3.5 rounded-full bg-tertiary-container flex items-center justify-center text-white text-[9px] font-bold">2</span>
+</div>
+<!-- Stage Content -->
+<div class="bg-surface-container-low/70 rounded-2xl p-3.5 tap-scale">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">阶段 2 · 分批止盈 TP 1</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm">减仓 60%</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                浮盈达到 <strong class="text-primary font-semibold">+3.0R</strong> 时平掉原始仓位 60%，锁定利润。
+              </p>
+<div class="flex items-center justify-between mt-2.5 pt-2 border-t border-surface-container-high/30">
+<span class="font-label-sm text-label-sm text-outline">触发阈值 / 减仓量</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">— USDT / — BTC</span>
+</div>
+</div>
+</div>
+<!-- Stage 3: Take Profit 2 (Final) -->
+<div class="relative flex flex-col group">
+<!-- Node Indicator -->
+<div class="absolute -left-6 top-0.5 w-[24px] h-[24px] rounded-full bg-surface-container-lowest flex items-center justify-center ring-4 ring-background">
+<span class="w-3.5 h-3.5 rounded-full bg-tertiary-container flex items-center justify-center text-white text-[9px] font-bold">3</span>
+</div>
+<!-- Stage Content -->
+<div class="bg-surface-container-low/70 rounded-2xl p-3.5 tap-scale">
+<div class="flex items-center justify-between">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface">阶段 3 · 终极止盈 TP 2</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-tertiary font-label-sm text-label-sm">终极离场</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5 leading-relaxed">
+                浮盈达到 <strong class="text-primary font-semibold">+5.0R</strong> 时清空全部余仓 40%，圆满结束该笔纪律交易。
+              </p>
+<div class="flex items-center justify-between mt-2.5 pt-2 border-t border-surface-container-high/30">
+<span class="font-label-sm text-label-sm text-outline">触发阈值</span>
+<span class="font-label-sm text-label-sm font-semibold text-on-surface">— USDT</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Action & Close Section -->
+<section class="flex flex-col space-y-2 pt-1">
+<!-- Restrained Rose Action Button (Pill curvature, disabled/dormant placeholder state) -->
+<button class="w-full h-[52px] rounded-full bg-secondary-container/20 text-secondary font-label-lg text-label-lg font-semibold flex items-center justify-center space-x-2 cursor-not-allowed opacity-80 border border-secondary-container/30" disabled="" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="cancel">cancel</span>
+<span>平掉剩余仓位</span>
+</button>
+<p class="text-center font-label-sm text-[11px] text-outline">
+          平仓始终可用 · 需服务与行情可用
+        </p>
+<!-- Single Quiet Rule Reminder Card -->
+<div class="p-3.5 rounded-2xl bg-surface-container-low/80 flex items-center justify-center space-x-1.5 mt-2">
+<span class="material-symbols-outlined text-outline text-[16px]" data-icon="verified_user">verified_user</span>
+<span class="font-label-sm text-[11px] text-on-surface-variant">
+            服务端保存 · 模拟交易 · 连亏 3 笔熔断冷却 24h
+          </span>
+</div>
+</section>
+</main>
+<!-- 5. Bottom Floating Navigation Island (MANDATORY SHARED COMPONENT) -->
+<!-- Destination count: 4 | Labels: ["合约", "持仓", "纪律", "连接"] | Active tab: "持仓" (Position Protection context) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl porcelain-dock">
+<!-- Tab 1: 合约 (Inactive) -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 tap-scale" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="font-label-sm text-label-sm mt-0.5">合约</span>
+</button>
+<!-- Tab 2: 持仓 (ACTIVE - Exact Contextual Match) -->
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 tap-scale" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="pie_chart" data-weight="fill" style="font-variation-settings: 'FILL' 1;">pie_chart</span>
+<span class="font-label-sm text-label-sm mt-0.5 font-bold">持仓</span>
+</button>
+<!-- Tab 3: 纪律 (Inactive) -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 tap-scale" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="shield_lock">shield_lock</span>
+<span class="font-label-sm text-label-sm mt-0.5">纪律</span>
+</button>
+<!-- Tab 4: 连接 (Inactive) -->
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200 tap-scale" type="button">
+<span class="material-symbols-outlined text-[22px]" data-icon="link">link</span>
+<span class="font-label-sm text-label-sm mt-0.5">连接</span>
+</button>
+</nav>
+</div>
+</body></html>

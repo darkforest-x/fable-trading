@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE 合约 · 独立纪律交易</title>
+<!-- Tailwind CSS v3 CDN with Forms & Container Queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tradeGreen: '#10B981',
+            tradeGreenDark: '#059669',
+            tradeRed: '#EF4444',
+            tradeRedDark: '#DC2626',
+            warningAmber: '#F59E0B',
+            appBg: '#FFFFFF',
+            cardBg: '#F8F9FA',
+            borderSubtle: '#E5E7EB',
+            textDark: '#111827',
+            textMuted: '#6B7280',
+          },
+          fontFamily: {
+            mono: ['SF Mono', 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Micro-Styles -->
+<style data-purpose="depth-bars">
+    /* Subtle orderbook depth visualization bars */
+    .depth-bar-ask {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(239, 68, 68, 0.08);
+      z-index: 1;
+    }
+    .depth-bar-bid {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background: rgba(16, 185, 129, 0.08);
+      z-index: 1;
+    }
+  </style>
+<style data-purpose="typography">
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Prevent default tap outline on iOS */
+    * {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input {
+      user-select: text;
+    }
+  </style>
+<!-- END: Custom Micro-Styles -->
+</head>
+<body class="bg-gray-100 flex justify-center items-start min-h-screen text-textDark antialiased font-sans">
+<!-- Mobile Viewport Container: Fixed 390px, flex column for exactly 844px target viewport -->
+<div class="w-[390px] min-h-[844px] bg-white flex flex-col justify-between shadow-2xl relative overflow-hidden border-x border-borderSubtle">
+<!-- Top Flow Container -->
+<div class="flex flex-col w-full">
+<!-- BEGIN: TopDisclaimerBar -->
+<section class="bg-gray-50 border-b border-borderSubtle px-3 py-1 flex items-center justify-between text-[11px] text-textMuted" data-purpose="demo-disclaimer">
+<div class="flex items-center space-x-1">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+<span class="font-medium text-gray-700">演示数据 · 未连接实盘</span>
+</div>
+<div class="tabular-nums font-mono text-[10px] text-gray-400">
+          2026-10-18 Asia/Shanghai
+        </div>
+</section>
+<!-- END: TopDisclaimerBar -->
+<!-- BEGIN: MainHeader -->
+<header class="px-3 pt-2.5 pb-2 flex items-center justify-between border-b border-gray-100" data-purpose="app-header">
+<!-- Brand & Product Tag -->
+<div class="flex items-center space-x-1.5">
+<span class="font-bold text-[17px] tracking-tight text-textDark">SPIKE 合约</span>
+<span class="px-1.5 py-0.2 bg-gray-100 text-gray-600 rounded text-[10px] font-medium border border-gray-200">演示</span>
+</div>
+<!-- Contract Pair Selector & Price Change -->
+<div class="flex items-center space-x-1.5 cursor-pointer">
+<span class="font-bold text-[15px] text-gray-900">BTCUSDT 永续</span>
+<svg class="w-3 h-3 text-gray-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+<span class="text-[12px] font-semibold text-tradeRed tabular-nums">-2.26%</span>
+</div>
+<!-- Chart and More Icons -->
+<div class="flex items-center space-x-2 text-gray-700">
+<button class="p-1 hover:text-black transition-colors" title="K线图表">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24">
+<path d="M18 20V10M12 20V4M6 20v-6"></path>
+</svg>
+</button>
+<button class="p-1 hover:text-black transition-colors" title="更多设置">
+<svg class="w-4 h-4" fill="currentColor" viewbox="0 0 24 24">
+<circle cx="5" cy="12" r="1.7"></circle>
+<circle cx="12" cy="12" r="1.7"></circle>
+<circle cx="19" cy="12" r="1.7"></circle>
+</svg>
+</button>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: DisciplineWarningStrip -->
+<section class="bg-amber-50/90 border-b border-amber-200/80 px-3 py-1.5 flex items-center justify-between text-[11.5px]" data-purpose="discipline-status">
+<div class="flex items-center space-x-1.5 text-amber-900 font-medium">
+<svg class="w-3.5 h-3.5 text-amber-600 flex-shrink-0" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" fill-rule="evenodd"></path>
+</svg>
+<span>今日剩余 <strong class="text-amber-950 font-bold">2</strong> 次 · 风险预算 <span class="font-mono font-bold">25.00</span> USDT</span>
+</div>
+<span class="text-[10px] text-amber-700 bg-amber-100 px-1 py-0.2 rounded border border-amber-300 font-mono">纪律管控中</span>
+</section>
+<!-- END: DisciplineWarningStrip -->
+<!-- BEGIN: LeverageAndFundingBar -->
+<section class="px-3 py-1.5 flex items-center justify-between border-b border-gray-100 text-[11px]" data-purpose="margin-leverage-control">
+<div class="flex items-center space-x-1.5">
+<!-- Fixed Isolated Margin Badge -->
+<div class="inline-flex items-center space-x-1 px-2 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-700 font-medium cursor-not-allowed">
+<span>逐仓</span>
+<svg class="w-2.5 h-2.5 text-gray-500" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<!-- Disciplined Fixed 3x Leverage -->
+<div class="inline-flex items-center space-x-1 px-2 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-700 font-medium font-mono cursor-not-allowed">
+<span>3.00x</span>
+<svg class="w-2.5 h-2.5 text-gray-500" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" fill-rule="evenodd"></path>
+</svg>
+</div>
+</div>
+<!-- Funding Rate & Countdown -->
+<div class="text-right text-[10px] text-gray-500">
+<span class="text-gray-400">资金费率/倒计时</span>
+<span class="ml-1 font-mono text-gray-700 font-medium tabular-nums">0.052% / 06:22:15</span>
+</div>
+</section>
+<!-- END: LeverageAndFundingBar -->
+<!-- BEGIN: DualColumnOrderEntry -->
+<section class="px-3 pt-2 pb-1 grid grid-cols-12 gap-2.5" data-purpose="order-form-and-depth">
+<!-- LEFT COLUMN: Order Input Form (approx 59% width) -->
+<div class="col-span-7 flex flex-col space-y-2">
+<!-- Open / Close Segmented Tab -->
+<div class="grid grid-cols-2 bg-gray-100 p-0.5 rounded-md text-[13px] font-medium text-center">
+<button class="bg-tradeGreen text-white py-1 rounded shadow-xs font-semibold">开仓</button>
+<button class="text-gray-500 py-1 hover:text-gray-800 transition-colors">平仓</button>
+</div>
+<!-- Order Type Selector -->
+<div class="flex items-center justify-between border border-gray-200 rounded px-2 py-1 bg-white text-[12px] text-gray-800">
+<span class="flex items-center space-x-1">
+<span class="text-gray-400 text-[11px]">ⓘ</span>
+<span class="font-medium">限价委托</span>
+</span>
+<svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Price Input with "对手价" button -->
+<div class="flex border border-gray-200 rounded overflow-hidden h-[34px] bg-white focus-within:border-gray-400">
+<div class="flex-1 px-2 py-0.5 flex flex-col justify-center">
+<span class="text-[9px] text-gray-400 leading-none">价格 (USDT)</span>
+<input class="w-full font-mono font-semibold text-[13px] text-gray-900 border-0 p-0 focus:ring-0 leading-tight tabular-nums" type="text" value="60,000.0"/>
+</div>
+<button class="px-2 text-[11px] text-gray-600 bg-gray-50 border-l border-gray-200 hover:bg-gray-100 flex items-center justify-center font-medium">
+              对手价
+            </button>
+</div>
+<!-- Quantity / Risk-budgeted Amount Input -->
+<div class="border border-gray-200 rounded px-2 py-0.5 h-[34px] bg-white flex flex-col justify-center focus-within:border-gray-400">
+<span class="text-[9px] text-gray-400 leading-none">风险内数量 (BTC)</span>
+<div class="flex items-center justify-between">
+<input class="w-full font-mono font-semibold text-[13px] text-gray-900 border-0 p-0 focus:ring-0 leading-tight tabular-nums" type="text" value="0.041"/>
+<span class="text-[10px] text-gray-400 ml-1">34%</span>
+</div>
+</div>
+<!-- Stepped Slider with Tick Points -->
+<div class="pt-0.5 pb-1">
+<div class="relative flex items-center justify-between px-1">
+<!-- Slider Track Line -->
+<div class="absolute left-1 right-1 h-0.5 bg-gray-200 -z-0"></div>
+<!-- Active Progress Track -->
+<div class="absolute left-1 w-1/3 h-0.5 bg-tradeGreen -z-0"></div>
+<!-- Ticks -->
+<span class="w-2.5 h-2.5 rounded-full bg-tradeGreen ring-2 ring-white z-10"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-tradeGreen ring-2 ring-white z-10"></span>
+<span class="w-2 h-2 rounded-full bg-gray-300 ring-2 ring-white z-10"></span>
+<span class="w-2 h-2 rounded-full bg-gray-300 ring-2 ring-white z-10"></span>
+<span class="w-2 h-2 rounded-full bg-gray-300 ring-2 ring-white z-10"></span>
+</div>
+<div class="flex justify-between text-[9px] text-gray-400 font-mono mt-1">
+<span>0%</span>
+<span>25%</span>
+<span>50%</span>
+<span>75%</span>
+<span>100%</span>
+</div>
+<div class="text-[9px] text-amber-700 mt-0.5 text-right font-medium">100% = 本次允许上限</div>
+</div>
+<!-- Available Balance -->
+<div class="flex justify-between items-center text-[11px] pt-0.5">
+<span class="text-gray-400">可用</span>
+<span class="font-mono text-gray-800 font-medium tabular-nums">5,000.00 USDT</span>
+</div>
+<!-- Mandatory Stop Loss / Discipline Lock Checkbox -->
+<div class="bg-gray-50 border border-gray-200 rounded p-1.5 flex flex-col space-y-1">
+<div class="flex items-center justify-between">
+<label class="flex items-center space-x-1 text-[11px] font-semibold text-gray-800">
+<input checked="" class="rounded border-gray-300 text-tradeRed focus:ring-0 w-3 h-3 cursor-not-allowed" disabled="" type="checkbox"/>
+<span>止损价 (强制纪律)</span>
+</label>
+<span class="text-[9px] text-tradeRed font-medium">单笔亏损 ≤ 24.60 USDT</span>
+</div>
+<div class="bg-white px-2 py-0.5 border border-gray-200 rounded text-[11px] flex justify-between items-center">
+<span class="font-mono font-bold text-tradeRed tabular-nums">59,400.0</span>
+<span class="text-[10px] text-gray-400">USDT 锁定</span>
+</div>
+</div>
+<!-- Stacked Action Buy / Sell Buttons -->
+<div class="flex flex-col space-y-1.5 pt-0.5">
+<!-- Buy Long Button -->
+<button class="w-full bg-tradeGreen hover:bg-tradeGreenDark text-white py-1.5 px-2 rounded-md flex flex-col items-center justify-center transition-all shadow-xs active:scale-[0.99]">
+<span class="font-bold text-[13px] leading-tight">买入开多</span>
+<span class="text-[9.5px] opacity-90 font-mono leading-none">≈ 0.041 BTC · 成本 ~820 USDT</span>
+</button>
+<!-- Sell Short Button -->
+<button class="w-full bg-tradeRed hover:bg-tradeRedDark text-white py-1.5 px-2 rounded-md flex flex-col items-center justify-center transition-all shadow-xs active:scale-[0.99]">
+<span class="font-bold text-[13px] leading-tight">卖出开空</span>
+<span class="text-[9.5px] opacity-90 font-mono leading-none">≈ 0.041 BTC · 成本 ~820 USDT</span>
+</button>
+</div>
+<!-- Notice / Disclaimer -->
+<div class="text-[9px] text-gray-400 text-center leading-tight">
+            规则示例，待确认；实际亏损可能超过预算
+          </div>
+</div>
+<!-- RIGHT COLUMN: Orderbook Depth Ladder (approx 41% width) -->
+<div class="col-span-5 flex flex-col justify-between pl-1 border-l border-gray-100">
+<!-- Depth Header -->
+<div class="flex justify-between text-[10px] text-gray-400 pb-1 font-medium">
+<span>价格 (USDT)</span>
+<span>数量 (BTC)</span>
+</div>
+<!-- Asks (Red) List - 6 levels -->
+<div class="flex flex-col space-y-1 text-[11px] font-mono tabular-nums">
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 48%;"></div>
+<span class="text-tradeRed font-medium z-10">60,042.5</span>
+<span class="text-gray-600 z-10 text-[10px]">11.45</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 62%;"></div>
+<span class="text-tradeRed font-medium z-10">60,035.0</span>
+<span class="text-gray-600 z-10 text-[10px]">14.80</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 35%;"></div>
+<span class="text-tradeRed font-medium z-10">60,028.5</span>
+<span class="text-gray-600 z-10 text-[10px]">8.24</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 78%;"></div>
+<span class="text-tradeRed font-medium z-10">60,019.0</span>
+<span class="text-gray-600 z-10 text-[10px]">18.60</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 42%;"></div>
+<span class="text-tradeRed font-medium z-10">60,010.5</span>
+<span class="text-gray-600 z-10 text-[10px]">10.12</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-ask" style="width: 25%;"></div>
+<span class="text-tradeRed font-medium z-10">60,001.0</span>
+<span class="text-gray-600 z-10 text-[10px]">5.88</span>
+</div>
+</div>
+<!-- Middle Mark / Last Price -->
+<div class="py-1.5 my-0.5 border-y border-gray-100 flex flex-col items-start justify-center">
+<div class="flex items-center space-x-1">
+<span class="text-[15px] font-bold font-mono text-tradeRed tabular-nums tracking-tight">60,000.0</span>
+<svg class="w-3 h-3 text-tradeRed" fill="currentColor" viewbox="0 0 20 20">
+<path clip-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<div class="flex items-center space-x-1 text-[9.5px] text-gray-400 font-mono">
+<span>指数 59,994.2</span>
+</div>
+</div>
+<!-- Bids (Green) List - 6 levels -->
+<div class="flex flex-col space-y-1 text-[11px] font-mono tabular-nums">
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 32%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,998.0</span>
+<span class="text-gray-600 z-10 text-[10px]">7.35</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 55%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,989.5</span>
+<span class="text-gray-600 z-10 text-[10px]">13.20</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 44%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,980.0</span>
+<span class="text-gray-600 z-10 text-[10px]">10.55</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 70%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,972.5</span>
+<span class="text-gray-600 z-10 text-[10px]">16.90</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 50%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,965.0</span>
+<span class="text-gray-600 z-10 text-[10px]">12.04</span>
+</div>
+<div class="relative flex justify-between items-center py-0.2">
+<div class="depth-bar-bid" style="width: 38%;"></div>
+<span class="text-tradeGreen font-medium z-10">59,960.5</span>
+<span class="text-gray-600 z-10 text-[10px]">9.11</span>
+</div>
+</div>
+<!-- Precision Selector & Depth Format Selector -->
+<div class="flex items-center justify-between pt-1 text-[11px] text-gray-500">
+<div class="flex items-center space-x-1 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+<span class="font-mono text-[10px]">0.1</span>
+<svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Depth icon representation -->
+<div class="p-1 hover:bg-gray-100 rounded cursor-pointer">
+<svg class="w-3.5 h-3.5 text-gray-500" fill="currentColor" viewbox="0 0 24 24">
+<rect fill="#EF4444" height="6" opacity="0.8" rx="1" width="7" x="3" y="4"></rect>
+<rect fill="#10B981" height="6" opacity="0.8" rx="1" width="7" x="3" y="14"></rect>
+<rect fill="#9CA3AF" height="16" opacity="0.5" rx="1" width="7" x="14" y="4"></rect>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<!-- END: DualColumnOrderEntry -->
+<!-- BEGIN: BottomPositionsAndOrdersArea -->
+<section class="mt-2 border-t border-gray-200" data-purpose="positions-and-orders">
+<!-- Tabs Header -->
+<div class="flex items-center justify-between px-3 border-b border-gray-100 bg-white text-[13px]">
+<div class="flex space-x-4">
+<button class="py-2 font-bold text-gray-900 border-b-2 border-gray-900 flex items-center space-x-0.5">
+<span>委托 (0)</span>
+<svg class="w-2.5 h-2.5 ml-0.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="py-2 text-gray-400 hover:text-gray-700">仓位 (0)</button>
+<button class="py-2 text-gray-400 hover:text-gray-700">资产</button>
+<button class="py-2 text-gray-400 hover:text-gray-700">纪律 (1/3)</button>
+</div>
+<!-- Order History Icon -->
+<button class="text-gray-400 hover:text-gray-700" title="全部历史委托">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<!-- Clean Zero-State Area -->
+<div class="py-5 flex flex-col items-center justify-center text-center bg-gray-50/50">
+<div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 mb-1.5">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="text-[12px] font-medium text-gray-600">暂无活动委托与持仓</span>
+<span class="text-[10px] text-gray-400 mt-0.5">当前处于开仓允许时段 · 风险配额充足</span>
+</div>
+</section>
+<!-- END: BottomPositionsAndOrdersArea -->
+</div>
+<!-- BEGIN: BottomNavigation -->
+<nav class="w-full bg-white border-t border-gray-200 px-4 py-2 flex items-center justify-around" data-purpose="app-bottom-navbar">
+<!-- Market Tab -->
+<a class="flex flex-col items-center text-gray-400 hover:text-gray-700" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span class="text-[10px] mt-0.5 font-medium">行情</span>
+</a>
+<!-- Futures Tab (Active) -->
+<a class="flex flex-col items-center text-gray-900" href="#">
+<div class="w-7 h-7 rounded-full bg-black text-white flex items-center justify-center -mt-1 shadow-sm">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<span class="text-[10px] mt-0.5 font-bold text-gray-900">合约</span>
+</a>
+<!-- Discipline Tab -->
+<a class="flex flex-col items-center text-gray-400 hover:text-gray-700 relative" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span class="text-[10px] mt-0.5 font-medium">纪律</span>
+</a>
+<!-- Assets Tab -->
+<a class="flex flex-col items-center text-gray-400 hover:text-gray-700" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"></path>
+</svg>
+<span class="text-[10px] mt-0.5 font-medium">我的</span>
+</a>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+</body></html>

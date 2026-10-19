@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SPIKE 独立纪律交易 v0.8.4+ · 合约开仓 (1R自动模式与行内进度卡版)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#F4F6F4',
+            surface: '#FFFFFF',
+            'surface-dim': '#F0F3F0',
+            jade: '#087F69',
+            'jade-dark': '#055C4C',
+            'jade-light': '#E6F4F1',
+            'rose-trade': '#E11D48',
+            'rose-light': '#FFE4E6',
+            'amber-warn': '#D97706',
+            'amber-light': '#FEF3C7',
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #087F69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(8, 127, 105, 0.35);
+      border: 2.5px solid #FFFFFF;
+      transition: transform 150ms ease;
+    }
+    input[type=range]:active::-webkit-slider-thumb {
+      transform: scale(1.18);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-[#EAEFEA] text-gray-900 font-sans flex justify-center py-4 px-2 select-none antialiased min-h-screen">
+
+  <!-- Mobile Container (390px) -->
+  <main class="w-full max-w-[390px] bg-canvas rounded-[40px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.12)] border border-black/5 overflow-hidden flex flex-col relative pb-28">
+
+    <!-- Top Nonblocking Routine Success Toast (Example: 账户切换/连接状态正常) -->
+    <div id="topToast" class="mx-3 mt-2 mb-1 p-2.5 rounded-xl bg-white border border-jade/30 shadow-sm flex items-center justify-between text-xs transition-all duration-200">
+      <div class="flex items-center gap-2 text-jade-dark font-medium">
+        <span class="w-2 h-2 rounded-full bg-jade animate-pulse"></span>
+        <span>已连接 OKX 节点 · 延迟 18ms</span>
+      </div>
+      <button onclick="document.getElementById('topToast').style.display='none'" class="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-gray-600 active:scale-90">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+
+    <!-- Standard Single-Row Header Architecture (v0.8.4 Specification) -->
+    <header class="px-4 pt-3 pb-2 flex items-center justify-between">
+      <!-- Left: Symbol Selector with 44px min hit target -->
+      <button class="h-11 px-3 -ml-2 rounded-2xl bg-surface border border-black/5 shadow-xs flex items-center gap-2 active:scale-[0.98] transition-transform">
+        <div class="w-6 h-6 rounded-full bg-[#F7931A] text-white flex items-center justify-center font-bold text-[11px] shadow-xs">₿</div>
+        <div class="text-left">
+          <div class="flex items-center gap-1 leading-none">
+            <span class="font-bold text-sm tracking-tight text-gray-900">BTC/USDT</span>
+            <span class="text-[10px] text-gray-500 font-mono bg-gray-100 px-1 py-0.5 rounded">永续</span>
+            <span class="material-symbols-outlined text-xs text-gray-400">expand_more</span>
+          </div>
+        </div>
+      </button>
+
+      <!-- Right: Standard 44x44px Settings Gear (Same Row, No utility header) -->
+      <button class="w-11 h-11 rounded-2xl bg-surface border border-black/5 shadow-xs flex items-center justify-center text-gray-700 active:scale-95 transition-transform">
+        <span class="material-symbols-outlined text-xl">settings</span>
+      </button>
+    </header>
+
+    <!-- Compact Price Line + Rhythm Indicator -->
+    <div class="px-4 py-1 flex items-baseline justify-between">
+      <div class="flex items-baseline gap-2">
+        <span class="text-2xl font-bold font-mono tracking-tight text-gray-900 tabular-nums">100.00</span>
+        <span class="text-xs font-mono font-semibold text-jade flex items-center gap-0.5">
+          +2.40%
+          <span class="w-1.5 h-1.5 rounded-full bg-jade ml-0.5"></span>
+        </span>
+      </div>
+      <span class="text-[11px] text-gray-400 font-mono">1R 风险上限: 10.00 U</span>
+    </div>
+
+    <!-- Compact 56px 3-Column Discipline Quota Strip -->
+    <div class="mx-4 my-2 p-2.5 rounded-2xl bg-surface border border-black/5 shadow-xs grid grid-cols-3 divide-x divide-black/5 text-center">
+      <div>
+        <div class="text-[10px] text-gray-400 font-medium">今日可开</div>
+        <div class="text-xs font-mono font-bold text-gray-900 tabular-nums mt-0.5"><span class="text-jade">2</span> / 3 次</div>
+      </div>
+      <div>
+        <div class="text-[10px] text-gray-400 font-medium">再亏停手</div>
+        <div class="text-xs font-mono font-bold text-jade tabular-nums mt-0.5">2 笔</div>
+      </div>
+      <div>
+        <div class="text-[10px] text-gray-400 font-medium">日亏剩余</div>
+        <div class="text-xs font-mono font-bold text-gray-900 tabular-nums mt-0.5">150 <span class="text-[10px] text-gray-400">U</span></div>
+      </div>
+    </div>
+
+    <!-- Main Order Trading Card -->
+    <div class="mx-4 space-y-3">
+      <div class="p-4 rounded-3xl bg-surface border border-black/5 shadow-sm space-y-3.5">
+        
+        <!-- Direction Switcher -->
+        <div class="grid grid-cols-2 gap-2 p-1 bg-surface-dim rounded-2xl">
+          <button class="h-10 rounded-xl bg-jade text-white font-medium text-xs shadow-xs flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform">
+            <span class="material-symbols-outlined text-sm">trending_up</span>
+            买入开多
+          </button>
+          <button class="h-10 rounded-xl text-gray-500 font-medium text-xs flex items-center justify-center gap-1.5 hover:text-gray-900 active:scale-[0.98] transition-transform">
+            <span class="material-symbols-outlined text-sm">trending_down</span>
+            卖出开空
+          </button>
+        </div>
+
+        <!-- Order Type & Leverage Pills -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex bg-surface-dim p-1 rounded-xl flex-1">
+            <button class="flex-1 py-1 rounded-lg text-xs font-semibold bg-white text-gray-900 shadow-xs">市价</button>
+            <button class="flex-1 py-1 rounded-lg text-xs font-medium text-gray-500">限价</button>
+          </div>
+          <button class="h-8 px-3 rounded-xl bg-surface-dim border border-black/5 text-xs font-mono font-medium text-gray-700 flex items-center gap-1 active:scale-95 transition-transform">
+            <span>杠杆 10x 逐仓</span>
+            <span class="material-symbols-outlined text-xs text-gray-400">tune</span>
+          </button>
+        </div>
+
+        <!-- 1R Stop Loss Block with Persistent Auto Selection & Recalculate Feedback -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <div class="flex items-center gap-1">
+              <span class="font-semibold text-gray-900">初始止损</span>
+              <span class="text-[10px] text-rose-trade font-medium bg-rose-light px-1.5 py-0.2 rounded">必设硬约束</span>
+            </div>
+            
+            <!-- 1R Persistent Mode Pills -->
+            <div class="flex items-center gap-1">
+              <button class="px-2 py-1 rounded-lg bg-jade-light text-jade border border-jade/30 text-[11px] font-medium flex items-center gap-1 active:scale-95 transition-transform">
+                <span class="w-1.5 h-1.5 rounded-full bg-jade"></span>
+                多单 1R (自动更新)
+              </button>
+              <button class="px-2 py-1 rounded-lg bg-surface-dim text-gray-500 text-[11px] font-medium hover:text-gray-800">
+                手动
+              </button>
+            </div>
+          </div>
+
+          <!-- Stop Loss Input with Jade Highlight Ring & Inline Recalculation Token -->
+          <div class="relative">
+            <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-jade">
+              <span class="material-symbols-outlined text-base">shield</span>
+            </div>
+            <input type="text" value="95.00" class="w-full h-11 pl-9 pr-24 rounded-2xl border border-jade/40 bg-jade-light/20 font-mono text-sm font-semibold text-gray-900 tabular-nums focus:outline-none focus:ring-2 focus:ring-jade/20" />
+            <div class="absolute inset-y-0 right-2.5 flex items-center gap-1 pointer-events-none">
+              <span class="text-[11px] font-mono text-gray-400">USDT</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-rose-light text-rose-trade">-5.00%</span>
+            </div>
+          </div>
+          
+          <!-- Inline Valid / Auto Recalculate Message (No blocking modal) -->
+          <div class="flex items-center justify-between text-[11px] text-jade-dark font-mono px-0.5">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-xs text-jade">check_circle</span>
+              已依 10x 杠杆自动同步 1R (-10.00 U)
+            </span>
+            <span class="text-gray-400">距离现价: 5.00 USDT</span>
+          </div>
+        </div>
+
+        <!-- Margin Quota Slider (100% of permitted margin) -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-medium text-gray-700">仓位额度 (占合规上限)</span>
+            <span class="font-mono font-bold text-jade tabular-nums text-xs">100% <span class="text-[11px] text-gray-400 font-normal">(保证金占净值 10%)</span></span>
+          </div>
+          <div class="relative flex items-center h-6">
+            <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div class="h-full bg-jade rounded-full" style="width: 100%;"></div>
+            </div>
+            <input type="range" min="10" max="100" value="100" class="absolute w-full h-6 inset-0 opacity-100 z-10" />
+          </div>
+          <div class="flex justify-between text-[10px] text-gray-400 font-mono">
+            <span>最小 (0.5%)</span>
+            <span class="text-jade font-medium">已达最大合规限额 (10%)</span>
+          </div>
+        </div>
+
+        <!-- 3 Estimate Columns -->
+        <div class="p-2.5 rounded-2xl bg-surface-dim border border-black/5 grid grid-cols-3 divide-x divide-black/5 text-center">
+          <div>
+            <div class="text-[10px] text-gray-400">本次持仓金额</div>
+            <div class="text-xs font-mono font-bold text-gray-900 tabular-nums mt-0.5">200.00 <span class="text-[10px] font-normal text-gray-400">U</span></div>
+          </div>
+          <div>
+            <div class="text-[10px] text-gray-400">预计保证金</div>
+            <div class="text-xs font-mono font-bold text-gray-900 tabular-nums mt-0.5">20.00 <span class="text-[10px] font-normal text-gray-400">U</span></div>
+          </div>
+          <div>
+            <div class="text-[10px] text-gray-400">预计止损 (1R)</div>
+            <div class="text-xs font-mono font-bold text-rose-trade tabular-nums mt-0.5">10.00 <span class="text-[10px] font-normal text-gray-400">U</span></div>
+          </div>
+        </div>
+
+        <!-- Primary Submit CTA with 44px min height -->
+        <button class="w-full h-12 rounded-2xl bg-jade hover:bg-jade-dark text-white font-semibold text-sm shadow-[0_6px_20px_-4px_rgba(8,127,105,0.4)] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform">
+          <span class="material-symbols-outlined text-lg">verified_user</span>
+          买入开多 (受纪律保护)
+        </button>
+
+      </div>
+
+      <!-- Compact Inline Order Progress Card (Submitting / Resting State) -->
+      <div class="p-3.5 rounded-2xl bg-white border border-jade/30 shadow-xs space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="animate-spin h-3.5 w-3.5 text-jade" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-xs font-bold text-gray-900">委托提交中 · 正在核验挂单与流水线</span>
+          </div>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-jade-light text-jade font-semibold">排队中</span>
+        </div>
+        <div class="w-full bg-gray-100 rounded-full h-1 overflow-hidden">
+          <div class="bg-jade h-1 rounded-full w-3/4 animate-pulse"></div>
+        </div>
+        <div class="flex items-center justify-between text-[11px] font-mono text-gray-500">
+          <span>BTC/USDT 市价 · 0.020 BTC</span>
+          <span>延迟 &lt; 50ms</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar (Strict 4 Items: 合约, 纪律, 持仓, 统计) -->
+    <nav class="fixed bottom-4 inset-x-0 max-w-[370px] mx-auto z-40 bg-surface/90 backdrop-blur-xl rounded-full p-1.5 shadow-[0_12px_36px_-6px_rgba(0,0,0,0.12)] border border-black/5 flex justify-around items-center">
+      <!-- Tab 1: 合约 (Active) -->
+      <a href="#" class="flex flex-col items-center justify-center bg-jade text-white rounded-full px-5 py-2 shadow-xs transition-transform active:scale-95">
+        <span class="material-symbols-outlined text-lg leading-none">candlestick_chart</span>
+        <span class="text-[10px] font-semibold mt-0.5">合约</span>
+      </a>
+      <!-- Tab 2: 纪律 -->
+      <a href="#" class="flex flex-col items-center justify-center text-gray-500 hover:text-gray-900 px-4 py-2 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-lg leading-none">shield_lock</span>
+        <span class="text-[10px] font-medium mt-0.5">纪律</span>
+      </a>
+      <!-- Tab 3: 持仓 -->
+      <a href="#" class="flex flex-col items-center justify-center text-gray-500 hover:text-gray-900 px-4 py-2 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-lg leading-none">pie_chart</span>
+        <span class="text-[10px] font-medium mt-0.5">持仓</span>
+      </a>
+      <!-- Tab 4: 统计 -->
+      <a href="#" class="flex flex-col items-center justify-center text-gray-500 hover:text-gray-900 px-4 py-2 transition-colors active:scale-95">
+        <span class="material-symbols-outlined text-lg leading-none">analytics</span>
+        <span class="text-[10px] font-medium mt-0.5">统计</span>
+      </a>
+    </nav>
+
+  </main>
+</body>
+</html>

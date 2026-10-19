@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE - 确认实盘订单</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "outline-variant": "#bdc9c4",
+            "on-primary-fixed": "#002019",
+            "primary": "#006452",
+            "surface-container-high": "#e7e8e6",
+            "on-primary-fixed-variant": "#005142",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "surface-tint": "#006b58",
+            "surface": "#f9faf8",
+            "on-background": "#191c1b",
+            "error": "#ba1a1a",
+            "on-tertiary": "#ffffff",
+            "inverse-primary": "#78d8be",
+            "error-container": "#ffdad6",
+            "tertiary-container": "#677370",
+            "surface-container": "#edeeec",
+            "on-primary": "#ffffff",
+            "inverse-on-surface": "#f0f1ef",
+            "secondary": "#a5374d",
+            "primary-container": "#087f69",
+            "on-surface": "#191c1b",
+            "on-secondary": "#ffffff",
+            "secondary-fixed": "#ffd9dc",
+            "background": "#f9faf8",
+            "secondary-fixed-dim": "#ffb2bb",
+            "outline": "#6e7a75",
+            "surface-container-lowest": "#ffffff",
+            "on-tertiary-container": "#ecf9f5",
+            "on-secondary-container": "#730f2a",
+            "on-secondary-fixed-variant": "#851e36",
+            "surface-dim": "#d9dad8",
+            "surface-variant": "#e2e3e1",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-fixed": "#d8e5e1",
+            "on-surface-variant": "#3e4945",
+            "surface-container-highest": "#e2e3e1",
+            "primary-fixed-dim": "#78d8be",
+            "on-secondary-fixed": "#400011",
+            "surface-container-low": "#f3f4f2",
+            "inverse-surface": "#2e3130",
+            "tertiary": "#4e5b58",
+            "surface-bright": "#f9faf8",
+            "secondary-container": "#fc7a8f",
+            "on-primary-container": "#d3fff0",
+            "on-error": "#ffffff",
+            "on-tertiary-fixed": "#121e1c",
+            "on-error-container": "#93000a",
+            "primary-fixed": "#94f4d9"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-xs": "0.25rem",
+            "margin-tablet": "2rem",
+            "gutter": "1rem",
+            "gutter-tablet": "1.5rem",
+            "space-lg": "1.5rem",
+            "space-xl": "2rem",
+            "margin": "1.25rem",
+            "space-sm": "0.5rem",
+            "space-md": "1rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "margin-desktop": "3rem"
+          },
+          "fontFamily": {
+            "display-lg": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "numeric-hero-mobile": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "label-lg": ["Inter"],
+            "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      font-size: 20px;
+      line-height: 1;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Tabular figures for financial precision */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-[#eef0ec] text-on-surface antialiased flex justify-center items-center min-h-screen p-0 m-0 font-body-md text-body-md selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Mobile Shell Enclosure (390px viewport frame) -->
+<div class="relative w-[390px] h-[844px] bg-background overflow-hidden shadow-2xl flex flex-col select-none border border-surface-container">
+<!-- UNDERLYING CONTRACT TRADING SCREEN (DIMMED CANVAS) -->
+<div aria-hidden="true" class="relative flex-1 flex flex-col bg-background overflow-hidden">
+<!-- Shared Component: TopAppBar -->
+<header class="bg-background/80 backdrop-blur-md docked full-width top-0 sticky z-10 flex justify-between items-center w-full px-margin h-14 max-w-md mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+<!-- OKX Real Mode Live Badge -->
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary-fixed/30 border border-primary/20 text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-sm font-label-sm font-semibold text-primary">实盘 · OKX 已就绪</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1 px-2 py-1 rounded-full bg-surface-container-low text-tertiary">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="sensors">sensors</span>
+<span class="text-[10px] font-medium text-on-surface-variant">实盘已连接</span>
+</div>
+</div>
+</header>
+<!-- Background Market Workspace Content (Dimmed Representation) -->
+<div class="px-4 py-2 space-y-3 opacity-60">
+<!-- Market Pair Bar -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl shadow-sm flex items-center justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-bold tracking-tight">BTCUSDT</span>
+<span class="text-label-sm font-label-sm px-1.5 py-0.5 rounded bg-surface-container text-tertiary">永续 100x</span>
+</div>
+<p class="text-numeric-hero-mobile font-numeric-hero-mobile text-primary tabular-nums mt-0.5">83,248.50</p>
+</div>
+<div class="text-right">
+<span class="text-label-md font-label-md px-2 py-1 rounded-full bg-primary-fixed text-primary font-semibold tabular-nums">+3.42%</span>
+<p class="text-label-sm font-label-sm text-outline mt-1 tabular-nums">24h量 4.82B</p>
+</div>
+</div>
+<!-- Simulated Candlestick Area Graphic -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl h-44 flex flex-col justify-between">
+<div class="flex justify-between text-label-sm font-label-sm text-outline">
+<span>高: 84,100.0</span>
+<span>低: 81,920.0</span>
+</div>
+<div class="w-full flex items-end justify-between gap-1.5 h-28 px-2">
+<div class="w-3 bg-primary-container/30 h-16 rounded-t-sm"></div>
+<div class="w-3 bg-primary-container/40 h-20 rounded-t-sm"></div>
+<div class="w-3 bg-secondary-container/40 h-12 rounded-t-sm"></div>
+<div class="w-3 bg-primary-container/60 h-24 rounded-t-sm"></div>
+<div class="w-3 bg-primary-container h-28 rounded-t-sm"></div>
+<div class="w-3 bg-primary-fixed-dim h-18 rounded-t-sm"></div>
+<div class="w-3 bg-primary h-22 rounded-t-sm"></div>
+</div>
+<div class="flex justify-between text-label-sm font-label-sm text-outline border-t border-surface-container-low pt-1">
+<span>14:00</span><span>15:00</span><span>16:00</span><span>17:00</span><span>当前</span>
+</div>
+</div>
+<!-- Quick Order Input Mockup -->
+<div class="bg-surface-container-lowest p-3 rounded-2xl space-y-2">
+<div class="flex justify-between text-label-md font-label-md">
+<span class="text-outline">可用保证金</span>
+<span class="font-semibold tabular-nums">12,450.80 USDT</span>
+</div>
+<div class="h-10 bg-surface-container-low rounded-xl flex items-center px-3 text-tertiary">
+<span>市价保护下单...</span>
+</div>
+</div>
+</div>
+<!-- Shared Component: BottomNavBar (Visible in dimmed underlying canvas) -->
+<nav class="fixed bottom-5 inset-x-4 z-10 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]">
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield_lock">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</button>
+<button class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-3 py-2 transition-colors duration-200">
+<span class="material-symbols-outlined text-[20px]" data-icon="link">link</span>
+<span class="text-label-sm font-label-sm mt-0.5">连接</span>
+</button>
+</nav>
+</div>
+<!-- TRANSLUCENT SCRIM BACKDROP OVERLAY -->
+<div class="absolute inset-0 bg-[#172422]/45 backdrop-blur-[2px] z-30 transition-opacity"></div>
+<!-- LIVE REAL ORDER CONFIRMATION BOTTOM SHEET (确认实盘订单) -->
+<section aria-labelledby="modal-headline" aria-modal="true" class="absolute bottom-0 inset-x-0 z-40 bg-surface-container-lowest rounded-t-[30px] shadow-[0_-12px_44px_rgba(23,36,34,0.22)] flex flex-col max-h-[92%] border-t border-white/80" role="dialog">
+<!-- Top Grab Bar & Dismiss Handle -->
+<div class="pt-2.5 pb-1 flex flex-col items-center">
+<div class="w-10 h-1 bg-[#d8dedb] rounded-full"></div>
+</div>
+<!-- Sheet Header -->
+<div class="px-5 pt-1 pb-3 flex items-start justify-between">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-sm font-headline-sm font-bold text-on-surface tracking-tight" id="modal-headline">确认实盘订单</h1>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-semibold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              真实资金 · OKX 实盘执行
+            </span>
+</div>
+<!-- Contract & Direction Pill Row -->
+<div class="flex items-center gap-1.5 mt-2">
+<span class="text-label-md font-label-md font-bold text-on-surface">BTCUSDT 永续</span>
+<span class="text-label-sm font-label-sm text-outline">· 全仓 100x ·</span>
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container text-on-primary text-label-sm font-label-sm font-semibold shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+              买入开多
+            </div>
+</div>
+</div>
+<!-- Accessible Close Button -->
+<button aria-label="关闭确认单" class="w-8 h-8 rounded-full bg-surface-container-low hover:bg-surface-container text-tertiary flex items-center justify-center transition-colors active:scale-95 touch-manipulation">
+<span class="text-base font-semibold leading-none">✕</span>
+</button>
+</div>
+<!-- Scrollable Parameters Content Container -->
+<div class="px-5 overflow-y-auto space-y-3.5 pb-3">
+<!-- Real Execution Parameters Grid (Porcelain Island) -->
+<div class="bg-surface p-3.5 rounded-2xl border border-[#e2e8e5]/60 shadow-[0_2px_12px_rgba(23,36,34,0.02)] space-y-2.5">
+<div class="flex items-center justify-between text-body-md font-body-md">
+<span class="text-on-surface-variant font-medium">拟开仓量</span>
+<span class="font-bold text-on-surface tabular-nums">0.010 BTC</span>
+</div>
+<div class="flex items-center justify-between text-body-md font-body-md">
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-medium">名义价值</span>
+<span class="text-[10px] text-outline">受名义上限额度约束</span>
+</div>
+<span class="font-semibold text-on-surface tabular-nums">1,000.00 USDT</span>
+</div>
+<div class="h-[1px] bg-surface-container-high/60 my-1"></div>
+<div class="flex items-center justify-between text-body-md font-body-md">
+<span class="text-on-surface-variant font-medium">委托类型</span>
+<span class="text-label-sm font-label-sm font-semibold px-2 py-0.5 rounded-md bg-surface-container text-on-surface">市价保护 (IOC 全部/取消)</span>
+</div>
+<div class="flex items-center justify-between text-body-md font-body-md">
+<div class="flex items-center gap-1">
+<span class="text-on-surface-variant font-medium">初始止损触发价</span>
+<span class="material-symbols-outlined text-[15px] text-primary" data-icon="shield_lock">shield_lock</span>
+</div>
+<span class="font-bold text-secondary tabular-nums">80,000.00 USDT</span>
+</div>
+<div class="flex items-center justify-between text-body-md font-body-md">
+<div class="flex flex-col">
+<span class="text-on-surface-variant font-medium">单笔 1R 计划风险</span>
+<span class="text-[10px] text-primary font-medium">严格锁定净值预算</span>
+</div>
+<span class="font-bold text-primary tabular-nums">10.00 USDT</span>
+</div>
+<div class="h-[1px] bg-surface-container-high/60 my-1"></div>
+<!-- OKX Exchange Direct Readiness State -->
+<div class="flex items-center justify-between pt-0.5">
+<span class="text-label-sm font-label-sm text-outline">交易所执行状态</span>
+<div class="flex items-center gap-1 text-[11px] font-semibold text-primary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              实盘账户已核验 · 自动报单就绪
+            </div>
+</div>
+</div>
+<!-- Discipline Protection Pipeline Summary Card -->
+<div class="bg-[#f0f5f3] p-3 rounded-2xl border border-primary/15 space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-label-sm font-label-sm font-semibold text-on-surface">纪律流水线挂接</span>
+</div>
+<span class="text-[11px] font-medium text-primary">规则就绪 (成交即刻托管)</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+            保护阶梯：<span class="font-semibold text-on-surface">1R 成本保本</span> → <span class="font-semibold text-on-surface">3R 止盈 60%</span> → <span class="font-semibold text-on-surface">5R 全平离场</span>。
+          </p>
+</div>
+<!-- Mandatory Risk Disclaimer -->
+<div class="bg-surface-container-low/70 p-3 rounded-xl border border-surface-container">
+<div class="flex items-start gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary shrink-0 mt-0.5" data-icon="shield_lock">shield_lock</span>
+<p class="text-[11px] leading-[16px] text-tertiary">
+              市价保护委托，若流动性不足将全部成交或取消；极端行情下实际滑点与损失可能超出预设预算。不承诺绝对无滑点或无损强平。
+            </p>
+</div>
+</div>
+<!-- Interactive Legal & Risk Checkbox (>=44px touch target) -->
+<label class="flex items-start gap-2.5 pt-0.5 cursor-pointer min-h-[44px] select-none group touch-manipulation">
+<input checked="" class="mt-0.5 h-5 w-5 rounded-md border-primary text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer" type="checkbox"/>
+<span class="text-label-md font-label-md text-on-surface leading-tight pt-0.5">
+            我已确认使用<strong class="font-semibold text-primary">真实资金</strong>执行本次交易，知晓风控仲裁机制与执行保护协议。
+          </span>
+</label>
+</div>
+<!-- Action Panel Buttons & Signed Footnote -->
+<div class="px-5 pt-2 pb-5 bg-surface-container-lowest border-t border-surface-container-low space-y-2">
+<!-- Primary Action Button (min-h: 52px / h-13, tactile, jade) -->
+<button class="w-full h-13 py-3.5 px-6 rounded-full bg-primary-container hover:bg-primary active:scale-[0.98] transition-all duration-150 flex items-center justify-center gap-2 text-on-primary font-headline-sm text-headline-sm font-semibold shadow-[0_8px_20px_rgba(8,127,105,0.22)] touch-manipulation">
+<span>确认实盘开仓</span>
+<span class="material-symbols-outlined text-[18px]" data-icon="trending_up">trending_up</span>
+</button>
+<!-- Secondary Dismiss Action Button (>= 44px touch target) -->
+<button class="w-full h-10 rounded-full text-tertiary hover:text-on-surface hover:bg-surface-container-low transition-colors font-body-md text-body-md font-medium touch-manipulation">
+          返回修改
+        </button>
+<!-- Micro Identity & Engine Signature -->
+<p class="text-center text-[10px] text-outline font-medium tracking-wide pt-1">
+          SPIKE 纪律引擎 v4.2 · 本地守护进程签署 · 真实资金实盘
+        </p>
+</div>
+</section>
+</div>
+</body></html>

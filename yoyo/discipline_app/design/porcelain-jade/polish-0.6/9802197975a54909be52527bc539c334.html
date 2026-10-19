@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>设置与账户 - SPIKE</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-tertiary-fixed-variant": "#3d4947",
+            "on-error": "#ffffff",
+            "tertiary-container": "#677370",
+            "tertiary": "#4e5b58",
+            "surface": "#f9faf8",
+            "error-container": "#ffdad6",
+            "surface-variant": "#e2e3e1",
+            "secondary": "#a5374d",
+            "on-secondary-fixed": "#400011",
+            "on-secondary": "#ffffff",
+            "on-primary-container": "#d3fff0",
+            "secondary-fixed-dim": "#ffb2bb",
+            "primary-container": "#087f69",
+            "background": "#f9faf8",
+            "on-tertiary-container": "#ecf9f5",
+            "surface-dim": "#d9dad8",
+            "outline": "#6e7a75",
+            "surface-tint": "#006b58",
+            "primary-fixed-dim": "#78d8be",
+            "primary": "#006452",
+            "on-primary": "#ffffff",
+            "on-tertiary-fixed": "#121e1c",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-background": "#191c1b",
+            "on-surface-variant": "#3e4945",
+            "inverse-primary": "#78d8be",
+            "on-surface": "#191c1b",
+            "surface-container-highest": "#e2e3e1",
+            "secondary-fixed": "#ffd9dc",
+            "secondary-container": "#fc7a8f",
+            "surface-container": "#edeeec",
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#002019",
+            "on-error-container": "#93000a",
+            "surface-container-high": "#e7e8e6",
+            "outline-variant": "#bdc9c4",
+            "on-secondary-container": "#730f2a",
+            "surface-container-lowest": "#ffffff",
+            "surface-bright": "#f9faf8",
+            "inverse-surface": "#2e3130",
+            "tertiary-fixed": "#d8e5e1",
+            "on-primary-fixed-variant": "#005142",
+            "inverse-on-surface": "#f0f1ef",
+            "surface-container-low": "#f3f4f2",
+            "primary-fixed": "#94f4d9",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "on-tertiary": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "margin": "1.25rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "3rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xl": "2rem",
+            "gutter-tablet": "1.5rem"
+          },
+          "fontFamily": {
+            "numeric-hero-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "label-md": ["Inter"]
+          },
+          "fontSize": {
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      background-color: #f9faf8;
+      color: #191c1b;
+      -webkit-font-smoothing: antialiased;
+      font-family: 'Inter', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+    }
+    .jade-shadow {
+      box-shadow: 0 4px 24px -2px rgba(23, 36, 34, 0.04), 0 1px 3px 0 rgba(8, 127, 105, 0.02);
+    }
+    .dock-shadow {
+      box-shadow: 0 16px 40px -6px rgba(23, 36, 34, 0.10);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="min-h-screen flex justify-center bg-background text-on-surface">
+<div class="w-full max-w-[390px] min-h-screen flex flex-col relative pb-28">
+<!-- Top App Bar (Shared Components standard implementation) -->
+<header class="bg-background/80 backdrop-blur-md docked full-width top-0 sticky z-40">
+<div class="flex justify-between items-center w-full px-margin h-14 max-w-md mx-auto">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[22px]">trending_up</span>
+<span class="text-headline-sm font-headline-sm font-bold tracking-tight text-on-surface">SPIKE</span>
+</div>
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-low border border-outline-variant/30">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="text-label-sm font-label-sm text-primary font-medium tracking-tight">守护运行中</span>
+<span class="material-symbols-outlined text-outline text-[16px]">sensors</span>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 px-margin pt-2 flex flex-col gap-6">
+<!-- Header Title Section -->
+<section class="flex flex-col gap-1">
+<h1 class="text-headline-lg font-headline-lg text-on-surface tracking-tight">设置与账户</h1>
+<p class="text-body-sm font-body-sm text-tertiary">当前已接入内置守护引擎，私有风控策略常态生效</p>
+</section>
+<!-- Section 1: 交易账户切换 (Compact Account Switcher Bento Card) -->
+<section class="flex flex-col gap-2.5">
+<div class="flex items-center justify-between px-1">
+<span class="text-label-md font-label-md text-tertiary">交易账户切换</span>
+<span class="text-label-sm font-label-sm text-primary font-medium">多账户隔离</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-5 jade-shadow flex flex-col gap-4">
+<!-- Active Account Capsule -->
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="text-headline-sm font-headline-sm text-on-surface">主账户</span>
+<span class="text-body-sm font-body-sm text-tertiary">(OKX 实盘 #01)</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span class="text-label-sm font-label-sm text-outline">已建立持久专线</span>
+</div>
+</div>
+</div>
+<div class="inline-flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-full">
+<span class="material-symbols-outlined text-primary text-[14px]">verified</span>
+<span class="text-label-sm font-label-sm text-primary font-semibold">实盘运行中</span>
+</div>
+</div>
+<!-- Segmented Account Switch Selector -->
+<div class="bg-surface-container p-1 rounded-full flex items-center gap-1">
+<button class="flex-1 py-2 px-3 rounded-full bg-surface-container-lowest text-primary text-label-md font-label-md font-medium text-center shadow-sm transition-all duration-150 flex items-center justify-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+              OKX 实盘 #01
+            </button>
+<button class="flex-1 py-2 px-3 rounded-full text-tertiary hover:text-on-surface text-label-md font-label-md text-center transition-all duration-150 flex items-center justify-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-outline-variant"></span>
+              备用 OKX #02
+            </button>
+</div>
+<!-- Direct Secondary Link Row -->
+<div class="pt-1 border-t border-surface-container/60 flex flex-col gap-2">
+<a class="flex items-center justify-between py-1 text-on-surface hover:text-primary transition-colors" href="javascript:void(0)">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[18px]">manage_accounts</span>
+<span class="text-body-md font-body-md font-medium">管理交易账户</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">chevron_right</span>
+</a>
+<p class="text-body-sm font-body-sm text-outline leading-snug">
+              账户切换互不影响各账户既有持仓保护与风控配额，系统将继续独立托管挂单。
+            </p>
+</div>
+</div>
+</section>
+<!-- Section 2: 交易安全与二次确认 -->
+<section class="flex flex-col gap-2.5">
+<div class="px-1">
+<span class="text-label-md font-label-md text-tertiary">交易安全与风控执行</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-5 jade-shadow flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">security</span>
+</div>
+<div class="flex flex-col">
+<span class="text-body-lg font-body-lg font-semibold text-on-surface">开平仓二次确认</span>
+<span class="text-label-sm font-label-sm text-outline">极速交易模式 (高频交易者推荐)</span>
+</div>
+</div>
+<!-- Native iOS style Switch Toggle (Default OFF as specified) -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="confirmToggle" type="checkbox"/>
+<div class="w-12 h-7 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary-container shadow-inner"></div>
+</label>
+</div>
+<div class="bg-surface-container-low rounded-xl p-3 flex items-start gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px] shrink-0 mt-0.5">info</span>
+<p class="text-body-sm font-body-sm text-tertiary">
+              关闭后点击开仓或平仓直接提交，风控仍执行。内置止损止盈及硬止损阈值不受界面确认框跳过影响。
+            </p>
+</div>
+</div>
+</section>
+<!-- Section 3: 连接与授权凭证 (Built-in Service, Server URL entirely hidden) -->
+<section class="flex flex-col gap-2.5">
+<div class="px-1">
+<span class="text-label-md font-label-md text-tertiary">连接与授权凭证</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-5 jade-shadow flex flex-col gap-4">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">verified_user</span>
+</div>
+<div class="flex flex-col">
+<span class="text-body-lg font-body-lg font-semibold text-on-surface">内置守护服务凭证</span>
+<span class="text-body-sm font-body-sm text-tertiary">无需配置外链节点，本地安全直通</span>
+</div>
+</div>
+<span class="px-2.5 py-0.5 rounded-full bg-surface-container-low text-primary text-label-sm font-label-sm font-semibold">已授权</span>
+</div>
+<div class="bg-surface-container-low/70 rounded-xl p-3.5 flex flex-col gap-2">
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-tertiary">服务链路</span>
+<span class="text-on-surface font-medium">内置守护引擎 (本地专用回环)</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm">
+<span class="text-tertiary">会话状态</span>
+<span class="text-primary font-medium flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                长效受信任 (Token Active)
+              </span>
+</div>
+</div>
+<button class="w-full h-[46px] rounded-full bg-surface-container-low hover:bg-surface-container text-primary font-medium text-body-md font-body-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">key</span>
+            重新授权服务 Token
+          </button>
+</div>
+</section>
+<!-- Section 4: 体验与偏好 -->
+<section class="flex flex-col gap-2.5 mb-4">
+<div class="px-1">
+<span class="text-label-md font-label-md text-tertiary">体验与偏好</span>
+</div>
+<div class="bg-surface-container-lowest rounded-[24px] p-2 jade-shadow flex flex-col divide-y divide-surface-container/50">
+<!-- Haptics Toggle (ON) -->
+<div class="flex items-center justify-between p-3.5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">vibration</span>
+</div>
+<div class="flex flex-col">
+<span class="text-body-md font-body-md font-semibold text-on-surface">触感反馈 (Haptics)</span>
+<span class="text-label-sm font-label-sm text-outline">滑单确认与风控报警震动提醒</span>
+</div>
+</div>
+<!-- Native Switch (Default ON) -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface-container-lowest after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container shadow-inner"></div>
+</label>
+</div>
+<!-- Motion Setting -->
+<div class="flex items-center justify-between p-3.5">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">motion_photos_on</span>
+</div>
+<div class="flex flex-col">
+<span class="text-body-md font-body-md font-semibold text-on-surface">动效与减弱动态设置</span>
+<span class="text-label-sm font-label-sm text-outline">柔和玉石微交互与转场动画</span>
+</div>
+</div>
+<div class="flex items-center gap-1 text-tertiary">
+<span class="text-body-sm font-body-sm">标准平滑</span>
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- App Info / Version Watermark -->
+<div class="flex flex-col items-center justify-center gap-1 py-2 text-center text-outline">
+<span class="text-label-sm font-label-sm tracking-wider">SPIKE DISCIPLINE ENGINE · V2.4.1</span>
+<span class="text-[10px] leading-tight text-outline/70">所有持仓指令本地签名，保护私密性</span>
+</div>
+</main>
+<!-- Bottom Floating Navigation Bar (5 Items: [合约, 持仓, 统计, 纪律, 设置 (active)]) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl dock-shadow">
+<!-- Item 1: 合约 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2.5 py-1.5 transition-colors duration-200" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">合约</span>
+</a>
+<!-- Item 2: 持仓 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2.5 py-1.5 transition-colors duration-200" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">pie_chart</span>
+<span class="text-label-sm font-label-sm mt-0.5">持仓</span>
+</a>
+<!-- Item 3: 统计 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2.5 py-1.5 transition-colors duration-200" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="text-label-sm font-label-sm mt-0.5">统计</span>
+</a>
+<!-- Item 4: 纪律 -->
+<a class="flex flex-col items-center justify-center text-tertiary hover:text-on-surface px-2.5 py-1.5 transition-colors duration-200" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]">shield_lock</span>
+<span class="text-label-sm font-label-sm mt-0.5">纪律</span>
+</a>
+<!-- Item 5: 设置 (ACTIVE - Styled strictly according to style_active_navigation) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary rounded-full px-4 py-2 transition-all duration-200 active:scale-95" href="javascript:void(0)">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">settings</span>
+<span class="text-label-sm font-label-sm mt-0.5">设置</span>
+</a>
+</nav>
+</div>
+</body></html>

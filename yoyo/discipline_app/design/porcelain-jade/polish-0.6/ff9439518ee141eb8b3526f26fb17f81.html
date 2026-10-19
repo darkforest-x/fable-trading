@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE 纪律交易 · App Icon 设计规范与无损矢量画板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            porcelain: '#F6F7F5',
+            'porcelain-light': '#FAFBF9',
+            'porcelain-dark': '#E9ECE7',
+            jade: '#087F69',
+            'jade-deep': '#044B3E',
+            'jade-glow': '#14A88B',
+            ink: '#172422',
+            'ink-muted': '#62706D',
+            'ink-subtle': '#8F9E9B',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* iOS App Icon Continuous Curvature squircle simulation */
+    .ios-squircle {
+      border-radius: 22.37%;
+      clip-path: url(#squircleClip);
+    }
+    .android-adaptive {
+      border-radius: 50%;
+    }
+    .checkerboard {
+      background-size: 16px 16px;
+      background-position: 0 0, 8px 8px;
+      background-image: 
+        linear-gradient(45deg, #E6E8E3 25%, transparent 25%), 
+        linear-gradient(-45deg, #E6E8E3 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #E6E8E3 75%), 
+        linear-gradient(-45deg, transparent 75%, #E6E8E3 75%);
+    }
+  </style>
+</head>
+<body class="bg-[#F2F4F0] text-ink font-sans antialiased min-h-screen p-6 md:p-12">
+
+  <!-- Squircle ClipPath Definition for iOS 1024 / Preview Sizes -->
+  <svg width="0" height="0" class="absolute">
+    <defs>
+      <clipPath id="squircleClip" clipPathUnits="objectBoundingBox">
+        <!-- Smooth iOS squircle approximation in normalized 0..1 coordinates -->
+        <path d="M 0.5 0 
+                 C 0.8 0 1 0.2 1 0.5 
+                 C 1 0.8 0.8 1 0.5 1 
+                 C 0.2 1 0 0.8 0 0.5 
+                 C 0 0.2 0.2 0 0.5 0 Z"/>
+      </clipPath>
+    </defs>
+  </svg>
+
+  <div class="max-w-6xl mx-auto space-y-10">
+
+    <!-- Header & Brand Positioning -->
+    <header class="flex flex-col md:flex-row md:items-end justify-between border-b border-[#D8DDD5] pb-6 gap-4">
+      <div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-jade/10 text-jade text-xs font-semibold uppercase tracking-wider mb-3">
+          <span class="w-2 h-2 rounded-full bg-jade animate-pulse"></span>
+          官方应用视觉资产 · Brand Icon Spec v2.0
+        </div>
+        <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-ink">
+          SPIKE 纪律交易 · App Icon 全新设计规范
+        </h1>
+        <p class="text-ink-muted text-sm md:text-base mt-2 max-w-2xl leading-relaxed">
+          纯粹抽象双轨互锁曲线（Interlocking S-Curve Monogram）与「白瓷与软玉」(Porcelain & Jade) 雕塑质感，彻底剔除传统俗套 K 线与箭头，在极小尺寸（40px）与视网膜超清屏幕下均保持卓越识别力。
+        </p>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="#svg-source" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-jade hover:bg-jade-deep text-white font-medium text-sm transition-all shadow-sm active:scale-95">
+          <span class="material-symbols-outlined text-[18px]">code</span>
+          提取无损 SVG 源码
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Hero Presentation: Full 1024x1024 Master & Core Geometric Philosophy -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- Left Column: Master Hero Icon Card -->
+      <div class="lg:col-span-7 bg-white rounded-3xl p-8 shadow-[0_20px_50px_-12px_rgba(23,36,34,0.08)] border border-[#E1E5DE] flex flex-col items-center">
+        
+        <div class="w-full flex items-center justify-between mb-6 pb-4 border-b border-[#F0F2EE]">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-sm tracking-wide text-ink">1024×1024 原始画板 (Master Bleed)</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-neutral-100 text-ink-muted font-mono">1:1 Square</span>
+          </div>
+          <span class="text-xs text-ink-subtle">系统外框由 iOS/Android 运行时自动倒角裁切</span>
+        </div>
+
+        <!-- The 1024x1024 Full Bleed Live SVG Component with Crisp Retinal Scaling -->
+        <div class="relative group p-4 rounded-3xl bg-porcelain shadow-inner border border-[#E3E7DF]">
+          <div class="w-72 h-72 sm:w-84 sm:h-84 md:w-96 md:h-96 relative rounded-[22.5%] overflow-hidden shadow-2xl transition-all duration-300 group-hover:scale-[1.01]">
+            <!-- Embedded Exact 1024x1024 SVG Graphic -->
+            <svg id="master-spike-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="100%" height="100%" class="w-full h-full block">
+              <defs>
+                <linearGradient id="cardBgPorcelain" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#FCFCFA"/>
+                  <stop offset="50%" stop-color="#F5F6F3"/>
+                  <stop offset="100%" stop-color="#E9ECE7"/>
+                </linearGradient>
+
+                <linearGradient id="cardPorcelainVignette" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+                  <stop offset="100%" stop-color="#D9DFD7" stop-opacity="0.4"/>
+                </linearGradient>
+
+                <linearGradient id="cardJadeAscent" x1="15%" y1="90%" x2="85%" y2="10%">
+                  <stop offset="0%" stop-color="#044D3F"/>
+                  <stop offset="35%" stop-color="#066F5B"/>
+                  <stop offset="70%" stop-color="#087F69"/>
+                  <stop offset="100%" stop-color="#14A88B"/>
+                </linearGradient>
+
+                <linearGradient id="cardJadeSupport" x1="85%" y1="15%" x2="15%" y2="85%">
+                  <stop offset="0%" stop-color="#0B987C"/>
+                  <stop offset="40%" stop-color="#087F69"/>
+                  <stop offset="85%" stop-color="#055546"/>
+                  <stop offset="100%" stop-color="#02332A"/>
+                </linearGradient>
+
+                <linearGradient id="cardJadeGleam" x1="30%" y1="10%" x2="70%" y2="90%">
+                  <stop offset="0%" stop-color="#A5F3E2" stop-opacity="0.9"/>
+                  <stop offset="45%" stop-color="#34D399" stop-opacity="0.25"/>
+                  <stop offset="100%" stop-color="#044D3F" stop-opacity="0"/>
+                </linearGradient>
+
+                <filter id="cardShadow" x="-20%" y="-20%" width="150%" height="150%" filterUnits="userSpaceOnUse">
+                  <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#0A241F" flood-opacity="0.18"/>
+                  <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#087F69" flood-opacity="0.12"/>
+                  <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#042B23" flood-opacity="0.10"/>
+                </filter>
+              </defs>
+
+              <!-- Full-bleed background -->
+              <rect width="1024" height="1024" fill="url(#cardBgPorcelain)"/>
+              <rect x="2" y="2" width="1020" height="1020" fill="none" stroke="url(#cardPorcelainVignette)" stroke-width="4"/>
+
+              <!-- Central Interlocking Kinetic Monogram -->
+              <g filter="url(#cardShadow)">
+                <!-- Lower foundation anchor curve (Discipline / Grounding) -->
+                <path d="M 276 690 
+                         C 276 776 346 846 432 846 
+                         C 528 846 620 782 682 708 
+                         C 730 650 754 582 754 512 
+                         C 754 448 732 388 692 340 
+                         L 576 438 
+                         C 598 468 610 500 610 534 
+                         C 610 578 584 624 550 660 
+                         C 514 698 466 720 420 720 
+                         C 388 720 364 698 364 670 
+                         C 364 636 390 604 424 576 
+                         L 516 502 
+                         C 454 506 388 534 338 578 
+                         C 298 612 276 652 276 690 Z" 
+                      fill="url(#cardJadeSupport)"/>
+
+                <!-- Upper Piercing Spike Blade (Alpha Kinetic Ascent) -->
+                <path d="M 748 334 
+                         C 748 248 678 178 592 178 
+                         C 496 178 404 242 342 316 
+                         C 294 374 270 442 270 512 
+                         C 270 576 292 636 332 684 
+                         L 448 586 
+                         C 426 556 414 524 414 490 
+                         C 414 446 440 400 474 364 
+                         C 510 326 558 304 604 304 
+                         C 636 304 660 326 660 354 
+                         C 660 388 634 420 600 448 
+                         L 508 522 
+                         C 570 518 636 490 686 446 
+                         C 726 412 748 372 748 334 Z" 
+                      fill="url(#cardJadeAscent)"/>
+
+                <!-- Central Interlocking Core (Equilibrium) -->
+                <path d="M 512 372 
+                         C 552 420 580 474 580 528 
+                         C 580 540 576 554 568 568 
+                         L 456 456 
+                         C 468 438 488 408 512 372 Z" 
+                      fill="#14A88B" 
+                      opacity="0.9" />
+
+                <!-- Sculptural Ceramic/Jade Specular Gleam -->
+                <path d="M 592 196 
+                         C 666 196 726 256 730 330 
+                         C 700 376 654 418 604 454 
+                         L 582 436 
+                         C 624 398 644 366 644 346 
+                         C 644 316 620 292 588 292 
+                         C 542 292 494 320 456 360 
+                         L 434 342 
+                         C 478 296 534 262 588 200 
+                         C 590 198 591 196 592 196 Z" 
+                      fill="url(#cardJadeGleam)" 
+                      opacity="0.9"/>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Metric Tokens -->
+        <div class="grid grid-cols-3 w-full gap-4 mt-8 pt-6 border-t border-[#F0F2EE] text-center">
+          <div class="p-3 rounded-2xl bg-porcelain">
+            <span class="block text-xs text-ink-muted">Master 尺寸</span>
+            <span class="font-mono font-bold text-sm text-ink mt-0.5">1024 × 1024</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-porcelain">
+            <span class="block text-xs text-ink-muted">核心品牌色</span>
+            <span class="font-mono font-bold text-sm text-jade mt-0.5">#087F69 软玉</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-porcelain">
+            <span class="block text-xs text-ink-muted">底衬温润度</span>
+            <span class="font-mono font-bold text-sm text-ink mt-0.5">#FCFCFA 白瓷</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Design Principles & Multi-Scale Verification Grid -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- Philosophy Card -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-[#E1E5DE] space-y-4">
+          <h2 class="text-base font-bold text-ink flex items-center gap-2">
+            <span class="material-symbols-outlined text-jade text-[20px]">architecture</span>
+            设计语言与几何解构
+          </h2>
+          <ul class="text-xs md:text-sm text-ink-muted space-y-3 leading-relaxed">
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-jade mt-2 shrink-0"></span>
+              <span><strong class="text-ink">双轨互锁曲线 (Dual Interlocking Blades)</strong>：由象征「严守风控」的稳健下托弧与象征「纪律执行突破」的破空锋芒交织而成，构成抽象字母「S」异构体。</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-jade mt-2 shrink-0"></span>
+              <span><strong class="text-ink">摒弃俗套金融图腾</strong>：杜绝蜡烛图/K线、折线图、美元符号或传统箭头等过载信息，以极高浓缩度的艺术化徽标呈现现代量化美学。</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-jade mt-2 shrink-0"></span>
+              <span><strong class="text-ink">白瓷玉质微雕 (Porcelain & Jade Sculptural Depth)</strong>：配合三层环境微阴影（Drop Shadow）与刃口晶莹高光，在任何背景墙纸上均具有深邃的立体存在感。</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Multi-Scale Clarity & 40px App Grid Testing Board -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-[#E1E5DE] space-y-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-base font-bold text-ink flex items-center gap-2">
+              <span class="material-symbols-outlined text-jade text-[20px]">grid_view</span>
+              多尺寸缩放与 40px 小图标清晰度验算
+            </h2>
+            <span class="text-xs text-jade font-medium bg-jade/10 px-2 py-0.5 rounded-full">像素级对齐</span>
+          </div>
+
+          <!-- Comparison Table of Standard App Grid Sizes -->
+          <div class="p-4 rounded-2xl bg-porcelain space-y-4">
+            
+            <!-- Row 1: iOS 60pt Home Screen (@3x = 180px, display ~64px) -->
+            <div class="flex items-center justify-between pb-3 border-b border-[#E3E7DF]">
+              <div class="flex items-center gap-3">
+                <div class="w-16 h-16 rounded-[22.5%] overflow-hidden shadow-md shrink-0 border border-black/5 bg-white">
+                  <svg viewBox="0 0 1024 1024" class="w-full h-full"><use href="#master-spike-svg"/></svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-ink">iOS 主屏幕图标</div>
+                  <div class="text-[11px] text-ink-subtle font-mono">60pt @3x (180×180)</div>
+                </div>
+              </div>
+              <span class="text-xs text-jade font-medium">轮廓丰满 · 质感分明</span>
+            </div>
+
+            <!-- Row 2: 40px Notification & Spotlight Size (The Critical Requirement) -->
+            <div class="flex items-center justify-between pb-3 border-b border-[#E3E7DF] bg-white p-2.5 rounded-xl border border-jade/30">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-[22.5%] overflow-hidden shadow-sm shrink-0 border border-black/5 bg-white">
+                  <svg viewBox="0 0 1024 1024" class="w-full h-full"><use href="#master-spike-svg"/></svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-ink flex items-center gap-1.5">
+                    <span>40px 关键尺寸验证</span>
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold">40×40px</span>
+                  </div>
+                  <div class="text-[11px] text-ink-muted">Spotlight 搜索 / 设置列表 / 顶部通知</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 text-jade text-xs font-bold">
+                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                超高识别
+              </div>
+            </div>
+
+            <!-- Row 3: Android Adaptive Icon (Circle) -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-full overflow-hidden shadow-md shrink-0 border border-black/5 bg-white p-0.5">
+                  <svg viewBox="0 0 1024 1024" class="w-full h-full rounded-full"><use href="#master-spike-svg"/></svg>
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-ink">Android 自适应图标</div>
+                  <div class="text-[11px] text-ink-subtle font-mono">Round Adaptive 48dp</div>
+                </div>
+              </div>
+              <span class="text-xs text-ink-muted">中心安全区完美居中</span>
+            </div>
+
+          </div>
+
+          <!-- Simulated iPhone Home Screen Dock Preview -->
+          <div class="pt-2">
+            <span class="block text-xs font-bold text-ink-muted mb-3">真实 iPhone Dock 栏沉浸式环境模拟</span>
+            <div class="w-full h-24 rounded-2xl bg-gradient-to-b from-[#7B8B9E]/40 to-[#47586A]/60 backdrop-blur-md p-3 flex items-center justify-around border border-white/20 shadow-lg">
+              
+              <!-- Dummy App 1 -->
+              <div class="flex flex-col items-center gap-1 opacity-60">
+                <div class="w-11 h-11 rounded-[22.5%] bg-slate-800 flex items-center justify-center text-white/50 text-xs font-bold">终端</div>
+              </div>
+
+              <!-- Dummy App 2 -->
+              <div class="flex flex-col items-center gap-1 opacity-60">
+                <div class="w-11 h-11 rounded-[22.5%] bg-emerald-800 flex items-center justify-center text-white/50 text-xs font-bold">OKX</div>
+              </div>
+
+              <!-- TARGET: SPIKE APP HERO -->
+              <div class="flex flex-col items-center gap-1 scale-110 -translate-y-0.5 transition-transform">
+                <div class="w-12 h-12 rounded-[22.5%] overflow-hidden shadow-xl ring-2 ring-white/50 bg-white">
+                  <svg viewBox="0 0 1024 1024" class="w-full h-full"><use href="#master-spike-svg"/></svg>
+                </div>
+                <span class="text-[10px] text-white font-medium tracking-tight drop-shadow">SPIKE</span>
+              </div>
+
+              <!-- Dummy App 3 -->
+              <div class="flex flex-col items-center gap-1 opacity-60">
+                <div class="w-11 h-11 rounded-[22.5%] bg-zinc-700 flex items-center justify-center text-white/50 text-xs font-bold">设置</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Exportable Standalone SVG Source Section -->
+    <section id="svg-source" class="bg-white rounded-3xl p-8 shadow-sm border border-[#E1E5DE] space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#F0F2EE] gap-2">
+        <div>
+          <h2 class="text-lg font-bold text-ink flex items-center gap-2">
+            <span class="material-symbols-outlined text-jade text-[22px]">terminal</span>
+            可直接提取的纯矢量 SVG 源码 (Lossless Standalone Asset)
+          </h2>
+          <p class="text-xs text-ink-muted mt-0.5">
+            符合 iOS App Store 与 Android Vector Drawable 严苛标准：纯几何曲线构成、零外部图片外链、自包含渐变与高动态滤镜。
+          </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-mono bg-porcelain px-2.5 py-1 rounded text-ink-muted">1024 × 1024 视窗</span>
+        </div>
+      </div>
+
+      <div class="relative">
+        <textarea readonly class="w-full h-64 p-4 font-mono text-xs text-slate-800 bg-[#F8FAF7] border border-[#DCE2D9] rounded-2xl focus:outline-none focus:ring-2 focus:ring-jade resize-y leading-relaxed selection:bg-jade/20" onclick="this.select()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Background porcelain subtlest luxury gradient -->
+    <linearGradient id="bgPorcelain" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCFCFA"/>
+      <stop offset="45%" stop-color="#F5F6F3"/>
+      <stop offset="100%" stop-color="#E9ECE7"/>
+    </linearGradient>
+
+    <!-- Ambient porcelain rim light / inner glow -->
+    <linearGradient id="porcelainVignette" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#DDE2DC" stop-opacity="0.4"/>
+    </linearGradient>
+
+    <!-- Primary Emerald Jade Curve Gradient -->
+    <linearGradient id="jadeAscent" x1="15%" y1="90%" x2="85%" y2="10%">
+      <stop offset="0%" stop-color="#044D3F"/>
+      <stop offset="35%" stop-color="#066F5B"/>
+      <stop offset="70%" stop-color="#087F69"/>
+      <stop offset="100%" stop-color="#14A88B"/>
+    </linearGradient>
+
+    <!-- Secondary Counter-Interlocking Jade Rib Gradient -->
+    <linearGradient id="jadeSupport" x1="85%" y1="15%" x2="15%" y2="85%">
+      <stop offset="0%" stop-color="#0B987C"/>
+      <stop offset="40%" stop-color="#087F69"/>
+      <stop offset="85%" stop-color="#055546"/>
+      <stop offset="100%" stop-color="#02332A"/>
+    </linearGradient>
+
+    <!-- Soft specular highlight for sculptural jade depth -->
+    <linearGradient id="jadeGleam" x1="30%" y1="10%" x2="70%" y2="90%">
+      <stop offset="0%" stop-color="#A5F3E2" stop-opacity="0.85"/>
+      <stop offset="40%" stop-color="#34D399" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#044D3F" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Precision drop shadow for tactile lift on porcelain surface -->
+    <filter id="sculpturalShadow" x="-20%" y="-20%" width="150%" height="150%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="24" stdDeviation="28" flood-color="#0A241F" flood-opacity="0.18"/>
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#087F69" flood-opacity="0.12"/>
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#042B23" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- Full-bleed 1024x1024 square background canvas (OS rounds corners smoothly) -->
+  <rect width="1024" height="1024" fill="url(#bgPorcelain)"/>
+
+  <!-- Subtle refined porcelain ceramic rim border -->
+  <rect x="2" y="2" width="1020" height="1020" fill="none" stroke="url(#porcelainVignette)" stroke-width="4"/>
+
+  <!-- Sculptural Jade Monogram Group: Geometric S-Spike Kinetic Curve -->
+  <g filter="url(#sculpturalShadow)">
+    <!-- Base Lower Foundation Curve (Discipline Anchor & Fluid Turn) -->
+    <path d="M 276 690 
+             C 276 776 346 846 432 846 
+             C 528 846 620 782 682 708 
+             C 730 650 754 582 754 512 
+             C 754 448 732 388 692 340 
+             L 576 438 
+             C 598 468 610 500 610 534 
+             C 610 578 584 624 550 660 
+             C 514 698 466 720 420 720 
+             C 388 720 364 698 364 670 
+             C 364 636 390 604 424 576 
+             L 516 502 
+             C 454 506 388 534 338 578 
+             C 298 612 276 652 276 690 Z" 
+          fill="url(#jadeSupport)"/>
+
+    <!-- Dominant Upper Piercing Spike / Ascending Fin Curve -->
+    <path d="M 748 334 
+             C 748 248 678 178 592 178 
+             C 496 178 404 242 342 316 
+             C 294 374 270 442 270 512 
+             C 270 576 292 636 332 684 
+             L 448 586 
+             C 426 556 414 524 414 490 
+             C 414 446 440 400 474 364 
+             C 510 326 558 304 604 304 
+             C 636 304 660 326 660 354 
+             C 660 388 634 420 600 448 
+             L 508 522 
+             C 570 518 636 490 686 446 
+             C 726 412 748 372 748 334 Z" 
+          fill="url(#jadeAscent)"/>
+
+    <!-- Central Interlocking Jade Core Diamond/Keystone Blade (Unified Equilibrium) -->
+    <path d="M 512 372 
+             C 552 420 580 474 580 528 
+             C 580 540 576 554 568 568 
+             L 456 456 
+             C 468 438 488 408 512 372 Z" 
+          fill="#14A88B" 
+          opacity="0.9" />
+
+    <!-- Pure Light Reflection Accent across the Jade Crest -->
+    <path d="M 592 196 
+             C 666 196 726 256 730 330 
+             C 700 376 654 418 604 454 
+             L 582 436 
+             C 624 398 644 366 644 346 
+             C 644 316 620 292 588 292 
+             C 542 292 494 320 456 360 
+             L 434 342 
+             C 478 296 534 262 588 200 
+             C 590 198 591 196 592 196 Z" 
+          fill="url(#jadeGleam)" 
+          opacity="0.85"/>
+  </g>
+</svg></textarea>
+      </div>
+      <p class="text-xs text-ink-subtle">
+        提示：复制上方纯矢量文本保存为 <code class="font-mono text-ink bg-neutral-100 px-1 py-0.5 rounded">spike_app_icon.svg</code>，即可在 Xcode Asset Catalog 或 Android Studio Asset Studio 中直接无损导入生成全套 AppIcon 规格包。
+      </p>
+    </section>
+
+    <!-- Footer Copyright & Discipline Guard Note -->
+    <footer class="pt-4 pb-12 text-center text-xs text-ink-subtle flex flex-col items-center gap-1">
+      <div class="flex items-center gap-1.5 font-medium text-ink-muted">
+        <span class="w-1.5 h-1.5 rounded-full bg-jade"></span>
+        SPIKE Discipline Engine · 独立纪律交易设计资产库
+      </div>
+      <div>符合 iOS Human Interface Guidelines 与 Android Material 3 图标规格标准</div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
