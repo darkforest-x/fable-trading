@@ -95,3 +95,16 @@ def test_pair_denominator_retains_wvf_rejections_and_excludes_required_unknowns(
 def test_audit_accepts_both_utc_wire_spellings_on_pinned_python():
     from yoyo.evaluation.spike_stoch_entry_verify import sec
     assert sec('2023-01-01T00:00:00Z')==sec('2023-01-01T00:00:00+00:00')==1672531200
+
+
+def test_scalar_oscillator_audit_handles_flat_price_windows():
+    from yoyo.evaluation.spike_fanshen_exit import compute_signals
+    from yoyo.evaluation.spike_stoch_entry_extremes import scalar_cross,scalar_green
+    rng=np.random.default_rng(31);c=100+np.cumsum(rng.normal(size=100))
+    h=c+rng.uniform(.1,2,100);l=c-rng.uniform(.1,2,100)
+    c[65:80]=h[65:80]=l[65:80]=c[64]
+    s=compute_signals(pd.DataFrame(dict(high=h,low=l,close=c)))
+    for i in range(50,100):
+        k,d,cross=scalar_cross(h,l,c,i);w,green=scalar_green(c,l,i)
+        np.testing.assert_allclose([k,d,w],[s.k.iloc[i],s.d.iloc[i],s.wvf.iloc[i]],atol=1e-8)
+        assert cross==s.arrow_long.iloc[i] and green==s.wvf_green.iloc[i]
