@@ -23,7 +23,7 @@ def read(path):
 
 def yes(x):return str(x).lower()=='true'
 def num(x):return float(x) if x not in ('',None) else math.nan
-def sec(x):return int(datetime.fromisoformat(x).timestamp())
+def sec(x):return int(datetime.fromisoformat(x.replace('Z','+00:00')).timestamp())
 
 
 def equal(a,b):

@@ -90,3 +90,8 @@ def test_pair_denominator_retains_wvf_rejections_and_excludes_required_unknowns(
     assert set(p.index)=={'closed','skipped'}
     assert p.loc['closed','signal_stoch_wvf']==0
     assert p.loc['skipped','signal_stoch']==0
+
+
+def test_audit_accepts_both_utc_wire_spellings_on_pinned_python():
+    from yoyo.evaluation.spike_stoch_entry_verify import sec
+    assert sec('2023-01-01T00:00:00Z')==sec('2023-01-01T00:00:00+00:00')==1672531200
