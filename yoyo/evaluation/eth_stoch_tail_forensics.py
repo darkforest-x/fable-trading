@@ -120,6 +120,27 @@ def accounting(out):
     """Posthoc path patterns and exact all-trade loss accounting, not filters."""
     out=Path(out);facts=pd.read_csv(out/'all_signals.csv')
     old=pd.read_csv(out/'all_policy_trades.csv.gz');ct=pd.read_csv(PARENT/'results_v1/controls.csv.gz')
+    origin=pd.Timestamp('2023-12-31T16:00:00Z')
+    for level in LEVELS:
+        index=facts[f'first_{level}r_i'].astype(int)
+        facts[f'first_{level}r_local']=[str((origin+pd.Timedelta(minutes=int(i))).tz_convert('Asia/Shanghai')) if i>=0 else '' for i in index]
+    facts['initial_stop_local']=[str((origin+pd.Timedelta(minutes=int(i))).tz_convert('Asia/Shanghai')) if i>=0 else '' for i in facts.initial_stop_i]
+    brackets=pd.read_csv(out/'signal_brackets.csv.gz')
+    for name in ('target_10r_no_opposite','target_20r_no_opposite'):
+        z=brackets[brackets.policy.eq(name)].set_index('pair_id')
+        for column in ('net_r','exit_i','exit_price','reason','closed'):
+            facts[name+'__'+column]=facts.pair_id.map(z[column])
+    for name in ('opposite_arrow','be_price_1r','be_price_2r'):
+        z=ct[ct.policy.eq(name)].set_index('pair_id')
+        facts[name+'__matched_random_net_r']=facts.pair_id.map(z.net_r)
+        for level in (10,20):
+            facts[name+f'__tail{level}_status']=np.select([
+                ~facts[f'hit_{level}r'],facts[name+'__gross_r'].ge(level-1e-8),
+                facts[name+'__exit_i'].lt(facts[f'first_{level}r_i']),
+                facts[name+'__exit_i'].eq(facts[f'first_{level}r_i'])],
+                ['not_reached_before_initial_stop','realized','exited_before_target_minute','same_minute_order_requires_detail'],
+                default='reached_then_gave_back')
+    facts.to_csv(out/'all_signals.csv',index=False)
     distributions=[];retention=[]
     for name in ('opposite_arrow','be_price_1r','be_price_2r'):
         rows=old[old.policy.eq(name)];random=ct[ct.policy.eq(name)]
@@ -153,6 +174,7 @@ def accounting(out):
                 if r.entry_i>right:clusters+=1
                 right=max(right,getattr(r,f'first_{level}r_i'))
         patterns[str(level)]=dict(n=len(z),overlap_components=clusters,
+            counts_within_minutes={str(limit):int(z[f'minutes_to_{level}r'].le(limit).sum()) for limit in (30,60,120,360,720,1440,2880,10080)},
             minutes_quantiles=z[f'minutes_to_{level}r'].quantile([.1,.5,.9]).to_dict(),
             risk_quantiles=z.risk.quantile([.1,.5,.9]).to_dict(),fee_r_quantiles=z.cost_r.quantile([.1,.5,.9]).to_dict(),
             mae_lower_quantiles=z[f'mae_before_{level}r_lower'].quantile([.1,.5,.9]).to_dict(),
@@ -163,7 +185,57 @@ def accounting(out):
     return findings
 
 
+def verify_forensics(out):
+    """Independent scalar excursion checks of extremes, drawings and seeded rows."""
+    out=Path(out);cfg=json.loads((PARENT/'config.json').read_text())
+    minute,_=load_minutes(cfg);a=minute[['open','high','low','close']].to_numpy()
+    facts=pd.read_csv(out/'all_signals.csv');draw=pd.read_csv(out/'drawings.csv')
+    candidates=pd.read_csv(PARENT/'results_v1/signal_candidates.csv')
+    indices=set(facts.nlargest(4,'static_mfe_r_lower').index)|set(facts.nlargest(4,'observed_minutes').index)|set(facts.nlargest(4,'minutes_to_20r').index)
+    indices.update(np.random.default_rng(621020).choice(facts.index,size=64,replace=False).tolist())
+    cases=[r for r in facts.loc[sorted(indices)].to_dict('records')]
+    for d in draw.to_dict('records'):
+        r=candidates[pd.to_datetime(candidates.signal_time).eq(pd.Timestamp(d['signal_local']))].iloc[0].to_dict()
+        r.update(d);cases.append(r)
+    for r in cases:
+        start=int(r['entry_i']);side=int(r['side']);entry=r['entry'];stop=r.get('stop',r.get('causal_stop'));risk=r['risk']
+        end=int(minute.index.searchsorted(pd.Timestamp(cfg[{'development':'split','validation':'examples_start','examples':'end'}[r['segment']]])))
+        lower=upper=0.;first={v:-1 for v in LEVELS};terminal=-1
+        for j in range(start,end):
+            op,high,low,close=a[j];op_r=side*(op-entry)/risk
+            best=side*((high if side==1 else low)-entry)/risk
+            worst=side*((low if side==1 else high)-entry)/risk
+            lower=max(lower,op_r)
+            if side*(op-stop)<=0:
+                upper=lower;terminal=j;break
+            for v in LEVELS:
+                if first[v]<0 and op_r>=v-1e-8:first[v]=j
+            if worst<=-1+1e-8:
+                upper=max(lower,best);terminal=j;break
+            lower=max(lower,best);upper=lower
+            for v in LEVELS:
+                if first[v]<0 and best>=v-1e-8:first[v]=j
+        assert terminal==int(r['initial_stop_i']),r.get('pair_id',r.get('ordinal'))
+        assert abs(lower-r['static_mfe_r_lower'])<1e-7 and abs(upper-r['static_mfe_r_upper'])<1e-7
+        for v in LEVELS:assert first[v]==int(r[f'first_{v}r_i'])
+    bracket=pd.read_csv(out/'signal_brackets.csv.gz');old=pd.read_csv(PARENT/'results_v1/paths.csv.gz')
+    paired=bracket[bracket.policy.eq('target_8r_opposite')].merge(old[old.policy.eq('target_8r')],on='pair_id',suffixes=('_new','_old'))
+    assert paired.exit_i_new.eq(paired.exit_i_old).all()
+    assert (paired.exit_price_new-paired.exit_price_old).abs().max()<1e-8
+    for level in (10,20):
+        z=bracket[bracket.policy.eq(f'target_{level}r_no_opposite')].set_index('pair_id')
+        expected=facts.set_index('pair_id')[f'hit_{level}r']
+        assert (expected==z.reason.isin(['target','target_gap']).reindex(expected.index)).all()
+    result=dict(status='passed',scalar_excursion_cases=len(cases),bracket_oracle_cases=33654,
+        original8r_opposite_parity=len(paired),first_passage_target_identities=2*len(facts),
+        max8r_price_difference=float((paired.exit_price_new-paired.exit_price_old).abs().max()),
+        caveat='Long-lived static MFE can span months; it is an outcome bound, never summed as realizable profit.')
+    (out/'verification.json').write_text(json.dumps(result,indent=2)+'\n')
+    return result
+
+
 def main():
+    start_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
     cfg=json.loads((PARENT/'config.json').read_text());v2=json.loads((EXP/'config.json').read_text())
     out=EXP/'results';out.mkdir(exist_ok=False)
     minute,receipt=load_minutes(cfg);ctx=prepare(minute);quiet=dict(ctx,arrow=np.zeros_like(ctx['arrow']))
@@ -260,7 +332,7 @@ def main():
             row[name+'_single_taken']=bool(pd.to_datetime(chosen.entry_time).eq(pd.Timestamp(r.entry_time)).any())
         drawings.append(row)
     pd.DataFrame(drawings).to_csv(out/'drawings.csv',index=False)
-    output=dict(experiment_id=v2['experiment_id'],git_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+    output=dict(experiment_id=v2['experiment_id'],git_commit=start_commit,
         old_paths=len(original),signal_opportunities=len(entries),random_opportunities=len(controls),bracket_oracle_checks=oracle_checks,
         source_receipt=receipt,original_tail_summary=old_summary,
         passage_totals={pop:{str(k):int(z[f'hit_{k}r'].sum()) for k in LEVELS} for pop,z in passage.items()},
@@ -268,6 +340,7 @@ def main():
         unchanged_cost=.002,posthoc=True,training_eligible=False,production_eligible=False)
     (out/'receipt.json').write_text(json.dumps(output,indent=2)+'\n')
     accounting(out)
+    verify_forensics(out)
     print(json.dumps({k:v for k,v in output.items() if k in ('old_paths','signal_opportunities','bracket_oracle_checks','passage_totals')}))
 
 
