@@ -42,3 +42,13 @@ to observe whether an earlier entry later completes confirmation.
   baseline and must be separated from old fixed-entry 1H statistics.
 - Keep code, config, raw ledgers, receipts, results, registries and learning;
   update Notion if connected, no automatic report. No AUC/ranking metrics apply.
+
+Pre-full-results aggregation addendum: pool timeframes by their actual trade and
+matched opportunity counts, keeping those denominators separate. Report gross,
+fees, net, PF, realized closed-trade R drawdown and descriptive top1% removal.
+Compare each stage's excess over random with rebreak's excess, not just absolute
+profit. Use original-anchor UTC-week block bootstrap and a two-sided 10,000-draw
+week sign-flip diagnostic; apply Holm across twelve later timeframe/stage
+incremental-excess tests. This is exploratory uncertainty, not forward proof.
+Reconcile fresh 1H rebreak occupancy against the prior fixed-entry 2ATR cohort,
+with shared/added/displaced entries and exact R contribution identity.
