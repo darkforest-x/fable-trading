@@ -14,6 +14,17 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-v131-excursions-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    status: active
+    question: How many original V13.1 trades experience floating losses and profits, and how are excursions distributed?
+    single_variable: Descriptive path measurement only; frozen entries, actual exits and 20bp costs unchanged.
+    artifacts: [spike-v131-excursions-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Original pre-exclusion 15m/30m/1H/4H closed ledgers. Recover actual 1H trail2 exit before path slicing. MAE stops at fills; intrabar stop-bar MFE is bounded. No content hashes or new data downloads.
   - experiment_id: exp-spike-v131-30m4h-bottom20-20261017-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 31ad5771667014c78e7714c28654ff3c65a3eb5a

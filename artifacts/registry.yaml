@@ -18,6 +18,16 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-v131-excursions-20261019-v1
+    artifact_type: manifest
+    role: Descriptive original V13.1 trade excursions with actual exit reconciliation
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/result.json
+    storage_uri: repo://experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/result.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Pending path calculation; original sources remain unchanged, no content hashes.
   - artifact_id: spike-v131-30m4h-bottom20-20261017-v1
     artifact_type: manifest
     role: frozen-retest-30m4h-bottom20-study
