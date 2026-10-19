@@ -24,8 +24,23 @@ def audit(root):
     cut=timepart(cfg['split']);start=timepart(cfg['analysis_start'])
     for minutes in cfg['timeframes']:
         streams=defaultdict(list)
+        current_symbol=None
+        def flush():
+            nonlocal occupancy,checks
+            for (cohort,policy,mode),rows in streams.items():
+                flat=-1
+                for r in sorted(rows,key=lambda x:(int(x['decision_i']),int(x['anchor_i']),x['trade_key'])):
+                    expected=r['filled']=='True' and int(r['decision_i'])>=flat
+                    assert (r[mode]=='True')==expected,(r['trade_key'],policy,mode)
+                    checks+=1
+                    if expected:
+                        if flat>=0:occupancy+=1
+                        flat=math.inf if r['status']=='censored_boundary' else int(float(r['exit_i']))
+            streams.clear()
         with gzip.open(root/f'events_{minutes}m.csv.gz','rt') as f:
             for r in csv.DictReader(f):
+                if current_symbol is not None and current_symbol!=r['symbol']:flush()
+                current_symbol=r['symbol']
                 filled=r['filled']=='True';taken=r['serial_all']=='True'
                 if filled:
                     close(float(r['entry_i']),float(r['decision_i'])+1)
@@ -36,19 +51,13 @@ def audit(root):
                         fee=.002*float(r['entry_price'])/risk
                         close(gross,r['gross_r']);close(fee,r['cost_r']);close(gross-fee,r['net_r'])
                 for mode in ['serial_all','serial_pair']:
-                    if r[mode]=='True':streams[r['symbol'],r['cohort'],r['policy'],mode].append(r)
+                    eligible=(r['cohort']=='signal') if mode=='serial_all' else r['pair_eligible']=='True'
+                    if eligible:streams[r['cohort'],r['policy'],mode].append(r)
                 if not (taken and r['cohort']=='signal' and r['status']=='closed' and timepart(r['entry_time'])>=start):continue
                 period='later' if timepart(r['entry_time'])>=cut else ('early' if timepart(r['mature_time'])<cut else 'crossing')
                 for side in [0,int(r['side'])]:
                     for scope in ['all',period]:serial[minutes,side,scope,r['policy']].append(float(r['net_r']))
-        for rows in streams.values():
-            previous=None
-            for r in sorted(rows,key=lambda x:(int(x['decision_i']),int(x['anchor_i']),x['trade_key'])):
-                if previous is not None:
-                    assert previous['status']!='censored_boundary'
-                    assert int(r['decision_i'])>=int(float(previous['exit_i']))
-                    occupancy+=1
-                previous=r
+        flush()
         for mode in ['independent','serial']:
             groups=defaultdict(lambda:defaultdict(list))
             with gzip.open(root/f'pairs_{minutes}m_{mode}.csv.gz','rt') as f:
