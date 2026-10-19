@@ -43,8 +43,9 @@ def audit(root,name='analysis_v1'):
     def applicable(r,p,m):
         mask=int(r['members'])
         if p in arms:return bool(mask&(1<<arms.index(p)))
+        if not mask&1:return False
         feature,band=p.rsplit('_',1);v=number(r[feature]);q=thresholds[str(m)][feature]
-        if not mask&1 or not math.isfinite(v):return False
+        if not math.isfinite(v):return False
         if band=='known':return True
         if q['lower'] is None:return False
         return v<=q['lower'] if band=='low' else v>q['upper'] if band=='high' else q['lower']<v<=q['upper']
