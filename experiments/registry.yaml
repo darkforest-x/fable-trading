@@ -14,6 +14,18 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-spike-stoch-wvf-entry-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f1dea4146a154aaaab03c62fafd563f0777b3f8f
+    status: active
+    question: Do original oversold Stoch and same-bar WVF improve standalone admission or Spike pullback entry net returns and adverse excursions?
+    single_variable: Fixed entry trigger only; six prespecified long-only policies, original risk and exits and20bp, independent occupancy and random controls.
+    artifacts: [spike-stoch-wvf-entry-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    result: Planned; no new return results yet.
   - experiment_id: exp-spike-v131-rule-state-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c51dd65279

@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: spike-stoch-wvf-entry-20261019-v1
+    artifact_type: manifest
+    role: Frozen Stoch and WVF standalone admission and Spike pullback timing experiment
+    source_repo: darkforest-x/fable-trading
+    source_commit: f1dea4146a154aaaab03c62fafd563f0777b3f8f
+    source_path: experiments/active/exp-spike-stoch-wvf-entry-20261019-v1/config.json
+    storage_uri: repo://experiments/active/exp-spike-stoch-wvf-entry-20261019-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Registered before results; original params and20bp, no production changes or content hashes.
   - artifact_id: spike-v131-rule-state-20261019-v1
     artifact_type: manifest
     role: Completed V13.1 entry-rule ablations and causal state diagnostics with original and same-state random controls
