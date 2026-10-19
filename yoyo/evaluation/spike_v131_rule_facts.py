@@ -152,7 +152,10 @@ def rules(frame,gap,asset,minutes,h1=None):
             if arm=='simple_breakout': mask &= available
             else:
                 mask &= available if arm=='no_bb' else bb
-                if arm!='no_rope_cap': mask &= s*(d['close']-d['ropeHigh' if s==1 else 'ropeLow'])/d['atr']<=3
+                if arm!='no_rope_cap':
+                    with np.errstate(divide='ignore',invalid='ignore',over='ignore'):
+                        distance=s*(d['close']-d['ropeHigh' if s==1 else 'ropeLow'])/d['atr']
+                    mask &= np.isfinite(distance) & (distance<=3)
                 if minutes==15 and arm!='no_h1': mask &= side_gate(d['close'],np.full(len(frame),s),h1)
             if arm!='no_volume_cap': mask &= rv<=50
             output[arm,s]=mask

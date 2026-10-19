@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 import subprocess
+import shutil
 import time
 
 import numpy as np
@@ -59,6 +60,9 @@ def worker(args):
         masks,raw,duration=rules(frame,facts['gap'],meta['asset'],minutes,facts['h1'].sma_60.to_numpy() if minutes==15 else None)
         np.testing.assert_array_equal(raw,facts['side'])
         np.testing.assert_array_equal(masks['baseline',1]|masks['baseline',-1],facts['v9'])
+        # A complete candle ending at END is observed data, but not a new
+        # decision opportunity in the half-open [start,END) research window.
+        for key in masks:masks[key] &= np.asarray(clock<pd.Timestamp(cfg['end']))
         feat=state_features(frame,facts['gap'],BTC[minutes],duration,minutes)
         identity=dict(symbol=symbol,timeframe_min=minutes,asset=meta['asset'],venue='binance_um')
         p=parent.source.prepared_arm(frame,facts['gap'],raw,f'binance_um:{symbol}:{minutes}m',identity,minutes,float(meta['tick']))
@@ -130,7 +134,30 @@ def worker(args):
     dump(folder/'receipt.json',receipt);return receipt
 
 
-def run(root,workers,symbols):
+def reuse_complete(prior,root,source,cfg):
+    """Reuse only complete, input-identical streams unaffected by the end fix.
+
+    Compatibility is deliberately restricted to builder448ec8998e, whose only
+    numerical difference is masked undefined distance arithmetic; the only
+    candidate change is excluding anchors at END. Any such stream is rebuilt.
+    No hashing, no rewriting old outputs and no trust in partial receipts.
+    """
+    folder=Path(prior)/'streams'/source['symbol'];receipt=folder/'receipt.json'
+    if not receipt.exists():return None
+    old=json.loads(receipt.read_text())
+    if old['input']!=provenance(source['path']):return None
+    if sorted(s['timeframe_min'] for s in old['streams'])!=sorted(cfg['timeframes']):return None
+    for stream in old['streams']:
+        f=read(folder/f"{stream['timeframe_min']}m.csv.gz",['cohort','anchor_time'])
+        if len(f)!=stream['rows']:return None
+        if len(f) and (pd.to_datetime(f.loc[f.cohort.eq('signal'),'anchor_time'],utc=True)>=pd.Timestamp(cfg['end'])).any():return None
+    destination=Path(root)/'streams'/source['symbol'];shutil.copytree(folder,destination)
+    old['reused_from']=str(folder);old['reuse_reason']='Complete old stream has no END anchor and identical source path/size/mtime; no output semantics change.'
+    dump(destination/'receipt.json',old)
+    return old
+
+
+def run(root,workers,symbols,reuse=None):
     cfg=json.loads(CONFIG.read_text());assert cfg['arms']==list(ARMS) and cfg['features']==list(FEATURES)
     paths=sorted(set([Path(__file__),CONFIG,EXP/'PROJECT_PLAN.md',*_local_transitive_python((Path(__file__),))]),key=str)
     for p in paths:subprocess.run(['git','ls-files','--error-unmatch',str(p)],check=True,stdout=subprocess.DEVNULL)
@@ -145,6 +172,17 @@ def run(root,workers,symbols):
         symbols=[r['symbol'] for r in sources],builder_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         code=[provenance(p) for p in paths],manifest=provenance(cfg['input_manifest']),metadata=provenance(parent.source.EXCHANGE_INFO),btc=provenance(btc['path'])))
     receipts=[];errors=[]
+    if reuse:
+        oldid=json.loads((Path(reuse)/'identity.json').read_text())
+        assert oldid['builder_commit'].startswith('448ec8998e') and oldid['config']==cfg
+        pending=[]
+        for source in sources:
+            cached=reuse_complete(reuse,root,source,cfg)
+            if cached is None:pending.append(source)
+            else:receipts.append(cached)
+        sources=pending
+        dump(root/'reuse.json',dict(source=str(reuse),original_builder=oldid['builder_commit'],reused=[r['symbol'] for r in receipts],fresh=[r['symbol'] for r in sources]))
+        print(json.dumps(dict(reused=len(receipts),fresh=len(sources))),flush=True)
     with ProcessPoolExecutor(max_workers=workers,initializer=init_worker,initargs=(btc,cfg)) as pool:
         fs={pool.submit(worker,(r,meta[r['symbol']],cfg,str(root))):r['symbol'] for r in sources}
         for n,f in enumerate(as_completed(fs),1):
@@ -157,5 +195,5 @@ def run(root,workers,symbols):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--output',type=Path,default=EXP/'paths_v1')
-    parser.add_argument('--workers',type=int,default=4);parser.add_argument('--symbols',nargs='+')
-    a=parser.parse_args();run(a.output,a.workers,a.symbols)
+    parser.add_argument('--workers',type=int,default=4);parser.add_argument('--symbols',nargs='+');parser.add_argument('--reuse',type=Path)
+    a=parser.parse_args();run(a.output,a.workers,a.symbols,a.reuse)

@@ -55,3 +55,21 @@ def test_weekly_statistics_respect_replication_unit():
     b={'a':{'n':2,'x':1},'b':{'n':2,'x':-2},'c':{'n':2,'x':3}}
     doubled={k:{field:value*2 for field,value in r.items()} for k,r in b.items()}
     assert infer(b,'x',cfg)==infer(doubled,'x',cfg)
+
+
+def test_reuse_rejects_end_anchor_and_partial_streams(tmp_path):
+    import json
+    from yoyo.evaluation.spike_v131_rule_study import reuse_complete
+    from yoyo.evaluation.spike_v131_excursions import provenance
+    source=tmp_path/'source.csv';source.write_text('test input')
+    prior=tmp_path/'prior';folder=prior/'streams'/'X';folder.mkdir(parents=True)
+    cfg=dict(timeframes=[15],end='2026-09-23T04:00:00Z')
+    receipt=dict(input=provenance(source),streams=[dict(timeframe_min=15,rows=1)])
+    (folder/'receipt.json').write_text(json.dumps(receipt))
+    f=pd.DataFrame(dict(cohort=['signal'],anchor_time=[cfg['end']]))
+    f.to_csv(folder/'15m.csv.gz',index=False)
+    assert reuse_complete(prior,tmp_path/'next',dict(symbol='X',path=str(source)),cfg) is None
+    f['anchor_time']='2026-09-23T03:45:00Z';f.to_csv(folder/'15m.csv.gz',index=False)
+    assert reuse_complete(prior,tmp_path/'next',dict(symbol='X',path=str(source)),cfg) is not None
+    cfg['timeframes']=[15,60]
+    assert reuse_complete(prior,tmp_path/'partial',dict(symbol='X',path=str(source)),cfg) is None
