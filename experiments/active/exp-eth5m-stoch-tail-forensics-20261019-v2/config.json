@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-eth5m-stoch-tail-forensics-20261019-v2",
+  "parent_experiment": "exp-eth5m-stoch-confirm-exits-20261019-v1",
+  "purpose": "Owner challenges omitted10R/20R winners; audit every signal and drawing, then isolate opposite-arrow early exit.",
+  "unchanged": ["Stoch5/3/3", "immediate next5m close confirmation", "four-bar structural stop plus1point", "skip risk over8points", "20bp cost", "chronological segments", "exact input cutoff", "original matched random draw"],
+  "first_passage_r": [1, 2, 5, 8, 10, 20],
+  "target_r": [8, 10, 20],
+  "comparison": "Within each fixed target, toggle opposite-arrow exit only; no automatic policy selection or deployment.",
+  "numerical_execution": "V2 rounds fixed targets to0.01 tick. V1 archived results remain unchanged; paired V2 arms use the same rounding.",
+  "estimands": ["independent signal opportunities", "separately replayed single-position diagnostic", "pre-original-stop MFE lower/upper bounds, not attainable realized returns"],
+  "posthoc": true,
+  "hypotheses_before_v2_replay": ["V1 already includes realized10R/20R winners", "opposite-arrow common exit truncates some later tails", "single-position assumption drops overlapping drawn trades", "drawn risk and rule-based risk change R denominators", "small winners and losses may still dominate total netR"],
+  "training_eligible": false,
+  "production_eligible": false
+}

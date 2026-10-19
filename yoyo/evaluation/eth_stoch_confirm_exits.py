@@ -33,6 +33,7 @@ class Policy:
     trail: float = 0.
     minutes: int = 0
     kd: bool = False
+    target_tick: float = 0.
 
 
 def policy(name):
@@ -148,6 +149,8 @@ def trace(ctx,entry_i,side,entry,initial_stop,p,cost=.002,end_i=None):
     risk=side*(entry-initial_stop)
     if not (risk>0 and side in (-1,1)): raise ValueError('invalid entry risk')
     stop=initial_stop; target=entry+side*p.target*risk; peak=entry
+    if p.target and p.target_tick:
+        target=round(target/p.target_tick)*p.target_tick
     fee=cost*entry; destination=entry+side*(fee if p.net_be else 0)
     destination=(np.ceil(destination*100-1e-8) if side==1 else np.floor(destination*100+1e-8))/100
     end_i=len(o) if end_i is None else min(int(end_i),len(o))

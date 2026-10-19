@@ -14,6 +14,18 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth5m-stoch-tail-forensics-20261019-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: ae8993216a
+    status: active
+    question: Where did the drawn10R/20R winners go,and what do every-signal paths show about original-stop survival,early exits,risk denominators and overlapping positions?
+    single_variable: For each8/10/20R target toggle opposite-arrow exit only;entry,stop,risk gate,20bp cost,splits and original matched draws frozen. Other analysis is descriptive path accounting.
+    artifacts: [eth5m-stoch-tail-forensics-20261019-v2]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    result: Registered before V2 replay. V1 already has33 serial gross10R winners including4 gross20R; earlier summary omitted them. Shared opposite exit and single-position restriction were research assumptions,not owner rules.
   - experiment_id: exp-eth5m-stoch-confirm-exits-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bb57287536b3cfb54a3211fa1d1f209603ef4396
