@@ -209,10 +209,93 @@ def baseline_parity(signal, random):
     return count
 
 
+def diagnostics(out):
+    """Reconcile every saved row and explain selected arms without re-selection."""
+    out = Path(out)
+    s = pd.read_csv(out/'signal_trades.csv.gz')
+    c = pd.read_csv(out/'random_trades.csv.gz')
+    summary = pd.read_csv(out/'summary.csv')
+    selection = json.loads((out/'selection.json').read_text())
+    for rows in (s, c):
+        assert not rows.duplicated(['policy', 'pair_id']).any()
+        assert rows.groupby('policy').size().nunique() == 1
+        assert rows.risk.between(0, 8+1e-8, inclusive='right').all()
+        assert np.allclose(rows.gross_points, rows.side*(rows.exit_price-rows.entry), atol=1e-8, rtol=0)
+        assert np.allclose(rows.net_points, rows.gross_points-rows.entry*.002, atol=1e-8, rtol=0)
+        assert np.allclose(rows.net_r, rows.net_points/rows.risk, atol=1e-8, rtol=0)
+        assert (rows.exit_i >= rows.entry_i).all()
+        assert (rows.loc[rows.protected_stop, 'be_activation_i'] < rows.loc[rows.protected_stop, 'exit_i']).all()
+        assert rows.reason.isin(['target', 'target_gap', 'stop', 'stop_gap', 'boundary']).all()
+        assert (rows.closed == rows.reason.ne('boundary')).all()
+    for r in summary.itertuples(index=False):
+        a = s[s.policy.eq(r.policy)]
+        if r.segment != 'all':
+            a = a[a.segment.eq(r.segment)]
+        q = a[a.closed]
+        assert len(a) == r.orders and len(q) == r.closed
+        assert abs(q.net_points.sum()-r.net_points) < 1e-7
+        assert r.target_hits+r.protected_stops+r.original_stops+r.censored == r.orders
+        assert r.target_hits+r.sacrificed_targets == r.baseline_target_hits
+
+    selected = sorted({selection[metric][part]['policy'] for metric in ('net_points', 'net_r')
+                       for part in ('development', 'all')})
+    years = []
+    baseline_tests = []
+    for name in selected:
+        a = s[s.policy.eq(name)]
+        for year, q in a.groupby(pd.to_datetime(a.entry_time).dt.year):
+            years.append(dict(policy=name, year=int(year), **aggregate(q)))
+        target = int(a.target_r.iloc[0])
+        b = s[s.policy.eq(f'tp{target}_none')]
+        z = a.merge(b, on='pair_id', suffixes=('', '_base'), validate='one_to_one')
+        z = z[z.closed & z.closed_base].copy()
+        z['delta'] = z.net_points-z.net_points_base
+        for seg in ('all', 'development', 'validation', 'examples'):
+            q = z if seg == 'all' else z[z.segment.eq(seg)]
+            baseline_tests.append(dict(policy=name, segment=seg, pairs=len(q),
+                delta_net_points=float(q.delta.sum()), **weekly_test(q.groupby('week').delta.sum()),
+                caveat='Post-selection descriptive uncertainty; not an independent policy discovery test.'))
+    pd.DataFrame(years).to_csv(out/'selected_years.csv', index=False)
+    pd.DataFrame(baseline_tests).to_csv(out/'selected_baseline_deltas.csv', index=False)
+
+    entries = pd.read_csv(V1/'results_v1/entries.csv')
+    drawings = pd.read_csv(V2/'results/drawings.csv')
+    entries['signal_utc'] = pd.to_datetime(entries.signal_time, utc=True)
+    drawings['signal_utc'] = pd.to_datetime(drawings.signal_local, utc=True)
+    drawmap = drawings[['ordinal', 'signal_utc', 'eligible']].merge(
+        entries[['pair_id', 'signal_utc']], on='signal_utc', how='left', validate='one_to_one')
+    draw_rows = drawmap[drawmap.eligible].merge(s, on='pair_id', validate='one_to_many')
+    draw_rows.drop(columns='signal_utc').to_csv(out/'drawing_outcomes.csv', index=False)
+    # Convenient full ledgers for the all-history and development selections.
+    s[s.policy.isin(selected)].to_csv(out/'selected_signal_trades.csv', index=False)
+    common = s.groupby('pair_id').closed.all()
+    common_ids = common[common].index
+    common_rank = s[s.pair_id.isin(common_ids)].groupby('policy').agg(
+        n=('pair_id', 'size'), net_points=('net_points', 'sum'), net_r=('net_r', 'sum')).reset_index()
+    common_rank.sort_values('net_points', ascending=False).to_csv(out/'common_closed_ranking.csv', index=False)
+    facts = dict(checked_ledger_rows=len(s)+len(c), summary_groups=len(summary),
+        selected_policies=selected, drawing_eligible=int(drawmap.eligible.sum()),
+        drawing_skipped=int((~drawmap.eligible).sum()), drawing_paths=len(draw_rows),
+        all_arms_closed_common_signals=len(common_ids),
+        common_closed_best_points=str(common_rank.sort_values('net_points', ascending=False).iloc[0].policy),
+        common_closed_best_r=str(common_rank.sort_values('net_r', ascending=False).iloc[0].policy),
+        cost_r_quantiles=(entries.entry*.002/entries.risk).quantile([.1, .5, .9]).to_dict(),
+        positive_net_points_arms_by_segment=summary.groupby('segment').net_points.apply(lambda x: int(x.gt(0).sum())).to_dict(),
+        highest_mtm_net_points_by_segment=summary.groupby('segment').mtm_inclusive_net_points.max().to_dict(),
+        ambiguity_counts=s.groupby('policy').ambiguous_old_stop_target.sum().to_dict(),
+        note='No classifier or account simulation: AUC, top-decile score and account drawdown are not defined.')
+    (out/'verification.json').write_text(json.dumps(facts, indent=2, allow_nan=False)+'\n')
+    return facts
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='results')
+    ap.add_argument('--audit-only', action='store_true')
     args = ap.parse_args()
+    if args.audit_only:
+        print(json.dumps(diagnostics(EXP/args.out)))
+        return
     cfg = json.loads((EXP/'config.json').read_text())
     source = json.loads((V1/'config.json').read_text())
     source.update(round_trip_cost=cfg['round_trip_cost'])
@@ -233,6 +316,7 @@ def main():
         production_eligible=False, training_eligible=False,
         total_net_positive_arms=int(summary[summary.segment.eq('all')].net_points.gt(0).sum()))
     (out/'receipt.json').write_text(json.dumps(facts, indent=2)+'\n')
+    diagnostics(out)
     print(json.dumps(dict(output=str(out), oracle_paths=len(s)+len(c), baseline_parity=parity)), flush=True)
 
 
