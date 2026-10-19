@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth5m-stoch-extreme-stop-20261020-v4
+    artifact_type: manifest
+    role: Task62 causal extreme-stop search configuration
+    source_repo: darkforest-x/fable-trading
+    source_commit: bfd5b5cd97
+    source_path: experiments/active/exp-eth5m-stoch-extreme-stop-20261020-v4/config.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-extreme-stop-20261020-v4/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Active research;101entryfilters x3buffers x4caps x26exits;nativekernel checked against scalar frozen engine before paths.
   - artifact_id: eth5m-stoch-target-be-20261019-v3
     artifact_type: manifest
     role: Task62 independent target and break-even grid
