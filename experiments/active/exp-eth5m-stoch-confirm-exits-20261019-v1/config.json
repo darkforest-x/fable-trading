@@ -4,24 +4,67 @@
   "instrument": "OKX:ETHUSDT.P",
   "start": "2024-01-02T00:00:00Z",
   "split": "2025-01-01T00:00:00Z",
-  "examples_start": "2026-10-16T16:00:00Z",
+  "examples_start": "2026-10-13T16:00:00Z",
   "end": "2026-10-19T14:45:00Z",
   "entry": "Stoch5/3/3 strict K,D<20 crossover or K,D>80 crossunder; immediate next 5m bar must close in signal direction; execute at following observed minute open",
   "stop": "extreme of signal, its two preceding bars, and confirmation bar; buffer 1.00 USDT; skip actual entry distance >8.00 USDT or <=0",
-  "owner_confirmed": {"wait_confirmation_close": true, "skip_over_8_points": true, "break_even_rule": "not fixed; research requested"},
+  "owner_confirmed": {
+    "wait_confirmation_close": true,
+    "skip_over_8_points": true,
+    "break_even_rule": "not fixed; research requested"
+  },
   "round_trip_cost": 0.002,
   "cost_basis": "entry notional, frozen project convention; no funding or additional slippage",
   "tick": 0.01,
   "control_seed": 621019,
   "control_match": "same ETH, side, UTC calendar week and causal 5m TR20/close bucket, same confirmation and stop eligibility; one fixed random draw per event with replacement, excluding actual arrows",
-  "volatility_bin_edges": [0.001, 0.002, 0.004, 0.008],
+  "volatility_bin_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008
+  ],
   "selection_metric": "development serial total net points per 1 ETH; ties by lower closed-trade drawdown then policy name",
   "time_boundary": "Each segment is independently reset; positions still open at its right edge are censored, never use post-split prices to select. All is the sum of these segmented closed-trade results, not continuous account equity.",
-  "policies": ["opposite_arrow", "opposite_kd", "target_1r", "target_2r", "target_3r", "target_4r", "target_6r", "target_8r", "be_price_0.5r", "be_price_1r", "be_price_1.5r", "be_price_2r", "be_net_0.5r", "be_net_1r", "be_net_1.5r", "be_net_2r", "trail_1r", "trail_2r", "trail_3r", "time_6bars", "time_12bars", "time_24bars"],
+  "policies": [
+    "opposite_arrow",
+    "opposite_kd",
+    "target_1r",
+    "target_2r",
+    "target_3r",
+    "target_4r",
+    "target_6r",
+    "target_8r",
+    "be_price_0.5r",
+    "be_price_1r",
+    "be_price_1.5r",
+    "be_price_2r",
+    "be_net_0.5r",
+    "be_net_1r",
+    "be_net_1.5r",
+    "be_net_2r",
+    "trail_1r",
+    "trail_2r",
+    "trail_3r",
+    "time_6bars",
+    "time_12bars",
+    "time_24bars"
+  ],
   "single_variable": "Each arm changes exit policy only. Targets, BE, trailing and timeouts retain opposite-arrow safety exit; opposite_kd replaces arrow exit. Do not combine the winners.",
   "execution": "Closed 5m signals exit at next minute open; static stop active immediately. Break-even/trail changes use completed minute close and become active next minute. Same-minute old stop and target touch: stop first. Gaps fill at open. BE net uses max(trigger R, fee points) and tick-rounded fee-covering stop.",
   "training_eligible": false,
   "production_eligible": false,
-  "raw_inputs": ["data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv", "data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv", "data/crypto/market/research-spike_v128_bb_slope_20260924/okx_api_ETH_USDT_SWAP_1m_20260922T1359_20260923T1600.csv"],
-  "limitations": ["Historical data reused, not untouched validation or forward evidence", "Drawings are winner-selected illustrations, not realized trades", "Minute OHLC cannot reveal tick order; conservative rules and ambiguity counts retained", "Fixed 8 USDT risk cap is price-level dependent", "No account sizing or leverage optimization"]
+  "raw_inputs": [
+    "data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+    "data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+    "data/crypto/market/research-spike_v128_bb_slope_20260924/okx_api_ETH_USDT_SWAP_1m_20260922T1359_20260923T1600.csv"
+  ],
+  "limitations": [
+    "Historical data reused, not untouched validation or forward evidence",
+    "Drawings are winner-selected illustrations, not realized trades",
+    "Minute OHLC cannot reveal tick order; conservative rules and ambiguity counts retained",
+    "Fixed 8 USDT risk cap is price-level dependent",
+    "No account sizing or leverage optimization"
+  ],
+  "boundary_refinement": "Before full replay/return inspection,12 UI drawings were uniquely matched to confirmation closes spanningOct14-19; examples partition expanded fromOct17 toOct14. Development selection period unchanged."
 }
