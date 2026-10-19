@@ -32700,3 +32700,19 @@ artifacts:
     production_eligible: false
     notes: Fanshen V1.1 private TradingView revision 2; original arrow conditions mirrored as same-bar green checks
       and red crosses. Native compile, visual alignment and layout save verified. Original source and script retained.
+
+  - artifact_id: eth5m-stoch-target-be-20261020-entry-hours
+    artifact_type: manifest
+    role: Task62 descriptive entry-hour profile of frozen V3 ledgers
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5cc0fcce16934215cef03a9501bceb677266b062
+    generator_commit: 5cc0fcce16934215cef03a9501bceb677266b062
+    source_path: experiments/active/exp-eth5m-stoch-target-be-20261019-v3/entry_hours_20261020/receipt.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-target-be-20261019-v3/entry_hours_20261020/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen20R+5RpriceBE ranks09-10Shanghai first at10/115;08-12first4h bin36/528.
+      Primary09h drops from6/33in2025to1/49in2026;not a stable time filter. All26arms and signal-clock sensitivity retained.
+      Original same-week controls may differ in clock hour; same-clock subset counts separate.624independent hourly groups,
+      104original summaries and1092hour-to4h reconciliation groups passed.No new paths,download,cost change or report.

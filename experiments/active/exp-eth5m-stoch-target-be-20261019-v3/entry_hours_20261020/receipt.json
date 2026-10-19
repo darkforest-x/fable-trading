@@ -1,0 +1,27 @@
+{
+  "source_experiment": "exp-eth5m-stoch-target-be-20261019-v3",
+  "primary_policy": "tp20_price_5r",
+  "builder_commit": "5cc0fcce16934215cef03a9501bceb677266b062",
+  "timezone": "Asia/Shanghai",
+  "grouping": "Actual entry time; fixed half-open 1h and 4h bins",
+  "observed_entry_start": "2024-01-03 00:55:00+08:00",
+  "observed_entry_end": "2026-10-19 17:50:00+08:00",
+  "source_signals": 2805,
+  "policies": 26,
+  "definition": "Net win: closed and net_points > 1e-8; all closed BE/stop trades stay in denominator; target_hit is separate",
+  "controls": "Original same-symbol/side/UTC-week/volatility-bucket matches, grouped by SIGNAL entry clock. Control clock may differ; same-clock subset counts supplied. This is not a clock-conditioned causal null.",
+  "checks": {
+    "independent_policy_hour_groups": 624,
+    "original_summary_groups": 104
+  },
+  "development_selected_hour": 23,
+  "limitations": [
+    "All-history rankings are hindsight across 24 hours; yearly stability is descriptive, not untouched or forward validation.",
+    "Fee-covering BE tick rounding can create tiny positive outcomes counted as net wins; target rates and protected wins are reported separately.",
+    "Independent overlapping trades are not account returns; 20bp cost remains frozen, no funding or extra slippage.",
+    "AUC/top-decile metrics do not apply to this descriptive clock grouping; no classifier is trained."
+  ],
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.eth_stoch_intraday --out entry_hours_20261020_reproduction",
+  "training_eligible": false,
+  "production_eligible": false
+}
