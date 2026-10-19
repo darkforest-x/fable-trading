@@ -16,16 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth5m-stoch-target-be-20261019-v3
     source_repo: darkforest-x/fable-trading
-    source_commit: 04150e750e
-    status: active
+    source_commit: 111e6b3a36
+    status: rejected
     question: Which independent10R/20R target and break-even timing retains large winners and maximizes net profits without opposite-arrow exits?
     single_variable: Owner-authorized target x BE grid26arms; all admission,risk,cost,data,splits and matched controls frozen from V1. No opposite exit or serial occupancy.
     artifacts: [eth5m-stoch-target-be-20261019-v3]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    result: Prespecified26arm grid; replay pending.
+    reuse_allowed: true
+    result: All26arms lose net over full history,development and validation at frozen20bp. Full-history best20R+5RpriceBE retains139of152targets,net-12858.60718points/-2725.1794R. Saves284initialstops but loses13targets;only+24R/+174.98points vs noBE,p0.7172. Matched2802pairs excess+1316.1326points,p0.4664,Holm1.2024selects20R+5RnetBE,later-9053.78696points,worse than noBE by849.10.
+    notes: 2805independent signals/2804fixed controls;145834oracle paths,11218V2baseline parity,104summary groups,156drawing paths and96tests pass. One final20Rtrade censored;MTM/commonclosed rankings unchanged. Recent24signals have3positive fixed1ETH arms;10R+2R/3RpriceBE earns6.06084points but loses2.4943equalriskR. No shared account,production or unseen-validation claim. Notion3fe8856479af81be8af4c0e578af1db7.
   - experiment_id: exp-eth5m-stoch-tail-forensics-20261019-v2
     source_repo: darkforest-x/fable-trading
     source_commit: d2f3cd6988

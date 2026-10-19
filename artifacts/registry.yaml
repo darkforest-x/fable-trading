@@ -22,13 +22,14 @@ artifacts:
     artifact_type: manifest
     role: Task62 independent target and break-even grid
     source_repo: darkforest-x/fable-trading
-    source_commit: 04150e750e
-    source_path: experiments/active/exp-eth5m-stoch-target-be-20261019-v3/config.json
-    storage_uri: repo://experiments/active/exp-eth5m-stoch-target-be-20261019-v3/config.json
+    source_commit: 111e6b3a36
+    generator_commit: 376e8af689
+    source_path: experiments/active/exp-eth5m-stoch-target-be-20261019-v3/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-target-be-20261019-v3/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Frozen26arms before replay; complete ledgers,tail retention,matched controls and independent oracle required. No new data download or hashes.
+    notes: Completed26arms with full local ledgers;compact summaries,tail attribution,chronology selection,matched inference,drawings and checks retained. All-history best20R+5RpriceBE still netnegative;not production eligible. No fetch or hashes.
   - artifact_id: eth5m-stoch-tail-forensics-20261019-v2
     artifact_type: manifest
     role: Task62 all-signal tail forensics and opposite-exit ablation

@@ -1,0 +1,76 @@
+{
+  "experiment_id": "exp-eth5m-stoch-target-be-20261019-v3",
+  "task_url": "https://app.notion.com/p/3fe8856479af8034b989fed2918245c2",
+  "notion_experiment_url": "https://app.notion.com/p/3fe8856479af81be8af4c0e578af1db7",
+  "completed_local_date": "2026-10-20",
+  "status": "completed_grid_economically_rejected_at_frozen20bp",
+  "path_builder_commit": "111e6b3a36",
+  "analysis_commit": "376e8af689",
+  "notion_readback": {
+    "task": "Done",
+    "experiment": "\u5b8c\u6210",
+    "grid_table_rows": 27
+  },
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.eth_stoch_target_be --out results_reproduction",
+    ".venv/bin/python -m pytest -q tests/evaluation/test_eth_stoch_target_be.py tests/evaluation/test_eth_stoch_confirm_exits.py tests/evaluation/test_eth_stoch_tail_forensics.py tests/boundaries/test_layer_imports.py"
+  ],
+  "actual_resume_command": ".venv/bin/python -m yoyo.evaluation.eth_stoch_target_be --out results --analyze-only --path-builder-commit 111e6b3a36",
+  "implementation_incident": "Initial replay completed and all145834 paths passed independent oracle; JSON selection export then rejected NaN for undefined0/0 example20R retention. Convert to null and resume statistics from saved ledgers. Trade paths,parameters,costs and rankings unchanged. Loaded builder111e6b3a36 remains path provenance despite later commits during replay.",
+  "checks": {
+    "behavior_and_boundary_tests": 96,
+    "independent_oracle_paths": 145834,
+    "v2_baseline_parity_paths": 11218,
+    "summary_groups": 104,
+    "drawing_paths": 156,
+    "registry_records": "validated individually; preexisting unrelated global registry missing source_commit remains"
+  },
+  "evidence": {
+    "config": "config.json",
+    "paths": "results/signal_trades.csv.gz",
+    "random": "results/random_trades.csv.gz",
+    "summary": "results/summary.csv",
+    "decomposition": "results/attribution.csv",
+    "matched": "results/matched_inference.csv",
+    "selected_trades": "results/selected_signal_trades.csv",
+    "drawings": "results/drawing_outcomes.csv",
+    "yearly": "results/selected_years.csv",
+    "selection": "results/selection.json",
+    "verification": "results/verification.json"
+  },
+  "key_findings": {
+    "all_history_best": "tp20_price_5r",
+    "development_selected": "tp20_net_5r",
+    "full_best_closed": 2804,
+    "full_best_censored": 1,
+    "full_best_target_hits": 139,
+    "baseline_target_hits": 152,
+    "full_best_net_points": -12858.60718,
+    "full_best_net_r": -2725.17940221911,
+    "delta_to_no_be_points": 174.98,
+    "delta_to_no_be_r": 24,
+    "delta_weekly_p": 0.7172,
+    "matched_pairs": 2802,
+    "matched_excess_points": 1316.1326,
+    "matched_p": 0.4664,
+    "matched_holm_p": 1.0,
+    "development_selected_validation_net_points": -9053.78696,
+    "development_selected_validation_vs_no_be_points": -849.1,
+    "full_history_positive_arms": 0,
+    "recent_24_signal_best_points": 6.06084,
+    "recent_24_signal_best_equal_risk_r": -2.4944532691676056
+  },
+  "boundaries": [
+    "Independent overlapping opportunities,not shared account returns; fixed1ETH points and equal initial riskR both reported.",
+    "1m OHLC close-trigger/nextminute BE; no fees read from account,no funding/extra slippage.",
+    "No untouched data claim; chronology selection reuses exposed history; full-history ranking is descriptive.",
+    "Weekly blocks may not remove cross-week holding dependence.",
+    "Original20R final position censored,MTM separately; common2804closed cohort has same winner."
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "content_hashes_used": false,
+  "new_browser_sessions": [],
+  "production_actions": [],
+  "extra_report_created": false
+}
