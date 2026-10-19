@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>SPIKE - 纪律合约交易</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface": "#f9faf8",
+            "on-secondary": "#ffffff",
+            "on-tertiary": "#ffffff",
+            "background": "#f9faf8",
+            "error": "#ba1a1a",
+            "secondary-fixed-dim": "#ffb2bb",
+            "on-primary-fixed-variant": "#005142",
+            "surface-container": "#edeeec",
+            "tertiary-container": "#677370",
+            "secondary-fixed": "#ffd9dc",
+            "surface-container-lowest": "#ffffff",
+            "primary-container": "#087f69",
+            "tertiary-fixed": "#d8e5e1",
+            "on-surface": "#191c1b",
+            "surface-container-highest": "#e2e3e1",
+            "on-tertiary-fixed": "#121e1c",
+            "outline-variant": "#bdc9c4",
+            "secondary": "#a5374d",
+            "on-error-container": "#93000a",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#78d8be",
+            "primary": "#006452",
+            "primary-fixed": "#94f4d9",
+            "on-secondary-container": "#730f2a",
+            "inverse-surface": "#2e3130",
+            "surface-container-high": "#e7e8e6",
+            "outline": "#6e7a75",
+            "on-secondary-fixed-variant": "#851e36",
+            "on-secondary-fixed": "#400011",
+            "surface-variant": "#e2e3e1",
+            "surface-bright": "#f9faf8",
+            "on-tertiary-fixed-variant": "#3d4947",
+            "tertiary-fixed-dim": "#bcc9c6",
+            "inverse-on-surface": "#f0f1ef",
+            "on-primary-fixed": "#002019",
+            "surface-container-low": "#f3f4f2",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "tertiary": "#4e5b58",
+            "on-tertiary-container": "#ecf9f5",
+            "on-background": "#191c1b",
+            "surface-dim": "#d9dad8",
+            "secondary-container": "#fc7a8f",
+            "on-surface-variant": "#3e4945",
+            "primary-fixed-dim": "#78d8be",
+            "surface-tint": "#006b58",
+            "on-primary-container": "#d3fff0"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "2xl": "1rem",
+            "3xl": "1.5rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "space-lg": "1.5rem",
+            "margin-tablet": "2rem",
+            "gutter-tablet": "1.5rem",
+            "margin-desktop": "3rem",
+            "space-xl": "2rem",
+            "gutter": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "1.25rem",
+            "space-2xl": "3rem",
+            "gutter-desktop": "2rem",
+            "space-xs": "0.25rem"
+          },
+          "fontFamily": {
+            "label-md": ["Inter"],
+            "label-lg": ["Inter"],
+            "display-lg-mobile": ["Inter"],
+            "numeric-hero": ["Inter"],
+            "label-sm": ["Inter"],
+            "display-lg": ["Inter"],
+            "numeric-hero-mobile": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-lg": ["Inter"],
+            "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "500" }],
+            "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+            "numeric-hero": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.03em", "fontWeight": "600" }],
+            "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "600" }],
+            "numeric-hero-mobile": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "body-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    };
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #087f69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(8, 127, 105, 0.35);
+      border: 2.5px solid #ffffff;
+    }
+    input[type=range]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 9999px;
+      background: #087f69;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(8, 127, 105, 0.35);
+      border: 2.5px solid #ffffff;
+    }
+    /* Tabular numbers for price accuracy */
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased min-h-screen flex flex-col justify-between selection:bg-primary-fixed selection:text-on-primary-fixed font-body-md text-body-md" style="background-color: #f6f8f5;">
+<!-- Top App Bar (Shared Components standard anchor) -->
+<!-- Mobile Screen Container (390px default canvas, fluid to 320px) -->
+<main class="w-full max-w-[420px] mx-auto px-3.5 pb-24 space-y-3"><!-- Header: BTC/USDT 永续 & Settings Gear -->
+<header class="pt-2 pb-1">
+<div class="flex items-center justify-between">
+<button class="flex items-center space-x-1.5 text-on-surface font-semibold text-lg hover:text-primary transition-colors active:scale-95" type="button">
+<span class="tracking-tight font-bold text-[18px]">BTC/USDT 永续</span>
+<span class="material-symbols-outlined text-tertiary text-lg" data-icon="expand_more">expand_more</span>
+</button>
+<button aria-label="交易偏好设置" class="w-11 h-11 flex items-center justify-center text-tertiary hover:text-on-surface rounded-full transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+</div>
+<!-- Price Headline & Badge -->
+<div class="mt-1 flex items-baseline justify-between">
+<div class="flex items-baseline space-x-2">
+<span class="text-[30px] font-bold tracking-tight text-on-surface tabular-nums">68,100.00</span>
+<span class="text-[11px] text-tertiary font-medium tracking-wide uppercase">USDT</span>
+</div>
+<div class="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded-full bg-[#E8F5F1] text-primary">
+<span class="h-1.5 w-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="text-xs font-semibold tabular-nums">+2.40%</span>
+</div>
+</div>
+<!-- Quiet Discipline Strip (3 columns with clean hairline dividers) -->
+<div class="mt-3 grid grid-cols-3 divide-x divide-neutral-200/60 rounded-[22px] border border-neutral-200/50 bg-white/90 backdrop-blur-sm px-2 py-2.5 text-center text-xs tabular-nums text-tertiary shadow-[0_2px_12px_rgba(0,0,0,0.02)]"><div class="px-1"><span class="text-[11px] block text-[#718096]">今日可开</span><span class="font-semibold text-[#1a1f1d] text-xs mt-0.5 block">2/3次</span></div><div class="px-1"><span class="text-[11px] block text-[#718096]">再连亏停手</span><span class="font-semibold text-[#d93848] text-xs mt-0.5 block">1次</span></div><div class="px-1"><span class="text-[11px] block text-[#718096]">日亏剩余</span><span class="font-semibold text-[#1a1f1d] text-xs mt-0.5 block">20.00 U</span></div></div>
+</header>
+<!-- Unified White Card Surface with 18px radius and hairline border -->
+<section class="rounded-[28px] bg-white border border-neutral-200/60 p-4 sm:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] space-y-4"><!-- 1. Direction segmented switch: fully rounded pill (rounded-full) with 44px tap targets --><div class="grid grid-cols-2 p-1 bg-[#eef3ee] rounded-full" id="direction-segmented-group"><button class="h-11 rounded-full bg-[#087f69] text-white font-semibold text-sm transition-all active:scale-[0.98] shadow-sm flex items-center justify-center" id="btn-long" onclick="setDirection('LONG')" type="button">做多</button><button class="h-11 rounded-full text-[#718096] font-medium text-sm transition-all hover:text-[#1a1f1d] active:scale-[0.98] flex items-center justify-center" id="btn-short" onclick="setDirection('SHORT')" type="button">做空</button></div><!-- 2. Order Type & Leverage row: Quiet text tabs with clean underline & 44px hit-target leverage link --><div class="flex items-center justify-between border-b border-neutral-100 pb-2"><div class="flex items-center space-x-6 text-sm"><button class="py-1 text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium border-b-2 border-transparent h-11 flex items-center" id="tab-market" onclick="setOrderType('market')" type="button">市价</button><button class="py-1 text-[#1a1f1d] font-semibold border-b-2 border-[#087f69] transition-colors h-11 flex items-center" id="tab-limit" onclick="setOrderType('limit')" type="button">限价</button></div><button class="h-11 px-2 flex items-center text-xs font-medium text-[#718096] hover:text-[#087f69] transition-colors active:scale-95" type="button"><span>全仓 100x</span><span class="material-symbols-outlined text-sm ml-0.5" data-icon="chevron_right">chevron_right</span></button></div><!-- 3. Limit Price Input row: Borderless light sage fill with 44px tap action --><div class="space-y-1.5" id="limit-price-row"><div class="flex items-center justify-between text-xs"><label class="text-[#718096] font-medium" for="input-limit-price">委托价</label><button class="text-[#087f69] font-medium hover:underline text-xs h-11 px-1 flex items-center active:scale-95" onclick="fillLatestPrice()" type="button">最新价</button></div><div class="relative flex items-center h-12 rounded-[18px] bg-[#f0f4f1] px-3.5 transition-all focus-within:ring-2 focus-within:ring-[#087f69]/20"><input class="w-full bg-transparent text-[18px] font-semibold text-[#1a1f1d] tabular-nums focus:outline-none" id="input-limit-price" placeholder="0.00" type="text" value="68,100.00"/><span class="text-xs text-[#718096] select-none font-medium ml-2">USDT</span></div></div><!-- 4. Initial Stop Loss row: Borderless light sage fill --><div class="space-y-1.5"><div class="flex items-center justify-between text-xs"><span class="text-[#718096] font-medium">初始止损</span><button class="flex items-center space-x-1 text-[#087f69] font-medium hover:underline text-xs h-11 px-1 active:scale-95" id="btn-quick-1r" type="button"><span class="h-1.5 w-1.5 rounded-full bg-[#087f69]"></span><span id="label-quick-1r">1R 自动计算</span></button></div><div class="relative flex items-center h-12 rounded-[18px] bg-[#f0f4f1] px-3.5 transition-all focus-within:ring-2 focus-within:ring-[#087f69]/20"><input class="w-full bg-transparent text-[18px] font-semibold text-[#1a1f1d] tabular-nums focus:outline-none" id="input-sl-price" placeholder="止损价" type="text" value="67,419.00"/><span class="text-xs text-[#d93848] font-medium tabular-nums select-none mr-2" id="sl-delta-percent">-1.00%</span><span class="text-xs text-[#718096] select-none font-medium">USDT</span></div></div><!-- 5. Allocation (仓位额度) Slider & Tick Targets --><div class="space-y-2 pt-1"><div class="flex items-baseline justify-between"><span class="text-xs text-[#718096] font-medium">仓位额度</span><div class="text-right"><span class="text-[20px] font-bold text-[#1a1f1d] tabular-nums" id="slider-val-label">100%</span><span class="block text-[11px] text-[#718096] font-normal">保证金占净值 2.0% (上限10%)</span></div></div><div class="h-11 flex items-center px-0.5"><input class="w-full h-1.5 bg-[#eef3ee] rounded-full appearance-none cursor-pointer" id="quota-slider" max="100" min="0" oninput="updateQuota(this.value)" step="5" type="range" value="100"/></div><!-- Subtle tick targets with 44px tap target height --><div class="grid grid-cols-4 text-center text-xs"><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-25" onclick="setSliderPercent(25)" type="button">25%</button><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-50" onclick="setSliderPercent(50)" type="button">50%</button><button class="h-11 flex items-center justify-center text-[#718096] hover:text-[#1a1f1d] transition-colors font-medium rounded-full active:scale-95" id="chip-75" onclick="setSliderPercent(75)" type="button">75%</button><button class="h-11 flex items-center justify-center text-[#087f69] font-bold rounded-full bg-[#087f69]/10 transition-colors active:scale-95" id="chip-100" onclick="setSliderPercent(100)" type="button">100%</button></div></div><!-- 6. Compact Estimate Strip (3-column flat hairline layout) --><div class="border-t border-neutral-100 pt-3"><div class="grid grid-cols-3 divide-x divide-neutral-100 text-center text-xs tabular-nums"><div class="px-1"><span class="text-[11px] text-[#718096] block">持仓金额</span><span class="font-semibold text-[#1a1f1d] text-[15px] mt-0.5 block" id="val-pos-size">200.00 U</span></div><div class="px-1"><span class="text-[11px] text-[#718096] block">占用保证金</span><span class="font-semibold text-[#1a1f1d] text-[15px] mt-0.5 block" id="val-margin">20.00 U</span></div><div class="px-1"><span class="text-[11px] text-[#718096] block">预计止损</span><span class="font-semibold text-[#d93848] text-[15px] mt-0.5 block" id="val-loss">-20.00 U</span></div></div></div><!-- 7. Account Equity Line --><div class="flex items-center justify-between text-xs text-[#718096] px-0.5"><span>可用 <strong class="text-[#1a1f1d] font-medium tabular-nums">800.00 U</strong></span><span class="text-neutral-300">·</span><span>净值 <strong class="text-[#1a1f1d] font-medium tabular-nums">1,000.00 U</strong></span></div><!-- 8. Primary Action Button: 48px height, rounded-full pill in solid Jade --><button class="w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-[#087f69] text-white font-semibold text-sm tracking-wide active:scale-[0.98] transition-all shadow-[0_4px_16px_rgba(8,127,105,0.25)] hover:bg-[#076f5c]" id="btn-submit-action" onclick="simulatePlaceOrder()" type="button"><span class="material-symbols-outlined text-[18px]" data-icon="shield">shield</span><span id="btn-submit-text">买入开多 (受纪律保护)</span></button><!-- 9. Inline Order Feedback Slot --><div class="flex items-center justify-between text-xs text-[#718096] px-1 pt-0.5" id="order-status-card"><div class="flex items-center space-x-2 truncate mr-2"><span class="h-1.5 w-1.5 rounded-full bg-[#087f69] flex-shrink-0"></span><span class="truncate text-[11px]" id="status-card-title">BTC · 限价开多 / 已挂出，等待成交</span></div><a class="text-[#087f69] font-medium hover:underline text-[11px] flex-shrink-0 h-11 flex items-center" href="#">查看订单</a></div></section></main>
+<!-- Bottom Navigation Bar (Shared Components JSON Anchor) -->
+<nav class="fixed bottom-5 inset-x-4 z-50 flex justify-around items-center h-16 max-w-sm mx-auto px-2 rounded-full bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_16px_40px_-6px_rgba(23,36,34,0.10)]"><!-- Tab 1: 合约 (active jade) -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-primary transition-all active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="candlestick_chart">candlestick_chart</span>
+<span class="text-[11px] font-semibold mt-0.5">合约</span>
+</button>
+<!-- Tab 2: 纪律 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="shield">shield</span>
+<span class="text-[11px] font-medium mt-0.5">纪律</span>
+</button>
+<!-- Tab 3: 持仓 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="pie_chart">pie_chart</span>
+<span class="text-[11px] font-medium mt-0.5">持仓</span>
+</button>
+<!-- Tab 4: 统计 -->
+<button class="flex flex-col items-center justify-center w-12 h-12 text-tertiary hover:text-on-surface transition-colors active:scale-95" type="button">
+<span class="material-symbols-outlined text-[20px]" data-icon="bar_chart">bar_chart</span>
+<span class="text-[11px] font-medium mt-0.5">统计</span>
+</button></nav>
+<!-- Interactive Logic for Drafting Direction, Quota Calculation, and Non-blocking feedback -->
+<script>
+    let currentDirection = 'LONG';
+    let currentRatio = 100;
+    const baseAllowance = 200.00; // USDT
+    const currentPrice = 68100.00;
+
+    function setDirection(dir) {
+      currentDirection = dir;
+      const btnLong = document.getElementById('btn-long');
+      const btnShort = document.getElementById('btn-short');
+      const submitBtn = document.getElementById('btn-submit-action');
+      const submitText = document.getElementById('btn-submit-text');
+      const quick1rLabel = document.getElementById('label-quick-1r');
+      const quick1rBtn = document.getElementById('btn-quick-1r');
+      const slInput = document.getElementById('input-sl-price');
+      const slPercent = document.getElementById('sl-delta-percent');
+      const statusTitle = document.getElementById('status-card-title');
+
+      if (dir === 'LONG') {
+        // Long Active Style
+        btnLong.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-primary-container/10 border-2 border-primary-container text-primary font-headline-sm text-headline-sm font-bold transition-all active:scale-[0.98]';
+        btnLong.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-primary text-[20px]';
+
+        // Short Inactive Style
+        btnShort.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-surface-container text-tertiary border-2 border-transparent font-headline-sm text-headline-sm font-medium transition-all active:scale-[0.98]';
+        btnShort.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-tertiary text-[20px]';
+
+        // CTA Button in Emerald
+        submitBtn.className = 'w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-primary-container text-on-primary font-headline-sm text-headline-sm font-semibold tracking-wide shadow-md active:scale-[0.98] transition-transform';
+        submitText.innerText = '买入开多 (受纪律保护)';
+        quick1rLabel.innerText = '多单 1R 锁定';
+        quick1rBtn.className = 'col-span-5 sm:col-span-4 h-12 flex flex-col justify-center items-center rounded-xl bg-primary-container/10 border border-primary-container/30 text-primary active:scale-95 transition-transform';
+
+        slInput.value = '67,419.00';
+        slPercent.innerText = '-1.00%';
+        slPercent.className = 'pr-2.5 text-label-sm font-label-sm text-secondary font-medium select-none tabular-nums';
+        statusTitle.innerText = 'BTC · 限价开多 / 已挂出，等待成交';
+      } else {
+        // Short Active Style (Rose Muted)
+        btnShort.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-[#FDF0F2] border-2 border-[#e11d48] text-[#e11d48] font-headline-sm text-headline-sm font-bold transition-all active:scale-[0.98]';
+        btnShort.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-[#e11d48] text-[20px]';
+
+        // Long Inactive Style
+        btnLong.className = 'flex items-center justify-center space-x-1.5 h-12 rounded-xl bg-surface-container text-tertiary border-2 border-transparent font-headline-sm text-headline-sm font-medium transition-all active:scale-[0.98]';
+        btnLong.querySelector('span.material-symbols-outlined').className = 'material-symbols-outlined text-tertiary text-[20px]';
+
+        // CTA Button in Rose
+        submitBtn.className = 'w-full h-12 flex items-center justify-center space-x-2 rounded-full bg-[#e11d48] text-white font-headline-sm text-headline-sm font-semibold tracking-wide shadow-md active:scale-[0.98] transition-transform';
+        submitText.innerText = '卖出开空 (受纪律保护)';
+        quick1rLabel.innerText = '空单 1R 锁定';
+        quick1rBtn.className = 'col-span-5 sm:col-span-4 h-12 flex flex-col justify-center items-center rounded-xl bg-[#FDF0F2] border border-[#e11d48]/30 text-[#e11d48] active:scale-95 transition-transform';
+
+        slInput.value = '68,781.00';
+        slPercent.innerText = '+1.00%';
+        slPercent.className = 'pr-2.5 text-label-sm font-label-sm text-secondary font-medium select-none tabular-nums';
+        statusTitle.innerText = 'BTC · 限价开空 / 已挂出，等待成交';
+      }
+    }
+
+    function updateQuota(val) {
+      currentRatio = parseInt(val, 10);
+      document.getElementById('slider-val-label').innerText = currentRatio + '% ' + (currentRatio === 100 ? '(满额风控)' : '(动态配额)');
+
+      const posSize = (baseAllowance * (currentRatio / 100)).toFixed(2);
+      const btcAmount = (posSize / currentPrice).toFixed(4);
+      const margin = (posSize / 10).toFixed(2);
+      const loss = (posSize * 0.1).toFixed(2);
+
+      document.getElementById('val-pos-size').innerText = posSize + ' USDT';
+      document.getElementById('val-margin').innerText = margin + ' USDT';
+      document.getElementById('val-loss').innerText = '-' + loss + ' U (' + (currentRatio / 100).toFixed(1) + 'R)';
+      document.getElementById('quota-detail-note').innerText = currentRatio + '% = 本规则允许上限 (' + posSize + ' USDT / ' + btcAmount + ' BTC)';
+
+      // Clear chip styles
+      [25, 50, 75, 100].forEach(p => {
+        const chip = document.getElementById('chip-' + p);
+        if (chip) {
+          if (p === currentRatio) {
+            chip.className = 'h-8 rounded-lg bg-primary-container text-on-primary text-label-sm font-label-sm font-semibold shadow-xs';
+          } else {
+            chip.className = 'h-8 rounded-lg bg-surface-container text-tertiary text-label-sm font-label-sm font-medium hover:bg-surface-container-high transition-colors';
+          }
+        }
+      });
+    }
+
+    function setSliderPercent(pct) {
+      const slider = document.getElementById('quota-slider');
+      slider.value = pct;
+      updateQuota(pct);
+    }
+
+    function fillLatestPrice() {
+      const input = document.getElementById('input-limit-price');
+      input.value = "68,100.00";
+      input.focus();
+    }
+
+    function simulatePlaceOrder() {
+      const btn = document.getElementById('btn-submit-action');
+      const originalText = document.getElementById('btn-submit-text').innerText;
+      btn.disabled = true;
+      btn.style.opacity = '0.7';
+      document.getElementById('btn-submit-text').innerText = '纪律审查已核准，指令提交中...';
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        document.getElementById('btn-submit-text').innerText = originalText;
+        const statusTitle = document.getElementById('status-card-title');
+        statusTitle.innerText = 'BTC · 挂单已更新于本地撮合队列 (等待触发)';
+      }, 900);
+    }
+  </script>
+</body></html>

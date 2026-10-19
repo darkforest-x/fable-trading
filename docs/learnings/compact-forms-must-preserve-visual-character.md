@@ -1,0 +1,7 @@
+# Compact forms must preserve the product's visual character
+
+- **Problem**: The owner wanted a compact mobile order ticket, but rejected both crowded inline controls and the subsequent square-looking redesign.
+- **Dead end**: Packing the stop label, value, 1R action and manual action into one input saved height at the cost of hierarchy. Reducing corner radii across the next revision made it feel unrelated to the existing rounded mobile UI. Passing small-screen checks did not establish aesthetic acceptance.
+- **Effective path**: Keep labels and secondary actions above independent inputs; use plain estimate columns and text tabs to reduce nesting. Restore the rounded main card, borderless soft input surfaces and pill-shaped direction/submit controls. Follow the owner's explicit feedback without changing order semantics. Stitch screen `c0b45b9cfa2641289e445a9e3b795ab3` supplies the final geometry; synthetic data validates layout separately from live trading.
+- **General rule**: Reduce repeated containers and competing information before shrinking typography or changing the product's shape language. Functional layout checks and owner visual acceptance are separate evidence; do not claim the latter from screenshots alone.
+- **Affected**: `yoyo/discipline_app/mobile/src/App.tsx`, `mobile/src/style.css`, and `design/flow-0.8.12/`. Inputs remain 18px and interactive controls retain at least 44px height; generated placeholder numbers and protection promises are not copied into product behavior.
