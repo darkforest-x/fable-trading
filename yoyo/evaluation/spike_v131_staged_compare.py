@@ -49,19 +49,24 @@ def run():
                 combined=pd.concat(chunks,ignore_index=True)
                 t=combined[combined.cohort.eq('signal')]
                 c=combined[combined.cohort.eq('control')&combined.trade_key.isin(t.trade_key)]
-                pairs=t[['trade_key','candidate_r']].merge(c[['trade_key','candidate_r']],on='trade_key',suffixes=('_t','_c'),validate='one_to_one')
+                pairs=t[['trade_key','entry_time','candidate_r']].merge(c[['trade_key','candidate_r']],on='trade_key',suffixes=('_t','_c'),validate='one_to_one')
                 assert len(t)==(21547 if evaluation=='full' else 14647)
                 rr=t.candidate_r.to_numpy();delta=rr-t.net_r.to_numpy()
                 block=pd.DataFrame(dict(week=t.entry_time.dt.strftime('%G-W%V').to_numpy(),delta=delta,n=1)).groupby('week').sum()
                 rng=np.random.default_rng(result['config']['seed']);ix=rng.integers(len(block),size=(3000,len(block)))
                 sims=block.delta.to_numpy()[ix].sum(axis=1)/block.n.to_numpy()[ix].sum(axis=1)
+                paired_block=pd.DataFrame(dict(week=pairs.entry_time.dt.strftime('%G-W%V').to_numpy(),
+                    delta=(pairs.candidate_r_t-pairs.candidate_r_c).to_numpy(),n=1)).groupby('week').sum()
+                paired_ix=rng.integers(len(paired_block),size=(3000,len(paired_block)))
+                paired_sims=paired_block.delta.to_numpy()[paired_ix].sum(axis=1)/paired_block.n.to_numpy()[paired_ix].sum(axis=1)
                 comparison=dict(selection_period=selection_period,evaluation_period=evaluation,grouping=grouping,
                     risk_capped=constrained,**stat(rr),baseline_sum_r=float(t.net_r.sum()),delta_sum_r=float(delta.sum()),
                     filled_opportunities=int(t.filled.sum()),win_rate_filled=float((rr>0).sum()/t.filled.sum()) if t.filled.sum() else None,
                     matched=len(pairs),matched_target_mean_r=float(pairs.candidate_r_t.mean()),
                     matched_control_mean_r=float(pairs.candidate_r_c.mean()),
                     matched_excess_mean_r=float((pairs.candidate_r_t-pairs.candidate_r_c).mean()),
-                    weekly_delta_mean_95=np.quantile(sims,[.025,.975]).tolist())
+                    weekly_delta_mean_95=np.quantile(sims,[.025,.975]).tolist(),
+                    matched_weekly_mean_95=np.quantile(paired_sims,[.025,.975]).tolist())
                 comparisons.append(comparison)
                 if grouping=='timeframe_side' and constrained:
                     t=t.assign(delta_r=delta)
