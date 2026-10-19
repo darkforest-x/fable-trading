@@ -20,15 +20,16 @@ schema_version: 1
 artifacts:
   - artifact_id: eth5m-stoch-confirm-exits-20261019-v1
     artifact_type: manifest
-    role: Frozen owner task62 ETH5m Stoch confirmation and exit study
+    role: Completed owner task62 ETH5m Stoch exit study and independent audit
     source_repo: darkforest-x/fable-trading
-    source_commit: 555e41403592bb3a8f0d61a77bd64e9daf175c4f
-    source_path: experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/config.json
-    storage_uri: repo://experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/config.json
+    source_commit: bb57287536b3cfb54a3211fa1d1f209603ef4396
+    generator_commit: 2ce6a353fe
+    source_path: experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Existing OKX minute sources reused without hashes;only recent gap fetched;private TradingView drawing intent checked;all losing signals retained.
+    notes: Config,12 original drawing observations,summary,matched inference,diagnostics,input provenance and verification retained. Local minute inputs and large ledgers excluded by scoped experiment ignore rules.22 exits negative;no production eligibility. Reproduction and failures in delivery receipt;no content hashes.
   - artifact_id: spike-stoch-wvf-entry-20261019-v1
     artifact_type: manifest
     role: Frozen Stoch and WVF standalone admission and Spike pullback timing experiment

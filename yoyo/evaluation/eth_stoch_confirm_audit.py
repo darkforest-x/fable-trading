@@ -4,6 +4,7 @@ Uses signed favorable-price coordinates, independently reconstructs Stoch and
 admission, and never calls the replay/trace/serial/metrics implementation.
 Only raw ingestion is shared; no model, production or account access.
 """
+import argparse
 import json
 import subprocess
 
@@ -61,8 +62,11 @@ def signed_path(a, arrows, crosses, r, endpoint):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--out', default='results_v1')
+    args = parser.parse_args()
     cfg = json.loads((EXP / 'config.json').read_text())
-    out = EXP / 'results_v1'
+    out = EXP / args.out
     minute, _ = load_minutes(cfg)
     arr = minute[['open', 'high', 'low', 'close']].to_numpy()
     blocks = arr.reshape(-1, 5, 4)

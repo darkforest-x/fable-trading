@@ -1,0 +1,79 @@
+{
+  "experiment_id": "exp-eth5m-stoch-confirm-exits-20261019-v1",
+  "completed_date_local": "2026-10-19",
+  "status": "rejected_economic_upgrade_research_complete",
+  "task_url": "https://app.notion.com/p/3fe8856479af8034b989fed2918245c2",
+  "experiment_url": "https://app.notion.com/p/3fe8856479af81fda7dcf91f09968c2a",
+  "notion_readback": {"task_status": "Done", "experiment_status": "完成", "task_tables": 1, "experiment_tables": 3, "original_task_content_preserved": true},
+  "commits": {
+    "builder_before_replay": "ddef3aa904",
+    "drawing_binding_and_formal_replay": "bb57287536b3cfb54a3211fa1d1f209603ef4396",
+    "independent_signed_price_audit": "86c9871604",
+    "floating_zero_summary_fix_and_final_audit": "2ce6a353fe1af091634ab1b686c522ee59c2bf41",
+    "descriptive_diagnostics": "1901b53f8a"
+  },
+  "commands": [
+    ".venv/bin/python -m yoyo.evaluation.eth_stoch_confirm_exits --out results_reproduction",
+    ".venv/bin/python -m yoyo.evaluation.eth_stoch_confirm_audit --out results_reproduction",
+    ".venv/bin/python -m pytest -q tests/evaluation/test_eth_stoch_confirm_exits.py tests/test_spike_fanshen_exit.py tests/test_spike_fanshen_study.py tests/boundaries/test_layer_imports.py"
+  ],
+  "input_reproduction": "Use the three original registered source paths plus the exact recent minute capture in inputs/okx_ETH_USDT_SWAP_1m_38899.csv. Preserve these inputs; do not rerun a rolling fetch to reproduce this cutoff. External Elements SE must be mounted. Provenance records path, bytes, mtime and actual reads, not content hashes.",
+  "results": {
+    "directory": "results_v1",
+    "minutes": 1473045,
+    "raw_arrows": 10907,
+    "confirmed_arrows": 5800,
+    "risk_qualified": 2805,
+    "matched_controls": 2804,
+    "unmatched_pair_ids": [998],
+    "policy_count": 22,
+    "net_profitable_policies": 0,
+    "selected_on_2024": "be_price_2r",
+    "selected_validation_closed": 1734,
+    "selected_validation_net_points": -9241.85806,
+    "selected_validation_pf": 0.2780676249112915,
+    "selected_validation_matched_excess_points": -1489.06658,
+    "selected_validation_holm_p_two_sided": 0.4872,
+    "all_history_hindsight_best": "be_price_1r",
+    "all_history_hindsight_best_net_points": -13947.76684,
+    "units": "Fixed1ETH per trade price points; not account returns",
+    "full_summary": "results_v1/summary.csv",
+    "matched_null": "results_v1/matched_inference.csv",
+    "drawing_and_cost_diagnostics": "results_v1/diagnostics.json"
+  },
+  "verification": {
+    "focused_and_boundary_tests": 98,
+    "final_own_test_rerun": 12,
+    "independent_scalar_paths": 123398,
+    "independent_serial_populations": 44,
+    "summary_groups": 176,
+    "receipt": "results_v1/verification.json",
+    "own_registry_records": "contract constructors and cross-reference pass",
+    "global_registry": "blocked by preexisting spike-v8-total2-1h-native-20260914-delivery missing source_commit; reproduced in HEAD before current registry edits"
+  },
+  "preserved_corrections_and_failures": [
+    "Initial test command named nonexistent tests/evaluation/test_spike_fanshen_exit.py and collected no tests; corrected to tests/test_spike_fanshen_exit.py and tests/test_spike_fanshen_study.py, all15 passed, included again in98-test final set.",
+    "Initial smoke only exercised recent paths and cannot select a policy because development is absent. Formal selection is from the complete run.",
+    "All12 drawn entries were matched before full replay; examples boundary expanded to BeijingOct14 fromOct17, development choice period unchanged.",
+    "Independent audit found64 signal and33 random tiny floating nonzero paths below1e-8 points. Win/PF classification fixed; original monetary ledgers preserved. summary_before_zero_tolerance.csv and verification_before_zero_tolerance.json retained; full audit rerun passed.",
+    "First Notion writing orchestration had a JavaScript syntax error before any call executed; corrected call created exactly one experiment after unique-key lookup.",
+    "Local reverse-proxy port8780 health probes returned421; direct documented backend8766 used for read-only service closeout. No service config change.",
+    "Luna max subagent requested but actual runtime settings unavailable for verification; agent did no research and was stopped. Primary completed work."
+  ],
+  "service_closeout": "service_closeout.json",
+  "limitations": [
+    "Reused historical data, not untouched validation or forward evidence",
+    "Twelve winner-selected drawings are illustrations, not a complete execution ledger; six fail reconstructed8point cap",
+    "Fixed8USDT price risk cap is price-level dependent",
+    "Minute OHLC and close-activated amendments cannot reconstruct intraminute execution",
+    "Frozen20bp cost on entry notional; no funding or additional slippage and no shared account sizing",
+    "One fixed matched control draw with replacement per signal; serial and independent-paired populations differ",
+    "AUC/top-decile not applicable without model scores; complete signals and matched random economic null used instead"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "production_actions": [],
+  "new_browser_sessions": [],
+  "new_browser_tabs": [],
+  "extra_report_created": false
+}

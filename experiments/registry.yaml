@@ -16,16 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth5m-stoch-confirm-exits-20261019-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 555e41403592bb3a8f0d61a77bd64e9daf175c4f
-    status: active
+    source_commit: bb57287536b3cfb54a3211fa1d1f209603ef4396
+    status: rejected
     question: Which causal exit best supports owner Stoch5m next-bar-close entries on OKX ETH with structural1point buffer and skipping risk above8points?
     single_variable: Exit policy only;22 prespecified arms with unchanged entries,structural stops,8point skip and20bp cost. Independent serial occupancy and fixed matched random controls.
     artifacts: [eth5m-stoch-confirm-exits-20261019-v1]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    result: Registered before replay; owner confirmed close confirmation and skip above8.2024 selection,2025 onward validation,Oct14-19 illustrations separate.
+    reuse_allowed: true
+    result: All22 exits lose after20bp in each chronological segment.10907 arrows,5800 confirmed,2805 risk-qualified.2024 selects2R price-BE; later1734 trades -9241.85806points,PF0.27807 versus baseline -8929.3191. Matched1810 pairs excess -1489.06658points,Holm0.4872. All-history hindsight best1R price-BE still -13947.76684points. Fixed1ETH units,not account returns;no exit accepted.
+    notes: Twelve drawings read and mapped; six exceed8points after causal reconstruction.123398 independent scalar paths,44 serial queues,176 summary groups and98 tests pass. Floating-zero win classification fixed with original summary retained; totals unchanged. Original data reused and only recent gap fetched,no content hashes. Historical reuse,minute execution,no funding/extra slippage. Notion task62 Done and experiment3fe8856479af81fda7dcf91f09968c2a read back. No report,training,production,Pine,service or account change.
   - experiment_id: exp-spike-stoch-wvf-entry-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f1dea4146a154aaaab03c62fafd563f0777b3f8f
