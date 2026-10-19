@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth5m-stoch-confirm-exits-20261019-v1
+    artifact_type: manifest
+    role: Frozen owner task62 ETH5m Stoch confirmation and exit study
+    source_repo: darkforest-x/fable-trading
+    source_commit: 555e41403592bb3a8f0d61a77bd64e9daf175c4f
+    source_path: experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/config.json
+    storage_uri: repo://experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Existing OKX minute sources reused without hashes;only recent gap fetched;private TradingView drawing intent checked;all losing signals retained.
   - artifact_id: spike-stoch-wvf-entry-20261019-v1
     artifact_type: manifest
     role: Frozen Stoch and WVF standalone admission and Spike pullback timing experiment

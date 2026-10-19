@@ -1,0 +1,17 @@
+{
+  "observed_at_local": "2026-10-19T22:54:00+08:00",
+  "source": "TradingView desktop UI, layout 综合过滤, cn.tradingview.com/chart/AlGc61US/",
+  "exchange": "OKX",
+  "timeframe": "5m",
+  "timezone": "UTC+8",
+  "indicator": "翻身版本V1-2025-07-06 / Stoch; settings 5,3,3,22,20,2,50,0.85,1.01",
+  "source_check": "UI source lines1-30 match the existing owner_fanshen_v1_20250706.pine signal formula. Long chart arrow requires only crossover and both K,D<20; WVF green is a separate long alert condition, not the arrow.",
+  "position_objects_seen": 11,
+  "position_values_read": [
+    {"side": "short", "entry": 2442.99, "stop_drawn": 2445.10, "target_drawn": 2384.40, "time_not_yet_verified": true},
+    {"side": "long", "signal_local": "2026-10-18T05:35:00+08:00", "entry_drawn": 2380.04, "stop_drawn": 2355.15, "target_drawn": 2418.84, "comment": "Drawing spans 05:40 to 09:45; actual following-open fill after confirmation is 05:45. Drawn risk24.89 already exceeds owner8 limit."}
+  ],
+  "signal_verticals_visually_verified_local": ["2026-10-17T22:40:00+08:00", "2026-10-18T05:00:00+08:00", "2026-10-18T05:35:00+08:00", "2026-10-18T10:10:00+08:00", "2026-10-19T16:05:00+08:00", "2026-10-19T17:40:00+08:00"],
+  "example_correction": "Task text says05:35 but quoted high2424.11 is the05:05 confirmation bar after05:00 short arrow. Entry05:10=2420.64; causal stop2425.11; risk4.47.05:35 is a separate long arrow after a crash.",
+  "not_a_trade_ledger": true
+}

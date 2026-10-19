@@ -14,6 +14,18 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth5m-stoch-confirm-exits-20261019-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 555e41403592bb3a8f0d61a77bd64e9daf175c4f
+    status: active
+    question: Which causal exit best supports owner Stoch5m next-bar-close entries on OKX ETH with structural1point buffer and skipping risk above8points?
+    single_variable: Exit policy only;22 prespecified arms with unchanged entries,structural stops,8point skip and20bp cost. Independent serial occupancy and fixed matched random controls.
+    artifacts: [eth5m-stoch-confirm-exits-20261019-v1]
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    result: Registered before replay; owner confirmed close confirmation and skip above8.2024 selection,2025 onward validation,Oct17-19 illustrations separate.
   - experiment_id: exp-spike-stoch-wvf-entry-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f1dea4146a154aaaab03c62fafd563f0777b3f8f
