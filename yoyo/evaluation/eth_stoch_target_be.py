@@ -185,8 +185,10 @@ def analyze(signal, random, arms, out):
         for segment in ('development', 'all'):
             t = summary[summary.segment.eq(segment)].sort_values([metric, 'policy'], ascending=[False, True])
             chosen = str(t.iloc[0].policy)
+            detail = summary[summary.policy.eq(chosen)].astype(object)
+            detail = detail.where(pd.notna(detail), None)
             selection[metric][segment] = dict(policy=chosen,
-                all_segments=summary[summary.policy.eq(chosen)].to_dict('records'))
+                all_segments=detail.to_dict('records'))
     selection['caveat'] = 'All-history ranking is hindsight. Chronological selection also reuses exposed history; neither is forward evidence.'
     selection['metrics_not_applicable'] = 'No classifier/ranking score: AUC/top-decile score metrics undefined; matched random economic null reported.'
     (out/'selection.json').write_text(json.dumps(selection, indent=2, allow_nan=False)+'\n')
@@ -292,6 +294,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--out', default='results')
     ap.add_argument('--audit-only', action='store_true')
+    ap.add_argument('--analyze-only', action='store_true')
+    ap.add_argument('--path-builder-commit', help='Required provenance for resuming already saved path ledgers.')
     args = ap.parse_args()
     if args.audit_only:
         print(json.dumps(diagnostics(EXP/args.out)))
@@ -300,18 +304,28 @@ def main():
     source = json.loads((V1/'config.json').read_text())
     source.update(round_trip_cost=cfg['round_trip_cost'])
     out = EXP/args.out
-    out.mkdir(parents=True, exist_ok=False)
-    commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+    if args.analyze_only:
+        if not args.path_builder_commit:
+            ap.error('--analyze-only requires the observed --path-builder-commit')
+        commit = subprocess.check_output(['git', 'rev-parse', args.path_builder_commit], text=True).strip()
+    else:
+        out.mkdir(parents=True, exist_ok=False)
+        commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
     minutes, facts = load_minutes(source)
-    ctx = prepare(minutes)
     arms = policies(cfg)
     entries = pd.read_csv(V1/'results_v1/entries.csv')
     controls = pd.read_csv(V1/'results_v1/control_entries.csv')
-    s = replay(ctx, entries, arms, source, out, 'signal')
-    c = replay(ctx, controls, arms, source, out, 'random')
+    if args.analyze_only:
+        s = pd.read_csv(out/'signal_trades.csv.gz')
+        c = pd.read_csv(out/'random_trades.csv.gz')
+    else:
+        ctx = prepare(minutes)
+        s = replay(ctx, entries, arms, source, out, 'signal')
+        c = replay(ctx, controls, arms, source, out, 'random')
     summary = analyze(s, c, arms, out)
     parity = baseline_parity(s, c)
     facts.update(builder_commit_at_start=commit, signals=len(entries), controls=len(controls),
+        analysis_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
         arms=len(arms), independent_oracle_paths=len(s)+len(c), v2_baseline_parity_paths=parity,
         production_eligible=False, training_eligible=False,
         total_net_positive_arms=int(summary[summary.segment.eq('all')].net_points.gt(0).sum()))
