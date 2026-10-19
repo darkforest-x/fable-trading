@@ -4,8 +4,8 @@
   "title": "V13.1 · 确认筛选收益与追价成本归因",
   "status": "不确定",
   "production_eligible": false,
-  "state": "transport_error_create_outcome_unknown",
-  "next_step": "Query unique key first. If found, update that page with guard audit. Otherwise create once. Do not duplicate.",
+  "state": "synced_after_deduplicated_recovery",
+  "next_step": "No retry required; deduplicated creation and content readback succeeded on 2026-10-19.",
   "related_page": "https://app.notion.com/p/3fe8856479af81d889bee875935c6672",
   "source": "https://github.com/darkforest-x/fable-trading/tree/main/experiments/active/exp-spike-v131-confirmation-cost-20261019-v1",
   "summary": "116667成熟原始信号机会、116574原控制；四周期21547原闭合单。确认平均追价15m/1H0.69/0.71原锚点R。完整五项归因及随机零成交保留；同UTC非周日门的控制覆盖87.1%/88.8%。后期配对每机会超额+0.00412/-0.02149R，周块95%区间[-0.00669,+0.01581]/[-0.03861,-0.00507]。距离、等待、费用分组无稳定统一过滤规律。原始不排周日结果另保留，未上线。",
@@ -15,5 +15,7 @@
     "results_v1/verification.json",
     "results_v1/lineage_verification.json",
     "delivery_receipt.json"
-  ]
+  ],
+  "page_id": "3fe88564-79af-8174-be16-e44a0e3344d4",
+  "page_url": "https://app.notion.com/p/3fe8856479af8174be16e44a0e3344d4"
 }
