@@ -45,6 +45,8 @@ def verify(root,name):
     receipt=json.loads((root/'receipt.json').read_text());result=json.loads((out/'result.json').read_text())
     assert receipt['complete'] and not receipt['errors']
     counts=defaultdict(int);full=defaultdict(list);pair_sums=defaultdict(lambda:defaultdict(float));pair_n=defaultdict(int)
+    opportunities=defaultdict(lambda:dict(original_opportunities=0,eligible=0,raw_filled=0,
+        eligible_statuses=defaultdict(int),executed_statuses=defaultdict(int)))
     start=sec(cfg['analysis_start']);cut=sec(cfg['split'])
     for m in cfg['timeframes']:
         exported={}
@@ -57,6 +59,14 @@ def verify(root,name):
             grouped=defaultdict(list);bykey=defaultdict(list)
             for r in rows:
                 grouped[r['policy'],r['cohort']].append(r);bykey[r['group'],r['trade_key']].append(r)
+                if r['cohort']=='signal':
+                    op=opportunities[m,r['policy']]
+                    if sec(r['anchor_time'])>=start:
+                        op['original_opportunities']+=1
+                        if yes(r['eligible']):
+                            op['eligible']+=1;op['raw_filled']+=yes(r['filled'])
+                            op['eligible_statuses'][r['status']]+=1
+                    if yes(r['serial_all']) and sec(r['entry_time'])>=start:op['executed_statuses'][r['status']]+=1
                 if yes(r['filled']):
                     e,s,risk=map(num,(r['entry_price'],r['initial_stop'],r['initial_risk']))
                     assert risk>0;equal(risk,e-s);equal(num(r['cost_r']),.002*e/risk);counts['scalar']+=2
@@ -136,6 +146,16 @@ def verify(root,name):
         for label,value in [('target',a),('random',b),('excess',a-b)]:equal(value,r[label]['sum']);counts['aggregates']+=1
     for r in result['common_fill_diagnostics']:
         equal(r['variant_mean']-r['baseline_mean'],r['delta']['mean']);counts['aggregates']+=1
+    for r in result.get('opportunities',[]):
+        expected=opportunities[r['timeframe_min'],r['policy']]
+        for field,value in expected.items():assert value==r[field],(field,value,r[field]);counts['aggregates']+=1
+    family=[r for r in result['comparisons'] if r['timeframe_min'] and r['period']=='later']
+    assert len(family)==result['holm_family_n']
+    pvalue=lambda r:r['excess_uncertainty']['weekly']['p'] if r['excess_uncertainty']['weekly']['p'] is not None else 1.
+    previous=0.
+    for i,r in enumerate(sorted(family,key=pvalue)):
+        previous=max(previous,min(1.,pvalue(r)*(len(family)-i)))
+        equal(previous,r['later_family_holm_p']);counts['aggregates']+=1
     summary=dict(status='passed',checks=dict(counts),
         limitations='Independent all-row accounting, three queues, pair exports and aggregate sums. Raw paths independently traced in builder; no native TradingView parity claim.')
     (out/'verification.json').write_text(json.dumps(summary,indent=2)+'\n');print(json.dumps(summary),flush=True)

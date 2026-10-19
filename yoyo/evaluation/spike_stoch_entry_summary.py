@@ -74,11 +74,19 @@ def run(root,name='analysis_v1'):
     assert receipt['complete'] and not receipt['errors']
     start=pd.Timestamp(cfg['analysis_start']);cut=pd.Timestamp(cfg['split'])
     startsec=int(start.timestamp());cutsec=int(cut.timestamp())
-    trades=[];allpairs=[];coverage=[];missed=[];commond=[]
+    trades=[];allpairs=[];coverage=[];missed=[];commond=[];opportunities=[]
     for m in cfg['timeframes']:
         fs=[read(root/'streams'/r['symbol']/f'{m}m.csv.gz') for r in receipt['receipts']]
         f=pd.concat([x for x in fs if len(x)],ignore_index=True)
+        del fs
         for k in ('anchor_time','decision_time','mature_time','entry_time','exit_time'):f[k]=pd.to_datetime(f[k],utc=True)
+        for policy in (*STOCH_POLICIES,*SPIKE_POLICIES):
+            sf=f[f.cohort.eq('signal') & f.policy.eq(policy) & (f.anchor_time>=start)]
+            executed=f[f.cohort.eq('signal') & f.policy.eq(policy) & f.serial_all & (f.entry_time>=start)]
+            opportunities.append(dict(timeframe_min=m,policy=policy,original_opportunities=len(sf),
+                eligible=int(sf.eligible.sum()),raw_filled=int((sf.eligible & sf.filled).sum()),
+                eligible_statuses={str(k):int(v) for k,v in sf.loc[sf.eligible,'status'].value_counts().items()},
+                executed_statuses={str(k):int(v) for k,v in executed.status.value_counts().items()}))
         t=f[f.cohort.eq('signal') & f.serial_all & f.status.eq('closed') & (f.entry_time>=start)].copy()
         t['period']=np.where(t.entry_time>=cut,'later',np.where(t.mature_time<cut,'early','crossing'))
         trades.append(t)
@@ -161,7 +169,7 @@ def run(root,name='analysis_v1'):
         adjusted=max(adjusted,min(1.,test_p(r)*(len(family)-i)))
         r['later_family_holm_p']=adjusted
     result=dict(status='complete',config=cfg,symbols=len(receipt['receipts']),serial=serial,comparisons=comp,
-        coverage=coverage,missed=missed,common_fill_diagnostics=commond,holm_family_n=len(family),
+        coverage=coverage,opportunities=opportunities,missed=missed,common_fill_diagnostics=commond,holm_family_n=len(family),
         limitations=['Long-only; standalone refers to entry admission with frozen Spike risk/raw-opposite exits.',
         'History reused; chronological partitions are not untouched or forward validation.',
         'Historical identity/tick universe not point-in-time; no funding/extra slippage/shared-capital account.',
@@ -169,6 +177,7 @@ def run(root,name='analysis_v1'):
         'Conditional common-fill MAE cannot alone establish reduced adverse excursion across opportunities.',
         'R drawdown is closed-trade accumulation; holding exposure is whole-bar approximation.',
         'Python closed-bar implementation is not TradingView native tick-by-tick parity.'],
+        not_applicable='No classifier or ranking score is trained: validation AUC and ranking top-decile metrics are not defined. Net trading returns and matched random controls are evaluated directly.',
         training_eligible=False,production_eligible=False)
     dump(out/'result.json',result)
     print(json.dumps(dict(output=str(out),rows=len(t),holm_family_n=len(family))),flush=True)
