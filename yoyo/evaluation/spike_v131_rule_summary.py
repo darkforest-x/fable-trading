@@ -81,8 +81,10 @@ def serial_flags(f,eligible,order=None):
     take=np.zeros(len(f),bool);flat=-1
     fill=f.filled.to_numpy(bool);di=f.decision_i.to_numpy(int)
     xi=f.exit_i.fillna(-1).to_numpy(int);status=f.status.to_numpy()
-    for i in order:
-        if eligible[i] and fill[i] and di[i]>=flat:
+    # Ineligible or unfilled candidates never alter queue state; select them
+    # out in NumPy before the scalar state machine, retaining the exact order.
+    for i in order[eligible[order] & fill[order]]:
+        if di[i]>=flat:
             take[i]=True;flat=np.iinfo(np.int64).max if status[i]=='censored_boundary' else xi[i]
     return take
 
