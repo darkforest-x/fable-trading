@@ -32685,3 +32685,18 @@ artifacts:
     production_eligible: false
     notes: First-touch complete 5m wick/reclaim; next-5m-open fixed-horizon labels. Raw event, measurement and control
       ledgers beside receipt. No execution or promotion validation.
+
+  - artifact_id: fanshen-v1-1-candle-marks-20261020-delivery
+    artifact_type: manifest
+    role: versioned_pine_visual_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3669720c18d9df5c53abe01f2b21c7b562e42289
+    source_path: output/pine/fanshen_v1_1_delivery.json
+    sha256: d82abe8e72dc295bbbd0959e5463a0459392c6ab929e9430a1771b109bf9b384
+    size_bytes: 2835
+    storage_uri: repo://output/pine/fanshen_v1_1_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Fanshen V1.1 private TradingView revision 2; original arrow conditions mirrored as same-bar green checks
+      and red crosses. Native compile, visual alignment and layout save verified. Original source and script retained.

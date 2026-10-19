@@ -1,0 +1,57 @@
+{
+  "version": "1.1",
+  "completed_at": "2026-10-20T00:24:00+08:00",
+  "source_path": "yoyo/evaluation/pine/owner_fanshen_v1_1.pine",
+  "source_commit": "3669720c18d9df5c53abe01f2b21c7b562e42289",
+  "original_source_path": "experiments/active/exp-spike-fanshen-exit-multitf-20260914-v1/source/owner_fanshen_v1_20250706.pine",
+  "changes": [
+    "Original signalLong -> tiny green check below the same price bar",
+    "Original signalShort -> tiny red cross above the same price bar"
+  ],
+  "signal_logic_parity": {
+    "method": "Remove appended V1.1 comment/plot block and restore indicator title, then compare exact source text",
+    "passed": true
+  },
+  "native_validation": {
+    "application": "TradingView Desktop",
+    "script_name": "翻身版本 V1.1 · K线勾叉",
+    "saved_revision": 2,
+    "saved_at": "2026-10-20T00:20:28+08:00",
+    "compile_and_add_at": "2026-10-20T00:23:20+08:00",
+    "compiler_console": [
+      "完成。",
+      "已添加到图表。"
+    ],
+    "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+    "symbol_timeframe": "OKX:ETHUSDT.P 5m",
+    "visual_observations": [
+      "Green check under the candle aligned with the green oscillator arrow at 2026-10-19 16:05 UTC+8",
+      "Red cross above the candle aligned with the red oscillator arrow at 2026-10-19 17:40 UTC+8",
+      "Before removing the old chart instance, both oscillator panes displayed identical K/D, WVF and arrow positions",
+      "Original Stoch chart instance removed; Stoch V1.1 remains; existing Monday Range and SPIKE instances and drawings retained",
+      "Layout save disabled after save at 00:23:57 UTC+8"
+    ],
+    "original_saved_script_preserved": true,
+    "new_script_private": true,
+    "temporary_browser_sessions_created": 0,
+    "verification_kind": "Observed native accessibility state and screenshots in the task; no screenshot files saved"
+  },
+  "stitch_design": {
+    "model_id": "GEMINI_3_8_FLASH",
+    "project_id": "8978791379095391159",
+    "reference_screen_id": "84121c9f6b5b461993837bca2b1ce811",
+    "screen_id": "eebc61f4b62c41629d89f4f41602ba11",
+    "screen_title": "Pine Indicator Chart Marker Specimen",
+    "html_resource": "projects/8978791379095391159/files/597602f53dad490da706c73b25f1f0e4",
+    "image_resource": "projects/8978791379095391159/files/941d8fedad954aaa93a2523be7016c11",
+    "design_preceded_implementation": true,
+    "reference_data": "Synthetic placeholder candles only"
+  },
+  "official_documentation": [
+    "https://www.tradingview.com/pine-script-docs/visuals/text-and-shapes/",
+    "https://www.tradingview.com/blog/en/display-visuals-on-chart-from-pane-scripts-45290/"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "scope": "Display-only indicator change; original intrabar signals, oscillator plots, WVF and alerts preserved"
+}
