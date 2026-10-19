@@ -49,7 +49,7 @@ test('public REST uses millisecond older cursor, no account credentials and forw
 });
 test('cache appears immediately; websocket arriving during REST wins; stop fences late callbacks',async t=>{
  t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:time*1000+5000});
- const disk=new Disk(),cache=new CandleCache(disk);cache.write(symbol,'1m',[bar(time-60)]);
+ const disk=new Disk(),cache=new CandleCache(disk);cache.write(symbol,'1m',[bar(time-120),bar(time-60)]);
  let resolve!:(bars:Candle[])=>void;const socket=new Socket();const states:CandleState[]=[];let signal:AbortSignal|undefined;
  const session=new CandleSession({symbol,period:'1m',cache,socket:()=>socket as unknown as WebSocket,fetchPage:(_s,_p,o)=>{signal=o.signal;return new Promise(r=>resolve=r)},onChange:s=>states.push(s)});
  session.start();assert.equal(states[0].status,'cached');socket.open();socket.bars([bar(time,104)]);
@@ -67,22 +67,45 @@ test('history errors survive live ticks; reconnect snapshot repairs gaps without
  t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1000)*1000});
  const cache=new CandleCache(new Disk());cache.write(symbol,'1m',[bar(time-1000)]);const socket=new Socket();let fail=true;let state!:CandleState;
  const session=new CandleSession({symbol,period:'1m',cache,socket:()=>socket as unknown as WebSocket,fetchPage:async()=>{if(fail)throw Error('offline');return [bar(time-60,100,true),bar(time)]},onChange:s=>state=s});
- session.start();await flush();socket.open();await flush();socket.bars([bar(time,104)]);assert.match(state.error,/历史/);assert.equal(state.status,'live');
+ session.start();await flush();socket.open();await flush();socket.bars([bar(time,104)]);assert.match(state.error,/历史/);assert.equal(state.status,'offline');assert.equal(state.historyReady,false);
  fail=false;await session.refresh();assert.deepEqual(state.bars.map(b=>b.time),[time-60,time]);assert.equal(state.error,'');session.stop();
 });
 test('heartbeat detects stale feed, repairs by REST and retries hung sockets; collapse clears retries',async t=>{
  t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});let state!:CandleState;let reads=0;const sockets:Socket[]=[];
- const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>{const s=new Socket();sockets.push(s);return s as unknown as WebSocket},fetchPage:async()=>{reads++;return [bar()]},onChange:s=>state=s});
+ const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>{const s=new Socket();sockets.push(s);return s as unknown as WebSocket},fetchPage:async()=>{reads++;return [bar(time-60),bar()]},onChange:s=>state=s});
  session.start();await flush();sockets[0].open();await flush();sockets[0].bars([bar()]);assert.equal(state.status,'live');
- t.mock.timers.tick(15000);await flush();assert.equal(state.status,'delayed');
+ t.mock.timers.tick(15000);await flush();assert.equal(state.status,'polling');
  t.mock.timers.tick(10000);await flush();assert.ok(sockets[0].closed);assert.ok(reads>=2);
  t.mock.timers.tick(1000);assert.equal(sockets.length,2);
  t.mock.timers.tick(15000);assert.ok(sockets[1].closed);session.stop();const count=sockets.length;t.mock.timers.tick(60000);assert.equal(sockets.length,count);
 });
 test('older history is single-flight, cannot overwrite live bars, and stops at exhaustion',async t=>{
  t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});const socket=new Socket();let state!:CandleState;let resolve!:(bars:Candle[])=>void;let olderReads=0;
- const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>socket as unknown as WebSocket,fetchPage:async(_s,_p,o)=>{if(o.before){olderReads++;return new Promise(r=>resolve=r)}return [bar()]},onChange:s=>state=s});
+ const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>socket as unknown as WebSocket,fetchPage:async(_s,_p,o)=>{if(o.before){olderReads++;return new Promise(r=>resolve=r)}return [bar(time-60),bar()]},onChange:s=>state=s});
  session.start();await flush();socket.open();await flush();const first=session.loadOlder();void session.loadOlder();assert.equal(olderReads,1);
- socket.bars([bar(time,104)]);resolve([bar(time-60,99,true),bar(time,98)]);await first;assert.equal(state.bars.at(-1)!.close,104);assert.equal(state.bars.length,2);
+ socket.bars([bar(time,104)]);resolve([bar(time-120,99,true),bar(time,98)]);await first;assert.equal(state.bars.at(-1)!.close,104);assert.equal(state.bars.length,3);
  const last=session.loadOlder();resolve([]);await last;assert.equal(state.canLoadOlder,false);session.stop();
+});
+
+test('healthy live tips do not suppress failed initial history retry or expose a one-bar chart',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});
+ const socket=new Socket();let state!:CandleState,reads=0,fail=true;
+ const session=new CandleSession({symbol,period:'1m',cache:new CandleCache(),socket:()=>socket as unknown as WebSocket,fetchPage:async()=>{reads++;if(fail)throw Error('history blocked');return [bar(time-60),bar()]},onChange:s=>state=s});
+ session.start();socket.open();await flush();socket.bars([bar()]);
+ assert.equal(state.historyReady,false);assert.equal(state.bars.length,1);assert.equal(reads,1);
+ await session.loadOlder();assert.equal(reads,1);
+ fail=false;
+ for(let i=0;i<5;i++){t.mock.timers.tick(1000);socket.bars([bar(time,104)]);await flush()}
+ assert.equal(reads,2);assert.equal(state.historyReady,true);assert.equal(state.status,'live');assert.equal(state.error,'');assert.equal(state.bars.at(-1)!.close,104);
+ session.stop();
+});
+test('repeated history failure backs off, retains real cache, and stops all background retry',async t=>{
+ t.mock.timers.enable({apis:['setTimeout','setInterval','Date'],now:(time+1)*1000});
+ const cache=new CandleCache(new Disk());cache.write(symbol,'1m',[bar(time-60),bar()]);let state!:CandleState,reads=0;
+ const socket=new Socket();const session=new CandleSession({symbol,period:'1m',cache,socket:()=>socket as unknown as WebSocket,fetchPage:async()=>{reads++;throw Error('offline')},onChange:s=>state=s});
+ session.start();socket.open();await flush();
+ for(let i=0;i<14;i++){t.mock.timers.tick(1000);socket.bars([bar()]);await flush()}
+ assert.equal(reads,2);assert.equal(state.historyReady,true);assert.equal(state.status,'delayed');assert.equal(state.errorKind,'snapshot');
+ t.mock.timers.tick(1000);await flush();assert.equal(reads,3);
+ session.stop();t.mock.timers.tick(120000);await flush();assert.equal(reads,3);
 });

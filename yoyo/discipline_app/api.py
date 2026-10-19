@@ -17,6 +17,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictBool, Secret
 from fastapi.exceptions import RequestValidationError
 from .book import Book
 from .market import PublicMarket
+from .candles import CandleHistory, CandleUnavailable
 from .policy import Rejected
 
 
@@ -86,8 +87,9 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.8.9', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='0.8.14', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
+    app.state.candle_history = CandleHistory()
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
     app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
@@ -133,7 +135,16 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.9')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.14')
+
+    @app.get('/v1/market/candles', dependencies=[Depends(auth)])
+    def candles(symbol: str = Query(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$'),
+                period: Literal['1m', '5m', '15m', '1H', '4H', '1D'] = '15m',
+                before: Optional[int] = Query(default=None, gt=0, lt=10_000_000_000)):
+        try:
+            return app.state.candle_history.read(symbol, period, before)
+        except (CandleUnavailable, TimeoutError):
+            raise HTTPException(503, '历史K线暂不可用，请重试') from None
 
     @app.get('/v1/state', dependencies=[Depends(auth)])
     def state(current=Depends(selected), x_spike_account: str = Header(default='')):

@@ -41,7 +41,7 @@ export class CandleCache {
  private now: () => number;
  constructor(disk?: Disk, now = Date.now) { this.disk = disk; this.now = now; }
  read(symbol: string, period: CandlePeriod): Candle[] {
-  if (!validSymbol(symbol) || !(period in PERIODS)) return [];
+  if (!validSymbol(symbol) || !Object.hasOwn(PERIODS,period)) return [];
   try {
    const raw = this.disk?.getItem(PREFIX + symbol + ':' + period);
    if (!raw || raw.length > 200000) return [];
@@ -51,7 +51,7 @@ export class CandleCache {
   } catch { return []; }
  }
  write(symbol: string, period: CandlePeriod, bars: Candle[]) {
-  if (!this.disk || !validSymbol(symbol) || !(period in PERIODS) || !bars.length) return;
+  if (!this.disk || !validSymbol(symbol) || !Object.hasOwn(PERIODS,period) || !bars.length) return;
   try {
    const key = PREFIX + symbol + ':' + period;
    const entries: { key: string; at: number }[] = [];
@@ -68,22 +68,29 @@ export class CandleCache {
 }
 export type CandleRequest = { before?: number; signal: AbortSignal };
 export type FetchCandles = (symbol: string, period: CandlePeriod, options: CandleRequest) => Promise<Candle[]>;
-export async function fetchCandles(symbol: string, period: CandlePeriod, options: CandleRequest, origin = 'https://www.okx.com'): Promise<Candle[]> {
- if (!validSymbol(symbol) || !(period in PERIODS)) throw Error('不支持的合约或周期');
+export type ReadCandleJSON = (url:URL,signal:AbortSignal) => Promise<unknown>;
+export async function browserCandleJSON(url:URL,signal:AbortSignal) {
+ const response=await fetch(url,{signal,credentials:'omit',cache:'no-store',redirect:'error'});
+ if(!response.ok)throw Error('K线暂时无法加载');
+ return response.json();
+}
+export function decodeCandles(payload:unknown):Candle[] {
+ const data=payload as {code?:string;data?:unknown[]}|null;
+ if(data?.code!=='0'||!Array.isArray(data.data))throw Error('行情服务返回异常');
+ const bars=parseCandles(data.data);
+ if(data.data.length&&!bars.length)throw Error('K线数据格式异常');
+ return bars;
+}
+export async function fetchCandles(symbol: string, period: CandlePeriod, options: CandleRequest, origin = 'https://www.okx.com',readJSON:ReadCandleJSON=browserCandleJSON): Promise<Candle[]> {
+ if (!validSymbol(symbol) || !Object.hasOwn(PERIODS,period)) throw Error('不支持的合约或周期');
  const controller = new AbortController();
  const abort = () => controller.abort();
  options.signal.throwIfAborted();
  options.signal.addEventListener('abort', abort, { once: true });
- const timer = setTimeout(abort, 8000);
+ const timer = setTimeout(abort, 18000);
  try {
   const url = new URL(options.before ? '/api/v5/market/history-candles' : '/api/v5/market/candles', origin);
   url.search = new URLSearchParams({ instId: symbol, bar: period, limit: '300', ...(options.before ? { after: String(options.before * 1000) } : {}) }).toString();
-  const response = await fetch(url, { signal: controller.signal, credentials: 'omit', cache: 'no-store' });
-  if (!response.ok) throw Error('K线暂时无法加载');
-  const data = await response.json();
-  if (data.code !== '0' || !Array.isArray(data.data)) throw Error('行情服务返回异常');
-  const bars = parseCandles(data.data);
-  if (data.data.length && !bars.length) throw Error('K线数据格式异常');
-  return bars;
+  return decodeCandles(await readJSON(url,controller.signal));
  } finally { clearTimeout(timer); options.signal.removeEventListener('abort', abort); }
 }

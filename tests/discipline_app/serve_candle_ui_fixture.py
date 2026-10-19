@@ -19,10 +19,11 @@ from fastapi.staticfiles import StaticFiles
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--web-directory', required=True)
+    parser.add_argument('--port', type=int, default=18921)
     options = parser.parse_args()
     app = FastAPI()
     metrics = dict(reads=0, streams=0, active=0, ticks=0, writes=0)
-    control = dict(offline=False)
+    control = dict(offline=False, history_offline=False, stream_offline=False)
     steps = {'1m': 60, '5m': 300, '15m': 900, '1H': 3600, '4H': 14400, '1D': 86400}
 
     def candle(stamp, step, symbol, live=False):
@@ -36,7 +37,7 @@ def main():
     @app.get('/api/v5/market/history-candles')
     def candles(instId: str = 'BTC-USDT-SWAP', bar: str = '15m', after: int = 0):
         metrics['reads'] += 1
-        if control['offline']:
+        if control['offline'] or control['history_offline']:
             return JSONResponse({'code': '500'}, status_code=503)
         step = steps[bar]
         newest = after // 1000 - step if after else int(time.time()) // step * step
@@ -51,7 +52,7 @@ def main():
             sub = (await ws.receive_json())['args'][0]
             step = steps[sub['channel'].removeprefix('candle')]
             while True:
-                if control['offline']:
+                if control['offline'] or control['stream_offline']:
                     await ws.close()
                     break
                 stamp = int(time.time()) // step * step
@@ -77,6 +78,16 @@ def main():
         control['offline'] = offline
         return control
 
+    @app.post('/qa/history-offline/{offline}')
+    def history_offline(offline: bool):
+        control['history_offline'] = offline
+        return control
+
+    @app.post('/qa/stream-offline/{offline}')
+    def stream_offline(offline: bool):
+        control['stream_offline'] = offline
+        return control
+
     @app.api_route('/v1/{path:path}', methods=['GET', 'POST', 'PUT', 'DELETE'])
     def no_account(path: str):
         return JSONResponse({'detail': 'Synthetic chart fixture has no account'}, status_code=401)
@@ -87,7 +98,7 @@ def main():
         return f'<html><body style="margin:0;background:#e9eeea;display:flex;justify-content:center"><iframe title="Synthetic candles {width}px" src="/" style="width:{width}px;height:{height}px;border:0"></iframe></body></html>'
 
     app.mount('/', StaticFiles(directory=Path(options.web_directory), html=True), name='web')
-    uvicorn.run(app, host='127.0.0.1', port=18921, access_log=False)
+    uvicorn.run(app, host='127.0.0.1', port=options.port, access_log=False)
 
 
 if __name__ == '__main__':

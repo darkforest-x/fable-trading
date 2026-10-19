@@ -285,7 +285,7 @@ export default function App(){
      <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
      <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
-    <CandleModule symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
+    <CandleModule connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
     <DisciplineBudget state={state} online={online} onOpen={()=>nav('纪律')}/>
     {connection&&reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={18}/><span>{reason}</span><Icon name="chevron" size={16}/></button>}
     {closeRecovery.attempt&&closeProgress()}

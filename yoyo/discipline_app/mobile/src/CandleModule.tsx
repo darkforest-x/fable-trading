@@ -2,9 +2,10 @@
 import { Component, lazy, memo, Suspense, useState, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import { feedback } from './feedback';
+import type { Connection } from './api';
 import { PERIODS, type CandlePeriod } from './candleData';
 const CandlePanel = lazy(() => import('./CandlePanel'));
-export type CandleProps = { symbol: string; tick?: string; entry?: string; stop?: string };
+export type CandleProps = { symbol: string; connection?: Connection | null; tick?: string; entry?: string; stop?: string };
 class ChartBoundary extends Component<{children:ReactNode;onClose:()=>void},{failed:boolean}> {
  state = { failed:false };
  static getDerivedStateFromError() { return { failed:true }; }
@@ -12,7 +13,7 @@ class ChartBoundary extends Component<{children:ReactNode;onClose:()=>void},{fai
 }
 export const CandleModule = memo(function CandleModule(props: CandleProps) {
  const [expanded,setExpanded] = useState(false);
- const [period,setPeriod] = useState<CandlePeriod>(() => { try { const saved=localStorage.getItem('spike-chart-period'); if(saved && saved in PERIODS) return saved as CandlePeriod; } catch {} return '15m'; });
+ const [period,setPeriod] = useState<CandlePeriod>(() => { try { const saved=localStorage.getItem('spike-chart-period'); if(saved && Object.hasOwn(PERIODS,saved)) return saved as CandlePeriod; } catch {} return '15m'; });
  function changePeriod(value:CandlePeriod) { setPeriod(value); try {localStorage.setItem('spike-chart-period',value)}catch{} feedback('light'); }
  function collapse() { setExpanded(false); feedback('light'); }
  return <section className="candle-module" data-no-swipe aria-label="K线行情">

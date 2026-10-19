@@ -2,8 +2,8 @@
  * REST snapshots repair reconnect gaps; websocket bars received during a snapshot take precedence.
  */
 import { CandleCache, MAX_CANDLES, PERIOD_SECONDS, mergeCandles, parseCandles, type Candle, type CandlePeriod, type FetchCandles } from './candleData.ts';
-export type CandleStatus = 'loading' | 'cached' | 'connecting' | 'live' | 'delayed' | 'offline' | 'paused';
-export type CandleState = { bars: Candle[]; status: CandleStatus; error: string; loadingOlder: boolean; canLoadOlder: boolean; reset: number };
+export type CandleStatus = 'loading' | 'cached' | 'connecting' | 'live' | 'polling' | 'delayed' | 'offline' | 'paused';
+export type CandleState = { bars: Candle[]; status: CandleStatus; error: string; errorKind: '' | 'snapshot' | 'older'; historyReady: boolean; loadingOlder: boolean; canLoadOlder: boolean; reset: number };
 type Options = { symbol: string; period: CandlePeriod; cache: CandleCache; fetchPage: FetchCandles; socket: () => WebSocket; onChange: (state: CandleState) => void; now?: () => number };
 export class CandleSession {
  private options: Options;
@@ -20,17 +20,26 @@ export class CandleSession {
  private connectedAt = 0;
  private lastData = 0;
  private lastSnapshot = 0;
+ private snapshotRequired = true;
+ private snapshotFailures = 0;
+ private nextSnapshotAt = 0;
+ private lastSnapshotSuccess = 0;
  private syncing = false;
  private hasOpened = false;
  private duringSync: Candle[] = [];
  constructor(options: Options) {
   this.options = options;
   const bars = options.cache.read(options.symbol, options.period);
-  this.state = { bars, status: bars.length ? 'cached' : 'loading', error: '', loadingOlder: false, canLoadOlder: true, reset: 0 };
+  this.state = { bars, status: bars.length ? 'cached' : 'loading', error: '', errorKind: '', historyReady: bars.length >= 2, loadingOlder: false, canLoadOlder: true, reset: 0 };
  }
  private now() { return (this.options.now ?? Date.now)(); }
+ private transportStatus(): CandleStatus {
+  if (this.snapshotRequired) return this.state.historyReady ? 'delayed' : this.state.error ? 'offline' : 'loading';
+  if (this.lastData && this.now() - this.lastData < 12000) return 'live';
+  return this.lastSnapshotSuccess && this.now() - this.lastSnapshotSuccess < 15000 ? 'polling' : this.state.historyReady ? 'delayed' : 'offline';
+ }
  private emit() { this.options.onChange({ ...this.state }); }
- private persist() { this.options.cache.write(this.options.symbol, this.options.period, this.state.bars); }
+ private persist() { if (this.state.historyReady) this.options.cache.write(this.options.symbol, this.options.period, this.state.bars); }
  private changed(bars: Candle[], reset = false) {
   this.state.bars = bars;
   if (reset) this.state.reset++;
@@ -41,7 +50,8 @@ export class CandleSession {
  start() {
   if (this.active) return;
   this.active = true; this.generation++;
-  this.state.status = this.state.bars.length ? 'cached' : 'loading'; this.emit();
+  this.snapshotRequired = true;
+  this.state.status = this.state.historyReady ? 'cached' : 'loading'; this.emit();
   void this.refresh(); this.connect();
   this.heartbeat = setInterval(() => {
    if (!this.active) return;
@@ -50,11 +60,10 @@ export class CandleSession {
     if (this.now() - this.lastMessage > 20000 || this.now() - Math.max(this.lastData, this.connectedAt) > 30000) this.socket.close();
     else this.socket.send('ping');
    }
-   if (this.now() - this.lastData > 12000) {
-    const status = this.state.bars.length ? 'delayed' : 'offline';
-    if (this.state.status !== status) { this.state.status = status; this.emit(); }
-    if (this.now() - this.lastSnapshot > 15000) void this.refresh();
-   }
+   const status = this.transportStatus();
+   if (this.state.status !== status) { this.state.status = status; this.emit(); }
+   // History repair is independent of a healthy websocket tip.
+   if (this.now() >= this.nextSnapshotAt && (this.snapshotRequired || this.now() - this.lastData >= 12000)) void this.refresh();
   }, 5000);
  }
  stop() {
@@ -72,7 +81,7 @@ export class CandleSession {
   const retry = () => {
    if (!this.active || generation !== this.generation) return;
    this.socket = null;
-   this.state.status = this.state.bars.length ? 'delayed' : 'offline'; this.emit();
+   this.lastData = 0; this.state.status = this.transportStatus(); this.emit();
    this.retryTimer = setTimeout(() => this.connect(), Math.min(15000, 1000 * 2 ** this.attempts++));
   };
   let socket: WebSocket;
@@ -81,7 +90,7 @@ export class CandleSession {
   socket.onopen = () => {
    if (!this.active || generation !== this.generation || this.socket !== socket) return;
    socket.send(JSON.stringify({ op: 'subscribe', args: [{ channel: 'candle' + this.options.period, instId: this.options.symbol }] }));
-   this.state.status = this.state.bars.length ? 'cached' : 'connecting'; this.emit();
+   this.state.status = this.transportStatus(); this.emit();
    if (this.hasOpened) void this.refresh();
    this.hasOpened = true;
   };
@@ -96,7 +105,7 @@ export class CandleSession {
     const bars = parseCandles(data.data).filter(bar => bar.time <= this.now() / 1000 + 60);
     if (!bars.length) return;
     this.lastData = this.now(); this.attempts = 0;
-    this.state.status = 'live';
+    this.state.status = this.transportStatus();
     if (this.syncing) this.duringSync = mergeCandles(this.duringSync, bars, 300);
     const oldLast = this.state.bars.at(-1)?.time ?? 0;
     const merged = mergeCandles(this.state.bars, bars);
@@ -114,19 +123,23 @@ export class CandleSession {
   try {
    const fresh = await this.options.fetchPage(this.options.symbol, this.options.period, { signal: controller.signal });
    if (!this.active || generation !== this.generation) return;
-   if (!fresh.length) throw Error('暂无K线数据');
+   if (fresh.length < 2) throw Error('历史K线不足');
    // A live tip may already have arrived; it cannot prove the old history is contiguous.
    const prefix = this.state.bars.filter(bar => bar.time < fresh[0].time);
    const gap = prefix.length && fresh[0].time - prefix.at(-1)!.time > PERIOD_SECONDS[this.options.period];
    const base = gap ? this.state.bars.filter(bar => bar.time >= fresh[0].time) : this.state.bars;
    const bars = mergeCandles(mergeCandles(base, fresh), this.duringSync);
-   this.state.error = '';
-   this.state.status = this.lastData && this.now() - this.lastData < 12000 ? 'live' : 'delayed';
+   this.snapshotRequired = false; this.snapshotFailures = 0; this.lastSnapshotSuccess = this.now(); this.nextSnapshotAt = this.now() + 5000;
+   this.state.historyReady = true;
+   if (this.state.errorKind !== 'older') { this.state.error = ''; this.state.errorKind = ''; }
+   this.state.status = this.transportStatus();
    this.changed(bars, true);
   } catch {
    if (this.active && generation === this.generation) {
-    this.state.error = this.state.bars.length ? '历史补齐失败，可重试' : 'K线暂时无法加载';
-    this.state.status = this.state.bars.length ? 'delayed' : 'offline'; this.emit();
+    this.snapshotRequired = true;
+    this.nextSnapshotAt = this.now() + Math.min(30000, 5000 * 2 ** this.snapshotFailures++);
+    this.state.error = this.state.historyReady ? '历史更新延迟 · 点击重试' : '历史暂不可用';
+    this.state.errorKind = 'snapshot'; this.state.status = this.transportStatus(); this.emit();
    }
   } finally {
    this.reads.delete(controller);
@@ -134,7 +147,7 @@ export class CandleSession {
   }
  }
  async loadOlder() {
-  if (!this.active || this.state.loadingOlder || !this.state.canLoadOlder || !this.state.bars.length) return;
+  if (!this.active || this.state.loadingOlder || !this.state.canLoadOlder || !this.state.historyReady || this.syncing || this.state.errorKind === 'snapshot') return;
   const generation = this.generation, before = this.state.bars[0].time, controller = new AbortController();
   this.reads.add(controller); this.state.loadingOlder = true; this.emit();
   try {
@@ -142,10 +155,10 @@ export class CandleSession {
    if (!this.active || generation !== this.generation) return;
    const room = MAX_CANDLES - this.state.bars.length;
    this.state.canLoadOlder = older.length > 0 && older.length < room;
-   this.state.error = '';
+   if (this.state.errorKind === 'older') { this.state.error = ''; this.state.errorKind = ''; }
    this.changed(mergeCandles(older.slice(-room), this.state.bars), true);
   } catch {
-   if (this.active && generation === this.generation) { this.state.error = '历史加载失败，点击重试'; this.emit(); }
+   if (this.active && generation === this.generation) { this.state.error = '历史加载失败，点击重试'; this.state.errorKind = 'older'; this.emit(); }
   } finally {
    this.reads.delete(controller);
    if (this.active && generation === this.generation) { this.state.loadingOlder = false; this.emit(); }

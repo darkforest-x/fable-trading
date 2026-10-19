@@ -12,5 +12,5 @@ npx cap sync
 cd android
 ./gradlew --no-daemon assembleDebug
 mkdir -p "$module_dir/releases"
-cp app/build/outputs/apk/debug/app-debug.apk "$module_dir/releases/spike-discipline-0.8.13.apk"
-"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$module_dir/releases/spike-discipline-0.8.13.apk"
+cp app/build/outputs/apk/debug/app-debug.apk "$module_dir/releases/spike-discipline-0.8.14.apk"
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$module_dir/releases/spike-discipline-0.8.14.apk"
