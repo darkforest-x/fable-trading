@@ -1,4 +1,6 @@
-# SPIKE 纪律交易 0.8.10
+# SPIKE 纪律交易 0.8.11
+
+0.8.11（20）：进一步压缩开仓票据。止损、1R 与手动切换合为一行，限价输入内置最新价；移除方向英文副标题，仓位比例改为轻量刻度，保证金占比并入标题行，预估金额和单位同排。保持输入字号至少 16px、操作按钮至少 44px；390×700 浏览器内常规市价票据与提交按钮可同屏查看。320px 已检查限价、长价格、1R/手动切换与字段错误，无横向溢出，假交易所写请求为 0。Stitch 来源 `design/flow-0.8.11/source.json`。网页构建、iOS / Android 编译和签名通过；iPhone 覆盖安装仍被 CoreDevice 1011 阻挡，Android 未做真机验收。服务端和交易逻辑不变。
 
 0.8.10（19）：开仓先选择多空方向，1R、预估和唯一提交按钮保持一致；限价支持填入最新价，仓位支持 25% / 50% / 75% / 100% 快捷选择。重复点击 1R 会重新计算，切换手动有独立入口；加仓沿用原方向、止损和杠杆。提交前持久化请求编号，核对中锁定重复提交，进度显示在按钮下方。已受理请求每秒核对；未送达的等待与阻断窗口不变。慢 POST 回执或迟到超时不能覆盖已查到的结果，不会自动重发订单。
 
@@ -100,7 +102,7 @@ python3 yoyo/discipline_app/scripts/live_service.py install --enable-execution
 
 安装包、设备安装收据、账户运行数据和验收截图只保存在本机，不随公开仓库分发；仓库保留完整源码、依赖锁文件及构建脚本。
 
-- Android：`releases/spike-discipline-0.8.10.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
+- Android：`releases/spike-discipline-0.8.11.apk`，自用调试签名，包名 `com.spike.discipline`。构建脚本 `scripts/build_android.sh`，未作为商店发行包。
 - iPhone：`mobile/ios/App/App.xcodeproj`，Xcode 26.6，Personal Team 真机签名。普通 Apple ID 的安装有有效期，需要重新签名续期；不会自动升级成付费会员。
 - 原生 HTTPS 校验保持开启，不绕过证书校验；原生请求不跟随重定向。
 

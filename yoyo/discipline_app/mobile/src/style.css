@@ -627,29 +627,52 @@ html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .external-history summary span{margin-left:6px}
 
 /* Stitch 478cef9cdb2b480b8550632ec936c526: one direction, one execution action. */
-.entry-ticket{--entry-accent:var(--green);--entry-soft:var(--green-soft);gap:13px}
+/* Compact ticket from Stitch 913fdf5e: group related controls, keep 44px targets. */
+.entry-page .quote-hero{padding-bottom:6px}
+.entry-page .price-row{margin:3px 0 8px}
+.entry-page .price-row strong{font-size:32px}
+.entry-page .discipline-budget{margin-bottom:10px;min-height:54px;padding:7px 4px}
+.entry-page .budget-cells>span{gap:3px}
+.entry-ticket{--entry-accent:var(--green);--entry-soft:var(--green-soft);padding:14px;gap:8px;border-radius:22px}
 .entry-ticket.entry-short{--entry-accent:var(--red);--entry-soft:var(--red-soft)}
 .direction-picker{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.direction-picker button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;border:1.5px solid transparent;border-radius:14px;background:var(--recessed);color:var(--muted);font-size:15px;font-weight:600}
-.direction-picker small{font-size:10px;letter-spacing:.03em;font-weight:500}
+.direction-picker button{display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid transparent;background:var(--recessed);color:var(--muted);font-weight:600}
 .direction-picker button.active{border-color:var(--entry-accent);background:var(--entry-soft);color:var(--entry-accent)}
 .direction-picker button:disabled:not(.active){opacity:.5}
-.order-options{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center}
-.order-options .leverage-field{width:auto;min-height:48px;padding:0 12px;gap:6px}
-.order-options .leverage-field>span{font-size:11px}.order-options .leverage-field>b{font-size:15px}
-.latest-price{margin-left:auto;border-radius:16px;background:var(--green-soft);color:var(--green);font-size:11px;padding:0 12px}
-.latest-price:disabled{opacity:.5}
-.allocation-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.allocation-presets button{border-radius:12px;min-height:44px;background:var(--recessed);color:var(--muted);font-size:12px}
-.allocation-presets button[aria-pressed=true]{background:var(--entry-soft);color:var(--entry-accent);box-shadow:inset 0 0 0 1px var(--entry-accent)}
-.entry-ticket .slider-scale{justify-content:flex-end;margin-top:7px}
-.entry-ticket .slider-heading output{color:var(--entry-accent)}
-.entry-ticket .ticket-estimate{padding:12px 8px}
-.entry-ticket .trade-progress{margin:0;padding:10px 12px}
-.entry-ticket .order-actions>button{min-height:50px}
-.entry-ticket .equity{font-size:11px}
-.entry-ticket .scale-in-note{font-size:11px;color:var(--muted);margin:0}
-.entry-ticket .field:has(.latest-price) .field-label{margin-bottom:3px}
-@media(max-width:360px){.order-options{gap:6px}.order-options .leverage-field{padding:0 10px}.order-options .leverage-field>span{display:none}.direction-picker small{display:none}}
-
 .direction-picker button[data-side=short] svg{transform:rotate(180deg)}
+.order-options{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;align-items:center}
+.order-options .leverage-field{width:auto;padding:0 12px;gap:6px}
+.order-options .leverage-field>span{font-size:11px}.order-options .leverage-field>b{font-size:15px}
+.latest-price:disabled{opacity:.5}
+.allocation-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.allocation-presets button{min-height:44px;color:var(--muted);font-size:12px}
+.entry-ticket .slider-heading output{color:var(--entry-accent)}
+.entry-ticket .trade-progress{margin:0;padding:10px 12px}
+.entry-ticket .scale-in-note{font-size:11px;color:var(--muted);margin:0}
+.direction-picker button{min-height:44px;border-radius:12px;font-size:14px}
+.order-options .leverage-field{min-height:44px;border-radius:12px}
+.entry-ticket .segment{padding:0}
+.entry-ticket .segment button{min-height:44px}
+.compact-price{gap:8px;min-height:48px;padding:2px 4px 2px 11px;border-radius:12px}
+.compact-price>label{flex:none;font-size:12px;color:var(--muted);white-space:nowrap}
+.compact-price input{flex:1;width:0;min-height:44px;font-size:16px;padding:0;border:0;background:transparent}
+.compact-price .latest-price,.compact-price .quick-stop{flex:none;min-height:44px;margin:0;padding:0 10px;border-radius:10px;font-size:11px;display:inline-flex;align-items:center;justify-content:center;gap:3px;background:var(--green-soft);color:var(--green)}
+.compact-price .quick-stop.applied{background:var(--green);color:white}
+.compact-price .inherited-stop{padding:0 8px;font-size:11px;color:var(--muted)}
+.compact-price .manual-stop{flex:none;min-width:44px;min-height:44px;padding:0 4px;color:var(--muted);font-size:11px}
+.entry-ticket .slider-heading{align-items:center;gap:6px}
+.entry-ticket .slider-heading label{font-size:12px;white-space:nowrap}
+.entry-ticket .slider-heading output{font-size:20px;order:1;white-space:nowrap}
+.entry-ticket .margin-caption{order:2;margin-left:auto;color:var(--muted);font-size:10px;text-align:right}
+.entry-ticket .allocation-presets{gap:4px}
+.entry-ticket .allocation-presets button{background:transparent;border-radius:9px}
+.entry-ticket .allocation-presets button[aria-pressed=true]{background:var(--entry-soft);box-shadow:none;font-weight:600}
+.entry-ticket .ticket-estimate{border-radius:12px;padding:10px 3px;gap:3px}
+.entry-ticket .ticket-estimate>div+div{border-left:1px solid var(--border)}
+.entry-ticket .ticket-estimate span{margin-bottom:4px}
+.entry-ticket .ticket-estimate small{display:inline;font-size:9px;margin:0;white-space:nowrap}
+.entry-ticket .ticket-estimate b{font-size:13px}
+.entry-ticket .order-actions>button{min-height:48px}
+.entry-ticket .equity{font-size:10px}
+.entry-ticket .equity b{font-size:12px}
+@media(max-width:360px){.entry-page .price-row strong{font-size:30px}.entry-ticket{padding:12px}.compact-price{gap:6px;padding-left:9px}.compact-price .quick-stop,.compact-price .latest-price{padding:0 8px}.entry-ticket .margin-caption{max-width:112px;line-height:1.3}}
