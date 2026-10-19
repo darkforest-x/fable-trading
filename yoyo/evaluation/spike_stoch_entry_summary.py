@@ -119,10 +119,12 @@ def run(root,name='analysis_v1'):
                             total_baseline_5r=int((bp.net_r>=5).sum())))
                         if len(shared):
                             a=bp.loc[shared];z=vp.loc[shared];weeks=a.anchor_time.dt.strftime('%G-W%V')
-                            for field in ('net_r','mae_r','mae_bp','mae_anchor_r','entry_price'):
-                                delta=z[field]-a[field]
+                            for field in ('net_r','mae_r','mae_bp','mae_anchor_r','entry_price_bp'):
+                                av=a[field] if field!='entry_price_bp' else pd.Series(0.,index=shared)
+                                zv=z[field] if field!='entry_price_bp' else (z.entry_price/a.entry_price-1)*10000
+                                delta=zv-av
                                 commond.append(dict(timeframe_min=m,period=period,baseline=baseline,policy=candidate,field=field,
-                                    n=len(shared),baseline_mean=float(a[field].mean()),variant_mean=float(z[field].mean()),
+                                    n=len(shared),baseline_mean=float(av.mean()),variant_mean=float(zv.mean()),
                                     delta=stats(delta),uncertainty=inference(delta,weeks,cfg),
                                     interpretation='Conditional on both policies executing and closing this original opportunity; descriptive selection, not causal.'))
         print(json.dumps(dict(timeframe_min=m,rows=len(f),closed_serial=len(t))),flush=True)

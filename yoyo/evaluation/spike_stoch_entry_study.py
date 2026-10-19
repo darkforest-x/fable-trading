@@ -82,6 +82,7 @@ def worker(args):
                         symbol=symbol,timeframe_min=minutes,eligible=bool(green[ai]) if policy=='stoch_wvf' else True,
                         pair_eligible=bool(pair),state_pair=bool(pair and green[ai] and green[ci]) if ci is not None else False,
                         anchor_green=bool(green[i]),anchor_stoch=bool(arrow[i]),
+                        decision_green=bool(green[d]),decision_stoch=bool(arrow[d]),
                         anchor_time=clock[i].isoformat(),decision_time=clock[d].isoformat(),mature_time=clock[x if r['filled'] else d].isoformat(),
                         entry_time=frame.index[int(r['entry_i'])].isoformat() if r['filled'] else None,
                         exit_time=frame.index[x].isoformat() if r['filled'] else None,
