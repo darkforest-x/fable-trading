@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_v131_rule_facts import FEATURES
-from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer,four_week_blocks,read
+from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer,four_week_blocks,read,epoch,known
 
 
 def test_feature_decimals_round_trip_at_observed_quantile_edge(tmp_path):
@@ -40,6 +40,8 @@ def test_required_censored_is_unknown_but_blocked_hypothetical_is_zero():
     f=rows();e=np.ones(3,bool)
     v,k,m=effective(f,e,serial_flags(f,e))
     assert v[1]==0 and k.tolist()==[True,True,False]
+    cached=effective(f,e,serial_flags(f,e),tuple(epoch(f[x]) for x in ['mature_time','decision_time','anchor_time']),f.status.map(known).to_numpy(bool))
+    for a,b in zip((v,k,m),cached):np.testing.assert_array_equal(a,b)
     e=np.array([False,True,True]);v,k,m=effective(f,e,serial_flags(f,e))
     assert v.tolist()==[0,2,0] and k.all()
     assert m[0]==int(pd.Timestamp(f.anchor_time[0]).timestamp())

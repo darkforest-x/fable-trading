@@ -89,13 +89,15 @@ def serial_flags(f,eligible,order=None):
     return take
 
 
-def effective(f,eligible,taken):
+def effective(f,eligible,taken,times=None,known_status=None):
     """Unknown retained only where this queue actually requires that outcome."""
     filled=f.filled.to_numpy(bool);closed=f.status.eq('closed').to_numpy()
+    if known_status is None:known_status=f.status.map(known).to_numpy(bool)
+    if times is None:times=(epoch(f.mature_time),epoch(f.decision_time),epoch(f.anchor_time))
     known_a=(~eligible | (filled & ~taken) | (taken & closed)
-             | (~filled & f.status.map(known).to_numpy(bool)))
+             | (~filled & known_status))
     value=np.where(taken,f.net_r.to_numpy(float),0.)
-    mature=np.where(taken,epoch(f.mature_time),np.where(eligible,epoch(f.decision_time),epoch(f.anchor_time)))
+    mature=np.where(taken,times[0],np.where(eligible,times[1],times[2]))
     return value,known_a,mature
 
 
@@ -178,6 +180,7 @@ def run(root,name='analysis_v1'):
             allowed=eligibility(f,thresholds[str(m)])
             target=f.cohort.eq('signal').to_numpy();pair=f.pair_eligible.to_numpy(bool)
             et=epoch(f.entry_time);xt=epoch(f.mature_time);side_all=f.side.to_numpy(int)
+            times=(xt,epoch(f.decision_time),epoch(f.anchor_time));known_status=f.status.map(known).to_numpy(bool)
             net_all=f.net_r.to_numpy(float);gross_all=f.gross_r.to_numpy(float);cost_all=f.cost_r.to_numpy(float)
             exits_all=f.exit_time.to_numpy();ids_all=f.trade_key.to_numpy();closed_all=f.status.eq('closed').to_numpy()
             flags={};flagframe=f[['trade_key','cohort']].copy()
@@ -217,11 +220,11 @@ def run(root,name='analysis_v1'):
             control_index=dict(zip(f.loc[~target&pair,'trade_key'],f.index[~target&pair]))
             ci=np.array([control_index[k] for k in f.loc[si,'trade_key']],int)
             assert np.array_equal(f.loc[si,'trade_key'].to_numpy(),f.loc[ci,'trade_key'].to_numpy())
-            anchor=epoch(f.anchor_time);first=np.minimum(anchor[si],anchor[ci]);side=f.side.to_numpy(int)[si]
+            anchor=times[2];first=np.minimum(anchor[si],anchor[ci]);side=f.side.to_numpy(int)[si]
             weeks=pd.to_datetime(f.loc[si,'anchor_time'],utc=True).dt.strftime('%G-W%V').to_numpy()
             weekcodes=pd.Categorical(weeks,categories=week_names).codes
             assert (weekcodes>=0).all()
-            values={p:effective(f,allowed[p],flags[p][1]) for p in POLICIES}
+            values={p:effective(f,allowed[p],flags[p][1],times,known_status) for p in POLICIES}
             for policy in POLICIES:
                 base=baseline_for(policy);v,k,mat=values[policy];b,bk,bmat=values[base]
                 relevant=allowed[policy][si]|allowed[policy][ci]|allowed[base][si]|allowed[base][ci]
