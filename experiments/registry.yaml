@@ -17,7 +17,7 @@ experiments:
   - experiment_id: exp-spike-v131-entry-stages-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 17ca60d913
-    status: active
+    status: inconclusive
     question: Which closed-bar entry stage improves frozen Spike net returns after fresh serial occupancy and matched random controls?
     single_variable: Entry stage only; immediate, first breakout, first valid pullback, existing rebreak. Original absolute stop, actual-entry R, timeframe trail and 20bp cost remain fixed.
     artifacts: [spike-v131-entry-stages-20261019-v1]
@@ -25,8 +25,8 @@ experiments:
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: true
-    result: Preregistered four-stage comparison running on638 registered symbols and15m/30m/1H/4H. Three-symbol smoke and98 focused/boundary tests pass; full results pending.
-    notes: Independent policy-specific occupancy includes newly freed entries. Paired queues share original seeded symbol/side/week/fold/volatility draws and nonSunday guard without redraw. Known no-fill retained as zero; actual censored outcomes remain unknown. Full-history ranking and early-selected later comparison kept separate. Smoke_v1 joint-control lineage scope error preserved; fixed before smoke_v2/full replay. No report or production change.
+    result: All638 symbols/four grids complete,175009 analysis anchors. Immediate/breakout/pullback/rebreak netR1273.87/3410.60/1475.59/1259.71; later -64.11/1634.92/736.61/579.06. Breakout trades106848 versus21534,meanR0.03192 versus0.05850,PF1.05028 versus1.09980,realized closed-R drawdown4090.78 versus609.00. Same matched serial breakout target3241.97R versus random6141.83R; no positive independent excess or production upgrade established. Pre2025 timeframe choices yield4093.03R full and2080.94R later but do not clear random/risk evidence.
+    notes: Fresh policy occupancy;153077 common mature paired serial opportunities with original seeded symbol/side/week/fold/volatility draws and nonSunday guard, no redraw, zero no-fill retained. Full and paired populations separate. New1H2ATR baseline3344 trades326.263R adds6 trades12.267R to3338 common Jan2023+ legacy trades. 5760431 independent scalar checks,892440 occupancy checks,128178 rebreak scalar checks,18237 serial identities,125506 draw identities,7497 prefix checks,32 extreme cases and120 cross-aggregation checks pass. 100 focused/boundary tests;13 numeric-kernel reruns warning-free. Failed smoke joint-arm scope and initial BLAS warning preserved in delivery receipt, fixed before official runs concerned. Historical reuse, non-PIT universe/ticks, no shared capital/funding/queue model. Notion3fe8856479af81baa0b7cb24537c6042 synced and reread. No report or production change.
   - experiment_id: exp-spike-v131-confirmation-cost-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c304b78ad0

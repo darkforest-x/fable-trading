@@ -1,0 +1,99 @@
+{
+  "experiment_id": "exp-spike-v131-entry-stages-20261019-v1",
+  "status": "completed_no_upgrade_accepted",
+  "builder_commit": "17ca60d913",
+  "original_builder_commit": "1221f67660",
+  "verification_commit": "1759d03019",
+  "summary_commit": "9c7f49a191",
+  "symbols": 638,
+  "timeframes": [
+    15,
+    30,
+    60,
+    240
+  ],
+  "analysis_signal_anchors": 175009,
+  "event_rows": 1418924,
+  "current_rebreak_closed": 21534,
+  "tests": {
+    "focused_and_boundary": 100,
+    "numeric_kernel_targeted_after_fix": 13
+  },
+  "validation": {
+    "status": "passed",
+    "independent_scalar_checks": 5760431,
+    "serial_nonoverlap_checks": 892440
+  },
+  "lineage": {
+    "rebreak_scalar_checks": 128178,
+    "serial_identity_checks": 18237,
+    "draw_identity_checks": 125506,
+    "prefix_checks": 7497
+  },
+  "prefix_cases": 32,
+  "comparison_checks": 120,
+  "outcome": {
+    "uniform_full_history_best": "breakout",
+    "uniform_full_history_net_r": 3410.6030612233435,
+    "rebreak_net_r": 1259.7134210042968,
+    "early_selected_later_net_r": 1634.9200676111568,
+    "later_rebreak_net_r": 579.0619381136786,
+    "pre2025_timeframe_selected_full_r": 4093.025662772152,
+    "pre2025_timeframe_selected_later_r": 2080.941317477296,
+    "production_upgrade": false
+  },
+  "one_hour_baseline_change": {
+    "legacy_n": 3338,
+    "fresh_n": 3344,
+    "shared": 3338,
+    "added_n": 6,
+    "removed_n": 0,
+    "legacy_r": 313.99629278089037,
+    "fresh_r": 326.263015449952,
+    "added_r": 12.266722669066498,
+    "removed_r": 0.0,
+    "delta_r": 12.266722669061608,
+    "definition": "Jan2023+ closed trades only; old fixed-entry2ATR versus fresh2ATR serial. Shared entries match."
+  },
+  "reproduction": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_entry_stages --workers 4 --output experiments/active/exp-spike-v131-entry-stages-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_entry_stages_verify experiments/active/exp-spike-v131-entry-stages-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_entry_stages_prefix_audit experiments/active/exp-spike-v131-entry-stages-20261019-v1/results_reproduce",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_entry_stages_summary experiments/active/exp-spike-v131-entry-stages-20261019-v1/results_reproduce"
+  ],
+  "notes": [
+    "Fresh output directory required; existing raw files not overwritten.",
+    "Smoke_v1 stopped on joint control keys in a mixed-arm archive; scoped v9_both before smoke_v2 and full replay. Failed receipt preserved.",
+    "Initial sign-flip tests passed with platform BLAS floating-point warnings. Before official summary, replaced tiny matmul with explicit finite-checked products; zero/exact-null and replication tests pass without warnings. Pinned dependencies unchanged.",
+    "Original 2022 December 19 trades excluded by common Jan2023 analysis start; fresh1H2ATR occupancy adds six closed trades, shared3338 exact netR match.",
+    "Same nonSunday random eligibility, no redraw, known no-fill zeros; all-four-policy common maturity retains153077 paired serial opportunities.",
+    "Top1pct removal is descriptive; summedR/closed-trade drawdown is not account return or marked portfolio drawdown.",
+    "No production/Pine/service/order changes; stops/costs/trails frozen. No downloads, content hashes, training or report generation.",
+    "Subagent actual model/effort unavailable from runtime; stopped without research; parent completed work."
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_status": "synced_and_readback_verified",
+  "all_signal_anchors_including_warmup": 177383,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81baa0b7cb24537c6042",
+  "comparison_verification": {
+    "status": "passed",
+    "cross_aggregation_checks": 120,
+    "unchanged_builder_inputs": 36,
+    "one_hour_delta_identity": true
+  },
+  "prefix_audit_commit": "9c7f49a191",
+  "timeframe_selected_matched": {
+    "all": {
+      "target_net_r": 3868.7688308334823,
+      "random_net_r": 9076.272826540842,
+      "opportunities": 153077
+    },
+    "later": {
+      "target_net_r": 1937.1052482268576,
+      "random_net_r": 6215.891171639424,
+      "opportunities": 101678
+    },
+    "definition": "Sum paired_serial side0 rows in result.json using the pre2025-selected policy for each timeframe; same matched populations."
+  }
+}

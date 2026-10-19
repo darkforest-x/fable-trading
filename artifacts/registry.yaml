@@ -23,12 +23,12 @@ artifacts:
     role: Four causal entry stages with fresh serial occupancy and original matched random draws
     source_repo: darkforest-x/fable-trading
     source_commit: 17ca60d913
-    source_path: experiments/active/exp-spike-v131-entry-stages-20261019-v1/config.json
-    storage_uri: repo://experiments/active/exp-spike-v131-entry-stages-20261019-v1/config.json
+    source_path: experiments/active/exp-spike-v131-entry-stages-20261019-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-spike-v131-entry-stages-20261019-v1/delivery_receipt.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Active study; config and PROJECT_PLAN frozen before the run. Raw compressed ledgers stay local. Uses path/size/mtime/read checks, no content hashing or downloads.
+    notes: Completed four-stage study; results_v1/result.json,comparisons.json,verification.json,prefix_verification.json,comparison_verification.json and provenance receipts retained. Raw per-stream/event/pair compressed ledgers local. Config/four stages fixed before run; pooled uncertainty addendum before full results inspected. Path/size/mtime/read checks only; no content hashing or downloads. Highest cumulativeR not independent alpha; no upgrade accepted.
   - artifact_id: spike-v131-confirmation-cost-20261019-v1
     artifact_type: manifest
     role: Frozen confirmation selection and price-cost attribution with opportunity-level random controls
