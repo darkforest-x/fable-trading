@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-spike-v131-rule-state-20261019-v1",
+  "input_manifest": "data/research/spike_v128_entry_clock_long_20260923/manifest.json",
+  "warmup_start": "2022-11-01T00:00:00Z",
+  "start": "2022-11-01T00:00:00Z",
+  "analysis_start": "2023-01-01T00:00:00Z",
+  "split": "2025-01-01T00:00:00Z",
+  "end": "2026-09-23T04:00:00Z",
+  "timeframes": [15, 30, 60, 240],
+  "arms": ["baseline", "no_density", "no_bb", "no_launch_volume", "no_imacd", "no_advance", "no_candle_shape", "no_body_support", "no_rope_cap", "no_volume_cap", "no_h1", "simple_breakout"],
+  "features": ["compression_run60", "advance20_atr", "relative_btc20_atr"],
+  "feature_quantiles": [0.3333333333333333, 0.6666666666666666],
+  "feature_min_early_closed": 30,
+  "prefix_symbols": ["BTCUSDT", "ETHUSDT", "1000PEPEUSDT", "0GUSDT", "SOLUSDT", "LUNA2USDT", "BNXUSDT", "ZECUSDT"],
+  "round_trip_cost": 0.002,
+  "control_seed": 923128,
+  "vol_bins": [0.005, 0.01, 0.02, 0.05, 0.1],
+  "seed": 20261019,
+  "bootstrap": 3000,
+  "training_eligible": false,
+  "production_eligible": false
+}
