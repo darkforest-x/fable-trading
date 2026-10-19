@@ -64,7 +64,8 @@ def run(root):
     root=Path(root);cfg=json.loads(CONFIG.read_text());selected=[]
     for minutes in cfg['timeframes']:
         f=read(root/f'events_{minutes}m.csv.gz')
-        f=f[f.cohort.eq('signal') & f.serial_all & f.status.eq('closed')]
+        f=f[f.cohort.eq('signal') & f.serial_all & f.status.eq('closed') &
+            (pd.to_datetime(f.entry_time,utc=True)>=pd.Timestamp(cfg['analysis_start']))]
         for policy,g in f.groupby('policy'):
             for label,i in [('max_net_r',g.net_r.idxmax()),('min_net_r',g.net_r.idxmin())]:
                 selected.append(g.loc[i].to_dict()|dict(audit_selection=label))

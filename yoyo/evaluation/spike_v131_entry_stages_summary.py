@@ -75,7 +75,9 @@ def run(root):
         adjusted=max(adjusted,min(1.,r['excess_increment_signflip_p']*(len(ranked)-i)))
         r['later_12_test_holm_p']=adjusted
     legacy=read('experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/trades.csv.gz')
-    legacy=legacy[legacy.timeframe_min.eq(60) & (pd.to_datetime(legacy.entry_time,utc=True)>=start)].set_index('trade_key')
+    symbols=json.loads((root/'identity.json').read_text())['symbols']
+    legacy=legacy[legacy.symbol.isin(symbols) & legacy.timeframe_min.eq(60) &
+        (pd.to_datetime(legacy.entry_time,utc=True)>=start)].set_index('trade_key')
     fresh=trades[trades.timeframe_min.eq(60)&trades.policy.eq('rebreak')].set_index('trade_key')
     shared=fresh.index.intersection(legacy.index);added=fresh.index.difference(legacy.index);removed=legacy.index.difference(fresh.index)
     np.testing.assert_allclose(fresh.loc[shared,'net_r'],legacy.loc[shared,'net_r'],atol=1e-8,rtol=0)
