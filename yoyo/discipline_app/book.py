@@ -286,6 +286,7 @@ class Book:
         if state['daily'] is None or state['daily']['key'] != key:
             previous = state['daily']
             state['daily'] = dict(key=key, start_equity=str(self.equity(state)), entries=0, locked_reason=None)
+            self.begin_day(state)
             # A completed loss streak starts a new daily streak after midnight;
             # the independently persisted 24h loss cooldown is never cleared.
             if previous and state['policy'] and state['loss_streak'] >= self.policy(state).loss_streak:
@@ -295,8 +296,14 @@ class Book:
             if state['loss_streak'] >= p.loss_streak:
                 state['daily']['locked_reason'] = state['daily']['locked_reason'] or '连续亏损停手'
             start = dec(state['daily']['start_equity'])
-            if start <= 0 or self.equity(state) <= start * (1 - dec(p.daily_loss_fraction)):
+            if start <= 0 or self.daily_pnl(state) <= -start * dec(p.daily_loss_fraction):
                 state['daily']['locked_reason'] = state['daily']['locked_reason'] or '当日净值亏损停手'
+
+    def begin_day(self, state):
+        """Subclass hook for a source-scoped daily valuation baseline."""
+
+    def daily_pnl(self, state):
+        return self.equity(state) - dec(state['daily']['start_equity'])
 
     def entry_guard(self, state, exclude_pending=None, add_to=None):
         p = self.policy(state)
@@ -788,7 +795,7 @@ class Book:
                 entries_limit=limit, entries_bonus=limit-p.max_entries,
                 losses_remaining=0 if state['cooldown_until'] > self.clock() else max(0, p.loss_streak - state['loss_streak']),
                 daily_loss_limit=str(start * dec(p.daily_loss_fraction)),
-                daily_loss_remaining=str(max(Decimal(0), self.equity(state) - start * (1 - dec(p.daily_loss_fraction)))))
+                daily_loss_remaining=str(max(Decimal(0), start * dec(p.daily_loss_fraction) + self.daily_pnl(state))))
         result['blockers'] = []
         try:
             self.entry_guard(state)

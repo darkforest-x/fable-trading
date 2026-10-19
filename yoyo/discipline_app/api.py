@@ -86,7 +86,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.8.6', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='0.8.9', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
@@ -133,7 +133,7 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.6')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.9')
 
     @app.get('/v1/state', dependencies=[Depends(auth)])
     def state(current=Depends(selected), x_spike_account: str = Header(default='')):

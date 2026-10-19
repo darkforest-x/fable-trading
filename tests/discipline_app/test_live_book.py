@@ -124,13 +124,15 @@ def test_timeout_with_actual_fill_reconciles_without_duplicate(live):
     assert len([x for x in exchange.writes if x[0].endswith('/order')])==1
 
 
-def test_invalid_fee_foreign_position_expired_preview_and_risk_all_reject(live):
+def test_fee_and_expired_preview_reject_but_other_contract_external_position_does_not(live):
     book,exchange,now=live
     exchange.fee='-0.001'
     with pytest.raises(Rejected,match='手续费'): book.preview(ticket())
     exchange.fee='-0.0005'
     exchange.positions=[dict(instId='ETH-USDT-SWAP',posSide='long',pos='1')]
-    with pytest.raises(Rejected,match='未管理'): book.preview(ticket())
+    assert book.preview(ticket())['plan']
+    with pytest.raises(Rejected,match='该合约有外部交易'):
+        book.preview(ticket(symbol='ETH-USDT-SWAP'))
     exchange.positions=[]
     preview=book.preview(ticket())
     now[0]+=46;quote(book)

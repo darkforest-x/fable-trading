@@ -3,6 +3,7 @@ import {entryAvailability} from './entryAvailability';
 import {TradeProgress,type EntryProgress} from './TradeProgress';
 import {useCloseRecovery} from './useCloseRecovery';
 import {TradeActivity} from './TradeActivity';
+import {ExternalActivity} from './ExternalActivity';
 import {useLiveQuotes} from './useLiveQuotes';
 import {ClosePosition} from './ClosePosition';
 import {PageHeader} from './PageHeader';
@@ -285,9 +286,10 @@ export default function App(){
    </>}
    {tab==='持仓'&&<>
     <PageHeader title="持仓保护" subtitle={`${state?.account_name??'当前账户'} · 每笔交易都有退出计划。`} onSettings={()=>nav('设置')}/>
-    <TradeProgress entry={pendingEntry?{...pendingEntry,status:'checking'}:entryProgress} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
+    <TradeProgress entry={pendingEntry?{...pendingEntry,status:'checking'}:entryProgress} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有 App 持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
     {state?.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}
     {state&&<TradeActivity state={state} busy={busy} cancelling={action?.kind==='cancel'?action.id:undefined} onCancel={cancelOrder} price={priceFmt}/>}
+    {state&&<ExternalActivity state={state} online={online}/>}
     <p className="disclaimer">{live?'已确认的交易所止损止盈不依赖手机在线。Mac 离线期间不能执行新的 1R 保本调整或应急指令。':'计划风险固定，实际损失可能超出预算。服务停机期间不会执行自动退出。'}</p>
    </>}
    {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')}/>}
@@ -299,7 +301,7 @@ export default function App(){
     {proposal&&<section className="card pending-policy-card"><span className="badge"><Icon name="clock" size={13}/>待生效变更</span><h2>{marginLabel(proposal.policy.margin_mode)} · 单笔风险 {Number(proposal.policy.risk_fraction)*100}%</h2><p>账户名义上限：BTC / ETH {proposal.policy.major_exposure_multiple}倍 · 山寨 {proposal.policy.alt_exposure_multiple}倍</p><p>最早 {new Date(proposal.effective_after*1000).toLocaleString('zh-CN',{timeZone:'Asia/Shanghai',hour12:false})}（北京时间）生效，届时需无持仓、无挂单。</p><small>当前规则、次数和冷静期继续保留。</small></section>}
     {ruleGroups.map(group=><section className="card rule-card" key={group.title}><h2><Icon name={group.icon} size={18}/>{group.title}</h2><div className="rules">{group.rows.map(([k,v])=><div key={k}><span>{k}</span><b>{v}</b></div>)}</div></section>)}
     <section className="card rule-card"><h2><Icon name="clock" size={18}/>当前记录</h2><dl className="metrics"><div><dt>今日已用次数</dt><dd>{state?.daily?.entries??'—'} / {state?.discipline?.entries_limit??p?.max_entries??3}</dd></div><div><dt>今日盈利奖励</dt><dd>+{state?.discipline?.entries_bonus??0} 次</dd></div><div><dt>连续净亏损</dt><dd>{state?.loss_streak??'—'} 笔</dd></div><div><dt>冷静期结束</dt><dd>{!state?'待连接':state.cooldown_until>state.server_time?new Date(state.cooldown_until*1000).toLocaleString('zh-CN'):'未触发'}</dd></div></dl></section>
-    <details className="explainer"><summary>规则计算与运行边界<Icon name="chevron" size={16}/></summary><p>每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。</p><p>保证金占比按账户净值计算：BTC/ETH 合计不超过 10%，山寨合计不超过 5%；同类已有持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位另保留总额度校验：BTC/ETH 名义金额 ÷ 10 + 山寨名义金额 ÷ 5，不得超过净值。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。</p><p>R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 {Number(p?.fee_rate??.0005)*100}%，滑点预留 {Number(p?.slippage_rate??.001)*100}%，未计资金费，不代表你的实际交易所费率。</p><p>日亏停手线不代替每笔止损，多个持仓风险会叠加。{live?'资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。':'当前模拟不计算交易所真实强平价。'}</p></details>
+    <details className="explainer"><summary>规则计算与运行边界<Icon name="chevron" size={16}/></summary><p>每日按北京时间 00:00 切换。未成交撤单经交易所确认后返还次数，已成交不返还。规则以当前生效版本为准。</p><p>外部交易仅记录，不占用 App 开仓次数、连亏、仓位或保证金额度。日亏只计算 App 管理交易的当日已实现与浮动盈亏；交易所可用资金仍需满足开仓要求。同币种外部交易与 App 仓位可能合并，归属未确认前不混合操作。</p><p>保证金占比按账户净值计算：BTC、ETH 各自不超过 10%，山寨合计不超过 5%；本 App 对应额度池的持仓与挂单占用会扣除，单笔计划止损风险仍不超过净值 5%。名义仓位按当前规则分别核验各额度池。开仓与成交前检查，并预留入场费用与不利价差；行情变化仍可能使已有仓位超过比例上限。</p><p>R 按确认的开仓计划固定，包含费用与滑点预留。止盈比例按原始仓位计算。成本预留费率每边 {Number(p?.fee_rate??.0005)*100}%，滑点预留 {Number(p?.slippage_rate??.001)*100}%，未计资金费，不代表你的实际交易所费率。</p><p>日亏停手线不代替每笔止损，多个持仓风险会叠加。{live?'资金费、滑点与全仓强平仍受交易所规则影响；实盘止损不是最大亏损保证。':'当前模拟不计算交易所真实强平价。'}</p></details>
    </>}
    {tab==='设置'&&<>
     <PageHeader title="设置与账户" subtitle="账户、操作习惯，都在这里。" onBack={()=>nav(settingsOrigin.current)}/>

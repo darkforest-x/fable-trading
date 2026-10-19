@@ -613,3 +613,15 @@ html { -webkit-text-size-adjust:100%; text-size-adjust:100%; }
 .contract-volume{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .contract-sort button{white-space:nowrap;flex-shrink:0}
 @media(max-width:350px){.contract-sort{flex-wrap:wrap}.contract-sort>span{width:100%;margin-bottom:2px}.contract-sort button{flex:1}.position-symbol{gap:5px}}
+
+/* External observations: Stitch flow-0.8.9, no execution controls. */
+.external-activity .section-heading{margin-bottom:4px}
+.external-activity>.micro{margin:0 0 12px}
+.external-record{padding:14px 0;border-top:1px solid var(--border,#e3eae6);min-width:0}
+.external-record .activity-title{flex-wrap:wrap;gap:6px}
+.external-record .activity-title>b{overflow-wrap:anywhere}
+.external-values{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+.external-values dt{font-size:11px;color:var(--muted,#758780);margin-bottom:5px}
+.external-values dd{font-size:13px;font-weight:600;margin:0;overflow-wrap:anywhere}
+.external-history summary{padding:14px 0 4px;font-size:13px;color:var(--muted,#758780);cursor:pointer}
+.external-history summary span{margin-left:6px}

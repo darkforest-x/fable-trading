@@ -12,6 +12,7 @@ export function entryAvailability({state,symbol,connected,online,fresh,restoring
  if(!state?.policy)return {text:'等待账户规则',tab:'纪律' as const};
  if(!fresh)return {text:'行情更新中 · 暂停开仓',tab:'设置' as const};
  if(state.pending.some(p=>p.symbol===symbol))return {text:'该币种已有挂单，成交或撤单后可继续',tab:'持仓' as const};
+ if(state.external_activity?.current.some(row=>row.symbol===symbol))return {text:'该合约有外部交易 · 仅记录，其他合约可正常开仓',tab:'持仓' as const};
  if(room<=0)return {text:`${['BTC-USDT-SWAP','ETH-USDT-SWAP'].includes(symbol)?(state.policy.major_allowance_scope==='independent'?symbol.replace('-USDT-SWAP',''):'BTC/ETH'):'山寨币'}可用保证金额度已用完`,tab:'持仓' as const};
  return null;
 }

@@ -33,6 +33,14 @@ test('disabled entry always has a reason and a relevant destination',()=>{
  assert.deepEqual(entryAvailability({...args,state:{...state,cooldown_until:161}}),{text:'冷静期剩余 00:01:01',tab:'纪律'});
 });
 
+test('external activity only blocks its own contract in the entry UI',()=>{
+ const external={...state,external_activity:{current:[{symbol:'ETH-USDT-SWAP'}],recent:[],updated_at:100}} as State;
+ const args={state:external,symbol:'BTC-USDT-SWAP',connected:true,online:true,fresh:true,restoring:false,pending:false,room:.1,now:100};
+ assert.equal(entryAvailability(args),null);
+ assert.deepEqual(entryAvailability({...args,symbol:'ETH-USDT-SWAP'}),{text:'该合约有外部交易 · 仅记录，其他合约可正常开仓',tab:'持仓'});
+ assert.equal(entryAvailability({...args,symbol:'ETH-USDT-SWAP',state:{...state,external_activity:{current:[],recent:external.external_activity!.current,updated_at:100}}}),null);
+});
+
 test('a rounded-to-zero order gets an inline minimum-size error',()=>{
  const tinyState={...state,equity:'1000',positions:[],policy:{major_margin_fraction:'.1',alt_margin_fraction:'.05',major_exposure_multiple:'10',alt_exposure_multiple:'5',risk_fraction:'.05',fee_rate:'.0005',slippage_rate:'.0005'},instruments:{'BTC-USDT-SWAP':{tick:'.01',step:'.001',minimum:'.001'}},quotes:{'BTC-USDT-SWAP':{last:'100000',ask:'100000',bid:'100000'}}} as unknown as State;
  assert.deepEqual(fieldIssue({...ticket,price:'100000',stop:'99000',fraction:'.000001'},tinyState),{field:'sizing',message:'低于合约最小委托量，请增加额度'});

@@ -11,6 +11,8 @@ import json
 import threading
 import time
 import uuid
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from decimal import Decimal
 from .book import Book, encoded
 from .execution_journal import ExecutionJournal
@@ -18,6 +20,7 @@ from .okx_execution import ExchangeRejected, ExchangeUncertain, entry_payload, p
 from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step
 from .closing import close_fraction, close_quantity
 from .managed_orders import ManagedOrders
+from .external_records import observed_records, persist_observations
 
 
 class LiveBook(ManagedOrders, Book):
@@ -53,15 +56,42 @@ class LiveBook(ManagedOrders, Book):
 
     def day(self, state):
         if self.equity(state) > 0 and state.get('private_at') and 0<=self.clock()-state['private_at']<=15:
+            daily = state['daily']
+            key = datetime.fromtimestamp(self.clock(), ZoneInfo('Asia/Shanghai')).date().isoformat()
+            if daily and daily['key'] == key and 'app_start_pnl' not in daily:
+                # Upgrade retains today's managed settlements and entry fees.
+                # For legacy overnight positions no midnight mark was stored:
+                # begin their floating-PnL measurement at this observed cutover.
+                start = datetime.fromisoformat(key).replace(tzinfo=ZoneInfo('Asia/Shanghai')).timestamp()
+                prior = sum((dec(p['pnl']) for p in state['closed'] if p['closed'] < start), Decimal(0))
+                carry = [p for p in state['positions'] if p.get('opened', self.clock()) < start]
+                baseline = prior + sum((self.position_pnl(state, p) for p in carry), Decimal(0))
+                daily.update(app_start_pnl=str(baseline), pnl_scope='app_managed', scope_started_at=self.clock(),
+                             overnight_baseline='cutover' if carry else 'no_open_carry')
+                if daily['locked_reason'] == '当日净值亏损停手' and self.daily_pnl(state) > -dec(daily['start_equity'])*dec(self.policy(state).daily_loss_fraction):
+                    daily['locked_reason'] = None
             super().day(state)
+
+    @staticmethod
+    def position_pnl(state, pos):
+        mark = dec(state['quotes'].get(pos['symbol'], {}).get('last', pos['entry']))
+        return dec(pos['pnl']) + (mark-dec(pos['entry']))*dec(pos['remaining'])*pos['direction']
+
+    def managed_pnl(self, state):
+        return (sum((dec(p['pnl']) for p in state['closed']), Decimal(0))
+                + sum((self.position_pnl(state, p) for p in state['positions']), Decimal(0)))
+
+    def begin_day(self, state):
+        state['daily'].update(app_start_pnl=str(self.managed_pnl(state)), pnl_scope='app_managed', scope_started_at=self.clock())
+
+    def daily_pnl(self, state):
+        return self.managed_pnl(state) - dec(state['daily'].get('app_start_pnl', '0'))
 
     def entry_guard(self, state, exclude_pending=None, add_to=None):
         if not self.client.write_enabled:
             raise Rejected('实盘执行尚未启用')
         if state.get('private_error') or not 0 <= self.clock()-state.get('private_at', 0) <= 15:
             raise Rejected(state.get('private_error') or '账户状态已过期，暂停开仓')
-        if state.get('foreign'):
-            raise Rejected('OKX 有此 App 未管理的仓位或委托，暂停开仓')
         if any(p['protection'] != 'exchange-verified' for p in state['positions']):
             raise Rejected('持仓保护尚未核对完成，暂停开仓')
         for pending in state['pending']:
@@ -78,6 +108,11 @@ class LiveBook(ManagedOrders, Book):
         return super().entry_guard(state, exclude_pending, add_to)
 
     def preview_in(self, state, request, reviewed_plan=None):
+        # An exchange position/lever setting belongs to a contract, not an App.
+        # Keep external activity on other contracts entirely outside policy;
+        # do not merge into or change leverage on an externally occupied one.
+        if any(row['symbol'] == request['symbol'] for row in state.get('external_activity', {}).get('current', [])):
+            raise Rejected('该合约有外部交易，仅记录；请在 OKX 处理同币仓位，其他合约可正常开仓')
         result = super().preview_in(state, request, reviewed_plan)
         if dec(result['margin']) + dec(result['costs']) > dec(state['available']):
             raise Rejected('OKX 可用保证金不足')
@@ -295,15 +330,10 @@ class LiveBook(ManagedOrders, Book):
                         for pos in state['positions']:
                             if pos['id'] in failed_roots:
                                 pos['protection']='awaiting-exchange'
-                with self.transaction() as (_, state):
-                    owned = [x for x in state['intents'].values() if x['phase'] not in ('cancelled','rejected','closed')]
-                    keys = {(x['request']['symbol'],x['request']['side']) for x in owned}
-                    order_ids = {x['payload']['clOrdId'] for x in owned}
-                    algo_ids = {a['attachAlgoClOrdId'] for x in owned for a in x['payload']['attachAlgoOrds']+x.get('protection_specs',[])+x.get('merging',{}).get('specs',[])}
-                    # A foreign order/position is never adopted or canceled.
-                    state['foreign'] = (any(dec(x.get('pos','0')) != 0 and (x['instId'],x['posSide']) not in keys for x in raw_positions)
-                        or any(x.get('clOrdId') not in order_ids for x in raw_orders)
-                        or any(x.get('algoClOrdId') not in algo_ids for x in algos))
+                with self.transaction() as (db, state):
+                    commands = [(endpoint, json.loads(body)) for endpoint, body in db.execute('SELECT endpoint,payload FROM exchange_commands')]
+                    records = observed_records(state, raw_positions, raw_orders, algos, commands)
+                    persist_observations(db, state, records, self.clock(), self.event)
                     self.day(state)
                     if errors:
                         state['private_error']=errors[0]
@@ -718,6 +748,7 @@ class LiveBook(ManagedOrders, Book):
             result['scope']='app_managed_trades'
             result['account_updated_at']=state['private_at']
             result['account'].update(initial_equity=None,net_pnl=None,return_fraction=None)
+            result['account']['unrealized_pnl'] = str(sum((self.position_pnl(state, p)-dec(p['pnl']) for p in state['positions']), Decimal(0)))
             result['market_fresh']=not state['private_error'] and 0<=self.clock()-state['private_at']<=15
             start=self.clock()-days*86400 if days else 0
             # Fees are complete-lifecycle fees at settlement; no double-counted entry.
