@@ -16,17 +16,17 @@ schema_version: 1
 experiments:
   - experiment_id: exp-spike-v131-staged-entry-search-20261019-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-builder
-    status: active
+    source_commit: e9ae4f92fc
+    status: inconclusive
     question: Which fixed entry fraction, retracement depth, add method and expiry maximize archived V13.1 net R?
     single_variable: Entry allocation policy; owner explicitly authorized the joint parameter grid in PROJECT_PLAN.md on 2026-10-19. Original stops, exits, quantity cap, risk denominator and 20bp rate remain frozen.
     artifacts: [spike-v131-staged-entry-search-20261019-v1]
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    result: Registered before market replay; no outcome yet.
-    notes: Reuse 21547 original closed opportunities and 3131 eligible matched controls. Full-history optimum is retrospective; pre2025 selection and later-entry diagnostics are separate. Conservative one-tick limit penetration, touch sensitivity, reclaim next-open fills and expiry. No report, downloads, hashes or production changes.
+    reuse_allowed: true
+    result: Two preserved stages search 3857 distinct policies. Original 1243.459849R; half immediate plus half at -0.5R yields 537.803423R. Uniform original-risk-capped maximum is all at -0.08R with eight-bar expiry, 1288.131191R; half version 1265.795520R. Per-timeframe-side capped retrospective maximum 1701.382254R, but early-selected policies later yield 486.321251R versus original 566.795215R. No stable improvement established.
+    notes: All 21547 target and 3131 eligible random-control baselines reconcile. Stage1 1432625 and stage2 2691203 independent scalar checks; 90 pooled-map checks and 17 boundary tests. Full-history refinement is explicitly adaptive, not unseen validation. All random controls receive identical entry methods. Weekly uncertainty spans zero. Fixed original occupancy, actual exits, 20bp rate and original R; no account or queue simulation. Builder d8837010cd preceded stage1 and e9ae4f92fc preceded stage2. Raw compressed ledgers remain local; results and reproduction config retained. Notion new version 3fe8856479af81d889bee875935c6672 linked to prior hypothesis. No report, downloads, hashes or production changes.
   - experiment_id: exp-spike-v131-excursions-20261019-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ae053685db

@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-10-19T07:24:15.492644+00:00",
+  "stage1_builder": "d8837010cd",
+  "stage2_builder": "e9ae4f92fc",
+  "comparison_builder": "05d19afb04",
+  "unique_parameter_sets": 3857,
+  "targets": 21547,
+  "matched_controls": 3131,
+  "stages": {
+    "results_v1": {
+      "candidate_count": 2293,
+      "builder_snapshot": "529a54dbf33ec7bbeef0a018826784895f40f60a",
+      "verification_checks": 1432625,
+      "files": [
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v1/leg_paths.csv.gz",
+          "bytes": 6339013
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v1/result.json",
+          "bytes": 361735
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v1/search.csv.gz",
+          "bytes": 7204273
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v1/verification.json",
+          "bytes": 24632
+        }
+      ]
+    },
+    "results_v2": {
+      "candidate_count": 1947,
+      "builder_snapshot": "05d19afb04bccbe23686cfc4ab899db5fdb56520",
+      "verification_checks": 2691203,
+      "files": [
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/causal_spotcheck.json",
+          "bytes": 3094
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/comparisons.json",
+          "bytes": 100573
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/comparisons_verification.json",
+          "bytes": 125
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/leg_paths.csv.gz",
+          "bytes": 10940708
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/result.json",
+          "bytes": 362313
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/search.csv.gz",
+          "bytes": 6510845
+        },
+        {
+          "path": "experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/verification.json",
+          "bytes": 29122
+        }
+      ]
+    }
+  },
+  "checks": {
+    "lifecycle_and_excursion_tests": 17,
+    "independent_comparison_checks": 90,
+    "causal_prefix_spotchecks": 9,
+    "own_registry_contracts": "passed",
+    "global_registry_load": "Blocked by pre-existing spike-v8-total2-1h-native-20260914-delivery missing source_commit; verified present before this turn, unchanged."
+  },
+  "notion": {
+    "new_record": "https://app.notion.com/p/3fe8856479af81d889bee875935c6672",
+    "prior_record": "https://app.notion.com/p/3fa8856479af8152ae1bca1fb534c805",
+    "deduplicated_before_creation": true,
+    "new_and_prior_read_back": true
+  },
+  "production_eligible": false,
+  "training_eligible": false,
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_staged_entry --workers 4 --output <fresh-stage1-directory>",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_staged_entry --config experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config_refine.json --workers 4 --output <fresh-stage2-directory>",
+    ".venv/bin/python -m yoyo.evaluation.spike_v131_staged_verify --root <stage-directory>"
+  ],
+  "limitations": [
+    "Original opportunity occupancy retained; no additional entries after no-fill/expiry.",
+    "Profit in original planned risk units, not leveraged account return.",
+    "Refinement uses prior full-history results; subsequent chronological diagnostics remain exploratory.",
+    "No production or live execution changes."
+  ]
+}

@@ -19,16 +19,16 @@ schema_version: 1
 
 artifacts:
   - artifact_id: spike-v131-staged-entry-search-20261019-v1
-    artifact_type: config
-    role: Frozen entry allocation grid and chronological comparison contract
+    artifact_type: manifest
+    role: Entry allocation search with original-risk ceiling and chronological comparisons
     source_repo: darkforest-x/fable-trading
-    source_commit: pending-builder
-    source_path: experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config.json
-    storage_uri: repo://experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/config.json
+    source_commit: e9ae4f92fc
+    source_path: experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/result.json
+    storage_uri: repo://experiments/active/exp-spike-v131-staged-entry-search-20261019-v1/results_v2/result.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Registered before replay; result artifacts will preserve per-opportunity leg fills, full grid summaries, source receipts and independent verification. No content hashes.
+    notes: Both results_v1 and results_v2 preserve leg_paths.csv.gz, search.csv.gz, result.json and independent verification.json. Stage2 also has comparisons.json, comparisons_verification.json and a causal prefix spot check. 3857 distinct policies; no stable benefit over original established. Compressed raw ledgers stay local, structured results and receipts are versioned. Original data reused with path/size/mtime checks, no content hashes. Production and training remain false.
   - artifact_id: spike-v131-excursions-20261019-v1
     artifact_type: manifest
     role: Descriptive original V13.1 trade excursions with actual exit reconciliation
