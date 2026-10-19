@@ -106,5 +106,8 @@ def test_week_signflip_does_not_treat_same_week_duplicates_as_independent_eviden
 
 
 def test_zero_week_differences_cannot_claim_a_statistical_advantage():
-    assert signflip(np.zeros(10),np.arange(10))==1.
+    with np.errstate(all='raise'):
+        assert signflip(np.zeros(10),np.arange(10))==1.
+        # Two equal positive weekly blocks: two of four signs attain |sum|=2.
+        assert signflip([1.,1.],['a','b'])==pytest.approx(.5,abs=.02)
     assert signflip([5.],['one_week']) is None

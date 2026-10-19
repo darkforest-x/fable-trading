@@ -22,7 +22,10 @@ def signflip(values,weeks):
     rng=np.random.default_rng(20261019);observed=abs(float(blocks.sum()));count=0
     for _ in range(20):
         signs=rng.integers(0,2,size=(500,len(blocks)),dtype=np.int8)*2-1
-        simulated=signs @ blocks
+        # Explicit products avoid platform BLAS floating-point status warnings
+        # observed even for finite, small inputs on this pinned local runtime.
+        simulated=(signs*blocks[None,:]).sum(axis=1)
+        assert np.isfinite(simulated).all()
         count+=int((np.abs(simulated)>=observed-1e-12).sum())
     return (count+1)/10001
 
