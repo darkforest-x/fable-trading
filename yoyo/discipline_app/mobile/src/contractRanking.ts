@@ -11,6 +11,14 @@ export function turnover(q:Quote|undefined):number|null{
 export function rankingSnapshot(quotes:Record<string,Quote>,now:number,sort:ContractSort):Record<string,number|null>{
  return Object.fromEntries(Object.entries(quotes).map(([symbol,q])=>[symbol,sort==='volume'?turnover(q):dayChange(q,now)]));
 }
+export type RankCache={key:string;ready:boolean;metrics:Record<string,number|null>};
+/** Live prices can refresh without re-ranking hundreds of rows while a user taps. */
+export function stableRanking(previous:RankCache|null,quotes:Record<string,Quote>,now:number,sort:ContractSort,revision:number):RankCache{
+ const key=`${sort}:${revision}`;
+ if(previous?.key===key&&previous.ready)return previous;
+ const metrics=rankingSnapshot(quotes,now,sort);
+ return {key,metrics,ready:Object.values(metrics).some(value=>value!==null)};
+}
 export function compareContracts(a:string,b:string,values:Record<string,number|null>,sort:ContractSort){
  const x=values[a],y=values[b];
  if(x==null)return y==null?a.localeCompare(b):1;

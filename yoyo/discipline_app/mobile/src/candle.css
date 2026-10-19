@@ -32,3 +32,9 @@
 @media(min-width:700px){.candle-fullscreen{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}.candle-fullscreen .candle-periods{max-width:420px}}
 @media(max-width:350px){.candle-panel{padding-left:8px;padding-right:8px}.candle-heading{gap:4px}.candle-periods{gap:0}.candle-periods button{font-size:11px}.candle-fullscreen .candle-heading>b{font-size:16px}}
 @media(prefers-reduced-motion:reduce){.candle-fullscreen{animation:none}}
+
+/* Shared motion kit; the canvas itself is never animated on a market tick. */
+.candle-panel { animation:candle-reveal 180ms var(--motion-ease); }
+@keyframes candle-reveal { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.candle-heading>button,.candle-periods button { transition:background-color var(--motion-fast),transform var(--motion-press); }
+@media(prefers-reduced-motion:reduce) { .candle-panel { animation:none; } }

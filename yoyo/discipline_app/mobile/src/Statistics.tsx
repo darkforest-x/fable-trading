@@ -1,6 +1,6 @@
 import {PageHeader} from './PageHeader';
 /** Stitch screen 7ef322e0d5404da9a262019d19c701aa; performance states from Stitch 7decfef946554bc0af201b633556a748; account-scoped display cache. */
-import {useEffect,useState} from 'react';
+import {memo,useEffect,useState} from 'react';
 import {type Connection,type State} from './api';
 import {cachedStatistics,loadStatistics,statisticsKey,type StatisticsData} from './statisticsData';
 import {Icon} from './Icon';
@@ -10,7 +10,7 @@ const fmt=(value?:string|number|null,d=2)=>value==null?'—':Number(value).toLoc
 const percent=(value?:string|null)=>value==null?'—':fmt(Number(value)*100,1);
 const tone=(value?:string|null)=>!value||Number(value)===0?'':Number(value)>0?'long':'short';
 
-function PnlChart({points}:{points:StatisticsData['curve']}){
+const PnlChart=memo(function PnlChart({points}:{points:StatisticsData['curve']}){
  const values=[0,...points.map(p=>Number(p.pnl))];
  const low=Math.min(...values),high=Math.max(...values),span=high-low||1;
  const y=(v:number)=>150-(v-low)/span*120;
@@ -20,11 +20,11 @@ function PnlChart({points}:{points:StatisticsData['curve']}){
  return <div className="pnl-chart"><svg viewBox="0 0 320 190" role="img" aria-label={`已平仓累计净盈亏 ${fmt(points.at(-1)!.pnl)} USDT，按北京时间每日平仓归集`}>
   <line x1="24" x2="296" y1={y(0)} y2={y(0)} stroke="#c6d8cd" strokeDasharray="4 5"/>
   <text x="24" y="16">{fmt(high)} USDT</text><text x="24" y="174">{fmt(low)} USDT</text>
-  <path d={path} fill="none" stroke={Number(points.at(-1)!.pnl)>=0?'#087f69':'#b74760'} strokeWidth="2.5" strokeLinejoin="round"/>
+  <path d={path} fill="none" stroke={Number(points.at(-1)!.pnl)>=0?'var(--green)':'var(--red)'} strokeWidth="2.5" strokeLinejoin="round"/>
   <circle cx={x(points.at(-1)!.date)} cy={y(Number(points.at(-1)!.pnl))} r="4" fill="currentColor"/>
  </svg><div className="chart-dates"><span>{points.length===1?'区间起点':points[0].date.slice(5)}</span><span>{points.at(-1)!.date}</span></div>
  <details className="chart-data"><summary>查看每日数据</summary>{points.map(point=><div key={point.date}><span>{point.date}</span><b className={tone(point.pnl)}>{fmt(point.pnl)} USDT</b></div>)}</details></div>;
-}
+});
 
 export function Statistics({connection,overview,online,onConnect}:{connection:Connection|null;overview:State|null;online:boolean;onConnect:()=>void}){
  const [days,setDays]=useState(30),[result,setResult]=useState<{key:string;data:StatisticsData}|null>(null),[error,setError]=useState(''),[loading,setLoading]=useState(false),[refresh,setRefresh]=useState(0);

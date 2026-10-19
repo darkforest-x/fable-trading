@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SPIKE 0.8.15 Emerald Motion Kit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <style>
+    /* SPIKE 0.8.15 Motion & Color Design Tokens */
+    :root {
+      /* Motion Duration Tokens */
+      --motion-pill-duration: 200ms;
+      --motion-pill-ease: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+
+      --motion-page-duration: 180ms;
+      --motion-page-ease: cubic-bezier(0.16, 1.0, 0.3, 1.0);
+
+      --motion-sheet-in: 220ms;
+      --motion-sheet-out: 180ms;
+      --motion-sheet-ease: cubic-bezier(0.32, 0.72, 0.0, 1.0);
+
+      --motion-dialog-duration: 140ms;
+      --motion-dialog-ease: cubic-bezier(0.16, 1.0, 0.3, 1.0);
+
+      --motion-press-duration: 90ms;
+      --motion-press-ease: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+
+      --motion-disclosure-duration: 160ms;
+      --motion-disclosure-ease: cubic-bezier(0.25, 1.0, 0.5, 1.0);
+
+      /* Color Tokens */
+      --color-emerald-vivid: #00C990;
+      --color-emerald-dark-ink: #042D21; /* High contrast dark ink on vivid green */
+      --color-emerald-accessible: #007A55; /* AAA/AA compliant for small text on white */
+      --color-emerald-surface: rgba(0, 201, 144, 0.12);
+
+      --color-rose-vivid: #FF3B69;
+      --color-rose-accessible: #B3173C; /* Darker readable red on light backgrounds */
+      --color-rose-surface: rgba(255, 59, 105, 0.10);
+
+      --color-bg-canvas: #F6F8F5; /* Porcelain off-white */
+      --color-card-surface: #FFFFFF;
+      --color-input-bg: #F0F3EF;
+      --color-border-subtle: #E3E7E1;
+
+      --focus-ring: rgba(0, 201, 144, 0.45);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--color-bg-canvas);
+      color: #1A221E;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-feature-settings: "tnum" 1, "zero" 1;
+    }
+
+    /* Standard Interactive Micro-Interactions */
+    .btn-press {
+      transition: transform var(--motion-press-duration) var(--motion-press-ease), opacity var(--motion-press-duration) var(--motion-press-ease);
+    }
+    .btn-press:active {
+      transform: scale(0.98);
+      opacity: 0.94;
+    }
+
+    /* Detail Disclosure Rotating Chevron */
+    .chevron-rotate {
+      transition: transform var(--motion-disclosure-duration) var(--motion-disclosure-ease);
+    }
+    .disclosure-expanded .chevron-rotate {
+      transform: rotate(180deg);
+    }
+    .disclosure-content {
+      transition: max-height var(--motion-disclosure-duration) var(--motion-disclosure-ease), opacity var(--motion-disclosure-duration) var(--motion-disclosure-ease);
+    }
+
+    /* Slider Track & Active State */
+    .range-slider-thumb {
+      box-shadow: 0 2px 8px rgba(0, 201, 144, 0.35);
+      transition: transform var(--motion-press-duration) var(--motion-press-ease), box-shadow var(--motion-press-duration) var(--motion-press-ease);
+    }
+    .range-slider-thumb:active {
+      transform: scale(1.15);
+      box-shadow: 0 3px 12px rgba(0, 201, 144, 0.55);
+    }
+
+    /* Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex justify-center py-6 px-3 bg-[#EEF2EC]">
+
+  <!-- Mobile Viewport Container 390px -->
+  <div class="w-full max-w-[390px] bg-[#F6F8F5] rounded-[36px] shadow-[0_20px_50px_rgba(20,38,30,0.12)] border border-[#E2E6E0] overflow-hidden flex flex-col relative pb-28">
+
+    <!-- Top Floating Toast Notification (short success toast, no modal) -->
+    <div id="demoToast" class="absolute top-3 inset-x-4 z-50 flex items-center justify-between px-3.5 py-2.5 bg-[#0D241C] text-white rounded-[18px] shadow-lg border border-[#00C990]/30 transition-all duration-[140ms] ease-[cubic-bezier(0.16,1,0.3,1)]">
+      <div class="flex items-center space-x-2">
+        <span class="w-5 h-5 rounded-full bg-[#00C990] text-[#042D21] flex items-center justify-center font-bold text-xs">✓</span>
+        <span class="text-xs font-medium tracking-tight">1R 止损参数已自动计算并锁定</span>
+      </div>
+      <span class="text-[10px] font-mono-num text-[#00C990] bg-[#00C990]/15 px-1.5 py-0.5 rounded-md">140ms Toast</span>
+    </div>
+
+    <!-- Top Header: BTC/USDT with Right-Aligned Settings Gear (44px target) -->
+    <header class="pt-14 px-4 pb-2 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-[#F7931A]/10 border border-[#F7931A]/20 flex items-center justify-center font-bold text-[#F7931A] text-sm font-mono-num">
+          ₿
+        </div>
+        <div>
+          <div class="flex items-center space-x-1.5">
+            <h1 class="text-base font-bold text-[#141E1A] tracking-tight">BTC/USDT 永续</h1>
+            <span class="text-[10px] bg-[#00C990]/15 text-[#007A55] font-semibold px-1.5 py-0.5 rounded-full">100x</span>
+          </div>
+          <div class="flex items-center space-x-2 text-xs">
+            <span class="font-mono-num font-semibold text-[#141E1A]">68,450.00</span>
+            <span class="font-mono-num text-[11px] font-medium text-[#007A55] bg-[#00C990]/15 px-1 py-0.2 rounded">+2.45%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings 44px Button aligned right -->
+      <button class="w-11 h-11 rounded-full flex items-center justify-center text-[#4A5952] hover:text-[#141E1A] hover:bg-[#EBEFE8] active:scale-95 transition-transform duration-[90ms]" title="设置" aria-label="设置">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Synthetic Balance Badge -->
+    <div class="px-4 py-1.5 flex items-center justify-between text-xs text-[#52635B]">
+      <div class="flex items-center space-x-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#00C990]"></span>
+        <span>可用资金 (模拟示例)</span>
+      </div>
+      <span class="font-mono-num font-semibold text-[#18231E]">1,000.00 USDT</span>
+    </div>
+
+    <!-- Main Content Area: Motion Component Specification Kit -->
+    <main class="px-4 space-y-3.5 mt-2 overflow-y-auto">
+
+      <!-- Spec Header Banner: Motion Tokens Info -->
+      <div class="bg-[#FFFFFF] border border-[#E2E6E0] rounded-[22px] p-3 shadow-sm">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold text-[#18231E] flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#00C990]"></span>
+            SPIKE 0.8.15 Emerald Motion Tokens
+          </span>
+          <span class="text-[10px] font-mono-num bg-[#F0F3EF] text-[#485850] px-1.5 py-0.5 rounded">390px Spec</span>
+        </div>
+        <div class="grid grid-cols-3 gap-1.5 text-[10px] font-mono-num text-[#506057]">
+          <div class="bg-[#F6F8F5] p-1.5 rounded-lg border border-[#E8ECE6]">
+            <span class="block text-[#7B8B82]">Tab Pill</span>
+            <span class="font-semibold text-[#141E1A]">200ms ease</span>
+          </div>
+          <div class="bg-[#F6F8F5] p-1.5 rounded-lg border border-[#E8ECE6]">
+            <span class="block text-[#7B8B82]">Page Shift</span>
+            <span class="font-semibold text-[#141E1A]">180ms ease</span>
+          </div>
+          <div class="bg-[#F6F8F5] p-1.5 rounded-lg border border-[#E8ECE6]">
+            <span class="block text-[#7B8B82]">Btn Press</span>
+            <span class="font-semibold text-[#141E1A]">90ms (.98)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Component 1: Segmented Control with Sliding Tab Pill (200ms cubic-bezier) -->
+      <section class="bg-[#FFFFFF] border border-[#E2E6E0] rounded-[22px] p-3.5 shadow-sm space-y-2.5">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-[#141E1A]">方向切换滑块 (Tab Pill 200ms)</span>
+          <span class="text-[10px] text-[#76877E] font-mono-num">Haptic: Light</span>
+        </div>
+
+        <!-- Pill container -->
+        <div class="relative bg-[#EFF3EE] p-1 rounded-full flex items-center h-11 select-none">
+          <!-- Active Pill Background Indicator -->
+          <div id="directionIndicator" class="absolute left-1 top-1 w-[calc(50%-4px)] h-9 bg-[#FFFFFF] rounded-full shadow-sm transition-transform duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)]"></div>
+
+          <button id="btnLong" class="relative z-10 w-1/2 h-full rounded-full flex items-center justify-center space-x-1.5 text-xs font-bold text-[#007A55] transition-colors duration-[160ms] btn-press">
+            <span class="w-2 h-2 rounded-full bg-[#00C990]"></span>
+            <span>做多 (LONG)</span>
+          </button>
+
+          <button id="btnShort" class="relative z-10 w-1/2 h-full rounded-full flex items-center justify-center space-x-1.5 text-xs font-semibold text-[#66776F] transition-colors duration-[160ms] btn-press">
+            <span class="w-2 h-2 rounded-full bg-[#FF3B69] opacity-40"></span>
+            <span>做空 (SHORT)</span>
+          </button>
+        </div>
+
+        <!-- 16px Touch Input with 44px min-height -->
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <div class="bg-[#F6F8F5] border border-[#E2E6E0] rounded-[16px] p-2.5 focus-within:border-[#00C990] focus-within:ring-2 focus-within:ring-[#00C990]/25 transition-all">
+            <label class="block text-[10px] font-medium text-[#708078]">委托价格 (USDT)</label>
+            <input type="text" value="68,450.00" class="w-full bg-transparent font-mono-num font-semibold text-sm text-[#141E1A] focus:outline-none min-h-[24px]" style="font-size: 16px;">
+          </div>
+          <div class="bg-[#F6F8F5] border border-[#E2E6E0] rounded-[16px] p-2.5 focus-within:border-[#00C990] focus-within:ring-2 focus-within:ring-[#00C990]/25 transition-all">
+            <div class="flex justify-between items-center">
+              <label class="text-[10px] font-medium text-[#708078]">初始止损 *必填</label>
+              <span class="text-[9px] text-[#007A55] font-semibold">1R 自动</span>
+            </div>
+            <input type="text" value="67,080.00" class="w-full bg-transparent font-mono-num font-semibold text-sm text-[#B3173C] focus:outline-none min-h-[24px]" style="font-size: 16px;">
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 2: Compact Percentage Slider (25/50/75/100 presets + Haptic Comments) -->
+      <section class="bg-[#FFFFFF] border border-[#E2E6E0] rounded-[22px] p-3.5 shadow-sm space-y-3">
+        <div class="flex justify-between items-center text-xs">
+          <div>
+            <span class="font-bold text-[#141E1A]">风险仓位比例</span>
+            <span class="text-[10px] text-[#708078] block">上限锁定 10% 保证金净值</span>
+          </div>
+          <div class="text-right">
+            <span id="sliderValueText" class="font-mono-num font-bold text-sm text-[#007A55]">100%</span>
+            <span class="text-[10px] text-[#708078] block font-mono-num">20.00 USDT (1R)</span>
+          </div>
+        </div>
+
+        <!-- Slider Range & Presets -->
+        <!-- Implementation note: Haptic feedback triggers medium vibration on step detents (25, 50, 75) and heavy vibration at endpoints (0, 100). No continuous harsh buzzing. -->
+        <div class="relative pt-1 pb-1">
+          <input id="riskRange" type="range" min="0" max="100" value="100" step="25" class="w-full h-2 bg-[#E3E8E1] rounded-lg appearance-none cursor-pointer accent-[#00C990] range-slider-thumb">
+          <div class="flex justify-between text-[11px] font-mono-num text-[#708078] mt-2 px-1">
+            <button class="preset-btn px-2 py-1 rounded-md bg-[#F4F6F2] hover:bg-[#E8EDE5] text-[#405047] active:scale-95 transition-transform" data-val="25">25%</button>
+            <button class="preset-btn px-2 py-1 rounded-md bg-[#F4F6F2] hover:bg-[#E8EDE5] text-[#405047] active:scale-95 transition-transform" data-val="50">50%</button>
+            <button class="preset-btn px-2 py-1 rounded-md bg-[#F4F6F2] hover:bg-[#E8EDE5] text-[#405047] active:scale-95 transition-transform" data-val="75">75%</button>
+            <button class="preset-btn px-2 py-1 rounded-md bg-[#00C990]/20 text-[#007A55] font-bold active:scale-95 transition-transform" data-val="100">100%</button>
+          </div>
+        </div>
+
+        <!-- Green Buy & Red Sell Buttons (44px min touch, 90ms press transform scale.98) -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <!-- Green Buy (Vivid emerald #00C990 with Dark Ink #042D21) -->
+          <button class="min-h-[44px] px-3 py-2.5 rounded-full bg-[#00C990] hover:bg-[#00B883] text-[#042D21] font-bold text-xs flex items-center justify-center space-x-1 shadow-sm btn-press">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+            <span>买入开多 (受保护)</span>
+          </button>
+
+          <!-- Red Sell (Rose Red #FF3B69 with Pure White Text) -->
+          <button class="min-h-[44px] px-3 py-2.5 rounded-full bg-[#FF3B69] hover:bg-[#F02F5D] text-[#FFFFFF] font-bold text-xs flex items-center justify-center space-x-1 shadow-sm btn-press">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+            <span>卖出开空 (受保护)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Component 3: Compact Positive/Negative PnL Card with Expandable Details -->
+      <!-- Rotating Chevron 160ms ease, detail disclosure -->
+      <section class="bg-[#FFFFFF] border border-[#E2E6E0] rounded-[22px] p-3.5 shadow-sm space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="w-2 h-2 rounded-full bg-[#00C990]"></span>
+            <span class="text-xs font-bold text-[#141E1A]">BTC 永续持仓</span>
+            <span class="text-[10px] bg-[#00C990]/15 text-[#007A55] font-semibold px-1.5 py-0.2 rounded-full">多 100x</span>
+          </div>
+          <!-- Positive / Negative Dual Badges -->
+          <div class="text-right">
+            <span class="font-mono-num text-xs font-bold text-[#007A55] bg-[#00C990]/15 px-1.5 py-0.5 rounded">+17.50 U (+0.88 R)</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1 text-[11px] font-mono-num pt-1 text-[#4F5F57]">
+          <div>
+            <span class="text-[9px] text-[#7B8B83] block">开仓均价</span>
+            <span class="font-semibold text-[#18231E]">67,820.0</span>
+          </div>
+          <div>
+            <span class="text-[9px] text-[#7B8B83] block">当前标记</span>
+            <span class="font-semibold text-[#007A55]">68,450.0</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[9px] text-[#7B8B83] block">动态保本止损</span>
+            <span class="font-semibold text-[#B3173C]">67,830.0</span>
+          </div>
+        </div>
+
+        <!-- Detail Disclosure & 160ms Rotating Chevron -->
+        <div id="disclosureBlock" class="border-t border-[#EAEFE8] pt-2">
+          <button id="toggleDisclosure" class="w-full flex items-center justify-between text-[11px] text-[#4A5A52] font-medium min-h-[36px] hover:text-[#141E1A]">
+            <span>折叠对账详情 (160ms 旋转展开)</span>
+            <svg id="chevronIcon" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 chevron-rotate text-[#708078]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <div id="disclosureContent" class="overflow-hidden max-h-0 opacity-0 transition-all duration-[160ms] ease-[cubic-bezier(0.25,1,0.5,1)] space-y-1.5 pt-1 text-[10px] font-mono-num text-[#506057]">
+            <div class="flex justify-between py-0.5 border-b border-[#F0F4ED]">
+              <span>成交编号</span>
+              <span class="text-[#141E1A]">#SPK-89210-BTC</span>
+            </div>
+            <div class="flex justify-between py-0.5 border-b border-[#F0F4ED]">
+              <span>占用保证金</span>
+              <span class="text-[#141E1A]">20.00 USDT</span>
+            </div>
+            <div class="flex justify-between py-0.5">
+              <span>预设出场流水</span>
+              <span class="text-[#007A55]">1R保本(已激活) / 3R减仓60%</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Component 4: Interactive Sample Bottom Sheet Trigger (sheet in 220ms / out 180ms) -->
+      <section class="bg-[#FFFFFF] border border-[#E2E6E0] rounded-[22px] p-3.5 shadow-sm space-y-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-[#141E1A]">底抽屉动效规范 (Sheet In 220 / Out 180)</span>
+          <span class="text-[10px] font-mono-num bg-[#F0F3EE] px-1.5 py-0.5 rounded text-[#4E5E56]">Overlay</span>
+        </div>
+        <p class="text-[11px] text-[#607068] leading-tight">支持快速选择合约或部分平仓。采用物理弹簧减震曲线，杜绝生硬闪烁。</p>
+
+        <button id="openSheetBtn" class="w-full min-h-[44px] rounded-xl bg-[#F0F4ED] hover:bg-[#E4EAE1] text-[#141E1A] font-semibold text-xs flex items-center justify-center space-x-1.5 btn-press">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-[#007A55]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
+          </svg>
+          <span>展开示例底抽屉 (Bottom Sheet Preview)</span>
+        </button>
+      </section>
+
+    </main>
+
+    <!-- Embedded Sample Bottom Sheet Modal (in 220ms / out 180ms) -->
+    <div id="sheetBackdrop" class="absolute inset-0 bg-[#0A1813]/40 z-40 opacity-0 pointer-events-none transition-opacity duration-[180ms] ease-out">
+      <div id="sheetPanel" class="absolute bottom-0 inset-x-0 bg-[#FFFFFF] rounded-t-[28px] p-4 shadow-2xl transform translate-y-full transition-transform duration-[220ms] ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col space-y-3">
+
+        <!-- Sheet Drag Handle -->
+        <div class="w-10 h-1 bg-[#D3D8D0] rounded-full mx-auto -mt-1"></div>
+
+        <div class="flex items-center justify-between pb-1 border-b border-[#EAEFE8]">
+          <div>
+            <h3 class="text-sm font-bold text-[#141E1A]">选择合约交易对 (Sheet 220ms)</h3>
+            <span class="text-[10px] text-[#6E7E76]">按 24h 成交额活跃排序</span>
+          </div>
+          <button id="closeSheetBtn" class="w-9 h-9 rounded-full bg-[#F2F5F0] flex items-center justify-center text-[#506058] active:scale-95">
+            ✕
+          </button>
+        </div>
+
+        <!-- Sheet Sample List -->
+        <div class="space-y-1.5 text-xs font-mono-num max-h-48 overflow-y-auto">
+          <div class="p-2 rounded-xl bg-[#00C990]/10 border border-[#00C990]/30 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-[#00C990]"></span>
+              <span class="font-bold text-[#141E1A]">BTC/USDT</span>
+              <span class="text-[10px] text-[#007A55] font-sans">主流 · 100x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-[#141E1A]">68,450.00</div>
+              <div class="text-[10px] text-[#007A55]">+2.45%</div>
+            </div>
+          </div>
+
+          <div class="p-2 rounded-xl bg-[#F6F8F5] border border-[#E5E9E2] flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-transparent"></span>
+              <span class="font-bold text-[#141E1A]">ETH/USDT</span>
+              <span class="text-[10px] text-[#6E7E76] font-sans">主流 · 100x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-[#141E1A]">3,480.20</div>
+              <div class="text-[10px] text-[#007A55]">+1.80%</div>
+            </div>
+          </div>
+
+          <div class="p-2 rounded-xl bg-[#F6F8F5] border border-[#E5E9E2] flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full bg-transparent"></span>
+              <span class="font-bold text-[#141E1A]">SOL/USDT</span>
+              <span class="text-[10px] text-[#6E7E76] font-sans">山寨 · 20x</span>
+            </div>
+            <div class="text-right">
+              <div class="font-semibold text-[#141E1A]">184.50</div>
+              <div class="text-[10px] text-[#B3173C]">-0.65%</div>
+            </div>
+          </div>
+        </div>
+
+        <button id="confirmSheetBtn" class="w-full min-h-[44px] rounded-full bg-[#00C990] text-[#042D21] font-bold text-xs flex items-center justify-center btn-press">
+          确认并载入标的行情
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation Bar: Exactly 4 Items (合约 纪律 持仓 统计) -->
+    <!-- Sliding Tab Pill 200ms ease -->
+    <nav class="absolute bottom-3 inset-x-4 h-16 bg-[#FFFFFF]/95 backdrop-blur-md rounded-full shadow-[0_12px_32px_rgba(20,38,30,0.08)] border border-[#E0E5DF] flex items-center justify-around px-2 z-30 select-none">
+
+      <!-- Tab 1: 合约 (Active by default) -->
+      <button class="nav-item relative flex-1 h-12 flex flex-col items-center justify-center rounded-full text-[#007A55] font-semibold text-[10px] btn-press" data-tab="contract">
+        <div class="absolute inset-x-1.5 inset-y-1 bg-[#00C990]/15 rounded-full -z-10 nav-active-pill transition-all duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)]"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        <span>合约</span>
+      </button>
+
+      <!-- Tab 2: 纪律 -->
+      <button class="nav-item relative flex-1 h-12 flex flex-col items-center justify-center rounded-full text-[#6E7E76] font-medium text-[10px] btn-press" data-tab="discipline">
+        <div class="absolute inset-x-1.5 inset-y-1 bg-transparent rounded-full -z-10 nav-active-pill transition-all duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)]"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span>纪律</span>
+      </button>
+
+      <!-- Tab 3: 持仓 -->
+      <button class="nav-item relative flex-1 h-12 flex flex-col items-center justify-center rounded-full text-[#6E7E76] font-medium text-[10px] btn-press" data-tab="positions">
+        <div class="absolute inset-x-1.5 inset-y-1 bg-transparent rounded-full -z-10 nav-active-pill transition-all duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)]"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>持仓</span>
+      </button>
+
+      <!-- Tab 4: 统计 -->
+      <button class="nav-item relative flex-1 h-12 flex flex-col items-center justify-center rounded-full text-[#6E7E76] font-medium text-[10px] btn-press" data-tab="statistics">
+        <div class="absolute inset-x-1.5 inset-y-1 bg-transparent rounded-full -z-10 nav-active-pill transition-all duration-[200ms] ease-[cubic-bezier(0.2,0,0,1)]"></div>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mb-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span>统计</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Interactive Logic Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Direction Pill Toggle (200ms)
+      const btnLong = document.getElementById('btnLong');
+      const btnShort = document.getElementById('btnShort');
+      const indicator = document.getElementById('directionIndicator');
+
+      btnLong.addEventListener('click', () => {
+        indicator.style.transform = 'translateX(0)';
+        btnLong.classList.add('text-[#007A55]', 'font-bold');
+        btnLong.classList.remove('text-[#66776F]');
+        btnShort.classList.remove('text-[#B3173C]', 'font-bold');
+        btnShort.classList.add('text-[#66776F]');
+      });
+
+      btnShort.addEventListener('click', () => {
+        indicator.style.transform = 'translateX(100%)';
+        btnShort.classList.add('text-[#B3173C]', 'font-bold');
+        btnShort.classList.remove('text-[#66776F]');
+        btnLong.classList.remove('text-[#007A55]', 'font-bold');
+        btnLong.classList.add('text-[#66776F]');
+      });
+
+      // 2. Risk Slider & Presets (Haptics medium on step, heavy on end)
+      const riskRange = document.getElementById('riskRange');
+      const sliderValueText = document.getElementById('sliderValueText');
+      const presetBtns = document.querySelectorAll('.preset-btn');
+
+      const updateSlider = (val) => {
+        riskRange.value = val;
+        sliderValueText.textContent = `${val}%`;
+        presetBtns.forEach(btn => {
+          if (btn.dataset.val === String(val)) {
+            btn.className = 'preset-btn px-2 py-1 rounded-md bg-[#00C990]/20 text-[#007A55] font-bold active:scale-95 transition-transform';
+          } else {
+            btn.className = 'preset-btn px-2 py-1 rounded-md bg-[#F4F6F2] hover:bg-[#E8EDE5] text-[#405047] active:scale-95 transition-transform';
+          }
+        });
+      };
+
+      riskRange.addEventListener('input', (e) => {
+        updateSlider(e.target.value);
+      });
+
+      presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          updateSlider(btn.dataset.val);
+        });
+      });
+
+      // 3. Detail Disclosure & Rotating Chevron (160ms)
+      const toggleDisclosure = document.getElementById('toggleDisclosure');
+      const chevronIcon = document.getElementById('chevronIcon');
+      const disclosureContent = document.getElementById('disclosureContent');
+      let isExpanded = false;
+
+      toggleDisclosure.addEventListener('click', () => {
+        isExpanded = !isExpanded;
+        if (isExpanded) {
+          chevronIcon.style.transform = 'rotate(180deg)';
+          disclosureContent.style.maxHeight = '120px';
+          disclosureContent.style.opacity = '1';
+        } else {
+          chevronIcon.style.transform = 'rotate(0deg)';
+          disclosureContent.style.maxHeight = '0px';
+          disclosureContent.style.opacity = '0';
+        }
+      });
+
+      // 4. Bottom Sheet Interactions (In 220ms / Out 180ms)
+      const openSheetBtn = document.getElementById('openSheetBtn');
+      const closeSheetBtn = document.getElementById('closeSheetBtn');
+      const confirmSheetBtn = document.getElementById('confirmSheetBtn');
+      const sheetBackdrop = document.getElementById('sheetBackdrop');
+      const sheetPanel = document.getElementById('sheetPanel');
+
+      const openSheet = () => {
+        sheetBackdrop.classList.remove('pointer-events-none');
+        sheetBackdrop.style.opacity = '1';
+        sheetPanel.style.transform = 'translateY(0)';
+      };
+
+      const closeSheet = () => {
+        sheetBackdrop.style.opacity = '0';
+        sheetPanel.style.transform = 'translateY(100%)';
+        setTimeout(() => {
+          sheetBackdrop.classList.add('pointer-events-none');
+        }, 180);
+      };
+
+      openSheetBtn.addEventListener('click', openSheet);
+      closeSheetBtn.addEventListener('click', closeSheet);
+      confirmSheetBtn.addEventListener('click', closeSheet);
+      sheetBackdrop.addEventListener('click', (e) => {
+        if (e.target === sheetBackdrop) closeSheet();
+      });
+
+      // 5. Bottom Navigation Tab Switching (200ms pill movement)
+      const navItems = document.querySelectorAll('.nav-item');
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          navItems.forEach(n => {
+            n.classList.remove('text-[#007A55]', 'font-semibold');
+            n.classList.add('text-[#6E7E76]', 'font-medium');
+            const pill = n.querySelector('.nav-active-pill');
+            if (pill) pill.classList.replace('bg-[#00C990]/15', 'bg-transparent');
+          });
+
+          item.classList.remove('text-[#6E7E76]', 'font-medium');
+          item.classList.add('text-[#007A55]', 'font-semibold');
+          const activePill = item.querySelector('.nav-active-pill');
+          if (activePill) activePill.classList.replace('bg-transparent', 'bg-[#00C990]/15');
+        });
+      });
+
+      // 6. Success Toast auto fade out demo
+      const demoToast = document.getElementById('demoToast');
+      setTimeout(() => {
+        demoToast.style.opacity = '0';
+        demoToast.style.transform = 'translateY(-10px)';
+        setTimeout(() => demoToast.style.display = 'none', 140);
+      }, 3500);
+    });
+  </script>
+</body>
+</html>

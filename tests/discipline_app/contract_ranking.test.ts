@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {compareContracts,rankingSnapshot,turnover,turnoverLabel,dayChange} from '../../yoyo/discipline_app/mobile/src/contractRanking.ts';
+import {stableRanking,compareContracts,rankingSnapshot,turnover,turnoverLabel,dayChange} from '../../yoyo/discipline_app/mobile/src/contractRanking.ts';
 import type {Quote} from '../../yoyo/discipline_app/mobile/src/api.ts';
 const quote=(volume?:string|null,change='0',time=100):Quote=>({last:'100',bid:'99',ask:'101',source:'synthetic',time,today_change:change,volume24h_usdt:volume});
 test('volume sorting is numeric, unpinned and puts missing behind valid zero',()=>{
@@ -25,4 +25,16 @@ test('compact activity labels distinguish unknown from zero and disclose estimat
  assert.equal(turnoverLabel(0),'24h ≈ 0 U');
  assert.equal(turnoverLabel(1230000000),'24h ≈ 12.3亿 U');
  assert.equal(turnoverLabel(850000),'24h ≈ 85万 U');
+});
+
+test('ranking snapshot is reused for live updates and rebuilt on explicit refresh',()=>{
+ const now=1700000000;
+ let reads=0;
+ const quotes:any={BTC:{get volume24h_usdt(){reads++;return '10'},time:now}};
+ let cache=stableRanking(null,quotes,now,'volume',0);
+ for(let i=0;i<1000;i++)cache=stableRanking(cache,quotes,now+i,'volume',0);
+ assert.equal(reads,1);assert.equal(cache.metrics.BTC,10);
+ cache=stableRanking(cache,quotes,now,'volume',1);assert.equal(reads,2);
+ const blank=stableRanking(null,{},now,'volume',0);assert.equal(blank.ready,false);
+ assert.equal(stableRanking(blank,quotes,now,'volume',0).ready,true);
 });

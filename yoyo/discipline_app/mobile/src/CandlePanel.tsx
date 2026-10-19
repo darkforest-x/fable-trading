@@ -43,7 +43,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
   });
-  const candles=chart.addSeries(CandlestickSeries,{upColor:'#087f69',downColor:'#b74760',wickUpColor:'#087f69',wickDownColor:'#b74760',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
+  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
@@ -56,7 +56,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   const g=graph.current;if(!g||!state.historyReady)return;
   const data=state.bars,old=previous.current;
-  const volumeBar=(bar:Candle)=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?'#087f6933':'#b7476033'});
+  const volumeBar=(bar:Candle)=>({time:bar.time as UTCTimestamp,value:bar.volume,color:bar.close>=bar.open?'#00c99033':'#ff3b6933'});
   const reset=old.reset!==state.reset||!old.bars.length||old.bars[0].time!==data[0].time;
   if(reset){
    const range=g.chart.timeScale().getVisibleLogicalRange();
@@ -73,7 +73,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  },[state.bars,state.reset,state.historyReady,symbol,period,view,showBar]);
  useEffect(()=>{
   const series=graph.current?.candles;if(!series)return;
-  const lines=[{price:Number(entry),title:'开仓',color:'#5b8572'},{price:Number(stop),title:'止损',color:'#b74760'}].filter(line=>Number.isFinite(line.price)&&line.price>0).map(line=>series.createPriceLine({...line,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true}));
+  const lines=[{price:Number(entry),title:'开仓',color:'#5b8572'},{price:Number(stop),title:'止损',color:'#ff3b69'}].filter(line=>Number.isFinite(line.price)&&line.price>0).map(line=>series.createPriceLine({...line,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true}));
   return()=>{for(const line of lines)series.removePriceLine(line)};
  },[entry,stop,symbol,period,showBar]);
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;

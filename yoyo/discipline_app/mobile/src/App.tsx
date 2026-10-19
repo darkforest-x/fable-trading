@@ -12,7 +12,7 @@ import {PageHeader} from './PageHeader';
 import {DisciplineBudget} from './DisciplineBudget';
 import {PositionCard} from './PositionCard';
 import {MAIN_TABS,useSwipeNav} from './useSwipeNav';
-import {useEffect,useRef,useState,type CSSProperties} from 'react';
+import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
 import {restoreSession,rememberSession,forgetSession,nativeSession} from './deviceSession';
 import {marginRoom,ticketEstimate,allocatedMargin} from './ticketEstimate';
 import {AccountSettings,type Account} from './AccountSettings';
@@ -25,7 +25,7 @@ import {Icon,type IconName} from './Icon';
 import {Statistics} from './Statistics';
 import {Dialog,Spinner} from './Dialog';
 import {Notification,type Notice} from './Notification';
-import {feedback,feedbackEnabled,setFeedbackEnabled} from './feedback';
+import {sliderFeedback,feedback,feedbackEnabled,setFeedbackEnabled} from './feedback';
 import {fieldIssue,issueForMessage,errorCopy,type FieldIssue} from './ticketValidation';
 import {useKeyboard} from './useKeyboard';
 import {api,ApiError,SERVICE_URL,authorizationScope,type Connection,type Plan,type Position,type State,type Ticket} from './api';
@@ -91,7 +91,7 @@ export default function App(){
  const [haptics,setHaptics]=useState(feedbackEnabled),[reviewSide,setReviewSide]=useState<'long'|'short'|null>(null);
  useEffect(()=>{window.scrollTo({top:0});},[tab]);
  const stream=useLiveQuotes([symbol,...(state?.positions.map(p=>p.symbol)??[])],import.meta.env.VITE_SPIKE_LIVE_QUOTES!=='off'&&!!connection&&live&&(tab==='合约'||tab==='持仓'));
- const displayState=state?{...state,quotes:{...state.quotes,...stream},server_time:Math.max(state.server_time,...Object.values(stream).map(q=>q.time))}:null;
+ const displayState=useMemo(()=>state?{...state,quotes:{...state.quotes,...stream},server_time:Math.max(state.server_time,...Object.values(stream).map(q=>q.time))}:null,[state,stream]);
  const selectedQuote=stream[symbol]??state?.quotes[symbol];
  const existing=state?.positions.find(pos=>pos.symbol===symbol);
  const selectedSide=existing?.side==='short'?'short':existing?.side==='long'?'long':direction;
@@ -108,7 +108,7 @@ export default function App(){
  const proposal=state?.policy_proposal;
  const exposureText=p?(p.major_exposure_multiple&&p.alt_exposure_multiple?`BTC / ETH ${p.major_allowance_scope==='independent'?'各 ':''}${p.major_exposure_multiple}倍 · 山寨合计 ${p.alt_exposure_multiple}倍`:'旧规则未配置名义上限'):'BTC / ETH 10倍 · 山寨 5倍';
  useEffect(()=>{setLeverage(existing?.leverage??cap)},[cap,symbol,state?.policy_revision,existing?.leverage]);
- const room=marginRoom(state,symbol);
+ const room=useMemo(()=>marginRoom(state,symbol),[state,symbol]);
  const fraction=String(allocatedMargin(room,allocation));
  const stopContext=JSON.stringify([connection?.cacheScope,connection?.accountId,connection?.mode,symbol,selectedSide,kind,price,allocation,leverage,state?.policy_revision]);
  const [stopFeedback,setStopFeedback]=useState<{side:'long'|'short';value:string;context:string}|null>(null);
@@ -117,7 +117,7 @@ export default function App(){
  const stopApplied=!!stopFeedback&&stopFeedback.context===stopContext&&stopFeedback.value===stop;
  const autoStopSide=automatic.working?automatic.mode:null;
  const inferredSide=selectedSide;
- const estimate=automatic.ready?ticketEstimate(displayState,{symbol,side:inferredSide,kind,price,stop,fraction,leverage,sizing_mode:'margin'}):null;
+ const estimate=useMemo(()=>automatic.ready?ticketEstimate(displayState,{symbol,side:inferredSide,kind,price,stop,fraction,leverage,sizing_mode:'margin'}):null,[automatic.ready,displayState,symbol,inferredSide,kind,price,stop,fraction,leverage]);
  const availability=entryAvailability({state,symbol,connected:!!connection,online,fresh,restoring,pending:!!pendingEntry||!!closeRecovery.attempt,room,now:displayNow});
  const blocked=!!availability;
  const reason=availability?.text??'';
@@ -302,7 +302,7 @@ export default function App(){
       <div className="input-shell entry-input"><input id="entry-stop" disabled={ticketLocked} data-field="stop" aria-invalid={fieldError?.field==='stop'} onBlur={()=>validateField('stop')} aria-label="初始止损" aria-describedby={fieldError?.field==='stop'?'field-stop-error':stopApplied?'stop-applied-status':undefined} readOnly={!!existing} inputMode="decimal" enterKeyHint="done" autoComplete="off" onKeyDown={e=>{if(e.key==='Enter')e.currentTarget.blur()}} value={stop} onChange={e=>{automatic.manual();setStop(e.target.value);setStopFeedback(null);setFieldError(null)}} placeholder="输入止损价格"/><span>USDT</span></div>
       {fieldError?.field==='stop'&&<span id="field-stop-error" className="field-error" role="status">{fieldError.message}</span>}<span id="stop-applied-status" className="sr-only" role="status" aria-live="polite">{stopApplied?`${stopFeedback?.side==='long'?'多单':'空单'} 1R 止损已填入，含成本预留`:''}</span>
      </div>
-     <div className="budget"><div className="slider-heading"><label htmlFor="position-size">仓位额度</label><span className="margin-caption">保证金占净值 {state?fmt(Number(fraction)*100,2):'—'}%</span><output htmlFor="position-size">{allocation}<small>%</small></output></div><input data-field="sizing" aria-describedby={fieldError?.field==='sizing'?'field-sizing-error':undefined} id="position-size" aria-label="仓位额度" aria-valuetext={`${allocation}% 可用额度，保证金占账户净值 ${fmt(Number(fraction)*100,2)}%`} type="range" min="0" max="100" step="1" disabled={ticketLocked||!state||room<=0} value={allocation} onChange={e=>{setAllocation(Number(e.target.value));setFieldError(null);feedback('tick')}} style={{'--fill':`${allocation}%`} as CSSProperties}/><div className="allocation-presets" aria-label="仓位额度快捷选择">{[25,50,75,100].map(value=><button type="button" key={value} aria-pressed={allocation===value} disabled={ticketLocked||!state||room<=0} onClick={()=>{setAllocation(value);setFieldError(null);feedback('light')}}>{value}%</button>)}</div></div>
+     <div className="budget"><div className="slider-heading"><label htmlFor="position-size">仓位额度</label><span className="margin-caption">保证金占净值 {state?fmt(Number(fraction)*100,2):'—'}%</span><output htmlFor="position-size">{allocation}<small>%</small></output></div><input data-field="sizing" aria-describedby={fieldError?.field==='sizing'?'field-sizing-error':undefined} id="position-size" aria-label="仓位额度" aria-valuetext={`${allocation}% 可用额度，保证金占账户净值 ${fmt(Number(fraction)*100,2)}%`} type="range" min="0" max="100" step="1" disabled={ticketLocked||!state||room<=0} value={allocation} onChange={e=>{sliderFeedback(allocation,Number(e.target.value));setAllocation(Number(e.target.value));setFieldError(null)}} style={{'--fill':`${allocation}%`} as CSSProperties}/><div className="allocation-presets" aria-label="仓位额度快捷选择">{[25,50,75,100].map(value=><button type="button" key={value} aria-pressed={allocation===value} disabled={ticketLocked||!state||room<=0} onClick={()=>{setAllocation(value);setFieldError(null);feedback(value===100?'heavy':'medium')}}>{value}%</button>)}</div></div>
      {fieldError&&['sizing','leverage'].includes(fieldError.field)&&<p id="field-sizing-error" className="field-error" role="status">{fieldError.message}</p>}<div className="ticket-estimate" aria-live="polite">{[[existing?'本次持仓金额':'持仓金额',estimate?.notional],['保证金',estimate?.margin],[existing?'合并止损金额':'预计止损',estimate?.risk]].map(([label,value])=><div key={String(label)}><span>{String(label)}</span><b>{fmt(value as number|undefined)}<small> U</small></b></div>)}</div>
      <div className="equity"><span>{live?`${state?.account_name??'主账户'} · USDT 净值`:'模拟净值'}</span><b>{fmt(state?.equity)} <small>USDT</small></b></div>
      <div className="order-actions"><button className={selectedSide==='long'?'buy':'sell'} disabled={blocked||ticketLocked||!automatic.ready} onClick={()=>review(selectedSide)}>{pendingEntry?<><Spinner/>正在核对订单</>:reviewSide?<><Spinner/>正在校验…</>:automatic.working?<><Spinner/>计算止损中</>:selectedSide==='long'?(existing?'买入加仓':'买入开多'):(existing?'卖出加仓':'卖出开空')}</button></div>
@@ -339,7 +339,7 @@ export default function App(){
     {connection&&<AccountSettings connection={connection} busy={busy||!!pendingEntry} onSwitch={switchAccount} onError={setError}/>}
     <section className="card experience-settings"><h2>交易操作</h2><label className="haptics-setting"><span><b>开仓二次确认</b><small>开仓可跳过二次确认；平仓选择比例后提交，风控仍执行。</small></span><input type="checkbox" role="switch" aria-label="开仓二次确认" checked={confirmTrades} disabled={busy} onChange={e=>{setConfirmTrades(e.target.checked);localStorage.setItem('spike-confirm-trades',String(e.target.checked));feedback('light')}}/><i aria-hidden="true"/></label></section>
     {connection&&<details className="card connection-card service-details"><summary>连接状态 <span className={`freshness ${online?'connected':''}`}><i/>{online?'已连接':'已中断'}</span></summary><p className="micro">{exchangeStatus?.error??'已有持仓由服务器持续管理。'}</p><button className="soft-button" disabled={busy} onClick={()=>{void forgetSession().then(()=>{epoch.current++;displayCache.clear();setConnection(null);setOnline(false);setState(null);notify('已清除本机授权；服务端继续管理已有持仓','info','toast')}).catch(()=>setError('本机授权未清除，请重试'))}}>清除本机授权</button></details>}
-    <section className="card experience-settings"><h2>体验设置</h2><label className="haptics-setting"><span><b>触感反馈</b><small>仅手机端，切换与重要操作时轻触反馈</small></span><input type="checkbox" role="switch" aria-label="触感反馈" checked={haptics} onChange={e=>{setHaptics(e.target.checked);setFeedbackEnabled(e.target.checked)}}/><i aria-hidden="true"/></label><p className="micro">行情刷新不触发震动。动画遵循系统的减少动态效果设置。</p></section>
+    <section className="card experience-settings"><h2>体验设置</h2><label className="haptics-setting"><span><b>触感反馈</b><small>滑杆分档震动，到达两端时加强反馈</small></span><input type="checkbox" role="switch" aria-label="触感反馈" checked={haptics} onChange={e=>{setHaptics(e.target.checked);setFeedbackEnabled(e.target.checked)}}/><i aria-hidden="true"/></label><p className="micro">行情刷新不触发震动。动画遵循系统的减少动态效果设置。</p></section>
     <div className="connection-promises"><p><Icon name="shield" size={18}/><span><b>{live?'独立实盘风控记录':'独立的模拟账户'}</b><small>模拟与实盘记录分开，重启不会清空风控。</small></span></p><p><Icon name="clock" size={18}/><span><b>Mac 在线，保护才持续</b><small>关闭 App 后服务继续管理；Mac 睡眠或断网会暂停新的保护调整。</small></span></p></div>
     <p className="disclaimer">{live?'实盘仅按你点击提交的指令执行。不能限制你在 OKX 官方 App 中的操作。':'仅模拟交易，未启用实盘。不能限制 OKX 官方 App 中的操作。'}</p>
    </>}

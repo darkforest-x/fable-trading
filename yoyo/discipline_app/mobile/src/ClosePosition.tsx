@@ -3,7 +3,7 @@
  */
 import type {CSSProperties} from 'react';
 import {Dialog,Spinner} from './Dialog';
-import {feedback} from './feedback';
+import {sliderFeedback,feedback} from './feedback';
 import {positionAmount} from './positionAmount';
 import type {Position,State} from './api';
 
@@ -19,9 +19,9 @@ export function ClosePosition({position,state,online,percent,onPercent,busy,lock
   <h2>平仓</h2><div className="position-head"><b>{current.symbol.replace('-USDT-SWAP','')} / USDT</b><span className={current.side==='long'?'long':'short'}>{current.side==='long'?'多':'空'} · {current.leverage}x</span></div>
   <div className="equity"><span>当前剩余持仓</span><b>{fmt(amount)} USDT</b></div>
   <div className="budget close-budget"><div className="slider-heading"><label htmlFor="close-percent">平仓比例</label><output htmlFor="close-percent">{percent}<small>%</small></output></div>
-   <input id="close-percent" aria-label="平仓比例" type="range" min="1" max="100" step="1" value={percent} disabled={busy||locked} onChange={e=>{onPercent(Number(e.target.value));feedback('tick')}} style={{'--fill':`${percent}%`} as CSSProperties}/>
+   <input id="close-percent" aria-label="平仓比例" type="range" min="1" max="100" step="1" value={percent} disabled={busy||locked} onChange={e=>{sliderFeedback(percent,Number(e.target.value));onPercent(Number(e.target.value))}} style={{'--fill':`${percent}%`} as CSSProperties}/>
    <div className="slider-scale"><span>1%</span><span>25</span><span>50</span><span>75</span><span>100%</span></div>
-   <div className="close-presets" aria-label="快捷平仓比例">{[25,50,75,100].map(value=><button key={value} type="button" aria-pressed={percent===value} disabled={busy||locked} onClick={()=>{onPercent(value);feedback('light')}}>{value}%</button>)}</div>
+   <div className="close-presets" aria-label="快捷平仓比例">{[25,50,75,100].map(value=><button key={value} type="button" aria-pressed={percent===value} disabled={busy||locked} onClick={()=>{onPercent(value);feedback(value===100?'heavy':'medium')}}>{value}%</button>)}</div>
   </div>
   <div className="ticket-estimate close-estimate"><div><span>本次平仓 · USDT</span><b>{fmt(closingAmount)}</b></div><div><span>平仓后剩余 · USDT</span><b>{fmt(amount===undefined||closingAmount===undefined?undefined:Math.max(0,amount-closingAmount))}</b></div></div>
   <p className="micro">{locked?'上一笔结果待核对，重试将使用原比例与编号。':!valid?'低于最小平仓数量，请调整比例或选择 100%。':percent===100?'平掉当前全部剩余仓位。':'剩余仓位继续执行保护规则。'} 按合约步长取整。</p>
