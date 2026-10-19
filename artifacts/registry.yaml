@@ -22,12 +22,13 @@ artifacts:
     artifact_type: manifest
     role: Descriptive original V13.1 trade excursions with actual exit reconciliation
     source_repo: darkforest-x/fable-trading
+    source_commit: ae053685db
     source_path: experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/result.json
     storage_uri: repo://experiments/active/exp-spike-v131-excursions-20261019-v1/results_v1/result.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Pending path calculation; original sources remain unchanged, no content hashes.
+    notes: Completed 21547-row trades.csv.gz, result.json with twelve timeframe/side groups and source path/size/mtime provenance, and verification.json. Every net R and close peak matches canonical exit replay; 468 standard-library checks pass. Gross MAE and bounded MFE stop at actual exits; 1H frozen entries and original costs preserved. Original sources unchanged, no content hashes. Compressed per-trade data remains local.
   - artifact_id: spike-v131-30m4h-bottom20-20261017-v1
     artifact_type: manifest
     role: frozen-retest-30m4h-bottom20-study
