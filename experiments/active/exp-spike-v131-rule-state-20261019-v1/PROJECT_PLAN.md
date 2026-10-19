@@ -13,6 +13,7 @@
 - Primary outputs: closed trade count, sum/mean netR, gross/costR, win rate, PF, realized closedR drawdown (not account DD), calendar-year results; matched signal/random totals, excess and incremental excess, weekly block bootstrap and signflip. Holm over all nonbaseline applicable later rule/TF comparisons and separately9state bins x4TF. Pooled comparisons additionally shown. No AUC: no trained classifier. Feature rank AUC/top-decile optional descriptive only, not the success criterion of these fixed coarse gates.
 - Validate full baseline anchor/status/price/exit/netR identity versus prior stage ledger, raw detector equality, independent accounting/serial reconstruction, synthetic rule-removal cases, missing BTC/gaps, prefix invariance on8 declared symbols, and extreme-winning paths before interpreting any unusually large return.
 - Preserve failed smoke outputs. Commit builders before runs. New outputs stay local in this experiment; compressed ledgers ignored, compact results/receipts tracked. Register experiment/artifacts and sync a deduplicated Notion record, eligibility false. No separate report.
+- Pre-full-results statistical addendum: also aggregate consecutive four calendar weeks into fixed blocks before incremental-excess bootstrap/signflip. This sensitivity addresses dependence beyond one week; it does not change policies, primary Holm families or early-only selection. Any significance claim must disclose disagreement with this sensitivity.
 
 Reproduce from repository root (fresh output directories):
 

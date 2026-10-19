@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.spike_v131_rule_facts import FEATURES
-from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer
+from yoyo.evaluation.spike_v131_rule_summary import serial_flags,effective,eligibility,cutpoints,infer,four_week_blocks
 
 
 def rows():
@@ -55,6 +55,11 @@ def test_weekly_statistics_respect_replication_unit():
     b={'a':{'n':2,'x':1},'b':{'n':2,'x':-2},'c':{'n':2,'x':3}}
     doubled={k:{field:value*2 for field,value in r.items()} for k,r in b.items()}
     assert infer(b,'x',cfg)==infer(doubled,'x',cfg)
+
+
+def test_longer_uncertainty_blocks_do_not_compress_missing_calendar_weeks():
+    b={'2022-W44':dict(n=1,x=1),'2022-W45':dict(n=1,x=2),'2022-W48':dict(n=1,x=3)}
+    assert four_week_blocks(b)=={0:dict(n=2.,x=3.),1:dict(n=1.,x=3.)}
 
 
 def test_reuse_rejects_end_anchor_and_partial_streams(tmp_path):

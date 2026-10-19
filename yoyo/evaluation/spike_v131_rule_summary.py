@@ -125,6 +125,18 @@ def infer(blocks,field,cfg):
     return dict(mean95=np.quantile(means,[.025,.975]).tolist(),p=(count+1)/10001,weeks=len(a))
 
 
+def four_week_blocks(blocks):
+    """Fixed consecutive four-week calendar blocks, retaining empty-week gaps."""
+    result={}
+    origin=pd.Timestamp('2022-10-31',tz='UTC')
+    for week,fields in blocks.items():
+        monday=pd.Timestamp(datetime.strptime(week+'-1','%G-W%V-%u'),tz='UTC')
+        key=int((monday-origin).days//28)
+        if key not in result:result[key]={field:0. for field in fields}
+        for field,value in fields.items():result[key][field]+=value
+    return result
+
+
 def baseline_for(policy):
     return policy.rsplit('_',1)[0]+'_known' if policy not in ARMS else 'baseline'
 
@@ -227,6 +239,7 @@ def run(root,name='analysis_v1'):
             means={key:value/n for key,value in sums.items()})
         if s==0:
             for field in ['excess','incremental_excess']:row[field+'_inference']=infer(b,field,cfg)
+            row['incremental_excess_4week_inference']=infer(four_week_blocks(b),'incremental_excess',cfg)
         paired.append(row)
     for family in ['rules','states']:
         candidates=[r for r in paired if r['side']==0 and r['period']=='later' and r['timeframe_min']!=0
