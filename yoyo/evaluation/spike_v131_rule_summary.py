@@ -112,7 +112,7 @@ def finish_metric(x):
 def infer(blocks,field,cfg):
     """Weekly paired resampling and sign flips; finite products, no BLAS call."""
     a=np.array([b[field] for b in blocks.values()],float);n=np.array([b['n'] for b in blocks.values()],float)
-    if len(a)<2 or not n.sum():return dict(mean95=[None,None],p=None,weeks=len(a))
+    if len(a)<2 or not n.sum():return dict(mean95=[None,None],p=None,blocks=len(a))
     rng=np.random.default_rng(cfg['seed']);means=[]
     for _ in range(cfg['bootstrap']//100):
         j=rng.integers(0,len(a),size=(100,len(a)))
@@ -122,7 +122,7 @@ def infer(blocks,field,cfg):
         signs=rng.integers(0,2,size=(500,len(a)),dtype=np.int8)*2-1
         simulated=(signs*a[None,:]).sum(axis=1);assert np.isfinite(simulated).all()
         count+=int((np.abs(simulated)>=observed-1e-12).sum())
-    return dict(mean95=np.quantile(means,[.025,.975]).tolist(),p=(count+1)/10001,weeks=len(a))
+    return dict(mean95=np.quantile(means,[.025,.975]).tolist(),p=(count+1)/10001,blocks=len(a))
 
 
 def four_week_blocks(blocks):
@@ -220,6 +220,11 @@ def run(root,name='analysis_v1'):
                     delta=v[si]-b[si],excess=v[si]-v[ci],incremental_excess=(v[si]-v[ci])-(b[si]-b[ci]))
                 for tf in [m,0]:
                     cov=coverage[tf,policy];cov['relevant_available']+=int((relevant&(first>=start)).sum());cov['mature']+=int(valid.sum())
+                    signal_scope=target & (anchor>=start)
+                    own=signal_scope & allowed[policy]
+                    comparison=signal_scope & (allowed[policy]|allowed[base])
+                    cov['signal_eligible']+=int(own.sum());cov['signal_with_draw']+=int((own&pair).sum())
+                    cov['comparison_signal_eligible']+=int(comparison.sum());cov['comparison_signal_with_draw']+=int((comparison&pair).sum())
                 for s in [0,1,-1]:
                     for period,mask in scopes.items():
                         use=mask if s==0 else mask&(side==s)
@@ -268,6 +273,7 @@ def run(root,name='analysis_v1'):
     result=dict(generated_at=datetime.now(timezone.utc).isoformat(),config=cfg,serial=serial,paired=paired,selection=selection,
         coverage=[dict(timeframe_min=k[0],policy=k[1],**v) for k,v in coverage.items()],thresholds=thresholds,
         baseline_serial_identity_checks=lineage,path_audits={key:sum(s[key] for r in receipt['receipts'] for s in r['streams']) for key in ['baseline_scalar_checks','draw_identity_checks','prefix_checks']},
+        raw_data_counts={key:sum(s[key] for r in receipt['receipts'] for s in r['streams']) for key in ['union_anchors','baseline_anchors','rows']},
         definitions={'baseline':'Original rebreak/fresh occupancy; fixed original raw opposite exits in all ablations.',
             'simple_breakout':'Minimal12-bar anchor plus SAME rebreak wrapper; combined benchmark, not a single-rule removal.',
             'state':'Each cohort uses its own anchor feature and pre2025 signal-derived cutpoints. Unknown excluded explicitly.',
