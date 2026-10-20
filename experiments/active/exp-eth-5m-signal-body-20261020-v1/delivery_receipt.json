@@ -1,0 +1,95 @@
+{
+  "experiment_id": "exp-eth-5m-signal-body-20261020-v1",
+  "source_commit": "479af940cda216336dfdbc0b69a385e3a6145b29",
+  "source_receipt": "experiments/active/exp-eth-5m-signal-body-20261020-v1/receipt.json",
+  "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_signal_body",
+  "reuse": "Completed study is preserved; read summary.csv/comparison.csv rather than rerun. A new output/config path is required for new research.",
+  "validation": {
+    "saved_native_rows_exact": 4128,
+    "saved_native_fields_exact": 35,
+    "summary_partition_checks": 5,
+    "paired_records": 1679,
+    "unique_control_records": 1679,
+    "unique_control_events": 1664,
+    "notion_readback_verified": true,
+    "tests": 3
+  },
+  "notion": {
+    "url": "https://app.notion.com/p/3ff8856479af814e80a7d115f494f240",
+    "readback_verified": true
+  },
+  "decision": "Reject default upgrade;mean constant-notional return does not improve,2026 deteriorates,and24of45gross20R retained.",
+  "inputs_unchanged": true,
+  "native_replays": 0,
+  "downloads": 0,
+  "indicator_changed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/.gitignore",
+      "bytes": 9,
+      "mtime_ns": 1792495665729428046
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/body_to_double.csv.gz",
+      "bytes": 317614,
+      "mtime_ns": 1792495712039195836
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/comparison.csv",
+      "bytes": 6060,
+      "mtime_ns": 1792495712054849553
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/config.json",
+      "bytes": 535,
+      "mtime_ns": 1792495665729009084
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/decisions.csv.gz",
+      "bytes": 45489,
+      "mtime_ns": 1792495711480030789
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/delay_attribution.json",
+      "bytes": 522,
+      "mtime_ns": 1792495712041135186
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/filter_effects.json",
+      "bytes": 946,
+      "mtime_ns": 1792495711789246627
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/inference.json",
+      "bytes": 4009,
+      "mtime_ns": 1792495711788996208
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/matched_pairs.csv.gz",
+      "bytes": 120105,
+      "mtime_ns": 1792495711441483711
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/receipt.json",
+      "bytes": 1672,
+      "mtime_ns": 1792495712076001191
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/selected_trades.csv.gz",
+      "bytes": 376476,
+      "mtime_ns": 1792495711401969750
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/summary.csv",
+      "bytes": 2461,
+      "mtime_ns": 1792495711788445662
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-signal-body-20261020-v1/validation.json",
+      "bytes": 249,
+      "mtime_ns": 1792495920702104032
+    }
+  ]
+}

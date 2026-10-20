@@ -1,0 +1,7 @@
+# Body-direction filtering needs a risk-normalization crosscheck
+
+- **Problem**: Requiring an ETH5m signal candle to agree with its arrow increased net win rate and improved mean net R. Those metrics alone appeared to justify a new entry gate.
+- **Dead end**: Comparing only cumulative or mean R obscures changed admission frequency and the initial-risk distribution. In the15m-watch study, the gate retained2211/3838 trades and mean net R improved from-0.976 to-0.787, but mean net notional return worsened from-16.785 to-16.961bp and only24/45 final gross20R remained.
+- **Effective path**: Apply the current-candle gate to cached independent native outcomes, preserving each trade's price, stop, exit and fee. Filter random controls on their own candle bodies and rematch within causal strata; report paired-subset coverage separately. Compare net notional return, net R, chronological segments and large-winner retention together.
+- **General rule**: An admission filter that changes the risk distribution needs both risk-normalized and constant-notional comparisons. A better win rate or R average alone does not establish better entry selection. Reuse existing independent outcomes when execution time and policy do not change.
+- **Scope**: `yoyo/evaluation/range_signal_body.py`; ETH15m observation, same-close5m entry, frozen five-bar structure stop plus0.05%,15m5R/4ATR,armedH1 reverse exit and20bp costs. Controls cover75.9% of retained signals; no default/Pine change.

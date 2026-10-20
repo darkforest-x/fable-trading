@@ -1,0 +1,38 @@
+{
+  "experiment_id": "exp-eth-5m-signal-body-20261020-v1",
+  "generated_at": "2026-10-20T11:28:32.054926+00:00",
+  "source_commit": "479af940cda216336dfdbc0b69a385e3a6145b29",
+  "elapsed_seconds": 2.358235999941826,
+  "reused_native_rows": 7676,
+  "preserved_native_fields": 35,
+  "independently_checked_body_rows": 7676,
+  "source_stamps": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/delivery_receipt.json",
+      "bytes": 7591,
+      "mtime_ns": 1792494006139239630
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/trades.csv",
+      "bytes": 2569540,
+      "mtime_ns": 1792493722866224579
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/results/baseline/trades.csv",
+      "bytes": 798954,
+      "mtime_ns": 1792493670329627851
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    }
+  ],
+  "native_replays": 0,
+  "downloads": 0,
+  "parameter_search": false,
+  "controls": "Same body gate;cached watch-qualified random outcomes;rematched without replacement by segment/week/side/volbucket. Incomplete coverage;compare paired subsets,not all-signal means.",
+  "limitations": "Historical independent R,not account return;20bp excludes funding/spread/latency. No trained score:AUC/top-decile inapplicable;weekly null controls used.",
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-5m-signal-body-20261020-v1
+    artifact_type: manifest
+    role: ETH15m-watch5m signal-body admission with cached-native attribution
+    source_repo: darkforest-x/fable-trading
+    source_commit: 479af940cda216336dfdbc0b69a385e3a6145b29
+    source_path: experiments/active/exp-eth-5m-signal-body-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-5m-signal-body-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Rawselectedtrades/decisions/pairs/delayjoin local,receipted bypath/size/time,nohash. Incomplete rematchedcontrolcoverageexplicit.
+      IndependentRnotaccountreturns;unchanged20bp,5bar0.05percentstop,15m5R4ATR,armedH1reverse.
   - artifact_id: eth-5m-double-confirm-20261020-v1
     artifact_type: manifest
     role: ETH15m-watch5m-double-confirm native outcomes and source-arrow attribution

@@ -14,6 +14,22 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-5m-signal-body-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 479af940cda216336dfdbc0b69a385e3a6145b29
+    status: rejected
+    question: Does same-direction5m signal-body admission improve15m-watch ETH entries without waiting another candle?
+    single_variable: Current5m candle body must agree with arrow;signal-close execution,watch,stop,exit,cost unchanged.
+    artifacts:
+    - eth-5m-signal-body-20261020-v1
+    canonical_report: experiments/active/exp-eth-5m-signal-body-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: Retains2211/3838;netwin9.56to10.76percent,net-1739.94R,meanR-0.787 butmeanbp-16.785to-16.961. Gross10R/20R116/45to65/24.1679pairedmeanRsignal-0.829/random-0.661;bp-17.796/-20.141,p.341,coverage75.94percent.2024/2025improvebp,2026worsens;2025plus-17.377versus-16.525baseline.
+    notes: 2.36seconds,no native replay/download.7676cached native rows;4128savedselectedrows35fields exact,3tests,5partitionchecks.1679uniquecontrolrecords1664uniqueevents.
+      NoPine/livechanges. Notion3ff8856479af814e80a7d115f494f240 verified;AUC/topdecileinapplicable withoutmodelscore.
   - experiment_id: exp-eth-5m-double-confirm-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2d3cb43367f1cdb01556e9b98894594c73505c3e
