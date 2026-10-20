@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.btc_range_wick_fanshen import (
-    monday_levels, pair_arrows, touch_masks,
+    candidates, monday_levels, pair_arrows, touch_masks,
 )
 from yoyo.evaluation.pepe_range_exits import aggregate, stop_events
 
@@ -87,3 +87,22 @@ def test_nine_5m_extrema_equal_three_complete_15m_at_entry():
             raw = (extreme-side*five.close.iloc[i]*.001)/.1
             expected = (np.floor(raw+1e-8) if side == 1 else np.ceil(raw-1e-8))*.1
             assert abs(entries.iloc[0].stop-expected) < 1e-9
+
+
+def test_candidate_segmentation_identical_for_micro_and_nanosecond_indices():
+    rng = np.random.default_rng(20261021)
+    n = 1500
+    close = 100 + np.cumsum(rng.normal(0, .2, n))
+    opened = np.r_[close[0], close[:-1]]
+    q = pd.DataFrame(dict(open=opened, high=np.maximum(opened, close)+.3,
+                          low=np.minimum(opened, close)-.3, close=close),
+                     index=pd.date_range("2026-10-19T04:15Z", periods=n, freq="15min"))
+    cfg = dict(ratios=[.5,.618,.705,1.13,1.27,1.618], timezone="America/New_York",
+               signal_distance_bars=2, start="2026-10-20T00:00Z",
+               split="2026-10-27T00:00Z", end="2026-11-03T00:00Z",
+               volatility_edges=[.001,.002,.004,.008,.016], seed=123)
+    a, missing_a = candidates(q.set_axis(q.index.as_unit("us")), cfg)
+    b, missing_b = candidates(q.set_axis(q.index.as_unit("ns")), cfg)
+    pd.testing.assert_frame_equal(a, b)
+    assert len(a) > 0 and a.family.eq("combined").any()
+    assert missing_a == missing_b

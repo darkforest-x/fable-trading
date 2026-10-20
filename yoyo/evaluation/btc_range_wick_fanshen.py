@@ -112,14 +112,16 @@ def candidates(quarter, cfg):
                                  touch_lag=0, levels="", level_prices="",
                                  monday_key=weeks[ids], developing=developing[ids]))
     real = pd.concat([combined, baseline], ignore_index=True)
-    index = quarter.index
-    bounds = pd.to_datetime([cfg["start"], cfg["split"], cfg["end"]], utc=True)
+    index = quarter.index.as_unit("ns")
+    bounds = pd.to_datetime([cfg["start"], cfg["split"], cfg["end"]], utc=True).as_unit("ns")
     vol = atr(quarter, 14).to_numpy() / quarter.close.to_numpy()
     bucket = np.digitize(vol, cfg["volatility_edges"])
     week = (index-pd.to_timedelta(index.dayofweek, unit="D")).normalize().asi8
     segment = np.searchsorted(bounds.asi8, index.asi8, side="right")-1
     valid = (segment >= 0) & (segment < 2) & np.isfinite(vol)
     real = real[valid[real.entry_q.to_numpy(int)]].copy()
+    if real.empty or not real.family.eq("combined").any():
+        raise ValueError("No eligible combined events; check clocks and source semantics")
     idx = real.entry_q.to_numpy(int)
     real["segment"], real["week"], real["bucket"] = segment[idx], week[idx], bucket[idx]
     real = real.sort_values(["family", "entry_q", "signal_q"]).reset_index(drop=True)
@@ -154,7 +156,10 @@ def prepare(config):
     work = config.parent
     receipt = work / "input_receipt.json"
     if receipt.exists():
-        return json.loads(receipt.read_text())
+        existing = json.loads(receipt.read_text())
+        if existing["config"] != cfg or not existing["counts"].get("combined/signal"):
+            raise ValueError("Preserve mismatched/empty preparation before rebuilding")
+        return existing
     recent = list(work.glob(cfg["recent_glob"]))
     if len(recent) != 1:
         raise ValueError("Need exactly one completed targeted BTC minute extension")
