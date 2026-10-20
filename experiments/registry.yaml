@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-gainer-board-exit-select-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 93567f2f4e
+    status: rejected
+    question: For coins freshly entering OKX's 24h gainer Top10 (last three months), does any of 26 predeclared exits, and then any single-feature coin selection, give positive net returns in both halves that beat volatility-matched and same-coin quiet-time controls?
+    single_variable: Stage A exit only (26 cells per side, dev-selected); stage B coin selection only (11 features x terciles) under the dev-selected exit. Events, 1H next-open entry and 20bp frozen.
+    result: 1910 fresh entries (dev 929, val 943). Long - all 26 exits lose in both halves (dev -14 to -89bp, val -31 to -122bp) and trail volatility-matched and quiet controls; dev pick trail3 -14.1 then -58.6bp; all 33 selection buckets lose in validation; dev/val Spearman 0.09 exits, 0.00 selection. Short mirror - dev pick offboard50 (cover after rank leaves Top50, max 48h) +48.9/+45.5bp, win 70/68 percent, beats volmatch +74/+85bp (p .023/.040) but not zero (p .11/.24); tails p1 -38/-39 percent, worst -142/-210 percent. Selection pullback24 mid +163 then +88bp (p .067). None meet p<0.01. Post-hoc - fresh entries straight into ranks 1-3 (74) shorted average +4.69 percent, median +5.43, worst -22.8, untested hypothesis.
+    artifacts:
+    - gainer-board-exit-select-20261021-v1
+    canonical_report: experiments/active/exp-gainer-board-exit-select-20261021-v1/verdict.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Owner 2026-10-21 follow-up to EXP-148. Reuses EXP-148 inputs and loaders (no new download), contract TP/SL resolver (stop-first; upper bound reported) and day-clustered inference. Universe is the 2026-10-21 live list plus cached delisted, not a census; USDC excluded. No funding, spread or depth; shorts without stop can lose over 100 percent of notional. No Pine, default, live or training change.
   - experiment_id: exp-btc-range-wick-fanshen-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f99765323d

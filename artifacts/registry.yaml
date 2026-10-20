@@ -52,6 +52,18 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Delivered private V2.12 revision6;20 local checks pass. BTC15m old off starts September17 with3199 closed bars;new off/on June18 with11999 bars and12 weeks instead of5. Common72 signals and signatures identical. 5m confirmed branch passes;QA removed,layout saved,V2.11 preserved. Initial CE10246 was truncated90-line editor source,corrected with full1088 lines.
+  - artifact_id: gainer-board-exit-select-20261021-v1
+    artifact_type: manifest
+    role: OKX gainer-board fresh entries with 26 long/short exits, controls and single-feature selection tables
+    source_repo: darkforest-x/fable-trading
+    source_commit: 93567f2f4e
+    generator_commit: 93567f2f4e
+    source_path: experiments/active/exp-gainer-board-exit-select-20261021-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-gainer-board-exit-select-20261021-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 1910 fresh Top10 entries 2026-07-21..10-18, dev/val halves. events.csv features, event_exits.csv.gz per event x cell x side with volmatch and quiet controls, exit_cells.csv, select_cells.csv, verdict.json. 6 focused tests. No content hash.
   - artifact_id: eth-h1-gainers-mfe16-20261021-v1
     artifact_type: manifest
     role: ETH H1 green-check OKX 24h gainer boards and their 16h maximum run-up, last three months

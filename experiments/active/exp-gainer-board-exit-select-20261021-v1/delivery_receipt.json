@@ -1,0 +1,122 @@
+{
+  "config": {
+    "experiment_id": "exp-gainer-board-exit-select-20261021-v1",
+    "instruments": "../exp-eth-h1-gainers-mfe16-20261021-v1/inputs/instruments_swap_20261021.json",
+    "symbols": "../exp-eth-h1-gainers-mfe16-20261021-v1/inputs/symbols.txt",
+    "h1_dir": "../exp-eth-h1-gainers-mfe16-20261021-v1/inputs/h1",
+    "local_15m_dir": "data/kline_fetched",
+    "exclude": [
+      "USDC_USDT_SWAP"
+    ],
+    "start": "2026-07-21T00:00:00Z",
+    "last_decision": "2026-10-18T15:00:00Z",
+    "dev_before": "2026-09-03T00:00:00Z",
+    "val_from": "2026-09-05T00:00:00Z",
+    "board_n": 10,
+    "fresh_hours": 24,
+    "rank_hours": 24,
+    "max_hold": 48,
+    "time_exits": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      24,
+      48
+    ],
+    "tp_percent": [
+      3,
+      5,
+      10,
+      20
+    ],
+    "sl_percent": [
+      3,
+      5,
+      10
+    ],
+    "tpsl_horizon": 24,
+    "trail_percent": [
+      3,
+      5,
+      8,
+      12
+    ],
+    "board_exit_n": [
+      10,
+      20,
+      50
+    ],
+    "vol_min_bars": 72,
+    "vol_max_bars": 168,
+    "vol_matches": 5,
+    "quiet_window": [
+      168,
+      72
+    ],
+    "quiet_draws": 5,
+    "min_dev_events_exit": 100,
+    "min_dev_events_select": 40,
+    "pass_p": 0.01,
+    "round_trip_cost": 0.002,
+    "seed": 20261021
+  },
+  "source_commit": "93567f2f4e4af30c36edd080b5cb465e2f7b7a15",
+  "reused": [
+    "eth_h1_gainers_mfe16.load_panel/rank_inputs/matched_vol",
+    "contracts.outcomes.resolve_barrier_outcome",
+    "imacd_startup_research.inference"
+  ],
+  "symbols": 289,
+  "panel": [
+    "2026-07-12 00:00:00+00:00",
+    "2026-10-20 15:00:00+00:00"
+  ],
+  "events": 1910,
+  "events_by_period": {
+    "val": 943,
+    "dev": 929,
+    "gap": 38
+  },
+  "exit_cells": 26,
+  "choice": {
+    "long": "trail3",
+    "short": "offboard50"
+  },
+  "select": {
+    "long": {
+      "feature": "r1",
+      "bucket": "high",
+      "dev_mean_bp": 17.756282188541487
+    },
+    "short": {
+      "feature": "pullback24",
+      "bucket": "mid",
+      "dev_mean_bp": 162.71296007367562
+    }
+  },
+  "spearman": {
+    "long": 0.09264957264957265,
+    "short": 0.48786324786324786
+  },
+  "passes": {
+    "long": [
+      false,
+      false
+    ],
+    "short": [
+      false,
+      false
+    ]
+  },
+  "production_eligible": false,
+  "training_eligible": false,
+  "limitations": [
+    "About three months, two ~6-week halves; independent overlapping events, not an account.",
+    "Universe is the 2026-10-21 live crypto list plus three cached delisted names, not a census.",
+    "1H bars: same-bar TP/SL resolved stop-first; upper bound reported separately.",
+    "No funding, spread, depth or slippage beyond 20bp; ctVal is the current snapshot.",
+    "Board exits applied literally to controls (off-board controls leave after one bar)."
+  ]
+}
