@@ -1,0 +1,37 @@
+// Append to V2.1 for native validation, then remove from delivered script.
+// Calls the production accumulator, not a Python reimplementation.
+if barstate.isfirst
+    int fixtureStart = timestamp("UTC", 2026, 1, 1, 0, 0)
+    H1RaySnapshot fixture = na
+    for i = 0 to 5
+        int at = fixtureStart + i * 3600000
+        fixture := h1Record(at, at + 3600000, 100.0 + i, 110.0 + i,
+             i == 0 or i == 2 or i == 4, i == 1 or i == 5, 4)
+        if i == 3 and fixture.count != 3
+            runtime.error("H1 fixture lost intermediate signals within a 4H bar")
+    if fixture.count != 4 or fixture.oldestAt != fixtureStart + 3600000 or fixture.newestAt != fixtureStart + 5 * 3600000
+        runtime.error("H1 fixture retention/order failed")
+    array<string> fixtureRows = str.split(fixture.events, ";")
+    array<string> firstRow = str.split(fixtureRows.first(), ",")
+    array<string> secondRow = str.split(fixtureRows.get(1), ",")
+    if str.tonumber(firstRow.get(2)) != 111 or str.tonumber(firstRow.get(3)) != -1
+        runtime.error("H1 fixture bearish anchor/direction failed")
+    if str.tonumber(secondRow.get(2)) != 102 or str.tonumber(secondRow.get(3)) != 1
+        runtime.error("H1 fixture bullish anchor/direction failed")
+    if int(str.tonumber(firstRow.get(1))) != fixtureStart + 2 * 3600000
+        runtime.error("H1 fixture availability time failed")
+    log.info("H1_NATIVE_CHECKS_PASS: multi-event 4H, retention, order, anchors, availability")
+varip string fixtureLogged = ""
+if barstate.islast and not na(h1) and fixtureLogged != str.tostring(h1.closeAt) + h1.events
+    int weightedTime = 0
+    int weightedPrice = 0
+    int weightedSide = 0
+    for [i, row] in str.split(h1.events, ";")
+        array<string> fields = str.split(row, ",")
+        if fields.size() == 4
+            weightedTime += int(str.tonumber(fields.get(0)) / 60000) * (i + 1)
+            weightedPrice += int(math.round(str.tonumber(fields.get(2)) / syminfo.mintick)) * (i + 1)
+            weightedSide += int(str.tonumber(fields.get(3))) * (i + 1)
+    log.info("H1_NATIVE_SNAPSHOT count={0} oldest={1} newest={2} through={3} weightedTime={4} weightedPrice={5} weightedSide={6}",
+         h1.count, h1.oldestAt, h1.newestAt, h1.closeAt, weightedTime, weightedPrice, weightedSide)
+    fixtureLogged := str.tostring(h1.closeAt) + h1.events

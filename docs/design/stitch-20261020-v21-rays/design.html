@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Range Fanshen V2.1 · 1H Vertical Rays (Pine 视觉规范)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            mono: ['"JetBrains Mono"', 'monospace'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            tv: {
+              bg: '#0c0f17',
+              card: '#131722',
+              cardHover: '#181d2a',
+              border: '#202636',
+              borderLight: '#2c3447',
+              green: '#22ab94',
+              red: '#f23645',
+              grayBar: '#363c4e',
+              textMuted: '#787b86',
+              textPrimary: '#d1d4dc',
+              stochBlue: '#2962ff',
+              stochOrange: '#ff9800',
+              mondayRange: '#2a3346'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #080a0f;
+      color: #d1d4dc;
+      font-family: 'Inter', sans-serif;
+    }
+    .chart-grid-line {
+      stroke: #171c28;
+      stroke-width: 1;
+      stroke-dasharray: 2 4;
+    }
+    .monday-range-band {
+      fill: rgba(41, 98, 255, 0.04);
+      stroke: #2a3346;
+      stroke-width: 1;
+      stroke-dasharray: 4 4;
+    }
+    .ray-line {
+      stroke: #f23645;
+      stroke-width: 1;
+      stroke-linecap: square;
+    }
+  </style>
+</head>
+<body class="p-6 md:p-10 flex flex-col items-center justify-center min-h-screen">
+
+  <div class="w-full max-w-6xl space-y-6">
+    
+    <!-- Top Meta Spec Header -->
+    <header class="flex flex-wrap items-center justify-between gap-4 border-b border-tv-border pb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-3 h-3 rounded-full bg-tv-green animate-pulse"></div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base font-bold text-white tracking-wide">Range Fanshen V2.1 · 1H Vertical Rays</h1>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-tv-red/10 text-tv-red border border-tv-red/30">PINE VISUAL SPEC</span>
+          </div>
+          <p class="text-xs text-tv-textMuted mt-0.5">跨周期固定时间戳锚定 · 1H 勾叉竖向单向射线 · 无水平漂移</p>
+        </div>
+      </div>
+
+      <!-- Quick Resolution Pills Specimen -->
+      <div class="flex items-center gap-1.5 bg-tv-card px-2.5 py-1.5 rounded-lg border border-tv-border text-xs">
+        <span class="text-tv-textMuted text-[11px] mr-1">多周期穿透测试:</span>
+        <span class="px-2 py-0.5 rounded text-white bg-tv-borderLight font-mono font-medium cursor-pointer">5m</span>
+        <span class="px-2 py-0.5 rounded text-tv-green bg-tv-green/10 border border-tv-green/30 font-mono font-bold cursor-pointer">1h (原基准)</span>
+        <span class="px-2 py-0.5 rounded text-tv-textMuted hover:text-white font-mono cursor-pointer">4h</span>
+        <span class="px-2 py-0.5 rounded text-tv-textMuted hover:text-white font-mono cursor-pointer">1D</span>
+        <span class="px-2 py-0.5 rounded text-tv-textMuted hover:text-white font-mono cursor-pointer">1W</span>
+      </div>
+    </header>
+
+    <!-- Main Chart Specimen Container (matches SCREEN_4 visual aesthetic) -->
+    <div class="bg-tv-card rounded-xl border border-tv-border overflow-hidden shadow-2xl">
+      
+      <!-- Chart Top Bar -->
+      <div class="flex items-center justify-between px-4 py-2.5 bg-tv-card border-b border-tv-border text-xs">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-tv-green"></span>
+            <span class="font-bold text-white font-mono">BTCUSDT · 1H</span>
+          </div>
+          <span class="text-tv-border">|</span>
+          <span class="text-tv-textMuted font-mono text-[11px]">RANGE FANSHEN V2.1 (force_overlay=true) 视觉映射规范</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="text-[11px] font-mono text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">合成示例 (占位数据 · 无账户交易)</span>
+        </div>
+      </div>
+
+      <!-- SVG Chart Viewport -->
+      <div class="relative w-full overflow-x-auto bg-[#0d1017]">
+        <svg viewBox="0 0 1000 580" class="w-full h-auto min-w-[800px] select-none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Ray Gradients / Filters -->
+            <filter id="rayGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feDropShadow dx="0" dy="0" stdDeviation="1.5" flood-color="#f23645" flood-opacity="0.4"/>
+            </filter>
+          </defs>
+
+          <!-- ================= BACKGROUND GRIDS ================= -->
+          <!-- Price Pane Horizontal Grid -->
+          <line x1="50" y1="50" x2="920" y2="50" class="chart-grid-line"/>
+          <line x1="50" y1="120" x2="920" y2="120" class="chart-grid-line"/>
+          <line x1="50" y1="190" x2="920" y2="190" class="chart-grid-line"/>
+          <line x1="50" y1="260" x2="920" y2="260" class="chart-grid-line"/>
+          <line x1="50" y1="330" x2="920" y2="330" class="chart-grid-line"/>
+          <line x1="50" y1="400" x2="920" y2="400" class="chart-grid-line"/>
+
+          <!-- Pane Separator (Price vs Stoch) -->
+          <line x1="50" y1="420" x2="920" y2="420" stroke="#252d3d" stroke-width="1.5"/>
+
+          <!-- Stoch Pane Horizontal Grid -->
+          <line x1="50" y1="450" x2="920" y2="450" class="chart-grid-line"/>
+          <line x1="50" y1="495" x2="920" y2="495" class="chart-grid-line"/>
+          <line x1="50" y1="540" x2="920" y2="540" class="chart-grid-line"/>
+
+          <!-- Vertical Time Grid Lines -->
+          <line x1="160" y1="30" x2="160" y2="550" class="chart-grid-line"/>
+          <line x1="320" y1="30" x2="320" y2="550" class="chart-grid-line"/>
+          <line x1="480" y1="30" x2="480" y2="550" class="chart-grid-line"/>
+          <line x1="640" y1="30" x2="640" y2="550" class="chart-grid-line"/>
+          <line x1="800" y1="30" x2="800" y2="550" class="chart-grid-line"/>
+
+          <!-- ================= SUBTLE MONDAY HORIZONTAL RANGES ================= -->
+          <!-- Monday Range 1 (High: 68,520, Low: 67,480) -->
+          <rect x="70" y="160" width="370" height="110" class="monday-range-band"/>
+          <line x1="70" y1="160" x2="440" y2="160" stroke="#3b4861" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="70" y1="270" x2="440" y2="270" stroke="#3b4861" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="75" y="152" fill="#5c6882" font-family="'JetBrains Mono', monospace" font-size="9">MON RANGE HIGH (68,520.0)</text>
+          <text x="75" y="282" fill="#5c6882" font-family="'JetBrains Mono', monospace" font-size="9">MON RANGE LOW (67,480.0)</text>
+
+          <!-- Monday Range 2 (High: 68,900, Low: 67,950) -->
+          <rect x="520" y="125" width="380" height="95" class="monday-range-band"/>
+          <line x1="520" y1="125" x2="900" y2="125" stroke="#3b4861" stroke-width="1" stroke-dasharray="3 3"/>
+          <line x1="520" y1="220" x2="900" y2="220" stroke="#3b4861" stroke-width="1" stroke-dasharray="3 3"/>
+          <text x="525" y="117" fill="#5c6882" font-family="'JetBrains Mono', monospace" font-size="9">MON RANGE HIGH (68,900.0)</text>
+          <text x="525" y="232" fill="#5c6882" font-family="'JetBrains Mono', monospace" font-size="9">MON RANGE LOW (67,950.0)</text>
+
+          <!-- ================= 1H VERTICAL RAYS SPECIFICATION (THE KEY FEATURE) ================= -->
+          
+          <!-- RAY 1: Bullish Signal at Candle X=270 (Time: 14:00) -->
+          <!-- Low is at Y=348 (67,120.0). Ray originates from Low and extends UPWARDS to top of price pane (Y=20) -->
+          <g id="bullish-ray-1">
+            <!-- 1px Solid Red Ray (#F23645) from candle.low UP to Price Pane Top -->
+            <line x1="270" y1="348" x2="270" y2="20" class="ray-line" filter="url(#rayGlow)"/>
+            <!-- Visual Origin Anchor Dot on Candle Low -->
+            <circle cx="270" cy="348" r="2" fill="#f23645"/>
+            <!-- Tiny Green Checkmark (plotchar bull_cond, char='✓', location.belowbar) -->
+            <text x="270" y="366" fill="#39f340" font-family="sans-serif" font-weight="bold" font-size="13" text-anchor="middle">✓</text>
+            <!-- Callout Tag -->
+            <rect x="200" y="24" width="140" height="20" rx="3" fill="#131722" stroke="#f23645" stroke-width="1"/>
+            <text x="270" y="37" fill="#f23645" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" text-anchor="middle">1H RAY ↑ (LOW → PANE TOP)</text>
+          </g>
+
+          <!-- RAY 2: Bearish Signal at Candle X=450 (Time: 15:30) -->
+          <!-- High is at Y=145 (68,680.0). Ray originates from High and extends DOWNWARDS to bottom of price pane (Y=420) -->
+          <g id="bearish-ray-1">
+            <!-- 1px Solid Red Ray (#F23645) from candle.high DOWN to Price Pane Bottom -->
+            <line x1="450" y1="145" x2="450" y2="420" class="ray-line" filter="url(#rayGlow)"/>
+            <!-- Visual Origin Anchor Dot on Candle High -->
+            <circle cx="450" cy="145" r="2" fill="#f23645"/>
+            <!-- Tiny Red Cross (plotchar bear_cond, char='✕', location.abovebar) -->
+            <text x="450" y="138" fill="#f23645" font-family="sans-serif" font-weight="bold" font-size="11" text-anchor="middle">✕</text>
+            <!-- Callout Tag -->
+            <rect x="460" y="380" width="155" height="20" rx="3" fill="#131722" stroke="#f23645" stroke-width="1"/>
+            <text x="537" y="393" fill="#f23645" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="600" text-anchor="middle">1H RAY ↓ (HIGH → PANE BTM)</text>
+          </g>
+
+          <!-- RAY 3: Bullish Signal at Candle X=630 (Time: 17:00) -->
+          <!-- Low is at Y=322 (67,410.0). Ray extends UPWARDS to top of price pane (Y=20) -->
+          <g id="bullish-ray-2">
+            <line x1="630" y1="322" x2="630" y2="20" class="ray-line" filter="url(#rayGlow)"/>
+            <circle cx="630" cy="322" r="2" fill="#f23645"/>
+            <text x="630" y="340" fill="#39f340" font-family="sans-serif" font-weight="bold" font-size="13" text-anchor="middle">✓</text>
+          </g>
+
+          <!-- RAY 4: Bearish Signal at Candle X=750 (Time: 18:00) -->
+          <!-- High is at Y=172 (68,440.0). Ray extends DOWNWARDS to bottom of price pane (Y=420) -->
+          <g id="bearish-ray-2">
+            <line x1="750" y1="172" x2="750" y2="420" class="ray-line" filter="url(#rayGlow)"/>
+            <circle cx="750" cy="172" r="2" fill="#f23645"/>
+            <text x="750" y="165" fill="#f23645" font-family="sans-serif" font-weight="bold" font-size="11" text-anchor="middle">✕</text>
+          </g>
+
+          <!-- ================= SYNTHETIC CANDLESTICKS ================= -->
+          <!-- Candlesticks Sequence (Gray & Green Palette) -->
+          <!-- Candle 1: Gray (Bear) -->
+          <line x1="175" y1="310" x2="175" y2="360" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="169" y="325" width="12" height="24" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 2: Red/Gray -->
+          <line x1="205" y1="315" x2="205" y2="375" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="199" y="332" width="12" height="28" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 3: Gray -->
+          <line x1="235" y1="320" x2="235" y2="390" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="229" y="345" width="12" height="30" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 4: Signal Bull (14:00) - Green Hammer / Reversal -->
+          <line x1="270" y1="315" x2="270" y2="348" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="264" y="320" width="12" height="18" fill="#22ab94"/>
+
+          <!-- Candle 5: Green Bull -->
+          <line x1="305" y1="290" x2="305" y2="335" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="299" y="298" width="12" height="22" fill="#22ab94"/>
+
+          <!-- Candle 6: Green Bull -->
+          <line x1="335" y1="265" x2="335" y2="310" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="329" y="272" width="12" height="26" fill="#22ab94"/>
+
+          <!-- Candle 7: Small Green Pause -->
+          <line x1="365" y1="268" x2="365" y2="295" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="359" y="274" width="12" height="10" fill="#22ab94"/>
+
+          <!-- Candle 8: Strong Green Impulse -->
+          <line x1="395" y1="205" x2="395" y2="280" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="389" y="215" width="12" height="52" fill="#22ab94"/>
+
+          <!-- Candle 9: Green Climax Bull -->
+          <line x1="425" y1="168" x2="425" y2="240" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="419" y="178" width="12" height="42" fill="#22ab94"/>
+
+          <!-- Candle 10: Signal Bear (15:30) - Red Shooting Star High at 145 -->
+          <line x1="450" y1="145" x2="450" y2="230" stroke="#f23645" stroke-width="1.5"/>
+          <rect x="444" y="180" width="12" height="26" fill="#f23645"/>
+
+          <!-- Candle 11: Gray Retracement -->
+          <line x1="480" y1="200" x2="480" y2="265" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="474" y="208" width="12" height="30" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 12: Gray Drop -->
+          <line x1="510" y1="230" x2="510" y2="290" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="504" y="240" width="12" height="28" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 13: Gray Consolidation -->
+          <line x1="540" y1="248" x2="540" y2="288" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="534" y="255" width="12" height="18" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 14: Gray Hammer -->
+          <line x1="570" y1="265" x2="570" y2="330" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="564" y="272" width="12" height="32" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 15: Gray Low -->
+          <line x1="600" y1="295" x2="600" y2="350" stroke="#5c657a" stroke-width="1.5"/>
+          <rect x="594" y="305" width="12" height="24" fill="#363c4e" stroke="#5c657a" stroke-width="1"/>
+
+          <!-- Candle 16: Signal Bull (17:00) - Low at 322 -->
+          <line x1="630" y1="290" x2="630" y2="322" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="624" y="295" width="12" height="16" fill="#22ab94"/>
+
+          <!-- Candle 17: Green Bull -->
+          <line x1="660" y1="250" x2="660" y2="305" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="654" y="260" width="12" height="28" fill="#22ab94"/>
+
+          <!-- Candle 18: Green Bull -->
+          <line x1="690" y1="210" x2="690" y2="270" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="684" y="225" width="12" height="32" fill="#22ab94"/>
+
+          <!-- Candle 19: Green Climax -->
+          <line x1="720" y1="180" x2="720" y2="240" stroke="#22ab94" stroke-width="1.5"/>
+          <rect x="714" y="195" width="12" height="28" fill="#22ab94"/>
+
+          <!-- Candle 20: Signal Bear (18:00) - High at 172 -->
+          <line x1="750" y1="172" x2="750" y2="255" stroke="#f23645" stroke-width="1.5"/>
+          <rect x="744" y="200" width="12" height="28" fill="#f23645"/>
+
+          <!-- Candle 21: Red Retrace -->
+          <line x1="780" y1="215" x2="780" y2="270" stroke="#f23645" stroke-width="1.5"/>
+          <rect x="774" y="222" width="12" height="20" fill="#f23645"/>
+
+
+          <!-- ================= PRICE AXIS LABELS ================= -->
+          <g fill="#787b86" font-family="'JetBrains Mono', monospace" font-size="10" text-anchor="start">
+            <text x="930" y="54">68,800.0</text>
+            <text x="930" y="124">68,400.0</text>
+            <text x="930" y="194">68,000.0</text>
+            <text x="930" y="264">67,600.0</text>
+            <text x="930" y="334">67,200.0</text>
+            <text x="930" y="404">66,800.0</text>
+          </g>
+
+          <!-- ================= LOWER STOCH PANE ================= -->
+          <text x="60" y="440" fill="#787b86" font-family="'JetBrains Mono', monospace" font-size="10" font-weight="600">STOCH (14, 3, 3) · %K / %D</text>
+
+          <!-- Stoch Horizontal Level 80 & 20 -->
+          <text x="930" y="465" fill="#5c657a" font-family="'JetBrains Mono', monospace" font-size="9">80</text>
+          <text x="930" y="525" fill="#5c657a" font-family="'JetBrains Mono', monospace" font-size="9">20</text>
+
+          <!-- Stoch Oscillators Lines (Blue %K / Orange %D) -->
+          <!-- Blue %K Line -->
+          <path d="M 175 510 
+                   C 220 525 250 535 270 535 
+                   C 310 535 340 470 380 455 
+                   C 420 445 440 450 450 456 
+                   C 480 475 520 515 570 525 
+                   C 610 532 625 535 630 535 
+                   C 670 535 700 460 740 455 
+                   C 760 455 770 470 780 495" 
+                fill="none" stroke="#2962ff" stroke-width="2"/>
+
+          <!-- Orange %D Line -->
+          <path d="M 175 516 
+                   C 220 530 250 538 270 538 
+                   C 310 538 340 478 380 460 
+                   C 420 452 440 455 450 460 
+                   C 480 480 520 518 570 528 
+                   C 610 535 625 538 630 538 
+                   C 670 538 700 465 740 458 
+                   C 760 460 770 475 780 502" 
+                fill="none" stroke="#ff9800" stroke-width="1.8"/>
+
+          <!-- Stoch Signal Arrow Indicators (Unchanged from original SCREEN_4) -->
+          <!-- Bullish Stoch Triangles at 14:00 (270) & 17:00 (630) -->
+          <polygon points="270,538 266,546 274,546" fill="#22ab94"/>
+          <polygon points="630,538 626,546 634,546" fill="#22ab94"/>
+          <!-- Bearish Stoch Triangles at 15:30 (450) & 18:00 (740) -->
+          <polygon points="450,452 446,444 454,444" fill="#f23645"/>
+          <polygon points="740,452 736,444 744,444" fill="#f23645"/>
+
+          <!-- ================= TIME AXIS LABELS ================= -->
+          <g fill="#787b86" font-family="'JetBrains Mono', monospace" font-size="10" text-anchor="middle">
+            <text x="270" y="565">14:00</text>
+            <text x="450" y="565">15:30</text>
+            <text x="630" y="565">17:00</text>
+            <text x="750" y="565">18:00</text>
+          </g>
+        </svg>
+      </div>
+
+      <!-- Settings Specimen Bar & Pine Indicator Params (User explicitly requested) -->
+      <div class="p-4 bg-tv-card border-t border-tv-border space-y-4">
+        
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-tv-textPrimary">指标配置面板 (Settings Specimen · 默认开启项)</span>
+            <span class="text-[10px] font-mono text-tv-textMuted bg-tv-cardHover px-1.5 py-0.5 rounded border border-tv-border">Pine Script v5 Parameters</span>
+          </div>
+          <span class="text-[11px] font-mono text-tv-green">1H 时间戳穿透状态: 正常锁存</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-[#0d1017] p-3.5 rounded-lg border border-tv-border text-xs">
+          <!-- Param 1: ON/OFF Checkbox -->
+          <div class="flex items-center gap-2.5">
+            <input type="checkbox" checked id="showRayCheck" class="w-4 h-4 rounded bg-tv-card border-tv-border text-tv-red focus:ring-tv-red accent-[#f23645] cursor-pointer">
+            <label for="showRayCheck" class="text-tv-textPrimary font-medium cursor-pointer">
+              显示 1H 勾叉竖射线
+              <span class="block text-[10px] text-tv-textMuted font-mono">show_1h_rays = input.bool(true)</span>
+            </label>
+          </div>
+
+          <!-- Param 2: Ray Color -->
+          <div class="flex items-center gap-2.5 border-l border-tv-border pl-3">
+            <div class="w-5 h-5 rounded bg-[#f23645] border border-white/20 shadow-sm flex items-center justify-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            </div>
+            <div>
+              <span class="text-tv-textPrimary font-medium">射线颜色 (Ray Color)</span>
+              <span class="block text-[10px] text-tv-textMuted font-mono">#F23645 (Red)</span>
+            </div>
+          </div>
+
+          <!-- Param 3: Line Width -->
+          <div class="flex items-center gap-2.5 border-l border-tv-border pl-3">
+            <div class="w-7 h-5 rounded bg-tv-cardHover border border-tv-border flex items-center justify-center font-mono font-bold text-white text-[11px]">
+              1 px
+            </div>
+            <div>
+              <span class="text-tv-textPrimary font-medium">线宽 (Line Width)</span>
+              <span class="block text-[10px] text-tv-textMuted font-mono">width = 1 (Solid)</span>
+            </div>
+          </div>
+
+          <!-- Param 4: Signal Buffer -->
+          <div class="flex items-center gap-2.5 border-l border-tv-border pl-3">
+            <div class="w-8 h-5 rounded bg-tv-cardHover border border-tv-border flex items-center justify-center font-mono font-bold text-tv-green text-[11px]">
+              100
+            </div>
+            <div>
+              <span class="text-tv-textPrimary font-medium">保留最近信号数</span>
+              <span class="block text-[10px] text-tv-textMuted font-mono">max_rays_count = 100</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Pine Script Implementation Reference (Exact mapping contract for Codex) -->
+    <div class="bg-tv-card rounded-xl border border-tv-border p-4 space-y-3 font-mono text-xs">
+      <div class="flex items-center justify-between text-tv-textMuted border-b border-tv-border pb-2">
+        <span class="font-bold text-tv-textPrimary">// Pine Script v5 Implementation Contract (Codex 交付指引)</span>
+        <span class="text-[11px] text-tv-green">100% 视觉对齐保证</span>
+      </div>
+
+      <pre class="bg-[#090b10] p-3 rounded-lg overflow-x-auto text-[11px] text-gray-300 leading-relaxed">
+<span class="text-purple-400">//@version=5</span>
+<span class="text-blue-400">indicator</span>(<span class="text-green-300">"Range Fanshen V2.1 1H Vertical Rays"</span>, overlay=<span class="text-amber-400">true</span>, max_lines_count=<span class="text-amber-400">500</span>)
+
+<span class="text-gray-500">// 1. Inputs Matching Settings Specimen</span>
+show_rays = <span class="text-blue-400">input.bool</span>(<span class="text-amber-400">true</span>, <span class="text-green-300">"显示 1H 勾叉竖射线"</span>, group=<span class="text-green-300">"Ray Settings"</span>)
+ray_color = <span class="text-blue-400">input.color</span>(<span class="text-red-400">#F23645</span>, <span class="text-green-300">"射线颜色"</span>, group=<span class="text-green-300">"Ray Settings"</span>)
+ray_width = <span class="text-blue-400">input.int</span>(<span class="text-amber-400">1</span>, <span class="text-green-300">"线宽 (px)"</span>, minval=<span class="text-amber-400">1</span>, maxval=<span class="text-amber-400">4</span>, group=<span class="text-green-300">"Ray Settings"</span>)
+max_rays  = <span class="text-blue-400">input.int</span>(<span class="text-amber-400">100</span>, <span class="text-green-300">"保留最近信号数"</span>, minval=<span class="text-amber-400">10</span>, maxval=<span class="text-amber-400">200</span>, group=<span class="text-green-300">"Ray Settings"</span>)
+
+<span class="text-gray-500">// 2. Anchor to Fixed 1-Hour Timeframe</span>
+is_1h_bar = <span class="text-blue-400">timeframe.isintraday</span> <span class="text-purple-400">and</span> (<span class="text-blue-400">timeframe.multiplier</span> == <span class="text-amber-400">60</span>)
+[h1_time, h1_low, h1_high, bull_sig, bear_sig] = <span class="text-blue-400">request.security</span>(
+    <span class="text-blue-400">syminfo.tickerid</span>, <span class="text-green-300">"60"</span>, 
+    [<span class="text-blue-400">time</span>, <span class="text-blue-400">low</span>, <span class="text-blue-400">high</span>, bull_cond, bear_cond], 
+    lookahead=<span class="text-blue-400">barmerge.lookahead_off</span>
+)
+
+<span class="text-gray-500">// 3. Unidirectional Rays: Low -> Upwards (Bull), High -> Downwards (Bear)</span>
+<span class="text-purple-400">if</span> show_rays <span class="text-purple-400">and</span> bull_sig
+    <span class="text-gray-500">// Anchored strictly at candle open timestamp, extends upwards</span>
+    <span class="text-blue-400">line.new</span>(x1=h1_time, y1=h1_low, x2=h1_time, y2=h1_low + <span class="text-amber-400">1000000</span>, xloc=<span class="text-blue-400">xloc.bar_time</span>, extend=<span class="text-blue-400">extend.none</span>, color=ray_color, width=ray_width)
+
+<span class="text-purple-400">if</span> show_rays <span class="text-purple-400">and</span> bear_sig
+    <span class="text-gray-500">// Anchored strictly at candle open timestamp, extends downwards</span>
+    <span class="text-blue-400">line.new</span>(x1=h1_time, y1=h1_high, x2=h1_time, y2=<span class="text-amber-400">0</span>, xloc=<span class="text-blue-400">xloc.bar_time</span>, extend=<span class="text-blue-400">extend.none</span>, color=ray_color, width=ray_width)
+      </pre>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-[11px] text-tv-textMuted">
+        <div class="flex items-center gap-1.5">
+          <span class="text-tv-green font-bold">✓ 零水平位移</span>: 以 `h1_time` 时间戳锚定，换周期不漂移。
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-tv-red font-bold">✓ 单向延伸</span>: 勾从 Low 向上贯穿；叉从 High 向下打底。
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-tv-stochBlue font-bold">✓ 附带参数</span>: 默认开启，支持颜色、线宽与 100 条环形缓冲。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
