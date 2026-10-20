@@ -1,0 +1,7 @@
+# Attribute scaleout gains by direction before proposing a common exit rule
+
+- **Problem**: All four RSI scaleout variants reduced pooled ETH net R, but the pooled result did not explain which positions lost the trend payoff.
+- **Dead end**: Treating the pooled loss as evidence that the signal is equally unhelpful for longs and shorts, or choosing a later diamond from its aggregate rank, would hide the different effects.
+- **Effective path**: Join the same cached native trades by ID and decompose each policy's net-R change by direction and chronological segment. All four pure RSI variants improved the long sample in all three segments. For the 5m second-diamond arm, long improvement was +90.89R, while short deterioration was -193.39R; long segment improvements were +32.95/+2.29/+55.66R. The pooled difference was -102.50R.
+- **Reusable rule**: Inspect direction-specific improvement and loss of large winners using the same trade identities, fees, and entry risk. A post-hoc direction split generates a new hypothesis; it does not authorize a direction-dependent default or establish positive expectancy. Both long and short absolute net results here remain negative.
+- **References**: `experiments/active/exp-eth-timebe-rsi-20261020-v2/runs/*/trades.csv`, keyed by `trade_id`, filtered to `population=signal`; changes grouped by `side` and `segment`. Existing 3,838 signals were reused without new simulation. Concrete short examples: `signal-2842` lost 45.35R of baseline profit, while `signal-616` gained 9.37R through partial realization.
