@@ -69,7 +69,7 @@ def month(label: str) -> dict:
     frame.index = pd.to_datetime(frame.ts, unit="ms", utc=True)
     start = pd.Timestamp(label + "-01", tz="UTC") - pd.Timedelta(hours=8)
     finish = pd.Timestamp(label + "-01", tz="UTC") + pd.offsets.MonthBegin(1) - pd.Timedelta(hours=8)
-    assert frame.index.min() >= start and frame.index.max() < finish
+    assert frame.empty or (frame.index.min() >= start and frame.index.max() < finish), label
     grouped = frame.resample("5min")
     five = grouped.agg({"open": "first", "high": "max", "low": "min", "close": "last"})
     count = grouped.close.count()
@@ -77,7 +77,8 @@ def month(label: str) -> dict:
     five.insert(0, "ts", five.index.asi8 // 1_000_000)
     five.to_csv(out, index=False)
     receipt = dict(path=str(out), source=url, bytes=len(payload), raw_rows=len(frame),
-                   rows=len(five), first=int(five.ts.iloc[0]), last=int(five.ts.iloc[-1]),
+                   rows=len(five), first=int(five.ts.iloc[0]) if len(five) else None,
+                   last=int(five.ts.iloc[-1]) if len(five) else None,
                    incomplete_five=int(((count > 0) & (count < 5)).sum()),
                    raw_gaps=int((frame.ts.diff().dropna() != 60000).sum()),
                    unconfirmed_minutes_excluded=unconfirmed)
