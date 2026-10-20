@@ -35,7 +35,29 @@ def native():
                              ctypes.c_double,ctypes.c_double,ctypes.c_double,
                              ctypes.c_double,array]
     lib.replay_be.restype = None
+    lib.replay_search.argtypes = [array,array,array,array,ctypes.c_int,
+        ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double,
+        ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_int,array]
+    lib.replay_search.restype = None
     return lib
+
+
+def replay_search(ctx, events, *, cost=.002, tick=.01, arm_r=5.,
+                  atr_multiple=4., be_r=None, reverse_exit=True,
+                  target_r=None, stop_first=False, lib=None):
+    """Parameterized screening, including native O-H-L-C target precedence.
+
+    All management uses the caller's sparse completed-close ATR. stop_first
+    supplies a conservative collision sensitivity, never the native claim.
+    """
+    lib = native() if lib is None else lib
+    events = np.ascontiguousarray(events, dtype=float)
+    output = np.empty((len(events),13), dtype=float)
+    lib.replay_search(ctx["bars"],ctx["atr"],ctx["hour"],events,len(events),
+        cost,tick,arm_r,atr_multiple,-1. if be_r is None else be_r,
+        int(reverse_exit),0. if target_r is None else target_r,
+        int(stop_first),output)
+    return output
 
 
 def replay(ctx, events, arm="be3", cost=.002, tick=1e-9, lib=None,

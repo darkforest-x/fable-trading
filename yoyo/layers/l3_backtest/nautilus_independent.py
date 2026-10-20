@@ -10,8 +10,8 @@ and the installed 1.231.0 engine.pyx (APIs differ from later online examples).
 Scope: independent signal research, synthetic unlimited liquidity, no funding,
 no latency/spread, original-entry-notional round-trip cost. Frozen account and
 large balance prevent cross-trade funding constraints; account returns are NOT
-reported. OHLC ordering is O-H-L-C. No intrabar target orders are supported:
-their collision semantics would differ from the historical stop-first oracle.
+reported. OHLC ordering is O-H-L-C. Optional fixed targets use native resting
+limit orders; stop/target collisions follow that path, not a stop-first oracle.
 MFE excludes stop-hit bars, preserving the conservative historical definition.
 Optional one-time partial realization is a 5m CLOSE market order, never an
 intrabar target. Remaining shares keep the same protection/management path.
@@ -56,6 +56,7 @@ class ExitPolicy:
     round_trip_cost: float = .002
     partial_close_r: float | None = None
     partial_fraction: float = .5
+    fixed_target_r: float | None = None
 
     def __post_init__(self):
         values = [self.trail_arm_r, self.trail_atr_multiple]
@@ -63,6 +64,10 @@ class ExitPolicy:
             values.append(self.breakeven_r)
         if self.partial_close_r is not None:
             values.append(self.partial_close_r)
+        if self.fixed_target_r is not None:
+            values.append(self.fixed_target_r)
+            if self.partial_close_r is not None:
+                raise ValueError("Fixed target and partial reduction cannot be combined")
         if not all(math.isfinite(x) and x > 0 for x in values):
             raise ValueError("R and ATR parameters must be finite and positive")
         if not math.isfinite(self.round_trip_cost) or self.round_trip_cost < 0:
@@ -100,6 +105,8 @@ class TradeState:
     stop_kind: int = 0
     deferred: int = 0
     stop_order: object = None
+    target_order: object = None
+    target_price: float = 0.
     fees: float = 0.
     fills: list = field(default_factory=list)
     remaining: int = 0
@@ -161,6 +168,28 @@ class IndependentCloseStrategy(Strategy):
         state.stop_order = order
         self._submit(order, state, "stop")
 
+    def _submit_target(self, state):
+        if self.policy.fixed_target_r is None:
+            return
+        row = state.source
+        raw = (row["entry"]+row["side"]*self.policy.fixed_target_r*row["risk"])/self.tick
+        state.target_price = (math.ceil(raw-1e-8) if row["side"] > 0
+                              else math.floor(raw+1e-8))*self.tick
+        # A short target below zero is unreachable, never clipped to an easier TP.
+        if state.target_price <= 0:
+            return
+        order = self.order_factory.limit(
+            self.instrument.id, OrderSide.SELL if row["side"] > 0 else OrderSide.BUY,
+            self.instrument.make_qty(state.remaining),
+            price=self.instrument.make_price(state.target_price), reduce_only=True,
+        )
+        state.target_order = order
+        self._submit(order, state, "target")
+
+    def _cancel_target(self, state):
+        if state.target_order is not None and not state.target_order.is_closed:
+            self.cancel_order(state.target_order)
+
     def on_order_filled(self, event):
         state, phase, requested = self.order_map[str(event.client_order_id)]
         i = self.indices[event.ts_event]
@@ -182,6 +211,7 @@ class IndependentCloseStrategy(Strategy):
             if i != state.source["entry_i"] or abs(price-state.source["entry"]) > self.eps:
                 raise RuntimeError("Entry did not fill at the signal bar close")
             self._submit_protective_stop(state)
+            self._submit_target(state)
             return
         state.remaining -= int(event.last_qty)
         if phase == "partial":
@@ -199,6 +229,11 @@ class IndependentCloseStrategy(Strategy):
             raise RuntimeError("Final exit left a nonzero runner")
         if phase == "stop":
             reason = 5 if state.stop_kind == 1 else 2 if state.arm_i >= 0 else 1
+        elif phase == "target":
+            # The native matcher cancels all remaining reduce-only orders for
+            # this closed HEDGING position after dispatching the fill. Sending
+            # another cancellation here races that native cleanup.
+            reason = 4
         else:
             reason = phase
         row = dict(state.source)
@@ -213,7 +248,10 @@ class IndependentCloseStrategy(Strategy):
         row.update(
             exit_i=i, exit_price=price, reason=int(reason), peak_r=state.peak,
             arm_i=state.arm_i, protection=state.stop,
-            steps=i-int(row["entry_i"]), ambiguous=0,
+            steps=i-int(row["entry_i"]), ambiguous=int(
+                state.target_price > 0 and
+                self.prices[i, 2] <= min(state.stop, state.target_price)+self.eps and
+                self.prices[i, 1] >= max(state.stop, state.target_price)-self.eps),
             be_trigger_i=state.be_trigger_i, be_effective_i=state.be_effective_i,
             be_price=state.be_price, stop_kind=state.stop_kind,
             deferred_closes=state.deferred, gross_r=gross,
@@ -260,7 +298,7 @@ class IndependentCloseStrategy(Strategy):
             old_stop = state.stop
             if quarter:
                 move = side*(close-entry)
-                if state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
+                if p.fixed_target_r is None and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
                     state.arm_i = i
                 if p.breakeven_r is not None:
                     if state.be_trigger_i < 0 and move+self.eps >= p.breakeven_r*risk:
@@ -280,6 +318,7 @@ class IndependentCloseStrategy(Strategy):
             reverse = p.opposite_hour_exit and state.arm_i >= 0 and self.hour[i] == -side
             if reverse or i == int(row["end_i"]):
                 self.cancel_order(state.stop_order)
+                self._cancel_target(state)
                 self._market(state, reason=3 if reverse else 0)
             elif (p.partial_close_r is not None and state.partial_i < 0
                   and side*(close-entry)+self.eps >= p.partial_close_r*risk):
@@ -396,13 +435,15 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         positions = engine.cache.positions()
         if len(positions) != len(entries) or any(p.is_open for p in positions):
             raise RuntimeError("Native position count/closure mismatch")
+        if policy.fixed_target_r is not None and engine.cache.orders_open():
+            raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None:
+        if policy.partial_close_r is not None or policy.fixed_target_r is not None:
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
             np.testing.assert_allclose(native_pnl, expected_pnl, atol=1e-6, rtol=1e-10,
-                                       err_msg="Native partial position PnL differs")
+                                       err_msg="Native position PnL differs")
         audit = dict(
             engine="nautilus_trader", version=ENGINE_VERSION,
             market_tick=market_tick, protection_tick=tick,
@@ -410,6 +451,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                                "when enabled. Returns normalized per original risk"),
             partial_execution="one completed 5m close reduction" if policy.partial_close_r is not None else "disabled",
             native_partial_accounting_checked=len(rows) if policy.partial_close_r is not None else 0,
+            fixed_target_execution="resting limit; O-H-L-C; native reduce-only sibling cleanup" if policy.fixed_target_r is not None else "disabled",
+            native_fixed_target_accounting_checked=len(rows) if policy.fixed_target_r is not None else 0,
             positions=len(positions), fills=len(fills),
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,
