@@ -11,6 +11,7 @@ import argparse
 from dataclasses import asdict, dataclass
 import json
 import math
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -131,13 +132,51 @@ def replay(minutes: pd.DataFrame, source_start: int) -> dict:
     return {"source_start": source_start, "through": int(five.index[-1].value // 1_000_000), "count": len(trades), "watch": [side, observed, consumed], "trades": [asdict(t) for t in trades]}
 
 
+def compare_native(result: dict, directory: Path) -> dict:
+    """Compare UI-captured Pine rows and all-record weighted signatures."""
+    by_time = {trade["entered"]: trade for trade in result["trades"]}
+    native = {}
+    for path in directory.glob("monday_range_v2_2_native*.txt"):
+        for row in re.findall(r"TX_ROW (\d[^\n]+)", path.read_text()):
+            fields = row.split(",")
+            if len(fields) == 13:
+                native[int(fields[0])] = fields
+    columns = ["entered", "observed", "side", "entry", "initial_stop", "protection", "peak_r", "current_r", "armed_at", "ended", "exit_price", "reason"]
+    errors = []
+    for at, fields in native.items():
+        for index, key in enumerate(columns):
+            if abs(float(fields[index]) - by_time[at][key]) > 1e-7:
+                errors.append([at, key, fields[index], by_time[at][key]])
+    checks = []
+    names = [("1m", 10), ("1h", 10), ("15m", 10), ("capacity20_start", 20), ("4h", 20), ("1w", 20)]
+    for suffix, count in names:
+        path = directory / f"monday_range_v2_2_native_{suffix}.txt"
+        match = re.search(r"TX_NATIVE_CHECKS_PASS count=(\d+).*timeSig=([\d,.-]+) priceSig=([\d,.-]+) exitSig=([\d,.-]+) sideSig=([\d,.-]+)", path.read_text())
+        assert match, path
+        records = result["trades"][-count:]
+        expected = [
+            sum(i * (t["entered"] + t["observed"]) / 60000 for i, t in enumerate(records, 1)),
+            sum(i * (t["entry"] + 3 * t["initial_stop"]) / .01 for i, t in enumerate(records, 1)),
+            sum(i * (t["ended"] / 60000 + (t["exit_price"] or 0) / .01 + t["reason"]) for i, t in enumerate(records, 1)),
+            sum(i * t["side"] for i, t in enumerate(records, 1)),
+        ]
+        actual = [float(value.replace(",", "")) for value in match.groups()[1:]]
+        assert all(abs(a - e) < .01 for a, e in zip(actual, expected)), path
+        checks.append(path.name)
+    assert not errors, errors
+    return {"visible_native_rows_compared": len(native), "fields_per_row": len(columns), "mismatches": errors, "weighted_signature_matches": checks, "note": "Weighted signatures supplement visible row comparison; they are not full ledger byte equality."}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-start", type=int, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--native-dir", type=Path)
     args = parser.parse_args()
     minutes = load_minutes()
     result = replay(minutes, args.source_start)
+    if args.native_dir:
+        result["native_parity"] = compare_native(result, args.native_dir)
     result["inputs"] = INPUTS
     result["minute_rows"] = len(minutes)
     result["minute_gaps"] = int((minutes.index.to_series().diff().dropna() != pd.Timedelta(minutes=1)).sum())

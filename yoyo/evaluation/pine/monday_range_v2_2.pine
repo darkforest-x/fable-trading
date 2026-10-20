@@ -126,7 +126,7 @@ labelText(string name, float price) =>
     name + " " + str.tostring(price, format.mintick)
 
 newRayLabel(float price, string name, color col) =>
-    label.new(time, price, labelText(name, price), xloc=xloc.bar_time, style=label.style_label_left,
+    label.new(time, price, labelText(name, price), xloc=xloc.bar_time, style=before ? label.style_label_right : label.style_label_left,
          color=hiddenCol, textcolor=col, size=size.small, force_overlay=true)
 
 // Both-end Fib prices of a range, with the ratio behind each price; a ratio
@@ -837,8 +837,8 @@ var array<label> txLabels = array.new<label>()
 var array<polyline> txPolys = array.new<polyline>()
 var table txInfo = table.new(position.top_right, 1, 2, border_width=0, force_overlay=true)
 
-txText(int at, float price, string caption, color tone, string tip) =>
-    txLabels.push(label.new(at, price, caption, xloc=xloc.bar_time, style=label.style_label_left,
+txText(int at, float price, string caption, color tone, string tip, bool before=false) =>
+    txLabels.push(label.new(at, price, caption, xloc=xloc.bar_time, style=before ? label.style_label_right : label.style_label_left,
          color=color.new(chart.bg_color, 100), textcolor=tone, size=size.tiny, tooltip=tip, force_overlay=true))
 
 txGuide(int start, int finish, float price) =>
@@ -867,18 +867,20 @@ txDraw(string row, int confirmedThrough) =>
         string detail = "1H观察确认 " + str.format_time(observed, "MM-dd HH:mm", "Asia/Shanghai") +
              "\n15m信号收盘参考 " + str.format_time(entered, "MM-dd HH:mm", "Asia/Shanghai") +
              "\n初始风险冻结；1R/3R/5R为参考，不是分批止盈。各框独立，非账户成交。" +
-             "\n止损按5m高低触及；非跳空触及仅知所在5m区间，结束标于该区间收盘。"
+             "\n止损按5m高低触及；非跳空触及仅知所在5m区间，结束标于该区间收盘。毛R未扣手续费、滑点及资金费。"
+        detail += live ? "" : "\n结束参考价 " + str.tostring(exitPrice, format.mintick)
         txBoxes.push(box.new(entered, math.max(entry, initial), finish, math.min(entry, initial), xloc=xloc.bar_time,
              border_color=color.new(txBear, live ? 45 : 65), bgcolor=color.new(txBear, live ? 92 : 96), force_overlay=true))
         txBoxes.push(box.new(entered, math.max(entry, reward), finish, math.min(entry, reward), xloc=xloc.bar_time,
              border_color=color.new(txBull, live ? 60 : 75), bgcolor=color.new(txBull, live ? 94 : 97), force_overlay=true))
-        txText(entered, entry, (side == 1 ? "多" : "空") + " · " + str.tostring(entry, format.mintick), chart.fg_color, detail)
-        txText(finish, initial, "SL " + str.tostring(initial, format.mintick), txBear, detail)
+        txText(entered, entry, (side == 1 ? "多" : "空") + " · " + str.tostring(entry, format.mintick), chart.fg_color, detail, true)
+        string outcome = live ? "" : " · " + (current >= 0 ? "+" : "") + str.tostring(current, "#.##") + "R（毛）"
+        txText(finish, initial, "SL " + str.tostring(initial, format.mintick) + (reason == 1 ? outcome : ""), txBear, detail)
         for level in array.from(1, 3, 5)
             float price = entry + side * risk * level
             if price > 0
                 txGuide(entered, finish, price)
-                txText(finish, price, str.tostring(level) + "R " + str.tostring(price, format.mintick), color.new(txBull, 15), detail)
+                txText(finish, price, str.tostring(level) + "R " + str.tostring(price, format.mintick), color.new(txBull, 15), detail, true)
         if armedAt > 0
             array<chart.point> path = array.new<chart.point>()
             float priorPrice = na
@@ -894,11 +896,8 @@ txDraw(string row, int confirmedThrough) =>
             if path.size() > 0
                 path.push(chart.point.from_time(finish, protection))
                 txPolys.push(polyline.new(path, xloc=xloc.bar_time, line_color=txTrailColor, line_width=1, force_overlay=true))
-            txText(finish, protection, "跟踪 " + str.tostring(protection, format.mintick), txTrailColor,
+            txText(finish, protection, "跟踪 " + str.tostring(protection, format.mintick) + (reason == 2 ? outcome : ""), txTrailColor,
                  "15m收盘首次达到 " + str.tostring(txArmR) + "R 后启动；15m ATR(" + str.tostring(txAtrLen) + ") × " + str.tostring(txAtrMult) + "，仅收紧、下根5m生效。")
-        if not live
-            txText(finish, exitPrice, (reason == 2 ? "跟踪结束 " : "止损 ") + (current >= 0 ? "+" : "") + str.tostring(current, "#.##") + "R（毛）",
-                 current >= 0 ? txBull : txBear, detail + "\n毛R未扣手续费、滑点及资金费。")
 
 if barstate.islast
     for item in txBoxes
