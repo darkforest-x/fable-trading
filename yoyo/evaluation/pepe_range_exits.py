@@ -137,6 +137,12 @@ def scalar(ctx, event, target=0., arm=5., multiple=4., tick=1e-9):
     return np.array([exit_i, price, reason, peak, activated, stop, ambiguous, steps], dtype=float)
 
 
+def assert_path_equal(actual, expected, tick):
+    np.testing.assert_array_equal(actual[[0, 2, 4, 6, 7]], expected[[0, 2, 4, 6, 7]])
+    np.testing.assert_allclose(actual[[1, 5]], expected[[1, 5]], rtol=0, atol=tick*1e-7)
+    np.testing.assert_allclose(actual[3], expected[3], rtol=0, atol=1e-7)
+
+
 def entries(ctx, cfg):
     index = ctx["frame"].index
     boundaries = pd.to_datetime([cfg["start"], *cfg["splits"], cfg["end"]], utc=True)
@@ -250,7 +256,7 @@ def study(ctx, cfg):
                     probes = np.unique(np.linspace(0, len(matrix)-1, min(8, len(matrix)), dtype=int))
                     for probe in probes:
                         check = scalar(ctx, matrix[probe], target, arm, multiple, cfg["tick"])
-                        np.testing.assert_allclose(z[probe], check, rtol=1e-11, atol=1e-9)
+                        assert_path_equal(z[probe], check, cfg["tick"])
                         audit_n += 1
                     ledger = result_frame(base, z, cfg)
                     exit_indices = z[:, 0].astype(int)

@@ -9,7 +9,7 @@ import subprocess
 import numpy as np
 import pandas as pd
 from yoyo.evaluation.pepe_range_data import EXP
-from yoyo.evaluation.pepe_range_exits import load_context, scalar, metrics, pairs, inference
+from yoyo.evaluation.pepe_range_exits import load_context, scalar, metrics, pairs, inference, assert_path_equal
 
 
 def main():
@@ -20,6 +20,18 @@ def main():
     chosen = list(dict.fromkeys([cfg["baseline"], choice["selected_on_development"],
                                 choice["full_history_descriptive_best"],
                                 "w5_b0.05_tp5_cap0", "w5_b0.05_tp10_cap0", "w5_b0.05_tp20_cap0"]))
+    positive_notional = summary[(summary.segment == -1) & (summary.net_notional_bp_sum > 0)]
+    notional_best = summary[summary.segment == -1].sort_values(
+        ["net_notional_bp_sum", "arm"], ascending=[False, True]).iloc[0].arm
+    notional_dev = summary[(summary.segment == 0) & (summary.n >= cfg["minimum_development_trades"])].sort_values(
+        ["net_notional_bp_sum", "arm"], ascending=[False, True]).iloc[0].arm
+    chosen = list(dict.fromkeys([*chosen, *positive_notional.arm, notional_dev]))
+    (out/"notional_selection.json").write_text(json.dumps(dict(
+        positive_full_history_arms=len(positive_notional), best_full_history=notional_best,
+        development_selected=notional_dev,
+        interpretation="Secondary objective examined after the frozen net-R analysis. No grid change; descriptive, not independent confirmation.",
+        constant_notional_example_usdt=1000,
+        formula="profit USDT = sum net_notional_bp * 1000 / 10000; not compounded account return"), indent=2)+"\n")
     paths = [x.rsplit("_cap", 1)[0] for x in chosen]
     keep = []
     for chunk in pd.read_csv(out/"paths.csv.gz", chunksize=100000, float_precision="round_trip"):
@@ -44,7 +56,7 @@ def main():
             expected = scalar(ctx, event, target, arm, mult, cfg["tick"])
             actual = np.array([row.exit_i, row.exit_price, row.reason, row.peak_r,
                                row.arm_i, row.protection, row.ambiguous, row.steps])
-            np.testing.assert_allclose(actual, expected, rtol=1e-10, atol=1e-9)
+            assert_path_equal(actual, expected, cfg["tick"])
             assert abs(row.net_r - (row.side*(row.exit_price-row.entry)-cfg["round_trip_cost"]*row.entry)/row.risk) < 1e-8
             count += 1
         audits.append(dict(arm=name, signal_and_random_paths=len(rows), mismatches=0))
@@ -75,6 +87,9 @@ def main():
                 median_cost_r=float(ss.fee_r.median()) if len(ss) else None,
                 paired_n=len(paired), paired_signal_net_r=float(paired.net_r.sum()),
                 paired_random_net_r=float(paired.net_r_random.sum()),
+                paired_signal_notional_bp=float(paired.net_notional_bp.sum()),
+                paired_random_notional_bp=float(paired.net_notional_bp_random.sum()),
+                paired_excess_notional_bp=float((paired.net_notional_bp-paired.net_notional_bp_random).sum()),
                 **inference(paired, cfg["seed"])))
         export = signal.copy()
         export["entry_shanghai"] = pd.to_datetime(export.entry_time).dt.tz_convert("Asia/Shanghai")

@@ -8,3 +8,4 @@
 - Include matched random entries and weekly block inference, single-factor neighbors, ambiguity counts, 10R/20R tail retention and cost burden. Report cumulative realized-R drawdown as an independent-trade statistic, never account drawdown.
 - Commit builder before generating data/results. Verify native recent baseline, hand-computed ordering cases, prefix invariance and an independent scalar oracle. Preserve raw results/config/source receipt, update registries and Notion; no standalone report requested.
 - No training, promote, live orders, account actions, chart changes, or new Pine version.
+- After the frozen primary analysis, inspect the already-computed constant-notional metric separately: its four positive full-history configurations must not be concealed by the negative equal-risk ranking. Audit every such path. This secondary-objective comparison is exploratory; the grid, primary selection and time splits remain unchanged.
