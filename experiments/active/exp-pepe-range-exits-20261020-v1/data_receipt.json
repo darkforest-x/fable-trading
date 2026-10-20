@@ -1,0 +1,842 @@
+{
+  "sources": [
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-05.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202305/PEPE-USDT-SWAP-candlesticks-2023-05.zip?v=999",
+      "bytes": 654823,
+      "raw_rows": 41045,
+      "rows": 8209,
+      "first": 1683086100000,
+      "last": 1685548500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-06.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202306/PEPE-USDT-SWAP-candlesticks-2023-06.zip?v=999",
+      "bytes": 650299,
+      "raw_rows": 43198,
+      "rows": 8639,
+      "first": 1685548800000,
+      "last": 1688140500000,
+      "incomplete_five": 1,
+      "raw_gaps": 1
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-07.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202307/PEPE-USDT-SWAP-candlesticks-2023-07.zip?v=999",
+      "bytes": 647457,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1688140800000,
+      "last": 1690818900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-08.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202308/PEPE-USDT-SWAP-candlesticks-2023-08.zip?v=999",
+      "bytes": 771136,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1690819200000,
+      "last": 1693497300000,
+      "incomplete_five": 0,
+      "raw_gaps": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-09.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202309/PEPE-USDT-SWAP-candlesticks-2023-09.zip?v=999",
+      "bytes": 950384,
+      "raw_rows": 1440,
+      "rows": 288,
+      "first": 1693497600000,
+      "last": 1693583700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 41760
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-10.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202310/PEPE-USDT-SWAP-candlesticks-2023-10.zip?v=999",
+      "bytes": 994541,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 44651
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-11.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202311/PEPE-USDT-SWAP-candlesticks-2023-11.zip?v=999",
+      "bytes": 858047,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 43200
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2023-12.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202312/PEPE-USDT-SWAP-candlesticks-2023-12.zip?v=999",
+      "bytes": 832758,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1701360000000,
+      "last": 1704038100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-01.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202401/PEPE-USDT-SWAP-candlesticks-2024-01.zip?v=999",
+      "bytes": 769370,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1704038400000,
+      "last": 1706716500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-02.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202402/PEPE-USDT-SWAP-candlesticks-2024-02.zip?v=999",
+      "bytes": 746652,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 41760
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-03.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202403/PEPE-USDT-SWAP-candlesticks-2024-03.zip?v=999",
+      "bytes": 1062288,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 44640
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-04.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202404/PEPE-USDT-SWAP-candlesticks-2024-04.zip?v=999",
+      "bytes": 1045068,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 43200
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-05.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202405/PEPE-USDT-SWAP-candlesticks-2024-05.zip?v=999",
+      "bytes": 1146363,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 44640
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-06.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202406/PEPE-USDT-SWAP-candlesticks-2024-06.zip?v=999",
+      "bytes": 1097622,
+      "raw_rows": 0,
+      "rows": 0,
+      "first": null,
+      "last": null,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 43245
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-07.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202407/PEPE-USDT-SWAP-candlesticks-2024-07.zip?v=999",
+      "bytes": 1117975,
+      "raw_rows": 19551,
+      "rows": 3910,
+      "first": 1721268600000,
+      "last": 1722441300000,
+      "incomplete_five": 1,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 25089
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-08.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202408/PEPE-USDT-SWAP-candlesticks-2024-08.zip?v=999",
+      "bytes": 1088021,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1722441600000,
+      "last": 1725119700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-09.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202409/PEPE-USDT-SWAP-candlesticks-2024-09.zip?v=999",
+      "bytes": 1026023,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1725120000000,
+      "last": 1727711700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-10.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202410/PEPE-USDT-SWAP-candlesticks-2024-10.zip?v=999",
+      "bytes": 1092527,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1727712000000,
+      "last": 1730390100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-11.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202411/PEPE-USDT-SWAP-candlesticks-2024-11.zip?v=999",
+      "bytes": 1101632,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1730390400000,
+      "last": 1732982100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2024-12.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202412/PEPE-USDT-SWAP-candlesticks-2024-12.zip?v=999",
+      "bytes": 1140219,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1732982400000,
+      "last": 1735660500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-01.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202501/PEPE-USDT-SWAP-candlesticks-2025-01.zip?v=999",
+      "bytes": 1110022,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1735660800000,
+      "last": 1738338900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-02.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202502/PEPE-USDT-SWAP-candlesticks-2025-02.zip?v=999",
+      "bytes": 983838,
+      "raw_rows": 40320,
+      "rows": 8064,
+      "first": 1738339200000,
+      "last": 1740758100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-03.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202503/PEPE-USDT-SWAP-candlesticks-2025-03.zip?v=999",
+      "bytes": 1073060,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1740758400000,
+      "last": 1743436500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-04.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202504/PEPE-USDT-SWAP-candlesticks-2025-04.zip?v=999",
+      "bytes": 1031735,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1743436800000,
+      "last": 1746028500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-05.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202505/PEPE-USDT-SWAP-candlesticks-2025-05.zip?v=999",
+      "bytes": 1114098,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1746028800000,
+      "last": 1748706900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-06.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202506/PEPE-USDT-SWAP-candlesticks-2025-06.zip?v=999",
+      "bytes": 1056387,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1748707200000,
+      "last": 1751298900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-07.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202507/PEPE-USDT-SWAP-candlesticks-2025-07.zip?v=999",
+      "bytes": 1102291,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1751299200000,
+      "last": 1753977300000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-08.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202508/PEPE-USDT-SWAP-candlesticks-2025-08.zip?v=999",
+      "bytes": 1068691,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1753977600000,
+      "last": 1756655700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-09.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202509/PEPE-USDT-SWAP-candlesticks-2025-09.zip?v=999",
+      "bytes": 1010432,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1756656000000,
+      "last": 1759247700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-10.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202510/PEPE-USDT-SWAP-candlesticks-2025-10.zip?v=999",
+      "bytes": 1045545,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1759248000000,
+      "last": 1761926100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-11.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202511/PEPE-USDT-SWAP-candlesticks-2025-11.zip?v=999",
+      "bytes": 986261,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1761926400000,
+      "last": 1764518100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2025-12.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202512/PEPE-USDT-SWAP-candlesticks-2025-12.zip?v=999",
+      "bytes": 978593,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1764518400000,
+      "last": 1767196500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-01.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202601/PEPE-USDT-SWAP-candlesticks-2026-01.zip?v=999",
+      "bytes": 1035660,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1767196800000,
+      "last": 1769874900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-02.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202602/PEPE-USDT-SWAP-candlesticks-2026-02.zip?v=999",
+      "bytes": 916386,
+      "raw_rows": 40320,
+      "rows": 8064,
+      "first": 1769875200000,
+      "last": 1772294100000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-03.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202603/PEPE-USDT-SWAP-candlesticks-2026-03.zip?v=999",
+      "bytes": 975368,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1772294400000,
+      "last": 1774972500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-04.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202604/PEPE-USDT-SWAP-candlesticks-2026-04.zip?v=999",
+      "bytes": 946802,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1774972800000,
+      "last": 1777564500000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-05.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202605/PEPE-USDT-SWAP-candlesticks-2026-05.zip?v=999",
+      "bytes": 953603,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1777564800000,
+      "last": 1780242900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-06.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202606/PEPE-USDT-SWAP-candlesticks-2026-06.zip?v=999",
+      "bytes": 914435,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1780243200000,
+      "last": 1782834900000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-07.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202607/PEPE-USDT-SWAP-candlesticks-2026-07.zip?v=999",
+      "bytes": 926647,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1782835200000,
+      "last": 1785513300000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-08.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202608/PEPE-USDT-SWAP-candlesticks-2026-08.zip?v=999",
+      "bytes": 933259,
+      "raw_rows": 44640,
+      "rows": 8928,
+      "first": 1785513600000,
+      "last": 1788191700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-09.csv",
+      "source": "https://static.okx.com/cdn/okex/traderecords/candlesticks/monthly/202609/PEPE-USDT-SWAP-candlesticks-2026-09.zip?v=999",
+      "bytes": 951520,
+      "raw_rows": 43200,
+      "rows": 8640,
+      "first": 1788192000000,
+      "last": 1790783700000,
+      "incomplete_five": 0,
+      "raw_gaps": 0,
+      "unconfirmed_minutes_excluded": 0
+    },
+    {
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_PEPE_USDT_SWAP_5m_2026-10-api.csv",
+      "sources": [
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792476000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792446000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792416000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792386000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792356000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792326000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792296000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792266000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792236000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792206000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792176000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792146000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792116000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792086000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792056000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1792026000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791996000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791966000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791936000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791906000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791876000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791846000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791816000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791786000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791756000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791726000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791696000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791666000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791636000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791606000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791576000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791546000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791516000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791486000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791456000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791426000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791396000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791366000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791336000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791306000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791276000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791246000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791216000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791186000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791156000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791126000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791096000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791066000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791036000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1791006000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790976000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790946000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790916000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790886000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790856000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790826000000",
+        "https://www.okx.com/api/v5/market/history-candles?instId=PEPE-USDT-SWAP&bar=5m&limit=100&after=1790796000000"
+      ],
+      "rows": 5640,
+      "first": 1790784000000,
+      "last": 1792475700000
+    }
+  ],
+  "gap_repairs": [
+    {
+      "start": 1687472100000,
+      "finish": 1687472400000,
+      "rows": 1,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1687472100000_1687472400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1693584000000,
+      "finish": 1694188800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1693584000000_1694188800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1694188800000,
+      "finish": 1694793600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1694188800000_1694793600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1694793600000,
+      "finish": 1695398400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1694793600000_1695398400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1695398400000,
+      "finish": 1696003200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1695398400000_1696003200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1696003200000,
+      "finish": 1696608000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1696003200000_1696608000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1696608000000,
+      "finish": 1697212800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1696608000000_1697212800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1697212800000,
+      "finish": 1697817600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1697212800000_1697817600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1697817600000,
+      "finish": 1698422400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1697817600000_1698422400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1698422400000,
+      "finish": 1699027200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1698422400000_1699027200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1699027200000,
+      "finish": 1699632000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1699027200000_1699632000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1699632000000,
+      "finish": 1700236800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1699632000000_1700236800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1700236800000,
+      "finish": 1700841600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1700236800000_1700841600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1700841600000,
+      "finish": 1701360000000,
+      "rows": 1728,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1700841600000_1701360000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1706716800000,
+      "finish": 1707321600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1706716800000_1707321600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1707321600000,
+      "finish": 1707926400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1707321600000_1707926400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1707926400000,
+      "finish": 1708531200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1707926400000_1708531200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1708531200000,
+      "finish": 1709136000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1708531200000_1709136000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1709136000000,
+      "finish": 1709740800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1709136000000_1709740800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1709740800000,
+      "finish": 1710345600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1709740800000_1710345600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1710345600000,
+      "finish": 1710950400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1710345600000_1710950400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1710950400000,
+      "finish": 1711555200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1710950400000_1711555200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1711555200000,
+      "finish": 1712160000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1711555200000_1712160000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1712160000000,
+      "finish": 1712764800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1712160000000_1712764800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1712764800000,
+      "finish": 1713369600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1712764800000_1713369600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1713369600000,
+      "finish": 1713974400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1713369600000_1713974400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1713974400000,
+      "finish": 1714579200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1713974400000_1714579200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1714579200000,
+      "finish": 1715184000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1714579200000_1715184000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1715184000000,
+      "finish": 1715788800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1715184000000_1715788800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1715788800000,
+      "finish": 1716393600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1715788800000_1716393600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1716393600000,
+      "finish": 1716998400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1716393600000_1716998400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1716998400000,
+      "finish": 1717603200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1716998400000_1717603200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1717603200000,
+      "finish": 1718208000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1717603200000_1718208000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1718208000000,
+      "finish": 1718812800000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1718208000000_1718812800000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1718812800000,
+      "finish": 1719417600000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1718812800000_1719417600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1719417600000,
+      "finish": 1720022400000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1719417600000_1720022400000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1720022400000,
+      "finish": 1720627200000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1720022400000_1720627200000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1720627200000,
+      "finish": 1721232000000,
+      "rows": 2016,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1720627200000_1721232000000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    },
+    {
+      "start": 1721232000000,
+      "finish": 1721268600000,
+      "rows": 122,
+      "path": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/native_gap_1721232000000_1721268600000.csv",
+      "source": "OKX public history-candles, confirmed native 5m"
+    }
+  ],
+  "rows": 364633,
+  "first": 1683086100000,
+  "last": 1792475700000,
+  "gaps": [],
+  "instrument": {
+    "instId": "PEPE-USDT-SWAP",
+    "tickSz": "0.000000001",
+    "listTime": "1683086101049",
+    "state": "live"
+  },
+  "validation": "metadata, actual read, OHLC, time continuity; no content hashes"
+}

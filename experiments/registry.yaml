@@ -16,18 +16,18 @@ schema_version: 1
 experiments:
   - experiment_id: exp-pepe-range-exits-20261020-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: e0607620a1
-    status: active
+    source_commit: 7daac57b4e68b2810bd86975a876c7c82613145a
+    status: inconclusive
     question: Which frozen stop and exit parameters improve PEPE V2.8 independent H1-to-15m trades after 20bp cost?
     single_variable: Owner-authorized joint grid of stop window, percentage buffer, skip cap and exit policy; admissions and costs frozen. Authorization in PROJECT_PLAN.
     artifacts: [pepe-range-exits-20261020-v1]
-    canonical_report: experiments/active/exp-pepe-range-exits-20261020-v1/config.json
+    canonical_report: experiments/active/exp-pepe-range-exits-20261020-v1/delivery_receipt.json
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: true
-    result: Frozen 2400 configurations before outcome inspection; source collection and native parity audit in progress.
-    notes: Same-venue public OKX inputs only; independent risk units, no account return, no Pine defaults changed.
+    result: All2400 full-history equal-risk net-R arms lose at20bp. Baseline1889 net-546.77R; descriptive best1789 net-35.39R uses5bars/0.2percent buffer/2percent skipcap/fixed20R. Four equal-notional arms positive; best1555 trades earns174.22USDT per1000USDT constant trade notional but loses114.85R. Early-selected risk arm loses131.01R in2025 and148.81R in2026. Original-stop fixed20R realizes107targets versus15baseline20R exits.
+    notes: Inconclusive as small equal-notional positives are retrospective and early-selected parameters fail later; not a validated profitable optimum.364633continuous5m rows;146native signatures,10native rows,26tests,9600grid probes and35842complete selected paths pass. Fixed costs exclude funding;two best-arm boundary marks add15.25R. Noaccount simulation,Pine changes,orders,training orpromote. Notion3ff8856479af8120a33ae4b0ea3ae4c2.
   - experiment_id: exp-pepe-range-entry-diagnostic-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ad2586953b

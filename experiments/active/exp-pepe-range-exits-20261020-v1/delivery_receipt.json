@@ -1,0 +1,163 @@
+{
+  "experiment_id": "exp-pepe-range-exits-20261020-v1",
+  "completed_at": "2026-10-20T14:55:42.604325+08:00",
+  "primary_builder_commit": "a52958dfe25e915bf6414286abdf58e9eccc3c0e",
+  "diagnostics_builder_commit": "7daac57b4e68b2810bd86975a876c7c82613145a",
+  "collector_commit": "b7ed96cdcf",
+  "notion_page": "https://app.notion.com/p/3ff8856479af8120a33ae4b0ea3ae4c2",
+  "data": {
+    "rows": 364633,
+    "gaps": [],
+    "repair_chunks": 39,
+    "repair_rows": 74427,
+    "start": "2023-06-01T00:00:00Z",
+    "end": "2026-10-20T06:00:00Z"
+  },
+  "selection": {
+    "selected_on_development": "w3_b0.1_trail3_atr3_cap1",
+    "full_history_descriptive_best": "w5_b0.2_tp20_cap2",
+    "total_configurations": 2400,
+    "baseline": "w5_b0.05_trail5_atr4_cap0",
+    "builder_commit": "a52958dfe25e915bf6414286abdf58e9eccc3c0e",
+    "note": "No untouched holdout claim. Full-history optimum is descriptive only. No Pine defaults changed."
+  },
+  "secondary_selection": {
+    "positive_full_history_arms": 4,
+    "best_full_history": "w3_b0.1_trail10_atr4_cap1",
+    "development_selected": "w1_b0.2_trail1_atr3_cap0.5",
+    "interpretation": "Secondary objective examined after the frozen net-R analysis. No grid change; descriptive, not independent confirmation.",
+    "constant_notional_example_usdt": 1000,
+    "formula": "profit USDT = sum net_notional_bp * 1000 / 10000; not compounded account return"
+  },
+  "all_equal_risk_positive": 0,
+  "validation": {
+    "focused_tests": 26,
+    "native": {
+      "input_overlap": [
+        {
+          "tf": "5m",
+          "rows": 2899,
+          "max_price_difference": 0.0
+        },
+        {
+          "tf": "15m",
+          "rows": 2899,
+          "max_price_difference": 0.0
+        },
+        {
+          "tf": "1H",
+          "rows": 799,
+          "max_price_difference": 0.0
+        }
+      ],
+      "native_baseline_count": 146,
+      "recovered_signature": [
+        640044461400.0,
+        163593976.0,
+        320081208946.0,
+        -5151.0
+      ],
+      "native_signature": [
+        640044461400.0,
+        163593976.0,
+        320081208946.0,
+        -5151.0
+      ],
+      "source_start_utc": "2026-07-08 01:20:00+00:00",
+      "through_utc": "2026-10-20 05:20:00+00:00",
+      "input_audit_start_utc": "2023-05-03 04:00:00+00:00",
+      "builder_commit": "79b40db9a6077f4fd6d83298328520f903ee6bb9"
+    },
+    "selected_scalar_audit": {
+      "selected_path_audits": [
+        {
+          "arm": "w5_b0.05_trail5_atr4_cap0",
+          "signal_and_random_paths": 3775,
+          "mismatches": 0
+        },
+        {
+          "arm": "w3_b0.1_trail3_atr3_cap1",
+          "signal_and_random_paths": 3198,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.2_tp20_cap2",
+          "signal_and_random_paths": 3590,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.05_tp5_cap0",
+          "signal_and_random_paths": 3775,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.05_tp10_cap0",
+          "signal_and_random_paths": 3775,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.05_tp20_cap0",
+          "signal_and_random_paths": 3775,
+          "mismatches": 0
+        },
+        {
+          "arm": "w3_b0.1_trail10_atr4_cap1",
+          "signal_and_random_paths": 3198,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.2_trail10_atr3_cap1",
+          "signal_and_random_paths": 2845,
+          "mismatches": 0
+        },
+        {
+          "arm": "w5_b0.2_trail10_atr4_cap1",
+          "signal_and_random_paths": 2845,
+          "mismatches": 0
+        },
+        {
+          "arm": "w12_b0.2_trail10_atr3_cap1",
+          "signal_and_random_paths": 2462,
+          "mismatches": 0
+        },
+        {
+          "arm": "w1_b0.2_trail1_atr3_cap0.5",
+          "signal_and_random_paths": 2604,
+          "mismatches": 0
+        }
+      ],
+      "total_scalar_paths": 35842,
+      "cost_identities": 35842,
+      "builder_commit": "7daac57b4e68b2810bd86975a876c7c82613145a",
+      "statistical_scope": "Weekly block nominal inference; full-history winner and development p-values are selection-biased. No account drawdown.",
+      "inapplicable": "AUC and model top-decile metrics do not apply: this study changes execution parameters, not a prediction model."
+    },
+    "grid_oracle": {
+      "paths_checked": 9600,
+      "mismatches": 0
+    },
+    "global_registry_check": "Blocked by pre-existing spike-v8-total2-1h-native-20260914-delivery missing source_commit; confirmed already absent before this study. New records validated separately.",
+    "new_registry_records": "both validate against ArtifactRecord and ExperimentRecord"
+  },
+  "reproduction_commands": [
+    ".venv/bin/python -m yoyo.evaluation.pepe_range_data",
+    ".venv/bin/python -m yoyo.evaluation.pepe_range_audit",
+    ".venv/bin/python -m yoyo.evaluation.pepe_range_exits",
+    ".venv/bin/python -m yoyo.evaluation.pepe_range_diagnostics",
+    ".venv/bin/python -m pytest -q tests/evaluation/test_pepe_range_exits.py tests/evaluation/test_monday_range_v2_7.py"
+  ],
+  "limitations": [
+    "Independent overlapping trade sums, not a funded account curve or compounded return.",
+    "20bp entry-notional convention; no funding or additional slippage.",
+    "5m same-bar stop/target ambiguity is conservative; no tick-level fill or liquidity model.",
+    "Full-history rankings and secondary notional objective are descriptive; all development configurations also lose under both metrics.",
+    "Best net-R arm lies at upper tested buffer and target bounds; no global continuous optimum claim.",
+    "Two open best-arm trades marked to period boundary; natural exits reported separately.",
+    "Current Pine tick 1e-9 held fixed across historical prices; historical tick schedule not modeled."
+  ],
+  "pine_changed": false,
+  "orders": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_readback_verified": true
+}
