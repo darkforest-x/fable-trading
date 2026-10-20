@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-range-fanshen-v2-9-20261020-delivery
+    artifact_type: manifest
+    role: Pine V2.9 optional 5m entry delivery and native clock validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: fbb42f1484
+    source_path: output/pine/monday_range_v2_9_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_9_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: V2.8 preserved; new private V2.9 defaults to 15m entry and trade module OFF. H1 watch/5m stop/15m exit clocks unchanged. 18 tests and native fixtures pass; 112 common closed trades including 79 off-quarter entries agree across 5m/15m/1H charts. Total coverage differs by available chart history; no profitability claim.
   - artifact_id: range-entry5m-20261020-v1
     artifact_type: manifest
     role: Four-coin native 5m entry comparison with frozen 15m exit management

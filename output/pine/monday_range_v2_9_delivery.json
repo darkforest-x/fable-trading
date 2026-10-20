@@ -1,0 +1,90 @@
+{
+  "version": "V2.9",
+  "source": "yoyo/evaluation/pine/monday_range_v2_9.pine",
+  "source_commit": "fbb42f14849c6c0836fdeb2f003c35b3459b00d7",
+  "private_script": "周一高低点区间＋翻身 · V2.9",
+  "prior_preserved": "V2.8 source and private script",
+  "entry_timeframes_minutes": [
+    15,
+    5
+  ],
+  "defaults": {
+    "entry_minutes": 15,
+    "trade_reference_enabled": false
+  },
+  "unchanged": [
+    "1H confirmed watch and strictly later same-direction repeated independent entries",
+    "Last5completed5m bars plus0.05percent buffer",
+    "15m close5R arming and4ATR14 trailing",
+    "Opposite H1 exits only armed positions",
+    "Viewport frame selection, H1 rays, chart Stoch/WVF and rangev1.11"
+  ],
+  "validation": {
+    "pytest": "18passed in1.52s",
+    "native": {
+      "records": {
+        "15m": {
+          "entry_minutes": 15,
+          "total": 146,
+          "frozen": 18,
+          "off_quarter": 0,
+          "time_signature": 10213286820,
+          "price_signature": 2766965,
+          "exit_signature": 5107601820
+        },
+        "5m_entry_15m_chart": {
+          "entry_minutes": 5,
+          "total": 587,
+          "frozen": 112,
+          "off_quarter": 79,
+          "time_signature": 377951785130,
+          "price_signature": 102975343,
+          "exit_signature": 189007839100
+        },
+        "5m_entry_5m_chart": {
+          "entry_minutes": 5,
+          "total": 217,
+          "frozen": 112,
+          "off_quarter": 79,
+          "time_signature": 377951785130,
+          "price_signature": 102975343,
+          "exit_signature": 189007839100
+        },
+        "5m_entry_1h_chart": {
+          "entry_minutes": 5,
+          "total": 587,
+          "frozen": 112,
+          "off_quarter": 79,
+          "time_signature": 377951785130,
+          "price_signature": 102975343,
+          "exit_signature": 189007839100
+        }
+      },
+      "common_closed_interval_parity": true,
+      "history_coverage_note": "5m chart exposes fewer source bars than 15m/1H on this account; only the common closed interval is compared. Existing history behavior retained.",
+      "fixture_pass": true
+    },
+    "final_compile": "completed and updated on chart",
+    "qa_appendix_in_delivered_script": false
+  },
+  "final_chart": {
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "15m",
+    "entry_minutes": 5,
+    "module_enabled": true,
+    "prices_shown": false,
+    "editor_closed": true,
+    "logs_closed": true,
+    "layout_saved": true,
+    "visible_frames": 23,
+    "matching_frames": 23
+  },
+  "temporary_browser_sessions_created": 0,
+  "no_orders": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "recorded_at": "2026-10-20T17:01:40.643368+08:00",
+  "private_save_evidence": "output/pine/monday_range_v2_9_saved_ax.txt",
+  "notion_verified": true
+}
