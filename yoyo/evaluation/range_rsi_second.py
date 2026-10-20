@@ -4,13 +4,15 @@ Only the first opposite confirmed diamond after entry is skipped, regardless
 of its profitability. Subsequent events retain the fee-positive gate and
 five original-size reductions. Inputs/features and all other exits stay fixed.
 """
+import argparse
 import json
 from pathlib import Path
 import subprocess
 
 import pandas as pd
 
-from yoyo.evaluation.range_rsi_scaleout import context,scaleout_overlay,ROOT,dump
+from yoyo.evaluation.range_rsi_scaleout import context,scaleout_overlay,ROOT,dump,analyze as analyze_all
+from yoyo.evaluation.pepe_range_exits import inference
 
 DEFAULT=ROOT/"experiments/active/exp-eth-timebe-rsi-20261020-v2/config.json"
 
@@ -50,5 +52,24 @@ def prepare(config=DEFAULT):
         source_commit=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip()))
 
 
+def analyze(config=DEFAULT):
+    analyze_all(config)
+    results=[]
+    for minutes in (3,5):
+        before=pd.read_csv(config.parent/f"runs/rsi{minutes}/trades.csv")
+        after=pd.read_csv(config.parent/f"runs/second_rsi{minutes}/trades.csv")
+        before=before[before.population=="signal"].set_index("trade_id")
+        after=after[after.population=="signal"].set_index("trade_id").loc[before.index]
+        paired=after[["pair_id","week","net_r"]].join(before.net_r.rename("net_r_random"))
+        results.append(dict(minutes=minutes,delta_net_r=float((after.net_r-before.net_r).sum()),
+            first_net_r=float(before.net_r.sum()),second_net_r=float(after.net_r.sum()),
+            yearly_delta=(after.net_r-before.net_r).groupby(after.segment).sum().to_dict(),
+            diagnostic_inference=inference(paired,20261020)))
+    dump(config.parent/"second_vs_first.json",results)
+
+
 if __name__=="__main__":
-    prepare()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--phase",choices=["prepare","analyze"],default="prepare")
+    args=parser.parse_args()
+    (prepare if args.phase=="prepare" else analyze)()
