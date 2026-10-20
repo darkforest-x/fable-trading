@@ -1,0 +1,7 @@
+# A management-clock comparison must freeze entry matching
+
+- **Problem**: The range study uses 15m ATR both for causal volatility matching at 5m entries and for trailing protection. The owner requested 5m-close management with 5m ATR14, while preserving entry conditions.
+- **Dead end**: Replacing every ATR series with 5m ATR would also change volatility buckets and random controls. Filling 15m ATR forward would change update frequency without implementing the requested 5m ATR. Either approach confounds the comparison.
+- **Effective path**: Reuse the frozen entry/control IDs and validated old 15m ledgers. Add a management timeframe only to the existing Nautilus feature preparer, calculate ATR14 from completed candles on that timeframe, and include it in cache identity. Tests check default15 parity, prefix causality, off-quarter arming and next-bar stop effectiveness. Pair old/new rows by trade ID and require initial risk and fee equality.
+- **General rule**: A requested joint change of management cadence and ATR timeframe is one explicitly defined treatment; it cannot establish the separate effect of cadence alone. Keep entry matching, risk denominators, costs and segment boundaries fixed. Reuse existing comparisons rather than re-running already validated ledgers.
+- **Related files**: `yoyo/evaluation/range_framework.py`, `yoyo/evaluation/range_management_study.py`, `tests/evaluation/test_range_management_clock.py`, `experiments/active/exp-range-management5m-20261020-v1/`.

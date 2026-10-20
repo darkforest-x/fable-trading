@@ -37,6 +37,25 @@ def holm(values):
 def run(config):
     cfg = json.loads(config.read_text())
     started = time.perf_counter()
+    preflight = []
+    for spec in cfg["runs"]:
+        current = json.loads((config.parent/spec["config"]).read_text())
+        previous = json.loads((ROOT/spec["baseline_receipt"]).read_text())["identity"]
+        actual = [file_stamp(ROOT/current[key]) for key in ("data", "entry_candidates")]
+        if actual != previous["inputs"]:
+            raise ValueError("Historical comparator input path/size/mtime changed")
+        for key in ("data", "entry_candidates", "symbol", "tick", "market_tick",
+                    "stop_window_5m", "buffer_percent", "maximum_risk_percent", "round_trip_cost"):
+            if current[key] != previous["config"][key]:
+                raise ValueError(f"Non-clock parameter changed: {key}")
+        policy = current["policies"][0]
+        keys = ("trail_arm_r", "trail_atr_multiple", "breakeven_r", "opposite_hour_exit")
+        if not any(all(old.get(k) == policy[k] for k in keys)
+                   for old in previous["config"]["policies"]):
+            raise ValueError("Historical comparator exit parameters differ")
+        preflight.append(dict(config=spec["config"], identical_inputs_by_path_size_mtime=True,
+                              unchanged_entry_stop_cost_policy=True))
+    dump(config.parent/"preflight.json", preflight)
 
     def one(spec):
         path = config.parent/spec["config"]
