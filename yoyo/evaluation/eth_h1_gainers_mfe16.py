@@ -115,7 +115,8 @@ def load_panel(cfg, folder):
                    local=local[0] if local else None)
         if len(fetched) > 1 or len(local) > 1:
             raise ValueError(f"{sym}: ambiguous source files")
-        old = hourly(pd.read_csv(local[0], usecols=["ts", *OHLC, "volume"]), 15) if local else None
+        raw15 = pd.read_csv(local[0], usecols=["ts", *OHLC, "volume"]) if local else None
+        old = hourly(raw15, 15) if local else None
         if fetched:
             new = hourly(pd.read_csv(fetched[0], usecols=["ts", *OHLC, "volume"]), 60)
             row["source"] = "okx_history_candles_1H"
@@ -124,9 +125,22 @@ def load_panel(cfg, folder):
                 overlap = overlap[overlap < LOCAL_END]
                 row["overlap_hours"] = len(overlap)
                 if len(overlap):
-                    rel = (new.loc[overlap, OHLC] / old.loc[overlap, OHLC] - 1).abs().to_numpy()
-                    row["overlap_max_rel_diff"] = float(rel.max())
-                    if rel.max() > 1e-9:
+                    # OKX pads no-trade 15m bars flat at the last price, while the
+                    # native 1H open is the hour's first trade: O/H/L may differ only
+                    # in hours holding a zero-volume 15m bar. Close and volume never.
+                    zero = pd.to_datetime(raw15.ts[raw15.volume.eq(0)], unit="ms",
+                                          utc=True).dt.floor("h").unique()
+                    padded = overlap.isin(zero)
+                    rel = (new.loc[overlap, OHLC] / old.loc[overlap, OHLC] - 1).abs()
+                    # Volume only gates "traded in 24h"; small later revisions are tolerated.
+                    vol = (new.loc[overlap, "volume"] - old.loc[overlap, "volume"]).abs() / (
+                        old.loc[overlap, "volume"].abs() + 1)
+                    row["overlap_padded_hours"] = int(padded.sum())
+                    row["overlap_max_rel_diff_unpadded"] = float(rel[~padded].to_numpy().max()) \
+                        if (~padded).any() else 0.
+                    row["overlap_max_volume_rel_diff"] = float(vol.max())
+                    if (rel["close"].max() > 1e-9 or vol.max() > 1e-3
+                            or row["overlap_max_rel_diff_unpadded"] > 1e-9):
                         raise ValueError(f"{sym}: fetched 1H disagrees with local 15m cache")
             frame = new
         elif old is not None:
