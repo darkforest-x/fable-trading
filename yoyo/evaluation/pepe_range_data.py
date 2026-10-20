@@ -61,7 +61,9 @@ def month(label: str) -> dict:
         assert len(names) == 1
         raw = pd.read_csv(archive.open(names[0]))
     assert set(raw.instrument_name) == {"PEPE-USDT-SWAP"}
-    assert set(raw["confirm"].astype(str)) <= {"1"}
+    assert set(raw["confirm"].astype(str)) <= {"0", "1"}, (label, raw["confirm"].unique())
+    unconfirmed = int((raw["confirm"] == 0).sum())
+    raw = raw[raw["confirm"] == 1]
     frame = raw.rename(columns={"open_time": "ts"})[["ts", "open", "high", "low", "close"]]
     frame = validate(frame)
     frame.index = pd.to_datetime(frame.ts, unit="ms", utc=True)
@@ -77,7 +79,8 @@ def month(label: str) -> dict:
     receipt = dict(path=str(out), source=url, bytes=len(payload), raw_rows=len(frame),
                    rows=len(five), first=int(five.ts.iloc[0]), last=int(five.ts.iloc[-1]),
                    incomplete_five=int(((count > 0) & (count < 5)).sum()),
-                   raw_gaps=int((frame.ts.diff().dropna() != 60000).sum()))
+                   raw_gaps=int((frame.ts.diff().dropna() != 60000).sum()),
+                   unconfirmed_minutes_excluded=unconfirmed)
     meta.write_text(json.dumps(receipt, indent=2) + "\n")
     print(label, receipt["rows"], flush=True)
     return receipt
@@ -113,6 +116,39 @@ def recent(start: int, finish: int) -> dict:
     return receipt
 
 
+def repair(frame: pd.DataFrame) -> tuple[pd.DataFrame, list]:
+    """Replace archive gaps with actual completed native OKX 5m observations."""
+    fixes = []
+    gaps = frame.index[frame.ts.diff() > 300000].tolist()
+    for i in gaps:
+        start, finish = int(frame.ts.iloc[i-1]+300000), int(frame.ts.iloc[i])
+        cursor, rows = finish, []
+        while cursor > start:
+            query = urllib.parse.urlencode(dict(instId="PEPE-USDT-SWAP", bar="5m", limit=100, after=cursor))
+            url = "https://www.okx.com/api/v5/market/history-candles?" + query
+            result = json.loads(get(url))
+            assert result["code"] == "0", result
+            page = result["data"]
+            if not page:
+                raise ValueError(f"cannot recover archive gap {start} through {finish}")
+            rows += [[int(r[0]), *map(float, r[1:5])] for r in page
+                     if int(r[8]) == 1 and start <= int(r[0]) < finish]
+            nxt = min(int(r[0]) for r in page)
+            assert nxt < cursor
+            cursor = nxt
+            time.sleep(.12)
+        expected = (finish-start)//300000
+        fixed = validate(pd.DataFrame(rows, columns=frame.columns))
+        assert len(fixed) == expected, (start, finish, len(fixed), expected)
+        path = EXP/"inputs"/f"native_gap_{start}_{finish}.csv"
+        fixed.to_csv(path, index=False)
+        fixes.append(dict(start=start, finish=finish, rows=len(fixed), path=str(path),
+                          source="OKX public history-candles, confirmed native 5m"))
+    if fixes:
+        frame = validate(pd.concat([frame, *[pd.read_csv(f["path"]) for f in fixes]], ignore_index=True))
+    return frame, fixes
+
+
 def main():
     cfg = json.loads((EXP / "config.json").read_text())
     (EXP / "inputs").mkdir(exist_ok=True)
@@ -127,8 +163,9 @@ def main():
     parts = [pd.read_csv(r["path"]) for r in receipts]
     frame = validate(pd.concat(parts, ignore_index=True))
     frame = frame[frame.ts < finish]
+    frame, fixes = repair(frame)
     gaps = frame.loc[frame.ts.diff().ne(300000) & frame.ts.diff().notna(), ["ts"]]
-    audit = dict(sources=receipts, rows=len(frame), first=int(frame.ts.iloc[0]),
+    audit = dict(sources=receipts, gap_repairs=fixes, rows=len(frame), first=int(frame.ts.iloc[0]),
                  last=int(frame.ts.iloc[-1]), gaps=gaps.ts.tolist(),
                  instrument={k: instrument.get(k) for k in ("instId", "tickSz", "listTime", "state")},
                  validation="metadata, actual read, OHLC, time continuity; no content hashes")
