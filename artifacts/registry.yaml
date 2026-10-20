@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-exit-search-20261020-v1
+    artifact_type: manifest
+    role: ETH fixed-risk exit optimization and boundary-attributed native parity evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: 188fcbc0daed60062268b1f5ab442481c7cfc716
+    generator_commit: 74a855b456447313cfdd5d645e7a60ea544cd99f
+    source_path: experiments/active/exp-eth-exit-search-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-exit-search-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 3557distinctpolicies;5nativeconfigurations38380positions;127tests. Screening source74a855b456,boundary59c5cca285,nativefix7bfc6b84de,analysis188fcbc0da. Rawlocal ledgers and3520grid inventoried without hashes;not account returns or validated edge.
   - artifact_id: eth-5m-partial-close-20261020-v1
     artifact_type: manifest
     role: ETH close-confirmed partial native fills and original-risk tail attribution

@@ -1,0 +1,61 @@
+{
+  "source_commit": "59c5cca285085f2235de476dd3fca2b24f2b9fb2",
+  "feature_cache_hit": true,
+  "arms": 39,
+  "paths": 299364,
+  "baseline_parity": {
+    "rows": 7676,
+    "compared_fields": [
+      "entry_i",
+      "side",
+      "end_i",
+      "exit_i",
+      "reason",
+      "arm_i",
+      "be_trigger_i",
+      "be_effective_i",
+      "stop_kind",
+      "deferred_closes",
+      "steps",
+      "entry",
+      "stop",
+      "risk",
+      "exit_price",
+      "protection",
+      "be_price",
+      "peak_r",
+      "gross_r",
+      "fee_r",
+      "net_r",
+      "net_notional_bp",
+      "exit_time"
+    ],
+    "native_fee_checks": 7676,
+    "status": "passed"
+  },
+  "selection": {
+    "development_2024": "w3_b0p4_trail_r10_a6_be0_rev1",
+    "rolling_through_2025": "w3_b0p8_trail_r10_a6_be0_rev1",
+    "descriptive_full": "w3_b1p2_trail_r20_a10_be0_rev1",
+    "baseline": "w5_b0p05_trail_r5_a4_be0_rev1",
+    "descriptive_trail": "w3_b1p2_trail_r20_a10_be0_rev1"
+  },
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+      "bytes": 894724,
+      "mtime_ns": 1792493635632797072
+    }
+  ],
+  "elapsed_seconds": 2.7455757919233292,
+  "phase": "screening;selected policies require native verification",
+  "selection_score": "Total net R; fixed targets use conservative stop-first collision sensitivity",
+  "historical_previously_seen": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

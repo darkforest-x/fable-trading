@@ -1,0 +1,7 @@
+# Late trailing optimization needs boundary-profit attribution
+
+- **Problem**: A boundary extension of ETH exit parameters produced +441.97R with a20R activation and10ATR trail, despite all3520 original configurations losing.
+- **Dead end**: Calling the positive full-history winner an optimal strategy. It was selected after viewing known history, stayed on the wider search boundary, and underperformed matched random entries (+470.46R). Treating all unfinished trades as zero would be a different, incomplete error.
+- **Effective approach**: Attribute profit by natural and forced end-of-segment exits.68 year-end/data-end closures contributed387.06R (87.6percent of net profit); natural exits contributed54.91R. Yearly results−530.94/+113.61/+859.30R, maximum duration119.09days,69 simultaneous signal positions, and cash-only drawdown881.99R reveal timing and capacity sensitivity. The68 closures are valid marks under the declared policy, not fabricated profit; they do not establish that the natural exit rule will bank it.
+- **General rule**: Report boundary marks, duration, overlap, period stability and matched controls before recommending late exits. Removing marked trades is attribution only, not a complete alternative backtest. Declare realized-only drawdown separately from mark-to-market drawdown; independentR is not an account.
+- **Scope**: `exp-eth-exit-search-20261020-v1/boundary_probe/`. No default or Pine promotion; funding, capacity and fresh forward evidence remain absent.

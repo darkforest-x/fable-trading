@@ -1,3 +1,10 @@
+## 2026-10-20 ETH fixed-risk exit search — completed, no default promotion
+
+- `exp-eth-exit-search-20261020-v1`:3838ETH15m-watch5m signals plus3838matched controls;20bp unchanged. Owner selected fixed risk and cumulative netR.3520planned configurations allnegative,best−533.75R;39separate boundary probes(37new) highest+441.97R versusmatchedrandom+470.46R,p=.537. No configuration positive inall2024/2025/2026 segments.
+- Highest descriptive parameters:last3completed5m extrema plus1.2percent buffer;15mclose20R arms10ATR14;noBE;armedH1oppositeexit.68forcedyear/data-endclosures contribute387.06R;natural54.91R. Cash-onlydrawdown881.99R,max119.09days,69simultaneous signal positions. Not a fundedaccount or established entry edge;noPine/default/livechange.
+- Reused C++ screen41.43seconds,selected5native configurations38380paths allparity.127tests. Fixed-target simultaneousquoteinterference reproduced andfixedthroughnativeFillModel;failurelogretained. Commits74a855b456/59c5cca285/7bfc6b84de/188fcbc0da. Rawresults inventoried in delivery_receipt.json;reuse cached runs.
+- Notion https://app.notion.com/p/3ff8856479af81d698ead0e77d9f20db readbackverified;registriesupdated. Single-factor buffer improvementmostlylowercostR;earlyBE raiseswinbutreducesnet. No fresh forward validation.
+
 ## 2026-10-20 ETH close-confirmed partial exits — completed, default rejected
 
 - `exp-eth-5m-partial-close-20261020-v1`: same3838ETH15m-watch5m entries plus3838matched controls;first5m-close1/3/5R reduces25/50percent once. Original stop/runner/cost unchanged, no extra BE.

@@ -1,0 +1,177 @@
+{
+  "results": {
+    "w12_b0p4_fixed_r20_a4_be5_rev0": {
+      "elapsed_seconds": 169.45766141603235,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.01,
+        "protection_tick": 0.01,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 7676,
+        "positions": 7676,
+        "fills": 15352,
+        "max_simultaneous_positions": 45,
+        "bars_with_both_directions": 199512,
+        "prepare_seconds": 1.7365298749646172,
+        "replay_seconds": 162.33015554200392,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns",
+        "parity": {
+          "rows": 7676,
+          "compared_fields": [
+            "entry_i",
+            "side",
+            "end_i",
+            "exit_i",
+            "reason",
+            "arm_i",
+            "be_trigger_i",
+            "be_effective_i",
+            "stop_kind",
+            "deferred_closes",
+            "steps",
+            "entry",
+            "stop",
+            "risk",
+            "exit_price",
+            "protection",
+            "be_price",
+            "peak_r",
+            "gross_r",
+            "fee_r",
+            "net_r",
+            "net_notional_bp",
+            "exit_time"
+          ],
+          "native_fee_checks": 7676,
+          "status": "passed"
+        }
+      },
+      "reused": false,
+      "source_commit": "188fcbc0daed60062268b1f5ab442481c7cfc716",
+      "native_path": "experiments/active/exp-eth-exit-search-20261020-v1/selected/w12_b0p4_fixed_r20_a4_be5_rev0/native"
+    },
+    "w3_b0p4_trail_r10_a6_be0_rev1": {
+      "elapsed_seconds": 0,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.01,
+        "protection_tick": 0.01,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "disabled",
+        "native_fixed_target_accounting_checked": 0,
+        "positions": 7676,
+        "fills": 15352,
+        "max_simultaneous_positions": 39,
+        "bars_with_both_directions": 133641,
+        "prepare_seconds": 1.283238000003621,
+        "replay_seconds": 118.54915970808361,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns",
+        "parity": {
+          "rows": 7676,
+          "compared_fields": [
+            "entry_i",
+            "side",
+            "end_i",
+            "exit_i",
+            "reason",
+            "arm_i",
+            "be_trigger_i",
+            "be_effective_i",
+            "stop_kind",
+            "deferred_closes",
+            "steps",
+            "entry",
+            "stop",
+            "risk",
+            "exit_price",
+            "protection",
+            "be_price",
+            "peak_r",
+            "gross_r",
+            "fee_r",
+            "net_r",
+            "net_notional_bp",
+            "exit_time"
+          ],
+          "native_fee_checks": 7676,
+          "status": "passed"
+        }
+      },
+      "reused": true,
+      "source_commit": "74a855b456447313cfdd5d645e7a60ea544cd99f",
+      "native_path": "experiments/active/exp-eth-exit-search-20261020-v1/selected/w3_b0p4_trail_r10_a6_be0_rev1/native"
+    },
+    "w8_b0p4_trail_r10_a6_be5_rev1": {
+      "elapsed_seconds": 0,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.01,
+        "protection_tick": 0.01,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "disabled",
+        "native_fixed_target_accounting_checked": 0,
+        "positions": 7676,
+        "fills": 15352,
+        "max_simultaneous_positions": 34,
+        "bars_with_both_directions": 164156,
+        "prepare_seconds": 1.5660297910217196,
+        "replay_seconds": 90.3221362499753,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns",
+        "parity": {
+          "rows": 7676,
+          "compared_fields": [
+            "entry_i",
+            "side",
+            "end_i",
+            "exit_i",
+            "reason",
+            "arm_i",
+            "be_trigger_i",
+            "be_effective_i",
+            "stop_kind",
+            "deferred_closes",
+            "steps",
+            "entry",
+            "stop",
+            "risk",
+            "exit_price",
+            "protection",
+            "be_price",
+            "peak_r",
+            "gross_r",
+            "fee_r",
+            "net_r",
+            "net_notional_bp",
+            "exit_time"
+          ],
+          "native_fee_checks": 7676,
+          "status": "passed"
+        }
+      },
+      "reused": true,
+      "source_commit": "59c5cca285085f2235de476dd3fca2b24f2b9fb2",
+      "native_path": "experiments/active/exp-eth-exit-search-20261020-v1/selected/w8_b0p4_trail_r10_a6_be5_rev1/native"
+    }
+  },
+  "elapsed_seconds": 171.56559975002892,
+  "baseline": "Reused original cached native ledger"
+}

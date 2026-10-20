@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-eth-exit-search-20261020-v1",
+  "engine": "nautilus",
+  "symbol": "ETH",
+  "tick": 0.01,
+  "market_tick": 0.01,
+  "data": "experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+  "stop_window_5m": 5,
+  "buffer_percent": 0.05,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "candidate",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": null,
+      "opposite_hour_exit": true,
+      "fixed_target_r": null,
+      "golden_ledger": "experiments/active/exp-eth-exit-search-20261020-v1/selected/w5_b0p05_trail_r5_a4_be0_rev1/screen.csv"
+    }
+  ],
+  "output": "experiments/active/exp-eth-exit-search-20261020-v1/selected/w5_b0p05_trail_r5_a4_be0_rev1/native"
+}
