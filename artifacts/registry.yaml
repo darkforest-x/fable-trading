@@ -32771,3 +32771,21 @@ artifacts:
       28 local checks passed; 5m/1H/4H/day/week event parity and monthly display checked, toggle and 200-signal capacity passed.
       Full V1.11-based V2.0 retained with explicit greater-than-daily Monday-range gate. Source/script preserved, alerts unchanged.
       Initial memory-limit failure fixed by final-state export; wall-clock guard verified. Stitch provenance and native evidence retained.
+
+  - artifact_id: monday-range-fanshen-v2-2-20261020-delivery
+    artifact_type: manifest
+    role: versioned_pine_visual_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 89a315526e8e7453ea71f936696772921f4dd0ec
+    source_path: output/pine/monday_range_v2_2_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_2_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.2 private revision 14 saved; optional default-off independent 1H observation / 15m close entry frames.
+      Latest five closed 5m extremes plus one price point; 1R/3R/5R references; 15m close 5R activates 4ATR trail.
+      34 local checks and native causal fixtures passed. Independent minute data reproduces 25 full-window entries;
+      18 visible rows compared across 12 fields and 10/20-record weighted signatures matched. Shorter native 5m
+      chart history separately reproduces 7 entries. Shared 15m history omission fixed; coverage limits disclosed.
+      Old V2.1 source/private script and original alerts retained; final module OFF, rays ON, layout saved.
+      Engineering parity only, no profitability conclusion, order execution, training or production promotion.

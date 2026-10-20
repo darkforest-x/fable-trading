@@ -1,0 +1,32 @@
+The following is a diff from the previous accessibility tree for Window: "ETHUSDT.P / 综合过滤" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 309
+~						7 text ETHUSDT.P ▼ 2,402.64 −0.18% /  综合过滤
+~										136 text 开= 2,399.83 高= 2,402.67 低= 2,398.88 收= 2,402.64 +2.81 (+0.12%)
+~									138 text 2,402.64 卖出
+~									140 text 2,402.65 买入
+~									214 文本 67.96
+~									215 文本 58.35
+~								244 文本 11:04:48 UTC+8
+~								275 编辑器 (settable) Description: Editor content;Press Alt+F1 for Accessibility Options., Value: int maxWait = input.int(96, "突破后最多等待K线", minval=3)
+int atrLen = input.int(14, "ATR周期", minval=1)
+float stopBuffer = input.float(0.1, "止损ATR缓冲", minval=0, step=0.05)
+float maxRiskR = input.float(1.5, "最大止损距离/周一区间", minval=0.1, step=0.1)
+bool usePartial = input.bool(true, "80%在0.618止盈；20%在1.13止盈")
+bool exitFriday = input.bool(true, "周五收盘前平仓")
+
+if barstate.isfirst and (not timeframe.isminutes or timeframe.multiplier != 5)
+    runtime.error("请在5分钟图运行，以避免低周期确认的历史重绘和跨午夜边界误差。")
+
+
+~							283 按钮 线形图 19, Col 1
+~								285 文本 19
++					323 文本 runtime.error("请在5分钟图运行，以避免低周期确认的历史重绘和跨午夜边界误差。")
+The focused UI element is 275 编辑器 (settable) Description: Editor content;Press Alt+F1 for Accessibility Options., Value: int maxWait = input.int(96, "突破后最多等待K线", minval=3)
+int atrLen = input.int(14, "ATR周期", minval=1)
+float stopBuffer = input.float(0.1, "止损ATR缓冲", minval=0, step=0.05)
+float maxRiskR = input.float(1.5, "最大止损距离/周一区间", minval=0.1, step=0.1)
+bool usePartial = input.bool(true, "80%在0.618止盈；20%在1.13止盈")
+bool exitFriday = input.bool(true, "周五收盘前平仓")
+
+if barstate.isfirst and (not timeframe.isminutes or timeframe.multiplier != 5)
+    runtime.error("请在5分钟图运行，以避免低周期确认的历史重绘和跨午夜边界误差。")

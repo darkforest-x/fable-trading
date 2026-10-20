@@ -1,0 +1,177 @@
+{
+  "version": "2.2",
+  "completed_at": "2026-10-20T11:45:03.666344+08:00",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_2.pine",
+  "source_commit": "89a315526e8e7453ea71f936696772921f4dd0ec",
+  "base": "yoyo/evaluation/pine/monday_range_v2_1.pine",
+  "rules": {
+    "enabled_by_default": false,
+    "observation": "Closed 1H direction; only opposite 1H rearms; same direction repeat does not reset.",
+    "entry": "First strictly subsequent same-direction 15m closed Stoch arrow, model entry at that close.",
+    "initial_stop": "Latest 5 completed 5m candles including the 5m candle closing with entry; extreme plus 1 price point, rounded outward to tick.",
+    "reference_levels_r": [
+      1,
+      3,
+      5
+    ],
+    "trail": "15m close reaches 5R; then close +/- 4 * 15m Wilder ATR(14); ratchet only; next 5m bar receives changed stop. No forced breakeven.",
+    "independent_frames": true,
+    "reverse_signal_forced_exit": false,
+    "orders": false,
+    "retention_default": 10,
+    "retention_max": 20,
+    "active_beyond_display_limit": "Still tracked until own exit; old closed records pruned.",
+    "trail_display_limit": 40,
+    "source_5m_requested_max": 30000
+  },
+  "local_validation": {
+    "passed": 34,
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_2.py tests/evaluation/test_monday_range_v2_1.py tests/evaluation/test_monday_range_v2_0.py tests/evaluation/test_monday_range_v1_11.py tests/monitor/test_market_context_okx.py",
+    "warning": "Existing urllib3 LibreSSL warning.",
+    "baseline": "Existing V2.1 range/Fanshen/1H bodies preserved except explicit enabled-only 15m history budget, object reservation, and displayed version."
+  },
+  "native_validation": {
+    "application": "TradingView Desktop",
+    "script_name": "周一高低点区间＋翻身 · V2.2",
+    "saved_revision": 14,
+    "saved_at": "2026-10-20T11:42:33+08:00",
+    "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+    "symbol": "OKX:ETHUSDT.P",
+    "final_timeframe": "1H",
+    "compile_runtime": "Final saved revision 14 compiled and rendered; temporary fixture removed; current indicator has no runtime guard failure.",
+    "fixture": "TX_NATIVE_CHECKS_PASS: direction regime, subsequent close, no duplicate same-regime entry, outward tick stop, entry-bar exclusion, wick vs close 5R, old stop before ratchet, both directions, adverse gap, no 1R/3R partial exit, retained independent live references.",
+    "tested_timeframes": [
+      "1m",
+      "5m",
+      "15m",
+      "1H",
+      "4H",
+      "1W"
+    ],
+    "full_source_count": 25,
+    "shorter_5m_chart_count": 7,
+    "full_source_retained_checks": [
+      10,
+      20
+    ],
+    "history_limitation": "Same-timeframe 5m request has chart-supplied shorter history, starting 2026-09-13; its 7 entries separately reproduced. Full other tested windows start 2026-07-07. Counts are compared within actual coverage, not treated as identical.",
+    "temporary_budget_check": "A temporary declaration calc_bars_count=30000 was tried on 5m and did not expand available history. 15m/1H/4H/1W QA kept this temporary declaration; final source removes it. Engine identical; final clean source renders on 1H.",
+    "visuals": "Long and short green/red reference boxes, 1R/3R/5R guides and cyan trail checked on August 2026 samples. Identical protection/exit prices combine labels. Full Stoch/WVF pane, arrows, main-pane checks/crosses and 1H rays retained.",
+    "defaults_restored": {
+      "txEnabled": false,
+      "txKeep": 10,
+      "showH1Rays": true,
+      "h1Keep": 100
+    },
+    "layout": "All changes saved confirmed on 1H; editor/log/settings closed; latest chart restored. Hidden V2.1 chart instance removed; private script and source preserved.",
+    "alerts": "Existing 1H alerts unchanged.",
+    "temporary_browser_sessions_created": 0
+  },
+  "independent_data_validation": {
+    "reference": "output/pine/monday_range_v2_2_reference.json",
+    "short_window_reference": "output/pine/monday_range_v2_2_reference_5m_window.json",
+    "minute_rows": 202492,
+    "minute_gaps": 0,
+    "through": 1792421400000,
+    "source_start": 1783467000000,
+    "count": 25,
+    "native_parity": {
+      "visible_native_rows_compared": 18,
+      "fields_per_row": 12,
+      "mismatches": [],
+      "weighted_signature_matches": [
+        "monday_range_v2_2_native_1m.txt",
+        "monday_range_v2_2_native_1h.txt",
+        "monday_range_v2_2_native_15m.txt",
+        "monday_range_v2_2_native_capacity20_start.txt",
+        "monday_range_v2_2_native_4h.txt",
+        "monday_range_v2_2_native_1w.txt"
+      ],
+      "note": "Weighted signatures supplement visible row comparison; they are not full ledger byte equality."
+    },
+    "command": ".venv/bin/python -m yoyo.evaluation.monday_range_v2_2_reference --source-start 1783467000000 --native-dir output/pine --output output/pine/monday_range_v2_2_reference.json",
+    "short_window_command": ".venv/bin/python -m yoyo.evaluation.monday_range_v2_2_reference --source-start 1789344000000 --output output/pine/monday_range_v2_2_reference_5m_window.json",
+    "interpretation": "Engineering agreement only. No strategy profitability or account-return conclusion; no fees, funding or matched random controls applied."
+  },
+  "resolved_failures": [
+    {
+      "symptom": "Only 7 entries despite July source start; independent complete-minute oracle found 25.",
+      "ineffective_attempts": [
+        "Raise only nested request history",
+        "Replace bar_index warmup guard"
+      ],
+      "fix": "Enabled-only shared 15m key request expanded from 3200 to 12000 bars; native total restored to 25."
+    },
+    {
+      "symptom": "Reserved text parameter failed Pine compile.",
+      "fix": "Renamed to caption."
+    },
+    {
+      "symptom": "Label refactor briefly changed original range helper, caught by source parity and native compile.",
+      "fix": "Restored original helper; all 34 checks passed; clean revision 14 compiled."
+    }
+  ],
+  "phone_error": {
+    "script": "Monday Range · Notion v2 (5m), internal strategy v2.0.1",
+    "line": 19,
+    "reason": "Old strategy deliberately requires 5m; phone ran 15m.",
+    "resolution": "Old strategy unchanged; new indicator V2.2 has no 5m-only runtime guard. Correct indicator name explicitly identified."
+  },
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "screen_id": "c4f096ebdebb40ada117915437c02108",
+    "model": "GEMINI_3_8_FLASH",
+    "assets": "docs/design/stitch-20261020-v22-frames/",
+    "scope": "Synthetic visual design only; invented design parameter defaults rejected in favor of owner-confirmed rules."
+  },
+  "learnings": [
+    "docs/learnings/pine-shared-request-history-needs-independent-event-parity.md"
+  ],
+  "notion_project": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "Standard time-based candles; Monday range coloring remains gated above daily as inherited from V2.1.",
+    "Historical coverage is bounded by available source candles, not a full-history account backtest.",
+    "Intrabar stops use 5m high/low; gap uses adverse open, otherwise exact within-bar exit time unknown and marked at that 5m close.",
+    "5R starts trailing, does not guarantee a profitable exit; ATR protection may remain at initial stop."
+  ],
+  "evidence": [
+    "output/pine/monday_range_v2_2_defaults_ax.txt",
+    "output/pine/monday_range_v2_2_defaults_final.txt",
+    "output/pine/monday_range_v2_2_final.png",
+    "output/pine/monday_range_v2_2_final_ax.txt",
+    "output/pine/monday_range_v2_2_frames_preview.png",
+    "output/pine/monday_range_v2_2_frames_preview_final.png",
+    "output/pine/monday_range_v2_2_native_15m.txt",
+    "output/pine/monday_range_v2_2_native_1h.txt",
+    "output/pine/monday_range_v2_2_native_1h_initial.txt",
+    "output/pine/monday_range_v2_2_native_1m.txt",
+    "output/pine/monday_range_v2_2_native_1m_full_history.txt",
+    "output/pine/monday_range_v2_2_native_1m_initial.txt",
+    "output/pine/monday_range_v2_2_native_1m_rows.txt",
+    "output/pine/monday_range_v2_2_native_1m_warmup_fix.txt",
+    "output/pine/monday_range_v2_2_native_1w.txt",
+    "output/pine/monday_range_v2_2_native_20_last_rows.txt",
+    "output/pine/monday_range_v2_2_native_20_more_rows.txt",
+    "output/pine/monday_range_v2_2_native_4h.txt",
+    "output/pine/monday_range_v2_2_native_5m.txt",
+    "output/pine/monday_range_v2_2_native_5m_budget.txt",
+    "output/pine/monday_range_v2_2_native_5m_initial.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_end.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_mid.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_mid2.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_mid3.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_start.txt",
+    "output/pine/monday_range_v2_2_native_capacity20_top.txt",
+    "output/pine/monday_range_v2_2_native_coverage.txt",
+    "output/pine/monday_range_v2_2_native_shared_history_fix.txt",
+    "output/pine/monday_range_v2_2_parity.json",
+    "output/pine/monday_range_v2_2_reference.json",
+    "output/pine/monday_range_v2_2_reference_5m_window.json",
+    "output/pine/monday_range_v2_2_reference_entries.json",
+    "output/pine/monday_range_v2_2_saved_final.txt",
+    "output/pine/monday_old_strategy_5m_guard_ax.txt"
+  ],
+  "evidence_format": "UI accessibility captures retain content; trailing whitespace normalized."
+}
