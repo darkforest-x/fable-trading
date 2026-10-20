@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-entry5m-20261020-v1
+    artifact_type: manifest
+    role: Four-coin native 5m entry comparison with frozen 15m exit management
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3b7a69c99
+    source_path: experiments/active/exp-range-entry5m-20261020-v1/receipt.json
+    storage_uri: repo://experiments/active/exp-range-entry5m-20261020-v1/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Raw candidates,fills,trades,64comparison rows,weekly matched inference and validation retained. All8mean-net comparisons worse than15m and24segments negative. Large MFE verified but not achievable exit target. No raw market-data download,engine/Pine change or production promotion. Notion3ff8856479af817d8472dcadfc2be532.
   - artifact_id: range-multicoin-20261020-v2
     artifact_type: manifest
     role: Binance ZEC extension of frozen native cross-coin range replay

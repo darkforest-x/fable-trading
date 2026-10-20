@@ -1,0 +1,58 @@
+{
+  "experiment_id": "exp-range-entry5m-20261020-v1",
+  "elapsed_seconds": 984.6253847499611,
+  "source_commit": "f3b7a69c9978f262bce9170333e554035049e81e",
+  "generated_at": "2026-10-20T08:46:34.799492+00:00",
+  "ledgers": [
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/results/be3/trades.csv"
+  ],
+  "runs": [
+    {
+      "symbol": "BTC",
+      "cached": false,
+      "elapsed_seconds": 337.74350470805075,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/config.json"
+    },
+    {
+      "symbol": "ETH",
+      "cached": false,
+      "elapsed_seconds": 208.76492637500633,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/config.json"
+    },
+    {
+      "symbol": "PEPE",
+      "cached": false,
+      "elapsed_seconds": 227.99535954196472,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/config.json"
+    },
+    {
+      "symbol": "ZEC",
+      "cached": false,
+      "elapsed_seconds": 179.78032308409456,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/config.json"
+    }
+  ],
+  "venues": {
+    "BTC": "OKX",
+    "ETH": "OKX",
+    "PEPE": "OKX",
+    "ZEC": "Binance"
+  },
+  "entry_minutes": 5,
+  "management_minutes": 15,
+  "baseline_comparison": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v2/summary.csv",
+    "bytes": 11309,
+    "mtime_ns": 1792484632154331014
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Independent overlapping R, not account returns. Frozen 20bp entry-notional cost; no funding/spread/latency. Nominal weekly inference, no parameter selection. Historical MFE excludes stop-hit bars. Segment-end marks reported explicitly."
+}

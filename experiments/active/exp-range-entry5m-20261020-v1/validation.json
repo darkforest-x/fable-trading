@@ -1,0 +1,197 @@
+{
+  "source_commit": "f3b7a69c9978f262bce9170333e554035049e81e",
+  "tests_passed": 6,
+  "coins": [
+    {
+      "symbol": "BTC",
+      "signals": 5169,
+      "controls": 5169,
+      "off_quarter_entries": 3464,
+      "vector_watch_and_matching": "passed"
+    },
+    {
+      "symbol": "ETH",
+      "signals": 4101,
+      "controls": 4101,
+      "off_quarter_entries": 2769,
+      "vector_watch_and_matching": "passed"
+    },
+    {
+      "symbol": "PEPE",
+      "signals": 4574,
+      "controls": 4574,
+      "off_quarter_entries": 3096,
+      "vector_watch_and_matching": "passed"
+    },
+    {
+      "symbol": "ZEC",
+      "signals": 4415,
+      "controls": 4415,
+      "off_quarter_entries": 3007,
+      "vector_watch_and_matching": "passed"
+    }
+  ],
+  "runs": [
+    {
+      "symbol": "BTC",
+      "policy": "baseline",
+      "positions": 10338,
+      "fills": 20676,
+      "armed": 1476,
+      "breakeven_triggered": 0,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 85.08415554265815,
+      "signal_median_stop_pct": 0.140850048599447,
+      "max_mfe": {
+        "trade_id": "signal-4943",
+        "entry_time": "2026-08-19 08:15:00+00:00",
+        "peak_r": 157.83333333334554,
+        "gross_r": 115.65322580646034,
+        "net_r": 112.20011827957835,
+        "extreme": 70099.2
+      }
+    },
+    {
+      "symbol": "BTC",
+      "policy": "be3",
+      "positions": 10338,
+      "fills": 20676,
+      "armed": 1111,
+      "breakeven_triggered": 2173,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 78.13890501064036,
+      "signal_median_stop_pct": 0.140850048599447,
+      "max_mfe": {
+        "trade_id": "signal-3778",
+        "entry_time": "2026-01-31 03:00:00+00:00",
+        "peak_r": 79.02439024389813,
+        "gross_r": 56.92026266416197,
+        "net_r": 55.34273921200445,
+        "extreme": 75658.0
+      }
+    },
+    {
+      "symbol": "ETH",
+      "policy": "baseline",
+      "positions": 8202,
+      "fills": 16404,
+      "armed": 1093,
+      "breakeven_triggered": 0,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 86.17410387710315,
+      "signal_median_stop_pct": 0.19888206046755982,
+      "max_mfe": {
+        "trade_id": "signal-1100",
+        "entry_time": "2025-02-01 04:45:00+00:00",
+        "peak_r": 325.1973333333333,
+        "gross_r": 166.9626666666667,
+        "net_r": 165.19968000000003,
+        "extreme": 2086.11
+      }
+    },
+    {
+      "symbol": "ETH",
+      "policy": "be3",
+      "positions": 8202,
+      "fills": 16404,
+      "armed": 897,
+      "breakeven_triggered": 1630,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 79.95610826627652,
+      "signal_median_stop_pct": 0.19888206046755982,
+      "max_mfe": {
+        "trade_id": "signal-1109",
+        "entry_time": "2025-02-02 06:25:00+00:00",
+        "peak_r": 185.90957446807428,
+        "gross_r": 80.7003546099244,
+        "net_r": 79.58878014183937,
+        "extreme": 2086.11
+      }
+    },
+    {
+      "symbol": "PEPE",
+      "policy": "baseline",
+      "positions": 9148,
+      "fills": 18296,
+      "armed": 1239,
+      "breakeven_triggered": 0,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 85.9422824661128,
+      "signal_median_stop_pct": 0.3141107149340853,
+      "max_mfe": {
+        "trade_id": "signal-2631",
+        "entry_time": "2025-10-10 06:05:00+00:00",
+        "peak_r": 509.6923076923193,
+        "gross_r": 190.53846153846592,
+        "net_r": 189.09723076923513,
+        "extreme": 2.742e-06
+      }
+    },
+    {
+      "symbol": "PEPE",
+      "policy": "be3",
+      "positions": 9148,
+      "fills": 18296,
+      "armed": 1065,
+      "breakeven_triggered": 1772,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 80.10494097070398,
+      "signal_median_stop_pct": 0.3141107149340853,
+      "max_mfe": {
+        "trade_id": "signal-2632",
+        "entry_time": "2025-10-10 16:45:00+00:00",
+        "peak_r": 132.47826086956258,
+        "gross_r": 42.282608695651334,
+        "net_r": 41.898434782607865,
+        "extreme": 2.742e-06
+      }
+    },
+    {
+      "symbol": "ZEC",
+      "policy": "baseline",
+      "positions": 8830,
+      "fills": 17660,
+      "armed": 1267,
+      "breakeven_triggered": 0,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 85.70781426953567,
+      "signal_median_stop_pct": 0.3275466754012493,
+      "max_mfe": {
+        "trade_id": "signal-3439",
+        "entry_time": "2026-03-14 21:15:00+00:00",
+        "peak_r": 167.72222222224232,
+        "gross_r": 104.83333333334593,
+        "net_r": 102.50755555556788,
+        "extreme": 239.51
+      }
+    },
+    {
+      "symbol": "ZEC",
+      "policy": "be3",
+      "positions": 8830,
+      "fills": 17660,
+      "armed": 1094,
+      "breakeven_triggered": 1786,
+      "financial_identities_stop_window_and_management_clock": "passed",
+      "signal_initial_stop_pct": 79.6149490373726,
+      "signal_median_stop_pct": 0.3275466754012493,
+      "max_mfe": {
+        "trade_id": "signal-3439",
+        "entry_time": "2026-03-14 21:15:00+00:00",
+        "peak_r": 167.72222222224232,
+        "gross_r": 104.83333333334593,
+        "net_r": 102.50755555556788,
+        "extreme": 239.51
+      }
+    }
+  ],
+  "comparison_rows": 64,
+  "generated_at": "2026-10-20T08:46:54.122105+00:00",
+  "status": "passed",
+  "notion_sync": {
+    "status": "verified",
+    "page_id": "3ff88564-79af-817d-8472-dcadfc2be532"
+  },
+  "reproduction_command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_multicoin --config experiments/active/exp-range-entry5m-20261020-v1/config.json",
+  "tests_command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest tests/evaluation/test_range_entry_clock.py tests/evaluation/test_range_multicoin.py -q"
+}

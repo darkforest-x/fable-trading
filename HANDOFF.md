@@ -1,3 +1,11 @@
+## 2026-10-20 — 四币5m入场单变量检验完成
+
+- Owner确认四币仅15m→5m入场，H1观察、5根5m止损＋0.05%缓冲、15m的5R/4ATR管理及3R保本对照保持不变。实验`exp-range-entry5m-20261020-v1`；复用前版连续5m，无下载或参数调优。
+- 2024-08-02至2026-09-22 14UTC；BTC/ETH/PEPE为OKX、ZEC为Binance。原版每笔净R由15m的−0.868/−0.656/−0.365/−0.331变成5m的−1.389/−0.985/−0.702/−0.764；5m笔数5169/4101/4574/4415。原版总净−7179.533/−4041.401/−3212.063/−3371.851R，匹配随机−7232.484/−4537.503/−3540.445/−2743.438R。
+- 3R保本仅ZEC少亏27.252R，其余恶化；四币两方案均不如各自15m每笔净R，24分段全部负，拒绝默认升级。最终毛20R仍有52/53/53/47笔；PEPE最大浮盈509.692R、最终净189.097R，逐K核对；大赢家不代表整体盈利。成本固定20bp，独立累计R不是账户收益。
+- 源f3b7a69c99先提交后运行，6测试、73036原生持仓/146072成交及独立候选/成本/结构止损/管理时钟检查通过。全部跟踪与保本仍只在15m收盘更新；候选ATR前向可见值与退出事件分离。首轮984.63秒，结果缓存；复现入口`python -m yoyo.evaluation.range_multicoin --config experiments/active/exp-range-entry5m-20261020-v1/config.json`使用隔离Nautilus运行时。
+- 逐笔、成交、64行15m对照、周块推断、来源及验收保留实验目录。Notion新版本<https://app.notion.com/p/3ff8856479af817d8472dcadfc2be532>已写入并验证；前轮ZEC同步亦恢复，原失败记录保留并追加成功回执。无Pine、UI或生产资格修改。
+
 ## 2026-10-20 — 区间翻身加入 ZEC 同期补充
 
 - `exp-range-multicoin-20261020-v2`：只新增ZEC，原BTC/ETH/PEPE三组均缓存命中，原48行摘要完全一致。入口`python -m yoyo.evaluation.range_multicoin --config experiments/active/exp-range-multicoin-20261020-v2/config.json`（使用隔离Nautilus运行时）。

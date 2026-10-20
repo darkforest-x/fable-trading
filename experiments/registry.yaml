@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-entry5m-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f3b7a69c99
+    status: rejected
+    question: Does changing only entry confirmation from 15m to 5m improve frozen four-coin range trades?
+    single_variable: Entry timeframe only; H1 watch, five completed 5m stop bars plus0.05percent,15m exit management,baseline and BE3,costs and data retained.
+    artifacts: [range-entry5m-20261020-v1]
+    canonical_report: experiments/active/exp-range-entry5m-20261020-v1/receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: BTC5169 baseline-7179.533R/BE3-7426.406R;ETH4101 -4041.401/-4457.498;PEPE4574 -3212.063/-3469.657;ZEC4415 -3371.851/-3344.599. All8per-trade net results worse than15m;24time segments negative. Baseline random-7232.484/-4537.503/-3540.445/-2743.438R.
+    notes: Common2024-08-02to2026-09-22 14UTC;ZEC Binance,others OKX.73036native positions/146072fills;6tests and independent watch,stop,cost,management-clock,max-MFE checks pass. No future ATR backfill or exit-clock change.984.63s initial run;cached thereafter. Final gross20R52/53/53/47. Independent R not account return;20bp frozen costs. Notion3ff8856479af817d8472dcadfc2be532. Prior ZEC Notion sync recovered and verified in this turn.
   - experiment_id: exp-range-multicoin-20261020-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 3789c275f5
