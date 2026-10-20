@@ -372,9 +372,49 @@ def analyze(config):
     return record
 
 
+def subgroup_inference(config):
+    """Quantify uncertainty of all predefined ratio strata; reuse saved fills."""
+    from yoyo.evaluation.range_management_study import holm
+    cfg = json.loads(config.read_text())
+    work = config.parent
+    result = []
+    for buffer in cfg["buffer_percent"]:
+        for target in cfg["target_r"]:
+            arm = f"b{str(buffer).replace('.', 'p')}_tp{target}"
+            rows = pd.read_csv(work/f"annotated_{arm}.csv.gz")
+            signal = rows[(rows.family=="combined") & (rows.population=="signal")]
+            for ratio in cfg["ratios"]:
+                mask = signal.levels.fillna("").map(
+                    lambda s: any(v.startswith(str(ratio)+":") for v in s.split("|")))
+                for segment in (-1, 0, 1):
+                    selected = signal[mask]
+                    if segment != -1:
+                        selected = selected[selected.segment==segment]
+                    random = rows[(rows.population=="random") & rows.pair_id.isin(selected.pair_id)]
+                    paired = pairs(selected, random)
+                    relative = inference(paired, cfg["seed"])
+                    absolute = inference(paired.assign(net_r_random=0.), cfg["seed"])
+                    result.append(dict(
+                        arm=arm, ratio=ratio, segment=segment, n=len(selected),
+                        signal_net_r=float(paired.net_r.sum()),
+                        random_net_r=float(paired.net_r_random.sum()),
+                        excess_p=relative["p_one_sided"],
+                        excess_r_ci=relative["weekly_bootstrap_total_r_95ci"],
+                        positive_net_p=absolute["p_one_sided"],
+                        net_r_ci=absolute["weekly_bootstrap_total_r_95ci"]))
+    for segment in (-1, 0, 1):
+        group = [r for r in result if r["segment"]==segment]
+        for field in ("excess_p", "positive_net_p"):
+            for row, value in zip(group, holm([r[field] for r in group])):
+                row["holm_48_"+field] = float(value)
+    dump(work/"strata_inference.json", result)
+    return dict(comparisons=len(result), native_replays=0,
+                note="Descriptive ratio strata, not a prespecified ratio-selection rule.")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["prepare", "run", "analyze"])
+    parser.add_argument("action", choices=["prepare", "run", "analyze", "strata"])
     parser.add_argument("--config", type=Path, default=DEFAULT)
     args = parser.parse_args()
     config = args.config.resolve()
@@ -389,8 +429,10 @@ def main():
             tag = str(buffer).replace(".", "p")
             result.append(run(config.parent/f"native_b{tag}.json"))
         result = dict(completed_buffers=len(result))
-    else:
+    elif args.action == "analyze":
         result = analyze(config)
+    else:
+        result = subgroup_inference(config)
     print(json.dumps(result, ensure_ascii=False, indent=2), flush=True)
 
 
