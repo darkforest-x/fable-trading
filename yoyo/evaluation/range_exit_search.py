@@ -303,6 +303,28 @@ def analyze(config):
             if seg==-1:
                 result["signal_vs_random"]["bonferroni_search_p"]=min(
                     1.,result["signal_vs_random"]["p_one_sided"]*len(table[table.segment==-1]))
+                boundary=signal[signal.reason==0]
+                durations=(signal.exit_i-signal.entry_i)*5/60
+                counts=fills[fills.trade_id.isin(signal.trade_id)][["ts_ns","phase"]].copy()
+                counts["change"]=np.where(counts.phase.eq("entry"),1,-1)
+                concurrent=counts.groupby("ts_ns").change.sum().sort_index().cumsum()
+                risk_pct=100*signal.risk/signal.entry
+                result["profile"]=dict(
+                    gross_r=float(signal.gross_r.sum()),fee_r=float(signal.fee_r.sum()),
+                    median_risk_percent=float(risk_pct.median()),
+                    median_fee_r=float(signal.fee_r.median()),
+                    median_holding_hours=float(durations.median()),
+                    p95_holding_hours=float(durations.quantile(.95)),
+                    max_holding_days=float(durations.max()/24),
+                    max_concurrent_signal_positions=int(concurrent.max()),
+                    boundary_n=len(boundary),boundary_net_r=float(boundary.net_r.sum()),
+                    natural_net_r=float(signal.loc[signal.reason!=0,"net_r"].sum()),
+                    boundary_by_time=boundary.groupby("exit_time").net_r.sum().to_dict(),
+                    positive_n=int((signal.net_r>1e-9).sum()),
+                    breakeven_n=int((signal.net_r.abs()<=1e-9).sum()),
+                    top10_profit_r=float(signal.net_r.nlargest(10).sum()),
+                    initial_stop_n=int(signal.reason.eq(1).sum()),
+                    note="Cash drawdown excludes unrealized PnL; natural-only sum is attribution, not an alternative complete backtest. R denominators change with stop width.")
             results.append(result)
     dump(work/"comparisons.json",results)
     full=table[table.segment==-1].sort_values("selection_net_r",ascending=False)
