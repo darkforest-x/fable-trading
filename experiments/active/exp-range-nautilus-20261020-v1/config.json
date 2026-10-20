@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-range-nautilus-20261020-v1",
+  "engine": "nautilus",
+  "symbol": "PEPE",
+  "tick": 1e-9,
+  "data": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_pepe_5m.csv.gz",
+  "entry_candidates": "experiments/active/exp-pepe-range-exits-20261020-v1/results/trades_w5_b0.05_trail5_atr4_cap0.csv",
+  "stop_window_5m": 5,
+  "buffer_percent": 0.05,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "baseline",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": null,
+      "opposite_hour_exit": true,
+      "golden_ledger": "experiments/active/exp-pepe-range-be3-20261020-v1/results/trades_baseline.csv"
+    },
+    {
+      "name": "be3",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": 3,
+      "opposite_hour_exit": true,
+      "golden_ledger": "experiments/active/exp-pepe-range-be3-20261020-v1/results/trades_be3.csv"
+    }
+  ],
+  "output": "experiments/active/exp-range-nautilus-20261020-v1/results"
+}
