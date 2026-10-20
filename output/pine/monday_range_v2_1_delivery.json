@@ -1,0 +1,167 @@
+{
+  "version": "2.1",
+  "completed_at": "2026-10-20T09:06:35.210194+08:00",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_1.pine",
+  "source_commit": "7fa48b64744bf25199017ac68d7ac14c9c67c02d",
+  "source_bases": [
+    "yoyo/evaluation/pine/monday_range_v2_0.pine",
+    "yoyo/evaluation/pine/monday_range_v1_11.pine",
+    "yoyo/evaluation/pine/owner_fanshen_v1_1.pine"
+  ],
+  "feature": {
+    "enabled_by_default": true,
+    "settings_group": "1H 勾叉竖射线",
+    "color": "#F23645",
+    "width": 1,
+    "retained_signals_default": 100,
+    "retained_signals_max": 200,
+    "source_1h_bars_max": 12000,
+    "bullish": "From closed signal hour low upward",
+    "bearish": "From closed signal hour high downward",
+    "anchor": "Original source hour open timestamp with xloc.bar_time; only available after that hour closes",
+    "implementation": "Bounded event accumulation on every 1H source bar; only final state exported across contexts. Confirmed previous snapshot below 1H; completed current or previous snapshot at/above 1H. Availability bounded by min(timenow,time_close)."
+  },
+  "local_validation": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_1.py tests/evaluation/test_monday_range_v2_0.py tests/evaluation/test_monday_range_v1_11.py tests/monitor/test_market_context_okx.py",
+    "passed": 28,
+    "warning": "Existing urllib3 LibreSSL warning",
+    "checks": [
+      "Exact Fanshen source-body parity",
+      "Range inverse parity except explicit version, timeframe guard, object budget and status changes",
+      "Confirmed source and wall-clock guard contracts",
+      "Exhaustive line capacity arithmetic across supported week, ray and Fib counts"
+    ]
+  },
+  "native_validation": {
+    "application": "TradingView Desktop",
+    "script_name": "周一高低点区间＋翻身 · V2.1",
+    "saved_revision": 6,
+    "saved_at": "2026-10-20T09:01:38+08:00",
+    "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+    "symbol": "OKX:ETHUSDT.P",
+    "final_timeframe": "1H",
+    "compile_and_runtime": "Final source saved and chart updated; no compile/runtime error observed. Test fixture removed from delivered revision.",
+    "fixture": "H1_NATIVE_CHECKS_PASS observed for production accumulator; multiple events within a coarse bar, anchors/directions/order/retention/availability checked.",
+    "parity": {
+      "1h": {
+        "oldest": 1775973600000,
+        "newest": 1792375200000,
+        "through": 1792454400000,
+        "weightedTime": 150411649740,
+        "weightedPrice": 1124794215,
+        "weightedSide": -870,
+        "count": 100
+      },
+      "5m": {
+        "oldest": 1775973600000,
+        "newest": 1792375200000,
+        "through": 1792454400000,
+        "weightedTime": 150411649740,
+        "weightedPrice": 1124794215,
+        "weightedSide": -870,
+        "count": 100
+      },
+      "4h": {
+        "oldest": 1775973600000,
+        "newest": 1792375200000,
+        "through": 1792454400000,
+        "weightedTime": 150411649740,
+        "weightedPrice": 1124794215,
+        "weightedSide": -870,
+        "count": 100
+      },
+      "1d": {
+        "oldest": 1775973600000,
+        "newest": 1792375200000,
+        "through": 1792454400000,
+        "weightedTime": 150411649740,
+        "weightedPrice": 1124794215,
+        "weightedSide": -870,
+        "count": 100
+      },
+      "1w": {
+        "oldest": 1775973600000,
+        "newest": 1792375200000,
+        "through": 1792454400000,
+        "weightedTime": 150411649740,
+        "weightedPrice": 1124794215,
+        "weightedSide": -870,
+        "count": 100
+      }
+    },
+    "parity_note": "5m/1H/4H live rows captured before final min-clock guard; same event buffer/signatures. Final guard validated at initial daily/weekly load before the next hour, with confirmed-through 08:00 instead of scheduled 09:00. Monthly Data Window separately confirmed same event count and oldest/newest/through.",
+    "toggle_off": "All ray Data Window fields empty; original indicator remains.",
+    "capacity_200": {
+      "count": 200,
+      "oldest": 1761606000000,
+      "newest": 1792375200000,
+      "runtime_error": false
+    },
+    "final_defaults_restored": {
+      "enabled": true,
+      "count": 100,
+      "oldest": 1775973600000,
+      "newest": 1792375200000
+    },
+    "key_levels_retained": {
+      "poc": 2422.0,
+      "vah": 2429.55,
+      "val": 2370.54,
+      "prior_week_high": 2578.44,
+      "prior_week_low": 2315.26
+    },
+    "layout_save": "所有更改已保存 observed after restoring 1H, default-on 100, closing editor/data window and deselecting indicator.",
+    "visuals": "Upward/downward rays on main price pane align with closed 1H green checks/red crosses; full Stoch/WVF pane and arrows retained.",
+    "chart_instances": "V2.1 visible. Hidden obsolete V2.0 instance removed; original saved private script/source preserved. Existing hidden V1.11 and SPIKE instances and manual drawings retained.",
+    "temporary_browser_sessions_created": 0,
+    "evidence": [
+      "output/pine/monday_range_v2_1_baseline_ax.txt",
+      "output/pine/monday_range_v2_1_capacity_200.txt",
+      "output/pine/monday_range_v2_1_final.png",
+      "output/pine/monday_range_v2_1_final_ax.txt",
+      "output/pine/monday_range_v2_1_final_values.txt",
+      "output/pine/monday_range_v2_1_native_1d.txt",
+      "output/pine/monday_range_v2_1_native_1h.txt",
+      "output/pine/monday_range_v2_1_native_1mo.txt",
+      "output/pine/monday_range_v2_1_native_1w.txt",
+      "output/pine/monday_range_v2_1_native_4h.txt",
+      "output/pine/monday_range_v2_1_native_5m.txt",
+      "output/pine/monday_range_v2_1_parity.json",
+      "output/pine/monday_range_v2_1_saved_final.txt",
+      "output/pine/monday_range_v2_1_settings.png",
+      "output/pine/monday_range_v2_1_toggle_off.txt",
+      "output/pine/monday_range_v2_1_weekly.png"
+    ]
+  },
+  "resolved_failures": [
+    {
+      "symptom": "RE10139 Memory limits exceeded with full 100-event UDT on every source bar",
+      "fix": "Export snapshot only at last / lastconfirmedhistory; retain bounded accumulator internally."
+    },
+    {
+      "symptom": "Initial native execution could select scheduled future chart close before first live update",
+      "fix": "h1ObservedAt=min(timenow,time_close); final daily/weekly initialization verified."
+    }
+  ],
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "screen_id": "f23f699784844d988e08f8ed96575b5f",
+    "model_requested": "GEMINI_3_8_FLASH",
+    "assets": "docs/design/stitch-20261020-v21-rays/",
+    "scope": "Synthetic visual specimen; private account data not uploaded."
+  },
+  "existing_alerts": "Original fixed-1H server-side alerts unchanged.",
+  "limitations": [
+    "Standard time-based candles only.",
+    "The Monday candle/range engine requires chart timeframe <=1D; on weekly/monthly it is gated while 1H rays, fixed-15m key levels and oscillator remain available.",
+    "History bounded by 12000 source hours and retained signal count; lower available source history can reduce it. Coarse charts visually overlap nearby hourly rays.",
+    "Pine total 500-line budget reserves ray slots and can shorten oldest historical Fib segments at high retention settings.",
+    "Display implementation, not a profitability or combined trading system validation."
+  ],
+  "notion_project": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "learnings": [
+    "docs/learnings/pine-event-buffers-must-export-only-display-state.md"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

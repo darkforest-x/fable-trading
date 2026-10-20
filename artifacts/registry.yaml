@@ -32756,3 +32756,18 @@ artifacts:
     notes: Owner requested rewriting V2.0 on full Monday Range V1.11, preserving POC/VA/nPOC/prior-week plus Fanshen.
       Private script revision 3 saved and chart updated; 24 checks passed, exact source parity, 1H/5m key-level parity,
       main/pane visuals and layout save verified. Earlier V1.8-based delivery archived. No alert or trading-rule changes.
+
+  - artifact_id: monday-range-fanshen-v2-1-20261020-delivery
+    artifact_type: manifest
+    role: versioned_pine_visual_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7fa48b64744bf25199017ac68d7ac14c9c67c02d
+    source_path: output/pine/monday_range_v2_1_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_1_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.1 private script revision 6 saved; default-on closed-1H vertical rays anchored to source timestamps.
+      28 local checks passed; 5m/1H/4H/day/week event parity and monthly display checked, toggle and 200-signal capacity passed.
+      Full V1.11-based V2.0 retained with explicit greater-than-daily Monday-range gate. Source/script preserved, alerts unchanged.
+      Initial memory-limit failure fixed by final-state export; wall-clock guard verified. Stitch provenance and native evidence retained.
