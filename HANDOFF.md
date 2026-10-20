@@ -1,3 +1,9 @@
+## 2026-10-20 · Range 5m ATR management comparison complete
+
+- Experiment `exp-range-management5m-20261020-v1`: 8 native runs, old15m ledgers reused. Primary0.05% net R worsens for all four coins; gross20R205→106. Secondary0.2% BTC full improves26.75R, but all16 coin/buffer comparisons in2025/2026 worsen. No default upgrade.
+- Same H1 watch/5m entries/initial risk/fees; only5m activation/update and actual5mATR14 changed. 18tests,73036positions,146072fills,117bounded scalar checks pass;675.84s native wall. No Pine/live changes.
+- Evidence: `experiments/active/exp-range-management5m-20261020-v1/receipt.json`. Notion `3ff8856479af819c8a12f7502d4e8ade` verified. Source82e2862d9c, analysisa94cb18c09. Independent R,not account return;all24newyearly groups negative.
+
 ## 2026-10-20 — 四币5m参数小范围研究完成，仍未找到净盈利配置
 
 - 实验 `exp-range-5m-params-20261020-v1` 冻结13组单变量，只改5m止损窗口、价格缓冲、启动R或15m跟踪ATR倍数中的一项。复用原候选/随机/行情与20bp成本；2024选择、2025/2026再检验，非未见数据。

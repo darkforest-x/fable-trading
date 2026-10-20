@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-management5m-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 82e2862d9c872cc4564746d417fd1aa75d4f7c10
+    status: rejected
+    question: Does actual5mATR close management improve four-coin5m entries versus15m?
+    single_variable: Management timeframe including activation/update and ATR; separate0.05percent/0.2percent buffer strata. Candidates,stops,risk,fees
+      frozen.
+    artifacts:
+    - range-management5m-20261020-v1
+    canonical_report: experiments/active/exp-range-management5m-20261020-v1/receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: Primary15m/5m netR:BTC-7179.533/-7557.611;ETH-4041.401/-4490.286;PEPE-3212.063/-3386.519;ZEC-3371.851/-3459.861. Matched random5m-7231.717/-4337.427/-3513.279/-2976.279.
+      Gross20R205to106. All24newyearly groups negative;all16later paired deltas negative.
+    notes: 8native runs675.84s,73036positions/146072fills,18tests,117scalar probes. Old15m reused. Secondary0.2percent BTCfull+26.749R but later
+      worse;no significant improvement. Notion3ff8856479af819c8a12f7502d4e8ade verified. No Pine/live changes.
   - experiment_id: exp-range-5m-params-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8609ed6f740749131abee75ad85c04f834483ad2

@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-management5m-20261020-v1
+    artifact_type: manifest
+    role: Native5m versus15m management paired comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 82e2862d9c872cc4564746d417fd1aa75d4f7c10
+    source_path: experiments/active/exp-range-management5m-20261020-v1/receipt.json
+    storage_uri: repo://experiments/active/exp-range-management5m-20261020-v1/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Compact configs,receipts,160summary rows,40paired comparisons and validation tracked. Raw fills/trades local,inventoried by path/size/mtime,no
+      hashes. Old15m outputs read-only. No profitability/account-return claim.
   - artifact_id: range-5m-params-20261020-v1
     artifact_type: manifest
     role: Bounded 5m stop and trailing search with time-ordered selection and native validation
