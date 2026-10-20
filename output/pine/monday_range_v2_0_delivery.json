@@ -1,71 +1,106 @@
 {
   "version": "2.0",
-  "date": "2026-10-20",
+  "revision": "corrected-v111-base",
+  "completed_at": "2026-10-20T08:42:45.928524+08:00",
   "source_path": "yoyo/evaluation/pine/monday_range_v2_0.pine",
-  "source_commit": "ee09f2d01224e7d75c54639f0d66ee5f3fd7eb3e",
+  "source_commit": "bb1342718380e227a385dc823de6226d1f365b43",
   "source_bases": [
-    "yoyo/evaluation/pine/monday_range_v1_8.pine",
+    "yoyo/evaluation/pine/monday_range_v1_11.pine",
     "yoyo/evaluation/pine/owner_fanshen_v1_1.pine"
   ],
-  "scope": "Display composition only; original formulas, parameters, intrabar signals and existing alert conditions preserved.",
+  "correction": "Owner corrected the intended base from V1.8 to V1.11 and explicitly requested rewriting V2.0 without incrementing its display version.",
+  "superseded_delivery": "output/pine/archive_v2_0_v18_superseded/monday_range_v2_0_delivery.json",
   "source_checks": {
     "version": "2.0",
+    "revision": "corrected-v111-base",
     "source_path": "yoyo/evaluation/pine/monday_range_v2_0.pine",
-    "range_source": "yoyo/evaluation/pine/monday_range_v1_8.pine",
+    "range_source": "yoyo/evaluation/pine/monday_range_v1_11.pine",
     "fanshen_source": "yoyo/evaluation/pine/owner_fanshen_v1_1.pine",
     "range_exact_reverse_parity": true,
     "fanshen_exact_reverse_parity": true,
-    "range_main_pane_constructors": 8,
+    "range_main_pane_constructors": 11,
+    "range_main_pane_constructor_counts": {
+      "plotcandle": 1,
+      "line.new": 5,
+      "label.new": 4,
+      "table.new": 1
+    },
     "price_marker_main_pane_plots": 2,
     "namespaced_variables": 30,
-    "total_lines": 246,
-    "stitch_waiver": "Owner explicit current-turn approval: 本次跳过 Stitch，直接完成合并",
-    "native_validation": "passed: TradingView Desktop revision 1 compiled and added; 5m numerical parity and 1H pane/marker/history display inspected"
+    "fixed_15m_requests_preserved": true,
+    "stitch_waiver": "Owner current merge waiver retained",
+    "owner_version_override": "Explicitly rewrite V2.0 using V1.11; no minor rename",
+    "native_validation": "passed: saved revision 3, chart updated, V1.11 key values match on 1H and 5m; main-pane table/levels and oscillator/marks visible",
+    "local_tests": {
+      "command": ".venv/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_0.py tests/evaluation/test_monday_range_v1_11.py tests/monitor/test_market_context_okx.py",
+      "passed": 24,
+      "warnings": [
+        "Existing urllib3 LibreSSL warning; no test failures."
+      ]
+    },
+    "display_precision": {
+      "range": "symbol inherited, as V1.11",
+      "fanshen": "format.price and 2 decimals explicitly on all 10 plots"
+    },
+    "fanshen_exact_reverse_parity_note": "Strip fs_ identifiers and per-plot format/precision moved from the original declaration; the restored body equals V1.1."
   },
   "native_validation": {
     "application": "TradingView Desktop",
     "script_name": "周一高低点区间＋翻身 · V2.0",
-    "saved_revision": 1,
-    "saved_at": "2026-10-20T08:21:47+08:00",
-    "compile_and_add_at": "2026-10-20T08:21:59+08:00",
-    "compiler_console": [
-      "完成。",
-      "已添加到图表。"
-    ],
+    "saved_revision": 3,
+    "saved_at": "2026-10-20T08:40:52+08:00",
     "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
     "symbol": "OKX:ETHUSDT.P",
-    "new_script_private": true,
-    "previous_sources_and_saved_scripts_retained": true,
-    "observations": [
-      "5m: old Fanshen and new V2.0 panes simultaneously displayed equal K, D and WVF values and arrow positions.",
-      "1H: price candles, Monday range rays, current and historical Fib lines remain on the price pane; oscillator scale remains separate.",
-      "1H: green checks below and red crosses above price candles align with the corresponding oscillator arrows.",
-      "Historical Fib labels include 2528.01, 2513.14, 2492.97, 2472.80 and 2457.93; historical range high/low are 2578.44/2407.50 in the captured view.",
-      "Old Monday Range v1.11 chart instance hidden and old Stoch V1.1 chart instance removed to avoid overlap; saved scripts preserved.",
-      "The two previously created fixed-1H close-confirmed check/cross server alerts remained active after the old Stoch chart instance was removed."
+    "compile": "Ctrl+S completed compilation, saved revision 3 and updated the chart; no compile/runtime error observed. New key-level inputs and outputs visible.",
+    "key_level_parity": {
+      "1h": {
+        "exact_displayed_values_match": true,
+        "values": "昨日 POC（15m估算） 2,422.00 昨日 VAH（15m估算） 2,429.55 昨日 VAL（15m估算） 2,370.54 上周高（15m） 2,578.44 上周低（15m） 2,315.26 关键位最后检查时间（Unix ms） 1,792,456,200,000.00"
+      },
+      "5m": {
+        "exact_displayed_values_match": true,
+        "values": "昨日 POC（15m估算） 2,422.00 昨日 VAH（15m估算） 2,429.55 昨日 VAL（15m估算） 2,370.54 上周高（15m） 2,578.44 上周低（15m） 2,315.26 关键位最后检查时间（Unix ms） 1,792,456,200,000.00"
+      }
+    },
+    "visual_observations": [
+      "Status table is on the main pane and reads V2.0 / range base v1.11; yesterday/prior week complete; nPOC count 3.",
+      "POC/VA/nPOC/prior-week lines, historical Monday/Fib and same-bar green checks/red crosses remain on the price pane.",
+      "Full Stoch/WVF oscillator pane expanded; triangle arrows align with price markers.",
+      "Old V1.11 chart instance hidden after parity check; original saved source/script preserved.",
+      "SPIKE visibility left as user set it; no other indicators removed."
     ],
-    "layout_save": "Not verified: the user resumed interacting with TradingView before the final layout-save action. No further chart actions were attempted after repeated user-change guards.",
-    "last_observed_timeframe": "1H",
-    "temporary_browser_sessions_created": 0,
+    "layout_save": "Confirmed 所有更改已保存 after revision 3, at 08:42 Shanghai time.",
+    "final_timeframe": "1H",
     "screenshots": [
-      "output/pine/monday_range_v2_0_compile.png",
-      "output/pine/monday_range_v2_0_1h.png"
+      "output/pine/monday_range_v2_0_v111_saved.png",
+      "output/pine/monday_range_v2_0_v111_final.png",
+      "output/pine/monday_range_v2_0_v111_saved_revision3.png",
+      "output/pine/monday_range_v2_0_v111_revision3_final.png"
     ],
-    "parity_ax": "output/pine/monday_range_v2_0_parity_ax.txt"
-  },
-  "existing_1h_alerts": {
-    "names": [
-      "ETH 1H 翻身绿勾 ✓｜收盘确认",
-      "ETH 1H 翻身红叉 ×｜收盘确认"
+    "evidence": [
+      "output/pine/monday_range_v2_0_v111_parity_1h.txt",
+      "output/pine/monday_range_v2_0_v111_parity_5m.txt",
+      "output/pine/monday_range_v2_0_v111_final_ax.txt",
+      "output/pine/monday_range_v2_0_v111_revision3_final_ax.txt"
     ],
-    "snapshot_source": "Fanshen V1.1 main-chart plotchar values crossing above 0.5; one alert per bar close",
-    "expires_at": "2026-12-19T01:44:00+08:00",
-    "note": "Existing server alerts retained, not silently recreated from V2.0 alertcondition. Original long alertcondition includes WVF green, while the green marker does not."
+    "temporary_browser_sessions_created": 0,
+    "key_level_parity_note": "Parity captures are from revision 2. Revision 3 only moves two-decimal formatting from the declaration to the 10 Fanshen plots; all formulas and key plots remain unchanged."
   },
+  "existing_1h_alerts": "No alert configurations were changed. Previously created V1.1 fixed-1H marker snapshots retained.",
+  "limitations": [
+    "Key-level parity was observed on current OKX ETH 1H/5m only, not all symbols and dates.",
+    "POC/VA remain V1.11 15m OHLCV estimates, not native tick-volume profiles.",
+    "This is an indicator composition; no new profitability or combined-trading validation."
+  ],
   "official_documentation": [
+    "https://www.tradingview.com/pine-script-docs/visuals/tables/",
     "https://www.tradingview.com/pine-script-docs/visuals/overview/",
-    "https://www.tradingview.com/pine-script-docs/language/declaration-statements/"
+    "https://www.tradingview.com/pine-script-docs/visuals/plots/"
   ],
   "training_eligible": false,
-  "production_eligible": false
+  "production_eligible": false,
+  "learnings": [
+    "docs/learnings/indicator-merge-base-must-cover-current-features.md",
+    "docs/learnings/pine-merged-plots-need-separate-precision.md"
+  ]
 }

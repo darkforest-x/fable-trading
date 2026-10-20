@@ -1,14 +1,34 @@
 {
   "version": "2.0",
+  "revision": "corrected-v111-base",
   "source_path": "yoyo/evaluation/pine/monday_range_v2_0.pine",
-  "range_source": "yoyo/evaluation/pine/monday_range_v1_8.pine",
+  "range_source": "yoyo/evaluation/pine/monday_range_v1_11.pine",
   "fanshen_source": "yoyo/evaluation/pine/owner_fanshen_v1_1.pine",
   "range_exact_reverse_parity": true,
   "fanshen_exact_reverse_parity": true,
-  "range_main_pane_constructors": 8,
+  "range_main_pane_constructors": 11,
+  "range_main_pane_constructor_counts": {
+    "plotcandle": 1,
+    "line.new": 5,
+    "label.new": 4,
+    "table.new": 1
+  },
   "price_marker_main_pane_plots": 2,
   "namespaced_variables": 30,
-  "total_lines": 246,
-  "stitch_waiver": "Owner explicit current-turn approval: 本次跳过 Stitch，直接完成合并",
-  "native_validation": "passed: TradingView Desktop revision 1 compiled and added; 5m numerical parity and 1H pane/marker/history display inspected"
+  "fixed_15m_requests_preserved": true,
+  "stitch_waiver": "Owner current merge waiver retained",
+  "owner_version_override": "Explicitly rewrite V2.0 using V1.11; no minor rename",
+  "native_validation": "passed: saved revision 3, chart updated, V1.11 key values match on 1H and 5m; main-pane table/levels and oscillator/marks visible",
+  "local_tests": {
+    "command": ".venv/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_0.py tests/evaluation/test_monday_range_v1_11.py tests/monitor/test_market_context_okx.py",
+    "passed": 24,
+    "warnings": [
+      "Existing urllib3 LibreSSL warning; no test failures."
+    ]
+  },
+  "display_precision": {
+    "range": "symbol inherited, as V1.11",
+    "fanshen": "format.price and 2 decimals explicitly on all 10 plots"
+  },
+  "fanshen_exact_reverse_parity_note": "Strip fs_ identifiers and per-plot format/precision moved from the original declaration; the restored body equals V1.1."
 }

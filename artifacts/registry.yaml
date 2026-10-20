@@ -32734,11 +32734,25 @@ artifacts:
     role: versioned_pine_visual_delivery
     source_repo: darkforest-x/fable-trading
     source_commit: ee09f2d01224e7d75c54639f0d66ee5f3fd7eb3e
+    source_path: output/pine/archive_v2_0_v18_superseded/monday_range_v2_0_delivery.json
+    storage_uri: repo://output/pine/archive_v2_0_v18_superseded/monday_range_v2_0_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Superseded after owner corrected the base to V1.11; prior evidence archived. Monday Range v1.8 plus Fanshen v1.1 saved as private V2.0 revision 1. Native compile and add passed;
+      exact reverse source parity, 5m numerical parity and 1H price/pane/history/marker display checked.
+      Old sources/scripts and existing 1H close-confirmed alerts retained. Final layout save unverified after user interaction.
+
+  - artifact_id: monday-range-fanshen-v2-0-v111-20261020-delivery
+    artifact_type: manifest
+    role: corrected_versioned_pine_visual_delivery
+    source_repo: darkforest-x/fable-trading
+    source_commit: bb1342718380e227a385dc823de6226d1f365b43
     source_path: output/pine/monday_range_v2_0_delivery.json
     storage_uri: repo://output/pine/monday_range_v2_0_delivery.json
     holdout_status: unknown
     training_eligible: false
     production_eligible: false
-    notes: Monday Range v1.8 plus Fanshen v1.1 saved as private V2.0 revision 1. Native compile and add passed;
-      exact reverse source parity, 5m numerical parity and 1H price/pane/history/marker display checked.
-      Old sources/scripts and existing 1H close-confirmed alerts retained. Final layout save unverified after user interaction.
+    notes: Owner requested rewriting V2.0 on full Monday Range V1.11, preserving POC/VA/nPOC/prior-week plus Fanshen.
+      Private script revision 3 saved and chart updated; 24 checks passed, exact source parity, 1H/5m key-level parity,
+      main/pane visuals and layout save verified. Earlier V1.8-based delivery archived. No alert or trading-rule changes.
