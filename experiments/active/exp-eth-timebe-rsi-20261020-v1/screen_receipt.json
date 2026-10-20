@@ -1,0 +1,100 @@
+{
+  "context": {
+    "identity": {
+      "schema": 1,
+      "inputs": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+          "bytes": 111173334,
+          "mtime_ns": 1790086886000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+          "bytes": 2516418,
+          "mtime_ns": 1790087679000000000
+        }
+      ],
+      "original_inputs": [
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+          "bytes": 3008152,
+          "mtime_ns": 1792485361528187312
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+          "bytes": 894724,
+          "mtime_ns": 1792493635632797072
+        }
+      ],
+      "indicator_code": [
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/parabolic_rsi_sar.py",
+          "bytes": 5824,
+          "mtime_ns": 1789569254368184940
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py",
+          "bytes": 5224,
+          "mtime_ns": 1789154154951106152
+        }
+      ]
+    },
+    "minute_rows": 1126920,
+    "original_5m_rows": 225384,
+    "original_ohlc_parity": true,
+    "original_feature_cache_hit": true,
+    "entries": 7676,
+    "first_close": "2024-08-01 00:01:00+00:00",
+    "last_close": "2026-09-22 14:00:00+00:00",
+    "rsi_counts": {
+      "3": {
+        "strong_up": 3626,
+        "strong_down": 3459
+      },
+      "5": {
+        "strong_up": 2155,
+        "strong_down": 2114
+      }
+    },
+    "source_commit": "54bcdfa794287172476a356ce9b68971fd630d3e"
+  },
+  "elapsed_seconds": 18.109838333097287,
+  "arms": 6,
+  "paths": 46056,
+  "cached_native_5m_baseline_parity": {
+    "rows": 7676,
+    "compared_fields": [
+      "entry_i",
+      "side",
+      "end_i",
+      "exit_i",
+      "reason",
+      "arm_i",
+      "be_trigger_i",
+      "be_effective_i",
+      "stop_kind",
+      "deferred_closes",
+      "steps",
+      "entry",
+      "stop",
+      "risk",
+      "exit_price",
+      "protection",
+      "be_price",
+      "peak_r",
+      "gross_r",
+      "fee_r",
+      "net_r",
+      "net_notional_bp",
+      "exit_time"
+    ],
+    "native_fee_checks": 7676,
+    "status": "passed"
+  },
+  "old_execution_comparison": {
+    "signal_net_r_5m": -3747.0889865451036,
+    "signal_net_r_1m": -3747.0889865451163,
+    "different_exit_prices": 0
+  },
+  "source_commit": "54bcdfa794287172476a356ce9b68971fd630d3e"
+}

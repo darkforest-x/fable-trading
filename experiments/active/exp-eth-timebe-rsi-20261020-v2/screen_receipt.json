@@ -1,0 +1,73 @@
+{
+  "reuse_receipts": {
+    "baseline": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/baseline/receipt.json",
+    "time25": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25/receipt.json",
+    "rsi3": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi3/receipt.json",
+    "rsi5": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi5/receipt.json",
+    "time25_rsi3": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi3/receipt.json",
+    "time25_rsi5": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi5/receipt.json"
+  },
+  "new_arms": 2,
+  "paths_per_arm": 7676,
+  "context": {
+    "identity": {
+      "schema": 1,
+      "inputs": [
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+          "bytes": 111173334,
+          "mtime_ns": 1790086886000000000
+        },
+        {
+          "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+          "bytes": 2516418,
+          "mtime_ns": 1790087679000000000
+        }
+      ],
+      "original_inputs": [
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+          "bytes": 3008152,
+          "mtime_ns": 1792485361528187312
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+          "bytes": 894724,
+          "mtime_ns": 1792493635632797072
+        }
+      ],
+      "indicator_code": [
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/parabolic_rsi_sar.py",
+          "bytes": 5824,
+          "mtime_ns": 1789569254368184940
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py",
+          "bytes": 5224,
+          "mtime_ns": 1789154154951106152
+        }
+      ]
+    },
+    "minute_rows": 1126920,
+    "original_5m_rows": 225384,
+    "original_ohlc_parity": true,
+    "original_feature_cache_hit": true,
+    "entries": 7676,
+    "first_close": "2024-08-01 00:01:00+00:00",
+    "last_close": "2026-09-22 14:00:00+00:00",
+    "rsi_counts": {
+      "3": {
+        "strong_up": 3626,
+        "strong_down": 3459
+      },
+      "5": {
+        "strong_up": 2155,
+        "strong_down": 2114
+      }
+    },
+    "source_commit": "54bcdfa794287172476a356ce9b68971fd630d3e"
+  },
+  "posthoc_owner_request": true,
+  "source_commit": "b485d4868349d1fa9aa87c88e31e359531efb357"
+}

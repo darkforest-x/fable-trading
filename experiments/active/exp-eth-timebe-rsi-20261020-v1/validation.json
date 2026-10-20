@@ -1,0 +1,15 @@
+{
+  "scoped_registry": "passed",
+  "experiments": [
+    "exp-eth-timebe-rsi-20261020-v1",
+    "exp-eth-timebe-rsi-20261020-v2"
+  ],
+  "artifacts": [
+    "eth-timebe-rsi-20261020-v1",
+    "eth-timebe-rsi-20261020-v2"
+  ],
+  "global_registry": "spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'",
+  "global_failure_preexisting": true,
+  "tests_passed": 139,
+  "tests_command": "python -m pytest tests/evaluation/test_range_rsi_scaleout.py tests/evaluation/test_parabolic_rsi_sar.py tests/evaluation/test_range_exit_search.py tests/evaluation/test_range_partial_close.py tests/evaluation/test_nautilus_independent.py tests/boundaries/test_layer_imports.py -q"
+}

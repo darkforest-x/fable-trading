@@ -18,6 +18,30 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-timebe-rsi-20261020-v2
+    artifact_type: manifest
+    role: Second opposite RSI diamond scaleout fills and paired first-diamond comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 39ebf73734936d1d00ddee561f92c872ba974bf5
+    generator_commit: b485d48683
+    source_path: experiments/active/exp-eth-timebe-rsi-20261020-v2/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-timebe-rsi-20261020-v2/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Six v1 arms reused; two new arms15352native positions35806fills allparity;139tests. Both improve first-diamond sample net but underperform original;5m second total20R39 contains35original+4new. No account return or positive-edge claim.
+  - artifact_id: eth-timebe-rsi-20261020-v1
+    artifact_type: manifest
+    role: Timed fee breakeven and original-size RSI fifth reductions with native accounting
+    source_repo: darkforest-x/fable-trading
+    source_commit: 947fe869b1
+    generator_commit: 54bcdfa794287172476a356ce9b68971fd630d3e
+    source_path: experiments/active/exp-eth-timebe-rsi-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-timebe-rsi-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Six arms46056native positions101973fills allparity;135tests. Same-source1126920one-minute bars reconstruct frozen5m exactly;baseline exits unchanged. Allfive new exits worse. Fee-BE tick rounding inflates win counts with near-zero outcomes. Raw local artifacts inventoried without hashes.
   - artifact_id: eth-exit-search-20261020-v1
     artifact_type: manifest
     role: ETH fixed-risk exit optimization and boundary-attributed native parity evidence

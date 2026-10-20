@@ -1,3 +1,11 @@
+## 2026-10-20 ETH timed BE / RSI scaleouts — completed, no default promotion
+
+- Owner Notion ideas tested in `exp-eth-timebe-rsi-20261020-v1`: frozen 3838 ETH signals + 3838 matched controls; same-source 1m execution. All five alternatives worsen full net R: original -3747.09; time25 -4325.56; first RSI3 -4053.96; first RSI5 -3898.26; combined3 -4269.69; combined5 -4306.25. Time BE waits after fifth 5m close until fee protection is feasible; only profitable opposite strong diamonds reduce original fifths.
+- Owner follow-up `exp-eth-timebe-rsi-20261020-v2` skips the first opposite confirmed diamond before the profit gate. Second RSI3 -3954.09 and second RSI5 -3849.59 improve first-diamond sample net by 99.87/48.68R, still worse than original by 207.00/102.50R. Second5m has 39 total gross20R outcomes, but only35 of the original45 retained plus4 new; old tail gross retention75.3percent. Matched random -3796.05/-3648.74R; no proven edge. No Pine/default/live changes.
+- Reused six v1 arms for follow-up, two new native arms only. V1 46056 positions/101973 fills/431.48s; V2 new15352/35806/229.81s; all native parity,139 tests. Core builder54bcdfa794, extensionb485d48683, analysis39ebf73734. Use cached artifacts; run modules `range_rsi_scaleout` / `range_rsi_second`. Delivery receipts inventory raw local data without hashes.
+- Win-rate trap: time BE strict positive rate34.47percent includes1196 trades below0.01R; total net is worse. Independent R is not account PnL;20bp unchanged, no funding/capacity/slippage. Known historical data ends2026-09-22, October19 example not replayed. Yearly boundaries unchanged.
+- Notion V1 https://app.notion.com/p/3ff8856479af8130b5bfe8894293287d and V2 https://app.notion.com/p/3ff8856479af8113b997da8c13d5d655 readback verified and linked from owner's ideas. Scoped registries pass; global registry still has pre-existing missing source_commit on spike-v8-total2-1h-native-20260914-delivery.
+
 ## 2026-10-20 ETH fixed-risk exit search — completed, no default promotion
 
 - `exp-eth-exit-search-20261020-v1`:3838ETH15m-watch5m signals plus3838matched controls;20bp unchanged. Owner selected fixed risk and cumulative netR.3520planned configurations allnegative,best−533.75R;39separate boundary probes(37new) highest+441.97R versusmatchedrandom+470.46R,p=.537. No configuration positive inall2024/2025/2026 segments.

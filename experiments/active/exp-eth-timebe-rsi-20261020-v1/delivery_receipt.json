@@ -1,0 +1,572 @@
+{
+  "experiment_id": "exp-eth-timebe-rsi-20261020-v1",
+  "generated_at": "2026-10-20T14:07:58.274481+00:00",
+  "decision": "Reject all five new exit policies as improvements over the frozen baseline",
+  "builder_commit": "54bcdfa794287172476a356ce9b68971fd630d3e",
+  "analysis_commit": "947fe869b1",
+  "source_before_execution": true,
+  "engine": "NautilusTrader1.231.0",
+  "python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python",
+  "signals": 3838,
+  "matched_controls": 3838,
+  "minute_bars": 1126920,
+  "native_positions": 46056,
+  "native_fills": 101973,
+  "native_seconds": 431.47799550008494,
+  "all_native_parity": true,
+  "tests_passed": 135,
+  "source_inputs": {
+    "schema": 1,
+    "inputs": [
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+        "bytes": 111173334,
+        "mtime_ns": 1790086886000000000
+      },
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv",
+        "bytes": 2516418,
+        "mtime_ns": 1790087679000000000
+      }
+    ],
+    "original_inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+        "bytes": 3008152,
+        "mtime_ns": 1792485361528187312
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+        "bytes": 894724,
+        "mtime_ns": 1792493635632797072
+      }
+    ],
+    "indicator_code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/parabolic_rsi_sar.py",
+        "bytes": 5824,
+        "mtime_ns": 1789569254368184940
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/spike_v6_bb_squeeze.py",
+        "bytes": 5224,
+        "mtime_ns": 1789154154951106152
+      }
+    ]
+  },
+  "full_summary": [
+    {
+      "arm": "baseline",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -3747.088986545104,
+      "gross_r": 543.312159465954,
+      "mean_net_r": -0.9763129198918976,
+      "win_rate": 0.0956227201667535,
+      "profit_factor": 0.4891638901746746,
+      "gross_10r": 116,
+      "gross_20r": 45,
+      "max_peak_r": 173.5275080906195,
+      "max_gross_r": 106.75757575757248,
+      "boundary_n": 2,
+      "natural_net_r": -3751.6807722364674,
+      "fixed_1000_notional_pnl": -6442.08188867411,
+      "mean_net_bp": -16.784997104414042,
+      "cash_r_drawdown": 3748.931088756686,
+      "near_zero_n": 1,
+      "tiny_positive_n": 1,
+      "net_above_0p1r_rate": 0.0948410630536737,
+      "rsi_reduced_n": 0,
+      "rsi_fully_exited_n": 0,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "baseline",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3468.641787588722,
+      "gross_r": 287.18458940457344,
+      "mean_net_r": -0.9037628419981036,
+      "win_rate": 0.1021365294424179,
+      "profit_factor": 0.4947409601335271,
+      "gross_10r": 98,
+      "gross_20r": 35,
+      "max_peak_r": 215.25653594771623,
+      "max_gross_r": 118.29901960784528,
+      "boundary_n": 2,
+      "natural_net_r": -3470.9893566122237,
+      "fixed_1000_notional_pnl": -6884.914827564915,
+      "mean_net_bp": -17.938808826380704,
+      "cash_r_drawdown": 3620.4600707370937,
+      "near_zero_n": 0,
+      "tiny_positive_n": 0,
+      "net_above_0p1r_rate": 0.1018759770713913,
+      "rsi_reduced_n": 0,
+      "rsi_fully_exited_n": 0,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "time25",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -4325.560969572805,
+      "gross_r": -35.159823561747665,
+      "mean_net_r": -1.127035166642211,
+      "win_rate": 0.3447107868681605,
+      "profit_factor": 0.2091555153502618,
+      "gross_10r": 35,
+      "gross_20r": 11,
+      "max_peak_r": 149.99724517905878,
+      "max_gross_r": 106.75757575757248,
+      "boundary_n": 1,
+      "natural_net_r": -4328.477516770446,
+      "fixed_1000_notional_pnl": -7955.169432142776,
+      "mean_net_bp": -20.72738257462943,
+      "cash_r_drawdown": 4325.872198975565,
+      "near_zero_n": 1215,
+      "tiny_positive_n": 1196,
+      "net_above_0p1r_rate": 0.0330901511203751,
+      "rsi_reduced_n": 0,
+      "rsi_fully_exited_n": 0,
+      "time_be_eligible_n": 1875,
+      "time_be_effective_n": 1342
+    },
+    {
+      "arm": "time25",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3640.1295704013983,
+      "gross_r": 115.69680659189676,
+      "mean_net_r": -0.9484443904120372,
+      "win_rate": 0.4051589369463262,
+      "profit_factor": 0.2499446919552171,
+      "gross_10r": 37,
+      "gross_20r": 15,
+      "max_peak_r": 76.79850746267812,
+      "max_gross_r": 69.6791044776043,
+      "boundary_n": 0,
+      "natural_net_r": -3640.1295704013983,
+      "fixed_1000_notional_pnl": -7030.204955501063,
+      "mean_net_bp": -18.317365699585885,
+      "cash_r_drawdown": 3675.188260569634,
+      "near_zero_n": 1439,
+      "tiny_positive_n": 1424,
+      "net_above_0p1r_rate": 0.0341323606044815,
+      "rsi_reduced_n": 0,
+      "rsi_fully_exited_n": 0,
+      "time_be_eligible_n": 2380,
+      "time_be_effective_n": 1570
+    },
+    {
+      "arm": "rsi3",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -4053.9646146068753,
+      "gross_r": 236.4365314041824,
+      "mean_net_r": -1.056270092393662,
+      "win_rate": 0.1227201667535174,
+      "profit_factor": 0.4183824795839672,
+      "gross_10r": 104,
+      "gross_20r": 13,
+      "max_peak_r": 126.55792682927816,
+      "max_gross_r": 46.937195121954915,
+      "boundary_n": 2,
+      "natural_net_r": -4059.291486968891,
+      "fixed_1000_notional_pnl": -7090.6689683642235,
+      "mean_net_bp": -18.474906118718664,
+      "cash_r_drawdown": 4054.701455491498,
+      "near_zero_n": 1,
+      "tiny_positive_n": 0,
+      "net_above_0p1r_rate": 0.121156852527358,
+      "rsi_reduced_n": 684,
+      "rsi_fully_exited_n": 173,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "rsi3",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3839.574729340707,
+      "gross_r": -83.74835234741153,
+      "mean_net_r": -1.0004102994634465,
+      "win_rate": 0.1406982803543512,
+      "profit_factor": 0.3938626020360407,
+      "gross_10r": 64,
+      "gross_20r": 14,
+      "max_peak_r": 94.0745098039148,
+      "max_gross_r": 51.09960784313361,
+      "boundary_n": 0,
+      "natural_net_r": -3839.574729340707,
+      "fixed_1000_notional_pnl": -8144.898228434586,
+      "mean_net_bp": -21.221725451887924,
+      "cash_r_drawdown": 3839.574729340693,
+      "near_zero_n": 3,
+      "tiny_positive_n": 0,
+      "net_above_0p1r_rate": 0.1391349661281917,
+      "rsi_reduced_n": 985,
+      "rsi_fully_exited_n": 273,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "rsi5",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -3898.264692524736,
+      "gross_r": 392.1364534863214,
+      "mean_net_r": -1.0157021085265077,
+      "win_rate": 0.1125586242834809,
+      "profit_factor": 0.4513972748345866,
+      "gross_10r": 116,
+      "gross_20r": 24,
+      "max_peak_r": 127.4077134986187,
+      "max_gross_r": 58.54415954415592,
+      "boundary_n": 2,
+      "natural_net_r": -3903.000589707477,
+      "fixed_1000_notional_pnl": -6809.36265126218,
+      "mean_net_bp": -17.741955839661752,
+      "cash_r_drawdown": 3899.3699538516776,
+      "near_zero_n": 4,
+      "tiny_positive_n": 1,
+      "net_above_0p1r_rate": 0.1107347576862949,
+      "rsi_reduced_n": 578,
+      "rsi_fully_exited_n": 70,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "rsi5",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3705.065411881146,
+      "gross_r": 50.76096511215036,
+      "mean_net_r": -0.965363577874191,
+      "win_rate": 0.1268890046899426,
+      "profit_factor": 0.4306498271644009,
+      "gross_10r": 77,
+      "gross_20r": 23,
+      "max_peak_r": 112.00000000001413,
+      "max_gross_r": 65.90505050505502,
+      "boundary_n": 0,
+      "natural_net_r": -3705.065411881146,
+      "fixed_1000_notional_pnl": -7659.9083261471005,
+      "mean_net_bp": -19.95807276223841,
+      "cash_r_drawdown": 3717.790493844716,
+      "near_zero_n": 1,
+      "tiny_positive_n": 0,
+      "net_above_0p1r_rate": 0.12480458572173,
+      "rsi_reduced_n": 828,
+      "rsi_fully_exited_n": 154,
+      "time_be_eligible_n": 0,
+      "time_be_effective_n": 0
+    },
+    {
+      "arm": "time25_rsi3",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -4269.686421096068,
+      "gross_r": 20.71472491498848,
+      "mean_net_r": -1.1124769205565577,
+      "win_rate": 0.3449713392391871,
+      "profit_factor": 0.2193710871121564,
+      "gross_10r": 41,
+      "gross_20r": 6,
+      "max_peak_r": 59.9242819843354,
+      "max_gross_r": 38.98441998306687,
+      "boundary_n": 1,
+      "natural_net_r": -4272.60296829371,
+      "fixed_1000_notional_pnl": -7698.6755869667,
+      "mean_net_bp": -20.05908177948593,
+      "cash_r_drawdown": 4269.997650498822,
+      "near_zero_n": 1049,
+      "tiny_positive_n": 1031,
+      "net_above_0p1r_rate": 0.0752996352266805,
+      "rsi_reduced_n": 290,
+      "rsi_fully_exited_n": 39,
+      "time_be_eligible_n": 1875,
+      "time_be_effective_n": 1342
+    },
+    {
+      "arm": "time25_rsi3",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3750.4133250485056,
+      "gross_r": 5.413051944789913,
+      "mean_net_r": -0.977179084171054,
+      "win_rate": 0.4054194893173528,
+      "profit_factor": 0.2270689367097804,
+      "gross_10r": 32,
+      "gross_20r": 7,
+      "max_peak_r": 76.79850746267812,
+      "max_gross_r": 40.987050359709265,
+      "boundary_n": 0,
+      "natural_net_r": -3750.4133250485056,
+      "fixed_1000_notional_pnl": -7625.779677189069,
+      "mean_net_bp": -19.869149758178917,
+      "cash_r_drawdown": 3750.7388622554754,
+      "near_zero_n": 1102,
+      "tiny_positive_n": 1088,
+      "net_above_0p1r_rate": 0.1021365294424179,
+      "rsi_reduced_n": 473,
+      "rsi_fully_exited_n": 69,
+      "time_be_eligible_n": 2380,
+      "time_be_effective_n": 1570
+    },
+    {
+      "arm": "time25_rsi5",
+      "segment": -1,
+      "population": "signal",
+      "n": 3838,
+      "net_r": -4306.248629101288,
+      "gross_r": -15.847483090231137,
+      "mean_net_r": -1.1220032905422843,
+      "win_rate": 0.3449713392391871,
+      "profit_factor": 0.2126864002586035,
+      "gross_10r": 38,
+      "gross_20r": 9,
+      "max_peak_r": 127.4077134986187,
+      "max_gross_r": 48.46198137172098,
+      "boundary_n": 1,
+      "natural_net_r": -4308.951606977395,
+      "fixed_1000_notional_pnl": -7836.583232112418,
+      "mean_net_bp": -20.418403418740017,
+      "cash_r_drawdown": 4306.559858504047,
+      "near_zero_n": 1123,
+      "tiny_positive_n": 1105,
+      "net_above_0p1r_rate": 0.0552371026576341,
+      "rsi_reduced_n": 214,
+      "rsi_fully_exited_n": 15,
+      "time_be_eligible_n": 1875,
+      "time_be_effective_n": 1342
+    },
+    {
+      "arm": "time25_rsi5",
+      "segment": -1,
+      "population": "random",
+      "n": 3838,
+      "net_r": -3719.244686620508,
+      "gross_r": 36.58169037278731,
+      "mean_net_r": -0.9690580215269692,
+      "win_rate": 0.4054194893173528,
+      "profit_factor": 0.233642878594167,
+      "gross_10r": 33,
+      "gross_20r": 10,
+      "max_peak_r": 76.79850746267812,
+      "max_gross_r": 47.64473684210588,
+      "boundary_n": 0,
+      "natural_net_r": -3719.244686620508,
+      "fixed_1000_notional_pnl": -7339.4904904080195,
+      "mean_net_bp": -19.12321649402819,
+      "cash_r_drawdown": 3719.252216058335,
+      "near_zero_n": 1225,
+      "tiny_positive_n": 1211,
+      "net_above_0p1r_rate": 0.0794684731631057,
+      "rsi_reduced_n": 347,
+      "rsi_fully_exited_n": 34,
+      "time_be_eligible_n": 2380,
+      "time_be_effective_n": 1570
+    }
+  ],
+  "analysis": {
+    "development_2024": "rsi5",
+    "descriptive_full": "baseline",
+    "arms": 6,
+    "no_new_holdout_claim": true,
+    "diagnostic_only_thresholds": {
+      "near_zero_r": 0.01,
+      "material_positive_r": 0.1
+    },
+    "source_commit": "947fe869b1a6b95ce36e653c8eb7d6be4656eca5",
+    "production_eligible": false,
+    "training_eligible": false,
+    "no_pine_change": true
+  },
+  "local_artifacts": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/config.json",
+      "bytes": 1957,
+      "mtime_ns": 1792503678111771870
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/.cache/features.json",
+      "bytes": 1798,
+      "mtime_ns": 1792504163903736267
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/.cache/features.npz",
+      "bytes": 15718884,
+      "mtime_ns": 1792504163838676042
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/.cache/entries.csv",
+      "bytes": 1064373,
+      "mtime_ns": 1792504158070596847
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/baseline/fills.csv",
+      "bytes": 1639916,
+      "mtime_ns": 1792504385026932874
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/baseline/screen.csv",
+      "bytes": 2609233,
+      "mtime_ns": 1792504164772899404
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/baseline/trades.csv",
+      "bytes": 2703010,
+      "mtime_ns": 1792504384960653436
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi3/fills.csv",
+      "bytes": 2127781,
+      "mtime_ns": 1792504506139789329
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi3/screen.csv",
+      "bytes": 1896901,
+      "mtime_ns": 1792504165351025949
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi3/trades.csv",
+      "bytes": 2874843,
+      "mtime_ns": 1792504506074026310
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi5/fills.csv",
+      "bytes": 2009552,
+      "mtime_ns": 1792504507875072549
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi5/screen.csv",
+      "bytes": 1892546,
+      "mtime_ns": 1792504165737380455
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi5/trades.csv",
+      "bytes": 2869085,
+      "mtime_ns": 1792504507774741826
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25/fills.csv",
+      "bytes": 1640298,
+      "mtime_ns": 1792504382509211445
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25/screen.csv",
+      "bytes": 2675471,
+      "mtime_ns": 1792504164956284081
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25/trades.csv",
+      "bytes": 2765381,
+      "mtime_ns": 1792504382447540564
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi3/fills.csv",
+      "bytes": 1818359,
+      "mtime_ns": 1792504618494119445
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi3/screen.csv",
+      "bytes": 1919905,
+      "mtime_ns": 1792504166135293375
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi3/trades.csv",
+      "bytes": 2941642,
+      "mtime_ns": 1792504618428022008
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi5/fills.csv",
+      "bytes": 1765569,
+      "mtime_ns": 1792504619905079833
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi5/screen.csv",
+      "bytes": 1920112,
+      "mtime_ns": 1792504166561257393
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi5/trades.csv",
+      "bytes": 2941155,
+      "mtime_ns": 1792504619842617283
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/baseline/receipt.json",
+      "bytes": 3116,
+      "mtime_ns": 1792504385317282172
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi3/receipt.json",
+      "bytes": 3005,
+      "mtime_ns": 1792504506274911297
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/rsi5/receipt.json",
+      "bytes": 3009,
+      "mtime_ns": 1792504508015481702
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25/receipt.json",
+      "bytes": 3109,
+      "mtime_ns": 1792504382721799473
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi3/receipt.json",
+      "bytes": 3012,
+      "mtime_ns": 1792504618618056416
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-timebe-rsi-20261020-v1/runs/time25_rsi5/receipt.json",
+      "bytes": 3011,
+      "mtime_ns": 1792504620017631764
+    }
+  ],
+  "notion": "https://app.notion.com/p/3ff8856479af8130b5bfe8894293287d",
+  "training_eligible": false,
+  "production_eligible": false,
+  "no_pine_change": true,
+  "limitations": [
+    "Known historical research, no fresh validation claim",
+    "0.2% round-trip original-notional cost; no funding or extra slippage",
+    "Independent original-risk returns, no shared account or capacity model",
+    "Year/period boundary exits retained identically",
+    "Original October19 example outside September22 data end"
+  ],
+  "reproduction": [
+    "python -m yoyo.evaluation.range_rsi_scaleout --phase screen",
+    "python -m yoyo.evaluation.range_rsi_scaleout --phase run",
+    "python -m yoyo.evaluation.range_rsi_scaleout --phase analyze"
+  ],
+  "reuse": "Existing outputs refuse screen overwrite; native receipts reused, input identities checked",
+  "registry_validation": {
+    "scoped_registry": "passed",
+    "experiments": [
+      "exp-eth-timebe-rsi-20261020-v1",
+      "exp-eth-timebe-rsi-20261020-v2"
+    ],
+    "artifacts": [
+      "eth-timebe-rsi-20261020-v1",
+      "eth-timebe-rsi-20261020-v2"
+    ],
+    "global_registry": "spike-v8-total2-1h-native-20260914-delivery: missing required field 'source_commit'",
+    "global_failure_preexisting": true,
+    "tests_passed": 139,
+    "tests_command": "python -m pytest tests/evaluation/test_range_rsi_scaleout.py tests/evaluation/test_parabolic_rsi_sar.py tests/evaluation/test_range_exit_search.py tests/evaluation/test_range_partial_close.py tests/evaluation/test_nautilus_independent.py tests/boundaries/test_layer_imports.py -q"
+  },
+  "notion_verified": true
+}

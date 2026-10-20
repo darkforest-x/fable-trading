@@ -16,16 +16,19 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth-timebe-rsi-20261020-v2
     source_repo: darkforest-x/fable-trading
-    source_commit: 947fe869b1
-    status: active
+    source_commit: 39ebf73734936d1d00ddee561f92c872ba974bf5
+    status: rejected
     question: Does skipping the first opposite RSI diamond preserve more tail profit than starting at the first?
     single_variable: Owner post-hoc follow-up; skip one confirmed opposite event before applying the unchanged profit gate, separately for 3m and 5m.
-    result: Pending native comparison; six completed v1 arms reused without replay.
+    result: Second3m -3954.09R and second5m -3849.59R improve first-diamond arms99.87/48.68R but underperform baseline207.00/102.50R. Random -3796.05/-3648.74R. Second5m total20R39 includes35of45original winners plus4new; original tail gross retained75.3percent. No stable/default improvement.
+    artifacts:
+    - eth-timebe-rsi-20261020-v2
+    canonical_report: experiments/active/exp-eth-timebe-rsi-20261020-v2/delivery_receipt.json
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    notes: Same ETH3838signals and matched controls, 1m execution and 20bp cost. No timed BE in the two new arms; five original-size fifths remain possible after skipping the first event.
+    reuse_allowed: true
+    notes: Same ETH3838signals and matched controls, 1m execution and 20bp cost. Six old arms reused;15352new native positions35806fills allparity,139tests. No timed BE in two new arms; five original-size fifths remain possible. Notion3ff8856479af8113b997da8c13d5d655 verified;noPine/default/livechanges.
   - experiment_id: exp-eth-timebe-rsi-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 947fe869b1
@@ -33,11 +36,14 @@ experiments:
     question: Do fifth-5m-bar fee breakeven and profitable opposite strong RSI diamonds improve ETH exits?
     single_variable: Six prespecified arms isolate timed BE, 3m or 5m RSI original-size fifths, and their owner-authorized combinations.
     result: All five alternatives worsen full-period netR. Baseline -3747.09R; time25 -4325.56R; RSI3 -4053.96R; RSI5 -3898.26R; combined3 -4269.69R; combined5 -4306.25R. All46056 native positions pass parity.
+    artifacts:
+    - eth-timebe-rsi-20261020-v1
+    canonical_report: experiments/active/exp-eth-timebe-rsi-20261020-v1/delivery_receipt.json
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
-    reuse_allowed: false
-    notes: Frozen 3838 signals and matched controls; original entries, structural stops, 15m5R4ATR runner and 20bp cost. Same-source 1m execution for all six arms. Owner requires waiting for feasible fee-BE and skipping unprofitable diamonds without consuming a reduction. Source Notion 3ff8856479af8017a948f6445144c9c6.
+    reuse_allowed: true
+    notes: Frozen3838signals+3838controls;original entries,stops,15m5R4ATR,20bp. Same-source1m equals original5mOHLC;baseline exitprices unchanged.46056positions101973fills allparity135tests. TimeBE waits until feasible;losingdiamonds consume no reduction. Notion3ff8856479af8130b5bfe8894293287d verified. NoPine/default/livechanges.
   - experiment_id: exp-eth-exit-search-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 188fcbc0daed60062268b1f5ab442481c7cfc716
