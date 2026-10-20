@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-eth-5m-signal-body-20261020-v1",
+  "source_experiment": "experiments/active/exp-eth-5m-double-confirm-20261020-v1",
+  "admission": "side*(signal5m.close-signal5m.open)>0;enter same signal close",
+  "observation": "Latest confirmed15m arrow;signal strictly later;all matching signals independent",
+  "frozen": "5bar5m stop+0.05percent;15m5R/ATR14x4;armedH1reverseexit;20bp",
+  "seed": 20261020,
+  "bootstrap_samples": 5000,
+  "sign_flips": 20000,
+  "training_eligible": false,
+  "production_eligible": false
+}
