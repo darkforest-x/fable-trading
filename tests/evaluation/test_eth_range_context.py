@@ -4,7 +4,8 @@ import pandas as pd
 import pytest
 
 from yoyo.evaluation.eth_range_context import (
-    context_features, attach_context, masks, match_candidates, select_development,
+    context_features, attach_context, masks, union_masks, match_candidates, select_development,
+    evaluate_admissions,
 )
 
 
@@ -113,3 +114,31 @@ def test_side_oriented_range_position_and_input_outcomes_preserved():
     result = attach_context(trades, f)
     np.testing.assert_allclose(result.day_u, [.2, .2])
     pd.testing.assert_series_equal(result.net_r, trades.net_r)
+
+
+def test_exploratory_unions_keep_either_support_but_not_unknown_context():
+    rows = pd.DataFrame(dict(observable=[True, True, True, False], side=[1]*4,
+                             day_u=[.1, .7, .7, .1], mon_u=[.1, .7, .7, .1],
+                             h4_arrow=[-1, 1, -1, 1], h4_momentum=[-1, 1, -1, 1]))
+    values = union_masks(rows)
+    assert len(values) == 8
+    np.testing.assert_array_equal(values["day_edge__or__h4_arrow"], [True, True, False, False])
+    assert set(values).isdisjoint(masks(rows))
+
+
+def test_shared_admission_evaluator_keeps_all_arms_and_time_segments():
+    rows = pd.DataFrame(dict(
+        population=["signal", "random", "signal", "random"], segment=[0, 0, 1, 1],
+        week=[10, 10, 20, 20], side=[1]*4, bucket=[1]*4, pair_id=[0, 0, 1, 1],
+        entry_i=[10, 20, 30, 40], trade_id=["s0", "r0", "s1", "r1"], h1_watch=[1, 1, 2, 2],
+        net_r=[20, -1, -1, -1], gross_r=[21, 0, 0, 0], peak_r=[22, 0, 0, 0],
+        net_notional_bp=[200, -10, -10, -10], reason=[1]*4))
+    cfg = dict(seed=1, bootstrap_samples=10, sign_flips=10)
+    records, inference, pairs, decisions = evaluate_admissions(
+        rows, rows[rows.population == "signal"],
+        {"both": np.ones(4, dtype=bool), "early": np.array([True, True, False, False])}, cfg)
+    assert len(records) == len(inference) == 10
+    assert len(pairs) == len(decisions) == 2
+    full = next(r for r in records if r["arm"] == "both" and r["segment"] == -1)
+    assert full["net_r"] == 19 and full["gross_20r"] == 1
+    assert full["matched_excess_bp"] == 105

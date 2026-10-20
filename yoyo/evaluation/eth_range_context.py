@@ -115,6 +115,14 @@ def masks(rows, edge=.382):
     return result
 
 
+def union_masks(rows, edge=.382):
+    """Exploratory supplement: one supportive context suffices, unknowns still fail."""
+    original = masks(rows, edge)
+    return {a+"__or__"+b: original[a] | original[b]
+            for a in ("day_edge", "day_breakout", "mon_edge", "mon_breakout")
+            for b in ("h4_arrow", "h4_momentum")}
+
+
 def match_candidates(signal, controls):
     """Deterministic without-replacement matching; never inspect trade outcomes."""
     keys = ["segment", "week", "side", "bucket"]
@@ -204,6 +212,41 @@ def split(rows, segment):
     return rows if segment == -1 else rows[rows.segment > 0] if segment == -2 else rows[rows.segment == segment]
 
 
+def evaluate_admissions(rows, base, admission, cfg):
+    """Shared admission analysis; no feature or execution recomputation."""
+    summary, inference, all_pairs, decisions = [], [], [], []
+    for arm, mask in admission.items():
+        kept = rows[mask]
+        ss, rr = kept[kept.population == "signal"], kept[kept.population == "random"]
+        matched = match_candidates(ss, rr)
+        si, ri = zip(*matched) if matched else ([], [])
+        paired = ss.loc[list(si), ["trade_id", "segment", "week", "h1_watch"]].reset_index(drop=True)
+        paired["control_id"] = rr.loc[list(ri), "trade_id"].to_numpy()
+        for metric in ("net_r", "net_notional_bp"):
+            paired[metric] = ss.loc[list(si), metric].to_numpy()
+            paired[metric+"_random"] = rr.loc[list(ri), metric].to_numpy()
+        paired["excess_bp"] = paired.net_notional_bp-paired.net_notional_bp_random
+        paired["arm"] = arm
+        all_pairs.append(paired)
+        decisions.append(rows[["trade_id", "population"]].assign(arm=arm, admitted=mask))
+        for segment in (-1, 0, 1, 2, -2):
+            a, b, pp = split(ss, segment), split(base, segment), split(paired, segment)
+            control = split(rr, segment)
+            record = dict(arm=arm, segment=segment, **stats(a, b),
+                          random_eligible_n=len(control), paired_n=len(pp),
+                          matching_coverage=len(pp)/len(a) if len(a) else None,
+                          matched_signal_mean_bp=float(pp.net_notional_bp.mean()) if len(pp) else None,
+                          matched_random_mean_bp=float(pp.net_notional_bp_random.mean()) if len(pp) else None,
+                          matched_excess_bp=float(pp.excess_bp.mean()) if len(pp) else None,
+                          matched_signal_net_r=float(pp.net_r.sum()),
+                          matched_random_net_r=float(pp.net_r_random.sum()))
+            summary.append(record)
+            inference.append(dict(arm=arm, segment=segment,
+                                  net=weekly_inference(a, "net_notional_bp", cfg),
+                                  excess=weekly_inference(pp, "excess_bp", cfg)))
+    return summary, inference, all_pairs, decisions
+
+
 def run(config_file):
     started = time.perf_counter()
     cfg = json.loads(config_file.read_text())
@@ -255,36 +298,8 @@ def run(config_file):
 
     admission = masks(rows, cfg["edge_fraction"])
     base = signal[admission["baseline"][signal.index]]
-    summary, inference, all_pairs, decisions, buckets = [], [], [], [], []
-    for arm, mask in admission.items():
-        kept = rows[mask]
-        ss, rr = kept[kept.population == "signal"], kept[kept.population == "random"]
-        matched = match_candidates(ss, rr)
-        si, ri = zip(*matched) if matched else ([], [])
-        paired = ss.loc[list(si), ["trade_id", "segment", "week", "h1_watch"]].reset_index(drop=True)
-        paired["control_id"] = rr.loc[list(ri), "trade_id"].to_numpy()
-        for metric in ("net_r", "net_notional_bp"):
-            paired[metric] = ss.loc[list(si), metric].to_numpy()
-            paired[metric+"_random"] = rr.loc[list(ri), metric].to_numpy()
-        paired["excess_bp"] = paired.net_notional_bp-paired.net_notional_bp_random
-        paired["arm"] = arm
-        all_pairs.append(paired)
-        decisions.append(rows[["trade_id", "population"]].assign(arm=arm, admitted=mask))
-        for segment in (-1, 0, 1, 2, -2):
-            a, b, pp = split(ss, segment), split(base, segment), split(paired, segment)
-            control = split(rr, segment)
-            record = dict(arm=arm, segment=segment, **stats(a, b),
-                          random_eligible_n=len(control), paired_n=len(pp),
-                          matching_coverage=len(pp)/len(a) if len(a) else None,
-                          matched_signal_mean_bp=float(pp.net_notional_bp.mean()) if len(pp) else None,
-                          matched_random_mean_bp=float(pp.net_notional_bp_random.mean()) if len(pp) else None,
-                          matched_excess_bp=float(pp.excess_bp.mean()) if len(pp) else None,
-                          matched_signal_net_r=float(pp.net_r.sum()),
-                          matched_random_net_r=float(pp.net_r_random.sum()))
-            summary.append(record)
-            inference.append(dict(arm=arm, segment=segment,
-                                  net=weekly_inference(a, "net_notional_bp", cfg),
-                                  excess=weekly_inference(pp, "excess_bp", cfg)))
+    buckets = []
+    summary, inference, all_pairs, decisions = evaluate_admissions(rows, base, admission, cfg)
     for segment in (-1, 0, 1, 2, -2):
         tests = [x for x in inference if x["segment"] == segment and x["arm"] != "baseline"]
         adjusted = holm([x["excess"]["p"] if x["excess"]["p"] is not None else 1 for x in tests])
@@ -337,11 +352,61 @@ def run(config_file):
                          baseline=original, common_observable=len(base)), ensure_ascii=False))
 
 
+def exploratory_unions(config_file):
+    """Reuse saved features and old statistics; explicitly post-hoc, not a new validation."""
+    started = time.perf_counter()
+    cfg = json.loads(config_file.read_text())
+    out = config_file.parent/"exploratory_unions"
+    if (out/"receipt.json").exists():
+        raise FileExistsError("Supplement already complete")
+    spec_file = out/"config.json"
+    spec = json.loads(spec_file.read_text())
+    committed = CODE+[str(spec_file.relative_to(ROOT))]
+    for path in committed:
+        subprocess.run(["git", "ls-files", "--error-unmatch", path], cwd=ROOT,
+                       check=True, stdout=subprocess.DEVNULL)
+    if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *committed], cwd=ROOT).returncode:
+        raise ValueError("Commit supplement before producing results")
+    old_receipt = json.loads((config_file.parent/"receipt.json").read_text())
+    feature_file = config_file.parent/"features.csv.gz"
+    assert file_stamp(feature_file) == next(x for x in old_receipt["raw_outputs"]
+                                            if x["path"].endswith("/features.csv.gz"))
+    rows = pd.read_csv(feature_file, float_precision="round_trip")
+    primary = masks(rows, cfg["edge_fraction"])
+    base = rows[primary["baseline"] & (rows.population == "signal")]
+    admission = union_masks(rows, cfg["edge_fraction"])
+    records, tests, pairs, decisions = evaluate_admissions(rows, base, admission, cfg)
+    old_summary = pd.read_csv(config_file.parent/"summary.csv")
+    combined = pd.concat([old_summary, pd.DataFrame(records)], ignore_index=True)
+    combined["exploratory_union"] = combined.arm.str.contains("__or__")
+    infer = json.loads((config_file.parent/"inference.json").read_text())+tests
+    for segment in (-1, 0, 1, 2, -2):
+        family = [x for x in infer if x["segment"] == segment and x["arm"] != "baseline"]
+        adjusted = holm([x["excess"]["p"] if x["excess"]["p"] is not None else 1 for x in family])
+        for row, value in zip(family, adjusted):
+            row["excess"]["holm_p_22_exploratory_family"] = value
+    combined.to_csv(out/"combined_summary.csv", index=False)
+    pd.concat(decisions).to_csv(out/"decisions.csv.gz", index=False)
+    pd.concat(pairs).to_csv(out/"matched_pairs.csv.gz", index=False)
+    dump(out/"combined_inference.json", infer)
+    dump(out/"receipt.json", dict(
+        generated_at=pd.Timestamp.now(tz="UTC").isoformat(),
+        source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        elapsed_seconds=time.perf_counter()-started, spec=spec, new_arms=8,
+        primary_selection_unchanged=old_receipt["selection"],
+        inputs=[file_stamp(feature_file), file_stamp(config_file.parent/"summary.csv")],
+        raw_outputs=[file_stamp(out/name) for name in ("decisions.csv.gz", "matched_pairs.csv.gz")],
+        training_eligible=False, production_eligible=False,
+        limitation="Exploratory definitions were frozen after seeing the primary results. No untouched validation claim."))
+    print(json.dumps(dict(supplement_arms=8, seconds=time.perf_counter()-started)))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=EXP/"config.json")
+    parser.add_argument("--exploratory-unions", action="store_true")
     args = parser.parse_args()
-    run(args.config.resolve())
+    (exploratory_unions if args.exploratory_unions else run)(args.config.resolve())
 
 
 if __name__ == "__main__":
