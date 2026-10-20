@@ -1,0 +1,7 @@
+# Diagnose missing entries from the observation regime, not only the signal bar
+
+- **Problem**: PEPE's 2026-10-16 13:15 Shanghai 15m candle had a confirmed short arrow but no V2.4 entry frame.
+- **Dead end**: A ten-day replay with fresh state placed the first short regime on October 12. That truncated initialization could not establish the real first admission. Looking only at the arrow, buffer, or displayed-frame limit would miss the persisted consumption flag.
+- **Effective path**: Extend native 1H/15m history before the last direction change. The short regime began October 6 at 19:00 and consumed its admission October 8 at 22:45. Native TradingView showed that first frame at 0.000004015. Subsequent same-direction 1H arrows did not rearm. The queried 13:15 candle closed at 13:30 with K=81.81 and D=85.33, matching the public-candle replay; consumption alone rejected it. Rearming on each new hourly arrow accepts this event, but that counterfactual was not deployed.
+- **General rule**: A stateful entry audit needs history before the last reset, explicit candle-open versus confirmation timestamps, and a record of each gate. Signal presence, admission, and display retention are separate facts. Do not equate one entry per direction regime with one entry per hourly signal.
+- **Affected paths**: `yoyo/evaluation/pine/monday_range_v2_4.pine` (`txObserve`, `txEligible`); `yoyo/evaluation/monday_range_entry_diagnostic.py`; raw evidence in `experiments/active/exp-pepe-range-entry-diagnostic-20261020-v1/`. No Pine trading rule changed; no profitability claim.

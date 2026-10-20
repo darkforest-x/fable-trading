@@ -32817,3 +32817,15 @@ artifacts:
       Fixes PEPE absolute-one-point oversized frames; native unit cases and 15m/1H visual checks passed.
       Module remains default OFF; current PEPE chart enabled with 0.05 percent. V2.3 retained.
       Not a profitability optimum; previous one-point trade outcomes are not interchangeable.
+
+  - artifact_id: pepe-range-entry-diagnostic-20261020-v1
+    artifact_type: manifest
+    role: pine_admission_diagnostic
+    source_repo: darkforest-x/fable-trading
+    source_commit: ad2586953b
+    source_path: experiments/active/exp-pepe-range-entry-diagnostic-20261020-v1/receipt.json
+    storage_uri: repo://experiments/active/exp-pepe-range-entry-diagnostic-20261020-v1/receipt.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Native OKX 1H/15m and target 5m structure read; actual regime gate and per-arrow-reset counterfactual. TradingView target and first-frame screenshots retained beside receipt. No Pine edit or performance claim.
