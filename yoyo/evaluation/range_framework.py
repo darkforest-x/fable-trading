@@ -48,12 +48,29 @@ def dump(path, data):
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False, allow_nan=False)+"\n")
 
 
+def management_context(frame, minutes=15):
+    """Use completed OHLC only: ATR14 on 5m closes or sparse 15m closes.
+
+    H1 arrows and entry candidates are unchanged. The dense candidate-matching
+    ATR series is never used here. Default 15m retains the previous preparer.
+    """
+    if minutes not in (5, 15):
+        raise ValueError("Management timeframe must be 5 or 15 minutes")
+    from yoyo.evaluation.pepe_range_exits import prepare
+    ctx = prepare(frame)
+    if minutes == 5:
+        from yoyo.evaluation.monday_range_v2_2_reference import atr
+        ctx["atr"] = np.ascontiguousarray(atr(frame, 14).to_numpy(float))
+    return ctx
+
+
 def prepared(cfg, cache_dir):
     """Cache aligned OHLC/causal features and candidate metadata, never outcomes."""
     identity = dict(
         schema=1, runtime=runtime_versions(), data=file_stamp(ROOT/cfg["data"]),
         candidates=file_stamp(ROOT/cfg["entry_candidates"]),
         code=[file_stamp(ROOT/p) for p in CODE[1:]],
+        management_minutes=cfg.get("management_minutes", 15),
     )
     meta, path = cache_dir/"features.json", cache_dir/"features.npz"
     hit = meta.exists() and path.exists() and json.loads(meta.read_text()) == identity
@@ -64,7 +81,6 @@ def prepared(cfg, cache_dir):
                                  index=pd.to_datetime(z["times"], utc=True))
         ctx["frame"] = frame
     else:
-        from yoyo.evaluation.pepe_range_exits import prepare
         frame = pd.read_csv(ROOT/cfg["data"], float_precision="round_trip")
         times = pd.to_datetime(frame.pop("ts"), unit="ms", utc=True)+pd.Timedelta(minutes=5)
         if times.duplicated().any() or not times.is_monotonic_increasing:
@@ -76,7 +92,7 @@ def prepared(cfg, cache_dir):
         if ((frame.high < frame[["open", "close", "low"]].max(axis=1)).any()
                 or (frame.low > frame[["open", "close", "high"]].min(axis=1)).any()):
             raise ValueError("Invalid OHLC range")
-        ctx = prepare(frame)
+        ctx = management_context(frame, cfg.get("management_minutes", 15))
         cache_dir.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(path, bars=ctx["bars"], atr=ctx["atr"],
                             hour=ctx["hour"], times=frame.index.asi8)
@@ -145,12 +161,14 @@ def run(config, output=None):
     cfg = json.loads(config.read_text())
     allowed = {"schema", "experiment_id", "engine", "data", "entry_candidates", "symbol",
                "tick", "market_tick", "stop_window_5m", "buffer_percent", "maximum_risk_percent",
-               "round_trip_cost", "policies", "output"}
+               "round_trip_cost", "policies", "output", "management_minutes"}
     if set(cfg)-allowed or cfg["schema"] != 1 or cfg["engine"] != "nautilus":
         raise ValueError("Unknown configuration fields or adapter")
     if (not isinstance(cfg["stop_window_5m"], int) or cfg["stop_window_5m"] < 1
             or cfg["buffer_percent"] < 0 or cfg.get("maximum_risk_percent", 0) < 0):
         raise ValueError("Invalid stop parameters")
+    if cfg.get("management_minutes", 15) not in (5, 15):
+        raise ValueError("Management timeframe must be 5 or 15 minutes")
     output = (ROOT/cfg["output"]) if output is None else output.resolve()
     identity = dict(config=cfg, runtime=runtime_versions(), code=[file_stamp(ROOT/p) for p in CODE],
                     inputs=[file_stamp(ROOT/cfg[k]) for k in ("data", "entry_candidates")],
@@ -201,6 +219,7 @@ def run(config, output=None):
         generated_at=pd.Timestamp.now(tz="UTC").isoformat(),
         data_rows=len(ctx["frame"]), data_first_close=str(ctx["frame"].index[0]),
         data_last_close=str(ctx["frame"].index[-1]), feature_cache_hit=cache_hit,
+        management_minutes=cfg.get("management_minutes", 15),
         elapsed_seconds=time.perf_counter()-started, results=results,
         production_eligible=False, training_eligible=False,
         limitations="Historical independent entry returns, not funded-account returns. "

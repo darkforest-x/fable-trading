@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-range-management5m-20261020-v1",
+  "engine": "nautilus",
+  "symbol": "PEPE",
+  "tick": 1e-09,
+  "market_tick": 1e-10,
+  "data": "experiments/active/exp-range-entry5m-20261020-v1/pepe/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-range-entry5m-20261020-v1/pepe/entries.csv",
+  "stop_window_5m": 5,
+  "buffer_percent": 0.05,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": null,
+      "opposite_hour_exit": true,
+      "name": "management5"
+    }
+  ],
+  "output": "experiments/active/exp-range-management5m-20261020-v1/pepe_b005/results",
+  "management_minutes": 5
+}

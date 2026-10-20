@@ -1,0 +1,78 @@
+{
+  "experiment_id": "exp-range-management5m-20261020-v1",
+  "seed": 20261020,
+  "runs": [
+    {
+      "symbol": "BTC",
+      "venue": "OKX",
+      "buffer_percent": 0.05,
+      "config": "btc_b005/config.json",
+      "baseline_config": "experiments/active/exp-range-entry5m-20261020-v1/btc/config.json",
+      "baseline_ledger": "experiments/active/exp-range-entry5m-20261020-v1/btc/results/baseline/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-entry5m-20261020-v1/btc/results/receipt.json"
+    },
+    {
+      "symbol": "ETH",
+      "venue": "OKX",
+      "buffer_percent": 0.05,
+      "config": "eth_b005/config.json",
+      "baseline_config": "experiments/active/exp-range-entry5m-20261020-v1/eth/config.json",
+      "baseline_ledger": "experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-entry5m-20261020-v1/eth/results/receipt.json"
+    },
+    {
+      "symbol": "PEPE",
+      "venue": "OKX",
+      "buffer_percent": 0.05,
+      "config": "pepe_b005/config.json",
+      "baseline_config": "experiments/active/exp-range-entry5m-20261020-v1/pepe/config.json",
+      "baseline_ledger": "experiments/active/exp-range-entry5m-20261020-v1/pepe/results/baseline/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-entry5m-20261020-v1/pepe/results/receipt.json"
+    },
+    {
+      "symbol": "ZEC",
+      "venue": "Binance",
+      "buffer_percent": 0.05,
+      "config": "zec_b005/config.json",
+      "baseline_config": "experiments/active/exp-range-entry5m-20261020-v1/zec/config.json",
+      "baseline_ledger": "experiments/active/exp-range-entry5m-20261020-v1/zec/results/baseline/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-entry5m-20261020-v1/zec/results/receipt.json"
+    },
+    {
+      "symbol": "BTC",
+      "venue": "OKX",
+      "buffer_percent": 0.2,
+      "config": "btc_b020/config.json",
+      "baseline_config": "experiments/active/exp-range-5m-params-20261020-v1/btc/native_config.json",
+      "baseline_ledger": "experiments/active/exp-range-5m-params-20261020-v1/btc/native/buffer_percent_0p2/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-5m-params-20261020-v1/btc/native/receipt.json"
+    },
+    {
+      "symbol": "ETH",
+      "venue": "OKX",
+      "buffer_percent": 0.2,
+      "config": "eth_b020/config.json",
+      "baseline_config": "experiments/active/exp-range-5m-params-20261020-v1/eth/native_config.json",
+      "baseline_ledger": "experiments/active/exp-range-5m-params-20261020-v1/eth/native/buffer_percent_0p2/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-5m-params-20261020-v1/eth/native/receipt.json"
+    },
+    {
+      "symbol": "PEPE",
+      "venue": "OKX",
+      "buffer_percent": 0.2,
+      "config": "pepe_b020/config.json",
+      "baseline_config": "experiments/active/exp-range-5m-params-20261020-v1/pepe/native_config.json",
+      "baseline_ledger": "experiments/active/exp-range-5m-params-20261020-v1/pepe/native/buffer_percent_0p2/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-5m-params-20261020-v1/pepe/native/receipt.json"
+    },
+    {
+      "symbol": "ZEC",
+      "venue": "Binance",
+      "buffer_percent": 0.2,
+      "config": "zec_b020/config.json",
+      "baseline_config": "experiments/active/exp-range-5m-params-20261020-v1/zec/native_config.json",
+      "baseline_ledger": "experiments/active/exp-range-5m-params-20261020-v1/zec/native/buffer_percent_0p2/trades.csv",
+      "baseline_receipt": "experiments/active/exp-range-5m-params-20261020-v1/zec/native/receipt.json"
+    }
+  ]
+}
