@@ -5,8 +5,8 @@ explicitly configured Binance native 5m sources; retain exchange identity.
 Require complete continuous bars. No fetching or hashing.
 Features are computed only from completed 5m/15m/H1 candles by the existing
 preparer. Controls match each symbol, side, UTC week, segment and causal ATR bucket.
-Changing the symbol is the only new strategy comparison; baseline and BE3 are
-pre-existing frozen policies. Three time segments are descriptive, not untouched.
+Entry timeframe is explicit (default 15m, optional 5m); exit management remains
+the frozen 15m rule in both cases. Three time segments are descriptive, not untouched.
 """
 import argparse
 import json
@@ -17,15 +17,17 @@ import time
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.pepe_range_exits import prepare, entries, inference
+from yoyo.evaluation.pepe_range_exits import entries, inference
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp, run
 from yoyo.evaluation.range_native_preview import preview
+from yoyo.evaluation.range_entry_clock import entry_context
 
 EXP = ROOT / "experiments/active/exp-range-multicoin-20261020-v1"
 SOURCE = ROOT / "data/crypto/market/kline_lowtf_20260922"
 PEPE = ROOT / "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_pepe_5m.csv.gz"
 NATIVE = ROOT / "experiments/active/exp-range-nautilus-20261020-v1/results/baseline"
-CODE = ["yoyo/evaluation/range_multicoin.py", "yoyo/evaluation/range_native_preview.py"]
+CODE = ["yoyo/evaluation/range_multicoin.py", "yoyo/evaluation/range_native_preview.py",
+        "yoyo/evaluation/range_entry_clock.py"]
 
 
 def aggregate_minutes(data, start, end):
@@ -132,6 +134,8 @@ def main():
                     raise ValueError(f"Cannot reuse different study {key}")
             if ticks != old_study["symbols"][symbol]:
                 raise ValueError("Cannot reuse different precision")
+            if cfg.get("entry_minutes", 15) != old_study.get("entry_minutes", 15):
+                raise ValueError("Cannot reuse different entry timeframe")
         else:
             work = destination / symbol.lower()
             work.mkdir(exist_ok=True)
@@ -142,7 +146,7 @@ def main():
             close_frame = five[["open", "high", "low", "close"]].copy()
             close_frame.index = pd.DatetimeIndex(pd.to_datetime(five.ts, unit="ms", utc=True)
                                                  + pd.Timedelta(minutes=5)).as_unit("ns")
-            ctx = prepare(close_frame)
+            ctx = entry_context(close_frame, cfg.get("entry_minutes", 15))
             signal, control, unmatched = entries(ctx, cfg)
             for population, rows in (("signal", signal), ("random", control)):
                 rows["population"] = population
@@ -152,6 +156,7 @@ def main():
                 symbol=symbol, rows=len(five), sources=sources, signals=len(signal),
                 controls=len(control), unmatched_ids=unmatched,
                 start=cfg["start"], end=cfg["end"], warmup=cfg["warmup"],
+                entry_minutes=cfg.get("entry_minutes", 15), management_minutes=15,
                 venue=cfg.get("venues", {}).get(symbol, "OKX"),
                 source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
                 confirmation=cfg.get("native_5m_sources", {}).get(symbol, {}).get(
@@ -185,6 +190,7 @@ def main():
                         group = ss if stats["population"] == "signal" else rr
                         summary.append(dict(
                             symbol=symbol, venue=cfg.get("venues", {}).get(symbol, "OKX"),
+                            entry_minutes=cfg.get("entry_minutes", 15),
                             policy=policy["name"], **stats,
                             max_peak_r=float(group.peak_r.max()), max_gross_r=float(group.gross_r.max()),
                             mean_fee_r=float(group.fee_r.mean()),
@@ -193,12 +199,29 @@ def main():
                         ))
             paths.append(str(work/"results"/policy["name"]/"trades.csv"))
     pd.DataFrame(summary).to_csv(destination/"summary.csv", index=False)
+    if cfg.get("baseline_comparison"):
+        previous = pd.read_csv(ROOT/cfg["baseline_comparison"])
+        current = pd.DataFrame(summary)
+        keys = ["symbol", "venue", "policy", "segment", "population"]
+        # Different entry clocks produce different trades; this is a descriptive
+        # population comparison, never a paired trade-by-trade treatment effect.
+        metrics = ["n", "net_r", "win_rate", "gross_10r", "gross_20r"]
+        comparison = previous[keys+metrics].merge(
+            current[keys+metrics], on=keys, suffixes=("_15m", "_5m"), validate="one_to_one")
+        if len(comparison) != len(previous) or len(comparison) != len(current):
+            raise ValueError("Timeframe comparison populations differ")
+        for clock in ("15m", "5m"):
+            comparison[f"mean_net_r_{clock}"] = comparison[f"net_r_{clock}"]/comparison[f"n_{clock}"]
+        comparison.to_csv(destination/"entry_comparison.csv", index=False)
     dump(destination/"inference.json", tests)
     dump(destination/"receipt.json", dict(
         experiment_id=cfg["experiment_id"], elapsed_seconds=time.perf_counter()-started,
         source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
         generated_at=pd.Timestamp.now(tz="UTC").isoformat(), ledgers=paths, runs=runs,
         venues=cfg.get("venues", {}),
+        entry_minutes=cfg.get("entry_minutes", 15), management_minutes=15,
+        baseline_comparison=(file_stamp(ROOT/cfg["baseline_comparison"])
+                             if cfg.get("baseline_comparison") else None),
         training_eligible=False, production_eligible=False,
         limitations="Independent overlapping R, not account returns. Frozen 20bp entry-notional cost; "
                     "no funding/spread/latency. Nominal weekly inference, no parameter selection. "

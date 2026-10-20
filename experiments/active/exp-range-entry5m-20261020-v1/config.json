@@ -1,0 +1,101 @@
+{
+  "experiment_id": "exp-range-entry5m-20261020-v1",
+  "warmup": "2024-08-01T00:00:00Z",
+  "start": "2024-08-02T00:00:00Z",
+  "splits": [
+    "2025-01-01T00:00:00Z",
+    "2026-01-01T00:00:00Z"
+  ],
+  "end": "2026-09-22T14:00:00Z",
+  "windows_5m": [
+    5
+  ],
+  "seed": 20261020,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "symbols": {
+    "BTC": {
+      "tick": 0.1,
+      "market_tick": 0.1
+    },
+    "ETH": {
+      "tick": 0.01,
+      "market_tick": 0.01
+    },
+    "PEPE": {
+      "tick": 1e-09,
+      "market_tick": 1e-10
+    },
+    "ZEC": {
+      "tick": 0.01,
+      "market_tick": 0.01
+    }
+  },
+  "venues": {
+    "BTC": "OKX",
+    "ETH": "OKX",
+    "PEPE": "OKX",
+    "ZEC": "Binance"
+  },
+  "native_5m_sources": {
+    "BTC": {
+      "paths": [
+        "experiments/active/exp-range-multicoin-20261020-v1/btc/candles.csv.gz"
+      ],
+      "receipts": [
+        "experiments/active/exp-range-multicoin-20261020-v1/btc/input_receipt.json"
+      ],
+      "confirmation": "Exact previously validated continuous 5m input reused. Entry candidates recomputed at 5m; 15m exit management unchanged. No fetch or content hashing."
+    },
+    "ETH": {
+      "paths": [
+        "experiments/active/exp-range-multicoin-20261020-v1/eth/candles.csv.gz"
+      ],
+      "receipts": [
+        "experiments/active/exp-range-multicoin-20261020-v1/eth/input_receipt.json"
+      ],
+      "confirmation": "Exact previously validated continuous 5m input reused. Entry candidates recomputed at 5m; 15m exit management unchanged. No fetch or content hashing."
+    },
+    "PEPE": {
+      "paths": [
+        "experiments/active/exp-range-multicoin-20261020-v1/pepe/candles.csv.gz"
+      ],
+      "receipts": [
+        "experiments/active/exp-range-multicoin-20261020-v1/pepe/input_receipt.json"
+      ],
+      "confirmation": "Exact previously validated continuous 5m input reused. Entry candidates recomputed at 5m; 15m exit management unchanged. No fetch or content hashing."
+    },
+    "ZEC": {
+      "paths": [
+        "experiments/active/exp-range-multicoin-20261020-v2/zec/candles.csv.gz"
+      ],
+      "receipts": [
+        "experiments/active/exp-range-multicoin-20261020-v2/zec/input_receipt.json"
+      ],
+      "confirmation": "Exact previously validated continuous 5m input reused. Entry candidates recomputed at 5m; 15m exit management unchanged. No fetch or content hashing."
+    }
+  },
+  "policies": [
+    {
+      "name": "baseline",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": null,
+      "opposite_hour_exit": true
+    },
+    {
+      "name": "be3",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": 3,
+      "opposite_hour_exit": true
+    }
+  ],
+  "entry_minutes": 5,
+  "baseline_comparison": "experiments/active/exp-range-multicoin-20261020-v2/summary.csv"
+}
