@@ -1,0 +1,157 @@
+{
+  "scalar_price_path_checks": 55,
+  "eth_stats": {
+    "full": {
+      "n": 294,
+      "gross_up": 155,
+      "net_up": 137,
+      "mean_gross_bp": 1.1426772306616666,
+      "ever_up_1percent": 187,
+      "ever_down_2percent": 133,
+      "worst_mae_bp": -1322.165061777251
+    },
+    "later": {
+      "n": 175,
+      "gross_up": 94,
+      "net_up": 85,
+      "mean_gross_bp": -0.2393223246681256,
+      "ever_up_1percent": 118,
+      "ever_down_2percent": 84,
+      "worst_mae_bp": -1322.165061777251
+    },
+    "october": {
+      "n": 5,
+      "gross_up": 4,
+      "net_up": 4,
+      "mean_gross_bp": 64.19941715708477,
+      "ever_up_1percent": 3,
+      "ever_down_2percent": 1,
+      "worst_mae_bp": -487.44235821328033
+    }
+  },
+  "matched_control_coverage": [
+    {
+      "arm": "ETH",
+      "period": "full",
+      "matched": 294,
+      "signal_mean_on_matched_bp": -18.85732276933833,
+      "random_mean_on_matched_bp": -15.568867865129521
+    },
+    {
+      "arm": "ETH",
+      "period": "later",
+      "matched": 175,
+      "signal_mean_on_matched_bp": -20.239322324668123,
+      "random_mean_on_matched_bp": -24.021856950086715
+    },
+    {
+      "arm": "all_alts",
+      "period": "full",
+      "matched": 257,
+      "signal_mean_on_matched_bp": -6.017112370998305,
+      "random_mean_on_matched_bp": -13.581812890035318
+    },
+    {
+      "arm": "all_alts",
+      "period": "later",
+      "matched": 160,
+      "signal_mean_on_matched_bp": -25.661698728869357,
+      "random_mean_on_matched_bp": -21.99320053697529
+    },
+    {
+      "arm": "beta168",
+      "period": "full",
+      "matched": 287,
+      "signal_mean_on_matched_bp": 17.55978606320987,
+      "random_mean_on_matched_bp": -3.3618130744136296
+    },
+    {
+      "arm": "beta168",
+      "period": "later",
+      "matched": 171,
+      "signal_mean_on_matched_bp": -14.86346297715875,
+      "random_mean_on_matched_bp": -22.332184276604618
+    },
+    {
+      "arm": "lowvol168",
+      "period": "full",
+      "matched": 291,
+      "signal_mean_on_matched_bp": -9.970424909259833,
+      "random_mean_on_matched_bp": -17.572435839461455
+    },
+    {
+      "arm": "lowvol168",
+      "period": "later",
+      "matched": 173,
+      "signal_mean_on_matched_bp": -24.55559241469715,
+      "random_mean_on_matched_bp": -16.84777708888548
+    },
+    {
+      "arm": "own_bull4",
+      "period": "full",
+      "matched": 291,
+      "signal_mean_on_matched_bp": -13.908745324108704,
+      "random_mean_on_matched_bp": -13.768088880119512
+    },
+    {
+      "arm": "own_bull4",
+      "period": "later",
+      "matched": 174,
+      "signal_mean_on_matched_bp": -10.748399382237457,
+      "random_mean_on_matched_bp": -19.109287112123976
+    },
+    {
+      "arm": "strength24",
+      "period": "full",
+      "matched": 283,
+      "signal_mean_on_matched_bp": 23.658980654097306,
+      "random_mean_on_matched_bp": 20.361591701810365
+    },
+    {
+      "arm": "strength24",
+      "period": "later",
+      "matched": 172,
+      "signal_mean_on_matched_bp": -9.175370477391095,
+      "random_mean_on_matched_bp": 11.065354549273007
+    },
+    {
+      "arm": "volume_rebound4",
+      "period": "full",
+      "matched": 286,
+      "signal_mean_on_matched_bp": 17.59876942393016,
+      "random_mean_on_matched_bp": 7.98653982620013
+    },
+    {
+      "arm": "volume_rebound4",
+      "period": "later",
+      "matched": 174,
+      "signal_mean_on_matched_bp": -8.516252999968561,
+      "random_mean_on_matched_bp": -1.6470187861184222
+    },
+    {
+      "arm": "weakness24",
+      "period": "full",
+      "matched": 281,
+      "signal_mean_on_matched_bp": -24.627976019075597,
+      "random_mean_on_matched_bp": -12.016540500919646
+    },
+    {
+      "arm": "weakness24",
+      "period": "later",
+      "matched": 169,
+      "signal_mean_on_matched_bp": -23.058922221805954,
+      "random_mean_on_matched_bp": -34.41546842177733
+    }
+  ],
+  "all_same_time_benchmarks_complete": true,
+  "cash_event_counts": {
+    "ETH": 0,
+    "all_alts": 0,
+    "beta168": 0,
+    "lowvol168": 0,
+    "own_bull4": 12,
+    "strength24": 0,
+    "volume_rebound4": 59,
+    "weakness24": 0
+  }
+}

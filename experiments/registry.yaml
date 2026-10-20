@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-h1-alt-selection-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c219d143ab
+    status: rejected
+    question: Can confirmed ETH H1 green checks time a16hour rebound and causally select three profitable alts?
+    single_variable: Six predeclared past-only top3 rankings at identical ETH events;16hour next-open holding and20bp cost frozen.
+    result: ETH294events netwin46.60percent mean-18.8573bp versusmatchedtime-15.5689bp. Early119select beta168+64.5935bp; later175-10.7583bp versus same-time basket-24.9473bp,excessp.2061. Allsixlater meansnegative;October5ETH4wins cannot establish stable edge.
+    artifacts:
+    - eth-h1-alt-selection-20261020-v1
+    canonical_report: experiments/active/exp-eth-h1-alt-selection-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Registered54OKX convenience pool,52alts;existing history reused,tail toOct20 fetched via existing loader.54overlap checks min92h,76tests,12prefixchecks,55scalarpathchecks. Eventstudy reuses existing fixedhorizon/clusteredstatistics,no new engine or Nautilus fill claim. Samecoin random-time missingpairs reported. NoPine/live/modelchanges;Notion3ff8856479af81c097e6f460f19a199a.
   - experiment_id: exp-eth-entrybar-stop-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7ed68577d7
