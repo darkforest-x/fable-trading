@@ -1,0 +1,334 @@
+{
+  "experiment_id": "exp-range-5m-params-20261020-v1",
+  "status": "rejected_default_upgrade",
+  "source_commit": "8609ed6f740749131abee75ad85c04f834483ad2",
+  "audit_commit": "fad3af01bfe41d1e98ffd9d666e86dd8462a75a8",
+  "generated_at": "2026-10-20",
+  "parameters_per_coin": 13,
+  "coins": 4,
+  "cost_round_trip": 0.002,
+  "selection": {
+    "BTC": {
+      "development_selected": "buffer_percent_0p2",
+      "descriptive_best": "buffer_percent_0p2"
+    },
+    "ETH": {
+      "development_selected": "buffer_percent_0p2",
+      "descriptive_best": "buffer_percent_0p2"
+    },
+    "PEPE": {
+      "development_selected": "buffer_percent_0p2",
+      "descriptive_best": "buffer_percent_0p2"
+    },
+    "ZEC": {
+      "development_selected": "buffer_percent_0p2",
+      "descriptive_best": "buffer_percent_0p2"
+    }
+  },
+  "screen_seconds": 61.593937334022485,
+  "tests": "24 passed",
+  "screen_scalar_probes": 728,
+  "cached_native_baseline_paths": 36518,
+  "native_positions": 36518,
+  "native_fills": 73036,
+  "validation": {
+    "source_commit": "fad3af01bfe41d1e98ffd9d666e86dd8462a75a8",
+    "audited_rows": 474734,
+    "independently_checked_summaries": 260,
+    "later_period_changes": {
+      "BTC": {
+        "later_n": 4106,
+        "later_delta_net_r": 3319.0893099913883,
+        "gross_r_component": -395.42727165894803,
+        "fee_r_reduction_component": 3714.5165816503363,
+        "later_fixed_1000_notional_baseline_usdt": -7248.24257148488,
+        "later_fixed_1000_notional_selected_usdt": -6645.1468629505425,
+        "later_fixed_1000_notional_delta_usdt": 603.0957085343387
+      },
+      "ETH": {
+        "later_n": 3194,
+        "later_delta_net_r": 1725.9586015424607,
+        "gross_r_component": -93.04834095595649,
+        "fee_r_reduction_component": 1819.0069424984165,
+        "later_fixed_1000_notional_baseline_usdt": -5201.25490295188,
+        "later_fixed_1000_notional_selected_usdt": -4225.033396885401,
+        "later_fixed_1000_notional_delta_usdt": 976.22150606648
+      },
+      "PEPE": {
+        "later_n": 3691,
+        "later_delta_net_r": 1265.621525369902,
+        "gross_r_component": 102.87099825690677,
+        "fee_r_reduction_component": 1162.7505271129953,
+        "later_fixed_1000_notional_baseline_usdt": -6374.996333819532,
+        "later_fixed_1000_notional_selected_usdt": -5515.160501733347,
+        "later_fixed_1000_notional_delta_usdt": 859.8358320861856
+      },
+      "ZEC": {
+        "later_n": 3455,
+        "later_delta_net_r": 826.7359858697021,
+        "gross_r_component": -155.98592781491604,
+        "fee_r_reduction_component": 982.7219136846181,
+        "later_fixed_1000_notional_baseline_usdt": -8194.847249094439,
+        "later_fixed_1000_notional_selected_usdt": -8688.603558752084,
+        "later_fixed_1000_notional_delta_usdt": -493.7563096576447
+      }
+    },
+    "profitable_full_history_arms": 0,
+    "profitable_yearly_arms": 0,
+    "note": "Equal initial risk and equal notional are different allocation assumptions; neither is a funded account simulation."
+  },
+  "notion": "https://app.notion.com/p/3ff8856479af81b4962fde7394d2abf1",
+  "notion_readback_verified": true,
+  "local_raw_outputs": [
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/baseline.csv.gz",
+      "bytes": 903566
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/buffer_percent_0p025.csv.gz",
+      "bytes": 894603
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/buffer_percent_0p1.csv.gz",
+      "bytes": 913536
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/buffer_percent_0p2.csv.gz",
+      "bytes": 919394
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/native/buffer_percent_0p2/fills.csv",
+      "bytes": 2273322
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/native/buffer_percent_0p2/trades.csv",
+      "bytes": 3644351
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/stop_window_5m_12.csv.gz",
+      "bytes": 910004
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/stop_window_5m_3.csv.gz",
+      "bytes": 899389
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/stop_window_5m_8.csv.gz",
+      "bytes": 906272
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_arm_r_10.csv.gz",
+      "bytes": 892774
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_arm_r_3.csv.gz",
+      "bytes": 910407
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_arm_r_8.csv.gz",
+      "bytes": 896241
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_atr_multiple_2.csv.gz",
+      "bytes": 908427
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_atr_multiple_3.csv.gz",
+      "bytes": 906445
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/btc/trail_atr_multiple_6.csv.gz",
+      "bytes": 898389
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/baseline.csv.gz",
+      "bytes": 708532
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/buffer_percent_0p025.csv.gz",
+      "bytes": 704256
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/buffer_percent_0p1.csv.gz",
+      "bytes": 715793
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/buffer_percent_0p2.csv.gz",
+      "bytes": 723654
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/native/buffer_percent_0p2/fills.csv",
+      "bytes": 1744611
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/native/buffer_percent_0p2/trades.csv",
+      "bytes": 2769064
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/stop_window_5m_12.csv.gz",
+      "bytes": 715474
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/stop_window_5m_3.csv.gz",
+      "bytes": 704400
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/stop_window_5m_8.csv.gz",
+      "bytes": 711591
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_arm_r_10.csv.gz",
+      "bytes": 701848
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_arm_r_3.csv.gz",
+      "bytes": 713404
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_arm_r_8.csv.gz",
+      "bytes": 704042
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_atr_multiple_2.csv.gz",
+      "bytes": 712734
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_atr_multiple_3.csv.gz",
+      "bytes": 710885
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/eth/trail_atr_multiple_6.csv.gz",
+      "bytes": 704700
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/baseline.csv.gz",
+      "bytes": 707902
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/buffer_percent_0p025.csv.gz",
+      "bytes": 705165
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/buffer_percent_0p1.csv.gz",
+      "bytes": 713000
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/buffer_percent_0p2.csv.gz",
+      "bytes": 720350
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/native/buffer_percent_0p2/fills.csv",
+      "bytes": 2109323
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/native/buffer_percent_0p2/trades.csv",
+      "bytes": 3420099
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/stop_window_5m_12.csv.gz",
+      "bytes": 718717
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/stop_window_5m_3.csv.gz",
+      "bytes": 701993
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/stop_window_5m_8.csv.gz",
+      "bytes": 713116
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_arm_r_10.csv.gz",
+      "bytes": 702437
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_arm_r_3.csv.gz",
+      "bytes": 711508
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_arm_r_8.csv.gz",
+      "bytes": 704252
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_atr_multiple_2.csv.gz",
+      "bytes": 712041
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_atr_multiple_3.csv.gz",
+      "bytes": 710005
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/pepe/trail_atr_multiple_6.csv.gz",
+      "bytes": 704333
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/baseline.csv.gz",
+      "bytes": 672083
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/buffer_percent_0p025.csv.gz",
+      "bytes": 670255
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/buffer_percent_0p1.csv.gz",
+      "bytes": 677443
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/buffer_percent_0p2.csv.gz",
+      "bytes": 684322
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/native/buffer_percent_0p2/fills.csv",
+      "bytes": 1861802
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/native/buffer_percent_0p2/trades.csv",
+      "bytes": 2913842
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/stop_window_5m_12.csv.gz",
+      "bytes": 682127
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/stop_window_5m_3.csv.gz",
+      "bytes": 666323
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/stop_window_5m_8.csv.gz",
+      "bytes": 676769
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_arm_r_10.csv.gz",
+      "bytes": 666787
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_arm_r_3.csv.gz",
+      "bytes": 675556
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_arm_r_8.csv.gz",
+      "bytes": 668819
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_atr_multiple_2.csv.gz",
+      "bytes": 677391
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_atr_multiple_3.csv.gz",
+      "bytes": 674970
+    },
+    {
+      "path": "experiments/active/exp-range-5m-params-20261020-v1/zec/trail_atr_multiple_6.csv.gz",
+      "bytes": 669401
+    }
+  ],
+  "raw_output_storage": "Local experiment directory, preserved and git-ignored; no raw data copying or download. Compact metadata and summaries are tracked.",
+  "reproduce": [
+    "~/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_parameter_search --phase screen",
+    "~/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_parameter_search --phase native",
+    "~/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_parameter_search --phase audit"
+  ],
+  "rerun_note": "Completed screening refuses overwrite. For a clean replay copy config to a new local experiment directory and pass --config; retain source paths. Existing native results use validated cache.",
+  "limitations": "All historical dates previously researched. Equal-risk independent R is not account return. Stops change R denominators. ZEC uses Binance, others OKX. No funding, additional spread/latency, shared capital, Pine default change or production claims.",
+  "training_eligible": false,
+  "production_eligible": false
+}

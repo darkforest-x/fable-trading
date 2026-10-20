@@ -1,0 +1,47 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "market_tick": 0.1,
+  "protection_tick": 0.1,
+  "research_quantity": "max(1, floor(1000 / entry)); returns normalized per original risk",
+  "positions": 10338,
+  "fills": 20676,
+  "max_simultaneous_positions": 41,
+  "bars_with_both_directions": 87135,
+  "prepare_seconds": 0.8161648330278695,
+  "replay_seconds": 157.6306337499991,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ],
+  "accounting": "independent original-risk R; frozen account; not portfolio returns",
+  "parity": {
+    "rows": 10338,
+    "compared_fields": [
+      "entry_i",
+      "side",
+      "end_i",
+      "exit_i",
+      "reason",
+      "arm_i",
+      "be_trigger_i",
+      "be_effective_i",
+      "stop_kind",
+      "deferred_closes",
+      "steps",
+      "entry",
+      "stop",
+      "risk",
+      "exit_price",
+      "protection",
+      "be_price",
+      "peak_r",
+      "gross_r",
+      "fee_r",
+      "net_r",
+      "net_notional_bp",
+      "exit_time"
+    ],
+    "native_fee_checks": 10338,
+    "status": "passed"
+  }
+}

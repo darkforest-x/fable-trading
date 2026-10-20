@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-range-5m-params-20261020-v1",
+  "engine": "nautilus",
+  "symbol": "ETH",
+  "tick": 0.01,
+  "market_tick": 0.01,
+  "data": "experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-range-entry5m-20261020-v1/eth/entries.csv",
+  "stop_window_5m": 5,
+  "buffer_percent": 0.2,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "buffer_percent_0p2",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "breakeven_r": null,
+      "opposite_hour_exit": true,
+      "golden_ledger": "experiments/active/exp-range-5m-params-20261020-v1/eth/buffer_percent_0p2.csv.gz"
+    }
+  ],
+  "output": "experiments/active/exp-range-5m-params-20261020-v1/eth/native"
+}

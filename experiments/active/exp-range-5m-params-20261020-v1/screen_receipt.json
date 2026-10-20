@@ -1,0 +1,224 @@
+{
+  "source_commit": "8609ed6f740749131abee75ad85c04f834483ad2",
+  "elapsed_seconds": 61.593937334022485,
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/config.json",
+      "bytes": 823,
+      "mtime_ns": 1792485015452470175
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/candles.csv.gz",
+      "bytes": 3191564,
+      "mtime_ns": 1792485014498804514
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/entries.csv",
+      "bytes": 802915,
+      "mtime_ns": 1792485015425472569
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/btc/results/baseline/trades.csv",
+      "bytes": 3619864,
+      "mtime_ns": 1792485158258244523
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/config.json",
+      "bytes": 825,
+      "mtime_ns": 1792485363036946901
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/entries.csv",
+      "bytes": 636881,
+      "mtime_ns": 1792485362985297074
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+      "bytes": 2748933,
+      "mtime_ns": 1792485476240980320
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/config.json",
+      "bytes": 831,
+      "mtime_ns": 1792485580021082247
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/candles.csv.gz",
+      "bytes": 2233120,
+      "mtime_ns": 1792485579086684870
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/entries.csv",
+      "bytes": 710272,
+      "mtime_ns": 1792485579987267573
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/pepe/results/baseline/trades.csv",
+      "bytes": 3393082,
+      "mtime_ns": 1792485695315536713
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/config.json",
+      "bytes": 825,
+      "mtime_ns": 1792485814654277562
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/candles.csv.gz",
+      "bytes": 2344043,
+      "mtime_ns": 1792485813684489991
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/entries.csv",
+      "bytes": 683986,
+      "mtime_ns": 1792485814618197496
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/zec/results/baseline/trades.csv",
+      "bytes": 2898216,
+      "mtime_ns": 1792485900438156082
+    }
+  ],
+  "checks": {
+    "BTC": {
+      "cached_native_baseline_parity": {
+        "rows": 10338,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 10338,
+        "status": "passed"
+      },
+      "scalar_paths_checked": 182
+    },
+    "ETH": {
+      "cached_native_baseline_parity": {
+        "rows": 8202,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 8202,
+        "status": "passed"
+      },
+      "scalar_paths_checked": 182
+    },
+    "PEPE": {
+      "cached_native_baseline_parity": {
+        "rows": 9148,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 9148,
+        "status": "passed"
+      },
+      "scalar_paths_checked": 182
+    },
+    "ZEC": {
+      "cached_native_baseline_parity": {
+        "rows": 8830,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 8830,
+        "status": "passed"
+      },
+      "scalar_paths_checked": 182
+    }
+  },
+  "runtime_phase": "screening; development-selected arms require native verification",
+  "generated_at": "2026-10-20T09:11:59.950533+00:00",
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-5m-params-20261020-v1
+    artifact_type: manifest
+    role: Bounded 5m stop and trailing search with time-ordered selection and native validation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8609ed6f740749131abee75ad85c04f834483ad2
+    source_path: experiments/active/exp-range-5m-params-20261020-v1/receipt.json
+    storage_uri: repo://experiments/active/exp-range-5m-params-20261020-v1/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Compact configuration, summary, selection, diagnostic and native receipts tracked. 52 compressed path ledgers and
+      native fills preserved locally and inventoried by path/size without content hashing. All tested arms remain net negative;
+      no profitability or account-return claim.
   - artifact_id: monday-range-fanshen-v2-9-20261020-delivery
     artifact_type: manifest
     role: Pine V2.9 optional 5m entry delivery and native clock validation
