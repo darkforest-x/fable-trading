@@ -1,0 +1,264 @@
+
+// TEMPORARY QA APPENDIX. Never included in the delivered private script.
+// Exercises the production transition helpers with hand-computed OHLC paths.
+if barstate.islast
+    TxWatch fixtureWatch = TxWatch.new()
+    bool watchPass = not txEligible(fixtureWatch, 1, 1000)
+    txObserve(fixtureWatch, 1, 1000)
+    watchPass := watchPass and not txEligible(fixtureWatch, 1, 1000) and txEligible(fixtureWatch, 1, 2000) and not txEligible(fixtureWatch, -1, 2000)
+    // Multiple admissions from one observation remain eligible.
+    watchPass := watchPass and txEligible(fixtureWatch, 1, 3000) and txEligible(fixtureWatch, 1, 4000)
+    txObserve(fixtureWatch, 1, 5000)
+    watchPass := watchPass and fixtureWatch.since == 5000 and not txEligible(fixtureWatch, 1, 5000) and txEligible(fixtureWatch, 1, 6000)
+    txObserve(fixtureWatch, -1, 4000)
+    watchPass := watchPass and fixtureWatch.side == 1 and fixtureWatch.since == 5000
+    txObserve(fixtureWatch, -1, 7000)
+    watchPass := watchPass and fixtureWatch.since == 7000 and not txEligible(fixtureWatch, 1, 8000) and txEligible(fixtureWatch, -1, 8000) and txEligible(fixtureWatch, -1, 9000)
+    bool stopPass = math.abs(txRoundedStop(1, 98.25, 1.0, 0.1) - 97.2) < 0.000001 and math.abs(txRoundedStop(-1, 101.25, 1.0, 0.1) - 102.3) < 0.000001
+    TxTrade fixtureLong = TxTrade.new(1000, 0, 1, 100.0, 99.0, 1.0, 99.0)
+    txAdvance(fixtureLong, 0, 1000, 100, 120, 1, 105, true, 1, 5, 4, 0.01)
+    bool entryPass = fixtureLong.endedAt == 0 and fixtureLong.peakR == 0 and not fixtureLong.armed
+    txAdvance(fixtureLong, 1000, 2000, 100, 106, 99.5, 104, true, 1, 5, 4, 0.01)
+    bool armPass = not fixtureLong.armed and fixtureLong.protection == 99 and fixtureLong.peakR == 6
+    txAdvance(fixtureLong, 2000, 3000, 104, 106, 100, 105, true, 1, 5, 4, 0.01)
+    armPass := armPass and fixtureLong.armed and fixtureLong.armedAt == 3000 and fixtureLong.protection == 101 and fixtureLong.endedAt == 0
+    txAdvance(fixtureLong, 3000, 4000, 105, 106, 102, 104, true, 1, 5, 4, 0.01)
+    bool ratchetPass = fixtureLong.protection == 101
+    txAdvance(fixtureLong, 4000, 5000, 104, 110, 100.5, 109, true, 1, 5, 4, 0.01)
+    bool exitPass = fixtureLong.endedAt == 5000 and fixtureLong.exitPrice == 101 and fixtureLong.currentR == 1 and fixtureLong.reason == 2
+    TxTrade fixtureShort = TxTrade.new(1000, 0, -1, 100.0, 101.0, 1.0, 101.0)
+    txAdvance(fixtureShort, 1000, 2000, 100, 100.5, 94, 95, true, 1, 5, 4, 0.01)
+    bool shortPass = fixtureShort.armed and fixtureShort.protection == 99 and fixtureShort.endedAt == 0
+    txAdvance(fixtureShort, 2000, 3000, 95, 99.5, 94, 95, false, 1, 5, 4, 0.01)
+    shortPass := shortPass and fixtureShort.exitPrice == 99 and fixtureShort.currentR == 1 and fixtureShort.reason == 2
+    TxTrade fixtureGap = TxTrade.new(1000, 0, 1, 100.0, 99.0, 1.0, 99.0)
+    txAdvance(fixtureGap, 1000, 2000, 97, 98, 96, 97, false, 1, 5, 4, 0.01)
+    bool gapPass = fixtureGap.exitPrice == 97 and fixtureGap.endedAt == 1000 and fixtureGap.currentR == -3 and fixtureGap.reason == 1
+    TxTrade fixtureNoPartial = TxTrade.new(1000, 0, 1, 100.0, 99.0, 1.0, 99.0)
+    txAdvance(fixtureNoPartial, 1000, 2000, 100, 104, 99.5, 103, true, 0.1, 5, 4, 0.01)
+    bool noPartialPass = fixtureNoPartial.endedAt == 0 and not fixtureNoPartial.armed and fixtureNoPartial.protection == 99
+    array<TxTrade> independent = array.new<TxTrade>()
+    array<TxTrade> archived = array.new<TxTrade>()
+    TxTrade oldLive = TxTrade.new(1000, 0, 1, 100, 90, 10, 90)
+    independent.push(oldLive)
+    independent.push(fixtureGap)
+    independent.push(fixtureNoPartial)
+    for trade in independent
+        archived.push(trade)
+    txRemoveClosed(independent)
+    bool independentPass = independent.size() == 2 and archived.size() == 3
+    txAdvance(oldLive, 5000, 6000, 100, 102, 89, 101, false, 1, 5, 4, 0.01)
+    txRemoveClosed(independent)
+    independentPass := independentPass and independent.size() == 1 and archived.first().endedAt == 6000 and archived.size() == 3
+    // A left-overlapping frame survives; the full rightmost chart bar is included.
+    bool viewportPass = txIntersects(1000000, 2000000, 9000000, 1500000, 1800000)
+    viewportPass := viewportPass and txIntersects(1799999, 3000000, 9000000, 1500000, 1800000)
+    viewportPass := viewportPass and not txIntersects(1800000, 3000000, 9000000, 1500000, 1800000)
+    viewportPass := viewportPass and not txIntersects(1000000, 1200000, 9000000, 1500000, 1800000)
+    array<string> records = array.new<string>()
+    for n = 1 to 50
+        TxTrade record = TxTrade.new(n * 1000000, 0, 1, 100, 99, 1, 99)
+        record.endedAt := n * 1000000 + 400000
+        records.push(txPack(record))
+    [olderRows, olderCount] = txSelect(records, 60000000, 1000000, 4000000, 40)
+    [newerRows, newerCount] = txSelect(records, 60000000, 48000000, 51000000, 40)
+    [wideRows, wideCount] = txSelect(records, 60000000, 0, 51000000, 40)
+    [emptyRows, emptyCount] = txSelect(records, 60000000, 0, 1000000, 40)
+    viewportPass := viewportPass and olderCount == 3 and newerCount == 3 and wideCount == 50 and wideRows.size() == 40 and emptyCount == 0
+    viewportPass := viewportPass and str.startswith(olderRows.first(), "1000000,") and str.startswith(wideRows.first(), "11000000,") and records.size() == 50
+    // A repeated same-side entry and a reverse observation cannot close peers.
+    TxTrade peer = TxTrade.new(2000, 1000, 1, 102, 95, 7, 95)
+    TxTrade earlier = TxTrade.new(1000, 0, 1, 100, 99, 1, 99)
+    txObserve(fixtureWatch, -1, 10000)
+    txAdvance(earlier, 10000, 11000, 100, 103, 98, 101, false, 1, 5, 4, 0.01)
+    txAdvance(peer, 10000, 11000, 100, 103, 98, 101, false, 1, 5, 4, 0.01)
+    bool peerPass = earlier.endedAt == 11000 and peer.endedAt == 0 and peer.protection == 95
+    array<TxTrade> manyLive = array.new<TxTrade>()
+    for n = 1 to 25
+        manyLive.push(TxTrade.new(n * 1000, 0, 1, 100, 90, 10, 90))
+    txRemoveClosed(manyLive)
+    peerPass := peerPass and manyLive.size() == 25
+    if not (viewportPass and peerPass and independentPass and watchPass and stopPass and entryPass and armPass and ratchetPass and exitPass and shortPass and gapPass and noPartialPass)
+        runtime.error("V28_NATIVE_CHECKS_FAIL watch=" + str.tostring(watchPass) + " stop=" + str.tostring(stopPass) + " entry=" + str.tostring(entryPass) + " arm=" + str.tostring(armPass) + " ratchet=" + str.tostring(ratchetPass) + " exit=" + str.tostring(exitPass) + " short=" + str.tostring(shortPass) + " gap=" + str.tostring(gapPass) + " partial=" + str.tostring(noPartialPass))
+
+// New V2.7 phase and event-order fixtures call the production helper.
+if barstate.islast
+    TxTrade hLong = TxTrade.new(1000, 0, 1, 100, 99, 1, 99)
+    txAdvance(hLong, 1000, 2000, 100, 106, 99.5, 105, true, 1, 5, 4, 0.01)
+    txExitOnH1(hLong, -1, 2000, 105)
+    bool hourlyPass = hLong.endedAt == 2000 and hLong.reason == 3 and hLong.exitPrice == 105 and hLong.currentR == 5 and hLong.peakR == 6
+    txExitOnH1(hLong, -1, 3000, 109)
+    hourlyPass := hourlyPass and hLong.endedAt == 2000 and hLong.exitPrice == 105
+    TxTrade hShort = TxTrade.new(1000, 0, -1, 100, 101, 1, 101)
+    txAdvance(hShort, 1000, 2000, 100, 100.5, 94, 95, true, 1, 5, 4, 0.01)
+    txExitOnH1(hShort, -1, 2000, 95)
+    txExitOnH1(hShort, 0, 2000, 95)
+    txExitOnH1(hShort, 1, 1500, 95)
+    hourlyPass := hourlyPass and hShort.endedAt == 0
+    txExitOnH1(hShort, 1, 3000, 94)
+    hourlyPass := hourlyPass and hShort.reason == 3 and hShort.currentR == 6
+    TxTrade unarmed = TxTrade.new(1000, 0, 1, 100, 99, 1, 99)
+    txExitOnH1(unarmed, -1, 2000, 104)
+    hourlyPass := hourlyPass and unarmed.endedAt == 0
+    TxTrade stopFirst = TxTrade.new(1000, 0, 1, 100, 99, 1, 99)
+    txAdvance(stopFirst, 1000, 2000, 100, 106, 99.5, 105, true, 1, 5, 4, 0.01)
+    txAdvance(stopFirst, 2000, 3000, 105, 110, 100, 109, true, 1, 5, 4, 0.01)
+    txExitOnH1(stopFirst, -1, 3000, 109)
+    hourlyPass := hourlyPass and stopFirst.reason == 2 and stopFirst.exitPrice == 101 and stopFirst.peakR == 6
+    TxTrade negativeExit = TxTrade.new(1000, 0, 1, 100, 99, 1, 99)
+    txAdvance(negativeExit, 1000, 2000, 100, 106, 99.5, 105, true, 10, 5, 4, 0.01)
+    txAdvance(negativeExit, 2000, 3000, 105, 106, 99.1, 99.5, true, 10, 5, 4, 0.01)
+    txExitOnH1(negativeExit, -1, 3000, 99.5)
+    hourlyPass := hourlyPass and negativeExit.reason == 3 and negativeExit.currentR == -0.5
+    bool captionPass = txPriceText(100, false) == "" and str.length(txPriceText(100, true)) > 0 and txRText(5) == "+5R" and txRText(-0.5) == "-0.5R"
+    if not hourlyPass or not captionPass
+        runtime.error("V28_HOURLY_CHECKS_FAIL phase=" + str.tostring(hourlyPass) + " caption=" + str.tostring(captionPass))
+
+txBrief(string row) =>
+    array<string> fields = str.split(row, ",")
+    array.join(array.slice(fields, 0, 12), ",")
+
+varip bool txFixtureLogged = false
+if barstate.islast and not txFixtureLogged and not na(tx)
+    txFixtureLogged := true
+    float timeSignature = 0
+    float priceSignature = 0
+    float exitSignature = 0
+    float directionSignature = 0
+    int index = 0
+    for row in tx.trades
+        array<string> fields = str.split(row, ",")
+        if fields.size() == 13
+            index += 1
+            timeSignature += index * (str.tonumber(fields.get(0)) + str.tonumber(fields.get(1))) / 60000
+            priceSignature += index * (str.tonumber(fields.get(3)) + 3 * str.tonumber(fields.get(4))) / syminfo.mintick
+            exitSignature += index * (str.tonumber(fields.get(9)) / 60000 + nz(str.tonumber(fields.get(10))) / syminfo.mintick + str.tonumber(fields.get(11)))
+            directionSignature += index * str.tonumber(fields.get(2))
+    log.info("V28_NATIVE_CHECKS_PASS count={0} active={1} total={2} through={3} watch={4}/{5} timeSig={6} priceSig={7} exitSig={8} sideSig={9}", tx.count, tx.active, tx.total, tx.closeAt, tx.watchSide, tx.watchSince, timeSignature, priceSignature, exitSignature, directionSignature)
+    log.info("TX_SOURCE_START {0}", tx.sourceStart)
+    log.info("V28_VIEW left={0} right={1} rightEnd={2} matched={3} shown={4} boxes={5} labels={6} polys={7}", txVisibleLeft, txVisibleRight, txVisibleEnd, txVisibleTotal, txVisibleRows.size(), box.all.size(), label.all.size(), polyline.all.size())
+    for row in txVisibleRows
+        log.info("V28_VISIBLE_ROW {0}", txBrief(row))
+    for row in tx.trades
+        array<string> values = str.split(row, ",")
+        if int(str.tonumber(values.get(0))) >= 1791783000000
+            log.info("V28_PARITY_ROW {0}", txBrief(row))
+
+// A second reconciliation of an unchanged confirmed view must allocate zero
+// drawings. This executes the production path, including the 40-frame budget.
+if barstate.islast and not na(tx)
+    int reused = txSync(txFrames, txVisibleRows, tx.closeAt)
+    if reused != 0 or txFrames.size() != txVisibleRows.size()
+        runtime.error("V28_REUSE_FAIL")
+    for frame in txFrames
+        if not txSameDrawing(frame, frame.row, tx.closeAt)
+            runtime.error("V28_DRAW_STATE_FAIL")
+
+qaOldKeyEngine(int sourceTime, int sourceEnd, float sourceHigh, float sourceLow, float sourceClose, float sourceVolume) =>
+    var array<float> dh = array.new<float>()
+    var array<float> dl = array.new<float>()
+    var array<float> dc = array.new<float>()
+    var array<float> dv = array.new<float>()
+    var array<NakedPoint> naked = array.new<NakedPoint>()
+    var int firstSeen = sourceTime
+    var int lastEnd = na
+    var int activeDay = na
+    var int activeWeek = na
+    var bool dayOK = false
+    var bool weekOK = false
+    var float wh = na
+    var float wl = na
+    var int profileStart = na
+    var int profileEnd = na
+    var float poc = na
+    var float vah = na
+    var float val = na
+    var int priorStart = na
+    var int priorEnd = na
+    var float priorHigh = na
+    var float priorLow = na
+    int ds = dayStart(sourceTime)
+    int de = dayStart(sourceTime, 1)
+    int ws = weekStart(sourceTime)
+    int we = dayStart(ws, 7)
+    bool continuous = not na(lastEnd) and sourceTime == lastEnd
+    bool validBar = sourceEnd - sourceTime == 900000 and not na(sourceHigh) and not na(sourceLow) and sourceHigh >= sourceLow
+    // A gap makes all earlier untouched claims unknown, even if price stayed away.
+    if not continuous or not validBar
+        naked.clear()
+        firstSeen := sourceTime
+    if na(activeDay) or ds != activeDay
+        activeDay := ds
+        dh.clear()
+        dl.clear()
+        dc.clear()
+        dv.clear()
+        dayOK := sourceTime == ds
+    else
+        dayOK := dayOK and continuous
+    if na(activeWeek) or ws != activeWeek
+        activeWeek := ws
+        wh := sourceHigh
+        wl := sourceLow
+        weekOK := sourceTime == ws
+    else
+        wh := math.max(wh, sourceHigh)
+        wl := math.min(wl, sourceLow)
+        weekOK := weekOK and continuous
+    dayOK := dayOK and validBar and not na(sourceVolume) and sourceVolume >= 0
+    weekOK := weekOK and validBar
+    // Existing POCs see this candle. A newly formed POC does not see its own day.
+    int cutoffDay = dayStart(sourceEnd, -nakedDays)
+    int k = naked.size() - 1
+    while k >= 0
+        NakedPoint point = naked.get(k)
+        if point.start < cutoffDay or (sourceLow <= point.price and sourceHigh >= point.price)
+            naked.remove(k)
+        k -= 1
+    dh.push(sourceHigh)
+    dl.push(sourceLow)
+    dc.push(sourceClose)
+    dv.push(sourceVolume)
+    // Freeze at the actual local midnight, including 23/25-hour DST days.
+    // No first-bar-of-tomorrow delay, and no partial-day replacement.
+    if sourceEnd == de and dayOK
+        [p, h, l] = estimatedProfile(dh, dl, dc, dv)
+        profileStart := ds
+        profileEnd := de
+        poc := p
+        vah := h
+        val := l
+        if not na(p)
+            naked.push(NakedPoint.new(ds, de, p))
+    if sourceEnd == we and weekOK
+        priorStart := ws
+        priorEnd := we
+        priorHigh := wh
+        priorLow := wl
+    lastEnd := sourceEnd
+    string packed = ""
+    for point in naked
+        packed += str.tostring(point.start) + "," + str.tostring(point.finish) + "," + str.tostring(point.price, "#.################") + ";"
+    KeySnapshot.new(sourceEnd, firstSeen, profileStart, profileEnd, poc, vah, val,
+         priorStart, priorEnd, priorHigh, priorLow, packed)
+
+
+qaKeyEqual(KeySnapshot a, KeySnapshot b) =>
+    a.closeAt == b.closeAt and a.coverageAt == b.coverageAt and
+     nz(a.profileStart) == nz(b.profileStart) and nz(a.profileEnd) == nz(b.profileEnd) and
+     nz(a.poc) == nz(b.poc) and nz(a.vah) == nz(b.vah) and nz(a.val) == nz(b.val) and
+     nz(a.weekStart) == nz(b.weekStart) and nz(a.weekEnd) == nz(b.weekEnd) and
+     nz(a.weekHigh) == nz(b.weekHigh) and nz(a.weekLow) == nz(b.weekLow) and a.naked == b.naked
+
+if timeframe.in_seconds() == 900
+    KeySnapshot qaNew = keyEngine(time, time_close, high, low, close, volume)
+    KeySnapshot qaOld = qaOldKeyEngine(time, time_close, high, low, close, volume)
+    if not qaKeyEqual(qaNew, qaOld)
+        runtime.error("V28_KEY_CACHE_PARITY_FAIL")
+    if barstate.islastconfirmedhistory
+        log.info("V28_KEY_CACHE_PARITY_PASS bars={0} naked={1}", bar_index + 1, qaNew.naked)
+
+varip bool qaReuseLogged = false
+if barstate.islast and not na(tx) and not qaReuseLogged
+    qaReuseLogged := true
+    log.info("V28_REUSE_PASS frames={0} noExtraAllocations=0", txFrames.size())
