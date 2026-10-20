@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-entrybar-stop-20261020-v1
+    artifact_type: manifest
+    role: Entry-candle versus five-candle initial stops with native fills and paired tail attribution
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7ed68577d7
+    generator_commit: 7ed68577d7
+    source_path: experiments/active/exp-eth-entrybar-stop-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-entrybar-stop-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Two new arms15352native positions30704fills allparity;91tests. Original5bar stops reconstructed7676rows with5prefixcausalitychecks. Same0.05percent buffer,20bp costs;oldruns reused. FixedrisknetR worsens botharms despite more20Rcounts. Rawlocaloutputs inventoried without hashes.
   - artifact_id: eth-timebe-rsi-20261020-v2
     artifact_type: manifest
     role: Second opposite RSI diamond scaleout fills and paired first-diamond comparison
@@ -33137,3 +33149,19 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Frozen V2.8 baseline1889;holding10R121/20R34 versus exits54/15,max202.89R. Initial-stop one-hour touch recovery935/1582;both-stopped matched signal821/1384 versus random830/1384. Future recovery labels not achievable profit.3775holding paths and18180complete recovery windows independently audited;8focused tests. Separate decimal-exact5R sensitivity affects9signal arming times but only1payoff,+1.01724R;original Pine and baseline unchanged. Notion3ff8856479af8120a33ae4b0ea3ae4c2 updated.
+
+  - artifact_id: eth-trade-review-20260823-20260922
+    source_commit: b485d48683
+    artifact_type: manifest
+    role: frozen_native_trade_review_export
+    source_repo: darkforest-x/fable-trading
+    source_path: outputs/01a1549e-b1bc-70a2-b5f4-d24d9ddf2b78/eth_trade_review_20260823_20260922/validation.json
+    storage_uri: repo://outputs/01a1549e-b1bc-70a2-b5f4-d24d9ddf2b78/eth_trade_review_20260823_20260922/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner selected the existing backtest's final calendar month in Asia/Shanghai, Aug23 through Sep22.
+      Projection of frozen baseline and second_rsi5 native results, not a replay or new experiment.
+      All166 signal entries and682 fills included; original-position grossR and fees reconcile below1e-8.
+      One data-end forced close explicitly labeled; peakR excludes stop-fill candles.
+      Source commit identifies the frozen study builder; local export scripts and XLSX are beside the manifest.
