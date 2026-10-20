@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-multicoin-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f935e1ac4d
+    status: inconclusive
+    question: Do the frozen range baseline and BE3 policies transfer to BTC and ETH, with a same-period PEPE comparator?
+    single_variable: Coin only; existing baseline and BE3 policies, costs and matching reused without retuning over one common confirmed-data interval.
+    artifacts: [range-multicoin-20261020-v1]
+    canonical_report: experiments/active/exp-range-multicoin-20261020-v1/receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: BTC1373 baseline-1191.90R/BE3-1291.70R;ETH986 -647.17R/-603.63R;PEPE1231 -449.48R/-442.83R. All18coin-policy-segments negative.14360native positions/28720fills;185.44s first run.
+    notes: 2024-08-02 to2026-09-22 14UTC; omit earlier unconfirmed archive months. Same-coin matched random baseline -1803.46/-754.05/-1001.63R. Native PEPE preview16trades/32fills,4105bars. Independent R not account return;20bp cost, no funding. Notion3ff8856479af81fa8e43dd40dbdcbe52. No Pine or engine changes.
   - experiment_id: exp-range-nautilus-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0278e1eb81

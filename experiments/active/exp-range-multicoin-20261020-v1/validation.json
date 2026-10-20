@@ -1,0 +1,53 @@
+{
+  "new_tests": 2,
+  "native_positions": 14360,
+  "native_fills": 28720,
+  "economic_identities": "passed",
+  "fill_cardinality": "two fills per independent trade",
+  "largest_MFE_checks": [
+    {
+      "coin": "btc",
+      "trade_id": "signal-453",
+      "entry_time": "2025-04-06 05:30:00+00:00",
+      "entry": 83507.8,
+      "risk_percent": 0.09148845976065556,
+      "extreme": 78669.9,
+      "max_r": 63.32329842931225,
+      "net_r": 48.81524083769076
+    },
+    {
+      "coin": "eth",
+      "trade_id": "signal-279",
+      "entry_time": "2025-02-02 14:45:00+00:00",
+      "entry": 3096.1,
+      "risk_percent": 0.22189205775008386,
+      "extreme": 2086.11,
+      "max_r": 147.01455604074948,
+      "net_r": 59.740582241627294
+    },
+    {
+      "coin": "pepe",
+      "trade_id": "signal-1048",
+      "entry_time": "2026-06-02 04:00:00+00:00",
+      "entry": 3.403e-06,
+      "risk_percent": 0.17631501616222306,
+      "extreme": 3.039e-06,
+      "max_r": 60.66666666666208,
+      "net_r": 37.69899999999712
+    }
+  ],
+  "preview": {
+    "native_renderer": true,
+    "static_export_inspected": true,
+    "interactive_browser_check": "file protocol rejected by browser policy; no workaround used",
+    "bars": 4105,
+    "fills": 32,
+    "trades": 16
+  },
+  "notion": "https://app.notion.com/p/3ff8856479af81fa8e43dd40dbdcbe52",
+  "source_commit": "f935e1ac4d",
+  "initial_run_seconds": 185.435593042057,
+  "cached_btc_cli_wall_seconds": 0.75980525,
+  "browser_cleanup": "No QA browser sessions created; native PNG export exited. User-requested preview tab retained.",
+  "background_check": "monitor service_alive=true, scan errors=0; research/copier listener processes retained."
+}

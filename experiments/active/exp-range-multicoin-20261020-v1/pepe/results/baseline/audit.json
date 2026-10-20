@@ -1,0 +1,17 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "market_tick": 1e-10,
+  "protection_tick": 1e-09,
+  "research_quantity": "max(1, floor(1000 / entry)); returns normalized per original risk",
+  "positions": 2462,
+  "fills": 4924,
+  "max_simultaneous_positions": 5,
+  "bars_with_both_directions": 6538,
+  "prepare_seconds": 1.249002082971856,
+  "replay_seconds": 16.62306766700931,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ],
+  "accounting": "independent original-risk R; frozen account; not portfolio returns"
+}

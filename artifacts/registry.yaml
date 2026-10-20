@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-multicoin-20261020-v1
+    artifact_type: manifest
+    role: Frozen cross-coin native replay and interactive fill preview
+    source_repo: darkforest-x/fable-trading
+    source_commit: f935e1ac4d
+    source_path: experiments/active/exp-range-multicoin-20261020-v1/receipt.json
+    storage_uri: repo://experiments/active/exp-range-multicoin-20261020-v1/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: BTC/ETH/PEPE common-period baseline and BE3 all negative. Native fills, input lineage, summaries and weekly paired inference preserved.2new tests and14360economic/fill checks passed. Existing installed Nautilus template; HTML/PNG local regenerable preview, no account equity claim.
   - artifact_id: range-nautilus-20261020-v1
     artifact_type: manifest
     role: Native Nautilus range replay parity and cache timing receipt
