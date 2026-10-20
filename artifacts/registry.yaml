@@ -32846,3 +32846,22 @@ artifacts:
       PEPE target October16 13:30 and five other closed records match12fields; one live entry matches5initial fields.
       Native15m/1H snapshots match; percentage buffer0.05 and5R/4ATR rules retained. Display10default20max does not cap tracking.
       Prior V2.4 source/private script preserved. No orders or profitability inference; Pine exempt from Stitch.
+
+  - artifact_id: monday-range-fanshen-v2-6-20261020-delivery
+    source_commit: a966f7c2f69860f47d6a0e4c056b91eecac1bed0
+    artifact_type: manifest
+    role: versioned_pine_trade_reference_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_6_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_6_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.6 retains the source-window trade archive and selects lifetime-overlapping frames in chart context.
+      Default40 maximum40 per viewport; visible/matching counts and source coverage disclosed. AllV2.5 admission and exit rules preserved.
+      Native15m historical date navigation and1H wide view retain identical146-entry ledger signatures;
+      old adjacent views show3/4 frames with3 identical overlapping records. Wide view shows40/109 with200 boxes.
+      Six closed records match priorV2.5 on12fields;11 focused tests pass. Private revision3 saved20261020T12:59:54+08:00.
+      Prior source/private preserved; QA appendix removed; finalPEPE15m historical chart shows4/4 and layout saved.
+      Native mouse-drag automation did not move viewport and is not claimed as a completed manual drag test.
+      No orders, profitability inference, or changes to existing alerts; Pine exempt fromStitch.
