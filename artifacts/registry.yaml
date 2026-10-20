@@ -32911,3 +32911,15 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Frozen2400arms and1889signals. All equal-risk full-history netR negative;four equal-notional positives audited separately. Raw paths161MiB and research inputs stay local at receipt paths;no content hashes.146native signatures and35842selected scalar paths match.26tests pass;full-registry validation separately blocked by pre-existing spike-v8-total2-1h-native-20260914-delivery missing source_commit;this new record validates.
+
+  - artifact_id: pepe-range-recovery-20261020-v1
+    source_commit: 65ee2be5e49019d72a33fdd462f34a65cb241606
+    artifact_type: manifest
+    role: pepe_holding_excursion_and_post_stop_recovery
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-pepe-range-exits-20261020-v1/results/recovery_v1/summary.json
+    storage_uri: repo://experiments/active/exp-pepe-range-exits-20261020-v1/results/recovery_v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen V2.8 baseline1889;holding10R121/20R34 versus exits54/15,max202.89R. Initial-stop one-hour touch recovery935/1582;both-stopped matched signal821/1384 versus random830/1384. Future recovery labels not achievable profit.3775holding paths and18180complete recovery windows independently audited;8focused tests. Separate decimal-exact5R sensitivity affects9signal arming times but only1payoff,+1.01724R;original Pine and baseline unchanged. Notion3ff8856479af8120a33ae4b0ea3ae4c2 updated.

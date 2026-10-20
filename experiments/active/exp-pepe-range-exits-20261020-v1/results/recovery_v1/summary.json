@@ -1,0 +1,88 @@
+{
+  "builder_commit": "65ee2be5e49019d72a33fdd462f34a65cb241606",
+  "configuration": {
+    "analysis": "holding MFE and post-stop recovery, descriptive follow-up v1",
+    "owner_request": "统计过最大打到的 R 吗，还有止损后立马又回来的这种呢",
+    "baseline": "w5_b0.05_trail5_atr4_cap0",
+    "windows_minutes": [
+      15,
+      30,
+      60,
+      240,
+      1440
+    ],
+    "thresholds_r": [
+      0,
+      1,
+      3,
+      5,
+      10,
+      20
+    ],
+    "risk": "Original entry minus original stop, signed by side; frozen after exit.",
+    "clock": "Start at the stop-hit 5m bar close; observe only subsequent complete 5m bars. Exclude the ambiguous remainder of the stop-hit bar. Timing is bar resolution, not exact execution time.",
+    "boundary": "Do not cross original segment right edge. A horizon contributes only when fully observed; report censored counts.",
+    "holding_mfe": "Keep conservative existing peak_r and independently reconstruct it. Stop-hit bar favorable wick excluded; its possible contribution recorded separately as an upper bound.",
+    "recovery": "Touch and 5m close reclamation of entry are separate. Post-exit R is a hypothetical price displacement, not a realized trade return.",
+    "adverse_excursion": "For entry recovery, include stop-hit bar and recovery-hit bar full adverse extremes as a conservative adverse bound; intrabar order unknown.",
+    "control": "Reuse frozen same-side/week/causal-volatility matched random entries; show stopped-population rates and jointly eligible pairs where both stopped, explicitly conditional.",
+    "scope": "No new strategy or parameter selection. No Pine changes, reentry performance claims, or live actions."
+  },
+  "source_rows": 364633,
+  "audited_holding_paths": 3775,
+  "audited_recovery_windows": 18180,
+  "signal_trades": 1889,
+  "reasons": {
+    "1": 1584,
+    "2": 222,
+    "3": 83
+  },
+  "maximum_holding_r": 202.88888888892146,
+  "gross_r": 302.4198236747968,
+  "net_r": -546.7684614377234,
+  "initial_stops_that_touched_5r": 34,
+  "compound_recovery_counts": [
+    {
+      "segment": -1,
+      "eligible_24h": 1579,
+      "recovered_entry_in_1h": 932,
+      "quick_recovery_then_24h_touch_1r": 862,
+      "quick_recovery_then_24h_touch_3r": 709,
+      "quick_recovery_then_24h_touch_5r": 579,
+      "quick_recovery_then_24h_touch_10r": 330,
+      "quick_recovery_then_24h_touch_20r": 131
+    },
+    {
+      "segment": 0,
+      "eligible_24h": 741,
+      "recovered_entry_in_1h": 439,
+      "quick_recovery_then_24h_touch_1r": 407,
+      "quick_recovery_then_24h_touch_3r": 339,
+      "quick_recovery_then_24h_touch_5r": 268,
+      "quick_recovery_then_24h_touch_10r": 153,
+      "quick_recovery_then_24h_touch_20r": 66
+    },
+    {
+      "segment": 1,
+      "eligible_24h": 489,
+      "recovered_entry_in_1h": 285,
+      "quick_recovery_then_24h_touch_1r": 263,
+      "quick_recovery_then_24h_touch_3r": 211,
+      "quick_recovery_then_24h_touch_5r": 176,
+      "quick_recovery_then_24h_touch_10r": 101,
+      "quick_recovery_then_24h_touch_20r": 39
+    },
+    {
+      "segment": 2,
+      "eligible_24h": 349,
+      "recovered_entry_in_1h": 208,
+      "quick_recovery_then_24h_touch_1r": 192,
+      "quick_recovery_then_24h_touch_3r": 159,
+      "quick_recovery_then_24h_touch_5r": 135,
+      "quick_recovery_then_24h_touch_10r": 76,
+      "quick_recovery_then_24h_touch_20r": 26
+    }
+  ],
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.pepe_range_recovery",
+  "interpretation": "Descriptive excursions; future recovery is not a realizable strategy payoff. No strategy, cost, or sizing changes."
+}

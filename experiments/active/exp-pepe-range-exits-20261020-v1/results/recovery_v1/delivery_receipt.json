@@ -1,0 +1,36 @@
+{
+  "analysis_id": "pepe-range-recovery-20261020-v1",
+  "source_commit": "65ee2be5e49019d72a33fdd462f34a65cb241606",
+  "notion_page": "https://app.notion.com/p/3ff8856479af8120a33ae4b0ea3ae4c2",
+  "notion_readback_verified": true,
+  "focused_tests": 8,
+  "audited_holding_paths": 3775,
+  "audited_complete_recovery_windows": 18180,
+  "maximum_holding_case_checked_against_raw_ohlc": 32,
+  "recent_stop_then_recover_case_checked_against_raw_ohlc": 1860,
+  "reproduction": ".venv/bin/python -m yoyo.evaluation.pepe_range_recovery",
+  "test_command": ".venv/bin/python -m pytest -q tests/evaluation/test_pepe_range_recovery.py",
+  "outputs": [
+    "summary.json",
+    "holding_thresholds.csv",
+    "holding_buckets.csv",
+    "recovery_summary.csv",
+    "conditional_matched_controls.json",
+    "post_stop_windows.csv.gz",
+    "all_trade_excursions.csv.gz",
+    "largest_holding_peaks.csv",
+    "fast_recoveries_with_largest_24h_move.csv",
+    "arming_boundary_audit.json"
+  ],
+  "limitations": [
+    "Future recovery is a retrospective label, not a strategy payoff.",
+    "Timing starts at the stop-hit 5m close; intrabar execution time is unknown.",
+    "Favorable wick on the stop-hit bar is excluded; holding upper bound is recorded separately.",
+    "Full-window denominators exclude observations crossing original segment boundaries.",
+    "Matched both-stopped control is a conditional descriptive comparison, not proof of strategy profitability.",
+    "Exact-5R floating-point sensitivity is isolated in arming_boundary_audit.json; baseline and Pine are preserved.",
+    "Existing 20bp costs exclude funding and additional slippage; overlapping independent R sums are not account returns."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
