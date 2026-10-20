@@ -65,12 +65,50 @@ def observe(bars, row, minutes, thresholds):
 
 
 def counts(frame, columns):
-    return {key: int(frame[key].fillna(False).astype(bool).sum())
+    return {key: int(frame[key].eq(True).sum())
             for key in columns}
 
 
 def write_json(path, value):
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False)+"\n")
+
+
+def audit_windows(raw, rows, rec, thresholds):
+    """Independent rolling-aggregate oracle for every complete future window."""
+    sources = rows.set_index(["population", "pair_id"])
+    checked = 0
+    for minutes, group in rec.groupby("minutes"):
+        width = int(minutes)//5
+        rolling = dict(high=raw.high.rolling(width).max(),
+                       low=raw.low.rolling(width).min(),
+                       high_close=raw.close.rolling(width).max(),
+                       low_close=raw.close.rolling(width).min())
+        for window in group.itertuples():
+            row = sources.loc[(window.population, window.pair_id)]
+            z = int(row.exit_i)
+            last = z + width
+            assert bool(window.complete) == (last <= min(int(row.end_i), len(raw)-1))
+            if not window.complete:
+                continue
+            favorable = rolling["high" if row.side == 1 else "low"].iloc[last]
+            adverse = rolling["low" if row.side == 1 else "high"].iloc[last]
+            closed = rolling["high_close" if row.side == 1 else "low_close"].iloc[last]
+            assert abs(window.post_max_r-row.side*(favorable-row.entry)/row.risk) < 1e-7
+            assert abs(window.post_min_r-row.side*(adverse-row.entry)/row.risk) < 1e-7
+            for threshold in thresholds:
+                for method, extreme in (("touch", favorable), ("close", closed)):
+                    assert getattr(window, f"{method}_{threshold}r") == (
+                        row.side*(extreme-row.entry) >= threshold*row.risk-1e-16)
+                when = getattr(window, f"first_touch_{threshold}r_minutes")
+                if pd.notna(when):
+                    idx = z + int(when)//5
+                    key = "high" if row.side == 1 else "low"
+                    price = row.entry + row.side*threshold*row.risk
+                    assert row.side*(raw[key].iloc[idx]-price) >= -1e-16
+                    previous = raw[key].iloc[z+1:idx]
+                    assert not (row.side*(previous-price) >= -1e-16).any()
+            checked += 1
+    return checked
 
 
 def main():
@@ -100,6 +138,7 @@ def main():
     rows["stop_bar_close_shanghai"] = close_times.iloc[
         rows.exit_i.to_numpy(dtype=int)].dt.tz_convert("Asia/Shanghai").to_numpy()
     rec = pd.DataFrame(recovery)
+    checked_windows = audit_windows(raw, rows, rec, cfg["thresholds_r"])
     boolean_cols = [f"{method}_{r}r" for method in ("touch", "close") for r in cfg["thresholds_r"]]
     summaries, holding_summaries = [], []
     for population in ("signal", "random"):
@@ -147,7 +186,7 @@ def main():
         pair = sample[sample.population == "signal"].merge(
             sample[sample.population == "random"], on="pair_id", suffixes=("", "_random"))
         paired.append(dict(minutes=minutes, both_initial_stop_and_covered=len(pair),
-            **{f"{name}_{key}": int(pair[key+suffix].fillna(False).astype(bool).sum())
+            **{f"{name}_{key}": int(pair[key+suffix].eq(True).sum())
                for name, suffix in (("signal", ""), ("random", "_random"))
                for key in boolean_cols}))
     write_json(out/"conditional_matched_controls.json", paired)
@@ -170,7 +209,7 @@ def main():
                   (signal.post_1440m_complete == True)]
     fast.sort_values("post_1440m_post_max_r", ascending=False).head(20)[columns].to_csv(
         out/"fast_recoveries_with_largest_24h_move.csv", index=False)
-    bucket = pd.cut(signal.holding_peak_r, [float("-inf"),1,3,5,10,20,float("inf")],
+    bucket = pd.cut(signal.holding_peak_r+1e-7, [float("-inf"),1,3,5,10,20,float("inf")],
                     right=False, labels=["<1", "1–3", "3–5", "5–10", "10–20", ">=20"])
     bucket_table = signal.assign(peak_bucket=bucket).groupby("peak_bucket", observed=False).agg(
         n=("pair_id","count"), gross_r=("gross_r","sum"), net_r=("net_r","sum"))
@@ -188,6 +227,7 @@ def main():
     write_json(out/"summary.json", dict(
         builder_commit=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
         configuration=cfg, source_rows=len(raw), audited_holding_paths=len(rows),
+        audited_recovery_windows=checked_windows,
         signal_trades=len(signal),
         reasons={str(int(k)):int(v) for k,v in signal.reason.value_counts().items()},
         maximum_holding_r=float(signal.holding_peak_r.max()),

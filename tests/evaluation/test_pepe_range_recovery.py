@@ -2,7 +2,8 @@
 from types import SimpleNamespace
 
 import numpy as np
-from yoyo.evaluation.pepe_range_recovery import excursions, observe
+import pandas as pd
+from yoyo.evaluation.pepe_range_recovery import counts, excursions, observe
 
 
 def record(**kwargs):
@@ -61,3 +62,7 @@ def test_decimal_tick_touch_is_retained():
     bars = candles()*1e-9
     r = record(entry=100e-9, risk=1e-9)
     assert observe(bars, r, 15, [5])["touch_5r"]
+
+
+def test_missing_censored_labels_are_not_recoveries():
+    assert counts(pd.DataFrame({"touch": [True, False, np.nan]}), ["touch"]) == {"touch": 1}
