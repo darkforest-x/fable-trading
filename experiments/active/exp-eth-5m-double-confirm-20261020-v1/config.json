@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-eth-5m-double-confirm-20261020-v1",
+  "baseline_config": "experiments/active/exp-range-entry5m-20261020-v1/eth/config.json",
+  "baseline_receipt": "experiments/active/exp-range-entry5m-20261020-v1/eth/results/receipt.json",
+  "baseline_ledger": "experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+  "start": "2024-08-02T00:00:00Z",
+  "splits": ["2025-01-01T00:00:00Z", "2026-01-01T00:00:00Z"],
+  "end": "2026-09-22T14:00:00Z",
+  "windows_5m": [5],
+  "seed": 20261020,
+  "volatility_edges": [0.001, 0.002, 0.004, 0.008, 0.016],
+  "arms": ["h1_baseline_cached", "watch15_immediate", "watch15_two_directional_bodies_next_close"],
+  "observation_refresh": "Every confirmed15m arrow refreshes watch and cancels pending confirmation",
+  "controls": "New arms: same week/segment/side/causal volatility bucket and same watch/body eligibility; sampling with replacement, excluding admitted signal timestamps. Old baseline retains frozen generic controls; cross-arm random levels are not a paired treatment effect.",
+  "frozen": "5m stop window5 plus0.05percent;15m close5R/ATR14x4;armed H1 opposite exit;20bp;no breakeven",
+  "training_eligible": false,
+  "production_eligible": false
+}
