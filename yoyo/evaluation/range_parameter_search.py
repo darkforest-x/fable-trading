@@ -211,12 +211,93 @@ def verify_native(config):
                       for symbol, r in records.items()}), flush=True)
 
 
+def audit(config):
+    """Independently recompute all stops/economics and the selected-arm changes."""
+    cfg = json.loads(config.read_text())
+    directory = config.parent
+    selected = json.loads((directory/"selection.json").read_text())
+    summary = pd.read_csv(directory/"summary.csv")
+    total, changes, summary_checks = 0, {}, 0
+    for symbol, source in cfg["source_configs"].items():
+        old = json.loads((ROOT/source).read_text())
+        frame = pd.read_csv(ROOT/old["data"], float_precision="round_trip")
+        ts = pd.to_datetime(frame.ts, unit="ms", utc=True)+pd.Timedelta(minutes=5)
+        candidates = pd.read_csv(ROOT/old["entry_candidates"])
+        ledgers = {}
+        for arm in cfg["arms"]:
+            rows = pd.read_csv(directory/symbol.lower()/f"{arm['name']}.csv.gz",
+                               float_precision="round_trip")
+            np.testing.assert_array_equal(rows.entry_i, candidates.entry_i)
+            np.testing.assert_array_equal(rows.pair_id, candidates.pair_id)
+            np.testing.assert_array_equal(rows.side, candidates.side)
+            np.testing.assert_array_equal(rows.population, candidates.population)
+            ii = rows.entry_i.to_numpy(int)
+            side = rows.side.to_numpy()
+            prices = frame.close.to_numpy()[ii]
+            window = int(arm["stop_window_5m"])
+            lows, highs = frame.low.to_numpy(), frame.high.to_numpy()
+            extrema = np.array([
+                np.min(lows[i-window+1:i+1]) if d > 0
+                else np.max(highs[i-window+1:i+1]) for i, d in zip(ii, side)
+            ])
+            raw = (extrema-side*prices*arm["buffer_percent"]/100)/old["tick"]
+            stops = np.where(side > 0, np.floor(raw+1e-8), np.ceil(raw-1e-8))*old["tick"]
+            risks = side*(prices-stops)
+            for name, expected in (("entry", prices), ("stop", stops), ("risk", risks)):
+                np.testing.assert_allclose(rows[name], expected, rtol=0, atol=old["tick"]*1e-7)
+            expected_gross = side*(rows.exit_price.to_numpy()-prices)/risks
+            expected_fee = .002*prices/risks
+            np.testing.assert_allclose(rows.gross_r, expected_gross, rtol=0, atol=1e-7)
+            np.testing.assert_allclose(rows.fee_r, expected_fee, rtol=0, atol=1e-7)
+            np.testing.assert_allclose(rows.net_r, expected_gross-expected_fee, rtol=0, atol=1e-7)
+            assert ((rows.exit_i > rows.entry_i) & (rows.exit_i <= rows.end_i)).all()
+            armed = rows.loc[rows.arm_i >= 0, "arm_i"].to_numpy(int)
+            assert (ts.iloc[armed].dt.minute % 15 == 0).all()
+            for segment in (-1, 0, 1, 2, -2):
+                p = rows[rows.population == "signal"]
+                if segment == -2:
+                    p = p[p.segment > 0]
+                elif segment >= 0:
+                    p = p[p.segment == segment]
+                reported = summary[(summary.symbol == symbol) & (summary.arm == arm["name"])
+                                   & (summary.segment == segment)].iloc[0]
+                assert reported.n == len(p)
+                np.testing.assert_allclose(reported.net_r, p.net_r.sum(), rtol=0, atol=1e-7)
+                summary_checks += 1
+            total += len(rows)
+            ledgers[arm["name"]] = rows
+        baseline = ledgers["baseline"]
+        winner = ledgers[selected[symbol]["development_selected"]]
+        a = baseline[(baseline.population == "signal") & (baseline.segment > 0)].set_index("pair_id")
+        b = winner[(winner.population == "signal") & (winner.segment > 0)].set_index("pair_id").loc[a.index]
+        gain = float((b.net_r-a.net_r).sum())
+        gross = float((b.gross_r-a.gross_r).sum())
+        fee = float((a.fee_r-b.fee_r).sum())
+        assert abs(gain-gross-fee) < 1e-7
+        changes[symbol] = dict(
+            later_n=len(a), later_delta_net_r=gain, gross_r_component=gross,
+            fee_r_reduction_component=fee,
+            later_fixed_1000_notional_baseline_usdt=float(a.net_notional_bp.sum()/10),
+            later_fixed_1000_notional_selected_usdt=float(b.net_notional_bp.sum()/10),
+            later_fixed_1000_notional_delta_usdt=float((b.net_notional_bp-a.net_notional_bp).sum()/10),
+        )
+    dump(directory/"diagnostics.json", dict(
+        source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        audited_rows=total, independently_checked_summaries=summary_checks,
+        later_period_changes=changes,
+        profitable_full_history_arms=int(((summary.segment == -1) & (summary.net_r > 0)).sum()),
+        profitable_yearly_arms=int(((summary.segment >= 0) & (summary.net_r > 0)).sum()),
+        note="Equal initial risk and equal notional are different allocation assumptions; neither is a funded account simulation.",
+    ))
+    print(json.dumps(dict(audited_rows=total, summary_checks=summary_checks)), flush=True)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, default=DEFAULT)
-    parser.add_argument("--phase", choices=["screen", "native"], required=True)
+    parser.add_argument("--phase", choices=["screen", "native", "audit"], required=True)
     args = parser.parse_args()
-    (screen if args.phase == "screen" else verify_native)(args.config.resolve())
+    dict(screen=screen, native=verify_native, audit=audit)[args.phase](args.config.resolve())
 
 
 if __name__ == "__main__":

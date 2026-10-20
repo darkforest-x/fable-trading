@@ -1,0 +1,7 @@
+# Wider-stop R gains need a fixed-notional comparator
+
+- **Problem**: In the bounded 5m range study, all four coins selected a 0.2% structural buffer instead of 0.05%. Later-period net R improved, which could be mistaken for stronger signal quality or a profitable strategy.
+- **Dead end**: Ranking only net R or counting fewer 20R trades hides that changing the initial stop changes every trade's risk denominator, its fee measured in R, and its activation price. A larger R total is not directly a larger fixed-position currency profit.
+- **Effective path**: Preserve the exact entries and matched random controls, select using the earlier segment, then decompose later net-R change into gross-R change and fee-R reduction. Compare a separate fixed-notional currency metric. The ZEC candidate improves later net R by 826.736R while each-trade 1000-USDT-notional aggregate PnL worsens by 493.756 USDT; the risk allocation assumptions explain why those findings can coexist.
+- **General rule**: Whenever TP/SL changes the R denominator, report both equal-initial-risk and fixed-notional outcomes with unchanged costs. Do not describe smaller fee-R as lower exchange fee rates, or an R-based improvement as a positive trading edge.
+- **Related files**: `experiments/active/exp-range-5m-params-20261020-v1/`, `yoyo/evaluation/range_parameter_search.py`. These are independent overlapping trade outcomes, not shared-capital account returns. All 13 arms remain net negative for every coin and yearly segment.
