@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-htf-entry-screen-20261020-v1",
+  "data_dir": "data/kline_deep",
+  "glob": "okx_*_USDT_SWAP_15m_*.csv",
+  "timeframes": ["4h", "1d"],
+  "seed": 20261020,
+  "gates": {
+    "min_events": 50,
+    "min_mean_bp": 60,
+    "net_ci_lo_above": 0,
+    "x_drift_ci_lo_above": 0
+  },
+  "output": "experiments/active/exp-htf-entry-screen-20261020-v1/results"
+}
