@@ -240,7 +240,7 @@ def analyze(config):
     work = config.parent
     meta = pd.read_csv(work/"candidates.csv").set_index("trade_id")
     lib = native()
-    summary, inference_rows, audits = [], [], []
+    summary, inference_rows, audits, strata = [], [], [], []
     for buffer in cfg["buffer_percent"]:
         tag = str(buffer).replace(".", "p")
         native_cfg = json.loads((work/f"native_b{tag}.json").read_text())
@@ -272,6 +272,37 @@ def analyze(config):
             audits.append(dict(arm=arm, paths=len(rows), native_oracle="passed",
                                conservative_changed=int((rows.exit_i != conservative[:, 0]).sum()
                                                         + (abs(rows.exit_price-conservative[:, 1])>1e-7).sum())))
+            combined_signal = rows[(rows.family=="combined") & (rows.population=="signal")]
+            filters = {
+                "long": combined_signal.side.eq(1),
+                "short": combined_signal.side.eq(-1),
+                "developing_monday": combined_signal.developing,
+                "frozen_monday": ~combined_signal.developing,
+            }
+            for ratio in cfg["ratios"]:
+                filters[f"ratio_{ratio}"] = combined_signal.levels.fillna("").map(
+                    lambda s: any(v.startswith(str(ratio)+":") for v in s.split("|")))
+            for lag in range(-2, 3):
+                filters[f"signal_minus_touch_{lag}"] = combined_signal.touch_lag.eq(lag)
+            months = pd.to_datetime(combined_signal.entry_time, utc=True).dt.strftime("%Y-%m")
+            for month in sorted(months.unique()):
+                filters["month_"+month] = months.eq(month)
+            for name, mask in filters.items():
+                for segment in (-1, 0, 1):
+                    s = combined_signal[mask]
+                    if segment != -1:
+                        s = s[s.segment==segment]
+                    random = rows[(rows.family=="combined") & (rows.population=="random")
+                                  & rows.pair_id.isin(s.pair_id)]
+                    paired = pairs(s.reset_index(), random.reset_index())
+                    strata.append(dict(arm=arm, stratum=name, segment=segment,
+                        n=len(s), matched_n=len(paired), net_r=float(s.net_r.sum()),
+                        selection_net_r=float(s.selection_net_r.sum()),
+                        win_rate=float((s.net_r>1e-9).mean()) if len(s) else None,
+                        mean_net_bp=float(s.net_notional_bp.mean()) if len(s) else None,
+                        paired_signal_net_r=float(paired.net_r.sum()),
+                        random_net_r=float(paired.net_r_random.sum()),
+                        paired_excess_r=float((paired.net_r-paired.net_r_random).sum())))
             for family in ("combined", "arrow_only"):
                 for segment in (-1, 0, 1):
                     group = rows[rows.family == family]
@@ -305,6 +336,14 @@ def analyze(config):
                                                **inference(paired, cfg["seed"])))
     table = pd.DataFrame(summary)
     table.to_csv(work/"summary.csv", index=False)
+    pd.DataFrame(strata).to_csv(work/"strata.csv", index=False)
+    from yoyo.evaluation.range_management_study import holm
+    for family in ("combined", "arrow_only"):
+        for segment in (-1, 0, 1):
+            selected = [r for r in inference_rows if r["family"]==family and r["segment"]==segment]
+            adjusted = holm([r["p_one_sided"] for r in selected])
+            for row, value in zip(selected, adjusted):
+                row["holm_p_over_eight_exits"] = float(value)
     dump(work/"inference.json", inference_rows)
     selections = {}
     for family in ("combined", "arrow_only"):
