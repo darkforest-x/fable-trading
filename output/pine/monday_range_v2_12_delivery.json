@@ -1,40 +1,108 @@
 {
   "version": "V2.12",
-  "status": "local_ready_native_validation_pending",
+  "status": "delivered_native_validated",
   "prepared_at_shanghai": "2026-10-21T00:35:58.640855+08:00",
   "source": "yoyo/evaluation/pine/monday_range_v2_12.pine",
   "source_commit": "e241800e2a",
   "change": "Both 15m key-level requests use 12000 bars regardless of txEnabled; all other executable statements unchanged except version",
-  "prior_preserved": "V2.11 local source and private script untouched",
+  "prior_preserved": "V2.11 local source and private script unchanged; its chart instance is hidden",
   "local_tests": {
     "passed": 20,
     "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_12.py tests/evaluation/test_monday_range_v2_11.py tests/evaluation/test_monday_range_v2_10.py tests/evaluation/test_range_entry_clock.py tests/evaluation/test_range_management_clock.py"
   },
   "native_validation": {
-    "completed": false,
-    "reason": "Chart eventually returned after tab reload; Pine editor still showed a loading spinner. Editor closed at cleanup. No source was pasted or saved in TradingView.",
-    "planned": [
-      "BTCUSDT.P 15m old/new source coverage and common-window signal parity",
-      "V2.12 trade-reference off/on shared history coverage",
-      "5m confirmed request branch and unsupported chart route"
-    ]
+    "completed": true,
+    "symbol": "OKX:BTCUSDT.P",
+    "timezone": "Asia/Shanghai",
+    "common_signal_window_utc": [
+      "2026-10-01T00:00:00Z",
+      "2026-10-19T00:00:00Z"
+    ],
+    "baseline_v211_15m_off": {
+      "bars": 3199,
+      "chart_first": "2026-09-17 17:00",
+      "key_first": "2026-09-17 17:00",
+      "first_retained_monday": "2026-09-22 04:15",
+      "retained_weeks": 5,
+      "signals": 72,
+      "time_signature": 78482830600,
+      "price_signature": 2174377553
+    },
+    "v212_15m_off_and_on": {
+      "bars": 11999,
+      "chart_first": "2026-06-18 01:00",
+      "key_first": "2026-06-18 01:00",
+      "first_retained_monday": "2026-08-04 01:15",
+      "retained_weeks": 12,
+      "signals": 72,
+      "time_signature": 78482830600,
+      "price_signature": 2174377553
+    },
+    "v212_5m_on": {
+      "bars": 10570,
+      "chart_first": "2026-09-14 08:00",
+      "key_first": "2026-06-18 01:00",
+      "first_retained_monday": "2026-09-15 04:20",
+      "retained_weeks": 6,
+      "signals": 250,
+      "time_signature": 937002446039,
+      "price_signature": 25925900460
+    },
+    "interpretation": "September17 cutoff reproduced with old source. New source expands 15m history and retains identical common-window signal count/direction-time/price signatures. 5m confirmed request branch works; main-chart 5m history remains platform-limited.",
+    "baseline_method": "V2.11 source with indicator title renamed to V2.12 and temporary QA appended, run in pending V2.12 private script; original V2.11 private source untouched.",
+    "qa_removed": true,
+    "evidence": [
+      "output/pine/monday_range_v2_12_native_off.png",
+      "output/pine/monday_range_v2_12_baseline_ax.txt",
+      "output/pine/monday_range_v2_12_on_ax.txt",
+      "output/pine/monday_range_v2_12_5m_ax.txt",
+      "output/pine/monday_range_v2_12_final_editor_ax.txt",
+      "output/pine/monday_range_v2_12_final_ax.txt",
+      "output/pine/monday_range_v2_12_final.png"
+    ],
+    "scope": "History-only native checks on 15m and5m. Unsupported-period routing was not rerun; existing local regression checks were retained."
   },
-  "private_script_created": false,
-  "on_chart": false,
+  "private_script_created": true,
+  "on_chart": true,
   "no_orders": true,
   "temporary_browser_sessions_created": 0,
   "temporary_tabs_created": 0,
   "training_eligible": false,
   "production_eligible": false,
   "limits": [
-    "12000 requested 15m bars is not a guarantee of available TradingView history",
-    "Reported September 17 cutoff is not yet natively reproduced",
-    "Ray retention remains 100 by default and 200 maximum; range retention remains 12 weeks by default"
+    "12000 requested15m bars is not a guarantee of available history for other chart/account contexts",
+    "Ray retention remains100 by default and200 maximum; range retention remains12 weeks by default",
+    "5m main-chart history observed startsSeptember14 despite15m key context reachingJune18"
   ],
   "final_chart": {
     "symbol": "OKX:BTCUSDT.P",
     "timeframe": "15m",
-    "indicator": "V2.11",
-    "editor_closed": true
+    "indicator": "V2.12",
+    "trade_reference_enabled": false,
+    "v211_hidden": true,
+    "editor_closed": true,
+    "logs_closed": true,
+    "layout_saved": true
+  },
+  "delivered_at_shanghai": "2026-10-21T00:52:52+08:00",
+  "private_script_name": "周一高低点区间＋翻身 · V2.12",
+  "private_script_revision": 6,
+  "saved_at_shanghai": "2026-10-21T00:52:05+08:00",
+  "compiler_error_resolution": {
+    "error": "CE10246",
+    "cause": "Private revision1 ended at line90 in Fib inputs, before the first output statement. Local full source has1088 lines plus trailing empty line.",
+    "fix": "Replaced editor contents with full versioned source; revision2 saved00:46:43 and added to chart00:46:56. Final clean revision6 saved00:52:05.",
+    "evidence": [
+      "output/pine/monday_range_v2_12_error_editor_ax.txt",
+      "output/pine/monday_range_v2_12_compile_ax.txt"
+    ]
+  },
+  "cleanup": {
+    "temporary_browser_sessions_created": 0,
+    "temporary_tabs_created": 0,
+    "temporary_probe_removed": true,
+    "accidental_code_text_drawing_removed": true,
+    "existing_manual_drawings_preserved": true,
+    "execution_services_touched": false
   }
 }

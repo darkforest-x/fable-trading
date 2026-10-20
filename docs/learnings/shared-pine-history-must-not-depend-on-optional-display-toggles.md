@@ -7,3 +7,5 @@
 - **牵连**：`yoyo/evaluation/pine/monday_range_v2_12.pine`、`tests/evaluation/test_monday_range_v2_12.py`、`tests/evaluation/monday_range_v2_12_native_checks.pine`。既有原生证据见 [共享请求历史教训](pine-shared-request-history-needs-independent-event-parity.md)。本次工程修改不构成收益研究或实盘授权。
 
 收尾补充：重载数分钟后 BTC15m 图表恢复，但 Pine 编辑器仍停在加载动画；已收起编辑器，图上仍为 V2.11。原生验收状态不变。
+
+2026-10-21 00:52 原生验收补充：编辑器恢复后，在同一 BTC15m 图用旧源码重现 3199 根、起点 9 月 17 日 17:00；新源码开关 OFF/ON 都为 11999 根、起点 6 月 18 日 01:00，保留周数从 5 增至 12。10 月 1—18 日 UTC 的 72 个信号，时间/方向和价格签名一致。5m 确认分支的关键位历史同样达到 6 月 18 日，但主图历史仍只到 9 月 14 日，说明请求预算与平台主图历史需要分别验证。最终私有 V2.12 修订 6 已保存并上图，临时探针移除；原先待验状态由回执中的原生记录解除。

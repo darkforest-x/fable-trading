@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-h1-gainers-mfe16-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72a9462ee4
+    status: rejected
+    question: At each ETH H1 green check in the last three months, how far do the coins on OKX's 24h gainer board run within 16 hours, versus the same-time market, volatility-matched coins and the board at ordinary hours?
+    single_variable: Coin selection only (OKX 24h gainer board Top10 at the decision close); EXP-147 signal, next-open entry, 16h horizon and 20bp cost frozen.
+    result: 22 events. Top10 16h max gain mean +8.05% (coin median +4.62%, 28.2% reach +10%) vs same-time market +3.18%, vol-matched +4.39% (+3.66pp, 20/22), ETH +1.14%; but the board at ordinary same-month/6h hours runs +8.13% (signal minus random -0.08pp, 8/22). Max drawdown -6.55% (-2.98% before the peak); 16h close net -0.75% vs market -0.27%. The run-up is a property of the gainer board, not of the ETH check, and is not captured by holding.
+    artifacts:
+    - eth-h1-gainers-mfe16-20261021-v1
+    canonical_report: experiments/active/exp-eth-h1-gainers-mfe16-20261021-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Owner 2026-10-21 follow-up to EXP-147, limited to the last three months. Universe is the 2026-10-21 live OKX USDT crypto swap list (287, stock/commodity/pre-market excluded) plus cached delisted ICX/QNT/WEN, not a census. Builder c7b6c896b0 then source-check fix 72a9462ee4 committed before the full run. Maximum gain is a pre-cost path extreme; 1H bars cannot order high and low. Descriptive only.
   - experiment_id: exp-htf-entry-screen-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 13b4cf81d3

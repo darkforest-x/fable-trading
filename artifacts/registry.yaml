@@ -20,7 +20,7 @@ schema_version: 1
 artifacts:
   - artifact_id: monday-range-fanshen-v2-12-20261021-prepared
     artifact_type: manifest
-    role: Pine shared15m history fix prepared with native validation pending
+    role: Pine shared15m history fix delivered with native coverage and signal parity
     source_repo: darkforest-x/fable-trading
     source_commit: e241800e2a
     source_path: output/pine/monday_range_v2_12_delivery.json
@@ -28,7 +28,19 @@ artifacts:
     holdout_status: historical
     training_eligible: false
     production_eligible: false
-    notes: Both key-level request branches12000 independent of reference toggle;20local checks pass. TradingView editor and reload stuck loading. No native validation,private script or on-chart delivery yet. V2.11 preserved.
+    notes: Delivered private V2.12 revision6;20 local checks pass. BTC15m old off starts September17 with3199 closed bars;new off/on June18 with11999 bars and12 weeks instead of5. Common72 signals and signatures identical. 5m confirmed branch passes;QA removed,layout saved,V2.11 preserved. Initial CE10246 was truncated90-line editor source,corrected with full1088 lines.
+  - artifact_id: eth-h1-gainers-mfe16-20261021-v1
+    artifact_type: manifest
+    role: ETH H1 green-check OKX 24h gainer boards and their 16h maximum run-up, last three months
+    source_repo: darkforest-x/fable-trading
+    source_commit: 72a9462ee4
+    generator_commit: 72a9462ee4
+    source_path: experiments/active/exp-eth-h1-gainers-mfe16-20261021-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-h1-gainers-mfe16-20261021-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 22 ETH checks 2026-07-24..10-19, 290 OKX USDT crypto swaps (289 native 1H fetched 10-21, ICX cache to 08-14); live list plus cached delisted, not a census. Boards, ranks, per-coin MFE/MAE/net and four controls stored. 22/22 EXP-147 signals reproduced; 3 raw-CSV spot checks match. Inputs h1/ local only. No content hash.
   - artifact_id: eth-h1-alt-selection-20261020-v1
     artifact_type: manifest
     role: ETH H1 sixteen-hour event outcomes and causal top3 altcoin candidates
