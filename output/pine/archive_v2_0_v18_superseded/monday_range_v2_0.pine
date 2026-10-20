@@ -1,0 +1,246 @@
+//@version=6
+// V2.0 combines Monday Range v1.8 and Fanshen v1.1 without changing their rules.
+// Source files are retained as separate prior versions.
+// Use the chart timeframe. No declaration-level timeframe override: range
+// line/label side effects must execute in the chart context.
+// Oscillators/arrows stay in this script's pane; price candles, range drawings,
+// and check/cross markers are explicitly routed to the main price pane.
+// Owner waived Stitch for this merge on 2026-10-20.
+indicator("周一高低点区间＋翻身 · V2.0", shorttitle="区间翻身 V2.0", overlay=false,
+     behind_chart=false, format=format.price, precision=2, max_lines_count=500, max_labels_count=500)
+
+// === Monday Range v1.8: unchanged logic, main-pane routing only =============
+string timeGroup = "时间"
+string tzOpt = input.string("America/New_York", "时区（判断周一 / 周末）",
+     options=["America/New_York", "UTC", "Asia/Shanghai", "交易所时区"], group=timeGroup)
+
+string candleGroup = "K线"
+color baseCol = input.color(color.gray, "普通K线", group=candleGroup)
+color mondayCol = input.color(color.green, "周一K线", group=candleGroup)
+color weekendCol = input.color(#B2B5BE, "周六、周日K线", group=candleGroup)
+
+string rayGroup = "周一高低点射线"
+color highCol = input.color(#F23645, "高点射线", group=rayGroup)
+color lowCol = input.color(#2962FF, "低点射线", group=rayGroup)
+int rayWidth = input.int(1, "线宽", minval=1, maxval=4, group=rayGroup)
+string rayStyleOpt = input.string("实线", "线型", options=["实线", "虚线", "点线"], group=rayGroup)
+// Per kept week: 2 rays + up to 5 history Fib lines; plus 11 latest-Fib lines,
+// all inside max_lines_count=500 (labels follow the same count).
+int keepWeeks = input.int(12, "保留最近几周", minval=1, maxval=65, group=rayGroup)
+bool extendHistory = input.bool(false, "历史周的射线也无限向右延伸", group=rayGroup)
+bool showLabels = input.bool(true, "显示价格标签", group=rayGroup)
+
+string fibGroup = "斐波那契（最新一周的周一区间）"
+bool showFib = input.bool(true, "显示斐波那契", group=fibGroup)
+string fibLevelsStr = input.string("0.5, 0.618, 0.705, 1.13, 1.27, 1.618",
+     "比例（逗号分隔，上下两个方向都画）", group=fibGroup)
+color fibCol = input.color(#787B86A6, "线颜色", group=fibGroup)
+color fibTextCol = input.color(#787B86, "文字颜色", group=fibGroup)
+string fibSizeOpt = input.string("中", "文字大小", options=["小", "中", "大"], group=fibGroup)
+
+string histFibGroup = "斐波那契（历史周，只画周一到周五）"
+bool showHistFib = input.bool(true, "显示历史周斐波那契", group=histFibGroup)
+string histFibLevelsStr = input.string("0.5, 0.618, 0.705",
+     "比例（逗号分隔，上下两个方向都画）", group=histFibGroup)
+color histFibCol = input.color(#787B8659, "线颜色", group=histFibGroup)
+color histFibTextCol = input.color(#787B86A6, "文字颜色", group=histFibGroup)
+
+if barstate.isfirst and (timeframe.isweekly or timeframe.ismonthly)
+    runtime.error("请在日线或更低周期使用：周线 / 月线没有单独的“周一”K线。")
+
+string tz = timeframe.isdaily or tzOpt == "交易所时区" ? syminfo.timezone : tzOpt
+string rayStyle = rayStyleOpt == "虚线" ? line.style_dashed : rayStyleOpt == "点线" ? line.style_dotted : line.style_solid
+
+int dow = dayofweek(time, tz)
+bool isMonday = dow == dayofweek.monday
+bool isWeekend = dow == dayofweek.saturday or dow == dayofweek.sunday
+int dateKey = year(time, tz) * 10000 + month(time, tz) * 100 + dayofmonth(time, tz)
+// The date key also catches back-to-back Mondays when a whole week is missing.
+bool newMonday = isMonday and (not isMonday[1] or dateKey != dateKey[1])
+
+// ---- Candles -------------------------------------------------------------
+color hiddenCol = color.new(color.white, 100)
+color candleCol = isWeekend ? weekendCol : isMonday ? mondayCol : baseCol
+barcolor(candleCol, title="K线着色")
+plotcandle(open, high, low, close, "K线", color=candleCol, wickcolor=candleCol,
+     bordercolor=candleCol, display=display.pane, force_overlay=true)
+
+// ---- Monday rays ---------------------------------------------------------
+var array<line> highLines = array.new<line>()
+var array<line> lowLines = array.new<line>()
+var array<label> highLabels = array.new<label>()
+var array<label> lowLabels = array.new<label>()
+var float monHigh = na
+var float monLow = na
+var int monStartBar = na
+var int lastWeekdayBar = na
+var array<line> histFibLines = array.new<line>()
+var array<label> histFibLabels = array.new<label>()
+string fibSize = fibSizeOpt == "小" ? size.small : fibSizeOpt == "大" ? size.large : size.normal
+
+labelText(string name, float price) =>
+    name + " " + str.tostring(price, format.mintick)
+
+newRayLabel(float price, string name, color col) =>
+    label.new(bar_index, price, labelText(name, price), style=label.style_label_left,
+         color=hiddenCol, textcolor=col, size=size.small, force_overlay=true)
+
+// Both-end Fib prices of a range, with the ratio behind each price; a ratio
+// whose two prices coincide (0.5) is kept once.
+fibPrices(float hi, float lo, string levels) =>
+    array<float> prices = array.new<float>()
+    array<float> ratios = array.new<float>()
+    float rng = hi - lo
+    for item in str.split(str.replace_all(levels, " ", ""), ",")
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = lo + r * rng
+            float dn = hi - r * rng
+            prices.push(up)
+            ratios.push(r)
+            if math.abs(up - dn) >= syminfo.mintick
+                prices.push(dn)
+                ratios.push(r)
+    [prices, ratios]
+
+fibText(float r, float price) =>
+    str.tostring(r) + " (" + str.tostring(price, format.mintick) + ")"
+
+if newMonday
+    // Freeze the previous week at the last bar before this Monday.
+    if highLines.size() > 0 and not extendHistory
+        for l in array.from(highLines.last(), lowLines.last())
+            l.set_extend(extend.none)
+            l.set_x2(bar_index - 1)
+    // The week that just ended gets its faint Fib, Monday through its last
+    // weekday bar. lastWeekdayBar has not seen this bar yet.
+    if showHistFib and not na(monStartBar) and not na(lastWeekdayBar) and lastWeekdayBar >= monStartBar
+        [hp, hr] = fibPrices(monHigh, monLow, histFibLevelsStr)
+        for [i, p] in hp
+            histFibLines.push(line.new(monStartBar, p, lastWeekdayBar, p, color=histFibCol, width=1, force_overlay=true))
+            histFibLabels.push(label.new(lastWeekdayBar, p, fibText(hr.get(i), p),
+                 style=label.style_label_left, color=hiddenCol, textcolor=histFibTextCol, size=fibSize, force_overlay=true))
+        while histFibLines.size() > keepWeeks * hp.size()
+            histFibLines.shift().delete()
+            histFibLabels.shift().delete()
+    monHigh := high
+    monLow := low
+    monStartBar := bar_index
+    highLines.push(line.new(bar_index, high, bar_index + 1, high, extend=extend.right,
+         color=highCol, style=rayStyle, width=rayWidth, force_overlay=true))
+    lowLines.push(line.new(bar_index, low, bar_index + 1, low, extend=extend.right,
+         color=lowCol, style=rayStyle, width=rayWidth, force_overlay=true))
+    if showLabels
+        highLabels.push(newRayLabel(high, "周一高", highCol))
+        lowLabels.push(newRayLabel(low, "周一低", lowCol))
+    if highLines.size() > keepWeeks
+        highLines.shift().delete()
+        lowLines.shift().delete()
+    if highLabels.size() > keepWeeks
+        highLabels.shift().delete()
+        lowLabels.shift().delete()
+else if isMonday and highLines.size() > 0
+    if high > monHigh
+        monHigh := high
+        highLines.last().set_xy1(bar_index, high)
+        highLines.last().set_xy2(bar_index + 1, high)
+    if low < monLow
+        monLow := low
+        lowLines.last().set_xy1(bar_index, low)
+        lowLines.last().set_xy2(bar_index + 1, low)
+
+if not isWeekend
+    lastWeekdayBar := bar_index
+
+// The current week's labels ride on the latest bar; once the next Monday
+// starts they stay at the old week's last bar (the weekend slot).
+if highLabels.size() > 0
+    highLabels.last().set_xy(bar_index, monHigh)
+    highLabels.last().set_text(labelText("周一高", monHigh))
+    lowLabels.last().set_xy(bar_index, monLow)
+    lowLabels.last().set_text(labelText("周一低", monLow))
+
+// ---- Fibonacci on the latest Monday range --------------------------------
+var array<line> fibLines = array.new<line>()
+var array<label> fibLabels = array.new<label>()
+// Fib labels sit right of the Monday labels so the two do not collide.
+int fibLabelOffset = 20
+
+if showFib and barstate.islast and not na(monStartBar)
+    for l in fibLines
+        l.delete()
+    for lb in fibLabels
+        lb.delete()
+    fibLines.clear()
+    fibLabels.clear()
+    float rng = monHigh - monLow
+    for item in str.split(str.replace_all(fibLevelsStr, " ", ""), ",")
+        float r = str.tonumber(item)
+        if not na(r)
+            float up = monLow + r * rng
+            float dn = monHigh - r * rng
+            array<float> prices = math.abs(up - dn) < syminfo.mintick ? array.from(up) : array.from(up, dn)
+            for p in prices
+                fibLines.push(line.new(monStartBar, p, bar_index + 1, p, extend=extend.right,
+                     color=fibCol, width=1, force_overlay=true))
+                fibLabels.push(label.new(bar_index + fibLabelOffset, p,
+                     str.tostring(r) + " (" + str.tostring(p, format.mintick) + ")",
+                     style=label.style_label_left, color=hiddenCol, textcolor=fibTextCol, size=fibSize, force_overlay=true))
+
+// === Fanshen v1.1: unchanged formulas, namespaced identifiers ===============
+fs_periodK = input.int(5, title="%K Length", minval=1)
+fs_smoothK = input.int(3, title="%K Smoothing", minval=1)
+fs_periodD = input.int(3, title="%D Smoothing", minval=1)
+fs_k = ta.sma(ta.stoch(close, high, low, fs_periodK), fs_smoothK)
+fs_d = ta.sma(fs_k, fs_periodD)
+plot(fs_k, title="%K", color=#2962FF)
+plot(fs_d, title="%D", color=#FF6D00)
+fs_h0 = hline(80, "Upper Band", color=#787B86)
+hline(50, "Middle Band", color=color.new(#787B86, 50))
+fs_h1 = hline(20, "Lower Band", color=#787B86)
+fill(fs_h0, fs_h1, color=color.rgb(33, 150, 243, 90), title="Background")
+fs_crossUp = ta.crossover(fs_k, fs_d)
+fs_oversold = fs_k < 20 and fs_d < 20
+fs_signalLong = fs_crossUp and fs_oversold
+plotshape(fs_signalLong, title="做多", location=location.bottom, style=shape.triangleup, color=color.rgb(57, 243, 64), size=size.tiny)
+fs_crossDown = ta.crossunder(fs_k, fs_d)
+fs_overbought = fs_k > 80 and fs_d > 80
+fs_signalShort = fs_crossDown and fs_overbought
+plotshape(fs_signalShort, title="做空", location=location.top, style=shape.triangledown, color=color.rgb(255, 82, 82), size=size.tiny)
+
+// === 警报条件（可在TradingView设置报警） ===
+// alertcondition(signalLong, title="Stoch 超卖金叉", message="Stochastic 超卖金叉：买入信号")
+alertcondition(fs_signalShort, title="Stoch 超买死叉", message="Stochastic 超买死叉：卖出信号")
+
+fs_pd = input.int(22, title="LookBack Period Standard Deviation High")
+fs_bbl = input.int(20, title="Bolinger Band Length")
+fs_mult = input.float(2.0, minval=1.0, maxval=5.0, title="Bollinger Band Standard Deviation Up")
+fs_lb = input.int(50, title="Look Back Period Percentile High")
+fs_ph = input.float(0.85, title="Highest Percentile - 0.90=90%, 0.95=95%, 0.99=99%")
+fs_pl = input.float(1.01, title="Lowest Percentile - 1.10=90%, 1.05=95%, 1.01=99%")
+fs_hp = input.bool(false, title="Show High Range - Based on Percentile and LookBack Period?")
+fs_sd = input.bool(false, title="Show Standard Deviation Line?")
+
+fs_wvf = ((ta.highest(close, fs_pd) - low) / ta.highest(close, fs_pd)) * 100
+fs_sDev = fs_mult * ta.stdev(fs_wvf, fs_bbl)
+fs_midLine = ta.sma(fs_wvf, fs_bbl)
+fs_lowerBand = fs_midLine - fs_sDev
+fs_upperBand = fs_midLine + fs_sDev
+fs_rangeHigh = ta.highest(fs_wvf, fs_lb) * fs_ph
+fs_rangeLow = ta.lowest(fs_wvf, fs_lb) * fs_pl
+fs_col = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh) ? color.lime : color.gray
+plot(fs_hp ? fs_rangeHigh : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(fs_hp ? fs_rangeLow : na, title="Range Low Percentile", style=plot.style_line, linewidth=4, color=color.orange)
+plot(fs_wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=fs_col)
+plot(fs_sd ? fs_upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+
+// 添加柱子为绿色的条件
+fs_wvfGreen = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh)
+// 修改后的警报条件：Stoch 超卖金叉 且 WVF 柱子为绿色
+alertcondition(fs_signalLong and fs_wvfGreen, title="Stoch 超卖金叉 + 柱子绿色", message="买入信号：Stochastic 超卖金叉，WVF柱子为绿色")
+
+// V1.1 display-only: mirror the original arrow conditions onto the price pane.
+// Source: owner_fanshen_v1_20250706.pine; owner confirmed red-arrow bars only.
+// Original intrabar behavior, oscillator plots, WVF and alerts are preserved.
+plotchar(fs_signalLong, title="主图绿色勾", char="✓", location=location.belowbar, color=color.rgb(57, 243, 64), size=size.tiny, display=display.pane, force_overlay=true)
+plotchar(fs_signalShort, title="主图红色叉", char="×", location=location.abovebar, color=color.rgb(255, 82, 82), size=size.tiny, display=display.pane, force_overlay=true)
