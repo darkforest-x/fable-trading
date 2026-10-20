@@ -1,0 +1,20 @@
+{
+  "experiment_id": "exp-eth-h1-gainers-mfe16-20261021-v1",
+  "instruments": "inputs/instruments_swap_20261021.json",
+  "symbols": "inputs/symbols.txt",
+  "h1_dir": "inputs/h1",
+  "local_15m_dir": "data/kline_fetched",
+  "prior_events": "experiments/active/exp-eth-h1-alt-selection-20261020-v1/events.csv",
+  "start": "2026-07-21T00:00:00Z",
+  "hold_hours": 16,
+  "rank_hours": 24,
+  "top_n": [5, 10, 20],
+  "primary_n": 10,
+  "vol_min_bars": 72,
+  "vol_max_bars": 168,
+  "vol_matches": 5,
+  "mfe_thresholds_percent": [3, 5, 10],
+  "round_trip_cost": 0.002,
+  "bootstrap_draws": 9999,
+  "seed": 20261021
+}
