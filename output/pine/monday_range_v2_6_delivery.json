@@ -1,0 +1,89 @@
+{
+  "version": "2.6",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_6.pine",
+  "base": "yoyo/evaluation/pine/monday_range_v2_5.pine",
+  "owner_request": "Display historical trade frames for the visible chart interval without changing trade rules.",
+  "display": {
+    "archive": "All admitted trades within the existing fixed5m source window",
+    "viewport": "Frame lifetime intersects [left visible bar open, right visible bar actual close). Left-overlapping frames included.",
+    "maximum_frames": 40,
+    "default_frames": 40,
+    "capacity_overflow": "Show newest40 within the visible interval, disclose shown/matching counts and request narrower view.",
+    "source_coverage_disclosed": true,
+    "max_boxes": 200,
+    "max_polylines": 40,
+    "tracking_independent_of_display": true
+  },
+  "unchanged": {
+    "every_confirmed_h1_refreshes": true,
+    "every_later_same_direction_15m_may_enter": true,
+    "independent_exits": true,
+    "module_default_enabled": false,
+    "buffer_percent": 0.05,
+    "stop_5m_bars": 5,
+    "trail_arm_15m_close_r": 5,
+    "trail_atr_length": 14,
+    "trail_atr_multiplier": 4,
+    "source_5m_max_bars": 30000,
+    "trail_display_points_per_trade": 40,
+    "range_fanshen_rays_alerts": true
+  },
+  "native_validation": {
+    "private_script": "周一高低点区间＋翻身 · V2.6",
+    "saved_revision": 3,
+    "saved_at": "2026-10-20T12:59:54+08:00",
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframes_checked": [
+      "15m",
+      "1H"
+    ],
+    "ledger_count_all_viewports": 146,
+    "live_count_all_viewports": 1,
+    "matching_closed_v25_records_12_fields": 6,
+    "old_view_matching_frames": 3,
+    "shifted_view_matching_frames": 4,
+    "identical_old_records_in_overlap": 3,
+    "wide_view_matching_frames": 109,
+    "wide_view_displayed": 40,
+    "wide_boxes": 200,
+    "wide_labels": 208,
+    "wide_polylines": 10,
+    "gate_marker": "V26_NATIVE_CHECKS_PASS",
+    "buffer_marker": "V24_UNIT_CHECKS_PASS",
+    "qa_appendix_removed": true,
+    "final_chart_module_enabled": true,
+    "final_chart_timeframe": "15m",
+    "final_chart_view": "September22-24 historical window,4/4 frames visible",
+    "layout_all_changes_saved": true,
+    "editor_logs_closed": true,
+    "navigation_validation": "Date navigation and3-month range selection. Native mouse-drag automation did not move viewport; no claim of completed manual drag test."
+  },
+  "local_validation": {
+    "command": ".venv/bin/python -m pytest tests/evaluation/test_monday_range_v2_6.py tests/evaluation/test_monday_range_v2_5.py -q",
+    "passed": 11
+  },
+  "evidence": [
+    "output/pine/monday_range_v2_6_final_ax.txt",
+    "output/pine/monday_range_v2_6_final_older.png",
+    "output/pine/monday_range_v2_6_native_older.txt",
+    "output/pine/monday_range_v2_6_native_qa.pine",
+    "output/pine/monday_range_v2_6_native_recent.txt",
+    "output/pine/monday_range_v2_6_native_shifted.txt",
+    "output/pine/monday_range_v2_6_native_wide.txt",
+    "output/pine/monday_range_v2_6_older.png",
+    "output/pine/monday_range_v2_6_parity.json",
+    "output/pine/monday_range_v2_6_saved_ax.txt",
+    "output/pine/monday_range_v2_6_wide.png"
+  ],
+  "notion_project_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "prior_source_private_preserved": true,
+  "stitch": "Owner exemption for Pine",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "Source history remains limited by30000 requested5m bars andTradingView available data.",
+    "At most40 frames are displayed per viewport; wider intervals disclose truncation.",
+    "Existing last40 trailing-path points per trade retained.",
+    "Independent model references; no account orders or profitability claims."
+  ]
+}
