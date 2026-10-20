@@ -112,6 +112,15 @@ class NativeContractTests(unittest.TestCase):
         self.assertEqual(rows.iloc[0].exit_price, .000001533)
         self.assertEqual(rows.iloc[0].reason, 1)
 
+    def test_large_microprice_position_closes_without_fractional_dust(self):
+        rows, fills, _ = replay(
+            [[.0000010871]*4, [.0000010871, .0000011, .00000108, .000001095]],
+            [(0, -1, .000001089, 1)], tick=1e-9, market_tick=1e-10,
+        )
+        self.assertEqual(len(fills), 2)
+        self.assertEqual(fills.iloc[0].quantity, fills.iloc[1].quantity)
+        self.assertEqual(rows.iloc[0].quantity, 919878576)
+
 
 if __name__ == "__main__":
     unittest.main()

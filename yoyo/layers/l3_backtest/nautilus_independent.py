@@ -154,7 +154,10 @@ class IndependentCloseStrategy(Strategy):
         self.fill_rows.append(fill)
         state.fills.append(fill)
         if event.last_qty != state.quantity:
-            raise RuntimeError("Partial fill: independent unlimited-liquidity contract violated")
+            raise RuntimeError(
+                f"Partial fill for {state.source['trade_id']} ({phase}): "
+                f"got {event.last_qty}, requested {state.quantity}, bar {i}"
+            )
         if phase == "entry":
             if i != state.source["entry_i"] or abs(price-state.source["entry"]) > self.eps:
                 raise RuntimeError("Entry did not fill at the signal bar close")
@@ -244,7 +247,10 @@ class IndependentCloseStrategy(Strategy):
             be = (math.ceil(be_raw-1e-8) if side > 0 else math.floor(be_raw+1e-8))*self.tick
             state = TradeState(
                 row, PositionId(row["trade_id"]),
-                self.instrument.make_qty(1000/entry), row["stop"], be,
+                # Research returns are normalized independently of order size.
+                # Whole units avoid fractional position roundoff at ~1e9 PEPE:
+                # native float exposure can otherwise trim 1e-7 units on exit.
+                self.instrument.make_qty(max(1, int(1000/entry))), row["stop"], be,
             )
             self.active[row["trade_id"]] = state
             self._market(state, entering=True)
@@ -283,7 +289,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         base_currency=Currency.from_str(symbol), quote_currency=USDT,
         settlement_currency=USDT, is_inverse=False,
         price_precision=precision, price_increment=Price(market_tick, precision),
-        size_precision=8, size_increment=Quantity.from_str("0.00000001"),
+        size_precision=0, size_increment=Quantity.from_int(1),
         margin_init=Decimal("0"), margin_maint=Decimal("0"),
         maker_fee=Decimal("0"), taker_fee=Decimal("0"), ts_event=0, ts_init=0,
     )
@@ -339,6 +345,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         audit = dict(
             engine="nautilus_trader", version=ENGINE_VERSION,
             market_tick=market_tick, protection_tick=tick,
+            research_quantity="max(1, floor(1000 / entry)); returns normalized per original risk",
             positions=len(positions), fills=len(fills),
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,
