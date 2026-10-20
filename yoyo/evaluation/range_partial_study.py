@@ -182,6 +182,17 @@ def analyze(path):
                     losers_to_winners=int(((base.net_r<=1e-9)&(s.net_r>1e-9)).sum()),
                     winners_to_losses=int(((base.net_r>1e-9)&(s.net_r<=1e-9)).sum()),
                     policy_gain=inference(improvement,cfg['seed']),matched_increment=inference(effect,cfg['seed']))
+                bp_gain=s[['week','net_notional_bp']].rename(columns={'net_notional_bp':'net_r'})
+                bp_gain['net_r_random']=base.net_notional_bp
+                bp_effect=sbp.merge(cbp,on='pair_id')
+                signal_delta=(s.set_index('pair_id').net_notional_bp
+                              - base.set_index('pair_id').net_notional_bp)
+                control_delta=(control.set_index('pair_id').net_notional_bp
+                               - old.loc[control.index].set_index('pair_id').net_notional_bp)
+                bp_effect['net_r']=bp_effect.pair_id.map(signal_delta)
+                bp_effect['net_r_random']=bp_effect.pair_id.map(control_delta)
+                item['policy_gain_bp']=inference(bp_gain,cfg['seed'])
+                item['matched_increment_bp']=inference(bp_effect,cfg['seed'])
                 for level in (10,20):
                     mask=base.gross_r>=level-1e-7
                     item[f'old_{level}r_n']=int(mask.sum())
@@ -191,7 +202,7 @@ def analyze(path):
             comparisons.append(item)
     for seg in (-1,0,1,2,-2):
         group=[r for r in comparisons if r['segment']==seg and r['arm']!='baseline']
-        for metric in ('policy_gain','matched_increment'):
+        for metric in ('policy_gain','matched_increment','policy_gain_bp','matched_increment_bp'):
             for record,p in zip(group,holm([r[metric]['p_one_sided'] for r in group])):
                 record[metric]['holm_p_six']=p
     table=pd.DataFrame(tables);table.to_csv(dest/'summary.csv',index=False)
