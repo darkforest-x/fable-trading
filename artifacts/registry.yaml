@@ -32899,3 +32899,15 @@ artifacts:
       26local checks pass. Private revision2 saved20261020T14:01:52+08:00;priorV2.7 retained;QA appendix removed.
       Profiler samples both approximately1.1s with different viewport/tick windows; no proven initial-load speedup or percent claim.
       Viewport changes still restart all history; network-delay warning observed. Noorders or rule changes.
+
+  - artifact_id: pepe-range-exits-20261020-v1
+    source_commit: e0607620a1
+    artifact_type: config
+    role: frozen_pepe_range_exit_research
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-pepe-range-exits-20261020-v1/config.json
+    storage_uri: repo://experiments/active/exp-pepe-range-exits-20261020-v1/config.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized 2400-configuration TP/SL grid; frozen chronological selection and 20bp costs. No outcome claim yet.
