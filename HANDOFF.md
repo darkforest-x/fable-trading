@@ -1,3 +1,11 @@
+## 2026-10-21 · BTC chart-opportunity correction and Monday endpoints
+
+- Owner clarified “no losses” means favorable space after the signal. Prior10.15percent was fixed10R realized net win rate and answered a different question. Added Monday high/low; both directions and latest3completed15m stop unchanged.
+- Read all7 manual TradingView positions. At0.2percent buffer all7 had >20bp before initialSL; at0.1percent6/7. Two Oct1 Monday-high shorts were missing in v1; Oct20 evening entry advances23:00 to22:45 Beijing. Manual drawing prices and causal-close prices retained separately.
+- September1 through October21 midnight Beijing:69 signals,42/69 (60.87percent) cover20bp versus44/69 matchedrandom. At least1R31/69 versus36/69;2R22/69 versus20/69. Conservative excludes stop-touch5m;20bp count unchanged at upper bound. Seven examples are not the full cohort, and MFE is not an executable exit.
+- Two years981signals (+173;17earlier entries), eight fixed-exit cells still netnegative;0.2percent/10R net-449.79R versus random-431.98R, win9.58percent. Reused8024 execution rows; only7672 new native paths, all oracle parity passed;11tests,14prefixes,14drawing-buffer rows; stop-first changes no signal payoff.
+- Evidence `experiments/active/exp-btc-range-wick-fanshen-20261021-v2/delivery_receipt.json`; code51fc52ef7b/667d45104f. Notion EXP-151 https://app.notion.com/p/3ff8856479af810aa605d0cc9500cb96, task65Done; v1 preserved. No report requested. No Pine/default/live/model changes, training/productionfalse. Existing TradingView used, no temporary tabs/sessions created, properties dialogs canceled.
+
 ## 2026-10-21 · BTC Fib wick / 15m check-cross study completed
 
 - Owner task65 confirmed both directions and latest3completed15m extrema at entry. Two years to Beijing2026-10-21; causal pre-touch Monday levels, first close with both touch and arrow known. Eight0.1/0.2percent buffer by2/3/5/10R targets all netnegative after20bp.

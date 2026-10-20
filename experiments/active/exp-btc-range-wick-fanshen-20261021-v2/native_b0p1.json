@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-btc-range-wick-fanshen-20261021-v2",
+  "engine": "nautilus",
+  "symbol": "BTC",
+  "tick": 0.1,
+  "market_tick": 0.1,
+  "data": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/pending_candidates.csv",
+  "stop_window_5m": 9,
+  "buffer_percent": 0.1,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "tp2",
+      "fixed_target_r": 2,
+      "opposite_hour_exit": false
+    },
+    {
+      "name": "tp3",
+      "fixed_target_r": 3,
+      "opposite_hour_exit": false
+    },
+    {
+      "name": "tp5",
+      "fixed_target_r": 5,
+      "opposite_hour_exit": false
+    },
+    {
+      "name": "tp10",
+      "fixed_target_r": 10,
+      "opposite_hour_exit": false
+    }
+  ],
+  "output": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1"
+}

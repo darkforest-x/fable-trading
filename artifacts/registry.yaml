@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-range-wick-fanshen-20261021-v2
+    artifact_type: manifest
+    role: BTC Monday-endpoint addition and chart-opportunity versus fixed-exit reconciliation
+    source_repo: darkforest-x/fable-trading
+    source_commit: 667d45104f
+    generator_commit: 51fc52ef7b
+    source_path: experiments/active/exp-btc-range-wick-fanshen-20261021-v2/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-range-wick-fanshen-20261021-v2/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen v1 data and unchanged executions reused; raw new ledgers, MFE bounds and combined annotations local. Small summaries, drawing reconciliation, native receipts and run provenance retained. No input content hashes. Seven charts cover20bp at0.2percent buffer, versus42/69 full recent rule cohort and44/69 matched random. This is retrospective space, not an achievable profit claim.
   - artifact_id: btc-range-wick-fanshen-20261021-v1
     artifact_type: manifest
     role: BTC causal Fib wick and15m Stoch eight-exit study with matched controls and ratio uncertainty

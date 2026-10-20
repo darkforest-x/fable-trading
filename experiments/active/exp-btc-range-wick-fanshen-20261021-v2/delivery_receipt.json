@@ -1,0 +1,422 @@
+{
+  "source_commit": "51fc52ef7be3ee7052c326075bef9f639fec4a82",
+  "checks": [
+    {
+      "arm": "b0p1_tp2",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p1_tp3",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p1_tp5",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p1_tp10",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p2_tp2",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p2_tp3",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p2_tp5",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    },
+    {
+      "arm": "b0p2_tp10",
+      "new_oracle_paths": 959,
+      "reused_rows": 1003
+    }
+  ],
+  "native_new_paths": 7672,
+  "cached_rows": 8024,
+  "note": "Favorable opportunity is hypothetical best price before initial SL, not realized profit. Lower bound excludes the entire first stop-touch 5m bar.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "experiment_id": "exp-btc-range-wick-fanshen-20261021-v2",
+  "generated_at": "2026-10-20T17:47:44.112532+00:00",
+  "review_export_commit": "667d45104f",
+  "notion_url": "https://app.notion.com/p/3ff8856479af810aa605d0cc9500cb96",
+  "notion_experiment": "EXP-151",
+  "source_task": "https://app.notion.com/p/3ff8856479af80a68faec10c42af11a3",
+  "signals": 981,
+  "matched_random": 981,
+  "added_signals": 173,
+  "changed_entry": 17,
+  "recent_signals": 69,
+  "manual_review": {
+    "count": 7,
+    "covers_20bp_buffer_0p2": 7,
+    "covers_20bp_buffer_0p1": 6,
+    "endpoint_missing_in_v1": 2,
+    "endpoint_advanced": 1,
+    "matching_note": "Candidate event matches, not exact manual drawing-anchor timestamps; both manual and causal prices preserved."
+  },
+  "recent_opportunity": {
+    "buffer_percent": 0.2,
+    "covers_20bp": 42,
+    "matched_random_covers_20bp": 44,
+    "same_stop_bar_upper_count": 42,
+    "note": "20bp is original cost reference, not a new owner-defined sufficient-space threshold."
+  },
+  "verification": {
+    "tests": "11 passed in 1.41s",
+    "prefix_checks": 14,
+    "native_oracle_paths": 7672,
+    "cached_native_rows": 8024,
+    "same_bar_stop_first_changed_signal_outcomes": 0,
+    "drawing_rows": 14
+  },
+  "native_elapsed_seconds": 28.871673416999784,
+  "reproduce": {
+    "python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python",
+    "cwd": "/Users/zhangzc/fable-trading",
+    "module": "yoyo.evaluation.btc_range_wick_review",
+    "actions": [
+      "prepare",
+      "run",
+      "analyze",
+      "drawings",
+      "sensitivity"
+    ],
+    "policy": "Inspect receipts first; do not rerun unchanged native executions."
+  },
+  "limitations": [
+    "Favorable excursion is a retrospective extreme, not a realizable exit policy.",
+    "Exclude initial-stop-touch 5m candle for lower bound; upper bound retained.",
+    "Independent per-trade R, no funding, extra slippage, liquidity or shared-account constraints.",
+    "Seven observed drawings do not establish that all rule signals have sufficient space."
+  ],
+  "browser_cleanup": {
+    "used_existing_app": true,
+    "created_temporary_tabs_or_sessions": 0,
+    "drawing_settings_changed": false,
+    "dialogs_closed": true
+  },
+  "service_check": {
+    "service_alive": true,
+    "scan_status": "scanning",
+    "completed": 273,
+    "total": 1976,
+    "errors": 0,
+    "model_ready": false,
+    "market_ready": false,
+    "note": "Readonly health during ongoing scheduled scan; no service changes."
+  },
+  "local_inventory": [
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/analysis.log",
+      "bytes": 1118,
+      "mtime_ns": 1792517893695392574
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p1_tp10.csv.gz",
+      "bytes": 208838,
+      "mtime_ns": 1792517892600350362
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p1_tp2.csv.gz",
+      "bytes": 212117,
+      "mtime_ns": 1792517891836848039
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p1_tp3.csv.gz",
+      "bytes": 211026,
+      "mtime_ns": 1792517892171896011
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p1_tp5.csv.gz",
+      "bytes": 210002,
+      "mtime_ns": 1792517892385703812
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p2_tp10.csv.gz",
+      "bytes": 209389,
+      "mtime_ns": 1792517893644200197
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p2_tp2.csv.gz",
+      "bytes": 212827,
+      "mtime_ns": 1792517892864385957
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p2_tp3.csv.gz",
+      "bytes": 211773,
+      "mtime_ns": 1792517893196724345
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/annotated_b0p2_tp5.csv.gz",
+      "bytes": 210469,
+      "mtime_ns": 1792517893422378980
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/candidates.csv",
+      "bytes": 306417,
+      "mtime_ns": 1792517809412967169
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/config.json",
+      "bytes": 3333,
+      "mtime_ns": 1792517766389212763
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/drawing_observations.json",
+      "bytes": 1970,
+      "mtime_ns": 1792517766389334804
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/drawing_reconciliation.csv",
+      "bytes": 5602,
+      "mtime_ns": 1792518269658354055
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/excursions_b0p1.csv",
+      "bytes": 432282,
+      "mtime_ns": 1792517891981566795
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/excursions_b0p2.csv",
+      "bytes": 434457,
+      "mtime_ns": 1792517892988559504
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/inference.json",
+      "bytes": 7953,
+      "mtime_ns": 1792517893679241740
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native.log",
+      "bytes": 2440,
+      "mtime_ns": 1792517891003708713
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/receipt.json",
+      "bytes": 16660,
+      "mtime_ns": 1792517877273403561
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp10/audit.json",
+      "bytes": 1014,
+      "mtime_ns": 1792517877257971602
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp10/fills.csv",
+      "bytes": 210344,
+      "mtime_ns": 1792517877257843061
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp10/trades.csv",
+      "bytes": 337430,
+      "mtime_ns": 1792517877254182311
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp2/audit.json",
+      "bytes": 1012,
+      "mtime_ns": 1792517867047092888
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp2/fills.csv",
+      "bytes": 210573,
+      "mtime_ns": 1792517867046614096
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp2/trades.csv",
+      "bytes": 337190,
+      "mtime_ns": 1792517867042723221
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp3/audit.json",
+      "bytes": 1012,
+      "mtime_ns": 1792517870414270319
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp3/fills.csv",
+      "bytes": 210721,
+      "mtime_ns": 1792517870414086694
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp3/trades.csv",
+      "bytes": 337701,
+      "mtime_ns": 1792517870410262360
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp5/audit.json",
+      "bytes": 1013,
+      "mtime_ns": 1792517873805054418
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp5/fills.csv",
+      "bytes": 210565,
+      "mtime_ns": 1792517873804901751
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1/tp5/trades.csv",
+      "bytes": 337685,
+      "mtime_ns": 1792517873801260543
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p1.json",
+      "bytes": 943,
+      "mtime_ns": 1792517809416471086
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/receipt.json",
+      "bytes": 16637,
+      "mtime_ns": 1792517891002832171
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp10/audit.json",
+      "bytes": 1013,
+      "mtime_ns": 1792517890987101254
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp10/fills.csv",
+      "bytes": 210372,
+      "mtime_ns": 1792517890986953962
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp10/trades.csv",
+      "bytes": 337577,
+      "mtime_ns": 1792517890983356421
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp2/audit.json",
+      "bytes": 1012,
+      "mtime_ns": 1792517880717821704
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp2/fills.csv",
+      "bytes": 210791,
+      "mtime_ns": 1792517880717672287
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp2/trades.csv",
+      "bytes": 337688,
+      "mtime_ns": 1792517880713971162
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp3/audit.json",
+      "bytes": 1013,
+      "mtime_ns": 1792517884123364803
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp3/fills.csv",
+      "bytes": 210796,
+      "mtime_ns": 1792517884123235220
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp3/trades.csv",
+      "bytes": 338039,
+      "mtime_ns": 1792517884119633720
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp5/audit.json",
+      "bytes": 1014,
+      "mtime_ns": 1792517887524699986
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp5/fills.csv",
+      "bytes": 210407,
+      "mtime_ns": 1792517887524140986
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2/tp5/trades.csv",
+      "bytes": 337668,
+      "mtime_ns": 1792517887520538402
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/native_b0p2.json",
+      "bytes": 943,
+      "mtime_ns": 1792517809416830419
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/opportunity_summary.csv",
+      "bytes": 4381,
+      "mtime_ns": 1792517893678940240
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/pending_candidates.csv",
+      "bytes": 128199,
+      "mtime_ns": 1792517809415745044
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/preparation.json",
+      "bytes": 4923,
+      "mtime_ns": 1792517812053846611
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/prepare.log",
+      "bytes": 4923,
+      "mtime_ns": 1792517812054546320
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/quarter.csv.gz",
+      "bytes": 1076974,
+      "mtime_ns": 1792516086175239776
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/sensitivity_summary.csv",
+      "bytes": 1728,
+      "mtime_ns": 1792518270705623723
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p1_tp10.csv.gz",
+      "bytes": 29789,
+      "mtime_ns": 1792518270421766211
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p1_tp2.csv.gz",
+      "bytes": 30041,
+      "mtime_ns": 1792518270253528413
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p1_tp3.csv.gz",
+      "bytes": 29919,
+      "mtime_ns": 1792518270309540332
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p1_tp5.csv.gz",
+      "bytes": 29828,
+      "mtime_ns": 1792518270365186668
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p2_tp10.csv.gz",
+      "bytes": 29476,
+      "mtime_ns": 1792518270704796432
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p2_tp2.csv.gz",
+      "bytes": 29778,
+      "mtime_ns": 1792518270531127466
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p2_tp3.csv.gz",
+      "bytes": 29677,
+      "mtime_ns": 1792518270587684718
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/stop_first_b0p2_tp5.csv.gz",
+      "bytes": 29524,
+      "mtime_ns": 1792518270644708804
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v2/summary.csv",
+      "bytes": 3424,
+      "mtime_ns": 1792517893678311199
+    }
+  ]
+}

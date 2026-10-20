@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-range-wick-fanshen-20261021-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 667d45104f
+    status: inconclusive
+    question: Do the owner's seven chart examples have favorable space before initial stop, and how does that compare with all causal signals after adding Monday high and low?
+    single_variable: Add Monday endpoints to the v1 candidate levels; entry, three completed 15m stop, buffers, costs and exits unchanged. MFE is a separate descriptive diagnostic.
+    result: At 0.2 percent stop buffer all seven drawings had over20bp favorable space before SL, but only42/69 September-onward rule signals did so versus44/69 matched random. At0.1 percent buffer six of seven drawings cover20bp, and38/69 signals versus41/69 random. Added173 signals and advanced17 entries; two Oct1 manual examples missing in v1 are now included. All eight fixed-exit configurations remain netnegative over981 trades;0.2percent/10R net-449.794R versus random-431.978R, net win9.582percent. Opportunity is not realized profit; no executable exit edge established.
+    artifacts:
+    - btc-range-wick-fanshen-20261021-v2
+    canonical_report: experiments/active/exp-btc-range-wick-fanshen-20261021-v2/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Owner clarified no losses means sufficient favorable space. Reused v1 data and8024 execution rows, only7672 new native paths, all oracle parity passed. Conservative MFE excludes first stop-touch5m bar; recent20bp count unchanged under upper bound.11 tests,14 prefixes,14 manual-buffer rows passed; stop-first changes no signal payoff. Notion EXP-151 https://app.notion.com/p/3ff8856479af810aa605d0cc9500cb96 links preserved EXP-149. No Pine/default/live/model change. Source builder51fc52ef7b and review export667d45104f committed before generation.
   - experiment_id: exp-gainer-board-exit-select-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 93567f2f4e
