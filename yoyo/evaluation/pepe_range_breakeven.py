@@ -32,21 +32,27 @@ def native():
     lib = ctypes.CDLL(str(path))
     array = np.ctypeslib.ndpointer(dtype=np.float64, flags="C_CONTIGUOUS")
     lib.replay_be.argtypes = [array,array,array,array,ctypes.c_int,ctypes.c_int,
-                             ctypes.c_double,ctypes.c_double,array]
+                             ctypes.c_double,ctypes.c_double,ctypes.c_double,
+                             ctypes.c_double,array]
     lib.replay_be.restype = None
     return lib
 
 
-def replay(ctx, events, arm="be3", cost=.002, tick=1e-9, lib=None):
+def replay(ctx, events, arm="be3", cost=.002, tick=1e-9, lib=None,
+           arm_r=5., atr_multiple=4.):
+    """Reuse the corrected screening kernel with explicit trailing parameters."""
+    if not all(np.isfinite(x) and x > 0 for x in (arm_r, atr_multiple)):
+        raise ValueError("Trailing parameters must be finite and positive")
     lib = native() if lib is None else lib
     events = np.ascontiguousarray(events, dtype=float)
     result = np.empty((len(events),13), dtype=float)
     lib.replay_be(ctx["bars"],ctx["atr"],ctx["hour"],events,len(events),
-                  ARMS[arm],cost,tick,result)
+                  ARMS[arm],cost,tick,arm_r,atr_multiple,result)
     return result
 
 
-def scalar(ctx, event, arm="be3", cost=.002, tick=1e-9):
+def scalar(ctx, event, arm="be3", cost=.002, tick=1e-9,
+           arm_r=5., atr_multiple=4.):
     """Readable signed-price oracle, independent of the native implementation."""
     first, side, entry, initial, last = event
     first, side, last = int(first), int(side), int(last)
@@ -68,7 +74,8 @@ def scalar(ctx, event, arm="be3", cost=.002, tick=1e-9):
         peak = max(peak, side*(good-entry)/risk)
         quarter = np.isfinite(ctx["atr"][i]) and ctx["atr"][i] > 0
         if quarter:
-            above = side*(c-entry)/risk >= 5 if arm == "legacy" else side*(c-entry)+eps >= 5*risk
+            above = (side*(c-entry)/risk >= arm_r if arm == "legacy"
+                     else side*(c-entry)+eps >= arm_r*risk)
             if trailing < 0 and above:
                 trailing = i
             if arm == "be3":
@@ -82,7 +89,7 @@ def scalar(ctx, event, arm="be3", cost=.002, tick=1e-9):
                     else:
                         deferred += 1
             if trailing >= 0:
-                raw = (c-side*4*ctx["atr"][i])/tick
+                raw = (c-side*atr_multiple*ctx["atr"][i])/tick
                 candidate = (np.floor(raw+1e-8) if side > 0 else np.ceil(raw-1e-8))*tick
                 if side*(candidate-stop) > 0:
                     stop, source = candidate, 2

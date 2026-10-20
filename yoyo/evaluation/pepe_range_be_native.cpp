@@ -6,6 +6,7 @@
 extern "C" void replay_be(
     const double* bars, const double* atr, const double* hour,
     const double* events, int count, int mode, double cost, double tick,
+    double arm_r, double atr_multiple,
     double* output) {
   for (int e = 0; e < count; ++e) {
     const double* ev = events + e * 5;
@@ -32,8 +33,8 @@ extern "C" void replay_be(
       double favorable = side == 1 ? h : l;
       peak = std::max(peak, side*(favorable-entry)/risk);
       if (std::isfinite(atr[j]) && atr[j] > 0) {
-        bool beyond5 = mode == 0 ? side*(c-entry)/risk >= 5
-                                : side*(c-entry) >= 5*risk-eps;
+        bool beyond5 = mode == 0 ? side*(c-entry)/risk >= arm_r
+                                : side*(c-entry) >= arm_r*risk-eps;
         if (trail_i < 0 && beyond5) trail_i = j;
         if (mode == 2) {
           if (be_trigger < 0 && side*(c-entry) >= 3*risk-eps) be_trigger = j;
@@ -47,7 +48,7 @@ extern "C" void replay_be(
           }
         }
         if (trail_i >= 0) {
-          double raw = (c-side*4*atr[j])/tick;
+          double raw = (c-side*atr_multiple*atr[j])/tick;
           double candidate = (side == 1 ? std::floor(raw+1e-8)
                                         : std::ceil(raw-1e-8))*tick;
           if (side*(candidate-stop) > 0) { stop = candidate; stop_kind = 2; }

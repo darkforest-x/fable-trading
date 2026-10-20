@@ -1,0 +1,112 @@
+{
+  "experiment_id": "exp-range-5m-params-20261020-v1",
+  "source_configs": {
+    "BTC": "experiments/active/exp-range-entry5m-20261020-v1/btc/config.json",
+    "ETH": "experiments/active/exp-range-entry5m-20261020-v1/eth/config.json",
+    "PEPE": "experiments/active/exp-range-entry5m-20261020-v1/pepe/config.json",
+    "ZEC": "experiments/active/exp-range-entry5m-20261020-v1/zec/config.json"
+  },
+  "venues": {
+    "BTC": "OKX",
+    "ETH": "OKX",
+    "PEPE": "OKX",
+    "ZEC": "Binance"
+  },
+  "round_trip_cost": 0.002,
+  "arms": [
+    {
+      "name": "baseline",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "stop_window_5m_3",
+      "stop_window_5m": 3,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "stop_window_5m_8",
+      "stop_window_5m": 8,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "stop_window_5m_12",
+      "stop_window_5m": 12,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "buffer_percent_0p025",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.025,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "buffer_percent_0p1",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.1,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "buffer_percent_0p2",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.2,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "trail_arm_r_3",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 3,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "trail_arm_r_8",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 8,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "trail_arm_r_10",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 10,
+      "trail_atr_multiple": 4
+    },
+    {
+      "name": "trail_atr_multiple_2",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 2
+    },
+    {
+      "name": "trail_atr_multiple_3",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 3
+    },
+    {
+      "name": "trail_atr_multiple_6",
+      "stop_window_5m": 5,
+      "buffer_percent": 0.05,
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 6
+    }
+  ],
+  "seed": 20261020,
+  "minimum_development_trades": 100,
+  "selection": "Highest development (2024) total net R; ties lower realized R drawdown then name. Later 2025/2026 recheck. No untouched-data claim."
+}
