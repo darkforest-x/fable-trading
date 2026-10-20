@@ -8,6 +8,7 @@ R always uses the original risk, never a denominator recomputed after a stop.
 """
 import json
 import subprocess
+from decimal import Decimal
 
 import numpy as np
 import pandas as pd
@@ -111,6 +112,40 @@ def audit_windows(raw, rows, rec, thresholds):
     return checked
 
 
+def arming_boundary_audit(raw, rows):
+    """Diagnose exact-5R float comparisons without replacing the frozen ledger."""
+    from yoyo.evaluation.pepe_range_exits import prepare, replay
+    frame = raw.copy()
+    frame.index = pd.to_datetime(frame.ts, unit="ms", utc=True)+pd.Timedelta(minutes=5)
+    ctx = prepare(frame)
+    result = replay(ctx, rows[["entry_i","side","entry","stop","end_i"]].to_numpy(),
+                    arm=5-1e-7)
+    changed = []
+    for row, new in zip(rows.itertuples(), result):
+        if row.arm_i == new[4]:
+            continue
+        # The tiny relaxed comparison is only a screen. Require every affected
+        # earlier close to equal exactly 5R in decimal, not merely be nearby.
+        entry = Decimal(str(row.entry))
+        stop = Decimal(round(row.stop/1e-9))*Decimal("1e-9")
+        risk = int(row.side)*(entry-stop)
+        observed = Decimal(str(raw.close.iloc[int(new[4])]))
+        assert int(row.side)*(observed-entry) == 5*risk, row.pair_id
+        gross = row.side*(new[1]-row.entry)/row.risk
+        changed.append(dict(pair_id=int(row.pair_id), population=row.population,
+            entry_time=row.entry_time, old_arm_i=int(row.arm_i), corrected_arm_i=int(new[4]),
+            old_reason=int(row.reason), corrected_reason=int(new[2]),
+            old_exit_i=int(row.exit_i), corrected_exit_i=int(new[0]),
+            old_gross_r=float(row.gross_r), corrected_gross_r=float(gross),
+            net_r_delta=float(gross-row.gross_r)))
+    signal = [r for r in changed if r["population"] == "signal"]
+    return dict(scope="Numerical sensitivity only; frozen baseline and Pine unchanged.",
+        screen_arm_r=5-1e-7, all_changed_closes_verified_decimal_exact_5r=True,
+        changed_signal_armings=len(signal), changed_signal_payoffs=sum(
+            abs(r["net_r_delta"]) > 1e-7 for r in signal),
+        signal_net_r_delta=sum(r["net_r_delta"] for r in signal), changes=changed)
+
+
 def main():
     cfg = json.loads((EXP/"recovery_config.json").read_text())
     out = EXP/"results"/"recovery_v1"
@@ -120,6 +155,8 @@ def main():
     raw = pd.read_csv(EXP/"inputs"/"okx_pepe_5m.csv.gz", float_precision="round_trip")
     assert (raw.ts.diff().dropna() == 300000).all()
     bars = raw[["open", "high", "low", "close"]].to_numpy()
+    boundary_audit = arming_boundary_audit(raw, rows)
+    write_json(out/"arming_boundary_audit.json", boundary_audit)
     close_times = pd.to_datetime(raw.ts, unit="ms", utc=True)+pd.Timedelta(minutes=5)
     assert pd.to_datetime(rows.entry_time).reset_index(drop=True).equals(
         close_times.iloc[rows.entry_i.to_numpy(dtype=int)].reset_index(drop=True))
