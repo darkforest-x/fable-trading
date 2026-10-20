@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from yoyo.evaluation.btc_range_wick_fanshen import candidates, prefix_audit
-from yoyo.evaluation.pepe_range_exits import pairs, inference, stop_events
+from yoyo.evaluation.pepe_range_exits import pairs, inference
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp, run, prepared
 
 WORK = ROOT / "experiments/active/exp-btc-range-wick-fanshen-20261021-v2"
@@ -197,9 +197,93 @@ def analyze():
     return receipt
 
 
+def drawings():
+    """Reconcile the seven UI observations against frozen causal candidates."""
+    observations = json.loads((WORK/"drawing_observations.json").read_text())["drawings"]
+    old = pd.read_csv(OLD/"candidates.csv")
+    old = old[(old.family=="combined") & (old.population=="signal")].set_index("signal_q")
+    q = pd.read_csv(OLD/"quarter.csv.gz", index_col="close_time", parse_dates=True)
+    records = []
+    for tag in ("0p1", "0p2"):
+        rows = pd.read_csv(WORK/f"excursions_b{tag}.csv")
+        rows = rows[rows.population=="signal"]
+        times = pd.to_datetime(rows.entry_time, utc=True)
+        outcomes = {r: pd.read_csv(WORK/f"annotated_b{tag}_tp{r}.csv.gz")
+                    .set_index("trade_id") for r in (2, 3, 5, 10)}
+        for observed in observations:
+            time = pd.Timestamp(observed["candidate_close_beijing"], tz="Asia/Shanghai")
+            match = rows[times.eq(time) & rows.side.eq(observed["side"])]
+            assert len(match)==1
+            row = match.iloc[0]
+            prior = old.loc[row.signal_q] if row.signal_q in old.index else None
+            result = dict(observed, buffer=tag, trade_id=row.trade_id,
+                entry_close_beijing=str(time), actual_entry=float(row.entry),
+                actual_stop=float(row.stop), initial_risk=float(row.risk),
+                mfe_percent=float(row.mfe_bp/100), mfe_r=float(row.mfe_r),
+                mfe_upper_r=float(row.mfe_upper_r), levels=row.levels,
+                covered_20bp=bool(row.mfe_bp>=20), bars_before_stop=int(row.bars_before_stop),
+                signal_open_beijing=str((q.index[int(row.signal_q)]-pd.Timedelta(minutes=15))
+                                        .tz_convert("Asia/Shanghai")),
+                touch_open_beijing=str((q.index[int(row.touch_q)]-pd.Timedelta(minutes=15))
+                                       .tz_convert("Asia/Shanghai")),
+                old_entry_time=str(prior.entry_time) if prior is not None else "",
+                prior_status="missing_monday_endpoint" if prior is None else
+                    ("entry_advanced_by_endpoint" if int(prior.entry_i)!=int(row.entry_i)
+                     else "same_event"))
+            result.update({f"fixed_{r}r_net":float(outcomes[r].loc[row.trade_id,"net_r"])
+                           for r in outcomes})
+            records.append(result)
+    result=pd.DataFrame(records)
+    result.to_csv(WORK/"drawing_reconciliation.csv",index=False)
+    return dict(drawings_per_buffer=7, reconciled=len(result),
+                covers_cost=result.groupby("buffer").covered_20bp.sum().to_dict())
+
+
+def sensitivity():
+    """Reuse old stop-first outcomes; screen only new candidate identities."""
+    from yoyo.evaluation.pepe_range_breakeven import replay_search
+    cfg = json.loads((WORK/"config.json").read_text())
+    summaries = []
+    for tag in ("0p1", "0p2"):
+        native_cfg = json.loads((WORK/f"native_b{tag}.json").read_text())
+        ctx, pending, _ = prepared(native_cfg, WORK/".cache")
+        for target in cfg["target_r"]:
+            rows = pd.read_csv(WORK/f"annotated_b{tag}_tp{target}.csv.gz")
+            old = pd.read_csv(OLD/f"annotated_b{tag}_tp{target}.csv.gz")
+            old = old.set_index("trade_id").selection_net_r
+            conservative = replay_search(
+                ctx, pending[["entry_i", "side", "entry", "stop", "end_i"]].to_numpy(float),
+                tick=cfg["tick"], target_r=target, reverse_exit=False, stop_first=True)
+            net = (pending.side.to_numpy()*(conservative[:, 1]-pending.entry.to_numpy())
+                   - cfg["round_trip_cost"]*pending.entry.to_numpy())/pending.risk.to_numpy()
+            new = dict(zip(pending.trade_id, net))
+            rows["stop_first_net_r"] = [
+                old.loc[r.source_trade_id] if r.reused else new[r.source_trade_id]
+                for r in rows.itertuples()]
+            for period, mask in {
+                "full": np.ones(len(rows), bool),
+                "september_onward": pd.to_datetime(rows.entry_time, utc=True)
+                    .ge(pd.Timestamp(cfg["recent_start"])),
+            }.items():
+                real = rows[mask & rows.population.eq("signal")]
+                control = rows[rows.population.eq("random") & rows.pair_id.isin(real.pair_id)]
+                summaries.append(dict(arm=f"b{tag}_tp{target}", period=period, n=len(real),
+                    native_net_r=float(real.net_r.sum()),
+                    stop_first_net_r=float(real.stop_first_net_r.sum()),
+                    random_native_net_r=float(control.net_r.sum()),
+                    random_stop_first_net_r=float(control.stop_first_net_r.sum()),
+                    changed_signals=int((real.stop_first_net_r-real.net_r).abs().gt(1e-7).sum())))
+            rows[["trade_id", "net_r", "stop_first_net_r"]].to_csv(
+                WORK/f"stop_first_b{tag}_tp{target}.csv.gz", index=False)
+    result = pd.DataFrame(summaries)
+    result.to_csv(WORK/"sensitivity_summary.csv", index=False)
+    return dict(arms=8, native_replays=0,
+                changed_signals=int(result[result.period.eq("full")].changed_signals.sum()))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["prepare", "run", "analyze"])
+    parser.add_argument("action", choices=["prepare", "run", "analyze", "drawings", "sensitivity"])
     args = parser.parse_args()
     subprocess.run(["git", "diff", "--exit-code", "HEAD", "--", __file__,
                     str(WORK/"config.json")], check=True, capture_output=True)
@@ -208,6 +292,10 @@ def main():
     elif args.action == "run":
         result = [run(WORK/f"native_b{tag}.json") for tag in ("0p1", "0p2")]
         result = {"completed_buffers": len(result)}
+    elif args.action == "drawings":
+        result = drawings()
+    elif args.action == "sensitivity":
+        result = sensitivity()
     else:
         result = analyze()
     print(json.dumps(result, ensure_ascii=False, indent=2))
