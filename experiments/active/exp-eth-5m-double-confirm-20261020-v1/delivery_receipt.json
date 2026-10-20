@@ -1,0 +1,219 @@
+{
+  "experiment_id": "exp-eth-5m-double-confirm-20261020-v1",
+  "source_commit": "2d3cb43367f1cdb01556e9b98894594c73505c3e",
+  "candidate_builder_commit": "f85b495ddb",
+  "generated_at": "2026-10-20T11:00:06.137716+00:00",
+  "reproduce": {
+    "python": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python",
+    "module": "yoyo.evaluation.range_double_confirm",
+    "phases": [
+      "build (fresh directory only)",
+      "run (native cache thereafter)",
+      "analyze"
+    ]
+  },
+  "scope": "ETH only;15m watch plus5m next-close two-body confirmation;noPine changes",
+  "tests": {
+    "targeted": 22,
+    "real_prefixes": 6,
+    "old_candidates_identical": 4101,
+    "new_native_positions": 10054,
+    "new_native_fills": 20108,
+    "independent_actual_entry_stop_watch_body": 10054,
+    "scalar_exit_paths": 34
+  },
+  "runtime": {
+    "runs": [
+      {
+        "arm": "watch15",
+        "elapsed_seconds": 69.32470329198986
+      },
+      {
+        "arm": "watch15_double",
+        "elapsed_seconds": 16.757703791954555
+      }
+    ],
+    "wall_seconds": 70.27251945796888
+  },
+  "native_adapter_unchanged": true,
+  "baseline_replayed": false,
+  "results": [
+    {
+      "before": "h1_baseline",
+      "after": "watch15",
+      "retained": 2199,
+      "removed": 1902,
+      "added": 1639,
+      "removed_losers": 1741,
+      "removed_winners": 161,
+      "removed_net_r": -2005.7145759052553,
+      "surviving_original_net_r": -2035.6860501850042,
+      "surviving_new_net_r": -2035.6860501850042,
+      "surviving_original_mean_net_bp": -15.86410931360534,
+      "surviving_new_mean_net_bp": -15.86410931360534,
+      "attribution_only": "Delayed survivors are known only at the later close; their original-price outcome is a hindsight counterfactual, not tradable.",
+      "old_10r": 122,
+      "rejected_10r": 48,
+      "retained_signal_10r": 74,
+      "still_final_10r": 74,
+      "new_final_10r": 42,
+      "old_20r": 53,
+      "rejected_20r": 29,
+      "retained_signal_20r": 24,
+      "still_final_20r": 24,
+      "new_final_20r": 21
+    },
+    {
+      "before": "watch15",
+      "after": "watch15_double",
+      "retained": 1189,
+      "removed": 2649,
+      "added": 0,
+      "removed_losers": 2465,
+      "removed_winners": 184,
+      "removed_net_r": -3431.451901293549,
+      "surviving_original_net_r": -315.63708525155477,
+      "surviving_new_net_r": -596.1380173652036,
+      "surviving_original_mean_net_bp": -2.6314982556346176,
+      "surviving_new_mean_net_bp": -14.782562415980722,
+      "attribution_only": "Delayed survivors are known only at the later close; their original-price outcome is a hindsight counterfactual, not tradable.",
+      "old_10r": 116,
+      "rejected_10r": 64,
+      "retained_signal_10r": 52,
+      "still_final_10r": 29,
+      "new_final_10r": 4,
+      "old_20r": 45,
+      "rejected_20r": 25,
+      "retained_signal_20r": 20,
+      "still_final_20r": 7,
+      "new_final_20r": 1
+    }
+  ],
+  "notion": {
+    "url": "https://app.notion.com/p/3ff8856479af81918d81dd385fab4f80",
+    "readback_verified": true
+  },
+  "decision": "Do not upgrade default: every year netnegative;20R tails lost;2026 worsens;no stable advantage over matched random",
+  "limitations": [
+    "Independent overlapping original-risk R,not account return",
+    "20bp frozen cost excludes funding/spread/latency/capacity",
+    "Repeated historical research,not untouched validation",
+    "Old generic controls differ from new watch/body-matched controls;only within-arm comparisons supported",
+    "Survivor old-entry figures are hindsight attribution,not executable entries",
+    "No trained score;AUC/top-decile not applicable;paired weekly null replaces it"
+  ],
+  "artifacts": [
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/.gitignore",
+      "bytes": 73,
+      "mtime_ns": 1792493568365890918
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/config.json",
+      "bytes": 1236,
+      "mtime_ns": 1792493568365285827
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/h1_baseline_to_watch15.csv.gz",
+      "bytes": 604058,
+      "mtime_ns": 1792493842392414792
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/inference.json",
+      "bytes": 8622,
+      "mtime_ns": 1792493842751799860
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/input_receipt.json",
+      "bytes": 879,
+      "mtime_ns": 1792493637914060144
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/run_receipt.json",
+      "bytes": 224,
+      "mtime_ns": 1792493723456339997
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/source_effects.json",
+      "bytes": 1680,
+      "mtime_ns": 1792493842752396409
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/summary.csv",
+      "bytes": 8308,
+      "mtime_ns": 1792493842751049142
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/validation.json",
+      "bytes": 457,
+      "mtime_ns": 1792493842776941929
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/config.json",
+      "bytes": 711,
+      "mtime_ns": 1792493635633324204
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+      "bytes": 894724,
+      "mtime_ns": 1792493635632797072
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/audit.json",
+      "bytes": 620,
+      "mtime_ns": 1792493722935116455
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/fills.csv",
+      "bytes": 1631678,
+      "mtime_ns": 1792493722934560490
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/trades.csv",
+      "bytes": 2569540,
+      "mtime_ns": 1792493722866224579
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/receipt.json",
+      "bytes": 6463,
+      "mtime_ns": 1792493722976674067
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/config.json",
+      "bytes": 725,
+      "mtime_ns": 1792493637165820761
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/entries.csv",
+      "bytes": 275628,
+      "mtime_ns": 1792493637165165252
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/results/baseline/audit.json",
+      "bytes": 619,
+      "mtime_ns": 1792493670351473254
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/results/baseline/fills.csv",
+      "bytes": 496802,
+      "mtime_ns": 1792493670351111041
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/results/baseline/trades.csv",
+      "bytes": 798954,
+      "mtime_ns": 1792493670329627851
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_double/results/receipt.json",
+      "bytes": 6482,
+      "mtime_ns": 1792493670400838340
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15_to_watch15_double.csv.gz",
+      "bytes": 475541,
+      "mtime_ns": 1792493842745158650
+    }
+  ],
+  "production_eligible": false,
+  "training_eligible": false
+}

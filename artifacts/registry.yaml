@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-5m-double-confirm-20261020-v1
+    artifact_type: manifest
+    role: ETH15m-watch5m-double-confirm native outcomes and source-arrow attribution
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d3cb43367f1cdb01556e9b98894594c73505c3e
+    source_path: experiments/active/exp-eth-5m-double-confirm-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-5m-double-confirm-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen20bp,5bar5m0.05percent stop,15m5R4ATR andarmedH1reverseexit. Allrawinputs/trades/fills/sourcejoins inventoried bypathsize/time,nohash.
+      Defaultnotupgraded;independentRnotaccountreturns.
   - artifact_id: monday-range-fanshen-v2-10-20261020-delivery
     artifact_type: manifest
     role: Pine V2.10 follows5m/15m chart entry clocks, other charts context only

@@ -14,6 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-5m-double-confirm-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2d3cb43367f1cdb01556e9b98894594c73505c3e
+    status: rejected
+    question: Does15m observation and two directional5m candles preserve large winners and improve ETH5m entries?
+    single_variable: 'Sequential arms: H1to15m observation,then next-close two-body confirmation. Stops recalculated at actual entry;existing
+      management/cost unchanged.'
+    artifacts:
+    - eth-5m-double-confirm-20261020-v1
+    canonical_report: experiments/active/exp-eth-5m-double-confirm-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: H1/15m/15m-double counts4101/3838/1189,netR-4041.40/-3747.09/-596.14,meanbp-17.395/-16.785/-14.783,finalgross20R53/45/8. Double
+      removes25old20R;20pass butonly7remain20R,plus1new. Signal/random meanR-0.985/-1.106,-0.976/-0.904,-0.501/-0.446. All3doubleyearsegmentsnegative;2026worsens.
+    notes: 22tests,6prefixes,4101cachedcandidateparity,10054nativepositions/20108fills,34scalarchecks. Nativewall70s;noPine/download/newengine.
+      Matchednewcontrols satisfy samewatch/body;oldcontrols generic. Hindsight survivors oldentrymean-2.63bp versusactualdelayed-14.78bp
+      isnotexecutableearlyselection. Notion3ff8856479af81918d81dd385fab4f80 verified.
   - experiment_id: exp-eth-5m-rejections-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0497918a514b20fb257f7d7461a9d207c526bed5
