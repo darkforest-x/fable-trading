@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-range-fanshen-v2-12-20261021-prepared
+    artifact_type: manifest
+    role: Pine shared15m history fix prepared with native validation pending
+    source_repo: darkforest-x/fable-trading
+    source_commit: e241800e2a
+    source_path: output/pine/monday_range_v2_12_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_12_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Both key-level request branches12000 independent of reference toggle;20local checks pass. TradingView editor and reload stuck loading. No native validation,private script or on-chart delivery yet. V2.11 preserved.
   - artifact_id: eth-h1-alt-selection-20261020-v1
     artifact_type: manifest
     role: ETH H1 sixteen-hour event outcomes and causal top3 altcoin candidates

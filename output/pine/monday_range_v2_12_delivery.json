@@ -1,0 +1,34 @@
+{
+  "version": "V2.12",
+  "status": "local_ready_native_validation_pending",
+  "prepared_at_shanghai": "2026-10-21T00:35:58.640855+08:00",
+  "source": "yoyo/evaluation/pine/monday_range_v2_12.pine",
+  "source_commit": "e241800e2a",
+  "change": "Both 15m key-level requests use 12000 bars regardless of txEnabled; all other executable statements unchanged except version",
+  "prior_preserved": "V2.11 local source and private script untouched",
+  "local_tests": {
+    "passed": 20,
+    "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_12.py tests/evaluation/test_monday_range_v2_11.py tests/evaluation/test_monday_range_v2_10.py tests/evaluation/test_range_entry_clock.py tests/evaluation/test_range_management_clock.py"
+  },
+  "native_validation": {
+    "completed": false,
+    "reason": "TradingView Pine editor remained loading; current chart tab reload also remained loading. No source was pasted or saved in TradingView.",
+    "planned": [
+      "BTCUSDT.P 15m old/new source coverage and common-window signal parity",
+      "V2.12 trade-reference off/on shared history coverage",
+      "5m confirmed request branch and unsupported chart route"
+    ]
+  },
+  "private_script_created": false,
+  "on_chart": false,
+  "no_orders": true,
+  "temporary_browser_sessions_created": 0,
+  "temporary_tabs_created": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "limits": [
+    "12000 requested 15m bars is not a guarantee of available TradingView history",
+    "Reported September 17 cutoff is not yet natively reproduced",
+    "Ray retention remains 100 by default and 200 maximum; range retention remains 12 weeks by default"
+  ]
+}
