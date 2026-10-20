@@ -1,0 +1,95 @@
+{
+  "version": "2.7",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_7.pine",
+  "base": "yoyo/evaluation/pine/monday_range_v2_6.pine",
+  "owner_requests": [
+    "After trend arming, exit on confirmed opposite hourly signal close.",
+    "R-only captions by default; optional price visibility off by default; show peak R.",
+    "Remove the bottom-left version and range status table."
+  ],
+  "exit_rule": {
+    "armed_only": true,
+    "signal": "confirmed opposite H1 check/cross",
+    "price": "same H1 close from fixed5m engine",
+    "reason": 3,
+    "precedence": [
+      "old5m stop/gap",
+      "15m close arming and ratchet",
+      "H1 opposite close exit"
+    ],
+    "same_close_first_arming_eligible": true,
+    "positive_pnl_filter": false
+  },
+  "display": {
+    "prices_default": false,
+    "maximum_r": true,
+    "maximum_r_definition": "Confirmed favorable extremes while held, excluding entry pre-fill wick and ambiguous stop-hit5m extremes. Frozen at exit.",
+    "maximum_r_is_not_realized_profit": true,
+    "bottom_left_range_table_removed": true,
+    "viewport_frames_maximum": 40
+  },
+  "unchanged": {
+    "module_default_enabled": false,
+    "every_h1_resets_observation": true,
+    "every_later_same_side_15m_may_enter": true,
+    "stop_5m_bars": 5,
+    "buffer_percent": 0.05,
+    "arm_r": 5,
+    "atr15_length": 14,
+    "atr15_multiplier": 4,
+    "full_source_ledger_and_viewport_selection": true,
+    "range_fanshen_rays_alerts": true
+  },
+  "native_validation": {
+    "private_script": "周一高低点区间＋翻身 · V2.7",
+    "saved_revision": 2,
+    "saved_at": "2026-10-20T13:34:37+08:00",
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframes_checked": [
+      "15m",
+      "1H"
+    ],
+    "ledger_count": 146,
+    "active": 0,
+    "ledger_signatures_identical": true,
+    "reference_closed_records_12_fields": 10,
+    "changed_recent_exits": 3,
+    "gate_marker": "V27_NATIVE_CHECKS_PASS",
+    "buffer_marker": "V24_UNIT_CHECKS_PASS",
+    "qa_appendix_removed": true,
+    "price_switch_on_off_verified": true,
+    "final_chart_module_enabled": true,
+    "final_chart_prices_enabled": false,
+    "layout_all_changes_saved": true,
+    "editor_logs_closed": true,
+    "new_temporary_browser_sessions": 0
+  },
+  "local_validation": {
+    "command": "python3 -m pytest tests/evaluation/test_monday_range_v2_7.py tests/evaluation/test_monday_range_v2_6.py tests/evaluation/test_monday_range_v2_5.py -q",
+    "passed": 23
+  },
+  "notion_project_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "prior_source_private_preserved": true,
+  "stitch": "Persistent owner exemption for Pine",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": [
+    "Raw PEPE overlap only is independently replayed; larger native ledger checked across timeframes.",
+    "Maximum R is conservative on stop-hit OHLC bars; actual intrabar path is unavailable.",
+    "Source history remains limited to30000 requested5m bars and available TradingView data.",
+    "No account orders or profitability superiority inference; examples are gross R without costs."
+  ],
+  "evidence": [
+    "output/pine/monday_range_v2_7_defaults_ax.txt",
+    "output/pine/monday_range_v2_7_final.png",
+    "output/pine/monday_range_v2_7_final_ax.txt",
+    "output/pine/monday_range_v2_7_native_15m.txt",
+    "output/pine/monday_range_v2_7_native_1h.txt",
+    "output/pine/monday_range_v2_7_native_qa.pine",
+    "output/pine/monday_range_v2_7_prices_on.png",
+    "output/pine/monday_range_v2_7_r_only.png",
+    "output/pine/monday_range_v2_7_reference.json",
+    "output/pine/monday_range_v2_7_saved_ax.txt",
+    "output/pine/monday_range_v2_7_tests.txt"
+  ]
+}

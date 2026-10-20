@@ -1,0 +1,73 @@
+The following is a diff from the previous accessibility tree for Window: "PEPEUSDT.P / 综合过滤" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 159-207, 260
+~						7 text PEPEUSDT.P ▲ 0.000004175 +0.48% /  综合过滤
+~								57 按钮 重做更新区间翻身 V2.7 脚本
+~								59 按钮 保存布局里的所有图表，包含图表里的全部品种和周期
+~										137 text 开= 0.000004188 高= 0.000004192 低= 0.000004175 收= 0.000004175 −0.000000013 (−0.31%)
+~									139 text 0.000004174 卖出
+~									141 text 0.000004175 买入
++							322 工具栏
++								323 container
++									324 文本 区间翻身 V2.7
++									325 文本 1
++									326 文本 100
++									327 文本 5
++									328 文本 入场价百分比
++									329 文本 0.05
++									330 文本 5
++									331 文本 14
++									332 文本 4
++									333 文本 40
++									334 文本 America/New_York
++									335 文本 1
++									336 文本 实线
++									337 文本 12
++									338 文本 0.5, 0.618, 0.705, 1.13, 1.27, 1.618
++									339 文本 中
++									340 文本 0.5, 0.618, 0.705
++									341 文本 14
++									342 文本 8
++									343 文本 5
++									344 文本 3
++									345 文本 3
++									346 文本 22
++									347 文本 20
++									348 文本 2
++									349 文本 50
++									350 文本 0.85
++									351 文本 1.01
++								352 container
++									353 按钮 隐藏
++										354 图像
++									355 按钮 设置
++										356 图像
++									357 图像
++									358 按钮 移除
++										359 图像
++									360 按钮 更多
++										361 图像
++								362 按钮 在Pine编辑器打开
++								363 container
++									364 文本 20.32
++									365 文本 27.18
++									366 文本 0.00
++									367 文本 0.00
++									368 文本 ∅
++									369 文本 ∅
++									370 文本 0.97
++									371 文本 ∅
+~								229 文本 13:35:49 UTC+8
+~							279 按钮 (disabled) 图表更新
++								372 container 13:34:37
++									373 文本 13:34:37
++								374 container “周一高低点区间＋翻身 · V2.7”已保存。
++									375 文本 “周一高低点区间＋翻身 · V2.7”已保存。
+~							310 按钮 2 ∙ 今天, 13:34
+The focused UI element is 283 编辑器 (settable) Description: Editor content;Press Alt+F1 for Accessibility Options., Value: lay=display.data_window, precision=0)
+plot(not na(tx) ? tx.lastEntry : na, "交易参考：最新入场价", display=display.data_window)
+plot(not na(tx) ? tx.lastStop : na, "交易参考：最新初始止损", display=display.data_window)
+plot(not na(tx) ? tx.closeAt : na, "交易参考：确认至（Unix ms）", display=display.data_window, precision=0)
+
+plot(not na(tx) ? tx.sourceStart : na, "交易参考：源数据起点（Unix ms）", display=display.data_window, precision=0)
+
+plot(not na(tx) ? txVisibleTotal : na, "交易参考：可见时段相交总数", display=display.data_window, precision=0)
