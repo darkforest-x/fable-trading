@@ -1,0 +1,7 @@
+# Next-candle confirmation changes the trade, not just admission
+
+- **Problem**: A two-body rule appears to be a filter on existing 5m arrows, but its second candle is available only one bar after the original entry. Measuring accepted rows from the old ledger would give the new strategy unavailable entry prices and the wrong initial risk.
+- **Dead end**: Filtering the old entry ledger by the following candle's body silently uses future information at the old execution time. Moving timestamps alone is also insufficient: the completed five-bar stop window and entry-based percentage buffer have moved.
+- **Effective path**: Build causal candidates at the confirmation close, expire pending signals on a new observation, exclude split-boundary carryover, and feed those candidates to the existing Nautilus adapter. Recompute entry and structure stop there; keep exit clocks and costs frozen. Link outcomes by the original arrow to separate rejected winners from surviving signals whose delayed trades no longer reach the same R.
+- **General rule**: Before reusing an outcome ledger for a new filter, ask whether every required fact exists at its original execution time. If it does not, reuse market inputs and the execution framework, not the old outcomes. Random controls must obey the same delayed-confirmation requirements.
+- **Scope**: `yoyo/evaluation/range_double_confirm.py`; ETH 15m observation / 5m entry study. Latest five completed 5m bars, 0.05% buffer, unchanged 15m ATR management and armed H1 reverse exit. No Pine or live-trading change.

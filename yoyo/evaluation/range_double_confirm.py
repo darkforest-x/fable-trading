@@ -21,7 +21,7 @@ import time
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.pepe_range_exits import prepare, signals, entries, inference
+from yoyo.evaluation.pepe_range_exits import aggregate, prepare, signals, entries, inference
 from yoyo.evaluation.range_entry_clock import entry_context
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp, prepared
 from yoyo.evaluation.range_management_study import summary, subset, holm
@@ -204,6 +204,28 @@ def analyze(path):
                           on=["pair_id", "population"], validate="one_to_one")
         nativecfg = json.loads((work/"config.json").read_text())
         ctx, _, _ = prepared(nativecfg, work/".cache")
+        # Independent index-based checks use raw arrows and candle bodies,
+        # not the admission state machine that produced the candidates.
+        raw_five = signals(ctx["frame"]).to_numpy(int)
+        raw_quarter = signals(aggregate(ctx["frame"], 15)).reindex(
+            ctx["frame"].index, fill_value=0).to_numpy(int)
+        observed_indices = np.flatnonzero(raw_quarter)
+        source_idx = rows.source_i.to_numpy(int)
+        entry_idx = rows.entry_i.to_numpy(int)
+        latest_at_source = observed_indices[
+            np.searchsorted(observed_indices, source_idx, side="right")-1]
+        latest_at_entry = observed_indices[
+            np.searchsorted(observed_indices, entry_idx, side="right")-1]
+        np.testing.assert_array_equal(latest_at_source, rows.observed_i)
+        np.testing.assert_array_equal(latest_at_entry, rows.observed_i)
+        np.testing.assert_array_equal(raw_quarter[latest_at_entry], rows.side)
+        signal_mask = (rows.population == "signal").to_numpy()
+        np.testing.assert_array_equal(raw_five[source_idx[signal_mask]],
+                                      rows.side.to_numpy()[signal_mask])
+        if name.endswith("double"):
+            body = ctx["bars"][:, 3]-ctx["bars"][:, 0]
+            assert (rows.side.to_numpy()*body[source_idx] > 0).all()
+            assert (rows.side.to_numpy()*body[entry_idx] > 0).all()
         probes = np.unique(np.r_[np.linspace(0, len(rows)-1, 16, dtype=int),
                                  np.argmax(rows.peak_r), np.argmax(rows.net_r)])
         columns = ["exit_i", "exit_price", "reason", "peak_r", "arm_i", "protection",
@@ -227,7 +249,8 @@ def analyze(path):
             assert r.entry_i-r.source_i == (1 if name.endswith("double") else 0)
         frames[name] = rows
         audits.append(dict(arm=name, scalar_paths=len(probes),
-                           actual_entry_stop_rows=len(rows)))
+                           actual_entry_stop_rows=len(rows),
+                           independent_watch_arrow_body_rows=len(rows)))
     frames["h1_baseline"]["source_i"] = frames["h1_baseline"].entry_i
     for name, rows in frames.items():
         for seg in (-1, 0, 1, 2, -2):
