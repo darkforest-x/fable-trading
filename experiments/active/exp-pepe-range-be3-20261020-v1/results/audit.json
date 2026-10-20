@@ -1,0 +1,43 @@
+{
+  "builder_commit": "59904e1645e8049cea2bdf384787634b770f39de",
+  "scalar_paths": 11325,
+  "legacy_paths_matched": 3775,
+  "source_ledger": "experiments/active/exp-pepe-range-exits-20261020-v1/results/trades_w5_b0.05_trail5_atr4_cap0.csv",
+  "source_data": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_pepe_5m.csv.gz",
+  "source_5m_rows": 364633,
+  "signal_n": 1889,
+  "random_n": 1886,
+  "frozen_entries_risk_cost_and_boundaries": true,
+  "config": {
+    "experiment_id": "exp-pepe-range-be3-20261020-v1",
+    "parent": "exp-pepe-range-exits-20261020-v1",
+    "source_ledger": "experiments/active/exp-pepe-range-exits-20261020-v1/results/trades_w5_b0.05_trail5_atr4_cap0.csv",
+    "source_data": "experiments/active/exp-pepe-range-exits-20261020-v1/inputs/okx_pepe_5m.csv.gz",
+    "arms": [
+      "legacy",
+      "baseline",
+      "be3"
+    ],
+    "primary_comparison": "be3 minus baseline",
+    "legacy": "Exact prior numerical behavior, required to reproduce frozen ledger.",
+    "baseline": "Prior rules with shared price-domain tolerance at the 5R trigger; no breakeven.",
+    "be3": "Same baseline plus cost breakeven, first confirmed 15m close at or beyond 3R.",
+    "be_trigger_r": 3,
+    "be_stop": "entry + side * round_trip_cost * entry; round toward profit to the next tick; can only tighten protection.",
+    "validity": "After trigger, apply only at a completed 15m close at least one tick beyond rounded breakeven; otherwise defer until a later valid 15m close.",
+    "effective": "Old stop is tested first. All close-derived stops become effective next 5m bar. No entry-bar wick use.",
+    "trail_arm_r": 5,
+    "trail_atr_multiple": 4,
+    "trail_atr_length": 14,
+    "hour_exit": "Only after the original 5R trailing activation; 3R breakeven alone does not enable H1 opposite exit.",
+    "round_trip_cost": 0.002,
+    "tick": 1e-09,
+    "seed": 20261020,
+    "boundary": "Reuse original per-entry segment end; no crossing cuts. Keep all independent overlapping entries and matching identities.",
+    "outputs": "Full and chronological segment net R, constant-notional PnL, matched controls and paired policy changes, saved losers, lost 10R/20R outcomes, per-trade differences.",
+    "limitations": "Historical exploratory test, not unseen confirmation; no funding/additional slippage or shared-capital account simulation.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.pepe_range_breakeven"
+}

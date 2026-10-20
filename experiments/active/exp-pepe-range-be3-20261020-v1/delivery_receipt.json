@@ -1,0 +1,64 @@
+{
+  "experiment_id": "exp-pepe-range-be3-20261020-v1",
+  "source_commit": "59904e1645",
+  "notion_page": "https://app.notion.com/p/3ff8856479af81d8926dff01acc7626d",
+  "decision": "Reject enabling 3R cost breakeven by default; small historical gain is uncertain, 2026 worsens and tail retention declines.",
+  "comparison": {
+    "signal_n": 1889,
+    "random_n": 1886,
+    "baseline_net_r": -545.7512200584131,
+    "be3_net_r": -508.39154528995346,
+    "policy_delta_net_r": 37.35967476845976,
+    "legacy_numerical_correction_r": 1.017241379310339,
+    "rescued_losers": 190,
+    "rescued_initial_stops": 123,
+    "rescued_trailing_losses": 67,
+    "rescue_gain_r": 282.5796921132468,
+    "truncated_winners": 27,
+    "truncation_loss_r": -245.220017344787,
+    "retained_10r_of_baseline": [44, 54],
+    "retained_20r_of_baseline": [13, 15],
+    "delta_net_r_2026": -23.157654935555072,
+    "nominal_weekly_p": 0.304234788260587,
+    "matched_policy_increment_r": 15.74595671662884,
+    "matched_policy_increment_p": 0.44022798860057
+  },
+  "validation": {
+    "focused_tests": 13,
+    "full_scalar_paths": 11325,
+    "legacy_paths_matched": 3775,
+    "economic_identities": 7550,
+    "protection_cost_cover_and_no_later_exit": 3775,
+    "summary_checks": 12,
+    "policy_delta_decompositions": 8,
+    "raw_bar_extreme_case_ids": [1673, 1394]
+  },
+  "reproduction_commands": [
+    ".venv/bin/python -m pytest -q tests/evaluation/test_pepe_range_breakeven.py",
+    ".venv/bin/python -m yoyo.evaluation.pepe_range_breakeven"
+  ],
+  "outputs": [
+    "config.json",
+    "PROJECT_PLAN.md",
+    "results/audit.json",
+    "results/summary.json",
+    "results/comparisons.json",
+    "results/trades_legacy.csv",
+    "results/trades_baseline.csv",
+    "results/trades_be3.csv",
+    "results/signal_policy_differences.csv",
+    "results/largest_sacrifices.csv",
+    "results/largest_rescues.csv"
+  ],
+  "limitations": [
+    "Single predeclared intervention on previously studied historical data, not unseen or forward validation.",
+    "15m-close3R activation only; no conclusions about all breakeven thresholds or intrabar triggers.",
+    "20bp costs frozen at entry notional; no funding or additional slippage.",
+    "Gap-through protection may lose; none occurred among this arm's signal breakeven exits.",
+    "Tick-rounded cost breakeven leaves small positive net R and raises win rate without guaranteeing improved economic performance.",
+    "Independent overlapping trade totals are not capital-constrained account returns.",
+    "AUC and model-ranking top-decile metrics are inapplicable to an exit-only comparison."
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

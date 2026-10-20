@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: pepe-range-be3-20261020-v1
+    artifact_type: manifest
+    role: PEPE3Rcostbreakeven singlevariable research receipt
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59904e1645
+    source_path: experiments/active/exp-pepe-range-be3-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-pepe-range-be3-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen15mclose3RcostBE versus original5R4ATR exits with shared numerical fix;1889signals and1886controls. All11325paths independently audited. Saves190losers but sacrifices27winners,fullincrement37.36R yet2026-23.16R. Rejectupgrade;olddata/Pine preserved.
   - artifact_id: eth5m-stoch-extreme-stop-20261020-v4
     artifact_type: manifest
     role: Task62 completed causal extreme-stop research and audit receipt

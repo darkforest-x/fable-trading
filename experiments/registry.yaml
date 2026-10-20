@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-pepe-range-be3-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 59904e1645
+    status: rejected
+    question: Does confirmed15m-close3R cost breakeven improve PEPE V2.8 net returns while retaining large winners?
+    single_variable: Enable3R cost breakeven only; both arms share the known5R numerical correction. Original entries,initial stops,5R4ATR trailing,H1 exit,cost and matching unchanged.
+    artifacts: [pepe-range-be3-20261020-v1]
+    canonical_report: experiments/active/exp-pepe-range-be3-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: Baseline1889 net-545.751R versus BE3 net-508.392R,increment+37.360R.190losers rescued+282.580R;27winners truncated-245.220R. Retains44of54gross10R and13of15gross20R.2026increment-23.158R. Nominal weekly p0.304;matched incremental excess15.746R,p0.440. Reject default upgrade.
+    notes: Reuse364633OKX5m.13tests,11325complete scalar paths,3775legacy parity pass.7550economic identities and3775no-later-exit/tick-cost-cover checks pass. Legacy numerical correction+1.017R separated. NoPine/live changes,funding,additionalslippage oraccountsimulation. Notion3ff8856479af81d8926dff01acc7626d.
   - experiment_id: exp-pepe-range-exits-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 7daac57b4e68b2810bd86975a876c7c82613145a
