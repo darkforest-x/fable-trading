@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-10-20T10:13:04.008023+00:00",
+  "source_commit": "b78177f5bf3e5d46f3b4164e4cd21d09f3b84995",
+  "elapsed_seconds": 13.921214666916057,
+  "spec": {
+    "status": "exploratory_post_hoc",
+    "prior_results_seen": "All primary15-arm full and yearly summaries",
+    "reason": "Test permissive alternatives for the owner's large-winner preservation objective",
+    "locations": [
+      "day_edge",
+      "day_breakout",
+      "mon_edge",
+      "mon_breakout"
+    ],
+    "environments": [
+      "h4_arrow",
+      "h4_momentum"
+    ],
+    "operator": "OR",
+    "thresholds_unchanged": true,
+    "primary_selection_unchanged": true,
+    "new_native_replays": 0,
+    "untouched_validation": false
+  },
+  "new_arms": 8,
+  "primary_selection_unchanged": {
+    "selected": "h4_arrow",
+    "qualified_arms": [
+      "h4_arrow",
+      "mon_edge"
+    ],
+    "selected_from_segment": 0,
+    "requirement": "100trades,20watches,70%10R and20R retention,better mean netbp than baseline",
+    "profitability_not_implied": true
+  },
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/features.csv.gz",
+      "bytes": 947058,
+      "mtime_ns": 1792490834122627289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/summary.csv",
+      "bytes": 27473,
+      "mtime_ns": 1792490835510246462
+    }
+  ],
+  "raw_outputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/exploratory_unions/decisions.csv.gz",
+      "bytes": 188288,
+      "mtime_ns": 1792491183446257104
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/exploratory_unions/matched_pairs.csv.gz",
+      "bytes": 1148924,
+      "mtime_ns": 1792491184001939766
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitation": "Exploratory definitions were frozen after seeing the primary results. No untouched validation claim."
+}

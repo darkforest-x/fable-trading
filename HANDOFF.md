@@ -1,3 +1,10 @@
+## 2026-10-20 · ETH range-location and4H admission research complete
+
+- `exp-eth-range-context-20261020-v1`:15predefined arms plus8explicit exploratory unions, only admission changes. Reused frozen OKX ETH5m entry/15m exit ledger; no native replay/download. Common4068trades after33missing-context exclusions; original4101included122tenR/53twentyR,common121/53.
+- Baseline mean-17.640bp. H4alignment2478trades,-17.733bp,33twentyR;dayedgeANDH4 1452,-15.473bp,23twentyR. ExploratoryMondayedgeORH4momentum3229,-17.576bp,42twentyR:79%trades and79%twentyR retained. All22filters full netnegative; no upgrade.
+- Frozen2024selection H4alignment fails2025+mean(-17.263bp vs-16.284baseline),keeps22/41twentyR. Daybreakout2025positive12.636bp but2026negative28.812bp. No stable filter claimed; only simple high/low position and4HStoch tested,not POC/reclaim/MA compression.
+- Evidence `experiments/active/exp-eth-range-context-20261020-v1/delivery_receipt.json`;sourcea29f37ddee,supplementb78177f5bf.11tests,5prefix checks,115summaries,36922rematchedpairs,8202native rows34fields preserved;36.14s batch analysis. Notion3ff8856479af81a8b88aca8636f16000 readback verified. Raw outputs local;noPine/live/training change. Luna runtime metadata unavailable,delegate stopped and root completed.
+
 ## 2026-10-20 · Range 5m ATR management comparison complete
 
 - Experiment `exp-range-management5m-20261020-v1`: 8 native runs, old15m ledgers reused. Primary0.05% net R worsens for all four coins; gross20R205→106. Secondary0.2% BTC full improves26.75R, but all16 coin/buffer comparisons in2025/2026 worsen. No default upgrade.

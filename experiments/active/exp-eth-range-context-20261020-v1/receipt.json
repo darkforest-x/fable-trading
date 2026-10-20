@@ -1,0 +1,111 @@
+{
+  "experiment_id": "exp-eth-range-context-20261020-v1",
+  "elapsed_seconds": 22.218316999962553,
+  "generated_at": "2026-10-20T10:07:15.543218+00:00",
+  "source_commit": "a29f37ddee58f7f917967b9d32e849bfa1801adf",
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/entries.csv",
+      "bytes": 636881,
+      "mtime_ns": 1792485362985297074
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+      "bytes": 2748933,
+      "mtime_ns": 1792485476240980320
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/receipt.json",
+      "bytes": 10319,
+      "mtime_ns": 1792485571803938745
+    }
+  ],
+  "native_outcomes_reused": true,
+  "unchanged_native_fields": [
+    "pair_id",
+    "entry_i",
+    "side",
+    "segment",
+    "week",
+    "bucket",
+    "end_i",
+    "population",
+    "entry_time",
+    "entry",
+    "stop",
+    "risk",
+    "trade_id",
+    "exit_i",
+    "exit_price",
+    "reason",
+    "peak_r",
+    "arm_i",
+    "protection",
+    "steps",
+    "ambiguous",
+    "be_trigger_i",
+    "be_effective_i",
+    "be_price",
+    "stop_kind",
+    "deferred_closes",
+    "gross_r",
+    "fee_r",
+    "net_r",
+    "net_notional_bp",
+    "exit_time",
+    "framework_exit_time",
+    "framework_position_id",
+    "framework_commission",
+    "quantity"
+  ],
+  "baseline_rows": 8202,
+  "arms": 15,
+  "prefixes_checked": [
+    1234,
+    27000,
+    63500,
+    171500,
+    220001
+  ],
+  "common_observable_signal_n": 4068,
+  "selection": {
+    "selected": "h4_arrow",
+    "qualified_arms": [
+      "h4_arrow",
+      "mon_edge"
+    ],
+    "selected_from_segment": 0,
+    "requirement": "100trades,20watches,70%10R and20R retention,better mean netbp than baseline",
+    "profitability_not_implied": true
+  },
+  "raw_outputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/features.csv.gz",
+      "bytes": 947058,
+      "mtime_ns": 1792490834122627289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/decisions.csv.gz",
+      "bytes": 349198,
+      "mtime_ns": 1792490834797950134
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/matched_pairs.csv.gz",
+      "bytes": 909310,
+      "mtime_ns": 1792490835437967053
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/winner_decisions.csv.gz",
+      "bytes": 14108,
+      "mtime_ns": 1792490835502804898
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Known historical data; not untouched validation. Independent overlapping trades, not account returns. 20bp frozen costs; no funding. Filtered controls are rematched within same week/side/volatility; coverage is incomplete, and unmatched trades are not silently assigned zero controls."
+}

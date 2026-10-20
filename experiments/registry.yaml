@@ -14,6 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-range-context-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a29f37ddee58f7f917967b9d32e849bfa1801adf
+    status: rejected
+    question: Can ETH range position and completed4H context filter ineffective5m entries while preserving10R/20R winners?
+    single_variable: Admission masks only; original5m entries,0.05percent-buffer stops,15m5R4ATR exits and20bp costs unchanged.15predefined arms
+      plus8explicit posthoc unions.
+    artifacts:
+    - eth-range-context-20261020-v1
+    canonical_report: experiments/active/exp-eth-range-context-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: Common4068 baseline-17.640bp/trade,121/53gross10R/20R. H4alignment2478,-17.733bp,76/33;dayedgeANDH4 1452,-15.473bp,49/23;exploratoryMondayedgeORH4momentum3229,-17.576bp,98/42.
+      Matched excess9.060/6.712/5.992/7.902bp. All22filters full netnegative;2024selectedH4 later worsens mean and keeps22/41twentyR.
+    notes: OKX ETH only2024-08-02to2026-09-22.33missing-context trades incl1tenR excluded identically;no20Rexcluded.11tests,5prefixes,115summaries,36922same-context
+      matched pairs,8202native rows34fields unchanged.36.14seconds analysis;no native replay/download.1of69year groups positive(daybreakout2025),fails2026.
+      Notion3ff8856479af81a8b88aca8636f16000 verified. Exploratory sourceb78177f5bf;noPine/live change.
   - experiment_id: exp-range-management5m-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 82e2862d9c872cc4564746d417fd1aa75d4f7c10

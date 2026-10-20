@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-range-context-20261020-v1
+    artifact_type: manifest
+    role: ETH causal range/higher-timeframe admission and large-winner retention evidence
+    source_repo: darkforest-x/fable-trading
+    source_commit: a29f37ddee58f7f917967b9d32e849bfa1801adf
+    source_path: experiments/active/exp-eth-range-context-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-range-context-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 15primary arms and8explicit posthoc unions kept separately;115combined summary rows. Raw causal features,decisions,winner decisions andrematched
+      controls kept locally with path/size/mtime inventories,nohash. Primary selection/75rows preserved. Sharedcapital/funding excluded.
   - artifact_id: range-management5m-20261020-v1
     artifact_type: manifest
     role: Native5m versus15m management paired comparison

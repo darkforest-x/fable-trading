@@ -1,0 +1,71 @@
+{
+  "experiment_id": "exp-eth-range-context-20261020-v1",
+  "status": "rejected_filter_upgrade",
+  "generated_at": "2026-10-20T10:18:07.775193+00:00",
+  "source_commit": "a29f37ddee58f7f917967b9d32e849bfa1801adf",
+  "exploratory_source_commit": "b78177f5bf3e5d46f3b4164e4cd21d09f3b84995",
+  "primary_arms": 15,
+  "exploratory_arms": 8,
+  "exploratory_added_after_primary_results": true,
+  "primary_selection_unchanged": {
+    "selected": "h4_arrow",
+    "qualified_arms": [
+      "h4_arrow",
+      "mon_edge"
+    ],
+    "selected_from_segment": 0,
+    "requirement": "100trades,20watches,70%10R and20R retention,better mean netbp than baseline",
+    "profitability_not_implied": true
+  },
+  "compute_seconds": 36.13953166687861,
+  "validation": {
+    "passed": true,
+    "tests": 11,
+    "summary_rows_reconciled": 115,
+    "pairs_checked": 36922,
+    "admission_arms": 23,
+    "no_control_reuse_within_arm": true,
+    "same_filter_applied_to_controls": true,
+    "matching_keys": [
+      "segment",
+      "week",
+      "side",
+      "bucket"
+    ],
+    "primary_summary_rows_preserved": 75,
+    "native_rows_fields_preserved": [
+      8202,
+      34
+    ],
+    "prefix_causality_checks": 5,
+    "new_native_replays": 0,
+    "source": "Independent reconciliation of saved decisions/pairs against frozen source rows; no content hashing"
+  },
+  "notion": "https://app.notion.com/p/3ff8856479af81a8b88aca8636f16000",
+  "notion_readback_verified": true,
+  "positive_full_period_filter_arms": 0,
+  "positive_year_groups": [
+    {
+      "arm": "day_breakout",
+      "segment": 1,
+      "n": 110,
+      "mean_net_bp": 12.635747853002467,
+      "net_r": 22.515782542933508
+    }
+  ],
+  "current_default_changed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "conclusion": "The predefined2024 selection h4_arrow fails later mean-return and tail-retention goals. Strict masks lose many winners; exploratory permissive unions mostly retain winners in proportion to trade count. All22 full-period filters remain net negative; no filter upgrade.",
+  "limitations": "Only simple high/low location and completed4H Stoch context tested. No POC/VAH,reclaim sequence,MA compression or structural trend claim. Known historical data,not untouched validation. Same20bp cost and independent original-risk exits; no account return. Matching coverage reported separately from all-signal results.",
+  "results": "experiments/active/exp-eth-range-context-20261020-v1/exploratory_unions/combined_summary.csv",
+  "raw_lineage_receipts": [
+    "experiments/active/exp-eth-range-context-20261020-v1/receipt.json",
+    "experiments/active/exp-eth-range-context-20261020-v1/exploratory_unions/receipt.json"
+  ],
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.eth_range_context",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.eth_range_context --exploratory-unions"
+  ],
+  "reuse_note": "Completed outputs refuse overwrite; inspect existing results. Use a new experiment directory/config for changed research; historical source paths stay read-only."
+}
