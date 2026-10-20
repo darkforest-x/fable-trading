@@ -126,7 +126,7 @@ labelText(string name, float price) =>
     name + " " + str.tostring(price, format.mintick)
 
 newRayLabel(float price, string name, color col) =>
-    label.new(time, price, labelText(name, price), xloc=xloc.bar_time, style=before ? label.style_label_right : label.style_label_left,
+    label.new(time, price, labelText(name, price), xloc=xloc.bar_time, style=label.style_label_left,
          color=hiddenCol, textcolor=col, size=size.small, force_overlay=true)
 
 // Both-end Fib prices of a range, with the ratio behind each price; a ratio
