@@ -17,6 +17,7 @@ import urllib.request
 import zipfile
 
 import pandas as pd
+from src.data.fetch_okx import REQUEST_HEADERS
 
 EXP = Path("experiments/active/exp-pepe-range-exits-20261020-v1")
 
@@ -24,7 +25,7 @@ EXP = Path("experiments/active/exp-pepe-range-exits-20261020-v1")
 def get(url: str) -> bytes:
     for attempt in range(5):
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            req = urllib.request.Request(url, headers=REQUEST_HEADERS)
             with urllib.request.urlopen(req, timeout=45) as response:
                 return response.read()
         except Exception:
