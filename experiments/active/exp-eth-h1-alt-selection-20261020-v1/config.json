@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-eth-h1-alt-selection-20261020-v1",
+  "manifest": "data/altcoin_trends_20260909_v1/history_full_verified/manifest.json",
+  "start": "2023-01-01T00:00:00Z",
+  "end": "2026-10-20T15:00:00Z",
+  "select_before": "2025-01-01T00:00:00Z",
+  "hold_hours": 16,
+  "top_k": 3,
+  "round_trip_cost": 0.002,
+  "lookback_hours": 168,
+  "rules": ["strength24", "weakness24", "beta168", "volume_rebound4", "own_bull4", "lowvol168"],
+  "seed": 20261020
+}
