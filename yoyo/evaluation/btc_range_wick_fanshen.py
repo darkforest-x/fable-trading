@@ -352,8 +352,19 @@ def analyze(config):
                 ["selection_net_r", "realized_r_drawdown", "arm"],
                 ascending=[False, True, True]).iloc[0].arm
         selections[family] = dict(first_year_selected=best(0), full_descriptive=best(-1))
+    # The preflight is reused only for this unchanged candidate preparation.
+    prefix_path = work/"prefix_preflight.json"
+    preparation = json.loads((work/"input_receipt.json").read_text())
+    prior = json.loads(prefix_path.read_text()) if prefix_path.exists() else {}
+    identity = dict(config=cfg, quarter=file_stamp(work/"quarter.csv.gz"),
+                    preparation_commit=preparation["source_commit"])
+    if prior.get("identity") == identity:
+        prefix_checks = prior["checks"]
+    else:
+        prefix_checks = prefix_audit(config)
+        dump(prefix_path, dict(identity=identity, checks=prefix_checks))
     record = dict(selections=selections, native_audits=audits,
-                  prefix_checks=prefix_audit(config), training_eligible=False,
+                  prefix_checks=prefix_checks, training_eligible=False,
                   production_eligible=False,
                   limitations="Known historical research; fixed initial-risk units, not account returns. "
                   "No funding/spread/capacity/latency. Five-minute OHLC order sensitivity retained.")
