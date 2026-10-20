@@ -1,3 +1,7 @@
+## 2026-10-20 · V2.11 delivered: 15m observation for5m entries and15m rays
+
+Owner confirmed5m chart uses15m watch,15m chart keepsH1 watch. Every later same-direction chart signal independently enters; no body filter. All-chart rays now confirmed15m,greenup/red down,defaulton. Stops,15m5R4ATR andarmedH1reverseexit unchanged;reference defaultoff. Private`周一高低点区间＋翻身 · V2.11` revision3 saved19:54:09Shanghai;V2.10source/private preserved.17tests;native1m/5m/15m/1H/4H shared30rays19bull/11bear signatures identical;15m18closed signatures matchV2.10;unsupported charts0frames. FinalQA removed,PEPE5m moduleon,8visibleframes,layoutsaved,editor/logsclosed. Code d0e3d9a380;receipt`output/pine/monday_range_v2_11_delivery.json`;Notion system page updated/readback verified. Noorders orprofitability claim;training/productionfalse.
+
 ## 2026-10-20 · ETH15m watch /5m signal-body-only filter rejected
 
 Owner authorized same-direction signalK,enter atsame5m close. `exp-eth-5m-signal-body-20261020-v1` retains2211/3838trades;netwin10.76%,net-1739.94R,meanR-0.787 butmeanbp worsens-16.785to-16.961;gross10R/20R116/45to65/24.2024/2025bpimprove,2026worsens;2025plus-17.377versus-16.525baseline.1679rematchedpairs(75.94%) signal/random meanbp-17.796/-20.141,p.341;no stable advantage. Reused7676Nautilus rows;4128savedrows35fields exact,3tests,5partitionchecks;2.36s,0replays/downloads. Code479af940cd;receipt/delivery_receipt.json andrawlocaldecisions retained. Notion https://app.notion.com/p/3ff8856479af814e80a7d115f494f240 verified. NoPine/default/livechange;training/productionfalse.

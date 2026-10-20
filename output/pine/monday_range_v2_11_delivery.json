@@ -1,0 +1,121 @@
+{
+  "version": "V2.11",
+  "source": "yoyo/evaluation/pine/monday_range_v2_11.pine",
+  "source_commit": "d0e3d9a3801327bedae982fdda5526f8118eb157",
+  "private_script": "周一高低点区间＋翻身 · V2.11",
+  "private_revision": 3,
+  "saved_at_shanghai": "2026-10-20T19:54:09+08:00",
+  "prior_preserved": "V2.10 source and private script; old chart instance removed only",
+  "entry_observation": {
+    "5m_chart": "15m confirmed watch, every later same-direction 5m signal close",
+    "15m_chart": "H1 confirmed watch, every later same-direction 15m signal close",
+    "other_charts": "confirmation and ranges only; reference engine disabled"
+  },
+  "rays": {
+    "source": "15m confirmed Stoch arrows",
+    "timestamp": "source candle open; available after close",
+    "bull": "green upward from source low",
+    "bear": "red downward from source high",
+    "default_keep": 100,
+    "max_keep": 200,
+    "requested_source_bars": 12000
+  },
+  "defaults": {
+    "rays_enabled": true,
+    "trade_reference_enabled": false,
+    "show_trade_prices": false
+  },
+  "unchanged": [
+    "5 completed 5m structure bars plus 0.05 percent frozen buffer",
+    "15m close 5R arming and ATR14 x4 trailing",
+    "armed-only confirmed opposite H1 close exit",
+    "independent concurrent trades and viewport history",
+    "range v1.11, chart Stoch/WVF, existing alerts"
+  ],
+  "body_filter_added": false,
+  "validation": {
+    "passed": true,
+    "tests_passed": 17,
+    "native_records": {
+      "15m": [
+        "228 文本 [2026-10-20T19:45:00.000+08:00]: V211_PASS mode=15 total=147 frozen=18 offQuarter=0 timeSig=10,213,286,820 priceSig=2,766,965 exitSig=5,107,601,820 shown=4",
+        "230 文本 [2026-10-20T19:45:00.000+08:00]: V211_ROUTE_PASS chart=15 entry=15 requested=true enabled=true frames=4 hasTx=true",
+        "232 文本 [2026-10-20T19:45:00.000+08:00]: V211_RAYS_PASS chart=15 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+      ],
+      "5m": [
+        "234 文本 [2026-10-20T19:50:00.000+08:00]: V211_PASS mode=5 total=200 frozen=99 offQuarter=65 timeSig=295,660,960,060 priceSig=80,042,687 exitSig=147,852,188,824 shown=3",
+        "236 文本 [2026-10-20T19:50:00.000+08:00]: V211_ROUTE_PASS chart=5 entry=5 requested=true enabled=true frames=3 hasTx=true",
+        "238 文本 [2026-10-20T19:50:00.000+08:00]: V211_RAYS_PASS chart=5 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+      ],
+      "1h": [
+        "234 文本 [2026-10-20T19:00:00.000+08:00]: V211_ROUTE_PASS chart=60 entry=60 requested=true enabled=false frames=0 hasTx=false",
+        "236 文本 [2026-10-20T19:00:00.000+08:00]: V211_RAYS_PASS chart=60 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+      ],
+      "4h": [
+        "234 文本 [2026-10-20T16:00:00.000+08:00]: V211_ROUTE_PASS chart=240 entry=240 requested=true enabled=false frames=0 hasTx=false",
+        "236 文本 [2026-10-20T16:00:00.000+08:00]: V211_RAYS_PASS chart=240 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+      ],
+      "1m": [
+        "234 文本 [2026-10-20T19:53:00.000+08:00]: V211_ROUTE_PASS chart=1 entry=1 requested=true enabled=false frames=0 hasTx=false",
+        "236 文本 [2026-10-20T19:53:00.000+08:00]: V211_RAYS_PASS chart=1 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+      ]
+    },
+    "unchanged_15m_closed_window_parity": true,
+    "rays_common_closed_window_all_five_charts_identical": true,
+    "ray_common_window": {
+      "source_open_from_utc": "2026-10-10T00:00:00Z",
+      "source_close_before_utc": "2026-10-19T00:00:00Z",
+      "count": 30,
+      "bull": 19,
+      "bear": 11
+    },
+    "fixture_cases": [
+      "strict later close",
+      "multiple entries per observation",
+      "same-direction observation refresh",
+      "opposite observation refresh",
+      "unconfirmed source ignored",
+      "15m entry lane keeps H1 watch",
+      "entry candle wick excluded",
+      "15m-only ATR arming and ratchet",
+      "stop precedence",
+      "ledger observation and arming clocks",
+      "confirmed ray timestamps and line count"
+    ],
+    "profitability_claim": false
+  },
+  "final_compile": "Saved revision3; update disabled and chart undo label confirms update",
+  "qa_appendix_in_delivered_script": false,
+  "final_chart": {
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "5m",
+    "watch_minutes": 15,
+    "module_enabled": true,
+    "visible_frames": 8,
+    "editor_closed": true,
+    "logs_closed": true,
+    "layout_saved": true
+  },
+  "temporary_browser_sessions_created": 0,
+  "no_orders": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "notion_verified": true,
+  "test_command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_11.py tests/evaluation/test_monday_range_v2_10.py tests/evaluation/test_range_entry_clock.py tests/evaluation/test_range_management_clock.py",
+  "evidence": [
+    "output/pine/monday_range_v2_11_15m_ax.txt",
+    "output/pine/monday_range_v2_11_1h_ax.txt",
+    "output/pine/monday_range_v2_11_1m_ax.txt",
+    "output/pine/monday_range_v2_11_4h_ax.txt",
+    "output/pine/monday_range_v2_11_5m_ax.txt",
+    "output/pine/monday_range_v2_11_final.png",
+    "output/pine/monday_range_v2_11_final_ax.txt",
+    "output/pine/monday_range_v2_11_saved_ax.txt",
+    "output/pine/monday_range_v2_11_settings_defaults_ax.txt"
+  ],
+  "limits": [
+    "Engineering verification only; no profitability claim",
+    "Available historical source data remains subject to TradingView limits"
+  ]
+}

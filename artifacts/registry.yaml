@@ -18,6 +18,20 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-range-fanshen-v2-11-20261020-delivery
+    artifact_type: manifest
+    role: Pine 5m entries observe15m;15m entries retainH1;all rays15m
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0e3d9a3801327bedae982fdda5526f8118eb157
+    source_path: output/pine/monday_range_v2_11_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_11_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 17tests;native5chart modes. Shared30rays identical including19bull/11bear;15m18closed
+      signatures unchanged fromV2.10. Private revision3 saved19:54:09+08:00;QA removed;PEPE5m
+      layout saved;oldsource/private preserved. Noorders or profitability claim;Notion
+      verified.
   - artifact_id: eth-5m-signal-body-20261020-v1
     artifact_type: manifest
     role: ETH15m-watch5m signal-body admission with cached-native attribution

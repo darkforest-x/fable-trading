@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "tests_passed": 17,
+  "native_records": {
+    "15m": [
+      "228 文本 [2026-10-20T19:45:00.000+08:00]: V211_PASS mode=15 total=147 frozen=18 offQuarter=0 timeSig=10,213,286,820 priceSig=2,766,965 exitSig=5,107,601,820 shown=4",
+      "230 文本 [2026-10-20T19:45:00.000+08:00]: V211_ROUTE_PASS chart=15 entry=15 requested=true enabled=true frames=4 hasTx=true",
+      "232 文本 [2026-10-20T19:45:00.000+08:00]: V211_RAYS_PASS chart=15 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+    ],
+    "5m": [
+      "234 文本 [2026-10-20T19:50:00.000+08:00]: V211_PASS mode=5 total=200 frozen=99 offQuarter=65 timeSig=295,660,960,060 priceSig=80,042,687 exitSig=147,852,188,824 shown=3",
+      "236 文本 [2026-10-20T19:50:00.000+08:00]: V211_ROUTE_PASS chart=5 entry=5 requested=true enabled=true frames=3 hasTx=true",
+      "238 文本 [2026-10-20T19:50:00.000+08:00]: V211_RAYS_PASS chart=5 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+    ],
+    "1h": [
+      "234 文本 [2026-10-20T19:00:00.000+08:00]: V211_ROUTE_PASS chart=60 entry=60 requested=true enabled=false frames=0 hasTx=false",
+      "236 文本 [2026-10-20T19:00:00.000+08:00]: V211_RAYS_PASS chart=60 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+    ],
+    "4h": [
+      "234 文本 [2026-10-20T16:00:00.000+08:00]: V211_ROUTE_PASS chart=240 entry=240 requested=true enabled=false frames=0 hasTx=false",
+      "236 文本 [2026-10-20T16:00:00.000+08:00]: V211_RAYS_PASS chart=240 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+    ],
+    "1m": [
+      "234 文本 [2026-10-20T19:53:00.000+08:00]: V211_ROUTE_PASS chart=1 entry=1 requested=true enabled=false frames=0 hasTx=false",
+      "236 文本 [2026-10-20T19:53:00.000+08:00]: V211_RAYS_PASS chart=1 count=100 frozen=30 bull=19 timeSig=13,889,257,252 priceSig=1,853,180"
+    ]
+  },
+  "unchanged_15m_closed_window_parity": true,
+  "rays_common_closed_window_all_five_charts_identical": true,
+  "ray_common_window": {
+    "source_open_from_utc": "2026-10-10T00:00:00Z",
+    "source_close_before_utc": "2026-10-19T00:00:00Z",
+    "count": 30,
+    "bull": 19,
+    "bear": 11
+  },
+  "fixture_cases": [
+    "strict later close",
+    "multiple entries per observation",
+    "same-direction observation refresh",
+    "opposite observation refresh",
+    "unconfirmed source ignored",
+    "15m entry lane keeps H1 watch",
+    "entry candle wick excluded",
+    "15m-only ATR arming and ratchet",
+    "stop precedence",
+    "ledger observation and arming clocks",
+    "confirmed ray timestamps and line count"
+  ],
+  "profitability_claim": false
+}
