@@ -1,0 +1,61 @@
+{
+  "experiment_id": "exp-btc-range-wick-fanshen-20261021-v2",
+  "source_task": "https://app.notion.com/p/3ff8856479af80a68faec10c42af11a3",
+  "symbol": "BTC",
+  "venue": "OKX",
+  "warmup": "2024-10-01T00:00:00Z",
+  "start": "2024-10-20T16:00:00Z",
+  "split": "2025-10-20T16:00:00Z",
+  "end": "2026-10-20T16:00:00Z",
+  "timezone": "America/New_York",
+  "ratios": [
+    0,
+    0.5,
+    0.618,
+    0.705,
+    1.13,
+    1.27,
+    1.618
+  ],
+  "signal_distance_bars": 2,
+  "stop_bars_15m": 3,
+  "buffer_percent": [
+    0.1,
+    0.2
+  ],
+  "target_r": [
+    2,
+    3,
+    5,
+    10
+  ],
+  "tick": 0.1,
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "inputs": [
+    "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+    "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv"
+  ],
+  "recent_glob": "inputs/okx_BTC_USDT_SWAP_1m_*.csv",
+  "entry": "One entry per confirmed 15m Stoch5/3/3 arrow. Require a directional wick containing a same-week Fib price within two 15m bars before/after the arrow. Enter at the first close at which both facts are known. Prefer the nearest already-known touch when several are available at the arrow close. No H1 watch gate.",
+  "levels": "Both lo+r*(hi-lo) and hi-r*(hi-lo), deduplicate midpoint. Use the current Monday range known BEFORE each touch candle opens; Monday develops, Tuesday-Sunday freeze. First Monday candle has no new-week level. Never back-project final Monday extrema.",
+  "wick": "Long: low <= level <= min(open,close); short: max(open,close) <= level <= high. Require a nonzero directional wick. Zero extra price tolerance.",
+  "stops": "Latest three completed 15m extrema at entry, equivalent to nine complete 5m bars; entry-price buffer 0.1/0.2 percent; round outward to tick.",
+  "exits": "Native fixed 2/3/5/10R target and initial stop, independent positions, no trailing/breakeven/opposite exit. Force closure at each chronological segment boundary. Retain native O-H-L-C results and stop-first same-bar sensitivity.",
+  "controls": "Same BTC/side/UTC week/time segment/causal ATR14 bucket, 15m-close random entry, without replacement within each family/side/stratum; exclude all real arrow and combined entry bars. Same stop/target/cost. Preserve unmatched events and report paired subsets separately.",
+  "baseline": "Reuse EXP-149 arrow-only results; do not replay unchanged positions.",
+  "selection": "Descriptive endpoint addition and chart reconciliation. Report fixed-target results separately from favorable opportunity.",
+  "not_applicable": "No fitted model or score: AUC and top-decile ranking metrics do not apply. Arrow-only and matched random controls provide the null comparisons.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "recent_start": "2026-08-31T16:00:00Z",
+  "clarification": "Owner 2026-10-21 adds Monday high/low and defines no losses as sufficient favorable space after the signal. Add both endpoints via ratio0; all earlier entry/stop/cost clocks unchanged.",
+  "excursion": "Conservative 5m favorable extreme after entry and before initial SL; exclude entire stop-touch candle. Not realized profit. Report chance to exceed0,20bp,1/2/3/5/10R against matched random."
+}
