@@ -1,0 +1,7 @@
+# Observation resets and entry cardinality are separate rules
+
+- **Problem**: Owner requested V2.5 to refresh observation on every confirmed 1H arrow and accept many subsequent same-direction 15m signals, while prior trades keep their own exits.
+- **Dead end**: Merely rearming the old `consumed` flag on repeated hourly arrows would still suppress the second and later 15m entries. Removing an old live trade because its frame falls outside the display limit would also silently change exits.
+- **Effective path**: Remove the admission-consumption state entirely; refresh only side/time at every new hourly event. Require each 15m confirmation to be strictly later. Keep existing per-trade stop/ATR transitions and closed-only pruning unchanged. Native fixtures cover repeated entries, same-close rejection, reversals, peer exits, and 25 live trades with a ten-frame display budget. The formerly missing PEPE entry and six other native records match an independent OHLC replay; 1H/15m snapshots agree.
+- **General rule**: Specify observation lifetime, per-signal admission, position lifecycle, and display retention independently. A new observation must not mutate previous positions, and display limits must not become admission or exit limits.
+- **Affected paths**: `yoyo/evaluation/pine/monday_range_v2_5.pine`, `tests/evaluation/monday_range_v2_5_native_checks.pine`, `yoyo/evaluation/monday_range_v2_5_reference.py`. Old V2.4 source/private script preserved; engineering verification does not establish profitability.
