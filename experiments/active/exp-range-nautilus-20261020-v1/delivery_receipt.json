@@ -1,0 +1,104 @@
+{
+  "first_run_seconds": 51.507756375009194,
+  "cached_command_wall_seconds": 0.8152007920000001,
+  "cached_lookup_seconds": 0.007488041999749839,
+  "cached": true,
+  "tests": 8,
+  "layer_boundary_tests": 72,
+  "source_commit": "0278e1eb81bcc18ceb8079490ba4d021c5a2fcfc",
+  "framework_version": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "parity": [
+    {
+      "positions": 3775,
+      "fills": 7550,
+      "max_simultaneous_positions": 6,
+      "bars_with_both_directions": 9028,
+      "parity": {
+        "rows": 3775,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 3775,
+        "status": "passed"
+      },
+      "runtime_warnings": [
+        "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+      ]
+    },
+    {
+      "positions": 3775,
+      "fills": 7550,
+      "max_simultaneous_positions": 6,
+      "bars_with_both_directions": 6934,
+      "parity": {
+        "rows": 3775,
+        "compared_fields": [
+          "entry_i",
+          "side",
+          "end_i",
+          "exit_i",
+          "reason",
+          "arm_i",
+          "be_trigger_i",
+          "be_effective_i",
+          "stop_kind",
+          "deferred_closes",
+          "steps",
+          "entry",
+          "stop",
+          "risk",
+          "exit_price",
+          "protection",
+          "be_price",
+          "peak_r",
+          "gross_r",
+          "fee_r",
+          "net_r",
+          "net_notional_bp",
+          "exit_time"
+        ],
+        "native_fee_checks": 3775,
+        "status": "passed"
+      },
+      "runtime_warnings": [
+        "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+      ]
+    }
+  ],
+  "prior_attempts": [
+    {
+      "source_commit": "5c5cdda9b2",
+      "failure": "Historical OHLC precision finer than protection tick; strict input guard stopped before replay."
+    },
+    {
+      "source_commit": "0bbc9e45a5",
+      "failure": "Native fractional-size exposure clipped signal-7 stop fill by0.00000016units; strict partial-fill guard stopped replay. Whole research units fix is separately tested."
+    }
+  ]
+}
