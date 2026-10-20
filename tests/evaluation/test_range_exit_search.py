@@ -83,6 +83,29 @@ def test_target_partial_combination_fails_closed():
         ExitPolicy(fixed_target_r=3,partial_close_r=1)
 
 
+@pytest.mark.parametrize("side", [1, -1])
+def test_simultaneous_targets_do_not_change_other_positions_market_quotes(side):
+    bars=np.array([[100]*4,[100,130,70,100],[100,130,70,100],[100]*4],float)
+    if side==1:
+        # High first crosses every long target before the low can hit their stops.
+        stops=[99.,98.,97.]
+    else:
+        # High first stops only the tightest short, then low crosses both targets.
+        bars[1:3,1]=101.
+        stops=[101.,102.,103.]
+    frame=pd.DataFrame(bars,columns=["open","high","low","close"],
+        index=pd.date_range("2026-01-01",periods=4,freq="5min",tz="UTC"))
+    entries=pd.DataFrame([dict(trade_id=f"s{i}",entry_i=0,side=side,entry=100.,
+        stop=stop,risk=abs(stop-100),end_i=3) for i,stop in enumerate(stops)])
+    rows,fills,_=run_native(frame,np.full(4,np.nan),np.zeros(4),entries,
+        ExitPolicy(fixed_target_r=5),.01,"TEST")
+    ordered=rows.set_index("trade_id").sort_index()
+    assert ordered.exit_i.tolist()==[1,1,1]
+    assert ordered.reason.tolist()==([4,4,4] if side==1 else [1,4,4])
+    assert ordered.exit_price.tolist()==([105,110,115] if side==1 else [101,90,85])
+    assert len(fills)==6
+
+
 def test_grid_and_development_selection_exclude_later_outcomes():
     import json
     from yoyo.evaluation.range_exit_search import DEFAULT,all_arms,choose

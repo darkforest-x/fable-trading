@@ -29,13 +29,14 @@ import numpy as np
 import pandas as pd
 import nautilus_trader
 from nautilus_trader.backtest.engine import BacktestEngine
-from nautilus_trader.backtest.models import FeeModel
+from nautilus_trader.backtest.models import FeeModel, FillModel
 from nautilus_trader.config import (
     BacktestEngineConfig, LoggingConfig, RiskEngineConfig, StrategyConfig,
 )
 from nautilus_trader.model.currencies import USDT
-from nautilus_trader.model.data import BarType
-from nautilus_trader.model.enums import AccountType, OmsType, OrderSide
+from nautilus_trader.model.book import OrderBook
+from nautilus_trader.model.data import BarType, BookOrder
+from nautilus_trader.model.enums import AccountType, BookType, OmsType, OrderSide, OrderType
 from nautilus_trader.model.identifiers import InstrumentId, PositionId, Symbol, Venue
 from nautilus_trader.model.instruments import CryptoPerpetual
 from nautilus_trader.model.objects import Currency, Money, Price, Quantity
@@ -89,6 +90,27 @@ class EntryNotionalFee(FeeModel):
     def get_commission(self, order, fill_qty, fill_px, instrument):
         entry = Decimal(str(self.entries[str(order.client_order_id)]))
         return Money(entry * fill_qty.as_decimal() * self.rate, USDT)
+
+
+class IndependentLimitFill(FillModel):
+    """Keep native limit triggering independent across simultaneous positions.
+
+    Nautilus1.231.0 determine_limit_price_and_volume mutates shared quotes to a
+    maker's limit price until the entire matching iteration finishes. A second
+    crossed target can then be delayed. Its documented simulated-book hook
+    bypasses that mutation. Native matching still decides WHEN a limit executes;
+    this hook supplies only its limit-price fill, with synthetic full liquidity.
+    Market/stop orders retain the default model. No future bars are inspected.
+    """
+
+    def get_orderbook_for_fill_simulation(self, instrument, order, best_bid, best_ask):
+        if order.order_type != OrderType.LIMIT:
+            return None
+        book = OrderBook(instrument_id=instrument.id, book_type=BookType.L2_MBP)
+        side = OrderSide.SELL if order.side == OrderSide.BUY else OrderSide.BUY
+        book.add(BookOrder(side=side, price=order.price,
+                           size=order.quantity, order_id=1), 0, 0)
+        return book
 
 
 @dataclass
@@ -410,6 +432,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             venue, OmsType.HEDGING, AccountType.MARGIN,
             [Money(1_000_000_000, USDT)], base_currency=USDT,
             fee_model=fee_model, frozen_account=True,
+            fill_model=IndependentLimitFill() if policy.fixed_target_r is not None else None,
             bar_execution=True, bar_adaptive_high_low_ordering=False,
             liquidity_consumption=False,
         )
@@ -451,7 +474,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                                "when enabled. Returns normalized per original risk"),
             partial_execution="one completed 5m close reduction" if policy.partial_close_r is not None else "disabled",
             native_partial_accounting_checked=len(rows) if policy.partial_close_r is not None else 0,
-            fixed_target_execution="resting limit; O-H-L-C; native reduce-only sibling cleanup" if policy.fixed_target_r is not None else "disabled",
+            fixed_target_execution="resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup" if policy.fixed_target_r is not None else "disabled",
             native_fixed_target_accounting_checked=len(rows) if policy.fixed_target_r is not None else 0,
             positions=len(positions), fills=len(fills),
             max_simultaneous_positions=strategy.max_open,

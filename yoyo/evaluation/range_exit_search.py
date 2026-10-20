@@ -207,8 +207,39 @@ def native_verify(config):
     names=sorted(set(selection.values())-{selection["baseline"]})
     def one(name):
         folder=work/"selected"/name
+        # The boundary probe may select a previously verified parent candidate.
+        # Reuse only identical execution parameters, input stamps and full paths.
+        requested=json.loads((folder/"config.json").read_text())
+        reused=False
+        for prior in (folder/"native",work.parent/"selected"/name/"native"):
+            if not (prior/"receipt.json").exists():
+                continue
+            receipt=json.loads((prior/"receipt.json").read_text())
+            old=receipt["identity"]["config"]
+            keys=("symbol","tick","market_tick","data","entry_candidates",
+                  "stop_window_5m","buffer_percent","maximum_risk_percent","round_trip_cost")
+            policy=lambda c:{k:v for k,v in c["policies"][0].items()
+                             if k not in ("golden_ledger","name")}
+            assert all(old[k]==requested[k] for k in keys) and policy(old)==policy(requested)
+            assert receipt["identity"]["inputs"]==[
+                file_stamp(ROOT/requested[k]) for k in ("data","entry_candidates")]
+            compare_golden(pd.read_csv(prior/"candidate/trades.csv",float_precision="round_trip"),
+                           folder/"screen.csv",requested["tick"])
+            native_path=prior
+            reused=True
+            break
+        if reused:
+            audit=receipt["results"][0]["audit"]
+            assert audit["parity"]["status"]=="passed"
+            return name,dict(elapsed_seconds=0,audit=audit,reused=True,
+                source_commit=receipt["source_commit"],native_path=str(native_path.relative_to(ROOT)))
         if not (folder/".cache").exists():
             shutil.copytree(work/".cache",folder/".cache")
+        if (folder/"native.log").exists():
+            archive=folder/"native.failed.1.log"
+            if archive.exists():
+                raise RuntimeError("Preserve prior failure; choose a fresh retry log")
+            (folder/"native.log").rename(archive)
         with (folder/"native.log").open("w") as log:
             subprocess.run([sys.executable,"-m","yoyo.evaluation.range_framework",
                 "--config",str(folder/"config.json")],cwd=ROOT,stdout=log,
@@ -217,7 +248,8 @@ def native_verify(config):
         audit=receipt["results"][0]["audit"]
         assert audit["parity"]["status"]=="passed"
         print(json.dumps(dict(native_completed=name,rows=audit["positions"])),flush=True)
-        return name,dict(elapsed_seconds=receipt["elapsed_seconds"],audit=audit)
+        return name,dict(elapsed_seconds=receipt["elapsed_seconds"],audit=audit,reused=False,
+            source_commit=receipt["source_commit"],native_path=str((folder/"native").relative_to(ROOT)))
     start=time.perf_counter()
     with ThreadPoolExecutor(max_workers=2) as pool:
         results=dict(pool.map(one,names))
@@ -240,7 +272,7 @@ def analyze(config):
             rows=base
             fills=pd.read_csv(ROOT/original["output"]/"baseline/fills.csv",float_precision="round_trip")
         else:
-            folder=work/"selected"/name/"native/candidate"
+            folder=ROOT/validation["results"][name]["native_path"]/"candidate"
             rows=pd.read_csv(folder/"trades.csv",float_precision="round_trip")
             fills=pd.read_csv(folder/"fills.csv",float_precision="round_trip")
             assert name in validation["results"]
