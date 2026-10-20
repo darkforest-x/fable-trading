@@ -226,7 +226,7 @@ int rangeVisibleLeft = chart.left_visible_bar_time
 int rangeVisibleRight = chart.right_visible_bar_time
 var int rangeVisibleTotal = 0
 var int rangeDrawnTotal = 0
-var table rangeInfo = table.new(position.top_left, 1, 1, force_overlay=true)
+var table rangeInfo = table.new(position.bottom_left, 1, 1, force_overlay=true)
 if barstate.islast
     // Clear only this module's handles before allocation. Reserve other
     // modules' peak counts, including the previous realtime draw's objects.
