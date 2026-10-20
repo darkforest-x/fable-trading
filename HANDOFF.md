@@ -1,3 +1,11 @@
+## 2026-10-20 — 区间翻身加入 ZEC 同期补充
+
+- `exp-range-multicoin-20261020-v2`：只新增ZEC，原BTC/ETH/PEPE三组均缓存命中，原48行摘要完全一致。入口`python -m yoyo.evaluation.range_multicoin --config experiments/active/exp-range-multicoin-20261020-v2/config.json`（使用隔离Nautilus运行时）。
+- ZEC采用明确标注的Binance数据；OKX public instruments确认该合约2025-11-06上市，覆盖不了2024-08-02起的原共同区间。已向Owner说明来源差异，不得冒充OKX结果。225384根连续5m含预热，止于2026-09-22 14UTC；无行情下载或内容哈希。
+- 1330笔，原版净−439.591R／3R保本−436.780R，随机−597.694R／−480.882R，周块名义p.238／.417。2026段+4.436R／+5.296R但全期负；不是账户收益，不升级参数。原版46笔毛10R、7笔毛20R、最大浮盈60.150R（逐K核对）。
+- 源3789c275f5；3测试、5320原生持仓／10640成交的费用及收益恒等式通过。ZEC两组34.58秒，总流程61.40秒。原始逐笔、四币汇总、分段及验收均在实验目录。
+- Notion连接连续3次HTTP传输失败，尚未同步；目标原跨币种研究页`3ff88564-79af-81fa-8e43-dd40dbdcbe52`，待同步唯一键`exp-range-multicoin-20261020-v2`。本地validation.json保留状态。无Pine、执行服务或生产资格修改。
+
 ## 2026-10-20 — Nautilus 原生交互预览与 BTC／ETH／PEPE 同期复测
 
 - 原生PEPE K线成交图：`experiments/active/exp-range-multicoin-20261020-v1/preview/pepe-native.html`，16笔／32成交、4105根5m；保留原生缩放滑块，悬停开平仓／净R／最大浮盈R。静态PNG已检查；浏览器工具禁止file协议，所以未宣称浏览器交互验收。

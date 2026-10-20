@@ -1,0 +1,51 @@
+{
+  "experiment_id": "exp-range-multicoin-20261020-v2",
+  "elapsed_seconds": 61.400971792056225,
+  "source_commit": "3789c275f5956fe371c2f363e50981e7751a2c1d",
+  "generated_at": "2026-10-20T08:23:52.181652+00:00",
+  "ledgers": [
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/btc/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/btc/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/eth/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/eth/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/pepe/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/pepe/results/be3/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v2/zec/results/baseline/trades.csv",
+    "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v2/zec/results/be3/trades.csv"
+  ],
+  "runs": [
+    {
+      "symbol": "BTC",
+      "cached": true,
+      "elapsed_seconds": 0.006438042037189007,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/btc/config.json"
+    },
+    {
+      "symbol": "ETH",
+      "cached": true,
+      "elapsed_seconds": 0.0056900420458987355,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/eth/config.json"
+    },
+    {
+      "symbol": "PEPE",
+      "cached": true,
+      "elapsed_seconds": 0.004913709009997547,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v1/pepe/config.json"
+    },
+    {
+      "symbol": "ZEC",
+      "cached": false,
+      "elapsed_seconds": 34.582453207927756,
+      "config": "/Users/zhangzc/fable-trading/experiments/active/exp-range-multicoin-20261020-v2/zec/config.json"
+    }
+  ],
+  "venues": {
+    "BTC": "OKX",
+    "ETH": "OKX",
+    "PEPE": "OKX",
+    "ZEC": "Binance"
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Independent overlapping R, not account returns. Frozen 20bp entry-notional cost; no funding/spread/latency. Nominal weekly inference, no parameter selection. Historical MFE excludes stop-hit bars. Segment-end marks reported explicitly."
+}

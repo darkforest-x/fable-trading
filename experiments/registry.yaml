@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-multicoin-20261020-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3789c275f5
+    status: inconclusive
+    question: What do the frozen range baseline and BE3 policies return on ZEC over the prior common interval?
+    single_variable: Add explicitly labeled Binance ZEC as a cross-venue supplement; prior three OKX coin results and all strategy parameters reused unchanged.
+    artifacts: [range-multicoin-20261020-v2]
+    canonical_report: experiments/active/exp-range-multicoin-20261020-v2/receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: ZEC1330signal/1330random;baseline net-439.591R versus BE3-436.780R;random-597.694R/-480.882R.2026segment+4.436R/+5.296R. Baseline final gross10R46/gross20R7;max MFE60.150R. Nominal full weekly paired p.238/.417.
+    notes: Binance native5m225384continuous bars,2024-08-02to2026-09-22. OKX ZEC lists2025-11-06, so no same-venue full-period claim. Prior48summary rows unchanged,3cache hits.5320native positions/10640fills;ZEC native34.58s,total61.40s.3tests and financial identities pass. Notion read failed3times with HTTP transport error;sync pending.
   - experiment_id: exp-range-multicoin-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: f935e1ac4d

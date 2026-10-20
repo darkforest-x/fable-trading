@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-multicoin-20261020-v2
+    artifact_type: manifest
+    role: Binance ZEC extension of frozen native cross-coin range replay
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3789c275f5
+    source_path: experiments/active/exp-range-multicoin-20261020-v2/receipt.json
+    storage_uri: repo://experiments/active/exp-range-multicoin-20261020-v2/receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Explicit Binance venue;prior OKX results cached unchanged. Native ledgers,cost identities,source overlap/continuity and max-MFE checks retained. Overall net R negative despite 2026small positive;independent overlapping positions,not account return. Notion HTTP transport unavailable,pending sync recorded.
   - artifact_id: range-multicoin-20261020-v1
     artifact_type: manifest
     role: Frozen cross-coin native replay and interactive fill preview
