@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: eth-5m-rejections-20261020-v1
+    artifact_type: manifest
+    role: Fixed5m ETH causal rejection evidence and false-rejected tail trades
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0497918a514b20fb257f7d7461a9d207c526bed5
+    source_path: experiments/active/exp-eth-5m-rejections-20261020-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-eth-5m-rejections-20261020-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 4101signals plus4101native controls;10singlevetoes anddiagnosticbins. Rawfeatures/decisions/pairs/winnerdecisions local with
+      path/size/mtime;nohash. Knownhistory,nofunding,notaccountreturns.
   - artifact_id: eth-range-context-20261020-v1
     artifact_type: manifest
     role: ETH causal range/higher-timeframe admission and large-winner retention evidence

@@ -14,6 +14,24 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-5m-rejections-20261020-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0497918a514b20fb257f7d7461a9d207c526bed5
+    status: rejected
+    question: Which5m ETH entries can be rejected without losing10R/20R winners?
+    single_variable: Ten separate causal admission vetoes; native5m entries/stops/15m exits/20bp costs unchanged.
+    artifacts:
+    - eth-5m-rejections-20261020-v1
+    canonical_report: experiments/active/exp-eth-5m-rejections-20261020-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    result: 4101baseline -17.395bp;cost<=1R2037 -18.357bp keeps18/53gross20R;notoutsideMonday2756 -14.277bp keeps40/53;density4043 -17.229bp
+      keeps53/53. Matched means(signal/random) -17.395/-25.635, -18.514/-34.206, -13.870/-23.021, -17.783/-25.441.2024selecteddensitylater
+      -16.290vsbaseline -16.284bp;all10fullmeansnegative.
+    notes: 16tests,3prefixes,40scalarchecks,8202native35fields unchanged,55summary rows,20557matchedpairs.23.51s analysis,no replay/download.19unknownMonday
+      pass.31/53gross20R occuratwatchordinal>=7. Notion3ff8856479af81b09877d3d1c2c8ba9c verified;noPine/livechange.
   - experiment_id: exp-eth-range-context-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a29f37ddee58f7f917967b9d32e849bfa1801adf

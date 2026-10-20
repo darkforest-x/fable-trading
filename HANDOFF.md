@@ -1,3 +1,9 @@
+## 2026-10-20 · ETH fixed5m rejection study completed
+
+Owner freezes research entries to5m; higher timeframes confirm only. Reuse `exp-eth-range-entry5m-20261020-v1` native4101ETH signals, same stops/15m exits/20bp costs. New `experiments/active/exp-eth-5m-rejections-20261020-v1`:10single vetoes all netnegative.2024-selected density filter fails later (-16.290vs-16.284bp). Rejecting risk<0.2% deletes35/53gross20R and worsens mean;watchordinal>=7 contains31/53gross20R. NotoutsideMonday improvesmean -17.395to-14.277bp butdeletes13/53gross20R;later gainHolmp=.170,notvalidated.16tests,3prefixes,40scalarchecks,8202native35fields preserved;23.51s,no replay/download. Notion https://app.notion.com/p/3ff8856479af81b09877d3d1c2c8ba9c verified. NoPine/livechange fromthisstudy.
+
+Latest separate UI instruction: removeV2.9 entry selector;5m/15m charts automatically use own entryclock, allothercharts showcontext only. V2.10 implementation/TVvalidation inprogress. This display request doesnot rewrite the frozen5m ETH research.
+
 ## 2026-10-20 · ETH range-location and4H admission research complete
 
 - `exp-eth-range-context-20261020-v1`:15predefined arms plus8explicit exploratory unions, only admission changes. Reused frozen OKX ETH5m entry/15m exit ledger; no native replay/download. Common4068trades after33missing-context exclusions; original4101included122tenR/53twentyR,common121/53.

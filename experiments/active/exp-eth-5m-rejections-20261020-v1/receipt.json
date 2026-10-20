@@ -1,0 +1,128 @@
+{
+  "experiment_id": "exp-eth-5m-rejections-20261020-v1",
+  "generated_at": "2026-10-20T10:28:13.732757+00:00",
+  "elapsed_seconds": 23.513160667032935,
+  "source_commit": "0497918a514b20fb257f7d7461a9d207c526bed5",
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/features.csv.gz",
+      "bytes": 947058,
+      "mtime_ns": 1792490834122627289
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/results/baseline/trades.csv",
+      "bytes": 2748933,
+      "mtime_ns": 1792485476240980320
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-context-20261020-v1/receipt.json",
+      "bytes": 3262,
+      "mtime_ns": 1792490835593771175
+    }
+  ],
+  "unchanged_input_fields": [
+    "pair_id",
+    "entry_i",
+    "side",
+    "segment",
+    "week",
+    "bucket",
+    "end_i",
+    "population",
+    "entry_time",
+    "entry",
+    "stop",
+    "risk",
+    "trade_id",
+    "exit_i",
+    "exit_price",
+    "reason",
+    "peak_r",
+    "arm_i",
+    "protection",
+    "steps",
+    "ambiguous",
+    "be_trigger_i",
+    "be_effective_i",
+    "be_price",
+    "stop_kind",
+    "deferred_closes",
+    "gross_r",
+    "fee_r",
+    "net_r",
+    "net_notional_bp",
+    "exit_time",
+    "framework_exit_time",
+    "framework_position_id",
+    "framework_commission",
+    "quantity",
+    "day_hi",
+    "day_lo",
+    "day_asof",
+    "mon_hi",
+    "mon_lo",
+    "mon_asof",
+    "mon_developing",
+    "h1_arrow",
+    "h1_watch",
+    "h4_arrow",
+    "h4_watch",
+    "h4_momentum",
+    "h4_asof",
+    "day_u",
+    "mon_u",
+    "observable"
+  ],
+  "native_outcomes_reused": true,
+  "signal_n": 4101,
+  "control_n": 4101,
+  "arms": 11,
+  "prefixes": [
+    3901,
+    63500,
+    171503
+  ],
+  "unknown_range_passed": {
+    "day": 0,
+    "mon": 19
+  },
+  "selection": {
+    "selected": "not_dense_repeat",
+    "qualified_arms": [
+      "not_dense_repeat"
+    ],
+    "selected_from_segment": 0,
+    "requirement": "2024 only:100trades,20watches,80% gross10R/20R retention,better meanbp",
+    "profitability_not_implied": true
+  },
+  "training_eligible": false,
+  "production_eligible": false,
+  "raw_outputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-rejections-20261020-v1/features.csv.gz",
+      "bytes": 1491202,
+      "mtime_ns": 1792492093685820053
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-rejections-20261020-v1/decisions.csv.gz",
+      "bytes": 258516,
+      "mtime_ns": 1792492092409615266
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-rejections-20261020-v1/matched_pairs.csv.gz",
+      "bytes": 1146265,
+      "mtime_ns": 1792492092842061846
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-rejections-20261020-v1/winner_decisions.csv.gz",
+      "bytes": 11718,
+      "mtime_ns": 1792492093717993966
+    }
+  ],
+  "limits": "Previously examined history, no untouched validation. Independent overlapping R, not account returns. 20bp cost, no funding. Native exits unchanged. Random matching incomplete. Fixed binary vetoes have no trained AUC or top-decile scores. No Pine or live change."
+}
