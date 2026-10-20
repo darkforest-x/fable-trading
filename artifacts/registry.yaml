@@ -32865,3 +32865,20 @@ artifacts:
       Prior source/private preserved; QA appendix removed; finalPEPE15m historical chart shows4/4 and layout saved.
       Native mouse-drag automation did not move viewport and is not claimed as a completed manual drag test.
       No orders, profitability inference, or changes to existing alerts; Pine exempt fromStitch.
+
+  - artifact_id: monday-range-fanshen-v2-7-20261020-delivery
+    source_commit: 0ff54bf673ecf1c05ba0a22dac53e669fdbf819e
+    artifact_type: manifest
+    role: versioned_pine_trade_reference_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_7_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_7_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.7 armed-only opposite confirmed H1 close exit after old5m stop testing and15m arming. Same-close arming eligible;
+      unarmed peers unchanged. R-only captions with price switch defaultOFF and per-trade conservative peakR. Bottom-left
+      range status table removed. Native15m/1H146-entry ledger signatures identical;10closed records match12fields against
+      independent PEPE OHLC replay;23local tests pass. New private revision2 saved20261020T13:34:37+08:00;priorV2.6 preserved.
+      QA appendix removed; finalpricesOFF andlayout saved. Noorders or profitability inference; existing alerts unchanged;
+      Pine exempt fromStitch.
