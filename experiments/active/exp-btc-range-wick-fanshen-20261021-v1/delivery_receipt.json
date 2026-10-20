@@ -1,0 +1,676 @@
+{
+  "selections": {
+    "combined": {
+      "first_year_selected": "b0p2_tp10",
+      "full_descriptive": "b0p2_tp10"
+    },
+    "arrow_only": {
+      "first_year_selected": "b0p2_tp10",
+      "full_descriptive": "b0p2_tp10"
+    }
+  },
+  "native_audits": [
+    {
+      "arm": "b0p1_tp2",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 8
+    },
+    {
+      "arm": "b0p1_tp3",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 5
+    },
+    {
+      "arm": "b0p1_tp5",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 0
+    },
+    {
+      "arm": "b0p1_tp10",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 0
+    },
+    {
+      "arm": "b0p2_tp2",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 1
+    },
+    {
+      "arm": "b0p2_tp3",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 0
+    },
+    {
+      "arm": "b0p2_tp5",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 0
+    },
+    {
+      "arm": "b0p2_tp10",
+      "paths": 7122,
+      "native_oracle": "passed",
+      "conservative_changed": 0
+    }
+  ],
+  "prefix_checks": [
+    {
+      "bars": 19,
+      "matched_events": 1
+    },
+    {
+      "bars": 100,
+      "matched_events": 2
+    },
+    {
+      "bars": 500,
+      "matched_events": 2
+    },
+    {
+      "bars": 1000,
+      "matched_events": 6
+    },
+    {
+      "bars": 8729,
+      "matched_events": 103
+    },
+    {
+      "bars": 17655,
+      "matched_events": 205
+    },
+    {
+      "bars": 24886,
+      "matched_events": 307
+    },
+    {
+      "bars": 32212,
+      "matched_events": 409
+    },
+    {
+      "bars": 35984,
+      "matched_events": 447
+    },
+    {
+      "bars": 43752,
+      "matched_events": 511
+    },
+    {
+      "bars": 54378,
+      "matched_events": 613
+    },
+    {
+      "bars": 63412,
+      "matched_events": 715
+    },
+    {
+      "bars": 71532,
+      "matched_events": 817
+    },
+    {
+      "bars": 71967,
+      "matched_events": 823
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Known historical research; fixed initial-risk units, not account returns. No funding/spread/capacity/latency. Five-minute OHLC order sensitivity retained.",
+  "experiment_id": "exp-btc-range-wick-fanshen-20261021-v1",
+  "status": "completed",
+  "verdict": "Pooled hypothesis rejected; 0.618 subset retained as unvalidated descriptive observation",
+  "generated_at": "2026-10-20T17:21:32.481514+00:00",
+  "preparation_commit": "dda785c1220768618c36f9545a213d81d3b0e945",
+  "native_commit": "9e6e41b29d553fdeaaf7200b9a2ad58f26823c06",
+  "analysis_commit": "f99765323d",
+  "native_runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "native_total_paths": 56976,
+  "native_total_fills": 113952,
+  "native_total_elapsed_seconds": 215.34755575100007,
+  "native_audit_count_note": "conservative_changed sums exit-index and exit-price differences and is not a unique trade count",
+  "selected_pooled_summary": [
+    {
+      "arm": "b0p2_tp10",
+      "buffer_percent": "0.2",
+      "target_r": "10",
+      "family": "combined",
+      "segment": "-1",
+      "n": "808",
+      "matched_n": "808",
+      "net_r": "-323.13467213483057",
+      "gross_r": "78.70635134096541",
+      "fee_r": "401.84102347579596",
+      "selection_net_r": "-323.1346721348296",
+      "win_rate": "0.10148514851485149",
+      "target_rate": "0.09900990099009901",
+      "pf": "0.702528961244091",
+      "mean_net_bp": "-16.255755157392247",
+      "realized_r_drawdown": "336.68909696272664",
+      "paired_signal_net_r": "-323.13467213483057",
+      "random_net_r": "-442.8206575499887",
+      "paired_excess_r": "119.68598541515817",
+      "boundary_n": "2",
+      "boundary_net_r": "3.903719357565531",
+      "collisions": "0",
+      "conservative_random_r": "-442.8206575499902"
+    },
+    {
+      "arm": "b0p2_tp10",
+      "buffer_percent": "0.2",
+      "target_r": "10",
+      "family": "combined",
+      "segment": "0",
+      "n": "437",
+      "matched_n": "437",
+      "net_r": "-204.91679675011824",
+      "gross_r": "13.999999999999698",
+      "fee_r": "218.91679675011795",
+      "selection_net_r": "-204.9167967501178",
+      "win_rate": "0.09382151029748284",
+      "target_rate": "0.09382151029748284",
+      "pf": "0.6552179337520392",
+      "mean_net_bp": "-17.525128412848346",
+      "realized_r_drawdown": "269.6933089876816",
+      "paired_signal_net_r": "-204.91679675011824",
+      "random_net_r": "-221.73347894124373",
+      "paired_excess_r": "16.816682191125473",
+      "boundary_n": "0",
+      "boundary_net_r": "0.0",
+      "collisions": "0",
+      "conservative_random_r": "-221.7334789412443"
+    },
+    {
+      "arm": "b0p2_tp10",
+      "buffer_percent": "0.2",
+      "target_r": "10",
+      "family": "combined",
+      "segment": "1",
+      "n": "371",
+      "matched_n": "371",
+      "net_r": "-118.21787538471231",
+      "gross_r": "64.70635134096571",
+      "fee_r": "182.92422672567804",
+      "selection_net_r": "-118.21787538471179",
+      "win_rate": "0.1105121293800539",
+      "target_rate": "0.10512129380053908",
+      "pf": "0.7596882830077226",
+      "mean_net_bp": "-14.760563479132632",
+      "realized_r_drawdown": "154.6233811772956",
+      "paired_signal_net_r": "-118.21787538471231",
+      "random_net_r": "-221.087178608745",
+      "paired_excess_r": "102.8693032240327",
+      "boundary_n": "2",
+      "boundary_net_r": "3.903719357565531",
+      "collisions": "0",
+      "conservative_random_r": "-221.08717860874586"
+    }
+  ],
+  "selected_pooled_inference": [
+    {
+      "arm": "b0p2_tp10",
+      "family": "combined",
+      "segment": -1,
+      "weeks": 104,
+      "excess_r": 119.6859854151582,
+      "p_one_sided": 0.18394080295985202,
+      "weekly_bootstrap_total_r_95ci": [
+        -121.88530866070653,
+        378.8465698124843
+      ],
+      "holm_p_over_eight_exits": 0.7187640617969101
+    },
+    {
+      "arm": "b0p2_tp10",
+      "family": "combined",
+      "segment": 0,
+      "weeks": 53,
+      "excess_r": 16.816682191125473,
+      "p_one_sided": 0.4383780810959452,
+      "weekly_bootstrap_total_r_95ci": [
+        -161.11204201981192,
+        200.4986638705355
+      ],
+      "holm_p_over_eight_exits": 1.0
+    },
+    {
+      "arm": "b0p2_tp10",
+      "family": "combined",
+      "segment": 1,
+      "weeks": 52,
+      "excess_r": 102.86930322403273,
+      "p_one_sided": 0.12469376531173441,
+      "weekly_bootstrap_total_r_95ci": [
+        -70.1223996180309,
+        274.21059833122376
+      ],
+      "holm_p_over_eight_exits": 0.46097695115244236
+    }
+  ],
+  "descriptive_0618_inference": [
+    {
+      "arm": "b0p2_tp10",
+      "ratio": 0.618,
+      "segment": -1,
+      "n": 205,
+      "signal_net_r": 32.22630567422958,
+      "random_net_r": -57.04853634728205,
+      "excess_p": 0.0904454777261137,
+      "excess_r_ci": [
+        -45.488892764085,
+        218.0805744096575
+      ],
+      "positive_net_p": 0.28678566071696415,
+      "net_r_ci": [
+        -78.6400960032289,
+        144.76833820877195
+      ],
+      "holm_48_excess_p": 1.0,
+      "holm_48_positive_net_p": 1.0
+    },
+    {
+      "arm": "b0p2_tp10",
+      "ratio": 0.618,
+      "segment": 0,
+      "n": 111,
+      "signal_net_r": 9.572039647260274,
+      "random_net_r": -26.89097514318788,
+      "excess_p": 0.2127393630318484,
+      "excess_r_ci": [
+        -71.59460819404889,
+        141.88407307412064
+      ],
+      "positive_net_p": 0.4032798360081996,
+      "net_r_ci": [
+        -65.7848182092,
+        88.82339116181025
+      ],
+      "holm_48_excess_p": 1.0,
+      "holm_48_positive_net_p": 1.0
+    },
+    {
+      "arm": "b0p2_tp10",
+      "ratio": 0.618,
+      "segment": 1,
+      "n": 94,
+      "signal_net_r": 22.654266026969303,
+      "random_net_r": -30.157561204094176,
+      "excess_p": 0.12984350782460877,
+      "excess_r_ci": [
+        -25.14743632396275,
+        131.1910015092889
+      ],
+      "positive_net_p": 0.2910854457277136,
+      "net_r_ci": [
+        -53.01562932615868,
+        105.02386921391918
+      ],
+      "holm_48_excess_p": 1.0,
+      "holm_48_positive_net_p": 1.0
+    }
+  ],
+  "candidate_audit": {
+    "combined_event_identities_checked": 808,
+    "paired_context_checked": 3561,
+    "archive_months_confirmed": 24,
+    "quarter_event_clock": "all 15m closes",
+    "source_metadata_checks": "path/size/read; no content hashes",
+    "manual_examples": [
+      {
+        "pair_id": 3558,
+        "entry_time": "2026-10-20 04:30:00+00:00",
+        "side": -1,
+        "levels": "0.5:up",
+        "level_prices": "82157.9",
+        "touch_lag": 0
+      },
+      {
+        "pair_id": 3560,
+        "entry_time": "2026-10-20 15:00:00+00:00",
+        "side": -1,
+        "levels": "1.13:up",
+        "level_prices": "83407.694",
+        "touch_lag": -1
+      }
+    ]
+  },
+  "stop_audit": {
+    "actual_15m_stop_extrema_checks": 14244,
+    "status": "passed",
+    "economic_paths_checked_in_delivery_receipt": 56976
+  },
+  "failure_preserved": {
+    "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1",
+    "cause": "Pandas us/ns datetime integer mismatch produced empty candidates; normalized timestamps and added nonempty guard before native runs"
+  },
+  "ml_metrics": "No trained model, classifier ranking or top-decile selection. AUC and top-decile metrics do not apply; arrow-only and matched random are the null baselines.",
+  "statistical_scope": "First year selects exits; later year evaluates frozen exit choice. All known history. Ratio subgroup selection is descriptive after 48 comparisons; overlapping strata must not be summed.",
+  "notion": {
+    "task": "https://app.notion.com/p/3ff8856479af80a68faec10c42af11a3",
+    "research": "https://app.notion.com/p/3ff8856479af817cb72dd5896e7896bd",
+    "research_id": "EXP-149",
+    "task_state": "Done",
+    "research_state": "完成",
+    "readback_verified": true
+  },
+  "raw_inventory": [
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/.cache/features.json",
+      "bytes": 1023,
+      "mtime_ns": 1792516179354340390
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/.cache/features.npz",
+      "bytes": 3794002,
+      "mtime_ns": 1792516179353633930
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/analysis.log",
+      "bytes": 2369,
+      "mtime_ns": 1792516411415197842
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p1_tp10.csv.gz",
+      "bytes": 739790,
+      "mtime_ns": 1792516408814587035
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p1_tp2.csv.gz",
+      "bytes": 754960,
+      "mtime_ns": 1792516407133788666
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p1_tp3.csv.gz",
+      "bytes": 750024,
+      "mtime_ns": 1792516407688743795
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p1_tp5.csv.gz",
+      "bytes": 744516,
+      "mtime_ns": 1792516408259105364
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p2_tp10.csv.gz",
+      "bytes": 741078,
+      "mtime_ns": 1792516411066536389
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p2_tp2.csv.gz",
+      "bytes": 756819,
+      "mtime_ns": 1792516409426086464
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p2_tp3.csv.gz",
+      "bytes": 751650,
+      "mtime_ns": 1792516409972997412
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/annotated_b0p2_tp5.csv.gz",
+      "bytes": 745618,
+      "mtime_ns": 1792516410507685923
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/candidate_audit.json",
+      "bytes": 620,
+      "mtime_ns": 1792516257301889787
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/candidates.csv",
+      "bytes": 972289,
+      "mtime_ns": 1792516085401589786
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/candles.csv.gz",
+      "bytes": 3055101,
+      "mtime_ns": 1792516084109628978
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/config.json",
+      "bytes": 3025,
+      "mtime_ns": 1792515825977498407
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/candidates.csv",
+      "bytes": 162,
+      "mtime_ns": 1792515971959655259
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/candles.csv.gz",
+      "bytes": 3055101,
+      "mtime_ns": 1792515970402560679
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/input_receipt.json",
+      "bytes": 4172,
+      "mtime_ns": 1792515973315764841
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/native_b0p1.json",
+      "bytes": 935,
+      "mtime_ns": 1792515973266032383
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/native_b0p2.json",
+      "bytes": 935,
+      "mtime_ns": 1792515973266484842
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/prepare.log",
+      "bytes": 4172,
+      "mtime_ns": 1792515973318054220
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/failed_prepare_v1/quarter.csv.gz",
+      "bytes": 1076974,
+      "mtime_ns": 1792515973264608006
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inference.json",
+      "bytes": 14899,
+      "mtime_ns": 1792516411411123419
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/input_receipt.json",
+      "bytes": 4292,
+      "mtime_ns": 1792516086203375864
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv",
+      "bytes": 1030402,
+      "mtime_ns": 1792515781716862278
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native.log",
+      "bytes": 2456,
+      "mtime_ns": 1792516393729921795
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/receipt.json",
+      "bytes": 16766,
+      "mtime_ns": 1792516279981654818
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp10/audit.json",
+      "bytes": 1018,
+      "mtime_ns": 1792516279962214369
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp10/fills.csv",
+      "bytes": 1564588,
+      "mtime_ns": 1792516279961598243
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp10/trades.csv",
+      "bytes": 2497121,
+      "mtime_ns": 1792516279935181658
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp2/audit.json",
+      "bytes": 1017,
+      "mtime_ns": 1792516206220866576
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp2/fills.csv",
+      "bytes": 1568065,
+      "mtime_ns": 1792516206220249492
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp2/trades.csv",
+      "bytes": 2498837,
+      "mtime_ns": 1792516206190326692
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp3/audit.json",
+      "bytes": 1017,
+      "mtime_ns": 1792516231682513763
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp3/fills.csv",
+      "bytes": 1567151,
+      "mtime_ns": 1792516231682124179
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp3/trades.csv",
+      "bytes": 2500193,
+      "mtime_ns": 1792516231650791419
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp5/audit.json",
+      "bytes": 1017,
+      "mtime_ns": 1792516256561803270
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp5/fills.csv",
+      "bytes": 1565623,
+      "mtime_ns": 1792516256561533228
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1/tp5/trades.csv",
+      "bytes": 2498420,
+      "mtime_ns": 1792516256531296011
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p1.json",
+      "bytes": 935,
+      "mtime_ns": 1792516086175921569
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/receipt.json",
+      "bytes": 16766,
+      "mtime_ns": 1792516393729447711
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp10/audit.json",
+      "bytes": 1019,
+      "mtime_ns": 1792516393701777165
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp10/fills.csv",
+      "bytes": 1564632,
+      "mtime_ns": 1792516393701234331
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp10/trades.csv",
+      "bytes": 2499808,
+      "mtime_ns": 1792516393669205236
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp2/audit.json",
+      "bytes": 1018,
+      "mtime_ns": 1792516303877898654
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp2/fills.csv",
+      "bytes": 1568007,
+      "mtime_ns": 1792516303877579446
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp2/trades.csv",
+      "bytes": 2501843,
+      "mtime_ns": 1792516303849767900
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp3/audit.json",
+      "bytes": 1016,
+      "mtime_ns": 1792516334450271384
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp3/fills.csv",
+      "bytes": 1566846,
+      "mtime_ns": 1792516334449537424
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp3/trades.csv",
+      "bytes": 2502366,
+      "mtime_ns": 1792516334414565158
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp5/audit.json",
+      "bytes": 1019,
+      "mtime_ns": 1792516364239198440
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp5/fills.csv",
+      "bytes": 1565442,
+      "mtime_ns": 1792516364238940356
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2/tp5/trades.csv",
+      "bytes": 2500183,
+      "mtime_ns": 1792516364209887975
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/native_b0p2.json",
+      "bytes": 935,
+      "mtime_ns": 1792516086176094819
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/prefix_preflight.json",
+      "bytes": 4515,
+      "mtime_ns": 1792516378528083028
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/prepare.log",
+      "bytes": 4292,
+      "mtime_ns": 1792516086203874198
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/quarter.csv.gz",
+      "bytes": 1076974,
+      "mtime_ns": 1792516086175239776
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/stop_audit.json",
+      "bytes": 123,
+      "mtime_ns": 1792516543566360454
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/strata.csv",
+      "bytes": 136885,
+      "mtime_ns": 1792516411410475001
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/strata_analysis.log",
+      "bytes": 128,
+      "mtime_ns": 1792516515389389340
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/strata_inference.json",
+      "bytes": 65965,
+      "mtime_ns": 1792516515389151508
+    },
+    {
+      "path": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/summary.csv",
+      "bytes": 14655,
+      "mtime_ns": 1792516411406257244
+    }
+  ],
+  "inventory_policy": "Path, size, mtime and actual reads only; no input content hashing, per owner."
+}

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-range-wick-fanshen-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: f99765323d
+    status: rejected
+    question: Do causal Monday Fib wick touches within two 15m bars of a Stoch check/cross identify profitable BTC entries over two years?
+    single_variable: Owner-authorized 0.1/0.2 percent structural-stop buffer by fixed 2/3/5/10R target; symmetric long/short entries and latest three completed15m extrema frozen.
+    result: All eight pooled configurations lose after20bp. First-year selected0.2percent/10R yields808 trades net-323.1347R versus matched random-442.8207R; later371 net-118.2179R versus-221.0872R, excess p0.1247. Only the descriptive0.618 subgroup with these exits is positive among48 ratio/exit cells,205 trades+32.2263R versus-57.0485R, but net95percentCI[-78.6401,144.7683]R and Holm48 p1.0. Retain as unvalidated observation.
+    artifacts:
+    - btc-range-wick-fanshen-20261021-v1
+    canonical_report: experiments/active/exp-btc-range-wick-fanshen-20261021-v1/delivery_receipt.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Beijing2024-10-21 through2026-10-21, chronological midpoint.808combined plus2753arrow-only signals, all3561 matched. Existing1m history reused with targeted recent tail; causal pre-touch Monday levels. Nautilus1.231.0 eight arms56976positions113952fills, native oracle parity and14244stop-extrema checks passed;14prefix checks. Empty-candidate timestamp-unit failure preserved before any replay. Known history and independentR, not account returns. No Pine/default/live/model change. Notion EXP-149 3ff8856479af817cb72dd5896e7896bd, task65 completed.
   - experiment_id: exp-eth-h1-gainers-mfe16-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 72a9462ee4

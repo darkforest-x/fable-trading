@@ -1,3 +1,11 @@
+## 2026-10-21 · BTC Fib wick / 15m check-cross study completed
+
+- Owner task65 confirmed both directions and latest3completed15m extrema at entry. Two years to Beijing2026-10-21; causal pre-touch Monday levels, first close with both touch and arrow known. Eight0.1/0.2percent buffer by2/3/5/10R targets all netnegative after20bp.
+- First-year and full descriptive choice0.2percent/10R:808trades net-323.13R versus matchedrandom-442.82R; later371 net-118.22R versus-221.09R, excessp.1247. Pure-arrow2753trades mean-17.32bp versus combined-16.26bp, not proof of filtering edge. Both directions lose.
+- Only0.618/0.2percent/10R is full-period positive among48ratio/exit cells:205trades+32.23R versusrandom-57.05R; first/later+9.57/+22.65R. Net95percentCI[-78.64,+144.77]R and Holm48p1.0, retain as unvalidated observation, not a promoted strategy.
+- Reused Nautilus1.231.0:56976positions113952fills, all native/oracle identities passed,14244stop-extrema checks,808event/3561matching audits,14prefix checks; initial86tests and final7candidate tests passed. Timestamp-unit empty preparation preserved and fixed before native replay. Commits dda785c122/9e6e41b29d/f99765323d; no unchanged replays.
+- Evidence `experiments/active/exp-btc-range-wick-fanshen-20261021-v1/delivery_receipt.json`; Notion EXP-149 https://app.notion.com/p/3ff8856479af817cb72dd5896e7896bd. IndependentR, not account returns; no funding/slippage/capacity. No Pine/default/live/model change; training/productionfalse. No temporary browser/tab created.
+
 ## 2026-10-20 ETH timed BE / RSI scaleouts — completed, no default promotion
 
 - Owner Notion ideas tested in `exp-eth-timebe-rsi-20261020-v1`: frozen 3838 ETH signals + 3838 matched controls; same-source 1m execution. All five alternatives worsen full net R: original -3747.09; time25 -4325.56; first RSI3 -4053.96; first RSI5 -3898.26; combined3 -4269.69; combined5 -4306.25. Time BE waits after fifth 5m close until fee protection is feasible; only profitable opposite strong diamonds reduce original fifths.

@@ -1,0 +1,125 @@
+{
+  "checks": [
+    {
+      "bars": 19,
+      "matched_events": 1
+    },
+    {
+      "bars": 100,
+      "matched_events": 2
+    },
+    {
+      "bars": 500,
+      "matched_events": 2
+    },
+    {
+      "bars": 1000,
+      "matched_events": 6
+    },
+    {
+      "bars": 8729,
+      "matched_events": 103
+    },
+    {
+      "bars": 17655,
+      "matched_events": 205
+    },
+    {
+      "bars": 24886,
+      "matched_events": 307
+    },
+    {
+      "bars": 32212,
+      "matched_events": 409
+    },
+    {
+      "bars": 35984,
+      "matched_events": 447
+    },
+    {
+      "bars": 43752,
+      "matched_events": 511
+    },
+    {
+      "bars": 54378,
+      "matched_events": 613
+    },
+    {
+      "bars": 63412,
+      "matched_events": 715
+    },
+    {
+      "bars": 71532,
+      "matched_events": 817
+    },
+    {
+      "bars": 71967,
+      "matched_events": 823
+    }
+  ],
+  "identity": {
+    "config": {
+      "experiment_id": "exp-btc-range-wick-fanshen-20261021-v1",
+      "source_task": "https://app.notion.com/p/3ff8856479af80a68faec10c42af11a3",
+      "symbol": "BTC",
+      "venue": "OKX",
+      "warmup": "2024-10-01T00:00:00Z",
+      "start": "2024-10-20T16:00:00Z",
+      "split": "2025-10-20T16:00:00Z",
+      "end": "2026-10-20T16:00:00Z",
+      "timezone": "America/New_York",
+      "ratios": [
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "signal_distance_bars": 2,
+      "stop_bars_15m": 3,
+      "buffer_percent": [
+        0.1,
+        0.2
+      ],
+      "target_r": [
+        2,
+        3,
+        5,
+        10
+      ],
+      "tick": 0.1,
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "inputs": [
+        "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+        "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv"
+      ],
+      "recent_glob": "inputs/okx_BTC_USDT_SWAP_1m_*.csv",
+      "entry": "One entry per confirmed 15m Stoch5/3/3 arrow. Require a directional wick containing a same-week Fib price within two 15m bars before/after the arrow. Enter at the first close at which both facts are known. Prefer the nearest already-known touch when several are available at the arrow close. No H1 watch gate.",
+      "levels": "Both lo+r*(hi-lo) and hi-r*(hi-lo), deduplicate midpoint. Use the current Monday range known BEFORE each touch candle opens; Monday develops, Tuesday-Sunday freeze. First Monday candle has no new-week level. Never back-project final Monday extrema.",
+      "wick": "Long: low <= level <= min(open,close); short: max(open,close) <= level <= high. Require a nonzero directional wick. Zero extra price tolerance.",
+      "stops": "Latest three completed 15m extrema at entry, equivalent to nine complete 5m bars; entry-price buffer 0.1/0.2 percent; round outward to tick.",
+      "exits": "Native fixed 2/3/5/10R target and initial stop, independent positions, no trailing/breakeven/opposite exit. Force closure at each chronological segment boundary. Retain native O-H-L-C results and stop-first same-bar sensitivity.",
+      "controls": "Same BTC/side/UTC week/time segment/causal ATR14 bucket, 15m-close random entry, without replacement within each family/side/stratum; exclude all real arrow and combined entry bars. Same stop/target/cost. Preserve unmatched events and report paired subsets separately.",
+      "baseline": "Confirmed 15m arrows without the location gate, under the same eight exits and matched controls. It also differs in entry timing when a combined event waits for a later touch.",
+      "selection": "Maximize cumulative net original-risk R on the first year, using stop-first sensitivity; second year evaluates that frozen choice. All-history best is descriptive. Ratios/directions/developing Mondays are descriptive strata, not additional fitted filters.",
+      "not_applicable": "No fitted model or score: AUC and top-decile ranking metrics do not apply. Arrow-only and matched random controls provide the null comparisons.",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    "quarter": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-range-wick-fanshen-20261021-v1/quarter.csv.gz",
+      "bytes": 1076974,
+      "mtime_ns": 1792516086175239776
+    },
+    "preparation_commit": "dda785c1220768618c36f9545a213d81d3b0e945"
+  }
+}

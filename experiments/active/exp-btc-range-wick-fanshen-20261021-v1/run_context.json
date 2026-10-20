@@ -1,0 +1,75 @@
+{
+  "status": "completed",
+  "notion_task": "https://app.notion.com/p/3ff8856479af80a68faec10c42af11a3",
+  "notion_research": "https://app.notion.com/p/3ff8856479af817cb72dd5896e7896bd",
+  "preparation_commit": "dda785c122",
+  "analysis_commit": "f99765323d",
+  "tests": {
+    "initial_targeted_and_boundary": 86,
+    "final_candidate_tests": 7
+  },
+  "scope": "Eight stop-buffer/target combinations; same signals, 20bp cost, independent framework positions",
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_range_wick_fanshen prepare",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_range_wick_fanshen run",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_range_wick_fanshen analyze",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_range_wick_fanshen strata"
+  ],
+  "input_requirement": "Reuse the frozen input paths in input_receipt.json. The original rolling recent fetch command was python -m src.data.fetch_okx --symbols BTC_USDT_SWAP --days 9 --bar 1m --workers 1 --out-dir experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs on 2026-10-21 Asia/Shanghai; rerunning that rolling command later is not an exact input replay.",
+  "browser_cleanup": "No browser or tab created. Existing TradingView inspected; object-properties dialog cancelled and object tree closed. No drawings/script/layout changed.",
+  "completed_at": "2026-10-20T17:21:32.481514+00:00",
+  "native_commit": "9e6e41b29d",
+  "service_readonly_check": {
+    "observed_at": "2026-10-20T17:13:41.183Z",
+    "service_alive": true,
+    "market_ready": true,
+    "model_ready": false,
+    "overall_ok": false,
+    "scan_state": "idle",
+    "scan_completed": 1976,
+    "scan_total": 1976,
+    "scan_errors": 0,
+    "scan_duration_seconds": 3.7,
+    "next_scan_ms": 1792516462252,
+    "note": "Market/monitor running; no active production model, so overall ok=false is preserved rather than reported as healthy. No service changes by this task."
+  },
+  "notion_readback_verified": true,
+  "final_service_readonly_check": {
+    "observed_at": "2026-10-20T17:23:02.334421+00:00",
+    "service_alive": true,
+    "now_ms": 1792516982330,
+    "scan": {
+      "status": "idle",
+      "generation": "ae81f22c05cb4f65aca699f7726b1a71",
+      "worker_pid": 2668,
+      "worker_started_at_ms": 1792514658151,
+      "started_at_ms": 1792516884724,
+      "finished_at_ms": 1792516901606,
+      "completed": 1976,
+      "total": 1976,
+      "errors": 0,
+      "error_samples": [],
+      "isolated": true,
+      "timing_ms": {
+        "cells": 1976,
+        "changed_cells": 0,
+        "unchanged_cells": 1976,
+        "fetch_total": 21.913,
+        "analyze_total": 0.0,
+        "checkpoint_total": 2020.411,
+        "analyze_cpu_total": 0.0,
+        "checkpoint_cpu_total": 489.032,
+        "fetch_max": 0.465,
+        "analyze_max": 0.0,
+        "checkpoint_max": 7.026,
+        "analyze_cpu_max": 0.0,
+        "checkpoint_cpu_max": 0.869
+      },
+      "duration_seconds": 16.88,
+      "next_scan_ms": 1792517021606
+    },
+    "market_ready": true,
+    "model_ready": false,
+    "ok": false
+  }
+}
