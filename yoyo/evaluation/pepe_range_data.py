@@ -12,6 +12,7 @@ import io
 import json
 from pathlib import Path
 import time
+import threading
 import urllib.parse
 import urllib.request
 import zipfile
@@ -20,11 +21,17 @@ import pandas as pd
 from src.data.fetch_okx import REQUEST_HEADERS
 
 EXP = Path("experiments/active/exp-pepe-range-exits-20261020-v1")
+_request_lock = threading.Lock()
+_last_request = 0.
 
 
 def get(url: str) -> bytes:
+    global _last_request
     for attempt in range(5):
         try:
+            with _request_lock:
+                time.sleep(max(0., .13-(time.monotonic()-_last_request)))
+                _last_request = time.monotonic()
             req = urllib.request.Request(url, headers=REQUEST_HEADERS)
             with urllib.request.urlopen(req, timeout=45) as response:
                 return response.read()
@@ -119,10 +126,21 @@ def recent(start: int, finish: int) -> dict:
 
 def repair(frame: pd.DataFrame) -> tuple[pd.DataFrame, list]:
     """Replace archive gaps with actual completed native OKX 5m observations."""
-    fixes = []
-    gaps = frame.index[frame.ts.diff() > 300000].tolist()
-    for i in gaps:
-        start, finish = int(frame.ts.iloc[i-1]+300000), int(frame.ts.iloc[i])
+    ranges = []
+    for i in frame.index[frame.ts.diff() > 300000]:
+        begin, end = int(frame.ts.iloc[i-1]+300000), int(frame.ts.iloc[i])
+        for start in range(begin, end, 7*86400000):
+            ranges.append((start, min(start+7*86400000, end)))
+
+    def fetch_range(bounds):
+        start, finish = bounds
+        path = EXP/"inputs"/f"native_gap_{start}_{finish}.csv"
+        expected = (finish-start)//300000
+        if path.exists():
+            fixed = validate(pd.read_csv(path))
+            assert len(fixed) == expected
+            return dict(start=start, finish=finish, rows=len(fixed), path=str(path),
+                        source="OKX public history-candles, confirmed native 5m")
         cursor, rows = finish, []
         while cursor > start:
             query = urllib.parse.urlencode(dict(instId="PEPE-USDT-SWAP", bar="5m", limit=100, after=cursor))
@@ -138,13 +156,14 @@ def repair(frame: pd.DataFrame) -> tuple[pd.DataFrame, list]:
             assert nxt < cursor
             cursor = nxt
             time.sleep(.12)
-        expected = (finish-start)//300000
         fixed = validate(pd.DataFrame(rows, columns=frame.columns))
         assert len(fixed) == expected, (start, finish, len(fixed), expected)
-        path = EXP/"inputs"/f"native_gap_{start}_{finish}.csv"
         fixed.to_csv(path, index=False)
-        fixes.append(dict(start=start, finish=finish, rows=len(fixed), path=str(path),
-                          source="OKX public history-candles, confirmed native 5m"))
+        print("repaired", pd.Timestamp(start, unit="ms", tz="UTC"), len(fixed), flush=True)
+        return dict(start=start, finish=finish, rows=len(fixed), path=str(path),
+                    source="OKX public history-candles, confirmed native 5m")
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
+        fixes = list(pool.map(fetch_range, ranges))
     if fixes:
         frame = validate(pd.concat([frame, *[pd.read_csv(f["path"]) for f in fixes]], ignore_index=True))
     return frame, fixes
