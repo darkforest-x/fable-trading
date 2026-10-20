@@ -144,7 +144,7 @@ def run(config, output=None):
     started = time.perf_counter()
     cfg = json.loads(config.read_text())
     allowed = {"schema", "experiment_id", "engine", "data", "entry_candidates", "symbol",
-               "tick", "stop_window_5m", "buffer_percent", "maximum_risk_percent",
+               "tick", "market_tick", "stop_window_5m", "buffer_percent", "maximum_risk_percent",
                "round_trip_cost", "policies", "output"}
     if set(cfg)-allowed or cfg["schema"] != 1 or cfg["engine"] != "nautilus":
         raise ValueError("Unknown configuration fields or adapter")
@@ -182,7 +182,7 @@ def run(config, output=None):
         policy = ExitPolicy(round_trip_cost=cfg["round_trip_cost"],
                             **{k: v for k, v in spec.items() if k not in ("name", "golden_ledger")})
         rows, fills, audit = run_native(ctx["frame"], ctx["atr"], ctx["hour"], entries,
-                                       policy, cfg["tick"], cfg["symbol"])
+                                       policy, cfg["tick"], cfg["symbol"], cfg.get("market_tick"))
         if spec.get("golden_ledger"):
             audit["parity"] = compare_golden(rows, ROOT/spec["golden_ledger"], cfg["tick"])
         destination = output/spec["name"]

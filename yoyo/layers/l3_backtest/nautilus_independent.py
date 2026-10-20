@@ -94,7 +94,7 @@ class TradeState:
 
 
 class IndependentCloseStrategy(Strategy):
-    def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees):
+    def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees, protection_tick):
         super().__init__(StrategyConfig(
             oms_type="HEDGING", log_events=False, log_commands=False,
         ))
@@ -104,7 +104,7 @@ class IndependentCloseStrategy(Strategy):
         self.prices = frame[["open", "high", "low", "close"]].to_numpy()
         self.atr, self.hour = np.asarray(atr), np.asarray(hour)
         self.policy, self.fees = policy, fees
-        self.tick = float(instrument.price_increment)
+        self.tick = protection_tick
         self.eps = self.tick * 1e-7
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
         self.by_entry = {}
@@ -252,7 +252,7 @@ class IndependentCloseStrategy(Strategy):
         self.hedged_bars += int({s.source["side"] for s in self.active.values()} == {-1, 1})
 
 
-def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE"):
+def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
@@ -272,14 +272,17 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE"):
     frame.index = frame.index.as_unit("ns")
     if entries.empty or not entries.trade_id.is_unique:
         raise ValueError("Need nonempty, uniquely identified independent trades")
-    precision = -Decimal(str(tick)).as_tuple().exponent
+    market_tick = tick if market_tick is None else market_tick
+    if not 0 < market_tick <= tick or abs(tick/market_tick-round(tick/market_tick)) > 1e-8:
+        raise ValueError("Protection tick must be an integer multiple of the market precision")
+    precision = -Decimal(str(market_tick)).as_tuple().exponent
     venue = Venue("RESEARCH")
     instrument = CryptoPerpetual(
         instrument_id=InstrumentId(Symbol(f"{symbol}-USDT"), venue),
         raw_symbol=Symbol(f"{symbol}-USDT"),
         base_currency=Currency.from_str(symbol), quote_currency=USDT,
         settlement_currency=USDT, is_inverse=False,
-        price_precision=precision, price_increment=Price(tick, precision),
+        price_precision=precision, price_increment=Price(market_tick, precision),
         size_precision=8, size_increment=Quantity.from_str("0.00000001"),
         margin_init=Decimal("0"), margin_maint=Decimal("0"),
         maker_fee=Decimal("0"), taker_fee=Decimal("0"), ts_event=0, ts_init=0,
@@ -287,7 +290,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE"):
     prices = frame[["open", "high", "low", "close"]].to_numpy()
     if not np.isfinite(prices).all() or (prices <= 0).any():
         raise ValueError("Invalid OHLC")
-    if (np.abs(prices/tick-np.rint(prices/tick)) > 1e-5).any():
+    if (np.abs(prices/market_tick-np.rint(prices/market_tick)) > 1e-5).any():
         raise ValueError("OHLC does not lie on the configured tick grid")
     for r in entries.itertuples():
         if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
@@ -313,7 +316,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE"):
         engine.add_instrument(instrument)
         bar_type = BarType.from_str(f"{instrument.id}-5-MINUTE-LAST-EXTERNAL")
         strategy = IndependentCloseStrategy(
-            instrument, bar_type, frame, atr, hour, entries, policy, fee_model,
+            instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
         )
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
@@ -335,6 +338,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE"):
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
         audit = dict(
             engine="nautilus_trader", version=ENGINE_VERSION,
+            market_tick=market_tick, protection_tick=tick,
             positions=len(positions), fills=len(fills),
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,

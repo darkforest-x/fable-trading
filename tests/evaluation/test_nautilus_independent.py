@@ -16,7 +16,7 @@ if importlib.util.find_spec("nautilus_trader") is None:
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
 
 
-def replay(bars, events, atr=None, hour=None, **policy):
+def replay(bars, events, atr=None, hour=None, tick=1., market_tick=None, **policy):
     frame = pd.DataFrame(
         bars, columns=["open", "high", "low", "close"],
         index=pd.date_range("2026-01-01", periods=len(bars), freq="5min", tz="UTC"),
@@ -29,7 +29,7 @@ def replay(bars, events, atr=None, hour=None, **policy):
     return run_native(
         frame, np.full(len(bars), np.nan) if atr is None else atr,
         np.zeros(len(bars)) if hour is None else hour, pd.DataFrame(rows),
-        ExitPolicy(**policy), tick=1., symbol="TEST",
+        ExitPolicy(**policy), tick=tick, symbol="TEST", market_tick=market_tick,
     )
 
 
@@ -101,6 +101,16 @@ class NativeContractTests(unittest.TestCase):
         self.assertEqual(row.exit_price, 10015)
         self.assertEqual(row.reason, 5)
         self.assertEqual(row.net_r, -5)
+
+    def test_historical_market_precision_preserves_entry_and_stop_grid(self):
+        rows, _, _ = replay(
+            [[.0000015348]*4, [.0000015348, .000001536, .0000015331, .000001535],
+             [.000001535, .000001536, .000001532, .000001534]],
+            [(0, 1, .000001533, 2)], tick=1e-9, market_tick=1e-10,
+        )
+        self.assertEqual(rows.iloc[0].entry, .0000015348)
+        self.assertEqual(rows.iloc[0].exit_price, .000001533)
+        self.assertEqual(rows.iloc[0].reason, 1)
 
 
 if __name__ == "__main__":
