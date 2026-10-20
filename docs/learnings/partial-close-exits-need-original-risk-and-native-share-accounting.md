@@ -1,0 +1,7 @@
+# Partial close exits need original-risk and native-share accounting
+
+- **Problem**: Adding partial profit realization to independent overlapping trades can falsely improve returns if the runner is treated as full size, its risk denominator shrinks, or every exit is charged a full round-trip fee.
+- **Dead end**: Applying a fraction to historical MFE does not identify an executable close, and a target touched during a stop-hit candle cannot be assumed filled first. Native integer ETH positions also cannot represent25percent of a1-unit research position. These unsuitable shortcuts were rejected before the study.
+- **Effective path**: Use first surviving5m close as the trigger, submit a real reduce-only market order, then protect only the remaining native quantity at the existing management stop. Keep original position quantity/risk for allR calculations and allocate costs by filled quantity. Size synthetic positions in exact fraction-denominator multiples. Validate weighted cash against the framework's closed-position PnL and an independent first-close scan; the unchanged runner must end at the original exit.
+- **General rule**: Define event order and denominator before adding partial exits. Separate close-confirmed execution from intrabar target execution; neither MFE nor final runnerR is the whole-position profit.
+- **Scope**: `yoyo/layers/l3_backtest/nautilus_independent.py`, `yoyo/evaluation/range_partial_study.py`; no funded account or capacity claims. Existing no-partial behavior is guarded by native regression and cached baseline probes.

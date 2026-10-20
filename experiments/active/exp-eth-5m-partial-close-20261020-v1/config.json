@@ -1,0 +1,51 @@
+{
+  "experiment_id": "exp-eth-5m-partial-close-20261020-v1",
+  "baseline_config": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/config.json",
+  "baseline_receipt": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/receipt.json",
+  "baseline_ledger": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/trades.csv",
+  "baseline_fills": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/fills.csv",
+  "seed": 20261020,
+  "arms": [
+    {
+      "name": "partial1_pct25",
+      "config": "partial1_pct25.json",
+      "trigger_r": 1,
+      "fraction": 0.25
+    },
+    {
+      "name": "partial1_pct50",
+      "config": "partial1_pct50.json",
+      "trigger_r": 1,
+      "fraction": 0.5
+    },
+    {
+      "name": "partial3_pct25",
+      "config": "partial3_pct25.json",
+      "trigger_r": 3,
+      "fraction": 0.25
+    },
+    {
+      "name": "partial3_pct50",
+      "config": "partial3_pct50.json",
+      "trigger_r": 3,
+      "fraction": 0.5
+    },
+    {
+      "name": "partial5_pct25",
+      "config": "partial5_pct25.json",
+      "trigger_r": 5,
+      "fraction": 0.25
+    },
+    {
+      "name": "partial5_pct50",
+      "config": "partial5_pct50.json",
+      "trigger_r": 5,
+      "fraction": 0.5
+    }
+  ],
+  "selection": "2024 mean net notional bp, including unchanged baseline; examine2025/2026 separately",
+  "clock": "First surviving5m close >=trigger,execute at that close; no intrabar limit target",
+  "single_variable": "Only exit share size changes; original entries/stops/runner exits/cost frozen",
+  "training_eligible": false,
+  "production_eligible": false
+}
