@@ -3,7 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 import pytest
-from yoyo.evaluation.pepe_range_exits import prepare, replay, scalar, stop_events, entries
+from yoyo.evaluation.pepe_range_exits import prepare, replay, scalar, stop_events, entries, signals
 from yoyo.evaluation.monday_range_entry_diagnostic import load
 
 
@@ -60,6 +60,28 @@ def test_gap_stop_uses_worse_open():
     ctx = context([[100, 100, 100, 100], [97, 100, 96, 99]])
     z = replay(ctx, [[0, 1, 100, 99, 1]], tick=.01)[0]
     assert z[1] == 97 and z[2] == 1
+
+
+def test_tick_touch_is_not_lost_to_binary_float_representation():
+    stop = 2847*1e-9
+    ctx = context([[2.9e-6]*4, [2.88e-6, 2.89e-6, 2.847e-6, 2.85e-6]])
+    z = replay(ctx, [[0, 1, 2.9e-6, stop, 1]])[0]
+    assert z[2] == 1
+
+
+def test_mathematical_k_80_is_not_strictly_overbought():
+    # Registered OKX 15m Aug04 2026 12:00--16:15 UTC, in 1e-9 price units.
+    bars = [[2908,2912,2905,2906],[2906,2907,2898,2902],
+            [2902,2907,2900,2906],[2907,2917,2906,2911],
+            [2911,2911,2899,2901],[2901,2901,2886,2890],
+            [2889,2899,2888,2894],[2893,2907,2891,2904],
+            [2904,2904,2882,2888],[2887,2888,2868,2883],
+            [2882,2884,2865,2875],[2875,2889,2873,2885],
+            [2884,2890,2882,2885],[2886,2895,2885,2893],
+            [2893,2895,2877,2883],[2883,2908,2883,2907],
+            [2907,2912,2902,2903],[2903,2906,2897,2901]]
+    f = pd.DataFrame(np.array(bars)*1e-9, columns=["open","high","low","close"])
+    assert signals(f).iloc[-1] == 0
 
 
 def test_native_recent_ten_trades_match_existing_tradingview_evidence():

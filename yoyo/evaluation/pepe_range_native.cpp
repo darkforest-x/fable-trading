@@ -17,14 +17,15 @@ extern "C" void replay(
     target = (side == 1 ? std::ceil(target/tick - 1e-8)
                         : std::floor(target/tick + 1e-8)) * tick;
     double peak = 0, exit_price = entry;
+    const double eps = tick * 1e-7;
     int armed = -1, exit_i = last, reason = 0, ambiguous = 0, steps = 0;
     for (int j = first + 1; j <= last; ++j) {
       ++steps;
       double o = bars[j*4], h = bars[j*4+1], l = bars[j*4+2], c = bars[j*4+3];
-      bool stop_hit = side == 1 ? l <= stop : h >= stop;
-      bool target_hit = target_r > 0 && (side == 1 ? h >= target : l <= target);
-      bool stop_gap = side == 1 ? o < stop : o > stop;
-      bool target_gap = target_r > 0 && side * (o - target) >= 0;
+      bool stop_hit = side == 1 ? l <= stop+eps : h >= stop-eps;
+      bool target_hit = target_r > 0 && (side == 1 ? h >= target-eps : l <= target+eps);
+      bool stop_gap = side == 1 ? o < stop-eps : o > stop+eps;
+      bool target_gap = target_r > 0 && side * (o - target) >= -eps;
       if (stop_hit && target_hit && !stop_gap && !target_gap) ++ambiguous;
       if (stop_gap || (stop_hit && !target_gap)) {
         exit_price = side == 1 ? std::min(o, stop) : std::max(o, stop);

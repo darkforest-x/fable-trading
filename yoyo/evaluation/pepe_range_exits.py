@@ -17,11 +17,26 @@ import subprocess
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.monday_range_v2_2_reference import signals, atr
+from yoyo.evaluation.monday_range_v2_2_reference import atr
 from yoyo.evaluation.pepe_range_data import EXP, validate
 
 ROOT = Path(__file__).resolve().parents[2]
 CPP = ROOT / "yoyo/evaluation/pepe_range_native.cpp"
+
+
+def signals(frame):
+    """Stoch5/3/3 with decimal-noise normalization at strict 20/80 boundaries.
+
+    Native PEPE Aug04 16:15 UTC has mathematical K=80, whereas subtracting
+    micro-price floats yields 80.0000000000001 in pandas. Ten decimal places
+    remove this arithmetic artifact; they are not an optimized threshold.
+    """
+    lo, hi = frame.low.rolling(5).min(), frame.high.rolling(5).max()
+    k = (100*(frame.close-lo)/(hi-lo)).rolling(3).mean().round(10)
+    d = k.rolling(3).mean().round(10)
+    bull = (k > d) & (k.shift() <= d.shift()) & (k < 20) & (d < 20)
+    bear = (k < d) & (k.shift() >= d.shift()) & (k > 80) & (d > 80)
+    return bull.astype(int)-bear.astype(int)
 
 
 def aggregate(five, minutes):
@@ -94,9 +109,10 @@ def scalar(ctx, event, target=0., arm=5., multiple=4., tick=1e-9):
         steps += 1
         o, h, l, c = ctx["bars"][j]
         adverse, favorable = (l, h) if side == 1 else (h, l)
-        stop_hit, gap = side*(adverse-stop) <= 0, side*(o-stop) < 0
-        tp_hit = target > 0 and side*(favorable-ceiling) >= 0
-        tp_gap = target > 0 and side*(o-ceiling) >= 0
+        eps = tick*1e-7
+        stop_hit, gap = side*(adverse-stop) <= eps, side*(o-stop) < -eps
+        tp_hit = target > 0 and side*(favorable-ceiling) >= -eps
+        tp_gap = target > 0 and side*(o-ceiling) >= -eps
         ambiguous += int(stop_hit and tp_hit and not gap and not tp_gap)
         if gap or (stop_hit and not tp_gap):
             price, reason, exit_i = (o if gap else stop), (2 if activated >= 0 else 1), j
@@ -237,6 +253,12 @@ def study(ctx, cfg):
                         np.testing.assert_allclose(z[probe], check, rtol=1e-11, atol=1e-9)
                         audit_n += 1
                     ledger = result_frame(base, z, cfg)
+                    exit_indices = z[:, 0].astype(int)
+                    exit_times = index[exit_indices]
+                    gaps = np.isin(z[:, 2], [1, 2]) & (base.side.to_numpy() *
+                            (ctx["bars"][exit_indices, 0]-z[:, 5]) < -cfg["tick"]*1e-7)
+                    exit_times = exit_times-pd.to_timedelta(gaps.astype(int)*5, unit="min")
+                    ledger["exit_time"] = exit_times.astype(str)
                     ledger["path"] = f"w{w}_b{b:g}_{policy}"
                     ledger["population"] = population
                     records.append(ledger)

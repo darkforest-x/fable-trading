@@ -51,7 +51,7 @@ def main():
     observed = stamps[ctx["observed"][base.entry_i.to_numpy(int)]]
     exits = result[:, 0].astype(int)
     ended = stamps[exits].copy()
-    gap = np.isin(result[:, 2], [1, 2]) & (base.side.to_numpy()*(ctx["bars"][exits, 0]-result[:, 5]) < 0)
+    gap = np.isin(result[:, 2], [1, 2]) & (base.side.to_numpy()*(ctx["bars"][exits, 0]-result[:, 5]) < -1e-16)
     ended[gap] -= 300000
     ended[result[:, 2] == 0] = 0
     weights = np.arange(1, len(base)+1)
