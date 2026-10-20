@@ -1,0 +1,30 @@
+// Temporary native acceptance probe; never deliver this appendix.
+var int qaFirstBar = time
+var int qaMondayCount = 0
+var int qaSignals = 0
+var float qaTimeSig = 0
+var float qaPriceSig = 0
+if newMonday
+    qaMondayCount += 1
+if time >= timestamp("UTC", 2026, 10, 1, 0, 0) and time_close <= timestamp("UTC", 2026, 10, 19, 0, 0) and (fs_signalLong or fs_signalShort)
+    qaSignals += 1
+    qaTimeSig += qaSignals * (time / 60000 + (fs_signalLong ? 1 : -1))
+    qaPriceSig += qaSignals * close / syminfo.mintick
+varip bool qaLogged = false
+if barstate.islast and not qaLogged
+    int missing = 0
+    for id in highLines
+        missing += line.all.includes(id) ? 0 : 1
+    for id in lowLines
+        missing += line.all.includes(id) ? 0 : 1
+    for id in highLabels
+        missing += label.all.includes(id) ? 0 : 1
+    for id in lowLabels
+        missing += label.all.includes(id) ? 0 : 1
+    log.info("QA_RANGE tf={0} tx={1} source={2} seen={3} stored={4} visible={5} drawn={6} firstStored={7} firstDrawn={8} lines={9} labels={10} missing={11} fib={12} signals={13} timeSig={14} priceSig={15}",
+         timeframe.main_period, txEnabled, str.format_time(qaFirstBar, "yyyy-MM-dd", "Asia/Shanghai"),
+         qaMondayCount, mondayHistory.size(), rangeVisibleTotal, rangeDrawnTotal,
+         mondayHistory.size() > 0 ? str.format_time(mondayHistory.first().startAt, "yyyy-MM-dd", "Asia/Shanghai") : "na",
+         highLines.size() > 0 ? str.format_time(highLines.first().get_x1(), "yyyy-MM-dd HH:mm", "Asia/Shanghai") : "na",
+         line.all.size(), label.all.size(), missing, histFibLines.size(), qaSignals, qaTimeSig, qaPriceSig)
+    qaLogged := true
