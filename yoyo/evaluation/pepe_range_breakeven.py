@@ -39,7 +39,21 @@ def native():
         ctypes.c_double,ctypes.c_double,ctypes.c_double,ctypes.c_double,
         ctypes.c_double,ctypes.c_int,ctypes.c_double,ctypes.c_int,array]
     lib.replay_search.restype = None
+    lib.replay_timed.argtypes = [array,array,array,array,array,ctypes.c_int,
+        ctypes.c_double,ctypes.c_double,ctypes.c_int,array]
+    lib.replay_timed.restype = None
     return lib
+
+
+def replay_timed(ctx, events, *, delay=25, cost=.002, tick=.01, lib=None):
+    """Delay is in execution bars; BE checks only the supplied 5m close clock."""
+    lib = native() if lib is None else lib
+    events = np.ascontiguousarray(events,dtype=float)
+    output = np.empty((len(events),13),dtype=float)
+    lib.replay_timed(ctx["bars"],ctx["atr"],ctx["hour"],
+        np.ascontiguousarray(ctx["be_clock"],dtype=float),events,len(events),
+        cost,tick,delay,output)
+    return output
 
 
 def replay_search(ctx, events, *, cost=.002, tick=.01, arm_r=5.,

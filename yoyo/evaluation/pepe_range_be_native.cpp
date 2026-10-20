@@ -8,7 +8,7 @@ static void replay_core(
     const double* events, int count, int mode, double cost, double tick,
     double arm_r, double atr_multiple, double be_r, bool reverse_exit,
     double target_r, bool stop_first,
-    double* output) {
+    double* output, int time_delay = 0, const double* be_clock = nullptr) {
   for (int e = 0; e < count; ++e) {
     const double* ev = events + e * 5;
     int first = static_cast<int>(ev[0]), side = static_cast<int>(ev[1]);
@@ -50,6 +50,15 @@ static void replay_core(
         break;
       }
       peak = std::max(peak, side*(favorable-entry)/risk);
+      if (time_delay > 0 && be_clock[j] > 0) {
+        if (be_trigger < 0 && j-first >= time_delay) be_trigger = j;
+        if (be_trigger >= 0 && be_i < 0) {
+          if (side*(c-be_price) >= tick-eps) {
+            be_i = j;
+            if (side*(be_price-stop) > eps) { stop=be_price; stop_kind=1; }
+          } else { ++deferred; }
+        }
+      }
       if (std::isfinite(atr[j]) && atr[j] > 0) {
         bool beyond5 = mode == 0 ? side*(c-entry)/risk >= arm_r
                                 : side*(c-entry) >= arm_r*risk-eps;
@@ -101,4 +110,12 @@ extern "C" void replay_search(
     double target_r, int stop_first, double* output) {
   replay_core(bars,atr,hour,events,count,1,cost,tick,arm_r,atr_multiple,
               be_r,reverse_exit,target_r,stop_first,output);
+}
+
+extern "C" void replay_timed(
+    const double* bars, const double* atr, const double* hour,
+    const double* be_clock, const double* events, int count,
+    double cost, double tick, int delay, double* output) {
+  replay_core(bars,atr,hour,events,count,1,cost,tick,5.,4.,
+              -1.,true,0.,false,output,delay,be_clock);
 }

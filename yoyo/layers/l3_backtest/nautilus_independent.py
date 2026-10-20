@@ -58,8 +58,19 @@ class ExitPolicy:
     partial_close_r: float | None = None
     partial_fraction: float = .5
     fixed_target_r: float | None = None
+    time_breakeven_minutes: int | None = None
+    rsi_scaleout: bool = False
 
     def __post_init__(self):
+        if self.time_breakeven_minutes is not None:
+            if (not isinstance(self.time_breakeven_minutes, int)
+                    or self.time_breakeven_minutes <= 0
+                    or self.time_breakeven_minutes % 5):
+                raise ValueError("Timed BE must be a positive whole number of 5m bars")
+            if self.breakeven_r is not None:
+                raise ValueError("Time and R breakeven triggers cannot be combined")
+        if self.rsi_scaleout and (self.partial_close_r is not None or self.fixed_target_r is not None):
+            raise ValueError("RSI reductions cannot combine with other partial/target policies")
         values = [self.trail_arm_r, self.trail_atr_multiple]
         if self.breakeven_r is not None:
             values.append(self.breakeven_r)
@@ -135,13 +146,17 @@ class TradeState:
     partial_i: int = -1
     partial_price: float = float("nan")
     partial_weight: float = 0.
+    rsi_count: int = 0
+    rsi_first_i: int = -1
+    rsi_skipped: int = 0
 
     def __post_init__(self):
         self.remaining = int(self.quantity)
 
 
 class IndependentCloseStrategy(Strategy):
-    def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees, protection_tick):
+    def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees,
+                 protection_tick, execution_minutes=5, rsi_side=None):
         super().__init__(StrategyConfig(
             oms_type="HEDGING", log_events=False, log_commands=False,
         ))
@@ -150,6 +165,9 @@ class IndependentCloseStrategy(Strategy):
         self.frame = frame
         self.prices = frame[["open", "high", "low", "close"]].to_numpy()
         self.atr, self.hour = np.asarray(atr), np.asarray(hour)
+        self.execution_minutes = execution_minutes
+        self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
+        self.be_clock = frame.index.minute % 5 == 0
         self.policy, self.fees = policy, fees
         self.tick = protection_tick
         self.eps = self.tick * 1e-7
@@ -236,6 +254,18 @@ class IndependentCloseStrategy(Strategy):
             self._submit_target(state)
             return
         state.remaining -= int(event.last_qty)
+        if phase == "rsi_partial":
+            if state.rsi_count >= 5 or state.remaining < 0:
+                raise RuntimeError("RSI reductions exceeded the original position")
+            if abs(price-self.prices[i, 3]) > self.eps:
+                raise RuntimeError("RSI reduction did not fill at the confirmed close")
+            state.rsi_count += 1
+            if state.rsi_first_i < 0:
+                state.rsi_first_i = i
+            if state.remaining > 0:
+                self._submit_protective_stop(state)
+                return
+            phase = 6
         if phase == "partial":
             if state.partial_i >= 0 or state.remaining <= 0:
                 raise RuntimeError("Duplicate partial or exhausted runner")
@@ -264,6 +294,9 @@ class IndependentCloseStrategy(Strategy):
         if state.partial_i >= 0:
             gross = (state.partial_weight*side*(state.partial_price-entry)/risk
                      + (1-state.partial_weight)*gross)
+        if self.policy.rsi_scaleout:
+            gross = sum(f["quantity"]*side*(f["price"]-entry)/risk
+                        for f in state.fills if f["phase"] != "entry")/float(state.quantity)
         # Native bar events carry close timestamps. Preserve a separate logical
         # open timestamp for gap exits without pretending intrabar time is known.
         gap = phase == "stop" and side*(self.prices[i, 0]-state.stop) < -self.eps
@@ -280,7 +313,7 @@ class IndependentCloseStrategy(Strategy):
             fee_r=self.policy.round_trip_cost*entry/risk,
             net_r=gross-self.policy.round_trip_cost*entry/risk,
             net_notional_bp=(gross*risk/entry-self.policy.round_trip_cost)*10000,
-            exit_time=str(self.frame.index[i]-pd.Timedelta(minutes=5 if gap else 0)),
+            exit_time=str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes if gap else 0)),
             framework_exit_time=str(self.frame.index[i]),
             framework_position_id=str(event.position_id),
             framework_commission=state.fees, quantity=float(state.quantity),
@@ -290,6 +323,11 @@ class IndependentCloseStrategy(Strategy):
                        partial_weight=state.partial_weight,
                        partial_time=str(self.frame.index[state.partial_i])
                        if state.partial_i >= 0 else "",
+                       runner_gross_r=side*(price-entry)/risk)
+        if self.policy.rsi_scaleout:
+            row.update(rsi_partial_count=state.rsi_count,rsi_first_i=state.rsi_first_i,
+                       rsi_skipped_unprofitable=state.rsi_skipped,
+                       rsi_realized_weight=state.rsi_count/5,
                        runner_gross_r=side*(price-entry)/risk)
         self.rows.append(row)
         del self.active[row["trade_id"]]
@@ -318,6 +356,17 @@ class IndependentCloseStrategy(Strategy):
             entry, side, risk = row["entry"], row["side"], row["risk"]
             state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             old_stop = state.stop
+            if p.time_breakeven_minutes is not None and self.be_clock[i]:
+                elapsed=(i-int(row["entry_i"]))*self.execution_minutes
+                if state.be_trigger_i < 0 and elapsed >= p.time_breakeven_minutes:
+                    state.be_trigger_i = i
+                if state.be_trigger_i >= 0 and state.be_effective_i < 0:
+                    if side*(close-state.be_price)+self.eps >= self.tick:
+                        state.be_effective_i = i
+                        if side*(state.be_price-state.stop) > self.eps:
+                            state.stop,state.stop_kind=state.be_price,1
+                    else:
+                        state.deferred += 1
             if quarter:
                 move = side*(close-entry)
                 if p.fixed_target_r is None and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
@@ -342,6 +391,18 @@ class IndependentCloseStrategy(Strategy):
                 self.cancel_order(state.stop_order)
                 self._cancel_target(state)
                 self._market(state, reason=3 if reverse else 0)
+            elif p.rsi_scaleout and self.rsi_side[i] == -side:
+                # Reduce one fifth of ORIGINAL units, only at a fee-positive
+                # opposite strong-diamond close. Losing events consume no slot.
+                if side*(close-entry)-p.round_trip_cost*entry > self.eps:
+                    self.cancel_order(state.stop_order)
+                    self._market(state, reason="rsi_partial",
+                                 quantity=min(int(state.quantity)//5,state.remaining))
+                else:
+                    state.rsi_skipped += 1
+                    if abs(state.stop-old_stop) > self.eps:
+                        self.modify_order(state.stop_order,
+                                          trigger_price=self.instrument.make_price(state.stop))
             elif (p.partial_close_r is not None and state.partial_i < 0
                   and side*(close-entry)+self.eps >= p.partial_close_r*risk):
                 # Old resting stops win before on_bar; terminal close exits
@@ -361,6 +422,8 @@ class IndependentCloseStrategy(Strategy):
             if p.partial_close_r is not None:
                 denominator = Fraction(str(p.partial_fraction)).denominator
                 units = ((units+denominator-1)//denominator)*denominator
+            if p.rsi_scaleout:
+                units = ((units+4)//5)*5
             state = TradeState(
                 row, PositionId(row["trade_id"]),
                 # Research returns are normalized independently of order size.
@@ -374,7 +437,8 @@ class IndependentCloseStrategy(Strategy):
         self.hedged_bars += int({s.source["side"] for s in self.active.values()} == {-1, 1})
 
 
-def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None):
+def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
+               *, execution_minutes=5, rsi_side=None):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
@@ -383,6 +447,12 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     No future excursion or expected-exit fields are read by the strategy.
     """
     started = time.perf_counter()
+    if execution_minutes not in (1,5):
+        raise ValueError("Execution resolution must be 1m or 5m")
+    if policy.rsi_scaleout:
+        if (rsi_side is None or len(rsi_side)!=len(frame)
+                or not np.isin(rsi_side,[-1,0,1]).all()):
+            raise ValueError("RSI policy requires aligned confirmed side events")
     if nautilus_trader.__version__ != ENGINE_VERSION:
         raise RuntimeError(f"Expected Nautilus {ENGINE_VERSION}; revalidate before upgrading")
     if frame.empty or not frame.index.is_monotonic_increasing or frame.index.has_duplicates:
@@ -437,9 +507,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             liquidity_consumption=False,
         )
         engine.add_instrument(instrument)
-        bar_type = BarType.from_str(f"{instrument.id}-5-MINUTE-LAST-EXTERNAL")
+        bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
         strategy = IndependentCloseStrategy(
             instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
+            execution_minutes,rsi_side,
         )
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
@@ -461,7 +532,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if policy.fixed_target_r is not None and engine.cache.orders_open():
             raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None or policy.fixed_target_r is not None:
+        if policy.partial_close_r is not None or policy.fixed_target_r is not None or policy.rsi_scaleout:
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
@@ -477,6 +548,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             fixed_target_execution="resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup" if policy.fixed_target_r is not None else "disabled",
             native_fixed_target_accounting_checked=len(rows) if policy.fixed_target_r is not None else 0,
             positions=len(positions), fills=len(fills),
+            execution_minutes=execution_minutes,
+            rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
+            timed_be_minutes=policy.time_breakeven_minutes,
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,
             prepare_seconds=prepared-started,
