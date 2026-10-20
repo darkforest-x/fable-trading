@@ -8,13 +8,21 @@ import re
 import subprocess
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.pepe_range_data import EXP
-from yoyo.evaluation.pepe_range_exits import load_context, aggregate, stop_events, replay
+from yoyo.evaluation.pepe_range_data import EXP, validate
+from yoyo.evaluation.pepe_range_exits import load_context, aggregate, stop_events, replay, prepare
 from yoyo.evaluation.monday_range_entry_diagnostic import load
 
 
 def main():
-    ctx = load_context()
+    if (EXP/"inputs"/"okx_pepe_5m.csv.gz").exists():
+        ctx = load_context()
+    else:
+        # Current-year source is complete while older native repairs may run.
+        paths = sorted((EXP/"inputs").glob("okx_PEPE_USDT_SWAP_5m_2026-*.csv"))
+        recent = validate(pd.concat([pd.read_csv(p) for p in paths], ignore_index=True))
+        assert (recent.ts.diff().dropna() == 300000).all()
+        recent.index = pd.to_datetime(recent.ts, unit="ms", utc=True)+pd.Timedelta(minutes=5)
+        ctx = prepare(recent)
     frame = ctx["frame"]
     checks = []
     for tf, width in [("5m", 5), ("15m", 15), ("1H", 60)]:
@@ -66,6 +74,7 @@ def main():
                    recovered_signature=got, native_signature=expected,
                    source_start_utc=str(frame.index[first]-pd.Timedelta(minutes=5)),
                    through_utc=str(frame.index[last]),
+                   input_audit_start_utc=str(frame.index[0]),
                    builder_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip())
     (EXP/"parity_receipt.json").write_text(json.dumps(receipt, indent=2)+"\n")
     print(json.dumps(receipt, indent=2))
