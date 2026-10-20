@@ -1,7 +1,8 @@
 """Frozen cross-coin research and native preview, using existing local inputs.
 
-Read confirmed-month OKX 1m archives and confirmed public-API extensions; require
-unique continuous minutes before complete 5m aggregation. No fetching or hashing.
+Read confirmed-month OKX 1m archives and confirmed public-API extensions, or
+explicitly configured Binance native 5m sources; retain exchange identity.
+Require complete continuous bars. No fetching or hashing.
 Features are computed only from completed 5m/15m/H1 candles by the existing
 preparer. Controls match each symbol, side, UTC week, segment and causal ATR bucket.
 Changing the symbol is the only new strategy comparison; baseline and BE3 are
@@ -53,6 +54,23 @@ def aggregate_minutes(data, start, end):
 
 
 def load_symbol(symbol, cfg):
+    if symbol in cfg.get("native_5m_sources", {}):
+        from yoyo.evaluation.pepe_range_data import validate
+        spec = cfg["native_5m_sources"][symbol]
+        paths = [ROOT/p for p in spec["paths"]]
+        start = int(pd.Timestamp(cfg["warmup"]).timestamp()*1000)
+        end = int(pd.Timestamp(cfg["end"]).timestamp()*1000)
+        parts = []
+        for path in paths:
+            part = pd.read_csv(path, float_precision="round_trip",
+                               usecols=["ts", "open", "high", "low", "close"])
+            parts.append(part[(part.ts >= start) & (part.ts < end)])
+        # Exact duplicates are benign; overlapping conflicting OHLC is not.
+        frame = validate(pd.concat(parts, ignore_index=True))
+        if not np.isfinite(frame.to_numpy()).all() or not np.array_equal(
+                frame.ts.to_numpy(), np.arange(start, end, 300_000)):
+            raise ValueError("Native 5m source has missing/invalid candles")
+        return frame, [file_stamp(p) for p in paths + [ROOT/p for p in spec["receipts"]]]
     if symbol == "PEPE":
         frame = pd.read_csv(PEPE, float_precision="round_trip")
         ts = pd.to_datetime(frame.ts, unit="ms", utc=True)
@@ -88,19 +106,36 @@ def make_preview():
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--preview-only", action="store_true")
+    parser.add_argument("--config", type=Path, default=EXP/"config.json")
     args = parser.parse_args()
     if subprocess.run(["git", "diff", "--quiet", "HEAD", "--", *CODE], cwd=ROOT).returncode:
         raise RuntimeError("Commit builder before generating")
-    print(json.dumps(make_preview(), ensure_ascii=False), flush=True)
     if args.preview_only:
+        print(json.dumps(make_preview(), ensure_ascii=False), flush=True)
         return
-    cfg = json.loads((EXP / "config.json").read_text())
+    config_file = args.config.resolve()
+    destination = config_file.parent
+    cfg = json.loads(config_file.read_text())
+    if destination == EXP:
+        print(json.dumps(make_preview(), ensure_ascii=False), flush=True)
     started = time.perf_counter()
-    summary, tests, paths = [], [], []
+    summary, tests, paths, runs = [], [], [], []
     for symbol, ticks in cfg["symbols"].items():
-        work = EXP / symbol.lower()
-        work.mkdir(exist_ok=True)
-        config_path = work / "config.json"
+        reuse = cfg.get("reuse_configs", {}).get(symbol)
+        if reuse:
+            config_path = ROOT/reuse
+            work = config_path.parent
+            old_study = json.loads((work.parent/"config.json").read_text())
+            for key in ("warmup", "start", "splits", "end", "windows_5m",
+                        "seed", "volatility_edges", "policies"):
+                if cfg[key] != old_study[key]:
+                    raise ValueError(f"Cannot reuse different study {key}")
+            if ticks != old_study["symbols"][symbol]:
+                raise ValueError("Cannot reuse different precision")
+        else:
+            work = destination / symbol.lower()
+            work.mkdir(exist_ok=True)
+            config_path = work / "config.json"
         if not config_path.exists():
             five, sources = load_symbol(symbol, cfg)
             five.to_csv(work / "candles.csv.gz", index=False)
@@ -117,9 +152,11 @@ def main():
                 symbol=symbol, rows=len(five), sources=sources, signals=len(signal),
                 controls=len(control), unmatched_ids=unmatched,
                 start=cfg["start"], end=cfg["end"], warmup=cfg["warmup"],
+                venue=cfg.get("venues", {}).get(symbol, "OKX"),
                 source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-                confirmation="Existing monthly audit: all 1 from Aug2024; extension confirm_only. "
-                             "PEPE uses prior repaired native 5m receipt.",
+                confirmation=cfg.get("native_5m_sources", {}).get(symbol, {}).get(
+                    "confirmation", "Existing monthly audit: all 1 from Aug2024; extension confirm_only. "
+                                    "PEPE uses prior repaired native 5m receipt."),
             ))
             native = dict(
                 schema=1, experiment_id=cfg["experiment_id"], engine="nautilus",
@@ -131,6 +168,8 @@ def main():
             )
             dump(config_path, native)
         result = run(config_path)
+        runs.append(dict(symbol=symbol, cached=result["cached"],
+                         elapsed_seconds=result["elapsed_seconds"], config=str(config_path)))
         for policy in result["results"]:
             rows = pd.read_csv(work/"results"/policy["name"]/"trades.csv")
             for segment in (-1, 0, 1, 2):
@@ -145,19 +184,21 @@ def main():
                     if stats["segment"] == segment:
                         group = ss if stats["population"] == "signal" else rr
                         summary.append(dict(
-                            symbol=symbol, policy=policy["name"], **stats,
+                            symbol=symbol, venue=cfg.get("venues", {}).get(symbol, "OKX"),
+                            policy=policy["name"], **stats,
                             max_peak_r=float(group.peak_r.max()), max_gross_r=float(group.gross_r.max()),
                             mean_fee_r=float(group.fee_r.mean()),
                             peak_10r=int((group.peak_r >= 10).sum()),
                             peak_20r=int((group.peak_r >= 20).sum()),
                         ))
             paths.append(str(work/"results"/policy["name"]/"trades.csv"))
-    pd.DataFrame(summary).to_csv(EXP/"summary.csv", index=False)
-    dump(EXP/"inference.json", tests)
-    dump(EXP/"receipt.json", dict(
+    pd.DataFrame(summary).to_csv(destination/"summary.csv", index=False)
+    dump(destination/"inference.json", tests)
+    dump(destination/"receipt.json", dict(
         experiment_id=cfg["experiment_id"], elapsed_seconds=time.perf_counter()-started,
         source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-        generated_at=pd.Timestamp.now(tz="UTC").isoformat(), ledgers=paths,
+        generated_at=pd.Timestamp.now(tz="UTC").isoformat(), ledgers=paths, runs=runs,
+        venues=cfg.get("venues", {}),
         training_eligible=False, production_eligible=False,
         limitations="Independent overlapping R, not account returns. Frozen 20bp entry-notional cost; "
                     "no funding/spread/latency. Nominal weekly inference, no parameter selection. "

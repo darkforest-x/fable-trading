@@ -1,0 +1,40 @@
+{
+  "experiment_id": "exp-range-multicoin-20261020-v2",
+  "warmup": "2024-08-01T00:00:00Z",
+  "start": "2024-08-02T00:00:00Z",
+  "splits": ["2025-01-01T00:00:00Z", "2026-01-01T00:00:00Z"],
+  "end": "2026-09-22T14:00:00Z",
+  "windows_5m": [5],
+  "seed": 20261020,
+  "volatility_edges": [0.001, 0.002, 0.004, 0.008, 0.016],
+  "symbols": {
+    "BTC": {"tick": 0.1, "market_tick": 0.1},
+    "ETH": {"tick": 0.01, "market_tick": 0.01},
+    "PEPE": {"tick": 1e-9, "market_tick": 1e-10},
+    "ZEC": {"tick": 0.01, "market_tick": 0.01}
+  },
+  "venues": {"BTC": "OKX", "ETH": "OKX", "PEPE": "OKX", "ZEC": "Binance"},
+  "reuse_configs": {
+    "BTC": "experiments/active/exp-range-multicoin-20261020-v1/btc/config.json",
+    "ETH": "experiments/active/exp-range-multicoin-20261020-v1/eth/config.json",
+    "PEPE": "experiments/active/exp-range-multicoin-20261020-v1/pepe/config.json"
+  },
+  "native_5m_sources": {
+    "ZEC": {
+      "paths": [
+        "data/crypto/market/kline_preholdout_binance_um5m/series/binance_um_ZECUSDT_5m_654240.csv",
+        "data/crypto/market/research-spike_v128_recent_20260923/series/ZECUSDT.csv.gz"
+      ],
+      "receipts": [
+        "data/crypto/market/kline_preholdout_binance_um5m/audits/ZECUSDT.json",
+        "data/crypto/market/research-spike_v128_recent_20260923/audits/ZECUSDT.json",
+        "data/crypto/market/kline_preholdout_binance_um5m/exchange_info.json"
+      ],
+      "confirmation": "Existing Binance native 5m monthly archives and completed REST extension, status complete. Exact OHLC overlap equality and full expected 5m grid required. No hash checks. Tick 0.01 from archived Binance exchange_info."
+    }
+  },
+  "policies": [
+    {"name": "baseline", "trail_arm_r": 5, "trail_atr_multiple": 4, "breakeven_r": null, "opposite_hour_exit": true},
+    {"name": "be3", "trail_arm_r": 5, "trail_atr_multiple": 4, "breakeven_r": 3, "opposite_hour_exit": true}
+  ]
+}

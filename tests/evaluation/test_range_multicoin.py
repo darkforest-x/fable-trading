@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.range_multicoin import aggregate_minutes
+from yoyo.evaluation.range_multicoin import aggregate_minutes, load_symbol
 from yoyo.evaluation.range_native_preview import native_view
 
 
@@ -36,3 +36,21 @@ def test_native_chart_preserves_side_time_and_micro_price():
     assert view._fills.action.tolist() == ["开空", "平空"]
     np.testing.assert_array_equal(view._fills.last_px, fills.price)
     assert view._fills.ts_init.tolist() == [bar["ts_init"] for bar in view._bars]
+
+
+def test_native_sources_require_agreement_and_full_coverage(tmp_path):
+    five = aggregate_minutes(minutes(), "2025-01-01T00:00Z", "2025-01-01T00:10Z")
+    a, b = tmp_path/"a.csv", tmp_path/"b.csv"
+    five.to_csv(a, index=False)
+    five.iloc[[1]].to_csv(b, index=False)
+    cfg = dict(warmup="2025-01-01T00:00Z", end="2025-01-01T00:10Z",
+               native_5m_sources={"ZEC": {"paths": [str(a), str(b)], "receipts": []}})
+    merged, _ = load_symbol("ZEC", cfg)
+    assert len(merged) == 2
+    five.loc[1, "close"] = 2.8
+    five.iloc[[1]].to_csv(b, index=False)
+    with pytest.raises(ValueError, match="conflicting duplicate"):
+        load_symbol("ZEC", cfg)
+    cfg["native_5m_sources"]["ZEC"]["paths"] = [str(b)]
+    with pytest.raises(ValueError, match="missing"):
+        load_symbol("ZEC", cfg)
