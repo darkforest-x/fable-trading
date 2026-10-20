@@ -301,6 +301,9 @@ def analyze(config):
                 metric=summary(p)
                 metric.update(mean_net_bp=float(p.net_notional_bp.mean()),
                     cash_r_drawdown=drawdown(money.groupby("ts_ns").cash_r.sum().sort_index()),
+                    near_zero_n=int(p.net_r.abs().le(.01).sum()),
+                    tiny_positive_n=int((p.net_r.gt(1e-9)&p.net_r.le(.01)).sum()),
+                    net_above_0p1r_rate=float(p.net_r.gt(.1).mean()),
                     rsi_reduced_n=int(p.rsi_partial_count.gt(0).sum()) if "rsi_partial_count" in p else 0,
                     rsi_fully_exited_n=int(p.reason.eq(6).sum()),
                     time_be_eligible_n=int(p.be_trigger_i.ge(0).sum()),
@@ -339,6 +342,8 @@ def analyze(config):
     dump(folder/"attribution.json",attribution)
     dump(folder/"analysis_receipt.json",dict(development_2024=selected,
         descriptive_full=best,arms=len(cfg["arms"]),no_new_holdout_claim=True,
+        diagnostic_only_thresholds=dict(near_zero_r=.01,material_positive_r=.1),
+        source_commit=subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),
         production_eligible=False,training_eligible=False,no_pine_change=True))
     print(full[["arm","net_r","win_rate","gross_20r"]].to_json(orient="records"),flush=True)
 
