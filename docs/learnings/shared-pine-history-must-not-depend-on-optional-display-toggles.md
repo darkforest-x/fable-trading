@@ -5,3 +5,5 @@
 - **有效路径**：V2.12 保留 V2.11 源码，将关键价位的两个请求分支固定为 12000 根，与其他 15m 模块一致。20 项本地检查通过，逐条可执行语句比较确认只改版本和这两个请求参数。另备原生探针，比较交易参考开关前后覆盖起点、首个保留周一区间与固定时间窗信号签名。TradingView 编辑器持续加载，重载后图表也未加载完成，因此尚未保存新私有脚本或宣称原生修复成功。
 - **通用规则**：多模块共用时间周期时统一盘点全部请求预算；可选模块的关闭不应减少常驻模块的历史预算。覆盖扩展用修改前后原生数据起点及共同时间窗事件验证；请求上限不保证平台一定提供该长度。
 - **牵连**：`yoyo/evaluation/pine/monday_range_v2_12.pine`、`tests/evaluation/test_monday_range_v2_12.py`、`tests/evaluation/monday_range_v2_12_native_checks.pine`。既有原生证据见 [共享请求历史教训](pine-shared-request-history-needs-independent-event-parity.md)。本次工程修改不构成收益研究或实盘授权。
+
+收尾补充：重载数分钟后 BTC15m 图表恢复，但 Pine 编辑器仍停在加载动画；已收起编辑器，图上仍为 V2.11。原生验收状态不变。

@@ -12,7 +12,7 @@
   },
   "native_validation": {
     "completed": false,
-    "reason": "TradingView Pine editor remained loading; current chart tab reload also remained loading. No source was pasted or saved in TradingView.",
+    "reason": "Chart eventually returned after tab reload; Pine editor still showed a loading spinner. Editor closed at cleanup. No source was pasted or saved in TradingView.",
     "planned": [
       "BTCUSDT.P 15m old/new source coverage and common-window signal parity",
       "V2.12 trade-reference off/on shared history coverage",
@@ -30,5 +30,11 @@
     "12000 requested 15m bars is not a guarantee of available TradingView history",
     "Reported September 17 cutoff is not yet natively reproduced",
     "Ray retention remains 100 by default and 200 maximum; range retention remains 12 weeks by default"
-  ]
+  ],
+  "final_chart": {
+    "symbol": "OKX:BTCUSDT.P",
+    "timeframe": "15m",
+    "indicator": "V2.11",
+    "editor_closed": true
+  }
 }
