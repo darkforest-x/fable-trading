@@ -1,0 +1,71 @@
+{
+  "version": "2.0",
+  "date": "2026-10-20",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_0.pine",
+  "source_commit": "ee09f2d01224e7d75c54639f0d66ee5f3fd7eb3e",
+  "source_bases": [
+    "yoyo/evaluation/pine/monday_range_v1_8.pine",
+    "yoyo/evaluation/pine/owner_fanshen_v1_1.pine"
+  ],
+  "scope": "Display composition only; original formulas, parameters, intrabar signals and existing alert conditions preserved.",
+  "source_checks": {
+    "version": "2.0",
+    "source_path": "yoyo/evaluation/pine/monday_range_v2_0.pine",
+    "range_source": "yoyo/evaluation/pine/monday_range_v1_8.pine",
+    "fanshen_source": "yoyo/evaluation/pine/owner_fanshen_v1_1.pine",
+    "range_exact_reverse_parity": true,
+    "fanshen_exact_reverse_parity": true,
+    "range_main_pane_constructors": 8,
+    "price_marker_main_pane_plots": 2,
+    "namespaced_variables": 30,
+    "total_lines": 246,
+    "stitch_waiver": "Owner explicit current-turn approval: 本次跳过 Stitch，直接完成合并",
+    "native_validation": "passed: TradingView Desktop revision 1 compiled and added; 5m numerical parity and 1H pane/marker/history display inspected"
+  },
+  "native_validation": {
+    "application": "TradingView Desktop",
+    "script_name": "周一高低点区间＋翻身 · V2.0",
+    "saved_revision": 1,
+    "saved_at": "2026-10-20T08:21:47+08:00",
+    "compile_and_add_at": "2026-10-20T08:21:59+08:00",
+    "compiler_console": [
+      "完成。",
+      "已添加到图表。"
+    ],
+    "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+    "symbol": "OKX:ETHUSDT.P",
+    "new_script_private": true,
+    "previous_sources_and_saved_scripts_retained": true,
+    "observations": [
+      "5m: old Fanshen and new V2.0 panes simultaneously displayed equal K, D and WVF values and arrow positions.",
+      "1H: price candles, Monday range rays, current and historical Fib lines remain on the price pane; oscillator scale remains separate.",
+      "1H: green checks below and red crosses above price candles align with the corresponding oscillator arrows.",
+      "Historical Fib labels include 2528.01, 2513.14, 2492.97, 2472.80 and 2457.93; historical range high/low are 2578.44/2407.50 in the captured view.",
+      "Old Monday Range v1.11 chart instance hidden and old Stoch V1.1 chart instance removed to avoid overlap; saved scripts preserved.",
+      "The two previously created fixed-1H close-confirmed check/cross server alerts remained active after the old Stoch chart instance was removed."
+    ],
+    "layout_save": "Not verified: the user resumed interacting with TradingView before the final layout-save action. No further chart actions were attempted after repeated user-change guards.",
+    "last_observed_timeframe": "1H",
+    "temporary_browser_sessions_created": 0,
+    "screenshots": [
+      "output/pine/monday_range_v2_0_compile.png",
+      "output/pine/monday_range_v2_0_1h.png"
+    ],
+    "parity_ax": "output/pine/monday_range_v2_0_parity_ax.txt"
+  },
+  "existing_1h_alerts": {
+    "names": [
+      "ETH 1H 翻身绿勾 ✓｜收盘确认",
+      "ETH 1H 翻身红叉 ×｜收盘确认"
+    ],
+    "snapshot_source": "Fanshen V1.1 main-chart plotchar values crossing above 0.5; one alert per bar close",
+    "expires_at": "2026-12-19T01:44:00+08:00",
+    "note": "Existing server alerts retained, not silently recreated from V2.0 alertcondition. Original long alertcondition includes WVF green, while the green marker does not."
+  },
+  "official_documentation": [
+    "https://www.tradingview.com/pine-script-docs/visuals/overview/",
+    "https://www.tradingview.com/pine-script-docs/language/declaration-statements/"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
