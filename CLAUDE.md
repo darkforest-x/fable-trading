@@ -4,6 +4,8 @@
 
 ## UI 设计先走 Stitch（owner，2026-10-18）
 
+- **Pine 指标例外（owner，2026-10-20）**：Pine/TradingView 指标修改不需要 Stitch，包括勾叉、射线、配色和交易参考框；直接实现并在 TradingView 验证。此例外持续有效。
+
 - Stitch 生成、编辑及变体调用默认显式使用 `modelId="GEMINI_3_8_FLASH"`（owner，2026-10-19）；不使用未指定模型或 Balance 默认项。官方 MCP 当前已提供该模型枚举；若后续不可用，先说明，不静默换模型。
 
 - 后续每次修改界面，先让 Google Stitch 产出设计图和前端代码，再由 Codex 接入本仓；包括页面布局、导航、卡片、配色、字体、间距和响应式调整。不得先改实现再补设计。

@@ -1,0 +1,27 @@
+{
+  "version": "2.3",
+  "completed_at": "2026-10-20T11:54:35.111207+08:00",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_3.pine",
+  "base": "yoyo/evaluation/pine/monday_range_v2_2.pine",
+  "change": "Fixed 1H rays use green #39F340 for bullish checks and red #F23645 for bearish crosses, with separate color inputs.",
+  "source_validation": "Reverse normalization of header/version/color changes produces byte-identical V2.2 source; all signal and trade logic unchanged.",
+  "native_validation": {
+    "script": "周一高低点区间＋翻身 · V2.3",
+    "private": true,
+    "revision": 2,
+    "saved_at": "2026-10-20T11:53:32+08:00",
+    "compiled_and_added_at": "2026-10-20T11:53:42+08:00",
+    "symbol": "OKX:ETHUSDT.P",
+    "timeframe": "1H",
+    "visual": "Green upward rays align with green checks; red downward rays align with red crosses.",
+    "layout_saved": true,
+    "old_source_and_private_script_preserved": true
+  },
+  "evidence": [
+    "output/pine/monday_range_v2_3_final.png",
+    "output/pine/monday_range_v2_3_final_ax.txt"
+  ],
+  "design_process": "Owner clarified Pine indicators do not require Stitch. Exemption recorded in AGENTS.md. Already-dispatched Stitch screen ee774c2836f543f78abfd87cb6819aab completed but was not used.",
+  "training_eligible": false,
+  "production_eligible": false
+}
