@@ -4,9 +4,10 @@
 // Prior source/receipt are retained in output/pine/archive_v2_0_v18_superseded/.
 // V1.11 profile/VA/nPOC/prior-week engine, closed-15m requests and defaults are unchanged.
 // Main-pane visuals use force_overlay; oscillator plots/arrows keep their own pane.
+// Range output precision inherits the symbol; each Fanshen plot keeps two decimals.
 // Owner's Stitch waiver applies to this corrected merge. No trading-rule changes.
 indicator("周一高低点区间＋翻身 · V2.0", shorttitle="区间翻身 V2.0", overlay=false,
-     behind_chart=false, format=format.price, precision=2, max_lines_count=500, max_labels_count=500)
+     behind_chart=false, max_lines_count=500, max_labels_count=500)
 
 // === Monday Range v1.11: unchanged logic, main-pane routing only ============
 string timeGroup = "时间"
@@ -477,8 +478,8 @@ fs_smoothK = input.int(3, title="%K Smoothing", minval=1)
 fs_periodD = input.int(3, title="%D Smoothing", minval=1)
 fs_k = ta.sma(ta.stoch(close, high, low, fs_periodK), fs_smoothK)
 fs_d = ta.sma(fs_k, fs_periodD)
-plot(fs_k, title="%K", color=#2962FF)
-plot(fs_d, title="%D", color=#FF6D00)
+plot(fs_k, title="%K", color=#2962FF, format=format.price, precision=2)
+plot(fs_d, title="%D", color=#FF6D00, format=format.price, precision=2)
 fs_h0 = hline(80, "Upper Band", color=#787B86)
 hline(50, "Middle Band", color=color.new(#787B86, 50))
 fs_h1 = hline(20, "Lower Band", color=#787B86)
@@ -486,11 +487,11 @@ fill(fs_h0, fs_h1, color=color.rgb(33, 150, 243, 90), title="Background")
 fs_crossUp = ta.crossover(fs_k, fs_d)
 fs_oversold = fs_k < 20 and fs_d < 20
 fs_signalLong = fs_crossUp and fs_oversold
-plotshape(fs_signalLong, title="做多", location=location.bottom, style=shape.triangleup, color=color.rgb(57, 243, 64), size=size.tiny)
+plotshape(fs_signalLong, title="做多", location=location.bottom, style=shape.triangleup, color=color.rgb(57, 243, 64), size=size.tiny, format=format.price, precision=2)
 fs_crossDown = ta.crossunder(fs_k, fs_d)
 fs_overbought = fs_k > 80 and fs_d > 80
 fs_signalShort = fs_crossDown and fs_overbought
-plotshape(fs_signalShort, title="做空", location=location.top, style=shape.triangledown, color=color.rgb(255, 82, 82), size=size.tiny)
+plotshape(fs_signalShort, title="做空", location=location.top, style=shape.triangledown, color=color.rgb(255, 82, 82), size=size.tiny, format=format.price, precision=2)
 
 // === 警报条件（可在TradingView设置报警） ===
 // alertcondition(signalLong, title="Stoch 超卖金叉", message="Stochastic 超卖金叉：买入信号")
@@ -513,10 +514,10 @@ fs_upperBand = fs_midLine + fs_sDev
 fs_rangeHigh = ta.highest(fs_wvf, fs_lb) * fs_ph
 fs_rangeLow = ta.lowest(fs_wvf, fs_lb) * fs_pl
 fs_col = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh) ? color.lime : color.gray
-plot(fs_hp ? fs_rangeHigh : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange)
-plot(fs_hp ? fs_rangeLow : na, title="Range Low Percentile", style=plot.style_line, linewidth=4, color=color.orange)
-plot(fs_wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=fs_col)
-plot(fs_sd ? fs_upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua)
+plot(fs_hp ? fs_rangeHigh : na, title="Range High Percentile", style=plot.style_line, linewidth=4, color=color.orange, format=format.price, precision=2)
+plot(fs_hp ? fs_rangeLow : na, title="Range Low Percentile", style=plot.style_line, linewidth=4, color=color.orange, format=format.price, precision=2)
+plot(fs_wvf, title="Williams Vix Fix", style=plot.style_histogram, linewidth=4, color=fs_col, format=format.price, precision=2)
+plot(fs_sd ? fs_upperBand : na, title="Upper Band", style=plot.style_line, linewidth=3, color=color.aqua, format=format.price, precision=2)
 
 // 添加柱子为绿色的条件
 fs_wvfGreen = (fs_wvf >= fs_upperBand or fs_wvf >= fs_rangeHigh)
@@ -526,5 +527,5 @@ alertcondition(fs_signalLong and fs_wvfGreen, title="Stoch 超卖金叉 + 柱子
 // V1.1 display-only: mirror the original arrow conditions onto the price pane.
 // Source: owner_fanshen_v1_20250706.pine; owner confirmed red-arrow bars only.
 // Original intrabar behavior, oscillator plots, WVF and alerts are preserved.
-plotchar(fs_signalLong, title="主图绿色勾", char="✓", location=location.belowbar, color=color.rgb(57, 243, 64), size=size.tiny, display=display.pane, force_overlay=true)
-plotchar(fs_signalShort, title="主图红色叉", char="×", location=location.abovebar, color=color.rgb(255, 82, 82), size=size.tiny, display=display.pane, force_overlay=true)
+plotchar(fs_signalLong, title="主图绿色勾", char="✓", location=location.belowbar, color=color.rgb(57, 243, 64), size=size.tiny, display=display.pane, force_overlay=true, format=format.price, precision=2)
+plotchar(fs_signalShort, title="主图红色叉", char="×", location=location.abovebar, color=color.rgb(255, 82, 82), size=size.tiny, display=display.pane, force_overlay=true, format=format.price, precision=2)

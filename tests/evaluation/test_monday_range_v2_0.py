@@ -1,7 +1,7 @@
 """Guard the owner-corrected V2.0 composition against dropping V1.11 features.
 
 This is a source contract, not a Pine interpreter. Only pane-routing, the
-status/version label and Fanshen identifier prefixes may differ from the two
+status/version label and Fanshen plot formatting/identifier prefixes may differ from the two
 original bodies. Native compilation and value parity are verified separately.
 """
 from pathlib import Path
@@ -32,7 +32,7 @@ def test_v20_preserves_fanshen_signals_plots_and_alerts():
     restored = LEX.sub(
         lambda m: m.group()[3:] if m.group().startswith("fs_") else m.group(), body
     )
-    assert restored == parent
+    assert restored.replace(", format=format.price, precision=2", "") == parent
 
 
 def test_v20_keeps_single_pane_declaration_and_closed_15m_requests():
@@ -43,3 +43,13 @@ def test_v20_keeps_single_pane_declaration_and_closed_15m_requests():
     assert source.count("request.security(") == 2
     assert '"15", confirmedKeyEngine(), lookahead=barmerge.lookahead_on' in source
     assert 'latestKey.closeAt <= observedAt ? latestKey : previousKey' in source
+
+
+def test_symbol_price_precision_is_not_replaced_by_oscillator_precision():
+    source = SOURCE.read_text()
+    declaration = source.split("indicator(", 1)[1].split("\n\n", 1)[0]
+    assert "precision=" not in declaration and "format=" not in declaration
+    fanshen = source.split(FANSHEN_MARKER)[1]
+    plots = [line for line in fanshen.splitlines() if line.startswith(("plot(", "plotshape(", "plotchar("))]
+    assert len(plots) == 10
+    assert all(", format=format.price, precision=2)" in line for line in plots)
