@@ -1,0 +1,3 @@
+# Exploratory boundary probe
+
+The frozen3,520-arm screen selected the upper buffer/arm/ATR bounds, while all full-period scores stayed negative. Before computing this extension, freeze39arms: baseline; window3,buffer0.4/0.6/0.8/1.2percent,activation10/15/20R,ATR6/8/10,BEoff,H1reverseon (36combinations);window1/2 at the prior best. Reuse identical entries/costs and algorithms. Parent chronological choice remains unchanged. This extension is informed by full-history results and is explicitly exploratory; do not present its later-year results as fresh validation. Finite upper bounds are research boundaries, not proof of global optimality.

@@ -34,6 +34,11 @@ CODE = ["yoyo/evaluation/range_exit_search.py",
 
 
 def all_arms(cfg):
+    if "explicit_arms" in cfg:
+        arms=cfg["explicit_arms"]
+        if not arms or len({p["name"] for p in arms})!=len(arms):
+            raise ValueError("Explicit arms must be nonempty and uniquely named")
+        return arms
     exits = []
     for arm, multiple, be, reverse in itertools.product(
             cfg["trail_arm_r"], cfg["trail_atr_multiple"], cfg["breakeven_r"],
@@ -158,9 +163,9 @@ def screen(config):
     selected=dict(development_2024=choose(table,0),
                   rolling_through_2025=choose(table,-3),
                   descriptive_full=choose(table,-1),
-                  descriptive_fixed=choose(table,-1,"fixed"),
-                  descriptive_trail=choose(table,-1,"trail"),
                   baseline=baseline_name)
+    selected.update({f"descriptive_{family}":choose(table,-1,family)
+                     for family in table.family.unique()})
     dump(work/"selection.json",selected)
     chosen=set(selected.values())
     records={}
