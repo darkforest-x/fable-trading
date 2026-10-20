@@ -1,0 +1,60 @@
+{
+  "version": "2.4",
+  "completed_at": "2026-10-20T12:10:36.856878+08:00",
+  "source_path": "yoyo/evaluation/pine/monday_range_v2_4.pine",
+  "base": "yoyo/evaluation/pine/monday_range_v2_3.pine",
+  "problem": "Absolute price buffer 1 on PEPE ~0.0000042 creates invalid negative long stops and short stops ~1 USDT, causing oversized persistent overlapping frames.",
+  "owner_final_choice": "Percentage buffer; owner superseded initial 1-tick reply and authorized implementation discretion.",
+  "defaults": {
+    "trade_module_enabled": false,
+    "buffer_unit": "entry_price_percent",
+    "buffer_value": 0.05,
+    "entry_frozen": true,
+    "outward_tick_rounding": true
+  },
+  "legacy_price_points_and_ticks": "Available explicitly; no automatic per-symbol preset.",
+  "native_validation": {
+    "script": "周一高低点区间＋翻身 · V2.4",
+    "symbol": "OKX:PEPEUSDT.P",
+    "native_marker": "V24_UNIT_CHECKS_PASS mintick=0.000000001",
+    "cases": [
+      "one-tick PEPE long and short",
+      "0.05-percent PEPE outward rounding",
+      "ETH absolute-point compatibility",
+      "old invalid PEPE buffer reproduced",
+      "1-tick sample 5R coordinates",
+      "zero buffer across all modes"
+    ],
+    "final_timeframe": "15m",
+    "checked_timeframes": [
+      "15m",
+      "1H"
+    ],
+    "chart_module_enabled": true,
+    "chart_buffer": "0.05%",
+    "layout_saved": true,
+    "qa_appendix_removed": true,
+    "evidence": [
+      "output/pine/monday_range_v2_4_native_units.txt",
+      "output/pine/monday_range_v2_4_pepe_15m.png",
+      "output/pine/monday_range_v2_4_pepe_1h.png",
+      "output/pine/monday_range_v2_4_final_ax.txt",
+      "output/pine/monday_range_v2_4_saved_ax.txt"
+    ],
+    "saved_revision": 5,
+    "saved_at": "2026-10-20T12:10:58+08:00",
+    "final_compiled_and_added_at": "2026-10-20T12:11:30+08:00",
+    "final_revision_loaded": 5
+  },
+  "limitations": [
+    "0.05% is a scale-normalizing starting parameter, not a backtested optimum.",
+    "Native helper tests and visual checks do not constitute profitability validation.",
+    "Previous history-coverage limits and independent overlapping reference semantics remain."
+  ],
+  "source_parity": "Range/Stoch/WVF/1H rays/observation/trade advancement/serialization/rendering bodies match V2.3 except display version; only entry buffer conversion and unit display added.",
+  "initial_test_failure": "Absolute tolerance <1e-9 compared as zero by Pine; fixture corrected to tick-normalized tolerances, production math unchanged.",
+  "prior_source_and_private_script_preserved": true,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "training_eligible": false,
+  "production_eligible": false
+}

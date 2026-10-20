@@ -1,0 +1,30 @@
+// Temporary native behavioral fixture; not part of the delivered script.
+// Expected values are hand-calculated on distinct symbol price scales.
+// Pine comparisons round float operands to nine fractional digits.
+// Compare errors in tick units, not sub-nanoprice tolerances.
+v24Near(float actual, float expected, float tick) =>
+    math.abs((actual - expected) / tick) < 0.000001
+
+if barstate.islast
+    float pepeTick = 0.000000001
+    float pepeEntry = 0.0000042
+    float oneTick = txBufferPrice("最小跳动（tick）", 1, pepeEntry, pepeTick)
+    float longStop = txRoundedStop(1, 0.00000418, oneTick, pepeTick)
+    float shortStop = txRoundedStop(-1, 0.00000422, oneTick, pepeTick)
+    bool tickPass = v24Near(oneTick, pepeTick, pepeTick) and v24Near(longStop, 0.000004179, pepeTick) and v24Near(shortStop, 0.000004221, pepeTick)
+    float pct = txBufferPrice("入场价百分比", 0.05, pepeEntry, pepeTick)
+    bool percentPass = v24Near(pct, 0.0000000021, pepeTick) and v24Near(txRoundedStop(1, 0.00000418, pct, pepeTick), 0.000004177, pepeTick) and v24Near(txRoundedStop(-1, 0.00000422, pct, pepeTick), 0.000004223, pepeTick)
+    float ethBuffer = txBufferPrice("价格点", 1, 2400, 0.01)
+    bool legacyPass = ethBuffer == 1 and v24Near(txRoundedStop(1, 2398.25, ethBuffer, 0.01), 2397.25, 0.01) and v24Near(txRoundedStop(-1, 2401.25, ethBuffer, 0.01), 2402.25, 0.01)
+    float badBuffer = txBufferPrice("价格点", 1, pepeEntry, pepeTick)
+    bool reproducesBug = txRoundedStop(1, 0.00000418, badBuffer, pepeTick) < 0 and txRoundedStop(-1, 0.00000422, badBuffer, pepeTick) > 1
+    float long5R = pepeEntry + 5 * (pepeEntry - longStop)
+    float short5R = pepeEntry - 5 * (shortStop - pepeEntry)
+    bool rangePass = v24Near(long5R, 0.000004305, pepeTick) and v24Near(short5R, 0.000004095, pepeTick)
+    bool zeroPass = txBufferPrice("价格点", 0, pepeEntry, pepeTick) == 0 and txBufferPrice("最小跳动（tick）", 0, pepeEntry, pepeTick) == 0 and txBufferPrice("入场价百分比", 0, pepeEntry, pepeTick) == 0
+    if not (tickPass and percentPass and legacyPass and reproducesBug and rangePass and zeroPass)
+        runtime.error("V24_UNIT_CHECKS_FAIL tick=" + str.tostring(tickPass) + " pct=" + str.tostring(percentPass) + " legacy=" + str.tostring(legacyPass) + " bug=" + str.tostring(reproducesBug) + " R=" + str.tostring(rangePass) + " zero=" + str.tostring(zeroPass))
+varip bool v24Logged = false
+if barstate.islast and not v24Logged
+    v24Logged := true
+    log.info("V24_UNIT_CHECKS_PASS mintick={0}", str.tostring(syminfo.mintick, format.mintick))

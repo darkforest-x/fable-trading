@@ -32802,3 +32802,18 @@ artifacts:
     notes: V2.3 private revision 2 saved and compiled. Bullish 1H check rays now green, bearish rays red.
       Exact source parity outside version/header and color changes; native 1H visual verified and layout saved.
       V2.2 source/private script retained. Owner permanently exempts Pine indicators from Stitch.
+
+  - artifact_id: monday-range-fanshen-v2-4-20261020-delivery
+    artifact_type: manifest
+    role: versioned_pine_visual_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_4_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_4_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.4 adds explicit stop-buffer units; owner final choice is percentage scaling.
+      Default buffer is 0.05 percent of entry close, frozen at entry and rounded outward to tick.
+      Fixes PEPE absolute-one-point oversized frames; native unit cases and 15m/1H visual checks passed.
+      Module remains default OFF; current PEPE chart enabled with 0.05 percent. V2.3 retained.
+      Not a profitability optimum; previous one-point trade outcomes are not interchangeable.
