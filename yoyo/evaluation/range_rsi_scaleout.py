@@ -59,7 +59,7 @@ def context(config):
     cfg=json.loads(config.read_text())
     old=json.loads((ROOT/cfg["source_config"]).read_text())
     folder=config.parent
-    cache=folder/".cache"
+    cache=ROOT/cfg["feature_cache"] if cfg.get("feature_cache") else folder/".cache"
     cache.mkdir(exist_ok=True)
     identity=dict(schema=1,inputs=[file_stamp(ROOT/p) for p in cfg["minute_sources"]],
         original_inputs=[file_stamp(ROOT/old[k]) for k in ("data","entry_candidates")],
@@ -132,7 +132,7 @@ def context(config):
     return cfg,old,ctx,base,info
 
 
-def scaleout_overlay(runner,ctx,minutes,cost=.002,tick=.01):
+def scaleout_overlay(runner,ctx,minutes,cost=.002,tick=.01,skip_events=0):
     """Size-only audit overlay; stops/management remain independent of quantity.
 
     Native terminal exits have precedence at their execution-bar close. The
@@ -146,6 +146,9 @@ def scaleout_overlay(runner,ctx,minutes,cost=.002,tick=.01):
         a,b=np.searchsorted(available,[r.entry_i,r.exit_i],side="left")
         available=available[a:b]
         available=available[available>r.entry_i]
+        # Count confirmed opposite events before the profit gate. Even a
+        # losing first event is the first diamond, not the first reduction.
+        available=available[skip_events:]
         pnl=r.side*(ctx["bars"][available,3]-r.entry)
         hits=available[pnl-cost*r.entry>tick*1e-7][:5]
         count=len(hits)
@@ -245,7 +248,8 @@ def native_arm(config,name):
     rsi=ctx[f"rsi{arm['rsi_minutes']}"] if arm["rsi_minutes"] else None
     rows,fills,audit=run_native(ctx["frame"],ctx["atr"],ctx["hour"],base,
         ExitPolicy(time_breakeven_minutes=25 if arm["time_be"] else None,
-                   rsi_scaleout=bool(arm["rsi_minutes"])),.01,"ETH",.01,
+                   rsi_scaleout=bool(arm["rsi_minutes"]),
+                   rsi_skip_events=arm.get("rsi_skip_events",0)),.01,"ETH",.01,
         execution_minutes=1,rsi_side=rsi)
     # Preserve failed native paths as evidence too; do not discard them on mismatch.
     rows.to_csv(folder/"trades.csv",index=False)
@@ -269,18 +273,24 @@ def run(config):
     cfg=json.loads(config.read_text())
     def one(arm):
         name=arm["name"]
+        reused=(config.parent/"runs"/name/"receipt.json").exists()
         with (config.parent/(name+".log")).open("w") as log:
             subprocess.run([sys.executable,"-m","yoyo.evaluation.range_rsi_scaleout",
                 "--config",str(config),"--phase","native-arm","--arm",name],
                 cwd=ROOT,stdout=log,stderr=subprocess.STDOUT,check=True)
         r=json.loads((config.parent/"runs"/name/"receipt.json").read_text())
-        print(json.dumps(dict(completed=name,seconds=r["elapsed_seconds"])),flush=True)
+        r=dict(r,reused=reused)
+        print(json.dumps(dict(completed=name,reused=reused,
+                              seconds=0 if reused else r["elapsed_seconds"])),flush=True)
         return name,r
     started=time.perf_counter()
     with ThreadPoolExecutor(max_workers=2) as pool:
         result=dict(pool.map(one,cfg["arms"]))
     dump(config.parent/"native_validation.json",dict(
-        arms={k:v["audit"] for k,v in result.items()},elapsed_seconds=time.perf_counter()-started))
+        arms={k:v["audit"] for k,v in result.items()},
+        reused_arms=[k for k,v in result.items() if v["reused"]],
+        new_arms=[k for k,v in result.items() if not v["reused"]],
+        elapsed_seconds=time.perf_counter()-started))
 
 
 def analyze(config):

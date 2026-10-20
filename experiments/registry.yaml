@@ -14,12 +14,25 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-timebe-rsi-20261020-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 947fe869b1
+    status: active
+    question: Does skipping the first opposite RSI diamond preserve more tail profit than starting at the first?
+    single_variable: Owner post-hoc follow-up; skip one confirmed opposite event before applying the unchanged profit gate, separately for 3m and 5m.
+    result: Pending native comparison; six completed v1 arms reused without replay.
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: false
+    notes: Same ETH3838signals and matched controls, 1m execution and 20bp cost. No timed BE in the two new arms; five original-size fifths remain possible after skipping the first event.
   - experiment_id: exp-eth-timebe-rsi-20261020-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: 73148afc57
-    status: active
+    source_commit: 947fe869b1
+    status: rejected
     question: Do fifth-5m-bar fee breakeven and profitable opposite strong RSI diamonds improve ETH exits?
     single_variable: Six prespecified arms isolate timed BE, 3m or 5m RSI original-size fifths, and their owner-authorized combinations.
+    result: All five alternatives worsen full-period netR. Baseline -3747.09R; time25 -4325.56R; RSI3 -4053.96R; RSI5 -3898.26R; combined3 -4269.69R; combined5 -4306.25R. All46056 native positions pass parity.
     training_eligible: false
     production_eligible: false
     holdout_consumed: false

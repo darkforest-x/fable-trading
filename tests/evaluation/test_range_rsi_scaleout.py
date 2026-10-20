@@ -7,7 +7,7 @@ from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy,run_native
 from yoyo.evaluation.pepe_range_breakeven import replay_timed,assert_equal
 
 
-def fixture(bars, side=1, events=None, timer=None, minutes=1, atr=None, hour=None):
+def fixture(bars, side=1, events=None, timer=None, minutes=1, atr=None, hour=None, skip=0):
     bars=np.array(bars,float)
     if side < 0:
         bars=200-bars[:,[0,2,1,3]]
@@ -20,7 +20,8 @@ def fixture(bars, side=1, events=None, timer=None, minutes=1, atr=None, hour=Non
     entry=dict(trade_id="s",entry_i=0,entry=100.,stop=100.-side,risk=1.,
                side=side,end_i=n-1)
     rows,fills,audit=run_native(frame,atr,hour,pd.DataFrame([entry]),
-        ExitPolicy(time_breakeven_minutes=timer,rsi_scaleout=rsi is not None),
+        ExitPolicy(time_breakeven_minutes=timer,rsi_scaleout=rsi is not None,
+                   rsi_skip_events=skip),
         .01,"TEST",execution_minutes=minutes,rsi_side=rsi)
     return rows.iloc[0],fills,audit,frame,atr,hour
 
@@ -89,6 +90,35 @@ def test_rsi_requires_events_and_rejects_combined_partial_policy():
         ExitPolicy(time_breakeven_minutes=25,breakeven_r=3)
     with pytest.raises(ValueError,match="whole number"):
         ExitPolicy(time_breakeven_minutes=24)
+    with pytest.raises(ValueError,match="RSI skip"):
+        ExitPolicy(rsi_skip_events=1)
+
+
+@pytest.mark.parametrize("first_close",[99.9,101.])
+def test_second_diamond_counts_events_before_profit_gate(first_close):
+    bars=[[100]*4,[100,101,99.5,first_close],[first_close,102,99.5,102],
+          [102,102,98,100]]
+    r,f,_,_,_,_=fixture(bars,events=[-1,-1,-1,0],skip=1)
+    assert r.rsi_seen==2 and r.rsi_partial_count==1 and r.rsi_first_i==2
+    assert r.rsi_skipped_unprofitable==0
+    assert r.net_r==pytest.approx(-.6)
+    assert f.loc[f.phase=="rsi_partial","price"].tolist()==[102.]
+
+
+def test_skipping_first_diamond_still_updates_original_trailing_stop():
+    bars=[[100]*4,[100,107,99.5,106],[106,107,101,105]]
+    r,_,_,_,_,_=fixture(bars,events=[0,-1,0],skip=1,atr=[np.nan,1,np.nan])
+    assert r.rsi_seen==1 and r.rsi_partial_count==0
+    assert r.reason==2 and r.exit_price==102
+
+
+def test_second_start_can_still_reduce_five_original_fifths():
+    bars=[[100]*4]+[[100+i-1,100+i,99.5,100+i] for i in range(1,8)]
+    r,f,_,_,_,_=fixture(bars,events=[0,-1,-1,-1,-1,-1,-1,0],skip=1)
+    assert r.reason==6 and r.exit_i==6
+    assert r.rsi_seen==6 and r.rsi_partial_count==5
+    assert f.loc[f.phase=="rsi_partial","price"].tolist()==[102.,103.,104.,105.,106.]
+    assert r.gross_r==pytest.approx(4)
 
 
 @pytest.mark.parametrize("minutes",[3,5])

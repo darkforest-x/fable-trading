@@ -1,0 +1,68 @@
+{
+  "experiment_id": "exp-eth-timebe-rsi-20261020-v2",
+  "owner_source": "https://app.notion.com/p/3ff8856479af8017a948f6445144c9c6",
+  "pine_source": "https://app.notion.com/p/3ff8856479af80f38250f786f7e67b39",
+  "source_config": "experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/config.json",
+  "minute_sources": [
+    "data/crypto/market/kline_lowtf_20260922/okx_ETH_USDT_SWAP_1m_1402560.csv",
+    "data/crypto/market/kline_lowtf_20260922/okx_api_ETH_USDT_SWAP_1m_20260831T1600_20260922T1400.csv"
+  ],
+  "round_trip_cost": 0.002,
+  "seed": 20261020,
+  "arms": [
+    {
+      "name": "baseline",
+      "time_be": false,
+      "rsi_minutes": null
+    },
+    {
+      "name": "time25",
+      "time_be": true,
+      "rsi_minutes": null
+    },
+    {
+      "name": "rsi3",
+      "time_be": false,
+      "rsi_minutes": 3
+    },
+    {
+      "name": "rsi5",
+      "time_be": false,
+      "rsi_minutes": 5
+    },
+    {
+      "name": "time25_rsi3",
+      "time_be": true,
+      "rsi_minutes": 3
+    },
+    {
+      "name": "time25_rsi5",
+      "time_be": true,
+      "rsi_minutes": 5
+    },
+    {
+      "name": "second_rsi3",
+      "time_be": false,
+      "rsi_minutes": 3,
+      "rsi_skip_events": 1
+    },
+    {
+      "name": "second_rsi5",
+      "time_be": false,
+      "rsi_minutes": 5,
+      "rsi_skip_events": 1
+    }
+  ],
+  "objective": "Fixed original risk per position; cumulative net R",
+  "time_be_rule": "Eligible25minutes after entry excluding entry candle; check each5m close. Wait if fee-cover stop cannot be placed; never force loss close; never loosen stop.",
+  "rsi_rule": "RSI14 SAR.02/.02/.2, strong SAR threshold30/70; opposite confirmed close strictly after entry. Reduce20percent of original quantity only when that close's per-unit PnL exceeds round-trip cost. Losing diamonds consume no slot. Fifth qualifying diamond exits all.",
+  "same_time_priority": "Resting stop, then terminal H1 reversal/boundary exit, then RSI reduction. Original15m5R4ATR runner unchanged.",
+  "comparison_clock": "All six arms use identical1m execution candles; original5m baseline is separately compared, not silently mixed.",
+  "selection": "2024-only cumulative netR chooses an arm; inspect2025/2026. Wholehistory best descriptive. Known historical research.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "reuse_experiment": "experiments/active/exp-eth-timebe-rsi-20261020-v1",
+  "feature_cache": "experiments/active/exp-eth-timebe-rsi-20261020-v1/.cache",
+  "posthoc": true,
+  "second_rule": "Skip the first opposite confirmed diamond after entry regardless of profit; start fee-positive original20percent reductions at the second or later, maximum five reductions."
+}

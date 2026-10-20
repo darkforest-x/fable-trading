@@ -60,8 +60,13 @@ class ExitPolicy:
     fixed_target_r: float | None = None
     time_breakeven_minutes: int | None = None
     rsi_scaleout: bool = False
+    rsi_skip_events: int = 0
 
     def __post_init__(self):
+        if (not isinstance(self.rsi_skip_events, int)
+                or self.rsi_skip_events not in (0,1)
+                or (self.rsi_skip_events and not self.rsi_scaleout)):
+            raise ValueError("RSI skip requires an enabled RSI policy and zero or one event")
         if self.time_breakeven_minutes is not None:
             if (not isinstance(self.time_breakeven_minutes, int)
                     or self.time_breakeven_minutes <= 0
@@ -149,6 +154,7 @@ class TradeState:
     rsi_count: int = 0
     rsi_first_i: int = -1
     rsi_skipped: int = 0
+    rsi_seen: int = 0
 
     def __post_init__(self):
         self.remaining = int(self.quantity)
@@ -327,6 +333,7 @@ class IndependentCloseStrategy(Strategy):
         if self.policy.rsi_scaleout:
             row.update(rsi_partial_count=state.rsi_count,rsi_first_i=state.rsi_first_i,
                        rsi_skipped_unprofitable=state.rsi_skipped,
+                       rsi_seen=state.rsi_seen,
                        rsi_realized_weight=state.rsi_count/5,
                        runner_gross_r=side*(price-entry)/risk)
         self.rows.append(row)
@@ -394,7 +401,12 @@ class IndependentCloseStrategy(Strategy):
             elif p.rsi_scaleout and self.rsi_side[i] == -side:
                 # Reduce one fifth of ORIGINAL units, only at a fee-positive
                 # opposite strong-diamond close. Losing events consume no slot.
-                if side*(close-entry)-p.round_trip_cost*entry > self.eps:
+                state.rsi_seen += 1
+                if state.rsi_seen <= p.rsi_skip_events:
+                    if abs(state.stop-old_stop) > self.eps:
+                        self.modify_order(state.stop_order,
+                                          trigger_price=self.instrument.make_price(state.stop))
+                elif side*(close-entry)-p.round_trip_cost*entry > self.eps:
                     self.cancel_order(state.stop_order)
                     self._market(state, reason="rsi_partial",
                                  quantity=min(int(state.quantity)//5,state.remaining))
@@ -550,6 +562,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             positions=len(positions), fills=len(fills),
             execution_minutes=execution_minutes,
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
+            rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,
