@@ -286,7 +286,13 @@ def analyze(path):
                       removed_winners=int((absent & (joined.net_r_before > 0)).sum()),
                       removed_net_r=float(joined.loc[absent, "net_r_before"].sum()),
                       surviving_original_net_r=float(joined.loc[both, "net_r_before"].sum()),
-                      surviving_new_net_r=float(joined.loc[both, "net_r_after"].sum()))
+                      surviving_new_net_r=float(joined.loc[both, "net_r_after"].sum()),
+                      surviving_original_mean_net_bp=float(
+                          joined.loc[both, "net_notional_bp_before"].mean()),
+                      surviving_new_mean_net_bp=float(
+                          joined.loc[both, "net_notional_bp_after"].mean()),
+                      attribution_only="Delayed survivors are known only at the later close; "
+                          "their original-price outcome is a hindsight counterfactual, not tradable.")
         for threshold in (10, 20):
             prior = joined.gross_r_before >= threshold-1e-7
             now = joined.gross_r_after >= threshold-1e-7
