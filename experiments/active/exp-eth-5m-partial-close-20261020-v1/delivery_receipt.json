@@ -1,0 +1,807 @@
+{
+  "experiment_id": "exp-eth-5m-partial-close-20261020-v1",
+  "generated_at": "2026-10-20T12:32:57.490894+00:00",
+  "builder_commit": "396ab2636c52991b95aac97a8594641c4264d262",
+  "analysis_commit": "555d9169364956910417c8b947386ce656be5ed6",
+  "source_before_execution": true,
+  "engine": "NautilusTrader 1.231.0",
+  "decision": "reject_default_upgrade",
+  "pine_changed": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "scope": "ETH OKX perpetual;15m watch,5m entry;original candidates/stops/runner exits/cost fixed;one first5m-close partial at1/3/5R x25/50percent;no additional breakeven",
+  "full_result": [
+    {
+      "arm": "baseline",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3747.0889865451036",
+      "gross_r": "543.312159465954",
+      "mean_net_r": "-0.9763129198918977",
+      "win_rate": "0.09562272016675352",
+      "profit_factor": "0.48916389017467465",
+      "gross_10r": "116",
+      "gross_20r": "45",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "106.75757575757248",
+      "boundary_n": "2",
+      "natural_net_r": "-3751.6807722364674",
+      "fixed_1000_notional_pnl": "-6442.081888674111",
+      "mean_net_bp": "-16.784997104414046",
+      "realized_r_drawdown": "3748.9310887566853",
+      "realized_bp_drawdown": "64854.95219527021",
+      "partial_n": "0"
+    },
+    {
+      "arm": "baseline",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3468.641787588722",
+      "gross_r": "287.18458940457344",
+      "mean_net_r": "-0.9037628419981036",
+      "win_rate": "0.10213652944241793",
+      "profit_factor": "0.49474096013352714",
+      "gross_10r": "98",
+      "gross_20r": "35",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "118.29901960784528",
+      "boundary_n": "2",
+      "natural_net_r": "-3470.9893566122237",
+      "fixed_1000_notional_pnl": "-6884.914827564915",
+      "mean_net_bp": "-17.938808826380704",
+      "realized_r_drawdown": "3620.4600707370923",
+      "realized_bp_drawdown": "71774.50466839866",
+      "partial_n": "0"
+    },
+    {
+      "arm": "partial1_pct25",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3889.600168420926",
+      "gross_r": "400.80097759013165",
+      "mean_net_r": "-1.0134445462274428",
+      "win_rate": "0.09770713913496613",
+      "profit_factor": "0.4138662035784243",
+      "gross_10r": "95",
+      "gross_20r": "30",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "80.40358126721516",
+      "boundary_n": "2",
+      "natural_net_r": "-3893.4220657500136",
+      "fixed_1000_notional_pnl": "-6793.840627318632",
+      "mean_net_bp": "-17.701512838245524",
+      "realized_r_drawdown": "3890.981745079615",
+      "realized_bp_drawdown": "68289.35027425666",
+      "partial_n": "1538"
+    },
+    {
+      "arm": "partial1_pct25",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3555.9807265963746",
+      "gross_r": "199.84565039692086",
+      "mean_net_r": "-0.9265192096394931",
+      "win_rate": "0.10396039603960396",
+      "profit_factor": "0.4241072973695097",
+      "gross_10r": "74",
+      "gross_20r": "25",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "89.06576797385783",
+      "boundary_n": "2",
+      "natural_net_r": "-3558.1990429685916",
+      "fixed_1000_notional_pnl": "-7217.856249086978",
+      "mean_net_bp": "-18.80629559428603",
+      "realized_r_drawdown": "3645.7691948468387",
+      "realized_bp_drawdown": "73698.5566062458",
+      "partial_n": "1537"
+    },
+    {
+      "arm": "partial1_pct50",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-4032.111350296749",
+      "gross_r": "258.2897957143092",
+      "mean_net_r": "-1.0505761725629883",
+      "win_rate": "0.10500260552371027",
+      "profit_factor": "0.32217845244945736",
+      "gross_10r": "53",
+      "gross_20r": "12",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "54.04958677685783",
+      "boundary_n": "2",
+      "natural_net_r": "-4035.16335926356",
+      "fixed_1000_notional_pnl": "-7145.599365963157",
+      "mean_net_bp": "-18.618028572077012",
+      "realized_r_drawdown": "4033.285842900715",
+      "realized_bp_drawdown": "71772.27115892123",
+      "partial_n": "1538"
+    },
+    {
+      "arm": "partial1_pct50",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3643.3196656040273",
+      "gross_r": "112.50671138926819",
+      "mean_net_r": "-0.9492755772808825",
+      "win_rate": "0.11959353830119854",
+      "profit_factor": "0.33761840401742377",
+      "gross_10r": "39",
+      "gross_20r": "13",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "59.832516339870374",
+      "boundary_n": "2",
+      "natural_net_r": "-3645.408729324959",
+      "fixed_1000_notional_pnl": "-7550.797670609043",
+      "mean_net_bp": "-19.673782362191357",
+      "realized_r_drawdown": "3671.078318956592",
+      "realized_bp_drawdown": "75622.60854409321",
+      "partial_n": "1537"
+    },
+    {
+      "arm": "partial3_pct25",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3872.245804035346",
+      "gross_r": "418.15534197571225",
+      "mean_net_r": "-1.008922825439121",
+      "win_rate": "0.1034392912975508",
+      "profit_factor": "0.4327032439029037",
+      "gross_10r": "98",
+      "gross_20r": "31",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "80.98071625344105",
+      "boundary_n": "2",
+      "natural_net_r": "-3877.0181420129775",
+      "fixed_1000_notional_pnl": "-6698.357480891881",
+      "mean_net_bp": "-17.45272923629985",
+      "realized_r_drawdown": "3873.6273806940353",
+      "realized_bp_drawdown": "67405.90727164276",
+      "partial_n": "836"
+    },
+    {
+      "arm": "partial3_pct25",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3564.1537509657946",
+      "gross_r": "191.67262602750108",
+      "mean_net_r": "-0.9286487105174035",
+      "win_rate": "0.10995310057321521",
+      "profit_factor": "0.44295635181089965",
+      "gross_10r": "77",
+      "gross_20r": "27",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "89.5040849673219",
+      "boundary_n": "2",
+      "natural_net_r": "-3567.4249681806405",
+      "fixed_1000_notional_pnl": "-7139.0877989353585",
+      "mean_net_bp": "-18.601062529795097",
+      "realized_r_drawdown": "3656.133918034876",
+      "realized_bp_drawdown": "72924.0383556478",
+      "partial_n": "812"
+    },
+    {
+      "arm": "partial3_pct50",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3997.402621525587",
+      "gross_r": "292.99852448547057",
+      "mean_net_r": "-1.0415327309863438",
+      "win_rate": "0.17430953621677958",
+      "profit_factor": "0.38205849577116413",
+      "gross_10r": "64",
+      "gross_20r": "14",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "55.2038567493096",
+      "boundary_n": "2",
+      "natural_net_r": "-4002.355511789487",
+      "fixed_1000_notional_pnl": "-6954.633073109653",
+      "mean_net_bp": "-18.12046136818565",
+      "realized_r_drawdown": "3998.3236726313776",
+      "realized_bp_drawdown": "69981.46680892714",
+      "partial_n": "836"
+    },
+    {
+      "arm": "partial3_pct50",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3659.665714342867",
+      "gross_r": "96.16066265042866",
+      "mean_net_r": "-0.9535345790367032",
+      "win_rate": "0.17561229807191245",
+      "profit_factor": "0.4008735182277341",
+      "gross_10r": "46",
+      "gross_20r": "14",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "60.7091503267985",
+      "boundary_n": "2",
+      "natural_net_r": "-3663.860579749057",
+      "fixed_1000_notional_pnl": "-7393.260770305799",
+      "mean_net_bp": "-19.263316233209483",
+      "realized_r_drawdown": "3691.807765332657",
+      "realized_bp_drawdown": "74073.57204289702",
+      "partial_n": "812"
+    },
+    {
+      "arm": "partial5_pct25",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3857.0723214342806",
+      "gross_r": "433.32882457677704",
+      "mean_net_r": "-1.0049693385706828",
+      "win_rate": "0.11307972902553413",
+      "profit_factor": "0.44982236429222444",
+      "gross_10r": "103",
+      "gross_20r": "31",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "81.44490358126471",
+      "boundary_n": "2",
+      "natural_net_r": "-3861.6641071256445",
+      "fixed_1000_notional_pnl": "-6662.421000923906",
+      "mean_net_bp": "-17.359095885679796",
+      "realized_r_drawdown": "3858.914423645865",
+      "realized_bp_drawdown": "67195.37522731775",
+      "partial_n": "587"
+    },
+    {
+      "arm": "partial5_pct25",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3577.537604517763",
+      "gross_r": "178.2887724755323",
+      "mean_net_r": "-0.9321359052938414",
+      "win_rate": "0.11412193850964043",
+      "profit_factor": "0.4607155061987396",
+      "gross_10r": "86",
+      "gross_20r": "28",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "90.18014705882517",
+      "boundary_n": "2",
+      "natural_net_r": "-3579.885173541265",
+      "fixed_1000_notional_pnl": "-7200.261415872786",
+      "mean_net_bp": "-18.76045183916828",
+      "realized_r_drawdown": "3678.7930564058",
+      "realized_bp_drawdown": "73826.60527850207",
+      "partial_n": "548"
+    },
+    {
+      "arm": "partial5_pct50",
+      "segment": "-1",
+      "population": "signal",
+      "n": "3838",
+      "net_r": "-3967.0556563234577",
+      "gross_r": "323.3454896876",
+      "mean_net_r": "-1.0336257572494678",
+      "win_rate": "0.1487754038561751",
+      "profit_factor": "0.42541305558002107",
+      "gross_10r": "77",
+      "gross_20r": "19",
+      "max_peak_r": "173.5275080906195",
+      "max_gross_r": "56.132231404956926",
+      "boundary_n": "2",
+      "natural_net_r": "-3971.6474420148215",
+      "fixed_1000_notional_pnl": "-6882.760113173703",
+      "mean_net_bp": "-17.933194666945553",
+      "realized_r_drawdown": "3968.8977585350394",
+      "realized_bp_drawdown": "69563.22744909915",
+      "partial_n": "587"
+    },
+    {
+      "arm": "partial5_pct50",
+      "segment": "-1",
+      "population": "random",
+      "n": "3838",
+      "net_r": "-3686.4334214468045",
+      "gross_r": "69.39295554649118",
+      "mean_net_r": "-0.960508968589579",
+      "win_rate": "0.13626889004689943",
+      "profit_factor": "0.43545445390592",
+      "gross_10r": "62",
+      "gross_20r": "17",
+      "max_peak_r": "215.25653594771623",
+      "max_gross_r": "62.06127450980504",
+      "boundary_n": "2",
+      "natural_net_r": "-3688.7809904703063",
+      "fixed_1000_notional_pnl": "-7515.608004180656",
+      "mean_net_bp": "-19.58209485195585",
+      "realized_r_drawdown": "3738.403976083046",
+      "realized_bp_drawdown": "75878.70588860572",
+      "partial_n": "548"
+    }
+  ],
+  "chronological_selection": {
+    "development_selected": "partial5_pct50",
+    "primary": "2024 mean net notional bp; baseline included",
+    "descriptive_full_best": "baseline",
+    "later": [
+      {
+        "arm": "baseline",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -2806.802146708237,
+        "gross_r": 546.6744291662379,
+        "mean_net_r": -0.9472838834654868,
+        "win_rate": 0.0931488356395545,
+        "profit_factor": 0.5086412438899209,
+        "gross_10r": 93,
+        "gross_20r": 36,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 106.75757575757248,
+        "boundary_n": 2,
+        "natural_net_r": -2811.3939323996015,
+        "fixed_1000_notional_pnl": -4896.230509818998,
+        "mean_net_bp": -16.52457141349645,
+        "realized_r_drawdown": 2833.3930940546848,
+        "realized_bp_drawdown": 49465.21030866493,
+        "partial_n": 0
+      },
+      {
+        "arm": "partial1_pct25",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -2951.291091168509,
+        "gross_r": 402.1854847059665,
+        "mean_net_r": -0.9960482926657135,
+        "win_rate": 0.09551130610867364,
+        "profit_factor": 0.42912978285167225,
+        "gross_10r": 75,
+        "gross_20r": 25,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 80.40358126721516,
+        "boundary_n": 2,
+        "natural_net_r": -2955.1129884975962,
+        "fixed_1000_notional_pnl": -5225.02629360628,
+        "mean_net_bp": -17.634243312879782,
+        "realized_r_drawdown": 2972.085817633801,
+        "realized_bp_drawdown": 52641.58873352152,
+        "partial_n": 1183
+      },
+      {
+        "arm": "partial1_pct50",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -3095.78003562878,
+        "gross_r": 257.6965402456951,
+        "mean_net_r": -1.0448127018659399,
+        "win_rate": 0.10428619642254472,
+        "profit_factor": 0.3324616035199382,
+        "gross_10r": 42,
+        "gross_20r": 12,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 54.04958677685783,
+        "boundary_n": 2,
+        "natural_net_r": -3098.8320445955915,
+        "fixed_1000_notional_pnl": -5553.822077393563,
+        "mean_net_bp": -18.74391521226312,
+        "realized_r_drawdown": 3110.9242559817926,
+        "realized_bp_drawdown": 55822.67138147472,
+        "partial_n": 1183
+      },
+      {
+        "arm": "partial3_pct25",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -2943.699703967981,
+        "gross_r": 409.77687190649425,
+        "mean_net_r": -0.9934862315112997,
+        "win_rate": 0.10091123860951738,
+        "profit_factor": 0.4467007225281016,
+        "gross_10r": 77,
+        "gross_20r": 26,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 80.98071625344105,
+        "boundary_n": 2,
+        "natural_net_r": -2948.472041945613,
+        "fixed_1000_notional_pnl": -5162.226166756758,
+        "mean_net_bp": -17.42229553410988,
+        "realized_r_drawdown": 2965.7131631994826,
+        "realized_bp_drawdown": 52031.734338352384,
+        "partial_n": 639
+      },
+      {
+        "arm": "partial3_pct50",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -3080.5972612277246,
+        "gross_r": 272.87931464675063,
+        "mean_net_r": -1.0396885795571127,
+        "win_rate": 0.171110361120486,
+        "profit_factor": 0.3887533094048591,
+        "gross_10r": 53,
+        "gross_20r": 14,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 55.2038567493096,
+        "boundary_n": 2,
+        "natural_net_r": -3085.5501514916245,
+        "fixed_1000_notional_pnl": -5428.221823694518,
+        "mean_net_bp": -18.320019654723314,
+        "realized_r_drawdown": 3098.03323234427,
+        "realized_bp_drawdown": 54598.25836803974,
+        "partial_n": 639
+      },
+      {
+        "arm": "partial5_pct25",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -2938.807930925354,
+        "gross_r": 414.66864494912136,
+        "mean_net_r": -0.9918352787463226,
+        "win_rate": 0.11069861626729666,
+        "profit_factor": 0.4625120321195328,
+        "gross_10r": 81,
+        "gross_20r": 26,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 81.44490358126471,
+        "boundary_n": 2,
+        "natural_net_r": -2943.3997166167183,
+        "fixed_1000_notional_pnl": -5154.795251000005,
+        "mean_net_bp": -17.397216506918678,
+        "realized_r_drawdown": 2960.518531444596,
+        "realized_bp_drawdown": 51972.787396794956,
+        "partial_n": 442
+      },
+      {
+        "arm": "partial5_pct50",
+        "segment": -2,
+        "population": "signal",
+        "n": 2963,
+        "net_r": -3070.8137151424708,
+        "gross_r": 282.66286073200484,
+        "mean_net_r": -1.0363866740271586,
+        "win_rate": 0.1441106986162673,
+        "profit_factor": 0.4297501087888646,
+        "gross_10r": 63,
+        "gross_20r": 18,
+        "max_peak_r": 173.5275080906195,
+        "max_gross_r": 56.132231404956926,
+        "boundary_n": 2,
+        "natural_net_r": -3075.4055008338346,
+        "fixed_1000_notional_pnl": -5413.359992181013,
+        "mean_net_bp": -18.269861600340914,
+        "realized_r_drawdown": 3087.6439688345085,
+        "realized_bp_drawdown": 54480.364484925056,
+        "partial_n": 442
+      }
+    ],
+    "historical_not_unseen": true
+  },
+  "validation": {
+    "behavioral_and_causality_tests_passed": 35,
+    "test_files": [
+      "tests/evaluation/test_range_partial_close.py",
+      "tests/evaluation/test_nautilus_independent.py",
+      "tests/evaluation/test_range_management_clock.py",
+      "tests/evaluation/test_range_entry_clock.py"
+    ],
+    "layer_import_boundary_tests_passed": 72,
+    "baseline_regression_rows": 50,
+    "baseline_compared_fields": [
+      "entry_i",
+      "side",
+      "end_i",
+      "exit_i",
+      "reason",
+      "arm_i",
+      "be_trigger_i",
+      "be_effective_i",
+      "stop_kind",
+      "deferred_closes",
+      "steps",
+      "entry",
+      "stop",
+      "risk",
+      "exit_price",
+      "protection",
+      "be_price",
+      "peak_r",
+      "gross_r",
+      "fee_r",
+      "net_r",
+      "net_notional_bp",
+      "exit_time"
+    ],
+    "baseline_native_fee_checks": 50,
+    "new_native_positions": 46056,
+    "new_native_fills": 103828,
+    "native_position_accounting_rows": 46056,
+    "first_close_oracle_rows": 46056,
+    "unchanged_runner_exit_rows": 46056,
+    "weighted_fee_cash_rows": 46056,
+    "baseline_and_inputs_size_mtime_unchanged": true,
+    "new_registry_rows_validated": true
+  },
+  "feature_cache_hit": true,
+  "native_wall_seconds": 393.145277832984,
+  "full_baseline_replayed": false,
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-entry5m-20261020-v1/eth/candles.csv.gz",
+      "bytes": 3008152,
+      "mtime_ns": 1792485361528187312
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/entries.csv",
+      "bytes": 894724,
+      "mtime_ns": 1792493635632797072
+    }
+  ],
+  "baseline_ledger": {
+    "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-5m-double-confirm-20261020-v1/watch15/results/baseline/trades.csv",
+    "bytes": 2569540,
+    "mtime_ns": 1792493722866224579
+  },
+  "notion": {
+    "url": "https://app.notion.com/p/3ff8856479af811bb9abe0b999d12616",
+    "readback_verified": true,
+    "unique_key": "exp-eth-5m-partial-close-20261020-v1"
+  },
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_partial_study --phase run",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_partial_study --phase analyze"
+  ],
+  "reuse": "Read summaries and cached ledgers when source,config,input identity unchanged;do not rerun by default.",
+  "limitations": [
+    "Only close-confirmed single reductions,not wick/limit TP or multi-stage reductions.",
+    "Independent original-risk R and realized-cash drawdown,not portfolio or MTM returns.",
+    "Frozen20bp roundtrip allocated by shares;funding,spread,latency and capacity omitted.",
+    "Historical data previously seen;chronological selection does not claim unseen forward validation.",
+    "AUC/top-decile inapplicable without classifier score;matched same-symbol/week/side/segment/volatility controls used."
+  ],
+  "inventory": [
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/.gitignore",
+      "bytes": 60,
+      "mtime_ns": 1792498570104239371
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/PROJECT_PLAN.md",
+      "bytes": 1899,
+      "mtime_ns": 1792498570104586456
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/audit.json",
+      "bytes": 1149,
+      "mtime_ns": 1792499110776601860
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/baseline_probe.csv",
+      "bytes": 16978,
+      "mtime_ns": 1792498705823729941
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/baseline_regression.json",
+      "bytes": 1340,
+      "mtime_ns": 1792498705857132864
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/comparisons.json",
+      "bytes": 64636,
+      "mtime_ns": 1792499110776335067
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/config.json",
+      "bytes": 1676,
+      "mtime_ns": 1792498570104024745
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial1_pct25.json",
+      "bytes": 779,
+      "mtime_ns": 1792498570101821528
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial1_pct25.log",
+      "bytes": 490,
+      "mtime_ns": 1792498852636117995
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial1_pct50.json",
+      "bytes": 778,
+      "mtime_ns": 1792498570102367531
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial1_pct50.log",
+      "bytes": 489,
+      "mtime_ns": 1792498853165342031
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial3_pct25.json",
+      "bytes": 779,
+      "mtime_ns": 1792498570102809824
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial3_pct25.log",
+      "bytes": 487,
+      "mtime_ns": 1792498975133870807
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial3_pct50.json",
+      "bytes": 778,
+      "mtime_ns": 1792498570103003367
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial3_pct50.log",
+      "bytes": 490,
+      "mtime_ns": 1792498975136389402
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial5_pct25.json",
+      "bytes": 779,
+      "mtime_ns": 1792498570103412326
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial5_pct25.log",
+      "bytes": 490,
+      "mtime_ns": 1792499083777535436
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial5_pct50.json",
+      "bytes": 778,
+      "mtime_ns": 1792498570103817078
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/partial5_pct50.log",
+      "bytes": 486,
+      "mtime_ns": 1792499083640585523
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/preflight.json",
+      "bytes": 849,
+      "mtime_ns": 1792498705887157649
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/run_receipt.json",
+      "bytes": 588,
+      "mtime_ns": 1792499084227732289
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct25/partial1_pct25/audit.json",
+      "bytes": 768,
+      "mtime_ns": 1792498852538162943
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct25/partial1_pct25/fills.csv",
+      "bytes": 1976284,
+      "mtime_ns": 1792498852537658858
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct25/partial1_pct25/trades.csv",
+      "bytes": 2855114,
+      "mtime_ns": 1792498852423090657
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct25/receipt.json",
+      "bytes": 6723,
+      "mtime_ns": 1792498852632365813
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct50/partial1_pct50/audit.json",
+      "bytes": 768,
+      "mtime_ns": 1792498853091112782
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct50/partial1_pct50/fills.csv",
+      "bytes": 1968531,
+      "mtime_ns": 1792498853089025648
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct50/partial1_pct50/trades.csv",
+      "bytes": 2845262,
+      "mtime_ns": 1792498852896173933
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial1_pct50/receipt.json",
+      "bytes": 6715,
+      "mtime_ns": 1792498853164120985
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct25/partial3_pct25/audit.json",
+      "bytes": 767,
+      "mtime_ns": 1792498975033071614
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct25/partial3_pct25/fills.csv",
+      "bytes": 1819690,
+      "mtime_ns": 1792498975032462194
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct25/partial3_pct25/trades.csv",
+      "bytes": 2781694,
+      "mtime_ns": 1792498974941484465
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct25/receipt.json",
+      "bytes": 6694,
+      "mtime_ns": 1792498975131172502
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct50/partial3_pct50/audit.json",
+      "bytes": 768,
+      "mtime_ns": 1792498975078701958
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct50/partial3_pct50/fills.csv",
+      "bytes": 1811500,
+      "mtime_ns": 1792498975078026163
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct50/partial3_pct50/trades.csv",
+      "bytes": 2773173,
+      "mtime_ns": 1792498974981420949
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial3_pct50/receipt.json",
+      "bytes": 6697,
+      "mtime_ns": 1792498975135223896
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct25/partial5_pct25/audit.json",
+      "bytes": 768,
+      "mtime_ns": 1792499083732706135
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct25/partial5_pct25/fills.csv",
+      "bytes": 1763369,
+      "mtime_ns": 1792499083731833965
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct25/partial5_pct25/trades.csv",
+      "bytes": 2755216,
+      "mtime_ns": 1792499083637532385
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct25/receipt.json",
+      "bytes": 6719,
+      "mtime_ns": 1792499083774684883
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct50/partial5_pct50/audit.json",
+      "bytes": 768,
+      "mtime_ns": 1792499083603808545
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct50/partial5_pct50/fills.csv",
+      "bytes": 1755026,
+      "mtime_ns": 1792499083602909666
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct50/partial5_pct50/trades.csv",
+      "bytes": 2748854,
+      "mtime_ns": 1792499083530277131
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/runs/partial5_pct50/receipt.json",
+      "bytes": 6707,
+      "mtime_ns": 1792499083639853895
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/selection.json",
+      "bytes": 5186,
+      "mtime_ns": 1792499110773486223
+    },
+    {
+      "path": "experiments/active/exp-eth-5m-partial-close-20261020-v1/summary.csv",
+      "bytes": 18974,
+      "mtime_ns": 1792499110768694496
+    }
+  ],
+  "no_content_hash": true,
+  "no_download": true,
+  "learning": "docs/learnings/partial-close-exits-need-original-risk-and-native-share-accounting.md"
+}

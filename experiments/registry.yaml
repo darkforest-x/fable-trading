@@ -16,21 +16,22 @@ schema_version: 1
 experiments:
   - experiment_id: exp-eth-5m-partial-close-20261020-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: b73cec8fe1c921d29d744f84dbb4e98dd7c36974
-    status: active
-    question: Can one close-confirmed partial realization improve ETH15m-watch5m net
-      returns while preserving tail profit?
-    single_variable: Six exit-size policies;1/3/5R first5m-close trigger x25/50percent,remaining
-      stops and exits unchanged.
-    artifacts: []
+    source_commit: 396ab2636c52991b95aac97a8594641c4264d262
+    status: rejected
+    question: Can one close-confirmed partial realization improve ETH15m-watch5m net returns while preserving tail profit?
+    single_variable: Six exit-size policies;1/3/5R first5m-close trigger x25/50percent,remaining stops and exits unchanged.
+    artifacts:
+    - eth-5m-partial-close-20261020-v1
     canonical_report: experiments/active/exp-eth-5m-partial-close-20261020-v1/delivery_receipt.json
     training_eligible: false
     production_eligible: false
     holdout_consumed: false
     reuse_allowed: true
-    result: Frozen before native execution;pending.
-    notes: Reuses3838signals and3838matched controls,20bp;old baseline preserved. Close-confirmed
-      reduction,not intrabar target.
+    result: All6 close-partial arms worse full-period netR,bp and realizedR drawdown.3838signals:baseline-3747.09R;5R25 leastbad partial-3857.07R,20R45to31.2024select5R50
+      later-3070.81versusbaseline-2806.80R.3R50 rescues302losers butloses250.31R;old20Rtail retains55.1percent.
+    notes: Nautilus1.231.0;46056newnativepositions103828fills;allnativePnL/fee/cash/oracle/runner-exit checks pass.50baselineprobes,35behavioral
+      and72boundarytests.393.15s native,cachehit,no fullbaseline replay.3838matchedcontrols eacharm,no stable superiority;Notion3ff8856479af811bb9abe0b999d12616
+      verified.NoPine/default/livechange.
   - experiment_id: exp-eth-5m-signal-body-20261020-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 479af940cda216336dfdbc0b69a385e3a6145b29

@@ -1,3 +1,10 @@
+## 2026-10-20 ETH close-confirmed partial exits — completed, default rejected
+
+- `exp-eth-5m-partial-close-20261020-v1`: same3838ETH15m-watch5m entries plus3838matched controls;first5m-close1/3/5R reduces25/50percent once. Original stop/runner/cost unchanged, no extra BE.
+- All6 full-period netR/bp/realizedR drawdown worse. Baseline−3747.09R,leastbad partial5R25−3857.07R;whole-position20R45→31.3R50 netwin9.56→17.43percent butextra loss250.31R.2024-selected5R50 laterextra loss264.01R. Do not upgrade Pine/default from this result.
+- Source396ab2636,analysis555d916936;6native arms393.15s,cachehit,46056positions103828fills,50baseline probes,35behavioral72boundarytests. Allnative accounting/oracle/runner checks pass;raw ledgers and delivery_receipt.json retained. IndependentR,20bp,knownhistory,not account returns or unseen validation.
+- Notion: https://app.notion.com/p/3ff8856479af811bb9abe0b999d12616 (readback verified). Registry rows updated;no new market download/orders/Pine changes. Reuse cached results.
+
 ## 2026-10-20 · V2.11 delivered: 15m observation for5m entries and15m rays
 
 Owner confirmed5m chart uses15m watch,15m chart keepsH1 watch. Every later same-direction chart signal independently enters; no body filter. All-chart rays now confirmed15m,greenup/red down,defaulton. Stops,15m5R4ATR andarmedH1reverseexit unchanged;reference defaultoff. Private`周一高低点区间＋翻身 · V2.11` revision3 saved19:54:09Shanghai;V2.10source/private preserved.17tests;native1m/5m/15m/1H/4H shared30rays19bull/11bear signatures identical;15m18closed signatures matchV2.10;unsupported charts0frames. FinalQA removed,PEPE5m moduleon,8visibleframes,layoutsaved,editor/logsclosed. Code d0e3d9a380;receipt`output/pine/monday_range_v2_11_delivery.json`;Notion system page updated/readback verified. Noorders orprofitability claim;training/productionfalse.

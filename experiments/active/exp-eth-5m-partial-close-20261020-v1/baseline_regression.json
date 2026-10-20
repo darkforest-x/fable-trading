@@ -1,0 +1,52 @@
+{
+  "audit": {
+    "engine": "nautilus_trader",
+    "version": "1.231.0",
+    "market_tick": 0.01,
+    "protection_tick": 0.01,
+    "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+    "partial_execution": "disabled",
+    "native_partial_accounting_checked": 0,
+    "positions": 50,
+    "fills": 100,
+    "max_simultaneous_positions": 1,
+    "bars_with_both_directions": 0,
+    "prepare_seconds": 1.4132918750401586,
+    "replay_seconds": 9.94014566601254,
+    "runtime_warnings": [
+      "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+    ],
+    "accounting": "independent original-risk R; frozen account; not portfolio returns"
+  },
+  "parity": {
+    "rows": 50,
+    "compared_fields": [
+      "entry_i",
+      "side",
+      "end_i",
+      "exit_i",
+      "reason",
+      "arm_i",
+      "be_trigger_i",
+      "be_effective_i",
+      "stop_kind",
+      "deferred_closes",
+      "steps",
+      "entry",
+      "stop",
+      "risk",
+      "exit_price",
+      "protection",
+      "be_price",
+      "peak_r",
+      "gross_r",
+      "fee_r",
+      "net_r",
+      "net_notional_bp",
+      "exit_time"
+    ],
+    "native_fee_checks": 50,
+    "status": "passed"
+  },
+  "full_baseline_replayed": false
+}
