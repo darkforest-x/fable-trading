@@ -1,0 +1,7 @@
+# Changing an observation clock must not silently change exits or another entry lane
+
+- **Problem**: V2.11 changes the 5m entry lane from H1 to 15m observation and makes all vertical rays use 15m. V2.10 also supports direct 15m entries and H1 reverse exits after trailing activates.
+- **Dead end**: A global H1-to-15m replacement would change the exit rule without authorization. It would also refresh the 15m watch on every 15m entry arrow before checking strict later-than-watch admission, eliminating that lane's entries. This was identified before execution, not a failed live run.
+- **Effective path**: The owner explicitly retained H1 observation for the 15m chart. Route observation by the chart-origin entry clock; leave H1 reverse exits and 15m ATR management independent. Retain the bounded source-event buffer for 15m rays so higher chart periods do not drop intermediate signals. Native fixtures cover simultaneous closes, repeated same-direction watches, opposite refreshes and both entry lanes; compare the unchanged 15m closed ledger with V2.10.
+- **General rule**: Separate observation, entry, protection-update and reverse-exit clocks before replacing a timeframe. Check for observation/entry collisions and test each supported chart lane.
+- **Scope**: `yoyo/evaluation/pine/monday_range_v2_11.pine`, `tests/evaluation/monday_range_v2_11_native_checks.pine`. This engineering change does not establish trading profitability.

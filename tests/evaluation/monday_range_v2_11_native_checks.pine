@@ -1,0 +1,103 @@
+// Temporary native QA only; do not save this appendix in the delivered script.
+if barstate.islast
+    TxWatch w = TxWatch.new()
+    txObserve(w, 1, 3600000)
+    bool routing = not txEntryEligible(w, "5", true, 1, 3600000, 1, 3600000)
+    routing := routing and txEntryEligible(w, "5", false, 1, 3900000, 1, 3600000)
+    routing := routing and not txEntryEligible(w, "15", false, 1, 3900000, 1, 3600000)
+    routing := routing and txEntryEligible(w, "5", false, 1, 4200000, 0, 3600000)
+    routing := routing and not txEntryEligible(w, "5", true, -1, 4500000, 1, 4500000)
+    routing := routing and txEntryEligible(w, "15", true, -1, 4500000, 1, 4500000)
+    txObserve(w, -1, 7200000)
+    routing := routing and not txEntryEligible(w, "5", true, -1, 7200000, -1, 7200000)
+    routing := routing and txEntryEligible(w, "5", false, -1, 7500000, 1, 7200000)
+    // A 15m watch updates the 5m lane only; H1 still owns the 15m lane.
+    TxWatch fiveWatch = TxWatch.new()
+    txRefreshObservation(fiveWatch, "5", true, -1, 3600000, true, 1, 3600000)
+    routing := routing and fiveWatch.side == 1 and fiveWatch.since == 3600000
+    routing := routing and not txEligible(fiveWatch, 1, 3600000)
+    routing := routing and txEligible(fiveWatch, 1, 3900000) and txEligible(fiveWatch, 1, 4200000)
+    txRefreshObservation(fiveWatch, "5", false, -1, 3600000, false, -1, 4500000)
+    routing := routing and fiveWatch.side == 1
+    txRefreshObservation(fiveWatch, "5", false, 0, 3600000, true, 1, 4500000)
+    routing := routing and fiveWatch.since == 4500000 and not txEligible(fiveWatch, 1, 4500000)
+    txRefreshObservation(fiveWatch, "5", false, 0, 3600000, true, -1, 5400000)
+    routing := routing and fiveWatch.side == -1 and txEligible(fiveWatch, -1, 5700000)
+    TxWatch fifteenWatch = TxWatch.new()
+    txRefreshObservation(fifteenWatch, "15", true, -1, 3600000, true, 1, 3600000)
+    txRefreshObservation(fifteenWatch, "15", false, 0, 3600000, true, 1, 4500000)
+    routing := routing and fifteenWatch.side == -1 and fifteenWatch.since == 3600000
+    // A 5m entry's own wick is excluded. Off-quarter 6R does not arm.
+    TxTrade t = TxTrade.new(3900000, 3600000, 1, 100, 99, 1, 99)
+    txAdvance(t, 3600000, 3900000, 100, 150, 1, 100, false, 1, 5, 4, 0.01)
+    bool clock = t.peakR == 0 and t.endedAt == 0
+    txAdvance(t, 3900000, 4200000, 100, 107, 99.5, 106, false, 1, 5, 4, 0.01)
+    clock := clock and not t.armed and t.protection == 99
+    txAdvance(t, 4200000, 4500000, 106, 108, 105, 107, true, 1, 5, 4, 0.01)
+    clock := clock and t.armedAt == 4500000 and t.protection == 103
+    txAdvance(t, 4500000, 4800000, 107, 110, 104, 109, false, 1, 5, 4, 0.01)
+    clock := clock and t.protection == 103
+    txAdvance(t, 4800000, 5100000, 109, 120, 102, 115, false, 1, 5, 4, 0.01)
+    clock := clock and t.reason == 2 and t.exitPrice == 103 and t.peakR == 10
+    if not routing or not clock
+        runtime.error("V211_FIXTURE_FAIL routing=" + str.tostring(routing) + " clock=" + str.tostring(clock))
+
+varip bool qa211Logged = false
+if barstate.islast and not na(tx) and not qa211Logged
+    qa211Logged := true
+    int offQuarter = 0
+    int frozenCount = 0
+    float timeSig = 0
+    float priceSig = 0
+    float exitSig = 0
+    // Common closed interval excludes warmup-boundary and live-tick differences.
+    for row in tx.trades
+        array<string> f = str.split(row, ",")
+        int entered = int(str.tonumber(f.get(0)))
+        int observed = int(str.tonumber(f.get(1)))
+        int armed = int(str.tonumber(f.get(8)))
+        int ended = int(str.tonumber(f.get(9)))
+        if entered <= observed or observed % (txEntryTf == "5" ? 900000 : 3600000) != 0 or (armed > 0 and armed % 900000 != 0)
+            runtime.error("V211_LEDGER_CLOCK_FAIL")
+        if entered >= timestamp("UTC", 2026, 10, 1, 0, 0) and entered < timestamp("UTC", 2026, 10, 19, 0, 0) and ended > 0 and ended < timestamp("UTC", 2026, 10, 20, 0, 0)
+            frozenCount += 1
+            offQuarter += entered % 900000 != 0 ? 1 : 0
+            timeSig += frozenCount * (entered + observed) / 60000
+            priceSig += frozenCount * (str.tonumber(f.get(3)) + 3 * str.tonumber(f.get(4))) / syminfo.mintick
+            exitSig += frozenCount * (ended / 60000 + str.tonumber(f.get(10)) / syminfo.mintick + str.tonumber(f.get(11)))
+    log.info("V211_PASS mode={0} total={1} frozen={2} offQuarter={3} timeSig={4} priceSig={5} exitSig={6} shown={7}", txEntryTf, tx.total, frozenCount, offQuarter, timeSig, priceSig, exitSig, txVisibleRows.size())
+
+varip bool qa211RouteLogged = false
+if barstate.islast and not qa211RouteLogged
+    qa211RouteLogged := true
+    bool chartRoute = txEntryTf == timeframe.main_period
+    bool allowed = timeframe.main_period == "5" or timeframe.main_period == "15"
+    if not chartRoute or txEnabled != (txRequested and allowed)
+        runtime.error("V211_CHART_ROUTE_FAIL")
+    if not allowed and (not na(tx) or txFrames.size() > 0 or txVisibleRows.size() > 0)
+        runtime.error("V211_UNSUPPORTED_FRAMES_FAIL")
+    log.info("V211_ROUTE_PASS chart={0} entry={1} requested={2} enabled={3} frames={4} hasTx={5}", timeframe.main_period, txEntryTf, txRequested, txEnabled, txFrames.size(), not na(tx))
+
+varip bool qa211RaysLogged = false
+if barstate.islast and not na(ray15) and not qa211RaysLogged
+    qa211RaysLogged := true
+    int rayCount = 0
+    int rayBull = 0
+    float rayTimeSig = 0
+    float rayPriceSig = 0
+    for row in str.split(ray15.events, ";")
+        array<string> f = str.split(row, ",")
+        if f.size() == 4
+            int opened = int(str.tonumber(f.get(0)))
+            int confirmed = int(str.tonumber(f.get(1)))
+            int side = int(str.tonumber(f.get(3)))
+            if confirmed - opened != 900000 or confirmed > observedThrough
+                runtime.error("V211_RAY_CLOCK_FAIL")
+            if opened >= timestamp("UTC", 2026, 10, 10, 0, 0) and confirmed < timestamp("UTC", 2026, 10, 19, 0, 0)
+                rayCount += 1
+                rayBull += side == 1 ? 1 : 0
+                rayTimeSig += rayCount * (opened / 60000 + side)
+                rayPriceSig += rayCount * str.tonumber(f.get(2)) / syminfo.mintick
+    if ray15Lines.size() != ray15.count
+        runtime.error("V211_RAY_DRAW_COUNT_FAIL")
+    log.info("V211_RAYS_PASS chart={0} count={1} frozen={2} bull={3} timeSig={4} priceSig={5}", timeframe.main_period, ray15.count, rayCount, rayBull, rayTimeSig, rayPriceSig)
