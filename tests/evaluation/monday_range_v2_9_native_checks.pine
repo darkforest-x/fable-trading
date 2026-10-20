@@ -1,0 +1,52 @@
+// Temporary native QA only; do not save this appendix in the delivered script.
+if barstate.islast
+    TxWatch w = TxWatch.new()
+    txObserve(w, 1, 3600000)
+    bool routing = not txEntryEligible(w, "5", true, 1, 3600000, 1, 3600000)
+    routing := routing and txEntryEligible(w, "5", false, 1, 3900000, 1, 3600000)
+    routing := routing and not txEntryEligible(w, "15", false, 1, 3900000, 1, 3600000)
+    routing := routing and txEntryEligible(w, "5", false, 1, 4200000, 0, 3600000)
+    routing := routing and not txEntryEligible(w, "5", true, -1, 4500000, 1, 4500000)
+    routing := routing and txEntryEligible(w, "15", true, -1, 4500000, 1, 4500000)
+    txObserve(w, -1, 7200000)
+    routing := routing and not txEntryEligible(w, "5", true, -1, 7200000, -1, 7200000)
+    routing := routing and txEntryEligible(w, "5", false, -1, 7500000, 1, 7200000)
+    // A 5m entry's own wick is excluded. Off-quarter 6R does not arm.
+    TxTrade t = TxTrade.new(3900000, 3600000, 1, 100, 99, 1, 99)
+    txAdvance(t, 3600000, 3900000, 100, 150, 1, 100, false, 1, 5, 4, 0.01)
+    bool clock = t.peakR == 0 and t.endedAt == 0
+    txAdvance(t, 3900000, 4200000, 100, 107, 99.5, 106, false, 1, 5, 4, 0.01)
+    clock := clock and not t.armed and t.protection == 99
+    txAdvance(t, 4200000, 4500000, 106, 108, 105, 107, true, 1, 5, 4, 0.01)
+    clock := clock and t.armedAt == 4500000 and t.protection == 103
+    txAdvance(t, 4500000, 4800000, 107, 110, 104, 109, false, 1, 5, 4, 0.01)
+    clock := clock and t.protection == 103
+    txAdvance(t, 4800000, 5100000, 109, 120, 102, 115, false, 1, 5, 4, 0.01)
+    clock := clock and t.reason == 2 and t.exitPrice == 103 and t.peakR == 10
+    if not routing or not clock
+        runtime.error("V29_FIXTURE_FAIL routing=" + str.tostring(routing) + " clock=" + str.tostring(clock))
+
+varip bool qa29Logged = false
+if barstate.islast and not na(tx) and not qa29Logged
+    qa29Logged := true
+    int offQuarter = 0
+    int frozenCount = 0
+    float timeSig = 0
+    float priceSig = 0
+    float exitSig = 0
+    // Common closed interval excludes warmup-boundary and live-tick differences.
+    for row in tx.trades
+        array<string> f = str.split(row, ",")
+        int entered = int(str.tonumber(f.get(0)))
+        int observed = int(str.tonumber(f.get(1)))
+        int armed = int(str.tonumber(f.get(8)))
+        int ended = int(str.tonumber(f.get(9)))
+        if entered <= observed or (armed > 0 and armed % 900000 != 0)
+            runtime.error("V29_LEDGER_CLOCK_FAIL")
+        if entered >= timestamp("UTC", 2026, 10, 1, 0, 0) and entered < timestamp("UTC", 2026, 10, 19, 0, 0) and ended > 0 and ended < timestamp("UTC", 2026, 10, 20, 0, 0)
+            frozenCount += 1
+            offQuarter += entered % 900000 != 0 ? 1 : 0
+            timeSig += frozenCount * (entered + observed) / 60000
+            priceSig += frozenCount * (str.tonumber(f.get(3)) + 3 * str.tonumber(f.get(4))) / syminfo.mintick
+            exitSig += frozenCount * (ended / 60000 + str.tonumber(f.get(10)) / syminfo.mintick + str.tonumber(f.get(11)))
+    log.info("V29_PASS mode={0} total={1} frozen={2} offQuarter={3} timeSig={4} priceSig={5} exitSig={6} shown={7}", txEntryTf, tx.total, frozenCount, offQuarter, timeSig, priceSig, exitSig, txVisibleRows.size())
