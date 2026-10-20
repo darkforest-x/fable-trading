@@ -1,0 +1,70 @@
+{
+  "version": "V2.10",
+  "source": "yoyo/evaluation/pine/monday_range_v2_10.pine",
+  "source_commit": "2e2e2ca8a3d7736396dd90d9c3cfc876770e9ac0",
+  "private_script": "周一高低点区间＋翻身 · V2.10",
+  "private_revision": 3,
+  "saved_at_shanghai": "2026-10-20T18:41:12+08:00",
+  "prior_preserved": "V2.9 source and private script",
+  "entry_clock": "chart timeframe.main_period; only5m and15m enabled",
+  "removed_input": "入场信号周期（分钟）",
+  "defaults": {
+    "trade_reference_enabled": false
+  },
+  "other_chart_periods": "Trade engine disabled and trade frames absent; confirmation signals/ranges retained",
+  "unchanged": [
+    "H1 confirmed watch and later same-direction repeated independent entries",
+    "5completed5m structure bars plus0.05percent buffer",
+    "15m close5R/ATR14x4 management and armed oppositeH1 exit",
+    "Viewport history, rangev1.11, Stoch/WVF, H1rays and alerts"
+  ],
+  "validation": {
+    "passed": true,
+    "prior_V29_closed_interval_parity": true,
+    "settings_selector_removed": true,
+    "tests_passed": 16,
+    "native_records": {
+      "15m": [
+        "228 文本 [2026-10-20T18:30:00.000+08:00]: V210_PASS mode=15 total=146 frozen=18 offQuarter=0 timeSig=10,213,286,820 priceSig=2,766,965 exitSig=5,107,601,820 shown=1",
+        "230 文本 [2026-10-20T18:30:00.000+08:00]: V210_ROUTE_PASS chart=15 entry=15 requested=true enabled=true frames=1 hasTx=true"
+      ],
+      "5m": [
+        "234 文本 [2026-10-20T18:35:00.000+08:00]: V210_PASS mode=5 total=217 frozen=112 offQuarter=79 timeSig=377,951,785,130 priceSig=102,975,343 exitSig=189,007,839,100 shown=2",
+        "236 文本 [2026-10-20T18:35:00.000+08:00]: V210_ROUTE_PASS chart=5 entry=5 requested=true enabled=true frames=2 hasTx=true"
+      ],
+      "1h": [
+        "233 文本 [2026-10-20T18:00:00.000+08:00]: V210_ROUTE_PASS chart=60 entry=60 requested=true enabled=false frames=0 hasTx=false"
+      ],
+      "4h": [
+        "233 文本 [2026-10-20T16:00:00.000+08:00]: V210_ROUTE_PASS chart=240 entry=240 requested=true enabled=false frames=0 hasTx=false"
+      ]
+    }
+  },
+  "final_compile": "Saved revision3; update disabled after save and chart undo label confirms script update",
+  "qa_appendix_in_delivered_script": false,
+  "final_chart": {
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "15m",
+    "entry_minutes": 15,
+    "module_enabled": true,
+    "editor_closed": true,
+    "logs_closed": true,
+    "layout_saved": true
+  },
+  "temporary_browser_sessions_created": 0,
+  "no_orders": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "notion_verified": true,
+  "official_reference": "https://www.tradingview.com/pine-script-docs/concepts/chart-information/",
+  "evidence": [
+    "output/pine/monday_range_v2_10_settings_ax.txt",
+    "output/pine/monday_range_v2_10_15m_ax.txt",
+    "output/pine/monday_range_v2_10_5m_ax.txt",
+    "output/pine/monday_range_v2_10_1h_ax.txt",
+    "output/pine/monday_range_v2_10_4h_ax.txt",
+    "output/pine/monday_range_v2_10_final_ax.txt",
+    "output/pine/monday_range_v2_10_final.png"
+  ]
+}

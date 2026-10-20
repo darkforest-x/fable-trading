@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-range-fanshen-v2-10-20261020-delivery
+    artifact_type: manifest
+    role: Pine V2.10 follows5m/15m chart entry clocks, other charts context only
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2e2e2ca8a3d7736396dd90d9c3cfc876770e9ac0
+    source_path: output/pine/monday_range_v2_10_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_10_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 16tests;native15m18closed and5m112closed signatures exactly V2.9 respective modes;1H/4H no engine/frames with user switchon;source
+      defaultoff;selector removed. Prior privateV2.9 preserved;notion verified;noorders.
   - artifact_id: eth-5m-rejections-20261020-v1
     artifact_type: manifest
     role: Fixed5m ETH causal rejection evidence and false-rejected tail trades
