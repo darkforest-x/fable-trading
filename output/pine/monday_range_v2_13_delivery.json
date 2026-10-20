@@ -1,0 +1,93 @@
+{
+  "version": "V2.13",
+  "status": "delivered_native_validated",
+  "source": "yoyo/evaluation/pine/monday_range_v2_13.pine",
+  "source_commit": "36493d4000",
+  "implementation_commit": "8ceff6178c",
+  "change": "Remove the 12-week deletion policy. Retain every loaded Monday range as data and redraw records intersecting the visible chart window, with shared line/label budgets.",
+  "prior_preserved": "V2.12 source and private script preserved; V2.11 chart instance remains hidden.",
+  "local_tests": {
+    "passed": 2,
+    "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_monday_range_v2_13.py",
+    "scope": "Whole suffix from current Fib through key levels, signals and trade-reference engine is identical to V2.12; preceding executable configuration changes are limited to version, removed retention input and display tooltip."
+  },
+  "native_validation": {
+    "symbol": "OKX:BTCUSDT.P",
+    "timezone": "Asia/Shanghai",
+    "probe": "tests/evaluation/monday_range_v2_13_native_checks.pine",
+    "btc15m": {
+      "source_start": "2026-06-18",
+      "seen_weeks": 18,
+      "stored_weeks": 18,
+      "first_stored_monday": "2026-06-22",
+      "current_visible_weeks": 1,
+      "current_drawn_weeks": 1,
+      "early_view_drawn_high_at": "2026-06-29 20:00",
+      "common_signal_window_utc": ["2026-10-01T00:00:00Z", "2026-10-19T00:00:00Z"],
+      "common_signals": 72,
+      "time_signature": 78482830600,
+      "price_signature": 2174377553,
+      "signal_signatures_match_v212": true,
+      "missing_range_handles": 0
+    },
+    "daily_capacity_pressure": {
+      "source_start": "2019-12-17",
+      "seen_weeks": 357,
+      "stored_weeks": 357,
+      "visible_weeks": 289,
+      "drawn_weeks": 178,
+      "lines": 469,
+      "labels": 369,
+      "missing_range_handles": 0,
+      "capacity_hint_visible": true
+    },
+    "daily_recovery_after_pressure": {
+      "stored_weeks": 357,
+      "visible_weeks": 28,
+      "drawn_weeks": 28,
+      "first_drawn_high_at": "2019-12-23 08:00",
+      "historical_fib_lines": 140,
+      "lines": 309,
+      "labels": 209,
+      "missing_range_handles": 0
+    },
+    "qa_removed": true,
+    "evidence": [
+      "output/pine/monday_range_v2_13_current_ax.txt",
+      "output/pine/monday_range_v2_13_early_ax.txt",
+      "output/pine/monday_range_v2_13_early.png",
+      "output/pine/monday_range_v2_13_capacity_ax.txt",
+      "output/pine/monday_range_v2_13_recovered_ax.txt",
+      "output/pine/monday_range_v2_13_final_editor_ax.txt",
+      "output/pine/monday_range_v2_13_final_ax.txt",
+      "output/pine/monday_range_v2_13_final.png"
+    ],
+    "scope": "15m history and signal parity plus daily pressure/recovery. Trade-reference-on and other timeframe routing were not rerun because those executable modules are unchanged. Final change moves only the capacity hint from top-left to bottom-left and clean native save succeeds."
+  },
+  "limits": [
+    "Only chart data actually supplied by TradingView can be retained; no fixed calendar date or week-count cutoff remains in the Monday-range module.",
+    "15m stored data begins June22, but the main chart could only navigate back to candles around July1 in this account/session. June29 range is visibly verified; June22 visibility is not claimed.",
+    "A viewport exceeding Pine drawing capacity temporarily shows recent intersecting boundaries and a zoom-in hint. Earlier records remain available when panning or zooming.",
+    "Historical Fib groups use remaining drawing capacity after range boundaries; no incomplete group is drawn.",
+    "15m signal-ray retention is unchanged."
+  ],
+  "private_script_name": "周一高低点区间＋翻身 · V2.13",
+  "private_script_created": true,
+  "private_script_revision": 4,
+  "saved_at_shanghai": "2026-10-21T01:10:15+08:00",
+  "on_chart": true,
+  "final_chart": {
+    "symbol": "OKX:BTCUSDT.P",
+    "timeframe": "15m",
+    "indicator": "V2.13",
+    "trade_reference_enabled": false,
+    "editor_closed": true,
+    "logs_closed": true,
+    "layout_saved": true
+  },
+  "temporary_browser_sessions_created": 0,
+  "temporary_tabs_created": 0,
+  "no_orders": true,
+  "training_eligible": false,
+  "production_eligible": false
+}

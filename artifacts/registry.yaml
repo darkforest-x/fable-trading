@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-range-fanshen-v2-13-20261021-delivery
+    artifact_type: manifest
+    role: Pine all-loaded Monday history with visible-window drawing and native capacity recovery
+    source_repo: darkforest-x/fable-trading
+    source_commit: 36493d4000
+    source_path: output/pine/monday_range_v2_13_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_13_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Private V2.13 revision4 saved; no12week deletion. BTC15m18of18weeks retained and common72signals signatures unchanged. Daily357of357weeks retained; wideviewport178of289drawn without GC then oldest28of28restore from2019-12-23. Two scope-isolation checks pass. QA removed and BTC15m restored;V2.12 source/private preserved. Platform data and drawing capacity still apply.
   - artifact_id: monday-range-fanshen-v2-12-20261021-prepared
     artifact_type: manifest
     role: Pine shared15m history fix delivered with native coverage and signal parity
