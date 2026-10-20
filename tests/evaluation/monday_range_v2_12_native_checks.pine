@@ -1,0 +1,20 @@
+// Temporary native history probe; never include in the delivered script.
+var int qaHistoryFirst = time
+var int qaHistoryBars = 0
+var int qaHistorySignals = 0
+var float qaHistoryTimeSig = 0
+var float qaHistoryPriceSig = 0
+qaHistoryBars += 1
+// Frozen common interval: independent of newly admitted history and live ticks.
+if time >= timestamp("UTC", 2026, 10, 1, 0, 0) and time_close <= timestamp("UTC", 2026, 10, 19, 0, 0) and (fs_signalLong or fs_signalShort)
+    qaHistorySignals += 1
+    qaHistoryTimeSig += qaHistorySignals * (time / 60000 + (fs_signalLong ? 1 : -1))
+    qaHistoryPriceSig += qaHistorySignals * close / syminfo.mintick
+if barstate.islastconfirmedhistory
+    int firstMonday = highLines.size() > 0 ? highLines.first().get_x1() : na
+    log.info("QA_HISTORY chart={0} tx={1} bars={2} first={3} keyFirst={4} mondayFirst={5} weeks={6} signals={7} timeSig={8} priceSig={9}",
+         timeframe.main_period, txEnabled, qaHistoryBars,
+         str.format_time(qaHistoryFirst, "yyyy-MM-dd HH:mm", "Asia/Shanghai"),
+         not na(key) ? str.format_time(key.coverageAt, "yyyy-MM-dd HH:mm", "Asia/Shanghai") : "na",
+         not na(firstMonday) ? str.format_time(firstMonday, "yyyy-MM-dd HH:mm", "Asia/Shanghai") : "na",
+         highLines.size(), qaHistorySignals, qaHistoryTimeSig, qaHistoryPriceSig)
