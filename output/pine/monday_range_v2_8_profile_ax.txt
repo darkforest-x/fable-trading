@@ -1,0 +1,22 @@
+The following is a diff from the previous accessibility tree for Window: "PEPEUSDT.P / 综合过滤" with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~						7 text PEPEUSDT.P ▲ 0.000004161 +0.14% /  综合过滤
+~										302 text 开= 0.000004167 高= 0.000004172 低= 0.000004159 收= 0.000004161 −0.000000006 (−0.14%)
+~								237 文本 14:03:02 UTC+8
+~								305 编辑器 (settable) Description: Editor content;Press Alt+F1 for Accessibility Options., Value: TxSnapshot tx = na
+if txEnabled
+    if timeframe.in_seconds() < 300
+        tx := request.security(syminfo.tickerid, "5", txConfirmed(), lookahead=barmerge.lookahead_on, calc_bars_count=30000)
+    else
+        [currentTx, priorTx] = request.security(syminfo.tickerid, "5", txPair(), lookahead=barmerge.lookahead_off, calc_bars_count=30000)
+        tx := not na(currentTx) and currentTx.closeAt <= h1ObservedAt ? currentTx : priorTx
+
+// The drawing layer only reads serialized confirmed state. It never chooses
+// entries/exits using chart OHLC. Boxes carry horizontal R guides so no new
+
+~							292 按钮 线形图 876, Col 138
+~								294 文本 876
+~								297 文本 138
++					384 container
++						385 text Line number:  876
++						386 text Time: 30.5 % ( 328.6ms  from  1.1s  total) Executions: 42041
+The focused UI element is 11 HTML 内容 TradingView - 实时股票,指数,期货,外汇与比特币图表, URL: cn.tradingview.com/chart/AlGc61US/

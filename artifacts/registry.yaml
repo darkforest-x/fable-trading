@@ -32882,3 +32882,20 @@ artifacts:
       independent PEPE OHLC replay;23local tests pass. New private revision2 saved20261020T13:34:37+08:00;priorV2.6 preserved.
       QA appendix removed; finalpricesOFF andlayout saved. Noorders or profitability inference; existing alerts unchanged;
       Pine exempt fromStitch.
+
+  - artifact_id: monday-range-fanshen-v2-8-20261020-delivery
+    source_commit: 758efb52671f2f24a95023835c8305d6e7a85f01
+    artifact_type: manifest
+    role: versioned_pine_trade_reference_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_8_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_8_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: V2.8 clarifies entry captions and reuses unchanged trade drawing handles with rollback-consistent var state.
+      nPOC serialization only on mutation. Complete trade engine and source-history limits unchanged fromV2.7.
+      Native15m/1H146-trade signatures equalV2.7;10679-bar key-engine parity;40frames/200boxes and reuse assertions pass.
+      26local checks pass. Private revision2 saved20261020T14:01:52+08:00;priorV2.7 retained;QA appendix removed.
+      Profiler samples both approximately1.1s with different viewport/tick windows; no proven initial-load speedup or percent claim.
+      Viewport changes still restart all history; network-delay warning observed. Noorders or rule changes.

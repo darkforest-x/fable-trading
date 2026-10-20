@@ -1,0 +1,72 @@
+{
+  "version": "V2.8",
+  "source": "yoyo/evaluation/pine/monday_range_v2_8.pine",
+  "source_commit": "758efb52671f2f24a95023835c8305d6e7a85f01",
+  "private_script": "周一高低点区间＋翻身 · V2.8",
+  "private_revision": 2,
+  "saved_at": "2026-10-20T14:01:52+08:00",
+  "prior_preserved": "V2.7 source and private script",
+  "changes": [
+    "Entry labels renamed to 多单入场 / 空单入场; peak R retained.",
+    "Reuse unchanged confirmed-frame handles; delete changed handles before replacement.",
+    "Rebuild serialized nPOCs only when the list changes."
+  ],
+  "unchanged": [
+    "Complete trade engine text identical to V2.7.",
+    "History limits, frame capacity, entry/exit rules, inputs and alerts unchanged."
+  ],
+  "validation": {
+    "pytest": "26 passed in 2.48s",
+    "native_trade_count": 146,
+    "native_timeframes": [
+      "15m",
+      "1h"
+    ],
+    "signatures_equal_v27": {
+      "time": 640044461400,
+      "price": 163593976,
+      "exit": 320081208946,
+      "side": -5151
+    },
+    "key_cache_old_new_native_bars": 10679,
+    "wide_view": {
+      "matched": 118,
+      "shown": 40,
+      "boxes": 200,
+      "all_labels": 314,
+      "polylines": 10
+    },
+    "same_snapshot_second_sync_new_frames": 0
+  },
+  "performance": {
+    "baseline_request_5m_ms": 263.9,
+    "baseline_total_approx_s": 1.1,
+    "updated_request_5m_ms": 328.6,
+    "updated_total_approx_s": 1.1,
+    "comparable_end_to_end_benchmark": false,
+    "limitations": [
+      "Profiler estimates include different live tick durations and viewport sizes.",
+      "No demonstrated improvement in initial total loading time; no percentage speed claim.",
+      "Changed viewport causes a full Pine restart; network/data requests and rendering are outside this CPU estimate.",
+      "Uncommitted realtime drawing IDs may still require reconstruction until a chart bar commits; ordinary var matches Pine rollback."
+    ],
+    "observed_network_warning": "TradingView: 网络连接不佳。日志可能会延迟。"
+  },
+  "qa_appendix_in_delivered_script": false,
+  "training_eligible": false,
+  "production_eligible": false,
+  "notion_page": "https://app.notion.com/p/3fe8856479af81adbb12e5f56021d3bf",
+  "no_orders": true,
+  "final_chart": {
+    "symbol": "OKX:PEPEUSDT.P",
+    "timeframe": "15m",
+    "module_enabled": true,
+    "prices_shown": false,
+    "visible_frames": 6,
+    "matching_frames": 6,
+    "layout_saved": true,
+    "profiler_enabled": false,
+    "editor_closed": true
+  },
+  "temporary_browser_sessions_created": 0
+}
