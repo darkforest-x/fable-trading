@@ -32829,3 +32829,20 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Native OKX 1H/15m and target 5m structure read; actual regime gate and per-arrow-reset counterfactual. TradingView target and first-frame screenshots retained beside receipt. No Pine edit or performance claim.
+
+  - artifact_id: monday-range-fanshen-v2-5-20261020-delivery
+    source_commit: c7b1763b76f75b25241d32f86489dcd04ac648cc
+    artifact_type: manifest
+    role: versioned_pine_trade_reference_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_5_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_5_delivery.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-authorized multiple entries per H1 observation. Every new confirmed H1 arrow refreshes side/time;
+      every strictly later same-side15m signal may enter independently. No consumed gate; prior trades retain independent exits.
+      Private V2.5 revision2 saved20261020T12:32:56+08:00 and chart updated. Native fixtures and four focused checks pass.
+      PEPE target October16 13:30 and five other closed records match12fields; one live entry matches5initial fields.
+      Native15m/1H snapshots match; percentage buffer0.05 and5R/4ATR rules retained. Display10default20max does not cap tracking.
+      Prior V2.4 source/private script preserved. No orders or profitability inference; Pine exempt from Stitch.
