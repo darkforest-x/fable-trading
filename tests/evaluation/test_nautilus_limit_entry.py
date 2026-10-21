@@ -9,6 +9,7 @@ if importlib.util.find_spec("nautilus_trader") is None:
     raise unittest.SkipTest("Use the existing isolated Nautilus environment")
 
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
+from yoyo.evaluation.range_entry_followups import native_oracle
 
 
 def replay(bars, side=1, limit=100., stop=98., expires=2, count=1):
@@ -78,6 +79,18 @@ class LimitEntryTests(unittest.TestCase):
         rows, _, _ = replay([[102]*4,[102,103,99,101],[95,99,94,97],[97]*4])
         self.assertEqual(rows.iloc[0].exit_i, 2)
         self.assertEqual(rows.iloc[0].exit_price, 95.)
+
+    def test_tick_touch_audit_ignores_binary_float_residue(self):
+        frame=pd.DataFrame([[2280.]*4,[2280.,2280.95,2279.,2280.],
+            [2280.]*4,[2280.]*4],columns=['open','high','low','close'],
+            index=pd.date_range('2026-01-06 00:05',periods=4,freq='5min',tz='UTC'))
+        entries=pd.DataFrame([dict(trade_id='tick',entry_i=0,entry=2280.9500000000003,
+            side=-1,stop=2281.32,risk=2281.32-2280.9500000000003,expire_i=2,end_i=3)])
+        rows,_,audit=run_native(frame,np.full(4,np.nan),np.zeros(4),entries,
+            ExitPolicy(confirmed_pivot_exit=True,opposite_hour_exit=False),
+            tick=.01,symbol='TEST',entry_order_mode='limit')
+        result=native_oracle(frame,entries,rows,audit['opportunities'],tick=.01)
+        self.assertEqual(result['filled_paths'],1)
 
 
 if __name__ == '__main__':

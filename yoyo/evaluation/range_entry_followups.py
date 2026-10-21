@@ -127,7 +127,7 @@ def limit_candidates(five, base, matches, tick, wait_minutes, timezone):
     return pd.DataFrame(rows)
 
 
-def native_oracle(five, candidates, rows, opportunities, strict=False):
+def native_oracle(five, candidates, rows, opportunities, strict=False, tick=.01):
     """Independent bounded path audit; validation only, never native input.
 
     Resting limit must first touch strictly AFTER submission, on/before expiry.
@@ -137,13 +137,15 @@ def native_oracle(five, candidates, rows, opportunities, strict=False):
     from yoyo.layers.l3_backtest.nautilus_independent import confirmed_pivots
     high, low, centers = confirmed_pivots(five, strict=strict)
     p = five[OHLC].to_numpy()
+    price_ticks = np.rint(p/tick).astype(np.int64)
     actual = rows.set_index('trade_id') if len(rows) else pd.DataFrame()
     outcomes = {r['trade_id']: r for r in opportunities}
     checked, same_bar, gaps = 0, 0, 0
     for r in candidates.itertuples():
         fill = None
+        limit_tick = round(r.entry/tick)
         for j in range(int(r.entry_i)+1, int(r.expire_i)+1):
-            if (p[j,2] <= r.entry if r.side == 1 else p[j,1] >= r.entry):
+            if (price_ticks[j,2] <= limit_tick if r.side == 1 else price_ticks[j,1] >= limit_tick):
                 fill = j
                 break
         if fill is None:
@@ -310,9 +312,16 @@ def run_retest(cfg, dest):
             code=[file_stamp(ROOT/p) for p in CODE])
         meta=folder/'preparation.json'
         if meta.exists():
-            if json.loads(meta.read_text())['identity']!=identity:
+            previous=json.loads(meta.read_text())['identity']
+            # Analysis-only fixes may reuse completed native executions, but
+            # inputs/config/native code AND regenerated admission rows must agree.
+            if ({k:v for k,v in previous.items() if k!='code'} !=
+                    {k:v for k,v in identity.items() if k!='code'} or
+                    previous['code'][1:] != identity['code'][1:]):
                 raise RuntimeError('Changed preparation; choose new experiment directory')
             planned=read(folder/'opportunities.csv')
+            rebuilt=limit_candidates(five,base,matches,spec['tick'],cfg['wait_minutes'],cfg['timezone'])
+            pd.testing.assert_frame_equal(planned,rebuilt,check_dtype=False,check_exact=True)
         else:
             planned=limit_candidates(five,base,matches,spec['tick'],cfg['wait_minutes'],cfg['timezone'])
             folder.mkdir(exist_ok=False)
@@ -339,7 +348,7 @@ def run_retest(cfg, dest):
                 decisions.loc[item['trade_id'],'status']=item['status']
             decisions=decisions.reset_index()
             validation=native_oracle(five,planned[planned.status.eq('pending')],rows,
-                audit['opportunities'],strict=policy=='strict_ties')
+                audit['opportunities'],strict=policy=='strict_ties',tick=spec['tick'])
             ledger=realize_opportunities(original,rows,decisions)
             ledger.to_csv(folder/f'{name}_opportunities.csv',index=False)
             ledgers[name]=ledger
