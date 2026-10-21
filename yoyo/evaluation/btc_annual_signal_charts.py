@@ -165,6 +165,9 @@ def render(limit=0):
         indices = [b["index"] for b in bars]
         ai, ti, ei = (indices.index(r[k]) for k in ("signal_i", "touch_i", "entry_i"))
         n, side, p = len(bars), r["side"], r["level"]
+        # At the study end there may be fewer than 14 subsequent candles.
+        # Keep space for the six-bar entry line and its price, without inventing OHLC.
+        plot_n = max(n, ei + 11)
         col = "#36C9A3" if side == 1 else "#F36C7A"
         low = min(min(b["low"] for b in bars), r["stop"])
         high = max(max(b["high"] for b in bars), r["stop"])
@@ -180,7 +183,7 @@ def render(limit=0):
         fig.text(.065, .872, key_name(r["key"]), fontsize=12, color="#EEEEEE")
         fig.text(.87, .872, f"{p:,.1f}", fontsize=13, color=col, ha="right")
         ax = fig.add_axes([.065, .305, .79, .535])
-        ax.set(xlim=(-1, n - .1), ylim=(low - span * .16, high + span * .16))
+        ax.set(xlim=(-1, plot_n - .1), ylim=(low - span * .16, high + span * .16))
         ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=7, steps=[1, 2, 2.5, 4, 5, 10]))
         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
         ax.yaxis.tick_right()
@@ -197,7 +200,7 @@ def render(limit=0):
                     lw=.65, zorder=1)
         # The horizontal candidate price is explicitly the matched touch-time
         # value. This is distinct from the grid's historical time-varying lines.
-        ax.hlines(p, max(-.5, ti - 3), n - .1, color=col, alpha=.85, lw=.65,
+        ax.hlines(p, max(-.5, ti - 3), plot_n - .1, color=col, alpha=.85, lw=.65,
                   linestyles=(0, (3, 3)), zorder=2)
         for x, b in enumerate(bars):
             cc = ("#FFED46" if x == ti else "#4CAF50" if b["ny_day"] == 0
@@ -224,10 +227,10 @@ def render(limit=0):
             bbox=dict(facecolor="black", edgecolor="none", pad=2),
             arrowprops=dict(arrowstyle="->", color="#FFED46", lw=.7, shrinkA=5, shrinkB=12), zorder=8)
         ax.scatter([ti], [p], s=18, facecolors="#FFFFFF", edgecolors="#000000", lw=.65, zorder=9)
-        ax.annotate(f"{p:,.1f}", xy=(n - .12, p), xytext=(5, 0), textcoords="offset points",
+        key_label = ax.annotate(f"{p:,.1f}", xy=(plot_n - .12, p), xytext=(5, 0), textcoords="offset points",
             color=col, fontsize=8.2, va="center", bbox=dict(facecolor="black", edgecolor="none", pad=2), zorder=9)
         ax.hlines(r["entry"], ei + .4, ei + 6.4, color=col, lw=.7, zorder=7)
-        ax.text(ei + 6.65, r["entry"], f"{r['entry']:,.1f}", color=col, fontsize=7.4,
+        entry_label = ax.text(ei + 6.65, r["entry"], f"{r['entry']:,.1f}", color=col, fontsize=7.4,
                 va="center", bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=9)
         ax.hlines(r["stop"], ei + .4, ei + 6.4, color="#F36C7A", lw=.55,
                   linestyles=(0, (3, 3)), alpha=.8, zorder=6)
@@ -260,10 +263,18 @@ def render(limit=0):
             fig.text(.065, .077, "止损按该版本原参数；图中后续K线只供复盘", fontsize=8.4, color="#848B95")
         fig.text(.065, .052, f"周一 {r['monday_date']}  高 {r['monday_high']:,.1f} / 低 {r['monday_low']:,.1f}",
                  fontsize=8.2, color="#737A85")
-        fig.text(.065, .025, "原始OHLC重绘 · 非TradingView截图 · 局部纵轴 · 淡色勾叉仅为原始信号背景",
+        footer = "原始OHLC重绘 · 非TradingView截图 · 局部纵轴 · 淡色勾叉仅为原始信号背景"
+        if plot_n > n:
+            footer = "原始OHLC重绘 · 数据截至 " + stamp(payload["end"]) + " · 右侧留白无K线"
+            ax.axvline(n - .5, color="#353943", lw=.6, ls=(0, (2, 4)))
+        fig.text(.065, .025, footer,
                  fontsize=7.3, color="#606772")
         name = f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}.png"
         path = folder / name
+        fig.canvas.draw()
+        for text in [*fig.texts, entry_label, key_label]:
+            box = text.get_window_extent(fig.canvas.get_renderer())
+            assert box.x0 >= 0 and box.x1 <= fig.bbox.width, (r['version'], r['number'], text.get_text())
         fig.savefig(path, dpi=200)
         plt.close(fig)
         output.append(dict(version=r["version"], number=r["number"], signal_time=r["signal_time"],
