@@ -149,6 +149,8 @@ def summaries(rows,lower,symbol,name,seed):
     for group, mask in [("all",np.ones(len(rows),bool)),("long",rows.side==1),
         ("short",rows.side==-1),("first_half",rows.segment==0),("second_half",rows.segment==1)]:
         part=rows[mask];s=part[part.population=="signal"];r=part[part.population=="random"]
+        if part.empty:
+            continue
         ss=lower.set_index("trade_id").loc[s.trade_id]
         rr=lower.set_index("trade_id").loc[r.trade_id]
         loss=-s.loc[s.net_r<0,"net_r"].sum()
