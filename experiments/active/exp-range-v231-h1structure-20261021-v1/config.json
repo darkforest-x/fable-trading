@@ -1,0 +1,31 @@
+{
+  "start": "2021-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "midpoint": "2024-04-21T00:00:00+08:00",
+  "timezone": "America/New_York",
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "experiment_id": "exp-range-v231-h1structure-20261021-v1",
+  "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+  "symbols": [
+    {
+      "symbol": "BTC",
+      "tick": 0.1
+    },
+    {
+      "symbol": "ETH",
+      "tick": 0.01
+    }
+  ],
+  "authorization": "Owner selected entry research directions 2 and 3 on 2026-10-21; run separately, no live/default changes.",
+  "baseline": "Frozen V2.31 five-year original signal and matched control ledger, without sweep or MTF filters.",
+  "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+  "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+  "controls": "Preserve all original matched pair IDs and times, same symbol/side/UTC week/chronological half/ATR bucket. Apply the tested rule to each population, retain rejected/unfilled opportunities as zero. No redraw after outcomes.",
+  "analysis": "Primary equal-entry-notional net bp per original opportunity, plus actual-risk R and original-risk R bridge; weekly paired sign randomization and block bootstrap; chronological halves and years; Holm adjustment. No parameter search.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "entry": "Original entries and executions unchanged; classify each signal/control at its own admission close using only completed1H candles. Two most recently confirmed2/2 high pivots and low pivots: HH+HL upward, LH+LL downward, all other combinations mixed; fewer than two highs or lows unknown. Relative to trade direction: aligned/counter/mixed/unknown. Each context evaluated separately.",
+  "ties": "Default latest tie wins (center >= left, > right); strict > all four is a sensitivity only.",
+  "causality": "No provisional pivots, backfill or future-hour visibility. Prefix invariance checked at actual entry closes. Mixed structure is not asserted to be a range."
+}

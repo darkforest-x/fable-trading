@@ -101,7 +101,8 @@ def prepared(cfg, cache_dir):
     # Explicit projection prevents accidental reuse of expected exits or MFE.
     provided = cfg.get("entry_mode", "structure") == "provided"
     candidates = pd.read_csv(ROOT/cfg["entry_candidates"],
-                             usecols=ENTRY_FIELDS + (["entry", "stop"] if provided else []),
+                             usecols=ENTRY_FIELDS + (["entry", "stop"] if provided else [])
+                             + (["expire_i"] if cfg.get("entry_order_mode") == "limit" else []),
                              float_precision="round_trip")
     if provided:
         entries = candidates.copy()
@@ -146,6 +147,8 @@ def compare_golden(rows, path, tick):
 
 def summarize(rows):
     result = []
+    if rows.empty:
+        return result
     for segment in (-1, 0, 1, 2):
         part = rows if segment == -1 else rows[rows.segment == segment]
         for population in ("signal", "random"):
@@ -169,7 +172,7 @@ def run(config, output=None):
     cfg = json.loads(config.read_text())
     allowed = {"schema", "experiment_id", "engine", "data", "entry_candidates", "symbol",
                "tick", "market_tick", "stop_window_5m", "buffer_percent", "maximum_risk_percent",
-               "round_trip_cost", "policies", "output", "management_minutes", "entry_mode"}
+               "round_trip_cost", "policies", "output", "management_minutes", "entry_mode", "entry_order_mode"}
     if set(cfg)-allowed or cfg["schema"] != 1 or cfg["engine"] != "nautilus":
         raise ValueError("Unknown configuration fields or adapter")
     if (not isinstance(cfg["stop_window_5m"], int) or cfg["stop_window_5m"] < 1
@@ -179,6 +182,9 @@ def run(config, output=None):
         raise ValueError("Management timeframe must be 5 or 15 minutes")
     if cfg.get("entry_mode", "structure") not in ("structure", "provided"):
         raise ValueError("Unknown candidate entry mode")
+    if cfg.get("entry_order_mode", "market") not in ("market", "limit") or (
+            cfg.get("entry_order_mode") == "limit" and cfg.get("entry_mode") != "provided"):
+        raise ValueError("Resting limits require explicitly provided entry prices")
     output = (ROOT/cfg["output"]) if output is None else output.resolve()
     identity = dict(config=cfg, runtime=runtime_versions(), code=[file_stamp(ROOT/p) for p in CODE],
                     inputs=[file_stamp(ROOT/cfg[k]) for k in ("data", "entry_candidates")],
@@ -210,7 +216,8 @@ def run(config, output=None):
         policy = ExitPolicy(round_trip_cost=cfg["round_trip_cost"],
                             **{k: v for k, v in spec.items() if k not in ("name", "golden_ledger")})
         rows, fills, audit = run_native(ctx["frame"], ctx["atr"], ctx["hour"], entries,
-                                       policy, cfg["tick"], cfg["symbol"], cfg.get("market_tick"))
+                                       policy, cfg["tick"], cfg["symbol"], cfg.get("market_tick"),
+                                       entry_order_mode=cfg.get("entry_order_mode", "market"))
         if spec.get("golden_ledger"):
             audit["parity"] = compare_golden(rows, ROOT/spec["golden_ledger"], cfg["tick"])
         destination = output/spec["name"]
@@ -220,7 +227,8 @@ def run(config, output=None):
         dump(destination/"audit.json", audit)
         summary = summarize(rows)
         results.append(dict(name=spec["name"], summary=summary, audit=audit))
-        signal = next(s for s in summary if s["segment"] == -1 and s["population"] == "signal")
+        signal = next((s for s in summary if s["segment"] == -1 and s["population"] == "signal"),
+                      dict(segment=-1, population="signal", n=0, net_r=0.))
         print(json.dumps(dict(policy=spec["name"], **signal,
                               replay_seconds=audit["replay_seconds"]), ensure_ascii=False), flush=True)
     record = dict(
@@ -252,8 +260,9 @@ def main():
     compact = {k: v for k, v in result.items() if k != "results"}
     if result["cached"]:
         compact["policies"] = [
-            dict(name=p["name"], **next(s for s in p["summary"]
-                 if s["segment"] == -1 and s["population"] == "signal"))
+            dict(name=p["name"], **next((s for s in p["summary"]
+                 if s["segment"] == -1 and s["population"] == "signal"),
+                 dict(segment=-1, population="signal", n=0, net_r=0.)))
             for p in result["results"]
         ]
     print(json.dumps(compact, ensure_ascii=False))

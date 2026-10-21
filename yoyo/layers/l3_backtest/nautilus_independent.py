@@ -167,15 +167,23 @@ class IndependentLimitFill(FillModel):
     crossed target can then be delayed. Its documented simulated-book hook
     bypasses that mutation. Native matching still decides WHEN a limit executes;
     this hook supplies only its limit-price fill, with synthetic full liquidity.
-    Market/stop orders retain the default model. No future bars are inspected.
+    Market/later-stop orders retain the default model. Limit-entry protection
+    can register a stop crossing price for that entry bar only. Native matching
+    determines the trigger; no future bars are inspected.
     """
 
+    def __init__(self):
+        super().__init__()
+        self.entry_bar_stops = {}
+
     def get_orderbook_for_fill_simulation(self, instrument, order, best_bid, best_ask):
-        if order.order_type != OrderType.LIMIT:
+        stop_price = self.entry_bar_stops.get(str(order.client_order_id))
+        if order.order_type != OrderType.LIMIT and stop_price is None:
             return None
         book = OrderBook(instrument_id=instrument.id, book_type=BookType.L2_MBP)
         side = OrderSide.SELL if order.side == OrderSide.BUY else OrderSide.BUY
-        book.add(BookOrder(side=side, price=order.price,
+        price = order.price if stop_price is None else instrument.make_price(stop_price)
+        book.add(BookOrder(side=side, price=price,
                            size=order.quantity, order_id=1), 0, 0)
         return book
 
@@ -214,7 +222,8 @@ class TradeState:
 
 class IndependentCloseStrategy(Strategy):
     def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees,
-                 protection_tick, execution_minutes=5, rsi_side=None):
+                 protection_tick, execution_minutes=5, rsi_side=None, entry_order_mode="market",
+                 entry_fill_model=None):
         super().__init__(StrategyConfig(
             oms_type="HEDGING", log_events=False, log_commands=False,
         ))
@@ -224,6 +233,10 @@ class IndependentCloseStrategy(Strategy):
         self.prices = frame[["open", "high", "low", "close"]].to_numpy()
         self.atr, self.hour = np.asarray(atr), np.asarray(hour)
         self.execution_minutes = execution_minutes
+        self.entry_order_mode = entry_order_mode
+        self.pending, self.opportunity_rows = {}, []
+        self.entry_fill_model = entry_fill_model
+        self.entering_limit_i = None
         self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
         self.be_clock = frame.index.minute % 5 == 0
         self.policy, self.fees = policy, fees
@@ -266,6 +279,14 @@ class IndependentCloseStrategy(Strategy):
             reduce_only=True,
         )
         state.stop_order = order
+        if self.entering_limit_i is not None:
+            # A bar update can jump directly from above the buy limit to below
+            # its stop. Immediate protection must model the intervening stop
+            # crossing, not fill at the synthetic low. On a genuine opening gap
+            # retain the adverse open. Native matching alone decides triggering.
+            opened = self.prices[self.entering_limit_i, 0]
+            price = min(opened, state.stop) if side > 0 else max(opened, state.stop)
+            self.entry_fill_model.entry_bar_stops[str(order.client_order_id)] = price
         self._submit(order, state, "stop")
 
     def _submit_target(self, state):
@@ -314,9 +335,27 @@ class IndependentCloseStrategy(Strategy):
                 f"got {event.last_qty}, requested {requested}, bar {i}"
             )
         if phase == "entry":
-            if i != state.source["entry_i"] or abs(price-state.source["entry"]) > self.eps:
+            if self.entry_order_mode == "limit":
+                row = state.source
+                if not row["entry_i"] < i <= row["expire_i"]:
+                    raise RuntimeError("Limit filled before submission or after expiry")
+                if abs(price-row["entry"]) > self.eps:
+                    raise RuntimeError("Limit fill differs from conservative resting price")
+                row["signal_entry_i"] = row["entry_i"]
+                row["signal_entry_time"] = str(self.frame.index[row["entry_i"]])
+                row["entry_i"], row["entry_time"] = i, str(self.frame.index[i])
+                # Intrabar time is unknown: preserve the interval, and require
+                # exit pivot centers to begin after its conservative close bound.
+                row["entry_interval_start"] = str(self.frame.index[i]-pd.Timedelta(minutes=self.execution_minutes))
+                self.pending.pop(row["trade_id"])
+                self.active[row["trade_id"]] = state
+                self.opportunity_rows.append(dict(trade_id=row["trade_id"], status="filled",
+                    submitted_i=row["signal_entry_i"], fill_i=i, expire_i=row["expire_i"]))
+            elif i != state.source["entry_i"] or abs(price-state.source["entry"]) > self.eps:
                 raise RuntimeError("Entry did not fill at the signal bar close")
+            self.entering_limit_i = i if self.entry_order_mode == "limit" else None
             self._submit_protective_stop(state)
+            self.entering_limit_i = None
             self._submit_target(state)
             return
         state.remaining -= int(event.last_qty)
@@ -420,6 +459,10 @@ class IndependentCloseStrategy(Strategy):
 
     def on_bar(self, bar):
         i = self.indices[bar.ts_event]
+        if self.entry_fill_model is not None:
+            # The current bar has finished matching. Later gap stops must use
+            # their own native price, never the entry bar's override.
+            self.entry_fill_model.entry_bar_stops.clear()
         _, high, low, close = self.prices[i]
         p = self.policy
         quarter = np.isfinite(self.atr[i]) and self.atr[i] > 0
@@ -428,7 +471,8 @@ class IndependentCloseStrategy(Strategy):
         for state in list(self.active.values()):
             row = state.source
             entry, side, risk = row["entry"], row["side"], row["risk"]
-            state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
+            if i > int(row["entry_i"]):
+                state.peak = max(state.peak, side*((high if side > 0 else low)-entry)/risk)
             old_stop = state.stop
             if p.time_breakeven_minutes is not None and self.be_clock[i]:
                 elapsed=(i-int(row["entry_i"]))*self.execution_minutes
@@ -518,7 +562,15 @@ class IndependentCloseStrategy(Strategy):
             elif abs(state.stop-old_stop) > self.eps:
                 self.modify_order(state.stop_order,
                                   trigger_price=self.instrument.make_price(state.stop))
-        for row in self.by_entry.get(i, []):
+        for key, (state, order) in list(self.pending.items()):
+            if i >= int(state.source["expire_i"]):
+                self.cancel_order(order)
+                self.opportunity_rows.append(dict(trade_id=key, status="expired",
+                    submitted_i=state.source["entry_i"], fill_i=-1,
+                    expire_i=state.source["expire_i"]))
+                del self.pending[key]
+        for source in self.by_entry.get(i, []):
+            row = dict(source)
             side, entry = row["side"], row["entry"]
             be_cost = p.round_trip_cost if p.breakeven_includes_cost else 0.
             be_raw = (entry+side*be_cost*entry)/self.tick
@@ -536,14 +588,21 @@ class IndependentCloseStrategy(Strategy):
                 # native float exposure can otherwise trim 1e-7 units on exit.
                 self.instrument.make_qty(units), row["stop"], be,
             )
-            self.active[row["trade_id"]] = state
-            self._market(state, entering=True)
+            if self.entry_order_mode == "limit":
+                order = self.order_factory.limit(self.instrument.id,
+                    OrderSide.BUY if side > 0 else OrderSide.SELL, state.quantity,
+                    price=self.instrument.make_price(entry))
+                self.pending[row["trade_id"]] = (state, order)
+                self._submit(order, state, "entry")
+            else:
+                self.active[row["trade_id"]] = state
+                self._market(state, entering=True)
         self.max_open = max(self.max_open, len(self.active))
         self.hedged_bars += int({s.source["side"] for s in self.active.values()} == {-1, 1})
 
 
 def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
-               *, execution_minutes=5, rsi_side=None):
+               *, execution_minutes=5, rsi_side=None, entry_order_mode="market"):
     """Execute supplied entries using native orders, fills and HEDGING positions.
 
     Frame index is UTC close time. ATR is NaN except at completed management
@@ -552,6 +611,11 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     No future excursion or expected-exit fields are read by the strategy.
     """
     started = time.perf_counter()
+    if entry_order_mode not in ("market", "limit"):
+        raise ValueError("Unknown entry order mode")
+    limit_entry = entry_order_mode == "limit"
+    if limit_entry and not policy.confirmed_pivot_exit:
+        raise ValueError("Resting entry currently supports initial-stop/pivot management only")
     if execution_minutes not in (1,5):
         raise ValueError("Execution resolution must be 1m or 5m")
     if policy.rsi_scaleout:
@@ -593,7 +657,12 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     for r in entries.itertuples():
         if r.side not in (-1, 1) or not 0 <= r.entry_i < r.end_i < len(frame):
             raise ValueError("Invalid entry direction or bounded interval")
-        if abs(prices[int(r.entry_i), 3]-r.entry) > tick*1e-7:
+        if limit_entry:
+            if (not r.entry_i < r.expire_i < r.end_i
+                    or r.side*(prices[int(r.entry_i), 3]-r.entry) < tick-tick*1e-7
+                    or abs(r.entry/market_tick-round(r.entry/market_tick)) > 1e-5):
+                raise ValueError("Limit must be favorable, tick-aligned, and have a bounded expiry")
+        elif abs(prices[int(r.entry_i), 3]-r.entry) > tick*1e-7:
             raise ValueError("Entry differs from completed close")
         if r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
@@ -605,6 +674,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                     or abs(target/tick-round(target/tick)) > 1e-5):
                 raise ValueError("Per-entry target must be favorable and tick-aligned")
     fee_model = EntryNotionalFee(policy.round_trip_cost)
+    fill_model = IndependentLimitFill() if has_targets or limit_entry else None
     engine = BacktestEngine(BacktestEngineConfig(
         logging=LoggingConfig(bypass_logging=True),
         risk_engine=RiskEngineConfig(bypass=True),
@@ -615,7 +685,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             venue, OmsType.HEDGING, AccountType.MARGIN,
             [Money(1_000_000_000, USDT)], base_currency=USDT,
             fee_model=fee_model, frozen_account=True,
-            fill_model=IndependentLimitFill() if has_targets else None,
+            # Fill callbacks must protect an intrabar entry immediately. The
+            # default command queue waits until the whole bar has completed.
+            use_message_queue=not limit_entry, reject_stop_orders=not limit_entry,
+            fill_model=fill_model,
             bar_execution=True, bar_adaptive_high_low_ordering=False,
             liquidity_consumption=False,
         )
@@ -623,7 +696,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
         strategy = IndependentCloseStrategy(
             instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
-            execution_minutes,rsi_side,
+            execution_minutes,rsi_side,entry_order_mode,fill_model if limit_entry else None,
         )
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
@@ -637,15 +710,17 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             engine.run()
         if strategy.errors:
             raise RuntimeError(f"Native order errors: {strategy.errors[:3]}")
-        if strategy.active or len(strategy.rows) != len(entries):
+        expired = sum(r["status"] == "expired" for r in strategy.opportunity_rows)
+        expected_positions = len(entries)-expired
+        if strategy.active or strategy.pending or len(strategy.rows) != expected_positions:
             raise RuntimeError("Missing or open independent trades")
         positions = engine.cache.positions()
-        if len(positions) != len(entries) or any(p.is_open for p in positions):
+        if len(positions) != expected_positions or any(p.is_open for p in positions):
             raise RuntimeError("Native position count/closure mismatch")
-        if has_targets and engine.cache.orders_open():
+        if (has_targets or limit_entry) and engine.cache.orders_open():
             raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None or has_targets or policy.rsi_scaleout or policy.confirmed_pivot_exit or policy.structural_pivot_stop:
+        if len(rows) and (policy.partial_close_r is not None or has_targets or policy.rsi_scaleout or policy.confirmed_pivot_exit or policy.structural_pivot_stop):
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
@@ -679,6 +754,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             runtime_warnings=sorted({str(w.message) for w in emitted}),
             accounting="independent original-risk R; frozen account; not portfolio returns",
         )
+        if limit_entry:
+            audit.update(entry_order_mode="limit", opportunities=strategy.opportunity_rows,
+                expired=expired, entry_fill="Native resting limit after signal close; fixed limit price even on favorable gaps; OHLC order O-H-L-C; synchronous protection on fill; entry-bar stop book uses stop/adverse open, later stops use native model; expiry after last eligible bar matching", entry_bar_mfe="excluded")
         if policy.structural_pivot_stop:
             audit["protection_updates"] = strategy.protection_updates
         return rows, fills, audit
