@@ -61,8 +61,17 @@ class ExitPolicy:
     time_breakeven_minutes: int | None = None
     rsi_scaleout: bool = False
     rsi_skip_events: int = 0
+    confirmed_pivot_exit: bool = False
+    strict_pivot_ties: bool = False
 
     def __post_init__(self):
+        if self.strict_pivot_ties and not self.confirmed_pivot_exit:
+            raise ValueError("Strict pivot ties require confirmed pivot exits")
+        if self.confirmed_pivot_exit and (self.opposite_hour_exit
+                or self.breakeven_r is not None or self.time_breakeven_minutes is not None
+                or self.partial_close_r is not None or self.fixed_target_r is not None
+                or self.rsi_scaleout):
+            raise ValueError("Confirmed pivot exits require standalone initial-stop management")
         if (not isinstance(self.rsi_skip_events, int)
                 or self.rsi_skip_events not in (0,1)
                 or (self.rsi_skip_events and not self.rsi_scaleout)):
@@ -93,6 +102,32 @@ class ExitPolicy:
             raise ValueError("Partial fraction must be strictly between zero and one")
         if Fraction(str(self.partial_fraction)).denominator > 10000:
             raise ValueError("Partial fraction requires excessive research sizing")
+
+
+def confirmed_pivots(frame, execution_minutes=5, strict=False):
+    """Return 15m 2/2 extremes only at their confirmation close.
+
+    Inputs are completed OHLC indexed by close time. Positive shifts inspect
+    only the current and previous four completed quarters. Pivot timestamps
+    identify the center candle OPEN, never its confirmation or backdated fill.
+    Default ties select the latest equal extreme; strict mode excludes ties
+    on both sides for sensitivity because TradingView does not document ties.
+    """
+    quarter = frame.resample("15min", closed="right", label="right").agg(
+        {"open": "first", "high": "max", "low": "min", "close": "last"})
+    count = frame.close.resample("15min", closed="right", label="right").count()
+    quarter.loc[count != 15 // execution_minutes] = np.nan
+    outputs = []
+    for column, direction in (("high", 1), ("low", -1)):
+        value = direction * quarter[column]
+        center = value.shift(2)
+        left = ((center > value.shift(3)) & (center > value.shift(4))) if strict else (
+            (center >= value.shift(3)) & (center >= value.shift(4)))
+        valid = left & (center > value.shift(1)) & (center > value)
+        outputs.append((direction * center.where(valid)).reindex(frame.index).to_numpy(float))
+    at = pd.Series((quarter.index - pd.Timedelta(minutes=45)).as_unit("ns").asi8,
+                   index=quarter.index).reindex(frame.index).fillna(-1).to_numpy(np.int64)
+    return (*outputs, at)
 
 
 class EntryNotionalFee(FeeModel):
@@ -175,6 +210,7 @@ class IndependentCloseStrategy(Strategy):
         self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
         self.be_clock = frame.index.minute % 5 == 0
         self.policy, self.fees = policy, fees
+        self.pivots = confirmed_pivots(frame, execution_minutes, policy.strict_pivot_ties) if policy.confirmed_pivot_exit else None
         self.tick = protection_tick
         self.eps = self.tick * 1e-7
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
@@ -336,6 +372,11 @@ class IndependentCloseStrategy(Strategy):
                        rsi_seen=state.rsi_seen,
                        rsi_realized_weight=state.rsi_count/5,
                        runner_gross_r=side*(price-entry)/risk)
+        if self.policy.confirmed_pivot_exit:
+            pivot_price = self.pivots[0 if side == 1 else 1][i] if reason == 7 else float("nan")
+            row.update(pivot_price=pivot_price,
+                       pivot_open_time=str(pd.Timestamp(self.pivots[2][i], tz="UTC")) if reason == 7 else "",
+                       pivot_reference_r=side*(pivot_price-entry)/risk)
         self.rows.append(row)
         del self.active[row["trade_id"]]
 
@@ -374,7 +415,7 @@ class IndependentCloseStrategy(Strategy):
                             state.stop,state.stop_kind=state.be_price,1
                     else:
                         state.deferred += 1
-            if quarter:
+            if quarter and not p.confirmed_pivot_exit:
                 move = side*(close-entry)
                 if p.fixed_target_r is None and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
                     state.arm_i = i
@@ -394,10 +435,15 @@ class IndependentCloseStrategy(Strategy):
                     if side*(candidate-state.stop) > 0:
                         state.stop, state.stop_kind = candidate, 2
             reverse = p.opposite_hour_exit and state.arm_i >= 0 and self.hour[i] == -side
-            if reverse or i == int(row["end_i"]):
+            pivot_exit = False
+            if p.confirmed_pivot_exit:
+                pivot_price = self.pivots[0 if side == 1 else 1][i]
+                pivot_exit = (self.pivots[2][i] >= self.frame.index[int(row["entry_i"])].value
+                              and np.isfinite(pivot_price) and side*(pivot_price-entry) > 0)
+            if reverse or pivot_exit or i == int(row["end_i"]):
                 self.cancel_order(state.stop_order)
                 self._cancel_target(state)
-                self._market(state, reason=3 if reverse else 0)
+                self._market(state, reason=7 if pivot_exit else 3 if reverse else 0)
             elif p.rsi_scaleout and self.rsi_side[i] == -side:
                 # Reduce one fifth of ORIGINAL units, only at a fee-positive
                 # opposite strong-diamond close. Losing events consume no slot.
@@ -544,7 +590,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if policy.fixed_target_r is not None and engine.cache.orders_open():
             raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None or policy.fixed_target_r is not None or policy.rsi_scaleout:
+        if policy.partial_close_r is not None or policy.fixed_target_r is not None or policy.rsi_scaleout or policy.confirmed_pivot_exit:
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
@@ -564,6 +610,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
             rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
+            confirmed_pivot_exit=policy.confirmed_pivot_exit,
+            pivot_execution="15m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme" if policy.confirmed_pivot_exit else "disabled",
+            strict_pivot_ties=policy.strict_pivot_ties,
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,
             prepare_seconds=prepared-started,

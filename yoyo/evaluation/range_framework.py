@@ -3,7 +3,8 @@
 Usage: scripts/backtest-range --config <json> [--output <new-run-directory>]
 Inputs are existing read-only OHLC and frozen candidate IDs, never outcomes.
 Completed 5m -> 15m/H1 feature preparation is reused from the audited study.
-Stops use only the latest N completed 5m bars at entry. The cache is invalidated
+Stops use the latest N completed 5m bars, or explicitly supplied causal wick
+extremes under entry_mode=provided. The cache is invalidated
 by file path/size/mtime and preparation parameters, with no content hashing.
 Only the selected native adapter is imported, and unchanged completed runs
 return their small receipt without replaying bars or re-auditing every path.
@@ -98,10 +99,17 @@ def prepared(cfg, cache_dir):
                             hour=ctx["hour"], times=frame.index.asi8)
         dump(meta, identity)
     # Explicit projection prevents accidental reuse of expected exits or MFE.
-    candidates = pd.read_csv(ROOT/cfg["entry_candidates"], usecols=ENTRY_FIELDS)
-    from yoyo.evaluation.pepe_range_exits import stop_events
-    entries, _ = stop_events(ctx, candidates, cfg["stop_window_5m"],
-                             cfg["buffer_percent"], cfg["tick"])
+    provided = cfg.get("entry_mode", "structure") == "provided"
+    candidates = pd.read_csv(ROOT/cfg["entry_candidates"],
+                             usecols=ENTRY_FIELDS + (["entry", "stop"] if provided else []),
+                             float_precision="round_trip")
+    if provided:
+        entries = candidates.copy()
+        entries["risk"] = entries.side * (entries.entry - entries.stop)
+    else:
+        from yoyo.evaluation.pepe_range_exits import stop_events
+        entries, _ = stop_events(ctx, candidates, cfg["stop_window_5m"],
+                                 cfg["buffer_percent"], cfg["tick"])
     entries["trade_id"] = entries.population+"-"+entries.pair_id.astype(str)
     if cfg.get("maximum_risk_percent", 0) > 0:
         entries = entries[entries.risk/entries.entry*100 <= cfg["maximum_risk_percent"]+1e-10]
@@ -161,7 +169,7 @@ def run(config, output=None):
     cfg = json.loads(config.read_text())
     allowed = {"schema", "experiment_id", "engine", "data", "entry_candidates", "symbol",
                "tick", "market_tick", "stop_window_5m", "buffer_percent", "maximum_risk_percent",
-               "round_trip_cost", "policies", "output", "management_minutes"}
+               "round_trip_cost", "policies", "output", "management_minutes", "entry_mode"}
     if set(cfg)-allowed or cfg["schema"] != 1 or cfg["engine"] != "nautilus":
         raise ValueError("Unknown configuration fields or adapter")
     if (not isinstance(cfg["stop_window_5m"], int) or cfg["stop_window_5m"] < 1
@@ -169,6 +177,8 @@ def run(config, output=None):
         raise ValueError("Invalid stop parameters")
     if cfg.get("management_minutes", 15) not in (5, 15):
         raise ValueError("Management timeframe must be 5 or 15 minutes")
+    if cfg.get("entry_mode", "structure") not in ("structure", "provided"):
+        raise ValueError("Unknown candidate entry mode")
     output = (ROOT/cfg["output"]) if output is None else output.resolve()
     identity = dict(config=cfg, runtime=runtime_versions(), code=[file_stamp(ROOT/p) for p in CODE],
                     inputs=[file_stamp(ROOT/cfg[k]) for k in ("data", "entry_candidates")],
