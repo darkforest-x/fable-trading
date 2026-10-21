@@ -18,6 +18,32 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-retest-20261021-v1
+    artifact_type: manifest
+    role: V2.31 retest five-year causal entry experiment with original opportunities and matched controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 130d2e272e45d53e34dbec0845716a782a013041
+    generator_commit: 130d2e272e45d53e34dbec0845716a782a013041
+    source_path: experiments/active/exp-range-v231-retest-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-retest-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Compact summary,comparison and delivery_receipt track local raw candidates,contexts,opportunity ledgers and native
+      fills. No content hashing; all original data and results preserved.
+  - artifact_id: range-v231-h1structure-20261021-v1
+    artifact_type: manifest
+    role: V2.31 h1structure five-year causal entry experiment with original opportunities and matched controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9c3126c65d5f17baf043f2969a34a608498174f2
+    generator_commit: 9c3126c65d5f17baf043f2969a34a608498174f2
+    source_path: experiments/active/exp-range-v231-h1structure-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-h1structure-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Compact summary,comparison and delivery_receipt track local raw candidates,contexts,opportunity ledgers and native
+      fills. No content hashing; all original data and results preserved.
   - artifact_id: btc-fiveyear-1618-25-charts-20261021
     artifact_type: manifest
     role: All25 BTC Fib1.618 trades after sweep20 and MTF filters in the five-year study

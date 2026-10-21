@@ -14,6 +14,57 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-retest-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 130d2e272e45d53e34dbec0845716a782a013041
+    status: rejected
+    question: Does waiting for a30minute retest after full V2.31 admission improve net entry outcomes?
+    single_variable: 'Admission execution only: resting original-key limit after confirmation;original stop/exit/cost unchanged.'
+    result: BTC retest signal/random n293/275,netR-1226.6337/-1174.1691,meanbp-24.4180,per-original-opportunitybp-14.7515/-11.0925;
+      ETH retest signal/random n221/229,netR-594.0875/-853.3815,meanbp-20.8742,per-original-opportunitybp-11.9823/-14.9364.
+      Every tested full-period arm remains net negative; no default promotion.
+    artifacts:
+    - range-v231-retest-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-retest-20261021-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Native1.231.0 resting limits submitted after full confirmation,at original key,30minute deadline;original stop unchanged.
+      Original485/385 signals,293/221 fills,192/164 expiries and79/72 skipped original winners. Fixed limit prices,immediate
+      native protection,OHLC O-H-L-C,entry-bar MFE excluded.2036native positions4072fills,all independent path audits pass;strict
+      ties same outcomes. Native code9c3126c65d;oracle tick comparison130d2e272e;first failed audit preserved and execution
+      reused. Original-risk netR-402.2824/-201.9351,not new-riskR cash-loss comparison. Weekly block paired bp inference,Holm;original
+      matched controls execute their own rule,all rejected opportunities remain zero.35native tests8feature/accounting tests72boundaries
+      pass. Known-history research,20bp unchanged,no funding/slippage/capacity/account-return claim. Reproduce isolatedNautilusPython
+      -m yoyo.evaluation.range_entry_followups retest.
+  - experiment_id: exp-range-v231-h1structure-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9c3126c65d5f17baf043f2969a34a608498174f2
+    status: rejected
+    question: Does causal confirmed1H price-structure context identify profitable V2.31 entries?
+    single_variable: 'Admission selection only: aligned/counter/mixed H1 swing context;no price/stop/exit/cost changes.'
+    result: BTC aligned signal/random n140/125,netR-173.6064/-163.6935,meanbp-26.5985,per-original-opportunitybp-7.6779/-5.2186;
+      BTC counter signal/random n156/161,netR-210.4917/-182.8023,meanbp-31.8178,per-original-opportunitybp-10.2342/-6.6551;
+      BTC mixed signal/random n189/199,netR-168.4471/-211.8692,meanbp-14.1936,per-original-opportunitybp-5.5311/-7.7579; ETH
+      aligned signal/random n109/107,netR-82.4718/-103.1602,meanbp-4.1574,per-original-opportunitybp-1.1770/-8.0045; ETH counter
+      signal/random n116/117,netR-97.4306/-113.3001,meanbp-32.9595,per-original-opportunitybp-9.9306/-9.2858; ETH mixed signal/random
+      n160/161,netR-104.2439/-163.9148,meanbp-21.0694,per-original-opportunitybp-8.7561/-10.7722. Every tested full-period arm
+      remains net negative; no default promotion.
+    artifacts:
+    - range-v231-h1structure-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-h1structure-20261021-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Only completed H1 OHLC,two confirmed2/2 high andlow pivots;HH+HL up,LH+LL down,mixed otherwise. Same-close availability,prefix
+      causal checks16;1740 original native paths reused,no replay/download. Unknown0;four context ledgers sum exactly to baseline.
+      Strict ties change6BTC/4ETH signal/control classifications. ETH aligned earlier/later meanbp+4.46/-14.71;not stable profitability.
+      Mixed is not proof of range-bound market. Weekly block paired bp inference,Holm;original matched controls execute their
+      own rule,all rejected opportunities remain zero.35native tests8feature/accounting tests72boundaries pass. Known-history
+      research,20bp unchanged,no funding/slippage/capacity/account-return claim. Reproduce isolatedNautilusPython -m yoyo.evaluation.range_entry_followups
+      h1structure.
   - experiment_id: exp-range-v231-fiveyear-filters-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 455c3b3d1a

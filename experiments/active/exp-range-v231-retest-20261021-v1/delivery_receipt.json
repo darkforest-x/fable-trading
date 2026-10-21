@@ -1,0 +1,271 @@
+{
+  "experiment_id": "exp-range-v231-retest-20261021-v1",
+  "generated_at": "2026-10-21T15:26:52.630578+00:00",
+  "source_commit": "130d2e272e45d53e34dbec0845716a782a013041",
+  "reproduce": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_entry_followups retest",
+  "notion_page_id": "40088564-79af-8121-b098-c7973488d026",
+  "validation": {
+    "native_tests": 35,
+    "entry_feature_accounting_tests": 8,
+    "layer_boundaries": 72,
+    "history_checks": [
+      {
+        "symbol": "BTC",
+        "policy": "pivot",
+        "opportunities": 970,
+        "filled_paths": 568,
+        "expired": 402,
+        "same_bar_stops": 245,
+        "gap_stops": 0,
+        "status": "passed"
+      },
+      {
+        "symbol": "BTC",
+        "policy": "strict_ties",
+        "opportunities": 970,
+        "filled_paths": 568,
+        "expired": 402,
+        "same_bar_stops": 245,
+        "gap_stops": 0,
+        "status": "passed"
+      },
+      {
+        "symbol": "ETH",
+        "policy": "pivot",
+        "opportunities": 770,
+        "filled_paths": 450,
+        "expired": 320,
+        "same_bar_stops": 183,
+        "gap_stops": 0,
+        "status": "passed"
+      },
+      {
+        "symbol": "ETH",
+        "policy": "strict_ties",
+        "opportunities": 770,
+        "filled_paths": 450,
+        "expired": 320,
+        "same_bar_stops": 183,
+        "gap_stops": 0,
+        "status": "passed"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/candidates.csv",
+      "bytes": 178193,
+      "mtime_ns": 1792596114298632342
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/pivot/audit.json",
+      "bytes": 144204,
+      "mtime_ns": 1792596127083469728
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/pivot/fills.csv",
+      "bytes": 120304,
+      "mtime_ns": 1792596127080953016
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/pivot/trades.csv",
+      "bytes": 235763,
+      "mtime_ns": 1792596127077830844
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/receipt.json",
+      "bytes": 377744,
+      "mtime_ns": 1792596136467503949
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/strict_ties/audit.json",
+      "bytes": 144203,
+      "mtime_ns": 1792596136444952108
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/strict_ties/fills.csv",
+      "bytes": 120304,
+      "mtime_ns": 1792596136442826228
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native/strict_ties/trades.csv",
+      "bytes": 235763,
+      "mtime_ns": 1792596136440178306
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/native.json",
+      "bytes": 850,
+      "mtime_ns": 1792596114299042467
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/opportunities.csv",
+      "bytes": 178193,
+      "mtime_ns": 1792596114291343205
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/preparation.json",
+      "bytes": 4094,
+      "mtime_ns": 1792596114299170801
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/retest_opportunities.csv",
+      "bytes": 558931,
+      "mtime_ns": 1792596240306834141
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/BTC/retest_strict_opportunities.csv",
+      "bytes": 558931,
+      "mtime_ns": 1792596240463192062
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/candidates.csv",
+      "bytes": 141364,
+      "mtime_ns": 1792596138227680009
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/pivot/audit.json",
+      "bytes": 114684,
+      "mtime_ns": 1792596149495930216
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/pivot/fills.csv",
+      "bytes": 92967,
+      "mtime_ns": 1792596149490118789
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/pivot/trades.csv",
+      "bytes": 182559,
+      "mtime_ns": 1792596149488303118
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/receipt.json",
+      "bytes": 301879,
+      "mtime_ns": 1792596157285202807
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/strict_ties/audit.json",
+      "bytes": 114682,
+      "mtime_ns": 1792596157263997185
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/strict_ties/fills.csv",
+      "bytes": 92967,
+      "mtime_ns": 1792596157262341474
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native/strict_ties/trades.csv",
+      "bytes": 182559,
+      "mtime_ns": 1792596157260353012
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/native.json",
+      "bytes": 852,
+      "mtime_ns": 1792596138228326593
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/opportunities.csv",
+      "bytes": 141364,
+      "mtime_ns": 1792596138223575500
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/preparation.json",
+      "bytes": 4095,
+      "mtime_ns": 1792596138228461218
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/retest_opportunities.csv",
+      "bytes": 438487,
+      "mtime_ns": 1792596241819396233
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/ETH/retest_strict_opportunities.csv",
+      "bytes": 438487,
+      "mtime_ns": 1792596241950786573
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/comparison.csv",
+      "bytes": 40497,
+      "mtime_ns": 1792596242783763848
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/config.json",
+      "bytes": 2458,
+      "mtime_ns": 1792596007249153179
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/run.log",
+      "bytes": 11462,
+      "mtime_ns": 1792596242784098807
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/run_attempt1.log",
+      "bytes": 2270,
+      "mtime_ns": 1792596157387696364
+    },
+    {
+      "path": "experiments/active/exp-range-v231-retest-20261021-v1/summary.json",
+      "bytes": 106543,
+      "mtime_ns": 1792596242781465928
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "notes": "Original cached history reused. No content hashes, new data downloads, Pine/default/live changes, or separate report. Raw ledgers remain local; compact summary and lineage committed. Builder was committed before results. H1 summary predates analysis-only oracle fix; native adapter/config unchanged. Retest reran only validation after tick-comparison fix; native results reused.",
+  "execution": {
+    "native_positions": 2036,
+    "native_fills": 4072,
+    "policies": 2,
+    "failed_audit_log": "run_attempt1.log",
+    "correction": "Normalize touched prices to integer ticks; regenerate candidates exact equality; cached engine/config/inputs unchanged."
+  },
+  "combined_family_excess_bp_holm": [
+    {
+      "symbol": "BTC",
+      "arm": "retest",
+      "p": 0.9712014399280036,
+      "holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "retest",
+      "p": 0.1262436878156092,
+      "holm_p": 0.8837058147092645
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "p": 0.9418529073546322,
+      "holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "p": 0.9807009649517524,
+      "holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "p": 0.13564321783910804,
+      "holm_p": 0.8837058147092645
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "p": 0.05969701514924254,
+      "holm_p": 0.47757612119394033
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "p": 0.5972701364931754,
+      "holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "p": 0.24593770311484425,
+      "holm_p": 1.0
+    }
+  ]
+}

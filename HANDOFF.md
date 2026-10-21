@@ -1,3 +1,11 @@
+## 2026-10-21 · V2.31 entry directions 2 and 3 completed, no upgrade
+
+- Owner selected confirmation-then-retest and confirmed1H structure as separate studies on the original five-year BTC/ETH V2.31 baseline, not sweep+MTF. Original exact-wick stop, confirmed15m2/2 close exit and20bp unchanged.
+- Retest: fixed30minutes at original key after full admission. BTC293/485 andETH221/385 fills; net-1226.63/-594.09 new-riskR, each-filled-24.42/-20.87bp versus original-23.44/-19.86bp. Missed79/104 and72/93 original winners. Per-original-opportunity-14.75/-11.98bp versus same-protocol random-11.09/-14.94bp; original-risk bridge-402.28/-201.94R. Different sizing measures are not funded-account PnL. All ten symbol-years netR negative.
+- H1 confirmed2/2 highs/lows: aligned/counter/mixed six full-period cells netnegative. ETH aligned109trades-82.47R,mean-4.16bp;earlier+4.46/later-14.71bp. Across both studies eight excess tests none passesHolm p<.01;bestETHalignedp.4776. Mixed structure is not automatically a trading range.
+- Native2036positions4072fills and every path audited;1740 original paths reused for H1,16prefix checks;35native+8feature/accounting+72boundary tests pass. Fixed limit-entry same-bar protection before research. First audit ETH floating-tick equality failure preserved;corrected audit reused all native fills without replay. Builders9c3126c65d/130d2e272e. No fresh data,Pine/default/live/model changes or report;training/productionfalse.
+- Evidence: `experiments/active/exp-range-v231-retest-20261021-v1/summary.json` and `exp-range-v231-h1structure-20261021-v1/summary.json`;both delivery_receipt.json inventory local raw results. Notion https://app.notion.com/p/4008856479af8121b098c7973488d026 and https://app.notion.com/p/4008856479af8149ab51c83cbe421561,readback verified. Original hypothesis LRN-25 linked to both failures;space/cost direction1 remains unexecuted.
+
 ## 2026-10-21 · BTC chart-opportunity correction and Monday endpoints
 
 - Owner clarified “no losses” means favorable space after the signal. Prior10.15percent was fixed10R realized net win rate and answered a different question. Added Monday high/low; both directions and latest3completed15m stop unchanged.

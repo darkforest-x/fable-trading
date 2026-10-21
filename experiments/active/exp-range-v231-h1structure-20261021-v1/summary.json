@@ -1,0 +1,6372 @@
+{
+  "identity": {
+    "config": {
+      "start": "2021-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "midpoint": "2024-04-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "experiment_id": "exp-range-v231-h1structure-20261021-v1",
+      "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01
+        }
+      ],
+      "authorization": "Owner selected entry research directions 2 and 3 on 2026-10-21; run separately, no live/default changes.",
+      "baseline": "Frozen V2.31 five-year original signal and matched control ledger, without sweep or MTF filters.",
+      "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+      "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+      "controls": "Preserve all original matched pair IDs and times, same symbol/side/UTC week/chronological half/ATR bucket. Apply the tested rule to each population, retain rejected/unfilled opportunities as zero. No redraw after outcomes.",
+      "analysis": "Primary equal-entry-notional net bp per original opportunity, plus actual-risk R and original-risk R bridge; weekly paired sign randomization and block bootstrap; chronological halves and years; Holm adjustment. No parameter search.",
+      "training_eligible": false,
+      "production_eligible": false,
+      "entry": "Original entries and executions unchanged; classify each signal/control at its own admission close using only completed1H candles. Two most recently confirmed2/2 high pivots and low pivots: HH+HL upward, LH+LL downward, all other combinations mixed; fewer than two highs or lows unknown. Relative to trade direction: aligned/counter/mixed/unknown. Each context evaluated separately.",
+      "ties": "Default latest tie wins (center >= left, > right); strict > all four is a sensitivity only.",
+      "causality": "No provisional pivots, backfill or future-hour visibility. Prefix invariance checked at actual entry closes. Mixed structure is not asserted to be a range."
+    },
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_entry_followups.py",
+        "bytes": 22639,
+        "mtime_ns": 1792596096129897386
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+        "bytes": 14322,
+        "mtime_ns": 1792596096129676094
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+        "bytes": 43045,
+        "mtime_ns": 1792596096129398843
+      }
+    ],
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/candles.csv.gz",
+        "bytes": 7286259,
+        "mtime_ns": 1792578376973956636
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/candidates.csv",
+        "bytes": 92464,
+        "mtime_ns": 1792578376979090349
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/signal_matches.csv",
+        "bytes": 80155,
+        "mtime_ns": 1792578376977097472
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/trades.csv",
+        "bytes": 451826,
+        "mtime_ns": 1792578393517738096
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/native.json",
+        "bytes": 837,
+        "mtime_ns": 1792578376981370185
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 6996506,
+        "mtime_ns": 1792578597423742102
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candidates.csv",
+        "bytes": 72144,
+        "mtime_ns": 1792578597432384463
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/signal_matches.csv",
+        "bytes": 63278,
+        "mtime_ns": 1792578597429919906
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/trades.csv",
+        "bytes": 352991,
+        "mtime_ns": 1792578613782227682
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/native.json",
+        "bytes": 839,
+        "mtime_ns": 1792578597435675398
+      }
+    ]
+  },
+  "config": {
+    "start": "2021-10-21T00:00:00+08:00",
+    "end": "2026-10-21T00:00:00+08:00",
+    "midpoint": "2024-04-21T00:00:00+08:00",
+    "timezone": "America/New_York",
+    "round_trip_cost": 0.002,
+    "seed": 20261021,
+    "experiment_id": "exp-range-v231-h1structure-20261021-v1",
+    "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+    "symbols": [
+      {
+        "symbol": "BTC",
+        "tick": 0.1
+      },
+      {
+        "symbol": "ETH",
+        "tick": 0.01
+      }
+    ],
+    "authorization": "Owner selected entry research directions 2 and 3 on 2026-10-21; run separately, no live/default changes.",
+    "baseline": "Frozen V2.31 five-year original signal and matched control ledger, without sweep or MTF filters.",
+    "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+    "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+    "controls": "Preserve all original matched pair IDs and times, same symbol/side/UTC week/chronological half/ATR bucket. Apply the tested rule to each population, retain rejected/unfilled opportunities as zero. No redraw after outcomes.",
+    "analysis": "Primary equal-entry-notional net bp per original opportunity, plus actual-risk R and original-risk R bridge; weekly paired sign randomization and block bootstrap; chronological halves and years; Holm adjustment. No parameter search.",
+    "training_eligible": false,
+    "production_eligible": false,
+    "entry": "Original entries and executions unchanged; classify each signal/control at its own admission close using only completed1H candles. Two most recently confirmed2/2 high pivots and low pivots: HH+HL upward, LH+LL downward, all other combinations mixed; fewer than two highs or lows unknown. Relative to trade direction: aligned/counter/mixed/unknown. Each context evaluated separately.",
+    "ties": "Default latest tie wins (center >= left, > right); strict > all four is a sensitivity only.",
+    "causality": "No provisional pivots, backfill or future-hour visibility. Prefix invariance checked at actual entry closes. Mixed structure is not asserted to be a range."
+  },
+  "rows": [
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "all",
+      "opportunities": 485,
+      "n": 485,
+      "random_n": 485,
+      "fill_or_admission_rate": 1.0,
+      "wins": 104,
+      "win_rate": 0.21443298969072164,
+      "gross_r": 5.912279416280661,
+      "fee_r": 558.4575164896006,
+      "net_r": -552.5452370733201,
+      "mean_r": -1.1392685300480827,
+      "mean_net_bp": -23.44321265206375,
+      "per_opportunity_net_bp": -23.44321265206375,
+      "random_net_r": -558.3649935536861,
+      "random_mean_net_bp": -19.631670964736585,
+      "random_per_opportunity_net_bp": -19.631670964736585,
+      "original_risk_net_r": -552.5452370733201,
+      "random_original_risk_net_r": -558.3649935536861,
+      "pf": 0.2595612372981116,
+      "realized_r_drawdown": 581.0822383005975,
+      "without_best_net_r": -576.8239160856593,
+      "without_best5_net_r": -613.7562450519696,
+      "initial_stops": 285,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 3,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -1848.5977183536743,
+        "p": 0.9088545572721364,
+        "ci95": [
+          -4418.115340909028,
+          856.5240150805272
+        ],
+        "weeks": 204
+      },
+      "absolute_bp_test": {
+        "total": -11369.958136250916,
+        "p": 1.0,
+        "ci95": [
+          -13626.00656651979,
+          -9084.386538542482
+        ],
+        "weeks": 204
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 204
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 204
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "earlier",
+      "opportunities": 246,
+      "n": 246,
+      "random_n": 246,
+      "fill_or_admission_rate": 1.0,
+      "wins": 47,
+      "win_rate": 0.1910569105691057,
+      "gross_r": -28.72436738211401,
+      "fee_r": 234.58594802992485,
+      "net_r": -263.3103154120389,
+      "mean_r": -1.0703671358212963,
+      "mean_net_bp": -25.52947924482157,
+      "per_opportunity_net_bp": -25.52947924482157,
+      "random_net_r": -248.374493605068,
+      "random_mean_net_bp": -19.920861064172332,
+      "random_per_opportunity_net_bp": -19.920861064172332,
+      "original_risk_net_r": -263.3103154120389,
+      "random_original_risk_net_r": -248.374493605068,
+      "pf": 0.2507164490605252,
+      "realized_r_drawdown": 263.3103154120388,
+      "without_best_net_r": -276.93931541203887,
+      "without_best5_net_r": -300.2558334824737,
+      "initial_stops": 155,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -1379.7200724397123,
+        "p": 0.9029548522573871,
+        "ci95": [
+          -3408.7921527992153,
+          681.2241741457948
+        ],
+        "weeks": 105
+      },
+      "absolute_bp_test": {
+        "total": -6280.251894226105,
+        "p": 1.0,
+        "ci95": [
+          -8179.238685617713,
+          -4419.504427177511
+        ],
+        "weeks": 105
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 105
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 105
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "later",
+      "opportunities": 239,
+      "n": 239,
+      "random_n": 239,
+      "fill_or_admission_rate": 1.0,
+      "wins": 57,
+      "win_rate": 0.2384937238493724,
+      "gross_r": 34.63664679839468,
+      "fee_r": 323.8715684596758,
+      "net_r": -289.23492166128113,
+      "mean_r": -1.2101879567417622,
+      "mean_net_bp": -21.29584201684022,
+      "per_opportunity_net_bp": -21.29584201684022,
+      "random_net_r": -309.99049994861804,
+      "random_mean_net_bp": -19.334010862388496,
+      "random_per_opportunity_net_bp": -19.334010862388496,
+      "original_risk_net_r": -289.23492166128113,
+      "random_original_risk_net_r": -309.99049994861804,
+      "pf": 0.2674336051438247,
+      "realized_r_drawdown": 317.7719228885591,
+      "without_best_net_r": -313.5136006736204,
+      "without_best5_net_r": -342.3249273213588,
+      "initial_stops": 130,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 2,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -468.87764591396257,
+        "p": 0.7008649567521624,
+        "ci95": [
+          -2174.1628947335944,
+          1265.5006436067722
+        ],
+        "weeks": 99
+      },
+      "absolute_bp_test": {
+        "total": -5089.706242024811,
+        "p": 1.0,
+        "ci95": [
+          -6456.7591634837045,
+          -3648.7220566505716
+        ],
+        "weeks": 99
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 99
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 99
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "year1",
+      "opportunities": 109,
+      "n": 109,
+      "random_n": 109,
+      "fill_or_admission_rate": 1.0,
+      "wins": 24,
+      "win_rate": 0.22018348623853212,
+      "gross_r": 0.991017945003692,
+      "fee_r": 80.3394655888432,
+      "net_r": -79.34844764383949,
+      "mean_r": -0.7279674095765091,
+      "mean_net_bp": -23.329113337815105,
+      "per_opportunity_net_bp": -23.329113337815105,
+      "random_net_r": -87.70943150227927,
+      "random_mean_net_bp": -17.24639755622092,
+      "random_per_opportunity_net_bp": -17.24639755622092,
+      "original_risk_net_r": -79.34844764383949,
+      "random_original_risk_net_r": -87.70943150227927,
+      "pf": 0.43334195814643506,
+      "realized_r_drawdown": 79.34844764383948,
+      "without_best_net_r": -92.97744764383947,
+      "without_best5_net_r": -115.86326237825209,
+      "initial_stops": 75,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -663.0160201937658,
+        "p": 0.8116594170291486,
+        "ci95": [
+          -2094.2204877538943,
+          806.1061176679461
+        ],
+        "weeks": 45
+      },
+      "absolute_bp_test": {
+        "total": -2542.8733538218457,
+        "p": 0.9982000899955003,
+        "ci95": [
+          -4079.532108122548,
+          -973.318546411377
+        ],
+        "weeks": 45
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 45
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 45
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "year2",
+      "opportunities": 74,
+      "n": 74,
+      "random_n": 74,
+      "fill_or_admission_rate": 1.0,
+      "wins": 12,
+      "win_rate": 0.16216216216216217,
+      "gross_r": -14.172040438833038,
+      "fee_r": 94.43466859306652,
+      "net_r": -108.60670903189957,
+      "mean_r": -1.467658230160805,
+      "mean_net_bp": -26.138681288502617,
+      "per_opportunity_net_bp": -26.138681288502617,
+      "random_net_r": -109.53129334778264,
+      "random_mean_net_bp": -27.689482663559865,
+      "random_per_opportunity_net_bp": -27.689482663559865,
+      "original_risk_net_r": -108.60670903189957,
+      "random_original_risk_net_r": -109.53129334778264,
+      "pf": 0.07949203612937651,
+      "realized_r_drawdown": 108.60670903189956,
+      "without_best_net_r": -111.44659593666142,
+      "without_best5_net_r": -115.69170726853939,
+      "initial_stops": 40,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 114.7593017542366,
+        "p": 0.43307834608269585,
+        "ci95": [
+          -1084.6991115207993,
+          1447.277473631715
+        ],
+        "weeks": 38
+      },
+      "absolute_bp_test": {
+        "total": -1934.2624153491936,
+        "p": 1.0,
+        "ci95": [
+          -2689.7897570409164,
+          -1191.395611014903
+        ],
+        "weeks": 38
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 38
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 38
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "year3",
+      "opportunities": 117,
+      "n": 117,
+      "random_n": 117,
+      "fill_or_admission_rate": 1.0,
+      "wins": 28,
+      "win_rate": 0.23931623931623933,
+      "gross_r": -0.37959798913928744,
+      "fee_r": 118.74060255155533,
+      "net_r": -119.12020054069463,
+      "mean_r": -1.0181213721426892,
+      "mean_net_bp": -24.468032252621793,
+      "per_opportunity_net_bp": -24.468032252621793,
+      "random_net_r": -113.48586370872371,
+      "random_mean_net_bp": -16.065682298806948,
+      "random_per_opportunity_net_bp": -16.065682298806948,
+      "original_risk_net_r": -119.12020054069463,
+      "random_original_risk_net_r": -113.48586370872371,
+      "pf": 0.25977275152589935,
+      "realized_r_drawdown": 119.12020054069463,
+      "without_best_net_r": -125.69254166219005,
+      "without_best5_net_r": -141.7471687359994,
+      "initial_stops": 66,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -983.074944596337,
+        "p": 0.9657517124143793,
+        "ci95": [
+          -2018.0955035892778,
+          69.6942043205692
+        ],
+        "weeks": 44
+      },
+      "absolute_bp_test": {
+        "total": -2862.75977355675,
+        "p": 1.0,
+        "ci95": [
+          -3711.893670868068,
+          -2043.6235650345272
+        ],
+        "weeks": 44
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 44
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 44
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "year4",
+      "opportunities": 110,
+      "n": 110,
+      "random_n": 110,
+      "fill_or_admission_rate": 1.0,
+      "wins": 20,
+      "win_rate": 0.18181818181818182,
+      "gross_r": 0.1321886498695954,
+      "fee_r": 162.2162948052827,
+      "net_r": -162.0841061554131,
+      "mean_r": -1.4734918741401193,
+      "mean_net_bp": -21.579158543972532,
+      "per_opportunity_net_bp": -21.579158543972532,
+      "random_net_r": -162.96596985668793,
+      "random_mean_net_bp": -20.53694773234071,
+      "random_per_opportunity_net_bp": -20.53694773234071,
+      "original_risk_net_r": -162.0841061554131,
+      "random_original_risk_net_r": -162.96596985668793,
+      "pf": 0.18874222204439636,
+      "realized_r_drawdown": 162.08410615541305,
+      "without_best_net_r": -172.0850234268196,
+      "without_best5_net_r": -191.04522428344282,
+      "initial_stops": 61,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -114.64318927949945,
+        "p": 0.5648217589120544,
+        "ci95": [
+          -1404.745635174086,
+          1189.8484482524264
+        ],
+        "weeks": 42
+      },
+      "absolute_bp_test": {
+        "total": -2373.7074398369787,
+        "p": 0.999950002499875,
+        "ci95": [
+          -3358.4053074542585,
+          -1267.870420345518
+        ],
+        "weeks": 42
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 42
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 42
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "baseline",
+      "period": "year5",
+      "opportunities": 75,
+      "n": 75,
+      "random_n": 75,
+      "fill_or_admission_rate": 1.0,
+      "wins": 20,
+      "win_rate": 0.26666666666666666,
+      "gross_r": 19.340711249379687,
+      "fee_r": 102.72648495085298,
+      "net_r": -83.3857737014733,
+      "mean_r": -1.111810316019644,
+      "mean_net_bp": -22.084735382481984,
+      "per_opportunity_net_bp": -22.084735382481984,
+      "random_net_r": -84.6724351382125,
+      "random_mean_net_bp": -19.383097168637864,
+      "random_per_opportunity_net_bp": -19.383097168637864,
+      "original_risk_net_r": -83.3857737014733,
+      "random_original_risk_net_r": -84.6724351382125,
+      "pf": 0.346037229149696,
+      "realized_r_drawdown": 111.92277492875114,
+      "without_best_net_r": -107.66445271381252,
+      "without_best5_net_r": -117.13978440439979,
+      "initial_stops": 43,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -202.6228660383088,
+        "p": 0.6724663766811659,
+        "ci95": [
+          -1072.0352687655118,
+          675.5427116419107
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -1656.3551536861492,
+        "p": 0.999850007499625,
+        "ci95": [
+          -2397.504455887319,
+          -814.54317465378
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "all",
+      "opportunities": 485,
+      "n": 140,
+      "random_n": 125,
+      "fill_or_admission_rate": 0.28865979381443296,
+      "wins": 27,
+      "win_rate": 0.19285714285714287,
+      "gross_r": 17.984708693464004,
+      "fee_r": 191.5911262658941,
+      "net_r": -173.60641757243008,
+      "mean_r": -1.240045839803072,
+      "mean_net_bp": -26.59847056348654,
+      "per_opportunity_net_bp": -7.6779090286352885,
+      "random_net_r": -163.69348882263472,
+      "random_mean_net_bp": -20.24827533267646,
+      "random_per_opportunity_net_bp": -5.218627663060943,
+      "original_risk_net_r": -173.60641757243008,
+      "random_original_risk_net_r": -163.69348882263472,
+      "pf": 0.28146844410895916,
+      "realized_r_drawdown": 200.71646247482923,
+      "without_best_net_r": -197.88509658476931,
+      "without_best5_net_r": -226.375049600891,
+      "initial_stops": 86,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 2,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {
+        "filtered": 345
+      },
+      "skipped_original_winners": 77,
+      "skipped_original_net_r": -378.9388195008899,
+      "excess_bp_test": {
+        "total": -1192.7514623035581,
+        "p": 0.9418529073546322,
+        "ci95": [
+          -2671.634053792844,
+          281.68796556463354
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      },
+      "absolute_bp_test": {
+        "total": -3723.785878888115,
+        "p": 1.0,
+        "ci95": [
+          -5088.842466706114,
+          -2371.949814268526
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 7646.172257362801,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          5834.779483027269,
+          9473.287592457096
+        ],
+        "weeks": 204
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 655.8462560501163,
+        "p": 0.29338533073346335,
+        "ci95": [
+          -1641.9196336510306,
+          2887.257917998952
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "earlier",
+      "opportunities": 246,
+      "n": 74,
+      "random_n": 70,
+      "fill_or_admission_rate": 0.3008130081300813,
+      "wins": 10,
+      "win_rate": 0.13513513513513514,
+      "gross_r": -19.30388370193534,
+      "fee_r": 85.90179838201443,
+      "net_r": -105.20568208394981,
+      "mean_r": -1.4216984065398623,
+      "mean_net_bp": -35.43780881618873,
+      "per_opportunity_net_bp": -10.660153871536444,
+      "random_net_r": -62.32624388795213,
+      "random_mean_net_bp": -20.664925597859714,
+      "random_per_opportunity_net_bp": -5.880263381504798,
+      "original_risk_net_r": -105.20568208394981,
+      "random_original_risk_net_r": -62.32624388795213,
+      "pf": 0.15239110860879188,
+      "realized_r_drawdown": 105.2056820839498,
+      "without_best_net_r": -118.83468208394979,
+      "without_best5_net_r": -123.72686995872868,
+      "initial_stops": 50,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 172
+      },
+      "skipped_original_winners": 37,
+      "skipped_original_net_r": -158.10463332808905,
+      "excess_bp_test": {
+        "total": -1175.8530605477856,
+        "p": 0.983750812459377,
+        "ci95": [
+          -2184.87467381337,
+          -107.36014226115338
+        ],
+        "weeks": 105
+      },
+      "absolute_bp_test": {
+        "total": -2622.397852397966,
+        "p": 1.0,
+        "ci95": [
+          -3587.290039612731,
+          -1695.6885624497666
+        ],
+        "weeks": 105
+      },
+      "delta_vs_original_bp_test": {
+        "total": 3657.85404182814,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          2124.398265714625,
+          5232.979686573768
+        ],
+        "weeks": 105
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 203.86701189192615,
+        "p": 0.41577921103944804,
+        "ci95": [
+          -1677.3968128913002,
+          2089.303283947125
+        ],
+        "weeks": 105
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "later",
+      "opportunities": 239,
+      "n": 66,
+      "random_n": 55,
+      "fill_or_admission_rate": 0.27615062761506276,
+      "wins": 17,
+      "win_rate": 0.25757575757575757,
+      "gross_r": 37.288592395399355,
+      "fee_r": 105.68932788387964,
+      "net_r": -68.4007354884803,
+      "mean_r": -1.0363747801284893,
+      "mean_net_bp": -16.687697371062868,
+      "per_opportunity_net_bp": -4.608318102469245,
+      "random_net_r": -101.36724493468255,
+      "random_mean_net_bp": -19.717993176988674,
+      "random_per_opportunity_net_bp": -4.537613492612457,
+      "original_risk_net_r": -68.4007354884803,
+      "random_original_risk_net_r": -101.36724493468255,
+      "pf": 0.41782765622244816,
+      "realized_r_drawdown": 97.083402012501,
+      "without_best_net_r": -92.67941450081952,
+      "without_best5_net_r": -108.47929586721568,
+      "initial_stops": 36,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {
+        "filtered": 173
+      },
+      "skipped_original_winners": 40,
+      "skipped_original_net_r": -220.83418617280086,
+      "excess_bp_test": {
+        "total": -16.898401755772134,
+        "p": 0.5083245837708115,
+        "ci95": [
+          -1012.818948489046,
+          988.2607314382623
+        ],
+        "weeks": 99
+      },
+      "absolute_bp_test": {
+        "total": -1101.3880264901495,
+        "p": 0.9902004899755013,
+        "ci95": [
+          -1999.9572524813636,
+          -179.64416823521634
+        ],
+        "weeks": 99
+      },
+      "delta_vs_original_bp_test": {
+        "total": 3988.318215534663,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          3016.881074263518,
+          5002.923529427973
+        ],
+        "weeks": 99
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 451.97924415819017,
+        "p": 0.2575371231438428,
+        "ci95": [
+          -905.3465200060043,
+          1771.0169724140494
+        ],
+        "weeks": 99
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "year1",
+      "opportunities": 109,
+      "n": 30,
+      "random_n": 27,
+      "fill_or_admission_rate": 0.27522935779816515,
+      "wins": 6,
+      "win_rate": 0.2,
+      "gross_r": 1.224810576103689,
+      "fee_r": 19.785305097519824,
+      "net_r": -18.560494521416135,
+      "mean_r": -0.6186831507138711,
+      "mean_net_bp": -34.98019798936365,
+      "per_opportunity_net_bp": -9.627577428265223,
+      "random_net_r": -24.614185397090523,
+      "random_mean_net_bp": -20.85604050537376,
+      "random_per_opportunity_net_bp": -5.166175171055886,
+      "original_risk_net_r": -18.560494521416135,
+      "random_original_risk_net_r": -24.614185397090523,
+      "pf": 0.49519236319236054,
+      "realized_r_drawdown": 18.560494521416135,
+      "without_best_net_r": -32.189494521416115,
+      "without_best5_net_r": -36.7605033839146,
+      "initial_stops": 20,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 79
+      },
+      "skipped_original_winners": 18,
+      "skipped_original_net_r": -60.78795312242336,
+      "excess_bp_test": {
+        "total": -486.29284603581806,
+        "p": 0.8852057397130143,
+        "ci95": [
+          -1230.531337438156,
+          264.18245810276915
+        ],
+        "weeks": 45
+      },
+      "absolute_bp_test": {
+        "total": -1049.4059396809093,
+        "p": 0.992400379981001,
+        "ci95": [
+          -1868.5370018376266,
+          -229.658513490752
+        ],
+        "weeks": 45
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1493.467414140937,
+        "p": 0.012599370031498426,
+        "ci95": [
+          233.6077505325554,
+          2670.8382211468615
+        ],
+        "weeks": 45
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 176.72317415794782,
+        "p": 0.3960301984900755,
+        "ci95": [
+          -1094.953846404269,
+          1447.42474023584
+        ],
+        "weeks": 45
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "year2",
+      "opportunities": 74,
+      "n": 27,
+      "random_n": 24,
+      "fill_or_admission_rate": 0.36486486486486486,
+      "wins": 2,
+      "win_rate": 0.07407407407407407,
+      "gross_r": -8.04013236121513,
+      "fee_r": 51.72218345932818,
+      "net_r": -59.76231582054331,
+      "mean_r": -2.213419104464567,
+      "mean_net_bp": -29.234194642568376,
+      "per_opportunity_net_bp": -10.666530477693868,
+      "random_net_r": -33.49906303146976,
+      "random_mean_net_bp": -25.21366368431373,
+      "random_per_opportunity_net_bp": -8.177404438155804,
+      "original_risk_net_r": -59.76231582054331,
+      "random_original_risk_net_r": -33.49906303146976,
+      "pf": 0.008163889200748366,
+      "realized_r_drawdown": 59.76231582054331,
+      "without_best_net_r": -60.144276294851664,
+      "without_best5_net_r": -59.52957064871612,
+      "initial_stops": 16,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 47
+      },
+      "skipped_original_winners": 10,
+      "skipped_original_net_r": -48.84439321135627,
+      "excess_bp_test": {
+        "total": -184.1953269258167,
+        "p": 0.7616619169041547,
+        "ci95": [
+          -669.0547395994472,
+          279.6351409181552
+        ],
+        "weeks": 38
+      },
+      "absolute_bp_test": {
+        "total": -789.3232553493461,
+        "p": 1.0,
+        "ci95": [
+          -1140.0491480207565,
+          -454.911927924031
+        ],
+        "weeks": 38
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1144.9391599998473,
+        "p": 0.0012499375031248437,
+        "ci95": [
+          434.01583417796553,
+          1919.209572048514
+        ],
+        "weeks": 38
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -298.9546286800532,
+        "p": 0.6816159192040397,
+        "ci95": [
+          -1532.3161227535884,
+          912.8930167261859
+        ],
+        "weeks": 38
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "year3",
+      "opportunities": 117,
+      "n": 28,
+      "random_n": 31,
+      "fill_or_admission_rate": 0.23931623931623933,
+      "wins": 4,
+      "win_rate": 0.14285714285714285,
+      "gross_r": -6.465373393852167,
+      "fee_r": 24.779879231416714,
+      "net_r": -31.24525262526888,
+      "mean_r": -1.1159018794738886,
+      "mean_net_bp": -34.62577866568951,
+      "per_opportunity_net_bp": -8.286511133669284,
+      "random_net_r": -36.881469153282545,
+      "random_mean_net_bp": -18.739652305783622,
+      "random_per_opportunity_net_bp": -4.9652070211905315,
+      "original_risk_net_r": -31.24525262526888,
+      "random_original_risk_net_r": -36.881469153282545,
+      "pf": 0.21110217240841012,
+      "realized_r_drawdown": 33.82836259273043,
+      "without_best_net_r": -37.8175937467643,
+      "without_best5_net_r": -39.37256468609969,
+      "initial_stops": 19,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 89
+      },
+      "skipped_original_winners": 24,
+      "skipped_original_net_r": -87.87494791542574,
+      "excess_bp_test": {
+        "total": -388.592581160014,
+        "p": 0.8803059847007649,
+        "ci95": [
+          -1043.0281796410914,
+          237.16679883575495
+        ],
+        "weeks": 44
+      },
+      "absolute_bp_test": {
+        "total": -969.5218026393063,
+        "p": 0.9996500174991251,
+        "ci95": [
+          -1507.1619526237462,
+          -445.6964163732703
+        ],
+        "weeks": 44
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1893.237970917444,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1129.1444204361023,
+          2676.578936965996
+        ],
+        "weeks": 44
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 594.482363436323,
+        "p": 0.12049397530123494,
+        "ci95": [
+          -394.0552503195923,
+          1544.7049722102338
+        ],
+        "weeks": 44
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "year4",
+      "opportunities": 110,
+      "n": 33,
+      "random_n": 20,
+      "fill_or_admission_rate": 0.3,
+      "wins": 6,
+      "win_rate": 0.18181818181818182,
+      "gross_r": -3.9006356236501185,
+      "fee_r": 64.97158193121808,
+      "net_r": -68.8722175548682,
+      "mean_r": -2.0870368956020666,
+      "mean_net_bp": -21.883285449175506,
+      "per_opportunity_net_bp": -6.564985634752651,
+      "random_net_r": -34.52739826224552,
+      "random_mean_net_bp": -19.755652908192523,
+      "random_per_opportunity_net_bp": -3.591936892398641,
+      "original_risk_net_r": -68.8722175548682,
+      "random_original_risk_net_r": -34.52739826224552,
+      "pf": 0.10894025878459461,
+      "realized_r_drawdown": 71.74718185128945,
+      "without_best_net_r": -74.38021523629638,
+      "without_best5_net_r": -77.15245089231074,
+      "initial_stops": 21,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 77
+      },
+      "skipped_original_winners": 14,
+      "skipped_original_net_r": -93.21188860054482,
+      "excess_bp_test": {
+        "total": -327.03536165894127,
+        "p": 0.8057597120143993,
+        "ci95": [
+          -991.4864417553408,
+          385.2294901304205
+        ],
+        "weeks": 42
+      },
+      "absolute_bp_test": {
+        "total": -722.1484198227919,
+        "p": 0.9774511274436278,
+        "ci95": [
+          -1395.9155994695618,
+          14.389741928471087
+        ],
+        "weeks": 42
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1651.5590200141874,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          909.5579261089972,
+          2364.9485758490378
+        ],
+        "weeks": 42
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -212.3921723794417,
+        "p": 0.6795160241987901,
+        "ci95": [
+          -1085.3557119333939,
+          695.4543392486012
+        ],
+        "weeks": 42
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "aligned",
+      "period": "year5",
+      "opportunities": 75,
+      "n": 22,
+      "random_n": 23,
+      "fill_or_admission_rate": 0.29333333333333333,
+      "wins": 9,
+      "win_rate": 0.4090909090909091,
+      "gross_r": 35.16603949607774,
+      "fee_r": 30.332176546411294,
+      "net_r": 4.833862949666434,
+      "mean_r": 0.2197210431666561,
+      "mean_net_bp": -8.790293699807343,
+      "per_opportunity_net_bp": -2.578486151943488,
+      "random_net_r": -34.17137297854635,
+      "random_mean_net_bp": -16.8152658640345,
+      "random_per_opportunity_net_bp": -5.156681531637247,
+      "original_risk_net_r": 4.833862949666434,
+      "random_original_risk_net_r": -34.17137297854635,
+      "pf": 1.1745554495350874,
+      "realized_r_drawdown": 22.276181952732628,
+      "without_best_net_r": -19.444816062672793,
+      "without_best5_net_r": -26.20802400840131,
+      "initial_stops": 10,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 1,
+      "zero_opportunity_statuses": {
+        "filtered": 53
+      },
+      "skipped_original_winners": 11,
+      "skipped_original_net_r": -88.21963665113974,
+      "excess_bp_test": {
+        "total": 193.36465347703196,
+        "p": 0.2671866406679666,
+        "ci95": [
+          -395.308130017855,
+          799.738467782442
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -193.3864613957616,
+        "p": 0.7658117094145293,
+        "ci95": [
+          -649.210685560554,
+          307.9796562530812
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1462.9686922903875,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          932.7182214908585,
+          1961.3184256935956
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 395.98751951534075,
+        "p": 0.1464926753662317,
+        "ci95": [
+          -278.46670477167464,
+          1133.7355740387454
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "all",
+      "opportunities": 485,
+      "n": 156,
+      "random_n": 161,
+      "fill_or_admission_rate": 0.3216494845360825,
+      "wins": 25,
+      "win_rate": 0.16025641025641027,
+      "gross_r": -48.34823910402359,
+      "fee_r": 162.14343955245255,
+      "net_r": -210.49167865647615,
+      "mean_r": -1.3493056324133086,
+      "mean_net_bp": -31.81784632957883,
+      "per_opportunity_net_bp": -10.234193870957315,
+      "random_net_r": -182.80234105763464,
+      "random_mean_net_bp": -20.04801171609602,
+      "random_per_opportunity_net_bp": -6.655113167611255,
+      "original_risk_net_r": -210.49167865647615,
+      "random_original_risk_net_r": -182.80234105763464,
+      "pf": 0.15025628032006064,
+      "realized_r_drawdown": 210.49167865647613,
+      "without_best_net_r": -217.22174922988452,
+      "without_best5_net_r": -233.5194172774476,
+      "initial_stops": 102,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 329
+      },
+      "skipped_original_winners": 79,
+      "skipped_original_net_r": -342.0535584168439,
+      "excess_bp_test": {
+        "total": -1735.8541411228389,
+        "p": 0.9807009649517524,
+        "ci95": [
+          -3354.4367223416875,
+          -79.62475561263575
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      },
+      "absolute_bp_test": {
+        "total": -4963.584027414297,
+        "p": 1.0,
+        "ci95": [
+          -6320.134047026154,
+          -3649.216534707007
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 6406.3741088366205,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          4205.418147236181,
+          8566.19630123149
+        ],
+        "weeks": 204
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 112.74357723083585,
+        "p": 0.4650267486625669,
+        "ci95": [
+          -2266.634861389123,
+          2429.699666749964
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "earlier",
+      "opportunities": 246,
+      "n": 82,
+      "random_n": 81,
+      "fill_or_admission_rate": 0.3333333333333333,
+      "wins": 9,
+      "win_rate": 0.10975609756097561,
+      "gross_r": -43.91606977996302,
+      "fee_r": 64.80172057870104,
+      "net_r": -108.71779035866406,
+      "mean_r": -1.3258267116910252,
+      "mean_net_bp": -40.54594129318998,
+      "per_opportunity_net_bp": -13.515313764396659,
+      "random_net_r": -103.8142778811741,
+      "random_mean_net_bp": -29.19597770532101,
+      "random_per_opportunity_net_bp": -9.613309732239845,
+      "original_risk_net_r": -108.71779035866406,
+      "random_original_risk_net_r": -103.8142778811741,
+      "pf": 0.09032520074959986,
+      "realized_r_drawdown": 109.72531261893802,
+      "without_best_net_r": -113.95506535866406,
+      "without_best5_net_r": -118.07666518137516,
+      "initial_stops": 59,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 164
+      },
+      "skipped_original_winners": 38,
+      "skipped_original_net_r": -154.5925250533748,
+      "excess_bp_test": {
+        "total": -959.8929919105766,
+        "p": 0.9409529523523824,
+        "ci95": [
+          -2124.850453957853,
+          231.8109876172101
+        ],
+        "weeks": 105
+      },
+      "absolute_bp_test": {
+        "total": -3324.7671860415785,
+        "p": 1.0,
+        "ci95": [
+          -4462.281748677412,
+          -2296.566424845806
+        ],
+        "weeks": 105
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2955.4847081845273,
+        "p": 0.0012499375031248437,
+        "ci95": [
+          1094.8013791960732,
+          4842.284975083437
+        ],
+        "weeks": 105
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 419.82708052913574,
+        "p": 0.34118294085295736,
+        "ci95": [
+          -1598.7831190678933,
+          2321.0628547102083
+        ],
+        "weeks": 105
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "later",
+      "opportunities": 239,
+      "n": 74,
+      "random_n": 80,
+      "fill_or_admission_rate": 0.30962343096234307,
+      "wins": 16,
+      "win_rate": 0.21621621621621623,
+      "gross_r": -4.432169324060573,
+      "fee_r": 97.3417189737515,
+      "net_r": -101.77388829781208,
+      "mean_r": -1.3753228148352983,
+      "mean_net_bp": -22.146173532063777,
+      "per_opportunity_net_bp": -6.856974231685019,
+      "random_net_r": -78.98806317646051,
+      "random_mean_net_bp": -10.785696152005716,
+      "random_per_opportunity_net_bp": -3.6102748625960555,
+      "original_risk_net_r": -101.77388829781208,
+      "random_original_risk_net_r": -78.98806317646051,
+      "pf": 0.2061266338059803,
+      "realized_r_drawdown": 101.77388829781208,
+      "without_best_net_r": -108.50395887122045,
+      "without_best5_net_r": -121.55108352912137,
+      "initial_stops": 43,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 165
+      },
+      "skipped_original_winners": 41,
+      "skipped_original_net_r": -187.46103336346908,
+      "excess_bp_test": {
+        "total": -775.9611492122622,
+        "p": 0.903904804759762,
+        "ci95": [
+          -1899.0062729020449,
+          288.92509477333834
+        ],
+        "weeks": 99
+      },
+      "absolute_bp_test": {
+        "total": -1638.8168413727194,
+        "p": 1.0,
+        "ci95": [
+          -2339.730360700173,
+          -989.417738403551
+        ],
+        "weeks": 99
+      },
+      "delta_vs_original_bp_test": {
+        "total": 3450.8894006520927,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          2224.1340030120327,
+          4650.783658804
+        ],
+        "weeks": 99
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -307.0835032982998,
+        "p": 0.6711664416779161,
+        "ci95": [
+          -1623.5730720418294,
+          1026.2358821708576
+        ],
+        "weeks": 99
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "year1",
+      "opportunities": 109,
+      "n": 40,
+      "random_n": 42,
+      "fill_or_admission_rate": 0.3669724770642202,
+      "wins": 5,
+      "win_rate": 0.125,
+      "gross_r": -21.516194031406172,
+      "fee_r": 29.537495290634954,
+      "net_r": -51.05368932204112,
+      "mean_r": -1.2763422330510281,
+      "mean_net_bp": -35.9461194349698,
+      "per_opportunity_net_bp": -13.191236489897175,
+      "random_net_r": -37.67387449068365,
+      "random_mean_net_bp": -26.96548349153235,
+      "random_per_opportunity_net_bp": -10.390369785728062,
+      "original_risk_net_r": -51.05368932204112,
+      "random_original_risk_net_r": -37.67387449068365,
+      "pf": 0.11560285734388412,
+      "realized_r_drawdown": 51.053689322041116,
+      "without_best_net_r": -56.29096432204111,
+      "without_best5_net_r": -57.72710794690181,
+      "initial_stops": 31,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 69
+      },
+      "skipped_original_winners": 19,
+      "skipped_original_net_r": -28.294758321798366,
+      "excess_bp_test": {
+        "total": -305.2944707544335,
+        "p": 0.7323633818309084,
+        "ci95": [
+          -1228.7106645208205,
+          649.8460450674983
+        ],
+        "weeks": 45
+      },
+      "absolute_bp_test": {
+        "total": -1437.8447773987923,
+        "p": 0.999950002499875,
+        "ci95": [
+          -2125.0791233361306,
+          -743.629814291756
+        ],
+        "weeks": 45
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1105.0285764230543,
+        "p": 0.08459577021148942,
+        "ci95": [
+          -498.11570298811665,
+          2575.969549604534
+        ],
+        "weeks": 45
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 357.72154943933214,
+        "p": 0.31978401079946,
+        "ci95": [
+          -1109.8122433421722,
+          1804.3859310643963
+        ],
+        "weeks": 45
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "year2",
+      "opportunities": 74,
+      "n": 17,
+      "random_n": 18,
+      "fill_or_admission_rate": 0.22972972972972974,
+      "wins": 1,
+      "win_rate": 0.058823529411764705,
+      "gross_r": -10.025349384295653,
+      "fee_r": 14.730249318321379,
+      "net_r": -24.755598702617036,
+      "mean_r": -1.4562116883892373,
+      "mean_net_bp": -42.661086466675904,
+      "per_opportunity_net_bp": -9.800519863966084,
+      "random_net_r": -31.912985913971607,
+      "random_mean_net_bp": -24.72914915723991,
+      "random_per_opportunity_net_bp": -6.015198443652951,
+      "original_risk_net_r": -24.755598702617036,
+      "random_original_risk_net_r": -31.912985913971607,
+      "pf": 0.020951943436101503,
+      "realized_r_drawdown": 24.755598702617032,
+      "without_best_net_r": -25.2853764803948,
+      "without_best5_net_r": -24.30205774331877,
+      "initial_stops": 11,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 57
+      },
+      "skipped_original_winners": 11,
+      "skipped_original_net_r": -83.85111032928253,
+      "excess_bp_test": {
+        "total": -280.11378510317195,
+        "p": 0.7782110894455277,
+        "ci95": [
+          -987.4800018843372,
+          269.09129195586576
+        ],
+        "weeks": 38
+      },
+      "absolute_bp_test": {
+        "total": -725.2384699334903,
+        "p": 0.999950002499875,
+        "ci95": [
+          -1350.3102480047216,
+          -303.656749888685
+        ],
+        "weeks": 38
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1209.0239454157033,
+        "p": 0.0005499725013749313,
+        "ci95": [
+          515.9981818806958,
+          1846.8235778376657
+        ],
+        "weeks": 38
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -394.87308685740857,
+        "p": 0.7153142342882856,
+        "ci95": [
+          -1592.7786597864072,
+          537.3153458692793
+        ],
+        "weeks": 38
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "year3",
+      "opportunities": 117,
+      "n": 44,
+      "random_n": 43,
+      "fill_or_admission_rate": 0.37606837606837606,
+      "wins": 10,
+      "win_rate": 0.22727272727272727,
+      "gross_r": -5.603486413839567,
+      "fee_r": 47.175508995084,
+      "net_r": -52.778995408923564,
+      "mean_r": -1.199522622930081,
+      "mean_net_bp": -33.61814187689665,
+      "per_opportunity_net_bp": -12.642720022080791,
+      "random_net_r": -44.800548421237536,
+      "random_mean_net_bp": -19.63397278853071,
+      "random_per_opportunity_net_bp": -7.215904529118123,
+      "original_risk_net_r": -52.778995408923564,
+      "random_original_risk_net_r": -44.800548421237536,
+      "pf": 0.2062397253972694,
+      "realized_r_drawdown": 52.77899540892355,
+      "without_best_net_r": -56.2424473173205,
+      "without_best5_net_r": -64.46882889541608,
+      "initial_stops": 26,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 73
+      },
+      "skipped_original_winners": 18,
+      "skipped_original_net_r": -66.34120513177105,
+      "excess_bp_test": {
+        "total": -634.9374126766321,
+        "p": 0.976001199940003,
+        "ci95": [
+          -1262.3924271883857,
+          -27.099505785232427
+        ],
+        "weeks": 44
+      },
+      "absolute_bp_test": {
+        "total": -1479.1982425834528,
+        "p": 0.999850007499625,
+        "ci95": [
+          -2309.256743796009,
+          -765.3524611316451
+        ],
+        "weeks": 44
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1383.5615309732975,
+        "p": 0.0026498675066246686,
+        "ci95": [
+          311.6212363776338,
+          2285.7590443486174
+        ],
+        "weeks": 44
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 348.137531919705,
+        "p": 0.23088845557722115,
+        "ci95": [
+          -584.5974682243672,
+          1246.0000742329255
+        ],
+        "weeks": 44
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "year4",
+      "opportunities": 110,
+      "n": 39,
+      "random_n": 37,
+      "fill_or_admission_rate": 0.35454545454545455,
+      "wins": 8,
+      "win_rate": 0.20512820512820512,
+      "gross_r": 1.8805791251175683,
+      "fee_r": 52.89515824221796,
+      "net_r": -51.0145791171004,
+      "mean_r": -1.3080661312077027,
+      "mean_net_bp": -17.291049930699444,
+      "per_opportunity_net_bp": -6.130463157247985,
+      "random_net_r": -58.26859746325958,
+      "random_mean_net_bp": -14.916473081007195,
+      "random_per_opportunity_net_bp": -5.017359127247875,
+      "original_risk_net_r": -51.0145791171004,
+      "random_original_risk_net_r": -58.26859746325958,
+      "pf": 0.2392746488126596,
+      "realized_r_drawdown": 51.34954549043445,
+      "without_best_net_r": -57.744649690508766,
+      "without_best5_net_r": -66.10189458958374,
+      "initial_stops": 22,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 71
+      },
+      "skipped_original_winners": 12,
+      "skipped_original_net_r": -111.06952703831264,
+      "excess_bp_test": {
+        "total": -122.44144330001214,
+        "p": 0.6295685215739213,
+        "ci95": [
+          -850.859983871407,
+          589.8014787253476
+        ],
+        "weeks": 42
+      },
+      "absolute_bp_test": {
+        "total": -674.3509472972784,
+        "p": 0.9966501674916254,
+        "ci95": [
+          -1130.0293080815595,
+          -198.48069390802988
+        ],
+        "weeks": 42
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1699.3564925397004,
+        "p": 0.00044997750112494374,
+        "ci95": [
+          805.8582070078344,
+          2531.031428025437
+        ],
+        "weeks": 42
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -7.798254020512516,
+        "p": 0.5080245987700615,
+        "ci95": [
+          -891.0141058631157,
+          794.9762838899904
+        ],
+        "weeks": 42
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "counter",
+      "period": "year5",
+      "opportunities": 75,
+      "n": 16,
+      "random_n": 21,
+      "fill_or_admission_rate": 0.21333333333333335,
+      "wins": 1,
+      "win_rate": 0.0625,
+      "gross_r": -13.083788399599765,
+      "fee_r": 17.805027706194252,
+      "net_r": -30.88881610579402,
+      "mean_r": -1.9305510066121263,
+      "mean_net_bp": -40.434474387580266,
+      "per_opportunity_net_bp": -8.62602120268379,
+      "random_net_r": -10.14633476848224,
+      "random_mean_net_bp": -12.089740995842629,
+      "random_per_opportunity_net_bp": -3.385127478835936,
+      "original_risk_net_r": -30.88881610579402,
+      "random_original_risk_net_r": -10.14633476848224,
+      "pf": 0.008278582086322097,
+      "realized_r_drawdown": 30.888816105794024,
+      "without_best_net_r": -31.146666339803367,
+      "without_best5_net_r": -26.517960020014694,
+      "initial_stops": 12,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 59
+      },
+      "skipped_original_winners": 19,
+      "skipped_original_net_r": -52.49695759567926,
+      "excess_bp_test": {
+        "total": -393.0670292885891,
+        "p": 0.8325583720813959,
+        "ci95": [
+          -1209.395785774134,
+          305.68514433343944
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -646.9515902012843,
+        "p": 0.999850007499625,
+        "ci95": [
+          -1039.0891472297276,
+          -296.1680927260006
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1009.4035634848647,
+        "p": 0.004699765011749413,
+        "ci95": [
+          247.10799442392843,
+          1689.5124009825456
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -190.44416325028027,
+        "p": 0.6758662066896656,
+        "ci95": [
+          -1030.8627240254577,
+          609.0230591417215
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "all",
+      "opportunities": 485,
+      "n": 189,
+      "random_n": 199,
+      "fill_or_admission_rate": 0.38969072164948454,
+      "wins": 52,
+      "win_rate": 0.2751322751322751,
+      "gross_r": 36.27580982684024,
+      "fee_r": 204.722950671254,
+      "net_r": -168.44714084441375,
+      "mean_r": -0.8912547134625066,
+      "mean_net_bp": -14.193588518246056,
+      "per_opportunity_net_bp": -5.531109752471145,
+      "random_net_r": -211.86916367341678,
+      "random_mean_net_bp": -18.907518165935812,
+      "random_per_opportunity_net_bp": -7.757930134064385,
+      "original_risk_net_r": -168.44714084441375,
+      "random_original_risk_net_r": -211.86916367341678,
+      "pf": 0.34434818032102726,
+      "realized_r_drawdown": 190.8435829034231,
+      "without_best_net_r": -178.44805811582023,
+      "without_best5_net_r": -201.76457618625506,
+      "initial_stops": 97,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 296
+      },
+      "skipped_original_winners": 52,
+      "skipped_original_net_r": -384.09809622890623,
+      "excess_bp_test": {
+        "total": 1080.007885072722,
+        "p": 0.13564321783910804,
+        "ci95": [
+          -802.4299305560158,
+          3064.690912470302
+        ],
+        "weeks": 204,
+        "holm_p": 0.6782160891955402
+      },
+      "absolute_bp_test": {
+        "total": -2682.5882299485047,
+        "p": 0.9985000749962502,
+        "ci95": [
+          -4366.695505736554,
+          -973.0900606381131
+        ],
+        "weeks": 204,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 8687.369906302414,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          6690.046429998933,
+          10577.537159775311
+        ],
+        "weeks": 204
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 2928.605603426396,
+        "p": 0.004849757512124394,
+        "ci95": [
+          719.7364280983738,
+          5083.39963032822
+        ],
+        "weeks": 204,
+        "holm_p": 0.02909854507274636
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "earlier",
+      "opportunities": 246,
+      "n": 90,
+      "random_n": 95,
+      "fill_or_admission_rate": 0.36585365853658536,
+      "wins": 28,
+      "win_rate": 0.3111111111111111,
+      "gross_r": 34.49558609978434,
+      "fee_r": 83.88242906920934,
+      "net_r": -49.38684296942498,
+      "mean_r": -0.5487426996602776,
+      "mean_net_bp": -3.70096506429513,
+      "per_opportunity_net_bp": -1.3540116088884615,
+      "random_net_r": -82.23397183594176,
+      "random_mean_net_bp": -11.464345640054862,
+      "random_per_opportunity_net_bp": -4.427287950427691,
+      "original_risk_net_r": -49.38684296942498,
+      "random_original_risk_net_r": -82.23397183594176,
+      "pf": 0.5417927289997986,
+      "realized_r_drawdown": 70.66113070759576,
+      "without_best_net_r": -55.72336890860189,
+      "without_best5_net_r": -77.7142692031249,
+      "initial_stops": 46,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 156
+      },
+      "skipped_original_winners": 19,
+      "skipped_original_net_r": -213.92347244261387,
+      "excess_bp_test": {
+        "total": 756.02598001865,
+        "p": 0.19239038048097595,
+        "ci95": [
+          -876.1692636146565,
+          2475.0648577163574
+        ],
+        "weeks": 105
+      },
+      "absolute_bp_test": {
+        "total": -333.08685578656167,
+        "p": 0.6680665966701665,
+        "ci95": [
+          -1823.51839819298,
+          1256.5577742749622
+        ],
+        "weeks": 105
+      },
+      "delta_vs_original_bp_test": {
+        "total": 5947.165038439543,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          4553.282392857046,
+          7414.067014893434
+        ],
+        "weeks": 105
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 2135.746052458362,
+        "p": 0.0026998650067496625,
+        "ci95": [
+          666.3577719886641,
+          3582.710099442785
+        ],
+        "weeks": 105
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "later",
+      "opportunities": 239,
+      "n": 99,
+      "random_n": 104,
+      "fill_or_admission_rate": 0.41422594142259417,
+      "wins": 24,
+      "win_rate": 0.24242424242424243,
+      "gross_r": 1.7802237270558954,
+      "fee_r": 120.84052160204469,
+      "net_r": -119.06029787498878,
+      "mean_r": -1.202629271464533,
+      "mean_net_bp": -23.732337112746904,
+      "per_opportunity_net_bp": -9.830549682685955,
+      "random_net_r": -129.63519183747502,
+      "random_mean_net_bp": -25.706569992461684,
+      "random_per_opportunity_net_bp": -11.186122507179979,
+      "original_risk_net_r": -119.06029787498878,
+      "random_original_risk_net_r": -129.63519183747502,
+      "pf": 0.20164905340322034,
+      "realized_r_drawdown": 123.93500647751571,
+      "without_best_net_r": -129.06121514639526,
+      "without_best5_net_r": -139.1318404156118,
+      "initial_stops": 51,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 140
+      },
+      "skipped_original_winners": 33,
+      "skipped_original_net_r": -170.1746237862924,
+      "excess_bp_test": {
+        "total": 323.981905054072,
+        "p": 0.2522373881305935,
+        "ci95": [
+          -641.4428426425961,
+          1283.569222850889
+        ],
+        "weeks": 99
+      },
+      "absolute_bp_test": {
+        "total": -2349.501374161943,
+        "p": 1.0,
+        "ci95": [
+          -3167.6053467878323,
+          -1578.1387831559668
+        ],
+        "weeks": 99
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2740.204867862869,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1517.9857428077062,
+          3914.2216440122547
+        ],
+        "weeks": 99
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 792.8595509680342,
+        "p": 0.16834158292085397,
+        "ci95": [
+          -807.0042724826628,
+          2406.4023985485132
+        ],
+        "weeks": 99
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "year1",
+      "opportunities": 109,
+      "n": 39,
+      "random_n": 40,
+      "fill_or_admission_rate": 0.3577981651376147,
+      "wins": 13,
+      "win_rate": 0.3333333333333333,
+      "gross_r": 21.28240140030617,
+      "fee_r": 31.016665200688404,
+      "net_r": -9.73426380038223,
+      "mean_r": -0.24959650770210848,
+      "mean_net_bp": -1.426221454926792,
+      "per_opportunity_net_bp": -0.5102994196527045,
+      "random_net_r": -25.42137161450509,
+      "random_mean_net_bp": -4.60484833346576,
+      "random_per_opportunity_net_bp": -1.689852599436977,
+      "original_risk_net_r": -9.73426380038223,
+      "random_original_risk_net_r": -25.42137161450509,
+      "pf": 0.7862209910247495,
+      "realized_r_drawdown": 27.255997256864642,
+      "without_best_net_r": -16.07078973955914,
+      "without_best5_net_r": -36.48643732164267,
+      "initial_stops": 24,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 70
+      },
+      "skipped_original_winners": 11,
+      "skipped_original_net_r": -69.61418384345727,
+      "excess_bp_test": {
+        "total": 128.5712965964857,
+        "p": 0.41652917354132296,
+        "ci95": [
+          -1092.0563703138366,
+          1359.7243811330864
+        ],
+        "weeks": 45
+      },
+      "absolute_bp_test": {
+        "total": -55.62263674214486,
+        "p": 0.536723163841808,
+        "ci95": [
+          -1174.8962948021833,
+          1223.6239522929368
+        ],
+        "weeks": 45
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2487.2507170797016,
+        "p": 9.99950002499875e-05,
+        "ci95": [
+          1429.339961093989,
+          3531.9124524550552
+        ],
+        "weeks": 45
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 791.5873167902514,
+        "p": 0.09529523523823809,
+        "ci95": [
+          -399.5767575079738,
+          1923.6032285773538
+        ],
+        "weeks": 45
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "year2",
+      "opportunities": 74,
+      "n": 30,
+      "random_n": 32,
+      "fill_or_admission_rate": 0.40540540540540543,
+      "wins": 9,
+      "win_rate": 0.3,
+      "gross_r": 3.8934413066777447,
+      "fee_r": 27.982235815416974,
+      "net_r": -24.088794508739227,
+      "mean_r": -0.8029598169579742,
+      "mean_net_bp": -13.990023002211904,
+      "per_opportunity_net_bp": -5.671630946842664,
+      "random_net_r": -44.119244402341266,
+      "random_mean_net_bp": -31.21153449529945,
+      "random_per_opportunity_net_bp": -13.496879781751112,
+      "original_risk_net_r": -24.088794508739227,
+      "random_original_risk_net_r": -44.119244402341266,
+      "pf": 0.25757333762205314,
+      "realized_r_drawdown": 24.088794508739223,
+      "without_best_net_r": -26.928681413501078,
+      "without_best5_net_r": -31.173792745379046,
+      "initial_stops": 13,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 44
+      },
+      "skipped_original_winners": 3,
+      "skipped_original_net_r": -84.51791452316034,
+      "excess_bp_test": {
+        "total": 579.068413783225,
+        "p": 0.15174241287935603,
+        "ci95": [
+          -370.0739952233782,
+          1670.6392749118022
+        ],
+        "weeks": 38
+      },
+      "absolute_bp_test": {
+        "total": -419.70069006635714,
+        "p": 0.9125043747812609,
+        "ci95": [
+          -988.2476872957616,
+          183.31910679283087
+        ],
+        "weeks": 38
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1514.5617252828367,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1019.1319410325708,
+          2127.0347511191067
+        ],
+        "weeks": 38
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 464.3091120289886,
+        "p": 0.12654367281635917,
+        "ci95": [
+          -265.45722259647795,
+          1268.6428095955112
+        ],
+        "weeks": 38
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "year3",
+      "opportunities": 117,
+      "n": 45,
+      "random_n": 43,
+      "fill_or_admission_rate": 0.38461538461538464,
+      "wins": 14,
+      "win_rate": 0.3111111111111111,
+      "gross_r": 11.689261818552446,
+      "fee_r": 46.78521432505462,
+      "net_r": -35.09595250650217,
+      "mean_r": -0.7799100557000482,
+      "mean_net_bp": -9.20088285186647,
+      "per_opportunity_net_bp": -3.5388010968717207,
+      "random_net_r": -31.803846134203624,
+      "random_mean_net_bp": -10.56964599010001,
+      "random_per_opportunity_net_bp": -3.884570748498294,
+      "original_risk_net_r": -35.09595250650217,
+      "random_original_risk_net_r": -31.803846134203624,
+      "pf": 0.35985791456650046,
+      "realized_r_drawdown": 36.130916904378914,
+      "without_best_net_r": -40.76393084252436,
+      "without_best5_net_r": -50.49707714713817,
+      "initial_stops": 21,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 72
+      },
+      "skipped_original_winners": 14,
+      "skipped_original_net_r": -84.02424803419245,
+      "excess_bp_test": {
+        "total": 40.45504924030911,
+        "p": 0.4578771061446928,
+        "ci95": [
+          -673.0860086829463,
+          796.3884081100457
+        ],
+        "weeks": 44
+      },
+      "absolute_bp_test": {
+        "total": -414.0397283339912,
+        "p": 0.792310384480776,
+        "ci95": [
+          -1266.3014924605802,
+          591.642238413643
+        ],
+        "weeks": 44
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2448.720045222759,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1555.572418109954,
+          3411.867922855445
+        ],
+        "weeks": 44
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 1023.5299938366461,
+        "p": 0.007849607519624019,
+        "ci95": [
+          235.39709976488436,
+          1851.050486209537
+        ],
+        "weeks": 44
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "year4",
+      "opportunities": 110,
+      "n": 38,
+      "random_n": 53,
+      "fill_or_admission_rate": 0.34545454545454546,
+      "wins": 6,
+      "win_rate": 0.15789473684210525,
+      "gross_r": 2.152245148402155,
+      "fee_r": 44.34955463184661,
+      "net_r": -42.19730948344446,
+      "mean_r": -1.1104555127222226,
+      "mean_net_bp": -25.716001913602863,
+      "per_opportunity_net_bp": -8.883709751971898,
+      "random_net_r": -70.16997413118288,
+      "random_mean_net_bp": -24.75550355464835,
+      "random_per_opportunity_net_bp": -11.927651712694201,
+      "original_risk_net_r": -42.19730948344446,
+      "random_original_risk_net_r": -70.16997413118288,
+      "pf": 0.23887445856783476,
+      "realized_r_drawdown": 42.19730948344446,
+      "without_best_net_r": -52.19822675485094,
+      "without_best5_net_r": -55.428364817035806,
+      "initial_stops": 18,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 72
+      },
+      "skipped_original_winners": 14,
+      "skipped_original_net_r": -119.8867966719686,
+      "excess_bp_test": {
+        "total": 334.8336156794537,
+        "p": 0.09239538023098845,
+        "ci95": [
+          -143.39040002130875,
+          816.7805238148917
+        ],
+        "weeks": 42
+      },
+      "absolute_bp_test": {
+        "total": -977.2080727169088,
+        "p": 0.9998000099995,
+        "ci95": [
+          -1459.1792410554272,
+          -513.8150217293818
+        ],
+        "weeks": 42
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1396.49936712007,
+        "p": 0.0011499425028748563,
+        "ci95": [
+          471.34904787536607,
+          2216.442601519846
+        ],
+        "weeks": 42
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 449.47680495895327,
+        "p": 0.23553822308884556,
+        "ci95": [
+          -709.7872489369767,
+          1610.5967420338404
+        ],
+        "weeks": 42
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "mixed",
+      "period": "year5",
+      "opportunities": 75,
+      "n": 37,
+      "random_n": 31,
+      "fill_or_admission_rate": 0.49333333333333335,
+      "wins": 10,
+      "win_rate": 0.2702702702702703,
+      "gross_r": -2.741539847098283,
+      "fee_r": 54.58928069824742,
+      "net_r": -57.330820545345695,
+      "mean_r": -1.5494816363606945,
+      "mean_net_bp": -22.054516272678462,
+      "per_opportunity_net_bp": -10.880228027854708,
+      "random_net_r": -40.354727391183886,
+      "random_mean_net_bp": -26.228922963301656,
+      "random_per_opportunity_net_bp": -10.841288158164684,
+      "original_risk_net_r": -57.330820545345695,
+      "random_original_risk_net_r": -40.354727391183886,
+      "pf": 0.1651178166130482,
+      "realized_r_drawdown": 62.2055291478726,
+      "without_best_net_r": -60.36119950296889,
+      "without_best5_net_r": -67.36333892957762,
+      "initial_stops": 21,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 38
+      },
+      "skipped_original_winners": 10,
+      "skipped_original_net_r": -26.05495315612758,
+      "excess_bp_test": {
+        "total": -2.9204902267516815,
+        "p": 0.5004749762511874,
+        "ci95": [
+          -614.6054247616702,
+          634.7629669986817
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -816.0171020891031,
+        "p": 0.9991000449977501,
+        "ci95": [
+          -1289.823661941392,
+          -340.2363321662043
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 840.3380515970457,
+        "p": 0.007899605019749012,
+        "ci95": [
+          149.1840618357831,
+          1490.2661509582192
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 199.70237581155706,
+        "p": 0.344282785860707,
+        "ci95": [
+          -729.6388295560056,
+          1164.5893639493127
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "all",
+      "opportunities": 485,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 485
+      },
+      "skipped_original_winners": 104,
+      "skipped_original_net_r": -552.5452370733201,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 204
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 204
+      },
+      "delta_vs_original_bp_test": {
+        "total": 11369.958136250916,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          9084.38653854248,
+          13626.006566519789
+        ],
+        "weeks": 204
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 1848.5977183536743,
+        "p": 0.0911954402279886,
+        "ci95": [
+          -856.5240150805287,
+          4418.1153409090275
+        ],
+        "weeks": 204
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "earlier",
+      "opportunities": 246,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 246
+      },
+      "skipped_original_winners": 47,
+      "skipped_original_net_r": -263.3103154120389,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 105
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 105
+      },
+      "delta_vs_original_bp_test": {
+        "total": 6280.251894226105,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          4419.5044271775105,
+          8179.238685617712
+        ],
+        "weeks": 105
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 1379.7200724397123,
+        "p": 0.09709514524273787,
+        "ci95": [
+          -681.2241741457963,
+          3408.792152799213
+        ],
+        "weeks": 105
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "later",
+      "opportunities": 239,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 239
+      },
+      "skipped_original_winners": 57,
+      "skipped_original_net_r": -289.23492166128113,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 99
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 99
+      },
+      "delta_vs_original_bp_test": {
+        "total": 5089.706242024811,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          3648.7220566505716,
+          6456.759163483703
+        ],
+        "weeks": 99
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 468.87764591396257,
+        "p": 0.2991850407479626,
+        "ci95": [
+          -1265.5006436067727,
+          2174.1628947335944
+        ],
+        "weeks": 99
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "year1",
+      "opportunities": 109,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 109
+      },
+      "skipped_original_winners": 24,
+      "skipped_original_net_r": -79.34844764383949,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 45
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 45
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2542.8733538218457,
+        "p": 0.0018499075046247689,
+        "ci95": [
+          973.3185464113751,
+          4079.5321081225475
+        ],
+        "weeks": 45
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 663.0160201937658,
+        "p": 0.18839058047097645,
+        "ci95": [
+          -806.1061176679468,
+          2094.220487753894
+        ],
+        "weeks": 45
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "year2",
+      "opportunities": 74,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 74
+      },
+      "skipped_original_winners": 12,
+      "skipped_original_net_r": -108.60670903189957,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 38
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 38
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1934.2624153491936,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1191.3956110149024,
+          2689.789757040916
+        ],
+        "weeks": 38
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -114.7593017542366,
+        "p": 0.5669716514174291,
+        "ci95": [
+          -1447.2774736317158,
+          1084.6991115207964
+        ],
+        "weeks": 38
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "year3",
+      "opportunities": 117,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 117
+      },
+      "skipped_original_winners": 28,
+      "skipped_original_net_r": -119.12020054069463,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 44
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 44
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2862.75977355675,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          2043.623565034527,
+          3711.893670868068
+        ],
+        "weeks": 44
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 983.074944596337,
+        "p": 0.034298285085745714,
+        "ci95": [
+          -69.69420432056944,
+          2018.0955035892775
+        ],
+        "weeks": 44
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "year4",
+      "opportunities": 110,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 110
+      },
+      "skipped_original_winners": 20,
+      "skipped_original_net_r": -162.0841061554131,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 42
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 42
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2373.7074398369787,
+        "p": 9.99950002499875e-05,
+        "ci95": [
+          1267.8704203455177,
+          3358.4053074542576
+        ],
+        "weeks": 42
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 114.64318927949945,
+        "p": 0.4352282385880706,
+        "ci95": [
+          -1189.8484482524266,
+          1404.745635174085
+        ],
+        "weeks": 42
+      }
+    },
+    {
+      "symbol": "BTC",
+      "arm": "unknown",
+      "period": "year5",
+      "opportunities": 75,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 75
+      },
+      "skipped_original_winners": 20,
+      "skipped_original_net_r": -83.3857737014733,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1656.3551536861492,
+        "p": 0.000199990000499975,
+        "ci95": [
+          814.5431746537799,
+          2397.504455887319
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 202.6228660383088,
+        "p": 0.32758362081895903,
+        "ci95": [
+          -675.5427116419107,
+          1072.0352687655115
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "all",
+      "opportunities": 385,
+      "n": 385,
+      "random_n": 385,
+      "fill_or_admission_rate": 1.0,
+      "wins": 93,
+      "win_rate": 0.24155844155844156,
+      "gross_r": 5.473506814414447,
+      "fee_r": 289.6197611643436,
+      "net_r": -284.1462543499291,
+      "mean_r": -0.738042219090725,
+      "mean_net_bp": -19.86377769818893,
+      "per_opportunity_net_bp": -19.86377769818893,
+      "random_net_r": -380.37511074391045,
+      "random_mean_net_bp": -28.062369865419978,
+      "random_per_opportunity_net_bp": -28.062369865419978,
+      "original_risk_net_r": -284.1462543499291,
+      "random_original_risk_net_r": -380.37511074391045,
+      "pf": 0.35942637913922615,
+      "realized_r_drawdown": 286.6224881010158,
+      "without_best_net_r": -297.3967661982703,
+      "without_best5_net_r": -326.7873744571591,
+      "initial_stops": 205,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 2,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 3156.4579843839538,
+        "p": 0.06749662516874157,
+        "ci95": [
+          -488.7191765299049,
+          7376.945910725867
+        ],
+        "weeks": 193
+      },
+      "absolute_bp_test": {
+        "total": -7647.554413802738,
+        "p": 1.0,
+        "ci95": [
+          -10638.925065600322,
+          -4212.298947103165
+        ],
+        "weeks": 193
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 193
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 193
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "earlier",
+      "opportunities": 214,
+      "n": 214,
+      "random_n": 214,
+      "fill_or_admission_rate": 1.0,
+      "wins": 55,
+      "win_rate": 0.2570093457943925,
+      "gross_r": 10.89908216432132,
+      "fee_r": 163.898457455593,
+      "net_r": -152.9993752912717,
+      "mean_r": -0.7149503518283724,
+      "mean_net_bp": -18.864537286127582,
+      "per_opportunity_net_bp": -18.864537286127582,
+      "random_net_r": -221.8815166910352,
+      "random_mean_net_bp": -30.319935639669325,
+      "random_per_opportunity_net_bp": -30.319935639669325,
+      "original_risk_net_r": -152.9993752912717,
+      "random_original_risk_net_r": -221.8815166910352,
+      "pf": 0.36971865313043767,
+      "realized_r_drawdown": 156.31136376358197,
+      "without_best_net_r": -166.24988713961287,
+      "without_best5_net_r": -190.72999095645633,
+      "initial_stops": 111,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 2,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 2451.455247657933,
+        "p": 0.09449527523623819,
+        "ci95": [
+          -753.0219898572362,
+          6131.39236649768
+        ],
+        "weeks": 100
+      },
+      "absolute_bp_test": {
+        "total": -4037.0109792313024,
+        "p": 0.9988500574971252,
+        "ci95": [
+          -6432.660252306556,
+          -1170.120588111439
+        ],
+        "weeks": 100
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 100
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 100
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "later",
+      "opportunities": 171,
+      "n": 171,
+      "random_n": 171,
+      "fill_or_admission_rate": 1.0,
+      "wins": 38,
+      "win_rate": 0.2222222222222222,
+      "gross_r": -5.425575349906879,
+      "fee_r": 125.72130370875053,
+      "net_r": -131.1468790586574,
+      "mean_r": -0.7669408132085227,
+      "mean_net_bp": -21.11428909106103,
+      "per_opportunity_net_bp": -21.11428909106103,
+      "random_net_r": -158.4935940528753,
+      "random_mean_net_bp": -25.237112112850618,
+      "random_per_opportunity_net_bp": -25.237112112850618,
+      "original_risk_net_r": -131.1468790586574,
+      "random_original_risk_net_r": -158.4935940528753,
+      "pf": 0.3469860742260929,
+      "realized_r_drawdown": 131.21263525491437,
+      "without_best_net_r": -138.83254668043443,
+      "without_best5_net_r": -158.1005042006449,
+      "initial_stops": 94,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 705.0027367260207,
+        "p": 0.248037598120094,
+        "ci95": [
+          -1290.113118514619,
+          2752.2947724212336
+        ],
+        "weeks": 93
+      },
+      "absolute_bp_test": {
+        "total": -3610.5434345714343,
+        "p": 1.0,
+        "ci95": [
+          -5099.921111039091,
+          -2065.987761360447
+        ],
+        "weeks": 93
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 93
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 93
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "year1",
+      "opportunities": 107,
+      "n": 107,
+      "random_n": 107,
+      "fill_or_admission_rate": 1.0,
+      "wins": 27,
+      "win_rate": 0.2523364485981308,
+      "gross_r": 8.372650342868894,
+      "fee_r": 59.9932583572863,
+      "net_r": -51.620608014417385,
+      "mean_r": -0.48243558891978866,
+      "mean_net_bp": -27.804398586076182,
+      "per_opportunity_net_bp": -27.804398586076182,
+      "random_net_r": -85.70850208909779,
+      "random_mean_net_bp": -32.96677350633599,
+      "random_per_opportunity_net_bp": -32.96677350633599,
+      "original_risk_net_r": -51.620608014417385,
+      "random_original_risk_net_r": -85.70850208909779,
+      "pf": 0.5244018737611255,
+      "realized_r_drawdown": 54.936632418739705,
+      "without_best_net_r": -64.87111986275858,
+      "without_best5_net_r": -82.62071332141397,
+      "initial_stops": 61,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 552.3741164677992,
+        "p": 0.28998550072496376,
+        "ci95": [
+          -1355.6956524289199,
+          2449.6075094403477
+        ],
+        "weeks": 46
+      },
+      "absolute_bp_test": {
+        "total": -2975.0706487101506,
+        "p": 0.99990000499975,
+        "ci95": [
+          -4445.789261243625,
+          -1515.2639078206098
+        ],
+        "weeks": 46
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 46
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 46
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "year2",
+      "opportunities": 65,
+      "n": 65,
+      "random_n": 65,
+      "fill_or_admission_rate": 1.0,
+      "wins": 18,
+      "win_rate": 0.27692307692307694,
+      "gross_r": 6.070705955395242,
+      "fee_r": 71.82701294240181,
+      "net_r": -65.75630698700655,
+      "mean_r": -1.011635492107793,
+      "mean_net_bp": -0.6520826182413654,
+      "per_opportunity_net_bp": -0.6520826182413654,
+      "random_net_r": -104.68006212172077,
+      "random_mean_net_bp": -37.04628385925375,
+      "random_per_opportunity_net_bp": -37.04628385925375,
+      "original_risk_net_r": -65.75630698700655,
+      "random_original_risk_net_r": -104.68006212172077,
+      "pf": 0.24039254884298353,
+      "realized_r_drawdown": 70.62925869975665,
+      "without_best_net_r": -76.14609834633228,
+      "without_best5_net_r": -81.60531311796561,
+      "initial_stops": 30,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 2365.6230806658054,
+        "p": 0.009649517524123795,
+        "ci95": [
+          342.8589961673641,
+          5427.261094073364
+        ],
+        "weeks": 37
+      },
+      "absolute_bp_test": {
+        "total": -42.385370185688274,
+        "p": 0.5015749212539373,
+        "ci95": [
+          -1610.5145559869627,
+          2337.6256566031625
+        ],
+        "weeks": 37
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 37
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 37
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "year3",
+      "opportunities": 80,
+      "n": 80,
+      "random_n": 80,
+      "fill_or_admission_rate": 1.0,
+      "wins": 12,
+      "win_rate": 0.15,
+      "gross_r": -29.245615544938147,
+      "fee_r": 60.03828500691604,
+      "net_r": -89.28390055185417,
+      "mean_r": -1.1160487568981772,
+      "mean_net_bp": -33.380214474009236,
+      "per_opportunity_net_bp": -33.380214474009236,
+      "random_net_r": -63.737317302173345,
+      "random_mean_net_bp": -16.048172133335402,
+      "random_per_opportunity_net_bp": -16.048172133335402,
+      "original_risk_net_r": -89.28390055185417,
+      "random_original_risk_net_r": -63.737317302173345,
+      "pf": 0.12673697847024182,
+      "realized_r_drawdown": 93.46880856372375,
+      "without_best_net_r": -93.46880856372375,
+      "without_best5_net_r": -100.72721354905724,
+      "initial_stops": 46,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": -1386.563387253907,
+        "p": 0.9640517974101295,
+        "ci95": [
+          -2882.9885008924152,
+          37.21941887280919
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -2670.417157920739,
+        "p": 1.0,
+        "ci95": [
+          -3690.7084778196304,
+          -1746.120928114926
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "year4",
+      "opportunities": 64,
+      "n": 64,
+      "random_n": 64,
+      "fill_or_admission_rate": 1.0,
+      "wins": 12,
+      "win_rate": 0.1875,
+      "gross_r": -2.151066943207682,
+      "fee_r": 41.68954592834261,
+      "net_r": -43.84061287155029,
+      "mean_r": -0.6850095761179733,
+      "mean_net_bp": -21.865886422861703,
+      "per_opportunity_net_bp": -21.865886422861703,
+      "random_net_r": -68.94182284662034,
+      "random_mean_net_bp": -33.79524637760411,
+      "random_per_opportunity_net_bp": -33.79524637760411,
+      "original_risk_net_r": -43.84061287155029,
+      "random_original_risk_net_r": -68.94182284662034,
+      "pf": 0.40685903147109004,
+      "realized_r_drawdown": 46.923943126049025,
+      "without_best_net_r": -51.52628049332733,
+      "without_best5_net_r": -66.9569890856127,
+      "initial_stops": 35,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 763.4790371035139,
+        "p": 0.13159342032898355,
+        "ci95": [
+          -550.1303718634903,
+          2072.8461676114102
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -1399.4167310631492,
+        "p": 0.9959002049897505,
+        "ci95": [
+          -2319.9169798678085,
+          -416.5677318942623
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "baseline",
+      "period": "year5",
+      "opportunities": 69,
+      "n": 69,
+      "random_n": 69,
+      "fill_or_admission_rate": 1.0,
+      "wins": 24,
+      "win_rate": 0.34782608695652173,
+      "gross_r": 22.42683300429614,
+      "fee_r": 56.07165892939678,
+      "net_r": -33.64482592510063,
+      "mean_r": -0.4876061728275454,
+      "mean_net_bp": -8.119775448159558,
+      "per_opportunity_net_bp": -8.119775448159558,
+      "random_net_r": -57.30740638429823,
+      "random_mean_net_bp": -20.605936859764515,
+      "random_per_opportunity_net_bp": -20.605936859764515,
+      "original_risk_net_r": -33.64482592510063,
+      "random_original_risk_net_r": -57.30740638429823,
+      "pf": 0.5347922080395893,
+      "realized_r_drawdown": 39.98113306407101,
+      "without_best_net_r": -39.5841372976497,
+      "without_best5_net_r": -53.781189422497576,
+      "initial_stops": 33,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {},
+      "skipped_original_winners": 0,
+      "skipped_original_net_r": 0.0,
+      "excess_bp_test": {
+        "total": 861.545137400742,
+        "p": 0.08529573521323934,
+        "ci95": [
+          -221.07947851950166,
+          2061.6469015203293
+        ],
+        "weeks": 39
+      },
+      "absolute_bp_test": {
+        "total": -560.2645059230096,
+        "p": 0.864206789660517,
+        "ci95": [
+          -1499.0615629466201,
+          458.6432068885863
+        ],
+        "weeks": 39
+      },
+      "delta_vs_original_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 39
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 39
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "all",
+      "opportunities": 385,
+      "n": 109,
+      "random_n": 107,
+      "fill_or_admission_rate": 0.2831168831168831,
+      "wins": 24,
+      "win_rate": 0.22018348623853212,
+      "gross_r": 9.760824944364108,
+      "fee_r": 92.2326345233902,
+      "net_r": -82.47180957902609,
+      "mean_r": -0.7566221062295971,
+      "mean_net_bp": -4.157386369154302,
+      "per_opportunity_net_bp": -1.1770262707475836,
+      "random_net_r": -103.16019141178158,
+      "random_mean_net_bp": -28.801084906994493,
+      "random_per_opportunity_net_bp": -8.004457363762105,
+      "original_risk_net_r": -82.47180957902609,
+      "random_original_risk_net_r": -103.16019141178158,
+      "pf": 0.3946831871898792,
+      "realized_r_drawdown": 86.34288181928831,
+      "without_best_net_r": -92.86160093835181,
+      "without_best5_net_r": -109.1584332931331,
+      "initial_stops": 55,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 276
+      },
+      "skipped_original_winners": 69,
+      "skipped_original_net_r": -201.674444770903,
+      "excess_bp_test": {
+        "total": 2628.5609708105912,
+        "p": 0.05969701514924254,
+        "ci95": [
+          -255.96555318248093,
+          6684.089136980784
+        ],
+        "weeks": 193,
+        "holm_p": 0.3581820908954553
+      },
+      "absolute_bp_test": {
+        "total": -453.15511423781936,
+        "p": 0.568521573921304,
+        "ci95": [
+          -2741.0245906375967,
+          2831.351292636956
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 7194.399299564919,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          5018.029859266919,
+          9400.9776270443
+        ],
+        "weeks": 193
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -527.8970135733623,
+        "p": 0.6443677816109195,
+        "ci95": [
+          -3298.410794725522,
+          2290.1829402943463
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "earlier",
+      "opportunities": 214,
+      "n": 60,
+      "random_n": 63,
+      "fill_or_admission_rate": 0.2803738317757009,
+      "wins": 11,
+      "win_rate": 0.18333333333333332,
+      "gross_r": 8.88875302784867,
+      "fee_r": 53.001181111265865,
+      "net_r": -44.11242808341719,
+      "mean_r": -0.7352071347236199,
+      "mean_net_bp": 4.457256659853777,
+      "per_opportunity_net_bp": 1.2496981289309625,
+      "random_net_r": -59.171979538626374,
+      "random_mean_net_bp": -31.552518085633963,
+      "random_per_opportunity_net_bp": -9.288825417733364,
+      "original_risk_net_r": -44.11242808341719,
+      "random_original_risk_net_r": -59.171979538626374,
+      "pf": 0.41980468627912443,
+      "realized_r_drawdown": 47.917744127422424,
+      "without_best_net_r": -54.50221944274293,
+      "without_best5_net_r": -68.82431562717184,
+      "initial_stops": 28,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 154
+      },
+      "skipped_original_winners": 44,
+      "skipped_original_net_r": -108.88694720785449,
+      "excess_bp_test": {
+        "total": 2255.2440389861663,
+        "p": 0.07769611519424029,
+        "ci95": [
+          -252.52997789803987,
+          6181.905268164209
+        ],
+        "weeks": 100
+      },
+      "absolute_bp_test": {
+        "total": 267.43539959122626,
+        "p": 0.48697565121743913,
+        "ci95": [
+          -1753.9954698908932,
+          3390.6686847427554
+        ],
+        "weeks": 100
+      },
+      "delta_vs_original_bp_test": {
+        "total": 4304.4463788225285,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          2572.506121791312,
+          6088.970549385437
+        ],
+        "weeks": 100
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -196.2112086717666,
+        "p": 0.5704714764261787,
+        "ci95": [
+          -2293.464083708802,
+          1933.5671404837258
+        ],
+        "weeks": 100
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "later",
+      "opportunities": 171,
+      "n": 49,
+      "random_n": 44,
+      "fill_or_admission_rate": 0.28654970760233917,
+      "wins": 13,
+      "win_rate": 0.2653061224489796,
+      "gross_r": 0.8720719165154369,
+      "fee_r": 39.23145341212433,
+      "net_r": -38.359381495608886,
+      "mean_r": -0.7828445203185487,
+      "mean_net_bp": -14.70592885365399,
+      "per_opportunity_net_bp": -4.213979613035353,
+      "random_net_r": -43.9882118731552,
+      "random_mean_net_bp": -24.861532855760696,
+      "random_per_opportunity_net_bp": -6.3971195652249735,
+      "original_risk_net_r": -38.359381495608886,
+      "random_original_risk_net_r": -43.9882118731552,
+      "pf": 0.36296379798341005,
+      "realized_r_drawdown": 38.42513769186586,
+      "without_best_net_r": -42.56885640469979,
+      "without_best5_net_r": -54.86890490403881,
+      "initial_stops": 27,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 122
+      },
+      "skipped_original_winners": 25,
+      "skipped_original_net_r": -92.78749756304852,
+      "excess_bp_test": {
+        "total": 373.31693182442507,
+        "p": 0.2823858807059647,
+        "ci95": [
+          -803.2710439500187,
+          1678.4284346025659
+        ],
+        "weeks": 93
+      },
+      "absolute_bp_test": {
+        "total": -720.5905138290456,
+        "p": 0.9309534523273836,
+        "ci95": [
+          -1653.7442969112153,
+          281.0277309337535
+        ],
+        "weeks": 93
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2889.952920742389,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1529.074217166623,
+          4182.226207206036
+        ],
+        "weeks": 93
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -331.68580490159576,
+        "p": 0.64076796160192,
+        "ci95": [
+          -2055.653199625535,
+          1433.7738947105852
+        ],
+        "weeks": 93
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "year1",
+      "opportunities": 107,
+      "n": 27,
+      "random_n": 32,
+      "fill_or_admission_rate": 0.2523364485981308,
+      "wins": 6,
+      "win_rate": 0.2222222222222222,
+      "gross_r": 4.390540125294265,
+      "fee_r": 15.946820518211647,
+      "net_r": -11.556280392917381,
+      "mean_r": -0.42801038492286597,
+      "mean_net_bp": -12.989359283241848,
+      "per_opportunity_net_bp": -3.2776887910984116,
+      "random_net_r": -22.72837461760235,
+      "random_mean_net_bp": -25.742482352499657,
+      "random_per_opportunity_net_bp": -7.6986863110279335,
+      "original_risk_net_r": -11.556280392917381,
+      "random_original_risk_net_r": -22.72837461760235,
+      "pf": 0.5574374888814019,
+      "realized_r_drawdown": 15.361596436922602,
+      "without_best_net_r": -16.348961154016738,
+      "without_best5_net_r": -25.658134383745306,
+      "initial_stops": 13,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 80
+      },
+      "skipped_original_winners": 21,
+      "skipped_original_net_r": -40.06432762150001,
+      "excess_bp_test": {
+        "total": 473.046734632459,
+        "p": 0.20293985300734962,
+        "ci95": [
+          -593.9938322929975,
+          1570.081743235896
+        ],
+        "weeks": 46
+      },
+      "absolute_bp_test": {
+        "total": -350.7127006475299,
+        "p": 0.7993100344982751,
+        "ci95": [
+          -1102.6437275686994,
+          468.70102720508527
+        ],
+        "weeks": 46
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2624.3579480626213,
+        "p": 0.0002999850007499625,
+        "ci95": [
+          1278.3486337023153,
+          3956.5585025500795
+        ],
+        "weeks": 46
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -79.32738183534042,
+        "p": 0.5376231188440578,
+        "ci95": [
+          -1542.7945208995855,
+          1347.221571766378
+        ],
+        "weeks": 46
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "year2",
+      "opportunities": 65,
+      "n": 22,
+      "random_n": 17,
+      "fill_or_admission_rate": 0.3384615384615385,
+      "wins": 3,
+      "win_rate": 0.13636363636363635,
+      "gross_r": 3.0398446282439915,
+      "fee_r": 28.206240438419435,
+      "net_r": -25.166395810175448,
+      "mean_r": -1.1439270822807022,
+      "mean_net_bp": 32.019397653616906,
+      "per_opportunity_net_bp": 10.837334590454955,
+      "random_net_r": -25.86687140306107,
+      "random_mean_net_bp": -56.02897297061772,
+      "random_per_opportunity_net_bp": -14.653731392315402,
+      "original_risk_net_r": -25.166395810175448,
+      "random_original_risk_net_r": -25.86687140306107,
+      "pf": 0.33099450059344476,
+      "realized_r_drawdown": 36.051724584467124,
+      "without_best_net_r": -35.55618716950118,
+      "without_best5_net_r": -37.207321133605845,
+      "initial_stops": 10,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 43
+      },
+      "skipped_original_winners": 15,
+      "skipped_original_net_r": -40.58991117683113,
+      "excess_bp_test": {
+        "total": 1656.9192888800733,
+        "p": 0.18839058047097645,
+        "ci95": [
+          -224.9233753356521,
+          5069.362403297272
+        ],
+        "weeks": 37
+      },
+      "absolute_bp_test": {
+        "total": 704.426748379572,
+        "p": 0.4975251237438128,
+        "ci95": [
+          -914.104277184605,
+          3492.1320922826294
+        ],
+        "weeks": 37
+      },
+      "delta_vs_original_bp_test": {
+        "total": 746.8121185652604,
+        "p": 0.047647617619119044,
+        "ci95": [
+          -79.3306367037563,
+          1638.758054039677
+        ],
+        "weeks": 37
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -708.7037917857323,
+        "p": 0.8822558872056397,
+        "ci95": [
+          -1824.579941980262,
+          422.23219491164775
+        ],
+        "weeks": 37
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "year3",
+      "opportunities": 80,
+      "n": 27,
+      "random_n": 26,
+      "fill_or_admission_rate": 0.3375,
+      "wins": 2,
+      "win_rate": 0.07407407407407407,
+      "gross_r": -10.748784874096653,
+      "fee_r": 22.094586757078925,
+      "net_r": -32.843371631175586,
+      "mean_r": -1.2164211715250217,
+      "mean_net_bp": -32.993345436617616,
+      "per_opportunity_net_bp": -11.135254084858445,
+      "random_net_r": -21.111358610390226,
+      "random_mean_net_bp": -14.88226381645226,
+      "random_per_opportunity_net_bp": -4.8367357403469855,
+      "original_risk_net_r": -32.843371631175586,
+      "random_original_risk_net_r": -21.111358610390226,
+      "pf": 0.13007154021438178,
+      "realized_r_drawdown": 32.84337163117558,
+      "without_best_net_r": -36.47876731462893,
+      "without_best5_net_r": -37.211433160357586,
+      "initial_stops": 16,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 53
+      },
+      "skipped_original_winners": 10,
+      "skipped_original_net_r": -56.44052892067861,
+      "excess_bp_test": {
+        "total": -503.881467560917,
+        "p": 0.896205189740513,
+        "ci95": [
+          -1254.4714712630334,
+          227.2949067351622
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -890.8203267886755,
+        "p": 0.9944002799860007,
+        "ci95": [
+          -1516.5940106723758,
+          -203.03017498050605
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1779.5968311320637,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          968.2795200891019,
+          2685.2377243838455
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 882.6819196929903,
+        "p": 0.08994550272486376,
+        "ci95": [
+          -313.277885013394,
+          2155.1260126650477
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "year4",
+      "opportunities": 64,
+      "n": 15,
+      "random_n": 15,
+      "fill_or_admission_rate": 0.234375,
+      "wins": 5,
+      "win_rate": 0.3333333333333333,
+      "gross_r": 4.348120575823037,
+      "fee_r": 11.097184985465027,
+      "net_r": -6.74906440964199,
+      "mean_r": -0.449937627309466,
+      "mean_net_bp": -9.598079033704016,
+      "per_opportunity_net_bp": -2.249549773524379,
+      "random_net_r": -22.016884532900423,
+      "random_mean_net_bp": -32.97840043191673,
+      "random_per_opportunity_net_bp": -7.7293126012304825,
+      "original_risk_net_r": -6.74906440964199,
+      "random_original_risk_net_r": -22.016884532900423,
+      "pf": 0.600809683401127,
+      "realized_r_drawdown": 10.496797843474495,
+      "without_best_net_r": -10.958539318732893,
+      "without_best5_net_r": -16.90688408262116,
+      "initial_stops": 8,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 49
+      },
+      "skipped_original_winners": 7,
+      "skipped_original_net_r": -37.0915484619083,
+      "excess_bp_test": {
+        "total": 350.7048209731907,
+        "p": 0.143942802859857,
+        "ci95": [
+          -218.57931073182323,
+          1005.9974712870375
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -143.97118550556024,
+        "p": 0.7161141942902854,
+        "ci95": [
+          -611.8347257796175,
+          357.32738930280374
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1255.445545557589,
+        "p": 0.006549672516374182,
+        "ci95": [
+          305.78988324891947,
+          2112.2554805785517
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -412.77421613032317,
+        "p": 0.7333133343332834,
+        "ci95": [
+          -1684.4326999541083,
+          781.0005939447934
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "aligned",
+      "period": "year5",
+      "opportunities": 69,
+      "n": 18,
+      "random_n": 17,
+      "fill_or_admission_rate": 0.2608695652173913,
+      "wins": 8,
+      "win_rate": 0.4444444444444444,
+      "gross_r": 8.731104489099469,
+      "fee_r": 14.88780182421516,
+      "net_r": -6.156697335115693,
+      "mean_r": -0.3420387408397607,
+      "mean_net_bp": 12.662352795798578,
+      "per_opportunity_net_bp": 3.3032224684691944,
+      "random_net_r": -11.436702247827508,
+      "random_mean_net_bp": -24.932308444788855,
+      "random_per_opportunity_net_bp": -6.142742660310297,
+      "original_risk_net_r": -6.156697335115693,
+      "random_original_risk_net_r": -11.436702247827508,
+      "pf": 0.6551813167183791,
+      "realized_r_drawdown": 7.372644145866478,
+      "without_best_net_r": -9.655207022149948,
+      "without_best5_net_r": -17.65563485864057,
+      "initial_stops": 8,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 51
+      },
+      "skipped_original_winners": 16,
+      "skipped_original_net_r": -27.488128589984957,
+      "excess_bp_test": {
+        "total": 651.771593885785,
+        "p": 0.0662966851657417,
+        "ci95": [
+          -31.421880957491098,
+          1576.3661111723932
+        ],
+        "weeks": 39
+      },
+      "absolute_bp_test": {
+        "total": 227.92235032437432,
+        "p": 0.2650367481625919,
+        "ci95": [
+          -320.89973000991006,
+          929.1821706758327
+        ],
+        "weeks": 39
+      },
+      "delta_vs_original_bp_test": {
+        "total": 788.186856247384,
+        "p": 0.03729813509324534,
+        "ci95": [
+          -103.05200538695343,
+          1602.154509250398
+        ],
+        "weeks": 39
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -209.77354351495705,
+        "p": 0.6615169241537923,
+        "ci95": [
+          -1179.2983953182538,
+          736.9260190658069
+        ],
+        "weeks": 39
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "all",
+      "opportunities": 385,
+      "n": 116,
+      "random_n": 117,
+      "fill_or_admission_rate": 0.3012987012987013,
+      "wins": 24,
+      "win_rate": 0.20689655172413793,
+      "gross_r": -16.13695815771404,
+      "fee_r": 81.29362602312497,
+      "net_r": -97.43058418083902,
+      "mean_r": -0.8399188291451639,
+      "mean_net_bp": -32.95945985693722,
+      "per_opportunity_net_bp": -9.930642450401866,
+      "random_net_r": -113.30014013779598,
+      "random_mean_net_bp": -30.555679558141385,
+      "random_per_opportunity_net_bp": -9.285751969616994,
+      "original_risk_net_r": -97.43058418083902,
+      "random_original_risk_net_r": -113.30014013779598,
+      "pf": 0.2654513540379183,
+      "realized_r_drawdown": 100.3768140119064,
+      "without_best_net_r": -110.68109602918021,
+      "without_best5_net_r": -121.0097458551827,
+      "initial_stops": 64,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 269
+      },
+      "skipped_original_winners": 69,
+      "skipped_original_net_r": -186.71567016909006,
+      "excess_bp_test": {
+        "total": -248.28283510217517,
+        "p": 0.5972701364931754,
+        "ci95": [
+          -2171.093005678508,
+          1648.2902010741132
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      },
+      "absolute_bp_test": {
+        "total": -3823.297343404718,
+        "p": 1.0,
+        "ci95": [
+          -5362.60297749932,
+          -2271.2535337520203
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 3824.257070398019,
+        "p": 0.004699765011749413,
+        "ci95": [
+          210.15289987309708,
+          6604.385864749505
+        ],
+        "weeks": 193
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -3404.7408194861287,
+        "p": 0.9540022998850057,
+        "ci95": [
+          -7969.153667680571,
+          47.87518468569584
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "earlier",
+      "opportunities": 214,
+      "n": 66,
+      "random_n": 65,
+      "fill_or_admission_rate": 0.308411214953271,
+      "wins": 15,
+      "win_rate": 0.22727272727272727,
+      "gross_r": 1.4898495588504868,
+      "fee_r": 44.45261153069585,
+      "net_r": -42.96276197184536,
+      "mean_r": -0.6509509389673539,
+      "mean_net_bp": -32.72871668791624,
+      "per_opportunity_net_bp": -10.093903277581644,
+      "random_net_r": -57.17375162889272,
+      "random_mean_net_bp": -28.777121501658247,
+      "random_per_opportunity_net_bp": -8.740714474802738,
+      "original_risk_net_r": -42.96276197184536,
+      "random_original_risk_net_r": -57.17375162889272,
+      "pf": 0.37605073431045566,
+      "realized_r_drawdown": 45.90899180291274,
+      "without_best_net_r": -56.213273820186544,
+      "without_best5_net_r": -64.87319340311166,
+      "initial_stops": 33,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 148
+      },
+      "skipped_original_winners": 40,
+      "skipped_original_net_r": -110.03661331942634,
+      "excess_bp_test": {
+        "total": -289.582403794686,
+        "p": 0.6297685115744213,
+        "ci95": [
+          -1949.669670871531,
+          1369.3565857811702
+        ],
+        "weeks": 100
+      },
+      "absolute_bp_test": {
+        "total": -2160.095301402472,
+        "p": 0.9991000449977501,
+        "ci95": [
+          -3534.662814201062,
+          -796.0946154268255
+        ],
+        "weeks": 100
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1876.9156778288307,
+        "p": 0.11354432278386081,
+        "ci95": [
+          -1458.1073922628277,
+          4253.454716244298
+        ],
+        "weeks": 100
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -2741.037651452618,
+        "p": 0.9387530623468826,
+        "ci95": [
+          -6757.044935461429,
+          221.5737032382187
+        ],
+        "weeks": 100
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "later",
+      "opportunities": 171,
+      "n": 50,
+      "random_n": 52,
+      "fill_or_admission_rate": 0.29239766081871343,
+      "wins": 9,
+      "win_rate": 0.18,
+      "gross_r": -17.62680771656453,
+      "fee_r": 36.84101449242913,
+      "net_r": -54.46782220899367,
+      "mean_r": -1.0893564441798733,
+      "mean_net_bp": -33.26404084004492,
+      "per_opportunity_net_bp": -9.726327731007288,
+      "random_net_r": -56.126388508903275,
+      "random_mean_net_bp": -32.77887712874532,
+      "random_per_opportunity_net_bp": -9.967845676577525,
+      "original_risk_net_r": -54.46782220899367,
+      "random_original_risk_net_r": -56.126388508903275,
+      "pf": 0.14605677937600067,
+      "realized_r_drawdown": 54.46782220899365,
+      "without_best_net_r": -57.018382208993714,
+      "without_best5_net_r": -61.71087171064292,
+      "initial_stops": 31,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 121
+      },
+      "skipped_original_winners": 29,
+      "skipped_original_net_r": -76.67905684966374,
+      "excess_bp_test": {
+        "total": 41.29956869251079,
+        "p": 0.4701264936753162,
+        "ci95": [
+          -929.1841555828137,
+          994.7014786553813
+        ],
+        "weeks": 93
+      },
+      "absolute_bp_test": {
+        "total": -1663.202042002246,
+        "p": 1.0,
+        "ci95": [
+          -2380.4971082065313,
+          -954.328260639849
+        ],
+        "weeks": 93
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1947.3413925691884,
+        "p": 0.0030998450077496125,
+        "ci95": [
+          592.4077596964725,
+          3285.9268198321665
+        ],
+        "weeks": 93
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -663.7031680335106,
+        "p": 0.7620118994050298,
+        "ci95": [
+          -2500.426266021119,
+          1151.2200557038373
+        ],
+        "weeks": 93
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "year1",
+      "opportunities": 107,
+      "n": 33,
+      "random_n": 36,
+      "fill_or_admission_rate": 0.308411214953271,
+      "wins": 9,
+      "win_rate": 0.2727272727272727,
+      "gross_r": 6.657947259208083,
+      "fee_r": 13.451813620931642,
+      "net_r": -6.79386636172356,
+      "mean_r": -0.20587473823404728,
+      "mean_net_bp": -29.184088531953783,
+      "per_opportunity_net_bp": -9.000700201443689,
+      "random_net_r": -24.78508354650722,
+      "random_mean_net_bp": -37.443362341905974,
+      "random_per_opportunity_net_bp": -12.597766769239394,
+      "original_risk_net_r": -6.79386636172356,
+      "random_original_risk_net_r": -24.78508354650722,
+      "pf": 0.7628718746139902,
+      "realized_r_drawdown": 15.921031301331299,
+      "without_best_net_r": -20.044378210064746,
+      "without_best5_net_r": -27.386076906964878,
+      "initial_stops": 17,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 1,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 74
+      },
+      "skipped_original_winners": 18,
+      "skipped_original_net_r": -44.82674165269383,
+      "excess_bp_test": {
+        "total": 384.8861227541405,
+        "p": 0.28263586820658965,
+        "ci95": [
+          -791.3312762717596,
+          1704.2369450588205
+        ],
+        "weeks": 46
+      },
+      "absolute_bp_test": {
+        "total": -963.0749215544747,
+        "p": 0.968251587420629,
+        "ci95": [
+          -1914.3809929729975,
+          41.51359853316481
+        ],
+        "weeks": 46
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2011.9957271556768,
+        "p": 0.000999950002499875,
+        "ci95": [
+          816.8407784986327,
+          3282.2525205659294
+        ],
+        "weeks": 46
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -167.48799371365885,
+        "p": 0.5804209789510525,
+        "ci95": [
+          -1668.0439970774794,
+          1364.784131386071
+        ],
+        "weeks": 46
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "year2",
+      "opportunities": 65,
+      "n": 14,
+      "random_n": 15,
+      "fill_or_admission_rate": 0.2153846153846154,
+      "wins": 4,
+      "win_rate": 0.2857142857142857,
+      "gross_r": 3.7678719056574064,
+      "fee_r": 14.113974347788488,
+      "net_r": -10.346102442131086,
+      "mean_r": -0.7390073172950775,
+      "mean_net_bp": -30.743487108584507,
+      "per_opportunity_net_bp": -6.621674146464358,
+      "random_net_r": -19.02374244318341,
+      "random_mean_net_bp": -17.521907443140144,
+      "random_per_opportunity_net_bp": -4.04351710226311,
+      "original_risk_net_r": -10.346102442131086,
+      "random_original_risk_net_r": -19.02374244318341,
+      "pf": 0.2649458381464577,
+      "realized_r_drawdown": 10.346102442131086,
+      "without_best_net_r": -11.851882442131277,
+      "without_best5_net_r": -14.014983885661097,
+      "initial_stops": 7,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 51
+      },
+      "skipped_original_winners": 14,
+      "skipped_original_net_r": -55.410204544875484,
+      "excess_bp_test": {
+        "total": -167.58020787308104,
+        "p": 0.6408179591020449,
+        "ci95": [
+          -971.8931582977755,
+          466.6766777297585
+        ],
+        "weeks": 37
+      },
+      "absolute_bp_test": {
+        "total": -430.4088195201832,
+        "p": 0.8628068596570172,
+        "ci95": [
+          -1183.5137462472442,
+          161.41174539390298
+        ],
+        "weeks": 37
+      },
+      "delta_vs_original_bp_test": {
+        "total": -388.02344933449484,
+        "p": 0.5036748162591871,
+        "ci95": [
+          -3324.7348304407874,
+          1372.893290772871
+        ],
+        "weeks": 37
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -2533.2032885388867,
+        "p": 0.9923503824808759,
+        "ci95": [
+          -6133.381703382445,
+          -308.7633448471985
+        ],
+        "weeks": 37
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "year3",
+      "opportunities": 80,
+      "n": 28,
+      "random_n": 29,
+      "fill_or_admission_rate": 0.35,
+      "wins": 3,
+      "win_rate": 0.10714285714285714,
+      "gross_r": -13.112508971606568,
+      "fee_r": 21.810259130798073,
+      "net_r": -34.922768102404646,
+      "mean_r": -1.247241717943023,
+      "mean_net_bp": -40.49266716255073,
+      "per_opportunity_net_bp": -14.172433506892759,
+      "random_net_r": -25.937937241144514,
+      "random_mean_net_bp": -22.037897183380405,
+      "random_per_opportunity_net_bp": -7.988737728975394,
+      "original_risk_net_r": -34.922768102404646,
+      "random_original_risk_net_r": -25.937937241144514,
+      "pf": 0.02365660798605933,
+      "realized_r_drawdown": 35.46146116153061,
+      "without_best_net_r": -35.46146116153061,
+      "without_best5_net_r": -35.54623424657994,
+      "initial_stops": 14,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 52
+      },
+      "skipped_original_winners": 9,
+      "skipped_original_net_r": -54.36113244944955,
+      "excess_bp_test": {
+        "total": -494.69566223338893,
+        "p": 0.8418079096045198,
+        "ci95": [
+          -1462.5545130093421,
+          378.34733348712746
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -1133.7946805514205,
+        "p": 0.999750012499375,
+        "ci95": [
+          -1887.0765405748527,
+          -528.3124641615732
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1536.6224773693186,
+        "p": 9.99950002499875e-05,
+        "ci95": [
+          800.336338924167,
+          2226.5608624608476
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 891.8677250205182,
+        "p": 0.038148092595370234,
+        "ci95": [
+          -63.027224751488056,
+          1823.7229023067187
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "year4",
+      "opportunities": 64,
+      "n": 23,
+      "random_n": 21,
+      "fill_or_admission_rate": 0.359375,
+      "wins": 2,
+      "win_rate": 0.08695652173913043,
+      "gross_r": -14.959071011860267,
+      "fee_r": 14.754107714411338,
+      "net_r": -29.713178726271604,
+      "mean_r": -1.2918773359248523,
+      "mean_net_bp": -38.03814178483785,
+      "per_opportunity_net_bp": -13.6699572039261,
+      "random_net_r": -25.50933587482203,
+      "random_mean_net_bp": -37.775183797978535,
+      "random_per_opportunity_net_bp": -12.394982183711708,
+      "original_risk_net_r": -29.713178726271604,
+      "random_original_risk_net_r": -25.50933587482203,
+      "pf": 0.048246986075915335,
+      "realized_r_drawdown": 30.22762317071605,
+      "without_best_net_r": -30.70497728742268,
+      "without_best5_net_r": -30.109221047226,
+      "initial_stops": 16,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 41
+      },
+      "skipped_original_winners": 10,
+      "skipped_original_net_r": -14.127434145278691,
+      "excess_bp_test": {
+        "total": -81.59840129372114,
+        "p": 0.6206689665516724,
+        "ci95": [
+          -551.5088815483899,
+          400.0999921252935
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -874.8772610512704,
+        "p": 0.9998000099995,
+        "ci95": [
+          -1294.9249069886343,
+          -425.67783019003247
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 524.5394700118784,
+        "p": 0.11504424778761062,
+        "ci95": [
+          -323.09346650293253,
+          1292.8253214687586
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -845.0774383972351,
+        "p": 0.903504824758762,
+        "ci95": [
+          -2088.4227950657573,
+          395.8339369171366
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "counter",
+      "period": "year5",
+      "opportunities": 69,
+      "n": 18,
+      "random_n": 16,
+      "fill_or_admission_rate": 0.2608695652173913,
+      "wins": 6,
+      "win_rate": 0.3333333333333333,
+      "gross_r": 1.5088026608873037,
+      "fee_r": 17.163471209195436,
+      "net_r": -15.65466854830813,
+      "mean_r": -0.8697038082393406,
+      "mean_net_bp": -23.39675892929828,
+      "per_opportunity_net_bp": -6.10350232938216,
+      "random_net_r": -18.044041032138836,
+      "random_mean_net_bp": -33.240435891952785,
+      "random_per_opportunity_net_bp": -7.707927163351372,
+      "original_risk_net_r": -15.65466854830813,
+      "random_original_risk_net_r": -18.044041032138836,
+      "pf": 0.31715940317554703,
+      "realized_r_drawdown": 15.985908118472487,
+      "without_best_net_r": -18.205228548308174,
+      "without_best5_net_r": -22.594562763660107,
+      "initial_stops": 10,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 51
+      },
+      "skipped_original_winners": 18,
+      "skipped_original_net_r": -17.990157376792517,
+      "excess_bp_test": {
+        "total": 110.70531354387556,
+        "p": 0.37013149342532875,
+        "ci95": [
+          -502.5888586445443,
+          789.3788203735185
+        ],
+        "weeks": 39
+      },
+      "absolute_bp_test": {
+        "total": -421.14166072736907,
+        "p": 0.9633018349082546,
+        "ci95": [
+          -883.3784238778014,
+          5.5273459041932
+        ],
+        "weeks": 39
+      },
+      "delta_vs_original_bp_test": {
+        "total": 139.12284519564045,
+        "p": 0.3807309634518274,
+        "ci95": [
+          -817.1638269760383,
+          999.9826150672561
+        ],
+        "weeks": 39
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -750.8398238568666,
+        "p": 0.888205589720514,
+        "ci95": [
+          -1961.9403964736227,
+          306.4955042063738
+        ],
+        "weeks": 39
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "all",
+      "opportunities": 385,
+      "n": 160,
+      "random_n": 161,
+      "fill_or_admission_rate": 0.4155844155844156,
+      "wins": 45,
+      "win_rate": 0.28125,
+      "gross_r": 11.84964002776439,
+      "fee_r": 116.09350061782837,
+      "net_r": -104.24386059006397,
+      "mean_r": -0.6515241286878999,
+      "mean_net_bp": -21.069387226001247,
+      "per_opportunity_net_bp": -8.75610897703948,
+      "random_net_r": -163.91477919433288,
+      "random_mean_net_bp": -25.75951431574992,
+      "random_per_opportunity_net_bp": -10.772160532040877,
+      "original_risk_net_r": -104.24386059006397,
+      "random_original_risk_net_r": -163.91477919433288,
+      "pf": 0.40328142711576304,
+      "realized_r_drawdown": 104.24386059006395,
+      "without_best_net_r": -111.92952821184102,
+      "without_best5_net_r": -132.09312183367672,
+      "initial_stops": 86,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 225
+      },
+      "skipped_original_winners": 48,
+      "skipped_original_net_r": -179.9023937598651,
+      "excess_bp_test": {
+        "total": 776.1798486755378,
+        "p": 0.24593770311484425,
+        "ci95": [
+          -1378.973583653705,
+          2886.5571058924615
+        ],
+        "weeks": 193,
+        "holm_p": 0.983750812459377
+      },
+      "absolute_bp_test": {
+        "total": -3371.1019561601997,
+        "p": 0.99990000499975,
+        "ci95": [
+          -5006.204051052811,
+          -1760.4837420240103
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      },
+      "delta_vs_original_bp_test": {
+        "total": 4276.452457642537,
+        "p": 0.0006499675016249188,
+        "ci95": [
+          1280.9825853724974,
+          6752.449386293517
+        ],
+        "weeks": 193
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -2380.2781357084154,
+        "p": 0.8908554572271387,
+        "ci95": [
+          -6301.839850651878,
+          867.0605291447873
+        ],
+        "weeks": 193,
+        "holm_p": 1.0
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "earlier",
+      "opportunities": 214,
+      "n": 88,
+      "random_n": 86,
+      "fill_or_admission_rate": 0.411214953271028,
+      "wins": 29,
+      "win_rate": 0.32954545454545453,
+      "gross_r": 0.5204795776221696,
+      "fee_r": 66.44466481363129,
+      "net_r": -65.92418523600912,
+      "mean_r": -0.7491384685910127,
+      "mean_net_bp": -24.36762587977337,
+      "per_opportunity_net_bp": -10.0203321374769,
+      "random_net_r": -105.53578552351605,
+      "random_mean_net_bp": -30.58307778937802,
+      "random_per_opportunity_net_bp": -12.290395747133223,
+      "original_risk_net_r": -65.92418523600912,
+      "random_original_risk_net_r": -105.53578552351605,
+      "pf": 0.32635052691672095,
+      "realized_r_drawdown": 66.84779325493903,
+      "without_best_net_r": -70.58772156818922,
+      "without_best5_net_r": -82.82040885522572,
+      "initial_stops": 50,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 126
+      },
+      "skipped_original_winners": 26,
+      "skipped_original_net_r": -87.07519005526257,
+      "excess_bp_test": {
+        "total": 485.7936124664525,
+        "p": 0.27403629818509073,
+        "ci95": [
+          -1037.8251154387776,
+          2107.8757507335936
+        ],
+        "weeks": 100
+      },
+      "absolute_bp_test": {
+        "total": -2144.3510774200568,
+        "p": 0.9993500324983751,
+        "ci95": [
+          -3455.189725386809,
+          -915.3511977006481
+        ],
+        "weeks": 100
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1892.659901811246,
+        "p": 0.07549622518874056,
+        "ci95": [
+          -903.6445425030031,
+          4175.17683275623
+        ],
+        "weeks": 100
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -1965.66163519148,
+        "p": 0.8618569071546422,
+        "ci95": [
+          -5578.992648796899,
+          961.55144803335
+        ],
+        "weeks": 100
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "later",
+      "opportunities": 171,
+      "n": 72,
+      "random_n": 75,
+      "fill_or_admission_rate": 0.42105263157894735,
+      "wins": 16,
+      "win_rate": 0.2222222222222222,
+      "gross_r": 11.329160450142219,
+      "fee_r": 49.64883580419708,
+      "net_r": -38.31967535405485,
+      "mean_r": -0.5322177132507618,
+      "mean_net_bp": -17.038206649168654,
+      "per_opportunity_net_bp": -7.17398174701838,
+      "random_net_r": -58.378993670816826,
+      "random_mean_net_bp": -20.228494865989713,
+      "random_per_opportunity_net_bp": -8.87214687104812,
+      "original_risk_net_r": -38.31967535405485,
+      "random_original_risk_net_r": -58.378993670816826,
+      "pf": 0.5012662002980287,
+      "realized_r_drawdown": 38.319675354054844,
+      "without_best_net_r": -46.00534297583189,
+      "without_best5_net_r": -64.56524399375726,
+      "initial_stops": 36,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 99
+      },
+      "skipped_original_winners": 22,
+      "skipped_original_net_r": -92.82720370460255,
+      "excess_bp_test": {
+        "total": 290.38623620908527,
+        "p": 0.35588220588970554,
+        "ci95": [
+          -1250.9242318650759,
+          1819.6356002246407
+        ],
+        "weeks": 93
+      },
+      "absolute_bp_test": {
+        "total": -1226.750878740143,
+        "p": 0.9867006649667517,
+        "ci95": [
+          -2252.081538804318,
+          -149.75815949002953
+        ],
+        "weeks": 93
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2383.792555831292,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1226.147450803777,
+          3460.6044144954235
+        ],
+        "weeks": 93
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -414.6165005169356,
+        "p": 0.7007149642517874,
+        "ci95": [
+          -1988.1789535616845,
+          1082.6586073740887
+        ],
+        "weeks": 93
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "year1",
+      "opportunities": 107,
+      "n": 47,
+      "random_n": 39,
+      "fill_or_admission_rate": 0.4392523364485981,
+      "wins": 12,
+      "win_rate": 0.2553191489361702,
+      "gross_r": -2.6758370416334483,
+      "fee_r": 30.594624218143004,
+      "net_r": -33.270461259776454,
+      "mean_r": -0.7078821544633288,
+      "mean_net_bp": -35.34644737251375,
+      "per_opportunity_net_bp": -15.526009593534077,
+      "random_net_r": -38.19504392498822,
+      "random_mean_net_bp": -34.762161168957604,
+      "random_per_opportunity_net_bp": -12.670320426068658,
+      "original_risk_net_r": -33.270461259776454,
+      "random_original_risk_net_r": -38.19504392498822,
+      "pf": 0.3813079450897419,
+      "realized_r_drawdown": 33.89340677191722,
+      "without_best_net_r": -37.933997591956555,
+      "without_best5_net_r": -47.90452824833873,
+      "initial_stops": 31,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 60
+      },
+      "skipped_original_winners": 15,
+      "skipped_original_net_r": -18.35014675464094,
+      "excess_bp_test": {
+        "total": -305.55874091880014,
+        "p": 0.6973651317434129,
+        "ci95": [
+          -1458.360968122922,
+          778.5286702739322
+        ],
+        "weeks": 46
+      },
+      "absolute_bp_test": {
+        "total": -1661.2830265081466,
+        "p": 0.9982500874956253,
+        "ci95": [
+          -2759.042288295308,
+          -624.7872899226448
+        ],
+        "weeks": 46
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1313.7876222020047,
+        "p": 0.02389880505974701,
+        "ci95": [
+          -5.239959199990259,
+          2541.7880609414783
+        ],
+        "weeks": 46
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -857.9328573865996,
+        "p": 0.8225088745562722,
+        "ci95": [
+          -2703.520872775207,
+          882.3854518804636
+        ],
+        "weeks": 46
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "year2",
+      "opportunities": 65,
+      "n": 29,
+      "random_n": 33,
+      "fill_or_admission_rate": 0.4461538461538462,
+      "wins": 11,
+      "win_rate": 0.3793103448275862,
+      "gross_r": -0.7370105785061549,
+      "fee_r": 29.506798156193884,
+      "net_r": -30.243808734700036,
+      "mean_r": -1.0428899563689666,
+      "mean_net_bp": -10.910458587761287,
+      "per_opportunity_net_bp": -4.867743062231958,
+      "random_net_r": -59.78944827547629,
+      "random_mean_net_bp": -36.142039354663346,
+      "random_per_opportunity_net_bp": -18.349035364675238,
+      "original_risk_net_r": -30.243808734700036,
+      "random_original_risk_net_r": -59.78944827547629,
+      "pf": 0.1327506117090512,
+      "realized_r_drawdown": 30.243808734700036,
+      "without_best_net_r": -31.642591343395676,
+      "without_best5_net_r": -33.950070075919484,
+      "initial_stops": 13,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 36
+      },
+      "skipped_original_winners": 7,
+      "skipped_original_net_r": -35.512498252306536,
+      "excess_bp_test": {
+        "total": 876.2839996588133,
+        "p": 0.024098795060246987,
+        "ci95": [
+          99.30437762577057,
+          1772.3174302628827
+        ],
+        "weeks": 37
+      },
+      "absolute_bp_test": {
+        "total": -316.40329904507735,
+        "p": 0.8740562971851408,
+        "ci95": [
+          -807.0314974786677,
+          242.98197917590122
+        ],
+        "weeks": 37
+      },
+      "delta_vs_original_bp_test": {
+        "total": -274.0179288593888,
+        "p": 0.5061246937653118,
+        "ci95": [
+          -2574.1294585465193,
+          1180.2402118397006
+        ],
+        "weeks": 37
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -1489.3390810069923,
+        "p": 0.8564571771411429,
+        "ci95": [
+          -4467.672506215778,
+          295.1236881721092
+        ],
+        "weeks": 37
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "year3",
+      "opportunities": 80,
+      "n": 25,
+      "random_n": 25,
+      "fill_or_admission_rate": 0.3125,
+      "wins": 7,
+      "win_rate": 0.28,
+      "gross_r": -5.384321699234927,
+      "fee_r": 16.133439119039036,
+      "net_r": -21.517760818273963,
+      "mean_r": -0.8607104327309585,
+      "mean_net_bp": -25.83208602322572,
+      "per_opportunity_net_bp": -8.072526882258037,
+      "random_net_r": -16.6880214506386,
+      "random_mean_net_bp": -10.312635724841675,
+      "random_per_opportunity_net_bp": -3.2226986640130235,
+      "original_risk_net_r": -21.517760818273963,
+      "random_original_risk_net_r": -16.6880214506386,
+      "pf": 0.2507393620100093,
+      "realized_r_drawdown": 25.702668830143555,
+      "without_best_net_r": -25.70266883014355,
+      "without_best5_net_r": -28.63683930959013,
+      "initial_stops": 16,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 55
+      },
+      "skipped_original_winners": 5,
+      "skipped_original_net_r": -67.76613973358023,
+      "excess_bp_test": {
+        "total": -387.9862574596011,
+        "p": 0.8695065246737663,
+        "ci95": [
+          -1049.9147674790877,
+          299.9956805169648
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -645.802150580643,
+        "p": 0.9938003099845008,
+        "ci95": [
+          -1101.8077828147632,
+          -165.68365288448769
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2024.615007340096,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1173.834264773565,
+          3022.403361739477
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 998.5771297943061,
+        "p": 0.06554672266386681,
+        "ci95": [
+          -188.83192835382573,
+          2277.2255062298477
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "year4",
+      "opportunities": 64,
+      "n": 26,
+      "random_n": 28,
+      "fill_or_admission_rate": 0.40625,
+      "wins": 5,
+      "win_rate": 0.19230769230769232,
+      "gross_r": 8.459883492829551,
+      "fee_r": 15.83825322846625,
+      "net_r": -7.378369735636699,
+      "mean_r": -0.28378345137064226,
+      "mean_net_bp": -14.637241711781472,
+      "per_opportunity_net_bp": -5.946379445411222,
+      "random_net_r": -21.415602438897896,
+      "random_mean_net_bp": -31.247889354655804,
+      "random_per_opportunity_net_bp": -13.670951592661915,
+      "original_risk_net_r": -7.378369735636699,
+      "random_original_risk_net_r": -21.415602438897896,
+      "pf": 0.7138650787050034,
+      "realized_r_drawdown": 15.684133311969875,
+      "without_best_net_r": -15.064037357413737,
+      "without_best5_net_r": -25.786330805913135,
+      "initial_stops": 11,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 38
+      },
+      "skipped_original_winners": 7,
+      "skipped_original_net_r": -36.46224313591358,
+      "excess_bp_test": {
+        "total": 494.3726174240444,
+        "p": 0.21858907054647267,
+        "ci95": [
+          -653.6500681862227,
+          1711.6226133213745
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": -380.56828450631826,
+        "p": 0.8393580320983951,
+        "ci95": [
+          -1016.7379029429101,
+          383.3318921458337
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1018.8484465568308,
+        "p": 0.0012999350032498376,
+        "ci95": [
+          439.8219700386168,
+          1614.6976791391876
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -269.1064196794696,
+        "p": 0.7394130293485326,
+        "ci95": [
+          -1095.339480156231,
+          505.0774344253018
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "mixed",
+      "period": "year5",
+      "opportunities": 69,
+      "n": 33,
+      "random_n": 36,
+      "fill_or_admission_rate": 0.4782608695652174,
+      "wins": 10,
+      "win_rate": 0.30303030303030304,
+      "gross_r": 12.186925854309369,
+      "fee_r": 24.020385895986195,
+      "net_r": -11.833460041676823,
+      "mean_r": -0.358589698232631,
+      "mean_net_bp": -11.122581682424693,
+      "per_opportunity_net_bp": -5.319495587246592,
+      "random_net_r": -27.82666310433189,
+      "random_mean_net_bp": -12.947595152530457,
+      "random_per_opportunity_net_bp": -6.755267036102848,
+      "original_risk_net_r": -11.833460041676823,
+      "random_original_risk_net_r": -27.82666310433189,
+      "pf": 0.6248284059039281,
+      "realized_r_drawdown": 17.772771414225883,
+      "without_best_net_r": -17.772771414225886,
+      "without_best5_net_r": -29.140767728099473,
+      "initial_stops": 15,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 36
+      },
+      "skipped_original_winners": 14,
+      "skipped_original_net_r": -21.81136588342383,
+      "excess_bp_test": {
+        "total": 99.06822997108152,
+        "p": 0.41482925853707314,
+        "ci95": [
+          -754.1951186572775,
+          975.0535292945029
+        ],
+        "weeks": 39
+      },
+      "absolute_bp_test": {
+        "total": -367.04519552001494,
+        "p": 0.832008399580021,
+        "ci95": [
+          -1053.8510766618936,
+          416.59443196801055
+        ],
+        "weeks": 39
+      },
+      "delta_vs_original_bp_test": {
+        "total": 193.21931040299472,
+        "p": 0.30693465326733665,
+        "ci95": [
+          -570.6248423856449,
+          899.1903532499421
+        ],
+        "weeks": 39
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -762.4769074296604,
+        "p": 0.9340532973351332,
+        "ci95": [
+          -1787.3290679176735,
+          139.7385394637803
+        ],
+        "weeks": 39
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "all",
+      "opportunities": 385,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 385
+      },
+      "skipped_original_winners": 93,
+      "skipped_original_net_r": -284.1462543499291,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 193
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 193
+      },
+      "delta_vs_original_bp_test": {
+        "total": 7647.554413802738,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          4212.298947103163,
+          10638.925065600317
+        ],
+        "weeks": 193
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -3156.4579843839538,
+        "p": 0.9325533723313835,
+        "ci95": [
+          -7376.945910725871,
+          488.7191765299036
+        ],
+        "weeks": 193
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "earlier",
+      "opportunities": 214,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 214
+      },
+      "skipped_original_winners": 55,
+      "skipped_original_net_r": -152.9993752912717,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 100
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 100
+      },
+      "delta_vs_original_bp_test": {
+        "total": 4037.0109792313024,
+        "p": 0.00119994000299985,
+        "ci95": [
+          1170.120588111437,
+          6432.660252306551
+        ],
+        "weeks": 100
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -2451.455247657933,
+        "p": 0.9055547222638868,
+        "ci95": [
+          -6131.392366497681,
+          753.0219898572359
+        ],
+        "weeks": 100
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "later",
+      "opportunities": 171,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 171
+      },
+      "skipped_original_winners": 38,
+      "skipped_original_net_r": -131.1468790586574,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 93
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 93
+      },
+      "delta_vs_original_bp_test": {
+        "total": 3610.5434345714343,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          2065.987761360446,
+          5099.92111103909
+        ],
+        "weeks": 93
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -705.0027367260207,
+        "p": 0.752012399380031,
+        "ci95": [
+          -2752.294772421234,
+          1290.1131185146185
+        ],
+        "weeks": 93
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "year1",
+      "opportunities": 107,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 107
+      },
+      "skipped_original_winners": 27,
+      "skipped_original_net_r": -51.620608014417385,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 46
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 46
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2975.0706487101506,
+        "p": 0.00014999250037498125,
+        "ci95": [
+          1515.2639078206091,
+          4445.789261243624
+        ],
+        "weeks": 46
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -552.3741164677992,
+        "p": 0.7100644967751613,
+        "ci95": [
+          -2449.607509440349,
+          1355.695652428919
+        ],
+        "weeks": 46
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "year2",
+      "opportunities": 65,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 65
+      },
+      "skipped_original_winners": 18,
+      "skipped_original_net_r": -65.75630698700655,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 37
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 37
+      },
+      "delta_vs_original_bp_test": {
+        "total": 42.385370185688274,
+        "p": 0.4984750762461877,
+        "ci95": [
+          -2337.6256566031684,
+          1610.514555986962
+        ],
+        "weeks": 37
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -2365.6230806658054,
+        "p": 0.9904004799760012,
+        "ci95": [
+          -5427.2610940733675,
+          -342.8589961673654
+        ],
+        "weeks": 37
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "year3",
+      "opportunities": 80,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 80
+      },
+      "skipped_original_winners": 12,
+      "skipped_original_net_r": -89.28390055185417,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 2670.417157920739,
+        "p": 4.999750012499375e-05,
+        "ci95": [
+          1746.1209281149258,
+          3690.7084778196295
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": 1386.563387253907,
+        "p": 0.0359982000899955,
+        "ci95": [
+          -37.219418872809946,
+          2882.988500892414
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "year4",
+      "opportunities": 64,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 64
+      },
+      "skipped_original_winners": 12,
+      "skipped_original_net_r": -43.84061287155029,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 36
+      },
+      "delta_vs_original_bp_test": {
+        "total": 1399.4167310631492,
+        "p": 0.004149792510374482,
+        "ci95": [
+          416.5677318942593,
+          2319.9169798678085
+        ],
+        "weeks": 36
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -763.4790371035139,
+        "p": 0.8684565771711414,
+        "ci95": [
+          -2072.8461676114107,
+          550.13037186349
+        ],
+        "weeks": 36
+      }
+    },
+    {
+      "symbol": "ETH",
+      "arm": "unknown",
+      "period": "year5",
+      "opportunities": 69,
+      "n": 0,
+      "random_n": 0,
+      "fill_or_admission_rate": 0.0,
+      "wins": 0,
+      "win_rate": null,
+      "gross_r": 0.0,
+      "fee_r": 0.0,
+      "net_r": 0.0,
+      "mean_r": null,
+      "mean_net_bp": null,
+      "per_opportunity_net_bp": 0.0,
+      "random_net_r": 0.0,
+      "random_mean_net_bp": null,
+      "random_per_opportunity_net_bp": 0.0,
+      "original_risk_net_r": 0.0,
+      "random_original_risk_net_r": 0.0,
+      "pf": null,
+      "realized_r_drawdown": 0.0,
+      "without_best_net_r": 0.0,
+      "without_best5_net_r": 0.0,
+      "initial_stops": 0,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "gross10r": 0,
+      "gross20r": 0,
+      "zero_opportunity_statuses": {
+        "filtered": 69
+      },
+      "skipped_original_winners": 24,
+      "skipped_original_net_r": -33.64482592510063,
+      "excess_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 39
+      },
+      "absolute_bp_test": {
+        "total": 0.0,
+        "p": 1.0,
+        "ci95": [
+          0.0,
+          0.0
+        ],
+        "weeks": 39
+      },
+      "delta_vs_original_bp_test": {
+        "total": 560.2645059230096,
+        "p": 0.13584320783960802,
+        "ci95": [
+          -458.64320688858635,
+          1499.06156294662
+        ],
+        "weeks": 39
+      },
+      "incremental_vs_random_bp_test": {
+        "total": -861.545137400742,
+        "p": 0.9147542622868856,
+        "ci95": [
+          -2061.6469015203293,
+          221.07947851950132
+        ],
+        "weeks": 39
+      }
+    }
+  ],
+  "checks": [
+    {
+      "symbol": "BTC",
+      "reused_native_paths": 970,
+      "prefix_checks": 8,
+      "partition_fields": [
+        "gross_r",
+        "fee_r",
+        "net_r",
+        "net_notional_bp"
+      ],
+      "strict_changed_contexts": 6,
+      "strict_context_results": [
+        {
+          "context": "aligned",
+          "opportunities": 485,
+          "n": 141,
+          "random_n": 124,
+          "fill_or_admission_rate": 0.2907216494845361,
+          "wins": 28,
+          "win_rate": 0.19858156028368795,
+          "gross_r": 20.391188811284668,
+          "fee_r": 193.66202759137292,
+          "net_r": -173.27083878008824,
+          "mean_r": -1.2288711970219024,
+          "mean_net_bp": -26.38684385018574,
+          "per_opportunity_net_bp": -7.671226768816886,
+          "random_net_r": -161.50545724368732,
+          "random_mean_net_bp": -20.114514897092118,
+          "random_per_opportunity_net_bp": -5.142680097400871,
+          "original_risk_net_r": -173.27083878008824,
+          "random_original_risk_net_r": -161.50545724368732,
+          "pf": 0.28285735562016423,
+          "realized_r_drawdown": 200.3808836824874,
+          "without_best_net_r": -197.54951779242748,
+          "without_best5_net_r": -226.03947080854917,
+          "initial_stops": 86,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 2,
+          "gross20r": 1,
+          "zero_opportunity_statuses": {
+            "filtered": 344
+          },
+          "skipped_original_winners": 76,
+          "skipped_original_net_r": -379.2743982932318,
+          "excess_bp_test": {
+            "total": -1226.3451356367675,
+            "p": 0.9473526323683816,
+            "ci95": [
+              -2698.6586900964658,
+              238.26794089140975
+            ],
+            "weeks": 204
+          },
+          "absolute_bp_test": {
+            "total": -3720.544982876189,
+            "p": 1.0,
+            "ci95": [
+              -5084.762799192827,
+              -2371.8803826281905
+            ],
+            "weeks": 204
+          },
+          "delta_vs_original_bp_test": {
+            "total": 7649.413153374728,
+            "p": 4.999750012499375e-05,
+            "ci95": [
+              5836.74635620687,
+              9474.005520836221
+            ],
+            "weeks": 204
+          },
+          "incremental_vs_random_bp_test": {
+            "total": 622.252582716907,
+            "p": 0.303684815759212,
+            "ci95": [
+              -1675.41026598413,
+              2861.880543922528
+            ],
+            "weeks": 204
+          }
+        },
+        {
+          "context": "counter",
+          "opportunities": 485,
+          "n": 157,
+          "random_n": 162,
+          "fill_or_admission_rate": 0.3237113402061856,
+          "wins": 25,
+          "win_rate": 0.1592356687898089,
+          "gross_r": -49.348239104023634,
+          "fee_r": 162.85328076669654,
+          "net_r": -212.20151987072018,
+          "mean_r": -1.3516020373931221,
+          "mean_net_bp": -31.922034029809694,
+          "per_opportunity_net_bp": -10.33352441789716,
+          "random_net_r": -180.65583176047062,
+          "random_mean_net_bp": -19.884853468901163,
+          "random_per_opportunity_net_bp": -6.641951055591729,
+          "original_risk_net_r": -212.20151987072018,
+          "random_original_risk_net_r": -180.65583176047062,
+          "pf": 0.14922624050816108,
+          "realized_r_drawdown": 212.20151987072015,
+          "without_best_net_r": -218.93159044412855,
+          "without_best5_net_r": -235.2292584916916,
+          "initial_stops": 103,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 0,
+          "gross20r": 0,
+          "zero_opportunity_statuses": {
+            "filtered": 328
+          },
+          "skipped_original_winners": 79,
+          "skipped_original_net_r": -340.3437172025998,
+          "excess_bp_test": {
+            "total": -1790.413080718134,
+            "p": 0.9828008599570022,
+            "ci95": [
+              -3399.201992180759,
+              -136.64701053805922
+            ],
+            "weeks": 204
+          },
+          "absolute_bp_test": {
+            "total": -5011.759342680123,
+            "p": 1.0,
+            "ci95": [
+              -6358.894722036035,
+              -3703.1796302142047
+            ],
+            "weeks": 204
+          },
+          "delta_vs_original_bp_test": {
+            "total": 6358.198793570795,
+            "p": 4.999750012499375e-05,
+            "ci95": [
+              4185.1357006992785,
+              8526.373731722399
+            ],
+            "weeks": 204
+          },
+          "incremental_vs_random_bp_test": {
+            "total": 58.18463763554064,
+            "p": 0.4833258337083146,
+            "ci95": [
+              -2315.87762735653,
+              2378.923543778124
+            ],
+            "weeks": 204
+          }
+        },
+        {
+          "context": "mixed",
+          "opportunities": 485,
+          "n": 187,
+          "random_n": 199,
+          "fill_or_admission_rate": 0.38556701030927837,
+          "wins": 51,
+          "win_rate": 0.2727272727272727,
+          "gross_r": 34.86932970901962,
+          "fee_r": 201.9422081315312,
+          "net_r": -167.07287842251156,
+          "mean_r": -0.8934378525267999,
+          "mean_net_bp": -14.105100591949764,
+          "per_opportunity_net_bp": -5.438461465349703,
+          "random_net_r": -216.20370454952814,
+          "random_mean_net_bp": -19.124695018572023,
+          "random_per_opportunity_net_bp": -7.847039811743984,
+          "original_risk_net_r": -167.07287842251156,
+          "random_original_risk_net_r": -216.20370454952814,
+          "pf": 0.345340328695152,
+          "realized_r_drawdown": 189.46932048152092,
+          "without_best_net_r": -177.07379569391804,
+          "without_best5_net_r": -200.39031376435287,
+          "initial_stops": 96,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 1,
+          "gross20r": 0,
+          "zero_opportunity_statuses": {
+            "filtered": 298
+          },
+          "skipped_original_winners": 53,
+          "skipped_original_net_r": -385.4723586508085,
+          "excess_bp_test": {
+            "total": 1168.1604980012264,
+            "p": 0.11894405279736013,
+            "ci95": [
+              -729.6038043124864,
+              3164.130317413509
+            ],
+            "weeks": 204
+          },
+          "absolute_bp_test": {
+            "total": -2637.6538106946064,
+            "p": 0.9984000799960002,
+            "ci95": [
+              -4321.749025774239,
+              -931.4658555400032
+            ],
+            "weeks": 204
+          },
+          "delta_vs_original_bp_test": {
+            "total": 8732.304325556312,
+            "p": 4.999750012499375e-05,
+            "ci95": [
+              6751.44143471208,
+              10654.491328297112
+            ],
+            "weeks": 204
+          },
+          "incremental_vs_random_bp_test": {
+            "total": 3016.7582163549005,
+            "p": 0.0039998000099995,
+            "ci95": [
+              798.2271589071798,
+              5177.612550588262
+            ],
+            "weeks": 204
+          }
+        }
+      ],
+      "inputs": [
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/candles.csv.gz",
+          "bytes": 7286259,
+          "mtime_ns": 1792578376973956636
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/candidates.csv",
+          "bytes": 92464,
+          "mtime_ns": 1792578376979090349
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/trades.csv",
+          "bytes": 451826,
+          "mtime_ns": 1792578393517738096
+        }
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "reused_native_paths": 770,
+      "prefix_checks": 8,
+      "partition_fields": [
+        "gross_r",
+        "fee_r",
+        "net_r",
+        "net_notional_bp"
+      ],
+      "strict_changed_contexts": 4,
+      "strict_context_results": [
+        {
+          "context": "aligned",
+          "opportunities": 385,
+          "n": 108,
+          "random_n": 107,
+          "fill_or_admission_rate": 0.2805194805194805,
+          "wins": 24,
+          "win_rate": 0.2222222222222222,
+          "gross_r": 9.845524397916012,
+          "fee_r": 91.35602796601312,
+          "net_r": -81.51050356809709,
+          "mean_r": -0.7547268848897879,
+          "mean_net_bp": -3.9928025445700177,
+          "per_opportunity_net_bp": -1.1200588956196422,
+          "random_net_r": -102.92659745379048,
+          "random_mean_net_bp": -28.879006129616524,
+          "random_per_opportunity_net_bp": -8.026113391867447,
+          "original_risk_net_r": -81.51050356809709,
+          "random_original_risk_net_r": -102.92659745379048,
+          "pf": 0.39748773340824933,
+          "realized_r_drawdown": 85.3815758083593,
+          "without_best_net_r": -91.90029492742282,
+          "without_best5_net_r": -108.19712728220412,
+          "initial_stops": 55,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 1,
+          "gross20r": 0,
+          "zero_opportunity_statuses": {
+            "filtered": 277
+          },
+          "skipped_original_winners": 69,
+          "skipped_original_net_r": -202.63575078183197,
+          "excess_bp_test": {
+            "total": 2658.8309810554056,
+            "p": 0.05604719764011799,
+            "ci95": [
+              -225.5198815872065,
+              6737.602042644833
+            ],
+            "weeks": 193
+          },
+          "absolute_bp_test": {
+            "total": -431.222674813562,
+            "p": 0.5652217389130544,
+            "ci95": [
+              -2715.967658658062,
+              2853.334916409537
+            ],
+            "weeks": 193
+          },
+          "delta_vs_original_bp_test": {
+            "total": 7216.331738989176,
+            "p": 4.999750012499375e-05,
+            "ci95": [
+              5036.685566586051,
+              9435.940513030131
+            ],
+            "weeks": 193
+          },
+          "incremental_vs_random_bp_test": {
+            "total": -497.62700332854746,
+            "p": 0.6364181790910455,
+            "ci95": [
+              -3266.547680262784,
+              2319.403714497604
+            ],
+            "weeks": 193
+          }
+        },
+        {
+          "context": "counter",
+          "opportunities": 385,
+          "n": 116,
+          "random_n": 116,
+          "fill_or_admission_rate": 0.3012987012987013,
+          "wins": 24,
+          "win_rate": 0.20689655172413793,
+          "gross_r": -16.13695815771404,
+          "fee_r": 81.29362602312497,
+          "net_r": -97.43058418083902,
+          "mean_r": -0.8399188291451639,
+          "mean_net_bp": -32.95945985693722,
+          "per_opportunity_net_bp": -9.930642450401866,
+          "random_net_r": -113.43967712409737,
+          "random_mean_net_bp": -30.89283948144495,
+          "random_per_opportunity_net_bp": -9.307972415188608,
+          "original_risk_net_r": -97.43058418083902,
+          "random_original_risk_net_r": -113.43967712409737,
+          "pf": 0.2654513540379183,
+          "realized_r_drawdown": 100.3768140119064,
+          "without_best_net_r": -110.68109602918021,
+          "without_best5_net_r": -121.0097458551827,
+          "initial_stops": 64,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 1,
+          "gross20r": 0,
+          "zero_opportunity_statuses": {
+            "filtered": 269
+          },
+          "skipped_original_winners": 69,
+          "skipped_original_net_r": -186.71567016909006,
+          "excess_bp_test": {
+            "total": -239.72796355710392,
+            "p": 0.5940702964851757,
+            "ci95": [
+              -2169.5324682801406,
+              1648.5040728627368
+            ],
+            "weeks": 193
+          },
+          "absolute_bp_test": {
+            "total": -3823.297343404718,
+            "p": 1.0,
+            "ci95": [
+              -5362.60297749932,
+              -2271.2535337520203
+            ],
+            "weeks": 193
+          },
+          "delta_vs_original_bp_test": {
+            "total": 3824.257070398019,
+            "p": 0.004699765011749413,
+            "ci95": [
+              210.15289987309708,
+              6604.385864749505
+            ],
+            "weeks": 193
+          },
+          "incremental_vs_random_bp_test": {
+            "total": -3396.1859479410577,
+            "p": 0.9535023248837559,
+            "ci95": [
+              -7958.455164226482,
+              51.6554664449644
+            ],
+            "weeks": 193
+          }
+        },
+        {
+          "context": "mixed",
+          "opportunities": 385,
+          "n": 161,
+          "random_n": 162,
+          "fill_or_admission_rate": 0.41818181818181815,
+          "wins": 45,
+          "win_rate": 0.2795031055900621,
+          "gross_r": 11.764940574212488,
+          "fee_r": 116.97010717520546,
+          "net_r": -105.20516660099295,
+          "mean_r": -0.6534482397577203,
+          "mean_net_bp": -21.074747798661225,
+          "per_opportunity_net_bp": -8.813076352167421,
+          "random_net_r": -164.0088361660226,
+          "random_mean_net_bp": -25.49623063253154,
+          "random_per_opportunity_net_bp": -10.728284058363919,
+          "original_risk_net_r": -105.20516660099295,
+          "random_original_risk_net_r": -164.0088361660226,
+          "pf": 0.40107441010743233,
+          "realized_r_drawdown": 105.20516660099292,
+          "without_best_net_r": -112.89083422277,
+          "without_best5_net_r": -133.0544278446057,
+          "initial_stops": 86,
+          "boundary_n": 0,
+          "boundary_net_r": 0.0,
+          "gross10r": 0,
+          "gross20r": 0,
+          "zero_opportunity_statuses": {
+            "filtered": 224
+          },
+          "skipped_original_winners": 48,
+          "skipped_original_net_r": -178.94108774893613,
+          "excess_bp_test": {
+            "total": 737.3549668856517,
+            "p": 0.25688715564221787,
+            "ci95": [
+              -1412.494214944934,
+              2854.302178206805
+            ],
+            "weeks": 193
+          },
+          "absolute_bp_test": {
+            "total": -3393.0343955844573,
+            "p": 0.99990000499975,
+            "ci95": [
+              -5027.795303180373,
+              -1791.7978447779433
+            ],
+            "weeks": 193
+          },
+          "delta_vs_original_bp_test": {
+            "total": 4254.52001821828,
+            "p": 0.0006499675016249188,
+            "ci95": [
+              1270.1963724390503,
+              6735.789059533462
+            ],
+            "weeks": 193
+          },
+          "incremental_vs_random_bp_test": {
+            "total": -2419.103017498302,
+            "p": 0.8954052297385131,
+            "ci95": [
+              -6317.9014485391135,
+              816.646944356407
+            ],
+            "weeks": 193
+          }
+        }
+      ],
+      "inputs": [
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candles.csv.gz",
+          "bytes": 6996506,
+          "mtime_ns": 1792578597423742102
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candidates.csv",
+          "bytes": 72144,
+          "mtime_ns": 1792578597432384463
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/trades.csv",
+          "bytes": 352991,
+          "mtime_ns": 1792578613782227682
+        }
+      ]
+    }
+  ],
+  "source_commit": "9c3126c65d5f17baf043f2969a34a608498174f2",
+  "generated_at": "2026-10-21T15:21:59.907755+00:00",
+  "training_eligible": false,
+  "production_eligible": false,
+  "limitations": "Known-history independent research, not an account return. Fees20bp unchanged; no funding/slippage/latency/capacity. Original matched opportunity times; random applies its own selection/execution. Zeros include all unfilled/filtered opportunities. Actual-risk R and original-risk bridge both reported. OHLC synthetic path, not observed intrabar ticks. Mixed swings do not prove range-bound conditions."
+}
