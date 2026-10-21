@@ -1,0 +1,38 @@
+{
+  "experiment_id": "exp-range-v231-fiveyear-20261021-v1",
+  "start": "2021-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "warmup": "2021-10-01T00:00:00+08:00",
+  "midpoint": "2024-04-21T00:00:00+08:00",
+  "timezone": "America/New_York",
+  "ratios": [0, 0.5, 0.618, 0.705, 1.13, 1.27, 1.618],
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "volatility_edges": [0.001, 0.002, 0.004, 0.008, 0.016],
+  "annual_start": "2025-10-21T00:00:00+08:00",
+  "annual_data": "experiments/active/exp-range-v230-pivot-20261021-v1",
+  "annual_results": "experiments/active/exp-range-v231-returns-20261021-v1",
+  "symbols": [
+    {"symbol": "BTC", "tick": 0.1, "seed_offset": 0,
+     "inputs": [
+       "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+       "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+       "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+     ]},
+    {"symbol": "ETH", "tick": 0.01, "seed_offset": 1,
+     "inputs": [
+       "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+       "data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+       "experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+       "experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv"
+     ]}
+  ],
+  "entry": "Frozen V2.31: 15m Stoch5/3/3; touch within two bars before/on/after arrow; first qualifying close; pre-arrow five bodies and pairing bodies clear the same key; wick penetration >=10%; NY Tue-Fri; short key>=Monday midpoint, long key<=midpoint. No sweep or MTF.",
+  "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+  "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+  "controls": "Same coin, side, UTC week, chronological half and ATR14/close bucket; NY Tue-Fri, without replacement, exclude arrows and real entries. Copy relative stop risk and round outward. Reuse unchanged annual controls after identity checks.",
+  "data": "Existing OKX official monthly1m archives plus known confirmed API tails. Only missing archive minutes requested from OKX history API, confirmed only, exact known-neighbour overlap required; no synthetic fill or data hashes.",
+  "analysis": "Overall, five chronological anniversary-year entry cohorts, long/short and all eight key groups. Net-positive wins after20bp, paired random results, weekly-block inference, descriptive Wilson intervals; no fitting or point selection.",
+  "training_eligible": false,
+  "production_eligible": false
+}
