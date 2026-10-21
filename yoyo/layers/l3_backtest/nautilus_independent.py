@@ -63,8 +63,14 @@ class ExitPolicy:
     rsi_skip_events: int = 0
     confirmed_pivot_exit: bool = False
     strict_pivot_ties: bool = False
+    target_from_entry: bool = False
+    breakeven_includes_cost: bool = True
 
     def __post_init__(self):
+        if self.target_from_entry and (self.fixed_target_r is not None
+                or self.partial_close_r is not None or self.rsi_scaleout
+                or self.confirmed_pivot_exit):
+            raise ValueError("Per-entry targets cannot combine with another target or reduction policy")
         if self.strict_pivot_ties and not self.confirmed_pivot_exit:
             raise ValueError("Strict pivot ties require confirmed pivot exits")
         if self.confirmed_pivot_exit and (self.opposite_hour_exit
@@ -251,12 +257,18 @@ class IndependentCloseStrategy(Strategy):
         self._submit(order, state, "stop")
 
     def _submit_target(self, state):
-        if self.policy.fixed_target_r is None:
+        if self.policy.fixed_target_r is None and not self.policy.target_from_entry:
             return
         row = state.source
-        raw = (row["entry"]+row["side"]*self.policy.fixed_target_r*row["risk"])/self.tick
-        state.target_price = (math.ceil(raw-1e-8) if row["side"] > 0
-                              else math.floor(raw+1e-8))*self.tick
+        if self.policy.target_from_entry:
+            target = row["target_price"]
+            if not np.isfinite(target):
+                return
+            state.target_price = float(target)
+        else:
+            raw = (row["entry"]+row["side"]*self.policy.fixed_target_r*row["risk"])/self.tick
+            state.target_price = (math.ceil(raw-1e-8) if row["side"] > 0
+                                  else math.floor(raw+1e-8))*self.tick
         # A short target below zero is unreachable, never clipped to an easier TP.
         if state.target_price <= 0:
             return
@@ -417,7 +429,7 @@ class IndependentCloseStrategy(Strategy):
                         state.deferred += 1
             if quarter and not p.confirmed_pivot_exit:
                 move = side*(close-entry)
-                if p.fixed_target_r is None and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
+                if p.fixed_target_r is None and not p.target_from_entry and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
                     state.arm_i = i
                 if p.breakeven_r is not None:
                     if state.be_trigger_i < 0 and move+self.eps >= p.breakeven_r*risk:
@@ -474,7 +486,8 @@ class IndependentCloseStrategy(Strategy):
                                   trigger_price=self.instrument.make_price(state.stop))
         for row in self.by_entry.get(i, []):
             side, entry = row["side"], row["entry"]
-            be_raw = (entry+side*p.round_trip_cost*entry)/self.tick
+            be_cost = p.round_trip_cost if p.breakeven_includes_cost else 0.
+            be_raw = (entry+side*be_cost*entry)/self.tick
             be = (math.ceil(be_raw-1e-8) if side > 0 else math.floor(be_raw+1e-8))*self.tick
             units = max(1, int(1000/entry))
             if p.partial_close_r is not None:
@@ -523,6 +536,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if entries.empty or not entries.trade_id.is_unique:
         raise ValueError("Need nonempty, uniquely identified independent trades")
     market_tick = tick if market_tick is None else market_tick
+    has_targets = policy.fixed_target_r is not None or policy.target_from_entry
     if not 0 < market_tick <= tick or abs(tick/market_tick-round(tick/market_tick)) > 1e-8:
         raise ValueError("Protection tick must be an integer multiple of the market precision")
     precision = -Decimal(str(market_tick)).as_tuple().exponent
@@ -549,6 +563,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             raise ValueError("Entry differs from completed close")
         if r.stop <= 0 or r.risk < tick-tick*1e-7 or abs(r.side*(r.entry-r.stop)-r.risk) > tick*1e-7:
             raise ValueError("Invalid initial risk")
+        if policy.target_from_entry:
+            target = getattr(r, "target_price", None)
+            if target is None or np.isinf(target):
+                raise ValueError("Per-entry target must be a finite price or explicit NaN")
+            if np.isfinite(target) and (target <= 0 or r.side*(target-r.entry) < tick-tick*1e-7
+                    or abs(target/tick-round(target/tick)) > 1e-5):
+                raise ValueError("Per-entry target must be favorable and tick-aligned")
     fee_model = EntryNotionalFee(policy.round_trip_cost)
     engine = BacktestEngine(BacktestEngineConfig(
         logging=LoggingConfig(bypass_logging=True),
@@ -560,7 +581,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             venue, OmsType.HEDGING, AccountType.MARGIN,
             [Money(1_000_000_000, USDT)], base_currency=USDT,
             fee_model=fee_model, frozen_account=True,
-            fill_model=IndependentLimitFill() if policy.fixed_target_r is not None else None,
+            fill_model=IndependentLimitFill() if has_targets else None,
             bar_execution=True, bar_adaptive_high_low_ordering=False,
             liquidity_consumption=False,
         )
@@ -587,10 +608,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         positions = engine.cache.positions()
         if len(positions) != len(entries) or any(p.is_open for p in positions):
             raise RuntimeError("Native position count/closure mismatch")
-        if policy.fixed_target_r is not None and engine.cache.orders_open():
+        if has_targets and engine.cache.orders_open():
             raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None or policy.fixed_target_r is not None or policy.rsi_scaleout or policy.confirmed_pivot_exit:
+        if policy.partial_close_r is not None or has_targets or policy.rsi_scaleout or policy.confirmed_pivot_exit:
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
@@ -603,8 +624,10 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                                "when enabled. Returns normalized per original risk"),
             partial_execution="one completed 5m close reduction" if policy.partial_close_r is not None else "disabled",
             native_partial_accounting_checked=len(rows) if policy.partial_close_r is not None else 0,
-            fixed_target_execution="resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup" if policy.fixed_target_r is not None else "disabled",
-            native_fixed_target_accounting_checked=len(rows) if policy.fixed_target_r is not None else 0,
+            fixed_target_execution="resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup" if has_targets else "disabled",
+            native_fixed_target_accounting_checked=len(rows) if has_targets else 0,
+            target_from_entry=policy.target_from_entry,
+            breakeven_includes_cost=policy.breakeven_includes_cost,
             positions=len(positions), fills=len(fills),
             execution_minutes=execution_minutes,
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
