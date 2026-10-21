@@ -45,7 +45,7 @@ def prepare():
         lo = max(0, min(i - 20, len(q) - 60))
         hi = lo + 60
         assert lo <= min(i, j, e) <= max(i, j, e) < hi <= len(q)
-        assert np.all(np.diff(q.index[lo:hi].asi8) == pd.Timedelta(minutes=15).value)
+        assert np.all(np.diff(q.index[lo:hi].as_unit("ns").asi8) == pd.Timedelta(minutes=15).value)
         assert opened[i] == pd.Timestamp(row["signal_time"])
         assert opened[j] == pd.Timestamp(row["touch_time"])
         assert q.index[e] == pd.Timestamp(row["entry_time"])
@@ -148,7 +148,7 @@ def render(limit=0, version=None, number=None):
         for lv, text_y in spread_labels(visible, ymin, ymax):
             key, price = lv["key"], lv["price"]
             lc = "#F23645" if key == "0:down" else "#3680FF" if key == "0:up" else "#737B88"
-            if key == r["key"]:
+            if key == r["key"] and not key.startswith("0:"):
                 lc = "#FFED46"
             ax.hlines(price, -.5, 60.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
                       alpha=1 if key.startswith("0:") or key == r["key"] else .6, zorder=1)
