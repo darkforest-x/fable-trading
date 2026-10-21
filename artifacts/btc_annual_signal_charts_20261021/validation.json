@@ -1,0 +1,52 @@
+{
+  "created_at": "2026-10-21T06:32:54.430785+00:00",
+  "source_commit": "513678d5005cb36a75c8fadbb56d59f9de817ac2",
+  "source_data": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+  "period": [
+    "2025-10-21T00:00:00+08:00",
+    "2026-10-21T00:00:00+08:00"
+  ],
+  "checks": {
+    "V2.30": {
+      "signals": 131,
+      "png_count": 131,
+      "pdf_pages": 131,
+      "pdf_bookmarks": 131,
+      "zip_members": 131
+    },
+    "V2.21": {
+      "signals": 98,
+      "png_count": 98,
+      "pdf_pages": 98,
+      "pdf_bookmarks": 98,
+      "zip_members": 98
+    }
+  },
+  "all_229_signal_touch_entry_times_prices_stops_and_key_values_match_frozen_sources": true,
+  "all_png_dimensions": [
+    1200,
+    2000
+  ],
+  "shared_arrow_events": 93,
+  "unique_arrow_events": 136,
+  "all_page_text_horizontal_bounds_checked": true,
+  "execution_not_replayed": true,
+  "stitch_not_applicable": "Static data figures using existing morning portrait renderer, no product UI.",
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_annual_signal_charts prepare",
+    ".venv/bin/python -m yoyo.evaluation.btc_annual_signal_charts render",
+    "/Users/zhangzc/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 -m yoyo.evaluation.btc_annual_signal_charts pack"
+  ],
+  "limitations": [
+    "Reconstructed from actual OKX OHLC; not native TradingView screenshots.",
+    "Only Monday/Fib price levels; no volume-profile reconstruction.",
+    "Three V2.21 recorded exits fall beyond the local window and are explicitly marked.",
+    "V2.21 final trade is study-end settlement, explicitly marked."
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "pdf_visual_checks": [
+    "V2.30 page131 final price-label boundary",
+    "V2.21 page87 morning accepted Sep02 example"
+  ]
+}

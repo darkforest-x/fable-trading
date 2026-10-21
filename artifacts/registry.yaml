@@ -33283,3 +33283,21 @@ artifacts:
       All166 signal entries and682 fills included; original-position grossR and fees reconcile below1e-8.
       One data-end forced close explicitly labeled; peakR excludes stop-fill candles.
       Source commit identifies the frozen study builder; local export scripts and XLSX are beside the manifest.
+
+  - artifact_id: btc-annual-signal-closeups-20261021
+    source_commit: 513678d500
+    artifact_type: manifest
+    role: frozen_btc_signal_visual_review
+    source_repo: darkforest-x/fable-trading
+    source_path: artifacts/btc_annual_signal_charts_20261021/validation.json
+    storage_uri: repo://artifacts/btc_annual_signal_charts_20261021/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested morning-style local OHLC charts for all annual BTC signals.
+      V2.30 has131 and V2.21 has98 images;93 shared arrows,136 unique events.
+      All229 key prices, touch/arrow/entry times, entry prices and stops reconcile to frozen candles and ledgers.
+      Two bookmarked PDF image books and two full-resolution PNG archives remain local beside the manifest.
+      Native backtests unchanged; each page separates retrospective pivot price from actual exit.
+      Actual OHLC reconstruction rather than TradingView screenshots; volume profiles omitted.
+      PNG dimensions and decoding, PDF page/bookmark counts and ZIP membership checked; representative PDF pages visually checked.
