@@ -14,6 +14,32 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-sweep20-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ec72733aba
+    status: inconclusive
+    question: Does requiring the touch candle to sweep the preceding20-bar extreme improve V2.31 entries, alone and
+      with the accepted MTF-first gate?
+    single_variable: Fixed20 strict touch-high/low breakout before pairing; same keys,bodies,earliest-close semantics,exact-wick
+      stops,20bp costs and18approved exits. Secondary intersection retains same paired MTF arrow0/15/30minutes earlier.
+    result: Annual primary pivot BTC58signals18wins31.03percent,net-53.3255R vs random-92.0168R; ETH54signals20wins37.04percent,net-12.0054R
+      vs random-32.9003R. With MTF BTC35signals14wins40percent,-26.7651R vs random-68.5953R; ETH27signals11wins40.74percent,-1.8332R
+      vs random-4.2465R. Recent combined BTC9signals5wins,+23.1068R vs random-9.9660R,but excluding largest-1.1719R;
+      ETH7signals2wins,-2.5512R vs random+2.5163R.
+    artifacts:
+    - range-v231-sweep20-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-sweep20-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Pre-pair gate replaces3BTC/8ETH touches; preserves91pairs and all original random times.36selector prefixes,12MTF
+      prefixes,12focused tests pass.506new exit-leg paths match C++oracle;44pivot/strict paths88fills reconcile.288prior
+      aggregates reproduced across18exits/four periods/two baseline groups. Primary four week-cluster excess tests
+      Holm p0.318to0.425. BTC0of18annual positive exit arms;ETH1of18sweep-only,9of18combined,all known-history exploratory.
+      No new parameters,data,Pine/default/live change or report. Native Python -m yoyo.evaluation.range_sweep_study
+      --execute; .venv/bin/python -m yoyo.evaluation.range_sweep_study --analyze. Builder ec72733aba; analysis audit
+      c6a1a67d9a.
   - experiment_id: exp-range-v231-mtf-confluence-20261021-v2
     source_repo: darkforest-x/fable-trading
     source_commit: ec6613c647

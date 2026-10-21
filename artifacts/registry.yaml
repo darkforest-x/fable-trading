@@ -18,6 +18,21 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-sweep20-20261021-v1
+    artifact_type: manifest
+    role: Causal prior20-bar sweep before touch pairing with original and MTF-combined admissions
+    source_repo: darkforest-x/fable-trading
+    source_commit: ec72733aba
+    generator_commit: c6a1a67d9a
+    source_path: experiments/active/exp-range-v231-sweep20-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-sweep20-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Signal matches,candidates,MTF admissions,720comparison rows,18original-exit ledgers and sensitivities,delta
+      native fills/oracle receipts.58BTC54ETHsweep,35BTC27ETHcombined.Original post-filter55/46 is explicitly separated
+      from pre-pair58/54. All initialSL and original-size fees retained; controls preserve relative risk and original
+      time. Same inspected history,not independent validation. No reports or market downloads.
   - artifact_id: range-v231-mtf-confluence-20261021-v2
     artifact_type: manifest
     role: Owner-authorized earlier MTF arrow within the unchanged key pairing window

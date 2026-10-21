@@ -1,0 +1,176 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-sweep20-20261021-v1",
+      "start": "2025-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "warmup": "2025-10-01T00:00:00+08:00",
+      "midpoint": "2026-04-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "seed_offset": 0
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "seed_offset": 1
+        }
+      ],
+      "training_eligible": false,
+      "production_eligible": false,
+      "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+      "exit_reference": "experiments/active/exp-range-v230-exits-20261021-v1",
+      "signal_minutes": 15,
+      "pivot_minutes": 15,
+      "entry": "Require touch high strictly above previous20highs for shorts, or low below previous20lows for longs, before V2.31 pairing. All other key/body/entry rules unchanged; no extra reclaim rule.",
+      "exit": "Same18 approved exits. Current pivot is15m2/2 confirmation-close market fill; exact touch stop first.",
+      "controls": "Preserve original unique random times when same coin/side/week/half/ATR14-close bucket remains valid; otherwise deterministic rematch. Same relative risk and20bp cost.",
+      "limitations": "Same frozen5mOHLC, O-H-L-C native execution and stop-first sensitivity; zero latency, no funding/spread/depth; independent R, not account returns.",
+      "reproduction": "Native Python -m yoyo.evaluation.range_sweep_study --execute; .venv/bin/python -m yoyo.evaluation.range_sweep_study --analyze",
+      "comparison": "experiments/active/exp-range-v231-returns-20261021-v1",
+      "sweep_window": 20,
+      "recent_start": "2026-08-21T00:00:00+08:00",
+      "mtf_previous": "experiments/active/exp-range-v231-mtf-confluence-20261021-v2",
+      "mtf": "Secondary intersection: the exact paired15m arrow was H1-watch eligible at its close; key entry0/15/30minutes later. No alternative arrow borrowing."
+    },
+    "spec": {
+      "symbol": "ETH",
+      "tick": 0.01,
+      "seed_offset": 1
+    },
+    "data": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+      "bytes": 1453331,
+      "mtime_ns": 1792560819928804129
+    },
+    "baseline": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/signal_matches.csv",
+      "bytes": 11261,
+      "mtime_ns": 1792567765260440298
+    },
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_sweep_study.py",
+        "bytes": 17168,
+        "mtime_ns": 1792576107631995374
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_sweep_reference.py",
+        "bytes": 1670,
+        "mtime_ns": 1792575996604309699
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_31_reference.py",
+        "bytes": 4390,
+        "mtime_ns": 1792568947324233598
+      }
+    ]
+  },
+  "previous": 69,
+  "n": 54,
+  "longs": 34,
+  "shorts": 20,
+  "kept": [
+    0,
+    2,
+    4,
+    7,
+    10,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    24,
+    26,
+    27,
+    28,
+    30,
+    32,
+    33,
+    36,
+    37,
+    41,
+    43,
+    44,
+    46,
+    48,
+    52,
+    54,
+    55,
+    57,
+    58,
+    59,
+    62,
+    63,
+    64,
+    68,
+    70,
+    73,
+    79,
+    80,
+    81,
+    82,
+    84,
+    85,
+    86,
+    88,
+    89,
+    91,
+    95,
+    96,
+    97,
+    98
+  ],
+  "changed": [
+    13,
+    16,
+    24,
+    27,
+    30,
+    64,
+    79,
+    95
+  ],
+  "reassigned": [
+    13,
+    16,
+    24,
+    27,
+    30,
+    64,
+    79,
+    95
+  ],
+  "unchanged": 46,
+  "new_arrows": 0,
+  "removed": 15,
+  "new_control_times": 0,
+  "prefix_checks": 18,
+  "source_commit": "ec72733aba99e17845ec7dcd8a7ce48692084b85"
+}
