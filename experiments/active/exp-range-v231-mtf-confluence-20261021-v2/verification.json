@@ -1,0 +1,45 @@
+{
+  "unchanged_admission_fields": true,
+  "new_executions": 0,
+  "family_sensitivity": [
+    {
+      "definition": "strict_same_close",
+      "symbol": "BTC",
+      "wild_p": 0.03765,
+      "holm_four": 0.11295000000000001
+    },
+    {
+      "definition": "strict_same_close",
+      "symbol": "ETH",
+      "wild_p": 0.6092,
+      "holm_four": 1.0
+    },
+    {
+      "definition": "paired_arrow_window",
+      "symbol": "BTC",
+      "wild_p": 0.0233,
+      "holm_four": 0.0932
+    },
+    {
+      "definition": "paired_arrow_window",
+      "symbol": "ETH",
+      "wild_p": 0.6914,
+      "holm_four": 1.0
+    }
+  ],
+  "recent_checks": [
+    {
+      "symbol": "BTC",
+      "recent_kept_wins": 7,
+      "recent_removed_wins": 0,
+      "recent_removed_net_r": -4.672994963235151
+    },
+    {
+      "symbol": "ETH",
+      "recent_kept_wins": 2,
+      "recent_removed_wins": 3,
+      "recent_removed_net_r": -4.451672601953044
+    }
+  ],
+  "explanation": "Both definitions were inspected on the same known history. Holm4 is a conservative sensitivity across both coins and definitions, not independent validation."
+}

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-mtf-confluence-20261021-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: ec6613c647
+    status: inconclusive
+    question: Does allowing the same MTF-qualified15m arrow to precede the key-entry confirmation by up to two bars improve the intersection?
+    single_variable: Owner permits MTF first; retain original paired arrow and earliest key-entry close,zero to two15m bars later. All prices/stops/exits/controls reused exactly from v1, no new executions.
+    result: BTC45 signals16wins35.56percent,net-39.1103R versus random-65.3308R;ETH36signals14wins38.89percent,net-4.1650R versus random-19.4707R. Recent BTC13signals7wins53.85percent,+21.9133R versus random-4.9404R,retains all7 original winners and removes2losers;excluding largest is-2.3654R. Recent ETH8signals2wins25percent,-4.2255R versus random+3.0282R. Screenshot management annual BTC5of45,-63.9418R versus random-28.3409R;ETH6of36,-3.4531R versus random-26.2039R. No established profitable annual rule.
+    artifacts:
+    - range-v231-mtf-confluence-20261021-v2
+    canonical_report: experiments/active/exp-range-v231-mtf-confluence-20261021-v2/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Adds16BTC and7ETH over strict v1; all earlier observations remain same-side at actual entry in this cohort.304prior aggregates reproduced,152partitions reconcile,8focused tests; previous12causal-prefix and288native-oracle checks reused. BTC raw adjusted p0.0233,Holm2p0.0466; sensitivity across both inspected definitions/coins Holm4p0.0932,ETH1.0. Known revised historical sample, not independent validation. One screenshot BTC final-boundary mark+1.975R retained. No Pine/default change or report. Reproduce .venv/bin/python -m yoyo.evaluation.range_mtf_confluence_window; verify_completed writes definition-family sensitivity.
   - experiment_id: exp-range-v231-mtf-confluence-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 66fed26043

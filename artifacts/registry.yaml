@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-mtf-confluence-20261021-v2
+    artifact_type: manifest
+    role: Owner-authorized earlier MTF arrow within the unchanged key pairing window
+    source_repo: darkforest-x/fable-trading
+    source_commit: ec6613c647
+    generator_commit: b06dd04914
+    source_path: experiments/active/exp-range-v231-mtf-confluence-20261021-v2/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-mtf-confluence-20261021-v2/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Two admission tables and608comparison rows reuse v1 causal traces and native ledgers.45BTC/36ETH retained;no timestamps/prices changed and no execution replay.8focused tests,304previous aggregates and152partition checks. Verification includes recent kept/removed wins and conservative Holm4 across both inspected gate definitions. Exact same paired arrow only,0/15/30minute lag;no arbitrary earlier signal or future confirmation borrowed.
   - artifact_id: range-v231-mtf-confluence-20261021-v1
     artifact_type: manifest
     role: Exact-close key and multi-timeframe entry intersection with unchanged and screenshot exits
