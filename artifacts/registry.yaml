@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-mtf-confluence-20261021-v1
+    artifact_type: manifest
+    role: Exact-close key and multi-timeframe entry intersection with unchanged and screenshot exits
+    source_repo: darkforest-x/fable-trading
+    source_commit: 66fed26043
+    generator_commit: 66fed26043
+    source_path: experiments/active/exp-range-v231-mtf-confluence-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-mtf-confluence-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Annual BTC75/ETH69 original candidates;29strict simultaneous entries each. Raw admission clocks, screenshot risk-matched candidates, native config/trades/fills/audits and456comparison rows remain beside summary. Original18exit ledgers reused. V2.30/V2.31 MTF engine blocks identical; H1 arrows refresh before lower-clock eligibility, same-close observation excluded.7tests,12prefixes,288oracle paths,36baseline and152partition checks. Known historical sample; no new data, training, default or live actions.
   - artifact_id: range-v231-morphology-20261021-v1
     artifact_type: manifest
     role: Causal pre-entry candle morphology associations with frozen trade outcomes

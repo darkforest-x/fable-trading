@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-mtf-confluence-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 66fed26043
+    status: inconclusive
+    question: Does requiring the key-level entry and H1-watch15m-arrow module to emit same-direction entries at the exact same close improve BTC and ETH wins?
+    single_variable: Strict simultaneous admission first on18cached exits; separately compare the owner's screenshot management with five completed5m extrema plus0.05percent buffer and15m5R/ATR14x4 armed trailing, retaining H1 opposite exit.
+    result: Annual BTC75to29 signals, original-pivot netwin26.67to41.38percent but retained net-20.7391R versus random-25.6833R. ETH69to29,34.78to37.93percent,net-7.8867R versus random-16.9618R. Exact screenshot management on intersection yields BTC3of29wins,-35.8034R versus random-27.6508R;ETH4of29,-3.5472R versus random-19.9275R. Recent original-pivot BTC10trades5wins,-3.0026R;ETH7trades1win,-7.7269R. BTC original largest24.2787R winner excluded because key touch came two bars after its MTF-qualified arrow. Holm2 p0.0753/0.6092; no established profitable filter.
+    artifacts:
+    - range-v231-mtf-confluence-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-mtf-confluence-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Same2025-10-21to2026-10-21Shanghai data, current all-key15m midpoint gate. Two modules share15m Stoch, so not independent confirmations. All36prior exit baselines reproduced,152group partitions reconcile,12causal prefixes and7focused tests pass.288new native positions576fills match existing C++oracle; costs and commission verified. Screenshot controls reuse original times with signal-relative new risk, not independent structural stops. One BTC screenshot-all boundary mark+1.975R,none in intersections. No Pine/default/90minute-cap addition or report. Reproduce .venv/bin/python -m yoyo.evaluation.range_mtf_confluence.
   - experiment_id: exp-range-v231-morphology-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0faa40f7f2
