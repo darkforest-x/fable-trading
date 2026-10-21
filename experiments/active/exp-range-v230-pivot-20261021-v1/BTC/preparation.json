@@ -1,0 +1,102 @@
+{
+  "config": {
+    "experiment_id": "exp-range-v230-pivot-20261021-v1",
+    "start": "2025-10-21T00:00:00+08:00",
+    "end": "2026-10-21T00:00:00+08:00",
+    "warmup": "2025-10-01T00:00:00+08:00",
+    "midpoint": "2026-04-21T00:00:00+08:00",
+    "timezone": "America/New_York",
+    "ratios": [
+      0,
+      0.5,
+      0.618,
+      0.705,
+      1.13,
+      1.27,
+      1.618
+    ],
+    "round_trip_cost": 0.002,
+    "seed": 20261021,
+    "volatility_edges": [
+      0.001,
+      0.002,
+      0.004,
+      0.008,
+      0.016
+    ],
+    "symbols": [
+      {
+        "symbol": "BTC",
+        "tick": 0.1,
+        "seed_offset": 0,
+        "expected_signals": 131,
+        "source_receipt": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/input_receipt.json"
+      },
+      {
+        "symbol": "ETH",
+        "tick": 0.01,
+        "seed_offset": 1,
+        "expected_signals": 99,
+        "source_receipt": "experiments/active/exp-eth-range-wick-v221-20261021-v1/run.json"
+      }
+    ],
+    "entry": "Frozen V2.30 qualification; earliest close with arrow and eligible touch, exact touch extreme stop, independent signals including same-close duplicates.",
+    "exit": "First profitable 15m 2/2 pivot after entry, market fill at confirmation close; native initial stops precede that close. No end-of-day exit; residual positions marked at study end separately.",
+    "controls": "One deterministic random entry per signal without replacement, same symbol, side, UTC week, chronological half and ATR14/close bucket; Tuesday-Friday NY close only; real arrows/entries excluded. Preserve signal relative initial risk, round stop outward to tick. Same exit and fees.",
+    "tie_sensitivity": "Latest-equal pivot versus strictly unique extreme; no return-driven choice. TradingView tie handling is undocumented.",
+    "limitations": "Idealized zero-latency close fills on 5m OHLC, no funding/spread/depth. R is independent original-risk return, not an account percentage. Known historical data, no training or parameter search.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "spec": {
+    "symbol": "BTC",
+    "tick": 0.1,
+    "seed_offset": 0,
+    "expected_signals": 131,
+    "source_receipt": "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/input_receipt.json"
+  },
+  "sources": [
+    {
+      "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+      "bytes": 213251340,
+      "mtime_ns": 1791868235000000000
+    },
+    {
+      "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+      "bytes": 1415272,
+      "mtime_ns": 1791869051000000000
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv",
+      "bytes": 1030402,
+      "mtime_ns": 1792515781716862278
+    }
+  ],
+  "minute_rows": 554400,
+  "quarter_rows": 36960,
+  "signals": 131,
+  "controls": 131,
+  "code": [
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_pivot_study.py",
+      "bytes": 10853,
+      "mtime_ns": 1792560652361643435
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+      "bytes": 13665,
+      "mtime_ns": 1792560739568948587
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+      "bytes": 33577,
+      "mtime_ns": 1792560477737498190
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_24_reference.py",
+      "bytes": 3601,
+      "mtime_ns": 1792553676065146378
+    }
+  ],
+  "source_commit": "07306646250381a579207238d22a306ec9de46e4"
+}

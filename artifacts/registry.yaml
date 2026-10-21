@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v230-pivot-20261021-v1
+    artifact_type: manifest
+    role: Current V2.30 BTC and ETH confirmed-pivot native executions and matched controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0730664625
+    generator_commit: 0730664625
+    source_path: experiments/active/exp-range-v230-pivot-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v230-pivot-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Prepared causal candidates, raw native trades/fills and costs retained locally; generated config/preparation and summary retained with builder0730664625. No extra report. Confirmation-close fills with initial stop priority; main/tie/control920 positions1840fills. BTC net-159.5831R versus random-158.3127R; ETH-67.7462R versus-108.0589R. One BTC tie path differs; strict total-156.6484R. Neither variant is profitable after20bp. No funding/spread/depth or latency simulation; independent R is not account return.
   - artifact_id: btc-range-wick-fanshen-20261021-v2
     artifact_type: manifest
     role: BTC Monday-endpoint addition and chart-opportunity versus fixed-exit reconciliation

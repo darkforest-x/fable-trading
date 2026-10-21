@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v230-pivot-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0730664625
+    status: rejected
+    question: How do current V2.30 BTC and ETH entries perform over the last year when confirmed 15m local pivots exit at the confirmation close rather than the retrospective extreme?
+    single_variable: Translate the existing pivot drawing into a causal close exit; keep V2.30 entries and exact touch-extreme stops. Strict ties are a numerical sensitivity, not a selected policy.
+    result: BTC131 entries net win22.90percent gross+34.9166R fees194.4998R net-159.5831R versus random-158.3127R excess p0.5115. ETH99 entries net win31.31percent gross+26.6882R fees94.4344R net-67.7462R versus random-108.0589R excess p0.0566. Both chronological halves and both sides lose after20bp. No boundary marks. Strict pivot ties alter one BTC path to total-156.6484R, no ETH or control path changes. Current causal pivot exit is not profitable under the frozen cost model.
+    artifacts:
+    - range-v230-pivot-20261021-v1
+    canonical_report: experiments/active/exp-range-v230-pivot-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Reuses scripts/backtest-range and Nautilus1.231.0 native HEDGING orders. Frozen BTC131 and ETH99; matched same-symbol side week half volatility controls with preserved relative risk; 20bp. Beijing2025-10-21 through2026-10-21.149 adapter and import-boundary tests passed;920 native positions and1840fills across main/tie/control runs; per-position PnL and commission checked. BTC71 and ETH48 initial stops;30of60 BTC and20of51 ETH pivot exits lose net. Builder0730664625 committed before preparation. No Pine, live, model or account-return change. Native TradingView pivot ties remain undocumented; both conventions retained, not selected for returns.
   - experiment_id: exp-btc-range-wick-fanshen-20261021-v2
     source_repo: darkforest-x/fable-trading
     source_commit: 667d45104f

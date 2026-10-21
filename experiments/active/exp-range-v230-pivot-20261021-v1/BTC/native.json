@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-range-v230-pivot-20261021-v1",
+  "engine": "nautilus",
+  "symbol": "BTC",
+  "tick": 0.1,
+  "market_tick": 0.1,
+  "entry_mode": "provided",
+  "data": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candidates.csv",
+  "stop_window_5m": 1,
+  "buffer_percent": 0,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "pivot",
+      "confirmed_pivot_exit": true,
+      "opposite_hour_exit": false
+    },
+    {
+      "name": "strict_ties",
+      "confirmed_pivot_exit": true,
+      "strict_pivot_ties": true,
+      "opposite_hour_exit": false
+    }
+  ],
+  "output": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/native"
+}
