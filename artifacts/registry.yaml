@@ -18,6 +18,23 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-sweep20-mtf-35-charts-20261021
+    artifact_type: manifest
+    role: Owner-requested all35 BTC sweep20 plus MTF trade close-ups
+    source_repo: darkforest-x/fable-trading
+    source_commit: 45c4266ed7
+    generator_commit: ad79e336dc
+    source_path: artifacts/btc_sweep20_mtf_35_charts_20261021/validation.json
+    storage_uri: repo://artifacts/btc_sweep20_mtf_35_charts_20261021/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: All35 cohort members sorted by actual entry;14netwins21netlosses.35PNG2880x1620,60real15m candles each,35pagePDF,PNGzip,CSVindex
+      andfive overview sheets. Actual touch candle/matched Fib/Mondayhighlow/prior20 extreme/entry/exit/grossfee/netR.17initialstops
+      and4pivot netlosses,onefee-flip. Native5m source and frozen ledger reused, no recalculation, data fetch or Pine/default
+      change. Charts use subsequent candles only as review context and fixed touch-time Monday/Fib reference lines;
+      no volume-profile reconstruction. Reproduce nativePython -m yoyo.evaluation.btc_sweep_mtf_charts prepare; projectPython
+      render; bundledPython pdf.
   - artifact_id: range-v231-sweep20-20261021-v1
     artifact_type: manifest
     role: Causal prior20-bar sweep before touch pairing with original and MTF-combined admissions
