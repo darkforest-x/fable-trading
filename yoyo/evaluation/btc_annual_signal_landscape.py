@@ -94,14 +94,15 @@ def spread_labels(levels, lower, upper):
     return list(zip(ordered, positions))
 
 
-def render(limit=0, version=None, number=None):
+def render(limit=0, version=None, number=None, *, destination=None, source_data=None, trade_review=False):
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib import font_manager, ticker
     from matplotlib.patches import Rectangle
 
-    data = json.loads((DEST / "chart_data.json").read_text())
+    destination = DEST if destination is None else Path(destination)
+    data = json.loads((destination / "chart_data.json").read_text()) if source_data is None else source_data
     font_manager.fontManager.addfont(FONT)
     plt.rcParams.update({"font.family": font_manager.FontProperties(fname=FONT).get_name(),
         "axes.unicode_minus": False, "figure.facecolor": "#000000", "axes.facecolor": "#000000",
@@ -128,7 +129,8 @@ def render(limit=0, version=None, number=None):
                  + "  ·  15m × 60  ·  北京时间", fontsize=12, color="#C8CDD6", ha="right", va="top")
         fig.text(.045, .910, f"触及 {label(r['key'])}  {r['level']:,.1f}", fontsize=12, color="#FFED46")
         cohort = (f"对应 {r['other_version']} #{r['other_number']:03d}" if r["other_number"] else "仅此版本")
-        fig.text(.955, .910, cohort + "  ·  黄色=触价K  /  E=入场K  /  ◇=实际退出", fontsize=9.6,
+        legend = "黄色=触价K  /  入场、出场均为实际成交" if trade_review else cohort + "  ·  黄色=触价K  /  E=入场K  /  ◇=实际退出"
+        fig.text(.955, .910, legend, fontsize=9.6,
                  color="#929BA9", ha="right")
         ax = fig.add_axes([.055, .245, .90, .625])
         # Sixty candles occupy 0..59; the empty right margin is for line names.
@@ -197,6 +199,20 @@ def render(limit=0, version=None, number=None):
         if -.5 <= exit_x <= 59.5:
             ax.scatter([exit_x], [ex["price"]], s=35, marker="D", facecolors="none",
                        edgecolors="#E5E8F0", lw=.9, zorder=10)
+        if trade_review:
+            # Both markers sit at the right edge of the candle whose close
+            # generated the actual fill; axis timestamps label candle opens.
+            entry_x = ei + .5
+            ax.scatter([entry_x], [r['entry']], s=32, marker='v' if side == -1 else '^',
+                       color=col, edgecolors='black', linewidths=.5, zorder=10)
+            named.append(ax.annotate('入场', xy=(entry_x,r['entry']),
+                xytext=(max(2,ei-9),r['entry']-side*span*.13), fontsize=12, color=col,
+                ha='center', va='center', bbox=dict(facecolor='black',edgecolor='none',pad=3),
+                arrowprops=dict(arrowstyle='->',color=col,lw=.85,shrinkA=7,shrinkB=8),zorder=11))
+            named.append(ax.annotate(f"出场  {ex['price']:,.1f}",xy=(exit_x,ex['price']),
+                xytext=(min(51,exit_x+9),ex['price']+side*span*.13),fontsize=12,color='#E5E8F0',
+                ha='center',va='center',bbox=dict(facecolor='black',edgecolor='none',pad=3),
+                arrowprops=dict(arrowstyle='->',color='#E5E8F0',lw=.85,shrinkA=7,shrinkB=8),zorder=11))
         fig.text(.045, .157, "勾叉K " + stamp(r["signal_time"]) + "    触价K " + stamp(r["touch_time"]), fontsize=10.3)
         fig.text(.045, .124, "入场K " + stamp(r["entry_bar_time"]) + " → " + stamp(r["entry_time"], "%H:%M")
                  + f" 收盘  {r['entry']:,.1f}    止损 {r['stop']:,.1f}", fontsize=10.3, color=col)
@@ -215,7 +231,7 @@ def render(limit=0, version=None, number=None):
                  fontsize=9.1, color="#9AA2AF")
         fig.text(.045, .024, f"原始OHLC重绘 · 60根真实15mK · 信号前{r['bars_before']}根 / 后{r['bars_after']}根 · "
                  + "关键线按触价时已知周一区间作复盘参照 · 淡色勾叉仅为背景信号", fontsize=8.4, color="#6E7785")
-        path = DEST / r["version"] / f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}_60bars.png"
+        path = destination / r["version"] / f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}_60bars.png"
         path.parent.mkdir(exist_ok=True)
         fig.canvas.draw()
         renderer = fig.canvas.get_renderer()
@@ -227,12 +243,12 @@ def render(limit=0, version=None, number=None):
         plt.close(fig)
         manifest.append(dict(version=r["version"], number=r["number"], signal_time=r["signal_time"],
             key=r["key"], level=r["level"], other_number=r["other_number"], candle_count=60,
-            labeled_levels=[lv["key"] for lv in visible], file=str(path.relative_to(DEST))))
+            labeled_levels=[lv["key"] for lv in visible], file=str(path.relative_to(destination))))
         if len(manifest) % 25 == 0:
             print(f"Rendered {len(manifest)} / {len(selected)}", flush=True)
     if not any((limit, version, number)):
-        assert len(manifest) == 229
-        (DEST / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
+        assert len(manifest) == (229 if source_data is None else len(data['charts']))
+        (destination / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2))
     print(f"Rendered {len(manifest)} landscape charts", flush=True)
 
 
