@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-fiveyear-1618-25-charts-20261021
+    artifact_type: manifest
+    role: All25 BTC Fib1.618 trades after sweep20 and MTF filters in the five-year study
+    source_repo: darkforest-x/fable-trading
+    source_commit: c27bb7fc86
+    generator_commit: d57b1a82f6
+    source_path: artifacts/btc_fiveyear_1618_25_charts_20261021/validation.json
+    storage_uri: repo://artifacts/btc_fiveyear_1618_25_charts_20261021/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner-requested25PNG2880x1620,each60real15m candles,fourcontact sheets andPNGzip.11netwins14netlosses,net-8.345415R. Frozen actualfills and20bp fees;bothMonday bounds,namedFib andprior20 extreme;whole touch candle highlighted. Two distinct arrows shareone touch-entry;all25signal rows retained,24unique touch-entry pairs. Original cachedOHLC andledgers reused;no strategychange,replay,fetch ordefaultchange. Reproduce nativePython -m yoyo.evaluation.btc_fiveyear_1618_charts prepare;projectPython -m yoyo.evaluation.btc_fiveyear_1618_charts render. Binaryimages andarchive remainlocal.
   - artifact_id: range-v231-fiveyear-filters-20261021-v1
     artifact_type: manifest
     role: Five-year BTC/ETH original versus sweep20 and MTF-first admission comparison
