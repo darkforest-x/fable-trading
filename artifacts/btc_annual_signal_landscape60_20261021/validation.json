@@ -1,0 +1,40 @@
+{
+  "charts": 229,
+  "bars_per_chart": 60,
+  "dimensions": [
+    2880,
+    1620
+  ],
+  "matched_key_and_both_monday_bounds_labeled": 229,
+  "all_png_verified": true,
+  "entries_stops_and_exits_unchanged": true,
+  "archives": [
+    {
+      "version": "V2.30",
+      "count": 131,
+      "file": "BTC_V2.30_131_landscape_60bars_PNG.zip",
+      "bytes": 31215538
+    },
+    {
+      "version": "V2.21",
+      "count": 98,
+      "file": "BTC_V2.21_98_landscape_60bars_PNG.zip",
+      "bytes": 23535123
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_commit": "263b62d11b6fae17474d07ea3f917723378252e3",
+  "portrait_source": "artifacts/btc_annual_signal_charts_20261021/chart_data.json",
+  "visual_checks": [
+    "V2.30 #131 short at study end",
+    "V2.30 #002 long below Monday low",
+    "V2.21 #098 buffered stop and study-end settlement"
+  ],
+  "all_229_core_signal_and_execution_fields_equal_portrait_source": true,
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.btc_annual_signal_landscape prepare",
+    ".venv/bin/python -m yoyo.evaluation.btc_annual_signal_landscape render",
+    ".venv/bin/python -m yoyo.evaluation.btc_annual_signal_landscape pack"
+  ]
+}
