@@ -1,0 +1,55 @@
+{
+  "experiment_id": "exp-range-v221-postbars-20261021-v1",
+  "start": "2025-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "warmup": "2025-10-01T00:00:00+08:00",
+  "midpoint": "2026-04-21T00:00:00+08:00",
+  "timezone": "America/New_York",
+  "ratios": [
+    0,
+    0.5,
+    0.618,
+    0.705,
+    1.13,
+    1.27,
+    1.618
+  ],
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "symbols": [
+    {
+      "symbol": "BTC",
+      "tick": 0.1,
+      "seed_offset": 0
+    },
+    {
+      "symbol": "ETH",
+      "tick": 0.01,
+      "seed_offset": 1
+    }
+  ],
+  "post_bars": [
+    0,
+    1,
+    2
+  ],
+  "pre_bars": 5,
+  "penetration": 0.1,
+  "buffer": 0.002,
+  "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+  "parity_reference": "experiments/active/exp-range-v221-compare-20261021-v1/v221_original",
+  "entry": "V2.21 defaults with only post-arrow body-clear confirmation varied: 0, 1 or 2 completed 15m closes. Entry at max(arrow, touch, arrow+post) close, Tue-Fri NY.",
+  "exit": "First profitable 15m 2/2 pivot after entry, market fill at confirmation close; native initial stop first. No end-of-day exit; residual positions marked at study end separately.",
+  "stops": "Matched touch candle extreme plus 0.2% of entry, rounded outward to tick (V2.21 original).",
+  "controls": "Per variant: one deterministic random entry per signal without replacement, same symbol, side, UTC week, chronological half and ATR14/close bucket; Tue-Fri NY close; real arrows/entries excluded; same relative risk, exit and fees.",
+  "limitations": "Idealized zero-latency close fills on 5m OHLC, no funding/spread/depth. R is independent original-risk return. One known year, no parameter search beyond the three Pine options.",
+  "training_eligible": false,
+  "production_eligible": false
+}
