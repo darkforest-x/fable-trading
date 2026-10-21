@@ -73,6 +73,8 @@ def prepare():
 
 
 def label(key):
+    if key.startswith("prior20:"):
+        return "此前20根最低" if key.endswith("low") else "此前20根最高"
     ratio, direction = key.split(":")
     if float(ratio) == 0:
         return "周一低点" if direction == "up" else "周一高点"
@@ -130,6 +132,8 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         fig.text(.045, .910, f"触及 {label(r['key'])}  {r['level']:,.1f}", fontsize=12, color="#FFED46")
         cohort = (f"对应 {r['other_version']} #{r['other_number']:03d}" if r["other_number"] else "仅此版本")
         legend = "黄色=触价K  /  入场、出场均为实际成交" if trade_review else cohort + "  ·  黄色=触价K  /  E=入场K  /  ◇=实际退出"
+        if r.get('review_group'):
+            legend = r['review_group'] + f"   ·   净 {r['exit']['net_r']:+.2f}R   ·   黄色=触价K"
         fig.text(.955, .910, legend, fontsize=9.6,
                  color="#929BA9", ha="right")
         ax = fig.add_axes([.055, .245, .90, .625])
@@ -150,9 +154,12 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         for lv, text_y in spread_labels(visible, ymin, ymax):
             key, price = lv["key"], lv["price"]
             lc = "#F23645" if key == "0:down" else "#3680FF" if key == "0:up" else "#737B88"
+            if key.startswith('prior20:'):
+                lc = '#AB9DDB'
             if key == r["key"] and not key.startswith("0:"):
                 lc = "#FFED46"
             ax.hlines(price, -.5, 60.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
+                      linestyles=(0, (4, 3)) if key.startswith('prior20:') else 'solid',
                       alpha=1 if key.startswith("0:") or key == r["key"] else .6, zorder=1)
             ax.plot([60.1, 61.1], [price, text_y], color=lc, lw=.55, alpha=.85, zorder=2)
             text = ("● " if key == r["key"] else "") + label(key) + f"  {price:,.1f}"
@@ -218,12 +225,18 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                  + f" 收盘  {r['entry']:,.1f}    止损 {r['stop']:,.1f}", fontsize=10.3, color=col)
         fig.text(.045, .091, f"触价K  O {touch['open']:,.1f}   H {touch['high']:,.1f}   L {touch['low']:,.1f}   C {touch['close']:,.1f}",
                  fontsize=9.5, color="#9AA2AF")
-        fig.text(.045, .059, f"影线 {r['wick']:.1f} 点    越过 {r['depth']:.2f} 点 / {r['penetration']:.1%}",
+        detail = f"影线 {r['wick']:.1f} 点    越过 {r['depth']:.2f} 点 / {r['penetration']:.1%}"
+        if r.get('mtf_arrow_time'):
+            detail += '    多周期信号收盘 ' + stamp(r['mtf_arrow_time'], '%H:%M')
+        fig.text(.045, .059, detail,
                  fontsize=9.5, color="#9AA2AF")
         reason = {1: "止损", 7: "分型确认后退出", 0: "期末结算"}[ex["reason"]]
         fig.text(.565, .157, reason + " " + stamp(ex["time"]) + f"  {ex['price']:,.1f}"
                  + ("（图外）" if ex["outside_window"] else ""), fontsize=10.2)
-        fig.text(.565, .124, f"实际毛收益 {ex['gross_r']:+.2f}R   /   扣0.2%费用后 {ex['net_r']:+.2f}R", fontsize=10.2, color="#B3BAC5")
+        payoff = f"实际毛收益 {ex['gross_r']:+.2f}R   /   扣0.2%费用后 {ex['net_r']:+.2f}R"
+        if r.get('review_group'):
+            payoff = f"毛 {ex['gross_r']:+.2f}R  −  费用 {ex['gross_r']-ex['net_r']:.2f}R  =  净 {ex['net_r']:+.2f}R"
+        fig.text(.565, .124, payoff, fontsize=10.2, color="#B3BAC5")
         pivot = ex["pivot"]
         fig.text(.565, .091, (f"局部极值 {pivot['price']:,.1f} / {pivot['reference_r']:.2f}R（回看参考，非成交价）"
                  if pivot else "真实退出按原账本保留；本次只改展示"), fontsize=9.5, color="#9AA2AF")
