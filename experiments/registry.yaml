@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-fiveyear-filters-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 455c3b3d1a
+    status: rejected
+    question: Do the already-admitted sweep20 and MTF-first filters make the frozen five-year BTC/ETH V2.31 pivot strategy profitable after20bp costs?
+    single_variable: Apply the owner-requested existing combined admission filter; sweep-only is an attribution bridge. No change to exact-wick stops,pivot confirmation-close fills,costs or history.
+    result: BTC baseline485trades21.44percent netwins,-552.5452R; sweep379trades23.75percent,-342.5634R; combined212trades56wins26.42percent,-141.9284R versus matched random-240.9036R,mean-0.6695R,-16.2822bp. ETH baseline385trades24.16percent,-284.1463R; sweep317trades24.29percent,-222.4956R; combined162trades37wins22.84percent,-112.0633R versus random-123.2725R,mean-0.6917R,-22.5159bp. All ten combined symbol-year cohorts negative. Combined versus random Holm2 p0.0297/0.3479;no profitable system established.
+    artifacts: [range-v231-fiveyear-filters-20261021-v1]
+    canonical_report: experiments/active/exp-range-v231-fiveyear-filters-20261021-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Frozen five-year OKX data reused;no downloads. Sweep eligibility precedes pairing. Same paired15m arrow must have qualified after its latestH1 watch;key entry0/15/30minutes later. Prior annual58/54sweep and35/27combined cohorts,returns and controls reproduce exactly. Reuse629signal/control pairs per pivot convention;replay67new older pairs only.12unit,36sweep-prefix and12MTF-prefix checks pass;ETH alternate official history yields identical new gates. Positive key subgroups BTC Mondayhigh13trades+16.10R,ETH Mondaylow6trades+3.32R and0.70514trades+3.77R all turn negative without their largest trade. Controls are matched backgrounds,not sweep/MTF-constrained;known-history exploration,no Pine/live edits.
   - experiment_id: exp-range-v231-fiveyear-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cb4cc8d9f3

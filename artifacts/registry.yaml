@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-fiveyear-filters-20261021-v1
+    artifact_type: manifest
+    role: Five-year BTC/ETH original versus sweep20 and MTF-first admission comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 455c3b3d1a
+    generator_commit: 455c3b3d1a
+    source_path: experiments/active/exp-range-v231-fiveyear-filters-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-fiveyear-filters-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Combined212BTC/162ETH trades with paired random controls,key and chronological annual statistics. Native execution-input reuse mapping,new delta ledgers,admission fields and validation retained.20bp independentR,not account returns;no boundary exits. Native feature cache remains local.
   - artifact_id: range-v231-fiveyear-20261021-v1
     artifact_type: manifest
     role: Frozen original V2.31 five-year BTC/ETH native outcomes and key-level statistics

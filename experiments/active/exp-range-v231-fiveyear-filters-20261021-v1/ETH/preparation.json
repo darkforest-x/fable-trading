@@ -1,0 +1,1937 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-fiveyear-filters-20261021-v1",
+      "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+      "annual_sweep": "experiments/active/exp-range-v231-sweep20-20261021-v1",
+      "start": "2021-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "midpoint": "2024-04-21T00:00:00+08:00",
+      "annual_start": "2025-10-21T00:00:00+08:00",
+      "recent_start": "2026-08-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "seed_offset": 0
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "seed_offset": 1
+        }
+      ],
+      "owner_request": "Add the already-approved sweep20 and multi-timeframe filters to the five-year BTC/ETH study.",
+      "sweep": "Touch low strictly below preceding20 lows for longs; touch high above preceding20 highs for shorts. Full20 prior bars, current excluded. Gate touch candidates BEFORE V2.31 pairing; no additional reclaim condition.",
+      "mtf": "Same paired15m arrow was eligible after the latest same-direction completedH1 watch at its own close. EveryH1 arrow refreshes watch, even same-side; simultaneousH1/15m close cannot qualify. Existing key entry0/15/30minutes after the paired arrow; no unrelated earlier arrow.",
+      "exit": "Unchanged exact touch extreme stop and first profitable15m2/2 pivot confirmation-close market exit; initial stop first. No day/year time exits. Strict-tie sensitivity only.",
+      "controls": "Reuse baseline controls except current annual sweep controls have priority; validate same side,UTCweek,half,ATR14bucket,allowed weekdays and unique eligible times. Rematch deterministically if needed. Same relative risk and20bp cost; controls do not have to satisfy new gates.",
+      "reproduction": "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_fiveyear_filters --execute; PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.range_fiveyear_filters --analyze",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    "spec": {
+      "symbol": "ETH",
+      "tick": 0.01,
+      "seed_offset": 1
+    },
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_fiveyear_filters.py",
+        "bytes": 19462,
+        "mtime_ns": 1792586303199675541
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_sweep_reference.py",
+        "bytes": 1670,
+        "mtime_ns": 1792575996604309699
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_31_reference.py",
+        "bytes": 4390,
+        "mtime_ns": 1792568947324233598
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_mtf_confluence.py",
+        "bytes": 13711,
+        "mtime_ns": 1792575024300751959
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_mtf_confluence_window.py",
+        "bytes": 8592,
+        "mtime_ns": 1792575555976992882
+      }
+    ],
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 6996506,
+        "mtime_ns": 1792578597423742102
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/signal_matches.csv",
+        "bytes": 63278,
+        "mtime_ns": 1792578597429919906
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candidates.csv",
+        "bytes": 72144,
+        "mtime_ns": 1792578597432384463
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/trades.csv",
+        "bytes": 352991,
+        "mtime_ns": 1792578613782227682
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/sensitivity.csv",
+        "bytes": 357471,
+        "mtime_ns": 1792578613847975079
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/signal_matches.csv",
+        "bytes": 8820,
+        "mtime_ns": 1792576138803094912
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/candidates.csv",
+        "bytes": 9753,
+        "mtime_ns": 1792576138803747121
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/admission.csv",
+        "bytes": 8327,
+        "mtime_ns": 1792576269431868871
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/pivot/trades.csv",
+        "bytes": 39370,
+        "mtime_ns": 1792576222113463160
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/pivot/sensitivity.csv",
+        "bytes": 39370,
+        "mtime_ns": 1792576222114681328
+      }
+    ]
+  },
+  "baseline": 385,
+  "sweep": 317,
+  "reused": [
+    {
+      "pair_id": 0,
+      "source": "baseline",
+      "source_pair_id": 0,
+      "offset": 0
+    },
+    {
+      "pair_id": 1,
+      "source": "baseline",
+      "source_pair_id": 1,
+      "offset": 0
+    },
+    {
+      "pair_id": 2,
+      "source": "baseline",
+      "source_pair_id": 2,
+      "offset": 0
+    },
+    {
+      "pair_id": 3,
+      "source": "baseline",
+      "source_pair_id": 3,
+      "offset": 0
+    },
+    {
+      "pair_id": 4,
+      "source": "baseline",
+      "source_pair_id": 4,
+      "offset": 0
+    },
+    {
+      "pair_id": 6,
+      "source": "baseline",
+      "source_pair_id": 6,
+      "offset": 0
+    },
+    {
+      "pair_id": 7,
+      "source": "baseline",
+      "source_pair_id": 7,
+      "offset": 0
+    },
+    {
+      "pair_id": 8,
+      "source": "baseline",
+      "source_pair_id": 8,
+      "offset": 0
+    },
+    {
+      "pair_id": 9,
+      "source": "baseline",
+      "source_pair_id": 9,
+      "offset": 0
+    },
+    {
+      "pair_id": 10,
+      "source": "baseline",
+      "source_pair_id": 10,
+      "offset": 0
+    },
+    {
+      "pair_id": 11,
+      "source": "baseline",
+      "source_pair_id": 11,
+      "offset": 0
+    },
+    {
+      "pair_id": 12,
+      "source": "baseline",
+      "source_pair_id": 12,
+      "offset": 0
+    },
+    {
+      "pair_id": 13,
+      "source": "baseline",
+      "source_pair_id": 13,
+      "offset": 0
+    },
+    {
+      "pair_id": 14,
+      "source": "baseline",
+      "source_pair_id": 14,
+      "offset": 0
+    },
+    {
+      "pair_id": 15,
+      "source": "baseline",
+      "source_pair_id": 15,
+      "offset": 0
+    },
+    {
+      "pair_id": 17,
+      "source": "baseline",
+      "source_pair_id": 17,
+      "offset": 0
+    },
+    {
+      "pair_id": 20,
+      "source": "baseline",
+      "source_pair_id": 20,
+      "offset": 0
+    },
+    {
+      "pair_id": 22,
+      "source": "baseline",
+      "source_pair_id": 22,
+      "offset": 0
+    },
+    {
+      "pair_id": 23,
+      "source": "baseline",
+      "source_pair_id": 23,
+      "offset": 0
+    },
+    {
+      "pair_id": 25,
+      "source": "baseline",
+      "source_pair_id": 25,
+      "offset": 0
+    },
+    {
+      "pair_id": 26,
+      "source": "baseline",
+      "source_pair_id": 26,
+      "offset": 0
+    },
+    {
+      "pair_id": 27,
+      "source": "baseline",
+      "source_pair_id": 27,
+      "offset": 0
+    },
+    {
+      "pair_id": 28,
+      "source": "baseline",
+      "source_pair_id": 28,
+      "offset": 0
+    },
+    {
+      "pair_id": 31,
+      "source": "baseline",
+      "source_pair_id": 31,
+      "offset": 0
+    },
+    {
+      "pair_id": 32,
+      "source": "baseline",
+      "source_pair_id": 32,
+      "offset": 0
+    },
+    {
+      "pair_id": 34,
+      "source": "baseline",
+      "source_pair_id": 34,
+      "offset": 0
+    },
+    {
+      "pair_id": 36,
+      "source": "baseline",
+      "source_pair_id": 36,
+      "offset": 0
+    },
+    {
+      "pair_id": 37,
+      "source": "baseline",
+      "source_pair_id": 37,
+      "offset": 0
+    },
+    {
+      "pair_id": 38,
+      "source": "baseline",
+      "source_pair_id": 38,
+      "offset": 0
+    },
+    {
+      "pair_id": 39,
+      "source": "baseline",
+      "source_pair_id": 39,
+      "offset": 0
+    },
+    {
+      "pair_id": 41,
+      "source": "baseline",
+      "source_pair_id": 41,
+      "offset": 0
+    },
+    {
+      "pair_id": 44,
+      "source": "baseline",
+      "source_pair_id": 44,
+      "offset": 0
+    },
+    {
+      "pair_id": 45,
+      "source": "baseline",
+      "source_pair_id": 45,
+      "offset": 0
+    },
+    {
+      "pair_id": 46,
+      "source": "baseline",
+      "source_pair_id": 46,
+      "offset": 0
+    },
+    {
+      "pair_id": 47,
+      "source": "baseline",
+      "source_pair_id": 47,
+      "offset": 0
+    },
+    {
+      "pair_id": 48,
+      "source": "baseline",
+      "source_pair_id": 48,
+      "offset": 0
+    },
+    {
+      "pair_id": 50,
+      "source": "baseline",
+      "source_pair_id": 50,
+      "offset": 0
+    },
+    {
+      "pair_id": 51,
+      "source": "baseline",
+      "source_pair_id": 51,
+      "offset": 0
+    },
+    {
+      "pair_id": 54,
+      "source": "baseline",
+      "source_pair_id": 54,
+      "offset": 0
+    },
+    {
+      "pair_id": 55,
+      "source": "baseline",
+      "source_pair_id": 55,
+      "offset": 0
+    },
+    {
+      "pair_id": 56,
+      "source": "baseline",
+      "source_pair_id": 56,
+      "offset": 0
+    },
+    {
+      "pair_id": 57,
+      "source": "baseline",
+      "source_pair_id": 57,
+      "offset": 0
+    },
+    {
+      "pair_id": 58,
+      "source": "baseline",
+      "source_pair_id": 58,
+      "offset": 0
+    },
+    {
+      "pair_id": 60,
+      "source": "baseline",
+      "source_pair_id": 60,
+      "offset": 0
+    },
+    {
+      "pair_id": 61,
+      "source": "baseline",
+      "source_pair_id": 61,
+      "offset": 0
+    },
+    {
+      "pair_id": 62,
+      "source": "baseline",
+      "source_pair_id": 62,
+      "offset": 0
+    },
+    {
+      "pair_id": 63,
+      "source": "baseline",
+      "source_pair_id": 63,
+      "offset": 0
+    },
+    {
+      "pair_id": 65,
+      "source": "baseline",
+      "source_pair_id": 65,
+      "offset": 0
+    },
+    {
+      "pair_id": 66,
+      "source": "baseline",
+      "source_pair_id": 66,
+      "offset": 0
+    },
+    {
+      "pair_id": 68,
+      "source": "baseline",
+      "source_pair_id": 68,
+      "offset": 0
+    },
+    {
+      "pair_id": 69,
+      "source": "baseline",
+      "source_pair_id": 69,
+      "offset": 0
+    },
+    {
+      "pair_id": 71,
+      "source": "baseline",
+      "source_pair_id": 71,
+      "offset": 0
+    },
+    {
+      "pair_id": 72,
+      "source": "baseline",
+      "source_pair_id": 72,
+      "offset": 0
+    },
+    {
+      "pair_id": 73,
+      "source": "baseline",
+      "source_pair_id": 73,
+      "offset": 0
+    },
+    {
+      "pair_id": 74,
+      "source": "baseline",
+      "source_pair_id": 74,
+      "offset": 0
+    },
+    {
+      "pair_id": 75,
+      "source": "baseline",
+      "source_pair_id": 75,
+      "offset": 0
+    },
+    {
+      "pair_id": 76,
+      "source": "baseline",
+      "source_pair_id": 76,
+      "offset": 0
+    },
+    {
+      "pair_id": 77,
+      "source": "baseline",
+      "source_pair_id": 77,
+      "offset": 0
+    },
+    {
+      "pair_id": 78,
+      "source": "baseline",
+      "source_pair_id": 78,
+      "offset": 0
+    },
+    {
+      "pair_id": 79,
+      "source": "baseline",
+      "source_pair_id": 79,
+      "offset": 0
+    },
+    {
+      "pair_id": 80,
+      "source": "baseline",
+      "source_pair_id": 80,
+      "offset": 0
+    },
+    {
+      "pair_id": 83,
+      "source": "baseline",
+      "source_pair_id": 83,
+      "offset": 0
+    },
+    {
+      "pair_id": 84,
+      "source": "baseline",
+      "source_pair_id": 84,
+      "offset": 0
+    },
+    {
+      "pair_id": 85,
+      "source": "baseline",
+      "source_pair_id": 85,
+      "offset": 0
+    },
+    {
+      "pair_id": 86,
+      "source": "baseline",
+      "source_pair_id": 86,
+      "offset": 0
+    },
+    {
+      "pair_id": 88,
+      "source": "baseline",
+      "source_pair_id": 88,
+      "offset": 0
+    },
+    {
+      "pair_id": 89,
+      "source": "baseline",
+      "source_pair_id": 89,
+      "offset": 0
+    },
+    {
+      "pair_id": 90,
+      "source": "baseline",
+      "source_pair_id": 90,
+      "offset": 0
+    },
+    {
+      "pair_id": 92,
+      "source": "baseline",
+      "source_pair_id": 92,
+      "offset": 0
+    },
+    {
+      "pair_id": 93,
+      "source": "baseline",
+      "source_pair_id": 93,
+      "offset": 0
+    },
+    {
+      "pair_id": 96,
+      "source": "baseline",
+      "source_pair_id": 96,
+      "offset": 0
+    },
+    {
+      "pair_id": 97,
+      "source": "baseline",
+      "source_pair_id": 97,
+      "offset": 0
+    },
+    {
+      "pair_id": 98,
+      "source": "baseline",
+      "source_pair_id": 98,
+      "offset": 0
+    },
+    {
+      "pair_id": 99,
+      "source": "baseline",
+      "source_pair_id": 99,
+      "offset": 0
+    },
+    {
+      "pair_id": 100,
+      "source": "baseline",
+      "source_pair_id": 100,
+      "offset": 0
+    },
+    {
+      "pair_id": 101,
+      "source": "baseline",
+      "source_pair_id": 101,
+      "offset": 0
+    },
+    {
+      "pair_id": 102,
+      "source": "baseline",
+      "source_pair_id": 102,
+      "offset": 0
+    },
+    {
+      "pair_id": 103,
+      "source": "baseline",
+      "source_pair_id": 103,
+      "offset": 0
+    },
+    {
+      "pair_id": 104,
+      "source": "baseline",
+      "source_pair_id": 104,
+      "offset": 0
+    },
+    {
+      "pair_id": 105,
+      "source": "baseline",
+      "source_pair_id": 105,
+      "offset": 0
+    },
+    {
+      "pair_id": 106,
+      "source": "baseline",
+      "source_pair_id": 106,
+      "offset": 0
+    },
+    {
+      "pair_id": 108,
+      "source": "baseline",
+      "source_pair_id": 108,
+      "offset": 0
+    },
+    {
+      "pair_id": 111,
+      "source": "baseline",
+      "source_pair_id": 111,
+      "offset": 0
+    },
+    {
+      "pair_id": 112,
+      "source": "baseline",
+      "source_pair_id": 112,
+      "offset": 0
+    },
+    {
+      "pair_id": 113,
+      "source": "baseline",
+      "source_pair_id": 113,
+      "offset": 0
+    },
+    {
+      "pair_id": 115,
+      "source": "baseline",
+      "source_pair_id": 115,
+      "offset": 0
+    },
+    {
+      "pair_id": 116,
+      "source": "baseline",
+      "source_pair_id": 116,
+      "offset": 0
+    },
+    {
+      "pair_id": 117,
+      "source": "baseline",
+      "source_pair_id": 117,
+      "offset": 0
+    },
+    {
+      "pair_id": 118,
+      "source": "baseline",
+      "source_pair_id": 118,
+      "offset": 0
+    },
+    {
+      "pair_id": 119,
+      "source": "baseline",
+      "source_pair_id": 119,
+      "offset": 0
+    },
+    {
+      "pair_id": 120,
+      "source": "baseline",
+      "source_pair_id": 120,
+      "offset": 0
+    },
+    {
+      "pair_id": 121,
+      "source": "baseline",
+      "source_pair_id": 121,
+      "offset": 0
+    },
+    {
+      "pair_id": 122,
+      "source": "baseline",
+      "source_pair_id": 122,
+      "offset": 0
+    },
+    {
+      "pair_id": 123,
+      "source": "baseline",
+      "source_pair_id": 123,
+      "offset": 0
+    },
+    {
+      "pair_id": 124,
+      "source": "baseline",
+      "source_pair_id": 124,
+      "offset": 0
+    },
+    {
+      "pair_id": 125,
+      "source": "baseline",
+      "source_pair_id": 125,
+      "offset": 0
+    },
+    {
+      "pair_id": 126,
+      "source": "baseline",
+      "source_pair_id": 126,
+      "offset": 0
+    },
+    {
+      "pair_id": 127,
+      "source": "baseline",
+      "source_pair_id": 127,
+      "offset": 0
+    },
+    {
+      "pair_id": 128,
+      "source": "baseline",
+      "source_pair_id": 128,
+      "offset": 0
+    },
+    {
+      "pair_id": 129,
+      "source": "baseline",
+      "source_pair_id": 129,
+      "offset": 0
+    },
+    {
+      "pair_id": 130,
+      "source": "baseline",
+      "source_pair_id": 130,
+      "offset": 0
+    },
+    {
+      "pair_id": 133,
+      "source": "baseline",
+      "source_pair_id": 133,
+      "offset": 0
+    },
+    {
+      "pair_id": 134,
+      "source": "baseline",
+      "source_pair_id": 134,
+      "offset": 0
+    },
+    {
+      "pair_id": 135,
+      "source": "baseline",
+      "source_pair_id": 135,
+      "offset": 0
+    },
+    {
+      "pair_id": 136,
+      "source": "baseline",
+      "source_pair_id": 136,
+      "offset": 0
+    },
+    {
+      "pair_id": 137,
+      "source": "baseline",
+      "source_pair_id": 137,
+      "offset": 0
+    },
+    {
+      "pair_id": 138,
+      "source": "baseline",
+      "source_pair_id": 138,
+      "offset": 0
+    },
+    {
+      "pair_id": 142,
+      "source": "baseline",
+      "source_pair_id": 142,
+      "offset": 0
+    },
+    {
+      "pair_id": 143,
+      "source": "baseline",
+      "source_pair_id": 143,
+      "offset": 0
+    },
+    {
+      "pair_id": 144,
+      "source": "baseline",
+      "source_pair_id": 144,
+      "offset": 0
+    },
+    {
+      "pair_id": 145,
+      "source": "baseline",
+      "source_pair_id": 145,
+      "offset": 0
+    },
+    {
+      "pair_id": 146,
+      "source": "baseline",
+      "source_pair_id": 146,
+      "offset": 0
+    },
+    {
+      "pair_id": 147,
+      "source": "baseline",
+      "source_pair_id": 147,
+      "offset": 0
+    },
+    {
+      "pair_id": 148,
+      "source": "baseline",
+      "source_pair_id": 148,
+      "offset": 0
+    },
+    {
+      "pair_id": 149,
+      "source": "baseline",
+      "source_pair_id": 149,
+      "offset": 0
+    },
+    {
+      "pair_id": 150,
+      "source": "baseline",
+      "source_pair_id": 150,
+      "offset": 0
+    },
+    {
+      "pair_id": 151,
+      "source": "baseline",
+      "source_pair_id": 151,
+      "offset": 0
+    },
+    {
+      "pair_id": 153,
+      "source": "baseline",
+      "source_pair_id": 153,
+      "offset": 0
+    },
+    {
+      "pair_id": 154,
+      "source": "baseline",
+      "source_pair_id": 154,
+      "offset": 0
+    },
+    {
+      "pair_id": 155,
+      "source": "baseline",
+      "source_pair_id": 155,
+      "offset": 0
+    },
+    {
+      "pair_id": 157,
+      "source": "baseline",
+      "source_pair_id": 157,
+      "offset": 0
+    },
+    {
+      "pair_id": 158,
+      "source": "baseline",
+      "source_pair_id": 158,
+      "offset": 0
+    },
+    {
+      "pair_id": 159,
+      "source": "baseline",
+      "source_pair_id": 159,
+      "offset": 0
+    },
+    {
+      "pair_id": 161,
+      "source": "baseline",
+      "source_pair_id": 161,
+      "offset": 0
+    },
+    {
+      "pair_id": 162,
+      "source": "baseline",
+      "source_pair_id": 162,
+      "offset": 0
+    },
+    {
+      "pair_id": 163,
+      "source": "baseline",
+      "source_pair_id": 163,
+      "offset": 0
+    },
+    {
+      "pair_id": 164,
+      "source": "baseline",
+      "source_pair_id": 164,
+      "offset": 0
+    },
+    {
+      "pair_id": 165,
+      "source": "baseline",
+      "source_pair_id": 165,
+      "offset": 0
+    },
+    {
+      "pair_id": 167,
+      "source": "baseline",
+      "source_pair_id": 167,
+      "offset": 0
+    },
+    {
+      "pair_id": 168,
+      "source": "baseline",
+      "source_pair_id": 168,
+      "offset": 0
+    },
+    {
+      "pair_id": 169,
+      "source": "baseline",
+      "source_pair_id": 169,
+      "offset": 0
+    },
+    {
+      "pair_id": 174,
+      "source": "baseline",
+      "source_pair_id": 174,
+      "offset": 0
+    },
+    {
+      "pair_id": 176,
+      "source": "baseline",
+      "source_pair_id": 176,
+      "offset": 0
+    },
+    {
+      "pair_id": 177,
+      "source": "baseline",
+      "source_pair_id": 177,
+      "offset": 0
+    },
+    {
+      "pair_id": 178,
+      "source": "baseline",
+      "source_pair_id": 178,
+      "offset": 0
+    },
+    {
+      "pair_id": 180,
+      "source": "baseline",
+      "source_pair_id": 180,
+      "offset": 0
+    },
+    {
+      "pair_id": 181,
+      "source": "baseline",
+      "source_pair_id": 181,
+      "offset": 0
+    },
+    {
+      "pair_id": 182,
+      "source": "baseline",
+      "source_pair_id": 182,
+      "offset": 0
+    },
+    {
+      "pair_id": 184,
+      "source": "baseline",
+      "source_pair_id": 184,
+      "offset": 0
+    },
+    {
+      "pair_id": 185,
+      "source": "baseline",
+      "source_pair_id": 185,
+      "offset": 0
+    },
+    {
+      "pair_id": 186,
+      "source": "baseline",
+      "source_pair_id": 186,
+      "offset": 0
+    },
+    {
+      "pair_id": 187,
+      "source": "baseline",
+      "source_pair_id": 187,
+      "offset": 0
+    },
+    {
+      "pair_id": 188,
+      "source": "baseline",
+      "source_pair_id": 188,
+      "offset": 0
+    },
+    {
+      "pair_id": 189,
+      "source": "baseline",
+      "source_pair_id": 189,
+      "offset": 0
+    },
+    {
+      "pair_id": 191,
+      "source": "baseline",
+      "source_pair_id": 191,
+      "offset": 0
+    },
+    {
+      "pair_id": 192,
+      "source": "baseline",
+      "source_pair_id": 192,
+      "offset": 0
+    },
+    {
+      "pair_id": 193,
+      "source": "baseline",
+      "source_pair_id": 193,
+      "offset": 0
+    },
+    {
+      "pair_id": 194,
+      "source": "baseline",
+      "source_pair_id": 194,
+      "offset": 0
+    },
+    {
+      "pair_id": 196,
+      "source": "baseline",
+      "source_pair_id": 196,
+      "offset": 0
+    },
+    {
+      "pair_id": 197,
+      "source": "baseline",
+      "source_pair_id": 197,
+      "offset": 0
+    },
+    {
+      "pair_id": 198,
+      "source": "baseline",
+      "source_pair_id": 198,
+      "offset": 0
+    },
+    {
+      "pair_id": 199,
+      "source": "baseline",
+      "source_pair_id": 199,
+      "offset": 0
+    },
+    {
+      "pair_id": 200,
+      "source": "baseline",
+      "source_pair_id": 200,
+      "offset": 0
+    },
+    {
+      "pair_id": 201,
+      "source": "baseline",
+      "source_pair_id": 201,
+      "offset": 0
+    },
+    {
+      "pair_id": 204,
+      "source": "baseline",
+      "source_pair_id": 204,
+      "offset": 0
+    },
+    {
+      "pair_id": 205,
+      "source": "baseline",
+      "source_pair_id": 205,
+      "offset": 0
+    },
+    {
+      "pair_id": 207,
+      "source": "baseline",
+      "source_pair_id": 207,
+      "offset": 0
+    },
+    {
+      "pair_id": 208,
+      "source": "baseline",
+      "source_pair_id": 208,
+      "offset": 0
+    },
+    {
+      "pair_id": 209,
+      "source": "baseline",
+      "source_pair_id": 209,
+      "offset": 0
+    },
+    {
+      "pair_id": 212,
+      "source": "baseline",
+      "source_pair_id": 212,
+      "offset": 0
+    },
+    {
+      "pair_id": 213,
+      "source": "baseline",
+      "source_pair_id": 213,
+      "offset": 0
+    },
+    {
+      "pair_id": 214,
+      "source": "baseline",
+      "source_pair_id": 214,
+      "offset": 0
+    },
+    {
+      "pair_id": 215,
+      "source": "baseline",
+      "source_pair_id": 215,
+      "offset": 0
+    },
+    {
+      "pair_id": 218,
+      "source": "baseline",
+      "source_pair_id": 218,
+      "offset": 0
+    },
+    {
+      "pair_id": 220,
+      "source": "baseline",
+      "source_pair_id": 220,
+      "offset": 0
+    },
+    {
+      "pair_id": 221,
+      "source": "baseline",
+      "source_pair_id": 221,
+      "offset": 0
+    },
+    {
+      "pair_id": 223,
+      "source": "baseline",
+      "source_pair_id": 223,
+      "offset": 0
+    },
+    {
+      "pair_id": 225,
+      "source": "baseline",
+      "source_pair_id": 225,
+      "offset": 0
+    },
+    {
+      "pair_id": 227,
+      "source": "baseline",
+      "source_pair_id": 227,
+      "offset": 0
+    },
+    {
+      "pair_id": 228,
+      "source": "baseline",
+      "source_pair_id": 228,
+      "offset": 0
+    },
+    {
+      "pair_id": 229,
+      "source": "baseline",
+      "source_pair_id": 229,
+      "offset": 0
+    },
+    {
+      "pair_id": 230,
+      "source": "baseline",
+      "source_pair_id": 230,
+      "offset": 0
+    },
+    {
+      "pair_id": 231,
+      "source": "baseline",
+      "source_pair_id": 231,
+      "offset": 0
+    },
+    {
+      "pair_id": 232,
+      "source": "baseline",
+      "source_pair_id": 232,
+      "offset": 0
+    },
+    {
+      "pair_id": 233,
+      "source": "baseline",
+      "source_pair_id": 233,
+      "offset": 0
+    },
+    {
+      "pair_id": 235,
+      "source": "baseline",
+      "source_pair_id": 235,
+      "offset": 0
+    },
+    {
+      "pair_id": 236,
+      "source": "baseline",
+      "source_pair_id": 236,
+      "offset": 0
+    },
+    {
+      "pair_id": 237,
+      "source": "baseline",
+      "source_pair_id": 237,
+      "offset": 0
+    },
+    {
+      "pair_id": 238,
+      "source": "baseline",
+      "source_pair_id": 238,
+      "offset": 0
+    },
+    {
+      "pair_id": 240,
+      "source": "baseline",
+      "source_pair_id": 240,
+      "offset": 0
+    },
+    {
+      "pair_id": 241,
+      "source": "baseline",
+      "source_pair_id": 241,
+      "offset": 0
+    },
+    {
+      "pair_id": 242,
+      "source": "baseline",
+      "source_pair_id": 242,
+      "offset": 0
+    },
+    {
+      "pair_id": 244,
+      "source": "baseline",
+      "source_pair_id": 244,
+      "offset": 0
+    },
+    {
+      "pair_id": 247,
+      "source": "baseline",
+      "source_pair_id": 247,
+      "offset": 0
+    },
+    {
+      "pair_id": 248,
+      "source": "baseline",
+      "source_pair_id": 248,
+      "offset": 0
+    },
+    {
+      "pair_id": 249,
+      "source": "baseline",
+      "source_pair_id": 249,
+      "offset": 0
+    },
+    {
+      "pair_id": 252,
+      "source": "baseline",
+      "source_pair_id": 252,
+      "offset": 0
+    },
+    {
+      "pair_id": 254,
+      "source": "baseline",
+      "source_pair_id": 254,
+      "offset": 0
+    },
+    {
+      "pair_id": 255,
+      "source": "baseline",
+      "source_pair_id": 255,
+      "offset": 0
+    },
+    {
+      "pair_id": 257,
+      "source": "baseline",
+      "source_pair_id": 257,
+      "offset": 0
+    },
+    {
+      "pair_id": 258,
+      "source": "baseline",
+      "source_pair_id": 258,
+      "offset": 0
+    },
+    {
+      "pair_id": 260,
+      "source": "baseline",
+      "source_pair_id": 260,
+      "offset": 0
+    },
+    {
+      "pair_id": 261,
+      "source": "baseline",
+      "source_pair_id": 261,
+      "offset": 0
+    },
+    {
+      "pair_id": 262,
+      "source": "baseline",
+      "source_pair_id": 262,
+      "offset": 0
+    },
+    {
+      "pair_id": 263,
+      "source": "baseline",
+      "source_pair_id": 263,
+      "offset": 0
+    },
+    {
+      "pair_id": 266,
+      "source": "baseline",
+      "source_pair_id": 266,
+      "offset": 0
+    },
+    {
+      "pair_id": 268,
+      "source": "baseline",
+      "source_pair_id": 268,
+      "offset": 0
+    },
+    {
+      "pair_id": 269,
+      "source": "baseline",
+      "source_pair_id": 269,
+      "offset": 0
+    },
+    {
+      "pair_id": 271,
+      "source": "baseline",
+      "source_pair_id": 271,
+      "offset": 0
+    },
+    {
+      "pair_id": 273,
+      "source": "baseline",
+      "source_pair_id": 273,
+      "offset": 0
+    },
+    {
+      "pair_id": 274,
+      "source": "baseline",
+      "source_pair_id": 274,
+      "offset": 0
+    },
+    {
+      "pair_id": 277,
+      "source": "baseline",
+      "source_pair_id": 277,
+      "offset": 0
+    },
+    {
+      "pair_id": 279,
+      "source": "baseline",
+      "source_pair_id": 279,
+      "offset": 0
+    },
+    {
+      "pair_id": 280,
+      "source": "baseline",
+      "source_pair_id": 280,
+      "offset": 0
+    },
+    {
+      "pair_id": 281,
+      "source": "baseline",
+      "source_pair_id": 281,
+      "offset": 0
+    },
+    {
+      "pair_id": 284,
+      "source": "baseline",
+      "source_pair_id": 284,
+      "offset": 0
+    },
+    {
+      "pair_id": 285,
+      "source": "baseline",
+      "source_pair_id": 285,
+      "offset": 0
+    },
+    {
+      "pair_id": 288,
+      "source": "baseline",
+      "source_pair_id": 288,
+      "offset": 0
+    },
+    {
+      "pair_id": 289,
+      "source": "baseline",
+      "source_pair_id": 289,
+      "offset": 0
+    },
+    {
+      "pair_id": 290,
+      "source": "baseline",
+      "source_pair_id": 290,
+      "offset": 0
+    },
+    {
+      "pair_id": 291,
+      "source": "baseline",
+      "source_pair_id": 291,
+      "offset": 0
+    },
+    {
+      "pair_id": 292,
+      "source": "baseline",
+      "source_pair_id": 292,
+      "offset": 0
+    },
+    {
+      "pair_id": 293,
+      "source": "baseline",
+      "source_pair_id": 293,
+      "offset": 0
+    },
+    {
+      "pair_id": 295,
+      "source": "baseline",
+      "source_pair_id": 295,
+      "offset": 0
+    },
+    {
+      "pair_id": 296,
+      "source": "baseline",
+      "source_pair_id": 296,
+      "offset": 0
+    },
+    {
+      "pair_id": 297,
+      "source": "baseline",
+      "source_pair_id": 297,
+      "offset": 0
+    },
+    {
+      "pair_id": 299,
+      "source": "baseline",
+      "source_pair_id": 299,
+      "offset": 0
+    },
+    {
+      "pair_id": 300,
+      "source": "baseline",
+      "source_pair_id": 300,
+      "offset": 0
+    },
+    {
+      "pair_id": 301,
+      "source": "baseline",
+      "source_pair_id": 301,
+      "offset": 0
+    },
+    {
+      "pair_id": 303,
+      "source": "baseline",
+      "source_pair_id": 303,
+      "offset": 0
+    },
+    {
+      "pair_id": 304,
+      "source": "baseline",
+      "source_pair_id": 304,
+      "offset": 0
+    },
+    {
+      "pair_id": 305,
+      "source": "baseline",
+      "source_pair_id": 305,
+      "offset": 0
+    },
+    {
+      "pair_id": 306,
+      "source": "baseline",
+      "source_pair_id": 306,
+      "offset": 0
+    },
+    {
+      "pair_id": 307,
+      "source": "baseline",
+      "source_pair_id": 307,
+      "offset": 0
+    },
+    {
+      "pair_id": 308,
+      "source": "baseline",
+      "source_pair_id": 308,
+      "offset": 0
+    },
+    {
+      "pair_id": 309,
+      "source": "baseline",
+      "source_pair_id": 309,
+      "offset": 0
+    },
+    {
+      "pair_id": 310,
+      "source": "baseline",
+      "source_pair_id": 310,
+      "offset": 0
+    },
+    {
+      "pair_id": 311,
+      "source": "baseline",
+      "source_pair_id": 311,
+      "offset": 0
+    },
+    {
+      "pair_id": 312,
+      "source": "baseline",
+      "source_pair_id": 312,
+      "offset": 0
+    },
+    {
+      "pair_id": 313,
+      "source": "baseline",
+      "source_pair_id": 313,
+      "offset": 0
+    },
+    {
+      "pair_id": 314,
+      "source": "baseline",
+      "source_pair_id": 314,
+      "offset": 0
+    },
+    {
+      "pair_id": 315,
+      "source": "baseline",
+      "source_pair_id": 315,
+      "offset": 0
+    },
+    {
+      "pair_id": 316,
+      "source": "annual",
+      "source_pair_id": 0,
+      "offset": 420768
+    },
+    {
+      "pair_id": 317,
+      "source": "annual",
+      "source_pair_id": 2,
+      "offset": 420768
+    },
+    {
+      "pair_id": 319,
+      "source": "annual",
+      "source_pair_id": 4,
+      "offset": 420768
+    },
+    {
+      "pair_id": 320,
+      "source": "annual",
+      "source_pair_id": 7,
+      "offset": 420768
+    },
+    {
+      "pair_id": 321,
+      "source": "annual",
+      "source_pair_id": 10,
+      "offset": 420768
+    },
+    {
+      "pair_id": 323,
+      "source": "annual",
+      "source_pair_id": 13,
+      "offset": 420768
+    },
+    {
+      "pair_id": 324,
+      "source": "annual",
+      "source_pair_id": 14,
+      "offset": 420768
+    },
+    {
+      "pair_id": 325,
+      "source": "annual",
+      "source_pair_id": 15,
+      "offset": 420768
+    },
+    {
+      "pair_id": 326,
+      "source": "annual",
+      "source_pair_id": 16,
+      "offset": 420768
+    },
+    {
+      "pair_id": 327,
+      "source": "annual",
+      "source_pair_id": 17,
+      "offset": 420768
+    },
+    {
+      "pair_id": 328,
+      "source": "annual",
+      "source_pair_id": 18,
+      "offset": 420768
+    },
+    {
+      "pair_id": 329,
+      "source": "annual",
+      "source_pair_id": 19,
+      "offset": 420768
+    },
+    {
+      "pair_id": 330,
+      "source": "annual",
+      "source_pair_id": 20,
+      "offset": 420768
+    },
+    {
+      "pair_id": 331,
+      "source": "annual",
+      "source_pair_id": 21,
+      "offset": 420768
+    },
+    {
+      "pair_id": 334,
+      "source": "annual",
+      "source_pair_id": 24,
+      "offset": 420768
+    },
+    {
+      "pair_id": 336,
+      "source": "annual",
+      "source_pair_id": 26,
+      "offset": 420768
+    },
+    {
+      "pair_id": 337,
+      "source": "annual",
+      "source_pair_id": 27,
+      "offset": 420768
+    },
+    {
+      "pair_id": 338,
+      "source": "annual",
+      "source_pair_id": 28,
+      "offset": 420768
+    },
+    {
+      "pair_id": 339,
+      "source": "annual",
+      "source_pair_id": 30,
+      "offset": 420768
+    },
+    {
+      "pair_id": 340,
+      "source": "annual",
+      "source_pair_id": 32,
+      "offset": 420768
+    },
+    {
+      "pair_id": 341,
+      "source": "annual",
+      "source_pair_id": 33,
+      "offset": 420768
+    },
+    {
+      "pair_id": 343,
+      "source": "annual",
+      "source_pair_id": 36,
+      "offset": 420768
+    },
+    {
+      "pair_id": 344,
+      "source": "annual",
+      "source_pair_id": 37,
+      "offset": 420768
+    },
+    {
+      "pair_id": 347,
+      "source": "annual",
+      "source_pair_id": 41,
+      "offset": 420768
+    },
+    {
+      "pair_id": 349,
+      "source": "annual",
+      "source_pair_id": 43,
+      "offset": 420768
+    },
+    {
+      "pair_id": 350,
+      "source": "annual",
+      "source_pair_id": 44,
+      "offset": 420768
+    },
+    {
+      "pair_id": 351,
+      "source": "annual",
+      "source_pair_id": 46,
+      "offset": 420768
+    },
+    {
+      "pair_id": 352,
+      "source": "annual",
+      "source_pair_id": 48,
+      "offset": 420768
+    },
+    {
+      "pair_id": 353,
+      "source": "annual",
+      "source_pair_id": 52,
+      "offset": 420768
+    },
+    {
+      "pair_id": 354,
+      "source": "annual",
+      "source_pair_id": 54,
+      "offset": 420768
+    },
+    {
+      "pair_id": 355,
+      "source": "annual",
+      "source_pair_id": 55,
+      "offset": 420768
+    },
+    {
+      "pair_id": 356,
+      "source": "annual",
+      "source_pair_id": 57,
+      "offset": 420768
+    },
+    {
+      "pair_id": 357,
+      "source": "annual",
+      "source_pair_id": 58,
+      "offset": 420768
+    },
+    {
+      "pair_id": 358,
+      "source": "annual",
+      "source_pair_id": 59,
+      "offset": 420768
+    },
+    {
+      "pair_id": 360,
+      "source": "annual",
+      "source_pair_id": 62,
+      "offset": 420768
+    },
+    {
+      "pair_id": 361,
+      "source": "annual",
+      "source_pair_id": 63,
+      "offset": 420768
+    },
+    {
+      "pair_id": 362,
+      "source": "annual",
+      "source_pair_id": 64,
+      "offset": 420768
+    },
+    {
+      "pair_id": 363,
+      "source": "annual",
+      "source_pair_id": 68,
+      "offset": 420768
+    },
+    {
+      "pair_id": 364,
+      "source": "annual",
+      "source_pair_id": 70,
+      "offset": 420768
+    },
+    {
+      "pair_id": 366,
+      "source": "annual",
+      "source_pair_id": 73,
+      "offset": 420768
+    },
+    {
+      "pair_id": 369,
+      "source": "annual",
+      "source_pair_id": 79,
+      "offset": 420768
+    },
+    {
+      "pair_id": 370,
+      "source": "annual",
+      "source_pair_id": 80,
+      "offset": 420768
+    },
+    {
+      "pair_id": 371,
+      "source": "annual",
+      "source_pair_id": 81,
+      "offset": 420768
+    },
+    {
+      "pair_id": 372,
+      "source": "annual",
+      "source_pair_id": 82,
+      "offset": 420768
+    },
+    {
+      "pair_id": 373,
+      "source": "annual",
+      "source_pair_id": 84,
+      "offset": 420768
+    },
+    {
+      "pair_id": 374,
+      "source": "annual",
+      "source_pair_id": 85,
+      "offset": 420768
+    },
+    {
+      "pair_id": 375,
+      "source": "annual",
+      "source_pair_id": 86,
+      "offset": 420768
+    },
+    {
+      "pair_id": 377,
+      "source": "annual",
+      "source_pair_id": 88,
+      "offset": 420768
+    },
+    {
+      "pair_id": 378,
+      "source": "annual",
+      "source_pair_id": 89,
+      "offset": 420768
+    },
+    {
+      "pair_id": 379,
+      "source": "annual",
+      "source_pair_id": 91,
+      "offset": 420768
+    },
+    {
+      "pair_id": 381,
+      "source": "annual",
+      "source_pair_id": 95,
+      "offset": 420768
+    },
+    {
+      "pair_id": 382,
+      "source": "annual",
+      "source_pair_id": 96,
+      "offset": 420768
+    },
+    {
+      "pair_id": 383,
+      "source": "annual",
+      "source_pair_id": 97,
+      "offset": 420768
+    },
+    {
+      "pair_id": 384,
+      "source": "annual",
+      "source_pair_id": 98,
+      "offset": 420768
+    }
+  ],
+  "replay_ids": [
+    16,
+    19,
+    24,
+    30,
+    33,
+    35,
+    40,
+    43,
+    49,
+    64,
+    67,
+    70,
+    82,
+    87,
+    109,
+    110,
+    131,
+    132,
+    141,
+    183,
+    206,
+    210,
+    217,
+    234,
+    250,
+    265,
+    267,
+    272,
+    278,
+    286,
+    298
+  ],
+  "rematched_ids": [
+    16,
+    19,
+    24,
+    30,
+    33,
+    35,
+    40,
+    43,
+    49,
+    64,
+    67,
+    70,
+    82,
+    87,
+    108,
+    109,
+    110,
+    131,
+    132,
+    141,
+    183,
+    206,
+    210,
+    217,
+    234,
+    250,
+    265,
+    267,
+    272,
+    278,
+    286,
+    298,
+    323,
+    326,
+    334,
+    337,
+    339,
+    362,
+    369,
+    381
+  ],
+  "new_control_times": 0,
+  "prefix_checks": 18,
+  "revision_sweep_parity": true,
+  "annual_sweep_parity": 54,
+  "source_commit": "455c3b3d1a1a5f660dba9290a693da4fa639497b"
+}

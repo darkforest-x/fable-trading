@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "sweep_n": 379,
+      "combined_n": 212,
+      "reused_pairs": 343,
+      "replayed_pairs": 36,
+      "new_positions_both_tie_policies": 144,
+      "new_fills_both_tie_policies": 288,
+      "unique_matched_controls": true,
+      "annual_and_recent_returns_exact": true,
+      "group_totals_exact": true,
+      "fees_and_notional_exact": true,
+      "positive_key_tail_checks": [
+        {
+          "key": "Monday high",
+          "n": 13,
+          "net_r": 16.10386976137307,
+          "without_best_trade": -8.174809250966156
+        }
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "sweep_n": 317,
+      "combined_n": 162,
+      "reused_pairs": 286,
+      "replayed_pairs": 31,
+      "new_positions_both_tie_policies": 124,
+      "new_fills_both_tie_policies": 248,
+      "unique_matched_controls": true,
+      "annual_and_recent_returns_exact": true,
+      "group_totals_exact": true,
+      "fees_and_notional_exact": true,
+      "positive_key_tail_checks": [
+        {
+          "key": "0.705",
+          "n": 14,
+          "net_r": 3.7732475126557294,
+          "without_best_trade": -4.449864252050233
+        },
+        {
+          "key": "Monday low",
+          "n": 6,
+          "net_r": 3.321413529868043,
+          "without_best_trade": -0.8880613792228602
+        }
+      ]
+    }
+  ],
+  "unit_tests_passed": 12,
+  "sweep_prefix_checks": 36,
+  "mtf_prefix_checks": 12,
+  "revision_sensitivity": "ETH alternative official prices produce identical sweep matches and all MTF gate fields; no path exposure through known revision window.",
+  "reproduction": "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_fiveyear_filters --execute; PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.range_fiveyear_filters --analyze"
+}
