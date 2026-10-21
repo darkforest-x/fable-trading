@@ -1,0 +1,1806 @@
+{
+  "config": {
+    "experiment_id": "exp-range-v231-recent2m-20261021-v1",
+    "source": "experiments/active/exp-range-v231-returns-20261021-v1",
+    "start": "2026-08-21T00:00:00+08:00",
+    "end": "2026-10-21T00:00:00+08:00",
+    "symbols": [
+      "BTC",
+      "ETH"
+    ],
+    "round_trip_cost": 0.002,
+    "seed": 20261021,
+    "signal_minutes": 15,
+    "entry_keys": "All current Monday/Fib keys; retain inclusive midpoint-side gate. No0.618-only restriction.",
+    "scope": "Entry-close window only; no new parameters. Exact touch-extreme stops; same18approved exits. Preserve full historical warmup, exclude entries before start, same end settlement boundary.",
+    "execution": "Reuse identical independent Nautilus executions and same-window matched controls; no portfolio capital or carry-in positions.",
+    "limitations": "Known historical two-month subset, not independent validation;20bp cost, no funding/spread/depth; independent original-riskR and equal-notionalbp, not account performance.",
+    "reproduction": "python -m yoyo.evaluation.range_recent_window",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "counts": {
+    "BTC": {
+      "n": 15,
+      "longs": 6,
+      "shorts": 9
+    },
+    "ETH": {
+      "n": 15,
+      "longs": 7,
+      "shorts": 8
+    }
+  },
+  "rows": [
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": 17.240313726768903,
+      "random_net_r": -8.03275159601974,
+      "wins": 7,
+      "mean_net_bp": -1.6603578091612547,
+      "random_mean_net_bp": -10.905673434862763,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 138.6797343855227,
+      "bp_excess_p": 0.2902854857257137,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -189.66493521856864,
+        531.1370569027424
+      ],
+      "win_rate": 0.4666666666666667,
+      "gross_win_rate": 0.5333333333333333,
+      "gross_r": 34.193713579334556,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": 1.1493542484512602,
+      "pf": 2.25577161148352,
+      "realized_r_drawdown": 11.581854167175628,
+      "weeks": 7,
+      "excess_r": 25.273065322788646,
+      "p_one_sided": 0.32518374081295937,
+      "weekly_bootstrap_total_r_95ci": [
+        -8.921166252920784,
+        82.37983923137573
+      ],
+      "sensitivity_net_r": 17.240313726768903,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "fixed_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -17.953399852566086,
+      "random_net_r": -9.941310204870394,
+      "wins": 4,
+      "mean_net_bp": -23.41565028184127,
+      "random_mean_net_bp": -7.832625312452401,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -233.74537454083296,
+      "bp_excess_p": 0.9073046347682616,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -567.3294034841877,
+        126.1428015605045
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.4666666666666667,
+      "gross_r": -1.0000000000004283,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -1.1968933235044057,
+      "pf": 0.08061773327160164,
+      "realized_r_drawdown": 18.88028973676991,
+      "weeks": 7,
+      "excess_r": -8.01208964769569,
+      "p_one_sided": 0.9699515024248787,
+      "weekly_bootstrap_total_r_95ci": [
+        -18.00249336221931,
+        1.9785305664476711
+      ],
+      "sensitivity_net_r": -17.953399852566115,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "fixed_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -13.953399852565907,
+      "random_net_r": -10.941310204870144,
+      "wins": 5,
+      "mean_net_bp": -20.285525086150756,
+      "random_mean_net_bp": -9.134539530044346,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -167.26478334159617,
+      "bp_excess_p": 0.7244637768111595,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -683.2047776917769,
+        380.1904556196479
+      ],
+      "win_rate": 0.3333333333333333,
+      "gross_win_rate": 0.4,
+      "gross_r": 2.999999999999755,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.9302266568377271,
+      "pf": 0.28759004324044657,
+      "realized_r_drawdown": 16.295860811559294,
+      "weeks": 7,
+      "excess_r": -3.0120896476957575,
+      "p_one_sided": 0.7455627218639068,
+      "weekly_bootstrap_total_r_95ci": [
+        -15.003746990379291,
+        14.96954825543581
+      ],
+      "sensitivity_net_r": -13.95339985256638,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "fixed_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -11.953399852566694,
+      "random_net_r": -3.9413102048702626,
+      "wins": 4,
+      "mean_net_bp": -15.823564944332217,
+      "random_mean_net_bp": 4.131246880481994,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -299.3221773722133,
+      "bp_excess_p": 0.7716614169291536,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -981.7370871902805,
+        481.3737055995612
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.3333333333333333,
+      "gross_r": 4.999999999998966,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.7968933235044463,
+      "pf": 0.4207227268056192,
+      "realized_r_drawdown": 16.29586081156008,
+      "weeks": 7,
+      "excess_r": -8.012089647696431,
+      "p_one_sided": 0.8407579621018949,
+      "weekly_bootstrap_total_r_95ci": [
+        -24.004055443191533,
+        15.970038112956551
+      ],
+      "sensitivity_net_r": -11.953399852566825,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "fixed_5r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -13.953399852566882,
+      "random_net_r": -19.941310204869744,
+      "wins": 2,
+      "mean_net_bp": -31.40819632966008,
+      "random_mean_net_bp": -35.1863351654446,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 56.672082536767874,
+      "bp_excess_p": 0.2574371281435928,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -320.1857313668825,
+        444.0765594509748
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 2.999999999998775,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.9302266568377922,
+      "pf": 0.36094261976058456,
+      "realized_r_drawdown": 18.14257082188032,
+      "weeks": 7,
+      "excess_r": 5.987910352302865,
+      "p_one_sided": 0.49477526123693816,
+      "weekly_bootstrap_total_r_95ci": [
+        -12.012797317457498,
+        23.98771604081915
+      ],
+      "sensitivity_net_r": -13.953399852566946,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "fixed_10r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -16.76635650137483,
+      "random_net_r": -20.941310204870646,
+      "wins": 2,
+      "mean_net_bp": -39.22399092077606,
+      "random_mean_net_bp": -37.71744146873488,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377104,
+      "bp_excess_sum": -22.598241780617855,
+      "bp_excess_p": 0.5128243587820609,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -377.7785535125501,
+        309.9102949962057
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.13333333333333333,
+      "gross_r": 0.18704335119082582,
+      "fee_r": 16.953399852565656,
+      "mean_net_r": -1.1177571000916553,
+      "pf": 0.299553858454118,
+      "realized_r_drawdown": 19.142570821881556,
+      "weeks": 7,
+      "excess_r": 4.174953703495816,
+      "p_one_sided": 0.5009249537523124,
+      "weekly_bootstrap_total_r_95ci": [
+        -0.029450151061198193,
+        12.557453193542194
+      ],
+      "sensitivity_net_r": -16.766356501375228,
+      "boundary_n": 1,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "split_1_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -14.953399852566392,
+      "random_net_r": -6.941310204870328,
+      "wins": 4,
+      "mean_net_bp": -19.61960761308674,
+      "random_mean_net_bp": -1.8506892159852029,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -266.533775956523,
+      "bp_excess_p": 0.8268586570671467,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -758.8012779646663,
+        221.76776937320204
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.3333333333333333,
+      "gross_r": 1.9999999999992684,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.9968933235044262,
+      "pf": 0.23843227192843042,
+      "realized_r_drawdown": 17.295860811559745,
+      "weeks": 7,
+      "excess_r": -8.01208964769606,
+      "p_one_sided": 0.8410579471026449,
+      "weekly_bootstrap_total_r_95ci": [
+        -21.003027596014157,
+        6.970038112957811
+      ],
+      "sensitivity_net_r": -14.953399852566474,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "split_2_5r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -13.953399852566395,
+      "random_net_r": -15.441310204869946,
+      "wins": 3,
+      "mean_net_bp": -25.846860707905414,
+      "random_mean_net_bp": -22.16043734774448,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -55.29635040241408,
+      "bp_excess_p": 0.6109194540272986,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -380.8984179791228,
+        296.0662941438306
+      ],
+      "win_rate": 0.2,
+      "gross_win_rate": 0.4,
+      "gross_r": 2.999999999999264,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.9302266568377597,
+      "pf": 0.26490379729756214,
+      "realized_r_drawdown": 16.642570821879758,
+      "weeks": 7,
+      "excess_r": 1.4879103523035546,
+      "p_one_sided": 0.4930253487325634,
+      "weekly_bootstrap_total_r_95ci": [
+        -12.0036343505815,
+        17.969627996103238
+      ],
+      "sensitivity_net_r": -13.953399852566662,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "key_tp",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": 2.405306274139658,
+      "random_net_r": -13.017345356916195,
+      "wins": 5,
+      "mean_net_bp": -19.032889346244012,
+      "random_mean_net_bp": -13.752681077327308,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -79.20312403375063,
+      "bp_excess_p": 0.6922153892305385,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -383.40199438152297,
+        194.07189772311722
+      ],
+      "win_rate": 0.3333333333333333,
+      "gross_win_rate": 0.4,
+      "gross_r": 19.35870612670531,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": 0.16035375160931054,
+      "pf": 1.146507085173899,
+      "realized_r_drawdown": 12.855101085216884,
+      "weeks": 7,
+      "excess_r": 15.422651631055851,
+      "p_one_sided": 0.44617769111544425,
+      "weekly_bootstrap_total_r_95ci": [
+        -7.940693421147295,
+        56.19271693316195
+      ],
+      "sensitivity_net_r": 2.4053062741393676,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_price_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -10.953399852566958,
+      "random_net_r": -12.941310204869943,
+      "wins": 2,
+      "mean_net_bp": -24.780918862958934,
+      "random_mean_net_bp": -20.96593480912239,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -57.22476080754831,
+      "bp_excess_p": 0.5981200939953002,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -474.3434953903421,
+        361.18155751750237
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 5.9999999999987,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.7302266568377972,
+      "pf": 0.4184348134585841,
+      "realized_r_drawdown": 15.142570821880396,
+      "weeks": 7,
+      "excess_r": 1.9879103523029826,
+      "p_one_sided": 0.49477526123693816,
+      "weekly_bootstrap_total_r_95ci": [
+        -19.00315831471724,
+        23.969671971708895
+      ],
+      "sensitivity_net_r": -10.953399852567022,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_price_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -10.953399852566958,
+      "random_net_r": -14.941310204869886,
+      "wins": 2,
+      "mean_net_bp": -24.780918862958934,
+      "random_mean_net_bp": -24.211476020948037,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -8.541642630163551,
+      "bp_excess_p": 0.5180240987950603,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -363.0069294894134,
+        371.2172765067879
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 5.9999999999987,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.7302266568377972,
+      "pf": 0.4184348134585841,
+      "realized_r_drawdown": 15.142570821880396,
+      "weeks": 7,
+      "excess_r": 3.9879103523029293,
+      "p_one_sided": 0.432078396080196,
+      "weekly_bootstrap_total_r_95ci": [
+        -14.004317412843005,
+        23.970539758306728
+      ],
+      "sensitivity_net_r": -10.953399852567022,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_price_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -11.95339985256696,
+      "random_net_r": -15.941310204869794,
+      "wins": 2,
+      "mean_net_bp": -26.05217829056245,
+      "random_mean_net_bp": -25.5422497817605,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -7.648927632029313,
+      "bp_excess_p": 0.504024798760062,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -394.4894003458349,
+        380.1031092905996
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 4.9999999999987,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.7968933235044641,
+      "pf": 0.39733833683126746,
+      "realized_r_drawdown": 16.142570821880398,
+      "weeks": 7,
+      "excess_r": 3.987910352302837,
+      "p_one_sided": 0.46462676866156694,
+      "weekly_bootstrap_total_r_95ci": [
+        -16.002480955046,
+        24.00310956675665
+      ],
+      "sensitivity_net_r": -11.953399852567024,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_cost_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -16.584934071613237,
+      "random_net_r": -13.772718202457742,
+      "wins": 5,
+      "mean_net_bp": -31.430251378560907,
+      "random_mean_net_bp": -18.861607438343007,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -188.52965910326864,
+      "bp_excess_p": 0.9208039598020099,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -392.5814234850317,
+        31.100429985151244
+      ],
+      "win_rate": 0.3333333333333333,
+      "gross_win_rate": 0.4,
+      "gross_r": 0.3684657809524229,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -1.1056622714408824,
+      "pf": 7.598210515924419e-05,
+      "realized_r_drawdown": 16.585152537177766,
+      "weeks": 7,
+      "excess_r": -2.8122158691554935,
+      "p_one_sided": 0.6506674666266686,
+      "weekly_bootstrap_total_r_95ci": [
+        -10.483261139199515,
+        7.812924724305282
+      ],
+      "sensitivity_net_r": -16.584934071613276,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_cost_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -8.704708837825626,
+      "random_net_r": -15.335102504568038,
+      "wins": 5,
+      "mean_net_bp": -20.779763804141826,
+      "random_mean_net_bp": -22.56677447816038,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 26.805160110278266,
+      "bp_excess_p": 0.4094795260236988,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -299.00644703308694,
+        369.86610195837034
+      ],
+      "win_rate": 0.3333333333333333,
+      "gross_win_rate": 0.4,
+      "gross_r": 8.248691014740034,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.5803139225217084,
+      "pf": 0.47518347687488416,
+      "realized_r_drawdown": 12.893919022825369,
+      "weeks": 7,
+      "excess_r": 6.630393666742412,
+      "p_one_sided": 0.2822358882055897,
+      "weekly_bootstrap_total_r_95ci": [
+        -8.290391821020028,
+        24.646630104205983
+      ],
+      "sensitivity_net_r": -8.704708837825667,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "be_cost_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -10.753855595504787,
+      "random_net_r": -17.33765678298435,
+      "wins": 4,
+      "mean_net_bp": -23.384760938384623,
+      "random_mean_net_bp": -25.23172116647979,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 27.70440342142733,
+      "bp_excess_p": 0.4096795160241988,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -308.50925684036395,
+        376.6987283966252
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.3333333333333333,
+      "gross_r": 6.199544257060873,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.7169237063669858,
+      "pf": 0.4229223329282124,
+      "realized_r_drawdown": 14.94306578050453,
+      "weeks": 7,
+      "excess_r": 6.583801187479562,
+      "p_one_sided": 0.2823858807059647,
+      "weekly_bootstrap_total_r_95ci": [
+        -8.450811165534441,
+        24.60198143505613
+      ],
+      "sensitivity_net_r": -10.753855595504927,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "half_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -13.704388450383242,
+      "random_net_r": -19.44278611540128,
+      "wins": 2,
+      "mean_net_bp": -27.710327779054378,
+      "random_mean_net_bp": -31.330948397967727,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 54.30930928370017,
+      "bp_excess_p": 0.26443677816109196,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -306.84379442372233,
+        425.5616989729589
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 3.2490114021824175,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.913625896692216,
+      "pf": 0.27240317334265735,
+      "realized_r_drawdown": 17.89355941969668,
+      "weeks": 7,
+      "excess_r": 5.738397665018041,
+      "p_one_sided": 0.49477526123693816,
+      "weekly_bootstrap_total_r_95ci": [
+        -11.512353830153202,
+        22.988546344766995
+      ],
+      "sensitivity_net_r": -13.704388450383224,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "key_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -14.049482150911416,
+      "random_net_r": -17.91868771714213,
+      "wins": 2,
+      "mean_net_bp": -28.19195021772821,
+      "random_mean_net_bp": -30.408897866642192,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": 33.25421473371,
+      "bp_excess_p": 0.391730413479326,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -338.8929370390884,
+        428.137717816401
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.2,
+      "gross_r": 2.9039177016542412,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": -0.9366321433940944,
+      "pf": 0.27232899603707683,
+      "realized_r_drawdown": 18.238653120224853,
+      "weeks": 7,
+      "excess_r": 3.8692055662307157,
+      "p_one_sided": 0.28013599320034,
+      "weekly_bootstrap_total_r_95ci": [
+        -14.191686649987087,
+        19.812449704606916
+      ],
+      "sensitivity_net_r": -14.049482150911345,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "arm": "key_tp_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": 1.5979694270742422,
+      "random_net_r": -12.222171431604739,
+      "wins": 4,
+      "mean_net_bp": -19.013751222554447,
+      "random_mean_net_bp": -12.695407703417592,
+      "median_risk_percent": 0.2362083801565495,
+      "mean_cost_r": 1.1302266568377106,
+      "bp_excess_sum": -94.77515278705276,
+      "bp_excess_p": 0.7583120843957802,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -309.887419266781,
+        83.05198027691426
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.4,
+      "gross_r": 18.551369279639903,
+      "fee_r": 16.95339985256566,
+      "mean_net_r": 0.10653129513828281,
+      "pf": 1.1097962090434974,
+      "realized_r_drawdown": 11.679341199732152,
+      "weeks": 7,
+      "excess_r": 13.820140858678982,
+      "p_one_sided": 0.4171291435428229,
+      "weekly_bootstrap_total_r_95ci": [
+        -6.312400167820183,
+        48.22040582903516
+      ],
+      "sensitivity_net_r": 1.5979694270740317,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -8.677194461453011,
+      "random_net_r": -6.393389814317928,
+      "wins": 5,
+      "mean_net_bp": -9.21957897652881,
+      "random_mean_net_bp": -2.9582903697723935,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": -93.9193291013462,
+      "bp_excess_p": 0.6624168791560422,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -489.3859030289648,
+        295.51182438032646
+      ],
+      "win_rate": 0.3333333333333333,
+      "gross_win_rate": 0.4,
+      "gross_r": 1.929528791802659,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.578479630763534,
+      "pf": 0.4177946091223846,
+      "realized_r_drawdown": 12.312744023970849,
+      "weeks": 7,
+      "excess_r": -2.2838046471350824,
+      "p_one_sided": 0.6549172541372932,
+      "weekly_bootstrap_total_r_95ci": [
+        -16.055121770965467,
+        11.4720424072436
+      ],
+      "sensitivity_net_r": -8.677194461453011,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.606723253255623,
+      "random_net_r": -7.597502329003711,
+      "wins": 7,
+      "mean_net_bp": -4.113401708293479,
+      "random_mean_net_bp": -5.050149425623795,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 14.051215759954736,
+      "bp_excess_p": 0.424178791060447,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -189.8644131635944,
+        207.74337383517897
+      ],
+      "win_rate": 0.4666666666666667,
+      "gross_win_rate": 0.6,
+      "gross_r": 3.0000000000000475,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.5071148835503749,
+      "pf": 0.3379372064578683,
+      "realized_r_drawdown": 10.29578609236933,
+      "weeks": 7,
+      "excess_r": -0.009220924251912233,
+      "p_one_sided": 0.6833158342082896,
+      "weekly_bootstrap_total_r_95ci": [
+        -8.006135339216307,
+        7.987693490712482
+      ],
+      "sensitivity_net_r": -7.606723253255623,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.60672325325559,
+      "random_net_r": -10.597502329003671,
+      "wins": 6,
+      "mean_net_bp": -1.425570896267942,
+      "random_mean_net_bp": -18.299154895822806,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 253.10375999332288,
+      "bp_excess_p": 0.2872356382180891,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -566.3578712621397,
+        1198.9189315172937
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4,
+      "gross_r": 3.000000000000079,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.5071148835503727,
+      "pf": 0.5336848185711397,
+      "realized_r_drawdown": 11.295786092369298,
+      "weeks": 7,
+      "excess_r": 2.9907790757480788,
+      "p_one_sided": 0.4924753762311884,
+      "weekly_bootstrap_total_r_95ci": [
+        -9.011672771669565,
+        14.992358563472216
+      ],
+      "sensitivity_net_r": -7.606723253255626,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -1.6067232532556808,
+      "random_net_r": -17.59750232900382,
+      "wins": 6,
+      "mean_net_bp": 18.684830034588042,
+      "random_mean_net_bp": -46.362116695015,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 975.7042009440455,
+      "bp_excess_p": 0.03769811509424529,
+      "bp_excess_weekly_bootstrap_95ci": [
+        127.53569550160722,
+        2373.280955179609
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4,
+      "gross_r": 8.99999999999999,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.10711488355037872,
+      "pf": 0.9015029967039715,
+      "realized_r_drawdown": 8.295786092369353,
+      "weeks": 7,
+      "excess_r": 15.990779075748137,
+      "p_one_sided": 0.12324383780810959,
+      "weekly_bootstrap_total_r_95ci": [
+        3.9877771331404723,
+        31.993301262438173
+      ],
+      "sensitivity_net_r": -1.6067232532556657,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 0.6785660716964153
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.60672325325594,
+      "random_net_r": -13.59750232900392,
+      "wins": 3,
+      "mean_net_bp": -12.445839360140472,
+      "random_mean_net_bp": -38.65560066972982,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 393.14641964384043,
+      "bp_excess_p": 0.13239338033098344,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -0.17097337469579088,
+        1001.0294962912966
+      ],
+      "win_rate": 0.2,
+      "gross_win_rate": 0.2,
+      "gross_r": 2.999999999999729,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.507114883550396,
+      "pf": 0.6395187112737335,
+      "realized_r_drawdown": 15.819266515799727,
+      "weeks": 7,
+      "excess_r": 5.990779075747977,
+      "p_one_sided": 0.5001749912504375,
+      "weekly_bootstrap_total_r_95ci": [
+        -0.01816838358261874,
+        17.996249494671815
+      ],
+      "sensitivity_net_r": -7.60672325325594,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_10r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -3.6067232532559164,
+      "random_net_r": -14.597502329003571,
+      "wins": 2,
+      "mean_net_bp": 4.3897789979009225,
+      "random_mean_net_bp": -32.74134697293004,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 556.9668895624643,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -0.6990107213225514,
+        1671.4055865369708
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.13333333333333333,
+      "gross_r": 6.999999999999753,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.24044821688372775,
+      "pf": 0.8411570137813174,
+      "realized_r_drawdown": 22.70621661752482,
+      "weeks": 7,
+      "excess_r": 10.990779075747657,
+      "p_one_sided": 0.5001749912504375,
+      "weekly_bootstrap_total_r_95ci": [
+        -0.01816838358275441,
+        32.996249494671254
+      ],
+      "sensitivity_net_r": -3.6067232532559164,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_1_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -4.606723253255652,
+      "random_net_r": -12.597502329003763,
+      "wins": 6,
+      "mean_net_bp": 7.285714163147281,
+      "random_mean_net_bp": -25.7061330603194,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 494.8777083520002,
+      "bp_excess_p": 0.08364581770911454,
+      "bp_excess_weekly_bootstrap_95ci": [
+        1.7016891875648952,
+        1218.5921142521668
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4,
+      "gross_r": 6.000000000000018,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.3071148835503768,
+      "pf": 0.6539526557900486,
+      "realized_r_drawdown": 9.29578609236934,
+      "weeks": 7,
+      "excess_r": 7.9907790757481125,
+      "p_one_sided": 0.12324383780810959,
+      "weekly_bootstrap_total_r_95ci": [
+        -2.002999369550028,
+        17.992740988888315
+      ],
+      "sensitivity_net_r": -4.606723253255645,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.6067232532557645,
+      "random_net_r": -12.097502329003792,
+      "wins": 4,
+      "mean_net_bp": -6.935705128204207,
+      "random_mean_net_bp": -28.477377782776315,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 323.1250898185817,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -256.62639142624016,
+        1103.1803166882266
+      ],
+      "win_rate": 0.26666666666666666,
+      "gross_win_rate": 0.4,
+      "gross_r": 2.9999999999999045,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.5071148835503843,
+      "pf": 0.5510548748387563,
+      "realized_r_drawdown": 12.819266515799644,
+      "weeks": 7,
+      "excess_r": 4.490779075748028,
+      "p_one_sided": 0.3385330733463327,
+      "weekly_bootstrap_total_r_95ci": [
+        -4.508148479526707,
+        14.993698218467284
+      ],
+      "sensitivity_net_r": -7.606723253255782,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "key_tp",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.116760609884657,
+      "random_net_r": -4.290628145936234,
+      "wins": 6,
+      "mean_net_bp": -6.487684738015329,
+      "random_mean_net_bp": 7.228849920340514,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": -205.74801987533763,
+      "bp_excess_p": 0.7865106744662766,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -635.5294284343527,
+        254.37179446976205
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4666666666666667,
+      "gross_r": 3.4899626433710136,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.47445070732564376,
+      "pf": 0.4468587458829681,
+      "realized_r_drawdown": 10.137664106584328,
+      "weeks": 7,
+      "excess_r": -2.826132463948423,
+      "p_one_sided": 0.6664666766661667,
+      "weekly_bootstrap_total_r_95ci": [
+        -14.621345508502582,
+        10.442503299496334
+      ],
+      "sensitivity_net_r": -7.116760609884708,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_price_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -6.6067232532559395,
+      "random_net_r": -8.59750232900392,
+      "wins": 2,
+      "mean_net_bp": -5.029339684456028,
+      "random_mean_net_bp": -17.36972619556497,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 185.1057976666341,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -464.02663848364887,
+        857.5409582120867
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.13333333333333333,
+      "gross_r": 3.999999999999729,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.4404482168837293,
+      "pf": 0.5766857339721622,
+      "realized_r_drawdown": 12.577229146047578,
+      "weeks": 7,
+      "excess_r": 1.9907790757479766,
+      "p_one_sided": 0.4306784660766962,
+      "weekly_bootstrap_total_r_95ci": [
+        -13.00386078387152,
+        15.991993626298246
+      ],
+      "sensitivity_net_r": -6.606723253255836,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_price_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -9.60672325325594,
+      "random_net_r": -11.59750232900392,
+      "wins": 2,
+      "mean_net_bp": -13.740624743871365,
+      "random_mean_net_bp": -29.994570241825492,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 243.80918246931185,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -690.3802285280238,
+        1243.2909780264908
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.13333333333333333,
+      "gross_r": 0.9999999999997291,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.6404482168837293,
+      "pf": 0.4837075767363463,
+      "realized_r_drawdown": 15.577229146047578,
+      "weeks": 7,
+      "excess_r": 1.9907790757479766,
+      "p_one_sided": 0.36903154842257885,
+      "weekly_bootstrap_total_r_95ci": [
+        -16.007896170041374,
+        18.99415355447312
+      ],
+      "sensitivity_net_r": -9.606723253255993,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_price_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -9.60672325325594,
+      "random_net_r": -13.59750232900392,
+      "wins": 2,
+      "mean_net_bp": -13.740624743871365,
+      "random_mean_net_bp": -38.65560066972982,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 373.72463888787695,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -440.9774555413669,
+        1400.6413685403063
+      ],
+      "win_rate": 0.13333333333333333,
+      "gross_win_rate": 0.13333333333333333,
+      "gross_r": 0.9999999999997291,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.6404482168837293,
+      "pf": 0.4837075767363463,
+      "realized_r_drawdown": 15.577229146047578,
+      "weeks": 7,
+      "excess_r": 3.9907790757479766,
+      "p_one_sided": 0.30938453077346134,
+      "weekly_bootstrap_total_r_95ci": [
+        -13.0069150097228,
+        21.996254031697827
+      ],
+      "sensitivity_net_r": -9.606723253255993,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_cost_1r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -4.4805152981006815,
+      "random_net_r": -6.5126111880203,
+      "wins": 7,
+      "mean_net_bp": 1.8715430511916922,
+      "random_mean_net_bp": -10.696432244493641,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 188.51962943527994,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -400.5871006166031,
+        792.8047358681871
+      ],
+      "win_rate": 0.4666666666666667,
+      "gross_win_rate": 0.5333333333333333,
+      "gross_r": 6.126207955154986,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.29870101987337877,
+      "pf": 0.6677452956263769,
+      "realized_r_drawdown": 10.609748573312075,
+      "weeks": 7,
+      "excess_r": 2.032095889919617,
+      "p_one_sided": 0.3696315184240788,
+      "weekly_bootstrap_total_r_95ci": [
+        -11.857244663997156,
+        15.364253028394403
+      ],
+      "sensitivity_net_r": -4.48051529810079,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_cost_2r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.308852507787812,
+      "random_net_r": -10.94945623235203,
+      "wins": 6,
+      "mean_net_bp": -8.39982533945535,
+      "random_mean_net_bp": -27.32445137988174,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 283.86939060639577,
+      "bp_excess_p": 0.25498725063746813,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -650.342912673638,
+        1268.7173369985908
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4,
+      "gross_r": 3.297870745467857,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.4872568338525208,
+      "pf": 0.5519451977239778,
+      "realized_r_drawdown": 13.437645782999176,
+      "weeks": 7,
+      "excess_r": 3.640603724564217,
+      "p_one_sided": 0.30938453077346134,
+      "weekly_bootstrap_total_r_95ci": [
+        -13.61405285140872,
+        19.285125781129477
+      ],
+      "sensitivity_net_r": -7.308852507787941,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "be_cost_3r",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.308852507787812,
+      "random_net_r": -13.59750232900392,
+      "wins": 6,
+      "mean_net_bp": -8.39982533945535,
+      "random_mean_net_bp": -38.65560066972982,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 453.83662995411726,
+      "bp_excess_p": 0.22273886305684715,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -352.4906490374631,
+        1483.395515148147
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4,
+      "gross_r": 3.297870745467857,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.4872568338525208,
+      "pf": 0.5519451977239778,
+      "realized_r_drawdown": 13.437645782999176,
+      "weeks": 7,
+      "excess_r": 6.288649821216107,
+      "p_one_sided": 0.30938453077346134,
+      "weekly_bootstrap_total_r_95ci": [
+        -9.855331646674319,
+        23.47454872868161
+      ],
+      "sensitivity_net_r": -7.308852507787941,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "half_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.358978708044331,
+      "random_net_r": -10.349539886678695,
+      "wins": 3,
+      "mean_net_bp": -11.31780392323875,
+      "random_mean_net_bp": -29.17836600060445,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 267.9084311604854,
+      "bp_excess_p": 0.271886405679716,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -241.17586874150496,
+        959.2243239557907
+      ],
+      "win_rate": 0.2,
+      "gross_win_rate": 0.2,
+      "gross_r": 3.2477445452113374,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.49059858053628874,
+      "pf": 0.5935126334375916,
+      "realized_r_drawdown": 13.821314426516993,
+      "weeks": 7,
+      "excess_r": 2.9905611786343655,
+      "p_one_sided": 0.5001749912504375,
+      "weekly_bootstrap_total_r_95ci": [
+        -8.254665561922602,
+        17.242414022986765
+      ],
+      "sensitivity_net_r": -7.35897870804428,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "arm": "key_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -6.953780734846532,
+      "random_net_r": -13.986607993121543,
+      "wins": 3,
+      "mean_net_bp": -8.168508182039599,
+      "random_mean_net_bp": -36.77735191234117,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": 429.13265595452356,
+      "bp_excess_p": 0.053897305134743265,
+      "bp_excess_weekly_bootstrap_95ci": [
+        24.309089839963423,
+        1007.1828426463612
+      ],
+      "win_rate": 0.2,
+      "gross_win_rate": 0.2,
+      "gross_r": 3.6529425184091373,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.46358538232310215,
+      "pf": 0.6123356626898775,
+      "realized_r_drawdown": 14.026277519134299,
+      "weeks": 7,
+      "excess_r": 7.032827258275013,
+      "p_one_sided": 0.053897305134743265,
+      "weekly_bootstrap_total_r_95ci": [
+        0.32368096248112327,
+        18.826577302660016
+      ],
+      "sensitivity_net_r": -6.953780734846408,
+      "boundary_n": 0,
+      "holm_p_arms": 0.9701514924253788,
+      "bp_holm_p_arms": 0.9162541872906355
+    },
+    {
+      "symbol": "ETH",
+      "arm": "key_tp_stop",
+      "version": "v231_all_keys_recent2m",
+      "group": "all",
+      "n": 15,
+      "net_r": -7.159557862618137,
+      "random_net_r": -5.442228403352296,
+      "wins": 6,
+      "mean_net_bp": -9.456256574941351,
+      "random_mean_net_bp": 2.7161137589897133,
+      "median_risk_percent": 0.31903310104529486,
+      "mean_cost_r": 0.707114883550378,
+      "bp_excess_sum": -182.58555500896594,
+      "bp_excess_p": 0.7547622618869056,
+      "bp_excess_weekly_bootstrap_95ci": [
+        -611.5234826616438,
+        260.94547875323804
+      ],
+      "win_rate": 0.4,
+      "gross_win_rate": 0.4666666666666667,
+      "gross_r": 3.4471653906375304,
+      "fee_r": 10.60672325325567,
+      "mean_net_r": -0.4773038575078758,
+      "pf": 0.38585386667179516,
+      "realized_r_drawdown": 8.929325452733309,
+      "weeks": 7,
+      "excess_r": -1.7173294592658448,
+      "p_one_sided": 0.6598170091495426,
+      "weekly_bootstrap_total_r_95ci": [
+        -13.526762630914508,
+        11.164305389662214
+      ],
+      "sensitivity_net_r": -7.159557862618107,
+      "boundary_n": 0,
+      "holm_p_arms": 1.0,
+      "bp_holm_p_arms": 1.0
+    }
+  ],
+  "concentration": [
+    {
+      "symbol": "BTC",
+      "pair_id": 124,
+      "entry_time": "2026-10-01T06:15:00+00:00",
+      "net_r": 24.278679012339225,
+      "net_r_without_largest": -7.038365285570322,
+      "price_return_bp": 93.27390395966617
+    },
+    {
+      "symbol": "ETH",
+      "pair_id": 80,
+      "entry_time": "2026-08-27T09:30:00+00:00",
+      "net_r": 3.501418406805808,
+      "net_r_without_largest": -12.178612868258819,
+      "price_return_bp": 177.31096254694893
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/signal_matches.csv",
+      "bytes": 12260,
+      "mtime_ns": 1792567765104765354
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/candidates.csv",
+      "bytes": 13704,
+      "mtime_ns": 1792567765105295817
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/pivot/trades.csv",
+      "bytes": 54816,
+      "mtime_ns": 1792567798310023858
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/pivot/sensitivity.csv",
+      "bytes": 54816,
+      "mtime_ns": 1792567798317173504
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_1r/trades.csv",
+      "bytes": 31929,
+      "mtime_ns": 1792567798399970520
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_1r/sensitivity.csv",
+      "bytes": 31590,
+      "mtime_ns": 1792567798405840446
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_2r/trades.csv",
+      "bytes": 31871,
+      "mtime_ns": 1792567798476531190
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_2r/sensitivity.csv",
+      "bytes": 31447,
+      "mtime_ns": 1792567798481967737
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_3r/trades.csv",
+      "bytes": 31851,
+      "mtime_ns": 1792567798552055350
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_3r/sensitivity.csv",
+      "bytes": 31416,
+      "mtime_ns": 1792567798557857151
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_5r/trades.csv",
+      "bytes": 31771,
+      "mtime_ns": 1792567798628445477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_5r/sensitivity.csv",
+      "bytes": 31245,
+      "mtime_ns": 1792567798633618772
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_10r/trades.csv",
+      "bytes": 31805,
+      "mtime_ns": 1792567798700659109
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_10r/sensitivity.csv",
+      "bytes": 31167,
+      "mtime_ns": 1792567798706425451
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_1_3r/trades.csv",
+      "bytes": 31864,
+      "mtime_ns": 1792567798776401147
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_1_3r/sensitivity.csv",
+      "bytes": 31381,
+      "mtime_ns": 1792567798781591275
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_2_5r/trades.csv",
+      "bytes": 31964,
+      "mtime_ns": 1792567798850135375
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_2_5r/sensitivity.csv",
+      "bytes": 31501,
+      "mtime_ns": 1792567798854931542
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp/trades.csv",
+      "bytes": 32286,
+      "mtime_ns": 1792567798922441466
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp/sensitivity.csv",
+      "bytes": 31896,
+      "mtime_ns": 1792567798927864055
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_1r/trades.csv",
+      "bytes": 31184,
+      "mtime_ns": 1792567799000057853
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_1r/sensitivity.csv",
+      "bytes": 30897,
+      "mtime_ns": 1792567799005584235
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_2r/trades.csv",
+      "bytes": 31429,
+      "mtime_ns": 1792567799098848010
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_2r/sensitivity.csv",
+      "bytes": 31019,
+      "mtime_ns": 1792567799103721969
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_3r/trades.csv",
+      "bytes": 31591,
+      "mtime_ns": 1792567799174174502
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_3r/sensitivity.csv",
+      "bytes": 31184,
+      "mtime_ns": 1792567799179569591
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_1r/trades.csv",
+      "bytes": 32436,
+      "mtime_ns": 1792567799251689889
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_1r/sensitivity.csv",
+      "bytes": 32063,
+      "mtime_ns": 1792567799257099561
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_2r/trades.csv",
+      "bytes": 32187,
+      "mtime_ns": 1792567799327239508
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_2r/sensitivity.csv",
+      "bytes": 31789,
+      "mtime_ns": 1792567799333450729
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_3r/trades.csv",
+      "bytes": 32000,
+      "mtime_ns": 1792567799412313085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_3r/sensitivity.csv",
+      "bytes": 31566,
+      "mtime_ns": 1792567799419009019
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/half_stop/trades.csv",
+      "bytes": 32822,
+      "mtime_ns": 1792567799497037744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/half_stop/sensitivity.csv",
+      "bytes": 32702,
+      "mtime_ns": 1792567799502179205
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_stop/trades.csv",
+      "bytes": 32772,
+      "mtime_ns": 1792567799575461680
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_stop/sensitivity.csv",
+      "bytes": 32572,
+      "mtime_ns": 1792567799580104304
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp_stop/trades.csv",
+      "bytes": 33004,
+      "mtime_ns": 1792567799674997426
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp_stop/sensitivity.csv",
+      "bytes": 32868,
+      "mtime_ns": 1792567799680730059
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/signal_matches.csv",
+      "bytes": 11261,
+      "mtime_ns": 1792567765260440298
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/candidates.csv",
+      "bytes": 12408,
+      "mtime_ns": 1792567765260897219
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/pivot/trades.csv",
+      "bytes": 49649,
+      "mtime_ns": 1792567799764600085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/pivot/sensitivity.csv",
+      "bytes": 49649,
+      "mtime_ns": 1792567799770871473
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_1r/trades.csv",
+      "bytes": 29196,
+      "mtime_ns": 1792567799851342552
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_1r/sensitivity.csv",
+      "bytes": 29020,
+      "mtime_ns": 1792567799857033227
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_2r/trades.csv",
+      "bytes": 29094,
+      "mtime_ns": 1792567799936108669
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_2r/sensitivity.csv",
+      "bytes": 28915,
+      "mtime_ns": 1792567799940860918
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_3r/trades.csv",
+      "bytes": 29036,
+      "mtime_ns": 1792567800020148112
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_3r/sensitivity.csv",
+      "bytes": 28847,
+      "mtime_ns": 1792567800025111322
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_5r/trades.csv",
+      "bytes": 28976,
+      "mtime_ns": 1792567800098572090
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_5r/sensitivity.csv",
+      "bytes": 28769,
+      "mtime_ns": 1792567800102789794
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_10r/trades.csv",
+      "bytes": 28942,
+      "mtime_ns": 1792567800168541286
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_10r/sensitivity.csv",
+      "bytes": 28717,
+      "mtime_ns": 1792567800172672280
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_1_3r/trades.csv",
+      "bytes": 29119,
+      "mtime_ns": 1792567800238353522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_1_3r/sensitivity.csv",
+      "bytes": 28997,
+      "mtime_ns": 1792567800242281598
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_2_5r/trades.csv",
+      "bytes": 29173,
+      "mtime_ns": 1792567800309119766
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_2_5r/sensitivity.csv",
+      "bytes": 28997,
+      "mtime_ns": 1792567800313058383
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp/trades.csv",
+      "bytes": 29751,
+      "mtime_ns": 1792567800384547092
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp/sensitivity.csv",
+      "bytes": 29517,
+      "mtime_ns": 1792567800389508261
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_1r/trades.csv",
+      "bytes": 28267,
+      "mtime_ns": 1792567800457118310
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_1r/sensitivity.csv",
+      "bytes": 28395,
+      "mtime_ns": 1792567800461030345
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_2r/trades.csv",
+      "bytes": 28551,
+      "mtime_ns": 1792567800530376910
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_2r/sensitivity.csv",
+      "bytes": 28522,
+      "mtime_ns": 1792567800534721281
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_3r/trades.csv",
+      "bytes": 28764,
+      "mtime_ns": 1792567800610154233
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_3r/sensitivity.csv",
+      "bytes": 28669,
+      "mtime_ns": 1792567800614599563
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_1r/trades.csv",
+      "bytes": 29673,
+      "mtime_ns": 1792567800691830656
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_1r/sensitivity.csv",
+      "bytes": 29507,
+      "mtime_ns": 1792567800696589781
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_2r/trades.csv",
+      "bytes": 29351,
+      "mtime_ns": 1792567800774936716
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_2r/sensitivity.csv",
+      "bytes": 29157,
+      "mtime_ns": 1792567800779352672
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_3r/trades.csv",
+      "bytes": 29160,
+      "mtime_ns": 1792567800852026391
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_3r/sensitivity.csv",
+      "bytes": 28968,
+      "mtime_ns": 1792567800857154769
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/half_stop/trades.csv",
+      "bytes": 30105,
+      "mtime_ns": 1792567800953037358
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/half_stop/sensitivity.csv",
+      "bytes": 30060,
+      "mtime_ns": 1792567800958277529
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_stop/trades.csv",
+      "bytes": 30037,
+      "mtime_ns": 1792567801034613447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_stop/sensitivity.csv",
+      "bytes": 29982,
+      "mtime_ns": 1792567801039689199
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp_stop/trades.csv",
+      "bytes": 30273,
+      "mtime_ns": 1792567801111562828
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp_stop/sensitivity.csv",
+      "bytes": 30176,
+      "mtime_ns": 1792567801116252244
+    }
+  ],
+  "unchanged_paths_reused": 36,
+  "builder_commit": "8da3a2b7944f91b2a0e22ce929407a0739a48225"
+}

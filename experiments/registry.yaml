@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-recent2m-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8da3a2b794
+    status: inconclusive
+    question: How did the unchanged all-key15m V2.31 rules perform in the latest two months?
+    single_variable: Entry-close study window2026-08-21to2026-10-21Shanghai; all current keys and midpoint-side gate retained. Same exact stops,18exits,20bp costs and final boundary.
+    result: BTC15signals6long9short, pivot7netwins46.67percent and+17.2403R versus random-8.0328R; equal-notional mean-1.6604bp. Largest trade+24.2787R; other14trades-7.0384R. ETH15signals7long8short,5netwins33.33percent and-8.6772R versus random-6.3934R; mean-9.2196bp. BTC3of18arms positive netR, ETH0of18; all fixed1/2/3/5/10R negative. No corrected significance.
+    artifacts:
+    - range-v231-recent2m-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-recent2m-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Reused unchanged independent Nautilus paths with complete historical warmup; all30matched controls also inside requested window.6focused tests,36coin-policy ledgers plus sensitivities validated. Largest BTC trade checked against raw5m path and recalculated15m2/2 pivot; no earlier stop or extreme-price fill. No new entry restriction, Pine delivery, report or account-performance claim.
   - experiment_id: exp-range-v231-fib0618-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 2eca0ca828

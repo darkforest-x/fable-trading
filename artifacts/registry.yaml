@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-recent2m-20261021-v1
+    artifact_type: manifest
+    role: Two-month all-key15m native trade-window evaluation with paired controls and concentration check
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8da3a2b794
+    generator_commit: 8da3a2b794
+    source_path: experiments/active/exp-range-v231-recent2m-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-recent2m-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: BTC15ETH15; current pivot+17.2403R/-8.6772R, matched random-8.0328R/-6.3934R.36policy ledgers reuse exact prior inputs; no changed path replay. Six tests, paired time-boundary checks, no carry-in trades; BTC largest+24.2787R raw path verified. Full18arm summary, entry lists, pivot ledgers and verification retained. No0.618-only filter or Pine change.
   - artifact_id: range-v231-fib0618-20261021-v1
     artifact_type: manifest
     role: Annual15m Fib0.618-only entry comparison with unchanged native18exit policies and matched controls

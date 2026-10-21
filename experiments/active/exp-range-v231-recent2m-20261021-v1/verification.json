@@ -1,0 +1,23 @@
+{
+  "tests_passed": 6,
+  "coin_policy_ledgers": 36,
+  "paired_candidates": 30,
+  "population_paths_per_policy": 60,
+  "time_bounds": "All signal and paired control entries in [2026-08-21,2026-10-21) Asia/Shanghai. Prior study end unchanged; no carry-in trades.",
+  "cache": "Input identity and fee arithmetic asserted for primary and sensitivity paths. Same complete warmup; no changed execution to rerun.",
+  "btc_largest_trade": {
+    "pair_id": 124,
+    "entry_time": "2026-10-01T14:15:00+08:00",
+    "entry": 84335.4,
+    "stop": 84367.8,
+    "maximum_post_entry_high_through_exit": 84340.4,
+    "exit_time": "2026-10-01T16:00:00+08:00",
+    "exit_price": 83380.1,
+    "retrospective_pivot_low": 83272.6,
+    "net_r": 24.278679012339225,
+    "other_trades_net_r": -7.038365285570321,
+    "checks": "Raw completed5m highs never hit stop; exit matches confirmation close, not pivot extreme;15m2/2 pivot independently recalculated; netR formula agrees."
+  },
+  "reused_from": "exp-range-v231-returns-20261021-v1",
+  "builder_commit": "8da3a2b7944f91b2a0e22ce929407a0739a48225"
+}
