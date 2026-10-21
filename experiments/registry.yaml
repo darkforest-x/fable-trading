@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-fiveyear-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cb4cc8d9f3
+    status: rejected
+    question: Does the original V2.31 key-wick strategy remain profitable over five years of OKX BTC/ETH with its existing exact-wick stop and confirmed-pivot exit?
+    single_variable: Historical coverage only,2021-10-21 through2026-10-21 Shanghai; no sweep20 or MTF gate,no new entry or exit parameter.
+    result: BTC485trades104netwins21.44percent,gross+5.9123R,net-552.5452R versus matched random-558.3650R,p0.4578; ETH385trades93netwins24.16percent,gross+5.4735R,net-284.1463R versus random-380.3751R,p0.0166. All ten symbol-year cohorts and all sixteen symbol-key groups have negative independent netR. Equal-notional mean BTC-23.4432bp,ETH-19.8638bp. No boundary exits.
+    artifacts: [range-v231-fiveyear-20261021-v1]
+    canonical_report: experiments/active/exp-range-v231-fiveyear-20261021-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Existing OKX official minute archives/tails;3BTC and43ETH missing minutes recovered from confirmed official API. ETH2022-12-18 has67 differing overlap rows; known archive prices retained,alternate API prices yield identical admissions/control buckets,and no signal/control path crosses the revision window. Recent annual75BTC/69ETH admissions and110880candles per symbol exactly match cached results;288annual signal/control paths reused per pivot convention. New1452positions per convention replayed by Nautilus1.231.0.36prefix checks and60existing admission/pivot tests pass. No funding,slippage,capacity or account-compounding claim;historical point strata are descriptive. BTC builder3098c63078,ETH revision audit cb4cc8d9f3;no Pine or live changes.
   - experiment_id: exp-range-v231-sweep20-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: ec72733aba

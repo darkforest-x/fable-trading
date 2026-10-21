@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-fiveyear-20261021-v1
+    artifact_type: manifest
+    role: Frozen original V2.31 five-year BTC/ETH native outcomes and key-level statistics
+    source_repo: darkforest-x/fable-trading
+    source_commit: cb4cc8d9f3
+    generator_commit: cb4cc8d9f3
+    source_path: experiments/active/exp-range-v231-fiveyear-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-fiveyear-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: BTC485 andETH385 original-rule signals,matched random controls,chronological annual cohorts,key and side statistics. Full native delta ledgers,annual cache lineage,API gap receipts and source revisions retained;large candles/features remain local. IndependentR and equal-notionalbp after20bp round trip,not portfolio returns.
   - artifact_id: btc-sweep20-mtf-35-charts-20261021
     artifact_type: manifest
     role: Owner-requested all35 BTC sweep20 plus MTF trade close-ups

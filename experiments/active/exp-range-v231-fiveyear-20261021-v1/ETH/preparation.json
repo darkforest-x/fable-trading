@@ -1,0 +1,300 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-fiveyear-20261021-v1",
+      "start": "2021-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "warmup": "2021-10-01T00:00:00+08:00",
+      "midpoint": "2024-04-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "annual_start": "2025-10-21T00:00:00+08:00",
+      "annual_data": "experiments/active/exp-range-v230-pivot-20261021-v1",
+      "annual_results": "experiments/active/exp-range-v231-returns-20261021-v1",
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "seed_offset": 0,
+          "inputs": [
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+            "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+          ]
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "seed_offset": 1,
+          "known_revision_window": [
+            "2022-12-18T02:00:00Z",
+            "2022-12-18T11:00:00Z"
+          ],
+          "inputs": [
+            "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+            "experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+            "experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv"
+          ]
+        }
+      ],
+      "entry": "Frozen V2.31: 15m Stoch5/3/3; touch within two bars before/on/after arrow; first qualifying close; pre-arrow five bodies and pairing bodies clear the same key; wick penetration >=10%; NY Tue-Fri; short key>=Monday midpoint, long key<=midpoint. No sweep or MTF.",
+      "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+      "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+      "controls": "Same coin, side, UTC week, chronological half and ATR14/close bucket; NY Tue-Fri, without replacement, exclude arrows and real entries. Copy relative stop risk and round outward. Reuse unchanged annual controls after identity checks.",
+      "data": "Existing OKX official monthly1m archives plus known confirmed API tails. Only missing archive minutes requested from OKX history API, confirmed only; no synthetic fill or data hashes. Preserve known archive OHLC. Explicit bounded ETH2022-12-18 API revisions require unchanged admissions/control buckets under alternate API prices and no trade exposure through revision or pivot confirmation window; all other overlap must match exactly.",
+      "analysis": "Overall, five chronological anniversary-year entry cohorts, long/short and all eight key groups. Net-positive wins after20bp, paired random results, weekly-block inference, descriptive Wilson intervals; no fitting or point selection.",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    "spec": {
+      "symbol": "ETH",
+      "tick": 0.01,
+      "seed_offset": 1,
+      "known_revision_window": [
+        "2022-12-18T02:00:00Z",
+        "2022-12-18T11:00:00Z"
+      ],
+      "inputs": [
+        "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+        "data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+        "experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv"
+      ]
+    },
+    "sources": [
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+        "bytes": 211169111,
+        "mtime_ns": 1791814916000000000
+      },
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "bytes": 1412517,
+        "mtime_ns": 1791868770000000000
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+        "bytes": 3117144,
+        "mtime_ns": 1792422094336296255
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv",
+        "bytes": 353078,
+        "mtime_ns": 1792548662196881950
+      }
+    ],
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_fiveyear.py",
+        "bytes": 21289,
+        "mtime_ns": 1792578560257457748
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_31_reference.py",
+        "bytes": 4390,
+        "mtime_ns": 1792568947324233598
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v231_midpoint.py",
+        "bytes": 4302,
+        "mtime_ns": 1792567333881118559
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v221_compare.py",
+        "bytes": 10748,
+        "mtime_ns": 1792562517111072199
+      }
+    ],
+    "annual": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/signal_matches.csv",
+        "bytes": 11261,
+        "mtime_ns": 1792567765260440298
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/candidates.csv",
+        "bytes": 12408,
+        "mtime_ns": 1792567765260897219
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/pivot/trades.csv",
+        "bytes": 49649,
+        "mtime_ns": 1792567799764600085
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/pivot/sensitivity.csv",
+        "bytes": 49649,
+        "mtime_ns": 1792567799770871473
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 1453331,
+        "mtime_ns": 1792560819928804129
+      }
+    ]
+  },
+  "quality": {
+    "minute_rows": 2658240,
+    "missing_archive_minutes": 43,
+    "remaining_missing": 0,
+    "pages": [
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=1m&after=1687472880000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/inputs/okx_gap_1687472280000.json",
+        "recovered": 2,
+        "matching_neighbours": 98,
+        "revised_neighbours": 0
+      },
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=1m&after=1671359820000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/inputs/okx_gap_1671359220000.json",
+        "recovered": 30,
+        "matching_neighbours": 9,
+        "revised_neighbours": 61
+      },
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=1m&after=1671333600000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/inputs/okx_gap_1671333000000.json",
+        "recovered": 9,
+        "matching_neighbours": 85,
+        "revised_neighbours": 6
+      },
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=1m&after=1666753080000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/inputs/okx_gap_1666752480000.json",
+        "recovered": 1,
+        "matching_neighbours": 99,
+        "revised_neighbours": 0
+      },
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=ETH-USDT-SWAP&bar=1m&after=1665283140000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/inputs/okx_gap_1665282540000.json",
+        "recovered": 1,
+        "matching_neighbours": 99,
+        "revised_neighbours": 0
+      }
+    ],
+    "overlap_revisions": 67,
+    "sources": [
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+        "bytes": 211169111,
+        "mtime_ns": 1791814916000000000
+      },
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "bytes": 1412517,
+        "mtime_ns": 1791868770000000000
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+        "bytes": 3117144,
+        "mtime_ns": 1792422094336296255
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv",
+        "bytes": 353078,
+        "mtime_ns": 1792548662196881950
+      }
+    ],
+    "revision_admission_and_control_bucket_parity": true
+  },
+  "signals": 385,
+  "controls": 385,
+  "reused_annual_signals": 69,
+  "new_signals": 316,
+  "annual_ohlc_parity": 110880,
+  "annual_signal_parity": true,
+  "causal_prefix_checks": 18,
+  "offset": 420768,
+  "old_to_new": {
+    "0": 316,
+    "2": 317,
+    "3": 318,
+    "4": 319,
+    "7": 320,
+    "10": 321,
+    "11": 322,
+    "13": 323,
+    "14": 324,
+    "15": 325,
+    "16": 326,
+    "17": 327,
+    "18": 328,
+    "19": 329,
+    "20": 330,
+    "21": 331,
+    "22": 332,
+    "23": 333,
+    "24": 334,
+    "25": 335,
+    "26": 336,
+    "27": 337,
+    "28": 338,
+    "30": 339,
+    "32": 340,
+    "33": 341,
+    "35": 342,
+    "36": 343,
+    "37": 344,
+    "38": 345,
+    "40": 346,
+    "41": 347,
+    "42": 348,
+    "43": 349,
+    "44": 350,
+    "46": 351,
+    "48": 352,
+    "52": 353,
+    "54": 354,
+    "55": 355,
+    "57": 356,
+    "58": 357,
+    "59": 358,
+    "60": 359,
+    "62": 360,
+    "63": 361,
+    "64": 362,
+    "68": 363,
+    "70": 364,
+    "72": 365,
+    "73": 366,
+    "75": 367,
+    "76": 368,
+    "79": 369,
+    "80": 370,
+    "81": 371,
+    "82": 372,
+    "84": 373,
+    "85": 374,
+    "86": 375,
+    "87": 376,
+    "88": 377,
+    "89": 378,
+    "91": 379,
+    "92": 380,
+    "95": 381,
+    "96": 382,
+    "97": 383,
+    "98": 384
+  },
+  "source_commit": "cb4cc8d9f3427a9ebf5425cfa7435983f7009102"
+}

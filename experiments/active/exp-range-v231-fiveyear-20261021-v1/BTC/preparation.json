@@ -1,0 +1,262 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-fiveyear-20261021-v1",
+      "start": "2021-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "warmup": "2021-10-01T00:00:00+08:00",
+      "midpoint": "2024-04-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "annual_start": "2025-10-21T00:00:00+08:00",
+      "annual_data": "experiments/active/exp-range-v230-pivot-20261021-v1",
+      "annual_results": "experiments/active/exp-range-v231-returns-20261021-v1",
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "seed_offset": 0,
+          "inputs": [
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+            "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+          ]
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "seed_offset": 1,
+          "inputs": [
+            "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
+            "data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+            "experiments/active/exp-eth5m-stoch-confirm-exits-20261019-v1/inputs/okx_ETH_USDT_SWAP_1m_38899.csv",
+            "experiments/active/exp-eth-range-wick-v221-20261021-v1/inputs/okx_ETH_USDT_SWAP_1m_4399.csv"
+          ]
+        }
+      ],
+      "entry": "Frozen V2.31: 15m Stoch5/3/3; touch within two bars before/on/after arrow; first qualifying close; pre-arrow five bodies and pairing bodies clear the same key; wick penetration >=10%; NY Tue-Fri; short key>=Monday midpoint, long key<=midpoint. No sweep or MTF.",
+      "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
+      "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
+      "controls": "Same coin, side, UTC week, chronological half and ATR14/close bucket; NY Tue-Fri, without replacement, exclude arrows and real entries. Copy relative stop risk and round outward. Reuse unchanged annual controls after identity checks.",
+      "data": "Existing OKX official monthly1m archives plus known confirmed API tails. Only missing archive minutes requested from OKX history API, confirmed only, exact known-neighbour overlap required; no synthetic fill or data hashes.",
+      "analysis": "Overall, five chronological anniversary-year entry cohorts, long/short and all eight key groups. Net-positive wins after20bp, paired random results, weekly-block inference, descriptive Wilson intervals; no fitting or point selection.",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    "spec": {
+      "symbol": "BTC",
+      "tick": 0.1,
+      "seed_offset": 0,
+      "inputs": [
+        "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+        "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+      ]
+    },
+    "sources": [
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+        "bytes": 213251340,
+        "mtime_ns": 1791868235000000000
+      },
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "bytes": 1415272,
+        "mtime_ns": 1791869051000000000
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv",
+        "bytes": 1030402,
+        "mtime_ns": 1792515781716862278
+      }
+    ],
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_fiveyear.py",
+        "bytes": 18516,
+        "mtime_ns": 1792578336547191549
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_31_reference.py",
+        "bytes": 4390,
+        "mtime_ns": 1792568947324233598
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v231_midpoint.py",
+        "bytes": 4302,
+        "mtime_ns": 1792567333881118559
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v221_compare.py",
+        "bytes": 10748,
+        "mtime_ns": 1792562517111072199
+      }
+    ],
+    "annual": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/signal_matches.csv",
+        "bytes": 12260,
+        "mtime_ns": 1792567765104765354
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/candidates.csv",
+        "bytes": 13704,
+        "mtime_ns": 1792567765105295817
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/pivot/trades.csv",
+        "bytes": 54816,
+        "mtime_ns": 1792567798310023858
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/pivot/sensitivity.csv",
+        "bytes": 54816,
+        "mtime_ns": 1792567798317173504
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+        "bytes": 1558509,
+        "mtime_ns": 1792560804279783191
+      }
+    ]
+  },
+  "quality": {
+    "minute_rows": 2658240,
+    "missing_archive_minutes": 3,
+    "remaining_missing": 0,
+    "pages": [
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=BTC-USDT-SWAP&bar=1m&after=1687472880000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/inputs/okx_gap_1687472280000.json",
+        "recovered": 2,
+        "matching_neighbours": 98
+      },
+      {
+        "url": "https://www.okx.com/api/v5/market/history-candles?instId=BTC-USDT-SWAP&bar=1m&after=1666753860000&limit=100",
+        "path": "experiments/active/exp-range-v231-fiveyear-20261021-v1/BTC/inputs/okx_gap_1666753260000.json",
+        "recovered": 1,
+        "matching_neighbours": 99
+      }
+    ],
+    "sources": [
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+        "bytes": 213251340,
+        "mtime_ns": 1791868235000000000
+      },
+      {
+        "path": "/Volumes/Elements SE/MacData/zhangzc/fable-trading/data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+        "bytes": 1415272,
+        "mtime_ns": 1791869051000000000
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv",
+        "bytes": 1030402,
+        "mtime_ns": 1792515781716862278
+      }
+    ]
+  },
+  "signals": 485,
+  "controls": 485,
+  "reused_annual_signals": 75,
+  "new_signals": 410,
+  "annual_ohlc_parity": 110880,
+  "annual_signal_parity": true,
+  "causal_prefix_checks": 18,
+  "offset": 420768,
+  "old_to_new": {
+    "1": 410,
+    "3": 411,
+    "4": 412,
+    "6": 413,
+    "7": 414,
+    "8": 415,
+    "9": 416,
+    "13": 417,
+    "16": 418,
+    "17": 419,
+    "19": 420,
+    "20": 421,
+    "24": 422,
+    "26": 423,
+    "27": 424,
+    "28": 425,
+    "29": 426,
+    "36": 427,
+    "37": 428,
+    "38": 429,
+    "41": 430,
+    "43": 431,
+    "44": 432,
+    "45": 433,
+    "46": 434,
+    "50": 435,
+    "52": 436,
+    "53": 437,
+    "56": 438,
+    "57": 439,
+    "59": 440,
+    "60": 441,
+    "61": 442,
+    "63": 443,
+    "64": 444,
+    "66": 445,
+    "68": 446,
+    "71": 447,
+    "73": 448,
+    "74": 449,
+    "75": 450,
+    "76": 451,
+    "77": 452,
+    "78": 453,
+    "79": 454,
+    "80": 455,
+    "81": 456,
+    "85": 457,
+    "88": 458,
+    "89": 459,
+    "91": 460,
+    "92": 461,
+    "95": 462,
+    "96": 463,
+    "98": 464,
+    "100": 465,
+    "105": 466,
+    "106": 467,
+    "107": 468,
+    "108": 469,
+    "109": 470,
+    "110": 471,
+    "115": 472,
+    "117": 473,
+    "118": 474,
+    "119": 475,
+    "120": 476,
+    "121": 477,
+    "122": 478,
+    "123": 479,
+    "124": 480,
+    "126": 481,
+    "127": 482,
+    "129": 483,
+    "130": 484
+  },
+  "source_commit": "3098c6307823bfc8b54ae97e57e2ecd44ae0a553"
+}

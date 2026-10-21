@@ -1,0 +1,50 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "trades_with_controls": 970,
+      "pair_fields_checked": [
+        "side",
+        "week",
+        "bucket",
+        "segment"
+      ],
+      "cached_annual_paths_exact": 150,
+      "group_totals_exact": true,
+      "NY_Tue_to_Fri_only": true,
+      "boundary_exits": 0,
+      "median_stop_percent": 0.26781258491840254,
+      "cost_exceeds_1R_trades": 173,
+      "median_holding_minutes": 45.0,
+      "official_revision_trade_exposure": null
+    },
+    {
+      "symbol": "ETH",
+      "trades_with_controls": 770,
+      "pair_fields_checked": [
+        "side",
+        "week",
+        "bucket",
+        "segment"
+      ],
+      "cached_annual_paths_exact": 138,
+      "group_totals_exact": true,
+      "NY_Tue_to_Fri_only": true,
+      "boundary_exits": 0,
+      "median_stop_percent": 0.3804238369100662,
+      "cost_exceeds_1R_trades": 77,
+      "median_holding_minutes": 50.0,
+      "official_revision_trade_exposure": 0
+    }
+  ],
+  "regression_tests": {
+    "tests": 60,
+    "passed": 60,
+    "files": [
+      "tests/evaluation/test_monday_range_v2_31.py",
+      "tests/evaluation/test_nautilus_pivot.py"
+    ]
+  },
+  "reproduction": "For fresh outputs, copy config.json to a new local experiment folder and run PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_fiveyear --config <new-folder>/config.json. Reuse the existing completed summary/ledgers if inputs and rules are unchanged.",
+  "new_registry_records_valid": true
+}
