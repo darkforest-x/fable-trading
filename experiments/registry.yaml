@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-morphology-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0faa40f7f2
+    status: inconclusive
+    question: Are frozen V2.31 BTC and ETH net wins associated with touch-candle geometry, arrow-candle direction or nearby pre-entry structure?
+    single_variable: Observational classification only; 18 predetermined shape contrasts per coin on unchanged annual entries and 18 cached exits. ATR ends before touch; all features are known by entry.
+    result: BTC75 signals20netwins and ETH69 signals24netwins. Sweep of prior20bar extreme has32.7vs10.0percent BTC and39.1vs26.1percent ETH wins; direction agrees across18of18 and17of18 exits. Wick occupying at least half the candle has15.4vs32.7percent BTC and25.0vs41.5percent ETH wins. BTC sweep-qualified cohort still loses49.5867R versus matched random93.0445R loss. All36 side/risk/half-adjusted week-cluster tests fail Holm correction; minimum rawp0.0389. No profitable admission rule established.
+    artifacts:
+    - range-v231-morphology-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-morphology-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: 2025-10-21to2026-10-21Shanghai; current all-key15m entries with inclusive midpoint-side gate, exact touch-wick stops and20bp round-trip costs. 8tests,12causal-prefix checks,36original baselines and4104partition reconciliations pass. BTC74distinct touch events; deduplication preserves main directions. Prior outcomes are known history, not independent validation. No volume, model training, new execution replay, Pine/default change or report. Reproduce .venv/bin/python -m yoyo.evaluation.range_morphology; checks and plots use matching module suffixes.
   - experiment_id: exp-btc-v231-key90m-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 9e37decb72

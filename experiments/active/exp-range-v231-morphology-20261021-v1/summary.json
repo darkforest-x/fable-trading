@@ -1,0 +1,3203 @@
+{
+  "config": {
+    "experiment_id": "exp-range-v231-morphology-20261021-v1",
+    "source": "experiments/active/exp-range-v231-returns-20261021-v1",
+    "candles": "experiments/active/exp-range-v230-pivot-20261021-v1",
+    "symbols": [
+      {
+        "symbol": "BTC",
+        "tick": 0.1,
+        "expected": 75
+      },
+      {
+        "symbol": "ETH",
+        "tick": 0.01,
+        "expected": 69
+      }
+    ],
+    "start": "2025-10-21T00:00:00+08:00",
+    "end": "2026-10-21T00:00:00+08:00",
+    "midpoint": "2026-04-21T00:00:00+08:00",
+    "recent_start": "2026-08-21T00:00:00+08:00",
+    "cost": 0.002,
+    "seed": 20261021,
+    "bootstrap_weeks": 4000,
+    "wild_score_draws": 19999,
+    "minimum_group": 8,
+    "primary_arm": "pivot",
+    "hypotheses": [
+      {
+        "id": "wick_half",
+        "feature": "wick_share",
+        "op": "ge",
+        "threshold": 0.5,
+        "label": "触价影线占全K至少50%"
+      },
+      {
+        "id": "wick_body2",
+        "feature": "wick_body",
+        "op": "ge",
+        "threshold": 2,
+        "label": "触价影线至少为实体2倍"
+      },
+      {
+        "id": "wick_atr_half",
+        "feature": "wick_atr",
+        "op": "ge",
+        "threshold": 0.5,
+        "label": "触价影线至少0.5ATR"
+      },
+      {
+        "id": "penetration_half",
+        "feature": "penetration",
+        "op": "ge",
+        "threshold": 0.5,
+        "label": "越线深度占影线至少50%"
+      },
+      {
+        "id": "wide_candle",
+        "feature": "range_atr",
+        "op": "ge",
+        "threshold": 1.5,
+        "label": "触价整根振幅至少1.5ATR"
+      },
+      {
+        "id": "aligned_body",
+        "feature": "signed_body_share",
+        "op": "gt",
+        "threshold": 0,
+        "label": "触价K实体朝交易方向收盘"
+      },
+      {
+        "id": "strong_close",
+        "feature": "close_rejection",
+        "op": "ge",
+        "threshold": 0.75,
+        "label": "触价K收在拒绝方向末端25%"
+      },
+      {
+        "id": "sweep5",
+        "feature": "sweep5",
+        "op": "ge",
+        "threshold": 1,
+        "label": "触价影线扫过前5根极值"
+      },
+      {
+        "id": "sweep20",
+        "feature": "sweep20",
+        "op": "ge",
+        "threshold": 1,
+        "label": "触价影线扫过前20根极值"
+      },
+      {
+        "id": "fast_approach",
+        "feature": "approach8_atr",
+        "op": "ge",
+        "threshold": 2,
+        "label": "此前8根朝关键位推进至少2ATR"
+      },
+      {
+        "id": "efficient_trend",
+        "feature": "efficiency20",
+        "op": "ge",
+        "threshold": 0.5,
+        "label": "此前20根走势效率至少50%"
+      },
+      {
+        "id": "compression",
+        "feature": "compression5_20",
+        "op": "le",
+        "threshold": 0.75,
+        "label": "此前5根振幅压缩至20根均值75%"
+      },
+      {
+        "id": "repeated_rejection",
+        "feature": "rejections5",
+        "op": "ge",
+        "threshold": 2,
+        "label": "此前5根已有至少2根同向长影线"
+      },
+      {
+        "id": "engulfing",
+        "feature": "directional_engulf",
+        "op": "ge",
+        "threshold": 1,
+        "label": "触价K实体形成顺交易方向吞没"
+      },
+      {
+        "id": "entry_followthrough",
+        "feature": "followthrough_atr",
+        "op": "ge",
+        "threshold": 0.25,
+        "label": "触价后到入场已顺向推进0.25ATR"
+      },
+      {
+        "id": "same_close",
+        "feature": "touch_entry_lag",
+        "op": "eq",
+        "threshold": 0,
+        "label": "触价K收盘即入场"
+      },
+      {
+        "id": "arrow_body",
+        "feature": "arrow_body_share",
+        "op": "gt",
+        "threshold": 0,
+        "label": "勾叉K实体朝交易方向收盘"
+      },
+      {
+        "id": "clean_level20",
+        "feature": "body_touches20",
+        "op": "eq",
+        "threshold": 0,
+        "label": "此前20根实体未碰过同一关键位"
+      }
+    ],
+    "context_cuts": [
+      {
+        "id": "risk_covers_fee",
+        "feature": "risk_bp",
+        "op": "ge",
+        "threshold": 20,
+        "label": "初始止损距离至少0.2%"
+      }
+    ],
+    "inference": "Exploratory observational associations. Primary18binary shape contrasts per coin use week-cluster bootstrap win-rate differences and wild-cluster score tests with side,calendar-half and log risk-bp controls. Holm across36primary tests. Fisher exact nominal p is descriptive only. All18cached exits and temporal/side cuts are stability diagnostics, not extra optimized filters or independent validation. No model training.",
+    "features": "Touch candle OHLC and matched key; arrow candle OHLC; trailing5/8/20closed15m candles; ATR14 ending before touch; touch-to-entry movement observed by entry close. No post-entry candles used as predictors. Frozen files lack volume.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "associations": [
+    {
+      "symbol": "BTC",
+      "cut": "wick_half",
+      "label": "触价影线占全K至少50%",
+      "primary": true,
+      "yes": {
+        "n": 26,
+        "events": 26,
+        "weeks": 21,
+        "wins": 4,
+        "win_rate": 0.15384615384615385,
+        "win_wilson95": [
+          0.06150033723578355,
+          0.3353119932821348
+        ],
+        "gross_wins": 5,
+        "net_r": -29.89919642794255,
+        "gross_r": -9.449669161466272,
+        "mean_r": -1.1499690933824058,
+        "mean_bp": -35.78416662118447,
+        "median_bp": -39.93734117244454,
+        "random_wins": 8,
+        "random_net_r": -1.5898242854141074,
+        "random_mean_bp": -10.119798322875727,
+        "excess_mean_bp": -25.66436829830874,
+        "median_risk_bp": 24.066022040704603,
+        "mean_fee_r": 0.7865202794798568,
+        "net_r_without_best": -31.533569884732668
+      },
+      "no": {
+        "n": 49,
+        "events": 48,
+        "weeks": 29,
+        "wins": 16,
+        "win_rate": 0.32653061224489793,
+        "win_wilson95": [
+          0.21207497001811865,
+          0.4662079468542984
+        ],
+        "gross_wins": 18,
+        "net_r": -53.486577273530735,
+        "gross_r": 28.790380410845955,
+        "mean_r": -1.0915628015006273,
+        "mean_bp": -14.81564941908883,
+        "median_bp": -28.559731076369193,
+        "random_wins": 6,
+        "random_net_r": -83.08261085279838,
+        "random_mean_bp": -24.29831696434839,
+        "excess_mean_bp": 9.482667545259563,
+        "median_risk_bp": 19.781864841743996,
+        "mean_fee_r": 1.6791215853954429,
+        "net_r_without_best": -77.76525628586995
+      },
+      "delta_win": -0.17268445839874408,
+      "bootstrap95": [
+        -0.35786529812017065,
+        0.01678509230233372
+      ],
+      "fisher_p": 0.1695157605206637,
+      "adjusted_delta": -0.22440382983243962,
+      "wild_p": 0.0542,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "wick_body2",
+      "label": "触价影线至少为实体2倍",
+      "primary": true,
+      "yes": {
+        "n": 26,
+        "events": 26,
+        "weeks": 21,
+        "wins": 4,
+        "win_rate": 0.15384615384615385,
+        "win_wilson95": [
+          0.06150033723578355,
+          0.3353119932821348
+        ],
+        "gross_wins": 5,
+        "net_r": -32.94691616306321,
+        "gross_r": -10.51463184995114,
+        "mean_r": -1.2671890831947388,
+        "mean_bp": -30.520023720594413,
+        "median_bp": -38.33908483066389,
+        "random_wins": 7,
+        "random_net_r": -13.32272836455345,
+        "random_mean_bp": -14.702147769715149,
+        "excess_mean_bp": -15.817875950879257,
+        "median_risk_bp": 23.3984018404455,
+        "mean_fee_r": 0.8627801658889257,
+        "net_r_without_best": -34.58128961985333
+      },
+      "no": {
+        "n": 49,
+        "events": 48,
+        "weeks": 29,
+        "wins": 16,
+        "win_rate": 0.32653061224489793,
+        "win_wilson95": [
+          0.21207497001811865,
+          0.4662079468542984
+        ],
+        "gross_wins": 18,
+        "net_r": -50.43885753841007,
+        "gross_r": 29.855343099330824,
+        "mean_r": -1.029364439559389,
+        "mean_bp": -17.608868101034577,
+        "median_bp": -28.559731076369193,
+        "random_wins": 7,
+        "random_net_r": -71.34970677365904,
+        "random_mean_bp": -21.866866237454,
+        "excess_mean_bp": 4.2579981364194275,
+        "median_risk_bp": 19.810576164167323,
+        "mean_fee_r": 1.6386571558722633,
+        "net_r_without_best": -74.71753655074929
+      },
+      "delta_win": -0.17268445839874408,
+      "bootstrap95": [
+        -0.3463840579710145,
+        -0.011291066814322641
+      ],
+      "fisher_p": 0.1695157605206637,
+      "adjusted_delta": -0.2183506329330354,
+      "wild_p": 0.04635,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "wick_atr_half",
+      "label": "触价影线至少0.5ATR",
+      "primary": true,
+      "yes": {
+        "n": 44,
+        "events": 44,
+        "weeks": 32,
+        "wins": 13,
+        "win_rate": 0.29545454545454547,
+        "win_wilson95": [
+          0.1815552911850489,
+          0.44220200126160236
+        ],
+        "gross_wins": 15,
+        "net_r": -33.339114768309315,
+        "gross_r": -1.3548627628732297,
+        "mean_r": -0.7577071538252117,
+        "mean_bp": -23.64273482819302,
+        "median_bp": -38.68052123491697,
+        "random_wins": 9,
+        "random_net_r": -30.775098271354413,
+        "random_mean_bp": -24.761792290596073,
+        "excess_mean_bp": 1.1190574624030567,
+        "median_risk_bp": 31.627311987871334,
+        "mean_fee_r": 0.7269148183053655,
+        "net_r_without_best": -36.36949372593251
+      },
+      "no": {
+        "n": 31,
+        "events": 30,
+        "weeks": 22,
+        "wins": 7,
+        "win_rate": 0.22580645161290322,
+        "win_wilson95": [
+          0.11395135561262493,
+          0.3981241838334205
+        ],
+        "gross_wins": 8,
+        "net_r": -50.046658933163954,
+        "gross_r": 20.695574012252912,
+        "mean_r": -1.6144083526827082,
+        "mean_bp": -19.873381330505037,
+        "median_bp": -29.59559488382564,
+        "random_wins": 5,
+        "random_net_r": -53.89733686685807,
+        "random_mean_bp": -11.74882022134235,
+        "excess_mean_bp": -8.124561109162684,
+        "median_risk_bp": 15.287890306717795,
+        "mean_fee_r": 2.2820075143682863,
+        "net_r_without_best": -74.32533794550318
+      },
+      "delta_win": 0.06964809384164225,
+      "bootstrap95": [
+        -0.13730572673589617,
+        0.26315888703659607
+      ],
+      "fisher_p": 0.6003413384252734,
+      "adjusted_delta": 0.015813170141445447,
+      "wild_p": 0.9087,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "penetration_half",
+      "label": "越线深度占影线至少50%",
+      "primary": true,
+      "yes": {
+        "n": 49,
+        "events": 48,
+        "weeks": 29,
+        "wins": 10,
+        "win_rate": 0.20408163265306123,
+        "win_wilson95": [
+          0.11481849605782132,
+          0.3363700091951255
+        ],
+        "gross_wins": 10,
+        "net_r": -59.834564688277375,
+        "gross_r": 11.111728984411341,
+        "mean_r": -1.2211135650668852,
+        "mean_bp": -28.511577902527215,
+        "median_bp": -39.36745540707441,
+        "random_wins": 8,
+        "random_net_r": -60.912792885050095,
+        "random_mean_bp": -20.65196057937355,
+        "excess_mean_bp": -7.859617323153664,
+        "median_risk_bp": 23.175965665236053,
+        "mean_fee_r": 1.447883544340586,
+        "net_r_without_best": -84.11324370061661
+      },
+      "no": {
+        "n": 26,
+        "events": 26,
+        "weeks": 21,
+        "wins": 10,
+        "win_rate": 0.38461538461538464,
+        "win_wilson95": [
+          0.22428594435712798,
+          0.5746514991488447
+        ],
+        "gross_wins": 13,
+        "net_r": -23.55120901319592,
+        "gross_r": 8.228982264968344,
+        "mean_r": -0.9058157312767661,
+        "mean_bp": -9.972609094704437,
+        "median_bp": -18.31945479947894,
+        "random_wins": 6,
+        "random_net_r": -23.759642253162397,
+        "random_mean_bp": -16.991777663789847,
+        "excess_mean_bp": 7.019168569085412,
+        "median_risk_bp": 19.831206331458844,
+        "mean_fee_r": 1.2223150491601642,
+        "net_r_without_best": -26.58158797081911
+      },
+      "delta_win": -0.1805337519623234,
+      "bootstrap95": [
+        -0.44099588012631485,
+        0.0636960600375235
+      ],
+      "fisher_p": 0.1071947647401218,
+      "adjusted_delta": -0.19534123499406225,
+      "wild_p": 0.13725,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "wide_candle",
+      "label": "触价整根振幅至少1.5ATR",
+      "primary": true,
+      "yes": {
+        "n": 36,
+        "events": 36,
+        "weeks": 27,
+        "wins": 12,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.2021461882430531,
+          0.4966600212884348
+        ],
+        "gross_wins": 13,
+        "net_r": -27.95763789452446,
+        "gross_r": 1.408317193355257,
+        "mean_r": -0.7766010526256795,
+        "mean_bp": -18.163283867125305,
+        "median_bp": -30.680485786223947,
+        "random_wins": 6,
+        "random_net_r": -35.82762489371424,
+        "random_mean_bp": -29.6789157908716,
+        "excess_mean_bp": 11.5156319237463,
+        "median_risk_bp": 30.77202931718545,
+        "mean_fee_r": 0.8157209746633254,
+        "net_r_without_best": -30.988016852147652
+      },
+      "no": {
+        "n": 39,
+        "events": 38,
+        "weeks": 25,
+        "wins": 8,
+        "win_rate": 0.20512820512820512,
+        "win_wilson95": [
+          0.10779718230710382,
+          0.35533968013582296
+        ],
+        "gross_wins": 10,
+        "net_r": -55.42813580694881,
+        "gross_r": 17.932394056024425,
+        "mean_r": -1.4212342514602259,
+        "mean_bp": -25.704536781272765,
+        "median_bp": -33.65020255139316,
+        "random_wins": 8,
+        "random_net_r": -48.84481024449825,
+        "random_mean_bp": -9.879264594268264,
+        "excess_mean_bp": -15.825272187004506,
+        "median_risk_bp": 18.906856462418517,
+        "mean_fee_r": 1.8810392272557244,
+        "net_r_without_best": -79.70681481928804
+      },
+      "delta_win": 0.1282051282051282,
+      "bootstrap95": [
+        -0.08334176788124155,
+        0.32792915417915425
+      ],
+      "fisher_p": 0.29647429725314656,
+      "adjusted_delta": 0.11466548913155375,
+      "wild_p": 0.35535,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "aligned_body",
+      "label": "触价K实体朝交易方向收盘",
+      "primary": true,
+      "yes": {
+        "n": 28,
+        "events": 27,
+        "weeks": 19,
+        "wins": 7,
+        "win_rate": 0.25,
+        "win_wilson95": [
+          0.12676494919293316,
+          0.4335567031899896
+        ],
+        "gross_wins": 8,
+        "net_r": -25.16412576362121,
+        "gross_r": -3.247607535667111,
+        "mean_r": -0.8987187772721861,
+        "mean_bp": -30.303143192412886,
+        "median_bp": -39.36745540707441,
+        "random_wins": 7,
+        "random_net_r": -11.00846557837404,
+        "random_mean_bp": -20.03432400382839,
+        "excess_mean_bp": -10.268819188584493,
+        "median_risk_bp": 28.19994913858293,
+        "mean_fee_r": 0.7827327938555034,
+        "net_r_without_best": -27.889535933112718
+      },
+      "no": {
+        "n": 47,
+        "events": 47,
+        "weeks": 29,
+        "wins": 13,
+        "win_rate": 0.2765957446808511,
+        "win_wilson95": [
+          0.16936563369682642,
+          0.41758563624878886
+        ],
+        "gross_wins": 15,
+        "net_r": -58.22164793785207,
+        "gross_r": 22.588318785046795,
+        "mean_r": -1.23875846676281,
+        "mean_bp": -17.18866264465081,
+        "median_bp": -30.140385975593407,
+        "random_wins": 7,
+        "random_net_r": -73.66396955983846,
+        "random_mean_bp": -18.995132245545634,
+        "excess_mean_bp": 1.8064696008948298,
+        "median_risk_bp": 19.453749466618323,
+        "mean_fee_r": 1.7193609941042312,
+        "net_r_without_best": -82.5003269501913
+      },
+      "delta_win": -0.026595744680851074,
+      "bootstrap95": [
+        -0.20897839515383007,
+        0.16710365216179168
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.07164728983608676,
+      "wild_p": 0.4833,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "strong_close",
+      "label": "触价K收在拒绝方向末端25%",
+      "primary": true,
+      "yes": {
+        "n": 21,
+        "events": 20,
+        "weeks": 18,
+        "wins": 7,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.17194752605083477,
+          0.5462654802574476
+        ],
+        "gross_wins": 8,
+        "net_r": -13.409994257910707,
+        "gross_r": 2.5277957057917257,
+        "mean_r": -0.6385711551386051,
+        "mean_bp": -23.506602653419943,
+        "median_bp": -39.36745540707441,
+        "random_wins": 5,
+        "random_net_r": -4.171017150338606,
+        "random_mean_bp": -17.82366277883488,
+        "excess_mean_bp": -5.682939874585058,
+        "median_risk_bp": 24.978397267770056,
+        "mean_fee_r": 0.7589423792239254,
+        "net_r_without_best": -16.135404427402214
+      },
+      "no": {
+        "n": 54,
+        "events": 54,
+        "weeks": 31,
+        "wins": 13,
+        "win_rate": 0.24074074074074073,
+        "win_wilson95": [
+          0.14644291495284428,
+          0.36947524183502795
+        ],
+        "gross_wins": 15,
+        "net_r": -69.97577944356259,
+        "gross_r": 16.812915543587962,
+        "mean_r": -1.2958477674733813,
+        "mean_bp": -21.53178699933945,
+        "median_bp": -30.974401420635644,
+        "random_wins": 9,
+        "random_net_r": -80.5014179878739,
+        "random_mean_bp": -19.989543875783472,
+        "excess_mean_bp": -1.5422431235559715,
+        "median_risk_bp": 19.79622050295566,
+        "mean_fee_r": 1.6071980553176024,
+        "net_r_without_best": -94.25445845590181
+      },
+      "delta_win": 0.09259259259259259,
+      "bootstrap95": [
+        -0.10942388672491841,
+        0.29313389197486905
+      ],
+      "fisher_p": 0.5614692971228076,
+      "adjusted_delta": 0.0603772097550413,
+      "wild_p": 0.5576,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "sweep5",
+      "label": "触价影线扫过前5根极值",
+      "primary": true,
+      "yes": {
+        "n": 71,
+        "events": 70,
+        "weeks": 36,
+        "wins": 20,
+        "win_rate": 0.28169014084507044,
+        "win_wilson95": [
+          0.19037090703170384,
+          0.3954201706880652
+        ],
+        "gross_wins": 22,
+        "net_r": -76.08287512119254,
+        "gross_r": 21.59367288040281,
+        "mean_r": -1.0715897904393317,
+        "mean_bp": -21.620861905378327,
+        "median_bp": -33.10626064163063,
+        "random_wins": 12,
+        "random_net_r": -82.5313147447524,
+        "random_mean_bp": -20.122573494696404,
+        "excess_mean_bp": -1.4982884106819239,
+        "median_risk_bp": 20.427914366687137,
+        "mean_fee_r": 1.3757260281914836,
+        "net_r_without_best": -100.36155413353177
+      },
+      "no": {
+        "n": 4,
+        "events": 4,
+        "weeks": 4,
+        "wins": 0,
+        "win_rate": 0.0,
+        "win_wilson95": [
+          0,
+          0.4898908364545973
+        ],
+        "gross_wins": 1,
+        "net_r": -7.302898580280757,
+        "gross_r": -2.2529616310231257,
+        "mean_r": -1.8257246450701892,
+        "mean_bp": -30.318489601071946,
+        "median_bp": -34.006740271493754,
+        "random_wins": 2,
+        "random_net_r": -2.1411203934601337,
+        "random_mean_bp": -6.257392381098906,
+        "excess_mean_bp": -24.061097219973043,
+        "median_risk_bp": 19.261320440335496,
+        "mean_fee_r": 1.2624842373144076,
+        "net_r_without_best": -6.68410404103161
+      },
+      "delta_win": 0.28169014084507044,
+      "bootstrap95": [
+        0.16923076923076924,
+        0.4
+      ],
+      "fisher_p": 0.5683080340614587,
+      "adjusted_delta": 0.2538574903517753,
+      "wild_p": 1.0,
+      "inferable": false,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "sweep20",
+      "label": "触价影线扫过前20根极值",
+      "primary": true,
+      "yes": {
+        "n": 55,
+        "events": 55,
+        "weeks": 34,
+        "wins": 18,
+        "win_rate": 0.32727272727272727,
+        "win_wilson95": [
+          0.21813065595168937,
+          0.45896776443421317
+        ],
+        "gross_wins": 19,
+        "net_r": -49.58671889359656,
+        "gross_r": 29.35591061052425,
+        "mean_r": -0.9015767071563011,
+        "mean_bp": -18.759839834826284,
+        "median_bp": -30.828744556827868,
+        "random_wins": 8,
+        "random_net_r": -93.04453370015058,
+        "random_mean_bp": -28.049972628995214,
+        "excess_mean_bp": 9.290132794168937,
+        "median_risk_bp": 24.66611239000432,
+        "mean_fee_r": 1.4353205364385606,
+        "net_r_without_best": -73.8653979059358
+      },
+      "no": {
+        "n": 20,
+        "events": 19,
+        "weeks": 15,
+        "wins": 2,
+        "win_rate": 0.1,
+        "win_wilson95": [
+          0.027866481213768224,
+          0.3010336452284873
+        ],
+        "gross_wins": 4,
+        "net_r": -33.799054807876715,
+        "gross_r": -10.01519936114457,
+        "mean_r": -1.6899527403938357,
+        "mean_bp": -31.22819813853517,
+        "median_bp": -38.03434583404673,
+        "random_wins": 6,
+        "random_net_r": 8.37209856193807,
+        "random_mean_bp": 4.450810347344844,
+        "excess_mean_bp": -35.67900848588001,
+        "median_risk_bp": 19.367455407074402,
+        "mean_fee_r": 1.1891927723366071,
+        "net_r_without_best": -35.28524410190325
+      },
+      "delta_win": 0.22727272727272727,
+      "bootstrap95": [
+        0.04962639992276291,
+        0.3815454545454546
+      ],
+      "fisher_p": 0.07499156825571798,
+      "adjusted_delta": 0.21397148677421476,
+      "wild_p": 0.0389,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "fast_approach",
+      "label": "此前8根朝关键位推进至少2ATR",
+      "primary": true,
+      "yes": {
+        "n": 48,
+        "events": 47,
+        "weeks": 31,
+        "wins": 14,
+        "win_rate": 0.2916666666666667,
+        "win_wilson95": [
+          0.18241578926516536,
+          0.431792598095717
+        ],
+        "gross_wins": 15,
+        "net_r": -26.60888787558082,
+        "gross_r": 27.0075210123839,
+        "mean_r": -0.554351830741267,
+        "mean_bp": -19.32458616985537,
+        "median_bp": -32.38513041791829,
+        "random_wins": 7,
+        "random_net_r": -66.9464863893067,
+        "random_mean_bp": -28.65570028074102,
+        "excess_mean_bp": 9.331114110885652,
+        "median_risk_bp": 24.82225482888719,
+        "mean_fee_r": 1.117008518499265,
+        "net_r_without_best": -50.887566887920045
+      },
+      "no": {
+        "n": 27,
+        "events": 27,
+        "weeks": 22,
+        "wins": 6,
+        "win_rate": 0.2222222222222222,
+        "win_wilson95": [
+          0.10607239452360037,
+          0.4075692886663257
+        ],
+        "gross_wins": 8,
+        "net_r": -56.776885825892464,
+        "gross_r": -7.6668097630042205,
+        "mean_r": -2.1028476231812023,
+        "mean_bp": -26.991667316040406,
+        "median_bp": -33.10626064163063,
+        "random_wins": 7,
+        "random_net_r": -17.725948748905793,
+        "random_mean_bp": -2.8984694137878106,
+        "excess_mean_bp": -24.093197902252594,
+        "median_risk_bp": 19.38198439659384,
+        "mean_fee_r": 1.8188917060328984,
+        "net_r_without_best": -58.62362249255911
+      },
+      "delta_win": 0.06944444444444448,
+      "bootstrap95": [
+        -0.12754723084886124,
+        0.23682758959819855
+      ],
+      "fisher_p": 0.5941130056319375,
+      "adjusted_delta": 0.060753773556419366,
+      "wild_p": 0.54525,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "efficient_trend",
+      "label": "此前20根走势效率至少50%",
+      "primary": true,
+      "yes": {
+        "n": 12,
+        "events": 12,
+        "weeks": 10,
+        "wins": 5,
+        "win_rate": 0.4166666666666667,
+        "win_wilson95": [
+          0.19326031365875665,
+          0.6804886874504503
+        ],
+        "gross_wins": 5,
+        "net_r": -8.07004519445576,
+        "gross_r": 1.7852158272036118,
+        "mean_r": -0.6725037662046467,
+        "mean_bp": -11.754256082410356,
+        "median_bp": -23.864755053199524,
+        "random_wins": 1,
+        "random_net_r": -13.31776297789177,
+        "random_mean_bp": -25.0280066178051,
+        "excess_mean_bp": 13.27375053539474,
+        "median_risk_bp": 34.17943472096506,
+        "mean_fee_r": 0.8212717518049478,
+        "net_r_without_best": -9.94285109126168
+      },
+      "no": {
+        "n": 63,
+        "events": 62,
+        "weeks": 35,
+        "wins": 15,
+        "win_rate": 0.23809523809523808,
+        "win_wilson95": [
+          0.14993783678290606,
+          0.35635660109696865
+        ],
+        "gross_wins": 18,
+        "net_r": -75.31572850701752,
+        "gross_r": 17.555495422176072,
+        "mean_r": -1.1954877540796434,
+        "mean_bp": -24.052445725352772,
+        "median_bp": -33.65020255139316,
+        "random_wins": 13,
+        "random_net_r": -71.35467216032073,
+        "random_mean_bp": -18.307876321177442,
+        "excess_mean_bp": -5.744569404175327,
+        "median_risk_bp": 19.781864841743996,
+        "mean_fee_r": 1.4741464115745013,
+        "net_r_without_best": -99.59440751935675
+      },
+      "delta_win": 0.1785714285714286,
+      "bootstrap95": [
+        -0.11484592892487629,
+        0.49603608085462947
+      ],
+      "fisher_p": 0.2839913536928581,
+      "adjusted_delta": 0.16103038747580184,
+      "wild_p": 0.3245,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "compression",
+      "label": "此前5根振幅压缩至20根均值75%",
+      "primary": true,
+      "yes": {
+        "n": 9,
+        "events": 9,
+        "weeks": 8,
+        "wins": 5,
+        "win_rate": 0.5555555555555556,
+        "win_wilson95": [
+          0.26665129349549305,
+          0.8112214789023355
+        ],
+        "gross_wins": 6,
+        "net_r": -3.1717130902977693,
+        "gross_r": 6.093676969666113,
+        "mean_r": -0.35241256558864104,
+        "mean_bp": -9.081473881735043,
+        "median_bp": 0.18942383583290656,
+        "random_wins": 4,
+        "random_net_r": 17.852862478505312,
+        "random_mean_bp": 20.8573067773712,
+        "excess_mean_bp": -29.93878065910624,
+        "median_risk_bp": 19.38198439659384,
+        "mean_fee_r": 1.0294877844404313,
+        "net_r_without_best": -5.0184497569644115
+      },
+      "no": {
+        "n": 66,
+        "events": 65,
+        "weeks": 35,
+        "wins": 15,
+        "win_rate": 0.22727272727272727,
+        "win_wilson95": [
+          0.14285229563373036,
+          0.34169455364638307
+        ],
+        "gross_wins": 17,
+        "net_r": -80.21406061117553,
+        "gross_r": 13.247034279713574,
+        "mean_r": -1.2153645547147807,
+        "mean_bp": -23.85790740531111,
+        "median_bp": -34.0028687564335,
+        "random_wins": 10,
+        "random_net_r": -102.52529761671781,
+        "random_mean_bp": -24.870424979457283,
+        "excess_mean_bp": 1.0125175741461727,
+        "median_risk_bp": 21.801940015961595,
+        "mean_fee_r": 1.416077195316501,
+        "net_r_without_best": -104.49273962351475
+      },
+      "delta_win": 0.3282828282828283,
+      "bootstrap95": [
+        -0.03806970795790295,
+        0.7681438127090302
+      ],
+      "fisher_p": 0.05117056405871497,
+      "adjusted_delta": 0.34713826137397297,
+      "wild_p": 0.0645,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "repeated_rejection",
+      "label": "此前5根已有至少2根同向长影线",
+      "primary": true,
+      "yes": {
+        "n": 11,
+        "events": 11,
+        "weeks": 8,
+        "wins": 2,
+        "win_rate": 0.18181818181818182,
+        "win_wilson95": [
+          0.05136768974608513,
+          0.4769805619608442
+        ],
+        "gross_wins": 3,
+        "net_r": -16.1865350332744,
+        "gross_r": -3.6366214135764583,
+        "mean_r": -1.4715031848431273,
+        "mean_bp": -28.423290055559605,
+        "median_bp": -33.65020255139316,
+        "random_wins": 2,
+        "random_net_r": 3.1211692922898906,
+        "random_mean_bp": -6.8668497297907125,
+        "excess_mean_bp": -21.556440325768893,
+        "median_risk_bp": 26.16644912550879,
+        "mean_fee_r": 1.1409012381543582,
+        "net_r_without_best": -18.059340930080317
+      },
+      "no": {
+        "n": 64,
+        "events": 63,
+        "weeks": 35,
+        "wins": 18,
+        "win_rate": 0.28125,
+        "win_wilson95": [
+          0.18593372333727837,
+          0.40133930282207403
+        ],
+        "gross_wins": 20,
+        "net_r": -67.19923866819889,
+        "gross_r": 22.977332662956144,
+        "mean_r": -1.0499881041906076,
+        "mean_bp": -20.995296298046767,
+        "median_bp": -32.11315946303702,
+        "random_wins": 12,
+        "random_net_r": -87.79360443050237,
+        "random_mean_bp": -21.53432719718972,
+        "excess_mean_bp": 0.5390308991429533,
+        "median_risk_bp": 20.261811455320547,
+        "mean_fee_r": 1.4090089270492974,
+        "net_r_without_best": -91.47791768053811
+      },
+      "delta_win": -0.09943181818181818,
+      "bootstrap95": [
+        -0.3421142754145638,
+        0.15841346153846184
+      ],
+      "fisher_p": 0.716627057665993,
+      "adjusted_delta": -0.08850638462558272,
+      "wild_p": 0.47195,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "engulfing",
+      "label": "触价K实体形成顺交易方向吞没",
+      "primary": true,
+      "yes": {
+        "n": 3,
+        "events": 3,
+        "weeks": 3,
+        "wins": 1,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.06149194472039621,
+          0.7923403991979522
+        ],
+        "gross_wins": 1,
+        "net_r": -2.623913498725547,
+        "gross_r": -1.1644700196863824,
+        "mean_r": -0.8746378329085157,
+        "mean_bp": -25.74939254963354,
+        "median_bp": -41.46075198474954,
+        "random_wins": 0,
+        "random_net_r": -4.3881760328899455,
+        "random_mean_bp": -67.06693362049874,
+        "excess_mean_bp": 41.3175410708652,
+        "median_risk_bp": 35.57066015033274,
+        "mean_fee_r": 0.4864811596797216,
+        "net_r_without_best": -2.8817637327348944
+      },
+      "no": {
+        "n": 72,
+        "events": 71,
+        "weeks": 36,
+        "wins": 19,
+        "win_rate": 0.2638888888888889,
+        "win_wilson95": [
+          0.17593776659767213,
+          0.37575862046176634
+        ],
+        "gross_wins": 22,
+        "net_r": -80.76186020274773,
+        "gross_r": 20.505181269066064,
+        "mean_r": -1.1216925028159406,
+        "mean_bp": -21.932041333850673,
+        "median_bp": -32.11315946303702,
+        "random_wins": 14,
+        "random_net_r": -80.28425910532255,
+        "random_mean_bp": -17.39627064981033,
+        "excess_mean_bp": -4.5357706840403385,
+        "median_risk_bp": 20.030939455669927,
+        "mean_fee_r": 1.4064866871085249,
+        "net_r_without_best": -105.04053921508695
+      },
+      "delta_win": 0.06944444444444442,
+      "bootstrap95": [
+        -0.3340361445783132,
+        0.7463054446079461
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": 0.0359940327002548,
+      "wild_p": 1.0,
+      "inferable": false,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "entry_followthrough",
+      "label": "触价后到入场已顺向推进0.25ATR",
+      "primary": true,
+      "yes": {
+        "n": 4,
+        "events": 4,
+        "weeks": 4,
+        "wins": 1,
+        "win_rate": 0.25,
+        "win_wilson95": [
+          0.04558726080970055,
+          0.6993581574175981
+        ],
+        "gross_wins": 1,
+        "net_r": -3.0351863584371976,
+        "gross_r": -0.6048089193364099,
+        "mean_r": -0.7587965896092994,
+        "mean_bp": -18.462567514138804,
+        "median_bp": -34.77739188139758,
+        "random_wins": 0,
+        "random_net_r": -2.876370954287382,
+        "random_mean_bp": -34.0794604873076,
+        "excess_mean_bp": 15.616892973168802,
+        "median_risk_bp": 41.442940848160006,
+        "mean_fee_r": 0.607594359775197,
+        "net_r_without_best": -4.444478283903036
+      },
+      "no": {
+        "n": 71,
+        "events": 70,
+        "weeks": 36,
+        "wins": 19,
+        "win_rate": 0.2676056338028169,
+        "win_wilson95": [
+          0.17852803486507762,
+          0.3805398865785474
+        ],
+        "gross_wins": 22,
+        "net_r": -80.3505873430361,
+        "gross_r": 19.945520168716097,
+        "mean_r": -1.1316984132821986,
+        "mean_bp": -22.288801177881606,
+        "median_bp": -33.10626064163063,
+        "random_wins": 14,
+        "random_net_r": -81.79606418392514,
+        "random_mean_bp": -18.555133038008584,
+        "excess_mean_bp": -3.733668139873012,
+        "median_risk_bp": 20.102690032370333,
+        "mean_fee_r": 1.4126212325598897,
+        "net_r_without_best": -104.62926635537532
+      },
+      "delta_win": -0.017605633802816878,
+      "bootstrap95": [
+        -0.32412447658926535,
+        0.6714285714285715
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.1251668314838278,
+      "wild_p": 1.0,
+      "inferable": false,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "same_close",
+      "label": "触价K收盘即入场",
+      "primary": true,
+      "yes": {
+        "n": 66,
+        "events": 65,
+        "weeks": 35,
+        "wins": 15,
+        "win_rate": 0.22727272727272727,
+        "win_wilson95": [
+          0.14285229563373036,
+          0.34169455364638307
+        ],
+        "gross_wins": 18,
+        "net_r": -81.97299230358541,
+        "gross_r": 12.654207347057307,
+        "mean_r": -1.2420150349028094,
+        "mean_bp": -24.280532211386316,
+        "median_bp": -34.0028687564335,
+        "random_wins": 13,
+        "random_net_r": -81.90564721060994,
+        "random_mean_bp": -19.719067098038433,
+        "excess_mean_bp": -4.561465113347884,
+        "median_risk_bp": 21.801940015961595,
+        "mean_fee_r": 1.4337454492521624,
+        "net_r_without_best": -106.25167131592464
+      },
+      "no": {
+        "n": 9,
+        "events": 9,
+        "weeks": 8,
+        "wins": 5,
+        "win_rate": 0.5555555555555556,
+        "win_wilson95": [
+          0.26665129349549305,
+          0.8112214789023355
+        ],
+        "gross_wins": 5,
+        "net_r": -1.4127813978878652,
+        "gross_r": 6.686503902322375,
+        "mean_r": -0.15697571087642948,
+        "mean_bp": -5.982225303850198,
+        "median_bp": 0.18942383583290656,
+        "random_wins": 1,
+        "random_net_r": -2.766787927602553,
+        "random_mean_bp": -16.91931768636703,
+        "excess_mean_bp": 10.93709238251683,
+        "median_risk_bp": 19.95918887896952,
+        "mean_fee_r": 0.899920588912249,
+        "net_r_without_best": -3.2595180645545074
+      },
+      "delta_win": -0.3282828282828283,
+      "bootstrap95": [
+        -0.6672034510603935,
+        0.07142857142857142
+      ],
+      "fisher_p": 0.05117056405871497,
+      "adjusted_delta": -0.2980361727719767,
+      "wild_p": 0.15125,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "arrow_body",
+      "label": "勾叉K实体朝交易方向收盘",
+      "primary": true,
+      "yes": {
+        "n": 39,
+        "events": 38,
+        "weeks": 24,
+        "wins": 13,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.20632956189598373,
+          0.4902260560065401
+        ],
+        "gross_wins": 14,
+        "net_r": -28.94011214170371,
+        "gross_r": 28.393483502604496,
+        "mean_r": -0.7420541574795824,
+        "mean_bp": -20.286435359169545,
+        "median_bp": -33.10626064163063,
+        "random_wins": 5,
+        "random_net_r": -68.39714605433603,
+        "random_mean_bp": -29.942261974274732,
+        "excess_mean_bp": 9.65582661510519,
+        "median_risk_bp": 24.511206065754255,
+        "mean_fee_r": 1.4700921960079028,
+        "net_r_without_best": -53.21879115404293
+      },
+      "no": {
+        "n": 36,
+        "events": 36,
+        "weeks": 25,
+        "wins": 7,
+        "win_rate": 0.19444444444444445,
+        "win_wilson95": [
+          0.09753095418928728,
+          0.3502804299517739
+        ],
+        "gross_wins": 9,
+        "net_r": -54.44566155976958,
+        "gross_r": -9.05277225322481,
+        "mean_r": -1.5123794877713772,
+        "mean_bp": -24.032893741070463,
+        "median_bp": -32.23947355411051,
+        "random_wins": 9,
+        "random_net_r": -16.275289083876455,
+        "random_mean_bp": -7.944001962531266,
+        "excess_mean_bp": -16.088891778539196,
+        "median_risk_bp": 19.41786693160608,
+        "mean_fee_r": 1.260913591848466,
+        "net_r_without_best": -57.476040517392775
+      },
+      "delta_win": 0.13888888888888887,
+      "bootstrap95": [
+        -0.03730113636363638,
+        0.3182535193564605
+      ],
+      "fisher_p": 0.2005941034002937,
+      "adjusted_delta": 0.12126581171373789,
+      "wild_p": 0.1958,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "clean_level20",
+      "label": "此前20根实体未碰过同一关键位",
+      "primary": true,
+      "yes": {
+        "n": 58,
+        "events": 58,
+        "weeks": 34,
+        "wins": 18,
+        "win_rate": 0.3103448275862069,
+        "win_wilson95": [
+          0.2062209562281909,
+          0.4380306442428171
+        ],
+        "gross_wins": 20,
+        "net_r": -53.9011757022353,
+        "gross_r": 27.250877973583965,
+        "mean_r": -0.929330615555781,
+        "mean_bp": -19.698278016548823,
+        "median_bp": -32.38513041791829,
+        "random_wins": 9,
+        "random_net_r": -93.33401297776315,
+        "random_mean_bp": -26.93793791488621,
+        "excess_mean_bp": 7.23965989833739,
+        "median_risk_bp": 24.143475202829634,
+        "mean_fee_r": 1.3991733392382633,
+        "net_r_without_best": -78.17985471457453
+      },
+      "no": {
+        "n": 17,
+        "events": 16,
+        "weeks": 13,
+        "wins": 2,
+        "win_rate": 0.11764705882352941,
+        "win_wilson95": [
+          0.03287977376379267,
+          0.3433635059488588
+        ],
+        "gross_wins": 3,
+        "net_r": -29.484597999237987,
+        "gross_r": -7.910166724204283,
+        "mean_r": -1.7343881176022347,
+        "mean_bp": -30.226766395665717,
+        "median_bp": -33.10626064163063,
+        "random_wins": 5,
+        "random_net_r": 8.661577839550652,
+        "random_mean_bp": 6.392241847974129,
+        "excess_mean_bp": -36.61900824363985,
+        "median_risk_bp": 18.715725207336856,
+        "mean_fee_r": 1.269084192649041,
+        "net_r_without_best": -30.97078729326452
+      },
+      "delta_win": 0.1926977687626775,
+      "bootstrap95": [
+        -0.019230769230769218,
+        0.36385633484162905
+      ],
+      "fisher_p": 0.13387189365341953,
+      "adjusted_delta": 0.18810198435834038,
+      "wild_p": 0.09775,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "BTC",
+      "cut": "risk_covers_fee",
+      "label": "初始止损距离至少0.2%",
+      "primary": false,
+      "yes": {
+        "n": 39,
+        "events": 39,
+        "weeks": 27,
+        "wins": 13,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.20632956189598373,
+          0.4902260560065401
+        ],
+        "gross_wins": 14,
+        "net_r": -21.92085379174726,
+        "gross_r": 0.41420804514651577,
+        "mean_r": -0.5620731741473656,
+        "mean_bp": -23.927816284644116,
+        "median_bp": -43.175965665236056,
+        "random_wins": 7,
+        "random_net_r": -26.37529743183351,
+        "random_mean_bp": -30.145777341756713,
+        "excess_mean_bp": 6.217961057112597,
+        "median_risk_bp": 34.99749121926744,
+        "mean_fee_r": 0.5726938932536866,
+        "net_r_without_best": -24.95123274937045
+      },
+      "no": {
+        "n": 36,
+        "events": 35,
+        "weeks": 25,
+        "wins": 7,
+        "win_rate": 0.19444444444444445,
+        "win_wilson95": [
+          0.09753095418928728,
+          0.3502804299517739
+        ],
+        "gross_wins": 9,
+        "net_r": -61.464919909726035,
+        "gross_r": 18.92650320423317,
+        "mean_r": -1.7073588863812788,
+        "mean_bp": -20.08806440513967,
+        "median_bp": -30.534828922416175,
+        "random_wins": 7,
+        "random_net_r": -58.297137706378976,
+        "random_mean_bp": -7.723526981092451,
+        "excess_mean_bp": -12.36453742404722,
+        "median_risk_bp": 15.233709590524118,
+        "mean_fee_r": 2.2330950864988663,
+        "net_r_without_best": -85.74359892206526
+      },
+      "delta_win": 0.13888888888888887,
+      "bootstrap95": [
+        -0.08562939607082223,
+        0.34830623306233066
+      ],
+      "fisher_p": 0.2005941034002937,
+      "adjusted_delta": 0.17061733246634986,
+      "wild_p": 0.36505,
+      "inferable": true
+    },
+    {
+      "symbol": "ETH",
+      "cut": "wick_half",
+      "label": "触价影线占全K至少50%",
+      "primary": true,
+      "yes": {
+        "n": 28,
+        "events": 28,
+        "weeks": 21,
+        "wins": 7,
+        "win_rate": 0.25,
+        "win_wilson95": [
+          0.12676494919293316,
+          0.4335567031899896
+        ],
+        "gross_wins": 9,
+        "net_r": -21.158426565160465,
+        "gross_r": -7.1002723551735745,
+        "mean_r": -0.7556580916128738,
+        "mean_bp": -31.653650531476,
+        "median_bp": -33.599924825143034,
+        "random_wins": 8,
+        "random_net_r": -14.189785284382399,
+        "random_mean_bp": -20.794491429803998,
+        "excess_mean_bp": -10.859159101672011,
+        "median_risk_bp": 49.01181197871242,
+        "mean_fee_r": 0.5020769360709603,
+        "net_r_without_best": -22.632669283607036
+      },
+      "no": {
+        "n": 41,
+        "events": 41,
+        "weeks": 29,
+        "wins": 17,
+        "win_rate": 0.4146341463414634,
+        "win_wilson95": [
+          0.27756549454252133,
+          0.5663289686596986
+        ],
+        "gross_wins": 20,
+        "net_r": -12.486399359940183,
+        "gross_r": 29.527105359469715,
+        "mean_r": -0.3045463258521996,
+        "mean_bp": 7.952139242885817,
+        "median_bp": -22.585779269438248,
+        "random_wins": 9,
+        "random_net_r": -43.11762109991582,
+        "random_mean_bp": -20.477167885103412,
+        "excess_mean_bp": 28.429307127989226,
+        "median_risk_bp": 27.913865785575275,
+        "mean_fee_r": 1.0247196273026804,
+        "net_r_without_best": -18.425710732489243
+      },
+      "delta_win": -0.1646341463414634,
+      "bootstrap95": [
+        -0.3723884598884599,
+        0.04342248283752858
+      ],
+      "fisher_p": 0.20211630700529443,
+      "adjusted_delta": -0.21427802814942307,
+      "wild_p": 0.06725,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "wick_body2",
+      "label": "触价影线至少为实体2倍",
+      "primary": true,
+      "yes": {
+        "n": 29,
+        "events": 29,
+        "weeks": 20,
+        "wins": 7,
+        "win_rate": 0.2413793103448276,
+        "win_wilson95": [
+          0.12218422442520088,
+          0.42107601617811335
+        ],
+        "gross_wins": 8,
+        "net_r": -22.997900143020605,
+        "gross_r": -4.788447482609778,
+        "mean_r": -0.7930310394145036,
+        "mean_bp": -30.612563051721008,
+        "median_bp": -36.63744544335448,
+        "random_wins": 9,
+        "random_net_r": -12.758091508048967,
+        "random_mean_bp": -14.951927395591671,
+        "excess_mean_bp": -15.660635656129333,
+        "median_risk_bp": 33.70588329618448,
+        "mean_fee_r": 0.6279121607038214,
+        "net_r_without_best": -24.76809923804319
+      },
+      "no": {
+        "n": 40,
+        "events": 40,
+        "weeks": 28,
+        "wins": 17,
+        "win_rate": 0.425,
+        "win_wilson95": [
+          0.28509392559950375,
+          0.5780493145800892
+        ],
+        "gross_wins": 21,
+        "net_r": -10.646925782080043,
+        "gross_r": 27.215280486905918,
+        "mean_r": -0.2661731445520011,
+        "mean_bp": 8.187495564422488,
+        "median_bp": -15.391384816918677,
+        "random_wins": 8,
+        "random_net_r": -44.54931487624926,
+        "random_mean_bp": -24.705093721289824,
+        "excess_mean_bp": 32.89258928571231,
+        "median_risk_bp": 29.62821776278954,
+        "mean_fee_r": 0.9465551567246491,
+        "net_r_without_best": -16.586237154629103
+      },
+      "delta_win": -0.1836206896551724,
+      "bootstrap95": [
+        -0.396634436015421,
+        0.03969387755102042
+      ],
+      "fisher_p": 0.13229664928001028,
+      "adjusted_delta": -0.21105274076114172,
+      "wild_p": 0.0536,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "wick_atr_half",
+      "label": "触价影线至少0.5ATR",
+      "primary": true,
+      "yes": {
+        "n": 41,
+        "events": 41,
+        "weeks": 27,
+        "wins": 12,
+        "win_rate": 0.2926829268292683,
+        "win_wilson95": [
+          0.17609187626113423,
+          0.44479467722997157
+        ],
+        "gross_wins": 15,
+        "net_r": -21.203368221943737,
+        "gross_r": 0.43442944185055615,
+        "mean_r": -0.5171553224864326,
+        "mean_bp": -13.818021270964877,
+        "median_bp": -32.56627783669084,
+        "random_wins": 12,
+        "random_net_r": -17.60792275048535,
+        "random_mean_bp": -20.225036541802687,
+        "excess_mean_bp": 6.407015270837808,
+        "median_risk_bp": 41.27273599846602,
+        "mean_fee_r": 0.527751162531568,
+        "net_r_without_best": -24.704786628749545
+      },
+      "no": {
+        "n": 28,
+        "events": 28,
+        "weeks": 21,
+        "wins": 12,
+        "win_rate": 0.42857142857142855,
+        "win_wilson95": [
+          0.26508547124123694,
+          0.6092921437253123
+        ],
+        "gross_wins": 14,
+        "net_r": -12.44145770315691,
+        "gross_r": 21.992403562445585,
+        "mean_r": -0.4443377751127468,
+        "mean_bp": 0.22408450666251767,
+        "median_bp": -19.46240568122681,
+        "random_wins": 5,
+        "random_net_r": -39.699483633812875,
+        "random_mean_bp": -21.163683753922903,
+        "excess_mean_bp": 21.387768260585432,
+        "median_risk_bp": 22.342499104335985,
+        "mean_fee_r": 1.2297807594858037,
+        "net_r_without_best": -18.38076907570597
+      },
+      "delta_win": -0.13588850174216027,
+      "bootstrap95": [
+        -0.40198120915032676,
+        0.11008076690821267
+      ],
+      "fisher_p": 0.3063355563200709,
+      "adjusted_delta": -0.23221651292118975,
+      "wild_p": 0.088,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "penetration_half",
+      "label": "越线深度占影线至少50%",
+      "primary": true,
+      "yes": {
+        "n": 41,
+        "events": 41,
+        "weeks": 28,
+        "wins": 13,
+        "win_rate": 0.3170731707317073,
+        "win_wilson95": [
+          0.19564613898988575,
+          0.4698419964434429
+        ],
+        "gross_wins": 18,
+        "net_r": -24.85615922247277,
+        "gross_r": 5.178814059055037,
+        "mean_r": -0.60624778591397,
+        "mean_bp": -17.606456904831468,
+        "median_bp": -31.221382654787465,
+        "random_wins": 8,
+        "random_net_r": -37.80992136776726,
+        "random_mean_bp": -24.860352751164694,
+        "excess_mean_bp": 7.253895846333221,
+        "median_risk_bp": 34.79335349396785,
+        "mean_fee_r": 0.7325603239397027,
+        "net_r_without_best": -28.599492555806325
+      },
+      "no": {
+        "n": 28,
+        "events": 28,
+        "weeks": 22,
+        "wins": 11,
+        "win_rate": 0.39285714285714285,
+        "win_wilson95": [
+          0.2356568654157959,
+          0.5759095570340281
+        ],
+        "gross_wins": 11,
+        "net_r": -8.788666702627873,
+        "gross_r": 17.248018945241103,
+        "mean_r": -0.3138809536652812,
+        "mean_bp": 5.771436684824311,
+        "median_bp": -25.797415165809305,
+        "random_wins": 9,
+        "random_net_r": -19.497485016530966,
+        "random_mean_bp": -14.376256447357113,
+        "excess_mean_bp": 20.147693132181423,
+        "median_risk_bp": 32.69804125409708,
+        "mean_fee_r": 0.929881630281035,
+        "net_r_without_best": -14.727978075176935
+      },
+      "delta_win": -0.07578397212543553,
+      "bootstrap95": [
+        -0.3102121374865735,
+        0.15909914361001323
+      ],
+      "fisher_p": 0.6093991268834462,
+      "adjusted_delta": -0.04664599141214611,
+      "wild_p": 0.71225,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "wide_candle",
+      "label": "触价整根振幅至少1.5ATR",
+      "primary": true,
+      "yes": {
+        "n": 22,
+        "events": 22,
+        "weeks": 19,
+        "wins": 11,
+        "win_rate": 0.5,
+        "win_wilson95": [
+          0.3072210627372502,
+          0.6927789372627497
+        ],
+        "gross_wins": 14,
+        "net_r": 1.5729782879830183,
+        "gross_r": 13.412770704116319,
+        "mean_r": 0.07149901309013719,
+        "mean_bp": 13.78700238774777,
+        "median_bp": 0.09843390067405733,
+        "random_wins": 7,
+        "random_net_r": -7.752788546710367,
+        "random_mean_bp": -14.447328343566051,
+        "excess_mean_bp": 28.23433073131383,
+        "median_risk_bp": 45.099922286412514,
+        "mean_fee_r": 0.5381723825515136,
+        "net_r_without_best": -1.9284401188227895
+      },
+      "no": {
+        "n": 47,
+        "events": 47,
+        "weeks": 30,
+        "wins": 13,
+        "win_rate": 0.2765957446808511,
+        "win_wilson95": [
+          0.16936563369682642,
+          0.41758563624878886
+        ],
+        "gross_wins": 15,
+        "net_r": -35.21780421308366,
+        "gross_r": 9.01406230017982,
+        "mean_r": -0.7493149832570991,
+        "mean_bp": -18.374011881988523,
+        "median_bp": -34.656060493420654,
+        "random_wins": 10,
+        "random_net_r": -49.554617837587855,
+        "random_mean_bp": -23.488689782240392,
+        "excess_mean_bp": 5.1146779002518725,
+        "median_risk_bp": 29.660316833437466,
+        "mean_fee_r": 0.9411035428353932,
+        "net_r_without_best": -41.157115585632724
+      },
+      "delta_win": 0.22340425531914893,
+      "bootstrap95": [
+        -0.03626191583352707,
+        0.4597410061203165
+      ],
+      "fisher_p": 0.1032875747537098,
+      "adjusted_delta": 0.29771538238344303,
+      "wild_p": 0.0641,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "aligned_body",
+      "label": "触价K实体朝交易方向收盘",
+      "primary": true,
+      "yes": {
+        "n": 31,
+        "events": 31,
+        "weeks": 24,
+        "wins": 10,
+        "win_rate": 0.3225806451612903,
+        "win_wilson95": [
+          0.18569426566359176,
+          0.49858990691914357
+        ],
+        "gross_wins": 12,
+        "net_r": -12.251433055270457,
+        "gross_r": 8.976264605301171,
+        "mean_r": -0.39520751791195025,
+        "mean_bp": -24.589252463408254,
+        "median_bp": -29.00905106218036,
+        "random_wins": 8,
+        "random_net_r": -29.90178748863804,
+        "random_mean_bp": -28.088315810231844,
+        "excess_mean_bp": 3.4990633468235868,
+        "median_risk_bp": 38.739669421487605,
+        "mean_fee_r": 0.6847644406636008,
+        "net_r_without_best": -15.994766388604013
+      },
+      "no": {
+        "n": 38,
+        "events": 38,
+        "weeks": 27,
+        "wins": 14,
+        "win_rate": 0.3684210526315789,
+        "win_wilson95": [
+          0.23384219247155955,
+          0.5271604044299099
+        ],
+        "gross_wins": 17,
+        "net_r": -21.393392869830194,
+        "gross_r": 13.450568398994971,
+        "mean_r": -0.5629840228902683,
+        "mean_bp": 5.315850537964375,
+        "median_bp": -27.47338754110405,
+        "random_wins": 9,
+        "random_net_r": -27.40561889566019,
+        "random_mean_bp": -14.501890873856965,
+        "excess_mean_bp": 19.817741411821334,
+        "median_risk_bp": 31.931272557086466,
+        "mean_fee_r": 0.9169463491796095,
+        "net_r_without_best": -27.332704242379258
+      },
+      "delta_win": -0.04584040747028861,
+      "bootstrap95": [
+        -0.24685685685685682,
+        0.17725797753920752
+      ],
+      "fisher_p": 0.8011404537900556,
+      "adjusted_delta": -0.09070313677994192,
+      "wild_p": 0.3981,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "strong_close",
+      "label": "触价K收在拒绝方向末端25%",
+      "primary": true,
+      "yes": {
+        "n": 20,
+        "events": 20,
+        "weeks": 17,
+        "wins": 5,
+        "win_rate": 0.25,
+        "win_wilson95": [
+          0.11186170140766569,
+          0.468700877618744
+        ],
+        "gross_wins": 7,
+        "net_r": -11.949566155549771,
+        "gross_r": -2.873747005122806,
+        "mean_r": -0.5974783077774886,
+        "mean_bp": -31.736624358913765,
+        "median_bp": -25.720408225631544,
+        "random_wins": 6,
+        "random_net_r": -10.910973043808848,
+        "random_mean_bp": -25.709597984185045,
+        "excess_mean_bp": -6.027026374728715,
+        "median_risk_bp": 54.012961320816274,
+        "mean_fee_r": 0.4537909575213483,
+        "net_r_without_best": -13.06658854360952
+      },
+      "no": {
+        "n": 49,
+        "events": 49,
+        "weeks": 36,
+        "wins": 19,
+        "win_rate": 0.3877551020408163,
+        "win_wilson95": [
+          0.2642901171173567,
+          0.5275400055647954
+        ],
+        "gross_wins": 22,
+        "net_r": -21.695259769550876,
+        "gross_r": 25.300580009418944,
+        "mean_r": -0.44276040346022194,
+        "mean_bp": 1.5197547194952177,
+        "median_bp": -31.221382654787465,
+        "random_wins": 11,
+        "random_net_r": -46.39643334048939,
+        "random_mean_bp": -18.522809870205116,
+        "excess_mean_bp": 20.042564589700333,
+        "median_risk_bp": 28.805482138074506,
+        "mean_fee_r": 0.9590987709993841,
+        "net_r_without_best": -27.634571142099936
+      },
+      "delta_win": -0.1377551020408163,
+      "bootstrap95": [
+        -0.375350885034865,
+        0.11449385489626004
+      ],
+      "fisher_p": 0.40431540864309273,
+      "adjusted_delta": -0.19640164739621785,
+      "wild_p": 0.1813,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "sweep5",
+      "label": "触价影线扫过前5根极值",
+      "primary": true,
+      "yes": {
+        "n": 59,
+        "events": 59,
+        "weeks": 36,
+        "wins": 21,
+        "win_rate": 0.3559322033898305,
+        "win_wilson95": [
+          0.2460329140381331,
+          0.48344504018145007
+        ],
+        "gross_wins": 26,
+        "net_r": -25.54041078983076,
+        "gross_r": 17.824641845700494,
+        "mean_r": -0.4328883184717078,
+        "mean_bp": -6.052580090425985,
+        "median_bp": -22.431765389082724,
+        "random_wins": 15,
+        "random_net_r": -44.71655877679274,
+        "random_mean_bp": -20.796189134778167,
+        "excess_mean_bp": 14.743609044352187,
+        "median_risk_bp": 35.72642941635675,
+        "mean_fee_r": 0.7350008921276483,
+        "net_r_without_best": -31.479722162379822
+      },
+      "no": {
+        "n": 10,
+        "events": 10,
+        "weeks": 10,
+        "wins": 3,
+        "win_rate": 0.3,
+        "win_wilson95": [
+          0.10779126740630099,
+          0.6032218525388546
+        ],
+        "gross_wins": 3,
+        "net_r": -8.104415135269889,
+        "gross_r": 4.602191158595643,
+        "mean_r": -0.8104415135269889,
+        "mean_bp": -20.31622805878765,
+        "median_bp": -35.25472324832083,
+        "random_wins": 2,
+        "random_net_r": -12.590847607505488,
+        "random_mean_bp": -19.483448437183956,
+        "excess_mean_bp": -0.8327796216036937,
+        "median_risk_bp": 18.783432770683817,
+        "mean_fee_r": 1.2706606293865534,
+        "net_r_without_best": -11.847748468603445
+      },
+      "delta_win": 0.055932203389830515,
+      "bootstrap95": [
+        -0.2701929723502304,
+        0.35294577205882355
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": 0.03859618293077763,
+      "wild_p": 0.78675,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "sweep20",
+      "label": "触价影线扫过前20根极值",
+      "primary": true,
+      "yes": {
+        "n": 46,
+        "events": 46,
+        "weeks": 31,
+        "wins": 18,
+        "win_rate": 0.391304347826087,
+        "win_wilson95": [
+          0.26393225037829016,
+          0.5354315676837925
+        ],
+        "gross_wins": 22,
+        "net_r": -6.962302132072894,
+        "gross_r": 19.248351915778027,
+        "mean_r": -0.1513543941754977,
+        "mean_bp": -1.6702280860455405,
+        "median_bp": -20.906338382920868,
+        "random_wins": 12,
+        "random_net_r": -26.832068913859683,
+        "random_mean_bp": -22.900436817372007,
+        "excess_mean_bp": 21.230208731326467,
+        "median_risk_bp": 40.913130205843856,
+        "mean_fee_r": 0.5697968271271939,
+        "net_r_without_best": -12.901613504621956
+      },
+      "no": {
+        "n": 23,
+        "events": 23,
+        "weeks": 19,
+        "wins": 6,
+        "win_rate": 0.2608695652173913,
+        "win_wilson95": [
+          0.12548616044986347,
+          0.4647000483742537
+        ],
+        "gross_wins": 7,
+        "net_r": -26.68252379302775,
+        "gross_r": 3.1784810885181107,
+        "mean_r": -1.1601097301316414,
+        "mean_bp": -21.018870172387597,
+        "median_bp": -34.27843451849348,
+        "random_wins": 5,
+        "random_net_r": -30.475337470438546,
+        "random_mean_bp": -16.01693694454953,
+        "excess_mean_bp": -5.001933227838067,
+        "median_risk_bp": 22.229035719760233,
+        "mean_fee_r": 1.2983045600672116,
+        "net_r_without_best": -30.425857126361308
+      },
+      "delta_win": 0.13043478260869568,
+      "bootstrap95": [
+        -0.11413083244962885,
+        0.35680091185410334
+      ],
+      "fisher_p": 0.4217278762081207,
+      "adjusted_delta": 0.11406760518653004,
+      "wild_p": 0.4057,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "fast_approach",
+      "label": "此前8根朝关键位推进至少2ATR",
+      "primary": true,
+      "yes": {
+        "n": 40,
+        "events": 40,
+        "weeks": 27,
+        "wins": 14,
+        "win_rate": 0.35,
+        "win_wilson95": [
+          0.2213452887317629,
+          0.5049411916274231
+        ],
+        "gross_wins": 18,
+        "net_r": -3.78655449640409,
+        "gross_r": 17.957148693374897,
+        "mean_r": -0.09466386241010225,
+        "mean_bp": -2.401073380870701,
+        "median_bp": -25.11416322566617,
+        "random_wins": 11,
+        "random_net_r": -20.40583371598944,
+        "random_mean_bp": -28.217581821162593,
+        "excess_mean_bp": 25.81650844029189,
+        "median_risk_bp": 43.70318538947454,
+        "mean_fee_r": 0.5435925797444746,
+        "net_r_without_best": -9.725865868953152
+      },
+      "no": {
+        "n": 29,
+        "events": 29,
+        "weeks": 22,
+        "wins": 10,
+        "win_rate": 0.3448275862068966,
+        "win_wilson95": [
+          0.19940718526674994,
+          0.5265489590952386
+        ],
+        "gross_wins": 11,
+        "net_r": -29.858271428696558,
+        "gross_r": 4.469684310921241,
+        "mean_r": -1.0295955665067777,
+        "mean_bp": -16.007640368557983,
+        "median_bp": -32.36099581276985,
+        "random_wins": 6,
+        "random_net_r": -36.90157266830879,
+        "random_mean_bp": -10.107116223353374,
+        "excess_mean_bp": -5.900524145204606,
+        "median_risk_bp": 22.45596248891174,
+        "mean_fee_r": 1.1837226117109585,
+        "net_r_without_best": -33.601604762030114
+      },
+      "delta_win": 0.005172413793103403,
+      "bootstrap95": [
+        -0.16728796169630641,
+        0.18564764183185237
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.06210039975852847,
+      "wild_p": 0.5857,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "efficient_trend",
+      "label": "此前20根走势效率至少50%",
+      "primary": true,
+      "yes": {
+        "n": 15,
+        "events": 15,
+        "weeks": 13,
+        "wins": 5,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.1517632443971473,
+          0.5828645226148023
+        ],
+        "gross_wins": 6,
+        "net_r": 3.188818051171741,
+        "gross_r": 12.268369117165522,
+        "mean_r": 0.21258787007811605,
+        "mean_bp": -3.683988683281377,
+        "median_bp": -36.63744544335448,
+        "random_wins": 4,
+        "random_net_r": -11.388794274531875,
+        "random_mean_bp": -20.568956090888964,
+        "excess_mean_bp": 16.88496740760759,
+        "median_risk_bp": 31.70429614348942,
+        "mean_fee_r": 0.6053034043995855,
+        "net_r_without_best": -2.750493321377321
+      },
+      "no": {
+        "n": 54,
+        "events": 54,
+        "weeks": 34,
+        "wins": 19,
+        "win_rate": 0.35185185185185186,
+        "win_wilson95": [
+          0.2382301110811473,
+          0.4851516927976369
+        ],
+        "gross_wins": 23,
+        "net_r": -36.833643976272384,
+        "gross_r": 10.158463887130617,
+        "mean_r": -0.6821045180791182,
+        "mean_bp": -9.351938438403497,
+        "median_bp": -25.797415165809305,
+        "random_wins": 13,
+        "random_net_r": -45.91861210976635,
+        "random_mean_bp": -20.616209295563277,
+        "excess_mean_bp": 11.264270857159785,
+        "median_risk_bp": 33.2484087142325,
+        "mean_fee_r": 0.8702242196926483,
+        "net_r_without_best": -40.57697730960594
+      },
+      "delta_win": -0.018518518518518545,
+      "bootstrap95": [
+        -0.2782326432528045,
+        0.25180069930069954
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.08666967139375083,
+      "wild_p": 0.49995,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "compression",
+      "label": "此前5根振幅压缩至20根均值75%",
+      "primary": true,
+      "yes": {
+        "n": 10,
+        "events": 10,
+        "weeks": 9,
+        "wins": 2,
+        "win_rate": 0.2,
+        "win_wilson95": [
+          0.05668215145437519,
+          0.5098375284633583
+        ],
+        "gross_wins": 2,
+        "net_r": -11.132414622798855,
+        "gross_r": -3.1278994941381604,
+        "mean_r": -1.1132414622798854,
+        "mean_bp": -30.305188315981837,
+        "median_bp": -36.177341181807975,
+        "random_wins": 4,
+        "random_net_r": -4.757747442430507,
+        "random_mean_bp": -3.4580450815932537,
+        "excess_mean_bp": -26.847143234388586,
+        "median_risk_bp": 29.5629999752816,
+        "mean_fee_r": 0.8004515128660692,
+        "net_r_without_best": -12.249437010858603
+      },
+      "no": {
+        "n": 59,
+        "events": 59,
+        "weeks": 36,
+        "wins": 22,
+        "win_rate": 0.3728813559322034,
+        "win_wilson95": [
+          0.2608399879232115,
+          0.5004640893293619
+        ],
+        "gross_wins": 27,
+        "net_r": -22.512411302301793,
+        "gross_r": 25.554732498434305,
+        "mean_r": -0.38156629325935243,
+        "mean_bp": -4.3595359790371395,
+        "median_bp": -22.431765389082724,
+        "random_wins": 13,
+        "random_net_r": -52.549658941867726,
+        "random_mean_bp": -23.51235919504778,
+        "excess_mean_bp": 19.15282321601064,
+        "median_risk_bp": 33.25898389095433,
+        "mean_fee_r": 0.814697352554849,
+        "net_r_without_best": -28.451722674850856
+      },
+      "delta_win": -0.17288135593220338,
+      "bootstrap95": [
+        -0.43859649122807015,
+        0.11952960526315795
+      ],
+      "fisher_p": 0.4753507825721802,
+      "adjusted_delta": -0.1532872366295065,
+      "wild_p": 0.31645,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "repeated_rejection",
+      "label": "此前5根已有至少2根同向长影线",
+      "primary": true,
+      "yes": {
+        "n": 9,
+        "events": 9,
+        "weeks": 8,
+        "wins": 3,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.1205838183869109,
+          0.6457978644196036
+        ],
+        "gross_wins": 3,
+        "net_r": -1.1630437797824096,
+        "gross_r": 4.561273209877255,
+        "mean_r": -0.12922708664248994,
+        "mean_bp": -7.855286915721077,
+        "median_bp": -21.21927538915198,
+        "random_wins": 2,
+        "random_net_r": -7.9182610078778914,
+        "random_mean_bp": -19.72663111338614,
+        "excess_mean_bp": 11.871344197665072,
+        "median_risk_bp": 31.903310104529485,
+        "mean_fee_r": 0.6360352210732959,
+        "net_r_without_best": -3.81204563507006
+      },
+      "no": {
+        "n": 60,
+        "events": 60,
+        "weeks": 35,
+        "wins": 21,
+        "win_rate": 0.35,
+        "win_wilson95": [
+          0.24167774406017556,
+          0.47637381158245135
+        ],
+        "gross_wins": 26,
+        "net_r": -32.48178214531823,
+        "gross_r": 17.865559794418886,
+        "mean_r": -0.5413630357553038,
+        "mean_bp": -8.159448728025332,
+        "median_bp": -31.79118923377866,
+        "random_wins": 15,
+        "random_net_r": -49.38914537642034,
+        "random_mean_bp": -20.737832721721265,
+        "excess_mean_bp": 12.57838399369594,
+        "median_risk_bp": 33.2484087142325,
+        "mean_fee_r": 0.8391223656622855,
+        "net_r_without_best": -38.42109351786729
+      },
+      "delta_win": -0.016666666666666663,
+      "bootstrap95": [
+        -0.3637533422459893,
+        0.3277120877157722
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.06738631068576913,
+      "wild_p": 0.7513,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "engulfing",
+      "label": "触价K实体形成顺交易方向吞没",
+      "primary": true,
+      "yes": {
+        "n": 4,
+        "events": 4,
+        "weeks": 4,
+        "wins": 2,
+        "win_rate": 0.5,
+        "win_wilson95": [
+          0.15003898915214947,
+          0.8499610108478506
+        ],
+        "gross_wins": 3,
+        "net_r": -0.6413067280313703,
+        "gross_r": 1.3167756763116065,
+        "mean_r": -0.16032668200784259,
+        "mean_bp": -12.585233833943446,
+        "median_bp": -2.5646237791615625,
+        "random_wins": 0,
+        "random_net_r": -4.564891944427511,
+        "random_mean_bp": -49.24089443440114,
+        "excess_mean_bp": 36.6556606004577,
+        "median_risk_bp": 49.47841788793912,
+        "mean_fee_r": 0.4895206010857443,
+        "net_r_without_best": -0.6869814685158138
+      },
+      "no": {
+        "n": 65,
+        "events": 65,
+        "weeks": 38,
+        "wins": 22,
+        "win_rate": 0.3384615384615385,
+        "win_wilson95": [
+          0.2353350331209667,
+          0.45961623084487946
+        ],
+        "gross_wins": 26,
+        "net_r": -33.00351919706927,
+        "gross_r": 21.11005732798453,
+        "mean_r": -0.507746449185681,
+        "mean_bp": -7.844978009034397,
+        "median_bp": -31.221382654787465,
+        "random_wins": 17,
+        "random_net_r": -52.74251443987072,
+        "random_mean_bp": -18.84378562440226,
+        "excess_mean_bp": 10.998807615367866,
+        "median_risk_bp": 33.077491248917106,
+        "mean_fee_r": 0.8325165619239048,
+        "net_r_without_best": -38.94283056961833
+      },
+      "delta_win": 0.16153846153846152,
+      "bootstrap95": [
+        -0.36569756376094403,
+        0.6994047619047619
+      ],
+      "fisher_p": 0.606061762797267,
+      "adjusted_delta": 0.16535178191051636,
+      "wild_p": 1.0,
+      "inferable": false,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "entry_followthrough",
+      "label": "触价后到入场已顺向推进0.25ATR",
+      "primary": true,
+      "yes": {
+        "n": 6,
+        "events": 6,
+        "weeks": 6,
+        "wins": 2,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.09677141110578041,
+          0.700006684861608
+        ],
+        "gross_wins": 3,
+        "net_r": -3.277485854032841,
+        "gross_r": -0.5302880019508607,
+        "mean_r": -0.5462476423388068,
+        "mean_bp": -19.56225211618561,
+        "median_bp": -29.397497290963553,
+        "random_wins": 2,
+        "random_net_r": -1.1646471888888417,
+        "random_mean_bp": 10.724739637791009,
+        "excess_mean_bp": -30.28699175397662,
+        "median_risk_bp": 49.391099726276366,
+        "mean_fee_r": 0.45786630868033024,
+        "net_r_without_best": -4.967387392494388
+      },
+      "no": {
+        "n": 63,
+        "events": 63,
+        "weeks": 38,
+        "wins": 22,
+        "win_rate": 0.3492063492063492,
+        "win_wilson95": [
+          0.24325989015230323,
+          0.47248539226338215
+        ],
+        "gross_wins": 26,
+        "net_r": -30.367340071067808,
+        "gross_r": 22.957121006246997,
+        "mean_r": -0.4820212709693303,
+        "mean_bp": -7.030015765490409,
+        "median_bp": -29.00905106218036,
+        "random_wins": 15,
+        "random_net_r": -56.142759195409376,
+        "random_mean_bp": -23.58981081191266,
+        "excess_mean_bp": 16.55979504642225,
+        "median_risk_bp": 32.15824897068351,
+        "mean_fee_r": 0.8464200171002351,
+        "net_r_without_best": -36.30665144361687
+      },
+      "delta_win": -0.015873015873015872,
+      "bootstrap95": [
+        -0.390625,
+        0.46460554371002155
+      ],
+      "fisher_p": 1.0,
+      "adjusted_delta": -0.03504342038523748,
+      "wild_p": 1.0,
+      "inferable": false,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "same_close",
+      "label": "触价K收盘即入场",
+      "primary": true,
+      "yes": {
+        "n": 57,
+        "events": 57,
+        "weeks": 36,
+        "wins": 17,
+        "win_rate": 0.2982456140350877,
+        "win_wilson95": [
+          0.19532550074818086,
+          0.42664280103459995
+        ],
+        "gross_wins": 21,
+        "net_r": -35.48064522589692,
+        "gross_r": 11.036949399310965,
+        "mean_r": -0.6224674601034548,
+        "mean_bp": -9.409631431025685,
+        "median_bp": -32.36099581276985,
+        "random_wins": 13,
+        "random_net_r": -54.54889229196196,
+        "random_mean_bp": -28.666336137127832,
+        "excess_mean_bp": 19.256704706102145,
+        "median_risk_bp": 33.077491248917106,
+        "mean_fee_r": 0.8160981513194365,
+        "net_r_without_best": -41.419956598445985
+      },
+      "no": {
+        "n": 12,
+        "events": 12,
+        "weeks": 10,
+        "wins": 7,
+        "win_rate": 0.5833333333333334,
+        "win_wilson95": [
+          0.31951131254954973,
+          0.8067396863412435
+        ],
+        "gross_wins": 8,
+        "net_r": 1.8358193007962762,
+        "gross_r": 11.389883604985178,
+        "mean_r": 0.15298494173302302,
+        "mean_bp": -1.9929595295454536,
+        "median_bp": 4.578949766482992,
+        "random_wins": 4,
+        "random_net_r": -2.7585140923362674,
+        "random_mean_bp": 17.68095970771124,
+        "excess_mean_bp": -19.673919237256687,
+        "median_risk_bp": 35.38633514348791,
+        "mean_fee_r": 0.7961720253490753,
+        "net_r_without_best": -1.9075140325372795
+      },
+      "delta_win": -0.28508771929824567,
+      "bootstrap95": [
+        -0.5710433408336013,
+        -0.032096861471861304
+      ],
+      "fisher_p": 0.09363741637818487,
+      "adjusted_delta": -0.25467774007935384,
+      "wild_p": 0.1061,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "arrow_body",
+      "label": "勾叉K实体朝交易方向收盘",
+      "primary": true,
+      "yes": {
+        "n": 40,
+        "events": 40,
+        "weeks": 25,
+        "wins": 18,
+        "win_rate": 0.45,
+        "win_wilson95": [
+          0.3070530781090492,
+          0.6017090820106794
+        ],
+        "gross_wins": 21,
+        "net_r": -3.9154972564460158,
+        "gross_r": 19.108161570069296,
+        "mean_r": -0.09788743141115039,
+        "mean_bp": -1.521184740446398,
+        "median_bp": -10.986324403318047,
+        "random_wins": 11,
+        "random_net_r": -26.66676727618153,
+        "random_mean_bp": -22.848842921574622,
+        "excess_mean_bp": 21.32765818112822,
+        "median_risk_bp": 39.64659691735465,
+        "mean_fee_r": 0.5755914706628829,
+        "net_r_without_best": -7.416915663251824
+      },
+      "no": {
+        "n": 29,
+        "events": 29,
+        "weeks": 23,
+        "wins": 6,
+        "win_rate": 0.20689655172413793,
+        "win_wilson95": [
+          0.09846070197841039,
+          0.38390090403867905
+        ],
+        "gross_wins": 8,
+        "net_r": -29.72932866865463,
+        "gross_r": 3.3186714342268453,
+        "mean_r": -1.0251492644363667,
+        "mean_bp": -17.221279872591506,
+        "median_bp": -32.7174705793955,
+        "random_wins": 6,
+        "random_net_r": -30.640639108116694,
+        "random_mean_bp": -17.51227332623334,
+        "excess_mean_bp": 0.29099345364183404,
+        "median_risk_bp": 27.81694716223703,
+        "mean_fee_r": 1.1395862104441887,
+        "net_r_without_best": -35.668640041203695
+      },
+      "delta_win": 0.24310344827586208,
+      "bootstrap95": [
+        0.013542949507389174,
+        0.4643165024630544
+      ],
+      "fisher_p": 0.043715527341545074,
+      "adjusted_delta": 0.2410896759346805,
+      "wild_p": 0.05435,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "clean_level20",
+      "label": "此前20根实体未碰过同一关键位",
+      "primary": true,
+      "yes": {
+        "n": 57,
+        "events": 57,
+        "weeks": 36,
+        "wins": 19,
+        "win_rate": 0.3333333333333333,
+        "win_wilson95": [
+          0.2249380607515073,
+          0.4627748841994856
+        ],
+        "gross_wins": 23,
+        "net_r": -30.19304925286948,
+        "gross_r": 12.613843566984066,
+        "mean_r": -0.5297026184713943,
+        "mean_bp": -7.601216660684577,
+        "median_bp": -31.221382654787465,
+        "random_wins": 15,
+        "random_net_r": -40.61749408692921,
+        "random_mean_bp": -21.316197640484884,
+        "excess_mean_bp": 13.714980979800309,
+        "median_risk_bp": 35.72642941635675,
+        "mean_fee_r": 0.7509981196465533,
+        "net_r_without_best": -36.13236062541854
+      },
+      "no": {
+        "n": 12,
+        "events": 12,
+        "weeks": 11,
+        "wins": 5,
+        "win_rate": 0.4166666666666667,
+        "win_wilson95": [
+          0.19326031365875665,
+          0.6804886874504503
+        ],
+        "gross_wins": 6,
+        "net_r": -3.4517766722311674,
+        "gross_r": 9.812989437312076,
+        "mean_r": -0.28764805601926396,
+        "mean_bp": -10.582929688665724,
+        "median_bp": -19.227835883590338,
+        "random_wins": 2,
+        "random_net_r": -16.689912297369016,
+        "random_mean_bp": -17.232198151342768,
+        "excess_mean_bp": 6.649268462677043,
+        "median_risk_bp": 22.040789539824704,
+        "mean_fee_r": 1.10539717579527,
+        "net_r_without_best": -7.1951100055647235
+      },
+      "delta_win": -0.08333333333333337,
+      "bootstrap95": [
+        -0.4143116359447005,
+        0.2178023479252988
+      ],
+      "fisher_p": 0.7401648876624245,
+      "adjusted_delta": -0.09537732790302411,
+      "wild_p": 0.56505,
+      "inferable": true,
+      "holm_p": 1.0,
+      "fisher_holm_p": 1.0
+    },
+    {
+      "symbol": "ETH",
+      "cut": "risk_covers_fee",
+      "label": "初始止损距离至少0.2%",
+      "primary": false,
+      "yes": {
+        "n": 54,
+        "events": 54,
+        "weeks": 31,
+        "wins": 21,
+        "win_rate": 0.3888888888888889,
+        "win_wilson95": [
+          0.270419338291165,
+          0.5221170146179233
+        ],
+        "gross_wins": 26,
+        "net_r": -3.680470278495271,
+        "gross_r": 23.669622582338025,
+        "mean_r": -0.06815685700917168,
+        "mean_bp": -3.691857476595462,
+        "median_bp": -20.906338382920868,
+        "random_wins": 14,
+        "random_net_r": -30.203112876713966,
+        "random_mean_bp": -21.727205559047313,
+        "excess_mean_bp": 18.03534808245185,
+        "median_risk_bp": 40.05680809631731,
+        "mean_fee_r": 0.5064832011265425,
+        "net_r_without_best": -9.619781651044333
+      },
+      "no": {
+        "n": 15,
+        "events": 15,
+        "weeks": 12,
+        "wins": 3,
+        "win_rate": 0.2,
+        "win_wilson95": [
+          0.07047549346981563,
+          0.45185448715169363
+        ],
+        "gross_wins": 3,
+        "net_r": -29.964355646605373,
+        "gross_r": -1.2427895780418847,
+        "mean_r": -1.9976237097736915,
+        "mean_bp": -24.060280145790298,
+        "median_bp": -32.7174705793955,
+        "random_wins": 3,
+        "random_net_r": -27.104293507584266,
+        "random_mean_bp": -16.569369542346443,
+        "excess_mean_bp": -7.490910603443862,
+        "median_risk_bp": 14.656060493420656,
+        "mean_fee_r": 1.914771071237566,
+        "net_r_without_best": -33.70768897993893
+      },
+      "delta_win": 0.18888888888888888,
+      "bootstrap95": [
+        -0.015010400522065455,
+        0.41379792621171935
+      ],
+      "fisher_p": 0.22852178001527243,
+      "adjusted_delta": 0.11935662064250929,
+      "wild_p": 0.42835,
+      "inferable": true
+    }
+  ],
+  "baseline": [
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "all",
+      "n": 75,
+      "events": 74,
+      "weeks": 36,
+      "wins": 20,
+      "win_rate": 0.26666666666666666,
+      "win_wilson95": [
+        0.17976313631473848,
+        0.3763079901772376
+      ],
+      "gross_wins": 23,
+      "net_r": -83.3857737014733,
+      "gross_r": 19.340711249379687,
+      "mean_r": -1.111810316019644,
+      "mean_bp": -22.084735382481984,
+      "median_bp": -33.10626064163063,
+      "random_wins": 14,
+      "random_net_r": -84.6724351382125,
+      "random_mean_bp": -19.383097168637864,
+      "excess_mean_bp": -2.7016382138441166,
+      "median_risk_bp": 20.42093287827076,
+      "mean_fee_r": 1.369686466011373,
+      "net_r_without_best": -107.66445271381252
+    },
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "first_half",
+      "n": 28,
+      "events": 27,
+      "weeks": 14,
+      "wins": 6,
+      "win_rate": 0.21428571428571427,
+      "win_wilson95": [
+        0.1021246033289788,
+        0.3953858565372187
+      ],
+      "gross_wins": 7,
+      "net_r": -34.629641004818126,
+      "gross_r": -8.754864790639932,
+      "mean_r": -1.2367728930292188,
+      "mean_bp": -28.247441268263064,
+      "median_bp": -34.91789174589014,
+      "random_wins": 4,
+      "random_net_r": -23.225860196696697,
+      "random_mean_bp": -23.278687073430028,
+      "excess_mean_bp": -4.968754194833035,
+      "median_risk_bp": 29.34096425681316,
+      "mean_fee_r": 0.9240991505063642,
+      "net_r_without_best": -36.50244690162405
+    },
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "second_half",
+      "n": 47,
+      "events": 47,
+      "weeks": 22,
+      "wins": 14,
+      "win_rate": 0.2978723404255319,
+      "win_wilson95": [
+        0.18651250504604835,
+        0.4397767391904607
+      ],
+      "gross_wins": 16,
+      "net_r": -48.756132696655165,
+      "gross_r": 28.09557604001962,
+      "mean_r": -1.0373645254607482,
+      "mean_bp": -18.413336131378358,
+      "median_bp": -33.10626064163063,
+      "random_wins": 10,
+      "random_net_r": -61.44657494151579,
+      "random_mean_bp": -17.06232020408083,
+      "excess_mean_bp": -1.351015927297528,
+      "median_risk_bp": 19.781864841743996,
+      "mean_fee_r": 1.6351427390781865,
+      "net_r_without_best": -73.0348117089944
+    },
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "recent2m",
+      "n": 15,
+      "events": 15,
+      "weeks": 7,
+      "wins": 7,
+      "win_rate": 0.4666666666666667,
+      "win_wilson95": [
+        0.24809535365737387,
+        0.698830199745016
+      ],
+      "gross_wins": 8,
+      "net_r": 17.240313726768903,
+      "gross_r": 34.193713579334556,
+      "mean_r": 1.1493542484512602,
+      "mean_bp": -1.6603578091612547,
+      "median_bp": -11.799725876550731,
+      "random_wins": 5,
+      "random_net_r": -8.03275159601974,
+      "random_mean_bp": -10.905673434862765,
+      "excess_mean_bp": 9.245315625701513,
+      "median_risk_bp": 23.62083801565495,
+      "mean_fee_r": 1.1302266568377106,
+      "net_r_without_best": -7.038365285570322
+    },
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "long",
+      "n": 36,
+      "events": 36,
+      "weeks": 27,
+      "wins": 8,
+      "win_rate": 0.2222222222222222,
+      "win_wilson95": [
+        0.11716331975796462,
+        0.3808470294611818
+      ],
+      "gross_wins": 9,
+      "net_r": -46.092380510986565,
+      "gross_r": -9.01507334776584,
+      "mean_r": -1.2803439030829602,
+      "mean_bp": -26.374991801925507,
+      "median_bp": -33.378231596511895,
+      "random_wins": 4,
+      "random_net_r": -45.39722577243732,
+      "random_mean_bp": -26.910407542320723,
+      "excess_mean_bp": 0.5354157403952094,
+      "median_risk_bp": 20.261811455320547,
+      "mean_fee_r": 1.0299251989783536,
+      "net_r_without_best": -47.96518640779249
+    },
+    {
+      "symbol": "BTC",
+      "arm": "pivot",
+      "period": "short",
+      "n": 39,
+      "events": 38,
+      "weeks": 26,
+      "wins": 12,
+      "win_rate": 0.3076923076923077,
+      "win_wilson95": [
+        0.18565932306911137,
+        0.4642125437414931
+      ],
+      "gross_wins": 14,
+      "net_r": -37.29339319048671,
+      "gross_r": 28.355784597145522,
+      "mean_r": -0.9562408510381208,
+      "mean_bp": -18.124498687611037,
+      "median_bp": -29.59559488382564,
+      "random_wins": 10,
+      "random_net_r": -39.275209365775154,
+      "random_mean_bp": -12.434810669853691,
+      "excess_mean_bp": -5.68968801775734,
+      "median_risk_bp": 23.62083801565495,
+      "mean_fee_r": 1.6833122509649296,
+      "net_r_without_best": -61.572072202825936
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "all",
+      "n": 69,
+      "events": 69,
+      "weeks": 39,
+      "wins": 24,
+      "win_rate": 0.34782608695652173,
+      "win_wilson95": [
+        0.24618141928624354,
+        0.4655212245104244
+      ],
+      "gross_wins": 29,
+      "net_r": -33.64482592510063,
+      "gross_r": 22.42683300429614,
+      "mean_r": -0.4876061728275454,
+      "mean_bp": -8.119775448159558,
+      "median_bp": -29.00905106218036,
+      "random_wins": 17,
+      "random_net_r": -57.30740638429823,
+      "random_mean_bp": -20.605936859764515,
+      "excess_mean_bp": 12.486161411604956,
+      "median_risk_bp": 33.23783353751065,
+      "mean_fee_r": 0.8126327381071997,
+      "net_r_without_best": -39.5841372976497
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "first_half",
+      "n": 36,
+      "events": 36,
+      "weeks": 19,
+      "wins": 15,
+      "win_rate": 0.4166666666666667,
+      "win_wilson95": [
+        0.2714056205144606,
+        0.5779974842512834
+      ],
+      "gross_wins": 17,
+      "net_r": -3.1990545967251722,
+      "gross_r": 19.148238973552044,
+      "mean_r": -0.08886262768681034,
+      "mean_bp": 1.277643312170254,
+      "median_bp": -21.667957531658644,
+      "random_wins": 9,
+      "random_net_r": -19.335682849182522,
+      "random_mean_bp": -22.869689913730994,
+      "excess_mean_bp": 24.14733322590125,
+      "median_risk_bp": 33.48243359356941,
+      "mean_fee_r": 0.6207581547299226,
+      "net_r_without_best": -9.138365969274235
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "second_half",
+      "n": 33,
+      "events": 33,
+      "weeks": 20,
+      "wins": 9,
+      "win_rate": 0.2727272727272727,
+      "win_wilson95": [
+        0.1506744088542064,
+        0.44217559002872625
+      ],
+      "gross_wins": 12,
+      "net_r": -30.445771328375475,
+      "gross_r": 3.2785940307441,
+      "mean_r": -0.9225991311628932,
+      "mean_bp": -18.37150500488299,
+      "median_bp": -32.56627783669084,
+      "random_wins": 8,
+      "random_net_r": -37.97172353511571,
+      "random_mean_bp": -18.136388073619266,
+      "excess_mean_bp": -0.2351169312637263,
+      "median_risk_bp": 31.903310104529485,
+      "mean_fee_r": 1.0219504654278657,
+      "net_r_without_best": -34.18910466170903
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "recent2m",
+      "n": 15,
+      "events": 15,
+      "weeks": 7,
+      "wins": 5,
+      "win_rate": 0.3333333333333333,
+      "win_wilson95": [
+        0.1517632443971473,
+        0.5828645226148023
+      ],
+      "gross_wins": 6,
+      "net_r": -8.677194461453011,
+      "gross_r": 1.929528791802659,
+      "mean_r": -0.578479630763534,
+      "mean_bp": -9.21957897652881,
+      "median_bp": -22.431765389082724,
+      "random_wins": 5,
+      "random_net_r": -6.393389814317929,
+      "random_mean_bp": -2.9582903697723935,
+      "excess_mean_bp": -6.2612886067564135,
+      "median_risk_bp": 31.903310104529485,
+      "mean_fee_r": 0.707114883550378,
+      "net_r_without_best": -12.178612868258819
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "long",
+      "n": 44,
+      "events": 44,
+      "weeks": 30,
+      "wins": 13,
+      "win_rate": 0.29545454545454547,
+      "win_wilson95": [
+        0.1815552911850489,
+        0.44220200126160236
+      ],
+      "gross_wins": 16,
+      "net_r": -44.635312442884526,
+      "gross_r": -6.809895747066648,
+      "mean_r": -1.0144389191564664,
+      "mean_bp": -21.44357572718569,
+      "median_bp": -35.97412444920482,
+      "random_wins": 9,
+      "random_net_r": -44.24748499151671,
+      "random_mean_bp": -26.019444692350234,
+      "excess_mean_bp": 4.575868965164549,
+      "median_risk_bp": 32.471064840500034,
+      "mean_fee_r": 0.8596685612685883,
+      "net_r_without_best": -48.133822129918784
+    },
+    {
+      "symbol": "ETH",
+      "arm": "pivot",
+      "period": "short",
+      "n": 25,
+      "events": 25,
+      "weeks": 20,
+      "wins": 11,
+      "win_rate": 0.44,
+      "win_wilson95": [
+        0.26665638881067344,
+        0.6293266813020123
+      ],
+      "gross_wins": 13,
+      "net_r": 10.990486517783884,
+      "gross_r": 29.236728751362786,
+      "mean_r": 0.4396194607113554,
+      "mean_bp": 15.330113042926428,
+      "median_bp": -16.33903209301537,
+      "random_wins": 8,
+      "random_net_r": -13.059921392781522,
+      "random_mean_bp": -11.078163074413647,
+      "excess_mean_bp": 26.408276117340073,
+      "median_risk_bp": 33.70588329618448,
+      "mean_fee_r": 0.7298496893431561,
+      "net_r_without_best": 5.051175145234822
+    }
+  ],
+  "sources": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/pivot/trades.csv",
+      "bytes": 54816,
+      "mtime_ns": 1792567798310023858
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_1r/trades.csv",
+      "bytes": 31929,
+      "mtime_ns": 1792567798399970520
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_2r/trades.csv",
+      "bytes": 31871,
+      "mtime_ns": 1792567798476531190
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_3r/trades.csv",
+      "bytes": 31851,
+      "mtime_ns": 1792567798552055350
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_5r/trades.csv",
+      "bytes": 31771,
+      "mtime_ns": 1792567798628445477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/fixed_10r/trades.csv",
+      "bytes": 31805,
+      "mtime_ns": 1792567798700659109
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_1_3r/trades.csv",
+      "bytes": 31864,
+      "mtime_ns": 1792567798776401147
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/split_2_5r/trades.csv",
+      "bytes": 31964,
+      "mtime_ns": 1792567798850135375
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp/trades.csv",
+      "bytes": 32286,
+      "mtime_ns": 1792567798922441466
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_1r/trades.csv",
+      "bytes": 31184,
+      "mtime_ns": 1792567799000057853
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_2r/trades.csv",
+      "bytes": 31429,
+      "mtime_ns": 1792567799098848010
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_price_3r/trades.csv",
+      "bytes": 31591,
+      "mtime_ns": 1792567799174174502
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_1r/trades.csv",
+      "bytes": 32436,
+      "mtime_ns": 1792567799251689889
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_2r/trades.csv",
+      "bytes": 32187,
+      "mtime_ns": 1792567799327239508
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/be_cost_3r/trades.csv",
+      "bytes": 32000,
+      "mtime_ns": 1792567799412313085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/half_stop/trades.csv",
+      "bytes": 32822,
+      "mtime_ns": 1792567799497037744
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_stop/trades.csv",
+      "bytes": 32772,
+      "mtime_ns": 1792567799575461680
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/key_tp_stop/trades.csv",
+      "bytes": 33004,
+      "mtime_ns": 1792567799674997426
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/pivot/trades.csv",
+      "bytes": 49649,
+      "mtime_ns": 1792567799764600085
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_1r/trades.csv",
+      "bytes": 29196,
+      "mtime_ns": 1792567799851342552
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_2r/trades.csv",
+      "bytes": 29094,
+      "mtime_ns": 1792567799936108669
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_3r/trades.csv",
+      "bytes": 29036,
+      "mtime_ns": 1792567800020148112
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_5r/trades.csv",
+      "bytes": 28976,
+      "mtime_ns": 1792567800098572090
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/fixed_10r/trades.csv",
+      "bytes": 28942,
+      "mtime_ns": 1792567800168541286
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_1_3r/trades.csv",
+      "bytes": 29119,
+      "mtime_ns": 1792567800238353522
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/split_2_5r/trades.csv",
+      "bytes": 29173,
+      "mtime_ns": 1792567800309119766
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp/trades.csv",
+      "bytes": 29751,
+      "mtime_ns": 1792567800384547092
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_1r/trades.csv",
+      "bytes": 28267,
+      "mtime_ns": 1792567800457118310
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_2r/trades.csv",
+      "bytes": 28551,
+      "mtime_ns": 1792567800530376910
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_price_3r/trades.csv",
+      "bytes": 28764,
+      "mtime_ns": 1792567800610154233
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_1r/trades.csv",
+      "bytes": 29673,
+      "mtime_ns": 1792567800691830656
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_2r/trades.csv",
+      "bytes": 29351,
+      "mtime_ns": 1792567800774936716
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/be_cost_3r/trades.csv",
+      "bytes": 29160,
+      "mtime_ns": 1792567800852026391
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/half_stop/trades.csv",
+      "bytes": 30105,
+      "mtime_ns": 1792567800953037358
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_stop/trades.csv",
+      "bytes": 30037,
+      "mtime_ns": 1792567801034613447
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/key_tp_stop/trades.csv",
+      "bytes": 30273,
+      "mtime_ns": 1792567801111562828
+    }
+  ],
+  "prepared": {
+    "counts": {
+      "BTC": {
+        "signals": 75,
+        "events": 74,
+        "weeks": 36,
+        "duplicate_touch_events": 1,
+        "prefix_checks": 6,
+        "numeric_missing": 0,
+        "volume_available": false
+      },
+      "ETH": {
+        "signals": 69,
+        "events": 69,
+        "weeks": 39,
+        "duplicate_touch_events": 0,
+        "prefix_checks": 6,
+        "numeric_missing": 0,
+        "volume_available": false
+      }
+    },
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/signal_matches.csv",
+        "bytes": 12260,
+        "mtime_ns": 1792567765104765354
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/candidates.csv",
+        "bytes": 13704,
+        "mtime_ns": 1792567765105295817
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+        "bytes": 1558509,
+        "mtime_ns": 1792560804279783191
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/signal_matches.csv",
+        "bytes": 11261,
+        "mtime_ns": 1792567765260440298
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/ETH/candidates.csv",
+        "bytes": 12408,
+        "mtime_ns": 1792567765260897219
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 1453331,
+        "mtime_ns": 1792560819928804129
+      }
+    ],
+    "builder_commit": "0faa40f7f25f500687db5967bdb3d8146cc6d647"
+  },
+  "builder_commit": "0faa40f7f25f500687db5967bdb3d8146cc6d647",
+  "limitations": "Small selected observational cohort; known history, not untouched validation. Multiple cuts overlap and are not additive. Conditional random references inherit signal-selected groups, not random shape matching. Week independence and linear nuisance adjustment are approximations. No volume data, no post-entry predictor, no new trade rule."
+}
