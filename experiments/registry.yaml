@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-returns-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d85e051a7b
+    status: inconclusive
+    question: Does the owner-requested midpoint filter improve annual BTC and ETH returns under the same18 exit policies and20bp costs?
+    single_variable: V2.31 admission and its two causal BTC rematches; all exits and fees retained. Reuse142 unchanged signal/control pairs and replay2 with original matched control times after checking week-half-volatility buckets.
+    result: Pivot BTC131to75 netR-159.5831to-83.3858, win22.90to26.67percent, mean netbp-20.8636to-22.0847; ETH99to69 netR-67.7462to-33.6448, win31.31to34.78percent, meanbp-11.9035to-8.1198. New pivot matched random-84.6724R/-57.3074R. All36 coin-policy netR totals negative; BTC all equal-notional averages negative, ETH10 positive. ETH10R is-4.0717R and+31.8991meanbp versus random-69.9294R/-30.4482bp. No comparison passes corrected p<0.01. BTC overall loss reduction is mainly fewer losing trades; ETH per-trade performance improves but current pivot remains negative.
+    artifacts:
+    - range-v231-returns-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-returns-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: No new data or Pine changes. Native2pivot policies plus17fixed-staged-BE delta arms;92fixed legs pass existing C++ price-time oracle.108old summary rows reproduce,27focused tests. Stop-first and pivot-tie sensitivity retained. Independent R and equal-notional returns are distinct; no account return, funding, slippage or untouched validation claim. Reproduce python -m yoyo.evaluation.range_v231_returns; completed summary is reused. No report requested.
   - experiment_id: exp-range-v231-midpoint-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6dde2abf50

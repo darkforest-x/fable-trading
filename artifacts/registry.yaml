@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-returns-20261021-v1
+    artifact_type: manifest
+    role: V2.31 midpoint admission return comparison with cached independent paths and native rematch deltas
+    source_repo: darkforest-x/fable-trading
+    source_commit: d85e051a7b
+    generator_commit: d85e051a7b
+    source_path: experiments/active/exp-range-v231-returns-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-returns-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Summary, preparation, verification and raw combined ledgers retained. Only2BTC rematches and their controls rerun,142pairs reused; all execution inputs asserted.18policies, BTC75ETH69, same original20bp costs; current pivot still negative. No content hashes or new report. Fixed-risk R and equal-notional bp both retained, with matched random and chronological halves.
   - artifact_id: range-v231-midpoint-20261021-v1
     artifact_type: manifest
     role: V2.31 inclusive midpoint filter annual BTC and ETH admissions and conformance counts
