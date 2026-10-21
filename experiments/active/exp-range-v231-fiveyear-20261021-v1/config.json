@@ -20,6 +20,7 @@
        "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
      ]},
     {"symbol": "ETH", "tick": 0.01, "seed_offset": 1,
+     "known_revision_window": ["2022-12-18T02:00:00Z", "2022-12-18T11:00:00Z"],
      "inputs": [
        "data/research/spike_v1210_eth15m_5y_20261012/okx_ETH_USDT_SWAP_1m_2672597.csv",
        "data/research/spike_v1_okx_30m_5y_20261013/okx_api_ETH_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
@@ -31,7 +32,7 @@
   "stop": "Exact touch candle extreme; no buffer. Preserve original first-match consumption and positive one-tick minimum risk.",
   "exit": "Existing Nautilus 15m2/2 first profitable pivot confirmed two bars later; market exit at confirmation close, initial stop has priority. No forced day/year exits. Strict-tie sensitivity retained.",
   "controls": "Same coin, side, UTC week, chronological half and ATR14/close bucket; NY Tue-Fri, without replacement, exclude arrows and real entries. Copy relative stop risk and round outward. Reuse unchanged annual controls after identity checks.",
-  "data": "Existing OKX official monthly1m archives plus known confirmed API tails. Only missing archive minutes requested from OKX history API, confirmed only, exact known-neighbour overlap required; no synthetic fill or data hashes.",
+  "data": "Existing OKX official monthly1m archives plus known confirmed API tails. Only missing archive minutes requested from OKX history API, confirmed only; no synthetic fill or data hashes. Preserve known archive OHLC. Explicit bounded ETH2022-12-18 API revisions require unchanged admissions/control buckets under alternate API prices and no trade exposure through revision or pivot confirmation window; all other overlap must match exactly.",
   "analysis": "Overall, five chronological anniversary-year entry cohorts, long/short and all eight key groups. Net-positive wins after20bp, paired random results, weekly-block inference, descriptive Wilson intervals; no fitting or point selection.",
   "training_eligible": false,
   "production_eligible": false

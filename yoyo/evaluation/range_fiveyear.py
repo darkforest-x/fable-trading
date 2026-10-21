@@ -5,7 +5,9 @@ five pre-arrow bodies, +/-2 touch bars and the admitted midpoint-side gate.
 No sweep, MTF, future-body gate, parameter search or new exit engine.
 Reuse native annual paths only after full overlapping OHLC/entry identity
 checks. Download only absent archive minutes from the same official OKX API;
-verify adjacent overlap and never synthesize missing candles.
+verify adjacent overlap and never synthesize missing candles. A bounded,
+explicitly listed archive/API revision is retained for admission/control
+sensitivity; known archive rows are never silently overwritten.
 """
 from __future__ import annotations
 
@@ -50,7 +52,7 @@ def load_minutes(cfg, spec, folder):
     if len(missing)>100:
         raise ValueError(f'Unexpected large data gap: {len(missing)} minutes')
     original_missing = missing.copy()
-    pages, patches = [], []
+    pages, patches, revisions = [], [], []
     while len(missing):
         # The 100-bar page includes both missing bars and known neighbours.
         at = int(missing[-1]); end = at + 10*60000
@@ -67,16 +69,26 @@ def load_minutes(cfg, spec, folder):
         overlap = fetched.merge(frame,on='ts',suffixes=('_api','_archive'),validate='one_to_one')
         if overlap.empty:
             raise ValueError('Gap page has no known neighbours for verification')
-        np.testing.assert_array_equal(overlap[[k+'_api' for k in OHLC]],
-                                      overlap[[k+'_archive' for k in OHLC]])
+        if not target.exists():
+            dump(target,payload)
+        changed=np.any(overlap[[k+'_api' for k in OHLC]].to_numpy()!=
+                       overlap[[k+'_archive' for k in OHLC]].to_numpy(),axis=1)
+        different=overlap[changed].copy()
+        if len(different):
+            bounds=spec.get('known_revision_window')
+            if bounds is None:
+                raise ValueError('Unexpected official archive/API conflict')
+            low,high=[pd.Timestamp(x).value//1_000_000 for x in bounds]
+            if not different.ts.between(low,high,inclusive='left').all():
+                raise ValueError('Official revision outside the bounded audit window')
+            revisions.append(different)
         patch = fetched[fetched.ts.isin(missing)]
         if patch.empty:
             raise ValueError('Official API cannot recover archive gap')
-        if not target.exists():
-            dump(target,payload)
         patches.append(patch)
         pages.append(dict(url=url,path=str(target.relative_to(ROOT)),
-                          recovered=len(patch),matching_neighbours=len(overlap)))
+                          recovered=len(patch),matching_neighbours=len(overlap)-len(different),
+                          revised_neighbours=len(different)))
         frame = merge_minutes([frame,patch])
         missing = np.setdiff1d(expected,frame.ts.to_numpy())
     np.testing.assert_array_equal(frame.ts,expected)
@@ -87,9 +99,11 @@ def load_minutes(cfg, spec, folder):
         raise ValueError('Invalid minute OHLC range')
     if patches:
         pd.concat(patches).sort_values('ts').to_csv(folder/'inputs/gap_minutes.csv',index=False)
+    if revisions:
+        pd.concat(revisions).drop_duplicates('ts').sort_values('ts').to_csv(folder/'inputs/overlap_revisions.csv',index=False)
     frame.index=pd.DatetimeIndex(pd.to_datetime(frame.pop('ts'),unit='ms',utc=True)).as_unit('ns')
     return frame,dict(minute_rows=len(frame),missing_archive_minutes=len(original_missing),
-                     remaining_missing=0,pages=pages,
+                     remaining_missing=0,pages=pages,overlap_revisions=sum(len(x) for x in revisions),
                      sources=[file_stamp(ROOT/p) for p in spec['inputs']])
 
 
@@ -114,6 +128,15 @@ def prepare(cfg,spec,dest):
         return saved
     minutes,quality=load_minutes(cfg,spec,folder)
     five=minute_aggregate(minutes,5)
+    alternate=None
+    if quality['overlap_revisions']:
+        revision=pd.read_csv(folder/'inputs/overlap_revisions.csv',float_precision='round_trip')
+        revision.index=pd.to_datetime(revision.ts,unit='ms',utc=True)
+        buckets=revision.index.floor('5min').unique()
+        affected=minutes[minutes.index.floor('5min').isin(buckets)].copy()
+        affected.loc[revision.index,OHLC]=revision[[k+'_api' for k in OHLC]].to_numpy()
+        alternate=five.copy();updated=minute_aggregate(affected,5)
+        alternate.loc[updated.index,OHLC]=updated[OHLC]
     del minutes
     q=aggregate(five,15)
     assert (five.index.to_series().diff().dropna()==pd.Timedelta(minutes=5)).all()
@@ -154,6 +177,16 @@ def prepare(cfg,spec,dest):
     matched.update(additional)
     assert len(set(matched.values()))==len(records)
     candidates=candidate_rows(five,q,records,matched,(half,week,bucket),spec['tick'])
+    if alternate is not None:
+        from yoyo.evaluation.monday_range_v2_2_reference import atr
+        aq=aggregate(alternate,15)
+        ag,an,aw,_=monday_levels(aq,cfg['ratios'],cfg['timezone'])
+        arows=exact_stops(select_matches(aq,signals(aq).to_numpy(),ag,an,aw,**kwargs),aq,spec['tick'],cfg['end'])
+        assert arows==rows, 'Official revision changes admitted signals'
+        abucket=np.digitize(atr(aq,14).to_numpy()/aq.close.to_numpy(),cfg['volatility_edges'])
+        used=[r['entry_i'] for r in records]+list(matched.values())
+        np.testing.assert_array_equal(abucket[used],bucket[used])
+        quality['revision_admission_and_control_bucket_parity']=True
     # Preserve each cached annual random price/risk exactly, not a rerounded copy.
     for row in prior_candidates.itertuples():
         pid=old_to_new[row.pair_id]
@@ -215,6 +248,12 @@ def combine(cfg,spec,dest,meta):
             np.testing.assert_allclose(actual[col],expected[col],rtol=0,atol=1e-8)
         np.testing.assert_allclose(rows.gross_r-rows.fee_r,rows.net_r,rtol=0,atol=1e-8)
         np.testing.assert_allclose(rows.fee_r,cfg['round_trip_cost']*rows.entry/rows.risk,rtol=0,atol=1e-7)
+        if spec.get('known_revision_window'):
+            lo,hi=map(pd.Timestamp,spec['known_revision_window'])
+            # Include two future15m bars to cover pivot confirmation influence.
+            hit=(pd.to_datetime(rows.entry_time,utc=True)<hi+pd.Timedelta(minutes=30))&(
+                pd.to_datetime(rows.exit_time,utc=True)>=lo)
+            assert not hit.any(), 'Trade path crosses ambiguous official revision; requires sensitivity replay'
         rows.to_csv(folder/name,index=False)
 
 
@@ -291,10 +330,13 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config',type=Path,default=CONFIG)
     parser.add_argument('--prepare-only',action='store_true')
+    parser.add_argument('--symbol',choices=['BTC','ETH'])
     args=parser.parse_args();cfg=json.loads(args.config.read_text());dest=args.config.parent
     if subprocess.run(['git','diff','--quiet','HEAD','--',*CODE,str(args.config)],cwd=ROOT).returncode:
         raise RuntimeError('Commit builder/config before generation')
     for spec in cfg['symbols']:
+        if args.symbol and args.symbol!=spec['symbol']:
+            continue
         meta=prepare(cfg,spec,dest)
         if not args.prepare_only:
             run(dest/spec['symbol']/'native.json')
