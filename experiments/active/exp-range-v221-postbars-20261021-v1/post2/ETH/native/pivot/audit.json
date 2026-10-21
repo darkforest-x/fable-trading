@@ -1,0 +1,32 @@
+{
+  "engine": "nautilus_trader",
+  "version": "1.231.0",
+  "market_tick": 0.01,
+  "protection_tick": 0.01,
+  "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+  "partial_execution": "disabled",
+  "native_partial_accounting_checked": 0,
+  "fixed_target_execution": "disabled",
+  "native_fixed_target_accounting_checked": 0,
+  "target_from_entry": false,
+  "breakeven_includes_cost": true,
+  "positions": 180,
+  "fills": 360,
+  "execution_minutes": 5,
+  "rsi_scaleout": "disabled",
+  "rsi_skip_events": 0,
+  "timed_be_minutes": null,
+  "confirmed_pivot_exit": true,
+  "structural_pivot_stop": false,
+  "structural_execution": "disabled",
+  "pivot_execution": "15m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme",
+  "strict_pivot_ties": false,
+  "max_simultaneous_positions": 3,
+  "bars_with_both_directions": 26,
+  "prepare_seconds": 0.12750795799365733,
+  "replay_seconds": 1.4306877500057453,
+  "runtime_warnings": [
+    "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+  ],
+  "accounting": "independent original-risk R; frozen account; not portfolio returns"
+}

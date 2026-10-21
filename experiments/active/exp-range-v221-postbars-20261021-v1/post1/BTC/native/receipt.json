@@ -1,0 +1,304 @@
+{
+  "identity": {
+    "config": {
+      "schema": 1,
+      "experiment_id": "exp-range-v221-postbars-20261021-v1",
+      "engine": "nautilus",
+      "symbol": "BTC",
+      "tick": 0.1,
+      "market_tick": 0.1,
+      "entry_mode": "provided",
+      "data": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+      "entry_candidates": "experiments/active/exp-range-v221-postbars-20261021-v1/post1/BTC/candidates.csv",
+      "stop_window_5m": 1,
+      "buffer_percent": 0,
+      "maximum_risk_percent": 0,
+      "round_trip_cost": 0.002,
+      "policies": [
+        {
+          "name": "pivot",
+          "confirmed_pivot_exit": true,
+          "opposite_hour_exit": false
+        },
+        {
+          "name": "strict_ties",
+          "confirmed_pivot_exit": true,
+          "strict_pivot_ties": true,
+          "opposite_hour_exit": false
+        }
+      ],
+      "output": "experiments/active/exp-range-v221-postbars-20261021-v1/post1/BTC/native"
+    },
+    "runtime": {
+      "nautilus_trader": "1.231.0",
+      "pandas": "3.0.5",
+      "numpy": "2.5.3"
+    },
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+        "bytes": 37725,
+        "mtime_ns": 1792572129388199680
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+        "bytes": 13665,
+        "mtime_ns": 1792560739568948587
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+        "bytes": 17722,
+        "mtime_ns": 1792479018859194613
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+        "bytes": 9348,
+        "mtime_ns": 1792467583097764831
+      }
+    ],
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+        "bytes": 1558509,
+        "mtime_ns": 1792560804279783191
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v221-postbars-20261021-v1/post1/BTC/candidates.csv",
+        "bytes": 21846,
+        "mtime_ns": 1792593761571561908
+      }
+    ],
+    "goldens": []
+  },
+  "source_commit": "fe03bd3482ac67386647beaa79335ec3a919a114",
+  "generated_at": "2026-10-21T14:42:54.393854+00:00",
+  "data_rows": 110880,
+  "data_first_close": "2025-09-30 16:05:00+00:00",
+  "data_last_close": "2026-10-20 16:00:00+00:00",
+  "feature_cache_hit": false,
+  "management_minutes": 15,
+  "elapsed_seconds": 3.820275000005495,
+  "results": [
+    {
+      "name": "pivot",
+      "summary": [
+        {
+          "segment": -1,
+          "population": "signal",
+          "n": 116,
+          "net_r": -58.091308520971246,
+          "gross_r": -5.537049877028425,
+          "win_rate": 0.2672413793103448,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -278.2175052409391
+        },
+        {
+          "segment": -1,
+          "population": "random",
+          "n": 116,
+          "net_r": -67.78652150752566,
+          "gross_r": -15.241942401121658,
+          "win_rate": 0.23275862068965517,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -329.69212131649033
+        },
+        {
+          "segment": 0,
+          "population": "signal",
+          "n": 50,
+          "net_r": -27.14195560696561,
+          "gross_r": -6.905283915550069,
+          "win_rate": 0.28,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -150.09109395871354
+        },
+        {
+          "segment": 0,
+          "population": "random",
+          "n": 50,
+          "net_r": -33.13019790539365,
+          "gross_r": -12.896397177085706,
+          "win_rate": 0.2,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -180.15715844810904
+        },
+        {
+          "segment": 1,
+          "population": "signal",
+          "n": 66,
+          "net_r": -30.949352914005647,
+          "gross_r": 1.3682340385216438,
+          "win_rate": 0.25757575757575757,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -128.12641128222555
+        },
+        {
+          "segment": 1,
+          "population": "random",
+          "n": 66,
+          "net_r": -34.656323602132005,
+          "gross_r": -2.345545224035949,
+          "win_rate": 0.25757575757575757,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -149.53496286838123
+        }
+      ],
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "disabled",
+        "native_fixed_target_accounting_checked": 0,
+        "target_from_entry": false,
+        "breakeven_includes_cost": true,
+        "positions": 232,
+        "fills": 464,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": true,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "15m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 3,
+        "bars_with_both_directions": 48,
+        "prepare_seconds": 0.13755091599887237,
+        "replay_seconds": 1.5160986669943668,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      }
+    },
+    {
+      "name": "strict_ties",
+      "summary": [
+        {
+          "segment": -1,
+          "population": "signal",
+          "n": 116,
+          "net_r": -56.49915301940925,
+          "gross_r": -3.9448943754664305,
+          "win_rate": 0.27586206896551724,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -272.54302518512213
+        },
+        {
+          "segment": -1,
+          "population": "random",
+          "n": 116,
+          "net_r": -66.254869377463,
+          "gross_r": -13.710290271058998,
+          "win_rate": 0.2413793103448276,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -324.2863801185629
+        },
+        {
+          "segment": 0,
+          "population": "signal",
+          "n": 50,
+          "net_r": -27.14195560696561,
+          "gross_r": -6.905283915550069,
+          "win_rate": 0.28,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -150.09109395871354
+        },
+        {
+          "segment": 0,
+          "population": "random",
+          "n": 50,
+          "net_r": -33.19236092474028,
+          "gross_r": -12.958560196432334,
+          "win_rate": 0.2,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -180.43191260621873
+        },
+        {
+          "segment": 1,
+          "population": "signal",
+          "n": 66,
+          "net_r": -29.357197412443647,
+          "gross_r": 2.9603895400836397,
+          "win_rate": 0.2727272727272727,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -122.45193122640858
+        },
+        {
+          "segment": 1,
+          "population": "random",
+          "n": 66,
+          "net_r": -33.062508452722724,
+          "gross_r": -0.7517300746266635,
+          "win_rate": 0.2727272727272727,
+          "gross_10r": 0,
+          "gross_20r": 0,
+          "boundary_marks": 0,
+          "constant_1000_notional_pnl": -143.85446751234412
+        }
+      ],
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "disabled",
+        "native_fixed_target_accounting_checked": 0,
+        "target_from_entry": false,
+        "breakeven_includes_cost": true,
+        "positions": 232,
+        "fills": 464,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": true,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "15m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme",
+        "strict_pivot_ties": true,
+        "max_simultaneous_positions": 3,
+        "bars_with_both_directions": 48,
+        "prepare_seconds": 0.16461529101070482,
+        "replay_seconds": 1.549754124993342,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      }
+    }
+  ],
+  "production_eligible": false,
+  "training_eligible": false,
+  "limitations": "Historical independent entry returns, not funded-account returns. Frozen 20bp entry-notional cost; no funding, latency, spread or capacity model. Engineering parity only; not a new profitability validation."
+}

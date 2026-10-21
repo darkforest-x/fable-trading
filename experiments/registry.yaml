@@ -12410,3 +12410,18 @@ experiments:
       entry; only first touches. 91 tests and independent raw-slice replay of 5946 signals, 17835 outcomes, 112782
       control pairs pass; max error 1.14e-12bp. No model/ranking, so AUC/class/top-decile metrics not applicable.
       Reproduction command in config.json. Notion https://app.notion.com/p/3fb8856479af819b9facfcb02b6db533 .
+  - experiment_id: exp-range-v221-postbars-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fe03bd3482
+    status: rejected
+    question: Does removing V2.21's two-bar post-arrow confirmation (post0/post1 versus post2) make the confirmed-pivot exit profitable on BTC/ETH annual candles?
+    single_variable: Only the V2.21 reference matcher `after` (Pine 勾叉后收盘确认) varies over its Pine options 0/1/2. Pre5 bodies, 10percent wick, key rules, 0.2percent stop buffer, Tue-Fri entry, pivot exit, 20bp cost and control definition unchanged.
+    result: All six netR totals negative. BTC post0/post1/post2 n137/116/98 net-65.85/-58.09/-47.08R, mean net-22.3/-24.0/-26.5bp, random-38.8/-67.8/-49.2R. ETH n107/97/90 net-32.62/-31.98/-33.51R, mean net-14.8/-21.7/-20.9bp, random-61.2/-20.2/-24.8R. On shared arrows post2 enters a median10.1bp(0.21R) BTC and18.7bp(0.27R) ETH worse than post0; post1 4.3/8.6bp. Earlier entry improves mean bp a few bp but admits extra signals and narrower stops, so gross stays near0 and fees0.3-0.5R/trade dominate. Best excess ETH post0+28.5R p0.040 Holm0.12, still net negative; BTC post0 underperforms random by27.0R. No variant passes corrected p<0.01; post2 default not changed.
+    artifacts:
+    - range-v221-postbars-20261021-v1
+    canonical_report: experiments/active/exp-range-v221-postbars-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Execution via the NautilusTrader 1.231.0 range_framework runner (scripts/backtest-range); builder fe03bd3482 committed before generation. post2 candidates, control times and pivot ledger reproduce exp-range-v221-compare v221_original exactly (asserted). ETH post0 drops3 post2 arrows whose earlier entry close fails the weekday/risk gates. Per-variant matched controls from the shared seed. Strict-tie sensitivity within1.6R. 95 focused tests pass. One known year, no unseen validation; no Pine/live/model/dependency change.
