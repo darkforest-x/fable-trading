@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v221-compare-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3b696cccda
+    status: inconclusive
+    question: How do V2.21 default admission and stops compare with V2.30 under the same annual BTC/ETH candles and approved exit policies?
+    single_variable: Owner-requested version comparison preserves historical defaults, with an exact-wick V2.21 bridge isolating stop width on identical entries and control times. Reuse17 approved exits plus causal pivot; no retuning.
+    result: V2.21 BTC98 ETH90 versus V2.30 BTC131 ETH99. All108 version/coin/exit annual cumulative netR sums are negative. Original V2.21 best R is BTC pivot-47.0786R versus random-49.2101R and ETH2R-22.6417R versus random-43.6300R. Exact-wick bridge best BTC pivot-89.1605R and ETH5R-16.5967R. Equal-notional weighting changes interpretation; ETH10R mean netbp original-5.2418, bridge+5.2804, V2.30+17.8487 versus random-46.7546,-27.7895,-31.7950 respectively. V2.30 ETH5R with3R fee-cover BE also has a small positive+0.2815bp average versus random-31.3364bp. No R or notional comparison passes corrected p<0.01. Version superiority is inconclusive and position-sizing dependent; no default promoted.
+    artifacts:
+    - range-v221-compare-20261021-v1
+    canonical_report: experiments/active/exp-range-v221-compare-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Native runs reuse prior annual candles. V2.21 waits post2 body-clear closes, retains0.2percent stop buffer and allows long extension keys above Monday high. Bridge changes only stops,98/90 admissions unchanged. Same-week half volatility control times shared within original/bridge. Common arrows BTC93 ETH80, current earlier72/69 and median30minutes. Previously accepted ETH17 overlaps match exactly.142 focused tests including weighting-sign fixture pass.76new native runs18800positions37600fills; all17296 fixed/staged/BE legs audited by existing price/time oracle,1504pivot positions checked by native accounting. V2.30 executions reused without rerun. Builder3b696cccda precedes executions; derived-weighting builder14777f8a88 precedes weighting.json. Full-year maxima are descriptive, not unseen validation. Prior all-negative statement refers to equal-risk R, not all sizing methods. No Pine/live/model/dependency change.
   - experiment_id: exp-range-v230-exits-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 473203b3c4

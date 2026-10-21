@@ -1,0 +1,62 @@
+{
+  "admission_builder_commit": "3b696cccda",
+  "weighting_builder_commit": "14777f8a88",
+  "commands": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -u -m yoyo.evaluation.range_v221_compare",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_v221_weighting"
+  ],
+  "tests_passed": 142,
+  "test_commands": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_range_v221_compare.py tests/evaluation/test_monday_range_v2_21.py tests/evaluation/test_monday_range_v2_24.py tests/evaluation/test_range_v230_exit_compare.py tests/evaluation/test_nautilus_pivot.py tests/boundaries/test_layer_imports.py",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_range_v221_weighting.py"
+  ],
+  "new_native_runs": 76,
+  "native_positions": 18800,
+  "native_fills": 37600,
+  "fixed_staged_be_oracle_parity": 17296,
+  "causal_prefix_checks": {
+    "BTC": 14,
+    "ETH": 14
+  },
+  "previous_ETH_17_signal_overlap": "Exact signal/touch/entry time, side, key, price and stop parity within common date bounds",
+  "stop_bridge": "All non-stop candidate fields identical between original and bridge, including each random-control time; no invalid exact-wick risks",
+  "prior_executions": "V2.30 cached exit and pivot results reused; no rerun",
+  "positive_equal_notional": [
+    {
+      "variant": "v221_wick",
+      "symbol": "ETH",
+      "arm": "fixed_10r",
+      "mean_net_bp": 5.28039892218694,
+      "random_mean_net_bp": -27.789498421525796,
+      "bp_excess_p": 0.22048897555122243,
+      "bp_excess_holm_p": 1.0
+    },
+    {
+      "variant": "v230",
+      "symbol": "ETH",
+      "arm": "fixed_10r",
+      "mean_net_bp": 17.848725019512674,
+      "random_mean_net_bp": -31.79503455059622,
+      "bp_excess_p": 0.01504924753762312,
+      "bp_excess_holm_p": 0.7374131293435329
+    },
+    {
+      "variant": "v230",
+      "symbol": "ETH",
+      "arm": "be_cost_3r",
+      "mean_net_bp": 0.2814699721971956,
+      "random_mean_net_bp": -31.336404333284868,
+      "bp_excess_p": 0.022098895055247238,
+      "bp_excess_holm_p": 1.0
+    }
+  ],
+  "result": "All108 equal-original-risk annual totals negative. Equal-notional means are positive for three ETH cells: exact-wick V2.21 10R, V2.30 10R, and V2.30 5R with3R fee-cover BE. No corrected matched-control significance at p<0.01. No overall superior version established.",
+  "registry_validation": "New unique experiment/artifact rows pass schema and link; known pre-existing unrelated global missing-source_commit issue unchanged",
+  "limitations": [
+    "Independent opportunities, not account returns",
+    "No funding/depth/latency simulation",
+    "Yearly rankings descriptive; no untouched selection or promoted preset"
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

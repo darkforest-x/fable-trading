@@ -1,0 +1,443 @@
+{
+  "identity": {
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 1453331,
+        "mtime_ns": 1792560819928804129
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v221-compare-20261021-v1/v221_wick/ETH/candidates.csv",
+        "bytes": 16578,
+        "mtime_ns": 1792562656652859298
+      }
+    ],
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_exit_compare.py",
+        "bytes": 13226,
+        "mtime_ns": 1792561880904840772
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+        "bytes": 34882,
+        "mtime_ns": 1792561426653286088
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_breakeven.py",
+        "bytes": 14693,
+        "mtime_ns": 1792503466110711990
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_be_native.cpp",
+        "bytes": 5467,
+        "mtime_ns": 1792503466110324198
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/btc_range_wick_fanshen.py",
+        "bytes": 24375,
+        "mtime_ns": 1792516503642491535
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+        "bytes": 9348,
+        "mtime_ns": 1792467583097764831
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+        "bytes": 17722,
+        "mtime_ns": 1792479018859194613
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_management_study.py",
+        "bytes": 10731,
+        "mtime_ns": 1792488870307794373
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+        "bytes": 13665,
+        "mtime_ns": 1792560739568948587
+      }
+    ],
+    "config": {
+      "experiment_id": "exp-range-v221-compare-20261021-v1",
+      "source": "experiments/active/exp-range-v221-compare-20261021-v1/v221_wick",
+      "start": "2025-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "round_trip_cost": 0.002,
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "seed": 20261021,
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "expected_signals": 131
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "expected_signals": 99
+        }
+      ],
+      "arms": [
+        {
+          "name": "fixed_1r",
+          "target_r": 1
+        },
+        {
+          "name": "fixed_2r",
+          "target_r": 2
+        },
+        {
+          "name": "fixed_3r",
+          "target_r": 3
+        },
+        {
+          "name": "fixed_5r",
+          "target_r": 5
+        },
+        {
+          "name": "fixed_10r",
+          "target_r": 10
+        },
+        {
+          "name": "split_1_3r",
+          "split_r": [
+            1,
+            3
+          ]
+        },
+        {
+          "name": "split_2_5r",
+          "split_r": [
+            2,
+            5
+          ]
+        },
+        {
+          "name": "key_tp",
+          "key_tp": true
+        },
+        {
+          "name": "be_price_1r",
+          "target_r": 5,
+          "be_r": 1,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_price_2r",
+          "target_r": 5,
+          "be_r": 2,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_price_3r",
+          "target_r": 5,
+          "be_r": 3,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_cost_1r",
+          "target_r": 5,
+          "be_r": 1,
+          "be_mode": "cost"
+        },
+        {
+          "name": "be_cost_2r",
+          "target_r": 5,
+          "be_r": 2,
+          "be_mode": "cost"
+        },
+        {
+          "name": "be_cost_3r",
+          "target_r": 5,
+          "be_r": 3,
+          "be_mode": "cost"
+        },
+        {
+          "name": "half_stop",
+          "target_r": 5,
+          "stop_mode": "half_r"
+        },
+        {
+          "name": "key_stop",
+          "target_r": 5,
+          "stop_mode": "key"
+        },
+        {
+          "name": "key_tp_stop",
+          "key_tp": true,
+          "stop_mode": "key"
+        }
+      ],
+      "owner_approval": "2026-10-21 owner explicitly approved all fixed/split/BE tiers and both staged-stop variants.",
+      "tranche_semantics": "Two halves of ORIGINAL size. Leg1 has first target and early stop when specified; leg2 has second target and original wick stop. Either exit of leg1 consumes that original half, never reduces the remaining half again.",
+      "key_snapshot": "Monday endpoints and configured bidirectional Fib levels known at entry close; nearest two favorable unique tick prices. Missing target leaves that half protected by stop until study boundary. Nearest adverse key strictly between entry and original stop is optional early half stop; absent means original stop.",
+      "be_clock": "Completed5m close reaches1/2/3 original R; modification effective next bar; price BE leaves fees, cost BE covers20bp if no gap. A cost-cover stop cannot be installed beyond current price and is deferred until feasible.",
+      "comparison": "Same frozen entries and matched controls. Fixed5R is the baseline for BE and staged stops. Key_tp_stop adds only staged key stop to key_tp. Full-year comparisons are descriptive; half-year cohorts are not untouched validation and no defaults are promoted.",
+      "execution": "Native independent hedging bracket orders with existing O-H-L-C and independent-limit fill model. Existing C++ kernel audits price/time and provides stop-first same-bar sensitivity. No new execution engine.",
+      "training_eligible": false,
+      "production_eligible": false,
+      "variant": "v221_wick",
+      "admission_code": [
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_exit_compare.py",
+          "bytes": 13226,
+          "mtime_ns": 1792561880904840772
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+          "bytes": 34882,
+          "mtime_ns": 1792561426653286088
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_breakeven.py",
+          "bytes": 14693,
+          "mtime_ns": 1792503466110711990
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_be_native.cpp",
+          "bytes": 5467,
+          "mtime_ns": 1792503466110324198
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/btc_range_wick_fanshen.py",
+          "bytes": 24375,
+          "mtime_ns": 1792516503642491535
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+          "bytes": 9348,
+          "mtime_ns": 1792467583097764831
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+          "bytes": 17722,
+          "mtime_ns": 1792479018859194613
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_management_study.py",
+          "bytes": 10731,
+          "mtime_ns": 1792488870307794373
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+          "bytes": 13665,
+          "mtime_ns": 1792560739568948587
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v221_compare.py",
+          "bytes": 10748,
+          "mtime_ns": 1792562517111072199
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_21_reference.py",
+          "bytes": 4803,
+          "mtime_ns": 1792547834636967818
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_pivot_study.py",
+          "bytes": 10853,
+          "mtime_ns": 1792560652361643435
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pine/monday_range_v2_21.pine",
+          "bytes": 88818,
+          "mtime_ns": 1792547756196724051
+        }
+      ]
+    }
+  },
+  "audit": {
+    "engine": "nautilus_trader",
+    "version": "1.231.0",
+    "market_tick": 0.01,
+    "protection_tick": 0.01,
+    "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+    "partial_execution": "disabled",
+    "native_partial_accounting_checked": 0,
+    "fixed_target_execution": "resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup",
+    "native_fixed_target_accounting_checked": 360,
+    "target_from_entry": true,
+    "breakeven_includes_cost": true,
+    "positions": 360,
+    "fills": 720,
+    "execution_minutes": 5,
+    "rsi_scaleout": "disabled",
+    "rsi_skip_events": 0,
+    "timed_be_minutes": null,
+    "confirmed_pivot_exit": false,
+    "pivot_execution": "disabled",
+    "strict_pivot_ties": false,
+    "max_simultaneous_positions": 6,
+    "bars_with_both_directions": 667,
+    "prepare_seconds": 0.14697687499574386,
+    "replay_seconds": 1.8136136660032207,
+    "runtime_warnings": [
+      "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+    ],
+    "accounting": "independent original-risk R; frozen account; not portfolio returns"
+  },
+  "oracle": {
+    "checked": 360,
+    "native_price_time_parity": true,
+    "conservative_changed": 2
+  },
+  "summary": [
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "group": "all",
+      "n": 90,
+      "wins": 29,
+      "win_rate": 0.32222222222222224,
+      "gross_r": 24.000000000001048,
+      "fee_r": 52.59670946923776,
+      "net_r": -28.596709469236707,
+      "pf": 0.6706825260913539,
+      "mean_net_bp": -4.286923441998409,
+      "random_net_r": -66.01907011227365,
+      "conservative_net_r": -33.09670946923667,
+      "random_conservative_net_r": -66.01907011227354,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -28.596709469236707,
+      "missing_target_n": 0,
+      "ambiguous_legs": 2,
+      "be_effective_n": 0,
+      "weeks": 40,
+      "excess_r": 37.422360643036946,
+      "p_one_sided": 0.08994550272486376,
+      "weekly_bootstrap_total_r_95ci": [
+        -12.029583820703003,
+        91.33121134806282
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "group": "long",
+      "n": 58,
+      "wins": 16,
+      "win_rate": 0.27586206896551724,
+      "gross_r": 5.000000000000371,
+      "fee_r": 33.11171766870728,
+      "net_r": -28.11171766870691,
+      "pf": 0.5386017936176332,
+      "mean_net_bp": -16.867327418231874,
+      "random_net_r": -44.55309792539621,
+      "conservative_net_r": -32.61171766870683,
+      "random_conservative_net_r": -44.55309792539597,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -28.11171766870691,
+      "missing_target_n": 0,
+      "ambiguous_legs": 2,
+      "be_effective_n": 0,
+      "weeks": 36,
+      "excess_r": 16.4413802566893,
+      "p_one_sided": 0.18669066546672666,
+      "weekly_bootstrap_total_r_95ci": [
+        -15.031053821471117,
+        47.97476212255384
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "group": "short",
+      "n": 32,
+      "wins": 13,
+      "win_rate": 0.40625,
+      "gross_r": 19.00000000000068,
+      "fee_r": 19.48499180053048,
+      "net_r": -0.48499180052980506,
+      "pf": 0.9812809951092986,
+      "mean_net_bp": 18.51505876492474,
+      "random_net_r": -21.465972186877455,
+      "conservative_net_r": -0.48499180052984503,
+      "random_conservative_net_r": -21.46597218687758,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -0.48499180052980506,
+      "missing_target_n": 0,
+      "ambiguous_legs": 0,
+      "be_effective_n": 0,
+      "weeks": 24,
+      "excess_r": 20.980980386347653,
+      "p_one_sided": 0.11459427028648568,
+      "weekly_bootstrap_total_r_95ci": [
+        -9.032028941090687,
+        50.985891287766826
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "group": "first_half",
+      "n": 46,
+      "wins": 15,
+      "win_rate": 0.32608695652173914,
+      "gross_r": 10.999999999999666,
+      "fee_r": 20.401568508206754,
+      "net_r": -9.401568508207088,
+      "pf": 0.7625225618412775,
+      "mean_net_bp": 4.338170536084669,
+      "random_net_r": -31.859672848592115,
+      "conservative_net_r": -13.901568508207049,
+      "random_conservative_net_r": -31.85967284859209,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -9.401568508207088,
+      "missing_target_n": 0,
+      "ambiguous_legs": 2,
+      "be_effective_n": 0,
+      "weeks": 20,
+      "excess_r": 22.45810434038503,
+      "p_one_sided": 0.16584170791460426,
+      "weekly_bootstrap_total_r_95ci": [
+        -16.543226593000096,
+        64.42064880631847
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "split_2_5r",
+      "group": "second_half",
+      "n": 44,
+      "wins": 14,
+      "win_rate": 0.3181818181818182,
+      "gross_r": 13.000000000001382,
+      "fee_r": 32.19514096103101,
+      "net_r": -19.195140961029626,
+      "pf": 0.5937276890953215,
+      "mean_net_bp": -13.304067146358,
+      "random_net_r": -34.15939726368155,
+      "conservative_net_r": -19.195140961029633,
+      "random_conservative_net_r": -34.15939726368146,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -19.195140961029626,
+      "missing_target_n": 0,
+      "ambiguous_legs": 0,
+      "be_effective_n": 0,
+      "weeks": 20,
+      "excess_r": 14.96425630265192,
+      "p_one_sided": 0.20013999300034999,
+      "weekly_bootstrap_total_r_95ci": [
+        -16.533363551561212,
+        44.96834930796757
+      ]
+    }
+  ],
+  "source_commit": "3b696cccdafef26751118a10473fd425fb366942"
+}

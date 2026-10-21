@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v221-compare-20261021-v1
+    artifact_type: manifest
+    role: Historical V2.21 default and exact-wick bridge versus V2.30 annual native executions and weighting comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 3b696cccda
+    generator_commit: 3b696cccda
+    source_path: experiments/active/exp-range-v221-compare-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v221-compare-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Config/preparation/native receipts/summary/weighting/run metadata retained; raw signals, controls, leg orders/fills and outcomes local. Reuses original annual candles and V2.30 executions. No content hashes. Original98BTC90ETH entries; same entries for exact-wick bridge. Native18800positions37600fills,142tests. Weighting14777f8a88 is read-only aggregation, not a second execution. All R totals negative; equal-notional ETH10R bridge andV2.30 positive averages remain unvalidated against corrected matched-control tests. Independent opportunities with synthetic liquidity; no funding/depth/latency/account-portfolio model.
   - artifact_id: range-v230-exits-20261021-v1
     artifact_type: manifest
     role: V2.30 annual fixed staged and breakeven native exit comparison
