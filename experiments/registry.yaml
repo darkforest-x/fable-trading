@@ -14,6 +14,36 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-v231-key90m-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9e37decb72
+    status: inconclusive
+    question: Does nearest-key50percent realization plus90minute maximum holding improve the recent BTC15m cohort?
+    single_variable: First add90minute entry-relative cap with original stop; then add nearest known favorable Monday/Fib half target. Frozen15signals and15controls, exact stops and20bp costs.
+    result: Cap-only6of15netwins40percent,+14.0966R versus random-6.4668R,mean-0.8343bp. Key-half plus cap6wins,+6.4909R versus random-11.0550R,mean-9.1963bp. Original15mpivot+17.2403R. Both exclude-largest totals negative; no corrected significance. Five signals hit partial key target; seven scheduled cap exits and one incomplete final position marked at data end.
+    artifacts:
+    - btc-v231-key90m-20261021-v1
+    canonical_report: experiments/active/exp-btc-v231-key90m-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Existing native half-position execution and aggregation reused;90native positions180fills,all90price-time paths match existing C++oracle,stop-first changes0.18focused tests.2026-08-21to2026-10-21Shanghai,independentR not account return;funding/spread/depth absent. No Pine/default change or report. Reproduce isolated Nautilus Python -m yoyo.evaluation.range_key_time_exit.
+  - experiment_id: exp-btc-v231-exit5m-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 069f8ae129
+    status: inconclusive
+    question: Can5m exits retain more profit while current15m BTC entries remain frozen?
+    single_variable: Change15m first-profitable-pivot exit to5m; separately change5m first-pivot market exit to confirmed opposite-pivot stop ratchet. Same15recent signals,15controls,exact stops and20bp costs.
+    result: Original7wins+17.2403R versus random-8.0328R.5mpivot3wins-11.6865R versus random-15.7268R;11exits earlier.5mstructural stop5wins+14.4916R versus random-1.8400R,mean+1.2371bp;7exits later,2earlier. Largest trade+19.0349R,other14negative-4.5432R. One final data-boundary mark+2.3762R; no corrected significance.
+    artifacts:
+    - btc-v231-exit5m-20261021-v1
+    canonical_report: experiments/active/exp-btc-v231-exit5m-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: 36focused tests;120native positions240fills and128confirmed amendments verified against rawOHLC;strict ties preserve signal totals but random structural result differs. Newstop only tightens at confirmation,post-entry centers only,next-bar effectiveness;noprofit gate. Baseline30cached paths reused, no data download. IndependentR and equalnotionalbp distinct;no Pine/default change or report. Reproduce isolated Nautilus Python -m yoyo.evaluation.range_exit5m.
   - experiment_id: exp-range-v231-recent2m-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 8da3a2b794

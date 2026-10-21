@@ -18,6 +18,30 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-v231-key90m-20261021-v1
+    artifact_type: manifest
+    role: Frozen-entry BTC nearest-key half realization and90minute time-cap native comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9e37decb72
+    generator_commit: 9e37decb72
+    source_path: experiments/active/exp-btc-v231-key90m-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-btc-v231-key90m-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Two completed arms;rawlegs,native trades,fills,aggregated parenttrades,stopfirst sensitivity and audits retained beside summary.90nativelegs pass existingoracle;all15signals and15controls unchanged. One final sample-boundary residue separately identified. No account-performance or maximum-profit claim.
+  - artifact_id: btc-v231-exit5m-20261021-v1
+    artifact_type: manifest
+    role: Recent BTC15m entries with5m pivot versus structural-stop native exits
+    source_repo: darkforest-x/fable-trading
+    source_commit: 069f8ae129
+    generator_commit: 069f8ae129
+    source_path: experiments/active/exp-btc-v231-exit5m-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-btc-v231-exit5m-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes:15signals plus15matchedcontrols,4newnative arms including tie sensitivities;original15mpivot cache reused. Rawconfirmedstopamendments and actualfills retained.36tests and120nativepathchecks;30inputidentitychecks. Existingentrykeys andPine untouched;knownsample notindependentvalidation.
   - artifact_id: btc-recent-winners-20261021
     artifact_type: manifest
     role: Seven requested net-profitable recent BTC15m trades with actual entry and exit annotations
