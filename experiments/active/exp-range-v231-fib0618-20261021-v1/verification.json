@@ -15,5 +15,14 @@
   ],
   "source_commit": "454d61d2221b383d6d2ee627b250562e6287aca3",
   "limitation": "No live Pine change. Old75/69 admitted rows reproduce. Entry whitelist leaves full grid for key exits. Small historical sample; no promotion.",
-  "recovery": "First one-pair fixed1R serialization failed on an empty subgroup. Preserved incomplete folder; skip empty groups and regression-test, then rerun the incomplete arm. Native pivot cache reused."
+  "recovery": "First one-pair fixed1R serialization failed on an empty subgroup. Preserved incomplete folder; skip empty groups and regression-test, then rerun the incomplete arm. Native pivot cache reused.",
+  "registry_validation": {
+    "new_records": "pass",
+    "global_tests": {
+      "passed": 12,
+      "failed": 4
+    },
+    "baseline_commit": "2e66a13e36",
+    "existing_failures": "Old2026-09-14 artifact and experiment rows have missing source_commit; confirmed already present before this task. No historical metadata invented."
+  }
 }
