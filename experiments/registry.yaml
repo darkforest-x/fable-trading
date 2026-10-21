@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-midpoint-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6dde2abf50
+    status: accepted
+    question: Apply owner-requested inclusive midpoint-side eligibility to current wick signals without changing other admission or display rules.
+    single_variable: Matched touch key price must be at or above Monday midpoint for shorts and at or below it for longs; use touch snapshot before candidate selection.
+    result: Same annual inputs reproduce V2.30 BTC131 ETH99 exactly. V2.31 BTC75 (36long39short), ETH69 (44long25short); removes56BTC30ETH arrows, adds0, rematches2 retainedBTC arrows.85focused tests and54annual prefix checks pass. Admission verification only; no new profitability result.
+    artifacts:
+    - range-v231-midpoint-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-midpoint-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Reuse frozen2025-10-21to2026-10-21Shanghai OHLC, no download or exit rerun. Exact touch-extreme stop and earliest eligible close unchanged. Reproduce with isolated Nautilus Python -m yoyo.evaluation.range_v231_midpoint into a new output directory. Source committed before generation; prior Pine versions preserved. No outcome metrics or random-return control apply to this rule-conformance count; unchanged V2.30 identities are the baseline.
   - experiment_id: exp-range-v221-compare-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 3b696cccda
