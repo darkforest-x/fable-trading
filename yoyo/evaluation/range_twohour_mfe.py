@@ -13,7 +13,6 @@ import subprocess
 import numpy as np
 import pandas as pd
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp
-from yoyo.evaluation.btc_range_wick_review import excursions
 
 DEST = ROOT/'experiments/active/exp-range-v231-2h-mfe-20261022-v1'
 
@@ -45,7 +44,22 @@ def load(cfg,spec):
     base['trade_id']=base.entry_id
     base['risk']=base.side*(base.entry-base.stop)
     base['source_end_i']=base.end_i
-    base['end_i']=np.minimum(base.entry_i+cfg['hold_minutes']//5,base.source_end_i)
+    base['end_i']=base.entry_i+cfg['hold_minutes']//5
+    if base.end_i.max() >= len(frame):
+        # Preserve frozen entries; reuse the registered confirmed minute tail
+        # solely for the last entry's complete outcome horizon.
+        from yoyo.evaluation.monday_range_v2_2_reference import aggregate
+        original=json.loads((source.parent/'config.json').read_text())
+        tail_spec=next(s for s in original['symbols'] if s['symbol']==spec['symbol'])
+        minute=read(ROOT/tail_spec['inputs'][-1])
+        minute.index=pd.DatetimeIndex(pd.to_datetime(minute.ts,unit='ms',utc=True)).as_unit('ns')
+        tail=aggregate(minute[['open','high','low','close']],5)
+        overlap=frame.index.intersection(tail.index)
+        pd.testing.assert_frame_equal(frame.loc[overlap],tail.loc[overlap],check_freq=False,check_names=False)
+        required=frame.index[base.entry_i.max()]+pd.Timedelta(minutes=cfg['hold_minutes'])
+        frame=pd.concat([frame,tail[(tail.index>frame.index[-1])&(tail.index<=required)]])
+    assert base.end_i.max()<len(frame), 'Missing complete two-hour outcome horizon'
+    assert frame.index.to_series().diff().dropna().eq(pd.Timedelta(minutes=5)).all()
     assert (base.end_i-base.entry_i).eq(24).all(), 'Incomplete two-hour windows require explicit handling'
     assert len(base)==2*spec['n'] and base.entry_id.is_unique
     assert base.population.eq('signal').sum()==base.population.eq('random').sum()==spec['n']
@@ -78,6 +92,7 @@ def mix_ledgers(elementary,schedule):
 
 
 def run_symbol(cfg,spec):
+    from yoyo.evaluation.btc_range_wick_review import excursions
     from yoyo.evaluation.range_v230_exit_compare import make_legs,aggregate_legs,oracle,CODE
     from yoyo.evaluation.pepe_range_breakeven import native
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy,run_native
@@ -85,6 +100,10 @@ def run_symbol(cfg,spec):
     source,frame,base=load(cfg,spec)
     identity=dict(config=cfg,inputs=[file_stamp(source/p) for p in ['candles.csv.gz','candidates.csv']],
                   code=[file_stamp(ROOT/p) for p in [*CODE,'yoyo/evaluation/range_twohour_mfe.py']])
+    if base.end_i.max()>base.source_end_i.max():
+        original=json.loads((source.parent/'config.json').read_text())
+        original_spec=next(s for s in original['symbols'] if s['symbol']==spec['symbol'])
+        identity['inputs'].append(file_stamp(ROOT/original_spec['inputs'][-1]))
     if (folder/'receipt.json').exists():
         assert json.loads((folder/'receipt.json').read_text())['identity']==identity
         print(spec['symbol']+': reuse completed native output',flush=True)
