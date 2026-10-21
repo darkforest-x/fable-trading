@@ -72,7 +72,7 @@ def prepare():
             assert wick>0 and .1-1e-8<=depth/wick<=1
             assert b.low<=m.level<bodylo if side==1 else bodyhi<m.level<=b.high
             assert t.stop==(b.low if side==1 else b.high)
-            assert t.reason==1 and t.exit_price==t.stop and abs(t.gross_r+1)<1e-8
+            assert t.reason==1 and abs(t.exit_price-t.stop)<spec['tick']*1e-6 and abs(t.gross_r+1)<1e-8
             assert old.loc[t.pair_id,'exit_i']==t.exit_i and abs(old.loc[t.pair_id,'gross_r']+1)<1e-8
             assert abs(t.target_price-(t.entry+side*t.risk))<spec['tick']*1.01
             lo=max(0,min(min(i,j)-20,len(q)-60));hi=lo+60
