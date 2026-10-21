@@ -213,7 +213,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
             ax.scatter([entry_x], [r['entry']], s=32, marker='v' if side == -1 else '^',
                        color=col, edgecolors='black', linewidths=.5, zorder=10)
             named.append(ax.annotate('入场', xy=(entry_x,r['entry']),
-                xytext=(max(2,ei-9),r['entry']-side*span*.13), fontsize=12, color=col,
+                xytext=(max(2,ei-(14 if r.get('separate_entry_callout') else 9)),r['entry']-side*span*.13), fontsize=12, color=col,
                 ha='center', va='center', bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color=col,lw=.85,shrinkA=7,shrinkB=8),zorder=11))
             named.append(ax.annotate(f"出场  {ex['price']:,.1f}",xy=(exit_x,ex['price']),

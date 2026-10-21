@@ -99,7 +99,7 @@ def prepare():
             wick=float(wick), depth=float(depth), penetration=float(depth/wick),
             bars_before=i-lo, bars_after=hi-i-1,
             mtf_arrow_time=pd.Timestamp(g.arrow_close).tz_convert('Asia/Shanghai').isoformat(),
-            review_group='扫20根＋多周期 · 1.618', prior20=prior20,
+            review_group='扫20根＋多周期 · 1.618', prior20=prior20, separate_entry_callout=True,
             candles=[dict(index=k, time=opened[k].tz_convert('Asia/Shanghai').isoformat(),
                 ny_day=int(opened[k].tz_convert(cfg['timezone']).dayofweek), arrow=int(arrows[k]),
                 **{c: float(q.iloc[k][c]) for c in ['open', 'high', 'low', 'close']}) for k in range(lo, hi)],
@@ -143,7 +143,7 @@ def render():
             with Image.open(DEST / row['file']) as im:
                 assert im.size == (2880, 1620)
                 contact.paste(im.resize((800, 450), Image.Resampling.LANCZOS), ((offset%2)*800, 70+(offset//2)*492))
-            caption = f"#{r['number']:02d}  {stamp(r['entry_time'])}  {'多' if r['side']==1 else '空'}  净 {r['exit']['net_r']:+.2f}R"
+            caption = f"#{r['number']:02d}  {stamp(r['entry_time'], '%Y-%m-%d %H:%M')}  {'多' if r['side']==1 else '空'}  净 {r['exit']['net_r']:+.2f}R"
             ink.text(((offset%2)*800+22, 70+(offset//2)*492+451), caption, font=font,
                      fill='#36C9A3' if r['exit']['net_r'] > 0 else '#F36C7A')
         name = f'overview_{start//8+1:02d}.jpg'
