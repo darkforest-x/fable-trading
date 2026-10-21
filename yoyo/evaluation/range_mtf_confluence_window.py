@@ -35,6 +35,31 @@ def window_gate(admission):
     return allowed
 
 
+def verify_completed():
+    """Audit restored winners and both historical definitions as one test family."""
+    cfg=json.loads(CONFIG.read_text());dest=CONFIG.parent;old=ROOT/cfg['previous']
+    current=json.loads((dest/'summary.json').read_text());prior=json.loads((old/'summary.json').read_text())
+    family=[dict(definition=label,symbol=r['symbol'],wild_p=r['wild_p'])
+        for label,summary in [('strict_same_close',prior),('paired_arrow_window',current)]
+        for r in summary['primary_tests']]
+    for row,p in zip(family,holm([r['wild_p'] for r in family])):row['holm_four']=float(p)
+    checks=[]
+    for coin in ['BTC','ETH']:
+        g=read(dest/f'{coin}_admission.csv')
+        before=read(old/coin/'admission.csv')
+        pd.testing.assert_frame_equal(g[before.columns],before)
+        rows=read(ROOT/prior['config']['source']/coin/'pivot/trades.csv')
+        s=rows[rows.population=='signal'].set_index('pair_id')
+        recent=pd.to_datetime(g.entry_time,utc=True)>=pd.Timestamp(cfg['recent_start'])
+        r=g[recent];kept=r.loc[r.window_both,'pair_id'];removed=r.loc[~r.window_both,'pair_id']
+        checks.append(dict(symbol=coin,recent_kept_wins=int((s.loc[kept,'net_r']>1e-9).sum()),
+            recent_removed_wins=int((s.loc[removed,'net_r']>1e-9).sum()),
+            recent_removed_net_r=float(s.loc[removed,'net_r'].sum())))
+    dump(dest/'verification.json',dict(unchanged_admission_fields=True,new_executions=0,
+        family_sensitivity=family,recent_checks=checks,
+        explanation='Both definitions were inspected on the same known history. Holm4 is a conservative sensitivity across both coins and definitions, not independent validation.'))
+
+
 def main():
     cfg=json.loads(CONFIG.read_text());dest=CONFIG.parent
     if (dest/'summary.json').exists():
