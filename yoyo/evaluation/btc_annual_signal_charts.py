@@ -9,7 +9,7 @@ Post-entry candles and recorded exits are review context, never entry features.
 Each price axis is local. PDF files only collect the same requested PNG images.
 
 Preparation uses the existing Nautilus environment; rendering uses .venv with
-Matplotlib/Pillow/ReportLab. This keeps research dependencies unchanged.
+Matplotlib, and PDF packing uses bundled ReportLab. Dependencies are unchanged.
 """
 from __future__ import annotations
 
@@ -150,7 +150,6 @@ def render(limit=0):
     import matplotlib.pyplot as plt
     from matplotlib import font_manager, ticker
     from matplotlib.patches import Rectangle
-    from reportlab.pdfgen import canvas
     from datetime import datetime
 
     payload = json.loads((DEST / "chart_data.json").read_text())
@@ -261,7 +260,7 @@ def render(limit=0):
             fig.text(.065, .077, "止损按该版本原参数；图中后续K线只供复盘", fontsize=8.4, color="#848B95")
         fig.text(.065, .052, f"周一 {r['monday_date']}  高 {r['monday_high']:,.1f} / 低 {r['monday_low']:,.1f}",
                  fontsize=8.2, color="#737A85")
-        fig.text(.065, .025, "原始OHLC重绘 · 非TradingView截图 · 局部纵轴 · 灰色勾叉仅为原始信号背景",
+        fig.text(.065, .025, "原始OHLC重绘 · 非TradingView截图 · 局部纵轴 · 淡色勾叉仅为原始信号背景",
                  fontsize=7.3, color="#606772")
         name = f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}.png"
         path = folder / name
@@ -272,27 +271,41 @@ def render(limit=0):
         if len(output) % 25 == 0:
             print(f"Rendered {len(output)} / {len(payload['charts'])}", flush=True)
     if not limit:
-        for version, count in payload["signal_counts"].items():
-            selected = [r for r in output if r["version"] == version]
-            assert len(selected) == count
-            pdf = canvas.Canvas(str(DEST / f"BTC_{version}_all_{count}_signals.pdf"), pagesize=(432, 720))
-            pdf.setTitle(f"BTCUSDT.P {version} - {count} annual signal close-ups")
-            with zipfile.ZipFile(DEST / f"BTC_{version}_{count}_PNG.zip", "w", zipfile.ZIP_DEFLATED) as archive:
-                for r in selected:
-                    image = DEST / r["file"]
-                    pdf.bookmarkPage(str(r["number"]))
-                    pdf.addOutlineEntry(f"{r['number']:03d}  {stamp(r['signal_time'], '%Y-%m-%d %H:%M')}", str(r["number"]))
-                    pdf.drawImage(str(image), 0, 0, width=432, height=720)
-                    pdf.showPage()
-                    archive.write(image, image.name)
-            pdf.save()
+        assert len(output) == sum(payload["signal_counts"].values())
         (DEST / "manifest.json").write_text(json.dumps(output, ensure_ascii=False, indent=2))
     print(f"Completed {len(output)} images: {DEST}", flush=True)
 
 
+def pack():
+    """Collect the exact rendered PNGs, one unchanged image per PDF page."""
+    from reportlab.pdfgen import canvas
+    payload = json.loads((DEST / "chart_data.json").read_text())
+    output = json.loads((DEST / "manifest.json").read_text())
+    for version, count in payload["signal_counts"].items():
+        selected = [r for r in output if r["version"] == version]
+        assert len(selected) == count
+        pdf = canvas.Canvas(str(DEST / f"BTC_{version}_all_{count}_signals.pdf"), pagesize=(432, 720))
+        pdf.setTitle(f"BTCUSDT.P {version} - {count} annual signal close-ups")
+        with zipfile.ZipFile(DEST / f"BTC_{version}_{count}_PNG.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+            for r in selected:
+                image = DEST / r["file"]
+                pdf.bookmarkPage(str(r["number"]))
+                pdf.addOutlineEntry(f"{r['number']:03d}  {stamp(r['signal_time'], '%Y-%m-%d %H:%M')}", str(r["number"]))
+                pdf.drawImage(str(image), 0, 0, width=432, height=720)
+                pdf.showPage()
+                archive.write(image, image.name)
+        pdf.save()
+        print(f"Packed {version}: {count} pages", flush=True)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "render"))
+    parser.add_argument("mode", choices=("prepare", "render", "pack"))
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
-    prepare() if args.mode == "prepare" else render(args.limit)
+    if args.mode == "prepare":
+        prepare()
+    elif args.mode == "render":
+        render(args.limit)
+    else:
+        pack()
