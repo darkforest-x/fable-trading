@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-2h-mfe-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 43e531d7eb
+    status: rejected
+    question: What maximum floating R is available within120minutes, and do static scale-outs improve original V2.31 outcomes?
+    single_variable: Owner-authorized exit-family comparison;remove pivot exit,retain initial wick SL,cap at120minutes;18predeclared fixed/partial schedules plus no-TP baseline;entry/cost/control unchanged.
+    result: BTC485/ETH385 conservative MFE medians0.8252/0.8164R,means1.5825/1.5854R. Native1R reach44.9485/45.1948percent;5R reach6.8041/7.7922percent. All19full-period exit policies remain netnegative. No-TP2h netR-549.1573/-243.9585 versus matchedrandom-563.3957/-376.1129. Best retrospective partial BTC2R25percent+5R75percent net-564.2221R;ETH2R25percent+5R25percent+10R50percent net-271.5566R. First-three-year choices remain negative in later-two-year evaluation.
+    artifacts: [range-v231-2h-mfe-20261022-v1]
+    canonical_report: experiments/active/exp-range-v231-2h-mfe-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Nautilus1.231.0 executes10440independent target/deadline positions and20880fills;existingC++oracle matchesallprice/time paths,stop-first sensitivity retained.5focused tests include native3tranches,long/short,deadline andMFEbounds. Static fractions combine original-risk native legs with proportional costs,noBE. All870signals have full120minute horizons;lastBTCusesregisteredconfirmedminute tail withoverlapparity. ETHrevisionhorizon exposurezero. Histograms distinguish pre-SL MFE from full2h ignoringSL. No data downloads,Pine,productionoraccountchanges. Necessary raw native ledgers and PNGs remainlocal;compact elementary results,MFE,summary and reproduction tracked.
   - experiment_id: exp-range-v231-fixed1r-fiveyear-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4ba694b7ae

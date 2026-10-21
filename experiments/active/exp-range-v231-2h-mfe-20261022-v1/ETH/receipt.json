@@ -1,0 +1,385 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-2h-mfe-20261022-v1",
+      "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+      "start": "2021-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "selection_end": "2024-10-21T00:00:00+08:00",
+      "hold_minutes": 120,
+      "round_trip_cost": 0.002,
+      "seed": 20261022,
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "n": 485
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "n": 385
+        }
+      ],
+      "targets": [
+        1,
+        2,
+        3,
+        5,
+        10
+      ],
+      "two_leg_targets": [
+        [
+          1,
+          3
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "two_leg_weights": [
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.75,
+          0.25
+        ]
+      ],
+      "three_leg_targets": [
+        [
+          1,
+          3,
+          5
+        ],
+        [
+          2,
+          5,
+          10
+        ]
+      ],
+      "three_leg_weights": [
+        [
+          0.25,
+          0.25,
+          0.5
+        ],
+        [
+          0.3333333333333333,
+          0.3333333333333333,
+          0.3333333333333333
+        ],
+        [
+          0.5,
+          0.25,
+          0.25
+        ]
+      ],
+      "five_leg_targets": [
+        1,
+        2,
+        3,
+        5,
+        10
+      ],
+      "five_leg_weights": [
+        0.2,
+        0.2,
+        0.2,
+        0.2,
+        0.2
+      ],
+      "selection": "Select by mean net R on first three years, evaluate same frozen choice on later two years. Also report equal-notional bp and matched controls. Previously exposed history, not unseen OOS.",
+      "owner_request": "Remove local-pivot exit; analyze maximum floating R over a two-hour holding period and compare tranche count/fractions using the framework.",
+      "execution": "Original unfiltered V2.31 entries and exact-wick initial stops. Exit remaining size at entry close plus120minutes. No breakeven. Nautilus1.231.0 native HEDGING, resting limits/stops, O-H-L-C; existing C++ stop-first sensitivity. Static tranche outcomes are weighted native target legs, validated against direct native three-leg execution.",
+      "mfe": "Subsequent5m OHLC through first initial stop or120minutes. Conservative MFE excludes first stop-touch candle; upper bound includes it. Separately show full120minute extrema ignoring stops, explicitly non-tradable after SL.",
+      "training_eligible": false,
+      "production_eligible": false
+    },
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 6996506,
+        "mtime_ns": 1792578597423742102
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candidates.csv",
+        "bytes": 72144,
+        "mtime_ns": 1792578597432384463
+      }
+    ],
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_exit_compare.py",
+        "bytes": 13370,
+        "mtime_ns": 1792569148891020322
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+        "bytes": 43045,
+        "mtime_ns": 1792596096129398843
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_breakeven.py",
+        "bytes": 14693,
+        "mtime_ns": 1792503466110711990
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_be_native.cpp",
+        "bytes": 5467,
+        "mtime_ns": 1792503466110324198
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/btc_range_wick_fanshen.py",
+        "bytes": 24642,
+        "mtime_ns": 1792568073841704631
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+        "bytes": 9348,
+        "mtime_ns": 1792467583097764831
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+        "bytes": 17722,
+        "mtime_ns": 1792479018859194613
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_management_study.py",
+        "bytes": 10731,
+        "mtime_ns": 1792488870307794373
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+        "bytes": 14322,
+        "mtime_ns": 1792596096129676094
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_twohour_mfe.py",
+        "bytes": 16623,
+        "mtime_ns": 1792602537454259499
+      }
+    ]
+  },
+  "audit": {
+    "engine": "nautilus_trader",
+    "version": "1.231.0",
+    "market_tick": 0.01,
+    "protection_tick": 0.01,
+    "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+    "partial_execution": "disabled",
+    "native_partial_accounting_checked": 0,
+    "fixed_target_execution": "resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup",
+    "native_fixed_target_accounting_checked": 4620,
+    "target_from_entry": true,
+    "breakeven_includes_cost": true,
+    "positions": 4620,
+    "fills": 9240,
+    "execution_minutes": 5,
+    "rsi_scaleout": "disabled",
+    "rsi_skip_events": 0,
+    "timed_be_minutes": null,
+    "confirmed_pivot_exit": false,
+    "structural_pivot_stop": false,
+    "structural_execution": "disabled",
+    "pivot_execution": "disabled",
+    "strict_pivot_ties": false,
+    "max_simultaneous_positions": 14,
+    "bars_with_both_directions": 76,
+    "prepare_seconds": 0.9101543330034474,
+    "replay_seconds": 16.952331041989964,
+    "runtime_warnings": [
+      "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+    ],
+    "accounting": "independent original-risk R; frozen account; not portfolio returns"
+  },
+  "oracle": {
+    "checked": 4620,
+    "native_price_time_parity": true,
+    "conservative_changed": 13
+  },
+  "native_mfe_lower_bound_parity": true,
+  "all_horizons_120_minutes": true,
+  "revision_horizon_exposure": 0,
+  "source_commit": "98918e0ea6c8c8d07a66b21adf302c540d628f10",
+  "loader_equivalence_revalidation": {
+    "reason": "BTC-only tail extension and delayed import; ETH full OHLC source and all entry/stop/deadline fields unchanged; native adapter and oracle unchanged",
+    "original_identity": {
+      "config": {
+        "experiment_id": "exp-range-v231-2h-mfe-20261022-v1",
+        "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+        "start": "2021-10-21T00:00:00+08:00",
+        "end": "2026-10-21T00:00:00+08:00",
+        "selection_end": "2024-10-21T00:00:00+08:00",
+        "hold_minutes": 120,
+        "round_trip_cost": 0.002,
+        "seed": 20261022,
+        "symbols": [
+          {
+            "symbol": "BTC",
+            "tick": 0.1,
+            "n": 485
+          },
+          {
+            "symbol": "ETH",
+            "tick": 0.01,
+            "n": 385
+          }
+        ],
+        "targets": [
+          1,
+          2,
+          3,
+          5,
+          10
+        ],
+        "two_leg_targets": [
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            5
+          ]
+        ],
+        "two_leg_weights": [
+          [
+            0.25,
+            0.75
+          ],
+          [
+            0.5,
+            0.5
+          ],
+          [
+            0.75,
+            0.25
+          ]
+        ],
+        "three_leg_targets": [
+          [
+            1,
+            3,
+            5
+          ],
+          [
+            2,
+            5,
+            10
+          ]
+        ],
+        "three_leg_weights": [
+          [
+            0.25,
+            0.25,
+            0.5
+          ],
+          [
+            0.3333333333333333,
+            0.3333333333333333,
+            0.3333333333333333
+          ],
+          [
+            0.5,
+            0.25,
+            0.25
+          ]
+        ],
+        "five_leg_targets": [
+          1,
+          2,
+          3,
+          5,
+          10
+        ],
+        "five_leg_weights": [
+          0.2,
+          0.2,
+          0.2,
+          0.2,
+          0.2
+        ],
+        "selection": "Select by mean net R on first three years, evaluate same frozen choice on later two years. Also report equal-notional bp and matched controls. Previously exposed history, not unseen OOS.",
+        "owner_request": "Remove local-pivot exit; analyze maximum floating R over a two-hour holding period and compare tranche count/fractions using the framework.",
+        "execution": "Original unfiltered V2.31 entries and exact-wick initial stops. Exit remaining size at entry close plus120minutes. No breakeven. Nautilus1.231.0 native HEDGING, resting limits/stops, O-H-L-C; existing C++ stop-first sensitivity. Static tranche outcomes are weighted native target legs, validated against direct native three-leg execution.",
+        "mfe": "Subsequent5m OHLC through first initial stop or120minutes. Conservative MFE excludes first stop-touch candle; upper bound includes it. Separately show full120minute extrema ignoring stops, explicitly non-tradable after SL.",
+        "training_eligible": false,
+        "production_eligible": false
+      },
+      "inputs": [
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candles.csv.gz",
+          "bytes": 6996506,
+          "mtime_ns": 1792578597423742102
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-fiveyear-20261021-v1/ETH/candidates.csv",
+          "bytes": 72144,
+          "mtime_ns": 1792578597432384463
+        }
+      ],
+      "code": [
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_exit_compare.py",
+          "bytes": 13370,
+          "mtime_ns": 1792569148891020322
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+          "bytes": 43045,
+          "mtime_ns": 1792596096129398843
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_breakeven.py",
+          "bytes": 14693,
+          "mtime_ns": 1792503466110711990
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_be_native.cpp",
+          "bytes": 5467,
+          "mtime_ns": 1792503466110324198
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/btc_range_wick_fanshen.py",
+          "bytes": 24642,
+          "mtime_ns": 1792568073841704631
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+          "bytes": 9348,
+          "mtime_ns": 1792467583097764831
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+          "bytes": 17722,
+          "mtime_ns": 1792479018859194613
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_management_study.py",
+          "bytes": 10731,
+          "mtime_ns": 1792488870307794373
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+          "bytes": 14322,
+          "mtime_ns": 1792596096129676094
+        },
+        {
+          "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_twohour_mfe.py",
+          "bytes": 15220,
+          "mtime_ns": 1792602327701742189
+        }
+      ]
+    },
+    "commit": "43e531d7eb377ead66f098cc00e3138e3d5bfb5f",
+    "unchanged_candidates": 770,
+    "unchanged_bar_count": 531648
+  }
+}

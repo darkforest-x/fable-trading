@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-2h-mfe-20261022-v1
+    artifact_type: manifest
+    role: Two-hour MFE histograms and original V2.31 native fixed and static partial exit comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 43e531d7eb
+    generator_commit: 43e531d7eb
+    source_path: experiments/active/exp-range-v231-2h-mfe-20261022-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-2h-mfe-20261022-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: BTC485/ETH385 plus matched controls; original stops,20bp fees,120minute cap,no pivots. Compact elementary primary/stopfirst and MFE ledgers committed. Native legs/fills and two standalone PNG charts retainedlocally and listed in validation.json with sizes,without content hashes. Static fractions conserve initial shares and nativefees;not accountreturns. Allfullperiodpolicies netnegative,not promoted.
   - artifact_id: range-v231-fixed1r-fiveyear-20261022-v1
     artifact_type: manifest
     role: Five-year original V2.31 fixed1R outcomes and stop-first sensitivity

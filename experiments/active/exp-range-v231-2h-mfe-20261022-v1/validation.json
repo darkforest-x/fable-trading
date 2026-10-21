@@ -1,0 +1,184 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "signals": 485,
+      "native_positions": 5820,
+      "native_fills": 11640,
+      "all_2h": true,
+      "tail_extended_candidates": 1,
+      "oracle": {
+        "checked": 5820,
+        "native_price_time_parity": true,
+        "conservative_changed": 22
+      }
+    },
+    {
+      "symbol": "ETH",
+      "signals": 385,
+      "native_positions": 4620,
+      "native_fills": 9240,
+      "all_2h": true,
+      "tail_extended_candidates": 0,
+      "oracle": {
+        "checked": 4620,
+        "native_price_time_parity": true,
+        "conservative_changed": 13
+      }
+    }
+  ],
+  "tests": "5 passed; native3tranches,long/short,original-riskfees,exact120mdeadline,MFEstop/entrybar exclusions",
+  "charts": "Both PNGs visually inspected; labels, counts, shared scales and stop-vs-no-stop definitions clear",
+  "registries": {
+    "scoped_new_records": "schema, uniqueness and cross references pass",
+    "global_existing_failure": "Unrelated historical spike-v8-total2-1h-native-20260914-delivery lacks source_commit; left unchanged"
+  },
+  "reproduction": [
+    "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_twohour_mfe --stage run",
+    "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_twohour_mfe --stage analyze",
+    "PYTHONPATH=. .venv/bin/python -m yoyo.evaluation.range_twohour_mfe_charts"
+  ],
+  "files": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/summary.json",
+      "bytes": 255192,
+      "mtime_ns": 1792602582358458314
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/target_reach.csv",
+      "bytes": 1222,
+      "mtime_ns": 1792602582352949383
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/config.json",
+      "bytes": 1842,
+      "mtime_ns": 1792602327700600387
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/.gitignore",
+      "bytes": 291,
+      "mtime_ns": 1792602849700416856
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/histogram.csv",
+      "bytes": 5335,
+      "mtime_ns": 1792602582352472878
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/comparison.csv",
+      "bytes": 29825,
+      "mtime_ns": 1792602582354239104
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/mfe_histogram.png",
+      "bytes": 210716,
+      "mtime_ns": 1792602601327776109
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/target_reach.png",
+      "bytes": 116650,
+      "mtime_ns": 1792602601430767193
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/elementary.csv",
+      "bytes": 1503799,
+      "mtime_ns": 1792602570814063852
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/fills.csv",
+      "bytes": 1569751,
+      "mtime_ns": 1792602570779065827
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/legs.csv",
+      "bytes": 1377324,
+      "mtime_ns": 1792602570688713734
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/elementary_stop_first.csv",
+      "bytes": 1490915,
+      "mtime_ns": 1792602570850467725
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/candidates.csv",
+      "bytes": 135645,
+      "mtime_ns": 1792602570661004366
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/stop_first.csv",
+      "bytes": 5249759,
+      "mtime_ns": 1792602579708017456
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/trades.csv",
+      "bytes": 5289437,
+      "mtime_ns": 1792602579337043260
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/native_trades.csv",
+      "bytes": 2734642,
+      "mtime_ns": 1792602570753126477
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/mfe.csv",
+      "bytes": 271445,
+      "mtime_ns": 1792602570858871020
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/BTC/receipt.json",
+      "bytes": 6662,
+      "mtime_ns": 1792602570887815316
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/elementary.csv",
+      "bytes": 1186759,
+      "mtime_ns": 1792602421267024154
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/fills.csv",
+      "bytes": 1222170,
+      "mtime_ns": 1792602421241158002
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/legs.csv",
+      "bytes": 1084729,
+      "mtime_ns": 1792602421175308403
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/elementary_stop_first.csv",
+      "bytes": 1182844,
+      "mtime_ns": 1792602421293646645
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/candidates.csv",
+      "bytes": 107547,
+      "mtime_ns": 1792602421154124961
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/stop_first.csv",
+      "bytes": 4164010,
+      "mtime_ns": 1792602581395571889
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/trades.csv",
+      "bytes": 4176783,
+      "mtime_ns": 1792602581081127856
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/native_trades.csv",
+      "bytes": 2124894,
+      "mtime_ns": 1792602421222514499
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/mfe.csv",
+      "bytes": 215869,
+      "mtime_ns": 1792602421299440323
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-2h-mfe-20261022-v1/ETH/receipt.json",
+      "bytes": 11941,
+      "mtime_ns": 1792602571212791106
+    }
+  ],
+  "code_commit": "43e531d7eb377ead66f098cc00e3138e3d5bfb5f"
+}
