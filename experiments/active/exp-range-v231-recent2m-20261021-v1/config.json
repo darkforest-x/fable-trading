@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-range-v231-recent2m-20261021-v1",
+  "source": "experiments/active/exp-range-v231-returns-20261021-v1",
+  "start": "2026-08-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "symbols": ["BTC", "ETH"],
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "signal_minutes": 15,
+  "entry_keys": "All current Monday/Fib keys; retain inclusive midpoint-side gate. No0.618-only restriction.",
+  "scope": "Entry-close window only; no new parameters. Exact touch-extreme stops; same18approved exits. Preserve full historical warmup, exclude entries before start, same end settlement boundary.",
+  "execution": "Reuse identical independent Nautilus executions and same-window matched controls; no portfolio capital or carry-in positions.",
+  "limitations": "Known historical two-month subset, not independent validation;20bp cost, no funding/spread/depth; independent original-riskR and equal-notionalbp, not account performance.",
+  "reproduction": "python -m yoyo.evaluation.range_recent_window",
+  "training_eligible": false,
+  "production_eligible": false
+}
