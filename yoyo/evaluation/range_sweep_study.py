@@ -225,7 +225,7 @@ def analyze(cfg, dest):
                         for field in ['n', 'wins', 'net_r', 'random_net_r']:
                             np.testing.assert_allclose(stat[field], saved[field], rtol=0, atol=1e-7)
                     if name in ['sweep', 'sweep_mtf']:
-                        stat['stop_first_net_r'] = summarize(low, ids)['net_r']
+                        stat['sensitivity_net_r'] = summarize(low, ids)['net_r']
                     results.append(dict(symbol=coin, arm=arm, period=period, group=name, **stat))
                     if arm == 'pivot' and period == 'all' and name in ['sweep', 'sweep_mtf']:
                         part = rows[rows.pair_id.isin(ids)]
@@ -233,6 +233,27 @@ def analyze(cfg, dest):
                             **inference(pairs(part[part.population == 'signal'], part[part.population == 'random']), cfg['seed'])))
     for row, p in zip(primary, holm([r['p_one_sided'] for r in primary])):
         row['holm_four_p'] = float(p)
+    native_checks = []
+    for spec in cfg['symbols']:
+        coin = spec['symbol']; changed = execution['metadata'][coin]['changed']
+        if not changed: continue
+        for name in ['pivot', 'strict_ties']:
+            folder = dest/'delta'/coin/'native'/name
+            rows = read(folder/'trades.csv'); fills = read(folder/'fills.csv')
+            audit = json.loads((folder/'audit.json').read_text())
+            assert len(rows) == audit['positions'] == 2*len(changed)
+            assert len(fills) == audit['fills'] == 2*len(rows)
+            risk = rows.side*(rows.entry-rows.stop)
+            gross = rows.side*(rows.exit_price-rows.entry)/risk
+            fee = cfg['round_trip_cost']*rows.entry/risk
+            np.testing.assert_allclose(rows.net_r, gross-fee, rtol=0, atol=1e-7)
+            assert (rows.exit_i > rows.entry_i).all()
+            native_checks.append(dict(symbol=coin, arm=name, paths=len(rows), fills=len(fills)))
+        for arm in arms:
+            if arm == 'pivot': continue
+            receipt = json.loads((dest/'delta/exits'/coin/arm/'receipt.json').read_text())
+            assert receipt['oracle']['native_price_time_parity']
+            native_checks.append(dict(symbol=coin, arm=arm, oracle=receipt['oracle']))
     stability = []
     for coin in ['BTC', 'ETH']:
         for group in ['sweep', 'sweep_mtf']:
@@ -244,7 +265,7 @@ def analyze(cfg, dest):
     for stamp in sources: assert stamp == file_stamp(stamp['path'])
     pd.DataFrame(results).to_csv(dest/'comparison.csv', index=False)
     dump(dest/'summary.json', dict(config=cfg, rows=results, primary_tests=primary, checks=checks,
-        execution=execution, stability=stability, sources=sources,
+        execution=execution, stability=stability, sources=sources, native_checks=native_checks,
         builder_commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip(),
         limitations='Fixed20 selected after known-history morphology. Same inspected data, not independent validation. Conditional matched random controls are not sweep/MTF constrained.20bp cost, exact wickSL, existing18exits and5mOHLC fill assumptions. IndependentR not account returns. No Pine/default or live change.'))
     print(json.dumps([r for r in results if r['arm'] == 'pivot' and r['period'] in ['all', 'recent2m'] and r['group'] != 'postfilter_sweep'], indent=2))
