@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-btc-v231-exit5m-20261021-v1",
+  "engine": "nautilus",
+  "symbol": "BTC",
+  "tick": 0.1,
+  "market_tick": 0.1,
+  "entry_mode": "provided",
+  "data": "experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-range-v231-recent2m-20261021-v1/BTC/candidates.csv",
+  "stop_window_5m": 1,
+  "buffer_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {"name": "pivot5m", "confirmed_pivot_exit": true, "pivot_minutes": 5, "opposite_hour_exit": false},
+    {"name": "pivot5m_strict", "confirmed_pivot_exit": true, "pivot_minutes": 5, "opposite_hour_exit": false, "strict_pivot_ties": true},
+    {"name": "structure5m", "structural_pivot_stop": true, "pivot_minutes": 5, "opposite_hour_exit": false},
+    {"name": "structure5m_strict", "structural_pivot_stop": true, "pivot_minutes": 5, "opposite_hour_exit": false, "strict_pivot_ties": true}
+  ],
+  "output": "experiments/active/exp-btc-v231-exit5m-20261021-v1/native"
+}

@@ -62,21 +62,25 @@ class ExitPolicy:
     rsi_scaleout: bool = False
     rsi_skip_events: int = 0
     confirmed_pivot_exit: bool = False
+    structural_pivot_stop: bool = False
     strict_pivot_ties: bool = False
     pivot_minutes: int = 15
     target_from_entry: bool = False
     breakeven_includes_cost: bool = True
 
     def __post_init__(self):
-        if self.pivot_minutes not in (5, 15) or (self.pivot_minutes != 15 and not self.confirmed_pivot_exit):
+        pivot_management = self.confirmed_pivot_exit or self.structural_pivot_stop
+        if self.confirmed_pivot_exit and self.structural_pivot_stop:
+            raise ValueError("Pivot market exits and structural stops are separate policies")
+        if self.pivot_minutes not in (5, 15) or (self.pivot_minutes != 15 and not pivot_management):
             raise ValueError("Pivot timeframe must be 5m or 15m and requires pivot exits")
         if self.target_from_entry and (self.fixed_target_r is not None
                 or self.partial_close_r is not None or self.rsi_scaleout
-                or self.confirmed_pivot_exit):
+                or pivot_management):
             raise ValueError("Per-entry targets cannot combine with another target or reduction policy")
-        if self.strict_pivot_ties and not self.confirmed_pivot_exit:
+        if self.strict_pivot_ties and not pivot_management:
             raise ValueError("Strict pivot ties require confirmed pivot exits")
-        if self.confirmed_pivot_exit and (self.opposite_hour_exit
+        if pivot_management and (self.opposite_hour_exit
                 or self.breakeven_r is not None or self.time_breakeven_minutes is not None
                 or self.partial_close_r is not None or self.fixed_target_r is not None
                 or self.rsi_scaleout):
@@ -202,6 +206,7 @@ class TradeState:
     rsi_first_i: int = -1
     rsi_skipped: int = 0
     rsi_seen: int = 0
+    structural_updates: int = 0
 
     def __post_init__(self):
         self.remaining = int(self.quantity)
@@ -222,7 +227,7 @@ class IndependentCloseStrategy(Strategy):
         self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
         self.be_clock = frame.index.minute % 5 == 0
         self.policy, self.fees = policy, fees
-        self.pivots = confirmed_pivots(frame, execution_minutes, policy.strict_pivot_ties, policy.pivot_minutes) if policy.confirmed_pivot_exit else None
+        self.pivots = confirmed_pivots(frame, execution_minutes, policy.strict_pivot_ties, policy.pivot_minutes) if (policy.confirmed_pivot_exit or policy.structural_pivot_stop) else None
         self.tick = protection_tick
         self.eps = self.tick * 1e-7
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
@@ -231,6 +236,7 @@ class IndependentCloseStrategy(Strategy):
             self.by_entry.setdefault(int(row["entry_i"]), []).append(row)
         self.active, self.order_map = {}, {}
         self.rows, self.fill_rows, self.errors = [], [], []
+        self.protection_updates = []
         self.max_open = self.hedged_bars = 0
 
     def on_start(self):
@@ -340,7 +346,7 @@ class IndependentCloseStrategy(Strategy):
         if state.remaining != 0:
             raise RuntimeError("Final exit left a nonzero runner")
         if phase == "stop":
-            reason = 5 if state.stop_kind == 1 else 2 if state.arm_i >= 0 else 1
+            reason = 8 if state.stop_kind == 3 else 5 if state.stop_kind == 1 else 2 if state.arm_i >= 0 else 1
         elif phase == "target":
             # The native matcher cancels all remaining reduce-only orders for
             # this closed HEDGING position after dispatching the fill. Sending
@@ -395,6 +401,8 @@ class IndependentCloseStrategy(Strategy):
             row.update(pivot_price=pivot_price,
                        pivot_open_time=str(pd.Timestamp(self.pivots[2][i], tz="UTC")) if reason == 7 else "",
                        pivot_reference_r=side*(pivot_price-entry)/risk)
+        if self.policy.structural_pivot_stop:
+            row["structural_updates"] = state.structural_updates
         self.rows.append(row)
         del self.active[row["trade_id"]]
 
@@ -433,7 +441,7 @@ class IndependentCloseStrategy(Strategy):
                             state.stop,state.stop_kind=state.be_price,1
                     else:
                         state.deferred += 1
-            if quarter and not p.confirmed_pivot_exit:
+            if quarter and not (p.confirmed_pivot_exit or p.structural_pivot_stop):
                 move = side*(close-entry)
                 if p.fixed_target_r is None and not p.target_from_entry and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
                     state.arm_i = i
@@ -452,6 +460,26 @@ class IndependentCloseStrategy(Strategy):
                     candidate = (math.floor(raw+1e-8) if side > 0 else math.ceil(raw-1e-8))*self.tick
                     if side*(candidate-state.stop) > 0:
                         state.stop, state.stop_kind = candidate, 2
+            if p.structural_pivot_stop:
+                # Long protection uses confirmed lows; short protection highs.
+                # Center candle must open at/after entry. Two right bars are
+                # complete; the amended stop cannot fill retrospectively.
+                pivot_price = self.pivots[1 if side == 1 else 0][i]
+                center = self.pivots[2][i]
+                if (center >= self.frame.index[int(row["entry_i"])].value
+                        and np.isfinite(pivot_price) and i < int(row["end_i"])):
+                    raw = pivot_price/self.tick
+                    candidate = (math.floor(raw+1e-8) if side > 0 else math.ceil(raw-1e-8))*self.tick
+                    if (side*(candidate-state.stop) > self.eps
+                            and side*(close-candidate)+self.eps >= self.tick):
+                        self.protection_updates.append(dict(
+                            trade_id=row["trade_id"], bar_i=i, pivot_open_ns=int(center),
+                            pivot_price=float(pivot_price), previous_stop=state.stop,
+                            stop=candidate, close=float(close)))
+                        state.stop, state.stop_kind = candidate, 3
+                        state.structural_updates += 1
+                        if state.arm_i < 0:
+                            state.arm_i = i
             reverse = p.opposite_hour_exit and state.arm_i >= 0 and self.hour[i] == -side
             pivot_exit = False
             if p.confirmed_pivot_exit:
@@ -617,7 +645,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         if has_targets and engine.cache.orders_open():
             raise RuntimeError("Fixed target left an orphaned protective order")
         rows, fills = pd.DataFrame(strategy.rows), pd.DataFrame(strategy.fill_rows)
-        if policy.partial_close_r is not None or has_targets or policy.rsi_scaleout or policy.confirmed_pivot_exit:
+        if policy.partial_close_r is not None or has_targets or policy.rsi_scaleout or policy.confirmed_pivot_exit or policy.structural_pivot_stop:
             realized = {str(p.id): float(p.realized_pnl) for p in positions}
             native_pnl = rows.framework_position_id.map(realized).to_numpy()
             expected_pnl = (rows.net_r*rows.risk*rows.quantity).to_numpy()
@@ -640,6 +668,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
             confirmed_pivot_exit=policy.confirmed_pivot_exit,
+            structural_pivot_stop=policy.structural_pivot_stop,
+            structural_execution=(f"{policy.pivot_minutes}m 2/2 opposite pivot ratchets exact stop; post-entry centers only; confirmation-close amendment effective next bar; no profit gate" if policy.structural_pivot_stop else "disabled"),
             pivot_execution=f"{policy.pivot_minutes}m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme" if policy.confirmed_pivot_exit else "disabled",
             strict_pivot_ties=policy.strict_pivot_ties,
             max_simultaneous_positions=strategy.max_open,
@@ -649,6 +679,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             runtime_warnings=sorted({str(w.message) for w in emitted}),
             accounting="independent original-risk R; frozen account; not portfolio returns",
         )
+        if policy.structural_pivot_stop:
+            audit["protection_updates"] = strategy.protection_updates
         return rows, fills, audit
     finally:
         engine.dispose()
