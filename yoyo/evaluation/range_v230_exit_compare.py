@@ -39,20 +39,20 @@ def rounded(price, tick, upward):
     return (math.ceil(price/tick-1e-8) if upward else math.floor(price/tick+1e-8))*tick
 
 
-def entry_keys(frame, base, ratios, timezone):
+def entry_keys(frame, base, ratios, timezone, bar_minutes=15):
     """Freeze levels known at each entry CLOSE, including final Monday bar.
 
     monday_levels exposes the range before a candle opens. The next candle's
     pre-open state therefore contains exactly entry-close knowledge. A dummy
     final candle lets prefix inputs expose that state without any future OHLC.
     """
-    q = aggregate(frame, 15)
+    q = aggregate(frame, bar_minutes)
     dummy = q.iloc[-1:].copy()
-    dummy.index += pd.Timedelta(minutes=15)
-    prices, _, _, _ = monday_levels(pd.concat([q,dummy]),ratios,timezone)
+    dummy.index += pd.Timedelta(minutes=bar_minutes)
+    prices, _, _, _ = monday_levels(pd.concat([q,dummy]),ratios,timezone,bar_minutes=bar_minutes)
     indices = q.index.get_indexer(frame.index[base.entry_i.to_numpy(int)])
     if (indices < 0).any():
-        raise ValueError("Entries must be completed quarters")
+        raise ValueError("Entries must be completed signal-timeframe candles")
     return {r.trade_id: prices[i+1] for r,i in zip(base.itertuples(),indices)}
 
 
@@ -175,7 +175,7 @@ def run_symbol(cfg,spec,dest):
     base=pd.read_csv(ROOT/native_cfg["entry_candidates"],float_precision="round_trip")
     base["trade_id"]=base.population+"-"+base.pair_id.astype(str)
     base["risk"]=base.side*(base.entry-base.stop)
-    keys=entry_keys(frame,base,cfg["ratios"],cfg["timezone"])
+    keys=entry_keys(frame,base,cfg["ratios"],cfg["timezone"],cfg.get("key_minutes",15))
     ctx=dict(bars=np.ascontiguousarray(frame.to_numpy(float)),
              atr=np.ascontiguousarray(atr(frame,14).to_numpy()),hour=np.zeros(len(frame)))
     library=native()

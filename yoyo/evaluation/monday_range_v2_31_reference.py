@@ -19,15 +19,18 @@ import pandas as pd
 
 def select_matches(quarter, arrows, prices, labels, weeks, *, before=5, wait_bars=2,
                    penetration=.10, buffer=.002, tick=.1,
-                   timezone="America/New_York", start="2026-09-01T00:00:00+08:00"):
+                   timezone="America/New_York", start="2026-09-01T00:00:00+08:00",
+                   bar_minutes=15):
     """Return only decisions observable in this input prefix.
 
-    Source columns: open/high/low/close, close-time index; prices/weekly IDs
+    Source columns: open/high/low/close, close-time index at bar_minutes; prices/weekly IDs
     must describe the range known before each touch opens. Previous bodies use
     [arrow-before, arrow); pairing bodies include both arrow and touch.
     Touch offsets range from -2 through wait_bars, relative to arrow.
     All selected indices are <= entry_i; later outcomes are never inspected.
     """
+    if bar_minutes not in (5, 15):
+        raise ValueError("Signal candles must be 5m or 15m")
     if not 0 <= before <= 20 or wait_bars not in (1, 2):
         raise ValueError("Invalid previous-body or touch-window settings")
     o,h,l,c=(quarter[k].to_numpy() for k in ("open","high","low","close"))
@@ -66,7 +69,7 @@ def select_matches(quarter, arrows, prices, labels, weeks, *, before=5, wait_bar
             continue
         if quarter.index[e]<pd.Timestamp(start):
             continue
-        opened=lambda k: (quarter.index[k]-pd.Timedelta(minutes=15)).tz_convert("Asia/Shanghai").isoformat()
+        opened=lambda k: (quarter.index[k]-pd.Timedelta(minutes=bar_minutes)).tz_convert("Asia/Shanghai").isoformat()
         rows.append(dict(signal_i=i,touch_i=int(j),entry_i=int(e),side=side,
             signal_time=opened(i),touch_time=opened(j),entry_bar_time=opened(e),
             entry_time=quarter.index[e].tz_convert("Asia/Shanghai").isoformat(),

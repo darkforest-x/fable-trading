@@ -63,10 +63,13 @@ class ExitPolicy:
     rsi_skip_events: int = 0
     confirmed_pivot_exit: bool = False
     strict_pivot_ties: bool = False
+    pivot_minutes: int = 15
     target_from_entry: bool = False
     breakeven_includes_cost: bool = True
 
     def __post_init__(self):
+        if self.pivot_minutes not in (5, 15) or (self.pivot_minutes != 15 and not self.confirmed_pivot_exit):
+            raise ValueError("Pivot timeframe must be 5m or 15m and requires pivot exits")
         if self.target_from_entry and (self.fixed_target_r is not None
                 or self.partial_close_r is not None or self.rsi_scaleout
                 or self.confirmed_pivot_exit):
@@ -110,19 +113,22 @@ class ExitPolicy:
             raise ValueError("Partial fraction requires excessive research sizing")
 
 
-def confirmed_pivots(frame, execution_minutes=5, strict=False):
-    """Return 15m 2/2 extremes only at their confirmation close.
+def confirmed_pivots(frame, execution_minutes=5, strict=False, pivot_minutes=15):
+    """Return 5m or 15m 2/2 extremes only at their confirmation close.
 
     Inputs are completed OHLC indexed by close time. Positive shifts inspect
-    only the current and previous four completed quarters. Pivot timestamps
+    only the current and previous four completed pivot candles. Pivot timestamps
     identify the center candle OPEN, never its confirmation or backdated fill.
     Default ties select the latest equal extreme; strict mode excludes ties
     on both sides for sensitivity because TradingView does not document ties.
     """
-    quarter = frame.resample("15min", closed="right", label="right").agg(
+    if pivot_minutes not in (5, 15) or execution_minutes <= 0 or pivot_minutes % execution_minutes:
+        raise ValueError("Pivot timeframe must contain whole execution candles")
+    rule = f"{pivot_minutes}min"
+    quarter = frame.resample(rule, closed="right", label="right").agg(
         {"open": "first", "high": "max", "low": "min", "close": "last"})
-    count = frame.close.resample("15min", closed="right", label="right").count()
-    quarter.loc[count != 15 // execution_minutes] = np.nan
+    count = frame.close.resample(rule, closed="right", label="right").count()
+    quarter.loc[count != pivot_minutes // execution_minutes] = np.nan
     outputs = []
     for column, direction in (("high", 1), ("low", -1)):
         value = direction * quarter[column]
@@ -131,7 +137,7 @@ def confirmed_pivots(frame, execution_minutes=5, strict=False):
             (center >= value.shift(3)) & (center >= value.shift(4)))
         valid = left & (center > value.shift(1)) & (center > value)
         outputs.append((direction * center.where(valid)).reindex(frame.index).to_numpy(float))
-    at = pd.Series((quarter.index - pd.Timedelta(minutes=45)).as_unit("ns").asi8,
+    at = pd.Series((quarter.index - pd.Timedelta(minutes=3*pivot_minutes)).as_unit("ns").asi8,
                    index=quarter.index).reindex(frame.index).fillna(-1).to_numpy(np.int64)
     return (*outputs, at)
 
@@ -216,7 +222,7 @@ class IndependentCloseStrategy(Strategy):
         self.rsi_side = np.zeros(len(frame)) if rsi_side is None else np.asarray(rsi_side)
         self.be_clock = frame.index.minute % 5 == 0
         self.policy, self.fees = policy, fees
-        self.pivots = confirmed_pivots(frame, execution_minutes, policy.strict_pivot_ties) if policy.confirmed_pivot_exit else None
+        self.pivots = confirmed_pivots(frame, execution_minutes, policy.strict_pivot_ties, policy.pivot_minutes) if policy.confirmed_pivot_exit else None
         self.tick = protection_tick
         self.eps = self.tick * 1e-7
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
@@ -634,7 +640,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             rsi_skip_events=policy.rsi_skip_events,
             timed_be_minutes=policy.time_breakeven_minutes,
             confirmed_pivot_exit=policy.confirmed_pivot_exit,
-            pivot_execution="15m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme" if policy.confirmed_pivot_exit else "disabled",
+            pivot_execution=f"{policy.pivot_minutes}m 2/2 confirmation-close market order; initial stop first; no fill at retrospective extreme" if policy.confirmed_pivot_exit else "disabled",
             strict_pivot_ties=policy.strict_pivot_ties,
             max_simultaneous_positions=strategy.max_open,
             bars_with_both_directions=strategy.hedged_bars,

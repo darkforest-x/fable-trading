@@ -1,0 +1,51 @@
+{
+  "experiment_id": "exp-range-v231-5m-20261021-v1",
+  "start": "2025-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "warmup": "2025-10-01T00:00:00+08:00",
+  "midpoint": "2026-04-21T00:00:00+08:00",
+  "timezone": "America/New_York",
+  "ratios": [
+    0,
+    0.5,
+    0.618,
+    0.705,
+    1.13,
+    1.27,
+    1.618
+  ],
+  "round_trip_cost": 0.002,
+  "seed": 20261021,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "symbols": [
+    {
+      "symbol": "BTC",
+      "tick": 0.1,
+      "seed_offset": 0
+    },
+    {
+      "symbol": "ETH",
+      "tick": 0.01,
+      "seed_offset": 1
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+  "admissions_15m": "experiments/active/exp-range-v231-midpoint-20261021-v1",
+  "comparison_15m": "experiments/active/exp-range-v231-returns-20261021-v1",
+  "exit_reference": "experiments/active/exp-range-v230-exits-20261021-v1",
+  "signal_minutes": 5,
+  "pivot_minutes": 5,
+  "entry": "V2.31 rules on completed5m candles; pre5 and +/-2 remain counts, not75/30minute durations; exact touch wick stops.",
+  "exit": "5m2/2 profitable pivot after entry; market exit at confirmation close, initial stop first. Same17 approved fixed/staged/BE policies for comparison.",
+  "controls": "Same coin/side/UTC week/chronological half/5m ATR14-close bucket, unique times, no returns used.",
+  "limitations": "Same frozen5mOHLC, O-H-L-C native execution and stop-first sensitivity; zero latency, no funding/spread/depth; independent R, not account returns.",
+  "reproduction": "python -m yoyo.evaluation.range_v231_5m_study"
+}

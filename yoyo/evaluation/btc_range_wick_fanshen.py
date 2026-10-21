@@ -26,9 +26,15 @@ CODE = ["yoyo/evaluation/btc_range_wick_fanshen.py",
         "tests/evaluation/test_btc_range_wick_fanshen.py"]
 
 
-def monday_levels(quarter, ratios, timezone):
-    """Read open timestamps and earlier OHLC only; reset before each Monday."""
-    opened = quarter.index - pd.Timedelta(minutes=15)
+def monday_levels(quarter, ratios, timezone, bar_minutes=15):
+    """Read open timestamps and earlier OHLC only; reset before each Monday.
+
+    bar_minutes defines the supplied closed-bar index (5m or 15m), not a
+    future aggregation. The historical default remains 15m.
+    """
+    if bar_minutes not in (5, 15):
+        raise ValueError("Monday source candles must be 5m or 15m")
+    opened = quarter.index - pd.Timedelta(minutes=bar_minutes)
     local = opened.tz_convert(timezone)
     hi = lo = np.nan
     monday_key = None
