@@ -265,9 +265,93 @@ def pack():
     print(json.dumps(receipt), flush=True)
 
 
+def send():
+    """Deliver only the owner-requested ZIPs to the verified existing TG target.
+
+    Bot API sendDocument returns a Message. Persist pending before upload and
+    never repeat an uncertain request. Tokens stay in the existing loader and
+    never enter command arguments, logs or receipts. This is a manual upload,
+    with no change to the disabled production notification worker.
+    Reference: https://core.telegram.org/bots/api#senddocument
+    """
+    import requests
+    from yoyo.notify import _load
+
+    check = json.loads((DEST / "validation.json").read_text())
+    assert check["charts"] == 229 and check["bars_per_chart"] == 60
+    creds = _load()
+    if creds is None:
+        raise RuntimeError("Configured Telegram credentials missing")
+    token, chat = creds
+    url = "https://api.telegram.org/bot" + token + "/"
+    try:
+        response = requests.post(url + "getChat", json={"chat_id": chat}, timeout=(10, 20)).json()
+    except Exception as exc:
+        raise RuntimeError("getChat failed: " + type(exc).__name__) from None
+    if not response.get("ok"):
+        raise RuntimeError("getChat rejected")
+    target = response["result"]
+    if target.get("title") != "Yolo均线密集交易系统" or target.get("type") not in ("channel", "supergroup", "group"):
+        raise RuntimeError("Configured Telegram target differs from verified owner destination")
+    path = DEST / "telegram_receipt.json"
+    receipt = json.loads(path.read_text()) if path.exists() else dict(
+        target_id=target["id"], target_title=target["title"], actions=[], complete=False)
+    assert receipt["target_id"] == target["id"]
+
+    def save():
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(receipt, ensure_ascii=False, indent=2))
+        temporary.replace(path)
+
+    for row in check["archives"]:
+        archive = DEST / row["file"]
+        assert archive.stat().st_size == row["bytes"] < 49_000_000
+        previous = next((a for a in receipt["actions"] if a["file"] == row["file"]), None)
+        if previous:
+            if previous["status"] == "sent" and previous["bytes"] == row["bytes"]:
+                continue
+            raise RuntimeError("Previous upload is uncertain or rejected; no automatic resend")
+        action = dict(file=row["file"], bytes=row["bytes"], status="pending")
+        receipt["actions"].append(action)
+        save()
+        caption = (f"BTCUSDT.P {row['version']}｜{row['count']}个年度信号｜60根15m横图\n"
+                   "2025-10-21 至 2026-10-21 00:00（北京时间）。\n"
+                   "2880×1620原尺寸PNG。每图60根真实K线，关键线注明Fib比例、方向和价格；"
+                   "周一高点红线、周一低点蓝线均完整显示。黄色为触价K，E为入场K。\n"
+                   "信号编号及原入场、止损、退出保持不变；两版共有信号有对应编号。")
+        try:
+            with archive.open("rb") as handle:
+                result = requests.post(url + "sendDocument", data={"chat_id": chat, "caption": caption},
+                    files={"document": (archive.name, handle, "application/zip")}, timeout=(15, 120)).json()
+        except Exception as exc:
+            action.update(status="unknown", error_type=type(exc).__name__)
+            save()
+            raise RuntimeError("Upload response uncertain; no automatic resend") from None
+        if not result.get("ok"):
+            action.update(status="rejected", error_code=result.get("error_code"))
+            save()
+            raise RuntimeError("Telegram rejected upload, code " + str(result.get("error_code")))
+        message = result["result"]
+        doc = message.get("document", {})
+        if (message["chat"]["id"] != target["id"] or doc.get("file_name") != archive.name
+                or doc.get("file_size") != row["bytes"]):
+            action["status"] = "unknown"
+            save()
+            raise RuntimeError("Telegram receipt does not match upload; no resend")
+        username = target.get("username")
+        link = (f"https://t.me/{username}/{message['message_id']}" if username else
+                f"https://t.me/c/{str(target['id']).removeprefix('-100')}/{message['message_id']}")
+        action.update(status="sent", message_id=message["message_id"], message_url=link,
+                      telegram_file_size=doc["file_size"], sent_at=message["date"])
+        save()
+        print(json.dumps({k: action[k] for k in ("file", "status", "message_id", "message_url")}), flush=True)
+    receipt["complete"] = True
+    save()
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=("prepare", "render", "pack"))
+    parser.add_argument("mode", choices=("prepare", "render", "pack", "send"))
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--version")
     parser.add_argument("--number", type=int)
@@ -276,5 +360,7 @@ if __name__ == "__main__":
         prepare()
     elif args.mode == "render":
         render(args.limit, args.version, args.number)
-    else:
+    elif args.mode == "pack":
         pack()
+    else:
+        send()
