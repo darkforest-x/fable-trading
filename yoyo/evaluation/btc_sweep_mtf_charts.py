@@ -71,7 +71,7 @@ def prepare():
         exitbar = five.iloc[int(t.exit_i)]
         assert exitbar.low-.1 < t.exit_price < exitbar.high+.1
         if int(t.reason) == 7:
-            assert t.exit_price == exitbar.close
+            assert abs(t.exit_price-exitbar.close) < 1e-8
         risk = side*(t.entry-t.stop)
         assert abs(t.gross_r-side*(t.exit_price-t.entry)/risk) < 1e-8
         assert abs(t.fee_r-.002*t.entry/risk) < 1e-8
