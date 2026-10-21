@@ -96,6 +96,39 @@ def spread_labels(levels, lower, upper):
     return list(zip(ordered, positions))
 
 
+def execution_inset(fig, row):
+    """Optional exact 5m bars for reviewing a native stop/target sequence.
+
+    Candle centers are bar opens; fill markers sit at the execution bar's
+    right edge. After-exit OHLC is faded review context, never an open trade.
+    """
+    from matplotlib.patches import Rectangle
+    bars=row['execution_bars']
+    ax=fig.add_axes([.565,.064,.39,.12])
+    ids=[b['index'] for b in bars]
+    entry=ids.index(row['entry_5m_i']);exitbar=ids.index(row['exit_5m_i'])
+    lower=min(min(b['low'] for b in bars),row['target'],row['stop'])
+    upper=max(max(b['high'] for b in bars),row['target'],row['stop'])
+    span=upper-lower
+    for i,b in enumerate(bars):
+        color='#D0D3DA' if i<=exitbar else '#515764'
+        ax.vlines(i,b['low'],b['high'],color=color,lw=.65)
+        body=min(b['open'],b['close']);height=max(abs(b['close']-b['open']),span*.002)
+        ax.add_patch(Rectangle((i-.28,body),.56,height,facecolor=color,edgecolor=color,lw=.3))
+    for price,color,name in [(row['entry'],COLORS[row['side']],'E'),(row['stop'],'#F36C7A','SL'),(row['target'],'#36C9A3','1R')]:
+        ax.hlines(price,entry+.5,len(bars)-.5,color=color,lw=.55,linestyles='dashed')
+        ax.text(len(bars)-.2,price,name,color=color,fontsize=7,va='center')
+    ax.axvline(entry+.5,color=COLORS[row['side']],lw=.65,linestyle=':')
+    ax.scatter([entry+.5],[row['entry']],marker='^' if row['side']==1 else 'v',s=18,color=COLORS[row['side']],zorder=5)
+    ax.scatter([exitbar+.5],[row['exit']['price']],marker='D',s=22,facecolors='none',edgecolors='white',lw=.8,zorder=5)
+    ticks=sorted(set([entry,exitbar,len(bars)-1]))
+    ax.set_xticks(ticks,[stamp(bars[i]['time'],'%H:%M') for i in ticks])
+    ax.set(xlim=(-1,len(bars)+1),ylim=(lower-span*.1,upper+span*.1))
+    ax.set_yticks([]);ax.tick_params(axis='x',length=0,labelsize=7,colors='#8993A1')
+    for spine in ax.spines.values():spine.set_visible(False)
+    ax.set_title('5m 执行放大 · E入场 / ◇止损 / 灰暗K为退出后走势',loc='left',fontsize=8.2,color='#ABB5C3',pad=5)
+
+
 def render(limit=0, version=None, number=None, *, destination=None, source_data=None, trade_review=False):
     import matplotlib
     matplotlib.use("Agg")
@@ -120,16 +153,20 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         ids = [b["index"] for b in bars]
         ai, ti, ei = (ids.index(r[k]) for k in ("signal_i", "touch_i", "entry_i"))
         side, col = r["side"], COLORS[r["side"]]
+        precision=int(r.get('price_decimals',1))
+        price=lambda value: f'{value:,.{precision}f}'
         low = min(r["monday_low"], r["stop"], min(b["low"] for b in bars))
         high = max(r["monday_high"], r["stop"], max(b["high"] for b in bars))
+        if r.get('target') is not None:
+            low=min(low,r['target']);high=max(high,r['target'])
         span = high - low
         ymin, ymax = low - .08 * span, high + .08 * span
         fig = plt.figure(figsize=(16, 9), dpi=180)
-        fig.text(.045, .952, f"BTCUSDT.P   {r['version']}   #{r['number']:03d} / {r['total']}   "
+        fig.text(.045, .952, f"{r.get('symbol','BTC')}USDT.P   {r.get('display_version',r['version'])}   #{r['number']:03d} / {r['total']}   "
                  + ("多头" if side == 1 else "空头"), fontsize=19, color=col, va="top")
         fig.text(.955, .949, stamp(r["signal_time"], "%Y-%m-%d %H:%M")
                  + "  ·  15m × 60  ·  北京时间", fontsize=12, color="#C8CDD6", ha="right", va="top")
-        fig.text(.045, .910, f"触及 {label(r['key'])}  {r['level']:,.1f}", fontsize=12, color="#FFED46")
+        fig.text(.045, .910, f"触及 {label(r['key'])}  {price(r['level'])}", fontsize=12, color="#FFED46")
         cohort = (f"对应 {r['other_version']} #{r['other_number']:03d}" if r["other_number"] else "仅此版本")
         legend = "黄色=触价K  /  入场、出场均为实际成交" if trade_review else cohort + "  ·  黄色=触价K  /  E=入场K  /  ◇=实际退出"
         if r.get('review_group'):
@@ -152,17 +189,17 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         assert {"0:up", "0:down", r["key"]} <= {lv["key"] for lv in visible}
         named = []
         for lv, text_y in spread_labels(visible, ymin, ymax):
-            key, price = lv["key"], lv["price"]
+            key, line_price = lv["key"], lv["price"]
             lc = "#F23645" if key == "0:down" else "#3680FF" if key == "0:up" else "#737B88"
             if key.startswith('prior20:'):
                 lc = '#AB9DDB'
             if key == r["key"] and not key.startswith("0:"):
                 lc = "#FFED46"
-            ax.hlines(price, -.5, 60.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
+            ax.hlines(line_price, -.5, 60.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
                       linestyles=(0, (4, 3)) if key.startswith('prior20:') else 'solid',
                       alpha=1 if key.startswith("0:") or key == r["key"] else .6, zorder=1)
-            ax.plot([60.1, 61.1], [price, text_y], color=lc, lw=.55, alpha=.85, zorder=2)
-            text = ("● " if key == r["key"] else "") + label(key) + f"  {price:,.1f}"
+            ax.plot([60.1, 61.1], [line_price, text_y], color=lc, lw=.55, alpha=.85, zorder=2)
+            text = ("● " if key == r["key"] else "") + label(key) + f"  {price(line_price)}"
             named.append(ax.text(61.4, text_y, text, color=lc, fontsize=9.5,
                                 va="center", zorder=8, bbox=dict(facecolor="black", edgecolor="none", pad=1)))
         for x, b in enumerate(bars):
@@ -184,7 +221,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                     ha="center", va="center", alpha=1 if x == ai else .32, zorder=5)
         touch = bars[ti]
         extreme = touch["low"] if side == 1 else touch["high"]
-        extreme_label = ax.annotate(f"{extreme:,.1f}", xy=(ti, extreme),
+        extreme_label = ax.annotate(price(extreme), xy=(ti, extreme),
             xytext=(max(2, ti - 7), extreme - side * span * .07), textcoords="data",
             fontsize=10, color="#FFED46", va="center", ha="right",
             bbox=dict(facecolor="black", edgecolor="none", pad=2),
@@ -197,7 +234,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         else:
             entry_start = ei + .4
         ax.hlines(r["entry"], entry_start, entry_end, color=col, lw=.7, zorder=7)
-        named.append(ax.text(entry_end + .5, r["entry"], f"{r['entry']:,.1f}", fontsize=8.3,
+        named.append(ax.text(entry_end + .5, r["entry"], price(r['entry']), fontsize=8.3,
             va="center", color=col, zorder=9, bbox=dict(facecolor="black", edgecolor="none", pad=1)))
         ax.hlines(r["stop"], entry_start, entry_end, color="#F36C7A", lw=.55, linestyles=(0, (3, 3)), zorder=6)
         ax.text(ei, -.102, "E", transform=ax.get_xaxis_transform(), color=col, ha="center", fontsize=10)
@@ -206,6 +243,10 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         if -.5 <= exit_x <= 59.5:
             ax.scatter([exit_x], [ex["price"]], s=35, marker="D", facecolors="none",
                        edgecolors="#E5E8F0", lw=.9, zorder=10)
+        if r.get('target') is not None:
+            ax.hlines(r['target'],ei+.5,entry_end,color='#36C9A3',lw=.6,linestyles='dashed',zorder=6)
+            named.append(ax.text(entry_end+.5,r['target'],'1R '+price(r['target']),fontsize=8.3,
+                color='#36C9A3',va='center',bbox=dict(facecolor='black',edgecolor='none',pad=1),zorder=9))
         if trade_review:
             # Both markers sit at the right edge of the candle whose close
             # generated the actual fill; axis timestamps label candle opens.
@@ -216,14 +257,14 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                 xytext=(max(2,ei-(14 if r.get('separate_entry_callout') else 9)),r['entry']-side*span*.13), fontsize=12, color=col,
                 ha='center', va='center', bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color=col,lw=.85,shrinkA=7,shrinkB=8),zorder=11))
-            named.append(ax.annotate(f"出场  {ex['price']:,.1f}",xy=(exit_x,ex['price']),
+            named.append(ax.annotate(f"{ex.get('label','出场')}  {price(ex['price'])}",xy=(exit_x,ex['price']),
                 xytext=(min(51,exit_x+9),ex['price']+side*span*.13),fontsize=12,color='#E5E8F0',
                 ha='center',va='center',bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color='#E5E8F0',lw=.85,shrinkA=7,shrinkB=8),zorder=11))
         fig.text(.045, .157, "勾叉K " + stamp(r["signal_time"]) + "    触价K " + stamp(r["touch_time"]), fontsize=10.3)
         fig.text(.045, .124, "入场K " + stamp(r["entry_bar_time"]) + " → " + stamp(r["entry_time"], "%H:%M")
-                 + f" 收盘  {r['entry']:,.1f}    止损 {r['stop']:,.1f}", fontsize=10.3, color=col)
-        fig.text(.045, .091, f"触价K  O {touch['open']:,.1f}   H {touch['high']:,.1f}   L {touch['low']:,.1f}   C {touch['close']:,.1f}",
+                 + f" 收盘  {price(r['entry'])}    止损 {price(r['stop'])}", fontsize=10.3, color=col)
+        fig.text(.045, .091, f"触价K  O {price(touch['open'])}   H {price(touch['high'])}   L {price(touch['low'])}   C {price(touch['close'])}",
                  fontsize=9.5, color="#9AA2AF")
         detail = f"影线 {r['wick']:.1f} 点    越过 {r['depth']:.2f} 点 / {r['penetration']:.1%}"
         if r.get('mtf_arrow_time'):
@@ -231,19 +272,29 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         fig.text(.045, .059, detail,
                  fontsize=9.5, color="#9AA2AF")
         reason = {1: "止损", 7: "分型确认后退出", 0: "期末结算"}[ex["reason"]]
-        fig.text(.565, .157, reason + " " + stamp(ex["time"]) + f"  {ex['price']:,.1f}"
-                 + ("（图外）" if ex["outside_window"] else ""), fontsize=10.2)
+        if r.get('execution_bars'):
+            execution_inset(fig,r)
+            fig.text(.565,.218,'止损K收盘 '+stamp(ex['time'])+'  '+price(ex['price'])
+                +f"  ·  毛 {ex['gross_r']:+.2f}R / 净 {ex['net_r']:+.2f}R",fontsize=10,color='#F36C7A')
+            fig.text(.565,.031,'5m OHLC模拟；时间标记执行K收盘，非逐笔成交秒。'+
+                ('本笔同5m双触，按O-H-L-C顺序。' if r.get('ambiguous') else ''),fontsize=7.7,color='#8993A1')
+        else:
+            fig.text(.565, .157, reason + " " + stamp(ex["time"]) + f"  {ex['price']:,.1f}"
+                     + ("（图外）" if ex["outside_window"] else ""), fontsize=10.2)
         payoff = f"实际毛收益 {ex['gross_r']:+.2f}R   /   扣0.2%费用后 {ex['net_r']:+.2f}R"
         if r.get('review_group'):
             payoff = f"毛 {ex['gross_r']:+.2f}R  −  费用 {ex['gross_r']-ex['net_r']:.2f}R  =  净 {ex['net_r']:+.2f}R"
-        fig.text(.565, .124, payoff, fontsize=10.2, color="#B3BAC5")
+        if not r.get('execution_bars'):
+            fig.text(.565, .124, payoff, fontsize=10.2, color="#B3BAC5")
         pivot = ex["pivot"]
-        fig.text(.565, .091, (f"局部极值 {pivot['price']:,.1f} / {pivot['reference_r']:.2f}R（回看参考，非成交价）"
-                 if pivot else "真实退出按原账本保留；本次只改展示"), fontsize=9.5, color="#9AA2AF")
-        fig.text(.565, .059, f"周一 {r['monday_date']} · ↑低点向上 / ↓高点向下 · 线旁名称为匹配周的关键位",
-                 fontsize=9.1, color="#9AA2AF")
-        fig.text(.045, .024, f"原始OHLC重绘 · 60根真实15mK · 信号前{r['bars_before']}根 / 后{r['bars_after']}根 · "
-                 + "关键线按触价时已知周一区间作复盘参照 · 淡色勾叉仅为背景信号", fontsize=8.4, color="#6E7785")
+        if not r.get('execution_bars'):
+            fig.text(.565, .091, (f"局部极值 {pivot['price']:,.1f} / {pivot['reference_r']:.2f}R（回看参考，非成交价）"
+                     if pivot else "真实退出按原账本保留；本次只改展示"), fontsize=9.5, color="#9AA2AF")
+            fig.text(.565, .059, f"周一 {r['monday_date']} · ↑低点向上 / ↓高点向下 · 线旁名称为匹配周的关键位",
+                     fontsize=9.1, color="#9AA2AF")
+        footer=(f"周一 {r['monday_date']} · 关键线固定为触价时已知区间 · 淡色勾叉为背景信号" if r.get('execution_bars') else
+            f"原始OHLC重绘 · 60根真实15mK · 信号前{r['bars_before']}根 / 后{r['bars_after']}根 · 关键线按触价时已知周一区间作复盘参照 · 淡色勾叉仅为背景信号")
+        fig.text(.045, .024,footer,fontsize=8.4,color="#6E7785")
         path = destination / r["version"] / f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}_60bars.png"
         path.parent.mkdir(exist_ok=True)
         fig.canvas.draw()
