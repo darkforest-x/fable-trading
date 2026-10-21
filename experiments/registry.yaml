@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v230-exits-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 473203b3c4
+    status: rejected
+    question: Can owner-approved fixed targets, staged exits or breakeven improve V2.30 BTC and ETH annual returns with unchanged wick stops and20bp costs?
+    single_variable: Frozen17-arm exit comparison; fixed5R is the common baseline for BE and staged stops. Key_tp_stop adds an adverse-key half stop to key_tp. Entries, original risk, costs and matched controls are unchanged.
+    result: All17 arms netnegative for both symbols. BTC best new arm key_tp_stop gross15.4496R net-179.0502R versus random-109.0460R, worse than prior pivot-159.5831R. ETH best fixed10R gross55R net-39.4344R versus random-127.2104R;14of99 netwins, first-half+8.5535R and second-half-47.9879R. ETH5R-43.4344R;3R fee-cover BE-42.2246R, while both staged stops and both R split targets worsen5R. No arm passes Holm-adjusted p<0.01. No profitable default found under the frozen costs.
+    artifacts:
+    - range-v230-exits-20261021-v1
+    canonical_report: experiments/active/exp-range-v230-exits-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Owner explicitly approved all tiers and both staged-stop definitions. Nautilus1.231.0 native HEDGING brackets,10580positions21160fills, per-position PnL and commission checked; existing C++ price/time parity for every leg plus stop-first sensitivity.163 focused regression/boundary tests pass. Worst signal sensitivity reduction6R; all combinations remain negative. Only BTC10R has one study-boundary close contributing+2.3762R; both annual leaders have none. Key snapshots freeze at entry; two halves of original size aggregate to parent risk. BE completed5m close, effective next bar; fee-cover may defer when infeasible. Reused prior data, exact131/99signals and matched controls. Builder committed before generation. No Pine, live, model, dependency or default change; no new report.
   - experiment_id: exp-range-v230-pivot-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 0730664625

@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v230-exits-20261021-v1
+    artifact_type: manifest
+    role: V2.30 annual fixed staged and breakeven native exit comparison
+    source_repo: darkforest-x/fable-trading
+    source_commit: 473203b3c4
+    generator_commit: 473203b3c4
+    source_path: experiments/active/exp-range-v230-exits-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v230-exits-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Config, summary,34native receipts and run metadata retained; raw original-half leg inputs/fills/parent results and stop-first sensitivity retained locally. Reuses exp-range-v230-pivot-20261021-v1 source candles and candidates unchanged. Annual BTC131 and ETH99,20bp, independent original-risk units. All34coin-policy results negative; BTC best new-179.0502R and ETH best-39.4344R.10580native positions21160fills;163tests. No funding/depth/latency simulation and no account-return claim. Full-year rankings and chronological halves are descriptive, not untouched validation.
   - artifact_id: range-v230-pivot-20261021-v1
     artifact_type: manifest
     role: Current V2.30 BTC and ETH confirmed-pivot native executions and matched controls

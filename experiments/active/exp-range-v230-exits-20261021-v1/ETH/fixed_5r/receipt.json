@@ -1,0 +1,375 @@
+{
+  "identity": {
+    "inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 1453331,
+        "mtime_ns": 1792560819928804129
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candidates.csv",
+        "bytes": 17718,
+        "mtime_ns": 1792560819933383442
+      }
+    ],
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v230_exit_compare.py",
+        "bytes": 13226,
+        "mtime_ns": 1792561880904840772
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/layers/l3_backtest/nautilus_independent.py",
+        "bytes": 34882,
+        "mtime_ns": 1792561426653286088
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_breakeven.py",
+        "bytes": 14693,
+        "mtime_ns": 1792503466110711990
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_be_native.cpp",
+        "bytes": 5467,
+        "mtime_ns": 1792503466110324198
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/btc_range_wick_fanshen.py",
+        "bytes": 24375,
+        "mtime_ns": 1792516503642491535
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_2_reference.py",
+        "bytes": 9348,
+        "mtime_ns": 1792467583097764831
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/pepe_range_exits.py",
+        "bytes": 17722,
+        "mtime_ns": 1792479018859194613
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_management_study.py",
+        "bytes": 10731,
+        "mtime_ns": 1792488870307794373
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_framework.py",
+        "bytes": 13665,
+        "mtime_ns": 1792560739568948587
+      }
+    ],
+    "config": {
+      "experiment_id": "exp-range-v230-exits-20261021-v1",
+      "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+      "start": "2025-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "round_trip_cost": 0.002,
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "seed": 20261021,
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "expected_signals": 131
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "expected_signals": 99
+        }
+      ],
+      "arms": [
+        {
+          "name": "fixed_1r",
+          "target_r": 1
+        },
+        {
+          "name": "fixed_2r",
+          "target_r": 2
+        },
+        {
+          "name": "fixed_3r",
+          "target_r": 3
+        },
+        {
+          "name": "fixed_5r",
+          "target_r": 5
+        },
+        {
+          "name": "fixed_10r",
+          "target_r": 10
+        },
+        {
+          "name": "split_1_3r",
+          "split_r": [
+            1,
+            3
+          ]
+        },
+        {
+          "name": "split_2_5r",
+          "split_r": [
+            2,
+            5
+          ]
+        },
+        {
+          "name": "key_tp",
+          "key_tp": true
+        },
+        {
+          "name": "be_price_1r",
+          "target_r": 5,
+          "be_r": 1,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_price_2r",
+          "target_r": 5,
+          "be_r": 2,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_price_3r",
+          "target_r": 5,
+          "be_r": 3,
+          "be_mode": "price"
+        },
+        {
+          "name": "be_cost_1r",
+          "target_r": 5,
+          "be_r": 1,
+          "be_mode": "cost"
+        },
+        {
+          "name": "be_cost_2r",
+          "target_r": 5,
+          "be_r": 2,
+          "be_mode": "cost"
+        },
+        {
+          "name": "be_cost_3r",
+          "target_r": 5,
+          "be_r": 3,
+          "be_mode": "cost"
+        },
+        {
+          "name": "half_stop",
+          "target_r": 5,
+          "stop_mode": "half_r"
+        },
+        {
+          "name": "key_stop",
+          "target_r": 5,
+          "stop_mode": "key"
+        },
+        {
+          "name": "key_tp_stop",
+          "key_tp": true,
+          "stop_mode": "key"
+        }
+      ],
+      "owner_approval": "2026-10-21 owner explicitly approved all fixed/split/BE tiers and both staged-stop variants.",
+      "tranche_semantics": "Two halves of ORIGINAL size. Leg1 has first target and early stop when specified; leg2 has second target and original wick stop. Either exit of leg1 consumes that original half, never reduces the remaining half again.",
+      "key_snapshot": "Monday endpoints and configured bidirectional Fib levels known at entry close; nearest two favorable unique tick prices. Missing target leaves that half protected by stop until study boundary. Nearest adverse key strictly between entry and original stop is optional early half stop; absent means original stop.",
+      "be_clock": "Completed5m close reaches1/2/3 original R; modification effective next bar; price BE leaves fees, cost BE covers20bp if no gap. A cost-cover stop cannot be installed beyond current price and is deferred until feasible.",
+      "comparison": "Same frozen entries and matched controls. Fixed5R is the baseline for BE and staged stops. Key_tp_stop adds only staged key stop to key_tp. Full-year comparisons are descriptive; half-year cohorts are not untouched validation and no defaults are promoted.",
+      "execution": "Native independent hedging bracket orders with existing O-H-L-C and independent-limit fill model. Existing C++ kernel audits price/time and provides stop-first same-bar sensitivity. No new execution engine.",
+      "training_eligible": false,
+      "production_eligible": false
+    }
+  },
+  "audit": {
+    "engine": "nautilus_trader",
+    "version": "1.231.0",
+    "market_tick": 0.01,
+    "protection_tick": 0.01,
+    "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+    "partial_execution": "disabled",
+    "native_partial_accounting_checked": 0,
+    "fixed_target_execution": "resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup",
+    "native_fixed_target_accounting_checked": 198,
+    "target_from_entry": true,
+    "breakeven_includes_cost": true,
+    "positions": 198,
+    "fills": 396,
+    "execution_minutes": 5,
+    "rsi_scaleout": "disabled",
+    "rsi_skip_events": 0,
+    "timed_be_minutes": null,
+    "confirmed_pivot_exit": false,
+    "pivot_execution": "disabled",
+    "strict_pivot_ties": false,
+    "max_simultaneous_positions": 4,
+    "bars_with_both_directions": 426,
+    "prepare_seconds": 0.13056345799850533,
+    "replay_seconds": 1.5295150840029237,
+    "runtime_warnings": [
+      "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+    ],
+    "accounting": "independent original-risk R; frozen account; not portfolio returns"
+  },
+  "oracle": {
+    "checked": 198,
+    "native_price_time_parity": true,
+    "conservative_changed": 1
+  },
+  "summary": [
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "group": "all",
+      "n": 99,
+      "wins": 23,
+      "win_rate": 0.23232323232323232,
+      "gross_r": 51.00000000000296,
+      "fee_r": 94.43440113675649,
+      "net_r": -43.43440113675353,
+      "pf": 0.6804702025251655,
+      "mean_net_bp": -1.5064772417092687,
+      "random_net_r": -109.21041982005791,
+      "conservative_net_r": -49.43440113675352,
+      "random_conservative_net_r": -109.21041982005795,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -43.43440113675353,
+      "missing_target_n": 0,
+      "ambiguous_legs": 1,
+      "be_effective_n": 0,
+      "weeks": 42,
+      "excess_r": 65.7760186833044,
+      "p_one_sided": 0.04889755512224389,
+      "weekly_bootstrap_total_r_95ci": [
+        -0.21817455415078155,
+        137.55041823939789
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "group": "long",
+      "n": 58,
+      "wins": 9,
+      "win_rate": 0.15517241379310345,
+      "gross_r": 1.999999999999826,
+      "fee_r": 50.70303441735612,
+      "net_r": -48.70303441735629,
+      "pf": 0.44263158833389704,
+      "mean_net_bp": -23.641706172000518,
+      "random_net_r": -78.56610628509584,
+      "conservative_net_r": -54.70303441735629,
+      "random_conservative_net_r": -78.56610628509553,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -48.70303441735629,
+      "missing_target_n": 0,
+      "ambiguous_legs": 1,
+      "be_effective_n": 0,
+      "weeks": 37,
+      "excess_r": 29.863071867739546,
+      "p_one_sided": 0.1151942402879856,
+      "weekly_bootstrap_total_r_95ci": [
+        -6.142341707034636,
+        65.939759579677
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "group": "short",
+      "n": 41,
+      "wins": 14,
+      "win_rate": 0.34146341463414637,
+      "gross_r": 49.00000000000314,
+      "fee_r": 43.731366719400356,
+      "net_r": 5.268633280602784,
+      "pf": 1.1085154634694945,
+      "mean_net_bp": 29.806773440166157,
+      "random_net_r": -30.64431353496209,
+      "conservative_net_r": 5.268633280602784,
+      "random_conservative_net_r": -30.644313534962425,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": 5.268633280602784,
+      "missing_target_n": 0,
+      "ambiguous_legs": 0,
+      "be_effective_n": 0,
+      "weeks": 31,
+      "excess_r": 35.912946815564865,
+      "p_one_sided": 0.13174341282935853,
+      "weekly_bootstrap_total_r_95ci": [
+        -18.056154041930892,
+        83.92709811470895
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "group": "first_half",
+      "n": 48,
+      "wins": 13,
+      "win_rate": 0.2708333333333333,
+      "gross_r": 29.999999999999886,
+      "fee_r": 31.446491380873013,
+      "net_r": -1.4464913808731286,
+      "pf": 0.9752775840071647,
+      "mean_net_bp": 15.201590124072538,
+      "random_net_r": -19.412820241847207,
+      "conservative_net_r": -1.4464913808731286,
+      "random_conservative_net_r": -19.412820241847157,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -1.4464913808731286,
+      "missing_target_n": 0,
+      "ambiguous_legs": 0,
+      "be_effective_n": 0,
+      "weeks": 20,
+      "excess_r": 17.96632886097408,
+      "p_one_sided": 0.34763261836908155,
+      "weekly_bootstrap_total_r_95ci": [
+        -36.03889443840784,
+        77.96833373941853
+      ]
+    },
+    {
+      "symbol": "ETH",
+      "arm": "fixed_5r",
+      "group": "second_half",
+      "n": 51,
+      "wins": 10,
+      "win_rate": 0.19607843137254902,
+      "gross_r": 21.000000000003077,
+      "fee_r": 62.98790975588347,
+      "net_r": -41.98790975588039,
+      "pf": 0.4576812440183161,
+      "mean_net_bp": -17.231717115386264,
+      "random_net_r": -89.79759957821072,
+      "conservative_net_r": -47.98790975588039,
+      "random_conservative_net_r": -89.7975995782108,
+      "boundary_n": 0,
+      "boundary_net_r": 0.0,
+      "natural_net_r": -41.98790975588039,
+      "missing_target_n": 0,
+      "ambiguous_legs": 1,
+      "be_effective_n": 0,
+      "weeks": 22,
+      "excess_r": 47.80968982233033,
+      "p_one_sided": 0.027148642567871608,
+      "weekly_bootstrap_total_r_95ci": [
+        11.838398933463134,
+        89.69654283397257
+      ]
+    }
+  ],
+  "source_commit": "473203b3c4dceb7a87d01344eb60b633e86d464f"
+}

@@ -1,0 +1,42 @@
+{
+  "source_commit": "473203b3c4dceb7a87d01344eb60b633e86d464f",
+  "engine": "NautilusTrader 1.231.0",
+  "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -u -m yoyo.evaluation.range_v230_exit_compare",
+  "config": "experiments/active/exp-range-v230-exits-20261021-v1/config.json",
+  "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+  "test_command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_range_v230_exit_compare.py tests/evaluation/test_nautilus_independent.py tests/evaluation/test_nautilus_pivot.py tests/evaluation/test_range_rsi_scaleout.py tests/evaluation/test_range_partial_close.py tests/evaluation/test_range_exit_search.py tests/evaluation/test_range_management_clock.py tests/boundaries/test_layer_imports.py",
+  "tests_passed": 163,
+  "coin_policy_runs": 34,
+  "signals": {
+    "BTC": 131,
+    "ETH": 99
+  },
+  "positions": 10580,
+  "fills": 21160,
+  "price_time_parity_legs": 10580,
+  "conservative_changed_legs": 54,
+  "maximum_signal_same_bar_sensitivity_r": 6.000000000002331,
+  "boundary_rows": [
+    {
+      "symbol": "BTC",
+      "arm": "fixed_10r",
+      "boundary_n": 1,
+      "boundary_net_r": 2.3762143205067243,
+      "natural_net_r": -202.68893773498326
+    }
+  ],
+  "result": "All 34 annual coin-policy comparisons are netnegative at frozen20bp. No new default.",
+  "limitations": [
+    "Independent original-risk units, not account returns",
+    "Synthetic full liquidity; no funding, spread/depth or latency simulation",
+    "Full-year rankings and chronological halves are descriptive, not unseen validation",
+    "One frozen matched-control draw, paired by side/week/half/volatility with preserved relative stop",
+    "Cost-cover breakeven can realize small tick-rounding profit; positive-net win rate includes it"
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "registry_validation": {
+    "new_experiment_and_artifact_rows": "passed; unique and cross-linked",
+    "global_registry": "pre-existing HEAD row spike-v8-total2-1h-native-20260914-delivery lacks source_commit; unchanged by this task"
+  }
+}
