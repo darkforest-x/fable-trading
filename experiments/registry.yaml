@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-fixed1r-fiveyear-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4ba694b7ae
+    status: rejected
+    question: What is the five-year original V2.31 win rate with fixed1R TP and original wick SL?
+    single_variable: Replace pivot exit with fixed1R native target;same unfiltered entries,exact wick stops,matched controls and20bp round-trip cost.
+    result: BTC234of485TP48.247percent,140netwins28.866percent,net-575.4575R versus random-546.6398R;ETH194of385TP50.390percent,156netwins40.519percent,net-286.6198R versus random-318.0466R. Stop-firstTP rates47.423percent/49.610percent. No boundary exits;all gross outcomes are exactlyplus/minus1R. Both full-period arms remain netnegative.
+    artifacts: [range-v231-fixed1r-fiveyear-20261022-v1]
+    canonical_report: experiments/active/exp-range-v231-fixed1r-fiveyear-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Frozen2021-10-21through2026-10-21Shanghai;annual144signal-control pairs reused,726olderpairs replayed as1452nativepositions2904fills. Existing C++ oracle matches all1452native price-time paths;13focused regressiontests pass. Original entries/stops/fees identical;no sweep20,MTF,breakeven orpartialexits. BTC94andETH38TP trades fail to produce positive netR due20bp costs. ETH known revision window haszero path exposure. Five-year,annual andtwo-month results retained;independentR notaccountreturns. Reproduce isolatedNautilusPython -m yoyo.evaluation.range_fiveyear_fixed1r.
   - experiment_id: exp-range-v231-retest-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 130d2e272e45d53e34dbec0845716a782a013041

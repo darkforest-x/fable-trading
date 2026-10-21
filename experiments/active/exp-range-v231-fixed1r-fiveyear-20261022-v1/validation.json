@@ -1,0 +1,30 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "entries_stops_fees_identical_to_original": true,
+      "all_gross_outcomes_plus_or_minus_one": true,
+      "native_new_positions": 820,
+      "native_new_fills": 1640,
+      "oracle": {
+        "checked": 820,
+        "native_price_time_parity": true,
+        "conservative_changed": 12
+      }
+    },
+    {
+      "symbol": "ETH",
+      "entries_stops_fees_identical_to_original": true,
+      "all_gross_outcomes_plus_or_minus_one": true,
+      "native_new_positions": 632,
+      "native_new_fills": 1264,
+      "oracle": {
+        "checked": 632,
+        "native_price_time_parity": true,
+        "conservative_changed": 3
+      }
+    }
+  ],
+  "focused_tests_passed": 13,
+  "test_command": "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_nautilus_independent.py tests/evaluation/test_range_v230_exit_compare.py -k \"target or fixed or same_bar or fees\""
+}
