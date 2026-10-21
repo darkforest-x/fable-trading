@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-fib0618-20261021-v1
+    artifact_type: manifest
+    role: Annual15m Fib0.618-only entry comparison with unchanged native18exit policies and matched controls
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2eca0ca828
+    generator_commit: 2eca0ca828
+    source_path: experiments/active/exp-range-v231-fib0618-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-fib0618-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: BTC11ETH10,20cached pairs and1native replay pair;42prefix checks,90tests. Full key grid retained for exits. Config,signals,candidates,preparation,verification,combined ledgers and native deltas retained. Summary fix454d61d222, no reports, content hashes or Pine delivery. No corrected significance or production qualification.
   - artifact_id: range-v231-5m-20261021-v1
     artifact_type: manifest
     role: Full5m V2.31 annual BTC and ETH entries and native18policy comparison against frozen15m results

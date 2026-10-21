@@ -1,0 +1,110 @@
+{
+  "identity": {
+    "config": {
+      "experiment_id": "exp-range-v231-fib0618-20261021-v1",
+      "start": "2025-10-21T00:00:00+08:00",
+      "end": "2026-10-21T00:00:00+08:00",
+      "warmup": "2025-10-01T00:00:00+08:00",
+      "midpoint": "2026-04-21T00:00:00+08:00",
+      "timezone": "America/New_York",
+      "ratios": [
+        0,
+        0.5,
+        0.618,
+        0.705,
+        1.13,
+        1.27,
+        1.618
+      ],
+      "round_trip_cost": 0.002,
+      "seed": 20261021,
+      "volatility_edges": [
+        0.001,
+        0.002,
+        0.004,
+        0.008,
+        0.016
+      ],
+      "symbols": [
+        {
+          "symbol": "BTC",
+          "tick": 0.1,
+          "seed_offset": 0
+        },
+        {
+          "symbol": "ETH",
+          "tick": 0.01,
+          "seed_offset": 1
+        }
+      ],
+      "training_eligible": false,
+      "production_eligible": false,
+      "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+      "exit_reference": "experiments/active/exp-range-v230-exits-20261021-v1",
+      "signal_minutes": 15,
+      "pivot_minutes": 15,
+      "entry": "V2.31 15m unchanged except only Fib0.618 candidates before pairing; short upper half and long lower half. Preserve full Monday/Fib grid for midpoint and exit keys.",
+      "exit": "Same18 approved exits. Current pivot is15m2/2 confirmation-close market fill; exact touch stop first.",
+      "controls": "Preserve original unique random times when same coin/side/week/half/ATR14-close bucket remains valid; otherwise deterministic rematch. Same relative risk and20bp cost.",
+      "limitations": "Same frozen5mOHLC, O-H-L-C native execution and stop-first sensitivity; zero latency, no funding/spread/depth; independent R, not account returns.",
+      "reproduction": "python -m yoyo.evaluation.range_v231_fib0618",
+      "comparison": "experiments/active/exp-range-v231-returns-20261021-v1",
+      "allowed_entry_keys": [
+        "0.618:up",
+        "0.618:down"
+      ]
+    },
+    "spec": {
+      "symbol": "BTC",
+      "tick": 0.1,
+      "seed_offset": 0
+    },
+    "data": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+      "bytes": 1558509,
+      "mtime_ns": 1792560804279783191
+    },
+    "baseline": {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v231-returns-20261021-v1/BTC/signal_matches.csv",
+      "bytes": 12260,
+      "mtime_ns": 1792567765104765354
+    },
+    "code": [
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/range_v231_fib0618.py",
+        "bytes": 11370,
+        "mtime_ns": 1792569074412392476
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/yoyo/evaluation/monday_range_v2_31_reference.py",
+        "bytes": 4390,
+        "mtime_ns": 1792568947324233598
+      }
+    ]
+  },
+  "previous": 75,
+  "n": 11,
+  "longs": 5,
+  "shorts": 6,
+  "kept": [
+    3,
+    4,
+    20,
+    37,
+    61,
+    66,
+    71,
+    73,
+    89,
+    98,
+    126
+  ],
+  "changed": [],
+  "reassigned": [],
+  "unchanged": 11,
+  "new_arrows": 0,
+  "removed": 64,
+  "new_control_times": 0,
+  "prefix_checks": 22,
+  "source_commit": "2eca0ca82873524644c6250613cf2008383ca5f0"
+}

@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-fib0618-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 2eca0ca828
+    status: inconclusive
+    question: Does restricting V2.31 15m entries to Fib0.618 improve annual BTC and ETH returns under unchanged exits?
+    single_variable: Entry-key whitelist before pairing; retain midpoint-side gate and complete Monday/Fib grid for exit keys. All other15m thresholds, exact wick stops,18exit policies and20bp costs unchanged.
+    result: BTC11signals versus75, pivot1win net-46.4707R and mean-27.8253bp versus-22.0847bp; matched random-41.3928R. ETH10signals versus69, pivot5wins net-2.4259R and mean20.4105bp versus-8.1198bp; random-8.3035R. ETH13of18arms netR positive; fixed5R+7.1659R, cost-BE2R/3R with5Rtarget+8.7679R. BTC all18netR negative. No Holm-corrected advantage established; no Pine default change.
+    artifacts:
+    - range-v231-fib0618-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-fib0618-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Frozen2025-10-21to2026-10-21Shanghai data;90tests,42causal prefixes,108baseline summary rows preserved.20unchanged signal/control pairs reused;1ETH execution pair replayed, plus1key-only reassignment. Prior relative-risk matched controls retained. Sparse delta empty-group serialization fixed in454d61d222; incomplete output preserved. Historical small samples; independentR and equal-notionalbp are distinct, no account compounding/funding/slippage.
   - experiment_id: exp-range-v231-5m-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 4aeead3cc9

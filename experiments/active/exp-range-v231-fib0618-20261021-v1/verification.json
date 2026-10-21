@@ -1,0 +1,19 @@
+{
+  "tests": 90,
+  "baseline_summary_rows_reused_exactly": 108,
+  "coin_policy_ledgers_checked": 36,
+  "causal_prefix_checks": 42,
+  "unchanged_signal_control_pairs_reused": 20,
+  "replayed_pairs": 1,
+  "delta_exit_policies": 17,
+  "delta_native_positions": 46,
+  "delta_native_fills": 92,
+  "delta_fixed_leg_oracle_checks": 46,
+  "delta_pivot_policies": [
+    "pivot",
+    "strict_ties"
+  ],
+  "source_commit": "454d61d2221b383d6d2ee627b250562e6287aca3",
+  "limitation": "No live Pine change. Old75/69 admitted rows reproduce. Entry whitelist leaves full grid for key exits. Small historical sample; no promotion.",
+  "recovery": "First one-pair fixed1R serialization failed on an empty subgroup. Preserved incomplete folder; skip empty groups and regression-test, then rerun the incomplete arm. Native pivot cache reused."
+}
