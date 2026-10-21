@@ -20,7 +20,7 @@ import pandas as pd
 def select_matches(quarter, arrows, prices, labels, weeks, *, before=5, wait_bars=2,
                    penetration=.10, buffer=.002, tick=.1,
                    timezone="America/New_York", start="2026-09-01T00:00:00+08:00",
-                   bar_minutes=15):
+                   bar_minutes=15, allowed_keys=None):
     """Return only decisions observable in this input prefix.
 
     Source columns: open/high/low/close, close-time index at bar_minutes; prices/weekly IDs
@@ -28,11 +28,17 @@ def select_matches(quarter, arrows, prices, labels, weeks, *, before=5, wait_bar
     [arrow-before, arrow); pairing bodies include both arrow and touch.
     Touch offsets range from -2 through wait_bars, relative to arrow.
     All selected indices are <= entry_i; later outcomes are never inspected.
+    Optional allowed_keys restricts entry candidates before selection. Keep
+    the complete price grid: columns 0/1 still define Monday's low/high and
+    the midpoint, and this option does not change any exit-key snapshot.
     """
     if bar_minutes not in (5, 15):
         raise ValueError("Signal candles must be 5m or 15m")
     if not 0 <= before <= 20 or wait_bars not in (1, 2):
         raise ValueError("Invalid previous-body or touch-window settings")
+    eligible = set(labels) if allowed_keys is None else set(allowed_keys)
+    if not eligible.issubset(labels):
+        raise ValueError("Unknown entry key")
     o,h,l,c=(quarter[k].to_numpy() for k in ("open","high","low","close"))
     lower,upper=np.minimum(o,c),np.maximum(o,c)
     n=len(quarter); rows=[]
@@ -46,6 +52,8 @@ def select_matches(quarter, arrows, prices, labels, weeks, *, before=5, wait_bar
                 continue
             wick=lower[j]-l[j] if side==1 else h[j]-upper[j]
             for k,p in enumerate(prices[j]):
+                if labels[k] not in eligible:
+                    continue
                 outside=l[j]<=p<lower[j] if side==1 else upper[j]<p<=h[j]
                 depth=p-l[j] if side==1 else h[j]-p
                 midpoint = prices[j,0] + .5 * (prices[j,1] - prices[j,0])
