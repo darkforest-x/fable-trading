@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v231-5m-20261021-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4aeead3cc9
+    status: rejected
+    question: Does moving all V2.31 signal and pivot clocks from15m to5m produce positive annual after-cost returns under the same18 exit policies?
+    single_variable: Signal timeframe5m including Stoch, pre5 bodies, +/-2 touches, Monday-open timestamps and2/2pivot confirmation; bar counts and all numeric thresholds unchanged. Full5m variant, not5m entry with15m exit.
+    result: BTC170signals versus75; pivot net-331.7291R versus15m-83.3858R, win15.88versus26.67percent, random-415.8671R. ETH184versus69; pivot net-287.6828R versus-33.6448R, win19.57versus34.78percent, random-279.9809R.5m mean netbp BTC-19.7190 (15m-22.0847), ETH-18.9216 (15m-8.1198). All36coin-policy5m cumulative netR and equal-notional means negative. Best R BTC key_tp-317.57R, ETH10R-233.62R. No positive-edge or default-change evidence.
+    artifacts:
+    - range-v231-5m-20261021-v1
+    canonical_report: experiments/active/exp-range-v231-5m-20261021-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    holdout_consumed: false
+    reuse_allowed: true
+    notes: Frozen2025-10-21to2026-10-21Shanghai inputs reused; no download.164tests,34prefix checks,15m75/69identity parity;17700native positions35400fills and16284fixed-leg oracle checks pass.5m median stopBTC0.1422percent ETH0.1665percent; mean20bp cost2.2955R/1.7045R. Same-coin-side-week-half-5mATRbucket unique controls, equal risk fractions. Strict pivot ties and stop-first sensitivity retained; all5m results negative. Native pivot_minutes default15m preserved. Pine remains15m; no account-compounding, funding, spread/depth, latency or unseen-validation claim. Reproduce python -m yoyo.evaluation.range_v231_5m_study. No report requested.
   - experiment_id: exp-range-v231-returns-20261021-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d85e051a7b

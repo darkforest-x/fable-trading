@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v231-5m-20261021-v1
+    artifact_type: manifest
+    role: Full5m V2.31 annual BTC and ETH entries and native18policy comparison against frozen15m results
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4aeead3cc9
+    generator_commit: 4aeead3cc9
+    source_path: experiments/active/exp-range-v231-5m-20261021-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v231-5m-20261021-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Config, preparation, verification, native receipts, fills and trades retained. BTC170ETH184, same20bp costs and exact touch stops.5m2/2confirmation closes; no fill at pivot extreme.17700positions35400fills,16284oracle legs,164tests pass.15m cached results reused; no new chart delivery, report or content hashes. All5m R and equal-notional results negative.
   - artifact_id: range-v231-returns-20261021-v1
     artifact_type: manifest
     role: V2.31 midpoint admission return comparison with cached independent paths and native rematch deltas
