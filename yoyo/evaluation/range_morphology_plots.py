@@ -49,14 +49,15 @@ def contrast_figure(cfg,dest):
             low,high=r['bootstrap95'];y=n-1-i
             ax.plot([100*low,100*high],[y,y],c=color,alpha=.55,lw=2)
             ax.scatter([100*center],[y],s=42,c=color,marker='o' if r['inferable'] else 'x',zorder=3)
-            ax.text(96,y,f"{r['yes']['wins']}/{r['yes']['n']} vs {r['no']['wins']}/{r['no']['n']}",va='center',ha='right',fontsize=8,color='#58626E')
-        ax.set_xlim(-85,100);ax.set_xticks([-75,-50,-25,0,25,50,75]);ax.axvline(0,c='#323A43',lw=1)
+            ax.text(1.02,y,f"{r['yes']['wins']}/{r['yes']['n']} vs {r['no']['wins']}/{r['no']['n']}",
+                    transform=ax.get_yaxis_transform(),va='center',ha='left',fontsize=8,color='#58626E')
+        ax.set_xlim(-85,85);ax.set_xticks([-75,-50,-25,0,25,50,75]);ax.axvline(0,c='#323A43',lw=1)
         ax.grid(axis='x',alpha=.12);ax.spines[['top','right','left']].set_visible(False)
         ax.set_title(coin+'：满足条件 − 不满足条件',fontproperties=FONT,fontsize=14,pad=12)
         ax.set_xlabel('净胜率差（百分点）',fontproperties=FONT);ax.tick_params(axis='y',length=0)
     axes[0].set_yticks(np.arange(n));axes[0].set_yticklabels([c['label'] for c in cuts[::-1]],fontproperties=FONT,fontsize=10)
     fig.suptitle('形态是否改变胜率：同时看效应大小、样本量和不确定性',fontproperties=FONT,fontsize=17,y=.97)
-    fig.text(.5,.925,'点为观察差异，横线为按周重采样95%区间；右侧为两组盈利笔数/总笔数。×表示样本不足以做主要检验。',ha='center',fontproperties=FONT,fontsize=10,color='#58626E')
+    fig.text(.5,.925,'点为观察差异；横线为按周重采样95%区间（未做多重比较校正）。右侧为盈利笔数/总笔数；×表示检验样本不足。',ha='center',fontproperties=FONT,fontsize=10,color='#58626E')
     fig.tight_layout(rect=[0,.04,1,.90]);fig.savefig(dest/'shape_winrate_contrasts.png',dpi=180,facecolor='white');plt.close(fig)
 
 
