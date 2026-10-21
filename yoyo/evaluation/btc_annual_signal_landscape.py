@@ -259,7 +259,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                 ha='center', va='center', bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color=col,lw=.85,shrinkA=7,shrinkB=8),zorder=11))
             named.append(ax.annotate(f"{ex.get('label','出场')}  {price(ex['price'])}",xy=(exit_x,ex['price']),
-                xytext=(min(51,exit_x+9),ex['price']+side*span*.13),fontsize=12,color='#E5E8F0',
+                xytext=(min(51,exit_x+9),ex['price']+side*span*(.22 if r.get('execution_bars') else .13)),fontsize=12,color='#E5E8F0',
                 ha='center',va='center',bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color='#E5E8F0',lw=.85,shrinkA=7,shrinkB=8),zorder=11))
         fig.text(.045, .157, "勾叉K " + stamp(r["signal_time"]) + "    触价K " + stamp(r["touch_time"]), fontsize=10.3)
