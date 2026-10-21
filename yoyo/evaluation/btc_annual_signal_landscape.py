@@ -173,7 +173,8 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
             legend = r['review_group'] + f"   ·   净 {r['exit']['net_r']:+.2f}R   ·   黄色=触价K"
         fig.text(.955, .910, legend, fontsize=9.6,
                  color="#929BA9", ha="right")
-        ax = fig.add_axes([.055, .245, .90, .625])
+        ax = fig.add_axes([.055, .30, .90, .57] if r.get('execution_bars')
+                          else [.055, .245, .90, .625])
         # Sixty candles occupy 0..59; the empty right margin is for line names.
         xmax = 75
         ax.set(xlim=(-1, xmax), ylim=(ymin, ymax))

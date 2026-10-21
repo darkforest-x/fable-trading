@@ -97,7 +97,7 @@ def prepare():
                 levels=[dict(key=name,price=float(grid[j,k])) for k,name in enumerate(names)],
                 execution_bars=[dict(index=k,time=(five.index[k]-pd.Timedelta(minutes=5)).tz_convert('Asia/Shanghai').isoformat(),
                     **{c:float(five.iloc[k][c]) for c in ['open','high','low','close']})
-                    for k in range(t.entry_i-1,t.end_i+1)],
+                    for k in range(max(0,t.entry_i-2),min(len(five),t.exit_i+3))],
                 exit=dict(time=ex.isoformat(),price=float(t.exit_price),reason=1,label='止损',gross_r=float(t.gross_r),
                     net_r=float(t.net_r),outside_window=False,pivot=None))
             charts.append(r)
