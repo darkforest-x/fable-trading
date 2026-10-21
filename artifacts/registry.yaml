@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-recent-winners-20261021
+    artifact_type: manifest
+    role: Seven requested net-profitable recent BTC15m trades with actual entry and exit annotations
+    source_repo: darkforest-x/fable-trading
+    source_commit: 9a9e7007e2
+    generator_commit: 9a9e7007e2
+    source_path: artifacts/btc_recent_winners_20261021/validation.json
+    storage_uri: repo://artifacts/btc_recent_winners_20261021/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Seven of15current all-key BTC signals from2026-08-21to2026-10-21;6short1long.2880x1620PNG,60real15m candles each, named matched keys and both Monday boundaries. Actual entry/exit prices and close times verified against frozen ledger and OHLC; retrospective pivot shown separately. Seven-image ZIP checked. Full contact sheet plus charts4and7 visually checked; no new backtest, Pine change or Telegram send.
   - artifact_id: range-v231-recent2m-20261021-v1
     artifact_type: manifest
     role: Two-month all-key15m native trade-window evaluation with paired controls and concentration check
