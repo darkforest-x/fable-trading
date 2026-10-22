@@ -33735,6 +33735,23 @@ artifacts:
     production_eligible: false
     notes: Reuses causal BTC5m1745/BTC15m711/ETH5m962/ETH15m415 events and matched controls. No new entry or fills; existing excursions utility measures gross MFE before initial SL or data end, excluding stop-touch candle with separate upper bound. No TP/BE/ATR/H1 or time cap. All cached native TP1/2/3 hits under OHLC and OLHC lie within per-position MFE bounds; histogram counts reconcile. Medians1.0194/1.0181/0.8378/0.9685R; censored9/3/7/2. Large tails include multi-month holding and are not intraday or realized returns. Run isolated Nautilus Python module yoyo.evaluation.range_v237_mfe_charts --calculate-only, then main venv same module --render-only. PNG visually inspected; no report or production change.
 
+  - artifact_id: range-v237-langlang-confirm-20261022
+    source_commit: 995392608a
+    generator_commit: 1542a4a590
+    artifact_type: manifest
+    role: causal_next_open_confirmation_and_signal_extreme_stop_comparison
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-range-v237-langlang-confirm-20261022-v1/validation.json
+    storage_uri: repo://experiments/active/exp-range-v237-langlang-confirm-20261022-v1/validation.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Preserve original MTF pairing; three bars hold original5m arrow extreme, then directional close beyond priorbar.
+      Confirmation may precede pair publication but never backdates entry. Next observed5m open entry; exact arrow extreme stop and120minute cap.
+      Native1747positions3494fills,16tests, all anchor-side, entry/exit/cost audits. One incomplete delayedBTC5m pair excluded symmetrically.
+      BTC406/154andETH232/88 filled signals; all cohorts and years netnegative. Same-rule random and zero-return rejected opportunities retained.
+      Raw compressed ledgers local; no new data, Pine or production changes.
+
   - artifact_id: range-v237-smaller-stop-20261022
     source_commit: ef9fd4ae70
     generator_commit: ef9fd4ae70
