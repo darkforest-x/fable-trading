@@ -1,3 +1,12 @@
+## 2026-10-22 · Monday 1.618 monitor — Apple Glass delivered
+
+- Owner-approved Apple Glass screen `07032a6d28ba421790a667c5dc50eccc` recovered from browser DOM and direct Stitch get_screen. The list API omitted the completed screen; prior absence conclusion was incorrect. Actual HTML/CSS preserved in artifacts/monday-fib-monitor-20261022/stitch-apple.html; rejected Obsidian source remains unused. No duplicate generation or design waiver.
+- Frontend a473791648 adds the menu, lazy assets, glass tokens, locally bundled source font, searchable/paginated full contract list, state filters, Monday H/L details, quote freshness, touch receipts and independent TG switch. API and monitoring semantics unchanged; no backtest or trading changes.
+- 37 frontend tests and 2 static-asset tests pass. Desktop1280x1000 and phone390x844 verified with no horizontal overflow or console errors; search/empty/missing-history/details/pagination and route style isolation checked. Screenshots and frontend_smoke.json retain evidence. User-requested final IAB tab retained; no temporary browser process remains. The existing Owner Stitch Chrome tab was not closed.
+- Live snapshot507 contracts,494 full Monday anchors,13 missing full Monday. Original scanner alive/errors0; four patrol plans enabled at15/15/240/1440minutes with current worker heartbeat. The older4h/day rounds remain partial, not claimed fully complete. Subscription was off initially, then activation at1792682048630 occurred outside agent actions; current on state preserved. No real test message or agent subscription write. API records natural live notifications separately.
+- Receipt and registry updated; stitch-1-618 follow-up PAUSED, implementation complete. Shared main workspace and other sessions' dirty edits preserved. No formal report generated.
+
+
 ## 2026-10-22 · Monday 1.618 first-touch win rate and failure attribution
 
 - Owner image short84375.8→TP8081923.8→TP2081166 confirms deep-side0.618 target; NYMonday H83149.8/L81166 matchesOKX exactly. Initial provisional Binance result13.48percent preserved separately; screenshot-matched OKX15.73percent is primary.
