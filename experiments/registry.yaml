@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-body-20261022-v10
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0234aca68176ac7c296c08fcf023647a013d7e2
+    status: rejected
+    question: Does near-Monday TP1 with immediate breakeven improve confirmed1618 reversals?
+    single_variable: 'Only TP1 changes from Monday midpoint to near Monday boundary: high for short, low for long. Same25percent original notional and immediate remainder breakeven. TP2/TP3/TP4, latest5 completed15m structuralSL, confirmation/adverse gates and zero fees unchanged. Existing firstTP room skip remains active.'
+    result: 71closed19wins52losses26.7606percent;mean-16.55568bp,sum-26.16055R vs v9 16.9014percent,-7.77968bp,-20.90645R.710random19.5775percent,-5.33176bp;equalnotionalp.81986. Oldlosersgain11.99143R,oldwinnerslose17.24552R. Earlymean-25.3143bp/later-9.3691bp. No default upgrade.
+    artifacts:
+    - btc-monday-fib-body-20261022-v10
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v10/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Only25percentTP1 moves midpoint to nearMondayedge; immediate75percentBE, other3targets/latest5completed15mSL/two-closeentry/2percentpreentrygate/fee0 unchanged.71identicalentriesandstops,7lossesrescued12oldwinsallstaywinsbutsmaller;TP4count8to4.53tests,3124legs6248fills24.2s,781cash/stopchecks710random71targetchecks,reversepayoff0. https://app.notion.com/p/4018856479af81178dded6f5ff741a37
   - experiment_id: exp-btc-monday-fib-body-20261022-v9
     source_repo: darkforest-x/fable-trading
     source_commit: af83a16d14ab26bd7bf0abb62e5f9b6c8840048d

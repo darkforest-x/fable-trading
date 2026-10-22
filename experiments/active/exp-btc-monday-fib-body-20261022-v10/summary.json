@@ -1,0 +1,396 @@
+{
+  "config": {
+    "experiment_id": "exp-btc-monday-fib-body-20261022-v10",
+    "symbol": "BTCUSDT",
+    "venue": "OKX USDT perpetual",
+    "timezone": "America/New_York",
+    "start": "2024-10-22T00:00:00+08:00",
+    "split": "2025-10-22T00:00:00+08:00",
+    "end": "2026-10-22T00:00:00+08:00",
+    "warmup": "2024-10-01T00:00:00Z",
+    "tick": 0.1,
+    "stop_fraction": 0.007,
+    "round_trip_cost": 0.0,
+    "seed": 20261022,
+    "controls_per_signal": 10,
+    "volatility_edges": [
+      0.001,
+      0.002,
+      0.004,
+      0.008,
+      0.016
+    ],
+    "inference": "Week-cluster sign permutation; 1 fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.",
+    "not_applicable": "No fitted model or score; AUC, top-decile ranking and single-feature model baselines do not apply. Matched random entry is the null comparator.",
+    "limitations": "Completed15m body confirmation and one-minute OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.",
+    "training_eligible": false,
+    "production_eligible": false,
+    "venue_evidence": "Owner screenshot Monday H83149.8/L81166 exactly matches existing OKX2026-10-19 NY data; Binance H83157.9/L81146.4 differs. Preserve initial Binance experiment as explicit venue comparison.",
+    "wait_minutes": null,
+    "be_minutes": [
+      0
+    ],
+    "entry": "First weekly-side touch; earliest adjacent15m pair where first open AND close are strictly inside outer1618 and next close is strictly inside. Enter on second close. Next open unrestricted. Failed pair keeps observing. No arrow, no elapsed timeout. Pre-entry2percent adverse wick invalidation remains live through second close. Original nextMonday reset. First target must remain ahead with native tick clearance.",
+    "exit": "Four original25percent tranches. Latest5 completed15m low/high initial SL, no buffer. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry. Observation deadline follows wait_minutes; None means no elapsed-time timeout, original next-Monday reset retained.",
+    "resolution": "Completed15m signals built from existing minute-close OHLC; native1m execution. No true tick-order claim.",
+    "selection": "Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.",
+    "controls": "10 random minute closes matched by coin/side/NYweek/half/causalATR bucket. Same directional latest5 completed15m structuralSL rule, only loss-side stops eligible; relative target geometry matches signal. No forming15m high/low. No confirmation requirement on controls.",
+    "targets": "Short: Monday high, lower0.618, lower0.705, Monday low. Long: Monday low, upper0.618, upper0.705, Monday high. Each25percent original notional. Midpoint target removed.",
+    "target_breakeven": true,
+    "prior_experiment": "exp-btc-monday-fib-confirm-20261022-v1",
+    "prior_inputs": "experiments/active/exp-btc-monday-fib-body-20261022-v9",
+    "change": "Only TP1 changes from Monday midpoint to near Monday boundary: high for short, low for long. Same25percent original notional and immediate remainder breakeven. TP2/TP3/TP4, latest5 completed15m structuralSL, confirmation/adverse gates and zero fees unchanged. Existing firstTP room skip remains active.",
+    "require_arrow": false,
+    "arms": [
+      "body15m"
+    ],
+    "skip_insufficient_fee_room": true,
+    "preserve_prior_receipts": true,
+    "fee_authority": "Latest owner AGENTS instruction2026-10-22: all backtests temporarily exclude fees, overriding previous20bp.",
+    "adverse_extension_fraction": 0.02,
+    "next_15m_close_confirmation": true,
+    "stop_15m_lookback": 5,
+    "first_target_monday_boundary": true
+  },
+  "scope": {},
+  "admission": {
+    "source_experiment": "exp-btc-monday-fib-body-20261022-v9",
+    "previous_inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v9/entries.csv",
+        "bytes": 19012,
+        "mtime_ns": 1792671972705410855
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v9/controls.csv",
+        "bytes": 142619,
+        "mtime_ns": 1792671972708430119
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v9/decisions.csv",
+        "bytes": 24082,
+        "mtime_ns": 1792671972709529833
+      }
+    ],
+    "frozen_signals": 71,
+    "frozen_controls": 710,
+    "admission_checks": {
+      "weeks": 105,
+      "weekly_sides": 210,
+      "touched": 90,
+      "body_checks": 71,
+      "arrow_required": false,
+      "elapsed_wait_timeout": false,
+      "fee_geometry_filter": true,
+      "next_15m_close_confirmation": true,
+      "adverse_extension_fraction": 0.02,
+      "stop_15m_lookback": 5
+    },
+    "change": "Only TP1 changes from Monday midpoint to near Monday boundary: high for short, low for long. Same25percent original notional and immediate remainder breakeven. TP2/TP3/TP4, latest5 completed15m structuralSL, confirmation/adverse gates and zero fees unchanged. Existing firstTP room skip remains active."
+  },
+  "comparisons": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "segment": -1,
+      "signal": {
+        "n": 71,
+        "closed": 71,
+        "open": 0,
+        "wins": 19,
+        "losses": 52,
+        "breakeven": 0,
+        "win_pct": 26.76056338028169,
+        "nonloss_pct": 26.76056338028169,
+        "net_r": -26.160548529893454,
+        "mean_bp": -16.555683727185365,
+        "tp1": 19,
+        "tp2": 7,
+        "tp3": 5,
+        "tp4": 4,
+        "be_exit": 15,
+        "be_active": 19,
+        "reverse_net_r": -26.160548529893347,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 710,
+        "closed": 710,
+        "open": 0,
+        "wins": 139,
+        "losses": 571,
+        "breakeven": 0,
+        "win_pct": 19.577464788732392,
+        "nonloss_pct": 19.577464788732392,
+        "net_r": 70.30470323932819,
+        "mean_bp": -5.3317600316974065,
+        "tp1": 139,
+        "tp2": 65,
+        "tp3": 61,
+        "tp4": 44,
+        "be_exit": 95,
+        "be_active": 139,
+        "reverse_net_r": 70.30470323932977,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 63,
+        "excess_r": -33.19101885382627,
+        "p_one_sided": 0.991300434978251,
+        "weekly_bootstrap_total_r_95ci": [
+          -60.598393054752655,
+          -7.385993577182658
+        ]
+      }
+    },
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "segment": 0,
+      "signal": {
+        "n": 32,
+        "closed": 32,
+        "open": 0,
+        "wins": 7,
+        "losses": 25,
+        "breakeven": 0,
+        "win_pct": 21.875,
+        "nonloss_pct": 21.875,
+        "net_r": -18.393734787801648,
+        "mean_bp": -25.314297487925394,
+        "tp1": 7,
+        "tp2": 2,
+        "tp3": 1,
+        "tp4": 1,
+        "be_exit": 6,
+        "be_active": 7,
+        "reverse_net_r": -18.393734787801606,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 320,
+        "closed": 320,
+        "open": 0,
+        "wins": 54,
+        "losses": 266,
+        "breakeven": 0,
+        "win_pct": 16.875,
+        "nonloss_pct": 16.875,
+        "net_r": -57.87523040417342,
+        "mean_bp": -13.051747192030652,
+        "tp1": 54,
+        "tp2": 24,
+        "tp3": 24,
+        "tp4": 18,
+        "be_exit": 36,
+        "be_active": 54,
+        "reverse_net_r": -57.87523040417324,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 29,
+        "excess_r": -12.6062117473843,
+        "p_one_sided": 0.9812009399530024,
+        "weekly_bootstrap_total_r_95ci": [
+          -24.46791716660053,
+          -1.5203536548574637
+        ]
+      }
+    },
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "segment": 1,
+      "signal": {
+        "n": 39,
+        "closed": 39,
+        "open": 0,
+        "wins": 12,
+        "losses": 27,
+        "breakeven": 0,
+        "win_pct": 30.76923076923077,
+        "nonloss_pct": 30.76923076923077,
+        "net_r": -7.766813742091806,
+        "mean_bp": -9.369128846578159,
+        "tp1": 12,
+        "tp2": 5,
+        "tp3": 4,
+        "tp4": 3,
+        "be_exit": 9,
+        "be_active": 12,
+        "reverse_net_r": -7.766813742091744,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 390,
+        "closed": 390,
+        "open": 0,
+        "wins": 85,
+        "losses": 305,
+        "breakeven": 0,
+        "win_pct": 21.794871794871796,
+        "nonloss_pct": 21.794871794871796,
+        "net_r": 128.17993364350167,
+        "mean_bp": 1.002588407550385,
+        "tp1": 85,
+        "tp2": 41,
+        "tp3": 37,
+        "tp4": 26,
+        "be_exit": 59,
+        "be_active": 85,
+        "reverse_net_r": 128.179933643503,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 34,
+        "excess_r": -20.584807106441968,
+        "p_one_sided": 0.9482025898705064,
+        "weekly_bootstrap_total_r_95ci": [
+          -44.89191131637182,
+          3.4192534160943993
+        ]
+      }
+    }
+  ],
+  "selections": [],
+  "native_audits": [
+    {
+      "delay": 0,
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "market_tick": 0.1,
+      "protection_tick": 0.1,
+      "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+      "partial_execution": "disabled",
+      "native_partial_accounting_checked": 0,
+      "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+      "native_fixed_target_accounting_checked": 3124,
+      "target_from_entry": true,
+      "target_breakeven": true,
+      "breakeven_includes_cost": true,
+      "breakeven_on_touch": false,
+      "intrabar_path": null,
+      "synthetic_segments_per_bar": 1,
+      "positions": 3124,
+      "fills": 6248,
+      "execution_minutes": 1,
+      "rsi_scaleout": "disabled",
+      "rsi_skip_events": 0,
+      "timed_be_minutes": null,
+      "confirmed_pivot_exit": false,
+      "structural_pivot_stop": false,
+      "structural_execution": "disabled",
+      "pivot_execution": "disabled",
+      "strict_pivot_ties": false,
+      "max_simultaneous_positions": 44,
+      "bars_with_both_directions": 13398,
+      "prepare_seconds": 1.6437731659971178,
+      "replay_seconds": 24.215054291998968,
+      "runtime_warnings": [
+        "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+      ],
+      "accounting": "independent original-risk R; frozen account; not portfolio returns",
+      "oracle_checked": 3124,
+      "same_endpoint_target_metadata": 0,
+      "reverse_payoff_changes": 0
+    }
+  ],
+  "baseline_audits": [],
+  "prior_rule_comparison": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "old": {
+        "n": 71,
+        "closed": 71,
+        "open": 0,
+        "wins": 12,
+        "losses": 59,
+        "breakeven": 0,
+        "win_pct": 16.901408450704224,
+        "nonloss_pct": 16.901408450704224,
+        "net_r": -20.906454498170294,
+        "mean_bp": -7.779680196494384,
+        "tp1": 12,
+        "tp2": 12,
+        "tp3": 10,
+        "tp4": 8,
+        "be_exit": 4,
+        "be_active": 12,
+        "reverse_net_r": -20.906454498170213,
+        "terminal_mark_r": 0.0
+      },
+      "new": {
+        "n": 71,
+        "closed": 71,
+        "open": 0,
+        "wins": 19,
+        "losses": 52,
+        "breakeven": 0,
+        "win_pct": 26.76056338028169,
+        "nonloss_pct": 26.76056338028169,
+        "net_r": -26.160548529893454,
+        "mean_bp": -16.555683727185365,
+        "tp1": 19,
+        "tp2": 7,
+        "tp3": 5,
+        "tp4": 4,
+        "be_exit": 15,
+        "be_active": 19,
+        "reverse_net_r": -26.160548529893347,
+        "terminal_mark_r": 0.0
+      },
+      "pairing_unit": "same entry",
+      "changed_entry_times": 0,
+      "shared_entry_shift_minutes": {},
+      "paired_rows": 71,
+      "added": [],
+      "removed": [],
+      "removed_metrics": {
+        "n": 0,
+        "closed": 0,
+        "open": 0,
+        "wins": 0,
+        "losses": 0,
+        "breakeven": 0,
+        "win_pct": null,
+        "nonloss_pct": null,
+        "net_r": 0.0,
+        "mean_bp": null,
+        "tp1": 0,
+        "tp2": 0,
+        "tp3": 0,
+        "tp4": 0,
+        "be_exit": 0,
+        "be_active": 0,
+        "reverse_net_r": 0.0,
+        "terminal_mark_r": 0.0
+      },
+      "delta_r": -5.254094031723154,
+      "risk_scale_changed": false,
+      "shared_mean_change_bp": -8.776003530690978,
+      "delta_in_prior_risk_units": -5.254094031723155,
+      "transitions": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 52
+        },
+        {
+          "old": "loss",
+          "new": "win",
+          "n": 7
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 12
+        }
+      ]
+    }
+  ],
+  "source_commit": "d0234aca68176ac7c296c08fcf023647a013d7e2",
+  "audit_version_note": "Only active scope is summarized. Completed timed arms are retained but excluded following owner instruction. Same-endpoint target-only metadata ordering is distinguished from exact stop/target prices,times,reasons.",
+  "training_eligible": false,
+  "production_eligible": false
+}

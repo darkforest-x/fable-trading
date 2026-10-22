@@ -1,0 +1,7 @@
+# A nearer first target can raise win rate while reducing total payoff
+
+- **Problem**: Owner moved only the first25percent Monday-range target from midpoint to the near boundary, keeping immediate BE on all remaining quantity. Same71 entries and latest5 completed15m structural stops produced19wins instead of12, but mean entry-notional return worsened from-0.0778percent to-0.1656percent.
+- **Dead end**: Counting7 rescued losses as proof of improvement. Earlier TP also advances the protection time for the other75percent, so the change affects every runner's path rather than just the first quarter's exit price.
+- **Effective path**: Compare exact shared entries and initial risk using native fill ledgers. The59 old losses improved by11.9914R, while the12 old winners lost17.2455R of payoff; all old winners stayed positive, masking their reduced contribution in win rate. Full fourth-target trades fell8to4. Total own-riskR fell-20.9065to-26.1605, and equal-notionalPF fell.8463to.6265.
+- **General rule**: When partial TP triggers protection, a target change is also a protection-timing change. Attribute both rescued losses and compressed winners, and check later-target survival before interpreting a higher win rate as progress.
+- **Related**: `yoyo/evaluation/monday_fib_near_target_compare.py`; `experiments/active/exp-btc-monday-fib-body-20261022-v10/target_comparison.json`. Zero fees, no timed expiry or default promotion; fixed historical comparison, not forward validation.

@@ -1,0 +1,70 @@
+{
+  "parent_cash_reconciliations": 781,
+  "matched_control_checks": 710,
+  "minute_grid_rows": 1080960,
+  "no_post_split_development_outcomes": true,
+  "independent_partial_candle_checks": 0,
+  "independent_body_checks": 71,
+  "independent_next_close_checks": 71,
+  "independent_structural_stop_checks": 781,
+  "independent_monday_first_target_checks": 71,
+  "admission": [
+    {
+      "arm": "body15m",
+      "entries": 71,
+      "statuses": {
+        "confirmed": 71,
+        "adverse_extension_invalidated": 16,
+        "expired": 2,
+        "data_censored": 1
+      },
+      "arrow_first": 0,
+      "body_first": 0,
+      "same_minute": 0,
+      "entry_back_outside": 0,
+      "arrow_later_disappeared": 0,
+      "wait_median_minutes": 28.0
+    }
+  ],
+  "transitions": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "counts": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 52
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 19
+        }
+      ],
+      "mean_change_bp": 0.0
+    }
+  ],
+  "cash_metrics": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "realized_cash_dd_r": 29.70531790779059,
+      "pf": 0.49691252827128096
+    }
+  ],
+  "holm_adjusted": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "p": 0.991300434978251
+    }
+  ],
+  "multiplicity_comparisons": 1,
+  "test_receipt": {
+    "passed": 53,
+    "failed": 0,
+    "command": "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_monday_fib_confirmation.py tests/evaluation/test_nautilus_target_breakeven.py tests/evaluation/test_monday_fib_limits.py"
+  },
+  "limitations": "Completed15m body, native TP-triggered protection; OHLC1m is not a real tick path. Round-trip entry-notional cost=0.000000. Independent R is not portfolio return. No arrows or elapsed-time expiry."
+}

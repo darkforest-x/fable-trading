@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-monday-fib-body-20261022-v10
+    artifact_type: manifest
+    role: Does near-Monday TP1 with immediate breakeven improve confirmed1618 reversals?
+    source_repo: darkforest-x/fable-trading
+    source_commit: d0234aca68176ac7c296c08fcf023647a013d7e2
+    generator_commit: d0234aca68176ac7c296c08fcf023647a013d7e2
+    source_path: experiments/active/exp-btc-monday-fib-body-20261022-v10/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-body-20261022-v10/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Only25percentTP1 moves midpoint to nearMondayedge; immediate75percentBE, other3targets/latest5completed15mSL/two-closeentry/2percentpreentrygate/fee0 unchanged.71identicalentriesandstops,7lossesrescued12oldwinsallstaywinsbutsmaller;TP4count8to4.53tests,3124legs6248fills24.2s,781cash/stopchecks710random71targetchecks,reversepayoff0. https://app.notion.com/p/4018856479af81178dded6f5ff741a37
   - artifact_id: btc-monday-fib-body-20261022-v9
     artifact_type: manifest
     role: Does latest5 completed15m structural stop improve the confirmed Monday1618 reversal?

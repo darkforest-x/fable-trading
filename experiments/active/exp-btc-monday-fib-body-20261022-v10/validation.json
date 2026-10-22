@@ -1,0 +1,20 @@
+{
+  "tests_passed": 53,
+  "native_positions": 3124,
+  "native_fills": 6248,
+  "replay_seconds": 24.215054291998968,
+  "independent_exit_checks": 3124,
+  "structural_stop_checks": 781,
+  "first_target_checks": 71,
+  "parent_cash_checks": 781,
+  "matched_random_checks": 710,
+  "unchanged_entries_stops_later_targets": 71,
+  "reverse_path_changes": 0,
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.monday_fib_tp_breakeven --experiment experiments/active/exp-btc-monday-fib-body-20261022-v10 --initialize --delays 0 --collect",
+    "python3 -m yoyo.evaluation.monday_fib_near_target_compare"
+  ],
+  "reuse": "Native execution complete; read saved results without rerunning unchanged native paths."
+}

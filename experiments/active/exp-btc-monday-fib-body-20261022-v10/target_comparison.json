@@ -1,0 +1,232 @@
+{
+  "experiment": "exp-btc-monday-fib-body-20261022-v10",
+  "unchanged_entry_stop_and_later_targets": 71,
+  "skipped_prior_ids": [],
+  "skipped_prior_outcomes": {},
+  "skipped_prior_sum_bp": 0.0,
+  "tp1_distance_pct": {
+    "min": 0.3952236046180505,
+    "q25": 1.0531830905763475,
+    "median": 1.4216505551024359,
+    "q75": 1.839398495309287,
+    "max": 4.437247516040151
+  },
+  "prior_tp1_distance_pct": {
+    "min": 1.1858914529966045,
+    "q25": 2.140242048744748,
+    "median": 2.824808468703316,
+    "q75": 3.5718910754121946,
+    "max": 8.394878443016552
+  },
+  "transitions": [
+    {
+      "old": "loss",
+      "new": "loss",
+      "n": 52
+    },
+    {
+      "old": "loss",
+      "new": "win",
+      "n": 7
+    },
+    {
+      "old": "win",
+      "new": "win",
+      "n": 12
+    }
+  ],
+  "attribution_by_prior_outcome": [
+    {
+      "prior_outcome": "loss",
+      "n": 59,
+      "sum_change_bp": 760.711183884014,
+      "sum_change_r": 11.991428938830694
+    },
+    {
+      "prior_outcome": "win",
+      "n": 12,
+      "sum_change_bp": -1383.8074345630735,
+      "sum_change_r": -17.24552297055385
+    }
+  ],
+  "equal_notional_pf": 0.6265055079204552,
+  "prior_equal_notional_pf": 0.8463349138194726,
+  "mean_per_original_opportunity_bp": -16.555683727185365,
+  "prior_mean_per_original_opportunity_bp": -7.779680196494384,
+  "equal_notional_strategy_vs_random": {
+    "weeks": 63,
+    "p_one_sided": 0.8198590070496475,
+    "excess_sum_bp": -796.8985823796452,
+    "weekly_bootstrap_total_bp_95ci": [
+      -2460.517922439874,
+      914.9711547504181
+    ]
+  },
+  "equal_notional_new_vs_old_per_original_opportunity": {
+    "weeks": 63,
+    "p_one_sided": 0.8490075496225189,
+    "excess_sum_bp": -623.0962506790595,
+    "weekly_bootstrap_total_bp_95ci": [
+      -1845.068329083932,
+      444.00147528481614
+    ]
+  },
+  "outcome_changes": [
+    {
+      "parent_id": "body15m-2025-03-17--1",
+      "week": "2025-03-17",
+      "side": -1,
+      "segment": 0,
+      "entry": 85754.0,
+      "risk": 624.0,
+      "outcome": "win",
+      "net_r": 0.3947916666666643,
+      "net_bp": 28.727522914382835,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -72.76628495463768,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 101.49380786902051,
+      "change_r": 1.3947916666666642
+    },
+    {
+      "parent_id": "body15m-2025-03-31--1",
+      "week": "2025-03-31",
+      "side": -1,
+      "segment": 0,
+      "entry": 85162.6,
+      "risk": 425.1000000000058,
+      "outcome": "win",
+      "net_r": 0.7168901434956639,
+      "net_bp": 35.78448755674567,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -0.9999999999999658,
+      "net_bp_old": -49.9162778026964,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 85.70076535944207,
+      "change_r": 1.7168901434956299
+    },
+    {
+      "parent_id": "body15m-2025-05-19--1",
+      "week": "2025-05-19",
+      "side": -1,
+      "segment": 0,
+      "entry": 109005.7,
+      "risk": 833.4000000000087,
+      "outcome": "win",
+      "net_r": 0.6457583393328458,
+      "net_bp": 49.37127141057754,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -76.45471750559913,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 125.82598891617667,
+      "change_r": 1.6457583393328457
+    },
+    {
+      "parent_id": "body15m-2025-08-04--1",
+      "week": "2025-08-04",
+      "side": -1,
+      "segment": 0,
+      "entry": 116250.1,
+      "risk": 526.8999999999942,
+      "outcome": "win",
+      "net_r": 0.2667014613778969,
+      "net_bp": 12.088161644593196,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -45.324692193812666,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 57.412853838405866,
+      "change_r": 1.2667014613778969
+    },
+    {
+      "parent_id": "body15m-2025-12-08-1",
+      "week": "2025-12-08",
+      "side": 1,
+      "segment": 1,
+      "entry": 87999.9,
+      "risk": 476.59999999999127,
+      "outcome": "win",
+      "net_r": 0.8184011749895455,
+      "net_bp": 44.32391400444889,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -54.15915245358134,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 98.48306645803024,
+      "change_r": 1.8184011749895455
+    },
+    {
+      "parent_id": "body15m-2026-02-09-1",
+      "week": "2026-02-09",
+      "side": 1,
+      "segment": 1,
+      "entry": 66636.8,
+      "risk": 297.1999999999971,
+      "outcome": "win",
+      "net_r": 1.356325706594894,
+      "net_bp": 60.492100461006316,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -44.59998079139411,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 105.09208125240042,
+      "change_r": 2.3563257065948937
+    },
+    {
+      "parent_id": "body15m-2026-04-13--1",
+      "week": "2026-04-13",
+      "side": -1,
+      "segment": 1,
+      "entry": 77433.3,
+      "risk": 806.5,
+      "outcome": "win",
+      "net_r": 0.7925604463732185,
+      "net_bp": 82.54846429120296,
+      "tp1": true,
+      "tp4": false,
+      "be_exit": true,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -104.1541558993353,
+      "tp1_old": false,
+      "tp4_old": false,
+      "be_exit_old": false,
+      "change_bp": 186.70262019053825,
+      "change_r": 1.7925604463732185
+    }
+  ],
+  "units": "bp is unlevered original-entry-notional per trade, not account return. Same retained entries and initial risk; removed opportunities separately zero exposure.",
+  "source_commit": "f76d1d7276d0ceb0c617cd4237467b860cdd2833"
+}
