@@ -1,0 +1,72 @@
+{
+  "version": "V2.37",
+  "source_commit": "2b1a8b0aa1",
+  "native_fixture_commit": "6f36761a77",
+  "source": "yoyo/evaluation/pine/monday_range_v2_37.pine",
+  "private_script": "周一高低点区间＋翻身 · V2.37",
+  "private_revision": 1,
+  "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+  "chart_symbol": "OKX:BTCUSDT.P",
+  "chart_timeframe": "15m",
+  "chart_settings": {
+    "txRequested": true,
+    "txMatchWindow": 5,
+    "txStopBars": 5,
+    "txStopBuffer": 0.05,
+    "txBufferUnit": "入场价百分比",
+    "txArmR": 5,
+    "txAtrLen": 14,
+    "txAtrMult": 4
+  },
+  "scope": "Additional same-side5m arrow filter on original H1-qualified15m frames. Existing5m pairing and key-level module unchanged.",
+  "window": {
+    "unit": "5m candle open",
+    "before": 5,
+    "after": 5,
+    "inclusive": true,
+    "minutes_each_side": 25,
+    "center": "15m arrow candle open"
+  },
+  "publication": "Only after both arrows close; preserve original15m reference entry, stop and intervening outcomes. Later match is explicitly retrospective.",
+  "owner_example": {
+    "quarter_open": "2026-10-16T19:30:00+08:00",
+    "five_open": "2026-10-16T19:25:00+08:00",
+    "entry_close": "2026-10-16T19:45:00+08:00",
+    "publication": "2026-10-16T19:45:00+08:00",
+    "entry": 82663.9,
+    "stop": 82939.4,
+    "peak_r": 6.87186933,
+    "exit_r": 5.6123412,
+    "occurrences": 1
+  },
+  "validation": {
+    "local_tests_passed": 65,
+    "native_fixture_groups_passed": 12,
+    "loaded_5m": {
+      "total": 77,
+      "retrospective": 69,
+      "owner_occurrences": 1
+    },
+    "loaded_15m": {
+      "total": 86,
+      "retrospective": 2,
+      "owner_occurrences": 1,
+      "entries_since_20260822_published_by_20261022_1015": 47
+    },
+    "native_5m_evidence": "output/pine/monday_range_v2_37_native_5m_ax.txt",
+    "native_15m_evidence": "output/pine/monday_range_v2_37_native_15m_ax.txt",
+    "save_evidence": "output/pine/monday_range_v2_37_clean_save_ax.txt",
+    "settings_evidence": "output/pine/monday_range_v2_37_settings_ax.txt",
+    "final_evidence": "output/pine/monday_range_v2_37_final_ax.txt",
+    "clean_production_example_screenshot": "output/pine/monday_range_v2_37_final.png",
+    "scope": "Loaded TradingView history and frozen-cache overlap; not a new profitability backtest."
+  },
+  "prior_sources_and_private_scripts_preserved": true,
+  "old_chart_copy_removed": "V2.36",
+  "production_source_has_no_qa_appendix": true,
+  "editor_and_logs_closed": true,
+  "chart_layout_saved": true,
+  "temporary_browser_sessions_created": 0,
+  "production_eligible": false,
+  "training_eligible": false
+}
