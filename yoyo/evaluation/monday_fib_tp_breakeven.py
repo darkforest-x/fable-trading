@@ -38,10 +38,14 @@ def initialize():
     cfg,entry,random=context()
     oldcfg=json.loads((OLD/'config.json').read_text())
     if (cfg['wait_minutes']!=oldcfg['wait_minutes']
-            or cfg.get('require_arrow',True)!=oldcfg.get('require_arrow',True)):
+            or cfg.get('require_arrow',True)!=oldcfg.get('require_arrow',True)
+            or cfg.get('adverse_extension_fraction')!=oldcfg.get('adverse_extension_fraction')):
         frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
         entry,decisions,checks=m.prepare(frame,cfg)
-        random=m.controls(frame,entry,cfg)
+        if cfg.get('reuse_execution_experiment'):
+            keys=pd.MultiIndex.from_frame(entry[['arm','pair_id']])
+            random=random[pd.MultiIndex.from_frame(random[['arm','pair_id']]).isin(keys)].copy()
+        else:random=m.controls(frame,entry,cfg)
         entry.to_csv(EXP/'entries.csv',index=False)
         random.to_csv(EXP/'controls.csv',index=False)
         decisions.to_csv(EXP/'decisions.csv',index=False)
@@ -99,6 +103,45 @@ def replay_uncontested():
     print(json.dumps(dict(partial_only=True,parents=len(rows),audit=audit),ensure_ascii=False),flush=True)
 
 
+def project():
+    """Causal entry filter reuses identical independent native positions/fills.
+
+    No exits change, no portfolio competition or liquidity consumption exists.
+    Original engine run and accounting evidence remain the execution source.
+    """
+    cfg,_,_=context()
+    source=ROOT/cfg['reuse_execution_experiment']/'native_market_be_0'
+    assert (source/'identity.json').exists(),'Source native execution is not complete'
+    entries=pd.read_csv(EXP/'entries.csv',float_precision='round_trip')
+    controls=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
+    desired=m.legs(pd.concat([entries,controls],ignore_index=True)).set_index('trade_id')
+    rows=pd.read_csv(source/'trades.csv',float_precision='round_trip')
+    rows=rows[rows.trade_id.isin(desired.index)].copy()
+    assert len(rows)==len(desired)
+    indexed=rows.set_index('trade_id').loc[desired.index]
+    for c in ('entry_i','side','entry','stop','risk','target_price','end_i','weight'):
+        assert (indexed[c]-desired[c]).abs().lt(1e-8).all(),f'Changed {c}'
+    fills=pd.read_csv(source/'fills.csv',float_precision='round_trip')
+    fills=fills[fills.trade_id.isin(desired.index)].copy()
+    parents=pd.read_csv(source/'parents.csv',float_precision='round_trip')
+    parents=parents[parents.parent_id.isin(entries.trade_id.tolist()+controls.trade_id.tolist())].copy()
+    assert len(rows)==4*len(parents) and len(fills)==2*len(rows)
+    folder=EXP/'native_market_be_0';folder.mkdir(exist_ok=True)
+    source_audit=json.loads((source/'audit.json').read_text())
+    audit=dict(engine=source_audit['engine'],version=source_audit['version'],
+        target_breakeven=True,target_from_entry=True,positions=len(rows),fills=len(fills),oracle_checked=len(rows),
+        native_fixed_target_accounting_checked=len(rows),
+        execution_kind='Projection of unchanged independent native positions; no new engine replay',
+        source_directory=str(source.relative_to(ROOT)),source_positions=source_audit['positions'],
+        source_fills=source_audit['fills'],source_run_audit=source_audit,source_oracle_checks_inherited=True,
+        causal_prefilter_checks=len(parents),reverse_payoff_changes=int((abs(rows.net_r-rows.reverse_net_r)>1e-8).sum()))
+    rows.to_csv(folder/'trades.csv',index=False);fills.to_csv(folder/'fills.csv',index=False)
+    parents.to_csv(folder/'parents.csv',index=False);dump(folder/'audit.json',audit)
+    dump(folder/'identity.json',dict(config=cfg,delay=0,mode='market',execution_kind='native_projection',
+        source_identity=file_stamp(source/'identity.json'),source_trades=file_stamp(source/'trades.csv'),
+        selected_trade_ids=desired.index.tolist(),code=[file_stamp(ROOT/p) for p in CODE]))
+
+
 def collect():
     cfg,entry,random=context();summary=[];audits=[];ledger=[];old_comparison=[]
     scope=json.loads((EXP/'scope.json').read_text()) if (EXP/'scope.json').exists() else {}
@@ -137,6 +180,7 @@ def collect():
                 old_comparison.append(dict(arm=arm,delay=delay,old=m.metric(before),new=m.metric(s),
                     paired_rows=npairs,added=sorted(set(s.index)-set(before.index)),
                     removed=sorted(set(before.index)-set(s.index)),
+                    removed_metrics=m.metric(before.loc[before.index.difference(s.index)]),
                     delta_r=float((p.net_r-p.net_r_old).sum()),
                     transitions=[dict(old=a,new=b,n=int(n)) for (a,b),n in p.groupby(['outcome_old','outcome']).size().items()]))
     pd.concat(ledger,ignore_index=True).to_csv(EXP/'all_parents.csv',index=False)
@@ -170,9 +214,11 @@ if __name__=='__main__':
     parser.add_argument('--delays',type=int,nargs='+')
     parser.add_argument('--collect',action='store_true')
     parser.add_argument('--uncontested',action='store_true')
+    parser.add_argument('--project',action='store_true')
     args=parser.parse_args()
     if args.experiment:EXP=args.experiment.resolve()
     if args.initialize:initialize()
     if args.delays:replay(args.delays)
     if args.uncontested:replay_uncontested()
+    if args.project:project()
     if args.collect:collect()

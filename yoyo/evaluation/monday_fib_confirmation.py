@@ -194,6 +194,18 @@ def prepare_body(frame,cfg):
             **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),status=status,
             entry_i=j,body_i=j,arrow_i=-1,arrow_minutes=0,
             wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False)
+        extension=cfg.get('adverse_extension_fraction')
+        if extension is not None:
+            until=j if j>=0 else last
+            adverse=bars[i:until+1,2 if r.side==1 else 1]
+            invalid=np.flatnonzero(-r.side*(adverse-r.entry)>extension*r.entry+1e-8)
+            if len(invalid):
+                bad=i+int(invalid[0])
+                row.update(status='adverse_extension_invalidated',invalid_i=bad,
+                    invalid_time=str(frame.index[bad]),invalid_price=float(adverse[invalid[0]]),
+                    invalid_threshold=r.entry*(1-r.side*extension))
+                decisions.append(row)
+                continue
         if j>=0:
             price=float(frame.close.iloc[j]);room=r.side*(row['tp1']-price)
             if room<cfg['tick']-1e-8:row['status']='target_already_passed'
@@ -213,7 +225,8 @@ def prepare_body(frame,cfg):
         assert r['side']*(r['entry']-r['level'])>0
     return pd.DataFrame(entries),pd.DataFrame(decisions),dict(weeks=int(weekly.week.nunique()),
         weekly_sides=len(weekly),touched=len(touch),body_checks=len(entries),
-        arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True)
+        arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True,
+        adverse_extension_fraction=cfg.get('adverse_extension_fraction'))
 
 
 def controls(frame,entry,cfg):
