@@ -13,6 +13,7 @@ from yoyo.evaluation.monday_fib_confirmation import EXP,SOURCE,ARMS,aggregate,fo
 from yoyo.evaluation.pepe_range_exits import signals
 from yoyo.evaluation.range_framework import dump,file_stamp
 from yoyo.evaluation import monday_fib_limits as base
+from yoyo.evaluation.monday_range_v2_2_reference import atr
 
 
 def run():
@@ -21,6 +22,24 @@ def run():
     decisions=pd.read_csv(EXP/'decisions.csv',float_precision='round_trip')
     ledger=pd.read_csv(EXP/'all_parents.csv',float_precision='round_trip')
     frame=base.aligned(pd.read_csv(SOURCE/'candles.csv.gz',float_precision='round_trip'))
+    assert frame.index.is_unique and (np.diff(frame.index.asi8)==60_000_000_000).all()
+    controls=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
+    quarter=aggregate(frame,15)
+    volatility=(atr(quarter,14)/quarter.close).reindex(frame.index,method='ffill')
+    buckets=np.digitize(volatility.to_numpy(),cfg['volatility_edges'])
+    actual=entry.set_index(['arm','pair_id'])
+    assert controls.groupby(['arm','pair_id']).size().eq(cfg['controls_per_signal']).all()
+    for r in controls.itertuples():
+        s=actual.loc[(r.arm,r.pair_id)]
+        t=frame.index[r.entry_i].tz_convert(cfg['timezone'])
+        week=(t.normalize()-pd.DateOffset(days=t.dayofweek)).strftime('%Y-%m-%d')
+        assert r.week==s.week==week and r.side==s.side
+        assert r.segment==s.segment==int(frame.index[r.entry_i]>=pd.Timestamp(cfg['split']))
+        assert r.bucket==buckets[r.entry_i]==buckets[int(s.entry_i)]
+        assert abs(r.entry-frame.close.iloc[r.entry_i])<1e-8
+        for j in (1,2,3,4):
+            target=base.rounded(r.entry*s[f'tp{j}']/s.entry,cfg['tick'],r.side==1)
+            assert abs(getattr(r,f'tp{j}')-target)<1e-8
     split=int(frame.index.searchsorted(pd.Timestamp(cfg['split'])))
     assert not ((ledger.segment==0)&(ledger.exit_i>=split)).any(), 'Selection read post-split outcome'
     old=ledger[ledger.delay.eq(0)&ledger.population.eq('signal')&ledger.arm.ne('touch')].set_index('parent_id')
@@ -84,6 +103,7 @@ def run():
             arrow_later_disappeared=int(g.arrow_disappeared_by_close.sum()),
             wait_median_minutes=float(g.wait_minutes.median())))
     dump(EXP/'review.json',dict(parent_cash_reconciliations=reconciliations,
+        matched_control_checks=len(controls),minute_grid_rows=len(frame),
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm48=ranked,
         focused_and_layer_tests=107,
