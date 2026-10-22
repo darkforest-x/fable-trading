@@ -95,4 +95,9 @@ if barstate.islast and not na(tx) and not qa236LedgerLogged
                 log.info("V236_OWNER_EXAMPLE {0}", row)
         else if f.size() != 13
             runtime.error("V236_OLD15M_FIELDS_FAIL")
+    if tx.total != tx.trades.size()
+        runtime.error("V236_HISTORY_COUNT_FAIL")
+    int ownerAt = timestamp("Asia/Shanghai", 2026, 10, 22, 5, 45)
+    if txEntryTf == "5" and syminfo.tickerid == "OKX:BTCUSDT.P" and tx.sourceStart < ownerAt and tx.closeAt >= ownerAt + 1800000 and exampleCount != 1
+        runtime.error("V236_OWNER_HISTORY_MISSING")
     log.info("V236_LEDGER_PASS chart={0} total={1} retrospective={2} ownerExample={3}", txEntryTf, tx.total, retrospective, exampleCount)
