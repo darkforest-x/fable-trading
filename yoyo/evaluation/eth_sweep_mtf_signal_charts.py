@@ -71,6 +71,7 @@ def prepare():
         prior20=float(q.low.iloc[j-20:j].min() if side==1 else q.high.iloc[j-20:j].max())
         lo=max(0,min(min(i,j)-20,len(q)-60));hi=lo+60
         ex=pd.Timestamp(t.exit_time).tz_convert('Asia/Shanghai')
+        hi=min(len(q),max(hi,int(q.index.searchsorted(ex))+4))
         assert opened[lo]<=ex<=q.index[hi-1]
         assert np.all(np.diff(q.index[lo:hi].asi8)==pd.Timedelta(minutes=15).value)
         assert five.low.iloc[int(t.exit_i)]-1e-8<=t.exit_price<=five.high.iloc[int(t.exit_i)]+1e-8
@@ -84,6 +85,7 @@ def prepare():
             wick=float(wick),depth=float(depth),penetration=float(depth/wick),bars_before=i-lo,bars_after=hi-i-1,
             mtf_arrow_time=g.arrow_close,review_group='扫前20根＋多周期 · 固定1R · 零手续费',
             separate_entry_callout=True,price_decimals=2,zero_fee=True,ambiguous=bool(t.ambiguous),
+            extend_to_exit=hi-lo>60,
             entry_5m_i=int(t.entry_i),exit_5m_i=int(t.exit_i),prior20=prior20,
             candles=[dict(index=k,time=opened[k].tz_convert('Asia/Shanghai').isoformat(),
                 ny_day=int(opened[k].tz_convert(cfg['timezone']).dayofweek),arrow=int(arrow[k]),
@@ -127,7 +129,7 @@ def render():
         ink.text((24,18),f'ETH · 扫极值＋多周期 · #{start+1:02d}–#{start+len(chunk):02d} / 27 · 零手续费',font=font,fill='#D9DADB')
         for offset,m in enumerate(chunk):
             r=data['charts'][start+offset]
-            assert {r['key'],'0:up','0:down'}<=set(m['labeled_levels']) and m['candle_count']==60
+            assert {r['key'],'0:up','0:down'}<=set(m['labeled_levels']) and m['candle_count']==len(r['candles'])
             with Image.open(DEST/m['file']) as im:
                 assert im.size==(2880,1620)
                 contact.paste(im.resize((800,450),Image.Resampling.LANCZOS),((offset%3)*800,80+(offset//3)*500))
@@ -143,7 +145,7 @@ def render():
     with zipfile.ZipFile(archive) as z:
         assert sum(n.endswith('.png') for n in z.namelist())==27 and z.testzip() is None
     receipt=dict(count=27,wins=19,losses=8,gross_r=11.,round_trip_cost=0,
-        dimensions=[2880,1620],bars_per_chart=60,all_source_fills_reconciled=True,
+        dimensions=[2880,1620],bars_per_chart=[len(r['candles']) for r in data['charts']],all_source_fills_reconciled=True,
         all_source_signal_ids_included=True,all_5m_execution_insets=True,
         post_entry_is_review_context=True,ambiguous=sum(r['ambiguous'] for r in data['charts']),
         overviews=overviews,zip=archive.name,zip_bytes=archive.stat().st_size,

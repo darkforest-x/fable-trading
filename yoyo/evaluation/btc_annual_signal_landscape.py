@@ -149,7 +149,8 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
     manifest = []
     for r in selected:
         bars = r["candles"]
-        assert len(bars) == 60
+        count = len(bars)
+        assert count == 60 or (r.get('extend_to_exit') and count > 60)
         ids = [b["index"] for b in bars]
         ai, ti, ei = (ids.index(r[k]) for k in ("signal_i", "touch_i", "entry_i"))
         side, col = r["side"], COLORS[r["side"]]
@@ -165,7 +166,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         fig.text(.045, .952, f"{r.get('symbol','BTC')}USDT.P   {r.get('display_version',r['version'])}   #{r['number']:03d} / {r['total']}   "
                  + ("多头" if side == 1 else "空头"), fontsize=19, color=col, va="top")
         fig.text(.955, .949, stamp(r["signal_time"], "%Y-%m-%d %H:%M")
-                 + "  ·  15m × 60  ·  北京时间", fontsize=12, color="#C8CDD6", ha="right", va="top")
+                 + f"  ·  15m × {count}  ·  北京时间", fontsize=12, color="#C8CDD6", ha="right", va="top")
         fig.text(.045, .910, f"触及 {label(r['key'])}  {price(r['level'])}", fontsize=12, color="#FFED46")
         cohort = (f"对应 {r['other_version']} #{r['other_number']:03d}" if r["other_number"] else "仅此版本")
         legend = "黄色=触价K  /  入场、出场均为实际成交" if trade_review else cohort + "  ·  黄色=触价K  /  E=入场K  /  ◇=实际退出"
@@ -175,13 +176,14 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                  color="#929BA9", ha="right")
         ax = fig.add_axes([.055, .30, .90, .57] if r.get('execution_bars')
                           else [.055, .245, .90, .625])
-        # Sixty candles occupy 0..59; the empty right margin is for line names.
-        xmax = 75
+        # Keep the original60 layout; an explicit review extension includes
+        # long-running exits without changing the signal's left context.
+        xmax = count + 15
         ax.set(xlim=(-1, xmax), ylim=(ymin, ymax))
         ax.yaxis.set_major_locator(ticker.MaxNLocator(nbins=8, steps=[1, 2, 2.5, 4, 5, 10]))
         ax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:,.0f}"))
         ax.tick_params(axis="both", colors="#7F8793", length=0, labelsize=9, pad=8)
-        ticks = list(range(0, 60, 6)) + [59]
+        ticks = list(range(0, count, max(6,(count+9)//10))) + [count-1]
         ax.set_xticks(ticks, [stamp(bars[x]["time"], "%m-%d\n%H:%M") for x in ticks])
         ax.grid(color="#15191E", linewidth=.5, linestyle=(0, (1, 5)))
         for spine in ax.spines.values():
@@ -196,12 +198,12 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                 lc = '#AB9DDB'
             if key == r["key"] and not key.startswith("0:"):
                 lc = "#FFED46"
-            ax.hlines(line_price, -.5, 60.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
+            ax.hlines(line_price, -.5, count+.1, color=lc, lw=1.05 if key.startswith("0:") else .65,
                       linestyles=(0, (4, 3)) if key.startswith('prior20:') else 'solid',
                       alpha=1 if key.startswith("0:") or key == r["key"] else .6, zorder=1)
-            ax.plot([60.1, 61.1], [line_price, text_y], color=lc, lw=.55, alpha=.85, zorder=2)
+            ax.plot([count+.1, count+1.1], [line_price, text_y], color=lc, lw=.55, alpha=.85, zorder=2)
             text = ("● " if key == r["key"] else "") + label(key) + f"  {price(line_price)}"
-            named.append(ax.text(61.4, text_y, text, color=lc, fontsize=9.5,
+            named.append(ax.text(count+1.4, text_y, text, color=lc, fontsize=9.5,
                                 va="center", zorder=8, bbox=dict(facecolor="black", edgecolor="none", pad=1)))
         for x, b in enumerate(bars):
             cc = ("#FFED46" if x == ti else "#4CAF50" if b["ny_day"] == 0
@@ -229,7 +231,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
             arrowprops=dict(arrowstyle="->", color="#FFED46", lw=.7, shrinkA=6, shrinkB=11), zorder=9)
         ax.scatter([ti], [r["level"]], s=21, facecolors="#FFFFFF", edgecolors="#000000", lw=.7, zorder=9)
         entry_end = ei + 6.4
-        if entry_end > 59.7:
+        if entry_end > count-.3:
             # Retain six-bar reference length at the study edge, going left.
             entry_start, entry_end = ei - 5.6, ei + .4
         else:
@@ -241,7 +243,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         ax.text(ei, -.102, "E", transform=ax.get_xaxis_transform(), color=col, ha="center", fontsize=10)
         ex = r["exit"]
         exit_x = (datetime.fromisoformat(ex["time"]) - datetime.fromisoformat(bars[0]["time"])).total_seconds() / 900 - .5
-        if -.5 <= exit_x <= 59.5:
+        if -.5 <= exit_x <= count-.5:
             ax.scatter([exit_x], [ex["price"]], s=35, marker="D", facecolors="none",
                        edgecolors="#E5E8F0", lw=.9, zorder=10)
         if r.get('target') is not None:
@@ -259,7 +261,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                 ha='center', va='center', bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color=col,lw=.85,shrinkA=7,shrinkB=8),zorder=11))
             named.append(ax.annotate(f"{ex.get('label','出场')}  {price(ex['price'])}",xy=(exit_x,ex['price']),
-                xytext=(min(51,exit_x+9),ex['price']+side*span*(.22 if r.get('execution_bars') else .13)),fontsize=12,color='#E5E8F0',
+                xytext=(min(count-9,exit_x+9),ex['price']+side*span*(.22 if r.get('execution_bars') else .13)),fontsize=12,color='#E5E8F0',
                 ha='center',va='center',bbox=dict(facecolor='black',edgecolor='none',pad=3),
                 arrowprops=dict(arrowstyle='->',color='#E5E8F0',lw=.85,shrinkA=7,shrinkB=8),zorder=11))
         fig.text(.045, .157, "勾叉K " + stamp(r["signal_time"]) + "    触价K " + stamp(r["touch_time"]), fontsize=10.3)
@@ -309,7 +311,7 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
         fig.savefig(path, dpi=180)
         plt.close(fig)
         manifest.append(dict(version=r["version"], number=r["number"], signal_time=r["signal_time"],
-            key=r["key"], level=r["level"], other_number=r["other_number"], candle_count=60,
+            key=r["key"], level=r["level"], other_number=r["other_number"], candle_count=count,
             labeled_levels=[lv["key"] for lv in visible], file=str(path.relative_to(destination))))
         if len(manifest) % 25 == 0:
             print(f"Rendered {len(manifest)} / {len(selected)}", flush=True)
