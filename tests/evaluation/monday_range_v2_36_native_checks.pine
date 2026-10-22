@@ -1,0 +1,98 @@
+// Temporary native fixture appendix; never deliver in the private indicator.
+qa236At(int bar) =>
+    1800000000000 + bar * 300000
+qa236Candidate(int bar, int side) =>
+    TxTrade trade = TxTrade.new(qa236At(bar + 1), 0, side, 100, 100 - side, 1, 100 - side)
+    TxReviewCandidate.new(trade, qa236At(bar), side == 1 ? 99.5 : 100.5)
+
+varip bool qa236Logged = false
+if barstate.islast and not qa236Logged
+    bool boundaries = txReviewMatches(qa236At(-5), 1, qa236At(0), 1, 5)
+    boundaries := boundaries and txReviewMatches(qa236At(5), 1, qa236At(0), 1, 5)
+    boundaries := boundaries and txReviewMatches(qa236At(0), -1, qa236At(0), -1, 5)
+    boundaries := boundaries and not txReviewMatches(qa236At(-6), 1, qa236At(0), 1, 5)
+    boundaries := boundaries and not txReviewMatches(qa236At(6), 1, qa236At(0), 1, 5)
+    boundaries := boundaries and not txReviewMatches(qa236At(0), -1, qa236At(0), 1, 5)
+    // Owner:05:40 five-minute arrow,06:00 fifteen-minute arrow; closes05:45/06:15.
+    array<TxReviewCandidate> pending = array.from(qa236Candidate(-4, -1))
+    array<TxReviewQuarter> quarters = array.from(TxReviewQuarter.new(qa236At(0), qa236At(3), -1))
+    array<TxReviewCandidate> accepted = array.new<TxReviewCandidate>()
+    array<TxTrade> live = array.new<TxTrade>()
+    txMatchReview(pending, quarters, accepted, live, qa236At(2), 5)
+    bool hiddenBeforeClose = accepted.size() == 0 and pending.size() == 1
+    txMatchReview(pending, quarters, accepted, live, qa236At(3), 5)
+    bool ownerCase = accepted.size() == 1 and accepted.first().signalAt == qa236At(-4)
+    ownerCase := ownerCase and accepted.first().trade.enteredAt == qa236At(-3) and accepted.first().trade.entry == 100
+    ownerCase := ownerCase and accepted.first().confirmedAt == qa236At(3) and accepted.first().matched15At == qa236At(0)
+    txMatchReview(pending, quarters, accepted, live, qa236At(4), 5)
+    bool dedup = accepted.size() == 1
+    // All eligible5m arrows survive; there is no one-trade-per15m cap.
+    pending.push(qa236Candidate(0, -1))
+    pending.push(qa236Candidate(2, -1))
+    pending.push(qa236Candidate(5, -1))
+    txMatchReview(pending, quarters, accepted, live, qa236At(6), 5)
+    bool multiple = accepted.size() == 4 and live.size() == 4
+    pending.push(qa236Candidate(6, -1))
+    txMatchReview(pending, quarters, accepted, live, qa236At(7), 5)
+    bool laterExcluded = accepted.size() == 4
+    // A candidate at -N survives exactly until the latest matching15m CLOSE.
+    array<TxReviewCandidate> edgePending = array.from(qa236Candidate(-5, 1))
+    array<TxReviewCandidate> edgeAccepted = array.new<TxReviewCandidate>()
+    array<TxTrade> edgeLive = array.new<TxTrade>()
+    array<TxReviewQuarter> edgeQuarters = array.new<TxReviewQuarter>()
+    txMatchReview(edgePending, edgeQuarters, edgeAccepted, edgeLive, qa236At(3), 5)
+    bool inclusiveExpiry = edgePending.size() == 1
+    edgeQuarters.push(TxReviewQuarter.new(qa236At(0), qa236At(3), 1))
+    txMatchReview(edgePending, edgeQuarters, edgeAccepted, edgeLive, qa236At(3), 5)
+    inclusiveExpiry := inclusiveExpiry and edgeAccepted.size() == 1
+    array<TxReviewCandidate> expired = array.from(qa236Candidate(-5, 1))
+    txMatchReview(expired, array.new<TxReviewQuarter>(), array.new<TxReviewCandidate>(), array.new<TxTrade>(), qa236At(4), 5)
+    bool expiry = expired.size() == 0
+    // Stop hit after5m entry but BEFORE15m confirmation remains in the frame.
+    TxReviewCandidate stopped = qa236Candidate(-4, 1)
+    txAdvance(stopped.trade, qa236At(-4), qa236At(-3), 100, 110, 90, 100, false, 1, 5, 4, .01)
+    bool entryWick = stopped.trade.endedAt == 0 and stopped.trade.peakR == 0
+    txAdvance(stopped.trade, qa236At(-3), qa236At(-2), 100, 101, 98, 99, false, 1, 5, 4, .01)
+    array<TxReviewCandidate> stopPending = array.from(stopped)
+    array<TxReviewCandidate> stopAccepted = array.new<TxReviewCandidate>()
+    array<TxTrade> stopLive = array.new<TxTrade>()
+    txMatchReview(stopPending, edgeQuarters, stopAccepted, stopLive, qa236At(3), 5)
+    bool earlyStop = stopAccepted.size() == 1 and stopLive.size() == 0 and stopAccepted.first().trade.reason == 1
+    earlyStop := earlyStop and stopAccepted.first().trade.currentR == -1 and stopAccepted.first().trade.endedAt < stopAccepted.first().confirmedAt
+    // Late discovery keeps original5m chronology and no duplicate for two15m matches.
+    array<TxReviewCandidate> sortPending = array.from(qa236Candidate(-1, -1))
+    txMatchReview(sortPending, quarters, accepted, live, qa236At(6), 5)
+    bool sorted = accepted.get(1).signalAt == qa236At(-1) and accepted.size() == 5
+    quarters.push(TxReviewQuarter.new(qa236At(3), qa236At(6), -1))
+    txMatchReview(sortPending, quarters, accepted, live, qa236At(6), 5)
+    sorted := sorted and accepted.size() == 5
+    TxWatch oldWatch = TxWatch.new(1, qa236At(0))
+    bool oldRoute = not txEntryEligible(oldWatch, "15", true, 1, qa236At(0), 1, qa236At(0))
+    oldRoute := oldRoute and txEntryEligible(oldWatch, "15", true, -1, qa236At(3), 1, qa236At(3))
+    if not (boundaries and hiddenBeforeClose and ownerCase and dedup and multiple and laterExcluded and inclusiveExpiry and expiry and entryWick and earlyStop and sorted and oldRoute)
+        runtime.error("V236_FIXTURE_FAIL")
+    qa236Logged := true
+    log.info("V236_FIXTURES_PASS boundaries/hiddenBeforeClose/owner0540to0600/dedup/allMatches/outside/expiryEdge/expired/entryWick/preConfirmationStop/sort/old15m")
+
+varip bool qa236LedgerLogged = false
+if barstate.islast and not na(tx) and not qa236LedgerLogged
+    qa236LedgerLogged := true
+    int retrospective = 0
+    int exampleCount = 0
+    for row in tx.trades
+        array<string> f = str.split(row, ",")
+        int entered = int(str.tonumber(f.get(0)))
+        if txEntryTf == "5"
+            if f.size() != 16
+                runtime.error("V236_LEDGER_FIELDS_FAIL")
+            int source15 = int(str.tonumber(f.get(13)))
+            int confirmed = int(str.tonumber(f.get(14)))
+            if math.abs(entered - 300000 - source15) > txMatchWindow * 300000 or confirmed < entered or confirmed > tx.closeAt
+                runtime.error("V236_LEDGER_CLOCK_FAIL")
+            retrospective += confirmed > entered ? 1 : 0
+            if entered == timestamp("Asia/Shanghai", 2026, 10, 22, 5, 45)
+                exampleCount += 1
+                log.info("V236_OWNER_EXAMPLE {0}", row)
+        else if f.size() != 13
+            runtime.error("V236_OLD15M_FIELDS_FAIL")
+    log.info("V236_LEDGER_PASS chart={0} total={1} retrospective={2} ownerExample={3}", txEntryTf, tx.total, retrospective, exampleCount)
