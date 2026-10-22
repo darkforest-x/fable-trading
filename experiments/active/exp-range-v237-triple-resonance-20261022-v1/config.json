@@ -1,0 +1,16 @@
+{
+  "experiment_id":"exp-range-v237-triple-resonance-20261022-v1",
+  "source":"experiments/active/exp-range-v237-twoyear-20261022-v1",
+  "symbols":[{"symbol":"BTC","tick":0.1,"seed_offset":0},{"symbol":"ETH","tick":0.01,"seed_offset":1}],
+  "seed":202610225,
+  "hour_window":5,
+  "entry":"Freeze existing5m-primary/earliest15m-open pair within inclusive25minutes. Accept only if that15m signal open lies within inclusive5hours of a same-direction H1 signal open. Choose earliest such H1, wait max5m/15m/H1 close. Do not use latest-H1-watch or invalidate on intervening opposite arrows; neither was requested.",
+  "stop":"At actual entry close, latest5 completed5m extremes plus0.05percent entry buffer, outward tick rounding. Each trade own risk defines1R.",
+  "exit":"Unchanged initial stop; completed15m profit>=5R arms4ATR14close trailing; once armed confirmed oppositeH1 close exits. No2hour cap, fixedTP,BE orLanglang.",
+  "reference":"Retain exact original5m arrow entry/stop and cached exits for chart attribution only. If H1 is later, filtered old causal entry is also retrospective and cannot substantiate executable profit.",
+  "controls":"Rematch actual triple causal entries using existing same coin/side/anniversary-year/UTCweek/ATRbucket/15mphase and copied relative risk. Cached original controls for reference and old-entry attribution. Rejected setups zero only in paired per-original-opportunity comparison; pending/open outcomes excluded,neverzeroed.",
+  "cost":0.002,
+  "boundary":"No matching H1 yet and admissible future hourly close beyond cutoff => pending. Matched at final source close => no entry interval. Open end marks excluded from natural-exit wins, reported separately.",
+  "training_eligible":false,
+  "production_eligible":false
+}
