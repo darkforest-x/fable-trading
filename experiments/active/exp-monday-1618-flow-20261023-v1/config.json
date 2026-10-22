@@ -1,0 +1,17 @@
+{
+  "experiment_id": "exp-monday-1618-flow-20261023-v1",
+  "question": "Notion task 区间1.618测试 (owner 想办法, option 2): do open interest, long/short positioning, taker flow and funding at the touch judge whether the first weekly 1618 holds?",
+  "symbols": ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "DOGEUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT", "LTCUSDT", "DOTUSDT", "TRXUSDT"],
+  "inputs": "data.binance.vision USD-M daily metrics, monthly fundingRate, monthly 15m klines 2022-09-01..2026-09-30 via yoyo.data.binance_um_vision_fetch (local inputs, not committed).",
+  "split": "2024-10-01T00:00:00Z",
+  "horizon_days": 14,
+  "top_fraction": 0.3,
+  "seed": 20261023,
+  "label": "Unchanged from exp-monday-1618-validity: Monday near edge before 2.0 extension, 15m conservative ordering.",
+  "primary_hypothesis": "oi_since_monday lower (no new positions built into the level) -> higher validity; later-period AUC of -oi_since_monday with one-sided permutation p<0.01.",
+  "success_criterion": "Model (logistic C=0.5, 8 flow features, trained before split): later AUC>=0.55 AND early-threshold top30 percent validity>=38.2 and mean R>0 AND week-stratified p<0.01.",
+  "null": "Driftless barrier odds 38.2 percent for the fixed geometry; week-stratified permutation for selection.",
+  "limitations": "Binance metrics are 5m snapshots with unknown publication delay (one-period lag used); 15m OHLC; independent R, fee 0.",
+  "training_eligible": false,
+  "production_eligible": false
+}
