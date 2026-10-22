@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v236-recent2m-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1397ca7c59
+    status: accepted
+    question: How many V2.36 matched5m signals occurred in the latest two months for BTC and ETH, and what does each local chart show?
+    single_variable: No indicator changes; enumerate the delivered retrospective5m pairing contract and render each event with60real5m candles.
+    result: Shanghai2026-08-22 00:00 through2026-10-22 10:15; BTC124 signals55long69short, ETH78signals31long47short. BTC113andETH72publishafterthe5mreferenceclose. NativeBTCoverlap77matches69retrospectiveexactlyreproduced;202Nautilusreferencepathsagreewithexistingindependentscalaroracle.202landscapePNGsverified.
+    artifacts: [range-v236-recent2m-charts-20261022]
+    canonical_report: experiments/active/exp-range-v236-recent2m-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Count and rendering acceptance only, no profitability validation or new live signal. Reuse frozenOKX5m history and fetch only missing1day10hourtail with exactoverlap. Bothcoins23739complete5mbars includingwarmup;nogaps.12focusedtests,6publicationprefixchecks,owner05:40example and nativeoverlap pass. Frames preserve53BTCand34ETHstopsonorbeforepublication. No weekday,key,sweepfilteradded. Frameworkboundarymarkrenderedasstillopen;no forcedtimeexit. FullsizePNGs,offlineimageindexesandpercoinarchivesremainlocal;necessarymanifestsandledgersretained.
   - experiment_id: exp-range-v231-2h-mfe-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 43e531d7eb

@@ -1,0 +1,64 @@
+{
+  "config": {
+    "experiment_id": "exp-range-v236-recent2m-20261022-v1",
+    "source": "experiments/active/exp-range-v230-pivot-20261021-v1",
+    "start": "2026-08-22T00:00:00+08:00",
+    "end": "2026-10-22T10:15:00+08:00",
+    "warmup": "2026-08-01T00:00:00+08:00",
+    "symbols": [
+      {
+        "symbol": "BTC",
+        "tick": 0.1
+      },
+      {
+        "symbol": "ETH",
+        "tick": 0.01
+      }
+    ],
+    "pairing": "V2.36 same-side5m/15m Stoch5/3/3, open positions within +/-5five-minute bars, every5m arrow once; earliest confirmed15m match.",
+    "window_basis": "5m candle open; both signals must be confirmed by end; last40minutes may have still-pending candidates.",
+    "display": "60 real5m candles per landscape2880x1620PNG; reference boxes and confirmation clocks; Monday/Fibcontext, no keyfilter.",
+    "execution": "Nautilus reference paths from retrospective5m close, stop latest5bars+0.05%, 15mclose5R arms4ATR14, armedH1opposite exit. Not causal admission or profitability validation.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "symbols": [
+    {
+      "symbol": "BTC",
+      "count": 124,
+      "longs": 55,
+      "shorts": 69,
+      "retrospective": 113,
+      "immediate": 11,
+      "distinct15m": 111,
+      "source": {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/BTC/candles.csv.gz",
+        "bytes": 1558509,
+        "mtime_ns": 1792560804279783191
+      },
+      "bars": 23739,
+      "gaps": 0,
+      "prefix_checks": 3,
+      "native_overlap_count": 77,
+      "native_overlap_retrospective": 69
+    },
+    {
+      "symbol": "ETH",
+      "count": 78,
+      "longs": 31,
+      "shorts": 47,
+      "retrospective": 72,
+      "immediate": 6,
+      "distinct15m": 70,
+      "source": {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v230-pivot-20261021-v1/ETH/candles.csv.gz",
+        "bytes": 1453331,
+        "mtime_ns": 1792560819928804129
+      },
+      "bars": 23739,
+      "gaps": 0,
+      "prefix_checks": 3
+    }
+  ],
+  "source_commit": "1397ca7c59839fba0b0c87150cbb2e1f1d9d6a0c"
+}

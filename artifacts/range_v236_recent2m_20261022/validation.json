@@ -1,0 +1,48 @@
+{
+  "charts": 202,
+  "bars_per_chart": 60,
+  "dimensions": [
+    2880,
+    1620
+  ],
+  "all_png_verified": true,
+  "groups": [
+    {
+      "symbol": "BTC",
+      "count": 124,
+      "archive": "BTC_V2.36_5m_124张横图.zip",
+      "viewer": "BTC.html"
+    },
+    {
+      "symbol": "ETH",
+      "count": 78,
+      "archive": "ETH_V2.36_5m_78张横图.zip",
+      "viewer": "ETH.html"
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false,
+  "source_commit": "1397ca7c59",
+  "generator_commit": "dce38348cc",
+  "native_scalar_paths_checked": 202,
+  "local_tests_passed": 12,
+  "publication_prefix_checks": 6,
+  "native_btc_overlap": {
+    "count": 77,
+    "retrospective": 69
+  },
+  "visual_checks": [
+    "BTC001 short/Monday developing",
+    "BTC123 owner0540/quarter0600/publication0615",
+    "ETH001 long/stoppedbeforepublication",
+    "ETH first12contactsheet"
+  ],
+  "reproduce": [
+    ".venv/bin/python -m yoyo.evaluation.range_v236_charts prepare",
+    "scripts/backtest-range --config experiments/active/exp-range-v236-recent2m-20261022-v1/BTC/native.json",
+    "scripts/backtest-range --config experiments/active/exp-range-v236-recent2m-20261022-v1/ETH/native.json",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_v236_charts chart-data",
+    ".venv/bin/python -m yoyo.evaluation.range_v236_charts render",
+    ".venv/bin/python -m yoyo.evaluation.range_v236_charts pack"
+  ]
+}
