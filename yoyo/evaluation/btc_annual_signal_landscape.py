@@ -126,7 +126,7 @@ def execution_inset(fig, row):
     ax.set(xlim=(-1,len(bars)+1),ylim=(lower-span*.1,upper+span*.1))
     ax.set_yticks([]);ax.tick_params(axis='x',length=0,labelsize=7,colors='#8993A1')
     for spine in ax.spines.values():spine.set_visible(False)
-    ax.set_title('5m 执行放大 · E入场 / ◇止损 / 灰暗K为退出后走势',loc='left',fontsize=8.2,color='#ABB5C3',pad=5)
+    ax.set_title('5m 执行放大 · E入场 / ◇退出 / 灰暗K为退出后走势',loc='left',fontsize=8.2,color='#ABB5C3',pad=5)
 
 
 def render(limit=0, version=None, number=None, *, destination=None, source_data=None, trade_review=False):
@@ -272,11 +272,13 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
             detail += '    多周期信号收盘 ' + stamp(r['mtf_arrow_time'], '%H:%M')
         fig.text(.045, .059, detail,
                  fontsize=9.5, color="#9AA2AF")
-        reason = {1: "止损", 7: "分型确认后退出", 0: "期末结算"}[ex["reason"]]
+        reason = {1: "止损", 4: "止盈", 7: "分型确认后退出", 0: "期末结算"}[ex["reason"]]
         if r.get('execution_bars'):
             execution_inset(fig,r)
-            fig.text(.565,.218,'止损K收盘 '+stamp(ex['time'])+'  '+price(ex['price'])
-                +f"  ·  毛 {ex['gross_r']:+.2f}R / 净 {ex['net_r']:+.2f}R",fontsize=10,color='#F36C7A')
+            result_text = (f"  ·  零手续费 {ex['gross_r']:+.2f}R" if r.get('zero_fee') else
+                           f"  ·  毛 {ex['gross_r']:+.2f}R / 净 {ex['net_r']:+.2f}R")
+            fig.text(.565,.218,reason+'执行K收盘 '+stamp(ex['time'])+'  '+price(ex['price'])
+                +result_text,fontsize=10,color='#36C9A3' if ex['gross_r']>0 else '#F36C7A')
             fig.text(.565,.031,'5m OHLC模拟；时间标记执行K收盘，非逐笔成交秒。'+
                 ('本笔同5m双触，按O-H-L-C顺序。' if r.get('ambiguous') else ''),fontsize=7.7,color='#8993A1')
         else:
