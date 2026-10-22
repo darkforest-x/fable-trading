@@ -14,6 +14,51 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-flow-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2ddd21337d841dac30b129a08cceaa9ca536bab
+    status: rejected
+    question: 'Do open interest, long/short positioning, taker flow and funding at the touch judge whether the first weekly 1618 holds?'
+    single_variable: 'Eight Binance USD-M positioning/flow features read before the touch (OI 4h/24h/since Monday, top-trader and global long/short, taker imbalance 1h/4h, funding); logistic fit before 2024-10.'
+    result: '12 majors 2212 touches (early 38.0, late 34.3 percent). Primary OI-build hypothesis later AUC 0.517 p .19; model later AUC 0.514, top30 percent 34.2 percent -0.106R, stratified p .27; all univariate AUC 0.46-0.52.'
+    artifacts:
+    - monday-1618-flow-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-flow-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-session-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ff3029be60364ebc8ae54db05459d445e56f3a25
+    status: rejected
+    question: 'Do first 1618 touches in thin sessions (00-08 UTC or Sat/Sun) hold more often?'
+    single_variable: 'Session flag from the touch bar open time only; frozen OKX ledger.'
+    result: 'Thin sessions worse in both periods (39.4 vs 41.7, 37.1 vs 37.8 percent). Post-hoc: 20-24 UTC block 47.5 percent n=1437, frozen for method 12.'
+    artifacts:
+    - monday-1618-session-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-session-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-hour-oos-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cd4b266309b1019722ef387e639da04ede31024f
+    status: rejected
+    question: 'Does the post-hoc 20-24 UTC pattern survive on independent Binance 1m touches 2022-11..2025-05?'
+    single_variable: 'Hour block 20-24 UTC frozen from the session study; judged only on Binance oos_pre touches.'
+    result: '111 touches 41.4 percent, +0.085R, p .27 versus 38.2; other hours 34.7 percent. Same direction, not significant; forward observation only.'
+    artifacts:
+    - monday-1618-hour-oos-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-hour-oos-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-confluence-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: bb8cc06fe2979dded49553110b5a9981e2a5ce40

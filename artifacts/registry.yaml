@@ -18,6 +18,42 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-flow-20261023-v1
+    artifact_type: manifest
+    role: 'Do open interest, long/short positioning, taker flow and funding at the touch judge whether the first weekly 1618 holds?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: a2ddd21337d841dac30b129a08cceaa9ca536bab
+    generator_commit: a2ddd21337d841dac30b129a08cceaa9ca536bab
+    source_path: experiments/active/exp-monday-1618-flow-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-flow-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 12 majors 2212 touches (early 38.0, late 34.3 percent). Primary OI-build hypothesis later AUC 0.517 p .19; model later AUC 0.514, top30 percent 34.2 p'
+  - artifact_id: monday-1618-session-20261023-v1
+    artifact_type: manifest
+    role: 'Do first 1618 touches in thin sessions (00-08 UTC or Sat/Sun) hold more often?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: ff3029be60364ebc8ae54db05459d445e56f3a25
+    generator_commit: ff3029be60364ebc8ae54db05459d445e56f3a25
+    source_path: experiments/active/exp-monday-1618-session-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-session-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Thin sessions worse in both periods (39.4 vs 41.7, 37.1 vs 37.8 percent). Post-hoc: 20-24 UTC block 47.5 percent n=1437, frozen for method 12.'
+  - artifact_id: monday-1618-hour-oos-20261023-v1
+    artifact_type: manifest
+    role: 'Does the post-hoc 20-24 UTC pattern survive on independent Binance 1m touches 2022-11..2025-05?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: cd4b266309b1019722ef387e639da04ede31024f
+    generator_commit: cd4b266309b1019722ef387e639da04ede31024f
+    source_path: experiments/active/exp-monday-1618-hour-oos-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-hour-oos-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 111 touches 41.4 percent, +0.085R, p .27 versus 38.2; other hours 34.7 percent. Same direction, not significant; forward observation only.'
   - artifact_id: monday-1618-confluence-20261023-v1
     artifact_type: manifest
     role: 'Does volume-profile or swing confluence at the 1618 judge whether it holds?'

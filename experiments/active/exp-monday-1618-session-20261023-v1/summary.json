@@ -1,0 +1,83 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-session-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 11: do first 1618 touches in thin sessions (00-08 UTC or Sat/Sun) hold more often?",
+    "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+    "success_criterion": "Both periods: thin validity >38.2 and above other touches; later one-sided binomial p<0.01 vs 38.2 and later mean R>0.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "touches": 10130,
+  "table": {
+    "earlier": {
+      "thin": {
+        "n": 1473,
+        "valid_pct": 39.44331296673455,
+        "mean_r": 0.033716875552108644,
+        "p_vs_382": 0.16908910344580655
+      },
+      "other": {
+        "n": 3118,
+        "valid_pct": 41.661321359846056,
+        "mean_r": 0.09077694191593626,
+        "p_vs_382": 4.017384353590698e-05
+      }
+    },
+    "later": {
+      "thin": {
+        "n": 2031,
+        "valid_pct": 37.12456917774495,
+        "mean_r": -0.025991423675670356,
+        "p_vs_382": 0.8455954057004502
+      },
+      "other": {
+        "n": 3508,
+        "valid_pct": 37.82782212086659,
+        "mean_r": -0.0027393048813981508,
+        "p_vs_382": 0.6795532995787539
+      }
+    },
+    "by_hour_block": {
+      "00-04": {
+        "n": 1453,
+        "valid_pct": 33.65450791465933,
+        "mean_r": -0.11775530220460205,
+        "p_vs_382": 0.9998522387276091
+      },
+      "04-08": {
+        "n": 1291,
+        "valid_pct": 39.039504260263364,
+        "mean_r": 0.024173763482722713,
+        "p_vs_382": 0.27566774465119376
+      },
+      "08-12": {
+        "n": 1320,
+        "valid_pct": 38.71212121212121,
+        "mean_r": 0.013406314453434848,
+        "p_vs_382": 0.3599024951596947
+      },
+      "12-16": {
+        "n": 2563,
+        "valid_pct": 35.93445181428014,
+        "mean_r": -0.05785377488422784,
+        "p_vs_382": 0.9914796370736029
+      },
+      "16-20": {
+        "n": 2066,
+        "valid_pct": 41.28751210067764,
+        "mean_r": 0.08517994483074313,
+        "p_vs_382": 0.0021412728572079696
+      },
+      "20-24": {
+        "n": 1437,
+        "valid_pct": 47.529575504523315,
+        "mean_r": 0.25386266454379436,
+        "p_vs_382": 3.8060541396247174e-13
+      }
+    }
+  },
+  "passed": false,
+  "source_commit": "ff3029be60364ebc8ae54db05459d445e56f3a25",
+  "training_eligible": false,
+  "production_eligible": false
+}

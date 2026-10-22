@@ -1,3 +1,8 @@
+## 2026-10-23 · 区间1.618 methods 6-12 (owner "想办法", goal mode): all rejected
+
+- Positioning/flow (Binance 12 majors 2212 touches; OI, long/short, taker, funding via yoyo/data/binance_um_vision_fetch.py, 19068 archives, inputs local) later AUC 0.514, OI-build hypothesis p .19. Volume-profile/swing confluence AUC 0.512. Retest after 0.236R pullback 37.7% (3497). 1m small bounces 0.1/0.2/0.3R = driftless (78.7/64.6/55.8 vs 79.3/65.6/56.0). XAU spot 2011-2026 685 touches 35.9%, hold and break both n.s. Thin sessions slightly worse; post-hoc 20-24 UTC 47.5% held 41.4% on Binance OOS (n=111, p .27), forward observation only.
+- Twelve methods total: first weekly 1618 behaves like a driftless barrier; not judgeable with price, structure, flow, session or gold history. Notion task updated (当前阶段/下一步), 13 knowledge-base records in Spike · 研究实验. Experiments `exp-monday-1618-{flow,confluence,second-touch,reaction-curve,xau-spot,session,hour-oos}-20261023-v1`; validity touch() gained opt-in monday_min_bars (default unchanged). No Pine/default/live change.
+
 ## 2026-10-23 · Notion 区间1.618测试 completed: validity not judgeable from price
 
 - Owner TradingView AlGc61US read-only: BTC 32 + XAU 8 positions, entries at weekly 1618 (BTC 30/32, XAU 8/8 within 0.03R), mostly first-touch 4h bar; BTC stops about 2.0 ext (median 1.89/-0.99), XAU 1.75/-0.72. All 40 TP-first with hindsight targets; drawn 78%/100% vs undrawn 19%/0% objectively valid = selection, not edge. Chart restored to BTC 4h.

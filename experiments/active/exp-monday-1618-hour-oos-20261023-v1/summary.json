@@ -1,0 +1,67 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-hour-oos-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 12: does the post-hoc OKX pattern (touch bar opening 20:00-24:00 UTC holds 47.5 percent) survive on independent Binance 1m touches 2022-11..2025-05?",
+    "touch_ledger": "experiments/active/exp-monday-1618-oos-1m-20261023-v1",
+    "success_criterion": "20-24 UTC touches: one-sided binomial p<0.01 above 38.2 percent and mean R>0.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "touches": 656,
+  "table": {
+    "hour_20_24": {
+      "n": 111,
+      "valid_pct": 41.44144144144144,
+      "mean_r": 0.08485448799584983,
+      "p_vs_382": 0.27078750267836127
+    },
+    "other": {
+      "n": 545,
+      "valid_pct": 34.678899082568805,
+      "mean_r": -0.08950636894158688,
+      "p_vs_382": 0.9592614445543854
+    },
+    "by_symbol": {
+      "BNB": {
+        "n": 10,
+        "valid_pct": 30.0,
+        "mean_r": -0.2146596858638728,
+        "p_vs_382": 0.8018754637703998
+      },
+      "BTC": {
+        "n": 24,
+        "valid_pct": 33.333333333333336,
+        "mean_r": -0.12739965095986105,
+        "p_vs_382": 0.7550050326611775
+      },
+      "DOGE": {
+        "n": 17,
+        "valid_pct": 58.8235294117647,
+        "mean_r": 0.5398829688943657,
+        "p_vs_382": 0.06861781008034609
+      },
+      "ETH": {
+        "n": 22,
+        "valid_pct": 50.0,
+        "mean_r": 0.30890052356021,
+        "p_vs_382": 0.17814965083115647
+      },
+      "SOL": {
+        "n": 19,
+        "valid_pct": 36.8421052631579,
+        "mean_r": -0.03554698263984535,
+        "p_vs_382": 0.6328310651207212
+      },
+      "XRP": {
+        "n": 19,
+        "valid_pct": 36.8421052631579,
+        "mean_r": -0.035546982639844786,
+        "p_vs_382": 0.6328310651207212
+      }
+    }
+  },
+  "passed": false,
+  "source_commit": "cd4b266309b1019722ef387e639da04ede31024f",
+  "training_eligible": false,
+  "production_eligible": false
+}
