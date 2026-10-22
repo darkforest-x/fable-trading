@@ -1,0 +1,290 @@
+{
+  "status": "complete",
+  "builders": [
+    "313da02c74",
+    "9dec71a42f",
+    "13542083db"
+  ],
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "reproduction": [
+    "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_fixed_target_compare",
+    "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_pivot_zero_fee"
+  ],
+  "tests": {
+    "native_and_static_accounting": 17,
+    "pivot_accounting": 2
+  },
+  "accounting_checks": {
+    "fixed_rows": 4850,
+    "new_native_positions": 3280,
+    "new_native_fills": 6560,
+    "cached_fixed_rows": 1570,
+    "all_native_commissions_zero": true,
+    "all_natural_payoffs_match_targets": true,
+    "year_partitions_reconcile": true,
+    "three_prior_gross_pivot_summaries_reconcile": true,
+    "combined_pivot_admission_identity": true
+  },
+  "failure_retained": "run.log: annualBTC10Rboundaryguard; fixedusinghorizonparity; recoveryreusedallnativefills",
+  "registry_records_valid": true,
+  "notion_url": "https://app.notion.com/p/4018856479af815897e4d40bad7c012b",
+  "notion_readback_verified": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/.gitignore",
+      "bytes": 67,
+      "mtime_ns": 1792655018344360713
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/config.json",
+      "bytes": 1598,
+      "mtime_ns": 1792655018344212879
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/fills.csv",
+      "bytes": 184095,
+      "mtime_ns": 1792655106649747335
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/legs.csv",
+      "bytes": 158535,
+      "mtime_ns": 1792655106639967089
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/native_trades.csv",
+      "bytes": 316439,
+      "mtime_ns": 1792655106646843907
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/receipt.json",
+      "bytes": 9856,
+      "mtime_ns": 1792655106670628122
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/stop_first.csv",
+      "bytes": 151301,
+      "mtime_ns": 1792655106657006820
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/fixed_10r/trades.csv",
+      "bytes": 156988,
+      "mtime_ns": 1792655106653258056
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/sensitivity.csv",
+      "bytes": 371104,
+      "mtime_ns": 1792655226274992489
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/trades.csv",
+      "bytes": 376877,
+      "mtime_ns": 1792655226208330612
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/validation.json",
+      "bytes": 1390,
+      "mtime_ns": 1792655226275481449
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_1r/BTC/reuse.json",
+      "bytes": 500,
+      "mtime_ns": 1792655214425004340
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_1r/BTC/sensitivity.csv",
+      "bytes": 381447,
+      "mtime_ns": 1792655214424442087
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_1r/BTC/trades.csv",
+      "bytes": 380400,
+      "mtime_ns": 1792655214406169227
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/fills.csv",
+      "bytes": 184594,
+      "mtime_ns": 1792655074468423411
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/legs.csv",
+      "bytes": 159075,
+      "mtime_ns": 1792655074458073913
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/native_trades.csv",
+      "bytes": 317726,
+      "mtime_ns": 1792655074465282107
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/receipt.json",
+      "bytes": 9819,
+      "mtime_ns": 1792655074492527002
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/stop_first.csv",
+      "bytes": 154291,
+      "mtime_ns": 1792655074475650855
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/fixed_2r/trades.csv",
+      "bytes": 157960,
+      "mtime_ns": 1792655074472113008
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/sensitivity.csv",
+      "bytes": 374241,
+      "mtime_ns": 1792655217460476268
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/trades.csv",
+      "bytes": 376553,
+      "mtime_ns": 1792655217389084665
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/validation.json",
+      "bytes": 1388,
+      "mtime_ns": 1792655217461497397
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/fills.csv",
+      "bytes": 184341,
+      "mtime_ns": 1792655085347632584
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/legs.csv",
+      "bytes": 158845,
+      "mtime_ns": 1792655085337840214
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/native_trades.csv",
+      "bytes": 317855,
+      "mtime_ns": 1792655085344684032
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/receipt.json",
+      "bytes": 9852,
+      "mtime_ns": 1792655085371171798
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/stop_first.csv",
+      "bytes": 153705,
+      "mtime_ns": 1792655085354657277
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/fixed_3r/trades.csv",
+      "bytes": 158242,
+      "mtime_ns": 1792655085351214264
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/sensitivity.csv",
+      "bytes": 373356,
+      "mtime_ns": 1792655220338818019
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/trades.csv",
+      "bytes": 377014,
+      "mtime_ns": 1792655220279720171
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/validation.json",
+      "bytes": 1388,
+      "mtime_ns": 1792655220339681397
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/fills.csv",
+      "bytes": 184145,
+      "mtime_ns": 1792655095960316794
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/legs.csv",
+      "bytes": 158628,
+      "mtime_ns": 1792655095950407715
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/native_trades.csv",
+      "bytes": 316833,
+      "mtime_ns": 1792655095957106906
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/receipt.json",
+      "bytes": 9864,
+      "mtime_ns": 1792655095981427248
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/stop_first.csv",
+      "bytes": 152436,
+      "mtime_ns": 1792655095967525487
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/fixed_5r/trades.csv",
+      "bytes": 157390,
+      "mtime_ns": 1792655095963944932
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/sensitivity.csv",
+      "bytes": 371141,
+      "mtime_ns": 1792655223506005902
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/trades.csv",
+      "bytes": 375586,
+      "mtime_ns": 1792655223443951084
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/validation.json",
+      "bytes": 1388,
+      "mtime_ns": 1792655223506449195
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/original_pivot_zero_fee.csv",
+      "bytes": 497696,
+      "mtime_ns": 1792655402550470238
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/pivot_reference.log",
+      "bytes": 7101,
+      "mtime_ns": 1792655404180623311
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/pivot_reference_summary.json",
+      "bytes": 90680,
+      "mtime_ns": 1792655404179943184
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/recovery.log",
+      "bytes": 11198,
+      "mtime_ns": 1792655227810687749
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/run.log",
+      "bytes": 1297,
+      "mtime_ns": 1792655106898722525
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/summary.json",
+      "bytes": 141418,
+      "mtime_ns": 1792655227809834413
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/sweep20_mtf_pivot_zero_fee.csv",
+      "bytes": 214126,
+      "mtime_ns": 1792655403655691996
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/sweep20_pivot_zero_fee.csv",
+      "bytes": 380670,
+      "mtime_ns": 1792655403098103848
+    },
+    {
+      "path": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/validation.json",
+      "bytes": 7783,
+      "mtime_ns": 1792655227810214914
+    }
+  ]
+}

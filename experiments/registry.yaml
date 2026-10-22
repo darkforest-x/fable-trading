@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-touch-fixed-targets-fiveyear-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 13542083db
+    status: inconclusive
+    question: Which existing BTC touch-highlight variants balance winrate,returns anddrawdown overfive years withoutfees?
+    single_variable: Fixed1/2/3/5/10R varyonlytarget on485frozenentries;separateaccounting review ofthree existingpivot/filter ledgers doesnotattribute bundleddifferences toonefactor.
+    result: Fixedtargets allnegative at-17/-32/-49/-35/-40.813R andbelowmatchedrandom. Existing sweep20+MTFpivot212trades38.208percent,+73.067R,PF1.652,realizedDD17.324R,max9losses versusrandom-26.172R;fourpositiveyears,butwithoutbest5only+2.552R. ThreepivotvariantHolmp.04740 exceeds.01 anddoesnotcoverallpriorselection;candidateonly.
+    artifacts: [btc-touch-fixed-targets-fiveyear-20261022, btc-touch-pivot-zero-fee-20261022]
+    canonical_report: experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Nautilus1.231.0 executes3280positions6560fills,allprice-time oraclechecks;1570cachedrowsreused,4850economicrowschecked.17focusednative/accountingtests plus2pivotaccountingtests. One10Rterminalmark+3.187R preservedonlyafterhorizonparity;failurelogretained,recoveryreusesallnativefills. Pivotreferencesreuseoldfee-independentconfirmation-closepaths;no newexecution. Builders313da02c74/9dec71a42f/13542083db. Reproduce isolatedNautilusPython modulesrange_fixed_target_compare andrange_pivot_zero_fee. Notion4018856479af815897e4d40bad7c012b. No newengine,download,hash,Pine,defaultorlivechange.
   - experiment_id: exp-eth-touch-fixed10r-fiveyear-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: c1908aa388

@@ -1,0 +1,198 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "target_r": 1,
+      "full_cache_reuse": true,
+      "rows": 970
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 2,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 820,
+        "target_from_entry": true,
+        "breakeven_includes_cost": true,
+        "breakeven_on_touch": false,
+        "intrabar_path": null,
+        "synthetic_segments_per_bar": 1,
+        "positions": 820,
+        "fills": 1640,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": false,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "disabled",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 3,
+        "bars_with_both_directions": 288,
+        "prepare_seconds": 0.6785861660027876,
+        "replay_seconds": 7.281098874984309,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      },
+      "oracle": {
+        "checked": 820,
+        "native_price_time_parity": true,
+        "conservative_changed": 5
+      },
+      "source_validation": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_2r/BTC/validation.json"
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 3,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 820,
+        "target_from_entry": true,
+        "breakeven_includes_cost": true,
+        "breakeven_on_touch": false,
+        "intrabar_path": null,
+        "synthetic_segments_per_bar": 1,
+        "positions": 820,
+        "fills": 1640,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": false,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "disabled",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 4,
+        "bars_with_both_directions": 557,
+        "prepare_seconds": 0.5832805840182118,
+        "replay_seconds": 6.8658368329925,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      },
+      "oracle": {
+        "checked": 820,
+        "native_price_time_parity": true,
+        "conservative_changed": 3
+      },
+      "source_validation": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_3r/BTC/validation.json"
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 5,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 820,
+        "target_from_entry": true,
+        "breakeven_includes_cost": true,
+        "breakeven_on_touch": false,
+        "intrabar_path": null,
+        "synthetic_segments_per_bar": 1,
+        "positions": 820,
+        "fills": 1640,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": false,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "disabled",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 4,
+        "bars_with_both_directions": 1764,
+        "prepare_seconds": 0.5736913749715313,
+        "replay_seconds": 6.663771208026446,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      },
+      "oracle": {
+        "checked": 820,
+        "native_price_time_parity": true,
+        "conservative_changed": 1
+      },
+      "source_validation": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_5r/BTC/validation.json"
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 10,
+      "audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.1,
+        "protection_tick": 0.1,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 820,
+        "target_from_entry": true,
+        "breakeven_includes_cost": true,
+        "breakeven_on_touch": false,
+        "intrabar_path": null,
+        "synthetic_segments_per_bar": 1,
+        "positions": 820,
+        "fills": 1640,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": false,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "disabled",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 4,
+        "bars_with_both_directions": 3579,
+        "prepare_seconds": 0.5713655420113355,
+        "replay_seconds": 6.764888792007696,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      },
+      "oracle": {
+        "checked": 820,
+        "native_price_time_parity": true,
+        "conservative_changed": 1
+      },
+      "source_validation": "experiments/active/exp-btc-touch-fixed-targets-fiveyear-20261022-v1/fixed_10r/BTC/validation.json"
+    }
+  ],
+  "totals": {
+    "new_native_positions": 3280,
+    "new_native_fills": 6560,
+    "cached_rows": 1570
+  },
+  "frozen_entry_stop_control_parity": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
