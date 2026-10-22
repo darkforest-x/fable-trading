@@ -1,0 +1,19 @@
+{
+  "experiment_id": "exp-monday-1618-post-touch-20261023-v1",
+  "question": "Notion task 区间1.618测试 stage2: after a first weekly 1618 touch, does the reaction in the next 1h/2h/4h tell whether the level will hold?",
+  "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+  "checkpoints": [4, 8, 16],
+  "shallow_R": 0.15,
+  "horizon_days": 14,
+  "controls_per_entry": 3,
+  "seed": 20261023,
+  "min_n": 200,
+  "focus": ["BTC", "ETH", "XAU"],
+  "selection": "One of 12 cells (3 checkpoints x unresolved/inside/inside_clean/inside_shallow) chosen on the earlier period (before 2026-01-01) by excess mean R over matched random with n>=200; later period judges only that cell.",
+  "success_criterion": "Later period selected cell: mean R >0 AND excess R over matched random >0 AND week-cluster sign-flip p<0.01.",
+  "exit": "Entry at checkpoint close; SL 2.0 extension, TP Monday near edge, fixed prices; later bars only, ties stop-first, 14-day horizon mark; fee 0.",
+  "null": "3 random bar closes per entry, same symbol/NY week/side, identical price distances to stop and target, same ordering rules.",
+  "limitations": "15m OHLC, conservative ties, independent R not account returns, no fees/funding/slippage.",
+  "training_eligible": false,
+  "production_eligible": false
+}
