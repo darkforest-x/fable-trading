@@ -33735,6 +33735,22 @@ artifacts:
     production_eligible: false
     notes: Reuses causal BTC5m1745/BTC15m711/ETH5m962/ETH15m415 events and matched controls. No new entry or fills; existing excursions utility measures gross MFE before initial SL or data end, excluding stop-touch candle with separate upper bound. No TP/BE/ATR/H1 or time cap. All cached native TP1/2/3 hits under OHLC and OLHC lie within per-position MFE bounds; histogram counts reconcile. Medians1.0194/1.0181/0.8378/0.9685R; censored9/3/7/2. Large tails include multi-month holding and are not intraday or realized returns. Run isolated Nautilus Python module yoyo.evaluation.range_v237_mfe_charts --calculate-only, then main venv same module --render-only. PNG visually inspected; no report or production change.
 
+  - artifact_id: range-v237-smaller-stop-20261022
+    source_commit: ef9fd4ae70
+    generator_commit: ef9fd4ae70
+    artifact_type: manifest
+    role: causal_two_hour_tighter_stop_comparison
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-range-v237-smaller-stop-20261022-v1/completion.json
+    storage_uri: repo://experiments/active/exp-range-v237-smaller-stop-20261022-v1/completion.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Original,75,50,25percent stop distances; frozen BTC5m1745/15m711 andETH5m962/15m415 causal signals with matching controls.
+      Each arm uses its own newrisk as1R, with unchanged20bp notional costs. All entries and120minute deadlines preserved.
+      Reused6245baseline native paths;18735newpositions37470fills. Full stop/deadline oracle parity and16focusedtests pass.
+      Every tighterstop lowers netwin/netR in bothyears. Not portfolio returns; raw compressed ledgers remain local.
+
   - artifact_id: range-v237-2h-scaleout-20261022
     source_commit: d8bf02d1e5
     generator_commit: 3a2c170a24

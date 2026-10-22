@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v237-smaller-stop-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: ef9fd4ae70
+    status: rejected
+    question: Does reducing initial stop distance to75/50/25percent improve two-year causal V2.37 BTC/ETH net returns under a120minute holding cap?
+    single_variable: Initial stop distance only, with outward tick rounding. Frozen causal entries, side, event multiplicity, matched controls, 120minute deadline and20bp cost. Primary1R is each variant's own new risk, per owner correction; noTP,BE,ATR orH1 exit.
+    result: All three cuts reduce net win rate and netR in every coin/lane, in both chronological years. Baseline to half-stop BTC5m n1745 win23.09to15.13percent net-1827.81to-3689.11R, random-1922.69to-3686.21R; BTC15m n711 win23.63to16.17 net-725.10to-1434.50R, random-765.12to-1514.88R. ETH5m n962 win24.01to16.53 net-805.93to-1432.09R, random-712.35to-1385.20R; ETH15m n415 win28.19to19.04 net-318.58to-564.11R, random-192.97to-372.12R. Half-stop newly stops139/53BTC and72/38ETH baseline net winners. Original stop selected in allfour first-year comparisons. No corrected evidence of excess over matched random; all28Holm p1.0.
+    artifacts: [range-v237-smaller-stop-20261022]
+    canonical_report: experiments/active/exp-range-v237-smaller-stop-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Nautilus1.231.0 reuses6245baseline positions and executes18735newpositions37470fills. Allprice/time/reason audits pass;16focusedtests pass. Native reason0 is scheduled2h close and included in netwins, not censored. Primary equal-price-risk independentR includes costs divided by newrisk; not account compounding. Frozen3833cohort occurrences overlap across5m/15m and are not independent unique trades. No freshdata, formalreport, Pine/default/live/dependency change. Reproduce with isolated Nautilus Python module yoyo.evaluation.range_v237_smaller_stop run --symbol BTC, then ETH, then analyze.
+
   - experiment_id: exp-range-v237-2h-scaleout-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: d8bf02d1e5
