@@ -1,0 +1,33 @@
+{
+  "experiment_id": "exp-range-v237-winner-shapes-20261022-v1",
+  "source": "experiments/active/exp-range-v237-twoyear-20261022-v1",
+  "symbols": [{"symbol":"BTC","tick":0.1},{"symbol":"ETH","tick":0.01}],
+  "midpoint": "2025-10-22T10:15:00+08:00",
+  "seed": 20261022,
+  "minimum_first": 40,
+  "minimum_retention": 0.25,
+  "selection": "Choose one single-feature rule per coin/lane by earlier-year net win rate, tie mean netR then ID. At least40 trades,25percent retention,5 net>3R winners. Purge training labels exiting at/after split. Check later year unchanged; Holm4 for selected tests, known history not fresh OOS.",
+  "cohorts": "Primary actual net realized>3R versus initialSL with certain pre-stop grossMFE<1R. Gross>3R sensitivity counts also reported. Stop-bar ambiguous reaches excluded from early-loss cohort; open boundary marks excluded.5m primary,15m corroboration; reference retrospective descriptive,causal executable comparison. No Langlang or2h exit.",
+  "controls": "Attach frozen same symbol/side/year/week/volatility/clock-phase/random-risk counterfactual to each retained signal. Random does not necessarily pass the signal-shape filter; not claimed as a filtered random strategy.",
+  "cost": 0.002,
+  "cuts": [
+    {"id":"aligned_body","feature":"arrow_aligned_body","op":"ge","threshold":1,"label":"信号K实体顺交易方向"},
+    {"id":"wick_half","feature":"arrow_wick_share","op":"ge","threshold":0.5,"label":"信号影线占全K至少50%"},
+    {"id":"wick_body2","feature":"arrow_wick_body","op":"ge","threshold":2,"label":"信号影线至少实体2倍"},
+    {"id":"strong_close","feature":"arrow_close_rejection","op":"ge","threshold":0.75,"label":"信号收盘在顺向末端25%"},
+    {"id":"sweep20","feature":"arrow_sweep20","op":"ge","threshold":1,"label":"信号影线扫前20根极值后收回"},
+    {"id":"wide_arrow","feature":"arrow_range_atr","op":"ge","threshold":1.5,"label":"信号振幅至少1.5ATR"},
+    {"id":"trend20","feature":"prior20_signed_atr","op":"ge","threshold":0,"label":"此前20根净方向一致"},
+    {"id":"compress","feature":"compression5_20","op":"le","threshold":0.75,"label":"此前5根相对20根振幅压缩"},
+    {"id":"ma15","feature":"ma15_aligned","op":"ge","threshold":1,"label":"15m MA20/60顺交易方向排列"},
+    {"id":"ma60","feature":"ma60_aligned","op":"ge","threshold":1,"label":"1H MA20/60顺交易方向排列"},
+    {"id":"ma240","feature":"ma240_aligned","op":"ge","threshold":1,"label":"4H MA20/60顺交易方向排列"},
+    {"id":"risk20bp","feature":"risk_bp","op":"ge","threshold":20,"label":"初始止损距离至少0.2%"},
+    {"id":"risk1atr","feature":"risk_atr5","op":"ge","threshold":1,"label":"初始止损距离至少1个5m ATR"},
+    {"id":"entry_break","feature":"entry_break_previous","op":"ge","threshold":1,"label":"入场收盘突破前一根顺向极值"},
+    {"id":"wick_key","feature":"arrow_wick_key","op":"ge","threshold":1,"label":"信号影线触及已知周一或Fib位"},
+    {"id":"space3r","feature":"next_key_r","op":"ge","threshold":3,"label":"盈利方向最近已知关键位至少3R"}
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
