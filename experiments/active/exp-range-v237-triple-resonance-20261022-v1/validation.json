@@ -1,0 +1,31 @@
+{
+  "tests": "36 focused tests passed",
+  "prefix_checks": 6,
+  "new_native_positions": 1439,
+  "cached_native_positions": 119,
+  "new_oracle_checks": {
+    "BTC": 944,
+    "ETH": 495
+  },
+  "builder_commit": "360557d336",
+  "oracle_boundary_fix_commit": "bfb10dda20",
+  "unique_entry_sensitivity": {
+    "BTC": {
+      "unique_entries": 418,
+      "unique_closed": 417,
+      "unique_net_win_rate": 0.10551558752997602,
+      "unique_net_r": -514.5316458798058,
+      "max_signals_same_entry": 5
+    },
+    "ETH": {
+      "unique_entries": 229,
+      "unique_closed": 229,
+      "unique_net_win_rate": 0.11353711790393013,
+      "unique_net_r": -181.23192780779493,
+      "max_signals_same_entry": 3
+    }
+  },
+  "independent_R_not_account_return": true,
+  "native_outputs_unchanged_after_oracle_fix": true,
+  "no_content_hashes": true
+}

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "experiment_id": "exp-range-v237-triple-resonance-20261022-v1",
+  "engine": "nautilus",
+  "symbol": "BTC",
+  "tick": 0.1,
+  "market_tick": 0.1,
+  "entry_mode": "provided",
+  "data": "experiments/active/exp-range-v237-twoyear-20261022-v1/BTC/candles.csv.gz",
+  "entry_candidates": "experiments/active/exp-range-v237-triple-resonance-20261022-v1/BTC/new_candidates.csv",
+  "stop_window_5m": 5,
+  "buffer_percent": 0.05,
+  "maximum_risk_percent": 0,
+  "round_trip_cost": 0.002,
+  "policies": [
+    {
+      "name": "baseline",
+      "trail_arm_r": 5,
+      "trail_atr_multiple": 4,
+      "opposite_hour_exit": true
+    }
+  ],
+  "output": "experiments/active/exp-range-v237-triple-resonance-20261022-v1/BTC/native"
+}

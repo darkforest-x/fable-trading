@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v237-triple-resonance-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 360557d336
+    status: rejected
+    question: Does adding a same-direction H1 arrow within inclusive five hours of the existing 15m pair improve two-year BTC and ETH 5m entries?
+    single_variable: H1 admission only; preserve earliest original 5m/15m pair within25minutes, wait all three closes, then apply unchanged5bar0.05percent stop and15m5R4ATR/armedH1 exits.
+    result: BTC1745 to616 signals,615closed, netwin13.70to11.22percent, net-1467.86to-764.73R, mean-0.842to-1.243R; ETH962to295, netwin10.40to10.51percent, net-604.64to-225.22R, mean-0.629to-0.763R. Matchedrandom-780.60/-370.13R; corrected excessp.465/.257. Both remain negative and average trade worsens. Later-yearETH119trades16.81percent,-8.03R, but earlier-year-217.20R; not stable.
+    artifacts: [range-v237-triple-resonance-20261022]
+    canonical_report: experiments/active/exp-range-v237-triple-resonance-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NativeNautilus1.231.0 executes1439new and reuses119cached economic paths;36focusedtests,6prefixchecks andallnative-oracle parity. Oracle-only exact5R floating-boundary fixbfb10dda20 preserves enginefills. BTC515/ETH263wait extra,median150/165minutes;onependingwindow each,oneBTCopen excluded. Duplicate actual entries418/229,net-514.53/-181.23R afterdedup. Snapshot ends2026-10-22 10:15Shanghai, twoanniversaryyears. Reference andfiltered-old-entry outcomes retrospective attributiononly. Reproduce .venv/bin/python -m yoyo.evaluation.range_v237_triple_resonance prepare/assemble --symbol BTC orETH; scripts/backtest-range --config experiments/active/exp-range-v237-triple-resonance-20261022-v1/BTC/native.json orETH/native.json; module analyze. Notion4018856479af817488d6d38f7b1e42e5. NoLanglang,2hcap,newdata,hash,formalreport,Pine,default orlivechange.
   - experiment_id: exp-btc-touch-fixed-targets-fiveyear-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 13542083db
