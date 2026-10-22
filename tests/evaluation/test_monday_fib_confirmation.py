@@ -16,6 +16,28 @@ def frame(n=400):
 
 
 class ConfirmationTests(unittest.TestCase):
+    def test_near_monday_target_changes_only_first_quarter(self):
+        for side,edge in ((1,80.),(-1,100.)):
+            old=targets(100,80,side,.1)
+            new=targets(100,80,side,.1,True)
+            self.assertEqual(new['tp1'],edge)
+            for j in (2,3,4):self.assertEqual(new[f'tp{j}'],old[f'tp{j}'])
+            self.assertTrue(all(side*(new[f'tp{j+1}']-new[f'tp{j}'])>0 for j in (1,2,3)))
+
+    def test_near_target_invalidates_cached_admission_and_execution(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed,check_projection_policy
+        old={};new=dict(first_target_monday_boundary=True)
+        self.assertTrue(admission_changed(new,old))
+        with self.assertRaisesRegex(ValueError,'first_target_monday_boundary'):
+            check_projection_policy(new,old)
+
+    def test_near_target_already_passed_keeps_existing_skip_rule(self):
+        old,_,_=self.body_fixture(low=99.,high=103.)
+        new,decisions,_=self.body_fixture(low=99.,high=103.,first_boundary=True)
+        self.assertEqual(len(old),1)
+        self.assertTrue(new.empty)
+        self.assertEqual(decisions.status.tolist(),['target_already_passed'])
+
     def test_structural_stop_exact_five_closed_bars_and_mirror(self):
         f=frame(120);f.loc[:,'high']=110.;f.loc[:,'low']=90.
         f.iloc[0,f.columns.get_loc('low')]=1.
@@ -72,7 +94,7 @@ class ConfirmationTests(unittest.TestCase):
         self.assertTrue(admission_changed(new,old))
         check_projection_policy(new,old)
 
-    def body_fixture(self,late=False,low=101.,high=103.,extension=None,wick=None,wick_i=10,next_close=False):
+    def body_fixture(self,late=False,low=101.,high=103.,extension=None,wick=None,wick_i=10,next_close=False,first_boundary=False):
         f=pd.DataFrame([[100.]*4]*600,columns=['open','high','low','close'],
             index=pd.date_range('2026-01-06T00:01Z',periods=600,freq='min'))
         if late:f.iloc[:300]=98.
@@ -84,7 +106,7 @@ class ConfirmationTests(unittest.TestCase):
         original=pd.DataFrame([dict(parent_id='a',entry_i=touch)])
         cfg=dict(timezone='America/New_York',tick=.1,round_trip_cost=.002,
                  stop_fraction=.007,split='2026-06-01T00:00Z',adverse_extension_fraction=extension,
-                 next_15m_close_confirmation=next_close)
+                 next_15m_close_confirmation=next_close,first_target_monday_boundary=first_boundary)
         with patch('yoyo.evaluation.monday_fib_confirmation.pd.read_csv',side_effect=[weekly,original]):
             return prepare_body(f,cfg)
 

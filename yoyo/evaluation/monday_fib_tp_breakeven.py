@@ -72,15 +72,18 @@ def initialize():
 
 def admission_changed(cfg,oldcfg):
     """Costs can change first-target feasibility, not just reported returns."""
-    defaults=dict(require_arrow=True,adverse_extension_fraction=None,next_15m_close_confirmation=False)
+    defaults=dict(require_arrow=True,adverse_extension_fraction=None,next_15m_close_confirmation=False,
+                  first_target_monday_boundary=False)
     return any(cfg.get(k,defaults.get(k))!=oldcfg.get(k,defaults.get(k)) for k in
         ('wait_minutes','require_arrow','adverse_extension_fraction',
-         'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation','stop_15m_lookback'))
+         'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation','stop_15m_lookback',
+         'first_target_monday_boundary'))
 
 
 def check_projection_policy(cfg,source_cfg):
     """Protect native fill reuse when costs also set the breakeven barrier."""
-    for key in ('round_trip_cost','target_breakeven','be_minutes','tick','stop_fraction','stop_15m_lookback'):
+    for key in ('round_trip_cost','target_breakeven','be_minutes','tick','stop_fraction','stop_15m_lookback',
+                'first_target_monday_boundary'):
         if cfg.get(key)!=source_cfg.get(key):
             raise ValueError(f'Native projection changes execution policy: {key}')
 

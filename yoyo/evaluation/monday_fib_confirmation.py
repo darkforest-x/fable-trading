@@ -27,9 +27,10 @@ CODE=['yoyo/evaluation/monday_fib_confirmation.py',
 ARMS=('15m','30m','60m','any')
 
 
-def targets(high,low,side,tick):
-    """Owner's four directional targets, each25percent of original notional."""
+def targets(high,low,side,tick,first_boundary=False):
+    """Four25percent targets from completed Monday; optional near-edge TP1."""
     fractions=(.5,.618,.705,1.) if side==1 else (.5,.382,.295,0.)
+    if first_boundary:fractions=((0. if side==1 else 1.),*fractions[1:])
     return {f'tp{j+1}':base.rounded(low+f*(high-low),tick,side==1)
             for j,f in enumerate(fractions)}
 
@@ -137,7 +138,8 @@ def prepare(frame,cfg):
                     boundary_changes.append(dict(pair_id=r.pair_id,arm=arm))
             row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm=arm,
                 touch_i=i,touch_time=str(frame.index[i]),level=r.entry,
-                **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),**result)
+                **targets(r.monday_high,r.monday_low,r.side,cfg['tick'],
+                          cfg.get('first_target_monday_boundary',False)),**result)
             if result['status']=='confirmed':
                 j=result['entry_i'];entry=float(frame.close.iloc[j])
                 if r.side*(row['tp1']-entry)<cfg['tick']-1e-8:
@@ -233,7 +235,8 @@ def prepare_body(frame,cfg):
         status='data_censored' if week_end>frame.index[-1] else 'expired'
         row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm='body15m',touch_i=i,
             touch_time=str(frame.index[i]),level=r.entry,
-            **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),status=status,
+            **targets(r.monday_high,r.monday_low,r.side,cfg['tick'],
+                      cfg.get('first_target_monday_boundary',False)),status=status,
             entry_i=j,body_i=body_i,arrow_i=-1,arrow_minutes=0,
             wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False)
         extension=cfg.get('adverse_extension_fraction')
@@ -445,7 +448,8 @@ def direct_baseline(frame,cfg):
     for r in weekly.itertuples():
         if r.trade_id not in old.index:continue
         row=r._asdict();row.pop('Index')
-        row.update(targets(r.monday_high,r.monday_low,r.side,cfg['tick']))
+        row.update(targets(r.monday_high,r.monday_low,r.side,cfg['tick'],
+                           cfg.get('first_target_monday_boundary',False)))
         row.update(arm='touch',trade_id='touch-'+r.trade_id,segment=int(old.loc[r.trade_id,'segment']))
         entries.append(row)
     limits=pd.DataFrame(entries)

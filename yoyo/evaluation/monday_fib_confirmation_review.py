@@ -40,6 +40,15 @@ def run():
             assert abs(r.risk-r.side*(r.entry-r.stop))<1e-8 and r.risk>0
             structural_checks+=1
     quarter=aggregate(frame,15)
+    monday_target_checks=0
+    if cfg.get('first_target_monday_boundary'):
+        anchors=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip').set_index('pair_id')
+        for r in entry.itertuples():
+            a=anchors.loc[r.pair_id]
+            edge=a.monday_low if r.side==1 else a.monday_high
+            assert abs(r.tp1-base.rounded(edge,cfg['tick'],r.side==1))<1e-8
+            assert r.side*(r.tp1-r.entry)>=2*cfg['tick']-1e-8
+            monday_target_checks+=1
     body_checks=next_close_checks=0
     if not cfg.get('require_arrow',True):
         for r in entry.itertuples():
@@ -150,6 +159,7 @@ def run():
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         independent_body_checks=body_checks,independent_next_close_checks=next_close_checks,
         independent_structural_stop_checks=structural_checks,
+        independent_monday_first_target_checks=monday_target_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
         multiplicity_comparisons=len(p),
         test_receipt=(json.loads((EXP/'test_receipt.json').read_text())
