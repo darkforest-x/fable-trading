@@ -22,7 +22,8 @@ def stats(values):
 
 def bp_inference(paired,seed):
     """Reuse week-cluster resampling with explicit basis-point output units."""
-    result=inference(paired.rename(columns={'net_bp':'net_r','random_bp':'net_r_random'}),seed)
+    values=paired[['week','net_bp','random_bp']]
+    result=inference(values.rename(columns={'net_bp':'net_r','random_bp':'net_r_random'}),seed)
     result['excess_sum_bp']=result.pop('excess_r')
     result['weekly_bootstrap_total_bp_95ci']=result.pop('weekly_bootstrap_total_r_95ci')
     return result
