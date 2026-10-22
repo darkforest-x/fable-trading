@@ -192,16 +192,26 @@ def controls(frame,entry,cfg):
     return pd.DataFrame(out)
 
 
-def oracle(bars,r,delay,tick,cost,path='OHLC'):
+def oracle(bars,r,delay,tick,cost,path='OHLC',target_be=False):
     """Independent audit only; never supplies native trades or fills."""
     side=int(r.side);stop=round(r.stop/tick);target=round(r.target_price/tick)
     be=round(base.rounded(r.entry*(1+side*cost),tick,side==1)/tick)
+    first_target=round(r.tp1/tick) if target_be else target
     kind=1;trigger=effective=-1
     for i in range(int(r.entry_i)+1,int(r.end_i)+1):
         o,h,l,c=bars[i];points=[o,h,l,c] if path=='OHLC' else [o,l,h,c]
         if side*(o-stop)<=0: return i,o*tick,kind,trigger,effective
+        if target_be and effective<0 and target!=first_target and side*(o-first_target)>=0:
+            trigger=i if trigger<0 else trigger;effective=i;stop=be;kind=5
         if side*(o-target)>=0: return i,target*tick,4,trigger,effective
         for a,b in zip(points[:-1],points[1:]):
+            if target_be and effective<0 and target!=first_target and min(a,b)<=first_target<=max(a,b):
+                # The native first tranche fills before a later target. Initial
+                # protection, if earlier on this segment, still wins.
+                if min(a,b)<=stop<=max(a,b) and abs(stop-a)<abs(first_target-a):
+                    return i,stop*tick,kind,trigger,effective
+                trigger=i if trigger<0 else trigger;effective=i;stop=be;kind=5
+                a=first_target
             hits=[(abs(p-a),p,reason) for p,reason in ((stop,kind),(target,4)) if min(a,b)<=p<=max(a,b)]
             if hits:
                 _,p,reason=min(hits);return i,p*tick,reason,trigger,effective
@@ -227,6 +237,7 @@ def execute(frame,entries,delay,cfg,mode='market'):
         return pd.read_csv(folder/'parents.csv',float_precision='round_trip'),json.loads((folder/'audit.json').read_text())
     rows,fills,audit=run_native(frame,np.full(len(frame),np.nan),np.zeros(len(frame)),prepared,
         ExitPolicy(target_from_entry=True,opposite_hour_exit=False,
+            target_breakeven=cfg.get('target_breakeven',False),
             time_breakeven_minutes=delay or None,round_trip_cost=cfg['round_trip_cost']),
         tick=cfg['tick'],symbol='BTC',execution_minutes=1,entry_order_mode=mode)
     bars=np.rint(frame[base.OHLC].to_numpy()/cfg['tick']).astype(np.int64)
@@ -240,8 +251,8 @@ def execute(frame,entries,delay,cfg,mode='market'):
             expected=(*value[1:],-1,-1)
             reverse=base.path_oracle(bars,o,mode,cfg['tick'],'OLHC')[1:]
         else:
-            expected=oracle(bars,r,delay,cfg['tick'],cfg['round_trip_cost'])
-            reverse=oracle(bars,r,delay,cfg['tick'],cfg['round_trip_cost'],'OLHC')
+            expected=oracle(bars,r,delay,cfg['tick'],cfg['round_trip_cost'],target_be=cfg.get('target_breakeven',False))
+            reverse=oracle(bars,r,delay,cfg['tick'],cfg['round_trip_cost'],'OLHC',target_be=cfg.get('target_breakeven',False))
         got=(r.exit_i,r.exit_price,r.reason,r.be_trigger_i,r.be_effective_i)
         assert got[0]==expected[0] and got[2:]==expected[2:] and abs(got[1]-expected[1])<1e-7,(r.trade_id,got,expected)
         reversed_r.append(r.side*(reverse[1]-r.entry)/r.risk-r.fee_r)

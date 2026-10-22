@@ -66,11 +66,14 @@ class ExitPolicy:
     strict_pivot_ties: bool = False
     pivot_minutes: int = 15
     target_from_entry: bool = False
+    target_breakeven: bool = False
     breakeven_includes_cost: bool = True
     breakeven_on_touch: bool = False
     intrabar_path: str | None = None
 
     def __post_init__(self):
+        if self.target_breakeven and not self.target_from_entry:
+            raise ValueError("Target breakeven requires per-entry targets and parent groups")
         if self.intrabar_path not in (None, "OHLC", "OLHC"):
             raise ValueError("Intrabar path must be OHLC or OLHC")
         if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
@@ -333,6 +336,26 @@ class IndependentCloseStrategy(Strategy):
         if state.target_order is not None and not state.target_order.is_closed:
             self.cancel_order(state.target_order)
 
+    def _protect_target_siblings(self, filled, i):
+        """A native TP fill immediately protects only its parent's live legs.
+
+        No completed-bar OHLC or future target is inspected. Synchronous order
+        amendments allow a later segment of this same bar to stop the runner.
+        Each runner covers its own original entry-notional fee; earlier profit
+        is not used to relax protection below cost-adjusted entry.
+        """
+        for state in list(self.active.values()):
+            if (state.remaining <= 0 or state.source["parent_id"] != filled.source["parent_id"]
+                    or state.be_effective_i >= 0):
+                continue
+            if state.be_trigger_i < 0:
+                state.be_trigger_i = i
+            state.be_effective_i = i
+            if state.source["side"]*(state.be_price-state.stop) > self.eps:
+                state.stop, state.stop_kind = state.be_price, 1
+                self.modify_order(state.stop_order,
+                                  trigger_price=self.instrument.make_price(state.stop))
+
     def on_order_filled(self, event):
         state, phase, requested = self.order_map[str(event.client_order_id)]
         i = self.indices[event.ts_event]
@@ -410,6 +433,8 @@ class IndependentCloseStrategy(Strategy):
             # this closed HEDGING position after dispatching the fill. Sending
             # another cancellation here races that native cleanup.
             reason = 4
+            if self.policy.target_breakeven:
+                self._protect_target_siblings(state, i)
         else:
             reason = phase
         row = dict(state.source)
@@ -424,7 +449,8 @@ class IndependentCloseStrategy(Strategy):
         # Native bar events carry close timestamps. Preserve a separate logical
         # open timestamp for gap exits without pretending intrabar time is known.
         point_phase = self.point_phases.get(event.ts_event, (i, 0))[1]
-        gap = phase == "stop" and point_phase == 0 and side*(self.prices[i, 0]-state.stop) < -self.eps
+        gap = (phase == "stop" and point_phase == 0 and state.be_effective_i != i
+               and side*(self.prices[i, 0]-state.stop) < -self.eps)
         row.update(
             exit_i=i, exit_price=price, reason=int(reason), peak_r=state.peak,
             arm_i=state.arm_i, protection=state.stop,
@@ -674,6 +700,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if entry_order_mode not in ("market", "limit"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
+    if limit_entry and policy.target_breakeven:
+        raise ValueError("Target sibling breakeven currently requires completed-close entries")
     if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
                             or policy.fixed_target_r is not None):
         raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
@@ -694,6 +722,16 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     frame.index = frame.index.as_unit("ns")
     if entries.empty or not entries.trade_id.is_unique:
         raise ValueError("Need nonempty, uniquely identified independent trades")
+    if policy.target_breakeven:
+        if "parent_id" not in entries or entries.parent_id.isna().any():
+            raise ValueError("Target breakeven requires explicit parent IDs")
+        shared = ["entry_i", "side", "entry", "stop", "risk", "end_i"]
+        if entries.groupby("parent_id")[shared].nunique().gt(1).any().any():
+            raise ValueError("Target breakeven siblings must share entry and initial risk")
+        cost = policy.round_trip_cost if policy.breakeven_includes_cost else 0.
+        # Protection must be feasible at every native target fill.
+        if (entries.side*(entries.target_price-entries.entry)-cost*entries.entry < 2*tick).any():
+            raise ValueError("Target breakeven needs targets beyond cost protection")
     market_tick = tick if market_tick is None else market_tick
     has_targets = policy.fixed_target_r is not None or policy.target_from_entry
     if not 0 < market_tick <= tick or abs(tick/market_tick-round(tick/market_tick)) > 1e-8:
@@ -748,7 +786,8 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             fee_model=fee_model, frozen_account=True,
             # Fill callbacks must protect an intrabar entry immediately. The
             # default command queue waits until the whole bar has completed.
-            use_message_queue=not limit_entry, reject_stop_orders=not limit_entry,
+            use_message_queue=not (limit_entry or policy.target_breakeven),
+            reject_stop_orders=not limit_entry,
             fill_model=fill_model,
             bar_execution=True, bar_adaptive_high_low_ordering=False,
             liquidity_consumption=False,
@@ -798,6 +837,7 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
             fixed_target_execution=(f"resting limit; {policy.intrabar_path or 'OHLC'}; independent limit-price book; native reduce-only sibling cleanup" if has_targets else "disabled"),
             native_fixed_target_accounting_checked=len(rows) if has_targets else 0,
             target_from_entry=policy.target_from_entry,
+            target_breakeven=policy.target_breakeven,
             breakeven_includes_cost=policy.breakeven_includes_cost,
             breakeven_on_touch=policy.breakeven_on_touch,
             intrabar_path=policy.intrabar_path,
