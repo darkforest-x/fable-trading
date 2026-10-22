@@ -76,8 +76,6 @@ def chart(ax, data, minutes, row, entry_t, exit_t, touch_t, focus):
             price=getattr(row,f'tp{j}')
             if lo-pad<price<hi+pad:
                 ax.axhline(price,color=TP,ls=':',lw=1,alpha=.7)
-                ax.text(.01,price,f'TP{j}  {price:,.1f}',color=TP,fontsize=10,
-                        transform=ax.get_yaxis_transform(),va='bottom')
     if left<xdate(exit_t)<right:
         ax.axvspan(xdate(exit_t),right,color='#a7b1c2',alpha=.09,zorder=0)
         ax.text(.98,.97,'灰区：止损后走势',transform=ax.transAxes,color=MUTED,
