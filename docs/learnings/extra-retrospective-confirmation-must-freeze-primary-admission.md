@@ -1,0 +1,7 @@
+# Extra retrospective confirmation must freeze the original admission
+
+- **Problem**: V2.37 adds a same-side 5m arrow within ±5 five-minute candle positions to existing H1-qualified 15m reference frames.
+- **Dead end**: Rechecking the H1 state when the later 5m match arrives would change the original candidate set. Skipping hidden trade updates would also erase stops occurring before publication.
+- **Effective path**: Freeze H1 eligibility, the 15m close reference entry, and initial stop when the 15m candidate forms. Advance its original management while pending, then publish once a closed 5m match exists. Keep signal position, entry close, and publication as separate timestamps. Native tests cover pre-publication stops, inclusive ±25-minute edges, expiration and one frame per 15m event. Fixture calls must consume the returned match count as the production engine does; otherwise the native compiler can eliminate the last mutation-only test call.
+- **General rule**: An added retrospective display filter may change visibility, but must not silently change baseline admission or hide the intervening path. Verify both the instrumented ledger and the clean delivered indicator.
+- **Scope**: `yoyo/evaluation/pine/monday_range_v2_37.pine`; `tests/evaluation/monday_range_v2_37_native_checks.pine`. The 5m branch and key-level module remain unchanged. Later publication is a review reference, not an executable historical fill. See [the three-clock distinction](candle-position-close-and-publication-are-distinct-clocks.md).

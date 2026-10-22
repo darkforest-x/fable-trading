@@ -58,10 +58,10 @@ if barstate.islast and not qa237Logged
     // Different15m candidates may share a5m arrow, but each appears once.
     array<TxFilteredQuarter> multiple = array.from(qa237Quarter(3, -1), qa237Quarter(0, -1))
     array<TxFilteredQuarter> sorted = array.new<TxFilteredQuarter>()
-    txMatchQuarter(multiple, array.from(qa237Five(1, -1)), sorted, array.new<TxTrade>(), qa237At(6), 5)
-    bool sharedFive = sorted.size() == 2 and sorted.first().signalAt == qa237At(0)
+    int sharedCount = txMatchQuarter(multiple, array.from(qa237Five(1, -1)), sorted, array.new<TxTrade>(), qa237At(6), 5)
+    bool sharedFive = sharedCount == 2 and sorted.size() == 2 and sorted.first().signalAt == qa237At(0)
     if not (windowUnits and beforeQuarterClose and earlierFive and oneQuarter and waitForFiveClose and entryWickIgnored and lateStop and expiryEdge and expires and wrongOrOutside and hourRequired and sharedFive)
-        runtime.error("V237_FIXTURE_FAIL")
+        runtime.error("V237_FIXTURE_FAIL " + "windowUnits=" + str.tostring(windowUnits) + "|" + "beforeQuarterClose=" + str.tostring(beforeQuarterClose) + "|" + "earlierFive=" + str.tostring(earlierFive) + "|" + "oneQuarter=" + str.tostring(oneQuarter) + "|" + "waitForFiveClose=" + str.tostring(waitForFiveClose) + "|" + "entryWickIgnored=" + str.tostring(entryWickIgnored) + "|" + "lateStop=" + str.tostring(lateStop) + "|" + "expiryEdge=" + str.tostring(expiryEdge) + "|" + "expires=" + str.tostring(expires) + "|" + "wrongOrOutside=" + str.tostring(wrongOrOutside) + "|" + "hourRequired=" + str.tostring(hourRequired) + "|" + "sharedFive=" + str.tostring(sharedFive) + " count=" + str.tostring(sharedCount) + " size=" + str.tostring(sorted.size()) + " first=" + (sorted.size() > 0 ? str.tostring(sorted.first().signalAt) : "empty"))
     qa237Logged := true
     log.info("V237_FIXTURES_PASS windowUnits/beforeQuarterClose/earlierFive/oneQuarter/waitForFiveClose/entryWickIgnored/lateStop/expiryEdge/expires/wrongOrOutside/hourRequired/sharedFive")
 
