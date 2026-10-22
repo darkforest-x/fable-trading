@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-touch-multidim-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b9c85e9dcd
+    status: rejected
+    question: What do the frozen five-year BTC/ETH touch-highlight trades show across time, side, key, stop distance and outcome dimensions in the unchanged V2.37 module?
+    single_variable: Descriptive stratification only; reuse V2.31 wf engine and all original native trades, stops, confirmation-close pivot exits and20bp costs. No strategy changes or replay.
+    result: BTC485trades21.44percent netwins gross5.91/net-552.55R versus random-558.36R;ETH385trades24.16percent gross5.47/net-284.15R versus random-380.38R. All10symbol-years,4directions,16keys negative.217descriptive cells;ETH risk above0.8percent49trades+2.18R but withoutbest-8.21R,later11trades-1.36R. No profitability or filter promotion.
+    artifacts: [range-touch-multidim-20261022]
+    canonical_report: experiments/active/exp-range-touch-multidim-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: V2.31 andV2.37 level-touch engine source exactlyequal;do not mix withV2.37 two-yearMTF frames.870pairedoccurrences,1740economicrows,30existingstrata reconciled.472/382unique touch-sideevents. Outcomestrata arepostentry;controls retainoriginal pairmembership,notnew clockmatching. Knownhistory first3years chooses bestmeanR group withn30,later2years descriptivecheck. Chinese870rowCSV andall217groups local;Notion4018856479af8157acaecfc60ee5a176 verified. Reproduce .venv/bin/python -m yoyo.evaluation.range_touch_multidim. No formalreport,download,hash,dependency,Pine,account or production change.
   - experiment_id: exp-range-v237-winner-shapes-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5bff9e117b
