@@ -1,0 +1,94 @@
+// Temporary native fixture appendix, excluded from the private delivery.
+qa237At(int bar) =>
+    1800000000000 + bar * 300000
+qa237Quarter(int bar, int side) =>
+    TxTrade trade = TxTrade.new(qa237At(bar + 3), qa237At(bar - 12), side, 100, 100 - side, 1, 100 - side)
+    TxFilteredQuarter.new(trade, qa237At(bar))
+qa237Five(int bar, int side) =>
+    TxReviewFive.new(qa237At(bar), qa237At(bar + 1), side)
+
+varip bool qa237Logged = false
+if barstate.islast and not qa237Logged
+    bool windowUnits = txReviewMatches(qa237At(-5), -1, qa237At(0), -1, 5) and txReviewMatches(qa237At(5), -1, qa237At(0), -1, 5)
+    windowUnits := windowUnits and not txReviewMatches(qa237At(-6), -1, qa237At(0), -1, 5) and not txReviewMatches(qa237At(6), -1, qa237At(0), -1, 5)
+    windowUnits := windowUnits and txReviewMatches(qa237At(0), 1, qa237At(0), 1, 5) and not txReviewMatches(qa237At(0), -1, qa237At(0), 1, 5)
+    array<TxFilteredQuarter> pending = array.from(qa237Quarter(0, -1))
+    array<TxReviewFive> fives = array.from(qa237Five(-4, -1))
+    array<TxFilteredQuarter> accepted = array.new<TxFilteredQuarter>()
+    array<TxTrade> live = array.new<TxTrade>()
+    txMatchQuarter(pending, fives, accepted, live, qa237At(2), 5)
+    bool beforeQuarterClose = pending.size() == 1 and accepted.size() == 0
+    txMatchQuarter(pending, fives, accepted, live, qa237At(3), 5)
+    bool earlierFive = accepted.size() == 1 and accepted.first().confirmedAt == qa237At(3)
+    earlierFive := earlierFive and accepted.first().matched5At == qa237At(-4) and accepted.first().trade.observedAt == qa237At(-12)
+    earlierFive := earlierFive and accepted.first().trade.enteredAt == qa237At(3) and accepted.first().trade.entry == 100
+    fives.push(qa237Five(0, -1))
+    fives.push(qa237Five(2, -1))
+    txMatchQuarter(pending, fives, accepted, live, qa237At(4), 5)
+    bool oneQuarter = accepted.size() == 1 and live.size() == 1
+    array<TxFilteredQuarter> late = array.from(qa237Quarter(0, 1))
+    array<TxFilteredQuarter> lateAccepted = array.new<TxFilteredQuarter>()
+    array<TxTrade> lateLive = array.new<TxTrade>()
+    array<TxReviewFive> later = array.from(qa237Five(5, 1))
+    txMatchQuarter(late, later, lateAccepted, lateLive, qa237At(5), 5)
+    bool waitForFiveClose = lateAccepted.size() == 0 and late.size() == 1
+    // A candidate can stop while waiting for the later five-minute match.
+    txAdvance(late.first().trade, qa237At(2), qa237At(3), 100, 110, 90, 100, false, 1, 5, 4, .01)
+    bool entryWickIgnored = late.first().trade.endedAt == 0 and late.first().trade.peakR == 0
+    txAdvance(late.first().trade, qa237At(3), qa237At(4), 100, 101, 98, 99, false, 1, 5, 4, .01)
+    txMatchQuarter(late, later, lateAccepted, lateLive, qa237At(6), 5)
+    bool lateStop = lateAccepted.size() == 1 and lateLive.size() == 0
+    lateStop := lateStop and lateAccepted.first().confirmedAt == qa237At(6) and lateAccepted.first().trade.enteredAt == qa237At(3)
+    lateStop := lateStop and lateAccepted.first().trade.reason == 1 and lateAccepted.first().trade.currentR == -1
+    array<TxFilteredQuarter> edge = array.from(qa237Quarter(0, 1))
+    txMatchQuarter(edge, array.new<TxReviewFive>(), array.new<TxFilteredQuarter>(), array.new<TxTrade>(), qa237At(6), 5)
+    bool expiryEdge = edge.size() == 1
+    txMatchQuarter(edge, array.new<TxReviewFive>(), array.new<TxFilteredQuarter>(), array.new<TxTrade>(), qa237At(7), 5)
+    bool expires = edge.size() == 0
+    array<TxFilteredQuarter> wrong = array.from(qa237Quarter(0, 1))
+    array<TxFilteredQuarter> none = array.new<TxFilteredQuarter>()
+    txMatchQuarter(wrong, array.from(qa237Five(0, -1), qa237Five(6, 1)), none, array.new<TxTrade>(), qa237At(7), 5)
+    bool wrongOrOutside = none.size() == 0
+    TxWatch absent = TxWatch.new()
+    TxWatch hour = TxWatch.new(-1, qa237At(0))
+    bool hourRequired = not txEntryEligible(absent, "15", true, -1, qa237At(3), -1, qa237At(3))
+    hourRequired := hourRequired and not txEntryEligible(hour, "15", true, -1, qa237At(0), -1, qa237At(0))
+    hourRequired := hourRequired and txEntryEligible(hour, "15", true, 1, qa237At(3), -1, qa237At(3))
+    hourRequired := hourRequired and not txEntryEligible(hour, "15", true, 1, qa237At(3), 1, qa237At(3))
+    // Different15m candidates may share a5m arrow, but each appears once.
+    array<TxFilteredQuarter> multiple = array.from(qa237Quarter(3, -1), qa237Quarter(0, -1))
+    array<TxFilteredQuarter> sorted = array.new<TxFilteredQuarter>()
+    txMatchQuarter(multiple, array.from(qa237Five(1, -1)), sorted, array.new<TxTrade>(), qa237At(6), 5)
+    bool sharedFive = sorted.size() == 2 and sorted.first().signalAt == qa237At(0)
+    if not (windowUnits and beforeQuarterClose and earlierFive and oneQuarter and waitForFiveClose and entryWickIgnored and lateStop and expiryEdge and expires and wrongOrOutside and hourRequired and sharedFive)
+        runtime.error("V237_FIXTURE_FAIL")
+    qa237Logged := true
+    log.info("V237_FIXTURES_PASS windowUnits/beforeQuarterClose/earlierFive/oneQuarter/waitForFiveClose/entryWickIgnored/lateStop/expiryEdge/expires/wrongOrOutside/hourRequired/sharedFive")
+
+varip bool qa237LedgerLogged = false
+if barstate.islast and not na(tx) and not qa237LedgerLogged
+    qa237LedgerLogged := true
+    int lateCount = 0
+    int ownerCount = 0
+    int cutoffCount = 0
+    for row in tx.trades
+        array<string> fields = str.split(row, ",")
+        int entered = int(str.tonumber(fields.get(0)))
+        int confirmed = int(str.tonumber(fields.get(14)))
+        int matched = int(str.tonumber(fields.get(13)))
+        int position = entered - (txEntryTf == "15" ? 900000 : 300000)
+        if fields.size() != (txEntryTf == "15" ? 15 : 16) or math.abs(position - matched) > txMatchWindow * 300000 or confirmed < entered or confirmed > tx.closeAt
+            runtime.error("V237_LEDGER_CONTRACT_FAIL")
+        if txEntryTf == "15" and (entered <= int(str.tonumber(fields.get(1))) or confirmed != math.max(entered, matched + 300000))
+            runtime.error("V237_H1_OR_PUBLICATION_FAIL")
+        if confirmed > entered
+            lateCount += 1
+        if entered >= timestamp("Asia/Shanghai", 2026, 8, 22, 0, 0) and confirmed <= timestamp("Asia/Shanghai", 2026, 10, 22, 10, 15)
+            cutoffCount += 1
+        int ownerAt = txEntryTf == "15" ? timestamp("Asia/Shanghai", 2026, 10, 16, 19, 45) : timestamp("Asia/Shanghai", 2026, 10, 22, 5, 45)
+        if entered == ownerAt
+            ownerCount += 1
+            log.info("V237_OWNER " + row)
+    if tx.total == 0 or tx.total != tx.trades.size()
+        runtime.error("V237_EMPTY_OR_COUNT_FAIL")
+    log.info("V237_LEDGER_PASS chart={0} total={1} late={2} owner={3} cutoffCount={4} start={5} through={6}", txEntryTf, tx.total, lateCount, ownerCount, cutoffCount, tx.sourceStart, tx.closeAt)
