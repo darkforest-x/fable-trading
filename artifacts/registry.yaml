@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: range-v237-winner-shapes-20261022
+    artifact_type: manifest
+    role: Original V2.37 winner versus early-stop morphology, causal temporal filter checks and separated ledgers
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5bff9e117b
+    generator_commit: 71df840e37
+    source_path: experiments/active/exp-range-v237-winner-shapes-20261022-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v237-winner-shapes-20261022-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Frozen Nautilus1.231.0 originalSL/15m5R4ATR/armedH1exit,20bp cost. Compact summaries,profiles,filtercomparison andsupplement committed; fullfeature and16separatedBTC/ETH5m/15mreference/causalwinner/earlystopCSVledgers local. Inputs identifiedbypath,size,mtime,without hashes. First-year cut selection, later-year audit,weeklyuncertainty,matchedrandom anddedupchecks;notnewunseenhistory oraccountreturns.
   - artifact_id: btc-v237-twoyear-gallery-20261022
     artifact_type: manifest
     role: Owner-requested two-year BTC causal signal PNG archives and Telegram delivery

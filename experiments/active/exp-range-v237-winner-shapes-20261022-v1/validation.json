@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "symbol": "BTC",
+      "rows": 4912,
+      "prefix_checks": 4,
+      "source_bars": 216411,
+      "feature_missing": {
+        "next_key_r": 425,
+        "monday_location": 1
+      },
+      "outcome_and_cost_identities": true
+    },
+    {
+      "symbol": "ETH",
+      "rows": 2754,
+      "prefix_checks": 4,
+      "source_bars": 216411,
+      "feature_missing": {
+        "next_key_r": 268
+      },
+      "outcome_and_cost_identities": true
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/BTC/candles.csv.gz",
+      "bytes": 3062150,
+      "mtime_ns": 1792638889015492028
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/BTC/results.csv.gz",
+      "bytes": 1013080,
+      "mtime_ns": 1792638972445495265
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/ETH/candles.csv.gz",
+      "bytes": 2883779,
+      "mtime_ns": 1792638889412262329
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/ETH/results.csv.gz",
+      "bytes": 563294,
+      "mtime_ns": 1792638972145867687
+    }
+  ],
+  "builder_commit": "5bff9e117bb8d97efb00cb8c626abe48698f88fa",
+  "native_replays": 0,
+  "training": false,
+  "pine_changed": false
+}

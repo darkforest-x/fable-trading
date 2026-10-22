@@ -1,0 +1,7 @@
+# Winner-versus-loser shapes do not establish a profitable entry filter
+
+- **Problem**: A large winning reference frame suggests learning its candle shape and excluding trades stopped before1R. Reference entry can precede the confirmation needed to display it, and a5m stop candle can also touch1R in an unknown order.
+- **Dead end**: Ranking only winners against extreme losers removes middle outcomes and hides missed winners. Selecting a filter on all known history or comparing only smaller total losses rewards fewer trades. ETH long-wick first-year profit became a later-year loss; the selected15m sweep's later positive total disappeared without its single best trade.
+- **Effective path**: Keep chart-reference attribution separate from publication-close execution. Use strict pre-stop MFE bounds with opening-gap treatment. Freeze single-feature thresholds, extract only completed-bar context, select on fully resolved first-year labels, and evaluate all later trades with retained winners, meanR, paired random, deduplication and weekly uncertainty.
+- **General rule**: Outcome-defined cohorts propose hypotheses; full-cohort chronological comparisons test them. Report gross/net thresholds, information timing, ambiguous paths and tail concentration before recommending an entry filter.
+- **Scope**: `yoyo/evaluation/range_v237_winner_shapes.py`; `experiments/active/exp-range-v237-winner-shapes-20261022-v1/`. No Pine, execution parameters, training or production configuration changed.
