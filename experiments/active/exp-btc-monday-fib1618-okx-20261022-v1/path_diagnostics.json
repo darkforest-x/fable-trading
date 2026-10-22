@@ -1,0 +1,193 @@
+{
+  "trades": 90,
+  "full_initial_stop": 75,
+  "winners": 14,
+  "partial_then_stop": 4,
+  "tp80_r": {
+    "n": 90,
+    "p25": 4.024811829958864,
+    "median": 5.020094276321624,
+    "p75": 6.593342769125217,
+    "maximum": 14.006715916722852
+  },
+  "tp80_pct": {
+    "n": 90,
+    "p25": 2.817788992967098,
+    "median": 3.5143953838717317,
+    "p75": 4.615432551364415,
+    "maximum": 9.805440336251014
+  },
+  "tp20_r": {
+    "n": 90,
+    "p25": 5.268691329222909,
+    "median": 6.571498419584491,
+    "p75": 8.630908999480692,
+    "maximum": 18.33562793821383
+  },
+  "loser_mfe_r": {
+    "n": 75,
+    "p25": 0.416868725623028,
+    "median": 0.8344653293318516,
+    "p75": 1.7033831089097418,
+    "maximum": 4.96498388829216
+  },
+  "loser_duration_minutes": {
+    "n": 75,
+    "p25": 37.5,
+    "median": 154.0,
+    "p75": 671.5,
+    "maximum": 7509.0
+  },
+  "loser_mfe_bands": [
+    {
+      "lower_r": 0,
+      "upper_r": 0.25,
+      "n": 11,
+      "pct": 14.666666666666666
+    },
+    {
+      "lower_r": 0.25,
+      "upper_r": 0.5,
+      "n": 14,
+      "pct": 18.666666666666668
+    },
+    {
+      "lower_r": 0.5,
+      "upper_r": 1,
+      "n": 18,
+      "pct": 24.0
+    },
+    {
+      "lower_r": 1,
+      "upper_r": 2,
+      "n": 18,
+      "pct": 24.0
+    },
+    {
+      "lower_r": 2,
+      "upper_r": null,
+      "n": 14,
+      "pct": 18.666666666666668
+    }
+  ],
+  "loser_mfe_thresholds": [
+    {
+      "r": 0.25,
+      "ohlc_count": 64,
+      "olhc_count": 65
+    },
+    {
+      "r": 0.5,
+      "ohlc_count": 50,
+      "olhc_count": 49
+    },
+    {
+      "r": 1,
+      "ohlc_count": 32,
+      "olhc_count": 32
+    },
+    {
+      "r": 2,
+      "ohlc_count": 14,
+      "olhc_count": 14
+    }
+  ],
+  "stopped_entry_minute": 2,
+  "losers_stop_within": {
+    "5": 8,
+    "15": 14,
+    "30": 17,
+    "60": 27,
+    "240": 40,
+    "1440": 66
+  },
+  "loser_entry_close_outside": 30,
+  "loser_entry_crossing_body": 30,
+  "loser_entry_entire_body_outside": 0,
+  "loser_before_5m": 5,
+  "loser_before_15m": 8,
+  "loser_5m_outside": 33,
+  "loser_15m_outside": 28,
+  "loser_15m_whole_body_outside": 0,
+  "close_descriptive_tables": [
+    {
+      "label": "entry_minute_close_outside",
+      "value": false,
+      "n": 56,
+      "closed": 56,
+      "wins": 11,
+      "win_pct": 19.642857142857142
+    },
+    {
+      "label": "entry_minute_close_outside",
+      "value": true,
+      "n": 34,
+      "closed": 33,
+      "wins": 3,
+      "win_pct": 9.090909090909092
+    },
+    {
+      "label": "close5_outside",
+      "value": false,
+      "n": 52,
+      "closed": 51,
+      "wins": 9,
+      "win_pct": 17.647058823529413
+    },
+    {
+      "label": "close5_outside",
+      "value": true,
+      "n": 38,
+      "closed": 38,
+      "wins": 5,
+      "win_pct": 13.157894736842104
+    },
+    {
+      "label": "close15_outside",
+      "value": false,
+      "n": 55,
+      "closed": 55,
+      "wins": 8,
+      "win_pct": 14.545454545454545
+    },
+    {
+      "label": "close15_outside",
+      "value": true,
+      "n": 35,
+      "closed": 34,
+      "wins": 6,
+      "win_pct": 17.647058823529413
+    }
+  ],
+  "post_stop_recovery": [
+    {
+      "hours": 24,
+      "complete": 75,
+      "recovered": 6,
+      "percentage": 8.0,
+      "required_max_adverse_pct": {
+        "n": 6,
+        "p25": 1.7581825524236905,
+        "median": 3.3178022203536113,
+        "p75": 4.008811848280284,
+        "maximum": 5.356984496811474
+      }
+    },
+    {
+      "hours": 168,
+      "complete": 75,
+      "recovered": 33,
+      "percentage": 44.0,
+      "required_max_adverse_pct": {
+        "n": 33,
+        "p25": 1.2919062252858928,
+        "median": 1.7834565145442194,
+        "p75": 4.191015655391227,
+        "maximum": 10.673528038263532
+      }
+    }
+  ],
+  "average_winner_r": 3.9661831560598455,
+  "break_even_win_pct": 20.136188468598426,
+  "limitations": "Post-entry bodies and future recovery are retrospective descriptions. They are not tested entry filters or proof that widening stops improves returns. Recovery adverse extremes include the full target-touch minute and are conservative bounds. OHLC vs OLHC is path sensitivity, not known tick order."
+}

@@ -1,0 +1,376 @@
+{
+  "config": {
+    "experiment_id": "exp-btc-monday-fib1618-okx-20261022-v1",
+    "symbol": "BTCUSDT",
+    "venue": "OKX USDT perpetual",
+    "timezone": "America/New_York",
+    "start": "2024-10-22T00:00:00+08:00",
+    "split": "2025-10-22T00:00:00+08:00",
+    "end": "2026-10-22T00:00:00+08:00",
+    "warmup": "2024-10-01T00:00:00Z",
+    "tick": 0.1,
+    "stop_fraction": 0.007,
+    "round_trip_cost": 0,
+    "seed": 20261022,
+    "controls_per_signal": 10,
+    "volatility_edges": [
+      0.001,
+      0.002,
+      0.004,
+      0.008,
+      0.016
+    ],
+    "entry": "Completed NY Monday H/L, D=H-L. Tuesday close-boundary submission: buy L-0.618D; sell H+0.618D. First touch per side/week only; unfilled limits expire at next Monday start. No arrows/confirmation/filter. Round buy down/sell up to tick.",
+    "exit": "Long TP80=L+0.618D, TP20=H; short TP80=H-0.618D, TP20=L. Initial0.7percent stop, rounded outward. No breakeven, trail or weekly time exit. Independent native legs weighted0.8/0.2. Data-end marks excluded from closed-trade win rate.",
+    "owner_image": "Short H83149.8,L81166:entry84375.8,TP80 lower0.61881923.8,TP20 Mondaylow81166. Confirmed first weekly touch per direction; open position holds across weeks.",
+    "controls": "Ten seeded random1m-close entries per filled signal, same OKX BTC/NY week/side/chronological half/causal15m ATR14 bucket, Tue-Sun only. Exclude within5minutes of all real fills; no replacement within side/week. Copy percentage target distances and0.7percent stop, same zero fee and native exits. Report matched subset and unmatched signals.",
+    "inference": "Week-cluster sign permutation of signal minus mean matched-control R; chronological entry-year summaries, no parameter selection. Confidence intervals are descriptive historical uncertainty, not forward evidence.",
+    "not_applicable": "No fitted model or score; AUC, top-decile ranking and single-feature model baselines do not apply. Matched random entry is the null comparator.",
+    "limitations": "OHLC1m path, no real tick sequence, funding/slippage/spread/queue/capacity/account sizing. Conservative fixed limit fill even on favorable gaps; stop-first and reverse-order path audit. Not funded account returns.",
+    "training_eligible": false,
+    "production_eligible": false,
+    "inputs": [
+      "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+      "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+      "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+    ],
+    "venue_evidence": "Owner screenshot Monday H83149.8/L81166 exactly matches existing OKX2026-10-19 NY data; Binance H83157.9/L81146.4 differs. Preserve initial Binance experiment as explicit venue comparison."
+  },
+  "comparisons": [
+    {
+      "part": "all",
+      "signal": {
+        "n": 90,
+        "closed": 89,
+        "open": 1,
+        "wins": 14,
+        "losses": 75,
+        "win_pct": 15.730337078651685,
+        "wilson95_pct": [
+          9.607809666620685,
+          24.688785006875126
+        ],
+        "tp80": 14,
+        "tp20": 10,
+        "tp80_pct": 15.555555555555555,
+        "tp20_pct": 11.11111111111111,
+        "gross_r": -19.473435815162134,
+        "mean_r": -0.2188026496085633,
+        "pf": 0.7403541891311715,
+        "terminal_mark_r": -0.21381411884203314,
+        "stopfirst_win_pct": 15.730337078651685,
+        "stopfirst_r": -19.473435815162134,
+        "olhc_r": -19.473435815162134,
+        "olhc_win_pct": 15.730337078651685,
+        "max_holding_days": 12.145833333333334
+      },
+      "random": {
+        "n": 900,
+        "closed": 900,
+        "open": 0,
+        "wins": 108,
+        "losses": 792,
+        "win_pct": 12.0,
+        "wilson95_pct": [
+          10.03683171890362,
+          14.286179432580475
+        ],
+        "tp80": 108,
+        "tp20": 83,
+        "tp80_pct": 12.0,
+        "tp20_pct": 9.222222222222221,
+        "gross_r": -271.475442694903,
+        "mean_r": -0.30163938077211444,
+        "pf": 0.6572279763953243,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 12.0,
+        "stopfirst_r": -271.47544269490294,
+        "olhc_r": -271.47544269490294,
+        "olhc_win_pct": 12.0,
+        "max_holding_days": 44.65694444444444
+      },
+      "matched_pairs": 89,
+      "comparison": {
+        "weeks": 77,
+        "excess_r": 6.674108454328172,
+        "p_one_sided": 0.32923353832308383,
+        "weekly_bootstrap_total_r_95ci": [
+          -20.71970733499253,
+          35.25485116426297
+        ]
+      }
+    },
+    {
+      "part": "long",
+      "signal": {
+        "n": 46,
+        "closed": 46,
+        "open": 0,
+        "wins": 9,
+        "losses": 37,
+        "win_pct": 19.565217391304348,
+        "wilson95_pct": [
+          10.650610134398717,
+          33.1712589229842
+        ],
+        "tp80": 9,
+        "tp20": 7,
+        "tp80_pct": 19.565217391304348,
+        "tp20_pct": 15.217391304347828,
+        "gross_r": -1.9649664892713925,
+        "mean_r": -0.04271666281024766,
+        "pf": 0.9468927975872602,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 19.565217391304348,
+        "stopfirst_r": -1.9649664892709842,
+        "olhc_r": -1.9649664892709842,
+        "olhc_win_pct": 19.565217391304348,
+        "max_holding_days": 5.239583333333333
+      },
+      "random": {
+        "n": 460,
+        "closed": 460,
+        "open": 0,
+        "wins": 70,
+        "losses": 390,
+        "win_pct": 15.217391304347826,
+        "wilson95_pct": [
+          12.22399846586313,
+          18.786911853884376
+        ],
+        "tp80": 70,
+        "tp20": 58,
+        "tp80_pct": 15.217391304347828,
+        "tp20_pct": 12.608695652173912,
+        "gross_r": -57.33298050510326,
+        "mean_r": -0.12463691414152882,
+        "pf": 0.8529923576792234,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 15.217391304347828,
+        "stopfirst_r": -57.33298050509981,
+        "olhc_r": -57.33298050509981,
+        "olhc_win_pct": 15.217391304347828,
+        "max_holding_days": 44.65694444444444
+      },
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 46,
+        "excess_r": 3.7683315612389374,
+        "p_one_sided": 0.3749812509374531,
+        "weekly_bootstrap_total_r_95ci": [
+          -19.20862910221807,
+          28.874202906444786
+        ]
+      }
+    },
+    {
+      "part": "short",
+      "signal": {
+        "n": 44,
+        "closed": 43,
+        "open": 1,
+        "wins": 5,
+        "losses": 38,
+        "win_pct": 11.627906976744185,
+        "wilson95_pct": [
+          5.070427739804279,
+          24.479161810081703
+        ],
+        "tp80": 5,
+        "tp20": 3,
+        "tp80_pct": 11.363636363636363,
+        "tp20_pct": 6.8181818181818175,
+        "gross_r": -17.508469325890744,
+        "mean_r": -0.4071737052532731,
+        "pf": 0.539250807213397,
+        "terminal_mark_r": -0.21381411884203314,
+        "stopfirst_win_pct": 11.627906976744185,
+        "stopfirst_r": -17.508469325891145,
+        "olhc_r": -17.508469325891145,
+        "olhc_win_pct": 11.627906976744185,
+        "max_holding_days": 12.145833333333334
+      },
+      "random": {
+        "n": 440,
+        "closed": 440,
+        "open": 0,
+        "wins": 38,
+        "losses": 402,
+        "win_pct": 8.636363636363637,
+        "wilson95_pct": [
+          6.356676640993662,
+          11.63205722646346
+        ],
+        "tp80": 38,
+        "tp20": 25,
+        "tp80_pct": 8.636363636363637,
+        "tp20_pct": 5.681818181818182,
+        "gross_r": -214.1424621897997,
+        "mean_r": -0.4866874140677266,
+        "pf": 0.4673073079855689,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 8.636363636363637,
+        "stopfirst_r": -214.1424621898031,
+        "olhc_r": -214.1424621898031,
+        "olhc_win_pct": 8.636363636363637,
+        "max_holding_days": 9.665972222222223
+      },
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 43,
+        "excess_r": 2.905776893089236,
+        "p_one_sided": 0.3952302384880756,
+        "weekly_bootstrap_total_r_95ci": [
+          -16.41877012547508,
+          24.346352262918664
+        ]
+      }
+    },
+    {
+      "part": "earlier",
+      "signal": {
+        "n": 43,
+        "closed": 43,
+        "open": 0,
+        "wins": 6,
+        "losses": 37,
+        "win_pct": 13.953488372093023,
+        "wilson95_pct": [
+          6.555723427965013,
+          27.26358796738242
+        ],
+        "tp80": 6,
+        "tp20": 5,
+        "tp80_pct": 13.953488372093023,
+        "tp20_pct": 11.627906976744185,
+        "gross_r": -14.650141200192678,
+        "mean_r": -0.34070095814401574,
+        "pf": 0.6040502378326293,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 13.953488372093023,
+        "stopfirst_r": -14.65014120019271,
+        "olhc_r": -14.65014120019271,
+        "olhc_win_pct": 13.953488372093023,
+        "max_holding_days": 5.214583333333334
+      },
+      "random": {
+        "n": 430,
+        "closed": 430,
+        "open": 0,
+        "wins": 40,
+        "losses": 390,
+        "win_pct": 9.30232558139535,
+        "wilson95_pct": [
+          6.905799503545507,
+          12.41956858105368
+        ],
+        "tp80": 40,
+        "tp20": 29,
+        "tp80_pct": 9.30232558139535,
+        "tp20_pct": 6.744186046511628,
+        "gross_r": -215.85762575276942,
+        "mean_r": -0.5019944784948126,
+        "pf": 0.44651890832623137,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 9.30232558139535,
+        "stopfirst_r": -215.85762575276988,
+        "olhc_r": -215.85762575276988,
+        "olhc_win_pct": 9.30232558139535,
+        "max_holding_days": 6.263194444444444
+      },
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 38,
+        "excess_r": 6.935621375084266,
+        "p_one_sided": 0.25798710064496777,
+        "weekly_bootstrap_total_r_95ci": [
+          -12.081215353005632,
+          28.24565475697253
+        ]
+      }
+    },
+    {
+      "part": "later",
+      "signal": {
+        "n": 47,
+        "closed": 46,
+        "open": 1,
+        "wins": 8,
+        "losses": 38,
+        "win_pct": 17.391304347826086,
+        "wilson95_pct": [
+          9.085791702246478,
+          30.723353716378078
+        ],
+        "tp80": 8,
+        "tp20": 5,
+        "tp80_pct": 17.02127659574468,
+        "tp20_pct": 10.638297872340425,
+        "gross_r": -4.8232946149694556,
+        "mean_r": -0.10485423076020556,
+        "pf": 0.873071194342909,
+        "terminal_mark_r": -0.21381411884203314,
+        "stopfirst_win_pct": 17.391304347826086,
+        "stopfirst_r": -4.8232946149694165,
+        "olhc_r": -4.8232946149694165,
+        "olhc_win_pct": 17.391304347826086,
+        "max_holding_days": 12.145833333333334
+      },
+      "random": {
+        "n": 470,
+        "closed": 470,
+        "open": 0,
+        "wins": 68,
+        "losses": 402,
+        "win_pct": 14.46808510638298,
+        "wilson95_pct": [
+          11.575685027856721,
+          17.93660356941674
+        ],
+        "tp80": 68,
+        "tp20": 54,
+        "tp80_pct": 14.468085106382977,
+        "tp20_pct": 11.48936170212766,
+        "gross_r": -55.61781694213352,
+        "mean_r": -0.11833578072794367,
+        "pf": 0.8616472215369814,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 14.468085106382977,
+        "stopfirst_r": -55.61781694213303,
+        "olhc_r": -55.61781694213303,
+        "olhc_win_pct": 14.468085106382977,
+        "max_holding_days": 44.65694444444444
+      },
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 40,
+        "excess_r": -0.2615129207560942,
+        "p_one_sided": 0.5080745962701865,
+        "weekly_bootstrap_total_r_95ci": [
+          -23.038632363054642,
+          22.883088998758147
+        ]
+      }
+    }
+  ],
+  "orders": 210,
+  "weeks": 105,
+  "filled": 90,
+  "unmatched": 0,
+  "checks": {
+    "signal": {
+      "native_paths_checked": 180,
+      "unfilled_checked": 240
+    },
+    "random": {
+      "native_paths_checked": 1800,
+      "unfilled_checked": 0
+    },
+    "prefixes": 8,
+    "native_positions": 1980,
+    "native_fills": 3960
+  },
+  "source_commit": "8962da9d64b17c153fa05ee069cb79843e4f3908",
+  "training_eligible": false,
+  "production_eligible": false
+}

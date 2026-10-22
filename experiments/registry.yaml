@@ -14,6 +14,34 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib1618-okx-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: abdf76e830
+    status: rejected
+    question: What is the two-year win rate of the owner image Monday1.618 first-touch strategy, why does it lose, and do wider stops help?
+    single_variable: Freeze entry limits and80/20 fixed targets; vary only owner-approved stop0.7/1/1.4/2percent. Correct venue from provisional Binance to screenshot-matched OKX with separate preserved results.
+    result: OKX90fills89closed14wins15.73percent,-19.47originalR;random12percent,pairedp.329. Long9of46 andshort5of43.75full losses include32MFE1R and14MFE2R;TP80median5.02R. Wider1/1.4/2percent wins23.60/29.21/37.08percent butequalnotionalmean-8.38/-9.91/-6.89bp versusoriginal-15.32bp.2percent rescues19oldlosses,still56losses;early-27.61/later+12.48bp. No positive full-period arm or stable edge.
+    artifacts: [btc-monday-fib1618-okx-20261022]
+    canonical_report: experiments/active/exp-btc-monday-fib1618-okx-20261022-v1/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NYcompletedMonday,firstlimitperside/week,unfilledexpireMonday,filledholdacrossweeks,noBE. ScreenshotH83149.8/L81166exactmatch.1mexistingOKXarchivesplus1379missingminutes,60overlap;nohash. Nautilus7920positions15840fills,alloraclepaths plus960unfilledlegs;104tests,8prefixes,900matching and990parentcash checks. OHLC/OLHC/stopfirst strategy resultsidentical. Source8962da9d64/abdf76e830; rawcachednativefills retained. Post-entry body/recovery classifications descriptive,notnewentryfilters.24h6of75 and7day33of75 recoverTP80afterstop. One signalopen excluded;randomwidearmsoneopen. No report,Pine,default,model orlivechange. Notion4018856479af81c3b258c4ff043d7492.
+  - experiment_id: exp-btc-monday-fib1618-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b01c8cac9a
+    status: rejected
+    question: How often does the provisional Binance Monday1.618 first-touch reversal with0.7percent stop and80/20 range targets win?
+    single_variable: Original fixed owner rule on Binance perpetual, retained separately after screenshot extrema identify OKX.
+    result: 90fills89closed12wins13.48percent,-31.07R versusrandom11.89percent;matchedexcessp.610.12reachTP80,8reachTP20,oneopen. This is not the screenshot-matched venue result.
+    artifacts: [btc-monday-fib1618-binance-20261022]
+    canonical_report: experiments/active/exp-btc-monday-fib1618-20261022-v1/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NYMonday2024-10-22through2026-10-22Shanghai;fee0. Existing Binance1marchive andonlyOctoberAPIgap,60overlap;1980nativepositions3960fills,allpathaudits;nohash. Preserve original provisional venue assumption and negative result. Corrected OKX experiment separately registered;no silent venue substitution.
   - experiment_id: exp-sweep-mtf-fixed1r-zero-fee-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 6425bc2419

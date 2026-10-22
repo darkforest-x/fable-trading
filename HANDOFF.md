@@ -1,3 +1,11 @@
+## 2026-10-22 · Monday 1.618 first-touch win rate and failure attribution
+
+- Owner image short84375.8→TP8081923.8→TP2081166 confirms deep-side0.618 target; NYMonday H83149.8/L81166 matchesOKX exactly. Initial provisional Binance result13.48percent preserved separately; screenshot-matched OKX15.73percent is primary.
+- Two years2024-10-22to2026-10-22Shanghai,fee0,firsttouchperside/week,0.7percentstop,80/20targets,noBE;90fills89closed14wins75losses,-19.47R,oneopen. Long19.57percent/short11.63percent;matchedrandom12percent,p.329. Four partial-then-runner-stop trades remain winners;tenreachboth targets.
+- Of75full losses,32had>=1R MFE,14>=2R;firsttargetmedian5.02R/3.514percent. Only2stopentryminute,8within5minutes;median154minutes.30entry-minute bodiescloseoutside. Poststop24h6/75 and7day33/75 reachTP80;future descriptions are not entry filters.
+- Owner approved single-variable1/1.4/2percentSL. Win23.60/29.21/37.08percent butsame-notionalmean-8.38/-9.91/-6.89bp,allfull-periodnegative versusoriginal-15.32bp.2percentrescues19oldlosses;early-27.61/later+12.48bp. No default promotion.
+- Nautilus1.231.0,OKX7920positions15840fills,allnative/oraclepaths plus960unfilledlegs;104tests,8prefixes,900matches and990parentcashchecks. OHLC/OLHC/stopfirst strategy resultsidentical. Original36.10RcashDD,19lossclosingstreak;notfundedaccount. Existing1marchives,onlymissingtail,60overlap,nohash. Sourceb01c8cac9a/8962da9d64/abdf76e830. Receipts in both `exp-btc-monday-fib1618[-okx]-20261022-v1` directories;rawfills andfailedpreflightcontext retained. Notion https://app.notion.com/p/4018856479af81c3b258c4ff043d7492 . No report/Pine/default/model/live changes.
+
 ## 2026-10-21 · V2.31 entry directions 2 and 3 completed, no upgrade
 
 - Owner selected confirmation-then-retest and confirmed1H structure as separate studies on the original five-year BTC/ETH V2.31 baseline, not sweep+MTF. Original exact-wick stop, confirmed15m2/2 close exit and20bp unchanged.

@@ -1,0 +1,922 @@
+{
+  "authorization": {
+    "authorization": "Owner2026-10-22 explicitly approved adding1.0/1.4/2.0percent stop comparisons after asking why win rate was low: tight stops, favorable excursion reversal, or body breakout.",
+    "stop_fractions": [
+      0.01,
+      0.014,
+      0.02
+    ],
+    "unchanged": "Original entry limits, first weekly side touch, all matched random times, fixed TP80/TP20 prices, no BE, no time exit, zero fees.",
+    "comparison_basis": "Equal-entry-notional bp and common original0.7percent risk; do not compare differently sized R sums without labels.",
+    "path_diagnostics": "Initial-SL losers: favorable excursion after fill, time to stop, entry1m and first5m/15m body state with survival status, target recovery within24h/7days after stop. Future recovery and body classifications are outcome descriptions, not new signal filters.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "results": [
+    {
+      "stop": "stop0.7",
+      "segment": -1,
+      "signal": {
+        "n": 90,
+        "closed": 89,
+        "open": 1,
+        "wins": 14,
+        "losses": 75,
+        "win_pct": 15.730337078651685,
+        "wilson95_pct": [
+          9.607809666620685,
+          24.688785006875126
+        ],
+        "tp80": 14,
+        "tp20": 10,
+        "tp80_pct": 15.555555555555555,
+        "tp20_pct": 11.11111111111111,
+        "gross_r": -19.473435815162134,
+        "mean_r": -0.2188026496085633,
+        "pf": 0.7403541891311715,
+        "terminal_mark_r": -0.21381411884203314,
+        "stopfirst_win_pct": 15.730337078651685,
+        "stopfirst_r": -19.473435815162134,
+        "olhc_r": -19.473435815162134,
+        "olhc_win_pct": 15.730337078651685,
+        "max_holding_days": 12.145833333333334,
+        "common07risk_r": -19.473435815162134,
+        "mean_notional_bp": -15.317801105826337,
+        "total_notional_bp": -1363.284298418544,
+        "stopfirst_common07risk_r": -19.473435815162134
+      },
+      "random": {
+        "n": 900,
+        "closed": 900,
+        "open": 0,
+        "wins": 108,
+        "losses": 792,
+        "win_pct": 12.0,
+        "wilson95_pct": [
+          10.03683171890362,
+          14.286179432580475
+        ],
+        "tp80": 108,
+        "tp20": 83,
+        "tp80_pct": 12.0,
+        "tp20_pct": 9.222222222222221,
+        "gross_r": -271.475442694903,
+        "mean_r": -0.30163938077211444,
+        "pf": 0.6572279763953243,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 12.0,
+        "stopfirst_r": -271.47544269490294,
+        "olhc_r": -271.47544269490294,
+        "olhc_win_pct": 12.0,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -271.475442694903,
+        "mean_notional_bp": -21.11689263645118,
+        "total_notional_bp": -19005.203372806063,
+        "stopfirst_common07risk_r": -271.47544269490294
+      },
+      "rescued_old_losers": 0,
+      "damaged_old_winners": 0,
+      "matched_pairs": 89,
+      "comparison": {
+        "weeks": 77,
+        "excess_r": 6.674108454328172,
+        "p_one_sided": 0.32923353832308383,
+        "weekly_bootstrap_total_r_95ci": [
+          -20.71970733499253,
+          35.25485116426297
+        ]
+      }
+    },
+    {
+      "stop": "stop0.7",
+      "segment": 0,
+      "signal": {
+        "n": 43,
+        "closed": 43,
+        "open": 0,
+        "wins": 6,
+        "losses": 37,
+        "win_pct": 13.953488372093023,
+        "wilson95_pct": [
+          6.555723427965013,
+          27.26358796738242
+        ],
+        "tp80": 6,
+        "tp20": 5,
+        "tp80_pct": 13.953488372093023,
+        "tp20_pct": 11.627906976744185,
+        "gross_r": -14.650141200192678,
+        "mean_r": -0.34070095814401574,
+        "pf": 0.6040502378326293,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 13.953488372093023,
+        "stopfirst_r": -14.65014120019271,
+        "olhc_r": -14.65014120019271,
+        "olhc_win_pct": 13.953488372093023,
+        "max_holding_days": 5.214583333333334,
+        "common07risk_r": -14.650141200192678,
+        "mean_notional_bp": -23.851087858958138,
+        "total_notional_bp": -1025.5967779352,
+        "stopfirst_common07risk_r": -14.65014120019271
+      },
+      "random": {
+        "n": 430,
+        "closed": 430,
+        "open": 0,
+        "wins": 40,
+        "losses": 390,
+        "win_pct": 9.30232558139535,
+        "wilson95_pct": [
+          6.905799503545507,
+          12.41956858105368
+        ],
+        "tp80": 40,
+        "tp20": 29,
+        "tp80_pct": 9.30232558139535,
+        "tp20_pct": 6.744186046511628,
+        "gross_r": -215.85762575276942,
+        "mean_r": -0.5019944784948126,
+        "pf": 0.44651890832623137,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 9.30232558139535,
+        "stopfirst_r": -215.85762575276988,
+        "olhc_r": -215.85762575276988,
+        "olhc_win_pct": 9.30232558139535,
+        "max_holding_days": 6.263194444444444,
+        "common07risk_r": -215.85762575276942,
+        "mean_notional_bp": -35.14253133284814,
+        "total_notional_bp": -15111.2884731247,
+        "stopfirst_common07risk_r": -215.85762575276988
+      },
+      "rescued_old_losers": 0,
+      "damaged_old_winners": 0,
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 38,
+        "excess_r": 6.935621375084266,
+        "p_one_sided": 0.25798710064496777,
+        "weekly_bootstrap_total_r_95ci": [
+          -12.081215353005632,
+          28.24565475697253
+        ]
+      }
+    },
+    {
+      "stop": "stop0.7",
+      "segment": 1,
+      "signal": {
+        "n": 47,
+        "closed": 46,
+        "open": 1,
+        "wins": 8,
+        "losses": 38,
+        "win_pct": 17.391304347826086,
+        "wilson95_pct": [
+          9.085791702246478,
+          30.723353716378078
+        ],
+        "tp80": 8,
+        "tp20": 5,
+        "tp80_pct": 17.02127659574468,
+        "tp20_pct": 10.638297872340425,
+        "gross_r": -4.8232946149694556,
+        "mean_r": -0.10485423076020556,
+        "pf": 0.873071194342909,
+        "terminal_mark_r": -0.21381411884203314,
+        "stopfirst_win_pct": 17.391304347826086,
+        "stopfirst_r": -4.8232946149694165,
+        "olhc_r": -4.8232946149694165,
+        "olhc_win_pct": 17.391304347826086,
+        "max_holding_days": 12.145833333333334,
+        "common07risk_r": -4.8232946149694556,
+        "mean_notional_bp": -7.341033053985739,
+        "total_notional_bp": -337.687520483344,
+        "stopfirst_common07risk_r": -4.8232946149694165
+      },
+      "random": {
+        "n": 470,
+        "closed": 470,
+        "open": 0,
+        "wins": 68,
+        "losses": 402,
+        "win_pct": 14.46808510638298,
+        "wilson95_pct": [
+          11.575685027856721,
+          17.93660356941674
+        ],
+        "tp80": 68,
+        "tp20": 54,
+        "tp80_pct": 14.468085106382977,
+        "tp20_pct": 11.48936170212766,
+        "gross_r": -55.61781694213352,
+        "mean_r": -0.11833578072794367,
+        "pf": 0.8616472215369814,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 14.468085106382977,
+        "stopfirst_r": -55.61781694213303,
+        "olhc_r": -55.61781694213303,
+        "olhc_win_pct": 14.468085106382977,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -55.61781694213352,
+        "mean_notional_bp": -8.284925318470988,
+        "total_notional_bp": -3893.914899681364,
+        "stopfirst_common07risk_r": -55.61781694213303
+      },
+      "rescued_old_losers": 0,
+      "damaged_old_winners": 0,
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 40,
+        "excess_r": -0.2615129207560942,
+        "p_one_sided": 0.5080745962701865,
+        "weekly_bootstrap_total_r_95ci": [
+          -23.038632363054642,
+          22.883088998758147
+        ]
+      }
+    },
+    {
+      "stop": "stop1",
+      "segment": -1,
+      "signal": {
+        "n": 90,
+        "closed": 89,
+        "open": 1,
+        "wins": 21,
+        "losses": 68,
+        "win_pct": 23.59550561797753,
+        "wilson95_pct": [
+          15.982438700810864,
+          33.39362604762034
+        ],
+        "tp80": 21,
+        "tp20": 15,
+        "tp80_pct": 23.333333333333332,
+        "tp20_pct": 16.666666666666664,
+        "gross_r": -7.459171078879583,
+        "mean_r": -0.083810910998647,
+        "pf": 0.8903063076635355,
+        "terminal_mark_r": -0.14968001896182498,
+        "stopfirst_win_pct": 23.595505617977526,
+        "stopfirst_r": -7.459171078879586,
+        "olhc_r": -7.459171078879586,
+        "olhc_win_pct": 23.595505617977526,
+        "max_holding_days": 12.147222222222222,
+        "common07risk_r": -10.656877479684209,
+        "mean_notional_bp": -8.38194345783527,
+        "total_notional_bp": -745.992967747339,
+        "stopfirst_common07risk_r": -10.656877479684214
+      },
+      "random": {
+        "n": 900,
+        "closed": 900,
+        "open": 0,
+        "wins": 151,
+        "losses": 749,
+        "win_pct": 16.77777777777778,
+        "wilson95_pct": [
+          14.478823635625837,
+          19.359130558215526
+        ],
+        "tp80": 151,
+        "tp20": 114,
+        "tp80_pct": 16.77777777777778,
+        "tp20_pct": 12.666666666666668,
+        "gross_r": -246.1997835405742,
+        "mean_r": -0.27355531504508246,
+        "pf": 0.6712953490780049,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 16.77777777777778,
+        "stopfirst_r": -246.1997835405743,
+        "olhc_r": -246.1997835405743,
+        "olhc_win_pct": 16.77777777777778,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -351.7008507926627,
+        "mean_notional_bp": -27.357074815396196,
+        "total_notional_bp": -24621.367333856575,
+        "stopfirst_common07risk_r": -351.70085079266283
+      },
+      "rescued_old_losers": 7,
+      "damaged_old_winners": 0,
+      "matched_pairs": 89,
+      "comparison": {
+        "weeks": 77,
+        "excess_r": 23.084651647902835,
+        "p_one_sided": 0.15004249787510623,
+        "weekly_bootstrap_total_r_95ci": [
+          -16.928235633506922,
+          67.63501778642697
+        ]
+      }
+    },
+    {
+      "stop": "stop1",
+      "segment": 0,
+      "signal": {
+        "n": 43,
+        "closed": 43,
+        "open": 0,
+        "wins": 9,
+        "losses": 34,
+        "win_pct": 20.930232558139537,
+        "wilson95_pct": [
+          11.422834220995794,
+          35.205642710736015
+        ],
+        "tp80": 9,
+        "tp20": 7,
+        "tp80_pct": 20.930232558139537,
+        "tp20_pct": 16.27906976744186,
+        "gross_r": -8.676510724480542,
+        "mean_r": -0.20177931917396608,
+        "pf": 0.7448085081035125,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 20.930232558139537,
+        "stopfirst_r": -8.676510724480627,
+        "olhc_r": -8.676510724480627,
+        "olhc_win_pct": 20.930232558139537,
+        "max_holding_days": 7.144444444444445,
+        "common07risk_r": -12.396090140908377,
+        "mean_notional_bp": -20.180118126814122,
+        "total_notional_bp": -867.7450794530073,
+        "stopfirst_common07risk_r": -12.396090140908505
+      },
+      "random": {
+        "n": 430,
+        "closed": 430,
+        "open": 0,
+        "wins": 62,
+        "losses": 368,
+        "win_pct": 14.418604651162791,
+        "wilson95_pct": [
+          11.413205401502378,
+          18.05411640960434
+        ],
+        "tp80": 62,
+        "tp20": 49,
+        "tp80_pct": 14.418604651162791,
+        "tp20_pct": 11.395348837209303,
+        "gross_r": -177.16843792405936,
+        "mean_r": -0.4120196230792078,
+        "pf": 0.5185640273802729,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 14.418604651162791,
+        "stopfirst_r": -177.16843792405973,
+        "olhc_r": -177.16843792405973,
+        "olhc_win_pct": 14.418604651162791,
+        "max_holding_days": 7.254861111111111,
+        "common07risk_r": -253.0896820025697,
+        "mean_notional_bp": -41.204144368153614,
+        "total_notional_bp": -17717.782078306052,
+        "stopfirst_common07risk_r": -253.08968200257016
+      },
+      "rescued_old_losers": 3,
+      "damaged_old_winners": 0,
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 38,
+        "excess_r": 12.912878059348582,
+        "p_one_sided": 0.21153942302884857,
+        "weekly_bootstrap_total_r_95ci": [
+          -16.650387792141085,
+          45.343613063185686
+        ]
+      }
+    },
+    {
+      "stop": "stop1",
+      "segment": 1,
+      "signal": {
+        "n": 47,
+        "closed": 46,
+        "open": 1,
+        "wins": 12,
+        "losses": 34,
+        "win_pct": 26.08695652173913,
+        "wilson95_pct": [
+          15.600886445642825,
+          40.259153528015176
+        ],
+        "tp80": 12,
+        "tp20": 8,
+        "tp80_pct": 25.53191489361702,
+        "tp20_pct": 17.02127659574468,
+        "gross_r": 1.2173396456009598,
+        "mean_r": 0.0264639053391513,
+        "pf": 1.0358041072235575,
+        "terminal_mark_r": -0.14968001896182498,
+        "stopfirst_win_pct": 26.08695652173913,
+        "stopfirst_r": 1.2173396456010437,
+        "olhc_r": 1.2173396456010437,
+        "olhc_win_pct": 26.08695652173913,
+        "max_holding_days": 12.147222222222222,
+        "common07risk_r": 1.7392126612241687,
+        "mean_notional_bp": 2.646785037079753,
+        "total_notional_bp": 121.75211170566864,
+        "stopfirst_common07risk_r": 1.7392126612242857
+      },
+      "random": {
+        "n": 470,
+        "closed": 470,
+        "open": 0,
+        "wins": 89,
+        "losses": 381,
+        "win_pct": 18.93617021276596,
+        "wilson95_pct": [
+          15.65133238912018,
+          22.724680396520096
+        ],
+        "tp80": 89,
+        "tp20": 65,
+        "tp80_pct": 18.93617021276596,
+        "tp20_pct": 13.829787234042554,
+        "gross_r": -69.03134561651487,
+        "mean_r": -0.14687520343939334,
+        "pf": 0.818815365835919,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 18.93617021276596,
+        "stopfirst_r": -69.03134561651459,
+        "olhc_r": -69.03134561651459,
+        "olhc_win_pct": 18.93617021276596,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -98.61116879009303,
+        "mean_notional_bp": -14.688479267128779,
+        "total_notional_bp": -6903.585255550526,
+        "stopfirst_common07risk_r": -98.61116879009265
+      },
+      "rescued_old_losers": 4,
+      "damaged_old_winners": 0,
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 40,
+        "excess_r": 10.171773588554247,
+        "p_one_sided": 0.247887605619719,
+        "weekly_bootstrap_total_r_95ci": [
+          -18.331684339798763,
+          40.590756841033055
+        ]
+      }
+    },
+    {
+      "stop": "stop1.4",
+      "segment": -1,
+      "signal": {
+        "n": 90,
+        "closed": 89,
+        "open": 1,
+        "wins": 26,
+        "losses": 63,
+        "win_pct": 29.213483146067414,
+        "wilson95_pct": [
+          20.783608917846113,
+          39.36350588411037
+        ],
+        "tp80": 26,
+        "tp20": 19,
+        "tp80_pct": 28.888888888888886,
+        "tp20_pct": 21.11111111111111,
+        "gross_r": -6.303152725668076,
+        "mean_r": -0.07082194073784355,
+        "pf": 0.8999499567354273,
+        "terminal_mark_r": -0.10691610937102179,
+        "stopfirst_win_pct": 29.213483146067414,
+        "stopfirst_r": -6.3031527256680295,
+        "olhc_r": -6.3031527256680295,
+        "olhc_win_pct": 29.213483146067414,
+        "max_holding_days": 12.154166666666667,
+        "common07risk_r": -12.606373224259936,
+        "mean_notional_bp": -9.914997875394143,
+        "total_notional_bp": -882.4348109100787,
+        "stopfirst_common07risk_r": -12.606373224259844
+      },
+      "random": {
+        "n": 900,
+        "closed": 899,
+        "open": 1,
+        "wins": 198,
+        "losses": 701,
+        "win_pct": 22.024471635150167,
+        "wilson95_pct": [
+          19.437708387068923,
+          24.84929847490807
+        ],
+        "tp80": 198,
+        "tp20": 150,
+        "tp80_pct": 22.0,
+        "tp20_pct": 16.666666666666664,
+        "gross_r": -217.2473724319398,
+        "mean_r": -0.24165447434031123,
+        "pf": 0.6900893403253355,
+        "terminal_mark_r": -0.5376426503150997,
+        "stopfirst_win_pct": 22.024471635150167,
+        "stopfirst_r": -217.24737243193965,
+        "olhc_r": -217.24737243193965,
+        "olhc_win_pct": 22.024471635150167,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -434.47518162296643,
+        "mean_notional_bp": -33.833113538819745,
+        "total_notional_bp": -30415.96907139895,
+        "stopfirst_common07risk_r": -434.4751816229662
+      },
+      "rescued_old_losers": 12,
+      "damaged_old_winners": 0,
+      "matched_pairs": 89,
+      "comparison": {
+        "weeks": 77,
+        "excess_r": 29.041214451436826,
+        "p_one_sided": 0.13719314034298286,
+        "weekly_bootstrap_total_r_95ci": [
+          -20.891588365800846,
+          80.16392824086479
+        ]
+      }
+    },
+    {
+      "stop": "stop1.4",
+      "segment": 0,
+      "signal": {
+        "n": 43,
+        "closed": 43,
+        "open": 0,
+        "wins": 11,
+        "losses": 32,
+        "win_pct": 25.58139534883721,
+        "wilson95_pct": [
+          14.92951712380847,
+          40.23840349884624
+        ],
+        "tp80": 11,
+        "tp20": 9,
+        "tp80_pct": 25.581395348837212,
+        "tp20_pct": 20.930232558139537,
+        "gross_r": -10.256839415320862,
+        "mean_r": -0.2385311491935084,
+        "pf": 0.6794737682712227,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 25.581395348837212,
+        "stopfirst_r": -10.256839415320881,
+        "olhc_r": -10.256839415320881,
+        "olhc_win_pct": 25.581395348837212,
+        "max_holding_days": 8.365972222222222,
+        "common07risk_r": -20.513084679615165,
+        "mean_notional_bp": -33.395570052301096,
+        "total_notional_bp": -1436.0095122489472,
+        "stopfirst_common07risk_r": -20.513084679615208
+      },
+      "random": {
+        "n": 430,
+        "closed": 430,
+        "open": 0,
+        "wins": 86,
+        "losses": 344,
+        "win_pct": 20.0,
+        "wilson95_pct": [
+          16.49233501506542,
+          24.03893631586769
+        ],
+        "tp80": 86,
+        "tp20": 70,
+        "tp80_pct": 20.0,
+        "tp20_pct": 16.27906976744186,
+        "gross_r": -146.8608841709013,
+        "mean_r": -0.3415369399323286,
+        "pf": 0.573078825084589,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 20.0,
+        "stopfirst_r": -146.8608841709015,
+        "olhc_r": -146.8608841709015,
+        "olhc_win_pct": 20.0,
+        "max_holding_days": 14.465972222222222,
+        "common07risk_r": -293.7094477751237,
+        "mean_notional_bp": -47.81706032012961,
+        "total_notional_bp": -20561.335937655735,
+        "stopfirst_common07risk_r": -293.7094477751241
+      },
+      "rescued_old_losers": 5,
+      "damaged_old_winners": 0,
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 38,
+        "excess_r": 8.857860097897202,
+        "p_one_sided": 0.3223838808059597,
+        "weekly_bootstrap_total_r_95ci": [
+          -27.255879673302488,
+          46.81455484139001
+        ]
+      }
+    },
+    {
+      "stop": "stop1.4",
+      "segment": 1,
+      "signal": {
+        "n": 47,
+        "closed": 46,
+        "open": 1,
+        "wins": 15,
+        "losses": 31,
+        "win_pct": 32.608695652173914,
+        "wilson95_pct": [
+          20.865943309255925,
+          47.032267580677185
+        ],
+        "tp80": 15,
+        "tp20": 10,
+        "tp80_pct": 31.914893617021278,
+        "tp20_pct": 21.27659574468085,
+        "gross_r": 3.953686689652786,
+        "mean_r": 0.08594971064462578,
+        "pf": 1.12753828031138,
+        "terminal_mark_r": -0.10691610937102179,
+        "stopfirst_win_pct": 32.608695652173914,
+        "stopfirst_r": 3.9536866896528498,
+        "olhc_r": 3.9536866896528498,
+        "olhc_win_pct": 32.608695652173914,
+        "max_holding_days": 12.154166666666667,
+        "common07risk_r": 7.906711455355234,
+        "mean_notional_bp": 12.034232637801484,
+        "total_notional_bp": 553.5747013388683,
+        "stopfirst_common07risk_r": 7.906711455355364
+      },
+      "random": {
+        "n": 470,
+        "closed": 469,
+        "open": 1,
+        "wins": 112,
+        "losses": 357,
+        "win_pct": 23.880597014925375,
+        "wilson95_pct": [
+          20.24402873457333,
+          27.941563829359094
+        ],
+        "tp80": 112,
+        "tp20": 80,
+        "tp80_pct": 23.829787234042556,
+        "tp20_pct": 17.02127659574468,
+        "gross_r": -70.38648826103847,
+        "mean_r": -0.150077800130146,
+        "pf": 0.802838968456475,
+        "terminal_mark_r": -0.5376426503150997,
+        "stopfirst_win_pct": 23.88059701492537,
+        "stopfirst_r": -70.38648826103814,
+        "olhc_r": -70.38648826103814,
+        "olhc_win_pct": 23.88059701492537,
+        "max_holding_days": 44.65694444444444,
+        "common07risk_r": -140.76573384784274,
+        "mean_notional_bp": -21.012010946147583,
+        "total_notional_bp": -9854.633133743217,
+        "stopfirst_common07risk_r": -140.76573384784209
+      },
+      "rescued_old_losers": 7,
+      "damaged_old_winners": 0,
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 40,
+        "excess_r": 20.183354353539627,
+        "p_one_sided": 0.1399430028498575,
+        "weekly_bootstrap_total_r_95ci": [
+          -14.987353981811887,
+          57.5169905298695
+        ]
+      }
+    },
+    {
+      "stop": "stop2",
+      "segment": -1,
+      "signal": {
+        "n": 90,
+        "closed": 89,
+        "open": 1,
+        "wins": 33,
+        "losses": 56,
+        "win_pct": 37.07865168539326,
+        "wilson95_pct": [
+          27.77363164998004,
+          47.45295322691184
+        ],
+        "tp80": 33,
+        "tp20": 23,
+        "tp80_pct": 36.666666666666664,
+        "tp20_pct": 25.555555555555554,
+        "gross_r": -3.064969023205535,
+        "mean_r": -0.03443785419332061,
+        "pf": 0.9452684102999012,
+        "terminal_mark_r": -0.07484000948091249,
+        "stopfirst_win_pct": 37.07865168539326,
+        "stopfirst_r": -3.064969023205494,
+        "olhc_r": -3.064969023205494,
+        "olhc_win_pct": 37.07865168539326,
+        "max_holding_days": 15.104166666666666,
+        "common07risk_r": -8.759202990392502,
+        "mean_notional_bp": -6.887708071682515,
+        "total_notional_bp": -613.0060183797439,
+        "stopfirst_common07risk_r": -8.759202990392378
+      },
+      "random": {
+        "n": 900,
+        "closed": 899,
+        "open": 1,
+        "wins": 261,
+        "losses": 638,
+        "win_pct": 29.032258064516128,
+        "wilson95_pct": [
+          26.159300510284382,
+          32.08364499064072
+        ],
+        "tp80": 261,
+        "tp20": 197,
+        "tp80_pct": 28.999999999999996,
+        "tp20_pct": 21.88888888888889,
+        "gross_r": -181.38386513107412,
+        "mean_r": -0.20176180770975985,
+        "pf": 0.7156992709544292,
+        "terminal_mark_r": -0.37633383010431504,
+        "stopfirst_win_pct": 29.03225806451613,
+        "stopfirst_r": -181.38386513107417,
+        "olhc_r": -181.38386513107417,
+        "olhc_win_pct": 29.03225806451613,
+        "max_holding_days": 52.99861111111111,
+        "common07risk_r": -518.2153132193935,
+        "mean_notional_bp": -40.3535869110705,
+        "total_notional_bp": -36277.87463305238,
+        "stopfirst_common07risk_r": -518.2153132193935
+      },
+      "rescued_old_losers": 19,
+      "damaged_old_winners": 0,
+      "matched_pairs": 89,
+      "comparison": {
+        "weeks": 77,
+        "excess_r": 40.49104640844819,
+        "p_one_sided": 0.10054497275136243,
+        "weekly_bootstrap_total_r_95ci": [
+          -19.86942082683399,
+          100.2558890256504
+        ]
+      }
+    },
+    {
+      "stop": "stop2",
+      "segment": 0,
+      "signal": {
+        "n": 43,
+        "closed": 43,
+        "open": 0,
+        "wins": 15,
+        "losses": 28,
+        "win_pct": 34.883720930232556,
+        "wilson95_pct": [
+          22.418589997352992,
+          49.82821800714754
+        ],
+        "tp80": 15,
+        "tp20": 12,
+        "tp80_pct": 34.883720930232556,
+        "tp20_pct": 27.906976744186046,
+        "gross_r": -5.935825189761324,
+        "mean_r": -0.13804244627351916,
+        "pf": 0.7880062432228098,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 34.883720930232556,
+        "stopfirst_r": -5.935825189761326,
+        "olhc_r": -5.935825189761326,
+        "olhc_win_pct": 34.883720930232556,
+        "max_holding_days": 15.104166666666666,
+        "common07risk_r": -16.959679657693975,
+        "mean_notional_bp": -27.609916420247245,
+        "total_notional_bp": -1187.2264060706316,
+        "stopfirst_common07risk_r": -16.95967965769398
+      },
+      "random": {
+        "n": 430,
+        "closed": 430,
+        "open": 0,
+        "wins": 120,
+        "losses": 310,
+        "win_pct": 27.906976744186046,
+        "wilson95_pct": [
+          23.87735828770906,
+          32.32784152964477
+        ],
+        "tp80": 120,
+        "tp20": 95,
+        "tp80_pct": 27.906976744186046,
+        "tp20_pct": 22.093023255813954,
+        "gross_r": -111.22678251106656,
+        "mean_r": -0.25866693607224783,
+        "pf": 0.6412039273836561,
+        "terminal_mark_r": 0.0,
+        "stopfirst_win_pct": 27.906976744186046,
+        "stopfirst_r": -111.22678251106673,
+        "olhc_r": -111.22678251106673,
+        "olhc_win_pct": 27.906976744186046,
+        "max_holding_days": 21.874305555555555,
+        "common07risk_r": -317.7737104470299,
+        "mean_notional_bp": -51.73450125209274,
+        "total_notional_bp": -22245.83553839988,
+        "stopfirst_common07risk_r": -317.7737104470304
+      },
+      "rescued_old_losers": 9,
+      "damaged_old_winners": 0,
+      "matched_pairs": 43,
+      "comparison": {
+        "weeks": 38,
+        "excess_r": 14.817691387009017,
+        "p_one_sided": 0.25688715564221787,
+        "weekly_bootstrap_total_r_95ci": [
+          -29.64105453844029,
+          58.4196898359693
+        ]
+      }
+    },
+    {
+      "stop": "stop2",
+      "segment": 1,
+      "signal": {
+        "n": 47,
+        "closed": 46,
+        "open": 1,
+        "wins": 18,
+        "losses": 28,
+        "win_pct": 39.130434782608695,
+        "wilson95_pct": [
+          26.393225037829325,
+          53.54315676837887
+        ],
+        "tp80": 18,
+        "tp20": 11,
+        "tp80_pct": 38.297872340425535,
+        "tp20_pct": 23.404255319148938,
+        "gross_r": 2.8708561665557895,
+        "mean_r": 0.06240991666425629,
+        "pf": 1.1025305773769927,
+        "terminal_mark_r": -0.07484000948091249,
+        "stopfirst_win_pct": 39.130434782608695,
+        "stopfirst_r": 2.8708561665558325,
+        "olhc_r": 2.8708561665558325,
+        "olhc_win_pct": 39.130434782608695,
+        "max_holding_days": 12.2375,
+        "common07risk_r": 8.200476667301473,
+        "mean_notional_bp": 12.483051906323642,
+        "total_notional_bp": 574.2203876908875,
+        "stopfirst_common07risk_r": 8.2004766673016
+      },
+      "random": {
+        "n": 470,
+        "closed": 469,
+        "open": 1,
+        "wins": 141,
+        "losses": 328,
+        "win_pct": 30.063965884861407,
+        "wilson95_pct": [
+          26.089771722697762,
+          34.362088724058836
+        ],
+        "tp80": 141,
+        "tp20": 102,
+        "tp80_pct": 30.0,
+        "tp20_pct": 21.70212765957447,
+        "gross_r": -70.15708262000754,
+        "mean_r": -0.14958866230278794,
+        "pf": 0.7861064554268062,
+        "terminal_mark_r": -0.37633383010431504,
+        "stopfirst_win_pct": 30.06396588486141,
+        "stopfirst_r": -70.15708262000746,
+        "olhc_r": -70.15708262000746,
+        "olhc_win_pct": 30.06396588486141,
+        "max_holding_days": 52.99861111111111,
+        "common07risk_r": -200.44160277236344,
+        "mean_notional_bp": -29.91905990331024,
+        "total_notional_bp": -14032.039094652504,
+        "stopfirst_common07risk_r": -200.44160277236324
+      },
+      "rescued_old_losers": 10,
+      "damaged_old_winners": 0,
+      "matched_pairs": 46,
+      "comparison": {
+        "weeks": 40,
+        "excess_r": 25.67335502143917,
+        "p_one_sided": 0.12499375031248437,
+        "weekly_bootstrap_total_r_95ci": [
+          -16.97807086910554,
+          67.90807464978168
+        ]
+      }
+    }
+  ],
+  "audits": [
+    {
+      "population": "signal",
+      "native_paths_checked": 540,
+      "unfilled_checked": 720,
+      "positions": 540,
+      "fills": 1080
+    },
+    {
+      "population": "random",
+      "native_paths_checked": 5400,
+      "unfilled_checked": 0,
+      "positions": 5400,
+      "fills": 10800
+    }
+  ],
+  "accounting": "common07risk_R uses each original trade risk as denominator; equal-notional bp exposes larger loss size. Own-risk R remains descriptive. Open end marks excluded from closed results."
+}
