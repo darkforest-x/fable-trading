@@ -1,0 +1,29 @@
+{
+  "feature": "monday-fib-monitor",
+  "status": "backend_verified_frontend_blocked_by_stitch",
+  "source_commit": "dd14f913ddd0f2c6fb43ab5a042f00b3127ab70c",
+  "scope": "All live OKX USDT perpetual contracts; NY Monday; upper H+0.618R, lower L-0.618R; first touch per week/symbol/side",
+  "telegram": "Dedicated opt-in, default off; forward-only, no historical replay; existing local credentials; no real test messages sent",
+  "stitch": {
+    "project_id": "8978791379095391159",
+    "model": "GEMINI_3_8_FLASH",
+    "tool": "generate_screen_from_text",
+    "result": "MCP timed out at 300 seconds; no new screen in subsequent project checks",
+    "owner_decision": "Continue waiting for Stitch; no waiver of design-first requirement",
+    "last_check": {
+      "current_time": "2026-10-22 14:15:53 UTC"
+    }
+  },
+  "validation": {
+    "command": ".venv/bin/python -m pytest tests/monitor/test_monday_fib.py tests/monitor/test_api_startup_imports.py -q",
+    "passed": 16,
+    "live_smoke": "live_smoke.json",
+    "real_tg_sent": 0
+  },
+  "deployment": "Not restarted or deployed; existing service continues unchanged. Temporary live validation worker exited; temporary browser tab closed.",
+  "pending": [
+    "Retrieve actual generated Stitch screen and frontend code; do not implement UI from existing spec without owner waiver.",
+    "Add monday-fib menu, lazy module, responsive page, independent Telegram switch and status/receipt UI.",
+    "Run browser desktop/mobile scenarios, verify toggles with isolated fake sender only, deploy and verify existing service health."
+  ]
+}
