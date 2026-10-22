@@ -1,7 +1,7 @@
 {
   "feature": "monday-fib-monitor",
-  "status": "apple_glass_frontend_integrated_and_browser_verified",
-  "source_commit": "a4737916488b051a889e693b1092ebb1b512070c",
+  "status": "touch_priority_and_inline_charts_verified",
+  "source_commit": "ca7aff1d6bbbc8f72002c0a170e92f6f383ad91e",
   "scope": "All live OKX USDT perpetual contracts; NY Monday; upper H+0.618R, lower L-0.618R; first touch per week/symbol/side",
   "telegram": "Dedicated opt-in defaults off. Initial QA was off; activation at 1792682048630 occurred outside agent UI actions, then current on state was preserved. No real test messages or agent subscription writes. Natural live notifications are distinct from QA.",
   "stitch": {
@@ -48,5 +48,47 @@
     "notify": "Only meaningful change, completion, or unrecoverable blocker; quiet while unchanged.",
     "scope": "Completed: recovered Apple Glass source, integrated live monitor and verified desktop/mobile. No further polling required."
   },
-  "completed_at": "2026-10-22T15:19:46.044294+00:00"
+  "completed_at": "2026-10-22T15:19:46.044294+00:00",
+  "touch_chart_revision": {
+    "completed_at": "2026-10-22T15:42:47.173302+00:00",
+    "source_commit": "ca7aff1d6bbbc8f72002c0a170e92f6f383ad91e",
+    "stitch_screen_id": "20fd581767514b34af5fb3efe2d42e6d",
+    "stitch_html_resource": "projects/8978791379095391159/files/93578401082047729e61378d6532175d",
+    "stitch_screenshot_resource": "projects/8978791379095391159/files/b188b9f4824841538f64952f0517898d",
+    "source": "stitch-touch-chart.html",
+    "request": "stitch-touch-chart-request.json",
+    "rules": [
+      "Hide untouched rows in every search/filter; background monitor still covers all507 contracts.",
+      "Sort latest weekly first-touch occurrence descending; history uses candle_ms, live uses observed_ms.",
+      "UI-only15minute live-event emphasis; history recovery never becomes a fresh trigger.",
+      "Click row to expand one selected15m closed-candle chart from NYMonday; nine levels use monitor anchors.",
+      "Reuse existing context demand cache and shared Lightweight Charts4.2 renderer; no new backend or trade API.",
+      "Keep chart DOM/zoom during quote polls, cancel obsolete requests and reject symbol/week mismatches."
+    ],
+    "validation": {
+      "tests_passed": 44,
+      "command": "node --test tests/monitor/frontend_monday_fib.test.cjs tests/monitor/frontend_monday_fib_chart.test.cjs tests/monitor/frontend_range_chart.test.cjs tests/monitor/frontend_module_loader.test.cjs tests/monitor/frontend_chart_tools.test.cjs tests/monitor/frontend_shell.test.cjs",
+      "desktop": "1280x1100; real BTC and SNDK candles, nine price levels, fullscreen survives polling",
+      "mobile": "390x844; scrollWidth390, canvas314x260, full precision nine-level legend",
+      "identity": "BTC to ETH switch shows loading then ETH candles; no reused BTC series",
+      "new_event": "Live MRVL first touch arrived during QA, moved to top and highlighted while expanded SNDK chart remained intact",
+      "console_errors": 0,
+      "screenshots": [
+        "touch-chart-desktop.png",
+        "touch-chart-mobile.png",
+        "touch-chart-highlight.png",
+        "touched-list-desktop.png"
+      ],
+      "telegram_writes_by_agent": 0,
+      "real_test_messages": 0
+    },
+    "health": {
+      "service_alive": true,
+      "scan_errors": 0,
+      "patrol_plans_enabled": 4,
+      "public_ws_connected": true,
+      "telegram_enabled_preserved": true
+    },
+    "browser": "Reused IAB2; retained as Owner-requested deliverable. Owner Stitch tab unchanged. No new browser session or temporary tab."
+  }
 }
