@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-touch-fixed10r-fiveyear-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: c1908aa388
+    status: inconclusive
+    question: Does the annual highest-return ETH original touch-highlight fixed10R strategy remain positive across five years without fees?
+    single_variable: Historical coverage extended to2021-10-21through2026-10-21Shanghai;same original entries,exact wick stops,fixed10R target andcontrols. Owner zero-fee policy retained from annual comparison.
+    result: ETH385trades46wins11.948percent,+121R versus matchedrandom-132R;PF1.357,realizeddrawdown44R,longest31losses. Fiveanniversaryyears-19,+23,-14,+79,+52R;threepositive,two negative. Sameentry1R+3R. Weeklypairedexcessp.001700 isunadjusted forhistorical18exit selection;notforwardvalidated orpromoted.
+    artifacts: [eth-touch-fixed10r-fiveyear-20261022]
+    canonical_report: experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Nautilus1.231.0 newlyexecutes632positions1264fills for316older signal-controlpairs;69annualpairs reusecachednativeprices/times withzero-fee accounting andoriginalfees retained. All632oracleprice-time checks pass,15focusedtests,all770payoffs minus1/plus10,no boundary contribution,stopfirst unchanged,ETHrevision exposurezero. Originalwf module unchanged31to37. No newengine,download,Pine orlivechange. Reproduce isolatedNautilusPython -m yoyo.evaluation.range_fiveyear_fixed_target. Notion4018856479af81d1b623ca50caf70f0c.
   - experiment_id: exp-range-touch-multidim-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: b9c85e9dcd

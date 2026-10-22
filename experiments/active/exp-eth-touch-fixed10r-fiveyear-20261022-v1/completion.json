@@ -1,0 +1,103 @@
+{
+  "builder_commit": "c1908aa388",
+  "status": "complete",
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "reproduction": "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_fiveyear_fixed_target",
+  "focused_tests_passed": 15,
+  "test_command": "PYTHONPATH=. /Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m pytest -q tests/evaluation/test_range_fiveyear_fixed_target.py tests/evaluation/test_nautilus_independent.py tests/evaluation/test_range_v230_exit_compare.py -k 'target or fixed or same_bar or fees or restatement or breakeven_cannot'",
+  "accounting_checks": {
+    "rows": 770,
+    "signal_wins": 46,
+    "signal_losses": 339,
+    "random_wins": 23,
+    "random_losses": 362,
+    "all_payoffs_minus1_or_plus10": true,
+    "all_native_commissions_zero": true,
+    "annual_cached_rows": 138,
+    "new_native_rows": 632,
+    "new_native_fills": 1264,
+    "anniversary_years_partition_full": true,
+    "stop_first_unchanged": true
+  },
+  "registry_records_valid": true,
+  "notion_url": "https://app.notion.com/p/4018856479af81d1b623ca50caf70f0c",
+  "notion_readback_verified": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "files": [
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/.gitignore",
+      "bytes": 62,
+      "mtime_ns": 1792654504081009593
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/fills.csv",
+      "bytes": 138893,
+      "mtime_ns": 1792654569713436028
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/legs.csv",
+      "bytes": 120719,
+      "mtime_ns": 1792654569703922492
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/native_trades.csv",
+      "bytes": 236114,
+      "mtime_ns": 1792654569710468308
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/receipt.json",
+      "bytes": 9598,
+      "mtime_ns": 1792654569738255580
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/stop_first.csv",
+      "bytes": 116401,
+      "mtime_ns": 1792654569720547471
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/fixed_10r/trades.csv",
+      "bytes": 117874,
+      "mtime_ns": 1792654569717076833
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/sensitivity.csv",
+      "bytes": 285006,
+      "mtime_ns": 1792654570127781384
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/trades.csv",
+      "bytes": 284445,
+      "mtime_ns": 1792654570076388481
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/ETH/validation.json",
+      "bytes": 1390,
+      "mtime_ns": 1792654570128306094
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/config.json",
+      "bytes": 1467,
+      "mtime_ns": 1792654504080615425
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/run.log",
+      "bytes": 24463,
+      "mtime_ns": 1792654570398747366
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/summary.json",
+      "bytes": 28229,
+      "mtime_ns": 1792654570397996363
+    },
+    {
+      "path": "experiments/active/exp-eth-touch-fixed10r-fiveyear-20261022-v1/validation.json",
+      "bytes": 1859,
+      "mtime_ns": 1792654570398177738
+    }
+  ]
+}

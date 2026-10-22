@@ -1,0 +1,50 @@
+{
+  "checks": [
+    {
+      "symbol": "ETH",
+      "native_audit": {
+        "engine": "nautilus_trader",
+        "version": "1.231.0",
+        "market_tick": 0.01,
+        "protection_tick": 0.01,
+        "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+        "partial_execution": "disabled",
+        "native_partial_accounting_checked": 0,
+        "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+        "native_fixed_target_accounting_checked": 632,
+        "target_from_entry": true,
+        "breakeven_includes_cost": true,
+        "breakeven_on_touch": false,
+        "intrabar_path": null,
+        "synthetic_segments_per_bar": 1,
+        "positions": 632,
+        "fills": 1264,
+        "execution_minutes": 5,
+        "rsi_scaleout": "disabled",
+        "rsi_skip_events": 0,
+        "timed_be_minutes": null,
+        "confirmed_pivot_exit": false,
+        "structural_pivot_stop": false,
+        "structural_execution": "disabled",
+        "pivot_execution": "disabled",
+        "strict_pivot_ties": false,
+        "max_simultaneous_positions": 3,
+        "bars_with_both_directions": 2531,
+        "prepare_seconds": 1.0544448750151787,
+        "replay_seconds": 10.711979165993398,
+        "runtime_warnings": [
+          "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+        ],
+        "accounting": "independent original-risk R; frozen account; not portfolio returns"
+      },
+      "native_oracle": {
+        "checked": 632,
+        "native_price_time_parity": true,
+        "conservative_changed": 0
+      },
+      "comparison_1r_admission_parity": true
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}
