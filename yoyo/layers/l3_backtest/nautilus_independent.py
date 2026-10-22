@@ -372,7 +372,10 @@ class IndependentCloseStrategy(Strategy):
             self.entering_limit_i = i if self.entry_order_mode == "limit" else None
             self._submit_protective_stop(state)
             self.entering_limit_i = None
-            self._submit_target(state)
+            # Synchronous protection can close a just-filled limit immediately.
+            # The callback then resumes here with zero remaining exposure.
+            if state.remaining > 0:
+                self._submit_target(state)
             return
         state.remaining -= int(event.last_qty)
         if phase == "rsi_partial":
@@ -671,8 +674,9 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
     if entry_order_mode not in ("market", "limit"):
         raise ValueError("Unknown entry order mode")
     limit_entry = entry_order_mode == "limit"
-    if limit_entry and not policy.confirmed_pivot_exit:
-        raise ValueError("Resting entry currently supports initial-stop/pivot management only")
+    if limit_entry and not (policy.confirmed_pivot_exit or policy.target_from_entry
+                            or policy.fixed_target_r is not None):
+        raise ValueError("Resting entry requires initial-stop/pivot or fixed-target management")
     if execution_minutes not in (1,5):
         raise ValueError("Execution resolution must be 1m or 5m")
     if policy.rsi_scaleout:
