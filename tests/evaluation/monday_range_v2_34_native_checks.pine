@@ -1,0 +1,81 @@
+// Temporary native fixture appendix; never ship in the private indicator.
+qa234At(int b) =>
+    1800000000000 + b * 300000
+qa234State() =>
+    TxConfirmation.new(na, 0, na, 0, array.new<TxPending>())
+qa234Count(array<TxPending> rows) =>
+    na(rows) ? 0 : rows.size()
+
+varip bool qa234Logged = false
+if barstate.islast and not qa234Logged
+    TxWatch w = TxWatch.new(1, qa234At(0))
+    TxConfirmation before = qa234State()
+    txConfirmEntries(before, w, false, 0, 0, 1, qa234At(1), 1, 5)
+    array<TxPending> a = txConfirmEntries(before, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)
+    bool past = qa234Count(a) == 1 and before.waiting.size() == 0
+    TxConfirmation stale = qa234State()
+    txConfirmEntries(stale, w, false, 0, 0, 1, qa234At(0), 0, 5)
+    bool pastOutside = qa234Count(txConfirmEntries(stale, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)) == 0
+    TxConfirmation simultaneous = qa234State()
+    bool same = qa234Count(txConfirmEntries(simultaneous, w, true, 1, qa234At(6), 1, qa234At(6), 6, 5)) == 1
+    bool consumed = qa234Count(txConfirmEntries(simultaneous, w, false, 0, 0, 1, qa234At(7), 7, 5)) == 0
+    TxConfirmation later = qa234State()
+    bool future = qa234Count(txConfirmEntries(later, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)) == 0
+    future := future and qa234Count(txConfirmEntries(later, w, false, 0, 0, -1, qa234At(7), 7, 5)) == 0
+    future := future and qa234Count(txConfirmEntries(later, w, false, 0, 0, 1, qa234At(8), 8, 5)) == 1
+    future := future and qa234Count(txConfirmEntries(later, w, false, 0, 0, 1, qa234At(9), 9, 5)) == 0
+    TxConfirmation edge = qa234State()
+    txConfirmEntries(edge, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)
+    bool last = qa234Count(txConfirmEntries(edge, w, false, 0, 0, 1, qa234At(11), 11, 5)) == 1
+    TxConfirmation expired = qa234State()
+    txConfirmEntries(expired, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)
+    bool outside = qa234Count(txConfirmEntries(expired, w, false, 0, 0, 1, qa234At(12), 12, 5)) == 0 and expired.waiting.size() == 0
+    TxConfirmation reverse = qa234State()
+    txConfirmEntries(reverse, w, true, 1, qa234At(6), 0, qa234At(6), 6, 5)
+    txObserve(w, -1, qa234At(7))
+    bool cancel = qa234Count(txConfirmEntries(reverse, w, false, 0, 0, 1, qa234At(7), 7, 5)) == 0 and reverse.waiting.size() == 0
+    TxWatch sameWatch = TxWatch.new(1, qa234At(0))
+    TxConfirmation refreshed = qa234State()
+    txConfirmEntries(refreshed, sameWatch, true, 1, qa234At(6), 0, qa234At(6), 6, 5)
+    txObserve(sameWatch, 1, qa234At(7))
+    array<TxPending> b = txConfirmEntries(refreshed, sameWatch, false, 0, 0, 1, qa234At(7), 7, 5)
+    bool refresh = qa234Count(b) == 1 and b.get(0).observedAt == qa234At(0)
+    TxConfirmation overlap = qa234State()
+    txConfirmEntries(overlap, sameWatch, true, 1, qa234At(9), 0, qa234At(9), 9, 5)
+    txConfirmEntries(overlap, sameWatch, true, 1, qa234At(12), 0, qa234At(12), 12, 5)
+    array<TxPending> c = txConfirmEntries(overlap, sameWatch, false, 0, 0, 1, qa234At(13), 13, 5)
+    bool independent = qa234Count(c) == 2 and c.get(0).signalAt != c.get(1).signalAt and overlap.waiting.size() == 0
+    TxWatch shortWatch = TxWatch.new(-1, qa234At(0))
+    TxConfirmation shortState = qa234State()
+    txConfirmEntries(shortState, shortWatch, false, 0, 0, -1, qa234At(5), 5, 5)
+    bool symmetric = qa234Count(txConfirmEntries(shortState, shortWatch, true, -1, qa234At(6), 0, qa234At(6), 6, 5)) == 1
+    TxConfirmation gap = qa234State()
+    txConfirmEntries(gap, sameWatch, true, 1, qa234At(9), 0, qa234At(9), 9, 5)
+    bool gaps = qa234Count(txConfirmEntries(gap, sameWatch, false, 0, 0, 1, qa234At(15), 10, 5)) == 0
+    TxWatch original = TxWatch.new(1, qa234At(6))
+    bool oldGate = not txEntryEligible(original, "15", true, 1, qa234At(6), 1, qa234At(6))
+    oldGate := oldGate and txEntryEligible(original, "15", true, -1, qa234At(9), 1, qa234At(9))
+    oldGate := oldGate and txEntryEligible(original, "5", false, 1, qa234At(7), 0, 0)
+    // Entry at the later close excludes that entry candle's earlier wick.
+    TxTrade delayed = TxTrade.new(qa234At(8), qa234At(0), 1, 100, 99, 1, 99)
+    txAdvance(delayed, qa234At(7), qa234At(8), 100, 110, 98, 100, false, 1, 5, 4, .01)
+    bool execution = delayed.endedAt == 0 and delayed.peakR == 0
+    txAdvance(delayed, qa234At(8), qa234At(9), 100, 101, 98, 99, true, 1, 5, 4, .01)
+    execution := execution and delayed.reason == 1 and delayed.exitPrice == 99
+    if not (past and pastOutside and same and consumed and future and last and outside and cancel and refresh and independent and symmetric and gaps and oldGate and execution)
+        runtime.error("V234_FIXTURE_FAIL")
+    qa234Logged := true
+    log.info("V234_FIXTURES_PASS past5/stale6/same/consume/firstFuture/next5/expired6/H1cancel/H1refresh/overlap/short/gaps/oldRoute/entryWick")
+
+varip bool qa234LedgerLogged = false
+if barstate.islast and not na(tx) and not qa234LedgerLogged
+    qa234LedgerLogged := true
+    int offQuarter = 0
+    for row in tx.trades
+        array<string> f = str.split(row, ",")
+        int entered = int(str.tonumber(f.get(0)))
+        int observed = int(str.tonumber(f.get(1)))
+        if entered <= observed or entered % 300000 != 0
+            runtime.error("V234_LEDGER_CLOCK_FAIL")
+        offQuarter += entered % 900000 != 0 ? 1 : 0
+    log.info("V234_LEDGER_PASS chart={0} filter={1} total={2} offQuarter={3}", txEntryTf, txFiveConfirm, tx.total, offQuarter)
