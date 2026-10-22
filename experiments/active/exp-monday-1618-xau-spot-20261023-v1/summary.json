@@ -1,0 +1,135 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-xau-spot-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 10: over 2011-2026 XAUUSD spot, does the first weekly 1618 hold or break more often than the driftless 38.2 percent?",
+    "pattern": "data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_*.zip",
+    "monday_min_bars": 80,
+    "horizon_days": 14,
+    "split": "2019-01-01T00:00:00Z",
+    "seed": 20261023,
+    "success_criterion": "Per direction (hold/break): both halves on that side of 38.2 percent, later one-sided binomial Holm p<0.01, later mean R of that direction's trade >0.",
+    "limitations": "Spot, not the owner's XAUUSDT.P perp; NY-local HistData M1 converted with DST; daily 17-18 NY break; minute ordering; fee 0; independent R.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "minutes": 5531707,
+  "touches": 685,
+  "table": {
+    "hold": {
+      "earlier": {
+        "n": 370,
+        "valid_pct": 34.86486486486486,
+        "mean_r": -0.063388443332717,
+        "p_one_sided": 0.9157152814424023
+      },
+      "later": {
+        "n": 315,
+        "valid_pct": 37.142857142857146,
+        "mean_r": -0.025065509265901925,
+        "p_one_sided": 0.6697815236134577,
+        "holm_p": 0.7467293762787497
+      },
+      "all": {
+        "n": 685,
+        "valid_pct": 35.91240875912409,
+        "mean_r": -0.04576548825089692,
+        "p_one_sided": 0.8983224452973181
+      }
+    },
+    "break": {
+      "earlier": {
+        "n": 370,
+        "valid_pct": 34.86486486486486,
+        "mean_r": 0.05396658794717046,
+        "p_one_sided": 0.10231023444078231
+      },
+      "later": {
+        "n": 315,
+        "valid_pct": 37.142857142857146,
+        "mean_r": 0.01710587147480348,
+        "p_one_sided": 0.37336468813937485,
+        "holm_p": 0.7467293762787497
+      },
+      "all": {
+        "n": 685,
+        "valid_pct": 35.91240875912409,
+        "mean_r": 0.03701603949637395,
+        "p_one_sided": 0.11647966782165006
+      }
+    }
+  },
+  "passed": {
+    "hold": false,
+    "break": false
+  },
+  "by_year": {
+    "2011": {
+      "n": 50,
+      "valid_pct": 32.0
+    },
+    "2012": {
+      "n": 52,
+      "valid_pct": 34.61538461538461
+    },
+    "2013": {
+      "n": 46,
+      "valid_pct": 32.608695652173914
+    },
+    "2014": {
+      "n": 41,
+      "valid_pct": 21.951219512195124
+    },
+    "2015": {
+      "n": 46,
+      "valid_pct": 45.65217391304348
+    },
+    "2016": {
+      "n": 49,
+      "valid_pct": 26.53061224489796
+    },
+    "2017": {
+      "n": 44,
+      "valid_pct": 47.72727272727273
+    },
+    "2018": {
+      "n": 42,
+      "valid_pct": 38.095238095238095
+    },
+    "2019": {
+      "n": 42,
+      "valid_pct": 26.190476190476193
+    },
+    "2020": {
+      "n": 32,
+      "valid_pct": 31.25
+    },
+    "2021": {
+      "n": 43,
+      "valid_pct": 44.18604651162791
+    },
+    "2022": {
+      "n": 46,
+      "valid_pct": 50.0
+    },
+    "2023": {
+      "n": 25,
+      "valid_pct": 28.000000000000004
+    },
+    "2024": {
+      "n": 48,
+      "valid_pct": 43.75
+    },
+    "2025": {
+      "n": 41,
+      "valid_pct": 39.02439024390244
+    },
+    "2026": {
+      "n": 38,
+      "valid_pct": 26.31578947368421
+    }
+  },
+  "ordering_changes": 2,
+  "source_commit": "57ff46d7622db466a5313dffe801346222e4d4af",
+  "training_eligible": false,
+  "production_eligible": false
+}

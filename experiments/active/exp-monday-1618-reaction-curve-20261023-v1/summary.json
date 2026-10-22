@@ -1,0 +1,260 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-reaction-curve-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 9: does the 1618 produce small bounces (0.1/0.2/0.3R inside) before the 2.0 extension more often than driftless odds on 1m bars?",
+    "touch_ledger": "experiments/active/exp-monday-1618-oos-1m-20261023-v1",
+    "targets_R": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "split": "2024-10-01T00:00:00Z",
+    "horizon_days": 14,
+    "success_criterion": "Per target: both halves above driftless odds 0.382/(0.382+x), later one-sided binomial Holm p<0.01 across 3 targets, later mean R>0.",
+    "limitations": "Binance UM 1m OHLC, touch minute stop-only, same minute both = stop; fee 0 (owner), so tiny targets ignore real costs and slippage that would dominate them.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "touches": 1035,
+  "table": {
+    "0.1": {
+      "earlier": {
+        "n": 493,
+        "hit_pct": 77.89046653144017,
+        "driftless_pct": 79.25311203319502,
+        "mean_r": -0.01719358983889638,
+        "p_one_sided": 0.7897534334111018,
+        "unresolved": 0
+      },
+      "later": {
+        "n": 542,
+        "hit_pct": 79.52029520295203,
+        "driftless_pct": 79.25311203319502,
+        "mean_r": 0.003371264079132934,
+        "p_one_sided": 0.46407577904058295,
+        "unresolved": 0,
+        "holm_p": 1.0
+      },
+      "all": {
+        "n": 1035,
+        "hit_pct": 78.74396135265701,
+        "driftless_pct": 79.25311203319502,
+        "mean_r": -0.006424361990034653,
+        "p_one_sided": 0.6730166093989032,
+        "unresolved": 0
+      },
+      "by_symbol": {
+        "BNB": {
+          "n": 164,
+          "hit_pct": 78.65853658536585,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": -0.007502234708210957,
+          "p_one_sided": 0.6183656320844813,
+          "unresolved": 0
+        },
+        "BTC": {
+          "n": 170,
+          "hit_pct": 81.76470588235294,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": 0.03169079149984599,
+          "p_one_sided": 0.2407915563835109,
+          "unresolved": 0
+        },
+        "DOGE": {
+          "n": 188,
+          "hit_pct": 75.53191489361703,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": -0.04695332516430879,
+          "p_one_sided": 0.9091708653220064,
+          "unresolved": 0
+        },
+        "ETH": {
+          "n": 166,
+          "hit_pct": 78.3132530120482,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": -0.011858954141172039,
+          "p_one_sided": 0.6590676722842488,
+          "unresolved": 0
+        },
+        "SOL": {
+          "n": 180,
+          "hit_pct": 78.88888888888889,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": -0.00459569517161141,
+          "p_one_sided": 0.5907381405476424,
+          "unresolved": 0
+        },
+        "XRP": {
+          "n": 167,
+          "hit_pct": 79.64071856287426,
+          "driftless_pct": 79.25311203319502,
+          "mean_r": 0.004890742076057289,
+          "p_one_sided": 0.4962438587986062,
+          "unresolved": 0
+        }
+      }
+    },
+    "0.2": {
+      "earlier": {
+        "n": 493,
+        "hit_pct": 64.0973630831643,
+        "driftless_pct": 65.63573883161511,
+        "mean_r": -0.023438080774826665,
+        "p_one_sided": 0.7789445791922148,
+        "unresolved": 0
+      },
+      "later": {
+        "n": 542,
+        "hit_pct": 65.12915129151291,
+        "driftless_pct": 65.63573883161511,
+        "mean_r": -0.0077181661868975,
+        "p_one_sided": 0.6170789703079554,
+        "unresolved": 0,
+        "holm_p": 1.0
+      },
+      "all": {
+        "n": 1035,
+        "hit_pct": 64.6376811594203,
+        "driftless_pct": 65.63573883161511,
+        "mean_r": -0.015206009560664716,
+        "p_one_sided": 0.7612978485886048,
+        "unresolved": 0
+      },
+      "by_symbol": {
+        "BNB": {
+          "n": 164,
+          "hit_pct": 60.36585365853659,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": -0.0802898735793641,
+          "p_one_sided": 0.9323873136379235,
+          "unresolved": 0
+        },
+        "BTC": {
+          "n": 170,
+          "hit_pct": 71.17647058823529,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": 0.084416384354789,
+          "p_one_sided": 0.07343179189426671,
+          "unresolved": 0
+        },
+        "DOGE": {
+          "n": 188,
+          "hit_pct": 61.702127659574465,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": -0.05993093461067174,
+          "p_one_sided": 0.8866912991962383,
+          "unresolved": 0
+        },
+        "ETH": {
+          "n": 166,
+          "hit_pct": 62.65060240963855,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": -0.04548035072226081,
+          "p_one_sided": 0.8141455161842425,
+          "unresolved": 0
+        },
+        "SOL": {
+          "n": 180,
+          "hit_pct": 66.11111111111111,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": 0.007242582897033145,
+          "p_one_sided": 0.48101234944135246,
+          "unresolved": 0
+        },
+        "XRP": {
+          "n": 167,
+          "hit_pct": 65.86826347305389,
+          "driftless_pct": 65.63573883161511,
+          "mean_r": 0.0035426529140671157,
+          "p_one_sided": 0.5106511072519366,
+          "unresolved": 0
+        }
+      }
+    },
+    "0.3": {
+      "earlier": {
+        "n": 493,
+        "hit_pct": 58.21501014198783,
+        "driftless_pct": 56.011730205278596,
+        "mean_r": 0.03933604494334292,
+        "p_one_sided": 0.17361625630494668,
+        "unresolved": 0
+      },
+      "later": {
+        "n": 542,
+        "hit_pct": 53.690036900369,
+        "driftless_pct": 56.011730205278596,
+        "mean_r": -0.041450126543150265,
+        "p_one_sided": 0.8711315387650198,
+        "unresolved": 0,
+        "holm_p": 1.0
+      },
+      "all": {
+        "n": 1035,
+        "hit_pct": 55.84541062801932,
+        "driftless_pct": 56.011730205278596,
+        "mean_r": -0.00296937046311051,
+        "p_one_sided": 0.5557993083816148,
+        "unresolved": 0
+      },
+      "by_symbol": {
+        "BNB": {
+          "n": 164,
+          "hit_pct": 54.26829268292683,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": -0.03112629293832208,
+          "p_one_sided": 0.7021320142062617,
+          "unresolved": 0
+        },
+        "BTC": {
+          "n": 170,
+          "hit_pct": 59.411764705882355,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": 0.06070218663381581,
+          "p_one_sided": 0.20763128761988803,
+          "unresolved": 0
+        },
+        "DOGE": {
+          "n": 188,
+          "hit_pct": 52.659574468085104,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": -0.05984738776874236,
+          "p_one_sided": 0.841211029504894,
+          "unresolved": 0
+        },
+        "ETH": {
+          "n": 166,
+          "hit_pct": 53.6144578313253,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": -0.04279947013183628,
+          "p_one_sided": 0.7586149822582844,
+          "unresolved": 0
+        },
+        "SOL": {
+          "n": 180,
+          "hit_pct": 57.77777777777778,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": 0.03152995927865034,
+          "p_one_sided": 0.34473561920226625,
+          "unresolved": 0
+        },
+        "XRP": {
+          "n": 167,
+          "hit_pct": 57.48502994011976,
+          "driftless_pct": 56.011730205278596,
+          "mean_r": 0.026303414114180003,
+          "p_one_sided": 0.38108353098360953,
+          "unresolved": 0
+        }
+      }
+    }
+  },
+  "passed": {
+    "0.1": false,
+    "0.2": false,
+    "0.3": false
+  },
+  "source_commit": "06a9d9139b7f7aaeb66f44a7a58402e6de3fd12e",
+  "training_eligible": false,
+  "production_eligible": false
+}

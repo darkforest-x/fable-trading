@@ -18,6 +18,54 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-confluence-20261023-v1
+    artifact_type: manifest
+    role: 'Does volume-profile or swing confluence at the 1618 judge whether it holds?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: bb8cc06fe2979dded49553110b5a9981e2a5ce40
+    generator_commit: bb8cc06fe2979dded49553110b5a9981e2a5ce40
+    source_path: experiments/active/exp-monday-1618-confluence-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-confluence-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Later AUC 0.512; early-threshold top30 percent 38.4 percent, +0.008R, week-stratified p .066. Previous-week POC distance AUC 0.548 early, 0.514 later.'
+  - artifact_id: monday-1618-second-touch-20261023-v1
+    artifact_type: manifest
+    role: 'After a 0.236R rejection, does the retest of the 1618 hold more often than driftless 38.2 percent?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0be40d8c9c005fe84fe143213ce2c972ce6affcc
+    generator_commit: 0be40d8c9c005fe84fe143213ce2c972ce6affcc
+    source_path: experiments/active/exp-monday-1618-second-touch-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-second-touch-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 3497 retests 37.7 percent (earlier 40.4, later 35.5, -0.063R). BTC 23 retests 60.9 percent, small and inside the period that already failed out of sam'
+  - artifact_id: monday-1618-reaction-curve-20261023-v1
+    artifact_type: manifest
+    role: 'Does the 1618 give small bounces (0.1/0.2/0.3R) before 2.0 more often than driftless odds on 1m bars?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 06a9d9139b7f7aaeb66f44a7a58402e6de3fd12e
+    generator_commit: 06a9d9139b7f7aaeb66f44a7a58402e6de3fd12e
+    source_path: experiments/active/exp-monday-1618-reaction-curve-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-reaction-curve-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 1035 touches: 0.1R 78.7 vs 79.3, 0.2R 64.6 vs 65.6, 0.3R 55.8 vs 56.0 percent; no half shows excess.'
+  - artifact_id: monday-1618-xau-spot-20261023-v1
+    artifact_type: manifest
+    role: 'Over 2011-2026 XAUUSD spot, does the first weekly 1618 hold or break more often than 38.2 percent?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 57ff46d7622db466a5313dffe801346222e4d4af
+    generator_commit: 57ff46d7622db466a5313dffe801346222e4d4af
+    source_path: experiments/active/exp-monday-1618-xau-spot-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-xau-spot-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 685 touches 35.9 percent (earlier 34.9, later 37.1); both directions later Holm p .747; yearly 22 to 50 percent.'
   - artifact_id: monday-1618-owner-drawings-20261023-v1
     artifact_type: manifest
     role: 'What regularities do the owner TradingView 1618 positions (OKX BTCUSDT.P 32, XAUUSDT.P 8) share?'

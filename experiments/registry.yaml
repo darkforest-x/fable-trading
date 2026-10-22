@@ -14,6 +14,66 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-confluence-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: bb8cc06fe2979dded49553110b5a9981e2a5ce40
+    status: rejected
+    question: 'Does volume-profile or swing confluence at the 1618 judge whether it holds?'
+    single_variable: 'Four confluence features (previous-week POC and value-area distance, 30-day volume density, 4h fractal swing distance); logistic fit on 2025-06..2025-12.'
+    result: 'Later AUC 0.512; early-threshold top30 percent 38.4 percent, +0.008R, week-stratified p .066. Previous-week POC distance AUC 0.548 early, 0.514 later.'
+    artifacts:
+    - monday-1618-confluence-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-confluence-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-second-touch-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0be40d8c9c005fe84fe143213ce2c972ce6affcc
+    status: rejected
+    question: 'After a 0.236R rejection, does the retest of the 1618 hold more often than driftless 38.2 percent?'
+    single_variable: 'Event becomes the retest after a >=0.236R pullback that reached neither edge nor 2.0; same label.'
+    result: '3497 retests 37.7 percent (earlier 40.4, later 35.5, -0.063R). BTC 23 retests 60.9 percent, small and inside the period that already failed out of sample.'
+    artifacts:
+    - monday-1618-second-touch-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-second-touch-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-reaction-curve-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 06a9d9139b7f7aaeb66f44a7a58402e6de3fd12e
+    status: rejected
+    question: 'Does the 1618 give small bounces (0.1/0.2/0.3R) before 2.0 more often than driftless odds on 1m bars?'
+    single_variable: 'Target becomes a 0.1/0.2/0.3R move back inside; stop 2.0 extension; Binance 1m ordering.'
+    result: '1035 touches: 0.1R 78.7 vs 79.3, 0.2R 64.6 vs 65.6, 0.3R 55.8 vs 56.0 percent; no half shows excess.'
+    artifacts:
+    - monday-1618-reaction-curve-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-reaction-curve-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-xau-spot-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 57ff46d7622db466a5313dffe801346222e4d4af
+    status: rejected
+    question: 'Over 2011-2026 XAUUSD spot, does the first weekly 1618 hold or break more often than 38.2 percent?'
+    single_variable: 'Market becomes HistData XAUUSD spot M1 (NY local, DST); hold and break directions pre-registered with Holm.'
+    result: '685 touches 35.9 percent (earlier 34.9, later 37.1); both directions later Holm p .747; yearly 22 to 50 percent.'
+    artifacts:
+    - monday-1618-xau-spot-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-xau-spot-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-owner-drawings-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: cffd3a9a868f44f981077fc6362e660b64efdc65

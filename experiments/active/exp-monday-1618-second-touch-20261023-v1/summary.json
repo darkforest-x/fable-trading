@@ -1,0 +1,78 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-second-touch-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 8: after the first touch is rejected by at least 0.236R, does the retest of the 1618 hold more often than driftless 38.2 percent?",
+    "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+    "pull_R": 0.236,
+    "horizon_days": 14,
+    "focus": [
+      "BTC",
+      "ETH",
+      "XAU"
+    ],
+    "success_criterion": "Earlier and later validity >38.2 percent, later one-sided binomial p<0.01 and later mean R>0.",
+    "limitations": "15m bars, conservative ordering, OKX swaps through 2026-08-14, fee 0, independent R.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "second_touches": 3497,
+  "first_touches": 10130,
+  "table": {
+    "earlier": {
+      "n": 1584,
+      "valid_pct": 40.4040404040404,
+      "mean_r": 0.0585575578451919,
+      "p_vs_382": 0.037721465443376595
+    },
+    "later": {
+      "n": 1913,
+      "valid_pct": 35.54626241505489,
+      "mean_r": -0.06265372053301554,
+      "p_vs_382": 0.9922255872444282
+    },
+    "all": {
+      "n": 3497,
+      "valid_pct": 37.74663997712325,
+      "mean_r": -0.007749898699706818,
+      "p_vs_382": 0.7138662159805955
+    },
+    "by_side": {
+      "-1": {
+        "n": 1487,
+        "valid_pct": 39.34095494283793,
+        "mean_r": 0.03107629214546567,
+        "p_vs_382": 0.18899306454312703
+      },
+      "1": {
+        "n": 2010,
+        "valid_pct": 36.56716417910448,
+        "mean_r": -0.03647355331999115,
+        "p_vs_382": 0.936925995402509
+      }
+    },
+    "focus": {
+      "BTC": {
+        "n": 23,
+        "valid_pct": 60.869565217391305,
+        "mean_r": 0.5934441156385111,
+        "p_vs_382": 0.02302278767458327
+      },
+      "ETH": {
+        "n": 16,
+        "valid_pct": 37.5,
+        "mean_r": -0.018324607329848655,
+        "p_vs_382": 0.6156390213442999
+      },
+      "XAU": {
+        "n": 12,
+        "valid_pct": 25.0,
+        "mean_r": -0.34554973821989154,
+        "p_vs_382": 0.8955761919730804
+      }
+    }
+  },
+  "passed": false,
+  "source_commit": "0be40d8c9c005fe84fe143213ce2c972ce6affcc",
+  "training_eligible": false,
+  "production_eligible": false
+}
