@@ -121,7 +121,9 @@ def execution_inset(fig, row):
     ax.axvline(entry+.5,color=COLORS[row['side']],lw=.65,linestyle=':')
     ax.scatter([entry+.5],[row['entry']],marker='^' if row['side']==1 else 'v',s=18,color=COLORS[row['side']],zorder=5)
     ax.scatter([exitbar+.5],[row['exit']['price']],marker='D',s=22,facecolors='none',edgecolors='white',lw=.8,zorder=5)
-    ticks=sorted(set([entry,exitbar,len(bars)-1]))
+    ticks=sorted(set([entry,exitbar]))
+    if len(bars)-1-ticks[-1] >= max(1,len(bars)//8):
+        ticks.append(len(bars)-1)
     ax.set_xticks(ticks,[stamp(bars[i]['time'],'%H:%M') for i in ticks])
     ax.set(xlim=(-1,len(bars)+1),ylim=(lower-span*.1,upper+span*.1))
     ax.set_yticks([]);ax.tick_params(axis='x',length=0,labelsize=7,colors='#8993A1')
@@ -297,10 +299,10 @@ def render(limit=0, version=None, number=None, *, destination=None, source_data=
                      if pivot else "真实退出按原账本保留；本次只改展示"), fontsize=9.5, color="#9AA2AF")
             fig.text(.565, .059, f"周一 {r['monday_date']} · ↑低点向上 / ↓高点向下 · 线旁名称为匹配周的关键位",
                      fontsize=9.1, color="#9AA2AF")
-        footer=(f"周一 {r['monday_date']} · 关键线固定为触价时已知区间 · 淡色勾叉为背景信号" if r.get('execution_bars') else
+        footer=(f"周一 {r['monday_date']} · 关键线固定为触价时已知区间 · 淡色勾叉为背景信号 · 入场后行情仅供复盘" if r.get('execution_bars') else
             f"原始OHLC重绘 · 60根真实15mK · 信号前{r['bars_before']}根 / 后{r['bars_after']}根 · 关键线按触价时已知周一区间作复盘参照 · 淡色勾叉仅为背景信号")
         fig.text(.045, .024,footer,fontsize=8.4,color="#6E7785")
-        path = destination / r["version"] / f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}_60bars.png"
+        path = destination / r["version"] / f"{r['number']:03d}_{stamp(r['signal_time'], '%Y%m%d_%H%M')}_{'long' if side == 1 else 'short'}_{count}bars.png"
         path.parent.mkdir(exist_ok=True)
         fig.canvas.draw()
         renderer = fig.canvas.get_renderer()
