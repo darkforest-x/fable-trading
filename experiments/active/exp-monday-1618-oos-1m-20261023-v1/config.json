@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-monday-1618-oos-1m-20261023-v1",
+  "question": "Notion task 区间1.618测试 stage3: does the BTC first weekly 1618 limit trade (SL 2.0 ext, TP Monday edge) beat the driftless 38.2 percent out of sample?",
+  "hypothesis_source": "exp-monday-1618-validity-20261023-v1 focus BTC 49.1 percent (n=53, OKX 2025-06..2026-08) versus universe 39.1; owner drawings place stops near 2.0 extension (median 1.9 / -0.99).",
+  "series": {
+    "BTC": "data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+    "ETH": "data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+    "SOL": "data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+    "BNB": "data/research/ma6_knot_1m_20261011/series/binance_um_BNBUSDT_1m_2059200.csv",
+    "XRP": "data/research/ma6_knot_1m_20261011/series/binance_um_XRPUSDT_1m_2059200.csv",
+    "DOGE": "data/research/ma6_knot_1m_20261011/series/binance_um_DOGEUSDT_1m_2059200.csv"
+  },
+  "oos_pre_end": "2025-06-01T00:00:00Z",
+  "discovery_end": "2026-08-14T00:00:00Z",
+  "horizon_days": 14,
+  "seed": 20261023,
+  "primary": "BTC oos_pre only. Pass = binomial p<0.01 for validity >38.2 percent AND mean R >0. Other symbols and periods are descriptive.",
+  "exit": "Limit at 1618 (gap fills at open), SL 2.0 extension, TP Monday near edge; 1m ordering, touch minute can only stop, same minute both = stop; 14-day mark; fee 0.",
+  "limitations": "Binance UM 1m OHLC (venue differs slightly from owner's OKX), no tick order within a minute, independent R not account returns, no fees/funding/slippage.",
+  "training_eligible": false,
+  "production_eligible": false
+}
