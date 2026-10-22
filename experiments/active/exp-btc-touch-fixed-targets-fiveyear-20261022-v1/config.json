@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-btc-touch-fixed-targets-fiveyear-20261022-v1",
+  "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+  "annual_results": "experiments/active/exp-range-v231-returns-20261021-v1",
+  "fixed1r_results": "experiments/active/exp-range-v231-fixed1r-fiveyear-20261022-v1",
+  "start": "2021-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "annual_start": "2025-10-21T00:00:00+08:00",
+  "recent_start": "2026-08-21T00:00:00+08:00",
+  "round_trip_cost": 0,
+  "timezone": "America/New_York",
+  "ratios": [0, 0.5, 0.618, 0.705, 1.13, 1.27, 1.618],
+  "seed": 20261022,
+  "symbols": [{"symbol":"BTC", "tick":0.1, "expected_signals":410, "expected_total":485}],
+  "targets_r": [1,2,3,5,10],
+  "owner_request": "Use BTC to investigate a five-year zero-fee compromise between win rate and returns, retaining original touch-highlight entries and stops.",
+  "single_variable": "Only existing fixed target distance changes. Same485original signals,485matched controls,exact wick stops andzero fees; no added filters,breakeven orpartial exits.",
+  "execution": "Reuse complete1R native ledger andannual75pairs for each2/3/5/10R. Replay only older410pairs pertarget through existingNautilus1.231.0 adapter. Five-minute OHLC O-H-L-C, same-bar stop-first sensitivity. No annual forced exits.",
+  "analysis": "Fullperiod,anniversaryyear,earlierthree/later two years,side;winrate,totalR,drawdown,losing streak,matchedrandom andHolm overfive targets. Pareto marks aredescriptive,notproduction selection.",
+  "training_eligible": false,
+  "production_eligible": false
+}
