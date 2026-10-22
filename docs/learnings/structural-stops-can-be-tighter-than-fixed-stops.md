@@ -1,0 +1,7 @@
+# Nearby structural stops can tighten most trades despite widening a few
+
+- **Problem**: Replacing a fixed0.7percent stop with the latest5 completed15m extrema sounded like a way to survive false breaks, but historical win rate fell from13/71 to12/71.
+- **Dead end**: Treating a structural stop as a uniformly wider stop, or comparing total own-riskR without noticing that its denominator changes. Those shortcuts confuse price protection with position sizing.
+- **Effective path**: Freeze the same71 entry prices/times and four targets. Check extrema from raw minutes up to the entry-time completed quarter only. Native replay showed48 narrower stops and23 wider, median0.5804percent; wider stops rescued2 losers while tighter stops lost3 old winners. Equal-notional mean improved from-0.1196percent to-0.0778percent, but own-riskR deteriorated from-12.126R to-20.906R. Improvement was not statistically established and the later half worsened.
+- **General rule**: Before interpreting a structural-stop test, count wider/narrower distances, reconcile exact outcome transitions, and compare equal-notional price returns separately from equal-risk returns. A local extremum is not evidence of a sufficiently wide stop.
+- **Related**: `yoyo/evaluation/monday_fib_confirmation.py`, `monday_fib_structural_compare.py`; `experiments/active/exp-btc-monday-fib-body-20261022-v9/stop_comparison.json`. Five completed15m bars include the entry confirmation candle; no buffer, no future/forming extrema, no default or live promotion.
