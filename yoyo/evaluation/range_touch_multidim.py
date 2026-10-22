@@ -177,7 +177,20 @@ def main():
                                           first_three_years=metrics(part), last_two_years=metrics(check)))
         details.append(data)
         data.to_csv(dest / f"{symbol}_paired_details.csv", index=False)
-    pd.concat(details).to_csv(dest / "all_paired_details.csv", index=False)
+    combined = pd.concat(details)
+    combined.to_csv(dest / "all_paired_details.csv", index=False)
+    export_names = {"symbol": "币种", "pair_id": "配对编号", "side": "方向_1多负1空",
+                    "entry_shanghai": "入场时间_北京时间", "entry": "入场价格", "stop": "初始止损",
+                    "risk_percent": "止损距离_百分比", "key_group": "触价关键位", "level": "关键位价格",
+                    "touch_time": "触价K开盘时间_带时区", "signal_time": "勾叉K开盘时间_带时区",
+                    "touch_lag": "触价相对勾叉_15m根数", "exit_shanghai": "退出时间_北京时间",
+                    "exit_price": "退出价格", "exit_reason": "退出原因", "holding_minutes": "持仓分钟",
+                    "peak_r": "原版持仓最大浮盈_R", "gross_r": "毛收益_R", "fee_r": "费用_R",
+                    "net_r": "净收益_R", "net_notional_bp": "名义净收益_bp",
+                    "pivot_reference_r": "回标极值参考_R", "entry_time_random": "随机入场时间_UTC",
+                    "net_r_random": "配对随机净收益_R", "net_notional_bp_random": "配对随机名义净收益_bp"}
+    combined[list(export_names)].rename(columns=export_names).to_csv(
+        dest / "trade_details_zh.csv", index=False, encoding="utf-8-sig")
     pd.DataFrame(grouped).to_csv(dest / "multidimensional.csv", index=False)
     result = dict(source=str(SOURCE.relative_to(ROOT)), source_start=old["start"], source_end=old["end"],
                   source_commit=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
