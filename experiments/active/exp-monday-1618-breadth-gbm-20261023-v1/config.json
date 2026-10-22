@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-breadth-gbm-20261023-v1",
+  "question": "Notion task 区间1.618测试 stage4: do market breadth, BTC context and a nonlinear model judge first-touch 1618 validity out of sample?",
+  "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+  "seed": 20261023,
+  "top_fraction": 0.3,
+  "model": "LightGBM num_leaves 8, 300 trees, lr 0.03, min_child_samples 100, colsample 0.8; fixed before running.",
+  "success_criterion": "Later AUC>=0.55 AND later top30 percent by earlier threshold validity>=38.2 percent and mean R>0 AND week-stratified p<0.01.",
+  "note": "Last pre-registered attempt in this series; failure ends the static-feature line for the task.",
+  "training_eligible": false,
+  "production_eligible": false
+}
