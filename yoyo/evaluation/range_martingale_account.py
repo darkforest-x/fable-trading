@@ -263,6 +263,63 @@ def main(config_path):
         limitations='Ex-post grid maxima, not out-of-sample optimization. Current tiers, gross margin and trade OHLC proxy; no historical mark prices or tier changes. No fees, funding, spread, latency or slippage. No live-liquidation guarantee.'))
 
 
+def leverage_search(config_path):
+    """Reuse the 100x search and search lower ceilings without altering old output."""
+    cfg = json.loads(Path(config_path).read_text())
+    dest = ROOT/cfg['output']
+    builder = str(Path(__file__).relative_to(ROOT))
+    if subprocess.run(['git','diff','--quiet','HEAD','--',builder],cwd=ROOT).returncode:
+        raise RuntimeError('Commit accounting builder first')
+    output = dest/'leverage_search_summary.json'
+    if output.exists():
+        print('Reuse '+str(output)); return
+    trades = pd.read_csv(ROOT/cfg['trades'])
+    frame = pd.read_csv(ROOT/cfg['candles'])
+    tiers = json.loads((dest/'okx_tiers.json').read_text())['data']
+    results = []
+    for years in (5,2,1):
+        start = pd.Timestamp(cfg['end']) - pd.DateOffset(years=years)
+        signal = trades[(trades.population=='signal') & (pd.to_datetime(trades.entry_time,utc=True)>=start)]
+        random = trades[(trades.population=='random') & trades.pair_id.isin(signal.pair_id)]
+        tape, rtape = event_tape(frame,signal), event_tape(frame,random)
+        high = pd.read_csv(dest/f'{years}y_search.csv.gz')
+        base = high.base_risk.to_numpy()
+        searches = [high]
+        for leverage in cfg['leverage_checks']:
+            if leverage == 100:
+                continue
+            path = dest/f'{years}y_leverage{leverage}_search.csv.gz'
+            if path.exists():
+                screen = pd.read_csv(path)
+            else:
+                screen,_,_ = replay(tape,base,tiers,leverage=leverage)
+                screen.to_csv(path,index=False)
+            searches.append(screen)
+        all_runs = pd.concat(searches,ignore_index=True)
+        alive = all_runs[~all_runs.liquidated]
+        full = alive[(alive.accepted==len(signal)) & alive.rejected.eq(0)]
+        max_full_base = float(full.base_risk.max())
+        stress,_,_ = replay(tape,base[base<=max_full_base],tiers,mark_stress=.005)
+        stress.to_csv(dest/f'{years}y_full_50bp_search.csv',index=False)
+        stress_full = stress[(~stress.liquidated)&(stress.accepted==len(signal))&stress.rejected.eq(0)]
+        for name, cohort in [('full_stream_best',full),('skips_allowed_best',alive),
+                             ('full_stream_50bp_stress_best',stress_full)]:
+            row = cohort.sort_values(['ending_equity','leverage'],ascending=[False,True]).iloc[0]
+            kwargs = dict(leverage=float(row.leverage),mark_stress=float(row.mark_stress))
+            s,l,c = replay(tape,[float(row.base_risk)],tiers,record=True,**kwargs)
+            r,_,_ = replay(rtape,[float(row.base_risk)],tiers,**kwargs)
+            fixed,_,_ = replay(tape,[float(row.base_risk)],tiers,multiplier=1.,**kwargs)
+            l.to_csv(dest/f'{years}y_all_leverages_{name}_ledger.csv',index=False)
+            c.to_csv(dest/f'{years}y_all_leverages_{name}_marks.csv.gz',index=False)
+            results.append(dict(years=years,kind=name,candidates=len(signal),signal=s.iloc[0].to_dict(),
+                random=r.iloc[0].to_dict(),same_base_no_doubling=fixed.iloc[0].to_dict()))
+        print(json.dumps(results[-3:],ensure_ascii=False),flush=True)
+    clean = json.loads(pd.Series(results).to_json(orient='values'))
+    dump(output,dict(rows=clean,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+        search_config=dict(base_risks=len(base),leverage_caps=cfg['leverage_checks'],horizons=[5,2,1]),
+        limitations='Same frozen native executions and current-tier/trade-mark limitations as summary.json. Highest observed grid result only. Each horizon optimized separately after observing history.'))
+
+
 if __name__ == '__main__':
     import sys
-    main(sys.argv[1])
+    (leverage_search if '--leverage-search' in sys.argv else main)(sys.argv[1])
