@@ -1,0 +1,33 @@
+{
+  "source_experiment": "exp-btc-monday-fib-body-20261022-v4",
+  "previous_inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v4/entries.csv",
+      "bytes": 21570,
+      "mtime_ns": 1792668785999272180
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v4/controls.csv",
+      "bytes": 161101,
+      "mtime_ns": 1792668786006602722
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v4/decisions.csv",
+      "bytes": 23520,
+      "mtime_ns": 1792668786008467649
+    }
+  ],
+  "frozen_signals": 80,
+  "frozen_controls": 800,
+  "admission_checks": {
+    "weeks": 105,
+    "weekly_sides": 210,
+    "touched": 90,
+    "body_checks": 80,
+    "arrow_required": false,
+    "elapsed_wait_timeout": false,
+    "fee_geometry_filter": true,
+    "adverse_extension_fraction": null
+  },
+  "change": "Change only round-trip fee from20bp to0 versus v4. Regenerate fee-sensitive admission and replay native TP-triggered BE; preserve all historical artifacts."
+}

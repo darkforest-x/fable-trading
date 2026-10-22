@@ -1,0 +1,33 @@
+{
+  "source_experiment": "exp-btc-monday-fib-body-20261022-v6",
+  "previous_inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v6/entries.csv",
+      "bytes": 21570,
+      "mtime_ns": 1792669675073328691
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v6/controls.csv",
+      "bytes": 161101,
+      "mtime_ns": 1792669675077883541
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v6/decisions.csv",
+      "bytes": 23520,
+      "mtime_ns": 1792669675079413005
+    }
+  ],
+  "frozen_signals": 74,
+  "frozen_controls": 740,
+  "admission_checks": {
+    "weeks": 105,
+    "weekly_sides": 210,
+    "touched": 90,
+    "body_checks": 74,
+    "arrow_required": false,
+    "elapsed_wait_timeout": false,
+    "fee_geometry_filter": true,
+    "adverse_extension_fraction": 0.02
+  },
+  "change": "Add only pre-entry adverse2percent wick invalidation versus zero-fee v6. Project unchanged native positions. Equivalent final v5 strategy with latest zero-fee mandate."
+}

@@ -1,0 +1,68 @@
+{
+  "parent_cash_reconciliations": 880,
+  "matched_control_checks": 800,
+  "minute_grid_rows": 1080960,
+  "no_post_split_development_outcomes": true,
+  "independent_partial_candle_checks": 0,
+  "admission": [
+    {
+      "arm": "body15m",
+      "entries": 80,
+      "statuses": {
+        "confirmed": 80,
+        "expired": 9,
+        "data_censored": 1
+      },
+      "arrow_first": 0,
+      "body_first": 0,
+      "same_minute": 0,
+      "entry_back_outside": 0,
+      "arrow_later_disappeared": 0,
+      "wait_median_minutes": 12.0
+    }
+  ],
+  "transitions": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "counts": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 67
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 13
+        }
+      ],
+      "mean_change_bp": 0.0
+    }
+  ],
+  "cash_metrics": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "realized_cash_dd_r": 38.975514398445114,
+      "pf": 0.6562329408459544
+    }
+  ],
+  "holm_adjusted": [
+    {
+      "arm": "body15m",
+      "delay": 0,
+      "p": 0.6241687915604219
+    }
+  ],
+  "multiplicity_comparisons": 1,
+  "focused_and_layer_tests": 117,
+  "broader_preflight": {
+    "passed": 170,
+    "failed": 16,
+    "skipped": 12,
+    "explanation": "Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed."
+  },
+  "initial_test_fixture_failure": "Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.",
+  "limitations": "Completed15m body, native TP-triggered protection; OHLC1m is not a real tick path. Round-trip entry-notional cost=0.000000. Independent R is not portfolio return. No arrows or elapsed-time expiry."
+}

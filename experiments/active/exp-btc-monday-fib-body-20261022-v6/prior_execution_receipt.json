@@ -1,0 +1,53 @@
+{
+  "reason": "Change only round-trip fee from20bp to0 versus v4. Regenerate fee-sensitive admission and replay native TP-triggered BE; preserve all historical artifacts.",
+  "successor": "exp-btc-monday-fib-body-20261022-v6",
+  "completed": [
+    {
+      "directory": "experiments/active/exp-btc-monday-fib-body-20261022-v4/native_market_be_0",
+      "completed_identity_path": "experiments/active/exp-btc-monday-fib-body-20261022-v4/native_market_be_0/identity.json",
+      "identity_bytes": 3148284,
+      "signal": {
+        "n": 80,
+        "closed": 80,
+        "open": 0,
+        "wins": 13,
+        "losses": 67,
+        "breakeven": 0,
+        "win_pct": 16.25,
+        "nonloss_pct": 16.25,
+        "net_r": -45.45901260538142,
+        "mean_bp": -39.78002573955341,
+        "tp1": 13,
+        "tp2": 13,
+        "tp3": 11,
+        "tp4": 9,
+        "be_exit": 4,
+        "be_active": 13,
+        "reverse_net_r": -45.45901260538136,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 800,
+        "closed": 800,
+        "open": 0,
+        "wins": 124,
+        "losses": 676,
+        "breakeven": 0,
+        "win_pct": 15.5,
+        "nonloss_pct": 15.5,
+        "net_r": -418.6198714886362,
+        "mean_bp": -36.632322819386694,
+        "tp1": 124,
+        "tp2": 110,
+        "tp3": 104,
+        "tp4": 85,
+        "be_exit": 39,
+        "be_active": 124,
+        "reverse_net_r": -420.5449988380128,
+        "terminal_mark_r": 0.0
+      }
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

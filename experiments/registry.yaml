@@ -14,6 +14,36 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-body-20261022-v7
+    source_repo: darkforest-x/fable-trading
+    source_commit: c3b19214640b1e5b0a92514eef3a5c8941324f7e
+    status: rejected
+    question: Does pre-entry2percent invalidation improve body-confirmed Monday reversal under the latest zero-fee policy?
+    single_variable: Add only pre-entry adverse2percent wick invalidation versus zero-fee v6. Project unchanged native positions. Equivalent final v5 strategy with latest zero-fee mandate.
+    result: 74closed,12wins,16.2162percent,-22.738547R,mean-21.511307bp;random15.0000percent,mean-19.592739bp,pairedp0.557672.2percent filter removes5losses1win; per-trade mean worsens from-20.1552bp to-21.5113bp.62losses never reachTP1.
+    artifacts:
+    - btc-monday-fib-body-20261022-v7
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v7/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Latest owner fee0 supersedes prior20bp. Fees affect TP protection, so v6 replays the native zero-fee baseline; v7 projects unchanged positions after2percent causal admission filtering.117related tests pass; no hashes or production/model changes. Previous paid-fee results retained. Current Notion https://app.notion.com/p/4018856479af81d7b780de7fa91a3215
+  - experiment_id: exp-btc-monday-fib-body-20261022-v6
+    source_repo: darkforest-x/fable-trading
+    source_commit: c3b19214640b1e5b0a92514eef3a5c8941324f7e
+    status: rejected
+    question: Apply latest zero-fee mandate to body-only Monday baseline including fee-sensitive protection.
+    single_variable: Change only round-trip fee from20bp to0 versus v4. Regenerate fee-sensitive admission and replay native TP-triggered BE; preserve all historical artifacts.
+    result: 80closed,13wins,16.2500percent,-23.032393R,mean-20.155206bp;random15.5000percent,mean-15.988299bp,pairedp0.624169.
+    artifacts:
+    - btc-monday-fib-body-20261022-v6
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v6/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Latest owner fee0 supersedes prior20bp. Fees affect TP protection, so v6 replays the native zero-fee baseline; v7 projects unchanged positions after2percent causal admission filtering.117related tests pass; no hashes or production/model changes. Previous paid-fee results retained. Current Notion https://app.notion.com/p/4018856479af81d7b780de7fa91a3215
   - experiment_id: exp-btc-monday-fib-body-20261022-v5
     source_repo: darkforest-x/fable-trading
     source_commit: 08ddb03f33
