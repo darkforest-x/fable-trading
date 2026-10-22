@@ -1,0 +1,7 @@
+# Symmetric signal windows require causal entry times
+
+- **Problem**: A15m entry arrow needs a same-side5m arrow within five bars before or after it. A retrospective boolean filter could silently keep the old entry price when confirmation happens later.
+- **Dead end**: Accepting a future match while retaining the15m close would use unavailable information. This approach was rejected before implementation; it was not backtested.
+- **Effective path**: Evaluate each completed5m bar. At the15m close, admit already-confirmed matches including the same close; otherwise retain a bounded candidate and admit only at the first later qualifying5m close. Freeze the original H1 observation, expire after five bars/25minutes, cancel on opposing H1 direction, and consume each candidate once. Recompute structural stop and entry at the actual admission close.
+- **General rule**: A symmetric research window has asymmetric execution: earlier evidence may be used immediately; later evidence requires a later trade. Test both window edges, expired candidates, overlapping candidates, and the entry candle's pre-entry wick in the native runtime.
+- **Scope**: `yoyo/evaluation/pine/monday_range_v2_34.pine`; native fixture `tests/evaluation/monday_range_v2_34_native_checks.pine`. Existing5m chart routing, key-wick module and exit rules remain separate. No profitability inference follows from these correctness tests.

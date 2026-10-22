@@ -68,7 +68,7 @@ bool rangeChartSupported = timeframe.in_seconds() <= 86400
 // === Optional chart-clock trade reference (5m/15m only, default OFF) ===============
 string txGroup = "15m→5m / 1H→15m 交易参考（可选）"
 bool txRequested = input.bool(false, "启用多周期观察交易参考", group=txGroup,
-     tooltip="5分钟图：15m勾叉定方向，之后每个同向5m收盘勾叉独立入场；15分钟图：1H观察、15m勾叉准备，默认还需前后5根5m内的同向勾叉；已有确认则15m收盘入场，否则等首次后续5m确认收盘，最多25分钟。每个新观察勾叉都刷新方向与起点，同刻收盘不算之后。其他周期只看确认信号和15m射线。进入趋势跟踪后，仍按反向1H勾叉收盘退出；未启动跟踪的旧框继续按自身止损。仅画模型参考，不下单。", display=display.none)
+     tooltip="5分钟图：15m勾叉定方向，之后每个同向5m收盘勾叉独立入场；15分钟图：1H观察、15m勾叉准备，默认还需前后5根5m内的同向勾叉；已有确认则15m收盘入场，否则等首次后续5m确认收盘，最多25分钟。每个新观察勾叉刷新方向与起点；1H观察与15m勾叉同刻不入场，15m与5m配对同刻则允许。其他周期只看确认信号和15m射线。进入趋势跟踪后，仍按反向1H勾叉收盘退出；未启动跟踪的旧框继续按自身止损。仅画模型参考，不下单。", display=display.none)
 // Do not use timeframe.period: nested security would rebind it to 5m.
 string txEntryTf = timeframe.main_period
 string txWatchLabel = txEntryTf == "5" ? "15m" : "1H"
