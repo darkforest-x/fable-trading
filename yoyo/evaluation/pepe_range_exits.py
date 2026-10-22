@@ -123,7 +123,7 @@ def scalar(ctx, event, target=0., arm=5., multiple=4., tick=1e-9):
             break
         peak = max(peak, side*(favorable-entry)/risk)
         if not target and np.isfinite(ctx["atr"][j]) and ctx["atr"][j] > 0:
-            if activated < 0 and side*(c-entry)/risk >= arm:
+            if activated < 0 and side*(c-entry)+eps >= arm*risk:
                 activated = j
             if activated >= 0:
                 raw = (c-side*multiple*ctx["atr"][j])/tick

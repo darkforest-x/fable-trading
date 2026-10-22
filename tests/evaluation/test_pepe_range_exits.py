@@ -69,6 +69,20 @@ def test_tick_touch_is_not_lost_to_binary_float_representation():
     assert z[2] == 1
 
 
+@pytest.mark.parametrize('side', [-1, 1])
+@pytest.mark.parametrize('shortfall,expected_arm', [(0., 1), (.1, -1)])
+def test_exact_five_r_decimal_boundary_arms_but_one_tick_short_does_not(side, shortfall, expected_arm):
+    # BTC 2025-08-07: decimal 1063 / 212.6 is mathematically 5, but doubles
+    # yield 4.999999999999863. Do not widen the rule by a tradable tick.
+    entry=115380.;stop=entry-side*212.6;close=entry+side*(1063.-shortfall)
+    ctx=context([[entry]*4, [entry,max(entry,close)+1,min(entry,close)-1,close]],
+                [np.nan,100.])
+    event=[0,side,entry,stop,1]
+    result=replay(ctx,[event],tick=.1)[0]
+    assert result[4]==expected_arm
+    np.testing.assert_allclose(result,scalar(ctx,event,tick=.1),atol=1e-10)
+
+
 def test_mathematical_k_80_is_not_strictly_overbought():
     # Registered OKX 15m Aug04 2026 12:00--16:15 UTC, in 1e-9 price units.
     bars = [[2908,2912,2905,2906],[2906,2907,2898,2902],

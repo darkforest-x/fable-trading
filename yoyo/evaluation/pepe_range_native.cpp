@@ -42,7 +42,8 @@ extern "C" void replay(
       }
       peak = std::max(peak, side * ((side == 1 ? h : l) - entry) / risk);
       if (target_r == 0 && std::isfinite(atr[j]) && atr[j] > 0) {
-        if (armed < 0 && side * (c-entry)/risk >= arm_r) armed = j;
+        // Inclusive R boundary in price units, matching native tick tolerance.
+        if (armed < 0 && side * (c-entry) + eps >= arm_r * risk) armed = j;
         if (armed >= 0) {
           double raw = c - side * atr_mult * atr[j];
           double candidate = (side == 1 ? std::floor(raw/tick + 1e-8)
