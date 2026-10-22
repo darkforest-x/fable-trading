@@ -9,13 +9,13 @@ gross hypothetical excursions, not executable returns or portfolio results.
 """
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 
 import numpy as np
 import pandas as pd
 
-from yoyo.evaluation.btc_range_wick_review import excursions
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp
 from yoyo.evaluation.range_v237_twoyear import close_frame, read
 
@@ -26,6 +26,7 @@ LABELS = ['0–<0.5', '0.5–<1', '1–<2', '2–<3', '3–<5', '5–<10', '10�
 
 
 def calculate():
+    from yoyo.evaluation.btc_range_wick_review import excursions
     cfg = json.loads((SOURCE / 'config.json').read_text())
     price_root = ROOT / cfg['source']
     source_cfg = json.loads((price_root / 'config.json').read_text())
@@ -148,10 +149,19 @@ def render(hist, result):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--calculate-only', action='store_true')
+    parser.add_argument('--render-only', action='store_true')
+    args = parser.parse_args()
+    assert not (args.calculate_only and args.render_only)
     if subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', __file__], cwd=ROOT).returncode:
         raise RuntimeError('Commit chart builder before generating artifacts')
-    hist, result = calculate()
-    render(hist, result)
+    if args.render_only:
+        hist, result = read(DEST/'histogram.csv'), json.loads((DEST/'summary.json').read_text())
+    else:
+        hist, result = calculate()
+    if not args.calculate_only:
+        render(hist, result)
     print(json.dumps([r for r in result['rows'] if r['population']=='signal'], ensure_ascii=False, indent=2))
 
 
