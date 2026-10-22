@@ -40,7 +40,7 @@ def initialize():
         folder=identity.parent
         rows=pd.read_csv(folder/'parents.csv',float_precision='round_trip')
         completed.append(dict(directory=str(folder.relative_to(ROOT)),
-            completed_identity=json.loads(identity.read_text()),
+            completed_identity_path=str(identity.relative_to(ROOT)),identity_bytes=identity.stat().st_size,
             signal=m.metric(rows[rows.population.eq('signal')]),
             random=m.metric(rows[rows.population.eq('random')])))
     dump(OLD/'superseded_receipt.json',dict(reason='Owner adds immediate cost breakeven on any TP; these completed runs lack that trigger. Remaining delays interrupted, not completed.',
@@ -53,6 +53,9 @@ def initialize():
 
 def replay(delays):
     cfg,entry,random=context()
+    scope=json.loads((EXP/'scope.json').read_text()) if (EXP/'scope.json').exists() else {}
+    if any(d not in scope.get('active_delays',cfg['be_minutes']) for d in delays):
+        raise RuntimeError('Owner withdrew timed-management research; do not replay it')
     frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
     for delay in delays:
         assert delay in cfg['be_minutes']
@@ -63,7 +66,9 @@ def replay(delays):
 
 def collect():
     cfg,entry,random=context();summary=[];audits=[];ledger=[];old_comparison=[]
-    for delay in cfg['be_minutes']:
+    scope=json.loads((EXP/'scope.json').read_text()) if (EXP/'scope.json').exists() else {}
+    active_delays=scope.get('active_delays',cfg['be_minutes'])
+    for delay in active_delays:
         folder=EXP/f'native_market_be_{delay}'
         assert (folder/'identity.json').exists(),f'Incomplete delay {delay}'
         identity=json.loads((folder/'identity.json').read_text())
@@ -96,16 +101,22 @@ def collect():
                     transitions=[dict(old=a,new=b,n=int(n)) for (a,b),n in p.groupby(['outcome_old','outcome']).size().items()]))
     pd.concat(ledger,ignore_index=True).to_csv(EXP/'all_parents.csv',index=False)
     selections=[]
-    for arm in m.ARMS:
+    for arm in m.ARMS if len(active_delays)>1 else ():
         earlier=[x for x in summary if x['arm']==arm and x['segment']==0]
         for objective in ('win_pct','mean_bp'):
             best=max(earlier,key=lambda x:(x['signal'][objective],-x['delay']))
             later=next(x for x in summary if x['arm']==arm and x['segment']==1 and x['delay']==best['delay'])
             selections.append(dict(arm=arm,objective=objective,delay=best['delay'],earlier=best,later=later))
-    dump(EXP/'summary.json',dict(config=cfg,admission=json.loads((EXP/'admission_receipt.json').read_text()),
+    final_cfg=dict(cfg,be_minutes=active_delays)
+    if active_delays==[0]:
+        final_cfg.update(exit='Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry; observation expiry before entry remains285minutes.',
+            selection='Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.',
+            inference='Week-cluster sign permutation; four fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.',
+            limitations='One-minute sampled intrabar signals and OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.')
+    dump(EXP/'summary.json',dict(config=final_cfg,scope=scope,admission=json.loads((EXP/'admission_receipt.json').read_text()),
         comparisons=summary,selections=selections,native_audits=audits,baseline_audits=[],
         prior_rule_comparison=old_comparison,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
-        audit_version_note='240/360 minute arms passed exact metadata checks before an audit-only refinement. Later arms allow same-endpoint target-only metadata ordering; all stop/target prices,times,reasons remain exact. Native adapter and config identical across all arms.',
+        audit_version_note='Only active scope is summarized. Completed timed arms are retained but excluded following owner instruction. Same-endpoint target-only metadata ordering is distinguished from exact stop/target prices,times,reasons.',
         training_eligible=False,production_eligible=False))
     from yoyo.evaluation import monday_fib_confirmation_review as review
     review.EXP=EXP

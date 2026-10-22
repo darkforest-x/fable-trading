@@ -105,12 +105,13 @@ def run():
     dump(EXP/'review.json',dict(parent_cash_reconciliations=reconciliations,
         matched_control_checks=len(controls),minute_grid_rows=len(frame),
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
-        admission=admission,transitions=transitions,cash_metrics=cash,holm48=ranked,
+        admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
+        multiplicity_comparisons=len(p),
         focused_and_layer_tests=107,
         broader_preflight=dict(passed=170,failed=16,skipped=12,
             explanation='Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed.'),
         initial_test_fixture_failure='Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.',
-        limitations='1m close samples miss sub-minute arrow flicker. Latches persist even after conditions cease;9any-arm entries are back outside key. Native5m timed-BE management, same .2percent entry-notional cost. Independent R is not portfolio return.'))
+        limitations='1m close samples miss sub-minute arrow flicker. Latches persist even after conditions cease;9any-arm entries are back outside key. Final scope uses immediate native TP-triggered protection only, no holding-time rule; same .2percent entry-notional cost. Independent R is not portfolio return.'))
     dump(EXP/'delivery_receipt.json',dict(experiment_id=EXP.name,
         source_builder=summary['source_commit'],engine='NautilusTrader1.231.0',
         native_positions=sum(x['positions'] for x in summary['native_audits']+summary['baseline_audits']),
