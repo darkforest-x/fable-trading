@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SPIKE // QUANT - 周一 1.618 扩展位监控</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- JetBrains Mono & Inter Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-secondary-container": "#c4abff",
+            "tertiary-container": "#ffc681",
+            "on-secondary": "#3c0091",
+            "on-background": "#dfe2ef",
+            "tertiary-fixed-dim": "#ffb95f",
+            "on-surface-variant": "#bac9cc",
+            "on-secondary-fixed-variant": "#5516be",
+            "background": "#0f131c",
+            "surface-container-low": "#181b25",
+            "on-error": "#690005",
+            "surface-dim": "#0f131c",
+            "primary-container": "#00e5ff",
+            "secondary-container": "#571bc1",
+            "on-surface": "#dfe2ef",
+            "secondary-fixed": "#e9ddff",
+            "surface-container-lowest": "#0a0e17",
+            "surface-container-highest": "#31353f",
+            "primary": "#c3f5ff",
+            "on-tertiary-fixed-variant": "#653e00",
+            "on-tertiary": "#472a00",
+            "on-tertiary-fixed": "#2a1700",
+            "on-primary-fixed": "#001f24",
+            "inverse-on-surface": "#2c303a",
+            "on-primary-container": "#00626e",
+            "on-primary": "#00363d",
+            "error": "#ffb4ab",
+            "tertiary-fixed": "#ffddb8",
+            "surface": "#0f131c",
+            "surface-container-high": "#262a34",
+            "secondary": "#d0bcff",
+            "outline-variant": "#3b494c",
+            "tertiary": "#ffe9d3",
+            "surface-bright": "#353943",
+            "on-primary-fixed-variant": "#004f58",
+            "surface-container": "#1c2029",
+            "primary-fixed-dim": "#00daf3",
+            "on-tertiary-container": "#7e4e00",
+            "outline": "#849396",
+            "inverse-surface": "#dfe2ef",
+            "inverse-primary": "#006875",
+            "secondary-fixed-dim": "#d0bcff",
+            "surface-variant": "#31353f",
+            "on-error-container": "#ffdad6",
+            "surface-tint": "#00daf3",
+            "primary-fixed": "#9cf0ff",
+            "error-container": "#93000a",
+            "on-secondary-fixed": "#23005c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "spacing": {
+            "margin": "0.75rem",
+            "gutter": "0.5rem",
+            "space-xl": "1rem",
+            "space-lg": "0.75rem",
+            "space-xs": "0.125rem",
+            "space-md": "0.5rem",
+            "space-sm": "0.25rem"
+          },
+          "fontFamily": {
+            "body-sm": ["Inter"],
+            "label-numeric-md": ["JetBrains Mono"],
+            "headline-xl": ["Inter"],
+            "body-md": ["Inter"],
+            "label-numeric-sm": ["JetBrains Mono"],
+            "body-lg": ["Inter"],
+            "code-snippet": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "label-numeric-lg": ["JetBrains Mono"],
+            "headline-lg": ["Inter"]
+          },
+          "fontSize": {
+            "body-sm": ["0.75rem", { "lineHeight": "1rem", "letterSpacing": "0.01em", "fontWeight": "400" }],
+            "label-numeric-md": ["0.8125rem", { "lineHeight": "1.125rem", "letterSpacing": "0em", "fontWeight": "500" }],
+            "headline-xl": ["2rem", { "lineHeight": "2.5rem", "letterSpacing": "-0.025em", "fontWeight": "700" }],
+            "body-md": ["0.8125rem", { "lineHeight": "1.25rem", "letterSpacing": "0em", "fontWeight": "400" }],
+            "label-numeric-sm": ["0.6875rem", { "lineHeight": "0.875rem", "letterSpacing": "0.02em", "fontWeight": "400" }],
+            "body-lg": ["0.9375rem", { "lineHeight": "1.375rem", "letterSpacing": "-0.01em", "fontWeight": "400" }],
+            "code-snippet": ["0.75rem", { "lineHeight": "1.125rem", "letterSpacing": "0em", "fontWeight": "400" }],
+            "headline-md": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "label-numeric-lg": ["1.125rem", { "lineHeight": "1.5rem", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "headline-lg": ["1.5rem", { "lineHeight": "2rem", "letterSpacing": "-0.02em", "fontWeight": "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Precision terminal tweaks & zero-shift font settings */
+    body {
+      background-color: #090B10;
+      color: #dfe2ef;
+      font-feature-settings: "tnum" 1, "zero" 1;
+      -webkit-font-smoothing: antialiased;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    /* Scrollbar styling for quant console density */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0e17;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #3b494c;
+      border-radius: 2px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00e5ff;
+    }
+  </style>
+</head>
+<body class="bg-[#090B10] text-on-surface min-h-screen flex flex-col font-body-md select-none overflow-x-hidden">
+<!-- ================= TOP APP BAR ================= -->
+<header class="w-full flex items-center justify-between px-3 h-10 border-b border-outline-variant/30 bg-surface-container-lowest fixed top-0 left-0 right-0 z-50">
+<div class="flex items-center gap-3">
+<!-- Brand Logo -->
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-lg">candlestick_chart</span>
+<span class="text-headline-md font-headline-md font-black tracking-wider text-primary">SPIKE // QUANT</span>
+</div>
+<div class="hidden sm:flex items-center px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 text-label-numeric-sm font-label-numeric-sm text-primary-container font-medium">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container mr-1.5 animate-pulse"></span>
+        CORE v4.2.0
+      </div>
+<!-- Heartbeat & Feed Latency -->
+<div class="hidden md:flex items-center gap-3 ml-2 pl-3 border-l border-outline-variant/20 text-label-numeric-sm font-label-numeric-sm text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-emerald-400 text-sm">wifi_tethering</span>
+<span>OKX WS:</span>
+<span class="text-emerald-400 font-medium tabular-nums">18ms</span>
+</span>
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-outline text-sm">schedule</span>
+<span>NY EDT:</span>
+<span class="text-on-surface font-medium tabular-nums" id="nyTimeDisplay">--:--:-- EDT</span>
+</span>
+</div>
+</div>
+<!-- Center Navigation Links (Shared Component Header Anchor) -->
+<nav class="hidden lg:flex items-center gap-1 text-body-sm font-body-sm">
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#">Workbench</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#">Order Flow</a>
+<a class="text-primary border-b border-primary font-medium py-2 px-2" href="#">Algo Matrix</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#">Backtest Telemetry</a>
+<a class="text-on-surface-variant hover:text-on-surface py-2 px-2 transition-colors" href="#">Risk Guard</a>
+</nav>
+<!-- Trailing Actions & Read-Only Badge -->
+<div class="flex items-center gap-2">
+<!-- Strict Read-Only Quant Engine Flag -->
+<div class="flex items-center gap-1.5 px-2 py-1 rounded bg-[#151A26] border border-outline-variant/40 text-label-numeric-sm font-label-numeric-sm">
+<span class="w-2 h-2 rounded-full bg-amber-400"></span>
+<span class="text-amber-400 font-medium">READ-ONLY MONITOR</span>
+<span class="hidden sm:inline text-on-surface-variant text-[10px]">| NO EXECUTION</span>
+</div>
+<!-- Icon Actions -->
+<div class="flex items-center text-on-surface-variant">
+<button class="p-1 hover:bg-surface-container-high hover:text-primary rounded transition-colors" title="Engine Tuning">
+<span class="material-symbols-outlined text-lg">tune</span>
+</button>
+<button class="p-1 hover:bg-surface-container-high hover:text-primary rounded transition-colors relative" title="Notifications">
+<span class="material-symbols-outlined text-lg">notifications</span>
+<span class="absolute top-1 right-1 w-1.5 h-1.5 bg-primary-container rounded-full"></span>
+</button>
+<button class="p-1 hover:bg-surface-container-high hover:text-primary rounded transition-colors hidden sm:block" title="Console Terminal">
+<span class="material-symbols-outlined text-lg">terminal</span>
+</button>
+<button class="p-1 hover:bg-surface-container-high hover:text-primary rounded transition-colors hidden sm:block" title="Full Screen">
+<span class="material-symbols-outlined text-lg">fullscreen</span>
+</button>
+</div>
+<!-- Avatar -->
+<div class="w-6 h-6 rounded bg-surface-container-high border border-outline-variant flex items-center justify-center text-[10px] font-bold text-primary">
+        QT
+      </div>
+</div>
+</header>
+<!-- ================= APP WORKSPACE CONTAINER ================= -->
+<div class="flex-1 flex pt-10 min-h-screen">
+<!-- ================= LEFT RAIL NAVIGATION ================= -->
+<aside class="w-14 sm:w-48 bg-surface-container-lowest border-r border-outline-variant/30 flex flex-col justify-between shrink-0 z-40 fixed left-0 top-10 bottom-0 select-none">
+<div class="flex flex-col">
+<!-- Section Header / Rail Title -->
+<div class="hidden sm:flex items-center justify-between px-3 py-2.5 border-b border-outline-variant/20">
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline tracking-wider uppercase font-semibold">ALPHA MODULES</span>
+<span class="text-[10px] text-primary-container bg-surface-container px-1 py-0.5 rounded">6 ACTIVE</span>
+</div>
+<!-- Rail Items list -->
+<nav class="flex flex-col py-1 gap-0.5 text-body-sm font-body-sm">
+<!-- Item 1 -->
+<a class="flex items-center gap-2.5 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary">query_stats</span>
+<span class="hidden sm:inline font-medium">行情与共振</span>
+</a>
+<!-- Item 2 -->
+<a class="flex items-center gap-2.5 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary">trending_up</span>
+<span class="hidden sm:inline font-medium">强势标的发现</span>
+</a>
+<!-- Item 3: ACTIVE MANDATORY ANCHOR -->
+<a class="flex items-center gap-2.5 px-3 py-2 bg-surface-container text-primary border-l-2 border-primary-container relative font-medium group shadow-[inset_4px_0_12px_rgba(0,229,255,0.08)]" href="#">
+<span class="material-symbols-outlined text-lg text-primary-container">alt_route</span>
+<span class="hidden sm:inline text-on-surface font-semibold">周一 1.618 监控</span>
+<span class="hidden sm:flex ml-auto w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+</a>
+<!-- Item 4 -->
+<a class="flex items-center gap-2.5 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary">stacked_line_chart</span>
+<span class="hidden sm:inline font-medium">均线密集巡检</span>
+</a>
+<!-- Item 5 -->
+<a class="flex items-center gap-2.5 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary">notifications_active</span>
+<span class="hidden sm:inline font-medium">信号中心</span>
+<span class="hidden sm:flex ml-auto text-[10px] bg-rose-950/60 text-rose-400 border border-rose-800/40 px-1 rounded tabular-nums font-label-numeric-sm">7</span>
+</a>
+<!-- Item 6 -->
+<a class="flex items-center gap-2.5 px-3 py-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors group" href="#">
+<span class="material-symbols-outlined text-lg group-hover:text-primary">folder_managed</span>
+<span class="hidden sm:inline font-medium">研究资产</span>
+</a>
+</nav>
+</div>
+<!-- Rail Footer Stats -->
+<div class="p-2 border-t border-outline-variant/20 flex flex-col gap-1.5">
+<div class="hidden sm:flex flex-col bg-[#0a0e17] p-2 rounded border border-outline-variant/30 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center justify-between text-outline text-[10px]">
+<span>ENGINE LOAD</span>
+<span class="text-primary-container">14.2%</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded mt-1 overflow-hidden">
+<div class="bg-primary-container h-full w-[14.2%]"></div>
+</div>
+<div class="flex items-center justify-between text-[10px] text-on-surface-variant mt-1.5">
+<span>MEM: 1.14 GB</span>
+<span>TICKS: 2.4k/s</span>
+</div>
+</div>
+<div class="flex items-center justify-center sm:justify-start gap-1.5 text-on-surface-variant text-label-numeric-sm px-1 py-1">
+<span class="material-symbols-outlined text-sm text-emerald-400">check_circle</span>
+<span class="hidden sm:inline text-[11px]">API 链路集群就绪</span>
+</div>
+</div>
+</aside>
+<!-- ================= MAIN VIEWPORT CANVAS ================= -->
+<main class="flex-1 ml-14 sm:ml-48 p-2.5 sm:p-3 overflow-y-auto max-w-full">
+<!-- MAIN HEADER & MATHEMATICAL SPECIFICATIONS -->
+<section class="bg-surface-container-lowest border border-outline-variant/30 rounded p-3 mb-2.5">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+<div>
+<div class="flex items-center gap-2">
+<h1 class="text-headline-md font-headline-md font-bold text-on-surface tracking-tight">周一 1.618 扩展位监控</h1>
+<span class="text-xs px-2 py-0.5 rounded bg-[#151A26] text-primary-container border border-primary-container/30 font-label-numeric-sm">Monday 1.618 Range Extension Monitor</span>
+<span class="hidden md:inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded bg-emerald-950/40 text-emerald-400 border border-emerald-800/40">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                全推流计算中
+              </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1 flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-sm">calendar_month</span>
+<span>计算基准: <strong class="text-on-surface font-semibold">纽约时间 (America/New_York) 完整周一自然日 K 线高低点</strong> (00:00 - 23:59 EST/EDT)</span>
+</p>
+</div>
+<!-- Quick Actions & Status -->
+<div class="flex flex-wrap items-center gap-1.5 text-label-numeric-sm font-label-numeric-sm">
+<span class="text-outline text-xs hidden xl:inline">基准锚定版本:</span>
+<span class="px-2 py-1 rounded bg-[#151A26] border border-outline-variant/40 text-on-surface text-xs font-mono">
+              2025-05-19 (Mon) EST
+            </span>
+<button class="flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-primary transition-colors text-xs" title="强制全量重校验所有标的周一K线">
+<span class="material-symbols-outlined text-sm">sync</span>
+<span>重算基准</span>
+</button>
+</div>
+</div>
+<!-- MATHEMATICAL FORMULA CARDS CHIPS (Institutional Grade) -->
+<div class="mt-3 pt-2.5 border-t border-outline-variant/20 grid grid-cols-1 md:grid-cols-3 gap-2 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center gap-2 p-1.5 px-2 rounded bg-[#0E121B] border border-outline-variant/30">
+<span class="text-xs px-1.5 py-0.5 rounded bg-rose-950/50 text-rose-400 border border-rose-800/40 font-semibold shrink-0">Upper 1.618</span>
+<code class="text-xs text-on-surface font-mono tracking-tight">= High + 0.618 × (High - Low)</code>
+</div>
+<div class="flex items-center gap-2 p-1.5 px-2 rounded bg-[#0E121B] border border-outline-variant/30">
+<span class="text-xs px-1.5 py-0.5 rounded bg-emerald-950/50 text-emerald-400 border border-emerald-800/40 font-semibold shrink-0">Lower 1.618</span>
+<code class="text-xs text-on-surface font-mono tracking-tight">= Low - 0.618 × (High - Low)</code>
+</div>
+<div class="flex items-center gap-2 p-1.5 px-2 rounded bg-[#0E121B] border border-outline-variant/30">
+<span class="text-xs px-1.5 py-0.5 rounded bg-primary-container/10 text-primary-container border border-primary-container/30 font-semibold shrink-0">监控生效周期</span>
+<span class="text-xs text-on-surface-variant truncate">周二 00:00 至下周一 00:00 EST · 触达即报 (首次限 1 次)</span>
+</div>
+</div>
+</section>
+<!-- ================= 4 COMPACT METRIC CARDS ================= -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2.5 flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant text-label-numeric-sm font-label-numeric-sm">
+<span>覆盖合约总数</span>
+<span class="material-symbols-outlined text-outline text-sm">layers</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1.5">
+<span class="text-headline-md font-headline-md font-bold text-on-surface tabular-nums">148</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">/ 148 USDT 永续</span>
+</div>
+<div class="mt-1 flex items-center text-[10px] text-emerald-400 gap-1 font-label-numeric-sm">
+<span class="material-symbols-outlined text-xs">done_all</span>
+<span>全市场流动性过滤已开</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2.5 flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant text-label-numeric-sm font-label-numeric-sm">
+<span>1.618 基准已锚定</span>
+<span class="material-symbols-outlined text-primary-container text-sm">anchor</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1.5">
+<span class="text-headline-md font-headline-md font-bold text-primary-container tabular-nums">142</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">标的 (95.9%)</span>
+</div>
+<div class="mt-1 flex items-center text-[10px] text-primary-container gap-1 font-label-numeric-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span>高低点完整性校验通过</span>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2.5 flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant text-label-numeric-sm font-label-numeric-sm">
+<span>本周首次触达报警</span>
+<span class="material-symbols-outlined text-amber-400 text-sm">bolt</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1.5">
+<span class="text-headline-md font-headline-md font-bold text-amber-400 tabular-nums">7</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">笔触发事件</span>
+</div>
+<div class="mt-1 flex items-center text-[10px] text-on-surface-variant gap-2 font-label-numeric-sm">
+<span class="text-rose-400">突破上沿: 4</span>
+<span class="text-outline">/</span>
+<span class="text-emerald-400">触底下沿: 3</span>
+</div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2.5 flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant text-label-numeric-sm font-label-numeric-sm">
+<span>历史缺失或数据陈旧</span>
+<span class="material-symbols-outlined text-rose-400 text-sm">warning</span>
+</div>
+<div class="mt-1 flex items-baseline gap-1.5">
+<span class="text-headline-md font-headline-md font-bold text-rose-400 tabular-nums">6</span>
+<span class="text-label-numeric-sm font-label-numeric-sm text-outline">标的 (已隔离排查)</span>
+</div>
+<div class="mt-1 flex items-center text-[10px] text-outline gap-1 font-label-numeric-sm">
+<span class="material-symbols-outlined text-xs text-rose-400">report_problem</span>
+<span>周一为新上线或K线缺损</span>
+</div>
+</div>
+</section>
+<!-- ================= MAIN DUAL-PANEL SECTION (70% TABLE / 30% CONTROL & STREAM) ================= -->
+<div class="grid grid-cols-1 xl:grid-cols-10 gap-2.5">
+<!-- ================= CENTRAL MAIN TABLE AREA (70% / col-span-7) ================= -->
+<div class="xl:col-span-7 flex flex-col gap-2">
+<!-- SEARCH & QUICK FILTER TABS -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-2">
+<!-- Symbol Search input -->
+<div class="relative w-full md:w-64">
+<span class="material-symbols-outlined absolute left-2 top-2 text-outline text-base">search</span>
+<input class="w-full bg-[#0A0D14] border border-[#1E293B] focus:border-primary-container focus:ring-1 focus:ring-primary-container text-body-sm text-on-surface placeholder-outline/60 pl-8 pr-3 py-1 rounded outline-none font-mono text-xs" id="symbolSearch" placeholder="搜索币种代码 (如 BTC, SOL, SUI)..." type="text"/>
+</div>
+<!-- Tab Filter Chips -->
+<!-- Tab Filter Chips -->
+<div class="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 text-label-numeric-sm font-label-numeric-sm scrollbar-none">
+<button class="filter-tab px-2.5 py-1 rounded bg-surface-container-high text-primary-container font-semibold border border-primary-container/40 shrink-0 text-xs flex items-center gap-1" data-filter="all">
+<span>全部</span>
+<span class="text-[10px] opacity-80">(148)</span>
+</button>
+<button class="filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors" data-filter="near">
+<span>临界 &lt;1.5%</span>
+<span class="text-[10px] text-amber-400 font-bold">(12)</span>
+</button>
+<button class="filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors" data-filter="triggered">
+<span>本周已触发</span>
+<span class="text-[10px] text-primary font-bold">(7)</span>
+</button>
+<button class="filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors" data-filter="upper">
+<span>上沿突破</span>
+<span class="text-[10px] text-rose-400 font-bold">(4)</span>
+</button>
+<button class="filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors" data-filter="lower">
+<span>下沿触底</span>
+<span class="text-[10px] text-emerald-400 font-bold">(3)</span>
+</button>
+<button class="filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors" data-filter="missing">
+<span>待排查/缺失</span>
+<span class="text-[10px] text-outline font-bold">(6)</span>
+</button>
+</div>
+</div>
+<!-- TABLE CONTAINER (Dense Institutional Layout) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded overflow-hidden flex flex-col">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse" id="monitorTable">
+<thead>
+<tr class="border-b border-outline-variant/30 bg-[#0E121B] text-on-surface-variant text-[11px] font-label-numeric-sm select-none">
+<th class="py-2 px-3 font-semibold text-outline">标的 / 合约</th>
+<th class="py-2 px-3 font-semibold text-right">实时最新价</th>
+<th class="py-2 px-3 font-semibold text-right">周一 H/L 区间 (高-低)</th>
+<th class="py-2 px-3 font-semibold text-right text-rose-300">1.618 上沿阻力</th>
+<th class="py-2 px-3 font-semibold text-right text-emerald-300">1.618 下沿支撑</th>
+<th class="py-2 px-3 font-semibold text-center">临界距离 %</th>
+<th class="py-2 px-3 font-semibold text-center">本周触达状态</th>
+<th class="py-2 px-3 font-semibold text-right">行情新鲜度</th>
+</tr>
+</thead>
+<tbody class="text-body-sm font-label-numeric-sm divide-y divide-outline-variant/15 tabular-nums">
+<!-- ROW 1: BTCUSDT (Near upper, active) -->
+<tr class="hover:bg-surface-container/60 transition-colors group">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">BTCUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">96,420.50</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">94,800.0</span> - <span class="text-on-surface">91,200.0</span>
+<div class="text-[10px] text-outline">Δ 3,600.0 (3.94%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 font-semibold text-xs">
+                      97,024.80
+                      <div class="text-[10px] text-outline">+0.62% 临界</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      88,975.20
+                      <div class="text-[10px] text-outline">-7.72%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-rose-400 font-bold">+0.62%</span>
+<span class="text-outline">距上沿</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-amber-400 h-full w-[88%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/40 text-amber-300 border border-amber-800/40">
+<span class="w-1 h-1 rounded-full bg-amber-400 animate-ping"></span>
+                        临界逼近中
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 85ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 2: SOLUSDT (Already triggered upper 1.618!) -->
+<tr class="hover:bg-surface-container/60 transition-colors group bg-rose-950/10">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+<span class="text-on-surface font-bold text-xs">SOLUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-rose-400 text-xs">184.65</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">176.20</span> - <span class="text-on-surface">162.50</span>
+<div class="text-[10px] text-outline">Δ 13.70 (8.43%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 font-bold text-xs">
+                      184.66
+                      <div class="text-[10px] text-rose-300">已达标</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      154.03
+                      <div class="text-[10px] text-outline">-16.58%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-rose-400 font-bold">已触达</span>
+<span class="text-outline">100%</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-rose-500 h-full w-[100%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950/70 text-rose-300 border border-rose-700/50">
+<span class="material-symbols-outlined text-[10px]">priority_high</span>
+                        本周已触达上沿
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 110ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 3: ETHUSDT (Normal deviation) -->
+<tr class="hover:bg-surface-container/60 transition-colors group">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">ETHUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">2,740.15</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">2,820.0</span> - <span class="text-on-surface">2,650.0</span>
+<div class="text-[10px] text-outline">Δ 170.0 (6.41%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs">
+                      2,925.06
+                      <div class="text-[10px] text-outline">+6.74%</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      2,544.94
+                      <div class="text-[10px] text-outline">-7.12%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-on-surface-variant">6.74%</span>
+<span class="text-outline">区间内</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[45%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container text-on-surface-variant border border-outline-variant/30">
+                        未触达 / 偏离中
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 94ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 4: SUIUSDT (Lower 1.618 touched) -->
+<tr class="hover:bg-surface-container/60 transition-colors group bg-emerald-950/10">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">SUIUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-emerald-400 text-xs">2.8420</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">3.4500</span> - <span class="text-on-surface">3.0800</span>
+<div class="text-[10px] text-outline">Δ 0.3700 (12.01%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs">
+                      3.6786
+                      <div class="text-[10px] text-outline">+29.4%</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 font-bold text-xs">
+                      2.8513
+                      <div class="text-[10px] text-emerald-300">已穿透下探</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-emerald-400 font-bold">已触达</span>
+<span class="text-outline">100%</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[100%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/70 text-emerald-300 border border-emerald-700/50">
+<span class="material-symbols-outlined text-[10px]">arrow_downward</span>
+                        本周已触达下沿
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 102ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 5: DOGEUSDT (Near upper < 1.5%) -->
+<tr class="hover:bg-surface-container/60 transition-colors group">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">DOGEUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">0.38520</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">0.37500</span> - <span class="text-on-surface">0.34200</span>
+<div class="text-[10px] text-outline">Δ 0.0330 (9.64%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 font-semibold text-xs">
+                      0.39539
+                      <div class="text-[10px] text-amber-400">+1.18% 临界</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      0.32160
+                      <div class="text-[10px] text-outline">-16.5%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-amber-400 font-bold">+1.18%</span>
+<span class="text-outline">距上沿</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-amber-400 h-full w-[78%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/40 text-amber-300 border border-amber-800/40">
+                        临界逼近中
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 120ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 6: NEARUSDT (Normal) -->
+<tr class="hover:bg-surface-container/60 transition-colors group">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">NEARUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">6.240</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">6.450</span> - <span class="text-on-surface">5.820</span>
+<div class="text-[10px] text-outline">Δ 0.630 (10.8%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs">
+                      6.839
+                      <div class="text-[10px] text-outline">+9.59%</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      5.430
+                      <div class="text-[10px] text-outline">-12.9%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-on-surface-variant">9.59%</span>
+<span class="text-outline">安全</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[30%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container text-on-surface-variant border border-outline-variant/30">
+                        未触达
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 115ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 7: AVAXUSDT (Near Lower < 1.5%) -->
+<tr class="hover:bg-surface-container/60 transition-colors group">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+<span class="text-on-surface font-bold text-xs">AVAXUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">33.12</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">36.50</span> - <span class="text-on-surface">34.20</span>
+<div class="text-[10px] text-outline">Δ 2.30 (6.72%)</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs">
+                      37.92
+                      <div class="text-[10px] text-outline">+14.4%</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 font-semibold text-xs">
+                      32.77
+                      <div class="text-[10px] text-amber-400">-1.05% 临界</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-emerald-400 font-bold">-1.05%</span>
+<span class="text-outline">距下沿</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-amber-400 h-full w-[82%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/40 text-amber-300 border border-amber-800/40">
+                        临界逼近中
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 90ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 8: PEPEUSDT (Upper reached) -->
+<tr class="hover:bg-surface-container/60 transition-colors group bg-rose-950/10">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+<span class="text-on-surface font-bold text-xs">PEPEUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-rose-400 text-xs">0.0000194</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">0.0000178</span> - <span class="text-on-surface">0.0000155</span>
+<div class="text-[10px] text-outline">Δ 0.0000023</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 font-bold text-xs">
+                      0.0000192
+                      <div class="text-[10px] text-rose-300">上沿击穿</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      0.0000140
+                      <div class="text-[10px] text-outline">-27.8%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-rose-400 font-bold">已触达</span>
+<span class="text-outline">100%</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-rose-500 h-full w-[100%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-950/70 text-rose-300 border border-rose-700/50">
+<span class="material-symbols-outlined text-[10px]">priority_high</span>
+                        本周已触达上沿
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-emerald-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">flash_on</span>
+                        实时 130ms
+                      </span>
+</td>
+</tr>
+<!-- ROW 9: EDGE STATE 1 (Missing Monday Data) -->
+<tr class="hover:bg-surface-container/60 transition-colors group bg-[#11141d]/80 opacity-75">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+<span class="text-on-surface font-semibold text-xs">BERAUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">NEW</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs">4.8210</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs" colspan="3">
+<div class="flex items-center justify-center gap-1.5 text-rose-400 text-[11px] font-sans">
+<span class="material-symbols-outlined text-sm">event_busy</span>
+<span>周一 K 线数据缺失（该合约于周三新上线，暂无周一 00:00-23:59 完整日线）</span>
+</div>
+</td>
+<td class="py-2 px-3 text-center text-outline text-[11px]">--</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container text-outline border border-outline-variant/40">
+                        待生成基准
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-outline">
+                      正常 140ms
+                    </td>
+</tr>
+<!-- ROW 10: EDGE STATE 2 (Stale Quote / WS Reconnecting) -->
+<tr class="hover:bg-surface-container/60 transition-colors group bg-amber-950/5">
+<td class="py-2 px-3 font-mono font-medium text-on-surface">
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+<span class="text-on-surface font-semibold text-xs">KASUSDT</span>
+<span class="text-[10px] px-1 py-0.2 rounded bg-surface-container text-outline">PERP</span>
+</div>
+</td>
+<td class="py-2 px-3 text-right font-bold text-on-surface text-xs text-amber-300">0.14280</td>
+<td class="py-2 px-3 text-right text-on-surface-variant text-xs">
+<span class="text-on-surface">0.15200</span> - <span class="text-on-surface">0.13800</span>
+<div class="text-[10px] text-outline">Δ 0.0140</div>
+</td>
+<td class="py-2 px-3 text-right text-rose-400 text-xs">
+                      0.16065
+                      <div class="text-[10px] text-outline">+12.5%</div>
+</td>
+<td class="py-2 px-3 text-right text-emerald-400 text-xs">
+                      0.12934
+                      <div class="text-[10px] text-outline">-9.42%</div>
+</td>
+<td class="py-2 px-3">
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-between w-24 text-[10px]">
+<span class="text-on-surface-variant">9.42%</span>
+<span class="text-outline">偏离</span>
+</div>
+<div class="w-24 bg-[#1E2538] h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary-container h-full w-[35%]"></div>
+</div>
+</div>
+</td>
+<td class="py-2 px-3 text-center">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-surface-container text-on-surface-variant border border-outline-variant/30">
+                        未触达
+                      </span>
+</td>
+<td class="py-2 px-3 text-right text-[10px] text-amber-400">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span>
+                        滞后 4,200ms
+                      </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Bottom Pagination / Summary -->
+<div class="border-t border-outline-variant/20 px-3 py-2 bg-[#0E121B] flex flex-col sm:flex-row items-center justify-between text-label-numeric-sm font-label-numeric-sm text-outline gap-2">
+<div class="flex items-center gap-2 text-xs">
+<span>显示 1 - 10 / 共 148 标的</span>
+<span class="text-outline/40">|</span>
+<span>排序权重: 临界距离升序 (Nearest First)</span>
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface disabled:opacity-40" disabled="">
+<span class="material-symbols-outlined text-xs">chevron_left</span>
+</button>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-primary-container font-bold text-xs">1</span>
+<button class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface text-xs">2</button>
+<button class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface text-xs">3</button>
+<span class="text-xs px-1">...</span>
+<button class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface text-xs">15</button>
+<button class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant hover:text-on-surface">
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- ================= RIGHT COMPACT CONTROL & RECEIPT STREAM (30% / col-span-3) ================= -->
+<div class="xl:col-span-3 flex flex-col gap-2.5">
+<!-- TELEGRAM WEBHOOK / NOTIFICATION CONTROL CARD -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-3 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-base">send</span>
+<span class="text-body-sm font-body-sm font-bold text-on-surface">Telegram 推送配置</span>
+</div>
+<span class="text-[10px] px-1.5 py-0.5 rounded bg-[#151A26] border border-outline-variant/30 text-outline">
+                Webhook v2
+              </span>
+</div>
+<!-- TOGGLE SWITCH (DEFAULT OFF) -->
+<div class="p-2.5 rounded bg-[#0E121B] border border-outline-variant/30 flex items-center justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-xs font-semibold text-on-surface" id="toggleStateLabel">推送开关: 已关停 (OFF)</span>
+<span class="w-2 h-2 rounded-full bg-slate-500" id="botStatusDot"></span>
+</div>
+<div class="text-[10px] text-outline mt-0.5">Bot: SpikeAlertBot (@spike_quant_bot)</div>
+</div>
+<!-- Interactive Switch -->
+<button aria-pressed="false" class="w-11 h-6 flex items-center bg-[#1E2538] rounded-full p-1 transition-colors duration-200 cursor-pointer focus:outline-none" id="webhookToggleBtn">
+<div class="bg-outline w-4 h-4 rounded-full shadow-md transform transition-transform duration-200" id="webhookToggleKnob"></div>
+</button>
+</div>
+<!-- CLEAR RULE NOTICE -->
+<div class="p-2 rounded bg-[#0A0D14] border border-outline-variant/20 text-body-sm font-body-sm text-[11px] leading-relaxed text-on-surface-variant">
+<div class="flex items-start gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-sm shrink-0 mt-0.5">info</span>
+<span>
+<strong class="text-primary-container font-semibold">流式触发准则:</strong>
+                  启用后仅推送未来新增的<strong>首次触达事件</strong>，绝不重播历史报警；只要实时价格击中 1.618 扩展位即刻毫秒触发，<strong>无需等待 15m 收线确认</strong>。
+                </span>
+</div>
+</div>
+<!-- Bot Test Ping Button -->
+<button class="w-full py-1.5 rounded bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-on-surface-variant hover:text-primary transition-colors text-xs font-label-numeric-sm flex items-center justify-center gap-1.5">
+<span class="material-symbols-outlined text-sm">network_ping</span>
+<span>发送通道测试消息 (Test Ping)</span>
+</button>
+</div>
+<!-- RECENT ALERT RECEIPTS STREAM (本周最新报警回执流水) -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-3 flex flex-col flex-1">
+<div class="flex items-center justify-between border-b border-outline-variant/20 pb-2">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-amber-400 text-base">receipt_long</span>
+<span class="text-body-sm font-body-sm font-bold text-on-surface">本周触达报警回执</span>
+</div>
+<span class="text-[10px] text-on-surface-variant font-label-numeric-sm tabular-nums">7 / 7 已记录</span>
+</div>
+<!-- Stream Item List -->
+<div class="flex flex-col gap-2 mt-2.5 overflow-y-auto max-h-[360px] pr-0.5">
+<!-- Receipt Item 1: SOL (Upper Triggered) -->
+<div class="p-2 rounded bg-[#0E121B] border border-outline-variant/30 flex flex-col gap-1 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono font-bold text-xs text-on-surface flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    SOLUSDT
+                  </span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                    已送达 200 OK
+                  </span>
+</div>
+<div class="flex items-center justify-between text-[11px] mt-0.5">
+<span class="text-rose-400 font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">north_east</span>
+                    上沿突破 @ 184.66
+                  </span>
+<span class="text-outline">触达幅: +0.01%</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-outline pt-1 border-t border-outline-variant/15 mt-0.5">
+<span>NY: 05-21 14:22:04 EDT</span>
+<span>北京: 05-22 02:22:04</span>
+</div>
+</div>
+<!-- Receipt Item 2: PEPE (Upper Triggered) -->
+<div class="p-2 rounded bg-[#0E121B] border border-outline-variant/30 flex flex-col gap-1 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono font-bold text-xs text-on-surface flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    PEPEUSDT
+                  </span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                    已送达 200 OK
+                  </span>
+</div>
+<div class="flex items-center justify-between text-[11px] mt-0.5">
+<span class="text-rose-400 font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">north_east</span>
+                    上沿突破 @ 0.0000192
+                  </span>
+<span class="text-outline">触达幅: +1.04%</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-outline pt-1 border-t border-outline-variant/15 mt-0.5">
+<span>NY: 05-21 11:05:18 EDT</span>
+<span>北京: 05-21 23:05:18</span>
+</div>
+</div>
+<!-- Receipt Item 3: SUI (Lower Touched) -->
+<div class="p-2 rounded bg-[#0E121B] border border-outline-variant/30 flex flex-col gap-1 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono font-bold text-xs text-on-surface flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    SUIUSDT
+                  </span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
+                    已送达 200 OK
+                  </span>
+</div>
+<div class="flex items-center justify-between text-[11px] mt-0.5">
+<span class="text-emerald-400 font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">south_east</span>
+                    下沿触底 @ 2.8513
+                  </span>
+<span class="text-outline">触达幅: -0.32%</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-outline pt-1 border-t border-outline-variant/15 mt-0.5">
+<span>NY: 05-21 08:41:50 EDT</span>
+<span>北京: 05-21 20:41:50</span>
+</div>
+</div>
+<!-- Receipt Item 4: TIA (Lower Touched - In Queue) -->
+<div class="p-2 rounded bg-[#0E121B] border border-outline-variant/30 flex flex-col gap-1 text-label-numeric-sm font-label-numeric-sm">
+<div class="flex items-center justify-between">
+<span class="font-mono font-bold text-xs text-on-surface flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    TIAUSDT
+                  </span>
+<span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-950/60 text-amber-300 border border-amber-800/40">
+                    排队中 Pending
+                  </span>
+</div>
+<div class="flex items-center justify-between text-[11px] mt-0.5">
+<span class="text-emerald-400 font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-xs">south_east</span>
+                    下沿下探 @ 4.120
+                  </span>
+<span class="text-outline">重试: 次数 1/3</span>
+</div>
+<div class="flex items-center justify-between text-[10px] text-outline pt-1 border-t border-outline-variant/15 mt-0.5">
+<span>NY: 05-20 22:14:10 EDT</span>
+<span>北京: 05-21 10:14:10</span>
+</div>
+</div>
+</div>
+</div>
+<!-- DISASTER TOLERANCE & EDGE CASE NOTICES -->
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded p-2.5 flex flex-col gap-1.5 text-body-sm font-body-sm">
+<div class="flex items-center gap-1.5 text-xs text-outline font-semibold">
+<span class="material-symbols-outlined text-sm text-outline">verified_user</span>
+<span>数据边界与容灾防护保障</span>
+</div>
+<ul class="text-[11px] text-on-surface-variant/80 space-y-1 list-disc list-inside">
+<li>若遇到分叉、插针或周一停盘，将自动从 OKX/Binance 双通道回放校准。</li>
+<li>仅统计已归档的自然日全量成交价，避免开盘前 5 分钟薄流动性假破。</li>
+<li>每周期每币种仅触发 1 次首次触达，若发生深度震荡绝不重复刷屏。</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Micro inline script for time clock and toggle interactions -->
+<script>
+    // Real-time NY Time UTC-4 Clock Display
+    function updateNYClock() {
+      const now = new Date();
+      // Format to America/New_York
+      const options = {
+        timeZone: 'America/New_York',
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      const formatter = new Intl.DateTimeFormat([], options);
+      const displayElem = document.getElementById('nyTimeDisplay');
+      if (displayElem) {
+        displayElem.textContent = formatter.format(now) + ' EDT';
+      }
+    }
+    setInterval(updateNYClock, 1000);
+    updateNYClock();
+
+    // Toggle switch logic for Telegram Webhook
+    const toggleBtn = document.getElementById('webhookToggleBtn');
+    const toggleKnob = document.getElementById('webhookToggleKnob');
+    const toggleStateLabel = document.getElementById('toggleStateLabel');
+    const botStatusDot = document.getElementById('botStatusDot');
+    let isWebhookActive = false;
+
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        isWebhookActive = !isWebhookActive;
+        if (isWebhookActive) {
+          toggleBtn.classList.remove('bg-[#1E2538]');
+          toggleBtn.classList.add('bg-primary-container');
+          toggleKnob.classList.remove('bg-outline');
+          toggleKnob.classList.add('bg-[#00363d]', 'translate-x-5');
+          toggleStateLabel.textContent = '推送开关: 运行中 (ACTIVE)';
+          toggleStateLabel.classList.add('text-primary-container');
+          botStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+        } else {
+          toggleBtn.classList.add('bg-[#1E2538]');
+          toggleBtn.classList.remove('bg-primary-container');
+          toggleKnob.classList.add('bg-outline');
+          toggleKnob.classList.remove('bg-[#00363d]', 'translate-x-5');
+          toggleStateLabel.textContent = '推送开关: 已关停 (OFF)';
+          toggleStateLabel.classList.remove('text-primary-container');
+          botStatusDot.className = 'w-2 h-2 rounded-full bg-slate-500';
+        }
+      });
+    }
+
+    // Interactive Filter Chips Demo Tab Switching
+    const filterTabs = document.querySelectorAll('.filter-tab');
+    filterTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        filterTabs.forEach(t => {
+          t.className = 'filter-tab px-2 py-1 rounded bg-[#0E121B] text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 shrink-0 text-xs transition-colors';
+        });
+        tab.className = 'filter-tab px-2.5 py-1 rounded bg-surface-container-high text-primary-container font-semibold border border-primary-container/40 shrink-0 text-xs flex items-center gap-1';
+      });
+    });
+
+    // Real-time Symbol Quick Search filter
+    const searchInput = document.getElementById('symbolSearch');
+    const tableRows = document.querySelectorAll('#monitorTable tbody tr');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const val = e.target.value.trim().toUpperCase();
+        tableRows.forEach(row => {
+          const symbolCol = row.querySelector('td');
+          if (symbolCol) {
+            const text = symbolCol.textContent.toUpperCase();
+            if (text.includes(val)) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          }
+        });
+      });
+    }
+  </script>
+</body></html>

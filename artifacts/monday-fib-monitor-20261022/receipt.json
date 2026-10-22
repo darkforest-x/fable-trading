@@ -1,28 +1,30 @@
 {
   "feature": "monday-fib-monitor",
-  "status": "backend_verified_frontend_blocked_by_stitch",
-  "source_commit": "dd14f913ddd0f2c6fb43ab5a042f00b3127ab70c",
+  "status": "backend_deployed_frontend_waiting_for_apple_stitch_redesign",
+  "source_commit": "f81f1ac244",
   "scope": "All live OKX USDT perpetual contracts; NY Monday; upper H+0.618R, lower L-0.618R; first touch per week/symbol/side",
   "telegram": "Dedicated opt-in, default off; forward-only, no historical replay; existing local credentials; no real test messages sent",
   "stitch": {
     "project_id": "8978791379095391159",
     "model": "GEMINI_3_8_FLASH",
     "tool": "generate_screen_from_text",
-    "result": "MCP timed out at 300 seconds; no new screen in subsequent project checks",
-    "owner_decision": "Continue waiting for Stitch; no waiver of design-first requirement",
-    "last_check": {
-      "current_time": "2026-10-22 14:15:53 UTC"
-    }
+    "result": "Original screen completed after timeout but owner rejected its appearance. New Apple Glass request timed out at 300 seconds; recovery checks have not found a new screen yet.",
+    "owner_decision": "Redesign with Apple-inspired simplicity, whitespace and frosted glass; continue waiting for Stitch, no design-first waiver.",
+    "last_check": "2026-10-22T14:36:24Z",
+    "rejected_screen_id": "7e8f3e8ef7424e8ca7b21631a3f61857",
+    "rejected_html": "stitch-obsidian-rejected.html",
+    "redesign_request": "stitch-apple-request.json",
+    "recovery_result": "Ten recovery listings after the timeout found no newly created screen; existing project screen count remains 133."
   },
   "validation": {
-    "command": ".venv/bin/python -m pytest tests/monitor/test_monday_fib.py tests/monitor/test_api_startup_imports.py -q",
-    "passed": 16,
+    "command": ".venv/bin/python -m pytest tests/monitor/test_monday_fib.py tests/monitor/test_api_startup_imports.py tests/monitor/test_asset_delivery.py -q",
+    "passed": 19,
     "live_smoke": "live_smoke.json",
     "real_tg_sent": 0
   },
-  "deployment": "Not restarted or deployed; existing service continues unchanged. Temporary live validation worker exited; temporary browser tab closed.",
+  "deployment": "Existing monitor LaunchAgent restarted with the public market monitor backend. GET /api/monday-fib is live; 507 contracts, 494 complete Monday anchors before restart, 13 incomplete Monday. Fresh boot reconciliation underway after f81f1ac244 restart; public WS connected. Original scanner advancing with errors=0. No frontend installed yet; no real Telegram messages sent and independent subscription remains disabled.",
   "pending": [
-    "Retrieve actual generated Stitch screen and frontend code; do not implement UI from existing spec without owner waiver.",
+    "Retrieve NEW Apple Glass Stitch design and code; rejected Obsidian screen must not be implemented.",
     "Add monday-fib menu, lazy module, responsive page, independent Telegram switch and status/receipt UI.",
     "Run browser desktop/mobile scenarios, verify toggles with isolated fake sender only, deploy and verify existing service health."
   ],
@@ -30,6 +32,7 @@
     "automation_id": "stitch-1-618",
     "status": "ACTIVE",
     "interval_minutes": 15,
-    "notify": "Only meaningful change, completion, or unrecoverable blocker; quiet while unchanged."
+    "notify": "Only meaningful change, completion, or unrecoverable blocker; quiet while unchanged.",
+    "scope": "Wait only for the new Apple-inspired redesign; original Obsidian screen is rejected and must not be implemented."
   }
 }
