@@ -68,6 +68,15 @@ class ConfirmationTests(unittest.TestCase):
         f,e,q=self.conditions(20,29);q.iloc[29,q.columns.get_loc('open')]=100
         self.assertEqual(observe(f,10,350,1,100,e,q)['status'],'expired')
 
+    def test_no_wait_timeout_but_weekly_reset_still_applies(self):
+        f,e,q=self.conditions(320,29)
+        self.assertEqual(observe(f,10,350,1,100,e,q,None)['entry_i'],320)
+        self.assertEqual(observe(f,10,310,1,100,e,q,None)['status'],'expired')
+
+    def test_no_wait_timeout_last_week_is_censored(self):
+        f,e,q=self.conditions(399,29)
+        self.assertEqual(observe(f,10,399,1,100,e,q,None)['status'],'data_censored')
+
     def test_native_timed_cost_be_waits_until_feasible(self):
         f=pd.DataFrame([[100.]*4]*21,columns=['open','high','low','close'],
             index=pd.date_range('2026-01-06T00:01Z',periods=21,freq='min'))

@@ -22,8 +22,10 @@ CODE=m.CODE+['yoyo/evaluation/monday_fib_tp_breakeven.py',
 
 
 def context():
+    global OLD
     m.EXP=EXP;m.CODE=CODE
     cfg=json.loads((EXP/'config.json').read_text())
+    OLD=ROOT/cfg.get('prior_inputs',str(OLD.relative_to(ROOT)))
     if subprocess.run(['git','diff','--quiet','HEAD','--',*CODE],cwd=ROOT).returncode:
         raise RuntimeError('Commit builders before native replay')
     entries=pd.read_csv(OLD/'entries.csv',float_precision='round_trip')
@@ -33,8 +35,18 @@ def context():
 
 def initialize():
     cfg,entry,random=context()
-    for name in ('entries.csv','controls.csv','decisions.csv'):
-        shutil.copyfile(OLD/name,EXP/name)
+    oldcfg=json.loads((OLD/'config.json').read_text())
+    if cfg['wait_minutes']!=oldcfg['wait_minutes']:
+        frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
+        entry,decisions,checks=m.prepare(frame,cfg)
+        random=m.controls(frame,entry,cfg)
+        entry.to_csv(EXP/'entries.csv',index=False)
+        random.to_csv(EXP/'controls.csv',index=False)
+        decisions.to_csv(EXP/'decisions.csv',index=False)
+    else:
+        checks={}
+        for name in ('entries.csv','controls.csv','decisions.csv'):
+            shutil.copyfile(OLD/name,EXP/name)
     completed=[]
     for identity in sorted(OLD.rglob('identity.json')):
         folder=identity.parent
@@ -43,16 +55,18 @@ def initialize():
             completed_identity_path=str(identity.relative_to(ROOT)),identity_bytes=identity.stat().st_size,
             signal=m.metric(rows[rows.population.eq('signal')]),
             random=m.metric(rows[rows.population.eq('random')])))
-    dump(OLD/'superseded_receipt.json',dict(reason='Owner adds immediate cost breakeven on any TP; these completed runs lack that trigger. Remaining delays interrupted, not completed.',
+    dump(OLD/'superseded_receipt.json',dict(reason=cfg.get('change','Owner adds immediate cost breakeven on any TP; these completed runs lack that trigger. Remaining delays interrupted, not completed.'),
         successor=EXP.name,completed=completed,training_eligible=False,production_eligible=False))
     dump(EXP/'admission_receipt.json',dict(source_experiment=OLD.name,
-        copied_inputs=[file_stamp(OLD/name) for name in ('entries.csv','controls.csv','decisions.csv')],
+        previous_inputs=[file_stamp(OLD/name) for name in ('entries.csv','controls.csv','decisions.csv')],
         frozen_signals=len(entry),frozen_controls=len(random),
-        change='Every native target fill synchronously protects remaining same-parent tranches; optional timer remains independent.'))
+        admission_checks=checks,change=cfg.get('change','Every native target fill synchronously protects remaining same-parent tranches; optional timer remains independent.')))
 
 
 def replay(delays):
     cfg,entry,random=context()
+    entry=pd.read_csv(EXP/'entries.csv',float_precision='round_trip')
+    random=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
     scope=json.loads((EXP/'scope.json').read_text()) if (EXP/'scope.json').exists() else {}
     if any(d not in scope.get('active_delays',cfg['be_minutes']) for d in delays):
         raise RuntimeError('Owner withdrew timed-management research; do not replay it')
@@ -94,9 +108,14 @@ def collect():
             for arm in m.ARMS:
                 s=rows[rows.arm.eq(arm)&rows.population.eq('signal')].set_index('parent_id')
                 before=prior[prior.arm.eq(arm)&prior.population.eq('signal')].set_index('parent_id')
-                assert set(s.index)==set(before.index)
-                p=s[['outcome','net_r']].join(before[['outcome','net_r']],rsuffix='_old')
+                shared=s.index.intersection(before.index)
+                p=s.loc[shared,['outcome','net_r']].join(before[['outcome','net_r']],rsuffix='_old')
+                npairs=len(shared)
+                for col in ('entry_i','entry'):
+                    assert (s.loc[shared,col]-before.loc[shared,col]).abs().lt(1e-8).all()
                 old_comparison.append(dict(arm=arm,delay=delay,old=m.metric(before),new=m.metric(s),
+                    paired_rows=npairs,added=sorted(set(s.index)-set(before.index)),
+                    removed=sorted(set(before.index)-set(s.index)),
                     delta_r=float((p.net_r-p.net_r_old).sum()),
                     transitions=[dict(old=a,new=b,n=int(n)) for (a,b),n in p.groupby(['outcome_old','outcome']).size().items()]))
     pd.concat(ledger,ignore_index=True).to_csv(EXP/'all_parents.csv',index=False)
@@ -109,7 +128,7 @@ def collect():
             selections.append(dict(arm=arm,objective=objective,delay=best['delay'],earlier=best,later=later))
     final_cfg=dict(cfg,be_minutes=active_delays)
     if active_delays==[0]:
-        final_cfg.update(exit='Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry; observation expiry before entry remains285minutes.',
+        final_cfg.update(exit='Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry. Observation deadline follows wait_minutes; None means no elapsed-time timeout, original next-Monday reset retained.',
             selection='Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.',
             inference='Week-cluster sign permutation; four fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.',
             limitations='One-minute sampled intrabar signals and OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.')
@@ -125,10 +144,12 @@ def collect():
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
+    parser.add_argument('--experiment',type=Path)
     parser.add_argument('--initialize',action='store_true')
     parser.add_argument('--delays',type=int,nargs='+')
     parser.add_argument('--collect',action='store_true')
     args=parser.parse_args()
+    if args.experiment:EXP=args.experiment.resolve()
     if args.initialize:initialize()
     if args.delays:replay(args.delays)
     if args.collect:collect()

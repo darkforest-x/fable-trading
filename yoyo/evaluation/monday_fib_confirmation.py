@@ -87,7 +87,8 @@ def observe(frame, touch_i, expiry_i, side, level, events, quarter, window=285):
     An arrow can appear before or after that body, and may disappear later.
     Equality at the key is not strictly inside. Deadline is inclusive.
     """
-    end=min(touch_i+window,expiry_i,len(frame)-2)
+    deadline=expiry_i if window is None else min(touch_i+window,expiry_i)
+    end=min(deadline,len(frame)-2)
     body_i=arrow_i=-1;lane=0
     q=quarter if quarter.index.equals(frame.index) else quarter.reindex(frame.index)
     for i in range(touch_i,end+1):
@@ -101,7 +102,7 @@ def observe(frame, touch_i, expiry_i, side, level, events, quarter, window=285):
         if body_i>=0 and arrow_i>=0:
             return dict(status='confirmed',entry_i=i,arrow_i=arrow_i,body_i=body_i,
                         arrow_minutes=lane,wait_minutes=i-touch_i)
-    status='data_censored' if end==len(frame)-2 and end<touch_i+window else 'expired'
+    status='data_censored' if end<deadline else 'expired'
     return dict(status=status,entry_i=-1,arrow_i=arrow_i,body_i=body_i,
                 arrow_minutes=lane,wait_minutes=-1)
 
@@ -124,9 +125,10 @@ def prepare(frame,cfg):
         for arm in ARMS:
             subset=events if arm=='any' else {int(arm[:-1]):events[int(arm[:-1])]}
             result=observe(frame,i,last,r.side,r.entry,subset,quarter,cfg['wait_minutes'])
-            conservative=observe(frame,i,last,r.side,r.entry,subset,quarter,cfg['wait_minutes']-1)
-            if (result['status'],result['entry_i'])!=(conservative['status'],conservative['entry_i']):
-                boundary_changes.append(dict(pair_id=r.pair_id,arm=arm))
+            if cfg['wait_minutes'] is not None:
+                conservative=observe(frame,i,last,r.side,r.entry,subset,quarter,cfg['wait_minutes']-1)
+                if (result['status'],result['entry_i'])!=(conservative['status'],conservative['entry_i']):
+                    boundary_changes.append(dict(pair_id=r.pair_id,arm=arm))
             row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm=arm,
                 touch_i=i,touch_time=str(frame.index[i]),level=r.entry,
                 **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),**result)
