@@ -122,11 +122,15 @@ def prepare(frame,cfg):
         if not len(hits):
             continue
         i=first+int(hits[0]);touch[r.trade_id]=i
+        week_end=pd.Timestamp(r.week,tz=cfg['timezone'])+pd.DateOffset(days=7)
+        # The source resting-order ledger clips expiry to the available tape.
+        # A partial last week is observationally censored, not a real reset.
+        observation_expiry=len(frame) if week_end>frame.index[-1] else last
         for arm in ARMS:
             subset=events if arm=='any' else {int(arm[:-1]):events[int(arm[:-1])]}
-            result=observe(frame,i,last,r.side,r.entry,subset,quarter,cfg['wait_minutes'])
+            result=observe(frame,i,observation_expiry,r.side,r.entry,subset,quarter,cfg['wait_minutes'])
             if cfg['wait_minutes'] is not None:
-                conservative=observe(frame,i,last,r.side,r.entry,subset,quarter,cfg['wait_minutes']-1)
+                conservative=observe(frame,i,observation_expiry,r.side,r.entry,subset,quarter,cfg['wait_minutes']-1)
                 if (result['status'],result['entry_i'])!=(conservative['status'],conservative['entry_i']):
                     boundary_changes.append(dict(pair_id=r.pair_id,arm=arm))
             row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm=arm,
