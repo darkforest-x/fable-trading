@@ -1,0 +1,49 @@
+{
+  "experiment_id": "exp-btc-monday-fib-body-20261022-v6",
+  "symbol": "BTCUSDT",
+  "venue": "OKX USDT perpetual",
+  "timezone": "America/New_York",
+  "start": "2024-10-22T00:00:00+08:00",
+  "split": "2025-10-22T00:00:00+08:00",
+  "end": "2026-10-22T00:00:00+08:00",
+  "warmup": "2024-10-01T00:00:00Z",
+  "tick": 0.1,
+  "stop_fraction": 0.007,
+  "round_trip_cost": 0.0,
+  "seed": 20261022,
+  "controls_per_signal": 10,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "inference": "One fixed body-only arm; week-cluster sign permutation and chronological descriptive halves; no parameter search.",
+  "not_applicable": "No fitted model or score; AUC, top-decile ranking and single-feature model baselines do not apply. Matched random entry is the null comparator.",
+  "limitations": "OHLC1m path, no real tick sequence, funding/slippage/spread/queue/capacity/account sizing. Conservative fixed limit fill even on favorable gaps; stop-first and reverse-order path audit. Not funded account returns.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "venue_evidence": "Owner screenshot Monday H83149.8/L81166 exactly matches existing OKX2026-10-19 NY data; Binance H83157.9/L81146.4 differs. Preserve initial Binance experiment as explicit venue comparison.",
+  "wait_minutes": null,
+  "be_minutes": [
+    0
+  ],
+  "entry": "First weekly-side touch of outer1618; enter at first completed15m candle whose open AND close are strictly inside outer1618. No arrow, no elapsed wait timeout. Original nextMonday reset for unconfirmed prior-week interval. Skip if firstTP already passed or space cannot coverconfigured entry-notional fees (zero in this run) plus native tick clearance; no rearm.",
+  "exit": "Four original25percent tranches,0.7percent actual-entry SL. Any native TP immediately protects all remaining same-parent tranches at entry plus own fees. No timed protection and no holding-time expiration; filled trades may crossweeks.",
+  "resolution": "1m minute-close sampling of forming higher candles. No subminute flashes or tick-order claims. Touch timestamp is touch-minute close; compare deadline1minute earlier.",
+  "selection": "No n selection; owner withdrew elapsed holding and285minute observation limits.",
+  "controls": "10 random minute closes per confirmed signal, same coin/side/NYweek/entry half/causal15mATR bucket. Targets relative to random entry, identicalSL/BE/cost. No confirmation requirement on background random entries.",
+  "targets": "Owner replaces previous80/20 exits before execution. Short lower0.618 and lower0.705, long mirrors.",
+  "target_breakeven": true,
+  "prior_experiment": "exp-btc-monday-fib-confirm-20261022-v1",
+  "prior_inputs": "experiments/active/exp-btc-monday-fib-body-20261022-v4",
+  "change": "Change only round-trip fee from20bp to0 versus v4. Regenerate fee-sensitive admission and replay native TP-triggered BE; preserve all historical artifacts.",
+  "require_arrow": false,
+  "arms": [
+    "body15m"
+  ],
+  "skip_insufficient_fee_room": true,
+  "preserve_prior_receipts": true,
+  "fee_authority": "Latest owner AGENTS instruction2026-10-22: all backtests temporarily exclude fees, overriding previous20bp."
+}

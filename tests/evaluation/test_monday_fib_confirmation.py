@@ -16,6 +16,25 @@ def frame(n=400):
 
 
 class ConfirmationTests(unittest.TestCase):
+    def test_fee_change_invalidates_admission_and_native_projection(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed,check_projection_policy
+        old=dict(wait_minutes=None,require_arrow=False,adverse_extension_fraction=.02,
+            round_trip_cost=.002,tick=.1,stop_fraction=.007,target_breakeven=True,be_minutes=[0])
+        new=dict(old,round_trip_cost=0.)
+        self.assertTrue(admission_changed(new,old))
+        with self.assertRaisesRegex(ValueError,'round_trip_cost'):
+            check_projection_policy(new,old)
+        self.assertFalse(admission_changed(old,dict(old)))
+        check_projection_policy(old,dict(old))
+
+    def test_causal_filter_only_allows_native_projection(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed,check_projection_policy
+        old=dict(wait_minutes=None,require_arrow=False,round_trip_cost=0.,tick=.1,
+            stop_fraction=.007,target_breakeven=True,be_minutes=[0])
+        new=dict(old,adverse_extension_fraction=.02)
+        self.assertTrue(admission_changed(new,old))
+        check_projection_policy(new,old)
+
     def body_fixture(self,late=False,low=101.,high=103.,extension=None,wick=None,wick_i=10):
         f=pd.DataFrame([[100.]*4]*600,columns=['open','high','low','close'],
             index=pd.date_range('2026-01-06T00:01Z',periods=600,freq='min'))

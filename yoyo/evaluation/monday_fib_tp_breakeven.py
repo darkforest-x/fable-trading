@@ -18,6 +18,7 @@ from yoyo.evaluation.pepe_range_exits import inference
 OLD=m.EXP
 EXP=ROOT/'experiments/active/exp-btc-monday-fib-confirm-20261022-v2'
 CODE=m.CODE+['yoyo/evaluation/monday_fib_tp_breakeven.py',
+             'yoyo/evaluation/monday_fib_confirmation_review.py',
              'tests/evaluation/test_nautilus_target_breakeven.py']
 
 
@@ -37,9 +38,7 @@ def context():
 def initialize():
     cfg,entry,random=context()
     oldcfg=json.loads((OLD/'config.json').read_text())
-    if (cfg['wait_minutes']!=oldcfg['wait_minutes']
-            or cfg.get('require_arrow',True)!=oldcfg.get('require_arrow',True)
-            or cfg.get('adverse_extension_fraction')!=oldcfg.get('adverse_extension_fraction')):
+    if admission_changed(cfg,oldcfg):
         frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
         entry,decisions,checks=m.prepare(frame,cfg)
         if cfg.get('reuse_execution_experiment'):
@@ -61,12 +60,29 @@ def initialize():
             completed_identity_path=str(identity.relative_to(ROOT)),identity_bytes=identity.stat().st_size,
             signal=m.metric(rows[rows.population.eq('signal')]),
             random=m.metric(rows[rows.population.eq('random')])))
-    dump(OLD/'superseded_receipt.json',dict(reason=cfg.get('change','Owner adds immediate cost breakeven on any TP; these completed runs lack that trigger. Remaining delays interrupted, not completed.'),
+    receipt=(EXP/'prior_execution_receipt.json' if cfg.get('preserve_prior_receipts')
+             else OLD/'superseded_receipt.json')
+    dump(receipt,dict(reason=cfg.get('change','Owner adds immediate cost breakeven on any TP; these completed runs lack that trigger. Remaining delays interrupted, not completed.'),
         successor=EXP.name,completed=completed,training_eligible=False,production_eligible=False))
     dump(EXP/'admission_receipt.json',dict(source_experiment=OLD.name,
         previous_inputs=[file_stamp(OLD/name) for name in ('entries.csv','controls.csv','decisions.csv')],
         frozen_signals=len(entry),frozen_controls=len(random),
         admission_checks=checks,change=cfg.get('change','Every native target fill synchronously protects remaining same-parent tranches; optional timer remains independent.')))
+
+
+def admission_changed(cfg,oldcfg):
+    """Costs can change first-target feasibility, not just reported returns."""
+    defaults=dict(require_arrow=True,adverse_extension_fraction=None)
+    return any(cfg.get(k,defaults.get(k))!=oldcfg.get(k,defaults.get(k)) for k in
+        ('wait_minutes','require_arrow','adverse_extension_fraction',
+         'round_trip_cost','tick','stop_fraction'))
+
+
+def check_projection_policy(cfg,source_cfg):
+    """Protect native fill reuse when costs also set the breakeven barrier."""
+    for key in ('round_trip_cost','target_breakeven','be_minutes','tick','stop_fraction'):
+        if cfg.get(key)!=source_cfg.get(key):
+            raise ValueError(f'Native projection changes execution policy: {key}')
 
 
 def replay(delays):
@@ -112,6 +128,7 @@ def project():
     cfg,_,_=context()
     source=ROOT/cfg['reuse_execution_experiment']/'native_market_be_0'
     assert (source/'identity.json').exists(),'Source native execution is not complete'
+    check_projection_policy(cfg,json.loads((source/'identity.json').read_text())['config'])
     entries=pd.read_csv(EXP/'entries.csv',float_precision='round_trip')
     controls=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
     desired=m.legs(pd.concat([entries,controls],ignore_index=True)).set_index('trade_id')

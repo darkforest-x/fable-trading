@@ -108,11 +108,14 @@ def run():
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
         multiplicity_comparisons=len(p),
-        focused_and_layer_tests=115,
+        focused_and_layer_tests=117,
         broader_preflight=dict(passed=170,failed=16,skipped=12,
             explanation='Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed.'),
         initial_test_fixture_failure='Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.',
-        limitations='Final body-only scope uses completed15m candles, native TP-triggered protection, no elapsed-time expiry and no arrow. OHLC1m is not a real tick path; same .2percent entry-notional cost. Independent R is not portfolio return.' if not cfg.get('require_arrow',True) else 'One-minute samples miss subminute arrow flicker; independent latched conditions, native TP protection, .2percent fees. Independent R is not portfolio return.'))
+        limitations=(f"Completed15m body, native TP-triggered protection; OHLC1m is not a real tick path. "
+            f"Round-trip entry-notional cost={cfg['round_trip_cost']:.6f}. Independent R is not portfolio return. "
+            + ('No arrows or elapsed-time expiry.' if not cfg.get('require_arrow',True)
+               else 'One-minute samples miss subminute arrow flicker.'))))
     dump(EXP/'delivery_receipt.json',dict(experiment_id=EXP.name,
         source_builder=summary['source_commit'],engine='NautilusTrader1.231.0',
         native_positions=sum(x['positions'] for x in summary['native_audits']+summary['baseline_audits']),
