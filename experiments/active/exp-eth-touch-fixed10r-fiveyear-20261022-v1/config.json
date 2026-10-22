@@ -1,0 +1,21 @@
+{
+  "experiment_id": "exp-eth-touch-fixed10r-fiveyear-20261022-v1",
+  "source": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+  "annual_results": "experiments/active/exp-range-v231-returns-20261021-v1",
+  "fixed1r_results": "experiments/active/exp-range-v231-fixed1r-fiveyear-20261022-v1",
+  "start": "2021-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "annual_start": "2025-10-21T00:00:00+08:00",
+  "recent_start": "2026-08-21T00:00:00+08:00",
+  "round_trip_cost": 0,
+  "timezone": "America/New_York",
+  "ratios": [0, 0.5, 0.618, 0.705, 1.13, 1.27, 1.618],
+  "seed": 20261022,
+  "symbols": [{"symbol": "ETH", "tick": 0.01, "expected_signals": 316, "expected_total": 385}],
+  "arms": [{"name": "fixed_10r", "target_r": 10}],
+  "owner_request": "Extend the highest-return annual original ETH touch-highlight fixed10R strategy to five years; temporarily exclude all fees. Confirm actual framework execution.",
+  "single_variable": "Extend historical coverage only relative to the annual zero-fee10R comparison. Same frozen original entries, exact wick stops, target and controls. No sweep or MTF filter.",
+  "execution": "Nautilus1.231.0 native independent HEDGING static brackets;5m O-H-L-C and existing stop-first oracle. Reuse69annual signal/control pairs, replay316older pairs. Static cached fills restated to zero fee with source fees preserved. No annual forced exits.",
+  "training_eligible": false,
+  "production_eligible": false
+}
