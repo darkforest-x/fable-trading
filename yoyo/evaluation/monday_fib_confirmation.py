@@ -187,6 +187,28 @@ def body_confirmation(quarter,touch_i,last_i,side,level,confirm_next_close=False
     return -1,-1
 
 
+def structural_stop_levels(frame,cfg):
+    """Past completed15m high/low only, including a bar closing at entry.
+
+    Rolling N completed buckets are forward-filled to minute closes. A forming
+    bucket never enters the extrema. No buffer, trailing update, or future bar.
+    """
+    n=cfg.get('stop_15m_lookback')
+    if n is None:return None
+    if isinstance(n,bool) or not isinstance(n,int) or n<1:
+        raise ValueError('stop_15m_lookback must be a positive integer')
+    q=aggregate(frame,15)
+    extrema=pd.DataFrame(dict(low=q.low.rolling(n).min(),high=q.high.rolling(n).max()))
+    return extrema.reindex(frame.index,method='ffill')
+
+
+def initial_stop(price,side,i,cfg,levels=None):
+    """Freeze entry-time structure or preserve the existing fixed fraction."""
+    value=(levels.iloc[i]['low' if side==1 else 'high'] if levels is not None
+           else price*(1-side*cfg['stop_fraction']))
+    return base.rounded(value,cfg['tick'],side==-1) if np.isfinite(value) else np.nan
+
+
 def prepare_body(frame,cfg):
     """First completed inner15m body after touch; no arrow or elapsed cap.
 
@@ -199,6 +221,7 @@ def prepare_body(frame,cfg):
     weekly=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip')
     original=pd.read_csv(SOURCE/'signal_trades.csv',float_precision='round_trip')
     q=aggregate(frame,15).reindex(frame.index)
+    stop_levels=structural_stop_levels(frame,cfg)
     bars=frame[base.OHLC].to_numpy();entries=[];decisions=[];touch={}
     for r in weekly.itertuples():
         first=int(r.entry_i)+1;last=int(r.expire_i)
@@ -231,7 +254,11 @@ def prepare_body(frame,cfg):
             elif room-cfg['round_trip_cost']*price<2*cfg['tick']:
                 row['status']='fee_space_insufficient'
             else:
-                stop=base.rounded(price*(1-r.side*cfg['stop_fraction']),cfg['tick'],r.side==-1)
+                stop=initial_stop(price,r.side,j,cfg,stop_levels)
+                if not np.isfinite(stop) or r.side*(price-stop)<cfg['tick']-1e-8:
+                    row['status']='structural_stop_unavailable'
+                    decisions.append(row)
+                    continue
                 row.update(status='confirmed',entry=price,stop=stop,risk=r.side*(price-stop),
                     entry_time=str(frame.index[j]),population='signal',trade_id=f'body15m-{r.pair_id}',
                     end_i=len(frame)-1,segment=int(frame.index[j]>=pd.Timestamp(cfg['split'])))
@@ -248,7 +275,8 @@ def prepare_body(frame,cfg):
         weekly_sides=len(weekly),touched=len(touch),body_checks=len(entries),
         arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True,
         next_15m_close_confirmation=cfg.get('next_15m_close_confirmation',False),
-        adverse_extension_fraction=cfg.get('adverse_extension_fraction'))
+        adverse_extension_fraction=cfg.get('adverse_extension_fraction'),
+        stop_15m_lookback=cfg.get('stop_15m_lookback'))
 
 
 def controls(frame,entry,cfg):
@@ -258,6 +286,7 @@ def controls(frame,entry,cfg):
     These background controls do not require the strategy's confirmation.
     """
     q=aggregate(frame,15);vol=(atr(q,14)/q.close).reindex(frame.index,method='ffill')
+    stop_levels=structural_stop_levels(frame,cfg)
     bucket=np.digitize(vol.to_numpy(),cfg['volatility_edges'])
     local=frame.index.tz_convert(cfg['timezone']);day=local.tz_localize(None).normalize()
     weeks=(day-pd.to_timedelta(local.dayofweek,unit='D')).strftime('%Y-%m-%d').to_numpy()
@@ -270,11 +299,17 @@ def controls(frame,entry,cfg):
         key=(r.arm,r.side);used.setdefault(key,set());b=int(bucket[r.entry_i])
         pool=np.flatnonzero(good&(weeks==r.week)&(segment==r.segment)&(bucket==b))
         pool=np.array([i for i in pool if i not in used[key]],dtype=int)
+        if stop_levels is not None:
+            # Background minute entries can lie outside the last completed
+            # quarter's structure. An initial stop must be on the loss side.
+            values=stop_levels['low' if r.side==1 else 'high'].to_numpy()[pool]
+            risk=r.side*(frame.close.to_numpy()[pool]-values)
+            pool=pool[np.isfinite(values)&(risk>=cfg['tick']-1e-8)]
         choice=rng.choice(pool,min(cfg['controls_per_signal'],len(pool)),replace=False)
         assert len(choice)==cfg['controls_per_signal']
         for k,i in enumerate(choice):
             used[key].add(i);p=float(frame.close.iloc[i])
-            stop=base.rounded(p*(1-r.side*cfg['stop_fraction']),cfg['tick'],r.side==-1)
+            stop=initial_stop(p,r.side,i,cfg,stop_levels)
             out.append(dict(trade_id=f'random-{r.trade_id}-{k}',pair_id=r.pair_id,
                 arm=r.arm,week=r.week,population='random',side=r.side,entry_i=int(i),
                 entry=p,stop=stop,risk=r.side*(p-stop),end_i=len(frame)-1,

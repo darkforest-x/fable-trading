@@ -24,6 +24,21 @@ def run():
     frame=base.aligned(pd.read_csv(SOURCE/'candles.csv.gz',float_precision='round_trip'))
     assert frame.index.is_unique and (np.diff(frame.index.asi8)==60_000_000_000).all()
     controls=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
+    structural_checks=0
+    if cfg.get('stop_15m_lookback'):
+        # Rebuild each extremum directly from minute rows, independently of
+        # the rolling/resample producer. Drop the still-forming quarter.
+        n=cfg['stop_15m_lookback']
+        for r in pd.concat([entry,controls],ignore_index=True).itertuples():
+            end=frame.index[int(r.entry_i)].floor('15min')
+            start=end-pd.Timedelta(minutes=15*n)
+            raw=frame.loc[(frame.index>start)&(frame.index<=end)]
+            assert len(raw)==15*n
+            value=raw.low.min() if r.side==1 else raw.high.max()
+            expected=base.rounded(value,cfg['tick'],r.side==-1)
+            assert abs(r.stop-expected)<1e-8
+            assert abs(r.risk-r.side*(r.entry-r.stop))<1e-8 and r.risk>0
+            structural_checks+=1
     quarter=aggregate(frame,15)
     body_checks=next_close_checks=0
     if not cfg.get('require_arrow',True):
@@ -134,6 +149,7 @@ def run():
         matched_control_checks=len(controls),minute_grid_rows=len(frame),
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         independent_body_checks=body_checks,independent_next_close_checks=next_close_checks,
+        independent_structural_stop_checks=structural_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
         multiplicity_comparisons=len(p),
         focused_and_layer_tests=126,

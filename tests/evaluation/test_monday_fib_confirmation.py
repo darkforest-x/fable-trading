@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body,body_confirmation
+from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body,body_confirmation,structural_stop_levels,initial_stop
 from yoyo.evaluation.pepe_range_exits import signals
 from yoyo.layers.l3_backtest.nautilus_independent import run_native,ExitPolicy
 
@@ -16,6 +16,43 @@ def frame(n=400):
 
 
 class ConfirmationTests(unittest.TestCase):
+    def test_structural_stop_exact_five_closed_bars_and_mirror(self):
+        f=frame(120);f.loc[:,'high']=110.;f.loc[:,'low']=90.
+        f.iloc[0,f.columns.get_loc('low')]=1.
+        f.iloc[0,f.columns.get_loc('high')]=999.
+        f.iloc[89,f.columns.get_loc('low')]=88.
+        f.iloc[89,f.columns.get_loc('high')]=112.
+        cfg=dict(stop_15m_lookback=5,tick=.1,stop_fraction=.007)
+        levels=structural_stop_levels(f,cfg)
+        self.assertEqual(initial_stop(100,1,89,cfg,levels),88.)
+        self.assertEqual(initial_stop(100,-1,89,cfg,levels),112.)
+
+    def test_structural_stop_ignores_forming_and_future_bars(self):
+        f=frame(120);cfg=dict(stop_15m_lookback=5,tick=.1)
+        before=structural_stop_levels(f,cfg)
+        f.iloc[90:,f.columns.get_loc('low')]=-1000.
+        f.iloc[90:,f.columns.get_loc('high')]=1000.
+        after=structural_stop_levels(f,cfg)
+        pd.testing.assert_frame_equal(before.iloc[:104],after.iloc[:104])
+        prefix=structural_stop_levels(f.iloc[:98],cfg)
+        pd.testing.assert_frame_equal(prefix,after.iloc[:98])
+        self.assertTrue(after.iloc[:74].isna().all().all())
+
+    def test_structural_stop_configuration_invalidates_frozen_reuse(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed,check_projection_policy
+        old=dict(stop_fraction=.007);new=dict(old,stop_15m_lookback=5)
+        self.assertTrue(admission_changed(new,old))
+        with self.assertRaisesRegex(ValueError,'stop_15m_lookback'):
+            check_projection_policy(new,old)
+        for n in (0,-1,2.5,True):
+            with self.assertRaises(ValueError):structural_stop_levels(frame(),dict(stop_15m_lookback=n))
+
+    def test_fixed_stop_default_remains_unchanged(self):
+        cfg=dict(stop_fraction=.007,tick=.1)
+        self.assertIsNone(structural_stop_levels(frame(),cfg))
+        self.assertAlmostEqual(initial_stop(100,1,0,cfg),99.3)
+        self.assertAlmostEqual(initial_stop(100,-1,0,cfg),100.7)
+
     def test_fee_change_invalidates_admission_and_native_projection(self):
         from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed,check_projection_policy
         old=dict(wait_minutes=None,require_arrow=False,adverse_extension_fraction=.02,

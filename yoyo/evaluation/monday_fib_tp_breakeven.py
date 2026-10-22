@@ -75,12 +75,12 @@ def admission_changed(cfg,oldcfg):
     defaults=dict(require_arrow=True,adverse_extension_fraction=None,next_15m_close_confirmation=False)
     return any(cfg.get(k,defaults.get(k))!=oldcfg.get(k,defaults.get(k)) for k in
         ('wait_minutes','require_arrow','adverse_extension_fraction',
-         'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation'))
+         'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation','stop_15m_lookback'))
 
 
 def check_projection_policy(cfg,source_cfg):
     """Protect native fill reuse when costs also set the breakeven barrier."""
-    for key in ('round_trip_cost','target_breakeven','be_minutes','tick','stop_fraction'):
+    for key in ('round_trip_cost','target_breakeven','be_minutes','tick','stop_fraction','stop_15m_lookback'):
         if cfg.get(key)!=source_cfg.get(key):
             raise ValueError(f'Native projection changes execution policy: {key}')
 
@@ -227,6 +227,10 @@ def collect():
                     removed=sorted(set(before.index)-set(s.index)),
                     removed_metrics=m.metric(before.loc[before.index.difference(s.index)]),
                     delta_r=float((p.net_r-p.net_r_old).sum()),
+                    risk_scale_changed=cfg.get('stop_15m_lookback')!=oldcfg.get('stop_15m_lookback'),
+                    shared_mean_change_bp=float((s.loc[shared,'net_bp']-before.loc[shared,'net_bp']).mean()),
+                    delta_in_prior_risk_units=float(((s.loc[shared,'net_bp']-before.loc[shared,'net_bp'])/10000
+                        *before.loc[shared,'entry']/before.loc[shared,'risk']).sum()),
                     transitions=[dict(old=a,new=b,n=int(n)) for (a,b),n in p.groupby(['outcome_old','outcome']).size().items()]))
     pd.concat(ledger,ignore_index=True).to_csv(EXP/'all_parents.csv',index=False)
     selections=[]
@@ -238,7 +242,9 @@ def collect():
             selections.append(dict(arm=arm,objective=objective,delay=best['delay'],earlier=best,later=later))
     final_cfg=dict(cfg,be_minutes=active_delays)
     if active_delays==[0]:
-        final_cfg.update(exit='Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry. Observation deadline follows wait_minutes; None means no elapsed-time timeout, original next-Monday reset retained.',
+        initial=(f"Latest{cfg['stop_15m_lookback']} completed15m low/high initial SL, no buffer. "
+                 if cfg.get('stop_15m_lookback') else f"Actual-entry{100*cfg['stop_fraction']:g}percent initial SL. ")
+        final_cfg.update(exit='Four original25percent tranches. '+initial+'Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry. Observation deadline follows wait_minutes; None means no elapsed-time timeout, original next-Monday reset retained.',
             selection='Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.',
             inference=f'Week-cluster sign permutation; {len(m.ARMS)} fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.',
             limitations='Completed15m body confirmation and one-minute OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.' if not cfg.get('require_arrow',True) else 'One-minute sampled intrabar arrows; OHLC execution and reverse-order sensitivity. No tick-sequence or funded-account claims.')
