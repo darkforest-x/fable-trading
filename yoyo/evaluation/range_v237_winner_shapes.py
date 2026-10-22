@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import subprocess
+import sys
 
 import numpy as np
 import pandas as pd
@@ -275,4 +276,49 @@ def main():
     print(json.dumps(selected,ensure_ascii=False),flush=True)
 
 
-if __name__=='__main__':main()
+def exports():
+    """Readable separated ledgers and gross-outcome sensitivity from cache only."""
+    cfg=json.loads(CONFIG.read_text());result=[];files=[];examples=[]
+    for spec in cfg['symbols']:
+        coin=spec['symbol'];d=read(EXP/f'{coin}_all_features.csv.gz')
+        for col,source in [('signal_time_shanghai','signal_ns'),('publication_time_shanghai','publication_ns')]:
+            d[col]=pd.to_datetime(d[source],unit='ns',utc=True).dt.tz_convert('Asia/Shanghai').astype(str)
+        for col in ['entry_time','exit_time']:
+            d[col+'_shanghai']=pd.to_datetime(d[col],utc=True).dt.tz_convert('Asia/Shanghai').astype(str)
+        cols=['event_id','signal_time_shanghai','publication_time_shanghai','entry_time_shanghai','exit_time_shanghai',
+            'side','entry','stop','exit_price','gross_r','fee_r','net_r','reason','stop_mfe_lower','stop_mfe_upper',
+            'arrow_wick_share','arrow_close_rejection','arrow_sweep20','prior20_signed_atr','compression5_20',
+            'risk_bp','ma15_aligned','ma60_aligned','ma240_aligned','arrow_wick_keys','retrospective']
+        for (mode,lane),g in d.groupby(['mode','lane']):
+            for cohort in ['winner_gt3R','stop_before1R']:
+                z=g[g.cohort.eq(cohort)].sort_values('signal_ns')
+                file=EXP/f'{coin}_{lane}m_{mode}_{cohort}.csv'
+                z[cols].to_csv(file,index=False)
+                files.append(dict(path=str(file.relative_to(ROOT)),rows=len(z)))
+            for side in [0,-1,1]:
+                z=g if not side else g[g.side.eq(side)]
+                bad=z[z.cohort.eq('stop_before1R')]
+                for measure in ['net_r','gross_r']:
+                    win=z[z.reason.ne(0)&z[measure].gt(3+EPS)]
+                    metrics={}
+                    for key in ['arrow_wick_share','arrow_close_rejection','arrow_sweep20',
+                        'prior20_efficiency','risk_bp']:
+                        metrics[key]=dict(winner_quartiles=win[key].quantile([.25,.5,.75]).tolist(),
+                            stop_quartiles=bad[key].quantile([.25,.5,.75]).tolist(),
+                            winner_mean=float(win[key].mean()),stop_mean=float(bad[key].mean()))
+                    result.append(dict(symbol=coin,mode=mode,lane=int(lane),side=side,measure=measure,
+                        winners=len(win),losers=len(bad),winner_net_r=float(win.net_r.sum()),
+                        loser_net_r=float(bad.net_r.sum()),late_published_winners=int(win.retrospective.sum()),
+                        late_published_losers=int(bad.retrospective.sum()),features=metrics))
+        if coin=='BTC':
+            for r in d[d.event_id.eq('5-216356')].to_dict('records'):
+                examples.append({k:r[k] for k in ['event_id','mode','entry_time_shanghai','publication_time_shanghai',
+                    'entry','stop','risk_bp','reason','gross_r','net_r','arrow_wick_share','arrow_close_rejection',
+                    'arrow_sweep20','ma15_aligned','ma60_aligned','ma240_aligned']})
+    dump(EXP/'supplement.json',dict(profiles=result,files=files,screenshot_at_frozen_cutoff=examples,
+        source='Cached feature and Nautilus ledgers; no new bars or replays',
+        export_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()))
+
+
+if __name__=='__main__':
+    exports() if '--exports' in sys.argv else main()
