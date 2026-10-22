@@ -215,6 +215,8 @@ def collect():
             for arm in m.ARMS:
                 s=rows[rows.arm.eq(arm)&rows.population.eq('signal')].set_index('parent_id')
                 before=prior[prior.arm.eq(arm)&prior.population.eq('signal')].set_index('parent_id')
+                # A new admission arm has no same-ID prior; compare by weekly opportunity elsewhere.
+                if before.empty:continue
                 shared=s.index.intersection(before.index)
                 p=s.loc[shared,['outcome','net_r']].join(before[['outcome','net_r']],rsuffix='_old')
                 npairs=len(shared)
