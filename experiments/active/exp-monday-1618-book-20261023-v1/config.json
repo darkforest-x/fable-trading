@@ -1,0 +1,15 @@
+{
+  "experiment_id": "exp-monday-1618-book-20261023-v1",
+  "question": "Notion task 区间1.618测试 method 13: does resting order-book depth in front of the move at the touch judge whether the 1618 holds?",
+  "touch_ledger": "experiments/active/exp-monday-1618-flow-20261023-v1",
+  "start": "2023-01-01T00:00:00Z",
+  "split": "2024-10-01T00:00:00Z",
+  "top_fraction": 0.3,
+  "seed": 20261023,
+  "workers": 32,
+  "primary_hypothesis": "Larger book_1pct (more resting notional opposing the move within 1 percent) -> higher validity; later AUC one-sided permutation p<0.01.",
+  "success_criterion": "Model on book_1pct and book_2pct trained before split: later AUC>=0.55, early-threshold top30 percent validity>=38.2 and mean R>0, week-stratified p<0.01.",
+  "limitations": "Binance bookDepth is a ~30s cumulative depth snapshot, not the full book or queue; spoofable; 15m labels; fee 0.",
+  "training_eligible": false,
+  "production_eligible": false
+}
