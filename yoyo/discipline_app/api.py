@@ -18,6 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from .book import Book
 from .market import PublicMarket
 from .candles import CandleHistory, CandleUnavailable
+from .monday_fib import MondayFibFeed, FibUnavailable
 from .policy import Rejected
 
 
@@ -87,9 +88,10 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
             if live:
                 book.stop()
 
-    app = FastAPI(title='SPIKE Discipline', version='0.8.14', lifespan=lifespan,
+    app = FastAPI(title='SPIKE Discipline', version='0.8.19', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.candle_history = CandleHistory()
+    app.state.monday_fib = MondayFibFeed()
     app.add_middleware(CORSMiddleware, allow_origins=list(origins), allow_methods=['GET', 'POST'],
                        allow_headers=['Authorization', 'Content-Type', 'X-Spike-Account'], allow_credentials=False)
     app.add_middleware(GZipMiddleware, minimum_size=1024, compresslevel=5)
@@ -135,7 +137,15 @@ def create_app(book: Book, token: str, market_enabled=True, origins=(), web_dire
 
     @app.get('/health')
     def health():
-        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.14')
+        return dict(service='spike-discipline', mode=mode, live_enabled=live and book.client.write_enabled, version='0.8.19')
+
+    @app.get('/v1/market/monday-fib')
+    def monday_fib():
+        # Public market-only projection; never forwards notification/account fields.
+        try:
+            return app.state.monday_fib.read()
+        except FibUnavailable:
+            raise HTTPException(503, '1.618 监控暂不可用，请稍后重试') from None
 
     @app.get('/v1/market/candles', dependencies=[Depends(auth)])
     def candles(symbol: str = Query(pattern=r'^[A-Z0-9]{1,40}-USDT-SWAP$'),

@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE · Apple Glass 交互动效与手势动力学规范画板 (Motion & Gesture Spec)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              accent: '#0071E3',
+              accentHover: '#0077ED',
+              accentLight: 'rgba(0, 113, 227, 0.08)',
+              accentGlow: 'rgba(0, 113, 227, 0.22)',
+            },
+            apple: {
+              label: '#1D1D1F',
+              secondary: '#6E6E73',
+              tertiary: '#86868B',
+              quaternary: '#A1A1A6',
+              border: 'rgba(255, 255, 255, 0.65)',
+              borderSubtle: 'rgba(0, 0, 0, 0.06)',
+              bgCanvas: '#F5F5F7',
+            },
+            trade: {
+              long: '#10B981',
+              longBg: 'rgba(16, 185, 129, 0.08)',
+              short: '#F43F5E',
+              shortBg: 'rgba(244, 63, 94, 0.08)',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Text', 'Plus Jakarta Sans', 'Segoe UI', 'sans-serif'],
+            mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --accent: #0071E3;
+      --glass-62: rgba(255, 255, 255, 0.62);
+      --glass-74: rgba(255, 255, 255, 0.74);
+      --glass-88: rgba(255, 255, 255, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.06), 0 2px 8px -2px rgba(0, 0, 0, 0.03);
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-cancel: cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    body {
+      background-color: #0B0E14;
+      color: #E2E8F0;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .glass-pill {
+      background: var(--glass-74);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+    }
+
+    .glass-card {
+      background: var(--glass-62);
+      backdrop-filter: blur(24px) saturate(160%);
+      -webkit-backdrop-filter: blur(24px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 30px -6px rgba(0, 0, 0, 0.05);
+    }
+
+    .phone-container {
+      width: 390px;
+      height: 844px;
+      border-radius: 54px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+      position: relative;
+      overflow: hidden;
+      background: #F5F5F7;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* Swipe track transition dynamics */
+    .swipe-track {
+      display: flex;
+      width: 500%;
+      height: 100%;
+      transition: transform 300ms var(--ease-spring);
+      will-change: transform;
+    }
+
+    .swipe-page {
+      width: 20%;
+      height: 100%;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      transition: opacity 300ms var(--ease-spring);
+    }
+
+    .interactive-press {
+      transition: transform 140ms var(--ease-spring), opacity 140ms ease;
+    }
+    .interactive-press:active {
+      transform: scale(0.97);
+    }
+
+    /* Range slider custom styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+      height: 24px;
+      width: 100%;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(0, 0, 0, 0.06);
+      border-radius: 999px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 22px;
+      width: 22px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0,0,0,0.04);
+      margin-top: -8px;
+      cursor: grab;
+      border: 2px solid var(--accent);
+      transition: transform 120ms ease;
+    }
+    input[type=range]:active::-webkit-slider-thumb {
+      transform: scale(1.15);
+      cursor: grabbing;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .swipe-track, .interactive-press, input[type=range]::-webkit-slider-thumb, .nav-pill-indicator {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="p-6 lg:p-10 min-h-screen">
+
+  <!-- Header & Executive Spec Board Meta -->
+  <header class="max-w-7xl mx-auto mb-10 pb-6 border-b border-slate-800 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-mono font-medium mb-3">
+        <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+        SPIKE DESIGN SYSTEM V2.6 · MOTION & KINETICS
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight text-white mb-2">Apple Glass 细节与滑动手势动力学规范</h1>
+      <p class="text-slate-400 text-sm max-w-2xl leading-relaxed">
+        确立全域统一交互色 <code class="text-blue-400 font-mono font-bold bg-blue-950/40 px-1 py-0.5 rounded">#0071E3</code>、交易语义专有色隔离（绿买/红卖/盈亏专属）、阻尼跟手滑动物理模型、手势冲突锁定机制以及首尾边缘橡皮筋回弹规范。
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-right">
+        <div class="text-[11px] text-slate-400 font-mono">GESTURE PHYSICS</div>
+        <div class="text-xs text-emerald-400 font-mono font-semibold">300ms Finish / 220ms Cancel</div>
+      </div>
+      <div class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-right">
+        <div class="text-[11px] text-slate-400 font-mono">INTERACTION ACCENT</div>
+        <div class="text-xs text-blue-400 font-mono font-semibold">#0071E3 Locked</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid: Left Interactive Stage (390px Real-Time Prototype), Right Spec Panels -->
+  <main class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+
+    <!-- LEFT: 390px Interactive iPhone Container (Spans 5 cols) -->
+    <section class="xl:col-span-5 flex flex-col items-center">
+      <div class="flex items-center justify-between w-[390px] mb-3 px-1 text-xs text-slate-400 font-mono">
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>390×844 LIVE ENGINE</span>
+        <span>DRAG HORIZONTAL TO SWIPE</span>
+      </div>
+
+      <!-- Real Phone Housing -->
+      <div class="phone-container relative" id="phoneWrapper">
+
+        <!-- Status Bar -->
+        <div class="absolute top-0 inset-x-0 h-12 z-40 pointer-events-none flex items-center justify-between px-7 text-xs font-semibold text-apple-label">
+          <span>09:41</span>
+          <div class="w-28 h-4 rounded-full bg-black/80 mx-auto"></div>
+          <div class="flex items-center gap-1.5 font-mono text-[10px]">
+            <span>5G</span>
+            <div class="w-4 h-2.5 border border-apple-label/80 rounded-sm p-[1px]"><div class="h-full w-2.5 bg-apple-label"></div></div>
+          </div>
+        </div>
+
+        <!-- Gesture Boundary Conflict Shield / Debug Visualizer overlay -->
+        <div id="gestureIndicator" class="absolute top-14 left-4 z-50 pointer-events-none px-2.5 py-1 rounded-md bg-blue-600/90 text-white font-mono text-[10px] shadow-sm opacity-0 transition-opacity duration-150 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span>
+          <span id="gestureText">SWIPE TRACKING: 0px</span>
+        </div>
+
+        <!-- Phone Screen Surface -->
+        <div class="phone-screen" id="touchSurface">
+
+          <!-- 5-Pages Horizontal Track -->
+          <div class="swipe-track" id="swipeTrack" style="transform: translateX(-40%);">
+
+            <!-- Page 0: 合约 (Order Ticket) -->
+            <div class="swipe-page bg-[#F5F5F7] pt-14 pb-28 px-4" data-index="0">
+              <!-- Top Bar -->
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2 glass-pill px-3 py-1.5 rounded-full">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span class="text-xs font-semibold text-apple-label">BTCUSDT 永续</span>
+                  <span class="text-[11px] text-apple-secondary">▾</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-1 rounded-full bg-brand-accentLight text-brand-accent text-[11px] font-mono font-semibold">10x 全仓</span>
+                  <button class="w-8 h-8 rounded-full glass-pill flex items-center justify-center text-apple-secondary interactive-press" aria-label="设置">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Price Card -->
+              <div class="glass-card rounded-2xl p-4 mb-3">
+                <div class="flex items-baseline justify-between mb-1">
+                  <div class="text-2xl font-bold font-mono tracking-tight text-apple-label">96,420.50 <span class="text-xs font-normal text-apple-secondary">USDT</span></div>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-trade-long font-mono text-xs font-semibold">+1.84%</span>
+                </div>
+                <div class="flex items-center justify-between text-xs text-apple-secondary border-t border-black/5 pt-2 mt-2">
+                  <span>今日剩余配额: <strong class="text-brand-accent font-mono font-semibold">2 / 3 次</strong></span>
+                  <span>单笔 1R: <strong class="text-apple-label font-mono">20.00 U</strong></span>
+                </div>
+              </div>
+
+              <!-- Direction Segment (Semantic Green/Red) -->
+              <div class="glass-card p-1 rounded-xl flex gap-1 mb-3">
+                <button class="flex-1 py-2 text-xs font-semibold rounded-lg bg-emerald-50 text-trade-long border border-emerald-200/80 shadow-sm interactive-press">买入开多 (Long)</button>
+                <button class="flex-1 py-2 text-xs font-semibold rounded-lg text-apple-secondary hover:text-apple-label interactive-press">卖出开空 (Short)</button>
+              </div>
+
+              <!-- Form Ticket -->
+              <div class="glass-card rounded-2xl p-4 space-y-3 mb-3">
+                <!-- Order Type (Brand Accent #0071E3) -->
+                <div class="flex items-center justify-between">
+                  <div class="flex bg-black/5 p-0.5 rounded-lg text-xs">
+                    <button class="px-3 py-1 rounded-md bg-white text-brand-accent font-semibold shadow-xs">市价委托</button>
+                    <button class="px-3 py-1 rounded-md text-apple-secondary">限价委托</button>
+                  </div>
+                  <span class="text-[11px] text-brand-accent font-medium flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    自动 1R 锚定
+                  </span>
+                </div>
+
+                <!-- Input Trigger Stop Loss (No horizontal gesture leak) -->
+                <div>
+                  <div class="flex justify-between text-[11px] text-apple-secondary mb-1">
+                    <span>初始止损触发价 *</span>
+                    <span class="text-brand-accent font-mono">服务端 1R 自动计算</span>
+                  </div>
+                  <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-black/10 focus-within:border-brand-accent focus-within:ring-2 focus-within:ring-brand-accentLight transition-all">
+                    <input type="text" value="95,450.00" class="w-full bg-transparent text-sm font-mono font-semibold text-apple-label outline-none stop-swipe-prop" />
+                    <span class="text-xs font-mono text-apple-secondary">USDT</span>
+                  </div>
+                </div>
+
+                <!-- Slider Isolated Drag Component -->
+                <div class="pt-1">
+                  <div class="flex justify-between text-xs mb-1">
+                    <span class="text-apple-secondary">保证金占用比例</span>
+                    <span class="font-mono font-semibold text-brand-accent" id="sliderVal">2.0% (推荐)</span>
+                  </div>
+                  <div class="px-1 py-1 stop-swipe-prop">
+                    <input type="range" min="0.5" max="10" step="0.5" value="2" id="demoSlider" class="stop-swipe-prop">
+                  </div>
+                  <div class="flex justify-between text-[10px] font-mono text-apple-tertiary px-1 mt-0.5">
+                    <span>0.5% (微仓)</span>
+                    <span>上限 10%</span>
+                  </div>
+                </div>
+
+                <!-- Submit Button (Brand Accent #0071E3) -->
+                <button class="w-full py-3 rounded-xl bg-brand-accent text-white text-xs font-semibold shadow-sm hover:bg-brand-accentHover interactive-press flex items-center justify-center gap-1.5 mt-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  买入开多 (受纪律保护)
+                </button>
+              </div>
+            </div>
+
+            <!-- Page 1: 纪律 (Rules & Safeguards) -->
+            <div class="swipe-page bg-[#F5F5F7] pt-14 pb-28 px-4" data-index="1">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-apple-label">交易纪律规则</h2>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-trade-long text-xs font-medium border border-emerald-200">常态生效中</span>
+              </div>
+
+              <!-- Active Rule Card -->
+              <div class="glass-card rounded-2xl p-4 mb-3 space-y-3">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-semibold text-brand-accent flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    当前生效纪律 (ACTIVE POLICY)
+                  </span>
+                  <span class="text-[10px] font-mono text-apple-secondary">v2.4.2</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div class="p-2.5 rounded-xl bg-white/70 border border-black/5 text-center">
+                    <div class="text-[10px] text-apple-secondary">单笔最大风险</div>
+                    <div class="text-sm font-bold font-mono text-brand-accent mt-0.5">2.0%</div>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-white/70 border border-black/5 text-center">
+                    <div class="text-[10px] text-apple-secondary">日内频次上限</div>
+                    <div class="text-sm font-bold font-mono text-apple-label mt-0.5">3 次</div>
+                  </div>
+                  <div class="p-2.5 rounded-xl bg-white/70 border border-black/5 text-center">
+                    <div class="text-[10px] text-apple-secondary">并发标的上限</div>
+                    <div class="text-sm font-bold font-mono text-apple-label mt-0.5">≤ 3 标</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3-Stage Pipeline -->
+              <div class="glass-card rounded-2xl p-4 space-y-2.5 mb-3">
+                <div class="text-xs font-semibold text-apple-label mb-1">离线自动化保护管道 (Pipeline)</div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-white/60 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-brand-accentLight text-brand-accent font-mono text-[10px] font-bold flex items-center justify-center">1</span>
+                    <span>1R 自动保本锁定</span>
+                  </div>
+                  <span class="font-mono text-brand-accent font-semibold">+1.0R</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-white/60 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-brand-accentLight text-brand-accent font-mono text-[10px] font-bold flex items-center justify-center">2</span>
+                    <span>3R 主力分批止盈 60%</span>
+                  </div>
+                  <span class="font-mono text-brand-accent font-semibold">+3.0R</span>
+                </div>
+                <div class="flex items-center justify-between p-2 rounded-xl bg-white/60 text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-full bg-brand-accentLight text-brand-accent font-mono text-[10px] font-bold flex items-center justify-center">3</span>
+                    <span>5R 剩余仓位清仓离场</span>
+                  </div>
+                  <span class="font-mono text-brand-accent font-semibold">+5.0R</span>
+                </div>
+              </div>
+
+              <!-- Pending Policy (Amber Neutral, Clean SF) -->
+              <div class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 leading-relaxed">
+                <div class="font-semibold text-amber-800 mb-0.5 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                  待生效调整 · 清仓后自动生效
+                </div>
+                <p class="text-[11px] text-amber-900/80">当前持仓期间禁止实时动态放宽风控，确保纪律不可篡改。</p>
+              </div>
+            </div>
+
+            <!-- Page 2: 1.618 (The Wallpaper Canvas Chart - CENTER DEFAULT) -->
+            <div class="swipe-page bg-white relative" data-index="2">
+
+              <!-- SVG Wallpaper Chart Mockup (Inset: 0, Full Bleed) -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 390 844" preserveAspectRatio="none">
+                <!-- Grid background lines -->
+                <defs>
+                  <pattern id="gridPattern" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(0,0,0,0.03)" stroke-width="1"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#gridPattern)" />
+
+                <!-- Monday baseline shaded blue range -->
+                <rect x="0" y="320" width="390" height="210" fill="rgba(56, 189, 248, 0.08)" />
+
+                <!-- Upper 1.618 Dashed Line (#10B981) -->
+                <line x1="0" y1="210" x2="390" y2="210" stroke="#10B981" stroke-width="1.5" stroke-dasharray="4 4" />
+                <text x="340" y="204" font-family="JetBrains Mono" font-size="11" fill="#10B981" font-weight="640">97025</text>
+
+                <!-- Monday High Solid Blue Line -->
+                <line x1="0" y1="320" x2="390" y2="320" stroke="#0071E3" stroke-width="1.5" />
+                <text x="340" y="314" font-family="JetBrains Mono" font-size="11" fill="#0071E3" font-weight="640">93950</text>
+
+                <!-- Monday EQ 0.5 Fine Line -->
+                <line x1="0" y1="425" x2="390" y2="425" stroke="#94A3B8" stroke-width="1" stroke-dasharray="2 3" opacity="0.6"/>
+                <text x="340" y="420" font-family="JetBrains Mono" font-size="10" fill="#94A3B8">91463</text>
+
+                <!-- Monday Low Solid Blue Line -->
+                <line x1="0" y1="530" x2="390" y2="530" stroke="#0071E3" stroke-width="1.5" />
+                <text x="340" y="524" font-family="JetBrains Mono" font-size="11" fill="#0071E3" font-weight="640">88975</text>
+
+                <!-- Lower 1.618 Dashed Line (#F43F5E) -->
+                <line x1="0" y1="640" x2="390" y2="640" stroke="#F43F5E" stroke-width="1.5" stroke-dasharray="4 4" />
+                <text x="340" y="634" font-family="JetBrains Mono" font-size="11" fill="#F43F5E" font-weight="640">85901</text>
+
+                <!-- Candlestick cluster rendering -->
+                <g stroke-linecap="round">
+                  <!-- Green bars -->
+                  <line x1="70" y1="600" x2="70" y2="530" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="65" y="550" width="10" height="40" fill="#10B981" rx="1"/>
+                  <line x1="95" y1="560" x2="95" y2="480" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="90" y="500" width="10" height="45" fill="#10B981" rx="1"/>
+                  <line x1="120" y1="510" x2="120" y2="450" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="115" y="460" width="10" height="35" fill="#10B981" rx="1"/>
+                  <line x1="150" y1="470" x2="150" y2="410" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="145" y="420" width="10" height="38" fill="#10B981" rx="1"/>
+
+                  <!-- Red bars pullback -->
+                  <line x1="180" y1="400" x2="180" y2="460" stroke="#F43F5E" stroke-width="1.5"/>
+                  <rect x="175" y="415" width="10" height="30" fill="#F43F5E" rx="1"/>
+                  <line x1="210" y1="430" x2="210" y2="480" stroke="#F43F5E" stroke-width="1.5"/>
+                  <rect x="205" y="440" width="10" height="25" fill="#F43F5E" rx="1"/>
+
+                  <!-- Strong expansion to 1.618 -->
+                  <line x1="240" y1="440" x2="240" y2="350" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="235" y="360" width="10" height="60" fill="#10B981" rx="1"/>
+                  <line x1="265" y1="360" x2="265" y2="280" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="260" y="290" width="10" height="55" fill="#10B981" rx="1"/>
+                  <line x1="290" y1="290" x2="290" y2="200" stroke="#10B981" stroke-width="1.5"/>
+                  <rect x="285" y="210" width="10" height="65" fill="#10B981" rx="1"/>
+                  <!-- Pinbar rejection at top -->
+                  <line x1="315" y1="195" x2="315" y2="270" stroke="#F43F5E" stroke-width="1.5"/>
+                  <rect x="310" y="225" width="10" height="35" fill="#F43F5E" rx="1"/>
+                </g>
+
+                <!-- Volume Bars Bottom -->
+                <g fill="#CBD5E1" opacity="0.4">
+                  <rect x="65" y="720" width="10" height="15"/>
+                  <rect x="90" y="710" width="10" height="25"/>
+                  <rect x="115" y="700" width="10" height="35"/>
+                  <rect x="145" y="690" width="10" height="45"/>
+                  <rect x="175" y="715" width="10" height="20"/>
+                  <rect x="205" y="720" width="10" height="15"/>
+                  <rect x="235" y="680" width="10" height="55"/>
+                  <rect x="260" y="660" width="10" height="75"/>
+                  <rect x="285" y="640" width="10" height="95"/>
+                  <rect x="310" y="670" width="10" height="65"/>
+                </g>
+              </svg>
+
+              <!-- Floating Top Island (Apple Glass Capsule) -->
+              <div class="absolute top-14 inset-x-4 z-20 flex flex-col gap-2 pointer-events-none">
+                <div class="flex items-center justify-between">
+                  <div class="glass-pill px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-auto shadow-sm">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                    <span class="text-xs font-semibold text-apple-label">BTCUSDT ▾</span>
+                    <span class="text-[10px] text-rose-500 font-mono font-medium">触顶 · 8m前</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 pointer-events-auto">
+                    <button class="w-8 h-8 rounded-full glass-pill flex items-center justify-center text-apple-label interactive-press" title="刷新">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
+                    <button class="w-8 h-8 rounded-full glass-pill flex items-center justify-center text-apple-label interactive-press" title="图表设置">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Timeframe Segment (Brand Accent #0071E3) -->
+                <div class="glass-pill px-2 py-1 rounded-full flex items-center justify-between pointer-events-auto self-start text-[11px] font-mono shadow-xs">
+                  <div class="flex gap-1">
+                    <button class="px-2 py-0.5 rounded-full text-apple-secondary">5m</button>
+                    <button class="px-2.5 py-0.5 rounded-full bg-brand-accent text-white font-semibold shadow-xs">15m</button>
+                    <button class="px-2 py-0.5 rounded-full text-apple-secondary">1H</button>
+                    <button class="px-2 py-0.5 rounded-full text-apple-secondary">4H</button>
+                  </div>
+                  <div class="pl-2 border-l border-black/10 flex items-center gap-1.5 text-[10px] text-apple-secondary font-sans">
+                    <span>高 97,025</span>
+                    <span>低 94,860</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quick 1R Order Pill (Floating above bottom navigation) -->
+              <div class="absolute bottom-24 inset-x-0 flex justify-center z-20 pointer-events-none">
+                <button class="glass-pill px-5 py-2.5 rounded-full text-xs font-semibold text-apple-label flex items-center gap-2 pointer-events-auto interactive-press shadow-md border border-white/90">
+                  <svg class="w-3.5 h-3.5 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                  <span>快捷开单 · 1R</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Page 3: 持仓 (Positions & Proportional Close) -->
+            <div class="swipe-page bg-[#F5F5F7] pt-14 pb-28 px-4" data-index="3">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-apple-label">当前持仓</h2>
+                <div class="flex bg-black/5 p-0.5 rounded-lg text-xs font-medium">
+                  <button class="px-2.5 py-1 rounded-md bg-white text-brand-accent shadow-xs">持仓 (1)</button>
+                  <button class="px-2.5 py-1 rounded-md text-apple-secondary">委托 (1)</button>
+                  <button class="px-2.5 py-1 rounded-md text-apple-secondary">已平</button>
+                </div>
+              </div>
+
+              <!-- Active Position Card (Apple Glass) -->
+              <div class="glass-card rounded-2xl p-4 mb-3 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-sm font-bold text-apple-label">BTCUSDT 永续</span>
+                    <span class="px-1.5 py-0.5 rounded bg-emerald-50 text-trade-long text-[10px] font-mono font-semibold">多 10x</span>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-sm font-bold font-mono text-trade-long">+17.50 U</div>
+                    <div class="text-[10px] font-mono text-trade-long/80">+0.88 R</div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-xs pt-1 border-t border-black/5">
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">持仓名义</div>
+                    <div class="font-mono font-medium text-apple-label">200.00 U</div>
+                  </div>
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">开仓均价</div>
+                    <div class="font-mono font-medium text-apple-label">95,450.0</div>
+                  </div>
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">保本动态止损</div>
+                    <div class="font-mono font-medium text-brand-accent">95,480.0</div>
+                  </div>
+                </div>
+
+                <!-- Action Button Triggering Proportional Close Drawer -->
+                <div class="flex items-center justify-between pt-1">
+                  <span class="text-[11px] text-brand-accent flex items-center gap-1 font-medium">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    已锁定保本 · 距 3R 差 1.2R
+                  </span>
+                  <button class="px-3 py-1.5 rounded-lg bg-apple-label text-white text-xs font-semibold interactive-press">部分平仓</button>
+                </div>
+              </div>
+
+              <!-- Pending Limit Order -->
+              <div class="glass-card rounded-2xl p-3.5 text-xs">
+                <div class="flex items-center justify-between mb-1.5">
+                  <div class="flex items-center gap-1.5 font-semibold text-apple-label">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                    <span>SOLUSDT 永续</span>
+                    <span class="text-apple-secondary text-[11px] font-normal">限价做空</span>
+                  </div>
+                  <span class="text-amber-600 font-mono text-[10px] font-medium">排队等待成交</span>
+                </div>
+                <div class="flex items-center justify-between text-apple-secondary font-mono text-[11px]">
+                  <span>委托价: 185.50</span>
+                  <span>拟开: 100.00 U</span>
+                  <button class="text-rose-500 font-sans hover:underline">撤单</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Page 4: 统计 (Account & Discipline Audit) -->
+            <div class="swipe-page bg-[#F5F5F7] pt-14 pb-28 px-4" data-index="4">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-bold text-apple-label">账户与纪律统计</h2>
+                <div class="flex bg-black/5 p-0.5 rounded-lg text-xs">
+                  <button class="px-2 py-0.5 rounded-md text-apple-secondary">7天</button>
+                  <button class="px-2 py-0.5 rounded-md bg-white text-brand-accent font-semibold shadow-xs">30天</button>
+                  <button class="px-2 py-0.5 rounded-md text-apple-secondary">全部</button>
+                </div>
+              </div>
+
+              <!-- Performance Summary Card -->
+              <div class="glass-card rounded-2xl p-4 mb-3 space-y-3">
+                <div class="text-xs text-apple-secondary">OKX USDT 当前净值 (固定基准 1,000 U)</div>
+                <div class="flex items-baseline gap-2">
+                  <div class="text-2xl font-bold font-mono text-apple-label">1,017.50</div>
+                  <div class="text-xs font-mono font-semibold text-trade-long">+17.50 U (+1.75%)</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 pt-2 border-t border-black/5 text-center">
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">已平仓</div>
+                    <div class="text-xs font-bold font-mono text-apple-label mt-0.5">8 笔</div>
+                  </div>
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">胜率</div>
+                    <div class="text-xs font-bold font-mono text-trade-long mt-0.5">62.5%</div>
+                  </div>
+                  <div>
+                    <div class="text-[10px] text-apple-secondary">盈亏比</div>
+                    <div class="text-xs font-bold font-mono text-apple-label mt-0.5">2.8 : 1</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 rounded-2xl bg-white/70 border border-black/5 text-[11px] text-apple-secondary leading-relaxed">
+                <strong class="text-apple-label font-medium">统计口径规范</strong>：仅计入由本 App 管理与触发的平仓样本，绝不编造未结成交与交易所全局历史收益。
+              </div>
+            </div>
+
+          </div><!-- /swipe-track -->
+
+          <!-- PERSISTENT FLOATING BOTTOM NAV (Exact 5 items, Apple Glass, #0071E3 active) -->
+          <div class="absolute bottom-5 inset-x-4 z-40">
+            <nav class="glass-pill h-16 rounded-full px-2 flex items-center justify-around shadow-lg border border-white/90">
+
+              <!-- Tab 0: 合约 -->
+              <button class="nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press text-apple-secondary transition-colors" data-tab="0">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                <span class="text-[10px] font-medium tracking-tight">合约</span>
+              </button>
+
+              <!-- Tab 1: 纪律 -->
+              <button class="nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press text-apple-secondary transition-colors" data-tab="1">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                <span class="text-[10px] font-medium tracking-tight">纪律</span>
+              </button>
+
+              <!-- Tab 2: 1.618 (CENTER DEFAULT ACTIVE, Pill with Brand Accent) -->
+              <button class="nav-tab active-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press bg-brand-accent text-white shadow-sm transition-all" data-tab="2">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                <span class="text-[10px] font-bold tracking-tight">1.618</span>
+              </button>
+
+              <!-- Tab 3: 持仓 -->
+              <button class="nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press text-apple-secondary transition-colors" data-tab="3">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+                <span class="text-[10px] font-medium tracking-tight">持仓</span>
+              </button>
+
+              <!-- Tab 4: 统计 -->
+              <button class="nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press text-apple-secondary transition-colors" data-tab="4">
+                <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-[10px] font-medium tracking-tight">统计</span>
+              </button>
+            </nav>
+          </div>
+
+        </div><!-- /phone-screen -->
+      </div><!-- /phone-container -->
+
+      <!-- Interactive Switch Controls Under Phone for Testing -->
+      <div class="mt-4 flex flex-wrap items-center justify-center gap-2">
+        <span class="text-xs text-slate-400 font-mono">快速手势跳页测试:</span>
+        <button onclick="setPageIndex(0)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 font-mono">0:合约</button>
+        <button onclick="setPageIndex(1)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 font-mono">1:纪律</button>
+        <button onclick="setPageIndex(2)" class="px-2.5 py-1 text-xs rounded-lg bg-blue-600 text-white font-mono font-semibold">2:1.618</button>
+        <button onclick="setPageIndex(3)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 font-mono">3:持仓</button>
+        <button onclick="setPageIndex(4)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-800 text-slate-200 hover:bg-slate-700 font-mono">4:统计</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: Detailed Specification & Implementation Directives (Spans 7 cols) -->
+    <section class="xl:col-span-7 space-y-6">
+
+      <!-- Spec Card 1: Color System & Strict Semantic Separation -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+            <h2 class="text-base font-bold text-white">1. 全域色彩基准与交互语义隔离规范</h2>
+          </div>
+          <span class="text-xs font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-400">STRICT REFACTOR</span>
+        </div>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          彻底清除在按钮、滑块、分段切换器上散落的杂乱玉绿色（Jade），确立单一交互基准色 <code class="text-blue-400 font-mono font-bold">#0071E3</code>。绿色与红色严格退守为交易专业多空语义：
+        </p>
+
+        <!-- Color Palette Token Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+          <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#0071E3] flex-shrink-0 shadow-sm border border-white/20"></div>
+              <div>
+                <div class="text-xs font-bold text-white">Apple Blue (#0071E3)</div>
+                <div class="text-[11px] text-slate-400">底栏激活、分段选项卡、输入框聚焦、1R自动锚定徽标、开关按钮</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono text-blue-400">交互独占</span>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#10B981] flex-shrink-0 shadow-sm border border-white/20"></div>
+              <div>
+                <div class="text-xs font-bold text-white">Emerald Green (#10B981)</div>
+                <div class="text-[11px] text-slate-400">仅限：买入开多、正浮盈 (+PnL)、常态运行中指示灯、上1.618标尺</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono text-emerald-400">多头/盈利</span>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#F43F5E] flex-shrink-0 shadow-sm border border-white/20"></div>
+              <div>
+                <div class="text-xs font-bold text-white">Rose Red (#F43F5E)</div>
+                <div class="text-[11px] text-slate-400">仅限：卖出开空、负亏损 (-PnL)、下1.618标尺、阻断警报</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono text-rose-400">空头/亏损</span>
+          </div>
+
+          <div class="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#F59E0B] flex-shrink-0 shadow-sm border border-white/20"></div>
+              <div>
+                <div class="text-xs font-bold text-white">Neutral Amber (#F59E0B)</div>
+                <div class="text-[11px] text-slate-400">待生效纪律规则、挂单排队中等中性等待态，无侵略性</div>
+              </div>
+            </div>
+            <span class="text-[10px] font-mono text-amber-400">中性警示</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spec Card 2: Gesture Physics & Directional Lock Engine -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+            <h2 class="text-base font-bold text-white">2. 手势动力学与方向锁机制 (Touch Dynamics)</h2>
+          </div>
+          <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">PHYSICS ENGINE</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+          <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-white flex items-center gap-1.5">
+              <span class="text-blue-400">①</span> 实时跟手与阻尼
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed">
+              在手指松开前，视口严格随手指位移 1:1 变换；首尾边缘引入 <code class="text-slate-200 font-mono">dx * 0.35</code> 橡皮筋阻尼，绝无生硬截断。
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-white flex items-center gap-1.5">
+              <span class="text-blue-400">②</span> 角度判断与方向锁
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed">
+              触摸启动后，若 <code class="text-slate-200 font-mono">|dy| > |dx|</code> 则立即判定为垂直滚动，永久锁定本轮水平手势，绝不误触翻页。
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-2xl bg-slate-950 border border-slate-800 space-y-1.5">
+            <div class="font-bold text-white flex items-center gap-1.5">
+              <span class="text-blue-400">③</span> 完成与撤销时间常数
+            </div>
+            <p class="text-slate-400 text-[11px] leading-relaxed">
+              完成翻页采用 <code class="text-blue-400 font-mono">300ms cubic-bezier(0.16, 1, 0.3, 1)</code>；未越过阈值取消采用 <code class="text-slate-300 font-mono">220ms ease-out</code> 回弹。
+            </p>
+          </div>
+        </div>
+
+        <!-- Gesture Boundary Conflict Matrix -->
+        <div class="p-4 rounded-2xl bg-slate-950/60 border border-slate-800">
+          <div class="text-xs font-bold text-white mb-2">手势冲突绝对豁免清单 (Conflict Shield Matrix)</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono">
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">✓ K线十字线拖动</div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">✓ 保证金占用滑块</div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">✓ 价格数字输入框</div>
+            <div class="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300">✓ 部分平仓底抽屉</div>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-2">
+            以上交互控件均包含 <code class="text-slate-200 font-mono">.stop-swipe-prop</code> 拦截器，冒泡阶段阻止父容器触发翻页，杜绝操作滑块或输入价格时界面横向漂移。
+          </div>
+        </div>
+      </div>
+
+      <!-- Spec Card 3: Apple Glass Material & Navigation Uniformity -->
+      <div class="p-6 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+            <h2 class="text-base font-bold text-white">3. Apple Glass 悬浮底栏绝对统一与零闪烁规范</h2>
+          </div>
+          <span class="text-xs font-mono px-2 py-0.5 rounded bg-cyan-400/10 text-cyan-400">ZERO FLICKER</span>
+        </div>
+
+        <div class="space-y-2 text-xs text-slate-300 leading-relaxed">
+          <p>
+            ● <strong>底栏几何与材质在 5 个页面间 100% 恒定</strong>：背景采用 <code class="text-slate-200 font-mono">rgba(255, 255, 255, 0.74)</code> + <code class="text-slate-200 font-mono">blur(28px) saturate(180%)</code>，外沿 1px 细白高光描边（`rgba(255, 255, 255, 0.85)`），卡片倒角 9999px 纯胶囊。
+          </p>
+          <p>
+            ● <strong>正中央 1.618 初始激活且永不闪烁</strong>：默认加载直达第 3 页 (Index 2)。切换标签时，激活态指示块仅做几何尺寸与位置的平滑位移（`scale(1) + 260ms`），杜绝卸载/重新挂载引起的白块闪烁。
+          </p>
+          <p>
+            ● <strong>无感知轻量透明度与微平移</strong>：换页过程中，非当前视口页面伴随 <code class="text-slate-200 font-mono">opacity: 0.88 -> 1.0</code> 与轻微微位移，严禁使用全屏刺眼白屏翻转或大距离生硬平移。
+          </p>
+          <p>
+            ● <strong>后台订阅解耦</strong>：滑动手势阶段仅驱动 DOM 视口偏移，只有在滑动释放且成功判定在新页面停留后，才触发该页面非高频数据刷新，绝不在滑动经过中连带触发邻近页面的全量 WebSocket 深度订阅。
+          </p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-800/40 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-blue-300">
+            <svg class="w-4 h-4 text-blue-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span>完整适配系统级 <code>prefers-reduced-motion</code> 降级偏好，开启时移除阻尼过渡直接跳态。</span>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-mono text-[10px]">WCAG AAA</span>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Interactive JavaScript Engine Implementing Follow-Finger, Direction-Lock, Rubber-Banding, and Conflict Avoidance -->
+  <script>
+    (function initMotionEngine() {
+      const track = document.getElementById('swipeTrack');
+      const touchSurface = document.getElementById('touchSurface');
+      const indicator = document.getElementById('gestureIndicator');
+      const indicatorText = document.getElementById('gestureText');
+      const navTabs = document.querySelectorAll('.nav-tab');
+      const slider = document.getElementById('demoSlider');
+      const sliderVal = document.getElementById('sliderVal');
+
+      let currentPage = 2; // Default to 1.618 (Index 2)
+      const totalPages = 5;
+      const pageWidth = 390; // Standard reference viewport width
+
+      let startX = 0;
+      let startY = 0;
+      let currentX = 0;
+      let currentY = 0;
+      let isSwiping = false;
+      let isVerticalScroll = false;
+      let isLockedHorizontal = false;
+      let isGestureShielded = false;
+
+      // Update Slider Demo text
+      if (slider && sliderVal) {
+        slider.addEventListener('input', (e) => {
+          sliderVal.textContent = parseFloat(e.target.value).toFixed(1) + '%';
+        });
+      }
+
+      // Exclude conflict controls from triggering swipe
+      document.querySelectorAll('.stop-swipe-prop').forEach(el => {
+        el.addEventListener('pointerdown', (e) => {
+          isGestureShielded = true;
+          e.stopPropagation();
+        });
+      });
+
+      // Update Navigation Tab Active Styles
+      window.updateNavStyles = function(index) {
+        navTabs.forEach((tab, idx) => {
+          if (idx === index) {
+            tab.className = 'nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press bg-brand-accent text-white shadow-sm transition-all duration-200';
+            const icon = tab.querySelector('svg');
+            const label = tab.querySelector('span');
+            if (label) label.className = 'text-[10px] font-bold tracking-tight';
+          } else {
+            tab.className = 'nav-tab flex flex-col items-center justify-center w-14 h-12 rounded-full interactive-press text-apple-secondary hover:text-apple-label transition-colors duration-200';
+            const label = tab.querySelector('span');
+            if (label) label.className = 'text-[10px] font-medium tracking-tight';
+          }
+        });
+      };
+
+      // Set Page with 300ms Spring Easing
+      window.setPageIndex = function(index) {
+        if (index < 0) index = 0;
+        if (index >= totalPages) index = totalPages - 1;
+        currentPage = index;
+
+        track.style.transition = 'transform 300ms cubic-bezier(0.16, 1, 0.3, 1)';
+        track.style.transform = `translateX(-${currentPage * 20}%)`;
+
+        // Subtle opacity transition
+        document.querySelectorAll('.swipe-page').forEach((pg, i) => {
+          pg.style.opacity = (i === currentPage) ? '1.0' : '0.9';
+        });
+
+        updateNavStyles(currentPage);
+      };
+
+      // Click on Tab jumps to page
+      navTabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+          const tabIdx = parseInt(tab.getAttribute('data-tab'), 10);
+          setPageIndex(tabIdx);
+        });
+      });
+
+      // Touch / Pointer Gesture Handling
+      touchSurface.addEventListener('pointerdown', (e) => {
+        if (isGestureShielded) return;
+        startX = e.clientX;
+        startY = e.clientY;
+        isSwiping = true;
+        isVerticalScroll = false;
+        isLockedHorizontal = false;
+
+        track.style.transition = 'none'; // Real-time follow finger
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isSwiping || isGestureShielded) return;
+
+        const diffX = e.clientX - startX;
+        const diffY = e.clientY - startY;
+
+        // Direction Lock Check
+        if (!isLockedHorizontal && !isVerticalScroll) {
+          if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+            isVerticalScroll = true; // Handled as vertical scroll, disable swipe
+            isSwiping = false;
+            return;
+          } else if (Math.abs(diffX) > 8) {
+            isLockedHorizontal = true; // Lock horizontal swipe
+            if (indicator) {
+              indicator.style.opacity = '1';
+              indicatorText.textContent = `SWIPING: ${diffX > 0 ? '+' : ''}${Math.round(diffX)}px`;
+            }
+          }
+        }
+
+        if (isLockedHorizontal) {
+          // Check edge rubber band resistance (first and last pages)
+          let effectiveDiff = diffX;
+          if ((currentPage === 0 && diffX > 0) || (currentPage === totalPages - 1 && diffX < 0)) {
+            effectiveDiff = diffX * 0.32; // 0.32 edge resistance
+          }
+
+          const basePercent = -(currentPage * 20);
+          const offsetPercent = (effectiveDiff / pageWidth) * 20;
+          track.style.transform = `translateX(${basePercent + offsetPercent}%)`;
+          if (indicator) {
+            indicatorText.textContent = `TRACK: ${Math.round(effectiveDiff)}px (Index ${currentPage})`;
+          }
+        }
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        isGestureShielded = false;
+        if (!isSwiping) return;
+        isSwiping = false;
+
+        if (indicator) {
+          indicator.style.opacity = '0';
+        }
+
+        if (isLockedHorizontal) {
+          const diffX = e.clientX - startX;
+          const threshold = 70; // 70px drag threshold
+
+          if (diffX < -threshold && currentPage < totalPages - 1) {
+            // Next Page
+            setPageIndex(currentPage + 1);
+          } else if (diffX > threshold && currentPage > 0) {
+            // Prev Page
+            setPageIndex(currentPage - 1);
+          } else {
+            // Cancelled gesture state: 220ms ease-out spring back
+            track.style.transition = 'transform 220ms cubic-bezier(0.25, 1, 0.5, 1)';
+            track.style.transform = `translateX(-${currentPage * 20}%)`;
+          }
+        }
+
+        isLockedHorizontal = false;
+        isVerticalScroll = false;
+      });
+
+      // Initialize tab styles
+      updateNavStyles(2);
+    })();
+  </script>
+</body>
+</html>

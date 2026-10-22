@@ -1,3 +1,5 @@
+import {fibLevels,type FibRange} from './fibData';
+import {FibRangePrimitive} from './FibRangePrimitive';
 /** Stitch 66260b3f29db4baf9dd0f2835a13e25c. One feed and a lazy Canvas chart.
  * Lightweight Charts v5.2: incremental series.update, bounded history, ResizeObserver.
  */
@@ -22,7 +24,7 @@ const timeLabel = (time:Time,full=false) => typeof time==='number' ? (full?fullF
 const dateLabel = (time:Time) => typeof time==='number' ? dateFormat.format(time*1000) : String(time);
 type ChartView = { key:string; range:LogicalRange|null };
 
-const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,stop,view,onOlder,fullscreen}:{state:CandleState;symbol:string;period:CandlePeriod;tick?:string;entry?:string;stop?:string;view:React.RefObject<ChartView>;onOlder:()=>void;fullscreen:boolean}) {
+const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,stop,view,onOlder,fullscreen,range}:{state:CandleState;symbol:string;period:CandlePeriod;tick?:string;entry?:string;stop?:string;view:React.RefObject<ChartView>;onOlder:()=>void;fullscreen:boolean;range?:FibRange}) {
  const host=useRef<HTMLDivElement>(null),legend=useRef<HTMLDivElement>(null);
  const graph=useRef<{chart:IChartApi;candles:ISeriesApi<'Candlestick'>;volume:ISeriesApi<'Histogram'>}|null>(null);
  const previous=useRef<{bars:Candle[];reset:number}>({bars:[],reset:-1});
@@ -34,12 +36,12 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   if(!host.current)return;
   const chart=createChart(host.current,{
-   layout:{background:{type:ColorType.Solid,color:'#ffffff'},textColor:'#75847d',fontSize:10,attributionLogo:true},
+   layout:{background:{type:ColorType.Solid,color:range?'#fbfcfa':'#ffffff'},textColor:'#75847d',fontSize:10,attributionLogo:true},
    grid:{vertLines:{visible:false},horzLines:{color:'#f0f3f0'}},
    rightPriceScale:{borderVisible:false,minimumWidth:58,scaleMargins:{top:.1,bottom:.27}},
-   timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,barSpacing:6,rightOffset:4,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time,type:number)=>type<3?dateLabel(time):timeLabel(time)},
+   timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,minimumHeight:range?34:26,barSpacing:6,rightOffset:4,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time,type:number)=>type<3?dateLabel(time):timeLabel(time)},
    localization:{locale:'zh-CN',timeFormatter:(time:Time)=>timeLabel(time,true)},
-   handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:false},
+   handleScroll:{mouseWheel:true,pressedMouseMove:true,horzTouchDrag:true,vertTouchDrag:!!range},
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
   });
@@ -74,12 +76,18 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   const series=graph.current?.candles;if(!series)return;
   const lines=[{price:Number(entry),title:'开仓',color:'#5b8572'},{price:Number(stop),title:'止损',color:'#ff3b69'}].filter(line=>Number.isFinite(line.price)&&line.price>0).map(line=>series.createPriceLine({...line,lineWidth:1,lineStyle:LineStyle.Dashed,axisLabelVisible:true}));
-  return()=>{for(const line of lines)series.removePriceLine(line)};
+  return()=>{if(graph.current?.candles===series)for(const line of lines)series.removePriceLine(line)};
  },[entry,stop,symbol,period,showBar]);
+ useEffect(()=>{
+  const series=graph.current?.candles;if(!series||!range)return;
+  const primitive=new FibRangePrimitive(range);series.attachPrimitive(primitive);
+  const lines=fibLevels(range).map(level=>series.createPriceLine({...level,lineWidth:1,title:'',lineStyle:level.title==='周一高'||level.title==='周一低'?LineStyle.Solid:LineStyle.Dashed,axisLabelVisible:false}));
+  return()=>{if(graph.current?.candles!==series)return;series.detachPrimitive(primitive);for(const line of lines)series.removePriceLine(line)};
+ },[range,symbol,period,showBar]);
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;
 });
 
-export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse}:CandleProps&{period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void}) {
+export default function CandlePanel({symbol,connection,tick,entry,stop,period,onPeriod,onCollapse,embedded=false,range}:CandleProps&{embedded?:boolean;range?:FibRange;period:CandlePeriod;onPeriod:(period:CandlePeriod)=>void;onCollapse:()=>void}) {
  const identity=symbol+period;
  const [snapshot,setSnapshot]=useState({identity,state:empty}),[fullscreen,setFullscreen]=useState(false);
  // Never paint the previous symbol/period while its replacement effect is starting.
@@ -112,9 +120,9 @@ export default function CandlePanel({symbol,connection,tick,entry,stop,period,on
  const loadOlder=useCallback(()=>{void feed.current?.loadOlder()},[]);
  const content=<div ref={panel} className={`candle-panel ${fullscreen?'candle-fullscreen':''}`} data-no-swipe role={fullscreen?'dialog':undefined} aria-modal={fullscreen||undefined} aria-label={fullscreen?'全屏K线':undefined} tabIndex={fullscreen?-1:undefined}>
   <header className="candle-heading"><b>{fullscreen?symbol.replace('-USDT-SWAP','/USDT'):'K线'}</b><span className={`candle-status ${state.status==='live'?'live':''}`} role="status"><i/>{statusText[state.status]}</span>{fullscreen?<button aria-label="退出全屏" onClick={()=>{setFullscreen(false);feedback('light')}}><Icon name="close" size={20}/></button>:<><button ref={fullButton} aria-label="全屏查看K线" onClick={()=>{setFullscreen(true);feedback('light')}}><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button><button aria-label="收起K线" onClick={onCollapse}><Icon name="chevron" size={16}/></button></>}</header>
-  <div className="candle-periods" aria-label="K线周期">{(Object.keys(PERIODS) as CandlePeriod[]).map(value=><button key={value} aria-pressed={value===period} onClick={()=>{if(value!==period)onPeriod(value)}}>{PERIODS[value]}</button>)}</div>
-  <div className="candle-plot"><CanvasChart key={symbol+period} state={state} symbol={symbol} period={period} tick={tick} entry={entry} stop={stop} view={view} onOlder={loadOlder} fullscreen={fullscreen}/>{!state.historyReady&&<div className="candle-empty"><span>{state.error?'历史暂不可用':'正在补齐历史K线…'}</span>{!!state.error&&<button onClick={()=>void feed.current?.refresh()}>重试</button>}</div>}</div>
-  <footer className="candle-footer"><span>OKX · 北京时间</span><button disabled={state.loadingOlder||!state.historyReady||!state.canLoadOlder} onClick={loadOlder}>{state.loadingOlder?'加载历史…':state.canLoadOlder?'更早K线':'历史已加载'}</button></footer>
+  <div className="candle-periods" aria-label="K线周期">{(embedded?['5m','15m','1H','4H'] as CandlePeriod[]:Object.keys(PERIODS) as CandlePeriod[]).map(value=><button key={value} aria-pressed={value===period} onClick={()=>{if(value!==period)onPeriod(value)}}>{PERIODS[value]}</button>)}</div>
+  <div className="candle-plot"><CanvasChart key={symbol+period} state={state} symbol={symbol} period={period} tick={tick} entry={entry} stop={stop} view={view} onOlder={loadOlder} fullscreen={fullscreen} range={range}/>{!state.historyReady&&<div className="candle-empty"><span>{state.error?'历史暂不可用':'正在补齐历史K线…'}</span>{!!state.error&&<button onClick={()=>void feed.current?.refresh()}>重试</button>}</div>}</div>
+  <footer className="candle-footer"><span>{range?`纽约周一基准 · 图表北京时间 · ${statusText[state.status]}`:'OKX · 北京时间'}</span><button disabled={state.loadingOlder||!state.historyReady||!state.canLoadOlder} onClick={loadOlder}>{state.loadingOlder?'加载历史…':state.canLoadOlder?'更早K线':'历史已加载'}</button></footer>
   {state.error&&state.historyReady&&<button className="candle-error" onClick={()=>state.errorKind==='older'?loadOlder():void feed.current?.refresh()}>{state.error}</button>}
   <details className="candle-credit"><summary>图表来源</summary><a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView Lightweight Charts™</a><small>Copyright (с) 2025 TradingView, Inc.</small></details>
  </div>;

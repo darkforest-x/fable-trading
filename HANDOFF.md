@@ -1,3 +1,10 @@
+## 2026-10-23 · Spike App 0.8.19 — full-screen 1.618 and shared Apple Glass
+
+- Default central 1.618 tab uses the existing NY Monday monitor's latest touched USDT perpetual; native Lightweight Charts supports dragging/scaling, Monday band, solid Monday high/low and extension lines without level labels. Market-only public projection, validated week/freshness; no trading/account fields exposed.
+- Quick entry reuses the contract ticket and server 1R, including existing-position protection semantics. No order sent during development or acceptance. Unified #0071E3 controls and glass material across contract/rules/fib/positions/statistics/settings; finger-following navigation, axis lock, edge resistance and reduced-motion support; charts and controls excluded.
+- Stitch designs and actual HTML retained under `yoyo/discipline_app/design/fib-home-20261022/` and `design/apple-glass-20261023/` (final motion screen9cd418117dd24ff0802728fdeb596a18).192 Python/55 frontend tests pass;320/390/1280 browser checks, touch input,0 synthetic new orders. iOS/Android builds and signatures verified. iPhone unavailable: package0.8.19(28) is not installed.
+- Service0.8.19 is running; existing1 position remains exchange-verified,pending0,blockers empty. Monitor scan2008/2008 errors0 and4 patrols enabled; no active model expected. Test fixturePID60064/port18922 closed,temporary Chrome tab closed; real preview at127.0.0.1:5199 retained. Build receipt `yoyo/discipline_app/releases/build-0.8.19.json`; other sessions' dirty changes preserved.
+
 ## 2026-10-23 · Notion 区间1.618测试 #1 two-wick engulfing rejected
 
 - Owner Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2 rule1: after first weekly 1618 touch, two completed15m wicks reach the key with open/close inside, then first later reversal engulfing enters at close. Only admission changes versus v8; 0.7percent SL, four25percent targets, any-TP breakeven and fee0 unchanged.

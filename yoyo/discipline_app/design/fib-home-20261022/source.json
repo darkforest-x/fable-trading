@@ -1,0 +1,37 @@
+{
+  "request": {
+    "projectId": "8978791379095391159",
+    "selectedScreenIds": [
+      "913fdf5ea4a94f2cb9c833a42d105163",
+      "05b5c17f178046979137b5b8b2639114"
+    ],
+    "deviceType": "MOBILE",
+    "modelId": "GEMINI_3_8_FLASH",
+    "prompt": "为现有 SPIKE 独立纪律交易手机 App 新增默认首页「1.618」，保留白瓷/软玉/Apple Glass、简洁留白和真实产品约束。请产出390×844手机完整设计与前端HTML/CSS，另含快捷开单展开态。底栏变为五项：1.618（默认选中）、合约、纪律、持仓、统计；设置保留右上角。页面主体是几乎铺满剩余视口的交互式真实K线，类似TradingView手机轻量行情图：上方紧凑可点的最新触价合约选择器、触及上/下1.618及发生时间小标签；15m默认，可选5m/1H/4H；OHLC、红绿蜡烛、成交量、右价格轴/下时间轴、拖动/缩放/回到最新。显示纽约周一完整区间高低点、区间底色、上方1.618=H+.618(H-L)、下方1.618=L-.618(H-L)、0.5中位线，关键线含名称和价格。顶栏仅轻量状态，不要KPI卡片。首次打开选最近触及1.618的合约；列表仅显示本周已触价合约，最新优先，数据缺失/暂无触价有诚实空态。下方底栏上方放紧凑「快捷开单 · 默认1R」胶囊/按钮，点击从底部展开复用原合约票据：合约/方向（上触预选空，下触预选多）/市价/现有仓位额度/现有杠杆/自动1R止损点位/计算结果及原确认动作。1R沿用服务既有风险定义，不新增风险比例，不自动执行，不在图表拖动时修改订单。可以放回到最新小按钮，不要TradingView完整绘图工具或假功能。请展示图表为主屏、底栏不遮挡，支持手机安全区与桌面居中手机壳宽度。所有示例行情/价格为占位，不含私密账户数据；代码只供视觉参考。请新建本次修改屏幕，名称「SPIKE · 1.618 默认图表首页与1R快捷开单」。"
+  },
+  "screen": {
+    "deviceType": "DESKTOP",
+    "generatedBy": "create_datastore_entry",
+    "height": "2048",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzdlMTMwNWJhODk2MTRlNDNiYzIzYTE0MDgxNDhmMzkxEgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+      "mimeType": "text/html",
+      "name": "projects/8978791379095391159/files/9d6f06f0add540a1b4d5d86fa036971e"
+    },
+    "id": "29ef83710fe44599b3efc0c0be7e49ab",
+    "name": "projects/8978791379095391159/screens/29ef83710fe44599b3efc0c0be7e49ab",
+    "screenMetadata": {
+      "agentType": "PRO_AGENT",
+      "status": "COMPLETE"
+    },
+    "screenType": "DESIGN",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1V3pWIYjNeFe00-uM7Pq_Z4k-Xd14Pf6WgEnjn-2vJQ6_uQF8qkvgk3vqQq0yZPTKe5sgfMsSc1ucBnXUmAwmRD07YbLTWAWWgq95A20nB2uQa7R8EJ_JNuxO3pFzoBEsObdKY0jRaQCf0qzKpA0L5q1f2mIGn0W1seoGRM1uRM2OtbJdNelKpH2IJLeQJpf-C2uXG2LG_fn0TxRp5qHgFOeuAzmXWYqOJ7pfD2EK3CWiKlJHH-zXLoCyk",
+      "name": "projects/8978791379095391159/files/e1243b6bec2d41cb8ec8c7651bbf8aeb"
+    },
+    "theme": {},
+    "title": "SPIKE · 1.618 默认图表首页与1R快捷开单",
+    "width": "2560"
+  },
+  "notes": "Generated demo values are not execution rules. Existing service 1R calculation, sizing, protections and confirmation preference retained."
+}

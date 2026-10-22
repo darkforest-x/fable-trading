@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPIKE 全应用 Apple Glass 统一升级规范工作台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Plus Jakarta Sans", "PingFang SC", "Helvetica Neue", sans-serif;
+      --font-mono: "JetBrains Mono", "SF Mono", Menlo, monospace;
+
+      /* Glass Tokens */
+      --glass-bg-subtle: rgba(255, 255, 255, 0.62);
+      --glass-bg-card: rgba(255, 255, 255, 0.74);
+      --glass-bg-elevated: rgba(255, 255, 255, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.85);
+      --glass-border-subtle: rgba(255, 255, 255, 0.55);
+      --glass-shadow: 0 10px 32px -8px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.03);
+      --glass-shadow-floating: 0 16px 40px -10px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+      --glass-blur: blur(28px) saturate(170%);
+
+      /* Apple Accent */
+      --apple-blue: #0071e3;
+      --apple-blue-hover: #0077ed;
+      --apple-blue-light: rgba(0, 113, 227, 0.08);
+      --trade-up: #10b981;
+      --trade-up-bg: rgba(16, 185, 129, 0.10);
+      --trade-down: #f43f5e;
+      --trade-down-bg: rgba(244, 63, 94, 0.10);
+
+      --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: #0c1017;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .num-mono {
+      font-family: var(--font-mono);
+      font-feature-settings: "tnum" on, "lnum" on;
+    }
+
+    /* Apple Glass Card Utilities */
+    .apple-glass-card {
+      background: var(--glass-bg-card);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      border-radius: 24px;
+    }
+
+    .apple-glass-capsule {
+      background: var(--glass-bg-subtle);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+      border-radius: 9999px;
+    }
+
+    .apple-glass-elevated {
+      background: var(--glass-bg-elevated);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow-floating);
+    }
+
+    /* Mobile Frame Canvas Simulation */
+    .mobile-viewport {
+      width: 390px;
+      height: 844px;
+      border-radius: 44px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(120% 80% at 50% 0%, #f7f9fd 0%, #edf2f9 45%, #e9eef6 100%);
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.45), 0 0 0 10px #1e2430, 0 0 0 12px rgba(255, 255, 255, 0.12);
+      flex-shrink: 0;
+    }
+
+    /* Subtle Specular Top Highlight for Mobile Screen */
+    .mobile-viewport::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 44px;
+      pointer-events: none;
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 0 20px rgba(0, 113, 227, 0.02);
+      z-index: 40;
+    }
+
+    /* Custom Scrollbar Inside Mockups */
+    .screen-scroll::-webkit-scrollbar {
+      width: 0px;
+      display: none;
+    }
+    .screen-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Interactive Spring Feel */
+    .btn-spring {
+      transition: transform 280ms var(--ease-spring), opacity 200ms ease, background-color 200ms ease;
+    }
+    .btn-spring:active {
+      transform: scale(0.97);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-spring {
+        transition: none !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="p-6 md:p-10 min-h-screen">
+
+  <!-- Header & Design Tokens Bar -->
+  <header class="max-w-[2160px] mx-auto mb-10">
+    <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-6 pb-6 border-b border-slate-800">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500/20 text-[#0071e3] border border-blue-400/30">
+            <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+          </span>
+          <span class="text-xs uppercase tracking-widest font-mono text-slate-400">Design System V2.5 · Complete App Refactor</span>
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white flex items-center gap-3">
+          SPIKE 全应用 Apple Glass 统一升级
+          <span class="text-xs font-normal px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20">Production Ready</span>
+        </h1>
+        <p class="text-slate-400 mt-2 max-w-3xl text-sm md:text-base leading-relaxed">
+          以《SPIKE1.618 · Apple Glass 极简全屏终稿》为全域基准，全面消除原生硬色块与多层嵌套胶囊。为「合约、纪律、持仓、统计、设置」五大功能构建通透冷白、极轻微光倒角、Apple SF 数字排版与精准 5 项常驻底栏（合约、纪律、1.618居中、持仓、统计）。
+        </p>
+      </div>
+
+      <!-- Quick Tokens Specimen -->
+      <div class="flex flex-wrap items-center gap-3 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 text-xs">
+        <div class="flex items-center gap-2 pr-3 border-r border-slate-800">
+          <span class="w-3.5 h-3.5 rounded-full bg-[#0071e3] shadow-sm"></span>
+          <span class="text-slate-300 font-mono">Accent: #0071e3</span>
+        </div>
+        <div class="flex items-center gap-2 pr-3 border-r border-slate-800">
+          <span class="w-3.5 h-3.5 rounded-full bg-white/70 border border-white/90"></span>
+          <span class="text-slate-300 font-mono">Glass: 0.65~0.80 Blur 28px</span>
+        </div>
+        <div class="flex items-center gap-2 pr-3 border-r border-slate-800">
+          <span class="w-3 h-3 rounded-full bg-[#10b981]"></span>
+          <span class="w-3 h-3 rounded-full bg-[#f43f5e]"></span>
+          <span class="text-slate-300 font-mono">Trading: Up/Down</span>
+        </div>
+        <div class="flex items-center gap-1.5 text-slate-400">
+          <span class="material-symbols-outlined text-sm text-blue-400">touch_app</span>
+          <span>44px Targets · 390px Mobile</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Horizontal Showcase of 5 Screens -->
+  <main class="max-w-[2160px] mx-auto overflow-x-auto pb-12 pt-2">
+    <div class="flex items-start gap-8 min-w-max pb-6">
+
+      <!-- ============================================================== -->
+      <!-- SCREEN 1: 合约开仓 (ORDER TICKET)                               -->
+      <!-- ============================================================== -->
+      <div class="flex flex-col items-center">
+        <div class="flex items-center justify-between w-[390px] px-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0071e3]"></span>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Screen 01 · 合约</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">Order Ticket & 1R Protection</span>
+        </div>
+
+        <div class="mobile-viewport flex flex-col justify-between">
+          <!-- Top Floating Header -->
+          <div class="pt-12 px-4 pb-2 z-20 flex items-center justify-between pointer-events-auto">
+            <div class="apple-glass-capsule px-3 py-1.5 flex items-center gap-2 cursor-pointer btn-spring">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span class="font-bold text-xs tracking-tight text-slate-900">BTCUSDT 永续</span>
+              <span class="material-symbols-outlined text-xs text-slate-500">expand_more</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="apple-glass-capsule px-2.5 py-1 text-[11px] font-mono text-slate-600">
+                10x 全仓
+              </div>
+              <button class="w-8 h-8 rounded-full apple-glass-capsule flex items-center justify-center text-slate-700 btn-spring">
+                <span class="material-symbols-outlined text-[17px]">settings</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Naturally Scrolling Content Area -->
+          <div class="flex-1 overflow-y-auto screen-scroll px-4 pt-1 pb-28 space-y-3.5 z-10">
+            <!-- Price Banner Capsule -->
+            <div class="apple-glass-card p-4">
+              <div class="flex items-baseline justify-between mb-1">
+                <div class="flex items-baseline gap-2">
+                  <span class="text-3xl font-bold num-mono text-slate-900 tracking-tight">96,420.50</span>
+                  <span class="text-xs text-slate-400 font-mono">USDT</span>
+                </div>
+                <div class="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs font-semibold num-mono border border-emerald-200/60">
+                  <span class="material-symbols-outlined text-[13px]">arrow_drop_up</span>
+                  +1.84%
+                </div>
+              </div>
+
+              <!-- Mini Discipline Status Line -->
+              <div class="flex items-center justify-between pt-2.5 mt-2 border-t border-slate-200/50 text-[11px]">
+                <div class="flex items-center gap-1.5 text-slate-500">
+                  <span class="material-symbols-outlined text-xs text-blue-500">verified_user</span>
+                  <span>今日剩余额度</span>
+                  <span class="font-bold text-slate-800 font-mono">2 / 3 次</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-slate-500">
+                  <span>单笔 1R</span>
+                  <span class="font-bold text-slate-800 font-mono">20.00 U</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Direction Selector: Minimal Apple Tab -->
+            <div class="grid grid-cols-2 gap-2 bg-slate-200/50 p-1 rounded-2xl border border-white/60">
+              <button class="py-2.5 rounded-xl font-semibold text-xs transition-all duration-200 bg-white text-emerald-600 shadow-sm flex items-center justify-center gap-1.5 border border-white/80 btn-spring">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                买入做多 (Long)
+              </button>
+              <button class="py-2.5 rounded-xl font-medium text-xs transition-all duration-200 text-slate-600 hover:text-slate-900 flex items-center justify-center gap-1.5 btn-spring">
+                <span class="w-1.5 h-1.5 rounded-full bg-transparent"></span>
+                卖出做空 (Short)
+              </button>
+            </div>
+
+            <!-- Order Input Card -->
+            <div class="apple-glass-card p-4 space-y-3.5">
+              <!-- Type & Quick Mode -->
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2">
+                  <button class="px-3 py-1 rounded-full bg-blue-500 text-white font-medium shadow-sm shadow-blue-500/20 btn-spring">市价委托</button>
+                  <button class="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 btn-spring">限价委托</button>
+                </div>
+                <span class="text-[11px] text-slate-400 font-mono">滑点保护: 自动</span>
+              </div>
+
+              <!-- Initial Stop Loss (Mandatory 1R) -->
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <label class="text-xs font-medium text-slate-700 flex items-center gap-1">
+                    初始止损触发价
+                    <span class="text-rose-500">*</span>
+                  </label>
+                  <span class="text-[10px] font-mono font-medium text-blue-600 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/50">
+                    服务端 1R 自动锚定
+                  </span>
+                </div>
+                <div class="relative">
+                  <input type="text" value="95,450.00" class="w-full h-11 px-3.5 rounded-xl bg-white/70 border border-slate-200/80 text-sm font-semibold num-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                  <span class="absolute right-3.5 top-3 text-xs text-slate-400 font-mono">USDT</span>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-1 font-mono">基于当前市价预估跌幅 -1.01% · 最大亏损 20.00 U</p>
+              </div>
+
+              <!-- Margin Budget Allocation Slider -->
+              <div>
+                <div class="flex justify-between items-center mb-1.5">
+                  <span class="text-xs font-medium text-slate-700">保证金占用比例</span>
+                  <span class="text-xs font-bold font-mono text-slate-900">2.0% <span class="text-slate-400 font-normal">(上限 10%)</span></span>
+                </div>
+                <div class="relative flex items-center my-2">
+                  <div class="w-full h-1.5 bg-slate-200/80 rounded-full overflow-hidden">
+                    <div class="h-full bg-[#0071e3] rounded-full" style="width: 20%"></div>
+                  </div>
+                  <div class="absolute left-[20%] -ml-2.5 w-5 h-5 bg-white border-2 border-[#0071e3] rounded-full shadow-md"></div>
+                </div>
+                <div class="grid grid-cols-4 gap-1.5 pt-1 text-[11px] font-mono">
+                  <button class="py-1 rounded-lg bg-white/60 hover:bg-white text-slate-700 border border-slate-200/50 text-center btn-spring">25%</button>
+                  <button class="py-1 rounded-lg bg-white/60 hover:bg-white text-slate-700 border border-slate-200/50 text-center btn-spring">50%</button>
+                  <button class="py-1 rounded-lg bg-white/60 hover:bg-white text-slate-700 border border-slate-200/50 text-center btn-spring">75%</button>
+                  <button class="py-1 rounded-lg bg-blue-50 text-blue-600 font-bold border border-blue-200/60 text-center btn-spring">100%</button>
+                </div>
+              </div>
+
+              <!-- Estimates Box -->
+              <div class="p-2.5 rounded-xl bg-white/50 border border-slate-200/40 grid grid-cols-3 gap-2 text-center text-[11px]">
+                <div>
+                  <span class="block text-slate-400 text-[10px]">持仓名义</span>
+                  <span class="font-bold font-mono text-slate-800">200.00 U</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px]">占用保证金</span>
+                  <span class="font-bold font-mono text-slate-800">20.00 U</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px]">预估 1R 止损</span>
+                  <span class="font-bold font-mono text-rose-500">-20.00 U</span>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button class="w-full h-12 rounded-xl bg-[#0071e3] hover:bg-[#0077ed] text-white font-semibold text-sm shadow-md shadow-blue-500/25 flex items-center justify-center gap-2 btn-spring">
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+                买入开多 (受纪律保护)
+              </button>
+              <div class="flex items-center justify-center gap-1.5 text-[10px] text-slate-400">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>全天候服务端守护进程在线 · 绝不向交易所发送明文敞口</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Reusable Glass Bottom Nav (Exact 5 Items) -->
+          <div class="absolute bottom-4 inset-x-3 z-30 pointer-events-auto">
+            <div class="apple-glass-elevated h-16 rounded-full px-2 flex items-center justify-around border border-white/90">
+              <!-- Item 1: 合约 (Active) -->
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-[#0071e3] btn-spring">
+                <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+                <span class="text-[10px] font-semibold tracking-tight mt-0.5">合约</span>
+              </button>
+              <!-- Item 2: 纪律 -->
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">shield</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">纪律</span>
+              </button>
+              <!-- Item 3: 1.618 (Center Pill) -->
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <div class="w-7 h-7 rounded-full bg-blue-500/10 text-[#0071e3] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5 text-blue-600">1.618</span>
+              </button>
+              <!-- Item 4: 持仓 -->
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">持仓</span>
+              </button>
+              <!-- Item 5: 统计 -->
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">统计</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================== -->
+      <!-- SCREEN 2: 交易纪律 (DISCIPLINE RULES)                          -->
+      <!-- ============================================================== -->
+      <div class="flex flex-col items-center">
+        <div class="flex items-center justify-between w-[390px] px-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0071e3]"></span>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Screen 02 · 纪律</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">Active & Pending Dual Rules</span>
+        </div>
+
+        <div class="mobile-viewport flex flex-col justify-between">
+          <!-- Top Floating Header -->
+          <div class="pt-12 px-4 pb-2 z-20 flex items-center justify-between pointer-events-auto">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 tracking-tight">交易纪律规则</h2>
+              <p class="text-[11px] text-slate-500">硬性风控仲裁 · 服务端强制生效</p>
+            </div>
+            <div class="apple-glass-capsule px-2.5 py-1 flex items-center gap-1.5 text-emerald-600 text-xs font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>常态生效中</span>
+            </div>
+          </div>
+
+          <!-- Scrolling Content Area -->
+          <div class="flex-1 overflow-y-auto screen-scroll px-4 pt-1 pb-28 space-y-3.5 z-10">
+            <!-- Active Policy Overview Card -->
+            <div class="apple-glass-card p-4">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-semibold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm text-blue-500">gavel</span>
+                  当前生效纪律 (Active Policy)
+                </span>
+                <span class="text-[10px] font-mono text-slate-400">Ver 2.4.2</span>
+              </div>
+
+              <!-- 3-Item Metrics Grid -->
+              <div class="grid grid-cols-3 gap-2">
+                <div class="p-2.5 rounded-xl bg-white/70 border border-slate-200/50 text-center">
+                  <span class="block text-[10px] text-slate-400">单笔最大风险</span>
+                  <span class="text-base font-bold font-mono text-slate-900">2.0%</span>
+                  <span class="block text-[9px] text-slate-400">净值 1R 基准</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/70 border border-slate-200/50 text-center">
+                  <span class="block text-[10px] text-slate-400">日内频次上限</span>
+                  <span class="text-base font-bold font-mono text-slate-900">3 次</span>
+                  <span class="block text-[9px] text-slate-400">净利平仓可+1</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white/70 border border-slate-200/50 text-center">
+                  <span class="block text-[10px] text-slate-400">并发标的上限</span>
+                  <span class="text-base font-bold font-mono text-slate-900">≤ 3 标</span>
+                  <span class="block text-[9px] text-slate-400">防情绪化加仓</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pipeline Protection Tier (3-Stage) -->
+            <div class="apple-glass-card p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm text-emerald-600">moving</span>
+                  离线自动化保护管道 (Pipeline)
+                </span>
+                <span class="text-[10px] font-mono text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
+                  全自动触发
+                </span>
+              </div>
+
+              <div class="space-y-2 text-xs">
+                <!-- Tier 1 -->
+                <div class="p-2.5 rounded-xl bg-white/60 border border-slate-200/50 flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-blue-500/10 text-blue-600 font-mono font-bold text-[11px] flex items-center justify-center mt-0.5 flex-shrink-0">1</span>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-semibold text-slate-800">1R 触达移动保本</span>
+                      <span class="text-blue-600 font-mono text-[11px]">+1.0R</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-0.5">浮盈达到 1R 时，止损自动推移至开仓均价 + 手续费缓冲垫。</p>
+                  </div>
+                </div>
+
+                <!-- Tier 2 -->
+                <div class="p-2.5 rounded-xl bg-white/60 border border-slate-200/50 flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-600 font-mono font-bold text-[11px] flex items-center justify-center mt-0.5 flex-shrink-0">2</span>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-semibold text-slate-800">3R 分批止盈 60%</span>
+                      <span class="text-emerald-600 font-mono text-[11px]">+3.0R</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-0.5">硬性锁定主力收益落袋为安，杜绝利润回撤焦虑。</p>
+                  </div>
+                </div>
+
+                <!-- Tier 3 -->
+                <div class="p-2.5 rounded-xl bg-white/60 border border-slate-200/50 flex items-start gap-2.5">
+                  <span class="w-5 h-5 rounded-full bg-purple-500/10 text-purple-600 font-mono font-bold text-[11px] flex items-center justify-center mt-0.5 flex-shrink-0">3</span>
+                  <div class="flex-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-semibold text-slate-800">5R 剩余清仓离场</span>
+                      <span class="text-purple-600 font-mono text-[11px]">+5.0R</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 mt-0.5">不设无序 Runner，严格完成既定纪律周期闭环。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Distinct Pending State Box -->
+            <div class="p-3.5 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-semibold text-amber-800 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm text-amber-600">hourglass_top</span>
+                  待生效调整 (Pending Policy)
+                </span>
+                <span class="text-[10px] font-mono text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded-full">清仓后生效</span>
+              </div>
+              <p class="text-[11px] text-amber-800/80 leading-relaxed">
+                当前有 1 笔活跃持仓运行中。已申请修改单笔风险上限为 1.5%，系统将在全部持仓结清后自动无缝激活，防止盘中动态篡改规避亏损。
+              </p>
+            </div>
+          </div>
+
+          <!-- Bottom Nav (Item 2 Active) -->
+          <div class="absolute bottom-4 inset-x-3 z-30 pointer-events-auto">
+            <div class="apple-glass-elevated h-16 rounded-full px-2 flex items-center justify-around border border-white/90">
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">合约</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-[#0071e3] btn-spring">
+                <span class="material-symbols-outlined text-[20px]">shield</span>
+                <span class="text-[10px] font-semibold tracking-tight mt-0.5">纪律</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <div class="w-7 h-7 rounded-full bg-blue-500/10 text-[#0071e3] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5 text-blue-600">1.618</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">持仓</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">统计</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================== -->
+      <!-- SCREEN 3: 当前持仓与部分平仓抽屉 (POSITIONS & SHEET)          -->
+      <!-- ============================================================== -->
+      <div class="flex flex-col items-center">
+        <div class="flex items-center justify-between w-[390px] px-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0071e3]"></span>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Screen 03 · 持仓</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">Live Positions & Partial Close</span>
+        </div>
+
+        <div class="mobile-viewport flex flex-col justify-between">
+          <!-- Top Floating Header -->
+          <div class="pt-12 px-4 pb-2 z-20 flex items-center justify-between pointer-events-auto">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 tracking-tight">当前持仓</h2>
+              <p class="text-[11px] text-slate-500 font-mono">1 活跃 · 1 待成交委托</p>
+            </div>
+            <!-- Sub-segment Switch -->
+            <div class="flex items-center p-0.5 rounded-full bg-slate-200/60 border border-white/60 text-xs">
+              <button class="px-3 py-1 rounded-full bg-white text-blue-600 font-semibold shadow-xs btn-spring">持仓 (1)</button>
+              <button class="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 btn-spring">委托 (1)</button>
+              <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-900 btn-spring">已平</button>
+            </div>
+          </div>
+
+          <!-- Scrolling Content Area -->
+          <div class="flex-1 overflow-y-auto screen-scroll px-4 pt-1 pb-28 space-y-3.5 z-10">
+            <!-- Active Position Card (With Protection Badge) -->
+            <div class="apple-glass-card p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  <span class="font-bold text-sm text-slate-900">BTCUSDT 永续</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 font-bold text-[10px] font-mono border border-emerald-200/60">多 10x</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-bold font-mono text-emerald-600">+17.50 U</span>
+                  <span class="block text-[10px] font-mono text-emerald-600/80 font-semibold">+0.88 R</span>
+                </div>
+              </div>
+
+              <!-- Position Data Grid -->
+              <div class="grid grid-cols-3 gap-2 py-2 border-y border-slate-200/50 text-[11px] font-mono">
+                <div>
+                  <span class="block text-slate-400 text-[10px]">持仓名义</span>
+                  <span class="font-semibold text-slate-800">200.00 U</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px]">开仓均价</span>
+                  <span class="font-semibold text-slate-800">95,450.0</span>
+                </div>
+                <div>
+                  <span class="block text-slate-400 text-[10px]">保本动态止损</span>
+                  <span class="font-bold text-blue-600">95,480.0</span>
+                </div>
+              </div>
+
+              <!-- Protection Progress Indicator -->
+              <div class="flex items-center justify-between text-[11px]">
+                <div class="flex items-center gap-1.5 text-slate-600">
+                  <span class="material-symbols-outlined text-xs text-blue-500">lock</span>
+                  <span>已锁定保本 · 距 3R 止盈差 1.2R</span>
+                </div>
+                <!-- Action Buttons: Partial Close Dialog Trigger -->
+                <button class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs shadow-sm btn-spring">
+                  部分平仓
+                </button>
+              </div>
+            </div>
+
+            <!-- Pending Limit Order Card -->
+            <div class="apple-glass-card p-3.5 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <div class="flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                  <span class="font-semibold text-slate-800">SOLUSDT 永续</span>
+                  <span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 text-[10px] font-mono">限价做空</span>
+                </div>
+                <span class="text-[11px] font-mono text-amber-600 font-medium">排队等待成交</span>
+              </div>
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-500 pt-1">
+                <span>委托价: 185.50</span>
+                <span>拟开: 100.00 U</span>
+                <button class="text-rose-500 hover:text-rose-600 font-sans font-medium text-xs btn-spring">撤单</button>
+              </div>
+            </div>
+
+            <!-- Partial Close Bottom Sheet Mockup (Layered directly inside for visual presentation) -->
+            <div class="mt-2 p-3.5 rounded-2xl bg-white/90 border border-blue-200/70 shadow-lg space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm text-blue-500">pie_chart</span>
+                  部分平仓抽屉交互规范 (Proportional Close)
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">390px Sheet</span>
+              </div>
+              <div class="grid grid-cols-4 gap-1.5 text-[11px] font-mono">
+                <button class="py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-800 text-center font-medium btn-spring">25%</button>
+                <button class="py-1.5 rounded-lg bg-blue-500 text-white text-center font-bold shadow-xs btn-spring">50%</button>
+                <button class="py-1.5 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-800 text-center font-medium btn-spring">75%</button>
+                <button class="py-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 text-center font-semibold btn-spring">全平 100%</button>
+              </div>
+              <p class="text-[10px] text-slate-400 font-mono text-center">平仓后系统按剩余比例等比收紧初始 1R 绝对现金风控</p>
+            </div>
+          </div>
+
+          <!-- Bottom Nav (Item 4 Active) -->
+          <div class="absolute bottom-4 inset-x-3 z-30 pointer-events-auto">
+            <div class="apple-glass-elevated h-16 rounded-full px-2 flex items-center justify-around border border-white/90">
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">合约</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">shield</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">纪律</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <div class="w-7 h-7 rounded-full bg-blue-500/10 text-[#0071e3] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5 text-blue-600">1.618</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-[#0071e3] btn-spring">
+                <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+                <span class="text-[10px] font-semibold tracking-tight mt-0.5">持仓</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">统计</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================== -->
+      <!-- SCREEN 4: 账户统计 (STATISTICS & AUDIT)                         -->
+      <!-- ============================================================== -->
+      <div class="flex flex-col items-center">
+        <div class="flex items-center justify-between w-[390px] px-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0071e3]"></span>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Screen 04 · 统计</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">App Trades & Baseline PnL</span>
+        </div>
+
+        <div class="mobile-viewport flex flex-col justify-between">
+          <!-- Top Floating Header -->
+          <div class="pt-12 px-4 pb-2 z-20 flex items-center justify-between pointer-events-auto">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 tracking-tight">账户表现统计</h2>
+              <p class="text-[11px] text-slate-500">仅计入本 App 管理订单 · 严禁虚构收益</p>
+            </div>
+            <!-- Time Window Switch -->
+            <div class="flex items-center p-0.5 rounded-full bg-slate-200/60 border border-white/60 text-xs">
+              <button class="px-2.5 py-1 rounded-full text-slate-600 hover:text-slate-900 btn-spring">7天</button>
+              <button class="px-3 py-1 rounded-full bg-white text-blue-600 font-semibold shadow-xs btn-spring">30天</button>
+              <button class="px-2.5 py-1 rounded-full text-slate-500 hover:text-slate-900 btn-spring">全部</button>
+            </div>
+          </div>
+
+          <!-- Scrolling Content Area -->
+          <div class="flex-1 overflow-y-auto screen-scroll px-4 pt-1 pb-28 space-y-3.5 z-10">
+            <!-- Cumulative Performance Card -->
+            <div class="apple-glass-card p-4">
+              <div class="flex items-baseline justify-between mb-1">
+                <div>
+                  <span class="block text-[10px] text-slate-400 font-medium">OKX USDT 账户总净值</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-2xl font-bold font-mono text-slate-900">1,017.50</span>
+                    <span class="text-xs text-slate-400 font-mono">USDT</span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="block text-[10px] text-slate-400 font-medium">App 累计净盈亏</span>
+                  <div class="text-sm font-bold font-mono text-emerald-600">
+                    +17.50 U <span class="text-xs font-semibold">(+1.75%)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Baseline Principal Note -->
+              <p class="text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-200/50 leading-tight">
+                * 固定基准本金 1,000.00 USDT，仅追踪通过 SPIKE 纪律执行的真实闭环开平仓。
+              </p>
+            </div>
+
+            <!-- Returns Curve Chart Card -->
+            <div class="apple-glass-card p-4 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-slate-800 flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-sm text-blue-500">timeline</span>
+                  已平仓累计净收益曲线 (R 净值)
+                </span>
+                <span class="font-mono text-emerald-600 font-bold">+2.4 R</span>
+              </div>
+
+              <!-- Clean Mini SVG Chart -->
+              <div class="h-24 w-full relative">
+                <svg viewBox="0 0 320 80" class="w-full h-full overflow-visible">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0071e3" stop-opacity="0.15" />
+                      <stop offset="100%" stop-color="#0071e3" stop-opacity="0.0" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Baseline 0 -->
+                  <line x1="0" y1="50" x2="320" y2="50" stroke="#cbd5e1" stroke-dasharray="2,2" stroke-width="1" />
+                  <!-- Area Fill -->
+                  <polygon points="0,50 40,50 80,35 120,40 160,25 200,30 240,15 280,20 320,8 320,50" fill="url(#areaGrad)" />
+                  <!-- Line Curve -->
+                  <polyline points="0,50 40,50 80,35 120,40 160,25 200,30 240,15 280,20 320,8" fill="none" stroke="#0071e3" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                  <!-- Current Peak Dot -->
+                  <circle cx="320" cy="8" r="4" fill="#0071e3" stroke="#ffffff" stroke-width="2" />
+                </svg>
+              </div>
+
+              <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                <span>05-01 基准</span>
+                <span>05-15 保本</span>
+                <span>今日 +2.4R</span>
+              </div>
+            </div>
+
+            <!-- Key Audit Metrics Grid -->
+            <div class="apple-glass-card p-3.5">
+              <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                <div class="p-2 rounded-xl bg-white/60 border border-slate-200/50">
+                  <span class="block text-[10px] text-slate-400">已平总笔数</span>
+                  <span class="text-sm font-bold font-mono text-slate-900">8 笔</span>
+                </div>
+                <div class="p-2 rounded-xl bg-white/60 border border-slate-200/50">
+                  <span class="block text-[10px] text-slate-400">胜率 (Win Rate)</span>
+                  <span class="text-sm font-bold font-mono text-emerald-600">62.5%</span>
+                </div>
+                <div class="p-2 rounded-xl bg-white/60 border border-slate-200/50">
+                  <span class="block text-[10px] text-slate-400">盈亏比 (R:R)</span>
+                  <span class="text-sm font-bold font-mono text-slate-900">2.8 : 1</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Nav (Item 5 Active) -->
+          <div class="absolute bottom-4 inset-x-3 z-30 pointer-events-auto">
+            <div class="apple-glass-elevated h-16 rounded-full px-2 flex items-center justify-around border border-white/90">
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">合约</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">shield</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">纪律</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <div class="w-7 h-7 rounded-full bg-blue-500/10 text-[#0071e3] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5 text-blue-600">1.618</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">持仓</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-[#0071e3] btn-spring">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+                <span class="text-[10px] font-semibold tracking-tight mt-0.5">统计</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- ============================================================== -->
+      <!-- SCREEN 5: 设置与设备授权 (SETTINGS & SECURITY)                  -->
+      <!-- ============================================================== -->
+      <div class="flex flex-col items-center">
+        <div class="flex items-center justify-between w-[390px] px-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-[#0071e3]"></span>
+            <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider">Screen 05 · 设置</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-500">Security & Preferences</span>
+        </div>
+
+        <div class="mobile-viewport flex flex-col justify-between">
+          <!-- Top Floating Header -->
+          <div class="pt-12 px-4 pb-2 z-20 flex items-center justify-between pointer-events-auto">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900 tracking-tight">系统设置与安全</h2>
+              <p class="text-[11px] text-slate-500">本地私密守护 · 零外泄隔离</p>
+            </div>
+            <div class="apple-glass-capsule px-2.5 py-1 text-[11px] font-mono text-blue-600 bg-blue-50 border border-blue-200/50">
+              v2.4.2 Core
+            </div>
+          </div>
+
+          <!-- Scrolling Content Area -->
+          <div class="flex-1 overflow-y-auto screen-scroll px-4 pt-1 pb-28 space-y-3.5 z-10">
+            <!-- Account & Connectivity Card -->
+            <div class="apple-glass-card p-4 space-y-3">
+              <span class="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-blue-500">dns</span>
+                交易服务与交易所连接
+              </span>
+
+              <div class="p-3 rounded-xl bg-white/60 border border-slate-200/50 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-black text-white font-mono font-bold text-xs flex items-center justify-center">OK</div>
+                  <div>
+                    <span class="font-bold text-xs text-slate-900 block">OKX 实盘 #01</span>
+                    <span class="text-[10px] text-slate-400 font-mono">ak_****8912 · 延时 18ms</span>
+                  </div>
+                </div>
+                <button class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-600 text-xs font-semibold border border-blue-200/50 btn-spring">
+                  切换账户
+                </button>
+              </div>
+
+              <!-- WebSocket State -->
+              <div class="flex items-center justify-between text-xs text-slate-600 pt-1">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                  守护引擎 WebSocket 正常
+                </span>
+                <button class="text-blue-600 hover:text-blue-700 font-medium btn-spring">测试连接</button>
+              </div>
+            </div>
+
+            <!-- Execution & Haptic Preferences -->
+            <div class="apple-glass-card p-4 space-y-3.5">
+              <span class="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-sm text-blue-500">tune</span>
+                执行与偏好选项 (Preserved Toggles)
+              </span>
+
+              <!-- Toggle 1: 二次确认 -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-medium text-slate-800 block">开平仓二次确认</span>
+                  <span class="text-[10px] text-slate-400">关闭后点击直接极速提交</span>
+                </div>
+                <!-- iOS Toggle (Off) -->
+                <div class="w-11 h-6 bg-slate-300 rounded-full relative p-0.5 cursor-pointer">
+                  <div class="w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                </div>
+              </div>
+
+              <!-- Toggle 2: 触感反馈 -->
+              <div class="flex items-center justify-between pt-2 border-t border-slate-200/50">
+                <div>
+                  <span class="text-xs font-medium text-slate-800 block">原生触感反馈 (Haptics)</span>
+                  <span class="text-[10px] text-slate-400">滑单确认与风控报警高级微震</span>
+                </div>
+                <!-- iOS Toggle (On) -->
+                <div class="w-11 h-6 bg-[#0071e3] rounded-full relative p-0.5 cursor-pointer flex justify-end">
+                  <div class="w-5 h-5 bg-white rounded-full shadow-sm"></div>
+                </div>
+              </div>
+
+              <!-- Toggle 3: 动效减弱适配 -->
+              <div class="flex items-center justify-between pt-2 border-t border-slate-200/50">
+                <div>
+                  <span class="text-xs font-medium text-slate-800 block">动效模式</span>
+                  <span class="text-[10px] text-slate-400">柔和 Spring (260ms) · 遵循系统减弱</span>
+                </div>
+                <span class="text-xs font-medium text-slate-500 font-mono">标准平滑 ›</span>
+              </div>
+            </div>
+
+            <!-- Device Authorization Revocation -->
+            <div class="apple-glass-card p-4 space-y-2.5">
+              <div class="flex items-center gap-2 text-xs font-semibold text-rose-600">
+                <span class="material-symbols-outlined text-base">lock_reset</span>
+                <span>设备与敏感权限控制</span>
+              </div>
+              <p class="text-[11px] text-slate-500 leading-relaxed">
+                当前 iPhone 已通过 Secure Enclave 硬件签名授权。清除后需重新在管理私有终端配对。
+              </p>
+              <button class="w-full py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 font-medium text-xs transition-colors btn-spring">
+                清除设备授权 (Clear Authorization)
+              </button>
+            </div>
+          </div>
+
+          <!-- Bottom Nav (Settings opened from Top Gear, Nav retains 5 items with active back-state) -->
+          <div class="absolute bottom-4 inset-x-3 z-30 pointer-events-auto">
+            <div class="apple-glass-elevated h-16 rounded-full px-2 flex items-center justify-around border border-white/90">
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">candlestick_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">合约</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">shield</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">纪律</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <div class="w-7 h-7 rounded-full bg-blue-500/10 text-[#0071e3] flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[18px]">show_chart</span>
+                </div>
+                <span class="text-[10px] font-medium tracking-tight mt-0.5 text-blue-600">1.618</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">pie_chart</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">持仓</span>
+              </button>
+              <button class="flex flex-col items-center justify-center w-14 py-1 text-slate-500 hover:text-slate-800 btn-spring">
+                <span class="material-symbols-outlined text-[20px]">equalizer</span>
+                <span class="text-[10px] font-normal tracking-tight mt-0.5">统计</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Architectural Summary & CSS Design Tokens Reference -->
+  <section class="max-w-[2160px] mx-auto mt-6 bg-slate-900/90 rounded-3xl p-6 md:p-8 border border-slate-800 text-slate-300">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div>
+        <h3 class="text-white font-bold text-base flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-blue-400">layers</span>
+          1. Apple Glass 材质与层次原则
+        </h3>
+        <p class="text-xs leading-relaxed text-slate-400">
+          基于已交付的《SPIKE1.618 · 极简全屏终稿》，全面推行通透半透明磨砂（<code class="text-blue-300">rgba(255,255,255,0.70) + backdrop-blur: 28px</code>）。页面内容采用自然垂直流式滚动（Natural Scroll），坚决杜绝生硬的纯黑/纯白矩形大色块遮挡，外圈搭载 1px 高光反射白描边与弥散柔和微阴影。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-white font-bold text-base flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-emerald-400">navigation</span>
+          2. 全局 5 项悬浮底栏绝对统一
+        </h3>
+        <p class="text-xs leading-relaxed text-slate-400">
+          全应用五大核心页面全部悬浮常驻同款胶囊底栏，顺序精准固定：<strong class="text-white">【合约】、【纪律】、【1.618】（居中带专属 K 线微标）、【持仓】、【统计】</strong>。设置统一收纳于顶栏右侧 44px 独立触控齿轮，保证底栏层级绝对纯净。
+        </p>
+      </div>
+
+      <div>
+        <h3 class="text-white font-bold text-base flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-purple-400">code</span>
+          3. 业务口径与动效无损保真
+        </h3>
+        <p class="text-xs leading-relaxed text-slate-400">
+          所有数值严格遵循脱敏占位规范；保留了 1R 服务端硬性止损锚定、BTC/ETH 100x 与山寨 20x 杠杆上限、部分平仓等比收紧风控、固定基准本金盈亏百分比核算及设备签名凭据开关。全局按钮点击搭载 <code class="text-purple-300">scale(0.97) + 280ms Spring</code> 体验。
+        </p>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

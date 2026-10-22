@@ -1,3 +1,5 @@
+import {FibHome} from './FibHome';
+import {fibSide,type FibContract} from './fibData';
 import {useAutoStop} from './useAutoStop';
 import {priceAtTick,parseEntryIntent,entryResolved,entryPollDelay,type EntryIntent} from './entryFlow';
 import {entryAvailability} from './entryAvailability';
@@ -34,14 +36,16 @@ const fmt=(v:string|number|undefined,d=2)=>v===undefined?'—':Number(v).toLocal
 const small=(v:string)=>v.replace('-USDT-SWAP','');
 const id=()=>crypto.randomUUID().replaceAll('-','');
 const marginLabel=(mode?:string)=>mode==='cross'?'全仓':'逐仓';
-type Tab='合约'|'持仓'|'统计'|'纪律'|'设置';
+type Tab='1.618'|'合约'|'持仓'|'统计'|'纪律'|'设置';
 type ExchangeStatus={connected:boolean;environment:'okx_live'|'okx_demo';execution_enabled:boolean;verified_at?:number;trade_permission?:boolean;position_mode?:string;error?:string};
 type Preview={plan:Plan;policy_revision:number;ticket:Ticket;request_id:string;preview_id?:string};
 
 export default function App(){
- const settingsOrigin=useRef<Tab>('合约');
+ const settingsOrigin=useRef<Tab>('1.618');
+ const [fibTicket,setFibTicket]=useState(false);
+ const [quickAuto,setQuickAuto]=useState<{symbol:string;side:'long'|'short'}|null>(null);
  const [navDirection,setNavDirection]=useState(1);
- const [tab,setTab]=useState<Tab>('合约'),[connection,setConnection]=useState<Connection|null>(null),[state,setState]=useState<State|null>(null),[online,setOnline]=useState(false);
+ const [tab,setTab]=useState<Tab>('1.618'),[connection,setConnection]=useState<Connection|null>(null),[state,setState]=useState<State|null>(null),[online,setOnline]=useState(false);
  const [token,setToken]=useState(''),[error,setError]=useState(''),[message,setMessage]=useState<Notice|null>(null),[busy,setBusy]=useState(false);
  const [symbol,setSymbol]=useState('BTC-USDT-SWAP'),[kind,setKind]=useState<'market'|'limit'>('market'),[price,setPrice]=useState(''),[stop,setStop]=useState(''),[allocation,setAllocation]=useState(100),[leverage,setLeverage]=useState(100);
  const [direction,setDirection]=useState<'long'|'short'>('long');
@@ -90,7 +94,7 @@ export default function App(){
  function dismissError(){setError('');if(!preview&&!closeTarget&&errorDetail.field){requestAnimationFrame(()=>document.querySelector<HTMLInputElement>(`input[aria-label="${errorDetail.field}"]`)?.focus())}}
  const [haptics,setHaptics]=useState(feedbackEnabled),[reviewSide,setReviewSide]=useState<'long'|'short'|null>(null);
  useEffect(()=>{window.scrollTo({top:0});},[tab]);
- const stream=useLiveQuotes([symbol,...(state?.positions.map(p=>p.symbol)??[])],import.meta.env.VITE_SPIKE_LIVE_QUOTES!=='off'&&!!connection&&live&&(tab==='合约'||tab==='持仓'));
+ const stream=useLiveQuotes([symbol,...(state?.positions.map(p=>p.symbol)??[])],import.meta.env.VITE_SPIKE_LIVE_QUOTES!=='off'&&!!connection&&live&&(tab==='合约'||tab==='持仓'||fibTicket));
  const displayState=useMemo(()=>state?{...state,quotes:{...state.quotes,...stream},server_time:Math.max(state.server_time,...Object.values(stream).map(q=>q.time))}:null,[state,stream]);
  const selectedQuote=stream[symbol]??state?.quotes[symbol];
  const existing=state?.positions.find(pos=>pos.symbol===symbol);
@@ -125,6 +129,7 @@ export default function App(){
  function validateField(field:FieldIssue['field']){const issue=fieldIssue({symbol,side:inferredSide,kind,price,stop,fraction,leverage,sizing_mode:'margin'},displayState);if(issue?.field===field)inlineIssue(issue)}
  useEffect(()=>{setFieldError(null);automatic.manual()},[connection?.cacheScope,connection?.accountId,symbol,existing?.id]);
  useEffect(()=>setEntryProgress(null),[connection?.cacheScope,connection?.accountId]);
+ useEffect(()=>{if(!quickAuto||symbol!==quickAuto.symbol||!fibTicket)return;if(!existing)automatic.select(quickAuto.side);setQuickAuto(null)},[quickAuto,symbol,fibTicket,existing?.id]);
  useEffect(()=>{if(!connection||!entryProgress||!['pending','partially_filled'].includes(entryProgress.status))return;let active=true;let timer:ReturnType<typeof setTimeout>;const poll=async()=>{try{const result=await api<{status:string}>(connection,`/v1/order-requests/${entryProgress.id}`);if(active&&result.status!==entryProgress.status){setEntryProgress({...entryProgress,status:result.status});void refresh().catch(()=>{})}}catch{}if(active)timer=setTimeout(poll,3000)};timer=setTimeout(poll,3000);return()=>{active=false;clearTimeout(timer)}},[connection,entryProgress?.id,entryProgress?.status]);
 
 
@@ -151,7 +156,7 @@ export default function App(){
   try{const url=SERVICE_URL;const c:Connection={url,token:token.trim()};if(c.token.length<32)throw Error('服务令牌格式不正确');
    const health=await api<{service:string;mode:string;live_enabled:boolean}>({url,token:''},'/health');
    if(health.service!=='spike-discipline'||!['paper','okx_live'].includes(health.mode))throw Error('不是独立纪律服务');c.mode=health.mode as 'paper'|'okx_live';
-   c.cacheScope=await authorizationScope(c.url,c.token);const next=await api<State>(c,'/v1/state');if(next.mode!==c.mode)throw Error('账户模式不匹配');c.accountId=next.account_id??'primary';await rememberSession(c);epoch.current++;setConnection(c);setState(next);setOnline(true);setToken('');setTab('合约');notify('已连接','success','toast');
+   c.cacheScope=await authorizationScope(c.url,c.token);const next=await api<State>(c,'/v1/state');if(next.mode!==c.mode)throw Error('账户模式不匹配');c.accountId=next.account_id??'primary';await rememberSession(c);epoch.current++;setConnection(c);setState(next);setOnline(true);setToken('');setTab('1.618');notify('已连接','success','toast');
    feedback('light');
   }catch(e){setError((e as Error).message);feedback('error')}finally{setBusy(false)}
  }
@@ -257,8 +262,9 @@ export default function App(){
  }
  function requestClose(pos:Position){if(command.current)return;if(closeRecovery.attempt){notify('请先等待原平仓请求完成核对');return}closeKey.current=id();setClosePercent(50);setCloseLocked(false);setCloseTarget(pos);feedback('light')}
 
- function nav(next:Tab){if(next!==tab){feedback('light');if(next==='设置')settingsOrigin.current=tab;setNavDirection(next==='设置'?1:tab==='设置'?-1:MAIN_TABS.indexOf(next as typeof MAIN_TABS[number])>MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number])?1:-1)}setTab(next);setError('');setMessage(null)}
+ function nav(next:Tab){setFibTicket(false);setQuickAuto(null);if(next!==tab){feedback('light');if(next==='设置')settingsOrigin.current=tab;setNavDirection(next==='设置'?1:tab==='设置'?-1:MAIN_TABS.indexOf(next as typeof MAIN_TABS[number])>MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number])?1:-1)}setTab(next);setError('');setMessage(null)}
  function choose(next:string,withFeedback=true){automatic.manual();if(next!==symbol&&withFeedback)feedback('light');setSymbol(next);setAllocation(100);setPrice('');setStop('');setFieldError(null)}
+ function openFibTicket(row:FibContract){if(busy||pendingEntryRef.current)return;choose(row.symbol,false);setKind('market');setDirection(fibSide(row));setStopFeedback(null);setFibTicket(true);setQuickAuto({symbol:row.symbol,side:fibSide(row)});feedback('light')}
  function openPositionSymbol(next:string){if(tab==='合约')feedback('light');if(next!==symbol)choose(next,false);nav('合约');requestAnimationFrame(()=>{window.scrollTo({top:0});document.querySelector<HTMLButtonElement>('.symbol-picker')?.focus({preventScroll:true})})}
  function dismissPreview(){setPreview(null);if(uncertain){setTab('持仓');void refresh().catch(()=>setOnline(false))}}
  function closeProgress(){return <section className="trade-progress close-recovery" aria-label="平仓请求进度"><div className="progress-heading"><Spinner/><b>{closeRecovery.attempt?.symbol.replace('-USDT-SWAP','')} · 平仓 {closeRecovery.attempt?.percent}%</b></div><p role="status">{closeRecovery.status==='ready'?'原请求尚未发送，可继续提交':'正在核对原平仓请求'}</p><div className="recovery-actions"><button disabled={busy} onClick={()=>{closeRecovery.check();feedback('light')}}>刷新核对</button>{closeRecovery.status==='ready'&&<button disabled={busy} onClick={()=>void close(null,true)}>以原请求重试</button>}</div></section>}
@@ -269,27 +275,15 @@ export default function App(){
 
  const riskPercent=Number(p?.risk_fraction??0.05)*100;
  const steps=[{r:p?.breakeven_r??'1',label:'成本保本'},{r:p?.take_profits[0][0]??'3',label:`平原始 ${Number(p?.take_profits[0][1]??.6)*100}%`},{r:p?.take_profits.at(-1)?.[0]??'5',label:'全部余仓'}];
- const swipe=useSwipeNav(tab,!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
- const navIcons:Record<Tab,IconName>={'合约':'trade','持仓':'positions','统计':'trend','纪律':'shield','设置':'link'};
+ const swipe=useSwipeNav(tab,fibTicket||!!sheet||!!preview||!!closeTarget||!!error||noticeModal||editing||busy,nav);
+ const navIcons:Record<Tab,IconName>={'1.618':'trade','合约':'trade','持仓':'positions','统计':'trend','纪律':'shield','设置':'link'};
  const ruleGroups=[
   {title:'单笔与仓位',icon:'trade' as IconName,rows:[['单笔计划风险',p?`净值的 ${riskPercent}%`:'待连接服务'],['保证金模式',p?mode:'待连接服务'],['杠杆上限',p?`BTC / ETH ${p.major_leverage}x · 山寨 ${p.alt_leverage}x`:'待连接服务'],...(p?.major_allowance_scope==='independent'?[['BTC 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['ETH 独立额度',`保证金 ${Number(p.major_margin_fraction??0)*100}% · 名义 ${p.major_exposure_multiple}倍`],['山寨币共享额度',`保证金 ${Number(p.alt_margin_fraction??0)*100}% · 名义 ${p.alt_exposure_multiple}倍`]]:[['保证金占比上限',p?`BTC / ETH 合计 ${Number(p.major_margin_fraction??0)*100}% · 山寨合计 ${Number(p.alt_margin_fraction??0)*100}%`:'待连接服务']]),['同时持仓与挂单',p?`合计最多 ${p.max_positions} 笔`:'待连接服务'],['每日基础次数',p?`${p.max_entries} 次`:'待连接服务'],['盈利平仓奖励',p?(p.profit_entry_bonus?'整笔净盈利平仓，当天 +1 次':'未启用'):'待连接服务'],['奖励计次','每笔仅一次，分批止盈不重复计'],['额度计算',p?.major_allowance_scope==='independent'?'BTC、ETH 各自独立，山寨币共享；持仓与挂单合计占用':'同类持仓与挂单共享保证金额度']]},
   {title:'停手与冷静',icon:'clock' as IconName,rows:[['连续净亏损',p?`${p.loss_streak} 笔停手`:'待连接服务'],['日亏停手线',p?`当日起始净值的 ${Number(p.daily_loss_fraction)*100}%`:'待连接服务'],['冷静期触发',p?`连亏 ${p.cooldown_after_losses??1} 笔后 ${p.loss_cooldown_seconds/3600} 小时`:'待连接服务'],['盈利 / 分批止盈','不触发冷静期']]},
   {title:'自动保护',icon:'shield' as IconName,rows:[['成本保本',p?`${p.breakeven_r}R`:'待连接服务'],['分批止盈',p?`${p.take_profits.map(([r,f],i)=>`${r}R ${i===p.take_profits.length-1?'全部余仓':`平原始 ${Number(f)*100}%`}`).join(' · ')}`:'待连接服务']]}
  ];
 
- return <div className={`app ${tab==='合约'?'trade-page':''} ${editing?'keyboard-open':''}`}>
-  <div inert={!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
-  <main key={tab} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
-   {tab==='合约'&&<>
-    <section className="quote-hero" aria-label="合约行情">
-     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
-     <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
-    </section>
-    <CandleModule connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
-    <DisciplineBudget state={state} online={online} onOpen={()=>nav('纪律')}/>
-    {connection&&reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={18}/><span>{reason}</span><Icon name="chevron" size={16}/></button>}
-    {closeRecovery.attempt&&closeProgress()}
-    <section className={`trade-card entry-ticket entry-${selectedSide}`} aria-label="下单设置">
+ const orderTicket=<section className={`trade-card entry-ticket entry-${selectedSide}`} aria-label="下单设置">
      <div className="direction-picker" aria-label="开仓方向">{(['long','short'] as const).map(side=><button key={side} data-side={side} type="button" aria-pressed={selectedSide===side} className={selectedSide===side?'active':''} disabled={ticketLocked||!!existing} onClick={()=>selectDirection(side)}>{side==='long'?'做多':'做空'}</button>)}</div>
      {existing&&<p className="scale-in-note">同向加仓 · 沿用当前止损和杠杆</p>}
      <div className="order-options">
@@ -308,7 +302,22 @@ export default function App(){
      <div className="order-actions"><button className={selectedSide==='long'?'buy':'sell'} disabled={blocked||ticketLocked||!automatic.ready} onClick={()=>review(selectedSide)}>{pendingEntry?<><Spinner/>正在核对订单</>:reviewSide?<><Spinner/>正在校验…</>:automatic.working?<><Spinner/>计算止损中</>:selectedSide==='long'?(existing?'买入加仓':'买入开多'):(existing?'卖出加仓':'卖出开空')}</button></div>
      <TradeProgress entry={activeEntry} state={state} onOpen={()=>nav('持仓')} onDismiss={()=>setEntryProgress(null)}/>
      {!connection?<button className="primary connect-action" onClick={()=>nav('设置')}><Icon name="link" size={17}/>连接纪律服务<Icon name="arrow" size={17}/></button>:null}
+    </section>;
+
+ return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
+  <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
+  <main key={tab} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
+   {tab==='1.618'&&<FibHome connection={connection} state={state} onSettings={()=>nav('设置')} onQuick={openFibTicket} locked={busy||!!pendingEntry}/>}
+   {tab==='合约'&&<>
+    <section className="quote-hero" aria-label="合约行情">
+     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
+     <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
+    <CandleModule connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
+    <DisciplineBudget state={state} online={online} onOpen={()=>nav('纪律')}/>
+    {connection&&reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={18}/><span>{reason}</span><Icon name="chevron" size={16}/></button>}
+    {closeRecovery.attempt&&closeProgress()}
+    {orderTicket}
     {!!state?.positions.length&&<section className="home-positions"><div className="section-heading"><h2>当前持仓 <span>{state.positions.length}</span></h2><button className="plain" onClick={()=>nav('持仓')}>全部持仓 ›</button></div>{state.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} compact onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}</section>}
     <section className="protection-preview" aria-label="自动保护计划"><div className="section-heading"><h2>自动保护</h2><span>{p?'按服务端规则':'连接后校验规则'}</span></div><div className="protection-rail">{steps.map(t=><div key={t.r}><span className="rail-node"><i/></span><b>{t.r}R</b><small>{t.label}</small></div>)}</div><p>R 固定为开仓时的计划风险</p></section>
     <div className="overview"><button onClick={()=>nav('持仓')}><span>持仓</span><b>{state?.positions.length??'—'}</b></button><button onClick={()=>nav('持仓')}><span>挂单</span><b>{state?.pending.length??'—'}</b></button><button onClick={()=>nav('纪律')}><span>今日申请</span><b>{state?.daily?.entries??'—'}<small> / {state?.discipline?.entries_limit??p?.max_entries??3}</small></b></button></div>
@@ -347,6 +356,7 @@ export default function App(){
   {editing&&<div className="keyboard-toolbar"><span>填写完成后继续</span><button onPointerDown={e=>e.preventDefault()} onClick={()=>{(document.activeElement as HTMLElement)?.blur();feedback('light')}}>完成<Icon name="check" size={17}/></button></div>}
   <nav hidden={editing} className={`bottom-nav ${tab==='设置'?'nav-settings':''}`} style={{'--nav-index':Math.max(0,MAIN_TABS.indexOf(tab as typeof MAIN_TABS[number]))} as CSSProperties} aria-label="主导航">{MAIN_TABS.map(t=><button key={t} aria-current={tab===t?'page':undefined} className={tab===t?'active':''} onClick={()=>nav(t)}><Icon name={navIcons[t]} size={21}/><span>{t}</span></button>)}</nav>
   </div>
+  {fibTicket&&!preview&&!error&&!sheet&&!noticeModal&&<Dialog label="1.618 快捷开单" busy={busy||!!pendingEntry} onDismiss={()=>{setFibTicket(false);setQuickAuto(null)}}><div className="fib-ticket"><div className="fib-ticket-title"><h2>{small(symbol)}<small> / USDT</small></h2><p>快捷开单 · {existing?'沿用持仓方向与止损':'默认 1R 自动计算'}</p></div>{reason&&<button className="guard-strip" onClick={()=>nav(availability?.tab??'纪律')}><Icon name="lock" size={16}/><span>{reason}</span></button>}{orderTicket}</div></Dialog>}
   {!error&&preview&&<Dialog label={live?'确认实盘订单':'确认模拟订单'} busy={busy} onDismiss={dismissPreview}>{dismiss=><><span className="eyebrow">确认交易计划</span><h2>{live?'确认实盘订单':'确认模拟订单'}</h2>{live&&<span className="badge live-mode">真实资金 · OKX 实盘执行</span>}<div className="position-head"><b>{small(preview.ticket.symbol)}USDT</b><span className={preview.ticket.side==='long'?'long':'short'}>{preview.ticket.side==='long'?'开多':'开空'} · {marginLabel(preview.plan.margin_mode)} {preview.ticket.leverage}x</span></div>{metrics(preview.plan)}{preview.plan.exposure_limited&&<p className="micro">本单已按账户剩余名义仓位额度缩小。</p>}<div className="warning"><Icon name="shield" size={18}/><span>{live?`${preview.ticket.kind==='limit'?'限价挂单等待成交，可在持仓页撤单':'全部成交或取消'}；保护异常会尝试平掉余仓，实际损失可能超出预算。`:'提交时重新校验，这不是实盘订单。'}</span></div>{uncertain&&<p className="error">上次请求结果未确认。可用同一编号重试，服务端会去重。也可先查看持仓核对。</p>}{error&&<p className="error" role="alert">{error}</p>}{live&&confirmTrades&&<label className="live-consent"><input type="checkbox" checked={liveConsent} onChange={e=>setLiveConsent(e.target.checked)}/><span>我确认使用真实资金执行本次交易</span></label>}<button className="primary" disabled={busy||(confirmTrades&&live&&!liveConsent)} onClick={confirm}>{busy?<><Spinner/>正在提交…</>:uncertain?'以同一请求重试':live?'确认实盘开仓':'确认模拟开仓'}</button><button className="plain" disabled={busy} onClick={dismiss}>{uncertain?'先查看服务端持仓':'返回修改'}</button></>}</Dialog>}
   {!error&&closeTarget&&<ClosePosition position={closeTarget} state={state} online={online} percent={closePercent} onPercent={setClosePercent} busy={busy} locked={closeLocked} onClose={()=>void close()} onDismiss={()=>setCloseTarget(null)}/>}
   {!error&&sheet==='symbol'&&<Dialog key="symbol-sheet" label="选择合约" busy={false} onDismiss={()=>setSheet(null)}>{dismiss=><><h2>选择合约</h2><p className="muted sheet-intro">全部 USDT 永续 · {Object.values(state?.instruments??{}).filter(i=>i.tradable!==false).length} 个合约</p><label className="input-shell search-contract"><input ref={searchInput} aria-label="搜索合约" value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜索币种，例如 BTC、DOGE" autoComplete="off" autoCapitalize="characters"/>{search&&<button type="button" className="clear-search" aria-label="清空搜索" onPointerDown={e=>e.preventDefault()} onClick={()=>{setSearch('');searchInput.current?.focus();feedback('light')}}><Icon name="close" size={17}/></button>}</label><div className="contract-sort"><span title={contractSort==='volume'?'24h 估算成交额：基准币成交量 × 最新价':undefined}>{contractSort==='volume'?'24h · USDT':'今日 · 北京时间'}</span>{(['volume','gainers','losers'] as const).map((v,i)=><button key={v} aria-pressed={contractSort===v} onClick={()=>{setContractSort(v);feedback('light')}}>{['成交量 ↓','涨幅 ↓','跌幅 ↑'][i]}</button>)}</div><ContractOptions sort={contractSort} state={state} search={search} selected={symbol} onSelect={value=>{choose(value);dismiss()}}/>{!connection&&<p className="micro">连接后读取 OKX 合约列表。</p>}<p className="micro">切换合约会清空委托价格和止损。</p></>}</Dialog>}

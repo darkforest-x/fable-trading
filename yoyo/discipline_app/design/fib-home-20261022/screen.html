@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPIKE · 1.618 默认图表首页与1R快捷开单</title>
+  <!-- Tailwind CDN & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            jade: {
+              50: '#f0fdf9',
+              100: '#ccfbf1',
+              500: '#087f69',
+              600: '#066956',
+              700: '#044d3f',
+            },
+            rose: {
+              500: '#f43f5e',
+              600: '#e11d48',
+            },
+            porcelain: {
+              base: '#f6f8f5',
+              card: '#ffffff',
+              cardSubtle: '#f1f4ef',
+              border: 'rgba(0, 0, 0, 0.06)',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom clean scrollbars & glass treatments */
+    ::-webkit-scrollbar { display: none; }
+    * { -ms-overflow-style: none; scrollbar-width: none; -webkit-tap-highlight-color: transparent; }
+
+    .glass-frost {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    .glass-capsule {
+      background: rgba(248, 250, 247, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px -2px rgba(8, 127, 105, 0.08), 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .sheet-shadow {
+      box-shadow: 0 -10px 40px -10px rgba(8, 36, 30, 0.16);
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Crosshair & candle hover styles */
+    .candle-hover:hover { opacity: 0.85; }
+  </style>
+</head>
+<body class="bg-[#eef1ed] text-[#1c221e] antialiased min-h-screen flex items-center justify-center p-0 md:p-6 select-none font-sans">
+
+  <!-- Mobile Frame Container (Strict 390x844 Shell for Native Preview) -->
+  <div class="relative w-full max-w-[390px] h-[844px] max-h-[844px] bg-[#f6f8f5] shadow-2xl md:rounded-[48px] overflow-hidden flex flex-col border border-black/5 ring-1 ring-black/5">
+
+    <!-- Dynamic Island / Top Hardware Bar Indicator (Pure Native iOS Header) -->
+    <div class="pt-3 px-6 pb-1 flex justify-between items-center text-xs font-semibold text-[#303833] z-30 select-none">
+      <span class="font-mono text-[13px] tracking-tight">09:41</span>
+      <div class="w-24 h-4 bg-black/85 rounded-full mx-auto -mt-1 hidden sm:block"></div>
+      <div class="flex items-center gap-1.5 font-mono text-[11px] text-[#4b554e]">
+        <span>5G</span>
+        <svg class="w-4 h-3 fill-current inline-block ml-0.5" viewBox="0 0 24 14">
+          <rect x="1" y="1" width="19" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+          <rect x="3" y="3" width="12" height="8" rx="1.5" fill="currentColor"/>
+          <path d="M22 5v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 1. Top Lightweight Status Bar (NO large KPI cards, clean title, sync status, gear icon) -->
+    <header class="px-4 py-2 flex items-center justify-between border-b border-black/[0.04] bg-white/70 backdrop-blur-md z-20">
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 bg-[#eaf4f0] text-jade-500 px-2 py-0.5 rounded-full text-[11px] font-medium border border-jade-500/15">
+          <span class="w-1.5 h-1.5 rounded-full bg-jade-500 animate-pulse"></span>
+          <span>SPIKE · 1.618</span>
+        </div>
+        <span class="text-[11px] font-mono text-[#718277]">纽约基准已锁定</span>
+      </div>
+
+      <!-- Action Icons: Refresh & Settings Gear (44px touch-target) -->
+      <div class="flex items-center gap-1">
+        <button id="refreshBtn" onclick="resetChart()" title="复位最新" class="w-8 h-8 rounded-full flex items-center justify-center text-[#55635a] hover:bg-black/5 active:scale-95 transition-all">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+        <button onclick="toggleSettingsModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-[#55635a] hover:bg-black/5 active:scale-95 transition-all" title="设置">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Compact Symbol Switcher & 1.618 Trigger Tag (Horizontal Scroll) -->
+    <div class="px-3 pt-2 pb-1.5 bg-white/60 border-b border-black/[0.03] flex items-center gap-1.5 overflow-x-auto no-scrollbar z-20">
+
+      <!-- Symbol Pill 1: BTCUSDT (Selected - Just Touched Upper 1.618) -->
+      <button onclick="selectSymbol('BTCUSDT', 97024.8, 'upper', '8分钟前', 96420.5, 93950.0, 88975.2, this)"
+              class="symbol-pill active flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-jade-500 text-white shadow-sm ring-1 ring-jade-600/30 text-xs transition-all">
+        <span class="font-bold tracking-tight">BTCUSDT</span>
+        <span class="px-1.5 py-0.2 bg-white/20 rounded text-[10px] font-mono leading-tight">上触 · 8m</span>
+      </button>
+
+      <!-- Symbol Pill 2: SOLUSDT (Upper Touched 14m ago) -->
+      <button onclick="selectSymbol('SOLUSDT', 184.66, 'upper', '14分钟前', 184.92, 172.20, 152.10, this)"
+              class="symbol-pill flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white text-[#333d36] hover:bg-[#eef3ec] border border-black/5 text-xs transition-all">
+        <span class="font-semibold">SOLUSDT</span>
+        <span class="px-1.5 py-0.2 bg-jade-50 text-jade-600 rounded text-[10px] font-mono">上触 · 14m</span>
+      </button>
+
+      <!-- Symbol Pill 3: SUIUSDT (Lower Touched) -->
+      <button onclick="selectSymbol('SUIUSDT', 2.8513, 'lower', '6小时前', 2.8720, 3.4210, 3.0680, this)"
+              class="symbol-pill flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white text-[#333d36] hover:bg-[#eef3ec] border border-black/5 text-xs transition-all">
+        <span class="font-semibold">SUIUSDT</span>
+        <span class="px-1.5 py-0.2 bg-rose-50 text-rose-500 rounded text-[10px] font-mono">下触 · 6h</span>
+      </button>
+
+      <!-- Symbol Pill 4: PEPEUSDT -->
+      <button onclick="selectSymbol('PEPEUSDT', 0.0000192, 'upper', '昨天', 0.0000194, 0.0000178, 0.0000155, this)"
+              class="symbol-pill flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white text-[#333d36] hover:bg-[#eef3ec] border border-black/5 text-xs transition-all">
+        <span class="font-semibold">PEPE</span>
+        <span class="px-1.5 py-0.2 bg-black/5 text-[#55635a] rounded text-[10px] font-mono">上沿 · 1d</span>
+      </button>
+
+      <!-- Empty Filter / All Touched Count Badge -->
+      <div class="flex-shrink-0 text-[10px] font-mono text-[#8a9890] px-1">共 4 触价</div>
+    </div>
+
+    <!-- 3. Chart Header Bar: Timeframes (15m default), Live OHLC & Floating Return Button -->
+    <div class="px-3 py-1.5 bg-white/40 flex items-center justify-between text-xs border-b border-black/[0.02] z-10">
+
+      <!-- Timeframe selector -->
+      <div class="flex items-center gap-1 bg-black/[0.04] p-0.5 rounded-lg text-[11px] font-medium text-[#4f5c53]">
+        <button class="px-2 py-0.5 rounded text-[#718277] hover:text-black">5m</button>
+        <button class="px-2 py-0.5 rounded bg-white shadow-xs font-semibold text-jade-600">15m</button>
+        <button class="px-2 py-0.5 rounded text-[#718277] hover:text-black">1H</button>
+        <button class="px-2 py-0.5 rounded text-[#718277] hover:text-black">4H</button>
+      </div>
+
+      <!-- Current Price & Trigger Direction Status Badge -->
+      <div class="flex items-center gap-1.5">
+        <div id="triggerStatusTag" class="flex items-center gap-1 px-1.5 py-0.5 bg-jade-50 text-jade-600 rounded text-[10px] font-mono font-medium border border-jade-500/20">
+          <span class="w-1.5 h-1.5 rounded-full bg-jade-500"></span>
+          <span id="triggerStatusText">上穿 1.618 (97,024.80)</span>
+        </div>
+        <button id="resetCrosshairBtn" onclick="resetChart()" class="text-[10px] bg-white px-1.5 py-0.5 rounded border border-black/10 text-[#4c5750] shadow-2xs hover:bg-[#eef3ec]" title="回到最新">
+          最新
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Mini OHLC Readout Bar -->
+    <div class="px-3 py-1 bg-white/20 flex items-center justify-between text-[10px] font-mono text-[#6d7c72] border-b border-black/[0.02]">
+      <div>
+        <span class="text-[#8c9c92]">O:</span> <span id="ohlcO" class="tabular-nums">96,210.0</span>
+        <span class="text-[#8c9c92] ml-1.5">H:</span> <span id="ohlcH" class="tabular-nums text-jade-600">97,110.5</span>
+        <span class="text-[#8c9c92] ml-1.5">L:</span> <span id="ohlcL" class="tabular-nums">96,150.0</span>
+        <span class="text-[#8c9c92] ml-1.5">C:</span> <span id="ohlcC" class="tabular-nums font-semibold text-jade-600">96,420.5</span>
+      </div>
+      <div class="text-[9px] text-[#8e9c94]">周一区间 88,975 - 93,950</div>
+    </div>
+
+    <!-- 4. MAIN INTERACTIVE CANDLESTICK CHART AREA (Fills bulk of viewport, TradingView style light mode) -->
+    <div class="relative flex-1 w-full bg-[#fcfdfa] overflow-hidden flex flex-col cursor-crosshair" id="chartContainer">
+
+      <!-- SVG Canvas for Candlesticks, Monday Range & 1.618 Projections -->
+      <svg id="candlestickSvg" class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 390 400">
+        <defs>
+          <!-- Monday Range Soft Porcelain Sky Gradient -->
+          <linearGradient id="mondayRangeGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.10"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.02"/>
+          </linearGradient>
+          <!-- 1.618 Touch Spike Accent Gradient -->
+          <linearGradient id="touchZoneGlow" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#087f69" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#087f69" stop-opacity="0.03"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Horizontal Grid Lines (Subtle light mode) -->
+        <line x1="0" y1="50" x2="330" y2="50" stroke="#000000" stroke-opacity="0.04" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="0" y1="120" x2="330" y2="120" stroke="#000000" stroke-opacity="0.04" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="0" y1="210" x2="330" y2="210" stroke="#000000" stroke-opacity="0.04" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="0" y1="290" x2="330" y2="290" stroke="#000000" stroke-opacity="0.04" stroke-width="1" stroke-dasharray="3,3" />
+        <line x1="0" y1="360" x2="330" y2="360" stroke="#000000" stroke-opacity="0.04" stroke-width="1" stroke-dasharray="3,3" />
+
+        <!-- Vertical Time Grid Lines -->
+        <line x1="80" y1="0" x2="80" y2="380" stroke="#000000" stroke-opacity="0.03" stroke-width="1" />
+        <line x1="170" y1="0" x2="170" y2="380" stroke="#000000" stroke-opacity="0.03" stroke-width="1" />
+        <line x1="260" y1="0" x2="260" y2="380" stroke="#000000" stroke-opacity="0.03" stroke-width="1" />
+
+        <!-- 1. MONDAY RANGE BASELINE ZONE (00:00 - 23:59 EST) -->
+        <!-- Rect highlights Mon High to Mon Low with subtle cyan-ice gradient -->
+        <rect x="0" y="120" width="130" height="170" fill="url(#mondayRangeGradient)" />
+        <line x1="130" y1="0" x2="130" y2="380" stroke="#0284c7" stroke-opacity="0.25" stroke-width="1" stroke-dasharray="2,2" />
+        <text x="6" y="280" font-size="8" fill="#0284c7" font-family="Inter" font-weight="600" opacity="0.8">周一定界区间 (Mon Baseline)</text>
+
+        <!-- 2. KEY PRICE LINES WITH ACCURATE FORMULA MAPPING -->
+
+        <!-- A. Upper 1.618 Extension = H + 0.618*(H - L) -> 97,024.80 -->
+        <g id="lineUpper1618">
+          <line x1="0" y1="50" x2="330" y2="50" stroke="#087f69" stroke-width="1.5" stroke-dasharray="4,2" />
+          <!-- Flash glow tag at the spike -->
+          <rect x="235" y="42" width="92" height="16" rx="4" fill="#087f69" fill-opacity="0.12" stroke="#087f69" stroke-width="0.8" />
+          <text x="239" y="53" font-size="8" font-family="JetBrains Mono" font-weight="600" fill="#087f69">上 1.618 · 97,024.8</text>
+        </g>
+
+        <!-- B. Monday High (H) -> 93,950.00 -->
+        <g id="lineMonHigh">
+          <line x1="0" y1="120" x2="330" y2="120" stroke="#475569" stroke-width="1" stroke-dasharray="4,4" />
+          <text x="6" y="115" font-size="8" font-family="JetBrains Mono" font-weight="500" fill="#475569">周一高 H 93,950.0</text>
+        </g>
+
+        <!-- C. Range Equilibrium 0.5 Midline -> 91,462.60 -->
+        <g id="lineEQ">
+          <line x1="0" y1="210" x2="330" y2="210" stroke="#94a3b8" stroke-width="0.75" stroke-dasharray="2,2" />
+          <text x="6" y="206" font-size="8" font-family="JetBrains Mono" fill="#64748b">EQ 0.5 91,462.6</text>
+        </g>
+
+        <!-- D. Monday Low (L) -> 88,975.20 -->
+        <g id="lineMonLow">
+          <line x1="0" y1="290" x2="330" y2="290" stroke="#475569" stroke-width="1" stroke-dasharray="4,4" />
+          <text x="6" y="285" font-size="8" font-family="JetBrains Mono" font-weight="500" fill="#475569">周一低 L 88,975.2</text>
+        </g>
+
+        <!-- E. Lower 1.618 Extension = L - 0.618*(H - L) -> 85,900.80 -->
+        <g id="lineLower1618">
+          <line x1="0" y1="360" x2="330" y2="360" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4,2" />
+          <text x="6" y="355" font-size="8" font-family="JetBrains Mono" font-weight="600" fill="#f43f5e">下 1.618 · 85,900.8</text>
+        </g>
+
+        <!-- 3. REALISTIC LIGHT CANDLESTICKS (Monday Accumulation -> Breakout -> Upper 1.618 Spike) -->
+        <g id="candlestickBars">
+          <!-- Mon Candle 1 (Green) -->
+          <line x1="20" y1="215" x2="20" y2="275" stroke="#087f69" stroke-width="1" />
+          <rect x="16" y="225" width="8" height="40" fill="#087f69" rx="0.5" />
+
+          <!-- Mon Candle 2 (Red) -->
+          <line x1="38" y1="230" x2="38" y2="295" stroke="#f43f5e" stroke-width="1" />
+          <rect x="34" y="240" width="8" height="45" fill="#f43f5e" rx="0.5" />
+
+          <!-- Mon Candle 3 (Green) -->
+          <line x1="56" y1="180" x2="56" y2="260" stroke="#087f69" stroke-width="1" />
+          <rect x="52" y="195" width="8" height="50" fill="#087f69" rx="0.5" />
+
+          <!-- Mon Candle 4 (Red) -->
+          <line x1="74" y1="170" x2="74" y2="240" stroke="#f43f5e" stroke-width="1" />
+          <rect x="70" y="180" width="8" height="35" fill="#f43f5e" rx="0.5" />
+
+          <!-- Mon Candle 5 - Testing High (Green) -->
+          <line x1="92" y1="125" x2="92" y2="210" stroke="#087f69" stroke-width="1" />
+          <rect x="88" y="135" width="8" height="55" fill="#087f69" rx="0.5" />
+
+          <!-- Mon Candle 6 - Pullback inside range (Red) -->
+          <line x1="110" y1="140" x2="110" y2="225" stroke="#f43f5e" stroke-width="1" />
+          <rect x="106" y="150" width="8" height="45" fill="#f43f5e" rx="0.5" />
+
+          <!-- Tue Breakout Candle 7 (Strong Green piercing Mon High) -->
+          <line x1="135" y1="100" x2="135" y2="185" stroke="#087f69" stroke-width="1.2" />
+          <rect x="131" y="110" width="8" height="60" fill="#087f69" rx="0.5" />
+
+          <!-- Tue Candle 8 (Green Consolidation above Range) -->
+          <line x1="155" y1="90" x2="155" y2="160" stroke="#087f69" stroke-width="1" />
+          <rect x="151" y="105" width="8" height="40" fill="#087f69" rx="0.5" />
+
+          <!-- Tue Candle 9 (Small Red Pullback) -->
+          <line x1="175" y1="85" x2="175" y2="150" stroke="#f43f5e" stroke-width="1" />
+          <rect x="171" y="95" width="8" height="30" fill="#f43f5e" rx="0.5" />
+
+          <!-- Wed Momentum Candle 10 (Green) -->
+          <line x1="195" y1="65" x2="195" y2="130" stroke="#087f69" stroke-width="1" />
+          <rect x="191" y="75" width="8" height="40" fill="#087f69" rx="0.5" />
+
+          <!-- Wed Candle 11 (Green thrust toward 1.618) -->
+          <line x1="215" y1="52" x2="215" y2="110" stroke="#087f69" stroke-width="1.2" />
+          <rect x="211" y="60" width="8" height="35" fill="#087f69" rx="0.5" />
+
+          <!-- KEY TRIGGER CANDLE 12: Upper Wick Touches 1.618 at 97,110.5 (y=44) -->
+          <g id="triggerCandle">
+            <!-- Long upper shadow needle piercing through 97,024.80 line -->
+            <line x1="238" y1="44" x2="238" y2="95" stroke="#087f69" stroke-width="1.5" />
+            <rect x="234" y="62" width="8" height="28" fill="#087f69" rx="0.5" />
+            <!-- Small touch pulse indicator mark -->
+            <circle cx="238" cy="44" r="3.5" fill="#087f69" stroke="#ffffff" stroke-width="1.5" />
+          </g>
+
+          <!-- Candle 13: Rejection Red Candle (Mean reversion after 1.618 rejection) -->
+          <line x1="260" y1="58" x2="260" y2="105" stroke="#f43f5e" stroke-width="1" />
+          <rect x="256" y="65" width="8" height="25" fill="#f43f5e" rx="0.5" />
+
+          <!-- Latest Live Active Candle 14 (96,420.50) -->
+          <g id="liveCandle">
+            <line x1="282" y1="60" x2="282" y2="92" stroke="#087f69" stroke-width="1.2" />
+            <rect x="278" y="68" width="8" height="18" fill="#087f69" rx="0.5" />
+            <!-- Live pulsating beacon on current close price y=68 (96,420.5) -->
+            <circle cx="282" cy="68" r="4" fill="#087f69" fill-opacity="0.3" class="animate-ping" />
+            <circle cx="282" cy="68" r="2.5" fill="#087f69" stroke="#ffffff" stroke-width="1" />
+          </g>
+        </g>
+
+        <!-- 4. BOTTOM VOLUME PROFILE SUB-PANE -->
+        <g id="volumeBars" opacity="0.65">
+          <line x1="0" y1="365" x2="330" y2="365" stroke="#000000" stroke-opacity="0.05" stroke-width="0.5" />
+          <rect x="17" y="380" width="6" height="15" fill="#087f69" opacity="0.35" />
+          <rect x="35" y="375" width="6" height="20" fill="#f43f5e" opacity="0.35" />
+          <rect x="53" y="365" width="6" height="30" fill="#087f69" opacity="0.35" />
+          <rect x="71" y="382" width="6" height="13" fill="#f43f5e" opacity="0.35" />
+          <rect x="89" y="370" width="6" height="25" fill="#087f69" opacity="0.4" />
+          <rect x="132" y="360" width="6" height="35" fill="#087f69" opacity="0.5" />
+          <rect x="172" y="385" width="6" height="10" fill="#f43f5e" opacity="0.3" />
+          <rect x="212" y="355" width="6" height="40" fill="#087f69" opacity="0.6" />
+          <!-- High volume on 1.618 trigger candle -->
+          <rect x="235" y="345" width="6" height="50" fill="#087f69" opacity="0.8" />
+          <rect x="257" y="368" width="6" height="27" fill="#f43f5e" opacity="0.5" />
+          <rect x="279" y="372" width="6" height="23" fill="#087f69" opacity="0.5" />
+        </g>
+
+        <!-- Dynamic Interactive Crosshair Element (Hidden initially, visible on touch) -->
+        <g id="crosshairGroup" class="hidden">
+          <line id="crosshairX" x1="0" y1="68" x2="330" y2="68" stroke="#087f69" stroke-width="0.8" stroke-dasharray="2,2" />
+          <line id="crosshairY" x1="282" y1="0" x2="282" y2="380" stroke="#087f69" stroke-width="0.8" stroke-dasharray="2,2" />
+        </g>
+      </svg>
+
+      <!-- RIGHT SIDE PRICE AXIS (TradingView Light Style) -->
+      <div class="absolute right-0 top-0 bottom-6 w-[58px] bg-[#f9faf7] border-l border-black/[0.04] flex flex-col justify-between py-2 text-[9px] font-mono select-none">
+
+        <!-- Upper 1.618 Price Tag -->
+        <div class="px-1 -mt-1 text-[#087f69] font-semibold bg-jade-50/80 rounded-l border-l-2 border-jade-500 py-0.5">
+          97,025
+        </div>
+
+        <!-- Current Last Price Tag (Live Jade Badge) -->
+        <div class="px-1 text-white font-bold bg-jade-600 rounded-l shadow-2xs py-0.5 transform -translate-y-2">
+          96,420
+        </div>
+
+        <!-- Monday High -->
+        <div class="px-1 text-[#475569] font-medium border-l border-slate-400 py-0.5">
+          93,950
+        </div>
+
+        <!-- EQ 0.5 -->
+        <div class="px-1 text-[#64748b] border-l border-slate-300 py-0.5">
+          91,463
+        </div>
+
+        <!-- Monday Low -->
+        <div class="px-1 text-[#475569] font-medium border-l border-slate-400 py-0.5">
+          88,975
+        </div>
+
+        <!-- Lower 1.618 -->
+        <div class="px-1 text-rose-500 font-semibold bg-rose-50/80 rounded-l border-l-2 border-rose-500 py-0.5 mb-1">
+          85,901
+        </div>
+      </div>
+
+      <!-- BOTTOM TIME AXIS -->
+      <div class="absolute left-0 right-[58px] bottom-0 h-6 bg-[#f9faf7] border-t border-black/[0.04] flex items-center justify-between px-3 text-[9px] font-mono text-[#78887e]">
+        <span>周一 00:00</span>
+        <span>周一 12:00</span>
+        <span>周二 08:00</span>
+        <span class="text-jade-600 font-semibold">今日 14:15</span>
+      </div>
+
+      <!-- Compact Floating Watermark / Legend in Chart -->
+      <div class="absolute top-2 left-2 bg-white/75 backdrop-blur-md px-2 py-1 rounded-md text-[9px] font-mono text-[#546258] border border-black/5 shadow-2xs pointer-events-none">
+        <span class="inline-block w-2 h-0.5 bg-jade-500 mr-1"></span>1.618 = H + 0.618(H-L)
+      </div>
+
+    </div>
+
+    <!-- 5. QUICK ENTRY 1R CAPSULE BAR (Directly above Bottom Nav, 44px Tap Hotspot) -->
+    <div class="px-4 py-2.5 bg-white/90 backdrop-blur-md border-t border-black/[0.04] z-20 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.03)]">
+
+      <!-- Mini Trade Context Tag -->
+      <div class="flex flex-col">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-bold text-[#1c2420]" id="quickTradeSymbol">BTCUSDT</span>
+          <span class="text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded" id="quickTradeBiasTag">预设做空 (反弹触顶)</span>
+        </div>
+        <span class="text-[10px] font-mono text-[#6d7e73]">
+          1R 止损 = <span id="quickTradeSL" class="text-rose-600 font-medium">97,420.0</span> <span class="text-[#8c9c93]">(+1.0%)</span>
+        </span>
+      </div>
+
+      <!-- Primary Action CTA Button: "快捷开单 · 默认 1R" (Opens Ticket Sheet) -->
+      <button onclick="openOrderTicketSheet()"
+              class="flex-1 max-w-[170px] h-10 px-3 bg-jade-500 hover:bg-jade-600 active:scale-98 text-white rounded-xl font-semibold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-jade-500/20 transition-all">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        <span>快捷开单 · 1R</span>
+      </button>
+    </div>
+
+    <!-- 6. FIVE-ITEM BOTTOM NAVIGATION BAR (1.618 Default Active, 合约, 纪律, 持仓, 统计) -->
+    <nav class="h-16 bg-[#ffffff] border-t border-black/[0.05] grid grid-cols-5 items-center px-1 z-30 select-none pb-safe">
+
+      <!-- Tab 1: 1.618 (DEFAULT ACTIVE) -->
+      <button class="flex flex-col items-center justify-center gap-1 text-jade-600 transition-colors">
+        <div class="w-8 h-5 rounded-full bg-jade-50 flex items-center justify-center">
+          <span class="font-mono text-xs font-extrabold tracking-tighter text-jade-600">1.6</span>
+        </div>
+        <span class="text-[10px] font-bold tracking-tight">1.618</span>
+      </button>
+
+      <!-- Tab 2: 合约 (Contracts) -->
+      <button onclick="navigateTab('contracts')" class="flex flex-col items-center justify-center gap-1 text-[#78887e] hover:text-black transition-colors">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span class="text-[10px] font-medium">合约</span>
+      </button>
+
+      <!-- Tab 3: 纪律 (Discipline) -->
+      <button onclick="navigateTab('discipline')" class="flex flex-col items-center justify-center gap-1 text-[#78887e] hover:text-black transition-colors">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <span class="text-[10px] font-medium">纪律</span>
+      </button>
+
+      <!-- Tab 4: 持仓 (Positions) -->
+      <button onclick="navigateTab('positions')" class="flex flex-col items-center justify-center gap-1 text-[#78887e] hover:text-black transition-colors">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v9h9" />
+        </svg>
+        <span class="text-[10px] font-medium">持仓</span>
+      </button>
+
+      <!-- Tab 5: 统计 (Analytics) -->
+      <button onclick="navigateTab('stats')" class="flex flex-col items-center justify-center gap-1 text-[#78887e] hover:text-black transition-colors">
+        <svg class="w-5 h-5 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="1.8">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="text-[10px] font-medium">统计</span>
+      </button>
+    </nav>
+
+
+    <!-- ======================================================== -->
+    <!-- 7. REUSABLE 1R QUICK ENTRY ORDER TICKET (BOTTOM SHEET)   -->
+    <!-- (Shown when user taps "快捷开单 · 1R" capsule)           -->
+    <!-- ======================================================== -->
+    <div id="orderTicketBackdrop" onclick="closeOrderTicketSheet()"
+         class="absolute inset-0 bg-black/40 backdrop-blur-xs z-40 opacity-0 pointer-events-none transition-opacity duration-200">
+    </div>
+
+    <div id="orderTicketSheet"
+         class="absolute bottom-0 left-0 right-0 max-h-[780px] bg-white rounded-t-[32px] sheet-shadow border-t border-black/5 z-50 transform translate-y-full transition-transform duration-300 ease-out flex flex-col overflow-hidden">
+
+      <!-- Drag handle & Top utility -->
+      <div class="pt-3 pb-1 flex flex-col items-center flex-shrink-0">
+        <div class="w-10 h-1 bg-black/15 rounded-full mb-2"></div>
+        <div class="w-full px-5 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-base text-[#1c2420]">1R 快捷开单票据</h3>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-jade-50 text-jade-600 font-medium">纪律自动锁定</span>
+          </div>
+          <button onclick="closeOrderTicketSheet()" class="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-[#55635a] active:scale-90">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Ticket Body Content (Compact 760px optimized form) -->
+      <div class="p-5 overflow-y-auto space-y-3.5 text-xs text-[#2a342e]">
+
+        <!-- Contract & Direction Selector (Auto-selects Short for Upper 1.618, Long for Lower 1.618) -->
+        <div class="grid grid-cols-2 gap-2">
+          <div class="bg-porcelain-base p-2.5 rounded-xl border border-black/5 flex items-center justify-between">
+            <span class="text-[11px] text-[#6d7e73]">标的合约</span>
+            <span id="sheetSymbol" class="font-bold font-mono text-sm">BTCUSDT 永续</span>
+          </div>
+          <div class="bg-porcelain-base p-1 rounded-xl border border-black/5 grid grid-cols-2 gap-1 text-center font-medium">
+            <button id="btnLong" onclick="setDirection('long')" class="py-1.5 rounded-lg text-[#718277] transition-all">做多 (LONG)</button>
+            <button id="btnShort" onclick="setDirection('short')" class="py-1.5 rounded-lg bg-rose-500 text-white font-bold shadow-xs transition-all">做空 (SHORT)</button>
+          </div>
+        </div>
+
+        <!-- Price Input (Market / Limit) & Current Benchmark -->
+        <div class="bg-porcelain-base p-3 rounded-xl border border-black/5 flex items-center justify-between">
+          <div>
+            <span class="text-[10px] text-[#6d7e73] block">委托类型</span>
+            <span class="font-semibold text-xs text-[#1c2420]">市价委托 (Market)</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] text-[#6d7e73] block">最新参考价</span>
+            <span id="sheetCurrentPrice" class="font-mono font-bold text-sm text-jade-600 tabular-nums">96,420.50</span>
+          </div>
+        </div>
+
+        <!-- 1R Automatic Stop Loss Calculation (Hard rule) -->
+        <div class="bg-[#fcfdfa] p-3.5 rounded-xl border border-jade-500/25 ring-1 ring-jade-500/10">
+          <div class="flex items-center justify-between mb-1.5">
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-jade-500"></span>
+              <span class="font-semibold text-xs text-jade-700">自动 1R 初始止损 (Hard-Stop)</span>
+            </div>
+            <span class="text-[10px] font-mono text-jade-600 bg-jade-50 px-1.5 py-0.2 rounded border border-jade-500/20">固定单笔 1R = 20.00 U</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="text-[11px] text-[#55635a]">
+              反算触发价: <span id="sheetStopLossPrice" class="font-mono font-bold text-sm text-rose-600 tabular-nums">97,420.00</span>
+            </div>
+            <span class="text-[11px] font-mono text-[#8a988f]">点位间距: 1.04%</span>
+          </div>
+        </div>
+
+        <!-- Position Sizing Slider (100% of allowed 1R Discipline Quota) -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-[11px]">
+            <span class="text-[#65766b]">单笔风控额度使用率</span>
+            <span class="font-mono font-bold text-jade-600">100% 额度 (合规上限 10%)</span>
+          </div>
+          <div class="relative w-full h-2 bg-black/5 rounded-full overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 bg-jade-500 w-full rounded-full"></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-mono text-[#8a988f]">
+            <span>占用保证金: 20.00 U</span>
+            <span>持仓名义: 200.00 U (全仓 10x)</span>
+          </div>
+        </div>
+
+        <!-- Risk Summary Ledger -->
+        <div class="bg-porcelain-base p-2.5 rounded-xl border border-black/5 grid grid-cols-3 gap-2 text-center text-[11px]">
+          <div>
+            <span class="text-[10px] text-[#718277] block">预估止损风险</span>
+            <span class="font-mono font-bold text-rose-600 tabular-nums">-20.00 U</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-[#718277] block">全仓默认杠杆</span>
+            <span class="font-mono font-semibold text-[#222]">10x (自动)</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-[#718277] block">今日可开次数</span>
+            <span class="font-mono font-bold text-jade-600 tabular-nums">2 / 3 次</span>
+          </div>
+        </div>
+
+        <!-- Confirmation Action Button -->
+        <button onclick="executeOrderSim()"
+                id="btnConfirmOrder"
+                class="w-full h-11 bg-jade-500 hover:bg-jade-600 active:scale-98 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-jade-500/25 transition-all">
+          <span>确认提交委托 (受纪律保护)</span>
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+
+        <p class="text-[10px] text-center text-[#8e9c94]">
+          * 所有参数由服务端风控仲裁强校验 · 模拟撮合环境 · 严禁无止损挂单
+        </p>
+
+      </div>
+    </div>
+
+    <!-- 8. TOAST NOTIFICATION MODAL (Center floating feedback) -->
+    <div id="toastSuccess" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white/95 backdrop-blur-xl border border-jade-500/30 rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-2 z-50 opacity-0 pointer-events-none transition-all duration-200">
+      <div class="w-10 h-10 rounded-full bg-jade-50 flex items-center justify-center text-jade-500">
+        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <span class="font-bold text-sm text-[#1b231f]">委托已提交并接入纪律托管</span>
+      <span class="text-xs font-mono text-[#627267]">BTCUSDT 市价空单 · 止损 97,420.00</span>
+    </div>
+
+  </div>
+
+  <!-- Client-side Interactive Simulation Script -->
+  <script>
+    // State storage
+    let currentSymbol = 'BTCUSDT';
+    let currentTriggerType = 'upper';
+    let currentPrice = 96420.50;
+    let upperLevel = 97024.80;
+
+    // Switch between symbols in top bar
+    function selectSymbol(sym, level, type, timeAgo, lastP, monH, monL, el) {
+      currentSymbol = sym;
+      currentTriggerType = type;
+      currentPrice = lastP;
+      upperLevel = level;
+
+      // Update pills UI
+      document.querySelectorAll('.symbol-pill').forEach(btn => {
+        btn.classList.remove('active', 'bg-jade-500', 'text-white');
+        btn.classList.add('bg-white', 'text-[#333d36]');
+      });
+      el.classList.add('active', 'bg-jade-500', 'text-white');
+      el.classList.remove('bg-white', 'text-[#333d36]');
+
+      // Update header tags
+      const tag = document.getElementById('triggerStatusTag');
+      const tagText = document.getElementById('triggerStatusText');
+      if (type === 'upper') {
+        tag.className = 'flex items-center gap-1 px-1.5 py-0.5 bg-jade-50 text-jade-600 rounded text-[10px] font-mono font-medium border border-jade-500/20';
+        tagText.innerText = `上穿 1.618 (${level.toLocaleString()})`;
+        document.getElementById('quickTradeBiasTag').innerText = '预设做空 (反弹触顶)';
+        document.getElementById('quickTradeBiasTag').className = 'text-[10px] font-semibold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded';
+        setDirection('short');
+      } else {
+        tag.className = 'flex items-center gap-1 px-1.5 py-0.5 bg-rose-50 text-rose-500 rounded text-[10px] font-mono font-medium border border-rose-500/20';
+        tagText.innerText = `下探 1.618 (${level.toLocaleString()})`;
+        document.getElementById('quickTradeBiasTag').innerText = '预设做多 (破位反抽)';
+        document.getElementById('quickTradeBiasTag').className = 'text-[10px] font-semibold text-jade-600 bg-jade-50 px-1.5 py-0.2 rounded';
+        setDirection('long');
+      }
+
+      // Update bottom capsule info
+      document.getElementById('quickTradeSymbol').innerText = sym;
+      document.getElementById('sheetSymbol').innerText = sym + ' 永续';
+      document.getElementById('sheetCurrentPrice').innerText = lastP.toLocaleString();
+
+      // Calculate 1% SL
+      const slPrice = type === 'upper' ? (lastP * 1.01).toFixed(type === 'upper' && lastP < 10 ? 4 : 1) : (lastP * 0.99).toFixed(type === 'upper' && lastP < 10 ? 4 : 1);
+      document.getElementById('quickTradeSL').innerText = slPrice;
+      document.getElementById('sheetStopLossPrice').innerText = slPrice;
+    }
+
+    // Direction switcher in sheet
+    function setDirection(dir) {
+      const btnLong = document.getElementById('btnLong');
+      const btnShort = document.getElementById('btnShort');
+      if (dir === 'short') {
+        btnShort.className = 'py-1.5 rounded-lg bg-rose-500 text-white font-bold shadow-xs transition-all';
+        btnLong.className = 'py-1.5 rounded-lg text-[#718277] transition-all';
+      } else {
+        btnLong.className = 'py-1.5 rounded-lg bg-jade-500 text-white font-bold shadow-xs transition-all';
+        btnShort.className = 'py-1.5 rounded-lg text-[#718277] transition-all';
+      }
+    }
+
+    // Order Ticket Bottom Sheet toggles
+    function openOrderTicketSheet() {
+      const sheet = document.getElementById('orderTicketSheet');
+      const backdrop = document.getElementById('orderTicketBackdrop');
+      backdrop.classList.remove('pointer-events-none', 'opacity-0');
+      backdrop.classList.add('opacity-100');
+      sheet.classList.remove('translate-y-full');
+      sheet.classList.add('translate-y-0');
+    }
+
+    function closeOrderTicketSheet() {
+      const sheet = document.getElementById('orderTicketSheet');
+      const backdrop = document.getElementById('orderTicketBackdrop');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100');
+      sheet.classList.add('translate-y-full');
+      sheet.classList.remove('translate-y-0');
+    }
+
+    // Execute order simulation feedback
+    function executeOrderSim() {
+      closeOrderTicketSheet();
+      const toast = document.getElementById('toastSuccess');
+      toast.classList.remove('opacity-0', 'pointer-events-none');
+      toast.classList.add('opacity-100', 'scale-100');
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none');
+        toast.classList.remove('opacity-100');
+      }, 2200);
+    }
+
+    // Chart touch interactions for crosshair
+    const container = document.getElementById('chartContainer');
+    const crosshair = document.getElementById('crosshairGroup');
+    const chX = document.getElementById('crosshairX');
+    const chY = document.getElementById('crosshairY');
+
+    container.addEventListener('pointerdown', (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      crosshair.classList.remove('hidden');
+      chX.setAttribute('y1', y);
+      chX.setAttribute('y2', y);
+      chY.setAttribute('x1', x);
+      chY.setAttribute('x2', x);
+    });
+
+    container.addEventListener('pointermove', (e) => {
+      if (e.buttons > 0) {
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        chX.setAttribute('y1', y);
+        chX.setAttribute('y2', y);
+        chY.setAttribute('x1', x);
+        chY.setAttribute('x2', x);
+      }
+    });
+
+    function resetChart() {
+      crosshair.classList.add('hidden');
+      // Visual feedback
+      const btn = document.getElementById('refreshBtn');
+      btn.classList.add('rotate-180');
+      setTimeout(() => btn.classList.remove('rotate-180'), 400);
+    }
+
+    function toggleSettingsModal() {
+      alert("SPIKE 设备安全与交易偏好已就绪 (WebSocket 专线 18ms，硬件密钥已签名)");
+    }
+
+    function navigateTab(tabName) {
+      console.log("Navigating to: ", tabName);
+    }
+  </script>
+</body>
+</html>

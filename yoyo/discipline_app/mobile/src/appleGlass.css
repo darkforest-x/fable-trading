@@ -1,0 +1,60 @@
+/* Stitch 76f296d50287405ab90ce0a0bc181010: shared Apple Glass materials.
+   Visual layer only; pricing, trade direction, risk and confirmation semantics stay local. */
+:root{
+ --motion-ease:cubic-bezier(.16,1,.3,1);--motion-fast:220ms;--motion-page:300ms;--motion-pill:320ms;--motion-press:260ms;--motion-disclosure:240ms;--motion-sheet-in:340ms;
+ --canvas:#f5f7fb;--card:rgba(255,255,255,.74);--recessed:rgba(225,232,241,.55);--ink:#1d1d1f;--muted:#6e6e73;--border:rgba(29,29,31,.065);--radius:24px;
+ --shadow:inset 0 1px 0 #fffffff0,0 10px 32px -8px #0f172a0f,0 1px 2px #0f172a07;
+ --glass-subtle:rgba(255,255,255,.62);--glass-elevated:rgba(255,255,255,.88);--glass-border:1px solid rgba(255,255,255,.85);--glass-blur:blur(28px) saturate(180%);--accent:#0071e3;--accent-soft:rgba(0,113,227,.08);
+ color:var(--ink);background:#edf1f6;
+}
+.app:not(.fib-page){background:radial-gradient(ellipse at 20% 0%,#fbfcff 0%,#f1f5fb 48%,#edf2f7 100%);background-attachment:fixed}
+.app:not(.fib-page) main{padding-top:calc(var(--safe-top) + 20px);padding-bottom:calc(130px + var(--safe-bottom))}
+.app:not(.fib-page)::before{background:#f7f9fc}
+.app .card,.app .trade-card,.app .position-lite,.app .pending-lite,.app .completed-group{
+ background:var(--card);border:var(--glass-border);box-shadow:var(--shadow);border-radius:var(--radius);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
+}
+.app .card{padding:22px}.app .rule-card,.app .experience-settings,.app .account-settings{margin-bottom:18px}
+.app .page-header{margin:0 2px 26px}.app .page-header-row h1{font-size:27px;font-weight:600;letter-spacing:-.8px}.app .page-header>p{color:var(--muted);line-height:1.75}
+.app .settings-gear,.app .page-back,.app .connection-indicator{background:var(--glass-subtle);border:var(--glass-border);box-shadow:var(--shadow);border-radius:50%;color:#535962;-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}
+.app .quote-hero{padding:0 2px 20px}.app .symbol-picker{background:var(--glass-subtle);border:var(--glass-border);border-radius:99px;padding:4px 27px 4px 10px;min-height:46px;font-size:20px;box-shadow:0 4px 16px -2px #0f172a08}.app .symbol-picker .down-chevron{right:12px}.app .trade-heading{gap:7px}.app .trade-heading .neutral{background:transparent;padding:0;font-size:10px}.app .instrument-mode{font-size:11px}.app .price-row{margin:22px 2px 0}.app .price-row strong{font-size:34px;font-weight:600;letter-spacing:-1px}
+.app .discipline-budget{background:var(--glass-subtle);border:var(--glass-border);border-radius:20px;padding:13px 6px;margin-bottom:18px;box-shadow:var(--shadow)}.app .discipline-budget.halted{background:#fff6e9e0}
+.app .entry-ticket{padding:20px;border-radius:24px}.app .entry-ticket .order-options{margin-top:1px;border:0;gap:8px}.app .entry-ticket .order-options .segment{gap:2px;border-radius:99px;padding:3px}.app .input-shell{background:#f6f8fb99;border:1px solid #dde3ec85;border-radius:16px;box-shadow:inset 0 1px 2px #1d1d1f03}.app .input-shell:focus-within{border-color:#0071e359;box-shadow:0 0 0 3px #0071e312}
+.app .segment,.app .catalog-tabs{background:#e6ebf180;border:1px solid #ffffff80;padding:4px}.app .segment button,.app .catalog-tabs button{min-height:44px}.app .segment .active,.app .segment button[aria-pressed=true],.app .catalog-tabs button[aria-selected=true]{background:#ffffffdb;color:var(--accent);box-shadow:0 2px 8px #0f172a08}
+.app .entry-ticket .segment .active{background:var(--accent);color:white}.app .quick-stop,.app .entry-ticket .quick-stop.applied{background:var(--accent-soft);color:var(--accent);border-color:#0071e314}.app .entry-ticket .entry-input input{font-size:20px}.app .ticket-estimate{background:transparent;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:17px 0}.app .entry-ticket .equity{margin-top:3px}
+.app .allocation-presets button{background:#ffffff70;border:1px solid #e5e9ef80;min-height:44px;border-radius:12px}.app .allocation-presets button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:#0071e326}
+.app .primary{background:var(--accent);box-shadow:0 4px 12px #0071e31a}.app .buy,.app .sell{box-shadow:0 5px 14px #17242210}.app .plain,.app .settings-link{color:var(--accent)}
+.app .rule-card h2{font-weight:600;margin-bottom:12px}.app .rule-card h2 svg{color:var(--accent)}.app .rules>div{padding:14px 0;font-size:12px;border-bottom:1px solid var(--border)}.app .rules>div:last-child{border:0;padding-bottom:2px}.app .rules b{line-height:1.7}.app .rules span{flex-shrink:1;min-width:84px}.app .discipline-summary .badge{background:var(--accent-soft);color:var(--accent)}.app .pending-policy-card{background:#fff8e8c9;border:1px solid #edc98766}
+.app .position-lite{padding:20px;margin-bottom:16px}.app .position-profit{margin-top:20px;margin-bottom:20px}.app .position-lite-actions button{background:#ffffff99;border:1px solid #dde5edb3;border-radius:99px;min-height:44px;color:var(--accent)}.app .position-lite-actions button:last-child{background:#1d1d1f;color:white;border-color:transparent}.app .position-detail{border-color:var(--border)}
+.app .statistics-page .card{margin-bottom:20px}.app .account-hero{background:rgba(255,255,255,.72)}.app .account-equity strong{font-weight:600;letter-spacing:-1.2px}.app .stats-four{row-gap:20px}.app .account-split{border-color:var(--border)}
+.app .account-current{background:transparent}.app .account-avatar{background:var(--accent-soft);color:var(--accent)}.app .account-switch-list button.selected{background:var(--accent-soft);color:var(--accent)}.app .haptics-setting>i{background:#dce1e8}.app .haptics-setting input:checked+i{background:var(--accent)}.app .haptics-setting>i::after{transition:transform 280ms var(--motion-ease)}.app .haptics-setting{padding-top:16px;padding-bottom:16px}.app .haptics-setting small{line-height:1.7}
+.app .bottom-nav,.app.fib-page .bottom-nav{bottom:calc(37px + var(--safe-bottom));width:calc(100% - 32px);background:var(--card);border:var(--glass-border);box-shadow:var(--shadow);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur)}.app .bottom-nav::before{background:var(--accent);box-shadow:0 4px 12px #0071e326;transition:transform 320ms var(--motion-ease),opacity 200ms ease}.app .bottom-nav button{color:var(--muted);transition:color 240ms ease,transform 260ms var(--motion-ease)}.app .bottom-nav button.active{color:white}
+.app button{transition:transform 260ms var(--motion-ease),background-color 240ms ease,box-shadow 260ms ease,color 240ms ease}.app button:active:not(:disabled){transform:scale(.97)}.app .page-transition{animation-duration:300ms}.app .modal-backdrop{background:#18202720;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);animation-duration:240ms}.app .modal{background:#fffffff0;border:1px solid #ffffffeb;box-shadow:0 20px 48px -8px #0f172929;-webkit-backdrop-filter:blur(40px) saturate(180%);backdrop-filter:blur(40px) saturate(180%);animation-duration:340ms;animation-timing-function:var(--motion-ease)}.app .dialog-closing,.app .dialog-closing .modal{animation-duration:180ms}.app .modal.sheet-dragging{transition:none}
+.app .fib-ticket .entry-ticket{background:transparent;border:0;padding:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.app button:focus-visible,.app input:focus-visible,.app summary:focus-visible{outline-color:var(--accent)}
+.app .entry-ticket .segment button{border-radius:99px;border-bottom:0;padding:0 12px;min-height:44px}.app .entry-ticket .segment button::after{display:none}
+@media(max-width:350px){.app:not(.fib-page) main{padding-left:14px;padding-right:14px}.app .card,.app .entry-ticket,.app .position-lite{padding:17px}.app .symbol-picker{font-size:17px;gap:6px}.app .price-row strong{font-size:30px}.app .stats-four b{font-size:17px}.app .rules>div{gap:10px}.app .page-header-row h1{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.app button:active:not(:disabled){transform:none}.app .page-transition,.app .modal,.app .modal-backdrop{animation:none}.app .bottom-nav::before{transition:none}}
+
+/* Stitch 9cd418117dd24ff0802728fdeb596a18 — interaction color and release dynamics. */
+.app{overflow-x:clip}
+.app .page-transition{translate:var(--swipe-x,0px) 0;animation-name:glass-page-in}
+@keyframes glass-page-in{from{opacity:.9;transform:translateX(var(--page-offset,12px))}to{opacity:1;transform:translateX(0)}}
+.app main[data-swipe=drag]{will-change:translate;transition:none}
+.app main[data-swipe=cancel]{transition:translate 220ms cubic-bezier(.25,1,.5,1);opacity:1}
+.app main[data-swipe=finish]{transition:translate 100ms var(--motion-ease),opacity 100ms ease;opacity:.9}
+.app .freshness.connected,.app .candle-toggle,.app .candle-periods button[aria-pressed=true],.app .stop-applied-mark{color:var(--accent)}
+.app .freshness.connected i,.app .connection-indicator.connected i{background:var(--accent)}
+.app .healthy{color:var(--accent);background:var(--accent-soft)}
+.app .entry-field-heading button{color:var(--accent);border-radius:99px;padding:0 8px}
+.app .entry-field-heading .manual-stop{color:var(--muted)}
+.app .entry-ticket .allocation-presets button[aria-pressed=true]{background:var(--accent-soft);color:var(--accent);border-color:#0071e326}
+.app .entry-ticket .stop-field.stop-applied .input-shell{box-shadow:inset 0 0 0 1px #0071e326;background:var(--accent-soft)}
+.app .entry-ticket .input-shell:focus-within{border-color:#0071e359;background:#ffffff9c;box-shadow:0 0 0 3px #0071e312}
+.app .budget:not(.close-budget) input[type=range]{--slider-color:var(--accent)}
+.app .budget input[type=range]:active:not(:disabled)::-webkit-slider-thumb{box-shadow:0 0 0 5px #0071e312,0 3px 10px #17242220}
+.app .contract-sort button{background:var(--recessed);min-height:44px}.app .contract-sort button[aria-pressed=true]{background:var(--accent);color:white}
+.app .position-lite-stats{background:var(--recessed)}
+.app .candle-periods button{min-height:44px}.app .fib-chart .candle-periods button[aria-pressed=true]{color:white}
+.app .fib-chart .candle-realtime,.app .fib-new{min-height:44px}
+.app .fib-chart .candle-credit summary{min-height:36px}
+@media(prefers-reduced-motion:reduce){.app main[data-swipe]{transition:none;translate:none;opacity:1}.app .page-transition{animation:none}.app button,.app .haptics-setting>i::after{transition:none}}

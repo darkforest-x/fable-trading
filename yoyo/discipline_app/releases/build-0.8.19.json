@@ -1,0 +1,63 @@
+{
+  "version": "0.8.19",
+  "build": 28,
+  "verified_at": "2026-10-22T16:45:54.459881+00:00",
+  "python_tests_passed": 192,
+  "frontend_tests_passed": 55,
+  "mobile_build": true,
+  "ios_build": true,
+  "android_build": true,
+  "android_signature_verified": true,
+  "device_install": {
+    "success": false,
+    "attempted": false,
+    "reason": "iPhone unavailable; native package built but not installed"
+  },
+  "public_backend_version": "0.8.19",
+  "screens": [
+    320,
+    390,
+    1280
+  ],
+  "design_sources": [
+    "design/fib-home-20261022/apple-glass-source.json",
+    "design/apple-glass-20261023/source.json",
+    "design/apple-glass-20261023/motion-source.json"
+  ],
+  "ui_evidence": "design/apple-glass-20261023/",
+  "gestures_verified": [
+    "finger following -35px",
+    "cancel and return",
+    "successful adjacent navigation",
+    "first edge resistance 100px to 32px",
+    "vertical intent lock",
+    "chart touch excluded",
+    "reduced motion immediate switch"
+  ],
+  "material_verified": {
+    "accent": "#0071e3",
+    "background": "rgba(255,255,255,0.74)",
+    "blur": "28px",
+    "saturation": 1.8,
+    "nav_height_px": 67
+  },
+  "synthetic_fixture": {
+    "streams": 12,
+    "active": 0,
+    "auto_stop": 0,
+    "seed_orders": 1,
+    "order_writes": 0
+  },
+  "real_order_commands_sent": 0,
+  "service_health": {
+    "heartbeat": 1792687547.402412,
+    "blockers": [],
+    "positions": 1,
+    "pending": 0,
+    "fib_connected": true,
+    "monitor_service_alive": true,
+    "model_ready": false,
+    "note": "No active model is configured; healthz ok is not asserted."
+  },
+  "ios_signature_verified": true
+}
