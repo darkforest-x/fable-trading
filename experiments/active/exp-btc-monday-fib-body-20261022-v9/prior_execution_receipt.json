@@ -1,0 +1,53 @@
+{
+  "reason": "Only initial stop changes to latest5 completed15m low for long/high for short, including entry confirmation candle; no buffer. Fixed at entry until anyTP moves remainder to breakeven. Same entry, targets, pre-entry gate, zero cost.",
+  "successor": "exp-btc-monday-fib-body-20261022-v9",
+  "completed": [
+    {
+      "directory": "experiments/active/exp-btc-monday-fib-body-20261022-v8/native_market_be_0",
+      "completed_identity_path": "experiments/active/exp-btc-monday-fib-body-20261022-v8/native_market_be_0/identity.json",
+      "identity_bytes": 2799845,
+      "signal": {
+        "n": 71,
+        "closed": 71,
+        "open": 0,
+        "wins": 13,
+        "losses": 58,
+        "breakeven": 0,
+        "win_pct": 18.30985915492958,
+        "nonloss_pct": 18.30985915492958,
+        "net_r": -12.125796616871973,
+        "mean_bp": -11.95651119370425,
+        "tp1": 13,
+        "tp2": 13,
+        "tp3": 11,
+        "tp4": 9,
+        "be_exit": 4,
+        "be_active": 13,
+        "reverse_net_r": -12.125796616871906,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 710,
+        "closed": 710,
+        "open": 0,
+        "wins": 114,
+        "losses": 596,
+        "breakeven": 0,
+        "win_pct": 16.056338028169016,
+        "nonloss_pct": 16.056338028169016,
+        "net_r": -152.46474298773825,
+        "mean_bp": -15.032738123327658,
+        "tp1": 114,
+        "tp2": 105,
+        "tp3": 97,
+        "tp4": 71,
+        "be_exit": 43,
+        "be_active": 114,
+        "reverse_net_r": -152.464742987738,
+        "terminal_mark_r": 0.0
+      }
+    }
+  ],
+  "training_eligible": false,
+  "production_eligible": false
+}

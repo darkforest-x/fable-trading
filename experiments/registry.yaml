@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-body-20261022-v9
+    source_repo: darkforest-x/fable-trading
+    source_commit: af83a16d14ab26bd7bf0abb62e5f9b6c8840048d
+    status: rejected
+    question: Does latest5 completed15m structural stop improve the confirmed Monday1618 reversal?
+    single_variable: Only initial stop changes to latest5 completed15m low for long/high for short, including entry confirmation candle; no buffer. Fixed at entry until anyTP moves remainder to breakeven. Same entry, targets, pre-entry gate, zero cost.
+    result: 71closed12wins59losses16.9014percent,mean-7.77968bp;prior13wins18.3099percent,mean-11.95651bp. Random71011.5493percent,mean-6.72302bp,equal-notionalp.5267. Own-riskR-20.90645 vs prior-12.12580;units differ. Earlymean-30.3182bp/later+10.7135bp;later worse than baseline+18.0319bp.
+    artifacts:
+    - btc-monday-fib-body-20261022-v9
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v9/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Five completed15m extrema at entry incl confirmation, no buffer;71same entries/targets,48tighter23wider,medianSL.5804percent;2losses rescued3oldwins lost. Fee0,anyTPBE.50tests,3124nativelegs6248fills20.5s,781extrema/cashchecks,710random,reversepayoff0. No defaults or live changes. https://app.notion.com/p/4018856479af81a39200f1fbefc90e1b
   - experiment_id: exp-btc-monday-fib-body-20261022-v8
     source_repo: darkforest-x/fable-trading
     source_commit: 8df2abcbddf6dca1669e86c2016458ab57d61f3d

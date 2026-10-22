@@ -1,0 +1,197 @@
+{
+  "experiment": "exp-btc-monday-fib-body-20261022-v9",
+  "unchanged_entry_and_target_checks": 71,
+  "stop_distance_percent": {
+    "min": 0.0879906900173143,
+    "q25": 0.39920751275308786,
+    "median": 0.5803728612622783,
+    "q75": 0.7841094385566022,
+    "max": 2.245984355285014
+  },
+  "stop_change_counts": {
+    "narrower": 48,
+    "wider": 23
+  },
+  "changed_outcomes": [
+    {
+      "parent_id": "body15m-2025-06-30-1",
+      "week": "2025-06-30",
+      "side": 1,
+      "segment": 0,
+      "entry": 105683.3,
+      "risk": 309.3000000000029,
+      "outcome": "loss",
+      "net_r": -1.0,
+      "net_bp": -29.26668641119296,
+      "risk_old": 739.8000000000029,
+      "outcome_old": "win",
+      "net_r_old": 3.0754595836712433,
+      "net_bp_old": 215.2870888778071,
+      "stop_pct": 0.2926668641119296,
+      "stop_change": "narrower",
+      "change_bp": -244.55377528900004,
+      "new_in_prior_risk_r": -0.418085969180862
+    },
+    {
+      "parent_id": "body15m-2025-09-22-1",
+      "week": "2025-09-22",
+      "side": 1,
+      "segment": 0,
+      "entry": 109715.9,
+      "risk": 1149.7999999999884,
+      "outcome": "win",
+      "net_r": 3.4160723604105465,
+      "net_bp": 357.9973367579363,
+      "risk_old": 768.0999999999913,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -70.00808451646401,
+      "stop_pct": 1.0479793721784978,
+      "stop_change": "wider",
+      "change_bp": 428.0054212744003,
+      "new_in_prior_risk_r": 5.113657075901641
+    },
+    {
+      "parent_id": "body15m-2025-10-20-1",
+      "week": "2025-10-20",
+      "side": 1,
+      "segment": 1,
+      "entry": 107760.3,
+      "risk": 1160.300000000003,
+      "outcome": "win",
+      "net_r": 2.7109152805308856,
+      "net_bp": 291.8955311000429,
+      "risk_old": 754.3999999999942,
+      "outcome_old": "loss",
+      "net_r_old": -1.0,
+      "net_bp_old": -70.0072290073426,
+      "stop_pct": 1.0767416200585957,
+      "stop_change": "wider",
+      "change_bp": 361.90276010738546,
+      "new_in_prior_risk_r": 4.169505567338308
+    },
+    {
+      "parent_id": "body15m-2026-01-26--1",
+      "week": "2026-01-26",
+      "side": -1,
+      "segment": 1,
+      "entry": 90093.3,
+      "risk": 229.10000000000582,
+      "outcome": "loss",
+      "net_r": -0.9999999999999365,
+      "net_bp": -25.429193957818313,
+      "risk_old": 630.6999999999971,
+      "outcome_old": "win",
+      "net_r_old": 4.0286982717615505,
+      "net_bp_old": 282.02985127639874,
+      "stop_pct": 0.2542919395781993,
+      "stop_change": "narrower",
+      "change_bp": -307.45904523421706,
+      "new_in_prior_risk_r": -0.36324718566670733
+    },
+    {
+      "parent_id": "body15m-2026-08-10-1",
+      "week": "2026-08-10",
+      "side": 1,
+      "segment": 1,
+      "entry": 62855.7,
+      "risk": 189.6999999999971,
+      "outcome": "loss",
+      "net_r": -1.0,
+      "net_bp": -30.18023822819523,
+      "risk_old": 439.9999999999927,
+      "outcome_old": "win",
+      "net_r_old": 4.596875000000076,
+      "net_bp_old": 321.78863651188357,
+      "stop_pct": 0.30180238228195233,
+      "stop_change": "narrower",
+      "change_bp": -351.9688747400788,
+      "new_in_prior_risk_r": -0.43113636363636415
+    }
+  ],
+  "by_stop_change": [
+    {
+      "group": "narrower",
+      "n": 48,
+      "wins": 5,
+      "old_wins": 8,
+      "mean_bp": -20.230615410656153,
+      "old_mean_bp": -22.400770765543104,
+      "sum_change_bp": 104.16745703457352
+    },
+    {
+      "group": "wider",
+      "n": 23,
+      "wins": 7,
+      "old_wins": 5,
+      "mean_bp": 18.204880250451918,
+      "old_mean_bp": 9.840204434481192,
+      "sum_change_bp": 192.3875437673268
+    }
+  ],
+  "by_side": [
+    {
+      "group": "-1",
+      "n": 33,
+      "wins": 4,
+      "old_wins": 5,
+      "mean_bp": -12.598937569770888,
+      "old_mean_bp": -15.22824020409363,
+      "sum_change_bp": 86.7669869326505
+    },
+    {
+      "group": "1",
+      "n": 38,
+      "wins": 8,
+      "old_wins": 8,
+      "mean_bp": -3.5945356354911073,
+      "old_mean_bp": -9.115272842576628,
+      "sum_change_bp": 209.78801386924957
+    }
+  ],
+  "by_segment": [
+    {
+      "group": "0",
+      "n": 32,
+      "wins": 3,
+      "old_wins": 3,
+      "mean_bp": -30.318197717508067,
+      "old_mean_bp": -48.5049298097493,
+      "sum_change_bp": 581.9754269517197
+    },
+    {
+      "group": "1",
+      "n": 39,
+      "wins": 9,
+      "old_wins": 10,
+      "mean_bp": 10.71346238485018,
+      "old_mean_bp": 18.031934850230165,
+      "sum_change_bp": -285.42042614981955
+    }
+  ],
+  "mean_change_bp": 4.176830997209861,
+  "equal_notional_pf": 0.8463349138194726,
+  "prior_equal_notional_pf": 0.7909248162967888,
+  "new_sum_in_prior_risk_r": -7.890578239808227,
+  "prior_sum_r": -12.125796616871973,
+  "equal_notional_strategy_vs_random": {
+    "weeks": 63,
+    "p_one_sided": 0.5267236638168091,
+    "excess_sum_bp": -75.0231698300313,
+    "weekly_bootstrap_total_bp_95ci": [
+      -2172.0416565773116,
+      2227.9229638829706
+    ]
+  },
+  "equal_notional_new_vs_old": {
+    "weeks": 63,
+    "p_one_sided": 0.3659317034148293,
+    "excess_sum_bp": 296.55500080190023,
+    "weekly_bootstrap_total_bp_95ci": [
+      -1276.2082676138457,
+      1950.742162917264
+    ]
+  },
+  "units": "Percent and bp are unlevered entry-notional per trade, not compounded account return. Own-risk R differs across stop rules.",
+  "source_commit": "6c8ab85abf552ecd8b9ba19396c526d92e2e1d5d"
+}

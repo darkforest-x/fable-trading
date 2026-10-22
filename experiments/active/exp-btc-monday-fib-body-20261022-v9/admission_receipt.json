@@ -1,0 +1,35 @@
+{
+  "source_experiment": "exp-btc-monday-fib-body-20261022-v8",
+  "previous_inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v8/entries.csv",
+      "bytes": 19082,
+      "mtime_ns": 1792670872856120685
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v8/controls.csv",
+      "bytes": 144066,
+      "mtime_ns": 1792670872864807514
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v8/decisions.csv",
+      "bytes": 24152,
+      "mtime_ns": 1792670872869291867
+    }
+  ],
+  "frozen_signals": 71,
+  "frozen_controls": 710,
+  "admission_checks": {
+    "weeks": 105,
+    "weekly_sides": 210,
+    "touched": 90,
+    "body_checks": 71,
+    "arrow_required": false,
+    "elapsed_wait_timeout": false,
+    "fee_geometry_filter": true,
+    "next_15m_close_confirmation": true,
+    "adverse_extension_fraction": 0.02,
+    "stop_15m_lookback": 5
+  },
+  "change": "Only initial stop changes to latest5 completed15m low for long/high for short, including entry confirmation candle; no buffer. Fixed at entry until anyTP moves remainder to breakeven. Same entry, targets, pre-entry gate, zero cost."
+}
