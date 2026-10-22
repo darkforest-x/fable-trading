@@ -1,0 +1,7 @@
+# Candle position, signal close and retrospective publication are different clocks
+
+- **Problem**: The owner wanted a 05:40 five-minute arrow paired with the 06:00 fifteen-minute arrow four bars later, with its frame back-marked to the original five-minute signal.
+- **Dead end**: Comparing close timestamps changes that separation to six five-minute bars. Retiming the earlier signal to the later confirmation also changes the requested visual reference. The previous persistent direction watch admits unrelated later signals.
+- **Effective path**: Match candle-open timestamps within an inclusive symmetric window; freeze hypothetical entry and stop at the five-minute close; publish only when both signals have closed. Advance hidden candidate outcomes before publication so a pre-confirmation stop cannot disappear. Consume each candidate once while allowing all matching candidates around a fifteen-minute event.
+- **General rule**: Establish three timestamps separately: chart position, decision data cutoff, and first time the result can be known. Retrospective display may back-mark the first only when requested; it must retain the third and must not be represented as causal historical execution.
+- **Scope**: `monday_range_v2_36.pine` replaces only the enabled five-minute multi-timeframe review lane. The fifteen-minute entry engine, key-level module and exit mechanics remain unchanged. Native fixtures include the owner's timing example and pre-confirmation losses.

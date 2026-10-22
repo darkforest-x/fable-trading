@@ -50,3 +50,4 @@ def test_pending_outcomes_advance_before_visibility_matching():
     assert 'txAdvance(candidate.trade, time, time_close' in engine
     assert 'txExitOnH1(candidate.trade' in engine
     assert 'txEntryEligible' not in engine
+    assert 'total += txMatchReview(' in engine

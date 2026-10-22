@@ -1115,6 +1115,7 @@ txReviewEngine() =>
     var array<TxReviewCandidate> accepted = array.new<TxReviewCandidate>()
     var array<TxReviewQuarter> quarters = array.new<TxReviewQuarter>()
     var array<TxTrade> live = array.new<TxTrade>()
+    var int total = 0
     var int sourceStart = time
     for trade in live
         txAdvance(trade, time, time_close, open, high, low, close, qClose, quarterAtr, txArmR, txAtrMult, syminfo.mintick)
@@ -1134,7 +1135,10 @@ txReviewEngine() =>
             pending.push(TxReviewCandidate.new(trade, time, fiveSide == 1 ? low : high))
     if qClose and quarterSide != 0
         quarters.push(TxReviewQuarter.new(quarterEnd - 900000, quarterEnd, quarterSide))
-    txMatchReview(pending, quarters, accepted, live, time_close, txMatchWindow)
+    // Keep the state transition in the returned series dependency. Pine can
+    // otherwise prune historical helper calls whose only effect is mutation
+    // of a nested collection read only in the final snapshot.
+    total += txMatchReview(pending, quarters, accepted, live, time_close, txMatchWindow)
     // Older quarters cannot match a newly appearing5m signal. A generous bounded
     // retention also covers all still-pending candidates across data gaps.
     while quarters.size() > 0 and quarters.first().closeAt < time_close - 2 * txMatchWindow * 300000 - 900000
@@ -1145,7 +1149,7 @@ txReviewEngine() =>
         for candidate in accepted
             rows.push(txPackReview(candidate))
         result := TxSnapshot.new(time_close, rows, rows.size(), live.size(), 0, 0,
-             accepted.size(), accepted.size() > 0 ? accepted.last().trade.entry : na,
+             total, accepted.size() > 0 ? accepted.last().trade.entry : na,
              accepted.size() > 0 ? accepted.last().trade.initialStop : na, sourceStart)
     result
 
