@@ -1,0 +1,14 @@
+{
+  "experiment_id": "exp-range-v237-fixed-exits-20261022-v1",
+  "source": "experiments/active/exp-range-v237-twoyear-20261022-v1",
+  "symbols": [{"symbol":"BTC","tick":0.1},{"symbol":"ETH","tick":0.01}],
+  "entry": "Reuse causal confirmation-close signal and matched-control occurrences exactly, including entry, initial stop, event multiplicity and original two-year boundary. No signal regeneration.",
+  "targets": [1,2,3],
+  "breakeven": "First intrabar touch of +1 original-riskR moves stop to entry; excludes fees. Fixed1R+BE1R equals fixed1R because the resting target executes before the BE amendment.",
+  "paths": ["OHLC","OLHC"],
+  "cost": 0.002,
+  "baseline": "Reuse previous native causal5R/4ATR+armedH1 results. Fixed-target arms disable ATR and H1 exits, do not add holding limit or partials.",
+  "uncertainty": "5m OHLC does not identify intrabar order. Execute both paths natively; adverse-first per-side envelope is a sensitivity, not reconstructed tick history. Synthetic segment timestamps convey order only.",
+  "training_eligible": false,
+  "production_eligible": false
+}

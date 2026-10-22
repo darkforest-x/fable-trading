@@ -67,8 +67,22 @@ class ExitPolicy:
     pivot_minutes: int = 15
     target_from_entry: bool = False
     breakeven_includes_cost: bool = True
+    breakeven_on_touch: bool = False
+    intrabar_path: str | None = None
 
     def __post_init__(self):
+        if self.intrabar_path not in (None, "OHLC", "OLHC"):
+            raise ValueError("Intrabar path must be OHLC or OLHC")
+        if self.breakeven_on_touch and (self.breakeven_r is None or self.intrabar_path is None):
+            raise ValueError("Touch breakeven requires an R trigger and explicit intrabar path")
+        if self.breakeven_on_touch and self.breakeven_includes_cost:
+            raise ValueError("Touch breakeven currently supports entry-price protection only")
+        if self.intrabar_path is not None and (self.fixed_target_r is None
+                or self.opposite_hour_exit or self.partial_close_r is not None
+                or self.time_breakeven_minutes is not None or self.rsi_scaleout
+                or self.confirmed_pivot_exit or self.structural_pivot_stop
+                or self.target_from_entry):
+            raise ValueError("Explicit intrabar path supports standalone fixed-target management")
         pivot_management = self.confirmed_pivot_exit or self.structural_pivot_stop
         if self.confirmed_pivot_exit and self.structural_pivot_stop:
             raise ValueError("Pivot market exits and structural stops are separate policies")
@@ -223,7 +237,7 @@ class TradeState:
 class IndependentCloseStrategy(Strategy):
     def __init__(self, instrument, bar_type, frame, atr, hour, entries, policy, fees,
                  protection_tick, execution_minutes=5, rsi_side=None, entry_order_mode="market",
-                 entry_fill_model=None):
+                 entry_fill_model=None, point_phases=None):
         super().__init__(StrategyConfig(
             oms_type="HEDGING", log_events=False, log_commands=False,
         ))
@@ -244,6 +258,8 @@ class IndependentCloseStrategy(Strategy):
         self.tick = protection_tick
         self.eps = self.tick * 1e-7
         self.indices = {int(t): i for i, t in enumerate(frame.index.asi8)}
+        self.point_phases = {} if point_phases is None else point_phases
+        self.indices.update({t: i for t, (i, _) in self.point_phases.items()})
         self.by_entry = {}
         for row in entries.to_dict("records"):
             self.by_entry.setdefault(int(row["entry_i"]), []).append(row)
@@ -404,7 +420,8 @@ class IndependentCloseStrategy(Strategy):
                         for f in state.fills if f["phase"] != "entry")/float(state.quantity)
         # Native bar events carry close timestamps. Preserve a separate logical
         # open timestamp for gap exits without pretending intrabar time is known.
-        gap = phase == "stop" and side*(self.prices[i, 0]-state.stop) < -self.eps
+        point_phase = self.point_phases.get(event.ts_event, (i, 0))[1]
+        gap = phase == "stop" and point_phase == 0 and side*(self.prices[i, 0]-state.stop) < -self.eps
         row.update(
             exit_i=i, exit_price=price, reason=int(reason), peak_r=state.peak,
             arm_i=state.arm_i, protection=state.stop,
@@ -423,6 +440,9 @@ class IndependentCloseStrategy(Strategy):
             framework_position_id=str(event.position_id),
             framework_commission=state.fees, quantity=float(state.quantity),
         )
+        if self.policy.intrabar_path:
+            row.update(intrabar_path=self.policy.intrabar_path, exit_path_phase=point_phase,
+                       simulated_event_ns=int(event.ts_event))
         if self.policy.partial_close_r is not None:
             row.update(partial_i=state.partial_i, partial_price=state.partial_price,
                        partial_weight=state.partial_weight,
@@ -459,6 +479,22 @@ class IndependentCloseStrategy(Strategy):
 
     def on_bar(self, bar):
         i = self.indices[bar.ts_event]
+        if self.policy.intrabar_path:
+            # Only the current path endpoint is visible here. The full parent
+            # bar's features/entries are consumed at its final close, not early.
+            if self.policy.breakeven_on_touch:
+                price = float(bar.close)
+                for state in list(self.active.values()):
+                    r = state.source
+                    if (i > r["entry_i"] and state.be_trigger_i < 0
+                            and r["side"]*(price-r["entry"])+self.eps
+                            >= self.policy.breakeven_r*r["risk"]):
+                        state.be_trigger_i = state.be_effective_i = i
+                        state.stop, state.stop_kind = state.be_price, 1
+                        self.modify_order(state.stop_order,
+                            trigger_price=self.instrument.make_price(state.stop))
+            if self.point_phases[bar.ts_event][1] != 3:
+                return
         if self.entry_fill_model is not None:
             # The current bar has finished matching. Later gap stops must use
             # their own native price, never the entry bar's override.
@@ -489,7 +525,7 @@ class IndependentCloseStrategy(Strategy):
                 move = side*(close-entry)
                 if p.fixed_target_r is None and not p.target_from_entry and state.arm_i < 0 and move+self.eps >= p.trail_arm_r*risk:
                     state.arm_i = i
-                if p.breakeven_r is not None:
+                if p.breakeven_r is not None and not p.breakeven_on_touch:
                     if state.be_trigger_i < 0 and move+self.eps >= p.breakeven_r*risk:
                         state.be_trigger_i = i
                     if state.be_trigger_i >= 0 and state.be_effective_i < 0:
@@ -601,6 +637,27 @@ class IndependentCloseStrategy(Strategy):
         self.hedged_bars += int({s.source["side"] for s in self.active.values()} == {-1, 1})
 
 
+def ohlc_path_frame(frame, path):
+    """Expose a stated OHLC path as opening point and three monotone segments.
+
+    These are synthetic execution segments, not observed lower-timeframe bars.
+    All timestamps occupy the last four nanoseconds of the original interval;
+    only sequence is asserted. Features and entries remain on the real close.
+    An opening gap stays a gap; later continuous segments let native matching
+    fill a crossed stop at its trigger instead of at an artificial endpoint.
+    """
+    cols = ["open", "high", "low", "close"] if path == "OHLC" else ["open", "low", "high", "close"]
+    points = frame[cols].to_numpy()
+    previous = np.column_stack([points[:, 0], points[:, :-1]])
+    data = np.column_stack([previous.ravel(), np.maximum(previous, points).ravel(),
+                            np.minimum(previous, points).ravel(), points.ravel()])
+    times = (frame.index.as_unit("ns").asi8[:, None]+np.arange(-3, 1)).ravel()
+    expanded = pd.DataFrame(data, columns=["open", "high", "low", "close"],
+                            index=pd.to_datetime(times, utc=True))
+    phases = {int(t): (i//4, i%4) for i, t in enumerate(times)}
+    return expanded, phases
+
+
 def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", market_tick=None,
                *, execution_minutes=5, rsi_side=None, entry_order_mode="market"):
     """Execute supplied entries using native orders, fills and HEDGING positions.
@@ -694,14 +751,15 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
         )
         engine.add_instrument(instrument)
         bar_type = BarType.from_str(f"{instrument.id}-{execution_minutes}-MINUTE-LAST-EXTERNAL")
+        execution_frame, point_phases = (ohlc_path_frame(frame, policy.intrabar_path)
+            if policy.intrabar_path else (frame.copy(), None))
         strategy = IndependentCloseStrategy(
             instrument, bar_type, frame, atr, hour, entries, policy, fee_model, tick,
-            execution_minutes,rsi_side,entry_order_mode,fill_model if limit_entry else None,
+            execution_minutes,rsi_side,entry_order_mode,fill_model if limit_entry else None,point_phases,
         )
         engine.add_strategy(strategy)
         # Synthetic liquidity deliberately decouples each independent entry
         # from other entries. These are unit returns, not capacity estimates.
-        execution_frame = frame.copy()
         execution_frame["volume"] = 1_000_000_000_000.
         engine.add_data(BarDataWrangler(bar_type, instrument).process(execution_frame))
         prepared = time.perf_counter()
@@ -733,10 +791,13 @@ def run_native(frame, atr, hour, entries, policy, tick=1e-9, symbol="PEPE", mark
                                "when enabled. Returns normalized per original risk"),
             partial_execution="one completed 5m close reduction" if policy.partial_close_r is not None else "disabled",
             native_partial_accounting_checked=len(rows) if policy.partial_close_r is not None else 0,
-            fixed_target_execution="resting limit; O-H-L-C; independent limit-price book; native reduce-only sibling cleanup" if has_targets else "disabled",
+            fixed_target_execution=(f"resting limit; {policy.intrabar_path or 'OHLC'}; independent limit-price book; native reduce-only sibling cleanup" if has_targets else "disabled"),
             native_fixed_target_accounting_checked=len(rows) if has_targets else 0,
             target_from_entry=policy.target_from_entry,
             breakeven_includes_cost=policy.breakeven_includes_cost,
+            breakeven_on_touch=policy.breakeven_on_touch,
+            intrabar_path=policy.intrabar_path,
+            synthetic_segments_per_bar=4 if policy.intrabar_path else 1,
             positions=len(positions), fills=len(fills),
             execution_minutes=execution_minutes,
             rsi_scaleout="five original20percent reductions at fee-positive opposite confirmed strong closes" if policy.rsi_scaleout else "disabled",
