@@ -1,0 +1,30 @@
+{
+  "experiment_id": "exp-range-v237-2h-scaleout-20261022-v1",
+  "source": "experiments/active/exp-range-v237-fixed-exits-20261022-v1",
+  "hold_minutes": 120,
+  "cost": 0.002,
+  "seed": 20261022,
+  "targets": [1, 2, 3, 5],
+  "paths": ["OHLC", "OLHC"],
+  "symbols": [{"symbol":"BTC","tick":0.1},{"symbol":"ETH","tick":0.01}],
+  "schedules": [
+    {"name":"split_1_2_half","targets":[1,2],"weights":[0.5,0.5]},
+    {"name":"split_1_3_quarter","targets":[1,3],"weights":[0.25,0.75]},
+    {"name":"split_1_3_half","targets":[1,3],"weights":[0.5,0.5]},
+    {"name":"split_1_3_three_quarter","targets":[1,3],"weights":[0.75,0.25]},
+    {"name":"split_2_3_half","targets":[2,3],"weights":[0.5,0.5]},
+    {"name":"split_2_5_quarter","targets":[2,5],"weights":[0.25,0.75]},
+    {"name":"split_2_5_half","targets":[2,5],"weights":[0.5,0.5]},
+    {"name":"split_2_5_three_quarter","targets":[2,5],"weights":[0.75,0.25]},
+    {"name":"split_1_2_3_equal","targets":[1,2,3],"weights":[0.3333333333333333,0.3333333333333333,0.3333333333333333]},
+    {"name":"split_1_2_5_front","targets":[1,2,5],"weights":[0.5,0.25,0.25]},
+    {"name":"split_1_time_half","targets":[1,null],"weights":[0.5,0.5]},
+    {"name":"split_2_time_half","targets":[2,null],"weights":[0.5,0.5]}
+  ],
+  "entry": "Frozen V2.37 causal confirmation-close entries, existing five-bar structural stop plus0.05percent buffer, matching controls and event multiplicity unchanged. Separate 5m and15m cohorts.",
+  "execution": "NautilusTrader1.231.0 native fixed limits, original stops and explicit entry+120minute market close. Reuse earlier cached TP1/2/3 fills when they precede or equal the new deadline, replay only unresolved positions; TP5 and initial-stop-only run natively. Static fractions are weighted original-size native legs; no BE, ATR, H1 or dynamic stop change.",
+  "conditional": "Future OHLC outcomes only. First reach1R/2R after entry, before original stop, within120minutes from ENTRY (not120minutes after reach). Compare OHLC and OLHC: post-trigger minimumR, running-peak drawdown, further peakR, return-to-entry versus next target order. Do not include adverse moves before the first trigger, or price history after stop. Opening gaps are discrete.",
+  "selection": "Predeclare12partial schedules and5whole-position comparators. Select partial by mean netR in first chronological year and describe its later-year outcome; reused history is not untouched out-of-sample. Matched controls and weekly paired inference retained. No live parameter change.",
+  "training_eligible": false,
+  "production_eligible": false
+}
