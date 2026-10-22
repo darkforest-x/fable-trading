@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-1618-confluence-20261023-v1",
+  "question": "Notion task 区间1.618测试 method 7: does volume-profile or swing confluence at the 1618 judge whether it holds?",
+  "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+  "top_fraction": 0.3,
+  "seed": 20261023,
+  "features": "pw_poc_dist, pw_va_dist, vol_density, swing_dist (see builder docstring); frozen before running.",
+  "split": "Ledger segment: earlier before 2026-01-01, later after (same as stage 1).",
+  "success_criterion": "Later AUC>=0.55 AND early-threshold top30 percent validity>=38.2 and mean R>0 AND week-stratified p<0.01.",
+  "limitations": "Volume profile approximated from 15m bars spread uniformly over each bar range; OKX swap volumes; 15m conservative labels.",
+  "training_eligible": false,
+  "production_eligible": false
+}
