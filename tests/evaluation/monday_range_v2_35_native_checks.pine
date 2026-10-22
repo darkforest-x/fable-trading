@@ -1,0 +1,112 @@
+// Temporary native fixture appendix; never ship in the private indicator.
+qa235At(int b) =>
+    1800000000000 + b * 300000
+qa235State() =>
+    TxConfirmation.new(na, 0, na, 0, array.new<TxPending>())
+qa235Count(array<TxPending> rows) =>
+    na(rows) ? 0 : rows.size()
+
+varip bool qa235Logged = false
+if barstate.islast and not qa235Logged
+    TxWatch w = TxWatch.new(1, qa235At(0))
+    TxConfirmation before = qa235State()
+    txConfirmEntries(before, w, false, 0, 0, 1, qa235At(1), 1, 5)
+    array<TxPending> a = txConfirmEntries(before, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    bool past = qa235Count(a) == 1 and before.waiting.size() == 0
+    TxConfirmation stale = qa235State()
+    txConfirmEntries(stale, w, false, 0, 0, 1, qa235At(0), 0, 5)
+    bool pastOutside = qa235Count(txConfirmEntries(stale, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)) == 0
+    TxConfirmation simultaneous = qa235State()
+    bool same = qa235Count(txConfirmEntries(simultaneous, w, true, 1, qa235At(6), 1, qa235At(6), 6, 5)) == 1
+    bool consumed = qa235Count(txConfirmEntries(simultaneous, w, false, 0, 0, 1, qa235At(7), 7, 5)) == 0
+    TxConfirmation later = qa235State()
+    bool future = qa235Count(txConfirmEntries(later, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)) == 0
+    future := future and qa235Count(txConfirmEntries(later, w, false, 0, 0, -1, qa235At(7), 7, 5)) == 0
+    future := future and qa235Count(txConfirmEntries(later, w, false, 0, 0, 1, qa235At(8), 8, 5)) == 1
+    future := future and qa235Count(txConfirmEntries(later, w, false, 0, 0, 1, qa235At(9), 9, 5)) == 0
+    TxConfirmation edge = qa235State()
+    txConfirmEntries(edge, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    bool last = qa235Count(txConfirmEntries(edge, w, false, 0, 0, 1, qa235At(11), 11, 5)) == 1
+    TxConfirmation expired = qa235State()
+    txConfirmEntries(expired, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    bool outside = qa235Count(txConfirmEntries(expired, w, false, 0, 0, 1, qa235At(12), 12, 5)) == 0 and expired.waiting.size() == 0
+    TxConfirmation reverse = qa235State()
+    txConfirmEntries(reverse, w, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    txObserve(w, -1, qa235At(7))
+    bool cancel = qa235Count(txConfirmEntries(reverse, w, false, 0, 0, 1, qa235At(7), 7, 5)) == 0 and reverse.waiting.size() == 0
+    TxWatch sameWatch = TxWatch.new(1, qa235At(0))
+    TxConfirmation refreshed = qa235State()
+    txConfirmEntries(refreshed, sameWatch, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    txObserve(sameWatch, 1, qa235At(7))
+    array<TxPending> b = txConfirmEntries(refreshed, sameWatch, false, 0, 0, 1, qa235At(7), 7, 5)
+    bool refresh = qa235Count(b) == 1 and b.get(0).observedAt == qa235At(0)
+    TxConfirmation overlap = qa235State()
+    txConfirmEntries(overlap, sameWatch, true, 1, qa235At(9), 0, qa235At(9), 9, 5)
+    txConfirmEntries(overlap, sameWatch, true, 1, qa235At(12), 0, qa235At(12), 12, 5)
+    array<TxPending> c = txConfirmEntries(overlap, sameWatch, false, 0, 0, 1, qa235At(13), 13, 5)
+    bool independent = qa235Count(c) == 2 and c.get(0).signalAt != c.get(1).signalAt and overlap.waiting.size() == 0
+    TxWatch shortWatch = TxWatch.new(-1, qa235At(0))
+    TxConfirmation shortState = qa235State()
+    txConfirmEntries(shortState, shortWatch, false, 0, 0, -1, qa235At(5), 5, 5)
+    bool symmetric = qa235Count(txConfirmEntries(shortState, shortWatch, true, -1, qa235At(6), 0, qa235At(6), 6, 5)) == 1
+    TxConfirmation gap = qa235State()
+    txConfirmEntries(gap, sameWatch, true, 1, qa235At(9), 0, qa235At(9), 9, 5)
+    bool gaps = qa235Count(txConfirmEntries(gap, sameWatch, false, 0, 0, 1, qa235At(15), 10, 5)) == 0
+    TxWatch original = TxWatch.new(1, qa235At(6))
+    bool oldGate = not txEntryEligible(original, "15", true, 1, qa235At(6), 1, qa235At(6))
+    oldGate := oldGate and txEntryEligible(original, "15", true, -1, qa235At(9), 1, qa235At(9))
+    oldGate := oldGate and txEntryEligible(original, "5", false, 1, qa235At(7), 0, 0)
+    // Entry at the later close excludes that entry candle's earlier wick.
+    TxTrade delayed = TxTrade.new(qa235At(8), qa235At(0), 1, 100, 99, 1, 99)
+    txAdvance(delayed, qa235At(7), qa235At(8), 100, 110, 98, 100, false, 1, 5, 4, .01)
+    bool execution = delayed.endedAt == 0 and delayed.peakR == 0
+    txAdvance(delayed, qa235At(8), qa235At(9), 100, 101, 98, 99, true, 1, 5, 4, .01)
+    execution := execution and delayed.reason == 1 and delayed.exitPrice == 99
+    if not (past and pastOutside and same and consumed and future and last and outside and cancel and refresh and independent and symmetric and gaps and oldGate and execution)
+        runtime.error("V235_FIXTURE_FAIL")
+    qa235Logged := true
+    log.info("V235_FIXTURES_PASS past5/stale6/same/consume/firstFuture/next5/expired6/watchCancel/watchRefresh/overlap/short/gaps/oldRoute/entryWick")
+
+varip bool qa235LedgerLogged = false
+if barstate.islast and not na(tx) and not qa235LedgerLogged
+    qa235LedgerLogged := true
+    int offQuarter = 0
+    for row in tx.trades
+        array<string> f = str.split(row, ",")
+        int entered = int(str.tonumber(f.get(0)))
+        int observed = int(str.tonumber(f.get(1)))
+        if entered < observed or entered % 300000 != 0 or (txEntryTf == "5" and txFiveConfirm and entered - observed > txFiveWindow * 300000)
+            runtime.error("V235_LEDGER_CLOCK_FAIL")
+        offQuarter += entered % 900000 != 0 ? 1 : 0
+    log.info("V235_LEDGER_PASS chart={0} filter={1} total={2} offQuarter={3}", txEntryTf, txFiveConfirm, tx.total, offQuarter)
+
+// Exercise the production route, not only its pairing helper.
+varip bool qa235RouteLogged = false
+if barstate.islast and not qa235RouteLogged
+    TxWatch fiveWatch = TxWatch.new()
+    TxConfirmation fiveState = qa235State()
+    txRefreshObservation(fiveWatch, "5", true, -1, qa235At(6), true, 1, qa235At(6))
+    array<TxPending> sameFive = txAdmissions(fiveState, fiveWatch, "5", true, true, 1, qa235At(6), 1, qa235At(6), 6, 5)
+    bool noH1EntryGate = fiveWatch.side == 1 and qa235Count(sameFive) == 1 and sameFive.get(0).observedAt == qa235At(6)
+    bool onceFive = qa235Count(txAdmissions(fiveState, fiveWatch, "5", true, false, 0, 0, 1, qa235At(7), 7, 5)) == 0
+    TxWatch waitingWatch = TxWatch.new()
+    TxConfirmation waitingState = qa235State()
+    txRefreshObservation(waitingWatch, "5", false, 0, 0, true, 1, qa235At(6))
+    txAdmissions(waitingState, waitingWatch, "5", true, true, 1, qa235At(6), 0, qa235At(6), 6, 5)
+    txRefreshObservation(waitingWatch, "5", true, -1, qa235At(7), false, 0, 0)
+    bool hourlyDoesNotCancel = qa235Count(txAdmissions(waitingState, waitingWatch, "5", true, false, 0, 0, 1, qa235At(7), 7, 5)) == 1
+    TxWatch quarterWatch = TxWatch.new()
+    TxConfirmation quarterState = qa235State()
+    txRefreshObservation(quarterWatch, "15", false, 0, 0, true, 1, qa235At(6))
+    bool hourlyStillRequired = qa235Count(txAdmissions(quarterState, quarterWatch, "15", true, true, 1, qa235At(6), 1, qa235At(6), 6, 5)) == 0
+    txRefreshObservation(quarterWatch, "15", true, 1, qa235At(6), true, 1, qa235At(6))
+    bool simultaneousHourExcluded = qa235Count(txAdmissions(quarterState, quarterWatch, "15", true, true, 1, qa235At(6), 1, qa235At(6), 6, 5)) == 0
+    bool quarterIgnoresFilter = qa235Count(txAdmissions(quarterState, quarterWatch, "15", true, true, 1, qa235At(9), 0, qa235At(9), 9, 5)) == 1
+    TxWatch offWatch = TxWatch.new(1, qa235At(6))
+    TxConfirmation offState = qa235State()
+    bool offSameExcluded = qa235Count(txAdmissions(offState, offWatch, "5", false, true, 1, qa235At(6), 1, qa235At(6), 6, 5)) == 0
+    bool offUnbounded = qa235Count(txAdmissions(offState, offWatch, "5", false, false, 0, 0, 1, qa235At(12), 12, 5)) == 1
+    if not (noH1EntryGate and onceFive and hourlyDoesNotCancel and hourlyStillRequired and simultaneousHourExcluded and quarterIgnoresFilter and offSameExcluded and offUnbounded)
+        runtime.error("V235_ROUTE_FAIL")
+    qa235RouteLogged := true
+    log.info("V235_ROUTE_PASS 5mNoH1/5mOnce/H1NoCancel/15mNeedsH1/15mSameExcluded/15mIgnoresFilter/offSameExcluded/offUnbounded")
