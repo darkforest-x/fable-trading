@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-monday-fib-wick-engulf-20261023-v1
+    artifact_type: manifest
+    role: 'Notion task 区间1.618测试 #1: two15m wick rejections then reversal engulfing at Monday1618'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5ebcda4694e615a2f1bb1ddece0f838e28fae509
+    generator_commit: 5ebcda4694e615a2f1bb1ddece0f838e28fae509
+    source_path: experiments/active/exp-btc-monday-fib-wick-engulf-20261023-v1/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-wick-engulf-20261023-v1/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 66 entries10.61percent win,-27.81bp fee0 vs matched random14.09percent p.690 and v8 body18.31percent. Rejected; no default, Pine or live change.
   - artifact_id: monday-fib-monitor-20261022
     artifact_type: manifest
     role: Public OKX all-USDT perpetual Monday 1.618 location monitor implementation evidence

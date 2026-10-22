@@ -1,3 +1,9 @@
+## 2026-10-23 · Notion 区间1.618测试 #1 two-wick engulfing rejected
+
+- Owner Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2 rule1: after first weekly 1618 touch, two completed15m wicks reach the key with open/close inside, then first later reversal engulfing enters at close. Only admission changes versus v8; 0.7percent SL, four25percent targets, any-TP breakeven and fee0 unchanged.
+- BTC OKX two years: 90 touched sides, 66 entries, 7 wins 10.61percent, -26.22R, mean-27.81bp, PF.556. Matched random 14.09percent, -18.18bp, p.690; v8 body 18.31percent, -11.96bp, per-opportunity -20.39 vs -9.43bp p.746. Both halves and both sides negative. Median wait 367min; 25/66 engulf closes still beyond1618 (post hoc only).
+- Nautilus1.231.0 2904 legs 5808 fills, all oracle checks, 66 independent wick/engulf rebuilds, 726 cash checks; 39 tests. Builders b06bbf29cd/5ebcda4694; `experiments/active/exp-btc-monday-fib-wick-engulf-20261023-v1/rule_comparison.json`. Notion task status 进行中, sub-task line checked; knowledge-base EXP record not created (no API in session). No Pine/default/live change.
+
 ## 2026-10-22 · Monday 1.618 monitor — Apple Glass delivered
 
 - Update ca7aff1d6b: Owner requested hidden untouched rows, emphasis on new touches and click-to-expand per-contract K lines. Stitch20fd581767514b34af5fb3efe2d42e6d source retained. Occurrence-time descending sort; live-only15minute display highlight, historical recovery excluded. Existing15m closed-candle API and renderer reused with9 monitor-anchored levels and Monday band; one open chart, stable DOM/zoom, request cancellation and symbol/week checks.44 tests pass; desktop1280 and mobile390 verified onBTC/ETH/SNDK. A real MRVL touch arrived and moved to top while SNDK chart stayed open. No backend/TG/trading changes; prior validation below remains historical.

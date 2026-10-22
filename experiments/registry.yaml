@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-wick-engulf-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 5ebcda4694e615a2f1bb1ddece0f838e28fae509
+    status: rejected
+    question: 'Notion task 区间1.618测试 #1: do two15m wick rejections at the Monday1618 followed by a reversal engulfing identify a valid level?'
+    single_variable: 'Entry admission only: after first weekly-side touch, two completed15m candles reach1618 with open and close inside, then first later reversal engulfing enters at close. Replaces v8 inner body plus next close and its2percent gate. v8 exits unchanged: 0.7percent SL, four25percent targets, any TP protects remainder, fee0.'
+    result: 90touched,66entries,7wins59losses10.61percent,-26.22R,mean-27.81bp,PF.556. Matched random660 14.09percent,-18.18bp,p.690. v8 body71 18.31percent,-11.96bp; per opportunity -20.39 vs -9.43bp,p.746. Early10.0/later11.1percent both negative. Long12.5 vs random18.4, short8.8 vs10.0.
+    artifacts:
+    - btc-monday-fib-wick-engulf-20261023-v1
+    canonical_report: experiments/active/exp-btc-monday-fib-wick-engulf-20261023-v1/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Median wait touch to entry367min, second wick to engulf120min. 25/66 engulf closes still beyond1618 (12percent,+1.27bp) versus41 inside (9.8percent,-45.54bp); post hoc descriptive, not a filter. 39tests,2904native legs5808fills,726cash checks,660random,66independent wick/engulf rebuilds,reverse payoff0. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2
   - experiment_id: exp-btc-monday-fib-body-20261022-v10
     source_repo: darkforest-x/fable-trading
     source_commit: d0234aca68176ac7c296c08fcf023647a013d7e2
