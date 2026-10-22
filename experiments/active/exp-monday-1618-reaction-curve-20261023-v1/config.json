@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-reaction-curve-20261023-v1",
+  "question": "Notion task 区间1.618测试 method 9: does the 1618 produce small bounces (0.1/0.2/0.3R inside) before the 2.0 extension more often than driftless odds on 1m bars?",
+  "touch_ledger": "experiments/active/exp-monday-1618-oos-1m-20261023-v1",
+  "targets_R": [0.1, 0.2, 0.3],
+  "split": "2024-10-01T00:00:00Z",
+  "horizon_days": 14,
+  "success_criterion": "Per target: both halves above driftless odds 0.382/(0.382+x), later one-sided binomial Holm p<0.01 across 3 targets, later mean R>0.",
+  "limitations": "Binance UM 1m OHLC, touch minute stop-only, same minute both = stop; fee 0 (owner), so tiny targets ignore real costs and slippage that would dominate them.",
+  "training_eligible": false,
+  "production_eligible": false
+}
