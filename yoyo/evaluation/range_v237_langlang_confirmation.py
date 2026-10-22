@@ -248,10 +248,17 @@ def metric(g):
 def analyze():
     from yoyo.evaluation.pepe_range_exits import inference
     from yoyo.evaluation.range_management_study import holm
-    cfg=json.loads(CONFIG.read_text()); stats=[]; tests=[]; retention=[]
+    cfg=json.loads(CONFIG.read_text()); stats=[]; tests=[]; retention=[]; censoring=[]
     for spec in cfg['symbols']:
         symbol=spec['symbol']; folder=EXP/symbol
         opp=read(folder/'opportunities.csv.gz'); trades=read(folder/'trades.csv.gz')
+        censored=opp[opp.status.isin(['unconfirmed','missing_open','incomplete_horizon','crosses_period_boundary'])]
+        excluded=set(zip(censored.lane,censored.event_id))
+        censoring.append(dict(symbol=symbol,excluded_pairs=len(excluded),rows=censored[['lane','event_id','population','status']].to_dict('records')))
+        eligible=lambda df: np.array([(lane,event) not in excluded for lane,event in zip(df.lane,df.event_id)])
+        # A setup with an unobserved outcome is not a real zero-return rejection.
+        # Remove its whole matched pair from both policies, retaining raw ledgers.
+        opp=opp[eligible(opp)].copy()
         outcomes=['gross_r','fee_r','net_r','net_notional_bp','reason','exit_bar_i']
         combined=opp.merge(trades[['trade_id',*outcomes]],on='trade_id',validate='one_to_one')
         assert combined.status.eq('filled').all()
@@ -261,6 +268,7 @@ def analyze():
         new=pd.concat([combined,missing],ignore_index=True);new['arm']='confirmation'
         baseline=read(ROOT/cfg['baseline']/symbol/'hold/trades.csv.gz')
         source_occ=load(symbol)[4]
+        source_occ=source_occ[eligible(source_occ)].copy()
         old=source_occ.merge(baseline[['pair_id',*outcomes[:-1]]],on='pair_id',validate='many_to_one')
         old['arm']='original';old['filled']=True;old['trade_id']=old.population+'-'+old.event_id
         old['status']='filled'
@@ -290,7 +298,7 @@ def analyze():
                 statuses=a.status.value_counts().to_dict()))
     for t,p in zip(tests,holm([t['p_one_sided'] for t in tests])):t['holm_p']=p
     pd.json_normalize(stats).to_csv(EXP/'comparison.csv',index=False)
-    dump(EXP/'summary.json',dict(config=cfg,comparison=stats,retention=retention,inference=tests))
+    dump(EXP/'summary.json',dict(config=cfg,comparison=stats,retention=retention,inference=tests,censoring=censoring))
     dump(EXP/'completion.json',dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         audits=[json.loads((EXP/s['symbol']/'audit.json').read_text()) for s in cfg['symbols']],
         training_eligible=False,production_eligible=False))
