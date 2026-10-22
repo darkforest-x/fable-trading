@@ -1,0 +1,465 @@
+{
+  "source": "experiments/active/exp-range-v237-fixed-exits-20261022-v1",
+  "start": "2024-10-22T10:15:00+08:00",
+  "end": "2026-10-22T10:15:00+08:00",
+  "definition": "Initial-stop MFE diagnostic for frozen V2.37 confirmation-close entries.\n\nReuse the existing excursions implementation and cached native fixed-target\nledgers. Future 5m OHLC is an outcome only: inspect entry_i+1 through the first\ninitial-stop touch or end_i. There is no TP, BE, ATR, H1 or time-based exit.\nExclude the entire stop-touch candle from the conservative main histogram;\nincluding its favorable extreme gives an explicit upper bound. These are\ngross hypothetical excursions, not executable returns or portfolio results.\n",
+  "rows": [
+    {
+      "symbol": "BTC",
+      "lane": 5,
+      "population": "random",
+      "n": 1745,
+      "median_r": 0.8804915514593112,
+      "mean_r": 5.099215760737726,
+      "p75_r": 2.7761194029849654,
+      "p90_r": 8.314942262088728,
+      "max_r": 306.08211920532756,
+      "initial_stop_hit": 1734,
+      "censored_at_data_end": 11,
+      "ambiguous_mfe_n": 180,
+      "median_observed_minutes": 65.0,
+      "max_observed_days": 470.08680555555554,
+      "reach": {
+        "1": {
+          "lower_n": 828,
+          "upper_n": 850
+        },
+        "2": {
+          "lower_n": 555,
+          "upper_n": 568
+        },
+        "3": {
+          "lower_n": 416,
+          "upper_n": 421
+        },
+        "5": {
+          "lower_n": 280,
+          "upper_n": 281
+        },
+        "10": {
+          "lower_n": 140,
+          "upper_n": 140
+        },
+        "20": {
+          "lower_n": 81,
+          "upper_n": 81
+        }
+      }
+    },
+    {
+      "symbol": "BTC",
+      "lane": 5,
+      "population": "signal",
+      "n": 1745,
+      "median_r": 1.0194319880418423,
+      "mean_r": 6.552573473973715,
+      "p75_r": 3.206928838951442,
+      "p90_r": 11.574359629392767,
+      "max_r": 525.4166666666495,
+      "initial_stop_hit": 1736,
+      "censored_at_data_end": 9,
+      "ambiguous_mfe_n": 133,
+      "median_observed_minutes": 70.0,
+      "max_observed_days": 467.77777777777777,
+      "reach": {
+        "1": {
+          "lower_n": 887,
+          "upper_n": 902
+        },
+        "2": {
+          "lower_n": 593,
+          "upper_n": 600
+        },
+        "3": {
+          "lower_n": 465,
+          "upper_n": 466
+        },
+        "5": {
+          "lower_n": 307,
+          "upper_n": 307
+        },
+        "10": {
+          "lower_n": 193,
+          "upper_n": 193
+        },
+        "20": {
+          "lower_n": 111,
+          "upper_n": 111
+        }
+      }
+    },
+    {
+      "symbol": "BTC",
+      "lane": 15,
+      "population": "random",
+      "n": 711,
+      "median_r": 1.0254200775527533,
+      "mean_r": 4.9982137006734355,
+      "p75_r": 3.1495877043432863,
+      "p90_r": 7.951273885350309,
+      "max_r": 462.85555555555555,
+      "initial_stop_hit": 707,
+      "censored_at_data_end": 4,
+      "ambiguous_mfe_n": 72,
+      "median_observed_minutes": 85.0,
+      "max_observed_days": 343.4791666666667,
+      "reach": {
+        "1": {
+          "lower_n": 359,
+          "upper_n": 370
+        },
+        "2": {
+          "lower_n": 244,
+          "upper_n": 246
+        },
+        "3": {
+          "lower_n": 188,
+          "upper_n": 190
+        },
+        "5": {
+          "lower_n": 119,
+          "upper_n": 120
+        },
+        "10": {
+          "lower_n": 59,
+          "upper_n": 59
+        },
+        "20": {
+          "lower_n": 30,
+          "upper_n": 30
+        }
+      }
+    },
+    {
+      "symbol": "BTC",
+      "lane": 15,
+      "population": "signal",
+      "n": 711,
+      "median_r": 1.018111254851153,
+      "mean_r": 5.726053572765211,
+      "p75_r": 3.3323197044099437,
+      "p90_r": 10.989751098096143,
+      "max_r": 304.60154241642203,
+      "initial_stop_hit": 708,
+      "censored_at_data_end": 3,
+      "ambiguous_mfe_n": 53,
+      "median_observed_minutes": 75.0,
+      "max_observed_days": 302.46527777777777,
+      "reach": {
+        "1": {
+          "lower_n": 360,
+          "upper_n": 366
+        },
+        "2": {
+          "lower_n": 244,
+          "upper_n": 245
+        },
+        "3": {
+          "lower_n": 190,
+          "upper_n": 190
+        },
+        "5": {
+          "lower_n": 122,
+          "upper_n": 122
+        },
+        "10": {
+          "lower_n": 74,
+          "upper_n": 74
+        },
+        "20": {
+          "lower_n": 47,
+          "upper_n": 47
+        }
+      }
+    },
+    {
+      "symbol": "ETH",
+      "lane": 5,
+      "population": "random",
+      "n": 962,
+      "median_r": 0.8710395408163087,
+      "mean_r": 4.921987261126451,
+      "p75_r": 2.859903478176613,
+      "p90_r": 7.864220842736074,
+      "max_r": 432.4452296819551,
+      "initial_stop_hit": 957,
+      "censored_at_data_end": 5,
+      "ambiguous_mfe_n": 103,
+      "median_observed_minutes": 60.0,
+      "max_observed_days": 560.8541666666666,
+      "reach": {
+        "1": {
+          "lower_n": 454,
+          "upper_n": 470
+        },
+        "2": {
+          "lower_n": 303,
+          "upper_n": 307
+        },
+        "3": {
+          "lower_n": 232,
+          "upper_n": 235
+        },
+        "5": {
+          "lower_n": 151,
+          "upper_n": 153
+        },
+        "10": {
+          "lower_n": 72,
+          "upper_n": 72
+        },
+        "20": {
+          "lower_n": 40,
+          "upper_n": 40
+        }
+      }
+    },
+    {
+      "symbol": "ETH",
+      "lane": 5,
+      "population": "signal",
+      "n": 962,
+      "median_r": 0.8377931256023439,
+      "mean_r": 6.055442773510114,
+      "p75_r": 2.4934468238795273,
+      "p90_r": 8.137171336392695,
+      "max_r": 374.63174114022826,
+      "initial_stop_hit": 955,
+      "censored_at_data_end": 7,
+      "ambiguous_mfe_n": 120,
+      "median_observed_minutes": 55.0,
+      "max_observed_days": 561.0208333333334,
+      "reach": {
+        "1": {
+          "lower_n": 440,
+          "upper_n": 459
+        },
+        "2": {
+          "lower_n": 289,
+          "upper_n": 295
+        },
+        "3": {
+          "lower_n": 204,
+          "upper_n": 205
+        },
+        "5": {
+          "lower_n": 142,
+          "upper_n": 142
+        },
+        "10": {
+          "lower_n": 81,
+          "upper_n": 81
+        },
+        "20": {
+          "lower_n": 47,
+          "upper_n": 47
+        }
+      }
+    },
+    {
+      "symbol": "ETH",
+      "lane": 15,
+      "population": "random",
+      "n": 415,
+      "median_r": 0.9042331714087369,
+      "mean_r": 6.691503881285084,
+      "p75_r": 3.176551176744262,
+      "p90_r": 8.512536174139532,
+      "max_r": 360.95480225989076,
+      "initial_stop_hit": 411,
+      "censored_at_data_end": 4,
+      "ambiguous_mfe_n": 39,
+      "median_observed_minutes": 85.0,
+      "max_observed_days": 560.8333333333334,
+      "reach": {
+        "1": {
+          "lower_n": 194,
+          "upper_n": 197
+        },
+        "2": {
+          "lower_n": 135,
+          "upper_n": 135
+        },
+        "3": {
+          "lower_n": 108,
+          "upper_n": 108
+        },
+        "5": {
+          "lower_n": 72,
+          "upper_n": 72
+        },
+        "10": {
+          "lower_n": 35,
+          "upper_n": 35
+        },
+        "20": {
+          "lower_n": 23,
+          "upper_n": 23
+        }
+      }
+    },
+    {
+      "symbol": "ETH",
+      "lane": 15,
+      "population": "signal",
+      "n": 415,
+      "median_r": 0.968539325842625,
+      "mean_r": 6.393305788500251,
+      "p75_r": 2.8994711949774343,
+      "p90_r": 9.71067882716379,
+      "max_r": 261.9166666666759,
+      "initial_stop_hit": 413,
+      "censored_at_data_end": 2,
+      "ambiguous_mfe_n": 48,
+      "median_observed_minutes": 65.0,
+      "max_observed_days": 561.0208333333334,
+      "reach": {
+        "1": {
+          "lower_n": 203,
+          "upper_n": 209
+        },
+        "2": {
+          "lower_n": 140,
+          "upper_n": 143
+        },
+        "3": {
+          "lower_n": 102,
+          "upper_n": 102
+        },
+        "5": {
+          "lower_n": 71,
+          "upper_n": 71
+        },
+        "10": {
+          "lower_n": 40,
+          "upper_n": 40
+        },
+        "20": {
+          "lower_n": 23,
+          "upper_n": 23
+        }
+      }
+    }
+  ],
+  "native_bound_checks": [
+    {
+      "symbol": "BTC",
+      "target_r": 1,
+      "path": "OHLC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 1,
+      "path": "OLHC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 2,
+      "path": "OHLC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 2,
+      "path": "OLHC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 3,
+      "path": "OHLC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "BTC",
+      "target_r": 3,
+      "path": "OLHC",
+      "native_positions": 4003,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 1,
+      "path": "OHLC",
+      "native_positions": 2242,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 1,
+      "path": "OLHC",
+      "native_positions": 2242,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 2,
+      "path": "OHLC",
+      "native_positions": 2242,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 2,
+      "path": "OLHC",
+      "native_positions": 2242,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 3,
+      "path": "OHLC",
+      "native_positions": 2242,
+      "bound_parity": true
+    },
+    {
+      "symbol": "ETH",
+      "target_r": 3,
+      "path": "OLHC",
+      "native_positions": 2242,
+      "bound_parity": true
+    }
+  ],
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-fixed-exits-20261022-v1/BTC/candidates.csv",
+      "bytes": 921343,
+      "mtime_ns": 1792640167126632345
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-fixed-exits-20261022-v1/BTC/occurrences.csv",
+      "bytes": 1125967,
+      "mtime_ns": 1792640167167167698
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/BTC/candles.csv.gz",
+      "bytes": 3062150,
+      "mtime_ns": 1792638889015492028
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-fixed-exits-20261022-v1/ETH/candidates.csv",
+      "bytes": 511930,
+      "mtime_ns": 1792640167104023713
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-fixed-exits-20261022-v1/ETH/occurrences.csv",
+      "bytes": 625920,
+      "mtime_ns": 1792640167124766514
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-range-v237-twoyear-20261022-v1/ETH/candles.csv.gz",
+      "bytes": 2883779,
+      "mtime_ns": 1792638889412262329
+    }
+  ],
+  "source_commit": "45e6599924be7d0bd90db62b97411d971d6692d4",
+  "production_eligible": false,
+  "training_eligible": false
+}

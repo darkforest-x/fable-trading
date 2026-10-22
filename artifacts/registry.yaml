@@ -33709,3 +33709,16 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: NativeNautilus1.231.0fixed1/2/3R and1Rtouch-to-entryBE;frozenV2.37causalentriesandrandomcontrols,20bpunchanged.62450positions124900fills,alloraclepathsverified. BothOHLC/OLHCassumptionsandpertradelower/upperenvelopesretained. Allarmsnetnegativeandworsethanprevious5Rbaseline;entry-priceBEdoesnotcoverfees. No formalreportornewmarketdownload.
+
+  - artifact_id: range-v237-initial-stop-mfe-20261022
+    source_commit: 45e6599924
+    generator_commit: d20f88fb5c
+    artifact_type: manifest
+    role: confirmation_close_initial_stop_excursion_chart
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-range-v237-fixed-exits-20261022-v1/mfe/summary.json
+    storage_uri: repo://experiments/active/exp-range-v237-fixed-exits-20261022-v1/mfe/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Reuses causal BTC5m1745/BTC15m711/ETH5m962/ETH15m415 events and matched controls. No new entry or fills; existing excursions utility measures gross MFE before initial SL or data end, excluding stop-touch candle with separate upper bound. No TP/BE/ATR/H1 or time cap. All cached native TP1/2/3 hits under OHLC and OLHC lie within per-position MFE bounds; histogram counts reconcile. Medians1.0194/1.0181/0.8378/0.9685R; censored9/3/7/2. Large tails include multi-month holding and are not intraday or realized returns. Run isolated Nautilus Python module yoyo.evaluation.range_v237_mfe_charts --calculate-only, then main venv same module --render-only. PNG visually inspected; no report or production change.
