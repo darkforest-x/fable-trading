@@ -81,7 +81,7 @@ def run():
                 pf=float(selected.loc[selected.net_r>1e-9,'net_r'].sum()/-selected.loc[selected.net_r< -1e-9,'net_r'].sum())))
     # Rebuild the current partial higher candle directly from a short prefix.
     appearance_checks=0
-    for row in entry.drop_duplicates(['arrow_i','arrow_minutes']).itertuples():
+    for row in entry[entry.arrow_i.ge(0)].drop_duplicates(['arrow_i','arrow_minutes']).itertuples():
         i=int(row.arrow_i);m=int(row.arrow_minutes)
         start=max(0,i-20*m)
         raw=frame.iloc[start:i+1]
@@ -97,8 +97,9 @@ def run():
     for arm,g in entry.groupby('arm'):
         d=decisions[decisions.arm.eq(arm)]
         admission.append(dict(arm=arm,entries=len(g),statuses=d.status.value_counts().to_dict(),
-            arrow_first=int((g.arrow_i<g.body_i).sum()),body_first=int((g.body_i<g.arrow_i).sum()),
-            same_minute=int((g.body_i==g.arrow_i).sum()),
+            arrow_first=int(((g.arrow_i>=0)&(g.arrow_i<g.body_i)).sum()),
+            body_first=int(((g.arrow_i>=0)&(g.body_i<g.arrow_i)).sum()),
+            same_minute=int(((g.arrow_i>=0)&(g.body_i==g.arrow_i)).sum()),
             entry_back_outside=int((g.side*(g.entry-g.level)<0).sum()),
             arrow_later_disappeared=int(g.arrow_disappeared_by_close.sum()),
             wait_median_minutes=float(g.wait_minutes.median())))
@@ -107,11 +108,11 @@ def run():
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
         multiplicity_comparisons=len(p),
-        focused_and_layer_tests=109,
+        focused_and_layer_tests=112,
         broader_preflight=dict(passed=170,failed=16,skipped=12,
             explanation='Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed.'),
         initial_test_fixture_failure='Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.',
-        limitations='1m close samples miss sub-minute arrow flicker. Latches persist even after conditions cease; admission records count entries back outside the key. Final scope uses immediate native TP-triggered protection only, no holding-time rule; same .2percent entry-notional cost. Independent R is not portfolio return.'))
+        limitations='Final body-only scope uses completed15m candles, native TP-triggered protection, no elapsed-time expiry and no arrow. OHLC1m is not a real tick path; same .2percent entry-notional cost. Independent R is not portfolio return.' if not cfg.get('require_arrow',True) else 'One-minute samples miss subminute arrow flicker; independent latched conditions, native TP protection, .2percent fees. Independent R is not portfolio return.'))
     dump(EXP/'delivery_receipt.json',dict(experiment_id=EXP.name,
         source_builder=summary['source_commit'],engine='NautilusTrader1.231.0',
         native_positions=sum(x['positions'] for x in summary['native_audits']+summary['baseline_audits']),

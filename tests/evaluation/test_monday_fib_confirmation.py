@@ -1,8 +1,9 @@
 """Causal forming candles, asynchronous conditions and native timed protection."""
 import unittest
+from unittest.mock import patch
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs
+from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body
 from yoyo.evaluation.pepe_range_exits import signals
 from yoyo.layers.l3_backtest.nautilus_independent import run_native,ExitPolicy
 
@@ -15,6 +16,35 @@ def frame(n=400):
 
 
 class ConfirmationTests(unittest.TestCase):
+    def body_fixture(self,late=False,low=101.,high=103.):
+        f=pd.DataFrame([[100.]*4]*600,columns=['open','high','low','close'],
+            index=pd.date_range('2026-01-06T00:01Z',periods=600,freq='min'))
+        if late:f.iloc[:300]=98.
+        else:f.iloc[10,f.columns.get_loc('low')]=98.
+        touch=1 if late else 10
+        weekly=pd.DataFrame([dict(trade_id='a',pair_id='a',week='2026-01-05',side=1,
+            entry_i=0,expire_i=598,entry=99.,monday_high=high,monday_low=low)])
+        original=pd.DataFrame([dict(parent_id='a',entry_i=touch)])
+        cfg=dict(timezone='America/New_York',tick=.1,round_trip_cost=.002,
+                 stop_fraction=.007,split='2026-06-01T00:00Z')
+        with patch('yoyo.evaluation.monday_fib_confirmation.pd.read_csv',side_effect=[weekly,original]):
+            return prepare_body(f,cfg)
+
+    def test_body_only_has_no_arrow_requirement(self):
+        entries,_,_=self.body_fixture()
+        self.assertEqual(entries.entry_i.tolist(),[14])
+        self.assertTrue(entries.arrow_i.eq(-1).all())
+
+    def test_body_only_accepts_after_removed_deadline(self):
+        entries,_,_=self.body_fixture(late=True)
+        self.assertEqual(entries.entry_i.tolist(),[314])
+        self.assertGreater(entries.wait_minutes.iloc[0],285)
+
+    def test_body_only_skips_insufficient_fee_room(self):
+        entries,decisions,_=self.body_fixture(low=100.,high=100.2)
+        self.assertTrue(entries.empty)
+        self.assertEqual(decisions.status.tolist(),['fee_space_insufficient'])
+
     def test_owner_four_targets_and_original_quarters(self):
         t=targets(83149.8,81166.,-1,.1)
         np.testing.assert_allclose(list(t.values()),[82157.9,81923.8,81751.2,81166.],atol=1e-8)

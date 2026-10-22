@@ -25,6 +25,7 @@ def context():
     global OLD
     m.EXP=EXP;m.CODE=CODE
     cfg=json.loads((EXP/'config.json').read_text())
+    m.ARMS=tuple(cfg.get('arms',('15m','30m','60m','any')))
     OLD=ROOT/cfg.get('prior_inputs',str(OLD.relative_to(ROOT)))
     if subprocess.run(['git','diff','--quiet','HEAD','--',*CODE],cwd=ROOT).returncode:
         raise RuntimeError('Commit builders before native replay')
@@ -36,7 +37,8 @@ def context():
 def initialize():
     cfg,entry,random=context()
     oldcfg=json.loads((OLD/'config.json').read_text())
-    if cfg['wait_minutes']!=oldcfg['wait_minutes']:
+    if (cfg['wait_minutes']!=oldcfg['wait_minutes']
+            or cfg.get('require_arrow',True)!=oldcfg.get('require_arrow',True)):
         frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
         entry,decisions,checks=m.prepare(frame,cfg)
         random=m.controls(frame,entry,cfg)
@@ -75,7 +77,7 @@ def replay(delays):
         assert delay in cfg['be_minutes']
         rows,audit=m.execute(frame,pd.concat([entry,random],ignore_index=True),delay,cfg)
         print(json.dumps(dict(delay=delay,audit=audit,
-            any=m.metric(rows[rows.arm.eq('any')&rows.population.eq('signal')])),ensure_ascii=False),flush=True)
+            signals={arm:m.metric(rows[rows.arm.eq(arm)&rows.population.eq('signal')]) for arm in m.ARMS}),ensure_ascii=False),flush=True)
 
 
 def replay_uncontested():
@@ -149,15 +151,15 @@ def collect():
     if active_delays==[0]:
         final_cfg.update(exit='Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry. Observation deadline follows wait_minutes; None means no elapsed-time timeout, original next-Monday reset retained.',
             selection='Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.',
-            inference='Week-cluster sign permutation; four fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.',
-            limitations='One-minute sampled intrabar signals and OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.')
+            inference=f'Week-cluster sign permutation; {len(m.ARMS)} fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.',
+            limitations='Completed15m body confirmation and one-minute OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.' if not cfg.get('require_arrow',True) else 'One-minute sampled intrabar arrows; OHLC execution and reverse-order sensitivity. No tick-sequence or funded-account claims.')
     dump(EXP/'summary.json',dict(config=final_cfg,scope=scope,admission=json.loads((EXP/'admission_receipt.json').read_text()),
         comparisons=summary,selections=selections,native_audits=audits,baseline_audits=[],
         prior_rule_comparison=old_comparison,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         audit_version_note='Only active scope is summarized. Completed timed arms are retained but excluded following owner instruction. Same-endpoint target-only metadata ordering is distinguished from exact stop/target prices,times,reasons.',
         training_eligible=False,production_eligible=False))
     from yoyo.evaluation import monday_fib_confirmation_review as review
-    review.EXP=EXP
+    review.EXP=EXP;review.ARMS=m.ARMS
     review.run()
 
 

@@ -108,6 +108,8 @@ def observe(frame, touch_i, expiry_i, side, level, events, quarter, window=285):
 
 
 def prepare(frame,cfg):
+    if not cfg.get('require_arrow',True):
+        return prepare_body(frame,cfg)
     weekly=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip')
     original=pd.read_csv(SOURCE/'signal_trades.csv',float_precision='round_trip')
     features={m:forming(frame,m) for m in (15,30,60)}
@@ -164,6 +166,54 @@ def prepare(frame,cfg):
         weeks=int(weekly.week.nunique()),weekly_sides=len(weekly),touched=len(touch),
         prefix_checks=prefix_checks,touch_minute_deadline_sensitivity=boundary_changes,
         forming_matches_all_completed_arrows=True)
+
+
+def prepare_body(frame,cfg):
+    """First completed inner15m body after touch; no arrow or elapsed cap.
+
+    Only observed quarter-hour open/close enter the decision. Weekly anchors
+    reset nextMonday; data end is censored. Insufficient first-target fee room
+    skips that weekly-side opportunity, without a later rearm.
+    """
+    weekly=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip')
+    original=pd.read_csv(SOURCE/'signal_trades.csv',float_precision='round_trip')
+    q=aggregate(frame,15).reindex(frame.index)
+    bars=frame[base.OHLC].to_numpy();entries=[];decisions=[];touch={}
+    for r in weekly.itertuples():
+        first=int(r.entry_i)+1;last=int(r.expire_i)
+        hits=np.flatnonzero(r.side*(bars[first:last+1,2 if r.side==1 else 1]-r.entry)<=1e-8)
+        if not len(hits):continue
+        i=first+int(hits[0]);touch[r.trade_id]=i
+        qualifies=(r.side*(q.open.iloc[i:last+1]-r.entry)>1e-8)&(r.side*(q.close.iloc[i:last+1]-r.entry)>1e-8)
+        confirmed=np.flatnonzero(qualifies.to_numpy())
+        week_end=pd.Timestamp(r.week,tz=cfg['timezone'])+pd.DateOffset(days=7)
+        status='data_censored' if week_end>frame.index[-1] else 'expired'
+        j=i+int(confirmed[0]) if len(confirmed) else -1
+        row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm='body15m',touch_i=i,
+            touch_time=str(frame.index[i]),level=r.entry,
+            **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),status=status,
+            entry_i=j,body_i=j,arrow_i=-1,arrow_minutes=0,
+            wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False)
+        if j>=0:
+            price=float(frame.close.iloc[j]);room=r.side*(row['tp1']-price)
+            if room<cfg['tick']-1e-8:row['status']='target_already_passed'
+            elif room-cfg['round_trip_cost']*price<2*cfg['tick']:
+                row['status']='fee_space_insufficient'
+            else:
+                stop=base.rounded(price*(1-r.side*cfg['stop_fraction']),cfg['tick'],r.side==-1)
+                row.update(status='confirmed',entry=price,stop=stop,risk=r.side*(price-stop),
+                    entry_time=str(frame.index[j]),population='signal',trade_id=f'body15m-{r.pair_id}',
+                    end_i=len(frame)-1,segment=int(frame.index[j]>=pd.Timestamp(cfg['split'])))
+                entries.append(row.copy())
+        decisions.append(row)
+    assert touch==dict(zip(original.parent_id,original.entry_i))
+    for r in entries:
+        assert frame.index[r['entry_i']].minute%15==0 and r['body_i']>=r['touch_i']
+        assert r['side']*(q.open.iloc[r['body_i']]-r['level'])>0
+        assert r['side']*(r['entry']-r['level'])>0
+    return pd.DataFrame(entries),pd.DataFrame(decisions),dict(weeks=int(weekly.week.nunique()),
+        weekly_sides=len(weekly),touched=len(touch),body_checks=len(entries),
+        arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True)
 
 
 def controls(frame,entry,cfg):
