@@ -33614,3 +33614,19 @@ artifacts:
       First later confirmation enters at its own5m close; no backdated entry. Other signal and exit modules unchanged.
       Native14 boundary fixtures and56 local regression tests pass. Loaded BTC ledger57 entries includes6 off-quarter confirmations.
       No profitability backtest or performance claim. Native logs and final chart evidence retained locally.
+
+  - artifact_id: range-pine-v235-chart-scope-20261022
+    source_commit: 54a20c1339
+    generator_commit: 54a20c1339
+    artifact_type: manifest
+    role: pine_five_minute_chart_pairing_scope_correction
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_35_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_35_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner corrected V2.34 scope to5m chart. V2.35 pairs15m arrows with same-side5m arrows within25minutes before or after, with causal entry at the later confirmation.
+      No H1 entry gate on5m chart;15m chart original H1 observation route restored. Stops, trailing exits and key module preserved.
+      Native14 pairing and8 routing cases plus61 local checks pass. Clean private revision1 saved; old scripts preserved.
+      Loaded5m BTC ledger46 entries only; no profitability comparison.

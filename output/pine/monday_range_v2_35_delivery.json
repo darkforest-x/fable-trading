@@ -1,0 +1,29 @@
+{
+  "version": "V2.35",
+  "source_commit": "54a20c1339",
+  "source": "yoyo/evaluation/pine/monday_range_v2_35.pine",
+  "private_script": "周一高低点区间＋翻身 · V2.35",
+  "private_revision": 1,
+  "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+  "chart_symbol": "OKX:BTCUSDT.P",
+  "chart_timeframe": "5m",
+  "chart_settings": {"txRequested": true, "txFiveConfirm": true, "txFiveWindow": 5},
+  "scope_correction": "5m chart pairs15m and5m arrows; no H1 entry gate.15m chart restores original H1 observation route.",
+  "validation": {
+    "local_tests_passed": 61,
+    "native_boundary_cases_passed": 14,
+    "native_route_cases_passed": 8,
+    "loaded_chart_ledger": {"entries": 46, "off_15m_close_entries": 1},
+    "ledger_scope": "Loaded BTC5m chart history only; not an annual or five-year backtest",
+    "native_evidence": "output/pine/monday_range_v2_35_native_qa_ax.txt",
+    "clean_save_evidence": "output/pine/monday_range_v2_35_clean_save_ax.txt",
+    "settings_evidence": "output/pine/monday_range_v2_35_settings_ax.txt",
+    "final_evidence": "output/pine/monday_range_v2_35_final_ax.txt"
+  },
+  "prior_sources_and_private_scripts_preserved": true,
+  "profitability_backtest_run": false,
+  "temporary_browser_sessions_created": 0,
+  "test_log_and_editor_closed": true,
+  "training_eligible": false,
+  "production_eligible": false
+}
