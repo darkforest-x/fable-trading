@@ -1,0 +1,682 @@
+{
+  "source": "experiments/active/exp-range-v231-sweep20-20261021-v1",
+  "start": "2025-10-21T00:00:00+08:00",
+  "end": "2026-10-21T00:00:00+08:00",
+  "strategy": "sweep20 + same paired MTF arrow + fixed1R",
+  "framework": "NautilusTrader 1.231.0 frozen native execution",
+  "round_trip_cost": 0.0,
+  "execution_replayed": false,
+  "source_commit": "6425bc2419d90f3d139145b2ca0c1a4282feed2a",
+  "reproduce": ".venv/bin/python -m yoyo.evaluation.sweep_mtf_fixed1r_zero_fee",
+  "limitation": "Known-history descriptive comparison; independent R, not account return. No funding/slippage.",
+  "symbols": {
+    "BTC": {
+      "native_ohlc": {
+        "all": {
+          "signal": {
+            "n": 35,
+            "wins": 20,
+            "losses": 15,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 4.999999999999466,
+            "profit_factor": 1.3333333333332982,
+            "realized_max_drawdown_r": 5.99999999999987,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 2,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 35,
+            "wins": 18,
+            "losses": 17,
+            "win_rate": 0.5142857142857142,
+            "gross_r": 1.0000000000022038,
+            "profit_factor": 1.058823529411902,
+            "realized_max_drawdown_r": 7.999999999997716,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "long": {
+          "signal": {
+            "n": 16,
+            "wins": 12,
+            "losses": 4,
+            "win_rate": 0.75,
+            "gross_r": 7.999999999999924,
+            "profit_factor": 2.9999999999999805,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 16,
+            "wins": 7,
+            "losses": 9,
+            "win_rate": 0.4375,
+            "gross_r": -2.000000000000101,
+            "profit_factor": 0.7777777777777749,
+            "realized_max_drawdown_r": 5.000000000000153,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "short": {
+          "signal": {
+            "n": 19,
+            "wins": 8,
+            "losses": 11,
+            "win_rate": 0.42105263157894735,
+            "gross_r": -3.000000000000459,
+            "profit_factor": 0.7272727272726853,
+            "realized_max_drawdown_r": 7.000000000000118,
+            "longest_loss_streak": 5,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 19,
+            "wins": 11,
+            "losses": 8,
+            "win_rate": 0.5789473684210527,
+            "gross_r": 3.000000000002304,
+            "profit_factor": 1.375000000000405,
+            "realized_max_drawdown_r": 3.999999999997563,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "first_half": {
+          "signal": {
+            "n": 9,
+            "wins": 6,
+            "losses": 3,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 3.0000000000000204,
+            "profit_factor": 2.000000000000019,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 9,
+            "wins": 3,
+            "losses": 6,
+            "win_rate": 0.3333333333333333,
+            "gross_r": -3.0000000000001528,
+            "profit_factor": 0.49999999999999223,
+            "realized_max_drawdown_r": 4.000000000000153,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "second_half": {
+          "signal": {
+            "n": 26,
+            "wins": 14,
+            "losses": 12,
+            "win_rate": 0.5384615384615384,
+            "gross_r": 1.9999999999994447,
+            "profit_factor": 1.1666666666666201,
+            "realized_max_drawdown_r": 5.99999999999987,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 2,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769,
+            "gross_r": 4.0000000000023554,
+            "profit_factor": 1.3636363636366564,
+            "realized_max_drawdown_r": 3.999999999997563,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "recent2m": {
+          "signal": {
+            "n": 9,
+            "wins": 6,
+            "losses": 3,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 2.999999999999571,
+            "profit_factor": 1.9999999999998401,
+            "realized_max_drawdown_r": 2.0000000000000506,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 9,
+            "wins": 7,
+            "losses": 2,
+            "win_rate": 0.7777777777777778,
+            "gross_r": 4.999999999999957,
+            "profit_factor": 3.4999999999999334,
+            "realized_max_drawdown_r": 1.0000000000000364,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        }
+      },
+      "stop_first": {
+        "all": {
+          "signal": {
+            "n": 35,
+            "wins": 19,
+            "losses": 16,
+            "win_rate": 0.5428571428571428,
+            "gross_r": 2.9999999999995577,
+            "profit_factor": 1.1874999999999725,
+            "realized_max_drawdown_r": 8.0,
+            "longest_loss_streak": 7,
+            "ambiguous_n": 2,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 35,
+            "wins": 18,
+            "losses": 17,
+            "win_rate": 0.5142857142857142,
+            "gross_r": 0.9999999999999143,
+            "profit_factor": 1.0588235294117598,
+            "realized_max_drawdown_r": 7.999999999999787,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "long": {
+          "signal": {
+            "n": 16,
+            "wins": 11,
+            "losses": 5,
+            "win_rate": 0.6875,
+            "gross_r": 6.0000000000000995,
+            "profit_factor": 2.2000000000000197,
+            "realized_max_drawdown_r": 3.0,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 16,
+            "wins": 7,
+            "losses": 9,
+            "win_rate": 0.4375,
+            "gross_r": -1.999999999999289,
+            "profit_factor": 0.7777777777778567,
+            "realized_max_drawdown_r": 4.9999999999999405,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "short": {
+          "signal": {
+            "n": 19,
+            "wins": 8,
+            "losses": 11,
+            "win_rate": 0.42105263157894735,
+            "gross_r": -3.000000000000542,
+            "profit_factor": 0.727272727272678,
+            "realized_max_drawdown_r": 7.000000000000089,
+            "longest_loss_streak": 5,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 19,
+            "wins": 11,
+            "losses": 8,
+            "win_rate": 0.5789473684210527,
+            "gross_r": 2.9999999999992037,
+            "profit_factor": 1.3749999999999005,
+            "realized_max_drawdown_r": 4.000000000000059,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "first_half": {
+          "signal": {
+            "n": 9,
+            "wins": 6,
+            "losses": 3,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 3.000000000000064,
+            "profit_factor": 2.0000000000000213,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 9,
+            "wins": 3,
+            "losses": 6,
+            "win_rate": 0.3333333333333333,
+            "gross_r": -2.999999999999816,
+            "profit_factor": 0.5000000000000305,
+            "realized_max_drawdown_r": 3.999999999999941,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "second_half": {
+          "signal": {
+            "n": 26,
+            "wins": 13,
+            "losses": 13,
+            "win_rate": 0.5,
+            "gross_r": -5.069278330438465e-13,
+            "profit_factor": 0.999999999999961,
+            "realized_max_drawdown_r": 8.0,
+            "longest_loss_streak": 7,
+            "ambiguous_n": 2,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 26,
+            "wins": 15,
+            "losses": 11,
+            "win_rate": 0.5769230769230769,
+            "gross_r": 3.999999999999732,
+            "profit_factor": 1.3636363636363393,
+            "realized_max_drawdown_r": 3.9999999999998446,
+            "longest_loss_streak": 3,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "recent2m": {
+          "signal": {
+            "n": 9,
+            "wins": 6,
+            "losses": 3,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 2.9999999999996376,
+            "profit_factor": 1.9999999999998792,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 9,
+            "wins": 7,
+            "losses": 2,
+            "win_rate": 0.7777777777777778,
+            "gross_r": 4.999999999999435,
+            "profit_factor": 3.4999999999997176,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        }
+      }
+    },
+    "ETH": {
+      "native_ohlc": {
+        "all": {
+          "signal": {
+            "n": 27,
+            "wins": 19,
+            "losses": 8,
+            "win_rate": 0.7037037037037037,
+            "gross_r": 11.00000000000006,
+            "profit_factor": 2.3750000000000075,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 27,
+            "wins": 15,
+            "losses": 12,
+            "win_rate": 0.5555555555555556,
+            "gross_r": 2.9999999999998135,
+            "profit_factor": 1.249999999999984,
+            "realized_max_drawdown_r": 4.000000000000116,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "long": {
+          "signal": {
+            "n": 14,
+            "wins": 9,
+            "losses": 5,
+            "win_rate": 0.6428571428571429,
+            "gross_r": 4.000000000000153,
+            "profit_factor": 1.8000000000000305,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 14,
+            "wins": 6,
+            "losses": 8,
+            "win_rate": 0.42857142857142855,
+            "gross_r": -2.000000000000159,
+            "profit_factor": 0.7499999999999851,
+            "realized_max_drawdown_r": 5.000000000000117,
+            "longest_loss_streak": 5,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "short": {
+          "signal": {
+            "n": 13,
+            "wins": 10,
+            "losses": 3,
+            "win_rate": 0.7692307692307693,
+            "gross_r": 6.999999999999906,
+            "profit_factor": 3.333333333333302,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 13,
+            "wins": 9,
+            "losses": 4,
+            "win_rate": 0.6923076923076923,
+            "gross_r": 4.9999999999999725,
+            "profit_factor": 2.250000000000033,
+            "realized_max_drawdown_r": 1.9999999999999103,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "first_half": {
+          "signal": {
+            "n": 15,
+            "wins": 10,
+            "losses": 5,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 4.999999999999992,
+            "profit_factor": 1.9999999999999987,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 15,
+            "wins": 8,
+            "losses": 7,
+            "win_rate": 0.5333333333333333,
+            "gross_r": 0.9999999999999476,
+            "profit_factor": 1.1428571428571335,
+            "realized_max_drawdown_r": 4.000000000000116,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "second_half": {
+          "signal": {
+            "n": 12,
+            "wins": 9,
+            "losses": 3,
+            "win_rate": 0.75,
+            "gross_r": 6.0000000000000675,
+            "profit_factor": 3.0000000000000226,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 12,
+            "wins": 7,
+            "losses": 5,
+            "win_rate": 0.5833333333333334,
+            "gross_r": 1.9999999999998666,
+            "profit_factor": 1.399999999999977,
+            "realized_max_drawdown_r": 2.0000000000000404,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "recent2m": {
+          "signal": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 1.000000000000018,
+            "profit_factor": 1.3333333333333393,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 0.9999999999999751,
+            "profit_factor": 1.333333333333335,
+            "realized_max_drawdown_r": 2.0000000000000107,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        }
+      },
+      "stop_first": {
+        "all": {
+          "signal": {
+            "n": 27,
+            "wins": 18,
+            "losses": 9,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 9.000000000000096,
+            "profit_factor": 2.0000000000000107,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 27,
+            "wins": 15,
+            "losses": 12,
+            "win_rate": 0.5555555555555556,
+            "gross_r": 2.999999999999843,
+            "profit_factor": 1.249999999999987,
+            "realized_max_drawdown_r": 4.0,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "long": {
+          "signal": {
+            "n": 14,
+            "wins": 8,
+            "losses": 6,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 2.0000000000001883,
+            "profit_factor": 1.3333333333333648,
+            "realized_max_drawdown_r": 1.0,
+            "longest_loss_streak": 1,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 14,
+            "wins": 6,
+            "losses": 8,
+            "win_rate": 0.42857142857142855,
+            "gross_r": -2.0000000000000018,
+            "profit_factor": 0.7499999999999998,
+            "realized_max_drawdown_r": 5.0,
+            "longest_loss_streak": 5,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "short": {
+          "signal": {
+            "n": 13,
+            "wins": 10,
+            "losses": 3,
+            "win_rate": 0.7692307692307693,
+            "gross_r": 6.999999999999906,
+            "profit_factor": 3.333333333333302,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 13,
+            "wins": 9,
+            "losses": 4,
+            "win_rate": 0.6923076923076923,
+            "gross_r": 4.9999999999998455,
+            "profit_factor": 2.2499999999999614,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "first_half": {
+          "signal": {
+            "n": 15,
+            "wins": 10,
+            "losses": 5,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 5.0000000000000275,
+            "profit_factor": 2.0000000000000058,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 15,
+            "wins": 8,
+            "losses": 7,
+            "win_rate": 0.5333333333333333,
+            "gross_r": 1.0000000000000262,
+            "profit_factor": 1.1428571428571463,
+            "realized_max_drawdown_r": 4.0,
+            "longest_loss_streak": 4,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          }
+        },
+        "second_half": {
+          "signal": {
+            "n": 12,
+            "wins": 8,
+            "losses": 4,
+            "win_rate": 0.6666666666666666,
+            "gross_r": 4.0000000000000675,
+            "profit_factor": 2.000000000000017,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 1,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 12,
+            "wins": 7,
+            "losses": 5,
+            "win_rate": 0.5833333333333334,
+            "gross_r": 1.9999999999998173,
+            "profit_factor": 1.3999999999999635,
+            "realized_max_drawdown_r": 2.0000000000001004,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        },
+        "recent2m": {
+          "signal": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 1.000000000000018,
+            "profit_factor": 1.3333333333333393,
+            "realized_max_drawdown_r": 2.0,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          },
+          "random": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "win_rate": 0.5714285714285714,
+            "gross_r": 0.9999999999998854,
+            "profit_factor": 1.333333333333295,
+            "realized_max_drawdown_r": 2.0000000000001004,
+            "longest_loss_streak": 2,
+            "ambiguous_n": 0,
+            "boundary_n": 0
+          }
+        }
+      }
+    }
+  },
+  "input_files": [
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/BTC/admission.csv",
+      "bytes": 8932,
+      "mtime_ns": 1792576267806533535
+    },
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/BTC/fixed_1r/trades.csv",
+      "bytes": 24625,
+      "mtime_ns": 1792576183452680296
+    },
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/BTC/fixed_1r/sensitivity.csv",
+      "bytes": 24452,
+      "mtime_ns": 1792576183454263464
+    },
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/admission.csv",
+      "bytes": 8327,
+      "mtime_ns": 1792576269431868871
+    },
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/fixed_1r/trades.csv",
+      "bytes": 22852,
+      "mtime_ns": 1792576222123117045
+    },
+    {
+      "path": "experiments/active/exp-range-v231-sweep20-20261021-v1/ETH/fixed_1r/sensitivity.csv",
+      "bytes": 22746,
+      "mtime_ns": 1792576222124054837
+    }
+  ]
+}

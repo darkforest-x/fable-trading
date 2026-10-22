@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-sweep-mtf-fixed1r-zero-fee-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6425bc2419
+    status: inconclusive
+    question: Does the owner-selected ETH sweep20 plus MTF fixed1R result carry over to BTC in the same annual window?
+    single_variable: Symbol comparison using existing native ledgers; restate gross returns with zero fees per owner, unchanged admission and execution.
+    result: BTC35 trades20 wins57.14percent,+5R versus random35 trades18 wins,+1R; ETH27 trades19 wins70.37percent,+11R versus random+3R. BTC realizedDD6R and4 consecutive losses. BTC long16 trades12 wins,+8R versus random-2R; short19 trades8 wins,-3R versus random+3R. BTC stop-first19 wins,+3R; later-half+2R versus random+4R. No stable edge established.
+    artifacts: [sweep-mtf-fixed1r-zero-fee-20261022]
+    canonical_report: experiments/active/exp-sweep-mtf-fixed1r-zero-fee-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Frozen2025-10-21to2026-10-21Shanghai;Nautilus1.231.0 results reused without replay. Both original O-H-L-C and existing stop-first ledgers retained. Assertions verify exact admission counts,pair uniqueness,matching side/week/half/volatility bucket,bounds,gross=net+fee,no boundary exits andfixed1R outcomes. Originalfee/net fields preserved alongside zero-fee fields. IndependentR notfundedreturns;no martingale. Notion4018856479af8154937fd4444b643fbd.
   - experiment_id: exp-eth-sweep20-mtf-27-charts-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 85fee25102
