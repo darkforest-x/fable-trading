@@ -5,6 +5,22 @@ import pandas as pd
 from yoyo.evaluation.monday_fib_diagnostics import path_mfe,stop_candidates
 
 
+def test_market_close_excludes_entry_bar_extreme():
+    from types import SimpleNamespace
+    row=SimpleNamespace(entry=100,stop=99,side=1,entry_i=0,exit_i=1,risk=1)
+    bars=np.array([[100,120,80,100],[101,102,98,100]])
+    assert path_mfe(bars,row,1,'OHLC','market')==2
+    assert path_mfe(bars,row,1,'OLHC','market')==1
+
+
+def test_market_short_stops_before_later_favorable_extreme():
+    from types import SimpleNamespace
+    row=SimpleNamespace(entry=100,stop=101,side=-1,entry_i=0,exit_i=1,risk=1)
+    bars=np.array([[100,120,80,100],[99,102,95,100]])
+    assert path_mfe(bars,row,1,'OHLC','market')==1
+    assert path_mfe(bars,row,1,'OLHC','market')==5
+
+
 def test_entry_high_before_limit_is_not_favorable_excursion():
     bars=np.array([[102,110,99,101],[101,103,97,102]])
     row=SimpleNamespace(entry=100,stop=98,side=1,risk=2,entry_i=0,exit_i=1)

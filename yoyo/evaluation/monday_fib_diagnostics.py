@@ -27,7 +27,7 @@ def quantile(values):
                 p75=float(np.quantile(x,.75)),maximum=float(x.max())) if len(x) else dict(n=0)
 
 
-def path_mfe(bars,row,tick,path='OHLC'):
+def path_mfe(bars,row,tick,path='OHLC',entry_mode='limit'):
     """Favorable excursion AFTER resting limit fill, before original stop/end.
 
     Integer-tick monotone segment audit, matching the disclosed native OHLC
@@ -35,8 +35,12 @@ def path_mfe(bars,row,tick,path='OHLC'):
     Reverse ordering supplies sensitivity, not observed tick truth.
     """
     entry=round(row.entry/tick);stop=round(row.stop/tick);side=row.side
-    entered=False;best=0
-    for i in range(int(row.entry_i),int(row.exit_i)+1):
+    if entry_mode not in ('limit','market'):raise ValueError(entry_mode)
+    # Market signals enter at the recorded minute close: its earlier wick
+    # cannot count as excursion. The following open is already held exposure.
+    entered=entry_mode=='market';best=0
+    start=int(row.entry_i)+(1 if entered else 0)
+    for i in range(start,int(row.exit_i)+1):
         o,h,l,c=bars[i];points=[o,h,l,c] if path=='OHLC' else [o,l,h,c]
         if not entered and side*(o-entry)<=0:
             entered=True
