@@ -222,7 +222,7 @@ def rate(frame):
 
 
 def quintiles(frame, name):
-    x = frame[[name, 'valid', 'r']].dropna()
+    x = frame[[name, 'valid', 'r', 'resolved']].dropna()
     if name in ('opp_touched', 'dow'):
         groups = x.groupby(name)
     else:
