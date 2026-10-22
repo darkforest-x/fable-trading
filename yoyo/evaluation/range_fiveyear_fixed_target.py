@@ -41,6 +41,21 @@ def restate_static_fees(rows, arm, cost):
     return out
 
 
+def validate_static_boundaries(rows):
+    """Preserve end-of-data marks, but reject earlier forced-exit cache rows.
+
+    The caller separately verifies mapped end_i against the frozen candidate
+    horizon. A boundary gain remains a boundary gain, not a target hit.
+    """
+    boundary = rows.boundary_weight.gt(0)
+    if not rows.boundary_weight.isin([0., 1.]).all():
+        raise AssertionError('Static whole-position cache has partial boundary weight')
+    if not (rows.loc[boundary, 'exit_i'] == rows.loc[boundary, 'end_i']).all():
+        raise AssertionError('Cached boundary exit precedes the frozen end')
+    if not (rows.exit_i <= rows.end_i).all():
+        raise AssertionError('Cached exit exceeds the frozen end')
+
+
 def combine(cfg, spec, dest):
     coin = spec['symbol']; arm = cfg['arms'][0]
     source = ROOT / cfg['source'] / coin
@@ -57,7 +72,7 @@ def combine(cfg, spec, dest):
     for name, newname in [('trades.csv', 'trades.csv'), ('sensitivity.csv', 'stop_first.csv')]:
         cached = read(annual / name)
         assert set(cached.pair_id) == set(mapping)
-        assert not cached.boundary_weight.gt(0).any()
+        validate_static_boundaries(cached)
         cached = restate_static_fees(cached, arm, cfg['round_trip_cost'])
         cached['source_trade_id'] = cached.trade_id
         cached['source_ledger'] = str((annual / name).relative_to(ROOT))
@@ -80,6 +95,7 @@ def combine(cfg, spec, dest):
             np.testing.assert_allclose(actual[col], indexed[col], rtol=0, atol=1e-8)
         assert (pd.to_datetime(actual.entry_time, utc=True) == pd.to_datetime(indexed.entry_time, utc=True)).all()
         assert (rows.exit_i > rows.entry_i).all()
+        validate_static_boundaries(rows)
         np.testing.assert_allclose(rows.gross_r - rows.fee_r, rows.net_r, rtol=0, atol=1e-8)
         np.testing.assert_allclose(rows.fee_r, cfg['round_trip_cost'] * rows.entry / rows.risk, rtol=0, atol=1e-8)
         # Exact intrabar chronology is represented by native fills; this column
