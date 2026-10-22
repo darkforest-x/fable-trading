@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-second-touch-20261023-v1",
+  "question": "Notion task 区间1.618测试 method 8: after the first touch is rejected by at least 0.236R, does the retest of the 1618 hold more often than driftless 38.2 percent?",
+  "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+  "pull_R": 0.236,
+  "horizon_days": 14,
+  "focus": ["BTC", "ETH", "XAU"],
+  "success_criterion": "Earlier and later validity >38.2 percent, later one-sided binomial p<0.01 and later mean R>0.",
+  "limitations": "15m bars, conservative ordering, OKX swaps through 2026-08-14, fee 0, independent R.",
+  "training_eligible": false,
+  "production_eligible": false
+}
