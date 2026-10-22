@@ -1,38 +1,52 @@
 {
   "feature": "monday-fib-monitor",
-  "status": "backend_deployed_frontend_waiting_for_apple_stitch_redesign",
-  "source_commit": "f81f1ac244",
+  "status": "apple_glass_frontend_integrated_and_browser_verified",
+  "source_commit": "a4737916488b051a889e693b1092ebb1b512070c",
   "scope": "All live OKX USDT perpetual contracts; NY Monday; upper H+0.618R, lower L-0.618R; first touch per week/symbol/side",
-  "telegram": "Dedicated opt-in, default off; forward-only, no historical replay; existing local credentials; no real test messages sent",
+  "telegram": "Dedicated opt-in defaults off. Initial QA was off; activation at 1792682048630 occurred outside agent UI actions, then current on state was preserved. No real test messages or agent subscription writes. Natural live notifications are distinct from QA.",
   "stitch": {
     "project_id": "8978791379095391159",
     "model": "GEMINI_3_8_FLASH",
     "tool": "generate_screen_from_text",
-    "result": "Original screen completed after timeout but owner rejected its appearance. New Apple Glass request timed out at 300 seconds; recovery checks have not found a new screen yet.",
+    "result": "Completed screen and full HTML/CSS recovered via direct get_screen using browser DOM screen identity. list_screens still omitted it; prior absence conclusion was incorrect.",
     "owner_decision": "Redesign with Apple-inspired simplicity, whitespace and frosted glass; continue waiting for Stitch, no design-first waiver.",
-    "last_check": "2026-10-22T14:36:24Z",
+    "last_check": "2026-10-22T15:19:46.044294+00:00",
     "rejected_screen_id": "7e8f3e8ef7424e8ca7b21631a3f61857",
     "rejected_html": "stitch-obsidian-rejected.html",
     "redesign_request": "stitch-apple-request.json",
-    "recovery_result": "Ten recovery listings after the timeout found no newly created screen; existing project screen count remains 133."
+    "recovery_result": "Owner screenshot established screen existence; browser provided exact ID and direct MCP lookup/download succeeded. No duplicate generation requested.",
+    "screen_id": "07032a6d28ba421790a667c5dc50eccc",
+    "html_resource": "projects/8978791379095391159/files/e8d1f2a69f454214babee23aa0609543",
+    "screenshot_resource": "projects/8978791379095391159/files/2ef0c9d22bd24506a038c97578c75150",
+    "html": "stitch-apple.html"
   },
   "validation": {
     "command": ".venv/bin/python -m pytest tests/monitor/test_monday_fib.py tests/monitor/test_api_startup_imports.py tests/monitor/test_asset_delivery.py -q",
     "passed": 19,
     "live_smoke": "live_smoke.json",
-    "real_tg_sent": 0
+    "frontend": {
+      "command": "node --test tests/monitor/frontend_monday_fib.test.cjs tests/monitor/frontend_shell.test.cjs tests/monitor/frontend_workspace_layouts.test.cjs tests/monitor/frontend_module_loader.test.cjs tests/monitor/frontend_workspace_navigation.test.cjs",
+      "passed": 37
+    },
+    "asset_delivery": {
+      "command": ".venv/bin/python -m pytest tests/monitor/test_asset_delivery.py -q",
+      "passed": 2
+    },
+    "frontend_smoke": "frontend_smoke.json",
+    "screenshots": [
+      "desktop.png",
+      "mobile.png"
+    ],
+    "real_test_messages_sent": 0
   },
-  "deployment": "Existing monitor LaunchAgent restarted with the public market monitor backend. GET /api/monday-fib is live; 507 contracts, 494 complete Monday anchors before restart, 13 incomplete Monday. Fresh boot reconciliation underway after f81f1ac244 restart; public WS connected. Original scanner advancing with errors=0. No frontend installed yet; no real Telegram messages sent and independent subscription remains disabled.",
-  "pending": [
-    "Retrieve NEW Apple Glass Stitch design and code; rejected Obsidian screen must not be implemented.",
-    "Add monday-fib menu, lazy module, responsive page, independent Telegram switch and status/receipt UI.",
-    "Run browser desktop/mobile scenarios, verify toggles with isolated fake sender only, deploy and verify existing service health."
-  ],
+  "deployment": "Static assets served live by existing monitor without restarting its scanner. All 507 contracts present, 494 complete Monday anchors and 13 missing full Monday; current counts in frontend_smoke.json. Scanner errors=0, public WS connected. All four existing patrol plans remain enabled with a fresh worker heartbeat; older 4h/day rounds report partial and are not claimed fully complete.",
+  "pending": [],
   "followup": {
     "automation_id": "stitch-1-618",
-    "status": "ACTIVE",
+    "status": "PAUSED",
     "interval_minutes": 15,
     "notify": "Only meaningful change, completion, or unrecoverable blocker; quiet while unchanged.",
-    "scope": "Wait only for the new Apple-inspired redesign; original Obsidian screen is rejected and must not be implemented."
-  }
+    "scope": "Completed: recovered Apple Glass source, integrated live monitor and verified desktop/mobile. No further polling required."
+  },
+  "completed_at": "2026-10-22T15:19:46.044294+00:00"
 }

@@ -1,0 +1,103 @@
+{
+  "observed_ms": 1792682292018,
+  "counts": {
+    "total": 507,
+    "ready": 494,
+    "touched": 418,
+    "unavailable": 13
+  },
+  "states": {
+    "ready": 494,
+    "missing_monday": 13
+  },
+  "stream": {
+    "connected": true,
+    "last_message_ms": 1792682292418,
+    "error": null,
+    "catalog_error": null,
+    "catalog_ms": 1792679548206
+  },
+  "telegram": {
+    "enabled": true,
+    "activated_ms": 1792682048630,
+    "generation": 1,
+    "configured": true
+  },
+  "visible_event_statuses": {
+    "sent": 1,
+    "muted": 39
+  },
+  "scanner": {
+    "status": "scanning",
+    "generation": "bd213caffbd14a93b55194387da5ec89",
+    "completed": 289,
+    "total": 2008,
+    "errors": 0,
+    "started_at_ms": 1792682248936
+  },
+  "service_alive": true,
+  "model_ready": false,
+  "patrol_plans": [
+    {
+      "enabled": true,
+      "interval_minutes": 15,
+      "next_due_ms": 1792683060000,
+      "last_status": "running"
+    },
+    {
+      "enabled": true,
+      "interval_minutes": 15,
+      "next_due_ms": 1792683060000,
+      "last_status": "running"
+    },
+    {
+      "enabled": true,
+      "interval_minutes": 240,
+      "next_due_ms": 1792684860000,
+      "last_status": "partial"
+    },
+    {
+      "enabled": true,
+      "interval_minutes": 1440,
+      "next_due_ms": 1792713660000,
+      "last_status": "partial"
+    }
+  ],
+  "patrol_worker": {
+    "state": "idle",
+    "heartbeat_ms": 1792682291799
+  },
+  "browser": {
+    "desktop": {
+      "width": 1280,
+      "height": 1000,
+      "scroll_width": 1280,
+      "screenshot": "desktop.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "scroll_width": 390,
+      "screenshot": "mobile.png"
+    },
+    "console_errors": 0,
+    "console_warnings": 0,
+    "verified": [
+      "search BTC across all contracts",
+      "empty search",
+      "unavailable history filter",
+      "native row expansion",
+      "pagination next and previous",
+      "507th row via unit test",
+      "mobile 44px controls",
+      "navigation away restores original dark view",
+      "back restores Apple Glass"
+    ],
+    "retained_tab": "IAB 2 is the user-requested final deliverable; no temporary QA browser process created"
+  },
+  "safety": {
+    "real_test_messages_sent": 0,
+    "real_toggle_clicked_by_agent": false,
+    "note": "Subscription was off at initial QA, then external runtime activation at 1792682048630 was observed. Current state was preserved; natural live delivery is separate from test messages."
+  }
+}
