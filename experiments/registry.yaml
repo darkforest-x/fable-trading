@@ -14,6 +14,34 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-eth-sweep20-mtf-27-charts-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 85fee25102
+    status: accepted
+    question: Render every ETH signal behind the owner-selected sweep20+MTF fixed1R gross19of27 result.
+    single_variable: Display only; frozen27admission IDs and native fills unchanged, fees displayed as zero perowner.
+    result: All27signals rendered;19wins8losses,+11R versus27matchedrandom15wins,+3R.26charts contain60real15m bars;one379bar5m holding period requires15215m bars. Same5m bracket collision on chart19 explicitly labeled.
+    artifacts: [eth-sweep20-mtf-27-charts-20261022]
+    canonical_report: experiments/active/exp-eth-sweep20-mtf-27-charts-20261022-v1/validation.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: All parent-to-native-leg price,time,risk,fee and admission joins checked,including sweep delta lineage.27PNG2880x1620,3contact sheets,ZIP andCSV retained locally. Shared renderer adds target labeling and optional expanded review window. Codecommitted beforegeneration;no replay,download orstrategy change. Notion4018856479af81eebd40da403b3f74f6.
+  - experiment_id: exp-btc-pivot-martingale-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: b90c57016e
+    status: inconclusive
+    question: How far can1000U grow with loss-doubling and win-reset over the frozen BTC sweep20+MTF pivot stream?
+    single_variable: Account sizing only; fixed-U base risk and leverage ceiling searched over unchanged native executions. No compounding or doubling cap; any realized loss advances state.
+    result: Across10450risks and7leveragecaps per5/2/1year,full-execution maxima2048.02/1372.48/1063.95U atbase.78/.85/.66U and100x;matchedrandom548.90/517.52/1178.21U. Allowing margin rejections gives2947.13/2615.90/5995.78U with1/25/18skips,using100/50/100x. All are hindsight grid results underproxy marks/currenttiers,notactual exchange survival proof.
+    artifacts: [btc-pivot-martingale-20261022]
+    canonical_report: experiments/active/exp-btc-pivot-martingale-20261022-v1/leverage_search_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: ReuseNautilus1.231.0 fills;new finite hedged account accounting preserves10overlaps and causal state,zero fees. CurrentOKXtiers,grossmargin,tradeOHLC O-H-L-C,lot.0001BTC,nohistoricalmarks/funding/slippage.50bpmarkstress full maxima2048.02/1354.87/1063.95U;1year5995.78candidatefailsstress.28tests,independentcashreconciliation<4.2e-11U. Builders16d05a9efc/b90c57016e beforegeneration;rawsearches/ledgers preserved. Notion4018856479af81f69a84fc9ba6220f3f;notpromoted.
   - experiment_id: exp-range-v237-triple-resonance-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 360557d336

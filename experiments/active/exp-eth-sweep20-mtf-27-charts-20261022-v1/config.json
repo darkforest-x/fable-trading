@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-eth-sweep20-mtf-27-charts-20261022-v1",
+  "source": "experiments/active/exp-range-v231-sweep20-20261021-v1",
+  "symbol": "ETH",
+  "arm": "fixed_1r",
+  "group": "sweep_mtf",
+  "selection": "All27signal IDs, chronological; no sampling",
+  "round_trip_cost": 0,
+  "source_cost": 0.002,
+  "training_eligible": false,
+  "production_eligible": false,
+  "reproduce": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.eth_sweep_mtf_signal_charts prepare",
+    ".venv/bin/python -m yoyo.evaluation.eth_sweep_mtf_signal_charts render"
+  ]
+}
