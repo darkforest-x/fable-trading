@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-body-20261022-v8
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8df2abcbddf6dca1669e86c2016458ab57d61f3d
+    status: rejected
+    question: Does immediately next15m close confirmation improve the Monday1618 body reversal?
+    single_variable: Only add immediately next completed15m close confirmation. First body must open and close inside1618; next close must also be inside, next open is unrestricted. Enter at second close. Failed pairs keep observing until2percent adverse invalidation or original weekly reset. Recompute actual-entry0.7percent stop; fixed Monday targets and zero fees remain.
+    result: 71closed13wins58losses18.3099percent,-12.1258R,mean-11.9565bp;random710,16.0563percent,-15.0327bp,p.422879. Prior74trades12wins16.2162percent,-21.5113bp. Improved but full period remains negative. Early32trades9.375percent,-22.17R;later39trades25.641percent,+10.05R. Actualmeanwinner3.529R implies samplebreakeven22.081percent.
+    artifacts:
+    - btc-monday-fib-body-20261022-v8
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v8/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Owner adds only adjacent next15m inner close, second open unrestricted. Failed pairs keep observing;2percent wick gate through actual entry. No arrows/timers,SL.7percent,four25percentTP,anyTPBE,fee0.71entries16invalidations2week-expiries1censored.3priorlosses removed,2losses become wins,1win becomesloss.126strategy plus5diagnostic tests.3124native legs6248fills,781cashchecks710controls,71direct earliest-pair checks,16firstinvalidations. MedianTP1=2.825percent/4.035R;15of58lossesMFE1R,7MFE2R;noTPchange. https://app.notion.com/p/4018856479af81afab50fb854801c65e
   - experiment_id: exp-btc-monday-fib-body-20261022-v7
     source_repo: darkforest-x/fable-trading
     source_commit: c3b19214640b1e5b0a92514eef3a5c8941324f7e

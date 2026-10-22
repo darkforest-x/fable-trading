@@ -1,0 +1,34 @@
+{
+  "source_experiment": "exp-btc-monday-fib-body-20261022-v7",
+  "previous_inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v7/entries.csv",
+      "bytes": 19959,
+      "mtime_ns": 1792669741247873925
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v7/controls.csv",
+      "bytes": 148961,
+      "mtime_ns": 1792669741252120240
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v7/decisions.csv",
+      "bytes": 24343,
+      "mtime_ns": 1792669741253530123
+    }
+  ],
+  "frozen_signals": 71,
+  "frozen_controls": 710,
+  "admission_checks": {
+    "weeks": 105,
+    "weekly_sides": 210,
+    "touched": 90,
+    "body_checks": 71,
+    "arrow_required": false,
+    "elapsed_wait_timeout": false,
+    "fee_geometry_filter": true,
+    "next_15m_close_confirmation": true,
+    "adverse_extension_fraction": 0.02
+  },
+  "change": "Only add immediately next completed15m close confirmation. First body must open and close inside1618; next close must also be inside, next open is unrestricted. Enter at second close. Failed pairs keep observing until2percent adverse invalidation or original weekly reset. Recompute actual-entry0.7percent stop; fixed Monday targets and zero fees remain."
+}

@@ -1,0 +1,104 @@
+{
+  "n": 71,
+  "wins": 13,
+  "losses": 58,
+  "tp1_pct": {
+    "n": 71,
+    "p25": 2.140242048744748,
+    "median": 2.824808468703316,
+    "p75": 3.5718910754121946,
+    "maximum": 8.394878443016552
+  },
+  "tp1_r": {
+    "n": 71,
+    "p25": 3.057286231024654,
+    "median": 4.035164835164835,
+    "p75": 5.102289275561544,
+    "maximum": 11.991430011762597
+  },
+  "target_distance_counts": {
+    "at_least_2R": 68,
+    "at_least_3R": 57,
+    "at_least_4R": 36,
+    "at_least_5R": 18,
+    "at_least_7R": 9,
+    "at_least_10R": 1
+  },
+  "loss_mfe_r": {
+    "n": 58,
+    "p25": 0.2877045517221981,
+    "median": 0.4971253981746665,
+    "p75": 1.0636408290882997,
+    "maximum": 6.949455819959343
+  },
+  "loss_mfe_pct": {
+    "n": 58,
+    "p25": 0.2014111710771483,
+    "median": 0.3480091694837354,
+    "p75": 0.7445817031716602,
+    "maximum": 4.865219485673476
+  },
+  "loss_mfe_thresholds": [
+    {
+      "r": 0.25,
+      "ohlc": 45,
+      "olhc": 45
+    },
+    {
+      "r": 0.5,
+      "ohlc": 28,
+      "olhc": 28
+    },
+    {
+      "r": 1,
+      "ohlc": 15,
+      "olhc": 15
+    },
+    {
+      "r": 2,
+      "ohlc": 7,
+      "olhc": 7
+    },
+    {
+      "r": 3,
+      "ohlc": 4,
+      "olhc": 4
+    }
+  ],
+  "loss_stop_minutes": {
+    "n": 58,
+    "p25": 84.75,
+    "median": 256.0,
+    "p75": 565.5,
+    "maximum": 6453.0
+  },
+  "stops_within_minutes": {
+    "5": 0,
+    "15": 1,
+    "30": 7,
+    "60": 13,
+    "240": 26
+  },
+  "average_win_r": 3.528784875625237,
+  "average_loss_r": 1.0000000000000009,
+  "sample_break_even_win_pct": 22.080978175452465,
+  "actual_win_pct": 18.309859154929576,
+  "poststop24h_complete": 58,
+  "poststop24h_tp1": 8,
+  "source_commit": "ed3529387ce64fea6820763aa80309ef5ec2525e",
+  "inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v8/all_parents.csv",
+      "bytes": 163563,
+      "mtime_ns": 1792670931072515186
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-body-20261022-v8/entries.csv",
+      "bytes": 19082,
+      "mtime_ns": 1792670872856120685
+    }
+  ],
+  "no_strategy_parameter_change": true,
+  "native_replay_performed": false,
+  "limitations": "MFE is before the first stop, excludes entry-minute pre-fill prices; OHLC/OLHC are path assumptions. Post-stop target touches are retrospective and do not prove a wider stop or a closer TP improves expected return. Sample break-even rate uses realized mean winner and loser, not a forecast."
+}
