@@ -49,8 +49,30 @@ def run():
             assert abs(r.tp1-base.rounded(edge,cfg['tick'],r.side==1))<1e-8
             assert r.side*(r.tp1-r.entry)>=2*cfg['tick']-1e-8
             monday_target_checks+=1
-    body_checks=next_close_checks=0
-    if not cfg.get('require_arrow',True):
+    body_checks=next_close_checks=wick_checks=0
+    if cfg.get('entry_rule')=='two_wick_engulf':
+        def candle(k):
+            # Rebuild from the quarter's own minute rows, not the resampler.
+            raw=frame.iloc[k-14:k+1]
+            assert frame.index[k].minute%15==0 and len(raw)==15
+            return raw.open.iloc[0],raw.high.max(),raw.low.min(),raw.close.iloc[-1]
+        for r in entry.itertuples():
+            s=int(r.side);k=int(r.touch_i);wicks=[];found=None
+            while frame.index[k].minute%15:k+=1
+            while k<=int(r.entry_i):
+                o,h,l,c=candle(k)
+                if len(wicks)==2:
+                    o1,_,_,c1=candle(k-15)
+                    if (s*(c-o)>1e-8 and s*(c1-o1)<-1e-8 and s*(o-c1)<=1e-8
+                            and s*(c-o1)>=-1e-8 and abs(c-o)>abs(c1-o1)+1e-8):
+                        found=k;break
+                elif s*((l if s==1 else h)-r.level)<=1e-8 and s*(o-r.level)>1e-8 and s*(c-r.level)>1e-8:
+                    wicks.append(k)
+                k+=15
+            assert (found,*wicks)==(int(r.entry_i),int(r.wick1_i),int(r.wick2_i)),'Not the earliest wick/engulf'
+            assert abs(frame.close.iloc[found]-r.entry)<1e-8
+            wick_checks+=1
+    elif not cfg.get('require_arrow',True):
         for r in entry.itertuples():
             body=int(r.body_i);i=int(r.entry_i)
             assert frame.index[body].minute%15==0
@@ -158,6 +180,7 @@ def run():
         matched_control_checks=len(controls),minute_grid_rows=len(frame),
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         independent_body_checks=body_checks,independent_next_close_checks=next_close_checks,
+        independent_wick_engulf_checks=wick_checks,
         independent_structural_stop_checks=structural_checks,
         independent_monday_first_target_checks=monday_target_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,

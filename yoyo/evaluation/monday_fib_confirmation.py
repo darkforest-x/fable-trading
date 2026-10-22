@@ -189,6 +189,36 @@ def body_confirmation(quarter,touch_i,last_i,side,level,confirm_next_close=False
     return -1,-1
 
 
+def wick_engulf_confirmation(quarter,touch_i,last_i,side,level):
+    """Owner task2026-10-22: two15m wick rejections, then reversal engulfing.
+
+    A wick candle reaches the key (long low, short high; equality touches)
+    while its open AND close stay strictly inside. Wicks need not be
+    adjacent. Strictly after the second wick, the first completed candle whose
+    body points into the range and covers the adjacent previous opposite body
+    enters at its close: open at/beyond previous close, close at/beyond
+    previous open, larger body. Reads completed15m OHLC only; no deadline but
+    the weekly reset. Returns (entry, first wick, second wick) or -1s.
+    """
+    v=quarter[base.OHLC].iloc[touch_i:last_i+1].to_numpy()
+    wicks=[]
+    for offset in np.flatnonzero(np.isfinite(v[:,0])):
+        k=touch_i+int(offset);o,h,l,c=v[offset]
+        if len(wicks)==2:
+            # Minute grid: the adjacent quarter closed15 rows earlier. It lies
+            # at or after the second wick, so inside this weekly slice.
+            if quarter.index[k]-quarter.index[k-15]!=pd.Timedelta(minutes=15):continue
+            o1,c1=v[offset-15,0],v[offset-15,3]
+            if (np.isfinite(o1) and side*(c-o)>1e-8 and side*(c1-o1)<-1e-8
+                    and side*(o-c1)<=1e-8 and side*(c-o1)>=-1e-8 and abs(c-o)>abs(c1-o1)+1e-8):
+                return k,wicks[0],wicks[1]
+            continue
+        extreme=l if side==1 else h
+        if side*(extreme-level)<=1e-8 and side*(o-level)>1e-8 and side*(c-level)>1e-8:
+            wicks.append(k)
+    return -1,-1,-1
+
+
 def structural_stop_levels(frame,cfg):
     """Past completed15m high/low only, including a bar closing at entry.
 
@@ -219,26 +249,36 @@ def prepare_body(frame,cfg):
     skips that weekly-side opportunity, without a later rearm. Optional next
     close confirmation delays admission15minutes; adverse invalidation remains
     active through that actual entry, not just the first qualifying body.
+    entry_rule='two_wick_engulf' swaps only the admission detector; targets,
+    stops, room skip and weekly reset are shared.
     """
     weekly=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip')
     original=pd.read_csv(SOURCE/'signal_trades.csv',float_precision='round_trip')
     q=aggregate(frame,15).reindex(frame.index)
     stop_levels=structural_stop_levels(frame,cfg)
+    wick_rule=cfg.get('entry_rule')=='two_wick_engulf'
+    arm='wick2engulf15m' if wick_rule else 'body15m'
     bars=frame[base.OHLC].to_numpy();entries=[];decisions=[];touch={}
     for r in weekly.itertuples():
         first=int(r.entry_i)+1;last=int(r.expire_i)
         hits=np.flatnonzero(r.side*(bars[first:last+1,2 if r.side==1 else 1]-r.entry)<=1e-8)
         if not len(hits):continue
         i=first+int(hits[0]);touch[r.trade_id]=i
-        j,body_i=body_confirmation(q,i,last,r.side,r.entry,cfg.get('next_15m_close_confirmation',False))
+        if wick_rule:
+            # The engulfing candle is the confirmation body; wicks are kept.
+            j,wick1,wick2=wick_engulf_confirmation(q,i,last,r.side,r.entry);body_i=j
+            extra=dict(wick1_i=wick1,wick2_i=wick2)
+        else:
+            j,body_i=body_confirmation(q,i,last,r.side,r.entry,cfg.get('next_15m_close_confirmation',False))
+            extra={}
         week_end=pd.Timestamp(r.week,tz=cfg['timezone'])+pd.DateOffset(days=7)
         status='data_censored' if week_end>frame.index[-1] else 'expired'
-        row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm='body15m',touch_i=i,
+        row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm=arm,touch_i=i,
             touch_time=str(frame.index[i]),level=r.entry,
             **targets(r.monday_high,r.monday_low,r.side,cfg['tick'],
                       cfg.get('first_target_monday_boundary',False)),status=status,
             entry_i=j,body_i=body_i,arrow_i=-1,arrow_minutes=0,
-            wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False)
+            wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False,**extra)
         extension=cfg.get('adverse_extension_fraction')
         if extension is not None:
             until=j if j>=0 else last
@@ -263,19 +303,26 @@ def prepare_body(frame,cfg):
                     decisions.append(row)
                     continue
                 row.update(status='confirmed',entry=price,stop=stop,risk=r.side*(price-stop),
-                    entry_time=str(frame.index[j]),population='signal',trade_id=f'body15m-{r.pair_id}',
+                    entry_time=str(frame.index[j]),population='signal',trade_id=f'{arm}-{r.pair_id}',
                     end_i=len(frame)-1,segment=int(frame.index[j]>=pd.Timestamp(cfg['split'])))
                 entries.append(row.copy())
         decisions.append(row)
     assert touch==dict(zip(original.parent_id,original.entry_i))
     for r in entries:
         assert frame.index[r['entry_i']].minute%15==0 and r['body_i']>=r['touch_i']
+        if wick_rule:
+            assert r['touch_i']<=r['wick1_i']<r['wick2_i']<r['entry_i']==r['body_i']
+            for w in (r['wick1_i'],r['wick2_i']):
+                assert r['side']*(q.open.iloc[w]-r['level'])>0 and r['side']*(q.close.iloc[w]-r['level'])>0
+            assert r['side']*(q.close.iloc[r['entry_i']]-q.open.iloc[r['entry_i']])>0
+            continue
         assert r['side']*(q.open.iloc[r['body_i']]-r['level'])>0
         assert r['side']*(q.close.iloc[r['body_i']]-r['level'])>0
         assert r['side']*(r['entry']-r['level'])>0
         assert r['entry_i']-r['body_i']==(15 if cfg.get('next_15m_close_confirmation',False) else 0)
     return pd.DataFrame(entries),pd.DataFrame(decisions),dict(weeks=int(weekly.week.nunique()),
         weekly_sides=len(weekly),touched=len(touch),body_checks=len(entries),
+        entry_rule=cfg.get('entry_rule','inner_body'),
         arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True,
         next_15m_close_confirmation=cfg.get('next_15m_close_confirmation',False),
         adverse_extension_fraction=cfg.get('adverse_extension_fraction'),

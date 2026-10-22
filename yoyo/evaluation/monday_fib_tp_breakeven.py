@@ -77,7 +77,7 @@ def admission_changed(cfg,oldcfg):
     return any(cfg.get(k,defaults.get(k))!=oldcfg.get(k,defaults.get(k)) for k in
         ('wait_minutes','require_arrow','adverse_extension_fraction',
          'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation','stop_15m_lookback',
-         'first_target_monday_boundary'))
+         'first_target_monday_boundary','entry_rule'))
 
 
 def check_projection_policy(cfg,source_cfg):

@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body,body_confirmation,structural_stop_levels,initial_stop
+from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body,body_confirmation,structural_stop_levels,initial_stop,wick_engulf_confirmation
 from yoyo.evaluation.pepe_range_exits import signals
 from yoyo.layers.l3_backtest.nautilus_independent import run_native,ExitPolicy
 
@@ -135,6 +135,50 @@ class ConfirmationTests(unittest.TestCase):
             q.iloc[14]=100+side
             q.iloc[29]=[100-side,100+side]
             self.assertEqual(body_confirmation(q,10,80,side,100,True),(29,14))
+
+    WICK_BARS={14:[101,102,100,101.5],29:[101.5,101.6,100.5,100.8],
+               44:[100.8,102.2,100.7,102],59:[101,101.2,99.5,100.6],74:[100.6,101.3,100.5,101.2]}
+
+    def wick_quarter(self,bars,side=1):
+        q=pd.DataFrame(np.nan,index=frame(200).index,columns=['open','high','low','close'])
+        for k,(o,h,l,c) in bars.items():
+            q.iloc[k]=[o,h,l,c] if side==1 else [200-o,200-l,200-h,200-c]
+        return q
+
+    def test_wick_engulf_waits_for_second_wick_and_mirrors(self):
+        for side in (1,-1):
+            q=self.wick_quarter(self.WICK_BARS,side)
+            self.assertEqual(wick_engulf_confirmation(q,7,190,side,100),(74,14,59))
+
+    def test_wick_requires_open_and_close_inside(self):
+        bars=dict(self.WICK_BARS);bars[14]=[99.5,102,99.5,101.5]
+        bars[74]=[100.6,101.3,100.6,101.2]
+        self.assertEqual(wick_engulf_confirmation(self.wick_quarter(bars),7,190,1,100),(-1,-1,-1))
+
+    def test_engulf_needs_larger_opposite_previous_body(self):
+        bars=dict(self.WICK_BARS);bars[74]=[100.6,101,100.5,100.9]
+        bars[89]=[100.9,101,100.6,100.7];bars[104]=[100.7,101.1,100.6,101]
+        self.assertEqual(wick_engulf_confirmation(self.wick_quarter(bars),7,190,1,100),(104,14,59))
+        self.assertEqual(wick_engulf_confirmation(self.wick_quarter(bars),7,100,1,100),(-1,-1,-1))
+
+    def test_wick_rule_admission_shares_targets_and_stop(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed
+        self.assertTrue(admission_changed(dict(entry_rule='two_wick_engulf'),{}))
+        f=pd.DataFrame([[101.5]*4]*600,columns=['open','high','low','close'],
+            index=pd.date_range('2026-01-06T00:01Z',periods=600,freq='min'))
+        for k,(o,h,l,c) in self.WICK_BARS.items():
+            f.iloc[k-14,0]=o;f.iloc[k,3]=c;f.iloc[k-7,1]=h;f.iloc[k-7,2]=l
+        weekly=pd.DataFrame([dict(trade_id='a',pair_id='a',week='2026-01-05',side=1,
+            entry_i=0,expire_i=598,entry=100.,monday_high=110.,monday_low=105.)])
+        original=pd.DataFrame([dict(parent_id='a',entry_i=7)])
+        cfg=dict(timezone='America/New_York',tick=.1,round_trip_cost=0.,stop_fraction=.007,
+                 split='2026-06-01T00:00Z',adverse_extension_fraction=None,entry_rule='two_wick_engulf')
+        with patch('yoyo.evaluation.monday_fib_confirmation.pd.read_csv',side_effect=[weekly,original]):
+            entries,_,checks=prepare_body(f,cfg)
+        r=entries.iloc[0]
+        self.assertEqual((r.trade_id,r.entry_i,r.wick1_i,r.wick2_i,r.entry),('wick2engulf15m-a',74,14,59,101.2))
+        self.assertEqual((r.tp1,r.stop),(107.5,100.4))
+        self.assertEqual(checks['entry_rule'],'two_wick_engulf')
 
     def test_next_close_must_be_immediately_adjacent_not_latched(self):
         q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
