@@ -24,3 +24,13 @@ test('interactive loading coalesces to the newest snapshot and never paints afte
  const retired=api.mount(host,{symbol:'SOL'},view);retired.create=()=>assert.fail('retired chart created');
  api.unmount(host);release();await new Promise(setImmediate);assert.deepEqual(paint,['ETH']);
 });
+
+test('Monday band uses millisecond calendar boundaries and second chart times',()=>{
+ sandbox.window.SpikeChartTools={syncer:()=>()=>{},library:()=>new Promise(()=>{})};
+ const host={replaceChildren(){}};const instance=sandbox.window.SpikeRangeChart.mount(host,{},view);
+ instance.rows=[{time:100},{time:200},{time:300}];instance.mondayWindow={start_ms:100000,end_ms:300000};
+ instance.band={hidden:true,style:{}};instance.chart={timeScale:()=>({timeToCoordinate:t=>t/10-5,width:()=>100})};
+ instance.paintMondayBand();assert.equal(instance.band.hidden,false);assert.equal(instance.band.style.width,'20px');
+ instance.mondayWindow=null;instance.paintMondayBand();assert.equal(instance.band.hidden,true);
+ instance.chart={remove(){}};sandbox.window.SpikeRangeChart.unmount(host);
+});

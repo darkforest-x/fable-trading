@@ -1,0 +1,7 @@
+# Calendar overlays must follow the chart's native time coordinates
+
+- **Problem**: The Monday band stayed hidden while the underlying BTC candles and nine price levels rendered correctly. There were 96 Monday candles, and the chart's visible logical range was 0–338.
+- **Dead end**: Counting bars and assuming logical-index projection was sufficient passed a small mock test but failed in the real browser. In this local runtime, the two requested logical coordinates both read zero while the chart width was 584 pixels. The reason for that unexpected API result was not established.
+- **Effective path**: Project the first and last Monday candle timestamps through the chart's native `timeToCoordinate`. Those coordinates were approximately -0.14 and 163.52 pixels. Add half a candle at each edge, clip to the plot width, and resynchronize after viewport changes. Real browser inspection then showed a visible 164.38-pixel Monday band.
+- **General rule**: Calendar annotations must use the same time domain and viewport projection as their candles. Keep milliseconds at the API boundary and seconds inside Lightweight Charts; confirm an overlay in the actual browser after resizing rather than treating mock geometry as visual proof.
+- **Scope**: Optional Monday band in `yoyo/monitor/static/range-chart.js`; targeted renderer tests and the desktop/390px screenshots under `artifacts/monday-fib-monitor-20261022/`. Other chart consumers leave this option disabled.

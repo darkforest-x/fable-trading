@@ -1,8 +1,9 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const source=fs.readFileSync('yoyo/monitor/static/monday-fib.js','utf8');
-const {price,selectRows}=require('../../yoyo/monitor/static/monday-fib.js');
-const item=(o={})=>({symbol:'BTC-USDT-SWAP',state:'ready',stale:false,price:82500,high:83149.8,low:81166,upper:84375.7884,lower:79940.0116,received_ms:Date.now(),distance_pct:1.2,nearest:'upper',touches:{},...o});
+const {price,selectRows,latestTouch,touchTime,recentTouch,RECENT_MS}=require('../../yoyo/monitor/static/monday-fib.js');
+const event=(o={})=>({source:'live',observed_ms:Date.now()-60000,candle_ms:Date.now()-60000,status:'muted',level:84375.7884,...o});
+const item=(o={})=>({symbol:'BTC-USDT-SWAP',state:'ready',stale:false,price:82500,high:83149.8,low:81166,upper:84375.7884,lower:79940.0116,received_ms:Date.now(),distance_pct:1.2,nearest:'upper',touches:{upper:event()},...o});
 const snap=(o={})=>({now_ms:Date.now(),week:'2026-10-19',monday_complete:true,stream:{connected:true,last_message_ms:Date.now()},telegram:{enabled:false,configured:true},counts:{total:1,touched:0},items:[item()],events:[],...o});
 const response=(d,ok=true)=>({ok,json:async()=>d});
 function harness(fetchImpl){
@@ -15,16 +16,23 @@ function harness(fetchImpl){
 const flush=async()=>{for(let i=0;i<12;i++)await Promise.resolve();};
 async function ready(c){c.api.setActive(true);await c.api.refresh();await flush();}
 test('small coin prices retain precision; null is never presented as zero',()=>{assert.equal(price(null),'—');assert.equal(price(.00000123),'0.00000123');assert.equal(price(83149.8),'83,149.8');});
-test('filters search all contracts, preserve side touches and exclude stale near levels',()=>{
- const a=[item(),item({symbol:'ETH-USDT-SWAP',stale:true,touches:{upper:{}}}),item({symbol:'SOL-USDT-SWAP',state:'missing_monday',distance_pct:null})];
- assert.equal(selectRows(a,'BTC/USDT').length,1);assert.equal(selectRows(a,'','near').length,1);assert.equal(selectRows(a,'','upper')[0].symbol,'ETH-USDT-SWAP');assert.equal(selectRows(a,'','unavailable').length,2);
+test('only touched contracts appear; real event time outranks distance and history insertion time',()=>{
+ const now=2e12,a=[item({symbol:'UNTOUCHED-USDT-SWAP',touches:{},distance_pct:0}),item({symbol:'OLD-USDT-SWAP',touches:{upper:event({observed_ms:now-120000})}}),item({symbol:'NEW-USDT-SWAP',touches:{lower:event({observed_ms:now-60000})}}),item({symbol:'HIST-USDT-SWAP',touches:{upper:event({source:'history',observed_ms:now,candle_ms:now-86400000})}})];
+ assert.deepEqual(selectRows(a,'','all',now).map(r=>r.symbol),['NEW-USDT-SWAP','OLD-USDT-SWAP','HIST-USDT-SWAP']);
+ assert.equal(selectRows(a,'UNTOUCHED','all',now).length,0);assert.equal(selectRows(a,'','recent',now).length,2);assert.equal(selectRows(a,'','lower',now).length,1);
+ assert.equal(touchTime(latestTouch(a[3])),now-86400000);assert.equal(a[0].symbol,'UNTOUCHED-USDT-SWAP');
+});
+test('recent highlight expires at 15 minutes and excludes recovery/future timestamps',()=>{
+ const now=2e12;assert.equal(recentTouch(event({observed_ms:now-RECENT_MS+1}),now),true);assert.equal(recentTouch(event({observed_ms:now-RECENT_MS}),now),false);
+ assert.equal(recentTouch(event({source:'history',observed_ms:now}),now),false);assert.equal(recentTouch(event({observed_ms:now+1}),now),false);
+ const both=item({touches:{upper:event({observed_ms:now-10}),lower:event({observed_ms:now-5})}});assert.equal(latestTouch(both).side,'lower');
 });
 test('opening is GET-only, renders real data and leaves TG off',async()=>{
  const calls=[];const c=harness(async(u,o)=>{calls.push([u,o]);return response(snap());});await ready(c);
  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));assert.equal(c.el('mf-tg-toggle').attrs['aria-checked'],'false');assert.match(c.el('mf-rows').innerHTML,/84,375.79/);assert.match(c.el('mf-week').textContent,/2026-10-19/);c.api.setActive(false);assert.equal(c.timers.size,0);
 });
 test('pagination reaches the final contract and filters reset the page',async()=>{
- const c=harness(async()=>response(snap({items:Array.from({length:507},(_,i)=>item({symbol:`C${i}-USDT-SWAP`}))})));await ready(c);
+ const c=harness(async()=>response(snap({items:Array.from({length:507},(_,i)=>item({symbol:`C${i}-USDT-SWAP`,touches:{upper:event({observed_ms:2e12-i})}}))})));await ready(c);
  for(let i=0;i<101;i++)c.el('mf-next').events.click();assert.match(c.el('mf-rows').innerHTML,/C506/);assert.equal(c.el('mf-next').disabled,true);
  c.el('mf-search').events.input({target:{value:'C0-USDT-SWAP'}});assert.equal(c.el('mf-page-number').textContent,'1 / 1');assert.match(c.el('mf-rows').innerHTML,/>C0</);c.api.setActive(false);
 });

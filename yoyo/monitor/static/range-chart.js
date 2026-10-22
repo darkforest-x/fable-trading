@@ -47,7 +47,11 @@
       this.volume.priceScale().applyOptions({scaleMargins:{top:.85,bottom:0}});
       this.controls=T.bind(this.panel,{chart:()=>this.chart,rows:()=>this.rows,canvas:this.canvas,panel:this.panel});
       this.crosshair=T.frame(p=>{if(!this.chart)return;this.hover=p?.time&&p.seriesData?.has(this.series)?p.time:null;this.readout();});
-      this.chart.subscribeCrosshairMove(this.crosshair);this.resize=T.resize(this.chart,this.canvas,{compactAxis:true});
+      this.chart.subscribeCrosshairMove(this.crosshair);
+      this.band=document.createElement('div');this.band.className='cv-monday-band';this.band.setAttribute('aria-hidden','true');this.band.hidden=true;this.canvas.append(this.band);
+      this.bandPaint=T.frame(()=>this.paintMondayBand());this.chart.timeScale().subscribeVisibleLogicalRangeChange(this.bandPaint);
+      this.bandResize=new ResizeObserver(this.bandPaint);this.bandResize.observe(this.canvas);
+      this.resize=T.resize(this.chart,this.canvas,{compactAxis:true});
       this.theme=new MutationObserver(()=>this.applyTheme());this.theme.observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});this.applyTheme();
     }
     applyTheme(){
@@ -64,23 +68,36 @@
       this.rows=(data?.candles||[]).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
       this.sync(this.series,this.rows.map(({time,open,high,low,close})=>({time,open,high,low,close})));
       this.sync(this.volume,this.rows.map(r=>({time:r.time,value:r.volume||0,color:r.close>=r.open?'#01e59938':'#ff4f7338'})));
-      this.series.applyOptions({priceFormat:T.priceFormat(this.rows)});
+      this.series.applyOptions({priceFormat:T.priceFormat(this.rows),...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})});
       for(const line of this.lines)this.series.removePriceLine(line);this.lines=[];
       const colors={range:'#3984b3',fib:'#9774c1',profile:'#cc8d35',npoc:'#b9689e',prior:'#8a969e'};
       const levels=(data?.levels||[]).filter(l=>view[l.kind]&&fin(l.price));this.activeLevels=levels;
-      for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:colors[level.kind],lineWidth:1,lineStyle:level.kind==='range'?0:2,axisLabelVisible:true,title:level.label}));
-      this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
+      for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),axisLabelVisible:level.axisLabelVisible!==false,title:level.label}));
+      this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
       this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 15min`;
-      const status=this.panel.querySelector('.cv-range-status'),warning=error||data?.error||data?.stale&&'行情已过期 · 仅供查看历史位置';
+      const status=this.panel.querySelector('.cv-range-status'),warning=error||data?.error||this.rows.length&&data?.stale&&'行情已过期 · 仅供查看历史位置';
       status.classList.toggle('is-warning',!!warning);status.textContent=warning||(!this.rows.length?'正在加载 K 线与关键价位…':`收盘边界：北京 ${clock(data.last_close_ms,true)} · ${data.monday?.complete?'周一区间已冻结':data.monday?.developing?'周一区间形成中':'周一数据不足，暂不画区间'}`);
       const retained=T.restore(saved,T.times(this.rows));
       if(retained)this.chart.timeScale().setVisibleLogicalRange(retained);else if(key!==this.key||!saved){
-        if(this.canvas.clientWidth<=700&&this.rows.length>70)this.chart.timeScale().setVisibleLogicalRange({from:this.rows.length-70,to:this.rows.length+3});
+        if(!view.fitAll&&this.canvas.clientWidth<=700&&this.rows.length>70)this.chart.timeScale().setVisibleLogicalRange({from:this.rows.length-70,to:this.rows.length+3});
         else this.chart.timeScale().fitContent();
       }
       this.key=key;this.readout();this.controls.update();
+      if(view.showLevels)this.panel.querySelector('.cv-level-details').open=true;
+      this.mondayWindow=view.mondayBand?data?.monday:null;this.paintMondayBand();
     }
-    destroy(){this.dead=true;this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
+    paintMondayBand(){
+      if(!this.band)return;const range=this.mondayWindow,scale=this.chart?.timeScale();
+      const indices=range?this.rows.map((r,i)=>r.time*1000>=range.start_ms&&r.time*1000<range.end_ms?i:-1).filter(i=>i>=0):[];
+      if(!indices.length||!scale){this.band.hidden=true;return;}
+      const first=scale.timeToCoordinate(this.rows[indices[0]].time),last=scale.timeToCoordinate(this.rows[indices.at(-1)].time),width=scale.width();
+      if(first==null||last==null){this.band.hidden=true;return;}
+      const half=indices.length>1?Math.abs(last-first)/(indices.length-1)/2:width/Math.max(1,this.rows.length)/2;
+      const a=first-half,b=last+half;
+      if(a==null||b==null||b<=0||a>=width){this.band.hidden=true;return;}
+      this.band.hidden=false;this.band.style.left=Math.max(0,a)+'px';this.band.style.width=Math.max(0,Math.min(width,b)-Math.max(0,a))+'px';this.band.textContent='纽约周一定界';
+    }
+    destroy(){this.dead=true;this.bandPaint?.cancel();this.bandResize?.disconnect();this.controls?.destroy();this.crosshair?.cancel();this.resize?.disconnect();this.theme?.disconnect();this.chart?.remove();this.chart=null;this.host.replaceChildren();}
   }
   const instances=new WeakMap();
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
