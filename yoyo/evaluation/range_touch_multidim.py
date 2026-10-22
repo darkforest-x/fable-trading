@@ -207,7 +207,7 @@ def main():
                    no_backtest_replay=True, no_content_hashes=True,
                    reproduction=".venv/bin/python -m yoyo.evaluation.range_touch_multidim",
                    files=[dict(path=str(p.relative_to(ROOT)), bytes=p.stat().st_size)
-                          for p in sorted(dest.iterdir()) if p.is_file()])
+                          for p in sorted(dest.iterdir()) if p.is_file() and p.name != "validation.json"])
     (dest / "validation.json").write_text(json.dumps(receipt, indent=2) + "\n")
     print(json.dumps(dict(output=str(dest), signal_occurrences=870, groups=len(grouped))))
 
