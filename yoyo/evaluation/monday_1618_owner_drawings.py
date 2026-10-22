@@ -50,7 +50,8 @@ def bars(symbol):
     raw = pd.read_csv(ROOT/'experiments/active/exp-btc-monday-fib1618-okx-20261022-v1/candles.csv.gz')
     m = raw.set_index(pd.to_datetime(raw.ts, unit='ms', utc=True))
     g = m.resample('15min', closed='left', label='left')
-    q = g.agg(dict(open='first', high='max', low='min', close='last', volume='sum'))[g.close.count().eq(15)]
+    q = g.agg(dict(open='first', high='max', low='min', close='last'))[g.close.count().eq(15)]
+    q['volume'] = np.nan  # the1m archive has no volume; only vol_ratio uses it
     return pd.concat([q, fresh[fresh.index > q.index[-1]]])
 
 
