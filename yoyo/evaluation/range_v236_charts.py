@@ -279,9 +279,10 @@ def render(limit=0):
             p=r['entry']+side*rr*r['risk']
             if ymin<p<ymax:
                 ax.hlines(p,entryx,endx,color='#F36C7A' if rr<0 else '#36C9A3',lw=.5,linestyles=(0,(3,4)),alpha=.7)
-        if ex['trail']:
-            xx=[x(t['time']) for t in ex['trail']];yy=[t['price'] for t in ex['trail']]
-            ax.step(xx+[x(ex['time'])],yy+[yy[-1]],where='post',color='#00BEC8',lw=.8,zorder=4)
+        visible_trail=[t for t in ex['trail'] if x(t['time'])<=endx]
+        if visible_trail:
+            xx=[x(t['time']) for t in visible_trail];yy=[t['price'] for t in visible_trail]
+            ax.step(xx+[endx],yy+[yy[-1]],where='post',color='#00BEC8',lw=.8,zorder=4)
         if ex['reason'] and not ex['outside']:
             ax.scatter([endx],[ex['price']],marker='D',s=34,facecolor='none',edgecolor='white',lw=.8,zorder=9)
             named.append(ax.annotate(f'{ex["result_r"]:+.2f}R',xy=(endx,ex['price']),xytext=(8,-15 if side==1 else 15),
@@ -301,7 +302,7 @@ def render(limit=0):
         fig.text(.045,.163,f'5m K线 {stamp(r["signal_time"])}  →  {stamp(r["entry_time"],"%H:%M")} 收盘参考价 {price(r["entry"])}',fontsize=10.5,color=col)
         fig.text(.045,.129,f'15m K线 {stamp(r["quarter_time"])}  →  {stamp(r["quarter_close"],"%H:%M")} 收盘；双方确认 {stamp(r["publication_time"])}',fontsize=10.2)
         reason={0:'截至数据末端仍未退出',1:'止损',2:'跟踪止损',3:'1H反向退出'}[ex['reason']]
-        fig.text(.045,.095,f'止损 {price(r["stop"])}  ·  1R = {price(r["risk"])}  ·  {reason} {stamp(ex["time"])}'+('（图外）' if ex['outside'] else '')+f'  ·  最大 {ex["peak_r"]:.2f}R',fontsize=9.5,color='#ADB5C2')
+        fig.text(.045,.095,f'止损 {price(r["stop"])}  ·  1R = {price(r["risk"])}  ·  {reason} {stamp(ex["time"])}'+('（图外）' if ex['outside'] else '')+f'  ·  全程最大 {ex["peak_r"]:.2f}R',fontsize=9.5,color='#ADB5C2')
         fig.text(.045,.061,bounds+(' · 周一发展中' if r['monday_developing'] else ''),fontsize=9,color='#9AA2AF')
         fig.text(.045,.024,'原始OHLC重绘 · 回标复盘框，非实时成交 · 止损=近5根极值+0.05% · 5R后4ATR跟踪 · Fib仅作参照 · 绿框至少5R仅为刻度',fontsize=8.5,color='#6E7785')
         folder=DEST/r['symbol'];folder.mkdir(exist_ok=True)
