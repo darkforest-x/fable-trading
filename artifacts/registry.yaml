@@ -33597,3 +33597,20 @@ artifacts:
       Exactly60real15m candles, named matched key and both Monday bounds, actual entry-stop prices and5m execution insets.
       Two-hour stops229BTC/175ETH; uncapped stops251BTC/191ETH. All20 selected trades stop identically in both ledgers.
       Sample004 has same5m stop-target ambiguity, explicitly labeled O-H-L-C. PNGs local; no archives created.
+
+  - artifact_id: range-pine-v234-pairing-20261022
+    source_commit: 7e64f917d1
+    generator_commit: 7e64f917d1
+    artifact_type: manifest
+    role: pine_causal_five_minute_confirmation_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_34_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_34_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: V2.34 private script saved in TradingView with V2.33 preserved.
+      Existing H1 observation and eligible15m arrow now require same-side5m confirmation within five bars before or after, inclusive of same close.
+      First later confirmation enters at its own5m close; no backdated entry. Other signal and exit modules unchanged.
+      Native14 boundary fixtures and56 local regression tests pass. Loaded BTC ledger57 entries includes6 off-quarter confirmations.
+      No profitability backtest or performance claim. Native logs and final chart evidence retained locally.
