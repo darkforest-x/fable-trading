@@ -33696,3 +33696,16 @@ artifacts:
     training_eligible: false
     production_eligible: false
     notes: Completed two-year V2.37 study with existingNautilus1.231.0adapter andfrozenOKXinputs. Sourcecommittedbeforepreparation.12552uniquepositions,25104fills,22focusedtests;referenceandpublication-closecohorts,matchedrandomcontrols andchronologicaltime-groupchecks retained. All four reference andfour causalcomparison cohorts netnegative;no profitabilityorproductioneligibilityclaim. NoPineorproductionchange.
+
+  - artifact_id: range-v237-fixed-exits-20261022
+    source_commit: 20375fb47a
+    generator_commit: 20375fb47a
+    artifact_type: manifest
+    role: causal_fixed_target_touch_breakeven_comparison
+    source_repo: darkforest-x/fable-trading
+    source_path: experiments/active/exp-range-v237-fixed-exits-20261022-v1/summary.json
+    storage_uri: repo://experiments/active/exp-range-v237-fixed-exits-20261022-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: NativeNautilus1.231.0fixed1/2/3R and1Rtouch-to-entryBE;frozenV2.37causalentriesandrandomcontrols,20bpunchanged.62450positions124900fills,alloraclepathsverified. BothOHLC/OLHCassumptionsandpertradelower/upperenvelopesretained. Allarmsnetnegativeandworsethanprevious5Rbaseline;entry-priceBEdoesnotcoverfees. No formalreportornewmarketdownload.
