@@ -1,0 +1,7 @@
+# Telegram upload connection errors need destination readback before retry
+
+- **Problem**: A 38 MB chart archive upload raised `ConnectionError` after eight acknowledged documents. The request exception did not establish whether Telegram published the ninth file.
+- **Dead end**: Treating the exception as a failed send would risk a duplicate; treating it as success would omit a requested artifact. The generic web reader could not access the channel, so it was not useful delivery evidence.
+- **Effective path**: Preserve the uncertain attempt, read the public destination directly, and verify a fresh server date, the latest acknowledged message, absence of the exact filename, and a message-not-found response for the next ID. The two channel observations ended at 3189. Only after reconciling that evidence was the exact file retried; confirmed parts were skipped.
+- **General rule**: An HTTP transport error is an unknown publication outcome. Keep pending/unknown receipts, reconcile against the destination, and distinguish an explicit rejection from a missing acknowledgement before retrying. A stale or incomplete feed cannot establish absence.
+- **Scope**: `yoyo/evaluation/range_v237_btc_gallery.py`; evidence in `artifacts/btc_v237_twoyear_20261022/telegram_readback_check.json` and `telegram_receipt.json`. The sender retains filename, byte-size and destination checks; credentials never enter logs or receipts.
