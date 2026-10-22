@@ -41,6 +41,8 @@ def load_data(cfg):
     cache=EXP/'candles.csv.gz'
     if cache.exists():
         return aligned(pd.read_csv(cache,float_precision='round_trip'))
+    if cfg.get('venue') == 'OKX USDT perpetual':
+        return load_okx_data(cfg,cache)
     source=ROOT/cfg['archive']
     raw=pd.read_csv(source,usecols=['ts',*OHLC],float_precision='round_trip')
     warm=int(pd.Timestamp(cfg['warmup']).value//10**6)
@@ -87,6 +89,56 @@ def load_data(cfg):
     dump(EXP/'data_receipt.json',dict(archive=file_stamp(source),api_urls=urls,
         archive_rows=len(raw),new_rows=len(merged)-len(raw),overlap_rows=len(overlap),
         total_rows=len(merged),first_open=str(pd.Timestamp(merged.ts.iloc[0],unit='ms',tz='UTC')),
+        last_close=str(pd.Timestamp(end,unit='ms',tz='UTC')),gaps=0,no_content_hash=True))
+    return aligned(merged)
+
+
+def load_okx_data(cfg,cache):
+    """Reuse named OKX archives; only fetch a missing confirmed1m tail."""
+    from src.data.fetch_okx import _request, API
+    warm=int(pd.Timestamp(cfg['warmup']).value//10**6)
+    end=int(pd.Timestamp(cfg['end']).value//10**6)
+    parts=[]
+    for filename in cfg['inputs']:
+        raw=pd.read_csv(ROOT/filename,usecols=['ts',*OHLC],float_precision='round_trip')
+        parts.append(raw[(raw.ts>=warm)&(raw.ts<end)])
+    old=pd.concat(parts,ignore_index=True).sort_values('ts')
+    duplicates=old[old.ts.duplicated(keep=False)]
+    if len(duplicates) and (duplicates.groupby('ts')[OHLC].nunique().to_numpy()>1).any():
+        raise ValueError('Historical OKX sources disagree on overlapping OHLC')
+    old=old.drop_duplicates('ts').reset_index(drop=True)
+    begin=int(old.ts.max())-59*60000;cursor=end;pages=[];urls=[]
+    folder=EXP/'inputs';folder.mkdir(exist_ok=True)
+    while cursor>begin:
+        p=folder/f'okx_BTC_USDT_SWAP_1m_{cursor}.json'
+        url=API+'?'+urllib.parse.urlencode(dict(instId='BTC-USDT-SWAP',bar='1m',limit=100,after=cursor))
+        if p.exists():
+            result=json.loads(p.read_text())
+        else:
+            result=_request(url);dump(p,result)
+        if result.get('code')!='0' or not result.get('data'):
+            raise ValueError('OKX returned no usable confirmed tail')
+        data=result['data'];urls.append(url)
+        pages.extend([int(x[0]),*map(float,x[1:5])] for x in data
+                     if x[8]=='1' and begin<=int(x[0])<end)
+        nxt=min(int(x[0]) for x in data)
+        if nxt>=cursor:
+            raise ValueError('OKX pagination stalled')
+        cursor=nxt
+    tail=pd.DataFrame(pages,columns=['ts',*OHLC]).sort_values('ts').drop_duplicates('ts')
+    overlap=old.merge(tail,on='ts',suffixes=('_old','_new'))
+    assert len(overlap)==60
+    for c in OHLC:
+        np.testing.assert_allclose(overlap[c+'_old'],overlap[c+'_new'],rtol=0,atol=1e-8)
+    merged=pd.concat([old,tail[tail.ts>old.ts.max()]],ignore_index=True)
+    assert merged.ts.is_unique and (merged.ts.diff().dropna()==60000).all()
+    assert merged.ts.iloc[0]==warm and merged.ts.iloc[-1]+60000==end
+    assert (merged.high>=merged[OHLC].max(axis=1)).all()
+    assert (merged.low<=merged[OHLC].min(axis=1)).all()
+    merged.to_csv(cache,index=False)
+    dump(EXP/'data_receipt.json',dict(sources=[file_stamp(ROOT/p) for p in cfg['inputs']],
+        api_urls=urls,archive_rows=len(old),new_rows=len(merged)-len(old),overlap_rows=len(overlap),
+        total_rows=len(merged),first_open=str(pd.Timestamp(warm,unit='ms',tz='UTC')),
         last_close=str(pd.Timestamp(end,unit='ms',tz='UTC')),gaps=0,no_content_hash=True))
     return aligned(merged)
 
@@ -361,4 +413,6 @@ def run():
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.parse_args();run()
+    parser=argparse.ArgumentParser()
+    parser.add_argument('--config',type=Path,default=EXP/'config.json')
+    args=parser.parse_args();EXP=args.config.resolve().parent;run()

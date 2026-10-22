@@ -1,0 +1,37 @@
+{
+  "experiment_id": "exp-btc-monday-fib1618-okx-20261022-v1",
+  "symbol": "BTCUSDT",
+  "venue": "OKX USDT perpetual",
+  "timezone": "America/New_York",
+  "start": "2024-10-22T00:00:00+08:00",
+  "split": "2025-10-22T00:00:00+08:00",
+  "end": "2026-10-22T00:00:00+08:00",
+  "warmup": "2024-10-01T00:00:00Z",
+  "tick": 0.1,
+  "stop_fraction": 0.007,
+  "round_trip_cost": 0,
+  "seed": 20261022,
+  "controls_per_signal": 10,
+  "volatility_edges": [
+    0.001,
+    0.002,
+    0.004,
+    0.008,
+    0.016
+  ],
+  "entry": "Completed NY Monday H/L, D=H-L. Tuesday close-boundary submission: buy L-0.618D; sell H+0.618D. First touch per side/week only; unfilled limits expire at next Monday start. No arrows/confirmation/filter. Round buy down/sell up to tick.",
+  "exit": "Long TP80=L+0.618D, TP20=H; short TP80=H-0.618D, TP20=L. Initial0.7percent stop, rounded outward. No breakeven, trail or weekly time exit. Independent native legs weighted0.8/0.2. Data-end marks excluded from closed-trade win rate.",
+  "owner_image": "Short H83149.8,L81166:entry84375.8,TP80 lower0.61881923.8,TP20 Mondaylow81166. Confirmed first weekly touch per direction; open position holds across weeks.",
+  "controls": "Ten seeded random1m-close entries per filled signal, same OKX BTC/NY week/side/chronological half/causal15m ATR14 bucket, Tue-Sun only. Exclude within5minutes of all real fills; no replacement within side/week. Copy percentage target distances and0.7percent stop, same zero fee and native exits. Report matched subset and unmatched signals.",
+  "inference": "Week-cluster sign permutation of signal minus mean matched-control R; chronological entry-year summaries, no parameter selection. Confidence intervals are descriptive historical uncertainty, not forward evidence.",
+  "not_applicable": "No fitted model or score; AUC, top-decile ranking and single-feature model baselines do not apply. Matched random entry is the null comparator.",
+  "limitations": "OHLC1m path, no real tick sequence, funding/slippage/spread/queue/capacity/account sizing. Conservative fixed limit fill even on favorable gaps; stop-first and reverse-order path audit. Not funded account returns.",
+  "training_eligible": false,
+  "production_eligible": false,
+  "inputs": [
+    "data/research/spike_v1_okx_30m_5y_20261013/okx_BTC_USDT_SWAP_1m_2672637.csv",
+    "data/research/spike_v1_okx_30m_5y_20261013/okx_api_BTC_USDT_SWAP_1m_20260930T1600_20261013T0000.csv",
+    "experiments/active/exp-btc-range-wick-fanshen-20261021-v1/inputs/okx_BTC_USDT_SWAP_1m_12999.csv"
+  ],
+  "venue_evidence": "Owner screenshot Monday H83149.8/L81166 exactly matches existing OKX2026-10-19 NY data; Binance H83157.9/L81146.4 differs. Preserve initial Binance experiment as explicit venue comparison."
+}
