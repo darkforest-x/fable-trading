@@ -33630,3 +33630,21 @@ artifacts:
       No H1 entry gate on5m chart;15m chart original H1 observation route restored. Stops, trailing exits and key module preserved.
       Native14 pairing and8 routing cases plus61 local checks pass. Clean private revision1 saved; old scripts preserved.
       Loaded5m BTC ledger46 entries only; no profitability comparison.
+
+  - artifact_id: range-pine-v236-retrospective-pairing-20261022
+    source_commit: f36d86b270
+    generator_commit: f36d86b270
+    artifact_type: manifest
+    role: pine_five_minute_retrospective_pairing_delivery
+    source_repo: darkforest-x/fable-trading
+    source_path: output/pine/monday_range_v2_36_delivery.json
+    storage_uri: repo://output/pine/monday_range_v2_36_delivery.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Owner explicitly requested retrospective5m frames around15m candle positions, replacing persistent direction-watch admission on5m only.
+      Inclusive plus/minus5 five-minute candle opens; retain every same-side match and deduplicate each5m event.
+      Original5m close entry and stop retained; hidden candidates keep pre-confirmation outcomes. Later15m confirmation publishes back-marked review only.
+      Original15m engine, key module and exits unchanged.58local checks and12native fixture groups pass, plus real-history assertions.
+      Native BTC05:40 short pairs06:00 quarter; entry84751.9 at05:45, publication06:15. Loaded77matches,69retrospective; not a profitability backtest.
+      Clean private revision1 saved and enabled on5m; older private versions preserved, duplicate old chart panes removed.

@@ -1,0 +1,65 @@
+{
+  "version": "V2.36",
+  "source_commit": "f36d86b270",
+  "native_fixture_commit": "42a4ae13f3",
+  "source": "yoyo/evaluation/pine/monday_range_v2_36.pine",
+  "private_script": "周一高低点区间＋翻身 · V2.36",
+  "private_revision": 1,
+  "chart_url": "https://cn.tradingview.com/chart/AlGc61US/",
+  "chart_symbol": "OKX:BTCUSDT.P",
+  "chart_timeframe": "5m",
+  "chart_settings": {
+    "txRequested": true,
+    "txMatchWindow": 5,
+    "txStopBars": 5,
+    "txStopBuffer": 0.05,
+    "txBufferUnit": "入场价百分比",
+    "txArmR": 5,
+    "txAtrLen": 14,
+    "txAtrMult": 4
+  },
+  "scope": "Replace enabled5m persistent15m direction watch with retrospective same-side15m/5m matching by candle-open position. Preserve15m engine and key module.",
+  "owner_example": {
+    "five_signal_open": "2026-10-22T05:40:00+08:00",
+    "five_signal_close": "2026-10-22T05:45:00+08:00",
+    "quarter_signal_open": "2026-10-22T06:00:00+08:00",
+    "published_at": "2026-10-22T06:15:00+08:00",
+    "side": "short",
+    "entry": 84751.9,
+    "initial_stop": 84842.3,
+    "five_high": 84799.9,
+    "occurrences": 1,
+    "retrospective_not_causal_entry": true
+  },
+  "validation": {
+    "local_tests_passed": 58,
+    "native_fixture_groups_passed": 12,
+    "native_real_history_count_and_owner_presence_checks_passed": true,
+    "loaded5m_ledger": {
+      "entries": 77,
+      "retrospective": 69
+    },
+    "loaded15m_ledger_entries": 172,
+    "unrelated15m_source_and_key_module_identical_to_v233": true,
+    "native_evidence": "output/pine/monday_range_v2_36_native_qa_ax.txt",
+    "native15m_evidence": "output/pine/monday_range_v2_36_native_15m_ax.txt",
+    "clean_save_evidence": "output/pine/monday_range_v2_36_clean_save_ax.txt",
+    "settings_evidence": "output/pine/monday_range_v2_36_settings_ax.txt",
+    "final_screenshot": "output/pine/monday_range_v2_36_final.png",
+    "scope": "Loaded TradingView history only; no annual or profitability backtest."
+  },
+  "prior_private_scripts_and_sources_preserved": true,
+  "old_chart_copies_removed": [
+    "V2.31",
+    "V2.33",
+    "V2.34",
+    "V2.35"
+  ],
+  "production_source_has_no_qa_appendix": true,
+  "profitability_backtest_run": false,
+  "temporary_browser_sessions_created": 0,
+  "editor_and_test_logs_closed": true,
+  "resolved_during_native_qa": "Uninstrumented historical helper transitions initially pruned; returned cumulative match count now preserves historical series dependency. Diagnostic-only success not accepted.",
+  "production_eligible": false,
+  "training_eligible": false
+}
