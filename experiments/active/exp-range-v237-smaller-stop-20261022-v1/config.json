@@ -1,0 +1,16 @@
+{
+  "experiment_id": "exp-range-v237-smaller-stop-20261022-v1",
+  "source": "experiments/active/exp-range-v237-2h-scaleout-20261022-v1",
+  "fractions": [1.0, 0.75, 0.5, 0.25],
+  "hold_minutes": 120,
+  "round_trip_cost": 0.002,
+  "symbols": [{"symbol":"BTC","tick":0.1},{"symbol":"ETH","tick":0.01}],
+  "seed": 20261022,
+  "single_variable": "Initial stop distance as a fraction of the frozen causal entry risk. Outward exchange tick rounding; all entries, directions, event multiplicity, matched controls and deadlines unchanged.",
+  "exit": "Native initial stop or entry+120minute market close, no TP, BE, ATR or H1 exit. Only one barrier so OHLC high/low ordering does not affect exit outcomes.",
+  "primary_metric": "Owner correction: each variant defines1R from its OWN new stop distance. NetR includes unchanged20bp fee divided by that new risk. Independent equal-risk trade sums, not account compounding; tighter stops imply larger exposure per equal risk budget.",
+  "diagnostics": "Report net/gross win rates, netR, PF, stop frequency, median stop width and feeR; paired baseline winner losses and average notional bp. Original-risk accounting is an internal bridge only, not the headline metric.",
+  "selection": "Choose among baseline and three tighter stops by first chronological year's mean new-risk netR; check later-year performance and paired baseline change. Reused history is descriptive, not untouched validation. Matched-random edge and paired improvement tests use weeks; Holm across16edge and12improvement comparisons.",
+  "training_eligible": false,
+  "production_eligible": false
+}
