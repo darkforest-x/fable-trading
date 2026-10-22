@@ -128,13 +128,33 @@ def project():
     assert len(rows)==4*len(parents) and len(fills)==2*len(rows)
     folder=EXP/'native_market_be_0';folder.mkdir(exist_ok=True)
     source_audit=json.loads((source/'audit.json').read_text())
+    tape=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
+    decisions=pd.read_csv(EXP/'decisions.csv',float_precision='round_trip')
+    confirmed=0;invalidated=0
+    for r in entries.itertuples():
+        part=tape.iloc[r.touch_i:r.entry_i+1]
+        extreme=part.low.min() if r.side==1 else part.high.max()
+        assert -r.side*(extreme-r.level)<=cfg['adverse_extension_fraction']*r.level+1e-8
+        confirmed+=1
+    for r in decisions[decisions.status.eq('adverse_extension_invalidated')].itertuples():
+        part=tape.iloc[int(r.touch_i):int(r.invalid_i)+1]
+        adverse=part.low if r.side==1 else part.high
+        outside=-r.side*(adverse-r.level)>cfg['adverse_extension_fraction']*r.level+1e-8
+        assert outside.iloc[-1] and not outside.iloc[:-1].any()
+        if r.entry_i>=0:assert r.invalid_i<=r.entry_i
+        invalidated+=1
+    dump(EXP/'prefilter_checks.json',dict(retained_signals=confirmed,
+        first_adverse_invalidations=invalidated,only_pre_entry_ohlc_read=True,
+        unchanged_native_legs=len(rows),unchanged_native_fills=len(fills),
+        same_retained_random_parents=len(controls),native_engine_replayed=False))
     audit=dict(engine=source_audit['engine'],version=source_audit['version'],
         target_breakeven=True,target_from_entry=True,positions=len(rows),fills=len(fills),oracle_checked=len(rows),
         native_fixed_target_accounting_checked=len(rows),
         execution_kind='Projection of unchanged independent native positions; no new engine replay',
         source_directory=str(source.relative_to(ROOT)),source_positions=source_audit['positions'],
         source_fills=source_audit['fills'],source_run_audit=source_audit,source_oracle_checks_inherited=True,
-        causal_prefilter_checks=len(parents),reverse_payoff_changes=int((abs(rows.net_r-rows.reverse_net_r)>1e-8).sum()))
+        projection_identity_checks=len(parents),causal_prefilter_checks=confirmed+invalidated,
+        reverse_payoff_changes=int((abs(rows.net_r-rows.reverse_net_r)>1e-8).sum()))
     rows.to_csv(folder/'trades.csv',index=False);fills.to_csv(folder/'fills.csv',index=False)
     parents.to_csv(folder/'parents.csv',index=False);dump(folder/'audit.json',audit)
     dump(folder/'identity.json',dict(config=cfg,delay=0,mode='market',execution_kind='native_projection',
