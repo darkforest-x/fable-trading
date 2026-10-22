@@ -1,0 +1,221 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-book-20261023-v1",
+    "question": "Notion task 区间1.618测试 method 13: does resting order-book depth in front of the move at the touch judge whether the 1618 holds?",
+    "touch_ledger": "experiments/active/exp-monday-1618-flow-20261023-v1",
+    "start": "2023-01-01T00:00:00Z",
+    "split": "2024-10-01T00:00:00Z",
+    "top_fraction": 0.3,
+    "seed": 20261023,
+    "workers": 32,
+    "primary_hypothesis": "Larger book_1pct (more resting notional opposing the move within 1 percent) -> higher validity; later AUC one-sided permutation p<0.01.",
+    "success_criterion": "Model on book_1pct and book_2pct trained before split: later AUC>=0.55, early-threshold top30 percent validity>=38.2 and mean R>0, week-stratified p<0.01.",
+    "limitations": "Binance bookDepth is a ~30s cumulative depth snapshot, not the full book or queue; spoofable; 15m labels; fee 0.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "receipt": {
+    "jobs": 2041,
+    "counts": {
+      "fetched": 2027,
+      "missing": 14
+    }
+  },
+  "touches": 2037,
+  "with_book": 2013,
+  "base": {
+    "early": {
+      "n": 948,
+      "valid_pct": 38.50210970464135,
+      "mean_r": 0.00790863101155368,
+      "unresolved": 0
+    },
+    "late": {
+      "n": 1089,
+      "valid_pct": 34.25160697887971,
+      "mean_r": -0.10202532452066786,
+      "unresolved": 1
+    }
+  },
+  "univariate": {
+    "book_1pct": {
+      "early_auc": 0.4947449194286987,
+      "early_quintiles": [
+        {
+          "bin": "(-1.0639999999999998, -0.0482]",
+          "n": 185,
+          "valid_pct": 38.91891891891892,
+          "mean_r": 0.0188198669874062,
+          "unresolved": 0
+        },
+        {
+          "bin": "(-0.0482, 0.0841]",
+          "n": 185,
+          "valid_pct": 38.91891891891892,
+          "mean_r": 0.018819866987406647,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.0841, 0.205]",
+          "n": 184,
+          "valid_pct": 39.67391304347826,
+          "mean_r": 0.03858411108581801,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.205, 0.344]",
+          "n": 185,
+          "valid_pct": 35.67567567567568,
+          "mean_r": -0.06608178859487755,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.344, 1.19]",
+          "n": 185,
+          "valid_pct": 38.91891891891892,
+          "mean_r": 0.018819866987406276,
+          "unresolved": 0
+        }
+      ],
+      "late_auc": 0.5241811074333129,
+      "late_quintiles": [
+        {
+          "bin": "(-12.795, -0.132]",
+          "n": 218,
+          "valid_pct": 31.19266055045872,
+          "mean_r": -0.18343820548537332,
+          "unresolved": 0
+        },
+        {
+          "bin": "(-0.132, 0.0518]",
+          "n": 218,
+          "valid_pct": 32.56880733944954,
+          "mean_r": -0.14741342043325745,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.0518, 0.222]",
+          "n": 217,
+          "valid_pct": 35.02304147465438,
+          "mean_r": -0.07646308478235986,
+          "unresolved": 1
+        },
+        {
+          "bin": "(0.222, 0.433]",
+          "n": 218,
+          "valid_pct": 37.15596330275229,
+          "mean_r": -0.027330803592871752,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.433, 8.726]",
+          "n": 218,
+          "valid_pct": 35.321100917431195,
+          "mean_r": -0.07536385032902596,
+          "unresolved": 0
+        }
+      ]
+    },
+    "book_2pct": {
+      "early_auc": 0.510982945122404,
+      "early_quintiles": [
+        {
+          "bin": "(-0.712, -0.0606]",
+          "n": 185,
+          "valid_pct": 38.37837837837838,
+          "mean_r": 0.004669591057025842,
+          "unresolved": 0
+        },
+        {
+          "bin": "(-0.0606, 0.103]",
+          "n": 185,
+          "valid_pct": 35.67567567567568,
+          "mean_r": -0.06608178859487782,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.103, 0.252]",
+          "n": 184,
+          "valid_pct": 41.84782608695652,
+          "mean_r": 0.0954928295014789,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.252, 0.393]",
+          "n": 185,
+          "valid_pct": 38.91891891891892,
+          "mean_r": 0.018819866987406942,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.393, 1.115]",
+          "n": 185,
+          "valid_pct": 37.2972972972973,
+          "mean_r": -0.023630960803735623,
+          "unresolved": 0
+        }
+      ],
+      "late_auc": 0.5266860874384052,
+      "late_quintiles": [
+        {
+          "bin": "(-12.828999999999999, -0.146]",
+          "n": 218,
+          "valid_pct": 31.19266055045872,
+          "mean_r": -0.18343820548537326,
+          "unresolved": 0
+        },
+        {
+          "bin": "(-0.146, 0.0359]",
+          "n": 218,
+          "valid_pct": 34.862385321100916,
+          "mean_r": -0.08069949265033047,
+          "unresolved": 1
+        },
+        {
+          "bin": "(0.0359, 0.246]",
+          "n": 217,
+          "valid_pct": 31.797235023041477,
+          "mean_r": -0.16761164861147915,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.246, 0.43]",
+          "n": 218,
+          "valid_pct": 37.61467889908257,
+          "mean_r": -0.01532254190883348,
+          "unresolved": 0
+        },
+        {
+          "bin": "(0.43, 7.172]",
+          "n": 218,
+          "valid_pct": 35.77981651376147,
+          "mean_r": -0.0633555886449872,
+          "unresolved": 0
+        }
+      ]
+    }
+  },
+  "primary": {
+    "late_auc": 0.5241811074333129,
+    "p_one_sided": 0.09095452273863068,
+    "n": 1089
+  },
+  "model": {
+    "coefficients": {
+      "book_1pct": -0.11154689692533803,
+      "book_2pct": 0.13308939698044805
+    },
+    "later_auc": 0.5142360747075652,
+    "late_selected": {
+      "n": 239,
+      "valid_pct": 33.47280334728033,
+      "mean_r": -0.12374860347433626,
+      "unresolved": 0
+    },
+    "late_top_week_stratified_p": 0.7501249375312344
+  },
+  "passed": false,
+  "source_commit": "21fa78489410f9cf2de695c4e66daf55a639ed91",
+  "training_eligible": false,
+  "production_eligible": false
+}

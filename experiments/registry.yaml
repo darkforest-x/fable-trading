@@ -14,6 +14,21 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-book-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 21fa78489410f9cf2de695c4e66daf55a639ed91
+    status: rejected
+    question: 'Does resting order-book depth in front of the move at the touch judge whether the 1618 holds?'
+    single_variable: 'Binance USD-M bookDepth cumulative notional within 1/2 percent, side-adjusted front/behind log ratio at the last snapshot before the touch.'
+    result: '2037 touches (2013 with a snapshot <= touch-30s), 2023-01..2026-09 Binance 12 majors. Primary book_1pct later AUC 0.524 p .091 (early 0.495); model later AUC 0.514, top30 percent 33.5 percent -0.124R, stratified p .75.'
+    artifacts:
+    - monday-1618-book-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-book-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: '2041 day archives, 14 missing (404). Fee 0; independent R. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-flow-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: a2ddd21337d841dac30b129a08cceaa9ca536bab

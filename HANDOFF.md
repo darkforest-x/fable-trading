@@ -1,3 +1,7 @@
+## 2026-10-23 · 区间1.618 method 13 order-book depth: rejected, series closed at 13
+
+- Binance bookDepth (touch days only, 2041 archives, 14 missing) for 12 majors 2023-01..2026-09: front/behind notional within 1/2 percent at the last snapshot <= touch-30s. Primary later AUC 0.524 p .091 (early 0.495); model later AUC 0.514, top30 percent 33.5 percent. Evidence `experiments/active/exp-monday-1618-book-20261023-v1/summary.json`; Notion task and knowledge base updated. Thirteen methods across price, structure, confirmation, breadth, volume profile, retest, small bounces, gold history, session, positioning/flow and order book all sit at driftless odds.
+
 ## 2026-10-23 · 区间1.618 methods 6-12 (owner "想办法", goal mode): all rejected
 
 - Positioning/flow (Binance 12 majors 2212 touches; OI, long/short, taker, funding via yoyo/data/binance_um_vision_fetch.py, 19068 archives, inputs local) later AUC 0.514, OI-build hypothesis p .19. Volume-profile/swing confluence AUC 0.512. Retest after 0.236R pullback 37.7% (3497). 1m small bounces 0.1/0.2/0.3R = driftless (78.7/64.6/55.8 vs 79.3/65.6/56.0). XAU spot 2011-2026 685 touches 35.9%, hold and break both n.s. Thin sessions slightly worse; post-hoc 20-24 UTC 47.5% held 41.4% on Binance OOS (n=111, p .27), forward observation only.

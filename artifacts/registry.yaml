@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-book-20261023-v1
+    artifact_type: manifest
+    role: 'Does resting order-book depth in front of the move at the touch judge whether the 1618 holds?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 21fa78489410f9cf2de695c4e66daf55a639ed91
+    generator_commit: 21fa78489410f9cf2de695c4e66daf55a639ed91
+    source_path: experiments/active/exp-monday-1618-book-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-book-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 2037 touches (2013 with a snapshot <= touch-30s), 2023-01..2026-09 Binance 12 majors. Primary book_1pct later AUC 0.524 p .091 (early 0.495); model la'
   - artifact_id: monday-1618-flow-20261023-v1
     artifact_type: manifest
     role: 'Do open interest, long/short positioning, taker flow and funding at the touch judge whether the first weekly 1618 holds?'
