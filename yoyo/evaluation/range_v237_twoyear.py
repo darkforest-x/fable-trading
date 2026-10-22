@@ -22,7 +22,6 @@ import pandas as pd
 from yoyo.evaluation.range_framework import ROOT, dump, file_stamp, run
 from yoyo.evaluation.pepe_range_exits import aggregate, signals, prepare, replay, inference
 from yoyo.evaluation.monday_range_v2_2_reference import round_stop, atr
-from yoyo.evaluation.range_morphology import wilson
 
 EXP = ROOT/'experiments/active/exp-range-v237-twoyear-20261022-v1'
 CONFIG = EXP/'config.json'
@@ -201,6 +200,8 @@ def build(symbol):
 
 def metrics(rows):
     """Natural-exit win rates; boundary marks excluded, reported separately."""
+    # Analysis-only scipy dependency stays outside the isolated native runtime.
+    from yoyo.evaluation.range_morphology import wilson
     natural=rows[rows.reason!=0];n=len(natural);wins=int(natural.net_r.gt(1e-9).sum())
     initial=natural.reason.eq(1);stop=natural.reason.isin([1,2])
     loss_stop=stop&natural.net_r.lt(-1e-9)
