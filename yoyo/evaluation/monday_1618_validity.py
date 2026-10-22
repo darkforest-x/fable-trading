@@ -116,7 +116,9 @@ def touches(f, symbol, cfg):
     for k, wk in enumerate(starts):
         pos = weeks.loc[[wk]].to_numpy()
         mon = pos[local[pos].dayofweek == 0]
-        if len(mon) != 96 or mon[-1]-mon[0] != 95:
+        # Spot markets with a daily break opt in to a minimum Monday bar count.
+        need = cfg.get('monday_min_bars')
+        if (len(mon) != 96 or mon[-1]-mon[0] != 95) if need is None else len(mon) < need:
             continue
         rest = pos[pos > mon[-1]]
         if not len(rest):

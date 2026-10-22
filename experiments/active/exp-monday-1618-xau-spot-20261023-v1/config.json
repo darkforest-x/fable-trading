@@ -1,0 +1,13 @@
+{
+  "experiment_id": "exp-monday-1618-xau-spot-20261023-v1",
+  "question": "Notion task 区间1.618测试 method 10: over 2011-2026 XAUUSD spot, does the first weekly 1618 hold or break more often than the driftless 38.2 percent?",
+  "pattern": "data/histdata/XAUUSD/HISTDATA_COM_ASCII_XAUUSD_M1_*.zip",
+  "monday_min_bars": 80,
+  "horizon_days": 14,
+  "split": "2019-01-01T00:00:00Z",
+  "seed": 20261023,
+  "success_criterion": "Per direction (hold/break): both halves on that side of 38.2 percent, later one-sided binomial Holm p<0.01, later mean R of that direction's trade >0.",
+  "limitations": "Spot, not the owner's XAUUSDT.P perp; NY-local HistData M1 converted with DST; daily 17-18 NY break; minute ordering; fee 0; independent R.",
+  "training_eligible": false,
+  "production_eligible": false
+}
