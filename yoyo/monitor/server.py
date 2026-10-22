@@ -81,6 +81,8 @@ def create_app(runtime=None, start_monitor=True):
     altcoin_leaders = LeaderService(runtime)
     from yoyo.monitor.vidya_retest_api import VidyaRetestService
     vidya_retest = VidyaRetestService(runtime)
+    from yoyo.monitor.monday_fib_service import MondayFibService, install as install_monday_fib
+    monday_fib = MondayFibService(runtime)
 
     @asynccontextmanager
     async def lifespan(app):
@@ -93,6 +95,7 @@ def create_app(runtime=None, start_monitor=True):
                 market_context.start()
                 altcoin_leaders.start()
                 vidya_retest.start()
+                monday_fib.start()
             if start_monitor:
                 app.state.start_yolo_workbench()
             app.state.paper_desk_market.start()
@@ -106,6 +109,7 @@ def create_app(runtime=None, start_monitor=True):
             app.state.paper_desk_worker.close()
             app.state.paper_desk_market.close()
             vidya_retest.close()
+            monday_fib.close()
             market_context.close()
             market_sync.close()
             altcoin_leaders.close()
@@ -131,6 +135,7 @@ def create_app(runtime=None, start_monitor=True):
     install_okx_dashboard(app)
     from yoyo.monitor.vidya_retest_api import install as install_vidya_retest
     install_vidya_retest(app, runtime, vidya_retest)
+    install_monday_fib(app, monday_fib)
 
     @app.middleware("http")
     async def headers(request, call_next):
