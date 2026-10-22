@@ -168,12 +168,33 @@ def prepare(frame,cfg):
         forming_matches_all_completed_arrows=True)
 
 
+def body_confirmation(quarter,touch_i,last_i,side,level,confirm_next_close=False):
+    """Return first causal (entry, body) pair on minute-aligned quarter bars.
+
+    Only the first bar's open/close and, when enabled, the immediately next
+    completed15m close are read for a candidate. Failed pairs keep observing;
+    no earlier body may be latched across intervening failed candles.
+    """
+    q=quarter.iloc[touch_i:last_i+1]
+    qualifies=(side*(q.open-level)>1e-8)&(side*(q.close-level)>1e-8)
+    for offset in np.flatnonzero(qualifies.to_numpy()):
+        body=touch_i+int(offset)
+        if not confirm_next_close:return body,body
+        entry=body+15
+        if entry>last_i or entry>=len(quarter):continue
+        if quarter.index[entry]-quarter.index[body]!=pd.Timedelta(minutes=15):continue
+        if side*(quarter.close.iloc[entry]-level)>1e-8:return entry,body
+    return -1,-1
+
+
 def prepare_body(frame,cfg):
     """First completed inner15m body after touch; no arrow or elapsed cap.
 
     Only observed quarter-hour open/close enter the decision. Weekly anchors
     reset nextMonday; data end is censored. Insufficient first-target fee room
-    skips that weekly-side opportunity, without a later rearm.
+    skips that weekly-side opportunity, without a later rearm. Optional next
+    close confirmation delays admission15minutes; adverse invalidation remains
+    active through that actual entry, not just the first qualifying body.
     """
     weekly=pd.read_csv(SOURCE/'weekly_orders.csv',float_precision='round_trip')
     original=pd.read_csv(SOURCE/'signal_trades.csv',float_precision='round_trip')
@@ -184,15 +205,13 @@ def prepare_body(frame,cfg):
         hits=np.flatnonzero(r.side*(bars[first:last+1,2 if r.side==1 else 1]-r.entry)<=1e-8)
         if not len(hits):continue
         i=first+int(hits[0]);touch[r.trade_id]=i
-        qualifies=(r.side*(q.open.iloc[i:last+1]-r.entry)>1e-8)&(r.side*(q.close.iloc[i:last+1]-r.entry)>1e-8)
-        confirmed=np.flatnonzero(qualifies.to_numpy())
+        j,body_i=body_confirmation(q,i,last,r.side,r.entry,cfg.get('next_15m_close_confirmation',False))
         week_end=pd.Timestamp(r.week,tz=cfg['timezone'])+pd.DateOffset(days=7)
         status='data_censored' if week_end>frame.index[-1] else 'expired'
-        j=i+int(confirmed[0]) if len(confirmed) else -1
         row=dict(pair_id=r.pair_id,week=r.week,side=r.side,arm='body15m',touch_i=i,
             touch_time=str(frame.index[i]),level=r.entry,
             **targets(r.monday_high,r.monday_low,r.side,cfg['tick']),status=status,
-            entry_i=j,body_i=j,arrow_i=-1,arrow_minutes=0,
+            entry_i=j,body_i=body_i,arrow_i=-1,arrow_minutes=0,
             wait_minutes=j-i if j>=0 else -1,arrow_disappeared_by_close=False)
         extension=cfg.get('adverse_extension_fraction')
         if extension is not None:
@@ -222,10 +241,13 @@ def prepare_body(frame,cfg):
     for r in entries:
         assert frame.index[r['entry_i']].minute%15==0 and r['body_i']>=r['touch_i']
         assert r['side']*(q.open.iloc[r['body_i']]-r['level'])>0
+        assert r['side']*(q.close.iloc[r['body_i']]-r['level'])>0
         assert r['side']*(r['entry']-r['level'])>0
+        assert r['entry_i']-r['body_i']==(15 if cfg.get('next_15m_close_confirmation',False) else 0)
     return pd.DataFrame(entries),pd.DataFrame(decisions),dict(weeks=int(weekly.week.nunique()),
         weekly_sides=len(weekly),touched=len(touch),body_checks=len(entries),
         arrow_required=False,elapsed_wait_timeout=False,fee_geometry_filter=True,
+        next_15m_close_confirmation=cfg.get('next_15m_close_confirmation',False),
         adverse_extension_fraction=cfg.get('adverse_extension_fraction'))
 
 

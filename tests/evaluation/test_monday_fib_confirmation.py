@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 import numpy as np
 import pandas as pd
-from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body
+from yoyo.evaluation.monday_fib_confirmation import forming,aggregate,observe,oracle,targets,legs,prepare_body,body_confirmation
 from yoyo.evaluation.pepe_range_exits import signals
 from yoyo.layers.l3_backtest.nautilus_independent import run_native,ExitPolicy
 
@@ -35,7 +35,7 @@ class ConfirmationTests(unittest.TestCase):
         self.assertTrue(admission_changed(new,old))
         check_projection_policy(new,old)
 
-    def body_fixture(self,late=False,low=101.,high=103.,extension=None,wick=None,wick_i=10):
+    def body_fixture(self,late=False,low=101.,high=103.,extension=None,wick=None,wick_i=10,next_close=False):
         f=pd.DataFrame([[100.]*4]*600,columns=['open','high','low','close'],
             index=pd.date_range('2026-01-06T00:01Z',periods=600,freq='min'))
         if late:f.iloc[:300]=98.
@@ -46,7 +46,8 @@ class ConfirmationTests(unittest.TestCase):
             entry_i=0,expire_i=598,entry=99.,monday_high=high,monday_low=low)])
         original=pd.DataFrame([dict(parent_id='a',entry_i=touch)])
         cfg=dict(timezone='America/New_York',tick=.1,round_trip_cost=.002,
-                 stop_fraction=.007,split='2026-06-01T00:00Z',adverse_extension_fraction=extension)
+                 stop_fraction=.007,split='2026-06-01T00:00Z',adverse_extension_fraction=extension,
+                 next_15m_close_confirmation=next_close)
         with patch('yoyo.evaluation.monday_fib_confirmation.pd.read_csv',side_effect=[weekly,original]):
             return prepare_body(f,cfg)
 
@@ -54,6 +55,57 @@ class ConfirmationTests(unittest.TestCase):
         entries,_,_=self.body_fixture()
         self.assertEqual(entries.entry_i.tolist(),[14])
         self.assertTrue(entries.arrow_i.eq(-1).all())
+
+    def test_next_close_delays_actual_entry_and_preserves_first_body(self):
+        entries,_,_=self.body_fixture(next_close=True)
+        self.assertEqual(entries.entry_i.tolist(),[29])
+        self.assertEqual(entries.body_i.tolist(),[14])
+
+    def test_next_close_keeps_adverse_gate_live_through_second_bar(self):
+        entries,decisions,_=self.body_fixture(next_close=True,extension=.02,wick=96.,wick_i=20)
+        self.assertTrue(entries.empty)
+        self.assertEqual(decisions.status.tolist(),['adverse_extension_invalidated'])
+
+    def test_next_close_future_after_delayed_entry_is_ignored(self):
+        entries,_,_=self.body_fixture(next_close=True,extension=.02,wick=96.,wick_i=35)
+        self.assertEqual(entries.entry_i.tolist(),[29])
+
+    def test_next_close_mirror_open_is_not_required(self):
+        for side in (1,-1):
+            q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
+            q.iloc[14]=100+side
+            q.iloc[29]=[100-side,100+side]
+            self.assertEqual(body_confirmation(q,10,80,side,100,True),(29,14))
+
+    def test_next_close_must_be_immediately_adjacent_not_latched(self):
+        q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
+        q.iloc[14]=101;q.iloc[29]=99;q.iloc[44]=[99,101]
+        self.assertEqual(body_confirmation(q,10,50,1,100,True),(-1,-1))
+        q.iloc[59]=101;q.iloc[74]=[99,101]
+        self.assertEqual(body_confirmation(q,10,80,1,100,True),(74,59))
+
+    def test_next_close_equal_to_level_fails(self):
+        q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
+        q.iloc[14]=101;q.iloc[29]=[101,100]
+        self.assertEqual(body_confirmation(q,10,35,1,100,True),(-1,-1))
+
+    def test_next_close_cannot_cross_week_or_data_end(self):
+        q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
+        q.iloc[14]=101;q.iloc[29]=101
+        self.assertEqual(body_confirmation(q,10,28,1,100,True),(-1,-1))
+        self.assertEqual(body_confirmation(q.iloc[:29],10,28,1,100,True),(-1,-1))
+
+    def test_next_close_prefix_causality(self):
+        q=pd.DataFrame(np.nan,index=frame(90).index,columns=['open','close'])
+        q.iloc[14]=101;q.iloc[29]=101
+        self.assertEqual(body_confirmation(q.iloc[:30],10,29,1,100,True),(29,14))
+        q.iloc[30:]=999
+        self.assertEqual(body_confirmation(q,10,89,1,100,True),(29,14))
+
+    def test_next_close_invalidates_admission_cache(self):
+        from yoyo.evaluation.monday_fib_tp_breakeven import admission_changed
+        old=dict(wait_minutes=None,require_arrow=False,round_trip_cost=0.)
+        self.assertTrue(admission_changed(dict(old,next_15m_close_confirmation=True),old))
 
     def test_body_only_accepts_after_removed_deadline(self):
         entries,_,_=self.body_fixture(late=True)

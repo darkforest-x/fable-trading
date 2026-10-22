@@ -72,10 +72,10 @@ def initialize():
 
 def admission_changed(cfg,oldcfg):
     """Costs can change first-target feasibility, not just reported returns."""
-    defaults=dict(require_arrow=True,adverse_extension_fraction=None)
+    defaults=dict(require_arrow=True,adverse_extension_fraction=None,next_15m_close_confirmation=False)
     return any(cfg.get(k,defaults.get(k))!=oldcfg.get(k,defaults.get(k)) for k in
         ('wait_minutes','require_arrow','adverse_extension_fraction',
-         'round_trip_cost','tick','stop_fraction'))
+         'round_trip_cost','tick','stop_fraction','next_15m_close_confirmation'))
 
 
 def check_projection_policy(cfg,source_cfg):
@@ -206,15 +206,23 @@ def collect():
         oldfolder=OLD/f'native_market_be_{delay}'
         if (oldfolder/'identity.json').exists():
             prior=pd.read_csv(oldfolder/'parents.csv',float_precision='round_trip')
+            oldcfg=json.loads((OLD/'config.json').read_text())
+            timing_change=(cfg.get('next_15m_close_confirmation',False)
+                           !=oldcfg.get('next_15m_close_confirmation',False))
             for arm in m.ARMS:
                 s=rows[rows.arm.eq(arm)&rows.population.eq('signal')].set_index('parent_id')
                 before=prior[prior.arm.eq(arm)&prior.population.eq('signal')].set_index('parent_id')
                 shared=s.index.intersection(before.index)
                 p=s.loc[shared,['outcome','net_r']].join(before[['outcome','net_r']],rsuffix='_old')
                 npairs=len(shared)
-                for col in ('entry_i','entry'):
-                    assert (s.loc[shared,col]-before.loc[shared,col]).abs().lt(1e-8).all()
+                shifts=s.loc[shared,'entry_i']-before.loc[shared,'entry_i']
+                if not timing_change:
+                    for col in ('entry_i','entry'):
+                        assert (s.loc[shared,col]-before.loc[shared,col]).abs().lt(1e-8).all()
                 old_comparison.append(dict(arm=arm,delay=delay,old=m.metric(before),new=m.metric(s),
+                    pairing_unit='same weekly-side first-touch opportunity; entries differ' if timing_change else 'same entry',
+                    changed_entry_times=int(shifts.ne(0).sum()),
+                    shared_entry_shift_minutes=shifts.to_dict() if timing_change else {},
                     paired_rows=npairs,added=sorted(set(s.index)-set(before.index)),
                     removed=sorted(set(before.index)-set(s.index)),
                     removed_metrics=m.metric(before.loc[before.index.difference(s.index)]),

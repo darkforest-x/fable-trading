@@ -1,0 +1,21 @@
+{
+  "owner_correction": "现在的入场条件下，下一根15minK线收盘也在1.618之下才行（空头），多头反之",
+  "active_delays": [
+    0
+  ],
+  "zero_meaning": "No timed management. Any TP immediately moves remaining tranches to entry when fees are zero.",
+  "entry_observation_expiry_minutes": null,
+  "holding_expiry": null,
+  "fee": 0.0,
+  "fee_authority": "Latest owner AGENTS instruction2026-10-22: all backtests temporarily exclude fees, overriding previous20bp.",
+  "timed_outputs": "All older timed and arrow-dependent artifacts retained separately, excluded from final body-only scope.",
+  "weekly_reset": "Original nextMonday cancellation of unconfirmed prior interval is retained.",
+  "arrow_required": false,
+  "skip_insufficient_fee_room": true,
+  "wick_counts": true,
+  "invalidation_before_entry_only": true,
+  "adverse_extension_fraction": 0.02,
+  "next_15m_close_confirmation": true,
+  "second_bar_open_required": false,
+  "failed_pair_policy": "Continue observing the same weekly-side opportunity for the next valid adjacent pair; no latch across failed candles."
+}

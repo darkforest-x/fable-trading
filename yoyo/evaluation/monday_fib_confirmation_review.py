@@ -25,6 +25,33 @@ def run():
     assert frame.index.is_unique and (np.diff(frame.index.asi8)==60_000_000_000).all()
     controls=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
     quarter=aggregate(frame,15)
+    body_checks=next_close_checks=0
+    if not cfg.get('require_arrow',True):
+        for r in entry.itertuples():
+            body=int(r.body_i);i=int(r.entry_i)
+            assert frame.index[body].minute%15==0
+            assert r.side*(frame.open.iloc[body-14]-r.level)>1e-8
+            assert r.side*(frame.close.iloc[body]-r.level)>1e-8
+            assert r.side*(frame.close.iloc[i]-r.level)>1e-8
+            assert abs(frame.close.iloc[i]-r.entry)<1e-8
+            expected_delay=15 if cfg.get('next_15m_close_confirmation',False) else 0
+            assert i-body==expected_delay
+            first=None
+            for candidate in range(int(r.touch_i),i+1):
+                if frame.index[candidate].minute%15 or candidate<14:continue
+                if r.side*(frame.open.iloc[candidate-14]-r.level)<=1e-8:continue
+                if r.side*(frame.close.iloc[candidate]-r.level)<=1e-8:continue
+                final=candidate+expected_delay
+                if final>i:continue
+                if r.side*(frame.close.iloc[final]-r.level)>1e-8:
+                    first=(candidate,final);break
+            assert first==(body,i),'Not the earliest valid adjacent confirmation'
+            if cfg.get('adverse_extension_fraction') is not None:
+                part=frame.iloc[int(r.touch_i):i+1]
+                adverse=part.low.min() if r.side==1 else part.high.max()
+                assert -r.side*(adverse-r.level)<=r.level*cfg['adverse_extension_fraction']+1e-8
+            body_checks+=1
+            next_close_checks+=int(expected_delay==15)
     volatility=(atr(quarter,14)/quarter.close).reindex(frame.index,method='ffill')
     buckets=np.digitize(volatility.to_numpy(),cfg['volatility_edges'])
     actual=entry.set_index(['arm','pair_id'])
@@ -106,9 +133,10 @@ def run():
     dump(EXP/'review.json',dict(parent_cash_reconciliations=reconciliations,
         matched_control_checks=len(controls),minute_grid_rows=len(frame),
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
+        independent_body_checks=body_checks,independent_next_close_checks=next_close_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm_adjusted=ranked,
         multiplicity_comparisons=len(p),
-        focused_and_layer_tests=117,
+        focused_and_layer_tests=126,
         broader_preflight=dict(passed=170,failed=16,skipped=12,
             explanation='Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed.'),
         initial_test_fixture_failure='Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.',
