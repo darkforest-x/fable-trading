@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v237-2h-scaleout-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: d8bf02d1e5
+    status: rejected
+    question: Within120minutes of causal V2.37 entry, how far do BTC/ETH trades retrace or extend after reaching1R/2R, and do static scale-outs improve realized net returns?
+    single_variable: Owner-authorized exit-family comparison under common120minute cap; frozen entries, original5bar+0.05percent stops, matched controls and20bp costs. Five elementary exits and12predeclared static partial schedules; noBE or ATR/H1.
+    result: All17policies negative for each coin/lane/year andbothOHLCorders. Primary conditional reach1R BTC5/15m48.02/47.54percent andETH42.62/44.34; after1R return-entry60.86/60.06 and60.98/55.43percent. After2R return-entry34.73/33.73 and37.89/32.22percent. Full-sample bestpartial BTC1R25percent+3R75percent net-1799.32/-703.33R; ETH1R75percent+3R25percent net-739.12/-280.13R. Bestwhole BTC3R-1798.33/-701.00R;ETH1R-721.34/-277.75R. No corrected evidence of excess over random; minimumHolm68p1.0. Earlier-year selected partials remain negative later; BTC5m optimalfraction changes.
+    artifacts: [range-v237-2h-scaleout-20261022]
+    canonical_report: experiments/active/exp-range-v237-2h-scaleout-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NativeNautilus1.231.0 reuses30210priorpaths andexecutes25995newpaths51990fills;all56205price/time/reason audits pass. Conditionalfirst1R/2Rtouch populations andbars matchnativeTP ledgers inbothorders. All3833signaloccurrences andpairedcontrols havecomplete2h;selectionyearboundarynotcrossed. Statictranches original-size weighted withproportionalcosts andunchangedSL;cannotexceedbestelementarytotal. Tenconditional/ticktests plusfiveexistingnativetranchetests pass. BTConefloat-tail equality fixedinauditonly;rawnativefillsretained. Nofreshdata,formalreport,Pine/default/livechange.
   - experiment_id: exp-range-v237-fixed-exits-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 20375fb47a

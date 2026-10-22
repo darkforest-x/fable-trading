@@ -1,0 +1,23 @@
+{
+  "experiment_id": "exp-range-v237-2h-scaleout-20261022-v1",
+  "generated_from_commit": "3a2c170a2456d4d375ac34b18dcb7d024c3db462",
+  "native_unique_paths": 56205,
+  "cached_paths": 30210,
+  "new_native_paths": 25995,
+  "new_native_fills": 51990,
+  "all_native_exit_price_time_reason_parity": true,
+  "conditional_trigger_population_and_time_parity": true,
+  "all_events_complete_120min_horizon": true,
+  "no_pair_horizon_crosses_year_selection_boundary": true,
+  "static_original_size_weights_and_fees_conserved": true,
+  "all_signal_cohort_policy_period_path_net_returns_negative": true,
+  "holm68_min": 1.0,
+  "tests": "10 conditional/precision tests + 5 existing native tranche/deadline tests",
+  "production_eligible": false,
+  "training_eligible": false,
+  "reproduction": [
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_v237_2h_scaleout run --symbol BTC",
+    "/Users/zhangzc/.local/share/crypto-toolkit/venvs/nautilus/bin/python -m yoyo.evaluation.range_v237_2h_scaleout run --symbol ETH",
+    ".venv/bin/python -m yoyo.evaluation.range_v237_2h_scaleout analyze"
+  ]
+}
