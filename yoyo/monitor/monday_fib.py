@@ -131,12 +131,15 @@ class FibBook:
                                  source, route["generation"], status, observed_ms, None, None))
             return cursor.rowcount == 1
 
-    def records(self, week=None, limit=1000):
+    def records(self, week=None, limit=None):
         with self.db() as db:
-            if week:
+            if week and limit is None:
+                # The all-market weekly status must not silently truncate sides.
+                rows = db.execute("SELECT * FROM touches WHERE week=? ORDER BY observed_ms DESC", (week,))
+            elif week:
                 rows = db.execute("SELECT * FROM touches WHERE week=? ORDER BY observed_ms DESC LIMIT ?", (week, limit))
             else:
-                rows = db.execute("SELECT * FROM touches ORDER BY observed_ms DESC LIMIT ?", (limit,))
+                rows = db.execute("SELECT * FROM touches ORDER BY observed_ms DESC LIMIT ?", (limit or 1000,))
             return [dict(row) for row in rows]
 
     def claim(self, now):

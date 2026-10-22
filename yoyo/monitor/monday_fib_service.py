@@ -233,6 +233,7 @@ class MondayFibService:
         now = self.client.clock()
         window = week_window(now)
         events = self.book.records(window["week"])
+        events.sort(key=lambda e: e["candle_ms"] if e["source"] == "history" else e["observed_ms"], reverse=True)
         touches = {(e["symbol"], e["side"]): e for e in events}
         with self.lock:
             rows = []

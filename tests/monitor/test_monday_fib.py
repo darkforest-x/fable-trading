@@ -175,6 +175,18 @@ def test_snapshot_keeps_monday_extrema_separate_from_live_candle(tmp_path):
     assert item["low"] == levels["low"] == 100
 
 
+def test_weekly_all_market_status_is_not_capped_at_1000_sides(tmp_path):
+    book = FibBook(tmp_path)
+    levels = baseline(history(), NOW)
+    with book.db() as db:
+        db.executemany("INSERT INTO touches VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", [
+            (levels["week"], f"C{i}-USDT-SWAP", side, levels[side], 105, NOW, NOW,
+             "history", 0, "history", NOW, None, None)
+            for i in range(507) for side in ("upper", "lower")])
+    assert len(book.records(levels["week"])) == 1014
+    assert len(book.records(levels["week"], limit=40)) == 40
+
+
 def test_api_mutation_requires_origin_explicit_boolean_and_credentials(tmp_path, monkeypatch):
     monkeypatch.setattr("yoyo.monitor.monday_fib_service.credentials", lambda: None)
     service, _ = ready_service(tmp_path)
