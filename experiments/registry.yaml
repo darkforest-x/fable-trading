@@ -14,6 +14,81 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-monday-1618-owner-drawings-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: cffd3a9a868f44f981077fc6362e660b64efdc65
+    status: inconclusive
+    question: 'What regularities do the owner TradingView 1618 positions (OKX BTCUSDT.P 32, XAUUSDT.P 8) share?'
+    single_variable: 'None; descriptive location of hand-drawn positions in NY Monday Fib ratios and comparison with all same-period first touches.'
+    result: 'BTC 30/32 and XAU 8/8 entries within 0.03R of 1618, entry median at the first-touch 4h bar (7 BTC later retests). Stops median 1.89/-0.99 BTC (about 2.0 ext, 0.81 percent), 1.75/-0.72 XAU. All 40 TP before SL with hindsight targets (RR median 5.4 BTC, 16.1 XAU). Drawn touches objectively valid 78 percent BTC / 8 of 8 XAU versus undrawn 19 percent / 0 of 5: hindsight selection, not causal evidence.'
+    artifacts:
+    - monday-1618-owner-drawings-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-owner-drawings-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Read-only export of layout AlGc61US; chart restored to BTC 4h. Fresh OKX 15m frozen in inputs (not committed). Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-validity-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 75f9c2e82dc3d91f901c6195647444da805dc5ff
+    status: rejected
+    question: 'Can touch-time information judge whether a first weekly 1618 touch returns to the Monday edge before the 2.0 extension?'
+    single_variable: 'Twelve causal touch-time features; logistic regression chosen on 2025-06..2025-12, judged on 2026-01..2026-08.'
+    result: '177 OKX swaps, 10130 touches: validity 39.1 percent versus driftless 38.2 (early 40.9, late 37.6); limit trade SL2.0/TP edge mean +0.027R fee0. Later AUC 0.520 fails pre-registered 0.55; top30 percent 40.0 percent, +0.055R. Same-week random geometry 30.0 percent is biased by within-week trend, not a fair absolute null.'
+    artifacts:
+    - monday-1618-validity-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-validity-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Universe through 2026-08-14; 15m conservative ordering. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-post-touch-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: e775ba3bec429c88e53dde28b9b0f7c7eb6aba10
+    status: rejected
+    question: 'Does the 1h/2h/4h reaction after a 1618 touch reveal validity?'
+    single_variable: '12 cells (checkpoints 4/8/16 x unresolved/inside/inside_clean/inside_shallow), one chosen early.'
+    result: 'Chosen k4 unresolved: later 44.2 percent valid versus driftless 45.2, mean R -0.001, fails. Inside/clean states raise validity to 56-64 percent but match the driftless probability of the nearer target (e.g. 63.6 vs 63.1): confirmation changes geometry, not information. Excess over same-week random +0.24R comes from biased controls.'
+    artifacts:
+    - monday-1618-post-touch-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-post-touch-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Same touch ledger and 15m bars. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-oos-1m-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8eeace163627c19c3546a24b23dea6588d7f281e
+    status: rejected
+    question: 'Does the BTC 1618 limit trade (SL 2.0, TP Monday edge) beat driftless 38.2 percent out of sample?'
+    single_variable: 'Hypothesis frozen from BTC 49.1 percent in discovery; judged on Binance UM 1m 2022-11..2025-05.'
+    result: 'BTC oos_pre 108 touches 31.5 percent, mean -0.176R, binomial p .94: fails. Discovery reproduces 49.1 percent on Binance. ETH/SOL/BNB/XRP/DOGE flip between periods (DOGE 48.3 to 28.1).'
+    artifacts:
+    - monday-1618-oos-1m-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-oos-1m-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: '1m ordering, touch minute stop-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-breadth-gbm-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1d9b9343fbfcb798049e2d4a9b959c81bd15fb62
+    status: rejected
+    question: 'Do market breadth, BTC Monday position and a LightGBM judge 1618 validity out of sample?'
+    single_variable: 'Adds breadth24h and btc_pos to stage-1 features; fixed small LightGBM trained early only.'
+    result: 'Early AUC 0.844 (overfit), later 0.516; later top30 percent 39.4 percent, +0.036R; both new features later AUC about 0.50. Fails.'
+    artifacts:
+    - monday-1618-breadth-gbm-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-breadth-gbm-20261023-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Last pre-registered static-feature attempt. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-btc-monday-fib-wick-engulf-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 5ebcda4694e615a2f1bb1ddece0f838e28fae509

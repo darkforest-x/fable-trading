@@ -1,0 +1,368 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-oos-1m-20261023-v1",
+    "question": "Notion task 区间1.618测试 stage3: does the BTC first weekly 1618 limit trade (SL 2.0 ext, TP Monday edge) beat the driftless 38.2 percent out of sample?",
+    "hypothesis_source": "exp-monday-1618-validity-20261023-v1 focus BTC 49.1 percent (n=53, OKX 2025-06..2026-08) versus universe 39.1; owner drawings place stops near 2.0 extension (median 1.9 / -0.99).",
+    "series": {
+      "BTC": "data/research/ma6_knot_1m_20261011/series/binance_um_BTCUSDT_1m_2059200.csv",
+      "ETH": "data/research/ma6_knot_1m_20261011/series/binance_um_ETHUSDT_1m_2059200.csv",
+      "SOL": "data/research/ma6_knot_1m_20261011/series/binance_um_SOLUSDT_1m_2059200.csv",
+      "BNB": "data/research/ma6_knot_1m_20261011/series/binance_um_BNBUSDT_1m_2059200.csv",
+      "XRP": "data/research/ma6_knot_1m_20261011/series/binance_um_XRPUSDT_1m_2059200.csv",
+      "DOGE": "data/research/ma6_knot_1m_20261011/series/binance_um_DOGEUSDT_1m_2059200.csv"
+    },
+    "oos_pre_end": "2025-06-01T00:00:00Z",
+    "discovery_end": "2026-08-14T00:00:00Z",
+    "horizon_days": 14,
+    "seed": 20261023,
+    "primary": "BTC oos_pre only. Pass = binomial p<0.01 for validity >38.2 percent AND mean R >0. Other symbols and periods are descriptive.",
+    "exit": "Limit at 1618 (gap fills at open), SL 2.0 extension, TP Monday near edge; 1m ordering, touch minute can only stop, same minute both = stop; 14-day mark; fee 0.",
+    "limitations": "Binance UM 1m OHLC (venue differs slightly from owner's OKX), no tick order within a minute, independent R not account returns, no fees/funding/slippage.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "primary": {
+    "symbol": "BTC",
+    "period": "oos_pre",
+    "passed": false,
+    "n": 108,
+    "valid": 34,
+    "valid_pct": 31.48148148148148,
+    "mean_r": -0.17587744812875775,
+    "sum_r": -18.994764397905836,
+    "p_valid_vs_382": 0.9392165300853528,
+    "p_mean_r_week_flip": 0.9283035848207589,
+    "long": {
+      "n": 48,
+      "valid_pct": 29.166666666666668
+    },
+    "short": {
+      "n": 60,
+      "valid_pct": 33.33333333333333
+    }
+  },
+  "table": {
+    "BNB": {
+      "oos_pre": {
+        "n": 102,
+        "valid": 43,
+        "valid_pct": 42.15686274509804,
+        "mean_r": 0.1035827943742945,
+        "sum_r": 10.56544502617804,
+        "p_valid_vs_382": 0.23428548338732397,
+        "p_mean_r_week_flip": 0.21633918304084795,
+        "long": {
+          "n": 51,
+          "valid_pct": 43.13725490196079
+        },
+        "short": {
+          "n": 51,
+          "valid_pct": 41.17647058823529
+        }
+      },
+      "discovery": {
+        "n": 55,
+        "valid": 18,
+        "valid_pct": 32.72727272727273,
+        "mean_r": -0.14326511185149812,
+        "sum_r": -7.879581151832397,
+        "p_valid_vs_382": 0.8347442276858089,
+        "p_mean_r_week_flip": 0.807759612019399,
+        "long": {
+          "n": 26,
+          "valid_pct": 38.46153846153847
+        },
+        "short": {
+          "n": 29,
+          "valid_pct": 27.586206896551722
+        }
+      },
+      "oos_post": {
+        "n": 7,
+        "valid": 3,
+        "valid_pct": 42.857142857142854,
+        "mean_r": 0.12191473448017638,
+        "sum_r": 0.8534031413612346,
+        "p_valid_vs_382": 0.540297608565817,
+        "p_mean_r_week_flip": 0.312134393280336,
+        "long": {
+          "n": 3,
+          "valid_pct": 66.66666666666666
+        },
+        "short": {
+          "n": 4,
+          "valid_pct": 25.0
+        }
+      }
+    },
+    "BTC": {
+      "oos_pre": {
+        "n": 108,
+        "valid": 34,
+        "valid_pct": 31.48148148148148,
+        "mean_r": -0.17587744812875775,
+        "sum_r": -18.994764397905836,
+        "p_valid_vs_382": 0.9392165300853528,
+        "p_mean_r_week_flip": 0.9283035848207589,
+        "long": {
+          "n": 48,
+          "valid_pct": 29.166666666666668
+        },
+        "short": {
+          "n": 60,
+          "valid_pct": 33.33333333333333
+        }
+      },
+      "discovery": {
+        "n": 55,
+        "valid": 27,
+        "valid_pct": 49.09090909090909,
+        "mean_r": 0.28510233222274844,
+        "sum_r": 15.680628272251164,
+        "p_valid_vs_382": 0.06511849883265063,
+        "p_mean_r_week_flip": 0.06954652267386631,
+        "long": {
+          "n": 32,
+          "valid_pct": 46.875
+        },
+        "short": {
+          "n": 23,
+          "valid_pct": 52.17391304347826
+        }
+      },
+      "oos_post": {
+        "n": 7,
+        "valid": 3,
+        "valid_pct": 42.857142857142854,
+        "mean_r": 0.12191473448017108,
+        "sum_r": 0.8534031413611975,
+        "p_valid_vs_382": 0.540297608565817,
+        "p_mean_r_week_flip": 0.4106794660266987,
+        "long": {
+          "n": 3,
+          "valid_pct": 66.66666666666666
+        },
+        "short": {
+          "n": 4,
+          "valid_pct": 25.0
+        }
+      }
+    },
+    "DOGE": {
+      "oos_pre": {
+        "n": 116,
+        "valid": 56,
+        "valid_pct": 48.275862068965516,
+        "mean_r": 0.2637660227477884,
+        "sum_r": 30.59685863874345,
+        "p_valid_vs_382": 0.01708938726095088,
+        "p_mean_r_week_flip": 0.019549022548872558,
+        "long": {
+          "n": 60,
+          "valid_pct": 51.66666666666667
+        },
+        "short": {
+          "n": 56,
+          "valid_pct": 44.642857142857146
+        }
+      },
+      "discovery": {
+        "n": 64,
+        "valid": 18,
+        "valid_pct": 28.125,
+        "mean_r": -0.2637434554973812,
+        "sum_r": -16.879581151832397,
+        "p_valid_vs_382": 0.9653506656325822,
+        "p_mean_r_week_flip": 0.9554522273886306,
+        "long": {
+          "n": 34,
+          "valid_pct": 26.47058823529412
+        },
+        "short": {
+          "n": 30,
+          "valid_pct": 30.0
+        }
+      },
+      "oos_post": {
+        "n": 8,
+        "valid": 3,
+        "valid_pct": 37.5,
+        "mean_r": -0.01832460732984509,
+        "sum_r": -0.1465968586387607,
+        "p_valid_vs_382": 0.6458224585428072,
+        "p_mean_r_week_flip": 0.5173741312934353,
+        "long": {
+          "n": 4,
+          "valid_pct": 50.0
+        },
+        "short": {
+          "n": 4,
+          "valid_pct": 25.0
+        }
+      }
+    },
+    "ETH": {
+      "oos_pre": {
+        "n": 111,
+        "valid": 37,
+        "valid_pct": 33.333333333333336,
+        "mean_r": -0.12739965095986075,
+        "sum_r": -14.141361256544542,
+        "p_valid_vs_382": 0.8760167667090426,
+        "p_mean_r_week_flip": 0.8575571221438928,
+        "long": {
+          "n": 49,
+          "valid_pct": 26.53061224489796
+        },
+        "short": {
+          "n": 62,
+          "valid_pct": 38.70967741935484
+        }
+      },
+      "discovery": {
+        "n": 48,
+        "valid": 13,
+        "valid_pct": 27.083333333333332,
+        "mean_r": -0.29101221640488584,
+        "sum_r": -13.96858638743452,
+        "p_valid_vs_382": 0.9612533099635937,
+        "p_mean_r_week_flip": 0.9555022248887556,
+        "long": {
+          "n": 25,
+          "valid_pct": 32.0
+        },
+        "short": {
+          "n": 23,
+          "valid_pct": 21.73913043478261
+        }
+      },
+      "oos_post": {
+        "n": 7,
+        "valid": 3,
+        "valid_pct": 42.857142857142854,
+        "mean_r": 0.12191473448017619,
+        "sum_r": 0.8534031413612333,
+        "p_valid_vs_382": 0.540297608565817,
+        "p_mean_r_week_flip": 0.43652817359132046,
+        "long": {
+          "n": 3,
+          "valid_pct": 66.66666666666666
+        },
+        "short": {
+          "n": 4,
+          "valid_pct": 25.0
+        }
+      }
+    },
+    "SOL": {
+      "oos_pre": {
+        "n": 116,
+        "valid": 35,
+        "valid_pct": 30.17241379310345,
+        "mean_r": -0.21014623578263197,
+        "sum_r": -24.37696335078531,
+        "p_valid_vs_382": 0.9711463629272405,
+        "p_mean_r_week_flip": 0.9637018149092546,
+        "long": {
+          "n": 51,
+          "valid_pct": 37.254901960784316
+        },
+        "short": {
+          "n": 65,
+          "valid_pct": 24.615384615384617
+        }
+      },
+      "discovery": {
+        "n": 57,
+        "valid": 23,
+        "valid_pct": 40.35087719298246,
+        "mean_r": 0.056305685680169595,
+        "sum_r": 3.209424083769667,
+        "p_valid_vs_382": 0.4174378650313876,
+        "p_mean_r_week_flip": 0.3719314034298285,
+        "long": {
+          "n": 30,
+          "valid_pct": 46.666666666666664
+        },
+        "short": {
+          "n": 27,
+          "valid_pct": 33.33333333333333
+        }
+      },
+      "oos_post": {
+        "n": 7,
+        "valid": 4,
+        "valid_pct": 57.142857142857146,
+        "mean_r": 0.49588631264023825,
+        "sum_r": 3.471204188481668,
+        "p_valid_vs_382": 0.25572400201476553,
+        "p_mean_r_week_flip": 0.15374231288435578,
+        "long": {
+          "n": 4,
+          "valid_pct": 75.0
+        },
+        "short": {
+          "n": 3,
+          "valid_pct": 33.33333333333333
+        }
+      }
+    },
+    "XRP": {
+      "oos_pre": {
+        "n": 103,
+        "valid": 30,
+        "valid_pct": 29.12621359223301,
+        "mean_r": -0.22341104432341072,
+        "sum_r": -23.011337565311305,
+        "p_valid_vs_382": 0.9786484033903481,
+        "p_mean_r_week_flip": 0.9635518224088796,
+        "long": {
+          "n": 48,
+          "valid_pct": 29.166666666666668
+        },
+        "short": {
+          "n": 55,
+          "valid_pct": 29.09090909090909
+        }
+      },
+      "discovery": {
+        "n": 57,
+        "valid": 20,
+        "valid_pct": 35.08771929824562,
+        "mean_r": -0.08147331679985262,
+        "sum_r": -4.643979057591599,
+        "p_valid_vs_382": 0.7297873778498598,
+        "p_mean_r_week_flip": 0.6925653717314134,
+        "long": {
+          "n": 34,
+          "valid_pct": 38.23529411764706
+        },
+        "short": {
+          "n": 23,
+          "valid_pct": 30.434782608695656
+        }
+      },
+      "oos_post": {
+        "n": 7,
+        "valid": 3,
+        "valid_pct": 42.857142857142854,
+        "mean_r": 0.12191473448018122,
+        "sum_r": 0.8534031413612686,
+        "p_valid_vs_382": 0.540297608565817,
+        "p_mean_r_week_flip": 0.3746312684365782,
+        "long": {
+          "n": 4,
+          "valid_pct": 50.0
+        },
+        "short": {
+          "n": 3,
+          "valid_pct": 33.33333333333333
+        }
+      }
+    }
+  },
+  "ordering_changes": 0,
+  "source_commit": "8eeace163627c19c3546a24b23dea6588d7f281e",
+  "training_eligible": false,
+  "production_eligible": false
+}

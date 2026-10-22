@@ -1,0 +1,220 @@
+{
+  "config": {
+    "experiment_id": "exp-monday-1618-breadth-gbm-20261023-v1",
+    "question": "Notion task 区间1.618测试 stage4: do market breadth, BTC context and a nonlinear model judge first-touch 1618 validity out of sample?",
+    "touch_ledger": "experiments/active/exp-monday-1618-validity-20261023-v1",
+    "seed": 20261023,
+    "top_fraction": 0.3,
+    "model": "LightGBM num_leaves 8, 300 trees, lr 0.03, min_child_samples 100, colsample 0.8; fixed before running.",
+    "success_criterion": "Later AUC>=0.55 AND later top30 percent by earlier threshold validity>=38.2 percent and mean R>0 AND week-stratified p<0.01.",
+    "note": "Last pre-registered attempt in this series; failure ends the static-feature line for the task.",
+    "training_eligible": false,
+    "production_eligible": false
+  },
+  "features": [
+    "range_atr",
+    "hours",
+    "move6h",
+    "trend_d",
+    "slope4h",
+    "beyond_pw",
+    "beyond_30d",
+    "opp_touched",
+    "vol_ratio",
+    "rsi1h_ext",
+    "dow",
+    "mon_body",
+    "breadth24h",
+    "btc_pos"
+  ],
+  "early_auc": 0.843666269022187,
+  "later_auc": 0.5156263158172665,
+  "early_threshold": 0.49819524337943083,
+  "late_selected": {
+    "n": 1464,
+    "valid_pct": 39.41256830601093,
+    "mean_r": 0.03622498792457287,
+    "unresolved": 5
+  },
+  "late_all": {
+    "n": 5539,
+    "valid_pct": 37.56995847625925,
+    "mean_r": -0.011265221702334573,
+    "unresolved": 23
+  },
+  "late_top_week_stratified_p": 0.0004997501249375312,
+  "importance": {
+    "range_atr": 87,
+    "hours": 491,
+    "move6h": 100,
+    "trend_d": 123,
+    "slope4h": 123,
+    "beyond_pw": 57,
+    "beyond_30d": 176,
+    "opp_touched": 6,
+    "vol_ratio": 164,
+    "rsi1h_ext": 151,
+    "dow": 31,
+    "mon_body": 96,
+    "breadth24h": 227,
+    "btc_pos": 268
+  },
+  "univariate": {
+    "breadth24h_early_auc": 0.5534285064002449,
+    "breadth24h_early_quintiles": [
+      {
+        "bin": "(-0.001, 0.0395]",
+        "n": 1008,
+        "valid_pct": 35.11904761904761,
+        "mean_r": -0.08008502654363968,
+        "unresolved": 1
+      },
+      {
+        "bin": "(0.0395, 0.107]",
+        "n": 860,
+        "valid_pct": 42.55813953488372,
+        "mean_r": 0.11408742237915506,
+        "unresolved": 0
+      },
+      {
+        "bin": "(0.107, 0.198]",
+        "n": 904,
+        "valid_pct": 35.508849557522126,
+        "mean_r": -0.06917703221950879,
+        "unresolved": 1
+      },
+      {
+        "bin": "(0.198, 0.367]",
+        "n": 936,
+        "valid_pct": 39.85042735042735,
+        "mean_r": 0.04328515494881173,
+        "unresolved": 0
+      },
+      {
+        "bin": "(0.367, 0.864]",
+        "n": 883,
+        "valid_pct": 52.774631936579844,
+        "mean_r": 0.3820375064398742,
+        "unresolved": 1
+      }
+    ],
+    "breadth24h_late_auc": 0.505597686412831,
+    "breadth24h_late_quintiles": [
+      {
+        "bin": "(-0.001, 0.0339]",
+        "n": 1123,
+        "valid_pct": 38.824577025823686,
+        "mean_r": 0.01838287634829708,
+        "unresolved": 2
+      },
+      {
+        "bin": "(0.0339, 0.0904]",
+        "n": 1166,
+        "valid_pct": 33.9622641509434,
+        "mean_r": -0.10864700590699179,
+        "unresolved": 2
+      },
+      {
+        "bin": "(0.0904, 0.169]",
+        "n": 1049,
+        "valid_pct": 40.51477597712107,
+        "mean_r": 0.06651021856821482,
+        "unresolved": 5
+      },
+      {
+        "bin": "(0.169, 0.299]",
+        "n": 1149,
+        "valid_pct": 38.46823324630113,
+        "mean_r": 0.020178603939972624,
+        "unresolved": 12
+      },
+      {
+        "bin": "(0.299, 0.808]",
+        "n": 1052,
+        "valid_pct": 36.31178707224335,
+        "mean_r": -0.0468764823820364,
+        "unresolved": 2
+      }
+    ],
+    "btc_pos_early_auc": 0.4774723937936068,
+    "btc_pos_early_quintiles": [
+      {
+        "bin": "(-3.999, -0.716]",
+        "n": 926,
+        "valid_pct": 36.933045356371494,
+        "mean_r": -0.03268705362475503,
+        "unresolved": 1
+      },
+      {
+        "bin": "(-0.716, -0.441]",
+        "n": 921,
+        "valid_pct": 47.99131378935939,
+        "mean_r": 0.2563171149046964,
+        "unresolved": 0
+      },
+      {
+        "bin": "(-0.441, -0.0704]",
+        "n": 908,
+        "valid_pct": 45.26431718061674,
+        "mean_r": 0.1855605208478802,
+        "unresolved": 1
+      },
+      {
+        "bin": "(-0.0704, 0.467]",
+        "n": 918,
+        "valid_pct": 41.61220043572985,
+        "mean_r": 0.09064949480076806,
+        "unresolved": 1
+      },
+      {
+        "bin": "(0.467, 4.909]",
+        "n": 918,
+        "valid_pct": 33.006535947712415,
+        "mean_r": -0.13594507379688145,
+        "unresolved": 0
+      }
+    ],
+    "btc_pos_late_auc": 0.4942447281846356,
+    "btc_pos_late_quintiles": [
+      {
+        "bin": "(-4.271, -0.673]",
+        "n": 1108,
+        "valid_pct": 36.8231046931408,
+        "mean_r": -0.035985164197747686,
+        "unresolved": 0
+      },
+      {
+        "bin": "(-0.673, -0.285]",
+        "n": 1109,
+        "valid_pct": 41.11812443642921,
+        "mean_r": 0.07974289639510823,
+        "unresolved": 2
+      },
+      {
+        "bin": "(-0.285, 0.0681]",
+        "n": 1106,
+        "valid_pct": 33.634719710669074,
+        "mean_r": -0.10063721488738675,
+        "unresolved": 18
+      },
+      {
+        "bin": "(0.0681, 0.517]",
+        "n": 1109,
+        "valid_pct": 39.13435527502254,
+        "mean_r": 0.026718054340692004,
+        "unresolved": 2
+      },
+      {
+        "bin": "(0.517, 5.338]",
+        "n": 1107,
+        "valid_pct": 37.12737127371274,
+        "mean_r": -0.026456129881372623,
+        "unresolved": 1
+      }
+    ]
+  },
+  "passed": false,
+  "source_commit": "1d9b9343fbfcb798049e2d4a9b959c81bd15fb62",
+  "training_eligible": false,
+  "production_eligible": false
+}

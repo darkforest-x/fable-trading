@@ -1,3 +1,9 @@
+## 2026-10-23 · Notion 区间1.618测试 completed: validity not judgeable from price
+
+- Owner TradingView AlGc61US read-only: BTC 32 + XAU 8 positions, entries at weekly 1618 (BTC 30/32, XAU 8/8 within 0.03R), mostly first-touch 4h bar; BTC stops about 2.0 ext (median 1.89/-0.99), XAU 1.75/-0.72. All 40 TP-first with hindsight targets; drawn 78%/100% vs undrawn 19%/0% objectively valid = selection, not edge. Chart restored to BTC 4h.
+- 177 OKX swaps 10130 first touches: edge-before-2.0 validity 39.1% vs driftless 38.2%, mean +0.03R fee0. Touch-time logistic later AUC 0.520; post-touch states only match driftless odds of nearer targets (63.6 vs 63.1); BTC 49% discovery fails Binance 1m 2022-11..2025-05 (31.5%, -0.18R); breadth+BTC context+LightGBM later AUC 0.516. All pre-registered gates fail. Same-week random controls are trend-biased (-0.24R), not an absolute null.
+- Experiments `exp-monday-1618-{owner-drawings,validity,post-touch,oos-1m,breadth-gbm}-20261023-v1` summary.json; builders 96a6d871e9..cffd3a9a86; learnings confirmation-win-rate-must-be-compared-with-driftless-barrier-odds, same-week-random-controls-inherit-the-weeks-trend, hand-drawn-chart-positions-are-hindsight-labels. No Pine/default/live change; training/production false.
+
 ## 2026-10-23 · Spike App 0.8.19 — full-screen 1.618 and shared Apple Glass
 
 - Default central 1.618 tab uses the existing NY Monday monitor's latest touched USDT perpetual; native Lightweight Charts supports dragging/scaling, Monday band, solid Monday high/low and extension lines without level labels. Market-only public projection, validated week/freshness; no trading/account fields exposed.

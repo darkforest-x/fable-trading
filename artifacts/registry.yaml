@@ -18,6 +18,66 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-1618-owner-drawings-20261023-v1
+    artifact_type: manifest
+    role: 'What regularities do the owner TradingView 1618 positions (OKX BTCUSDT.P 32, XAUUSDT.P 8) share?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: cffd3a9a868f44f981077fc6362e660b64efdc65
+    generator_commit: cffd3a9a868f44f981077fc6362e660b64efdc65
+    source_path: experiments/active/exp-monday-1618-owner-drawings-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-owner-drawings-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'inconclusive; BTC 30/32 and XAU 8/8 entries within 0.03R of 1618, entry median at the first-touch 4h bar (7 BTC later retests). Stops median 1.89/-0.99 BTC (about 2.0 ext, 0.'
+  - artifact_id: monday-1618-validity-20261023-v1
+    artifact_type: manifest
+    role: 'Can touch-time information judge whether a first weekly 1618 touch returns to the Monday edge before the 2.0 extension?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 75f9c2e82dc3d91f901c6195647444da805dc5ff
+    generator_commit: 75f9c2e82dc3d91f901c6195647444da805dc5ff
+    source_path: experiments/active/exp-monday-1618-validity-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-validity-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; 177 OKX swaps, 10130 touches: validity 39.1 percent versus driftless 38.2 (early 40.9, late 37.6); limit trade SL2.0/TP edge mean +0.027R fee0. Later AUC 0.520 '
+  - artifact_id: monday-1618-post-touch-20261023-v1
+    artifact_type: manifest
+    role: 'Does the 1h/2h/4h reaction after a 1618 touch reveal validity?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: e775ba3bec429c88e53dde28b9b0f7c7eb6aba10
+    generator_commit: e775ba3bec429c88e53dde28b9b0f7c7eb6aba10
+    source_path: experiments/active/exp-monday-1618-post-touch-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-post-touch-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Chosen k4 unresolved: later 44.2 percent valid versus driftless 45.2, mean R -0.001, fails. Inside/clean states raise validity to 56-64 percent but match the dr'
+  - artifact_id: monday-1618-oos-1m-20261023-v1
+    artifact_type: manifest
+    role: 'Does the BTC 1618 limit trade (SL 2.0, TP Monday edge) beat driftless 38.2 percent out of sample?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8eeace163627c19c3546a24b23dea6588d7f281e
+    generator_commit: 8eeace163627c19c3546a24b23dea6588d7f281e
+    source_path: experiments/active/exp-monday-1618-oos-1m-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-oos-1m-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; BTC oos_pre 108 touches 31.5 percent, mean -0.176R, binomial p .94: fails. Discovery reproduces 49.1 percent on Binance. ETH/SOL/BNB/XRP/DOGE flip between perio'
+  - artifact_id: monday-1618-breadth-gbm-20261023-v1
+    artifact_type: manifest
+    role: 'Do market breadth, BTC Monday position and a LightGBM judge 1618 validity out of sample?'
+    source_repo: darkforest-x/fable-trading
+    source_commit: 1d9b9343fbfcb798049e2d4a9b959c81bd15fb62
+    generator_commit: 1d9b9343fbfcb798049e2d4a9b959c81bd15fb62
+    source_path: experiments/active/exp-monday-1618-breadth-gbm-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-1618-breadth-gbm-20261023-v1/summary.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: 'rejected; Early AUC 0.844 (overfit), later 0.516; later top30 percent 39.4 percent, +0.036R; both new features later AUC about 0.50. Fails.'
   - artifact_id: btc-monday-fib-wick-engulf-20261023-v1
     artifact_type: manifest
     role: 'Notion task 区间1.618测试 #1: two15m wick rejections then reversal engulfing at Monday1618'
