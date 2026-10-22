@@ -78,6 +78,25 @@ def replay(delays):
             any=m.metric(rows[rows.arm.eq('any')&rows.population.eq('signal')])),ensure_ascii=False),flush=True)
 
 
+def replay_uncontested():
+    """Execute only policy-independent parents while fee geometry is unresolved.
+
+    This is a partial computation, NOT permission to exclude pending parents
+    from the strategy denominator. Pending IDs remain explicitly enumerated.
+    """
+    cfg,_,_=context()
+    entry=pd.read_csv(EXP/'entries.csv',float_precision='round_trip')
+    random=pd.read_csv(EXP/'controls.csv',float_precision='round_trip')
+    allentries=pd.concat([entry,random],ignore_index=True)
+    ready=allentries.side*(allentries.tp1-allentries.entry)-cfg['round_trip_cost']*allentries.entry>=2*cfg['tick']
+    m.EXP=EXP/'uncontested';m.EXP.mkdir(exist_ok=True)
+    dump(m.EXP/'scope.json',dict(partial_only=True,pending_parents=allentries.loc[~ready,'trade_id'].tolist(),
+        no_strategy_exclusion_authorized=True))
+    frame=m.base.aligned(pd.read_csv(m.SOURCE/'candles.csv.gz',float_precision='round_trip'))
+    rows,audit=m.execute(frame,allentries[ready],0,cfg)
+    print(json.dumps(dict(partial_only=True,parents=len(rows),audit=audit),ensure_ascii=False),flush=True)
+
+
 def collect():
     cfg,entry,random=context();summary=[];audits=[];ledger=[];old_comparison=[]
     scope=json.loads((EXP/'scope.json').read_text()) if (EXP/'scope.json').exists() else {}
@@ -148,8 +167,10 @@ if __name__=='__main__':
     parser.add_argument('--initialize',action='store_true')
     parser.add_argument('--delays',type=int,nargs='+')
     parser.add_argument('--collect',action='store_true')
+    parser.add_argument('--uncontested',action='store_true')
     args=parser.parse_args()
     if args.experiment:EXP=args.experiment.resolve()
     if args.initialize:initialize()
     if args.delays:replay(args.delays)
+    if args.uncontested:replay_uncontested()
     if args.collect:collect()
