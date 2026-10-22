@@ -1,0 +1,22 @@
+{
+  "experiment_id": "exp-range-v237-twoyear-20261022-v1",
+  "start": "2024-10-22T10:15:00+08:00",
+  "end": "2026-10-22T10:15:00+08:00",
+  "midpoint": "2025-10-22T10:15:00+08:00",
+  "warmup": "2024-10-01T00:00:00+08:00",
+  "history": "experiments/active/exp-range-v231-fiveyear-20261021-v1",
+  "tail": "experiments/active/exp-range-v236-recent2m-20261022-v1",
+  "symbols": [{"symbol":"BTC","tick":0.1,"seed_offset":0},{"symbol":"ETH","tick":0.01,"seed_offset":1}],
+  "seed": 20261022,
+  "volatility_edges": [0.001,0.002,0.004,0.008,0.016],
+  "minimum_time_group": 30,
+  "entry": "V2.37, shared inclusive +/-5five-minute OPEN positions.5m primary has no H1 gate;15m primary retains original H1 watch. Earliest same-side match, one frame per primary arrow.",
+  "reference": "Exact chart reference close and stop, with late confirmation explicitly retrospective. Keep pre-publication losses.",
+  "causal": "Research comparison only: enter at max(primary close, matching close); recompute latest5completed5m structural stop plus0.05percent at that actual close. Freeze original H1 qualification for15m. Keep all primary events independently, including shared publication closes. No Pine changes.",
+  "exit": "Original initial stop;15m close>=5R arms4ATR14close trail, tighten only;once armed, confirmed oppositeH1 close exits. No fixed TP, partial exit,BE or time limit. Study-end marks separately counted as stillopen.",
+  "cost": "Unchanged20bp round-trip entry-notional cost. Independent R, not funded-account compounded return. No funding,slippage or latency model.",
+  "time_groups": "Asia/Shanghai actual/reference entry close;1hour and fixed2hour bins,weekday. Report counts and Wilson intervals. First-year winner (>=30closed) checked in second year, descriptive only.",
+  "controls": "Same symbol/side/anniversary-year/UTCweek/causalATR14bucket/15mclockphase,withoutreplacement per cohort. Exclude native5m/15m arrow and real entry closes;copy relative risk rounded outward. All same exits and costs.",
+  "training_eligible": false,
+  "production_eligible": false
+}
