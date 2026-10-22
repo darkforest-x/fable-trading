@@ -22,6 +22,7 @@
     "trading-books": ["交易书架", "从原文到小册：选书、逐章研读、自己的笔记与复习。"],
     learning: ["学习中心", "围绕问题安排学习、复述与复习，把答案沉淀为自己的知识。"],
     orderflow: ["订单流框架", "订单流与机构框架学习小册：逐章阅读、笔记、间隔复习与练习清单。小册内容只在本机。"],
+    "monday-fib": ["周一1.618监控", "OKX 全部 USDT 永续 · 纽约周一区间外触价提醒"],
     "auto-leaders": ["自动找龙头", "筛选山寨币观察候选，追踪相对强度、回吐与恢复进度。"],
     "yolo-detect": ["均线密集检测", "选择币种与周期，用 YOLO 在全局 K 线上定位均线密集形态。"],
     langlang: ["Bit浪浪体系", "主升浪交易法：体系图、逐章阅读、直播原话检索、案例盲测与开单检查。资料只在本机。"],
@@ -49,7 +50,7 @@
     notifications: ["通知中心", "管理通知渠道状态与来源订阅。"],
     system: ["运行状态", "行情、扫描与通知，每个环节都清晰可见。"],
   };
-  const workspaceView = (view = state.view) => ["learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
+  const workspaceView = (view = state.view) => ["learning", "trading-books", "orderflow", "langlang", "auto-leaders", "monday-fib", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(view);
   const eventNames = { tv_start: "V12.8 启动", yolo_confirmed: "YOLO 补充确认" };
   const modelStates = { pending: "等待确认", confirmed: "模型已通过", invalidated: "结构失效", expired: "等待已到期", error: "检测异常", disabled: "周期已关闭" };
   const TV_SETTINGS = "近零至少 12 根 · 0.1 ATR · 普通系统标记关闭";
@@ -308,8 +309,8 @@
     state.view = nextView;
     syncRefreshButton();
     const section = signalView(state.view) ? "signals" : linesView(state.view) ? "lines" : state.view;
-    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
-    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
+    ["retest", "signals", "watch", "lines", "shadow", "notifications", "system", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "monday-fib", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].forEach((key) => $(`${key}-view`).classList.toggle("hidden", key !== section));
+    $("primary-metrics").classList.toggle("hidden", ["retest", "shadow", "joints", "breaks", "notifications", "learning", "trading-books", "orderflow", "langlang", "auto-leaders", "monday-fib", "yolo-detect", "rektproof", "knowledge", "content", "manual", "paper-desk", "copier", "market", "platform", "models", "research", "datasets", "factors", "strategies", "paper", "experiments", "backtests", "yolo", "vision"].includes(state.view));
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === state.view;
       button.classList.toggle("active", active);
@@ -391,6 +392,7 @@
     window.SpikeTradingBooks?.setActive(activeView === "trading-books");
     window.SpikeOrderflow?.setActive(activeView === "orderflow");
     window.SpikeLanglang?.setActive(activeView === "langlang");
+    window.SpikeMondayFib?.setActive(activeView === "monday-fib");
     window.SpikeLeaderPage?.setActive(activeView === "auto-leaders");
     window.SpikeYoloDetect?.setActive(activeView === "yolo-detect");
     window.SpikeRektproof?.setActive(activeView === "rektproof");
@@ -1261,6 +1263,7 @@
     if (state.view === "market") { await window.SpikeMarketSync?.refresh(); return; }
     if (state.view === "trading-books") { if (trigger !== "periodic") await window.SpikeTradingBooks?.refresh(); return; }
     if (state.view === "orderflow") { if (trigger !== "periodic") await window.SpikeOrderflow?.refresh(); return; }
+    if (state.view === "monday-fib") { if (trigger !== "periodic") await window.SpikeMondayFib?.refresh(); return; }
     if (state.view === "auto-leaders") { if (trigger !== "periodic") await window.SpikeLeaderPage?.refresh(); return; }
     if (state.view === "yolo-detect") { if (trigger !== "periodic") await window.SpikeYoloDetect?.refresh(); return; }
     if (state.view === "langlang") { if (trigger !== "periodic") await window.SpikeLanglang?.refresh(); return; }

@@ -166,3 +166,15 @@ test("daily detection and leader entries are independent workspaces", async () =
   assert.equal(c.get('yolo-detect-view').classList.contains('hidden'),false);
   assert.equal(c.get('primary-metrics').classList.contains('hidden'),true);
 });
+
+test('Monday Fib has an independent route, lifecycle and manual refresh',async()=>{
+ const c=harness(),active=[];let refreshes=0;
+ c.window.SpikeMondayFib={setActive:value=>active.push(value),refresh:async()=>refreshes++};
+ c.setView('monday-fib',false);
+ assert.equal(c.get('monday-fib-view').classList.contains('hidden'),false);
+ assert.equal(c.get('page-title').textContent,'周一1.618监控');
+ assert.equal(c.get('primary-metrics').classList.contains('hidden'),true);
+ assert.equal(active.at(-1),true);
+ await c.refresh();assert.equal(refreshes,1);
+ c.setView('research',false);assert.equal(active.at(-1),false);
+});

@@ -5,7 +5,7 @@
 (() => {
   'use strict';
   const GROUPS = {
-    market: {title:'市场观察', views:['market','auto-leaders']},
+    market: {title:'市场观察', views:['market','auto-leaders','monday-fib']},
     signals: {title:'信号与检测', views:['signals','yolo-detect']},
     accounts: {title:'账户与交易', views:['manual','copier']},
     simulation: {title:'模拟交易', views:['paper-desk','paper']},
@@ -15,7 +15,7 @@
   };
   const legacyViews=['watch','warmup','shadow'];
   const groupFor = view => legacyViews.includes(view)?'manage':Object.keys(GROUPS).find(key=>GROUPS[key].views.includes(view)) || 'market';
-  const familyFor = view => ['market','auto-leaders','signals','yolo-detect','paper-desk','copier'].includes(view)?'terminal':
+  const familyFor = view => ['market','auto-leaders','monday-fib','signals','yolo-detect','paper-desk','copier'].includes(view)?'terminal':
     ['trading-books','orderflow','langlang','rektproof'].includes(view)?'reader':
     ['learning','knowledge','content'].includes(view)?'collection':
     ['notifications','system'].includes(view)?'settings':'registry';

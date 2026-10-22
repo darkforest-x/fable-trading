@@ -1,0 +1,7 @@
+# A missing Stitch list entry does not prove the screen is missing
+
+- **Problem**: After an Apple Glass generation timed out, repeated `list_screens` calls omitted the completed screen. We incorrectly told the Owner that the design was unavailable, until the Owner supplied a browser screenshot showing it.
+- **Dead end**: Repeating the same listing, including through a scheduled follow-up, only reproduced the incomplete discovery result. A timeout and an absent list entry were not evidence that generation had failed.
+- **Effective path**: Read the existing project in the Owner's browser, obtain the screen ID from its rendered node, then call `get_screen` directly. Screen `07032a6d28ba421790a667c5dc50eccc` returned both screenshot and complete HTML/CSS even while the list still omitted it. We downloaded that source and integrated it without submitting another generation.
+- **General rule**: When a user-visible artifact contradicts an API listing, inspect that artifact through its direct identity before reporting absence. Keep discovery status separate from resource availability. The cause of this listing omission was not established; do not label it a cache bug without evidence.
+- **Scope**: Project `8978791379095391159`; `artifacts/monday-fib-monitor-20261022/stitch-apple.html`; the receipt retains the exact screen and file resources. This recovery satisfied the existing Stitch-first requirement, without a design waiver or a duplicate generation.

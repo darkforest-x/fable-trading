@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+<html class="light" lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spike · 周一1.618监控 · Apple Glass</title>
+<!-- Google Fonts: Plus Jakarta Sans for Apple macOS typography feel -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-primary-fixed": "#001b3f",
+            "on-primary-fixed-variant": "#00458f",
+            "on-tertiary-fixed-variant": "#930005",
+            "background": "#faf9fe",
+            "on-secondary": "#ffffff",
+            "error-container": "#ffdad6",
+            "tertiary": "#ba0009",
+            "on-error": "#ffffff",
+            "on-surface": "#1a1b1f",
+            "on-primary": "#ffffff",
+            "tertiary-container": "#e1231e",
+            "on-surface-variant": "#414753",
+            "primary-fixed-dim": "#abc7ff",
+            "surface-bright": "#faf9fe",
+            "tertiary-fixed": "#ffdad5",
+            "surface-container": "#eeedf3",
+            "surface": "#faf9fe",
+            "on-secondary-container": "#00732a",
+            "on-primary-container": "#fcfbff",
+            "surface-variant": "#e3e2e7",
+            "inverse-primary": "#abc7ff",
+            "surface-container-highest": "#e3e2e7",
+            "secondary-fixed-dim": "#53e16f",
+            "outline-variant": "#c1c6d6",
+            "primary-fixed": "#d7e2ff",
+            "on-secondary-fixed": "#002107",
+            "error": "#ba1a1a",
+            "secondary-container": "#6ffb85",
+            "on-error-container": "#93000a",
+            "tertiary-fixed-dim": "#ffb4aa",
+            "primary-container": "#0071e3",
+            "inverse-surface": "#2f3034",
+            "on-tertiary-fixed": "#410001",
+            "surface-tint": "#005cbb",
+            "on-background": "#1a1b1f",
+            "secondary": "#006e28",
+            "secondary-fixed": "#72fe88",
+            "outline": "#717785",
+            "surface-container-high": "#e9e7ed",
+            "primary": "#0059b5",
+            "on-secondary-fixed-variant": "#00531c",
+            "surface-container-low": "#f4f3f8",
+            "on-tertiary": "#ffffff",
+            "on-tertiary-container": "#fffaf9",
+            "inverse-on-surface": "#f1f0f5",
+            "surface-dim": "#dad9df",
+            "surface-container-lowest": "#ffffff"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "space-md": "1rem",
+            "space-xl": "2.5rem",
+            "gutter-lg": "2rem",
+            "margin-mobile": "1.25rem",
+            "margin-desktop": "3rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-xs": "0.25rem",
+            "gutter": "1.5rem",
+            "gutter-sm": "1rem",
+            "margin": "2rem"
+          },
+          fontFamily: {
+            "headline-xl": ["Plus Jakarta Sans"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "display-lg-mobile": ["Plus Jakarta Sans"],
+            "headline-xl-mobile": ["Plus Jakarta Sans"],
+            "label-sm": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "metric-val": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "headline-sm": ["Plus Jakarta Sans"],
+            "display-lg": ["Plus Jakarta Sans"],
+            "headline-md": ["Plus Jakarta Sans"]
+          },
+          fontSize: {
+            "headline-xl": ["36px", { lineHeight: "44px", letterSpacing: "-0.025em", fontWeight: "600" }],
+            "body-sm": ["13px", { lineHeight: "18px", letterSpacing: "0em", fontWeight: "400" }],
+            "display-lg-mobile": ["34px", { lineHeight: "40px", letterSpacing: "-0.025em", fontWeight: "700" }],
+            "headline-xl-mobile": ["28px", { lineHeight: "34px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.04em", fontWeight: "600" }],
+            "body-md": ["15px", { lineHeight: "21px", letterSpacing: "-0.005em", fontWeight: "400" }],
+            "headline-lg": ["24px", { lineHeight: "30px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "body-lg": ["17px", { lineHeight: "24px", letterSpacing: "-0.01em", fontWeight: "400" }],
+            "metric-val": ["28px", { lineHeight: "32px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "label-md": ["13px", { lineHeight: "16px", letterSpacing: "0.01em", fontWeight: "500" }],
+            "headline-sm": ["17px", { lineHeight: "22px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "display-lg": ["48px", { lineHeight: "56px", letterSpacing: "-0.03em", fontWeight: "700" }],
+            "headline-md": ["20px", { lineHeight: "26px", letterSpacing: "-0.015em", fontWeight: "600" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Specular glass physics & Apple-grade transitions */
+    .glass-canvas {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(28px) saturate(160%);
+      -webkit-backdrop-filter: blur(28px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 10px 30px -4px rgba(0, 0, 0, 0.03), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(36px);
+      -webkit-backdrop-filter: blur(36px);
+      border: 1px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.04), 0 2px 6px -1px rgba(0, 0, 0, 0.02), inset 0 1px 0 0 rgba(255, 255, 255, 1);
+    }
+    .glass-well {
+      background: rgba(244, 243, 248, 0.75);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .ios-switch {
+      position: relative;
+      width: 44px;
+      height: 26px;
+      border-radius: 9999px;
+      background: #e3e2e7;
+      transition: background-color 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+      cursor: pointer;
+    }
+    .ios-switch.active {
+      background: #34C759;
+    }
+    .ios-switch-knob {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 22px;
+      height: 22px;
+      border-radius: 9999px;
+      background: #ffffff;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15), 0 0 1px rgba(0,0,0,0.1);
+      transition: transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .ios-switch.active .ios-switch-knob {
+      transform: translateX(18px);
+    }
+    /* Ambient macOS canvas glow */
+    .mac-ambient-glow {
+      background: radial-gradient(circle at 50% 0%, rgba(215, 226, 255, 0.5) 0%, rgba(250, 249, 254, 0) 70%);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md antialiased min-h-screen selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Ambient Light Wells (macOS Sequoia visual atmosphere) -->
+<div class="fixed inset-0 pointer-events-none mac-ambient-glow z-0"></div>
+<div class="fixed top-[-10%] right-[10%] w-[500px] h-[500px] rounded-full bg-secondary-fixed/20 blur-[120px] pointer-events-none z-0"></div>
+<div class="fixed top-[20%] left-[5%] w-[450px] h-[450px] rounded-full bg-primary-fixed/25 blur-[140px] pointer-events-none z-0"></div>
+<!-- Relative Content Wrapper -->
+<div class="relative z-10 flex flex-col min-h-screen">
+<!-- FLOATING APPLE MACOS FROSTED NAVIGATION BAR (TopNavBar Anchor) -->
+<header class="sticky top-0 z-50 w-full px-4 md:px-margin-desktop py-space-sm">
+<div class="max-w-[1536px] mx-auto glass-canvas rounded-2xl px-space-md md:px-space-lg h-14 flex items-center justify-between border-b border-outline-variant/30">
+<!-- Left: Brand + Badge -->
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-[0_2px_8px_rgba(0,113,227,0.3)]">
+<span class="material-symbols-outlined text-[18px]">insights</span>
+</div>
+<div class="flex items-baseline gap-1.5">
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">SPIKE</span>
+<span class="text-[10px] tracking-wider font-semibold uppercase px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed">RESEARCH</span>
+</div>
+</div>
+<!-- Middle: Menu Navigation Tabs (Responsive Desktop) -->
+<nav class="hidden md:flex items-center gap-1 bg-surface-container/60 p-1 rounded-xl">
+<a class="px-3.5 py-1 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors rounded-lg" href="#">市场观察</a>
+<a class="px-3.5 py-1 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors rounded-lg" href="#">均线密集</a>
+<a class="px-3.5 py-1 bg-surface-container-lowest text-primary shadow-[0_2px_8px_rgba(0,0,0,0.04)] font-label-md text-label-md font-semibold rounded-lg" href="#">周一 1.618</a>
+<a class="px-3.5 py-1 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors rounded-lg" href="#">信号中心</a>
+<a class="px-3.5 py-1 text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors rounded-lg" href="#">研究资产</a>
+</nav>
+<!-- Right: Status Indicator + Clean Actions -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-secondary-fixed/30 border border-secondary-fixed/50">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-sm text-label-sm text-on-secondary-fixed-variant font-medium">OKX 永续在线</span>
+</div>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container/80 transition-all">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container/80 transition-all">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+<div class="h-4 w-px bg-outline-variant/40 mx-0.5"></div>
+<div class="w-7 h-7 rounded-full bg-surface-container-high border border-outline-variant/50 flex items-center justify-center text-on-surface font-label-sm">
+<span class="material-symbols-outlined text-[16px]">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN CANVASES CONTAINER -->
+<main class="flex-1 w-full max-w-[1536px] mx-auto px-4 md:px-margin-desktop py-space-md md:py-space-lg flex flex-col gap-space-lg">
+<!-- PAGE TITLE & TIME CONTEXT -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2 mb-1.5">
+<span class="font-label-sm text-label-sm font-semibold tracking-wider uppercase text-primary">QUANTITATIVE RANGE EXTENSION</span>
+<span class="text-outline-variant">/</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">每周定界模型</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl font-bold tracking-tight text-on-surface">周一 1.618 扩展位监控</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">
+            基准结算：纽约时间 (EST/EDT) 完整自然周一 (2025-05-19) · 监控有效期至下周一 00:00 EST
+          </p>
+</div>
+<!-- Concise Apple Glass Formula Reminder Container -->
+<div class="glass-canvas px-space-md py-2.5 rounded-xl border border-white flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-primary text-[18px]">functions</span>
+<div class="font-body-sm text-body-sm">
+<span class="font-semibold text-on-surface">Upper 1.618</span> = High + 0.618 × (High - Low)
+            <span class="mx-1.5 opacity-40">|</span>
+<span class="font-semibold text-on-surface">Lower 1.618</span> = Low - 0.618 × (High - Low)
+            <span class="text-outline ml-1 hidden lg:inline">(以每个合约纽约周一完整自然日自动锁定)</span>
+</div>
+</div>
+</div>
+<!-- SUMMARY METRIC COUNTERS (Airy, compact, non-noisy) -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-space-md">
+<div class="glass-card rounded-2xl p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">监控合约</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">layers</span>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-metric-val text-metric-val font-bold text-on-surface">148</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">OKX USDT 永续全标的</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">本周已触及</span>
+<span class="material-symbols-outlined text-secondary text-[18px]">check_circle</span>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-metric-val text-metric-val font-bold text-secondary">7</span>
+<span class="font-label-sm text-label-sm text-on-secondary-container">首次触碰记录</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">临界预警</span>
+<span class="material-symbols-outlined text-primary text-[18px]">notification_important</span>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-metric-val text-metric-val font-bold text-primary">12</span>
+<span class="font-label-sm text-label-sm text-primary">距目标位 &lt; 1.5%</span>
+</div>
+</div>
+<div class="glass-card rounded-2xl p-space-md flex flex-col justify-between">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-md text-label-md">基准已锁定</span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">lock_clock</span>
+</div>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="font-metric-val text-metric-val font-bold text-on-surface">142</span>
+<span class="font-label-sm text-label-sm text-outline">6 个新标的待周一</span>
+</div>
+</div>
+</div>
+<!-- MAIN 2-COLUMN DESKTOP ARCHITECTURE (Responsive 70% / 30%) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT / MAIN AREA (70% ~ 8.4 cols, here 8 of 12) -->
+<section class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- CONTROLS & FILTER BAR -->
+<div class="glass-canvas p-space-md rounded-2xl flex flex-col gap-space-md">
+<div class="flex flex-col md:flex-row gap-space-sm items-stretch md:items-center justify-between">
+<!-- Search bar with subtle well -->
+<div class="relative flex-1 max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant text-[18px]">search</span>
+<input class="w-full pl-9 pr-4 py-2 glass-well border-none rounded-xl font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary-container/20 transition-all outline-none" placeholder="搜索合约 (如 BTC, ETH, SOL)..." type="text"/>
+</div>
+<!-- Sort indicator badge -->
+<div class="flex items-center justify-end gap-1.5 font-label-sm text-label-sm text-outline">
+<span class="material-symbols-outlined text-[16px]">swap_vert</span>
+<span>默认按临界距离升序排列</span>
+</div>
+</div>
+<!-- Segmented Filter Pills (Apple style) -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md font-semibold bg-surface-container-lowest text-on-surface shadow-[0_2px_8px_rgba(0,0,0,0.06)] shrink-0">
+                全部 (148)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/60 transition-all shrink-0">
+                临界预警 &lt;1.5% (12)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/60 transition-all shrink-0">
+                本周已触及 (7)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/60 transition-all shrink-0">
+                上沿突破 (4)
+              </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest/60 transition-all shrink-0">
+                下沿触底 (3)
+              </button>
+</div>
+</div>
+<!-- CONTRACTS TABLE / CARDS CONTAINER -->
+<div class="glass-card rounded-2xl overflow-hidden border border-white">
+<!-- Table Header (Visible on Desktop) -->
+<div class="hidden md:grid grid-cols-12 px-space-lg py-3.5 font-label-sm text-label-sm text-outline border-b border-outline-variant/20 bg-surface-container-lowest/40">
+<div class="col-span-3">合约标的 (SYMBOL)</div>
+<div class="col-span-2 text-right">最新成交价</div>
+<div class="col-span-3 text-center">周一 1.618 扩展区间</div>
+<div class="col-span-2 text-right">距目标位</div>
+<div class="col-span-2 text-right">本周触碰状态</div>
+</div>
+<!-- List Item 1: BTCUSDT (临界逼近中 < 1.5%) -->
+<div class="p-space-md md:px-space-lg md:py-4 border-b border-outline-variant/15 hover:bg-surface-container-lowest/90 transition-all cursor-pointer group">
+<div class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-0">
+<div class="col-span-3 flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed/30 text-primary flex items-center justify-center font-bold text-xs">
+                    ₿
+                  </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">BTCUSDT</span>
+<span class="font-label-sm text-[10px] px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Bitcoin</span>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">96,420.50</div>
+<span class="font-label-sm text-[11px] text-secondary font-medium">+1.84% 24h</span>
+</div>
+<div class="col-span-3 px-2 flex flex-col items-center">
+<div class="w-full flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="text-tertiary">下沿 88,975.20</span>
+<span class="text-secondary font-medium">上沿 97,024.80</span>
+</div>
+<!-- Progress gauge of position between monday ranges -->
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden flex">
+<div class="bg-secondary h-full rounded-full" style="width: 93%;"></div>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-fixed/40 text-on-secondary-fixed-variant font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                    +0.62%
+                  </span>
+<div class="font-label-sm text-[11px] text-outline mt-0.5">距上沿 604.30</div>
+</div>
+<div class="col-span-2 flex items-center justify-between md:justify-end gap-2">
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold bg-primary-fixed/50 text-on-primary-fixed">
+                    临界逼近中
+                  </span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+</div>
+</div>
+<!-- Sub-drawer info preview (expanded elegance) -->
+<div class="mt-2.5 pt-2.5 border-t border-outline-variant/10 flex flex-wrap items-center justify-between font-body-sm text-body-sm text-outline">
+<div class="flex items-center gap-4">
+<span>周一 High: <strong class="text-on-surface font-medium">93,950.00</strong></span>
+<span>周一 Low: <strong class="text-on-surface font-medium">88,975.20</strong></span>
+<span>区间差 R: <strong class="text-on-surface font-medium">4,974.80</strong></span>
+</div>
+<div class="text-[12px]">锁定于 05-19 23:59:59 EST</div>
+</div>
+</div>
+<!-- List Item 2: SOLUSDT (已触达上沿) -->
+<div class="p-space-md md:px-space-lg md:py-4 border-b border-outline-variant/15 hover:bg-surface-container-lowest/90 transition-all cursor-pointer group">
+<div class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-0">
+<div class="col-span-3 flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-xs">
+                    S
+                  </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">SOLUSDT</span>
+<span class="font-label-sm text-[10px] px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Solana</span>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">184.92</div>
+<span class="font-label-sm text-[11px] text-secondary font-medium">+5.42% 24h</span>
+</div>
+<div class="col-span-3 px-2 flex flex-col items-center">
+<div class="w-full flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="text-tertiary">下沿 152.10</span>
+<span class="text-secondary font-medium">上沿 184.66</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden flex">
+<div class="bg-secondary h-full rounded-full" style="width: 100%;"></div>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary/15 text-secondary font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[14px]">done_all</span>
+                    已突破
+                  </span>
+<div class="font-label-sm text-[11px] text-outline mt-0.5">高点 185.34</div>
+</div>
+<div class="col-span-2 flex items-center justify-between md:justify-end gap-2">
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold bg-secondary-fixed/50 text-on-secondary-fixed">
+                    已触达上沿
+                  </span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+</div>
+</div>
+<div class="mt-2.5 pt-2.5 border-t border-outline-variant/10 flex flex-wrap items-center justify-between font-body-sm text-body-sm text-outline">
+<div class="flex items-center gap-4">
+<span>周一 High: <strong class="text-on-surface font-medium">172.20</strong></span>
+<span>周一 Low: <strong class="text-on-surface font-medium">152.10</strong></span>
+<span>触达时间: <strong class="text-secondary font-medium">05-21 14:22 EST</strong></span>
+</div>
+<div class="text-[12px]">本周首次触达已入账</div>
+</div>
+</div>
+<!-- List Item 3: ETHUSDT (区间震荡内) -->
+<div class="p-space-md md:px-space-lg md:py-4 border-b border-outline-variant/15 hover:bg-surface-container-lowest/90 transition-all cursor-pointer group">
+<div class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-0">
+<div class="col-span-3 flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-xs">
+                    Ξ
+                  </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">ETHUSDT</span>
+<span class="font-label-sm text-[10px] px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">Ethereum</span>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">2,642.10</div>
+<span class="font-label-sm text-[11px] text-tertiary font-medium">-0.45% 24h</span>
+</div>
+<div class="col-span-3 px-2 flex flex-col items-center">
+<div class="w-full flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="text-tertiary">下沿 2,410.00</span>
+<span class="text-secondary font-medium">上沿 2,820.50</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden flex">
+<div class="bg-primary h-full rounded-full" style="width: 58%;"></div>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<span class="font-label-md text-label-md text-on-surface font-medium">
+                    +6.75%
+                  </span>
+<div class="font-label-sm text-[11px] text-outline mt-0.5">中间平衡态</div>
+</div>
+<div class="col-span-2 flex items-center justify-between md:justify-end gap-2">
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm font-medium bg-surface-container text-on-surface-variant">
+                    区间震荡内
+                  </span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 4: SUIUSDT (行情微延迟状态) -->
+<div class="p-space-md md:px-space-lg md:py-4 border-b border-outline-variant/15 hover:bg-surface-container-lowest/90 transition-all cursor-pointer group">
+<div class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-0">
+<div class="col-span-3 flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-high text-on-surface flex items-center justify-center font-bold text-xs">
+                    S
+                  </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface">SUIUSDT</span>
+<span class="font-label-sm text-[10px] px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">永续</span>
+</div>
+<div class="flex items-center gap-1 text-[11px] text-outline">
+<span class="material-symbols-outlined text-[13px] text-outline">schedule</span>
+<span>行情微延迟 (420ms)</span>
+</div>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<div class="font-body-lg text-body-lg font-semibold text-on-surface">2.8720</div>
+<span class="font-label-sm text-[11px] text-secondary font-medium">+3.12% 24h</span>
+</div>
+<div class="col-span-3 px-2 flex flex-col items-center">
+<div class="w-full flex justify-between font-label-sm text-label-sm mb-1 text-on-surface-variant">
+<span class="text-tertiary">下沿 2.8513</span>
+<span class="text-secondary font-medium">上沿 3.4210</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container overflow-hidden flex">
+<div class="bg-tertiary h-full rounded-full" style="width: 4%;"></div>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-md text-label-md font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                    -0.72%
+                  </span>
+<div class="font-label-sm text-[11px] text-outline mt-0.5">已探底回升</div>
+</div>
+<div class="col-span-2 flex items-center justify-between md:justify-end gap-2">
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm font-semibold bg-tertiary-fixed/50 text-on-tertiary-fixed">
+                    已触达下沿
+                  </span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors text-[18px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- List Item 5: APEUSDT (数据待同步 / 新上线合约周一数据缺失) -->
+<div class="p-space-md md:px-space-lg md:py-4 hover:bg-surface-container-lowest/90 transition-all cursor-pointer group">
+<div class="grid grid-cols-1 md:grid-cols-12 items-center gap-2 md:gap-0">
+<div class="col-span-3 flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-surface-container-low text-outline flex items-center justify-center font-bold text-xs">
+                    *
+                  </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface-variant">IOSTUSDT</span>
+<span class="font-label-sm text-[10px] px-1 py-0.2 rounded bg-surface-container-high text-on-surface-variant">永续</span>
+</div>
+<span class="font-label-sm text-label-sm text-outline">新标的待周一</span>
+</div>
+</div>
+<div class="col-span-2 text-left md:text-right">
+<div class="font-body-lg text-body-lg font-normal text-on-surface-variant">0.007812</div>
+<span class="font-label-sm text-[11px] text-outline">实时价格在线</span>
+</div>
+<div class="col-span-5 px-2">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-container/50 text-outline font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-outline">sync_problem</span>
+<span>数据待同步：新上线合约周一数据缺失，待下周一 00:00 自动定界</span>
+</div>
+</div>
+<div class="col-span-2 flex items-center justify-between md:justify-end gap-2">
+<span class="px-2.5 py-1 rounded-full font-label-sm text-label-sm font-medium bg-surface-container-high text-outline">
+                    待生成基准
+                  </span>
+<span class="material-symbols-outlined text-outline-variant text-[18px]">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Pagination / Footnote -->
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline px-2">
+<span>显示 5 / 148 个监控标的</span>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1 rounded-lg border border-outline-variant/30 hover:bg-surface-container transition-all">上一页</button>
+<span class="px-2 font-medium text-on-surface">1 / 30</span>
+<button class="px-3 py-1 rounded-lg border border-outline-variant/30 hover:bg-surface-container transition-all">下一页</button>
+</div>
+</div>
+</section>
+<!-- RIGHT / SECONDARY AREA (30% ~ 3.6 cols, here 4 of 12) -->
+<aside class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- CARD 1: TELEGRAM 报警推送配置 (Apple glass card) -->
+<div class="glass-card rounded-2xl p-space-lg">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed/40 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">send</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">Telegram 触价推送</h3>
+<p class="font-label-sm text-label-sm text-outline">高确定性实时预警通道</p>
+</div>
+</div>
+<!-- Apple iOS Switch (Interactive Vanilla JS) -->
+<div class="ios-switch" id="tg-switch" onclick="this.classList.toggle('active'); document.getElementById('switch-status').innerText = this.classList.contains('active') ? '推送状态：已开启 (实时响应)' : '推送状态：未开启';">
+<div class="ios-switch-knob"></div>
+</div>
+</div>
+<!-- Configuration Status Pill & Settings -->
+<div class="space-y-3 font-body-sm text-body-sm">
+<div class="flex items-center justify-between p-2.5 rounded-xl bg-surface-container/50">
+<span class="font-medium text-on-surface-variant" id="switch-status">推送状态：未开启</span>
+<span class="inline-flex items-center gap-1 font-label-sm text-label-sm text-secondary font-semibold">
+<span class="material-symbols-outlined text-[14px]">check</span>
+                  已配置 Webhook
+                </span>
+</div>
+<!-- Rule Note -->
+<div class="p-3 rounded-xl bg-surface-container-lowest/60 border border-outline-variant/20 text-on-surface-variant font-body-sm space-y-1.5">
+<div class="flex items-start gap-1.5 font-medium text-on-surface">
+<span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">notifications_active</span>
+<span>只推启用后的新触价事件，不补推历史记录。</span>
+</div>
+<p class="text-outline text-xs leading-relaxed">
+                  首次触及即刻记录并触发下发，不等待 15 分钟收线确认。
+                </p>
+</div>
+<!-- Micro explanation -->
+<div class="flex items-center gap-1.5 text-xs text-outline px-1">
+<span class="material-symbols-outlined text-[14px]">info</span>
+<span>推送成功送达服务已接受，不代表手机客户端即时已读。</span>
+</div>
+</div>
+</div>
+<!-- CARD 2: 本周触达事件回执流 (Recent Alerts Ledger) -->
+<div class="glass-card rounded-2xl p-space-lg">
+<div class="flex items-center justify-between mb-space-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-[20px]">history_toggle_off</span>
+<h3 class="font-headline-sm text-headline-sm font-semibold text-on-surface">本周最新触达 (7/7)</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-secondary-fixed/50 text-on-secondary-fixed font-semibold">
+                实时回执
+              </span>
+</div>
+<!-- Timeline items -->
+<div class="space-y-3">
+<!-- Event 1 -->
+<div class="p-3 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/15 flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface font-body-sm">SOLUSDT</span>
+<span class="font-label-sm text-[11px] text-secondary">触达上沿 184.66</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline">05-21 14:22 EST</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">回执: Telegram Webhook</span>
+<span class="px-2 py-0.5 rounded bg-secondary-fixed/30 text-on-secondary-fixed-variant font-medium text-[11px]">
+                    服务已接受
+                  </span>
+</div>
+</div>
+<!-- Event 2 -->
+<div class="p-3 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/15 flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface font-body-sm">PEPEUSDT</span>
+<span class="font-label-sm text-[11px] text-secondary">上沿触碰 0.0000192</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline">05-21 11:05 EST</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">系统入账</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-outline font-medium text-[11px]">
+                    未启用推送时触碰 · 历史只读
+                  </span>
+</div>
+</div>
+<!-- Event 3 -->
+<div class="p-3 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/15 flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface font-body-sm">SUIUSDT</span>
+<span class="font-label-sm text-[11px] text-tertiary">触达下沿 2.8513</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline">05-21 08:41 EST</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">回执: Telegram Webhook</span>
+<span class="px-2 py-0.5 rounded bg-secondary-fixed/30 text-on-secondary-fixed-variant font-medium text-[11px]">
+                    服务已接受
+                  </span>
+</div>
+</div>
+<!-- Event 4 -->
+<div class="p-3 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/15 flex flex-col gap-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="font-semibold text-on-surface font-body-sm">TIAUSDT</span>
+<span class="font-label-sm text-[11px] text-tertiary">下沿下探 4.120</span>
+</div>
+<span class="font-label-sm text-[10px] text-outline">05-20 22:18 EST</span>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-outline">通道重连中</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-fixed/40 text-on-tertiary-fixed font-medium text-[11px]">
+                    待发送重试 1/3
+                  </span>
+</div>
+</div>
+</div>
+</div>
+<!-- CARD 3: 容灾与业务口径说明 (Discipline & Edge Cases Note) -->
+<div class="glass-card rounded-2xl p-space-lg text-on-surface-variant">
+<div class="flex items-center gap-2 mb-2.5">
+<span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+<h4 class="font-headline-sm text-headline-sm font-semibold text-on-surface">业务与监控口径准则</h4>
+</div>
+<ol class="space-y-2 font-body-sm text-body-sm text-outline list-decimal list-inside leading-relaxed">
+<li><strong class="text-on-surface font-medium">交易所源：</strong>仅接入 OKX USDT 永续合约实时行情。</li>
+<li><strong class="text-on-surface font-medium">基准定界：</strong>纽约时间自然周一 00:00 - 23:59 完整日线作为定界基准。</li>
+<li><strong class="text-on-surface font-medium">未收盘处理：</strong>周一未收盘前显示预估基准；若周一数据缺失则标为待生成。</li>
+<li><strong class="text-on-surface font-medium">去噪机制：</strong>本周内同标的同方向仅记录首次触及，避免频繁骚扰。只读研投监控，不具备开仓交易功能。</li>
+</ol>
+</div>
+</aside>
+</div>
+</main>
+<!-- FOOTER CITATION -->
+<footer class="w-full max-w-[1536px] mx-auto px-4 md:px-margin-desktop py-space-lg text-center font-body-sm text-outline border-t border-outline-variant/15 mt-space-xl">
+<div class="flex flex-col md:flex-row items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="font-semibold text-on-surface">Spike Terminal v4.12.0</span>
+<span>·</span>
+<span>Institutional Light Alpha Engine</span>
+</div>
+<div>
+<span>数据时间戳同步于 2025-05-21 15:40:02 EDT</span>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

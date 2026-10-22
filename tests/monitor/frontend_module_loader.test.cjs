@@ -37,3 +37,8 @@ test('all dependency downloads are preloaded before the first stylesheet resolve
  assert.equal(c.calls.filter(x=>x.includes('.js')).length,0);
  await pending;assert.equal(c.calls.filter(x=>x.includes('.js')).length,5);
 });
+
+test('Monday Fib loads its own glass stylesheet and controller only',async()=>{
+ const c=harness();await c.api.ensure('monday-fib');
+ assert.deepEqual(c.calls,['/static/monday-fib.css','/static/monday-fib.js']);
+});
