@@ -14,6 +14,20 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-range-v237-twoyear-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: fa60c27870
+    status: rejected
+    question: What are two-year BTC and ETH V2.37 five-minute and fifteen-minute frame win rates, favorable-then-stop counts, and time-of-day/weekday distributions?
+    single_variable: Freeze current V2.37 reference contract; compare entry at causal publication close using the same structural stop formula. No Pine or exit-parameter changes.
+    result: Two-year reference net win rates BTC5m8.3716percent/15m13.3803percent,ETH5m5.7173percent/15m12.0482percent; natural-exit netR -2636.5748/-579.7812/-1154.7448/-176.6231. Confirmation-close comparison net win rates13.7041/13.6620/10.3950/12.2892percent;netR -1467.8617/-514.8930/-604.6437/-168.2500. All cohorts and each chronological year remain netnegative. Profitability not established.
+    artifacts: [range-v237-twoyear-20261022]
+    canonical_report: experiments/active/exp-range-v237-twoyear-20261022-v1/summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Original±5five-minute candle-open pairing;15m retainsH1qualification. Reference late publications explicitly retrospective;causal comparison recomputes entry and5bar+0.05percent stop at publication. Same5R/4ATR15m andarmedH1exit,20bp costs. Boundarymarks excluded from closed winrate. Matchedrandom controls,Shanghai fixed2hour/weekdaygroups andfirst/later-year descriptivecheck. Continuous216411bars each includingwarmup,no downloads;12552uniqueNautiluspositions/25104fills match independentexistingoracle.22focusedtests and6publicationprefixchecks pass. No Pine changes;no new weekday/key/sweepfilters. Time-group winners are descriptive selections,not qualified trading rules.
   - experiment_id: exp-range-v236-recent2m-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 1397ca7c59
