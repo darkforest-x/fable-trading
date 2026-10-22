@@ -1,0 +1,32 @@
+{
+  "source_experiment": "exp-btc-monday-fib-confirm-20261022-v3",
+  "previous_inputs": [
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v3/entries.csv",
+      "bytes": 78022,
+      "mtime_ns": 1792668250774104324
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v3/controls.csv",
+      "bytes": 575409,
+      "mtime_ns": 1792668250785382138
+    },
+    {
+      "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v3/decisions.csv",
+      "bytes": 89648,
+      "mtime_ns": 1792668250788203613
+    }
+  ],
+  "frozen_signals": 80,
+  "frozen_controls": 800,
+  "admission_checks": {
+    "weeks": 105,
+    "weekly_sides": 210,
+    "touched": 90,
+    "body_checks": 80,
+    "arrow_required": false,
+    "elapsed_wait_timeout": false,
+    "fee_geometry_filter": true
+  },
+  "change": "Owner removes all arrow/check-cross requirements after confirming insufficient-fee-room entries must be skipped. Prior no-timeout entry set preserved separately; native policy remains four25percent TP legs and immediate costBE on anyTP."
+}

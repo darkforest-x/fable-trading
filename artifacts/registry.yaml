@@ -18,6 +18,66 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-monday-fib-body-20261022-v5
+    artifact_type: manifest
+    role: Does pre-entry2percent adverse invalidation improve body-only Monday1618 reversal?
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08ddb03f33
+    generator_commit: 08ddb03f33
+    source_path: experiments/active/exp-btc-monday-fib-body-20261022-v5/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-body-20261022-v5/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Final owner scope has no arrow or elapsed observation/holding timer.15m full innerbody,SL.7percent,four25percent TP,immediate feeBE on anyTP,20bp explicitfee.13of90setups invalidated,only6previous trades removed;74retained and13firstviolations audited beforeentry.3256native legs6512fills projected from unchanged v4;740controls814cashchecks115tests. No production/model/Pine/accountchanges. Notion4018856479af810ebdf5db9c763fdd01.
+  - artifact_id: btc-monday-fib-body-20261022-v4
+    artifact_type: manifest
+    role: Does body-only confirmation without arrows or timers improve Monday1618 reversal?
+    source_repo: darkforest-x/fable-trading
+    source_commit: b593bfcb9c
+    generator_commit: b593bfcb9c
+    source_path: experiments/active/exp-btc-monday-fib-body-20261022-v4/superseded_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-body-20261022-v4/superseded_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Full Nautilus1.231.0 replay3520positions7040fills; all native exits independently checked. Subsequent v5 reuses only unchanged positions and retained matched controls. No fee-space skips in final body-only admission;1lastweekcensored.
+  - artifact_id: btc-monday-fib-confirm-20261022-v3
+    artifact_type: manifest
+    role: What changes when285minute observation expiry is removed from arrow-plus-body entries?
+    source_repo: darkforest-x/fable-trading
+    source_commit: a527ef9bd4
+    generator_commit: a527ef9bd4
+    source_path: experiments/active/exp-btc-monday-fib-confirm-20261022-v3/superseded_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-confirm-20261022-v3/superseded_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Inconclusive because owner superseded this scope before a complete execution audit. Partial uncontested raw native output preserved,not accepted PnL evidence; no final win rate reported.223priorentries unchanged plus73new,4lastweekstatuses corrected to censored without any input-trade change. Finalbodyv4/v5 replaces this scope.
+  - artifact_id: btc-monday-fib-confirm-20261022-v2
+    artifact_type: manifest
+    role: Does immediate TP-triggered cost protection improve the confirmed Monday reversal?
+    source_repo: darkforest-x/fable-trading
+    source_commit: 74fcc38b99
+    generator_commit: 74fcc38b99
+    source_path: experiments/active/exp-btc-monday-fib-confirm-20261022-v2/delivery_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-confirm-20261022-v2/delivery_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Superseded285minute and arrow scope,not finalstrategy. Completed0timer group9812native legs19624fills,2453cashchecks157forming-candlechecks; timedoutputs retained but withdrawn and excluded. Every loss failed to reachTP1; TPBE changes only profitable runners.
+  - artifact_id: btc-monday-fib-confirm-20261022-v1
+    artifact_type: manifest
+    role: Test independent intrabar arrow/body latches and four-tranche timed protection.
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4802465e13
+    generator_commit: 4802465e13
+    source_path: experiments/active/exp-btc-monday-fib-confirm-20261022-v1/superseded_receipt.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-confirm-20261022-v1/superseded_receipt.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Inconclusive as full proposed grid was superseded and interrupted by owner corrections. Completed native results are explicitly older rule evidence; do not label them final strategy.30m/1h forming arrows sampled everyminute,not true tickflicker. Old input and result artifacts preserved; no model eligibility.
   - artifact_id: btc-monday-fib1618-okx-20261022
     artifact_type: manifest
     role: Screenshot-matched Monday1618 first-touch winrate and original loss-path plus wider-stop evidence

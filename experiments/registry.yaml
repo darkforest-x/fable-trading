@@ -14,6 +14,81 @@
 schema_version: 1
 
 experiments:
+  - experiment_id: exp-btc-monday-fib-body-20261022-v5
+    source_repo: darkforest-x/fable-trading
+    source_commit: 08ddb03f33
+    status: rejected
+    question: Does pre-entry2percent adverse invalidation improve body-only Monday1618 reversal?
+    single_variable: Only add owner-approved adverse wick filter to v4; retained native entries and exits unchanged.
+    result: 74closed12wins62losses16.22percent,-43.451R,mean-41.106bp;random15percent,-39.865bp,pairedp.539. Beforefilter80trades13wins16.25percent,-45.459R,mean-39.780bp. Removed5losses1win,total-2.008R; lower total loss but worse per-trade expectancy.
+    artifacts:
+    - btc-monday-fib-body-20261022-v5
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v5/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Final owner scope has no arrow or elapsed observation/holding timer.15m full innerbody,SL.7percent,four25percent TP,immediate feeBE on anyTP,20bp explicitfee.13of90setups invalidated,only6previous trades removed;74retained and13firstviolations audited beforeentry.3256native legs6512fills projected from unchanged v4;740controls814cashchecks115tests. No production/model/Pine/accountchanges. Notion4018856479af810ebdf5db9c763fdd01.
+  - experiment_id: exp-btc-monday-fib-body-20261022-v4
+    source_repo: darkforest-x/fable-trading
+    source_commit: b593bfcb9c
+    status: rejected
+    question: Does body-only confirmation without arrows or timers improve Monday1618 reversal?
+    single_variable: Owner removes arrow prerequisite; existing15m body and four TP plus immediate costBE remain.
+    result: 80closed13wins16.25percent,-45.459R,mean-39.780bp. Completed baseline retained for v5 causal2percent filter.
+    artifacts:
+    - btc-monday-fib-body-20261022-v4
+    canonical_report: experiments/active/exp-btc-monday-fib-body-20261022-v4/superseded_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Full Nautilus1.231.0 replay3520positions7040fills; all native exits independently checked. Subsequent v5 reuses only unchanged positions and retained matched controls. No fee-space skips in final body-only admission;1lastweekcensored.
+  - experiment_id: exp-btc-monday-fib-confirm-20261022-v3
+    source_repo: darkforest-x/fable-trading
+    source_commit: a527ef9bd4
+    status: inconclusive
+    question: What changes when285minute observation expiry is removed from arrow-plus-body entries?
+    single_variable: Remove elapsed observation deadline; retain original nextMonday reset and no timedholding rule.
+    result: Entry counts15m78,30m75,60m64,any79. Five grouped signal entries have TP1space below20bpfees; owner authorized skipping them then removed arrows entirely before completion.
+    artifacts:
+    - btc-monday-fib-confirm-20261022-v3
+    canonical_report: experiments/active/exp-btc-monday-fib-confirm-20261022-v3/superseded_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Inconclusive because owner superseded this scope before a complete execution audit. Partial uncontested raw native output preserved,not accepted PnL evidence; no final win rate reported.223priorentries unchanged plus73new,4lastweekstatuses corrected to censored without any input-trade change. Finalbodyv4/v5 replaces this scope.
+  - experiment_id: exp-btc-monday-fib-confirm-20261022-v2
+    source_repo: darkforest-x/fable-trading
+    source_commit: 74fcc38b99
+    status: rejected
+    question: Does immediate TP-triggered cost protection improve the confirmed Monday reversal?
+    single_variable: Add immediate same-parent TP protection versus v1; owner subsequently removes timedn from active comparisons.
+    result: Any-period66closed8wins58losses12.12percent,-52.487R,mean-55.672bp;random13.03percent,-46.399bp,p.774. Originalv1sameentries-53.773R,win countunchanged.
+    artifacts:
+    - btc-monday-fib-confirm-20261022-v2
+    canonical_report: experiments/active/exp-btc-monday-fib-confirm-20261022-v2/delivery_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Superseded285minute and arrow scope,not finalstrategy. Completed0timer group9812native legs19624fills,2453cashchecks157forming-candlechecks; timedoutputs retained but withdrawn and excluded. Every loss failed to reachTP1; TPBE changes only profitable runners.
+  - experiment_id: exp-btc-monday-fib-confirm-20261022-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 4802465e13
+    status: inconclusive
+    question: Test independent intrabar arrow/body latches and four-tranche timed protection.
+    single_variable: Owner-authorized confirmation/exit research before immediate TP protection correction.
+    result: Completed no-timerany66trades8wins12.12percent,-53.773R; additional completed timedarms retained. Missing TP-triggered protection corrected in v2.
+    artifacts:
+    - btc-monday-fib-confirm-20261022-v1
+    canonical_report: experiments/active/exp-btc-monday-fib-confirm-20261022-v1/superseded_receipt.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: Inconclusive as full proposed grid was superseded and interrupted by owner corrections. Completed native results are explicitly older rule evidence; do not label them final strategy.30m/1h forming arrows sampled everyminute,not true tickflicker. Old input and result artifacts preserved; no model eligibility.
   - experiment_id: exp-btc-monday-fib1618-okx-20261022-v1
     source_repo: darkforest-x/fable-trading
     source_commit: abdf76e830

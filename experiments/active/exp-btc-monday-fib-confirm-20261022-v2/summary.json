@@ -1,0 +1,1005 @@
+{
+  "config": {
+    "experiment_id": "exp-btc-monday-fib-confirm-20261022-v2",
+    "symbol": "BTCUSDT",
+    "venue": "OKX USDT perpetual",
+    "timezone": "America/New_York",
+    "start": "2024-10-22T00:00:00+08:00",
+    "split": "2025-10-22T00:00:00+08:00",
+    "end": "2026-10-22T00:00:00+08:00",
+    "warmup": "2024-10-01T00:00:00Z",
+    "tick": 0.1,
+    "stop_fraction": 0.007,
+    "round_trip_cost": 0.002,
+    "seed": 20261022,
+    "controls_per_signal": 10,
+    "volatility_edges": [
+      0.001,
+      0.002,
+      0.004,
+      0.008,
+      0.016
+    ],
+    "inference": "Week-cluster sign permutation; four fixed confirmation arms, descriptive chronological halves, no fitted parameter selection.",
+    "not_applicable": "No fitted model or score; AUC, top-decile ranking and single-feature model baselines do not apply. Matched random entry is the null comparator.",
+    "limitations": "One-minute sampled intrabar signals and OHLC execution; independent reverse-order payoff sensitivity. No subminute tick sequence, slippage, funding, spread, queue, capacity or funded-account return claims.",
+    "training_eligible": false,
+    "production_eligible": false,
+    "venue_evidence": "Owner screenshot Monday H83149.8/L81166 exactly matches existing OKX2026-10-19 NY data; Binance H83157.9/L81146.4 differs. Preserve initial Binance experiment as explicit venue comparison.",
+    "wait_minutes": 285,
+    "be_minutes": [
+      0
+    ],
+    "entry": "First touch per NY week/side, observed minute close. Independent post-touch latches: first forming15/30/60m Fanshen appearance and first completed15m body strictly inside1618. Either order, both within285minutes and weekly expiry. Arrow latch survives disappearance. Enter at first minute close both known. Any arm uses earliest arrow from any of3. Invalid target geometry is skipped; no rearm.",
+    "exit": "Four original25percent tranches; actual-entry0.7percent initial SL. Any native TP immediately protects same-parent remaining tranches at cost-inclusive entry. No holding-time trigger or holding-time expiry; observation expiry before entry remains285minutes.",
+    "resolution": "1m minute-close sampling of forming higher candles. No subminute flashes or tick-order claims. Touch timestamp is touch-minute close; compare deadline1minute earlier.",
+    "selection": "Disabled: owner withdrew n; only mandatory TP-triggered protection is evaluated.",
+    "controls": "10 random minute closes per confirmed signal, same coin/side/NYweek/entry half/causal15mATR bucket. Targets relative to random entry, identicalSL/BE/cost. No confirmation requirement on background random entries.",
+    "targets": "Owner replaces previous80/20 exits before execution. Short lower0.618 and lower0.705, long mirrors.",
+    "target_breakeven": true,
+    "prior_experiment": "exp-btc-monday-fib-confirm-20261022-v1"
+  },
+  "scope": {
+    "owner_correction": "先不需要关注 n 了，不用这个持仓时间来作为失效条件",
+    "active_delays": [
+      0
+    ],
+    "zero_meaning": "No timed management. Any TP still immediately moves remaining tranches to fee-inclusive breakeven.",
+    "entry_observation_expiry_minutes": 285,
+    "holding_expiry": null,
+    "fee": 0.002,
+    "fee_authority": "Explicit session instruction: 沿用以前的往返0.2%，所有对照统一计费",
+    "timed_outputs": "Interrupted on owner request; completed artifacts retained as inactive historical exploration and excluded from final comparisons and selection."
+  },
+  "admission": {
+    "source_experiment": "exp-btc-monday-fib-confirm-20261022-v1",
+    "copied_inputs": [
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v1/entries.csv",
+        "bytes": 58871,
+        "mtime_ns": 1792665916322470158
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v1/controls.csv",
+        "bytes": 433390,
+        "mtime_ns": 1792665918639654650
+      },
+      {
+        "path": "/Users/zhangzc/fable-trading/experiments/active/exp-btc-monday-fib-confirm-20261022-v1/decisions.csv",
+        "bytes": 81394,
+        "mtime_ns": 1792665916325300091
+      }
+    ],
+    "frozen_signals": 223,
+    "frozen_controls": 2230,
+    "change": "Every native target fill synchronously protects remaining same-parent tranches; optional timer remains independent."
+  },
+  "comparisons": [
+    {
+      "arm": "15m",
+      "delay": 0,
+      "segment": -1,
+      "signal": {
+        "n": 58,
+        "closed": 58,
+        "open": 0,
+        "wins": 8,
+        "losses": 50,
+        "breakeven": 0,
+        "win_pct": 13.793103448275861,
+        "nonloss_pct": 13.793103448275861,
+        "net_r": -39.74778472895713,
+        "mean_bp": -47.97484160225585,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 3,
+        "be_active": 8,
+        "reverse_net_r": -39.74778472895703,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 580,
+        "closed": 580,
+        "open": 0,
+        "wins": 74,
+        "losses": 506,
+        "breakeven": 0,
+        "win_pct": 12.758620689655173,
+        "nonloss_pct": 12.758620689655173,
+        "net_r": -382.18060997004676,
+        "mean_bp": -46.129504528968226,
+        "tp1": 74,
+        "tp2": 63,
+        "tp3": 57,
+        "tp4": 45,
+        "be_exit": 29,
+        "be_active": 74,
+        "reverse_net_r": -382.18060997004693,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 53,
+        "excess_r": -1.5297237319524521,
+        "p_one_sided": 0.5561721913904305,
+        "weekly_bootstrap_total_r_95ci": [
+          -23.704014688752117,
+          21.09881516793509
+        ]
+      }
+    },
+    {
+      "arm": "15m",
+      "delay": 0,
+      "segment": 0,
+      "signal": {
+        "n": 30,
+        "closed": 30,
+        "open": 0,
+        "wins": 3,
+        "losses": 27,
+        "breakeven": 0,
+        "win_pct": 10.0,
+        "nonloss_pct": 10.0,
+        "net_r": -23.093124143047568,
+        "mean_bp": -53.887578114767145,
+        "tp1": 3,
+        "tp2": 3,
+        "tp3": 3,
+        "tp4": 3,
+        "be_exit": 0,
+        "be_active": 3,
+        "reverse_net_r": -23.093124143047532,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 300,
+        "closed": 300,
+        "open": 0,
+        "wins": 38,
+        "losses": 262,
+        "breakeven": 0,
+        "win_pct": 12.666666666666668,
+        "nonloss_pct": 12.666666666666668,
+        "net_r": -195.89367650569625,
+        "mean_bp": -45.71201405966648,
+        "tp1": 38,
+        "tp2": 31,
+        "tp3": 28,
+        "tp4": 24,
+        "be_exit": 14,
+        "be_active": 38,
+        "reverse_net_r": -195.8936765056962,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 27,
+        "excess_r": -3.503756492477944,
+        "p_one_sided": 0.7187140642967852,
+        "weekly_bootstrap_total_r_95ci": [
+          -14.31067648300116,
+          7.9355374190191945
+        ]
+      }
+    },
+    {
+      "arm": "15m",
+      "delay": 0,
+      "segment": 1,
+      "signal": {
+        "n": 28,
+        "closed": 28,
+        "open": 0,
+        "wins": 5,
+        "losses": 23,
+        "breakeven": 0,
+        "win_pct": 17.857142857142858,
+        "nonloss_pct": 17.857142857142858,
+        "net_r": -16.654660585909557,
+        "mean_bp": -41.6397667674223,
+        "tp1": 5,
+        "tp2": 5,
+        "tp3": 4,
+        "tp4": 2,
+        "be_exit": 3,
+        "be_active": 5,
+        "reverse_net_r": -16.654660585909493,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 280,
+        "closed": 280,
+        "open": 0,
+        "wins": 36,
+        "losses": 244,
+        "breakeven": 0,
+        "win_pct": 12.857142857142856,
+        "nonloss_pct": 12.857142857142856,
+        "net_r": -186.28693346435048,
+        "mean_bp": -46.57681574607725,
+        "tp1": 36,
+        "tp2": 32,
+        "tp3": 29,
+        "tp4": 21,
+        "be_exit": 15,
+        "be_active": 36,
+        "reverse_net_r": -186.2869334643507,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 26,
+        "excess_r": 1.974032760525489,
+        "p_one_sided": 0.42412879356032196,
+        "weekly_bootstrap_total_r_95ci": [
+          -17.648433520583843,
+          21.55836936939855
+        ]
+      }
+    },
+    {
+      "arm": "30m",
+      "delay": 0,
+      "segment": -1,
+      "signal": {
+        "n": 49,
+        "closed": 49,
+        "open": 0,
+        "wins": 6,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 12.244897959183673,
+        "nonloss_pct": 12.244897959183673,
+        "net_r": -32.77827214507664,
+        "mean_bp": -46.82985249341682,
+        "tp1": 6,
+        "tp2": 6,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 1,
+        "be_active": 6,
+        "reverse_net_r": -32.77827214507666,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 490,
+        "closed": 490,
+        "open": 0,
+        "wins": 79,
+        "losses": 411,
+        "breakeven": 0,
+        "win_pct": 16.122448979591837,
+        "nonloss_pct": 16.122448979591837,
+        "net_r": -253.35229362481755,
+        "mean_bp": -36.19580072948511,
+        "tp1": 79,
+        "tp2": 62,
+        "tp3": 57,
+        "tp4": 47,
+        "be_exit": 32,
+        "be_active": 79,
+        "reverse_net_r": -253.35229362481766,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 45,
+        "excess_r": -7.443042782594892,
+        "p_one_sided": 0.7582620868956552,
+        "weekly_bootstrap_total_r_95ci": [
+          -27.366729105223268,
+          12.944234510518594
+        ]
+      }
+    },
+    {
+      "arm": "30m",
+      "delay": 0,
+      "segment": 0,
+      "signal": {
+        "n": 26,
+        "closed": 26,
+        "open": 0,
+        "wins": 3,
+        "losses": 23,
+        "breakeven": 0,
+        "win_pct": 11.538461538461538,
+        "nonloss_pct": 11.538461538461538,
+        "net_r": -17.672152214557503,
+        "mean_bp": -47.581313716957574,
+        "tp1": 3,
+        "tp2": 3,
+        "tp3": 3,
+        "tp4": 3,
+        "be_exit": 0,
+        "be_active": 3,
+        "reverse_net_r": -17.67215221455753,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 260,
+        "closed": 260,
+        "open": 0,
+        "wins": 46,
+        "losses": 214,
+        "breakeven": 0,
+        "win_pct": 17.692307692307693,
+        "nonloss_pct": 17.692307692307693,
+        "net_r": -142.5645978324408,
+        "mean_bp": -38.385316347811134,
+        "tp1": 46,
+        "tp2": 38,
+        "tp3": 34,
+        "tp4": 27,
+        "be_exit": 19,
+        "be_active": 46,
+        "reverse_net_r": -142.56459783244065,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 23,
+        "excess_r": -3.4156924313134254,
+        "p_one_sided": 0.76081195940203,
+        "weekly_bootstrap_total_r_95ci": [
+          -11.055675296830614,
+          5.965802296977587
+        ]
+      }
+    },
+    {
+      "arm": "30m",
+      "delay": 0,
+      "segment": 1,
+      "signal": {
+        "n": 23,
+        "closed": 23,
+        "open": 0,
+        "wins": 3,
+        "losses": 20,
+        "breakeven": 0,
+        "win_pct": 13.043478260869565,
+        "nonloss_pct": 13.043478260869565,
+        "net_r": -15.106119930519144,
+        "mean_bp": -45.980374588544684,
+        "tp1": 3,
+        "tp2": 3,
+        "tp3": 3,
+        "tp4": 2,
+        "be_exit": 1,
+        "be_active": 3,
+        "reverse_net_r": -15.106119930519132,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 230,
+        "closed": 230,
+        "open": 0,
+        "wins": 33,
+        "losses": 197,
+        "breakeven": 0,
+        "win_pct": 14.347826086956522,
+        "nonloss_pct": 14.347826086956522,
+        "net_r": -110.78769579237678,
+        "mean_bp": -33.72069611746437,
+        "tp1": 33,
+        "tp2": 24,
+        "tp3": 23,
+        "tp4": 20,
+        "be_exit": 13,
+        "be_active": 33,
+        "reverse_net_r": -110.78769579237701,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 22,
+        "excess_r": -4.0273503512814655,
+        "p_one_sided": 0.6614669266536674,
+        "weekly_bootstrap_total_r_95ci": [
+          -22.46438150457282,
+          15.486315096287921
+        ]
+      }
+    },
+    {
+      "arm": "60m",
+      "delay": 0,
+      "segment": -1,
+      "signal": {
+        "n": 50,
+        "closed": 50,
+        "open": 0,
+        "wins": 7,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 14.000000000000002,
+        "nonloss_pct": 14.000000000000002,
+        "net_r": -30.45872325351612,
+        "mean_bp": -42.647536509342174,
+        "tp1": 7,
+        "tp2": 7,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 2,
+        "be_active": 7,
+        "reverse_net_r": -30.458723253516013,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 500,
+        "closed": 500,
+        "open": 0,
+        "wins": 60,
+        "losses": 440,
+        "breakeven": 0,
+        "win_pct": 12.0,
+        "nonloss_pct": 12.0,
+        "net_r": -356.6685683591655,
+        "mean_bp": -49.93768302194646,
+        "tp1": 60,
+        "tp2": 47,
+        "tp3": 46,
+        "tp4": 41,
+        "be_exit": 19,
+        "be_active": 60,
+        "reverse_net_r": -356.6685683591659,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 48,
+        "excess_r": 5.208133582400422,
+        "p_one_sided": 0.32128393580320985,
+        "weekly_bootstrap_total_r_95ci": [
+          -15.074754316248978,
+          27.61392316910384
+        ]
+      }
+    },
+    {
+      "arm": "60m",
+      "delay": 0,
+      "segment": 0,
+      "signal": {
+        "n": 22,
+        "closed": 22,
+        "open": 0,
+        "wins": 1,
+        "losses": 21,
+        "breakeven": 0,
+        "win_pct": 4.545454545454546,
+        "nonloss_pct": 4.545454545454546,
+        "net_r": -23.2000062163975,
+        "mean_bp": -73.82436602882355,
+        "tp1": 1,
+        "tp2": 1,
+        "tp3": 1,
+        "tp4": 1,
+        "be_exit": 0,
+        "be_active": 1,
+        "reverse_net_r": -23.200006216397476,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 220,
+        "closed": 220,
+        "open": 0,
+        "wins": 21,
+        "losses": 199,
+        "breakeven": 0,
+        "win_pct": 9.545454545454547,
+        "nonloss_pct": 9.545454545454547,
+        "net_r": -189.4145340338484,
+        "mean_bp": -60.27239847661354,
+        "tp1": 21,
+        "tp2": 17,
+        "tp3": 16,
+        "tp4": 12,
+        "be_exit": 9,
+        "be_active": 21,
+        "reverse_net_r": -189.41453403384816,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 21,
+        "excess_r": -4.258552813012662,
+        "p_one_sided": 0.7412629368531574,
+        "weekly_bootstrap_total_r_95ci": [
+          -15.112872102281928,
+          5.294265360078537
+        ]
+      }
+    },
+    {
+      "arm": "60m",
+      "delay": 0,
+      "segment": 1,
+      "signal": {
+        "n": 28,
+        "closed": 28,
+        "open": 0,
+        "wins": 6,
+        "losses": 22,
+        "breakeven": 0,
+        "win_pct": 21.428571428571427,
+        "nonloss_pct": 21.428571428571427,
+        "net_r": -7.258717037118624,
+        "mean_bp": -18.151456172606785,
+        "tp1": 6,
+        "tp2": 6,
+        "tp3": 5,
+        "tp4": 4,
+        "be_exit": 2,
+        "be_active": 6,
+        "reverse_net_r": -7.258717037118532,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 280,
+        "closed": 280,
+        "open": 0,
+        "wins": 39,
+        "losses": 241,
+        "breakeven": 0,
+        "win_pct": 13.928571428571429,
+        "nonloss_pct": 13.928571428571429,
+        "net_r": -167.2540343253171,
+        "mean_bp": -41.81754945042233,
+        "tp1": 39,
+        "tp2": 30,
+        "tp3": 30,
+        "tp4": 29,
+        "be_exit": 10,
+        "be_active": 39,
+        "reverse_net_r": -167.25403432531766,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 27,
+        "excess_r": 9.466686395413088,
+        "p_one_sided": 0.1630918454077296,
+        "weekly_bootstrap_total_r_95ci": [
+          -7.691649554376926,
+          29.273850734518664
+        ]
+      }
+    },
+    {
+      "arm": "any",
+      "delay": 0,
+      "segment": -1,
+      "signal": {
+        "n": 66,
+        "closed": 66,
+        "open": 0,
+        "wins": 8,
+        "losses": 58,
+        "breakeven": 0,
+        "win_pct": 12.121212121212121,
+        "nonloss_pct": 12.121212121212121,
+        "net_r": -52.48697244513342,
+        "mean_bp": -55.672169486773804,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 3,
+        "be_active": 8,
+        "reverse_net_r": -52.48697244513321,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 660,
+        "closed": 660,
+        "open": 0,
+        "wins": 86,
+        "losses": 574,
+        "breakeven": 0,
+        "win_pct": 13.030303030303031,
+        "nonloss_pct": 13.030303030303031,
+        "net_r": -437.44271346513375,
+        "mean_bp": -46.399105199535185,
+        "tp1": 86,
+        "tp2": 75,
+        "tp3": 70,
+        "tp4": 59,
+        "be_exit": 27,
+        "be_active": 86,
+        "reverse_net_r": -437.4427134651337,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 61,
+        "excess_r": -8.742701098620048,
+        "p_one_sided": 0.7736113194340283,
+        "weekly_bootstrap_total_r_95ci": [
+          -30.294482626184525,
+          14.18894380644298
+        ]
+      }
+    },
+    {
+      "arm": "any",
+      "delay": 0,
+      "segment": 0,
+      "signal": {
+        "n": 32,
+        "closed": 32,
+        "open": 0,
+        "wins": 2,
+        "losses": 30,
+        "breakeven": 0,
+        "win_pct": 6.25,
+        "nonloss_pct": 6.25,
+        "net_r": -33.27358239652587,
+        "mean_bp": -72.7908281175759,
+        "tp1": 2,
+        "tp2": 2,
+        "tp3": 2,
+        "tp4": 2,
+        "be_exit": 0,
+        "be_active": 2,
+        "reverse_net_r": -33.273582396525825,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 320,
+        "closed": 320,
+        "open": 0,
+        "wins": 48,
+        "losses": 272,
+        "breakeven": 0,
+        "win_pct": 15.0,
+        "nonloss_pct": 15.0,
+        "net_r": -190.70599597092652,
+        "mean_bp": -41.719870401347166,
+        "tp1": 48,
+        "tp2": 44,
+        "tp3": 40,
+        "tp4": 35,
+        "be_exit": 13,
+        "be_active": 48,
+        "reverse_net_r": -190.70599597092644,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 29,
+        "excess_r": -14.202982799433215,
+        "p_one_sided": 0.9977001149942503,
+        "weekly_bootstrap_total_r_95ci": [
+          -24.648358348990126,
+          -4.878748910926678
+        ]
+      }
+    },
+    {
+      "arm": "any",
+      "delay": 0,
+      "segment": 1,
+      "signal": {
+        "n": 34,
+        "closed": 34,
+        "open": 0,
+        "wins": 6,
+        "losses": 28,
+        "breakeven": 0,
+        "win_pct": 17.647058823529413,
+        "nonloss_pct": 17.647058823529413,
+        "net_r": -19.21339004860755,
+        "mean_bp": -39.56049077543064,
+        "tp1": 6,
+        "tp2": 6,
+        "tp3": 5,
+        "tp4": 3,
+        "be_exit": 3,
+        "be_active": 6,
+        "reverse_net_r": -19.213390048607387,
+        "terminal_mark_r": 0.0
+      },
+      "random": {
+        "n": 340,
+        "closed": 340,
+        "open": 0,
+        "wins": 38,
+        "losses": 302,
+        "breakeven": 0,
+        "win_pct": 11.176470588235295,
+        "nonloss_pct": 11.176470588235295,
+        "net_r": -246.7367174942072,
+        "mean_bp": -50.80309089194744,
+        "tp1": 38,
+        "tp2": 31,
+        "tp3": 30,
+        "tp4": 24,
+        "be_exit": 14,
+        "be_active": 38,
+        "reverse_net_r": -246.73671749420726,
+        "terminal_mark_r": 0.0
+      },
+      "comparison": {
+        "weeks": 32,
+        "excess_r": 5.460281700813171,
+        "p_one_sided": 0.2953352332383381,
+        "weekly_bootstrap_total_r_95ci": [
+          -13.206989842301187,
+          24.620950554867132
+        ]
+      }
+    }
+  ],
+  "selections": [],
+  "native_audits": [
+    {
+      "delay": 0,
+      "engine": "nautilus_trader",
+      "version": "1.231.0",
+      "market_tick": 0.1,
+      "protection_tick": 0.1,
+      "research_quantity": "Whole units; round up to the partial fraction denominator when enabled. Returns normalized per original risk",
+      "partial_execution": "disabled",
+      "native_partial_accounting_checked": 0,
+      "fixed_target_execution": "resting limit; OHLC; independent limit-price book; native reduce-only sibling cleanup",
+      "native_fixed_target_accounting_checked": 9812,
+      "target_from_entry": true,
+      "target_breakeven": true,
+      "breakeven_includes_cost": true,
+      "breakeven_on_touch": false,
+      "intrabar_path": null,
+      "synthetic_segments_per_bar": 1,
+      "positions": 9812,
+      "fills": 19624,
+      "execution_minutes": 1,
+      "rsi_scaleout": "disabled",
+      "rsi_skip_events": 0,
+      "timed_be_minutes": null,
+      "confirmed_pivot_exit": false,
+      "structural_pivot_stop": false,
+      "structural_execution": "disabled",
+      "pivot_execution": "disabled",
+      "strict_pivot_ties": false,
+      "max_simultaneous_positions": 132,
+      "bars_with_both_directions": 52220,
+      "prepare_seconds": 1.5359861250035465,
+      "replay_seconds": 73.90741600000183,
+      "runtime_warnings": [
+        "Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead."
+      ],
+      "accounting": "independent original-risk R; frozen account; not portfolio returns",
+      "oracle_checked": 9812,
+      "same_endpoint_target_metadata": 4,
+      "reverse_payoff_changes": 0
+    }
+  ],
+  "baseline_audits": [],
+  "prior_rule_comparison": [
+    {
+      "arm": "15m",
+      "delay": 0,
+      "old": {
+        "n": 58,
+        "closed": 58,
+        "open": 0,
+        "wins": 8,
+        "losses": 50,
+        "breakeven": 0,
+        "win_pct": 13.793103448275861,
+        "nonloss_pct": 13.793103448275861,
+        "net_r": -41.03353497468385,
+        "mean_bp": -49.52671250712247,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 0,
+        "be_active": 0,
+        "reverse_net_r": -41.03353497468377,
+        "terminal_mark_r": 0.0
+      },
+      "new": {
+        "n": 58,
+        "closed": 58,
+        "open": 0,
+        "wins": 8,
+        "losses": 50,
+        "breakeven": 0,
+        "win_pct": 13.793103448275861,
+        "nonloss_pct": 13.793103448275861,
+        "net_r": -39.74778472895713,
+        "mean_bp": -47.97484160225585,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 3,
+        "be_active": 8,
+        "reverse_net_r": -39.74778472895703,
+        "terminal_mark_r": 0.0
+      },
+      "delta_r": 1.2857502457267334,
+      "transitions": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 50
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 8
+        }
+      ]
+    },
+    {
+      "arm": "30m",
+      "delay": 0,
+      "old": {
+        "n": 49,
+        "closed": 49,
+        "open": 0,
+        "wins": 6,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 12.244897959183673,
+        "nonloss_pct": 12.244897959183673,
+        "net_r": -33.09970717128304,
+        "mean_bp": -47.289120673780786,
+        "tp1": 6,
+        "tp2": 6,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 0,
+        "be_active": 0,
+        "reverse_net_r": -33.099707171283065,
+        "terminal_mark_r": 0.0
+      },
+      "new": {
+        "n": 49,
+        "closed": 49,
+        "open": 0,
+        "wins": 6,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 12.244897959183673,
+        "nonloss_pct": 12.244897959183673,
+        "net_r": -32.77827214507664,
+        "mean_bp": -46.82985249341682,
+        "tp1": 6,
+        "tp2": 6,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 1,
+        "be_active": 6,
+        "reverse_net_r": -32.77827214507666,
+        "terminal_mark_r": 0.0
+      },
+      "delta_r": 0.3214350262064021,
+      "transitions": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 43
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 6
+        }
+      ]
+    },
+    {
+      "arm": "60m",
+      "delay": 0,
+      "old": {
+        "n": 50,
+        "closed": 50,
+        "open": 0,
+        "wins": 7,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 14.000000000000002,
+        "nonloss_pct": 14.000000000000002,
+        "net_r": -31.4230449278143,
+        "mean_bp": -43.99768774018396,
+        "tp1": 7,
+        "tp2": 7,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 0,
+        "be_active": 0,
+        "reverse_net_r": -31.423044927814185,
+        "terminal_mark_r": 0.0
+      },
+      "new": {
+        "n": 50,
+        "closed": 50,
+        "open": 0,
+        "wins": 7,
+        "losses": 43,
+        "breakeven": 0,
+        "win_pct": 14.000000000000002,
+        "nonloss_pct": 14.000000000000002,
+        "net_r": -30.45872325351612,
+        "mean_bp": -42.647536509342174,
+        "tp1": 7,
+        "tp2": 7,
+        "tp3": 6,
+        "tp4": 5,
+        "be_exit": 2,
+        "be_active": 7,
+        "reverse_net_r": -30.458723253516013,
+        "terminal_mark_r": 0.0
+      },
+      "delta_r": 0.9643216742981808,
+      "transitions": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 43
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 7
+        }
+      ]
+    },
+    {
+      "arm": "any",
+      "delay": 0,
+      "old": {
+        "n": 66,
+        "closed": 66,
+        "open": 0,
+        "wins": 8,
+        "losses": 58,
+        "breakeven": 0,
+        "win_pct": 12.121212121212121,
+        "nonloss_pct": 12.121212121212121,
+        "net_r": -53.772722690860185,
+        "mean_bp": -57.03600051404752,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 0,
+        "be_active": 0,
+        "reverse_net_r": -53.77272269085994,
+        "terminal_mark_r": 0.0
+      },
+      "new": {
+        "n": 66,
+        "closed": 66,
+        "open": 0,
+        "wins": 8,
+        "losses": 58,
+        "breakeven": 0,
+        "win_pct": 12.121212121212121,
+        "nonloss_pct": 12.121212121212121,
+        "net_r": -52.48697244513342,
+        "mean_bp": -55.672169486773804,
+        "tp1": 8,
+        "tp2": 8,
+        "tp3": 7,
+        "tp4": 5,
+        "be_exit": 3,
+        "be_active": 8,
+        "reverse_net_r": -52.48697244513321,
+        "terminal_mark_r": 0.0
+      },
+      "delta_r": 1.2857502457267576,
+      "transitions": [
+        {
+          "old": "loss",
+          "new": "loss",
+          "n": 58
+        },
+        {
+          "old": "win",
+          "new": "win",
+          "n": 8
+        }
+      ]
+    }
+  ],
+  "source_commit": "74fcc38b99c10205e613cd4aa7a00ec03b1499f3",
+  "audit_version_note": "Only active scope is summarized. Completed timed arms are retained but excluded following owner instruction. Same-endpoint target-only metadata ordering is distinguished from exact stop/target prices,times,reasons.",
+  "training_eligible": false,
+  "production_eligible": false
+}
