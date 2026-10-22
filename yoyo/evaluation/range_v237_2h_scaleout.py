@@ -85,6 +85,21 @@ def conditional_rows(bars, base, path):
     return pd.DataFrame(out)
 
 
+def initial_stop_expectation(bars, base, tick):
+    """Audit stop/deadline against tick-equal prices, ignoring float tails."""
+    rows=[]
+    for r in base.itertuples():
+        path=bars[int(r.entry_i)+1:int(r.end_i)+1]
+        adverse=path[:,2 if r.side==1 else 1]
+        touched=np.flatnonzero(r.side*(adverse-r.stop)<=tick*1e-7)
+        i=int(r.entry_i)+1+int(touched[0]) if len(touched) else int(r.end_i)
+        if len(touched):
+            price=bars[i,0] if r.side*(bars[i,0]-r.stop)<=tick*1e-7 else r.stop
+        else:price=bars[i,3]
+        rows.append((i,price,1 if len(touched) else 0))
+    return np.asarray(rows)
+
+
 def load(symbol):
     cfg=json.loads(CONFIG.read_text());source=ROOT/cfg['source']
     old_cfg=json.loads((source/'config.json').read_text())
@@ -106,7 +121,6 @@ def load(symbol):
 def run_symbol(symbol):
     from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy,run_native
     from yoyo.evaluation.range_v237_fixed_exits import oracle
-    from yoyo.evaluation.btc_range_wick_review import excursions
     cfg,source,frame,base,occ,stamps=load(symbol)
     tick=next(s['tick'] for s in cfg['symbols'] if s['symbol']==symbol)
     folder=EXP/symbol;folder.mkdir(exist_ok=True)
@@ -118,10 +132,13 @@ def run_symbol(symbol):
         name='hold' if target is None else f'tp{target}_{path}'
         dest=folder/name;dest.mkdir(exist_ok=True)
         identity=dict(inputs=stamps,target=target,path=path,
-            code=[file_stamp(ROOT/p) for p in ['yoyo/evaluation/range_v237_2h_scaleout.py',
-                'yoyo/layers/l3_backtest/nautilus_independent.py']])
+            code=[file_stamp(ROOT/'yoyo/layers/l3_backtest/nautilus_independent.py')])
         if (dest/'receipt.json').exists():
-            saved=json.loads((dest/'receipt.json').read_text());assert saved['identity']==identity
+            saved=json.loads((dest/'receipt.json').read_text())
+            old_identity=saved['identity'].copy()
+            # An audit-only precision fix does not invalidate native fills.
+            old_identity['code']=[c for c in old_identity['code'] if c['path'].endswith('/nautilus_independent.py')]
+            assert old_identity==identity
             result=read(dest/'trades.csv.gz');check=saved['check']
         else:
             cached=pd.DataFrame();pending=base
@@ -133,8 +150,14 @@ def run_symbol(symbol):
                 pending=base[~base.pair_id.isin(cached.pair_id)]
             policy=ExitPolicy(target_from_entry=True,opposite_hour_exit=False,round_trip_cost=cfg['cost']) if target is None else ExitPolicy(
                 fixed_target_r=target,intrabar_path=path,opposite_hour_exit=False,round_trip_cost=cfg['cost'])
-            native,fills,audit=run_native(frame,zeros,zeros,pending,policy,tick=tick,symbol=symbol)
-            native.to_csv(dest/'new_native.csv.gz',index=False);fills.to_csv(dest/'fills.csv.gz',index=False)
+            if (dest/'new_native.csv.gz').exists() and (dest/'fills.csv.gz').exists():
+                # Resume saved framework output after downstream audit failure.
+                native=read(dest/'new_native.csv.gz');fills=read(dest/'fills.csv.gz')
+                assert set(native.pair_id)==set(pending.pair_id) and len(fills)==2*len(native)
+                audit=dict(recovered_saved_native_fills=True,positions=len(native),fills=len(fills))
+            else:
+                native,fills,audit=run_native(frame,zeros,zeros,pending,policy,tick=tick,symbol=symbol)
+                native.to_csv(dest/'new_native.csv.gz',index=False);fills.to_csv(dest/'fills.csv.gz',index=False)
             result=pd.concat([cached,native],ignore_index=True).sort_values('pair_id')
             ordered=base.sort_values('pair_id')
             np.testing.assert_array_equal(result.pair_id,ordered.pair_id)
@@ -145,18 +168,15 @@ def run_symbol(symbol):
                 np.testing.assert_array_equal(result.exit_i,expected[:,0]);np.testing.assert_array_equal(result.reason,expected[:,2])
                 np.testing.assert_allclose(result.exit_price,expected[:,1],atol=tick*1e-7,rtol=0)
             else:
-                ex=excursions(bars,ordered)
-                ix=np.where(ex.initial_stop_hit,ex.stop_i,ordered.end_i).astype(int)
-                opens=bars[ix,0];gap=ordered.side.to_numpy()*(opens-ordered.stop.to_numpy())<=0
-                prices=np.where(ex.initial_stop_hit,np.where(gap,opens,ordered.stop),bars[ix,3])
-                np.testing.assert_array_equal(result.exit_i,ix)
-                np.testing.assert_array_equal(result.reason,np.where(ex.initial_stop_hit,1,0))
-                np.testing.assert_allclose(result.exit_price,prices,atol=tick*1e-7,rtol=0)
+                expected=initial_stop_expectation(bars,ordered,tick)
+                np.testing.assert_array_equal(result.exit_i,expected[:,0])
+                np.testing.assert_array_equal(result.reason,expected[:,2])
+                np.testing.assert_allclose(result.exit_price,expected[:,1],atol=tick*1e-7,rtol=0)
             np.testing.assert_allclose(result.net_r,result.gross_r-cfg['cost']*result.entry/result.risk,atol=1e-7,rtol=0)
             assert (result.exit_i<=result.end_i).all() and (result.exit_i>result.entry_i).all()
             result.to_csv(dest/'trades.csv.gz',index=False)
             check=dict(name=name,total=len(result),cached=len(cached),new_native=len(native),fills=len(fills),native_audit=audit,oracle_parity=True)
-            dump(dest/'receipt.json',dict(identity=identity,check=check))
+            dump(dest/'receipt.json',dict(identity=identity,check=check,audit_code=file_stamp(__file__)))
         result['target']='hold' if target is None else f'tp{target}';result['path']=path
         pieces.append(result);checks.append(check)
         print(symbol,name,'cached',check['cached'],'new',check['new_native'],flush=True)

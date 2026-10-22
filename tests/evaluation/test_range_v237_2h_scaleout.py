@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from yoyo.evaluation.range_v237_2h_scaleout import conditional_rows, trajectory
+from yoyo.evaluation.range_v237_2h_scaleout import conditional_rows, trajectory, initial_stop_expectation
 
 
 def base(end=2, side=1):
@@ -67,3 +67,11 @@ def test_repeated_trigger_keeps_first_hit():
     bars=np.array([[100,200,1,100],[100,101.1,99.8,100.5],[100.5,101.5,99.7,101]],float)
     r=conditional_rows(bars,base(),'OHLC').iloc[0]
     assert r.hit_i==1 and r.minimum_r==pytest.approx(-.3)
+
+
+def test_stop_audit_uses_exchange_tick_equality():
+    bars=np.array([[100,100,100,100],[100,101.1,99.5,100.5],[100.5,102,100,101]],float)
+    entries=base(side=-1).assign(stop=101.10000000001,risk=1.10000000001)
+    expected=initial_stop_expectation(bars,entries,.1)
+    assert expected[0,0]==1 and expected[0,2]==1
+    assert expected[0,1]==pytest.approx(101.1)
