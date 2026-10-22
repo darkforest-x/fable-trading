@@ -171,6 +171,8 @@ def chart_data():
     cfg = json.loads(CONFIG.read_text()); charts=[]
     for spec in cfg['symbols']:
         symbol=spec['symbol']; five=load(symbol); folder=EXP/symbol
+        from yoyo.evaluation.monday_range_v2_2_reference import atr
+        q=aggregate(five,15); a=atr(q)
         rows=pd.read_csv(folder/'signals.csv', float_precision='round_trip')
         trades=pd.read_csv(folder/'native/reference/trades.csv', float_precision='round_trip').set_index('pair_id')
         grid,names,weeks,developing=monday_levels(five,[0,.5,.618,.705,1.13,1.27,1.618],
@@ -190,8 +192,7 @@ def chart_data():
             levels=[dict(key=name,price=float(grid[i,j])) for j,name in enumerate(names) if np.isfinite(grid[i,j])]
             # Same completed15m close ratchet as the native/Pine engines, using
             # the framework's recorded first arm; prices are display-only.
-            from yoyo.evaluation.monday_range_v2_2_reference import atr
-            q=aggregate(five,15); a=atr(q); trail=[]; protection=r['stop']
+            trail=[]; protection=r['stop']
             if int(t['arm_i']) >= 0:
                 for at in q.index[(q.index>=five.index[int(t['arm_i'])])&(q.index<=exclose)]:
                     if at==exclose and int(t['reason']) in [1,2]:continue
