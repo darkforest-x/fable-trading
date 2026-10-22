@@ -18,6 +18,18 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: btc-monday-fib-body-v7-loss-sample10-20261022
+    artifact_type: manifest
+    role: Ten uniformly sampled actual closed losses, real15m/1m OHLC charts with entries stops and target ladder
+    source_repo: darkforest-x/fable-trading
+    source_commit: 7957a4cae492b4e38bbad537fe7b54cb6709dabe
+    generator_commit: 7957a4cae492b4e38bbad537fe7b54cb6709dabe
+    source_path: experiments/active/exp-btc-monday-fib-body-20261022-v7/loss_sample10_seed20261022/manifest.json
+    storage_uri: repo://experiments/active/exp-btc-monday-fib-body-20261022-v7/loss_sample10_seed20261022/manifest.json
+    holdout_status: historical
+    training_eligible: false
+    production_eligible: false
+    notes: Fixedseed20261022 without replacement from62closed signal losses. Ten PNG1920x1200, sixlong fourshort;40native initial-stop legs checked; all10body confirmations checked. TimeAsia/Shanghai; anchorsAmerica/New_York. Future post-stop context shaded. No strategy or fee changes; no contenthash.
   - artifact_id: btc-monday-fib-body-20261022-v7
     artifact_type: manifest
     role: Does pre-entry2percent invalidation improve body-confirmed Monday reversal under the latest zero-fee policy?
