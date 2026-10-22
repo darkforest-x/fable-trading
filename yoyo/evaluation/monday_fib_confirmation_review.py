@@ -86,7 +86,7 @@ def run():
     dump(EXP/'review.json',dict(parent_cash_reconciliations=reconciliations,
         no_post_split_development_outcomes=True,independent_partial_candle_checks=appearance_checks,
         admission=admission,transitions=transitions,cash_metrics=cash,holm48=ranked,
-        focused_and_layer_tests=106,
+        focused_and_layer_tests=107,
         broader_preflight=dict(passed=170,failed=16,skipped=12,
             explanation='Broad suite was accidentally run in isolated Nautilus runtime: missing training/render/YAML dependencies and different isolated numpy/pandas pins; existing docs/sibling-path failures also remain. No training environment, dependencies or unrelated files changed.'),
         initial_test_fixture_failure='Pandas3 refused assigning fractional prices into integer test fixture; explicit float fixture fixed before historical execution.',

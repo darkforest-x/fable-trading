@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import pytest
 from yoyo.layers.l3_backtest.nautilus_independent import ExitPolicy, run_native
-from yoyo.evaluation.monday_fib_confirmation import oracle
+from yoyo.evaluation.monday_fib_confirmation import oracle,check_oracle
 
 
 def replay(side=1, enabled=True, bars=None, delay=None, unrelated=False):
@@ -84,3 +84,13 @@ def test_opening_gap_crosses_two_targets(side):
     expected_targets=3 if side==1 else 2
     assert rows.reason.eq(4).sum()==expected_targets
     assert rows.reason.eq(5).sum()==4-expected_targets
+
+
+def test_same_endpoint_target_metadata_does_not_relax_stop_or_cash_checks():
+    assert check_oracle((20,102.,4,-1,-1),(20,102.,4,20,20),'target')
+    with pytest.raises(AssertionError):
+        check_oracle((20,100.2,5,-1,-1),(20,100.2,5,20,20),'stop')
+    with pytest.raises(AssertionError):
+        check_oracle((20,101.9,4,-1,-1),(20,102.,4,20,20),'wrong cash')
+    with pytest.raises(AssertionError):
+        check_oracle((20,102.,4,19,19),(20,102.,4,20,20),'earlier protection')

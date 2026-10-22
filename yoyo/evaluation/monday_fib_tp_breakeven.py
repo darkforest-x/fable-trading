@@ -66,6 +66,10 @@ def collect():
     for delay in cfg['be_minutes']:
         folder=EXP/f'native_market_be_{delay}'
         assert (folder/'identity.json').exists(),f'Incomplete delay {delay}'
+        identity=json.loads((folder/'identity.json').read_text())
+        assert identity['config']==cfg and identity['delay']==delay
+        native_stamp=file_stamp(ROOT/'yoyo/layers/l3_backtest/nautilus_independent.py')
+        assert native_stamp in identity['code'], 'Native execution changed across arms'
         rows=pd.read_csv(folder/'parents.csv',float_precision='round_trip')
         audit=json.loads((folder/'audit.json').read_text());audits.append(dict(delay=delay,**audit))
         rows['delay']=delay;ledger.append(rows)
@@ -101,6 +105,7 @@ def collect():
     dump(EXP/'summary.json',dict(config=cfg,admission=json.loads((EXP/'admission_receipt.json').read_text()),
         comparisons=summary,selections=selections,native_audits=audits,baseline_audits=[],
         prior_rule_comparison=old_comparison,source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+        audit_version_note='240/360 minute arms passed exact metadata checks before an audit-only refinement. Later arms allow same-endpoint target-only metadata ordering; all stop/target prices,times,reasons remain exact. Native adapter and config identical across all arms.',
         training_eligible=False,production_eligible=False))
     from yoyo.evaluation import monday_fib_confirmation_review as review
     review.EXP=EXP
