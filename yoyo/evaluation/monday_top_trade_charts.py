@@ -9,6 +9,7 @@ own price scales; levels outside those scales stay listed in the sidebar.
 from __future__ import annotations
 import json
 import textwrap
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib
@@ -222,13 +223,23 @@ def verify_prices(f,r):
 def render(ranks=None):
     selected=pd.read_csv(OUT/'selected.csv',float_precision='round_trip')
     if ranks:selected=selected[selected['rank'].isin(ranks)]
-    cfg=json.loads((old.EXP/'config.json').read_text());jobs=dict(old.jobs(cfg)[0])
+    cfg=json.loads((old.EXP/'config.json').read_text())
     manifest=[];inputs=[]
     previous=OUT/'charts-manifest.json'
     if previous.exists():manifest=json.loads(previous.read_text())
     rendered_ranks=set(selected['rank'].astype(int));manifest=[r for r in manifest if r['rank'] not in rendered_ranks]
     for symbol,g in selected.groupby('symbol',sort=True):
-        paths=jobs[symbol];inputs.extend(file_stamp(p) for p in paths)
+        # Frozen per-symbol identities avoid hundreds of missing-tail stat calls
+        # on the migrated drive, and preserve the exact backtest input set.
+        identity=json.loads((old.EXP/'symbols'/symbol/'identity.json').read_text())
+        paths=[]
+        for stamp in identity['inputs']:
+            name=Path(stamp['path']).name
+            original=(ROOT/cfg['crypto_root']/'series'/name if name.startswith('binance_um_')
+                      else ROOT/cfg['crypto_tail']/name)
+            current=file_stamp(original)
+            assert current['bytes']==stamp['bytes'] and current['mtime_ns']==stamp['mtime_ns'],(symbol,'changed source')
+            paths.append(str(original));inputs.append(current)
         f=volume.load(paths)
         f['ts']=f.index.as_unit('ms').asi8
         f=add_six_mas(f)
