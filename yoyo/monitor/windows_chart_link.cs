@@ -18,9 +18,10 @@ public sealed class SpikeChartRequest
     public static SpikeChartRequest Parse(string link, string layout)
     {
         // Reject encoded delimiters, duplicate fields, options and shell text.
-        // The browser emits this single canonical format, never a caller URL.
+        // Windows browsers can normalize an empty path to a single root slash.
+        // Accept both equivalent forms, never arbitrary paths or a caller URL.
         if (link == null || link.Length > 256) throw new ArgumentException();
-        Match match = Regex.Match(link, @"\Aspike-tradingview://open\?symbol=([A-Z0-9]{1,30})-(USDT|USDC|USD)-SWAP&timeframe=(5m|15m|30m|1H|4H|1Dutc)\z");
+        Match match = Regex.Match(link, @"\Aspike-tradingview://open/?\?symbol=([A-Z0-9]{1,30})-(USDT|USDC|USD)-SWAP&timeframe=(5m|15m|30m|1H|4H|1Dutc)\z");
         if (!match.Success) throw new ArgumentException();
         if (layout == null || !Regex.IsMatch(layout, @"\Ahttps://(cn\.|www\.)?tradingview\.com/chart/(?:[A-Za-z0-9]{1,64}/)?\z"))
             throw new ArgumentException();

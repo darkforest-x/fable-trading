@@ -20,13 +20,21 @@ $source = Join-Path $SourceRoot 'yoyo\monitor\windows_chart_link.cs'
 $bridge = Join-Path $SourceRoot 'yoyo\monitor\windows_tradingview.ps1'
 if (-not (Test-Path -LiteralPath $source) -or -not (Test-Path -LiteralPath $bridge)) { throw 'The chart link source bundle is incomplete.' }
 New-Item -ItemType Directory -Force -Path $chartLinkRoot | Out-Null
-$executable = Join-Path $chartLinkRoot 'SpikeChartLink.exe'
-$temporary = Join-Path $chartLinkRoot 'SpikeChartLink.build.exe'
+# Switch the registration only after a complete build. An older warning dialog
+# may still hold its executable open; updates must not replace or kill it.
+$release = (Get-FileHash -LiteralPath $source -Algorithm SHA256).Hash.Substring(0,12) + '-' + (Get-FileHash -LiteralPath $bridge -Algorithm SHA256).Hash.Substring(0,12)
+$releaseRoot = Join-Path $chartLinkRoot (Join-Path 'releases' $release)
+New-Item -ItemType Directory -Force -Path $releaseRoot | Out-Null
+$executable = Join-Path $releaseRoot 'SpikeChartLink.exe'
+$installedBridge = Join-Path $releaseRoot 'windows_tradingview.ps1'
+$temporary = Join-Path $releaseRoot 'SpikeChartLink.build.exe'
 try {
-    & $compiler /nologo /target:winexe /optimize+ /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Web.Extensions.dll "/out:$temporary" $source
-    if ($LASTEXITCODE -ne 0) { throw 'Chart link compilation failed; existing registration unchanged.' }
-    Copy-Item -LiteralPath $bridge -Destination (Join-Path $chartLinkRoot 'windows_tradingview.ps1') -Force
-    Move-Item -LiteralPath $temporary -Destination $executable -Force
+    if (-not (Test-Path -LiteralPath $executable) -or -not (Test-Path -LiteralPath $installedBridge)) {
+        & $compiler /nologo /target:winexe /optimize+ /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Web.Extensions.dll "/out:$temporary" $source
+        if ($LASTEXITCODE -ne 0) { throw 'Chart link compilation failed; existing registration unchanged.' }
+        Copy-Item -LiteralPath $bridge -Destination $installedBridge -Force
+        Move-Item -LiteralPath $temporary -Destination $executable -Force
+    }
     New-Item -Path $protocolKey -Force | Out-Null
     Set-Item -LiteralPath $protocolKey -Value 'URL:Spike TradingView chart'
     New-ItemProperty -Path $protocolKey -Name 'URL Protocol' -Value '' -PropertyType String -Force | Out-Null

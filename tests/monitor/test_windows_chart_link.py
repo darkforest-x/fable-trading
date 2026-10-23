@@ -37,10 +37,27 @@ class WindowsChartLinkContract(unittest.TestCase):
                     self.assertEqual(json.loads(response.stdout), {"Symbol": symbol, "Timeframe": period,
                         "ChartUrl": LAYOUT + "?symbol=OKX%3A" + ticker + "&interval=" + interval})
 
+    def test_browser_normalized_root_slash_preserves_requested_chart(self):
+        # Captured from the failed Windows handler's actual command line.
+        link = "spike-tradingview://open/?symbol=BZ-USDT-SWAP&timeframe=15m"
+        response = self.parse(link)
+        self.assertEqual(response.returncode, 0)
+        self.assertEqual(json.loads(response.stdout), {"Symbol": "BZ-USDT-SWAP", "Timeframe": "15m",
+            "ChartUrl": LAYOUT + "?symbol=OKX%3ABZUSDT.P&interval=15"})
+        for period in ["5m", "15m", "30m", "1H", "4H", "1Dutc"]:
+            with self.subTest(period=period):
+                normalized = self.parse(link.replace("15m", period))
+                original = self.parse(link.replace("open/?", "open?").replace("15m", period))
+                self.assertEqual(normalized.returncode, 0)
+                self.assertEqual(original.returncode, 0)
+                self.assertEqual(normalized.stdout, original.stdout)
+
     def test_invalid_links_are_rejected_before_dispatch(self):
         for link in [LINK.replace("spike-tradingview:", "https:"), LINK.replace("//open?", "//evil?"),
             LINK.replace("//open?", "//user@open?"), LINK.replace("//open?", "//open:80?"),
-            LINK.replace("//open?", "//open/path?"), LINK + "#fragment", LINK + "&symbol=ETH-USDT-SWAP",
+            LINK.replace("//open?", "//open/path?"), LINK.replace("//open?", "//open//?"),
+            LINK.replace("//open?", "//open/%2F?"), LINK.replace("//open?", "//open/../?"),
+            LINK + "#fragment", LINK + "&symbol=ETH-USDT-SWAP",
             LINK + "&url=https://evil.test", LINK.replace("15m", "1m"), LINK.replace("BTC", "BTC%0A"),
             LINK + '\" & calc.exe', LINK + "\n", LINK.replace("BTC", "A" * 31), "--other"]:
             with self.subTest(link=link):

@@ -1,0 +1,28 @@
+{
+  "issue": "Windows browser inserts a root slash before the query, rejected by the original raw URL validator",
+  "captured_argument": "spike-tradingview://open/?symbol=BZ-USDT-SWAP&timeframe=15m",
+  "evidence": "Read from the actual failed SpikeChartLink process command line in Windows session 3; the saved layout was valid",
+  "before": {"captured_argument_validation_exit": 2, "regression_test": "failed as expected"},
+  "after": {
+    "windows_tests_passed": 5,
+    "parser_invocations": 56,
+    "installed_executable_validation_exit": 0,
+    "expected_chart": "https://cn.tradingview.com/chart/AlGc61US/?symbol=OKX%3ABZUSDT.P&interval=15",
+    "accepted_paths": ["empty", "/"],
+    "rejected_paths": ["/path", "//", "/%2F", "/../"],
+    "layout_changed": false,
+    "web_fallback": false
+  },
+  "deployment": {
+    "machine": "WIN-ZZC",
+    "user": "Administrator",
+    "installed_release": "702091202343-EC87B5221989",
+    "registration_command_readback": "points to the versioned SpikeChartLink.exe",
+    "repeat_install": "passed",
+    "old_process_terminated": false,
+    "existing_windows_client": "Running"
+  },
+  "native_chart_verification": "pending user click after updating the handler; parameter acceptance is not chart-render proof",
+  "training_eligible": false,
+  "production_eligible": false
+}

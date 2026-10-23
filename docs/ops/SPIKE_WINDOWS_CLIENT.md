@@ -21,11 +21,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\windows\install_sp
 
 使用系统自带 .NET Framework 编译器，无需安装 Python 或其他依赖。安装器先检查
 TradingView Desktop，注册当前用户的 `HKCU\Software\Classes\spike-tradingview`，
-程序位于 `%LOCALAPPDATA%\Spike\ChartLink\SpikeChartLink.exe`。
+程序位于 `%LOCALAPPDATA%\Spike\ChartLink\releases\<版本>\SpikeChartLink.exe`，
+实际入口以该注册项的 `shell\open\command` 为准。升级先完成新版本编译，再切换注册；
+旧错误弹窗占用旧程序时也能更新，无需强行结束客户端或旧弹窗进程。
 它复用下文的 `windows_tradingview.ps1`，把经过严格校验的 HTTPS 图表地址作为一个参数
 交给已安装的 TV 程序。无需网关、监听端口、浏览器策略或辅助功能权限。
 读取已有 `%LOCALAPPDATA%\Spike\tradingview-layout.txt`；没有该文件则使用 TG 的通用图表入口。
 URL 不接受外部目标地址、附加参数或命令。其他程序已占用此协议时，安装器拒绝覆盖。
+浏览器可能将空路径补成 `/`，入口同时接受 `spike-tradingview://open?…` 和
+`spike-tradingview://open/?…`；其他路径、双斜杠和编码路径仍拒绝。
 
 当前已安装到 WIN-ZZC 的 Administrator 用户，源文件保留在
 `C:\fable\spike-client\chart-link-build`。换电脑或 Windows 用户需分别安装。
