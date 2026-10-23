@@ -3,6 +3,7 @@ import {DataComponent, DataTable, Dropdown, SegmentedControl, EvidenceChart, Rep
 import {chartImages} from './chart-images.js';
 import {AltN5Chapter} from './AltN5Chapter.jsx';
 import {LatestResearch} from './LatestResearch.jsx';
+import {ParameterReadout} from './ParameterReadout.jsx';
 
 const names={BTC:'BTC',ETH:'ETH',XAUUSD:'XAUUSD · 黄金',GROUP1:'第一组汇总',ALTCOINS:'第二组 · 山寨'};
 const cases={'1':'情况1 · 5m 吞没','2':'情况2 · 15m 量价','3':'情况3 · 1h 不再触线','4':'情况4 · 4h 收盘守线'};
@@ -51,7 +52,8 @@ export function ReportContent() {
  <header className="report-hero"><div className="research-kicker">SPIKE / MONDAY 1.618 / RESEARCH 2026-10-23</div><h1 data-data-app-title contentEditable={canEdit&&mode==='edit'} suppressContentEditableWarning onBlur={e=>setAppTitle(e.currentTarget.textContent.trim()||appTitle)}>{appTitle}</h1>
  <Text id="hero:deck">{"本次更新重点解释山寨4h＋5根确认为什么胜率超过61%仍亏损，补齐9,065笔详细数据、浮盈回吐与12笔盈亏样本，并汇总已完成的VectorBT参数、近远侧目标、分批保本和定时退出研究。下方完整保留原四种情况的79,430笔信号、60笔样本及原始规则。各实验可能包含同一行情，不能把记录数相加当作独立事件。"}</Text>
  </header>
- <SectionNavigator sections={[{id:'alt-n5',label:'山寨N5详细分析'},{id:'latest-research',label:'参数与退出研究'},{id:'rules',label:'原四种情况与明细'}]} placement="inline"/>
+ <SectionNavigator sections={[{id:'parameter-ranking',label:'截图前16条中文解读'},{id:'alt-n5',label:'山寨N5详细分析'},{id:'latest-research',label:'参数与退出研究'},{id:'rules',label:'原四种情况与明细'}]} placement="inline"/>
+ <ParameterReadout/>
  <AltN5Chapter/>
  <LatestResearch/>
  <ReportSection id="answer" title="原四种情况基线：结果怎样理解" queryId="aggregate" sourceRows={agg} showHeading={false}>
