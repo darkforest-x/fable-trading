@@ -21,6 +21,13 @@ from .policy import Policy, Rejected, dec, positive, ceil_step, floor_step
 from .closing import close_fraction, close_quantity
 from .managed_orders import ManagedOrders
 from .external_records import observed_records, persist_observations
+from concurrent.futures import ThreadPoolExecutor
+
+
+class _Failed:
+    """A captured read error, re-raised in the original sequential order."""
+    def __init__(self, error):
+        self.error = error
 
 
 class LiveBook(ManagedOrders, Book):
@@ -35,6 +42,7 @@ class LiveBook(ManagedOrders, Book):
         self.lock = threading.RLock()
         self.stop_event = threading.Event()
         self.thread = None
+        self.readers = None
         with self.transaction() as (_, state):
             state['mode'] = self.mode
             state.setdefault('account_equity', '0')
@@ -234,28 +242,66 @@ class LiveBook(ManagedOrders, Book):
             state['heartbeat'] = self.clock()
             state['quote_error'] = None if accepted else '未收到新鲜有效行情'
 
+    ALGO_KINDS = ('conditional','oco','trigger','move_order_stop')
+
+    def _read_many(self, reads):
+        """Issue independent GETs concurrently; return each result or its error.
+
+        Each sequential round trip through the local proxy costs ~0.4-1.2s, so
+        eight serial account reads dominated every reconcile. Only reads run
+        here; callers still validate results in the original order.
+        """
+        if self.readers is None:
+            self.readers = ThreadPoolExecutor(max_workers=8, thread_name_prefix='discipline-okx-read')
+        def read(item):
+            try:
+                return self.client.get(item[0], **item[1])
+            except Exception as exc:  # Re-raised by the caller in request order.
+                return _Failed(exc)
+        return list(self.readers.map(read, reads))
+
+    @staticmethod
+    def _value(result):
+        if isinstance(result, _Failed):
+            raise result.error
+        return result
+
     def _fetch(self):
-        config = self.client.get('/api/v5/account/config')[0]
+        reads = [('/api/v5/account/config', {}), ('/api/v5/account/balance', dict(ccy='USDT')),
+                 ('/api/v5/account/positions', {}), ('/api/v5/trade/orders-pending', {})]
+        reads += [('/api/v5/trade/orders-algo-pending', dict(ordType=kind)) for kind in self.ALGO_KINDS]
+        config, balance, positions, orders, *algo_rows = self._read_many(reads)
+        config = self._value(config)[0]
         if config.get('acctLv') != '2' or config.get('posMode') != 'long_short_mode':
             raise Rejected('此版本实盘只支持合约账户与双向持仓模式；不会自动改账户设置')
         permissions = set(config.get('perm','').split(','))
         if 'trade' not in permissions or 'withdraw' in permissions:
             raise Rejected('API 必须具有读取和交易权限，且不能具有提币权限')
-        balance = self.client.get('/api/v5/account/balance', ccy='USDT')[0]
+        balance = self._value(balance)[0]
         usdt = next((row for row in balance['details'] if row['ccy']=='USDT'), None)
         if not usdt or dec(usdt['eq']) <= 0:
             raise Rejected('OKX 交易账户没有可用 USDT 净值')
-        positions = self.client.get('/api/v5/account/positions')
-        orders = self.client.get('/api/v5/trade/orders-pending')
+        positions = self._value(positions)
+        orders = self._value(orders)
         algos = []
-        for kind in ('conditional','oco','trigger','move_order_stop'):
-            rows = self.client.get('/api/v5/trade/orders-algo-pending', ordType=kind)
+        for rows in algo_rows:
+            rows = self._value(rows)
             if len(rows) >= 100:
                 raise Rejected('账户委托超出单次核对范围，暂停开仓')
             algos.extend(rows)
         if len(orders) >= 100 or len(positions) >= 100:
             raise Rejected('账户记录超出单次核对范围，暂停开仓')
         return config, usdt, positions, orders, algos
+
+    def _refetch_positions_and_algos(self):
+        reads = [('/api/v5/account/positions', {})]
+        reads += [('/api/v5/trade/orders-algo-pending', dict(ordType=kind)) for kind in self.ALGO_KINDS]
+        positions, *algo_rows = self._read_many(reads)
+        positions = self._value(positions)
+        algos = []
+        for rows in algo_rows:
+            algos.extend(self._value(rows))
+        return positions, algos
 
     def reconcile(self):
         with self.lock:
@@ -310,10 +356,7 @@ class LiveBook(ManagedOrders, Book):
                             self.refund_entry(db,state,intent)
                     intents=copy.deepcopy(state['intents'])
                 if any(x.get('execution_version') == 2 and x['phase'] not in ('closed','cancelled','rejected') for x in intents.values()):
-                    raw_positions=self.client.get('/api/v5/account/positions')
-                    algos=[]
-                    for kind in ('conditional','oco','trigger','move_order_stop'):
-                        algos.extend(self.client.get('/api/v5/trade/orders-algo-pending',ordType=kind))
+                    raw_positions, algos = self._refetch_positions_and_algos()
                 for intent in intents.values():
                     if intent.get('add_to') or intent['id'] in failed_roots or intent['phase'] in ('cancelled','rejected','closed'):
                         continue
@@ -787,3 +830,5 @@ class LiveBook(ManagedOrders, Book):
         self.stop_event.set()
         if self.thread:
             self.thread.join(timeout=15)
+        if self.readers is not None:
+            self.readers.shutdown(wait=False)

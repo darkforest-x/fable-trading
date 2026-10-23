@@ -41,8 +41,12 @@ class OkxExecutionClient:
         if environment not in ('okx_live', 'okx_demo'):
             raise ValueError('An explicit OKX environment is required')
         self.credentials, self.environment, self.write_enabled = credentials, environment, write_enabled
+        # A new TLS session through the local proxy costs ~2.4s; httpx's 5s
+        # default expiry dropped it between reconcile cycles. Keep a small
+        # warm pool so parallel account reads reuse established sessions.
         self.client = httpx.Client(base_url='https://www.okx.com', timeout=10,
-            follow_redirects=False, transport=transport)
+            follow_redirects=False, transport=transport,
+            limits=httpx.Limits(max_connections=12, max_keepalive_connections=10, keepalive_expiry=60))
         self.offset, self.synchronized_at = 0.0, 0.0
 
     def close(self):
