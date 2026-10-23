@@ -19,6 +19,12 @@
       .sort((a,b)=>touchTime(latestTouch(b))-touchTime(latestTouch(a))||a.symbol.localeCompare(b.symbol));
   }
   function selection(items,symbol,follow){const rows=selectRows(items);return (!follow&&rows.find(r=>r.symbol===symbol))||rows[0]||null;}
+  // Match the Monday alert's chart link, including its fixed 15-minute interval.
+  function tradingViewURL(symbol){
+    if(typeof symbol!=='string'||!/^[A-Z0-9]{1,32}-USDT-SWAP$/.test(symbol))return '';
+    const ticker='OKX:'+symbol.replace('-SWAP','').replaceAll('-','')+'.P';
+    return 'https://www.tradingview.com/chart/?symbol='+encodeURIComponent(ticker)+'&interval=15';
+  }
   // Anchor the first visible row so live reordering does not move the reader.
   function captureListScroll(container){
     const top=container.scrollTop||0;
@@ -75,7 +81,7 @@
     const blur=()=>finish(false);
     return {refresh:restore,setActive(value){active=value;finish(false);if(value){env.addEventListener?.('resize',resize);env.addEventListener?.('blur',blur);restore();}else{env.removeEventListener?.('resize',resize);env.removeEventListener?.('blur',blur);if(frame)env.cancelAnimationFrame?.(frame);frame=null;}},destroy(){this.setActive(false);for(const [h,e,f] of bindings)h.removeEventListener(e,f);}};
   }
-  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll};
+  if(typeof module!=='undefined')module.exports={esc,price,selectRows,selection,latestTouch,touchTime,recentTouch,RECENT_MS,STATES,clampPanel,mountLayout,captureListScroll,restoreListScroll,tradingViewURL};
   if(typeof document==='undefined')return;
   const root=document.getElementById('monday-fib-root');if(!root)return;
   const $=id=>document.getElementById(id);
@@ -97,7 +103,7 @@
       <label class="mf-search">${icon('search')}<input id="mf-search" type="search" placeholder="搜索已触价合约" aria-label="搜索已触价合约" autocomplete="off"></label>
       <div id="mf-filters" class="mf-filters" role="group" aria-label="触价方向">${Object.entries(FILTERS).map(([key,label])=>`<button data-filter="${key}" aria-pressed="${key==='all'}">${label}</button>`).join('')}</div>
       <div id="mf-rows" class="mf-rows" role="region" aria-label="已触价币种滚动列表" tabindex="0"></div>
-      <p class="mf-list-note">滚动浏览 · 点击切换图表</p>
+      <p class="mf-list-note">币种 ↗ TradingView · 右侧切换背景</p>
     </aside>
     <div id="mf-notice" class="mf-notice mf-glass" role="status" hidden></div>
     <div class="mf-dock mf-glass" data-mf-movable="dock" role="group" aria-label="图表控制">${grip('图表工具')}<button id="mf-timeframe" class="mf-timeframe" type="button" aria-label="选择 K 线周期" aria-haspopup="menu" aria-controls="mf-period-menu" aria-expanded="false"><span id="mf-period-label">15m</span><span aria-hidden="true">⌄</span></button><span class="mf-divider"></span><button id="mf-zoom-out" class="mf-zoom" aria-label="缩小 K 线" title="缩小 K 线（−）"><span aria-hidden="true">−</span></button><button id="mf-zoom-in" class="mf-zoom" aria-label="放大 K 线" title="放大 K 线（+）"><span aria-hidden="true">+</span></button><button id="mf-latest" aria-label="回到当前合约最新 K 线" title="回到当前合约最新 K 线，保留缩放宽度">${icon('chevron-right')}<span>最新 K 线</span></button><button id="mf-fit" aria-label="显示全部已加载 K 线并复位" title="恢复价格缩放并显示全部已加载 K 线">${icon('maximize')}<span>全图</span></button><button id="mf-fib" aria-pressed="false" title="显示区间内部 0.5 / 0.618 / 0.705">${icon('adjustments-horizontal')}<span>内部线</span></button><span class="mf-divider"></span><button id="mf-follow" aria-pressed="true">${icon('activity')}<span>跟随最新</span></button></div>
@@ -120,12 +126,16 @@
     const rows=selectRows(data?.items||[],query,filter,nowMs());
     const html=rows.map(r=>{
       const e=latestTouch(r),fresh=recentTouch(e,nowMs()),state=quoteState(r),side=e.side==='upper'?'上':'下';
-      return `<button class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" title="${esc(r.symbol)} · ${time(touchTime(e))} 北京时间"><span class="mf-row-symbol"><b>${esc(short(r.symbol))}</b><small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small></span><span class="mf-row-value"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></span></button>`;
+      const url=tradingViewURL(r.symbol),label=esc(short(r.symbol));
+      const name=`<b>${label}</b>${url?'<span class="mf-external" aria-hidden="true">↗</span>':''}<small>${e.source==='history'?'历史 · ':''}${time(touchTime(e))}${fresh?' · 刚触及':''}</small>`;
+      const link=url?`<a class="mf-row-symbol" data-tv-symbol="${esc(r.symbol)}" href="${esc(url)}" target="_blank" rel="noopener noreferrer" aria-label="在 TradingView 查看 ${label} 15 分钟图" title="TradingView · ${label} · 15 分钟">${name}</a>`:`<span class="mf-row-symbol">${name}</span>`;
+      return `<div class="mf-row${fresh?' mf-recent':''}" data-symbol="${esc(r.symbol)}" data-selected="${r.symbol===selected}">${link}<button type="button" class="mf-row-value" data-preview-symbol="${esc(r.symbol)}" aria-pressed="${r.symbol===selected}" aria-label="切换背景 K 线至 ${label}" title="切换背景 K 线 · ${label}"><strong class="mf-${e.side}">${side}沿 1.618</strong><small>${state||price(r.price)}</small></button></div>`;
     }).join('')||`<p class="mf-no-rows">${data?'没有匹配的已触价合约':'正在读取…'}</p>`;
     if(html!==lastRows){
-      const focused=$('mf-rows').contains?.(document.activeElement)?document.activeElement?.dataset?.symbol:null;
+      const focused=container.contains?.(document.activeElement)?document.activeElement?.dataset:null;
+      const focusKey=focused?.tvSymbol?'tvSymbol':'previewSymbol',focusSymbol=focused?.[focusKey];
       $('mf-rows').innerHTML=html;lastRows=html;
-      if(focused)Array.from($('mf-rows').querySelectorAll('[data-symbol]')).find(b=>b.dataset.symbol===focused)?.focus({preventScroll:true});
+      if(focusSymbol)Array.from(container.querySelectorAll('[data-tv-symbol],[data-preview-symbol]')).find(b=>b.dataset[focusKey]===focusSymbol)?.focus({preventScroll:true});
     }
     restoreListScroll(container,resetScroll?{top:0}:position);
     $('mf-list-count').textContent=`${rows.length} 个`;
@@ -191,7 +201,7 @@
   function setActive(value){if(active===value)return;active=value;cancel();layout.setActive(value);if(active){panel(listOpen);render();refresh();}}
   $('mf-search').addEventListener('input',e=>{query=e.target.value;renderRows(true);sync();});
   $('mf-filters').addEventListener('click',e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;renderRows(true);sync();});
-  $('mf-rows').addEventListener('click',e=>{const b=e.target.closest('[data-symbol]');if(!b)return;selected=b.dataset.symbol;follow=false;render();sync();if(window.matchMedia?.('(max-width: 760px)').matches)panel(false,true);});
+  $('mf-rows').addEventListener('click',e=>{const b=e.target.closest('[data-preview-symbol]');if(!b)return;selected=b.dataset.previewSymbol;follow=false;render();sync();if(window.matchMedia?.('(max-width: 760px)').matches)panel(false,true);});
   $('mf-list-toggle').addEventListener('click',()=>panel(!listOpen,true));$('mf-list-close').addEventListener('click',()=>panel(false,true));
   $('mf-follow').addEventListener('click',()=>{follow=true;render();sync();});
   $('mf-fit').addEventListener('click',()=>window.SpikeMondayFibChart?.fit());

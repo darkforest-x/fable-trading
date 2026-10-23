@@ -51,13 +51,13 @@ body[data-workspace="monday-fib"] :is(.app-shell,.workspace,#main,#monday-fib-vi
 #monday-fib-root .mf-filters {display:flex;gap:3px;margin:8px 0 5px;}
 #monday-fib-root .mf-filters button {flex:1;font-size:10px;min-height:32px;border-radius:8px;padding:4px;}
 #monday-fib-root .mf-filters [aria-pressed="true"] {background:#0071e310;color:var(--mf-blue);font-weight:600;}
-#monday-fib-root .mf-row {display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:10px 8px;border-radius:11px;text-align:left;margin:2px 0;min-height:57px;border:1px solid transparent;}
-#monday-fib-root .mf-row[aria-pressed="true"] {background:#0071e30d;border-color:#0071e326;}
+#monday-fib-root .mf-row {display:flex;align-items:stretch;justify-content:space-between;gap:2px;width:100%;padding:3px;border-radius:11px;text-align:left;margin:2px 0;min-height:57px;border:1px solid transparent;}
+#monday-fib-root .mf-row[data-selected="true"] {background:#0071e30d;border-color:#0071e326;}
 #monday-fib-root .mf-row.mf-recent {box-shadow:inset 2px 0 #0071e3;}
-#monday-fib-root .mf-row-symbol {min-width:0;}
+#monday-fib-root .mf-row-symbol {min-width:0;flex:1;align-content:center;min-height:44px;padding:4px;border-radius:8px;}
 #monday-fib-root .mf-row b {font-size:12px;font-weight:600;overflow-wrap:anywhere;}
 #monday-fib-root .mf-row small {display:block;margin-top:3px;font-size:9px;color:var(--mf-muted);white-space:nowrap;}
-#monday-fib-root .mf-row-value {text-align:right;flex:none;}
+#monday-fib-root .mf-row-value {text-align:right;flex:none;min-width:80px;min-height:44px;padding:4px;border-radius:8px;}
 #monday-fib-root .mf-row-value strong {font-size:10px;font-weight:500;}
 #monday-fib-root .mf-list-note {font-size:9px;text-align:center;color:#7d8995;}
 #monday-fib-root .mf-no-rows {padding:28px 8px;text-align:center;color:var(--mf-muted);}
@@ -94,7 +94,7 @@ body[data-workspace="monday-fib"] :is(.app-shell,.workspace,#main,#monday-fib-vi
  #monday-fib-root .mf-list-panel {top:auto;bottom:114px;left:12px;right:12px;width:auto;max-height:calc(100dvh - 184px);padding:8px 12px 10px;}
  #monday-fib-root .mf-search input {font-size:16px;height:44px;}
  #monday-fib-root .mf-filters button {min-height:36px;}
- #monday-fib-root .mf-row {min-height:54px;padding:8px;}
+ #monday-fib-root .mf-row {min-height:54px;}
  #monday-fib-root .mf-dock {bottom:max(52px,env(safe-area-inset-bottom));gap:0;padding:4px 5px;max-width:calc(100% - 24px);}
  #monday-fib-root .mf-dock button {padding:6px 10px;gap:5px;font-size:10px;}
  #monday-fib-root .mf-timeframe {padding:0 8px;font-size:10px;}
@@ -124,7 +124,7 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
 #monday-fib-root .mf-list-heading {gap:2px;}
 #monday-fib-root .mf-list-heading>div {flex:1;padding-left:0;}
 #monday-fib-root .mf-search {background:#eaf1f535;border-color:#aebfce50;}
-#monday-fib-root .mf-row[aria-pressed="true"] {background:#90bfff28;border-color:#0071e32b;}
+#monday-fib-root .mf-row[data-selected="true"] {background:#90bfff28;border-color:#0071e32b;}
 #monday-fib-root .mf-dock {padding-left:4px;}
 #monday-fib-root .mf-dock>.mf-grip {padding:0;}
 @media(max-width:760px){
@@ -177,3 +177,10 @@ body[data-workspace="monday-fib"] {--mf-glass:rgba(255,255,255,.18);--mf-border:
 #monday-fib-root .mf-rows::-webkit-scrollbar-thumb {background:#8fa3b566;border-radius:4px;}
 #monday-fib-root .mf-list-note {padding-top:8px;}
 @media(max-width:760px){#monday-fib-root .mf-list-panel{height:min(520px,calc(100dvh - 184px));}}
+/* Stitch 2891896fc30b44949e150b75562a72ea: sibling chart link and wallpaper action. */
+#monday-fib-root a.mf-row-symbol {transition:background-color .18s,color .18s;}
+#monday-fib-root a.mf-row-symbol:is(:hover,:focus-visible) {background:#ffffff55;color:var(--mf-blue);}
+#monday-fib-root a.mf-row-symbol:is(:hover,:focus-visible) b {text-decoration:underline;text-underline-offset:3px;}
+#monday-fib-root .mf-row :is(a,button):focus-visible {outline:2px solid #0071e380;outline-offset:-1px;}
+#monday-fib-root .mf-external {display:inline-block;font-size:12px;margin-left:4px;opacity:.5;transition:transform .18s,opacity .18s;}
+#monday-fib-root a.mf-row-symbol:is(:hover,:focus-visible) .mf-external {opacity:1;transform:translate(1px,-1px);}
