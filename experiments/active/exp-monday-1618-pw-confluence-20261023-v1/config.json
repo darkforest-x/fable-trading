@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-pw-confluence-20261023-v1",
+  "question": "Owner chart 2026-10-23: when the Monday 1618 coincides with last week's high (short) or low (long), does it hold more often?",
+  "example": "BTC week 2026-10-19: Monday H 83149.8 L 81166, 1618 84375.8, last week high 84348.2 (0.014R inside), nPOC 84632.8 above, target Monday high.",
+  "window_R": 0.05,
+  "descriptive_windows": [0.02, 0.1, 0.2],
+  "seed": 20261023,
+  "success_criterion": "Binance alts 2020-2025 and OKX 2025-2026 both: confluent validity above non-confluent, within-week permutation Holm p<0.01, and week-cluster bootstrap 95 lower bound of confluent validity >38.2 percent.",
+  "label": "Unchanged: Monday near edge before the 2.0 extension; owner's example stop (~1.93) is close to 2.0.",
+  "training_eligible": false,
+  "production_eligible": false
+}
