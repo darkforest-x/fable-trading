@@ -1,0 +1,24 @@
+// Temporary native fixture appendix; never saved in the delivered indicator.
+if barstate.islastconfirmedhistory
+    [u1, d1, su1, sd1] = fib1618Step(false, true, 106.18, 100, 106.18, 83.82, false, false, true)
+    [u2, d2, su2, sd2] = fib1618Step(false, true, 110, 90, 106.18, 83.82, su1, sd1, true)
+    [u3, d3, su3, sd3] = fib1618Step(false, true, 110, 83.82, 106.18, 83.82, su2, sd2, true)
+    [u4, d4, su4, sd4] = fib1618Step(true, false, 120, 70, 106.18, 83.82, su3, sd3, true)
+    [u5, d5, su5, sd5] = fib1618Step(false, true, 106.17, 83.83, 106.18, 83.82, false, false, true)
+    [u6, d6, su6, sd6] = fib1618Step(false, true, 110, 80, 106.18, 83.82, true, true, false)
+    [u7, d7, su7, sd7] = fib1618Step(false, true, 110, 80, na, na, false, false, true)
+    // A second tick of the first touch bar rolls back to the prior bar flags.
+    [u8, d8, su8, sd8] = fib1618Step(false, true, 106.18, 100, 106.18, 83.82, false, false, true)
+    [u9, d9, su9, sd9] = fib1618Step(false, false, 110, 80, 106.18, 83.82, true, false, true)
+    bool ok = u1 and not d1 and su1 and not sd1
+    ok := ok and not u2 and not d2 and su2 and not sd2
+    ok := ok and not u3 and d3 and su3 and sd3
+    ok := ok and not u4 and not d4 and not su4 and not sd4
+    ok := ok and not u5 and not d5 and not su5 and not sd5
+    ok := ok and u6 and d6 and su6 and sd6
+    ok := ok and not u7 and not d7 and not su7 and not sd7
+    ok := ok and u8 and not d8 and su8 and not sd8
+    ok := ok and not u9 and not d9 and su9 and not sd9
+    if not ok
+        runtime.error("V238_FIXTURES_FAIL")
+    log.info("V238_FIXTURES_PASS: equality/first-side/dedup/opposite-side/reset/no-touch/repeat/both/na/rollback/disabled-session")
