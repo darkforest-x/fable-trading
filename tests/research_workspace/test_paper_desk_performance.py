@@ -280,3 +280,32 @@ def test_estimate_prewarms_and_reports_entry_risk_without_network_or_receipts(cl
     with desk.connect() as db:
         assert db.execute('SELECT count(*) FROM quotes').fetchone()[0] == 0
         assert db.execute('SELECT count(*) FROM fills').fetchone()[0] == 0
+
+
+def test_cold_entry_waits_for_risk_then_uses_existing_paper_fill_path(client, monkeypatch):
+    c, desk, quotes = client
+    risk = PublicRisk()
+    risk.background = True
+    quotes.risk = risk
+    monkeypatch.setattr(risk, 'fetch', lambda *a, **kw: pytest.fail('reader performed risk network I/O'))
+    account = desk.create_account('Isolated quick test', '1000', 'quick-test-account')['id']
+    terms = dict(account_id=account, symbol=SYMBOL, side='long', leverage=20, position_multiple=1)
+    assert c.get(PREFIX+'/open-preview', params=terms).status_code == 503
+    assert c.get(PREFIX+'/estimate', params={'symbol': SYMBOL}).json()['entry_ready'] is False
+    at = book.clock_ms()
+    risk.instruments = {SYMBOL: dict(ctVal='1', ctMult='1')}
+    risk.instrument_at = time.monotonic()
+    risk.marks = {SYMBOL: dict(markPx='100', ts=str(at))}
+    risk.tiers = {SYMBOL: (time.monotonic(), [dict(maxSz='10000', mmr='.01', maxLever='100')], at)}
+    assert c.get(PREFIX+'/estimate', params={'symbol': SYMBOL}).json()['entry_ready'] is True
+    preview = c.get(PREFIX+'/open-preview', params=terms)
+    assert preview.status_code == 200
+    q = preview.json()
+    payload = dict(side='long', quantity=q['quantity'], quote_id=q['id'], leverage=20,
+                   request_id='quick-test-open-0001')
+    url = PREFIX+'/accounts/'+account+'/open?include_snapshot=true'
+    response = c.post(url, json=payload)
+    assert response.status_code == 201
+    assert response.json()['position']['symbol'] == SYMBOL
+    assert c.post(url, json=payload).json()['fill']['id'] == response.json()['fill']['id']
+    assert len(desk.export(account)['fills']) == 1
