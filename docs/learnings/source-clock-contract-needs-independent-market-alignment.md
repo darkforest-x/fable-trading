@@ -1,0 +1,7 @@
+# A source clock contract needs independent market alignment
+
+- **Problem**: Case1 mapped existing HistData gold timestamps using the FAQ's fixedEST statement. An older registry entry documented that these local archives instead align with New York daylight time. This affects Monday anchors and the reported gold result.
+- **Dead end**: Treating official generic documentation as sufficient proof for the actual downloaded file, and dismissing the older New York conversion without reproducing its evidence, produced a one-hour summer shift.
+- **Effective path**: Compare15m returns from the same raw summer2025 source under the two clock interpretations with independent UTC OKX gold returns. New York alignment correlates about0.945 over5706intervals; fixedEST about-0.004. Preserve the wrong-clock result and issue a separate gold-only correction through the same native framework. Cryptocurrency results do not change.
+- **General rule**: Clock documentation and archive behavior can disagree. Resolve the discrepancy with independent timestamped events or market alignment before deriving session boundaries; never select a clock for better strategy returns.
+- **Related**: `source-timezone-and-session-timezone-are-separate.md` remains the historical record of the mistaken application. Correction: `yoyo/evaluation/monday_5m_wick_gold_clock.py`; prior evidence: `exp-gold-breakout-15m-willy-20261013-v1` registry entry. No volume is supplied by this correction.
