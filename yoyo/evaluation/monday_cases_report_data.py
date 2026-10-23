@@ -98,14 +98,21 @@ def make_stats(frames,summaries):
             comparison=summaries[case]['comparisons'].get(key)
             if comparison:controls.append(dict(case=case,group=group,**comparison))
             for dimension in ['year','direction','hour','weekday','segment']:
-                for value,x in g.groupby(dimension):cuts.append(dict(case=case,group=group,dimension=dimension,value=str(value),**stats(x,gross)))
+                for value,x in g.groupby(dimension):
+                    # Keep controls attached to the selected signal cohort, rather
+                    # than reselecting controls by their unrelated entry hour.
+                    r=random[random.pair_id.isin(x.loc[x.closed,'pair_id'])]
+                    rs=stats(r,gross)
+                    cuts.append(dict(case=case,group=group,dimension=dimension,value=str(value),random_mean_r=rs.get('mean_r'),random_n=rs['n'],**stats(x,gross)))
             if len(c):
                 v=c.gross_r if gross else c.basis_r
                 hist=pd.cut(v,bins=bins,right=False).value_counts(sort=False)
                 for idx,(label,count) in enumerate(hist.items()):dist.append(dict(case=case,group=group,bin=str(label),order=idx,n=int(count),pct=float(count/len(c)*100)))
                 sums=c.assign(value=v).groupby('exit_month').agg(net_r=('value','sum'),n=('value','size'));sums['cumulative_r']=sums.net_r.cumsum()
                 for month,r in sums.iterrows():monthly.append(dict(case=case,group=group,month=month,net_r=float(r.net_r),cumulative_r=float(r.cumulative_r),n=int(r.n)))
-        for symbol,g in s.groupby('symbol'):symbols.append(dict(case=case,symbol=symbol,asset=g.asset.iloc[0],**stats(g,g.symbol.eq('XAUUSD').all())))
+        for symbol,g in s.groupby('symbol'):
+            gross=g.symbol.eq('XAUUSD').all();rs=stats(f[f.symbol.eq(symbol)&f.population.eq('random')],gross)
+            symbols.append(dict(case=case,symbol=symbol,asset=g.asset.iloc[0],random_mean_r=rs.get('mean_r'),random_n=rs['n'],**stats(g,gross)))
     return dict(aggregate=aggregate,cuts=cuts,monthly=monthly,distribution=dist,symbols=symbols,controls=controls)
 
 
@@ -177,7 +184,8 @@ def main():
     queries={}
     for name,rows in tables.items():queries[name]={'rows':rows,'source':{'label':'Frozen Nautilus ledgers / corrected spot clock','files':[str(x.relative_to(ROOT)) for x in paths], 'evidenceFlow':[{'title':'读取冻结结果','detail':'Case1 crypto unchanged; replace all old XAU rows with gold-trades.csv.gz from NY clock v2.'},{'title':'分组与统计','detail':'Only closed trades determine returns and win rates. Censored stay separate. GROUP1 gross basis; other crypto net, gold gross. Descriptive calendar cuts use Asia/Shanghai entry time; cumulative ledger uses exit month.'}],'metricDefinitions':[{'label':'R','definition':'side × (exit − entry) / initial stop distance; net subtracts actual two-fill fees. GROUP1 and XAU gross only. Independent trades, not a funded portfolio.'}],'caveats':['Same-week random controls inherit market trend. Parameter search and new simulations were not performed.']}}
     signals=pd.concat([x[x.population.eq('signal')] for x in frames.values()],ignore_index=True)
-    cols=['case','asset','symbol','trade_id','direction','entry_time','exit_interval_start','exit_interval_end','entry','stop','target_price','exit_price','gross_r','net_r','fee_r','outcome','closed','risk_pct','planned_rr','holding_h']
+    signals['pin_time']=signals.pin_dt.astype(str)
+    cols=['case','asset','symbol','trade_id','direction','pin_time','entry_time','exit_interval_start','exit_interval_end','entry','stop','target_price','exit_price','level','monday_high','monday_low','gross_r','net_r','fee_r','outcome','closed','risk_pct','planned_rr','holding_h']
     queries['trades']={'rows':records(signals[cols]),'source':{'label':'Complete signal trade ledger','files':[str(x.relative_to(ROOT)) for x in paths if x.suffix=='.gz'],'metricDefinitions':[{'label':'退出时间','definition':'exit_interval_start..end is the observed5m interval; exact sub-bar fill second is unknown. Censored are not wins or losses.'}]}}
     if args.reuse_samples:
         samples=json.loads((OUT/'samples.json').read_text())
@@ -186,7 +194,7 @@ def main():
         samples=sample_charts(selected);dump(OUT/'samples.json',samples)
     else:samples=[]
     queries['samples']={'rows':[{**{k:v for k,v in x.items() if k not in ['detail_bars','full_bars','confirmations']},'detail_json':json.dumps(x['detail_bars'],separators=(',',':')),'full_json':json.dumps(x['full_bars'],separators=(',',':')),'checks_json':json.dumps(x['confirmations'],separators=(',',':'))} for x in samples], 'payloadColumns':['detail_json','full_json','checks_json'], 'source':{'label':'Seeded outcome/side/asset-stratified historical candle samples','files':[str(x.relative_to(ROOT)) for x in paths],'evidenceFlow':[{'title':'抽样','detail':'Seed20261023, one uniform draw per case × BTC/ETH/XAU/ALT × long/short × win/loss; no duration or visual filtering. Missing cells remain missing. Charts explain trades, not overall prevalence.'},{'title':'重绘','detail':'Source5m OHLCV resampled onto original UTC signal timeframe. Spot comes from NY-clock M1 with existing conflict exclusion; spot volume unavailable. Full trade path retained, detail fixed around entry.'}]}}
-    snapshot=dict(surface='report',title='周一1.618：四种反转确认的回测证据',generatedAt=pd.Timestamp.now(tz='UTC').isoformat(),status='reviewed',buildStatus='creating',filters=[],queries=queries,report={'asOf':'2026-10-09'})
+    snapshot=dict(surface='report',title='周一1.618：四种反转确认的回测证据',generatedAt=pd.Timestamp.now(tz='UTC').isoformat(),status='reviewed',buildStatus='creating',filters=[],queries=queries,report={})
     dump(OUT/'reviewed.json',snapshot)
     signals[cols].to_csv(OUT/'all-signal-trades.csv.gz',index=False)
     dump(OUT/'analysis-receipt.json',dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),signal_rows=len(signals),sample_count=len(samples),sampling_seed=SEED,case1_gold_rows=int(len(frames[1][frames[1].symbol.eq('XAUUSD')&frames[1].population.eq('signal')])),no_engine_replay=True,source_stamps_verified=True))
