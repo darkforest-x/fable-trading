@@ -1,0 +1,43 @@
+
+// Append only for native QA. Never save this appendix in the delivered script.
+scanAssert(bool ok, string label) =>
+    if not ok
+        runtime.error("V239_FIXTURE_FAIL: " + label)
+
+if barstate.islastconfirmedhistory
+    int mon = timestamp("America/New_York", 2026, 10, 19, 0, 0)
+    for i = 0 to 100
+        int stamp = i < 99 ? mon + i * 900000 : mon + 7 * 86400000 + (i - 99) * 900000
+        float h = i == 96 ? 116.18 : i == 97 ? 120.0 : 110.0
+        float l = i == 98 ? 93.82 : 100.0
+        Scan1618 s = scan1618Advance(stamp, h, l, 105, 0.01)
+        if i == 95
+            scanAssert(not s.ready and na(s.upperAt), "Monday-not-final")
+        if i == 96
+            scanAssert(s.ready and math.abs(s.upper - 116.18) < 0.00001 and math.abs(s.lower - 93.82) < 0.00001, "complete-Monday-levels")
+            scanAssert(s.upperAt == stamp and na(s.lowerAt), "equal-upper-touch")
+        if i == 97
+            scanAssert(s.upperAt == mon + 96 * 900000, "retain-first-upper")
+        if i == 98
+            scanAssert(s.lowerAt == stamp, "independent-lower")
+        if i == 99
+            scanAssert(not s.ready and na(s.upperAt) and na(s.lowerAt) and s.week == stamp, "new-week-reset")
+    for i = 1 to 96
+        Scan1618 partial = scan1618Advance(mon + i * 900000, 110, 100, 105, 0.01)
+        if i == 96
+            scanAssert(not partial.ready, "partial-Monday-rejected")
+    for i = 0 to 96
+        if i != 20
+            Scan1618 gap = scan1618Advance(mon + i * 900000, 110, 100, 105, 0.01)
+            if i == 96
+                scanAssert(not gap.ready, "missing-Monday-bar-rejected")
+    for i = 0 to 96
+        Scan1618 stale = scan1618Advance(i < 96 ? mon + i * 900000 : mon + 8 * 86400000, 110, 100, 105, 0.01)
+        if i == 96
+            scanAssert(not stale.ready, "expired-week-rejected")
+    scanAssert(not scan1618New(false, na, false, mon, mon + 86400000), "startup-no-backfill")
+    scanAssert(scan1618New(true, mon, false, mon, mon + 86400000), "new-side")
+    scanAssert(not scan1618New(true, mon, true, mon, mon + 86400000), "intrabar-consumer-dedup")
+    scanAssert(scan1618New(true, mon, true, mon + 7 * 86400000, mon + 8 * 86400000), "consumer-new-week")
+    scanAssert(not scan1618New(true, mon, false, mon, na), "no-touch")
+    log.info("V239_FIXTURES_PASS: complete/partial/gapped/expired Monday, equality, first-side, both sides, weekly reset, startup, intrabar dedup")
