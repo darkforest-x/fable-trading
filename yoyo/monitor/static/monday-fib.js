@@ -142,7 +142,8 @@
   const time=ms=>ms?timeFormat.format(new Date(ms)):'时间待核对';
   const short=s=>s.replace('-USDT-SWAP','');
   function quoteState(r){return STATES[r.state]||((r.stale||!finite(r.received_ms)||nowMs()-r.received_ms>=90000||error)?'行情已滞后':'');}
-  function panel(open,focus=false){listOpen=open;$('mf-list-panel').hidden=!open;$('mf-list-toggle').setAttribute('aria-expanded',String(open));root.classList.toggle('mf-list-open',open);layout.refresh();if(focus)(open?$('mf-search'):$('mf-list-toggle')).focus({preventScroll:true});}
+  // Opening the list is browsing intent; focus a button so mobile keyboards stay closed.
+  function panel(open,focus=false){listOpen=open;$('mf-list-panel').hidden=!open;$('mf-list-toggle').setAttribute('aria-expanded',String(open));root.classList.toggle('mf-list-open',open);layout.refresh();if(focus)(open?$('mf-list-close'):$('mf-list-toggle')).focus({preventScroll:true});}
   function sync(){window.SpikeNavigation?.sync('monday-fib',{q:query||null,filter:filter==='all'?null:filter,page:null,symbol:follow?null:selected||null});}
   function renderRows(resetScroll=false){
     const container=$('mf-rows');

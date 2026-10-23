@@ -1,3 +1,8 @@
+## 2026-10-24 · Touch list opens without search autofocus
+
+- Opening the web Monday contract list focuses its close button instead of the search input, avoiding automatic mobile keyboard activation. Explicit search tap, filtering, Escape and launcher focus restoration remain functional.
+- Stitch GEMINI_3_8_FLASH screen64a55e101ddc40d6ae52c603561283a4; source references in `yoyo/monitor/design/fib-list-focus-20261024/source.json`.16 existing frontend tests pass; browser390/320/1440 focus/search/reopen/keyboard checks pass with0 write requests. Evidence `output/playwright/fib-list-focus/`. Static asset update, no service restart.
+
 ## 2026-10-24 · Monday chart inline numeric reference prices
 
 ## 2026-10-24 · 1h Monday body-only confirmation and detailed excursion statistics
