@@ -65,7 +65,7 @@ def subset(f,group):
 
 def stats(g,gross=False):
     c=g[g.closed].copy();v=c.gross_r if gross else c.basis_r;bp=c.gross_bp if gross else c.basis_bp
-    n=len(c);result=dict(total=len(g),n=n,censored=int((~g.closed).sum()),gross_basis=gross or (len(g)>0 and g.symbol.eq('XAUUSD').all()))
+    n=len(c);result=dict(total=len(g),n=n,censored=int((~g.closed).sum()),gross_basis=bool(gross or (len(g)>0 and g.symbol.eq('XAUUSD').all())))
     if not n:return result
     wins=v[v>0];loss=v[v<0];curve=v.iloc[np.argsort(c.exit_dt.to_numpy(),kind='stable')].cumsum();peak=curve.cummax().clip(lower=0);maxdd=(peak-curve).max()
     result.update(win_pct=float(v.gt(0).mean()*100),tp_pct=float(c.reason.eq(4).mean()*100),sl_pct=float(c.reason.eq(1).mean()*100),mean_r=float(v.mean()),median_r=float(v.median()),sum_r=float(v.sum()),mean_bp=float(bp.mean()),gross_mean_r=float(c.gross_r.mean()),mean_fee_r=None if result['gross_basis'] else float(c.fee_r.mean()),mean_win_r=float(wins.mean()) if len(wins) else None,mean_loss_r=float(loss.mean()) if len(loss) else None,pf=float(wins.sum()/-loss.sum()) if len(loss) else None,win_n=len(wins),loss_n=len(loss),flat_n=int(v.eq(0).sum()),p05_r=float(v.quantile(.05)),p95_r=float(v.quantile(.95)),min_r=float(v.min()),max_r=float(v.max()),holding_median_h=float(c.holding_h.median()),holding_p90_h=float(c.holding_h.quantile(.9)),risk_median_pct=float(c.risk_pct.median()),planned_rr_median=float(c.planned_rr.median()),ledger_max_drawdown_r=float(maxdd),fee_erased_wins=int((c.gross_r.gt(0)&v.le(0)).sum()),ambiguity=int(c.ambiguous_bar.sum()),first_entry=str(c.entry_dt.min()),last_entry=str(c.entry_dt.max()))
@@ -166,18 +166,23 @@ def sample_charts(selected):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--stats-only',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--stats-only',action='store_true');parser.add_argument('--reuse-samples',action='store_true');args=parser.parse_args()
     if subprocess.run(['git','diff','--quiet','HEAD','--','yoyo/evaluation/monday_cases_report_data.py'],cwd=ROOT).returncode:raise RuntimeError('Commit report builder before generating')
     OUT.mkdir(parents=True,exist_ok=True);frames={};summaries={};paths=[]
     for case in NAMES:frames[case],summaries[case],sources=prepare(case);paths.extend(sources)
     tables=make_stats(frames,summaries);selected,coverage=pick_samples(frames)
-    stamp=[file_stamp(x) for x in paths];dump(OUT/'source-stamps.json',stamp);dump(OUT/'sample-selection.json',coverage)
+    stamp=[file_stamp(x) for x in paths]
+    if args.reuse_samples:assert json.loads((OUT/'source-stamps.json').read_text())==stamp,'Changed report inputs'
+    dump(OUT/'source-stamps.json',stamp);dump(OUT/'sample-selection.json',coverage)
     queries={}
     for name,rows in tables.items():queries[name]={'rows':rows,'source':{'label':'Frozen Nautilus ledgers / corrected spot clock','files':[str(x.relative_to(ROOT)) for x in paths], 'evidenceFlow':[{'title':'读取冻结结果','detail':'Case1 crypto unchanged; replace all old XAU rows with gold-trades.csv.gz from NY clock v2.'},{'title':'分组与统计','detail':'Only closed trades determine returns and win rates. Censored stay separate. GROUP1 gross basis; other crypto net, gold gross. Descriptive calendar cuts use Asia/Shanghai entry time; cumulative ledger uses exit month.'}],'metricDefinitions':[{'label':'R','definition':'side × (exit − entry) / initial stop distance; net subtracts actual two-fill fees. GROUP1 and XAU gross only. Independent trades, not a funded portfolio.'}],'caveats':['Same-week random controls inherit market trend. Parameter search and new simulations were not performed.']}}
     signals=pd.concat([x[x.population.eq('signal')] for x in frames.values()],ignore_index=True)
     cols=['case','asset','symbol','trade_id','direction','entry_time','exit_interval_start','exit_interval_end','entry','stop','target_price','exit_price','gross_r','net_r','fee_r','outcome','closed','risk_pct','planned_rr','holding_h']
     queries['trades']={'rows':records(signals[cols]),'source':{'label':'Complete signal trade ledger','files':[str(x.relative_to(ROOT)) for x in paths if x.suffix=='.gz'],'metricDefinitions':[{'label':'退出时间','definition':'exit_interval_start..end is the observed5m interval; exact sub-bar fill second is unknown. Censored are not wins or losses.'}]}}
-    if not args.stats_only:
+    if args.reuse_samples:
+        samples=json.loads((OUT/'samples.json').read_text())
+        assert {(r['sample_id'],r['trade_id']) for r in samples}=={(r['sample_id'],r['trade_id']) for r in selected}
+    elif not args.stats_only:
         samples=sample_charts(selected);dump(OUT/'samples.json',samples)
     else:samples=[]
     queries['samples']={'rows':[{**{k:v for k,v in x.items() if k not in ['detail_bars','full_bars','confirmations']},'detail_json':json.dumps(x['detail_bars'],separators=(',',':')),'full_json':json.dumps(x['full_bars'],separators=(',',':')),'checks_json':json.dumps(x['confirmations'],separators=(',',':'))} for x in samples], 'payloadColumns':['detail_json','full_json','checks_json'], 'source':{'label':'Seeded outcome/side/asset-stratified historical candle samples','files':[str(x.relative_to(ROOT)) for x in paths],'evidenceFlow':[{'title':'抽样','detail':'Seed20261023, one uniform draw per case × BTC/ETH/XAU/ALT × long/short × win/loss; no duration or visual filtering. Missing cells remain missing. Charts explain trades, not overall prevalence.'},{'title':'重绘','detail':'Source5m OHLCV resampled onto original UTC signal timeframe. Spot comes from NY-clock M1 with existing conflict exclusion; spot volume unavailable. Full trade path retained, detail fixed around entry.'}]}}
