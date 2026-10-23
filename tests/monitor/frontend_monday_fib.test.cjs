@@ -29,7 +29,7 @@ test('recent highlight expires at 15 minutes and excludes recovery/future timest
 });
 test('wallpaper opens the newest occurrence automatically and has no notification control or write',async()=>{
  const calls=[];const c=harness(async(u,o)=>{calls.push([u,o]);return response(snap());});await ready(c);
- assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));
+ assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));
  assert.equal(c.el('mf-symbol').textContent,'BTC');assert.equal(c.charts.at(-1).symbol,'BTC-USDT-SWAP');
  assert.match(c.el('mf-week').textContent,/2026-10-19/);assert.doesNotMatch(source,/mf-tg|method:'PUT'|Telegram/);c.api.setActive(false);assert.equal(c.timers.size,0);
 });
@@ -101,7 +101,7 @@ test('coin links open externally while their sibling preview button alone pins t
  assert.equal(c.charts.length,before);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'true');
  c.el('mf-rows').events.click({target:{closest:()=>({dataset:{previewSymbol:a.symbol}})}});
  assert.equal(c.charts.at(-1).symbol,a.symbol);assert.equal(c.el('mf-follow').attrs['aria-pressed'],'false');
- assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));c.api.setActive(false);
+ assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));c.api.setActive(false);
 });
 test('Windows links use only the local app protocol and preserve independent wallpaper controls',async()=>{
  for(const navigator of [{platform:'Win32'},{platform:'Win64'},{platform:'Linux',userAgentData:{platform:'Windows'}}]){
@@ -113,7 +113,7 @@ test('Windows links use only the local app protocol and preserve independent wal
   const before=c.charts.length;
   c.el('mf-rows').events.click({target:{closest:()=>null}});
   assert.equal(c.charts.length,before);
-  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib'&&!o.method));
+  assert.ok(calls.every(([u,o])=>u==='/api/monday-fib?compact=true'&&!o.method));
   c.api.setActive(false);
  }
  assert.equal(tradingViewURL('1000PEPE-USDT-SWAP','Windows'),'spike-tradingview://open?symbol=1000PEPE-USDT-SWAP&timeframe=15m');
@@ -121,13 +121,14 @@ test('Windows links use only the local app protocol and preserve independent wal
  assert.equal(tradingViewURL('BTC-USDT-SWAP&timeframe=1H','Win32'),'');
  assert.equal(tradingViewURL('A'.repeat(31)+'-USDT-SWAP','Win32'),'');
 });
-test('a quote refresh retains focus on the same link or preview button',async()=>{
+test('quote-only refresh patches the price without replacing rows or moving focus/scroll',async()=>{
  let value=snap();const c=harness(async()=>response(value));await ready(c);
- for(const key of ['tvSymbol','previewSymbol']){
-  const focused={dataset:{[key]:'BTC-USDT-SWAP'}},otherKey=key==='tvSymbol'?'previewSymbol':'tvSymbol';let restored=false;
-  c.document.activeElement=focused;c.el('mf-rows').contains=el=>el===focused;
-  c.el('mf-rows').querySelectorAll=selector=>selector==='[data-symbol]'?[]:[{dataset:{[otherKey]:'BTC-USDT-SWAP'},focus(){assert.fail('wrong sibling received focus');}},{dataset:{[key]:'BTC-USDT-SWAP'},focus(options){assert.equal(options.preventScroll,true);restored=true;}}];
-  value=snap({items:[item({price:value.items[0].price+1})]});await c.api.refresh();assert.equal(restored,true);
- }
+ const container=c.el('mf-rows'),originalHTML=container.innerHTML,cell={textContent:'82,500'};
+ let writes=0;Object.defineProperty(container,'innerHTML',{get:()=>originalHTML,set(){writes++;}});
+ const focused={dataset:{tvSymbol:'BTC-USDT-SWAP'}};c.document.activeElement=focused;
+ container.scrollTop=620;
+ container.querySelectorAll=selector=>selector==='[data-preview-symbol]'?[{dataset:{previewSymbol:'BTC-USDT-SWAP'},querySelector:()=>cell}]:[];
+ value=snap({items:[{...value.items[0],price:82501}]});await c.api.refresh();
+ assert.equal(cell.textContent,'82,501');assert.equal(writes,0);assert.equal(c.document.activeElement,focused);assert.equal(container.scrollTop,620);
  c.api.setActive(false);
 });

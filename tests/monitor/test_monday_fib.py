@@ -203,3 +203,17 @@ def test_api_mutation_requires_origin_explicit_boolean_and_credentials(tmp_path,
     response = client.put(path, json={"enabled": True}, headers=headers)
     assert response.json()["telegram"]["enabled"] is True
     assert "fake-secret" not in response.text and "fake-chat" not in response.text
+
+
+def test_compact_snapshot_preserves_quotes_anchors_and_touch_semantics(tmp_path, monkeypatch):
+    service, levels = ready_service(tmp_path)
+    service.book.touch(levels, SYMBOL, 'upper', 120, NOW, NOW, 'live')
+    full = service.snapshot()
+    monkeypatch.setattr(service.book, 'subscription', lambda: pytest.fail('compact read must not load subscription'))
+    compact = service.snapshot(compact=True)
+    assert set(compact) == {'now_ms', 'week', 'timezone', 'monday_complete', 'stream', 'items'}
+    assert compact['week'] == full['week'] and compact['stream'] == full['stream']
+    row, original = compact['items'][0], full['items'][0]
+    for key in ('symbol', 'state', 'stale', 'price', 'high', 'low', 'upper', 'lower', 'received_ms'):
+        assert row[key] == original[key]
+    assert row['touches']['upper'] == {k: original['touches']['upper'][k] for k in ('source', 'observed_ms', 'candle_ms')}

@@ -13,7 +13,7 @@ test('range layer filters hide overlays and empty snapshots never invent candles
 });
 test('interactive loading coalesces to the newest snapshot and never paints after unmount',async()=>{
  let finish;const ready=new Promise(resolve=>finish=resolve),paint=[];
- sandbox.window.SpikeChartTools={syncer:()=>()=>{},library:()=>ready};
+ sandbox.window.SpikeChartTools={...require('../../yoyo/vision_research/static/chart-tools.js'),syncer:()=>()=>{},library:()=>ready};
  const api=sandbox.window.SpikeRangeChart,host={replaceChildren(){}};
  const instance=api.mount(host,{symbol:'BTC'},view);
  instance.create=function(){this.chart={remove(){}};};instance.draw=(data)=>paint.push(data.symbol);
@@ -26,12 +26,12 @@ test('interactive loading coalesces to the newest snapshot and never paints afte
 });
 
 test('Monday band uses millisecond calendar boundaries and second chart times',()=>{
- sandbox.window.SpikeChartTools={syncer:()=>()=>{},library:()=>new Promise(()=>{})};
+ sandbox.window.SpikeChartTools={...require('../../yoyo/vision_research/static/chart-tools.js'),syncer:()=>()=>{},library:()=>new Promise(()=>{})};
  const host={replaceChildren(){}};const instance=sandbox.window.SpikeRangeChart.mount(host,{},view);
- instance.rows=[{time:100},{time:200},{time:300}];instance.mondayWindow={start_ms:100000,end_ms:300000};
+ instance.rows=[{time:100},{time:200},{time:300}];instance.mondayWindow={start_ms:100000,end_ms:300000};instance.bandIndices=[0,1];
  instance.band={hidden:true,style:{}};instance.chart={timeScale:()=>({timeToCoordinate:t=>t/10-5,width:()=>100})};
  instance.paintMondayBand();assert.equal(instance.band.hidden,false);assert.equal(instance.band.style.width,'20px');
- instance.mondayWindow=null;instance.paintMondayBand();assert.equal(instance.band.hidden,true);
+ instance.mondayWindow=null;instance.bandIndices=[];instance.paintMondayBand();assert.equal(instance.band.hidden,true);
  instance.chart={remove(){}};sandbox.window.SpikeRangeChart.unmount(host);
 });
 
@@ -59,17 +59,22 @@ test('wallpaper starts with readable recent candles and refresh retains a manual
  sandbox.window.SpikeChartTools={...T,library:()=>new Promise(()=>{})};
  const host={replaceChildren(){}},instance=sandbox.window.SpikeRangeChart.mount(host,{},view),nodes=new Map();
  const node=key=>{if(!nodes.has(key))nodes.set(key,{innerHTML:'',textContent:'',classList:{toggle(){}}});return nodes.get(key);};
- let visible=null,autoScale=true;const scale={getVisibleLogicalRange:()=>visible,setVisibleLogicalRange:r=>visible=r,fitContent:()=>visible={from:0,to:399}};
- instance.chart={timeScale:()=>scale,applyOptions:o=>{if(o.rightPriceScale?.autoScale!==undefined)autoScale=o.rightPriceScale.autoScale;},remove(){}};
- instance.series={setData(){},update(){},applyOptions(){},createPriceLine(){},removePriceLine(){}};instance.volume={setData(){},update(){}};
+ let visible=null,autoScale=true,rangeWrites=0,seriesWrites=0,lineWrites=0,optionWrites=0;const scale={getVisibleLogicalRange:()=>visible,setVisibleLogicalRange:r=>{visible=r;rangeWrites++;},fitContent:()=>visible={from:0,to:399}};
+ instance.chart={priceScale:()=>({applyOptions:o=>autoScale=o.autoScale}),timeScale:()=>scale,applyOptions:o=>{if(o.rightPriceScale?.autoScale!==undefined)autoScale=o.rightPriceScale.autoScale;},remove(){}};
+ instance.series={setData(){seriesWrites++;},update(){seriesWrites++;},applyOptions(){optionWrites++;},createPriceLine(){lineWrites++;},removePriceLine(){lineWrites++;}};instance.volume={setData(){seriesWrites++;},update(){seriesWrites++;}};
  instance.canvas={clientWidth:1200};instance.panel={querySelector:node};instance.controls={update(){},destroy(){}};instance.paintMondayBand=()=>{};
  const data={symbol:'BTC',timezone:'America/New_York',levels:[],candles:Array.from({length:400},(_,i)=>({time:1e12+i*900000,open:100,high:102,low:99,close:101,volume:1}))};
  const config={...view,bars:672,wallpaper:true,initialBars:160};instance.draw(data,config,'');
  assert.equal(visible.to-visible.from,160);assert.ok(visible.to>399);
+ const counters=[rangeWrites,seriesWrites,lineWrites,optionWrites];
+ instance.draw(JSON.parse(JSON.stringify(data)),config,'');
+ assert.deepEqual([rangeWrites,seriesWrites,lineWrites,optionWrites],counters,'identical refresh must not redraw series, recreate lines, or touch viewport');
  visible={from:100.25,to:180.25};autoScale=false;
  instance.draw({...data,candles:[...data.candles,{...data.candles.at(-1),time:data.candles.at(-1).time+900000}]},config,'');
  assert.equal(visible.from,100.25);assert.equal(visible.to,180.25);assert.equal(autoScale,false);
  instance.draw({...data,symbol:'NEW',candles:[data.candles[0]]},config,'');
  assert.ok(visible.from<=0&&visible.to>=0,'right padding must not push short histories offscreen');
+ instance.draw(data,config,'');
+ assert.equal(visible.from,100.25);assert.equal(visible.to,180.25,'returning to a symbol restores its horizontal view');
  sandbox.window.SpikeRangeChart.unmount(host);
 });

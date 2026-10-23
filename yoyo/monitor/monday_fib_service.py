@@ -229,12 +229,15 @@ class MondayFibService:
                 pass
             self.stop.wait(1)
 
-    def snapshot(self):
+    def snapshot(self, compact=False):
         now = self.client.clock()
         window = week_window(now)
         events = self.book.records(window["week"])
         events.sort(key=lambda e: e["candle_ms"] if e["source"] == "history" else e["observed_ms"], reverse=True)
         touches = {(e["symbol"], e["side"]): e for e in events}
+        if compact:
+            touches = {key: {k: event[k] for k in ("source", "candle_ms", "observed_ms")}
+                       for key, event in touches.items()}
         with self.lock:
             rows = []
             for symbol in self.symbols:
@@ -249,15 +252,20 @@ class MondayFibService:
                         **{k: levels.get(k) for k in ("high", "low", "upper", "lower")},
                         **{k: quote.get(k) for k in ("price", "candle_ms", "received_ms")},
                         "touches": {s: touches[(symbol, s)] for s in ("upper", "lower") if (symbol, s) in touches}}
-                distances = [(abs(levels[s] / quote["price"] - 1) * 100, s) for s in ("upper", "lower")
-                             if levels.get(s, 0) > 0 and quote.get("price", 0) > 0]
-                item["distance_pct"], item["nearest"] = min(distances) if distances else (None, None)
+                if not compact:
+                    distances = [(abs(levels[s] / quote["price"] - 1) * 100, s) for s in ("upper", "lower")
+                                 if levels.get(s, 0) > 0 and quote.get("price", 0) > 0]
+                    item["distance_pct"], item["nearest"] = min(distances) if distances else (None, None)
                 rows.append(item)
-            rows.sort(key=lambda r: (r["stale"] or r["state"] != "ready", r["distance_pct"] if r["distance_pct"] is not None else float("inf"), r["symbol"]))
+            if not compact:
+                rows.sort(key=lambda r: (r["stale"] or r["state"] != "ready", r["distance_pct"] if r["distance_pct"] is not None else float("inf"), r["symbol"]))
             stream = {"connected": self.connected, "last_message_ms": self.last_message_ms,
                       "error": self.stream_error, "catalog_error": self.catalog_error, "catalog_ms": self.catalog_ms}
-        return {"now_ms": now, "week": window["week"], "timezone": "America/New_York",
-                "monday_complete": now >= window["end"], "stream": stream, "items": rows,
+        result = {"now_ms": now, "week": window["week"], "timezone": "America/New_York",
+                  "monday_complete": now >= window["end"], "stream": stream, "items": rows}
+        if compact:
+            return result
+        return {**result,
                 "telegram": {**self.book.subscription(), "configured": bool(credentials())},
                 "counts": {"total": len(rows), "ready": sum(r["state"] == "ready" and not r["stale"] for r in rows),
                            "touched": len(events), "unavailable": sum(r["state"] != "ready" or r["stale"] for r in rows)},
@@ -273,8 +281,8 @@ def install(app, service):
     app.state.monday_fib = service
 
     @app.get("/api/monday-fib")
-    def snapshot():
-        return service.snapshot()
+    def snapshot(compact: bool = False):
+        return service.snapshot(compact=compact)
 
     @app.put("/api/monday-fib/telegram")
     def subscribe(payload: FibSubscription, request: Request):

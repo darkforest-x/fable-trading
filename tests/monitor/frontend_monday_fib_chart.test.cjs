@@ -40,6 +40,8 @@ test('row chart makes only selected GETs, ignores retired replies and aborts on 
  api.zoom(.8);assert.equal(range.to-range.from,32);assert.equal(range.to,409);
  api.zoom(1.25);assert.equal(range.to-range.from,40);api.zoom(Infinity);assert.equal(range.to-range.from,40);
  api.fit();assert.equal(fits,1);assert.equal(pending.length,2);assert.ok(draws.every(s=>s==='ETH-USDT-SWAP'));
+ api.pause();assert.equal(timers.size,0);
+ api.show(second,{...row,symbol:'ETH-USDT-SWAP'},'2026-10-19');assert.equal(pending.length,2);assert.equal(timers.size,1);
  api.hide();assert.equal(timers.size,0);
 });
 
@@ -55,7 +57,7 @@ test('native timeframe is validated and daily candles retain context beyond NY M
 test('rapid timeframe switching aborts old loads and keeps responses and cache isolated',async()=>{
  const pending=[],draws=[];const state={textContent:''},mount={},button={addEventListener(){}};
  const host={innerHTML:'',replaceChildren(){},querySelector:s=>s==='[role=status]'?state:s==='.mf-chart-mount'?mount:button};
- const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>draws.push(d.bar),unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
+ const sandbox={document:{hidden:false},window:{SpikeRangeChart:{mount:(h,d)=>{if(d.candles.length)draws.push(d.bar);},unmount(){}}},Intl,Date,AbortController,fetch:(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})),setTimeout:()=>1,clearTimeout(){}};
  vm.runInNewContext(fs.readFileSync('yoyo/monitor/static/monday-fib-chart.js','utf8'),sandbox);
  const api=sandbox.window.SpikeMondayFibChart;
  api.show(host,row,'2026-10-19',{period:'15m'});api.show(host,row,'2026-10-19',{period:'5m'});
@@ -65,4 +67,16 @@ test('rapid timeframe switching aborts old loads and keeps responses and cache i
  assert.deepEqual(draws,['5m']);
  api.show(host,row,'2026-10-19',{period:'1H'});assert.match(pending[2].url,/period=1H/);
  api.show(host,row,'2026-10-19',{period:'5m'});assert.deepEqual(draws,['5m','5m']);assert.equal(pending[2].options.signal.aborted,true);api.hide();
+});
+
+test('closed candle scheduling follows server boundaries and retries incomplete tails',()=>{
+ const {refreshDelay,PERIODS}=require('../../yoyo/monitor/static/monday-fib-chart.js');
+ for(const [period,step] of Object.entries(PERIODS)){
+  const boundary=Math.floor(start/step)*step,now=boundary+5000;
+  const ready={...context(),now_ms:now,last_close_ms:boundary};
+  assert.equal(refreshDelay(ready,period),step-5000+1500);
+  assert.equal(refreshDelay({...ready,last_close_ms:boundary-step},period),3000);
+  assert.equal(refreshDelay({...ready,loading:true},period),1500);
+  assert.equal(refreshDelay({...ready,error:'offline'},period),10000);
+ }
 });

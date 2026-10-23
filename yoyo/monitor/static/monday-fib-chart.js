@@ -37,12 +37,24 @@
     }
     return {...context,candles,levels:levels(row),monday:{...context.monday,high:row.high,low:row.low,complete:true}};
   }
-  if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS};
+  // The display contains closed candles. Refresh at their next close, using
+  // server time so a user's clock cannot postpone updates. Lagging tails retry.
+  function refreshDelay(context,period){
+    if(context.loading)return 1500;
+    if(context.error||!context.candles?.length)return 10000;
+    const step=PERIODS[period],now=context.now_ms;
+    if(!finite(now))return 15000;
+    const boundary=Math.floor(now/step)*step;
+    if(context.last_close_ms<boundary)return 3000;
+    return Math.max(1000,boundary+step-now+1500);
+  }
+  if(typeof module!=='undefined')module.exports={levels,prepare,PERIODS,refreshDelay};
   if(typeof document==='undefined')return;
   const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
-  let target=null,controller=null,timer=null,version=0;
+  let target=null,controller=null,timer=null,version=0,paused=false;
   const cache=new Map();
-  function stop(){version++;clearTimeout(timer);controller?.abort();controller=null;if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
+  function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;}
+  function stop(){pause();if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
@@ -63,8 +75,9 @@
       const value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');
       if(token!==version||target!==current)return;
       prepare(value,current.row,current.week,current.period);
-      cache.delete(current.key);cache.set(current.key,{value,at:Date.now()});while(cache.size>6)cache.delete(cache.keys().next().value);
-      draw(value);if(value.loading)delay=3000;else if(value.error||!value.candles?.length)delay=10000;
+      delay=refreshDelay(value,current.period);
+      cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>6)cache.delete(cache.keys().next().value);
+      draw(value);
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(token===version&&target===current&&!document.hidden)timer=setTimeout(refresh,delay);}
   }
@@ -73,14 +86,23 @@
     const key=row.symbol+'|'+week+'|'+period;
     if(target?.host===host&&target.key===key){
       const changed=target.internal!==internal||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);return;
+      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
-    stop();if(!host)return;
-    host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
+    const reuse=target?.host===host?target:null;
+    if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;}else stop();
+    if(!host)return;paused=false;
+    if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
     target={host,row,week,key,internal,period,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
-    host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
-    const previous=cache.get(key);if(previous)draw(previous.value);
-    if(previous&&Date.now()-previous.at<15000&&!previous.value.loading)timer=setTimeout(refresh,15000-(Date.now()-previous.at));else refresh();
+    if(!reuse)host.querySelector('[data-mf-chart-retry]').addEventListener('click',()=>refresh());
+    const previous=cache.get(key);
+    if(previous)draw(previous.value);
+    else if(reuse){
+      // Clear the previous identity synchronously while keeping its canvas and
+      // per-symbol viewport cache. Never label the old candles as a new symbol.
+      target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:row.symbol,bar:period,candles:[],levels:[]},view);
+      message('正在加载区间 K 线…');
+    }
+    if(previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();
   }
   function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}
   function fit(){const chart=target?.instance?.chart;if(chart){chart.priceScale('right').applyOptions({autoScale:true});chart.timeScale().fitContent();}}
@@ -93,5 +115,5 @@
     const scale=target?.instance?.chart?.timeScale(),range=scale?.getVisibleLogicalRange();if(!range||!finite(factor)||factor<=0)return;
     const span=Math.max(8,Math.min(view.bars+20,(range.to-range.from)*factor));scale.setVisibleLogicalRange({from:range.to-span,to:range.to});
   }
-  window.SpikeMondayFibChart={show,hide:stop,setInternal,fit,latest,zoom};
+  window.SpikeMondayFibChart={show,hide:stop,pause,setInternal,fit,latest,zoom};
 })();

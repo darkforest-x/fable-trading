@@ -112,3 +112,47 @@ def test_api_validates_input_without_upstream_io(tmp_path):
             assert response.status_code == 200 and response.json()['bar'] == period
         assert client.get('/api/monday-fib/candles?symbol=BTC-USDT-SWAP&period=1s').status_code == 422
         assert client.get('/api/monday-fib/candles?symbol=https://bad&period=1m').status_code == 422
+
+
+def test_closed_bar_refresh_reuses_history_and_merges_overlapping_corrections():
+    client = Client(); service = MondayCandles(client=client)
+    try:
+        entry = run_fetch(service, '15m')
+        original_start = entry['candles'][0]['time']
+        client.now += STEPS['15m']
+        original_get = client.get
+        def correction(path, params):
+            rows = original_get(path, params)
+            rows[2][4] = '10.5'
+            return rows
+        client.get = correction
+        service.slots.acquire(); service._fetch('BTC-USDT-SWAP', '15m', entry)
+        assert len(client.calls) == 4  # One page, instead of three on every close.
+        assert len(entry['candles']) == 720
+        assert entry['candles'][0]['time'] == original_start + STEPS['15m']
+        assert entry['candles'][-3]['close'] == 10.5
+        assert entry['last_close_ms'] == bar_open(client.now, '15m')
+        client.now += STEPS['15m'] * 1000
+        service.slots.acquire(); service._fetch('BTC-USDT-SWAP', '15m', entry)
+        assert len(client.calls) == 7  # No overlap: normal bounded history load.
+        assert len(entry['candles']) == 720
+    finally:
+        service.close()
+
+
+def test_delayed_upstream_tail_does_not_claim_the_current_close():
+    client = Client(); service = MondayCandles(client=client)
+    original_get = client.get
+    def lagged(path, params):
+        rows = original_get(path, params)
+        return [r for r in rows if int(r[0]) < bar_open(client.now, '1H') - STEPS['1H']]
+    client.get = lagged
+    try:
+        entry = run_fetch(service, '1H')
+        assert entry['last_close_ms'] == bar_open(client.now, '1H') - STEPS['1H']
+        service.cache[('BTC-USDT-SWAP', '1H')] = entry
+        value = service.snapshot('BTC-USDT-SWAP', '1H')
+        assert value['now_ms'] == client.now
+        assert value['next_close_ms'] == bar_open(client.now, '1H') + STEPS['1H']
+    finally:
+        service.close()

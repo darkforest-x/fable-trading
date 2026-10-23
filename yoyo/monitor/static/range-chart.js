@@ -39,7 +39,7 @@
   }
   // Stable interactive instance: polling updates series without replacing the canvas.
   class Interactive {
-    constructor(host){this.host=host;this.rows=[];this.dead=false;this.lines=[];this.key='';this.sync=window.SpikeChartTools.syncer();}
+    constructor(host){this.host=host;this.rows=[];this.dead=false;this.lines=[];this.key='';this.sync=window.SpikeChartTools.syncer();this.views=new window.SpikeChartTools.Views();}
     async update(data,view,error=''){
       this.pending={data,view:{...view},error};
       if(!this.chart){
@@ -84,37 +84,47 @@
       this.chart.applyOptions({layout:{background:{type:'solid',color:value('--surface',dark?'#0b0e14':'#fff')},textColor:value('--muted',dark?'#c7c4d7':'#64748b'),fontSize:11},
         grid:{vertLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')},horzLines:{color:value('--line-soft',dark?'#20232b':'#eef1f5')}}});
     }
-    readout(){const row=this.rows.find(r=>r.time===this.hover)||this.rows.at(-1);this.panel.querySelector('.cv-readout').innerHTML=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';}
+    readout(){const row=this.rowByTime?.get(this.hover)||this.rows.at(-1),html=row?window.SpikeChartTools.readout(row,row.time,row.time!==this.hover):'';if(html!==this.readoutHTML){this.panel.querySelector('.cv-readout').innerHTML=html;this.readoutHTML=html;}}
     draw(data,view,error){
       const T=window.SpikeChartTools,key=`${data?.symbol||''}|${data?.timezone||''}|${data?.bar||'15m'}|${view.bars}`;
-      const saved=key===this.key?T.anchor(this.chart.timeScale().getVisibleLogicalRange(),T.times(this.rows)):null;
+      const oldTimes=T.times(this.rows),oldRange=this.chart.timeScale().getVisibleLogicalRange();
+      this.views.save(this.key,oldRange,oldTimes);
+      if(key!==this.key)this.chart.priceScale('right').applyOptions({autoScale:true});
+      const saved=key===this.key?T.anchor(oldRange,oldTimes):null;
       // API time is milliseconds. Keep only the API's disclosed, closed candle set.
       this.rows=(data?.candles||[]).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
+      this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
+      const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);
       this.sync(this.series,this.rows.map(({time,open,high,low,close})=>({time,open,high,low,close})));
       this.sync(this.volume,this.rows.map(r=>({time:r.time,value:r.volume||0,color:r.close>=r.open?'#01e59938':'#ff4f7338'})));
-      this.series.applyOptions({priceFormat:T.priceFormat(this.rows),...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})});
-      for(const line of this.lines)this.series.removePriceLine(line);this.lines=[];
+      const options={priceFormat:T.priceFormat(this.rows),...(view.candleColors?{upColor:view.candleColors.up,wickUpColor:view.candleColors.up,downColor:view.candleColors.down,wickDownColor:view.candleColors.down}:{})},optionKey=JSON.stringify(options);
+      if(optionKey!==this.optionKey){this.series.applyOptions(options);this.optionKey=optionKey;}
       const colors={range:'#3984b3',fib:'#9774c1',profile:'#cc8d35',npoc:'#b9689e',prior:'#8a969e'};
       const levels=(data?.levels||[]).filter(l=>view[l.kind]&&fin(l.price));this.activeLevels=levels;
-      if(view.wallpaper)this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:.25,bottom:.18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});
+      if(view.wallpaper&&!this.wallpaperOptions){this.wallpaperOptions=true;this.chart.applyOptions({rightPriceScale:{scaleMargins:{top:.25,bottom:.18}},grid:{vertLines:{visible:false},horzLines:{visible:false}}});}
+      const levelKey=JSON.stringify(levels);
+      if(levelKey!==this.levelKey){
+      for(const line of this.lines)this.series.removePriceLine(line);this.lines=[];
       for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),axisLabelVisible:level.axisLabelVisible!==false,title:level.label}));
       this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
+      this.levelKey=levelKey;}
       this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 ${data?.bar||'15m'}`;
       const status=this.panel.querySelector('.cv-range-status'),warning=error||data?.error||this.rows.length&&data?.stale&&'行情已过期 · 仅供查看历史位置';
       status.classList.toggle('is-warning',!!warning);status.textContent=warning||(!this.rows.length?'正在加载 K 线与关键价位…':`收盘边界：北京 ${clock(data.last_close_ms,true)} · ${data.monday?.complete?'周一区间已冻结':data.monday?.developing?'周一区间形成中':'周一数据不足，暂不画区间'}`);
-      const retained=T.restore(saved,T.times(this.rows));
-      if(retained)this.chart.timeScale().setVisibleLogicalRange(retained);else if(key!==this.key||!saved){
+      const retained=T.restore(saved,newTimes)||this.views.get(key,newTimes);
+      if((timeChanged||key!==this.key)&&retained)this.chart.timeScale().setVisibleLogicalRange(retained);else if(!retained&&(key!==this.key||timeChanged||!this.key)){
         if(view.initialBars&&this.rows.length){const span=Math.min(this.rows.length+10,this.canvas.clientWidth<=700?70:view.initialBars),to=this.rows.length-1+10;this.chart.timeScale().setVisibleLogicalRange({from:to-span,to});}
         else if(!view.fitAll&&this.canvas.clientWidth<=700&&this.rows.length>70)this.chart.timeScale().setVisibleLogicalRange({from:this.rows.length-70,to:this.rows.length+3});
         else this.chart.timeScale().fitContent();
       }
       this.key=key;this.readout();this.controls.update();
       if(view.showLevels)this.panel.querySelector('.cv-level-details').open=true;
-      this.mondayWindow=view.mondayBand?data?.monday:null;this.paintMondayBand();
+      this.mondayWindow=view.mondayBand?data?.monday:null;
+      this.bandIndices=this.mondayWindow?this.rows.map((r,i)=>r.time*1000>=this.mondayWindow.start_ms&&r.time*1000<this.mondayWindow.end_ms?i:-1).filter(i=>i>=0):[];this.paintMondayBand();
     }
     paintMondayBand(){
-      if(!this.band)return;const range=this.mondayWindow,scale=this.chart?.timeScale();
-      const indices=range?this.rows.map((r,i)=>r.time*1000>=range.start_ms&&r.time*1000<range.end_ms?i:-1).filter(i=>i>=0):[];
+      if(!this.band)return;const scale=this.chart?.timeScale();
+      const indices=this.bandIndices||[];
       if(!indices.length||!scale){this.band.hidden=true;return;}
       const first=scale.timeToCoordinate(this.rows[indices[0]].time),last=scale.timeToCoordinate(this.rows[indices.at(-1)].time),width=scale.width();
       if(first==null||last==null){this.band.hidden=true;return;}
@@ -129,5 +139,5 @@
   function mount(host,data,view,error=''){let instance=instances.get(host);if(!instance){instance=new Interactive(host);instances.set(host,instance);}instance.update(data,view,error);return instance;}
   function unmount(host){if(!host)return;instances.get(host)?.destroy();instances.delete(host);}
   window.SpikeRangeChart={render,price,clock,mount,unmount};
-  if(typeof module!=='undefined')module.exports={render,price,bindFreePan};
+  if(typeof module!=='undefined')module.exports={render,price,bindFreePan,Interactive};
 })();

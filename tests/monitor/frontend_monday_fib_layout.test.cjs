@@ -35,3 +35,17 @@ test('desktop and mobile positions are separate; keyboard reset and deactivation
  c.handle.events.pointerdown(c.e(20,80));c.handle.events.pointermove(c.e(250,250));c.api.setActive(false);assert.equal(c.block.style.left,'');assert.equal(c.captures(),0);assert.deepEqual(c.events,{});
  c.api.destroy();assert.deepEqual(c.handle.events,{});
 });
+
+test('high frequency grip moves coalesce without reading layout on every pointer event',()=>{
+ const c=harness(),frames=new Map();let id=0,reads=0;
+ const original=c.block.getBoundingClientRect.bind(c.block);
+ c.block.getBoundingClientRect=()=>{reads++;return original();};
+ c.env.requestAnimationFrame=fn=>{frames.set(++id,fn);return id;};c.env.cancelAnimationFrame=n=>frames.delete(n);
+ c.handle.events.pointerdown(c.e(25,90));
+ for(let i=0;i<100;i++)c.handle.events.pointermove(c.e(100+i,180+i));
+ assert.equal(reads,1);assert.equal(frames.size,1);assert.equal(c.block.style.left,'');
+ const paint=[...frames.values()][0];frames.clear();paint();
+ assert.equal(c.block.style.left,'194px');assert.equal(reads,1);
+ c.handle.events.pointermove(c.e(250,300));c.handle.events.pointerup(c.e(250,300));
+ assert.equal(frames.size,0);assert.equal(c.block.style.left,'245px');assert.equal(reads,2);
+});

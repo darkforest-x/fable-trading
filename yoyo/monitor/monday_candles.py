@@ -36,6 +36,10 @@ class MondayCandles:
         try:
             rows = {}
             cursor = boundary
+            # Reuse the closed history only once a new page overlaps it. Long
+            # absences still backfill normally instead of joining across a gap.
+            previous = {r['time']: r for r in entry['candles']}
+            overlap = False
             for _ in range(3):
                 raw = self.client.get('/api/v5/market/history-candles',
                                       dict(instId=symbol, bar=bar, limit='240', after=str(cursor)))
@@ -44,13 +48,22 @@ class MondayCandles:
                 if not page:
                     break
                 rows.update(page)
+                if previous and any(t in previous for t in page):
+                    overlap = True
+                    break
                 cursor = min(page)
                 if len(page) < 240:
                     break
             candles = [dict(time=t, open=float(r[1]), high=float(r[2]), low=float(r[3]),
                             close=float(r[4]), volume=float(r[5])) for t, r in sorted(rows.items())]
+            if overlap:
+                previous.update({r['time']: r for r in candles})
+                candles = [previous[t] for t in sorted(previous)][-720:]
+            # An upstream page can lag a just-closed bar. Retry that boundary;
+            # never call an older tail fresh merely because a fetch succeeded.
+            last_close = candles[-1]['time'] + STEPS[bar] if candles else 0
             with self.lock:
-                entry.update(candles=candles, last_close_ms=boundary, generated_ms=now, error=None)
+                entry.update(candles=candles, last_close_ms=last_close, generated_ms=now, error=None)
         except Exception:
             with self.lock:
                 entry['error'] = 'OKX K 线暂不可用，请重试'
@@ -83,7 +96,8 @@ class MondayCandles:
                     break
                 del self.cache[removable]
         value.pop('retry_ms', None)
-        return dict(value, symbol=symbol, bar=period, native_bar=bar, source='OKX',
+        return dict(value, now_ms=now, next_close_ms=bar_open(now, bar)+STEPS[bar],
+                    symbol=symbol, bar=period, native_bar=bar, source='OKX',
                     timezone='America/New_York', week=window['week'],
                     monday=dict(start_ms=window['start'], end_ms=window['end']))
 
