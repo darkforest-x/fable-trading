@@ -1,0 +1,18 @@
+{
+  "experiment_id": "exp-monday-1618-alt-hours-20261023-v1",
+  "question": "Out of sample: on Binance USD-M alts 2020-01..2025-05, do first weekly 1618 touches whose bar opens 04:00-08:00 Beijing hold more often?",
+  "hypothesis_source": "exp-monday-1618-timing-20261023-v1 (OKX alts 2025-06..2026-08: 04-08 Beijing 47.5 percent, n=1437).",
+  "exclude_symbols": ["BTCUSDT", "ETHUSDT", "BTCDOMUSDT", "DEFIUSDT", "FOOTBALLUSDT", "BLUEBIRDUSDT"],
+  "exclude_bases": ["USDC", "BUSD", "TUSD", "FDUSD", "USDP", "USDE", "DAI", "PAXG", "XAUT", "USD1"],
+  "fetch_start_month": "2019-12",
+  "fetch_end_month": "2025-06",
+  "start": "2020-01-01T00:00:00Z",
+  "end": "2025-06-01T00:00:00Z",
+  "horizon_days": 14,
+  "workers": 32,
+  "seed": 20261023,
+  "success_criterion": "04-08 Beijing validity >38.2 with week-cluster bootstrap 95 lower bound >38.2, validity gap vs other hours one-sided within-week permutation p<0.01, and mean R >0.",
+  "limitations": "15m conservative ordering, delisted symbols included, fee 0, independent R; Binance not OKX.",
+  "training_eligible": false,
+  "production_eligible": false
+}

@@ -1,0 +1,12 @@
+{
+  "experiment_id": "exp-monday-1618-macro-20261023-v1",
+  "question": "Do first weekly 1618 touches within +-2h of scheduled US CPI, payrolls or FOMC releases break more often?",
+  "window_hours": 2,
+  "seed": 20261023,
+  "events": "inputs/bls_release_dates.json (BLS archive filenames, 08:30 ET) and inputs/fomc*.htm (federalreserve.gov, scheduled decision day 14:00 ET; unscheduled, cancelled and notation votes excluded).",
+  "primaries": ["alt (Binance alts 2020-01..2025-05 from exp-monday-1618-alt-hours)", "xau (XAUUSD spot 2011-2026)"],
+  "success_criterion": "Per primary: news-window validity below other touches, one-sided within-week permutation Holm p<0.01, and news-window validity below 38.2 percent.",
+  "limitations": "Event times are scheduled times; 2011-2012 FOMC statement times varied (12:30/14:15 ET). Unscheduled events and other releases (PPI, retail sales, PCE) not included.",
+  "training_eligible": false,
+  "production_eligible": false
+}
