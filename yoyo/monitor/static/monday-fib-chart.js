@@ -71,11 +71,12 @@
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
     const timeout=setTimeout(()=>c.abort(),12000);let delay=15000;
     try{
-      const r=await fetch('/api/monday-fib/candles?symbol='+encodeURIComponent(current.row.symbol)+'&period='+encodeURIComponent(current.period),{cache:'no-store',credentials:'same-origin',signal:c.signal});
-      const value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');
+      const warming=window.SpikeStartup?.take(current.row.symbol+'|'+current.period,c.signal),warm=warming?await warming:null;
+      let value=warm?.value;
+      if(!warm){const r=await fetch('/api/monday-fib/candles?symbol='+encodeURIComponent(current.row.symbol)+'&period='+encodeURIComponent(current.period)+'&wait_ms=8000',{cache:'no-store',credentials:'same-origin',signal:c.signal});value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');}
       if(token!==version||target!==current)return;
       prepare(value,current.row,current.week,current.period);
-      delay=refreshDelay(value,current.period);
+      delay=Math.max(0,refreshDelay(value,current.period)-(warm?Date.now()-warm.receivedAt:0));
       cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>6)cache.delete(cache.keys().next().value);
       draw(value);
     }catch(e){if(token===version&&target===current){message((e.name==='AbortError'?'图表读取超时':e.message)+' · 可重新加载');delay=10000;}}

@@ -10,11 +10,11 @@ import time
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from pydantic import BaseModel, Field
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.gzip import GZipMiddleware
-from yoyo.monitor.asset_delivery import cache_policy, render_index
+from yoyo.monitor.asset_delivery import cache_policy, render_index, boot_bundle, BOOT_PATH, style_bundles
 
 from yoyo.monitor import FRESH_MS, MODEL_KIND, MODEL_PROTOCOL, MONITORED_TIMEFRAMES, SIGNAL_KIND, SIGNAL_PROTOCOL, SHORT_SIGNAL_PROTOCOL
 from yoyo.monitor import market_sync as market_sync_research
@@ -155,6 +155,23 @@ def create_app(runtime=None, start_monitor=True):
     @app.get("/")
     def index():
         return HTMLResponse(render_index(STATIC))
+
+    @app.get(BOOT_PATH)
+    def workspace_boot():
+        return Response(boot_bundle(STATIC)[0], media_type='text/javascript')
+
+    @app.get('/static/workspace-{name}.css')
+    def workspace_styles(name: str):
+        bundle = style_bundles(STATIC).get(name)
+        if bundle is None:
+            # Only the three generated names belong to this route. Preserve
+            # existing workspace-*.css URLs used by standalone study pages.
+            if name.isascii() and name.replace('-', '').isalnum():
+                path = STATIC / f'workspace-{name}.css'
+                if path.is_file():
+                    return FileResponse(path, media_type='text/css')
+            raise HTTPException(404, 'stylesheet_not_found')
+        return Response(bundle[0], media_type='text/css')
 
     @app.get("/api/status")
     def status():

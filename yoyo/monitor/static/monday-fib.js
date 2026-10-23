@@ -222,10 +222,11 @@
     if(!active||document.hidden)return Promise.resolve();if(pending)return pending;
     clearTimeout(timer);const rev=revision,c=new AbortController();controller=c;const timeout=setTimeout(()=>c.abort(),12000);
     const task=(async()=>{try{
-      const res=await fetch('/api/monday-fib?compact=true',{cache:'no-store',credentials:'same-origin',signal:c.signal}),d=await res.json();
-      if(!res.ok)throw Error(typeof d.detail==='string'?d.detail:'监控暂不可用，正在重试');
+      const warming=window.SpikeStartup?.take('monday-snapshot',c.signal),warm=warming?await warming:null;
+      let d=warm?.value;
+      if(!warm){const res=await fetch('/api/monday-fib?compact=true',{cache:'no-store',credentials:'same-origin',signal:c.signal});d=await res.json();if(!res.ok)throw Error(typeof d.detail==='string'?d.detail:'监控暂不可用，正在重试');}
       if(!Array.isArray(d.items)||!d.stream||!d.week)throw Error('监控数据格式异常');
-      if(rev!==revision||!active)return;data=d;receivedAt=Date.now();error='';render();
+      if(rev!==revision||!active)return;data=d;receivedAt=warm?.receivedAt||Date.now();error='';render();
     }catch(e){if(rev===revision&&active){error=e.name==='AbortError'?'数据请求超时，正在重试':e.message;render();}}
     finally{clearTimeout(timeout);if(controller===c)controller=null;if(pending===task)pending=null;if(rev===revision)schedule();}})();pending=task;return task;
   }

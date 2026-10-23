@@ -76,5 +76,8 @@ test('wallpaper starts with readable recent candles and refresh retains a manual
  assert.ok(visible.from<=0&&visible.to>=0,'right padding must not push short histories offscreen');
  instance.draw(data,config,'');
  assert.equal(visible.from,100.25);assert.equal(visible.to,180.25,'returning to a symbol restores its horizontal view');
+ const older=Array.from({length:240},(_,i)=>({...data.candles[0],time:data.candles[0].time-(240-i)*900000}));
+ instance.draw({...data,candles:[...older,...data.candles]},config,'');
+ assert.equal(visible.from,340.25);assert.equal(visible.to,420.25,'background history prepends must keep the same candle timestamps in view');
  sandbox.window.SpikeRangeChart.unmount(host);
 });

@@ -156,3 +156,71 @@ def test_delayed_upstream_tail_does_not_claim_the_current_close():
         assert value['next_close_ms'] == bar_open(client.now, '1H') + STEPS['1H']
     finally:
         service.close()
+
+
+def test_first_response_returns_a_page_before_history_finishes_without_polling():
+    client = Client(); service = MondayCandles(client=client)
+    older_started, finish_history = threading.Event(), threading.Event()
+    original_get = client.get
+    def blocked_history(path, params):
+        if client.calls:
+            older_started.set()
+            assert finish_history.wait(2)
+        return original_get(path, params)
+    client.get = blocked_history
+    try:
+        first = service.snapshot('BTC-USDT-SWAP', '1H', wait_ms=8000)
+        assert older_started.wait(1)
+        assert len(first['candles']) == 240 and first['loading']
+        assert first['history_complete'] is False
+        assert first['last_close_ms'] == bar_open(NOW, '1H')
+        assert len(client.calls) == 1
+        finish_history.set()
+        service.pool.shutdown(wait=True)
+        full = service.snapshot('BTC-USDT-SWAP', '1H')
+        assert len(full['candles']) == 720 and not full['loading']
+        assert full['history_complete'] and len(client.calls) == 3
+        assert full['candles'][-240:] == first['candles']
+    finally:
+        finish_history.set(); service.close()
+
+
+def test_partial_history_failure_retains_first_screen_and_retries_missing_pages():
+    client = Client(); service = MondayCandles(client=client)
+    original_get = client.get
+    def fail_older(path, params):
+        if client.calls: raise RuntimeError('older history offline')
+        return original_get(path, params)
+    client.get = fail_older
+    try:
+        entry = run_fetch(service, '15m')
+        assert len(entry['candles']) == 240 and entry['error']
+        assert not entry['history_complete']
+        service.cache[('BTC-USDT-SWAP', '15m')] = entry
+        client.get = original_get; client.now += 10001
+        service.snapshot('BTC-USDT-SWAP', '15m', wait_ms=8000)
+        service.pool.shutdown(wait=True)
+        assert len(entry['candles']) == 720 and entry['history_complete']
+        assert not entry['error'] and len(client.calls) == 4
+    finally:
+        service.close()
+
+
+def test_waiting_clients_are_bounded_and_shutdown_releases_a_cold_waiter():
+    client = Client(); service = MondayCandles(client=client)
+    entered, release = threading.Event(), threading.Event()
+    def blocked(path, params):
+        entered.set(); release.wait(2); raise RuntimeError('offline')
+    client.get = blocked
+    result = []
+    thread = threading.Thread(target=lambda: result.append(service.snapshot('BTC-USDT-SWAP', '1m', 8000)))
+    try:
+        for _ in range(8): assert service.waiters.acquire(False)
+        # Exhausting the wait budget never blocks or creates duplicate jobs.
+        assert service.snapshot('BTC-USDT-SWAP', '1m', 8000)['loading']
+        assert entered.wait(1)
+        for _ in range(8): service.waiters.release()
+        thread.start(); service.close(); thread.join(1)
+        assert not thread.is_alive() and result[0]['candles'] == []
+    finally:
+        release.set(); service.close()

@@ -99,7 +99,9 @@
   }
   let pending;
   const scriptBase=typeof document!=='undefined'&&document.currentScript?.src;
-  function library(){if(window.LightweightCharts)return Promise.resolve();if(!pending)pending=new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=scriptBase?new URL('vendor/lightweight-charts.standalone.production.js',scriptBase).href:'/vision-assets/vendor/lightweight-charts.standalone.production.js';el.onload=()=>window.LightweightCharts?resolve():reject(Error('图表组件不可用'));el.onerror=()=>{pending=null;el.remove();reject(Error('图表组件加载失败，请重试'));};document.head.append(el);});return pending;}
+  let libraryVersion='';
+  try{libraryVersion=JSON.parse(document.getElementById('asset-versions')?.textContent||'{}')['/vision-assets/vendor/lightweight-charts.standalone.production.js']||'';}catch{}
+  function library(){if(window.LightweightCharts)return Promise.resolve();if(!pending)pending=new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=libraryVersion?'/vision-assets/vendor/lightweight-charts.standalone.production.js?v='+libraryVersion:scriptBase?new URL('vendor/lightweight-charts.standalone.production.js',scriptBase).href:'/vision-assets/vendor/lightweight-charts.standalone.production.js';el.onload=()=>window.LightweightCharts?resolve():reject(Error('图表组件不可用'));el.onerror=()=>{pending=null;el.remove();reject(Error('图表组件加载失败，请重试'));};document.head.append(el);});return pending;}
   const api={lines,colors,price,axisPrice,compactAxisPrice,priceFormat,clock,times,anchor,restore,Views,validRange,resize,frame,syncer,interaction,readout,toolbar,bind,inspector,fullscreen,library};
   if(typeof window!=='undefined')window.SpikeChartTools=api;
   if(typeof module!=='undefined')module.exports=api;
