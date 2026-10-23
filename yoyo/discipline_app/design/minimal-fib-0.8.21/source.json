@@ -1,0 +1,409 @@
+{
+  "request": {
+    "projectId": "8978791379095391159",
+    "selectedScreenIds": [
+      "51ce1f55f38c4604a82b2425e50ad740"
+    ],
+    "deviceType": "MOBILE",
+    "modelId": "GEMINI_3_8_FLASH",
+    "prompt": "对 SPIKE App 的 1.618 全屏K线页面做 Owner 已指定的极简优化，保留现有白色背景、绿色/玫红K线、底部五项导航「合约、纪律、1.618、持仓、统计」、快捷开单胶囊、合约选择、周期选择与原有功能。请生成实际390px设计图与HTML/CSS，并考虑320px。具体：1)彻底去掉高低区间中间的浅蓝色底色，画布纯白、不加区间填充或块。2)高点、低点、上下1.618以及现有0.5中线全部使用纤细实线，线从纽约本周周一收盘开始向右画，收盘之前不能延伸。3)在高低点和上下1.618线末端直接用小号清晰文字写「高点」「低点」「1.618」；无标签背景、无边框、无圆角标牌、无价格轴标签。0.5中线只保留更浅的实线，不加额外标签。4)减少网格及重复说明文字造成的杂乱，保留必要OHLC、周期、价格轴、时间轴及TradingView归属。不要增加指示箭头、卡片或新功能。5)删掉此页右上角设置齿轮，其他合约/纪律/持仓页面右上角也不放设置；全应用仅统计页面右上角保留设置入口，设置页返回统计。不要更改交易逻辑或快捷开单规则。所有行情和金额均使用虚构占位资料，不使用账户截图或私密数据。新屏标题「SPIKE 1.618 · 极简实线与文字」。"
+  },
+  "screen": {
+    "designSystem": {
+      "designSystem": {
+        "displayName": "Liquid Specular",
+        "styleGuidelines": "## Brand & Style\n\nLiquid Glass Trading is an institutional-grade, precision financial interface influenced directly by Apple's Human Interface Guidelines, translucent liquid glass materiality, and modern quant terminal aesthetics. It marries surgical data clarity with tactile, fluid surfaces designed for rapid execution and disciplined risk management.\n\nThe style is primarily **Glassmorphism** combined with **Minimalist Financial Utilitarianism**:\n- Floating translucent capsules with saturated backdrop blur overlays suspended over clean edge-to-edge charting canvases.\n- Ambient micro-borders simulating physical glass specular edges (`rgba(255, 255, 255, 0.85)`).\n- Subdued light neutral stage (`#F7F8F6`) paired with high-contrast, pure-signal indicators to avoid cognitive fatigue during volatile trading conditions.\n\n## Layout & Spacing\n\nThe viewport implements a **No Grid / Fullscreen Canvas HUD** model:\n- The base chart runs edge-to-edge (`absolute inset-0`) behind all navigational layers.\n- Floating interface capsules utilize safe-area inset anchoring (e.g., `pt-12` header, `pb-5` footer).\n- Non-blocking pointer interaction: HUD containers feature `pointer-events: none` while specific interactive capsules enforce `pointer-events: auto`.\n- Standardized touch target boundaries enforce a minimum touch area of `44px x 44px` across mobile triggers.\n- Spacing steps prioritize multiples of 4px, leaning on `space-xs` (4px), `space-sm` (8px), and `space-md` (16px) for inner-capsule grouping.\n\n## Elevation & Depth\n\nVisual depth is achieved through optical glass layering rather than opaque drop shadows:\n\n1. **Floating Capsules (`glass-capsule`)**:\n   - Background: `rgba(255, 255, 255, 0.76)`\n   - Blur & Saturation: `backdrop-filter: blur(28px) saturate(180%)`\n   - Inner Specular Reflection: `box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9)`\n   - Ambient Shadow: `0 8px 24px -4px rgba(26, 27, 31, 0.08)`\n   - Border: `1px solid rgba(255, 255, 255, 0.85)`\n\n2. **Elevated Modal Sheets (`glass-card-elevated`)**:\n   - Background: `rgba(255, 255, 255, 0.92)`\n   - Blur: `backdrop-filter: blur(40px) saturate(190%)`\n   - Edge: `1px solid rgba(255, 255, 255, 0.95)`\n   - Occlusion Shadow: `0 20px 48px -8px rgba(15, 23, 42, 0.16)`\n\n3. **Motion & Feedback**:\n   - Interactive capsules apply spring-damped micro-compression on press: `transform: scale(0.96)` with timing `cubic-bezier(0.2, 0.8, 0.2, 1)`.\n\n## Components\n\n### Floating Navigation Bar\n- Frosted glass capsule floating 20px above viewport bottom.\n- Height: 56px (`h-14`), border: `1px solid rgba(255, 255, 255, 0.8)`.\n- Center tab elevated as an accent icon button with active tint (`#0071E3`).\n\n### Timeframe & Mode Selectors\n- Segmented pill container (`p-1`, `rounded-full`).\n- Inactive segments: text-outline (`#717785`), transparent fill, scale bounce on tap.\n- Active segment: solid fill (`#0071E3`), high-contrast white text, subtle elevation.\n\n### Quick Entry Action Capsule\n- Centered 44px pill button (`w-[220px]`).\n- Frosted translucent white body with dynamic symbol icon and risk indicator badge.\n\n### Half-Sheet Drawers (Symbol Search / Order Ticket)\n- Bottom-pinned overlay with top radius `32px`.\n- Drag handle: centered pill `40px x 4px` in low-contrast gray.\n- Backdrop: heavy blur (`blur-2xl`) with stacked summary cards inside.\n\n### Form Inputs & Risk Matrices\n- Input fields: recessed low-contrast container (`#F4F3F8`), inner 1px border.\n- Key-value list groups: clean horizontal splits separated by 1px translucent dividers (`rgba(113, 119, 133, 0.2)`).",
+        "theme": {
+          "bodyFont": "PLUS_JAKARTA_SANS",
+          "bodyFontFamily": "Plus Jakarta Sans",
+          "colorMode": "LIGHT",
+          "colorVariant": "FIDELITY",
+          "customColor": "#0071e3",
+          "designMd": "---\nname: Liquid Glass Trading\ncolors:\n  surface: '#f9f9ff'\n  surface-dim: '#d4daea'\n  surface-bright: '#f9f9ff'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f0f3ff'\n  surface-container: '#e8eefe'\n  surface-container-high: '#e2e8f8'\n  surface-container-highest: '#dde2f2'\n  on-surface: '#161c27'\n  on-surface-variant: '#414753'\n  inverse-surface: '#2a313d'\n  inverse-on-surface: '#ecf0ff'\n  outline: '#717785'\n  outline-variant: '#c1c6d6'\n  surface-tint: '#005cbb'\n  primary: '#0059b5'\n  on-primary: '#ffffff'\n  primary-container: '#0071e3'\n  on-primary-container: '#fcfbff'\n  inverse-primary: '#abc7ff'\n  secondary: '#006e2d'\n  on-secondary: '#ffffff'\n  secondary-container: '#7cf994'\n  on-secondary-container: '#007230'\n  tertiary: '#ba0012'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#df2828'\n  on-tertiary-container: '#fffaf9'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#d7e2ff'\n  primary-fixed-dim: '#abc7ff'\n  on-primary-fixed: '#001b3f'\n  on-primary-fixed-variant: '#00458f'\n  secondary-fixed: '#7ffc97'\n  secondary-fixed-dim: '#62df7d'\n  on-secondary-fixed: '#002109'\n  on-secondary-fixed-variant: '#005320'\n  tertiary-fixed: '#ffdad6'\n  tertiary-fixed-dim: '#ffb4ab'\n  on-tertiary-fixed: '#410002'\n  on-tertiary-fixed-variant: '#93000b'\n  background: '#f9f9ff'\n  on-background: '#161c27'\n  surface-variant: '#dde2f2'\n  chart-bull: '#16a34a'\n  chart-bear: '#dc2626'\n  fib-blue: '#0ea5e9'\n  fib-mid: '#94a3b8'\n  device-chassis: '#202227'\n  canvas-bg: '#F7F8F6'\n  glass-specular: rgba(255, 255, 255, 0.9)\n  glass-bg: rgba(255, 255, 255, 0.76)\n  glass-card-bg: rgba(255, 255, 255, 0.92)\ntypography:\n  display-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 48px\n    fontWeight: '700'\n    lineHeight: 56px\n    letterSpacing: -0.03em\n  display-lg-mobile:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 34px\n    fontWeight: '700'\n    lineHeight: 40px\n    letterSpacing: -0.025em\n  headline-xl:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 36px\n    fontWeight: '600'\n    lineHeight: 44px\n    letterSpacing: -0.025em\n  headline-xl-mobile:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 34px\n    letterSpacing: -0.02em\n  headline-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 24px\n    fontWeight: '600'\n    lineHeight: 30px\n    letterSpacing: -0.02em\n  headline-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 20px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.015em\n  headline-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 17px\n    fontWeight: '600'\n    lineHeight: 22px\n    letterSpacing: -0.01em\n  metric-val:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 28px\n    fontWeight: '600'\n    lineHeight: 32px\n    letterSpacing: -0.02em\n  body-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 17px\n    fontWeight: '400'\n    lineHeight: 24px\n    letterSpacing: -0.01em\n  body-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 15px\n    fontWeight: '400'\n    lineHeight: 21px\n    letterSpacing: -0.005em\n  body-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 13px\n    fontWeight: '400'\n    lineHeight: 18px\n    letterSpacing: 0em\n  label-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 13px\n    fontWeight: '500'\n    lineHeight: 16px\n    letterSpacing: 0.01em\n  label-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 11px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.04em\nrounded:\n  sm: 0.5rem\n  DEFAULT: 1rem\n  md: 1.5rem\n  lg: 2rem\n  xl: 3rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  gutter-sm: 1rem\n  gutter-lg: 2rem\n  margin: 2rem\n  margin-mobile: 1.25rem\n  margin-desktop: 3rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n## Brand & Style\n\nLiquid Glass Trading is an institutional-grade, precision financial interface influenced directly by Apple's Human Interface Guidelines, translucent liquid glass materiality, and modern quant terminal aesthetics. It marries surgical data clarity with tactile, fluid surfaces designed for rapid execution and disciplined risk management.\n\nThe style is primarily **Glassmorphism** combined with **Minimalist Financial Utilitarianism**:\n- Floating translucent capsules with saturated backdrop blur overlays suspended over clean edge-to-edge charting canvases.\n- Ambient micro-borders simulating physical glass specular edges (`rgba(255, 255, 255, 0.85)`).\n- Subdued light neutral stage (`#F7F8F6`) paired with high-contrast, pure-signal indicators to avoid cognitive fatigue during volatile trading conditions.\n\n## Colors\n\nThe palette pairs high-clarity Apple Cupertino Blue (`#0071E3`) with standard financial market semantic states, framed against a surgical off-white canvas (`#F7F8F6`).\n\n### Role Assignments\n- **Primary (`#0071E3`)**: Used for live price action focal points, primary action triggers, active timeframe states, and execution CTAs.\n- **Secondary (`#16A34A` / `#22C55E`)**: Signal confirmations, bullish candlestick bodies/wicks, positive take-profit targets, and expansion thresholds.\n- **Tertiary / Error (`#DC2626` / `#EF4444`)**: Bearish candlestick bodies/wicks, hard stops, risk disclosures, and critical overhead resistance triggers.\n- **Neutral / Structural (`#717785` / `#94A3B8`)**: Gridlines, inactive axes, equilibrium levels, and auxiliary tabular text.\n- **Surfaces & Glass (`#FFFFFF` translucent blends)**: Semi-transparent frosted layers calibrated to let underlying chart dynamics shine through without compromising legibility.\n\n## Typography\n\nTypography relies on **Plus Jakarta Sans** across all roles, providing geometric clarity, open apertures, and excellent legibility across small financial scales and dense price axis tables.\n\n- **Numerals & Metrics**: Prices, percentages, and order book quotes prioritize tabular or monospace rendering with tight letter tracking (`-0.01em` to `-0.02em`).\n- **Hierarchy Rules**:\n  - `display-*` and `headline-xl` reserved for executive overview totals and standalone metrics.\n  - `headline-sm` (17px) governs modal sheet headers and component titles.\n  - `label-sm` (11px, bold) drives status pills, timestamp markers, and interval chips.\n\n## Layout & Spacing\n\nThe viewport implements a **No Grid / Fullscreen Canvas HUD** model:\n- The base chart runs edge-to-edge (`absolute inset-0`) behind all navigational layers.\n- Floating interface capsules utilize safe-area inset anchoring (e.g., `pt-12` header, `pb-5` footer).\n- Non-blocking pointer interaction: HUD containers feature `pointer-events: none` while specific interactive capsules enforce `pointer-events: auto`.\n- Standardized touch target boundaries enforce a minimum touch area of `44px x 44px` across mobile triggers.\n- Spacing steps prioritize multiples of 4px, leaning on `space-xs` (4px), `space-sm` (8px), and `space-md` (16px) for inner-capsule grouping.\n\n## Elevation & Depth\n\nVisual depth is achieved through optical glass layering rather than opaque drop shadows:\n\n1. **Floating Capsules (`glass-capsule`)**:\n   - Background: `rgba(255, 255, 255, 0.76)`\n   - Blur & Saturation: `backdrop-filter: blur(28px) saturate(180%)`\n   - Inner Specular Reflection: `box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.9)`\n   - Ambient Shadow: `0 8px 24px -4px rgba(26, 27, 31, 0.08)`\n   - Border: `1px solid rgba(255, 255, 255, 0.85)`\n\n2. **Elevated Modal Sheets (`glass-card-elevated`)**:\n   - Background: `rgba(255, 255, 255, 0.92)`\n   - Blur: `backdrop-filter: blur(40px) saturate(190%)`\n   - Edge: `1px solid rgba(255, 255, 255, 0.95)`\n   - Occlusion Shadow: `0 20px 48px -8px rgba(15, 23, 42, 0.16)`\n\n3. **Motion & Feedback**:\n   - Interactive capsules apply spring-damped micro-compression on press: `transform: scale(0.96)` with timing `cubic-bezier(0.2, 0.8, 0.2, 1)`.\n\n## Shapes\n\nThe design system is fundamentally **Pill-shaped (`roundedness: 3`)**:\n- **Capsules & Action Triggers**: Fully rounded pills (`rounded-full` / `9999px`) for navigation bars, instrument switchers, timeframe controls, and execution buttons.\n- **Sheets & Cards**: Generously softened contours (`rounded-t-[32px]` or `rounded-2xl` / 16px) to maintain a friendly, tactile presence.\n- **Data Indicator Badges**: Subtle radiuses (`rounded` / 4px) for inline axis flags and candle representations.\n\n## Components\n\n### Floating Navigation Bar\n- Frosted glass capsule floating 20px above viewport bottom.\n- Height: 56px (`h-14`), border: `1px solid rgba(255, 255, 255, 0.8)`.\n- Center tab elevated as an accent icon button with active tint (`#0071E3`).\n\n### Timeframe & Mode Selectors\n- Segmented pill container (`p-1`, `rounded-full`).\n- Inactive segments: text-outline (`#717785`), transparent fill, scale bounce on tap.\n- Active segment: solid fill (`#0071E3`), high-contrast white text, subtle elevation.\n\n### Quick Entry Action Capsule\n- Centered 44px pill button (`w-[220px]`).\n- Frosted translucent white body with dynamic symbol icon and risk indicator badge.\n\n### Half-Sheet Drawers (Symbol Search / Order Ticket)\n- Bottom-pinned overlay with top radius `32px`.\n- Drag handle: centered pill `40px x 4px` in low-contrast gray.\n- Backdrop: heavy blur (`blur-2xl`) with stacked summary cards inside.\n\n### Form Inputs & Risk Matrices\n- Input fields: recessed low-contrast container (`#F4F3F8`), inner 1px border.\n- Key-value list groups: clean horizontal splits separated by 1px translucent dividers (`rgba(113, 119, 133, 0.2)`).",
+          "font": "PLUS_JAKARTA_SANS",
+          "headlineFont": "PLUS_JAKARTA_SANS",
+          "headlineFontFamily": "Plus Jakarta Sans",
+          "labelFont": "PLUS_JAKARTA_SANS",
+          "labelFontFamily": "Plus Jakarta Sans",
+          "namedColors": {
+            "background": "#f9f9ff",
+            "canvas-bg": "#F7F8F6",
+            "chart-bear": "#dc2626",
+            "chart-bull": "#16a34a",
+            "device-chassis": "#202227",
+            "error": "#ba1a1a",
+            "error_container": "#ffdad6",
+            "fib-blue": "#0ea5e9",
+            "fib-mid": "#94a3b8",
+            "glass-bg": "rgba(255, 255, 255, 0.76)",
+            "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+            "glass-specular": "rgba(255, 255, 255, 0.9)",
+            "inverse_on_surface": "#ecf0ff",
+            "inverse_primary": "#abc7ff",
+            "inverse_surface": "#2a313d",
+            "on_background": "#161c27",
+            "on_error": "#ffffff",
+            "on_error_container": "#93000a",
+            "on_primary": "#ffffff",
+            "on_primary_container": "#fcfbff",
+            "on_primary_fixed": "#001b3f",
+            "on_primary_fixed_variant": "#00458f",
+            "on_secondary": "#ffffff",
+            "on_secondary_container": "#007230",
+            "on_secondary_fixed": "#002109",
+            "on_secondary_fixed_variant": "#005320",
+            "on_surface": "#161c27",
+            "on_surface_variant": "#414753",
+            "on_tertiary": "#ffffff",
+            "on_tertiary_container": "#fffaf9",
+            "on_tertiary_fixed": "#410002",
+            "on_tertiary_fixed_variant": "#93000b",
+            "outline": "#717785",
+            "outline_variant": "#c1c6d6",
+            "primary": "#0059b5",
+            "primary_container": "#0071e3",
+            "primary_fixed": "#d7e2ff",
+            "primary_fixed_dim": "#abc7ff",
+            "secondary": "#006e2d",
+            "secondary_container": "#7cf994",
+            "secondary_fixed": "#7ffc97",
+            "secondary_fixed_dim": "#62df7d",
+            "surface": "#f9f9ff",
+            "surface_bright": "#f9f9ff",
+            "surface_container": "#e8eefe",
+            "surface_container_high": "#e2e8f8",
+            "surface_container_highest": "#dde2f2",
+            "surface_container_low": "#f0f3ff",
+            "surface_container_lowest": "#ffffff",
+            "surface_dim": "#d4daea",
+            "surface_tint": "#005cbb",
+            "surface_variant": "#dde2f2",
+            "tertiary": "#ba0012",
+            "tertiary_container": "#df2828",
+            "tertiary_fixed": "#ffdad6",
+            "tertiary_fixed_dim": "#ffb4ab"
+          },
+          "overrideNeutralColor": "#717785",
+          "overridePrimaryColor": "#0071e3",
+          "overrideSecondaryColor": "#16a34a",
+          "overrideTertiaryColor": "#dc2626",
+          "roundness": "ROUND_FULL",
+          "spacing": {
+            "gutter": "1.5rem",
+            "gutter-lg": "2rem",
+            "gutter-sm": "1rem",
+            "margin": "2rem",
+            "margin-desktop": "3rem",
+            "margin-mobile": "1.25rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "space-xl": "2.5rem",
+            "space-xs": "0.25rem"
+          },
+          "spacingScale": 2,
+          "typography": {
+            "body-lg": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "17px",
+              "fontWeight": "400",
+              "letterSpacing": "-0.01em",
+              "lineHeight": "24px"
+            },
+            "body-md": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "15px",
+              "fontWeight": "400",
+              "letterSpacing": "-0.005em",
+              "lineHeight": "21px"
+            },
+            "body-sm": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "13px",
+              "fontWeight": "400",
+              "letterSpacing": "0em",
+              "lineHeight": "18px"
+            },
+            "display-lg": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "48px",
+              "fontWeight": "700",
+              "letterSpacing": "-0.03em",
+              "lineHeight": "56px"
+            },
+            "display-lg-mobile": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "34px",
+              "fontWeight": "700",
+              "letterSpacing": "-0.025em",
+              "lineHeight": "40px"
+            },
+            "headline-lg": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "24px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "30px"
+            },
+            "headline-md": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "20px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.015em",
+              "lineHeight": "26px"
+            },
+            "headline-sm": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "17px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.01em",
+              "lineHeight": "22px"
+            },
+            "headline-xl": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "36px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.025em",
+              "lineHeight": "44px"
+            },
+            "headline-xl-mobile": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "28px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "34px"
+            },
+            "label-md": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "13px",
+              "fontWeight": "500",
+              "letterSpacing": "0.01em",
+              "lineHeight": "16px"
+            },
+            "label-sm": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "11px",
+              "fontWeight": "600",
+              "letterSpacing": "0.04em",
+              "lineHeight": "14px"
+            },
+            "metric-val": {
+              "fontFamily": "Plus Jakarta Sans",
+              "fontSize": "28px",
+              "fontWeight": "600",
+              "letterSpacing": "-0.02em",
+              "lineHeight": "32px"
+            }
+          }
+        }
+      },
+      "name": "assets/d2d37dd59ebe4de698884f6d017a5ce1",
+      "version": "2"
+    },
+    "deviceType": "MOBILE",
+    "generatedBy": "HatterAgent",
+    "height": "1768",
+    "htmlCode": {
+      "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sX2E5Y2JmNzk2ZDJmNDQyZTM4MmNmZDA1MTExZDgwYTNjEgsSBxCg8tPG9wkYAZIBIwoKcHJvamVjdF9pZBIVQhM4OTc4NzkxMzc5MDk1MzkxMTU5&filename=&opi=96797242",
+      "mimeType": "text/html",
+      "name": "projects/8978791379095391159/files/5fa8eabf63444eaf920cf6be8ca40d9d"
+    },
+    "id": "332e4a5b46a14da5b5787c27cd1d5b50",
+    "name": "projects/8978791379095391159/screens/332e4a5b46a14da5b5787c27cd1d5b50",
+    "prompt": "Refine the full-screen Monday 1.618 mobile screen strictly according to Owner specifications:\n1. Pure white background for the canvas/chart area: Completely REMOVE the light blue/shaded background fill between high and low range lines. No background blocks, no tinted intervals, purely white crisp canvas behind the candles.\n2. Levels (High, Low, +1.618, -1.618, and 0.5 EQ mid-line):\n   - All rendered as crisp, slender solid lines (1px solid).\n   - Horizontal lines start strictly at the NY Monday close bar time and extend rightward. They MUST NOT extend leftward before Monday's close.\n   - 0.5 Mid-line (EQ) is a subtle, lighter solid line without any text label.\n3. Text labels on lines:\n   - At the right end of the High, Low, and +/- 1.618 lines, place clean, small, unobtrusive text directly: '高点', '低点', '1.618' (e.g. '+1.618', '-1.618' or '1.618').\n   - Absolutely NO background pills, NO badge boxes, NO borders, NO rounded tags, NO price-axis block tags covering the axis. Just clean typographical direct text aligned with the line.\n4. Clean and de-cluttered grid & typography:\n   - Reduce visual noise from heavy grid lines and redundant duplicate text notes.\n   - Keep essential OHLC header, timeframe selector pills (5m, 15m active, 1H, 4H), right-hand price axis ticks, bottom time axis ticks, and subtle watermark/attribution.\n   - Do NOT add indicators, arrows, cards, or unrequested features.\n5. Header cleanup & Navigation rule:\n   - REMOVE the top-right settings gear icon entirely from this screen! (Header right area only has the connection status/signal pill, no gear icon).\n   - Preserve the bottom floating 5-item pill navigation: '合约', '纪律', '1.618' (active in center), '持仓', '统计'.\n   - Retain the bottom floating '⚡ 快捷开单 · 1R' pill button.\n6. Responsive to 390px and 320px viewport without clipping or horizontal overflow. Use synthetic placeholder market values (e.g., BTCUSDT). New screen title: 'SPIKE 1.618 · 极简实线与文字'.",
+    "screenMetadata": {
+      "agentType": "PRO_AGENT",
+      "status": "COMPLETE"
+    },
+    "screenType": "DESIGN",
+    "screenshot": {
+      "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1VOdSigenbje1TAbA954cpEyf72b1S_aHKcIH3-JjRWc__GCKWTElmodxhD2CdXmreD_MwmRxaT-MZQC_xwD7Z6A4g1M6Zdn2dhTGylMjEvxBnB9wrxrbpNK3OBOqrMzMbPLcvXzQUpiBcl9_Fvn8Ovhk_3GRYisnEYZiIjg6wQ00W91vhYiyt_87oOKWurFCq8LEvGAicsr5qxd47zbY-4cGHcGoS3CB2yWNZBXc_wGMNDk4N_T1U1mAk",
+      "name": "projects/8978791379095391159/files/aa0b0613b379471ca100519ced229149"
+    },
+    "theme": {
+      "bodyFont": "PLUS_JAKARTA_SANS",
+      "bodyFontFamily": "Plus Jakarta Sans",
+      "colorMode": "LIGHT",
+      "colorVariant": "FIDELITY",
+      "customColor": "#0071e3",
+      "font": "PLUS_JAKARTA_SANS",
+      "headlineFont": "PLUS_JAKARTA_SANS",
+      "headlineFontFamily": "Plus Jakarta Sans",
+      "labelFont": "PLUS_JAKARTA_SANS",
+      "labelFontFamily": "Plus Jakarta Sans",
+      "namedColors": {
+        "background": "#f9f9ff",
+        "canvas-bg": "#F7F8F6",
+        "chart-bear": "#dc2626",
+        "chart-bull": "#16a34a",
+        "device-chassis": "#202227",
+        "error": "#ba1a1a",
+        "error_container": "#ffdad6",
+        "fib-blue": "#0ea5e9",
+        "fib-mid": "#94a3b8",
+        "glass-bg": "rgba(255, 255, 255, 0.76)",
+        "glass-card-bg": "rgba(255, 255, 255, 0.92)",
+        "glass-specular": "rgba(255, 255, 255, 0.9)",
+        "inverse_on_surface": "#ecf0ff",
+        "inverse_primary": "#abc7ff",
+        "inverse_surface": "#2a313d",
+        "on_background": "#161c27",
+        "on_error": "#ffffff",
+        "on_error_container": "#93000a",
+        "on_primary": "#ffffff",
+        "on_primary_container": "#fcfbff",
+        "on_primary_fixed": "#001b3f",
+        "on_primary_fixed_variant": "#00458f",
+        "on_secondary": "#ffffff",
+        "on_secondary_container": "#007230",
+        "on_secondary_fixed": "#002109",
+        "on_secondary_fixed_variant": "#005320",
+        "on_surface": "#161c27",
+        "on_surface_variant": "#414753",
+        "on_tertiary": "#ffffff",
+        "on_tertiary_container": "#fffaf9",
+        "on_tertiary_fixed": "#410002",
+        "on_tertiary_fixed_variant": "#93000b",
+        "outline": "#717785",
+        "outline_variant": "#c1c6d6",
+        "primary": "#0059b5",
+        "primary_container": "#0071e3",
+        "primary_fixed": "#d7e2ff",
+        "primary_fixed_dim": "#abc7ff",
+        "secondary": "#006e2d",
+        "secondary_container": "#7cf994",
+        "secondary_fixed": "#7ffc97",
+        "secondary_fixed_dim": "#62df7d",
+        "surface": "#f9f9ff",
+        "surface_bright": "#f9f9ff",
+        "surface_container": "#e8eefe",
+        "surface_container_high": "#e2e8f8",
+        "surface_container_highest": "#dde2f2",
+        "surface_container_low": "#f0f3ff",
+        "surface_container_lowest": "#ffffff",
+        "surface_dim": "#d4daea",
+        "surface_tint": "#005cbb",
+        "surface_variant": "#dde2f2",
+        "tertiary": "#ba0012",
+        "tertiary_container": "#df2828",
+        "tertiary_fixed": "#ffdad6",
+        "tertiary_fixed_dim": "#ffb4ab"
+      },
+      "overrideNeutralColor": "#717785",
+      "overridePrimaryColor": "#0071e3",
+      "overrideSecondaryColor": "#16a34a",
+      "overrideTertiaryColor": "#dc2626",
+      "roundness": "ROUND_FULL",
+      "spacing": {
+        "gutter": "1.5rem",
+        "gutter-lg": "2rem",
+        "gutter-sm": "1rem",
+        "margin": "2rem",
+        "margin-desktop": "3rem",
+        "margin-mobile": "1.25rem",
+        "space-lg": "1.5rem",
+        "space-md": "1rem",
+        "space-sm": "0.5rem",
+        "space-xl": "2.5rem",
+        "space-xs": "0.25rem"
+      },
+      "spacingScale": 2,
+      "typography": {
+        "body-lg": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "17px",
+          "fontWeight": "400",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "24px"
+        },
+        "body-md": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "15px",
+          "fontWeight": "400",
+          "letterSpacing": "-0.005em",
+          "lineHeight": "21px"
+        },
+        "body-sm": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "13px",
+          "fontWeight": "400",
+          "letterSpacing": "0em",
+          "lineHeight": "18px"
+        },
+        "display-lg": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "48px",
+          "fontWeight": "700",
+          "letterSpacing": "-0.03em",
+          "lineHeight": "56px"
+        },
+        "display-lg-mobile": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "34px",
+          "fontWeight": "700",
+          "letterSpacing": "-0.025em",
+          "lineHeight": "40px"
+        },
+        "headline-lg": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "24px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "30px"
+        },
+        "headline-md": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "20px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.015em",
+          "lineHeight": "26px"
+        },
+        "headline-sm": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "17px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.01em",
+          "lineHeight": "22px"
+        },
+        "headline-xl": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "36px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.025em",
+          "lineHeight": "44px"
+        },
+        "headline-xl-mobile": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "28px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "34px"
+        },
+        "label-md": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "13px",
+          "fontWeight": "500",
+          "letterSpacing": "0.01em",
+          "lineHeight": "16px"
+        },
+        "label-sm": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "11px",
+          "fontWeight": "600",
+          "letterSpacing": "0.04em",
+          "lineHeight": "14px"
+        },
+        "metric-val": {
+          "fontFamily": "Plus Jakarta Sans",
+          "fontSize": "28px",
+          "fontWeight": "600",
+          "letterSpacing": "-0.02em",
+          "lineHeight": "32px"
+        }
+      }
+    },
+    "title": "SPIKE 1.618 · 极简实线与文字",
+    "width": "780"
+  },
+  "scope": "Adopt unfilled chart, solid time-bounded levels and plain inline labels. Preserve trading semantics; generated data is illustrative."
+}

@@ -42,7 +42,7 @@ type ExchangeStatus={connected:boolean;environment:'okx_live'|'okx_demo';executi
 type Preview={plan:Plan;policy_revision:number;ticket:Ticket;request_id:string;preview_id?:string};
 
 export default function App(){
- const settingsOrigin=useRef<Tab>('1.618');
+ const settingsOrigin=useRef<Tab>('统计');
  const [fibTicket,setFibTicket]=useState(false);
  const [fibPeriod,setFibPeriod]=useState<CandlePeriod>('15m');
  const [quickAuto,setQuickAuto]=useState<{symbol:string;side:'long'|'short'}|null>(null);
@@ -309,10 +309,10 @@ export default function App(){
  return <div className={`app ${tab==='合约'?'trade-page':''} ${tab==='1.618'?'fib-page':''} ${editing?'keyboard-open':''}`}>
   <div inert={fibTicket||!!preview||!!closeTarget||!!error||!!sheet||noticeModal}>
   <main key={tab} className={`page-transition ${tab==='合约'?'entry-page':''}`} style={{'--page-offset':`${navDirection*12}px`} as CSSProperties} {...swipe}>
-   {tab==='1.618'&&<FibHome connection={connection} state={state} onSettings={()=>nav('设置')} onQuick={openFibTicket} locked={busy||!!pendingEntry}/>}
+   {tab==='1.618'&&<FibHome connection={connection} state={state} onQuick={openFibTicket} locked={busy||!!pendingEntry}/>}
    {tab==='合约'&&<>
     <section className="quote-hero" aria-label="合约行情">
-     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span><button className="settings-gear" aria-label="设置" onClick={()=>nav('设置')}><Icon name="settings" size={21}/></button></div>
+     <div className="trade-heading"><button className="symbol-picker" aria-label="选择合约" disabled={ticketLocked} aria-haspopup="dialog" onClick={()=>{setSearch('');setSheet('symbol');feedback('light')}}><CoinLogo key={symbol} coin={small(symbol)}/><b>{small(symbol)}<small>/USDT</small></b><span className="down-chevron"/></button><span className="neutral">永续</span><span className="instrument-mode">{mode}</span></div>
      <div className="price-row"><strong className={!fresh?'stale':''}>{priceFmt(selectedQuote?.last)}</strong><span>USDT</span><span className={`freshness ${fresh?'connected':''}`}><i/>{fresh?'实时':selectedQuote?'待更新':'待连接'}</span></div>
     </section>
     <CandleModule connection={connection} symbol={symbol} tick={state?.instruments[symbol]?.tick} entry={existing?.entry} stop={existing?.stop}/>
@@ -326,7 +326,7 @@ export default function App(){
     <p className="disclaimer">{live?'真实资金交易。市价按价格边界成交，限价挂单等待成交；止损和止盈以交易所回执为准，实际损失可能超出预算。':'计划风险含成本预留，实际损失可能超出预算。当前没有交易所真实保护单。'}</p>
    </>}
    {tab==='持仓'&&<>
-    <PageHeader title="持仓保护" subtitle={`${state?.account_name??'当前账户'} · 每笔交易都有退出计划。`} onSettings={()=>nav('设置')}/>
+    <PageHeader title="持仓保护" subtitle={`${state?.account_name??'当前账户'} · 每笔交易都有退出计划。`}/>
     <TradeProgress entry={activeEntry} state={state} onOpen={()=>document.querySelector('.activity-list')?.scrollIntoView({block:'start'})} onDismiss={()=>setEntryProgress(null)}/>{closeRecovery.attempt&&closeProgress()}{!state?<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>连接后查看持仓</h2><p>仓位与保护记录保存在你的服务端。</p><button className="primary" onClick={()=>nav('设置')}>连接纪律服务</button></section>:!state.positions.length&&<section className="empty card"><span className="empty-icon"><Icon name="positions" size={32}/></span><h2>暂时没有 App 持仓</h2><p>先设好止损，再开始一笔有计划的交易。</p><button className="soft-button" onClick={()=>nav('合约')}>查看合约<Icon name="arrow" size={16}/></button></section>}
     {state?.positions.map(pos=><PositionCard key={pos.id} pos={pos} state={displayState!} online={online} busy={busy||!!closeRecovery.attempt} entryStopBusy={action?.kind==='entry-stop'&&action.id===pos.id} onEntryStop={entryStop} onClose={requestClose} onSelectSymbol={openPositionSymbol}/>)}
     {state&&<TradeActivity state={state} busy={busy} cancelling={action?.kind==='cancel'?action.id:undefined} onCancel={cancelOrder} price={priceFmt}/>}
@@ -335,7 +335,7 @@ export default function App(){
    </>}
    {tab==='统计'&&<Statistics overview={state} online={online} connection={connection} onConnect={()=>nav('设置')}/>}
    {tab==='纪律'&&<>
-    <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。" onSettings={()=>nav('设置')}/>
+    <PageHeader title="交易纪律" subtitle="把规则提前定好，把执行交给系统。"/>
     <div className={reason?'warning':'healthy'}><Icon name={reason?'lock':'shield'} size={18}/><span>{reason||'服务端规则生效中'}</span></div>
     <DisciplineBudget state={state} online={online} onOpen={()=>{}}/>
     <section className="card discipline-summary"><span className="badge"><Icon name="lock" size={13}/>{p?'当前生效规则':'连接后读取规则'}</span><div className="summary-grid"><div><b>{p?riskPercent:'—'}<small>%</small></b><span>单笔计划风险</span></div><div><b>{p?.max_entries??'—'}<small>次</small></b><span>每日基础次数</span></div></div><p>{p?.profit_entry_bonus?'盈利全平 +1 次 · 日亏与连亏停手优先':'刷新、退出或换手机，记录依然保留。'}</p></section>

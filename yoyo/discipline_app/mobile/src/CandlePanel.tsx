@@ -1,4 +1,4 @@
-import {fibLevels,type FibRange} from './fibData';
+import type {FibRange} from './fibData';
 import {FibRangePrimitive} from './FibRangePrimitive';
 /** Stitch 66260b3f29db4baf9dd0f2835a13e25c. One feed and a lazy Canvas chart.
  * Lightweight Charts v5.2: incremental series.update, bounded history, ResizeObserver.
@@ -36,8 +36,8 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   if(!host.current)return;
   const chart=createChart(host.current,{
-   layout:{background:{type:ColorType.Solid,color:range?'#fbfcfa':'#ffffff'},textColor:'#75847d',fontSize:10,attributionLogo:true},
-   grid:{vertLines:{visible:false},horzLines:{color:'#f0f3f0'}},
+   layout:{background:{type:ColorType.Solid,color:'#ffffff'},textColor:'#75847d',fontSize:10,attributionLogo:true},
+   grid:{vertLines:{visible:false},horzLines:{visible:!range,color:'#f0f3f0'}},
    rightPriceScale:{borderVisible:false,minimumWidth:58,scaleMargins:{top:.1,bottom:.27}},
    timeScale:{borderVisible:false,timeVisible:true,secondsVisible:false,minimumHeight:range?34:26,barSpacing:6,rightOffset:4,lockVisibleTimeRangeOnResize:true,tickMarkFormatter:(time:Time,type:number)=>type<3?dateLabel(time):timeLabel(time)},
    localization:{locale:'zh-CN',timeFormatter:(time:Time)=>timeLabel(time,true)},
@@ -45,7 +45,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
    handleScale:{axisPressedMouseMove:true,mouseWheel:true,pinch:true},
    crosshair:{vertLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'},horzLine:{color:'#8aa99b',labelBackgroundColor:'#47685a'}},
   });
-  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:LineStyle.Dashed});
+  const candles=chart.addSeries(CandlestickSeries,{upColor:'#00c990',downColor:'#ff3b69',wickUpColor:'#00c990',wickDownColor:'#ff3b69',borderVisible:false,priceLineColor:'#819b90',priceLineStyle:range?LineStyle.Solid:LineStyle.Dashed});
   const volume=chart.addSeries(HistogramSeries,{priceFormat:{type:'volume'},priceScaleId:'volume',lastValueVisible:false,priceLineVisible:false});
   volume.priceScale().applyOptions({scaleMargins:{top:.82,bottom:0},visible:false});
   graph.current={chart,candles,volume};
@@ -81,8 +81,7 @@ const CanvasChart = memo(function CanvasChart({state,symbol,period,tick,entry,st
  useEffect(()=>{
   const series=graph.current?.candles;if(!series||!range)return;
   const primitive=new FibRangePrimitive(range);series.attachPrimitive(primitive);
-  const lines=fibLevels(range).map(level=>series.createPriceLine({...level,lineWidth:1,title:'',lineStyle:level.title==='周一高'||level.title==='周一低'?LineStyle.Solid:LineStyle.Dashed,axisLabelVisible:false}));
-  return()=>{if(graph.current?.candles!==series)return;series.detachPrimitive(primitive);for(const line of lines)series.removePriceLine(line)};
+  return()=>{if(graph.current?.candles===series)series.detachPrimitive(primitive)};
  },[range,symbol,period,showBar]);
  return <><div className="candle-ohlc" ref={legend} aria-label="K线开高低收">开 —　高 —　低 —　收 —</div><div className={`candle-canvas ${fullscreen?'is-fullscreen':''}`} ref={host} role="img" aria-label={`${symbol.replace('-USDT-SWAP','/USDT')} ${PERIODS[period]} K线与成交量`} onTouchStart={e=>e.stopPropagation()}/>{state.historyReady&&<button className="candle-realtime" onClick={()=>{graph.current?.chart.timeScale().scrollToRealTime();feedback('light')}}>回到最新</button>}</>;
 });
@@ -122,7 +121,7 @@ export default function CandlePanel({symbol,connection,tick,entry,stop,period,on
   <header className="candle-heading"><b>{fullscreen?symbol.replace('-USDT-SWAP','/USDT'):'K线'}</b><span className={`candle-status ${state.status==='live'?'live':''}`} role="status"><i/>{statusText[state.status]}</span>{fullscreen?<button aria-label="退出全屏" onClick={()=>{setFullscreen(false);feedback('light')}}><Icon name="close" size={20}/></button>:<><button ref={fullButton} aria-label="全屏查看K线" onClick={()=>{setFullscreen(true);feedback('light')}}><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5"/></svg></button><button aria-label="收起K线" onClick={onCollapse}><Icon name="chevron" size={16}/></button></>}</header>
   <div className="candle-periods" aria-label="K线周期">{(embedded?['5m','15m','1H','4H'] as CandlePeriod[]:Object.keys(PERIODS) as CandlePeriod[]).map(value=><button key={value} aria-pressed={value===period} onClick={()=>{if(value!==period)onPeriod(value)}}>{PERIODS[value]}</button>)}</div>
   <div className="candle-plot"><CanvasChart key={symbol+period} state={state} symbol={symbol} period={period} tick={tick} entry={entry} stop={stop} view={view} onOlder={loadOlder} fullscreen={fullscreen} range={range}/>{!state.historyReady&&<div className="candle-empty"><span>{state.error?'历史暂不可用':'正在补齐历史K线…'}</span>{!!state.error&&<button onClick={()=>void feed.current?.refresh()}>重试</button>}</div>}</div>
-  <footer className="candle-footer"><span>{range?`纽约周一基准 · 图表北京时间 · ${statusText[state.status]}`:'OKX · 北京时间'}</span><button disabled={state.loadingOlder||!state.historyReady||!state.canLoadOlder} onClick={loadOlder}>{state.loadingOlder?'加载历史…':state.canLoadOlder?'更早K线':'历史已加载'}</button></footer>
+  <footer className="candle-footer"><span>{range?`北京时间 · ${statusText[state.status]}`:'OKX · 北京时间'}</span><button disabled={state.loadingOlder||!state.historyReady||!state.canLoadOlder} onClick={loadOlder}>{state.loadingOlder?'加载历史…':state.canLoadOlder?'更早K线':'历史已加载'}</button></footer>
   {state.error&&state.historyReady&&<button className="candle-error" onClick={()=>state.errorKind==='older'?loadOlder():void feed.current?.refresh()}>{state.error}</button>}
   <details className="candle-credit"><summary>图表来源</summary><a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView Lightweight Charts™</a><small>Copyright (с) 2025 TradingView, Inc.</small></details>
  </div>;

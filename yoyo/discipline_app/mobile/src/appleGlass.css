@@ -2,14 +2,14 @@
    Visual layer only; pricing, trade direction, risk and confirmation semantics stay local. */
 :root{
  --motion-ease:cubic-bezier(.16,1,.3,1);--motion-fast:220ms;--motion-page:300ms;--motion-pill:320ms;--motion-press:260ms;--motion-disclosure:240ms;--motion-sheet-in:340ms;
- --canvas:#f5f7fb;--card:rgba(255,255,255,.74);--recessed:rgba(225,232,241,.55);--ink:#1d1d1f;--muted:#6e6e73;--border:rgba(29,29,31,.065);--radius:24px;
+ --canvas:#ffffff;--card:rgba(255,255,255,.74);--recessed:rgba(225,232,241,.55);--ink:#1d1d1f;--muted:#6e6e73;--border:rgba(29,29,31,.065);--radius:24px;
  --shadow:inset 0 1px 0 #fffffff0,0 10px 32px -8px #0f172a0f,0 1px 2px #0f172a07;
  --glass-subtle:rgba(255,255,255,.62);--glass-elevated:rgba(255,255,255,.88);--glass-border:1px solid rgba(255,255,255,.85);--glass-blur:blur(28px) saturate(180%);--accent:#0071e3;--accent-soft:rgba(0,113,227,.08);
  color:var(--ink);background:#edf1f6;
 }
-.app:not(.fib-page){background:radial-gradient(ellipse at 20% 0%,#fbfcff 0%,#f1f5fb 48%,#edf2f7 100%);background-attachment:fixed}
+.app:not(.fib-page){background:var(--canvas)}
 .app:not(.fib-page) main{padding-top:calc(var(--safe-top) + 20px);padding-bottom:calc(130px + var(--safe-bottom))}
-.app:not(.fib-page)::before{background:#f7f9fc}
+.app:not(.fib-page)::before{background:var(--canvas)}
 .app .card,.app .trade-card,.app .position-lite,.app .pending-lite,.app .completed-group{
  background:var(--card);border:var(--glass-border);box-shadow:var(--shadow);border-radius:var(--radius);-webkit-backdrop-filter:var(--glass-blur);backdrop-filter:var(--glass-blur);
 }

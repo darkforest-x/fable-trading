@@ -3,16 +3,20 @@ export type FibTouch={side:'upper'|'lower';source:'live'|'history';occurred_ms:n
 export type FibContract={symbol:string;high:number;low:number;upper:number;lower:number;price:number|null;stale:boolean;touches:Partial<Record<'upper'|'lower',FibTouch>>};
 export type FibSnapshot={now_ms:number;week:string;timezone:string;week_start_ms:number;monday_end_ms:number;next_week_ms:number;monday_complete:boolean;connected:boolean;last_message_ms:number|null;items:FibContract[]};
 export type FibRange={high:number;low:number;upper:number;lower:number;start:number;end:number};
+/** Levels only become drawable after the NY Monday range has closed. */
+export function fibRangeFor(row:FibContract,data:FibSnapshot):FibRange{
+ return {high:row.high,low:row.low,upper:row.upper,lower:row.lower,start:data.monday_end_ms/1000,end:data.next_week_ms/1000};
+}
 export function latestFibTouch(row:FibContract):FibTouch {
  return Object.values(row.touches).sort((a,b)=>b.occurred_ms-a.occurred_ms||a.side.localeCompare(b.side))[0];
 }
 export function fibSide(row:FibContract){return latestFibTouch(row).side==='upper'?'short':'long'}
 export function fibLevels(range:FibRange){return [
- {price:range.upper,title:'上 1.618',color:'#087f69'},
- {price:range.high,title:'周一高',color:'#627d93'},
- {price:(range.high+range.low)/2,title:'0.5',color:'#9aa8af'},
- {price:range.low,title:'周一低',color:'#627d93'},
- {price:range.lower,title:'下 1.618',color:'#e14f70'},
+ {price:range.upper,title:'1.618',color:'#087f69'},
+ {price:range.high,title:'高点',color:'#627d93'},
+ {price:(range.high+range.low)/2,title:'',color:'#c5cdd0'},
+ {price:range.low,title:'低点',color:'#627d93'},
+ {price:range.lower,title:'1.618',color:'#e14f70'},
 ].filter(x=>x.price>0)}
 export function fibSelection(previous:string,previousWeek:string|undefined,next:FibSnapshot){
  return previousWeek===next.week&&next.items.some(r=>r.symbol===previous)?previous:next.items[0]?.symbol??'';

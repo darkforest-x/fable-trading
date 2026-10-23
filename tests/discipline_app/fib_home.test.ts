@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {fibLevels,fibSelection,fibSide,latestFibTouch,parseFibSnapshot,touchLabel,type FibSnapshot,type FibContract} from '../../yoyo/discipline_app/mobile/src/fibData.ts';
+import {fibRangeFor,fibLevels,fibSelection,fibSide,latestFibTouch,parseFibSnapshot,touchLabel,type FibSnapshot,type FibContract} from '../../yoyo/discipline_app/mobile/src/fibData.ts';
 const row=(symbol:string,side:'upper'|'lower',at:number,source:'live'|'history'='live'):FibContract=>({symbol,high:110,low:90,upper:122.36,lower:77.64,price:100,stale:false,touches:{[side]:{side,occurred_ms:at,source}}});
 const snapshot=(items:FibContract[],week='2026-10-19'):FibSnapshot=>({week,now_ms:5000,timezone:'America/New_York',week_start_ms:1000,monday_end_ms:2000,next_week_ms:10000,monday_complete:true,connected:true,last_message_ms:5000,items});
 test('five levels use monitor anchors and mirrored extension arithmetic',()=>{
@@ -25,4 +25,13 @@ test('direction uses newest side; history labels preserve hourly uncertainty',()
  assert.equal(latestFibTouch(two).side,'lower');
  assert.match(touchLabel({side:'upper',source:'history',occurred_ms:1000},5000),/时内/);
  assert.match(touchLabel({side:'lower',source:'live',occurred_ms:4999},5000),/刚刚/);
+});
+
+
+test('reference rays start at Monday close, not week open',()=>{
+ const data=snapshot([row('BTC-USDT-SWAP','upper',3000)]);
+ const range=fibRangeFor(data.items[0],data);
+ assert.equal(range.start,data.monday_end_ms/1000);
+ assert.notEqual(range.start,data.week_start_ms/1000);
+ assert.equal(range.end,data.next_week_ms/1000);
 });

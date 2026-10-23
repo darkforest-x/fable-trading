@@ -1,3 +1,9 @@
+## 2026-10-23 · App 0.8.21 — minimal Monday chart
+
+- Replace chart-wide price lines and range fill with time-bounded native primitive rays, starting at NY Monday close. Solid lines; plain 高点/低点/1.618 text; faint unlabeled midpoint; no band or reference price-axis labels. Candle/session/1R semantics retained. Settings gear exists only on Statistics; non-chart page background is now solid white.
+- Stitch screen332e4a5b46a14da5b5787c27cd1d5b50, source under `yoyo/discipline_app/design/minimal-fib-0.8.21/`.59 frontend tests and320/390 browser checks passed, including4H close between bars, offscreen ranges,0 range fills, settings counts0/0/0/0/1, and existing wick quick-stop. Raw QA `output/playwright/app-minimal/`; build receipt `yoyo/discipline_app/releases/build-0.8.21.json`.
+- Web assets updated, iOS/Android0.8.21(30) builds/signatures verified. iPhone install failed CoreDevice1011; not installed. Backend remains0.8.20 without restart or trade commands. Temporary browserPID5725 and fixturePID5650 closed after QA.
+
 ## 2026-10-23 · 区间1.618 limit + 30/50-minute hold rejected (NautilusTrader only)
 
 - Owner rule: rest a limit at the first weekly Monday 1618 (short above high, long below low), market exit after 30 or 50 minutes; variant adds the 2.0 stop. NautilusTrader 1.231.0 1m via `nautilus_independent.run_native` (limit entry, terminal market close), real fees maker .02 entry / taker .05 exit.

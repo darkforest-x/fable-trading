@@ -3,11 +3,11 @@ import {lazy,Suspense,useEffect,useMemo,useRef,useState} from 'react';
 import {api,SERVICE_URL,type Connection,type State} from './api';
 import {Dialog} from './Dialog';
 import {Icon} from './Icon';
-import {fibSelection,latestFibTouch,parseFibSnapshot,touchLabel,type FibContract,type FibSnapshot} from './fibData';
+import {fibRangeFor,fibSelection,latestFibTouch,parseFibSnapshot,touchLabel,type FibContract,type FibSnapshot} from './fibData';
 import type {CandlePeriod} from './candleData';
 import './fib.css';
 const CandlePanel=lazy(()=>import('./CandlePanel'));
-export function FibHome({connection,state,onSettings,onQuick,locked}:{connection:Connection|null;state:State|null;onSettings:()=>void;onQuick:(row:FibContract,period:CandlePeriod)=>void;locked:boolean}){
+export function FibHome({connection,state,onQuick,locked}:{connection:Connection|null;state:State|null;onQuick:(row:FibContract,period:CandlePeriod)=>void;locked:boolean}){
  const [data,setData]=useState<FibSnapshot|null>(null),[symbol,setSymbol]=useState(''),[error,setError]=useState('');
  const [period,setPeriod]=useState<CandlePeriod>('15m'),[chooser,setChooser]=useState(false),[search,setSearch]=useState('');
  const [revision,setRevision]=useState(0),[clock,setClock]=useState(Date.now());
@@ -23,14 +23,14 @@ export function FibHome({connection,state,onSettings,onQuick,locked}:{connection
  },[revision]);
  useEffect(()=>{const timer=setInterval(()=>setClock(Date.now()),30000);return()=>clearInterval(timer)},[]);
  const row=data?.items.find(r=>r.symbol===symbol),touch=row?latestFibTouch(row):null;
- const range=useMemo(()=>row&&data?{high:row.high,low:row.low,upper:row.upper,lower:row.lower,start:data.week_start_ms/1000,end:data.next_week_ms/1000}:undefined,[symbol,data?.week,row?.high,row?.low,row?.upper,row?.lower]);
+ const range=useMemo(()=>row&&data?fibRangeFor(row,data):undefined,[symbol,data?.monday_end_ms,data?.next_week_ms,row?.high,row?.low,row?.upper,row?.lower]);
  const live=!!data?.connected&&!!data.last_message_ms&&clock-data.last_message_ms<90000&&!error;
  function select(value:string){setSymbol(value);previous.current.symbol=value;setChooser(false)}
  const recent=data?.items[0];
  const tick=state?.instruments[symbol]?.tick??(row?String(10**-Math.min(12,Math.max(2,...[row.high,row.low].map(n=>String(n).split('.')[1]?.length??0)))):undefined);
  return <section className="fib-home" aria-label="1.618 行情" data-no-swipe>
   <div className="fib-screen" inert={chooser}>
-   <header className="fib-top"><button className="fib-symbol" aria-label="选择已触价合约" onClick={()=>{setSearch('');setChooser(true)}} disabled={!data?.items.length}><i className={live?'live':''}/><b>{symbol?symbol.replace('-USDT-SWAP',''):'1.618'}<small>{symbol?'/USDT':''}</small></b><Icon name="chevron" size={13}/></button><button className="fib-settings" aria-label="设置" onClick={onSettings}><Icon name="settings" size={20}/></button></header>
+   <header className="fib-top"><button className="fib-symbol" aria-label="选择已触价合约" onClick={()=>{setSearch('');setChooser(true)}} disabled={!data?.items.length}><i className={live?'live':''}/><b>{symbol?symbol.replace('-USDT-SWAP',''):'1.618'}<small>{symbol?'/USDT':''}</small></b><Icon name="chevron" size={13}/></button></header>
    {row&&touch?<>
     <div className="fib-selected"><span>{touchLabel(touch,clock)}</span>{error&&<span>连接延迟</span>}</div>
     {recent&&recent.symbol!==symbol&&<button className="fib-new" onClick={()=>select(recent.symbol)}>查看最新触价 · {recent.symbol.replace('-USDT-SWAP','')} <Icon name="arrow" size={12}/></button>}
