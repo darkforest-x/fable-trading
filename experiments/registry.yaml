@@ -13389,8 +13389,8 @@ experiments:
     result: "633 assets,19048 signals,74161 signal/control parents;33833 new native parents/135332fills;40328 unchanged non-TP1 parents reused.48 tests and complete fee/identity/fill audit pass. Hold to BE meanR BTC -0.14886/-0.14222,ETH -0.23612/-0.28463,XAU gross +0.15616/+0.05158;alts common18698 -0.094484/-0.104707. All win rates rise;5257 alt runner stops protected,2197 eventual far TPs cut. Alt unresolved52/28;24 newly resolved. All15 policy-gain Holm tests1. No default change. Notion4028856479af816d9168dcf69089eb2f verified."
   - experiment_id: exp-monday-limit-timed-vectorbt-20261024-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder_commit
-    status: running
+    source_commit: a3d5eaa01c
+    status: completed
     question: First weekly directional limit at1.618, no stop, how many profitable after5/15/60/240minutes with actual fees?
     single_variable: Holding time only; same pending limits, shared entry cohort, fees and matched timing controls. Intrabar fill-clock bounds are uncertainty diagnostics.
     artifacts:
@@ -13400,3 +13400,4 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: Owner explicitly confirmed first-touch/no-stop and5m plus15m/1h/4h. VectorBT native crossing and Portfolio fills only; existing1m refinement when OHLC agrees. No fabricated second-level clock; return bounds retained. XAU gross only.
+    result: "633 assets,65697 first touches,65644 shared entries,262716 available signal-horizon rows;1531141 native scenario positions/3062282fills audited,13 tests pass.5m reference wins BTC151/289,ETH154/299,XAU gross354/622,alts31080/64434. Alts5/15/60/240m net meanbp -9.5079/-0.0418/+13.9905/+12.9692;1h reference win56.73percent. Intrabar-clock bounds remain wide; exact elapsed5m alt win24.78-78.65percent. ETH largest quote verified against Binance; no silent removal. No profit qualification, defaults or live changes. Notion4028856479af815db17cc08424df4245 read back; analysis5ca58ed85a."
