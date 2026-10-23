@@ -1,3 +1,11 @@
+## 2026-10-24 · Monday1618 VectorBT parameter grids completed
+
+- Owner explicitly selected VectorBT and two separate one-variable grids: case2/3/4 confirmation bars1–5; case2 prior-volume10/20/30/40 with confirmation3. Stop pin extreme, target near NYMonday edge, first touch, real OKX fees unchanged; XAU gross only and no case2 volume.
+- 633assets,18unique configurations;220733configuration-signal rows (overlap across configs),546277new native framework positions,126507reused cached geometries,2462baseline signal checks.8focused tests pass. Empty frozen candidate CSVs handled. Exact-price inclusivity/open-before-intrabar priority fixed;633asset opening audit finds0affected historical fills, so no fill replay.
+- Select using pre2023 meanR, evaluate2023onward, exclude6cross-cut signal rows. All selected alt variants remain negative: 15mN3 -0.1061R;1hN5 -0.0461R versusbaseline -0.0612;4hN4 -0.0430R versus -0.0556;volume30 -0.1038R versus -0.1061. BTC4h keeps originalN3, later31trades +0.2531R but -4.14bp. Selected XAU settings lose later. No default change/promote.
+- Controls now verify actual NY entry week rather than trusting pin-week labels;5014configuration-signal rows cross weeks and cannot use old pin-week controls. Report paired signal/control R on the same complete cohort. Alt1h/4h outperform random (Holm0.008996) yet are not profitable. Previously explored history, not a fresh holdout.
+- Canonical: `experiments/active/exp-monday-vectorbt-parameters-20261023-v1/summary-entry-week.json`, `metrics-entry-week.csv`, `all-trades-open-priority.csv.gz`, `completion.json`. Initial summary/metrics preserve pre-entry-week-audit descriptions; use canonical files. `scripts/backtest-monday-parameters` validates unchanged dependencies and returns cached completion with0replays. No extra HTML, downloads, dependency installs, browser sessions or live actions.
+
 ## 2026-10-23 · 区间1.618 limit + hold with 15m wick stop rejected (NautilusTrader only)
 
 - Owner: "止损改成影线低点重新跑". Same limit at the first weekly Monday 1618 and 30/50-minute hold; stop = low (long) / high (short) of the 15m bar containing the touch, placed at that bar's close (price cannot pass it inside the bar). Adapter gained a one-time native stop tightening (`stop_update_i`/`stop_update`, reason 9); a close already at the wick extreme exits at that close. 250 adapter tests pass.

@@ -13334,13 +13334,14 @@ experiments:
   - experiment_id: exp-monday-vectorbt-parameters-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 89058b9225
-    status: active
+    status: completed
     question: Do independently varying confirmation counts or prior-volume windows improve the Monday1618 cases2-4?
     single_variable: Owner authorized confirmations1-5 separately for cases2/3/4, and previous-volume10/20/30/40 for case2 with confirmations3;18 unique configurations. Stops, targets, costs and first-touch rules unchanged.
     artifacts:
     - monday-vectorbt-parameters-20261023-v1
-    canonical_report: experiments/active/exp-monday-vectorbt-parameters-20261023-v1/summary.json
+    canonical_report: experiments/active/exp-monday-vectorbt-parameters-20261023-v1/summary-entry-week.json
     training_eligible: false
     production_eligible: false
     reuse_allowed: true
     notes: VectorBT1.2.0 isolated environment; native stop selection and Portfolio accounting; frozen baseline fills reused, new unique trade geometries simulated once. Earlier meanR selection then later evaluation; matched controls, no fresh holdout claim. XAU gross only and unavailable for volume condition.
+    result: "633assets and18configs completed. Earlier-selected alt settings remain net negative later: case2N3 -0.1061R, case3N5 -0.0461R, case4N4 -0.0430R, case2volume30 -0.1038R. BTC4h still selects originalN3 (+0.2531R later31trades but -4.14bp). No newly robust profitable setting; all defaults preserved."
