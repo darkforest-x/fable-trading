@@ -13345,3 +13345,16 @@ experiments:
     reuse_allowed: true
     notes: VectorBT1.2.0 isolated environment; native stop selection and Portfolio accounting; frozen baseline fills reused, new unique trade geometries simulated once. Earlier meanR selection then later evaluation; matched controls, no fresh holdout claim. XAU gross only and unavailable for volume condition.
     result: "633assets and18configs completed. Earlier-selected alt settings remain net negative later: case2N3 -0.1061R, case3N5 -0.0461R, case4N4 -0.0430R, case2volume30 -0.1038R. BTC4h still selects originalN3 (+0.2531R later31trades but -4.14bp). No newly robust profitable setting; all defaults preserved."
+  - experiment_id: exp-monday-1h-body-hold-vectorbt-20261024-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 09d920175d
+    status: running
+    question: Does allowing hourly confirmation wicks to cross1618 improve first-touch case3, and how often do profitable excursions end at the original stop?
+    single_variable: First change only strict whole-range confirmation to inclusive body-only confirmation atN3; then vary only confirmation count1-5. Original pin, stop, target, costs and first-touch admission fixed.
+    artifacts:
+    - monday-1h-body-hold-vectorbt-20261024-v1
+    canonical_report: experiments/active/exp-monday-1h-body-hold-vectorbt-20261024-v1/summary.json
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: NativeVectorBT fills only for new geometries; immutable frozen results reused. Earlier meanR selection, later historical evaluation, actual-entry-week matched controls. Excursions terminate at the execution event; prior-exit-bar bounds retained. No stop/target parameter sweep.
