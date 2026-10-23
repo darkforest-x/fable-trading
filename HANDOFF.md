@@ -1,3 +1,10 @@
+## 2026-10-24 · Explicit Monday HTML update awaiting Stitch
+
+- Owner asked where the HTML is, annotating BTC case4 N5 win65.71%. Default no-unsolicited-report does not cancel the earlier explicit HTML request. Old complete baseline HTML remains `artifacts/monday-cases-report-20261023/monday-1618-report.html`; it lacks subsequent parameter/exit research and must not be presented as current.
+- Prepared canonical update without any trade replay: `yoyo/evaluation/monday_report_update.py` (builder082a1d3d2d), stable report appID unchanged. `artifacts/monday-cases-report-20261024/continuation.json` is the resume contract. Existing79,430signals/60samples preserved;663new metric rows checked against frozen sources;35BTCN5 native trades,6seeded win/loss samples/12PNG and13CSV31.5MB companion ZIP ready. New HTML is NOT built or complete.
+- BTC N5:23/35positive=65.71%,mean netR-0.051744,payoff0.453813,PF0.869809;2023+20trades60%wins,-0.221301R. All12SL trades previously had positive gross MFE;5 reached1R,also true using only completed pre-exit bars. No other exit policy simulated.
+- Stitch edit screen5230353fc774421d9260d60091ad8a89 in project8978791379095391159 usingGEMINI_3_8_FLASH timed out300s. Three project recovery reads andscreenlist expose only olddesign;latestprojectupdate19:33:56UTC. Owner previously explicitly required waiting, no waiver. Do not silently use olddesign fornewlayout or resubmit samegeneration. Data source buildStatus paused; UI source andoldcompiledHTML unchanged. Continue once new image andcode appear; exact remaining steps in continuation.json. No test server/browser created; claimed existing userStitchtab left intact.
+
 ## 2026-10-24 · Aug19 Beijing review of Monday1.618
 
 - Owner requested8.19 retrospective;context fixes2026/Beijing. NYMondayAug17 is BeijingAug17noon-Aug18noon. BTC upper65432.5044 first touches22h17 andETH1938.8884 at20h49 (verified1m intervals), then closes68523.7/2085.16 onAug19;day gains5.71/8.78percent. Both lower levels untouched. Observed63firsttouch symbols:53upper,10lower;38upper at23h. Coverage is not the entire market.

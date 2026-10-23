@@ -1,0 +1,14 @@
+import image0 from "../assets/latest/btc-n5-01-detail.png";
+import image1 from "../assets/latest/btc-n5-01-full.png";
+import image2 from "../assets/latest/btc-n5-02-detail.png";
+import image3 from "../assets/latest/btc-n5-02-full.png";
+import image4 from "../assets/latest/btc-n5-03-detail.png";
+import image5 from "../assets/latest/btc-n5-03-full.png";
+import image6 from "../assets/latest/btc-n5-04-detail.png";
+import image7 from "../assets/latest/btc-n5-04-full.png";
+import image8 from "../assets/latest/btc-n5-05-detail.png";
+import image9 from "../assets/latest/btc-n5-05-full.png";
+import image10 from "../assets/latest/btc-n5-06-detail.png";
+import image11 from "../assets/latest/btc-n5-06-full.png";
+import aug19 from "../assets/latest/aug19.png";
+export const latestImages={"btc-n5-01-detail":image0,"btc-n5-01-full":image1,"btc-n5-02-detail":image2,"btc-n5-02-full":image3,"btc-n5-03-detail":image4,"btc-n5-03-full":image5,"btc-n5-04-detail":image6,"btc-n5-04-full":image7,"btc-n5-05-detail":image8,"btc-n5-05-full":image9,"btc-n5-06-detail":image10,"btc-n5-06-full":image11,aug19};
