@@ -200,7 +200,13 @@ def summarize(cfg):
         strict_subset_checks=sum(r['strict_subset_checks'] for r in done),selection=selections,
         baseline_comparison=[r for r in rows if r['period']=='all' and r['config_id'] in ('body-n3','strict-n3')],
         limitations=cfg['limitations'],production_eligible=False,training_eligible=False)
-    dump(EXP/'summary.json',summary);dump(EXP/'coverage.json',done)
+    # Empty cohorts and unknown spot costs are null, not non-standard JSON NaN.
+    def finite(value):
+        if isinstance(value,dict): return {k:finite(v) for k,v in value.items()}
+        if isinstance(value,list): return [finite(v) for v in value]
+        if isinstance(value,float) and not np.isfinite(value): return None
+        return value
+    dump(EXP/'summary.json',finite(summary));dump(EXP/'coverage.json',done)
     print(json.dumps({k:v for k,v in summary.items() if k not in ('selection','baseline_comparison','limitations')}),flush=True)
 
 
