@@ -1,0 +1,152 @@
+{
+  "experiment_id": "exp-monday-4h-close-hold-20261023-v1",
+  "builder_commit": "8fdc36e4d6",
+  "reproduce": "scripts/backtest-monday-4h --workers 3",
+  "runtime": {
+    "nautilus_trader": "1.231.0",
+    "pandas": "3.0.5",
+    "numpy": "2.5.3"
+  },
+  "completed_symbols": 633,
+  "signals": 13156,
+  "closed_signals": 13132,
+  "censored_signals": 24,
+  "native_positions": 44824,
+  "native_fills": 89648,
+  "oracle_checked": 44824,
+  "unique_native_trade_ids": 44824,
+  "inputs_and_code_stamps_unchanged": true,
+  "confirmation_delay_verified_hours": 16,
+  "max_native_oracle_r_error": 8.284928298962768e-12,
+  "max_per_fill_fee_r_error": 7.678302438307583e-13,
+  "unmatched_signals": 2600,
+  "rejected_entry_geometry": 8897,
+  "no_signal_symbols": [
+    "GENIUSUSDT",
+    "GWEIUSDT",
+    "MEGAUSDT",
+    "NIGHTUSDT",
+    "OPGUSDT",
+    "PRLUSDT",
+    "\u9f99\u867eUSDT"
+  ],
+  "crypto_end_dates": {
+    "2026-09-22": 226,
+    "2026-04-30": 406
+  },
+  "gold_signal_dates": {
+    "min": "2017-03-01 16:00:00+00:00",
+    "max": "2025-03-19 16:00:00+00:00"
+  },
+  "absolute_week_cluster_intervals": {
+    "BTC": {
+      "net_r": {
+        "mean": 0.27813681946448876,
+        "week_cluster_ci95": [
+          -0.13621428477560618,
+          0.7504466826393549
+        ]
+      },
+      "net_bp": {
+        "mean": 34.38528470988658,
+        "week_cluster_ci95": [
+          -12.436328141190303,
+          88.06111652448959
+        ]
+      }
+    },
+    "ETH": {
+      "net_r": {
+        "mean": 0.06877469539077144,
+        "week_cluster_ci95": [
+          -0.3287290160949233,
+          0.6097325476436226
+        ]
+      },
+      "net_bp": {
+        "mean": -4.486510662029273,
+        "week_cluster_ci95": [
+          -68.72648860277052,
+          62.81935100220096
+        ]
+      }
+    },
+    "XAUUSD": {
+      "gross_r": {
+        "mean": -0.2621387072290886,
+        "week_cluster_ci95": [
+          -0.8366451016635846,
+          0.3123676872054075
+        ]
+      },
+      "gross_bp": {
+        "mean": -4.136272468479168,
+        "week_cluster_ci95": [
+          -24.46776451216795,
+          15.148313151106025
+        ]
+      }
+    },
+    "GROUP1_BTC_ETH_GOLD": {
+      "gross_r": {
+        "mean": 0.20976559401162423,
+        "week_cluster_ci95": [
+          -0.07614070413433131,
+          0.5575592137619422
+        ]
+      },
+      "gross_bp": {
+        "mean": 21.092844593305525,
+        "week_cluster_ci95": [
+          -13.74205835359352,
+          59.40531094972991
+        ]
+      }
+    },
+    "ALTCOINS": {
+      "net_r": {
+        "mean": -0.049057643919143426,
+        "week_cluster_ci95": [
+          -0.09683680341590557,
+          -0.004242308059554172
+        ]
+      },
+      "net_bp": {
+        "mean": -11.775114663988138,
+        "week_cluster_ci95": [
+          -27.066584442810502,
+          2.599685378549321
+        ]
+      }
+    }
+  },
+  "real_BTC_prefix_signal_parity": {
+    "passed": true,
+    "cut_at": "2023-03-15 04:00:00+00:00",
+    "signals_checked": 29,
+    "future_price_rows_omitted": 370775
+  },
+  "screenshot_week_binance_example": {
+    "week": "2026-01-26",
+    "pin": "2026-01-28 12:00:00+00:00",
+    "level": 90233.6994,
+    "stop": 90444.4,
+    "target": 88983.3,
+    "confirmation_end": "2026-01-29 04:00:00+00:00",
+    "entry_open": 88003.2,
+    "admitted": false,
+    "reason": "Target already behind entry after three confirmations; screenshot is OKX, these are Binance counterpart prices"
+  },
+  "tests_passed": 18,
+  "raw_ledgers": "symbols/<symbol>/segment-*/native_gross.csv.gz,native_fills.csv.gz,fills.csv.gz,trades.csv.gz",
+  "not_a_portfolio_return": true,
+  "training_eligible": false,
+  "production_eligible": false,
+  "cache_reuse_verified": [
+    "BTCUSDT",
+    "XAUUSD"
+  ],
+  "notion_status": "synced",
+  "notion_url": "https://app.notion.com/p/4028856479af81878f9bc0615e838cfe",
+  "notion_readback_verified": true
+}

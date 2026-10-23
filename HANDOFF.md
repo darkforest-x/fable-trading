@@ -1,3 +1,12 @@
+## 2026-10-23 · Case4 4h wick plus three inside closes: BTC exploratory, alts negative
+
+- Owner case4:4h pin body strictly inside1618, wick touches; next3complete contiguous4h closes at/inside level, equality allowed, opens/wicks may cross. First weekly-side touch inherited. Enter pin+16h, originalpin SL/nearMondayedge TP. UTC4h versusNYMonday winter boundary handled using original5m firsttouch and knownprefix; no volume condition.
+- Reused Nautilus1.231.0 native5m adapter,633symbols13156signals13132closed24censored,44824positions89648fills all checked.18focused tests; input/code stamps unchanged andBTC/XAUcache reused. ActualBTC truncated before370775futurebars preserves all29prefix signals. `scripts/backtest-monday-4h --workers 3`; builder8fdc36e4d6.
+- BTC57 netwin59.65percent/netmean+.27814R,random-.21000R,PF1.670; absoluteCI[-.1362,.7504]R crosses0, matched37p.0305 exploratory. Earlier/later netR+.30793/+.25315, but later equalnotional-4.14bp. ETH59 netmean+.06877R,random-.36574R; later32-.21910R. Gold8grossmean-.26214R,random-.35984R,brokercostunknown. Group1 124grossmean+.20977R vsrandom-.23769R,absoluteCI crosses0; no mixed net figure.
+- 630alts13008closed24censored,netwin57.47percent,netmean-.04906R,random-.18991R,mean-11.78bp,PF.888; earlier/later netR-.01840/-.05562.10450fullmatches excess46.06bpCI[31.94,59.84],p.00050 but absolute net loss.2600signals lack3controls; absolute results retain them. One ambiguous signal:stopfirst-639.35R versus native-638.14R.
+- Screenshot weekBinance counterpart pin2026-01-28 12UTC confirms at01-29 04UTC,entry88003.2 already belowMondayhigh88983.3; skipped rather than retrospectively opened. ScreenshotOKX prices differ. Strict240observedminutes in each4h makesgold sparse; no synthetic gaps filled.
+- Results/receipt/cases1-4comparison in `experiments/active/exp-monday-4h-close-hold-20261023-v1/`. Notion https://app.notion.com/p/4028856479af81878f9bc0615e838cfe write/readback confirmed. Research only,training/productionfalse. No newdata/dependencies/browser/live actions; unrelated stagedREADME deletion preserved.
+
 ## 2026-10-23 · 1.618 homepage, current-week lines and free manual entry
 
 - Owner confirmed current NY Monday range and 1.618, plus free manual orders matching the paper ticket choices. Homepage/old #market redirect to1.618; Market navigation removed. MarketSync/MarketContext no longer start; retired context/workstation routes410 prevent old tabs restarting collection. Shared monitor, Monday stream, four patrols and execution stay enabled.

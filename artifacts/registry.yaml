@@ -18,6 +18,19 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-4h-close-hold-20261023-v1
+    artifact_type: manifest
+    role: four_hour_wick_rejection_three_close_only_confirmations
+    source_repo: darkforest-x/fable-trading
+    source_commit: 8fdc36e4d6
+    generator_commit: 8fdc36e4d6
+    source_path: experiments/active/exp-monday-4h-close-hold-20261023-v1/summary.json
+    storage_uri: repo://experiments/active/exp-monday-4h-close-hold-20261023-v1/summary.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: '633symbols13156signals44824native positions89648fills all checked;18tests. BTC positive sample mean with absoluteCI spanning0; ETH later negative; XAU only8gross-only;630alts negative. Reproduce scripts/backtest-monday-4h --workers 3. Prior cases retained, local ledgers, no formal report.'
+
   - artifact_id: monday-1h-wick-hold-20261023-v1
     artifact_type: manifest
     role: hourly_wick_rejection_three_untouched_confirmation_bars

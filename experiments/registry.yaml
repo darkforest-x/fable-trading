@@ -16,12 +16,13 @@ schema_version: 1
 experiments:
   - experiment_id: exp-monday-4h-close-hold-20261023-v1
     source_repo: darkforest-x/fable-trading
-    source_commit: pending_builder_commit
-    status: active
+    source_commit: 8fdc36e4d6
+    status: inconclusive
     question: 'Owner case4: 4h wick1618 touch and three closes remaining at or inside the same level.'
     single_variable: 'Owner-defined case4 protocol fixed before replay; original pin SL and nearMondayedge TP, existing execution and costs.'
-    result: 'Pending native framework replay; close-only confirmation, equality accepted, no volume filter.'
-    artifacts: []
+    result: '633symbols13156signals44824native positions89648fills. BTC57 netmean+.27814R vsrandom-.21000R but absoluteCI crosses0; ETH59+.06877R, later-.21910R. Gold8grossmean-.26214R, costs unknown. Group1 124grossmean+.20977R vsrandom-.23769R, absoluteCI crosses0.630alts13008closed24censored netwin57.47percent,netmean-.04906R vsrandom-.18991R; matched excess46.06bp p.00050 but absolute netR negative both periods. BTC exploratory, broad profitability unproven.'
+    artifacts:
+    - monday-4h-close-hold-20261023-v1
     canonical_report: experiments/active/exp-monday-4h-close-hold-20261023-v1/summary.json
     holdout_consumed: false
     training_eligible: false
