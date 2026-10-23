@@ -47,7 +47,7 @@
     start(symbol+'|'+period,'/api/monday-fib/candles?symbol='+encodeURIComponent(symbol)+'&period='+period+'&wait_ms=8000');
   });
   const critical=['workspace-base.css','workspace-shell.css','workspace-polish.css','workspace-boot.js'];
-  const names=[...critical,'monday-fib.css','range-chart.js','monday-fib-chart.js','monday-quick.js','monday-fib.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
+  const names=[...critical,'monday-fib.css','range-chart.js','monday-candle-feed.js','monday-fib-chart.js','monday-quick.js','monday-fib.js','/vision-assets/vendor/lightweight-charts.standalone.production.js'];
   for(const name of names){
     if(!versions[name])continue;
     const link=document.createElement('link');link.rel='preload';link.as=name.endsWith('.css')?'style':'script';

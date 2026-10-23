@@ -1,4 +1,4 @@
-/* Shared closed-candle renderer. Calendar/profile calculations stay in the API. */
+/* Shared OHLC renderer. Calendar/profile calculations stay in the API. */
 (() => {
   'use strict';
   const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -145,7 +145,8 @@
       this.views.save(this.key,oldRange,oldTimes);
       if(key!==this.key)this.chart.priceScale('right').applyOptions({autoScale:true});
       const saved=key===this.key?T.anchor(oldRange,oldTimes):null;
-      // API time is milliseconds. Keep only the API's disclosed, closed candle set.
+      // API time is milliseconds. Display-only live tips are explicitly merged
+      // by their owning chart; analytical consumers keep their closed series.
       this.rows=(data?.candles||[]).slice(-view.bars).map(r=>({...r,time:r.time/1000}));
       this.rowByTime=new Map(this.rows.map(r=>[r.time,r]));
       const newTimes=T.times(this.rows),timeChanged=oldTimes.length!==newTimes.length||oldTimes.some((t,i)=>t!==newTimes[i]);
@@ -165,7 +166,7 @@
       for(const level of levels)this.lines.push(this.series.createPriceLine({price:level.price,color:level.color||colors[level.kind],lineWidth:level.lineWidth||1,lineStyle:level.lineStyle??(level.kind==='range'?0:2),lineVisible:!this.levelWindow,axisLabelVisible:!this.levelWindow&&level.axisLabelVisible!==false,title:level.label}));
       this.panel.querySelector('.cv-levels').innerHTML=levels.map(l=>`<span style="color:${l.color||colors[l.kind]}">${esc(l.label)} <b>${T.axisPrice(l.price)}</b></span>`).join('');
       this.levelKey=levelKey;}
-      this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · 已收盘 ${data?.bar||'15m'}`;
+      this.panel.querySelector('[data-range-heading]').textContent=`${(data?.symbol||'').replace('-USDT-SWAP','')} · ${data?.display_live?'实时':'已收盘'} ${data?.bar||'15m'}`;
       const status=this.panel.querySelector('.cv-range-status'),warning=error||data?.error||this.rows.length&&data?.stale&&'行情已过期 · 仅供查看历史位置';
       status.classList.toggle('is-warning',!!warning);status.textContent=warning||(!this.rows.length?'正在加载 K 线与关键价位…':`收盘边界：北京 ${clock(data.last_close_ms,true)} · ${data.monday?.complete?'周一区间已冻结':data.monday?.developing?'周一区间形成中':'周一数据不足，暂不画区间'}`);
       const retained=T.restore(saved,newTimes)||this.views.get(key,newTimes);

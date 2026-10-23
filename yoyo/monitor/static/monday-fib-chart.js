@@ -1,6 +1,7 @@
 /* Read-only wallpaper chart. Reuses the bounded OKX cache and shared renderer.
  * Monday anchors come from the monitor; candles must match its symbol, NY week,
- * and closed-bar boundary. No trading, alert writes, or synthetic candles.
+ * and closed-bar boundary. A separate display-only feed supplies the live tip.
+ * No trading, alert writes, or synthetic candles.
  */
 (() => {
   'use strict';
@@ -56,19 +57,30 @@
   const view={bars:720,initialBars:160,range:true,fib:true,fitAll:false,showLevels:false,mondayBand:true,wallpaper:true,candleColors:{up:'#169873',down:'#d7355d'}};
   let target=null,controller=null,timer=null,version=0,paused=false;
   const cache=new Map();
-  function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;}
+  function pause(){paused=true;version++;clearTimeout(timer);controller?.abort();controller=null;target?.feed?.stop();if(target)target.feed=null;}
   function stop(){pause();if(target){window.SpikeRangeChart?.unmount(target.mount);target.host.replaceChildren?.();}target=null;}
   function draw(context,error=''){
     if(!target)return;
     try{
-      const value=prepare(context,target.row,target.week,target.period);
+      let value=prepare(context,target.row,target.week,target.period);
+      value=window.SpikeMondayCandleFeed?.mergeDisplay(value,target.live,target.period)||value;
       target.context=context;
       if(!target.internal)value.levels=value.levels.filter(l=>['上 1.618','周一高','周一低','下 1.618'].includes(l.label));
       target.instance=window.SpikeRangeChart.mount(target.mount,value,{...view,mondayBand:target.period!=='1D'},error);
-      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':''));
+      message(error||(context.error?'K 线更新失败：'+context.error:context.loading?'正在同步此合约 K 线…':!value.candles?.length?'暂无此周期 K 线，请稍后重试':target.live?.error||''));
     }catch(e){message(e.message);window.SpikeRangeChart.unmount(target.mount);}
   }
   function message(value){if(!target)return;target.state.textContent=value;target.caption.hidden=!value;}
+  function startFeed(){
+    if(!target||target.feed||document.hidden||paused||!window.SpikeMondayCandleFeed)return;
+    const current=target;current.live=null;
+    current.feed=window.SpikeMondayCandleFeed.create({symbol:current.row.symbol,period:current.period,
+      onChange:value=>{if(target!==current||paused)return;current.live=value;if(current.context)draw(current.context);},
+      onReconnect:()=>{if(target===current&&!paused)refresh();}});
+    // A cached high-timeframe snapshot can be hours old. Never reset the live
+    // clock to that historical receipt; fresh REST responses synchronize it.
+    current.feed.start();
+  }
   async function refresh(){
     if(!target||controller||document.hidden)return;
     clearTimeout(timer);const current=target,token=version,c=new AbortController();controller=c;
@@ -79,6 +91,7 @@
       if(!warm){const r=await fetch('/api/monday-fib/candles?symbol='+encodeURIComponent(current.row.symbol)+'&period='+encodeURIComponent(current.period)+'&wait_ms=8000',{cache:'no-store',credentials:'same-origin',signal:c.signal});value=await r.json();if(!r.ok)throw Error(typeof value.detail==='string'?value.detail:'图表读取失败');}
       if(token!==version||target!==current)return;
       prepare(value,current.row,current.week,current.period);
+      current.feed?.setClock(value.now_ms+(warm?Date.now()-warm.receivedAt:0));
       delay=Math.max(0,refreshDelay(value,current.period)-(warm?Date.now()-warm.receivedAt:0));
       cache.delete(current.key);cache.set(current.key,{value,due:Date.now()+delay});while(cache.size>6)cache.delete(cache.keys().next().value);
       draw(value);
@@ -90,10 +103,10 @@
     const key=row.symbol+'|'+week+'|'+period;
     if(target?.host===host&&target.key===key){
       const changed=target.internal!==internal||['high','low','upper','lower'].some(k=>target.row[k]!==row[k]);
-      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
+      target.row=row;target.internal=internal;if(changed&&target.context)draw(target.context);if(paused){paused=false;startFeed();const previous=cache.get(key);if(previous&&previous.due>Date.now())timer=setTimeout(refresh,previous.due-Date.now());else refresh();}return;
     }
     const reuse=target?.host===host?target:null;
-    if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;}else stop();
+    if(reuse){version++;clearTimeout(timer);controller?.abort();controller=null;target.feed?.stop();}else stop();
     if(!host)return;paused=false;
     if(!reuse)host.innerHTML='<div class="mf-chart-caption"><p role="status">正在加载区间 K 线…</p><button type="button" data-mf-chart-retry>重新加载</button></div><div class="mf-chart-mount"></div>';
     target={host,row,week,key,internal,period,state:host.querySelector('[role=status]'),caption:host.querySelector('.mf-chart-caption'),mount:host.querySelector('.mf-chart-mount')};
@@ -106,6 +119,7 @@
       target.instance=window.SpikeRangeChart.mount(target.mount,{symbol:row.symbol,bar:period,candles:[],levels:[]},view);
       message('正在加载区间 K 线…');
     }
+    startFeed();
     if(previous&&Date.now()<previous.due&&!previous.value.loading&&!previous.value.error)timer=setTimeout(refresh,previous.due-Date.now());else refresh();
   }
   function setInternal(value){if(!target)return;target.internal=value;if(target.context)draw(target.context);}

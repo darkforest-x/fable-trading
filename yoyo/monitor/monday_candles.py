@@ -3,7 +3,8 @@
 OKX bar/confirm contract: https://app.okx.com/docs-v5/en/#order-book-trading-market-data
 Daily candles use 1Dutc; NY Monday anchors still come from MondayFibService.
 Only the selected symbol/period is read through the shared public candle hub.
-Two bounded jobs and twelve cached views cannot expand the monitor universe.
+Two history jobs, two live-tail readers and twelve cached history views cannot
+expand the monitor universe. Closed snapshots remain separate from live tails.
 """
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
@@ -21,8 +22,12 @@ SYMBOL = r'^[A-Z0-9]{1,32}-USDT-SWAP$'
 
 
 class MondayCandles:
-    def __init__(self, runtime=None, client=None):
+    def __init__(self, runtime=None, client=None, live_client=None):
         self.client = client or OKX(runtime=runtime)
+        # Display-only tail. Never change the closed client's cache contract:
+        # order-context consumes snapshot(), not this live endpoint.
+        self.live_client = live_client or OKX(runtime=runtime, include_open=True)
+        self.live_slots = threading.BoundedSemaphore(2)
         self.lock = threading.Lock()
         self.ready = threading.Condition(self.lock)
         # Waiting clients cannot exhaust the API's sync worker pool.
@@ -91,6 +96,37 @@ class MondayCandles:
         return [dict(time=t, open=float(r[1]), high=float(r[2]), low=float(r[3]),
                      close=float(r[4]), volume=float(r[5])) for t, r in sorted(rows.items())]
 
+    def recent(self, symbol, period):
+        """Native display OHLC, with the forming candle explicitly separated.
+
+        Uses the shared two-second transient cache and background rate budget.
+        No subscriptions, scanner work, or writes to the closed snapshot.
+        """
+        if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
+            raise ValueError('unsupported_chart_query')
+        bar = '1Dutc' if period == '1D' else period
+        value = dict(symbol=symbol, bar=period, native_bar=bar,
+                     closed_candles=[], forming_candle=None, error=None)
+        if self.closed or not self.live_slots.acquire(False):
+            return dict(value, now_ms=self.client.clock(), error='实时 K 线正在重连')
+        try:
+            raw = self.live_client.get('/api/v5/market/candles',
+                                       dict(instId=symbol, bar=bar, limit='3'))
+            now = self.live_client.clock()
+            boundary = bar_open(now, bar)
+            rows = validate(raw, bar, now)
+            closed = {t:r for t,r in rows.items() if r[8]=='1' and t+STEPS[bar]<=boundary}
+            forming = {t:r for t,r in rows.items() if r[8]=='0' and t==boundary}
+            value.update(closed_candles=self._candles(closed),
+                         forming_candle=next(iter(self._candles(forming)), None))
+            if not closed and not forming:
+                value['error'] = '实时 K 线暂不可用'
+        except Exception:
+            value['error'] = '实时 K 线暂不可用'
+        finally:
+            self.live_slots.release()
+        return dict(value, now_ms=self.live_client.clock())
+
     def snapshot(self, symbol, period, wait_ms=0):
         if not re.fullmatch(SYMBOL, symbol) or period not in PERIODS:
             raise ValueError('unsupported_chart_query')
@@ -146,3 +182,8 @@ def install(app, runtime):
                 period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|1D)$'),
                 wait_ms: int = Query(0, ge=0, le=8000)):
         return service.snapshot(symbol, period, wait_ms)
+
+    @app.get('/api/monday-fib/live-candles')
+    def live_candles(symbol: str = Query(..., pattern=SYMBOL),
+                     period: str = Query('15m', pattern=r'^(1m|5m|15m|30m|1H|4H|1D)$')):
+        return service.recent(symbol, period)

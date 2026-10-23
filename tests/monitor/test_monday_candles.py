@@ -62,6 +62,52 @@ def test_native_bar_boundaries_and_complete_history(period):
         service.close()
 
 
+@pytest.mark.parametrize('period', PERIODS)
+def test_live_display_tail_never_enters_the_closed_snapshot(period):
+    client = Client()
+    native = '1Dutc' if period == '1D' else period
+    step = STEPS[native]
+    boundary = bar_open(NOW, native)
+    class Live(Client):
+        def get(self, path, params):
+            self.calls.append((path, params))
+            assert path == '/api/v5/market/candles'
+            assert params == dict(instId='BTC-USDT-SWAP', bar=native, limit='3')
+            return [[str(boundary), '10', '18', '2', '11', '4', '40', '400', '0'],
+                    [str(boundary-step), '10', '12', '9', '11', '4', '40', '400', '1']]
+    live = Live(); service = MondayCandles(client=client, live_client=live)
+    try:
+        entry = run_fetch(service, period)
+        service.cache[('BTC-USDT-SWAP', period)] = entry
+        before = service.snapshot('BTC-USDT-SWAP', period)
+        display = service.recent('BTC-USDT-SWAP', period)
+        assert display['forming_candle']['time'] == boundary
+        assert display['forming_candle']['low'] == 2
+        assert display['closed_candles'][0]['time'] == boundary-step
+        assert display['native_bar'] == native and not display['error']
+        assert service.snapshot('BTC-USDT-SWAP', period) == before
+        assert all(row['low'] == 9 for row in before['candles'])
+        assert len(client.calls) == 3 and len(live.calls) == 1
+    finally:
+        service.close()
+
+
+def test_live_failures_and_read_budget_never_leak_or_fabricate_ohlc():
+    client = Client(); client.fail = True
+    service = MondayCandles(client=client, live_client=client)
+    try:
+        result = service.recent('BTC-USDT-SWAP', '1H')
+        assert result['forming_candle'] is None and result['closed_candles'] == []
+        assert result['error'] and 'private' not in str(result)
+        service.live_slots.acquire(); service.live_slots.acquire()
+        before = len(client.calls)
+        assert service.recent('BTC-USDT-SWAP', '4H')['error']
+        assert len(client.calls) == before
+        assert not service.cache
+    finally:
+        service.close()
+
+
 def test_failure_retains_old_bars_with_explicit_error_and_bounded_nonblocking_work():
     client = Client()
     service = MondayCandles(client=client)
