@@ -44,7 +44,8 @@ OHLC = ['open', 'high', 'low', 'close']
 STEP = pd.Timedelta(minutes=5)
 TZ = 'America/New_York'
 CODE = ['yoyo/evaluation/monday_5m_wick_engulf.py',
-        'tests/evaluation/test_monday_5m_wick_engulf.py']
+        'tests/evaluation/test_monday_5m_wick_engulf.py',
+        'yoyo/layers/l3_backtest/nautilus_independent.py']
 
 
 def histdata_index(values):

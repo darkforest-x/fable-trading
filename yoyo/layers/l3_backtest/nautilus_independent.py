@@ -390,7 +390,10 @@ class IndependentCloseStrategy(Strategy):
                 self.active[row["trade_id"]] = state
                 self.opportunity_rows.append(dict(trade_id=row["trade_id"], status="filled",
                     submitted_i=row["signal_entry_i"], fill_i=i, expire_i=row["expire_i"]))
-            elif i != state.source["entry_i"] or abs(price-state.source["entry"]) > self.eps:
+            elif i != state.source["entry_i"] or abs(price-state.source["entry"]) > max(
+                    self.eps, 2*math.ulp(price), 2*math.ulp(state.source["entry"])):
+                # Fixed-point native Price -> float may differ by one ULP at
+                # large notionals; keep tolerance far below one market tick.
                 raise RuntimeError("Entry did not fill at the signal bar close")
             self.entering_limit_i = i if self.entry_order_mode == "limit" else None
             self._submit_protective_stop(state)

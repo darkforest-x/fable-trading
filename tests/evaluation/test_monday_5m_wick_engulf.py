@@ -69,3 +69,10 @@ def test_native_gap_censor_and_end_not_counted_as_closed(tmp_path):
     rows,_=m.execute(f,entries,'BTCUSDT',tmp_path,{'maker_fee':.0002,'taker_fee':.0005})
     assert not rows.closed.any()
     assert rows.exit_original_i.iloc[0]==1
+
+
+def test_native_large_price_one_ulp_is_not_a_different_fill(tmp_path):
+    f=frame([[69054.2,69060.,69000.,69040.],[69040.,69100.,69000.,69080.]])
+    entries=pd.DataFrame([dict(trade_id='L',pair_id='L',population='signal',symbol='BTCUSDT',entry_i=0,side=1,entry=69054.2,stop=68000.,target_price=70000.,risk=1054.2)])
+    rows,_=m.execute(f,entries,'BTCUSDT',tmp_path,{'maker_fee':.0002,'taker_fee':.0005})
+    assert rows.entry.iloc[0]==69054.2
