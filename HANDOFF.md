@@ -1,3 +1,9 @@
+## 2026-10-24 · Proposed small-timeframe framework research queue
+
+- Owner asked for additional strategy variants and whether frameworks can optimize parameters. Prepared10families in `experiments/active/exp-monday-smalltf-queue-20261024-v1/config.json`: fixedRTP,minimumplannedRR,cost-riskfilter,holdingdeadline,near/mid/fartarget,partialfraction,BEtrigger,stopbuffer,failedlevelcloseexit,retestlimitentry.
+- FirstbatchF1-F4=72newparameter slots plus4cachedoriginalbaselines(5mengulf,15mvolumeN3,1hstrictN3,1hbodyN3).Eachfamilyreturns to unchangedbaseline;no cascadingwins/jointsearch. Proposed objective earliermean netR0, laterhistorical evaluation;also showwinranking,counts,payoff,PF,cost,excursion,streakandmatchedcontrols. Goldvolume/cost unavailable remainexplicit. Native dynamic-exit adapters mustbeextendedbeforetheirhistoricalruns.
+- Preparationonly: run_enabled=false, no newthreshold orTP/SL range approved, no newhistoricalexecution. AGENTSline275requiresowner toconfirm newranges. Full package isconcreteforoneconfirmation;previouslyauthorizedgridsandnativefillsalreadycachedmustnotbereplayed. Notaproductionchangeorstandalonereport.
+
 ## 2026-10-24 · Altcoin N5 payoff and consecutive-stop diagnosis
 
 - Frozen case4-n5-v20:9065signals/620symbols,9041closed/24censored;5578wins/3463losses. Net payoff0.608088,break-evenwin62.1857percent versus61.6967percent observed. Gross+259.810416R minusfees333.054166R givesnet-73.243750R.5685targetsinclude107netlosses;3356SL. Near-Monday full TP andoriginalpinSL unchanged;68.2336percent plannedRRbelow1,median0.547401.

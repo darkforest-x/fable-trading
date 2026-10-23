@@ -18,6 +18,17 @@
 schema_version: 1
 
 artifacts:
+  - artifact_id: monday-smalltf-research-queue-20261024-v1
+    artifact_type: manifest
+    role: proposed_bounded_framework_parameter_queue
+    source_repo: darkforest-x/fable-trading
+    source_commit: cacc4d7e34
+    source_path: experiments/active/exp-monday-smalltf-queue-20261024-v1/config.json
+    storage_uri: repo://experiments/active/exp-monday-smalltf-queue-20261024-v1/config.json
+    holdout_status: unknown
+    training_eligible: false
+    production_eligible: false
+    notes: Ten proposal families with causal timing, exact numeric ranges, one-factor baselines, costs, R0 semantics and native adapter requirements. Firstbatch72new slots plus4cached baselines; awaiting owner range confirmation, no new historical execution.
   - artifact_id: monday-drawer-sizing-20261023
     artifact_type: manifest
     role: mobile_monday_order_drawer_equity_allowance_acceptance

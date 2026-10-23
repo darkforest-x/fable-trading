@@ -1,0 +1,171 @@
+{
+  "experiment_id": "exp-monday-smalltf-queue-20261024-v1",
+  "status": "proposed_ranges_await_owner_confirmation",
+  "created_at": "2026-10-24",
+  "owner_request": "Propose more Monday1.618 small-timeframe strategies for successive framework tests and explain optimal-parameter search.",
+  "authorization": {
+    "preparation": true,
+    "new_numeric_ranges": false,
+    "run_enabled": false,
+    "joint_parameter_search": false,
+    "reason": "AGENTS.md requires owner confirmation for new thresholds and TP/SL ranges; prepare the complete bounded package first. Existing approved grids are reused."
+  },
+  "scope": {
+    "groups": ["BTC", "ETH", "XAUUSD", "ALTCOINS"],
+    "universe": "Reuse registered BTC/ETH, spot XAUUSD and 630-alt universe and historical exclusions. Never select today's winners.",
+    "main_timeframes_minutes": [5, 15, 60],
+    "context_only_timeframes_minutes": [240],
+    "data": "Reuse registered original paths and source quality segments; no new downloads or content hashes.",
+    "gold": "Corrected NY source-clock data only. No volume case; unknown fees remain null. Cost-filter family unavailable."
+  },
+  "baselines": [
+    {
+      "id": "engulf5",
+      "timeframe_minutes": 5,
+      "rule": "Original case1 wick rejection followed immediately by body engulfing; every qualifying event, not restricted to first weekly touch.",
+      "ledger": "experiments/active/exp-monday-5m-wick-engulf-20261023-v1/all_trades.csv.gz",
+      "gold_ledger": "experiments/active/exp-monday-5m-wick-gold-clock-20261023-v2/gold-trades.csv.gz",
+      "source_config_id": null
+    },
+    {
+      "id": "volume15n3",
+      "timeframe_minutes": 15,
+      "rule": "First weekly directional pin; volume maximum among previous20 and itself; three following bodies strictly inside; XAU unavailable.",
+      "ledger": "experiments/active/exp-monday-vectorbt-parameters-20261023-v1/all-trades-open-priority.csv.gz",
+      "source_config_id": "case2-n3-v20"
+    },
+    {
+      "id": "strict60n3",
+      "timeframe_minutes": 60,
+      "rule": "First weekly directional wick-only pin; three following whole candle ranges strictly inside1.618.",
+      "ledger": "experiments/active/exp-monday-vectorbt-parameters-20261023-v1/all-trades-open-priority.csv.gz",
+      "source_config_id": "case3-n3-v20"
+    },
+    {
+      "id": "body60n3",
+      "timeframe_minutes": 60,
+      "rule": "First weekly directional wick-only pin; three following open/close bodies at or inside1.618, wicks unrestricted.",
+      "ledger": "experiments/active/exp-monday-1h-body-hold-vectorbt-20261024-v1/all-trades.csv.gz",
+      "source_config_id": "body-n3"
+    }
+  ],
+  "frozen_baseline_policy": {
+    "entry": "Next original signal-timeframe open after confirmation; taker.",
+    "stop": "Original pin low for long/high for short.",
+    "target": "Near completed NYMonday edge: Monday low for long/high for short; full limit exit.",
+    "holding": "No expiry, no BE, no partials or trailing, unless that family's one policy is being changed.",
+    "baseline_choice": "Original N3, not the full-period highest-win N5. Freeze before testing exit variants.",
+    "entry_cohort": "Freeze admitted baseline signals for exit/filter studies, including original invalid-entry exclusions. No target change silently adds new entries."
+  },
+  "costs": {
+    "maker": 0.0002,
+    "taker": 0.0005,
+    "fee_read_date": "2026-10-23",
+    "market_entry_stop_time_exit": "taker",
+    "resting_limit_target_or_retest_entry": "maker",
+    "slippage_funding_margin": "Not simulated; disclose separately. No funded-account claim."
+  },
+  "first_batch": {
+    "families": ["F1", "F2", "F3", "F4"],
+    "new_configuration_slots": 72,
+    "cached_baselines": 4,
+    "count_definition": "Four frozen baselines times (5 TP values +4 reward filters +4 cost filters +5 holding limits). Not trade count. Gold skips inapplicable families/baselines.",
+    "execution": "One family at a time; every family starts from its unchanged baseline. Never carry its winner into the next family."
+  },
+  "families": [
+    {
+      "id": "F1", "name_cn": "固定R全仓止盈", "priority": 1,
+      "variable": "target_r", "proposed_values": [0.5, 0.75, 1.0, 1.5, 2.0],
+      "policy": "Replace near target with entry + side * value * original pin risk. Keep stop and entry unchanged.",
+      "engine": "VectorBT native static-barrier adapter",
+      "implementation_status": "Existing execute() accepts explicit target_price; new candidate projection and cache namespace required."
+    },
+    {
+      "id": "F2", "name_cn": "过滤目标空间不足的交易", "priority": 2,
+      "variable": "minimum_planned_gross_rr", "proposed_values": [0.5, 1.0, 1.5, 2.0],
+      "policy": "At entry decision, admit only when side*(near_target-entry)/original_pin_risk >= threshold. No exit change. Baseline has no filter.",
+      "engine": "Frozen framework ledger subset; no new fill replay",
+      "implementation_status": "Filter only causal entry metadata, never exit or MFE. Retain baseline candidate counts and filtered reasons."
+    },
+    {
+      "id": "F3", "name_cn": "过滤手续费吞噬风险的交易", "priority": 3,
+      "variable": "minimum_risk_to_expected_stop_fee", "proposed_values": [1.0, 2.0, 3.0, 5.0],
+      "policy": "At entry admit when original risk >= multiplier*(entry*taker_fee + original_stop*taker_fee), per base unit. Actual fees still use actual fills. Baseline has no filter.",
+      "engine": "Frozen framework ledger subset; no new fill replay",
+      "implementation_status": "Crypto only. A gap can change actual stop fees; never use realized fee to filter entries."
+    },
+    {
+      "id": "F4", "name_cn": "止盈止损之外增加持仓时限", "priority": 4,
+      "variable": "maximum_holding_minutes", "proposed_values": [15, 30, 60, 120, 240],
+      "policy": "Keep original near TP/pin SL active before deadline. If still open, market exit at deadline open; not a censor. Deadline is measured from observed baseline entry open.",
+      "engine": "VectorBT native stops plus native deadline order accounting",
+      "implementation_status": "Extend adapter. Existing timed engine has no protective SL, so it cannot be reused unchanged. Define deadline-open priority and same-bar behavior explicitly before execution."
+    },
+    {
+      "id": "F5", "name_cn": "近侧中线远侧目标", "priority": 5,
+      "variable": "target_landmark", "proposed_values": ["near", "midpoint", "far"],
+      "policy": "Full exit at chosen frozen NYMonday landmark; entry and pin stop unchanged. Midpoint=(MondayHigh+MondayLow)/2.",
+      "engine": "VectorBT native static-barrier adapter",
+      "implementation_status": "Reuse body60n3 near/far results; midpoint and other signal families require new unique geometries only."
+    },
+    {
+      "id": "F6", "name_cn": "近侧与远侧分批比例", "priority": 6,
+      "variable": "near_exit_fraction", "proposed_values": [0.25, 0.5, 0.75],
+      "policy": "Near fraction at near Monday edge; remaining fraction at far edge; original stop unchanged on both legs. Compare ratios against fixed50/50 reference, no BE.",
+      "engine": "Reuse native near/far leg fills and sum actual quantity-weighted fees; framework calculates any missing leg once",
+      "implementation_status": "Existing independent-leg composition reusable. Do not multiply whole-trade fees without actual leg quantities; retain parent censoring."
+    },
+    {
+      "id": "F7", "name_cn": "达到浮盈阈值后推含费保本", "priority": 7,
+      "variable": "breakeven_arm_close_r", "proposed_values": [0.5, 1.0, 1.5, 2.0],
+      "policy": "First completed5m close at threshold arms fee-inclusive BE at next5m open; original near TP remains. No partial. Stop already hit before close wins; unfavorable next-open gap cannot be treated as a free BE fill.",
+      "engine": "VectorBT native order callback extension, or predeclared Nautilus native adapter if VBT semantics cannot be aligned; never both replays",
+      "implementation_status": "Current static VBT adapter cannot dynamically amend stops. Must add and validate native order semantics; existing MFE is not an execution simulator."
+    },
+    {
+      "id": "F8", "name_cn": "插针止损增加距离缓冲", "priority": 8,
+      "variable": "original_risk_distance_multiplier", "proposed_values": [1.0, 1.1, 1.25, 1.5],
+      "policy": "Stop=entry-side*multiplier*original_pin_risk. Entry/near TP unchanged. 1.0 is baseline; larger values only widen the original stop.",
+      "engine": "VectorBT native static-barrier adapter",
+      "implementation_status": "Reuse explicit stop input; retain original baseline risk R0 and actual new risk as separate columns. No ATR dependency or silent denominator change."
+    },
+    {
+      "id": "F9", "name_cn": "收盘失守1.618提前退出", "priority": 9,
+      "variable": "failed_level_close_exit", "proposed_values": [false, true],
+      "policy": "After entry, first completed signal-timeframe close beyond1.618 in adverse direction triggers next5m-open market exit. Original resting pin SL and near TP remain active.",
+      "engine": "VectorBT native exit-order adapter extension",
+      "implementation_status": "Extend competing native exit semantics; never use the completed candle's close information at that candle's open."
+    },
+    {
+      "id": "F10", "name_cn": "确认后回踩1.618限价入场", "priority": 10,
+      "variable": "retest_limit_valid_minutes", "proposed_values": [15, 30, 60, 120],
+      "policy": "Once original confirmation is complete, rest at frozen1.618 until expiry; original pin SL and near TP. Cancel unfilled order if original stop invalidates setup first. Count unfilled/expired orders explicitly. Compare each TTL against the same market-entry baseline.",
+      "engine": "Extend native pending-limit entry with attached exits; no future-touch entry timestamp fabrication",
+      "implementation_status": "Separate entry-method experiment, not pure exit optimization. Native order priority and OHLC uncertainty require focused tests before historical runs."
+    }
+  ],
+  "analysis": {
+    "proposed_primary_selection_metric": "earlier_mean_net_r0 for crypto; gross_r0 for spot",
+    "r0": "Frozen baseline entry-to-pin-stop risk per base unit. All variants retain R0; also report return_bp, actual risk, and R normalized by actual stop risk. Full capital allocation is not modeled.",
+    "split": "2023-01-01T00:00:00Z",
+    "selection": "Select on earlier segment only, separately by baseline and asset group. Fixed baseline is tie preference, then preregistered candidate order. No later-year tuning.",
+    "evaluation": "Later unchanged history, yearly/monthly/direction breakdown; these dates were already researched and are not fresh blind data.",
+    "sample_size": "Report counts, uncertainty and censoring. No unapproved minimum-trade filter or hidden deletion of rare/extreme outcomes.",
+    "rankings": ["highest earlier net mean R0", "highest earlier win rate", "neighboring-parameter stability and later persistence"],
+    "controls": "Same symbol, actual NY entry week, direction and causal volatility bucket; three closed controls per paired signal, identical candidate costs/barriers. For causal filters applied to frozen signal geometry, preserve the corresponding original matched sets and disclose the conditional control population. New entry geometries require new causal matches.",
+    "metrics": ["signals", "entered", "unfilled", "censored", "wins", "win_rate", "mean_win", "mean_loss", "payoff", "PF", "gross/fee/netR0", "net_bp", "actual_risk", "MFE/MAE_truncated_at_exit", "profit_then_stop", "holding_time", "longest_stop_streak", "longest_loss_streak", "same_bar_ambiguity", "matched_signal_and_control"],
+    "inference": "Reuse weekly-cluster uncertainty method and disclose/correct the predeclared number of comparisons. Absolute profitability and excess over random are separate claims.",
+    "joint_optimization": "Not authorized by this proposal. Independent one-factor winners do not establish a joint optimum; interactions would require a separately bounded joint search."
+  },
+  "execution_contract": {
+    "framework_only": true,
+    "one_historical_execution_per_unique_trade_geometry": true,
+    "replay_unchanged_baselines": false,
+    "cache_key": "Input source identity, quality segment, code/runtime version, entry, side, stop, target, deadline/stop-state policy and fee policy; dynamic semantics must be part of identity.",
+    "verification": "Synthetic causal/fee/order/edge cases before new historical execution; canonical frozen baseline metrics for reused inputs. No second full framework replay.",
+    "before_run": ["Owner confirms exact new ranges and selection objective", "Implement only selected first-batch adapters and meaningful tests", "Commit builder before creating results", "Validate registered source paths, sizes and read access", "Record immutable candidate IDs and costs"],
+    "delivery": "Conversation plus all-candidate and all-trade raw files; add results to the already requested HTML when its Stitch blocker clears. No separate unsolicited report."
+  },
+  "training_eligible": false,
+  "production_eligible": false
+}
