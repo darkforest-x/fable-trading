@@ -7,7 +7,7 @@ const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../../yoyo/monitor/static/paper-desk.js'), 'utf8');
 const flush = () => new Promise(resolve => setImmediate(resolve));
 
-function harness(onPost, beforeGet=async()=>{}, preferences=new Map()) {
+function harness(onPost, beforeGet=async()=>{}, preferences=new Map(), clock=Date) {
   let intervalCallback;
   let timerId=0, elapsed=0;
   const timers=new Map();
@@ -48,9 +48,9 @@ function harness(onPost, beforeGet=async()=>{}, preferences=new Map()) {
     contains:()=>editing, querySelector:selector=>nodes[selector]||null};
   const snapshot = {fee_rate:'0.001',accounts:[{id:'account-1',name:'Practice',initial_cash:'1000',balance:'1000',equity:'1000',
     available:'1000',reserved:'0',unrealized:'0',net_realized:'0',marks_complete:true}], positions:[],fills:[],now_ms:Date.now()};
-  const quote = {quantity:'1',sizing:'equity_multiple',id:'a'.repeat(32),symbol:'BTC-USDT-SWAP',bid:'99',ask:'100',source_ms:Date.now(),received_ms:Date.now(),expires_ms:Date.now()+15000};
+  const quote = {entry_ready:true,quantity:'1',sizing:'equity_multiple',id:'a'.repeat(32),symbol:'BTC-USDT-SWAP',bid:'99',ask:'100',source_ms:Date.now(),received_ms:Date.now(),expires_ms:Date.now()+15000};
   const symbols={symbols:[{symbol:'BTC-USDT-SWAP',base:'BTC'},{symbol:'ETH-USDT-SWAP',base:'ETH'},{symbol:'RESOLV-USDT-SWAP',base:'RESOLV'},{symbol:'SOL-USDT-SWAP',base:'SOL'},{symbol:'W-USDT-SWAP',base:'W'}]};
-  const sandbox = {window:{},document:{getElementById:()=>el,hidden:false,addEventListener(){},body:{classList:{toggle:(name,on)=>{if(on)bodyClasses.add(name);else bodyClasses.delete(name);}}}},Date,Number,String,JSON,Error,
+  const sandbox = {window:{},document:{getElementById:()=>el,hidden:false,addEventListener(){},body:{classList:{toggle:(name,on)=>{if(on)bodyClasses.add(name);else bodyClasses.delete(name);}}}},Date:clock,Number,String,JSON,Error,
     encodeURIComponent,crypto:{randomUUID:()=> 'request-uuid-12345678'},
     localStorage:{getItem:k=>preferences.get(k),setItem:(k,v)=>preferences.set(k,v)},
     setTimeout:(fn,delay)=>{const id=++timerId;timers.set(id,{fn,at:elapsed+delay});return id;},clearTimeout:id=>timers.delete(id),
@@ -1265,4 +1265,25 @@ test('floating ticket sends market entries through the same frozen-quote and ide
   assert.equal(posts[0].url,'/api/research/paper-desk/accounts/account-1/open?include_snapshot=true');
   const payload=JSON.parse(posts[0].body);assert.equal(payload.quote_id,'a'.repeat(32));assert.equal(payload.request_id,'request-uuid-12345678');
   assert.equal(c.storage.size,0);c.api.closeQuick();
+});
+
+test('floating market entry without stops warms risk and waits for readiness before submitting',async()=>{
+  let now=Date.now();class Clock extends Date{static now(){return now;}}
+  const c=harness(async()=>({ok:true,json:async()=>({fill:{action:'open',quantity:'1',price:'100',fee:'.1'}})}),async()=>{},new Map(),Clock);
+  c.quote.entry_ready=false;
+  c.el.classList={add(){},remove(){}};
+  const home={insertBefore(el){el.parentNode=home;}};const host={append(el){el.parentNode=host;}};c.el.parentNode=home;
+  const submit={disabled:false,textContent:''};c.nodes['[data-desk-trade] .desk-submit']=submit;
+  c.api.openQuick(host,{symbol:'BTC-USDT-SWAP'});await flush();
+  assert.equal(c.calls.filter(x=>x.url.includes('/estimate?')).length,1);
+  assert.equal(submit.disabled,true);assert.equal(submit.textContent,'正在准备合约…');
+  const form={symbol:'BTC-USDT-SWAP',leverage:'100',positionMultiple:'10',orderType:'market'};
+  c.submit('trade',form);await flush();
+  assert.equal(c.calls.some(x=>x.url.includes('/open-preview')||x.method==='POST'),false);
+  c.quote.entry_ready=true;now+=5100;c.tick();await flush();
+  assert.equal(submit.disabled,false);assert.match(submit.textContent,/开多/);
+  assert.equal(c.calls.filter(x=>x.url.includes('/estimate?')).length,2);
+  assert.equal(c.calls.some(x=>x.method==='POST'),false);
+  c.submit('trade',form);await flush();assert.equal(c.calls.filter(x=>x.method==='POST').length,1);
+  c.api.closeQuick();
 });

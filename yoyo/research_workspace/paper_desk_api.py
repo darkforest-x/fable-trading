@@ -329,7 +329,18 @@ def install(api, app, workspace_store):
         value = values.get(symbol)
         if not value or not fresh(value, clock_ms()):
             raise HTTPException(503, '该合约暂无新鲜有效报价')
+        ready = True
+        if isinstance(source, PublicQuotes) and source.risk:
+            # A floating ticket has no market chart polling to warm this cache.
+            # Report readiness from the same snapshots as entry, without moving
+            # exchange I/O into a request or weakening the mark-price gate.
+            try:
+                risk = source.risk.get([symbol]).get(symbol, {})
+                ready = bool(risk.get('risk') and -5000 <= clock_ms()-risk.get('mark_source_ms', 0) <= 15000)
+            except (httpx.HTTPError, ValueError, TypeError, KeyError):
+                ready = False
         return {**{k: value[k] for k in ['symbol', 'bid', 'ask', 'source_ms', 'received_ms']},
+                'entry_ready': ready,
                 'expires_ms': min(value['source_ms'], value['received_ms']) + 15000}
 
     @api.post("/paper-desk/accounts", status_code=201)

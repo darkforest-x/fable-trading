@@ -382,18 +382,21 @@
     const summary=root()?.querySelector('[data-desk-sizing-summary]');
     if(summary)summary.innerHTML=sizingSummary();
     const submit=root()?.querySelector('[data-desk-trade] .desk-submit');
-    if(submit&&state.tradeMode==='open'&&!state.busy&&!state.pending)submit.textContent=`开${state.draft.side==='short'?'空':'多'} · ${entrySizeLabel()}`;
+    if(submit&&state.tradeMode==='open'&&!state.busy&&!state.pending){submit.textContent=quickEntryWaiting()?(state.estimateError?'行情暂不可用':'正在准备合约…'):`开${state.draft.side==='short'?'空':'多'} · ${entrySizeLabel()}`;submit.disabled=quickEntryWaiting();}
     for(const name of ['takeProfit','stopLoss']){
       const output=root()?.querySelector(`[data-desk-estimate="${name}"]`);
       if(output)output.innerHTML=protectionEstimate(name);
     }
   }
+  function quickEntryWaiting(){
+    return !!quickMount&&state.tradeMode==='open'&&(!freshEstimateQuote(state.estimateQuote)||state.estimateQuote.entry_ready!==true);
+  }
   async function refreshEstimateQuote() {
     updateProtectionEstimates();
-    if(!state.active||state.busy||state.pending||state.quote||state.tradeMode!=='open'||!(Number(account()?.available)>0)||(state.draft.orderType!=='limit'&&!['takeProfit','stopLoss'].some(name=>validPrice(state.draft[name]))))return;
+    if(!state.active||state.busy||state.pending||state.quote||state.tradeMode!=='open'||!(Number(account()?.available)>0)||(!quickMount&&state.draft.orderType!=='limit'&&!['takeProfit','stopLoss'].some(name=>validPrice(state.draft[name]))))return;
     const symbol=state.draft.symbol, activation=state.activation;
     if(!(state.symbols||[]).some(item=>item.symbol===symbol))return;
-    if(freshEstimateQuote(state.estimateQuote)&&state.estimateQuote.expires_ms-Date.now()>5000)return;
+    if(freshEstimateQuote(state.estimateQuote)&&state.estimateQuote.expires_ms-Date.now()>5000&&(!quickMount||state.estimateQuote.entry_ready===true))return;
     if(state.estimateLoading?.symbol===symbol&&state.estimateLoading.activation===activation)return;
     if(state.estimateAttempt?.symbol===symbol&&state.estimateAttempt.activation===activation&&Date.now()-state.estimateAttempt.at<5000)return;
     const attempt={symbol,activation,at:Date.now()};
@@ -667,6 +670,7 @@
   }
   async function getQuote(form) {
     if(state.busy||state.pending) return;
+    if(quickEntryWaiting()){refreshEstimateQuote();return;}
     const values=new FormData(form), close=positions().find(p=>p.id===state.closeId);
     if(state.tradeMode==='close'&&!close)return;
     const symbol=close?.symbol||String(values.get('symbol')||'').trim().toUpperCase();

@@ -256,3 +256,27 @@ def test_new_read_routes_validate_paging_and_account(client):
     for params in [dict(kind='fills', limit=101), dict(kind='fills', offset=-1), dict(kind='bad')]:
         assert c.get(url, params=params).status_code == 422
     assert c.get(url, params={'kind': 'fills'}).json()['items'] == []
+
+
+def test_estimate_prewarms_and_reports_entry_risk_without_network_or_receipts(client, monkeypatch):
+    c, desk, quotes = client
+    risk = PublicRisk()
+    risk.background = True
+    quotes.risk = risk
+    monkeypatch.setattr(risk, 'fetch', lambda *a, **kw: pytest.fail('estimate performed risk network I/O'))
+    params = {'symbol': SYMBOL}
+    assert c.get(PREFIX+'/estimate', params=params).json()['entry_ready'] is False
+    assert SYMBOL in risk.requested
+    risk.instruments = {SYMBOL: dict(ctVal='1', ctMult='1')}
+    risk.instrument_at = time.monotonic()
+    risk.marks = {SYMBOL: dict(markPx='100', ts=str(book.clock_ms()))}
+    risk.tiers = {SYMBOL: (time.monotonic(), [dict(maxSz='10000', mmr='.01', maxLever='100')], book.clock_ms())}
+    assert c.get(PREFIX+'/estimate', params=params).json()['entry_ready'] is True
+    risk.marks[SYMBOL]['ts'] = str(book.clock_ms()-16000)
+    assert c.get(PREFIX+'/estimate', params=params).json()['entry_ready'] is False
+    risk.marks[SYMBOL]['ts'] = str(book.clock_ms())
+    risk.tiers[SYMBOL] = (time.monotonic()-3601, [], book.clock_ms()-3601000)
+    assert c.get(PREFIX+'/estimate', params=params).json()['entry_ready'] is False
+    with desk.connect() as db:
+        assert db.execute('SELECT count(*) FROM quotes').fetchone()[0] == 0
+        assert db.execute('SELECT count(*) FROM fills').fetchone()[0] == 0
