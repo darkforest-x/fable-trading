@@ -1,0 +1,7 @@
+# Keep reference annotations inside the chart pane
+
+- **Problem**: The Monday chart's price axis consumed 136px of a 320px/390px mobile viewport because reference badges combined level names and full prices.
+- **Dead end**: Compact tick formatting already existed, but the custom primitive's price-axis views still contributed long labels. Reducing ordinary tick precision could not remove that source of width.
+- **Effective path**: Opt the Monday levels out of axis labels and render bare numeric prices inside their existing time-bounded rays. Keep the shared renderer's legacy axis behavior as the default for other consumers. Use measured text width and pane clipping; short/offscreen rays do not produce orphan or partial numbers. The same synthetic viewport measured74px after the change, with unchanged reference prices and boundaries.
+- **General rule**: Inspect every axis-label producer, including custom primitives, before changing axis dimensions. Put descriptive annotations in the pane and let the price axis size ordinary tick/current-price numbers. Compare the same dataset and viewport using freshly loaded assets.
+- **Scope**: `yoyo/monitor/static/monday-fib-chart.js`, `range-chart.js`;15 focused frontend checks and synthetic320/390/1440 browser evidence in `output/playwright/fib-inline-prices/`. Floating controls can cover the underlying chart as before; this change does not reposition those controls or change price/time calculations.

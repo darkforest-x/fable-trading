@@ -23,6 +23,21 @@ test('shared range renderer uses the selected contract identity and small coin p
  const html=render(c,view);assert.match(html,/OKX WUSDT.P/);assert.match(html,/周一高 0.0023/);assert.doesNotMatch(html,/BTC/);
  assert.equal(price(.00001234),'0.00001234');assert.equal(price(null),'—');
 });
+test('inline reference prices use plain numbers inside their visible ray, without axis badges',()=>{
+ const {WeekLevels}=sandbox.module.exports,lines=[],texts=[],rectangles=[];
+ let offset=0,y=40;
+ const owner={rows:[{time:0},{time:100}],levelWindow:{start_ms:0,end_ms:100000},
+  activeLevels:[{label:'上 1.618',price:.13668908,axisLabelVisible:false,inlinePriceVisible:true,color:'#c93248'}],
+  chart:{timeScale:()=>({logicalToCoordinate:x=>x*200-offset})},series:{priceToCoordinate:()=>y}};
+ const primitive=new WeekLevels(owner),ctx={save(){},restore(){},beginPath(){},rect(){},clip(){},setLineDash(){},moveTo:(x,y)=>lines.push([x,y]),lineTo:(x,y)=>lines.push([x,y]),stroke(){},measureText:()=>({width:65}),fillText:(...args)=>texts.push(args),fillRect:(...args)=>rectangles.push(args)};
+ const paint=()=>primitive.paint({useMediaCoordinateSpace:fn=>fn({context:ctx,mediaSize:{width:180,height:100}})});
+ assert.equal(primitive.priceAxisViews().length,0);paint();
+ assert.deepEqual(lines,[[0,40],[180,40]]);assert.deepEqual(texts,[['0.13668908',174,36]]);assert.deepEqual(rectangles,[]);
+ texts.length=0;offset=160;paint();assert.deepEqual(texts,[],'a short visible ray must not crop its number');
+ offset=0;y=10;paint();assert.deepEqual(texts,[],'top clipping must not leave a partial label');
+ y=120;paint();assert.deepEqual(texts,[],'offscreen levels must not acquire floating labels');
+ y=40;offset=-200;paint();assert.deepEqual(texts,[],'a future interval does not draw prices over history');
+});
 test('range layer filters hide overlays and empty snapshots never invent candles',()=>{
  const c={symbol:'ETH-USDT-SWAP',candles:[{time:0,open:10,high:12,low:9,close:11,volume:10}],levels:[{kind:'fib',label:'Fib 0.618',price:10}]};
  assert.doesNotMatch(render(c,view),/Fib/);assert.match(render(c,{...view,fib:true}),/Fib/);assert.equal(render({candles:[]},view),'');

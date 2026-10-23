@@ -1,3 +1,9 @@
+## 2026-10-24 · Monday chart inline numeric reference prices
+
+- Owner requested a narrower right price axis without high/low/1.618 badges. Monday levels now opt out of reference axis labels; the shared weekly primitive draws plain numeric prices inside the existing rays. Prices, week boundaries, candle precision, colors and other renderer consumers remain unchanged. Dense optional internal lines retain their quiet presentation.
+- Stitch GEMINI_3_8_FLASH screen3998c8fa2b084856955af9e19f6e3f44, source in `yoyo/monitor/design/fib-inline-prices-20261024/`.15 focused frontend tests and5 asset-delivery checks pass. Same synthetic INIT data: right axis136→74px at320/390 and136→102px at1440; four main numeric values present, zero reference axis badges or write requests. Evidence `output/playwright/fib-inline-prices/`; learning saved.
+- Static asset content versions update without restarting services. Temporary browser18350 closed; no live actions or private-account fixtures. User can refresh the web monitor to load the change.
+
 ## 2026-10-24 · Hide secondary live-account tabs
 
 - Remove the live-account tabs from Signals and Pattern Patrol, plus the Signals context shortcut; omit the hidden tab from patrol keyboard cycling. Existing account routes, account status bands and execution services remain unchanged.

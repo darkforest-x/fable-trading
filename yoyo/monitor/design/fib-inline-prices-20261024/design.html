@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spike · 周一1.618 · 触价优先与区间K线</title>
+<!-- Tailwind CSS v3 with forms and container-queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['"SF Mono"', '"JetBrains Mono"', 'Menlo', 'monospace']
+          },
+          colors: {
+            glass: {
+              base: 'rgba(255, 255, 255, 0.72)',
+              border: 'rgba(255, 255, 255, 0.85)',
+              card: 'rgba(255, 255, 255, 0.65)',
+              subtle: 'rgba(240, 244, 250, 0.6)',
+              highlight: 'rgba(235, 244, 255, 0.85)'
+            },
+            bull: '#059669',
+            bear: '#E11D48',
+            brand: '#2563EB'
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(15, 35, 95, 0.04), 0 1px 2px 0 rgba(255, 255, 255, 0.8) inset',
+            'glass-hover': '0 12px 40px 0 rgba(15, 35, 95, 0.08), 0 1px 3px 0 rgba(255, 255, 255, 0.9) inset',
+            'glass-active': '0 0 0 1.5px rgba(59, 130, 246, 0.4), 0 8px 30px rgba(37, 99, 235, 0.08)',
+            'pill': '0 2px 8px rgba(0, 0, 0, 0.03)'
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: StyleSheets -->
+<style data-purpose="glass-typography">
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    body {
+      background: radial-gradient(1200px circle at 15% 10%, rgba(220, 238, 255, 0.6) 0%, transparent 60%),
+                  radial-gradient(900px circle at 85% 25%, rgba(235, 230, 255, 0.5) 0%, transparent 50%),
+                  radial-gradient(1000px circle at 50% 80%, rgba(225, 242, 254, 0.4) 0%, transparent 70%),
+                  linear-gradient(180deg, #F8FAFD 0%, #EEF2F7 100%);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: #1E293B;
+    }
+    /* Custom Scrollbar for sleek Apple feel */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(240, 243, 248, 0.5);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.5);
+    }
+  </style>
+<style data-purpose="micro-animations">
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.55; transform: scale(0.92); }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    .glass-card {
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background-color: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+      box-shadow: 0 8px 32px rgba(15, 30, 80, 0.035);
+    }
+    .glass-card-subtle {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background-color: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+  </style>
+<!-- END: StyleSheets -->
+</head>
+<body class="antialiased text-slate-800 selection:bg-blue-100 selection:text-blue-900 pb-16">
+<!-- BEGIN: MainHeader -->
+<header class="sticky top-0 z-50 backdrop-blur-2xl bg-white/70 border-b border-white/80 shadow-[0_2px_16px_rgba(0,0,0,0.02)]" data-purpose="site-navigation-bar">
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+<!-- Brand & Primary Nav -->
+<div class="flex items-center space-x-6 sm:space-x-8">
+<div class="flex items-center space-x-2.5">
+<div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-[0_4px_12px_rgba(37,99,235,0.25)] ring-2 ring-white/80">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold tracking-tight text-lg text-slate-900">SPIKE</span>
+<span class="text-[11px] font-semibold tracking-wider px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100/80">RESEARCH</span>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="hidden md:flex items-center space-x-1 text-sm font-medium" data-purpose="secondary-nav-tabs">
+<a class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-colors" href="#">市场观察</a>
+<a class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-colors" href="#">均线密集</a>
+<a class="px-3.5 py-1.5 rounded-lg text-blue-600 font-semibold bg-white/90 shadow-sm border border-slate-200/50" href="#">周一 1.618</a>
+<a class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-colors" href="#">信号中心</a>
+<a class="px-3.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-colors" href="#">研究资产</a>
+</nav>
+</div>
+<!-- Right Action Indicators -->
+<div class="flex items-center space-x-3">
+<!-- Live Indicator -->
+<div class="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50/80 border border-emerald-200/60 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-xs font-semibold text-emerald-700 tracking-wide">OKX 永续在线</span>
+</div>
+<!-- Icon Quick Actions -->
+<button class="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white/60 transition-all border border-transparent hover:border-slate-200/50" title="搜索标的">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<button class="p-2 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-white/60 transition-all border border-transparent hover:border-slate-200/50" title="全局参数">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+<div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white/80 overflow-hidden shadow-sm flex items-center justify-center text-slate-600 font-semibold text-xs">
+          AW
+        </div>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: PageContent -->
+<main class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-7">
+<!-- BEGIN: PageTitleAndFormula -->
+<section class="mb-7" data-purpose="title-and-mathematics-banner">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<div class="flex items-center space-x-2 text-xs font-semibold tracking-wider text-blue-600 uppercase mb-1.5">
+<span>Quantitative Range Extension</span>
+<span>·</span>
+<span>周一基界定点突破模型</span>
+</div>
+<h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+            周一 1.618 扩展位监控
+            <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-100/70 text-blue-800 border border-blue-200/60 hidden sm:inline-block">触价优先与区间 K 线穿透</span>
+</h1>
+<p class="mt-1.5 text-xs sm:text-sm text-slate-500 font-normal">
+            基准结算：纽约时间 (EST/EDT) 完整自然周一 (2025-05-19) · 监控有效期至下周一 00:00 EST
+          </p>
+</div>
+<!-- Formula Callout (Apple Glass Capsule) -->
+<div class="glass-card rounded-2xl px-4 py-3 border border-white/90 shadow-sm flex items-center gap-3 text-xs sm:text-[13px] self-start lg:self-auto">
+<div class="w-7 h-7 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center font-serif text-blue-700 font-bold">
+            Σ
+          </div>
+<div class="space-y-0.5 text-slate-600">
+<div>
+<span class="font-semibold text-slate-800">Upper 1.618</span> = High + 0.618 × (High − Low)
+            </div>
+<div>
+<span class="font-semibold text-slate-800">Lower 1.618</span> = Low − 0.618 × (High − Low)
+              <span class="text-slate-400 text-xs ml-1">(完整周一收盘定界锁定)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- KPI Summary 4-Cards Grid -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-6" data-purpose="kpi-metric-cards">
+<!-- Total Monitored -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden transition-all duration-200 hover:shadow-glass-hover">
+<div class="flex items-center justify-between text-xs text-slate-500 font-medium mb-1">
+<span>监控合约</span>
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-3xl font-extrabold text-slate-900 tracking-tight tabular-nums">148</span>
+<span class="text-xs text-slate-500">OKX USDT 全续全标的</span>
+</div>
+<div class="mt-2 text-[11px] text-slate-400 font-medium">全天候 250ms 逐笔撮合比对</div>
+</div>
+<!-- Triggered This Week (Highlighted Core Metric) -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-emerald-300/60 bg-white/80 shadow-glass-hover ring-1 ring-emerald-400/20">
+<div class="flex items-center justify-between text-xs text-emerald-700 font-semibold mb-1">
+<span>本周已触及 (优先源)</span>
+<span class="flex h-2 w-2 relative">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-3xl font-black text-emerald-600 tracking-tight tabular-nums">7</span>
+<span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/50">首次触碰记录</span>
+</div>
+<div class="mt-2 text-[11px] text-emerald-600/80 font-medium">包含 2 个标的处于刚触及窗口</div>
+</div>
+<!-- 15m Just Triggered Alert -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden border-blue-300/60 bg-blue-50/40 ring-1 ring-blue-400/30">
+<div class="flex items-center justify-between text-xs text-blue-700 font-bold mb-1">
+<span>15m 刚触及警戒</span>
+<div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse-subtle"></div>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-3xl font-black text-blue-600 tracking-tight tabular-nums">2</span>
+<span class="text-xs text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded font-medium">BTC · SOL 实时高亮</span>
+</div>
+<div class="mt-2 text-[11px] text-blue-600/80 font-medium">Telegram 秒级推送已就绪</div>
+</div>
+<!-- Locked Baseline -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 relative overflow-hidden">
+<div class="flex items-center justify-between text-xs text-slate-500 font-medium mb-1">
+<span>基准已锁定</span>
+<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="flex items-baseline space-x-2">
+<span class="text-3xl font-extrabold text-slate-800 tracking-tight tabular-nums">142</span>
+<span class="text-xs text-slate-500">6 个新标的待定界</span>
+</div>
+<div class="mt-2 text-[11px] text-slate-400 font-medium">锁定于 05-19 23:59:59 EST</div>
+</div>
+</div>
+</section>
+<!-- END: PageTitleAndFormula -->
+<!-- BEGIN: TwoColumnLayout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+<!-- BEGIN: MainContentList (Left 8.5 Cols) -->
+<section class="xl:col-span-8 space-y-4" data-purpose="triggered-prioritized-table-container">
+<!-- Filter Bar & Search -->
+<div class="glass-card rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-glass">
+<!-- Quick Filter Tabs (Refined 4 Items) -->
+<div class="flex items-center space-x-1.5 p-1 rounded-xl bg-slate-100/70 border border-slate-200/50 text-xs font-semibold">
+<button class="px-3.5 py-1.5 rounded-lg bg-white shadow-xs text-slate-900 border border-slate-200/40">
+              全部已触及 <span class="ml-1 text-[11px] text-blue-600 bg-blue-50 px-1 rounded-md tabular-nums">7</span>
+</button>
+<button class="px-3.5 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center space-x-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+<span>刚触及</span>
+<span class="text-[11px] text-blue-600 tabular-nums">2</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+              触及上沿 <span class="ml-0.5 text-slate-400 tabular-nums">(4)</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 transition">
+              触及下沿 <span class="ml-0.5 text-slate-400 tabular-nums">(3)</span>
+</button>
+</div>
+<!-- Sort Status & Search Bar -->
+<div class="flex items-center space-x-2.5">
+<div class="relative w-full sm:w-56">
+<input class="w-full pl-8 pr-3 py-1.5 text-xs bg-white/70 rounded-xl border border-slate-200/80 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder-slate-400 transition" placeholder="搜索已触及标的..." type="text"/>
+<svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<div class="hidden sm:flex items-center space-x-1 text-slate-400 text-xs font-medium whitespace-nowrap">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>按触碰倒序</span>
+</div>
+</div>
+</div>
+<!-- Triggered Items Stack -->
+<div class="space-y-3" data-purpose="prioritized-contracts-stack" id="contracts-list">
+<!-- ITEM 1: BTCUSDT (EXPANDED K-LINE STATE - 8m ago) -->
+<div class="glass-card rounded-2xl overflow-hidden border-blue-400/50 shadow-glass-active bg-blue-50/30 transition-all duration-300" id="card-btcusdt">
+<!-- Row Header Bar (Clickable) -->
+<div class="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-blue-50/40 select-none" id="btcusdt-toggle">
+<!-- Symbol Info -->
+<div class="flex items-center space-x-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-amber-500/20 ring-2 ring-white">
+                  ₿
+                </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-slate-900 text-base">BTCUSDT</span>
+<span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">永续</span>
+<!-- 15m Just Triggered Badge -->
+<span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100/90 text-blue-700 border border-blue-300/80 shadow-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-ping"></span>
+<span>刚触及 · 8分钟前</span>
+</span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                    纽约周一基准 H: <span class="tabular-nums font-semibold text-slate-700">93,950.00</span> | L: <span class="tabular-nums font-semibold text-slate-700">88,975.20</span>
+</div>
+</div>
+</div>
+<!-- Price & Trigger Target Alignment -->
+<div class="flex items-center justify-between md:justify-end gap-6 sm:gap-8">
+<!-- Current Price -->
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">最新成交价</div>
+<div class="text-base sm:text-lg font-black text-slate-900 tabular-nums">96,420.50</div>
+<div class="text-xs font-semibold text-emerald-600 tabular-nums">+1.84% (24h)</div>
+</div>
+<!-- Trigger Extension Target -->
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">触发上沿 1.618</div>
+<div class="text-base sm:text-lg font-black text-blue-600 tabular-nums">97,024.80</div>
+<div class="text-[11px] font-medium text-blue-700/80">触及瞬时峰值 97,110.50</div>
+</div>
+<!-- Collapse Toggle Icon Button -->
+<div class="flex items-center space-x-2 pl-2">
+<span class="text-xs font-medium text-blue-600 hidden sm:inline">收起 K 线区间图</span>
+<div class="w-8 h-8 rounded-full bg-white/80 border border-blue-200 flex items-center justify-center text-blue-600 shadow-sm transition-transform duration-300 rotate-180" id="btc-arrow">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- BEGIN: Expanded K-Line Chart Component -->
+<div class="border-t border-blue-200/50 bg-white/90 p-3 sm:p-5 transition-all duration-300" data-purpose="kline-candlestick-analysis-view" id="btcusdt-chart-container">
+<!-- OHLC Bar & Controls -->
+<div class="flex flex-col md:flex-row md:items-center justify-between pb-3 mb-3 border-b border-slate-100 gap-2">
+<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+<span class="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded">BTCUSDT 15m</span>
+<span class="text-slate-500">O: <span class="font-mono font-medium text-slate-800">96,210.00</span></span>
+<span class="text-slate-500">H: <span class="font-mono font-medium text-emerald-600 font-bold">97,110.50</span></span>
+<span class="text-slate-500">L: <span class="font-mono font-medium text-slate-800">96,150.00</span></span>
+<span class="text-slate-500">C: <span class="font-mono font-medium text-slate-900 font-bold">96,420.50</span></span>
+<span class="text-slate-400">Vol: <span class="font-mono text-slate-600">1,428 BTC</span></span>
+<span class="text-blue-600 font-medium pl-1 text-[11px] bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                    上影线冲高 97,024.80 触发
+                  </span>
+</div>
+<!-- Simulation State Toggles for Prototype Integrity -->
+<div class="flex items-center space-x-1.5 text-[11px] font-medium text-slate-500 self-end md:self-auto">
+<span class="text-slate-400 text-[10px]">视图模拟:</span>
+<button class="px-2 py-0.5 rounded bg-blue-600 text-white font-semibold shadow-xs">正常K线</button>
+<button class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition" onclick="alert('骨架加载态已就绪');">骨架态</button>
+<button class="px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 transition" onclick="alert('重试通道连接正常');">重试</button>
+</div>
+</div>
+<!-- Main K-Line Chart SVG & Canvas Representation -->
+<div class="relative w-full h-[280px] sm:h-[360px] bg-slate-50/50 rounded-xl border border-slate-200/70 overflow-hidden select-none">
+<!-- Chart Background Precision Grid -->
+<div class="absolute inset-0 flex flex-col justify-between p-3 pointer-events-none opacity-40">
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+<div class="border-b border-dashed border-slate-300 w-full h-0"></div>
+</div>
+<!-- Monday Definition Range Highlight Overlay (00:00 - 23:59 EST) -->
+<div class="absolute left-0 top-0 bottom-6 w-[28%] bg-gradient-to-r from-blue-100/40 to-blue-50/10 border-r border-dashed border-blue-400/40 pointer-events-none flex flex-col justify-end p-2.5">
+<span class="text-[10px] sm:text-xs font-semibold text-blue-700 bg-white/90 backdrop-blur-sm px-2 py-1 rounded shadow-xs border border-blue-200/60 inline-block w-fit">
+                    Monday Baseline Definition Range · 周一定界
+                  </span>
+</div>
+<!-- SVG Geometric K-Line Drawing & Key Extension Levels -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 360">
+<defs>
+<!-- Linear Gradient for Upper Zone -->
+<lineargradient id="upperGlow" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#2563EB" stop-opacity="0.12"></stop>
+<stop offset="100%" stop-color="#2563EB" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- 1. Upper 1.618 Extension Level (Y: ~35px) - 97,024.80 -->
+<line stroke="#2563EB" stroke-dasharray="5,4" stroke-width="2.2" x1="0" x2="990" y1="35" y2="35"></line>
+<!-- 2. Upper 0.705 Retracement (Y: ~95px) - 92,482.00 -->
+<line stroke="#38BDF8" stroke-dasharray="3,3" stroke-width="1.2" x1="280" x2="990" y1="95" y2="95"></line>
+<!-- 3. Upper 0.618 Key Level (Y: ~105px) - 92,049.00 -->
+<line stroke="#60A5FA" stroke-dasharray="4,4" stroke-width="1.2" x1="280" x2="990" y1="105" y2="105"></line>
+<!-- 4. Monday High (H) (Y: ~80px) - 93,950.00 -->
+<line stroke="#0F172A" stroke-width="2" x1="0" x2="990" y1="80" y2="80"></line>
+<!-- 5. Equilibrium 0.5 (Y: ~140px) - 91,462.60 -->
+<line stroke="#64748B" stroke-dasharray="6,4" stroke-width="1.2" x1="0" x2="990" y1="140" y2="140"></line>
+<!-- 6. Monday Low (L) (Y: ~200px) - 88,975.20 -->
+<line stroke="#0F172A" stroke-width="2" x1="0" x2="990" y1="200" y2="200"></line>
+<!-- 7. Lower 0.618 (Y: ~175px) -->
+<line stroke="#94A3B8" stroke-dasharray="2,3" stroke-width="1" x1="280" x2="990" y1="175" y2="175"></line>
+<!-- 8. Lower 0.705 (Y: ~185px) -->
+<line stroke="#94A3B8" stroke-dasharray="2,3" stroke-width="1" x1="280" x2="990" y1="185" y2="185"></line>
+<!-- 9. Lower 1.618 Extension Level (Y: ~310px) - 85,900.80 -->
+<line stroke="#059669" stroke-dasharray="5,4" stroke-width="2.2" x1="0" x2="990" y1="310" y2="310"></line>
+<!-- Monday Baseline Range Shaded Box -->
+<rect fill="rgba(37,99,235,0.03)" height="120" stroke="none" width="260" x="20" y="80"></rect>
+<!-- CANDLESTICKS RENDERING -->
+<!-- Monday Baseline Candles (within first 28%) -->
+<!-- C1 (Mon 00:00) -->
+<line stroke="#059669" stroke-width="1.5" x1="45" x2="45" y1="120" y2="180"></line>
+<rect fill="#059669" height="40" rx="1.5" width="10" x="40" y="130"></rect>
+<!-- C2 -->
+<line stroke="#E11D48" stroke-width="1.5" x1="80" x2="80" y1="100" y2="195"></line>
+<rect fill="#E11D48" height="75" rx="1.5" width="10" x="75" y="110"></rect>
+<!-- C3 (Touches Mon Low 88975) -->
+<line stroke="#059669" stroke-width="1.5" x1="115" x2="115" y1="130" y2="200"></line>
+<rect fill="#059669" height="40" rx="1.5" width="10" x="110" y="150"></rect>
+<!-- C4 -->
+<line stroke="#059669" stroke-width="1.5" x1="150" x2="150" y1="110" y2="170"></line>
+<rect fill="#059669" height="40" rx="1.5" width="10" x="145" y="120"></rect>
+<!-- C5 (Touches Mon High 93950) -->
+<line stroke="#059669" stroke-width="1.5" x1="190" x2="190" y1="80" y2="140"></line>
+<rect fill="#059669" height="45" rx="1.5" width="10" x="185" y="85"></rect>
+<!-- C6 (Mon Close around EQ) -->
+<line stroke="#E11D48" stroke-width="1.5" x1="235" x2="235" y1="90" y2="155"></line>
+<rect fill="#E11D48" height="45" rx="1.5" width="10" x="230" y="95"></rect>
+<!-- Midweek Consolidation & Expansion Phase (Tuesday to Wednesday) -->
+<!-- C7 (Tue Open) -->
+<line stroke="#059669" stroke-width="1.5" x1="310" x2="310" y1="105" y2="150"></line>
+<rect fill="#059669" height="30" rx="1.5" width="10" x="305" y="110"></rect>
+<!-- C8 (Retest 0.705) -->
+<line stroke="#059669" stroke-width="1.5" x1="360" x2="360" y1="92" y2="140"></line>
+<rect fill="#059669" height="30" rx="1.5" width="10" x="355" y="95"></rect>
+<!-- C9 (Breakout Monday High) -->
+<line stroke="#059669" stroke-width="1.5" x1="420" x2="420" y1="70" y2="110"></line>
+<rect fill="#059669" height="30" rx="1.5" width="10" x="415" y="75"></rect>
+<!-- C10 (Healthy pullback) -->
+<line stroke="#E11D48" stroke-width="1.5" x1="480" x2="480" y1="65" y2="95"></line>
+<rect fill="#E11D48" height="20" rx="1.5" width="10" x="475" y="70"></rect>
+<!-- C11 (Rally continues) -->
+<line stroke="#059669" stroke-width="1.5" x1="540" x2="540" y1="50" y2="85"></line>
+<rect fill="#059669" height="25" rx="1.5" width="10" x="535" y="55"></rect>
+<!-- C12 -->
+<line stroke="#059669" stroke-width="1.5" x1="600" x2="600" y1="45" y2="75"></line>
+<rect fill="#059669" height="20" rx="1.5" width="10" x="595" y="48"></rect>
+<!-- C13 -->
+<line stroke="#E11D48" stroke-width="1.5" x1="660" x2="660" y1="40" y2="70"></line>
+<rect fill="#E11D48" height="18" rx="1.5" width="10" x="655" y="42"></rect>
+<!-- C14 (Strong Bull surge) -->
+<line stroke="#059669" stroke-width="1.5" x1="720" x2="720" y1="35" y2="60"></line>
+<rect fill="#059669" height="20" rx="1.5" width="10" x="715" y="38"></rect>
+<!-- C15 (Touches Upper 1.618 Peak 97,110.50 with wick over 97,024.80) -->
+<line stroke="#059669" stroke-width="2" x1="785" x2="785" y1="28" y2="58"></line>
+<rect fill="#059669" height="18" rx="1.5" width="10" x="780" y="36"></rect>
+<!-- Touch Ping Marker -->
+<circle cx="785" cy="35" fill="#2563EB" r="4.5" stroke="#FFFFFF" stroke-width="1.5"></circle>
+<!-- C16 (Current Active Candle - pulling back slightly to 96,420.50) -->
+<line stroke="#E11D48" stroke-width="1.5" x1="840" x2="840" y1="34" y2="52"></line>
+<rect fill="#E11D48" height="12" rx="1.5" width="10" x="835" y="38"></rect>
+<g font-family="monospace" font-size="11" font-weight="600" id="svg-price-reference-labels" text-anchor="end"><text fill="#2563EB" x="985" y="30">97,024.80</text><text fill="#0F172A" x="985" y="75">93,950.00</text><text fill="#0284C7" font-size="10" opacity="0.85" x="985" y="91">92,482.00</text><text fill="#64748B" x="985" y="135">91,462.60</text><text fill="#0F172A" x="985" y="195">88,975.20</text><text fill="#059669" x="985" y="305">85,900.80</text></g></svg>
+<!-- Right Price Axis Tags & Indicators (Non-overlapping, strictly aligned) -->
+<div class="absolute right-0 top-0 bottom-0 w-20 sm:w-24 pointer-events-none flex flex-col justify-between py-2 pr-1.5 sm:pr-2 border-l border-slate-200/50 bg-white/40 backdrop-blur-xs select-none text-right font-mono text-[10px] sm:text-[11px] text-slate-400"><div class="pt-1 pr-1 font-semibold text-blue-600/80">97,500.0</div><div class="pr-1 relative -top-3"><div class="inline-block px-1.5 py-0.5 rounded bg-slate-900 text-white font-bold text-[10px] tabular-nums shadow-xs">96,420.5</div></div><div class="pr-1 text-slate-400">94,000.0</div><div class="pr-1 text-slate-400">91,500.0</div><div class="pr-1 text-slate-400">89,000.0</div><div class="pb-1 pr-1 font-semibold text-emerald-600/80">86,000.0</div></div>
+</div>
+<!-- Chart Interactive Foot Legend -->
+<div class="mt-3.5 pt-2.5 flex flex-wrap items-center justify-between text-[11px] text-slate-500 gap-2 border-t border-slate-100">
+<div class="flex flex-wrap items-center gap-3">
+<span class="flex items-center space-x-1.5">
+<span class="w-3 h-0.5 bg-slate-900"></span>
+<span class="text-slate-700 font-medium">周一高低点 (实线)</span>
+</span>
+<span class="flex items-center space-x-1.5">
+<span class="w-3 h-0.5 border-t border-dashed border-slate-500"></span>
+<span>0.5 中轴 Equilibrium</span>
+</span>
+<span class="flex items-center space-x-1.5">
+<span class="w-3 h-0.5 border-t border-dotted border-sky-500"></span>
+<span>0.618 / 0.705 斐波那契回撤</span>
+</span>
+<span class="flex items-center space-x-1.5">
+<span class="w-3 h-0.5 border-t-2 border-dashed border-blue-600"></span>
+<span class="text-blue-700 font-semibold">1.618 扩展目标</span>
+</span>
+</div>
+<div class="text-slate-400">
+                  纽约时间：2025-05-21 14:40:02 EDT · 实时同步中
+                </div>
+</div>
+</div>
+<!-- END: Expanded K-Line Chart Component -->
+</div>
+<!-- END ITEM 1 -->
+<!-- ITEM 2: SOLUSDT (14m ago - Just Triggered Alert State) -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-blue-300/80 bg-blue-50/20 hover:bg-blue-50/40 transition cursor-pointer" data-purpose="contract-row-just-triggered">
+<div class="flex items-center space-x-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-purple-500/20 ring-2 ring-white">
+                S
+              </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-slate-900 text-base">SOLUSDT</span>
+<span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">永续</span>
+<span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-700 border border-blue-300">
+<span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+<span>刚触及 · 14分钟前</span>
+</span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                  纽约周一基准 H: <span class="tabular-nums font-semibold text-slate-700">172.20</span> | L: <span class="tabular-nums font-semibold text-slate-700">152.10</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 sm:gap-8">
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">最新成交价</div>
+<div class="text-base sm:text-lg font-black text-slate-900 tabular-nums">184.92</div>
+<div class="text-xs font-semibold text-emerald-600 tabular-nums">+5.42% (24h)</div>
+</div>
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">触发上沿 1.618</div>
+<div class="text-base sm:text-lg font-black text-emerald-600 tabular-nums">184.66</div>
+<div class="text-[11px] font-medium text-emerald-700/80">触价高点 185.34</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/60 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- END ITEM 2 -->
+<!-- ITEM 3: PEPEUSDT (3.5 hours ago) -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-glass-hover transition cursor-pointer" data-purpose="contract-row-standard">
+<div class="flex items-center space-x-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-emerald-500/20 ring-2 ring-white">
+                P
+              </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-slate-900 text-base">PEPEUSDT</span>
+<span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">永续</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                    已触达上沿 · 3.5小时前
+                  </span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                  纽约周一基准 H: <span class="tabular-nums font-semibold text-slate-700">0.0000178</span> | L: <span class="tabular-nums font-semibold text-slate-700">0.0000155</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 sm:gap-8">
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">最新成交价</div>
+<div class="text-base sm:text-lg font-black text-slate-900 tabular-nums">0.0000194</div>
+<div class="text-xs font-semibold text-emerald-600 tabular-nums">+8.12% (24h)</div>
+</div>
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">触碰上沿 1.618</div>
+<div class="text-base sm:text-lg font-black text-emerald-600 tabular-nums">0.0000192</div>
+<div class="text-[11px] font-medium text-slate-500">05-21 11:05 EST</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/60 border border-slate-200 flex items-center justify-center text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- END ITEM 3 -->
+<!-- ITEM 4: SUIUSDT (6 hours ago - Lower Touch) -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-glass-hover transition cursor-pointer" data-purpose="contract-row-lower-touch">
+<div class="flex items-center space-x-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white font-black text-sm flex items-center justify-center shadow-md shadow-cyan-500/20 ring-2 ring-white">
+                S
+              </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-slate-900 text-base">SUIUSDT</span>
+<span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">永续</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200/60">
+                    已触达下沿 · 6小时前
+                  </span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                  纽约周一基准 H: <span class="tabular-nums font-semibold text-slate-700">3.4210</span> | L: <span class="tabular-nums font-semibold text-slate-700">3.0680</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 sm:gap-8">
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">最新成交价</div>
+<div class="text-base sm:text-lg font-black text-slate-900 tabular-nums">2.8720</div>
+<div class="text-xs font-semibold text-rose-600 tabular-nums">-0.72% (已探底回升)</div>
+</div>
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">触碰下沿 1.618</div>
+<div class="text-base sm:text-lg font-black text-rose-600 tabular-nums">2.8513</div>
+<div class="text-[11px] font-medium text-slate-500">05-21 08:41 EST</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/60 border border-slate-200 flex items-center justify-center text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- END ITEM 4 -->
+<!-- ITEM 5: TIAUSDT (Yesterday - Lower Touch) -->
+<div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:shadow-glass-hover transition cursor-pointer" data-purpose="contract-row-lower-touch">
+<div class="flex items-center space-x-3.5">
+<div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white font-black text-sm flex items-center justify-center shadow-md ring-2 ring-white">
+                T
+              </div>
+<div>
+<div class="flex items-center space-x-2">
+<span class="font-extrabold text-slate-900 text-base">TIAUSDT</span>
+<span class="text-[11px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">永续</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
+                    已触达下沿 · 昨天
+                  </span>
+</div>
+<div class="text-xs text-slate-500 mt-0.5">
+                  纽约周一基准 H: <span class="tabular-nums font-semibold text-slate-700">4.890</span> | L: <span class="tabular-nums font-semibold text-slate-700">4.415</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between md:justify-end gap-6 sm:gap-8">
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">最新成交价</div>
+<div class="text-base sm:text-lg font-black text-slate-900 tabular-nums">4.185</div>
+<div class="text-xs font-semibold text-slate-500 tabular-nums">-2.10% (24h)</div>
+</div>
+<div class="text-left md:text-right">
+<div class="text-xs text-slate-400 font-medium">触碰下沿 1.618</div>
+<div class="text-base sm:text-lg font-black text-rose-600 tabular-nums">4.120</div>
+<div class="text-[11px] font-medium text-slate-500">05-20 22:18 EST</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/60 border border-slate-200 flex items-center justify-center text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+<!-- END ITEM 5 -->
+</div>
+<!-- Pagination and Monitored Status Summary -->
+<div class="flex items-center justify-between text-xs text-slate-500 pt-2 px-1">
+<div>显示本周优先触碰 <span class="font-bold text-slate-800">5</span> / 7 个标的 (全量池 148 个)</div>
+<div class="flex items-center space-x-1">
+<button class="px-2.5 py-1 rounded bg-white/80 border border-slate-200 text-slate-400 cursor-not-allowed">上一页</button>
+<span class="px-2 font-medium text-slate-700">1 / 1</span>
+<button class="px-2.5 py-1 rounded bg-white/80 border border-slate-200 text-slate-400 cursor-not-allowed">下一页</button>
+</div>
+</div>
+</section>
+<!-- END: MainContentList -->
+<!-- BEGIN: Sidebar (Right 3.5 Cols) -->
+<aside class="xl:col-span-4 space-y-5" data-purpose="sidebar-tools-and-events">
+<!-- Telegram Notification Config Card -->
+<div class="glass-card rounded-2xl p-5 border border-white/90 shadow-glass">
+<div class="flex items-center justify-between mb-3">
+<div class="flex items-center space-x-2.5">
+<div class="w-9 h-9 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-md shadow-sky-500/20">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"></path>
+</svg>
+</div>
+<div>
+<h3 class="font-bold text-slate-900 text-sm">Telegram 触价推送</h3>
+<p class="text-[11px] text-slate-400">高确定性实时预警通道</p>
+</div>
+</div>
+<!-- Apple-style Active Toggle -->
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 shadow-inner"></div>
+</label>
+</div>
+<div class="flex items-center justify-between text-xs py-2 px-3 rounded-xl bg-slate-50/80 border border-slate-200/50 mb-3">
+<span class="text-slate-500 font-medium">推送状态：<span class="text-emerald-600 font-semibold">监控已就绪</span></span>
+<span class="text-[11px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded flex items-center gap-1">
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+              已配置 Webhook
+            </span>
+</div>
+<!-- Alert Notice Box -->
+<div class="p-3 rounded-xl bg-blue-50/60 border border-blue-200/60 text-xs space-y-1.5">
+<div class="flex items-center space-x-1.5 text-blue-800 font-semibold">
+<svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>只推启用后的新触价事件，不补推历史记录。</span>
+</div>
+<p class="text-[11px] text-slate-500 leading-relaxed">
+              首次触碰及即刻记录并发放，不等 15 分钟收线确认。15 分钟内刚触及进入优先加急流。
+            </p>
+</div>
+</div>
+<!-- Realtime Touch Stream (7/7 Events) -->
+<div class="glass-card rounded-2xl p-5 border border-white/90 shadow-glass" data-purpose="touch-events-timeline">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center space-x-2">
+<svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<h3 class="font-extrabold text-slate-900 text-sm tracking-tight">本周最新触达 (7/7)</h3>
+</div>
+<span class="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">实时回执</span>
+</div>
+<!-- Events Scroll Flow -->
+<div class="space-y-2.5">
+<!-- Event 1 (BTC Just Triggered) -->
+<div class="p-3 rounded-xl bg-blue-50/80 border border-blue-200/80 shadow-xs flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-black text-slate-900 text-xs">BTCUSDT</span>
+<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-1 rounded">触达上沿 97,024.80</span>
+</div>
+<div class="text-[10px] text-slate-400 mt-0.5">回执：Telegram 优先投递已接收</div>
+</div>
+<div class="text-right">
+<div class="text-[11px] font-mono font-bold text-blue-600">8分钟前</div>
+<span class="text-[9px] text-emerald-600 font-semibold">服务已接妥</span>
+</div>
+</div>
+<!-- Event 2 (SOL Just Triggered) -->
+<div class="p-3 rounded-xl bg-blue-50/50 border border-blue-200/60 shadow-xs flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-black text-slate-900 text-xs">SOLUSDT</span>
+<span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-1 rounded">触达上沿 184.66</span>
+</div>
+<div class="text-[10px] text-slate-400 mt-0.5">回执：Telegram Webhook</div>
+</div>
+<div class="text-right">
+<div class="text-[11px] font-mono font-bold text-blue-600">14分钟前</div>
+<span class="text-[9px] text-emerald-600 font-semibold">服务已接妥</span>
+</div>
+</div>
+<!-- Event 3 (PEPE) -->
+<div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-200/50 flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-bold text-slate-800 text-xs">PEPEUSDT</span>
+<span class="text-[10px] text-emerald-700 font-medium">触碰上沿 0.0000192</span>
+</div>
+<div class="text-[10px] text-slate-400">系统入账 · 历史只读</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-mono text-slate-400">05-21 11:05</div>
+<span class="text-[9px] text-slate-400">正常结存</span>
+</div>
+</div>
+<!-- Event 4 (SUI) -->
+<div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-200/50 flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-bold text-slate-800 text-xs">SUIUSDT</span>
+<span class="text-[10px] text-rose-700 font-medium">触达下沿 2.8513</span>
+</div>
+<div class="text-[10px] text-slate-400">回执：Telegram Webhook</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-mono text-slate-400">05-21 08:41</div>
+<span class="text-[9px] text-emerald-600 font-medium">服务已接妥</span>
+</div>
+</div>
+<!-- Event 5 (TIA) -->
+<div class="p-2.5 rounded-xl bg-slate-50/70 border border-slate-200/50 flex items-center justify-between">
+<div>
+<div class="flex items-center space-x-1.5">
+<span class="font-bold text-slate-800 text-xs">TIAUSDT</span>
+<span class="text-[10px] text-rose-700 font-medium">下沿探底 4.120</span>
+</div>
+<div class="text-[10px] text-slate-400">通道重连中</div>
+</div>
+<div class="text-right">
+<div class="text-[10px] font-mono text-slate-400">05-20 22:18</div>
+<span class="text-[9px] text-amber-600 font-medium">已补发结存</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Compliance & Metric Criteria Card -->
+<div class="glass-card rounded-2xl p-5 border border-white/90 shadow-glass text-xs space-y-2.5" data-purpose="compliance-rules-box">
+<div class="flex items-center space-x-2 text-slate-900 font-bold">
+<svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span>业务与监控口径准则</span>
+</div>
+<ul class="space-y-2 text-slate-500 text-[11px] leading-relaxed">
+<li><strong class="text-slate-700">1. 交易所源：</strong>仅接入 OKX USDT 永续合约实时撮合行。</li>
+<li><strong class="text-slate-700">2. 基准定界：</strong>纽约时间自然周一 00:00 - 23:59 完整日线作为定界基准。</li>
+<li><strong class="text-slate-700">3. 未收盘处理：</strong>周一未收盘前显示预估基准；周一数据缺失则标记为待生成。</li>
+<li><strong class="text-slate-700">4. 去噪机制：</strong>本周内同标的同方向仅记录首次触及，避免频繁骚扰。只读研投监控，不具备开仓交易功能。</li>
+</ul>
+</div>
+</aside>
+<!-- END: Sidebar -->
+</div>
+<!-- END: TwoColumnLayout -->
+</main>
+<!-- END: PageContent -->
+<!-- BEGIN: PageFooter -->
+<footer class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-6 border-t border-slate-200/60 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-3">
+<div class="flex items-center space-x-2">
+<span class="font-bold text-slate-700">Spike Terminal v4.12.0</span>
+<span>·</span>
+<span>Institutional Light Alpha Engine</span>
+</div>
+<div class="font-mono text-[11px]">
+      数据时间戳同步于 2025-05-21 15:40:02 EDT
+    </div>
+</footer>
+<!-- END: PageFooter -->
+<!-- BEGIN: InteractiveHandlers -->
+<script data-purpose="toggle-kline-card">
+    // Interactive toggle for the BTCUSDT Expanded K-Line Card
+    const toggleButton = document.getElementById('btcusdt-toggle');
+    const chartContainer = document.getElementById('btcusdt-chart-container');
+    const arrow = document.getElementById('btc-arrow');
+
+    if (toggleButton && chartContainer && arrow) {
+      toggleButton.addEventListener('click', () => {
+        const isCollapsed = chartContainer.classList.contains('hidden');
+        if (isCollapsed) {
+          chartContainer.classList.remove('hidden');
+          arrow.classList.add('rotate-180');
+        } else {
+          chartContainer.classList.add('hidden');
+          arrow.classList.remove('rotate-180');
+        }
+      });
+    }
+  </script>
+<!-- END: InteractiveHandlers -->
+</body></html>

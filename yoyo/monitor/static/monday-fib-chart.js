@@ -19,7 +19,10 @@
       {label:'下 0.705',price:h-.705*r,kind:'fib',color:'#8a6cbd',axisLabelVisible:false},
       {label:'周一低',price:l,kind:'range',color:'#528cc1',lineStyle:0},
       {label:'下 1.618',price:row.lower,kind:'fib',color:'#087f69',lineWidth:2,lineStyle:0},
-    ].filter(x=>finite(x.price));
+    ].filter(x=>finite(x.price)).map(level=>({...level,
+      // Keep names for data/inspection; only bare prices belong on the chart.
+      inlinePriceVisible:level.axisLabelVisible!==false,axisLabelVisible:false,
+    }));
   }
   function prepare(context,row,week,period='15m'){
     if(!PERIODS[period]||context.bar!==period||(period==='1D'&&context.native_bar!=='1Dutc'))throw Error('K 线周期不匹配');

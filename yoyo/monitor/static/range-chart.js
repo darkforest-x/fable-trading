@@ -74,7 +74,13 @@
         ctx.save();ctx.beginPath();ctx.rect(0,0,mediaSize.width,mediaSize.height);ctx.clip();
         for(const l of o.activeLevels||[]){const y=o.series.priceToCoordinate(l.price);if(y==null)continue;
           ctx.strokeStyle=l.color||'#528cc1';ctx.lineWidth=l.lineWidth||1;ctx.setLineDash(l.lineStyle===2?[4,4]:[]);
-          ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();}
+          ctx.beginPath();ctx.moveTo(a,y);ctx.lineTo(b,y);ctx.stroke();
+          if(l.inlinePriceVisible&&y>=16&&y<=mediaSize.height){
+            const text=window.SpikeChartTools?.axisPrice(l.price)??price(l.price);
+            ctx.font='11px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif';ctx.textAlign='right';ctx.textBaseline='bottom';
+            if(ctx.measureText(text).width+12<=b-a){ctx.fillStyle=l.color||'#528cc1';ctx.fillText(text,b-6,y-4);}
+          }
+        }
         ctx.restore();
       });
     }
