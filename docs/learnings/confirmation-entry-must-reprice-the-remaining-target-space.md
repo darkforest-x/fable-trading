@@ -1,0 +1,7 @@
+# Recompute remaining target space after confirmation closes
+
+- **Problem**: A wick rejection followed by three untouched candles can look successful on a chart, while the trade entered after confirmation still has poor reward relative to its original pin stop.
+- **Dead end**: Counting the rebound from the pin as strategy profit, or entering retrospectively at that pin after seeing three later candles, uses unavailable confirmation. A higher target-hit rate alone also ignores that winners may earn much less than one initial-risk unit.
+- **Effective path**: Freeze the pin extreme and Monday target, wait for all three complete consecutive candles, then recompute risk and remaining target distance from the actual next open. Retain small positive target distances without an unrequested minimum-R filter; reject only invalid geometry. Test future-prefix invariance and compare both risk-normalized and equal-notional returns with matched controls.
+- **General rule**: A confirmation rule defines a later executable entry. Keep that entry clock, stop anchor, and remaining target distance together; do not credit pre-entry movement to a post-confirmation trade.
+- **Related**: `yoyo/evaluation/monday_1h_wick_hold.py`; `tests/evaluation/test_monday_1h_wick_hold.py`; `experiments/active/exp-monday-1h-wick-hold-20261023-v1/`. The owner retained pin-extreme stops and near-Monday-edge targets. No profit claim follows from a single illustrated winner.
