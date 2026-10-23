@@ -148,23 +148,28 @@ def overview_panel(ax,f,r):
 
 def one(frame,r):
     entry=pd.Timestamp(r['entry_time']);end=pd.Timestamp(r['exit_interval_end']);pin=pd.Timestamp(r['pin_time'])
-    a=frame.loc[entry.floor('5min')-STEP*72:entry.floor('5min')+STEP*120]
-    b=frame.loc[pd.Timestamp(r['exit_interval_start']).floor('5min')-STEP*72:end.floor('5min')+STEP*24]
+    pin_end=pin+pd.Timedelta(minutes=int(r['signal_minutes']))
+    trigger=frame.loc[pin.floor('5min')-STEP*36:pin_end.floor('5min')+STEP*12]
+    a=frame.loc[entry.floor('5min')-STEP*36:entry.floor('5min')+STEP*12]
+    b=frame.loc[pd.Timestamp(r['exit_interval_start']).floor('5min')-STEP*36:end.floor('5min')+STEP*12]
     all_bars=frame.loc[min(pin,entry)-STEP*72:end+STEP*24]
     assert len(a)>1 and len(b)>1 and len(all_bars)>1
-    fig=plt.figure(figsize=(20,15),dpi=160)
-    gs=fig.add_gridspec(5,1,height_ratios=[4,1,4,1,3.7],hspace=.38)
-    fig.subplots_adjust(left=.06,right=.775,top=.83,bottom=.11)
-    ap=fig.add_subplot(gs[0]);av=fig.add_subplot(gs[1],sharex=ap)
-    bp=fig.add_subplot(gs[2]);bv=fig.add_subplot(gs[3],sharex=bp)
-    whole=fig.add_subplot(gs[4])
-    candle_panel(ap,av,a,r,f'A 入场附近 · 5分钟K线 · {when(a.index[0])} — {when(a.index[-1])}')
-    candle_panel(bp,bv,b,r,f'B 退出附近 · 5分钟K线 · {when(b.index[0])} — {when(b.index[-1])}')
+    fig=plt.figure(figsize=(20,20),dpi=160)
+    gs=fig.add_gridspec(7,1,height_ratios=[3.4,.7,3.4,.7,3.4,.7,3],hspace=.45)
+    fig.subplots_adjust(left=.06,right=.775,top=.86,bottom=.085)
+    tp=fig.add_subplot(gs[0]);tv=fig.add_subplot(gs[1],sharex=tp)
+    ap=fig.add_subplot(gs[2]);av=fig.add_subplot(gs[3],sharex=ap)
+    bp=fig.add_subplot(gs[4]);bv=fig.add_subplot(gs[5],sharex=bp)
+    whole=fig.add_subplot(gs[6])
+    candle_panel(tp,tv,trigger,r,f'A 触价柱附近 · 5分钟K线 · {when(trigger.index[0])} — {when(trigger.index[-1])}')
+    tp.axvspan(xpos(trigger,pin),xpos(trigger,pin_end),color=C['purple'],alpha=.08,zorder=0)
+    candle_panel(ap,av,a,r,f'B 入场附近 · 5分钟K线 · {when(a.index[0])} — {when(a.index[-1])}')
+    candle_panel(bp,bv,b,r,f'C 退出附近 · 5分钟K线 · {when(b.index[0])} — {when(b.index[-1])}')
     overview_panel(whole,all_bars,r)
     rank=int(r['rank']);direction='多' if r['side']==1 else '空'
     fig.text(.06,.97,f'#{rank:03d}  {r["symbol"]}  做{direction}    净收益 {r["net_pct"]:+.2f}%',fontsize=23,weight='bold',color=C['line'])
     fig.text(.06,.935,r['scheme'],fontsize=14,color=C['line'])
-    fig.text(.06,.908,'按原始开仓名义额计算，不含杠杆｜北京时间 UTC+8｜事后盈利样本｜上下局部图分别自动缩放',fontsize=11,color='#526175')
+    fig.text(.06,.908,'按原始开仓名义额计算，不含杠杆｜北京时间 UTC+8｜事后盈利样本｜各局部图分别自动缩放；紫带=原触价柱时段',fontsize=11,color='#526175')
     handles=[Line2D([0],[0],color=MA_COLOR[p],ls=ls,lw=1.2,label=f'{pre.upper()}{p}')
              for p in (20,60,120) for pre,ls in [('sma','-'),('ema','--')]]
     fig.legend(handles=handles,loc='upper left',bbox_to_anchor=(.055,.891),ncol=6,frameon=False,fontsize=10)
@@ -192,9 +197,9 @@ def one(frame,r):
         block('定时平仓说明',['该收益为网格参考成交；',timing,'真实时钟收益范围见CSV。'],C['amber'])
     elif present(r.get('ambiguous_bar')) and str(r.get('ambiguous_bar')).lower() in ('true','1','1.0'):
         block('同K双触',['原账本标记同K止盈止损双触；','收益沿用原框架路径假设。'],C['amber'])
-    fig.text(.06,.066,'E/▲/▼ 入场 · X 退出 · 黄带=退出时间区间 · P=触价柱 · 红竖虚线=数据时间缺口；缺口压缩显示，没有补造K线。',fontsize=10,color='#526175')
-    fig.text(.06,.044,'六均线仅用于形态复盘；原策略未要求均线时不视作入场条件。远离局部纵轴的周一线/止盈止损只在右栏列价。',fontsize=10,color='#526175')
-    fig.text(.06,.022,f"原记录：{r['source_key']} / {r['config_id']} / {r['trade_id']}   （完整文件与记录序号见CSV）",fontsize=8.8,color='#526175')
+    fig.text(.06,.050,'E/▲/▼ 入场 · X 退出 · 黄带=退出时间区间 · P=触价柱 · 红竖虚线=数据时间缺口；缺口压缩显示，没有补造K线。',fontsize=10,color='#526175')
+    fig.text(.06,.033,'六均线仅用于形态复盘；原策略未要求均线时不视作入场条件。远离局部纵轴的周一线/止盈止损只在右栏列价。',fontsize=10,color='#526175')
+    fig.text(.06,.016,f"原记录：{r['source_key']} / {r['config_id']} / {r['trade_id']}   （完整文件与记录序号见CSV）",fontsize=8.8,color='#526175')
     path=DELIVERY/r['image_file'];fig.savefig(path,dpi=160);plt.close(fig)
     datadir=DELIVERY/'逐笔5m原始行情';datadir.mkdir(exist_ok=True)
     data=all_bars[[*old.OHLC,'volume',*SIX_MA_COLUMNS]].copy()
@@ -202,7 +207,7 @@ def one(frame,r):
     data.insert(0,'open_time_beijing',data.index.tz_convert('Asia/Shanghai').astype(str))
     data.to_csv(datadir/(path.stem+'.csv.gz'))
     return dict(rank=rank,symbol=r['symbol'],image_file=r['image_file'],
-        width=3200,height=2400,entry_panel_bars=len(a),exit_panel_bars=len(b),
+        width=3200,height=3200,trigger_panel_bars=len(trigger),entry_panel_bars=len(a),exit_panel_bars=len(b),
         full_5m_bars=len(all_bars),gap_count=int((all_bars.index.to_series().diff().dropna()!=STEP).sum()),
         source_ledger=r['source_ledger'],source_csv_record=int(r['source_csv_record']),
         canonical_trade_id=r['trade_id'],config_id=r['config_id'])
@@ -264,12 +269,12 @@ def render(ranks=None):
         from PIL import Image
         for r in manifest:
             with Image.open(DELIVERY/r['image_file']) as im:
-                assert im.size==(3200,2400);im.verify()
+                assert im.size==(3200,3200);im.verify()
         summary=json.loads((OUT/'selection.json').read_text())
         text=f'''周一1.618 · 收益率前200笔 · 逐张复盘
 
 打开方式：PNG按001—200排名命名，用Finder/预览按名称排序逐张看。
-每笔一张3200×2400合图：A入场附近5分钟K线；B退出附近5分钟K线；底部是全部原始5分钟收盘和高低价范围，不降采样。
+每笔一张3200×3200合图：A触价柱附近5分钟K线；B入场附近5分钟K线；C退出附近5分钟K线；底部是全部原始5分钟收盘和高低价范围，不降采样。
 00_前200笔清单与复盘笔记.csv含全部200条记录、方案、净/毛收益率、手续费、净R、时刻、原始账本和图片名。最后三列留给你的逐笔观察。
 逐笔5m原始行情/保存图中完整时间范围的原始OHLCV及六均线，可继续放大或重绘。
 
@@ -288,7 +293,7 @@ def render(ranks=None):
 复现：.venv/bin/python -m yoyo.evaluation.monday_top_trades --select --render
 '''
         (DELIVERY/'00_先读我.txt').write_text(text)
-        dump(OUT/'completion.json',dict(status='rendered',charts=len(manifest),pixel_size=[3200,2400],
+        dump(OUT/'completion.json',dict(status='rendered',charts=len(manifest),pixel_size=[3200,3200],
             price_and_monday_checks=200,png_decode_checks=200,all_5m_data_files=200,
             folder=str(DELIVERY),browser_created=False,simulation_replayed=False))
 
