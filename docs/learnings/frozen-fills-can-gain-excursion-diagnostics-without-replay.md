@@ -1,0 +1,7 @@
+# Frozen fills can gain excursion diagnostics without another backtest
+
+- **问题**：The case4 N5 ledger established net outcomes but lacked per-trade MFE and MAE needed for the owner's detailed report.
+- **死胡同**：Replaying unchanged trades would duplicate execution work. Taking extrema over an arbitrary future window would credit prices reached after the original stop or target.
+- **有效路径**：Keep every original signal, fill, fee and censored status immutable. Map the recorded entry and exit interval onto the registered OHLC; calculate extrema only through the native exit segment and separately through complete bars before the exit bar. Reconcile all9065 original rows. Of3356 SL trades,489 reached1R before exit under the frozen path and486 did so in complete earlier bars.
+- **通用规则**：Missing descriptive fields do not require resimulating unchanged executions. Enrich the frozen ledger and retain timing bounds. A count of profitable excursions followed by stops is not evidence that a breakeven policy improves expectancy; such a policy also changes eventual winners and needs a separately authorized native test.
+- **牵连**：`yoyo/evaluation/monday_alt_n5_report.py`, `yoyo/evaluation/monday_alt_n5_report_review.py`, `artifacts/monday-alt-n5-report-20261024/`; original case4-n5-v20 entries, TP/SL and current per-fill costs unchanged. See also [exit-path truncation](excursions-must-stop-at-the-execution-path.md).
