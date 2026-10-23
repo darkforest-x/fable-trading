@@ -192,8 +192,14 @@ def main():
     ledger = pd.read_csv(SOURCE / '全部9065笔交易.csv', float_precision='round_trip')
     picked = sample_rows(ledger)
     dump(OUT / 'sample-selection.json', records(picked[['sample_id', 'trade_id', 'symbol', 'side', 'outcome_cn', 'sampling_pool']]))
-    cfg = json.loads((old.EXP / 'config.json').read_text())
-    paths = dict(old.jobs(cfg)[0])
+    # Use the registered per-symbol input receipts. Enumerating every external
+    # directory and probing all tail paths is unnecessary and can stall on a
+    # busy removable disk. Keep using the original repository symlink paths.
+    paths = {}
+    for symbol in ledger.symbol.unique():
+        receipt = SOURCE.parent / 'symbols' / symbol / 'identity.json'
+        inputs = json.loads(receipt.read_text())['inputs']
+        paths[symbol] = [str(ROOT / p['path'].split('/fable-trading/', 1)[1]) for p in inputs]
     jobs = [(symbol, paths[symbol], records(g), records(picked[picked.symbol == symbol])) for symbol, g in ledger.groupby('symbol')]
     evidence = []
     with ProcessPoolExecutor(max_workers=args.workers) as pool:
