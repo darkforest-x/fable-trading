@@ -1,3 +1,16 @@
+## 2026-10-23 · 区间1.618 limit + 30/50-minute hold rejected (NautilusTrader only)
+
+- Owner rule: rest a limit at the first weekly Monday 1618 (short above high, long below low), market exit after 30 or 50 minutes; variant adds the 2.0 stop. NautilusTrader 1.231.0 1m via `nautilus_independent.run_native` (limit entry, terminal market close), real fees maker .02 entry / taker .05 exit.
+- 30m: OKX BTC n91 net -1.9bp CI[-13.6,9.4]; Binance BTC/ETH/SOL/BNB/XRP/DOGE n1033 net +5.4bp CI[-5.0,15.1], later half -3.0. 50m: -2.5bp and +5.7bp CI[-6.4,17.7], later half -7.1. 2.0 stop makes both worse. Fails both; earlier-half gains do not persist.
+- Owner: backtests use only the framework, once; no parallel direct bar computation (rule added to CLAUDE.md/AGENTS.md). hold50 direct-computation outputs were discarded unread. Results `experiments/active/exp-monday-1618-hold30-20261023-v1/native_summary.json`, `exp-monday-1618-hold50-20261023-v1/native_summary.json`. No live orders, training/production false.
+
+## 2026-10-23 · App 0.8.20 — wick stop before 1R sizing
+
+- 1.618 quick tickets now pass the selected chart period, read the latest closed current-week wick touching 1.618, fill long low / short high, then apply the existing 1R and exposure limits. Public wick selection remains available when opening is blocked; manual edits invalidate pending results. No execution policy changes or real trade commands.
+- Shared pure selector `yoyo/data/monday_wick.py`; App uses its own chart candle sessions (daily UTC+8), checks continuous history, and refuses missing candles/no qualifying wick. Stitch screen `7debb7b7355b489f9ea600fc72c32df0`, source under `yoyo/discipline_app/design/wick-stop-0.8.20/`.
+- 209 Python / 56 frontend tests passed. 320/390 browser checks cover long/short, timeframe, manual-over-late-reply, missing wick and zero allowance. Synthetic order writes 0; temporary browser PID1616 and fixture PID1640 exited. Raw QA in `output/playwright/app-wick/` and release receipt `yoyo/discipline_app/releases/build-0.8.20.json`.
+- Service/public web updated to0.8.20. iOS/Android builds and signatures verified, iOS0.8.20(29) installation failed CoreDevice1011: phone unavailable. Existing live position was already awaiting-exchange before reload; latest state still blocks opening until protection reconciliation completes (1 position/0 pending, fresh heartbeat). This task did not repair or modify that position.
+
 ## 2026-10-23 · Four Monday reversal cases: requested offline HTML report
 
 - Owner explicitly requested detailed HTML with winning/losing K-line samples. Complete local file `artifacts/monday-cases-report-20261023/monday-1618-report.html` (72.4MB, all figures/data inline); authored app `reports/monday-1618-cases-20261023/`. No public publication.

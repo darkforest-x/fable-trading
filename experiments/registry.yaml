@@ -89,6 +89,36 @@ experiments:
     production_eligible: false
     reuse_allowed: true
     notes: 'Gold and combined group1 figures above are superseded by exp-monday-5m-wick-gold-clock-20261023-v2: local source actually NY wall time, prior fixedEST mapping incorrect. Original artifacts preserved; crypto fills unchanged. Nautilus1.231.0; OKX currentfee scenario on Binance history. Spotgross only. No holding timer.'
+  - experiment_id: exp-monday-1618-hold30-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 0242ed47062b01332feba0155154a2705fdd56db
+    status: rejected
+    question: 'Owner: rest a limit at the first weekly Monday 1618, hold 30 minutes, market exit. Profitable after real fees?'
+    single_variable: 'Exit = fixed 30-minute hold (no target); variant adds the 2.0-extension stop. Real fees maker 0.02 percent entry, taker 0.05 percent exit.'
+    result: 'NautilusTrader 1.231.0 1m: OKX BTC n91 gross +5.1bp net -1.9bp win 48.4 CI [-13.6,+9.4]; Binance BTC/ETH/SOL/BNB/XRP/DOGE n1033 gross +12.4 net +5.4 CI [-5.0,+15.1], earlier +14.7 later -3.0. With 2.0 stop both negative (-10.2, -1.6). Fails.'
+    artifacts:
+    - monday-1618-hold30-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-hold30-20261023-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'This run also had a direct bar computation (summary.json) that the owner said was redundant; native matches it trade by trade (mean abs diff 0.01/0.43bp). Later runs are framework-only. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
+  - experiment_id: exp-monday-1618-hold50-20261023-v1
+    source_repo: darkforest-x/fable-trading
+    source_commit: 6d8f07330c708fcb268a94a81576ce82cf90d0d0
+    status: rejected
+    question: 'Owner: same limit at the first weekly Monday 1618 as hold30, but hold 50 minutes. Profitable after real fees?'
+    single_variable: 'Holding time 30 -> 50 minutes versus exp-monday-1618-hold30-20261023-v1; fees maker 0.02 percent entry, taker 0.05 percent exit.'
+    result: 'NautilusTrader 1.231.0 only. OKX BTC n91 gross +4.5bp net -2.5bp win 44.0 CI [-15.0,+9.7], later -8.0; Binance majors n1033 gross +12.7 net +5.7 CI [-6.4,+17.7], earlier +19.8 later -7.1. With 2.0 stop -10.4 and -1.3. Fails; no better than 30 minutes.'
+    artifacts:
+    - monday-1618-hold50-20261023-v1
+    canonical_report: experiments/active/exp-monday-1618-hold50-20261023-v1/native_summary.json
+    holdout_consumed: false
+    training_eligible: false
+    production_eligible: false
+    reuse_allowed: true
+    notes: 'Framework-only (owner 2026-10-23); builder identical to 903cec5f97. An earlier direct bar computation for this config was discarded unread. No random null in this run. Notion task https://app.notion.com/p/nick-wiki/1-618-4018856479af8096aa78c08edd94f6e2'
   - experiment_id: exp-monday-1618-pw-confluence-20261023-v1
     source_repo: darkforest-x/fable-trading
     source_commit: 33e14cb5b354b6490aa20608c77fd5efe89d7920
